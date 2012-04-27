@@ -1,0 +1,9 @@
+﻿enyo.depends(
+	"Palette.js",
+	"Json.js",
+	"Serializer.js",
+	"Designer.js",
+	"Inspector.css",
+	"Inspector.js",
+	"ComponentView.js"
+);

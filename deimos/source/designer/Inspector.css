@@ -1,0 +1,15 @@
+.inspector-field-caption {
+	display: inline-block;
+	width: 7rem;
+	text-align: right;
+	/*color: gray;*/
+	padding-right: 0.5rem;
+}
+
+.inspector-field-editor {
+	width: 10rem;
+}
+
+input.inspector-field-checkbox {
+	margin: 6px 0 10px 0;
+}

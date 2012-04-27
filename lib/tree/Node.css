@@ -1,0 +1,22 @@
+.enyo-node {
+	cursor: default;
+	padding: 4px;
+}
+
+.enyo-node img {
+	vertical-align: middle;
+	padding-right: 6px;
+}
+
+.enyo-node-box {
+	overflow: hidden;
+}
+
+.enyo-node-client {
+	position: relative;
+}
+
+.enyo-animate .enyo-node-box, .enyo-animate .enyo-node-client {
+	-webkit-transition-property: height, top;
+	-webkit-transition-duration: 0.2s, 0.2s;
+}

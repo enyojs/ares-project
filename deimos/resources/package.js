@@ -1,0 +1,9 @@
+enyo.depends(
+	"base-design.js",
+	//"$lib/layout/fittable/source",
+	"$lib/layout/fittable/source/design.js",
+	//"$lib/bootstrap-ui/source",
+	//"$lib/bootstrap-ui/source/design.js",
+	//"$lib/onyx/source/",
+	"$lib/onyx/source/design.js"
+);
