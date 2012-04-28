@@ -1,4 +1,4 @@
-## Ares 2 Source Overview
+## Ares 2 Overview
 
 Updated: 4/27/2012
 
@@ -6,10 +6,13 @@ Ares 2 is a browser-based code editor and UI designer for developing Enyo 2 appl
 
 ### Basic architecture
 
-The Ares project architecture is divided into two main pieces:
+The Ares project architecture is divided into several main pieces:
 
-* **Ares** - The front-end designer/editor web application
-* **Hermes Components** - Pluggable node.js-based server-side components that provide interfaces to Ares clients for cloud-based services such as file storage and build services
+* **Ares** - The front-end designer/editor web application, with the following main components:
+	* **Harmonia** - File system layer
+	* **Phobos** - Document management
+	* **Deimos** - Visual designer
+* **Hermes Components** - Pluggable server-side components that provide interfaces to Ares clients for cloud-based services such as file storage and build services.  We're leveraging node.js, but Hermes components can use any server-side tech.
 
 ### Current status
 
