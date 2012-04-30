@@ -38,3 +38,17 @@ The following features are in the works, and you should see them added as we mov
 * Code completion and context-sensitive documentation
 * Additional Hermes components to extend the local and cloud file storage options
 * … and more!
+
+
+### Setup
+
+For Ares to run, it simply expects the enyo and lib folders (including onyx, layout, and extra) from the 2.0b4 SDK or latest from Github to be present next to ares-project, as follows:
+
+		* ares-project		git@github.com:enyojs/ares-project.git
+		* enyo				git@github.com:enyojs/enyo.git
+		* lib
+			* onyx			git@github.com:enyojs/onyx.git
+			* layout		git@github.com:enyojs/layout.git
+			* extra			git@github.com:enyojs/extra.git
+
+To run, simply open `ares-project/ares/index.html` from a web browser.
