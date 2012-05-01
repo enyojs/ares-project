@@ -1,6 +1,6 @@
 ## Ares 2 Overview
 
-Updated: 4/27/2012
+Updated: 4/30/2012
 
 Ares 2 is a browser-based code editor and UI designer for developing Enyo 2 applications.  Although Ares is still a work in progress, we have reached the point where we are opening the repo and will do further development in the open, so we encourage you to follow our progress and give us feedback as we push Ares forward.
 
