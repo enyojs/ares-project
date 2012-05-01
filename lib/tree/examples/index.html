@@ -15,27 +15,20 @@
 </head>
 <body class="enyo-unselectable">
 	<script type="text/javascript">
-		new enyo.Node({content: "Tree", components: [
+		new enyo.Node({content: "Tree", expandable: true, components: [
 				{content: "Alpha"},
-				{kind: "Node", content: "Bravo", components: [
-					{content: "Bravo-Alpha"},
+				{kind: "Node", content: "Bravo", expandable: true, components: [
+					{content: "Bravo-Alpha", components: []},
 					{content: "Bravo-Bravo"},
 					{content: "Bravo-Charlie"}
 				]},
-				{content: "Charlie", expanded: false, components: [
+				{content: "Charlie", expandable: true, expanded: false, components: [
 					{content: "Charlie-Alpha"},
 					{content: "Charlie-Bravo"},
 					{content: "Charlie-Charlie"}
 				]},
-				{content: "Delta"}
-			],
-			tap: function(inSender, inEvent) {
-				this.toggleExpanded();
-			},
-			nodeTap: function(inSender, inEvent) {
-				inSender.toggleExpanded();
-				return true;
-			}
+				{content: "Delta", expandable: true}
+			]
 		}).write();
 	</script>
 </body>
