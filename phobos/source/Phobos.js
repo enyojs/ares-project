@@ -2,7 +2,9 @@ enyo.kind({
 	name: "Phobos",
 	classes: "enyo-unselectable",
 	components: [
-		{name: "db", kind: "PackageDb", onFinish: "dbReady"},
+		{kind: "Analyzer", onIndexReady: "indexReady"},
+		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
+		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
 		{kind: "DragAvatar", components: [ 
 			{tag: "img", src: "images/icon.png"}
 		]},
@@ -39,15 +41,10 @@ enyo.kind({
 	},
 	create: function() {
 		this.inherited(arguments);
-		this.$.db.walk("$enyo/source");
+		this.buildDb();
 	},
-	showWaitPopup: function(inMessage) {
-		this.$.waitPopupMessage.setContent(inMessage);
-		this.$.waitPopup.show();
-	},
-	hideWaitPopup: function() {
-		this.$.waitPopup.hide();
-	},
+	//
+	//
 	saveDocAction: function() {
 		this.showWaitPopup("Saving document...");
 		this.bubble("onSaveDocument", {content: this.$.ace.getValue()});
@@ -65,37 +62,25 @@ enyo.kind({
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
 	},
-	reparseAction: function() {
-		var code = this.$.ace.getValue();
-		if (code) {
-			var module = new enyo.Documentor(code).results;
-			this.log(module);
-			//
-			this.$.db.indexModuleObjects([module]);
-			var objects = this.$.db.cookObjects();
-			//
-			this.$.db.indexInheritance(objects);
-			this.log(objects);
-			//
-			var c = objects[1];
-			this.dumpInfo(c);
-			if (c && c.properties) {
-				this.log(c.properties[3]);
-			}
-		}
+	showWaitPopup: function(inMessage) {
+		this.$.waitPopupMessage.setContent(inMessage);
+		this.$.waitPopup.show();
 	},
-	dbReady: function() {
-		this.dbReady = this.dbReady2;
-		this.$.db.walk("$lib/onyx");
+	hideWaitPopup: function() {
+		this.$.waitPopup.hide();
 	},
-	dbReady2: function() {
-		this.dbReady = this.testDb;
-		this.$.db.walk("$lib/layout/fittable");
+	//
+	//
+	buildDb: function() {
+		this.$.analyzer.analyze(["$enyo/source", "$lib/layout", "$lib/onyx"]);
+	},
+	indexReady: function() {
+		this.testDb();
 	},
 	testDb: function() {
 		//var c = this.$.db.findByName("enyo.Control");
 		//var c = this.$.db.findByName("onyx.Button");
-		var c = this.$.db.findByName("enyo.FittableRows");
+		var c = this.$.analyzer.index.findByName("enyo.FittableRows");
 		this.dumpInfo(c);
 	},
 	dumpInfo: function(inObject) {
@@ -106,11 +91,20 @@ enyo.kind({
 		}
 		//
 		var h$ = "<h3>" + c.name + "</h3>";
+		//
 		var h = [];
 		for (var i=0, p; p=c.superkinds[i]; i++) {
 			h.push(p);
 		}
-		h$ += "<h4>Superkinds</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
+		h$ += "<h4>Extends</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
+		//
+		var h = [];
+		for (var i=0, p; p=c.components[i]; i++) {
+			h.push(p.name);
+		}
+		if (h.length) {
+			h$ += "<h4>Components</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
+		}
 		//
 		h = [];
 		for (var i=0, p; p=c.properties[i]; i++) {
@@ -125,6 +119,15 @@ enyo.kind({
 		h$ += "<h4>All Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
 		this.$.dump.setContent(h$);
+	},
+	reparseAction: function() {
+		var module = {
+			name: "Document",
+			code: this.$.ace.getValue()
+		};
+		this.$.analyzer.index.indexModule(module);
+		// ad hoc: dump the first object, if it exists
+		this.dumpInfo(module.objects && module.objects[0]);
 	},
 	testDocAction: function() {
 		this.openDoc(code, "js");
