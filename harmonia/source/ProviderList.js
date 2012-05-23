@@ -17,7 +17,7 @@
 			//{Xcontent: "Duplicate", src: "$harmonia/images/server_preferences.png", hint: "Duplicate Selected Provider...", onclick: "duplicateClick"},
 			//{Xcontent: "Delete", src: "$harmonia/images/server_delete.png", hint: "Delete", onclick: "deleteClick"}
 		]},
-		{fit: true, name: "list", kind: "FlyweightRepeater", toggleSelected: true, onSetupRow: "setupRow", onSelect: "rowSelected", onDeselect: "rowDeselected", components: [
+		{fit: true, name: "list", kind: "FlyweightRepeater", toggleSelected: true, onSetupItem: "setupRow", onSelect: "rowSelected", onDeselect: "rowDeselected", components: [
 			{name: "item", classes: "enyo-children-inline", style: "padding: 8px 4px 4px; border-bottom: 1px solid gray;", ontap: "itemTap", ondblclick: "dblClick", /*onConfirm: "removeProvider",*/ components: [
 				{name: "icon", kind: "onyx.Icon", style: "margin-right: 10px"},
 				{name: "name", Xstyle: "width: 80%; display: inline-block;"},
@@ -42,7 +42,7 @@
 	},
 	gotFileServices: function(inSender, inServices) {
 		this.providers = inServices || [];
-		this.$.list.rows = this.providers.length;
+		this.$.list.count = this.providers.length;
 		this.$.list.render();
 	},
 	/*
