@@ -84,9 +84,10 @@
 			new enyo.Panels({name: "ares", fit: true, components: [
 					{kind: "HermesService", name: "service"},
 					{kind: "Harmonia", onFileDblClick: "openDocument"},
-					{kind: "Phobos", onSaveDocument: "saveDocument"}/*,
-					{kind: "Deimos"}*/
+					{kind: "Phobos", onSaveDocument: "saveDocument", onDesignDocument: "designDocument"},
+					{kind: "Deimos"}
 				],
+				//arrangerKind: "CollapsingArranger",
 				openDocument: function(inSender, inEvent) {
 					var f = inEvent.file;
 					this.fileId = f.id;
@@ -111,6 +112,10 @@
 							enyo.log("Save failed", inData);
 							inSender.hideWaitPopup();
 						});
+				},
+				designDocument: function(inSender, inEvent) {
+					var components=inEvent.content;
+					this.$.deimos.load(components);
 				}
 			}).write();
 		</script>

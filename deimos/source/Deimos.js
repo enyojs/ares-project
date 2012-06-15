@@ -42,8 +42,13 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 	},
-	load: function() {
-		this.newDocumentAction();
+	load: function(what) {
+		if (what) {
+			this.$.inspector.inspect(null);
+			this.$.designer.load(what);
+		} else {
+			this.newDocumentAction();
+		}
 	},
 	newDocumentAction: function() {
 		var document = [

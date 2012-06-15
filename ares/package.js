@@ -9,7 +9,6 @@
 	"../deimos/source",
 	"../deimos/resources",
 	//
-	"../lib/layout-panels",
 	"../lib/localStorage",
 	"../lib/tree",
 	"../lib/service",

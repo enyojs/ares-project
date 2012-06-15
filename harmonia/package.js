@@ -4,6 +4,5 @@
 	"../lib/localStorage",
 	"../lib/tree",
 	"../lib/service",
-	"../lib/layout-panels",
 	"source"
 );
