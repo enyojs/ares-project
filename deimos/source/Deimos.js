@@ -8,6 +8,7 @@ enyo.kind({
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{kind: "onyx.Toolbar", Xstyle: "margin: 0 10px;", components: [
+				{kind: "onyx.Button", content: "Close", ontap: "closeDesignerAction"},
 				{content: "Deimos"},
 				{kind: "onyx.Button", content: "New Document", ontap: "newDocumentAction"},
 				{kind: "onyx.Button", content: "Test Document", ontap: "testDocAction"},
@@ -118,6 +119,9 @@ enyo.kind({
 			//this.refreshInspector();
 			return true;
 		}
+	},
+	closeDesignerAction: function(inSender, inEvent) {
+		this.bubble("onCloseDesigner", {});
 	}
 });
 

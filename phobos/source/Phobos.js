@@ -10,6 +10,7 @@ enyo.kind({
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
+				{kind: "onyx.Button", content: "Close", ontap: "closeDocAction"},
 				{content: "Document"},
 				{kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
 				{fit: true},
@@ -148,6 +149,9 @@ enyo.kind({
 		var end=c.lastIndexOf("]")+1;
 		var js = eval("([\n"+c.substring(start, end)+")");
 		this.bubble("onDesignDocument", {content: js});
+	},
+	closeDocAction: function(inSender, inEvent) {
+		this.bubble("onCloseDocument", {});
 	}
 });
 
