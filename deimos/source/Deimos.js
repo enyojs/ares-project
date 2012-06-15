@@ -47,17 +47,18 @@ enyo.kind({
 	},
 	newDocumentAction: function() {
 		var document = [
-			{kind: "FittableRows", isContainer: true, classes: "enyo-fit"}
+			{kind: "FittableRows", isContainer: true, classes: "enyo-fit", components: [
+			]}
 		];
 		this.$.inspector.inspect(null);
 		this.$.designer.load(document);
 	},
 	testDocAction: function() {
 		var document = [
-			{kind: "Rows", classes: "enyo-fit", isContainer: true, components: [
-				{kind: "bts.NavBar", content: "Design!", isContainer: true},
+			{kind: "FittableRows", classes: "enyo-fit", isContainer: true, components: [
+				{kind: "onyx.Toolbar", content: "Design!", isContainer: true},
 				{fit: true, kind: "Scroller", isContainer: true, style: "background-color: lightblue;", components: [
-					{kind: "Rows", classes: "enyo-fit", isContainer: true}
+					{kind: "FittableRows", classes: "enyo-fit", isContainer: true}
 				]}
 			]}
 		];

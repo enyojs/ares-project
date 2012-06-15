@@ -4,7 +4,7 @@ enyo.kind({
 		{style: "background-color: #F5F5F5; border-radius: 8px; border: 1px solid #D0D0D0; margin-bottom: 14px; padding-bottom: 6px;", components: [
 			{name: "name", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;"},
 			{classes: "row-fluid", components: [
-				{name: "list", kind: "Repeater", rows: 1, onSetupRow: "setupRow", components: [
+				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
 					{kind: "PaletteItem"}
 				]}
 			]}
@@ -13,11 +13,11 @@ enyo.kind({
 	setModel: function(inModel) {
 		this.model = inModel;
 		this.$.name.setContent(this.model.name);
+		this.$.list.count = this.model.items.length;
 		this.$.list.build();
 	},
-	setupRow: function(inSender, inEvent) {
-		this.$.list.rows = this.model.items.length;
-		inEvent.row.$.paletteItem.setModel(this.model.items[inEvent.index]);
+	setupItem: function(inSender, inEvent) {
+		inEvent.item.$.paletteItem.setModel(this.model.items[inEvent.index]);
 		return true;
 	}
 });
@@ -55,7 +55,7 @@ enyo.kind({
 	components: [
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{kind: "Scroller", fit: true, components: [
-				{name: "list", kind: "Repeater", rows: 10, onSetupRow: "setupRow", style: "margin: 0 10px 0 0px;", components: [
+				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", style: "margin: 0 10px 0 0px;", components: [
 					{kind: "CategoryItem"}
 				]}
 			]},
@@ -78,7 +78,7 @@ enyo.kind({
 		//this.categories = this.categorize();
 		this.categories = this.model;
 		//this.$.list.rows = this.model.length;
-		this.$.list.rows = this.categories.length;
+		this.$.list.count = this.categories.length;
 		this.$.list.build();
 	},
 	categorize: function() {
@@ -95,8 +95,10 @@ enyo.kind({
 		}
 		return list;
 	},
-	setupRow: function(inSender, inEvent) {
-		inEvent.row.$.categoryItem.setModel(this.categories[inEvent.index]);
+	setupItem: function(inSender, inEvent) {
+		var index=inEvent.index;
+		var item = inEvent.item;
+		item.$.categoryItem.setModel(this.categories[index]);
 		return true;
 	},
 	dragstart: function(inSender, inEvent) {

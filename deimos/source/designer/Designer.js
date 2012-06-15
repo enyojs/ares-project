@@ -10,19 +10,11 @@ enyo.kind({
 		{name: "selectionOutline", kind: "DesignerOutline", style: "border: 5px dotted rgba(255, 146, 38, 0.7);"},
 		{name: "containerOutline", kind: "DesignerOutline", style: "border: 5px solid rgba(24, 24, 255, 0.3);"},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
-			{kind: "bts.ButtonToolbar", components: [
-				{highlander: false, components: [
-					{content: "Undo"},
-					{content: "Redo"}
-				]},
-				{highlander: false, components: [
-					{ontap: "upAction", components: [{kind: "bts.Icon", icon: "arrow-up"}]},
-					{ontap: "downAction", components: [{kind: "bts.Icon", icon: "arrow-down"}]}
-				]},
-				{highlander: false, components: [
-					{classes: "btn-danger", components: [{kind: "bts.Icon", classes: "icon-white", icon: "remove"}], ontap: "deleteAction"}
-				]}
-			]},
+			{kind: "Button", content: "Undo"},
+			{kind: "Button", content: "Redo"},
+			{kind: "Button", content: "Up", ontap: "upAction"},
+			{kind: "Button", content: "Down", ontap: "downAction"},
+			{kind: "Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
 			{name: "client", classes: "panel", fit: true}
 		]}
 	],
