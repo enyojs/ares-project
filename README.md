@@ -55,4 +55,5 @@ For Ares to run, it simply expects the enyo and lib folders (including onyx, lay
 To run, simply open `ares-project/ares/index.html` from a web browser.
 
 ### Running the local file "server"
-The local filesystem browser is in the ares-project repository, under 
+The local filesystem browser is in the ares-project repository, under hermes/filesystem. In order to run the service, you will need to have [Node.js](http://www.nodejs.org) installed (version 0.6 or later). To start the service, go to the hermes/filesystem directory, and run:
+    node index.js
