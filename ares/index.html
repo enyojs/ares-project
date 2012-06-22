@@ -96,6 +96,9 @@
 					this.$.phobos.beginOpenDoc();
 					this.$.service.getFile(f.id)
 						.response(this, function(inEvent, inData) {
+							if (inData.content) {
+								inData=inData.content;
+							}
 							this.$.phobos.openDoc(inData, ext);
 							this.setIndex(1);
 						})

@@ -17,7 +17,7 @@
 			//{Xcontent: "Duplicate", src: "$harmonia/images/server_preferences.png", hint: "Duplicate Selected Provider...", onclick: "duplicateClick"},
 			//{Xcontent: "Delete", src: "$harmonia/images/server_delete.png", hint: "Delete", onclick: "deleteClick"}
 		]},
-		{fit: true, name: "list", kind: "FlyweightRepeater", toggleSelected: true, onSetupItem: "setupRow", onSelect: "rowSelected", onDeselect: "rowDeselected", components: [
+		{fit: true, name: "list", kind: "FlyweightRepeater", toggleSelected: false, onSetupItem: "setupRow", onSelect: "rowSelected", onDeselect: "rowDeselected", components: [
 			{name: "item", classes: "enyo-children-inline", style: "padding: 8px 4px 4px; border-bottom: 1px solid gray;", ontap: "itemTap", ondblclick: "dblClick", /*onConfirm: "removeProvider",*/ components: [
 				{name: "icon", kind: "onyx.Icon", style: "margin-right: 10px"},
 				{name: "name", Xstyle: "width: 80%; display: inline-block;"},
@@ -79,9 +79,6 @@
 				this.doSelectProvider({service: p});
 			}
 		}
-	},
-	rowDeselected: function() {
-		this.doSelectProvider({service: null});
 	},
 	authorize: function(inProvider) {
 		var c = this.createComponent({kind: "ProviderConfigPopup", floating: true, centered: true, modal: true, autoDismiss: false,  ondragstart: "squelchPopupDrag", components: [

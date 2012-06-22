@@ -22,15 +22,15 @@ enyo.kind({
 						{content: "Code"}
 					]},
 					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart"},
-					{name: "code", classes: "panel", components: [
+					{name: "code", classes: "deimos_panel", components: [
 						{kind: "Scroller", classes: "enyo-selectable", components: [
 							{name: "codeText", tag: "pre", style: "white-space: pre; font-size: smaller; border: none; margin: 0;"}
 						]}
 					]}
 				]},
 				{name: "right", kind: "FittableRows", components: [
-					{kind: "ComponentView", classes: "panel", onSelect: "componentViewSelect", ondrop: "componentViewDrop"},
-					{kind: "Inspector", fit: true, classes: "panel", onModify: "inspectorModify"}
+					{kind: "ComponentView", classes: "deimos_panel", onSelect: "componentViewSelect", ondrop: "componentViewDrop"},
+					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
 				]}
 			]}
 		]}

@@ -15,7 +15,7 @@ enyo.kind({
 			{kind: "Button", content: "Up", ontap: "upAction"},
 			{kind: "Button", content: "Down", ontap: "downAction"},
 			{kind: "Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
-			{name: "client", classes: "panel", fit: true}
+			{name: "client", classes: "deimos_panel", fit: true}
 		]}
 	],
 	style: "outline: none; position: relative;",
