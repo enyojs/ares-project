@@ -136,7 +136,7 @@ enyo.kind({
 		this.openDoc(code, "js");
 	},
 	designerAction: function() {
-		// TODO: Crib more of this from Enyo2v1
+		// TODO: Crib more of this from Ares2v1
 		var c = this.$.ace.getValue();
 		var module = {
 			name: "Document",
