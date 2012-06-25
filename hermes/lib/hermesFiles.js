@@ -65,6 +65,10 @@ _.extend(true, HermesFiles.prototype, {
 		)
 	}
 , routes: {
+		'/': function(route, req, res) {
+			console.log("Route /");
+			res.send("<b>Hermes server running, use Ares to connect.</b>");
+		},		
 		'/:verb/*': function(route, req, res) {
 			console.log('HermesFiles, route: ', route)
 			// strip leading slash from path
