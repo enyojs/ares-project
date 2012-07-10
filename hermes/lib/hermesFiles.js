@@ -7,7 +7,6 @@ var prototype
 	, _ = require('./_')
 	, HermesClient = require('./hermesClient').HermesClient
 	, cache = require('./connectionCache')
-	, ZipRequestStream = require('../phonegap/ZipRequestStream')
 
 function HermesFiles(inConfig) {
 	arguments.callee.super_.call(this, inConfig)
@@ -78,6 +77,8 @@ _.extend(true, HermesFiles.prototype, {
 		}
 	}
 , verbs: {
+		// getFolder depends on zipRequestStream, which isn't included yet. We'll get to that 
+		// when Phonegap Build support goes in.
 		getFolder: function(req, res, next) {
 			var zipRequestStream
 				, self = this

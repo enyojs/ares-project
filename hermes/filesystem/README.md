@@ -9,5 +9,5 @@ it as an example of how to set this up, as most other Hermes components will wan
 The key and certificate in the certs/ directory were created using the OpenSSL tools, following [the instructions](http://www.openssl.org/docs/HOWTO/certificates.txt) on the OpenSSL website. Because this is a "self signed" certificate, you will need to approve the certificate in your web browser before you'll be able to use it with Ares.
 
 ### Approving the certificate
-To approve the certificate, start the server, then navigate to http://localhost:9010 in your browser. This will give you the opportunity to approve the certificate. We recommend that you *do not* check the box that says "always trust" certificates signed by enyojs.com. Since the signing key is included in this distribution, anyone can make a certificate that matches this key.
+To approve the certificate, start the server, then navigate to http://localhost:9010 in your browser. This will give you the opportunity to approve the certificate. We recommend that you *do not* check the box that says to "always trust" certificates signed by enyojs.com. Since the signing key is included in this distribution, anyone can make a certificate that matches this key.
  
