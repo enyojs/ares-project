@@ -1,6 +1,6 @@
 ## Ares 2 Overview
 
-Updated: 4/30/2012
+Updated: 2012-07-30
 
 Ares 2 is a browser-based code editor and UI designer for developing Enyo 2 applications.  Although Ares is still a work in progress, we have reached the point where we are opening the repo and will do further development in the open, so we encourage you to follow our progress and give us feedback as we push Ares forward.
 
@@ -43,7 +43,9 @@ The following features are in the works, and you should see them added as we mov
 
 ### Setup
 
-For Ares to run, it expects the enyo and lib folders (including onyx, layout, and extra) from the 2.0b5 SDK or latest from Github to be present next to ares-project, as follows:
+#### Get the source at the proper location
+
+For Ares to run, it expects the enyo and lib folders (including onyx, layout, and extra) from the 2.0b5 SDK (or later) from Github to be present next to ares-project, as follows:
 
 		* ares-project		git@github.com:enyojs/ares-project.git
 		* enyo				git@github.com:enyojs/enyo.git
@@ -52,16 +54,17 @@ For Ares to run, it expects the enyo and lib folders (including onyx, layout, an
 			* layout		git@github.com:enyojs/layout.git
 			* extra			git@github.com:enyojs/extra.git
 
-To run, simply open `ares-project/ares/index.html` from a web browser.
-
-### Running the local file "server"
+#### Running the local file "server"
 The local filesystem browser is in the ares-project repository, under hermes/filesystem. In order to run the service, you will need to have [Node.js](http://www.nodejs.org) installed (version 0.6 or later). To start the service, go to the hermes/filesystem directory, and run:
     node index.js
 
-### Approving the certificate
+#### Approving the certificate
 Since Hermes runs as an SSL server with a self-signed certificate, you will need to approve the certificate when you initially connect to the server. Otherwise, Ares will not be able to communicate with the server, and you won't see your files.
 
 To approve the certificate, start the server, then navigate to https://localhost:9010 in your browser. This will give you the opportunity to approve the certificate. We recommend that you *do not* check the box that says to "always trust" certificates signed by enyojs.com. Since the signing key is included in this distribution, anyone can make a certificate that matches this key.
+
+#### Running the IDE
+To run, simply open `ares-project/ares/index.html` from a web browser.
 
 
 
