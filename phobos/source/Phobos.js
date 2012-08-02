@@ -21,7 +21,7 @@ enyo.kind({
 				]},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;"}
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "changed"}
 					]}
 				]},
 				{name: "right", classes: "panel", components: [
@@ -36,10 +36,18 @@ enyo.kind({
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
 			{kind: "Image", src: "$phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 			{name: "waitPopupMessage", content: "Saving document...", style: "padding-top: 10px;"}
+		]},
+		{name: "savePopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
+			{name: "message", content: "Document was modified! Save it before closing?", style: "padding: 10px;"},
+			{kind: "FittableColumns", components: [
+				{kind: "onyx.Button", content: "Cancel", ontap: "cancelCloseAction"},
+				{kind: "onyx.Button", content: "Don't Save", ontap: "abandonDocAction"},
+			]}
 		]}
 	],
 	handlers: {
 	},
+	docChanged: false,
 	create: function() {
 		this.inherited(arguments);
 		this.buildDb();
@@ -52,6 +60,7 @@ enyo.kind({
 	},
 	saveComplete: function() {
 		this.hideWaitPopup();
+		this.docChanged=false;
 	},
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
@@ -62,6 +71,7 @@ enyo.kind({
 		this.$.ace.setEditingMode(mode);
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
+		this.docChanged=false;
 	},
 	showWaitPopup: function(inMessage) {
 		this.$.waitPopupMessage.setContent(inMessage);
@@ -146,7 +156,23 @@ enyo.kind({
 		this.bubble("onDesignDocument", {content: js});
 	},
 	closeDocAction: function(inSender, inEvent) {
+		if (this.docChanged) {
+			this.$.savePopup.show();
+		} else {
+			this.bubble("onCloseDocument", {});
+		}
+	},
+	// called when "Don't Save" is selected in save popup
+	abandonDocAction: function(inSender, inEvent) {
+		this.$.savePopup.hide();
 		this.bubble("onCloseDocument", {});
+	},
+	// called when the "Cancel" is selected in save popup
+	cancelCloseAction: function(inSender, inEvent) {
+		this.$.savePopup.hide();
+	},
+	changed: function(inSender, inEvent) {
+		this.docChanged=true;
 	}
 });
 
