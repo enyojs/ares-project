@@ -11,11 +11,9 @@ enyo.kind({
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
 				{kind: "onyx.Button", content: "Close", ontap: "closeDocAction"},
-				{content: "Document"},
+				{name: "documentLabel", content: "Document"},
 				{kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
 				{fit: true},
-				{kind: "onyx.Button", content: "Test Document", ontap: "testDocAction"},
-				{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
 				{kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
@@ -29,6 +27,7 @@ enyo.kind({
 				{name: "right", classes: "panel", components: [
 					// neccesary nesting here for 'margin: 8px;"
 					{kind: "enyo.Scroller", classes: "border panel enyo-fit", style: "margin: 8px;", components: [
+						{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
 						{name: "dump", style: "padding: 10px;", allowHtml: true}
 					]}
 				]}
@@ -130,10 +129,6 @@ enyo.kind({
 		this.$.analyzer.index.indexModule(module);
 		// ad hoc: dump the first object, if it exists
 		this.dumpInfo(module.objects && module.objects[0]);
-	},
-	testDocAction: function() {
-		var code = 'enyo.kind({\n	name: "App",\n	kind: "FittableRows",\n	margin: 10,\n	padding: 10,\n	classes: "enyo-unselectable",\n	components: [\n		{kind: "Signals", onload: "load"},\n		{kind: "DragAvatar", components: [ \n			{tag: "img", src: "images/icon.png"}\n		]},\n		{kind: "bts.NavBar", content: "Eros", style: "margin: 0 10px;", components: [\n			{kind: "bts.Menu", classes: "nav", components: [\n				{content: "New Document", ontap: "newDocument"},\n				{content: "Test Document", ontap: "testDocTap"}\n			]}\n		]},\n		{name: "body", fit: true, kind: "Columns", margin: 10, padding: 10, components: [\n			{name: "left", components: [\n				{kind: "Palette", classes: "enyo-fit", ondragstart: "dragStart"}\n			]},\n			{name: "middle", fit: true, components: [\n				{kind: "Designer", classes: "enyo-fit", onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart"}\n			]},\n			{name: "right", kind: "Rows", padding: 10, components: [\n				{kind: "ComponentView", classes: "well", onSelect: "componentViewSelect", ondrop: "componentViewDrop"},\n				{kind: "Inspector", fit: true, classes: "well", onModify: "inspectorModify"}\n			]}\n		]}\n	],\n	handlers: {\n		ondrag: "drag",\n		ondragfinish: "dragFinish",\n		ondrop: "drop"\n	},\n	create: function() {\n		this.inherited(arguments);\n	},\n	load: function() {\n		this.newDocument();\n	},\n	newDocument: function() {\n		var document = [\n			{kind: "Rows", isContainer: true, classes: "enyo-fit"}\n		];\n		this.$.inspector.inspect(null);\n		this.$.designer.load(document);\n	},\n	testDocTap: function() {\n		var document = [\n			{kind: "Rows", classes: "enyo-fit", isContainer: true, components: [\n				{kind: "bts.NavBar", content: "Design!", isContainer: true},\n				{fit: true, kind: "Scroller", isContainer: true, style: "background-color: lightblue;", components: [\n					{kind: "Rows", classes: "enyo-fit", isContainer: true}\n				]}\n			]}\n		];\n		this.$.inspector.inspect(null);\n		this.$.designer.load(document);\n	},\n	refreshComponentView: function() {\n		this.$.componentView.visualize(this.$.designer.$.client, this.$.designer.$.model);\n		this.$.componentView.select(this.$.designer.selection);\n	},\n	designerChange: function(inSender) {\n		this.refreshComponentView();\n	},\n	designerSelect: function(inSender) {\n		this.$.inspector.inspect(inSender.selection);\n		this.$.componentView.select(inSender.selection);\n	},\n	componentViewSelect: function(inSender) {\n		this.$.inspector.inspect(inSender.selection);\n		this.$.designer.select(inSender.selection);\n	},\n	inspectorModify: function() {\n		this.$.designer.refresh();\n		this.refreshComponentView();\n	},\n	componentViewDrop: function(inSender, inEvent) {\n		return this.$.designer.drop(inSender, inEvent);\n	},\n	dragStart: function(inSender, inEvent) {\n		//inEvent.dragInfo = this.$.designer.selection;\n		return true;\n	},\n	drag: function(inSender, inEvent) {\n		if (inEvent.dragInfo) {\n			this.$.dragAvatar.drag(inEvent);\n			return true;\n		}\n	},\n	dragFinish: function(inSender, inEvent) {\n		if (inEvent.dragInfo) {\n			this.$.dragAvatar.hide();\n			inEvent.preventTap();\n		}\n	}\n});\n\n';
-		this.openDoc(code, "js");
 	},
 	designerAction: function() {
 		// TODO: Crib more of this from Ares2v1

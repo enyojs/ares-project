@@ -7,20 +7,14 @@ enyo.kind({
 			{tag: "img", src: "images/icon.png", style: "width: 24px; height: 24px;"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
-			{kind: "onyx.Toolbar", Xstyle: "margin: 0 10px;", components: [
-				{kind: "onyx.Button", content: "Close", ontap: "closeDesignerAction"},
-				{content: "Deimos"},
-				{kind: "onyx.Button", content: "New Document", ontap: "newDocumentAction"},
-				{kind: "onyx.Button", content: "Test Document", ontap: "testDocAction"},
-				{kind: "onyx.Button", content: "Serialize", ontap: "serializeAction"}
+			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 0 10px;", components: [
+				{name: "docLabel", content: "Deimos"},
+				{fit: true},
+				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", components: [
 				{name: "left", kind: "Palette", ondragstart: "dragStart"},
 				{name: "middle", fit: true, kind: "FittableRows",components: [
-					{kind: "onyx.RadioGroup", components: [
-						{content: "Design", active: true},
-						{content: "Code"}
-					]},
 					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart"},
 					{name: "code", classes: "deimos_panel", components: [
 						{kind: "Scroller", classes: "enyo-selectable", components: [
@@ -53,14 +47,6 @@ enyo.kind({
 	},
 	newDocumentAction: function() {
 		var document = [
-			{kind: "FittableRows", isContainer: true, classes: "enyo-fit", components: [
-			]}
-		];
-		this.$.inspector.inspect(null);
-		this.$.designer.load(document);
-	},
-	testDocAction: function() {
-		var document = [
 			{kind: "FittableRows", classes: "enyo-fit", isContainer: true, components: [
 				{kind: "onyx.Toolbar", content: "Design!", isContainer: true},
 				{fit: true, kind: "Scroller", isContainer: true, style: "background-color: lightblue;", components: [
@@ -71,6 +57,7 @@ enyo.kind({
 		this.$.inspector.inspect(null);
 		this.$.designer.load(document);
 	},
+	// called after updating model
 	serializeAction: function() {
 		this.$.codeText.setContent("\t" + this.$.designer.serialize());
 	},
