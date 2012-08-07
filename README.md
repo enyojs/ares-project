@@ -82,4 +82,5 @@ To run, simply start the ARES server and open `http://localhost:9010/ide/ares/in
 
 	$ open -a Chromium http://localhost:9010/ide/ares/index.html
 	$ node-inspector &
+	$ open -a Chromium http://localhost:8080/debug?port=5858
 
