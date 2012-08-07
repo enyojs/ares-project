@@ -1,6 +1,6 @@
 var fs = require('fs')
 	, HermesFilesystem = require('./hermesFilesystem').HermesFilesystem
-	, basePort = parseInt(process.argv[2], 10) || 9009
+	, basePort = parseInt(process.argv[2], 10) || 9010
 	, config = {
 			certs: {
 				key: fs.readFileSync(__dirname + '/certs/key.pem').toString(),
@@ -23,6 +23,9 @@ app.configure(function(){
 	app.use('/ide', express.static(enyojsRoot + '/ares-project'));
 	app.use('/enyo', express.static(enyojsRoot + '/enyo'));
 	app.use('/lib', express.static(enyojsRoot + '/lib'));
+ 	app.get('/res/config', function(req, res) {
+		res.status(200).json({port: basePort+1});
+	});
 });
 app.listen(basePort, "127.0.0.1");
 
