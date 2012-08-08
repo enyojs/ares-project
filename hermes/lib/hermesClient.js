@@ -47,7 +47,7 @@ function HermesClient(inConfig) {
 	for (verb in this.routes) {
 		server.all(verb,  this.routes[verb].bind(this, verb))
 	}
-	server.listen(this.port)
+	server.listen(this.port, "127.0.0.1");
 	console.log("Serving [%s] at [http%s://localhost:%s/]", this.name, this.config.certs ? "s" : "", this.port)
 }
 
