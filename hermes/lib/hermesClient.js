@@ -58,7 +58,7 @@ HermesClient.prototype = {
 , port: 9000
 , debug: true
 , name: 'Hermes Service'
-, onError: function(err, next, req, res) {
+, onError: function(req, res, err, next) {
 		console.log('============================ ERROR ============================')
 		if (err instanceof Error) {
 			console.log(err.stack)
@@ -84,10 +84,10 @@ HermesClient.prototype = {
 
 		self = this
 
-		step(_.bindr(this.onError, this, req, res)
+		step(_.bind(this.onError, this, req, res)
 		, function() {
 				if (!self.hasVerb(inVerb)) {
-					self.onError('Verb not supported: '+inVerb, req, res)
+					self.onError(req, res, 'Verb not supported: '+inVerb)
 					return
 				}
 
@@ -95,7 +95,7 @@ HermesClient.prototype = {
 				console.log('Config:\n', req.cookies, '\n', req.params.config)
 
 				if (!req.params.config) {
-					return self.onError('Insufficient credentials provided.', req, res)
+					return self.onError(req, res, 'Insufficient credentials provided.')
 				}
 
 				self.execute(inVerb, req, res, this)
