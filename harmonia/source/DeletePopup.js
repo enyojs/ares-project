@@ -41,6 +41,6 @@ enyo.kind({
 	},
 	deleteConfirm: function(inSender, inEvent) {
 		this.hide();
-		this.doConfirm({name: this.fileName});
+		this.doConfirm({name: this.fileName, path: this.path});
 	}
 });

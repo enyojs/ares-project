@@ -5,7 +5,7 @@ enyo.kind({
 		title: "Name for new",
 		type: "",
 		path: "",
-		defaultName: ""
+		fileName: ""
 	},
 	events: {
 		onConfirm: "",
@@ -18,7 +18,7 @@ enyo.kind({
 		{name: "title", tag: "h3", content: "Name for new object"},
 		{name: "path", tag: "p", content: "Path: "},
 		{kind: "onyx.InputDecorator", components: [
-			{name: "fileName", kind: "onyx.Input"}
+			{name: "fileName", kind: "onyx.Input", onchange: "nameChanged"}
 		]},
 		{tag: "br"},
 		{tag: "br"},
@@ -29,7 +29,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.typeChanged();
 		this.pathChanged();
-		this.defaultNameChanged();
+		this.fileNameChanged();
 	},
 	typeChanged: function() {
 		this.$.title.setContent(this.title+" "+this.type);
@@ -40,9 +40,6 @@ enyo.kind({
 	pathChanged: function() {
 		this.$.path.setContent("in "+this.path);
 	},
-	defaultNameChanged: function() {
-		this.$.fileName.setValue(this.defaultName);
-	},
 	newCancel: function(inSender, inEvent) {
 		this.hide();
 		this.doCancel();
@@ -50,6 +47,12 @@ enyo.kind({
 	newConfirm: function(inSender, inEvent) {
 		var name = this.$.fileName.getValue();
 		this.hide();
-		this.doConfirm({name: name});
+		this.doConfirm({name: name, path: this.path});
+	},
+	nameChanged: function(inSender, inEvent) {
+		this.setFileName(this.$.fileName.getValue());
+	},
+	fileNameChanged: function() {
+		this.$.fileName.setValue(this.fileName);
 	}
 });	
