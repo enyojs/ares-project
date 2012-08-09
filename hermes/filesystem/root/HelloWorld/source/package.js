@@ -1,0 +1,4 @@
+enyo.depends(
+	"App.js"
+);
+	
