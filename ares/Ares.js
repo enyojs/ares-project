@@ -19,6 +19,9 @@ enyo.kind({
 			.response(this, function(inEvent, inData) {
 				if (inData.content) {
 					inData=inData.content;
+				} else {
+					// no data? Empty file
+					inData="";
 				}
 				this.$.phobos.openDoc(inData, ext);
 				this.setIndex(1);
