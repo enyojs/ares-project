@@ -2,5 +2,8 @@
 	"FieldDecorator.js",
 	"DropboxConfig.js",
 	"ProviderList.js",
-	"Harmonia.js"
+	"Harmonia.js",
+	"NamePopup.js",
+	"DeletePopup.js",
+	"RenamePopup.js"
 );

@@ -1,9 +1,9 @@
-﻿enyo.kind({
+enyo.kind({
 	name: "Harmonia",
 	kind: "FittableColumns",
 	components: [
 		{kind: "ProviderList", onSelectProvider: "selectProvider"},
-		{kind: "HermesFileTree", fit: true}
+		{kind: "HermesFileTree", fit: true, onFileClick: "selectFile", onFolderClick: "selectFolder"}
 	],
 	selectProvider: function(inSender, inInfo) {
 		//this.log(inInfo.service.auth);
@@ -20,5 +20,14 @@
 		this.$.hermesFileTree.$.service.setUrl(url);
 		this.$.hermesFileTree.$.service.setUseJsonp(jsonp);
 		this.$.hermesFileTree.reset();
+	},
+	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
+	selectFile: function(inSender, inEvent) {
+		console.log("Selected file: "+inEvent.file.id);
+		console.dir(inEvent.file);
+	},
+	selectFolder: function(inSender, inEvent) {
+		console.log("Selected folder: "+inEvent.file.id);
+		console.dir(inEvent.file);
 	}
 });

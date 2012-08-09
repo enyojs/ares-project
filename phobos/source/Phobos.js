@@ -96,7 +96,7 @@ enyo.kind({
 	},
 	dumpInfo: function(inObject) {
 		var c = inObject;
-		if (!c) {
+		if (!c || !c.superkinds) {
 			this.$.dump.setContent("(no info)");
 			return;
 		}
@@ -149,11 +149,15 @@ enyo.kind({
 		};
 		this.$.analyzer.index.indexModule(module);
 		var o = module.objects && module.objects[0];
-		var comps = o.components;
-		var start = o.components[0].start;
-		var end=c.lastIndexOf("]")+1;
-		var js = eval("([\n"+c.substring(start, end)+")");
-		this.bubble("onDesignDocument", {content: js});
+		if (o) { // must have kind definition...
+			var comps = o.components;
+			if (comps) { // ...and components block
+				var start = o.components[0].start;
+				var end=c.lastIndexOf("]")+1;
+				var js = eval("([\n"+c.substring(start, end)+")");
+				this.bubble("onDesignDocument", {content: js});
+			}
+		}
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docChanged) {
