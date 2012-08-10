@@ -13,12 +13,7 @@
 	</head>
 	<body class="enyo-unselectable Xonyx">
 		<script type="text/javascript">
-			if (window.location.protocol === 'http:') {
-				new Ares().write();
-			} else {
-				window.alert("Ares only works using HTTP");
-				window.location = "http://localhost:9010/ide/ares/index.html";
-			}
+			new Ares().write();
 		</script>
 	</body>
 </html>
