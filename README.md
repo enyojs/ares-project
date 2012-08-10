@@ -43,9 +43,9 @@ The following features are in the works, and you should see them added as we mov
 
 ### Setup
 
-#### Get the source at the proper location
+Install Node.js 0.6 or later, preferably from the [Official Download Page](http://nodejs.org/#download).
 
-For Ares to run, it expects the enyo and lib folders (including onyx, layout, and extra) from the 2.0b5 SDK (or later) from Github to be present next to ares-project, as follows:
+Get the source at the proper location: For Ares to run, it expects the enyo and lib folders (including onyx, layout, and extra) from the 2.0b5 SDK (or later) from Github to be present next to ares-project, as follows:
 
 		* ares-project		git@github.com:enyojs/ares-project.git
 		* enyo				git@github.com:enyojs/enyo.git
@@ -54,19 +54,65 @@ For Ares to run, it expects the enyo and lib folders (including onyx, layout, an
 			* layout		git@github.com:enyojs/layout.git
 			* extra			git@github.com:enyojs/extra.git
 
-#### Running the local file "server"
-The local filesystem browser is in the ares-project repository, under hermes/filesystem. In order to run the service, you will need to have [Node.js](http://www.nodejs.org) installed (version 0.6 or later). To start the service, go to the hermes/filesystem directory, and run:
-    node index.js
+### Run
 
-#### Approving the certificate
-Since Hermes runs as an SSL server with a self-signed certificate, you will need to approve the certificate when you initially connect to the server. Otherwise, Ares will not be able to communicate with the server, and you won't see your files.
+You have two options:
 
-To approve the certificate, start the server, then navigate to https://localhost:9010 in your browser. This will give you the opportunity to approve the certificate. We recommend that you *do not* check the box that says to "always trust" certificates signed by enyojs.com. Since the signing key is included in this distribution, anyone can make a certificate that matches this key.
+1. Use the IDE server (recommended)
+1. Configure & start sub-servers manually & open `ares/index.html` as a local file from the browser.
 
-#### Running the IDE
-To run, simply open `ares-project/ares/index.html` from a web browser.
+#### Served IDE
 
+Configure you local projects in `ide.json`. Current ide.json contains default working values. _Do not think you can modify the default values yet_.
 
+	% vi ide.json
+	{
+		"backends":[
+			{
+				"id":"local",
+				"name":"Local Filesystem",
+				"command":"node", "params":["hermes/filesystem/index.js"]
+			}
+		],
+		"workspace":{
+			"projects":[
+				{"id":"myProject", "backend_id":"local", "name":"My Project", "params":["9010", "hermes/filesystem/root"]}
+			],
+			"prefs":null
+		}
+	}
 
+Start the IDE server:
 
+	% node ide.js
+	[…]
+	ARES IDE is now running at <http://127.0.0.1:9009/ide/ares/index.html> Press CTRL + C to shutdown
+	[…]
+	Project [myProject]: connect to <https://127.0.0.1:9010> to accept SSL certificate
+	[…]
 
+Since Hermes runs as an SSL server with a self-signed certificate, you will need to approve the certificate when you initially connect to the server. Otherwise, Ares will not be able to communicate with the server, and you won't see your files.  We recommend that you *do not* check the box that says to "always trust" certificates signed by enyojs.com. Since the signing key is included in this distribution, anyone can make a certificate that matches this key.  Connect to the URL given in the logs above. _This step will vanish soon_
+
+Connect to the IDE using Google Chrome or Chromium.  The default URL is [http://127.0.0.1:9009/ide/ares/index.html](http://127.0.0.1:9009/ide/ares/index.html)
+
+	% open -a "Chromium" http://127.0.0.1:9009/ide/ares/index.html
+
+#### Manual IDE
+
+Start the file server:
+
+	$ node ares-project/hermes/filesystem/index.js 9010 hermes/filesystem/root
+	
+Accept the SLL certificate at [https://127.0.0.1:9010](https://127.0.0.1:9010).  Then from another terminal, open the Ares IDE:
+
+	$ open -a Chromium http://localhost:9010/ide/ares/index.html
+
+**Debugging:** The following sequence (to be run in separated terminals) opens the ARES local file server in debug-mode using `node-inspector`.
+
+	$ node --debug ares-project/hermes/filesystem/index.js 9010 hermes/filesystem/root
+		
+...then start `node-inspector` & the browser windows from a separated terminal:
+
+	$ open -a Chromium http://localhost:9010/ide/ares/index.html
+	$ node-inspector &
+	$ open -a Chromium http://localhost:8080/debug?port=5858

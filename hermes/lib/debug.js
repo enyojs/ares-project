@@ -1,6 +1,6 @@
 // Connect middleware for debugging using trycatch
 
-var trycatch = require('trycatch')
+var trycatch = require('trycatch');
 
 function debug(onError) {
 	onError = onError || function(req, res, err) {

@@ -5,6 +5,7 @@ var fs = require('fs')
 				key: fs.readFileSync(__dirname + '/certs/key.pem').toString(),
 				cert: fs.readFileSync(__dirname + '/certs/cert.pem').toString()
 			}
-		, port: parseInt(process.argv[2]) || 9010
+		, port: parseInt(process.argv[2], 10) || 0
+		, debug: true
 		}
-	, hermesFilesystem = new HermesFilesystem(config)
+	, hermesFilesystem = new HermesFilesystem(config);
