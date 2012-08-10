@@ -1,0 +1,15 @@
+{
+	"backends":[
+		{
+			"id":"local",
+			"name":"Local Filesystem",
+			"command":"node", "params":["hermes/filesystem/index.js"]
+		}
+	],
+	"workspace":{
+		"projects":[
+			{"id":"myProject", "backend_id":"local", "name":"My Project", "params":["9010", "hermes/filesystem/root"]}
+		],
+		"prefs":null
+	}
+}

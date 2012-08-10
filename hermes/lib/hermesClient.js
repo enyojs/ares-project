@@ -21,7 +21,8 @@ function cors(req, res, next) {
 };
 
 function HermesClient(inConfig) {
-	var server, self
+	var server, self;
+	var proto;
 
 	self = this
 
@@ -30,6 +31,7 @@ function HermesClient(inConfig) {
 
 	server = express.createServer(this.config.certs)
 	this.server = server
+	this.proto = "http" + (this.config.certs ? "s" : "");
 	
 	// Not sure if this is overridable, but it should be
 	server.configure(function() {
@@ -47,8 +49,11 @@ function HermesClient(inConfig) {
 	for (verb in this.routes) {
 		server.all(verb,  this.routes[verb].bind(this, verb))
 	}
-	server.listen(this.port)
-	console.log("Serving [%s] at [http%s://localhost:%s/]", this.name, this.config.certs ? "s" : "", this.port)
+	server.listen(this.port, "127.0.0.1", null /*backlog*/, function() {
+		console.log(JSON.stringify({
+			url: self.proto + "://127.0.0.1:"+server.address().port.toString()
+		}));
+	});
 }
 
 
@@ -58,7 +63,7 @@ HermesClient.prototype = {
 , port: 9000
 , debug: true
 , name: 'Hermes Service'
-, onError: function(err, next, req, res) {
+, onError: function(req, res, err, next) {
 		console.log('============================ ERROR ============================')
 		if (err instanceof Error) {
 			console.log(err.stack)
@@ -84,10 +89,10 @@ HermesClient.prototype = {
 
 		self = this
 
-		step(_.bindr(this.onError, this, req, res)
+		step(_.bind(this.onError, this, req, res)
 		, function() {
 				if (!self.hasVerb(inVerb)) {
-					self.onError('Verb not supported: '+inVerb, req, res)
+					self.onError(req, res, 'Verb not supported: '+inVerb)
 					return
 				}
 
@@ -95,7 +100,7 @@ HermesClient.prototype = {
 				console.log('Config:\n', req.cookies, '\n', req.params.config)
 
 				if (!req.params.config) {
-					return self.onError('Insufficient credentials provided.', req, res)
+					return self.onError(req, res, 'Insufficient credentials provided.')
 				}
 
 				self.execute(inVerb, req, res, this)
