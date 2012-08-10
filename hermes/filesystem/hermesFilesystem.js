@@ -77,13 +77,12 @@ _.extend(true, HermesFilesystem.prototype, {
 			fsPath = path.resolve(inRoot, inPath)
 		} else {
 			fsPath = inRoot
+			next = inContent
 			inContent = inPath
-			next = inContent 
 			inRoot = inPath = null
 		}
 
-		// This may be insufficient (not returning id like createfolder)
-		fs.writeFile(fsPath, inContent || '', next)
+		fs.writeFile(fsPath, inContent || '', 'utf8', next);
 	}
 , _createfolder: function(inRoot, inPath, next) {
 		var fsPath = path.resolve(inRoot, inPath)
