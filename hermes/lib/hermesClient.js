@@ -21,7 +21,8 @@ function cors(req, res, next) {
 };
 
 function HermesClient(inConfig) {
-	var server, self
+	var server, self;
+	var proto;
 
 	self = this
 
@@ -30,6 +31,7 @@ function HermesClient(inConfig) {
 
 	server = express.createServer(this.config.certs)
 	this.server = server
+	this.proto = "http" + (this.config.certs ? "s" : "");
 	
 	// Not sure if this is overridable, but it should be
 	server.configure(function() {
@@ -47,8 +49,11 @@ function HermesClient(inConfig) {
 	for (verb in this.routes) {
 		server.all(verb,  this.routes[verb].bind(this, verb))
 	}
-	server.listen(this.port, "127.0.0.1");
-	console.log("Serving [%s] at [http%s://localhost:%s/]", this.name, this.config.certs ? "s" : "", this.port)
+	server.listen(this.port, "127.0.0.1", null /*backlog*/, function() {
+		console.log(JSON.stringify({
+			url: self.proto + "://127.0.0.1:"+server.address().port.toString()
+		}));
+	});
 }
 
 
