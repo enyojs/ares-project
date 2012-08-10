@@ -61,12 +61,26 @@ The local filesystem browser is in the ares-project repository, under hermes/fil
 #### Approving the certificate
 Since Hermes runs as an SSL server with a self-signed certificate, you will need to approve the certificate when you initially connect to the server. Otherwise, Ares will not be able to communicate with the server, and you won't see your files.
 
-To approve the certificate, start the server, then navigate to https://localhost:9010 in your browser. This will give you the opportunity to approve the certificate. We recommend that you *do not* check the box that says to "always trust" certificates signed by enyojs.com. Since the signing key is included in this distribution, anyone can make a certificate that matches this key.
+To approve the certificate, start the server, then navigate to https://localhost:9011 in your browser. This will give you the opportunity to approve the certificate. We recommend that you *do not* check the box that says to "always trust" certificates signed by enyojs.com. Since the signing key is included in this distribution, anyone can make a certificate that matches this key.
 
 #### Running the IDE
-To run, simply open `ares-project/ares/index.html` from a web browser.
+To run, simply start the ARES server and open `http://localhost:9010/ide/ares/index.html` from a web browser.  Example below is using [Chromium](http://download-chromium.appspot.com).
 
+**Option 1 - Standard ARES** Start the ARES server…
 
+	$ node ares-project/hermes/filesystem/index.js
+	
+…then from another terminal:
 
+	$ open -a Chromium http://localhost:9010/ide/ares/index.html
 
+**Option 2 - Debug ARES** The following sequence (to be run in separated terminals) opens ARES in debug-mode using `node-inspector`. Start the ARES server:
+
+	$ node --debug ares-project/hermes/filesystem/index.js
+		
+...then start `node-inspector` & the browser windows from a separated terminal:
+
+	$ open -a Chromium http://localhost:9010/ide/ares/index.html
+	$ node-inspector &
+	$ open -a Chromium http://localhost:8080/debug?port=5858
 
