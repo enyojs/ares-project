@@ -3,7 +3,7 @@
     "description": "Ajax.org Code Editor is a full featured source code highlighting editor that powers the Cloud9 IDE",
     "version": "0.2.0",
     "homepage" : "http://github.com/ajaxorg/ace",
-    "engines": {"node": ">= 0.4.0"},
+    "engines": {"node": ">= 0.6.0"},
     "author": "Fabian Jakobs <fabian@ajax.org>",
     "main": "lib/ace",
     "repository" : {
@@ -11,25 +11,24 @@
          "url" : "http://github.com/ajaxorg/ace.git"
     },
     "dependencies": {
-        "mime": "1.2.x"
-    },
-    "devDependencies": {
+        "mime": "1.2.x",
         "asyncjs": "0.0.x",
         "jsdom": "0.2.x",
-        "amd-loader": ">=0.0.3",
-        "libxml": "0.0.x",
-        "dryice": ">=0.3.1 <0.4"
+        "amd-loader": "~0.0.4",
+        "plist": "",
+        "dryice": "",
+        "panino" : "~1.0.15"
     },
-
+    "mappings": {
+        "ace": "."
+    },
     "licenses": [{
         "type": "MPL",
         "url": "http://www.mozilla.org/MPL/"
-    },
-    {
+    }, {
         "type": "GPL",
         "url": "http://www.gnu.org/licenses/gpl.html"
-    },
-    {
+    }, {
         "type": "LGPL",
         "url": "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html"
     }],
@@ -37,6 +36,30 @@
         "lib": "lib/ace"
     },
     "scripts": {
-        "test": "node lib/ace/test/all.js"
+        "test": "node lib/ace/test/all.js",
+        "postinstall": "node ./install.js"
+    },
+    "config": {
+        "github.com/sourcemint/bundler-js/0/-meta/config/0": {
+            "adapter": "github.com/sourcemint/sdk-requirejs/0",
+            "modules": {
+                "/lib/ace/virtual_renderer.js": {
+                    "dynamicLinks": [
+                        "/lib/ace/theme/*.js"
+                    ]
+                },
+                "/lib/ace/worker/worker_client.js": {
+                    "dynamicLinks": [
+                        "/lib/ace/worker/worker_sourcemint.js"
+                    ]
+                },
+                "/lib/ace/worker/worker_sourcemint.js": {
+                    "bundleLoader": true,
+                    "dynamicLinks": [
+                        "/lib/ace/mode/*_worker.js"
+                    ]
+                }
+            }
+        }
     }
 }
