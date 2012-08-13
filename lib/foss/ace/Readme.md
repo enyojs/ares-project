@@ -1,6 +1,6 @@
 #### How to import ACE source code ####
 
- $ git clone git://github.com/ajaxorg/ace.git
+ $ git clone git://github.com/ajaxorg/ace.git # Do that outside of the ares-project tree
  $ cd ace
  $ npm install
  $ make build
