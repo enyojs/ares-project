@@ -54,13 +54,15 @@ for (var j = 0; j < ide.workspace.projects.length; j++) {
 			project.pid = sub_process.pid;
 			console.log("--- Project["+project.id+"'] pid="+project.pid);
 			sub_process.stderr.on('data', function(data){
-				console.err("--- Project["+project.id+"]: *** "+data);
+				console.error("--- Project["+project.id+"]: *** "+data);
 			});
 			sub_process.stdout.on('data', function(data){
 				console.log("--- Project["+project.id+"]: "+data);
 				try {
 					project.url = JSON.parse(data).url;
-					console.info("Project ["+project.id+"]: connect to <"+project.url+"> to accept SSL certificate");
+					if (project.url.match(/^https:/)) {
+						console.info("Project ["+project.id+"]: connect to <"+project.url+"> to accept SSL certificate");
+					}
 				} catch(e) {
 				}
 			});
