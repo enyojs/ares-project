@@ -88,10 +88,6 @@ Start the IDE server:
 	[…]
 	ARES IDE is now running at <http://127.0.0.1:9009/ide/ares/index.html> Press CTRL + C to shutdown
 	[…]
-	Project [myProject]: connect to <https://127.0.0.1:9010> to accept SSL certificate
-	[…]
-
-Since Hermes runs as an SSL server with a self-signed certificate, you will need to approve the certificate when you initially connect to the server. Otherwise, Ares will not be able to communicate with the server, and you won't see your files.  We recommend that you *do not* check the box that says to "always trust" certificates signed by enyojs.com. Since the signing key is included in this distribution, anyone can make a certificate that matches this key.  Connect to the URL given in the logs above. _This step will vanish soon_
 
 Connect to the IDE using Google Chrome or Chromium.  The default URL is [http://127.0.0.1:9009/ide/ares/index.html](http://127.0.0.1:9009/ide/ares/index.html)
 
@@ -103,10 +99,6 @@ Start the file server:
 
 	$ node ares-project/hermes/filesystem/index.js 9010 hermes/filesystem/root
 	
-Accept the SLL certificate at [https://127.0.0.1:9010](https://127.0.0.1:9010).  Then from another terminal, open the Ares IDE:
-
-	$ open -a Chromium http://localhost:9010/ide/ares/index.html
-
 **Debugging:** The following sequence (to be run in separated terminals) opens the ARES local file server in debug-mode using `node-inspector`.
 
 	$ node --debug ares-project/hermes/filesystem/index.js 9010 hermes/filesystem/root
