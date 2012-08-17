@@ -53,11 +53,17 @@ _.extend(true, HermesFilesystem.prototype, {
 			inRoot = inPath = null
 		}
 
-		fs.readFile(fsPath, function(err, data) {
-			if (err) return next(err)
-			
-			next(null, {content: data.toString()})
-		})
+		fs.stat(fsPath, function(err, stat) {
+			if (err) return next(err);
+			if (stat.isFile) {
+				fs.readFile(fsPath, function(err, data) {
+					if (err)
+						return next(err);
+					next(null, {content: data.toString()});
+				});
+			}
+			next("Not a file");
+		});
 	}
 , _put: function(inRoot, inPath, inContent, next) {
 		var fsPath = path.resolve(inRoot, inPath)
