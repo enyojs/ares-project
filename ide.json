@@ -1,6 +1,7 @@
 {
 	"services":[
 		{
+			"active":true,
 			"id":"home",
 			"icon":"server",
 			"name":"Local Files (home)",
@@ -9,16 +10,17 @@
 				"hermes/filesystem/index.js", "0", "@HOME@"
 			],
 			"useJsonp":false,
-			"active":true
+			"debug": false
 		},
 		{
+			"active":false,
 			"id":"dropbox-enyojs",
 			"icon":"dropbox",
 			"name":"Dropbox (enyojs.com)",
 			"type":"dropbox",
 			"command":"@NODE@", "params":["hermes/dropbox/index.js", "0", "http://184.169.139.5:8080"],
 			"useJsonp":false,
-			"active":false
+			"debug": false
 		}
 	]
 }
