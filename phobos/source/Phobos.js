@@ -250,6 +250,7 @@ enyo.kind({
 		var ace = this.$.ace;
 		var position = ace.getCursorPositionInDocument();
 		ace.insertAt(position, inSender.getValue());
+		ace.focus();
 		return true; // Stop the propagation of the event
 	}
 });
