@@ -18,12 +18,12 @@ HermesFilesystem.prototype.verbs = Object.create(prototype.verbs || {})
 _.extend(true, HermesFilesystem.prototype, {
 	name: "Filesystem Hermes Files Service"
 , parseConfig: function(inConfig) {
-		var config
-
-		config = prototype.parseConfig.apply(this, arguments) || {}
-		config.root = path.join(path.dirname(__filename), 'root')
-
-		return config
+		var config;
+		config = prototype.parseConfig.apply(this, arguments) || {};
+		if (!config.root) {
+			config.root = this.config.root;
+		}
+		return config;
 	}
 , execute: function(inVerb, req, res, next) {
 		if (req.connection.remoteAddress !== "127.0.0.1") {
@@ -31,14 +31,12 @@ _.extend(true, HermesFilesystem.prototype, {
 			res.send("Only local connections (from 127.0.0.1) are allowed", 403);
 			return;
 		};
-		req.params.root = req.params.config.root
+		req.params.root = req.params.config.root;
 		if (!_.endsWith(req.params.root, dl)) {
-			req.params.root += dl
+			req.params.root += dl;
 		}
-
-		req.params.fsPath = path.resolve(req.params.root, req.params.path)
-
-		prototype.execute.apply(this, arguments)
+		req.params.fsPath = path.resolve(req.params.root, req.params.path);
+		prototype.execute.apply(this, arguments);
 	}
 
 //

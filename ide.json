@@ -1,15 +1,24 @@
 {
-	"backends":[
+	"services":[
 		{
-			"id":"local",
-			"name":"Local Filesystem",
-			"command":"node", "params":["hermes/filesystem/index.js"]
+			"id":"home",
+			"icon":"server",
+			"name":"Local Files (home)",
+			"type":"local",
+			"command":"@NODE@", "params":[
+				"hermes/filesystem/index.js", "0", "@HOME@"
+			],
+			"useJsonp":false,
+			"active":true
+		},
+		{
+			"id":"dropbox-enyojs",
+			"icon":"dropbox",
+			"name":"Dropbox (enyojs.com)",
+			"type":"dropbox",
+			"command":"@NODE@", "params":["hermes/dropbox/index.js", "0", "http://184.169.139.5:8080"],
+			"useJsonp":false,
+			"active":false
 		}
-	],
-	"workspace":{
-		"projects":[
-			{"id":"myProject", "backend_id":"local", "name":"My Project", "params":["9010", "hermes/filesystem/root"]}
-		],
-		"prefs":null
-	}
+	]
 }
