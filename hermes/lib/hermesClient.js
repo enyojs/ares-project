@@ -61,7 +61,7 @@ function HermesClient(inConfig) {
 
 
 HermesClient.prototype = {
-	_configMask: ['port', 'debug', 'name', 'certs']
+	_configMask: ['port', 'debug', 'name', 'certs', 'root']
 , _propertyMask: ['port', 'debug', 'name']
 , port: 9000
 , debug: true
@@ -103,7 +103,7 @@ HermesClient.prototype = {
 				console.log('Config:\n', req.cookies, '\n', req.params.config)
 
 				if (!req.params.config) {
-					return self.onError(req, res, 'Insufficient credentials provided.')
+					return self.onError(req, res, 'Insufficient credentials provided.');
 				}
 
 				self.execute(inVerb, req, res, this)
