@@ -21,7 +21,7 @@ enyo.kind({
 				]},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "changed"}
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onEscape: "handleEscape"}
 					]}
 				]},
 				{name: "right", classes: "panel", components: [
@@ -47,7 +47,7 @@ enyo.kind({
 	],
 	handlers: {
 	},
-	docChanged: false,
+	docHasChanged: false,
 	create: function() {
 		this.inherited(arguments);
 		this.buildDb();
@@ -60,7 +60,7 @@ enyo.kind({
 	},
 	saveComplete: function() {
 		this.hideWaitPopup();
-		this.docChanged=false;
+		this.docHasChanged=false;
 	},
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
@@ -71,7 +71,7 @@ enyo.kind({
 		this.$.ace.setEditingMode(mode);
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
-		this.docChanged=false;
+		this.docHasChanged=false;
 	},
 	showWaitPopup: function(inMessage) {
 		this.$.waitPopupMessage.setContent(inMessage);
@@ -160,7 +160,7 @@ enyo.kind({
 		}
 	},
 	closeDocAction: function(inSender, inEvent) {
-		if (this.docChanged) {
+		if (this.docHasChanged) {
 			this.$.savePopup.show();
 		} else {
 			this.bubble("onCloseDocument", {});
@@ -175,8 +175,8 @@ enyo.kind({
 	cancelCloseAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
 	},
-	changed: function(inSender, inEvent) {
-		this.docChanged=true;
+	docChanged: function(inSender, inEvent) {
+		this.docHasChanged=true;
 	}
 });
 
