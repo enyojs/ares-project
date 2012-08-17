@@ -8,11 +8,11 @@
 var fs = require('fs'),
     HermesFilesystem = require(__dirname + '/hermesFilesystem').HermesFilesystem,
     port = parseInt(process.argv[2], 10) || 0,
-    directory = process.argv[3],
     secure = (process.argv[4] ? true : false),
     config = {
 	    port: parseInt(process.argv[2], 10) || 0,
-	    debug: false
+	    root: process.argv[3],
+	    debug: true
     };
 
 if (config.debug) {
@@ -22,14 +22,11 @@ if (config.debug) {
 }
 
 if (secure) {
-	console.log("Using https with a self-signed SSL certificate...");
 	config.certs = {
 		key: fs.readFileSync(__dirname + '/certs/key.pem').toString(),
 		cert: fs.readFileSync(__dirname + '/certs/cert.pem').toString()
 	};
-} else {
-	console.log("Using insecure http...");
 }
-
+if (config.debug) console.log("config="+JSON.stringify(config));
 var hermesFilesystem = new HermesFilesystem(config);
 
