@@ -29,9 +29,12 @@ function HermesClient(inConfig) {
 	this.config = _.mask(inConfig, this._configMask)
 	_.extend(this, _.mask(this.config, this._propertyMask))
 
-	server = express.createServer(this.config.certs)
+	if (this.config.certs) {
+		server = express.createServer(this.config.certs);
+	} else {
+		server = express.createServer();
+	}
 	this.server = server
-	this.proto = "http" + (this.config.certs ? "s" : "");
 	
 	// Not sure if this is overridable, but it should be
 	server.configure(function() {
@@ -51,14 +54,14 @@ function HermesClient(inConfig) {
 	}
 	server.listen(this.port, "127.0.0.1", null /*backlog*/, function() {
 		console.log(JSON.stringify({
-			url: self.proto + "://127.0.0.1:"+server.address().port.toString()
+			url: "http" + (self.config.certs ? "s" : "") + "://127.0.0.1:"+server.address().port.toString()
 		}));
 	});
 }
 
 
 HermesClient.prototype = {
-	_configMask: ['port', 'debug', 'name', 'certs']
+	_configMask: ['port', 'debug', 'name', 'certs', 'root']
 , _propertyMask: ['port', 'debug', 'name']
 , port: 9000
 , debug: true
@@ -100,7 +103,7 @@ HermesClient.prototype = {
 				console.log('Config:\n', req.cookies, '\n', req.params.config)
 
 				if (!req.params.config) {
-					return self.onError(req, res, 'Insufficient credentials provided.')
+					return self.onError(req, res, 'Insufficient credentials provided.');
 				}
 
 				self.execute(inVerb, req, res, this)

@@ -48,7 +48,7 @@
 	/*
 	providerChanged: function(inOld) {
 		for (var i=0, p; p=this.providers[i]; i++) {
-			if (p.moniker == this.provider) {
+			if (p.id == this.provider) {
 				this.selectByIndex(i);
 				return;
 			}
