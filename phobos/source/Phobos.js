@@ -5,7 +5,7 @@ enyo.kind({
 		{kind: "Analyzer", onIndexReady: "indexReady"},
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
-		{kind: "DragAvatar", components: [ 
+		{kind: "DragAvatar", components: [
 			{tag: "img", src: "images/icon.png"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
@@ -17,14 +17,13 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
-				{name: "left", classes: "panel", showing: false, components: [
-				]},
+				{name: "left",kind: "leftPanels",showing: false,arrangerKind: "CardArranger",fit: true},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
 						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "changed"}
 					]}
 				]},
-				{name: "right", classes: "panel", components: [
+				{name: "right", classes: "panel", showing: false, components: [
 					// neccesary nesting here for 'margin: 8px;"
 					{kind: "enyo.Scroller", classes: "border panel enyo-fit", style: "margin: 8px;", components: [
 						{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
@@ -68,6 +67,26 @@ enyo.kind({
 	openDoc: function(inCode, inExt) {
 		this.hideWaitPopup();
 		var mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
+		if (mode == "json"){
+			this.$.left.setIndex(0);
+			this.$.left.setShowing(false);
+			this.$.right.setShowing(false);
+		};
+		if (mode == "javascript"){
+			this.$.left.setIndex(1);
+			this.$.left.setShowing(false);
+			this.$.right.setShowing(true);
+		};
+		if ( mode == "html"){
+			this.$.left.setIndex(2);
+			this.$.left.setShowing(false);
+			this.$.right.setShowing(false);
+		};
+		if( mode == "css"){
+			this.$.left.setIndex(3);
+			this.$.left.setShowing(true);
+			this.$.right.setShowing(false);
+		};
 		this.$.ace.setEditingMode(mode);
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
@@ -180,3 +199,162 @@ enyo.kind({
 	}
 });
 
+
+enyo.kind({
+	name: "leftPanels",
+	kind: "Panels",
+
+	published: {
+	red: 'ff',
+	blue: 'ff',
+	green: 'ff',
+	color: "000000",
+	toggle: ""
+	},
+	wrap: false,
+	components: [
+		{// left panel jason go here
+		},
+		{// left panel javascript og here
+		},
+		{// left panel html go here
+		},
+
+		{kind: "enyo.FittableRows",		// left panel css
+		classes: "border panel enyo-fit",
+		style: "margin: 8px; border: 1px solid #000000;",
+		components: [
+			{name:"box",
+			style: "font-size: 15px; border: 1px solid #000000;",
+			classes: "enyo-selectable",
+			allowHtml: true,
+			components: [
+				{content:".SomeClass {"},
+				{name: "bg", allowHtml: true, content: "&nbsp;&nbsp;&nbsp;&nbsp;background-color: "},
+				{name: "fc", allowHtml: true, content:"&nbsp;&nbsp;&nbsp;&nbsp;color: "},
+				{content:"}"},
+				{name: "dud",content:"  ",style: "height: 1px"},
+			]},
+
+			{kind: "onyx.Slider",
+			name: "redSlider",
+			onChanging: "redSliding",
+			onChange: "redChanged",
+			style: "height:10px; background-color: red; enyo-unselectable;"
+			},
+
+			{style: "height: 5px"},
+
+			{kind: "onyx.Slider",
+			name: "greenSlider",onChanging: "greenSliding",
+			onChange: "greenChanged",
+			style: "height:10px;  background-color: green; enyo-unselectable"
+			},
+
+			{style: "height: 5px"},
+
+			{kind: "onyx.Slider",
+			name: "blueSlider",onChanging: "blueSliding",
+			onChange: "blueChanged",
+			style: "height:10px;  background-color: blue; enyo-unselectable"
+			},
+
+			{style: "height: 5px"},
+
+			{kind: "onyx.RadioGroup",
+			onActivate:"radioActivated",
+			components:[
+				{content:"background", active: true},
+				{content:"Font color"},
+			]},
+			{tag: "br"},
+		]},
+	],
+
+	create: function() {
+		this.inherited(arguments);
+		this.updateColor();
+	},
+
+	updateColor: function(){
+		var c = '#' + (this.red + this.green + this.blue).toUpperCase();
+		if(this.toggle == "background"){
+			this.$.box.applyStyle("background-color", c);
+			this.$.bg.setContent("&nbsp;&nbsp;&nbsp;&nbsp;background-color:" + " " + c + ";");
+			this.color = c;
+		}
+		if(this.toggle == "Font color"){
+			this.$.box.applyStyle("color", c);
+			this.$.fc.setContent("&nbsp;&nbsp;&nbsp;&nbsp;color:" + " " + c + ";");
+			this.color = c;
+		}
+
+	},
+
+	redChanged: function(inSender, inEvent){
+		var x = Math.floor(inEvent.value*255/100);
+		var h = x.toString(16);
+		if (h.length==1){
+			h = '0' + h;
+		}
+		this.red = h;
+		this.updateColor();
+	},
+
+	greenChanged: function(inSender, inEvent){
+		var x = Math.floor(inEvent.value*255/100);
+		var h = x.toString(16);
+		if (h.length==1){
+			h = '0' + h;
+		}
+		this.green = h;
+		this.updateColor();
+	},
+
+	blueChanged: function(inSender, inEvent){
+		var x = Math.floor(inEvent.value*255/100);
+		var h = x.toString(16);
+		if (h.length==1){
+			h = '0' + h;
+		}
+		this.blue = h;
+		this.updateColor();
+	},
+
+	redSliding: function(inSender, inEvent){
+		var x = Math.floor(inEvent.value*255/100);
+		var h = x.toString(16);
+		if (h.length==1){
+			h = '0' + h;
+		}
+		this.red = h;
+		this.updateColor();
+	},
+
+	greenSliding: function(inSender, inEvent){
+		var x = Math.floor(inEvent.value*255/100);
+		var h = x.toString(16);
+		if (h.length==1){
+			h = '0' + h;
+		}
+		this.green = h;
+		this.updateColor();
+	},
+
+	blueSliding: function(inSender, inEvent){
+		var x = Math.floor(inEvent.value*255/100);
+		var h = x.toString(16);
+		if (h.length==1){
+			h = '0' + h;
+		}
+		this.blue = h;
+		this.updateColor();
+	},
+
+	radioActivated: function(inSender, inEvent) {
+		if (inEvent.originator.getActive()) {
+			this.color = "#000000";
+			this.toggle = inEvent.originator.getContent();
+		}
+	},
+});
