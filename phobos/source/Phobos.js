@@ -153,8 +153,8 @@ enyo.kind({
 			var comps = o.components;
 			if (comps) { // ...and components block
 				var start = o.components[0].start;
-				var end=c.lastIndexOf("]")+1;
-				var js = eval("([\n"+c.substring(start, end)+")");
+				var end = o.components[0].end;
+				var js = eval("(["+c.substring(start, end)+"])");
 				this.bubble("onDesignDocument", {content: js});
 			}
 		}
