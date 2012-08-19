@@ -55,14 +55,15 @@ _.extend(true, HermesFilesystem.prototype, {
 
 		fs.stat(fsPath, function(err, stat) {
 			if (err) return next(err);
-			if (stat.isFile) {
+			if (stat.isFile()) {
 				fs.readFile(fsPath, function(err, data) {
 					if (err)
 						return next(err);
 					next(null, {content: data.toString()});
 				});
+			} else {
+				next("Not a file");
 			}
-			next("Not a file");
 		});
 	}
 , _put: function(inRoot, inPath, inContent, next) {
