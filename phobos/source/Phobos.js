@@ -87,6 +87,7 @@ enyo.kind({
 			this.$.left.setShowing(true);
 			this.$.right.setShowing(false);
 		};
+
 		this.$.ace.setEditingMode(mode);
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
@@ -205,9 +206,9 @@ enyo.kind({
 	kind: "Panels",
 
 	published: {
-	red: 'ff',
-	blue: 'ff',
-	green: 'ff',
+	red: '00',
+	blue: '00',
+	green: '00',
 	color: "000000",
 	toggle: ""
 	},
@@ -222,18 +223,19 @@ enyo.kind({
 
 		{kind: "enyo.FittableRows",		// left panel css
 		classes: "border panel enyo-fit",
-		style: "margin: 8px; border: 1px solid #000000;",
+		style: "margin: 8px; border: 1px solid #000000; ",
 		components: [
-			{name:"box",
-			style: "font-size: 15px; border: 1px solid #000000;",
+			{name:"outputBox",
+			style: "font-size: 10px; border: 1px solid #000000; width: 100%; height: 200px;",
 			classes: "enyo-selectable",
 			allowHtml: true,
 			components: [
-				{content:".SomeClass {"},
-				{name: "bg", allowHtml: true, content: "&nbsp;&nbsp;&nbsp;&nbsp;background-color: "},
-				{name: "fc", allowHtml: true, content:"&nbsp;&nbsp;&nbsp;&nbsp;color: "},
-				{content:"}"},
-				{name: "dud",content:"  ",style: "height: 1px"},
+				{name: "bg", allowHtml: true, style: "font-size: 12px;", content: ""},
+				//{content:".SomeClass {"},
+				//{name: "bg", allowHtml: true, content: "&nbsp;&nbsp;&nbsp;&nbsp;background-color: "},
+				//{name: "fc", allowHtml: true, content:"&nbsp;&nbsp;&nbsp;&nbsp;color: "},
+				//{content:"}"},
+				{name: "dud",allowHtml: true, content:"  ",style: "height: 10px"},
 			]},
 
 			{kind: "onyx.Slider",
@@ -273,22 +275,32 @@ enyo.kind({
 
 	create: function() {
 		this.inherited(arguments);
-		this.updateColor();
+		this.updateBox();
 	},
 
-	updateColor: function(){
-		var c = '#' + (this.red + this.green + this.blue).toUpperCase();
+	updateBox: function(){
+	var tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
+	var c = '#' + (this.red + this.green + this.blue).toUpperCase();
+
 		if(this.toggle == "background"){
-			this.$.box.applyStyle("background-color", c);
-			this.$.bg.setContent("&nbsp;&nbsp;&nbsp;&nbsp;background-color:" + " " + c + ";");
-			this.color = c;
-		}
-		if(this.toggle == "Font color"){
-			this.$.box.applyStyle("color", c);
-			this.$.fc.setContent("&nbsp;&nbsp;&nbsp;&nbsp;color:" + " " + c + ";");
-			this.color = c;
+			this.$.outputBox.applyStyle("background-color", c);
+			this.backgroundColor = c;
+			if (this.fontColor == null){
+				this.$.bg.setContent(".SomeClass {<br>" + tab + "background-color:" + " " +this.backgroundColor + ";<br>},");
+			}else{
+			this.$.bg.setContent(".SomeClass {<br>" + tab + "background-color:" + " " +this.backgroundColor + ";<br>" + tab + "fontcolor:" + " " + this.fontColor + ";<br>},");
+			}
 		}
 
+		if(this.toggle == "Font color"){
+			this.$.outputBox.applyStyle("color", c);
+			this.fontColor = c;
+			if (this.backgroundColor == null){
+				this.$.bg.setContent(".SomeClass {<br>" + tab + "fontcolor:" + " " + this.fontColor + ";<br>},");
+			}else{
+			this.$.bg.setContent(".SomeClass {<br>" + tab + "background-color:" + " " +this.backgroundColor + ";<br>" + tab + "fontcolor:" + " " + this.fontColor + ";<br>},");
+			}
+		}
 	},
 
 	redChanged: function(inSender, inEvent){
@@ -298,7 +310,7 @@ enyo.kind({
 			h = '0' + h;
 		}
 		this.red = h;
-		this.updateColor();
+		this.updateBox();
 	},
 
 	greenChanged: function(inSender, inEvent){
@@ -308,7 +320,7 @@ enyo.kind({
 			h = '0' + h;
 		}
 		this.green = h;
-		this.updateColor();
+		this.updateBox();
 	},
 
 	blueChanged: function(inSender, inEvent){
@@ -318,7 +330,7 @@ enyo.kind({
 			h = '0' + h;
 		}
 		this.blue = h;
-		this.updateColor();
+		this.updateBox();
 	},
 
 	redSliding: function(inSender, inEvent){
@@ -328,7 +340,7 @@ enyo.kind({
 			h = '0' + h;
 		}
 		this.red = h;
-		this.updateColor();
+		this.updateBox();
 	},
 
 	greenSliding: function(inSender, inEvent){
@@ -338,7 +350,7 @@ enyo.kind({
 			h = '0' + h;
 		}
 		this.green = h;
-		this.updateColor();
+		this.updateBox();
 	},
 
 	blueSliding: function(inSender, inEvent){
@@ -348,7 +360,7 @@ enyo.kind({
 			h = '0' + h;
 		}
 		this.blue = h;
-		this.updateColor();
+		this.updateBox();
 	},
 
 	radioActivated: function(inSender, inEvent) {
