@@ -226,15 +226,11 @@ enyo.kind({
 		style: "margin: 8px; border: 1px solid #000000; ",
 		components: [
 			{name:"outputBox",
-			style: "font-size: 10px; border: 1px solid #000000; width: 100%; height: 200px;",
+			style: "font-size: 10px; border: 1px solid #000000; width: 100%; height: 150px;",
 			classes: "enyo-selectable",
 			allowHtml: true,
 			components: [
 				{name: "bg", allowHtml: true, style: "font-size: 12px;", content: ""},
-				//{content:".SomeClass {"},
-				//{name: "bg", allowHtml: true, content: "&nbsp;&nbsp;&nbsp;&nbsp;background-color: "},
-				//{name: "fc", allowHtml: true, content:"&nbsp;&nbsp;&nbsp;&nbsp;color: "},
-				//{content:"}"},
 				{name: "dud",allowHtml: true, content:"  ",style: "height: 10px"},
 			]},
 
@@ -286,9 +282,9 @@ enyo.kind({
 			this.$.outputBox.applyStyle("background-color", c);
 			this.backgroundColor = c;
 			if (this.fontColor == null){
-				this.$.bg.setContent(".SomeClass {<br>" + tab + "background-color:" + " " +this.backgroundColor + ";<br>},");
+				this.$.bg.setContent(".SomeClass {<br>" + tab + "background-color:" + " " +this.backgroundColor + ";<br>}");
 			}else{
-			this.$.bg.setContent(".SomeClass {<br>" + tab + "background-color:" + " " +this.backgroundColor + ";<br>" + tab + "fontcolor:" + " " + this.fontColor + ";<br>},");
+			this.$.bg.setContent(".SomeClass {<br>" + tab + "background-color:" + " " +this.backgroundColor + ";<br>" + tab + "color:" + " " + this.fontColor + ";<br>}");
 			}
 		}
 
@@ -296,9 +292,9 @@ enyo.kind({
 			this.$.outputBox.applyStyle("color", c);
 			this.fontColor = c;
 			if (this.backgroundColor == null){
-				this.$.bg.setContent(".SomeClass {<br>" + tab + "fontcolor:" + " " + this.fontColor + ";<br>},");
+				this.$.bg.setContent(".SomeClass {<br>" + tab + "color:" + " " + this.fontColor + ";<br>}");
 			}else{
-			this.$.bg.setContent(".SomeClass {<br>" + tab + "background-color:" + " " +this.backgroundColor + ";<br>" + tab + "fontcolor:" + " " + this.fontColor + ";<br>},");
+			this.$.bg.setContent(".SomeClass {<br>" + tab + "background-color:" + " " +this.backgroundColor + ";<br>" + tab + "color:" + " " + this.fontColor + ";<br>}");
 			}
 		}
 	},
