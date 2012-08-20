@@ -21,7 +21,7 @@ enyo.kind({
 				]},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "changed"}
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged"}
 					]}
 				]},
 				{name: "right", classes: "panel", components: [
@@ -43,12 +43,32 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Cancel", ontap: "cancelCloseAction"},
 				{kind: "onyx.Button", content: "Don't Save", ontap: "abandonDocAction"},
 			]}
-		]}
+		]},
+		{name: "autocompletePopup", kind: "onyx.Popup", centered: false, floating: true, autoDismiss: false, modal: true,
+			style: "position: absolute; z-index: 100; width: 140px; height: 0px; padding: 0px; border: 0px",
+			onkeypress: "autocompletePopupKeyPress",
+			onkeyup: "autocompletePopupKeyUp",
+			components: [
+			    {kind: "Select", name: "autocompleteSelect", attributes: {size: 1}, onchange: "autocompleteChanged",
+			    	style: "z-index: 100; width: 140px; display: block; background-color: white; background-position: initial initial; background-repeat: initial initial; ",
+			    	components: [
+			            // options elements will be populated programmatically                  
+                ]}
+			]
+		}
 	],
 	handlers: {
 	},
-	docChanged: false,
+	docHasChanged: false,
+	debug: false,
+	// Constants
+	AUTOCOMP_THIS_DOLLAR: 'this.$.',
+	AUTOCOMP_THIS_DOLLAR_LEN: -1,	// Initialized in create function
+	ESCAPE_CODE: 27,
+	// Container of the code to analyze and of the analysis result
+	analysis: {},
 	create: function() {
+		this.AUTOCOMP_THIS_DOLLAR_LEN = this.AUTOCOMP_THIS_DOLLAR.length;
 		this.inherited(arguments);
 		this.buildDb();
 	},
@@ -60,7 +80,7 @@ enyo.kind({
 	},
 	saveComplete: function() {
 		this.hideWaitPopup();
-		this.docChanged=false;
+		this.docHasChanged=false;
 	},
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
@@ -71,7 +91,7 @@ enyo.kind({
 		this.$.ace.setEditingMode(mode);
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
-		this.docChanged=false;
+		this.docHasChanged=false;
 	},
 	showWaitPopup: function(inMessage) {
 		this.$.waitPopupMessage.setContent(inMessage);
@@ -132,13 +152,14 @@ enyo.kind({
 		this.$.dump.setContent(h$);
 	},
 	reparseAction: function() {
-		var module = {
+		var tempo = {
 			name: "Document",
 			code: this.$.ace.getValue()
 		};
-		this.$.analyzer.index.indexModule(module);
+		this.analysis = tempo;
+		this.$.analyzer.index.indexModule(tempo);
 		// ad hoc: dump the first object, if it exists
-		this.dumpInfo(module.objects && module.objects[0]);
+		this.dumpInfo(tempo.objects && tempo.objects[0]);
 	},
 	designerAction: function() {
 		// TODO: Crib more of this from Ares2v1
@@ -160,7 +181,7 @@ enyo.kind({
 		}
 	},
 	closeDocAction: function(inSender, inEvent) {
-		if (this.docChanged) {
+		if (this.docHasChanged) {
 			this.$.savePopup.show();
 		} else {
 			this.bubble("onCloseDocument", {});
@@ -175,8 +196,108 @@ enyo.kind({
 	cancelCloseAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
 	},
-	changed: function(inSender, inEvent) {
-		this.docChanged=true;
+	docChanged: function(inSender, inEvent) {
+		this.docHasChanged=true;
+		
+		if (this.debug) enyo.log("phobos.docChanged: " + JSON.stringify(inEvent.data));
+		
+		/*
+		 * Check to see if we need to show-up the auto-complete popup
+		 * 
+		 * NOTE: currently only done on "this.$."
+		 * 
+		 * When a '.' is entered, we check is it's the last character
+		 * of a "this.$." string.
+		 * If yes, we show a popup listing the components available
+		 * in the "this.$" map.
+		 */
+		var data = inEvent.data;
+		if (data && data.action === 'insertText') {
+			var last = data.text.substr(data.text.length - 1);
+			if (last === ".") { // Check that last entered char is a '."
+				var ace = this.$.ace;
+				var line = ace.getLine(data.range.end.row);
+				var end = data.range.end.column;
+				last = line.substr(end - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
+				
+				if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
+					this.showAutocompletePopup(this.analysis.objects[0].components, data.range.end);
+				}
+			}
+		}
+		
+		return true; // Stop the propagation of the event
+	},
+	cursorChanged: function(inSender, inEvent) {
+		if (this.debug) enyo.log("phobos.cursorChanged: " + inSender.id + " " + inEvent.type + " " + JSON.stringify(this.$.ace.getCursorPositionInDocument()));
+		return true; // Stop the propagation of the event
+	},
+	showAutocompletePopup: function(conponents, position) {
+		var autocompletePopup = this.$.autocompletePopup;
+		var select = this.$.autocompleteSelect;
+		// Fill-up the auto-completion list
+		enyo.forEach(conponents, function(a) {select.createComponent({content: a.name});});
+		select.nbEntries = conponents.length;
+		select.setAttribute("size", Math.min(conponents.length,10));
+		select.setSelected(0);
+		
+		// Compute the position of the popup
+		var ace = this.$.ace;
+		var editor = this.$.ace.editor;
+		var pos = editor.renderer.textToScreenCoordinates(position.row, position.column);			
+		pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
+
+		// Position the autocomplete popup
+		autocompletePopup.applyStyle("top", pos.pageY + "px");
+		autocompletePopup.applyStyle("left", pos.pageX + "px");
+		autocompletePopup.show();
+	},
+	hideAutocompletePopup: function() {
+		this.$.autocompletePopup.hide();
+		this.$.ace.focus();
+		return true; // Stop the propagation of the event
+	},
+	autocompleteChanged: function() {
+		// Insert the selected value
+		this.$.autocompletePopup.hide();
+		var ace = this.$.ace;
+		var position = ace.getCursorPositionInDocument();
+		var selected = this.$.autocompleteSelect.getValue();
+		if (this.debug) enyo.log("Inserting >>" + selected + "<< at " + JSON.stringify(position));
+		ace.insertAt(position, selected);
+		ace.focus();
+		return true; // Stop the propagation of the event
+	},
+	autocompletePopupKeyPress: function(inSender, inEvent) {
+		if (this.debug) enyo.log("Got a keypress ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
+//		TODO YDM TBC
+	},
+	autocompletePopupKeyUp: function(inSender, inEvent) {
+		if (this.debug) enyo.log("Got a keyup ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
+		
+		var key = inEvent.keyIdentifier;
+		if (key === "Up") {
+			var select = this.$.autocompleteSelect;
+			var selected = Math.max(select.getSelected() - 1, 0);
+			select.setSelected(selected);
+		} else if (key === "Down") {
+			var select = this.$.autocompleteSelect;
+			var selected = Math.min(select.getSelected() + 1, select.nbEntries - 1);
+			select.setSelected(selected);
+		} else if (key === "Enter") {
+			this.autocompleteChanged();
+			this.hideAutocompletePopup();
+		} else {
+			key = inEvent.keyCode;
+			if (key === this.ESCAPE_CODE) {
+				this.hideAutocompletePopup();
+			}
+		}
+		
+		var ace = this.$.ace;
+	    ace.blur();		// Needed to force ACE to ignore keystrokes after the popup is opened
+		
+	    return true; // Stop the propagation of the event
 	}
 });
 
