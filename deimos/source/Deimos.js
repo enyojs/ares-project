@@ -2,13 +2,18 @@ enyo.kind({
 	name: "Deimos",
 	classes: "enyo-unselectable",
 	components: [
-		{kind: "Signals", onload: "load"},
+		{kind: "Signals", onload: "documentLoaded"},
 		{kind: "DragAvatar", components: [ 
 			{tag: "img", src: "images/icon.png", style: "width: 24px; height: 24px;"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 0 10px;", components: [
 				{name: "docLabel", content: "Deimos"},
+				{kind: "onyx.PickerDecorator", components: [
+				    {name: "kindButton", kind: "onyx.PickerButton"}, //this uses the defaultKind property of PickerDecorator to inherit from PickerButton
+				    {name: "kindPicker", kind: "onyx.Picker", onChange: "kindSelected", components: [
+				    ]}
+				]},
 				{fit: true},
 				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction"}
 			]},
@@ -34,16 +39,31 @@ enyo.kind({
 		ondragfinish: "dragFinish",
 		ondrop: "drop"
 	},
+	kinds: null,
 	create: function() {
 		this.inherited(arguments);
 	},
+	//TODO: This only exists for standalong Deimos testing. Remove it?
 	load: function(what) {
-		if (what) {
-			this.$.inspector.inspect(null);
-			this.$.designer.load(what);
-		} else {
-			this.newDocumentAction();
-		}
+		this.kinds = what;
+		this.$.kindPicker.destroyClientControls();
+		for (var i = 0; i < what.length; i++) {
+			var k = what[i];
+			this.$.kindPicker.createComponent({
+				content: k.name,
+				index: i
+        	});
+    	}
+		this.$.kindPicker.setSelected(this.$.kindPicker.getClientControls()[0]);
+	},
+	documentLoaded: function(ev) {
+		this.newDocumentAction();
+	},
+	kindSelected: function(inSender, inEvent) {
+		var kind = inSender.getSelected().index;
+		var components = this.kinds[kind].content;
+		this.$.inspector.inspect(null);
+		this.$.designer.load(components);		
 	},
 	newDocumentAction: function() {
 		var document = [

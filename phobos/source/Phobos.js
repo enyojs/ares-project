@@ -148,15 +148,23 @@ enyo.kind({
 			code: c
 		};
 		this.$.analyzer.index.indexModule(module);
-		var o = module.objects && module.objects[0];
-		if (o) { // must have kind definition...
+		var kinds = [];
+		for (var i=0; i < module.objects.length; i++) {
+			var o = module.objects[i];
 			var comps = o.components;
-			if (comps) { // ...and components block
-				var start = o.components[0].start;
-				var end = o.components[0].end;
+			var name = o.name;
+			var kind = o.superkind;
+			if (comps) { // only include kinds with components block
+				var start = comps[0].start;
+				var end = comps[comps.length - 1].end;
 				var js = eval("(["+c.substring(start, end)+"])");
-				this.bubble("onDesignDocument", {content: js});
+				kinds.push({name: name, kind: kind, content: js});
 			}
+		}
+		if (kinds.length > 0) {
+			this.bubble("onDesignDocument", kinds);
+		} else {
+			alert("No kinds found in this file");
 		}
 	},
 	closeDocAction: function(inSender, inEvent) {
