@@ -44,33 +44,20 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Don't Save", ontap: "abandonDocAction"},
 			]}
 		]},
-		{name: "autocompletePopup", kind: "onyx.Popup", centered: false, floating: true, autoDismiss: false, modal: true,
-			style: "position: absolute; z-index: 100; width: 140px; height: 0px; padding: 0px; border: 0px",
-			onkeypress: "autocompletePopupKeyPress",
-			onkeyup: "autocompletePopupKeyUp",
-			components: [
-			    {kind: "Select", name: "autocompleteSelect", attributes: {size: 1}, onchange: "autocompleteChanged",
-			    	style: "z-index: 100; width: 140px; display: block; background-color: white; background-position: initial initial; background-repeat: initial initial; ",
-			    	components: [
-			            // options elements will be populated programmatically                  
-                ]}
-			]
-		}
+		{name: "autocomplete", kind: "Phobos.AutoComplete"}
 	],
 	handlers: {
 	},
 	docHasChanged: false,
 	debug: false,
-	// Constants
-	AUTOCOMP_THIS_DOLLAR: 'this.$.',
-	AUTOCOMP_THIS_DOLLAR_LEN: -1,	// Initialized in create function
-	ESCAPE_CODE: 27,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
 	create: function() {
-		this.AUTOCOMP_THIS_DOLLAR_LEN = this.AUTOCOMP_THIS_DOLLAR.length;
 		this.inherited(arguments);
 		this.buildDb();
+		
+		// Pass to the autocomplete compononent a reference to ace
+		this.$.autocomplete.setAce(this.$.ace);
 	},
 	//
 	//
@@ -201,6 +188,57 @@ enyo.kind({
 		
 		if (this.debug) enyo.log("phobos.docChanged: " + JSON.stringify(inEvent.data));
 		
+		// Call the autocomplete component
+		this.$.autocomplete.start(inEvent, this.analysis);
+		
+		return true; // Stop the propagation of the event
+	},
+	cursorChanged: function(inSender, inEvent) {
+		if (this.debug) enyo.log("phobos.cursorChanged: " + inSender.id + " " + inEvent.type + " " + JSON.stringify(this.$.ace.getCursorPositionInDocument()));
+		return true; // Stop the propagation of the event
+	}
+});
+
+enyo.kind({
+	name : "Phobos.AutoComplete",
+	kind : "onyx.Popup",
+	centered : false,
+	floating : true,
+	autoDismiss : false,
+	modal : true,
+//	scrimWhenModal: true, scrim: true, // TODO YDM TBR
+	style : "position: absolute; z-index: 100; width: 140px; height: 0px; padding: 0px; border: 0px",
+	published: {
+		ace: null
+	},
+	handlers: {
+		onkeyup: "keyUp",
+		onkeypress : "keyPress",
+		onkeydown : "keyDown"
+	},
+	components : [ {
+		kind : "Select",
+		name : "autocompleteSelect",
+		attributes : {
+			size : 1
+		},
+		onchange : "autocompleteChanged",
+		style : "z-index: 100; width: 140px; display: block; background-color: white; background-position: initial initial; background-repeat: initial initial; ",
+		components : [
+		    // options elements will be populated programmatically
+		]
+	} ],
+	// Constants
+	AUTOCOMP_THIS_DOLLAR: 'this.$.',
+	AUTOCOMP_THIS_DOLLAR_LEN: -1,	// Initialized in create function
+	ESCAPE_CODE: 27,
+	debug: false,
+	create: function() {
+		this.AUTOCOMP_THIS_DOLLAR_LEN = this.AUTOCOMP_THIS_DOLLAR.length;
+		this.inherited(arguments);
+	},
+	start: function(inEvent, inAnalysis) {
+		
 		/*
 		 * Check to see if we need to show-up the auto-complete popup
 		 * 
@@ -215,25 +253,17 @@ enyo.kind({
 		if (data && data.action === 'insertText') {
 			var last = data.text.substr(data.text.length - 1);
 			if (last === ".") { // Check that last entered char is a '."
-				var ace = this.$.ace;
-				var line = ace.getLine(data.range.end.row);
+				var line = this.ace.getLine(data.range.end.row);
 				var end = data.range.end.column;
 				last = line.substr(end - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
 				
 				if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
-					this.showAutocompletePopup(this.analysis.objects[0].components, data.range.end);
+					this.showAutocompletePopup(inAnalysis.objects[0].components, data.range.end);
 				}
 			}
 		}
-		
-		return true; // Stop the propagation of the event
-	},
-	cursorChanged: function(inSender, inEvent) {
-		if (this.debug) enyo.log("phobos.cursorChanged: " + inSender.id + " " + inEvent.type + " " + JSON.stringify(this.$.ace.getCursorPositionInDocument()));
-		return true; // Stop the propagation of the event
 	},
 	showAutocompletePopup: function(conponents, position) {
-		var autocompletePopup = this.$.autocompletePopup;
 		var select = this.$.autocompleteSelect;
 		// Fill-up the auto-completion list
 		enyo.forEach(conponents, function(a) {select.createComponent({content: a.name});});
@@ -242,25 +272,24 @@ enyo.kind({
 		select.setSelected(0);
 		
 		// Compute the position of the popup
-		var ace = this.$.ace;
-		var editor = this.$.ace.editor;
-		var pos = editor.renderer.textToScreenCoordinates(position.row, position.column);			
+		var ace = this.ace;
+		var pos = ace.editor.renderer.textToScreenCoordinates(position.row, position.column);			
 		pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
 
 		// Position the autocomplete popup
-		autocompletePopup.applyStyle("top", pos.pageY + "px");
-		autocompletePopup.applyStyle("left", pos.pageX + "px");
-		autocompletePopup.show();
+		this.applyStyle("top", pos.pageY + "px");
+		this.applyStyle("left", pos.pageX + "px");
+		this.show();
 	},
 	hideAutocompletePopup: function() {
-		this.$.autocompletePopup.hide();
-		this.$.ace.focus();
+		this.hide();
+		this.ace.focus();
 		return true; // Stop the propagation of the event
 	},
 	autocompleteChanged: function() {
 		// Insert the selected value
-		this.$.autocompletePopup.hide();
-		var ace = this.$.ace;
+		this.hide();
+		var ace = this.ace;
 		var position = ace.getCursorPositionInDocument();
 		var selected = this.$.autocompleteSelect.getValue();
 		if (this.debug) enyo.log("Inserting >>" + selected + "<< at " + JSON.stringify(position));
@@ -268,12 +297,13 @@ enyo.kind({
 		ace.focus();
 		return true; // Stop the propagation of the event
 	},
-	autocompletePopupKeyPress: function(inSender, inEvent) {
+	keyPress: function(inSender, inEvent) {
 		if (this.debug) enyo.log("Got a keypress ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
 //		TODO YDM TBC
+		return true; // Stop the propagation of the event
 	},
-	autocompletePopupKeyUp: function(inSender, inEvent) {
-		if (this.debug) enyo.log("Got a keyup ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
+	keyDown: function(inSender, inEvent) {
+		if (this.debug) enyo.log("Got a keydown ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
 		
 		var key = inEvent.keyIdentifier;
 		if (key === "Up") {
@@ -284,20 +314,25 @@ enyo.kind({
 			var select = this.$.autocompleteSelect;
 			var selected = Math.min(select.getSelected() + 1, select.nbEntries - 1);
 			select.setSelected(selected);
-		} else if (key === "Enter") {
+		} // else - Don't care
+		return true; // Stop the propagation of the event
+	},
+	keyUp: function(inSender, inEvent) {
+		if (this.debug) enyo.log("Got a keyup ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
+		
+		var key = inEvent.keyIdentifier;
+		if (key === "Enter") {
 			this.autocompleteChanged();
 			this.hideAutocompletePopup();
 		} else {
 			key = inEvent.keyCode;
 			if (key === this.ESCAPE_CODE) {
 				this.hideAutocompletePopup();
-			}
+			} // else - Don't care
 		}
 		
-		var ace = this.$.ace;
-	    ace.blur();		// Needed to force ACE to ignore keystrokes after the popup is opened
+	    this.ace.blur();		// Needed to force ACE to ignore keystrokes after the popup is opened
 		
 	    return true; // Stop the propagation of the event
 	}
 });
-
