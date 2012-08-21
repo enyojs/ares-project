@@ -43,7 +43,6 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 	},
-	//TODO: This only exists for standalong Deimos testing. Remove it?
 	load: function(what) {
 		this.kinds = what;
 		this.$.kindPicker.destroyClientControls();
@@ -51,11 +50,13 @@ enyo.kind({
 			var k = what[i];
 			this.$.kindPicker.createComponent({
 				content: k.name,
-				index: i
+				index: i,
+				active: (i==0)
         	});
     	}
-		this.$.kindPicker.setSelected(this.$.kindPicker.getClientControls()[0]);
+		this.$.kindPicker.render();
 	},
+	//TODO: This only exists for standalone Deimos testing. Remove it?
 	documentLoaded: function(ev) {
 		this.newDocumentAction();
 	},
