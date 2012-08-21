@@ -267,10 +267,12 @@ enyo.kind({
 	showAutocompletePopup: function(conponents, position) {
 		var select = this.$.autocompleteSelect;
 		// Fill-up the auto-completion list
+		select.destroyComponents();
 		enyo.forEach(conponents, function(a) {select.createComponent({content: a.name});});
 		select.nbEntries = conponents.length;
 		select.setAttribute("size", Math.min(conponents.length,10));
 		select.setSelected(0);
+		select.render();
 		
 		// Compute the position of the popup
 		var ace = this.ace;
