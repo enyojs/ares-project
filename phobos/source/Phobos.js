@@ -266,6 +266,30 @@ enyo.kind({
 				{content:"Font color"},
 			]},
 			{tag: "br"},
+
+			{fit: true,
+			name: "list",
+			kind: "FlyweightRepeater",
+			toggleSelected: false,
+			onSetupItem: "setupRow",
+			onSelect: "rowSelected",
+			onDeselect: "rowDeselected",
+			components: [
+				{name: "item",
+				classes: "enyo-children-inline",
+				style: "padding: 8px 4px 4px; border-bottom: 1px solid gray;",
+				ontap: "itemTap",
+				ondblclick: "dblClick", /*onConfirm: "removeProvider",*/
+				components: [
+					{name: "name", Xstyle: "width: 80%; display: inline-block;"},
+				]}
+			]},
+
+
+
+
+
+
 		]},
 	],
 
@@ -364,5 +388,11 @@ enyo.kind({
 			this.color = "#000000";
 			this.toggle = inEvent.originator.getContent();
 		}
+	},
+
+	setupRow: function(inSender, inEvent) {
+		this.$.name.setContent("2");
+
+		return true;
 	},
 });
