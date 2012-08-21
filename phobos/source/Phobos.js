@@ -68,6 +68,7 @@ enyo.kind({
 	saveComplete: function() {
 		this.hideWaitPopup();
 		this.docHasChanged=false;
+		this.reparseAction();
 	},
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
