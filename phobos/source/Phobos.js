@@ -51,7 +51,7 @@ enyo.kind({
 			    {kind: "Select", name: "autocompleteSelect", attributes: {size: 1}, onchange: "autocompleteChanged",
 			    	style: "z-index: 100; width: 140px; display: block; background-color: white; background-position: initial initial; background-repeat: initial initial; ",
 			    	components: [
-			            // options elements will be populated programmatically                  
+			            // options elements will be populated programmatically
                 ]}
 			]
 		}
@@ -218,14 +218,14 @@ enyo.kind({
 	},
 	docChanged: function(inSender, inEvent) {
 		this.docHasChanged=true;
-		
+
 		if (this.debug) enyo.log("phobos.docChanged: " + JSON.stringify(inEvent.data));
-		
+
 		/*
 		 * Check to see if we need to show-up the auto-complete popup
-		 * 
+		 *
 		 * NOTE: currently only done on "this.$."
-		 * 
+		 *
 		 * When a '.' is entered, we check is it's the last character
 		 * of a "this.$." string.
 		 * If yes, we show a popup listing the components available
@@ -239,13 +239,13 @@ enyo.kind({
 				var line = ace.getLine(data.range.end.row);
 				var end = data.range.end.column;
 				last = line.substr(end - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
-				
+
 				if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
 					this.showAutocompletePopup(this.analysis.objects[0].components, data.range.end);
 				}
 			}
 		}
-		
+
 		return true; // Stop the propagation of the event
 	},
 	cursorChanged: function(inSender, inEvent) {
@@ -260,11 +260,11 @@ enyo.kind({
 		select.nbEntries = conponents.length;
 		select.setAttribute("size", Math.min(conponents.length,10));
 		select.setSelected(0);
-		
+
 		// Compute the position of the popup
 		var ace = this.$.ace;
 		var editor = this.$.ace.editor;
-		var pos = editor.renderer.textToScreenCoordinates(position.row, position.column);			
+		var pos = editor.renderer.textToScreenCoordinates(position.row, position.column);
 		pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
 
 		// Position the autocomplete popup
@@ -294,7 +294,7 @@ enyo.kind({
 	},
 	autocompletePopupKeyUp: function(inSender, inEvent) {
 		if (this.debug) enyo.log("Got a keyup ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
-		
+
 		var key = inEvent.keyIdentifier;
 		if (key === "Up") {
 			var select = this.$.autocompleteSelect;
@@ -313,10 +313,10 @@ enyo.kind({
 				this.hideAutocompletePopup();
 			}
 		}
-		
+
 		var ace = this.$.ace;
 	    ace.blur();		// Needed to force ACE to ignore keystrokes after the popup is opened
-		
+
 	    return true; // Stop the propagation of the event
 	}
 });
@@ -347,7 +347,7 @@ enyo.kind({
 		style: "margin: 8px; border: 1px solid #000000; ",
 		components: [
 			{name:"outputBox",
-			style: "font-size: 10px; border: 1px solid #000000; width: 100%; height: 150px;",
+			style: "font-family: fontFamily; font-size: 10px; border: 1px solid #000000; width: 100%; height: 150px;",
 			classes: "enyo-selectable",
 			allowHtml: true,
 			components: [
@@ -383,34 +383,28 @@ enyo.kind({
 			{kind: "onyx.RadioGroup",
 			onActivate:"radioActivated",
 			components:[
-				{content:"background", active: true},
-				{content:"Font color"},
+				{content:"background", active: true, style: "width: 140px; height: 40px"},
+				{content:"Font color", style: "width: 140px; height: 40px"},
 			]},
 			{tag: "br"},
-
-			{fit: true,
-			name: "list",
-			kind: "FlyweightRepeater",
-			toggleSelected: false,
-			onSetupItem: "setupRow",
-			onSelect: "rowSelected",
-			onDeselect: "rowDeselected",
-			components: [
-				{name: "item",
-				classes: "enyo-children-inline",
-				style: "padding: 8px 4px 4px; border-bottom: 1px solid gray;",
-				ontap: "itemTap",
-				ondblclick: "dblClick", /*onConfirm: "removeProvider",*/
-				components: [
-					{name: "name", Xstyle: "width: 80%; display: inline-block;"},
-				]}
+			{kind: "onyx.RadioGroup",
+			//style:
+			width: "50 px",
+			onActivate:"fontActivated",
+			components:[
+				{content:"Serif", style: "font-family: Serif; width: 140px; height: 50px"},
+				{content:"Sans-serif", style: "font-family: Sans-serif; width: 140px; height: 50px"},
+				//{tag: "br"},
+				{content:"Helvetica  ", style: "font-family: Helvetica; width: 140px; height: 50px"},
+				{content:"Monospace", style: "font-family: Monospace; width: 140px; height: 50px"},
+				//{tag: "br"},
+				{content:" Lucida Sans Unicode ", style: "font-family: Lucida Sans Unicode; width: 140px; height: 50px"},
+				{content:"Times New Roman  ", style: "font-family: Times New Roman; width: 140px; height: 50px"},
+				//{tag: "br"},
+				{content:" Courier New ", style: "font-family: Courier New; width: 140px; height: 50px"},
+				{content:" Arial ", style: "font-family: Arial; width: 140px; height: 50px"},
+				//{tag: "br"},
 			]},
-
-
-
-
-
-
 		]},
 	],
 
@@ -421,27 +415,30 @@ enyo.kind({
 
 	updateBox: function(){
 	var tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
+	var outPut = ".SomeClass {<br>" ;
 	var c = '#' + (this.red + this.green + this.blue).toUpperCase();
 
 		if(this.toggle == "background"){
 			this.$.outputBox.applyStyle("background-color", c);
 			this.backgroundColor = c;
-			if (this.fontColor == null){
-				this.$.bg.setContent(".SomeClass {<br>" + tab + "background-color:" + " " +this.backgroundColor + ";<br>}");
-			}else{
-			this.$.bg.setContent(".SomeClass {<br>" + tab + "background-color:" + " " +this.backgroundColor + ";<br>" + tab + "color:" + " " + this.fontColor + ";<br>}");
 			}
-		}
-
 		if(this.toggle == "Font color"){
 			this.$.outputBox.applyStyle("color", c);
 			this.fontColor = c;
-			if (this.backgroundColor == null){
-				this.$.bg.setContent(".SomeClass {<br>" + tab + "color:" + " " + this.fontColor + ";<br>}");
-			}else{
-			this.$.bg.setContent(".SomeClass {<br>" + tab + "background-color:" + " " +this.backgroundColor + ";<br>" + tab + "color:" + " " + this.fontColor + ";<br>}");
 			}
+
+		if (this.backgroundColor != null){
+			outPut =outPut + tab + "background-color:" + " " +this.backgroundColor + ";<br>";
+			}
+
+		if (this.fontColor != null){
+			outPut = outPut + tab + "color:" + " " + this.fontColor + ";<br>";
+			}
+
+		if (this.fontFamily != null){
+			outPut = outPut + tab + "font-family:" + " " +this.fontFamily + ";";
 		}
+		this.$.bg.setContent(outPut + "<br>}");
 	},
 
 	redChanged: function(inSender, inEvent){
@@ -508,12 +505,14 @@ enyo.kind({
 		if (inEvent.originator.getActive()) {
 			this.color = "#000000";
 			this.toggle = inEvent.originator.getContent();
+			this.updateBox();
 		}
 	},
 
-	setupRow: function(inSender, inEvent) {
-		this.$.name.setContent("2");
-
-		return true;
+	fontActivated: function(inSender, inEvent) {
+		if (inEvent.originator.getActive()) {
+			this.fontFamily = inEvent.originator.getContent();
+			this.updateBox();
+		}
 	},
 });
