@@ -207,7 +207,6 @@ enyo.kind({
 	floating : true,
 	autoDismiss : false,
 	modal : true,
-//	scrimWhenModal: true, scrim: true, // TODO YDM TBR
 	style : "position: absolute; z-index: 100; width: 140px; height: 0px; padding: 0px; border: 0px",
 	published: {
 		ace: null
@@ -233,7 +232,9 @@ enyo.kind({
 	AUTOCOMP_THIS_DOLLAR: 'this.$.',
 	AUTOCOMP_THIS_DOLLAR_LEN: -1,	// Initialized in create function
 	ESCAPE_CODE: 27,
+	BACKSPACE_CODE: 8,
 	debug: false,
+	input: "",
 	create: function() {
 		this.AUTOCOMP_THIS_DOLLAR_LEN = this.AUTOCOMP_THIS_DOLLAR.length;
 		this.inherited(arguments);
@@ -259,24 +260,38 @@ enyo.kind({
 				last = line.substr(end - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
 				
 				if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
-					this.showAutocompletePopup(inAnalysis.objects[0].components, data.range.end);
+					this.input = "";
+					this.components = inAnalysis.objects[0].components;
+					this.position = data.range.end;
+					this.showAutocompletePopup();
 				}
 			}
 		}
 	},
-	showAutocompletePopup: function(conponents, position) {
+	showAutocompletePopup: function() {
 		var select = this.$.autocompleteSelect;
 		// Fill-up the auto-completion list
 		select.destroyComponents();
-		enyo.forEach(conponents, function(a) {select.createComponent({content: a.name});});
-		select.nbEntries = conponents.length;
-		select.setAttribute("size", Math.min(conponents.length,10));
+		var input = this.input;
+		enyo.forEach(this.components, function(a) {
+			if (input.length === 0) {
+				select.createComponent({content: a.name});
+			} else {
+				if (a.name.indexOf(input) === 0) {
+					select.createComponent({content: a.name});
+				}
+			}
+		});
+		select.nbEntries = select.controls.length;
+		var size = Math.max(2, Math.min(select.nbEntries, 10));
+		if (this.debug) enyo.log("Nb entries: " + select.nbEntries + " Shown: " + size);
+		select.setAttribute("size", size);
 		select.setSelected(0);
 		select.render();
 		
 		// Compute the position of the popup
 		var ace = this.ace;
-		var pos = ace.editor.renderer.textToScreenCoordinates(position.row, position.column);			
+		var pos = ace.editor.renderer.textToScreenCoordinates(this.position.row, this.position.column);			
 		pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
 
 		// Position the autocomplete popup
@@ -293,16 +308,27 @@ enyo.kind({
 		// Insert the selected value
 		this.hide();
 		var ace = this.ace;
-		var position = ace.getCursorPositionInDocument();
 		var selected = this.$.autocompleteSelect.getValue();
-		if (this.debug) enyo.log("Inserting >>" + selected + "<< at " + JSON.stringify(position));
-		ace.insertAt(position, selected);
+		selected = selected.substr(this.input.length);
+		var pos = enyo.clone(this.position);
+		pos.column += this.input.length;
+		if (this.debug) enyo.log("Inserting >>" + selected + "<< at " + JSON.stringify(pos));
+		this.ace.insertAt(pos, selected);
 		ace.focus();
 		return true; // Stop the propagation of the event
 	},
 	keyPress: function(inSender, inEvent) {
-		if (this.debug) enyo.log("Got a keypress ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
-//		TODO YDM TBC
+		var key = inEvent.keyIdentifier;
+		if (key !== 'Enter') {
+			var pos = enyo.clone(this.position);
+			pos.column += this.input.length;
+			var character = String.fromCharCode(inEvent.keyCode);
+			this.input += character;
+			if (this.debug) enyo.log("Got a keypress ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier + " ==> input: >>" + this.input + "<<");
+			if (this.debug) enyo.log("Inserting >>" + character + "<< at " + JSON.stringify(pos));
+			this.ace.insertAt(pos, character);
+			this.showAutocompletePopup();
+		} // else - Don't care
 		return true; // Stop the propagation of the event
 	},
 	keyDown: function(inSender, inEvent) {
@@ -311,11 +337,12 @@ enyo.kind({
 		var key = inEvent.keyIdentifier;
 		if (key === "Up") {
 			var select = this.$.autocompleteSelect;
-			var selected = Math.max(select.getSelected() - 1, 0);
+			var selected = select.getSelected() - 1;
+			if (selected < 0) { selected = select.nbEntries - 1;}
 			select.setSelected(selected);
 		} else if (key === "Down") {
 			var select = this.$.autocompleteSelect;
-			var selected = Math.min(select.getSelected() + 1, select.nbEntries - 1);
+			var selected = (select.getSelected() + 1) % select.nbEntries;
 			select.setSelected(selected);
 		} // else - Don't care
 		return true; // Stop the propagation of the event
@@ -331,7 +358,15 @@ enyo.kind({
 			key = inEvent.keyCode;
 			if (key === this.ESCAPE_CODE) {
 				this.hideAutocompletePopup();
-			} // else - Don't care
+			} else if (key === this.BACKSPACE_CODE) {
+				var str = this.input;
+				if (str.length > 0) {
+					this.input = str.substr(0, str.length -1);
+					if (this.debug) enyo.log("Got a backspace ==> input: >>" + this.input + "<<");
+					this.showAutocompletePopup();
+					this.ace.undo();
+				}
+			}// else - Don't care
 		}
 		
 	    this.ace.blur();		// Needed to force ACE to ignore keystrokes after the popup is opened
