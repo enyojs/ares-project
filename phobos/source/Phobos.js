@@ -146,8 +146,41 @@ enyo.kind({
 		};
 		this.analysis = tempo;
 		this.$.analyzer.index.indexModule(tempo);
-		// ad hoc: dump the first object, if it exists
-		this.dumpInfo(tempo.objects && tempo.objects[0]);
+		this.updateObjectsLines(tempo);
+		
+		// dump the object where the cursor is, if it exists
+		tempo.current = this.findCurrentEditedObject();
+		this.dumpInfo(tempo.objects && tempo.objects[tempo.current]);
+	},
+	/**
+	 * Add for each object the corresponding last line in the file
+	 * TODO: see if this should go in Analyzer2
+	 */
+	updateObjectsLines: function(tempo) {
+		tempo.lines = [];
+		if (tempo.objects && tempo.objects.length > 0) {
+			for( var idx = 1; idx < tempo.objects.length ; idx++ ) {
+				tempo.lines.push(tempo.objects[idx].line);
+			}
+			tempo.lines.push(1000000000);
+		}
+	},
+	/**
+	 * Return the index (in the analyzer result ) of the enyo kind
+	 * currently edited (in which the cursor is)
+	 * Otherwise return -1
+	 * @returns {Number}
+	 */
+	findCurrentEditedObject: function() {
+		if (this.analysis.lines) {
+			var position = this.$.ace.getCursorPositionInDocument();
+			for( var idx = 0 ; idx < this.analysis.lines.length ; idx++ ) {
+				if (position.row < this.analysis.lines[idx]) {
+					return idx;
+				}
+			}
+		}
+		return -1;
 	},
 	designerAction: function() {
 		// TODO: Crib more of this from Ares2v1
@@ -196,6 +229,14 @@ enyo.kind({
 	},
 	cursorChanged: function(inSender, inEvent) {
 		if (this.debug) enyo.log("phobos.cursorChanged: " + inSender.id + " " + inEvent.type + " " + JSON.stringify(this.$.ace.getCursorPositionInDocument()));
+		
+		// Check if we moved to another enyo kind and display it in the right pane
+		var current = this.findCurrentEditedObject();
+		var tempo = this.analysis;
+		if (current !== -1 && current != tempo.current) {
+			tempo.current = current;
+			this.dumpInfo(tempo.objects && tempo.objects[current]);
+		}
 		return true; // Stop the propagation of the event
 	}
 });
@@ -241,29 +282,31 @@ enyo.kind({
 	},
 	start: function(inEvent, inAnalysis) {
 		
-		/*
-		 * Check to see if we need to show-up the auto-complete popup
-		 * 
-		 * NOTE: currently only done on "this.$."
-		 * 
-		 * When a '.' is entered, we check is it's the last character
-		 * of a "this.$." string.
-		 * If yes, we show a popup listing the components available
-		 * in the "this.$" map.
-		 */
-		var data = inEvent.data;
-		if (data && data.action === 'insertText') {
-			var last = data.text.substr(data.text.length - 1);
-			if (last === ".") { // Check that last entered char is a '."
-				var line = this.ace.getLine(data.range.end.row);
-				var end = data.range.end.column;
-				last = line.substr(end - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
-				
-				if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
-					this.input = "";
-					this.components = inAnalysis.objects[0].components;
-					this.position = data.range.end;
-					this.showAutocompletePopup();
+		if (inAnalysis.objects && inAnalysis.objects.length > 0) {
+			/*
+			 * Check to see if we need to show-up the auto-complete popup
+			 * 
+			 * NOTE: currently only done on "this.$."
+			 * 
+			 * When a '.' is entered, we check is it's the last character
+			 * of a "this.$." string.
+			 * If yes, we show a popup listing the components available
+			 * in the "this.$" map.
+			 */
+			var data = inEvent.data;
+			if (data && data.action === 'insertText') {
+				var last = data.text.substr(data.text.length - 1);
+				if (last === ".") { // Check that last entered char is a '."
+					var line = this.ace.getLine(data.range.end.row);
+					var end = data.range.end.column;
+					last = line.substr(end - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
+					
+					if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
+						this.input = "";
+						this.components = inAnalysis.objects[inAnalysis.current].components;
+						this.position = data.range.end;
+						this.showAutocompletePopup();
+					}
 				}
 			}
 		}
@@ -283,21 +326,25 @@ enyo.kind({
 			}
 		});
 		select.nbEntries = select.controls.length;
-		var size = Math.max(2, Math.min(select.nbEntries, 10));
-		if (this.debug) enyo.log("Nb entries: " + select.nbEntries + " Shown: " + size);
-		select.setAttribute("size", size);
-		select.setSelected(0);
-		select.render();
-		
-		// Compute the position of the popup
-		var ace = this.ace;
-		var pos = ace.editor.renderer.textToScreenCoordinates(this.position.row, this.position.column);			
-		pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
-
-		// Position the autocomplete popup
-		this.applyStyle("top", pos.pageY + "px");
-		this.applyStyle("left", pos.pageX + "px");
-		this.show();
+		if (select.nbEntries > 0) {
+			var size = Math.max(2, Math.min(select.nbEntries, 10));
+			if (this.debug) enyo.log("Nb entries: " + select.nbEntries + " Shown: " + size);
+			select.setAttribute("size", size);
+			select.setSelected(0);
+			select.render();
+			
+			// Compute the position of the popup
+			var ace = this.ace;
+			var pos = ace.editor.renderer.textToScreenCoordinates(this.position.row, this.position.column);			
+			pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
+	
+			// Position the autocomplete popup
+			this.applyStyle("top", pos.pageY + "px");
+			this.applyStyle("left", pos.pageX + "px");
+			this.show();
+		} else {
+			this.hideAutocompletePopup();
+		}
 	},
 	hideAutocompletePopup: function() {
 		this.hide();
