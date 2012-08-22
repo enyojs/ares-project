@@ -5,7 +5,7 @@ enyo.kind({
 		{kind: "Analyzer", onIndexReady: "indexReady"},
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
-		{kind: "DragAvatar", components: [ 
+		{kind: "DragAvatar", components: [
 			{tag: "img", src: "images/icon.png"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
@@ -17,14 +17,13 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
-				{name: "left", classes: "panel", showing: false, components: [
-				]},
+				{name: "left",kind: "leftPanels",showing: false,arrangerKind: "CardArranger",fit: true},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
 						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged"}
 					]}
 				]},
-				{name: "right", classes: "panel", components: [
+				{name: "right", classes: "panel", showing: false, components: [
 					// neccesary nesting here for 'margin: 8px;"
 					{kind: "enyo.Scroller", classes: "border panel enyo-fit", style: "margin: 8px;", components: [
 						{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
@@ -52,7 +51,7 @@ enyo.kind({
 			    {kind: "Select", name: "autocompleteSelect", attributes: {size: 1}, onchange: "autocompleteChanged",
 			    	style: "z-index: 100; width: 140px; display: block; background-color: white; background-position: initial initial; background-repeat: initial initial; ",
 			    	components: [
-			            // options elements will be populated programmatically                  
+			            // options elements will be populated programmatically
                 ]}
 			]
 		}
@@ -88,6 +87,27 @@ enyo.kind({
 	openDoc: function(inCode, inExt) {
 		this.hideWaitPopup();
 		var mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
+		if (mode == "json"){
+			this.$.left.setIndex(0);
+			this.$.left.setShowing(false);
+			this.$.right.setShowing(false);
+		};
+		if (mode == "javascript"){
+			this.$.left.setIndex(1);
+			this.$.left.setShowing(false);
+			this.$.right.setShowing(true);
+		};
+		if ( mode == "html"){
+			this.$.left.setIndex(2);
+			this.$.left.setShowing(false);
+			this.$.right.setShowing(false);
+		};
+		if( mode == "css"){
+			this.$.left.setIndex(3);
+			this.$.left.setShowing(true);
+			this.$.right.setShowing(false);
+		};
+
 		this.$.ace.setEditingMode(mode);
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
@@ -198,14 +218,14 @@ enyo.kind({
 	},
 	docChanged: function(inSender, inEvent) {
 		this.docHasChanged=true;
-		
+
 		if (this.debug) enyo.log("phobos.docChanged: " + JSON.stringify(inEvent.data));
-		
+
 		/*
 		 * Check to see if we need to show-up the auto-complete popup
-		 * 
+		 *
 		 * NOTE: currently only done on "this.$."
-		 * 
+		 *
 		 * When a '.' is entered, we check is it's the last character
 		 * of a "this.$." string.
 		 * If yes, we show a popup listing the components available
@@ -219,13 +239,13 @@ enyo.kind({
 				var line = ace.getLine(data.range.end.row);
 				var end = data.range.end.column;
 				last = line.substr(end - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
-				
+
 				if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
 					this.showAutocompletePopup(this.analysis.objects[0].components, data.range.end);
 				}
 			}
 		}
-		
+
 		return true; // Stop the propagation of the event
 	},
 	cursorChanged: function(inSender, inEvent) {
@@ -240,11 +260,11 @@ enyo.kind({
 		select.nbEntries = conponents.length;
 		select.setAttribute("size", Math.min(conponents.length,10));
 		select.setSelected(0);
-		
+
 		// Compute the position of the popup
 		var ace = this.$.ace;
 		var editor = this.$.ace.editor;
-		var pos = editor.renderer.textToScreenCoordinates(position.row, position.column);			
+		var pos = editor.renderer.textToScreenCoordinates(position.row, position.column);
 		pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
 
 		// Position the autocomplete popup
@@ -274,7 +294,7 @@ enyo.kind({
 	},
 	autocompletePopupKeyUp: function(inSender, inEvent) {
 		if (this.debug) enyo.log("Got a keyup ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
-		
+
 		var key = inEvent.keyIdentifier;
 		if (key === "Up") {
 			var select = this.$.autocompleteSelect;
@@ -293,11 +313,209 @@ enyo.kind({
 				this.hideAutocompletePopup();
 			}
 		}
-		
+
 		var ace = this.$.ace;
 	    ace.blur();		// Needed to force ACE to ignore keystrokes after the popup is opened
-		
+
 	    return true; // Stop the propagation of the event
 	}
 });
 
+
+enyo.kind({
+	name: "leftPanels",
+	kind: "Panels",
+
+	published: {
+	red: '00',
+	blue: '00',
+	green: '00',
+	color: "000000",
+	toggle: ""
+	},
+	wrap: false,
+	components: [
+		{// left panel jason go here
+		},
+		{// left panel javascript og here
+		},
+		{// left panel html go here
+		},
+
+		{kind: "enyo.FittableRows",		// left panel css
+		classes: "border panel enyo-fit",
+		style: "margin: 8px; border: 1px solid #000000; ",
+		components: [
+			{name:"outputBox",
+			style: "font-family: fontFamily; font-size: 10px; border: 1px solid #000000; width: 100%; height: 150px;",
+			classes: "enyo-selectable",
+			allowHtml: true,
+			components: [
+				{name: "bg", allowHtml: true, style: "font-size: 12px; font-Family: fontFamily", content: ""},
+				{name: "dud",allowHtml: true, content:"  ",style: "height: 10px"},
+			]},
+
+			{kind: "onyx.Slider",
+			name: "redSlider",
+			onChanging: "redSliding",
+			onChange: "redChanged",
+			style: "height:10px; background-color: red; enyo-unselectable;"
+			},
+
+			{style: "height: 5px"},
+
+			{kind: "onyx.Slider",
+			name: "greenSlider",onChanging: "greenSliding",
+			onChange: "greenChanged",
+			style: "height:10px;  background-color: green; enyo-unselectable"
+			},
+
+			{style: "height: 5px"},
+
+			{kind: "onyx.Slider",
+			name: "blueSlider",onChanging: "blueSliding",
+			onChange: "blueChanged",
+			style: "height:10px;  background-color: blue; enyo-unselectable"
+			},
+
+			{style: "height: 5px"},
+
+			{kind: "onyx.RadioGroup",
+			onActivate:"radioActivated",
+			components:[
+				{content:"background", active: true, style: "width: 140px; height: 40px"},
+				{content:"Font color", style: "width: 140px; height: 40px"},
+			]},
+			{tag: "br"},
+			{kind: "onyx.RadioGroup",
+			//style:
+			width: "50 px",
+			onActivate:"fontActivated",
+			components:[
+				{content:"Serif", style: "font-family: Serif; width: 140px; height: 40px"},
+				{content:"Sans-serif", style: "font-family: Sans-serif; width: 140px; height: 40px"},
+				{tag: "br"},
+				{tag: "br"},
+				{content:"Helvetica  ", style: "font-family: Helvetica; width: 140px; height: 40px"},
+				{content:"Monospace", style: "font-family: Monospace; width: 140px; height: 40px"},
+				{tag: "br"},
+				{tag: "br"},
+				{content:" Lucida Sans Unicode ", style: "font-family: Lucida Sans Unicode; width: 140px; height: 50px"},
+				{content:"Times New Roman  ", style: "font-family: Times New Roman; width: 140px; height: 50px"},
+				{tag: "br"},
+				{tag: "br"},
+				{content:" Courier New ", style: "font-family: Courier New; width: 140px; height: 40px"},
+				{content:" Arial ", style: "font-family: Arial; width: 140px; height: 40px"},
+
+			]},
+		]},
+	],
+
+	create: function() {
+		this.inherited(arguments);
+		this.updateBox();
+	},
+
+	updateBox: function(){
+	var tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
+	var outPut = ".SomeClass {<br>" ;
+	var c = '#' + (this.red + this.green + this.blue).toUpperCase();
+
+		if(this.toggle == "background"){
+			this.$.outputBox.applyStyle("background-color", c);
+			this.backgroundColor = c;
+			}
+		if(this.toggle == "Font color"){
+			this.$.outputBox.applyStyle("color", c);
+			this.fontColor = c;
+			}
+
+		if (this.backgroundColor != null){
+			outPut =outPut + tab + "background-color:" + " " +this.backgroundColor + ";<br>";
+			}
+
+		if (this.fontColor != null){
+			outPut = outPut + tab + "color:" + " " + this.fontColor + ";<br>";
+			}
+
+		if (this.fontFamily != null){
+			outPut = outPut + tab + "font-family:" + " " +this.fontFamily + ";";
+		}
+		this.$.bg.setContent(outPut + "<br>}");
+	},
+
+	redChanged: function(inSender, inEvent){
+		var x = Math.floor(inEvent.value*255/100);
+		var h = x.toString(16);
+		if (h.length==1){
+			h = '0' + h;
+		}
+		this.red = h;
+		this.updateBox();
+	},
+
+	greenChanged: function(inSender, inEvent){
+		var x = Math.floor(inEvent.value*255/100);
+		var h = x.toString(16);
+		if (h.length==1){
+			h = '0' + h;
+		}
+		this.green = h;
+		this.updateBox();
+	},
+
+	blueChanged: function(inSender, inEvent){
+		var x = Math.floor(inEvent.value*255/100);
+		var h = x.toString(16);
+		if (h.length==1){
+			h = '0' + h;
+		}
+		this.blue = h;
+		this.updateBox();
+	},
+
+	redSliding: function(inSender, inEvent){
+		var x = Math.floor(inEvent.value*255/100);
+		var h = x.toString(16);
+		if (h.length==1){
+			h = '0' + h;
+		}
+		this.red = h;
+		this.updateBox();
+	},
+
+	greenSliding: function(inSender, inEvent){
+		var x = Math.floor(inEvent.value*255/100);
+		var h = x.toString(16);
+		if (h.length==1){
+			h = '0' + h;
+		}
+		this.green = h;
+		this.updateBox();
+	},
+
+	blueSliding: function(inSender, inEvent){
+		var x = Math.floor(inEvent.value*255/100);
+		var h = x.toString(16);
+		if (h.length==1){
+			h = '0' + h;
+		}
+		this.blue = h;
+		this.updateBox();
+	},
+
+	radioActivated: function(inSender, inEvent) {
+		if (inEvent.originator.getActive()) {
+			this.color = "#000000";
+			this.toggle = inEvent.originator.getContent();
+			this.updateBox();
+		}
+	},
+
+	fontActivated: function(inSender, inEvent) {
+		if (inEvent.originator.getActive()) {
+			this.fontFamily = inEvent.originator.getContent();
+			this.updateBox();
+		}
+	},
+});
