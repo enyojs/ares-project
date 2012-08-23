@@ -45,11 +45,11 @@ enyo.kind({
 		this.setIndex(0);
 	},
 	designDocument: function(inSender, inEvent) {
-		var components=inEvent.content;
-		this.$.deimos.load(components);
+		this.$.deimos.load(inEvent);
 		this.setIndex(2);
 	},
-	closeDesigner: function(inSender, inevent) {
+	closeDesigner: function(inSender, inEvent) {
+		this.$.phobos.updateComponents(inSender, inEvent);
 		this.setIndex(1);
 	}
 });

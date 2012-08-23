@@ -29,7 +29,7 @@ enyo.kind({
 		ondrop: "drop"
 	},
 	serialize: function() {
-		return enyo.json.codify.to(this.$.serializer._serializeComponent(this.$.client, this.$.model));
+		return this.$.serializer.serialize(this.$.client, this.$.model);
 	},
 	previewDomEvent: function(e) {
 		if (e.type == "down" && (e.dispatchTarget != this.$.outline) && e.dispatchTarget.isDescendantOf(this.$.client)) {
