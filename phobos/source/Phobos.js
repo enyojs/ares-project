@@ -139,18 +139,14 @@ enyo.kind({
 		//
 		this.$.dump.setContent(h$);
 	},
-	reparse: function() {
+	reparseAction: function() {
 		var module = {
 			name: "Document",
 			code: this.$.ace.getValue()
 		};
 		this.$.analyzer.index.indexModule(module);
 		this.analysis=module;
-	},
-	reparseAction: function() {
-		this.reparse();
 		this.updateObjectsLines(this.analysis);
-		
 		// dump the object where the cursor is positioned, if it exists
 		this.dumpInfo(this.analysis.objects && this.analysis.objects[this.analysis.currentObject]);
 	},
@@ -179,6 +175,7 @@ enyo.kind({
 		tempo.currentObject = this.findCurrentEditedObject(position);
 		tempo.currentRange = tempo.ranges[tempo.currentObject];
 		tempo.currentLine = position.row;
+		this.docHasChanged=true;
 	},
 	/**
 	 * Return the index (in the analyzer result ) of the enyo kind
@@ -198,7 +195,7 @@ enyo.kind({
 	},
 	designerAction: function() {
 		var c = this.$.ace.getValue();
-		this.reparse();
+		this.reparseAction();
 		var kinds = [];
 		for (var i=0; i < this.analysis.objects.length; i++) {
 			var o = this.analysis.objects[i];
@@ -234,6 +231,8 @@ enyo.kind({
 		post = post.substring(post.indexOf("]")+1);
 		var code = pre + inEvent.content + post;
 		this.$.ace.setValue(code);
+		this.reparseAction();
+		this.docHasChanged = true;
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docHasChanged) {
