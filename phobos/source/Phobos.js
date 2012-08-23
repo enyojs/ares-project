@@ -21,7 +21,7 @@ enyo.kind({
 				]},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged"}
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion"}
 					]}
 				]},
 				{name: "right", classes: "panel", components: [
@@ -49,7 +49,7 @@ enyo.kind({
 	handlers: {
 	},
 	docHasChanged: false,
-	debug: true,
+	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
 	create: function() {
@@ -256,6 +256,9 @@ enyo.kind({
 			}
 		}
 		return true; // Stop the propagation of the event
+	},
+	startAutoCompletion: function() {
+		this.$.autocomplete.start(null, this.analysis);
 	}
 });
 
@@ -301,31 +304,47 @@ enyo.kind({
 	start: function(inEvent, inAnalysis) {
 		
 		if (inAnalysis.objects && inAnalysis.objects.length > 0) {
-			/*
-			 * Check to see if we need to show-up the auto-complete popup
-			 * 
-			 * NOTE: currently only done on "this.$."
-			 * 
-			 * When a '.' is entered, we check is it's the last character
-			 * of a "this.$." string.
-			 * If yes, we show a popup listing the components available
-			 * in the "this.$" map.
-			 */
-			var data = inEvent.data;
-			if (data && data.action === 'insertText') {
-				var last = data.text.substr(data.text.length - 1);
-				if (last === ".") { // Check that last entered char is a '."
-					var line = this.ace.getLine(data.range.end.row);
-					var end = data.range.end.column;
-					last = line.substr(end - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
-					
-					if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
-						this.input = "";
-						this.components = inAnalysis.objects[inAnalysis.current].components;
-						this.position = data.range.end;
-						this.showAutocompletePopup();
+			var go = false;
+			if (inEvent) {
+				/*
+				 * Check to see if we need to show-up the auto-complete popup
+				 * 
+				 * NOTE: currently only done on "this.$."
+				 * 
+				 * When a '.' is entered, we check is it's the last character
+				 * of a "this.$." string.
+				 * If yes, we show a popup listing the components available
+				 * in the "this.$" map.
+				 */
+				var data = inEvent.data;
+				if (data && data.action === 'insertText') {
+					var last = data.text.substr(data.text.length - 1);
+					if (last === ".") { // Check that last entered char is a '."
+						var line = this.ace.getLine(data.range.end.row);
+						var end = data.range.end.column;
+						last = line.substr(end - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
+						
+						if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
+							this.position = data.range.end;
+							go = true;
+						}
 					}
 				}
+			} else {
+				// Triggered by a Ctrl-Space coming from the user
+				position = this.ace.getCursorPositionInDocument();
+				var line = this.ace.getLine(position.row);
+				last = line.substr(position.column - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
+				
+				if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
+					this.position = position;
+					go = true;
+				}
+			}
+			if (go === true) {
+				this.input = "";
+				this.components = inAnalysis.objects[inAnalysis.currentObject].components;
+				this.showAutocompletePopup();
 			}
 		}
 	},
