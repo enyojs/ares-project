@@ -2,7 +2,6 @@ enyo.kind({
 	name: "Deimos",
 	classes: "enyo-unselectable",
 	components: [
-		{kind: "Signals", onload: "documentLoaded"},
 		{kind: "DragAvatar", components: [ 
 			{tag: "img", src: "images/icon.png", style: "width: 24px; height: 24px;"}
 		]},
@@ -42,6 +41,8 @@ enyo.kind({
 	kinds: null,
 	create: function() {
 		this.inherited(arguments);
+		this.kinds=[];
+		this.index=null;
 	},
 	load: function(what) {
 		this.kinds = what;
@@ -56,27 +57,12 @@ enyo.kind({
     	}
 		this.$.kindPicker.render();
 	},
-	//TODO: This only exists for standalone Deimos testing. Remove it?
-	documentLoaded: function(ev) {
-		this.newDocumentAction();
-	},
 	kindSelected: function(inSender, inEvent) {
-		var kind = inSender.getSelected().index;
-		var components = this.kinds[kind].content;
+		var index = inSender.getSelected().index;
+		var kind = this.kinds[index];
 		this.$.inspector.inspect(null);
-		this.$.designer.load(components);		
-	},
-	newDocumentAction: function() {
-		var document = [
-			{kind: "FittableRows", classes: "enyo-fit", isContainer: true, components: [
-				{kind: "onyx.Toolbar", content: "Design!", isContainer: true},
-				{fit: true, kind: "Scroller", isContainer: true, style: "background-color: lightblue;", components: [
-					{kind: "FittableRows", classes: "enyo-fit", isContainer: true}
-				]}
-			]}
-		];
-		this.$.inspector.inspect(null);
-		this.$.designer.load(document);
+		this.$.designer.load(kind.components);
+		this.index=index;
 	},
 	// called after updating model
 	serializeAction: function() {
@@ -129,7 +115,7 @@ enyo.kind({
 		}
 	},
 	closeDesignerAction: function(inSender, inEvent) {
-		this.bubble("onCloseDesigner", {});
+		this.bubble("onCloseDesigner", {index: this.index, content: this.$.designer.serialize()});
 	}
 });
 

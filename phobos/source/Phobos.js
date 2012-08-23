@@ -109,8 +109,8 @@ enyo.kind({
 		}
 		h$ += "<h4>Extends</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
-		var h = [];
-		for (var i=0, p; p=c.components[i]; i++) {
+		h = [];
+		for (i=0, p; p=c.components[i]; i++) {
 			h.push(p.name);
 		}
 		if (h.length) {
@@ -118,39 +118,38 @@ enyo.kind({
 		}
 		//
 		h = [];
-		for (var i=0, p; p=c.properties[i]; i++) {
+		for (i=0, p; p=c.properties[i]; i++) {
 			h.push(p.name);
 		}
 		h$ += "<h4>Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
 		h = [];
-		for (var i=0, p; p=c.allProperties[i]; i++) {
+		for (i=0, p; p=c.allProperties[i]; i++) {
 			h.push(p.name);
 		}
 		h$ += "<h4>All Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
 		this.$.dump.setContent(h$);
 	},
-	reparseAction: function() {
+	reparse: function() {
 		var module = {
 			name: "Document",
 			code: this.$.ace.getValue()
 		};
 		this.$.analyzer.index.indexModule(module);
+		this.module=module;
+	},
+	reparseAction: function() {
+		this.reparse();
 		// ad hoc: dump the first object, if it exists
-		this.dumpInfo(module.objects && module.objects[0]);
+		this.dumpInfo(this.module.objects && this.module.objects[0]);
 	},
 	designerAction: function() {
-		// TODO: Crib more of this from Ares2v1
 		var c = this.$.ace.getValue();
-		var module = {
-			name: "Document",
-			code: c
-		};
-		this.$.analyzer.index.indexModule(module);
+		this.reparse();
 		var kinds = [];
-		for (var i=0; i < module.objects.length; i++) {
-			var o = module.objects[i];
+		for (var i=0; i < this.module.objects.length; i++) {
+			var o = this.module.objects[i];
 			var comps = o.components;
 			var name = o.name;
 			var kind = o.superkind;
@@ -158,7 +157,7 @@ enyo.kind({
 				var start = comps[0].start;
 				var end = comps[comps.length - 1].end;
 				var js = eval("(["+c.substring(start, end)+"])");
-				kinds.push({name: name, kind: kind, content: js});
+				kinds.push({name: name, kind: kind, components: js});
 			}
 		}
 		if (kinds.length > 0) {
@@ -166,6 +165,23 @@ enyo.kind({
 		} else {
 			alert("No kinds found in this file");
 		}
+	},
+	// called when designer has modified the components
+	updateComponents: function(inSender, inEvent) {
+		var c = this.$.ace.getValue();
+		var i = inEvent.index;
+		var comp = this.module.objects[i].components;
+		//TODO: Indexer doesn't quite capture the right locations for Components start and end...
+		// Indexer returns the start of the first component block, and we really want the location of the opening "["
+		// similarly for the end. Or, need to change serializer to not return the [], which might be easier, and less disruptive to people's formatting.
+		var start = comp[0].start;
+		var end = comp[comp.length-1].end;
+		var pre = c.substring(0, start);
+		pre = pre.substring(0, pre.lastIndexOf("["))
+		var post = c.substring(end);
+		post = post.substring(post.indexOf("]")+1);
+		var code = pre + inEvent.content + post;
+		this.$.ace.setValue(code);
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docChanged) {

@@ -48,7 +48,8 @@ enyo.kind({
 		this.$.deimos.load(inEvent);
 		this.setIndex(2);
 	},
-	closeDesigner: function(inSender, inevent) {
+	closeDesigner: function(inSender, inEvent) {
+		this.$.phobos.updateComponents(inSender, inEvent);
 		this.setIndex(1);
 	}
 });
