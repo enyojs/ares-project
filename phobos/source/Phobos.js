@@ -269,7 +269,7 @@ enyo.kind({
 	floating : true,
 	autoDismiss : false,
 	modal : true,
-	style : "position: absolute; z-index: 100; width: 140px; height: 0px; padding: 0px; border: 0px",
+	classes: "ares_phobos_autocomp",
 	published: {
 		ace: null
 	},
@@ -285,7 +285,7 @@ enyo.kind({
 			size : 1
 		},
 		onchange : "autocompleteChanged",
-		style : "z-index: 100; width: 140px; display: block; background-color: white; background-position: initial initial; background-repeat: initial initial; ",
+		classes : "ares_phobos_autocomp_select",
 		components : [
 		    // options elements will be populated programmatically
 		]
