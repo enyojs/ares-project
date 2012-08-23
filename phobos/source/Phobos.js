@@ -117,8 +117,8 @@ enyo.kind({
 		}
 		h$ += "<h4>Extends</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
-		var h = [];
-		for (var i=0, p; p=c.components[i]; i++) {
+		h = [];
+		for (i=0, p; p=c.components[i]; i++) {
 			h.push(p.name);
 		}
 		if (h.length) {
@@ -126,13 +126,13 @@ enyo.kind({
 		}
 		//
 		h = [];
-		for (var i=0, p; p=c.properties[i]; i++) {
+		for (i=0, p; p=c.properties[i]; i++) {
 			h.push(p.name);
 		}
 		h$ += "<h4>Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
 		h = [];
-		for (var i=0, p; p=c.allProperties[i]; i++) {
+		for (i=0, p; p=c.allProperties[i]; i++) {
 			h.push(p.name);
 		}
 		h$ += "<h4>All Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
@@ -140,16 +140,15 @@ enyo.kind({
 		this.$.dump.setContent(h$);
 	},
 	reparseAction: function() {
-		var tempo = {
+		var module = {
 			name: "Document",
 			code: this.$.ace.getValue()
 		};
-		this.analysis = tempo;
-		this.$.analyzer.index.indexModule(tempo);
-		this.updateObjectsLines(tempo);
-		
+		this.$.analyzer.index.indexModule(module);
+		this.analysis=module;
+		this.updateObjectsLines(this.analysis);
 		// dump the object where the cursor is positioned, if it exists
-		this.dumpInfo(tempo.objects && tempo.objects[tempo.currentObject]);
+		this.dumpInfo(this.analysis.objects && this.analysis.objects[this.analysis.currentObject]);
 	},
 	/**
 	 * Add for each object the corresponding range of lines in the file
@@ -194,23 +193,45 @@ enyo.kind({
 		return -1;
 	},
 	designerAction: function() {
-		// TODO: Crib more of this from Ares2v1
 		var c = this.$.ace.getValue();
-		var module = {
-			name: "Document",
-			code: c
-		};
-		this.$.analyzer.index.indexModule(module);
-		var o = module.objects && module.objects[0];
-		if (o) { // must have kind definition...
+		this.reparseAction();
+		var kinds = [];
+		for (var i=0; i < this.analysis.objects.length; i++) {
+			var o = this.analysis.objects[i];
 			var comps = o.components;
-			if (comps) { // ...and components block
-				var start = o.components[0].start;
-				var end=c.lastIndexOf("]")+1;
-				var js = eval("([\n"+c.substring(start, end)+")");
-				this.bubble("onDesignDocument", {content: js});
+			var name = o.name;
+			var kind = o.superkind;
+			if (comps) { // only include kinds with components block
+				var start = comps[0].start;
+				var end = comps[comps.length - 1].end;
+				var js = eval("(["+c.substring(start, end)+"])");
+				kinds.push({name: name, kind: kind, components: js});
 			}
 		}
+		if (kinds.length > 0) {
+			this.bubble("onDesignDocument", kinds);
+		} else {
+			alert("No kinds found in this file");
+		}
+	},
+	// called when designer has modified the components
+	updateComponents: function(inSender, inEvent) {
+		var c = this.$.ace.getValue();
+		var i = inEvent.index;
+		var comp = this.analysis.objects[i].components;
+		//TODO: Indexer doesn't quite capture the right locations for Components start and end...
+		// Indexer returns the start of the first component block, and we really want the location of the opening "["
+		// similarly for the end. Or, need to change serializer to not return the [], which might be easier, and less disruptive to people's formatting.
+		var start = comp[0].start;
+		var end = comp[comp.length-1].end;
+		var pre = c.substring(0, start);
+		pre = pre.substring(0, pre.lastIndexOf("["))
+		var post = c.substring(end);
+		post = post.substring(post.indexOf("]")+1);
+		var code = pre + inEvent.content + post;
+		this.$.ace.setValue(code);
+		this.reparseAction();
+		this.docHasChanged = true;
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docHasChanged) {
