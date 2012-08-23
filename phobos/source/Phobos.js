@@ -175,7 +175,6 @@ enyo.kind({
 		tempo.currentObject = this.findCurrentEditedObject(position);
 		tempo.currentRange = tempo.ranges[tempo.currentObject];
 		tempo.currentLine = position.row;
-		this.docHasChanged=true;
 	},
 	/**
 	 * Return the index (in the analyzer result ) of the enyo kind
