@@ -49,7 +49,7 @@ enyo.kind({
 	handlers: {
 	},
 	docHasChanged: false,
-	debug: false,
+	debug: true,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
 	create: function() {
@@ -148,22 +148,34 @@ enyo.kind({
 		this.$.analyzer.index.indexModule(tempo);
 		this.updateObjectsLines(tempo);
 		
-		// dump the object where the cursor is, if it exists
-		tempo.current = this.findCurrentEditedObject();
-		this.dumpInfo(tempo.objects && tempo.objects[tempo.current]);
+		// dump the object where the cursor is positioned, if it exists
+		this.dumpInfo(tempo.objects && tempo.objects[tempo.currentObject]);
 	},
 	/**
-	 * Add for each object the corresponding last line in the file
+	 * Add for each object the corresponding range of lines in the file
+	 * Update the information about the object currently referenced
+	 * by the cursor position
 	 * TODO: see if this should go in Analyzer2
 	 */
 	updateObjectsLines: function(tempo) {
-		tempo.lines = [];
+		tempo.ranges = [];
 		if (tempo.objects && tempo.objects.length > 0) {
+			var start = 0;
 			for( var idx = 1; idx < tempo.objects.length ; idx++ ) {
-				tempo.lines.push(tempo.objects[idx].line);
+				var range = { first: start, last: tempo.objects[idx].line - 1};
+				tempo.ranges.push(range);	// Push a range for previous object
+				start = tempo.objects[idx].line;
 			}
-			tempo.lines.push(1000000000);
+			
+			// Push a range for the last object
+			range = { first: start, last: 1000000000};
+			tempo.ranges.push(range);
 		}
+		
+		var position = this.$.ace.getCursorPositionInDocument();
+		tempo.currentObject = this.findCurrentEditedObject(position);
+		tempo.currentRange = tempo.ranges[tempo.currentObject];
+		tempo.currentLine = position.row;
 	},
 	/**
 	 * Return the index (in the analyzer result ) of the enyo kind
@@ -171,11 +183,10 @@ enyo.kind({
 	 * Otherwise return -1
 	 * @returns {Number}
 	 */
-	findCurrentEditedObject: function() {
-		if (this.analysis.lines) {
-			var position = this.$.ace.getCursorPositionInDocument();
-			for( var idx = 0 ; idx < this.analysis.lines.length ; idx++ ) {
-				if (position.row < this.analysis.lines[idx]) {
+	findCurrentEditedObject: function(position) {
+		if (this.analysis.ranges) {
+			for( var idx = 0 ; idx < this.analysis.ranges.length ; idx++ ) {
+				if (position.row <= this.analysis.ranges[idx].last) {
 					return idx;
 				}
 			}
@@ -228,14 +239,21 @@ enyo.kind({
 		return true; // Stop the propagation of the event
 	},
 	cursorChanged: function(inSender, inEvent) {
-		if (this.debug) enyo.log("phobos.cursorChanged: " + inSender.id + " " + inEvent.type + " " + JSON.stringify(this.$.ace.getCursorPositionInDocument()));
+		var position = this.$.ace.getCursorPositionInDocument();
+		if (this.debug) enyo.log("phobos.cursorChanged: " + inSender.id + " " + inEvent.type + " " + JSON.stringify(position));
 		
 		// Check if we moved to another enyo kind and display it in the right pane
-		var current = this.findCurrentEditedObject();
 		var tempo = this.analysis;
-		if (current !== -1 && current != tempo.current) {
-			tempo.current = current;
-			this.dumpInfo(tempo.objects && tempo.objects[current]);
+		if (tempo.currentLine != undefined && tempo.currentLine != position.row) {	// If no more on the same line			
+			tempo.currentLine = position.row;
+			
+			// Check if the cursor references another object
+			if (position.row < tempo.currentRange.first || position.row > tempo.currentRange.last) {
+				tempo.currentObject = this.findCurrentEditedObject(position);
+				tempo.currentRange = tempo.ranges[tempo.currentObject];
+				
+				this.dumpInfo(tempo.objects && tempo.objects[tempo.currentObject]);
+			}
 		}
 		return true; // Stop the propagation of the event
 	}
