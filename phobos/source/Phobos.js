@@ -145,12 +145,14 @@ enyo.kind({
 			code: this.$.ace.getValue()
 		};
 		try {
+			this.analysis = module;
 			this.$.analyzer.index.indexModule(module);
 			this.updateObjectsLines(module);
 			
 			// dump the object where the cursor is positioned, if it exists
 			this.dumpInfo(module.objects && module.objects[module.currentObject]);
 		} catch(error) {
+			enyo.log("An error occured during the code analysis: " + error);
 			this.dumpInfo(null);
 		}
 	},
