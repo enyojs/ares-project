@@ -2,7 +2,8 @@ enyo.kind({
         name: "App",
         kind: "FittableRows",
         components: [
-                {name: "hello", content: "Hello, World!", ontap:"ontap"}
+        	{name: "hello", content: "Hello", ontap:"ontap"},
+        	{name: "world", content: "World!", ontap:"ontap"}
         ],
         red: false,
         ontap: function() {
@@ -14,4 +15,11 @@ enyo.kind({
                         this.red = true;
                 }
         }
+});
+enyo.kind({
+        name: "Hello",
+        kind: "FittableRows",
+        components: [
+                {name: "hello", content: "Hello, World!", ontap:"ontap"}
+        ]
 });
