@@ -145,11 +145,15 @@ enyo.kind({
 			code: this.$.ace.getValue()
 		};
 		this.analysis = tempo;
-		this.$.analyzer.index.indexModule(tempo);
-		this.updateObjectsLines(tempo);
-		
-		// dump the object where the cursor is positioned, if it exists
-		this.dumpInfo(tempo.objects && tempo.objects[tempo.currentObject]);
+		try {
+			this.$.analyzer.index.indexModule(tempo);
+			this.updateObjectsLines(tempo);
+			
+			// dump the object where the cursor is positioned, if it exists
+			this.dumpInfo(tempo.objects && tempo.objects[tempo.currentObject]);
+		} catch(error) {
+			this.dumpInfo(null);
+		}
 	},
 	/**
 	 * Add for each object the corresponding range of lines in the file
@@ -248,7 +252,7 @@ enyo.kind({
 			tempo.currentLine = position.row;
 			
 			// Check if the cursor references another object
-			if (position.row < tempo.currentRange.first || position.row > tempo.currentRange.last) {
+			if (tempo.currentRange != undefined && (position.row < tempo.currentRange.first || position.row > tempo.currentRange.last)) {
 				tempo.currentObject = this.findCurrentEditedObject(position);
 				tempo.currentRange = tempo.ranges[tempo.currentObject];
 				
