@@ -47,6 +47,27 @@ try {
 if (!ide.services || !ide.services[0]) {
 	throw "Corrupted '"+configPath+"': no file service defined";
 }
+
+function servicePortSetter(service) {
+	return function(data){
+		console.log("--- Service['"+service.id+"']: "+data);
+		try {
+			service.url = JSON.parse(data).url;
+			if (service.url.match(/^https:/)) {
+				console.info("Service['"+service.id+"']: connect to <"+service.url+"> to accept SSL certificate");
+			}
+		} catch(e) {
+			//console.log("Error updating URL for service "+service.id+": "+e);
+		}
+	};
+}
+
+function serviceEcho(service) {
+	return function(data){
+		console.error("-E- Service['"+service.id+"']: *** "+data);
+	};
+}
+
 for (var i = 0; i < ide.services.length; i++) {
 	console.log("--- Service["+ide.services[i].id+"]: "+JSON.stringify(ide.services[i]));
 	service = ide.services[i];
@@ -57,19 +78,8 @@ for (var i = 0; i < ide.services.length; i++) {
 	});
 	console.log("--- Service['"+service.id+"']: running '"+command+" "+params.join(" ")+"'");
 	sub_process = spawn(command, params);
-	sub_process.stderr.on('data', function(data){
-		console.error("--- Service['"+service.id+"']: *** "+data);
-	});
-	sub_process.stdout.on('data', function(data){
-		console.log("--- Service['"+service.id+"']: "+data);
-		try {
-			service.url = JSON.parse(data).url;
-			if (service.url.match(/^https:/)) {
-				console.info("Service['"+service.id+"']: connect to <"+processUrl+"> to accept SSL certificate");
-			}
-		} catch(e) {
-		}
-	});
+	sub_process.stderr.on('data', serviceEcho(service));
+	sub_process.stdout.on('data', servicePortSetter(service));
 	sub_processes.push(sub_process);
 	break;
 }
