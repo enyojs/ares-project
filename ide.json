@@ -9,6 +9,7 @@
 			"command":"@NODE@", "params":[
 				"hermes/filesystem/index.js", "0", "@HOME@"
 			],
+			"url": "",
 			"useJsonp":false,
 			"debug": false
 		},
