@@ -82,7 +82,7 @@ Configure the `root` of your local file-system access `ide.json`.
 		},
 	[...]
 
-Start the IDE server:
+Start the IDE server using the NodeJS command prompt:
 
 	% node ide.js
 	[...]

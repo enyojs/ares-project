@@ -1,4 +1,5 @@
-var	util = require('util')
+var	fs = require('fs')
+	,util = require('util')
 	, Stream = require('stream').Stream
 	, express = require('express')
  	, _ = require('./_')
@@ -53,6 +54,8 @@ function HermesClient(inConfig) {
 		server.all(verb,  this.routes[verb].bind(this, verb))
 	}
 	server.listen(this.port, "127.0.0.1", null /*backlog*/, function() {
+		var url = "http" + (self.config.certs ? "s" : "") + "://127.0.0.1:"+server.address().port.toString();
+		fs.writeFile("url.txt", url);
 		console.log(JSON.stringify({
 			url: "http" + (self.config.certs ? "s" : "") + "://127.0.0.1:"+server.address().port.toString()
 		}));

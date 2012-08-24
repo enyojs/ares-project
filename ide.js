@@ -87,6 +87,9 @@ app.configure(function(){
 	app.use('/enyo', express.static(enyojsRoot + '/enyo'));
 	app.use('/lib', express.static(enyojsRoot + '/lib'));
 	app.get('/res/services', function(req, res) {
+		url = fs.readFileSync("url.txt").toString();
+		console.log(url);
+		ide.services[0].url = url;
 		res.status(200).json(ide.services);
 	});
 	app.get('/res/services/:service_id', function(req, res) {
