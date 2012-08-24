@@ -16,9 +16,22 @@ enyo.kind({
 				{fit: true},
 				{kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
-			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
-				{name: "left",kind: "leftPanels",showing: false,arrangerKind: "CardArranger",fit: true},
-				{name: "middle", fit: true, classes: "panel", components: [
+			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;",components: [
+
+				{name: "left",
+				kind: "leftPanels",
+				//fit: true,
+				//style: "margin: 10px; 10px: 10px; 10px; border: 100px solid #FF0000;",
+				showing: false,
+				arrangerKind: "CardArranger",
+				//fit: true
+				},
+
+
+				{name: "middle",
+				fit: true,
+				classes: "panel",
+				components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
 						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged"}
 					]}
@@ -323,16 +336,17 @@ enyo.kind({
 
 
 enyo.kind({
+	published: {
+		red: '00',
+		blue: '00',
+		green: '00',
+		color: "000000",
+		toggle: ""
+	},
+
 	name: "leftPanels",
 	kind: "Panels",
-
-	published: {
-	red: '00',
-	blue: '00',
-	green: '00',
-	color: "000000",
-	toggle: ""
-	},
+	//Xstyle: "padding-bottom: 10px;",
 	wrap: false,
 	components: [
 		{// left panel jason go here
@@ -343,13 +357,17 @@ enyo.kind({
 		},
 
 		{kind: "enyo.FittableRows",		// left panel css
-		classes: "border panel enyo-fit",
-		style: "margin: 8px; border: 1px solid #000000; ",
+		classes: "border panel ",
+		//fit: true,
+		style: "margin: 10px;",
+		//Xstyle: "padding-bottom: 10px;",
 		components: [
+			{kind: "onyx.Input", name: "input", placeholder: "Enter your class name!..",onchange: "inputChange"},
 			{name:"outputBox",
 			style: "font-family: fontFamily; font-size: 10px; border: 1px solid #000000; width: 100%; height: 150px;",
 			classes: "enyo-selectable",
 			allowHtml: true,
+			Xstyle: "padding: 10px;",
 			components: [
 				{name: "bg", allowHtml: true, style: "font-size: 12px; font-Family: fontFamily", content: ""},
 				{name: "dud",allowHtml: true, content:"  ",style: "height: 10px"},
@@ -383,13 +401,13 @@ enyo.kind({
 			{kind: "onyx.RadioGroup",
 			onActivate:"radioActivated",
 			components:[
-				{content:"background", active: true, style: "width: 140px; height: 40px"},
-				{content:"Font color", style: "width: 140px; height: 40px"},
+				{content:"background", active: true, style: "width: 135px; height: 40px"},
+				{content:"Font color", style: "width: 135px; height: 40px"},
 			]},
 			{tag: "br"},
 			{kind: "onyx.RadioGroup",
 			//style:
-			width: "50 px",
+			//width: "50 px",
 			onActivate:"fontActivated",
 			components:[
 				{content:"Serif", style: "font-family: Serif; width: 140px; height: 40px"},
@@ -418,7 +436,8 @@ enyo.kind({
 
 	updateBox: function(){
 	var tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
-	var outPut = ".SomeClass {<br>" ;
+	var className = ".classname";
+	var outPut = this.className + " " + "{<br>" ;
 	var c = '#' + (this.red + this.green + this.blue).toUpperCase();
 
 		if(this.toggle == "background"){
@@ -431,15 +450,15 @@ enyo.kind({
 			}
 
 		if (this.backgroundColor != null){
-			outPut =outPut + tab + "background-color:" + " " +this.backgroundColor + ";<br>";
+			outPut = outPut + tab + "background-color:" + " " +this.backgroundColor + ";";
 			}
 
 		if (this.fontColor != null){
-			outPut = outPut + tab + "color:" + " " + this.fontColor + ";<br>";
+			outPut = outPut + "<br>" + tab + "color:" + " " + this.fontColor + ";";
 			}
 
 		if (this.fontFamily != null){
-			outPut = outPut + tab + "font-family:" + " " +this.fontFamily + ";";
+			outPut = outPut + "<br>" +tab + "font-family:" + " " +this.fontFamily + ";";
 		}
 		this.$.bg.setContent(outPut + "<br>}");
 	},
@@ -518,4 +537,8 @@ enyo.kind({
 			this.updateBox();
 		}
 	},
+	inputChange: function(inSender, inEvent){
+		this.className = this.$.input.hasNode().value;
+		this.updateBox();
+	}
 });
