@@ -53,12 +53,15 @@ function HermesClient(inConfig) {
 		server.all(verb,  this.routes[verb].bind(this, verb))
 	}
 	server.listen(this.port, "127.0.0.1", null /*backlog*/, function() {
-		console.log(JSON.stringify({
+		var msg = {
 			url: "http" + (self.config.certs ? "s" : "") + "://127.0.0.1:"+server.address().port.toString()
-		}));
+		};
+		console.log(JSON.stringify(msg));
+		if (process.send) {
+			process.send(msg);
+		}
 	});
 }
-
 
 HermesClient.prototype = {
 	_configMask: ['port', 'debug', 'name', 'certs', 'root']
