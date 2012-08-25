@@ -49,7 +49,9 @@ enyo.kind({
 		this.setIndex(2);
 	},
 	closeDesigner: function(inSender, inEvent) {
-		this.$.phobos.updateComponents(inSender, inEvent);
+		if (inEvent.docHasChanged) {
+			this.$.phobos.updateComponents(inSender, inEvent);
+		}
 		this.setIndex(1);
 	}
 });

@@ -75,6 +75,7 @@ enyo.kind({
 	},
 	openDoc: function(inCode, inExt) {
 		this.hideWaitPopup();
+		this.analysis = null;
 		var mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
 		this.$.ace.setEditingMode(mode);
 		this.$.ace.setValue(inCode);
@@ -189,7 +190,7 @@ enyo.kind({
 	 * @returns {Number}
 	 */
 	findCurrentEditedObject: function(position) {
-		if (this.analysis.ranges) {
+		if (this.analysis && this.analysis.ranges) {
 			for( var idx = 0 ; idx < this.analysis.ranges.length ; idx++ ) {
 				if (position.row <= this.analysis.ranges[idx].last) {
 					return idx;
@@ -201,24 +202,26 @@ enyo.kind({
 	designerAction: function() {
 		var c = this.$.ace.getValue();
 		this.reparseAction();
-		var kinds = [];
-		for (var i=0; i < this.analysis.objects.length; i++) {
-			var o = this.analysis.objects[i];
-			var comps = o.components;
-			var name = o.name;
-			var kind = o.superkind;
-			if (comps) { // only include kinds with components block
-				var start = comps[0].start;
-				var end = comps[comps.length - 1].end;
-				var js = eval("(["+c.substring(start, end)+"])");
-				kinds.push({name: name, kind: kind, components: js});
+		if (this.analysis) {
+			var kinds = [];
+			for (var i=0; i < this.analysis.objects.length; i++) {
+				var o = this.analysis.objects[i];
+				var comps = o.components;
+				var name = o.name;
+				var kind = o.superkind;
+				if (comps) { // only include kinds with components block
+					var start = comps[0].start;
+					var end = comps[comps.length - 1].end;
+					var js = eval("(["+c.substring(start, end)+"])");
+					kinds.push({name: name, kind: kind, components: js});
+				}
+			}
+			if (kinds.length > 0) {
+				this.bubble("onDesignDocument", kinds);
+				return;
 			}
 		}
-		if (kinds.length > 0) {
-			this.bubble("onDesignDocument", kinds);
-		} else {
-			alert("No kinds found in this file");
-		}
+		alert("No kinds found in this file");
 	},
 	// called when designer has modified the components
 	updateComponents: function(inSender, inEvent) {
@@ -259,10 +262,11 @@ enyo.kind({
 		this.docHasChanged=true;
 		
 		if (this.debug) enyo.log("phobos.docChanged: " + JSON.stringify(inEvent.data));
-		
-		// Call the autocomplete component
-		this.$.autocomplete.start(inEvent, this.analysis);
-		
+
+		if (this.analysis) {
+			// Call the autocomplete component
+			this.$.autocomplete.start(inEvent, this.analysis);
+		}
 		return true; // Stop the propagation of the event
 	},
 	cursorChanged: function(inSender, inEvent) {
@@ -271,7 +275,7 @@ enyo.kind({
 		
 		// Check if we moved to another enyo kind and display it in the right pane
 		var tempo = this.analysis;
-		if (tempo.currentLine != undefined && tempo.currentLine != position.row) {	// If no more on the same line			
+		if (tempo && tempo.currentLine != undefined && tempo.currentLine != position.row) {	// If no more on the same line			
 			tempo.currentLine = position.row;
 			
 			// Check if the cursor references another object
@@ -359,7 +363,7 @@ enyo.kind({
 				}
 			} else {
 				// Triggered by a Ctrl-Space coming from the user
-				position = this.ace.getCursorPositionInDocument();
+				var position = this.ace.getCursorPositionInDocument();
 				var line = this.ace.getLine(position.row);
 				last = line.substr(position.column - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
 				
