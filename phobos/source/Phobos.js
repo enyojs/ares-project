@@ -5,7 +5,7 @@ enyo.kind({
 		{kind: "Analyzer", onIndexReady: "indexReady"},
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
-		{kind: "DragAvatar", components: [ 
+		{kind: "DragAvatar", components: [
 			{tag: "img", src: "images/icon.png"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
@@ -17,21 +17,15 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
-				{name: "left", classes: "panel", showing: false, components: [
-				]},
+				{name: "left", kind: "leftPanels", showing: false,	arrangerKind: "CardArranger"},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
 						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion"}
 					]}
 				]},
-				{name: "right", classes: "panel", components: [
-					// neccesary nesting here for 'margin: 8px;"
-					{kind: "enyo.Scroller", classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
-						{name: "dump", style: "padding: 10px;", allowHtml: true}
-					]}
-				]}
-			]}
+				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"},
+			]},
+
 		]},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
 			{kind: "Image", src: "$phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
@@ -44,8 +38,9 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Don't Save", ontap: "abandonDocAction"},
 			]}
 		]},
-		{name: "autocomplete", kind: "Phobos.AutoComplete"}
+		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 	],
+
 	handlers: {
 	},
 	docHasChanged: false,
@@ -55,7 +50,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.buildDb();
-		
+
 		// Pass to the autocomplete compononent a reference to ace
 		this.$.autocomplete.setAce(this.$.ace);
 	},
@@ -79,8 +74,32 @@ enyo.kind({
 		var mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
 		this.$.ace.setEditingMode(mode);
 		this.$.ace.setValue(inCode);
-		this.reparseAction();
+
 		this.docHasChanged=false;
+		if (mode == "json"){
+			this.$.left.setIndex(0);
+			this.$.left.setShowing(false);
+			this.$.right.setShowing(false);
+		};
+		if (mode == "javascript"){
+			this.$.left.setIndex(1);
+			this.$.right.setIndex(1);
+			this.$.left.setShowing(false);
+			this.$.right.setShowing(true);
+			this.reparseAction();
+		};
+		if ( mode == "html"){
+			this.$.left.setIndex(2);
+			this.$.left.setShowing(false);
+			this.$.right.setShowing(false);
+		};
+		if( mode == "css"){
+			this.$.left.setIndex(3);
+			this.$.right.setIndex(3);
+			this.$.left.setShowing(false);
+			this.$.right.setShowing(true);
+		};
+
 	},
 	showWaitPopup: function(inMessage) {
 		this.$.waitPopupMessage.setContent(inMessage);
@@ -106,7 +125,8 @@ enyo.kind({
 	dumpInfo: function(inObject) {
 		var c = inObject;
 		if (!c || !c.superkinds) {
-			this.$.dump.setContent("(no info)");
+		console.log(this.$.right.$.dump);
+			this.$.right.$.dump.setContent("(no info)");
 			return;
 		}
 		//
@@ -138,7 +158,7 @@ enyo.kind({
 		}
 		h$ += "<h4>All Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
-		this.$.dump.setContent(h$);
+		this.$.right.$.dump.setContent(h$);
 	},
 	reparseAction: function() {
 		var module = {
@@ -149,7 +169,7 @@ enyo.kind({
 			this.analysis = module;
 			this.$.analyzer.index.indexModule(module);
 			this.updateObjectsLines(module);
-			
+
 			// dump the object where the cursor is positioned, if it exists
 			this.dumpInfo(module.objects && module.objects[module.currentObject]);
 		} catch(error) {
@@ -172,12 +192,12 @@ enyo.kind({
 				tempo.ranges.push(range);	// Push a range for previous object
 				start = tempo.objects[idx].line;
 			}
-			
+
 			// Push a range for the last object
 			range = { first: start, last: 1000000000};
 			tempo.ranges.push(range);
 		}
-		
+
 		var position = this.$.ace.getCursorPositionInDocument();
 		tempo.currentObject = this.findCurrentEditedObject(position);
 		tempo.currentRange = tempo.ranges[tempo.currentObject];
@@ -260,7 +280,7 @@ enyo.kind({
 	},
 	docChanged: function(inSender, inEvent) {
 		this.docHasChanged=true;
-		
+
 		if (this.debug) enyo.log("phobos.docChanged: " + JSON.stringify(inEvent.data));
 
 		if (this.analysis) {
@@ -272,17 +292,17 @@ enyo.kind({
 	cursorChanged: function(inSender, inEvent) {
 		var position = this.$.ace.getCursorPositionInDocument();
 		if (this.debug) enyo.log("phobos.cursorChanged: " + inSender.id + " " + inEvent.type + " " + JSON.stringify(position));
-		
+
 		// Check if we moved to another enyo kind and display it in the right pane
 		var tempo = this.analysis;
-		if (tempo && tempo.currentLine != undefined && tempo.currentLine != position.row) {	// If no more on the same line			
+		if (tempo && tempo.currentLine != undefined && tempo.currentLine != position.row) {	// If no more on the same line
 			tempo.currentLine = position.row;
-			
+
 			// Check if the cursor references another object
 			if (tempo.currentRange != undefined && (position.row < tempo.currentRange.first || position.row > tempo.currentRange.last)) {
 				tempo.currentObject = this.findCurrentEditedObject(position);
 				tempo.currentRange = tempo.ranges[tempo.currentObject];
-				
+
 				this.dumpInfo(tempo.objects && tempo.objects[tempo.currentObject]);
 			}
 		}
@@ -333,15 +353,15 @@ enyo.kind({
 		this.inherited(arguments);
 	},
 	start: function(inEvent, inAnalysis) {
-		
+
 		if (inAnalysis.objects && inAnalysis.objects.length > 0) {
 			var go = false;
 			if (inEvent) {
 				/*
 				 * Check to see if we need to show-up the auto-complete popup
-				 * 
+				 *
 				 * NOTE: currently only done on "this.$."
-				 * 
+				 *
 				 * When a '.' is entered, we check is it's the last character
 				 * of a "this.$." string.
 				 * If yes, we show a popup listing the components available
@@ -354,7 +374,7 @@ enyo.kind({
 						var line = this.ace.getLine(data.range.end.row);
 						var end = data.range.end.column;
 						last = line.substr(end - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
-						
+
 						if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
 							this.position = data.range.end;
 							go = true;
@@ -366,7 +386,7 @@ enyo.kind({
 				var position = this.ace.getCursorPositionInDocument();
 				var line = this.ace.getLine(position.row);
 				last = line.substr(position.column - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
-				
+
 				if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
 					this.position = position;
 					go = true;
@@ -400,12 +420,12 @@ enyo.kind({
 			select.setAttribute("size", size);
 			select.setSelected(0);
 			select.render();
-			
+
 			// Compute the position of the popup
 			var ace = this.ace;
-			var pos = ace.editor.renderer.textToScreenCoordinates(this.position.row, this.position.column);			
+			var pos = ace.editor.renderer.textToScreenCoordinates(this.position.row, this.position.column);
 			pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
-	
+
 			// Position the autocomplete popup
 			this.applyStyle("top", pos.pageY + "px");
 			this.applyStyle("left", pos.pageX + "px");
@@ -448,7 +468,7 @@ enyo.kind({
 	},
 	keyDown: function(inSender, inEvent) {
 		if (this.debug) enyo.log("Got a keydown ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
-		
+
 		var key = inEvent.keyIdentifier;
 		if (key === "Up") {
 			var select = this.$.autocompleteSelect;
@@ -464,7 +484,7 @@ enyo.kind({
 	},
 	keyUp: function(inSender, inEvent) {
 		if (this.debug) enyo.log("Got a keyup ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
-		
+
 		var key = inEvent.keyIdentifier;
 		if (key === "Enter") {
 			this.autocompleteChanged();
@@ -483,9 +503,38 @@ enyo.kind({
 				}
 			}// else - Don't care
 		}
-		
+
 	    this.ace.blur();		// Needed to force ACE to ignore keystrokes after the popup is opened
-		
+
 	    return true; // Stop the propagation of the event
 	}
+});
+
+enyo.kind({name: "rightPanels",kind: "Panels", wrap: false,
+	components: [
+		{// right panel jason go here
+		},
+		{kind: "enyo.Scroller", classes: "border panel enyo-fit", style: "margin: 8px;",
+		components: [
+			{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
+			{name: "dump", style: "padding: 10px;", allowHtml: true}
+		]},
+		{// right panel html go here
+		},
+		{kind: "cssBuilder",    // right css here
+		},
+	]}
+
+);
+enyo.kind({name: "leftPanels",kind: "Panels",	wrap: false,
+	components: [
+		{// left panel jason go here
+		},
+		{// left panel javascript og here
+		},
+		{// left panel html go here
+		},
+		{ // css here
+		},
+	]
 });

@@ -1,3 +1,4 @@
 ﻿enyo.depends(
-	"Phobos.js"
+	"Phobos.js",
+	"cssbuilder.js"
 );
