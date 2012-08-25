@@ -39,6 +39,7 @@ enyo.kind({
 		ondrop: "drop"
 	},
 	kinds: null,
+	docHasChanged: false,
 	create: function() {
 		this.inherited(arguments);
 		this.kinds=[];
@@ -56,6 +57,7 @@ enyo.kind({
         	});
     	}
 		this.$.kindPicker.render();
+		this.docHasChanged = false;
 	},
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
@@ -81,6 +83,7 @@ enyo.kind({
 	designerChange: function(inSender) {
 		this.refreshComponentView();
 		this.refreshInspector();
+		this.docHasChanged = true;
 	},
 	designerSelect: function(inSender, inEvent) {
 		this.refreshInspector();
@@ -93,6 +96,7 @@ enyo.kind({
 	inspectorModify: function() {
 		this.$.designer.refresh();
 		this.refreshComponentView();
+		this.docHasChanged = true;
 	},
 	componentViewDrop: function(inSender, inEvent) {
 		return this.$.designer.drop(inSender, inEvent);
@@ -115,7 +119,7 @@ enyo.kind({
 		}
 	},
 	closeDesignerAction: function(inSender, inEvent) {
-		this.bubble("onCloseDesigner", {index: this.index, content: this.$.designer.serialize()});
+		this.bubble("onCloseDesigner", {docHasChanged: this.docHasChanged, index: this.index, content: this.$.designer.serialize()});
 	}
 });
 
