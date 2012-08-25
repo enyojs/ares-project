@@ -23,7 +23,7 @@ enyo.kind({
 						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion"}
 					]}
 				]},
-				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"},
+				{name: "right", kind: "rightPanels", showing: false, arrangerKind: "CardArranger"},
 			]},
 
 		]},
@@ -510,23 +510,28 @@ enyo.kind({
 	}
 });
 
-enyo.kind({name: "rightPanels",kind: "Panels", wrap: false,
-	components: [
+enyo.kind({name: "rightPanels",kind: "Panels",components: [
 		{// right panel jason go here
 		},
-		{kind: "enyo.Scroller", classes: "border panel enyo-fit", style: "margin: 8px;",
-		components: [
-			{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
-			{name: "dump", style: "padding: 10px;", allowHtml: true}
+		{kind: "enyo.Control", classes: "enyo-fit", components: [
+			{name: "right", classes: "border panel enyo-fit", style: "margin: 8px;", components: [
+				{kind: "enyo.Scroller", classes: "panel enyo-fit",components: [
+					{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
+					{name: "dump", allowHtml: true}
+				]},
+			]}
 		]},
 		{// right panel html go here
 		},
-		{kind: "cssBuilder",    // right css here
-		},
-	]}
+		{kind: "enyo.Control", classes: "enyo-fit",		// right css here
+		components: [
+			{kind: "cssBuilder", classes: "border panel enyo-fit",style: "margin: 8px;"
+			},
+		]},
 
-);
-enyo.kind({name: "leftPanels",kind: "Panels",	wrap: false,
+	]
+});
+enyo.kind({name: "leftPanels",kind: "Panels", wrap: false,
 	components: [
 		{// left panel jason go here
 		},

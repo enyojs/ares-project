@@ -7,11 +7,11 @@ published: {
 	toggle: ""
 },
 	name: "cssBuilder",
-	kind: "enyo.FittableRows",
-	classes: "border panel ",
-	//fit: true,
-	style: "margin: 10px;",
-	//Xstyle: "padding-bottom: 10px;",
+	kind: "enyo.Scroller",
+	components: [
+	{kind: "enyo.FittableRows",
+	//classes: "border panel ",
+	//style: "margin: 10px;",
 	components: [
 		{kind: "onyx.Input", name: "input", placeholder: "Enter your class name!..",onchange: "inputChange"},
 		{name:"outputBox",
@@ -77,7 +77,8 @@ published: {
 				{content:" Arial ", style: "font-family: Arial; width: 140px; height: 40px"},
 
 			]},
-		],
+		]},
+	],
 
 
 	create: function() {
