@@ -83,11 +83,28 @@ enyo.kind({
 
 			]},
 
+				{tag: "br"},
 				{classes: "onyx-toolbar-inline", components: [
 					{content: "Font Size",},
 					{kind: "onyx.PickerDecorator", components: [
 						{style: "min-width: 60px;"},
-						{name: "integerPicker", kind: "onyx.Picker",onSelect: "fontsize"}
+						{name: "fontSizePicker", kind: "onyx.Picker",onSelect: "fontSize"}
+					]}
+				]},
+				{tag: "br"},
+				{classes: "onyx-toolbar-inline", components: [
+					{content: "Margin Size",},
+					{kind: "onyx.PickerDecorator", components: [
+						{style: "min-width: 60px;"},
+						{name: "marginSizePicker", kind: "onyx.Picker",onSelect: "marginSize"}
+					]}
+				]},
+				{tag: "br"},
+				{classes: "onyx-toolbar-inline", components: [
+					{content: "Border Size",},
+					{kind: "onyx.PickerDecorator", components: [
+						{style: "min-width: 60px;"},
+						{name: "borderSizePicker", kind: "onyx.Picker",onSelect: "borderSize"}
 					]}
 				]},
 			]}
@@ -98,16 +115,23 @@ enyo.kind({
 	create: function() {
 
 		this.inherited(arguments);
-		this.updateBox();
-				for (var i=1; i<50; i++) {
-			this.$.integerPicker.createComponent({content: i, active: !i});
+		this.$.outputBox.applyStyle("color", "#FFFFFF");
+		for (var i=1; i<50; i++) {
+			this.$.fontSizePicker.createComponent({content: i, active: !i});
 		}
+		for (var i=1; i<50; i++) {
+			this.$.marginSizePicker.createComponent({content: i, active: !i});
+		}
+		for (var i=1; i<50; i++) {
+			this.$.borderSizePicker.createComponent({content: i, active: !i});
+		}
+
 	},
 
 	updateBox: function(){
 	var tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
 	var className = ".classname";
-	var fontSize = "";
+	//var fontSize = "";
 	var outPut = this.className + " " + "{<br>" ;
 	var c = '#' + (this.red + this.green + this.blue).toUpperCase();
 
@@ -120,20 +144,30 @@ enyo.kind({
 		this.fontColor = c;
 	}
 
-	if (this.backgroundColor != null){
-		outPut = outPut + tab + "background-color:" + " " +this.backgroundColor + ";";
+	if(this.backgroundColor != null){
+		outPut = outPut + tab + "background-color:" + " " + this.backgroundColor + ";";
 	}
 
-	if (this.fontColor != null){
+	if(this.fontColor != null){
 		outPut = outPut + "<br>" + tab + "color:" + " " + this.fontColor + ";";
 	}
 
-	if (this.fontFamily != null){
-		outPut = outPut + "<br>" +tab + "font-family:" + " " +this.fontFamily + ";";
+	if(this.fontFamily != null){
+		outPut = outPut + "<br>" +tab + "font-family:" + " " + this.fontFamily + ";";
 	}
-	if (this.$.fontSize != null){
-		outPut = outPut + "<br>" +tab + "font-size:" + " " +this.$.fontSize + "px;";
+
+	if(this.$.fontSize != null){
+		outPut = outPut + "<br>" +tab + "font-size:" + " " + this.$.fontSize + "px;";
 	}
+
+	if(this.$.marginSize != null){
+		outPut = outPut + "<br>" +tab + "margin:" + " " + this.$.marginSize + "px;";
+	}
+
+	if(this.$.borderSize != null){
+		outPut = outPut + "<br>" +tab + "border:" + " " + this.$.borderSize + "px;";
+	}
+
 	this.$.bg.setContent(outPut + "<br>}");
 	},
 
@@ -215,11 +249,16 @@ enyo.kind({
 		this.className = this.$.input.hasNode().value;
 		this.updateBox();
 	},
-	fontsize: function(inSender, inEvent) {
-
-	//this.$.fontSize = "";
+	fontSize: function(inSender, inEvent) {
 		this.$.fontSize = inEvent.selected.content;
-		console.log(this.$.fontSize);
+		this.updateBox();
+	},
+	marginSize: function(inSender, inEvent){
+		this.$.marginSize = inEvent.selected.content;
+		this.updateBox();
+	},
+	borderSize: function(inSender, inEvent){
+		this.$.borderSize = inEvent.selected.content;
 		this.updateBox();
 	}
 });
