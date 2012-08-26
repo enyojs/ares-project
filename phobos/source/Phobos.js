@@ -23,9 +23,8 @@ enyo.kind({
 						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion"}
 					]}
 				]},
-				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"},
-			]},
-
+				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"}
+			]}
 		]},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
 			{kind: "Image", src: "$phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
@@ -35,10 +34,10 @@ enyo.kind({
 			{name: "message", content: "Document was modified! Save it before closing?", style: "padding: 10px;"},
 			{kind: "FittableColumns", components: [
 				{kind: "onyx.Button", content: "Cancel", ontap: "cancelCloseAction"},
-				{kind: "onyx.Button", content: "Don't Save", ontap: "abandonDocAction"},
+				{kind: "onyx.Button", content: "Don't Save", ontap: "abandonDocAction"}
 			]}
 		]},
-		{name: "autocomplete", kind: "Phobos.AutoComplete"},
+		{name: "autocomplete", kind: "Phobos.AutoComplete"}
 	],
 
 	handlers: {
@@ -73,33 +72,23 @@ enyo.kind({
 		this.analysis = null;
 		var mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
 		this.$.ace.setEditingMode(mode);
+		this.adjustPanelsForMode(mode);
 		this.$.ace.setValue(inCode);
-
 		this.docHasChanged=false;
-		if (mode == "json"){
-			this.$.left.setIndex(0);
-			this.$.left.setShowing(false);
-			this.$.right.setShowing(false);
-		};
-		if (mode == "javascript"){
-			this.$.left.setIndex(1);
-			this.$.right.setIndex(1);
-			this.$.left.setShowing(false);
-			this.$.right.setShowing(true);
-			this.reparseAction();
-		};
-		if ( mode == "html"){
-			this.$.left.setIndex(2);
-			this.$.left.setShowing(false);
-			this.$.right.setShowing(false);
-		};
-		if( mode == "css"){
-			this.$.left.setIndex(3);
-			this.$.right.setIndex(3);
-			this.$.left.setShowing(false);
-			this.$.right.setShowing(true);
-		};
-
+	},
+	adjustPanelsForMode: function(mode) {
+		var modes = {
+			json:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0},
+			javascript:	{leftShowing: false, rightShowing: true,  leftIndex: 1, rightIndex: 1},
+			html:		{leftShowing: false, rightShowing: false, leftIndex: 2, rightIndex: 2},
+			css:		{leftShowing: false, rightShowing: true,  leftIndex: 3, rightIndex: 3},
+			text:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0},
+		}
+		var settings = modes[mode]||modes['text'];
+		this.$.left.setIndex(settings.leftIndex);
+		this.$.left.setShowing(settings.leftShowing);
+		this.$.right.setIndex(settings.rightIndex);
+		this.$.right.setShowing(settings.rightShowing);
 	},
 	showWaitPopup: function(inMessage) {
 		this.$.waitPopupMessage.setContent(inMessage);
@@ -512,16 +501,16 @@ enyo.kind({
 
 enyo.kind({name: "rightPanels",kind: "Panels", wrap: false,
 	components: [
-		{// right panel jason go here
+		{// right panel for JSON goes here
 		},
 		{kind: "enyo.Scroller", classes: "border panel enyo-fit", style: "margin: 8px;",
 		components: [
 			{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
 			{name: "dump", style: "padding: 10px;", allowHtml: true}
 		]},
-		{// right panel html go here
+		{// right panel for HTML goes here
 		},
-		{kind: "cssBuilder",    // right css here
+		{kind: "cssBuilder",    // right panel for CSS here
 		},
 	]}
 
