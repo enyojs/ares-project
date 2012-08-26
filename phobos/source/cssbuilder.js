@@ -13,97 +13,83 @@ enyo.kind({
 
 		{name:"outputBox",
 		kind: "enyo.Panels",
-		style: "font-family: fontFamily; font-size: 10px; border: 1px solid #000000; width: 100%; height: 150px;",
-		classes: "enyo-selectable",
+		style: "width: 100%; height: 150px; ",
+		classes: "enyo-selectable font",
 		allowHtml: true,
 		Xstyle: "padding: 10px;",
 		components: [
-			{name: "bg", allowHtml: true, style: "font-size: 12px; font-Family: fontFamily", content: ""},
-			{name: "dud",allowHtml: true, content:"  ",style: "height: 10px"}
+			{name: "bg", allowHtml: true, style: "font-size: 15px;", content: ""},
+			{name: "dd", allowHtml: true, content:"  ",style: "height: 10px"}
 		]},
 
+		{name: "redSlider", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
+		style: "height:10px; background-color: red; enyo-unselectable;"
+		},
 
+		{style: "height: 5px"},
 
-		{kind: "Panels", fit:true,
+		{name: "greenSlider", kind: "onyx.Slider", onChanging: "greenSliding", onChange: "greenChanged",
+		style: "height:10px;  background-color: green; enyo-unselectable"
+		},
+
+		{style: "height: 5px"},
+
+		{name: "blueSlider", kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged",
+		style: "height:10px;  background-color: blue; enyo-unselectable"
+		},
+		{kind: "onyx.RadioGroup", onActivate:"radioActivated",
+		components:[
+			{content:"background", classes: "RadioGroup"},
+			{content:"Font color", classes: "RadioGroup"},
+			{content:"Border color", classes: "RadioGroup"},
+		]},
+		{tag: "br"},
+		{kind: "Panels", fit:true, classes: "enyo-unselectable",
 		components: [
 			{kind: "enyo.Scroller", classes: "enyo-fit",
 			components: [
-				{kind: "onyx.Slider",
-			name: "redSlider",
-			onChanging: "redSliding",
-			onChange: "redChanged",
-			style: "height:10px; background-color: red; enyo-unselectable;"
-			},
-
-				{style: "height: 5px"},
-
-				{kind: "onyx.Slider",
-			name: "greenSlider",onChanging: "greenSliding",
-			onChange: "greenChanged",
-			style: "height:10px;  background-color: green; enyo-unselectable"
-			},
-
-				{style: "height: 5px"},
-
-				{kind: "onyx.Slider",
-			name: "blueSlider",onChanging: "blueSliding",
-			onChange: "blueChanged",
-			style: "height:10px;  background-color: blue; enyo-unselectable"
-			},
-
 				{style: "height: 5px"},
 
 				{kind: "onyx.RadioGroup",
-			onActivate:"radioActivated",
-			components:[
-				{content:"background", active: true, style: "width: 135px; height: 40px"},
-				{content:"Font color", style: "width: 135px; height: 40px"}
-			]},
-				{tag: "br"},
+				onActivate:"fontActivated",components:[
+					{content:"Serif", style: "font-family: Serif;", classes: "RadioGroup"},
+					{content:"Sans-serif", style: "font-family: Sans-serif;", classes: "RadioGroup"},
+					{tag: "br"},
 
-				{kind: "onyx.RadioGroup",
-			//style:
-			//width: "50 px",
-			onActivate:"fontActivated",
-			components:[
-				{content:"Serif", style: "font-family: Serif; width: 140px; height: 40px"},
-				{content:"Sans-serif", style: "font-family: Sans-serif; width: 140px; height: 40px"},
-				{tag: "br"},
-				{tag: "br"},
-				{content:"Helvetica  ", style: "font-family: Helvetica; width: 140px; height: 40px"},
-				{content:"Monospace", style: "font-family: Monospace; width: 140px; height: 40px"},
-				{tag: "br"},
-				{tag: "br"},
-				{content:" Lucida Sans Unicode ", style: "font-family: Lucida Sans Unicode; width: 140px; height: 50px"},
-				{content:"Times New Roman  ", style: "font-family: Times New Roman; width: 140px; height: 50px"},
-				{tag: "br"},
-				{tag: "br"},
-				{content:" Courier New ", style: "font-family: Courier New; width: 140px; height: 40px"},
-				{content:" Arial ", style: "font-family: Arial; width: 140px; height: 40px"}
+					{content:"Helvetica  ", style: "font-family: Helvetica;", classes: "RadioGroup"},
+					{content:"Monospace", style: "font-family: Monospace;", classes: "RadioGroup"},
+					{tag: "br"},
 
-			]},
+					{content:" Lucida Sans Unicode ", style: "font-family: Lucida Sans Unicode;", classes: "RadioGroup"},
+					{content:"Times New Roman  ", style: "font-family: Times New Roman;", classes: "RadioGroup"},
+					{tag: "br"},
+
+					{content:" Courier New ", style: "font-family: Courier New;", classes: "RadioGroup"},
+					{content:" Arial ", style: "font-family: Arial;", classes: "RadioGroup"}
+
+				]},
 
 				{tag: "br"},
 				{classes: "onyx-toolbar-inline", components: [
-					{content: "Font Size",},
+					{content: "Font Size", classes: "picker"},
 					{kind: "onyx.PickerDecorator", components: [
-						{style: "min-width: 60px;"},
+						{style: "min-width: 60px; font-size: 10px;"},
 						{name: "fontSizePicker", kind: "onyx.Picker",onSelect: "fontSize"}
 					]}
 				]},
 				{tag: "br"},
 				{classes: "onyx-toolbar-inline", components: [
-					{content: "Margin Size",},
+					{content: "Margin Size", classes: "picker"},
 					{kind: "onyx.PickerDecorator", components: [
-						{style: "min-width: 60px;"},
+						{style: "min-width: 60px; font-size: 10px;"},
 						{name: "marginSizePicker", kind: "onyx.Picker",onSelect: "marginSize"}
 					]}
 				]},
 				{tag: "br"},
 				{classes: "onyx-toolbar-inline", components: [
-					{content: "Border Size",},
+					{content: "Border Size", classes: "picker"},
 					{kind: "onyx.PickerDecorator", components: [
-						{style: "min-width: 60px;"},
+						{style: "min-width: 60px; font-size: 10px;"},
 						{name: "borderSizePicker", kind: "onyx.Picker",onSelect: "borderSize"}
 					]}
 				]},
@@ -113,9 +99,9 @@ enyo.kind({
 
 
 	create: function() {
-
 		this.inherited(arguments);
 		this.$.outputBox.applyStyle("color", "#FFFFFF");
+		this.$.outputBox.applyStyle("background-color", "#000000");
 		for (var i=1; i<50; i++) {
 			this.$.fontSizePicker.createComponent({content: i, active: !i});
 		}
@@ -131,7 +117,7 @@ enyo.kind({
 	updateBox: function(){
 	var tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
 	var className = ".classname";
-	//var fontSize = "";
+	var styleOut = ""
 	var outPut = this.className + " " + "{<br>" ;
 	var c = '#' + (this.red + this.green + this.blue).toUpperCase();
 
@@ -145,28 +131,37 @@ enyo.kind({
 	}
 
 	if(this.backgroundColor != null){
-		outPut = outPut + tab + "background-color:" + " " + this.backgroundColor + ";";
+		outPut = outPut + tab + "background-color:" + " " + this.backgroundColor + ";" + "<br>" ;
 	}
 
 	if(this.fontColor != null){
-		outPut = outPut + "<br>" + tab + "color:" + " " + this.fontColor + ";";
+		outPut = outPut + tab + "color:" + " " + this.fontColor + ";"  + "<br>";
 	}
 
 	if(this.fontFamily != null){
-		outPut = outPut + "<br>" +tab + "font-family:" + " " + this.fontFamily + ";";
+		outPut = outPut +tab + "font-family:" + " " + this.fontFamily + ";" + "<br>" ;
 	}
 
 	if(this.$.fontSize != null){
-		outPut = outPut + "<br>" +tab + "font-size:" + " " + this.$.fontSize + "px;";
+		outPut = outPut + tab + "font-size:" + " " + this.$.fontSize + "px;" + "<br>" ;
 	}
 
 	if(this.$.marginSize != null){
-		outPut = outPut + "<br>" +tab + "margin:" + " " + this.$.marginSize + "px;";
+		outPut = outPut  + tab + "margin:" + " " + this.$.marginSize + "px;" + "<br>";
 	}
 
 	if(this.$.borderSize != null){
-		outPut = outPut + "<br>" +tab + "border:" + " " + this.$.borderSize + "px;";
+		outPut = outPut + tab + "border:" + " " + this.$.borderSize + "px";
+
+		if(this.toggle == "Border color"){
+			outPut = outPut + " " + "sold" + " " + c + ";";
+		}else{
+		outPut = outPut + ";";
+		}
 	}
+
+
+
 
 	this.$.bg.setContent(outPut + "<br>}");
 	},
