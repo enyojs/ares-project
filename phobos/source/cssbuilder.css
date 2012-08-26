@@ -1,0 +1,15 @@
+.font {
+    font-size: 10px;
+
+}
+
+.RadioGroup {
+	font-size: 10px;
+	width: 130px;
+	height: 50px;
+
+}
+.picker {
+	min-width: 60px;
+	font-size: 10px;
+}
