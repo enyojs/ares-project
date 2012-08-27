@@ -10,7 +10,7 @@ enyo.kind({
 	kind: "enyo.FittableRows",
 	components: [
 		{kind: "onyx.Input", name: "input", placeholder: "Enter your class name!..",onchange: "inputChange"},
-
+		{kind: "onyx.Button", classes: "onyx-negative", content: "Reset", ontap:"reset"},
 		{name:"outputBox",
 		kind: "enyo.Panels",
 		style: "width: 100%; height: 150px; ",
@@ -255,5 +255,17 @@ enyo.kind({
 	borderSize: function(inSender, inEvent){
 		this.$.borderSize = inEvent.selected.content;
 		this.updateBox();
+	},
+	reset: function(){
+		this.className = null;
+		this.backgroundColor = null;
+		this.fontColor  = null;
+		this.$.borderSize = null;
+		this.fontFamily = null;
+		this.$.marginSize = null;
+		this.$.fontSize = null;
+		this.$.outPut = null;
+		this.updateBox();
+
 	}
 });
