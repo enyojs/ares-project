@@ -82,8 +82,8 @@ enyo.kind({
 			javascript:	{leftShowing: false, rightShowing: true,  leftIndex: 1, rightIndex: 1},
 			html:		{leftShowing: false, rightShowing: false, leftIndex: 2, rightIndex: 2},
 			css:		{leftShowing: false, rightShowing: true,  leftIndex: 3, rightIndex: 3},
-			text:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0},
-		}
+			text:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0}
+		};
 		var settings = modes[mode]||modes['text'];
 		this.$.left.setIndex(settings.leftIndex);
 		this.$.left.setShowing(settings.leftShowing);
@@ -243,7 +243,7 @@ enyo.kind({
 		var start = comp[0].start;
 		var end = comp[comp.length-1].end;
 		var pre = c.substring(0, start);
-		pre = pre.substring(0, pre.lastIndexOf("["))
+		pre = pre.substring(0, pre.lastIndexOf("["));
 		var post = c.substring(end);
 		post = post.substring(post.indexOf("]")+1);
 		var code = pre + inEvent.content + post;
@@ -284,11 +284,11 @@ enyo.kind({
 
 		// Check if we moved to another enyo kind and display it in the right pane
 		var tempo = this.analysis;
-		if (tempo && tempo.currentLine != undefined && tempo.currentLine != position.row) {	// If no more on the same line
+		if (tempo && tempo.currentLine !== undefined && tempo.currentLine != position.row) {	// If no more on the same line
 			tempo.currentLine = position.row;
 
 			// Check if the cursor references another object
-			if (tempo.currentRange != undefined && (position.row < tempo.currentRange.first || position.row > tempo.currentRange.last)) {
+			if (tempo.currentRange !== undefined && (position.row < tempo.currentRange.first || position.row > tempo.currentRange.last)) {
 				tempo.currentObject = this.findCurrentEditedObject(position);
 				tempo.currentRange = tempo.ranges[tempo.currentObject];
 
@@ -503,27 +503,30 @@ enyo.kind({name: "rightPanels",kind: "Panels", wrap: false,
 	components: [
 		{// right panel for JSON goes here
 		},
-		{kind: "enyo.Scroller", classes: "border panel enyo-fit", style: "margin: 8px;",
-		components: [
-			{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
-			{name: "dump", style: "padding: 10px;", allowHtml: true}
+		{kind: "enyo.Control", classes: "enyo-fit", components: [
+			{name: "right", classes: "border panel enyo-fit", style: "margin: 8px;", components: [
+				{kind: "enyo.Scroller", classes: "panel enyo-fit",components: [
+					{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
+					{name: "dump", allowHtml: true}
+				]}
+			]}
 		]},
 		{// right panel for HTML goes here
 		},
-		{kind: "cssBuilder",    // right panel for CSS here
-		},
-	]}
-
-);
-enyo.kind({name: "leftPanels",kind: "Panels",	wrap: false,
+		{kind: "enyo.Control", classes: "enyo-fit",	components: [ // right panel for CSS here
+			{kind: "cssBuilder", classes: "border panel enyo-fit",style: "margin: 8px;"}
+		]}
+	]
+});
+enyo.kind({name: "leftPanels",kind: "Panels", wrap: false,
 	components: [
-		{// left panel jason go here
+		{// left panel for JSON goes here
 		},
-		{// left panel javascript og here
+		{// left panel for javascript goes here
 		},
-		{// left panel html go here
+		{// left panel for HTML goes here
 		},
-		{ // css here
-		},
+		{ // left panel for CSS goes here
+		}
 	]
 });

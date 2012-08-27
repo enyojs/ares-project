@@ -39,7 +39,7 @@ body {
 	width: 280px;
 }
 #ares_phobos_right {
-	width: 320px;
+	width: 360px;
 }
 .ares_phobos_autocomp {
 	position: absolute;
@@ -55,7 +55,7 @@ body {
 	display: block;
 	background-color: white;
 	background-position: initial initial;
-	background-repeat: initial initial; 
+	background-repeat: initial initial;
 }
 /**/
 .border {
