@@ -74,6 +74,7 @@ enyo.kind({
 		this.$.ace.setEditingMode(mode);
 		this.adjustPanelsForMode(mode);
 		this.$.ace.setValue(inCode);
+		this.reparseAction();
 		this.docHasChanged=false;
 	},
 	adjustPanelsForMode: function(mode) {
