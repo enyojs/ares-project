@@ -39,14 +39,21 @@ if (!configStats.isFile()) {
 
 var configContent = fs.readFileSync(configPath, 'utf8');
 try {
-	ide = JSON.parse(configContent);
+	ide.conf = JSON.parse(configContent);
 } catch(e) {
 	throw "Improper JSON: "+configContent;
 }
 
-if (!ide.services || !ide.services[0]) {
-	throw "Corrupted '"+configPath+"': no file service defined";
+if (!ide.conf.services || !ide.conf.services[0]) {
+	throw "Corrupted '"+configPath+"': no storage services defined";
 }
+
+// configuration age/date is the UTC configuration file last modification date
+ide.conf.mtime = configStats.mtime.getTime();
+console.log("conf="+JSON.stringify(ide.conf));
+
+// live resources inherit (prototypal) from configuration
+ide.res = Object.create(ide.conf);
 
 function ipc_message(service) {
 	return function(msg) {
@@ -69,9 +76,9 @@ function serviceEcho(service) {
 	};
 }
 
-for (var i = 0; i < ide.services.length; i++) {
-	console.log("--- Service["+ide.services[i].id+"]: "+JSON.stringify(ide.services[i]));
-	service = ide.services[i];
+for (var i = 0; i < ide.res.services.length; i++) {
+	console.log("--- Service["+ide.res.services[i].id+"]: "+JSON.stringify(ide.res.services[i]));
+	service = ide.res.services[i];
 	var command = platformSubst(service.command);
 	var params = [];
 	var options = {
@@ -101,15 +108,18 @@ app.configure(function(){
 	app.use('/ide', express.static(enyojsRoot + '/ares-project'));
 	app.use('/enyo', express.static(enyojsRoot + '/enyo'));
 	app.use('/lib', express.static(enyojsRoot + '/lib'));
+	app.get('/conf', function(req, res) {
+		res.status(200).json(ide.conf);
+	});
 	app.get('/res/services', function(req, res) {
-		res.status(200).json(ide.services);
+		res.status(200).json(ide.res.services);
 	});
 	app.get('/res/services/:service_id', function(req, res) {
 		var service_id = req.params.service_id;
 		var service = null;
-		for (var i = 0; i < ide.services.length; i++) {
-			if (ide.services[i].id === service_id) {
-				service = ide.services[i];
+		for (var i = 0; i < ide.res.services.length; i++) {
+			if (ide.res.services[i].id === service_id) {
+				service = ide.res.services[i];
 				break;
 			}
 		}
