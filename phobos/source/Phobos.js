@@ -219,10 +219,11 @@ enyo.kind({
 				var name = o.name;
 				var kind = o.superkind;
 				if (comps) { // only include kinds with components block
-					var start = comps[0].start;
-					var end = comps[comps.length - 1].end;
-					var js = eval("(["+c.substring(start, end)+"])");
-					kinds.push({name: name, kind: kind, components: js});
+					var start = o.componentsBlockStart;
+					var end = o.componentsBlockEnd;
+					var js = c.substring(start, end);
+					var o = eval("(" + js + ")"); // Why eval? Because JSON.parse doesn't support unquoted keys...
+					kinds.push({name: name, kind: kind, components: o});
 				}
 			}
 			if (kinds.length > 0) {
@@ -237,15 +238,10 @@ enyo.kind({
 		var c = this.$.ace.getValue();
 		var i = inEvent.index;
 		var comp = this.analysis.objects[i].components;
-		//TODO: Indexer doesn't quite capture the right locations for Components start and end...
-		// Indexer returns the start of the first component block, and we really want the location of the opening "["
-		// similarly for the end. Or, need to change serializer to not return the [], which might be easier, and less disruptive to people's formatting.
-		var start = comp[0].start;
-		var end = comp[comp.length-1].end;
+		var start = this.analysis.objects[i].componentsBlockStart;
+		var end = this.analysis.objects[i].componentsBlockEnd;
 		var pre = c.substring(0, start);
-		pre = pre.substring(0, pre.lastIndexOf("["));
 		var post = c.substring(end);
-		post = post.substring(post.indexOf("]")+1);
 		var code = pre + inEvent.content + post;
 		this.$.ace.setValue(code);
 		this.reparseAction();
