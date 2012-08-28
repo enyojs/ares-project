@@ -6,7 +6,7 @@ enyo.kind({
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
 		{kind: "DragAvatar", components: [
-			{tag: "img", src: "images/icon.png"}
+			{tag: "img", src: "$deimos/images/icon.png"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [

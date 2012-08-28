@@ -3,7 +3,7 @@ enyo.kind({
 	classes: "enyo-unselectable",
 	components: [
 		{kind: "DragAvatar", components: [ 
-			{tag: "img", src: "images/icon.png", style: "width: 24px; height: 24px;"}
+			{tag: "img", src: "$deimos/images/icon.png", style: "width: 24px; height: 24px;"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 0 10px;", components: [
