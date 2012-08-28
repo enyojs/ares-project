@@ -13,3 +13,10 @@
 	min-width: 60px;
 	font-size: 10px;
 }
+.pannel {
+	background-color: #F5F5F5;
+	border-radius: 8px;
+	border: 1px solid #D0D0D0;
+	margin-bottom: 14px;
+	padding-bottom: 6px;
+}
