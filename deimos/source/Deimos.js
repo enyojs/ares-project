@@ -20,7 +20,7 @@ enyo.kind({
 				{name: "left", kind: "Palette", ondragstart: "dragStart"},
 				{name: "middle", fit: true, kind: "FittableRows",components: [
 					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart"},
-					{name: "code", classes: "deimos_panel", components: [
+					{name: "code", classes: "deimos_panel", showing: false, components: [
 						{kind: "Scroller", classes: "enyo-selectable", components: [
 							{name: "codeText", tag: "pre", style: "white-space: pre; font-size: smaller; border: none; margin: 0;"}
 						]}
