@@ -3,7 +3,7 @@ enyo.kind({
 	classes: "enyo-unselectable",
 	components: [
 		{kind: "DragAvatar", components: [ 
-			{tag: "img", src: "images/icon.png", style: "width: 24px; height: 24px;"}
+			{tag: "img", src: "$deimos/images/icon.png", style: "width: 24px; height: 24px;"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 0 10px;", components: [
@@ -20,7 +20,7 @@ enyo.kind({
 				{name: "left", kind: "Palette", ondragstart: "dragStart"},
 				{name: "middle", fit: true, kind: "FittableRows",components: [
 					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart"},
-					{name: "code", classes: "deimos_panel", components: [
+					{name: "code", classes: "deimos_panel", showing: false, components: [
 						{kind: "Scroller", classes: "enyo-selectable", components: [
 							{name: "codeText", tag: "pre", style: "white-space: pre; font-size: smaller; border: none; margin: 0;"}
 						]}

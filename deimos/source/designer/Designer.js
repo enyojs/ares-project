@@ -10,8 +10,8 @@ enyo.kind({
 		{name: "selectionOutline", kind: "DesignerOutline", style: "border: 5px dotted rgba(255, 146, 38, 0.7);"},
 		{name: "containerOutline", kind: "DesignerOutline", style: "border: 5px solid rgba(24, 24, 255, 0.3);"},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
-			{kind: "Button", content: "Undo"},
-			{kind: "Button", content: "Redo"},
+			//{kind: "Button", content: "Undo"},
+			//{kind: "Button", content: "Redo"},
 			{kind: "Button", content: "Up", ontap: "upAction"},
 			{kind: "Button", content: "Down", ontap: "downAction"},
 			{kind: "Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
