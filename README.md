@@ -82,12 +82,17 @@ Configure the `root` of your local file-system access `ide.json`.
 		},
 	[...]
 
-Start the IDE server:
+Start the IDE server **OSX & Linux**:
 
+	% /path/to/ares-server
 	% node ide.js
 	[...]
 	ARES IDE is now running at <http://127.0.0.1:9009/ide/ares/index.html> Press CTRL + C to shutdown
 	[...]
+
+**Windows**:
+
+	C:\Users\snowfix\GIT\enyojs\ares-project>"C:\Program Files\nodejs\node.exe" ide.js
 
 Connect to the IDE using Google Chrome or Chromium.  The default URL is [http://127.0.0.1:9009/ide/ares/index.html](http://127.0.0.1:9009/ide/ares/index.html)
 
