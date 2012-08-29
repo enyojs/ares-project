@@ -68,7 +68,7 @@ enyo.kind({
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
 	},
-	openDoc: function(inCode, inExt) {
+	openDoc: function(inFile, inCode, inExt) {
 		this.hideWaitPopup();
 		this.analysis = null;
 		var mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
@@ -77,6 +77,7 @@ enyo.kind({
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
 		this.docHasChanged=false;
+		this.$.documentLabel.setContent(inFile);
 	},
 	adjustPanelsForMode: function(mode) {
 		var modes = {
