@@ -131,32 +131,35 @@ enyo.kind({
 	},
 	createComponentAction: function(inProps) {
 		var c = this.getSelectedContainer();
-		if (c) {
-			// The selection objects are moved around in the DOM and the nodes can lose sync with the enyo node
-			// cache. Hiding the selection causes the selection nodes to be normalized, preventing any weirdness
-			// when rendering new Controls.
-			this.hideSelection();
-			//
-			// create the components
-			var b = c.createComponent(inProps, {owner: this.$.model});
-			//
-			// FIXME: hack name insertion
-			if (inProps.content == "$name") {
-				b.setContent(b.name);
-			}
-			// FIXME: hack control insertion
-			var p = this.selection && this.selection.parent;
-			if (p && p == b.parent) {
-				var i = p.children.indexOf(this.selection);
-				if (i >= 0) {
-					this.moveControl(b, i + 1);
-				}
-			}
-			this.$.client.render();
-			//
-			//this.modify();
-			this.select(b);
+		if ( ! c) {
+			// There is no object already created
+			c = this.$.client;
 		}
+		
+		// The selection objects are moved around in the DOM and the nodes can lose sync with the enyo node
+		// cache. Hiding the selection causes the selection nodes to be normalized, preventing any weirdness
+		// when rendering new Controls.
+		this.hideSelection();
+		//
+		// create the components
+		var b = c.createComponent(inProps, {owner: this.$.model});
+		//
+		// FIXME: hack name insertion
+		if (inProps.content == "$name") {
+			b.setContent(b.name);
+		}
+		// FIXME: hack control insertion
+		var p = this.selection && this.selection.parent;
+		if (p && p == b.parent) {
+			var i = p.children.indexOf(this.selection);
+			if (i >= 0) {
+				this.moveControl(b, i + 1);
+			}
+		}
+		this.$.client.render();
+		//
+		//this.modify();
+		this.select(b);
 	},
 	moveControl: function(inControl, inIndex) {
 		var move = function(inControl, inIndex, inList) {
