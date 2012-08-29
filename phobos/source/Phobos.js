@@ -13,6 +13,7 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Close", ontap: "closeDocAction"},
 				{name: "documentLabel", content: "Document"},
 				{kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
+				{kind: "onyx.Button", content: "New kind", ontap: "newKindAction"},
 				{fit: true},
 				{kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
@@ -295,6 +296,11 @@ enyo.kind({
 	},
 	startAutoCompletion: function() {
 		this.$.autocomplete.start(null, this.analysis);
+	},
+	newKindAction: function() {
+		// Insert a new empty enyo kind at the end of the file
+		var newKind = 'enyo.kind({\n	name : "NewEnyoKind",\n	kind : "enyo.Control",\n	components : []\n});';
+		this.$.ace.insertAtEndOfFile(newKind);
 	}
 });
 
