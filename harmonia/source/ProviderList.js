@@ -37,7 +37,6 @@
 	resetAction: function() {
 		this.$.serviceRegistry.resetProfile();
 		this.$.list.getSelection().clear();
-		this.doSelectProvider({service: null});
 		this.listServices();
 	},
 	gotFileServices: function(inSender, inServices) {
