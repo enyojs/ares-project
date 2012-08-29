@@ -82,7 +82,7 @@ Configure the `root` of your local file-system access `ide.json`.
 		},
 	[...]
 
-Start the IDE server:
+Start the IDE server: (e.g., in Windows using the Node.js Command Prompt, navigate to the ares directory and type 'node ide.js')
 
 	% node ide.js
 	[...]
