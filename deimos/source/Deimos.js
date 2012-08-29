@@ -56,6 +56,7 @@ enyo.kind({
 				active: (i==0)
         	});
     	}
+		this.index=null;
 		this.$.kindPicker.render();
 		this.docHasChanged = false;
 	},
