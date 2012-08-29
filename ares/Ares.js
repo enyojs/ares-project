@@ -13,6 +13,7 @@ enyo.kind({
 	openDocument: function(inSender, inEvent) {
 		var f = inEvent.file;
 		this.fileId = f.id;
+		this.fileName = f.name;
 		var ext = f.name.split(".").pop();
 		this.$.phobos.beginOpenDoc();
 		this.$.service.getFile(f.id)
@@ -23,7 +24,7 @@ enyo.kind({
 					// no data? Empty file
 					inData="";
 				}
-				this.$.phobos.openDoc(inData, ext);
+				this.$.phobos.openDoc(this.fileName, inData, ext);
 				this.setIndex(1);
 			})
 			.error(this, function(inEvent, inData) {

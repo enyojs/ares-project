@@ -2,6 +2,13 @@
  *  ARES IDE server
  */
 
+//extract major version
+var version = process.version.match(/[0-9]+.[0-9]+/)[0];
+if (version <= 0.7) {
+	console.error("Ares ide.js is only supported on Node.js version 0.8 and above");
+	process.exit(1);
+}
+
 var fs = require("fs"),
     path = require("path"),
     express = require(path.resolve(__dirname, "hermes/filesystem/node_modules/express")),
