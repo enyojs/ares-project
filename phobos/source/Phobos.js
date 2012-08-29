@@ -6,7 +6,7 @@ enyo.kind({
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
 		{kind: "DragAvatar", components: [
-			{tag: "img", src: "images/icon.png"}
+			{tag: "img", src: "$deimos/images/icon.png"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
@@ -75,6 +75,7 @@ enyo.kind({
 		this.$.ace.setEditingMode(mode);
 		this.adjustPanelsForMode(mode);
 		this.$.ace.setValue(inCode);
+		this.reparseAction();
 		this.docHasChanged=false;
 	},
 	adjustPanelsForMode: function(mode) {
