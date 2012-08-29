@@ -60,10 +60,26 @@ enyo.kind({
 		this.docHasChanged = false;
 	},
 	kindSelected: function(inSender, inEvent) {
+		/* FIXME
+		 * Strange: this function is always called twice for each change
+		 * If we return true, it is called only once 
+		 * but the PickerButton is not rendered correctly.
+		 */
 		var index = inSender.getSelected().index;
 		var kind = this.kinds[index];
-		this.$.inspector.inspect(null);
-		this.$.designer.load(kind.components);
+		
+		if (index != this.index) {
+			
+			if (this.index !== null && this.docHasChanged === true) {
+				var modified = this.$.designer.getComponents();
+				this.kinds[this.index].components = modified;
+				this.kinds[this.index].content = this.$.designer.serialize();
+			}
+			
+			this.$.inspector.inspect(null);
+			this.$.designer.load(kind.components);
+		}
+
 		this.index=index;
 		this.$.toolbar.reflow();
 	},
@@ -120,7 +136,16 @@ enyo.kind({
 		}
 	},
 	closeDesignerAction: function(inSender, inEvent) {
-		this.bubble("onCloseDesigner", {docHasChanged: this.docHasChanged, index: this.index, content: this.$.designer.serialize()});
+		// Get the last modifications
+		this.kinds[this.index].content = this.$.designer.serialize();
+		
+		// Prepare the data for the code editor
+		var event = {docHasChanged: this.docHasChanged, contents: []};
+		for(var i = 0 ; i < this.kinds.length ; i++ ) {
+			event.contents[i] = this.kinds[i].content;
+		}
+
+		this.bubble("onCloseDesigner", event);
 	}
 });
 

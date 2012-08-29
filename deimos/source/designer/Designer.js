@@ -31,6 +31,9 @@ enyo.kind({
 	serialize: function() {
 		return this.$.serializer.serialize(this.$.client, this.$.model);
 	},
+	getComponents: function() {
+		return this.$.serializer.getComponents(this.$.client, this.$.model);
+	},
 	previewDomEvent: function(e) {
 		if (e.type == "down" && (e.dispatchTarget != this.$.outline) && e.dispatchTarget.isDescendantOf(this.$.client)) {
 			this.trySelect(e.dispatchTarget instanceof enyo.Control ? e.dispatchTarget : null);

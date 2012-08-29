@@ -6,6 +6,10 @@ enyo.kind({
 		var s = this._serialize(inContainer, inOwner);
 		return enyo.json.codify.to(s, null, 4);
 	},
+	//* public
+	getComponents: function(inContainer, inOwner) {
+		return this._serialize(inContainer, inOwner);
+	},
 	//* protected
 	_serialize: function(inContainer, inOwner) {
 		var s = [];
