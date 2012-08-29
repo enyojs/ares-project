@@ -237,15 +237,17 @@ enyo.kind({
 	},
 	// called when designer has modified the components
 	updateComponents: function(inSender, inEvent) {
-		var c = this.$.ace.getValue();
-		var i = inEvent.index;
-		var comp = this.analysis.objects[i].components;
-		var start = this.analysis.objects[i].componentsBlockStart;
-		var end = this.analysis.objects[i].componentsBlockEnd;
-		var pre = c.substring(0, start);
-		var post = c.substring(end);
-		var code = pre + inEvent.content + post;
-		this.$.ace.setValue(code);
+		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
+			if (inEvent.contents[i]) {
+				var c = this.$.ace.getValue();
+				var start = this.analysis.objects[i].componentsBlockStart;
+				var end = this.analysis.objects[i].componentsBlockEnd;
+				var pre = c.substring(0, start);
+				var post = c.substring(end);
+				var code = pre + inEvent.contents[i] + post;
+				this.$.ace.setValue(code);
+			}
+		}
 		this.reparseAction();
 		this.docHasChanged = true;
 	},
