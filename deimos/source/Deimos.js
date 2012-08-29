@@ -6,7 +6,7 @@ enyo.kind({
 			{tag: "img", src: "$deimos/images/icon.png", style: "width: 24px; height: 24px;"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
-			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 0 10px;", name: "toolbar", components: [
+			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 0 10px;", components: [
 				{name: "docLabel", content: "Deimos"},
 				{kind: "onyx.PickerDecorator", components: [
 				    {name: "kindButton", kind: "onyx.PickerButton"}, //this uses the defaultKind property of PickerDecorator to inherit from PickerButton
@@ -65,7 +65,6 @@ enyo.kind({
 		this.$.inspector.inspect(null);
 		this.$.designer.load(kind.components);
 		this.index=index;
-		this.$.toolbar.reflow();
 	},
 	// called after updating model
 	serializeAction: function() {
