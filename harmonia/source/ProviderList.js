@@ -2,6 +2,8 @@ enyo.kind({
 	name: "ProviderList",
 	kind: "FittableRows",
 	published: {
+		// use 0 to pre-select the first storage provider of
+		// the list... or get an expection at first load.
 		selected: -1
 	},
 	events: {
@@ -36,7 +38,7 @@ enyo.kind({
 	},
 	//* @private
 	_handleServicesChange: function(inSender, inServices) {
-		this.log("RX: services='"+JSON.stringify(inServices)+"'");
+		//this.log("RX: services='"+JSON.stringify(inServices)+"'");
 		this.providers = inServices || [];
 		this.$.list.count = this.providers.length;
 		this.$.list.render();
