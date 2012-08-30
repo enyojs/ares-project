@@ -13,7 +13,7 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Close", ontap: "closeDocAction"},
 				{name: "documentLabel", content: "Document"},
 				{kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
-				{kind: "onyx.Button", content: "New kind", ontap: "newKindAction"},
+				{name: "newKindButton", kind: "onyx.Button", showing: "false", content: "New kind", ontap: "newKindAction"},
 				{fit: true},
 				{kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
@@ -81,17 +81,18 @@ enyo.kind({
 	},
 	adjustPanelsForMode: function(mode) {
 		var modes = {
-			json:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0},
-			javascript:	{leftShowing: false, rightShowing: true,  leftIndex: 1, rightIndex: 1},
-			html:		{leftShowing: false, rightShowing: false, leftIndex: 2, rightIndex: 2},
-			css:		{leftShowing: false, rightShowing: true,  leftIndex: 3, rightIndex: 3},
-			text:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0}
+			json:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: false },
+			javascript:	{leftShowing: false, rightShowing: true,  leftIndex: 1, rightIndex: 1, newKindButton: true},
+			html:		{leftShowing: false, rightShowing: false, leftIndex: 2, rightIndex: 2, newKindButton: true},
+			css:		{leftShowing: false, rightShowing: true,  leftIndex: 3, rightIndex: 3, newKindButton: false },
+			text:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: true}
 		};
 		var settings = modes[mode]||modes['text'];
 		this.$.left.setIndex(settings.leftIndex);
 		this.$.left.setShowing(settings.leftShowing);
 		this.$.right.setIndex(settings.rightIndex);
 		this.$.right.setShowing(settings.rightShowing);
+		this.$.newKindButton.setShowing(settings.newKindButton);
 	},
 	showWaitPopup: function(inMessage) {
 		this.$.waitPopupMessage.setContent(inMessage);
