@@ -19,7 +19,7 @@ The Ares project architecture is divided into several main pieces:
 Here are the main features you can start looking at today:
 
 * De-centralized file storage
-	* Ares currently connects toto a "filesystem" component, to edit local files
+	* Ares currently connects to a "filesystem" component, to edit local files
 	* We plan to add Hermes components for things Dropbox (implemented but not tested), FTP and Box.net in the future
 	* Key goals with this approach are to avoid forcing users to store files and/or credentials on Ares servers and allow freedom to choose the preferred storage location, whether cloud or local.
 * Code editor
@@ -82,7 +82,7 @@ Configure the `root` of your local file-system access `ide.json`.
 		},
 	[...]
 
-Start the IDE server:
+Start the IDE server: (e.g., in Windows using the Node.js Command Prompt, navigate to the ares directory and type 'node ide.js')
 
 	% node ide.js
 	[...]

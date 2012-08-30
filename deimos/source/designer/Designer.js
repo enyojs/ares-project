@@ -10,8 +10,8 @@ enyo.kind({
 		{name: "selectionOutline", kind: "DesignerOutline", style: "border: 5px dotted rgba(255, 146, 38, 0.7);"},
 		{name: "containerOutline", kind: "DesignerOutline", style: "border: 5px solid rgba(24, 24, 255, 0.3);"},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
-			{kind: "Button", content: "Undo"},
-			{kind: "Button", content: "Redo"},
+			//{kind: "Button", content: "Undo"},
+			//{kind: "Button", content: "Redo"},
 			{kind: "Button", content: "Up", ontap: "upAction"},
 			{kind: "Button", content: "Down", ontap: "downAction"},
 			{kind: "Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
@@ -30,6 +30,9 @@ enyo.kind({
 	},
 	serialize: function() {
 		return this.$.serializer.serialize(this.$.client, this.$.model);
+	},
+	getComponents: function() {
+		return this.$.serializer.getComponents(this.$.client, this.$.model);
 	},
 	previewDomEvent: function(e) {
 		if (e.type == "down" && (e.dispatchTarget != this.$.outline) && e.dispatchTarget.isDescendantOf(this.$.client)) {
@@ -131,32 +134,35 @@ enyo.kind({
 	},
 	createComponentAction: function(inProps) {
 		var c = this.getSelectedContainer();
-		if (c) {
-			// The selection objects are moved around in the DOM and the nodes can lose sync with the enyo node
-			// cache. Hiding the selection causes the selection nodes to be normalized, preventing any weirdness
-			// when rendering new Controls.
-			this.hideSelection();
-			//
-			// create the components
-			var b = c.createComponent(inProps, {owner: this.$.model});
-			//
-			// FIXME: hack name insertion
-			if (inProps.content == "$name") {
-				b.setContent(b.name);
-			}
-			// FIXME: hack control insertion
-			var p = this.selection && this.selection.parent;
-			if (p && p == b.parent) {
-				var i = p.children.indexOf(this.selection);
-				if (i >= 0) {
-					this.moveControl(b, i + 1);
-				}
-			}
-			this.$.client.render();
-			//
-			//this.modify();
-			this.select(b);
+		if ( ! c) {
+			// There is no object already created
+			c = this.$.client;
 		}
+		
+		// The selection objects are moved around in the DOM and the nodes can lose sync with the enyo node
+		// cache. Hiding the selection causes the selection nodes to be normalized, preventing any weirdness
+		// when rendering new Controls.
+		this.hideSelection();
+		//
+		// create the components
+		var b = c.createComponent(inProps, {owner: this.$.model});
+		//
+		// FIXME: hack name insertion
+		if (inProps.content == "$name") {
+			b.setContent(b.name);
+		}
+		// FIXME: hack control insertion
+		var p = this.selection && this.selection.parent;
+		if (p && p == b.parent) {
+			var i = p.children.indexOf(this.selection);
+			if (i >= 0) {
+				this.moveControl(b, i + 1);
+			}
+		}
+		this.$.client.render();
+		//
+		//this.modify();
+		this.select(b);
 	},
 	moveControl: function(inControl, inIndex) {
 		var move = function(inControl, inIndex, inList) {

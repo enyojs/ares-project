@@ -6,13 +6,14 @@ enyo.kind({
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
 		{kind: "DragAvatar", components: [
-			{tag: "img", src: "images/icon.png"}
+			{tag: "img", src: "$deimos/images/icon.png"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
 				{kind: "onyx.Button", content: "Close", ontap: "closeDocAction"},
 				{name: "documentLabel", content: "Document"},
 				{kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
+				{kind: "onyx.Button", content: "New kind", ontap: "newKindAction"},
 				{fit: true},
 				{kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
@@ -67,14 +68,16 @@ enyo.kind({
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
 	},
-	openDoc: function(inCode, inExt) {
+	openDoc: function(inFile, inCode, inExt) {
 		this.hideWaitPopup();
 		this.analysis = null;
 		var mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
 		this.$.ace.setEditingMode(mode);
 		this.adjustPanelsForMode(mode);
 		this.$.ace.setValue(inCode);
+		this.reparseAction();
 		this.docHasChanged=false;
+		this.$.documentLabel.setContent(inFile);
 	},
 	adjustPanelsForMode: function(mode) {
 		var modes = {
@@ -235,15 +238,17 @@ enyo.kind({
 	},
 	// called when designer has modified the components
 	updateComponents: function(inSender, inEvent) {
-		var c = this.$.ace.getValue();
-		var i = inEvent.index;
-		var comp = this.analysis.objects[i].components;
-		var start = this.analysis.objects[i].componentsBlockStart;
-		var end = this.analysis.objects[i].componentsBlockEnd;
-		var pre = c.substring(0, start);
-		var post = c.substring(end);
-		var code = pre + inEvent.content + post;
-		this.$.ace.setValue(code);
+		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
+			if (inEvent.contents[i]) {
+				var c = this.$.ace.getValue();
+				var start = this.analysis.objects[i].componentsBlockStart;
+				var end = this.analysis.objects[i].componentsBlockEnd;
+				var pre = c.substring(0, start);
+				var post = c.substring(end);
+				var code = pre + inEvent.contents[i] + post;
+				this.$.ace.setValue(code);
+			}
+		}
 		this.reparseAction();
 		this.docHasChanged = true;
 	},
@@ -295,6 +300,11 @@ enyo.kind({
 	},
 	startAutoCompletion: function() {
 		this.$.autocomplete.start(null, this.analysis);
+	},
+	newKindAction: function() {
+		// Insert a new empty enyo kind at the end of the file
+		var newKind = 'enyo.kind({\n	name : "NewEnyoKind",\n	kind : "enyo.Control",\n	components : []\n});';
+		this.$.ace.insertAtEndOfFile(newKind);
 	}
 });
 

@@ -3,10 +3,10 @@ enyo.kind({
 	classes: "enyo-unselectable",
 	components: [
 		{kind: "DragAvatar", components: [ 
-			{tag: "img", src: "images/icon.png", style: "width: 24px; height: 24px;"}
+			{tag: "img", src: "$deimos/images/icon.png", style: "width: 24px; height: 24px;"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
-			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 0 10px;", components: [
+			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 0 10px;", name: "toolbar", components: [
 				{name: "docLabel", content: "Deimos"},
 				{kind: "onyx.PickerDecorator", components: [
 				    {name: "kindButton", kind: "onyx.PickerButton"}, //this uses the defaultKind property of PickerDecorator to inherit from PickerButton
@@ -20,7 +20,7 @@ enyo.kind({
 				{name: "left", kind: "Palette", ondragstart: "dragStart"},
 				{name: "middle", fit: true, kind: "FittableRows",components: [
 					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart"},
-					{name: "code", classes: "deimos_panel", components: [
+					{name: "code", classes: "deimos_panel", showing: false, components: [
 						{kind: "Scroller", classes: "enyo-selectable", components: [
 							{name: "codeText", tag: "pre", style: "white-space: pre; font-size: smaller; border: none; margin: 0;"}
 						]}
@@ -56,15 +56,33 @@ enyo.kind({
 				active: (i==0)
         	});
     	}
+		this.index=null;
 		this.$.kindPicker.render();
 		this.docHasChanged = false;
 	},
 	kindSelected: function(inSender, inEvent) {
+		/* FIXME
+		 * Strange: this function is always called twice for each change
+		 * If we return true, it is called only once 
+		 * but the PickerButton is not rendered correctly.
+		 */
 		var index = inSender.getSelected().index;
 		var kind = this.kinds[index];
-		this.$.inspector.inspect(null);
-		this.$.designer.load(kind.components);
+		
+		if (index != this.index) {
+			
+			if (this.index !== null && this.docHasChanged === true) {
+				var modified = this.$.designer.getComponents();
+				this.kinds[this.index].components = modified;
+				this.kinds[this.index].content = this.$.designer.serialize();
+			}
+			
+			this.$.inspector.inspect(null);
+			this.$.designer.load(kind.components);
+		}
+
 		this.index=index;
+		this.$.toolbar.reflow();
 	},
 	// called after updating model
 	serializeAction: function() {
@@ -119,7 +137,16 @@ enyo.kind({
 		}
 	},
 	closeDesignerAction: function(inSender, inEvent) {
-		this.bubble("onCloseDesigner", {docHasChanged: this.docHasChanged, index: this.index, content: this.$.designer.serialize()});
+		// Get the last modifications
+		this.kinds[this.index].content = this.$.designer.serialize();
+		
+		// Prepare the data for the code editor
+		var event = {docHasChanged: this.docHasChanged, contents: []};
+		for(var i = 0 ; i < this.kinds.length ; i++ ) {
+			event.contents[i] = this.kinds[i].content;
+		}
+
+		this.bubble("onCloseDesigner", event);
 	}
 });
 
