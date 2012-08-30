@@ -67,6 +67,12 @@ enyo.kind({
 				inProps[p] = inComponent[p];
 			}
 		}
+		// this catches any event handlers added that aren't in the "events" list (e.g. DOM events)
+		for (p in inComponent) {
+			if (inComponent.hasOwnProperty(p) && p.substring(0,2) == "on") {
+				inProps[p] = inComponent[p];
+			}
+		}
 		return inProps;
 	},
 	buildPropList: function(inControl, inSource) {
