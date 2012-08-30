@@ -5,32 +5,26 @@ enyo.kind({
 		{kind: "Analyzer", onIndexReady: "indexReady"},
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
-		{kind: "DragAvatar", components: [ 
-			{tag: "img", src: "images/icon.png"}
+		{kind: "DragAvatar", components: [
+			{tag: "img", src: "$deimos/images/icon.png"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
 				{kind: "onyx.Button", content: "Close", ontap: "closeDocAction"},
 				{name: "documentLabel", content: "Document"},
 				{kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
+				{kind: "onyx.Button", content: "New kind", ontap: "newKindAction"},
 				{fit: true},
 				{kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
-				{name: "left", classes: "panel", showing: false, components: [
-				]},
+				{name: "left", kind: "leftPanels", showing: false,	arrangerKind: "CardArranger"},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
 						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion"}
 					]}
 				]},
-				{name: "right", classes: "panel", components: [
-					// neccesary nesting here for 'margin: 8px;"
-					{kind: "enyo.Scroller", classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
-						{name: "dump", style: "padding: 10px;", allowHtml: true}
-					]}
-				]}
+				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"}
 			]}
 		]},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
@@ -41,11 +35,12 @@ enyo.kind({
 			{name: "message", content: "Document was modified! Save it before closing?", style: "padding: 10px;"},
 			{kind: "FittableColumns", components: [
 				{kind: "onyx.Button", content: "Cancel", ontap: "cancelCloseAction"},
-				{kind: "onyx.Button", content: "Don't Save", ontap: "abandonDocAction"},
+				{kind: "onyx.Button", content: "Don't Save", ontap: "abandonDocAction"}
 			]}
 		]},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"}
 	],
+
 	handlers: {
 	},
 	docHasChanged: false,
@@ -55,7 +50,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.buildDb();
-		
+
 		// Pass to the autocomplete compononent a reference to ace
 		this.$.autocomplete.setAce(this.$.ace);
 	},
@@ -73,14 +68,30 @@ enyo.kind({
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
 	},
-	openDoc: function(inCode, inExt) {
+	openDoc: function(inFile, inCode, inExt) {
 		this.hideWaitPopup();
 		this.analysis = null;
 		var mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
 		this.$.ace.setEditingMode(mode);
+		this.adjustPanelsForMode(mode);
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
 		this.docHasChanged=false;
+		this.$.documentLabel.setContent(inFile);
+	},
+	adjustPanelsForMode: function(mode) {
+		var modes = {
+			json:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0},
+			javascript:	{leftShowing: false, rightShowing: true,  leftIndex: 1, rightIndex: 1},
+			html:		{leftShowing: false, rightShowing: false, leftIndex: 2, rightIndex: 2},
+			css:		{leftShowing: false, rightShowing: true,  leftIndex: 3, rightIndex: 3},
+			text:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0}
+		};
+		var settings = modes[mode]||modes['text'];
+		this.$.left.setIndex(settings.leftIndex);
+		this.$.left.setShowing(settings.leftShowing);
+		this.$.right.setIndex(settings.rightIndex);
+		this.$.right.setShowing(settings.rightShowing);
 	},
 	showWaitPopup: function(inMessage) {
 		this.$.waitPopupMessage.setContent(inMessage);
@@ -106,7 +117,8 @@ enyo.kind({
 	dumpInfo: function(inObject) {
 		var c = inObject;
 		if (!c || !c.superkinds) {
-			this.$.dump.setContent("(no info)");
+		console.log(this.$.right.$.dump);
+			this.$.right.$.dump.setContent("(no info)");
 			return;
 		}
 		//
@@ -138,7 +150,7 @@ enyo.kind({
 		}
 		h$ += "<h4>All Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
-		this.$.dump.setContent(h$);
+		this.$.right.$.dump.setContent(h$);
 	},
 	reparseAction: function() {
 		var module = {
@@ -149,7 +161,7 @@ enyo.kind({
 			this.analysis = module;
 			this.$.analyzer.index.indexModule(module);
 			this.updateObjectsLines(module);
-			
+
 			// dump the object where the cursor is positioned, if it exists
 			this.dumpInfo(module.objects && module.objects[module.currentObject]);
 		} catch(error) {
@@ -172,12 +184,12 @@ enyo.kind({
 				tempo.ranges.push(range);	// Push a range for previous object
 				start = tempo.objects[idx].line;
 			}
-			
+
 			// Push a range for the last object
 			range = { first: start, last: 1000000000};
 			tempo.ranges.push(range);
 		}
-		
+
 		var position = this.$.ace.getCursorPositionInDocument();
 		tempo.currentObject = this.findCurrentEditedObject(position);
 		tempo.currentRange = tempo.ranges[tempo.currentObject];
@@ -210,10 +222,11 @@ enyo.kind({
 				var name = o.name;
 				var kind = o.superkind;
 				if (comps) { // only include kinds with components block
-					var start = comps[0].start;
-					var end = comps[comps.length - 1].end;
-					var js = eval("(["+c.substring(start, end)+"])");
-					kinds.push({name: name, kind: kind, components: js});
+					var start = o.componentsBlockStart;
+					var end = o.componentsBlockEnd;
+					var js = c.substring(start, end);
+					var o = eval("(" + js + ")"); // Why eval? Because JSON.parse doesn't support unquoted keys...
+					kinds.push({name: name, kind: kind, components: o});
 				}
 			}
 			if (kinds.length > 0) {
@@ -225,20 +238,17 @@ enyo.kind({
 	},
 	// called when designer has modified the components
 	updateComponents: function(inSender, inEvent) {
-		var c = this.$.ace.getValue();
-		var i = inEvent.index;
-		var comp = this.analysis.objects[i].components;
-		//TODO: Indexer doesn't quite capture the right locations for Components start and end...
-		// Indexer returns the start of the first component block, and we really want the location of the opening "["
-		// similarly for the end. Or, need to change serializer to not return the [], which might be easier, and less disruptive to people's formatting.
-		var start = comp[0].start;
-		var end = comp[comp.length-1].end;
-		var pre = c.substring(0, start);
-		pre = pre.substring(0, pre.lastIndexOf("["))
-		var post = c.substring(end);
-		post = post.substring(post.indexOf("]")+1);
-		var code = pre + inEvent.content + post;
-		this.$.ace.setValue(code);
+		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
+			if (inEvent.contents[i]) {
+				var c = this.$.ace.getValue();
+				var start = this.analysis.objects[i].componentsBlockStart;
+				var end = this.analysis.objects[i].componentsBlockEnd;
+				var pre = c.substring(0, start);
+				var post = c.substring(end);
+				var code = pre + inEvent.contents[i] + post;
+				this.$.ace.setValue(code);
+			}
+		}
 		this.reparseAction();
 		this.docHasChanged = true;
 	},
@@ -260,7 +270,7 @@ enyo.kind({
 	},
 	docChanged: function(inSender, inEvent) {
 		this.docHasChanged=true;
-		
+
 		if (this.debug) enyo.log("phobos.docChanged: " + JSON.stringify(inEvent.data));
 
 		if (this.analysis) {
@@ -272,17 +282,17 @@ enyo.kind({
 	cursorChanged: function(inSender, inEvent) {
 		var position = this.$.ace.getCursorPositionInDocument();
 		if (this.debug) enyo.log("phobos.cursorChanged: " + inSender.id + " " + inEvent.type + " " + JSON.stringify(position));
-		
+
 		// Check if we moved to another enyo kind and display it in the right pane
 		var tempo = this.analysis;
-		if (tempo && tempo.currentLine != undefined && tempo.currentLine != position.row) {	// If no more on the same line			
+		if (tempo && tempo.currentLine !== undefined && tempo.currentLine != position.row) {	// If no more on the same line
 			tempo.currentLine = position.row;
-			
+
 			// Check if the cursor references another object
-			if (tempo.currentRange != undefined && (position.row < tempo.currentRange.first || position.row > tempo.currentRange.last)) {
+			if (tempo.currentRange !== undefined && (position.row < tempo.currentRange.first || position.row > tempo.currentRange.last)) {
 				tempo.currentObject = this.findCurrentEditedObject(position);
 				tempo.currentRange = tempo.ranges[tempo.currentObject];
-				
+
 				this.dumpInfo(tempo.objects && tempo.objects[tempo.currentObject]);
 			}
 		}
@@ -290,6 +300,11 @@ enyo.kind({
 	},
 	startAutoCompletion: function() {
 		this.$.autocomplete.start(null, this.analysis);
+	},
+	newKindAction: function() {
+		// Insert a new empty enyo kind at the end of the file
+		var newKind = 'enyo.kind({\n	name : "NewEnyoKind",\n	kind : "enyo.Control",\n	components : []\n});';
+		this.$.ace.insertAtEndOfFile(newKind);
 	}
 });
 
@@ -333,15 +348,15 @@ enyo.kind({
 		this.inherited(arguments);
 	},
 	start: function(inEvent, inAnalysis) {
-		
+
 		if (inAnalysis.objects && inAnalysis.objects.length > 0) {
 			var go = false;
 			if (inEvent) {
 				/*
 				 * Check to see if we need to show-up the auto-complete popup
-				 * 
+				 *
 				 * NOTE: currently only done on "this.$."
-				 * 
+				 *
 				 * When a '.' is entered, we check is it's the last character
 				 * of a "this.$." string.
 				 * If yes, we show a popup listing the components available
@@ -354,7 +369,7 @@ enyo.kind({
 						var line = this.ace.getLine(data.range.end.row);
 						var end = data.range.end.column;
 						last = line.substr(end - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
-						
+
 						if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
 							this.position = data.range.end;
 							go = true;
@@ -366,7 +381,7 @@ enyo.kind({
 				var position = this.ace.getCursorPositionInDocument();
 				var line = this.ace.getLine(position.row);
 				last = line.substr(position.column - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
-				
+
 				if (last == this.AUTOCOMP_THIS_DOLLAR) { // Check if it's part of a 'this.$." string
 					this.position = position;
 					go = true;
@@ -400,12 +415,12 @@ enyo.kind({
 			select.setAttribute("size", size);
 			select.setSelected(0);
 			select.render();
-			
+
 			// Compute the position of the popup
 			var ace = this.ace;
-			var pos = ace.editor.renderer.textToScreenCoordinates(this.position.row, this.position.column);			
+			var pos = ace.editor.renderer.textToScreenCoordinates(this.position.row, this.position.column);
 			pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
-	
+
 			// Position the autocomplete popup
 			this.applyStyle("top", pos.pageY + "px");
 			this.applyStyle("left", pos.pageX + "px");
@@ -448,7 +463,7 @@ enyo.kind({
 	},
 	keyDown: function(inSender, inEvent) {
 		if (this.debug) enyo.log("Got a keydown ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
-		
+
 		var key = inEvent.keyIdentifier;
 		if (key === "Up") {
 			var select = this.$.autocompleteSelect;
@@ -464,7 +479,7 @@ enyo.kind({
 	},
 	keyUp: function(inSender, inEvent) {
 		if (this.debug) enyo.log("Got a keyup ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
-		
+
 		var key = inEvent.keyIdentifier;
 		if (key === "Enter") {
 			this.autocompleteChanged();
@@ -483,9 +498,41 @@ enyo.kind({
 				}
 			}// else - Don't care
 		}
-		
+
 	    this.ace.blur();		// Needed to force ACE to ignore keystrokes after the popup is opened
-		
+
 	    return true; // Stop the propagation of the event
 	}
+});
+
+enyo.kind({name: "rightPanels",kind: "Panels", wrap: false,
+	components: [
+		{// right panel for JSON goes here
+		},
+		{kind: "enyo.Control", classes: "enyo-fit", components: [
+			{name: "right", classes: "border panel enyo-fit", style: "margin: 8px;", components: [
+				{kind: "enyo.Scroller", classes: "panel enyo-fit",components: [
+					{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
+					{name: "dump", allowHtml: true}
+				]}
+			]}
+		]},
+		{// right panel for HTML goes here
+		},
+		{kind: "enyo.Control", classes: "enyo-fit",	components: [ // right panel for CSS here
+			{kind: "cssBuilder", classes: "border panel enyo-fit",style: "margin: 8px;"}
+		]}
+	]
+});
+enyo.kind({name: "leftPanels",kind: "Panels", wrap: false,
+	components: [
+		{// left panel for JSON goes here
+		},
+		{// left panel for javascript goes here
+		},
+		{// left panel for HTML goes here
+		},
+		{ // left panel for CSS goes here
+		}
+	]
 });

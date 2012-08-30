@@ -1,7 +1,5 @@
 ## Ares 2 Overview
 
-Updated: 2012-08-17
-
 Ares 2 is a browser-based code editor and UI designer for developing Enyo 2 applications.  Although Ares is still a work in progress, we have reached the point where we are opening the repo and will do further development in the open, so we encourage you to follow our progress and give us feedback as we push Ares forward.
 
 ### Basic architecture
@@ -19,7 +17,7 @@ The Ares project architecture is divided into several main pieces:
 Here are the main features you can start looking at today:
 
 * De-centralized file storage
-	* Ares currently connects toto a "filesystem" component, to edit local files
+	* Ares currently connects to a "filesystem" component, to edit local files
 	* We plan to add Hermes components for things Dropbox (implemented but not tested), FTP and Box.net in the future
 	* Key goals with this approach are to avoid forcing users to store files and/or credentials on Ares servers and allow freedom to choose the preferred storage location, whether cloud or local.
 * Code editor
@@ -82,19 +80,21 @@ Configure the `root` of your local file-system access `ide.json`.
 		},
 	[...]
 
-Start the IDE server **OSX & Linux**:
+Start the IDE server: (e.g. using the Command Prompt, navigate to the ares directory and type 'node ide.js')
 
-	% /path/to/ares-server
+On OSX:
+
 	% node ide.js
+
+Then wait for the following message in the console:
+
 	[...]
 	ARES IDE is now running at <http://127.0.0.1:9009/ide/ares/index.html> Press CTRL + C to shutdown
 	[...]
 
-**Windows**:
+Connect to the IDE using Google Chrome or Chromium (other browserds are not that well tested so far).  The default URL is [http://127.0.0.1:9009/ide/ares/index.html](http://127.0.0.1:9009/ide/ares/index.html)
 
-	C:\Users\snowfix\GIT\enyojs\ares-project>"C:\Program Files\nodejs\node.exe" ide.js
-
-Connect to the IDE using Google Chrome or Chromium.  The default URL is [http://127.0.0.1:9009/ide/ares/index.html](http://127.0.0.1:9009/ide/ares/index.html)
+On OSX:
 
 	% open -a "Chromium" http://127.0.0.1:9009/ide/ares/index.html
 

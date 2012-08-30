@@ -6,6 +6,10 @@ enyo.kind({
 		var s = this._serialize(inContainer, inOwner);
 		return enyo.json.codify.to(s, null, 4);
 	},
+	//* public
+	getComponents: function(inContainer, inOwner) {
+		return this._serialize(inContainer, inOwner);
+	},
 	//* protected
 	_serialize: function(inContainer, inOwner) {
 		var s = [];
@@ -60,6 +64,12 @@ enyo.kind({
 		var proto = inComponent.ctor.prototype;
 		for (var j=0, p; p=ps[j]; j++) {
 			if (!this.noserialize[p] && proto[p] != inComponent[p]) {
+				inProps[p] = inComponent[p];
+			}
+		}
+		// this catches any event handlers added that aren't in the "events" list (e.g. DOM events)
+		for (p in inComponent) {
+			if (inComponent.hasOwnProperty(p) && p.substring(0,2) == "on") {
 				inProps[p] = inComponent[p];
 			}
 		}
