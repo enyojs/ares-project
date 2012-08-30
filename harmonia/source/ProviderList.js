@@ -1,4 +1,4 @@
-﻿enyo.kind({
+enyo.kind({
 	name: "ProviderList",
 	kind: "FittableRows",
 	published: {
@@ -25,7 +25,7 @@
 			]}
 		]},
 		//{kind: "ProviderConfigPopup", onSave: "saveProvider"},
-		{kind: "ServiceRegistry", onServicesReceived: "gotFileServices", onServicesChange: "gotFileServices"}
+		{kind: "ServiceRegistry", onServicesChange: "_handleServicesChange"}
 	],
 	create: function() {
 		this.inherited(arguments);
@@ -35,14 +35,17 @@
 		this.$.serviceRegistry.listServices("file");
 	},
 	resetAction: function() {
-		this.$.serviceRegistry.resetProfile();
+		this.$.serviceRegistry.reloadServices();
 		this.$.list.getSelection().clear();
-		this.listServices();
 	},
-	gotFileServices: function(inSender, inServices) {
+	//* @private
+	_handleServicesChange: function(inSender, inServices) {
+		this.log("RX: services='"+JSON.stringify(inServices)+"'");
 		this.providers = inServices || [];
 		this.$.list.count = this.providers.length;
 		this.$.list.render();
+		// re-select the line that was selected before service changed
+		this.doSelectProvider({service: this.providers[this.selected]});
 	},
 	/*
 	providerChanged: function(inOld) {
@@ -70,7 +73,7 @@
 	},
 	rowSelected: function(inSender, inEvent) {
 		this.selected = inEvent.key;
-		var p = this.providers[inEvent.key];
+		var p = this.providers[this.selected];
 		if (p) {
 			if (p.type == "dropbox" && !p.auth) {
 				this.authorize(p);

@@ -6,7 +6,7 @@ enyo.kind({
 		{kind: "HermesFileTree", fit: true, onFileClick: "selectFile", onFolderClick: "selectFolder"}
 	],
 	selectProvider: function(inSender, inInfo) {
-		//this.log(inInfo.service.auth);
+		this.log("service='"+JSON.stringify(inInfo.service)+"'");
 		// super hack
 		var auth = inInfo.service ? inInfo.service.auth : null;
 		var url = inInfo.service ? inInfo.service.url : null;

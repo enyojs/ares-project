@@ -136,44 +136,45 @@ _.extend(true, HermesFilesystem.prototype, {
 		})
 	}
 , _list: function(inRoot, inPath, next) {
-		var fsPath = path.resolve(inRoot, inPath)
+		var fsPath = path.resolve(inRoot, inPath);
 
-		inPath = _.rtrim(inPath, dl)
+		inPath = _.rtrim(inPath, dl);
 		
-		console.log('HermesFilesystem, _list', fsPath)
+		console.log('HermesFilesystem, _list', fsPath);
+	
 		fs.readdir(fsPath, function(err, files) {
-			if (err) return next(err)
-
+			if (err) return next(err);
+			
 			if (!files.length) {
-				return next(null, {contents:[]})
+				return next(null, {contents:[]});
 			}
-
+			
 			var count = files.length,
-				entries = []
+			    entries = [];
 			
 			files.forEach(function(name) {
 				fs.stat(path.join(fsPath, name), function(err, stats) {
-					if (err) return next(err)
-
+					if (err) return next(err);
+					
 					if (name.charAt(0) !==".") {
 						var l = entries.push({
 							id: inPath + '/' + name,
 							path: inPath + '/' + name,
 							name: name,
 							isDir: stats.isDirectory()
-						})
+						});
 					}
 					if (--count === 0) {
 						var ret = {
 							contents: entries
-						}
+						};
 						
-						console.log('HermesFilesystem, _list results', ret)
-						next(null, ret)
+						console.log('HermesFilesystem, _list results', ret);
+						next(null, ret);
 					}
-				})
-			})
-		})
+				});
+			});
+		});
 	}
 , verbs: {
 		get: function(req, res, next) {

@@ -49,7 +49,7 @@ if (!ide.conf.services || !ide.conf.services[0]) {
 }
 
 // configuration age/date is the UTC configuration file last modification date
-ide.conf.mtime = configStats.mtime.getTime();
+ide.conf.timestamp = configStats.atime.getTime();
 console.log("conf="+JSON.stringify(ide.conf));
 
 // live resources inherit (prototypal) from configuration
@@ -111,20 +111,20 @@ app.configure(function(){
 	app.get('/conf', function(req, res) {
 		res.status(200).json(ide.conf);
 	});
-	app.get('/res/services', function(req, res) {
-		res.status(200).json(ide.res.services);
-	});
-	app.get('/res/services/:service_id', function(req, res) {
-		var service_id = req.params.service_id;
-		var service = null;
-		for (var i = 0; i < ide.res.services.length; i++) {
-			if (ide.res.services[i].id === service_id) {
-				service = ide.res.services[i];
-				break;
-			}
-		}
-		res.status(200).json(service);
-	});
+	// app.get('/res/services', function(req, res) {
+	// 	res.status(200).json(ide.res.services);
+	// });
+	// app.get('/res/services/:service_id', function(req, res) {
+	// 	var service_id = req.params.service_id;
+	// 	var service = null;
+	// 	for (var i = 0; i < ide.res.services.length; i++) {
+	// 		if (ide.res.services[i].id === service_id) {
+	// 			service = ide.res.services[i];
+	// 			break;
+	// 		}
+	// 	}
+	// 	res.status(200).json(service);
+	// });
 });
 app.listen(port, addr);
 
