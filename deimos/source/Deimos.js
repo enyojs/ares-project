@@ -19,7 +19,7 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", components: [
 				{name: "left", kind: "Palette", ondragstart: "dragStart"},
 				{name: "middle", fit: true, kind: "FittableRows",components: [
-					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart"},
+					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart", onDesignRendered: "designRendered"},
 					{name: "code", classes: "deimos_panel", showing: false, components: [
 						{kind: "Scroller", classes: "enyo-selectable", components: [
 							{name: "codeText", tag: "pre", style: "white-space: pre; font-size: smaller; border: none; margin: 0;"}
@@ -147,6 +147,9 @@ enyo.kind({
 		}
 
 		this.bubble("onCloseDesigner", event);
+	},
+	designRendered: function() {
+		this.refreshComponentView();
 	}
 });
 
