@@ -8,14 +8,9 @@ enyo.kind({
 		onSelectProvider: ""
 	},
 	components: [
-		{kind: "onyx.Toolbar", XdefaultKind: "onyx.IconButton", components: [
-			{content: "Services"},
-			//{content: "Open", onclick: "openClick"},
-			{kind: "onyx.Button", content: "Reset", Xsrc: "$harmonia/images/server_into.png", hint: "Reset", ontap: "resetAction"}
-			//{content: "New", src: "$harmonia/images/server_add.png", hint: "New...", ontap: "newAction"}
-			//{Xcontent: "Edit", src: "$harmonia/images/server_preferences.png", hint: "Edit...", onclick: "editClick"},
-			//{Xcontent: "Duplicate", src: "$harmonia/images/server_preferences.png", hint: "Duplicate Selected Provider...", onclick: "duplicateClick"},
-			//{Xcontent: "Delete", src: "$harmonia/images/server_delete.png", hint: "Delete", onclick: "deleteClick"}
+		{kind: "onyx.Toolbar", components: [
+			{content: "Storage Services"}
+			//{kind: "onyx.Button", content: "Reset", Xsrc: "$harmonia/images/server_into.png", hint: "Reset", ontap: "_handleReset"}
 		]},
 		{fit: true, name: "list", kind: "FlyweightRepeater", toggleSelected: false, onSetupItem: "setupRow", onSelect: "rowSelected", onDeselect: "rowDeselected", components: [
 			{name: "item", classes: "enyo-children-inline", style: "padding: 8px 4px 4px; border-bottom: 1px solid gray;", ontap: "itemTap", ondblclick: "dblClick", /*onConfirm: "removeProvider",*/ components: [
@@ -32,9 +27,10 @@ enyo.kind({
 		this.listServices();
 	},
 	listServices: function() {
-		this.$.serviceRegistry.listServices("file");
+		this.$.serviceRegistry.listServices();
 	},
-	resetAction: function() {
+	//* @private
+	_handleReset: function() {
 		this.$.serviceRegistry.reloadServices();
 		this.$.list.getSelection().clear();
 	},
@@ -47,17 +43,6 @@ enyo.kind({
 		// re-select the line that was selected before service changed
 		this.doSelectProvider({service: this.providers[this.selected]});
 	},
-	/*
-	providerChanged: function(inOld) {
-		for (var i=0, p; p=this.providers[i]; i++) {
-			if (p.id == this.provider) {
-				this.selectByIndex(i);
-				return;
-			}
-		}
-		this.provider = inOld;
-	},
-	*/
 	setupRow: function(inSender, inEvent) {
 		var p = this.providers[inEvent.index];
 		if (p) {
