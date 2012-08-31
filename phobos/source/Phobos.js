@@ -13,12 +13,12 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Close", ontap: "closeDocAction"},
 				{name: "documentLabel", content: "Document"},
 				{kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
-				{name: "newKindButton", kind: "onyx.Button", showing: "false", content: "New kind", ontap: "newKindAction"},
+				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: "New kind", ontap: "newKindAction"},
 				{fit: true},
 				{kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
-				{name: "left", kind: "leftPanels", showing: false,	arrangerKind: "CardArranger"},
+				{name: "left", kind: "leftPanels", showing: false,	arrangerKind: "CardArranger", onCss: "newcssAction"},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
 						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion"}
@@ -42,6 +42,7 @@ enyo.kind({
 	],
 
 	handlers: {
+		onCss: "newcssAction",
 	},
 	docHasChanged: false,
 	debug: false,
@@ -50,6 +51,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.buildDb();
+//this.newcssAction();
 
 		// Pass to the autocomplete compononent a reference to ace
 		this.$.autocomplete.setAce(this.$.ace);
@@ -82,9 +84,9 @@ enyo.kind({
 	adjustPanelsForMode: function(mode) {
 		var modes = {
 			json:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: false },
-			javascript:	{leftShowing: false, rightShowing: true,  leftIndex: 1, rightIndex: 1, newKindButton: true},
+			javascript:	{leftShowing: false, rightShowing: true,  leftIndex: 1, rightIndex: 1, newKindButton: true },
 			html:		{leftShowing: false, rightShowing: false, leftIndex: 2, rightIndex: 2, newKindButton: true},
-			css:		{leftShowing: false, rightShowing: true,  leftIndex: 3, rightIndex: 3, newKindButton: false },
+			css:		{leftShowing: false, rightShowing: true,  leftIndex: 3, rightIndex: 3, newKindButton: false},
 			text:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: true}
 		};
 		var settings = modes[mode]||modes['text'];
@@ -118,7 +120,7 @@ enyo.kind({
 	dumpInfo: function(inObject) {
 		var c = inObject;
 		if (!c || !c.superkinds) {
-		console.log(this.$.right.$.dump);
+		//console.log(this.$.right.$.dump);
 			this.$.right.$.dump.setContent("(no info)");
 			return;
 		}
@@ -306,6 +308,9 @@ enyo.kind({
 		// Insert a new empty enyo kind at the end of the file
 		var newKind = 'enyo.kind({\n	name : "NewEnyoKind",\n	kind : "enyo.Control",\n	components : []\n});';
 		this.$.ace.insertAtEndOfFile(newKind);
+	},
+	newcssAction: function(inSender, inEvent){
+		this.$.ace.insertAtEndOfFile(inEvent.outPut);
 	}
 });
 
@@ -506,14 +511,18 @@ enyo.kind({
 	}
 });
 
-enyo.kind({name: "rightPanels",kind: "Panels", wrap: false,
+enyo.kind({
+	events: {
+		onCss: "",
+	},
+name: "rightPanels",kind: "Panels", wrap: false,
 	components: [
 		{// right panel for JSON goes here
 		},
 		{kind: "enyo.Control", classes: "enyo-fit", components: [
-			{name: "right", classes: "border panel enyo-fit", style: "margin: 8px;", components: [
+			{name: "right", classes: "border panel enyo-fit",style: "margin: 8px;", components: [
 				{kind: "enyo.Scroller", classes: "panel enyo-fit",components: [
-					{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
+					{kind: "onyx.Button", content: "Reparse",  ontap: "reparseAction"},
 					{name: "dump", allowHtml: true}
 				]}
 			]}
@@ -521,9 +530,16 @@ enyo.kind({name: "rightPanels",kind: "Panels", wrap: false,
 		{// right panel for HTML goes here
 		},
 		{kind: "enyo.Control", classes: "enyo-fit",	components: [ // right panel for CSS here
-			{kind: "cssBuilder", classes: "border panel enyo-fit",style: "margin: 8px;"}
+			{kind: "cssBuilder", classes: "border panel enyo-fit",style: "margin: 8px;", onInsert: "test"}
 		]}
-	]
+	],
+
+	create: function() {
+		this.inherited(arguments);
+	},
+	test: function(inEvent) {
+		this.doCss(inEvent);
+	}
 });
 enyo.kind({name: "leftPanels",kind: "Panels", wrap: false,
 	components: [
