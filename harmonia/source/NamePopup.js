@@ -2,10 +2,11 @@ enyo.kind({
 	name: "NamePopup",
 	kind: "onyx.Popup",
 	published: {
-		title: "Name for new",
+		title: "New",
 		type: "",
 		path: "",
-		fileName: ""
+		fileName: "",
+		placeHolder: ""
 	},
 	events: {
 		onConfirm: "",
@@ -18,18 +19,19 @@ enyo.kind({
 		{name: "title", tag: "h3", content: "Name for new object"},
 		{name: "path", tag: "p", content: "Path: "},
 		{kind: "onyx.InputDecorator", components: [
-			{name: "fileName", kind: "onyx.Input", onchange: "nameChanged"}
+			{name: "fileName", kind: "onyx.Input", onchange: "nameChanged", placeholder: ""}
 		]},
 		{tag: "br"},
 		{tag: "br"},
 		{name:"cancelButton", kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "newCancel"},
-		{name:"confirmButton", kind: "onyx.Button", classes: "onyx-affirmative", content: "Create", ontap: "newConfirm"},
+		{name:"confirmButton", kind: "onyx.Button", classes: "onyx-affirmative", content: "Create", ontap: "newConfirm"}
 	],
 	create: function() {
 		this.inherited(arguments);
 		this.typeChanged();
 		this.pathChanged();
 		this.fileNameChanged();
+		this.placeHolderChanged();
 	},
 	typeChanged: function() {
 		this.$.title.setContent(this.title+" "+this.type);
@@ -54,5 +56,8 @@ enyo.kind({
 	},
 	fileNameChanged: function() {
 		this.$.fileName.setValue(this.fileName);
+	},
+	placeHolderChanged: function(inSender, inEvent) {
+		this.$.fileName.setPlaceholder(this.placeHolder);
 	}
 });	

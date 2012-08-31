@@ -10,7 +10,8 @@
 				"hermes/filesystem/index.js", "0", "@HOME@"
 			],
 			"useJsonp":false,
-			"debug": false
+			"debug": false,
+			"respawn": true
 		},
 		{
 			"active":false,
