@@ -78,6 +78,17 @@ function serviceEcho(service) {
 	};
 }
 
+function handleServiceExit(service) {
+	return function(code, signal) {
+		if (signal) {
+			console.log("> Service['"+service.id+"']: killed (signal="+signal+")");
+		} else {
+			console.error("*** Service['"+service.id+"'] abnormal exit (code="+code+"), exiting...");
+			process.exit(code);
+		}
+	};
+}
+
 for (var i = 0; i < ide.res.services.length; i++) {
 	service = ide.res.services[i];
 	var command = platformSubst(service.command);
@@ -92,6 +103,7 @@ for (var i = 0; i < ide.res.services.length; i++) {
 	subProcess = spawn(command, params, options);
 	subProcess.stderr.on('data', serviceEcho(service));
 	subProcess.stdout.on('data', serviceEcho(service));
+	subProcess.on('exit', handleServiceExit(service));
 	subProcess.on('message', handleMessage(service));
 	subProcesses.push(subProcess);
 	break;
