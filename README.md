@@ -61,7 +61,7 @@ You have two options:
 
 #### Served IDE
 
-Configure the `root` of your local file-system access `ide.json`.
+Configure the `root` of your local file-system access `ide.json`.  For instance, change "@HOME@" to "@HOME@/Documents" or to "D:\\Users\\User" (if using forward slashes, use double slashes for JSON encoding)
 
 	% vi ide.json
 	{
