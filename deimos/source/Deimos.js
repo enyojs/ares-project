@@ -99,7 +99,6 @@ enyo.kind({
 		this.serializeAction();
 	},
 	designerChange: function(inSender) {
-		this.refreshComponentView();
 		this.refreshInspector();
 		this.docHasChanged = true;
 	},
@@ -113,7 +112,6 @@ enyo.kind({
 	},
 	inspectorModify: function() {
 		this.$.designer.refresh();
-		this.refreshComponentView();
 		this.docHasChanged = true;
 	},
 	componentViewDrop: function(inSender, inEvent) {
@@ -148,6 +146,8 @@ enyo.kind({
 
 		this.bubble("onCloseDesigner", event);
 	},
+	// When the designer finishes rendering, re-build the components view
+	// TODO: Build this from the Model, not by trawling the view hierarchy...
 	designRendered: function() {
 		this.refreshComponentView();
 	}

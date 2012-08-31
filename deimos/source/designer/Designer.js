@@ -123,14 +123,16 @@ enyo.kind({
 	},
 	dropComponentAction: function(inComponent) {
 		var c = this.getSelectedContainer();
-		if (c && inComponent !== c) {
+		if (c && !c.isDescendantOf(inComponent)) { // don't allow dropping onto yourself, or your children
 			var props = this.$.serializer._serializeComponent(inComponent, this.$.model);
 			this.log(props);
 			enyo.asyncMethod(this, function() {
 				inComponent.destroy();
 				this.createComponentAction(props);
 			});
+			return true;
 		}
+		return false;
 	},
 	createComponentAction: function(inProps) {
 		var c = this.getSelectedContainer();
