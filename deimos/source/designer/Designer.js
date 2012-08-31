@@ -15,7 +15,7 @@ enyo.kind({
 			{kind: "Button", content: "Up", ontap: "upAction"},
 			{kind: "Button", content: "Down", ontap: "downAction"},
 			{kind: "Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
-			{name: "client", classes: "deimos_panel", fit: true}
+			{name: "client", fit: true, kind: "DesignerPanel"}
 		]}
 	],
 	style: "outline: none; position: relative;",
@@ -214,5 +214,16 @@ enyo.kind({
 			this.removeNodeFromDom();
 			this.hide();
 		}
+	}
+});
+
+enyo.kind({
+	name: "DesignerPanel",
+	classes: "deimos_panel",
+	events: {
+		onDesignRendered: ""
+	},
+	rendered: function() {
+		this.doDesignRendered();
 	}
 });

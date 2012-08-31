@@ -1,7 +1,5 @@
 ## Ares 2 Overview
 
-Updated: 2012-08-17
-
 Ares 2 is a browser-based code editor and UI designer for developing Enyo 2 applications.  Although Ares is still a work in progress, we have reached the point where we are opening the repo and will do further development in the open, so we encourage you to follow our progress and give us feedback as we push Ares forward.
 
 ### Basic architecture
@@ -82,14 +80,21 @@ Configure the `root` of your local file-system access `ide.json`.
 		},
 	[...]
 
-Start the IDE server: (e.g., in Windows using the Node.js Command Prompt, navigate to the ares directory and type 'node ide.js')
+Start the IDE server: (e.g. using the Command Prompt, navigate to the ares directory and type 'node ide.js')
+
+On OSX:
 
 	% node ide.js
+
+Then wait for the following message in the console:
+
 	[...]
 	ARES IDE is now running at <http://127.0.0.1:9009/ide/ares/index.html> Press CTRL + C to shutdown
 	[...]
 
-Connect to the IDE using Google Chrome or Chromium.  The default URL is [http://127.0.0.1:9009/ide/ares/index.html](http://127.0.0.1:9009/ide/ares/index.html)
+Connect to the IDE using Google Chrome or Chromium (other browserds are not that well tested so far).  The default URL is [http://127.0.0.1:9009/ide/ares/index.html](http://127.0.0.1:9009/ide/ares/index.html)
+
+On OSX:
 
 	% open -a "Chromium" http://127.0.0.1:9009/ide/ares/index.html
 
