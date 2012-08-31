@@ -20,7 +20,6 @@ var fs = require("fs"),
 var ide = {};
 var service = {};
 var subProcesses = [];
-var subProcess = null;
 var platformVars = [
 	{regex: /@NODE@/, value: process.argv[0]},
 	{regex: /@HOME@/, value: process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']}
@@ -83,14 +82,19 @@ function handleServiceExit(service) {
 		if (signal) {
 			console.log("> Service['"+service.id+"']: killed (signal="+signal+")");
 		} else {
-			console.error("*** Service['"+service.id+"'] abnormal exit (code="+code+"), exiting...");
-			process.exit(code);
+			console.error("*** Service['"+service.id+"']: abnormal exit (code="+code+")");
+			if (service.respawn) {
+				console.error("*** Service['"+service.id+"']: respawning...");
+				startService(service);
+			} else {
+				console.error("*** Exiting...");
+				process.exit(code);
+			}
 		}
 	};
 }
 
-for (var i = 0; i < ide.res.services.length; i++) {
-	service = ide.res.services[i];
+function startService(service) {
 	var command = platformSubst(service.command);
 	var params = [];
 	var options = {
@@ -100,14 +104,19 @@ for (var i = 0; i < ide.res.services.length; i++) {
 		params.push(platformSubst(inParam));
 	});
 	console.log("> Service['"+service.id+"']: executing '"+command+" "+params.join(" ")+"'");
-	subProcess = spawn(command, params, options);
+	var subProcess = spawn(command, params, options);
 	subProcess.stderr.on('data', serviceEcho(service));
 	subProcess.stdout.on('data', serviceEcho(service));
 	subProcess.on('exit', handleServiceExit(service));
 	subProcess.on('message', handleMessage(service));
 	subProcesses.push(subProcess);
-	break;
 }
+
+ide.res.services.filter(function(service){
+	return service.active;
+}).forEach(function(service){
+	startService(service);
+});
 
 // Start the ide server
 
