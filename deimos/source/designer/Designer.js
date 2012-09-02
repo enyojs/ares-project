@@ -211,6 +211,9 @@ enyo.kind({
 		if (!enyo.constructorForKind(name)) {
 			component.kind = "Proxy";
 			component.realKind = name;
+			if (component.name) {
+				component.hadName=true;
+			}
 		}
 		var children = component.components;
 		if (children) {
@@ -232,8 +235,12 @@ enyo.kind({
 		if (component.realKind) {
 			component.kindName = component.realKind;
 			component.kind = component.realKind;
-			component.realKind = undefined;
+			delete component.realKind;
 		}
+		if (!component.hadName) {
+			delete component.name;
+		}
+		delete component.hadName;
 		var children = component.children;
 		if (children) {
 			var i; 
@@ -283,6 +290,6 @@ enyo.kind({
     content: "Proxy",
 	published: {
 		realKind: "",
-		realName: ""
+		hadName: false
 	}
 });
