@@ -15,7 +15,7 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: "New kind", ontap: "newKindAction"},
 				{fit: true},
-				{kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
+				{name: "designerButton", kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "left", kind: "leftPanels", showing: false,	arrangerKind: "CardArranger", onCss: "newcssAction"},
@@ -48,6 +48,8 @@ enyo.kind({
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
+	mode: "",				// js, css, ...
+	filename: "",			// Name of the file currently being edited
 	create: function() {
 		this.inherited(arguments);
 		this.buildDb();
@@ -73,21 +75,22 @@ enyo.kind({
 	openDoc: function(inFile, inCode, inExt) {
 		this.hideWaitPopup();
 		this.analysis = null;
-		var mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
-		this.$.ace.setEditingMode(mode);
-		this.adjustPanelsForMode(mode);
+		this.filename = inFile;
+		this.mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
+		this.$.ace.setEditingMode(this.mode);
+		this.adjustPanelsForMode(this.mode);
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
 		this.docHasChanged=false;
-		this.$.documentLabel.setContent(inFile);
+		this.$.documentLabel.setContent(this.filename);
 	},
 	adjustPanelsForMode: function(mode) {
 		var modes = {
-			json:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: false },
-			javascript:	{leftShowing: false, rightShowing: true,  leftIndex: 1, rightIndex: 1, newKindButton: true },
-			html:		{leftShowing: false, rightShowing: false, leftIndex: 2, rightIndex: 2, newKindButton: true},
-			css:		{leftShowing: false, rightShowing: true,  leftIndex: 3, rightIndex: 3, newKindButton: false},
-			text:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: true}
+			json:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: false, designer: false},
+			javascript:	{leftShowing: false, rightShowing: true,  leftIndex: 1, rightIndex: 1, newKindButton: true,  designer: true},
+			html:		{leftShowing: false, rightShowing: false, leftIndex: 2, rightIndex: 2, newKindButton: false, designer: false},
+			css:		{leftShowing: false, rightShowing: true,  leftIndex: 3, rightIndex: 3, newKindButton: false, designer: false},
+			text:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: false, designer: false}
 		};
 		var settings = modes[mode]||modes['text'];
 		this.$.left.setIndex(settings.leftIndex);
@@ -95,6 +98,7 @@ enyo.kind({
 		this.$.right.setIndex(settings.rightIndex);
 		this.$.right.setShowing(settings.rightShowing);
 		this.$.newKindButton.setShowing(settings.newKindButton);
+		this.$.designerButton.setShowing(settings.designer);
 	},
 	showWaitPopup: function(inMessage) {
 		this.$.waitPopupMessage.setContent(inMessage);
@@ -156,20 +160,24 @@ enyo.kind({
 		this.$.right.$.dump.setContent(h$);
 	},
 	reparseAction: function() {
-		var module = {
-			name: "Document",
-			code: this.$.ace.getValue()
-		};
-		try {
-			this.analysis = module;
-			this.$.analyzer.index.indexModule(module);
-			this.updateObjectsLines(module);
-
-			// dump the object where the cursor is positioned, if it exists
-			this.dumpInfo(module.objects && module.objects[module.currentObject]);
-		} catch(error) {
-			enyo.log("An error occured during the code analysis: " + error);
-			this.dumpInfo(null);
+		if (this.mode === 'javascript') {
+			var module = {
+				name: this.filename,
+				code: this.$.ace.getValue()
+			};
+			try {
+				this.analysis = module;
+				this.$.analyzer.index.indexModule(module);
+				this.updateObjectsLines(module);
+	
+				// dump the object where the cursor is positioned, if it exists
+				this.dumpInfo(module.objects && module.objects[module.currentObject]);
+			} catch(error) {
+				enyo.log("An error occured during the code analysis: " + error);
+				this.dumpInfo(null);
+			}
+		} else {
+			this.analysis = null;
 		}
 	},
 	/**
