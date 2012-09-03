@@ -314,8 +314,8 @@ enyo.kind({
 	},
 	newKindAction: function() {
 		// Insert a new empty enyo kind at the end of the file
-		var newKind = 'enyo.kind({\n	name : "NewEnyoKind",\n	kind : "enyo.Control",\n	components : []\n});';
-		this.$.ace.insertAtEndOfFile(newKind);
+		var newKind = 'enyo.kind({\n	name : "@cursor@",\n	kind : "enyo.Control",\n	components : []\n});';
+		this.$.ace.insertAtEndOfFile(newKind, '@cursor@');
 	},
 	newcssAction: function(inSender, inEvent){
 		this.$.ace.insertAtEndOfFile(inEvent.outPut);
