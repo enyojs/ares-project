@@ -74,6 +74,7 @@ enyo.kind({
 		this.hideWaitPopup();
 		this.analysis = null;
 		var mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
+		this.mode = mode;
 		this.$.ace.setEditingMode(mode);
 		this.adjustPanelsForMode(mode);
 		this.$.ace.setValue(inCode);
@@ -156,20 +157,22 @@ enyo.kind({
 		this.$.right.$.dump.setContent(h$);
 	},
 	reparseAction: function() {
-		var module = {
-			name: "Document",
-			code: this.$.ace.getValue()
-		};
-		try {
-			this.analysis = module;
-			this.$.analyzer.index.indexModule(module);
-			this.updateObjectsLines(module);
+		if(this.$.mode == "javascript"){
+				var module = {
+				name: "Document",
+				code: this.$.ace.getValue()
+			};
+			try {
+				this.analysis = module;
+				this.$.analyzer.index.indexModule(module);
+				this.updateObjectsLines(module);
 
-			// dump the object where the cursor is positioned, if it exists
-			this.dumpInfo(module.objects && module.objects[module.currentObject]);
-		} catch(error) {
-			enyo.log("An error occured during the code analysis: " + error);
-			this.dumpInfo(null);
+				// dump the object where the cursor is positioned, if it exists
+				this.dumpInfo(module.objects && module.objects[module.currentObject]);
+			} catch(error) {
+				enyo.log("An error occured during the code analysis: " + error);
+				this.dumpInfo(null);
+			}
 		}
 	},
 	/**
