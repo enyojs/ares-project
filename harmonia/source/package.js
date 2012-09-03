@@ -1,9 +1,11 @@
 ﻿enyo.depends(
+	"project.css",
 	"FieldDecorator.js",
 	"DropboxConfig.js",
 	"ProviderList.js",
 	"Harmonia.js",
 	"NamePopup.js",
 	"DeletePopup.js",
-	"RenamePopup.js"
+	"RenamePopup.js",
+	"projectmanger.js"
 );
