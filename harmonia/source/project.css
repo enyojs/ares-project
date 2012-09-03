@@ -1,0 +1,17 @@
+
+.inputButton {
+	background-color:#00FF00;
+	color: #000000;
+	font-family: Monospace;
+	font-size: 12px;
+
+}
+.popup {
+	background-color:#344537;
+	color: #CEE6E3;
+	height: 200px;
+	width: 250px;
+	margin: 5px;
+	border: 5px	;
+}
+
