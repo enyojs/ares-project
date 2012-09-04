@@ -291,5 +291,21 @@ enyo.kind({
 	published: {
 		realKind: "",
 		hadName: false
-	}
+	},
+	create: function() {
+		this.inherited(arguments);
+	},
+	//* @protected
+	// override this, and save imported properties
+	importProps: function(inProps) {
+		var ignoreProp = {container: true, owner: true};
+		this.inherited(arguments);
+		if (inProps) {
+			for (var n in inProps) {
+				if (!ignoreProp[n]) {
+					this.published[n] = inProps[n];
+				}
+			}
+		}
+	},	
 });
