@@ -29,8 +29,13 @@ _.extend(true, HermesFiles.prototype, {
 
 		console.log('HermesFiles, execute: ', inVerb)
 		step(function(err) {
-				next(err)
+			try {
+				next(err);
+			} catch(e) {
+				res.send(500, err);
 			}
+			//HermesClient.prototype.onError(req, res, err, next); FIXME should work...
+		} 
 		, function() {
 				var connection
 
