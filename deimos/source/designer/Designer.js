@@ -81,6 +81,7 @@ enyo.kind({
 		this.select(this.selection);
 	},
 	load: function(inDocument) {
+		this.proxyArray(inDocument);
 		this.hideSelection();
 		this.$.model.destroyComponents();
 		this.$.client.createComponents(inDocument, {owner: this.$.model});
@@ -90,6 +91,10 @@ enyo.kind({
 		if (c) {
 			this.trySelect(c);
 		}
+	},
+	save: function() {
+		this.unProxyUnknownKinds(this.$.client);
+		return this.$.serializer.serialize(this.$.client, this.$.model);
 	},
 	deleteAction: function() {
 		if (this.selection) {
@@ -193,7 +198,58 @@ enyo.kind({
 	},
 	downAction: function(inSender) {
 		this.nudgeControl(this.selection, 1);
-	}
+	},
+	proxyArray: function(block) {
+	    var i;
+	    for (i=0; i < block.length; i++) {
+	        block[i]=this.proxyUnknownKinds(block[i]);
+	    }
+        return block;	    
+	},
+	proxyUnknownKinds: function(component) {
+		var name = component.kind;
+		if (!enyo.constructorForKind(name)) {
+			component.kind = "Proxy";
+			component.realKind = name;
+			if (component.name) {
+				component.hadName=true;
+			}
+		}
+		var children = component.components;
+		if (children) {
+			var i; 
+			for (i=0; i< children.length; i++) {
+				children[i] = this.proxyUnknownKinds(children[i]);
+			}
+		}
+		return component;
+	},
+	unProxyArray: function(block) {
+	    var i;
+	    for (i=0; i < block.length; i++) {
+	        block[i]=this.unProxyUnknownKinds(block[i]);
+	    }
+        return block;	    
+	},
+	unProxyUnknownKinds: function(component) {
+		if (component.realKind) {
+			component.kindName = component.realKind;
+			component.kind = component.realKind;
+			delete component.realKind;
+			if (!component.hadName) {
+				delete component.name;
+			}
+		}
+		delete component.hadName;
+		var children = component.children;
+		if (children) {
+			var i; 
+			for (i=0; i< children.length; i++) {
+				children[i] = this.unProxyUnknownKinds(children[i]);
+			}
+		}
+		return component;
+	}	
 });
 
 enyo.kind({
@@ -228,4 +284,28 @@ enyo.kind({
 	rendered: function() {
 		this.doDesignRendered();
 	}
+});
+enyo.kind({
+    name: "Proxy",
+    content: "Proxy",
+	published: {
+		realKind: "",
+		hadName: false
+	},
+	create: function() {
+		this.inherited(arguments);
+	},
+	//* @protected
+	// override this, and save imported properties
+	importProps: function(inProps) {
+		var ignoreProp = {container: true, owner: true};
+		this.inherited(arguments);
+		if (inProps) {
+			for (var n in inProps) {
+				if (!ignoreProp[n]) {
+					this.published[n] = inProps[n];
+				}
+			}
+		}
+	},	
 });

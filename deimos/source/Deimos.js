@@ -74,7 +74,7 @@ enyo.kind({
 			if (this.index !== null && this.docHasChanged === true) {
 				var modified = this.$.designer.getComponents();
 				this.kinds[this.index].components = modified;
-				this.kinds[this.index].content = this.$.designer.serialize();
+				this.kinds[this.index].content = this.$.designer.save();
 			}
 			
 			this.$.inspector.inspect(null);
@@ -136,7 +136,7 @@ enyo.kind({
 	},
 	closeDesignerAction: function(inSender, inEvent) {
 		// Get the last modifications
-		this.kinds[this.index].content = this.$.designer.serialize();
+		this.kinds[this.index].content = this.$.designer.save();
 		
 		// Prepare the data for the code editor
 		var event = {docHasChanged: this.docHasChanged, contents: []};
