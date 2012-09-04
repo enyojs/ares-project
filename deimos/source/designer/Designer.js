@@ -236,9 +236,9 @@ enyo.kind({
 			component.kindName = component.realKind;
 			component.kind = component.realKind;
 			delete component.realKind;
-		}
-		if (!component.hadName) {
-			delete component.name;
+			if (!component.hadName) {
+				delete component.name;
+			}
 		}
 		delete component.hadName;
 		var children = component.children;
