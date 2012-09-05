@@ -1,21 +1,18 @@
-﻿enyo.kind({
+enyo.kind({
 	name: "ProviderList",
 	kind: "FittableRows",
 	published: {
+		// use 0 to pre-select the first storage provider of
+		// the list... or get an expection at first load.
 		selected: -1
 	},
 	events: {
 		onSelectProvider: ""
 	},
 	components: [
-		{kind: "onyx.Toolbar", XdefaultKind: "onyx.IconButton", components: [
-			{content: "Services"},
-			//{content: "Open", onclick: "openClick"},
-			{kind: "onyx.Button", content: "Reset", Xsrc: "$harmonia/images/server_into.png", hint: "Reset", ontap: "resetAction"}
-			//{content: "New", src: "$harmonia/images/server_add.png", hint: "New...", ontap: "newAction"}
-			//{Xcontent: "Edit", src: "$harmonia/images/server_preferences.png", hint: "Edit...", onclick: "editClick"},
-			//{Xcontent: "Duplicate", src: "$harmonia/images/server_preferences.png", hint: "Duplicate Selected Provider...", onclick: "duplicateClick"},
-			//{Xcontent: "Delete", src: "$harmonia/images/server_delete.png", hint: "Delete", onclick: "deleteClick"}
+		{kind: "onyx.Toolbar", components: [
+			{content: "Storage Services"}
+			//{kind: "onyx.Button", content: "Reset", Xsrc: "$harmonia/images/server_into.png", hint: "Reset", ontap: "_handleReset"}
 		]},
 		{fit: true, name: "list", kind: "FlyweightRepeater", toggleSelected: false, onSetupItem: "setupRow", onSelect: "rowSelected", onDeselect: "rowDeselected", components: [
 			{name: "item", classes: "enyo-children-inline", style: "padding: 8px 4px 4px; border-bottom: 1px solid gray;", ontap: "itemTap", ondblclick: "dblClick", /*onConfirm: "removeProvider",*/ components: [
@@ -25,37 +22,29 @@
 			]}
 		]},
 		//{kind: "ProviderConfigPopup", onSave: "saveProvider"},
-		{kind: "ServiceRegistry", onServicesReceived: "gotFileServices", onServicesChange: "gotFileServices"}
+		{kind: "ServiceRegistry", onServicesChange: "_handleServicesChange"}
 	],
 	create: function() {
 		this.inherited(arguments);
 		this.listServices();
 	},
 	listServices: function() {
-		this.$.serviceRegistry.listServices("file");
+		this.$.serviceRegistry.listServices();
 	},
-	resetAction: function() {
-		this.$.serviceRegistry.resetProfile();
+	//* @private
+	_handleReset: function() {
+		this.$.serviceRegistry.reloadServices();
 		this.$.list.getSelection().clear();
-		this.doSelectProvider({service: null});
-		this.listServices();
 	},
-	gotFileServices: function(inSender, inServices) {
+	//* @private
+	_handleServicesChange: function(inSender, inServices) {
+		//this.log("RX: services='"+JSON.stringify(inServices)+"'");
 		this.providers = inServices || [];
 		this.$.list.count = this.providers.length;
 		this.$.list.render();
+		// re-select the line that was selected before service changed
+		this.doSelectProvider({service: this.providers[this.selected]});
 	},
-	/*
-	providerChanged: function(inOld) {
-		for (var i=0, p; p=this.providers[i]; i++) {
-			if (p.id == this.provider) {
-				this.selectByIndex(i);
-				return;
-			}
-		}
-		this.provider = inOld;
-	},
-	*/
 	setupRow: function(inSender, inEvent) {
 		var p = this.providers[inEvent.index];
 		if (p) {
@@ -71,7 +60,7 @@
 	},
 	rowSelected: function(inSender, inEvent) {
 		this.selected = inEvent.key;
-		var p = this.providers[inEvent.key];
+		var p = this.providers[this.selected];
 		if (p) {
 			if (p.type == "dropbox" && !p.auth) {
 				this.authorize(p);

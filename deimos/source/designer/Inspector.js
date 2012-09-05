@@ -30,8 +30,9 @@ enyo.kind({
 			context = context.base && context.base.prototype;
 		}
 		var props = [];
-		for (var n in propMap) {
-			props.push(n);
+		var propKeys = Object.keys(propMap).sort();
+		for (var n = 0; n < propKeys.length; n++) {
+			props.push(propKeys[n]);
 		}
 		props.events = [];
 		for (var n in eventMap) {

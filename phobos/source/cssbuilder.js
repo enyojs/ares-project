@@ -6,10 +6,16 @@ enyo.kind({
 	color: "000000",
 	toggle: ""
 	},
+	 events: {
+		onInsert: "",
+	 },
 	name: "cssBuilder",
 	kind: "enyo.FittableRows", components: [
-		{kind: "onyx.Input", name: "input", placeholder: "Enter your class name!..",onchange: "inputChange"},
+		{kind: "onyx.Toolbar", components: [
+		{kind: "onyx.Button", classes: "onyx-affirmative", content: "Insert css", ontap:"newCssAction"},
 		{kind: "onyx.Button", classes: "onyx-negative", content: "Reset", ontap:"reset"},
+		]},
+		{kind: "onyx.Input", name: "input", placeholder: "Enter your class name!..",onchange: "inputChange"},
 		{kind: "Panels", fit:true, classes: "enyo-unselectable",components: [
 			{kind: "enyo.Scroller", classes: "enyo-fit",components: [
 				{classes: "pannel", style: " height: 375px", components: [
@@ -133,9 +139,8 @@ enyo.kind({
 
 	updateBox: function(){
 	var tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
-	var className = ".classname";
-	var styleOut = ""
 	var outPut = this.className + " " + "{<br>" ;
+	var outString =  this.className + " " + "{\n" ;
 	var c = '#' + (this.red + this.green + this.blue).toUpperCase();
 
 	if(this.toggle == "background"){
@@ -148,42 +153,54 @@ enyo.kind({
 	}
 
 	if(this.backgroundColor != null){
-		outPut = outPut + tab + "background-color:" + " " + this.backgroundColor + ";" + "<br>" ;
+		outPut = outPut + tab + "background-color:" + " " + this.backgroundColor + ";" + "<br>";
+		outString = outString + "	" + "background-color:" + this.backgroundColor + ";\n";
 	}
 
 	if(this.fontColor != null){
 		outPut = outPut + tab + "color:" + " " + this.fontColor + ";"  + "<br>";
+		outString = outString + "	" + "color:" + " " + this.fontColor + ";\n";
 	}
 
 	if(this.fontFamily != null){
-		outPut = outPut +tab + "font-family:" + " " + this.fontFamily + ";" + "<br>" ;
+		outPut = outPut +tab + "font-family:" + " " + this.fontFamily + ";" + "<br>";
+		outString = outString + "	" + "font-family:" + " " + this.fontFamily + ";\n";
 	}
 
 	if(this.$.fontSize != null){
-		outPut = outPut + tab + "font-size:" + " " + this.$.fontSize + "px;" + "<br>" ;
+		outPut = outPut + tab + "font-size:" + " " + this.$.fontSize + "px;" + "<br>";
+		outString = outString + "	" + "font-size:" + " " + this.$.fontSize + "px;\n";
 	}
 
 	if(this.$.marginSize != null){
 		outPut = outPut  + tab + "margin:" + " " + this.$.marginSize + "px;" + "<br>";
+		outString = outString + "	" + "margin:" + " " + this.$.marginSize + "px;\n";
 	}
 
 	if(this.$.borderSize != null){
 		outPut = outPut + tab + "border:" + " " + this.$.borderSize + "px";
+		outString = outString + "	" + "border:" + " " + this.$.borderSize + "px";
 
 	if(this.toggle == "Border color"){
 			outPut = outPut + " " + "sold" + " " + c + ";<br>";
+			outString = outString + "	" + "sold" + " " + c + ";\n";
 		}else{
 		outPut = outPut + ";<br>";
+		outString = outString + "	" +";\n";
 		}
 	}
 	if(this.$.heightSize != null){
 		outPut = outPut  + tab + "height:" + " " + this.$.heightSize + "px;" + "<br>";
+		outString = outString + "	" + "height:" + " " + this.$.heightSize + "px;\n";
 	}
 	if(this.$.widthSize != null){
 		outPut = outPut  + tab + "width:" + " " + this.$.widthSize + "px;" + "<br>";
+		outString = outString + "	" + "width:" + " " + this.$.widthSize + "px;\n";
 	}
 
 	this.$.bg.setContent(outPut + "<br>}");
+	outString = outString + "\n}"
+	this.outPut = outString;
 	},
 
 	redChanged: function(inSender, inEvent){
@@ -284,6 +301,11 @@ enyo.kind({
 		this.$.widthSize = inEvent.selected.content;
 		this.updateBox();
 	},
+	newCssAction: function(inSender, inEvent) {
+		// Insert a new Css at the end of the file
+		this.doInsert (inEvent);
+
+	},
 	reset: function(){
 		this.className = null;
 		this.backgroundColor = null;
@@ -293,6 +315,7 @@ enyo.kind({
 		this.$.marginSize = null;
 		this.$.fontSize = null;
 		this.$.outPut = null;
+		outString = "";
 		this.$.heightSize = null;
 		this.$.widthSize = null;
 		this.updateBox();

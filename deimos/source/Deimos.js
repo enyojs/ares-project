@@ -19,7 +19,7 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", components: [
 				{name: "left", kind: "Palette", ondragstart: "dragStart"},
 				{name: "middle", fit: true, kind: "FittableRows",components: [
-					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart"},
+					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart", onDesignRendered: "designRendered"},
 					{name: "code", classes: "deimos_panel", showing: false, components: [
 						{kind: "Scroller", classes: "enyo-selectable", components: [
 							{name: "codeText", tag: "pre", style: "white-space: pre; font-size: smaller; border: none; margin: 0;"}
@@ -74,7 +74,7 @@ enyo.kind({
 			if (this.index !== null && this.docHasChanged === true) {
 				var modified = this.$.designer.getComponents();
 				this.kinds[this.index].components = modified;
-				this.kinds[this.index].content = this.$.designer.serialize();
+				this.kinds[this.index].content = this.$.designer.save();
 			}
 			
 			this.$.inspector.inspect(null);
@@ -99,7 +99,6 @@ enyo.kind({
 		this.serializeAction();
 	},
 	designerChange: function(inSender) {
-		this.refreshComponentView();
 		this.refreshInspector();
 		this.docHasChanged = true;
 	},
@@ -113,7 +112,6 @@ enyo.kind({
 	},
 	inspectorModify: function() {
 		this.$.designer.refresh();
-		this.refreshComponentView();
 		this.docHasChanged = true;
 	},
 	componentViewDrop: function(inSender, inEvent) {
@@ -138,7 +136,7 @@ enyo.kind({
 	},
 	closeDesignerAction: function(inSender, inEvent) {
 		// Get the last modifications
-		this.kinds[this.index].content = this.$.designer.serialize();
+		this.kinds[this.index].content = this.$.designer.save();
 		
 		// Prepare the data for the code editor
 		var event = {docHasChanged: this.docHasChanged, contents: []};
@@ -147,6 +145,11 @@ enyo.kind({
 		}
 
 		this.bubble("onCloseDesigner", event);
+	},
+	// When the designer finishes rendering, re-build the components view
+	// TODO: Build this from the Model, not by trawling the view hierarchy...
+	designRendered: function() {
+		this.refreshComponentView();
 	}
 });
 

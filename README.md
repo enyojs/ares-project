@@ -1,7 +1,5 @@
 ## Ares 2 Overview
 
-Updated: 2012-08-17
-
 Ares 2 is a browser-based code editor and UI designer for developing Enyo 2 applications.  Although Ares is still a work in progress, we have reached the point where we are opening the repo and will do further development in the open, so we encourage you to follow our progress and give us feedback as we push Ares forward.
 
 ### Basic architecture
@@ -28,7 +26,7 @@ Here are the main features you can start looking at today:
 	* Upon opening/editing a JavaScript file, Ares will parse the file and display a semantic outline of the code in the right-hand panel (for purposes of demonstrating parser)
 	* In the future, this will be used for advanced features such as code-completion, context-sensitive documentation, etc.
 * UI designer for drag and drop UI editing
-	* The UI designer is hooked up to the editor in read-only mode currently. 
+	* Component definitions are round-tripped from the Editor to the Designer, meaning that changes made in one will immediately appear in the other.
 	
 **Note:**  The current Dropbox interface was implemented with an authentication mechanism that has since been deprecated by Dropbox and for which API keys are no longer available, so most users will not be able to run their own Hermes Dropbox component at the moment.  However, those wishing to test drive the functionality above can open `ares/index.html` which points to a temporary hosted version of the Dropbox Hermes component using a valid API key.  We will be migrating the Dropbox authentication mechanism to the currently recommended scheme.  Note there is not yet a publicly hosted version of Ares.
 	
@@ -36,23 +34,40 @@ Here are the main features you can start looking at today:
 
 The following features are in the works, and you should see them added as we move forward:
 
-* Round-trip editing in the code editor and the designer
 * Code completion and context-sensitive documentation
 * Additional Hermes components to extend the local and cloud file storage options
+* Improvements to the Designer component for greater ease of use
 * ... and more!
 
 ### Setup
 
-Install Node.js 0.8 or later, preferably from the [Official Download Page](http://nodejs.org/#download).
+####Install Node.js 0.8 or later####
+Preferably from the [Official Download Page](http://nodejs.org/#download).
 
-Get the source at the proper location: For Ares to run, it expects the enyo and lib folders (including onyx, layout, and extra) from the 2.0b5 SDK (or later) from Github to be present next to ares-project, as follows:
+####Install git (or a graphical git client)####
+See the [Github.com help](https://help.github.com/articles/set-up-git) for hints
 
-		* ares-project		git@github.com:enyojs/ares-project.git
-		* enyo				git@github.com:enyojs/enyo.git
-		* lib
-			* onyx			git@github.com:enyojs/onyx.git
-			* layout		git@github.com:enyojs/layout.git
-			* extra			git@github.com:enyojs/extra.git
+####Clone the ares-project repository from GitHub####
+Using git, clone the repository using either the HTTPS or SSH urls:
+`
+git clone https://github.com/enyojs/ares-project.git
+`
+or
+`
+git clone git@github.com:enyojs/ares-project.git
+`
+
+Which URL you should clone from depends on how you have git set up (see github docs above).
+
+####Update the submodule references####
+Because Ares and Enyo are so closely linked, there are specific versions of Enyo and the libs folder included as references in the Ares repository. After cloning Ares, you need to update the submodules using "git submodule update"
+
+`cd ares-project
+git submodule init
+git submodule update
+`
+
+If you are using a graphical Git client, there may or may not be a way to update the submodules from the GUI. If not, then use the commands above.
 
 ### Run
 
@@ -63,7 +78,9 @@ You have two options:
 
 #### Served IDE
 
-Configure the `root` of your local file-system access `ide.json`.
+Optionally, configure the `root` of your local file-system access in `ide.json`. By default, the local filesystem service serves the files from you "Home" or "My Documents" directory, depending on your operating system. You might want to change this to point to the location of your project files, to make navigation faster & easier. 
+
+For instance, you can change "@HOME@" to "@HOME@/Documents" or to "D:\\Users\\User" (if using backslashes [i.e. on Windows], use double slashes for JSON encoding)
 
 	% vi ide.json
 	{
@@ -82,14 +99,21 @@ Configure the `root` of your local file-system access `ide.json`.
 		},
 	[...]
 
-Start the IDE server: (e.g., in Windows using the Node.js Command Prompt, navigate to the ares directory and type 'node ide.js')
+Start the IDE server: (e.g. using the Command Prompt, navigate to the ares directory and type 'node ide.js')
+
+On OSX:
 
 	% node ide.js
+
+Then wait for the following message in the console:
+
 	[...]
 	ARES IDE is now running at <http://127.0.0.1:9009/ide/ares/index.html> Press CTRL + C to shutdown
 	[...]
 
-Connect to the IDE using Google Chrome or Chromium.  The default URL is [http://127.0.0.1:9009/ide/ares/index.html](http://127.0.0.1:9009/ide/ares/index.html)
+Connect to the IDE using Google Chrome or Chromium (other browserds are not that well tested so far).  The default URL is [http://127.0.0.1:9009/ide/ares/index.html](http://127.0.0.1:9009/ide/ares/index.html)
+
+On OSX:
 
 	% open -a "Chromium" http://127.0.0.1:9009/ide/ares/index.html
 

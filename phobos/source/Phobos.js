@@ -13,12 +13,12 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Close", ontap: "closeDocAction"},
 				{name: "documentLabel", content: "Document"},
 				{kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
-				{kind: "onyx.Button", content: "New kind", ontap: "newKindAction"},
+				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: "New kind", ontap: "newKindAction"},
 				{fit: true},
-				{kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
+				{name: "designerButton", kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
-				{name: "left", kind: "leftPanels", showing: false,	arrangerKind: "CardArranger"},
+				{name: "left", kind: "leftPanels", showing: false,	arrangerKind: "CardArranger", onCss: "newcssAction"},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
 						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion"}
@@ -42,14 +42,18 @@ enyo.kind({
 	],
 
 	handlers: {
+		onCss: "newcssAction",
 	},
 	docHasChanged: false,
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
+	mode: "",				// js, css, ...
+	filename: "",			// Name of the file currently being edited
 	create: function() {
 		this.inherited(arguments);
 		this.buildDb();
+//this.newcssAction();
 
 		// Pass to the autocomplete compononent a reference to ace
 		this.$.autocomplete.setAce(this.$.ace);
@@ -71,27 +75,30 @@ enyo.kind({
 	openDoc: function(inFile, inCode, inExt) {
 		this.hideWaitPopup();
 		this.analysis = null;
-		var mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
-		this.$.ace.setEditingMode(mode);
-		this.adjustPanelsForMode(mode);
+		this.filename = inFile;
+		this.mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
+		this.$.ace.setEditingMode(this.mode);
+		this.adjustPanelsForMode(this.mode);
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
 		this.docHasChanged=false;
-		this.$.documentLabel.setContent(inFile);
+		this.$.documentLabel.setContent(this.filename);
 	},
 	adjustPanelsForMode: function(mode) {
 		var modes = {
-			json:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0},
-			javascript:	{leftShowing: false, rightShowing: true,  leftIndex: 1, rightIndex: 1},
-			html:		{leftShowing: false, rightShowing: false, leftIndex: 2, rightIndex: 2},
-			css:		{leftShowing: false, rightShowing: true,  leftIndex: 3, rightIndex: 3},
-			text:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0}
+			json:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: false, designer: false},
+			javascript:	{leftShowing: false, rightShowing: true,  leftIndex: 1, rightIndex: 1, newKindButton: true,  designer: true},
+			html:		{leftShowing: false, rightShowing: false, leftIndex: 2, rightIndex: 2, newKindButton: false, designer: false},
+			css:		{leftShowing: false, rightShowing: true,  leftIndex: 3, rightIndex: 3, newKindButton: false, designer: false},
+			text:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: false, designer: false}
 		};
 		var settings = modes[mode]||modes['text'];
 		this.$.left.setIndex(settings.leftIndex);
 		this.$.left.setShowing(settings.leftShowing);
 		this.$.right.setIndex(settings.rightIndex);
 		this.$.right.setShowing(settings.rightShowing);
+		this.$.newKindButton.setShowing(settings.newKindButton);
+		this.$.designerButton.setShowing(settings.designer);
 	},
 	showWaitPopup: function(inMessage) {
 		this.$.waitPopupMessage.setContent(inMessage);
@@ -117,7 +124,7 @@ enyo.kind({
 	dumpInfo: function(inObject) {
 		var c = inObject;
 		if (!c || !c.superkinds) {
-		console.log(this.$.right.$.dump);
+		//console.log(this.$.right.$.dump);
 			this.$.right.$.dump.setContent("(no info)");
 			return;
 		}
@@ -153,20 +160,24 @@ enyo.kind({
 		this.$.right.$.dump.setContent(h$);
 	},
 	reparseAction: function() {
-		var module = {
-			name: "Document",
-			code: this.$.ace.getValue()
-		};
-		try {
-			this.analysis = module;
-			this.$.analyzer.index.indexModule(module);
-			this.updateObjectsLines(module);
-
-			// dump the object where the cursor is positioned, if it exists
-			this.dumpInfo(module.objects && module.objects[module.currentObject]);
-		} catch(error) {
-			enyo.log("An error occured during the code analysis: " + error);
-			this.dumpInfo(null);
+		if (this.mode === 'javascript') {
+			var module = {
+				name: this.filename,
+				code: this.$.ace.getValue()
+			};
+			try {
+				this.analysis = module;
+				this.$.analyzer.index.indexModule(module);
+				this.updateObjectsLines(module);
+	
+				// dump the object where the cursor is positioned, if it exists
+				this.dumpInfo(module.objects && module.objects[module.currentObject]);
+			} catch(error) {
+				enyo.log("An error occured during the code analysis: " + error);
+				this.dumpInfo(null);
+			}
+		} else {
+			this.analysis = null;
 		}
 	},
 	/**
@@ -303,8 +314,11 @@ enyo.kind({
 	},
 	newKindAction: function() {
 		// Insert a new empty enyo kind at the end of the file
-		var newKind = 'enyo.kind({\n	name : "NewEnyoKind",\n	kind : "enyo.Control",\n	components : []\n});';
-		this.$.ace.insertAtEndOfFile(newKind);
+		var newKind = 'enyo.kind({\n	name : "@cursor@",\n	kind : "enyo.Control",\n	components : []\n});';
+		this.$.ace.insertAtEndOfFile(newKind, '@cursor@');
+	},
+	newcssAction: function(inSender, inEvent){
+		this.$.ace.insertAtEndOfFile(inEvent.outPut);
 	}
 });
 
@@ -505,14 +519,18 @@ enyo.kind({
 	}
 });
 
-enyo.kind({name: "rightPanels",kind: "Panels", wrap: false,
+enyo.kind({
+	events: {
+		onCss: "",
+	},
+name: "rightPanels",kind: "Panels", wrap: false,
 	components: [
 		{// right panel for JSON goes here
 		},
 		{kind: "enyo.Control", classes: "enyo-fit", components: [
-			{name: "right", classes: "border panel enyo-fit", style: "margin: 8px;", components: [
+			{name: "right", classes: "border panel enyo-fit",style: "margin: 8px;", components: [
 				{kind: "enyo.Scroller", classes: "panel enyo-fit",components: [
-					{kind: "onyx.Button", content: "Reparse", ontap: "reparseAction"},
+					{kind: "onyx.Button", content: "Reparse",  ontap: "reparseAction"},
 					{name: "dump", allowHtml: true}
 				]}
 			]}
@@ -520,9 +538,16 @@ enyo.kind({name: "rightPanels",kind: "Panels", wrap: false,
 		{// right panel for HTML goes here
 		},
 		{kind: "enyo.Control", classes: "enyo-fit",	components: [ // right panel for CSS here
-			{kind: "cssBuilder", classes: "border panel enyo-fit",style: "margin: 8px;"}
+			{kind: "cssBuilder", classes: "border panel enyo-fit",style: "margin: 8px;", onInsert: "test"}
 		]}
-	]
+	],
+
+	create: function() {
+		this.inherited(arguments);
+	},
+	test: function(inEvent) {
+		this.doCss(inEvent);
+	}
 });
 enyo.kind({name: "leftPanels",kind: "Panels", wrap: false,
 	components: [
