@@ -1,0 +1,12 @@
+[submodule "enyo"]
+	path = enyo
+	url = ../enyo
+[submodule "lib/layout"]
+	path = lib/layout
+	url = ../layout
+[submodule "lib/onyx"]
+	path = lib/onyx
+	url = ../onyx
+[submodule "lib/extra"]
+	path = lib/extra
+	url = ../extra
