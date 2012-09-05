@@ -38,7 +38,7 @@ enyo.kind({
 		this.serializeEvents(p, inComponent);
 		return p;
 	},
-	noserialize: {owner: 1, container: 1, parent: 1, id: 1, attributes: 1},
+	noserialize: {owner: 1, container: 1, parent: 1, id: 1, attributes: 1, selected: 1},
 	serializeProps: function(inComponent) {
 		var o = {
 			kind: this.getComponentKindName(inComponent)
