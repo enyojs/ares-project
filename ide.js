@@ -120,14 +120,14 @@ ide.res.services.filter(function(service){
 
 // Start the ide server
 
-var enyojsRoot = path.resolve(__dirname, "..");
+var enyojsRoot = path.resolve(__dirname,".");
 var app = express.createServer();
 
 var port = parseInt(process.argv[2] || "9009", 10);
 var addr = process.argv[3] || "127.0.0.1";
 
 app.configure(function(){
-	app.use('/ide', express.static(enyojsRoot + '/ares-project'));
+	app.use('/ide', express.static(enyojsRoot + '/'));
 	app.use('/enyo', express.static(enyojsRoot + '/enyo'));
 	app.use('/lib', express.static(enyojsRoot + '/lib'));
 	app.get('/res/timestamp', function(req, res) {
@@ -147,6 +147,10 @@ app.configure(function(){
 		}
 		res.status(200).json({service: service});
 	});
+	app.get('/', function(req, res) {
+		res.redirect('/ide/ares/');
+	});
+	
 });
 app.listen(port, addr);
 

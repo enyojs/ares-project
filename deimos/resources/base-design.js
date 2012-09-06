@@ -1,6 +1,6 @@
 Palette.model.push(
 	{name: "standard", items: [
-		{name: "Panel", title: "Simple Container", icon: "box_new.png", stars: 4, version: 2.0, blurb: "Chosen many and hearty, energy, delectable.",
+		{name: "Container", title: "Simple Container", icon: "box_new.png", stars: 4, version: 2.0, blurb: "Chosen many and hearty, energy, delectable.",
 			inline: {Xcontent: "Panel", classes: "well", style: "margin: 0; background-color: #F6F6F6;"},
 			config: {content: "$name", isContainer: true, layoutKind: "BaseLayout", classes: "well"}
 		},
