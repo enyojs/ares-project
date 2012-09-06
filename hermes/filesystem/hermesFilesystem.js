@@ -93,7 +93,7 @@ _.extend(true, HermesFilesystem.prototype, {
 		var fsPath = path.resolve(inRoot, inPath)
 
 		fs.mkdir(fsPath, 0755, function(err) {
-			if (err) return next(err)
+			if (err) return next(err);
 			
 			next(null, {id: inPath, path: inPath})
 		})

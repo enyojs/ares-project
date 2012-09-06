@@ -29,7 +29,7 @@ enyo.kind({
 			})
 			.error(this, function(inEvent, inData) {
 				enyo.log("Open failed", inData);
-				inSender.hideWaitPopup();
+				this.$.phobos.hideWaitPopup();
 			});
 	},
 	saveDocument: function(inSender, inEvent) {
