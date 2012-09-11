@@ -93,6 +93,14 @@ enyo.kind({
 							]}
 						]},
 					]},
+					{tag: "br"},
+					{classes: "onyx-toolbar-inline", components: [
+						{content: "Padding", classes: "picker"},
+						{kind: "onyx.PickerDecorator", components: [
+							{style: "min-width: 40px; font-size: 10px;"},
+							{name: "Padding", kind: "onyx.Picker",onSelect: "padding"}
+						]}
+					]},
 					{kind: "enyo.FittableColumns", components: [
 
 						{classes: "onyx-toolbar-inline", components: [
@@ -134,7 +142,9 @@ enyo.kind({
 		for (var i=5; i<2000; i+=5) {
 			this.$.widthSizePicker.createComponent({content: i, active: !i});
 		}
-
+		for (var i=5; i<50; i++) {
+			this.$.Padding.createComponent({content: i, active: !i});
+		}
 	},
 
 	updateBox: function(){
@@ -196,6 +206,10 @@ enyo.kind({
 	if(this.$.widthSize != null){
 		outPut = outPut  + tab + "width:" + " " + this.$.widthSize + "px;" + "<br>";
 		outString = outString + "	" + "width:" + " " + this.$.widthSize + "px;\n";
+	}
+	if(this.$.paddingSize != null){
+		outPut = outPut  + tab + "padding:" + " " + this.$.paddingSize + "px;" + "<br>";
+		outString = outString + "	" + "padding:" + " " + this.$.paddingSize + "px;\n";
 	}
 
 	this.$.bg.setContent(outPut + "<br>}");
@@ -301,13 +315,17 @@ enyo.kind({
 		this.$.widthSize = inEvent.selected.content;
 		this.updateBox();
 	},
+		padding: function(inSender, inEvent){
+		this.$.paddingSize = inEvent.selected.content;
+		this.updateBox();
+	},
 	newCssAction: function(inSender, inEvent) {
 		// Insert a new Css at the end of the file
 		this.doInsert (inEvent);
 
 	},
 	reset: function(){
-		this.className = null;
+		this.className = "";
 		this.backgroundColor = null;
 		this.fontColor  = null;
 		this.$.borderSize = null;
@@ -318,6 +336,7 @@ enyo.kind({
 		outString = "";
 		this.$.heightSize = null;
 		this.$.widthSize = null;
+		this.$.paddingSize = null;
 		this.updateBox();
 
 	}
