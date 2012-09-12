@@ -14,6 +14,16 @@ var util  = require('util');
 
 // command-line arguments
 
+/**
+ * Local filesystem access trampoline server
+ * 
+ * @param {Object} config provides the necessary configuration items in a single object.
+ * @type null does not return anything 
+ * 
+ * - urlPrefix (Mandatory) can be '/', '/res/files/' ...etc
+ * - root (Mandatory) local filesystem access root absolute path
+ * - port (Optionnal) local IP port of the express server (default: 9009, 0: dynamic)
+ */
 function FsLocal(config) {
 
 	// check major version
@@ -30,10 +40,8 @@ function FsLocal(config) {
 
 	app.use(cors);
 	app.use(express.logger('dev'));
-	app.use(express.bodyParser()); // XXX useful?
-	app.use(express.cookieParser()); // XXX useful?
-	app.use(express.methodOverride()); // XXX useful?
-	//app.enable('strict routing'); // XXX what for?
+	app.use(express.cookieParser()); // credential storage
+	app.use(express.methodOverride()); // add non get/post methods
 	app.all(config.urlPrefix + '/:verb/*', function(req, res) {
 		if (req.connection.remoteAddress !== "127.0.0.1") {
 			fail(res, "Access denied from IP address "+req.connection.remoteAddress);
@@ -69,6 +77,21 @@ function FsLocal(config) {
 
 	// utilities library
 
+	/**
+	 * Set CORS HTTP headers
+	 * 
+	 * Ares IDE server & per-service servers are serving different origins
+	 * and even different ports.  Consequently, CORS (Cross-Origin Resources
+	 * Sharing) HTTP headers are required to allow the browser client to use
+	 * all of them at the same time.
+	 * 
+	 * @this FsLocal
+	 * @param {express.Request} req
+	 * @param {express.Response} res
+	 * @param {function(err,data)} next
+	 * @private
+	 * @todo be mor restrictive than "*" in the future...
+	 */
 	function cors(req, res, next) {
 		res.header('Access-Control-Allow-Origin', "*");
 		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
@@ -81,14 +104,27 @@ function FsLocal(config) {
 		}
 	}
 
+	/**
+	 * Encode a relative local path into a fileId
+	 * 
+	 * A fileId is a string that can be used in a URL and which is
+	 * unique for the current service root.
+	 * 
+	 * @see decodeFileId
+	 */
 	function encodeFileId(path) {
-		// ...or any other encoding whose value is unique for the
-		// current root
 		return encodeURIComponent(path);
 	}
 
+	/**
+	 * Decode a fileId into a relative local path
+	 * 
+	 * A fileId is a string that can be used in a URL and which is
+	 * unique for the current service root.
+	 * 
+	 * @see encodeFileId
+	 */
 	function decodeFileId(id) {
-		// reverse encodeFileId
 		return decodeURIComponent(id);
 	}
 
@@ -218,6 +254,12 @@ function FsLocal(config) {
 		}
 	};
 
+	/**
+	 * Perform a recursive delete of a folder tree
+	 * 
+	 * @param {String} dir absolte folder local path
+	 * @param {function(err,data)} callback async handler (using Node.js conventions).
+	 */
 	function rmrf(dir, callback) {
 		// https://gist.github.com/1526919
 		fs.stat(dir, function(err, stats) {
@@ -259,11 +301,8 @@ function FsLocal(config) {
 }
 
 var fsLocal = new FsLocal({
-	// urlPrefix (M) can be '/', '/res/files/' ...etc
-	urlPrefix:	process.argv[2],
-	// root (m) local filesystem access root absolute path
-	root:		path.resolve(process.argv[3]),
-	// port (o) local IP port of the express server (default: 9009, 0: dynamic)
+	urlPrefix: process.argv[2],
+	root: path.resolve(process.argv[3]),
 	port: parseInt(process.argv[4] || "9009", 10)
 });
 
