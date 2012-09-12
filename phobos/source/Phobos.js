@@ -247,10 +247,130 @@ enyo.kind({
 		}
 		alert("No kinds found in this file");
 	},
+	listHandlers: function(object, declared) {
+		declared = this.listDeclaredComponentsHandlers(object.components, declared);
+		for(var i = 0; i < object.properties.length; i++) {
+			var p = object.properties[i];
+			try {
+				if (p.name === 'handlers') {
+					for(var j = 0; i < p.value[0].properties.length; j++) {
+						var q = p.value[0].properties[j];
+						var name = q.value[0].name;
+						name = name.replace(/["']{1}/g, '');
+						declared[name] = "";
+					}
+				}
+			} catch(error) {
+				enyo.log("Unexpected error: " + error);		// TODO TBC
+			}
+		}
+		return declared;
+	},
+	/**
+	 * Recursively lists the handler methods mentioned in the "onXXXX"
+	 * attributes of the components passed as an input parameter 
+	 * @param components: components to walk thru
+	 * @param declared: list of handler methods already listed
+	 * @returns the list of declared handler methods
+	 * @protected
+	 */
+	listDeclaredComponentsHandlers: function(components, declared) {
+		for(var i = 0; i < components.length; i++) {
+			var c = components[i];
+			for(var k = 0 ; k < c.properties.length ; k++) {
+				var p = c.properties[k];
+				if (p.name.substr(0, 2) === 'on') {
+					var name = p.value[0].name.replace(/["']{1}/g, '');
+					declared[name] = "";
+				}
+			}
+			if (components.components) {
+				this.listDeclaredComponentsHandlers(components.components, declared);
+			}
+		}
+		return declared;
+	},
+	/**
+	 * This function checks all the kinds and add the missing
+	 * handler functions listed in the "onXXXX" attributes
+	 * @protected
+	 * Note: This implies to reparse/analyze the file before
+	 * and after the operation. 
+	 */
+	insertMissingHandlers: function() {
+		if (this.analysis) {
+			// Reparse to get the definition of possibly added onXXXX attributes
+			this.reparseAction();
+			
+			/*
+			 * Insert missing handlers starting from the end of the
+			 * file to limit the need of reparsing/reanalysing
+			 * the file 
+			 */  
+			for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
+				this.insertMissingHandlersIntoKind(this.analysis.objects[i]);
+			}
+	
+			// Reparse to get the definition of the newly added methods
+			this.reparseAction();
+		} else {
+			// There is no parser data for the current file
+			console.log("Unable to insert missing handler methods");
+		}
+	},
+	/**
+	 * This function checks the kind passed as an inout parameter
+	 *  and add the missing handler functions listed in the "onXXXX" attributes
+	 * @param object
+	 * @protected
+	 */
+	insertMissingHandlersIntoKind: function(object) {
+		// List existing handlers
+		var existing = {};
+		var commaTerminated = false;
+		for(var j = 0 ; j < object.properties.length ; j++) {
+			var p = object.properties[j];
+			commaTerminated = p.commaTerminated;
+			if (p.value[0].name === 'function') {
+				existing[p.name] = "";
+			}
+		}
+		
+		// List the handler methods declared in the components and in handlers map
+		var declared = this.listHandlers(object, {});
+		
+		// Prepare the code to insert
+		var codeToInsert = "";
+		for(var item in declared) {
+			if (existing[item] === undefined) {
+				codeToInsert += (commaTerminated ? "" : ",\n");
+				commaTerminated = false;
+				codeToInsert += ("    " + item + ": function(inSender, inEvent) {\n        // TO"
+						+ "DO - Auto-generated code\n    }"); 
+			}
+		}
+
+		// insert the missing handler methods code in the editor
+		if (object.block) {
+			if (codeToInsert !== "") {
+				codeToInsert += "\n";
+				var pos = object.block.end - 1;
+				var c = this.$.ace.getValue();
+				var pre = c.substring(0, pos);
+				var post = c.substring(pos);
+				var code = pre + codeToInsert + post;
+				this.$.ace.setValue(code);
+			}
+		} else {
+			// There is no block information for that kind - Parser is probably not up-to-date
+			console.log("Unable to insert missing handler methods");
+		}
+	},
 	// called when designer has modified the components
 	updateComponents: function(inSender, inEvent) {
 		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
 			if (inEvent.contents[i]) {
+				// Insert the new version of components
 				var c = this.$.ace.getValue();
 				var start = this.analysis.objects[i].componentsBlockStart;
 				var end = this.analysis.objects[i].componentsBlockEnd;
@@ -260,7 +380,11 @@ enyo.kind({
 				this.$.ace.setValue(code);
 			}
 		}
-		this.reparseAction();
+		/*
+		 * Insert the missing handlers
+		 * NB: reparseAction() is invoked by insertMissingHandlers()
+		 */
+		this.insertMissingHandlers();
 		this.docHasChanged = true;
 	},
 	closeDocAction: function(inSender, inEvent) {
