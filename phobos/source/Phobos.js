@@ -247,6 +247,25 @@ enyo.kind({
 		}
 		alert("No kinds found in this file");
 	},
+	listHandlers: function(object, declared) {
+		declared = this.listDeclaredComponentsHandlers(object.components, declared);
+		for(var i = 0; i < object.properties.length; i++) {
+			var p = object.properties[i];
+			try {
+				if (p.name === 'handlers') {
+					for(var j = 0; i < p.value[0].properties.length; j++) {
+						var q = p.value[0].properties[j];
+						var name = q.value[0].name;
+						name = name.replace(/["']{1}/g, '');
+						declared[name] = "";
+					}
+				}
+			} catch(error) {
+				enyo.log("Unexpected error: " + error);		// TODO TBC
+			}
+		}
+		return declared;
+	},
 	/**
 	 * Recursively lists the handler methods mentioned in the "onXXXX"
 	 * attributes of the components passed as an input parameter 
@@ -255,7 +274,7 @@ enyo.kind({
 	 * @returns the list of declared handler methods
 	 * @protected
 	 */
-	listDeclaredHandlers: function(components, declared) {
+	listDeclaredComponentsHandlers: function(components, declared) {
 		for(var i = 0; i < components.length; i++) {
 			var c = components[i];
 			for(var k = 0 ; k < c.properties.length ; k++) {
@@ -266,7 +285,7 @@ enyo.kind({
 				}
 			}
 			if (components.components) {
-				this.listDeclaredHandlers(components.components, declared);
+				this.listDeclaredComponentsHandlers(components.components, declared);
 			}
 		}
 		return declared;
@@ -295,7 +314,7 @@ enyo.kind({
 			// Reparse to get the definition of the newly added methods
 			this.reparseAction();
 		} else {
-			// There is parser data for the current file
+			// There is no parser data for the current file
 			console.log("Unable to insert missing handler methods");
 		}
 	},
@@ -317,8 +336,8 @@ enyo.kind({
 			}
 		}
 		
-		// List the handler methods declared in the components
-		var declared = this.listDeclaredHandlers(object.components, {});
+		// List the handler methods declared in the components and in handlers map
+		var declared = this.listHandlers(object, {});
 		
 		// Prepare the code to insert
 		var codeToInsert = "";
