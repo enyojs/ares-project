@@ -183,16 +183,16 @@ _.extend(true, HermesFilesystem.prototype, {
 	, put: function(req, res, next) {
 			this._put(req.params.root, req.params.path, req.param('content'), next)
 		}
-	, createfile: function(req, res, next) {
+	, createFile: function(req, res, next) {
 			this._createfile(req.params.fsPath, req.param('content'), next)
 		}
-	, createfolder: function(req, res, next) {
+	, createFolder: function(req, res, next) {
 			this._createfolder(req.params.root, req.params.path, next)
 		}
-	, deletefile: function(req, res, next) {
+	, deleteFile: function(req, res, next) {
 			this._deletefile(req.params.fsPath, next)
 		}
-	, deletefolder: function(req, res, next) {
+	, deleteFolder: function(req, res, next) {
 			this._deletefolder(req.params.fsPath, next)
 		}
 	, rename: function(req, res, next) {
@@ -205,7 +205,6 @@ _.extend(true, HermesFilesystem.prototype, {
 })
 
 var verbs = HermesFilesystem.prototype.verbs
-verbs.renameFolder = verbs.renameFile = verbs.rename
 
 module.exports = {
 	HermesFilesystem: HermesFilesystem

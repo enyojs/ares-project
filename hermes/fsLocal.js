@@ -171,7 +171,7 @@ function FsLocal(config) {
 				}
 			});
 		},
-		createfile: function(req, res, next) {
+		createFile: function(req, res, next) {
 			fs.stat(req.params.localPath, function(err, stats) {
 				if (err && err.code === "ENOENT") {
 					return verbs.put(req, res, next);
@@ -180,7 +180,7 @@ function FsLocal(config) {
 				}
 			});
 		},
-		createfolder: function(req, res, next) {
+		createFolder: function(req, res, next) {
 			fs.mkdir(req.params.localPath, function(err) {
 				if (!err) {
 					return success(res, {id: req.params.id, path: req.params.path});
@@ -191,7 +191,7 @@ function FsLocal(config) {
 				}
 			});
 		},
-		deletefile: function(req, res, next) {
+		deleteFile: function(req, res, next) {
 			fs.unlink(req.params.localPath, function(err){
 				if (err) {
 					return fail(res, err);
@@ -200,7 +200,7 @@ function FsLocal(config) {
 				}
 			});
 		},
-		deletefolder: function(req, res, next) {
+		deleteFolder: function(req, res, next) {
 			rmrf(req.params.localPath, function(err) {
 				if (err) {
 					return fail(res, err);
