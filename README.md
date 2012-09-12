@@ -134,3 +134,8 @@ Start the file server:
 	$ open -a Chromium http://localhost:9010/ide/ares/index.html
 	$ node-inspector &
 	$ open -a Chromium http://localhost:8080/debug?port=5858
+
+## References
+
+* [RFC4918 - HTTP Extensions for Web Distributed Authoring and Versioning (WebDAV)](http://tools.ietf.org/html/rfc4918)
+* [RFC5689 - Extended MKCOL for Web Distributed Authoring and Versioning (WebDAV)](http://tools.ietf.org/html/rfc5689)
