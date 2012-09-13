@@ -17,7 +17,7 @@ enyo.kind({
 	style: "padding: 8px; white-space: nowrap;",
 	noinspect: {owner: 1, container: 1, parent: 1, prepend: 1, events: 1, id: 1},
 	buildPropList: function(inControl) {
-		var domEvents = ["ontap", "ondown", "onup", "ondragstart", "ondrag", "ondragfinish", "onenter", "onleave"]; // from dispatcher/guesture
+		var domEvents = ["ontap", "onchange", "ondown", "onup", "ondragstart", "ondrag", "ondragfinish", "onenter", "onleave"]; // from dispatcher/guesture
 		var propMap = {}, eventMap = {};
 		var context = inControl;
 		while (context) {

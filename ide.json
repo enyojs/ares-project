@@ -1,7 +1,7 @@
 {
 	"services":[
 		{
-			"active":false,
+			"active":true,
 			"id":"home",
 			"icon":"server",
 			"name":"Local Files (home)",
@@ -14,7 +14,7 @@
 			"respawn": true
 		},
 		{
-			"active":true,
+			"active":false,
 			"id":"home2",
 			"icon":"server",
 			"name":"Local Files (home)",
