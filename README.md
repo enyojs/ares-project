@@ -49,23 +49,21 @@ See the [Github.com help](https://help.github.com/articles/set-up-git) for hints
 
 ####Clone the ares-project repository from GitHub####
 Using git, clone the repository using either the HTTPS or SSH urls:
-`
-git clone https://github.com/enyojs/ares-project.git
-`
+
+	$ git clone https://github.com/enyojs/ares-project.git
+
 or
-`
-git clone git@github.com:enyojs/ares-project.git
-`
+
+	$ git clone git@github.com:enyojs/ares-project.git
 
 Which URL you should clone from depends on how you have git set up (see github docs above).
 
 ####Update the submodule references####
 Because Ares and Enyo are so closely linked, there are specific versions of Enyo and the libs folder included as references in the Ares repository. After cloning Ares, you need to update the submodules using "git submodule update"
 
-`cd ares-project
-git submodule init
-git submodule update
-`
+	$ cd ares-project
+	$ git submodule init
+	$ git submodule update
 
 If you are using a graphical Git client, there may or may not be a way to update the submodules from the GUI. If not, then use the commands above.
 
@@ -135,6 +133,12 @@ Start the file server:
 	$ node-inspector &
 	$ open -a Chromium http://localhost:8080/debug?port=5858
 
+## Run Test Suite
+
+So far, only hermes local filesystem access comes with a (small) test suite.  Run it using:
+
+	$ node hermes/node_modules/jasmine-node/lib/jasmine-node/cli.js hermes/
+	
 ## References
 
 * [RFC4918 - HTTP Extensions for Web Distributed Authoring and Versioning (WebDAV)](http://tools.ietf.org/html/rfc4918)
