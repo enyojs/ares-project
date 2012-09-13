@@ -9,63 +9,90 @@
 
 var fs = require("fs");
 var path = require("path");
-var express = require(path.resolve(__dirname, "node_modules/express"));
+var express = require("express");
 var util  = require('util');
 
 // command-line arguments
 
-function FsLocal(config) {
+function FsLocal(config, next) {
 
-	// check major version
-
-	var version = process.version.match(/[0-9]+.[0-9]+/)[0];
-	if (version <= 0.7) {
-		console.error("Only supported on Node.js version 0.8 and above");
-		process.exit(1);
-	}
-	
-	// express REST-ful framework configuration
-
+	/**
+	 * Express server instance
+	 * 
+	 * @private
+	 */
 	var app = express.createServer();
 
-	app.use(cors);
 	app.use(express.logger('dev'));
-	//app.use(express.bodyParser()); // parses json, x-www-form-urlencoded, and multipart/form-data
-	app.use(express.cookieParser()); // XXX useful?
-	app.use(express.methodOverride()); // XXX useful?
-	//app.enable('strict routing'); // XXX what for?
-	app.all(config.urlPrefix + '/:verb/*', function(req, res) {
+
+	// Security
+	app.use(cors);
+	//app.use(express.cookieParser());
+	app.use(function(req, res, next) {
+		debugger;
+		console.log("authenticating...");
 		if (req.connection.remoteAddress !== "127.0.0.1") {
 			fail(res, "Access denied from IP address "+req.connection.remoteAddress);
+		} else {
+			next()
 		}
+	});
 
+	app.use(function(req, res, next) {
+		debugger;
+		console.log("originalMethod/method = "+req.originalMethod+"/"+req.method);
+		req.originalMethod = req.method;
+		if (req.query._method) {
+			req.method = req.query._method.toUpperCase();
+		}
+		console.log("originalMethod/method = "+req.originalMethod+"/"+req.method);
+		if (!verbs[req.originalMethod] || 
+		    !verbs[req.originalMethod][req.method]) {
+			next("unknown originalMethod/method = "+req.originalMethod+"/"+req.method);
+		} else {
+			next();
+		}
+	});
+
+	//app.use(express.bodyParser()); // parses json, x-www-form-urlencoded, and multipart/form-data
+	//app.enable('strict routing'); // XXX what for?
+
+	app.all(config.urlPrefix, function(req, res) {
+		res.redirect(config.urlPrefix +
+			     '/' + encodeFileId('/') + 
+			    "?_method=PROPFIND");
+	});
+	app.all(config.urlPrefix + '/:id', function(req, res, next) {
+		debugger;
+		console.log("parsing parameters...");
 		req.params.root = config.root;
-		req.params.id = req.params[0];
+		req.params.id = req.params.id || encodeFileId('/');
 		req.params.path = decodeFileId(req.params.id);
 		req.params.localPath = path.resolve(path.join(req.params.root, req.params.path));
+		req.params.depth = parseInt(req.param('depth'), 10) || 0;
+		console.log("req.params=");
 		console.dir(req.params);
-
-		if (verbs[req.params.verb]) {
-			verbs[req.params.verb](req, res, respond);
-		} else {
-			respond("unknown verb="+req.params.verb);
-		}
+		verbs[req.originalMethod][req.method](req, res, respond.bind(this, res));
 	});
-	// error handler is the last one
-	app.use(function(err, req, res, next){
-		fail(res, err);
-	});
-
-	// start the filesystem (fs) server & notify the IDE server (parent) where to find it
+	
+	// start the filesystem (fs) server & notify the IDE server
+	// (parent) where to find it
 
 	app.listen(config.port, "127.0.0.1", null /*backlog*/, function() {
-		// Send back the URL to the IDE server, when port is actually bound
+		// Send back the URL to the IDE server, when port is
+		// actually bound
 		var service = {
 			url: "http://127.0.0.1:"+app.address().port.toString()+config.urlPrefix
 		};
-		console.log("available at "+service.url);
-		process.send(service);
+		return next(null, service);
 	});
+
+	/**
+	 * Terminates express server
+	 */
+	this.quit = function() {
+		app.close();
+	};
 
 	// utilities library
 
@@ -81,22 +108,27 @@ function FsLocal(config) {
 		}
 	}
 
-	function encodeFileId(path) {
-		// ...or any other encoding whose value is unique for the
-		// current root
-		return encodeURIComponent(path);
+	function encodeFileId(relPath) {
+		if (relPath) {
+			return encodeURIComponent(relPath);
+		} else {
+			return undefined;
+		}
 	}
 
 	function decodeFileId(id) {
-		// reverse encodeFileId
-		return decodeURIComponent(id);
+		if (id) {
+			return decodeURIComponent(id);
+		} else {
+			return undefined;
+		}
 	}
 
-	function respond(err, data) {
+	function respond(res, err, data) {
 		if (err) {
 			return fail(res, err);
 		} else {
-			return success(res, {});
+			return success(res, data);
 		}
 	}
 
@@ -133,18 +165,17 @@ function FsLocal(config) {
 	// File-System (fs) verbs
 
 	var verbs = {
-		get: {}, 	// verbs that are transmitted over an HTTP GET method
-		post: {} 	// verbs that are transmitted over an HTTP POST method
+		GET: {}, 	// verbs that are transmitted over an HTTP GET method
+		POST: {} 	// verbs that are transmitted over an HTTP POST method
 	};
 	
-	verbs.get.propfind = function(req, res, next) {
-		var depth = parseInt(req.param('depth'), 10) || 1;
-		var localPath = req.params.localPath;
-		return _propfind(localPath, path, depth, next);
+	verbs.GET.PROPFIND = function(req, res, next) {
+		return _propfind(req.params.localPath, req.params.path,
+				 req.params.depth, next);
 	};
 
 	var _propfind = function(localPath, relPath, depth, next) {
-		if (relPath.basename(path).charAt(0) ===".") {
+		if (path.basename(relPath).charAt(0) ===".") {
 			// Skip hidden files & folders (using UNIX
 			// convention: XXX do it for Windows too)
 			return next(null);
@@ -158,20 +189,22 @@ function FsLocal(config) {
 			// minimum common set of properties
 			var node = {
 				path: relPath,
-				name: relPath.basename(path),
+				name: path.basename(relPath),
 				id: encodeFileId(relPath),
 				isDir: stat.isDirectory()
 			};
 
 			console.dir(node);
 
-			if (node.isDir) {
+			if (stat.isFile() || !depth) {
+				return next(null, node);
+			} else if (node.isDir) {
 				node.contents = [];
 				fs.readdir(localPath, function(err, files) {
 					if (err) {
 						return next(err); // XXX or skip this directory...
 					}
-					if (!files.length || !depth) {
+					if (!files.length) {
 						return next(null, node);
 					}
 					var count = files.length;
@@ -190,8 +223,6 @@ function FsLocal(config) {
 						});
 					});
 				});
-			} else if (stat.isFile()) {
-				return next(null, node);
 			} else {
 				// skip special files
 				return next(null);
@@ -199,7 +230,7 @@ function FsLocal(config) {
 		});
 	};
 	
-	verbs.get.get = function(req, res, next) {
+	verbs.GET.GET = function(req, res, next) {
 		fs.stat(req.params.localPath, function(err, stat) {
 			if (err) {
 				return next(err); // XXX be smarter about error codes
@@ -222,7 +253,7 @@ function FsLocal(config) {
 		});
 	};
 
-	verbs.post.put = function (req, res, next) {
+	verbs.POST.PUT = function (req, res, next) {
 		// XXX replace application/json body by direct upload using multipart/form-data + express.bodyParser()
 		var body = JSON.parse(req.body); // req.param('content') || ''
 		var buffer = new Buffer(body.content, 'base64');
@@ -232,7 +263,7 @@ function FsLocal(config) {
 		});
 	};
 
-	verbs.post.mkcol = function(req, res, next) {
+	verbs.POST.MKCOL = function(req, res, next) {
 		fs.mkdir(req.params.localPath, function(err) {
 			var error;
 			if (!err) {
@@ -249,7 +280,7 @@ function FsLocal(config) {
 		});
 	};
 
-	verbs.post.delete = function(req, res, next) {
+	verbs.POST.DELETE = function(req, res, next) {
 		_rmrf(req.params.localPath, next);
 	};
 
@@ -291,12 +322,12 @@ function FsLocal(config) {
 		});
 	}
 
-	verbs.post.move = function(req, res, next) {
+	verbs.POST.MOVE = function(req, res, next) {
 		// XXX improve status codes (see RFC4918, section 9.9.4)
 		_changeNode(req, res, fs.rename, next);
 	};
 
-	verbs.post.copy = function(req, res, next) {
+	verbs.POST.COPY = function(req, res, next) {
 		// XXX improve status codes (see RFC4918, section 9.9.4)
 		_changeNode(req, res, _cpr, next);
 	};
@@ -317,49 +348,63 @@ function FsLocal(config) {
 	}
 
 	function _cpr(srcPath, dstPath, next) {
-		fs.stat(srcPath, function(err, stats) {
+		function _copyFile(srcPath, dstPath, next) {
 			var is, os;
+				is = fs.createReadStream(srcPath);
+				os = fs.createWriteStream(dstPath);
+				util.pump(is, os, next); // XXX success should return 201 (Created)
+		}
+		function _copyDir(srcPath, dstPath, next) {
+			var count = 0;
+			fs.readdir(srcPath, function(err, files) {
+				if (err) {
+					return next(err);
+				}
+				fs.mkdir(dstPath, function(err) {
+					if (err) {
+						return next(err);
+					}
+					if (files.length >= 1) {
+						files.forEach(function(file) {
+							var sub = path.join(dstPath, file);
+							
+							_cpr(path.join(srcPath, file), path.join(dstPath, file), function(err) {
+								if (err) {
+									return next(err);
+								}
+								
+								if (++count == files.length) {
+									return next(null);
+								}
+							});
+						});
+					}
+				});
+			});
+		}
+		fs.stat(srcPath, function(err, stats) {
 			if (err) {
 				return next(err);
 			}
 			if (stats.isDirectory()) {
-					var count = 0;
-					fs.readdir(srcPath, function(err, files) {
-						if (err) {
-							return next(err);
-						}
-						fs.mkdir(dstPath, function(err) {
-							if (err) {
-								return next(err);
-							}
-							if (files.length >= 1) {
-								files.forEach(function(file) {
-									var sub = path.join(dstPath, file);
-									
-									_cpr(path.join(srcPath, file), path.join(dstPath, file), function(err) {
-										if (err) {
-											return next(err);
-										}
-										
-										if (++count == files.length) {
-											return next(null);
-										}
-									});
-								});
-							}
-						});
-					});
-			} else {
-				is = fs.createReadStream(srcPath);
-				os = fs.createWriteStream(dstPath);
-				util.pump(is, os, next); // XXX success should return 201 (Created)
+				_copyDir(srcPath, dstPath, next);
+			} else if (stats.isFile()){
+				_copyFile(srcPath, dstPath, next);
 			}
 		});
 	}
 }
 
+debugger;			// webkit breakpoint
+
 if (path.basename(process.argv[1]) === "fsLocal.js") {
 	// We are main.js: create & run the object...
+
+	var version = process.version.match(/[0-9]+.[0-9]+/)[0];
+	if (version <= 0.7) {
+		process.exit("Only supported on Node.js version 0.8 and above");
+	}
+
 	var fsLocal = new FsLocal({
 		// urlPrefix (M) can be '/', '/res/files/' ...etc
 		urlPrefix:	process.argv[2],
@@ -367,8 +412,19 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		root:		path.resolve(process.argv[3]),
 		// port (o) local IP port of the express server (default: 9009, 0: dynamic)
 		port: parseInt(process.argv[4] || "9009", 10)
+	}, function(err, service){
+		if (err) {
+			process.exit(err);
+		}
+		console.log("fsLocal['"+process.argv[3]+"'] available at "+service.url);
+		if (process.send) {
+			// only possible/available if parent-process is node
+			process.send(service);
+		}
 	});
+
 } else {
+
 	// ... otherwise hook into commonJS module systems
-	module.exports = fsLocal;
+	module.exports = FsLocal;
 }
