@@ -43,7 +43,7 @@ function FsLocal(config, next) {
 	app.use(express.cookieParser());
 	app.use(function(req, res, next) {
 		if (req.connection.remoteAddress !== "127.0.0.1") {
-			next("Access denied from IP address "+req.connection.remoteAddress);
+			next(new Error("Access denied from IP address "+req.connection.remoteAddress));
 		} else {
 			next();
 		}
@@ -58,7 +58,7 @@ function FsLocal(config, next) {
 		}
 		if (!verbs[req.originalMethod] || 
 		    !verbs[req.originalMethod][req.method]) {
-			next("unknown originalMethod/method = "+req.originalMethod+"/"+req.method);
+			next(new Error("unknown originalMethod/method = "+req.originalMethod+"/"+req.method));
 		} else {
 			next();
 		}
@@ -71,39 +71,27 @@ function FsLocal(config, next) {
 
 	// Success
 	function respond(res, err, response) {
-		var error;
-		var errMsg;
+		var status, body;
 		if (err) {
-			console.log("err=");
-			console.dir(err);
-			if (err.code && err.path) {
-				// fs.xxx error
-				if (err.code === 'EEXIST') {
-					errMsg = err.path + ": already exists";
-					error.http_code = 405; // Method Not Allowed
-				} else {
-					error = new Error(err.path + ": " + err.code);
-					error.http_code = 500; // Internal Server Error
+			status =  500; // Internal Server Error
+			if (err instanceof Error) {
+				if (err.errno) {
+					status = 405; // Method Not Allowed
 				}
-			} else if (typeof err === 'string') {
-				error = new Error(err);
-				error.http_code = 500; // Internal Server Error
-			} else if (err instanceof Error) {
-				error = err;
-			}
-			console.log("error=");
-			console.error(err.stack);
-			res.send(err.stack, err.http_code ? err.http_code : 500);
-		} else {
-			console.log("response=");
-			console.dir(response);
-			var code = response.code || 200;
-			var body = response.body;
-			if (body) {
-				res.status(code).send(body);
+				body = err;
 			} else {
-				res.status(code).end();
+				body = new Error(err.toString());
 			}
+			console.error("error=" + body);
+			console.error(body.stack);
+		} else {
+			status = response.code || 200;
+			body = response.body;
+		}
+		if (body) {
+			res.status(status).send(body);
+		} else {
+			res.status(status).end();
 		}
 	}
 	
@@ -268,7 +256,7 @@ function FsLocal(config, next) {
 					return next(err, {content: buffer.toString('base64')});
 				});
 			} else {
-				return next("Not a file"); // XXX be smarter about error codes
+				return next(new Error("Not a file")); // XXX be smarter about error codes
 			}
 		});
 	};
@@ -276,7 +264,7 @@ function FsLocal(config, next) {
 	verbs.POST.PUT = function (req, res, next) {
 		var newPath, newId;
 		if (!req.query.name) {
-			next("missing 'name' query parameter");
+			next(new Error("missing 'name' query parameter"));
 			return;
 		}
 		newPath = path.join(req.params.path, path.basename(req.query.name));
@@ -296,7 +284,7 @@ function FsLocal(config, next) {
 	verbs.POST.MKCOL = function(req, res, next) {
 		var newPath, newId;
 		if (!req.query.name) {
-			next("missing 'name' query parameter");
+			next(new Error("missing 'name' query parameter"));
 			return;
 		}
 		newPath = path.join(req.params.path, path.basename(req.query.name));
@@ -311,7 +299,16 @@ function FsLocal(config, next) {
 	};
 
 	verbs.POST.DELETE = function(req, res, next) {
-		_rmrf(req.params.localPath, next);
+		var localPath = path.join(config.root, req.params.path);
+		if (localPath === config.root) {
+			var err = new Error("Not allowed to remove service root");
+			err.http_code = 403 /*Forbidden*/;
+			next(err);
+		} else {
+			_rmrf(path.join(config.root, req.params.path), function(err) {
+				next(err, { code: 204 /*No Content*/ });
+			});
+		}
 	};
 
 	function _rmrf(dir, next) {
@@ -322,7 +319,7 @@ function FsLocal(config, next) {
 			}
 
 			if (!stats.isDirectory()) {
-				return fs.unlink(dir, next); // XXX should return 204 (No Content) on success
+				return fs.unlink(dir, next);
 			}
 
 			var count = 0;
@@ -332,7 +329,7 @@ function FsLocal(config, next) {
 				}
 
 				if (files.length < 1) {
-					return fs.rmdir(dir, next); // XXX should return 204 (No Content) on success
+					return fs.rmdir(dir, next);
 				}
 
 				files.forEach(function(file) {

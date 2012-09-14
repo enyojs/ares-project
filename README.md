@@ -133,13 +133,58 @@ Start the file server:
 	$ node-inspector &
 	$ open -a Chromium http://localhost:8080/debug?port=5858
 
+## Hermes Verbs
+
+Hermes file-system providers use verbs that closely mimic the semantics defined by [WebDAV (RFC4918)](http://tools.ietf.org/html/rfc4918):  although Hermes reuses the same HTTP verbs (`GET`, `PUT`, `PROPFIND`, `MKCOL`, `DELETE` ...), it differs in terms of carried data.  Many (if not most) of the HTTP clients implement only the `GET` and `POST` HTTP verbs:  Hermes uses the same HTTP Method Overrides as WebDAV usually do (tunnel every requests but `GET` into `POST` requests that include a special `_method` query parameter)
+
+* `PROPFIND` lists properties of a resource.  It recurses into the collections according to the `depth` parameter, which may be 0, 1, … etc plus `infinity`.  For example, the following directory structure:
+
+		$ tree 1/
+		1/
+		├── 0
+		└── 1
+
+… corresponds to the following JSON object returned by `PROPFIND`.
+
+		$ curl "http://127.0.0.1:9009/id/%2F?_method=PROPFIND&depth=10"
+		{
+		    "isDir": true, 
+		    "path": "/", 
+		    "name": "", 
+		    "contents": [
+		        {
+		            "isDir": false, 
+		            "path": "/0", 
+		            "name": "0", 
+		            "id": "%2F0"
+		        }, 
+		        {
+		            "isDir": false, 
+		            "path": "/1", 
+		            "name": "1", 
+		            "id": "%2F1"
+		        }
+		    ], 
+		    "id": "%2F"
+		}
+
+* `MKCOL` create a collection (a folder) into the given collection, using the name `name` passed as a query parameter (and therefore URL-encoded).:
+
+		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
+
+* `DELETE` delete a resource (a file), which might be a collection (a folder) 
+
+		$ curl -d "" "http://127.0.0.1:9009/id/%2Ftata?_method=DELETE"
+
+
 ## Run Test Suite
 
 So far, only hermes local filesystem access comes with a (small) test suite.  Run it using:
 
-	$ node hermes/node_modules/jasmine-node/lib/jasmine-node/cli.js hermes/
+	$ node hermes/node_modules/jasmine-node/lib/jasmine-node/cli.js hermes
 	
 ## References
 
 * [RFC4918 - HTTP Extensions for Web Distributed Authoring and Versioning (WebDAV)](http://tools.ietf.org/html/rfc4918)
 * [RFC5689 - Extended MKCOL for Web Distributed Authoring and Versioning (WebDAV)](http://tools.ietf.org/html/rfc5689)
+* Screencast [Debugging with `node-inspector`](http://howtonode.org/debugging-with-node-inspector)
