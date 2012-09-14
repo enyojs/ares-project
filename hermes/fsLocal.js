@@ -10,11 +10,12 @@
 var fs = require("fs");
 var path = require("path");
 var express = require("express");
-var util  = require('util');
-
-// command-line arguments
+var util  = require("util");
+var querystring = require("querystring");
 
 function FsLocal(config, next) {
+
+	config.root = path.resolve(config.root);
 
 	/**
 	 * Express server instance
@@ -25,27 +26,36 @@ function FsLocal(config, next) {
 
 	app.use(express.logger('dev'));
 
-	// Security
-	app.use(cors);
-	//app.use(express.cookieParser());
+	// CORS -- Cros-Origin Resources Sharing
 	app.use(function(req, res, next) {
-		debugger;
-		console.log("authenticating...");
-		if (req.connection.remoteAddress !== "127.0.0.1") {
-			fail(res, "Access denied from IP address "+req.connection.remoteAddress);
-		} else {
-			next()
+		res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
+		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+		res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+		if ('OPTIONS' == req.method) {
+			res.status(200).end();
+		}
+		else {
+			next();
 		}
 	});
 
+	// Authentication
+	app.use(express.cookieParser());
 	app.use(function(req, res, next) {
-		debugger;
-		console.log("originalMethod/method = "+req.originalMethod+"/"+req.method);
+		if (req.connection.remoteAddress !== "127.0.0.1") {
+			next("Access denied from IP address "+req.connection.remoteAddress);
+		} else {
+			next();
+		}
+	});
+
+	// HTTP method overloading
+	app.use(function(req, res, next) {
+		//debugger;
 		req.originalMethod = req.method;
 		if (req.query._method) {
 			req.method = req.query._method.toUpperCase();
 		}
-		console.log("originalMethod/method = "+req.originalMethod+"/"+req.method);
 		if (!verbs[req.originalMethod] || 
 		    !verbs[req.originalMethod][req.method]) {
 			next("unknown originalMethod/method = "+req.originalMethod+"/"+req.method);
@@ -54,26 +64,69 @@ function FsLocal(config, next) {
 		}
 	});
 
+	// Error handler (4 parameters)
+	app.use(function(err, req, res, next){
+		respond(res, err);
+	});
+
+	// Success
+	function respond(res, err, response) {
+		var error;
+		var errMsg;
+		if (err) {
+			console.log("err=");
+			console.dir(err);
+			if (err.code && err.path) {
+				// fs.xxx error
+				if (err.code === 'EEXIST') {
+					errMsg = err.path + ": already exists";
+					error.http_code = 405; // Method Not Allowed
+				} else {
+					error = new Error(err.path + ": " + err.code);
+					error.http_code = 500; // Internal Server Error
+				}
+			} else if (typeof err === 'string') {
+				error = new Error(err);
+				error.http_code = 500; // Internal Server Error
+			} else if (err instanceof Error) {
+				error = err;
+			}
+			console.log("error=");
+			console.error(err.stack);
+			res.send(err.stack, err.http_code ? err.http_code : 500);
+		} else {
+			console.log("response=");
+			console.dir(response);
+			var code = response.code || 200;
+			var body = response.body;
+			if (body) {
+				res.status(code).send(body);
+			} else {
+				res.status(code).end();
+			}
+		}
+	}
+	
 	//app.use(express.bodyParser()); // parses json, x-www-form-urlencoded, and multipart/form-data
 	//app.enable('strict routing'); // XXX what for?
 
-	app.all(config.urlPrefix, function(req, res) {
-		res.redirect(config.urlPrefix +
-			     '/' + encodeFileId('/') + 
-			    "?_method=PROPFIND");
+	app.all(path.normalize(config.urlPrefix), function(req, res) {
+		res.redirect('/id/' + encodeFileId('/') + 
+			     res.query ? "?" +
+			     querystring.stringify(req.query) : '');
 	});
-	app.all(config.urlPrefix + '/:id', function(req, res, next) {
-		debugger;
-		console.log("parsing parameters...");
-		req.params.root = config.root;
+	app.all(path.join(config.urlPrefix, '/id/:id'), function(req, res, next) {
+		console.log("req.query=");
+		console.dir(req.query);
 		req.params.id = req.params.id || encodeFileId('/');
 		req.params.path = decodeFileId(req.params.id);
-		req.params.localPath = path.resolve(path.join(req.params.root, req.params.path));
-		req.params.depth = parseInt(req.param('depth'), 10) || 0;
+		// 'infinity' is '-1', 'undefined' is '0'
+		req.params.depth = req.query.depth ? (req.query.depth === 'infinity' ? -1 : parseInt(req.query.depth, 10)) : 0;
 		console.log("req.params=");
 		console.dir(req.params);
 		verbs[req.originalMethod][req.method](req, res, respond.bind(this, res));
 	});
+	console.log("route="+path.join(config.urlPrefix, ':id'));
 	
 	// start the filesystem (fs) server & notify the IDE server
 	// (parent) where to find it
@@ -96,18 +149,6 @@ function FsLocal(config, next) {
 
 	// utilities library
 
-	function cors(req, res, next) {
-		res.header('Access-Control-Allow-Origin', "*");
-		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-		res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-		if ('OPTIONS' == req.method) {
-			res.send(200);
-		}
-		else {
-			next();
-		}
-	}
-
 	function encodeFileId(relPath) {
 		if (relPath) {
 			return encodeURIComponent(relPath);
@@ -121,33 +162,6 @@ function FsLocal(config, next) {
 			return decodeURIComponent(id);
 		} else {
 			return undefined;
-		}
-	}
-
-	function respond(res, err, data) {
-		if (err) {
-			return fail(res, err);
-		} else {
-			return success(res, data);
-		}
-	}
-
-	function success(res, data) {
-		if (data) {
-			res.status(200).send(data);
-		} else {
-			res.status(200);
-			res.end();
-		}
-	}
-
-	function fail(res, err, code) {
-		if (err instanceof Error) {
-			console.error(err.stack);
-			res.send(err.stack, code ? code : 500);
-		} else {
-			console.error(err);
-			res.send(JSON.stringify({error: err}), code ? code: 403);
 		}
 	}
 
@@ -170,11 +184,13 @@ function FsLocal(config, next) {
 	};
 	
 	verbs.GET.PROPFIND = function(req, res, next) {
-		return _propfind(req.params.localPath, req.params.path,
-				 req.params.depth, next);
+		_propfind(req.params.path, req.params.depth, function(err, content){
+			next(err, {code: 200, body: content});
+		});
 	};
 
-	var _propfind = function(localPath, relPath, depth, next) {
+	var _propfind = function(relPath, depth, next) {
+		var localPath = path.join(config.root, relPath);
 		if (path.basename(relPath).charAt(0) ===".") {
 			// Skip hidden files & folders (using UNIX
 			// convention: XXX do it for Windows too)
@@ -194,6 +210,7 @@ function FsLocal(config, next) {
 				isDir: stat.isDirectory()
 			};
 
+			console.log("depth="+depth+", node=");
 			console.dir(node);
 
 			if (stat.isFile() || !depth) {
@@ -209,11 +226,13 @@ function FsLocal(config, next) {
 					}
 					var count = files.length;
 					files.forEach(function(name) {
-						_propfind(path.join(localPath, name), path.join(relPath, name), depth-1, function(err, subNode){
+						_propfind(path.join(relPath, name), depth-1, function(err, subNode){
 							if (err) {
 								return next(err);
 							}
-							node.contents.push(subNode);
+							if (subNode) {
+								node.contents.push(subNode);
+							}
 							if (--count === 0) {
 								// return to upper layer only if
 								// every nodes of this layer
@@ -231,6 +250,7 @@ function FsLocal(config, next) {
 	};
 	
 	verbs.GET.GET = function(req, res, next) {
+		var localPath = path.join(config.root, req.params.path);
 		fs.stat(req.params.localPath, function(err, stat) {
 			if (err) {
 				return next(err); // XXX be smarter about error codes
@@ -238,11 +258,11 @@ function FsLocal(config, next) {
 			if (stat.isFile()) {
 				// XXX use the below when we upload using express.bodyParser()
 				/*
-				var mimeType = _mimeTypes[path.extname(req.params.localPath).split(".")[1]];
-				res.writeHead(200, {'Content-Type': mimeType} );
-				var fileStream = fs.createReadStream(req.params.localPath);
-				fileStream.pipe(res);
-				return success(res);
+				 var mimeType = _mimeTypes[path.extname(req.params.path).split(".")[1]];
+				 res.writeHead(200, {'Content-Type': mimeType} );
+				 var fileStream = fs.createReadStream(localPath);
+				 fileStream.pipe(res);
+				 next();
 				 */
 				return fs.readFile(req.params.localPath, function(err, buffer) {
 					return next(err, {content: buffer.toString('base64')});
@@ -254,29 +274,39 @@ function FsLocal(config, next) {
 	};
 
 	verbs.POST.PUT = function (req, res, next) {
+		var newPath, newId;
+		if (!req.query.name) {
+			next("missing 'name' query parameter");
+			return;
+		}
+		newPath = path.join(req.params.path, path.basename(req.query.name));
+		newId = encodeFileId(newPath);
+
 		// XXX replace application/json body by direct upload using multipart/form-data + express.bodyParser()
 		var body = JSON.parse(req.body); // req.param('content') || ''
 		var buffer = new Buffer(body.content, 'base64');
-		fs.writeFile(req.params.localPath, buffer, function(err){
-			// XXX success should return 201 (Created) if file did not exists before
-			next(err, {id: req.params.id, path: req.params.path});
+		fs.writeFile(path.join(config.root, newPath), buffer, function(err){
+			next(err, {
+				code: 201, // Created
+				body: {id: req.params.id, path: req.params.path}
+			});
 		});
 	};
 
 	verbs.POST.MKCOL = function(req, res, next) {
-		fs.mkdir(req.params.localPath, function(err) {
-			var error;
-			if (!err) {
-				next(null, {id: req.params.id, path: req.params.path});
-			} else if (err.code === 'EEXIST') {
-				error = new Error(err.path + ": already exists");
-				error.http_code = 405; // Method Not Allowed
-				next(error);
-			} else {
-				error = new Error(err.path + ": " + err.code);
-				error.http_code = 500; // Internal Server Error
-				next(error);
-			}
+		var newPath, newId;
+		if (!req.query.name) {
+			next("missing 'name' query parameter");
+			return;
+		}
+		newPath = path.join(req.params.path, path.basename(req.query.name));
+		newId = encodeFileId(newPath);
+
+		fs.mkdir(path.join(config.root, newPath), function(err) {
+			next(err, {
+				code: 201, // Created
+				body: {id: newId, path: newPath}
+			});
 		});
 	};
 
@@ -292,7 +322,7 @@ function FsLocal(config, next) {
 			}
 
 			if (!stats.isDirectory()) {
-				return fs.unlink(dir, next); // XXX success should return 204 (No Content)
+				return fs.unlink(dir, next); // XXX should return 204 (No Content) on success
 			}
 
 			var count = 0;
@@ -302,7 +332,7 @@ function FsLocal(config, next) {
 				}
 
 				if (files.length < 1) {
-					return fs.rmdir(dir, next); // XXX success should return 204 (No Content)
+					return fs.rmdir(dir, next); // XXX should return 204 (No Content) on success
 				}
 
 				files.forEach(function(file) {
@@ -334,25 +364,25 @@ function FsLocal(config, next) {
 
 	function _changeNode(req, res, op, next) {
 		var newPath;
-		if (req.param('name')) {
+		if (req.query.name) {
 			// rename file within the same collection (folder)
-			newPath = path.resolve(path.join(path.dirname(req.params.localPath),
-							 path.basename(req.param('name'))));
-		} else if (req.param('path')) {
+			newPath = path.join(config.root, req.params.path,
+					    path.basename(req.query.name));
+		} else if (req.query.path) {
 			// move at a new location
-			newPath = path.resolve(path.join(req.params.root, req.param('path')));
+			newPath = path.join(config.root, req.param('path'));
 		} else {
 			return next(new Error("missing parameter: name or path"));
 		}
-		return op(req.params.localPath, newPath, next);
+		return op(path.join(config.root, req.params.path), newPath, next);
 	}
 
 	function _cpr(srcPath, dstPath, next) {
 		function _copyFile(srcPath, dstPath, next) {
 			var is, os;
-				is = fs.createReadStream(srcPath);
-				os = fs.createWriteStream(dstPath);
-				util.pump(is, os, next); // XXX success should return 201 (Created)
+			is = fs.createReadStream(srcPath);
+			os = fs.createWriteStream(dstPath);
+			util.pump(is, os, next); // XXX should return 201 (Created) on success
 		}
 		function _copyDir(srcPath, dstPath, next) {
 			var count = 0;
@@ -395,7 +425,7 @@ function FsLocal(config, next) {
 	}
 }
 
-debugger;			// webkit breakpoint
+//debugger;
 
 if (path.basename(process.argv[1]) === "fsLocal.js") {
 	// We are main.js: create & run the object...
