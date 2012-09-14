@@ -40,9 +40,14 @@ enyo.kind({
 		]},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"}
 	],
-
+	events: {
+		onSaveDocument: "",
+		onDesignDocument: "",
+		onCloseDocument: ""
+	},
 	handlers: {
 		onCss: "newcssAction",
+		onReparseAsked: "reparseAction"
 	},
 	docHasChanged: false,
 	debug: false,
@@ -644,17 +649,18 @@ enyo.kind({
 });
 
 enyo.kind({
+	name: "rightPanels",kind: "Panels", wrap: false,
 	events: {
 		onCss: "",
+		onReparseAsked: ""
 	},
-name: "rightPanels",kind: "Panels", wrap: false,
 	components: [
 		{// right panel for JSON goes here
 		},
 		{kind: "enyo.Control", classes: "enyo-fit", components: [
 			{name: "right", classes: "border panel enyo-fit",style: "margin: 8px;", components: [
 				{kind: "enyo.Scroller", classes: "panel enyo-fit",components: [
-					{kind: "onyx.Button", content: "Reparse",  ontap: "reparseAction"},
+					{kind: "onyx.Button", content: "Reparse",  ontap: "doReparseAsked"},
 					{name: "dump", allowHtml: true}
 				]}
 			]}
@@ -673,6 +679,7 @@ name: "rightPanels",kind: "Panels", wrap: false,
 		this.doCss(inEvent);
 	}
 });
+
 enyo.kind({name: "leftPanels",kind: "Panels", wrap: false,
 	components: [
 		{// left panel for JSON goes here
