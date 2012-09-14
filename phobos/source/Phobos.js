@@ -49,7 +49,7 @@ enyo.kind({
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
 	mode: "",				// js, css, ...
-	filename: "",			// Name of the file currently being edited
+	file: null,			
 	create: function() {
 		this.inherited(arguments);
 		this.buildDb();
@@ -62,7 +62,7 @@ enyo.kind({
 	//
 	saveDocAction: function() {
 		this.showWaitPopup("Saving document...");
-		this.bubble("onSaveDocument", {content: this.$.ace.getValue()});
+		this.bubble("onSaveDocument", {content: this.$.ace.getValue(), file: this.file});
 	},
 	saveComplete: function() {
 		this.hideWaitPopup();
@@ -75,14 +75,14 @@ enyo.kind({
 	openDoc: function(inFile, inCode, inExt) {
 		this.hideWaitPopup();
 		this.analysis = null;
-		this.filename = inFile;
+		this.file = inFile;
 		this.mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
 		this.$.ace.setEditingMode(this.mode);
 		this.adjustPanelsForMode(this.mode);
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
 		this.docHasChanged=false;
-		this.$.documentLabel.setContent(this.filename);
+		this.$.documentLabel.setContent(this.file.name);
 	},
 	adjustPanelsForMode: function(mode) {
 		var modes = {
@@ -162,7 +162,7 @@ enyo.kind({
 	reparseAction: function() {
 		if (this.mode === 'javascript') {
 			var module = {
-				name: this.filename,
+				name: this.file.name,
 				code: this.$.ace.getValue()
 			};
 			try {
