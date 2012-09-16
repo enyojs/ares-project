@@ -101,6 +101,13 @@ enyo.kind({
 							{name: "Padding", kind: "onyx.Picker",onSelect: "padding"}
 						]}
 					]},
+					{classes: "onyx-toolbar-inline", components: [
+						{content: "Shadow", classes: "picker"},
+						{kind: "onyx.PickerDecorator", components: [
+							{style: "min-width: 40px; font-size: 10px;"},
+							{name: "Shadow", kind: "onyx.Picker",onSelect: "shadow"}
+						]}
+					]},
 					{kind: "enyo.FittableColumns", components: [
 
 						{classes: "onyx-toolbar-inline", components: [
@@ -129,21 +136,16 @@ enyo.kind({
 		this.$.outputBox.applyStyle("background-color", "#000000");
 		for (var i=1; i<50; i++) {
 			this.$.fontSizePicker.createComponent({content: i, active: !i});
-		}
-		for (var i=1; i<50; i++) {
-			this.$.marginSizePicker.createComponent({content: i, active: !i});
-		}
-		for (var i=1; i<50; i++) {
+			this.$.Padding.createComponent({content: i, active: !i});
+			this.$.Shadow.createComponent({content: i, active: !i});
 			this.$.borderSizePicker.createComponent({content: i, active: !i});
+			this.$.marginSizePicker.createComponent({content: i, active: !i});
+
 		}
+
 		for (var i=5; i<2000; i+=5) {
 			this.$.heightSizePicker.createComponent({content: i, active: !i});
-		}
-		for (var i=5; i<2000; i+=5) {
 			this.$.widthSizePicker.createComponent({content: i, active: !i});
-		}
-		for (var i=5; i<50; i++) {
-			this.$.Padding.createComponent({content: i, active: !i});
 		}
 	},
 
@@ -211,7 +213,10 @@ enyo.kind({
 		outPut = outPut  + tab + "padding:" + " " + this.$.paddingSize + "px;" + "<br>";
 		outString = outString + "	" + "padding:" + " " + this.$.paddingSize + "px;\n";
 	}
-
+	if(this.$.shadowSize != null){
+		outPut = outPut  + tab + "box-shadow:" + " " + this.$.paddingSize + "px;" + "<br>";
+		outString = outString + "	" + "box-shadow:" + " " + this.$.shadowSize + "px;\n";
+	}
 	this.$.bg.setContent(outPut + "<br>}");
 	outString = outString + "\n}"
 	this.outPut = outString;
@@ -317,6 +322,10 @@ enyo.kind({
 	},
 		padding: function(inSender, inEvent){
 		this.$.paddingSize = inEvent.selected.content;
+		this.updateBox();
+	},
+		shadow: function(inSender, inEvent){
+		this.$.shadowSize = inEvent.selected.content;
 		this.updateBox();
 	},
 	newCssAction: function(inSender, inEvent) {
