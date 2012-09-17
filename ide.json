@@ -15,6 +15,19 @@
 		},
 		{
 			"active":false,
+			"id":"home2",
+			"icon":"server",
+			"name":"Local Files (home)",
+			"type":"local",
+			"command":"@NODE@", "params":[
+				"hermes/fsLocal.js", "/some/files", "@HOME@", "0"
+			],
+			"useJsonp":false,
+			"debug": false,
+			"respawn": false
+		},
+		{
+			"active":false,
 			"id":"dropbox-enyojs",
 			"icon":"dropbox",
 			"name":"Dropbox (enyojs.com)",

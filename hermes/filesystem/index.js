@@ -1,8 +1,5 @@
 /**
- * Simple ARES FileSystemProvider, using local files.
- * 
- * This FileSystemProvider is both the simplest possible one
- * and a working sample for other implementations.
+ * filesystem/index.js -- Framework-based ARES FileSystemProvider, using local files.
  */
 
 var fs = require('fs'),

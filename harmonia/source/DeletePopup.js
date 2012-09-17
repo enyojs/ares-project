@@ -14,7 +14,7 @@ enyo.kind({
 	centered: true,
 	floating: true,
 	components: [
-		{name: "title", tag: "h3", content: "Delete file?"},
+		{name: "title", tag: "h3", content: "Delete?"},
 		{name: "path", tag: "p", content: "Path: "},
 		{tag: "br"},
 		{tag: "br"},
