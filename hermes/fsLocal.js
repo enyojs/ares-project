@@ -133,6 +133,7 @@ function FsLocal(config, next) {
 	 */
 	this.quit = function() {
 		app.close();
+		console.log("fsLocal exiting");
 	};
 
 	// utilities library
@@ -167,8 +168,8 @@ function FsLocal(config, next) {
 	// File-System (fs) verbs
 
 	var verbs = {
-		GET: {}, 	// verbs that are transmitted over an HTTP GET method
-		POST: {} 	// verbs that are transmitted over an HTTP POST method
+		GET: {},	// verbs that are transmitted over an HTTP GET method
+		POST: {}	// verbs that are transmitted over an HTTP POST method
 	};
 	
 	verbs.GET.PROPFIND = function(req, res, next) {
@@ -293,7 +294,7 @@ function FsLocal(config, next) {
 		fs.mkdir(path.join(config.root, newPath), function(err) {
 			next(err, {
 				code: 201, // Created
-				body: {id: newId, path: newPath}
+				body: {id: newId, path: newPath, isDir: true}
 			});
 		});
 	};

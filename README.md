@@ -179,9 +179,9 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 ## Run Test Suite
 
-So far, only hermes local filesystem access comes with a (small) test suite.  Run it using:
+So far, only hermes local filesystem access comes with a (small) test suite, that relies on [Mocha](http://visionmedia.github.com/mocha/) and [Should.js](https://github.com/visionmedia/should.js).  Run it using:
 
-	$ node hermes/node_modules/jasmine-node/lib/jasmine-node/cli.js hermes
+	$ hermes/node_modules/mocha/bin/mocha hermes/fsLocal.spec.js
 	
 ## References
 
