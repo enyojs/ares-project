@@ -58,7 +58,6 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.buildDb();
-//this.newcssAction();
 
 		// Pass to the autocomplete compononent a reference to ace
 		this.$.autocomplete.setAce(this.$.ace);
@@ -67,7 +66,7 @@ enyo.kind({
 	//
 	saveDocAction: function() {
 		this.showWaitPopup("Saving document...");
-		this.bubble("onSaveDocument", {content: this.$.ace.getValue()});
+		this.doSaveDocument({content: this.$.ace.getValue()});
 	},
 	saveComplete: function() {
 		this.hideWaitPopup();
@@ -246,7 +245,7 @@ enyo.kind({
 				}
 			}
 			if (kinds.length > 0) {
-				this.bubble("onDesignDocument", kinds);
+				this.doDesignDocument(kinds);
 				return;
 			}
 		}
@@ -396,13 +395,13 @@ enyo.kind({
 		if (this.docHasChanged) {
 			this.$.savePopup.show();
 		} else {
-			this.bubble("onCloseDocument", {});
+			this.doCloseDocument({});
 		}
 	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
-		this.bubble("onCloseDocument", {});
+		this.doCloseDocument({});
 	},
 	// called when the "Cancel" is selected in save popup
 	cancelCloseAction: function(inSender, inEvent) {
