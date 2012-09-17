@@ -12,12 +12,12 @@ var rimraf = require("rimraf");
 var should = require("should");
 var FsLocal = require("./fsLocal");
 
-function call(verb, path, query, body, next) {
-	console.log("calling...");
+function call(method, path, query, reqBody, next) {
+	var reqContent;
 	var req = http.request({
 		hostname: "127.0.0.1",
 		port: myPort,
-		method: verb,
+		method: method,
 		path: path + '?' + querystring.stringify(query)
 	}, function(res) {
 		var bufs = [];
@@ -51,8 +51,18 @@ function call(verb, path, query, body, next) {
 			next(err);
 		});
 	});
-	if (body) {
-		req.write(body);
+
+	// XXX replace/enhance application/json body by
+	// - direct upload using multipart/form-data + express.bodyParser()
+	// - straight binary in body (+streamed pipes)
+
+	if (reqBody) {
+		if (Buffer.isBuffer(reqBody)) {
+			reqContent = reqBody.toString('base64');
+		} else if (typeof reqBody === 'object') {
+			reqContent = reqBody;
+		}
+		req.write(JSON.stringify({content: reqContent}));
 	}
 	req.end();
 	req.on('error', next);
@@ -199,6 +209,21 @@ describe("fsLocal...", function() {
 			res.json.isDir.should.equal(true);
 			should.exist(res.json.path);
 			res.json.path.should.equal("/toto/titi");
+			done();
+		});
+	});
+
+	it("should create file", function(done) {
+		call('POST', '/id/' + encodeFileId('/toto/titi'), {_method: "PUT",name: "tata"} /*query*/, new Buffer("This is Tata content!") /*data*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201);
+			should.exist(res.json);
+			should.exist(res.json.isDir);
+			res.json.isDir.should.equal(false);
+			should.exist(res.json.path);
+			res.json.path.should.equal("/toto/titi/tata");
 			done();
 		});
 	});

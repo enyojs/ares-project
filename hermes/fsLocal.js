@@ -263,6 +263,7 @@ function FsLocal(config, next) {
 	};
 
 	verbs.POST.PUT = function (req, res, next) {
+		var bufs = []; 	// Buffer's
 		var newPath, newId;
 		if (!req.query.name) {
 			next(new Error("missing 'name' query parameter"));
@@ -271,15 +272,29 @@ function FsLocal(config, next) {
 		newPath = path.join(req.params.path, path.basename(req.query.name));
 		newId = encodeFileId(newPath);
 
-		// XXX replace application/json body by direct upload using multipart/form-data + express.bodyParser()
-		var body = JSON.parse(req.body); // req.param('content') || ''
-		var buffer = new Buffer(body.content, 'base64');
-		fs.writeFile(path.join(config.root, newPath), buffer, function(err){
-			next(err, {
-				code: 201, // Created
-				body: {id: req.params.id, path: req.params.path}
+		// XXX replace/enhance application/json body by
+		// - direct upload using multipart/form-data + express.bodyParser()
+		// - straight binary in body (+streamed pipes)
+
+		//if (req.headers['content-type'] !== 'application/json; charset=utf-8') {
+		//	next(new Error("unexpected 'content-type'="+req.headers['content-type']));
+		//}
+
+		req.on('data', function(chunk) {
+			bufs.push(chunk);
+		});
+		req.on('end', function() {
+			var bodyStr = Buffer.concat(bufs).toString();
+			var bodyObj = JSON.parse(bodyStr);
+			var content = new Buffer(bodyObj.content, 'base64');
+			fs.writeFile(path.join(config.root, newPath), content, function(err){
+				next(err, {
+					code: 201, // Created
+					body: {id: newId, path: newPath, isDir: false}
+				});
 			});
 		});
+
 	};
 
 	verbs.POST.MKCOL = function(req, res, next) {
