@@ -560,7 +560,7 @@ enyo.kind({
 
 			// Compute the position of the popup
 			var ace = this.ace;
-			var pos = ace.editor.renderer.textToScreenCoordinates(this.position.row, this.position.column);
+			var pos = ace.textToScreenCoordinates(this.position.row, this.position.column);
 			pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
 
 			// Position the autocomplete popup
