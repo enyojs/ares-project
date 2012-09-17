@@ -18,7 +18,7 @@ enyo.kind({
 			url: url,
 			jsonp: jsonp
 		};
-		this.$.hermesFileTree.setService(serviceObj);
+		this.$.hermesFileTree.setServiceInformation(serviceObj);
 		this.$.hermesFileTree.reset();
 	},
 	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
