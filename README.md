@@ -49,38 +49,29 @@ See the [Github.com help](https://help.github.com/articles/set-up-git) for hints
 
 ####Clone the ares-project repository from GitHub####
 Using git, clone the repository using either the HTTPS or SSH urls:
-`
-git clone https://github.com/enyojs/ares-project.git
-`
+
+	$ git clone https://github.com/enyojs/ares-project.git
+
 or
-`
-git clone git@github.com:enyojs/ares-project.git
-`
+
+	$ git clone git@github.com:enyojs/ares-project.git
 
 Which URL you should clone from depends on how you have git set up (see github docs above).
 
 ####Update the submodule references####
 Because Ares and Enyo are so closely linked, there are specific versions of Enyo and the libs folder included as references in the Ares repository. After cloning Ares, you need to update the submodules using "git submodule update"
 
-`cd ares-project
-git submodule init
-git submodule update
-`
+	$ cd ares-project
+	$ git submodule init
+	$ git submodule update
 
 If you are using a graphical Git client, there may or may not be a way to update the submodules from the GUI. If not, then use the commands above.
 
 ### Run
 
-You have two options:
+Optionally, configure the `root` of your local file-system access in `ide.json`. By default, the local filesystem service serves the files from your _Home_ or _My Documents_ directory, depending on your operating system. You might want to change this to point to the location of your project files, to make navigation faster & easier. 
 
-1. Use the IDE server (recommended)
-1. Configure & start sub-servers manually & open `ares/index.html` as a local file from the browser.
-
-#### Served IDE
-
-Optionally, configure the `root` of your local file-system access in `ide.json`. By default, the local filesystem service serves the files from you "Home" or "My Documents" directory, depending on your operating system. You might want to change this to point to the location of your project files, to make navigation faster & easier. 
-
-For instance, you can change "@HOME@" to "@HOME@/Documents" or to "D:\\Users\\User" (if using backslashes [i.e. on Windows], use double slashes for JSON encoding)
+For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\User` (if using backslashes [i.e. on Windows], use double slashes for JSON encoding)
 
 	% vi ide.json
 	{
@@ -118,19 +109,3 @@ On OSX:
 	% open -a "Chromium" http://127.0.0.1:9009/ide/ares/index.html
 
 **Debugging:** You cann add `--debug` or `--debug-brk` to the node command-line in `ide.json` if you want to troubleshoot the service providers, _or_ directly on the main node command line to to troubleshoot the main IDE server.    Then start `node-inspector` as usual.
-
-#### Manual IDE
-
-Start the file server:
-
-	$ node ares-project/hermes/filesystem/index.js 9010 hermes/filesystem/root
-	
-**Debugging:** The following sequence (to be run in separated terminals) opens the ARES local file server in debug-mode using `node-inspector`.
-
-	$ node --debug ares-project/hermes/filesystem/index.js 9010 hermes/filesystem/root
-		
-...then start `node-inspector` & the browser windows from a separated terminal:
-
-	$ open -a Chromium http://localhost:9010/ide/ares/index.html
-	$ node-inspector &
-	$ open -a Chromium http://localhost:8080/debug?port=5858
