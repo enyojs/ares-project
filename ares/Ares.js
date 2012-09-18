@@ -3,7 +3,6 @@ enyo.kind({
 	kind: "enyo.Panels",
 	fit: true,
 	components: [
-		{kind: "HermesService", name: "service"},
 		{kind: "Harmonia", onFileDblClick: "openDocument"},
 		{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"},
 		{kind: "Deimos", onCloseDesigner: "closeDesigner"}
@@ -12,11 +11,10 @@ enyo.kind({
 	draggable: false,
 	openDocument: function(inSender, inEvent) {
 		var f = inEvent.file;
-		this.fileId = f.id;
-		this.fileName = f.name;
+		var service = f.service;
 		var ext = f.name.split(".").pop();
 		this.$.phobos.beginOpenDoc();
-		this.$.service.getFile(f.id)
+		service.getFile(f.id)
 			.response(this, function(inEvent, inData) {
 				if (inData.content) {
 					inData=inData.content;
@@ -24,7 +22,7 @@ enyo.kind({
 					// no data? Empty file
 					inData="";
 				}
-				this.$.phobos.openDoc(this.fileName, inData, ext);
+				this.$.phobos.openDoc(f, inData, ext);
 				this.setIndex(1);
 			})
 			.error(this, function(inEvent, inData) {
@@ -33,7 +31,8 @@ enyo.kind({
 			});
 	},
 	saveDocument: function(inSender, inEvent) {
-		this.$.service.putFile(this.fileId, inEvent.content)
+		var service = inEvent.file.service;
+		service.putFile(inEvent.file.id, inEvent.content)
 			.response(this, function(inEvent, inData) {
 				inSender.saveComplete();
 			})
