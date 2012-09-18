@@ -71,27 +71,30 @@ function FsLocal(config, next) {
 
 	// Success
 	function respond(res, err, response) {
-		var status, body;
+		var statusCode, body;
+		var statusCodes = {
+			'ENOENT': 404, // Not-Found
+			'EPERM' : 403, // Forbidden
+			'EEXIST': 409  // Conflict
+		};
 		if (err) {
-			status =  500; // Internal Server Error
 			if (err instanceof Error) {
-				if (err.errno) {
-					status = 405; // Method Not Allowed
-				}
+				statusCode = statusCodes[err.code] ||  405; // Method Not Allowed
 				body = err;
 			} else {
+				statusCode = 500; // Internal Server Error
 				body = new Error(err.toString());
 			}
 			console.error("error=" + body);
 			console.error(body.stack);
 		} else {
-			status = response.code || 200;
+			statusCode = response.code || 200;
 			body = response.body;
 		}
 		if (body) {
-			res.status(status).send(body);
+			res.status(statusCode).send(body);
 		} else {
-			res.status(status).end();
+			res.status(statusCode).end();
 		}
 	}
 	
@@ -240,12 +243,12 @@ function FsLocal(config, next) {
 	
 	verbs.GET.GET = function(req, res, next) {
 		var localPath = path.join(config.root, req.params.path);
-		fs.stat(req.params.localPath, function(err, stat) {
+		fs.stat(localPath, function(err, stat) {
 			if (err) {
-				return next(err); // XXX be smarter about error codes
+				return next(err);
 			}
 			if (stat.isFile()) {
-				// XXX use the below when we upload using express.bodyParser()
+				// XXX use the below when/if we upload using express.bodyParser()
 				/*
 				 var mimeType = _mimeTypes[path.extname(req.params.path).split(".")[1]];
 				 res.writeHead(200, {'Content-Type': mimeType} );
@@ -253,11 +256,14 @@ function FsLocal(config, next) {
 				 fileStream.pipe(res);
 				 next();
 				 */
-				return fs.readFile(req.params.localPath, function(err, buffer) {
-					return next(err, {content: buffer.toString('base64')});
+				return fs.readFile(localPath, function(err, buffer) {
+					return next(err, {
+						code: 200,
+						body: { content: buffer.toString('base64') }
+					});
 				});
 			} else {
-				return next(new Error("Not a file")); // XXX be smarter about error codes
+				return next(new Error("Not a file"));
 			}
 		});
 	};

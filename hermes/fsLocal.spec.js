@@ -22,8 +22,6 @@ function call(method, path, query, reqBody, next) {
 	}, function(res) {
 		var bufs = [];
 		res.on('data', function(chunk){
-			//console.log('BODY: ' + chunk);
-			var length = parseInt(res.headers['content-length'], 10);
 			bufs.push(chunk);
 		});
 		res.on('end', function() {
@@ -39,6 +37,7 @@ function call(method, path, query, reqBody, next) {
 					data.json = JSON.parse(data.buffer.toString());
 				}
 			}
+			console.log("data=");
 			console.dir(data);
 			if (data.statusCode < 200 || data.statusCode >= 300) {
 				next(data);
@@ -213,8 +212,20 @@ describe("fsLocal...", function() {
 		});
 	});
 
+	it("should fail to download a directory", function(done) {
+		call('GET', '/id/' + encodeFileId('/toto/titi'), null /*query*/, null /*data*/, function(err, res) {
+			should.exist(err);
+			should.exist(err.statusCode);
+			err.statusCode.should.equal(405);
+			should.not.exist(res);
+			done();
+		});
+	});
+
+	var content = "This is Tata content!";
+
 	it("should create file", function(done) {
-		call('POST', '/id/' + encodeFileId('/toto/titi'), {_method: "PUT",name: "tata"} /*query*/, new Buffer("This is Tata content!") /*data*/, function(err, res) {
+		call('POST', '/id/' + encodeFileId('/toto/titi'), {_method: "PUT",name: "tata"} /*query*/, new Buffer(content) /*data*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -224,6 +235,44 @@ describe("fsLocal...", function() {
 			res.json.isDir.should.equal(false);
 			should.exist(res.json.path);
 			res.json.path.should.equal("/toto/titi/tata");
+			done();
+		});
+	});
+
+	it("should download the same file", function(done) {
+		call('GET', '/id/' + encodeFileId('/toto/titi/tata'), null /*query*/, null /*data*/, function(err, res) {
+			var contentBuf, contentStr;
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(200);
+			should.exist(res.json);
+			should.exist(res.json.content);
+			contentBuf = new Buffer(res.json.content, 'base64');
+			contentStr = contentBuf.toString();
+			contentStr.should.equal(content);
+			done();
+		});
+	});
+
+	it("should fail to describe a file", function(done) {
+		call('GET', '/id/' + encodeFileId('/toto/tutu/tata'), {_method: "PROPFIND", depth: 0} /*query*/, null /*data*/, function(err, res) {
+			var contentBuf, contentStr;
+			should.exist(err);
+			should.exist(err.statusCode);
+			err.statusCode.should.equal(404);
+			should.not.exist(res);
+			done();
+		});
+	});
+
+	it("should fail to download a file", function(done) {
+		call('GET', '/id/' + encodeFileId('/toto/tutu/tata'), null /*query*/, null /*data*/, function(err, res) {
+			var contentBuf, contentStr;
+			should.exist(err);
+			should.exist(err.statusCode);
+			err.statusCode.should.equal(404);
+			should.not.exist(res);
 			done();
 		});
 	});
