@@ -38,6 +38,9 @@ enyo.kind({
 		ondragfinish: "dragFinish",
 		ondrop: "drop"
 	},
+	events: {
+		onCloseDesigner: ""
+	},
 	kinds: null,
 	docHasChanged: false,
 	create: function() {
@@ -83,6 +86,7 @@ enyo.kind({
 
 		this.index=index;
 		this.$.toolbar.reflow();
+		return true; // Stop the propagation of the event
 	},
 	// called after updating model
 	serializeAction: function() {
@@ -101,29 +105,33 @@ enyo.kind({
 	designerChange: function(inSender) {
 		this.refreshInspector();
 		this.docHasChanged = true;
+		return true; // Stop the propagation of the event
 	},
 	designerSelect: function(inSender, inEvent) {
 		this.refreshInspector();
 		this.$.componentView.select(inSender.selection);
+		return true; // Stop the propagation of the event
 	},
 	componentViewSelect: function(inSender) {
 		this.$.designer.select(inSender.selection);
 		this.refreshInspector();
+		return true; // Stop the propagation of the event
 	},
 	inspectorModify: function() {
 		this.$.designer.refresh();
 		this.docHasChanged = true;
+		return true; // Stop the propagation of the event
 	},
 	componentViewDrop: function(inSender, inEvent) {
 		return this.$.designer.drop(inSender, inEvent);
 	},
 	dragStart: function(inSender, inEvent) {
-		return true;
+		return true; // Stop the propagation of the event
 	},
 	drag: function(inSender, inEvent) {
 		if (inEvent.dragInfo) {
 			this.$.dragAvatar.drag(inEvent);
-			return true;
+			return true; // Stop the propagation of the event
 		}
 	},
 	dragFinish: function(inSender, inEvent) {
@@ -131,7 +139,7 @@ enyo.kind({
 			inEvent.preventTap();
 			this.$.dragAvatar.hide();
 			//this.refreshInspector();
-			return true;
+			return true; // Stop the propagation of the event
 		}
 	},
 	closeDesignerAction: function(inSender, inEvent) {
@@ -144,12 +152,14 @@ enyo.kind({
 			event.contents[i] = this.kinds[i].content;
 		}
 
-		this.bubble("onCloseDesigner", event);
+		this.doCloseDesigner(event);
+		return true; // Stop the propagation of the event
 	},
 	// When the designer finishes rendering, re-build the components view
 	// TODO: Build this from the Model, not by trawling the view hierarchy...
 	designRendered: function() {
 		this.refreshComponentView();
+		return true; // Stop the propagation of the event
 	}
 });
 
