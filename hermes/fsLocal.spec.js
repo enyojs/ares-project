@@ -255,7 +255,7 @@ describe("fsLocal...", function() {
 		});
 	});
 
-	it("should fail to describe a file", function(done) {
+	it("should fail to describe a non-existing file", function(done) {
 		call('GET', '/id/' + encodeFileId('/toto/tutu/tata'), {_method: "PROPFIND", depth: 0} /*query*/, null /*data*/, function(err, res) {
 			var contentBuf, contentStr;
 			should.exist(err);
@@ -274,6 +274,135 @@ describe("fsLocal...", function() {
 			err.statusCode.should.equal(404);
 			should.not.exist(res);
 			done();
+		});
+	});
+
+	it("should copy file in the same folder, as a new file", function(done) {
+		call('POST', '/id/' + encodeFileId('/toto/titi/tata'), {_method: "COPY", name: "tata.1"} /*query*/, null /*data*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201); // Created
+			done();
+		});
+	});
+
+	it("should fail to copy file in the same folder, onto another one (no overwrite)", function(done) {
+		call('POST', '/id/' + encodeFileId('/toto/titi/tata.1'), {_method: "COPY", name: "tata"} /*query*/, null /*data*/, function(err, res) {
+			should.exist(err);
+			should.exist(err.statusCode);
+			err.statusCode.should.equal(412); // Precondition-Failed
+			should.not.exist(res);
+			done();
+		});
+	});
+
+	it("should copy file in the same folder, onto another one (overwrite)", function(done) {
+		call('POST', '/id/' + encodeFileId('/toto/titi/tata.1'), {_method: "COPY", name: "tata", overwrite: true} /*query*/, null /*data*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(204); // No-Content
+			done();
+		});
+	});
+
+	it("should fail to copy file in the same folder as the same name (overwrite)", function(done) {
+		call('POST', '/id/' + encodeFileId('/toto/titi/tata'), {_method: "COPY",name: "tata", overwrite: true} /*query*/, new Buffer(content) /*data*/, function(err, res) {
+			should.exist(err);
+			should.exist(err.statusCode);
+			err.statusCode.should.equal(405);
+			should.not.exist(res);
+			done();
+		});
+	});
+
+	var totoContents;
+
+	it("should reccursively copy folder in the same folder, as a new folder", function(done) {
+		call('POST', '/id/' + encodeFileId('/toto'), {_method: "COPY", name: "toto.1"} /*query*/, null /*data*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201); // Created
+
+			call('GET', '/id/' + encodeFileId('/toto.1/titi/tata'), null /*query*/, null /*data*/, function(err, res) {
+				var contentBuf, contentStr;
+				should.not.exist(err);
+				should.exist(res);
+				should.exist(res.statusCode);
+				res.statusCode.should.equal(200);
+				should.exist(res.json);
+				should.exist(res.json.content);
+				contentBuf = new Buffer(res.json.content, 'base64');
+				contentStr = contentBuf.toString();
+				contentStr.should.equal(content);
+				done();
+			});
+		});
+	});
+
+	it("should rename folder in the same folder, as a new folder", function(done) {
+		call('POST', '/id/' + encodeFileId('/toto.1'), {_method: "MOVE", name: "toto.2"} /*query*/, null /*data*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201); // Created
+
+			call('GET', '/id/' + encodeFileId('/toto.2/titi/tata'), null /*query*/, null /*data*/, function(err, res) {
+				var contentBuf, contentStr;
+				should.not.exist(err);
+				should.exist(res);
+				should.exist(res.statusCode);
+				res.statusCode.should.equal(200);
+				should.exist(res.json);
+				should.exist(res.json.content);
+				contentBuf = new Buffer(res.json.content, 'base64');
+				contentStr = contentBuf.toString();
+				contentStr.should.equal(content);
+
+				call('GET', '/id/' + encodeFileId('/toto.1/titi/tata'), {_method: "PROPFIND", depth: 0} /*query*/, null /*data*/, function(err, res) {
+					var contentBuf, contentStr;
+					should.exist(err);
+					should.exist(err.statusCode);
+					err.statusCode.should.equal(404);
+					should.not.exist(res);
+
+					done();
+				});
+			});
+		});
+	});
+
+	it("should rename file in the same folder, as a new file", function(done) {
+		call('POST', '/id/' + encodeFileId('/toto/titi/tata.1'), {_method: "MOVE", name: "tata.2"} /*query*/, null /*data*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201); // Created
+
+			call('GET', '/id/' + encodeFileId('/toto/titi/tata.2'), null /*query*/, null /*data*/, function(err, res) {
+				var contentBuf, contentStr;
+				should.not.exist(err);
+				should.exist(res);
+				should.exist(res.statusCode);
+				res.statusCode.should.equal(200);
+				should.exist(res.json);
+				should.exist(res.json.content);
+				contentBuf = new Buffer(res.json.content, 'base64');
+				contentStr = contentBuf.toString();
+				contentStr.should.equal(content);
+
+				call('GET', '/id/' + encodeFileId('/toto/titi/tata.1'), {_method: "PROPFIND", depth: 0} /*query*/, null /*data*/, function(err, res) {
+					var contentBuf, contentStr;
+					should.exist(err);
+					should.exist(err.statusCode);
+					err.statusCode.should.equal(404);
+					should.not.exist(res);
+
+					done();
+				});
+			});
 		});
 	});
 

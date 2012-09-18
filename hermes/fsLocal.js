@@ -79,7 +79,8 @@ function FsLocal(config, next) {
 		};
 		if (err) {
 			if (err instanceof Error) {
-				statusCode = statusCodes[err.code] ||  405; // Method Not Allowed
+				statusCode = err.statusCode || statusCodes[err.code] ||  405; // Method Not Allowed
+				delete err.statusCode;
 				body = err;
 			} else {
 				statusCode = 500; // Internal Server Error
@@ -372,31 +373,57 @@ function FsLocal(config, next) {
 	}
 
 	verbs.POST.MOVE = function(req, res, next) {
-		// XXX improve status codes (see RFC4918, section 9.9.4)
 		_changeNode(req, res, fs.rename, next);
 	};
 
 	verbs.POST.COPY = function(req, res, next) {
-		// XXX improve status codes (see RFC4918, section 9.9.4)
 		_changeNode(req, res, _cpr, next);
 	};
 
 	function _changeNode(req, res, op, next) {
-		var newPath;
+		var newLocalPath;
 		if (req.query.name) {
 			// rename file within the same collection (folder)
-			newPath = path.join(config.root, req.params.path,
+			newLocalPath = path.join(config.root,
+					    path.dirname(req.params.path),
 					    path.basename(req.query.name));
 		} else if (req.query.path) {
 			// move at a new location
-			newPath = path.join(config.root, req.param('path'));
+			newLocalPath = path.join(config.root, req.query.path);
 		} else {
 			return next(new Error("missing parameter: name or path"));
 		}
-		return op(path.join(config.root, req.params.path), newPath, next);
+		fs.stat(newLocalPath, function(err, stat) {
+			// see RFC4918, section 9.9.4 (MOVE Status
+			// Codes) & section 9.8.5 (COPY Status Codes).
+			var successStatus;
+			if (err) {
+				if (err.code === 'ENOENT') {
+					// Destination resource does not exist yet
+					successStatus = 201; // Created
+				} else {
+					return next(err);
+				}
+			} else if (stat) {
+				if (req.query.overwrite) {
+					// Destination resource already exists
+					successStatus = 204; // No-Content
+				} else {
+					err = new Error('Destination already exists');
+					err.statusCode = 412; // Precondition-Failed
+					return next(err);
+				}
+			}
+			op(path.join(config.root, req.params.path), newLocalPath, function(err) {
+				next(err, { code: successStatus });
+			});
+		});
 	}
 
 	function _cpr(srcPath, dstPath, next) {
+		if (srcPath === dstPath) {
+			return next(new Error("Cannot copy on itself"));
+		}
 		function _copyFile(srcPath, dstPath, next) {
 			var is, os;
 			is = fs.createReadStream(srcPath);
