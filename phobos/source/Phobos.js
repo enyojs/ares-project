@@ -40,9 +40,14 @@ enyo.kind({
 		]},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"}
 	],
-
+	events: {
+		onSaveDocument: "",
+		onDesignDocument: "",
+		onCloseDocument: ""
+	},
 	handlers: {
 		onCss: "newcssAction",
+		onReparseAsked: "reparseAction"
 	},
 	docHasChanged: false,
 	debug: false,
@@ -53,7 +58,6 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.buildDb();
-//this.newcssAction();
 
 		// Pass to the autocomplete compononent a reference to ace
 		this.$.autocomplete.setAce(this.$.ace);
@@ -62,7 +66,7 @@ enyo.kind({
 	//
 	saveDocAction: function() {
 		this.showWaitPopup("Saving document...");
-		this.bubble("onSaveDocument", {content: this.$.ace.getValue(), file: this.file});
+		this.doSaveDocument({content: this.$.ace.getValue(), file: this.file});
 	},
 	saveComplete: function() {
 		this.hideWaitPopup();
@@ -241,7 +245,7 @@ enyo.kind({
 				}
 			}
 			if (kinds.length > 0) {
-				this.bubble("onDesignDocument", kinds);
+				this.doDesignDocument(kinds);
 				return;
 			}
 		}
@@ -391,13 +395,13 @@ enyo.kind({
 		if (this.docHasChanged) {
 			this.$.savePopup.show();
 		} else {
-			this.bubble("onCloseDocument", {});
+			this.doCloseDocument({});
 		}
 	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
-		this.bubble("onCloseDocument", {});
+		this.doCloseDocument({});
 	},
 	// called when the "Cancel" is selected in save popup
 	cancelCloseAction: function(inSender, inEvent) {
@@ -556,7 +560,7 @@ enyo.kind({
 
 			// Compute the position of the popup
 			var ace = this.ace;
-			var pos = ace.editor.renderer.textToScreenCoordinates(this.position.row, this.position.column);
+			var pos = ace.textToScreenCoordinates(this.position.row, this.position.column);
 			pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
 
 			// Position the autocomplete popup
@@ -644,17 +648,18 @@ enyo.kind({
 });
 
 enyo.kind({
+	name: "rightPanels",kind: "Panels", wrap: false,
 	events: {
 		onCss: "",
+		onReparseAsked: ""
 	},
-name: "rightPanels",kind: "Panels", wrap: false,
 	components: [
 		{// right panel for JSON goes here
 		},
 		{kind: "enyo.Control", classes: "enyo-fit", components: [
 			{name: "right", classes: "border panel enyo-fit",style: "margin: 8px;", components: [
 				{kind: "enyo.Scroller", classes: "panel enyo-fit",components: [
-					{kind: "onyx.Button", content: "Reparse",  ontap: "reparseAction"},
+					{kind: "onyx.Button", content: "Reparse",  ontap: "doReparseAsked"},
 					{name: "dump", allowHtml: true}
 				]}
 			]}
@@ -673,6 +678,7 @@ name: "rightPanels",kind: "Panels", wrap: false,
 		this.doCss(inEvent);
 	}
 });
+
 enyo.kind({name: "leftPanels",kind: "Panels", wrap: false,
 	components: [
 		{// left panel for JSON goes here
