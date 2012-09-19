@@ -5,8 +5,6 @@
  * and a working sample for other implementations.
  */
 
-// modules requirements
-
 var fs = require("fs");
 var path = require("path");
 var express = require("express");
@@ -14,6 +12,19 @@ var util  = require("util");
 var querystring = require("querystring");
 
 function FsLocal(config, next) {
+
+	/**
+	 * Generic HTTP Error
+	 * 
+	 * @private
+	 */
+	function HttpError(msg, statusCode) {
+		Error.captureStackTrace(this, this);
+		this.statusCode = statusCode || 500; // Internal-Server-Error
+		this.message = msg || 'Error';
+	}
+	util.inherits(HttpError, Error);
+	HttpError.prototype.name = "HTTP Error";
 
 	config.root = path.resolve(config.root);
 
@@ -26,7 +37,7 @@ function FsLocal(config, next) {
 
 	app.use(express.logger('dev'));
 
-	// CORS -- Cros-Origin Resources Sharing
+	// CORS -- Cross-Origin Resources Sharing
 	app.use(function(req, res, next) {
 		res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
 		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
@@ -79,14 +90,13 @@ function FsLocal(config, next) {
 		};
 		if (err) {
 			if (err instanceof Error) {
-				statusCode = err.statusCode || statusCodes[err.code] ||  405; // Method Not Allowed
+				statusCode = err.statusCode || statusCodes[err.code] ||  403; // Forbidden
 				delete err.statusCode;
 				body = err;
 			} else {
 				statusCode = 500; // Internal Server Error
 				body = new Error(err.toString());
 			}
-			console.error("error=" + body);
 			console.error(body.stack);
 		} else {
 			statusCode = response.code || 200;
@@ -108,14 +118,12 @@ function FsLocal(config, next) {
 			     querystring.stringify(req.query) : '');
 	});
 	app.all(path.join(config.urlPrefix, '/id/:id'), function(req, res, next) {
-		console.log("req.query=");
-		console.dir(req.query);
+		console.log("req.query=" + util.inspect(req.query));
 		req.params.id = req.params.id || encodeFileId('/');
 		req.params.path = decodeFileId(req.params.id);
 		// 'infinity' is '-1', 'undefined' is '0'
 		req.params.depth = req.query.depth ? (req.query.depth === 'infinity' ? -1 : parseInt(req.query.depth, 10)) : 0;
-		console.log("req.params=");
-		console.dir(req.params);
+		console.log("req.params=" + util.inspect(req.params));
 		verbs[req.originalMethod][req.method](req, res, respond.bind(this, res));
 	});
 	console.log("route="+path.join(config.urlPrefix, ':id'));
@@ -334,29 +342,29 @@ function FsLocal(config, next) {
 		}
 	};
 
-	function _rmrf(dir, next) {
+	function _rmrf(localPath, next) {
 		// from <https://gist.github.com/1526919>
-		fs.stat(dir, function(err, stats) {
+		fs.stat(localPath, function(err, stats) {
 			if (err) {
 				return next(err);
 			}
 
 			if (!stats.isDirectory()) {
-				return fs.unlink(dir, next);
+				return fs.unlink(localPath, next);
 			}
 
 			var count = 0;
-			fs.readdir(dir, function(err, files) {
+			fs.readdir(localPath, function(err, files) {
 				if (err) {
 					return next(err);
 				}
 
 				if (files.length < 1) {
-					return fs.rmdir(dir, next);
+					return fs.rmdir(localPath, next);
 				}
 
 				files.forEach(function(file) {
-					var sub = path.join(dir, file);
+					var sub = path.join(localPath, file);
 
 					_rmrf(sub, function(err) {
 						if (err) {
@@ -364,7 +372,7 @@ function FsLocal(config, next) {
 						}
 
 						if (++count == files.length) {
-							return fs.rmdir(dir, next);
+							return fs.rmdir(localPath, next);
 						}
 					});
 				});
@@ -381,42 +389,51 @@ function FsLocal(config, next) {
 	};
 
 	function _changeNode(req, res, op, next) {
-		var newLocalPath;
+		var srcPath = path.join(config.root, req.params.path);
+		var dstPath;
 		if (req.query.name) {
-			// rename file within the same collection (folder)
-			newLocalPath = path.join(config.root,
+			// rename/copy file within the same collection (folder)
+			dstPath = path.join(config.root,
 					    path.dirname(req.params.path),
 					    path.basename(req.query.name));
-		} else if (req.query.path) {
-			// move at a new location
-			newLocalPath = path.join(config.root, req.query.path);
+		} else if (req.query.folderId) {
+			// move/copy at a new location
+			dstPath = path.join(config.root,
+					    decodeFileId(req.query.folderId),
+					    path.basename(req.params.path));
 		} else {
-			return next(new Error("missing parameter: name or path"));
+			next(new HttpError("missing query parameter: 'name' or 'folderId'", 400 /*Bad-Request*/));
+			return;
 		}
-		fs.stat(newLocalPath, function(err, stat) {
+		if (srcPath === dstPath) {
+			next(new HttpError("trying to move a resource onto itself", 400 /*Bad-Request*/));
+			return;
+		}
+		fs.stat(dstPath, function(err, stat) {
 			// see RFC4918, section 9.9.4 (MOVE Status
 			// Codes) & section 9.8.5 (COPY Status Codes).
-			var successStatus;
 			if (err) {
 				if (err.code === 'ENOENT') {
 					// Destination resource does not exist yet
-					successStatus = 201; // Created
+					op(srcPath, dstPath, function(err) {
+						next(err, { code: 201 /*Created*/ });
+					});
 				} else {
-					return next(err);
+					next(err);
 				}
 			} else if (stat) {
+				console.trace("req.query=" + util.inspect(req.query));
 				if (req.query.overwrite) {
-					// Destination resource already exists
-					successStatus = 204; // No-Content
+					// Destination resource already exists : destroy it first
+					_rmrf(dstPath, function(err) {
+						op(srcPath, dstPath, function(err) {
+							next(err, { code: 204 /*No-Content*/ });
+						});
+					});
 				} else {
-					err = new Error('Destination already exists');
-					err.statusCode = 412; // Precondition-Failed
-					return next(err);
+					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
 				}
 			}
-			op(path.join(config.root, req.params.path), newLocalPath, function(err) {
-				next(err, { code: successStatus });
-			});
 		});
 	}
 

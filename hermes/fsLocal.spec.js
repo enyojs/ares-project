@@ -11,6 +11,7 @@ var temp = require("temp");
 var rimraf = require("rimraf");
 var should = require("should");
 var FsLocal = require("./fsLocal");
+var util  = require("util");
 
 function call(method, path, query, reqBody, next) {
 	var reqContent;
@@ -37,8 +38,7 @@ function call(method, path, query, reqBody, next) {
 					data.json = JSON.parse(data.buffer.toString());
 				}
 			}
-			console.log("data=");
-			console.dir(data);
+			console.log("data="+util.inspect(data));
 			if (data.statusCode < 200 || data.statusCode >= 300) {
 				next(data);
 			} else {
@@ -105,7 +105,7 @@ describe("fsLocal...", function() {
 		});
 	});
 
-	it("should have an empty root-level directory (depth=0)", function(done) {
+	it("should have an empty root-level folder (depth=0)", function(done) {
 		call('GET', '/id/' + encodeFileId('/'), {_method: "PROPFIND", depth: 0} /*query*/, undefined /*data*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
@@ -119,7 +119,7 @@ describe("fsLocal...", function() {
 		});
 	});
 	
-	it("should have an empty root-level directory (depth=1)", function(done) {
+	it("should have an empty root-level folder (depth=1)", function(done) {
 		call('GET', '/id/' + encodeFileId('/'), {_method: "PROPFIND", depth: 1} /*query*/, undefined /*data*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
@@ -131,11 +131,12 @@ describe("fsLocal...", function() {
 			should.exist(res.json.contents);
 			should.exist(res.json.contents.length);
 			res.json.contents.length.should.equal(0);
+
 			done();
 		});
 	});
 	
-	it("should create a directory", function(done) {
+	it("should create a folder", function(done) {
 		call('POST', '/id/' + encodeFileId('/'), {_method: "MKCOL",name: "toto"} /*query*/, undefined /*data*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
@@ -150,7 +151,7 @@ describe("fsLocal...", function() {
 		});
 	});
 
-	it("should have a single sub-directory", function(done) {
+	it("should have a single sub-folder", function(done) {
 		call('GET', '/id/' + encodeFileId('/'), {_method: "PROPFIND", depth: 1} /*query*/, undefined /*data*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
@@ -170,7 +171,7 @@ describe("fsLocal...", function() {
 		});
 	});
 
-	it("should have an empty directory (depth=1)", function(done) {
+	it("should have an empty folder (depth=1)", function(done) {
 		call('GET', '/id/' + encodeFileId('/toto'), {_method: "PROPFIND", depth: 1} /*query*/, undefined /*data*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
@@ -186,7 +187,7 @@ describe("fsLocal...", function() {
 		});
 	});
 	
-	it("should fail to create a directory", function(done) {
+	it("should fail to create a folder", function(done) {
 		call('POST', '/id/' + encodeFileId('/'), {_method: "MKCOL",name: "toto"} /*query*/, undefined /*data*/, function(err, res) {
 			should.exist(err);
 			should.exist(err.json);
@@ -197,7 +198,7 @@ describe("fsLocal...", function() {
 		});
 	});
 
-	it("should create a sub-directory", function(done) {
+	it("should create a sub-folder", function(done) {
 		call('POST', '/id/' + encodeFileId('/toto'), {_method: "MKCOL",name: "titi"} /*query*/, undefined /*data*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
@@ -212,11 +213,11 @@ describe("fsLocal...", function() {
 		});
 	});
 
-	it("should fail to download a directory", function(done) {
+	it("should fail to download a folder", function(done) {
 		call('GET', '/id/' + encodeFileId('/toto/titi'), null /*query*/, null /*data*/, function(err, res) {
 			should.exist(err);
 			should.exist(err.statusCode);
-			err.statusCode.should.equal(405);
+			err.statusCode.should.equal(403); // Forbidden
 			should.not.exist(res);
 			done();
 		});
@@ -297,13 +298,51 @@ describe("fsLocal...", function() {
 		});
 	});
 
+	it("should fail to copy file as or to nothing", function(done) {
+		call('POST', '/id/' + encodeFileId('/toto/titi/tata.1'), {_method: "COPY"} /*query*/, null /*data*/, function(err, res) {
+			should.exist(err);
+			should.exist(err.statusCode);
+			err.statusCode.should.equal(400); // Bad-Request
+			should.not.exist(res);
+			done();
+		});
+	});
+
 	it("should copy file in the same folder, onto another one (overwrite)", function(done) {
 		call('POST', '/id/' + encodeFileId('/toto/titi/tata.1'), {_method: "COPY", name: "tata", overwrite: true} /*query*/, null /*data*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
 			res.statusCode.should.equal(204); // No-Content
-			done();
+
+			call('GET', '/id/' + encodeFileId('/toto/titi/tata'), null /*query*/, null /*data*/, function(err, res) {
+				var contentBuf, contentStr;
+				should.not.exist(err);
+				should.exist(res);
+				should.exist(res.statusCode);
+				res.statusCode.should.equal(200);
+				should.exist(res.json);
+				should.exist(res.json.content);
+				contentBuf = new Buffer(res.json.content, 'base64');
+				contentStr = contentBuf.toString();
+				contentStr.should.equal(content);
+
+
+				call('GET', '/id/' + encodeFileId('/toto/titi/tata.1'), null /*query*/, null /*data*/, function(err, res) {
+					var contentBuf, contentStr;
+					should.not.exist(err);
+					should.exist(res);
+					should.exist(res.statusCode);
+					res.statusCode.should.equal(200);
+					should.exist(res.json);
+					should.exist(res.json.content);
+					contentBuf = new Buffer(res.json.content, 'base64');
+					contentStr = contentBuf.toString();
+					contentStr.should.equal(content);
+					
+					done();
+				});
+			});
 		});
 	});
 
@@ -311,7 +350,7 @@ describe("fsLocal...", function() {
 		call('POST', '/id/' + encodeFileId('/toto/titi/tata'), {_method: "COPY",name: "tata", overwrite: true} /*query*/, new Buffer(content) /*data*/, function(err, res) {
 			should.exist(err);
 			should.exist(err.statusCode);
-			err.statusCode.should.equal(405);
+			err.statusCode.should.equal(400);
 			should.not.exist(res);
 			done();
 		});
@@ -399,6 +438,97 @@ describe("fsLocal...", function() {
 					should.exist(err.statusCode);
 					err.statusCode.should.equal(404);
 					should.not.exist(res);
+
+					done();
+				});
+			});
+		});
+	});
+
+	it("should fail to move file into a non-existing folder", function(done) {
+		call('POST', '/id/' + encodeFileId('/toto/titi/tata'), {_method: "MOVE", folderId: encodeFileId("/tutu")} /*query*/, null /*data*/, function(err, res) {
+			should.exist(err);
+			should.exist(err.statusCode);
+			err.statusCode.should.equal(404); // Not-Found
+			should.not.exist(res);
+			done();
+		});
+	});
+
+	it("should fail to move folder into a non-existing folder", function(done) {
+		call('POST', '/id/' + encodeFileId('/toto/titi'), {_method: "MOVE", folderId: encodeFileId("/tutu")} /*query*/, null /*data*/, function(err, res) {
+			should.exist(err);
+			should.exist(err.statusCode);
+			err.statusCode.should.equal(404); // Not-Found
+			should.not.exist(res);
+			done();
+		});
+	});
+
+	it("should move file into another folder", function(done) {
+		call('POST', '/id/' + encodeFileId('/'), {_method: "MKCOL",name: "toto.3"} /*query*/, undefined /*data*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201); // Created
+			should.exist(res.json);
+			should.exist(res.json.isDir);
+			res.json.isDir.should.equal(true);
+			should.exist(res.json.path);
+			res.json.path.should.equal("/toto.3");
+
+			call('POST', '/id/' + encodeFileId('/toto/titi/tata'), {_method: "MOVE", folderId: encodeFileId("/toto.3")} /*query*/, null /*data*/, function(err, res) {
+				should.not.exist(err);
+				should.exist(res);
+				should.exist(res.statusCode);
+				res.statusCode.should.equal(201); // Created
+
+				call('GET', '/id/' + encodeFileId('/toto.3/tata'), null /*query*/, null /*data*/, function(err, res) {
+					var contentBuf, contentStr;
+					should.not.exist(err);
+					should.exist(res);
+					should.exist(res.statusCode);
+					res.statusCode.should.equal(200);
+					should.exist(res.json);
+					should.exist(res.json.content);
+					contentBuf = new Buffer(res.json.content, 'base64');
+					contentStr = contentBuf.toString();
+					contentStr.should.equal(content);
+
+					done();
+				});
+			});
+		});
+	});
+
+	it("should move folder into another folder", function(done) {
+		call('POST', '/id/' + encodeFileId('/'), {_method: "MKCOL",name: "toto.4"} /*query*/, undefined /*data*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201); // Created
+			should.exist(res.json);
+			should.exist(res.json.isDir);
+			res.json.isDir.should.equal(true);
+			should.exist(res.json.path);
+			res.json.path.should.equal("/toto.4");
+
+			call('POST', '/id/' + encodeFileId('/toto.2/titi'), {_method: "MOVE", folderId: encodeFileId("/toto.4")} /*query*/, null /*data*/, function(err, res) {
+				should.not.exist(err);
+				should.exist(res);
+				should.exist(res.statusCode);
+				res.statusCode.should.equal(201); // Created
+
+				call('GET', '/id/' + encodeFileId('/toto.4/titi'), {_method: "PROPFIND", depth: 1} /*query*/, null /*data*/, function(err, res) {
+					should.not.exist(err);
+					should.exist(res);
+					should.exist(res.statusCode);
+					res.statusCode.should.equal(200);
+					should.exist(res.json);
+					should.exist(res.json.isDir);
+					res.json.isDir.should.equal(true);
+					should.exist(res.json.contents);
+					res.json.contents.length.should.equal(2);
 
 					done();
 				});

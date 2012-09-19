@@ -2,7 +2,9 @@
 
 Hermes is the file storage component of the Ares IDE.  It provides a consistent file-system abstraction API,  whatever backend storage system is in use.
 
-## Hermes Verbs
+## Hermes Protocol
+
+### Verbs
 
 Hermes file-system providers use verbs that closely mimic the semantics defined by [WebDAV (RFC4918)](http://tools.ietf.org/html/rfc4918):  although Hermes reuses the same HTTP verbs (`GET`, `PUT`, `PROPFIND`, `MKCOL`, `DELETE` ...), it differs in terms of carried data.  Many (if not most) of the HTTP clients implement only the `GET` and `POST` HTTP verbs:  Hermes uses the same HTTP Method Overrides as WebDAV usually do (tunnel every requests but `GET` into `POST` requests that include a special `_method` query parameter)
 
@@ -37,9 +39,11 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		    "id": "%2F"
 		}
 
-* `MKCOL` create a collection (a folder) into the given collection, using the name `name` passed as a query parameter (and therefore URL-encoded):
+* `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded):
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
+
+* `PUT` creates or overwrite a file resource.
 
 * `DELETE` delete a resource (a file), which might be a collection (a folder).  Status codes:
   * `204/No-Content` success, resource successfully removed
@@ -51,6 +55,22 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
   * `204/No-Content` success, an existing resource was successfully overwritten (query parameter `overwrite` was set to `true`)
   * `412/Precondition-Failed` failure, not allowed to copy onto an exising resource
 * `MOVE` has the exact same parameters and return codes as `COPY`
+
+### Parameters
+
+#### Path parameters
+
+		http://127.0.0.1:{port}/{urlPrefix}/id/{id}
+
+* **`port`** TCP port
+* **`urlPrefix`** server path
+* **`id`** resource IDs.  Even when readable, those resources need to be handled as if they were opaque values.
+
+#### Query parameters
+
+* **`name`** File or folder name, for creation methods (`MKCOL`, `PUT`, `COPY`, `MOVE`).  This is required, as the resource `id` is not (yet) known.
+* **`folderId`** target folder `id` used by `COPY` and `MOVE` methods.
+* **`overwrite`** when set to `true` with the `COPY`, `MOVE` and `PUT` methods, causes the target resource to be overwritten (not merged) in case it already exists.  When absent, `overwrite` defaults to `false`.
 
 
 ## Debug
