@@ -120,17 +120,39 @@ function FsLocal(config, next) {
 		_handleRequest(req, res, next);
 	});
 
-	function _handleRequest(req, res, next) {
+	function _handleRequest(req, res, next) { 
 		console.log("req.query=" + util.inspect(req.query));
 		req.params.id = req.params.id || encodeFileId('/');
 		req.params.path = decodeFileId(req.params.id);
-		// 'infinity' is '-1', 'undefined' is '0'
-		req.params.depth = req.query.depth ? (req.query.depth === 'infinity' ? -1 : parseInt(req.query.depth, 10)) : 0;
-		console.log("req.params=" + util.inspect(req.params));
-		verbs[req.originalMethod][req.method](req, res, respond.bind(this, res));
-	});
-	console.log("route="+path.join(config.urlPrefix, ':id'));
-	
+		_loadRequestParams(req, res, function() {
+			console.log("req.params=" + util.inspect(req.params));
+			verbs[req.originalMethod][req.method](req, res, respond.bind(this, res));
+		});
+	}
+
+	function _loadRequestParams(req, res, next) {
+		for (var param in req.query) {
+			req.params[param] = req.query[param];
+		}
+		if (req.headers['content-type'] === 'application/x-www-form-urlencoded') { 
+			var chunks = [];
+			req.on('data', function(chunk) {
+				chunks.push(chunk);
+			});
+			req.on('end', function() {
+				req.form = querystring.parse(Buffer.concat(chunks).toString());
+				console.log("req.form=");
+				console.dir(req.form);
+				for (var param in req.form) {
+					req.params[param] = req.form[param];
+				}
+				next();
+			});
+		} else {
+			next();
+		}
+	}
+
 	// start the filesystem (fs) server & notify the IDE server
 	// (parent) where to find it
 
@@ -188,7 +210,9 @@ function FsLocal(config, next) {
 	};
 	
 	verbs.GET.PROPFIND = function(req, res, next) {
-		_propfind(req.params.path, req.params.depth, function(err, content){
+		// 'infinity' is '-1', 'undefined' is '0'
+		var depth = req.params.depth ? (req.params.depth === 'infinity' ? -1 : parseInt(req.params.depth, 10)) : 1;
+		_propfind(req.params.path, depth, function(err, content){
 			next(err, {code: 200, body: content});
 		});
 	};
@@ -283,11 +307,11 @@ function FsLocal(config, next) {
 	verbs.POST.PUT = function (req, res, next) {
 		var bufs = []; 	// Buffer's
 		var newPath, newId;
-		if (!req.query.name) {
+		if (!req.params.name) {
 			next(new Error("missing 'name' query parameter"));
 			return;
 		}
-		newPath = path.join(req.params.path, path.basename(req.query.name));
+		newPath = path.join(req.params.path, path.basename(req.params.name));
 		newId = encodeFileId(newPath);
 
 		// XXX replace/enhance application/json body by
@@ -317,11 +341,11 @@ function FsLocal(config, next) {
 
 	verbs.POST.MKCOL = function(req, res, next) {
 		var newPath, newId;
-		if (!req.query.name) {
-			next(new Error("missing 'name' query parameter"));
+		if (!req.params.name) {
+			next(new HttpError("missing 'name' query parameter", 400 /*Bad-Request*/));
 			return;
 		}
-		newPath = path.join(req.params.path, path.basename(req.query.name));
+		newPath = path.join(req.params.path, path.basename(req.params.name));
 		newId = encodeFileId(newPath);
 
 		fs.mkdir(path.join(config.root, newPath), function(err) {
@@ -394,15 +418,15 @@ function FsLocal(config, next) {
 	function _changeNode(req, res, op, next) {
 		var srcPath = path.join(config.root, req.params.path);
 		var dstPath;
-		if (req.query.name) {
+		if (req.params.name) {
 			// rename/copy file within the same collection (folder)
 			dstPath = path.join(config.root,
 					    path.dirname(req.params.path),
-					    path.basename(req.query.name));
-		} else if (req.query.folderId) {
+					    path.basename(req.params.name));
+		} else if (req.params.folderId) {
 			// move/copy at a new location
 			dstPath = path.join(config.root,
-					    decodeFileId(req.query.folderId),
+					    decodeFileId(req.params.folderId),
 					    path.basename(req.params.path));
 		} else {
 			next(new HttpError("missing query parameter: 'name' or 'folderId'", 400 /*Bad-Request*/));
@@ -425,8 +449,8 @@ function FsLocal(config, next) {
 					next(err);
 				}
 			} else if (stat) {
-				console.trace("req.query=" + util.inspect(req.query));
-				if (req.query.overwrite) {
+				console.trace("req.params=" + util.inspect(req.params));
+				if (req.params.overwrite) {
 					// Destination resource already exists : destroy it first
 					_rmrf(dstPath, function(err) {
 						op(srcPath, dstPath, function(err) {
