@@ -190,9 +190,10 @@ describe("fsLocal...", function() {
 	it("should fail to create a folder", function(done) {
 		call('POST', '/id/' + encodeFileId('/'), {_method: "MKCOL",name: "toto"} /*query*/, undefined /*data*/, function(err, res) {
 			should.exist(err);
-			should.exist(err.json);
-			should.exist(err.json.code);
-			err.json.code.should.equal('EEXIST');
+			err.statusCode.should.equal(409); // Conflict
+			//should.exist(err.json);
+			//should.exist(err.json.code);
+			//err.json.code.should.equal('EEXIST');
 			should.not.exist(res);
 			done();
 		});
