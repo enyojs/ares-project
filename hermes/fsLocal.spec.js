@@ -136,6 +136,23 @@ describe("fsLocal...", function() {
 		});
 	});
 	
+	it("should have an empty root-level folder (implicit id, depth=1)", function(done) {
+		call('GET', '/id/', {_method: "PROPFIND", depth: 1} /*query*/, undefined /*data*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(200);
+			should.exist(res.json);
+			should.exist(res.json.isDir);
+			res.json.isDir.should.equal(true);
+			should.exist(res.json.contents);
+			should.exist(res.json.contents.length);
+			res.json.contents.length.should.equal(0);
+
+			done();
+		});
+	});
+	
 	it("should create a folder", function(done) {
 		call('POST', '/id/' + encodeFileId('/'), {_method: "MKCOL",name: "toto"} /*query*/, undefined /*data*/, function(err, res) {
 			should.not.exist(err);

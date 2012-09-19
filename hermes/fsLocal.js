@@ -112,12 +112,15 @@ function FsLocal(config, next) {
 	//app.use(express.bodyParser()); // parses json, x-www-form-urlencoded, and multipart/form-data
 	//app.enable('strict routing'); // XXX what for?
 
-	app.all(path.normalize(config.urlPrefix), function(req, res) {
-		res.redirect('/id/' + encodeFileId('/') + 
-			     res.query ? "?" +
-			     querystring.stringify(req.query) : '');
+	app.all(path.join(config.urlPrefix, 'id/'), function(req, res) {
+		req.params.id = encodeFileId('/');
+		_handleRequest(req, res, next);
 	});
 	app.all(path.join(config.urlPrefix, '/id/:id'), function(req, res, next) {
+		_handleRequest(req, res, next);
+	});
+
+	function _handleRequest(req, res, next) {
 		console.log("req.query=" + util.inspect(req.query));
 		req.params.id = req.params.id || encodeFileId('/');
 		req.params.path = decodeFileId(req.params.id);
