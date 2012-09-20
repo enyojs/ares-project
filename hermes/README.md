@@ -46,14 +46,15 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 * `PUT` creates or overwrite a file resource.
 
 * `DELETE` delete a resource (a file), which might be a collection (a folder).  Status codes:
-  * `204/No-Content` success, resource successfully removed
+  * `200/Ok` success, resource successfully removed.  The method returns the new status (`PROPFIND`) of the parent of the deleted resource.
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2Ftata?_method=DELETE"
 
-* `COPY` reccursively copies a resource as a new `name` or `path` provided in the query string (one of them is required).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not.  
+* `COPY` reccursively copies a resource as a new `name` or `path` provided in the query string (one of them is required).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not.  The method returns the new status (`PROPFIND`) of the target resource.
   * `201/Created` success, a new resource is created
-  * `204/No-Content` success, an existing resource was successfully overwritten (query parameter `overwrite` was set to `true`)
+  * `200/Ok` success, an existing resource was successfully overwritten (query parameter `overwrite` was set to `true`)
   * `412/Precondition-Failed` failure, not allowed to copy onto an exising resource
+
 * `MOVE` has the exact same parameters and return codes as `COPY`
 
 ### Parameters

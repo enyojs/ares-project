@@ -97,11 +97,13 @@ function FsLocal(config, next) {
 				statusCode = 500; // Internal Server Error
 				body = new Error(err.toString());
 			}
-			console.error(body.stack);
+			console.error("<<<\n"+body.stack);
 		} else {
-			statusCode = response.code || 200;
+			statusCode = response.code || 200 /*Ok*/;
 			body = response.body;
 		}
+		console.log("<<< STATUS:" + statusCode);
+		console.log("<<< BODY:\n" + util.inspect(body));
 		if (body) {
 			res.status(statusCode).send(body);
 		} else {
@@ -141,8 +143,7 @@ function FsLocal(config, next) {
 			});
 			req.on('end', function() {
 				req.form = querystring.parse(Buffer.concat(chunks).toString());
-				console.log("req.form=");
-				console.dir(req.form);
+				console.log("req.form=" + util.inspect(req.form));
 				for (var param in req.form) {
 					req.params[param] = req.form[param];
 				}
@@ -213,7 +214,7 @@ function FsLocal(config, next) {
 		// 'infinity' is '-1', 'undefined' is '0'
 		var depth = req.params.depth ? (req.params.depth === 'infinity' ? -1 : parseInt(req.params.depth, 10)) : 1;
 		_propfind(req.params.path, depth, function(err, content){
-			next(err, {code: 200, body: content});
+			next(err, {code: 200 /*Ok*/, body: content});
 		});
 	};
 
@@ -238,8 +239,7 @@ function FsLocal(config, next) {
 				isDir: stat.isDirectory()
 			};
 
-			console.log("depth="+depth+", node=");
-			console.dir(node);
+			console.log("depth="+depth+", node="+util.inspect(node));
 
 			if (stat.isFile() || !depth) {
 				return next(null, node);
@@ -294,7 +294,7 @@ function FsLocal(config, next) {
 				 */
 				return fs.readFile(localPath, function(err, buffer) {
 					return next(err, {
-						code: 200,
+						code: 200 /*Ok*/,
 						body: { content: buffer.toString('base64') }
 					});
 				});
@@ -307,37 +307,59 @@ function FsLocal(config, next) {
 	verbs.POST.PUT = function (req, res, next) {
 		var bufs = []; 	// Buffer's
 		var newPath, newId;
-		if (!req.params.name) {
-			next(new Error("missing 'name' query parameter"));
-			return;
+		if (req.params.name) {
+			newPath = path.join(req.params.path, path.basename(req.params.name));
+		} else {
+			newPath = req.params.path;
 		}
-		newPath = path.join(req.params.path, path.basename(req.params.name));
 		newId = encodeFileId(newPath);
 
 		// XXX replace/enhance application/json body by
 		// - direct upload using multipart/form-data + express.bodyParser()
 		// - straight binary in body (+streamed pipes)
 
-		//if (req.headers['content-type'] !== 'application/json; charset=utf-8') {
-		//	next(new Error("unexpected 'content-type'="+req.headers['content-type']));
-		//}
+		if (req.params.content) {
+			// content was passed in URL or as
+			// 'application/x-www-form-urlencode' in the
+			// request body.
+			_put(newPath, req.params.content, next);
+		} else {
+			// content is passed as the 'content' property
+			// of a JSON object in the body
 
-		req.on('data', function(chunk) {
-			bufs.push(chunk);
-		});
-		req.on('end', function() {
-			var bodyStr = Buffer.concat(bufs).toString();
-			var bodyObj = JSON.parse(bodyStr);
-			var content = new Buffer(bodyObj.content, 'base64');
-			fs.writeFile(path.join(config.root, newPath), content, function(err){
-				next(err, {
-					code: 201, // Created
-					body: {id: newId, path: newPath, isDir: false}
-				});
+			//if (req.headers['content-type'] !== 'application/json; charset=utf-8') {
+			//	next(new Error("unexpected 'content-type'="+req.headers['content-type']));
+			//}
+
+			req.on('data', function(chunk) {
+				bufs.push(chunk);
 			});
-		});
+			req.on('end', function() {
+				var bodyStr = Buffer.concat(bufs).toString();
+				var bodyObj = JSON.parse(bodyStr);
+				_put(newPath, bodyObj.content, next);
+			});
+		}
 
 	};
+
+	/**
+	 * Create/Write file
+	 * 
+	 * @param {string} relPath relative path to the file to create/write
+	 * @param {string} content base64-encoded string
+	 * @param {function} next(err, data)  
+	 */
+	function _put(relPath, content, next) {
+		var id = encodeFileId(relPath);
+		var buf = new Buffer(content, 'base64');
+		fs.writeFile(path.join(config.root, relPath), buf, function(err){
+			next(err, {
+				code: 201, // Created
+				body: {id: id, path: relPath, isDir: false}
+			});
+		});
+	}
 
 	verbs.POST.MKCOL = function(req, res, next) {
 		var newPath, newId;
@@ -359,12 +381,19 @@ function FsLocal(config, next) {
 	verbs.POST.DELETE = function(req, res, next) {
 		var localPath = path.join(config.root, req.params.path);
 		if (localPath === config.root) {
-			var err = new Error("Not allowed to remove service root");
-			err.http_code = 403 /*Forbidden*/;
-			next(err);
+			next(new HttpError("Not allowed to remove service root", 403 /*Forbidden*/));
 		} else {
 			_rmrf(path.join(config.root, req.params.path), function(err) {
-				next(err, { code: 204 /*No Content*/ });
+				if (err) {
+					next(err);
+				}
+				// return the new content of the parent folder
+				_propfind(path.dirname(req.params.path), 1 /*depth*/, function(err, content) {
+					next(err, {
+						code: 200 /*Ok*/,
+						body: content
+					});
+				});
 			});
 		}
 	};
@@ -417,21 +446,20 @@ function FsLocal(config, next) {
 
 	function _changeNode(req, res, op, next) {
 		var srcPath = path.join(config.root, req.params.path);
-		var dstPath;
+		var dstPath, dstRelPath;
 		if (req.params.name) {
 			// rename/copy file within the same collection (folder)
-			dstPath = path.join(config.root,
-					    path.dirname(req.params.path),
-					    path.basename(req.params.name));
+			dstRelPath = path.join(path.dirname(req.params.path),
+					       path.basename(req.params.name));
 		} else if (req.params.folderId) {
 			// move/copy at a new location
-			dstPath = path.join(config.root,
-					    decodeFileId(req.params.folderId),
-					    path.basename(req.params.path));
+			dstRelPath = path.join(decodeFileId(req.params.folderId),
+					       path.basename(req.params.path));
 		} else {
 			next(new HttpError("missing query parameter: 'name' or 'folderId'", 400 /*Bad-Request*/));
 			return;
 		}
+		dstPath = path.join(config.root, dstRelPath);
 		if (srcPath === dstPath) {
 			next(new HttpError("trying to move a resource onto itself", 400 /*Bad-Request*/));
 			return;
@@ -443,18 +471,38 @@ function FsLocal(config, next) {
 				if (err.code === 'ENOENT') {
 					// Destination resource does not exist yet
 					op(srcPath, dstPath, function(err) {
-						next(err, { code: 201 /*Created*/ });
+						if (err) {
+							next(err);
+						} else {
+							// return the new content of the destination path
+							_propfind(dstRelPath, 1 /*depth*/, function(err, content) {
+								next(err, {
+									code: 201 /*Created*/,
+									body: content
+								});
+							});
+						}
 					});
 				} else {
 					next(err);
 				}
 			} else if (stat) {
-				console.trace("req.params=" + util.inspect(req.params));
 				if (req.params.overwrite) {
 					// Destination resource already exists : destroy it first
 					_rmrf(dstPath, function(err) {
 						op(srcPath, dstPath, function(err) {
-							next(err, { code: 204 /*No-Content*/ });
+							//next(err, { code: 204 /*No-Content*/ });
+							if (err) {
+								next(err);
+							} else {
+								// return the new content of the destination path
+								_propfind(dstRelPath, 1 /*depth*/, function(err, content) {
+									next(err, {
+										code: 200 /*Ok*/,
+										body: content
+									});
+								});
+							}
 						});
 					});
 				} else {

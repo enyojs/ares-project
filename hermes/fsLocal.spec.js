@@ -13,14 +13,48 @@ var should = require("should");
 var FsLocal = require("./fsLocal");
 var util  = require("util");
 
-function call(method, path, query, reqBody, next) {
-	var reqContent;
-	var req = http.request({
+function call(method, path, query, data, next) {
+	var reqContent, reqBody;
+	var reqOptions = {
 		hostname: "127.0.0.1",
 		port: myPort,
 		method: method,
-		path: path + '?' + querystring.stringify(query)
-	}, function(res) {
+		headers: {}
+	};
+	// XXX replace/enhance application/json body by
+	// - direct upload using multipart/form-data + express.bodyParser()
+	// - straight binary in body (+streamed pipes)
+	if (data) {
+		if (Buffer.isBuffer(data)) {
+			reqContent = data.toString('base64');
+		} else if (typeof data === 'object') {
+			reqContent = data;
+		} else {
+			throw new Error("data can only be 'Buffer' or 'Object'");
+		}
+	}
+	if (method === 'POST') {
+		reqOptions.path = path + '?' + querystring.stringify({_method: query._method});
+		delete query._method;
+		if (reqContent) {
+			query.content = reqContent;
+		}
+		if (Object.keys(query).length > 0) {
+			reqBody = querystring.stringify(query);
+			reqOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+		}
+	} else if (method === 'GET') {
+		reqOptions.path = path + '?' + querystring.stringify(query);
+		if (reqContent) {
+			reqBody = JSON.stringify({content: reqContent});
+			reqOptions.headers['Content-Type'] = 'application/json; charset=utf-8';
+		}
+	} else {
+		throw new Error("method can only be 'GET' or 'POST'");
+	}
+	console.log("reqOptions="+util.inspect(reqOptions));
+	console.log("reqBody="+util.inspect(reqBody));
+	var req = http.request(reqOptions, function(res) {
 		var bufs = [];
 		res.on('data', function(chunk){
 			bufs.push(chunk);
@@ -50,18 +84,8 @@ function call(method, path, query, reqBody, next) {
 			next(err);
 		});
 	});
-
-	// XXX replace/enhance application/json body by
-	// - direct upload using multipart/form-data + express.bodyParser()
-	// - straight binary in body (+streamed pipes)
-
 	if (reqBody) {
-		if (Buffer.isBuffer(reqBody)) {
-			reqContent = reqBody.toString('base64');
-		} else if (typeof reqBody === 'object') {
-			reqContent = reqBody;
-		}
-		req.write(JSON.stringify({content: reqContent}));
+		req.write(reqBody);
 	}
 	req.end();
 	req.on('error', next);
@@ -96,7 +120,7 @@ describe("fsLocal...", function() {
  			root: myFsPath,
  			port: myPort
 		}, function(err, service){
-			console.dir(service);
+			console.log("service="+util.inspect(service));
 			should.not.exist(err);
 			should.exist(service);
 			should.exist(service.url);
@@ -331,7 +355,7 @@ describe("fsLocal...", function() {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
-			res.statusCode.should.equal(204); // No-Content
+			res.statusCode.should.equal(200); // Ok
 
 			call('GET', '/id/' + encodeFileId('/toto/titi/tata'), null /*query*/, null /*data*/, function(err, res) {
 				var contentBuf, contentStr;
