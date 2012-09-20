@@ -5,6 +5,7 @@ enyo.kind({
 		title: "New",
 		type: "",
 		path: "",
+		folderId: "",
 		fileName: "",
 		placeHolder: ""
 	},
@@ -49,7 +50,7 @@ enyo.kind({
 	newConfirm: function(inSender, inEvent) {
 		var name = this.$.fileName.getValue();
 		this.hide();
-		this.doConfirm({name: name, path: this.path});
+		this.doConfirm({name: name, path: this.path, folderId: this.folderId});
 	},
 	nameChanged: function(inSender, inEvent) {
 		this.setFileName(this.$.fileName.getValue());
