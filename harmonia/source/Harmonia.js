@@ -23,11 +23,11 @@ enyo.kind({
 	},
 	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
 	selectFile: function(inSender, inEvent) {
-		console.log("Selected file: "+inEvent.file.id);
+		console.log("Selected file: "+inEvent.file.path);
 		console.dir(inEvent.file);
 	},
 	selectFolder: function(inSender, inEvent) {
-		console.log("Selected folder: "+inEvent.file.id);
+		console.log("Selected folder: "+inEvent.file.path);
 		console.dir(inEvent.file);
 	}
 });
