@@ -5,9 +5,16 @@ enyo.kind({
 	components: [
 		{kind: "Harmonia", onFileDblClick: "openDocument"},
 		{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"},
-		{kind: "Deimos", onCloseDesigner: "closeDesigner"}
+		{kind: "Deimos", onCloseDesigner: "closeDesigner"},
+		{kind: "ProjectView"}
 	],
 	//arrangerKind: "CollapsingArranger",
+	create: function() {
+		this.inherited(arguments);
+		if (this.startOnProjectView && this.startOnProjectView === true) {
+			this.setIndex(3);
+		}
+	},
 	draggable: false,
 	openDocument: function(inSender, inEvent) {
 		var f = inEvent.file;

@@ -14,5 +14,6 @@
 	"../lib/localStorage",
 	"../lib/tree",
 	"../lib/service",
-	"../harmonia/source"
+	"../harmonia/source",
+	"../project-view/source"
 );
