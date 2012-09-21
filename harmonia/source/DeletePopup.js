@@ -2,9 +2,10 @@ enyo.kind({
 	name: "DeletePopup",
 	kind: "onyx.Popup",
 	published: {
-		type: "file",
-		fileName: "",
-		path: "",
+		type: "",
+		name: "",
+		nodeId: "",
+		path: ""
 	},
 	events: {
 		onConfirm: "",
@@ -15,25 +16,29 @@ enyo.kind({
 	floating: true,
 	components: [
 		{name: "title", tag: "h3", content: "Delete?"},
-		{name: "path", tag: "p", content: "Path: "},
+		//{name: "path", tag: "p", content: "Path: "},
 		{tag: "br"},
 		{tag: "br"},
 		{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "deleteCancel"},
-		{kind: "onyx.Button", classes: "onyx-affirmative", content: "Delete", ontap: "deleteConfirm"},
+		{kind: "onyx.Button", classes: "onyx-affirmative", content: "Delete", ontap: "deleteConfirm"}
 	],
 	create: function() {
 		this.inherited(arguments);
 		this.typeChanged();
+		this.nameChanged();
+		this.nodeIdChanged();
 		this.pathChanged();
 	},
 	typeChanged: function() {
-		this.$.title.setContent("Delete "+this.type+" "+this.fileName+"?");
+		this.$.title.setContent("Delete "+this.type+": "+this.name+"?");
 	},
-	fileNameChanged: function() {
-		this.$.title.setContent("Delete "+this.type+" "+this.fileName+"?");
+	nameChanged: function() {
+		this.$.title.setContent("Delete "+this.type+": "+this.name+"?");
+	},
+	nodeIdChanged: function() {
 	},
 	pathChanged: function() {
-		this.$.path.setContent("in "+this.path);
+		//this.$.path.setContent("in "+this.path);
 	},
 	deleteCancel: function(inSender, inEvent) {
 		this.hide();
@@ -41,6 +46,6 @@ enyo.kind({
 	},
 	deleteConfirm: function(inSender, inEvent) {
 		this.hide();
-		this.doConfirm({name: this.fileName, path: this.path});
+		this.doConfirm({name: this.name, nodeId: this.nodeId, path: this.path});
 	}
 });

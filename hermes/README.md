@@ -2,7 +2,9 @@
 
 Hermes is the file storage component of the Ares IDE.  It provides a consistent file-system abstraction API,  whatever backend storage system is in use.
 
-## Hermes Verbs
+## Hermes Protocol
+
+### Verbs
 
 Hermes file-system providers use verbs that closely mimic the semantics defined by [WebDAV (RFC4918)](http://tools.ietf.org/html/rfc4918):  although Hermes reuses the same HTTP verbs (`GET`, `PUT`, `PROPFIND`, `MKCOL`, `DELETE` ...), it differs in terms of carried data.  Many (if not most) of the HTTP clients implement only the `GET` and `POST` HTTP verbs:  Hermes uses the same HTTP Method Overrides as WebDAV usually do (tunnel every requests but `GET` into `POST` requests that include a special `_method` query parameter)
 
@@ -37,21 +39,40 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		    "id": "%2F"
 		}
 
-* `MKCOL` create a collection (a folder) into the given collection, using the name `name` passed as a query parameter (and therefore URL-encoded):
+* `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded):
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
 
+* `PUT` creates or overwrite a file resource.
+
 * `DELETE` delete a resource (a file), which might be a collection (a folder).  Status codes:
-  * `204/No-Content` success, resource successfully removed
+  * `200/Ok` success, resource successfully removed.  The method returns the new status (`PROPFIND`) of the parent of the deleted resource.
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2Ftata?_method=DELETE"
 
-* `COPY` reccursively copies a resource as a new `name` or `path` provided in the query string (one of them is required).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not.  
+* `COPY` reccursively copies a resource as a new `name` or `path` provided in the query string (one of them is required).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not.  The method returns the new status (`PROPFIND`) of the target resource.
   * `201/Created` success, a new resource is created
-  * `204/No-Content` success, an existing resource was successfully overwritten (query parameter `overwrite` was set to `true`)
+  * `200/Ok` success, an existing resource was successfully overwritten (query parameter `overwrite` was set to `true`)
   * `412/Precondition-Failed` failure, not allowed to copy onto an exising resource
+
 * `MOVE` has the exact same parameters and return codes as `COPY`
 
+### Parameters
+
+#### Path parameters
+
+		http://127.0.0.1:{port}/{urlPrefix}/id/{id}
+
+* **`port`** TCP port
+* **`urlPrefix`** server path
+* **`id`** resource IDs.  Even when readable, those resources need to be handled as if they were opaque values.
+
+#### Query parameters
+
+* **`name`** File or folder name, for creation methods (`MKCOL`, `PUT`, `COPY`, `MOVE`).  This is required, as the resource `id` is not (yet) known.
+* **`folderId`** target folder `id` used by `COPY` and `MOVE` methods.
+* **`overwrite`** when set to `true` with the `COPY`, `MOVE` and `PUT` methods, causes the target resource to be overwritten (not merged) in case it already exists.  When absent, `overwrite` defaults to `false`.
+* **`depth`** is only valid with the `PROPFIND` method.  It defines the recursion level of the request in the folder tree.  When omitted, it defaults to `1` (list immediate child resources of a folder).  The special value `infinity` causes the methods to recurse to the deepest possible level in the folder tree.
 
 ## Debug
 
