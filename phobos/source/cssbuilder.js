@@ -123,6 +123,9 @@ enyo.kind({
 			this.$.fontSizePicker.createComponent({content: i, active: !i});
 			this.$.borderSizePicker.createComponent({content: i, active: !i});
 			this.$.marginSizePicker.createComponent({content: i, active: !i});
+			this.$.Radius.createComponent({content: i, active: !i});
+			this.$.Padding.createComponent({content: i, active: !i});
+			this.$.TextShadow.createComponent({content: i, active: !i});
 		}
 
 		for (var i=5; i<2000; i+=5) {
@@ -191,6 +194,21 @@ enyo.kind({
 	if(this.$.widthSize != null){
 		outPut = outPut  + tab + "width:" + " " + this.$.widthSize + "px;" + "<br>";
 		outString = outString + "	" + "width:" + " " + this.$.widthSize + "px;\n";
+	}
+
+	if(this.$.paddingSize != null){
+		outPut = outPut  + tab + "padding:" + " " + this.$.paddingSize + "px;" + "<br>";
+		outString = outString + "	" + "padding:" + " " + this.$.paddingSize + "px;\n";
+	}
+
+	if(this.$.radiusSize != null){
+		outPut = outPut  + tab + "border-radius:" + " " + this.$.radiusSize + "px;" + "<br>";
+		outString = outString + "	" + "border-radius:" + " " + this.$.radiusSize + "px;\n";
+	}
+
+	if(this.$.textshadow != null){
+		outPut = outPut + tab + "text-shadow:" + " " + this.$.textshadow + "px;"  + " " + this.$.textshadow + "px;" + "<br>";
+		outString = outString + "	" + "text-shadow:" + " " + this.$.textshadow + "px1;" + " " + this.$.textshadow + "px2;\n";
 	}
 
 	this.$.bg.setContent(outPut + "<br>}");
@@ -301,6 +319,20 @@ enyo.kind({
 		this.doInsert (inEvent);
 
 	},
+
+	padding: function(inSender, inEvent){
+		this.$.paddingSize = inEvent.selected.content;
+		this.updateBox();
+	},
+	radius: function(inSender, inEvent){
+		this.$.radiusSize = inEvent.selected.content;
+		this.updateBox();
+	},
+
+	textshadow: function(inSender, inEvent) {
+		this.$.textshadow = inEvent.selected.content;
+		this.updateBox();
+	},
 	reset: function(){
 		this.className = null;
 		this.backgroundColor = null;
@@ -309,10 +341,13 @@ enyo.kind({
 		this.fontFamily = null;
 		this.$.marginSize = null;
 		this.$.fontSize = null;
-		this.$.outPut = null;
-		outString = "";
+		this.$.textshadow = null;
 		this.$.heightSize = null;
 		this.$.widthSize = null;
+		this.$.radiusSize =	null;
+		this.$.paddingSize = null;
+		this.$.outPut = null;
+		outString = "";
 		this.updateBox();
 
 	}
