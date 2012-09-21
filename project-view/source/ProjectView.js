@@ -119,9 +119,9 @@ enyo.kind({
     },
     directorySelected: function(inSender, inEvent) {
     	this.selectedDir =inEvent;
-    	this.log("YES");		
+    	this.log("YES");						// TODO TBR
     	console.dir(this.selectedDir);
-    	this.$.projectDirectory.setValue(this.selectedDir.id);
+    	this.$.projectDirectory.setValue(this.selectedDir.path);
     	this.$.selectServicePopup.hide();
     }
 });
@@ -187,8 +187,9 @@ enyo.kind({
 	},
 	selectFolder: function(inSender, inEvent) {
 		this.selectedDir = inEvent.file;
-		console.log("In " + this.kind + " Selected folder: " + this.selectedDir);
-		this.$.selectedDir.setContent("Selected: " + this.selectedDir.id);
+		this.log("Selected folder: " + this.selectedDir);
+		console.dir(this.selectedDir);
+		this.$.selectedDir.setContent("Selected: " + this.selectedDir.path);
 		this.$.confirm.setDisabled(false);
 		return true; // Stop event propagation
 	},
