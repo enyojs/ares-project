@@ -121,17 +121,12 @@ enyo.kind({
 		this.$.outputBox.applyStyle("background-color", "#000000");
 		for (var i=1; i<50; i++) {
 			this.$.fontSizePicker.createComponent({content: i, active: !i});
-		}
-		for (var i=1; i<50; i++) {
+			this.$.borderSizePicker.createComponent({content: i, active: !i});
 			this.$.marginSizePicker.createComponent({content: i, active: !i});
 		}
-		for (var i=1; i<50; i++) {
-			this.$.borderSizePicker.createComponent({content: i, active: !i});
-		}
+
 		for (var i=5; i<2000; i+=5) {
 			this.$.heightSizePicker.createComponent({content: i, active: !i});
-		}
-		for (var i=5; i<2000; i+=5) {
 			this.$.widthSizePicker.createComponent({content: i, active: !i});
 		}
 
