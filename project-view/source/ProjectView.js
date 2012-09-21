@@ -3,7 +3,7 @@ enyo.kind({
 	kind: "FittableColumns",
 	classes: "enyo-unselectable",
 	components: [
-	    {kind: "ProjectList", onCreateProject: "createProjectAction", },
+	    {kind: "ProjectList", onCreateProject: "createProjectAction", onProjectSelected: "showSelectedProject", name: "projectList"},
 		{kind: "HermesFileTree", fit:true, name: "hermesFileTree"},
 		{kind: "ProjectWizardPopup", canGenerate: false, name: "projectWizardPopup"}
     ],
@@ -36,14 +36,27 @@ enyo.kind({
 		var jsonp = service ? service.useJsonp : false;
 
 		//this.log("service: auth: "+auth+" url: "+url+" jsonp: "+jsonp);
-		var serviceObj = {
+		var serviceInfo = {
 			auth: auth,
 			url: url,
 			jsonp: jsonp
 		};
-		this.log("LET'S GO ... with: " + JSON.stringify(serviceObj));
-		this.$.hermesFileTree.setServiceInformation(serviceObj);
+		this.log("LET'S GO ... with: " + JSON.stringify(serviceInfo));
+    	
+    	// Add an entry into the project list
+    	this.$.projectList.addProject(inEvent.name, inEvent.selectedDir.path, serviceInfo);
+    	
+    	// Pass service information to HermesFileTree
+		this.$.hermesFileTree.setServiceInformation(serviceInfo);
 		this.$.hermesFileTree.reset();
+		
+		return true; //Stop event propagation
+    },
+    showSelectedProject: function(inSender, inEvent) {
+    	// Pass service information to HermesFileTree
+		this.$.hermesFileTree.setServiceInformation(inEvent.serviceInfo);
+		this.$.hermesFileTree.reset();
+		
 		return true; //Stop event propagation
     }
 });
@@ -53,23 +66,53 @@ enyo.kind({
 	classes: "enyo-unselectable",
 	style: "width: 300px",
 	events: {
-		onCreateProject: ""
+		onCreateProject: "",
+		onProjectSelected: ""
 	},
 	handlers: {
 	},
+	projects: [],
 	components: [
-	{kind: "onyx.Toolbar", isContainer: true, name: "toolbar", components: [
+	    {kind: "onyx.Toolbar", isContainer: true, name: "toolbar", components: [
 			{kind: "onyx.Button", content: "Create Project", ontap: "doCreateProject"},
 			{kind: "onyx.Button", content: "Open Project", ontap: "doOpenProject"}
 		]},
-	{kind: "List", content: "list", controlParentName: "client", name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap"}
-]
-,
-    projectListSetupItem: function(inSender, inEvent) {
-        // TODO - Auto-generated code
-    },
+	    {kind: "enyo.Repeater", style: "height: 300px", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
+                {kind: "Project", name: "item", classes: "enyo-children-inline"}
+	        ]}
+	],
+	addProject: function(name, selectedDirPath, serviceInfo) {
+		var project = {name: name, selectedDirPath: selectedDirPath, serviceInfo: serviceInfo};
+		this.projects.push(project);
+		this.log("Adding project " + name + " ==> nb projects: " + this.projects.length);
+		this.$.projectList.setCount(this.projects.length);
+		this.$.projectList.render();
+	},
+	projectListSetupItem: function(inSender, inEvent) {
+	    var project = this.projects[inEvent.index];
+	    this.log(" ==> index: " + inEvent.index + " name: " + project.name);
+	    var item = inEvent.item;
+	    // setup the controls for this item.
+	    item.$.item.setProjectName(project.name);
+	},
     projectListTap: function(inSender, inEvent) {
-        // TODO - Auto-generated code
+    	this.log("Project tapped: " + inEvent.index);
+    	console.dir(inEvent);
+    	this.doProjectSelected(this.projects[inEvent.index]);
+    }
+});
+
+enyo.kind({
+	name: "Project",
+	published: {
+		projectName: ""
+	},
+	components: [
+	    {name: "name"}
+	],
+	projectNameChanged: function(inOldValue) {
+		this.log("new project name: >>" + + this.projectName + "<<");
+        this.$.name.setContent(this.projectName);
     }
 });
 
