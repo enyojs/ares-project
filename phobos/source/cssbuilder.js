@@ -16,15 +16,17 @@ enyo.kind({
 		{kind: "onyx.Button", classes: "onyx-negative", content: "Reset", ontap:"reset"},
 		]},
 		{kind: "onyx.Input", name: "input", placeholder: "Enter your class name!..",onchange: "inputChange"},
+		{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 150px; ", classes: "enyo-selectable font",	allowHtml: true, Xstyle: "padding: 10px;", components: [
+			{name: "bg", allowHtml: true, style: "font-size: 10px;", content: ""},
+			{name: "dd", allowHtml: true, content:"  ",style: "height: 10px"}
+		]},
+
 		{kind: "Panels", fit:true, classes: "enyo-unselectable",components: [
 			{kind: "enyo.Scroller", classes: "enyo-fit",components: [
 				{classes: "pannel", style: " height: 375px", components: [
 						{name: "name", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Color "},
 
-						{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 150px; ", classes: "enyo-selectable font",	allowHtml: true, Xstyle: "padding: 10px;", components: [
-							{name: "bg", allowHtml: true, style: "font-size: 10px;", content: ""},
-							{name: "dd", allowHtml: true, content:"  ",style: "height: 10px"}
-						]},
+
 						{name: "redSlider", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
 						style: "height:10px; background-color: red; enyo-unselectable;"
 						},
