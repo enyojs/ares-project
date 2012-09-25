@@ -77,3 +77,7 @@ body {
 	padding: 19px;
 	box-sizing: border-box;
 }
+.ares_pview_popup {
+	width: 600px;
+	height: 400px;
+}
