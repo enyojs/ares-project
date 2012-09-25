@@ -6,13 +6,20 @@ enyo.kind({
 		onDeselect: "newDeselect",
 	},
 	components: [
-		{kind: "ProviderList", onSelectProvider: "selectProvider"},
+	    {name: "provideList", kind: "ProviderList", onSelectProvider: "selectProvider"},
 		{kind: "HermesFileTree", fit: true, onFileClick: "selectFile", onFolderClick: "selectFolder", 
 			onNewFileConfirm: "newFileConfirm", onNewFolderConfirm: "newFolderConfirm", 
 			onRenameConfirm: "renameConfirm", onDeleteConfirm: "deleteConfirm",
 			onCopyFileConfirm: "copyFileConfirm"}
-
 	],
+	providerListNeeded: true,
+	create: function() {
+		this.inherited(arguments);
+		// TODO provider list should probably go out of Harmonia
+		if (this.providerListNeeded === false) {
+			this.$.provideList.setShowing(false);
+		}
+	},
 	selectProvider: function(inSender, inInfo) {
 		//this.log("service='"+JSON.stringify(inInfo.service)+"'");
 		// super hack
@@ -26,6 +33,11 @@ enyo.kind({
 			url: url,
 			jsonp: jsonp
 		};
+		this.$.hermesFileTree.setServiceInformation(serviceObj);
+		this.$.hermesFileTree.reset();
+	},
+	setServiceInformation: function(serviceObj, subTreePath) {
+		// TODO take subTreePath into account - ENYO-1090	
 		this.$.hermesFileTree.setServiceInformation(serviceObj);
 		this.$.hermesFileTree.reset();
 	},
