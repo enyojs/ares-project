@@ -6,13 +6,15 @@ enyo.kind({
 		{kind: "Harmonia", onFileDblClick: "openDocument"},
 		{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"},
 		{kind: "Deimos", onCloseDesigner: "closeDesigner"},
-		{kind: "ProjectView"}
+		{kind: "ProjectView", onFileDblClick: "openDocument"}
 	],
 	//arrangerKind: "CollapsingArranger",
+	fileViewIndex: 0,
 	create: function() {
 		this.inherited(arguments);
 		if (this.startOnProjectView && this.startOnProjectView === true) {
-			this.setIndex(3);
+			this.fileViewIndex = 3;
+			this.setIndex(this.fileViewIndex);
 		}
 	},
 	draggable: false,
@@ -49,7 +51,7 @@ enyo.kind({
 			});
 	},
 	closeDocument: function(inSender, inEvent) {
-		this.setIndex(0);
+		this.setIndex(this.fileViewIndex);
 	},
 	designDocument: function(inSender, inEvent) {
 		this.$.deimos.load(inEvent);
