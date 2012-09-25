@@ -5,5 +5,6 @@
 	"Harmonia.js",
 	"NamePopup.js",
 	"DeletePopup.js",
-	"RenamePopup.js"
+	"RenamePopup.js",
+	"projectManger.js"
 );
