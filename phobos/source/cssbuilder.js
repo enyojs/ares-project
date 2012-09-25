@@ -448,8 +448,6 @@ console.log(inEvent);
 	textshadow: function(inSender, inEvent) {
 		this.toggle = null,
 		this.$.popup.show();
-		//this.$.textshadowH = inEvent.selected.content;
-		//this.updateBox();
 	},
 		textshadowH: function(inSender, inEvent) {
 			this.$.textshadowH = inEvent.selected.content;
@@ -461,10 +459,6 @@ console.log(inEvent);
 	},
 		textshadowB: function(inSender, inEvent) {
 		this.$.textshadowB = inEvent.selected.content;
-		//console.log(this.$);
-		//this.$.popup.show();
-		//this.$.outputBox.applyStyle("color", c);
-
 		this.updateBox();
 	},
 
