@@ -4,6 +4,7 @@ enyo.kind({
 	components: [
 		{kind: "ProviderList", onSelectProvider: "selectProvider"},
 		{kind: "HermesFileTree", fit: true, onFileClick: "selectFile", onFolderClick: "selectFolder"}
+		{kind: "ProjectManger", fit: true}
 	],
 	selectProvider: function(inSender, inInfo) {
 		//this.log("service='"+JSON.stringify(inInfo.service)+"'");
