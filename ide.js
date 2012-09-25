@@ -26,9 +26,11 @@ var platformVars = [
 ];
 function platformSubst(inStr) {
 	var outStr = inStr;
-	platformVars.forEach(function(subst){
-		outStr = outStr.replace(subst.regex,subst.value);
-	});
+	if (outStr) {
+		platformVars.forEach(function(subst){
+			outStr = outStr.replace(subst.regex,subst.value);
+		});
+	}
 	return outStr;
 }
 
@@ -115,7 +117,9 @@ function startService(service) {
 ide.res.services.filter(function(service){
 	return service.active;
 }).forEach(function(service){
-	startService(service);
+	if (service.command) {
+		startService(service);
+	}
 });
 
 // Start the ide server
