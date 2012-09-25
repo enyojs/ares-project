@@ -1,8 +1,11 @@
 enyo.kind({
 	published: {
 	red: '00',
+	red1: '00',
 	blue: '00',
+	blue1: '00',
 	green: '00',
+	green1: '00',
 	color: "000000",
 	toggle: ""
 	},
@@ -23,7 +26,7 @@ enyo.kind({
 
 		{kind: "Panels", fit:true, classes: "enyo-unselectable",components: [
 			{kind: "enyo.Scroller", classes: "enyo-fit",components: [
-				{classes: "pannel", style: " height: 375px", components: [
+				{classes: "pannel", style: " height: 250px", components: [
 						{name: "name", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Color "},
 
 
@@ -48,7 +51,7 @@ enyo.kind({
 						]},
 				]},
 
-				{classes: "pannel", style: " height: 300px", components: [
+				{classes: "pannel", style: " height: 350px", components: [
 					{name: "fonts", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Fonts "},
 					{kind: "onyx.RadioGroup",
 					onActivate:"fontActivated",components:[
@@ -73,28 +76,13 @@ enyo.kind({
 							{name: "fontSizePicker", kind: "onyx.Picker",onSelect: "fontSize"}
 						]}
 					]},
+					{style: "height: 5px"},
+					{kind: "onyx.Button", classes: "button ", content: "Text Shadow", ontap: "textshadow"}
 				]},
 
 				{classes: "pannel", style: " height: 300px", components: [
 					{name: "border", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Border/Margin"},
 
-					{kind: "enyo.FittableColumns", components: [
-						{classes: "onyx-toolbar-inline", components: [
-							{content: "Margin Size", classes: "picker"},
-							{kind: "onyx.PickerDecorator", components: [
-								{style: "min-width: 40px; font-size: 10px;"},
-								{name: "marginSizePicker", kind: "onyx.Picker",onSelect: "marginSize"}
-							]}
-						]},
-
-						{classes: "onyx-toolbar-inline", components: [
-							{content: "Border Size", classes: "picker"},
-							{kind: "onyx.PickerDecorator", components: [
-								{style: "min-width: 40px; font-size: 10px;"},
-								{name: "borderSizePicker", kind: "onyx.Picker",onSelect: "borderSize"}
-							]}
-						]},
-					]},
 					{kind: "enyo.FittableColumns", components: [
 
 						{classes: "onyx-toolbar-inline", components: [
@@ -112,27 +100,124 @@ enyo.kind({
 							]}
 						]}
 					]},
+					{kind: "enyo.FittableColumns", components: [
+						{classes: "onyx-toolbar-inline", components: [
+							{content: "Margin Size", classes: "picker"},
+							{kind: "onyx.PickerDecorator", components: [
+								{style: "min-width: 40px; font-size: 10px;"},
+								{name: "marginSizePicker", kind: "onyx.Picker",onSelect: "marginSize"}
+							]}
+						]},
+
+						{classes: "onyx-toolbar-inline", components: [
+							{content: "Border Size", classes: "picker"},
+							{kind: "onyx.PickerDecorator", components: [
+								{style: "min-width: 40px; font-size: 10px;"},
+								{name: "borderSizePicker", kind: "onyx.Picker",onSelect: "borderSize"}
+							]}
+						]},
+					]},
+
+					{kind: "enyo.FittableColumns", components: [
+						{classes: "onyx-toolbar-inline", components: [
+							{content: "Radius", classes: "picker"},
+							{kind: "onyx.PickerDecorator", components: [
+								{style: "min-width: 40px; font-size: 10px;"},
+								{name: "Radius", kind: "onyx.Picker",onSelect: "radius"}
+							]}
+						]},
+
+						{classes: "onyx-toolbar-inline", components: [
+							{content: "Padding", classes: "picker"},
+							{kind: "onyx.PickerDecorator", components: [
+								{style: "min-width: 40px; font-size: 10px;"},
+								{name: "Padding", kind: "onyx.Picker",onSelect: "padding"}
+							]}
+						]},
+					]},
+
+
 				]},
 			]}
-		]}
+		]},
+	{name: "popup", kind: "onyx.Popup", classes: "popup", centered: true, modal: true, floating: true, components: [
+		{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
+			{name: "shadowBar", content: "Text Shadow"},
+		]},
+		//{name:"outputBox2", kind: "enyo.Panels", classes: "outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
+			//{name: "bg", allowHtml: true, style: "font-size: 10px;", content: "HI"},
+			//{name: "dd", allowHtml: true, content:"  ",style: "height: 10px"}
+		//]},
+		{classes: "onyx-toolbar-inline", components: [
+			{content: "Horizontal shadow", classes: "picker"},
+			{kind: "onyx.PickerDecorator", components: [
+				{style: "min-width: 40px; font-size: 10px;"},
+				{name: "TextShadowH", kind: "onyx.Picker",onSelect: "textshadowH"}
+			]}
+		]},
+		{classes: "onyx-toolbar-inline", components: [
+			{content: "Vertical shadow--- ", classes: "picker"},
+			{kind: "onyx.PickerDecorator", components: [
+				{style: "min-width: 40px; font-size: 10px;"},
+				{name: "TextShadowV", kind: "onyx.Picker",onSelect: "textshadowV"}
+			]}
+		]},
+		{classes: "onyx-toolbar-inline", components: [
+			{content: "Blur distance-------", classes: "picker"},
+			{kind: "onyx.PickerDecorator", components: [
+				{style: "min-width: 40px; font-size: 10px;"},
+				{name: "TextShadowB", kind: "onyx.Picker",onSelect: "textshadowB"}
+			]}
+		]},
+
+		{kind: "enyo.FittableRows", components: [
+			{name: "redSlider1", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
+			style: "height:10px; background-color: red; enyo-unselectable;"
+			},
+			{style: "height: 5px"},
+
+			{name: "greenSlider1", kind: "onyx.Slider", onChanging: "greenSliding", onChange: "greenChanged",
+			style: "height:10px;  background-color: green; enyo-unselectable"
+			},
+			{style: "height: 5px"},
+
+			{name: "blueSlider1", kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged",
+			style: "height:10px;  background-color: blue; enyo-unselectable"
+			},
+
+
+			{name:"outputBox2", kind: "enyo.Panels", classes: "outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
+			//{name: "bg", allowHtml: true, style: "font-size: 10px;", content: "HI"},
+			//{name: "dd", allowHtml: true, content:"  ",style: "height: 10px"}
+			]},
+		{kind: "onyx.Button", content: "Close", ontap: "closePopup"},
+		]},
+	]
+}
+
+
 	],
 
 	create: function() {
 		this.inherited(arguments);
 		this.$.outputBox.applyStyle("color", "#FFFFFF");
 		this.$.outputBox.applyStyle("background-color", "#000000");
-		for (var i=1; i<50; i++) {
+		for (var i=0; i<50; i++) {
 			this.$.fontSizePicker.createComponent({content: i, active: !i});
 			this.$.borderSizePicker.createComponent({content: i, active: !i});
 			this.$.marginSizePicker.createComponent({content: i, active: !i});
 			this.$.Radius.createComponent({content: i, active: !i});
 			this.$.Padding.createComponent({content: i, active: !i});
-			this.$.TextShadow.createComponent({content: i, active: !i});
+			this.$.TextShadowB.createComponent({content: i, active: !i});
 		}
 
 		for (var i=5; i<2000; i+=5) {
 			this.$.heightSizePicker.createComponent({content: i, active: !i});
 			this.$.widthSizePicker.createComponent({content: i, active: !i});
+		}
+		for (var i=-25; i<25; i++) {
+			this.$.TextShadowH.createComponent({content: i, active: !i});
+			this.$.TextShadowV.createComponent({content: i, active: !i});
 		}
 
 	},
@@ -142,6 +227,7 @@ enyo.kind({
 	var outPut = this.className + " " + "{<br>" ;
 	var outString =  this.className + " " + "{\n" ;
 	var c = '#' + (this.red + this.green + this.blue).toUpperCase();
+	var c1 = '#' + (this.red1 + this.green1 + this.blue1).toUpperCase();
 
 	if(this.toggle == "background"){
 		this.$.outputBox.applyStyle("background-color", c);
@@ -186,7 +272,7 @@ enyo.kind({
 			outString = outString + "	" + "sold" + " " + c + ";\n";
 		}else{
 		outPut = outPut + ";<br>";
-		outString = outString + "	" +";\n";
+		outString = outString + ";\n";
 		}
 	}
 	if(this.$.heightSize != null){
@@ -208,9 +294,10 @@ enyo.kind({
 		outString = outString + "	" + "border-radius:" + " " + this.$.radiusSize + "px;\n";
 	}
 
-	if(this.$.textshadow != null){
-		outPut = outPut + tab + "text-shadow:" + " " + this.$.textshadow + "px;"  + " " + this.$.textshadow + "px;" + "<br>";
-		outString = outString + "	" + "text-shadow:" + " " + this.$.textshadow + "px1;" + " " + this.$.textshadow + "px2;\n";
+	if(this.$.textshadowH || this.$.textshadowV != null){
+		outPut = outPut + tab + "text-shadow:" + " " + this.$.textshadowH + "px"  + " " + this.$.textshadowV + "px" +  " " + this.$.textshadowB + "px" + " " + c1 +";<br>";
+		outString = outString + "	" + "text-shadow:" + " " + this.$.textshadowH + "px" + " " + this.$.textshadowV + "px" + " " + this.$.textshadowB + "px" + " "  + c1 + "\n";
+		this.$.outputBox.applyStyle(outString);
 	}
 
 	this.$.bg.setContent(outPut + "<br>}");
@@ -224,7 +311,14 @@ enyo.kind({
 		if (h.length==1){
 			h = '0' + h;
 		}
-		this.red = h;
+console.log(inSender.name);
+console.log(inEvent);
+		if(inSender.name == "redSlider1"){
+
+			this.red1 = h;
+		}else{
+			this.red = h;
+		}
 		this.updateBox();
 	},
 
@@ -234,7 +328,11 @@ enyo.kind({
 		if (h.length==1){
 			h = '0' + h;
 		}
-		this.green = h;
+		if(inSender.name == "greenSlider1"){
+			this.green1 = h;
+		}else{
+			this.green = h;
+		}
 		this.updateBox();
 	},
 
@@ -244,7 +342,11 @@ enyo.kind({
 		if (h.length==1){
 			h = '0' + h;
 		}
-		this.blue = h;
+		if(inSender.name == "blueSlider1"){
+			this.blue1 = h;
+		}else{
+			this.blue = h;
+		}
 		this.updateBox();
 	},
 
@@ -254,7 +356,11 @@ enyo.kind({
 		if (h.length==1){
 			h = '0' + h;
 		}
-		this.red = h;
+		if(inSender.name == "redSlider1"){
+			this.red1 = h;
+		}else{
+			this.red = h;
+		}
 		this.updateBox();
 	},
 
@@ -264,7 +370,11 @@ enyo.kind({
 		if (h.length==1){
 			h = '0' + h;
 		}
-		this.green = h;
+		if(inSender.name == "greenSlider1"){
+			this.green1 = h;
+		}else{
+			this.green = h;
+		}
 		this.updateBox();
 	},
 
@@ -274,7 +384,11 @@ enyo.kind({
 		if (h.length==1){
 			h = '0' + h;
 		}
-		this.blue = h;
+		if(inSender.name == "blueSlider1"){
+			this.blue1 = h;
+		}else{
+			this.blue = h;
+		}
 		this.updateBox();
 	},
 
@@ -332,8 +446,31 @@ enyo.kind({
 	},
 
 	textshadow: function(inSender, inEvent) {
-		this.$.textshadow = inEvent.selected.content;
+		this.toggle = null,
+		this.$.popup.show();
+		//this.$.textshadowH = inEvent.selected.content;
+		//this.updateBox();
+	},
+		textshadowH: function(inSender, inEvent) {
+			this.$.textshadowH = inEvent.selected.content;
+			this.updateBox();
+	},
+		textshadowV: function(inSender, inEvent) {
+		this.$.textshadowV = inEvent.selected.content;
 		this.updateBox();
+	},
+		textshadowB: function(inSender, inEvent) {
+		this.$.textshadowB = inEvent.selected.content;
+		//console.log(this.$);
+		//this.$.popup.show();
+		//this.$.outputBox.applyStyle("color", c);
+
+		this.updateBox();
+	},
+
+	closePopup: function() {
+		this.updateBox();
+		this.$.popup.hide();
 	},
 	reset: function(){
 		this.className = null;
@@ -354,3 +491,4 @@ enyo.kind({
 
 	}
 });
+
