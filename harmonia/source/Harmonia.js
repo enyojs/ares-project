@@ -3,7 +3,7 @@ enyo.kind({
 	kind: "FittableColumns",
 	components: [
 		{kind: "ProviderList", onSelectProvider: "selectProvider"},
-		{kind: "HermesFileTree", fit: true, onFileClick: "selectFile", onFolderClick: "selectFolder"}
+		{kind: "HermesFileTree", fit: true, onFileClick: "selectFile", onFolderClick: "selectFolder"},
 		{kind: "ProjectManger", fit: true}
 	],
 	selectProvider: function(inSender, inInfo) {
