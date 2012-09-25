@@ -40,7 +40,19 @@ enyo.kind({
         this.doCancel();
     },
     confirmTap: function(inSender, inEvent) {
-        this.doConfirmCreateProject({name: this.$.projectName.getValue(), selectedDir: this.selectedDir, serviceId: this.selectedServiceId});
+    	var service = this.selectedDir.service;
+		var name = this.$.projectName.getValue();
+		var folderId = this.selectedDir.id;
+		this.log("Creating new folder " + name + " into folderId=" + folderId);
+		service.createFolder(folderId, name)
+			.response(this, function(inSender, inResponse) {
+				this.doConfirmCreateProject({name: name, selectedDir: this.selectedDir, serviceId: this.selectedServiceId});
+			})
+			.error(this, function(inSender, inError) {
+				// TODO handle the error
+				this.log("Error: "+inError);
+				this.doCancel();
+			});
     },
     directorySelected: function(inSender, inEvent) {
     	this.selectedDir = inEvent.directory;

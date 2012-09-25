@@ -69,17 +69,18 @@ enyo.kind({
 		return true; //Stop event propagation
     },
     showSelectedProject: function(inSender, inEvent) {
-    	// Resolve serviceId
-    	var serviceInfo = this.resolveServiceId(inEvent.serviceId);
-    	if (! serviceInfo) {
-    		var msg = "Service " + inEvent.serviceId + " not found";
-    		this.showErrorPopup(msg);
-    		this.error(msg);
-    		return;
+    	if (inEvent.serviceId) {
+	    	// Resolve serviceId
+	    	var serviceInfo = this.resolveServiceId(inEvent.serviceId);
+	    	if (! serviceInfo) {
+	    		var msg = "Service " + inEvent.serviceId + " not found";
+	    		this.showErrorPopup(msg);
+	    		this.error(msg);
+	    		return;
+	    	}
+	    	// Pass service information to HermesFileTree
+			this.$.harmonia.setServiceInformation(serviceInfo, inEvent.selectedDirPath);
     	}
-    	// Pass service information to HermesFileTree
-		this.$.harmonia.setServiceInformation(serviceInfo, inEvent.selectedDirPath);
-		
 		return true; //Stop event propagation
     },
     resolveServiceId: function(serviceId) {
