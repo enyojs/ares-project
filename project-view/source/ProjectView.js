@@ -3,7 +3,7 @@ enyo.kind({
 	kind: "FittableColumns",
 	classes: "enyo-unselectable",
 	components: [
-	    {kind: "ProjectList", onCreateProject: "createProjectAction", onProjectSelected: "showSelectedProject", name: "projectList"},
+	    {kind: "ProjectList", onCreateProject: "createProjectAction", onOpenProject: "openProjectAction", onProjectSelected: "showSelectedProject", name: "projectList"},
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
 		{kind: "ProjectWizardPopup", canGenerate: false, name: "projectWizardPopup"},
 		{kind: "ServiceRegistry", onServicesChange: "handleServicesChange"},
@@ -35,7 +35,15 @@ enyo.kind({
 	handleServicesChange: function(inSender, inServices) {	// TODO We should have only one ServiceRegistry for the whole Ares application - ENYO-1106
 		this.services = inServices || [];
 	},
+    openProjectAction: function(inSender, inEvent) {
+    	this.$.projectWizardPopup.reset();
+    	this.$.projectWizardPopup.setCreateMode(false);
+        this.$.projectWizardPopup.show();
+        return true; //Stop event propagation
+    },
     createProjectAction: function(inSender, inEvent) {
+    	this.$.projectWizardPopup.reset();
+    	this.$.projectWizardPopup.setCreateMode(true);
         this.$.projectWizardPopup.show();
         return true; //Stop event propagation
     },
@@ -46,7 +54,7 @@ enyo.kind({
     confirmCreateProject: function(inSender, inEvent) {
     	this.$.projectWizardPopup.hide();
     	
-    	var service = inEvent.selectedDir.service;
+    	var service = inEvent.service;
     	var serviceId = inEvent.serviceId;
     	
 		// super hack
@@ -59,13 +67,12 @@ enyo.kind({
 			url: url,
 			jsonp: jsonp
 		};
-		this.log("LET'S GO ... with: " + serviceId + " - " + inEvent.selectedDir.path);
     	
     	// Add an entry into the project list
-    	this.$.projectList.addProject(inEvent.name, inEvent.selectedDir.path, serviceId);
+    	this.$.projectList.addProject(inEvent.name, inEvent.selectedPath, serviceId);
     	
     	// Pass service information to Harmonia
-		this.$.harmonia.setServiceInformation(serviceInfo, inEvent.selectedDir.path);
+		this.$.harmonia.setServiceInformation(serviceInfo, inEvent.selectedPath);
 		return true; //Stop event propagation
     },
     showSelectedProject: function(inSender, inEvent) {

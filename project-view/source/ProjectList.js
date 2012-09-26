@@ -3,7 +3,8 @@ enyo.kind({
 	classes: "enyo-unselectable",
 	events: {
 		onCreateProject: "",
-		onProjectSelected: ""
+		onProjectSelected: "",
+		onOpenProject: ""
 	},
 	handlers: {
 	},

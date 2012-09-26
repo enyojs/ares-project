@@ -1,6 +1,7 @@
 enyo.kind({
 	name: "ProjectWizard",
 	classes: "enyo-unselectable",
+	fit: true,
 	events: {
 		onCancel: "",
 		onConfirmCreateProject: ""
@@ -23,7 +24,7 @@ enyo.kind({
 						]},
 					{kind: "onyx.Button", content: "Browse", name: "browse", ontap: "browseTap"}
 				]},
-			{kind: "Control", fit: true, name: "control2"},
+			{fit: true},
 			{kind: "FittableColumns", style: "margin-top: 10px", name: "fittableColumns5", components: [
 					{kind: "Control", fit: true, name: "control7"},
 					{kind: "onyx.Button", content: "Cancel", name: "cancel", ontap: "cancelTap"},
@@ -32,7 +33,15 @@ enyo.kind({
 		]},
 		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup"}
     ],
-    // TODO Reset the projectName, ...
+    createMode: true,
+    debug: false,
+    reset: function() {
+    	this.$.projectName.setValue("");
+    	this.$.projectDirectory.setValue("");
+    },
+    setCreateMode: function(createMode) {
+    	this.createMode = createMode;
+    },
     browseTap: function(inSender, inEvent) {
         this.$.selectDirectoryPopup.show();
     },
@@ -40,23 +49,30 @@ enyo.kind({
         this.doCancel();
     },
     confirmTap: function(inSender, inEvent) {
-    	var service = this.selectedDir.service;
 		var name = this.$.projectName.getValue();
-		var folderId = this.selectedDir.id;
-		this.log("Creating new folder " + name + " into folderId=" + folderId);
-		service.createFolder(folderId, name)
-			.response(this, function(inSender, inResponse) {
-				this.doConfirmCreateProject({name: name, selectedDir: this.selectedDir, serviceId: this.selectedServiceId});
-			})
-			.error(this, function(inSender, inError) {
-				// TODO handle the error
-				this.log("Error: "+inError);
-				this.doCancel();
-			});
+		var service = this.selectedDir.service;
+		var selectedPath = null;
+    	if (this.createMode === true) {
+			var folderId = this.selectedDir.id;
+			selectedPath = this.selectedDir.path + "/" + name;
+			if (this.debug) this.log("Creating new folder " + name + " into folderId=" + folderId);
+			service.createFolder(folderId, name)
+				.response(this, function(inSender, inResponse) {
+					this.doConfirmCreateProject({name: name, selectedPath: selectedPath, service: this.selectedDir.service, serviceId: this.selectedServiceId});
+				})
+				.error(this, function(inSender, inError) {
+					// TODO handle the error
+					this.log("Error: "+inError);
+					this.doCancel();
+				});
+    	} else {
+    		selectedPath = this.selectedDir.path;
+    		this.doConfirmCreateProject({name: name, selectedPath: selectedPath, service: this.selectedDir.service, serviceId: this.selectedServiceId});
+    	}
     },
     directorySelected: function(inSender, inEvent) {
-    	this.selectedDir = inEvent.directory;
     	this.selectedServiceId = inEvent.serviceId;
+    	this.selectedDir = inEvent.directory;
     	this.$.projectDirectory.setValue(this.selectedDir.path);
     	this.$.selectDirectoryPopup.hide();
     }
@@ -71,8 +87,13 @@ enyo.kind({
 	centered: true,
 	floating: true,
 	autoDismiss: false,
-	classes: "ares_pview_popup",
 	components: [
         {kind: "ProjectWizard"}
-	]
+	],
+	reset: function() {
+		this.$.projectWizard.reset();
+	},
+	setCreateMode: function(createMode) {
+		this.$.projectWizard.setCreateMode(createMode);
+	}
 });
