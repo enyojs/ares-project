@@ -14,30 +14,31 @@ enyo.kind({
 			{kind: "FittableColumns", name: "fittableColumns", components: [
 					{kind: "Control", content: "Project name: ", name: "control"},
 					{kind: "onyx.InputDecorator", content: "Project name", name: "inputDecorator", components: [
-							{kind: "Input", placeholder: "Enter project name", name: "projectName"}
+							{kind: "Input", defaultFocus: true, placeholder: "Enter project name", name: "projectName", onchange: "enableConfirmButton"}
 						]}
 				]},
 			{kind: "FittableColumns", name: "fittableColumns4", components: [
 					{kind: "Control", content: "Directory:", name: "control5"},
 					{kind: "onyx.InputDecorator", name: "inputDecorator2", components: [
-							{kind: "Input", placeholder: "Enter text here", name: "projectDirectory"}
+							{kind: "onyx.Input", placeholder: "Enter text here", name: "projectDirectory", onchange: "enableConfirmButton"}
 						]},
 					{kind: "onyx.Button", content: "Browse", name: "browse", ontap: "browseTap"}
 				]},
 			{fit: true},
 			{kind: "FittableColumns", style: "margin-top: 10px", name: "fittableColumns5", components: [
 					{kind: "Control", fit: true, name: "control7"},
-					{kind: "onyx.Button", content: "Cancel", name: "cancel", ontap: "cancelTap"},
+					{kind: "onyx.Button", content: "Cancel", name: "cancel", ontap: "doCancel"},
 					{kind: "onyx.Button", content: "OK", name: "confirm", ontap: "confirmTap"}
 				]}
 		]},
-		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup"}
+		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup", onCancel: "cancelDirSelection"}
     ],
     createMode: true,
     debug: false,
     reset: function() {
     	this.$.projectName.setValue("");
     	this.$.projectDirectory.setValue("");
+    	this.$.confirm.setDisabled(true);
     },
     setCreateMode: function(createMode) {
     	this.createMode = createMode;
@@ -45,8 +46,8 @@ enyo.kind({
     browseTap: function(inSender, inEvent) {
         this.$.selectDirectoryPopup.show();
     },
-    cancelTap: function(inSender, inEvent) {
-        this.doCancel();
+    cancelDirSelection: function() {
+    	this.$.selectDirectoryPopup.hide();
     },
     confirmTap: function(inSender, inEvent) {
 		var name = this.$.projectName.getValue();
@@ -74,7 +75,15 @@ enyo.kind({
     	this.selectedServiceId = inEvent.serviceId;
     	this.selectedDir = inEvent.directory;
     	this.$.projectDirectory.setValue(this.selectedDir.path);
+    	this.enableConfirmButton();
     	this.$.selectDirectoryPopup.hide();
+    },
+    enableConfirmButton: function() {
+    	if ((this.$.projectDirectory.getValue() !== "") && (this.$.projectName.getValue() !== "")) {
+    		this.$.confirm.setDisabled(false);
+		} else {
+			this.$.confirm.setDisabled(true);
+		}
     }
 });
 

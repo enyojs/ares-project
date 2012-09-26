@@ -14,7 +14,8 @@ enyo.kind({
 		]}
     ],
 	events: {
-		onDirectorySelected: ""
+		onDirectorySelected: "",
+		onCancel: ""
 	},
 	selectedDir: undefined,
 	selectProvider: function(inSender, inInfo) {
