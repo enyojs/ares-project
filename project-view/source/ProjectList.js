@@ -10,6 +10,7 @@ enyo.kind({
 	},
 	projects: [],
 	components: [
+	    {kind: "LocalStorage"},
 	    {kind: "onyx.Toolbar", isContainer: true, name: "toolbar", components: [
 			{kind: "onyx.Button", content: "Create Project", ontap: "doCreateProject"},
 			{kind: "onyx.Button", content: "Open Project", ontap: "doOpenProject"}
@@ -21,16 +22,28 @@ enyo.kind({
 	PROJECTS_STORAGE_KEY: "com.enyo.ares.projects",
 	create: function() {
 		this.inherited(arguments);
-		var data = localStorage[this.PROJECTS_STORAGE_KEY];
-		if (data && data !== "") {
-			this.projects = JSON.parse(data);
+		var data = null;
+		try {
+			data = this.$.localStorage.get(this.PROJECTS_STORAGE_KEY);
+			if (data && data !== "") {
+				this.projects = JSON.parse(data);
+			}
+			this.$.projectList.setCount(this.projects.length);
+		} catch(error) {
+			this.error("Unable to retrieve projects information: " + error);
+			console.dir(data);		// Display the offending data in the console
+			this.$.localStorage.remove(this.PROJECTS_STORAGE_KEY); // Remove incorrect projects information
 		}
-		this.$.projectList.setCount(this.projects.length);
 	},
 	addProject: function(name, selectedDirPath, serviceId) {
 		var project = {name: name, selectedDirPath: selectedDirPath, serviceId: serviceId};
 		this.projects.push(project);
-		localStorage[this.PROJECTS_STORAGE_KEY] = JSON.stringify(this.projects);
+		try {
+			this.$.localStorage.put(this.PROJECTS_STORAGE_KEY, JSON.stringify(this.projects, enyo.bind(this, this.stringifyReplacer)));
+		} catch(error) {
+			this.error("Unable to store the project information: " + error);
+			console.dir(this.projects);		// Display the offending object in the console
+		}
 		this.$.projectList.setCount(this.projects.length);
 		this.$.projectList.render();
 	},
@@ -42,6 +55,12 @@ enyo.kind({
 	},
     projectListTap: function(inSender, inEvent) {
     	this.doProjectSelected(this.projects[inEvent.index]);
+    },
+    stringifyReplacer: function(key, value) {
+    	if (key === "originator") {
+    		return undefined;	// Exclude
+    	}
+    	return value;	// Accept
     }
 });
 
