@@ -14,10 +14,12 @@ enyo.kind({
 			{kind: "onyx.Button", content: "Create Project", ontap: "doCreateProject"},
 			{kind: "onyx.Button", content: "Open Project", ontap: "doOpenProject"}
 		]},
-	    {kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
+	    {kind: "enyo.Scroller", components: [
+			{kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
                 {kind: "Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
-	        ]}
-	],
+            ]}
+		]}
+    ],
 	PROJECTS_STORAGE_KEY: "com.enyo.ares.projects",
 	create: function() {
 		this.inherited(arguments);
