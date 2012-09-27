@@ -32,7 +32,7 @@ enyo.kind({
 				url: url,
 				jsonp: jsonp
 			};
-			this.$.hermesFileTree.setServiceInformation(serviceObj);
+			this.$.hermesFileTree.setConfig({service: serviceObj});
 			this.$.hermesFileTree.reset();
 		}
 		return true; //Stop event propagation

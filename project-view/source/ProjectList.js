@@ -37,8 +37,8 @@ enyo.kind({
 			this.$.localStorage.remove(this.PROJECTS_STORAGE_KEY); // Remove incorrect projects information
 		}
 	},
-	addProject: function(name, selectedDirPath, serviceId) {
-		var project = {name: name, selectedDirPath: selectedDirPath, serviceId: serviceId};
+	addProject: function(name, folderId, serviceId) {
+		var project = {name: name, folderId: folderId, serviceId: serviceId};
 		this.projects.push(project);
 		try {
 			this.$.localStorage.put(this.PROJECTS_STORAGE_KEY, JSON.stringify(this.projects, enyo.bind(this, this.stringifyReplacer)));

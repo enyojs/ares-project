@@ -53,7 +53,7 @@ enyo.kind({
     },
     confirmCreateProject: function(inSender, inEvent) {
     	this.$.projectWizardPopup.hide();
-    	
+
     	var service = inEvent.service;
     	var serviceId = inEvent.serviceId;
     	
@@ -69,10 +69,10 @@ enyo.kind({
 		};
     	
     	// Add an entry into the project list
-    	this.$.projectList.addProject(inEvent.name, inEvent.selectedPath, serviceId);
+    	this.$.projectList.addProject(inEvent.name, inEvent.folderId, serviceId);
     	
     	// Pass service information to Harmonia
-		this.$.harmonia.setServiceInformation(serviceInfo, inEvent.selectedPath);
+		this.$.harmonia.setConfig({service: serviceInfo, folderId: inEvent.folderId, firstNodeName: inEvent.name});
 		return true; //Stop event propagation
     },
     showSelectedProject: function(inSender, inEvent) {
@@ -86,7 +86,7 @@ enyo.kind({
 	    		return;
 	    	}
 	    	// Pass service information to HermesFileTree
-			this.$.harmonia.setServiceInformation(serviceInfo, inEvent.selectedDirPath);
+			this.$.harmonia.setConfig({service: serviceInfo, folderId: inEvent.folderId, firstNodeName: inEvent.name});
     	}
 		return true; //Stop event propagation
     },

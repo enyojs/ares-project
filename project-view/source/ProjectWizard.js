@@ -52,14 +52,13 @@ enyo.kind({
     confirmTap: function(inSender, inEvent) {
 		var name = this.$.projectName.getValue();
 		var service = this.selectedDir.service;
-		var selectedPath = null;
+		var folderId;
     	if (this.createMode === true) {
-			var folderId = this.selectedDir.id;
-			selectedPath = this.selectedDir.path + "/" + name;
+			folderId = this.selectedDir.id;
 			if (this.debug) this.log("Creating new folder " + name + " into folderId=" + folderId);
 			service.createFolder(folderId, name)
 				.response(this, function(inSender, inResponse) {
-					this.doConfirmCreateProject({name: name, selectedPath: selectedPath, service: this.selectedDir.service, serviceId: this.selectedServiceId});
+					this.doConfirmCreateProject({name: name, folderId: inResponse, service: this.selectedDir.service, serviceId: this.selectedServiceId});
 				})
 				.error(this, function(inSender, inError) {
 					// TODO handle the error
@@ -67,8 +66,8 @@ enyo.kind({
 					this.doCancel();
 				});
     	} else {
-    		selectedPath = this.selectedDir.path;
-    		this.doConfirmCreateProject({name: name, selectedPath: selectedPath, service: this.selectedDir.service, serviceId: this.selectedServiceId});
+    		folderId = this.selectedDir.id;
+    		this.doConfirmCreateProject({name: name, folderId: folderId, service: this.selectedDir.service, serviceId: this.selectedServiceId});
     	}
     },
     directorySelected: function(inSender, inEvent) {

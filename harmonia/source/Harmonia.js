@@ -33,12 +33,12 @@ enyo.kind({
 			url: url,
 			jsonp: jsonp
 		};
-		this.$.hermesFileTree.setServiceInformation(serviceObj);
+		this.$.hermesFileTree.setConfig({service: serviceObj});
 		this.$.hermesFileTree.reset();
 	},
-	setServiceInformation: function(serviceObj, subTreePath) {
+	setConfig: function(config) {
 		// TODO take subTreePath into account - ENYO-1090	
-		this.$.hermesFileTree.setServiceInformation(serviceObj);
+		this.$.hermesFileTree.setConfig(config);
 		this.$.hermesFileTree.reset();
 	},
 	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
