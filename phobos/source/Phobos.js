@@ -251,6 +251,14 @@ enyo.kind({
 		}
 		alert("No kinds found in this file");
 	},
+	/**
+	 * Lists the handler methods mentioned in the "handlers"
+	 * attributes and in the sub-components of the kind object
+	 * passed as a parameter
+	 * @param object: the kind definition to explore
+	 * @param declared: list of handler methods already listed
+	 * @returns the list of declared handler methods
+	 */
 	listHandlers: function(object, declared) {
 		declared = this.listDeclaredComponentsHandlers(object.components, declared);
 		for(var i = 0; i < object.properties.length; i++) {
@@ -261,7 +269,9 @@ enyo.kind({
 						var q = p.value[0].properties[j];
 						var name = q.value[0].name;
 						name = name.replace(/["']{1}/g, '');
-						declared[name] = "";
+						if (name.substr(0, 2) !== 'do') {	// Exclude doXXXX methods
+							declared[name] = "";
+						}
 					}
 				}
 			} catch(error) {
@@ -285,7 +295,9 @@ enyo.kind({
 				var p = c.properties[k];
 				if (p.name.substr(0, 2) === 'on') {
 					var name = p.value[0].name.replace(/["']{1}/g, '');
-					declared[name] = "";
+					if (name.substr(0, 2) !== 'do') {	// Exclude doXXXX methods
+						declared[name] = "";
+					}
 				}
 			}
 			if (components.components) {
