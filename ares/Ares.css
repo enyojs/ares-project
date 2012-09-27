@@ -81,3 +81,12 @@ body {
 	width: 600px;
 	height: 400px;
 }
+
+#ares_projectView_projectList {
+	width: 300px;
+	border-right: 1px solid gray;
+}
+
+.ares_projectView_projectList_item {
+	padding: 20px 4px 4px; border-bottom: 1px solid gray;
+}

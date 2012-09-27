@@ -14,7 +14,8 @@ enyo.kind({
 		]}
     ],
 	events: {
-		onDirectorySelected: ""
+		onDirectorySelected: "",
+		onCancel: ""
 	},
 	selectedDir: undefined,
 	selectProvider: function(inSender, inInfo) {
@@ -31,7 +32,7 @@ enyo.kind({
 				url: url,
 				jsonp: jsonp
 			};
-			this.$.hermesFileTree.setServiceInformation(serviceObj);
+			this.$.hermesFileTree.setConfig({service: serviceObj});
 			this.$.hermesFileTree.reset();
 		}
 		return true; //Stop event propagation
