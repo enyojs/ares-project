@@ -26,7 +26,12 @@ function FsLocal(config, next) {
 	util.inherits(HttpError, Error);
 	HttpError.prototype.name = "HTTP Error";
 
+	// (simple) parameters checking
 	config.root = path.resolve(config.root);
+
+	if (config.urlPrefix.charAt(0) !== '/') {
+		config.urlPrefix = '/' + config.urlPrefix;
+	}
 
 	/**
 	 * Express server instance
@@ -114,11 +119,11 @@ function FsLocal(config, next) {
 	//app.use(express.bodyParser()); // parses json, x-www-form-urlencoded, and multipart/form-data
 	//app.enable('strict routing'); // XXX what for?
 
-	app.all(path.join(config.urlPrefix, 'id/'), function(req, res) {
+	app.all(config.urlPrefix + '/id/', function(req, res) {
 		req.params.id = encodeFileId('/');
 		_handleRequest(req, res, next);
 	});
-	app.all(path.join(config.urlPrefix, '/id/:id'), function(req, res, next) {
+	app.all(config.urlPrefix + '/id/:id', function(req, res, next) {
 		_handleRequest(req, res, next);
 	});
 
