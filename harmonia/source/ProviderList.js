@@ -10,7 +10,7 @@ enyo.kind({
 		onSelectProvider: ""
 	},
 	components: [
-		{kind: "onyx.Toolbar", components: [
+		{kind: "onyx.Toolbar", classes: "ares_harmonia_toolBar", components: [
 			{content: "Storage Services"}
 			//{kind: "onyx.Button", content: "Reset", Xsrc: "$harmonia/images/server_into.png", hint: "Reset", ontap: "_handleReset"}
 		]},
