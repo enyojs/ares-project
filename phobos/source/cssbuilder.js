@@ -1,11 +1,8 @@
 enyo.kind({
 	published: {
 	red: '00',
-	red1: '00',
 	blue: '00',
-	blue1: '00',
 	green: '00',
-	green1: '00',
 	color: "000000",
 	toggle: ""
 	},
@@ -15,8 +12,8 @@ enyo.kind({
 	name: "cssBuilder",
 	kind: "enyo.FittableRows", components: [
 		{kind: "onyx.Toolbar", components: [
-		{kind: "onyx.Button", classes: "onyx-affirmative", content: "Insert css", ontap:"newCssAction"},
-		{kind: "onyx.Button", classes: "onyx-negative", content: "Reset", ontap:"reset"},
+			{kind: "onyx.Button", classes: "onyx-affirmative", content: "Insert css", ontap:"newCssAction"},
+			{kind: "onyx.Button", classes: "onyx-negative", content: "Reset", ontap:"reset"},
 		]},
 		{kind: "onyx.Input", name: "input", placeholder: "Enter your class name!..",onchange: "inputChange"},
 		{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 150px; ", classes: "enyo-selectable font",	allowHtml: true, Xstyle: "padding: 10px;", components: [
@@ -27,35 +24,34 @@ enyo.kind({
 		{kind: "Panels", fit:true, classes: "enyo-unselectable",components: [
 			{kind: "enyo.Scroller", classes: "enyo-fit",components: [
 				{classes: "pannel", style: " height: 250px", components: [
-						{name: "name", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Color "},
+					{name: "name", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Color "},
 
+					{name: "redSlider", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
+					style: "height:10px; background-color: red; enyo-unselectable;"
+					},
+					{style: "height: 5px"},
 
-						{name: "redSlider", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
-						style: "height:10px; background-color: red; enyo-unselectable;"
-						},
-						{style: "height: 5px"},
+					{name: "greenSlider", kind: "onyx.Slider", onChanging: "greenSliding", onChange: "greenChanged",
+					style: "height:10px;  background-color: green; enyo-unselectable"
+					},
+					{style: "height: 5px"},
 
-						{name: "greenSlider", kind: "onyx.Slider", onChanging: "greenSliding", onChange: "greenChanged",
-						style: "height:10px;  background-color: green; enyo-unselectable"
-						},
-						{style: "height: 5px"},
+					{name: "blueSlider", kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged",
+					style: "height:10px;  background-color: blue; enyo-unselectable"
+					},
 
-						{name: "blueSlider", kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged",
-						style: "height:10px;  background-color: blue; enyo-unselectable"
-						},
-
-						{kind: "onyx.RadioGroup", onActivate:"radioActivated", components:[
-							{content:"background", classes: "RadioGroup"},
-							{content:"Font color", classes: "RadioGroup"},
-							{content:"Border color", classes: "RadioGroup"},
-						]},
+					{kind: "onyx.RadioGroup", onActivate:"radioActivated", components:[
+						{content:"background", classes: "RadioGroup"},
+						{content:"Font color", classes: "RadioGroup"},
+						{content:"Border color", classes: "RadioGroup"},
+					]},
 				]},
 
 				{classes: "pannel", style: " height: 350px", components: [
 					{name: "fonts", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Fonts "},
 					{kind: "onyx.RadioGroup",
 					onActivate:"fontActivated",components:[
-					{tag: "br"},
+						{tag: "br"},
 						{content:"Serif", style: "font-family: Serif;", classes: "RadioGroup"},
 						{content:"Sans-serif", style: "font-family: Sans-serif;", classes: "RadioGroup"},
 
@@ -84,7 +80,6 @@ enyo.kind({
 					{name: "border", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Border/Margin"},
 
 					{kind: "enyo.FittableColumns", components: [
-
 						{classes: "onyx-toolbar-inline", components: [
 							{content: "Height", classes: "picker"},
 							{kind: "onyx.PickerDecorator", components: [
@@ -135,73 +130,113 @@ enyo.kind({
 							]}
 						]},
 					]},
-
-
+					{kind: "onyx.Button", classes: "button ", content: "Box Shadow", ontap: "boxshadow"}
 				]},
 			]}
 		]},
-	{name: "popup", kind: "onyx.Popup", classes: "popup", centered: true, modal: true, floating: true, components: [
-		{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
-			{name: "shadowBar", content: "Text Shadow"},
-		]},
-		//{name:"outputBox2", kind: "enyo.Panels", classes: "outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
-			//{name: "bg", allowHtml: true, style: "font-size: 10px;", content: "HI"},
-			//{name: "dd", allowHtml: true, content:"  ",style: "height: 10px"}
-		//]},
-		{classes: "onyx-toolbar-inline", components: [
-			{content: "Horizontal shadow", classes: "picker"},
-			{kind: "onyx.PickerDecorator", components: [
-				{style: "min-width: 40px; font-size: 10px;"},
-				{name: "TextShadowH", kind: "onyx.Picker",onSelect: "textshadowH"}
-			]}
-		]},
-		{classes: "onyx-toolbar-inline", components: [
-			{content: "Vertical shadow--- ", classes: "picker"},
-			{kind: "onyx.PickerDecorator", components: [
-				{style: "min-width: 40px; font-size: 10px;"},
-				{name: "TextShadowV", kind: "onyx.Picker",onSelect: "textshadowV"}
-			]}
-		]},
-		{classes: "onyx-toolbar-inline", components: [
-			{content: "Blur distance-------", classes: "picker"},
-			{kind: "onyx.PickerDecorator", components: [
-				{style: "min-width: 40px; font-size: 10px;"},
-				{name: "TextShadowB", kind: "onyx.Picker",onSelect: "textshadowB"}
-			]}
-		]},
-
-		{kind: "enyo.FittableRows", components: [
-			{name: "redSlider1", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
-			style: "height:10px; background-color: red; enyo-unselectable;"
-			},
-			{style: "height: 5px"},
-
-			{name: "greenSlider1", kind: "onyx.Slider", onChanging: "greenSliding", onChange: "greenChanged",
-			style: "height:10px;  background-color: green; enyo-unselectable"
-			},
-			{style: "height: 5px"},
-
-			{name: "blueSlider1", kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged",
-			style: "height:10px;  background-color: blue; enyo-unselectable"
-			},
 
 
-			{name:"outputBox2", kind: "enyo.Panels", classes: "outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
-			//{name: "bg", allowHtml: true, style: "font-size: 10px;", content: "HI"},
-			//{name: "dd", allowHtml: true, content:"  ",style: "height: 10px"}
+		{name: "popup", kind: "onyx.Popup", classes: "popup", centered: true, modal: true, floating: true, components: [
+			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
+				{name: "shadowBar", content: "Text Shadow"},
 			]},
-		{kind: "onyx.Button", content: "Close", ontap: "closePopup"},
+
+			{classes: "onyx-toolbar-inline", components: [
+				{content: "Horizontal shadow", classes: "picker"},
+				{kind: "onyx.PickerDecorator", components: [
+					{style: "min-width: 40px; font-size: 10px;"},
+					{name: "TextShadowH", kind: "onyx.Picker",onSelect: "textshadowH"}
+				]}
+			]},
+			{classes: "onyx-toolbar-inline", components: [
+				{content: "Vertical shadow--- ", classes: "picker"},
+				{kind: "onyx.PickerDecorator", components: [
+					{style: "min-width: 40px; font-size: 10px;"},
+					{name: "TextShadowV", kind: "onyx.Picker",onSelect: "textshadowV"}
+				]}
+			]},
+			{classes: "onyx-toolbar-inline", components: [
+				{content: "Blur distance-------", classes: "picker"},
+				{kind: "onyx.PickerDecorator", components: [
+					{style: "min-width: 40px; font-size: 10px;"},
+					{name: "TextShadowB", kind: "onyx.Picker",onSelect: "textshadowB"}
+				]}
+			]},
+			{name:"textoutputBox", kind: "enyo.Panels", classes: "outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
+				{content: "Text Shadow Color!"},
+			]},
+			{kind: "enyo.FittableRows", components: [
+				{name: "redSlider1", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
+					style: "height:10px; background-color: red; enyo-unselectable;"
+				},
+				{style: "height: 5px"},
+
+				{name: "greenSlider1", kind: "onyx.Slider", onChanging: "greenSliding", onChange: "greenChanged",
+				style: "height:10px;  background-color: green; enyo-unselectable"
+				},
+				{style: "height: 5px"},
+
+				{name: "blueSlider1", kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged",
+				style: "height:10px;  background-color: blue; enyo-unselectable"
+				},
+				{style: "height: 5px"},
+				{kind: "onyx.Button", content: "Close", ontap: "closePopup"},
+			]},
 		]},
-	]
-}
 
+		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "popup", centered: true, modal: true, floating: true, components: [
+			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
+				{name: "boxShadowBar", content: "Text Shadow"},
+			]},
 
+			{classes: "onyx-toolbar-inline", components: [
+				{content: "Horizontal shadow", classes: "picker"},
+				{kind: "onyx.PickerDecorator", components: [
+					{style: "min-width: 40px; font-size: 10px;"},
+					{name: "BoxShadowH", kind: "onyx.Picker",onSelect: "boxshadowH"}
+				]}
+			]},
+			{classes: "onyx-toolbar-inline", components: [
+				{content: "Vertical shadow--- ", classes: "picker"},
+				{kind: "onyx.PickerDecorator", components: [
+					{style: "min-width: 40px; font-size: 10px;"},
+					{name: "BoxShadowV", kind: "onyx.Picker",onSelect: "boxshadowV"}
+				]}
+			]},
+			{classes: "onyx-toolbar-inline", components: [
+				{content: "Blur distance-------", classes: "picker"},
+				{kind: "onyx.PickerDecorator", components: [
+					{style: "min-width: 40px; font-size: 10px;"},
+					{name: "BoxShadowB", kind: "onyx.Picker",onSelect: "boxshadowB"}
+				]}
+			]},
+			{name:"outputBox2", kind: "enyo.Panels", classes: "outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
+				{content: "Box Shadow Color"},
+			]},
+			{kind: "enyo.FittableRows", components: [
+				{name: "boxredSlider", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
+				style: "height:10px; background-color: red; enyo-unselectable;"
+				},
+				{style: "height: 5px"},
+
+				{name: "boxgreenSlider", kind: "onyx.Slider", onChanging: "greenSliding", onChange: "greenChanged",
+				style: "height:10px;  background-color: green; enyo-unselectable"
+				},
+				{style: "height: 5px"},
+
+				{name: "boxblueSlider", kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged",
+				style: "height:10px;  background-color: blue; enyo-unselectable"
+				},
+				{kind: "onyx.Button", content: "Close", ontap: "closePopup"},
+			]},
+		]}
 	],
 
 	create: function() {
 		this.inherited(arguments);
 		this.$.outputBox.applyStyle("color", "#FFFFFF");
 		this.$.outputBox.applyStyle("background-color", "#000000");
+
 		for (var i=0; i<50; i++) {
 			this.$.fontSizePicker.createComponent({content: i, active: !i});
 			this.$.borderSizePicker.createComponent({content: i, active: !i});
@@ -209,6 +244,7 @@ enyo.kind({
 			this.$.Radius.createComponent({content: i, active: !i});
 			this.$.Padding.createComponent({content: i, active: !i});
 			this.$.TextShadowB.createComponent({content: i, active: !i});
+			this.$.BoxShadowB.createComponent({content: i, active: !i});
 		}
 
 		for (var i=5; i<2000; i+=5) {
@@ -218,6 +254,8 @@ enyo.kind({
 		for (var i=-25; i<25; i++) {
 			this.$.TextShadowH.createComponent({content: i, active: !i});
 			this.$.TextShadowV.createComponent({content: i, active: !i});
+			this.$.BoxShadowH.createComponent({content: i, active: !i});
+			this.$.BoxShadowV.createComponent({content: i, active: !i});
 		}
 
 	},
@@ -227,20 +265,41 @@ enyo.kind({
 	var outPut = this.className + " " + "{<br>" ;
 	var outString =  this.className + " " + "{\n" ;
 	var c = '#' + (this.red + this.green + this.blue).toUpperCase();
-	var c1 = '#' + (this.red1 + this.green1 + this.blue1).toUpperCase();
 
-	if(this.toggle == "background"){
+	if(this.$.toggle == "background"){
 		this.$.outputBox.applyStyle("background-color", c);
 		this.backgroundColor = c;
 	}
-	if(this.toggle == "Font color"){
+	if(this.$.toggle == "Font color"){
 		this.$.outputBox.applyStyle("color", c);
 		this.fontColor = c;
 	}
 
+	if(this.$.toggle == "text-shadow"){
+		this.$.textshadowcolor = '#' + (this.red + this.green + this.blue).toUpperCase();
+	}
+
+	if(this.$.toggle == "box-shadow"){
+		this.$.boxshadowcolor = '#' + (this.red + this.green + this.blue).toUpperCase();
+	}
+
+
+
+	if(this.$.textshadowcolor != null ){
+		outPut = outPut + tab + "text-shadow:" + " " + this.$.textshadowH + "px"  + " " + this.$.textshadowV + "px" +  " " + this.$.textshadowB + "px" + " " + this.$.textshadowcolor  +";<br>";
+		outString = outString + "	" + "text-shadow:" + " " + this.$.textshadowH + "px" + " " + this.$.textshadowV + "px" + " " + this.$.textshadowB + "px" + " "  + this.$.textshadowcolor  + ";\n";
+		this.$.textoutputBox.applyStyle("background-color", c);
+	}
+
+	if(this.$.boxshadowcolor != null ){
+		outPut = outPut + tab + "box-shadow:" + " " + this.$.boxshadowH + "px"  + " " + this.$.boxshadowV + "px" +  " " + this.$.boxshadowB + "px" + " " + this.$.boxshadowcolor  +";<br>";
+		outString = outString + "	" + "box-shadow:" + " " + this.$.boxshadowH + "px" + " " + this.$.boxshadowV + "px" + " " + this.$.boxshadowB + "px" + " "  + this.$.boxshadowcolor  + ";\n";
+		this.$.outputBox2.applyStyle("background-color", c);
+	}
+
 	if(this.backgroundColor != null){
 		outPut = outPut + tab + "background-color:" + " " + this.backgroundColor + ";" + "<br>";
-		outString = outString + "	" + "background-color:" + this.backgroundColor + ";\n";
+		outString = outString + "	" + "background-color:" + "	" + this.backgroundColor + ";\n";
 	}
 
 	if(this.fontColor != null){
@@ -294,11 +353,7 @@ enyo.kind({
 		outString = outString + "	" + "border-radius:" + " " + this.$.radiusSize + "px;\n";
 	}
 
-	if(this.$.textshadowH || this.$.textshadowV != null){
-		outPut = outPut + tab + "text-shadow:" + " " + this.$.textshadowH + "px"  + " " + this.$.textshadowV + "px" +  " " + this.$.textshadowB + "px" + " " + c1 +";<br>";
-		outString = outString + "	" + "text-shadow:" + " " + this.$.textshadowH + "px" + " " + this.$.textshadowV + "px" + " " + this.$.textshadowB + "px" + " "  + c1 + "\n";
-		this.$.outputBox.applyStyle(outString);
-	}
+
 
 	this.$.bg.setContent(outPut + "<br>}");
 	outString = outString + "\n}"
@@ -311,14 +366,7 @@ enyo.kind({
 		if (h.length==1){
 			h = '0' + h;
 		}
-console.log(inSender.name);
-console.log(inEvent);
-		if(inSender.name == "redSlider1"){
-
-			this.red1 = h;
-		}else{
-			this.red = h;
-		}
+		this.red = h;
 		this.updateBox();
 	},
 
@@ -328,11 +376,7 @@ console.log(inEvent);
 		if (h.length==1){
 			h = '0' + h;
 		}
-		if(inSender.name == "greenSlider1"){
-			this.green1 = h;
-		}else{
-			this.green = h;
-		}
+		this.green = h;
 		this.updateBox();
 	},
 
@@ -342,11 +386,7 @@ console.log(inEvent);
 		if (h.length==1){
 			h = '0' + h;
 		}
-		if(inSender.name == "blueSlider1"){
-			this.blue1 = h;
-		}else{
-			this.blue = h;
-		}
+		this.blue = h;
 		this.updateBox();
 	},
 
@@ -356,11 +396,7 @@ console.log(inEvent);
 		if (h.length==1){
 			h = '0' + h;
 		}
-		if(inSender.name == "redSlider1"){
-			this.red1 = h;
-		}else{
-			this.red = h;
-		}
+		this.red = h;
 		this.updateBox();
 	},
 
@@ -370,11 +406,7 @@ console.log(inEvent);
 		if (h.length==1){
 			h = '0' + h;
 		}
-		if(inSender.name == "greenSlider1"){
-			this.green1 = h;
-		}else{
-			this.green = h;
-		}
+		this.green = h;
 		this.updateBox();
 	},
 
@@ -384,18 +416,14 @@ console.log(inEvent);
 		if (h.length==1){
 			h = '0' + h;
 		}
-		if(inSender.name == "blueSlider1"){
-			this.blue1 = h;
-		}else{
-			this.blue = h;
-		}
+		this.blue = h;
 		this.updateBox();
 	},
 
 	radioActivated: function(inSender, inEvent) {
 		if (inEvent.originator.getActive()) {
 			this.color = "#000000";
-			this.toggle = inEvent.originator.getContent();
+			this.$.toggle = inEvent.originator.getContent();
 			this.updateBox();
 		}
 	},
@@ -446,18 +474,18 @@ console.log(inEvent);
 	},
 
 	textshadow: function(inSender, inEvent) {
-		this.toggle = null,
+		this.$.toggle = "text-shadow",
 		this.$.popup.show();
 	},
-		textshadowH: function(inSender, inEvent) {
+	textshadowH: function(inSender, inEvent) {
 			this.$.textshadowH = inEvent.selected.content;
 			this.updateBox();
 	},
-		textshadowV: function(inSender, inEvent) {
+	textshadowV: function(inSender, inEvent) {
 		this.$.textshadowV = inEvent.selected.content;
 		this.updateBox();
 	},
-		textshadowB: function(inSender, inEvent) {
+	textshadowB: function(inSender, inEvent) {
 		this.$.textshadowB = inEvent.selected.content;
 		this.updateBox();
 	},
@@ -465,7 +493,28 @@ console.log(inEvent);
 	closePopup: function() {
 		this.updateBox();
 		this.$.popup.hide();
+		this.$.boxShadowPopup.hide();
 	},
+
+	boxshadow: function(inSender, inEvent) {
+		this.$.toggle = "box-shadow",
+		this.$.boxShadowPopup.show();
+	},
+	boxshadowH: function(inSender, inEvent) {
+			this.$.boxshadowH = inEvent.selected.content;
+			this.updateBox();
+	},
+	boxshadowV: function(inSender, inEvent) {
+		this.$.boxshadowV = inEvent.selected.content;
+		this.updateBox();
+	},
+	boxshadowB: function(inSender, inEvent) {
+		this.$.boxshadowB = inEvent.selected.content;
+		this.updateBox();
+	},
+
+
+
 	reset: function(){
 		this.className = null;
 		this.backgroundColor = null;
@@ -479,6 +528,8 @@ console.log(inEvent);
 		this.$.widthSize = null;
 		this.$.radiusSize =	null;
 		this.$.paddingSize = null;
+		this.$.boxshadowcolor = null;
+		this.$.textshadowcolor = null;
 		this.$.outPut = null;
 		outString = "";
 		this.updateBox();
