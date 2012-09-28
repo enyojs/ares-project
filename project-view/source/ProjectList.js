@@ -22,6 +22,7 @@ enyo.kind({
 		]}
     ],
 	PROJECTS_STORAGE_KEY: "com.enyo.ares.projects",
+	selected: null,
 	create: function() {
 		this.inherited(arguments);
 		var data = null;
@@ -56,6 +57,11 @@ enyo.kind({
 	    item.$.item.setProjectName(project.name);
 	},
     projectListTap: function(inSender, inEvent) {
+    	if (this.selected) {
+    		this.selected.removeClass("ares_projectView_projectList_item_selected");
+    	}
+    	this.selected = inEvent.originator;
+    	this.selected.addClass("ares_projectView_projectList_item_selected");
     	this.doProjectSelected(this.projects[inEvent.index]);
     },
     stringifyReplacer: function(key, value) {
