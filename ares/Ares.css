@@ -90,3 +90,7 @@ body {
 .ares_projectView_projectList_item {
 	padding: 20px 4px 4px; border-bottom: 1px solid gray;
 }
+
+.ares_projectView_projectList_item_selected {
+	background-color: lightblue;
+}
