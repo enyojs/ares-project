@@ -37,9 +37,11 @@ enyo.kind({
 		this.$.hermesFileTree.reset();
 	},
 	setConfig: function(config) {
-		// TODO take subTreePath into account - ENYO-1090	
+		console.dir(config);
 		this.$.hermesFileTree.setConfig(config);
-		this.$.hermesFileTree.reset();
+		if (config !== null) {
+			this.$.hermesFileTree.getSubFileView(config.firstNodeName, config.folderId);
+		} else this.$.hermesFileTree.reset();
 	},
 	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
 	selectFile: function(inSender, inEvent) {
