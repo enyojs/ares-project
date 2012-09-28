@@ -3,7 +3,7 @@ enyo.kind({
 	kind: "FittableColumns",
 	classes: "enyo-unselectable",
 	components: [
-	    {kind: "ProjectList", onCreateProject: "createProjectAction", onOpenProject: "openProjectAction", onProjectSelected: "showSelectedProject", name: "projectList"},
+	    {kind: "ProjectList", onCreateProject: "createProjectAction", onOpenProject: "openProjectAction", onProjectRemoved: "projectRemoved", onProjectSelected: "showSelectedProject", name: "projectList"},
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
 		{kind: "ProjectWizardPopup", canGenerate: false, name: "projectWizardPopup"},
 		{kind: "ServiceRegistry", onServicesChange: "handleServicesChange"},
@@ -98,5 +98,8 @@ enyo.kind({
     		}
     	}
     	return undefined;
+    },
+    projectRemoved: function(inSender, inEvent) {
+    	this.$.harmonia.setConfig(null);
     }
 });
