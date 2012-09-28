@@ -21,33 +21,39 @@ enyo.kind({
             ]}
 		]}
     ],
-	PROJECTS_STORAGE_KEY: "com.enyo.ares.projects",
+	PROJECTS_STORAGE_KEY: "com.enyojs.ares.projects",
 	create: function() {
+		var self = this;
 		this.inherited(arguments);
-		var data = null;
-		try {
-			data = this.$.localStorage.get(this.PROJECTS_STORAGE_KEY);
-			if (data && data !== "") {
-				this.projects = JSON.parse(data);
+		this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, function(data) {
+			try {
+				if (data && data !== "") {
+					self.projects = JSON.parse(data);
+				}
+				self.$.projectList.setCount(self.projects.length);
+			} catch(error) {
+				self.error("Unable to retrieve projects information: " + error);	// TODO ENYO-1105
+				console.dir(data);		// Display the offending data in the console
+				self.$.localStorage.remove(self.PROJECTS_STORAGE_KEY); // Remove incorrect projects information
 			}
-			this.$.projectList.setCount(this.projects.length);
-		} catch(error) {
-			this.error("Unable to retrieve projects information: " + error);	// TODO ENYO-1105
-			console.dir(data);		// Display the offending data in the console
-			this.$.localStorage.remove(this.PROJECTS_STORAGE_KEY); // Remove incorrect projects information
-		}
+		});
 	},
 	addProject: function(name, folderId, serviceId) {
+		var self = this;
+		var projectsString;
 		var project = {name: name, folderId: folderId, serviceId: serviceId};
 		this.projects.push(project);
 		try {
-			this.$.localStorage.put(this.PROJECTS_STORAGE_KEY, JSON.stringify(this.projects, enyo.bind(this, this.stringifyReplacer)));
+			projectsString = JSON.stringify(this.projects, enyo.bind(this, this.stringifyReplacer));
 		} catch(error) {
 			this.error("Unable to store the project information: " + error);	// TODO ENYO-1105
 			console.dir(this.projects);		// Display the offending object in the console
+			return;
 		}
-		this.$.projectList.setCount(this.projects.length);
-		this.$.projectList.render();
+		this.$.localStorage.set(this.PROJECTS_STORAGE_KEY, projectsString, function() {
+			self.$.projectList.setCount(self.projects.length);
+			self.$.projectList.render();
+		});
 	},
 	projectListSetupItem: function(inSender, inEvent) {
 	    var project = this.projects[inEvent.index];
