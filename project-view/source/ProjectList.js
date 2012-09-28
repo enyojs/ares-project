@@ -4,7 +4,8 @@ enyo.kind({
 	events: {
 		onCreateProject: "",
 		onProjectSelected: "",
-		onOpenProject: ""
+		onOpenProject: "",
+		onProjectRemoved: ""
 	},
 	handlers: {
 	},
@@ -13,7 +14,8 @@ enyo.kind({
 	    {kind: "LocalStorage"},
 	    {kind: "onyx.Toolbar", isContainer: true, name: "toolbar", components: [
 			{kind: "onyx.Button", content: "Create Project", ontap: "doCreateProject"},
-			{kind: "onyx.Button", content: "Open Project", ontap: "doOpenProject"}
+			{kind: "onyx.Button", content: "Open", ontap: "doOpenProject"},
+			{kind: "onyx.Button", content: "Remove", ontap: "removeProjectAction"}
 		]},
 	    {kind: "enyo.Scroller", components: [
 			{kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
@@ -38,23 +40,39 @@ enyo.kind({
 			this.$.localStorage.remove(this.PROJECTS_STORAGE_KEY); // Remove incorrect projects information
 		}
 	},
-	addProject: function(name, folderId, serviceId) {
-		var project = {name: name, folderId: folderId, serviceId: serviceId};
-		this.projects.push(project);
+	storeProjectsInLocalStorage: function() {
 		try {
 			this.$.localStorage.put(this.PROJECTS_STORAGE_KEY, JSON.stringify(this.projects, enyo.bind(this, this.stringifyReplacer)));
 		} catch(error) {
 			this.error("Unable to store the project information: " + error);	// TODO ENYO-1105
 			console.dir(this.projects);		// Display the offending object in the console
 		}
+	},
+	addProject: function(name, folderId, serviceId) {
+		var project = {name: name, folderId: folderId, serviceId: serviceId};
+		this.projects.push(project);
+		this.storeProjectsInLocalStorage();
 		this.$.projectList.setCount(this.projects.length);
 		this.$.projectList.render();
+	},
+	removeProjectAction: function(inSender, inEvent) {
+		console.dir(this.selected);
+		if (this.selected) {
+			this.projects.splice(this.selected.index, 1);
+			this.storeProjectsInLocalStorage();
+			this.selected = null;
+			this.$.projectList.setCount(this.projects.length);
+			this.$.projectList.render();
+			this.doProjectRemoved();
+		}
 	},
 	projectListSetupItem: function(inSender, inEvent) {
 	    var project = this.projects[inEvent.index];
 	    var item = inEvent.item;
 	    // setup the controls for this item.
-	    item.$.item.setProjectName(project.name);
+	    item = item.$.item;
+	    item.setProjectName(project.name);
+	    item.setIndex(inEvent.index);
 	},
     projectListTap: function(inSender, inEvent) {
     	if (this.selected) {
@@ -75,7 +93,8 @@ enyo.kind({
 enyo.kind({
 	name: "Project",
 	published: {
-		projectName: ""
+		projectName: "",
+		index: -1
 	},
 	components: [
 	    {name: "name"}
@@ -83,4 +102,17 @@ enyo.kind({
 	projectNameChanged: function(inOldValue) {
         this.$.name.setContent(this.projectName);
     }
+});
+
+enyo.kind({
+	name: "RemoveProjectPopup",
+	kind: "onyx.Popup",
+	events: {
+	},
+	modal: true,
+	centered: true,
+	floating: true,
+	autoDismiss: false,
+	components: [
+	]
 });
