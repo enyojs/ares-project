@@ -10,6 +10,9 @@ body {
 	width: 500px;
 	border: 2px solid #333;
 }
+.ares_harmonia_toolBar {
+	height: 66px;
+}
 /**/
 #ares_deimos {
 	position: relative;
@@ -56,7 +59,7 @@ body {
 	background-color: white;
 	background-position: initial initial;
 	background-repeat: initial initial;
-}
+
 /**/
 .border {
 	background-color: whiteSmoke;
