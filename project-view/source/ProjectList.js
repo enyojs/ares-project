@@ -21,7 +21,8 @@ enyo.kind({
 			{kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
                 {kind: "Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
             ]}
-		]}
+		]},
+		{kind: "RemoveProjectPopup", onConfirmDeleteProject: "confirmRemoveProject"}
     ],
 	PROJECTS_STORAGE_KEY: "com.enyo.ares.projects",
 	selected: null,
@@ -56,7 +57,12 @@ enyo.kind({
 		this.$.projectList.render();
 	},
 	removeProjectAction: function(inSender, inEvent) {
-		console.dir(this.selected);
+		if (this.selected) {
+			this.$.removeProjectPopup.setName(this.selected.getProjectName());
+			this.$.removeProjectPopup.show();
+		}
+	},
+	confirmRemoveProject: function(inSender, inEvent) {
 		if (this.selected) {
 			this.projects.splice(this.selected.index, 1);
 			this.storeProjectsInLocalStorage();
@@ -107,12 +113,31 @@ enyo.kind({
 enyo.kind({
 	name: "RemoveProjectPopup",
 	kind: "onyx.Popup",
+	published: {
+		name: ""
+	},
 	events: {
+		onConfirmDeleteProject: ""
 	},
 	modal: true,
 	centered: true,
 	floating: true,
 	autoDismiss: false,
 	components: [
-	]
+	    {name: "title", tag: "h3", content: "Delete?"},
+	    {tag: "br"},
+	    {tag: "br"},
+	    {kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "deleteCancel"},
+	    {kind: "onyx.Button", classes: "onyx-affirmative", content: "Delete", ontap: "deleteConfirm"}
+    ],
+	nameChanged: function() {
+		this.$.title.setContent("Delete project \"" + this.name + "\" ?");
+	},
+	deleteCancel: function(inSender, inEvent) {
+	    this.hide();
+	},
+	deleteConfirm: function(inSender, inEvent) {
+	    this.hide();
+	    this.doConfirmDeleteProject();
+	}
 });
