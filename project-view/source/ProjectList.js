@@ -12,10 +12,25 @@ enyo.kind({
 	projects: [],
 	components: [
 	    {kind: "LocalStorage"},
-	    {kind: "onyx.Toolbar", isContainer: true, name: "toolbar", components: [
-			{kind: "onyx.Button", content: "Create Project", ontap: "doCreateProject"},
-			{kind: "onyx.Button", content: "Open", ontap: "doOpenProject"},
-			{kind: "onyx.Button", content: "Remove", ontap: "removeProjectAction"}
+	    {kind: "onyx.Toolbar",  classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
+			{content: "Projects", style: "margin-right: 10px"},
+			 // FIXME: we may need icons dedicated for projects instead of re-using application icons
+			{kind: "onyx.TooltipDecorator", components: [
+				{kind: "onyx.IconButton", src: "$harmonia/images/application_new.png", onclick: "doCreateProject"},
+				{kind: "onyx.Tooltip", content: "Create Project..."},
+			]},
+			{kind: "onyx.TooltipDecorator", components: [
+				{kind: "onyx.IconButton", src: "$harmonia/images/application_edit.png", onclick: "doOpenProject"},
+				{kind: "onyx.Tooltip", content: "Open Project..."},
+			]},
+			{kind: "onyx.TooltipDecorator", components: [
+				{kind: "onyx.IconButton", src: "$harmonia/images/delete.png", onclick: "removeProjectAction"},
+				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
+				{kind: "onyx.Tooltip", content: "Remove Project..."},
+			]},
+			// {kind: "onyx.Button", content: "Create Project", ontap: "doCreateProject"},
+			// {kind: "onyx.Button", content: "Open Project", ontap: "doOpenProject"}
+			// {kind: "onyx.Button", content: "Remove", ontap: "removeProjectAction"}
 		]},
 	    {kind: "enyo.Scroller", components: [
 			{kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
