@@ -34,6 +34,7 @@ enyo.kind({
 			};
 			this.$.hermesFileTree.setConfig({service: serviceObj});
 			this.$.hermesFileTree.reset();
+			this.$.hermesFileTree.fileOps2Hide();
 		}
 		return true; //Stop event propagation
 	},
