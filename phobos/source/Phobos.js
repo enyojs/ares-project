@@ -190,25 +190,25 @@ enyo.kind({
 	 * by the cursor position
 	 * TODO: see if this should go in Analyzer2
 	 */
-	updateObjectsLines: function(tempo) {
-		tempo.ranges = [];
-		if (tempo.objects && tempo.objects.length > 0) {
+	updateObjectsLines: function(module) {
+		module.ranges = [];
+		if (module.objects && module.objects.length > 0) {
 			var start = 0;
-			for( var idx = 1; idx < tempo.objects.length ; idx++ ) {
-				var range = { first: start, last: tempo.objects[idx].line - 1};
-				tempo.ranges.push(range);	// Push a range for previous object
-				start = tempo.objects[idx].line;
+			for( var idx = 1; idx < module.objects.length ; idx++ ) {
+				var range = { first: start, last: module.objects[idx].line - 1};
+				module.ranges.push(range);	// Push a range for previous object
+				start = module.objects[idx].line;
 			}
 
 			// Push a range for the last object
 			range = { first: start, last: 1000000000};
-			tempo.ranges.push(range);
+			module.ranges.push(range);
 		}
 
 		var position = this.$.ace.getCursorPositionInDocument();
-		tempo.currentObject = this.findCurrentEditedObject(position);
-		tempo.currentRange = tempo.ranges[tempo.currentObject];
-		tempo.currentLine = position.row;
+		module.currentObject = this.findCurrentEditedObject(position);
+		module.currentRange = module.ranges[module.currentObject];
+		module.currentLine = position.row;
 	},
 	/**
 	 * Return the index (in the analyzer result ) of the enyo kind
@@ -422,7 +422,7 @@ enyo.kind({
 	docChanged: function(inSender, inEvent) {
 		this.docHasChanged=true;
 
-		if (this.debug) enyo.log("phobos.docChanged: " + JSON.stringify(inEvent.data));
+		if (this.debug) this.log(JSON.stringify(inEvent.data));
 
 		if (this.analysis) {
 			// Call the autocomplete component
@@ -432,7 +432,7 @@ enyo.kind({
 	},
 	cursorChanged: function(inSender, inEvent) {
 		var position = this.$.ace.getCursorPositionInDocument();
-		if (this.debug) enyo.log("phobos.cursorChanged: " + inSender.id + " " + inEvent.type + " " + JSON.stringify(position));
+		if (this.debug) this.log(inSender.id + " " + inEvent.type + " " + JSON.stringify(position));
 
 		// Check if we moved to another enyo kind and display it in the right pane
 		var tempo = this.analysis;
