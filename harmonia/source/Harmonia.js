@@ -20,26 +20,12 @@ enyo.kind({
 			this.$.provideList.setShowing(false);
 		}
 	},
-	selectProvider: function(inSender, inInfo) {
-		//this.log("service='"+JSON.stringify(inInfo.service)+"'");
-		// super hack
-		var auth = inInfo.service ? inInfo.service.auth : null;
-		var url = inInfo.service ? inInfo.service.url : null;
-		var jsonp = inInfo.service ? inInfo.service.useJsonp : false;
-
-		//this.log("service: auth: "+auth+" url: "+url+" jsonp: "+jsonp);
-		var serviceObj = {
-			auth: auth,
-			url: url,
-			jsonp: jsonp
-		};
-		this.$.hermesFileTree.setConfig({service: serviceObj});
-		this.$.hermesFileTree.reset();
-	},
-	setConfig: function(config) {
-		// TODO take subTreePath into account - ENYO-1090	
-		this.$.hermesFileTree.setConfig(config);
-		this.$.hermesFileTree.reset();
+	selectProvider: function(inSender, inData) {
+		console.dir(inData);
+		if (inData.service) {
+			this.$.hermesFileTree.initialize(inData.service);
+			this.$.hermesFileTree.reset();
+		}
 	},
 	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
 	selectFile: function(inSender, inEvent) {
