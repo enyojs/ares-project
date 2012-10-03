@@ -7,7 +7,7 @@
 	"offline_enabled": false,
 	"app": {
 		"background": {
-			"scripts": ["ext.js"]
+			"scripts": ["chrome-app.js"]
 		}
 	},
 	"icons": {
@@ -16,14 +16,15 @@
 	},
 	"permissions": [
 		"http://enyojs.com/",
+		"storage",
 		"unlimitedStorage",
 		"clipboardRead",
 		"clipboardWrite",
 		{"fileSystem": ["write"]}
 	],
 	"sandbox": {
-	  	"pages": [
-	  		"ares/index.html"
-	  	]
+	   	"pages": [
+	   		"ares/index.html"
+	   	]
 	}
 }
