@@ -28,9 +28,6 @@ enyo.kind({
 				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
 				{kind: "onyx.Tooltip", content: "Remove Project..."},
 			]},
-			// {kind: "onyx.Button", content: "Create Project", ontap: "doCreateProject"},
-			// {kind: "onyx.Button", content: "Open Project", ontap: "doOpenProject"}
-			// {kind: "onyx.Button", content: "Remove", ontap: "removeProjectAction"}
 		]},
 	    {kind: "enyo.Scroller", components: [
 			{kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
@@ -39,13 +36,19 @@ enyo.kind({
 		]},
 		{kind: "RemoveProjectPopup", onConfirmDeleteProject: "confirmRemoveProject"}
     ],
-	PROJECTS_STORAGE_KEY: "com.enyo.ares.projects",
+	PROJECTS_STORAGE_KEY: "com.enyojs.ares.projects",
 	selected: null,
 	create: function() {
 		this.inherited(arguments);
-		var data = null;
+		this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
+	},
+	/**
+	 * Callback functions which receives the project list data read from the storage
+	 * @protected
+	 * @param data: the project list in json format
+	 */
+	projectListAvailable: function(data) {
 		try {
-			data = this.$.localStorage.get(this.PROJECTS_STORAGE_KEY);
 			if (data && data !== "") {
 				this.projects = JSON.parse(data);
 			}
@@ -57,12 +60,18 @@ enyo.kind({
 		}
 	},
 	storeProjectsInLocalStorage: function() {
+		var projectsString;
 		try {
-			this.$.localStorage.put(this.PROJECTS_STORAGE_KEY, JSON.stringify(this.projects, enyo.bind(this, this.stringifyReplacer)));
+			projectsString = JSON.stringify(this.projects, enyo.bind(this, this.stringifyReplacer));
 		} catch(error) {
 			this.error("Unable to store the project information: " + error);	// TODO ENYO-1105
 			console.dir(this.projects);		// Display the offending object in the console
+			return;
 		}
+		this.$.localStorage.set(this.PROJECTS_STORAGE_KEY, projectsString, function() {
+			// WARNING: LocalStorage does not return any information about operation status (success or error)
+			enyo.log("Project list saved");
+		});
 	},
 	addProject: function(name, folderId, serviceId) {
 		var project = {name: name, folderId: folderId, serviceId: serviceId};
