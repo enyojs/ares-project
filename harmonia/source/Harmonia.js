@@ -35,12 +35,14 @@ enyo.kind({
 		};
 		this.$.hermesFileTree.setConfig({service: serviceObj});
 		this.$.hermesFileTree.reset();
+		this.$.hermesFileTree.fileOps2Hide(true);
 	},
 	setConfig: function(config) {
 		console.dir(config);
 		this.$.hermesFileTree.setConfig(config);
 		if (config !== null) {
 			this.$.hermesFileTree.getSubFileView(config.firstNodeName, config.folderId);
+			this.$.hermesFileTree.fileOps2Show();		
 		} else this.$.hermesFileTree.reset();
 	},
 	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
