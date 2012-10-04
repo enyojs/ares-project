@@ -4,24 +4,43 @@ enyo.kind({
 	events: {
 		onCreateProject: "",
 		onProjectSelected: "",
-		onOpenProject: ""
+		onOpenProject: "",
+		onProjectRemoved: ""
 	},
 	handlers: {
 	},
 	projects: [],
 	components: [
 	    {kind: "LocalStorage"},
-	    {kind: "onyx.Toolbar", isContainer: true, name: "toolbar", components: [
-			{kind: "onyx.Button", content: "Create Project", ontap: "doCreateProject"},
-			{kind: "onyx.Button", content: "Open Project", ontap: "doOpenProject"}
+	    {kind: "onyx.Toolbar",  classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
+			{content: "Projects", style: "margin-right: 10px"},
+			 // FIXME: we may need icons dedicated for projects instead of re-using application icons
+			{kind: "onyx.TooltipDecorator", components: [
+				{kind: "onyx.IconButton", src: "$harmonia/images/application_new.png", onclick: "doCreateProject"},
+				{kind: "onyx.Tooltip", content: "Create Project..."},
+			]},
+			{kind: "onyx.TooltipDecorator", components: [
+				{kind: "onyx.IconButton", src: "$harmonia/images/application_edit.png", onclick: "doOpenProject"},
+				{kind: "onyx.Tooltip", content: "Open Project..."},
+			]},
+			{kind: "onyx.TooltipDecorator", components: [
+				{kind: "onyx.IconButton", src: "$harmonia/images/delete.png", onclick: "removeProjectAction"},
+				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
+				{kind: "onyx.Tooltip", content: "Remove Project..."},
+			]},
+			// {kind: "onyx.Button", content: "Create Project", ontap: "doCreateProject"},
+			// {kind: "onyx.Button", content: "Open Project", ontap: "doOpenProject"}
+			// {kind: "onyx.Button", content: "Remove", ontap: "removeProjectAction"}
 		]},
 	    {kind: "enyo.Scroller", components: [
 			{kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
                 {kind: "Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
             ]}
-		]}
-    ],
-	PROJECTS_STORAGE_KEY: "com.enyojs.ares.projects",
+		]},
+		{kind: "RemoveProjectPopup", onConfirmDeleteProject: "confirmRemoveProject"}
+	],
+	PROJECTS_STORAGE_KEY: "com.enyo.ares.projects",
+	selected: null,
 	create: function() {
 		var self = this;
 		this.inherited(arguments);
@@ -38,31 +57,54 @@ enyo.kind({
 			}
 		});
 	},
-	addProject: function(name, folderId, serviceId) {
-		var self = this;
-		var projectsString;
-		var project = {name: name, folderId: folderId, serviceId: serviceId};
-		this.projects.push(project);
+	storeProjectsInLocalStorage: function() {
 		try {
-			projectsString = JSON.stringify(this.projects, enyo.bind(this, this.stringifyReplacer));
+			this.$.localStorage.set(this.PROJECTS_STORAGE_KEY, JSON.stringify(this.projects, enyo.bind(this, this.stringifyReplacer)));
 		} catch(error) {
 			this.error("Unable to store the project information: " + error);	// TODO ENYO-1105
 			console.dir(this.projects);		// Display the offending object in the console
-			return;
 		}
-		this.$.localStorage.set(this.PROJECTS_STORAGE_KEY, projectsString, function() {
-			self.$.projectList.setCount(self.projects.length);
-			self.$.projectList.render();
-		});
+	},
+	addProject: function(name, folderId, serviceId) {
+		var project = {name: name, folderId: folderId, serviceId: serviceId};
+		this.projects.push(project);
+		this.storeProjectsInLocalStorage();
+		this.$.projectList.setCount(this.projects.length);
+		this.$.projectList.render();
+	},
+	removeProjectAction: function(inSender, inEvent) {
+		if (this.selected) {
+			this.$.removeProjectPopup.setName(this.selected.getProjectName());
+			this.$.removeProjectPopup.show();
+		}
+	},
+	confirmRemoveProject: function(inSender, inEvent) {
+		if (this.selected) {
+			this.projects.splice(this.selected.index, 1);
+			this.storeProjectsInLocalStorage();
+			this.selected = null;
+			this.$.projectList.setCount(this.projects.length);
+			this.$.projectList.render();
+			this.doProjectRemoved();
+		}
 	},
 	projectListSetupItem: function(inSender, inEvent) {
 	    var project = this.projects[inEvent.index];
 	    var item = inEvent.item;
 	    // setup the controls for this item.
-	    item.$.item.setProjectName(project.name);
+	    item = item.$.item;
+	    item.setProjectName(project.name);
+	    item.setIndex(inEvent.index);
 	},
     projectListTap: function(inSender, inEvent) {
+    	if (this.selected) {
+    		this.selected.removeClass("ares_projectView_projectList_item_selected");
+    	}
+    	this.selected = inEvent.originator;
+    	this.selected.addClass("ares_projectView_projectList_item_selected");
     	this.doProjectSelected(this.projects[inEvent.index]);
+	    console.log("ProjectList.projectListTap: selected=");
+	    console.dir(this.selected);
     },
     stringifyReplacer: function(key, value) {
     	if (key === "originator") {
@@ -75,7 +117,8 @@ enyo.kind({
 enyo.kind({
 	name: "Project",
 	published: {
-		projectName: ""
+		projectName: "",
+		index: -1
 	},
 	components: [
 	    {name: "name"}
@@ -83,4 +126,36 @@ enyo.kind({
 	projectNameChanged: function(inOldValue) {
         this.$.name.setContent(this.projectName);
     }
+});
+
+enyo.kind({
+	name: "RemoveProjectPopup",
+	kind: "onyx.Popup",
+	published: {
+		name: ""
+	},
+	events: {
+		onConfirmDeleteProject: ""
+	},
+	modal: true,
+	centered: true,
+	floating: true,
+	autoDismiss: false,
+	components: [
+	    {name: "title", tag: "h3", content: "Delete?"},
+	    {tag: "br"},
+	    {tag: "br"},
+	    {kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "deleteCancel"},
+	    {kind: "onyx.Button", classes: "onyx-affirmative", content: "Delete", ontap: "deleteConfirm"}
+    ],
+	nameChanged: function() {
+		this.$.title.setContent("Delete project \"" + this.name + "\" ?");
+	},
+	deleteCancel: function(inSender, inEvent) {
+	    this.hide();
+	},
+	deleteConfirm: function(inSender, inEvent) {
+	    this.hide();
+	    this.doConfirmDeleteProject();
+	}
 });

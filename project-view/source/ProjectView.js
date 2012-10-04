@@ -3,11 +3,9 @@ enyo.kind({
 	kind: "FittableColumns",
 	classes: "enyo-unselectable",
 	components: [
-	    {kind: "ProjectList", onCreateProject: "createProjectAction", onOpenProject: "openProjectAction", onProjectSelected: "showSelectedProject", name: "projectList"},
+	    {kind: "ProjectList", onCreateProject: "createProjectAction", onOpenProject: "openProjectAction", onProjectRemoved: "projectRemoved", onProjectSelected: "handleProjectSelected", name: "projectList"},
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
 		{kind: "ProjectWizardPopup", canGenerate: false, name: "projectWizardPopup"},
-		{kind: "ServiceRegistry", onServicesChange: "handleServicesChange"},
-		
 		{name: "errorPopup", kind: "onyx.Popup", modal: true, centered: true, floating: true, components: [
 		    {tag: "h3", content: "An error occured"},
 		    {name: "errorMsg", content: "unknown error"},
@@ -20,7 +18,6 @@ enyo.kind({
 	},
 	create: function() {
 		this.inherited(arguments);
-		this.listServices();
 	},
 	showErrorPopup : function(msg) {		// TODO Should refine error notification for the whole Ares project - ENYO-1105
 		this.$.errorMsg.setContent(msg);
@@ -28,12 +25,6 @@ enyo.kind({
 	},
 	hideErrorPopup : function() {
 		this.$.errorPopup.hide();
-	},
-	listServices: function() {
-		this.$.serviceRegistry.listServices();
-	},
-	handleServicesChange: function(inSender, inServices) {	// TODO We should have only one ServiceRegistry for the whole Ares application - ENYO-1106
-		this.services = inServices || [];
 	},
     openProjectAction: function(inSender, inEvent) {
     	this.$.projectWizardPopup.reset();
@@ -51,52 +42,41 @@ enyo.kind({
         this.$.projectWizardPopup.hide();
         return true; //Stop event propagation
     },
-    confirmCreateProject: function(inSender, inEvent) {
-    	this.$.projectWizardPopup.hide();
+	confirmCreateProject: function(inSender, inEvent) {
+    		this.$.projectWizardPopup.hide();
 
-    	var service = inEvent.service;
-    	var serviceId = inEvent.serviceId;
-    	
-		// super hack
-		var auth = service ? service.auth : null;
-		var url = service ? service.url : null;
-		var jsonp = service ? service.useJsonp : false;
+    		// Add an entry into the project list
+    		this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
 
-		var serviceInfo = {
-			auth: auth,
-			url: url,
-			jsonp: jsonp
-		};
-    	
-    	// Add an entry into the project list
-    	this.$.projectList.addProject(inEvent.name, inEvent.folderId, serviceId);
-    	
-    	// Pass service information to Harmonia
-		this.$.harmonia.setConfig({service: serviceInfo, folderId: inEvent.folderId, firstNodeName: inEvent.name});
+    		// Pass service information to Harmonia
+		this.$.harmonia.setConfig({
+			service: inEvent.service,
+			folderId: inEvent.folderId,
+			firstNodeName: inEvent.name
+		});
 		return true; //Stop event propagation
-    },
-    showSelectedProject: function(inSender, inEvent) {
-    	if (inEvent.serviceId) {
-	    	// Resolve serviceId
-	    	var serviceInfo = this.resolveServiceId(inEvent.serviceId);
-	    	if (! serviceInfo) {
+	},
+	handleProjectSelected: function(inSender, inEvent) {
+		var service;
+		console.log("ProjectView.handleProjectSelected: inEvent=");
+		console.dir(inEvent);
+	    	service = this.serviceRegistry.resolveServiceId(inEvent.serviceId);
+	    	if (! service) {
 	    		var msg = "Service " + inEvent.serviceId + " not found";
 	    		this.showErrorPopup(msg);
 	    		this.error(msg);
-	    		return;
+	    		return false;
 	    	}
-	    	// Pass service information to HermesFileTree
-			this.$.harmonia.setConfig({service: serviceInfo, folderId: inEvent.folderId, firstNodeName: inEvent.name});
-    	}
+	    	// Pass service definition & configuration to Harmonia
+	    	// & consequently to HermesFileTree
+		this.$.harmonia.setConfig({
+			service: service,
+			folderId: inEvent.folderId,
+			firstNodeName: inEvent.name
+		});
 		return true; //Stop event propagation
-    },
-    resolveServiceId: function(serviceId) {
-    	for(var idx = 0; idx < this.services.length; idx++) {
-    		var service = this.services[idx];
-    		if (serviceId === service.id) {
-    			return service; 
-    		}
-    	}
-    	return undefined;
+	},
+    projectRemoved: function(inSender, inEvent) {
+    	this.$.harmonia.setConfig(null);
     }
 });

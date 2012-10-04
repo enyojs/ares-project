@@ -3,10 +3,10 @@ enyo.kind({
 	kind: "FittableColumns",
 	handlers: {
 		onSelect: "newSelect",
-		onDeselect: "newDeselect",
+		onDeselect: "newDeselect"
 	},
 	components: [
-	    {name: "provideList", kind: "ProviderList", onSelectProvider: "selectProvider"},
+	    {name: "providerList", kind: "ProviderList", onSelectProvider: "handleSelectProvider"},
 		{kind: "HermesFileTree", fit: true, onFileClick: "selectFile", onFolderClick: "selectFolder", 
 			onNewFileConfirm: "newFileConfirm", onNewFolderConfirm: "newFolderConfirm", 
 			onRenameConfirm: "renameConfirm", onDeleteConfirm: "deleteConfirm",
@@ -17,13 +17,25 @@ enyo.kind({
 		this.inherited(arguments);
 		// TODO provider list should probably go out of Harmonia
 		if (this.providerListNeeded === false) {
-			this.$.provideList.setShowing(false);
+			this.$.providerList.setShowing(false);
 		}
 	},
-	selectProvider: function(inSender, inData) {
-		console.dir(inData);
-		if (inData.service) {
-			this.$.hermesFileTree.initialize(inData.service);
+	handleSelectProvider: function(inSender, inEvent) {
+		if (inEvent.service) {
+			this.$.hermesFileTree.initialize(inEvent.service);
+			this.$.hermesFileTree.reset();
+		}
+		return true; //Stop event propagation
+	},
+	setConfig: function(config) {
+		console.log("Harmonia.setConfig: config=");
+		console.dir(config);
+		this.$.hermesFileTree.initialize(config.service);
+		delete config.service;
+		this.$.hermesFileTree.setConfig(config);
+		if (config.firstNodeName !== null) {
+			this.$.hermesFileTree.getSubFileView(config.firstNodeName, config.folderId);
+		} else {
 			this.$.hermesFileTree.reset();
 		}
 	},

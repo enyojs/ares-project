@@ -10,6 +10,9 @@ body {
 	width: 500px;
 	border: 2px solid #333;
 }
+.ares_harmonia_toolBar {
+	height: 66px;
+}
 /**/
 #ares_deimos {
 	position: relative;
@@ -89,4 +92,8 @@ body {
 
 .ares_projectView_projectList_item {
 	padding: 20px 4px 4px; border-bottom: 1px solid gray;
+}
+
+.ares_projectView_projectList_item_selected {
+	background-color: lightblue;
 }
