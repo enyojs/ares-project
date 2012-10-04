@@ -97,3 +97,13 @@ body {
 .ares_projectView_projectList_item_selected {
 	background-color: lightblue;
 }
+
+#ares_projectView_projectWizardPopup {
+    z-index: 140;
+
+}
+
+#ares_projectView_projectWizardPopup_projectWizard_selectDirectoryPopup {
+    z-index: 145;
+
+}

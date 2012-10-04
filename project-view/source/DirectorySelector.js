@@ -18,6 +18,10 @@ enyo.kind({
 		onCancel: ""
 	},
 	selectedDir: undefined,
+	create: function() {
+		this.inherited(arguments);
+		this.$.hermesFileTree.fileOps2Hide(false);
+	},
 	selectProvider: function(inSender, inInfo) {
 		if (inInfo.service) {
 			this.selectedServiceId = inInfo.service.id;
@@ -33,7 +37,7 @@ enyo.kind({
 				jsonp: jsonp
 			};
 			this.$.hermesFileTree.setConfig({service: serviceObj});
-			this.$.hermesFileTree.reset();
+			this.$.hermesFileTree.reset();			
 		}
 		return true; //Stop event propagation
 	},
