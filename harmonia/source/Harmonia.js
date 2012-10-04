@@ -43,7 +43,10 @@ enyo.kind({
 		if (config !== null) {
 			this.$.hermesFileTree.getSubFileView(config.firstNodeName, config.folderId);
 			this.$.hermesFileTree.fileOps2Show();		
-		} else this.$.hermesFileTree.reset();
+		} else {
+			this.$.hermesFileTree.reset();
+			this.$.hermesFileTree.fileOps2Hide(true);
+		}
 	},
 	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
 	selectFile: function(inSender, inEvent) {
