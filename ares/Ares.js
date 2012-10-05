@@ -32,7 +32,7 @@ enyo.kind({
 					inData="";
 				}
 				this.$.phobos.openDoc(f, inData, ext);
-				this.setIndex(1);
+				this.setIndex(1); // switch to code editor (listed in components)
 			})
 			.error(this, function(inEvent, inData) {
 				enyo.log("Open failed", inData);
