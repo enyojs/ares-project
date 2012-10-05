@@ -3,18 +3,25 @@ enyo.kind({
 	kind: "enyo.Panels",
 	fit: true,
 	components: [
+		{kind: "ServiceRegistry"},
 		{kind: "Harmonia", onFileDblClick: "openDocument"},
 		{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"},
 		{kind: "Deimos", onCloseDesigner: "closeDesigner"},
 		{kind: "ProjectView", onFileDblClick: "openDocument"}
 	],
 	//arrangerKind: "CollapsingArranger",
+	handlers: {
+		onReloadServices: "handleReloadServices"
+	},
 	fileViewIndex: 3,
 	create: function() {
 		this.inherited(arguments);
 		this.setIndex(this.fileViewIndex);
 	},
 	draggable: false,
+	handleReloadServices: function(inSender, inEvent) {
+		this.$.serviceRegistry.reloadServices();
+	},
 	openDocument: function(inSender, inEvent) {
 		var f = inEvent.file;
 		var service = f.service;
