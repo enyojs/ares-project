@@ -80,7 +80,7 @@ enyo.kind({
 		this.hideWaitPopup();
 		this.analysis = null;
 		this.file = inFile;
-		this.mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
+		this.mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image"}[inExt] || "text";
 		this.$.ace.setEditingMode(this.mode);
 		this.adjustPanelsForMode(this.mode);
 		this.$.ace.setValue(inCode);
@@ -89,18 +89,24 @@ enyo.kind({
 		this.$.documentLabel.setContent(this.file.name);
 	},
 	adjustPanelsForMode: function(mode) {
+		// xxxShowing: whether to show or not a panel
+        // xxxIndex: specify what to show in the "LeftPanels" or "RightPanels" kinds (declared at the end of this file)
+        // xxxIndex is ignored when xxxShowing is false
+		// There's no need for middle index since middle panel is always ace (the editor) 
 		var modes = {
-			json:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: false, designer: false},
-			javascript:	{leftShowing: false, rightShowing: true,  leftIndex: 1, rightIndex: 1, newKindButton: true,  designer: true},
-			html:		{leftShowing: false, rightShowing: false, leftIndex: 2, rightIndex: 2, newKindButton: false, designer: false},
-			css:		{leftShowing: false, rightShowing: true,  leftIndex: 3, rightIndex: 3, newKindButton: false, designer: false},
-			text:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: false, designer: false}
+			json:		{showing: {left: false, middle: true,  right: false }, leftIndex: 0, rightIndex: 0, newKindButton: false, designer: false},
+			javascript:	{showing: {left: false, middle: true,  right: true  }, leftIndex: 1, rightIndex: 1, newKindButton: true,  designer: true},
+			html:		{showing: {left: false, middle: true,  right: false }, leftIndex: 2, rightIndex: 2, newKindButton: false, designer: false},
+			css:		{showing: {left: false, middle: true,  right: true  }, leftIndex: 3, rightIndex: 3, newKindButton: false, designer: false},
+			text:		{showing: {left: false, middle: true,  right: false }, leftIndex: 0, rightIndex: 0, newKindButton: false, designer: false} ,
+			image:		{showing: {left: false, middle: false, right: true  }, leftIndex: 0, rightIndex: 4, newKindButton: false, designer: false}
 		};
 		var settings = modes[mode]||modes['text'];
 		this.$.left.setIndex(settings.leftIndex);
-		this.$.left.setShowing(settings.leftShowing);
+		this.$.left.setShowing(settings.showing.left);
+		this.$.middle.setShowing(settings.showing.middle);
 		this.$.right.setIndex(settings.rightIndex);
-		this.$.right.setShowing(settings.rightShowing);
+		this.$.right.setShowing(settings.showing.right);
 		this.$.newKindButton.setShowing(settings.newKindButton);
 		this.$.designerButton.setShowing(settings.designer);
 	},
@@ -483,7 +489,9 @@ enyo.kind({
 		},
 		{kind: "enyo.Control", classes: "enyo-fit",	components: [ // right panel for CSS here
 			{kind: "cssBuilder", classes: "border panel enyo-fit",style: "margin: 8px;", onInsert: "test"}
-		]}
+		]},
+		{kind: "enyo.Image", classes: "enyo-fit", src: "http://komarr.gre.hp.com/files/3_tier.png"
+		}
 	],
 
 	create: function() {
