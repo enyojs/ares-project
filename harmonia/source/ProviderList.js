@@ -25,8 +25,12 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 	},
+	/**
+	 * Receive the {onServicesChange} broadcast notification
+	 * @param {Object} inEvent.serviceRegistry
+	 */
 	handleServicesChange: function(inSender, inEvent) {
-		this.log("RX");
+		this.log(inEvent);
 		this.serviceRegistry = inEvent.serviceRegistry;
 		this.$.list.count = this.serviceRegistry.services.length;
 		this.$.list.render();
@@ -37,8 +41,8 @@ enyo.kind({
 		var p = this.serviceRegistry.services[inEvent.index];
 		if (p) {
 			this.$.item.applyStyle("background-color", inSender.isSelected(inEvent.index) ? "lightblue" : "");
-			this.$.name.setContent(p.name);
-			this.$.icon.setSrc("$harmonia/images/providers/" + p.icon + ".png");
+			this.$.name.setContent(p.conf.name);
+			this.$.icon.setSrc("$harmonia/images/providers/" + p.conf.icon + ".png");
 			//this.$.auth.setShowing(p.type !== "dropbox" || p.auth);
 		}
 		return true;

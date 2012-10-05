@@ -10,6 +10,7 @@ enyo.kind({
 	handlers: {
 	},
 	projects: [],
+	debug: false,
 	components: [
 	    {kind: "LocalStorage"},
 	    {kind: "onyx.Toolbar",  classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
@@ -28,45 +29,77 @@ enyo.kind({
 				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
 				{kind: "onyx.Tooltip", content: "Remove Project..."},
 			]},
-			// {kind: "onyx.Button", content: "Create Project", ontap: "doCreateProject"},
-			// {kind: "onyx.Button", content: "Open Project", ontap: "doOpenProject"}
-			// {kind: "onyx.Button", content: "Remove", ontap: "removeProjectAction"}
 		]},
-	    {kind: "enyo.Scroller", components: [
+		{kind: "enyo.Scroller", components: [
 			{kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
-                {kind: "Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
-            ]}
+				{kind: "Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
+			]}
 		]},
-		{kind: "RemoveProjectPopup", onConfirmDeleteProject: "confirmRemoveProject"}
+		{kind: "RemoveProjectPopup", onConfirmDeleteProject: "confirmRemoveProject"},
+		{name: "errorPopup", kind: "onyx.Popup", modal: true, centered: true, floating: true, components: [
+		    {tag: "h3", content: "An error occured"},
+		    {name: "errorMsg", content: "unknown error"},
+		    {kind : "onyx.Button", content : "OK", ontap : "hideErrorPopup"}
+		]},
+		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
-	PROJECTS_STORAGE_KEY: "com.enyo.ares.projects",
+	PROJECTS_STORAGE_KEY: "com.enyojs.ares.projects",
 	selected: null,
 	create: function() {
-		var self = this;
 		this.inherited(arguments);
-		this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, function(data) {
-			try {
-				if (data && data !== "") {
-					self.projects = JSON.parse(data);
-				}
-				self.$.projectList.setCount(self.projects.length);
-			} catch(error) {
-				self.error("Unable to retrieve projects information: " + error);	// TODO ENYO-1105
-				console.dir(data);		// Display the offending data in the console
-				self.$.localStorage.remove(self.PROJECTS_STORAGE_KEY); // Remove incorrect projects information
+		this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
+	},
+	/**
+	 * Receive the {onServicesChange} broadcast notification
+	 * @param {Object} inEvent.serviceRegistry
+	 */
+	handleServicesChange: function(inSender, inEvent) {
+		if (this.debug) this.log(inEvent);
+		this.serviceRegistry = inEvent.serviceRegistry;
+	},
+	/**
+	 * Callback functions which receives the project list data read from the storage
+	 * @protected
+	 * @param data: the project list in json format
+	 */
+	projectListAvailable: function(data) {
+		try {
+			if (data && data !== "") {
+				this.projects = JSON.parse(data);
+				if (this.debug) console.dir(this.projects);
 			}
-		});
+			this.$.projectList.setCount(this.projects.length);
+		} catch(error) {
+			this.error("Unable to retrieve projects information: " + error);	// TODO ENYO-1105
+			console.dir(data);		// Display the offending data in the console
+			this.$.localStorage.remove(this.PROJECTS_STORAGE_KEY); // Remove incorrect projects information
+			this.projects = [];
+		}
 	},
 	storeProjectsInLocalStorage: function() {
+		var projectsString;
+		if (this.debug) console.dir(this.projects);
 		try {
-			this.$.localStorage.set(this.PROJECTS_STORAGE_KEY, JSON.stringify(this.projects, enyo.bind(this, this.stringifyReplacer)));
+			projectsString = JSON.stringify(this.projects, enyo.bind(this, this.stringifyReplacer));
 		} catch(error) {
 			this.error("Unable to store the project information: " + error);	// TODO ENYO-1105
 			console.dir(this.projects);		// Display the offending object in the console
+			return;
 		}
+		this.$.localStorage.set(this.PROJECTS_STORAGE_KEY, projectsString, function() {
+			// WARNING: LocalStorage does not return any information about operation status (success or error)
+			enyo.log("Project list saved");
+		});
 	},
-	addProject: function(name, folderId, serviceId) {
-		var project = {name: name, folderId: folderId, serviceId: serviceId};
+	addProject: function(name, folderId, service) {
+		var project = {
+			name: name,
+			folderId: folderId,
+			serviceId: service.getConfig().id
+		};
+		if (!project.serviceId) {
+			throw new Error("Cannot add a project in service=" + service);
+		}
 		this.projects.push(project);
 		this.storeProjectsInLocalStorage();
 		this.$.projectList.setCount(this.projects.length);
@@ -96,16 +129,34 @@ enyo.kind({
 	    item.setProjectName(project.name);
 	    item.setIndex(inEvent.index);
 	},
-    projectListTap: function(inSender, inEvent) {
-    	if (this.selected) {
-    		this.selected.removeClass("ares_projectView_projectList_item_selected");
-    	}
-    	this.selected = inEvent.originator;
-    	this.selected.addClass("ares_projectView_projectList_item_selected");
-    	this.doProjectSelected(this.projects[inEvent.index]);
-	    console.log("ProjectList.projectListTap: selected=");
-	    console.dir(this.selected);
-    },
+	projectListTap: function(inSender, inEvent) {
+		var project, msg;
+		// Un-highlight former selection, if any
+    		if (this.selected) {
+    			this.selected.removeClass("ares_projectView_projectList_item_selected");
+    		}
+		project = this.projects[inEvent.index];
+		project.service = this.serviceRegistry.resolveServiceId(project.serviceId);
+		if (project.service) {
+			// Highlight a project item if & only if its
+			// filesystem service provider exists.
+    			this.selected = inEvent.originator;
+    			this.selected.addClass("ares_projectView_projectList_item_selected");
+    			this.doProjectSelected({project: project});
+		} else {
+			// ...otherwise let 
+	    		msg = "Service " + project.serviceId + " not found";
+	    		this.showErrorPopup(msg);
+	    		this.error(msg);
+		}
+	},
+	showErrorPopup : function(msg) {		// TODO Should refine error notification for the whole Ares project - ENYO-1105
+		this.$.errorMsg.setContent(msg);
+		this.$.errorPopup.show();
+	},
+	hideErrorPopup : function() {
+		this.$.errorPopup.hide();
+	},
     stringifyReplacer: function(key, value) {
     	if (key === "originator") {
     		return undefined;	// Exclude

@@ -20,7 +20,7 @@ enyo.kind({
 	selectedDir: undefined,
 	handleSelectProvider: function(inSender, inEvent) {
 		if (inEvent.service) {
-			this.$.hermesFileTree.initialize(inEvent.service);
+			this.$.hermesFileTree.setConfig({fs: inEvent.service});
 			this.$.hermesFileTree.reset();
 		}
 		return true; //Stop event propagation

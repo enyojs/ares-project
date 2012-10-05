@@ -45,38 +45,31 @@ enyo.kind({
 	confirmCreateProject: function(inSender, inEvent) {
     		this.$.projectWizardPopup.hide();
 
-    		// Add an entry into the project list
-    		this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
-
-    		// Pass service information to Harmonia
-		this.$.harmonia.setConfig({
-			service: inEvent.service,
-			folderId: inEvent.folderId,
-			firstNodeName: inEvent.name
-		});
-		return true; //Stop event propagation
-	},
-	handleProjectSelected: function(inSender, inEvent) {
-		var service;
-		console.log("ProjectView.handleProjectSelected: inEvent=");
-		console.dir(inEvent);
-	    	service = this.serviceRegistry.resolveServiceId(inEvent.serviceId);
-	    	if (! service) {
-	    		var msg = "Service " + inEvent.serviceId + " not found";
+		try {
+    			// Add an entry into the project list
+    			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
+			
+    			// Pass service information to Harmonia
+			this.$.harmonia.setProject({
+				service: inEvent.service,
+				folderId: inEvent.folderId,
+				name: inEvent.name
+			});
+		} catch(e) {
+	    		var msg = e.toString();
 	    		this.showErrorPopup(msg);
 	    		this.error(msg);
 	    		return false;
-	    	}
-	    	// Pass service definition & configuration to Harmonia
-	    	// & consequently to HermesFileTree
-		this.$.harmonia.setConfig({
-			service: service,
-			folderId: inEvent.folderId,
-			firstNodeName: inEvent.name
-		});
+		}
 		return true; //Stop event propagation
 	},
-    projectRemoved: function(inSender, inEvent) {
-    	this.$.harmonia.setConfig(null);
-    }
+	handleProjectSelected: function(inSender, inEvent) {
+	    	// Pass service definition & configuration to Harmonia
+	    	// & consequently to HermesFileTree
+		this.$.harmonia.setProject(inEvent.project);
+		return true; //Stop event propagation
+	},
+	projectRemoved: function(inSender, inEvent) {
+    		this.$.harmonia.setProject(null);
+	}
 });
