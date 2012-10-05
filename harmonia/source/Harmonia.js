@@ -35,13 +35,18 @@ enyo.kind({
 		};
 		this.$.hermesFileTree.setConfig({service: serviceObj});
 		this.$.hermesFileTree.reset();
+		this.$.hermesFileTree.fileOps2Hide(true);
 	},
 	setConfig: function(config) {
 		console.dir(config);
 		this.$.hermesFileTree.setConfig(config);
 		if (config !== null) {
 			this.$.hermesFileTree.getSubFileView(config.firstNodeName, config.folderId);
-		} else this.$.hermesFileTree.reset();
+			this.$.hermesFileTree.fileOps2Show();		
+		} else {
+			this.$.hermesFileTree.reset();
+			this.$.hermesFileTree.fileOps2Hide(true);
+		}
 	},
 	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
 	selectFile: function(inSender, inEvent) {
@@ -63,7 +68,7 @@ enyo.kind({
 	// File Operations
 	newFileConfirm: function(inSender, inEvent) {
 		var folderId = inEvent.folderId;
-		var name = inEvent.fileName;
+		var name = inEvent.fileName.trim();
 		var nameStem = name.substring(0, name.lastIndexOf("."));
 		var type = name.substring(name.lastIndexOf(".")+1);
 		var templatePath;
@@ -112,7 +117,7 @@ enyo.kind({
 	},	
 	newFolderConfirm: function(inSender, inEvent) {
 		var folderId = inEvent.folderId;
-		var name = inEvent.fileName;
+		var name = inEvent.fileName.trim();
 		var service = this.selectedFile.service;
 		this.log("Creating new folder "+name+" into folderId="+folderId);
 		service.createFolder(folderId, name)
@@ -128,7 +133,7 @@ enyo.kind({
 	renameConfirm: function(inSender, inEvent) {
 		var path = inEvent.path;
 		var oldId = this.selectedFile.id;
-		var newName = inEvent.fileName;
+		var newName = inEvent.fileName.trim();
 		var service = this.selectedFile.service;
 		this.log("Renaming file " + oldId + " as " + newName + " at " + path);
 		service['rename'](oldId, newName)
@@ -164,7 +169,7 @@ enyo.kind({
 		console.log("copyFileConfirm: inEvent=");
 		console.dir(inEvent);
 		var oldName = this.selectedFile.name;
-		var newName = inEvent.fileName;
+		var newName = inEvent.fileName.trim();
 		var service = this.selectedFile.service;
 		this.log("Creating new file " + newName + " as copy of" + this.selectedFile.name);
 		service.copy(this.selectedFile.id, newName)
