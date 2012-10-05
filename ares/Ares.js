@@ -13,13 +13,10 @@ enyo.kind({
 	handlers: {
 		onReloadServices: "handleReloadServices"
 	},
-	fileViewIndex: 0,
+	fileViewIndex: 3,
 	create: function() {
 		this.inherited(arguments);
-		if (this.startOnProjectView && this.startOnProjectView === true) {
-			this.fileViewIndex = 3;
-			this.setIndex(this.fileViewIndex);
-		}
+		this.setIndex(this.fileViewIndex);
 	},
 	draggable: false,
 	handleReloadServices: function(inSender, inEvent) {

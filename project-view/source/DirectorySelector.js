@@ -18,6 +18,10 @@ enyo.kind({
 		onCancel: ""
 	},
 	selectedDir: undefined,
+	create: function() {
+		this.inherited(arguments);
+		this.$.hermesFileTree.fileOps2Hide(false);
+	},
 	handleSelectProvider: function(inSender, inEvent) {
 		if (inEvent.service) {
 			this.$.hermesFileTree.setConfig({fs: inEvent.service});
