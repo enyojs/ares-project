@@ -7,7 +7,10 @@ enyo.kind({
 	modal : true,
 	classes: "ares_phobos_autocomp",
 	published: {
-		ace: null
+		ace: null,
+		analysis: null,
+		enyoIndexer: null,
+		projectIndexer: null
 	},
 	handlers: {
 		onkeyup: "keyUp",
@@ -27,21 +30,24 @@ enyo.kind({
 		]
 	} ],
 	// Constants
+	AUTOCOMP_THIS: 'this.',
 	AUTOCOMP_THIS_DOLLAR: 'this.$.',
-	AUTOCOMP_THIS_DOLLAR_LEN: -1,	// Initialized in create function
+	AUTOCOMP_ENYO: "enyo.",
+	AUTOCOMP_ONYX: "onyx.",
 	ESCAPE_CODE: 27,
 	BACKSPACE_CODE: 8,
 	debug: false,
 	input: "",
 	suggestions: null,				// List of suggestion to display in the popup
+	suggestionsEnyo: [],
+	suggestionsOnyx: [],
 	create: function() {
-		this.AUTOCOMP_THIS_DOLLAR_LEN = this.AUTOCOMP_THIS_DOLLAR.length;
 		this.inherited(arguments);
 	},
-	start: function(inEvent, inAnalysis) {
-		var suggestions = null, go = false;
-		if (inAnalysis.objects && inAnalysis.objects.length > 0) {
-			if (this.debug) this.log("Auto-Completion needed ?");
+	start: function(inEvent) {
+		var suggestions = [], go = false;
+		if (this.analysis && this.analysis.objects && this.analysis.objects.length > 0) {
+			this.debug && this.log("Auto-Completion needed ?");
 
 			if (inEvent) {
 				 // Check if a '.' was inserted and see if we need to show-up the auto-complete popup
@@ -59,19 +65,26 @@ enyo.kind({
 
 			// We can check further
 			if (go === true) {
-				suggestions = this.checkCompletionThisDollar(inEvent, inAnalysis);
-				if (suggestions === undefined) {
-					suggestions = this.checkCompletionThisDoStar(inEvent, inAnalysis);
+				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_THIS_DOLLAR)) {
+					suggestions = this.fillSuggestionsThisDollar(suggestions);
 				}
-				if (suggestions === undefined) {
-					suggestions = this.checkCompletionThisStar(inEvent, inAnalysis);
+
+				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_THIS)) {
+					suggestions = this.fillSuggestionsDoEvent(suggestions);
+					suggestions = this.fillSuggestionsGettersSetters(suggestions);
+					suggestions = this.fillSuggestionsProperties(suggestions);
 				}
-				if (suggestions === undefined) {
-					suggestions = this.checkCompletionThisDollarStarStar(inEvent, inAnalysis);
+
+				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_ENYO)) {
+					suggestions = this.fillSuggestionsEnyo(suggestions);
+				}
+
+				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_ONYX)) {
+					suggestions = this.fillSuggestionsOnyx(suggestions);
 				}
 			}
 			
-			if (suggestions) {	// Some suggestions were found.
+			if (suggestions.length > 0) {	// Some suggestions were found.
 				this.input = "";
 				this.suggestions = suggestions;
 				this.showAutocompletePopup();
@@ -79,15 +92,15 @@ enyo.kind({
 		}
 	},
 	/**
-	 * Check if we need to propose auto-completion for "this.$.*"
+	 * Check if we need to propose auto-completion for the pattern
+	 * passed as a parameter
 	 * @param inEvent
-	 * @param inAnalysis
-	 * @returns {Array} of suggestions and set this.popupPosition 
-	 * or returns undefined if nothing to do
+	 * @param pattern
+	 * @returns true if auto-completion is possible
 	 */
-	checkCompletionThisDollar: function(inEvent, inAnalysis) {
-		var line, last, popupPosition;
-		var suggestions = [];
+	isCompletionAvailable: function(inEvent, pattern) {
+		this.debug && this.log("for " + pattern);
+		var line, last, popupPosition, len;
 		if (inEvent) {	// Triggered by a '.' inserted by the user
 			popupPosition = inEvent.data.range.end;
 		} else {	// Triggered by a Ctrl-Space coming from the user
@@ -96,53 +109,41 @@ enyo.kind({
 
 		// Get the line and the last character entered
 		line = this.ace.getLine(popupPosition.row);
-		last = line.substr(popupPosition.column - this.AUTOCOMP_THIS_DOLLAR_LEN, this.AUTOCOMP_THIS_DOLLAR_LEN);
+		len = pattern.length;
+		last = line.substr(popupPosition.column - len, len);
+		this.debug && this.log("last >>" + last + " <<");
 		
-		// Check if it's part of a 'this.$." string
-		if (last == this.AUTOCOMP_THIS_DOLLAR) {
+		// Check if it's part of a pattern string
+		if (last === pattern) {
 			this.popupPosition = popupPosition;
-			enyo.forEach(inAnalysis.objects[inAnalysis.currentObject].components, function(a) {
-				suggestions.push(a.name);
-			});
-			return suggestions;
+			this.debug && this.log("Completion available for " + pattern);
+			return true;
 		}
-		return;			// Nothing to auto-complete
+		return false;			// Nothing to auto-complete
 	},
-	/**
-	 * Check if we need to propose auto-completion for "this.*"
-	 * @param inEvent
-	 * @param inAnalysis
-	 * @returns {Array} of suggestions and set this.popupPosition 
-	 * or returns undefined if nothing to do
-	 */
-	checkCompletionThisStar: function(inEvent, inAnalysis) {	// ENYO-1121
-		 // TODO Insert code here.
-		
-		return;			// Nothing to auto-complete
+	fillSuggestionsThisDollar: function(suggestions) {
+		enyo.forEach(this.analysis.objects[this.analysis.currentObject].components, function(a) {
+			suggestions.push(a.name);
+		});
+		return suggestions;
 	},
-	/**
-	 * Check if we need to propose auto-completion for "this.do*"
-	 * @param inEvent
-	 * @param inAnalysis
-	 * @returns {Array} of suggestions and set this.popupPosition 
-	 * or returns undefined if nothing to do
-	 */
-	checkCompletionThisDoStar: function(inEvent, inAnalysis) {	// ENYO-1122
-		 // TODO Insert code here.
-		
-		return;			// Nothing to auto-complete
+	fillSuggestionsDoEvent: function(suggestions) {
+		// TODO
+		return suggestions;
 	},
-	/**
-	 * Check if we need to propose auto-completion for "this.$.*.*"
-	 * @param inEvent
-	 * @param inAnalysis
-	 * @returns {Array} of suggestions and set this.popupPosition 
-	 * or returns undefined if nothing to do
-	 */
-	checkCompletionThisDollarStarStar: function(inEvent, inAnalysis) {	// ENYO-1120
-		 // TODO Insert code here.
-		
-		return;			// Nothing to auto-complete
+	fillSuggestionsGettersSetters: function(suggestions) {
+		// TODO
+		return suggestions;
+	},
+	fillSuggestionsProperties: function(suggestions) {
+		// TODO
+		return suggestions;
+	},
+	fillSuggestionsEnyo: function(suggestions) {		
+		return suggestions.concat(this.suggestionsEnyo);
+	},
+	fillSuggestionsOnyx: function(suggestions) {
+		return suggestions.concat(this.suggestionsOnyx);
 	},
 	showAutocompletePopup: function() {
 		this.fillSuggestionList();		// Fill-up the auto-completion list
@@ -258,6 +259,40 @@ enyo.kind({
 	    this.ace.blur();		// Needed to force ACE to ignore keystrokes after the popup is opened
 
 	    return true; // Stop the propagation of the event
+	},
+	enyoIndexerChanged: function() {
+		
+		// TODO YDM -- This test can be removed after lib/extra commit 5a31aa1f73aece000d5d0478487dc29ff9f1ed6e is integrated
+		if (this.enyoIndexer.getFunctionList) {
+			
+			// Build the suggestion lists as the analyzer just finished its job
+			var pattern = this.AUTOCOMP_ENYO, len = pattern.length;
+			this.suggestionsEnyo = [];
+			enyo.forEach(this.enyoIndexer.getFunctionList(pattern), function(name) {
+				name = name.substr(len);
+				this.suggestionsEnyo.push(name);
+			}, this);
+			enyo.forEach(this.enyoIndexer.getKindList(pattern), function(name) {
+				name = name.substr(len);
+				this.suggestionsEnyo.push(name);
+			}, this);
+			
+			// Build the suggestion lists as the analyzer just finished its job
+			this.suggestionsOnyx = []; 		
+			pattern = this.AUTOCOMP_ONYX;
+			len = pattern.length;
+			enyo.forEach(this.enyoIndexer.getFunctionList(pattern), function(name) {
+				name = name.substr(len);
+				this.suggestionsOnyx.push(name);
+			}, this);
+			enyo.forEach(this.enyoIndexer.getKindList(pattern), function(name) {
+				name = name.substr(len);
+				this.suggestionsOnyx.push(name);
+			}, this);
+		}
+	},
+	projectIndexerChanged: function() {
+		// TODO YDM TBC
 	}
 });
 
