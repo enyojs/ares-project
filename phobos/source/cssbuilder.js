@@ -575,25 +575,17 @@
 	},
 
 	hRepeat: function(inSender) {
-		if (inSender.getValue()) {
 		this.$.hRepeat = "H";
-			this.log("H repeat");
-		}
 		this.updateBox();
 	},
+
 	vRepeat: function(inSender) {
-		if (inSender.getValue()) {
-			this.$.vRepeat = "V";
-			this.log("V repeat");
-		}
+		this.$.vRepeat = "V";
 		this.updateBox();
 	},
 
 	nRepeat: function(inSender){
-		if (inSender.getValue()) {
 		this.$.noRepeat = "NO";
-			this.log("no repeat");
-		}
 		this.updateBox();
 	},
 
