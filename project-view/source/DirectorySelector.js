@@ -4,7 +4,7 @@ enyo.kind({
 	style: "height: 400px; width: 600px",
 	components : [
 	    {kind: "FittableColumns", content: "fittableColumns", fit: true, name: "fittableColumns", components: [
-			{kind: "ProviderList", name: "providerList", onSelectProvider: "selectProvider"},
+			{kind: "ProviderList", name: "providerList", onSelectProvider: "handleSelectProvider"},
 			{kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "selectFile", onFolderClick: "selectFolder"}
 		]},
 	    {kind: "FittableColumns", content: "fittableColumns2", isContainer: true, name: "fittableColumns2", components: [
@@ -18,21 +18,13 @@ enyo.kind({
 		onCancel: ""
 	},
 	selectedDir: undefined,
-	selectProvider: function(inSender, inInfo) {
-		if (inInfo.service) {
-			this.selectedServiceId = inInfo.service.id;
-	
-			// super hack
-			var auth = inInfo.service ? inInfo.service.auth : null;
-			var url = inInfo.service ? inInfo.service.url : null;
-			var jsonp = inInfo.service ? inInfo.service.useJsonp : false;
-	
-			var serviceObj = {
-				auth: auth,
-				url: url,
-				jsonp: jsonp
-			};
-			this.$.hermesFileTree.setConfig({service: serviceObj});
+	create: function() {
+		this.inherited(arguments);
+		this.$.hermesFileTree.fileOps2Hide(false);
+	},
+	handleSelectProvider: function(inSender, inEvent) {
+		if (inEvent.service) {
+			this.$.hermesFileTree.setConfig({fs: inEvent.service});
 			this.$.hermesFileTree.reset();
 		}
 		return true; //Stop event propagation

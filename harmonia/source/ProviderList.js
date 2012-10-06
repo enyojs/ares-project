@@ -10,9 +10,8 @@ enyo.kind({
 		onSelectProvider: ""
 	},
 	components: [
-		{kind: "onyx.Toolbar", components: [
+		{kind: "onyx.Toolbar", classes: "ares_harmonia_toolBar", components: [
 			{content: "Storage Services"}
-			//{kind: "onyx.Button", content: "Reset", Xsrc: "$harmonia/images/server_into.png", hint: "Reset", ontap: "_handleReset"}
 		]},
 		{fit: true, name: "list", kind: "FlyweightRepeater", toggleSelected: false, onSetupItem: "setupRow", onSelect: "rowSelected", onDeselect: "rowDeselected", components: [
 			{name: "item", classes: "enyo-children-inline", style: "padding: 8px 4px 4px; border-bottom: 1px solid gray;", ontap: "itemTap", ondblclick: "dblClick", /*onConfirm: "removeProvider",*/ components: [
@@ -21,36 +20,29 @@ enyo.kind({
 				{name: "auth", kind: "Image", src: "$harmonia/images/valid-check.png", style: "margin-left: 12px; vertical-align: middle;", showing: false}
 			]}
 		]},
-		//{kind: "ProviderConfigPopup", onSave: "saveProvider"},
-		{kind: "ServiceRegistry", onServicesChange: "_handleServicesChange"}
+		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 	create: function() {
 		this.inherited(arguments);
-		this.listServices();
 	},
-	listServices: function() {
-		this.$.serviceRegistry.listServices();
-	},
-	//* @private
-	_handleReset: function() {
-		this.$.serviceRegistry.reloadServices();
-		this.$.list.getSelection().clear();
-	},
-	//* @private
-	_handleServicesChange: function(inSender, inServices) {
-		//this.log("RX: services='"+JSON.stringify(inServices)+"'");
-		this.providers = inServices || [];
-		this.$.list.count = this.providers.length;
+	/**
+	 * Receive the {onServicesChange} broadcast notification
+	 * @param {Object} inEvent.serviceRegistry
+	 */
+	handleServicesChange: function(inSender, inEvent) {
+		this.log(inEvent);
+		this.serviceRegistry = inEvent.serviceRegistry;
+		this.$.list.count = this.serviceRegistry.services.length;
 		this.$.list.render();
 		// re-select the line that was selected before service changed
-		this.doSelectProvider({service: this.providers[this.selected]});
+		this.doSelectProvider({service: this.serviceRegistry.services[this.selected]});
 	},
 	setupRow: function(inSender, inEvent) {
-		var p = this.providers[inEvent.index];
+		var p = this.serviceRegistry.services[inEvent.index];
 		if (p) {
 			this.$.item.applyStyle("background-color", inSender.isSelected(inEvent.index) ? "lightblue" : "");
-			this.$.name.setContent(p.name);
-			this.$.icon.setSrc("$harmonia/images/providers/" + p.icon + ".png");
+			this.$.name.setContent(p.conf.name);
+			this.$.icon.setSrc("$harmonia/images/providers/" + p.conf.icon + ".png");
 			//this.$.auth.setShowing(p.type !== "dropbox" || p.auth);
 		}
 		return true;
@@ -60,7 +52,7 @@ enyo.kind({
 	},
 	rowSelected: function(inSender, inEvent) {
 		this.selected = inEvent.key;
-		var p = this.providers[this.selected];
+		var p = this.serviceRegistry.services[this.selected];
 		if (p) {
 			if (p.type == "dropbox" && !p.auth) {
 				this.authorize(p);
@@ -77,9 +69,10 @@ enyo.kind({
 		c.show();
 	},
 	auth: function(inSender) {
-		this.providers[this.selected].auth = inSender.auth;
-		this.$.serviceRegistry.saveServicesToStorage(this.providers);
-		this.doSelectProvider({service: this.providers[this.selected]});
+		var p = this.serviceRegistry.services[this.selected];
+		p.auth = inSender.auth;
+		this.serviceRegistry.saveServicesToStorage(); // TODO: redo when auth is re-activated
+		this.doSelectProvider({service: p});
 	},
 	// FIXME: a floating popup propagates events so if you drag the popup, the panels will drag!
 	squelchPopupDrag: function() {
