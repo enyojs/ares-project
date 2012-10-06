@@ -80,10 +80,10 @@
 					{name: "imageborder", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Border/Margin..."},
 
 					{kind: "enyo.FittableColumns", components: [
-						{classes: "onyx-toolbar-inline", components: [
+						{classes: "onyx-toolbar-inline fonts", components: [
 							{content: "Height", classes: "picker"},
 							{kind: "onyx.PickerDecorator", components: [
-								{style: "min-width: 60px; font-size: 10px;"},
+								{style: "min-width: 60px;"},
 								{name: "heightSizePicker", kind: "onyx.Picker",onSelect: "heightSize"}
 							]}
 						]},
@@ -113,7 +113,7 @@
 						]},
 					]},
 
-					{kind: "enyo.FittableColumns", components: [
+					{kind: "enyo.FittableColumns", classes: "font", components: [
 						{classes: "onyx-toolbar-inline", components: [
 							{content: "Radius", classes: "picker"},
 							{kind: "onyx.PickerDecorator", components: [
@@ -133,16 +133,16 @@
 					{kind: "onyx.Button", classes: "button ", content: "Box Shadow", ontap: "boxshadow"}
 				]},
 
-				{classes: "pannel", style: " height: 200px", components: [
+				{classes: "pannel font", style: " height: 200px", components: [
 					{name: "border", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Images..."},
 					{style: "height: 5px"},
 					{kind: "onyx.Input", name: "imageInput", placeholder: "Enter image url:...", onchange: "imageInput"},
 
-					{kind: "enyo.FittableColumns", components: [
+					{kind: "enyo.FittableColumns", classes: "font", components: [
 						{style: "height: 50px"},
-						{kind: "enyo.FittableRows", style: "witdh: 75px;", components: [
+						{kind: "enyo.FittableRows", style: "witdh: 75px;", classes: "fonts",components: [
 							{style: "height: 15px"},
-							{content: "Repeat H"},
+							{classes: "fonts", content: "Repeat H"},
 							{kind: "onyx.Checkbox", onchange: "hRepeat"},
 						]},
 						{style: "width: 100px"},
@@ -153,9 +153,9 @@
 						]},
 
 					]},
-					{kind: "enyo.FittableRows", components: [
+					{kind: "enyo.FittableRows", classes: "font", components: [
 						{style: "height: 5px"},
-						{style: "witdh: 25px;", content: "No-Repeat"},
+						{content: "No-Repeat"},
 						{kind: "onyx.Checkbox", onchange: "nRepeat"},
 					]},
 				]},
