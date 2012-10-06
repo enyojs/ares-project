@@ -1,4 +1,4 @@
-enyo.kind({
+  enyo.kind({
 	published: {
 	red: '00',
 	blue: '00',
@@ -76,8 +76,8 @@ enyo.kind({
 					{kind: "onyx.Button", classes: "button ", content: "Text Shadow", ontap: "textshadow"}
 				]},
 
-				{classes: "pannel", style: " height: 300px", components: [
-					{name: "border", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Border/Margin"},
+				{classes: "pannel", style: " height: 200px", components: [
+					{name: "imageborder", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Border/Margin..."},
 
 					{kind: "enyo.FittableColumns", components: [
 						{classes: "onyx-toolbar-inline", components: [
@@ -132,9 +132,35 @@ enyo.kind({
 					]},
 					{kind: "onyx.Button", classes: "button ", content: "Box Shadow", ontap: "boxshadow"}
 				]},
+
+				{classes: "pannel", style: " height: 200px", components: [
+					{name: "border", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Images..."},
+					{style: "height: 5px"},
+					{kind: "onyx.Input", name: "imageInput", placeholder: "Enter image url:...", onchange: "imageInput"},
+
+					{kind: "enyo.FittableColumns", components: [
+						{style: "height: 50px"},
+						{kind: "enyo.FittableRows", style: "witdh: 75px;", components: [
+							{style: "height: 15px"},
+							{content: "Repeat H"},
+							{kind: "onyx.Checkbox", onchange: "hRepeat"},
+						]},
+						{style: "width: 100px"},
+						{kind: "enyo.FittableRows", fit: true, components: [
+							{style: "height: 15px"},
+							{content: "Repeat V"},
+							{kind: "onyx.Checkbox", onchange: "vRepeat"},
+						]},
+
+					]},
+					{kind: "enyo.FittableRows", components: [
+						{style: "height: 5px"},
+						{style: "witdh: 25px;", content: "No-Repeat"},
+						{kind: "onyx.Checkbox", onchange: "nRepeat"},
+					]},
+				]},
 			]}
 		]},
-
 
 		{name: "popup", kind: "onyx.Popup", classes: "popup", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
@@ -184,7 +210,7 @@ enyo.kind({
 			]},
 		]},
 
-		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "popup", centered: true, modal: true, floating: true, components: [
+		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "popupp", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
 				{name: "boxShadowBar", content: "Text Shadow"},
 			]},
@@ -229,7 +255,7 @@ enyo.kind({
 				},
 				{kind: "onyx.Button", content: "Close", ontap: "closePopup"},
 			]},
-		]}
+		]},
 	],
 
 	create: function() {
@@ -282,8 +308,6 @@ enyo.kind({
 	if(this.$.toggle == "box-shadow"){
 		this.$.boxshadowcolor = '#' + (this.red + this.green + this.blue).toUpperCase();
 	}
-
-
 
 	if(this.$.textshadowcolor != null ){
 		outPut = outPut + tab + "text-shadow:" + " " + this.$.textshadowH + "px"  + " " + this.$.textshadowV + "px" +  " " + this.$.textshadowB + "px" + " " + this.$.textshadowcolor  +";<br>";
@@ -353,8 +377,25 @@ enyo.kind({
 		outString = outString + "	" + "border-radius:" + " " + this.$.radiusSize + "px;\n";
 	}
 
+	if(this.$.bgImage != null){
+		outPut = outPut  + tab + "background-image:url('" + this.$.bgImage +"');<br>";
+		outString = outString + "	" + "background-image:url('" + this.$.bgImage + "');\n";
+	}
 
+	if(this.$.hRepeat == "H" ){
+		outPut = outPut  + tab + "bacground-repeat: repeat-x;<br>";
+		outString = outString + "	" + "background-repeat: repeat-x;\n";
+	}
 
+	if(this.$.vRepeat == "V" ){
+		outPut = outPut  + tab + "background-repeat: repeat-y;<br>";
+		outString = outString + "	" + "background-repeat: repeat-y;\n";
+	}
+
+	if(this.$.noRepeat == "NO" ){
+		outPut = outPut  + tab + "background-repeat: no-repeat;<br>";
+		outString = outString + "	" + "background-repeat: no-repeat;\n";
+	}
 	this.$.bg.setContent(outPut + "<br>}");
 	outString = outString + "\n}"
 	this.outPut = outString;
@@ -513,8 +554,33 @@ enyo.kind({
 		this.updateBox();
 	},
 
+	imageInput: function(inSender, inEvent) {
+		this.$.bgImage = this.$.imageInput.hasNode().value;
+		this.updateBox();
+		console.log(this.$.bgImage, this.$.imageInput.hasNode().value );
+	},
+	hRepeat: function(inSender) {
+		if (inSender.getValue()) {
+		this.$.hRepeat = "H";
+			this.log("H repeat");
+		}
+		this.updateBox();
+	},
+	vRepeat: function(inSender) {
+		if (inSender.getValue()) {
+			this.$.vRepeat = "V";
+			this.log("V repeat");
+		}
+		this.updateBox();
+	},
 
-
+	nRepeat: function(inSender){
+		if (inSender.getValue()) {
+		this.$.noRepeat = "NO";
+			this.log("no repeat");
+		}
+		this.updateBox();
+	},
 	reset: function(){
 		this.className = null;
 		this.backgroundColor = null;
