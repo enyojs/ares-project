@@ -396,6 +396,7 @@
 		outPut = outPut  + tab + "background-repeat: no-repeat;<br>";
 		outString = outString + "	" + "background-repeat: no-repeat;\n";
 	}
+
 	this.$.bg.setContent(outPut + "<br>}");
 	outString = outString + "\n}"
 	this.outPut = outString;
@@ -475,40 +476,47 @@
 			this.updateBox();
 		}
 	},
+
 	inputChange: function(inSender, inEvent){
 		this.className = this.$.input.hasNode().value;
 		this.updateBox();
 	},
+
 	fontSize: function(inSender, inEvent) {
 		this.$.fontSize = inEvent.selected.content;
 		this.updateBox();
 	},
+
 	marginSize: function(inSender, inEvent){
 		this.$.marginSize = inEvent.selected.content;
 		this.updateBox();
 	},
+
 	borderSize: function(inSender, inEvent){
 		this.$.borderSize = inEvent.selected.content;
 		this.updateBox();
 	},
+
 	heightSize: function(inSender, inEvent){
 		this.$.heightSize = inEvent.selected.content;
 		this.updateBox();
 	},
+
 	widthSize: function(inSender, inEvent){
 		this.$.widthSize = inEvent.selected.content;
 		this.updateBox();
 	},
+
 	newCssAction: function(inSender, inEvent) {
 		// Insert a new Css at the end of the file
 		this.doInsert (inEvent);
-
 	},
 
 	padding: function(inSender, inEvent){
 		this.$.paddingSize = inEvent.selected.content;
 		this.updateBox();
 	},
+
 	radius: function(inSender, inEvent){
 		this.$.radiusSize = inEvent.selected.content;
 		this.updateBox();
@@ -518,14 +526,17 @@
 		this.$.toggle = "text-shadow",
 		this.$.popup.show();
 	},
+
 	textshadowH: function(inSender, inEvent) {
 			this.$.textshadowH = inEvent.selected.content;
 			this.updateBox();
 	},
+
 	textshadowV: function(inSender, inEvent) {
 		this.$.textshadowV = inEvent.selected.content;
 		this.updateBox();
 	},
+
 	textshadowB: function(inSender, inEvent) {
 		this.$.textshadowB = inEvent.selected.content;
 		this.updateBox();
@@ -541,14 +552,17 @@
 		this.$.toggle = "box-shadow",
 		this.$.boxShadowPopup.show();
 	},
+
 	boxshadowH: function(inSender, inEvent) {
 			this.$.boxshadowH = inEvent.selected.content;
 			this.updateBox();
 	},
+
 	boxshadowV: function(inSender, inEvent) {
 		this.$.boxshadowV = inEvent.selected.content;
 		this.updateBox();
 	},
+
 	boxshadowB: function(inSender, inEvent) {
 		this.$.boxshadowB = inEvent.selected.content;
 		this.updateBox();
@@ -559,6 +573,7 @@
 		this.updateBox();
 		console.log(this.$.bgImage, this.$.imageInput.hasNode().value );
 	},
+
 	hRepeat: function(inSender) {
 		if (inSender.getValue()) {
 		this.$.hRepeat = "H";
@@ -581,6 +596,7 @@
 		}
 		this.updateBox();
 	},
+
 	reset: function(){
 		this.className = null;
 		this.backgroundColor = null;
@@ -596,6 +612,13 @@
 		this.$.paddingSize = null;
 		this.$.boxshadowcolor = null;
 		this.$.textshadowcolor = null;
+		this.$.bgImage = null;
+		this.$.hRepeat = null;
+		this.$.vRepeat = null;
+		this.$.noRepeat = null;
+
+
+
 		this.$.outPut = null;
 		outString = "";
 		this.updateBox();
