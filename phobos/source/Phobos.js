@@ -81,7 +81,7 @@ enyo.kind({
 		this.hideWaitPopup();
 		this.analysis = null;
 		this.file = inFile;
-		this.mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image"}[inExt] || "text";
+		this.mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image"}[inExt] || "text";
 		var hasAce = this.adjustPanelsForMode(this.mode);
 		if (hasAce) {
 			this.$.ace.setEditingMode(this.mode);
