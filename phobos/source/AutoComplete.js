@@ -263,19 +263,21 @@ enyo.kind({
 	},
 	enyoIndexerChanged: function() {
 		this.debug && this.log("Enyo analysis ready");
-		var suggestions;
+		var suggestions, pattern, regexp;
 		
 		// TODO YDM -- This test "this.enyoIndexer.getFunctionList" can be removed after lib/extra commit 5a31aa1f73aece000d5d0478487dc29ff9f1ed6e is integrated
 		if (this.enyoIndexer && this.enyoIndexer.getFunctionList) {
 			
 			// Build the suggestion lists as the analyzer just finished its job
-			var pattern = this.AUTOCOMP_ENYO, len = pattern.length;
+			pattern = this.AUTOCOMP_ENYO, len = pattern.length;
+			regexp = /^enyo\..*$/;
 			suggestions = [];
-			enyo.forEach(this.enyoIndexer.getFunctionList(pattern), function(name) {
+			
+			enyo.forEach(this.enyoIndexer.getFunctionList(regexp, 'public'), function(name) {
 				name = name.substr(len);
 				suggestions.push(name);
 			}, this);
-			enyo.forEach(this.enyoIndexer.getKindList(pattern), function(name) {
+			enyo.forEach(this.enyoIndexer.getKindList(regexp, 'public'), function(name) {
 				name = name.substr(len);
 				suggestions.push(name);
 			}, this);
@@ -284,12 +286,13 @@ enyo.kind({
 			// Build the suggestion lists as the analyzer just finished its job
 			suggestions = [];
 			pattern = this.AUTOCOMP_ONYX;
+			regexp = /^onyx\..*$/;
 			len = pattern.length;
-			enyo.forEach(this.enyoIndexer.getFunctionList(pattern), function(name) {
+			enyo.forEach(this.enyoIndexer.getFunctionList(regexp, 'public'), function(name) {
 				name = name.substr(len);
 				suggestions.push(name);
 			}, this);
-			enyo.forEach(this.enyoIndexer.getKindList(pattern), function(name) {
+			enyo.forEach(this.enyoIndexer.getKindList(regexp, 'public'), function(name) {
 				name = name.substr(len);
 				suggestions.push(name);
 			}, this);
