@@ -141,7 +141,7 @@ describe("fsLocal...", function() {
 			should.exist(res.json);
 			should.exist(res.json.isDir);
 			res.json.isDir.should.equal(true);
-			should.not.exist(res.json.contents);
+			should.not.exist(res.json.children);
 			done();
 		});
 	});
@@ -155,9 +155,9 @@ describe("fsLocal...", function() {
 			should.exist(res.json);
 			should.exist(res.json.isDir);
 			res.json.isDir.should.equal(true);
-			should.exist(res.json.contents);
-			should.exist(res.json.contents.length);
-			res.json.contents.length.should.equal(0);
+			should.exist(res.json.children);
+			should.exist(res.json.children.length);
+			res.json.children.length.should.equal(0);
 
 			done();
 		});
@@ -172,9 +172,9 @@ describe("fsLocal...", function() {
 			should.exist(res.json);
 			should.exist(res.json.isDir);
 			res.json.isDir.should.equal(true);
-			should.exist(res.json.contents);
-			should.exist(res.json.contents.length);
-			res.json.contents.length.should.equal(0);
+			should.exist(res.json.children);
+			should.exist(res.json.children.length);
+			res.json.children.length.should.equal(0);
 
 			done();
 		});
@@ -204,13 +204,13 @@ describe("fsLocal...", function() {
 			should.exist(res.json);
 			should.exist(res.json.isDir);
 			res.json.isDir.should.equal(true);
-			should.exist(res.json.contents);
-			should.exist(res.json.contents.length);
-			res.json.contents.length.should.equal(1);
-			should.exist(res.json.contents[0]);
-			should.exist(res.json.contents[0].isDir);
-			res.json.contents[0].isDir.should.equal(true);
-			res.json.contents[0].path.should.equal("/toto");
+			should.exist(res.json.children);
+			should.exist(res.json.children.length);
+			res.json.children.length.should.equal(1);
+			should.exist(res.json.children[0]);
+			should.exist(res.json.children[0].isDir);
+			res.json.children[0].isDir.should.equal(true);
+			res.json.children[0].path.should.equal("/toto");
 			done();
 		});
 	});
@@ -224,9 +224,9 @@ describe("fsLocal...", function() {
 			should.exist(res.json);
 			should.exist(res.json.isDir);
 			res.json.isDir.should.equal(true);
-			should.exist(res.json.contents);
-			should.exist(res.json.contents.length);
-			res.json.contents.length.should.equal(0);
+			should.exist(res.json.children);
+			should.exist(res.json.children.length);
+			res.json.children.length.should.equal(0);
 			done();
 		});
 	});
@@ -287,15 +287,13 @@ describe("fsLocal...", function() {
 
 	it("should download the same file", function(done) {
 		call('GET', '/id/' + encodeFileId('/toto/titi/tata'), null /*query*/, null /*data*/, function(err, res) {
-			var contentBuf, contentStr;
+			var contentStr;
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
 			res.statusCode.should.equal(200);
-			should.exist(res.json);
-			should.exist(res.json.content);
-			contentBuf = new Buffer(res.json.content, 'base64');
-			contentStr = contentBuf.toString();
+			should.exist(res.buffer);
+			contentStr = res.buffer.toString();
 			contentStr.should.equal(content);
 			done();
 		});
@@ -361,28 +359,23 @@ describe("fsLocal...", function() {
 			res.statusCode.should.equal(200); // Ok
 
 			call('GET', '/id/' + encodeFileId('/toto/titi/tata'), null /*query*/, null /*data*/, function(err, res) {
-				var contentBuf, contentStr;
+				var contentStr;
 				should.not.exist(err);
 				should.exist(res);
 				should.exist(res.statusCode);
 				res.statusCode.should.equal(200);
-				should.exist(res.json);
-				should.exist(res.json.content);
-				contentBuf = new Buffer(res.json.content, 'base64');
-				contentStr = contentBuf.toString();
+				should.exist(res.buffer);
+				contentStr = res.buffer.toString();
 				contentStr.should.equal(content);
 
-
 				call('GET', '/id/' + encodeFileId('/toto/titi/tata.1'), null /*query*/, null /*data*/, function(err, res) {
-					var contentBuf, contentStr;
+					var contentStr;
 					should.not.exist(err);
 					should.exist(res);
 					should.exist(res.statusCode);
 					res.statusCode.should.equal(200);
-					should.exist(res.json);
-					should.exist(res.json.content);
-					contentBuf = new Buffer(res.json.content, 'base64');
-					contentStr = contentBuf.toString();
+					should.exist(res.buffer);
+					contentStr = res.buffer.toString();
 					contentStr.should.equal(content);
 					
 					done();
@@ -411,15 +404,13 @@ describe("fsLocal...", function() {
 			res.statusCode.should.equal(201); // Created
 
 			call('GET', '/id/' + encodeFileId('/toto.1/titi/tata'), null /*query*/, null /*data*/, function(err, res) {
-				var contentBuf, contentStr;
+				var contentStr;
 				should.not.exist(err);
 				should.exist(res);
 				should.exist(res.statusCode);
 				res.statusCode.should.equal(200);
-				should.exist(res.json);
-				should.exist(res.json.content);
-				contentBuf = new Buffer(res.json.content, 'base64');
-				contentStr = contentBuf.toString();
+				should.exist(res.buffer);
+				contentStr = res.buffer.toString();
 				contentStr.should.equal(content);
 				done();
 			});
@@ -434,15 +425,13 @@ describe("fsLocal...", function() {
 			res.statusCode.should.equal(201); // Created
 
 			call('GET', '/id/' + encodeFileId('/toto.2/titi/tata'), null /*query*/, null /*data*/, function(err, res) {
-				var contentBuf, contentStr;
+				var contentStr;
 				should.not.exist(err);
 				should.exist(res);
 				should.exist(res.statusCode);
 				res.statusCode.should.equal(200);
-				should.exist(res.json);
-				should.exist(res.json.content);
-				contentBuf = new Buffer(res.json.content, 'base64');
-				contentStr = contentBuf.toString();
+				should.exist(res.buffer);
+				contentStr = res.buffer.toString();
 				contentStr.should.equal(content);
 
 				call('GET', '/id/' + encodeFileId('/toto.1/titi/tata'), {_method: "PROPFIND", depth: 0} /*query*/, null /*data*/, function(err, res) {
@@ -466,15 +455,13 @@ describe("fsLocal...", function() {
 			res.statusCode.should.equal(201); // Created
 
 			call('GET', '/id/' + encodeFileId('/toto/titi/tata.2'), null /*query*/, null /*data*/, function(err, res) {
-				var contentBuf, contentStr;
+				var contentStr;
 				should.not.exist(err);
 				should.exist(res);
 				should.exist(res.statusCode);
 				res.statusCode.should.equal(200);
-				should.exist(res.json);
-				should.exist(res.json.content);
-				contentBuf = new Buffer(res.json.content, 'base64');
-				contentStr = contentBuf.toString();
+				should.exist(res.buffer);
+				contentStr = res.buffer.toString();
 				contentStr.should.equal(content);
 
 				call('GET', '/id/' + encodeFileId('/toto/titi/tata.1'), {_method: "PROPFIND", depth: 0} /*query*/, null /*data*/, function(err, res) {
@@ -529,15 +516,13 @@ describe("fsLocal...", function() {
 				res.statusCode.should.equal(201); // Created
 
 				call('GET', '/id/' + encodeFileId('/toto.3/tata'), null /*query*/, null /*data*/, function(err, res) {
-					var contentBuf, contentStr;
+					var contentStr;
 					should.not.exist(err);
 					should.exist(res);
 					should.exist(res.statusCode);
 					res.statusCode.should.equal(200);
-					should.exist(res.json);
-					should.exist(res.json.content);
-					contentBuf = new Buffer(res.json.content, 'base64');
-					contentStr = contentBuf.toString();
+					should.exist(res.buffer);
+					contentStr = res.buffer.toString();
 					contentStr.should.equal(content);
 
 					done();
@@ -572,8 +557,8 @@ describe("fsLocal...", function() {
 					should.exist(res.json);
 					should.exist(res.json.isDir);
 					res.json.isDir.should.equal(true);
-					should.exist(res.json.contents);
-					res.json.contents.length.should.equal(2);
+					should.exist(res.json.children);
+					res.json.children.length.should.equal(2);
 
 					done();
 				});

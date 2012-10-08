@@ -93,15 +93,13 @@ function FsLocal(config, next) {
 				body = new Error(err.toString());
 			}
 			console.error("<<<\n"+body.stack);
-		} else {
+		} else if (response) {
 			statusCode = response.code || 200 /*Ok*/;
 			body = response.body;
 		}
-		console.log("<<< STATUS:" + statusCode);
-		console.log("<<< BODY:\n" + util.inspect(body));
 		if (body) {
 			res.status(statusCode).send(body);
-		} else {
+		} else if (statusCode) {
 			res.status(statusCode).end();
 		}
 	}
@@ -115,7 +113,8 @@ function FsLocal(config, next) {
 	//app.use(express.bodyParser()); // parses json, x-www-form-urlencoded, and multipart/form-data
 	//app.enable('strict routing'); // XXX what for?
 
-	app.all(makeExpressRoute('/id/'), function(req, res) {
+	var idsRoot = makeExpressRoute('/id/');
+	app.all(idsRoot, function(req, res) {
 		req.params.id = encodeFileId('/');
 		_handleRequest(req, res, next);
 	});
@@ -193,17 +192,6 @@ function FsLocal(config, next) {
 		}
 	}
 
-	// Served files
-
-	var _mimeTypes = {
-		"html": "text/html",
-		"jpeg": "image/jpeg",
-		"jpg": "image/jpeg",
-		"png": "image/png",
-		"js": "text/javascript",
-		"css": "text/css"
-	};
-
 	// File-System (fs) verbs
 
 	var verbs = {
@@ -243,9 +231,10 @@ function FsLocal(config, next) {
 			console.log("depth="+depth+", node="+util.inspect(node));
 
 			if (stat.isFile() || !depth) {
+				node.pathname = idsRoot + node.id; // same terminology as location.pathname
 				return next(null, node);
 			} else if (node.isDir) {
-				node.contents = [];
+				node.children = [];
 				fs.readdir(localPath, function(err, files) {
 					if (err) {
 						return next(err); // XXX or skip this directory...
@@ -260,7 +249,7 @@ function FsLocal(config, next) {
 								return next(err);
 							}
 							if (subNode) {
-								node.contents.push(subNode);
+								node.children.push(subNode);
 							}
 							if (--count === 0) {
 								// return to upper layer only if
@@ -282,25 +271,16 @@ function FsLocal(config, next) {
 		var localPath = path.join(config.root, req.params.path);
 		fs.stat(localPath, function(err, stat) {
 			if (err) {
-				return next(err);
+				next(err);
+				return;
 			}
 			if (stat.isFile()) {
-				// XXX use the below when/if we upload using express.bodyParser()
-				/*
-				 var mimeType = _mimeTypes[path.extname(req.params.path).split(".")[1]];
-				 res.writeHead(200, {'Content-Type': mimeType} );
-				 var fileStream = fs.createReadStream(localPath);
-				 fileStream.pipe(res);
-				 next();
-				 */
-				return fs.readFile(localPath, function(err, buffer) {
-					return next(err, {
-						code: 200 /*Ok*/,
-						body: { content: buffer.toString('base64') }
-					});
-				});
+				res.sendfile(localPath);
+				// return nothing: streaming response
+				// is already in progress.
+				next();
 			} else {
-				return next(new Error("Not a file"));
+				next(new Error("Not a file"));
 			}
 		});
 	};
