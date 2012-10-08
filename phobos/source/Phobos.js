@@ -2,7 +2,8 @@ enyo.kind({
 	name: "Phobos",
 	classes: "enyo-unselectable",
 	components: [
-		{kind: "Analyzer", onIndexReady: "indexReady"},
+		{name: "enyoAnalyzer", kind: "Analyzer", onIndexReady: "enyoIndexReady"},
+		{name: "projectAnalyzer", kind: "Analyzer", onIndexReady: "projectIndexReady"},
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
 		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
 		{kind: "DragAvatar", components: [
@@ -57,7 +58,7 @@ enyo.kind({
 	file: null,			
 	create: function() {
 		this.inherited(arguments);
-		this.buildDb();
+		this.buildEnyoDb();
 
 		// Pass to the autocomplete compononent a reference to ace
 		this.$.autocomplete.setAce(this.$.ace);
@@ -85,6 +86,7 @@ enyo.kind({
 		this.adjustPanelsForMode(this.mode);
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
+		this.buildProjectDb();
 		this.docHasChanged=false;
 		this.$.documentLabel.setContent(this.file.name);
 	},
@@ -113,17 +115,19 @@ enyo.kind({
 	},
 	//
 	//
-	buildDb: function() {
-		this.$.analyzer.analyze(["$enyo/source", "$lib/layout", "$lib/onyx"]);
+	buildEnyoDb: function() {
+		this.$.enyoAnalyzer.analyze(["$enyo/source", "$lib/layout", "$lib/onyx"]);
 	},
-	indexReady: function() {
-		this.testDb();
+	buildProjectDb: function() {
+		// TODO Analyze the project sources -- Needs ENYO-1171
 	},
-	testDb: function() {
-		//var c = this.$.db.findByName("enyo.Control");
-		//var c = this.$.db.findByName("onyx.Button");
-		var c = this.$.analyzer.index.findByName("enyo.FittableRows");
-		this.dumpInfo(c);
+	enyoIndexReady: function() {
+		// Pass to the autocomplete component a reference to the enyo indexer
+		this.$.autocomplete.setEnyoIndexer(this.$.enyoAnalyzer.index);
+	},
+	projectIndexReady: function() {
+		// Pass to the autocomplete component a reference to the project indexer
+		this.$.autocomplete.setProjectIndexer(this.$.projectAnalyzer.index);
 	},
 	dumpInfo: function(inObject) {
 		var c = inObject;
@@ -171,17 +175,22 @@ enyo.kind({
 			};
 			try {
 				this.analysis = module;
-				this.$.analyzer.index.indexModule(module);
+				this.$.projectAnalyzer.index.indexModule(module);
 				this.updateObjectsLines(module);
 	
 				// dump the object where the cursor is positioned, if it exists
 				this.dumpInfo(module.objects && module.objects[module.currentObject]);
+				
+				// Give the information to the autocomplete component
+				this.$.autocomplete.setAnalysis(this.analysis);
 			} catch(error) {
 				enyo.log("An error occured during the code analysis: " + error);
 				this.dumpInfo(null);
+				this.$.autocomplete.setAnalysis(null);
 			}
 		} else {
 			this.analysis = null;
+			this.$.autocomplete.setAnalysis(null);
 		}
 	},
 	/**
@@ -407,12 +416,14 @@ enyo.kind({
 		if (this.docHasChanged) {
 			this.$.savePopup.show();
 		} else {
+			this.beforeClosingDocument();
 			this.doCloseDocument({});
 		}
 	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
+		this.beforeClosingDocument();
 		this.doCloseDocument({});
 	},
 	// called when the "Cancel" is selected in save popup
@@ -426,7 +437,7 @@ enyo.kind({
 
 		if (this.analysis) {
 			// Call the autocomplete component
-			this.$.autocomplete.start(inEvent, this.analysis);
+			this.$.autocomplete.start(inEvent);
 		}
 		return true; // Stop the propagation of the event
 	},
@@ -450,7 +461,7 @@ enyo.kind({
 		return true; // Stop the propagation of the event
 	},
 	startAutoCompletion: function() {
-		this.$.autocomplete.start(null, this.analysis);
+		this.$.autocomplete.start(null);
 	},
 	newKindAction: function() {
 		// Insert a new empty enyo kind at the end of the file
@@ -459,6 +470,13 @@ enyo.kind({
 	},
 	newcssAction: function(inSender, inEvent){
 		this.$.ace.insertAtEndOfFile(inEvent.outPut);
+	},
+	/*
+	 * Perform a few actions before closing a document
+	 * @protected
+	 */
+	beforeClosingDocument: function() {
+		this.$.autocomplete.setProjectIndexer(null);
 	}
 });
 
