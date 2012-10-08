@@ -29,17 +29,7 @@ function FsLocal(config, next) {
 	// (simple) parameters checking
 	config.root = path.resolve(config.root);
 
-	if (config.urlPrefix.charAt(0) !== '/') {
-		config.urlPrefix = '/' + config.urlPrefix;
-	}
-
-	/**
-	 * Express server instance
-	 * 
-	 * @private
-	 */
 	var app = express.createServer();
-
 	app.use(express.logger('dev'));
 
 	// CORS -- Cross-Origin Resources Sharing
@@ -116,18 +106,24 @@ function FsLocal(config, next) {
 		}
 	}
 	
+	var makeExpressRoute = function(path) {
+		return (config.urlPrefix + path)
+			.replace(/\/+/g, "/") // compact "//" into "/"
+			.replace(/(\.\.)+/g, ""); // remove ".."
+	};
+
 	//app.use(express.bodyParser()); // parses json, x-www-form-urlencoded, and multipart/form-data
 	//app.enable('strict routing'); // XXX what for?
 
-	app.all(config.urlPrefix + '/id/', function(req, res) {
+	app.all(makeExpressRoute('/id/'), function(req, res) {
 		req.params.id = encodeFileId('/');
 		_handleRequest(req, res, next);
 	});
-	app.all(config.urlPrefix + '/id/:id', function(req, res, next) {
+	app.all(makeExpressRoute('/id/:id'), function(req, res, next) {
 		_handleRequest(req, res, next);
 	});
 
-	function _handleRequest(req, res, next) { 
+	function _handleRequest(req, res, next) {
 		console.log("req.query=" + util.inspect(req.query));
 		req.params.id = req.params.id || encodeFileId('/');
 		req.params.path = decodeFileId(req.params.id);

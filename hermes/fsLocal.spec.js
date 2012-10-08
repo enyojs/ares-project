@@ -71,6 +71,9 @@ function call(method, path, query, data, next) {
 				if (mime === 'application/json; charset=utf-8') {
 					data.json = JSON.parse(data.buffer.toString());
 				}
+				if (mime === 'text/plain') {
+					data.text = data.buffer.toString();
+				}
 			}
 			console.log("data="+util.inspect(data));
 			if (data.statusCode < 200 || data.statusCode >= 300) {
