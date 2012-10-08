@@ -41,6 +41,7 @@ enyo.kind({
 	suggestions: null,				// List of suggestion to display in the popup
 	suggestionsEnyo: [],
 	suggestionsOnyx: [],
+	localKinds: {},					// The kinds defined in the currently edited file
 	create: function() {
 		this.inherited(arguments);
 	},
@@ -256,43 +257,82 @@ enyo.kind({
 			}// else - Don't care
 		}
 
-	    this.ace.blur();		// Needed to force ACE to ignore keystrokes after the popup is opened
+		this.ace.blur();		// Needed to force ACE to ignore keystrokes after the popup is opened
 
-	    return true; // Stop the propagation of the event
+		return true; // Stop the propagation of the event
 	},
 	enyoIndexerChanged: function() {
+		this.debug && this.log("Enyo analysis ready");
+		var suggestions;
 		
-		// TODO YDM -- This test can be removed after lib/extra commit 5a31aa1f73aece000d5d0478487dc29ff9f1ed6e is integrated
-		if (this.enyoIndexer.getFunctionList) {
+		// TODO YDM -- This test "this.enyoIndexer.getFunctionList" can be removed after lib/extra commit 5a31aa1f73aece000d5d0478487dc29ff9f1ed6e is integrated
+		if (this.enyoIndexer && this.enyoIndexer.getFunctionList) {
 			
 			// Build the suggestion lists as the analyzer just finished its job
 			var pattern = this.AUTOCOMP_ENYO, len = pattern.length;
-			this.suggestionsEnyo = [];
+			suggestions = [];
 			enyo.forEach(this.enyoIndexer.getFunctionList(pattern), function(name) {
 				name = name.substr(len);
-				this.suggestionsEnyo.push(name);
+				suggestions.push(name);
 			}, this);
 			enyo.forEach(this.enyoIndexer.getKindList(pattern), function(name) {
 				name = name.substr(len);
-				this.suggestionsEnyo.push(name);
+				suggestions.push(name);
 			}, this);
+			this.suggestionsEnyo = suggestions;
 			
 			// Build the suggestion lists as the analyzer just finished its job
-			this.suggestionsOnyx = []; 		
+			suggestions = [];
 			pattern = this.AUTOCOMP_ONYX;
 			len = pattern.length;
 			enyo.forEach(this.enyoIndexer.getFunctionList(pattern), function(name) {
 				name = name.substr(len);
-				this.suggestionsOnyx.push(name);
+				suggestions.push(name);
 			}, this);
 			enyo.forEach(this.enyoIndexer.getKindList(pattern), function(name) {
 				name = name.substr(len);
-				this.suggestionsOnyx.push(name);
+				suggestions.push(name);
 			}, this);
+			this.suggestionsOnyx = suggestions;
 		}
 	},
 	projectIndexerChanged: function() {
-		// TODO YDM TBC
+		this.debug && this.log("Project analysis ready");
+		// TODO something to do ?
+	},
+	analysisChanged: function() {
+		this.localKinds = {};	// Reset the list of kind for the currently edited file
+		if (this.analysis && this.analysis.objects) {
+			for(var i = 0, o; o = this.analysis.objects[i]; i++) {
+				if (this.localKinds[o.name]) {
+					this.log("Kind " + o.name + " is defined at least twice in the same file");	// TODO notify the user
+				}
+				this.localKinds[o.name] = o;
+			}
+		}
+	},
+	/**
+	 * Locates the requested kind name based the following priorties
+	 * - in the analysis of the currently edited file (most accurate)
+	 * - else in the analysis of the project
+	 * - else in the analysis of enyo/ares
+	 * @param name: the kind to search
+	 * @returns the definition of the requested kind or undefined
+	 */
+	getKindDefinition: function(name) {
+		var definition = this.localKinds[name];
+		
+		if (definition === undefined && this.projectIndexer) {
+			// Try to get it from the project analysis
+			definition = this.projectIndexer.findByName(name);
+		}
+		
+		if (definition === undefined && this.enyoIndexer) {
+			// Try to get it from the enyo/onyx analysis
+			definition = this.enyoIndexer.findByName(name);
+		}
+		
+		return definition;
 	}
 });
 

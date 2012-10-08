@@ -119,7 +119,7 @@ enyo.kind({
 		this.$.enyoAnalyzer.analyze(["$enyo/source", "$lib/layout", "$lib/onyx"]);
 	},
 	buildProjectDb: function() {
-		// TODO Analyze the project sources
+		// TODO Analyze the project sources -- Needs ENYO-1171
 	},
 	enyoIndexReady: function() {
 		// Pass to the autocomplete component a reference to the enyo indexer
@@ -416,12 +416,14 @@ enyo.kind({
 		if (this.docHasChanged) {
 			this.$.savePopup.show();
 		} else {
+			this.beforeClosingDocument();
 			this.doCloseDocument({});
 		}
 	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
+		this.beforeClosingDocument();
 		this.doCloseDocument({});
 	},
 	// called when the "Cancel" is selected in save popup
@@ -468,6 +470,13 @@ enyo.kind({
 	},
 	newcssAction: function(inSender, inEvent){
 		this.$.ace.insertAtEndOfFile(inEvent.outPut);
+	},
+	/*
+	 * Perform a few actions before closing a document
+	 * @protected
+	 */
+	beforeClosingDocument: function() {
+		this.$.autocomplete.setProjectIndexer(null);
 	}
 });
 
