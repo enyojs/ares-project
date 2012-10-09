@@ -3,10 +3,10 @@ enyo.kind({
 	kind: "FittableColumns",
 	handlers: {
 		onSelect: "newSelect",
-		onDeselect: "newDeselect",
+		onDeselect: "newDeselect"
 	},
 	components: [
-	    {name: "provideList", kind: "ProviderList", onSelectProvider: "selectProvider"},
+	    {name: "providerList", kind: "ProviderList", onSelectProvider: "handleSelectProvider"},
 		{kind: "HermesFileTree", fit: true, onFileClick: "selectFile", onFolderClick: "selectFolder", 
 			onNewFileConfirm: "newFileConfirm", onNewFolderConfirm: "newFolderConfirm", 
 			onRenameConfirm: "renameConfirm", onDeleteConfirm: "deleteConfirm",
@@ -17,45 +17,38 @@ enyo.kind({
 		this.inherited(arguments);
 		// TODO provider list should probably go out of Harmonia
 		if (this.providerListNeeded === false) {
-			this.$.provideList.setShowing(false);
+			this.$.providerList.setShowing(false);
 		}
 	},
-	selectProvider: function(inSender, inInfo) {
-		//this.log("service='"+JSON.stringify(inInfo.service)+"'");
-		// super hack
-		var auth = inInfo.service ? inInfo.service.auth : null;
-		var url = inInfo.service ? inInfo.service.url : null;
-		var jsonp = inInfo.service ? inInfo.service.useJsonp : false;
-
-		//this.log("service: auth: "+auth+" url: "+url+" jsonp: "+jsonp);
-		var serviceObj = {
-			auth: auth,
-			url: url,
-			jsonp: jsonp
-		};
-		this.$.hermesFileTree.setConfig({service: serviceObj});
-		this.$.hermesFileTree.reset();
+	handleSelectProvider: function(inSender, inEvent) {
+		if (inEvent.service) {
+			this.$.hermesFileTree.setConfig({
+				fs: inEvent.service
+			});
+		}
 		this.$.hermesFileTree.fileOps2Hide(true);
+		return true; //Stop event propagation
 	},
-	setConfig: function(config) {
-		console.dir(config);
+	setProject: function(project) {
+		this.log(project);
+		var config = project && {
+			fs: project.service,
+			nodeName: project.name,
+			folderId: project.folderId
+		};
 		this.$.hermesFileTree.setConfig(config);
-		if (config !== null) {
-			this.$.hermesFileTree.getSubFileView(config.firstNodeName, config.folderId);
+		if (project !== null) {
 			this.$.hermesFileTree.fileOps2Show();		
 		} else {
-			this.$.hermesFileTree.reset();
 			this.$.hermesFileTree.fileOps2Hide(true);
 		}
 	},
 	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
 	selectFile: function(inSender, inEvent) {
-		console.log("Selected file: "+inEvent.file.path);
-		console.dir(inEvent.file);
+		this.log(inEvent.file);
 	},
 	selectFolder: function(inSender, inEvent) {
-		console.log("Selected folder: "+inEvent.file.path);
-		console.dir(inEvent.file);
+		this.log(inEvent.file);
 	},
 	newSelect: function(inSender, inEvent) {
 		if (inSender.name !== "providerList") {
@@ -97,7 +90,7 @@ enyo.kind({
 			this.createFile(name, folderId, inResponse);
 		});
 		r.error(this, function(inSender, error) {
-			console.log("error: "+error.toString());
+			this.error(error);
 			this.createFile(name, folderId, null);
 		});
 		r.go();
@@ -147,14 +140,13 @@ enyo.kind({
 			});
 	},
 	deleteConfirm: function(inSender, inEvent) {
-		console.dir(inEvent);
+		this.log(inEvent);
 		var nodeId = inEvent.nodeId;
-		console.dir(this.selectFile);
+		this.log(this.selectFile);
 		var oldId = this.selectedFile.id;
 		var oldPath = this.selectedFile.path;
 		var method = this.selectedFile.isDir ? "deleteFolder" : "deleteFile";
 		var service = this.selectedFile.service;
-		this.log("Deleting " + this.selectedFile.path);
 		service.remove(inEvent.nodeId)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
@@ -166,8 +158,7 @@ enyo.kind({
 			});
 	},
 	copyFileConfirm: function(inSender, inEvent) {
-		console.log("copyFileConfirm: inEvent=");
-		console.dir(inEvent);
+		this.log(inEvent);
 		var oldName = this.selectedFile.name;
 		var newName = inEvent.fileName.trim();
 		var service = this.selectedFile.service;
@@ -181,7 +172,5 @@ enyo.kind({
 				this.log("Error: "+inError);
 				this.$.hermesFileTree.showErrorPopup("Creating file "+newName+" as copy of" + this.selectedFile.name +" failed:" + inError);
 			});
-	},
-
-
+	}
 });

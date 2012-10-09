@@ -1,24 +1,11 @@
 {
 	"services":[
 		{
-			"active":false,
+			"active":true,
 			"id":"home",
 			"icon":"server",
 			"name":"Local Files (home)",
-			"type":"local",
-			"command":"@NODE@", "params":[
-				"hermes/filesystem/index.js", "0", "@HOME@"
-			],
-			"useJsonp":false,
-			"debug": false,
-			"respawn": true
-		},
-		{
-			"active":true,
-			"id":"home2",
-			"icon":"server",
-			"name":"Local Files (home)",
-			"type":"local",
+			"type":"hermes",
 			"command":"@NODE@", "params":[
 				"hermes/fsLocal.js", "/some/files", "@HOME@", "0"
 			],
