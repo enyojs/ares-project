@@ -42,6 +42,7 @@ enyo.kind({
 	suggestionsEnyo: [],
 	suggestionsOnyx: [],
 	localKinds: {},					// The kinds defined in the currently edited file
+	kindName: "",
 	create: function() {
 		this.inherited(arguments);
 	},
@@ -49,7 +50,11 @@ enyo.kind({
 		var suggestions = [], go = false;
 		if (this.analysis && this.analysis.objects && this.analysis.objects.length > 0) {
 			this.debug && this.log("Auto-Completion needed ?");
-
+			
+			// Retrieve the kind name for the currently edited file
+			this.kindName = this.analysis.objects[this.analysis.currentObject].name;
+			//this.log("Current Kind Name: "+this.kindName);
+			
 			if (inEvent) {
 				 // Check if a '.' was inserted and see if we need to show-up the auto-complete popup
 				var data = inEvent.data;
@@ -71,9 +76,9 @@ enyo.kind({
 				}
 
 				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_THIS)) {
-					suggestions = this.fillSuggestionsDoEvent(suggestions);
-					suggestions = this.fillSuggestionsGettersSetters(suggestions);
-					suggestions = this.fillSuggestionsProperties(suggestions);
+					suggestions = this.fillSuggestionsDoEvent(this.kindName, suggestions);
+					suggestions = this.fillSuggestionsGettersSetters(this.kindName, suggestions);
+					suggestions = this.fillSuggestionsProperties(this.kindName, suggestions);
 				}
 
 				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_ENYO)) {
@@ -128,16 +133,52 @@ enyo.kind({
 		});
 		return suggestions;
 	},
-	fillSuggestionsDoEvent: function(suggestions) {
+	fillSuggestionsDoEvent: function(kindName, suggestions) {
 		// TODO
 		return suggestions;
 	},
-	fillSuggestionsGettersSetters: function(suggestions) {
-		// TODO
+	fillSuggestionsGettersSetters: function(kindName, suggestions) {
+		var definition, obj, p;		
+		// retrieve the kindName definition
+		definition = this.getKindDefinition(kindName);
+		//console.dir(definition);
+		if (definition !== undefined) {		
+			// support setXXX and getXXX for published properties when within the current kind definition
+			obj = definition.properties;
+			for (i=0; i<obj.length; i++) {
+				if (obj[i].token === "published") {
+					p = obj[i].value[0].properties;
+					//console.dir(p);
+					for (var j=0; j < p.length; j++) {
+						suggestions.push('set' + p[j].name.substr(0, 1).toUpperCase() + p[j].name.substr(1).trim());
+						suggestions.push('get' + p[j].name.substr(0, 1).toUpperCase() + p[j].name.substr(1).trim());
+					}				
+				}
+			}
+			// support super-kind published properties
+			this.fillSuggestionsGettersSetters(definition.superkind, suggestions);
+			return suggestions;
+		}
 		return suggestions;
 	},
-	fillSuggestionsProperties: function(suggestions) {
-		// TODO
+	fillSuggestionsProperties: function(kindName, suggestions) {
+		var definition, obj;		
+		// retrieve the kindName definition
+		definition = this.getKindDefinition(kindName);
+		//console.dir(definition);
+		if (definition !== undefined) {		
+			// support functions, handlers published when within the current kind definition
+			obj = definition.allProperties;
+			for (i=0; i<obj.length; i++) {
+				if (obj[i].value[0].token === "function") {
+					//console.dir(obj[i].name);
+					suggestions.push(obj[i].name);
+				}
+			}
+			// support super-kind published/properties/functions
+			this.fillSuggestionsProperties(definition.superkind, suggestions);
+			return suggestions;
+		}
 		return suggestions;
 	},
 	fillSuggestionsEnyo: function(suggestions) {		
