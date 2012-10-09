@@ -128,7 +128,7 @@ function FsLocal(config, next) {
 	// the project source code.
 	app.get(makeExpressRoute('/file/*'), function(req, res, next) {
 		req.params.path = req.params[0];
-		_getFile(req, res, respond);
+		_getFile(req, res, respond.bind(this, res));
 	});
 
 	function _handleRequest(req, res, next) {
@@ -283,6 +283,7 @@ function FsLocal(config, next) {
 	};
 	
 	function _getFile(req, res, next) {
+		//debugger;
 		var localPath = path.join(config.root, req.params.path);
 		console.log("sending localPath=" + localPath);
 		fs.stat(localPath, function(err, stat) {
