@@ -110,9 +110,10 @@ function FsLocal(config, next) {
 			.replace(/(\.\.)+/g, ""); // remove ".."
 	};
 
-	//app.use(express.bodyParser()); // parses json, x-www-form-urlencoded, and multipart/form-data
-	//app.enable('strict routing'); // XXX what for?
+	//app.use(express.bodyParser()); // XXX parses json, x-www-form-urlencoded, and multipart/form-data (ENYO-1082)
 
+	// URL-scheme: ID-based file/folder tree navigation, used by
+	// HermesClient.
 	var idsRoot = makeExpressRoute('/id/');
 	app.all(idsRoot, function(req, res) {
 		req.params.id = encodeFileId('/');
@@ -120,6 +121,14 @@ function FsLocal(config, next) {
 	});
 	app.all(makeExpressRoute('/id/:id'), function(req, res, next) {
 		_handleRequest(req, res, next);
+	});
+
+	// URL-scheme: WebDAV-like navigation, used by the Enyo
+	// loader, itself used by the Enyo Javacript parser to analyze
+	// the project source code.
+	app.get(makeExpressRoute('/file/*'), function(req, res, next) {
+		req.params.path = req.params[0];
+		_getFile(req, res, respond);
 	});
 
 	function _handleRequest(req, res, next) {
@@ -208,6 +217,7 @@ function FsLocal(config, next) {
 		});
 	};
 
+	// XXX ENYO-1086: refactor tree walk-down
 	var _propfind = function(relPath, depth, next) {
 		var localPath = path.join(config.root, relPath);
 		if (path.basename(relPath).charAt(0) ===".") {
@@ -269,19 +279,25 @@ function FsLocal(config, next) {
 	};
 	
 	verbs.GET.GET = function(req, res, next) {
+		_getFile(req, res, next);
+	};
+	
+	function _getFile(req, res, next) {
 		var localPath = path.join(config.root, req.params.path);
+		console.log("sending localPath=" + localPath);
 		fs.stat(localPath, function(err, stat) {
 			if (err) {
 				next(err);
 				return;
 			}
 			if (stat.isFile()) {
+				res.status(200);
 				res.sendfile(localPath);
 				// return nothing: streaming response
 				// is already in progress.
 				next();
 			} else {
-				next(new Error("Not a file"));
+				next(new Error("not a file"));
 			}
 		});
 	};
@@ -380,6 +396,7 @@ function FsLocal(config, next) {
 		}
 	};
 
+ 	// XXX ENYO-1086: refactor tree walk-down
 	function _rmrf(localPath, next) {
 		// from <https://gist.github.com/1526919>
 		fs.stat(localPath, function(err, stats) {
@@ -426,6 +443,7 @@ function FsLocal(config, next) {
 		_changeNode(req, res, _cpr, next);
 	};
 
+ 	// XXX ENYO-1086: refactor tree walk-down
 	function _changeNode(req, res, op, next) {
 		var srcPath = path.join(config.root, req.params.path);
 		var dstPath, dstRelPath;
@@ -494,6 +512,7 @@ function FsLocal(config, next) {
 		});
 	}
 
+ 	// XXX ENYO-1086: refactor tree walk-down
 	function _cpr(srcPath, dstPath, next) {
 		if (srcPath === dstPath) {
 			return next(new Error("Cannot copy on itself"));
