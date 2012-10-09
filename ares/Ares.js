@@ -26,6 +26,7 @@ enyo.kind({
 		var f = inEvent.file;
 		var service = f.service;
 		var ext = f.name.split(".").pop();
+		var origin = service.getConfig().origin;
 		this.$.phobos.beginOpenDoc();
 		service.getFile(f.id)
 			.response(this, function(inEvent, inData) {
