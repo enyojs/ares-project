@@ -105,7 +105,7 @@ function FsLocal(config, next) {
 	}
 	
 	var makeExpressRoute = function(path) {
-		return (config.urlPrefix + path)
+		return (config.pathname + path)
 			.replace(/\/+/g, "/") // compact "//" into "/"
 			.replace(/(\.\.)+/g, ""); // remove ".."
 	};
@@ -161,7 +161,8 @@ function FsLocal(config, next) {
 		// Send back the URL to the IDE server, when port is
 		// actually bound
 		var service = {
-			url: "http://127.0.0.1:"+app.address().port.toString()+config.urlPrefix
+			origin: "http://127.0.0.1:"+app.address().port.toString(),
+			pathname: config.pathname
 		};
 		return next(null, service);
 	});
@@ -555,8 +556,8 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 	}
 
 	var fsLocal = new FsLocal({
-		// urlPrefix (M) can be '/', '/res/files/' ...etc
-		urlPrefix:	process.argv[2],
+		// pathname (M) can be '/', '/res/files/' ...etc
+		pathname:	process.argv[2],
 		// root (m) local filesystem access root absolute path
 		root:		path.resolve(process.argv[3]),
 		// port (o) local IP port of the express server (default: 9009, 0: dynamic)
@@ -565,7 +566,7 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		if (err) {
 			process.exit(err);
 		}
-		console.log("fsLocal['"+process.argv[3]+"'] available at "+service.url);
+		console.log("fsLocal['"+process.argv[3]+"'] available at "+service.origin);
 		if (process.send) {
 			// only possible/available if parent-process is node
 			process.send(service);

@@ -119,15 +119,15 @@ describe("fsLocal...", function() {
 	
 	it("should start", function(done) {
 		myFs = new FsLocal({
- 			urlPrefix: "/",
+ 			pathname: "/",
  			root: myFsPath,
  			port: myPort
 		}, function(err, service){
 			console.log("service="+util.inspect(service));
 			should.not.exist(err);
 			should.exist(service);
-			should.exist(service.url);
-			service.url.should.match(/^http/);
+			should.exist(service.origin);
+			service.origin.should.match(/^http/);
 			done();
 		});
 	});
