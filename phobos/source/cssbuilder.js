@@ -1,10 +1,10 @@
-  enyo.kind({
+enyo.kind({
 	published: {
-	red: '00',
-	blue: '00',
-	green: '00',
-	color: "000000",
-	toggle: ""
+		red: '00',
+		blue: '00',
+		green: '00',
+		color: "000000",
+		toggle: ""
 	},
 	 events: {
 		onInsert: "",
@@ -48,7 +48,7 @@
 				]},
 
 				{classes: "pannel", style: " height: 350px", components: [
-					{name: "fonts", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Fonts "},
+					{name: "fonts", classes: "border", content:"Fonts "},
 					{kind: "onyx.RadioGroup",
 					onActivate:"fontActivated",components:[
 						{tag: "br"},
@@ -77,7 +77,7 @@
 				]},
 
 				{classes: "pannel", style: " height: 200px", components: [
-					{name: "imageborder", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Border/Margin..."},
+					{name: "imageborder", classes: "border", content:"Border/Margin..."},
 
 					{kind: "enyo.FittableColumns", components: [
 						{classes: "onyx-toolbar-inline fonts", components: [
@@ -133,8 +133,8 @@
 					{kind: "onyx.Button", classes: "button ", content: "Box Shadow", ontap: "boxshadow"}
 				]},
 
-				{classes: "pannel font", style: " height: 200px", components: [
-					{name: "border", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Images..."},
+				{classes: "pannel ", style: " height: 200px", components: [
+					{name: "border", classes: "border", content: "Images..."},
 					{style: "height: 5px"},
 					{kind: "onyx.Input", name: "imageInput", placeholder: "Enter image url:...", onchange: "imageInput"},
 
@@ -210,7 +210,7 @@
 			]},
 		]},
 
-		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "popupp", centered: true, modal: true, floating: true, components: [
+		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "popup", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
 				{name: "boxShadowBar", content: "Text Shadow"},
 			]},
@@ -254,8 +254,8 @@
 				style: "height:10px;  background-color: blue; enyo-unselectable"
 				},
 				{kind: "onyx.Button", content: "Close", ontap: "closePopup"},
-			]},
-		]},
+			]}
+		]}
 	],
 
 	create: function() {

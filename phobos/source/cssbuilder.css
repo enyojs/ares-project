@@ -45,3 +45,12 @@
 .button {
 	font-size: 10px;
 }
+
+.border{
+	padding: 8px;
+	background-color: #E1E2E4;
+	color: #5CA7E8;
+	text-transform: uppercase;
+	font-weight: bold;
+	font-size: 15px",
+}
