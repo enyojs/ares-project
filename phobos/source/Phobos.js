@@ -23,7 +23,7 @@ enyo.kind({
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
 						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion"},
-						{name: "imageViewer", kind: "enyo.Image", src: "http://komarr.gre.hp.com/files/3_tier.png"}
+						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
 				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"}
@@ -78,7 +78,7 @@ enyo.kind({
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
 	},
-	openDoc: function(inFile, inCode, inExt) {
+	openDoc: function(origin, inFile, inCode, inExt) {
 		this.hideWaitPopup();
 		this.analysis = null;
 		this.file = inFile;
@@ -87,6 +87,9 @@ enyo.kind({
 		if (hasAce) {
 			this.$.ace.setEditingMode(this.mode);
 			this.$.ace.setValue(inCode);
+		}
+		else {
+			this.$.imageViewer.setAttribute("src", origin + inFile.pathname);
 		}
 		this.reparseAction();
 		this.buildProjectDb();
