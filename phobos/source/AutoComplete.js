@@ -134,14 +134,14 @@ enyo.kind({
 		return suggestions;
 	},
 	fillSuggestionsDoEvent: function(kindName, suggestions) {
-		var definition, obj, p;		
+		var definition, obj, p, i;		
 		// retrieve the kindName definition
 		definition = this.getKindDefinition(kindName);
-		//console.dir(definition);
+
 		if (definition !== undefined) {
 			// this.do* - event trigger when within the current kind definition
 			obj = definition.properties;
-			for (var i=0; i<obj.length; i++) {
+			for (i=0; i<obj.length; i++) {
 				if (obj[i].token === "events") {
 					p = obj[i].value[0].properties;
 					for (var j=0; j < p.length; j++) {
@@ -150,23 +150,21 @@ enyo.kind({
 				}
 			}	
 			// support firing super-kind events as well
-			this.fillSuggestionsDoEvent(definition.superkind, suggestions);
-			return suggestions;
+			return this.fillSuggestionsDoEvent(definition.superkind, suggestions);
 		}
 		return suggestions;
 	},
 	fillSuggestionsGettersSetters: function(kindName, suggestions) {
-		var definition, obj, p;		
+		var definition, obj, p, i;		
 		// retrieve the kindName definition
 		definition = this.getKindDefinition(kindName);
-		//console.dir(definition);
+
 		if (definition !== undefined) {		
 			// support setXXX and getXXX for published properties when within the current kind definition
 			obj = definition.properties;
 			for (i=0; i<obj.length; i++) {
 				if (obj[i].token === "published") {
 					p = obj[i].value[0].properties;
-					//console.dir(p);
 					for (var j=0; j < p.length; j++) {
 						suggestions.push('set' + p[j].name.substr(0, 1).toUpperCase() + p[j].name.substr(1).trim());
 						suggestions.push('get' + p[j].name.substr(0, 1).toUpperCase() + p[j].name.substr(1).trim());
@@ -174,16 +172,15 @@ enyo.kind({
 				}
 			}
 			// support super-kind published properties
-			this.fillSuggestionsGettersSetters(definition.superkind, suggestions);
-			return suggestions;
+			return this.fillSuggestionsGettersSetters(definition.superkind, suggestions);
 		}
 		return suggestions;
 	},
 	fillSuggestionsProperties: function(kindName, suggestions) {
-		var definition, obj;		
+		var definition, obj, i;		
 		// retrieve the kindName definition
 		definition = this.getKindDefinition(kindName);
-		//console.dir(definition);
+
 		if (definition !== undefined) {		
 			// support functions, handlers published when within the current kind definition
 			obj = definition.allProperties;
@@ -194,8 +191,7 @@ enyo.kind({
 				}
 			}
 			// support super-kind published/properties/functions
-			this.fillSuggestionsProperties(definition.superkind, suggestions);
-			return suggestions;
+			return this.fillSuggestionsProperties(definition.superkind, suggestions);
 		}
 		return suggestions;
 	},
