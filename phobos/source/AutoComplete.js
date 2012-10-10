@@ -356,19 +356,17 @@ enyo.kind({
 		this.debug && this.log("Enyo analysis ready");
 		var suggestions, pattern, regexp;
 		
-		// TODO YDM -- This test "this.enyoIndexer.getFunctionList" can be removed after lib/extra commit 5a31aa1f73aece000d5d0478487dc29ff9f1ed6e is integrated
-		if (this.enyoIndexer && this.enyoIndexer.getFunctionList) {
-			
+		if (this.enyoIndexer) {	
 			// Build the suggestion lists as the analyzer just finished its job
 			pattern = this.AUTOCOMP_ENYO, len = pattern.length;
 			regexp = /^enyo\..*$/;
 			suggestions = [];
 			
-			enyo.forEach(this.enyoIndexer.getFunctionList(regexp, 'public'), function(name) {
+			enyo.forEach(this.getFunctionList(this.enyoIndexer, regexp, 'public'), function(name) {
 				name = name.substr(len);
 				suggestions.push(name);
 			}, this);
-			enyo.forEach(this.enyoIndexer.getKindList(regexp, 'public'), function(name) {
+			enyo.forEach(this.getKindList(this.enyoIndexer, regexp, 'public'), function(name) {
 				name = name.substr(len);
 				suggestions.push(name);
 			}, this);
@@ -379,11 +377,11 @@ enyo.kind({
 			pattern = this.AUTOCOMP_ONYX;
 			regexp = /^onyx\..*$/;
 			len = pattern.length;
-			enyo.forEach(this.enyoIndexer.getFunctionList(regexp, 'public'), function(name) {
+			enyo.forEach(this.getFunctionList(this.enyoIndexer, regexp, 'public'), function(name) {
 				name = name.substr(len);
 				suggestions.push(name);
 			}, this);
-			enyo.forEach(this.enyoIndexer.getKindList(regexp, 'public'), function(name) {
+			enyo.forEach(this.getKindList(this.enyoIndexer, regexp, 'public'), function(name) {
 				name = name.substr(len);
 				suggestions.push(name);
 			}, this);
@@ -436,6 +434,44 @@ enyo.kind({
 	sortAndRemoveDuplicates: function(suggestions) {
 		suggestions.sort(this.nameCompare);
 		return suggestions;
+	},
+	/**
+	 * Returns a list of all kind names matching the parameter nameRegexp
+	 * and the parameter group
+	 * @parma indexer
+	 * @param nameRegexp
+	 * @param group
+	 * @returns {Array} the list of matching kind name
+	 */
+	getKindList: function(indexer, nameRegexp, group) {
+		// TODO this function must be removed when the equivalent will be available in lib/extra/analyzer2
+		this.debug && this.log("getEnyoKindList --> result - regexp: " + nameRegexp + " group: " + group);
+		var list = [];
+		for (var i=0, o; o=indexer.objects[i]; i++) {
+			if ((o.type === 'kind') && (o.token === 'enyo.kind') && (o.group === group) && nameRegexp.test(o.name)) {
+				this.debug && this.log("getEnyoKindList --> this.objects[" + i + "]: type: " + o.type + " token: " + o.token + " group: "+ o.group + " name: " + o.name);
+				list.push(o.name);
+			}
+		}
+		return list;
+	},
+	/**
+	 * Returns a list of all function names matching the parameter nameRegexp
+	 * and the parameter group
+	 * @parma indexer
+	 * @param nameRegexp
+	 * @param group
+	 * @returns {Array} the list of matching function name
+	 */
+	getFunctionList: function(indexer, nameRegexp, group) {
+		// TODO this function must be removed when the equivalent will be available in lib/extra/analyzer2
+		var list = [];
+		for (var i=0, o; o=indexer.objects[i]; i++) {
+			if ((o.type === 'function') && (o.group === group) && nameRegexp.test(o.name)) {
+				list.push(o.name);
+			}
+		}
+		return list;
 	},
 	statics: {
 		nameCompare: function(inA, inB) {
