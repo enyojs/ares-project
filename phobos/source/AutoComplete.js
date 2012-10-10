@@ -88,11 +88,13 @@ enyo.kind({
 				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_ONYX)) {
 					suggestions = this.fillSuggestionsOnyx(suggestions);
 				}
+
+				this.buildLevel2Suggestions(inEvent, suggestions);
 			}
 			
 			if (suggestions.length > 0) {	// Some suggestions were found.
-				this.input = "";
-				this.suggestions = suggestions;
+				this.input = "";		// Reset the characters typed while the autocompletion popup is up
+				this.suggestions = this.sortAndRemoveDuplicates(suggestions);
 				this.showAutocompletePopup();
 			}
 		}
@@ -127,6 +129,37 @@ enyo.kind({
 		}
 		return false;			// Nothing to auto-complete
 	},
+	buildLevel2Suggestions: function(inEvent, suggestions) {
+		var line, last, popupPosition, len, pattern;
+		if (inEvent) {	// Triggered by a '.' inserted by the user
+			popupPosition = inEvent.data.range.end;
+		} else {	// Triggered by a Ctrl-Space coming from the user
+			popupPosition = this.ace.getCursorPositionInDocument();
+		}
+
+		// Get the line and the last character entered
+		line = this.ace.getLine(popupPosition.row);
+		
+		// Find the name of the components
+		for(var i = 0, o; o = this.analysis.objects[this.analysis.currentObject].components[i]; i++) {
+			pattern = this.AUTOCOMP_THIS_DOLLAR + o.name + ".";
+			len = pattern.length;
+			last = line.substr(popupPosition.column - len, len);
+			this.debug && this.log("last >>" + last + " <<");
+
+			// Check if it's part of a pattern string
+			if (last === pattern) {
+				this.popupPosition = popupPosition;
+				this.debug && this.log("Completion available for " + pattern + " kind: " + o.kind);
+		
+				this.fillSuggestionsDoEvent(o.kind, suggestions);
+				this.fillSuggestionsGettersSetters(o.kind, suggestions);
+				this.fillSuggestionsProperties(o.kind, suggestions);
+				return;
+			}
+		}
+		return;			// Nothing to auto-complete
+	},
 	fillSuggestionsThisDollar: function(suggestions) {
 		enyo.forEach(this.analysis.objects[this.analysis.currentObject].components, function(a) {
 			suggestions.push(a.name);
@@ -140,6 +173,7 @@ enyo.kind({
 
 		if (definition !== undefined) {
 			// this.do* - event trigger when within the current kind definition
+			this.debug && this.log("Adding doXXX for " + kindName);
 			obj = definition.properties;
 			for (i=0; i<obj.length; i++) {
 				if (obj[i].token === "events") {
@@ -159,8 +193,9 @@ enyo.kind({
 		// retrieve the kindName definition
 		definition = this.getKindDefinition(kindName);
 
-		if (definition !== undefined) {		
+		if (definition !== undefined) {
 			// support setXXX and getXXX for published properties when within the current kind definition
+			this.debug && this.log("Adding getters/setters for " + kindName);
 			obj = definition.properties;
 			for (i=0; i<obj.length; i++) {
 				if (obj[i].token === "published") {
@@ -181,8 +216,9 @@ enyo.kind({
 		// retrieve the kindName definition
 		definition = this.getKindDefinition(kindName);
 
-		if (definition !== undefined) {		
+		if (definition !== undefined) {
 			// support functions, handlers published when within the current kind definition
+			this.debug && this.log("Adding properties for " + kindName);
 			obj = definition.allProperties;
 			for (i=0; i<obj.length; i++) {
 				if (obj[i].value[0].token === "function") {
@@ -388,9 +424,31 @@ enyo.kind({
 		if (definition === undefined && this.enyoIndexer) {
 			// Try to get it from the enyo/onyx analysis
 			definition = this.enyoIndexer.findByName(name);
+			
+			if (definition === undefined) {
+				// Try again with the enyo prefix as it is optional
+				definition = this.enyoIndexer.findByName(this.AUTOCOMP_ENYO + name);
+			}
 		}
 		
 		return definition;
+	},
+	sortAndRemoveDuplicates: function(suggestions) {
+		suggestions.sort(this.nameCompare);
+		return suggestions;
+	},
+	statics: {
+		nameCompare: function(inA, inB) {
+			var na = inA.name.toLowerCase(), 
+				nb = inB.name.toLowerCase();
+			if (na < nb) {
+				return -1;
+			}
+			if (na > nb) {
+				return 1;
+			} 
+			return 0;
+		}
 	}
 });
 
