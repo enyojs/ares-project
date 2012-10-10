@@ -53,7 +53,7 @@ enyo.kind({
 			
 			// Retrieve the kind name for the currently edited file
 			this.kindName = this.analysis.objects[this.analysis.currentObject].name;
-			//this.log("Current Kind Name: "+this.kindName);
+			this.debug && this.log("Current Kind Name: "+this.kindName);
 			
 			if (inEvent) {
 				 // Check if a '.' was inserted and see if we need to show-up the auto-complete popup
@@ -141,10 +141,9 @@ enyo.kind({
 		if (definition !== undefined) {
 			// this.do* - event trigger when within the current kind definition
 			obj = definition.properties;
-			for (i=0; i<obj.length; i++) {
+			for (var i=0; i<obj.length; i++) {
 				if (obj[i].token === "events") {
 					p = obj[i].value[0].properties;
-					//console.dir(p);
 					for (var j=0; j < p.length; j++) {
 						suggestions.push(p[j].name.trim().replace('on', 'do'));
 					}
