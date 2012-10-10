@@ -4,6 +4,11 @@ Hermes is the file storage component of the Ares IDE.  It provides a consistent 
 
 ## Hermes Protocol
 
+### Resources
+
+* `/id/{id}` resources are accessible via avery verbs described below.  These resources are used to browse the folder tree & get idividual items
+* `/file/*` resources are files that are known to exist.  These resources are used only by the Enyo Javascript parser.  They can only be accessed using `GET`.
+
 ### Verbs
 
 Hermes file-system providers use verbs that closely mimic the semantics defined by [WebDAV (RFC4918)](http://tools.ietf.org/html/rfc4918):  although Hermes reuses the same HTTP verbs (`GET`, `PUT`, `PROPFIND`, `MKCOL`, `DELETE` ...), it differs in terms of carried data.  Many (if not most) of the HTTP clients implement only the `GET` and `POST` HTTP verbs:  Hermes uses the same HTTP Method Overrides as WebDAV usually do (tunnel every requests but `GET` into `POST` requests that include a special `_method` query parameter)
@@ -15,38 +20,36 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		├── 0
 		└── 1
 
-… corresponds to the following JSON object returned by `PROPFIND`.  Every nodes provide the `isDir`, `path`, `name` and `id` properties.  In addition, folders also provide `children` (to help reccursion) and file also provide `pathname` (to help subsequent `GET` operations).  Hermes does *not* provide an absolute URL to allow easier service relocation, for example behind a secure reverse proxy.
+… corresponds to the following JSON object returned by `PROPFIND`.
 
 		$ curl "http://127.0.0.1:9009/id/%2F?_method=PROPFIND&depth=10"
 		{
 		    "isDir": true, 
 		    "path": "/", 
 		    "name": "", 
-		    "children": [
+		    "contents": [
 		        {
 		            "isDir": false, 
 		            "path": "/0", 
 		            "name": "0", 
-		            "id": "%2F0",
-		            "pathname": "/some/files/id/%2F0"
+		            "id": "%2F0"
 		        }, 
 		        {
 		            "isDir": false, 
 		            "path": "/1", 
 		            "name": "1", 
 		            "id": "%2F1"
-		            "pathname": "/some/files/id/%2F1"
 		        }
 		    ], 
 		    "id": "%2F"
 		}
 
-* `GET` returns the file content associated with a `pathname`, or an error when attempted on a folder.
 * `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded):
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
 
 * `PUT` creates or overwrite a file resource.
+
 * `DELETE` delete a resource (a file), which might be a collection (a folder).  Status codes:
   * `200/Ok` success, resource successfully removed.  The method returns the new status (`PROPFIND`) of the parent of the deleted resource.
 
@@ -98,7 +101,7 @@ Start the file server:
 	
 ## Run Test Suite
 
-**Note** the test suite does not cover the former verbs used by Hermes, and implemented into `filesystem/index.js`.
+**New** the test suite does not cover the former verbs used by Hermes, and implemented into `filesystem/index.js`.
 
 So far, only hermes local filesystem access comes with a (small) test suite, that relies on [Mocha](http://visionmedia.github.com/mocha/) and [Should.js](https://github.com/visionmedia/should.js).  Run it using:
 
