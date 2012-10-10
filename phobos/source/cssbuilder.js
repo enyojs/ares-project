@@ -6,14 +6,14 @@ enyo.kind({
 		color: "000000",
 		toggle: ""
 	},
-	 events: {
-		onInsert: "",
-	 },
+	events: {
+		onInsert: ""
+	},
 	name: "cssBuilder",
 	kind: "enyo.FittableRows", components: [
 		{kind: "onyx.Toolbar", components: [
 			{kind: "onyx.Button", classes: "onyx-affirmative", content: "Insert css", ontap:"newCssAction"},
-			{kind: "onyx.Button", classes: "onyx-negative", content: "Reset", ontap:"reset"},
+			{kind: "onyx.Button", classes: "onyx-negative", content: "Reset", ontap:"reset"}
 		]},
 		{kind: "onyx.Input", name: "input", placeholder: "Enter your class name!..",onchange: "inputChange"},
 		{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 150px; ", classes: "enyo-selectable font",	allowHtml: true, Xstyle: "padding: 10px;", components: [
@@ -43,8 +43,8 @@ enyo.kind({
 					{kind: "onyx.RadioGroup", onActivate:"radioActivated", components:[
 						{content:"background", classes: "RadioGroup"},
 						{content:"Font color", classes: "RadioGroup"},
-						{content:"Border color", classes: "RadioGroup"},
-					]},
+						{content:"Border color", classes: "RadioGroup"}
+					]}
 				]},
 
 				{classes: "pannel", style: " height: 350px", components: [
@@ -110,7 +110,7 @@ enyo.kind({
 								{style: "min-width: 40px; font-size: 10px;"},
 								{name: "borderSizePicker", kind: "onyx.Picker",onSelect: "borderSize"}
 							]}
-						]},
+						]}
 					]},
 
 					{kind: "enyo.FittableColumns", classes: "font", components: [
@@ -128,7 +128,7 @@ enyo.kind({
 								{style: "min-width: 40px; font-size: 10px;"},
 								{name: "Padding", kind: "onyx.Picker",onSelect: "padding"}
 							]}
-						]},
+						]}
 					]},
 					{kind: "onyx.Button", classes: "button ", content: "Box Shadow", ontap: "boxshadow"}
 				]},
@@ -143,28 +143,28 @@ enyo.kind({
 						{kind: "enyo.FittableRows", style: "witdh: 75px;", classes: "fonts",components: [
 							{style: "height: 15px"},
 							{classes: "fonts", content: "Repeat H"},
-							{kind: "onyx.Checkbox", onchange: "hRepeat"},
+							{kind: "onyx.Checkbox", onchange: "hRepeat"}
 						]},
 						{style: "width: 100px"},
 						{kind: "enyo.FittableRows", fit: true, components: [
 							{style: "height: 15px"},
 							{content: "Repeat V"},
-							{kind: "onyx.Checkbox", onchange: "vRepeat"},
-						]},
+							{kind: "onyx.Checkbox", onchange: "vRepeat"}
+						]}
 
 					]},
 					{kind: "enyo.FittableRows", classes: "font", components: [
 						{style: "height: 5px"},
 						{content: "No-Repeat"},
-						{kind: "onyx.Checkbox", onchange: "nRepeat"},
-					]},
-				]},
+						{kind: "onyx.Checkbox", onchange: "nRepeat"}
+					]}
+				]}
 			]}
 		]},
 
 		{name: "popup", kind: "onyx.Popup", classes: "popup", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
-				{name: "shadowBar", content: "Text Shadow"},
+				{name: "shadowBar", content: "Text Shadow"}
 			]},
 
 			{classes: "onyx-toolbar-inline", components: [
@@ -189,7 +189,7 @@ enyo.kind({
 				]}
 			]},
 			{name:"textoutputBox", kind: "enyo.Panels", classes: "outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
-				{content: "Text Shadow Color!"},
+				{content: "Text Shadow Color!"}
 			]},
 			{kind: "enyo.FittableRows", components: [
 				{name: "redSlider1", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
@@ -206,13 +206,13 @@ enyo.kind({
 				style: "height:10px;  background-color: blue; enyo-unselectable"
 				},
 				{style: "height: 5px"},
-				{kind: "onyx.Button", content: "Close", ontap: "closePopup"},
-			]},
+				{kind: "onyx.Button", content: "Close", ontap: "closePopup"}
+			]}
 		]},
 
 		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "popup", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
-				{name: "boxShadowBar", content: "Text Shadow"},
+				{name: "boxShadowBar", content: "Text Shadow"}
 			]},
 
 			{classes: "onyx-toolbar-inline", components: [
@@ -237,7 +237,7 @@ enyo.kind({
 				]}
 			]},
 			{name:"outputBox2", kind: "enyo.Panels", classes: "outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
-				{content: "Box Shadow Color"},
+				{content: "Box Shadow Color"}
 			]},
 			{kind: "enyo.FittableRows", components: [
 				{name: "boxredSlider", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
@@ -253,7 +253,7 @@ enyo.kind({
 				{name: "boxblueSlider", kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged",
 				style: "height:10px;  background-color: blue; enyo-unselectable"
 				},
-				{kind: "onyx.Button", content: "Close", ontap: "closePopup"},
+				{kind: "onyx.Button", content: "Close", ontap: "closePopup"}
 			]}
 		]}
 	],
@@ -398,7 +398,7 @@ enyo.kind({
 	}
 
 	this.$.bg.setContent(outPut + "<br>}");
-	outString = outString + "\n}"
+	outString = outString + "\n}";
 	this.outPut = outString;
 	},
 
