@@ -156,11 +156,47 @@ enyo.kind({
 		return suggestions;
 	},
 	fillSuggestionsGettersSetters: function(kindName, suggestions) {
-		// TODO
+		var definition, obj, p;		
+		// retrieve the kindName definition
+		definition = this.getKindDefinition(kindName);
+		//console.dir(definition);
+		if (definition !== undefined) {		
+			// support setXXX and getXXX for published properties when within the current kind definition
+			obj = definition.properties;
+			for (i=0; i<obj.length; i++) {
+				if (obj[i].token === "published") {
+					p = obj[i].value[0].properties;
+					//console.dir(p);
+					for (var j=0; j < p.length; j++) {
+						suggestions.push('set' + p[j].name.substr(0, 1).toUpperCase() + p[j].name.substr(1).trim());
+						suggestions.push('get' + p[j].name.substr(0, 1).toUpperCase() + p[j].name.substr(1).trim());
+					}				
+				}
+			}
+			// support super-kind published properties
+			this.fillSuggestionsGettersSetters(definition.superkind, suggestions);
+			return suggestions;
+		}
 		return suggestions;
 	},
 	fillSuggestionsProperties: function(kindName, suggestions) {
-		// TODO
+		var definition, obj;		
+		// retrieve the kindName definition
+		definition = this.getKindDefinition(kindName);
+		//console.dir(definition);
+		if (definition !== undefined) {		
+			// support functions, handlers published when within the current kind definition
+			obj = definition.allProperties;
+			for (i=0; i<obj.length; i++) {
+				if (obj[i].value[0].token === "function") {
+					//console.dir(obj[i].name);
+					suggestions.push(obj[i].name);
+				}
+			}
+			// support super-kind published/properties/functions
+			this.fillSuggestionsProperties(definition.superkind, suggestions);
+			return suggestions;
+		}
 		return suggestions;
 	},
 	fillSuggestionsEnyo: function(suggestions) {		
