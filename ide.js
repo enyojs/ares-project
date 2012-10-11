@@ -63,9 +63,10 @@ console.dir(ide.res);
 function handleMessage(service) {
 	return function(msg) {
 		try {
-			service.url = msg.url;
-			if (service.url.match(/^https:/)) {
-				console.info("Service['"+service.id+"']: connect to <"+service.url+"> to accept SSL certificate");
+			service.origin = msg.origin;
+			service.pathname = msg.pathname;
+			if (service.origin.match(/^https:/)) {
+				console.info("Service['"+service.id+"']: connect to <"+service.origin+"> to accept SSL certificate");
 			}
 		} catch (e) {
 			console.error("Error updating URL for service "+service.id+": "+e);

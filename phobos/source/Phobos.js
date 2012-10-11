@@ -77,7 +77,7 @@ enyo.kind({
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
 	},
-	openDoc: function(inFile, inCode, inExt) {
+	openDoc: function(inFile, inCode, inExt, inProjectUrl) {
 		this.hideWaitPopup();
 		this.analysis = null;
 		this.file = inFile;
@@ -86,7 +86,7 @@ enyo.kind({
 		this.adjustPanelsForMode(this.mode);
 		this.$.ace.setValue(inCode);
 		this.reparseAction();
-		this.buildProjectDb();
+		this.buildProjectDb(inProjectUrl);
 		this.docHasChanged=false;
 		this.$.documentLabel.setContent(this.file.name);
 	},
@@ -118,8 +118,10 @@ enyo.kind({
 	buildEnyoDb: function() {
 		this.$.enyoAnalyzer.analyze(["$enyo/source", "$lib/layout", "$lib/onyx"]);
 	},
-	buildProjectDb: function() {
-		// TODO Analyze the project sources -- Needs ENYO-1171
+	buildProjectDb: function(inProjectUrl) {
+		this.log("projectUrl: " + inProjectUrl);			// TODO TBC
+//		this.$.projectAnalyzer.analyze(["http://127.0.0.1:44799/some/files/file/NewProject/AutoComplete"]); // TODO TBR
+		this.$.projectAnalyzer.analyze([inProjectUrl]);
 	},
 	enyoIndexReady: function() {
 		// Pass to the autocomplete component a reference to the enyo indexer

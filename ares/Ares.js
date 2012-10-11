@@ -26,6 +26,8 @@ enyo.kind({
 		var f = inEvent.file;
 		var service = f.service;
 		var ext = f.name.split(".").pop();
+		var origin = service.getConfig().origin;
+		var projectUrl = origin + service.getConfig().pathname + "/file" + inEvent.project;
 		this.$.phobos.beginOpenDoc();
 		service.getFile(f.id)
 			.response(this, function(inEvent, inData) {
@@ -35,7 +37,7 @@ enyo.kind({
 					// no data? Empty file
 					inData="";
 				}
-				this.$.phobos.openDoc(f, inData, ext);
+				this.$.phobos.openDoc(f, inData, ext, projectUrl);
 				this.setIndex(1);
 			})
 			.error(this, function(inEvent, inData) {
