@@ -29,17 +29,7 @@ function FsLocal(config, next) {
 	// (simple) parameters checking
 	config.root = path.resolve(config.root);
 
-	if (config.urlPrefix.charAt(0) !== '/') {
-		config.urlPrefix = '/' + config.urlPrefix;
-	}
-
-	/**
-	 * Express server instance
-	 * 
-	 * @private
-	 */
 	var app = express.createServer();
-
 	app.use(express.logger('dev'));
 
 	// CORS -- Cross-Origin Resources Sharing
@@ -103,31 +93,45 @@ function FsLocal(config, next) {
 				body = new Error(err.toString());
 			}
 			console.error("<<<\n"+body.stack);
-		} else {
+		} else if (response) {
 			statusCode = response.code || 200 /*Ok*/;
 			body = response.body;
 		}
-		console.log("<<< STATUS:" + statusCode);
-		console.log("<<< BODY:\n" + util.inspect(body));
 		if (body) {
 			res.status(statusCode).send(body);
-		} else {
+		} else if (statusCode) {
 			res.status(statusCode).end();
 		}
 	}
 	
-	//app.use(express.bodyParser()); // parses json, x-www-form-urlencoded, and multipart/form-data
-	//app.enable('strict routing'); // XXX what for?
+	var makeExpressRoute = function(path) {
+		return (config.pathname + path)
+			.replace(/\/+/g, "/") // compact "//" into "/"
+			.replace(/(\.\.)+/g, ""); // remove ".."
+	};
 
-	app.all(config.urlPrefix + '/id/', function(req, res) {
+	//app.use(express.bodyParser()); // XXX parses json, x-www-form-urlencoded, and multipart/form-data (ENYO-1082)
+
+	// URL-scheme: ID-based file/folder tree navigation, used by
+	// HermesClient.
+	var idsRoot = makeExpressRoute('/id/');
+	app.all(idsRoot, function(req, res) {
 		req.params.id = encodeFileId('/');
 		_handleRequest(req, res, next);
 	});
-	app.all(config.urlPrefix + '/id/:id', function(req, res, next) {
+	app.all(makeExpressRoute('/id/:id'), function(req, res, next) {
 		_handleRequest(req, res, next);
 	});
 
-	function _handleRequest(req, res, next) { 
+	// URL-scheme: WebDAV-like navigation, used by the Enyo
+	// loader, itself used by the Enyo Javacript parser to analyze
+	// the project source code.
+	app.get(makeExpressRoute('/file/*'), function(req, res, next) {
+		req.params.path = req.params[0];
+		_getFile(req, res, respond.bind(this, res));
+	});
+
+	function _handleRequest(req, res, next) {
 		console.log("req.query=" + util.inspect(req.query));
 		req.params.id = req.params.id || encodeFileId('/');
 		req.params.path = decodeFileId(req.params.id);
@@ -166,7 +170,8 @@ function FsLocal(config, next) {
 		// Send back the URL to the IDE server, when port is
 		// actually bound
 		var service = {
-			url: "http://127.0.0.1:"+app.address().port.toString()+config.urlPrefix
+			origin: "http://127.0.0.1:"+app.address().port.toString(),
+			pathname: config.pathname
 		};
 		return next(null, service);
 	});
@@ -197,17 +202,6 @@ function FsLocal(config, next) {
 		}
 	}
 
-	// Served files
-
-	var _mimeTypes = {
-		"html": "text/html",
-		"jpeg": "image/jpeg",
-		"jpg": "image/jpeg",
-		"png": "image/png",
-		"js": "text/javascript",
-		"css": "text/css"
-	};
-
 	// File-System (fs) verbs
 
 	var verbs = {
@@ -223,6 +217,7 @@ function FsLocal(config, next) {
 		});
 	};
 
+	// XXX ENYO-1086: refactor tree walk-down
 	var _propfind = function(relPath, depth, next) {
 		var localPath = path.join(config.root, relPath);
 		if (path.basename(relPath).charAt(0) ===".") {
@@ -247,9 +242,10 @@ function FsLocal(config, next) {
 			console.log("depth="+depth+", node="+util.inspect(node));
 
 			if (stat.isFile() || !depth) {
+				node.pathname = idsRoot + node.id; // same terminology as location.pathname
 				return next(null, node);
 			} else if (node.isDir) {
-				node.contents = [];
+				node.children = [];
 				fs.readdir(localPath, function(err, files) {
 					if (err) {
 						return next(err); // XXX or skip this directory...
@@ -264,7 +260,7 @@ function FsLocal(config, next) {
 								return next(err);
 							}
 							if (subNode) {
-								node.contents.push(subNode);
+								node.children.push(subNode);
 							}
 							if (--count === 0) {
 								// return to upper layer only if
@@ -283,28 +279,26 @@ function FsLocal(config, next) {
 	};
 	
 	verbs.GET.GET = function(req, res, next) {
+		_getFile(req, res, next);
+	};
+	
+	function _getFile(req, res, next) {
+		//debugger;
 		var localPath = path.join(config.root, req.params.path);
+		console.log("sending localPath=" + localPath);
 		fs.stat(localPath, function(err, stat) {
 			if (err) {
-				return next(err);
+				next(err);
+				return;
 			}
 			if (stat.isFile()) {
-				// XXX use the below when/if we upload using express.bodyParser()
-				/*
-				 var mimeType = _mimeTypes[path.extname(req.params.path).split(".")[1]];
-				 res.writeHead(200, {'Content-Type': mimeType} );
-				 var fileStream = fs.createReadStream(localPath);
-				 fileStream.pipe(res);
-				 next();
-				 */
-				return fs.readFile(localPath, function(err, buffer) {
-					return next(err, {
-						code: 200 /*Ok*/,
-						body: { content: buffer.toString('base64') }
-					});
-				});
+				res.status(200);
+				res.sendfile(localPath);
+				// return nothing: streaming response
+				// is already in progress.
+				next();
 			} else {
-				return next(new Error("Not a file"));
+				next(new Error("not a file"));
 			}
 		});
 	};
@@ -403,6 +397,7 @@ function FsLocal(config, next) {
 		}
 	};
 
+ 	// XXX ENYO-1086: refactor tree walk-down
 	function _rmrf(localPath, next) {
 		// from <https://gist.github.com/1526919>
 		fs.stat(localPath, function(err, stats) {
@@ -449,6 +444,7 @@ function FsLocal(config, next) {
 		_changeNode(req, res, _cpr, next);
 	};
 
+ 	// XXX ENYO-1086: refactor tree walk-down
 	function _changeNode(req, res, op, next) {
 		var srcPath = path.join(config.root, req.params.path);
 		var dstPath, dstRelPath;
@@ -517,6 +513,7 @@ function FsLocal(config, next) {
 		});
 	}
 
+ 	// XXX ENYO-1086: refactor tree walk-down
 	function _cpr(srcPath, dstPath, next) {
 		if (srcPath === dstPath) {
 			return next(new Error("Cannot copy on itself"));
@@ -579,8 +576,8 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 	}
 
 	var fsLocal = new FsLocal({
-		// urlPrefix (M) can be '/', '/res/files/' ...etc
-		urlPrefix:	process.argv[2],
+		// pathname (M) can be '/', '/res/files/' ...etc
+		pathname:	process.argv[2],
 		// root (m) local filesystem access root absolute path
 		root:		path.resolve(process.argv[3]),
 		// port (o) local IP port of the express server (default: 9009, 0: dynamic)
@@ -589,7 +586,7 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		if (err) {
 			process.exit(err);
 		}
-		console.log("fsLocal['"+process.argv[3]+"'] available at "+service.url);
+		console.log("fsLocal['"+process.argv[3]+"'] available at "+service.origin);
 		if (process.send) {
 			// only possible/available if parent-process is node
 			process.send(service);

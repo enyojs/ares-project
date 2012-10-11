@@ -4,6 +4,11 @@ Hermes is the file storage component of the Ares IDE.  It provides a consistent 
 
 ## Hermes Protocol
 
+### Resources
+
+* `/id/{id}` resources are accessible via avery verbs described below.  These resources are used to browse the folder tree & get idividual items
+* `/file/*` resources are files that are known to exist.  These resources are used only by the Enyo Javascript parser.  They can only be accessed using `GET`.
+
 ### Verbs
 
 Hermes file-system providers use verbs that closely mimic the semantics defined by [WebDAV (RFC4918)](http://tools.ietf.org/html/rfc4918):  although Hermes reuses the same HTTP verbs (`GET`, `PUT`, `PROPFIND`, `MKCOL`, `DELETE` ...), it differs in terms of carried data.  Many (if not most) of the HTTP clients implement only the `GET` and `POST` HTTP verbs:  Hermes uses the same HTTP Method Overrides as WebDAV usually do (tunnel every requests but `GET` into `POST` requests that include a special `_method` query parameter)

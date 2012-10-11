@@ -1,6 +1,8 @@
 /**
  * http://stackoverflow.com/questions/7268033/basic-static-file-server-in-nodejs
  */
+// https://github.com/tlrobinson/long-stack-traces
+var lst = require("long-stack-traces");
 var http = require('http'),
     url = require('url'),
     path = require('path'),
