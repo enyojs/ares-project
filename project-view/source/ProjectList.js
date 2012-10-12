@@ -35,12 +35,8 @@ enyo.kind({
 				{kind: "Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
 			]}
 		]},
-		{kind: "RemoveProjectPopup", onConfirmDeleteProject: "confirmRemoveProject"},
-		{name: "errorPopup", kind: "onyx.Popup", modal: true, centered: true, floating: true, components: [
-		    {tag: "h3", content: "An error occured"},
-		    {name: "errorMsg", content: "unknown error"},
-		    {kind : "onyx.Button", content : "OK", ontap : "hideErrorPopup"}
-		]},
+		{name: "removeProjectPopup", kind: "Ares.ActionPopup", onConfirmDeleteProject: "confirmRemoveProject"},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 	PROJECTS_STORAGE_KEY: "com.enyojs.ares.projects",
@@ -150,12 +146,9 @@ enyo.kind({
 	    		this.error(msg);
 		}
 	},
-	showErrorPopup : function(msg) {		// TODO Should refine error notification for the whole Ares project - ENYO-1105
-		this.$.errorMsg.setContent(msg);
+	showErrorPopup : function(msg) {
+		this.$.errorPopup.setErrorMsg(msg);
 		this.$.errorPopup.show();
-	},
-	hideErrorPopup : function() {
-		this.$.errorPopup.hide();
 	},
     stringifyReplacer: function(key, value) {
     	if (key === "originator") {
@@ -177,36 +170,4 @@ enyo.kind({
 	projectNameChanged: function(inOldValue) {
         this.$.name.setContent(this.projectName);
     }
-});
-
-enyo.kind({
-	name: "RemoveProjectPopup",
-	kind: "onyx.Popup",
-	published: {
-		name: ""
-	},
-	events: {
-		onConfirmDeleteProject: ""
-	},
-	modal: true,
-	centered: true,
-	floating: true,
-	autoDismiss: false,
-	components: [
-	    {name: "title", tag: "h3", content: "Delete?"},
-	    {tag: "br"},
-	    {tag: "br"},
-	    {kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "deleteCancel"},
-	    {kind: "onyx.Button", classes: "onyx-affirmative", content: "Delete", ontap: "deleteConfirm"}
-    ],
-	nameChanged: function() {
-		this.$.title.setContent("Delete project \"" + this.name + "\" ?");
-	},
-	deleteCancel: function(inSender, inEvent) {
-	    this.hide();
-	},
-	deleteConfirm: function(inSender, inEvent) {
-	    this.hide();
-	    this.doConfirmDeleteProject();
-	}
 });

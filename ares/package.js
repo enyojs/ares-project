@@ -5,6 +5,7 @@
 	"Ares.css",
 	//
 	"$lib/extra/analyzer2",
+	"../utilities/source",
 	"../lib/foss/ace",
 	"../phobos/source",
 	//
