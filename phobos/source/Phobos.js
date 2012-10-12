@@ -13,7 +13,7 @@ enyo.kind({
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
 				{kind: "onyx.Button", content: "Close", ontap: "closeDocAction"},
 				{name: "documentLabel", content: "Document"},
-				{kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
+				{name: "saveButton", kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: "New kind", ontap: "newKindAction"},
 				{fit: true},
 				{name: "designerButton", kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
@@ -22,7 +22,8 @@ enyo.kind({
 				{name: "left", kind: "leftPanels", showing: false,	arrangerKind: "CardArranger", onCss: "newcssAction"},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion"}
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion"},
+						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
 				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"}
@@ -77,34 +78,56 @@ enyo.kind({
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
 	},
-	openDoc: function(inFile, inCode, inExt, inProjectUrl) {
+	openDoc: function(origin, inFile, inCode, inExt, inProjectUrl) {
 		this.hideWaitPopup();
 		this.analysis = null;
 		this.file = inFile;
-		this.mode = {json: "json", js: "javascript", html: "html", css: "css"}[inExt] || "text";
-		this.$.ace.setEditingMode(this.mode);
-		this.adjustPanelsForMode(this.mode);
-		this.$.ace.setValue(inCode);
+		this.mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image"}[inExt] || "text";
+		var hasAce = this.adjustPanelsForMode(this.mode);
+		if (hasAce) {
+			this.$.ace.setEditingMode(this.mode);
+			this.$.ace.setValue(inCode);
+		}
+		else {
+			this.$.imageViewer.setAttribute("src", origin + inFile.pathname);
+		}
 		this.reparseAction();
 		this.buildProjectDb(inProjectUrl);
 		this.docHasChanged=false;
 		this.$.documentLabel.setContent(this.file.name);
 	},
 	adjustPanelsForMode: function(mode) {
-		var modes = {
-			json:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: false, designer: false},
-			javascript:	{leftShowing: false, rightShowing: true,  leftIndex: 1, rightIndex: 1, newKindButton: true,  designer: true},
-			html:		{leftShowing: false, rightShowing: false, leftIndex: 2, rightIndex: 2, newKindButton: false, designer: false},
-			css:		{leftShowing: false, rightShowing: true,  leftIndex: 3, rightIndex: 3, newKindButton: false, designer: false},
-			text:		{leftShowing: false, rightShowing: false, leftIndex: 0, rightIndex: 0, newKindButton: false, designer: false}
+		// whether to show or not a panel, imageViewer and ace cannot be enabled at the same time
+		var showModes = {
+			json:		{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
+			javascript:	{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: true,  designerButton: true ,  right: true  },
+			html:		{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
+			css:		{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: true  },
+			text:		{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
+			image:		{left: false, imageViewer: true , ace: false, saveButton: false, newKindButton: false, designerButton: false,  right: false }
 		};
+
+		var showSettings = showModes[mode]||showModes['text'];
+		for (stuff in showSettings) {
+			this.$[stuff].setShowing( showSettings[stuff] ) ;
+		}
+
+        // xxxIndex: specify what to show in the "LeftPanels" or "RightPanels" kinds (declared at the end of this file)
+        // xxxIndex is ignored when matching show setting is false
+		var modes = {
+			json:		{leftIndex: 0, rightIndex: 0},
+			javascript:	{leftIndex: 1, rightIndex: 1},
+			html:		{leftIndex: 2, rightIndex: 2},
+			css:		{leftIndex: 3, rightIndex: 3},
+			text:		{leftIndex: 0, rightIndex: 0},
+			image:		{leftIndex: 0, rightIndex: 0}
+		};
+
 		var settings = modes[mode]||modes['text'];
 		this.$.left.setIndex(settings.leftIndex);
-		this.$.left.setShowing(settings.leftShowing);
 		this.$.right.setIndex(settings.rightIndex);
-		this.$.right.setShowing(settings.rightShowing);
-		this.$.newKindButton.setShowing(settings.newKindButton);
-		this.$.designerButton.setShowing(settings.designer);
+
+		return showSettings.ace ;
 	},
 	showWaitPopup: function(inMessage) {
 		this.$.waitPopupMessage.setContent(inMessage);
