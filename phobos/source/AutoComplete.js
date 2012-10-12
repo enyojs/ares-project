@@ -39,17 +39,22 @@ enyo.kind({
 	debug: false,
 	input: "",
 	suggestions: null,				// List of suggestion to display in the popup
-	suggestionsEnyo: [],
-	suggestionsOnyx: [],
+	suggestionsEnyo: null,
+	suggestionsOnyx: null,
 	localKinds: {},					// The kinds defined in the currently edited file
+	kindName: "",
 	create: function() {
 		this.inherited(arguments);
 	},
 	start: function(inEvent) {
-		var suggestions = [], go = false;
+		var suggestions = new Phobos.Suggestions(), go = false;
 		if (this.analysis && this.analysis.objects && this.analysis.objects.length > 0) {
 			this.debug && this.log("Auto-Completion needed ?");
-
+			
+			// Retrieve the kind name for the currently edited file
+			this.kindName = this.analysis.objects[this.analysis.currentObject].name;
+			this.debug && this.log("Current Kind Name: "+this.kindName);
+			
 			if (inEvent) {
 				 // Check if a '.' was inserted and see if we need to show-up the auto-complete popup
 				var data = inEvent.data;
@@ -71,9 +76,9 @@ enyo.kind({
 				}
 
 				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_THIS)) {
-					suggestions = this.fillSuggestionsDoEvent(suggestions);
-					suggestions = this.fillSuggestionsGettersSetters(suggestions);
-					suggestions = this.fillSuggestionsProperties(suggestions);
+					suggestions = this.fillSuggestionsDoEvent(this.kindName, suggestions);
+					suggestions = this.fillSuggestionsGettersSetters(this.kindName, suggestions);
+					suggestions = this.fillSuggestionsProperties(this.kindName, suggestions);
 				}
 
 				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_ENYO)) {
@@ -83,11 +88,13 @@ enyo.kind({
 				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_ONYX)) {
 					suggestions = this.fillSuggestionsOnyx(suggestions);
 				}
+
+				this.buildLevel2Suggestions(inEvent, suggestions);
 			}
 			
-			if (suggestions.length > 0) {	// Some suggestions were found.
-				this.input = "";
-				this.suggestions = suggestions;
+			if (suggestions.getCount() > 0) {	// Some suggestions were found.
+				this.input = "";		// Reset the characters typed while the autocompletion popup is up
+				this.suggestions = suggestions.getSortedSuggestions();
 				this.showAutocompletePopup();
 			}
 		}
@@ -122,22 +129,109 @@ enyo.kind({
 		}
 		return false;			// Nothing to auto-complete
 	},
+	buildLevel2Suggestions: function(inEvent, suggestions) {
+		var line, last, popupPosition, len, pattern;
+		if (inEvent) {	// Triggered by a '.' inserted by the user
+			popupPosition = inEvent.data.range.end;
+		} else {	// Triggered by a Ctrl-Space coming from the user
+			popupPosition = this.ace.getCursorPositionInDocument();
+		}
+
+		// Get the line and the last character entered
+		line = this.ace.getLine(popupPosition.row);
+		
+		// Find the name of the components
+		for(var i = 0, o; o = this.analysis.objects[this.analysis.currentObject].components[i]; i++) {
+			pattern = this.AUTOCOMP_THIS_DOLLAR + o.name + ".";
+			len = pattern.length;
+			last = line.substr(popupPosition.column - len, len);
+			this.debug && this.log("last >>" + last + " <<");
+
+			// Check if it's part of a pattern string
+			if (last === pattern) {
+				this.popupPosition = popupPosition;
+				this.debug && this.log("Completion available for " + pattern + " kind: " + o.kind);
+		
+				this.fillSuggestionsDoEvent(o.kind, suggestions);
+				this.fillSuggestionsGettersSetters(o.kind, suggestions);
+				this.fillSuggestionsProperties(o.kind, suggestions);
+				return;
+			}
+		}
+		return;			// Nothing to auto-complete
+	},
 	fillSuggestionsThisDollar: function(suggestions) {
 		enyo.forEach(this.analysis.objects[this.analysis.currentObject].components, function(a) {
-			suggestions.push(a.name);
+			suggestions.addItem({name: a.name});
 		});
 		return suggestions;
 	},
-	fillSuggestionsDoEvent: function(suggestions) {
-		// TODO
+	fillSuggestionsDoEvent: function(kindName, suggestions) {
+		var definition, obj, p, i, name;		
+		// retrieve the kindName definition
+		definition = this.getKindDefinition(kindName);
+
+		if (definition !== undefined) {
+			// this.do* - event trigger when within the current kind definition
+			this.debug && this.log("Adding doXXX for " + kindName);
+			obj = definition.properties;
+			for (i=0; i<obj.length; i++) {
+				if (obj[i].token === "events") {
+					p = obj[i].value[0].properties;
+					for (var j=0; j < p.length; j++) {
+						name = p[j].name.trim().replace('on', 'do');
+						suggestions.addItem({name: name, kind: kindName});
+					}
+				}
+			}	
+			// support firing super-kind events as well
+			return this.fillSuggestionsDoEvent(definition.superkind, suggestions);
+		}
 		return suggestions;
 	},
-	fillSuggestionsGettersSetters: function(suggestions) {
-		// TODO
+	fillSuggestionsGettersSetters: function(kindName, suggestions) {
+		var definition, obj, p, i, name;		
+		// retrieve the kindName definition
+		definition = this.getKindDefinition(kindName);
+
+		if (definition !== undefined) {
+			// support setXXX and getXXX for published properties when within the current kind definition
+			this.debug && this.log("Adding getters/setters for " + kindName);
+			obj = definition.properties;
+			for (i=0; i<obj.length; i++) {
+				if (obj[i].token === "published") {
+					p = obj[i].value[0].properties;
+					for (var j=0; j < p.length; j++) {
+						name = 'set' + p[j].name.substr(0, 1).toUpperCase() + p[j].name.substr(1).trim();
+						suggestions.addItem({name: name, kind: kindName});
+						name = 'get' + p[j].name.substr(0, 1).toUpperCase() + p[j].name.substr(1).trim();
+						suggestions.addItem({name: name, kind: kindName});
+					}				
+				}
+			}
+			// support super-kind published properties
+			return this.fillSuggestionsGettersSetters(definition.superkind, suggestions);
+		}
 		return suggestions;
 	},
-	fillSuggestionsProperties: function(suggestions) {
-		// TODO
+	fillSuggestionsProperties: function(kindName, suggestions) {
+		var definition, obj, i, name;		
+		// retrieve the kindName definition
+		definition = this.getKindDefinition(kindName);
+
+		if (definition !== undefined) {
+			// support functions, handlers published when within the current kind definition
+			this.debug && this.log("Adding properties for " + kindName);
+			obj = definition.allProperties;
+			for (i=0; i<obj.length; i++) {
+				if (obj[i].value[0].token === "function") {
+					name = obj[i].name;
+					suggestions.addItem({name: name, kind: kindName});
+				}
+			}
+			// support super-kind published/properties/functions
+			return this.fillSuggestionsProperties(definition.superkind, suggestions);
+		}
 		return suggestions;
 	},
 	fillSuggestionsEnyo: function(suggestions) {		
@@ -176,13 +270,14 @@ enyo.kind({
 		// Fill-up the auto-completion list from this.suggestions with filtering based on this.input
 		select.destroyComponents();
 		var input = this.input;
-		if (this.debug) this.log("Preparing suggestions list, input: >>" + input + "<<");
-		enyo.forEach(this.suggestions, function(value) {
+		if (this.debug) this.log("Preparing suggestions list, input: >>" + input + "<< + count " + this.suggestions.length);
+		enyo.forEach(this.suggestions, function(item) {
+			var name = item.name;
 			if (input.length === 0) {
-				select.createComponent({content: value});
+				select.createComponent({content: name});
 			} else {
-				if (value.indexOf(input) === 0) {
-					select.createComponent({content: value});
+				if (name.indexOf(input) === 0) {
+					select.createComponent({content: name});
 				}
 			}
 		}, this);
@@ -265,36 +360,34 @@ enyo.kind({
 		this.debug && this.log("Enyo analysis ready");
 		var suggestions, pattern, regexp;
 		
-		// TODO YDM -- This test "this.enyoIndexer.getFunctionList" can be removed after lib/extra commit 5a31aa1f73aece000d5d0478487dc29ff9f1ed6e is integrated
-		if (this.enyoIndexer && this.enyoIndexer.getFunctionList) {
-			
+		if (this.enyoIndexer) {	
 			// Build the suggestion lists as the analyzer just finished its job
 			pattern = this.AUTOCOMP_ENYO, len = pattern.length;
 			regexp = /^enyo\..*$/;
-			suggestions = [];
+			suggestions = new Phobos.Suggestions();
 			
-			enyo.forEach(this.enyoIndexer.getFunctionList(regexp, 'public'), function(name) {
+			enyo.forEach(this.getFunctionList(this.enyoIndexer, regexp, 'public'), function(name) {
 				name = name.substr(len);
-				suggestions.push(name);
+				suggestions.addItem({name: name});
 			}, this);
-			enyo.forEach(this.enyoIndexer.getKindList(regexp, 'public'), function(name) {
+			enyo.forEach(this.getKindList(this.enyoIndexer, regexp, 'public'), function(name) {
 				name = name.substr(len);
-				suggestions.push(name);
+				suggestions.addItem({name: name});
 			}, this);
 			this.suggestionsEnyo = suggestions;
 			
 			// Build the suggestion lists as the analyzer just finished its job
-			suggestions = [];
+			suggestions = new Phobos.Suggestions();
 			pattern = this.AUTOCOMP_ONYX;
 			regexp = /^onyx\..*$/;
 			len = pattern.length;
-			enyo.forEach(this.enyoIndexer.getFunctionList(regexp, 'public'), function(name) {
+			enyo.forEach(this.getFunctionList(this.enyoIndexer, regexp, 'public'), function(name) {
 				name = name.substr(len);
-				suggestions.push(name);
+				suggestions.addItem({name: name});
 			}, this);
-			enyo.forEach(this.enyoIndexer.getKindList(regexp, 'public'), function(name) {
+			enyo.forEach(this.getKindList(this.enyoIndexer, regexp, 'public'), function(name) {
 				name = name.substr(len);
-				suggestions.push(name);
+				suggestions.addItem({name: name});
 			}, this);
 			this.suggestionsOnyx = suggestions;
 		}
@@ -333,9 +426,116 @@ enyo.kind({
 		if (definition === undefined && this.enyoIndexer) {
 			// Try to get it from the enyo/onyx analysis
 			definition = this.enyoIndexer.findByName(name);
+			
+			if (definition === undefined) {
+				// Try again with the enyo prefix as it is optional
+				definition = this.enyoIndexer.findByName(this.AUTOCOMP_ENYO + name);
+			}
 		}
 		
 		return definition;
+	},
+	/**
+	 * Returns a list of all kind names matching the parameter nameRegexp
+	 * and the parameter group
+	 * @parma indexer
+	 * @param nameRegexp
+	 * @param group
+	 * @returns {Array} the list of matching kind name
+	 */
+	getKindList: function(indexer, nameRegexp, group) {
+		// TODO this function must be removed when the equivalent will be available in lib/extra/analyzer2
+		this.debug && this.log("getEnyoKindList --> result - regexp: " + nameRegexp + " group: " + group);
+		var list = [];
+		for (var i=0, o; o=indexer.objects[i]; i++) {
+			if ((o.type === 'kind') && (o.token === 'enyo.kind') && (o.group === group) && nameRegexp.test(o.name)) {
+				this.debug && this.log("getEnyoKindList --> this.objects[" + i + "]: type: " + o.type + " token: " + o.token + " group: "+ o.group + " name: " + o.name);
+				list.push(o.name);
+			}
+		}
+		return list;
+	},
+	/**
+	 * Returns a list of all function names matching the parameter nameRegexp
+	 * and the parameter group
+	 * @parma indexer
+	 * @param nameRegexp
+	 * @param group
+	 * @returns {Array} the list of matching function name
+	 */
+	getFunctionList: function(indexer, nameRegexp, group) {
+		// TODO this function must be removed when the equivalent will be available in lib/extra/analyzer2
+		var list = [];
+		for (var i=0, o; o=indexer.objects[i]; i++) {
+			if ((o.type === 'function') && (o.group === group) && nameRegexp.test(o.name)) {
+				list.push(o.name);
+			}
+		}
+		return list;
 	}
 });
 
+enyo.kind({
+	name : "Phobos.Suggestions",
+	kind : "enyo.Component",
+	debug: false,
+	create: function() {
+		this.inherited(arguments);
+		this.objectId = Phobos.Suggestions.objectCounter++;
+		this.debug && this.log("objectId: " + this.objectId);
+		this.items = {};
+		this.nbItems = 0;
+	},
+	addItem: function(item) {
+		var name = item.name;
+		if (this.items[name] === undefined) {
+			this.items[name] = item;
+			this.nbItems++;
+			this.debug && this.log("objectId: " + this.objectId + " added: " + name + " count: " + this.nbItems);
+		}
+	},
+	reset: function() {
+		this.debug && this.log("objectId: " + this.objectId);
+		this.items = {};
+		this.nbItems = 0;
+	},
+	getSortedSuggestions: function() {
+		// Transform into an array
+		var suggestions = [];
+		for(var key in this.items) {
+			if (this.items.hasOwnProperty(key)) {
+				suggestions.push(this.items[key]);
+			}
+		}
+		return suggestions.sort(Phobos.Suggestions.nameCompare);
+	},
+	getCount: function() {
+		this.debug && this.log("objectId: " + this.objectId + " count: " + this.nbItems);
+		return this.nbItems;
+	},
+	/**
+	 * Concatenate the suggestions passed as parameter to the current object
+	 * @param suggestions must be a Phobos.Suggestions object
+	 */
+	concat: function(suggestions) {
+		this.debug && this.log("objectId: " + suggestions.objectId + " into " + this.objectId);
+		for(var key in suggestions.items) {
+			this.addItem(suggestions.items[key]);
+		}
+		return this;
+	},
+	statics: {
+		objectCounter: 0,
+		nameCompare: function(inA, inB) {
+			var na = inA.name.toLowerCase(), 
+				nb = inB.name.toLowerCase();
+			if (na < nb) {
+				return -1;
+			}
+			if (na > nb) {
+				return 1;
+			} 
+			return 0;
+		}
+	}
+});
