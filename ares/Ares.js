@@ -37,7 +37,7 @@ enyo.kind({
 					// no data? Empty file
 					inData="";
 				}
-				this.$.phobos.openDoc(f, inData, ext, projectUrl);
+				this.$.phobos.openDoc(origin, f, inData, ext, projectUrl);
 				this.setIndex(1);
 			})
 			.error(this, function(inEvent, inData) {
