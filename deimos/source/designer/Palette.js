@@ -55,7 +55,7 @@ enyo.kind({
 	components: [
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{kind: "Scroller", fit: true, components: [
-				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", style: "margin: 0 10px 0 0px;", components: [
+				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
 					{kind: "CategoryItem"}
 				]}
 			]},
