@@ -382,7 +382,7 @@ enyo.kind({
 		outString = outString + "	" + "background-image:url('" + this.$.bgImage + "');\n";
 	}
 
-	if(this.$.hRepeat == "H" ){
+	if(this.$.hRepeat === "H" ){
 		outPut = outPut  + tab + "bacground-repeat: repeat-x;<br>";
 		outString = outString + "	" + "background-repeat: repeat-x;\n";
 	}
@@ -574,18 +574,30 @@ enyo.kind({
 		console.log(this.$.bgImage, this.$.imageInput.hasNode().value );
 	},
 
-	hRepeat: function(inSender) {
-		this.$.hRepeat = "H";
+	hRepeat: function(inSender, inEvent) {
+		if (inSender.checked == true) {
+			this.$.hRepeat = "H";
+		}else{
+			this.$.hRepeat = "null";
+		}
 		this.updateBox();
 	},
 
 	vRepeat: function(inSender) {
-		this.$.vRepeat = "V";
+		if (inSender.checked == true) {
+			this.$.vRepeat = "V";
+		}else{
+			this.$.vRepeat = "null";
+		}
 		this.updateBox();
 	},
 
 	nRepeat: function(inSender){
-		this.$.noRepeat = "NO";
+		if (inSender.checked == true) {
+			this.$.noRepeat = "NO";
+		}else{
+			this.$.noRepeat = "null";
+		}
 		this.updateBox();
 	},
 
@@ -608,9 +620,6 @@ enyo.kind({
 		this.$.hRepeat = null;
 		this.$.vRepeat = null;
 		this.$.noRepeat = null;
-
-
-
 		this.$.outPut = null;
 		outString = "";
 		this.updateBox();
