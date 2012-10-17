@@ -21,14 +21,13 @@ function ArZip(config, next) {
 	HttpError.prototype.name = "HTTP Error";
 
 	// (simple) parameters checking
-	config.pathname = config.pathname || '/archive';
+	config.pathname = config.pathname || '/arZip';
 
 	var app = express.createServer(); // XXX replace by external HTTP server
 	app.use(express.logger('dev'));
 
 	// CORS -- Cross-Origin Resources Sharing
 	app.use(function(req, res, next) {
-		console.log("setting CORS");
 		res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
 		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
 		res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -43,7 +42,6 @@ function ArZip(config, next) {
 	// Authentication
 	app.use(express.cookieParser());
 	app.use(function(req, res, next) {
-		console.log("checking auth");
 		if (req.connection.remoteAddress !== "127.0.0.1") {
 			next(new Error("Access denied from IP address "+req.connection.remoteAddress));
 		} else {
@@ -51,14 +49,9 @@ function ArZip(config, next) {
 		}
 	});
 
-	// Error handler (4 parameters)
-	app.use(function(err, req, res, next){
-		console.log("error handler, err=" + util.inspect(err));
-		if (err) {
-			res.status(500).send(err.toString());
-		} else {
-			res.status(500).end();
-		}
+	// Error handler
+	app.error(function(err, req, res, next){
+		res.status(err.statusCode || 500).send(err.toString());
 	});
 
 	/**
@@ -72,74 +65,95 @@ function ArZip(config, next) {
 	}
 
 	// Create archive
-	var servicePath = makeExpressRoute('/zip');
-	console.log("servicePath=" + servicePath);
+	var servicePath = makeExpressRoute('');
 	app.post(servicePath, function(req, res, next) {
+		var form, zip, tasks, zipping = false;
+		var files = [], fields = [];
 		try {
-			// XXX test content-type: must be multipart/form-data
+			if (!req.is('multipart/form-data')) {
+				next(new HttpError("Not a multipart request", 415 /*Unsupported Media Type*/));
+				return;
+			}
 
-			var form = new formidable.IncomingForm();
-			var zip = zipstream.createZip({level: 1});
-			var ongoing = { form: true, files: 0 };
+			tasks = [];
+
 			res.contentType('application/zip');
+
+			zip = zipstream.createZip({level: 1});
 			zip.pipe(res);
-			form.onPart = function(part) {
-				try {
-					console.log("part=" + util.inspect(part));
-					if (!part.filename) {
-						// let formidable handle all non-file parts
-						form.handlePart(part);
-					} else {
-						console.log("Adding '" + part.filename + "'...");
-						ongoing.files++;
-						zip.addFile(part, {name: part.filename}, function() {
-							console.log("Added: '" + part.filename + "'");
-							ongoing.files--;
-							_complete();
-						});
-					}
-				} catch(e) {
-					next(e);
-				}
-			};
+
+			form = new formidable.IncomingForm();
+
+			// We use an intermediate temporary directory,
+			// because the following issue prevents piping
+			// directly node-formidable input-streams into
+			// a node-zipstream output-stream (archive).
+			// <https://github.com/felixge/node-formidable/issues/182>,
+
+			form.uploadDir = temp.path({prefix: 'com.palm.ares.hermes.arZip.'}) + '.d';
+			fs.mkdirSync(form.uploadDir);
+
+			form.on('file', function(field, file) {
+				files.push(file);
+				tasks.push(function() {
+					zipping = true;
+					zip.addFile(new fs.createReadStream(file.path), {name: file.name}, function() {
+						_nextTask();
+					});
+				});
+			});
+
+			form.on('field', function(field, value) {
+				console.log(field, value);
+				fields.push([field, value]);
+			});
 
 			form.on('end', function() {
-				console.log('form end');
-				ongoing.form = false;
-				_complete();
+				tasks.push(function() {
+					zip.finalize(function(written) {
+						res.status(201 /*Created*/).end();
+						_clean();
+					});
+				});
+				_nextTask();
 			});
-			
- 			// form.parse(req);
 
-			form.parse(req, function(err, fields, files) {
+			function _nextTask() {
+				var task = tasks.shift();
+				task && task();
+			}
+
+			form.parse(req, function(err) {
 				if (err) {
 					next(err);
-					return;
 				}
-				console.log("form parsed: fields=" + util.inspect(fields) + ", files=" + util.inspect(files));
 			});
 
+			function _clean(next) {
+				var file, count = files.length;
+				function _rmdir() {
+					(count === 0) && fs.rmdir(form.uploadDir, next);
+				}
+				_rmdir();
+				while ((file = files.shift())) {
+					fs.unlink(file.path, function(err) {
+						if (err) {
+							next(err);
+							return;
+						}
+						count--;
+						_rmdir();
+					});
+				}
+			}
 
 		} catch(e) {
 			console.error(e.stack);
 			next(new HttpError(e.msg));
 		}
-
-		function _complete(ar) {
-			console.log("ongoing=" + util.inspect(ongoing));
-			if (ongoing.form || ongoing.files) {
-				return;
-			} else {
-				zip.finalize(function(written) {
-					console.log(written + ' bytes written into ' + this.path);
-					res.status(201 /*Created*/).end();
-				});
-			}
-		}
-
 	});
 
-	// start the filesystem (fs) server & notify the IDE server
+	// start the archive (ar) server & notify the IDE server
 	// (parent) where to find it
 
 	app.listen(config.port, "127.0.0.1", null /*backlog*/, function() {
@@ -157,8 +171,6 @@ function ArZip(config, next) {
 	 */
 	this.quit = function() {
 		app.close();
-		Archive.cleanAll();
-		console.log("arZip exiting");
 	};
 
 }
@@ -172,7 +184,7 @@ if (path.basename(process.argv[1]) === "arZip.js") {
 	}
 
 	var arZip = new ArZip({
-		// pathname (M) can be '/', '/archive/' ...etc
+		// pathname (M) can be '/', '/zip/' ...etc
 		pathname:	process.argv[2],
 		// port (o) local IP port of the express server (default: 9019, 0: dynamic)
 		port: parseInt(process.argv[3] || "9019", 10)
