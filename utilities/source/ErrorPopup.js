@@ -1,5 +1,3 @@
-// Copyright 2012, $ORGANIZATION
-// All rights reserved.
 enyo.kind({
         name: "Ares.ErrorPopup",
         kind: "onyx.Popup",
