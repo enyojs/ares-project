@@ -9,7 +9,7 @@ enyo.kind({
 		{kind: "Serializer"},
 		{name: "selectionOutline", kind: "DesignerOutline", style: "border: 5px dotted rgba(255, 146, 38, 0.7);"},
 		{name: "containerOutline", kind: "DesignerOutline", style: "border: 5px solid rgba(24, 24, 255, 0.3);"},
-		{kind: "FittableRows", classes: "enyo-fit", components: [
+		{kind: "FittableRows", classes: "deimos_panel_center  enyo-fit", components: [
 			//{kind: "Button", content: "Undo"},
 			//{kind: "Button", content: "Redo"},
 			{kind: "Button", content: "Up", ontap: "upAction"},
@@ -145,7 +145,7 @@ enyo.kind({
 			// There is no object already created
 			c = this.$.client;
 		}
-		
+
 		// The selection objects are moved around in the DOM and the nodes can lose sync with the enyo node
 		// cache. Hiding the selection causes the selection nodes to be normalized, preventing any weirdness
 		// when rendering new Controls.
@@ -204,7 +204,7 @@ enyo.kind({
 	    for (i=0; i < block.length; i++) {
 	        block[i]=this.proxyUnknownKinds(block[i]);
 	    }
-        return block;	    
+        return block;
 	},
 	proxyUnknownKinds: function(component) {
 		var name = component.kind;
@@ -217,7 +217,7 @@ enyo.kind({
 		}
 		var children = component.components;
 		if (children) {
-			var i; 
+			var i;
 			for (i=0; i< children.length; i++) {
 				children[i] = this.proxyUnknownKinds(children[i]);
 			}
@@ -229,7 +229,7 @@ enyo.kind({
 	    for (i=0; i < block.length; i++) {
 	        block[i]=this.unProxyUnknownKinds(block[i]);
 	    }
-        return block;	    
+        return block;
 	},
 	unProxyUnknownKinds: function(component) {
 		if (component.realKind) {
@@ -243,18 +243,18 @@ enyo.kind({
 		delete component.hadName;
 		var children = component.children;
 		if (children) {
-			var i; 
+			var i;
 			for (i=0; i< children.length; i++) {
 				children[i] = this.unProxyUnknownKinds(children[i]);
 			}
 		}
 		return component;
-	}	
+	}
 });
 
 enyo.kind({
 	name: "DesignerOutline",
-	style: "pointer-events: none; position: absolute;", 
+	style: "pointer-events: none; position: absolute;",
 	showing: false,
 	create: function() {
 		this.inherited(arguments);
@@ -277,7 +277,7 @@ enyo.kind({
 
 enyo.kind({
 	name: "DesignerPanel",
-	classes: "deimos_panel",
+	classes: "deimos_panel_center",
 	events: {
 		onDesignRendered: ""
 	},
@@ -307,5 +307,5 @@ enyo.kind({
 				}
 			}
 		}
-	},	
+	},
 });
