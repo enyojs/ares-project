@@ -17,15 +17,15 @@ enyo.kind({
 			{content: "Projects", style: "margin-right: 10px"},
 			 // FIXME: we may need icons dedicated for projects instead of re-using application icons
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$harmonia/images/application_new.png", onclick: "doCreateProject"},
+				{kind: "onyx.IconButton", src: "$project-view/images/project_view_new.png", onclick: "doCreateProject"},
 				{kind: "onyx.Tooltip", content: "Create Project..."},
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$harmonia/images/application_edit.png", onclick: "doOpenProject"},
+				{kind: "onyx.IconButton", src: "$project-view/images/project_view_edit.png", onclick: "doOpenProject"},
 				{kind: "onyx.Tooltip", content: "Open Project..."},
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$harmonia/images/delete.png", onclick: "removeProjectAction"},
+				{kind: "onyx.IconButton", src: "$project-view/images/project_view_delete.png", onclick: "removeProjectAction"},
 				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
 				{kind: "onyx.Tooltip", content: "Remove Project..."},
 			]},
