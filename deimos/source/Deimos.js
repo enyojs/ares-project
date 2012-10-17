@@ -2,7 +2,7 @@ enyo.kind({
 	name: "Deimos",
 	classes: "enyo-unselectable",
 	components: [
-		{kind: "DragAvatar", components: [ 
+		{kind: "DragAvatar", components: [
 			{tag: "img", src: "$deimos/images/icon.png", style: "width: 24px; height: 24px;"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
@@ -16,7 +16,7 @@ enyo.kind({
 				{fit: true},
 				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction"}
 			]},
-			{name: "body", fit: true, kind: "FittableColumns", components: [
+			{name: "body", fit: true, classes: "deimos_panel_body",kind: "FittableColumns", components: [
 				{name: "left", kind: "Palette", ondragstart: "dragStart"},
 				{name: "middle", fit: true, kind: "FittableRows",components: [
 					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart", onDesignRendered: "designRendered"},
@@ -66,20 +66,20 @@ enyo.kind({
 	kindSelected: function(inSender, inEvent) {
 		/* FIXME
 		 * Strange: this function is always called twice for each change
-		 * If we return true, it is called only once 
+		 * If we return true, it is called only once
 		 * but the PickerButton is not rendered correctly.
 		 */
 		var index = inSender.getSelected().index;
 		var kind = this.kinds[index];
-		
+
 		if (index != this.index) {
-			
+
 			if (this.index !== null && this.docHasChanged === true) {
 				var modified = this.$.designer.getComponents();
 				this.kinds[this.index].components = modified;
 				this.kinds[this.index].content = this.$.designer.save();
 			}
-			
+
 			this.$.inspector.inspect(null);
 			this.$.designer.load(kind.components);
 		}
@@ -145,7 +145,7 @@ enyo.kind({
 	closeDesignerAction: function(inSender, inEvent) {
 		// Get the last modifications
 		this.kinds[this.index].content = this.$.designer.save();
-		
+
 		// Prepare the data for the code editor
 		var event = {docHasChanged: this.docHasChanged, contents: []};
 		for(var i = 0 ; i < this.kinds.length ; i++ ) {

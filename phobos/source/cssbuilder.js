@@ -76,8 +76,8 @@ enyo.kind({
 					{kind: "onyx.Button", classes: "button ", content: "Text Shadow", ontap: "textshadow"}
 				]},
 
-				{classes: "pannel", style: " height: 300px", components: [
-					{name: "border", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Border/Margin"},
+				{classes: "pannel", style: " height: 200px", components: [
+					{name: "imageborder", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Border/Margin..."},
 
 					{kind: "enyo.FittableColumns", components: [
 						{classes: "onyx-toolbar-inline", components: [
@@ -132,8 +132,29 @@ enyo.kind({
 					]},
 					{kind: "onyx.Button", classes: "button ", content: "Box Shadow", ontap: "boxshadow"}
 				]},
+				{classes: "pannel", style: " height: 200px", components: [
+					{name: "border", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Images..."},
+
+					{style: "height: 5px"},
+					{kind: "onyx.Input", name: "imageInput", placeholder: "Enter image url:...", onchange: "imageInput"},
+					{style: "height: 5px"},
+					{kind: "enyo.FittableRows", components: [
+						//{style: "height: 5px"},
+						{content: "Repeat H"},
+						{kind: "onyx.Checkbox", onchange: "checkboxClicked"},
+
+					]},
+					{style: "height: 5px"},
+					{kind: "enyo.FittableRows", fit: true, components: [
+						{style: "height: 5px"},
+						{style: "witdh: 75px;", content: "Repeat V"},
+						//{tag: "br"},
+						{kind: "onyx.Checkbox", onchange: "checkboxClicked2"},
+					]},
+				]},
 			]}
 		]},
+
 
 
 		{name: "popup", kind: "onyx.Popup", classes: "popup", centered: true, modal: true, floating: true, components: [
@@ -184,7 +205,7 @@ enyo.kind({
 			]},
 		]},
 
-		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "popup", centered: true, modal: true, floating: true, components: [
+		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "popupp", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
 				{name: "boxShadowBar", content: "Text Shadow"},
 			]},
@@ -229,7 +250,7 @@ enyo.kind({
 				},
 				{kind: "onyx.Button", content: "Close", ontap: "closePopup"},
 			]},
-		]}
+		]},
 	],
 
 	create: function() {
@@ -353,7 +374,10 @@ enyo.kind({
 		outString = outString + "	" + "border-radius:" + " " + this.$.radiusSize + "px;\n";
 	}
 
-
+	if(this.$.bgImage != null){
+		outPut = outPut  + tab + "bacground-image:url('" + this.$.bgImage +"');<br>";
+		outString = outString + "	" + "bacground-image:url('" + this.$.bgImage + "');\n";
+	}
 
 	this.$.bg.setContent(outPut + "<br>}");
 	outString = outString + "\n}"
@@ -513,8 +537,20 @@ enyo.kind({
 		this.updateBox();
 	},
 
-
-
+	imageInput: function(inSender, inEvent) {
+		this.$.bgImage = this.$.imageInput.hasNode().value;
+		console.log(this.$.bgImage, this.$.imageInput.hasNode().value );
+	},
+	checkboxClicked: function(inSender) {
+		if (inSender.getValue()) {
+			this.log("I've been checked!");
+		}
+	},
+	checkboxClicked2: function(inSender) {
+		if (inSender.getValue()) {
+			this.log("I've been checked!2");
+		}
+	},
 	reset: function(){
 		this.className = null;
 		this.backgroundColor = null;
