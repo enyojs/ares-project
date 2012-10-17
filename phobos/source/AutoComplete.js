@@ -49,7 +49,7 @@ enyo.kind({
 	start: function(inEvent) {
 		var suggestions = new Phobos.Suggestions(), go = false;
 		if (this.analysis && this.analysis.objects && this.analysis.objects.length > 0) {
-			this.debug && this.log("Auto-Completion needed ? - " + inEvent);
+			this.debug && this.log("Auto-Completion needed ? - " + (inEvent && JSON.stringify(inEvent.data)));
 			
 			// Retrieve the kind name for the currently edited file
 			this.kindName = this.analysis.objects[this.analysis.currentObject].name;
