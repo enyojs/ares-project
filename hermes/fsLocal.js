@@ -28,7 +28,8 @@ function FsLocal(config, next) {
 
 	// (simple) parameters checking
 	config.root = path.resolve(config.root);
-	console.dir(config);
+	//console.log("config:");
+	//console.dir(config);
 
 	var app = express.createServer();
 	app.use(express.logger('dev'));
@@ -174,6 +175,7 @@ function FsLocal(config, next) {
 			origin: "http://127.0.0.1:"+app.address().port.toString(),
 			pathname: config.pathname
 		};
+		//console.log("service: ");
 		//console.dir(service);
 		return next(null, service);
 	});
@@ -568,22 +570,23 @@ function FsLocal(config, next) {
 }
 
 //debugger;
-var toto = process.argv;
+;
 if (path.basename(process.argv[1]) === "fsLocal.js") {
 	// We are main.js: create & run the object...
 	
 	var argv = require("optimist")
-    .options('P', {
-        alias : 'pathname',
-        default : '/some/files'
-    })
-    .options('p', {
-        alias : 'port',
-        default : '9009',
-    })
+	.usage('\nAres FileSystem (fs) provider.\nUsage: "$0"')
+	.options('P', {
+		alias : 'pathname',
+		description: 'pathname (M) can be "/", "/res/files/" ...etc',
+	})
+	.demand('P')
+	.options('p', {
+		alias : 'port',
+		description: 'port (o) local IP port of the express server (default: 9009, 0: dynamic)',
+		default : '9009',
+	})
 	.argv;
-
-	console.dir(argv);
 	
 	var version = process.version.match(/[0-9]+.[0-9]+/)[0];
 	if (version <= 0.7) {
@@ -601,15 +604,15 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		if (err) {
 			process.exit(err);
 		}
-		console.log("fsLocal['"+argv._[1]+"'] available at "+service.origin);
+		console.log("fsLocal['"+argv._[0]+"'] available at "+service.origin);
 		if (process.send) {
 			// only possible/available if parent-process is node
 			process.send(service);
-		}
+		};
 	});
 
 } else {
 
 	// ... otherwise hook into commonJS module systems
 	module.exports = FsLocal;
-}
+};
