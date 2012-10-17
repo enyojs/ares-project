@@ -33,13 +33,7 @@ enyo.kind({
 			{kind: "Image", src: "$phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 			{name: "waitPopupMessage", content: "Saving document...", style: "padding-top: 10px;"}
 		]},
-		{name: "savePopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
-			{name: "message", content: "Document was modified! Save it before closing?", style: "padding: 10px;"},
-			{kind: "FittableColumns", components: [
-				{kind: "onyx.Button", content: "Cancel", ontap: "cancelCloseAction"},
-				{kind: "onyx.Button", content: "Don't Save", ontap: "abandonDocAction"}
-			]}
-		]},
+		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"}
 	],
 	events: {
@@ -439,6 +433,9 @@ enyo.kind({
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docHasChanged) {
+			this.$.savePopup.setName("Document was modified! Save it before closing?");
+			this.$.savePopup.setActionButton("Don't Save");
+			this.$.savePopup.applyStyle("padding-top: 10px");
 			this.$.savePopup.show();
 		} else {
 			this.beforeClosingDocument();
@@ -450,10 +447,6 @@ enyo.kind({
 		this.$.savePopup.hide();
 		this.beforeClosingDocument();
 		this.doCloseDocument({});
-	},
-	// called when the "Cancel" is selected in save popup
-	cancelCloseAction: function(inSender, inEvent) {
-		this.$.savePopup.hide();
 	},
 	docChanged: function(inSender, inEvent) {
 		this.docHasChanged=true;
