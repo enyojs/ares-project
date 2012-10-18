@@ -375,8 +375,8 @@ enyo.kind({
 	}
 
 	if(this.$.bgImage != null){
-		outPut = outPut  + tab + "bacground-image:url('" + this.$.bgImage +"');<br>";
-		outString = outString + "	" + "bacground-image:url('" + this.$.bgImage + "');\n";
+		outPut = outPut  + tab + "background-image:url('" + this.$.bgImage +"');<br>";
+		outString = outString + "	" + "background-image:url('" + this.$.bgImage + "');\n";
 	}
 
 	this.$.bg.setContent(outPut + "<br>}");
