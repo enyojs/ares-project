@@ -16,14 +16,14 @@ enyo.kind({
 			{kind: "onyx.Button", classes: "onyx-negative", content: "Reset", ontap:"reset"},
 		]},
 		{kind: "onyx.Input", name: "input", placeholder: "Enter your class name!..",onchange: "inputChange"},
-		{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 150px; ", classes: "enyo-selectable font",	allowHtml: true, Xstyle: "padding: 10px;", components: [
+		{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 150px; ", classes: "enyo-selectable css_builder_font",	allowHtml: true, Xstyle: "padding: 10px;", components: [
 			{name: "bg", allowHtml: true, style: "font-size: 10px;", content: ""},
 			{name: "dd", allowHtml: true, content:"  ",style: "height: 10px"}
 		]},
 
 		{kind: "Panels", fit:true, classes: "enyo-unselectable",components: [
 			{kind: "enyo.Scroller", classes: "enyo-fit",components: [
-				{classes: "pannel", style: " height: 250px", components: [
+				{classes: "css_builder_pannel", style: " height: 250px", components: [
 					{name: "name", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Color "},
 
 					{name: "redSlider", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
@@ -41,54 +41,54 @@ enyo.kind({
 					},
 
 					{kind: "onyx.RadioGroup", onActivate:"radioActivated", components:[
-						{content:"background", classes: "RadioGroup"},
-						{content:"Font color", classes: "RadioGroup"},
-						{content:"Border color", classes: "RadioGroup"},
+						{content:"background", classes: "css_builder_RadioGroup"},
+						{content:"Font color", classes: "css_builder_RadioGroup"},
+						{content:"Border color", classes: "css_builder_RadioGroup"},
 					]},
 				]},
 
-				{classes: "pannel", style: " height: 350px", components: [
+				{classes: "css_builder_pannel", style: " height: 350px", components: [
 					{name: "fonts", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Fonts "},
 					{kind: "onyx.RadioGroup",
 					onActivate:"fontActivated",components:[
 						{tag: "br"},
-						{content:"Serif", style: "font-family: Serif;", classes: "RadioGroup"},
-						{content:"Sans-serif", style: "font-family: Sans-serif;", classes: "RadioGroup"},
+						{content:"Serif", style: "font-family: Serif;", classes: "css_builder_RadioGroup"},
+						{content:"Sans-serif", style: "font-family: Sans-serif;", classes: "css_builder_RadioGroup"},
 
-						{content:"Helvetica  ", style: "font-family: Helvetica;", classes: "RadioGroup"},
-						{content:"Monospace", style: "font-family: Monospace;", classes: "RadioGroup"},
+						{content:"Helvetica  ", style: "font-family: Helvetica;", classes: "css_builder_RadioGroup"},
+						{content:"Monospace", style: "font-family: Monospace;", classes: "css_builder_RadioGroup"},
 
-						{content:" Lucida Sans Unicode ", style: "font-family: Lucida Sans Unicode;", classes: "RadioGroup"},
-						{content:"Times New Roman  ", style: "font-family: Times New Roman;", classes: "RadioGroup"},
+						{content:" Lucida Sans Unicode ", style: "font-family: Lucida Sans Unicode;", classes: "css_builder_RadioGroup"},
+						{content:"Times New Roman  ", style: "font-family: Times New Roman;", classes: "css_builder_RadioGroup"},
 
-						{content:" Courier New ", style: "font-family: Courier New;", classes: "RadioGroup"},
-						{content:" Arial ", style: "font-family: Arial;", classes: "RadioGroup"}
+						{content:" Courier New ", style: "font-family: Courier New;", classes: "css_builder_RadioGroup"},
+						{content:" Arial ", style: "font-family: Arial;", classes: "css_builder_RadioGroup"}
 					]},
 
 					{classes: "onyx-toolbar-inline", components: [
-						{content: "Font Size", classes: "picker"},
+						{content: "Font Size", classes: "css_builder_picker"},
 						{kind: "onyx.PickerDecorator", components: [
 							{style: "min-width: 30px; font-size: 10px;"},
 							{name: "fontSizePicker", kind: "onyx.Picker",onSelect: "fontSize"}
 						]}
 					]},
 					{style: "height: 5px"},
-					{kind: "onyx.Button", classes: "button ", content: "Text Shadow", ontap: "textshadow"}
+					{kind: "onyx.Button", classes: "css_builder_button ", content: "Text Shadow", ontap: "textshadow"}
 				]},
 
-				{classes: "pannel", style: " height: 200px", components: [
+				{classes: "css_builder_pannel", style: " height: 200px", components: [
 					{name: "imageborder", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Border/Margin..."},
 
 					{kind: "enyo.FittableColumns", components: [
 						{classes: "onyx-toolbar-inline", components: [
-							{content: "Height", classes: "picker"},
+							{content: "Height", classes: "css_builder_picker"},
 							{kind: "onyx.PickerDecorator", components: [
 								{style: "min-width: 60px; font-size: 10px;"},
 								{name: "heightSizePicker", kind: "onyx.Picker",onSelect: "heightSize"}
 							]}
 						]},
 						{classes: "onyx-toolbar-inline", components: [
-							{content: "Width", classes: "picker"},
+							{content: "Width", classes: "css_builder_picker"},
 							{kind: "onyx.PickerDecorator", components: [
 								{style: "min-width: 60px; font-size: 10px;"},
 								{name: "widthSizePicker", kind: "onyx.Picker",onSelect: "widthSize"}
@@ -97,7 +97,7 @@ enyo.kind({
 					]},
 					{kind: "enyo.FittableColumns", components: [
 						{classes: "onyx-toolbar-inline", components: [
-							{content: "Margin Size", classes: "picker"},
+							{content: "Margin Size", classes: "css_builder_picker"},
 							{kind: "onyx.PickerDecorator", components: [
 								{style: "min-width: 40px; font-size: 10px;"},
 								{name: "marginSizePicker", kind: "onyx.Picker",onSelect: "marginSize"}
@@ -105,7 +105,7 @@ enyo.kind({
 						]},
 
 						{classes: "onyx-toolbar-inline", components: [
-							{content: "Border Size", classes: "picker"},
+							{content: "Border Size", classes: "css_builder_picker"},
 							{kind: "onyx.PickerDecorator", components: [
 								{style: "min-width: 40px; font-size: 10px;"},
 								{name: "borderSizePicker", kind: "onyx.Picker",onSelect: "borderSize"}
@@ -115,7 +115,7 @@ enyo.kind({
 
 					{kind: "enyo.FittableColumns", components: [
 						{classes: "onyx-toolbar-inline", components: [
-							{content: "Radius", classes: "picker"},
+							{content: "Radius", classes: "css_builder_picker"},
 							{kind: "onyx.PickerDecorator", components: [
 								{style: "min-width: 40px; font-size: 10px;"},
 								{name: "Radius", kind: "onyx.Picker",onSelect: "radius"}
@@ -123,16 +123,16 @@ enyo.kind({
 						]},
 
 						{classes: "onyx-toolbar-inline", components: [
-							{content: "Padding", classes: "picker"},
+							{content: "Padding", classes: "css_builder_picker"},
 							{kind: "onyx.PickerDecorator", components: [
 								{style: "min-width: 40px; font-size: 10px;"},
 								{name: "Padding", kind: "onyx.Picker",onSelect: "padding"}
 							]}
 						]},
 					]},
-					{kind: "onyx.Button", classes: "button ", content: "Box Shadow", ontap: "boxshadow"}
+					{kind: "onyx.Button", classes: "css_builder_button ", content: "Box Shadow", ontap: "boxshadow"}
 				]},
-				{classes: "pannel", style: " height: 200px", components: [
+				{classes: "css_builder_pannel", style: " height: 200px", components: [
 					{name: "border", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Images..."},
 
 					{style: "height: 5px"},
@@ -157,33 +157,33 @@ enyo.kind({
 
 
 
-		{name: "popup", kind: "onyx.Popup", classes: "popup", centered: true, modal: true, floating: true, components: [
+		{name: "popup", kind: "onyx.Popup", classes: "css_builder_popup", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
 				{name: "shadowBar", content: "Text Shadow"},
 			]},
 
 			{classes: "onyx-toolbar-inline", components: [
-				{content: "Horizontal shadow", classes: "picker"},
+				{content: "Horizontal shadow", classes: "css_builder_picker"},
 				{kind: "onyx.PickerDecorator", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
 					{name: "TextShadowH", kind: "onyx.Picker",onSelect: "textshadowH"}
 				]}
 			]},
 			{classes: "onyx-toolbar-inline", components: [
-				{content: "Vertical shadow--- ", classes: "picker"},
+				{content: "Vertical shadow--- ", classes: "css_builder_picker"},
 				{kind: "onyx.PickerDecorator", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
 					{name: "TextShadowV", kind: "onyx.Picker",onSelect: "textshadowV"}
 				]}
 			]},
 			{classes: "onyx-toolbar-inline", components: [
-				{content: "Blur distance-------", classes: "picker"},
+				{content: "Blur distance-------", classes: "css_builder_picker"},
 				{kind: "onyx.PickerDecorator", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
 					{name: "TextShadowB", kind: "onyx.Picker",onSelect: "textshadowB"}
 				]}
 			]},
-			{name:"textoutputBox", kind: "enyo.Panels", classes: "outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
+			{name:"textoutputBox", kind: "enyo.Panels", classes: "css_builder_outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
 				{content: "Text Shadow Color!"},
 			]},
 			{kind: "enyo.FittableRows", components: [
@@ -205,33 +205,33 @@ enyo.kind({
 			]},
 		]},
 
-		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "popupp", centered: true, modal: true, floating: true, components: [
+		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "css_builder_popupp", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
 				{name: "boxShadowBar", content: "Text Shadow"},
 			]},
 
 			{classes: "onyx-toolbar-inline", components: [
-				{content: "Horizontal shadow", classes: "picker"},
+				{content: "Horizontal shadow", classes: "css_builder_picker"},
 				{kind: "onyx.PickerDecorator", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
 					{name: "BoxShadowH", kind: "onyx.Picker",onSelect: "boxshadowH"}
 				]}
 			]},
 			{classes: "onyx-toolbar-inline", components: [
-				{content: "Vertical shadow--- ", classes: "picker"},
+				{content: "Vertical shadow--- ", classes: "css_builder_picker"},
 				{kind: "onyx.PickerDecorator", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
 					{name: "BoxShadowV", kind: "onyx.Picker",onSelect: "boxshadowV"}
 				]}
 			]},
 			{classes: "onyx-toolbar-inline", components: [
-				{content: "Blur distance-------", classes: "picker"},
+				{content: "Blur distance-------", classes: "css_builder_picker"},
 				{kind: "onyx.PickerDecorator", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
 					{name: "BoxShadowB", kind: "onyx.Picker",onSelect: "boxshadowB"}
 				]}
 			]},
-			{name:"outputBox2", kind: "enyo.Panels", classes: "outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
+			{name:"outputBox2", kind: "enyo.Panels", classes: "css_builder_outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
 				{content: "Box Shadow Color"},
 			]},
 			{kind: "enyo.FittableRows", components: [
