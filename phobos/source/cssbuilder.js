@@ -157,7 +157,7 @@ enyo.kind({
 
 
 
-		{name: "popup", kind: "onyx.Popup", classes: "css_builder_popup", centered: true, modal: true, floating: true, components: [
+		{name: "textShadowPopup", kind: "onyx.Popup", classes: "css_builder_popup", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
 				{name: "shadowBar", content: "Text Shadow"}
 			]},
@@ -207,7 +207,7 @@ enyo.kind({
 
 		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "css_builder_popupp", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
-				{name: "boxShadowBar", content: "Text Shadow"}
+				{name: "boxShadowBar", content: "Box Shadow"}
 			]},
 
 			{classes: "onyx-toolbar-inline", components: [
@@ -499,7 +499,7 @@ enyo.kind({
 
 	textshadow: function(inSender, inEvent) {
 		this.$.toggle = "text-shadow",
-		this.$.popup.show();
+		this.$.textShadowPopup.show();
 	},
 	textshadowH: function(inSender, inEvent) {
 			this.$.textshadowH = inEvent.selected.content;
@@ -516,7 +516,7 @@ enyo.kind({
 
 	closePopup: function() {
 		this.updateBox();
-		this.$.popup.hide();
+		this.$.textShadowPopup.hide();
 		this.$.boxShadowPopup.hide();
 	},
 
