@@ -7,10 +7,12 @@ enyo.kind({
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
 		{kind: "ProjectWizardPopup", canGenerate: false, name: "projectWizardPopup"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{kind: "ProjectConfig", name: "projectConfig"},
     ],
 	handlers: {
 		onCancel: "cancelCreateProject",
-		onConfirmCreateProject: "confirmCreateProject"
+		onConfirmCreateProject: "confirmCreateProject",
+		onConfirmConfigProject: "confirmConfigProject"
 	},
 	create: function() {
 		this.inherited(arguments);
@@ -64,5 +66,21 @@ enyo.kind({
 	},
 	projectRemoved: function(inSender, inEvent) {
     		this.$.harmonia.setProject(null);
+	},
+	confirmConfigProject: function(inSender, inEvent) {
+		try {
+			// data to create the project properties file
+			var projectData = {
+					name: inEvent.name,
+					folderId: inEvent.folderId,
+					service: inEvent.service					
+			};
+			this.$.projectConfig.creationConfig(projectData);
+		} catch(e) {
+    		this.showErrorPopup(e.toString());
+    		return false;			
+		}
+		// handled here (don't bubble)
+		return true;
 	}
 });
