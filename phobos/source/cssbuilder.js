@@ -1,19 +1,19 @@
 enyo.kind({
 	published: {
-	red: '00',
-	blue: '00',
-	green: '00',
-	color: "000000",
-	toggle: ""
+		red: '00',
+		blue: '00',
+		green: '00',
+		color: "000000",
+		toggle: ""
 	},
-	 events: {
-		onInsert: "",
-	 },
+	events: {
+		onInsert: ""
+	},
 	name: "cssBuilder",
 	kind: "enyo.FittableRows", components: [
 		{kind: "onyx.Toolbar", components: [
 			{kind: "onyx.Button", classes: "onyx-affirmative", content: "Insert css", ontap:"newCssAction"},
-			{kind: "onyx.Button", classes: "onyx-negative", content: "Reset", ontap:"reset"},
+			{kind: "onyx.Button", classes: "onyx-negative", content: "Reset", ontap:"reset"}
 		]},
 		{kind: "onyx.Input", name: "input", placeholder: "Enter your class name!..",onchange: "inputChange"},
 		{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 150px; ", classes: "enyo-selectable css_builder_font",	allowHtml: true, Xstyle: "padding: 10px;", components: [
@@ -43,8 +43,8 @@ enyo.kind({
 					{kind: "onyx.RadioGroup", onActivate:"radioActivated", components:[
 						{content:"background", classes: "css_builder_RadioGroup"},
 						{content:"Font color", classes: "css_builder_RadioGroup"},
-						{content:"Border color", classes: "css_builder_RadioGroup"},
-					]},
+						{content:"Border color", classes: "css_builder_RadioGroup"}
+					]}
 				]},
 
 				{classes: "css_builder_pannel", style: " height: 350px", components: [
@@ -110,7 +110,7 @@ enyo.kind({
 								{style: "min-width: 40px; font-size: 10px;"},
 								{name: "borderSizePicker", kind: "onyx.Picker",onSelect: "borderSize"}
 							]}
-						]},
+						]}
 					]},
 
 					{kind: "enyo.FittableColumns", components: [
@@ -128,7 +128,7 @@ enyo.kind({
 								{style: "min-width: 40px; font-size: 10px;"},
 								{name: "Padding", kind: "onyx.Picker",onSelect: "padding"}
 							]}
-						]},
+						]}
 					]},
 					{kind: "onyx.Button", classes: "css_builder_button ", content: "Box Shadow", ontap: "boxshadow"}
 				]},
@@ -141,7 +141,7 @@ enyo.kind({
 					{kind: "enyo.FittableRows", components: [
 						//{style: "height: 5px"},
 						{content: "Repeat H"},
-						{kind: "onyx.Checkbox", onchange: "checkboxClicked"},
+						{kind: "onyx.Checkbox", onchange: "checkboxClicked"}
 
 					]},
 					{style: "height: 5px"},
@@ -149,9 +149,9 @@ enyo.kind({
 						{style: "height: 5px"},
 						{style: "witdh: 75px;", content: "Repeat V"},
 						//{tag: "br"},
-						{kind: "onyx.Checkbox", onchange: "checkboxClicked2"},
-					]},
-				]},
+						{kind: "onyx.Checkbox", onchange: "checkboxClicked2"}
+					]}
+				]}
 			]}
 		]},
 
@@ -159,7 +159,7 @@ enyo.kind({
 
 		{name: "popup", kind: "onyx.Popup", classes: "css_builder_popup", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
-				{name: "shadowBar", content: "Text Shadow"},
+				{name: "shadowBar", content: "Text Shadow"}
 			]},
 
 			{classes: "onyx-toolbar-inline", components: [
@@ -184,7 +184,7 @@ enyo.kind({
 				]}
 			]},
 			{name:"textoutputBox", kind: "enyo.Panels", classes: "css_builder_outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
-				{content: "Text Shadow Color!"},
+				{content: "Text Shadow Color!"}
 			]},
 			{kind: "enyo.FittableRows", components: [
 				{name: "redSlider1", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
@@ -201,13 +201,13 @@ enyo.kind({
 				style: "height:10px;  background-color: blue; enyo-unselectable"
 				},
 				{style: "height: 5px"},
-				{kind: "onyx.Button", content: "Close", ontap: "closePopup"},
-			]},
+				{kind: "onyx.Button", content: "Close", ontap: "closePopup"}
+			]}
 		]},
 
 		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "css_builder_popupp", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
-				{name: "boxShadowBar", content: "Text Shadow"},
+				{name: "boxShadowBar", content: "Text Shadow"}
 			]},
 
 			{classes: "onyx-toolbar-inline", components: [
@@ -232,7 +232,7 @@ enyo.kind({
 				]}
 			]},
 			{name:"outputBox2", kind: "enyo.Panels", classes: "css_builder_outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
-				{content: "Box Shadow Color"},
+				{content: "Box Shadow Color"}
 			]},
 			{kind: "enyo.FittableRows", components: [
 				{name: "boxredSlider", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
@@ -248,9 +248,9 @@ enyo.kind({
 				{name: "boxblueSlider", kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged",
 				style: "height:10px;  background-color: blue; enyo-unselectable"
 				},
-				{kind: "onyx.Button", content: "Close", ontap: "closePopup"},
-			]},
-		]},
+				{kind: "onyx.Button", content: "Close", ontap: "closePopup"}
+			]}
+		]}
 	],
 
 	create: function() {
@@ -268,15 +268,15 @@ enyo.kind({
 			this.$.BoxShadowB.createComponent({content: i, active: !i});
 		}
 
-		for (var i=5; i<2000; i+=5) {
-			this.$.heightSizePicker.createComponent({content: i, active: !i});
-			this.$.widthSizePicker.createComponent({content: i, active: !i});
+		for (var j=5; j<2000; j+=5) {
+			this.$.heightSizePicker.createComponent({content: j, active: !j});
+			this.$.widthSizePicker.createComponent({content: j, active: !j});
 		}
-		for (var i=-25; i<25; i++) {
-			this.$.TextShadowH.createComponent({content: i, active: !i});
-			this.$.TextShadowV.createComponent({content: i, active: !i});
-			this.$.BoxShadowH.createComponent({content: i, active: !i});
-			this.$.BoxShadowV.createComponent({content: i, active: !i});
+		for (var k=-25; k<25; k++) {
+			this.$.TextShadowH.createComponent({content: k, active: !k});
+			this.$.TextShadowV.createComponent({content: k, active: !k});
+			this.$.BoxShadowH.createComponent({content: k, active: !k});
+			this.$.BoxShadowV.createComponent({content: k, active: !k});
 		}
 
 	},
@@ -380,7 +380,7 @@ enyo.kind({
 	}
 
 	this.$.bg.setContent(outPut + "<br>}");
-	outString = outString + "\n}"
+	outString = outString + "\n}";
 	this.outPut = outString;
 	},
 
