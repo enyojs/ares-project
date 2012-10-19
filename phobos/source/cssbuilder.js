@@ -607,6 +607,9 @@ enyo.kind({
 		this.$.paddingSize = null;
 		this.$.boxshadowcolor = null;
 		this.$.textshadowcolor = null;
+		this.$.hrepeat = null;
+		this.$.vrepeat = null;
+		this.$.norepeat = null;
 		this.$.outPut = null;
 		outString = "";
 		this.updateBox();
