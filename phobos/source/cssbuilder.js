@@ -142,13 +142,13 @@ enyo.kind({
 					{style: "height: 5px"},
 					{kind: "enyo.FittableColumns", components: [
 						{kind: "Checkbox",  style: "height: 35px; width: 35px;",onchange: "hrepeat"},
-						{content: "Repeat H"}
+						{content: "Repeat X"}
 					]},
 					
 					{style: "height: 5px"},
 					{kind: "enyo.FittableColumns", components: [
 						{kind: "Checkbox", style: "height: 35px; width: 35px;", onchange: "vrepeat"},
-						{content: "Repeat V"}
+						{content: "Repeat Y"}
 					]},
 					
 					{style: "height: 5px"},
@@ -385,8 +385,22 @@ enyo.kind({
 	}
 
 	if(this.$.bgImage != null){
-		outPut = outPut  + tab + "background-image:url('" + this.$.bgImage +"');<br>";
-		outString = outString + "	" + "background-image:url('" + this.$.bgImage + "');\n";
+		outPut = outPut  + tab + "background-image: url('" + this.$.bgImage +"');<br>";
+		outString = outString + "	" + "background-image: url('" + this.$.bgImage + "');\n";
+	}
+	if(this.$.hrepeat != null){
+		outPut = outPut  + tab + "background-image: repeat-x;<br>";
+		outString = outString + "	" + "background-image: repeat-x;\n";	
+	}
+	
+	if(this.$.vrepeat != null){
+		outPut = outPut  + tab + "background-image: repeat-y;<br>";
+		outString = outString + "	" + "background-image: repeat-y;\n";	
+	}
+	
+	if(this.$.norepeat != null){
+		outPut = outPut  + tab + "background-image: no-repeat;<br>";
+		outString = outString + "	" + "background-image: no-repeat;\n";	
 	}
 
 	this.$.bg.setContent(outPut + "<br>}");
@@ -549,23 +563,33 @@ enyo.kind({
 
 	imageInput: function(inSender, inEvent) {
 		this.$.bgImage = this.$.imageInput.hasNode().value;
+		this.updateBox();
 		console.log(this.$.bgImage, this.$.imageInput.hasNode().value );
 	},
 	hrepeat: function(inSender) {
-		if (inSender.getValue()) {
-			this.log("I've been checked!");
-		}
+		if (inSender.checked == true ){
+			this.$.hrepeat = true;
+		}else{
+			this.$.hrepeat  = null;
+		}		
+		this.updateBox();
 	},
 	vrepeat: function(inSender) {
-		if (inSender.getValue()) {
-			this.log("I've been checked!2");
-		}
+		if (inSender.checked == true ){
+			this.$.vrepeat = true;
+		}else{
+			this.$.vrepeat  = null;
+		}		
+		this.updateBox();	
 	},
 	
 	norepeat: function(inSender) {
-		if (inSender.getValue()) {
-			this.log("No repeat");
-		}
+		if (inSender.checked == true ){
+			this.$.norepeat = true;
+		}else{
+			this.$.norepeat  = null;
+		}		
+		this.updateBox();
 	},	
 	
 	reset: function(){
