@@ -132,25 +132,35 @@ enyo.kind({
 					]},
 					{kind: "onyx.Button", classes: "css_builder_button ", content: "Box Shadow", ontap: "boxshadow"}
 				]},
+				
 				{classes: "css_builder_pannel", style: " height: 200px", components: [
-					{name: "border", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Images..."},
+					{name: "border", style:  "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Images..."},
 
 					{style: "height: 5px"},
 					{kind: "onyx.Input", name: "imageInput", placeholder: "Enter image url:...", onchange: "imageInput"},
+				
 					{style: "height: 5px"},
-					{kind: "enyo.FittableRows", components: [
-						//{style: "height: 5px"},
-						{content: "Repeat H"},
-						{kind: "onyx.Checkbox", onchange: "checkboxClicked"}
-
+					{kind: "enyo.FittableColumns", components: [
+						{kind: "Checkbox",  style: "height: 35px; width: 35px;",onchange: "hrepeat"},
+						{content: "Repeat H"}
 					]},
+					
 					{style: "height: 5px"},
-					{kind: "enyo.FittableRows", fit: true, components: [
-						{style: "height: 5px"},
-						{style: "witdh: 75px;", content: "Repeat V"},
-						//{tag: "br"},
-						{kind: "onyx.Checkbox", onchange: "checkboxClicked2"}
+					{kind: "enyo.FittableColumns", components: [
+						{kind: "Checkbox", style: "height: 35px; width: 35px;", onchange: "vrepeat"},
+						{content: "Repeat V"}
+					]},
+					
+					{style: "height: 5px"},
+
+					{kind: "enyo.FittableColumns", components:[
+						{kind: "Checkbox", style: "height: 35px; width: 35px;", onchange: "norepeat"},
+						{content: "No Repeat"}
+					//	
+						
+						
 					]}
+				
 				]}
 			]}
 		]},
@@ -541,16 +551,23 @@ enyo.kind({
 		this.$.bgImage = this.$.imageInput.hasNode().value;
 		console.log(this.$.bgImage, this.$.imageInput.hasNode().value );
 	},
-	checkboxClicked: function(inSender) {
+	hrepeat: function(inSender) {
 		if (inSender.getValue()) {
 			this.log("I've been checked!");
 		}
 	},
-	checkboxClicked2: function(inSender) {
+	vrepeat: function(inSender) {
 		if (inSender.getValue()) {
 			this.log("I've been checked!2");
 		}
 	},
+	
+	norepeat: function(inSender) {
+		if (inSender.getValue()) {
+			this.log("No repeat");
+		}
+	},	
+	
 	reset: function(){
 		this.className = null;
 		this.backgroundColor = null;
