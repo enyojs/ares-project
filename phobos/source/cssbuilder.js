@@ -215,7 +215,7 @@ enyo.kind({
 			]}
 		]},
 
-		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "css_builder_popupp", centered: true, modal: true, floating: true, components: [
+		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "css_builder_popup", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
 				{name: "boxShadowBar", content: "Box Shadow"}
 			]},
