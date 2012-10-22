@@ -54,6 +54,9 @@ enyo.kind({
 		this.selected = inEvent.key;
 		var p = this.serviceRegistry.services[this.selected];
 		if (p) {
+			if (p.type == "box" && !p.auth) {
+				this.box(p);
+			}
 			if (p.type == "dropbox" && !p.auth) {
 				this.authorize(p);
 			} else  {
@@ -64,6 +67,13 @@ enyo.kind({
 	authorize: function(inProvider) {
 		var c = this.createComponent({kind: "ProviderConfigPopup", floating: true, centered: true, modal: true, autoDismiss: false,  ondragstart: "squelchPopupDrag", components: [
 			{kind: "DropboxConfig", onAuth: "auth"}
+		]});
+		c.render();
+		c.show();
+	},
+	box: function(inProvider) {
+		var c = this.createComponent({kind: "ProviderConfigPopup", floating: true, centered: true, modal: true, autoDismiss: false,  ondragstart: "squelchPopupDrag", components: [
+			{kind: "Box"}
 		]});
 		c.render();
 		c.show();

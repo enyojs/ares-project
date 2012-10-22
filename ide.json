@@ -22,6 +22,17 @@
 			"command":"@NODE@", "params":["hermes/dropbox/index.js", "0", "http://184.169.139.5:8080"],
 			"useJsonp":false,
 			"debug": false
+		},
+				{
+			"active":false,
+			"id":"box.com",
+			"icon":"box",
+			"name":"Box.com",
+			"type":"box",
+
+			"useJsonp":false,
+			"debug": false
 		}
+
 	]
 }
