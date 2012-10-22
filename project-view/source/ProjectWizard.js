@@ -4,7 +4,8 @@ enyo.kind({
 	fit: true,
 	events: {
 		onCancel: "",
-		onConfirmCreateProject: ""
+		onConfirmCreateProject: "", 
+		onConfirmConfigProject: ""
 	},
 	handlers: {
 		onDirectorySelected: "directorySelected"
@@ -59,6 +60,7 @@ enyo.kind({
 			service.createFolder(folderId, name)
 				.response(this, function(inSender, inResponse) {
 					this.doConfirmCreateProject({name: name, folderId: inResponse, service: this.selectedDir.service, serviceId: this.selectedServiceId});
+					this.doConfirmConfigProject({name: name, folderId: inResponse, service: this.selectedDir.service});
 				})
 				.error(this, function(inSender, inError) {
 					// TODO handle the error
@@ -68,6 +70,7 @@ enyo.kind({
     	} else {
     		folderId = this.selectedDir.id;
     		this.doConfirmCreateProject({name: name, folderId: folderId, service: this.selectedDir.service, serviceId: this.selectedServiceId});
+    		this.doConfirmConfigProject({name: name, folderId: folderId, service: this.selectedDir.service});
     	}
     },
     directorySelected: function(inSender, inEvent) {

@@ -10,6 +10,7 @@ enyo.kind({
 	handlers: {
 	},
 	projects: [],
+	projectsConfig: [],
 	debug: false,
 	components: [
 	    {kind: "LocalStorage"},
@@ -44,6 +45,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
+		this.projectsConfig = [];
 	},
 	/**
 	 * Receive the {onServicesChange} broadcast notification
@@ -109,6 +111,12 @@ enyo.kind({
 	},
 	confirmRemoveProject: function(inSender, inEvent) {
 		if (this.selected) {
+			for (var i = 0; i<this.projectsConfig.length; i++) {
+				if (this.projectsConfig[i].name === this.selected.projectName) {
+					this.projectsConfig.splice(i,1);
+					break;
+				}
+			}
 			this.projects.splice(this.selected.index, 1);
 			this.storeProjectsInLocalStorage();
 			this.selected = null;
@@ -155,7 +163,19 @@ enyo.kind({
     		return undefined;	// Exclude
     	}
     	return value;	// Accept
-    }
+    },
+    storeProjectConfig: function (projectName, projectProperties) {
+    	var found = false;
+    	for (var i = 0; i<this.projectsConfig.length; i++) {
+    		if (this.projectsConfig[i].name === projectName) {
+    			found = true;
+    			break;
+    		}
+    	}
+    	if (!found) {
+    		this.projectsConfig.push({name: projectName, properties: projectProperties});
+    	}    	
+    },
 });
 
 enyo.kind({

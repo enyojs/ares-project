@@ -2,5 +2,6 @@
 	"ProjectList.js",
 	"DirectorySelector.js",
 	"ProjectWizard.js",
-	"ProjectView.js"
+	"ProjectView.js",
+	"ProjectConfig.js"
 );
