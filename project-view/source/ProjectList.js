@@ -32,7 +32,7 @@ enyo.kind({
 		]},
 		{kind: "enyo.Scroller", components: [
 			{kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
-				{kind: "Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
+				{kind: "ProjectList.Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
 			]}
 		]},
 		{name: "removeProjectPopup", kind: "Ares.ActionPopup", onConfirmDeleteProject: "confirmRemoveProject"},
@@ -136,7 +136,11 @@ enyo.kind({
 		if (project.service) {
 			// Highlight a project item if & only if its
 			// filesystem service provider exists.
-    			this.selected = inEvent.originator;
+			if (inEvent.originator.kind === 'ProjectList.Project') {
+				this.selected = inEvent.originator;
+			} else {
+				this.selected = inEvent.originator.owner;
+			}
     			this.selected.addClass("ares_projectView_projectList_item_selected");
     			this.doProjectSelected({project: project});
 		} else {
@@ -159,7 +163,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "Project",
+	name: "ProjectList.Project",
 	published: {
 		projectName: "",
 		index: -1
