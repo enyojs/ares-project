@@ -12,8 +12,16 @@ if (version <= 0.7) {
 var fs = require("fs"),
     path = require("path"),
     express = require(path.resolve(__dirname, "hermes/filesystem/node_modules/express")),
+    optimist = require(path.resolve(__dirname, "hermes/node_modules/optimist")),
     util  = require('util'),
     spawn = require('child_process').spawn;
+
+var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applications.\nUsage: "$0"\n')
+	.argv;
+
+if ((argv.h) || (argv.help)) {
+	argv.showHelp();
+}
 
 // Load IDE configuration & start per-project file servers
 
@@ -34,7 +42,7 @@ function platformSubst(inStr) {
 	return outStr;
 }
 
-var configPath = process.argv[2] || path.resolve(__dirname, "ide.json");
+var configPath = process.argv[3] || path.resolve(__dirname, "ide.json");
 if (!fs.existsSync(configPath)) {
 	throw "Did not find: '"+configPath+"': ";
 }
@@ -128,8 +136,8 @@ ide.res.services.filter(function(service){
 var enyojsRoot = path.resolve(__dirname,".");
 var app = express.createServer();
 
-var port = parseInt(process.argv[2] || "9009", 10);
-var addr = process.argv[3] || "127.0.0.1";
+var port = parseInt(process.argv[3] || "9009", 10);
+var addr = process.argv[4] || "127.0.0.1";
 
 app.configure(function(){
 	app.use('/ide', express.static(enyojsRoot + '/'));
