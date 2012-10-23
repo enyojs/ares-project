@@ -7,7 +7,7 @@
 			"name":"Local Files (home)",
 			"type":"hermes",
 			"command":"@NODE@", "params":[
-				"hermes/fsLocal.js", "-P", "/some/files", "@HOME@", "-p", "0"
+				"hermes/fsLocal.js", "/some/files", "@HOME@", "0"
 			],
 			"useJsonp":false,
 			"debug": false,
