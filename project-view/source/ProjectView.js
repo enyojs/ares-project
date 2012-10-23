@@ -7,10 +7,13 @@ enyo.kind({
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
 		{kind: "ProjectWizardPopup", canGenerate: false, name: "projectWizardPopup"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{kind: "ProjectConfig", name: "projectConfig"},
     ],
 	handlers: {
 		onCancel: "cancelCreateProject",
-		onConfirmCreateProject: "confirmCreateProject"
+		onConfirmCreateProject: "confirmCreateProject",
+		onConfirmConfigProject: "confirmConfigProject",
+		onUploadProjectConfig: "uploadProjectConfig"
 	},
 	create: function() {
 		this.inherited(arguments);
@@ -60,9 +63,30 @@ enyo.kind({
 	    	// Pass service definition & configuration to Harmonia
 	    	// & consequently to HermesFileTree
 		this.$.harmonia.setProject(inEvent.project);
+		this.$.projectConfig.checkConfig(inEvent.project);
 		return true; //Stop event propagation
 	},
 	projectRemoved: function(inSender, inEvent) {
     		this.$.harmonia.setProject(null);
+	},
+	confirmConfigProject: function(inSender, inEvent) {
+		try {
+			// data to create the project properties file
+			var projectData = {
+					name: inEvent.name,
+					folderId: inEvent.folderId,
+					service: inEvent.service					
+			};
+			this.$.projectConfig.createConfig(projectData);
+		} catch(e) {
+    		this.showErrorPopup(e.toString());
+    		return false;			
+		}
+		// handled here (don't bubble)
+		return true;
+	},
+	uploadProjectConfig: function(inSender, inEvent) {
+		// push project data to project list
+		this.$.projectList.storeProjectConfig(inEvent.name, inEvent.properties);
 	}
 });
