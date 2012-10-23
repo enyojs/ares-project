@@ -103,6 +103,7 @@ enyo.kind({
 		this.serializeAction();
 	},
 	designerChange: function(inSender) {
+		this.refreshComponentView();
 		this.refreshInspector();
 		this.docHasChanged = true;
 		return true; // Stop the propagation of the event
@@ -118,6 +119,7 @@ enyo.kind({
 		return true; // Stop the propagation of the event
 	},
 	inspectorModify: function() {
+		this.refreshComponentView();
 		this.$.designer.refresh();
 		this.docHasChanged = true;
 		return true; // Stop the propagation of the event
