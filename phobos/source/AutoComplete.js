@@ -34,8 +34,6 @@ enyo.kind({
 	AUTOCOMP_THIS_DOLLAR: 'this.$.',
 	AUTOCOMP_ENYO: "enyo.",
 	AUTOCOMP_ONYX: "onyx.",
-	ESCAPE_CODE: 27,
-	BACKSPACE_CODE: 8,
 	debug: false,
 	input: "",
 	suggestions: null,				// List of suggestion to display in the popup
@@ -43,13 +41,15 @@ enyo.kind({
 	suggestionsOnyx: null,
 	localKinds: {},					// The kinds defined in the currently edited file
 	kindName: "",
+	inputProcessor: null,			// To take care of browser differences regarding input events
 	create: function() {
 		this.inherited(arguments);
+		this.inputProcessor = new Phobos.InputProcessor();
 	},
 	start: function(inEvent) {
 		var suggestions = new Phobos.Suggestions(), go = false;
 		if (this.analysis && this.analysis.objects && this.analysis.objects.length > 0) {
-			this.debug && this.log("Auto-Completion needed ?");
+			this.debug && this.log("Auto-Completion needed ? - " + (inEvent && JSON.stringify(inEvent.data)));
 			
 			// Retrieve the kind name for the currently edited file
 			this.kindName = this.analysis.objects[this.analysis.currentObject].name;
@@ -295,35 +295,36 @@ enyo.kind({
 		selected = selected.substr(this.input.length);
 		var pos = enyo.clone(this.popupPosition);
 		pos.column += this.input.length;
-		if (this.debug) this.log("Inserting >>" + selected + "<< at " + JSON.stringify(pos));
+		this.debug && this.log("Inserting >>" + selected + "<< at " + JSON.stringify(pos));
 		this.ace.insertAt(pos, selected);
 		ace.focus();
 		return true; // Stop the propagation of the event
 	},
 	keyPress: function(inSender, inEvent) {
-		var key = inEvent.keyIdentifier;
-		if (key !== 'Enter') {
-			var pos = enyo.clone(this.popupPosition);
+		var input = this.inputProcessor;
+		input.setInput(inEvent);
+		var code = input.getCharCode();
+		if (code != 0 && code != input.CARRIAGE_RETURN) {	// Just consider regular character except ENTER
+			var pos = enyo.clone(this.popupPosition);		// to refine the selection filtering
 			pos.column += this.input.length;
-			var character = String.fromCharCode(inEvent.keyCode);
+			var character = String.fromCharCode(code);
 			this.input += character;
-			if (this.debug) this.log("Got a keypress ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier + " ==> input: >>" + this.input + "<<");
-			if (this.debug) this.log("Inserting >>" + character + "<< at " + JSON.stringify(pos));
+			this.debug && this.log("Inserting >>" + character + "<< at " + JSON.stringify(pos));
 			this.ace.insertAt(pos, character);
 			this.showAutocompletePopup();
-		} // else - Don't care
+		}	// else - Don't care
 		return true; // Stop the propagation of the event
 	},
 	keyDown: function(inSender, inEvent) {
-		if (this.debug) this.log("Got a keydown ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
-
-		var key = inEvent.keyIdentifier;
-		if (key === "Up") {
+		var input = this.inputProcessor;
+		input.setInput(inEvent);
+		var key = input.getKeyCode();
+		if (key === input.ARROW_UP) {					// Detect the UP arrow
 			var select = this.$.autocompleteSelect;
 			var selected = select.getSelected() - 1;
 			if (selected < 0) { selected = select.nbEntries - 1;}
 			select.setSelected(selected);
-		} else if (key === "Down") {
+		} else if (key === input.ARROW_DOWN) {			// Detect the DOWN arrow
 			var select = this.$.autocompleteSelect;
 			var selected = (select.getSelected() + 1) % select.nbEntries;
 			select.setSelected(selected);
@@ -331,26 +332,23 @@ enyo.kind({
 		return true; // Stop the propagation of the event
 	},
 	keyUp: function(inSender, inEvent) {
-		if (this.debug) this.log("Got a keyup ... code: " + inEvent.keyCode + " Ident:" + inEvent.keyIdentifier);
-
-		var key = inEvent.keyIdentifier;
-		if (key === "Enter") {
-			this.autocompleteChanged();
+		var input = this.inputProcessor;
+		input.setInput(inEvent);
+		var key = input.getKeyCode();
+		if (key === input.ESCAPE_CODE) {				// On ESCAPE, hide the auto-complete popup
 			this.hideAutocompletePopup();
-		} else {
-			key = inEvent.keyCode;
-			if (key === this.ESCAPE_CODE) {
-				this.hideAutocompletePopup();
-			} else if (key === this.BACKSPACE_CODE) {
-				var str = this.input;
-				if (str.length > 0) {
-					this.input = str.substr(0, str.length -1);
-					if (this.debug) this.log("Got a backspace ==> input: >>" + this.input + "<<");
-					this.showAutocompletePopup();
-					this.ace.undo();
-				}
-			}// else - Don't care
-		}
+		} else if (key === input.CARRIAGE_RETURN) {		// On ENTER, insert the current selection
+			this.autocompleteChanged();
+			this.hideAutocompletePopup();				
+		} else if (key === input.BACKSPACE_CODE) {		// On BACKSPACE, refine the selection filtering
+			var str = this.input;
+			if (str.length > 0) {
+				this.input = str.substr(0, str.length -1);
+				this.debug && this.log("Got a backspace ==> input: >>" + this.input + "<<");
+				this.showAutocompletePopup();
+				this.ace.undo();
+			}
+		}// else - Don't care
 
 		this.ace.blur();		// Needed to force ACE to ignore keystrokes after the popup is opened
 
@@ -472,6 +470,51 @@ enyo.kind({
 			}
 		}
 		return list;
+	}
+});
+
+/**
+ * Phobos.InputProcessor takes care of different browser behavior
+ * regarding input events.
+ * 
+ * For example, it filter keypress events on FireFox when
+ * a CTRL, ALT or META is pressed while entering a character
+ */
+enyo.kind({
+	name : "Phobos.InputProcessor",
+	kind : "enyo.Component",
+	debug: false,
+	CARRIAGE_RETURN: 13,
+	ARROW_UP: 38,
+	ARROW_DOWN: 40,
+	ESCAPE_CODE: 27,
+	BACKSPACE_CODE: 8,
+	setInput: function(inEvent) {
+		this.inEvent = inEvent;
+
+		this.debug && this.log("Got a " + inEvent.type + " ... keyCode: " + inEvent.keyCode + " charCode: " + inEvent.charCode + " Ident:" + inEvent.keyIdentifier);
+		this.debug && this.log("+++++ crtl: " + inEvent.ctrlKey + " alt: " + inEvent.altKey + " shift:" + inEvent.shiftKey + " meta:" + inEvent.metatKey + " isChar: " + inEvent.isChar);
+	},
+	getKeyIdentifier: function() {
+		var value = this.inEvent.keyIdentifier;
+		this.debug && this.log(this.inEvent.type + " --> keyIdentifier: " + value);
+		return value;
+	},
+	getKeyCode: function() {
+		var value = this.inEvent.keyCode;
+		this.debug && this.log(this.inEvent.type + " --> keyCode: " + value);
+		return value;
+	},
+	getCharCode: function() {
+		var event = this.inEvent;
+		var value;
+		if (event.ctrlKey || event.altKey || event.metatKey) {	// Avoid returning a CTRL-XXX on FireFox
+			value = 0;
+		} else {
+			value = event.charCode;
+		}
+		this.debug && this.log(event.type + " --> charCode: " + value);
+		return value;
 	}
 });
 

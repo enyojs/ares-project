@@ -10,6 +10,7 @@ enyo.kind({
 	handlers: {
 	},
 	projects: [],
+	projectsConfig: [],
 	debug: false,
 	components: [
 	    {kind: "LocalStorage"},
@@ -17,30 +18,26 @@ enyo.kind({
 			{content: "Projects", style: "margin-right: 10px"},
 			 // FIXME: we may need icons dedicated for projects instead of re-using application icons
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$harmonia/images/application_new.png", onclick: "doCreateProject"},
+				{kind: "onyx.IconButton", src: "$project-view/images/project_view_new.png", onclick: "doCreateProject"},
 				{kind: "onyx.Tooltip", content: "Create Project..."},
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$harmonia/images/application_edit.png", onclick: "doOpenProject"},
+				{kind: "onyx.IconButton", src: "$project-view/images/project_view_edit.png", onclick: "doOpenProject"},
 				{kind: "onyx.Tooltip", content: "Open Project..."},
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$harmonia/images/delete.png", onclick: "removeProjectAction"},
+				{kind: "onyx.IconButton", src: "$project-view/images/project_view_delete.png", onclick: "removeProjectAction"},
 				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
 				{kind: "onyx.Tooltip", content: "Remove Project..."},
 			]},
 		]},
 		{kind: "enyo.Scroller", components: [
 			{kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
-				{kind: "Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
+				{kind: "ProjectList.Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
 			]}
 		]},
-		{kind: "RemoveProjectPopup", onConfirmDeleteProject: "confirmRemoveProject"},
-		{name: "errorPopup", kind: "onyx.Popup", modal: true, centered: true, floating: true, components: [
-		    {tag: "h3", content: "An error occured"},
-		    {name: "errorMsg", content: "unknown error"},
-		    {kind : "onyx.Button", content : "OK", ontap : "hideErrorPopup"}
-		]},
+		{name: "removeProjectPopup", kind: "Ares.ActionPopup", onConfirmDeleteProject: "confirmRemoveProject"},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 	PROJECTS_STORAGE_KEY: "com.enyojs.ares.projects",
@@ -48,6 +45,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
+		this.projectsConfig = [];
 	},
 	/**
 	 * Receive the {onServicesChange} broadcast notification
@@ -113,6 +111,12 @@ enyo.kind({
 	},
 	confirmRemoveProject: function(inSender, inEvent) {
 		if (this.selected) {
+			for (var i = 0; i<this.projectsConfig.length; i++) {
+				if (this.projectsConfig[i].name === this.selected.projectName) {
+					this.projectsConfig.splice(i,1);
+					break;
+				}
+			}
 			this.projects.splice(this.selected.index, 1);
 			this.storeProjectsInLocalStorage();
 			this.selected = null;
@@ -140,7 +144,11 @@ enyo.kind({
 		if (project.service) {
 			// Highlight a project item if & only if its
 			// filesystem service provider exists.
-    			this.selected = inEvent.originator;
+			if (inEvent.originator.kind === 'ProjectList.Project') {
+				this.selected = inEvent.originator;
+			} else {
+				this.selected = inEvent.originator.owner;
+			}
     			this.selected.addClass("ares_projectView_projectList_item_selected");
     			this.doProjectSelected({project: project});
 		} else {
@@ -150,23 +158,32 @@ enyo.kind({
 	    		this.error(msg);
 		}
 	},
-	showErrorPopup : function(msg) {		// TODO Should refine error notification for the whole Ares project - ENYO-1105
-		this.$.errorMsg.setContent(msg);
+	showErrorPopup : function(msg) {
+		this.$.errorPopup.setErrorMsg(msg);
 		this.$.errorPopup.show();
-	},
-	hideErrorPopup : function() {
-		this.$.errorPopup.hide();
 	},
     stringifyReplacer: function(key, value) {
     	if (key === "originator") {
     		return undefined;	// Exclude
     	}
     	return value;	// Accept
-    }
+    },
+    storeProjectConfig: function (projectName, projectProperties) {
+    	var found = false;
+    	for (var i = 0; i<this.projectsConfig.length; i++) {
+    		if (this.projectsConfig[i].name === projectName) {
+    			found = true;
+    			break;
+    		}
+    	}
+    	if (!found) {
+    		this.projectsConfig.push({name: projectName, properties: projectProperties});
+    	}    	
+    },
 });
 
 enyo.kind({
-	name: "Project",
+	name: "ProjectList.Project",
 	published: {
 		projectName: "",
 		index: -1
@@ -177,36 +194,4 @@ enyo.kind({
 	projectNameChanged: function(inOldValue) {
         this.$.name.setContent(this.projectName);
     }
-});
-
-enyo.kind({
-	name: "RemoveProjectPopup",
-	kind: "onyx.Popup",
-	published: {
-		name: ""
-	},
-	events: {
-		onConfirmDeleteProject: ""
-	},
-	modal: true,
-	centered: true,
-	floating: true,
-	autoDismiss: false,
-	components: [
-	    {name: "title", tag: "h3", content: "Delete?"},
-	    {tag: "br"},
-	    {tag: "br"},
-	    {kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "deleteCancel"},
-	    {kind: "onyx.Button", classes: "onyx-affirmative", content: "Delete", ontap: "deleteConfirm"}
-    ],
-	nameChanged: function() {
-		this.$.title.setContent("Delete project \"" + this.name + "\" ?");
-	},
-	deleteCancel: function(inSender, inEvent) {
-	    this.hide();
-	},
-	deleteConfirm: function(inSender, inEvent) {
-	    this.hide();
-	    this.doConfirmDeleteProject();
-	}
 });

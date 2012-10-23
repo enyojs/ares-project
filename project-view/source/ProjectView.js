@@ -6,27 +6,23 @@ enyo.kind({
 	    {kind: "ProjectList", onCreateProject: "createProjectAction", onOpenProject: "openProjectAction", onProjectRemoved: "projectRemoved", onProjectSelected: "handleProjectSelected", name: "projectList"},
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
 		{kind: "ProjectWizardPopup", canGenerate: false, name: "projectWizardPopup"},
-		{name: "errorPopup", kind: "onyx.Popup", modal: true, centered: true, floating: true, components: [
-		    {tag: "h3", content: "An error occured"},
-		    {name: "errorMsg", content: "unknown error"},
-		    {kind : "onyx.Button", content : "OK", ontap : "hideErrorPopup"}
-		]},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{kind: "ProjectConfig", name: "projectConfig"},
     ],
 	handlers: {
 		onCancel: "cancelCreateProject",
-		onConfirmCreateProject: "confirmCreateProject"
+		onConfirmCreateProject: "confirmCreateProject",
+		onConfirmConfigProject: "confirmConfigProject",
+		onUploadProjectConfig: "uploadProjectConfig"
 	},
 	create: function() {
 		this.inherited(arguments);
 	},
-	showErrorPopup : function(msg) {		// TODO Should refine error notification for the whole Ares project - ENYO-1105
-		this.$.errorMsg.setContent(msg);
+	showErrorPopup : function(msg) {
+		this.$.errorPopup.setErrorMsg(msg);
 		this.$.errorPopup.show();
 	},
-	hideErrorPopup : function() {
-		this.$.errorPopup.hide();
-	},
-    openProjectAction: function(inSender, inEvent) {
+   openProjectAction: function(inSender, inEvent) {
     	this.$.projectWizardPopup.reset();
     	this.$.projectWizardPopup.setCreateMode(false);
         this.$.projectWizardPopup.show();
@@ -48,7 +44,7 @@ enyo.kind({
 		try {
     			// Add an entry into the project list
     			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
-			
+    			
     			// Pass service information to Harmonia
 			this.$.harmonia.setProject({
 				service: inEvent.service,
@@ -67,9 +63,30 @@ enyo.kind({
 	    	// Pass service definition & configuration to Harmonia
 	    	// & consequently to HermesFileTree
 		this.$.harmonia.setProject(inEvent.project);
+		this.$.projectConfig.checkConfig(inEvent.project);
 		return true; //Stop event propagation
 	},
 	projectRemoved: function(inSender, inEvent) {
     		this.$.harmonia.setProject(null);
+	},
+	confirmConfigProject: function(inSender, inEvent) {
+		try {
+			// data to create the project properties file
+			var projectData = {
+					name: inEvent.name,
+					folderId: inEvent.folderId,
+					service: inEvent.service					
+			};
+			this.$.projectConfig.createConfig(projectData);
+		} catch(e) {
+    		this.showErrorPopup(e.toString());
+    		return false;			
+		}
+		// handled here (don't bubble)
+		return true;
+	},
+	uploadProjectConfig: function(inSender, inEvent) {
+		// push project data to project list
+		this.$.projectList.storeProjectConfig(inEvent.name, inEvent.properties);
 	}
 });

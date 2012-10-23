@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "CategoryItem",
 	components: [
-		{style: "background-color: #F5F5F5; border-radius: 8px; border: 1px solid #D0D0D0; margin-bottom: 14px; padding-bottom: 6px;", components: [
+		{style: " border-radius: 4px; border: 1px solid #D0D0D0; margin-bottom: 1px;", components: [
 			{name: "name", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;"},
 			{classes: "row-fluid", components: [
 				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
@@ -25,7 +25,7 @@ enyo.kind({
 enyo.kind({
 	name: "PaletteItem",
 	components: [
-		{style: "background-color: #F5F5F5; border-top: 1px solid #D0D0D0; padding: 12px;", components: [
+		{style: "background-color: #F5F5F5; border-radius: 4px; border-top: 1px solid #D0D0D0; padding: 12px;", components: [
 			{tag: "h5", name: "name"},
 			{classes: "row-fluid", name: "client"}
 		]}
@@ -55,7 +55,7 @@ enyo.kind({
 	components: [
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{kind: "Scroller", fit: true, components: [
-				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", style: "margin: 0 10px 0 0px;", components: [
+				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
 					{kind: "CategoryItem"}
 				]}
 			]},

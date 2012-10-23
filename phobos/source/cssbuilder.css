@@ -45,3 +45,12 @@
 .button {
 	font-size: 10px;
 }
+
+.popupp{
+	width: 300px;
+	font-size: 15px;
+	color: #000000;
+	background-color: #F5F5F5;
+	border-radius: 8px;
+	border: 1px solid #D0D0D0;
+}
