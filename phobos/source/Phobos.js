@@ -72,7 +72,7 @@ enyo.kind({
 	},
 	saveFailed: function(inMsg) {
 		this.hideWaitPopup();
-		this.error("Save failed: " + inMsg);
+		this.log("Save failed: " + inMsg);
 		this.showErrorPopup("Unable to save the file");
 	},
 	beginOpenDoc: function() {
