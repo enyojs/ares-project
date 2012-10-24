@@ -34,7 +34,8 @@ enyo.kind({
 			{name: "waitPopupMessage", content: "Saving document...", style: "padding-top: 10px;"}
 		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
-		{name: "autocomplete", kind: "Phobos.AutoComplete"}
+		{name: "autocomplete", kind: "Phobos.AutoComplete"},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"}
 	],
 	events: {
 		onSaveDocument: "",
@@ -68,6 +69,11 @@ enyo.kind({
 		this.hideWaitPopup();
 		this.docHasChanged=false;
 		this.reparseAction();
+	},
+	saveFailed: function(inMsg) {
+		this.hideWaitPopup();
+		this.error("Save failed: " + inMsg);
+		this.showErrorPopup("Unable to save the file");
 	},
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
@@ -130,14 +136,17 @@ enyo.kind({
 	hideWaitPopup: function() {
 		this.$.waitPopup.hide();
 	},
+	showErrorPopup : function(msg) {
+		this.$.errorPopup.setErrorMsg(msg);
+		this.$.errorPopup.show();
+	},
 	//
 	//
 	buildEnyoDb: function() {
 		this.$.enyoAnalyzer.analyze(["$enyo/source", "$lib/layout", "$lib/onyx"]);
 	},
 	buildProjectDb: function(inProjectUrl) {
-		this.log("projectUrl: " + inProjectUrl);			// TODO TBC
-//		this.$.projectAnalyzer.analyze(["http://127.0.0.1:44799/some/files/file/NewProject/AutoComplete"]); // TODO TBR
+		this.debug && this.log("projectUrl: " + inProjectUrl);
 		this.$.projectAnalyzer.analyze([inProjectUrl]);
 	},
 	enyoIndexReady: function() {

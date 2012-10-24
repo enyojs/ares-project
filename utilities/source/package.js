@@ -1,4 +1,5 @@
 ﻿enyo.depends(
 	"ActionPopup.js",
-	"ErrorPopup.js"	
+	"ErrorPopup.js",
+	"AsyncError.js"
 );
