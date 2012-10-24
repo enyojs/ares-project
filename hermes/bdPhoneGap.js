@@ -2,14 +2,14 @@
  * Hermes PhoneGap build service
  */
 
-var fs = require("fs");
-var path = require("path");
-var express = require("express");
-var util  = require("util");
-var querystring = require("querystring");
-var temp = require("temp");
-var zipstream = require('zipstream');
-var formidable = require('formidable'),
+var fs = require("fs"),
+    path = require("path"),
+    express = require("express"),
+    util  = require("util"),
+    querystring = require("querystring"),
+    temp = require("temp"),
+    zipstream = require('zipstream'),
+    formidable = require('formidable'),
     async = require("async"),
     mkdirp = require("mkdirp"),
     rimraf = require("rimraf"),
@@ -18,7 +18,7 @@ var formidable = require('formidable'),
 var basename = path.basename(__filename);
 
 function BdPhoneGap(config, next) {
-	console.log("config=" + util.inspect(config));
+	console.log(basename, "config=",  util.inspect(config));
 
 	function HttpError(msg, statusCode) {
 		Error.captureStackTrace(this, this);
@@ -103,37 +103,10 @@ function BdPhoneGap(config, next) {
 		// debugger;
 		async.series([
 		 	prepare.bind(this),
-			dispatchFiles.bind(this, req, res),
-			bundle.bind(this, req, res),
+			store.bind(this, req, res),
+			zip.bind(this, req, res),
 			respond.bind(this, req, res),
-			cleanup.bind(this, req, res),
-
-			// function(done) {
-			// 	// prepare local files & directories
-			// 	prepare(req, res, done);
-			// }, function(done) {
-			// 	// parse & store multipart/form-data
-			// 	receive(req, res, done);
-			// }, function(done) {
-			// 	// return multipart/form-data as a ZIP archive
-			// 	returnZip(req, res, done);
-			// }, function(done) {
-			// 	// minify & compile LESS
-			// 	deployApp(req, res, done);
-			// }, function(done) {
-			// 	// prepare ZIP for for PhoneGap
-			// 	bundle(req, res, done);
-			// }, function(done) {
-			// 	// submit ZIP to PhoneGap
-			// 	callPhoneGap(req, res, done);
-			// }, function(done) {
-			// 	// return application package to Ares
-			// 	respond(req, res, done);
-			// }, function(done) {
-			// 	// cleanup local resources
-			// 	cleanup(req, res, done);
-			// }
-
+			cleanup.bind(this, req, res)
 		], function (err, results) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
@@ -179,60 +152,12 @@ function BdPhoneGap(config, next) {
 			function(done) { fs.mkdir(appDir.source, done); },
 			function(done) { fs.mkdir(appDir.build, done); },
 			function(done) { fs.mkdir(appDir.deploy, done); }
-		], function(err) {
-			console.log("prepare(): done (err=", err, ")");
-			next(err);
-		});
+		], next);
 	}
 
-	function receive(req, res, next) {
-		console.log("receive(): ");
-		debugger;
-		var form, fields = [], files = [];
 
-		req.on('close', function() {
-			throw new Error('client connection closed');
-		});
-
-		if (!req.is('multipart/form-data')) {
-			throw new HttpError("Not a multipart request", 415 /*Unsupported Media Type*/);
-		}
-		
-		form = new formidable.IncomingForm();
-		form.uploadDir = appDir.upload;
-
-		form.on('field', function(name, value) {
-			fields.push([name, value]);
-		});
-		
-		form.on('file', function(name, file) {
-			files.push(file);
-		});
-
-		form.parse(req, function(err) {
-			if (err) throw err;
-			console.log("receive(): form parsed");
-			// create necessary directory layout
-			async.forEachSeries(files, function(file, done) {
-				var dir = path.join(appDir.source, path.dirname(file.name));
-				console.log("receive(): mkdir -p " + dir);
-				mkdirp(dir, done);
-			}, function(err) {
-				next(err);
-				// move received files into real layout
-				async.forEach(files, function(file, done) {
-					console.log("receive(): mv " + file.path + " "  + file.name);
-					fs.rename(file.path, path.join(appDir.source, file.name), done);
-				}, function(err, results) {
-					console.log("receive(): moved " + util.inspect(results));
-					next(err);
-				});
-			});
-		});
-	}
-
-	function dispatchFiles(req, res, next) {
-		//console.log("dispatchFiles(): req.files = ", util.inspect(req.files));
+	function store(req, res, next) {
+		//console.log("store(): req.files = ", util.inspect(req.files));
 
 		if (!req.is('multipart/form-data')) {
 			next(new HttpError("Not a multipart request", 415 /*Unsupported Media Type*/));
@@ -246,28 +171,25 @@ function BdPhoneGap(config, next) {
 
 		async.forEachSeries(req.files.file, function(file, cb) {
 			var dir = path.join(appDir.source, path.dirname(file.name));
-			console.log("dispatchFiles(): mkdir -p ", dir);
+			//console.log("store(): mkdir -p ", dir);
 			mkdirp(dir, function(err) {
-				console.log("dispatchFiles(): mv ", file.path, " ", file.name);
+				//console.log("store(): mv ", file.path, " ", file.name);
 				if (err) {
 					cb(err);
 				} else {
 					fs.rename(file.path, path.join(appDir.source, file.name), function(err) {
-						console.log("dispatchFiles(): done: ", file.name);
+						console.log("store(): Stored: ", file.name);
 						cb(err);
 					});
 				}
 			});
-		}, function(err) {
-			console.log("dispatchFiles(): done");
-			next(err);
-		});
+		}, next);
 	}
 
-	function deployApp(req, res, next) {}
+	function deploy(req, res, next) {}
 
-	function bundle(req, res, next) {
-		console.log("bundle(): ");
+	function zip(req, res, next) {
+		//console.log("zip(): ");
 		req.zip = {};
 		req.zip.path = path.join(appDir.root, "app.zip");
 		req.zip.stream = zipstream.createZip({level: 1});
@@ -283,45 +205,33 @@ function BdPhoneGap(config, next) {
 			// TODO that _thing_ probably needs a bit of
 			// refactoring by someone that feels easy with
 			// node-async _arcanes_.
-			console.log("bundle._walk(): Parsing: ", relParent);
+			//console.log("zip._walk(): Parsing: ", relParent);
 			async.waterfall([
 				function(cb2) {
-					console.log("bundle._walk(): readdir: ", absParent);
+					//console.log("zip._walk(): readdir: ", absParent);
 					fs.readdir(absParent, cb2);
 				},
 				function(nodes, cb2) {
-					console.log("bundle._walk(): nodes.forEach");
+					//console.log("zip._walk(): nodes.forEach");
 					async.forEachSeries(nodes, function(name, cb3) {
 						var absPath = path.join(absParent, name),
 						    relPath = path.join(relParent, name);
-						console.log("bundle._walk(): stat: ", absPath);
+						//console.log("zip._walk(): stat: ", absPath);
 						fs.stat(absPath, function(err, stat) {
 							if (err) {
 								cb3(err);
 								return;
 							}
 							if (stat.isDirectory()) {
-								_walk(absPath, relPath,  /*cb3*/ function(err) {
-									console.log("bundle._walk(): cb3 (2/3) = ", util.inspect(cb3));
-									cb3(err);
-								});
+								_walk(absPath, relPath, cb3);
 							} else {
-								console.log("bundle._walk(): Adding: ", relPath);
-								req.zip.stream.addFile(fs.createReadStream(absPath), { name: relPath }, /*cb3*/ function(err) {
-									console.log("bundle._walk(): cb3 (3/3) = ", util.inspect(cb3));
-									cb3(err);
-								});
+								console.log("zip._walk(): Adding: ", relPath);
+								req.zip.stream.addFile(fs.createReadStream(absPath), { name: relPath }, cb3);
 							}
 						});
-					}, /*cb2*/ function(err) {
-						console.log("bundle._walk(): cb2 = ", util.inspect(cb2));
-						cb2(err);
-					});
+					}, cb2);
 				}
-			], /*cb*/ function(err) {
-				console.log("bundle._walk(): cb = ", util.inspect(cb));
-				cb(err);
-			});
+			], cb);
 		}
 	}
 
