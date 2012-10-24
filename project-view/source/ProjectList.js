@@ -17,6 +17,10 @@ enyo.kind({
 	    {kind: "onyx.Toolbar",  classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
 			{content: "Projects", style: "margin-right: 10px"},
 			 // FIXME: we may need icons dedicated for projects instead of re-using application icons
+			 {kind: "onyx.TooltipDecorator", components: [
+				{kind: "onyx.IconButton", src: "$project-view/images/project_settings.png", onclick: "modifyProjectSettings"},
+				{kind: "onyx.Tooltip", content: "Settings..."},
+			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_new.png", onclick: "doCreateProject"},
 				{kind: "onyx.Tooltip", content: "Create Project..."},
