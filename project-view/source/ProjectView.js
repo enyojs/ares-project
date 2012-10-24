@@ -3,17 +3,25 @@ enyo.kind({
 	kind: "FittableColumns",
 	classes: "enyo-unselectable",
 	components: [
-	    {kind: "ProjectList", onCreateProject: "createProjectAction", onOpenProject: "openProjectAction", onProjectRemoved: "projectRemoved", onProjectSelected: "handleProjectSelected", name: "projectList"},
+	    {kind: "ProjectList", 
+	    	onModifySettings: "modifySettingsAction",
+	    	onCreateProject: "createProjectAction", 
+	    	onOpenProject: "openProjectAction", 
+	    	onProjectRemoved: "projectRemoved", 
+	    	onProjectSelected: "handleProjectSelected", 
+	    	name: "projectList"},
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
 		{kind: "ProjectWizardPopup", canGenerate: false, name: "projectWizardPopup"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{kind: "ProjectConfig", name: "projectConfig"},
+		{kind: "ProjectPropertiesPopup", name: "projectPropertiesPopup"},
     ],
 	handlers: {
 		onCancel: "cancelCreateProject",
 		onConfirmCreateProject: "confirmCreateProject",
 		onConfirmConfigProject: "confirmConfigProject",
-		onUploadProjectConfig: "uploadProjectConfig"
+		onUploadProjectConfig: "uploadProjectConfig",
+		onCancelSettings: "cancelSettings",
 	},
 	create: function() {
 		this.inherited(arguments);
@@ -22,7 +30,7 @@ enyo.kind({
 		this.$.errorPopup.setErrorMsg(msg);
 		this.$.errorPopup.show();
 	},
-   openProjectAction: function(inSender, inEvent) {
+   	openProjectAction: function(inSender, inEvent) {
     	this.$.projectWizardPopup.reset();
     	this.$.projectWizardPopup.setCreateMode(false);
         this.$.projectWizardPopup.show();
@@ -88,5 +96,18 @@ enyo.kind({
 	uploadProjectConfig: function(inSender, inEvent) {
 		// push project data to project list
 		this.$.projectList.storeProjectConfig(inEvent.name, inEvent.properties);
+		this.$.projectPropertiesPopup.enableSettings(inEvent.properties);
+		this.$.projectPropertiesPopup.show();
+		// handled here (don't bubble)
+		return true;
+	},
+	modifySettingsAction: function(inSender, inEvent) {
+		this.$.projectPropertiesPopup.show();
+		return true; 
+	},
+	cancelSettings: function(inSender, inEvent) {
+	    this.$.projectPropertiesPopup.hide();
+	    // handled here (don't bubble)
+        return true;
 	}
 });

@@ -5,7 +5,8 @@ enyo.kind({
 		onCreateProject: "",
 		onProjectSelected: "",
 		onOpenProject: "",
-		onProjectRemoved: ""
+		onProjectRemoved: "",
+		onModifySettings: ""
 	},
 	handlers: {
 	},
@@ -18,7 +19,7 @@ enyo.kind({
 			{content: "Projects", style: "margin-right: 10px"},
 			 // FIXME: we may need icons dedicated for projects instead of re-using application icons
 			 {kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_settings.png", onclick: "modifyProjectSettings"},
+				{kind: "onyx.IconButton", src: "$project-view/images/project_settings.png", onclick: "doModifySettings"},
 				{kind: "onyx.Tooltip", content: "Settings..."},
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
