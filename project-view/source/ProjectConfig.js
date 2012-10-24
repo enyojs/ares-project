@@ -12,6 +12,7 @@ enyo.kind({
 	components: [
 	             {name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 	],
+	debug: false,
 	create: function() {
 		this.inherited(arguments);
 		this.configs = [];
@@ -21,11 +22,11 @@ enyo.kind({
 		this.$.errorPopup.show();
 	},
 	createConfig: function(inData) {
-		//this.log(inData);
+		if (this.debug) this.log(inData);
 		var service = inData.service;
 		service.listFiles(inData.folderId)
         	.response(this, function(inSender, inResponse) {
-                	//this.log("Response: "+inResponse);
+                	if (this.debug) this.log("Response: "+inResponse);
                 	var prj = inResponse.filter(function(node){
                         	return node.name === "project.json";
                 	});
@@ -34,8 +35,8 @@ enyo.kind({
                 		var projectData = JSON.stringify({format: 1, id: "com.example.myapp", name: inData.name, version: "1.0"});
                 		service.createFile(inData.folderId, "project.json", projectData)
                 			.response(this, function(inSender, inResponse) {
-                				this.log("New Project Name: "+inData.name);
-                				this.log("project.json created.");
+                				if (this.debug) this.log("New Project Name: "+inData.name);
+                				if (this.debug) this.log("project.json created.");
                 			})
                 			.error(this, function(inSender, inError) {
                 				this.log("Error: "+inError);
@@ -45,8 +46,8 @@ enyo.kind({
                 		service.getFile(prj[0].id)
                 			.response(this, function(inSender, inResponse) {
                 				if (inResponse && inResponse.content !== "") {
-                					this.log("Open Project Name: "+inData.name);
-                					this.log("Properties: "+JSON.stringify(inResponse.content));
+                					if (this.debug) this.log("Open Project Name: "+inData.name);
+                					if (this.debug) this.log("Properties: "+JSON.stringify(inResponse.content));
                 				}
                 			})
                 			.error(this, function(inSender, inError) {
@@ -63,7 +64,7 @@ enyo.kind({
 		var service = inData.service.impl;
 		service.listFiles(inData.folderId)
     	.response(this, function(inSender, inResponse) {
-            	this.log("Response: "+inResponse);
+            	if (this.debug) console.dir(inResponse);
             	var prj = inResponse.filter(function(node){
                     	return node.name === "project.json";
             	});
@@ -75,8 +76,8 @@ enyo.kind({
             		service.getFile(prj[0].id)
             		.response(this, function(inSender, inResponse) {
             			if (inResponse && inResponse.content !== "") {
-            				this.log("Upload Project Config:");
-            				console.log(inResponse.content);
+            				if (this.debug) this.log("Upload Project Config:");
+            				if (this.debug) console.log(inResponse.content);
             				this.doUploadProjectConfig({name: inData.name, properties: inResponse.content});
             			}
             		})
