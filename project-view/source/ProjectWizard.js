@@ -28,8 +28,8 @@ enyo.kind({
 			{fit: true},
 			{kind: "FittableColumns", style: "margin-top: 10px", name: "fittableColumns5", components: [
 					{kind: "Control", fit: true, name: "control7"},
-					{kind: "onyx.Button", content: "Cancel", name: "cancel", ontap: "doCancel"},
-					{kind: "onyx.Button", content: "OK", name: "confirm", ontap: "confirmTap"}
+					{kind: "onyx.Button", content: "Cancel", classes: "onyx-negative", name: "cancel", ontap: "doCancel"},
+					{kind: "onyx.Button", content: "OK", classes: "onyx-affirmative", name: "confirm", ontap: "confirmTap"}
 				]}
 		]},
 		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup", onCancel: "cancelDirSelection"}
