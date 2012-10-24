@@ -52,8 +52,7 @@ enyo.kind({
 				inSender.saveComplete();
 			})
 			.error(this, function(inEvent, inData) {
-				enyo.log("Save failed", inData);
-				inSender.hideWaitPopup();
+				inSender.saveFailed(inData);
 			});
 	},
 	closeDocument: function(inSender, inEvent) {
