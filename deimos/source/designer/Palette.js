@@ -31,21 +31,23 @@ enyo.kind({
 		]}
 	],
 	setModel: function(inModel) {
-		for (var n in inModel) {
-			var c = this.$[n];
-			if (c) {
-				var v = inModel[n];
-				if (c.tag == "img") {
-					c.setSrc("images/" + v);
-				} else {
-					c.setContent(v);
+		if (inModel) {
+			for (var n in inModel) {
+				var c = this.$[n];
+				if (c) {
+					var v = inModel[n];
+					if (c.tag == "img") {
+						c.setSrc("images/" + v);
+					} else {
+						c.setContent(v);
+					}
 				}
 			}
+			if (inModel.inline) {
+				this.createComponent(inModel.inline);
+			}
+			this.config = inModel.config;
 		}
-		if (inModel.inline) {
-			this.createComponent(inModel.inline);
-		}
-		this.config = inModel.config;
 	}
 });
 
