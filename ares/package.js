@@ -13,7 +13,6 @@
 	"../deimos/resources",
 	//
 	"../lib/localStorage",
-	"../lib/tree",
 	"../lib/service",
 	"../harmonia/source",
 	"../project-view/source"

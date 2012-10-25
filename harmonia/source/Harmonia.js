@@ -101,7 +101,7 @@ enyo.kind({
 		service.createFile(folderId, name, content)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.$.hermesFileTree.refreshFileTree(this.$.hermesFileTree);
+				this.$.hermesFileTree.refreshFileTree();
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
@@ -116,7 +116,7 @@ enyo.kind({
 		service.createFolder(folderId, name)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.$.hermesFileTree.refreshFileTree(this.$.hermesFileTree);
+				this.$.hermesFileTree.refreshFileTree();
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
@@ -132,7 +132,7 @@ enyo.kind({
 		service['rename'](oldId, newName)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.$.hermesFileTree.refreshFileTree(this.$.hermesFileTree);
+				this.$.hermesFileTree.refreshFileTree();
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
@@ -150,7 +150,7 @@ enyo.kind({
 		service.remove(inEvent.nodeId)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.$.hermesFileTree.refreshFileTree(this.$.hermesFileTree);
+				this.$.hermesFileTree.refreshFileTree();
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
@@ -166,7 +166,7 @@ enyo.kind({
 		service.copy(this.selectedFile.id, newName)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.$.hermesFileTree.refreshFileTree(this.$.hermesFileTree);
+				this.$.hermesFileTree.refreshFileTree();
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
