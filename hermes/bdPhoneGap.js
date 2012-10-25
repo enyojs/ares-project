@@ -13,12 +13,13 @@ var fs = require("fs"),
     async = require("async"),
     mkdirp = require("mkdirp"),
     rimraf = require("rimraf"),
-    http = require("http");
+    http = require("http"),
+    child_process = require("child_process");
 
 var basename = path.basename(__filename);
 
 function BdPhoneGap(config, next) {
-	console.log(basename, "config=",  util.inspect(config));
+	console.log("config=",  util.inspect(config));
 
 	function HttpError(msg, statusCode) {
 		Error.captureStackTrace(this, this);
@@ -75,6 +76,7 @@ function BdPhoneGap(config, next) {
 	 * @private
 	 */
 	function errorHandler(err, req, res, next){
+		console.error("Internal error: ", err.stack);
 		res.status(err.statusCode || 500).send(err.toString());
 	}
 
@@ -104,14 +106,14 @@ function BdPhoneGap(config, next) {
 		async.series([
 		 	prepare.bind(this),
 			store.bind(this, req, res),
+			deploy.bind(this, req, res),
 			zip.bind(this, req, res),
 			respond.bind(this, req, res),
 			cleanup.bind(this, req, res)
 		], function (err, results) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
-				console.error(err.stack);
-				cleanup.bind(this, req, res, next.bind(this, err));
+				cleanup.bind(this)(req, res, next.bind(this, err));
 				return;
 			}
 			console.log("POST "  + servicePath + " finished");
@@ -129,10 +131,11 @@ function BdPhoneGap(config, next) {
 	});
 
 	/**
-	 * Terminates express server
+	 * Terminates express server & clean-up the plate
 	 */
-	this.quit = function() {
+	this.quit = function(cb) {
 		app.close();
+		rimraf(uploadDir, cb);
 	};
 
 	var appTempDir = temp.path({prefix: 'com.palm.ares.hermes.bdPhoneGap.'}) + '.d';
@@ -186,7 +189,43 @@ function BdPhoneGap(config, next) {
 		}, next);
 	}
 
-	function deploy(req, res, next) {}
+	function deploy(req, res, next) {
+		console.log("deploy(): started");
+		// Execute the deploy.js script that comes with Enyo.
+		// 
+		// TODO: scalable processing is better acheived using
+		// VM <http://nodejs.org/api/vm.html> rather than
+		// child-processes
+		// <http://nodejs.org/api/child_process.html>.
+		var script = path.join(config.enyoDir, 'tools', 'deploy.js');
+		var params = [ '--packagejs', path.join(appDir.source, 'package.js'),
+			       '--source', appDir.source,
+			       '--enyo', config.enyoDir,
+			       '--build', appDir.build,
+			       '--out', appDir.deploy,
+			       '--less'];
+		console.log("deploy(): Running: '", script, params.join(' '), "'");
+		var child = child_process.fork(script, params, {
+			silent: false
+		});
+		child.on('message', function(msg) {
+			if (msg.error) {
+				console.error("child-process error: ", util.inspect(msg.error));
+				console.error("child-process stack: \n", msg.error.stack);
+			} else {
+				console.error("unexpected child-process message msg=", util.inspect(msg));
+			}
+		});
+		child.on('exit', function(code, signal) {
+			debugger;
+			if (code !== 0) {
+				next(new HttpError("child-process failed"));
+			} else {
+				console.log("deploy(): completed");
+				next();
+			}
+		});
+	}
 
 	function zip(req, res, next) {
 		//console.log("zip(): ");
@@ -194,11 +233,15 @@ function BdPhoneGap(config, next) {
 		req.zip.path = path.join(appDir.root, "app.zip");
 		req.zip.stream = zipstream.createZip({level: 1});
 		req.zip.stream.pipe(fs.createWriteStream(req.zip.path));
-		_walk.bind(this)(appDir.source, "" /*prefix*/, function() {
-			req.zip.stream.finalize(function(written){
-				console.log("finished ", req.zip.path);
-				next();
-			});
+		_walk.bind(this)(appDir.deploy, "" /*prefix*/, function() {
+			try {
+				req.zip.stream.finalize(function(written){
+					console.log("finished ", req.zip.path);
+					next();
+				});
+			} catch(e) {
+				next(e);
+			}
 		});
 
 		function _walk(absParent, relParent, cb) {
@@ -226,7 +269,14 @@ function BdPhoneGap(config, next) {
 								_walk(absPath, relPath, cb3);
 							} else {
 								console.log("zip._walk(): Adding: ", relPath);
-								req.zip.stream.addFile(fs.createReadStream(absPath), { name: relPath }, cb3);
+								try {
+									req.zip.stream.addFile(fs.createReadStream(absPath), { name: relPath }, function(err) {
+										console.log("zip._walk(): Added: ", relPath, "(err=", err, ")");
+										cb3(err);
+									});
+								} catch(e) {
+									cb3(e);
+								}
 							}
 						});
 					}, cb2);
@@ -266,7 +316,8 @@ if (path.basename(process.argv[1]) === basename) {
 		// pathname (M) can be '/', '/build/' ...etc
 		pathname:	process.argv[2] || '/build',
 		// port (o) local IP port of the express server (default: 9019, 0: dynamic)
-		port: parseInt(process.argv[3] || "9029", 10)
+		port: parseInt(process.argv[3] || "9029", 10),
+		enyoDir: path.resolve(__dirname, '..', 'enyo') // XXX use optimist/nopt
 	}, function(err, service){
 		if (err) {
 			process.exit(err);
