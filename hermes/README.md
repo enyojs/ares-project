@@ -125,6 +125,24 @@ The generated file is expected to look like to below:
 	 --------                   -------
 	     4068                   2 files
 
+## PhoneGap build service
+
+### Usage
+
+**XXX**
+
+### Development & Test
+
+Manual run:
+
+	$ node hermes/bdPhoneGap.js
+
+Linux & OSX: The following commands generates a POST request carrying a `multipart/form-data` message suitable to test the `bdPhoneGap.js` service using an application located in the current directory.
+
+	$ find . -type f | \
+		awk 'BEGIN{printf("curl ");}{sub("^\.\/", "", $1); printf("-F \"file=@%s;filename=%s\" ", $1, $1);}END{print(url)}' \
+		url=http://127.0.0.1:9029/build/
+
 ## Debug
 
 It is possible to debug an Hermes services by commenting-out the `command` property of the service to be debugged in the ide.json & start it manually along with `--debug` or `--debug-brk`  to later connect a `node-inspector`.
