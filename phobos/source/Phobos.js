@@ -70,6 +70,9 @@ enyo.kind({
 		this.docHasChanged=false;
 		this.reparseAction();
 	},
+	saveNeeded: function() {
+		return this.docHasChanged;
+	},
 	saveFailed: function(inMsg) {
 		this.hideWaitPopup();
 		this.log("Save failed: " + inMsg);
