@@ -10,6 +10,7 @@ enyo.kind({
 	handlers: {
 	},
 	projects: [],
+	projectsConfig: [],
 	debug: false,
 	components: [
 	    {kind: "LocalStorage"},
@@ -32,7 +33,7 @@ enyo.kind({
 		]},
 		{kind: "enyo.Scroller", components: [
 			{kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
-				{kind: "Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
+				{kind: "ProjectList.Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
 			]}
 		]},
 		{name: "removeProjectPopup", kind: "Ares.ActionPopup", onConfirmDeleteProject: "confirmRemoveProject"},
@@ -44,6 +45,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
+		this.projectsConfig = [];
 	},
 	/**
 	 * Receive the {onServicesChange} broadcast notification
@@ -109,6 +111,12 @@ enyo.kind({
 	},
 	confirmRemoveProject: function(inSender, inEvent) {
 		if (this.selected) {
+			for (var i = 0; i<this.projectsConfig.length; i++) {
+				if (this.projectsConfig[i].name === this.selected.projectName) {
+					this.projectsConfig.splice(i,1);
+					break;
+				}
+			}
 			this.projects.splice(this.selected.index, 1);
 			this.storeProjectsInLocalStorage();
 			this.selected = null;
@@ -136,7 +144,11 @@ enyo.kind({
 		if (project.service) {
 			// Highlight a project item if & only if its
 			// filesystem service provider exists.
-    			this.selected = inEvent.originator;
+			if (inEvent.originator.kind === 'ProjectList.Project') {
+				this.selected = inEvent.originator;
+			} else {
+				this.selected = inEvent.originator.owner;
+			}
     			this.selected.addClass("ares_projectView_projectList_item_selected");
     			this.doProjectSelected({project: project});
 		} else {
@@ -155,11 +167,23 @@ enyo.kind({
     		return undefined;	// Exclude
     	}
     	return value;	// Accept
-    }
+    },
+    storeProjectConfig: function (projectName, projectProperties) {
+    	var found = false;
+    	for (var i = 0; i<this.projectsConfig.length; i++) {
+    		if (this.projectsConfig[i].name === projectName) {
+    			found = true;
+    			break;
+    		}
+    	}
+    	if (!found) {
+    		this.projectsConfig.push({name: projectName, properties: projectProperties});
+    	}    	
+    },
 });
 
 enyo.kind({
-	name: "Project",
+	name: "ProjectList.Project",
 	published: {
 		projectName: "",
 		index: -1
