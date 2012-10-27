@@ -94,6 +94,7 @@ function ArZip(config, next) {
 			fs.mkdirSync(form.uploadDir);
 
 			form.on('file', function(field, file) {
+				console.log("file name=", file.name);
 				files.push(file);
 				tasks.push(function() {
 					zipping = true;
