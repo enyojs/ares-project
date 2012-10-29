@@ -14,13 +14,13 @@ enyo.kind({
 	    {kind: "FittableRows", fit: true, name: "fittableRows", components: [
 			{kind: "FittableColumns", name: "fittableColumns", components: [
 					{kind: "Control", content: "Project name: ", name: "control"},
-					{kind: "onyx.InputDecorator", content: "Project name", name: "inputDecorator", components: [
+					{kind: "onyx.InputDecorator", components: [
 							{kind: "Input", defaultFocus: true, placeholder: "Enter project name", name: "projectName", onchange: "enableConfirmButton"}
 						]}
 				]},
 			{kind: "FittableColumns", name: "fittableColumns4", components: [
 					{kind: "Control", content: "Directory:", name: "control5"},
-					{kind: "onyx.InputDecorator", name: "inputDecorator2", components: [
+					{kind: "onyx.InputDecorator", components: [
 							{kind: "onyx.Input", placeholder: "Enter text here", name: "projectDirectory", onchange: "enableConfirmButton"}
 						]},
 					{kind: "onyx.Button", content: "Browse", name: "browse", ontap: "browseTap"}
