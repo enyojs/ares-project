@@ -6,7 +6,8 @@ enyo.kind({
 		onProjectSelected: "",
 		onOpenProject: "",
 		onProjectRemoved: "",
-		onModifySettings: ""
+		onModifySettings: "",
+		onFinishProjectConfig: ""
 	},
 	handlers: {
 	},
@@ -173,7 +174,7 @@ enyo.kind({
     	}
     	return value;	// Accept
     },
-    storeProjectConfig: function (projectName, projectProperties) {
+    storeBaseConfigProject: function (projectName, folderId, projectProperties) {
     	var found = false;
     	for (var i = 0; i<this.projectsConfig.length; i++) {
     		if (this.projectsConfig[i].name === projectName) {
@@ -181,10 +182,30 @@ enyo.kind({
     			break;
     		}
     	}
-    	if (!found) {
-    		this.projectsConfig.push({name: projectName, properties: projectProperties});
-    	}    	
+    	if (found === false) {
+    		this.projectsConfig.push({name: projectName, folderId: folderId, status: "basic", properties: projectProperties});
+    	}
+
     },
+    storeCustomConfigProject: function (inData) {
+    	// data project store into projectsConfig 
+    	var obj = null;
+     	for (var i = 0; i<this.projectsConfig.length; i++) {
+    		if (this.projectsConfig[i].name === inData.name && this.projectsConfig[i].status === "basic") {
+    			obj = {
+    				name: inData.name,
+    				folderId: this.projectsConfig[i].folderId,
+    				status: "custom",
+    				properties: this.projectsConfig[i].properties,
+    				phonegap: {target: inData.target, key: inData.key}
+    			};	
+    			this.projectsConfig.splice(i,1); 
+    			this.projectsConfig.push(obj);
+    			break;
+    		}
+    	}     	
+    	this.doFinishProjectConfig(obj);
+    }
 });
 
 enyo.kind({

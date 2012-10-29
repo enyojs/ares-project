@@ -3,9 +3,10 @@ enyo.kind({
 	classes: "enyo-unselectable",
 	fit: true,
 	events: {
+		onCustomConfigProject: "",
 		onCancelSettings: "",
 	},
-	debug: false,
+	createMode: true,
 	components: [
 	    {kind: "FittableRows", fit: true, name: "fittableRows", components: [
 	    	{content: "Settings", style: "width:100%"},
@@ -21,14 +22,14 @@ enyo.kind({
 					{kind: "Control", content: "Project Id:", name: "control4Id"},
 					{fit: true},
 					{kind: "onyx.InputDecorator", name: "inputDecorator2", components: [
-							{kind: "onyx.Input", placeholder: "com.example.myapp", name: "projectId", onchange: "pIdChanged"}
+							{kind: "onyx.Input", placeholder: "com.example.myapp", name: "projectId"}
 						]},
 				]},
 			{kind: "FittableColumns", name: "fittableColumns3", style: "width:100%", components: [
 					{kind: "Control", content: "Project Name:", name: "control4Name"},
 					{fit: true},
 					{kind: "onyx.InputDecorator", name: "inputDecorator3", components: [
-							{kind: "onyx.Input", defaultFocus: true, placeholder: "My Project Name", name: "projectName",  onchange: "pNameChanged"}
+							{kind: "onyx.Input", placeholder: "My Project Name", name: "projectName"}
 					]},
 				]},
 			{kind: "FittableColumns", name: "fittableColumns4", style: "width:100%", components: [
@@ -62,32 +63,50 @@ enyo.kind({
 					{kind: "Control", name: "control4buttons"},
 					{fit: true},
 					{kind: "onyx.Button", content: "Cancel", classes: "onyx-negative", name: "cancel", ontap: "doCancelSettings"},
-					{kind: "onyx.Button", content: "Apply", classes: "onyx-affirmative", name: "apply", ontap: "doApply"}
-				]}
+					{kind: "onyx.Button", content: "OK", classes: "onyx-affirmative", name: "confirm", ontap: "confirmTap"}
+				]}				
 		]},
     ],
     create: function() {
     	this.inherited(arguments);
-    	this.$.apply.setDisabled(true);
+    	this.$.confirm.setDisabled(true);
     },
 	activateDrawer: function() {
+		//drawer is closed
 		this.$.phoneGapDrawer.setOpen(!this.$.phoneGapDrawer.open);
 	},
-	enable: function(inData) {
-		this.log("enableSettings function");
-		this.$.status.setContent(" ");
-		this.$.apply.setDisabled(false);
-		this.$.projectId.setPlaceholder("com.exemple."+inData.name);
-		this.$.projectName.setPlaceholder(inData.name);
-	},
-	pNameChanged: function(inSender, inEvent) {
-		this.setName(this.$.Name.getValue());
-	},
-	reset: function() {
-		this.log("reset function");
-		this.$.projectName.setValue("");
+    reset: function() {
+		this.$.projectName.setValue(" ");
 		this.$.projectId.setValue("com.example.myapp");
-		this.$.apply.setDisabled(true);
+		this.$.targetBuild.setPlaceholder("Enter target build");
+		this.$.phonegapKey.setPlaceholder("Enter your key");
+		this.$.status.setContent("You need to create a project!");
+		this.$.confirm.setDisabled(true);
+		this.activateDrawer();
+	},
+	enable: function(inData) {
+		// handle the pre-fill values
+		if (inData.name !== undefined) {
+			this.$.projectId.setValue("com.exemple."+inData.name);
+		} else
+			this.$.projectId.setValue("com.example.myapp");
+		this.$.projectName.setValue(inData.name);
+		this.$.targetBuild.setValue("");
+		this.$.phonegapKey.setValue("");
+		this.$.confirm.setDisabled(false);
+		this.$.status.setContent(" ");
+	},
+    confirmTap: function(inSender, inEvent) {
+		// retrieve modified values
+		var obj = {
+		 	name: this.$.projectName.getValue(),
+		 	id: this.$.projectId.getValue(),
+		 	target: this.$.targetBuild.getValue(),
+		 	key: this.$.phonegapKey.getValue()
+		}
+		this.doCustomConfigProject(obj);
+		// handled here (don't bubble)
+        return true;
 	},
 });
 
@@ -101,7 +120,7 @@ enyo.kind({
 	reset: function() {
 		this.$.projectProperties.reset();
 	},
-	enableSettings: function(inData) {
+	preFillConfig: function(inData) {
 		this.$.projectProperties.enable(inData);
-	}
+	},
 });

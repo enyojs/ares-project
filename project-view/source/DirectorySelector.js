@@ -9,7 +9,7 @@ enyo.kind({
 		]},
 	    {kind: "FittableColumns", content: "fittableColumns2", isContainer: true, name: "fittableColumns2", components: [
 			{name: "selectedDir", fit: true, content: "Selected: "},
-			{kind: "onyx.Button", content: "Cancel",  classes: "onyx-negative", ontap: "doCancel"},
+			{kind: "onyx.Button", content: "Cancel", classes: "onyx-negative", ontap: "doCancel"},
 			{kind: "onyx.Button", content: "OK", classes: "onyx-affirmative", isContainer: true, name: "confirm", ontap: "confirmTap"}
 		]}
     ],

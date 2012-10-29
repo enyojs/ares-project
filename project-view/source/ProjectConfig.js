@@ -7,7 +7,7 @@ enyo.kind({
 		// others will come ...
 	},
 	events: {
-		onUploadProjectConfig: "",
+		onInitConfigProject: "",
 	},
 	components: [
 	             {name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
@@ -15,7 +15,6 @@ enyo.kind({
 	debug: false,
 	create: function() {
 		this.inherited(arguments);
-		this.configs = [];
 	},
 	showErrorPopup : function(msg) {
 		this.$.errorPopup.setErrorMsg(msg);
@@ -60,32 +59,56 @@ enyo.kind({
 			});
 	},
 	checkConfig: function(inData) {
-		//this.log(inData);
-		var service = inData.service.impl;
+    	//this.log(inData);
+    	var service = inData.service.impl;
+        service.listFiles(inData.folderId)
+        .response(this, function(inSender, inResponse) {
+                if (this.debug) console.dir(inResponse);
+                var prj = inResponse.filter(function(node){
+                        return node.name === "project.json";
+                });
+                // check if project properties exists
+                if (prj.length < 1) {
+                        this.log("No project config file!!");
+                        this.showErrorPopup("No project config file!!");
+                } else {
+                        service.getFile(prj[0].id)
+                        .response(this, function(inSender, inResponse) {
+                                if (inResponse && inResponse.content !== "") {
+                                        if (this.debug) this.log("Upload Project Config:");
+                                        if (this.debug) console.log(inResponse.content);
+                                        this.doInitConfigProject({name: inData.name, folderId: inData.folderId, properties: inResponse.content});
+                                }
+                        })
+                        .error(this, function(inSender, inError) {
+                                this.log("Error: "+inError);
+                                this.showErrorPopup(inError);
+                        });
+                }
+        })
+        .error(this, function(inSender, inError) {
+                this.log("Error: "+inError);
+                this.showErrorPopup(inError);
+        });
+    },	
+	fsUpdateFile: function(inData) {
+		var service = inData.originator.serviceRegistry.services[0].impl;
+		var basic = inData.properties;
+		var phonegap = inData.phonegap;
 		service.listFiles(inData.folderId)
     	.response(this, function(inSender, inResponse) {
             	if (this.debug) console.dir(inResponse);
-            	var prj = inResponse.filter(function(node){
-                    	return node.name === "project.json";
+            	var projectData = JSON.stringify({format: 1, id: basic.id, name: inData.name, version: "1.0", key: phonegap.key, target: phonegap.target});      		
+            	service.createFile(inData.folderId, "project.json", projectData)
+            	.response(this, function(inSender, inResponse) {
+            		if (inResponse && inResponse.content !== "") {
+                		if (this.debug) this.log("project.json updated.");
+            		}
+            	})
+            	.error(this, function(inSender, inError) {
+            		this.log("Error: "+inError);
+            		this.showErrorPopup(inError);
             	});
-            	// check if project properties exists
-            	if (prj.length < 1) {
-            		this.log("No project config file!!");
-            		this.showErrorPopup("No project config file!!");
-            	} else {            		
-            		service.getFile(prj[0].id)
-            		.response(this, function(inSender, inResponse) {
-            			if (inResponse && inResponse.content !== "") {
-            				if (this.debug) this.log("Upload Project Config:");
-            				if (this.debug) console.log(inResponse.content);
-            				this.doUploadProjectConfig({name: inData.name, properties: inResponse.content});
-            			}
-            		})
-            		.error(this, function(inSender, inError) {
-            			this.log("Error: "+inError);
-            			this.showErrorPopup(inError);
-            		});
-            	}
         })
 		.error(this, function(inSender, inError) {
 			this.log("Error: "+inError);
