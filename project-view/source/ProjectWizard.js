@@ -11,26 +11,30 @@ enyo.kind({
 		onDirectorySelected: "directorySelected"
 	},
 	components: [
-	    {kind: "FittableRows", fit: true, name: "fittableRows", components: [
-			{kind: "FittableColumns", name: "fittableColumns", components: [
-					{kind: "Control", content: "Project name: ", name: "control"},
-					{kind: "onyx.InputDecorator", components: [
-							{kind: "Input", defaultFocus: true, placeholder: "Enter project name", name: "projectName", onchange: "enableConfirmButton"}
-						]}
-				]},
+	    {kind: "FittableRows", fit: true, components: [
+			{kind: "FittableColumns", components: [
+				{kind: "Control", content: "Project name: "},
+				{kind: "onyx.InputDecorator", components: [
+					{kind: "Input", defaultFocus: true, placeholder: "Enter project name", name: "projectName", oninput: "updateProjectDir"}
+				]}
+			]},
+			{kind: "FittableColumns", components: [
+				{kind: "Control", content: "Location:", name: "dod"},
+				{kind: "Control", content: "", name: "projectLocation", fit: true},
+				{kind: "onyx.Button", content: "Browse", ontap: "browseTap"}
+			]},
 			{kind: "FittableColumns", name: "fittableColumns4", components: [
-					{kind: "Control", content: "Directory:", name: "control5"},
-					{kind: "onyx.InputDecorator", components: [
-							{kind: "onyx.Input", placeholder: "Enter text here", name: "projectDirectory", onchange: "enableConfirmButton"}
-						]},
-					{kind: "onyx.Button", content: "Browse", name: "browse", ontap: "browseTap"}
-				]},
+				{kind: "Control", content: "Project directory:"},
+				{kind: "onyx.InputDecorator", components: [
+					{kind: "onyx.Input", name: "projectDirectory", onchange: "enableConfirmButton"}
+				]}
+			]},
 			{fit: true},
 			{kind: "FittableColumns", style: "margin-top: 10px", name: "fittableColumns5", components: [
-					{kind: "Control", fit: true, name: "control7"},
-					{kind: "onyx.Button", content: "Cancel", name: "cancel", ontap: "doCancel"},
-					{kind: "onyx.Button", content: "OK", name: "confirm", ontap: "confirmTap"}
-				]}
+				{kind: "Control", fit: true},
+				{kind: "onyx.Button", content: "Cancel", ontap: "doCancel"},
+				{kind: "onyx.Button", content: "OK", name: "confirm", ontap: "confirmTap"}
+			]}
 		]},
 		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup", onCancel: "cancelDirSelection"}
     ],
@@ -76,12 +80,19 @@ enyo.kind({
     directorySelected: function(inSender, inEvent) {
     	this.selectedServiceId = inEvent.serviceId;
     	this.selectedDir = inEvent.directory;
-    	this.$.projectDirectory.setValue(this.selectedDir.path);
+    	this.$.projectLocation.setContent(this.selectedDir.path);
     	this.enableConfirmButton();
     	this.$.selectDirectoryPopup.hide();
     },
+    updateProjectDir: function() {
+		this.$.projectDirectory.setValue(this.$.projectName.getValue()) ;
+		this.enableConfirmButton() ;
+	},
     enableConfirmButton: function() {
-    	if ((this.$.projectDirectory.getValue() !== "") && (this.$.projectName.getValue() !== "")) {
+    	if (    this.$.projectDirectory.getValue() 
+		     && this.$.projectName.getValue() 
+			 && this.$.projectLocation.getContent()
+		) {
     		this.$.confirm.setDisabled(false);
 		} else {
 			this.$.confirm.setDisabled(true);
