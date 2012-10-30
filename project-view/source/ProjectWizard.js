@@ -19,7 +19,7 @@ enyo.kind({
 				]}
 			]},
 			{kind: "FittableColumns", components: [
-				{kind: "Control", content: "Location:", name: "dod"},
+				{kind: "Control", content: "Location:"},
 				{kind: "Control", content: "", name: "projectLocation", fit: true},
 				{kind: "onyx.Button", content: "Browse", ontap: "browseTap"}
 			]},
@@ -38,6 +38,7 @@ enyo.kind({
 		]},
 		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup", onCancel: "cancelDirSelection"}
     ],
+	// false when wizard is invoked through import project
     createMode: true,
     debug: false,
     reset: function() {
@@ -90,8 +91,8 @@ enyo.kind({
 	},
     enableConfirmButton: function() {
     	if (    this.$.projectDirectory.getValue() 
-		     && this.$.projectName.getValue() 
-			 && this.$.projectLocation.getContent()
+			 && this.$.projectName     .getValue() 
+			 && this.$.projectLocation .getContent()
 		) {
     		this.$.confirm.setDisabled(false);
 		} else {

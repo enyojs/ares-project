@@ -3,7 +3,7 @@ enyo.kind({
 	kind: "FittableColumns",
 	classes: "enyo-unselectable",
 	components: [
-	    {kind: "ProjectList", onCreateProject: "createProjectAction", onOpenProject: "openProjectAction", onProjectRemoved: "projectRemoved", onProjectSelected: "handleProjectSelected", name: "projectList"},
+	    {kind: "ProjectList", onCreateProject: "createProjectAction", onImportProject: "importProjectAction", onProjectRemoved: "projectRemoved", onProjectSelected: "handleProjectSelected", name: "projectList"},
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
 		{kind: "ProjectWizardPopup", canGenerate: false, name: "projectWizardPopup"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
@@ -22,7 +22,7 @@ enyo.kind({
 		this.$.errorPopup.setErrorMsg(msg);
 		this.$.errorPopup.show();
 	},
-   openProjectAction: function(inSender, inEvent) {
+	importProjectAction: function(inSender, inEvent) {
     	this.$.projectWizardPopup.reset();
     	this.$.projectWizardPopup.setCreateMode(false);
         this.$.projectWizardPopup.show();

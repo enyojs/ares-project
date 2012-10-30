@@ -4,7 +4,7 @@ enyo.kind({
 	events: {
 		onCreateProject: "",
 		onProjectSelected: "",
-		onOpenProject: "",
+		onImportProject: "",
 		onProjectRemoved: ""
 	},
 	handlers: {
@@ -16,14 +16,13 @@ enyo.kind({
 	    {kind: "LocalStorage"},
 	    {kind: "onyx.Toolbar",  classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
 			{content: "Projects", style: "margin-right: 10px"},
-			 // FIXME: we may need icons dedicated for projects instead of re-using application icons
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_new.png", onclick: "doCreateProject"},
 				{kind: "onyx.Tooltip", content: "Create Project..."},
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_view_edit.png", onclick: "doOpenProject"},
-				{kind: "onyx.Tooltip", content: "Open Project..."},
+				{kind: "onyx.IconButton", src: "$project-view/images/project_view_edit.png", onclick: "doImportProject"},
+				{kind: "onyx.Tooltip", content: "Import Project..."},
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_delete.png", onclick: "removeProjectAction"},
