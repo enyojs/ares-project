@@ -11,13 +11,13 @@ enyo.kind({
 	    {kind: "FittableRows", fit: true, name: "fittableRows", components: [
 	    	{content: "Settings", style: "width:100%"},
 	    	{tag: "br"},
-			{kind: "FittableColumns", name: "fittableColumns", style: "width:100%", components: [
-					{kind: "Control", content: "Format: ", name: "control4format"},
-					{fit: true},
-					{kind: "onyx.InputDecorator", content: "Format: ", name: "inputDecorator", components: [
-							{kind: "Input", disabled: true, placeholder: "1", name: "format"}
-						]}
-				]},
+// 			{kind: "FittableColumns", name: "fittableColumns", style: "width:100%", components: [
+// 					{kind: "Control", content: "Format: ", name: "control4format"},
+// 					{fit: true},
+// 					{kind: "onyx.InputDecorator", content: "Format: ", name: "inputDecorator", components: [
+// 							{kind: "Input", disabled: true, placeholder: "1", name: "format"}
+// 						]}
+// 				]},
 			{kind: "FittableColumns", name: "fittableColumns2", style: "width:100%", components: [
 					{kind: "Control", content: "Project Id:", name: "control4Id"},
 					{fit: true},
@@ -32,13 +32,13 @@ enyo.kind({
 							{kind: "onyx.Input", placeholder: "My Project Name", name: "projectName"}
 					]},
 				]},
-			{kind: "FittableColumns", name: "fittableColumns4", style: "width:100%", components: [
-					{kind: "Control", content: "Version:", name: "control4version"},
-					{fit: true},
-					{kind: "onyx.InputDecorator", name: "inputDecorator4", components: [
-							{kind: "onyx.Input", disabled: true, placeholder: "1.0", name: "projectVersion"}
-					]},
-				]},	
+// 			{kind: "FittableColumns", name: "fittableColumns4", style: "width:100%", components: [
+// 					{kind: "Control", content: "Version:", name: "control4version"},
+// 					{fit: true},
+// 					{kind: "onyx.InputDecorator", name: "inputDecorator4", components: [
+// 							{kind: "onyx.Input", disabled: true, placeholder: "1.0", name: "projectVersion"}
+// 					]},
+// 				]},	
 			{tag: "br"},
 			{content: "PhoneGap ...", style: "width:100%", ontap:"activateDrawer"},
 					{tag: "br"},
@@ -47,7 +47,7 @@ enyo.kind({
 						{kind: "Control", content: "Target Build:", name: "control4target"},
 						{fit: true},
 						{kind: "onyx.InputDecorator", name: "inputDecorator5", components: [
-							{kind: "onyx.Input", placeholder: "Enter target build", name: "targetBuild"}
+							{kind: "onyx.Input", placeholder: "Enter a target build", name: "targetBuild"}
 						]},
 					]},	
 					{kind: "FittableColumns", name: "fittableColumns6", style: "width:100%", components: [
@@ -76,9 +76,9 @@ enyo.kind({
 		this.$.phoneGapDrawer.setOpen(!this.$.phoneGapDrawer.open);
 	},
     reset: function() {
-		this.$.projectName.setValue(" ");
+		this.$.projectName.setValue("");
 		this.$.projectId.setValue("com.example.myapp");
-		this.$.targetBuild.setPlaceholder("Enter target build");
+		this.$.targetBuild.setPlaceholder("Enter a target build");
 		this.$.phonegapKey.setPlaceholder("Enter your key");
 		this.$.status.setContent("You need to create a project!");
 		this.$.confirm.setDisabled(true);
@@ -87,12 +87,13 @@ enyo.kind({
 	enable: function(inData) {
 		// handle the pre-fill values
 		if (inData.name !== undefined) {
-			this.$.projectId.setValue("com.exemple."+inData.name);
+			//this.$.projectId.setValue("com.example."+inData.name);
+			this.$.projectId.setValue(inData.id);
 		} else
 			this.$.projectId.setValue("com.example.myapp");
 		this.$.projectName.setValue(inData.name);
-		this.$.targetBuild.setValue("");
-		this.$.phonegapKey.setValue("");
+		this.$.targetBuild.setValue(inData.phonegapbuild.target);
+		this.$.phonegapKey.setValue(inData.phonegapbuild.key);
 		this.$.confirm.setDisabled(false);
 		this.$.status.setContent(" ");
 	},

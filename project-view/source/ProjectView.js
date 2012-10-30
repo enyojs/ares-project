@@ -56,7 +56,7 @@ enyo.kind({
 		try {
 			// keep an reference on serviceFs
 			serviceFs = inEvent.service;
-			console.dir(serviceFs);
+			//console.dir(serviceFs);
     		// Add an entry into the project list
     		this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
     			

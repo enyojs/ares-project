@@ -30,8 +30,12 @@ enyo.kind({
                         	return node.name === "project.json";
                 	});
                 	if (prj.length < 1) {
-                		// new project
-                		var projectData = JSON.stringify({format: 1, id: "com.example.myapp", name: inData.name, version: "1.0"});
+                		// new project - basic project properties
+                		var projectData = JSON.stringify({format: 1, 
+                									id: "com.example."+inData.name, 
+                									name: inData.name,
+                									version: "1.0",
+                									phonegapbuild: {target: "", key: 0}});
                 		service.createFile(inData.folderId, "project.json", projectData)
                 			.response(this, function(inSender, inResponse) {
                 				if (this.debug) this.log("New Project Name: "+inData.name);
@@ -41,7 +45,7 @@ enyo.kind({
                 				this.log("Error: "+inError);
                 			});
                 	} else {
-                		// open project
+                		// open project - get basic project properties
                 		service.getFile(prj[0].id)
                 			.response(this, function(inSender, inResponse) {
                 				if (inResponse && inResponse.content !== "") {
@@ -77,7 +81,9 @@ enyo.kind({
                                 if (inResponse && inResponse.content !== "") {
                                         if (this.debug) this.log("Upload Project Config:");
                                         if (this.debug) console.log(inResponse.content);
-                                        this.doInitConfigProject({name: inData.name, folderId: inData.folderId, properties: inResponse.content});
+                                        this.doInitConfigProject({name: inData.name, 
+                                        					folderId: inData.folderId, 
+                                        					properties: inResponse.content});
                                 }
                         })
                         .error(this, function(inSender, inError) {
@@ -93,12 +99,16 @@ enyo.kind({
     },	
 	fsUpdateFile: function(inData) {
 		var service = inData.originator.serviceRegistry.services[0].impl;
-		var basic = inData.properties;
-		var phonegap = inData.phonegap;
+		var props = inData.properties;
 		service.listFiles(inData.folderId)
     	.response(this, function(inSender, inResponse) {
             	if (this.debug) console.dir(inResponse);
-            	var projectData = JSON.stringify({format: 1, id: basic.id, name: inData.name, version: "1.0", key: phonegap.key, target: phonegap.target});      		
+            	var obj = {
+            		target: props.phonegapbuild.target,
+            		key: props.phonegapbuild.key, 
+
+            	};
+            	var projectData = JSON.stringify({format: 1, id: props.id, name: props.name, version: "1.0", phonegapbuild: obj});      		
             	service.createFile(inData.folderId, "project.json", projectData)
             	.response(this, function(inSender, inResponse) {
             		if (inResponse && inResponse.content !== "") {
