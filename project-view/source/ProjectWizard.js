@@ -1,7 +1,12 @@
 enyo.kind({
-	name: "ProjectWizard",
+	name: "ProjectWizardPopup",
+	kind: "onyx.Popup",
+	modal: true,
+	centered: true,
+	floating: true,
+	autoDismiss: false,
+
 	classes: "enyo-unselectable",
-	fit: true,
 	events: {
 		onCancel: "",
 		onConfirmCreateProject: "", 
@@ -101,22 +106,3 @@ enyo.kind({
     }
 });
 
-enyo.kind({
-	name: "ProjectWizardPopup",
-	kind: "onyx.Popup",
-	events: {
-	},
-	modal: true,
-	centered: true,
-	floating: true,
-	autoDismiss: false,
-	components: [
-        {kind: "ProjectWizard"}
-	],
-	reset: function() {
-		this.$.projectWizard.reset();
-	},
-	setCreateMode: function(createMode) {
-		this.$.projectWizard.setCreateMode(createMode);
-	}
-});
