@@ -5,22 +5,23 @@ enyo.kind({
 	events: {
 		onCustomConfigProject: "",
 	},
+	
 	createMode: true,
 	components: [
-	    {kind: "FittableRows", fit: true, name: "fittableRows", components: [
+	    {kind: "FittableRows", fit: true, components: [
 	    	{content: "Settings", style: "width:100%"},
 	    	{tag: "br"},
-			{kind: "FittableColumns", name: "fittableColumns2", style: "width:100%", components: [
-					{kind: "Control", content: "Project Id:", name: "control4Id"},
+			{kind: "FittableColumns", style: "width:100%", components: [
+					{kind: "Control", content: "Project Id:"},
 					{fit: true},
-					{kind: "onyx.InputDecorator", name: "inputDecorator2", components: [
+					{kind: "onyx.InputDecorator", components: [
 							{kind: "onyx.Input", placeholder: "com.example.myapp", name: "projectId"}
 						]},
 				]},
-			{kind: "FittableColumns", name: "fittableColumns3", style: "width:100%", components: [
-					{kind: "Control", content: "Project Name:", name: "control4Name"},
+			{kind: "FittableColumns", style: "width:100%", components: [
+					{kind: "Control", content: "Project Name:"},
 					{fit: true},
-					{kind: "onyx.InputDecorator", name: "inputDecorator3", components: [
+					{kind: "onyx.InputDecorator", components: [
 							{kind: "onyx.Input", placeholder: "My Project Name", name: "projectName"}
 					]},
 				]},
@@ -28,24 +29,24 @@ enyo.kind({
 			{content: "PhoneGap ...", style: "width:100%", ontap:"activateDrawer"},
 					{tag: "br"},
 					{name: "phoneGapDrawer", kind: "onyx.Drawer", open:false, components: [
-					{kind: "FittableColumns", name: "fittableColumns5", style: "width:100%", components: [
-						{kind: "Control", content: "Target Build:", name: "control4target"},
+					{kind: "FittableColumns", style: "width:100%", components: [
+						{kind: "Control", content: "Target Build:"},
 						{fit: true},
-						{kind: "onyx.InputDecorator", name: "inputDecorator5", components: [
+						{kind: "onyx.InputDecorator", components: [
 							{kind: "onyx.Input", placeholder: "Enter a target build", name: "targetBuild"}
 						]},
 					]},	
-					{kind: "FittableColumns", name: "fittableColumns6", style: "width:100%", components: [
-						{kind: "Control", content: "PhoneGap Key:", name: "control4key"},
+					{kind: "FittableColumns", style: "width:100%", components: [
+						{kind: "Control", content: "PhoneGap Key:"},
 						{fit: true},
-						{kind: "onyx.InputDecorator", name: "inputDecorator6", components: [
+						{kind: "onyx.InputDecorator", components: [
 							{kind: "onyx.Input", placeholder: "Enter your key", name: "phonegapKey"}
 						]},
 					]},	
 				]},
 			{name: "status", tag: "p", content: "You need to create a project!", style: "width:100%; color: red"},
-			{kind: "FittableColumns", style: "width:100%", name: "fittableColumns10", components: [
-					{kind: "Control", name: "control4buttons"},
+			{kind: "FittableColumns", style: "width:100%", components: [
+					{kind: "Control"},
 					{fit: true},
 					{kind: "onyx.Button", content: "Cancel", classes: "onyx-negative", name: "cancel", ontap: "hide"},
 					{kind: "onyx.Button", content: "OK", classes: "onyx-affirmative", name: "confirm", ontap: "confirmTap"}
