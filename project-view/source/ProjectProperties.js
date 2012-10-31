@@ -4,20 +4,12 @@ enyo.kind({
 	fit: true,
 	events: {
 		onCustomConfigProject: "",
-		onCancelSettings: "",
 	},
 	createMode: true,
 	components: [
 	    {kind: "FittableRows", fit: true, name: "fittableRows", components: [
 	    	{content: "Settings", style: "width:100%"},
 	    	{tag: "br"},
-// 			{kind: "FittableColumns", name: "fittableColumns", style: "width:100%", components: [
-// 					{kind: "Control", content: "Format: ", name: "control4format"},
-// 					{fit: true},
-// 					{kind: "onyx.InputDecorator", content: "Format: ", name: "inputDecorator", components: [
-// 							{kind: "Input", disabled: true, placeholder: "1", name: "format"}
-// 						]}
-// 				]},
 			{kind: "FittableColumns", name: "fittableColumns2", style: "width:100%", components: [
 					{kind: "Control", content: "Project Id:", name: "control4Id"},
 					{fit: true},
@@ -32,13 +24,6 @@ enyo.kind({
 							{kind: "onyx.Input", placeholder: "My Project Name", name: "projectName"}
 					]},
 				]},
-// 			{kind: "FittableColumns", name: "fittableColumns4", style: "width:100%", components: [
-// 					{kind: "Control", content: "Version:", name: "control4version"},
-// 					{fit: true},
-// 					{kind: "onyx.InputDecorator", name: "inputDecorator4", components: [
-// 							{kind: "onyx.Input", disabled: true, placeholder: "1.0", name: "projectVersion"}
-// 					]},
-// 				]},	
 			{tag: "br"},
 			{content: "PhoneGap ...", style: "width:100%", ontap:"activateDrawer"},
 					{tag: "br"},
@@ -62,7 +47,7 @@ enyo.kind({
 			{kind: "FittableColumns", style: "width:100%", name: "fittableColumns10", components: [
 					{kind: "Control", name: "control4buttons"},
 					{fit: true},
-					{kind: "onyx.Button", content: "Cancel", classes: "onyx-negative", name: "cancel", ontap: "doCancelSettings"},
+					{kind: "onyx.Button", content: "Cancel", classes: "onyx-negative", name: "cancel", ontap: "hide"},
 					{kind: "onyx.Button", content: "OK", classes: "onyx-affirmative", name: "confirm", ontap: "confirmTap"}
 				]}				
 		]},
@@ -87,7 +72,6 @@ enyo.kind({
 	enable: function(inData) {
 		// handle the pre-fill values
 		if (inData.name !== undefined) {
-			//this.$.projectId.setValue("com.example."+inData.name);
 			this.$.projectId.setValue(inData.id);
 		} else
 			this.$.projectId.setValue("com.example.myapp");

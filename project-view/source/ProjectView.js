@@ -23,7 +23,6 @@ enyo.kind({
 		onInitConfigProject: "initConfigProject",
 		onCustomConfigProject: "customConfigProject",
 		onFinishProjectConfig: "finishConfigProject",
-		onCancelSettings: "cancelSettings",
 	},
 	serviceFs: null,
 	create: function() {
@@ -121,11 +120,5 @@ enyo.kind({
 		this.$.projectPropertiesPopup.show();
 		// handled here (don't bubble)	
 		return true; 
-	},
-	cancelSettings: function(inSender, inEvent) {
-		// projectProperties popup - cancel action
-	    this.$.projectPropertiesPopup.hide();
-	    // handled here (don't bubble)
-        return true;
-	},
+	}
 });
