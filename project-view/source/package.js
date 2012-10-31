@@ -3,5 +3,6 @@
 	"DirectorySelector.js",
 	"ProjectWizard.js",
 	"ProjectView.js",
-	"ProjectConfig.js"
+	"ProjectConfig.js",
+	"PhonegapBuild.js"
 );

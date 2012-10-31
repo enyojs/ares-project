@@ -8,6 +8,7 @@ enyo.kind({
 		{kind: "ProjectWizardPopup", canGenerate: false, name: "projectWizardPopup"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{kind: "ProjectConfig", name: "projectConfig"},
+		{kind: "PhonegapBuild"}
     ],
 	handlers: {
 		onCancel: "cancelCreateProject",
@@ -23,7 +24,7 @@ enyo.kind({
 		this.$.errorPopup.setErrorMsg(msg);
 		this.$.errorPopup.show();
 	},
-   openProjectAction: function(inSender, inEvent) {
+	openProjectAction: function(inSender, inEvent) {
     	this.$.projectWizardPopup.reset();
     	this.$.projectWizardPopup.setCreateMode(false);
         this.$.projectWizardPopup.show();
@@ -63,8 +64,10 @@ enyo.kind({
 	handleProjectSelected: function(inSender, inEvent) {
 	    	// Pass service definition & configuration to Harmonia
 	    	// & consequently to HermesFileTree
+	    this.log("project: ", inEvent.project);
 		this.$.harmonia.setProject(inEvent.project);
 		this.$.projectConfig.checkConfig(inEvent.project);
+		this.currentProject = inEvent.project;
 		return true; //Stop event propagation
 	},
 	projectRemoved: function(inSender, inEvent) {
@@ -91,29 +94,6 @@ enyo.kind({
 		this.$.projectList.storeProjectConfig(inEvent.name, inEvent.properties);
 	},
 	startPhonegapBuild: function(inSender, inEvent) {
-		var formData = new FormData();
-
-		// formData.append('username', 'johndoe');
-		// formData.append('id', 123456);
-		// var file = new File();
-		var b = new Blob(['enyo.depends(\n"$lib/layout",\n"$lib/onyx",\n"source"\n);'],
-			{type: "application/octet-stream"});
-		formData.append('file', b, 'package.js');
-
-		var b = new Blob(['enyo.depends("App.js");'],
-			{type: "application/octet-stream"});
-		formData.append('file', b, 'source/package.js');
-
-		var b = new Blob(['enyo.kind("App.js");'],
-			{type: "application/octet-stream"});
-		formData.append('file', b, 'source/App.js');
-
-		var xhr = new XMLHttpRequest();
-		xhr.open('POST', 'http://127.0.0.1:9029/build', true);
-		xhr.onload = function(e) {
-			enyo.log("form data onload: ", xhr);
-		};
-
-		xhr.send(formData);
-	},
+		this.$.phonegapBuild.startPhonegapBuild(this.currentProject);
+	}
 });
