@@ -104,7 +104,8 @@ enyo.kind({
 	},
 	removeProjectAction: function(inSender, inEvent) {
 		if (this.selected) {
-			this.$.removeProjectPopup.setName(this.selected.getProjectName());
+			this.$.removeProjectPopup.setName(
+				"Delete project '" + this.selected.getProjectName() + "' ?");
 			this.$.removeProjectPopup.show();
 		}
 	},
