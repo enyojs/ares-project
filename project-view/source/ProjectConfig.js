@@ -23,7 +23,7 @@ enyo.kind({
 	createConfig: function(inData) {
 		//this.log(inData);
 		var service = inData.service;
-		service.listFiles(inData.folderId)
+		return service.listFiles(inData.folderId)
         	.response(this, function(inSender, inResponse) {
                 	//this.log("Response: "+inResponse);
                 	var prj = inResponse.filter(function(node){
