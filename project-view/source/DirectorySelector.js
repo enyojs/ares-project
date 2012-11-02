@@ -57,6 +57,6 @@ enyo.kind({
 	floating: true,
 	autoDismiss: false,
 	components: [
-	    {kind: "DirectorySelector", name: "directotySelector"}
+	    {kind: "DirectorySelector", name: "directorySelector"}
     ]
 });
