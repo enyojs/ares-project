@@ -75,7 +75,7 @@ enyo.kind({
         var matchDirName = function(node){
 			return (node.content === name) ;
 		};
-		var hft = this.$.selectDirectoryPopup.$.directorySelector.$.hermesFileTree ;
+		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
 		var matchingNodes = hft.getNodeFiles(hft.selectedNode).filter( matchDirName ) ;
 			
 		if ( matchingNodes.length === 0 ) {

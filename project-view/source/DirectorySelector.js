@@ -1,18 +1,25 @@
 enyo.kind({
-	name : "DirectorySelector",
-	kind : "enyo.FittableRows",
-	style: "height: 400px; width: 600px",
-	components : [
-	    {kind: "FittableColumns", content: "fittableColumns", fit: true, name: "fittableColumns", components: [
-			{kind: "ProviderList", name: "providerList", onSelectProvider: "handleSelectProvider"},
-			{kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "selectFile", onFolderClick: "selectFolder"}
-		]},
-	    {kind: "FittableColumns", content: "fittableColumns2", isContainer: true, name: "fittableColumns2", components: [
-			{name: "selectedDir", fit: true, content: "Selected: "},
-			{kind: "onyx.Button", content: "Cancel", ontap: "doCancel"},
-			{kind: "onyx.Button", content: "OK", isContainer: true, name: "confirm", ontap: "confirmTap"}
-		]}
-    ],
+	name: "SelectDirectoryPopup",
+	kind: "onyx.Popup",
+	modal: true,
+	centered: true,
+	floating: true,
+	autoDismiss: false,
+	components: [{
+		kind : "enyo.FittableRows",
+		style: "height: 400px; width: 600px",
+		components : [
+			{kind: "FittableColumns", content: "fittableColumns", fit: true, components: [
+				 {kind: "ProviderList", onSelectProvider: "handleSelectProvider"},
+				 {kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "selectFile", onFolderClick: "selectFolder"}
+			 ]},
+			{kind: "FittableColumns", content: "fittableColumns2", isContainer: true, components: [
+				 {name: "selectedDir", fit: true, content: "Selected: "},
+				 {kind: "onyx.Button", content: "Cancel", ontap: "doCancel"},
+				 {kind: "onyx.Button", content: "OK", isContainer: true, name: "confirm", ontap: "confirmTap"}
+			 ]}
+		],
+	}],
 	events: {
 		onDirectorySelected: "",
 		onCancel: ""
@@ -47,16 +54,3 @@ enyo.kind({
     }
 });
 
-enyo.kind({
-	name: "SelectDirectoryPopup",
-	kind: "onyx.Popup",
-	events: {
-	},
-	modal: true,
-	centered: true,
-	floating: true,
-	autoDismiss: false,
-	components: [
-	    {kind: "DirectorySelector", name: "directorySelector"}
-    ]
-});
