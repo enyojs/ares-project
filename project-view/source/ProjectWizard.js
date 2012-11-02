@@ -92,6 +92,9 @@ enyo.kind({
 				this.$.selectDirectoryPopup.hide();
 			});
 		}
+		else {
+			this.importProject(name, matchingNodes[0].file.id) ;
+		}
 	},
     directorySelected: function(inSender, inEvent) {
     	this.selectedServiceId = inEvent.serviceId;
