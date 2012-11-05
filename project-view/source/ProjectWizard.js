@@ -14,9 +14,12 @@ enyo.kind({
     showDirPopup: function(inSender, inEvent) {
         this.$.selectDirectoryPopup.show();
     },
-	importProject: function(name, folderId) {
+	addProjectInList: function(name, folderId) {
 		this.hide();
     	this.doConfirmCreateProject({name: name, folderId: folderId, service: this.selectedDir.service, serviceId: this.selectedServiceId});
+	},
+	createProjectInView: function(name, folderId) {
+		this.addProjectInList(name,folderId);
     	this.doConfirmConfigProject({name: name, folderId: folderId, service: this.selectedDir.service});
 	}
 });
@@ -84,7 +87,7 @@ enyo.kind({
 			service
 				.createFolder(folderId, subDir)
 				.response(this, function(inSender, newFolderId) {
-					this.importProject(name, newFolderId) ;
+					this.createProjectInView(name, newFolderId) ;
 			})
 			.error(this, function(inSender, inError) {
 				// TODO display a popup to notify the error
@@ -93,7 +96,7 @@ enyo.kind({
 			});
 		}
 		else {
-			this.importProject(name, matchingNodes[0].file.id) ;
+			this.createProjectInView(name, matchingNodes[0].file.id) ;
 		}
 	},
     directorySelected: function(inSender, inEvent) {
