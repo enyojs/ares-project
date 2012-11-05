@@ -3,18 +3,19 @@ enyo.kind({
 	kind: "FittableColumns",
 	classes: "enyo-unselectable",
 	components: [
-	    {kind: "ProjectList", 
-	    	onModifySettings: "modifySettingsAction",
-	    	onCreateProject: "createProjectAction", 
-	    	onOpenProject: "openProjectAction", 
-	    	onProjectRemoved: "projectRemoved", 
-	    	onProjectSelected: "handleProjectSelected", 
-	    	name: "projectList"},
+		{kind: "ProjectList",
+			onModifySettings: "modifySettingsAction",
+			onCreateProject: "createProjectAction",
+			onOpenProject: "openProjectAction",
+			onProjectRemoved: "projectRemoved",
+			onProjectSelected: "handleProjectSelected",
+			name: "projectList"},
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
 		{kind: "ProjectWizardPopup", canGenerate: false, name: "projectWizardPopup"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{kind: "ProjectConfig", name: "projectConfig"},
-		{kind: "ProjectPropertiesPopup", name: "projectPropertiesPopup"},
+		{kind: "PhonegapBuild"},
+		{kind: "ProjectPropertiesPopup", name: "projectPropertiesPopup"}
     ],
 	handlers: {
 		onCancel: "cancelCreateProject",
@@ -24,6 +25,7 @@ enyo.kind({
 		onCustomConfigProject: "customConfigProject",
 		onFinishProjectConfig: "finishConfigProject",
 		onCancelSettings: "cancelSettings",
+		onPhonegapBuild: "startPhonegapBuild"
 	},
 	serviceFs: null,
 	create: function() {
@@ -34,15 +36,15 @@ enyo.kind({
 		this.$.errorPopup.setErrorMsg(msg);
 		this.$.errorPopup.show();
 	},
-   openProjectAction: function(inSender, inEvent) {
-    	this.$.projectWizardPopup.reset();
-    	this.$.projectWizardPopup.setCreateMode(false);
+	openProjectAction: function(inSender, inEvent) {
+		this.$.projectWizardPopup.reset();
+		this.$.projectWizardPopup.setCreateMode(false);
         this.$.projectWizardPopup.show();
         return true; //Stop event propagation
     },
     createProjectAction: function(inSender, inEvent) {
-    	this.$.projectWizardPopup.reset();
-    	this.$.projectWizardPopup.setCreateMode(true);
+		this.$.projectWizardPopup.reset();
+		this.$.projectWizardPopup.setCreateMode(true);
         this.$.projectWizardPopup.show();
         return true; //Stop event propagation
     },
@@ -51,38 +53,40 @@ enyo.kind({
         return true; //Stop event propagation
     },
 	confirmCreateProject: function(inSender, inEvent) {
-    		this.$.projectWizardPopup.hide();
+		this.$.projectWizardPopup.hide();
 
 		try {
 			// keep an reference on serviceFs
 			serviceFs = inEvent.service;
 			//console.dir(serviceFs);
-    		// Add an entry into the project list
-    		this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
-    			
-    		// Pass service information to Harmonia
+			// Add an entry into the project list
+			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
+
+			// Pass service information to Harmonia
 			this.$.harmonia.setProject({
 				service: inEvent.service,
 				folderId: inEvent.folderId,
 				name: inEvent.name
 			});
 		} catch(e) {
-	    		var msg = e.toString();
-	    		this.showErrorPopup(msg);
-	    		this.error(msg);
-	    		return false;
+			var msg = e.toString();
+			this.showErrorPopup(msg);
+			this.error(msg);
+			return false;
 		}
 		return true; //Stop event propagation
 	},
 	handleProjectSelected: function(inSender, inEvent) {
-	    	// Pass service definition & configuration to Harmonia
-	    	// & consequently to HermesFileTree
+		// Pass service definition & configuration to Harmonia
+		// & consequently to HermesFileTree
+		this.log("project: ", inEvent.project);
 		this.$.harmonia.setProject(inEvent.project);
 		this.$.projectConfig.checkConfig(inEvent.project);
+		this.currentProject = inEvent.project;
 		return true; //Stop event propagation
 	},
 	projectRemoved: function(inSender, inEvent) {
-    		this.$.harmonia.setProject(null);
+		this.$.harmonia.setProject(null);
 	},
 	setupConfigProject: function(inSender, inEvent) {
 		try {
@@ -90,12 +94,12 @@ enyo.kind({
 			var projectData = {
 					name: inEvent.name,
 					folderId: inEvent.folderId,
-					service: inEvent.service					
+					service: inEvent.service
 			};
 			this.$.projectConfig.createConfig(projectData);
 		} catch(e) {
-    		this.showErrorPopup(e.toString());
-    		return false;			
+			this.showErrorPopup(e.toString());
+			return false;
 		}
 		// handled here (don't bubble)
 		return true;
@@ -119,13 +123,16 @@ enyo.kind({
 	modifySettingsAction: function(inSender, inEvent) {
 		// projectProperties popup - onTap action
 		this.$.projectPropertiesPopup.show();
-		// handled here (don't bubble)	
-		return true; 
+		// handled here (don't bubble)
+		return true;
 	},
 	cancelSettings: function(inSender, inEvent) {
 		// projectProperties popup - cancel action
-	    	this.$.projectPropertiesPopup.hide();
-	    	// handled here (don't bubble)
-        	return true;
+		this.$.projectPropertiesPopup.hide();
+		// handled here (don't bubble)
+        return true;
+	},
+	startPhonegapBuild: function(inSender, inEvent) {
+		this.$.phonegapBuild.startPhonegapBuild(this.currentProject);
 	}
 });

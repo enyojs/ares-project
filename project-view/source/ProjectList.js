@@ -7,7 +7,8 @@ enyo.kind({
 		onOpenProject: "",
 		onProjectRemoved: "",
 		onModifySettings: "",
-		onFinishProjectConfig: ""
+		onFinishProjectConfig: "",
+		onPhonegapBuild: ""
 	},
 	handlers: {
 	},
@@ -36,6 +37,10 @@ enyo.kind({
 				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
 				{kind: "onyx.Tooltip", content: "Remove Project..."},
 			]},
+			{kind: "onyx.TooltipDecorator", components: [
+				{kind: "onyx.IconButton", src: "$project-view/images/project_view_build.png", onclick: "doPhonegapBuild"},
+				{kind: "onyx.Tooltip", content: "Phonegap build"},
+			]}
 		]},
 		{kind: "enyo.Scroller", components: [
 			{kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
