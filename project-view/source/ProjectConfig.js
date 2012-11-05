@@ -125,4 +125,26 @@ enyo.kind({
 			this.showErrorPopup(inError);
 		});
 	},
+	storeXml: function(inData) {
+		var service = inData.service;		
+		service.listFiles(inData.folderId)
+    	.response(this, function(inSender, inResponse) {
+            	if (this.debug) console.dir(inResponse);
+            	service.createFile(inData.folderId, "config.xml", inData.xmlFile)
+            	.response(this, function(inSender, inResponse) {
+            		if (inResponse && inResponse.content !== "") {
+                		if (this.debug) this.log("config.xml saved.");
+            		}
+            	})
+            	.error(this, function(inSender, inError) {
+            		this.log("Error: "+inError);
+            		this.showErrorPopup(inError);
+            	});
+        })
+		.error(this, function(inSender, inError) {
+			this.log("Error: "+inError);
+			this.showErrorPopup(inError);
+		});
+
+	},
 });
