@@ -6,6 +6,8 @@ enyo.kind({
 		onProjectSelected: "",
 		onOpenProject: "",
 		onProjectRemoved: "",
+		onModifySettings: "",
+		onFinishProjectConfig: "",
 		onPhonegapBuild: ""
 	},
 	handlers: {
@@ -18,6 +20,10 @@ enyo.kind({
 	    {kind: "onyx.Toolbar",  classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
 			{content: "Projects", style: "margin-right: 10px"},
 			 // FIXME: we may need icons dedicated for projects instead of re-using application icons
+			 {kind: "onyx.TooltipDecorator", components: [
+				{kind: "onyx.IconButton", src: "$project-view/images/project_settings.png", onclick: "doModifySettings"},
+				{kind: "onyx.Tooltip", content: "Settings..."},
+			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_new.png", onclick: "doCreateProject"},
 				{kind: "onyx.Tooltip", content: "Create Project..."},
@@ -31,7 +37,7 @@ enyo.kind({
 				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
 				{kind: "onyx.Tooltip", content: "Remove Project..."},
 			]},
-			{kind: "onyx.TooltipDecorator", showing: false, components: [
+			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_build.png", onclick: "doPhonegapBuild"},
 				{kind: "onyx.Tooltip", content: "Phonegap build"},
 			]}
@@ -173,7 +179,7 @@ enyo.kind({
     	}
     	return value;	// Accept
     },
-    storeProjectConfig: function (projectName, projectProperties) {
+    storeBaseConfigProject: function (projectName, folderId, projectProperties) {
     	var found = false;
     	for (var i = 0; i<this.projectsConfig.length; i++) {
     		if (this.projectsConfig[i].name === projectName) {
@@ -181,10 +187,41 @@ enyo.kind({
     			break;
     		}
     	}
-    	if (!found) {
-    		this.projectsConfig.push({name: projectName, properties: projectProperties});
-    	}    	
+    	if (found === false) {
+    		// store basic project properties
+    		this.projectsConfig.push({name: projectName, 
+    							folderId: folderId, 
+    							status: "basic", 
+    							properties: projectProperties});
+    	}
+
     },
+    storeCustomConfigProject: function (inData) {
+    	// data project store into projectsConfig 
+     	for (var i = 0; i<this.projectsConfig.length; i++) {
+    		if (this.projectsConfig[i].properties.id === inData.id) {
+    			var props = {
+    				format: this.projectsConfig[i].properties.format,
+    				id: this.projectsConfig[i].properties.id,
+    				name: inData.name,
+    				version: this.projectsConfig[i].properties.version,
+    				phonegapbuild: {target: inData.target, key: inData.key}
+    				
+    			}
+    			var obj = {
+    				name: this.projectsConfig[i].name,
+                    folderId: this.projectsConfig[i].folderId,
+                    status: "custom",
+                    properties: props,
+                               
+                }; 
+    			this.projectsConfig.splice(i,1);
+    			this.projectsConfig.push(obj);
+    			break;
+    		}
+    	}     	
+    	this.doFinishProjectConfig(obj);
+    }
 });
 
 enyo.kind({
