@@ -124,7 +124,7 @@ enyo.kind({
 
 enyo.kind({
 	name: "ProjectWizardImport",
-	kind: "onyx.Popup",
+	kind: "ProjectWizardAny",
 	modal: true,
 	centered: true,
 	floating: true,
