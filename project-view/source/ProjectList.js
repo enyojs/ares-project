@@ -97,10 +97,23 @@ enyo.kind({
 		if (!project.serviceId) {
 			throw new Error("Cannot add a project in service=" + service);
 		}
-		this.projects.push(project);
-		this.storeProjectsInLocalStorage();
-		this.$.projectList.setCount(this.projects.length);
-		this.$.projectList.render();
+		var known = 0;
+		var match = function(proj) {
+			if ( proj.name === name) {
+				known = 1;	
+			} 
+		} ;
+		enyo.forEach(this.projects, match) ;
+
+		if (known) {
+			this.log("Skipped project " + name + " as it is already listed") ;
+		}
+		else {
+			this.projects.push(project);
+			this.storeProjectsInLocalStorage();
+			this.$.projectList.setCount(this.projects.length);
+			this.$.projectList.render();
+		}
 	},
 	removeProjectAction: function(inSender, inEvent) {
 		if (this.selected) {
