@@ -25,6 +25,7 @@ enyo.kind({
 		onCustomConfigProject: "customConfigProject",
 		onFinishProjectConfig: "finishConfigProject",
 		onCancelSettings: "cancelSettings",
+		onSaveGeneratedXml: "saveGeneratedXml",
 		onPhonegapBuild: "startPhonegapBuild"
 	},
 	serviceFs: null,
@@ -56,33 +57,30 @@ enyo.kind({
 		this.$.projectWizardPopup.hide();
 
 		try {
-			// keep an reference on serviceFs
-			serviceFs = inEvent.service;
-			//console.dir(serviceFs);
-			// Add an entry into the project list
-			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
-
-			// Pass service information to Harmonia
+    		// Add an entry into the project list
+    		this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
+    			
+    		// Pass service information to Harmonia
 			this.$.harmonia.setProject({
 				service: inEvent.service,
 				folderId: inEvent.folderId,
 				name: inEvent.name
 			});
 		} catch(e) {
-			var msg = e.toString();
-			this.showErrorPopup(msg);
-			this.error(msg);
-			return false;
+	    		var msg = e.toString();
+	    		this.showErrorPopup(msg);
+	    		this.error(msg);
+	    		return false;
 		}
 		return true; //Stop event propagation
 	},
 	handleProjectSelected: function(inSender, inEvent) {
-		// Pass service definition & configuration to Harmonia
-		// & consequently to HermesFileTree
-		this.log("project: ", inEvent.project);
+	    // Pass service definition & configuration to Harmonia
+	    // & consequently to HermesFileTree
 		this.$.harmonia.setProject(inEvent.project);
 		this.$.projectConfig.checkConfig(inEvent.project);
-		this.currentProject = inEvent.project;
+		// Keep one reference on service FS implementation
+		serviceFs = inEvent.project.service.impl;
 		return true; //Stop event propagation
 	},
 	projectRemoved: function(inSender, inEvent) {
@@ -117,8 +115,11 @@ enyo.kind({
 	finishConfigProject: function(inSender, inEvent) {
 		// customized project data will be stored on FS into project.json
 		this.$.projectConfig.fsUpdateFile(inEvent);
+		// reset the popup settings
 		this.$.projectPropertiesPopup.reset();
 		this.$.projectPropertiesPopup.hide();
+		// generate the config.xml file
+		this.$.projectPropertiesPopup.generateConfigXML(inEvent);
 	},
 	modifySettingsAction: function(inSender, inEvent) {
 		// projectProperties popup - onTap action
@@ -128,9 +129,21 @@ enyo.kind({
 	},
 	cancelSettings: function(inSender, inEvent) {
 		// projectProperties popup - cancel action
-		this.$.projectPropertiesPopup.hide();
-		// handled here (don't bubble)
+	    this.$.projectPropertiesPopup.hide();
+	    // handled here (don't bubble)
         return true;
+	},
+	saveGeneratedXml: function(inEvent, inSender) {
+		// TODO: MADBH - need to discuss with FiX and Yves
+		// config.xml needs to saved/stored under a target/phonegapbuild directory
+		var configXmlData = {
+			folderId: inSender.folderId,
+			xmlFile: inSender.configXML,
+			service: serviceFs,
+		};
+		this.$.projectConfig.storeXml(configXmlData);
+	    // handled here (don't bubble)
+        return true;	
 	},
 	startPhonegapBuild: function(inSender, inEvent) {
 		this.$.phonegapBuild.startPhonegapBuild(this.currentProject);
