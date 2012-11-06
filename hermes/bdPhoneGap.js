@@ -297,39 +297,46 @@ function BdPhoneGap(config, next) {
 			return;
 		}
 		if (req.body.appId) {
-			api.updateFileBasedApp();
+			console.log("build(): updating appId="+ req.body.appId + " (title='" + req.body.title + "')");
+			api.updateFileBasedApp(req.body.token, req.zip.path, req.body.appId, {
+				success: next,
+				error: _fail
+			});
 		} else {
+			console.log("build(): creating new appId for title=" + req.body.title + "");
 			api.createFileBasedApp(req.body.token, req.zip.path, {
 				// reqData
 				create_method: 'file',
 				title: req.body.title
 			}, {
-				success: function(data) {
-					try {
-						console.log("build(): ", util.inspect(data));
-						if (typeof data === 'string') {
-							data = JSON.parse(data);
-						}
-						if (typeof data.error === 'string') {
-							_fail(data.error);
-							return;
-						}
-						res.body = data;
-						next();
-					} catch(e) {
-						_fail(e.toString());
-					}
-				},
+				success: _success,
 				error: _fail
 			});
 		}
-
+		
+		function _success(data) {
+			try {
+				console.log("build(): ", util.inspect(data));
+				if (typeof data === 'string') {
+					data = JSON.parse(data);
+				}
+				if (typeof data.error === 'string') {
+					_fail(data.error);
+					return;
+				}
+				res.body = data;
+				next();
+			} catch(e) {
+				_fail(e.toString());
+			}
+		}
+		
 		function _fail(errMsg) {
 			console.error("build(): error ", errMsg);
 			next(new HttpError("PhoneGap build error: " + errMsg, 400 /*Bad Request*/));
 		}
 	}
-
+	
 	function respond(req, res, next) {
 		console.log("respond(): ", res.body);
 

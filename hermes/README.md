@@ -143,13 +143,25 @@ Assuming you have a working account build.phonegap.com associated with the email
 	Enter host password for user 'YOUR_EMAIL':
 	{"token":"YOUR_TOKEN"}
 
-Linux & OSX: The following command generates a POST request carrying a `multipart/form-data` message suitable to test the `bdPhoneGap.js` service:  it creates a new `appId` using an application located in the current directory.  Note that you must provide the `token` and `title` form fields.  The `<name/>` in the `config.xml` is a suitable value for the `title` form field.
+Linux & OSX: The following commands generates a POST request carrying a `multipart/form-data` message suitable to test the `bdPhoneGap.js` service:
 
-	$ find . -type f | \
-		awk 'BEGIN{printf("curl ");}{sub("^\.\/", "", $1); printf("-F \"file=@%s;filename=%s\" ", $1, $1);}END{print(url)}' \
-		-F "token=YOUR_TOKEN" \
-		-F "title=\""My First PhoneGap App\"" \
-		url=http://127.0.0.1:9029/build/
+* This one creates a new `appId` using an application located in the current directory.  Note that you must provide the `token` and `title` form fields.  The `<name/>` in the `config.xml` is a suitable value for the `title` form field.
+
+		$ find . -type f | \
+			awk 'BEGIN{printf("curl ");}{sub("^\.\/", "", $1); printf("-F \"file=@%s;filename=%s\" ", $1, $1);}END{print(url)}' \
+			-F "token=YOUR_TOKEN" \
+			-F "title=\""My First PhoneGap App\"" \
+			url=http://127.0.0.1:9029/build/
+
+* This one updates the `appId=238006`.  Other form fields follow the same rules as before.
+
+		$ find . -type f | \
+			awk 'BEGIN{printf("curl ");}{sub("^\.\/", "", $1); printf("-F \"file=@%s;filename=%s\" ", $1, $1);}END{print(url)}' \
+			-F "token=YOUR_TOKEN" \
+			-F "title=\""My First PhoneGap App\"" \
+			-F "appId=238006" \
+			url=http://127.0.0.1:9029/build/
+
 
 ## Debug
 
