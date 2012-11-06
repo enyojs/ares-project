@@ -6,19 +6,19 @@ enyo.kind({
 		{kind: "ProjectList",
 			onModifySettings: "modifySettingsAction",
 			onCreateProject: "createProjectAction",
-			onOpenProject: "openProjectAction",
+			onImportProject: "importProjectAction",
 			onProjectRemoved: "projectRemoved",
 			onProjectSelected: "handleProjectSelected",
 			name: "projectList"},
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
-		{kind: "ProjectWizardPopup", canGenerate: false, name: "projectWizardPopup"},
+		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
+		{kind: "ProjectWizardImport", canGenerate: false, name: "projectWizardImport"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
-		{kind: "ProjectConfig", name: "projectConfig"},
+		{kind: "ProjectConfig", name: "projectConfig"}
 		{kind: "PhonegapBuild"},
 		{kind: "ProjectPropertiesPopup", name: "projectPropertiesPopup"}
     ],
 	handlers: {
-		onCancel: "cancelCreateProject",
 		onConfirmCreateProject: "confirmCreateProject",
 		onConfirmConfigProject: "setupConfigProject",
 		onInitConfigProject: "initConfigProject",
@@ -37,36 +37,20 @@ enyo.kind({
 		this.$.errorPopup.setErrorMsg(msg);
 		this.$.errorPopup.show();
 	},
-	openProjectAction: function(inSender, inEvent) {
-		this.$.projectWizardPopup.reset();
-		this.$.projectWizardPopup.setCreateMode(false);
-        this.$.projectWizardPopup.show();
+	importProjectAction: function(inSender, inEvent) {
+    	this.$.projectWizardImport.reset().show();
         return true; //Stop event propagation
     },
     createProjectAction: function(inSender, inEvent) {
-		this.$.projectWizardPopup.reset();
-		this.$.projectWizardPopup.setCreateMode(true);
-        this.$.projectWizardPopup.show();
-        return true; //Stop event propagation
-    },
-    cancelCreateProject: function(inSender, inEvent) {
-        this.$.projectWizardPopup.hide();
+    	this.$.projectWizardCreate.reset().show();
         return true; //Stop event propagation
     },
 	confirmCreateProject: function(inSender, inEvent) {
-		this.$.projectWizardPopup.hide();
 
 		try {
     		// Add an entry into the project list
     		this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
-    			
-    		// Pass service information to Harmonia
-			this.$.harmonia.setProject({
-				service: inEvent.service,
-				folderId: inEvent.folderId,
-				name: inEvent.name
-			});
-		} catch(e) {
+ 		} catch(e) {
 	    		var msg = e.toString();
 	    		this.showErrorPopup(msg);
 	    		this.error(msg);
@@ -94,7 +78,12 @@ enyo.kind({
 					folderId: inEvent.folderId,
 					service: inEvent.service
 			};
-			this.$.projectConfig.createConfig(projectData);
+			this.$.projectConfig.createConfig(projectData)
+				.response(this, function() {
+    				// Pass service information to Harmonia
+					// *once* project.json has been created
+					this.$.harmonia.setProject(projectData);
+				}) ;
 		} catch(e) {
 			this.showErrorPopup(e.toString());
 			return false;

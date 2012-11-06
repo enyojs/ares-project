@@ -4,7 +4,7 @@ enyo.kind({
 	events: {
 		onCreateProject: "",
 		onProjectSelected: "",
-		onOpenProject: "",
+		onImportProject: "",
 		onProjectRemoved: "",
 		onModifySettings: "",
 		onFinishProjectConfig: "",
@@ -19,7 +19,6 @@ enyo.kind({
 	    {kind: "LocalStorage"},
 	    {kind: "onyx.Toolbar",  classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
 			{content: "Projects", style: "margin-right: 10px"},
-			 // FIXME: we may need icons dedicated for projects instead of re-using application icons
 			 {kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_settings.png", onclick: "doModifySettings"},
 				{kind: "onyx.Tooltip", content: "Settings..."},
@@ -29,8 +28,8 @@ enyo.kind({
 				{kind: "onyx.Tooltip", content: "Create Project..."},
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_view_edit.png", onclick: "doOpenProject"},
-				{kind: "onyx.Tooltip", content: "Open Project..."},
+				{kind: "onyx.IconButton", src: "$project-view/images/project_view_edit.png", onclick: "doImportProject"},
+				{kind: "onyx.Tooltip", content: "Import Project..."},
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_delete.png", onclick: "removeProjectAction"},
@@ -109,14 +108,28 @@ enyo.kind({
 		if (!project.serviceId) {
 			throw new Error("Cannot add a project in service=" + service);
 		}
-		this.projects.push(project);
-		this.storeProjectsInLocalStorage();
-		this.$.projectList.setCount(this.projects.length);
-		this.$.projectList.render();
+		var known = 0;
+		var match = function(proj) {
+			if ( proj.name === name) {
+				known = 1;	
+			} 
+		} ;
+		enyo.forEach(this.projects, match) ;
+
+		if (known) {
+			this.log("Skipped project " + name + " as it is already listed") ;
+		}
+		else {
+			this.projects.push(project);
+			this.storeProjectsInLocalStorage();
+			this.$.projectList.setCount(this.projects.length);
+			this.$.projectList.render();
+		}
 	},
 	removeProjectAction: function(inSender, inEvent) {
 		if (this.selected) {
-			this.$.removeProjectPopup.setName(this.selected.getProjectName());
+			this.$.removeProjectPopup.setName(
+				"Delete project '" + this.selected.getProjectName() + "' ?");
 			this.$.removeProjectPopup.show();
 		}
 	},
