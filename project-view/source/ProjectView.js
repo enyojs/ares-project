@@ -17,7 +17,7 @@ enyo.kind({
 		{kind: "ProjectConfig", name: "projectConfig"},
 		{kind: "PhonegapBuild"},
 		{kind: "ProjectPropertiesPopup", name: "projectPropertiesPopup"}
-    ],
+	],
 	handlers: {
 		onConfirmCreateProject: "confirmCreateProject",
 		onConfirmConfigProject: "setupConfigProject",
@@ -38,29 +38,28 @@ enyo.kind({
 		this.$.errorPopup.show();
 	},
 	importProjectAction: function(inSender, inEvent) {
-    	this.$.projectWizardImport.reset().show();
-        return true; //Stop event propagation
-    },
-    createProjectAction: function(inSender, inEvent) {
-    	this.$.projectWizardCreate.reset().show();
-        return true; //Stop event propagation
-    },
+		this.$.projectWizardImport.reset().show();
+		return true; //Stop event propagation
+	},
+	createProjectAction: function(inSender, inEvent) {
+		this.$.projectWizardCreate.reset().show();
+		return true; //Stop event propagation
+	},
 	confirmCreateProject: function(inSender, inEvent) {
-
 		try {
-    		// Add an entry into the project list
-    		this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
- 		} catch(e) {
-	    		var msg = e.toString();
-	    		this.showErrorPopup(msg);
-	    		this.error(msg);
-	    		return false;
+			// Add an entry into the project list
+			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
+		} catch(e) {
+				var msg = e.toString();
+				this.showErrorPopup(msg);
+				this.error(msg);
+				return false;
 		}
 		return true; //Stop event propagation
 	},
 	handleProjectSelected: function(inSender, inEvent) {
-	    // Pass service definition & configuration to Harmonia
-	    // & consequently to HermesFileTree
+		// Pass service definition & configuration to Harmonia
+		// & consequently to HermesFileTree
 		this.$.harmonia.setProject(inEvent.project);
 		this.$.projectConfig.checkConfig(inEvent.project);
 		// Keep one reference on service FS implementation
@@ -80,7 +79,7 @@ enyo.kind({
 			};
 			this.$.projectConfig.createConfig(projectData)
 				.response(this, function() {
-    				// Pass service information to Harmonia
+					// Pass service information to Harmonia
 					// *once* project.json has been created
 					this.$.harmonia.setProject(projectData);
 				}) ;
@@ -118,9 +117,9 @@ enyo.kind({
 	},
 	cancelSettings: function(inSender, inEvent) {
 		// projectProperties popup - cancel action
-	    this.$.projectPropertiesPopup.hide();
-	    // handled here (don't bubble)
-        return true;
+		this.$.projectPropertiesPopup.hide();
+		// handled here (don't bubble)
+		return true;
 	},
 	saveGeneratedXml: function(inEvent, inSender) {
 		// TODO: MADBH - need to discuss with FiX and Yves
@@ -131,8 +130,8 @@ enyo.kind({
 			service: serviceFs,
 		};
 		this.$.projectConfig.storeXml(configXmlData);
-	    // handled here (don't bubble)
-        return true;	
+		// handled here (don't bubble)
+		return true;
 	},
 	startPhonegapBuild: function(inSender, inEvent) {
 		this.$.phonegapBuild.startPhonegapBuild(this.currentProject);

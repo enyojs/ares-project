@@ -7,12 +7,11 @@ enyo.kind({
 		onCancelSettings: "",
 		onSaveGeneratedXml: "",
 	},
-	
 	createMode: true,
 	components: [
-	    {kind: "FittableRows", fit: true, components: [
-	    	{content: "Settings", style: "width:100%"},
-	    	{tag: "br"},
+		{kind: "FittableRows", fit: true, components: [
+			{content: "Settings", style: "width:100%"},
+			{tag: "br"},
 			{kind: "FittableColumns", style: "width:100%", components: [
 					{kind: "Control", content: "Project Id:"},
 					{fit: true},
@@ -37,14 +36,14 @@ enyo.kind({
 						{kind: "onyx.InputDecorator", components: [
 							{kind: "onyx.Input", placeholder: "Enter a target build", name: "targetBuild"}
 						]},
-					]},	
+					]}, 
 					{kind: "FittableColumns", style: "width:100%", components: [
 						{kind: "Control", content: "PhoneGap Key:"},
 						{fit: true},
 						{kind: "onyx.InputDecorator", components: [
 							{kind: "onyx.Input", placeholder: "Enter your key", name: "phonegapKey"}
 						]},
-					]},	
+					]}, 
 				]},
 			{name: "status", tag: "p", content: "You need to create a project!", style: "width:100%; color: red"},
 			{kind: "FittableColumns", style: "width:100%", components: [
@@ -52,19 +51,19 @@ enyo.kind({
 					{fit: true},
 					{kind: "onyx.Button", content: "Cancel", classes: "onyx-negative", name: "cancel", ontap: "doCancelSettings"},
 					{kind: "onyx.Button", content: "OK", classes: "onyx-affirmative", name: "confirm", ontap: "confirmTap"}
-				]}				
+				]}
 		]},
-    ],
-    debug: false,
-    create: function() {
-    	this.inherited(arguments);
-    	this.$.confirm.setDisabled(true);
-    },
+	],
+	debug: false,
+	create: function() {
+		this.inherited(arguments);
+		this.$.confirm.setDisabled(true);
+	},
 	activateDrawer: function() {
 		//drawer is closed
 		this.$.phoneGapDrawer.setOpen(!this.$.phoneGapDrawer.open);
 	},
-    reset: function() {
+	reset: function() {
 		this.$.projectName.setValue("");
 		this.$.projectId.setValue("com.example.myapp");
 		this.$.targetBuild.setPlaceholder("Enter a target build");
@@ -85,27 +84,24 @@ enyo.kind({
 		this.$.confirm.setDisabled(false);
 		this.$.status.setContent(" ");
 	},
-    confirmTap: function(inSender, inEvent) {
+	confirmTap: function(inSender, inEvent) {
 		// retrieve modified values
 		var obj = {
-		 	name: this.$.projectName.getValue(),
-		 	id: this.$.projectId.getValue(),
-		 	target: this.$.targetBuild.getValue(),
-		 	key: this.$.phonegapKey.getValue()
+			name: this.$.projectName.getValue(),
+			id: this.$.projectId.getValue(),
+			target: this.$.targetBuild.getValue(),
+			key: this.$.phonegapKey.getValue()
 		}
 		this.doCustomConfigProject(obj);
 		// handled here (don't bubble)
-        return true;
+		return true;
 	},
 	generate: function(inData) {
-
 		var props = inData.properties;
 		var pgap = props.phonegapbuild;
 		var strXml = null;
-		
-		var xw = new XMLWriter('UTF-8');	
+		var xw = new XMLWriter('UTF-8');
 		xw.indentation = 4;
-
 		xw.writeStartDocument();
 			xw.writeStartElement( 'widget' );
 				xw.writeAttributeString('xmlns','http://www.w3.org/ns/widgets');
@@ -113,20 +109,20 @@ enyo.kind({
 				xw.writeAttributeString('format', props.format);
 				xw.writeAttributeString('id', props.id);
 				xw.writeAttributeString('version',props.version);
-				xw.writeComment('');			
+				xw.writeComment('');
 				xw.writeElementString('name', 'PhoneGap Application:'+props.name);
 				xw.writeComment('');
 				xw.writeElementString('description', 'Getting started with PhoneGap development and build.phonegap.com');
-				xw.writeComment('');	
+				xw.writeComment('');
 				xw.writeStartElement('gap:platforms');
 				xw.writeElementString('name', pgap.target);
 				xw.writeEndElement();
 			xw.writeEndElement();
-		//xw.writeEndDocument(); called by flush()		
-		strXml = xw.flush();	
+		//xw.writeEndDocument(); called by flush()
+		strXml = xw.flush();
 		if (this.debug) console.log(xw.flush());
-		
-		this.doSaveGeneratedXml({folderId: inData.folderId, configXML:strXml});	
+
+		this.doSaveGeneratedXml({folderId: inData.folderId, configXML:strXml}); 
 	}
 });
 
@@ -135,7 +131,7 @@ enyo.kind({
 	kind: "onyx.Popup",
 	modal: true, centered: true, floating: true, autoDismiss: false,
 	components: [
-        {kind: "ProjectProperties"}
+		{kind: "ProjectProperties"}
 	],
 	reset: function() {
 		this.$.projectProperties.reset();
