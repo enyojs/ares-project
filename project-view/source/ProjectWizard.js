@@ -183,7 +183,7 @@ enyo.kind({
 				var item = toScan.shift() ;
 				var parentDir = item[0] ;
 				var child = item[1];
-				this.log('myiter on ' + child.name ) ;
+				this.log('myiter on ' + child.name + ' isDir ' + child.isDir ) ;
 				if ( child.name === 'project.json' ) { 
 					this.log('opening project.json from ' + parentDir.name ) ;
 					service.getFile( child.id ).
@@ -193,7 +193,7 @@ enyo.kind({
 							this.addProjectInList(inContent.content.name, parentDir.id) ;
 						}); 
 				}
-				if ( child.isDir ) { 
+				if ( child.isDir ===  true ) { 
 					service.listFiles(child.id)
 						.response(this, function(inSender, inFiles) {
 							enyo.forEach(inFiles, function(v) {
