@@ -14,7 +14,8 @@ var fs = require("fs"),
     mkdirp = require("mkdirp"),
     rimraf = require("rimraf"),
     http = require("http"),
-    child_process = require("child_process");
+    child_process = require("child_process"),
+    api = require("phonegapbuildapi");
 
 var basename = path.basename(__filename);
 
@@ -76,7 +77,7 @@ function BdPhoneGap(config, next) {
 	 * @private
 	 */
 	function errorHandler(err, req, res, next){
-		console.error("Internal error: ", err.stack);
+		console.error("errorHandler(): ", err.stack);
 		res.status(err.statusCode || 500).send(err.toString());
 	}
 
@@ -100,14 +101,12 @@ function BdPhoneGap(config, next) {
 
 	var servicePath = makeExpressRoute('');
 	app.post(servicePath, function(req, res, next) {
-		//returnZip.bind(this, req, res)(next);
-
-		// debugger;
 		async.series([
 		 	prepare.bind(this),
 			store.bind(this, req, res),
 			deploy.bind(this, req, res),
 			zip.bind(this, req, res),
+			build.bind(this, req, res),
 			respond.bind(this, req, res),
 			cleanup.bind(this, req, res)
 		], function (err, results) {
@@ -217,7 +216,6 @@ function BdPhoneGap(config, next) {
 			}
 		});
 		child.on('exit', function(code, signal) {
-			debugger;
 			if (code !== 0) {
 				next(new HttpError("child-process failed"));
 			} else {
@@ -285,13 +283,62 @@ function BdPhoneGap(config, next) {
 		}
 	}
 
-	function callPhoneGap(req, res, next) {}
+	function build(req, res, next) {
+		console.log("build(): fields req.body = ", util.inspect(req.body));
+		var errs = [];
+		var mandatory = ['token', 'title'];
+		mandatory.forEach(function(field) {
+			if (!req.body[field]) {
+				errs.push("missing form field: '" + field + "'");
+			}
+		});
+		if (errs.length > 0) {
+			_fail(errs.toString());
+			return;
+		}
+		if (req.body.appId) {
+			api.updateFileBasedApp();
+		} else {
+			api.createFileBasedApp(req.body.token, req.zip.path, {
+				// reqData
+				create_method: 'file',
+				title: req.body.title
+			}, {
+				success: function(data) {
+					try {
+						console.log("build(): ", util.inspect(data));
+						if (typeof data === 'string') {
+							data = JSON.parse(data);
+						}
+						if (typeof data.error === 'string') {
+							_fail(data.error);
+							return;
+						}
+						res.body = data;
+						next();
+					} catch(e) {
+						_fail(e.toString());
+					}
+				},
+				error: _fail
+			});
+		}
+
+		function _fail(errMsg) {
+			console.error("build(): error ", errMsg);
+			next(new HttpError("PhoneGap build error: " + errMsg, 400 /*Bad Request*/));
+		}
+	}
 
 	function respond(req, res, next) {
-		console.log("respond()");
-		res.status(200).sendfile(req.zip.path);
-		// detach the zip file name & stream from the request
+		console.log("respond(): ", res.body);
+
+		res.status(200).send(res.body);
+		delete res.body;
+
+		//res.status(200).sendfile(req.zip.path);
 		delete req.zip;
+		 
 		next();
 	}
 
