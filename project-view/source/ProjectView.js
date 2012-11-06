@@ -14,7 +14,7 @@ enyo.kind({
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
 		{kind: "ProjectWizardImport", canGenerate: false, name: "projectWizardImport"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
-		{kind: "ProjectConfig", name: "projectConfig"}
+		{kind: "ProjectConfig", name: "projectConfig"},
 		{kind: "PhonegapBuild"},
 		{kind: "ProjectPropertiesPopup", name: "projectPropertiesPopup"}
     ],
