@@ -21,17 +21,15 @@ enyo.kind({
 	 */
 	startPhonegapBuild: function(project, credentials) {
 		this.debug && this.log("Start phonegap build: ", project);
-		var formData = new FormData();
 
-		// Add credential information in the FormData to get a phonegapbuild token
-		formData.append('username', credentials.username);
-		formData.append('password', credentials.password);
+		// Pass credential information to get a phonegapbuild token
+		var data = "username=" + credentials.username + "&password=" + credentials.password;
 
 		// Get a phonegapbuild token
 		var req = new enyo.Ajax({
-			url: 'http://127.0.0.1:9029/token',		// TODO xxxx
+			url: 'http://127.0.0.1:9029/token',		// TODO CORS issue with phonegap build
 			method: 'POST',
-			postBody: formData
+			postBody: encodeURI(data)
 		});
 		req.response(this, function(inEvent, inData) {
 			this.token = inData.token;
@@ -76,12 +74,10 @@ enyo.kind({
 	},
 	listAllFiles: function(inData, fileList) {
 		if (inData.isDir) {
-			this.debug && this.log("Dir : ", inData.path);
 			for(var item in inData.children) {
 				this.listAllFiles(inData.children[item], fileList);
 			}
 		} else {
-			this.debug && this.log("File: ", inData.path);
 			var obj = {path: inData.path, id: inData.id};
 			fileList.push(obj);
 		}
