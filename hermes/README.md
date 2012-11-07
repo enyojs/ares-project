@@ -127,15 +127,22 @@ The generated file is expected to look like to below:
 
 ## PhoneGap build service
 
-### Usage
+### Protocol
 
-**XXX**
+The Hermes PhoneGap build services exposes 2 non-cacheable resources, accessible only to `POST` verbs:
+
+* The default `<prefix>` value is `/phonegap`
+* `<prefix>/deploy` run the Enyo `deploy.js` script on the given application.  Application folder tree is encoded as a `multipart/form-data` in the POST request body.  If successfull, the response body is a `application/zip` containing the deployable application.  It is an intermediate step of the `<prefix>/build` operation.
+* `<prefix>/build` uploads the former deployable application to the [PhoneGap Build Service](https://build.phonegap.com) & returns the JSON-encoded answer of this service.  This operation expects some fields (`key=value`) to be passed inlined in the request body.  Each form field is passed verbatim as a property of the JSON requestObject (see [mantatory & optionnal parameters of the PhoneGap write API](https://build.phonegap.com/docs/write_api)). The following two fields are mandatory.
+   * `token` is the PhoneGap build authentication token, obtained by other means.
+   * `title` is the human-readable application name.  It is considered a good practice to reuse the value of the `<name/>` field of the `config.xml`.
+
 
 ### Development & Test
 
-Manual run:
+Manual run (`prefix` an optional parameter):
 
-	$ node hermes/bdPhoneGap.js
+	$ node hermes/bdPhoneGap.js [prefix]
 
 Assuming you have a working account build.phonegap.com associated with the email `YOUR_EMAIL`, get your PhoneGap developer token `YOUR_TOKEN`, using:
 
@@ -145,23 +152,30 @@ Assuming you have a working account build.phonegap.com associated with the email
 
 Linux & OSX: The following commands generates a POST request carrying a `multipart/form-data` message suitable to test the `bdPhoneGap.js` service:
 
-* This one creates a new `appId` using an application located in the current directory.  Note that you must provide the `token` and `title` form fields.  The `<name/>` in the `config.xml` is a suitable value for the `title` form field.
+* This one generates a command that returns a minified (deployable) application
 
 		$ find . -type f | \
 			awk 'BEGIN{printf("curl ");}{sub("^\.\/", "", $1); printf("-F \"file=@%s;filename=%s\" ", $1, $1);}END{print(url)}' \
-			-F "token=YOUR_TOKEN" \
-			-F "title=\""My First PhoneGap App\"" \
-			url=http://127.0.0.1:9029/build/
+			url=http://127.0.0.1:9029/phonegap/deploy/
 
-* This one updates the `appId=238006`.  Other form fields follow the same rules as before.
+* This one generates a command that creates a new `appId` using an application located in the current directory.  Note that you must provide the `token` and `title` form fields.  The `<name/>` in the `config.xml` is a suitable value for the `title` form field.
 
 		$ find . -type f | \
-			awk 'BEGIN{printf("curl ");}{sub("^\.\/", "", $1); printf("-F \"file=@%s;filename=%s\" ", $1, $1);}END{print(url)}' \
-			-F "token=YOUR_TOKEN" \
-			-F "title=\""My First PhoneGap App\"" \
-			-F "appId=238006" \
-			url=http://127.0.0.1:9029/build/
+			awk 'BEGIN{printf("curl ");}{sub("^\.\/", "", $1); printf("-F \"file=@%s;filename=%s\" ", $1, $1);}END{printf("-F \"token=%s\" -F \"title=%s\" %s\n", token, title, url)}' \
+			token=YOUR_TOKEN \
+			title="My First PhoneGap App" \
+			url=http://127.0.0.1:9029/phonegap/build/
 
+* This one generates a command that updates the `appId=238006`.  Other form fields follow the same rules as before.
+
+		$ find . -type f | \
+			awk 'BEGIN{printf("curl ");}{sub("^\.\/", "", $1); printf("-F \"file=@%s;filename=%s\" ", $1, $1);}END{printf("-F \"token=%s\" -F \"title=%s\" -F \"appId=%s\" %s\n", token, title, appId, url)}' \
+			token=YOUR_TOKEN \
+			title="My First PhoneGap App" \
+			appId=YOUR_APPID \
+			url=http://127.0.0.1:9029/phonegap/build/
+
+**Note:** In case you are working from behind the HP firewall (without ), you may need to prefix the `curl` and `node` commands above with `env https_proxy=web-proxy.corp.hp.com:8080`.
 
 ## Debug
 

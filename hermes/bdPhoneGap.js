@@ -20,8 +20,6 @@ var fs = require("fs"),
 var basename = path.basename(__filename);
 
 function BdPhoneGap(config, next) {
-	console.log("config=",  util.inspect(config));
-
 	function HttpError(msg, statusCode) {
 		Error.captureStackTrace(this, this);
 		this.statusCode = statusCode || 500; // Internal-Server-Error
@@ -32,6 +30,8 @@ function BdPhoneGap(config, next) {
 
 	// (simple) parameters checking
 	config.pathname = config.pathname || '/phonegap';
+
+	console.log("config=",  util.inspect(config));
 
 	/*
 	// express-3.x
@@ -99,15 +99,14 @@ function BdPhoneGap(config, next) {
 			.replace(/(\.\.)+/g, ""); // remove ".."
 	}
 
-	var servicePath = makeExpressRoute('');
-	app.post(servicePath, function(req, res, next) {
+	// Return the ZIP-ed deployed Enyo application
+	app.post(makeExpressRoute('/deploy'), function(req, res, next) {
 		async.series([
 		 	prepare.bind(this),
 			store.bind(this, req, res),
 			deploy.bind(this, req, res),
 			zip.bind(this, req, res),
-			build.bind(this, req, res),
-			respond.bind(this, req, res),
+			returnZip.bind(this, req, res),
 			cleanup.bind(this, req, res)
 		], function (err, results) {
 			if (err) {
@@ -115,7 +114,27 @@ function BdPhoneGap(config, next) {
 				cleanup.bind(this)(req, res, next.bind(this, err));
 				return;
 			}
-			console.log("POST "  + servicePath + " finished");
+		});
+	});
+	
+	// Upload ZIP-ed deployed Enyo application to the
+	// https://build.phonegap.com online service and return the
+	// JSON-encoded response of the service.
+	app.post(makeExpressRoute('/build'), function(req, res, next) {
+		async.series([
+		 	prepare.bind(this),
+			store.bind(this, req, res),
+			deploy.bind(this, req, res),
+			zip.bind(this, req, res),
+			build.bind(this, req, res),
+			returnBody.bind(this, req, res),
+			cleanup.bind(this, req, res)
+		], function (err, results) {
+			if (err) {
+				// cleanup & run express's next() : the errorHandler
+				cleanup.bind(this)(req, res, next.bind(this, err));
+				return;
+			}
 		});
 	});
 	
@@ -285,6 +304,7 @@ function BdPhoneGap(config, next) {
 
 	function build(req, res, next) {
 		console.log("build(): fields req.body = ", util.inspect(req.body));
+		var reqData = {};
 		var errs = [];
 		var mandatory = ['token', 'title'];
 		mandatory.forEach(function(field) {
@@ -304,11 +324,14 @@ function BdPhoneGap(config, next) {
 			});
 		} else {
 			console.log("build(): creating new appId for title=" + req.body.title + "");
-			api.createFileBasedApp(req.body.token, req.zip.path, {
-				// reqData
-				create_method: 'file',
-				title: req.body.title
-			}, {
+			reqData.create_method = 'file';
+			for (var p in req.body) {
+				if (typeof p === 'string') {
+					reqData[p] = req.body[p];
+				}
+			}
+			console.log("build(): reqData=", reqData);
+			api.createFileBasedApp(req.body.token, req.zip.path, reqData, {
 				success: _success,
 				error: _fail
 			});
@@ -337,15 +360,18 @@ function BdPhoneGap(config, next) {
 		}
 	}
 	
-	function respond(req, res, next) {
-		console.log("respond(): ", res.body);
+	function returnZip(req, res, next) {
+		console.log("returnZip(): ", res.body);
+		res.status(200).sendfile(req.zip.path);
+		delete req.zip;
+		next();
+	}
 
+	function returnBody(req, res, next) {
+		console.log("returnBody(): ", res.body);
 		res.status(200).send(res.body);
 		delete res.body;
-
-		//res.status(200).sendfile(req.zip.path);
 		delete req.zip;
-		 
 		next();
 	}
 
@@ -367,8 +393,8 @@ if (path.basename(process.argv[1]) === basename) {
 	}
 
 	new BdPhoneGap({
-		// pathname (M) can be '/', '/build/' ...etc
-		pathname:	process.argv[2] || '/build',
+		// pathname (M) can be '/', '/phonegap/' ...etc
+		pathname:	process.argv[2],
 		// port (o) local IP port of the express server (default: 9019, 0: dynamic)
 		port: parseInt(process.argv[3] || "9029", 10),
 		enyoDir: path.resolve(__dirname, '..', 'enyo') // XXX use optimist/nopt
