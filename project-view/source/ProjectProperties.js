@@ -80,8 +80,10 @@ enyo.kind({
 		} else
 			this.$.projectId.setValue("com.example.myapp");
 		this.$.projectName.setValue(pjson.name);
-		this.$.targetBuild.setValue(pjson.phonegapbuild.target);
-		this.$.phonegapKey.setValue(pjson.phonegapbuild.key);
+		if (pjson.phonegapbuild !== undefined) {
+			this.$.targetBuild.setValue(pjson.phonegapbuild.target);
+			this.$.phonegapKey.setValue(pjson.phonegapbuild.key);
+		}
 		this.$.confirm.setDisabled(false);
 		this.$.status.setContent(" ");
 	},
