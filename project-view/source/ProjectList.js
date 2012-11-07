@@ -193,6 +193,7 @@ enyo.kind({
 	},
 	storeBaseConfigProject: function (projectName, folderId, projectProperties) {
 		var found = false;
+		var props = JSON.parse(projectProperties);
 		for (var i = 0; i<this.projectsConfig.length; i++) {
 			if (this.projectsConfig[i].name === projectName) {
 				found = true;
@@ -204,7 +205,7 @@ enyo.kind({
 			this.projectsConfig.push({name: projectName, 
 								folderId: folderId, 
 								status: "basic", 
-								properties: projectProperties});
+								properties: props});
 		}
 	},
 	storeCustomConfigProject: function (inData) {

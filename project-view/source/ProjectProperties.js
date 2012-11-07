@@ -74,13 +74,14 @@ enyo.kind({
 	},
 	enable: function(inData) {
 		// handle the pre-fill values
-		if (inData.name !== undefined) {
-			this.$.projectId.setValue(inData.id);
+		var pjson= JSON.parse(inData);
+		if (pjson.name !== undefined) {
+			this.$.projectId.setValue("com.example."+pjson.name);
 		} else
 			this.$.projectId.setValue("com.example.myapp");
-		this.$.projectName.setValue(inData.name);
-		this.$.targetBuild.setValue(inData.phonegapbuild.target);
-		this.$.phonegapKey.setValue(inData.phonegapbuild.key);
+		this.$.projectName.setValue(pjson.name);
+		this.$.targetBuild.setValue(pjson.phonegapbuild.target);
+		this.$.phonegapKey.setValue(pjson.phonegapbuild.key);
 		this.$.confirm.setDisabled(false);
 		this.$.status.setContent(" ");
 	},

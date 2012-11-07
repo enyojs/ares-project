@@ -31,12 +31,13 @@ enyo.kind({
 					});
 					if (prj.length < 1) {
 						// new project - basic project properties
-						var projectData = JSON.stringify({format: 1, 
-													id: "com.example."+inData.name, 
-													name: inData.name,
-													version: "1.0",
-													phonegapbuild: {target: "", key: 0}});
-						service.createFile(inData.folderId, "project.json", projectData)
+						var projectData = {format: 1, 
+									id: "com.example."+inData.name, 
+									name: inData.name,
+									version: "1.0",
+									phonegapbuild: {target: "none", key: 0}
+						};
+						service.createFile(inData.folderId, "project.json", JSON.stringify(projectData))
 							.response(this, function(inSender, inResponse) {
 								if (this.debug) this.log("New Project Name: "+inData.name);
 								if (this.debug) this.log("project.json created.");
