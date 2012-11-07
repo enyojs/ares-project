@@ -95,11 +95,11 @@ enyo.kind({
 		});
 		r.go();
 	},
-    delayedRefresh: function() {
+    delayedRefresh: function(msg) {
 		var onDone = new enyo.Async() ;
-		onDone.response(this, function(inSender, inResponse) {
-			this.log("delayed refresh after " + inResponse ) ;
-			this.$.hermesFileTree.refreshFileTree();
+		onDone.response(this, function(inSender, toSelectId) {
+			this.log("delayed refresh after " + msg + ' on ' + toSelectId) ;
+			this.$.hermesFileTree.refreshFileTree(null, toSelectId);
 		}) ;
 		return onDone ;
 	},
@@ -109,7 +109,7 @@ enyo.kind({
 		service.createFile(folderId, name, content)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.delayedRefresh().go("file creation done") ;
+				this.delayedRefresh("file creation done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
@@ -124,7 +124,7 @@ enyo.kind({
 		service.createFolder(folderId, name)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.delayedRefresh().go("folder creation done") ;
+				this.delayedRefresh("folder creation done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
@@ -140,7 +140,7 @@ enyo.kind({
 		service['rename'](oldId, newName)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.delayedRefresh().go("rename done") ;
+				this.delayedRefresh("rename done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
@@ -158,7 +158,7 @@ enyo.kind({
 		service.remove(inEvent.nodeId)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.delayedRefresh().go("delete done") ;
+				this.delayedRefresh("delete done").go() ;
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
@@ -174,7 +174,7 @@ enyo.kind({
 		service.copy(this.selectedFile.id, newName)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.delayedRefresh().go("copy done") ;
+				this.delayedRefresh("copy done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
