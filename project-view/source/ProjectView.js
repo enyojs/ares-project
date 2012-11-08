@@ -16,7 +16,11 @@ enyo.kind({
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{kind: "ProjectConfig", name: "projectConfig"},
 		{kind: "PhonegapBuild"},
-		{kind: "ProjectPropertiesPopup", name: "projectPropertiesPopup"}
+		{kind: "ProjectPropertiesPopup", name: "projectPropertiesPopup"},
+		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
+			{kind: "Image", src: "$phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
+			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
+		]}
 	],
 	handlers: {
 		onConfirmCreateProject: "confirmCreateProject",
@@ -26,12 +30,20 @@ enyo.kind({
 		onFinishProjectConfig: "finishConfigProject",
 		onCancelSettings: "cancelSettings",
 		onSaveGeneratedXml: "saveGeneratedXml",
-		onPhonegapBuild: "startPhonegapBuild"
+		onPhonegapBuild: "startPhonegapBuild",
+		onBuildStarted: "phonegapBuildStarted",
+		onError: "showErrorMsg"
 	},
 	serviceFs: null,
 	create: function() {
 		this.inherited(arguments);
 		serviceFs = [];
+	},
+	showErrorMsg: function(inSender, inEvent) {
+		this.log(inEvent);
+		this.hideWaitPopup();
+		this.showErrorPopup(inEvent.msg);
+		return true; //Stop event propagation
 	},
 	showErrorPopup : function(msg) {
 		this.$.errorPopup.setErrorMsg(msg);
@@ -64,6 +76,7 @@ enyo.kind({
 		this.$.projectConfig.checkConfig(inEvent.project);
 		// Keep one reference on service FS implementation
 		serviceFs = inEvent.project.service.impl;
+		this.currentProject = inEvent.project;
 		return true; //Stop event propagation
 	},
 	projectRemoved: function(inSender, inEvent) {
@@ -133,7 +146,20 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
+	showWaitPopup: function(inMessage) {
+		this.$.waitPopupMessage.setContent(inMessage);
+		this.$.waitPopup.show();
+	},
+	hideWaitPopup: function() {
+		this.$.waitPopup.hide();
+	},
 	startPhonegapBuild: function(inSender, inEvent) {
-		this.$.phonegapBuild.startPhonegapBuild(this.currentProject);
+		var credentials = {	username: "xxxx", password: "yyyy"};	// TOOD TBR
+		this.showWaitPopup("Starting phonegap build");
+		this.$.phonegapBuild.startPhonegapBuild(this.currentProject, credentials);
+	},
+	phonegapBuildStarted: function(inSender, inEvent) {
+		this.showWaitPopup("Phonegap build started");
+		setTimeout(enyo.bind(this, "hideWaitPopup"), 2000);
 	}
 });

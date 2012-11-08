@@ -175,8 +175,6 @@ function FsLocal(config, next) {
 			origin: "http://127.0.0.1:"+app.address().port.toString(),
 			pathname: config.pathname
 		};
-		//console.log("service: ");
-		//console.dir(service);
 		return next(null, service);
 	});
 
@@ -575,16 +573,21 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 	// We are main.js: create & run the object...
 	
 	var argv = require("optimist")
-	.usage('\nAres FileSystem (fs) provider.\nUsage: "$0"')
+	.usage('\nAres FileSystem (fs) provider.\nUsage: "$0 [OPTIONS]"')
 	.options('P', {
 		alias : 'pathname',
-		description: 'pathname (M) can be "/", "/res/files/" ...etc',
+		description: 'pathname (M) can be "/", "/res/files/" ...etc'
 	})
 	.demand('P')
 	.options('p', {
 		alias : 'port',
 		description: 'port (o) local IP port of the express server (default: 9009, 0: dynamic)',
-		default : '9009',
+		default : '9009'
+	})
+	.options('h', {
+		alias : 'help',
+		description: 'help message',
+		boolean: true
 	})
 	.argv;
 	
@@ -594,21 +597,14 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 	}
 
 	var fsLocal = new FsLocal({
-		// pathname (M) can be '/', '/res/files/' ...etc
-		pathname:	argv.pathname,
-		// root (m) local filesystem access root absolute path
-		root:		argv._[0],
-		// port (o) local IP port of the express server (default: 9009, 0: dynamic)
-		port: 	argv.port
+		pathname: argv.pathname,
+		port: argv.port,
+		root: argv._[0]
 	}, function(err, service){
-		if (err) {
-			process.exit(err);
-		}
-		console.log("fsLocal['"+argv._[0]+"'] available at "+service.origin);
-		if (process.send) {
-			// only possible/available if parent-process is node
-			process.send(service);
-		};
+		err && process.exit(err);
+		// process.send() is only available if the
+		// parent-process is also node
+		process.send && process.send(service);
 	});
 
 } else {

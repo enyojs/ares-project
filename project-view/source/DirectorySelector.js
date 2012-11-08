@@ -10,7 +10,7 @@ enyo.kind({
 		style: "height: 400px; width: 600px",
 		components : [
 			{kind: "FittableColumns", content: "fittableColumns", fit: true, components: [
-				 {kind: "ProviderList", onSelectProvider: "handleSelectProvider"},
+				 {kind: "ProviderList", type: "filesystem", onSelectProvider: "handleSelectProvider"},
 				 {kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "selectFile", onFolderClick: "selectFolder"}
 			 ]},
 			{kind: "FittableColumns", content: "fittableColumns2", isContainer: true, components: [
