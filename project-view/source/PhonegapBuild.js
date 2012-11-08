@@ -5,6 +5,7 @@ enyo.kind({
 		onError: "",
 		onBuildStarted: ""
 	},
+	debug: false,
 	/**
 	 * startPhonegapBuild initiates the phonegap build
 	 * of the project passed as a parameter
@@ -18,16 +19,24 @@ enyo.kind({
 	 * - Save the appid
 	 * @param  project
 	 * @param  credentials
+	 * @param  projectConfig
 	 */
-	startPhonegapBuild: function(project, credentials) {
-		this.debug && this.log("Start phonegap build: ", project);
+	startPhonegapBuild: function(project, credentials, projectConfig) {
+		this.debug && this.log("Start phonegap build: ", projectConfig);
+
+		this.projectConfig = projectConfig;
+		this.appId = undefined;
+		if (this.projectConfig && projectConfig.phonegapbuild) {
+			this.appId = projectConfig.phonegapbuild.appId;
+			this.debug && this.log("App id: " + this.appId);
+		}
 
 		// Pass credential information to get a phonegapbuild token
 		var data = "username=" + credentials.username + "&password=" + credentials.password;
 
 		// Get a phonegapbuild token
 		var req = new enyo.Ajax({
-			url: 'http://127.0.0.1:9029/token',		// TODO CORS issue with phonegap build
+			url: 'http://127.0.0.1:9029/phonegap/token',		// TODO CORS issue with phonegap build
 			method: 'POST',
 			postBody: encodeURI(data)
 		});
@@ -122,19 +131,19 @@ enyo.kind({
 		// Add token information in the FormData
 		formData.append('token', this.token);
 		formData.append('title', "Hello ENYO");
-		if (this.appid) {
-			formData.append('appid', this.appid);
+		if (this.appId) {
+			this.debug && this.log("appId: " + this.appId);
+			formData.append('appId', this.appId);
 		}
 
 		// Ask nodejs to minify and zip the project
 		var req = new enyo.Ajax({
-			url: 'http://127.0.0.1:9029/build',		// TODO YDM TBC Fix hardcoded URL
+			url: 'http://127.0.0.1:9029/phonegap/build',		// TODO YDM TBC Fix hardcoded URL
 			method: 'POST',
 			postBody: formData,
-			handleAs: 'text'						// No transformation
 		});
 		req.response(this, function(inEvent, inData) {
-			this.storeAppid(inData);
+			this.storeAppId(inData);
 		});
 		req.error(this, function(inEvent, inData) {
 			this.log("ERROR while submitting build request: " + inData);
@@ -142,9 +151,19 @@ enyo.kind({
 		});
 		req.go();
 	},
-	storeAppid: function(inData) {
-		enyo.log("Build result: " + inData);
-		this.appid = inData.id;
-		this.doBuildStarted();
+	storeAppId: function(inData) {
+		this.debug && this.log("Build result: ", inData);
+		this.appId = inData.id;
+		this.debug && this.log("App id: " + this.appId);
+
+		if (this.projectConfig) {
+			if (this.projectConfig.phonegapbuild) {
+				this.projectConfig.phonegapbuild.appId = this.appId;
+			} else {
+				this.projectConfig.phonegapbuild = {appId: this.appId};
+			}
+		}
+
+		this.doBuildStarted({projectConfig: this.projectConfig});
 	}
 });
