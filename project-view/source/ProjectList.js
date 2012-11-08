@@ -214,11 +214,11 @@ enyo.kind({
 			if (this.projectsConfig[i].properties.id === inData.id) {
 				var props = {
 					format: this.projectsConfig[i].properties.format,
-					id: this.projectsConfig[i].properties.id,
+					id: inData.id,
 					name: inData.name,
 					version: this.projectsConfig[i].properties.version,
-					phonegapbuild: {target: inData.target, key: inData.key}
-					
+					title: inData.title,
+					description: inData.description					
 				}
 				var obj = {
 					name: this.projectsConfig[i].name,

@@ -15,7 +15,8 @@ var fs = require("fs"),
     rimraf = require("rimraf"),
     http = require("http"),
     child_process = require("child_process"),
-    api = require("phonegapbuildapi");
+    api = require("phonegapbuildapi"),
+    optimist = require('optimist');
 
 var basename = path.basename(__filename);
 
@@ -30,6 +31,15 @@ function BdPhoneGap(config, next) {
 
 	// (simple) parameters checking
 	config.pathname = config.pathname || '/phonegap';
+
+	var deployScript = path.join(config.enyoDir, 'tools', 'deploy.js');
+	try {
+		var stat = fs.statSync(deployScript);
+		if (!stat.isFile()) throw "Not a file";
+	} catch(e) {
+		// Build a more usable exception
+		next(new Error("Not a suitable Enyo: it does not contain a usable 'tools/deploy.js'"));
+	}
 
 	console.log("config=",  util.inspect(config));
 
@@ -154,12 +164,12 @@ function BdPhoneGap(config, next) {
 	this.quit = function(cb) {
 		app.close();
 		rimraf(uploadDir, cb);
+		console.log(basename,  " exiting");
 	};
 
 	var appTempDir = temp.path({prefix: 'com.palm.ares.hermes.bdPhoneGap.'}) + '.d';
 	var appDir = {
 		root: appTempDir,
-		//upload: path.join(appTempDir, 'upload'),
 		source: path.join(appTempDir, 'source'),
 		build: path.join(appTempDir, 'build'),
 		deploy: path.join(appTempDir, 'deploy')
@@ -169,7 +179,6 @@ function BdPhoneGap(config, next) {
 		console.log("prepare(): setting-up " + appDir.root);
 		async.series([
 			function(done) { mkdirp(appDir.root, done); },
-			//function(done) { fs.mkdir(appDir.upload, done); },
 			function(done) { fs.mkdir(appDir.source, done); },
 			function(done) { fs.mkdir(appDir.build, done); },
 			function(done) { fs.mkdir(appDir.deploy, done); }
@@ -178,8 +187,6 @@ function BdPhoneGap(config, next) {
 
 
 	function store(req, res, next) {
-		//console.log("store(): req.files = ", util.inspect(req.files));
-
 		if (!req.is('multipart/form-data')) {
 			next(new HttpError("Not a multipart request", 415 /*Unsupported Media Type*/));
 			return;
@@ -215,15 +222,14 @@ function BdPhoneGap(config, next) {
 		// VM <http://nodejs.org/api/vm.html> rather than
 		// child-processes
 		// <http://nodejs.org/api/child_process.html>.
-		var script = path.join(config.enyoDir, 'tools', 'deploy.js');
 		var params = [ '--packagejs', path.join(appDir.source, 'package.js'),
 			       '--source', appDir.source,
 			       '--enyo', config.enyoDir,
 			       '--build', appDir.build,
 			       '--out', appDir.deploy,
 			       '--less'];
-		console.log("deploy(): Running: '", script, params.join(' '), "'");
-		var child = child_process.fork(script, params, {
+		console.log("deploy(): Running: '", deployScript, params.join(' '), "'");
+		var child = child_process.fork(deployScript, params, {
 			silent: false
 		});
 		child.on('message', function(msg) {
@@ -392,20 +398,44 @@ if (path.basename(process.argv[1]) === basename) {
 		process.exit("Only supported on Node.js version 0.8 and above");
 	}
 
+	var argv = optimist.usage(
+		"Ares PhoneGap build service\nUsage: $0 [OPTIONS]", {
+			'P': {
+				description: "URL pathname prefix (before /deploy and /build",
+				required: false,
+				default: "/phonegap"
+			},
+			'p': {
+				description: "TCP port number",
+				required: false,
+				default: "9029"
+			},
+			'e': {
+				description: "Path to the Enyo version to use for mnifying the application",
+				required: false,
+				default: path.resolve(__dirname, '..', 'enyo')
+			},
+			'h': {
+				description: "Display help",
+				boolean: true,
+				required: false
+			}
+		}).argv;
+	
+	if (argv.h) {
+		optimist.showHelp();
+		process.exit(0);
+	};
+
 	new BdPhoneGap({
-		// pathname (M) can be '/', '/phonegap/' ...etc
-		pathname:	process.argv[2],
-		// port (o) local IP port of the express server (default: 9019, 0: dynamic)
-		port: parseInt(process.argv[3] || "9029", 10),
-		enyoDir: path.resolve(__dirname, '..', 'enyo') // XXX use optimist/nopt
+		pathname: argv.P,
+		port: parseInt(argv.p, 10),
+		enyoDir: argv.e
 	}, function(err, service){
-		if (err) {
-			process.exit(err);
-		}
-		if (process.send) {
-			// only possible/available if parent-process is node
-			process.send(service);
-		}
+		err && process.exit(err);
+		// process.send() is only available if the
+		// parent-process is also node
+		process.send && process.send(service);
 	});
 
 } else {
