@@ -13,6 +13,7 @@ enyo.kind({
 			onCopyFileConfirm: "copyFileConfirm"}
 	],
 	providerListNeeded: true,
+	debug: false,
 	create: function() {
 		this.inherited(arguments);
 		// TODO provider list should probably go out of Harmonia
@@ -83,15 +84,20 @@ enyo.kind({
 		};
 		var r = new enyo.Ajax(options);
 		r.response(this, function(inSender, inResponse) {
-			//this..log("response: "+inResponse.toString());
+			this.debug && this.log("response: "+inResponse.toString());
 			for (var n in replacements) {
 				inResponse = inResponse.replace(n, replacements[n]);
 			}
 			this.createFile(name, folderId, inResponse);
 		});
 		r.error(this, function(inSender, error) {
-			this.error(error);
-			this.createFile(name, folderId, null);
+			if (error === 404){
+				// no template found -> create an empty file
+				this.createFile(name, folderId, "\n"); 
+			}
+			else {
+				this.error("error while fetching " + templatePath + ': ' + error);
+			}
 		});
 		r.go();
 	},
