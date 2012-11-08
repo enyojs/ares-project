@@ -399,7 +399,7 @@ if (path.basename(process.argv[1]) === basename) {
 	}
 
 	var argv = optimist.usage(
-		"Ares PhoneGap build service\nUsage: $0 [-P pathname][-p port]", {
+		"Ares PhoneGap build service\nUsage: $0 [OPTIONS]", {
 			'P': {
 				description: "URL pathname prefix (before /deploy and /build",
 				required: false,
