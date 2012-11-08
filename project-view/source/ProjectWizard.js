@@ -183,14 +183,15 @@ enyo.kind({
 				var item = toScan.shift() ;
 				var parentDir = item[0] ;
 				var child = item[1];
-				this.log('myiter on ' + child.name + ' isDir ' + child.isDir ) ;
+				this.log('search iteration on ' + child.name + ' isDir ' + child.isDir ) ;
 				if ( child.name === 'project.json' ) { 
 					this.log('opening project.json from ' + parentDir.name ) ;
 					service.getFile( child.id ).
-						response(this, function(inSender, inContent) {
-							this.log( inContent ) ;
-							this.log('Imported project ' + inContent.content.name ) ;
-							this.addProjectInList(inContent.content.name, parentDir.id) ;
+						response(this, function(inSender, fileStuff) {
+							this.log( "file contents: '" + fileStuff.content + "'" ) ;
+							var projectData = JSON.parse(fileStuff.content)  ;
+							this.log('Imported project ' + projectData.name ) ;
+							this.addProjectInList(projectData.name, parentDir.id) ;
 						}); 
 				}
 				if ( child.isDir ===  true ) { 
