@@ -16,7 +16,7 @@ enyo.kind({
 					{kind: "Control", content: "Project Id:"},
 					{fit: true},
 					{kind: "onyx.InputDecorator", components: [
-							{kind: "onyx.Input", placeholder: "com.example.myapp", name: "projectId"}
+							{kind: "onyx.Input", style: "width:180px", placeholder: "com.example.myapp", name: "projectId"}
 						]},
 				]},
 			{kind: "FittableColumns", style: "width:100%", components: [
@@ -27,6 +27,20 @@ enyo.kind({
 					]},
 				]},
 			{tag: "br"},
+			{kind: "FittableColumns", style: "width:100%", components: [
+					{kind: "Control", content: "Title:"},
+					{fit: true},
+					{kind: "onyx.InputDecorator", components: [
+							{kind: "onyx.Input", style: "width:230px", placeholder: "", name: "projectTitle"}
+					]},
+				]},
+			{kind: "FittableColumns", style: "width:100%", components: [
+					{kind: "Control", content: "Description:"},
+					{fit: true},
+					{kind: "onyx.InputDecorator", components: [
+							{kind: "onyx.Input", style: "width:180px", placeholder: "", name: "projectDescription"}
+					]},
+				]},
 			{content: "PhoneGap ...", style: "width:100%", ontap:"activateDrawer"},
 					{tag: "br"},
 					{name: "phoneGapDrawer", kind: "onyx.Drawer", open:false, components: [
@@ -35,13 +49,6 @@ enyo.kind({
 						{fit: true},
 						{kind: "onyx.InputDecorator", components: [
 							{kind: "onyx.Input", placeholder: "Enter a target build", name: "targetBuild"}
-						]},
-					]}, 
-					{kind: "FittableColumns", style: "width:100%", components: [
-						{kind: "Control", content: "PhoneGap Key:"},
-						{fit: true},
-						{kind: "onyx.InputDecorator", components: [
-							{kind: "onyx.Input", placeholder: "Enter your key", name: "phonegapKey"}
 						]},
 					]}, 
 				]},
@@ -66,8 +73,8 @@ enyo.kind({
 	reset: function() {
 		this.$.projectName.setValue("");
 		this.$.projectId.setValue("com.example.myapp");
-		this.$.targetBuild.setPlaceholder("Enter a target build");
-		this.$.phonegapKey.setPlaceholder("Enter your key");
+		this.$.projectTitle.setValue("");
+		this.$.projectDescription.setValue("");
 		this.$.status.setContent("You need to create a project!");
 		this.$.confirm.setDisabled(true);
 		this.activateDrawer();
@@ -76,12 +83,13 @@ enyo.kind({
 		// handle the pre-fill values
 		var pjson= JSON.parse(inData);
 		if (pjson.name !== undefined) {
-			this.$.projectId.setValue("com.example."+pjson.name);
-		} else
-			this.$.projectId.setValue("com.example.myapp");
+			this.$.projectId.setValue("com.example.apps."+pjson.name);
+		} else {
+			this.$.projectId.setValue("com.example.apps.myapp");
+		}
 		this.$.projectName.setValue(pjson.name);
-		this.$.targetBuild.setValue(pjson.phonegapbuild.target);
-		this.$.phonegapKey.setValue(pjson.phonegapbuild.key);
+		this.$.projectTitle.setValue(pjson.title);
+		this.$.projectDescription.setValue(pjson.decription);
 		this.$.confirm.setDisabled(false);
 		this.$.status.setContent(" ");
 	},
@@ -90,8 +98,8 @@ enyo.kind({
 		var obj = {
 			name: this.$.projectName.getValue(),
 			id: this.$.projectId.getValue(),
-			target: this.$.targetBuild.getValue(),
-			key: this.$.phonegapKey.getValue()
+			title: this.$.projectTitle.getValue(),
+			description: this.$.projectDescription.getValue()
 		}
 		this.doCustomConfigProject(obj);
 		// handled here (don't bubble)
@@ -111,12 +119,11 @@ enyo.kind({
 				xw.writeAttributeString('id', props.id);
 				xw.writeAttributeString('version',props.version);
 				xw.writeComment('');
-				xw.writeElementString('name', 'PhoneGap Application:'+props.name);
+				xw.writeElementString('name', 'PhoneGap Application: '+props.name);
 				xw.writeComment('');
-				xw.writeElementString('description', 'Getting started with PhoneGap development and build.phonegap.com');
+				xw.writeElementString('description', 'Getting started with PhoneGap development and build.phonegap.com: '+props.description);
 				xw.writeComment('');
-				xw.writeStartElement('gap:platforms');
-				xw.writeElementString('name', pgap.target);
+				xw.writeElementString('title', props.title);
 				xw.writeEndElement();
 			xw.writeEndElement();
 		//xw.writeEndDocument(); called by flush()
