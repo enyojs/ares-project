@@ -75,7 +75,7 @@ enyo.kind({
 		var options = {
 			url: templatePath,
 			cacheBust: false,
-			handleAs: "text",
+			handleAs: "text"
 		};
 		var replacements = {
 			"$NAME": nameStem,
