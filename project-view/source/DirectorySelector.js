@@ -31,8 +31,9 @@ enyo.kind({
 	},
 	handleSelectProvider: function(inSender, inEvent) {
 		if (inEvent.service) {
-			this.$.hermesFileTree.setConfig({fs: inEvent.service});
-			this.$.hermesFileTree.reset();
+			this.$.hermesFileTree
+				.connectService(inEvent.service)
+				.refreshFileTree();
 		}
 		return true; //Stop event propagation
 	},

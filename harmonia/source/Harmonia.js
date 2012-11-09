@@ -22,25 +22,23 @@ enyo.kind({
 	},
 	handleSelectProvider: function(inSender, inEvent) {
 		if (inEvent.service) {
-			this.$.hermesFileTree.setConfig({
-				fs: inEvent.service
-			});
+			this.$.hermesFileTree.connectService(inEvent.service);
 		}
 		this.$.hermesFileTree.hideFileOpButtons();
 		return true; //Stop event propagation
 	},
 	setProject: function(project) {
 		this.log(project);
-		var config = project && {
-			fs: project.service,
-			nodeName: project.name,
-			folderId: project.folderId
-		};
-		this.$.hermesFileTree.setConfig(config);
+		var config ; 
 		if (project !== null) {
-			this.$.hermesFileTree.showFileOpButtons();		
+			config = {
+				fs: project.service,
+				nodeName: project.name,
+				folderId: project.folderId
+			};
+			this.$.hermesFileTree.setConfig(config).showFileOpButtons();		
 		} else {
-			this.$.hermesFileTree.hideFileOpButtons();
+			this.$.hermesFileTree.hideFileOpButtons().clear();
 		}
 	},
 	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
