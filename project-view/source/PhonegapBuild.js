@@ -1,22 +1,78 @@
 enyo.kind({
 	name: "PhonegapBuild",
 	kind: "enyo.Component",
-	startPhonegapBuild: function(project) {
+	events: {
+		onError: "",
+		onBuildStarted: ""
+	},
+	debug: false,
+	/**
+	 * startPhonegapBuild initiates the phonegap build
+	 * of the project passed as a parameter
+	 *
+	 * The following actions will be performed:
+	 * - Get a phongapbuild token
+	 * - Get the file list of the project
+	 * - Download all the project files
+	 * - Build a multipart/form-data with all the project data
+	 * - Send it to nodejs which will submit the build request
+	 * - Save the appid
+	 * @param  project
+	 * @param  credentials
+	 * @param  projectConfig
+	 */
+	startPhonegapBuild: function(project, credentials, projectConfig) {
+		this.debug && this.log("Start phonegap build: ", projectConfig);
+
+		this.projectConfig = projectConfig;
+		this.appId = undefined;
+		if (this.projectConfig && projectConfig.phonegapbuild) {
+			this.appId = projectConfig.phonegapbuild.appId;
+			this.debug && this.log("App id: " + this.appId);
+		}
+
+		// Pass credential information to get a phonegapbuild token
+		var data = "username=" + credentials.username + "&password=" + credentials.password;
+
+		// Get a phonegapbuild token
+		var req = new enyo.Ajax({
+			url: 'http://127.0.0.1:9029/phonegap/token',		// TODO CORS issue with phonegap build
+			method: 'POST',
+			postBody: encodeURI(data)
+		});
+		req.response(this, function(inEvent, inData) {
+			this.token = inData.token;
+			this.debug && enyo.log("Got phonegap token: " + this.token);
+			// Now get the list of all the files of the project
+			this.getFileList(project);
+		});
+		req.error(this, function(inEvent, inData) {
+			this.log("ERROR while getting token: " + inData);
+			this.doError({msg: "Unable to get phonegapbuild token"});
+		});
+		req.go();
+	},
+	/**
+	 * Get the list of files of the project for further upload
+	 * @param  project
+	 */
+	getFileList: function(project) {
 		var service, req, fileList = [],
 			formData = new FormData();
 
-		this.log("Start phonegap build: ", project);
-
-		service = project.service.impl;		// TODO TBC
+		service = project.service.impl;		// TODO TBC find a smarter/cleaner way
 		req = service.listFiles(project.folderId, -1);
 		req.response(this, function(inEvent, inData) {
-			enyo.log("Got the list of files", inData);
+			this.debug && enyo.log("Got the list of files", inData);
+			// Extract the list into an array
 			this.buildFileList(inData, fileList);
 			var prefixLen = this.extractPrefixLen(inData);
-			this.buildFormData(service, formData, fileList, 0, prefixLen);
+			// Start downloading files and building the FormData
+			this.downloadFiles(service, formData, fileList, 0, prefixLen);
 		});
 		req.error(this, function(inEvent, inData) {
-			enyo.log("ERROR: ", inData);	// TODO YDM TBC
+			this.log("ERROR while getting file list: " + inData);
+			this.doError({msg: "Unable to get project file list"});
 		});
 	},
 	buildFileList: function(inData, fileList) {
@@ -27,12 +83,10 @@ enyo.kind({
 	},
 	listAllFiles: function(inData, fileList) {
 		if (inData.isDir) {
-			this.debug && this.log("Dir : ", inData.path);
 			for(var item in inData.children) {
 				this.listAllFiles(inData.children[item], fileList);
 			}
 		} else {
-			this.debug && this.log("File: ", inData.path);
 			var obj = {path: inData.path, id: inData.id};
 			fileList.push(obj);
 		}
@@ -41,85 +95,75 @@ enyo.kind({
 		var item = inData[0];
 		return item.path.length - item.name.length;
 	},
-	buildFormData: function(service, formData, fileList, index, prefixLen) {
-		if (index >= fileList.length) {
-			this.log("FormData: ", formData);
+	/**
+	 * Download all the project files and add them into the multipart/form-data
+	 * @param  service
+	 * @param  formData
+	 * @param  fileList
+	 * @param  index
+	 * @param  prefixLen
+	 */
+	downloadFiles: function(service, formData, fileList, index, prefixLen) {
+		// Still some files to download. Get one.
+		var id = fileList[index].id;
+		var name = fileList[index].path.substr(prefixLen);
+		this.debug && this.log("Fetching " + name + " " + index + "/" + fileList.length);
+		var request = service.getFile(id);
+		request.response(this, function(inEvent, inData) {
+			// Got a file content: add it to the multipart/form-data
+			var blob = new Blob([inData.content || ""], {type: "application/octet-stream"});
+			formData.append('file', blob, name);
 
-			// Ask nodejs to minify and zip the project
-			var req = new enyo.Ajax({
-				url: 'http://127.0.0.1:9029/build',		// TODO YDM TBC Fix hardcoded URL
-				method: 'POST',
-				postBody: formData,
-				handleAs: 'text'						// No transformation
-			});
-			req.response(this, function(inEvent, inData) {
-				enyo.log("Got the minified zip");
-				this.getToken(inData);
-			});
-			req.error(this, function(inEvent, inData) {
-				enyo.log("ERROR: ", inData);
-			});
-			req.go();
-		} else {
-			var id = fileList[index].id;
-			this.log("Fetching " + fileList[index].path.substr(prefixLen));
-			var request = service.getFile(id);
-			request.response(this, function(inEvent, inData) {
-				var blob = new Blob([inData.content || ""], {type: "application/octet-stream"});
-				formData.append('file', blob, fileList[index].path.substr(prefixLen));
-
-				this.buildFormData(service, formData, fileList, index + 1, prefixLen);
-			});
-			request.error(this, function(inEvent, inData) {
-				this.log("ERROR: " + inData);
-			});
+			if (++index >= fileList.length) {
+				// No more file to download: submit the build request
+				this.submitBuildRequest(formData);
+			} else {
+				// Get the next file (will submit the build if no more file to get)
+				this.downloadFiles(service, formData, fileList, index, prefixLen);
+			}
+		});
+		request.error(this, function(inEvent, inData) {
+			this.log("ERROR while downloading files: " + inData);
+			this.doError({msg: "Unable to download project files"});
+		});
+	},
+	submitBuildRequest: function(formData) {
+		// Add token information in the FormData
+		formData.append('token', this.token);
+		formData.append('title', "Hello ENYO");
+		if (this.appId) {
+			this.debug && this.log("appId: " + this.appId);
+			formData.append('appId', this.appId);
 		}
-	},
-	getToken: function() {
-		// TODO: Only works when chrome is launched with --disable-web-security
 
-		// Get a phonegap token
+		// Ask nodejs to minify and zip the project
 		var req = new enyo.Ajax({
-			url: 'https://build.phonegap.com/token',		// TODO YDM TBC Fix hardcoded URL
-			method: 'POST',
-			username: "xxx",		// TODO Should be taken from local storage
-			password: "xxx"			// TODO Should be taken from local storage
-		});
-		req.response(this, function(inEvent, inData) {
-			enyo.log("Got phonegap token: ", inData);
-		});
-		req.error(this, function(inEvent, inData) {
-			this.log("ERROR: " + inData);
-		});
-		req.go();
-	},
-	tobecontinued: function() {
-				var req, formData = new FormData();
-
-		var blob = new Blob([zipData], {type: "application/octet-stream"});
-		formData.append('file', blob, "app.zip");
-
-		// Add the required phonegap "data"
-		var data = {"title":"Hello ENYO","package":"com.enyos.hello","version":"0.1.0",create_method:"file"};	// TODO YDM TBC Hardcoded value
-		blob = new Blob([JSON.stringify(data)]);
-		formData.append('data', blob);
-
-		// TODO: Only works when chrome is launched with --disable-web-security
-
-		req = new enyo.Ajax({
-			url: 'https://build.phonegap.com/api/v1/apps',		// TODO YDM TBC Fix hardcoded URL
+			url: 'http://127.0.0.1:9029/phonegap/build',		// TODO YDM TBC Fix hardcoded URL
 			method: 'POST',
 			postBody: formData,
-			handleAs: 'text',						// No transformation
-			username: "xxx",		// TODO Should be taken from local storage
-			password: "yyy"			// TODO Should be taken from local storage
 		});
 		req.response(this, function(inEvent, inData) {
-			enyo.log("Got phonegap token: ", inData);
+			this.storeAppId(inData);
 		});
 		req.error(this, function(inEvent, inData) {
-			this.log("ERROR: " + inData);
+			this.log("ERROR while submitting build request: " + inData);
+			this.doError({msg: "Unable to submit build request"});
 		});
 		req.go();
+	},
+	storeAppId: function(inData) {
+		this.debug && this.log("Build result: ", inData);
+		this.appId = inData.id;
+		this.debug && this.log("App id: " + this.appId);
+
+		if (this.projectConfig) {
+			if (this.projectConfig.phonegapbuild) {
+				this.projectConfig.phonegapbuild.appId = this.appId;
+			} else {
+				this.projectConfig.phonegapbuild = {appId: this.appId};
+			}
+		}
+
+		this.doBuildStarted({projectConfig: this.projectConfig});
 	}
 });

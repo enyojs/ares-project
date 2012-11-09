@@ -2,6 +2,7 @@ enyo.kind({
 	name: "ProviderList",
 	kind: "FittableRows",
 	published: {
+		type: "",
 		// use 0 to pre-select the first storage provider of
 		// the list... or get an expection at first load.
 		selected: -1
@@ -24,6 +25,7 @@ enyo.kind({
 	],
 	create: function() {
 		this.inherited(arguments);
+		this.services = [];
 	},
 	/**
 	 * Receive the {onServicesChange} broadcast notification
@@ -31,14 +33,16 @@ enyo.kind({
 	 */
 	handleServicesChange: function(inSender, inEvent) {
 		this.log(inEvent);
-		this.serviceRegistry = inEvent.serviceRegistry;
-		this.$.list.count = this.serviceRegistry.services.length;
+		this.services = inEvent.serviceRegistry.services.filter(function(service) {
+			return (service.conf.type === this.type);
+		}, this);
+		this.$.list.count = this.services.length;
 		this.$.list.render();
 		// re-select the line that was selected before service changed
-		this.doSelectProvider({service: this.serviceRegistry.services[this.selected]});
+		this.doSelectProvider({service: this.services[this.selected]});
 	},
 	setupRow: function(inSender, inEvent) {
-		var p = this.serviceRegistry.services[inEvent.index];
+		var p = this.services[inEvent.index];
 		if (p) {
 			this.$.item.applyStyle("background-color", inSender.isSelected(inEvent.index) ? "lightblue" : "");
 			this.$.name.setContent(p.conf.name);
@@ -52,7 +56,7 @@ enyo.kind({
 	},
 	rowSelected: function(inSender, inEvent) {
 		this.selected = inEvent.key;
-		var p = this.serviceRegistry.services[this.selected];
+		var p = this.services[this.selected];
 		if (p) {
 			if (p.type == "dropbox" && !p.auth) {
 				this.authorize(p);
@@ -69,9 +73,12 @@ enyo.kind({
 		c.show();
 	},
 	auth: function(inSender) {
-		var p = this.serviceRegistry.services[this.selected];
+		// TODO: redo when auth is re-activated
+		/*
+		var p = this.services[this.selected];
 		p.auth = inSender.auth;
-		this.serviceRegistry.saveServicesToStorage(); // TODO: redo when auth is re-activated
+		this.serviceRegistry.saveServicesToStorage();
+		 */
 		this.doSelectProvider({service: p});
 	},
 	// FIXME: a floating popup propagates events so if you drag the popup, the panels will drag!
