@@ -4,8 +4,11 @@ enyo.kind({
 	events: {
 		onCreateProject: "",
 		onProjectSelected: "",
-		onOpenProject: "",
-		onProjectRemoved: ""
+		onImportProject: "",
+		onProjectRemoved: "",
+		onModifySettings: "",
+		onFinishProjectConfig: "",
+		onPhonegapBuild: ""
 	},
 	handlers: {
 	},
@@ -13,23 +16,30 @@ enyo.kind({
 	projectsConfig: [],
 	debug: false,
 	components: [
-	    {kind: "LocalStorage"},
-	    {kind: "onyx.Toolbar",  classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
+		{kind: "LocalStorage"},
+		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
 			{content: "Projects", style: "margin-right: 10px"},
-			 // FIXME: we may need icons dedicated for projects instead of re-using application icons
+				{kind: "onyx.TooltipDecorator", components: [
+				{kind: "onyx.IconButton", src: "$project-view/images/project_settings.png", onclick: "doModifySettings"},
+				{kind: "onyx.Tooltip", content: "Settings..."},
+			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_new.png", onclick: "doCreateProject"},
 				{kind: "onyx.Tooltip", content: "Create Project..."},
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_view_edit.png", onclick: "doOpenProject"},
-				{kind: "onyx.Tooltip", content: "Open Project..."},
+				{kind: "onyx.IconButton", src: "$project-view/images/project_view_edit.png", onclick: "doImportProject"},
+				{kind: "onyx.Tooltip", content: "Import Project..."},
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_delete.png", onclick: "removeProjectAction"},
 				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
 				{kind: "onyx.Tooltip", content: "Remove Project..."},
 			]},
+			{kind: "onyx.TooltipDecorator", components: [
+				{kind: "onyx.IconButton", src: "$project-view/images/project_view_build.png", onclick: "doPhonegapBuild"},
+				{kind: "onyx.Tooltip", content: "Phonegap build"},
+			]}
 		]},
 		{kind: "enyo.Scroller", components: [
 			{kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
@@ -69,7 +79,7 @@ enyo.kind({
 			this.$.projectList.setCount(this.projects.length);
 		} catch(error) {
 			this.error("Unable to retrieve projects information: " + error);	// TODO ENYO-1105
-			console.dir(data);		// Display the offending data in the console
+			console.dir(data);	// Display the offending data in the console
 			this.$.localStorage.remove(this.PROJECTS_STORAGE_KEY); // Remove incorrect projects information
 			this.projects = [];
 		}
@@ -98,14 +108,27 @@ enyo.kind({
 		if (!project.serviceId) {
 			throw new Error("Cannot add a project in service=" + service);
 		}
-		this.projects.push(project);
-		this.storeProjectsInLocalStorage();
-		this.$.projectList.setCount(this.projects.length);
-		this.$.projectList.render();
+		var known = 0;
+		var match = function(proj) {
+			if ( proj.name === name) {
+				known = 1;
+			} 
+		} ;
+		enyo.forEach(this.projects, match) ;
+		if (known) {
+			this.log("Skipped project " + name + " as it is already listed") ;
+		}
+		else {
+			this.projects.push(project);
+			this.storeProjectsInLocalStorage();
+			this.$.projectList.setCount(this.projects.length);
+			this.$.projectList.render();
+		}
 	},
 	removeProjectAction: function(inSender, inEvent) {
 		if (this.selected) {
-			this.$.removeProjectPopup.setName(this.selected.getProjectName());
+			this.$.removeProjectPopup.setName(
+				"Delete project '" + this.selected.getProjectName() + "' ?");
 			this.$.removeProjectPopup.show();
 		}
 	},
@@ -126,19 +149,19 @@ enyo.kind({
 		}
 	},
 	projectListSetupItem: function(inSender, inEvent) {
-	    var project = this.projects[inEvent.index];
-	    var item = inEvent.item;
-	    // setup the controls for this item.
-	    item = item.$.item;
-	    item.setProjectName(project.name);
-	    item.setIndex(inEvent.index);
+		var project = this.projects[inEvent.index];
+		var item = inEvent.item;
+		// setup the controls for this item.
+		item = item.$.item;
+		item.setProjectName(project.name);
+		item.setIndex(inEvent.index);
 	},
 	projectListTap: function(inSender, inEvent) {
 		var project, msg;
 		// Un-highlight former selection, if any
-    		if (this.selected) {
-    			this.selected.removeClass("ares_projectView_projectList_item_selected");
-    		}
+		if (this.selected) {
+			this.selected.removeClass("ares_projectView_projectList_item_selected");
+		}
 		project = this.projects[inEvent.index];
 		project.service = this.serviceRegistry.resolveServiceId(project.serviceId);
 		if (project.service) {
@@ -149,37 +172,67 @@ enyo.kind({
 			} else {
 				this.selected = inEvent.originator.owner;
 			}
-    			this.selected.addClass("ares_projectView_projectList_item_selected");
-    			this.doProjectSelected({project: project});
+				this.selected.addClass("ares_projectView_projectList_item_selected");
+				this.doProjectSelected({project: project});
 		} else {
 			// ...otherwise let 
-	    		msg = "Service " + project.serviceId + " not found";
-	    		this.showErrorPopup(msg);
-	    		this.error(msg);
+				msg = "Service " + project.serviceId + " not found";
+				this.showErrorPopup(msg);
+				this.error(msg);
 		}
 	},
 	showErrorPopup : function(msg) {
 		this.$.errorPopup.setErrorMsg(msg);
 		this.$.errorPopup.show();
 	},
-    stringifyReplacer: function(key, value) {
-    	if (key === "originator") {
-    		return undefined;	// Exclude
-    	}
-    	return value;	// Accept
-    },
-    storeProjectConfig: function (projectName, projectProperties) {
-    	var found = false;
-    	for (var i = 0; i<this.projectsConfig.length; i++) {
-    		if (this.projectsConfig[i].name === projectName) {
-    			found = true;
-    			break;
-    		}
-    	}
-    	if (!found) {
-    		this.projectsConfig.push({name: projectName, properties: projectProperties});
-    	}    	
-    },
+	stringifyReplacer: function(key, value) {
+		if (key === "originator") {
+			return undefined;	// Exclude
+		}
+		return value;	// Accept
+	},
+	storeBaseConfigProject: function (projectName, folderId, projectProperties) {
+		var found = false;
+		var props = JSON.parse(projectProperties);
+		for (var i = 0; i<this.projectsConfig.length; i++) {
+			if (this.projectsConfig[i].name === projectName) {
+				found = true;
+				break;
+			}
+		}
+		if (found === false) {
+			// store basic project properties
+			this.projectsConfig.push({name: projectName, 
+								folderId: folderId, 
+								status: "basic", 
+								properties: props});
+		}
+	},
+	storeCustomConfigProject: function (inData) {
+		// data project store into projectsConfig 
+		for (var i = 0; i<this.projectsConfig.length; i++) {
+			if (this.projectsConfig[i].properties.id === inData.id) {
+				var props = {
+					format: this.projectsConfig[i].properties.format,
+					id: this.projectsConfig[i].properties.id,
+					name: inData.name,
+					version: this.projectsConfig[i].properties.version,
+					phonegapbuild: {target: inData.target, key: inData.key}
+					
+				}
+				var obj = {
+					name: this.projectsConfig[i].name,
+					folderId: this.projectsConfig[i].folderId,
+					status: "custom",
+					properties: props, 
+				}; 
+				this.projectsConfig.splice(i,1);
+				this.projectsConfig.push(obj);
+				break;
+			}
+		}
+		this.doFinishProjectConfig(obj);
+	}
 });
 
 enyo.kind({
@@ -189,9 +242,9 @@ enyo.kind({
 		index: -1
 	},
 	components: [
-	    {name: "name"}
+		{name: "name"}
 	],
 	projectNameChanged: function(inOldValue) {
-        this.$.name.setContent(this.projectName);
-    }
+		this.$.name.setContent(this.projectName);
+	}
 });

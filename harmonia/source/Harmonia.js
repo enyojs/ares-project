@@ -95,13 +95,21 @@ enyo.kind({
 		});
 		r.go();
 	},
+    delayedRefresh: function(msg) {
+		var onDone = new enyo.Async() ;
+		onDone.response(this, function(inSender, toSelectId) {
+			this.log("delayed refresh after " + msg + ' on ' + toSelectId) ;
+			this.$.hermesFileTree.refreshFileTree(null, toSelectId);
+		}) ;
+		return onDone ;
+	},
 	createFile: function(name, folderId, content) {
 		this.log("Creating new file "+name+" into folderId="+folderId);
 		var service = this.selectedFile.service;
 		service.createFile(folderId, name, content)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.$.hermesFileTree.refreshFileTree();
+				this.delayedRefresh("file creation done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
@@ -116,7 +124,7 @@ enyo.kind({
 		service.createFolder(folderId, name)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.$.hermesFileTree.refreshFileTree();
+				this.delayedRefresh("folder creation done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
@@ -132,7 +140,7 @@ enyo.kind({
 		service['rename'](oldId, newName)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.$.hermesFileTree.refreshFileTree();
+				this.delayedRefresh("rename done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
@@ -150,7 +158,7 @@ enyo.kind({
 		service.remove(inEvent.nodeId)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.$.hermesFileTree.refreshFileTree();
+				this.delayedRefresh("delete done").go() ;
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);
@@ -166,7 +174,7 @@ enyo.kind({
 		service.copy(this.selectedFile.id, newName)
 			.response(this, function(inSender, inResponse) {
 				this.log("Response: "+inResponse);
-				this.$.hermesFileTree.refreshFileTree();
+				this.delayedRefresh("copy done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
 				this.log("Error: "+inError);

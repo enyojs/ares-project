@@ -125,6 +125,32 @@ The generated file is expected to look like to below:
 	 --------                   -------
 	     4068                   2 files
 
+## PhoneGap build service
+
+### Usage
+
+**XXX**
+
+### Development & Test
+
+Manual run:
+
+	$ node hermes/bdPhoneGap.js
+
+Assuming you have a working account build.phonegap.com associated with the email `YOUR_EMAIL`, get your PhoneGap developer token `YOUR_TOKEN`, using:
+
+	$ curl -u YOUR_EMAIL -X POST -d "" https://build.phonegap.com/token
+	Enter host password for user 'YOUR_EMAIL':
+	{"token":"YOUR_TOKEN"}
+
+Linux & OSX: The following command generates a POST request carrying a `multipart/form-data` message suitable to test the `bdPhoneGap.js` service:  it creates a new `appId` using an application located in the current directory.  Note that you must provide the `token` and `title` form fields.  The `<name/>` in the `config.xml` is a suitable value for the `title` form field.
+
+	$ find . -type f | \
+		awk 'BEGIN{printf("curl ");}{sub("^\.\/", "", $1); printf("-F \"file=@%s;filename=%s\" ", $1, $1);}END{print(url)}' \
+		-F "token=YOUR_TOKEN" \
+		-F "title=\""My First PhoneGap App\"" \
+		url=http://127.0.0.1:9029/build/
+
 ## Debug
 
 It is possible to debug an Hermes services by commenting-out the `command` property of the service to be debugged in the ide.json & start it manually along with `--debug` or `--debug-brk`  to later connect a `node-inspector`.
