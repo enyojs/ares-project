@@ -26,7 +26,7 @@ enyo.kind({
 				fs: inEvent.service
 			});
 		}
-		this.$.hermesFileTree.fileOps2Hide(true);
+		this.$.hermesFileTree.hideFileOpButtons();
 		return true; //Stop event propagation
 	},
 	setProject: function(project) {
@@ -38,9 +38,9 @@ enyo.kind({
 		};
 		this.$.hermesFileTree.setConfig(config);
 		if (project !== null) {
-			this.$.hermesFileTree.fileOps2Show();		
+			this.$.hermesFileTree.showFileOpButtons();		
 		} else {
-			this.$.hermesFileTree.fileOps2Hide(true);
+			this.$.hermesFileTree.hideFileOpButtons();
 		}
 	},
 	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
