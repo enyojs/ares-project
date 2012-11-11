@@ -77,7 +77,10 @@ function BdPhoneGap(config, next) {
 		}
 	});
 
-	// Built-in form parser
+	// Built-in express form parser: handles:
+	// - 'application/json' => req.body
+	// - 'application/x-www-form-urlencoded' => req.body
+	// - 'multipart/form-data' => req.body.field[]
 	var uploadDir = temp.path({prefix: 'com.palm.ares.hermes.bdPhoneGap'}) + '.d';
 	fs.mkdirSync(uploadDir);
 	app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
@@ -126,6 +129,8 @@ function BdPhoneGap(config, next) {
 			}
 		});
 	});
+
+	app.post(makeExpressRoute('/token'), getToken);
 	
 	// Upload ZIP-ed deployed Enyo application to the
 	// https://build.phonegap.com online service and return the
@@ -306,6 +311,20 @@ function BdPhoneGap(config, next) {
 				}
 			], cb);
 		}
+	}
+
+	function getToken(req, res, next) {
+		// XXX !!! leave this log commented-out to not log password !!!
+		console.log("getToken(): req.body = ", util.inspect(req.body));
+		api.createAuthToken(req.body.username + ':' +req.body.password, {
+			success: function(token) {
+				res.status(200).send({token: token});
+				next();
+			},
+			error: function(errStr) {
+				next(new Error(errStr));
+			}
+		});
 	}
 
 	function build(req, res, next) {
