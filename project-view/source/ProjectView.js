@@ -14,8 +14,6 @@ enyo.kind({
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
 		{kind: "ProjectWizardImport", canGenerate: false, name: "projectWizardImport"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
-		{kind: "ProjectConfig", name: "projectConfig"},
-		{kind: "PhonegapBuild"},
 		{kind: "ProjectPropertiesPopup", name: "projectPropertiesPopup"},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
 			{kind: "Image", src: "$phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
@@ -34,10 +32,8 @@ enyo.kind({
 		onBuildStarted: "phonegapBuildStarted",
 		onError: "showErrorMsg"
 	},
-	serviceFs: null,
 	create: function() {
 		this.inherited(arguments);
-		serviceFs = [];
 	},
 	showErrorMsg: function(inSender, inEvent) {
 		this.log(inEvent);
@@ -70,19 +66,32 @@ enyo.kind({
 		return true; //Stop event propagation
 	},
 	handleProjectSelected: function(inSender, inEvent) {
+		var project = inEvent.project;
 		// Pass service definition & configuration to Harmonia
 		// & consequently to HermesFileTree
-		this.$.harmonia.setProject(inEvent.project);
-		this.$.projectConfig.checkConfig(inEvent.project);
-		// Keep one reference on service FS implementation
-		serviceFs = inEvent.project.service.impl;
-		this.currentProject = inEvent.project;
+		this.$.harmonia.setProject(project);
+		// FIXME: temporary hack to create config.json on the
+		// fly if needed... would be better to create/load it
+		// when the workspace is loaded & when a new project
+		// is created that would save per-click HTTP traffic
+		// to the FileSystemService.
+		self = this;
+		project.config = new ProjectConfig();
+		project.config.init({
+			service: project.service.impl,
+			folderId: project.folderId
+		}, function(err) {
+			err && self.showErrorPopup(err.toString());
+		});
+		this.currentProject = project;
 		return true; //Stop event propagation
 	},
 	projectRemoved: function(inSender, inEvent) {
 		this.$.harmonia.setProject(null);
 	},
 	setupConfigProject: function(inSender, inEvent) {
+		this.log("stubbed");
+		/*
 		try {
 			// data to create the project properties file
 			var projectData = {
@@ -102,8 +111,11 @@ enyo.kind({
 		}
 		// handled here (don't bubble)
 		return true;
+		 */
 	},
 	initConfigProject: function(inSender, inEvent) {
+		this.log("stubbed");
+		/*
 		// push project data in project list
 		this.$.projectList.storeBaseConfigProject(inEvent.name, inEvent.folderId, inEvent.properties);
 		// pre-filled and customized projectPropertiesPopup fields
@@ -112,8 +124,11 @@ enyo.kind({
 	customConfigProject: function(inSender, inEvent) {
 		// retrieve data modified  and store into projectConfig on FS
 		this.$.projectList.storeCustomConfigProject(inEvent);
+		 */
 	},
 	finishConfigProject: function(inSender, inEvent) {
+		this.log("stubbed");
+		/*
 		// customized project data will be stored on FS into project.json
 		this.$.projectConfig.fsUpdateFile(inEvent);
 		// reset the popup settings
@@ -121,6 +136,7 @@ enyo.kind({
 		this.$.projectPropertiesPopup.hide();
 		// generate the config.xml file
 		this.$.projectPropertiesPopup.generateConfigXML(inEvent);
+		 */
 	},
 	modifySettingsAction: function(inSender, inEvent) {
 		// projectProperties popup - onTap action
@@ -137,12 +153,7 @@ enyo.kind({
 	saveGeneratedXml: function(inEvent, inSender) {
 		// TODO: MADBH - need to discuss with FiX and Yves
 		// config.xml needs to saved/stored under a target/phonegapbuild directory
-		var configXmlData = {
-			folderId: inSender.folderId,
-			xmlFile: inSender.configXML,
-			service: serviceFs,
-		};
-		this.$.projectConfig.storeXml(configXmlData);
+		this.currentProject.config.saveXml(inSender.configXML);
 		// handled here (don't bubble)
 		return true;
 	},
@@ -154,9 +165,27 @@ enyo.kind({
 		this.$.waitPopup.hide();
 	},
 	startPhonegapBuild: function(inSender, inEvent) {
-		var credentials = {	username: "xxxx", password: "yyyy"};	// TOOD TBR
-		this.showWaitPopup("Starting phonegap build");
-		this.$.phonegapBuild.startPhonegapBuild(this.currentProject, credentials);
+		var self = this;
+		if (this.debug) this.log("inEvent", inEvent);
+		this.showWaitPopup("Starting project build");
+		// [0] assumes a single builder
+		var bdService =	ServiceRegistry.instance.getServicesByType('build')[0];
+		if (bdService) {
+			bdService.build( /*project*/ {
+				name: this.currentProject.name,
+				service: this.currentProject.service,
+				folderId: this.currentProject.folderId,
+				config: this.currentProject.config.data // FIXME: use whatever better location
+			}, function(inError) {
+				if (inError) {
+					self.hideWaitPopup();
+					self.showErrorPopup(inError.toString());
+				}
+			});
+		} else {
+			this.error("No build service defined:", inEvent);
+			this.doError({msg: 'No build service defined'});
+		}
 	},
 	phonegapBuildStarted: function(inSender, inEvent) {
 		this.showWaitPopup("Phonegap build started");
