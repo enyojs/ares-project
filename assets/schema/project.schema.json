@@ -1,0 +1,102 @@
+{
+	"name":"project",
+	"description":"JSON Schema of Ares Project File (project.json)",
+	"type": "object",
+	"properties": {
+		"format": {
+			"type":"number", 
+			"description": "Project file format version",
+			"required":true
+		},
+		"id": {
+			"type": "string",
+			"description":"Application ID in reverse domain-name format: com.example.apps.myapp" 
+			"format": "regex",
+			"pattern": "([a-z0-9]+\.)+[a-z0-9]+",
+			"required":true
+		},
+		"name": {
+			"type": "string",
+			"description": "One-word blank-less name of the application, used for package name.  Often the last term of the application {id}"
+			"format": "regex",
+			"pattern": "([a-z0-9]+)",
+			"required":true
+		},
+		"title": {
+			"type": "string",
+			"description": "One-line description of the application"
+			"format": "regex",
+			"pattern": "([a-z0-9]+)",
+			"required":true
+		},
+		"version": {
+			"type": "string",
+			"description":"Application version string: usually (M)ajor.(m)inor.(p)atchlevel" 
+			"format": "regex",
+			"pattern": "([0-9]+\.)+[0-9]+",
+			"required":true
+		}
+		"build": {
+			"type": "object",
+			"description": "List of builders",
+			"required":false,
+			"properties": {
+				"phonegap":{
+					"type": "object",
+					"description": "build.phonegap.com parameters",
+					"required":false,
+					"properties": {
+						"appId":{
+							"type": "string",
+							"description": "unique identifier, assigned by build.phonegap.com",
+							"required":false
+						},
+						"targets":{
+							"type":"object",
+							"description":"Selected build targets",
+							"required":false,
+							"properties":{
+								"android":{
+									"type":"object"
+									"description":"android-specific build properties",
+									"required":false,
+									"properties":{
+									}
+								},
+								"ios":{
+									"type":"object"
+									"description":"ios-specific build properties",
+									"required":false,
+									"properties":{
+									}
+								},
+								"winphone":{
+									"type":"object"
+									"description":"winphone-specific build properties",
+									"required":false,
+									"properties":{
+									}
+								},
+								"blackberry":{
+									"type":"object"
+									"description":"blackberry-specific build properties",
+									"required":false,
+									"properties":{
+									}
+								},
+								"webos":{
+									"type":"object"
+									"description":"webos-specific build properties",
+									"required":false,
+									"properties":{
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+	
