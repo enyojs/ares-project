@@ -72,8 +72,6 @@ enyo.kind({
 		this.setIndex(1);
 	},
 	handleBeforeUnload: function() {
-		if (this.$.phobos.saveNeeded() || this.$.deimos.saveNeeded()) {
-			return 'You have some unsaved data';
-		}
+		return 'You may have some unsaved data';
 	}
 });
