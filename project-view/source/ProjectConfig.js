@@ -32,7 +32,7 @@ enyo.kind({
 	init: function(inConfig, next) {
 		this.service = inConfig.service;
 		this.folderId = inConfig.folderId;
-		var req = this.service.propfind(this.folderId);
+		var req = this.service.propfind(this.folderId, 1);
 		req.response(this, function(inSender, inResponse) {
 			var prj = inResponse.children.filter(function(node){
 				return node.name === "project.json";
@@ -99,7 +99,7 @@ enyo.kind({
 	 * @todo remove this function: the config.xml should only exist in the memory of the browser client
 	 */
 	saveXml: function(xmlString, next) {
-		var req = this.service.createFile(this.folderId, "project.xml", xmlString);
+		var req = this.service.createFile(this.folderId, "config.xml", xmlString);
 		req.response(this, function(inSender, inResponse) {
 			if (this.debug) enyo.log("ProjectConfig.saveXml: response=", inResponse);
 			this.fileId = inResponse.id;
