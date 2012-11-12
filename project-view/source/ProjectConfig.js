@@ -32,10 +32,11 @@ enyo.kind({
 					if (prj.length < 1) {
 						// new project - basic project properties
 						var projectData = {format: 1, 
-									id: "com.example."+inData.name, 
+									id: "com.example.apps."+inData.name, 
 									name: inData.name,
 									version: "1.0",
-									phonegapbuild: {target: "none", key: 0}
+									title: "My New Application: "+inData.name,
+									description: "PhoneGap Application"
 						};
 						service.createFile(inData.folderId, "project.json", JSON.stringify(projectData))
 							.response(this, function(inSender, inResponse) {
@@ -104,11 +105,13 @@ enyo.kind({
 		service.listFiles(inData.folderId)
 		.response(this, function(inSender, inResponse) {
 				if (this.debug) console.dir(inResponse);
-				var obj = {
-					target: props.phonegapbuild.target,
-					key: props.phonegapbuild.key,
-				};
-				var projectData = JSON.stringify({format: 1, id: props.id, name: props.name, version: "1.0", phonegapbuild: obj});
+				var projectData = JSON.stringify({format: 1, 
+							id: props.id, 
+							name: props.name, 
+							title: props.title,
+							description: props.description,
+							version: "1.0",
+							});
 				service.createFile(inData.folderId, "project.json", projectData)
 				.response(this, function(inSender, inResponse) {
 					if (inResponse && inResponse.content !== "") {

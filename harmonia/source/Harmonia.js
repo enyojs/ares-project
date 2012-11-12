@@ -6,7 +6,7 @@ enyo.kind({
 		onDeselect: "newDeselect"
 	},
 	components: [
-	    {name: "providerList", kind: "ProviderList", onSelectProvider: "handleSelectProvider"},
+		{name: "providerList", kind: "ProviderList", type: "filesystem", onSelectProvider: "handleSelectProvider"},
 		{kind: "HermesFileTree", fit: true, onFileClick: "selectFile", onFolderClick: "selectFolder", 
 			onNewFileConfirm: "newFileConfirm", onNewFolderConfirm: "newFolderConfirm", 
 			onRenameConfirm: "renameConfirm", onDeleteConfirm: "deleteConfirm",
