@@ -17,6 +17,8 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.setIndex(this.fileViewIndex);
+
+		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 	},
 	draggable: false,
 	handleReloadServices: function(inSender, inEvent) {
@@ -50,6 +52,7 @@ enyo.kind({
 		service.putFile(inEvent.file.id, inEvent.content)
 			.response(this, function(inEvent, inData) {
 				inSender.saveComplete();
+				this.$.deimos.saveComplete();
 			})
 			.error(this, function(inEvent, inData) {
 				inSender.saveFailed(inData);
@@ -67,5 +70,10 @@ enyo.kind({
 			this.$.phobos.updateComponents(inSender, inEvent);
 		}
 		this.setIndex(1);
+	},
+	handleBeforeUnload: function() {
+		if (window.location.search.indexOf("debug") == -1) {
+			return 'You may have some unsaved data';
+		}
 	}
 });
