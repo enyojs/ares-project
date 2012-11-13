@@ -4,10 +4,11 @@
 			"active":true,
 			"id":"home",
 			"icon":"server",
-			"name":"Local Files (home)",
-			"type":"hermes",
+			"name":"Home Directory",
+			"type": "filesystem",
+			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"hermes/fsLocal.js", "-P", "/some/files", "@HOME@", "-p", "0"
+				"hermes/fsLocal.js", "-P", "/some/files", "-p", "0", "@HOME@"
 			],
 			"useJsonp":false,
 			"debug": false,
@@ -18,10 +19,25 @@
 			"id":"dropbox-enyojs",
 			"icon":"dropbox",
 			"name":"Dropbox (enyojs.com)",
-			"type":"dropbox",
+			"type": "filesystem",
+			"provider": "hermes",
 			"command":"@NODE@", "params":["hermes/dropbox/index.js", "0", "http://184.169.139.5:8080"],
 			"useJsonp":false,
 			"debug": false
+		},
+		{
+			"active":true,
+			"id":"phonegap",
+			"icon":"phonegap",
+			"name":"PhoneGap Build",
+			"type": "build",
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"hermes/bdPhoneGap.js", "-P", "/phonegap", "-p", "0"
+			],
+			"useJsonp":false,
+			"debug": false,
+			"respawn": false
 		}
 	]
 }
