@@ -32,7 +32,7 @@ enyo.kind({
 		var config ; 
 		if (project !== null) {
 			config = {
-				service: project.service,
+				filesystem: project.service,
 				nodeName: project.name,
 				folderId: project.folderId
 			};
