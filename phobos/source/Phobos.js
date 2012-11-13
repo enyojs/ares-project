@@ -487,6 +487,8 @@ enyo.kind({
 				this.dumpInfo(tempo.objects && tempo.objects[tempo.currentObject]);
 			}
 		}
+
+		this.$.autocomplete.cursorChanged(position);
 		return true; // Stop the propagation of the event
 	},
 	startAutoCompletion: function() {

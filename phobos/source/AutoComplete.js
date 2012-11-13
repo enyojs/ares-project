@@ -21,7 +21,7 @@ enyo.kind({
 		onchange : "autocompleteChanged",
 		classes : "ares_phobos_autocomp_select",
 		components : [
-		    // options elements will be populated programmatically
+			// options elements will be populated programmatically
 		]
 	} ],
 	// Constants
@@ -199,7 +199,7 @@ enyo.kind({
 		return suggestions;
 	},
 	fillSuggestionsDoEvent: function(kindName, suggestions) {
-		var definition, obj, p, i, name;		
+		var definition, obj, p, i, name;
 		// retrieve the kindName definition
 		definition = this.getKindDefinition(kindName);
 
@@ -215,14 +215,14 @@ enyo.kind({
 						suggestions.addItem({name: name, kind: kindName});
 					}
 				}
-			}	
+			}
 			// support firing super-kind events as well
 			return this.fillSuggestionsDoEvent(definition.superkind, suggestions);
 		}
 		return suggestions;
 	},
 	fillSuggestionsGettersSetters: function(kindName, suggestions) {
-		var definition, obj, p, i, name;		
+		var definition, obj, p, i, name;
 		// retrieve the kindName definition
 		definition = this.getKindDefinition(kindName);
 
@@ -238,7 +238,7 @@ enyo.kind({
 						suggestions.addItem({name: name, kind: kindName});
 						name = 'get' + p[j].name.substr(0, 1).toUpperCase() + p[j].name.substr(1).trim();
 						suggestions.addItem({name: name, kind: kindName});
-					}				
+					}
 				}
 			}
 			// support super-kind published properties
@@ -247,7 +247,7 @@ enyo.kind({
 		return suggestions;
 	},
 	fillSuggestionsProperties: function(kindName, suggestions) {
-		var definition, obj, i, name;		
+		var definition, obj, i, name;
 		// retrieve the kindName definition
 		definition = this.getKindDefinition(kindName);
 
@@ -266,7 +266,7 @@ enyo.kind({
 		}
 		return suggestions;
 	},
-	fillSuggestionsEnyo: function(suggestions) {		
+	fillSuggestionsEnyo: function(suggestions) {
 		return suggestions.concat(this.suggestionsEnyo);
 	},
 	fillSuggestionsOnyx: function(suggestions) {
@@ -346,21 +346,26 @@ enyo.kind({
 			throw "Unexpected action: " + data.action;
 		}
 
-		if (current.row !== this.popupPosition.row) { 	// Hide if the line has changed
-			this.hideAutocompletePopup();
-			return;
-		}
-		var len = current.column - this.popupPosition.column;
-		this.debug && this.log("Auto-Completion update - current: " + JSON.stringify(current) + " len: " + len);
-		if (len < 0) {		// Hide if current cursor position is before the popup position
-			this.hideAutocompletePopup();
-			return;
-		}
+		this.cursorChanged(current);
+	},
+	cursorChanged: function(current) {
+		if (this.popupShown) {
+			if (current.row !== this.popupPosition.row) { 	// Hide if the line has changed
+				this.hideAutocompletePopup();
+				return;
+			}
+			var len = current.column - this.popupPosition.column;
+			this.debug && this.log("Auto-Completion update - current: " + JSON.stringify(current) + " len: " + len);
+			if (len < 0) {		// Hide if current cursor position is before the popup position
+				this.hideAutocompletePopup();
+				return;
+			}
 
-		// Get the line and the last characters entered
-		line = this.ace.getLine(current.row);
-		this.input = line.substr(this.popupPosition.column, len);
-		this.showAutocompletePopup();
+			// Get the line and the last characters entered
+			line = this.ace.getLine(current.row);
+			this.input = line.substr(this.popupPosition.column, len);
+			this.showAutocompletePopup();
+		}
 	},
 	cursorUp: function() {
 		if (this.popupShown) {
