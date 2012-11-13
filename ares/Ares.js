@@ -72,6 +72,8 @@ enyo.kind({
 		this.setIndex(1);
 	},
 	handleBeforeUnload: function() {
-		return 'You may have some unsaved data';
+		if (window.location.search.indexOf("debug") == -1) {
+			return 'You may have some unsaved data';
+		}
 	}
 });
