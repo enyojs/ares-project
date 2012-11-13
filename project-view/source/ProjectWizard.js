@@ -177,34 +177,41 @@ enyo.kind({
 		// HFT and look for project.json
 		var toScan = [ [ null , topDir ] ]	; // list of parent_dir , child
 		// var this = this ;
+		
+		var iter, inIter ;
 
-		var iter = function() {
+		inIter = function() {
+			var item = toScan.shift() ;
+			var parentDir = item[0] ;
+			var child = item[1];
+			this.debug && this.log('search iteration on ' + child.name + ' isDir ' + child.isDir ) ;
+			if ( child.name === 'project.json' ) { 
+				this.debug && this.log('opening project.json from ' + parentDir.name ) ;
+				service.getFile( child.id ).
+					response(this, function(inSender, fileStuff) {
+						this.debug && this.log( "file contents: '" + fileStuff.content + "'" ) ;
+						var projectData = JSON.parse(fileStuff.content)  ;
+						this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
+						this.addProjectInList(projectData.name, parentDir.id) ;
+					}); 
+			}
+			if ( child.isDir ===  true ) { 
+				this.debug && this.log('opening dir ' + child.name ) ;
+				service.listFiles(child.id)
+					.response(this, function(inSender, inFiles) {
+						enyo.forEach(inFiles, function(v) {
+							this.debug && this.log('pushing ' + v.name + " from " + child.id) ;
+							toScan.push([child,v]);
+						},this) ;
+						iter.apply(this) ;
+					}
+				) ;
+			}
+		} ;
+
+		iter = function() {
 			while (toScan.length > 0) {
-				var item = toScan.shift() ;
-				var parentDir = item[0] ;
-				var child = item[1];
-				this.log('search iteration on ' + child.name + ' isDir ' + child.isDir ) ;
-				if ( child.name === 'project.json' ) { 
-					this.log('opening project.json from ' + parentDir.name ) ;
-					service.getFile( child.id ).
-						response(this, function(inSender, fileStuff) {
-							this.log( "file contents: '" + fileStuff.content + "'" ) ;
-							var projectData = JSON.parse(fileStuff.content)  ;
-							this.log('Imported project ' + projectData.name ) ;
-							this.addProjectInList(projectData.name, parentDir.id) ;
-						}); 
-				}
-				if ( child.isDir ===  true ) { 
-					service.listFiles(child.id)
-						.response(this, function(inSender, inFiles) {
-							enyo.forEach(inFiles, function(v) {
-								this.log('pushing ' + v.name) ;
-								toScan.push([child,v]);
-							},this) ;
-							iter.apply(this) ;
-						}
-					) ;
-				}
+				inIter.apply(this) ;
 			}
 		} ;
 
