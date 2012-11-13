@@ -184,23 +184,23 @@ enyo.kind({
 			var item = toScan.shift() ;
 			var parentDir = item[0] ;
 			var child = item[1];
-			this.log('search iteration on ' + child.name + ' isDir ' + child.isDir ) ;
+			this.debug && this.log('search iteration on ' + child.name + ' isDir ' + child.isDir ) ;
 			if ( child.name === 'project.json' ) { 
-				this.log('opening project.json from ' + parentDir.name ) ;
+				this.debug && this.log('opening project.json from ' + parentDir.name ) ;
 				service.getFile( child.id ).
 					response(this, function(inSender, fileStuff) {
-						this.log( "file contents: '" + fileStuff.content + "'" ) ;
+						this.debug && this.log( "file contents: '" + fileStuff.content + "'" ) ;
 						var projectData = JSON.parse(fileStuff.content)  ;
 						this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
 						this.addProjectInList(projectData.name, parentDir.id) ;
 					}); 
 			}
 			if ( child.isDir ===  true ) { 
-				this.log('opening dir ' + child.name ) ;
+				this.debug && this.log('opening dir ' + child.name ) ;
 				service.listFiles(child.id)
 					.response(this, function(inSender, inFiles) {
 						enyo.forEach(inFiles, function(v) {
-							this.log('pushing ' + v.name + " from " + child.id) ;
+							this.debug && this.log('pushing ' + v.name + " from " + child.id) ;
 							toScan.push([child,v]);
 						},this) ;
 						iter.apply(this) ;
