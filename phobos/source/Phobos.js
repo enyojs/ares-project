@@ -55,9 +55,6 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.buildEnyoDb();
-
-		// Pass to the autocomplete compononent a reference to ace
-		this.$.autocomplete.setAce(this.$.ace);
 	},
 	//
 	//
@@ -90,6 +87,8 @@ enyo.kind({
 		if (hasAce) {
 			this.$.ace.setEditingMode(this.mode);
 			this.$.ace.setValue(inCode);
+			// Pass to the autocomplete compononent a reference to ace
+			this.$.autocomplete.setAce(this.$.ace);
 		}
 		else {
 			this.$.imageViewer.setAttribute("src", origin + inFile.pathname);

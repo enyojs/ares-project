@@ -12,11 +12,6 @@ enyo.kind({
 		enyoIndexer: null,
 		projectIndexer: null
 	},
-	handlers: {
-		onkeyup: "keyUp",
-		onkeypress : "keyPress",
-		onkeydown : "keyDown"
-	},
 	components : [ {
 		kind : "Select",
 		name : "autocompleteSelect",
@@ -41,61 +36,98 @@ enyo.kind({
 	suggestionsOnyx: null,
 	localKinds: {},					// The kinds defined in the currently edited file
 	kindName: "",
-	inputProcessor: null,			// To take care of browser differences regarding input events
+	popupShown: false,
 	create: function() {
 		this.inherited(arguments);
-		this.inputProcessor = new Phobos.InputProcessor();
+	},
+	/**
+	 * The ace instance has been changed.
+	 * We register the commands needed for auto-completion
+	 */
+	aceChanged: function() {
+		var ace = this.ace;
+		ace.addCommand({
+			name: "Up",
+			bindKey: {win: "Up", mac: "Up"},
+			exec: enyo.bind(this, "cursorUp")
+		});
+
+		ace.addCommand({
+			name: "Down",
+			bindKey: {win: "Down", mac: "Down"},
+			exec: enyo.bind(this, "cursorDown")
+		});
+
+		ace.addCommand({
+			name: "Return",
+			bindKey: {win: "Return", mac: "Return"},
+			exec: enyo.bind(this, "keyReturn")
+		});
+
+		ace.addCommand({
+			name: "Escape",
+			bindKey: {win: "ESC", mac: "ESC"},
+			exec: enyo.bind(this, "keyEscape")
+		});
 	},
 	start: function(inEvent) {
 		var suggestions = new Phobos.Suggestions(), go = false;
 		if (this.analysis && this.analysis.objects && this.analysis.objects.length > 0) {
-			this.debug && this.log("Auto-Completion needed ? - " + (inEvent && JSON.stringify(inEvent.data)));
-			
-			// Retrieve the kind name for the currently edited file
-			this.kindName = this.analysis.objects[this.analysis.currentObject].name;
-			this.debug && this.log("Current Kind Name: "+this.kindName);
-			
-			if (inEvent) {
-				 // Check if a '.' was inserted and see if we need to show-up the auto-complete popup
-				var data = inEvent.data;
-				if (data && data.action === 'insertText') {
-					var last = data.text.substr(data.text.length - 1);
-					if (last === ".") { // Check that last entered char is a '."
-						go = true;	// We need to check further
-					}
+
+			if (this.popupShown) {
+				// The auto-completion is started. Take into account user input to refine the suggestions
+				if (inEvent.data) {
+					this.processChanges(inEvent);
 				}
 			} else {
-				// Triggered by a Ctrl-Space coming from the user
-				go = true;		// We need to check further
-			}
-
-			// We can check further
-			if (go === true) {
-				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_THIS_DOLLAR)) {
-					suggestions = this.fillSuggestionsThisDollar(suggestions);
+				this.debug && this.log("Auto-Completion needed ? - " + (inEvent && JSON.stringify(inEvent.data)));
+				
+				// Retrieve the kind name for the currently edited file
+				this.kindName = this.analysis.objects[this.analysis.currentObject].name;
+				this.debug && this.log("Current Kind Name: "+this.kindName);
+				
+				if (inEvent) {
+					// Check if a '.' was inserted and see if we need to show-up the auto-complete popup
+					var data = inEvent.data;
+					if (data && data.action === 'insertText') {
+						var last = data.text.substr(data.text.length - 1);
+						if (last === ".") { // Check that last entered char is a '."
+							go = true;	// We need to check further
+						}
+					}
+				} else {
+					// Triggered by a Ctrl-Space coming from the user
+					go = true;		// We need to check further
 				}
 
-				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_THIS)) {
-					suggestions = this.fillSuggestionsDoEvent(this.kindName, suggestions);
-					suggestions = this.fillSuggestionsGettersSetters(this.kindName, suggestions);
-					suggestions = this.fillSuggestionsProperties(this.kindName, suggestions);
-				}
+				// We can check further
+				if (go === true) {
+					if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_THIS_DOLLAR)) {
+						suggestions = this.fillSuggestionsThisDollar(suggestions);
+					}
 
-				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_ENYO)) {
-					suggestions = this.fillSuggestionsEnyo(suggestions);
-				}
+					if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_THIS)) {
+						suggestions = this.fillSuggestionsDoEvent(this.kindName, suggestions);
+						suggestions = this.fillSuggestionsGettersSetters(this.kindName, suggestions);
+						suggestions = this.fillSuggestionsProperties(this.kindName, suggestions);
+					}
 
-				if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_ONYX)) {
-					suggestions = this.fillSuggestionsOnyx(suggestions);
-				}
+					if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_ENYO)) {
+						suggestions = this.fillSuggestionsEnyo(suggestions);
+					}
 
-				this.buildLevel2Suggestions(inEvent, suggestions);
-			}
-			
-			if (suggestions.getCount() > 0) {	// Some suggestions were found.
-				this.input = "";		// Reset the characters typed while the autocompletion popup is up
-				this.suggestions = suggestions.getSortedSuggestions();
-				this.showAutocompletePopup();
+					if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_ONYX)) {
+						suggestions = this.fillSuggestionsOnyx(suggestions);
+					}
+
+					this.buildLevel2Suggestions(inEvent, suggestions);
+				}
+				
+				if (suggestions.getCount() > 0) {	// Some suggestions were found.
+					this.input = "";		// Reset the characters typed while the autocompletion popup is up
+					this.suggestions = suggestions.getSortedSuggestions();
+					this.showAutocompletePopup();
+				}
 			}
 		}
 	},
@@ -145,7 +177,7 @@ enyo.kind({
 			pattern = this.AUTOCOMP_THIS_DOLLAR + o.name + ".";
 			len = pattern.length;
 			last = line.substr(popupPosition.column - len, len);
-			this.debug && this.log("last >>" + last + " <<");
+			this.debug && this.log("last >>" + last + "<<");
 
 			// Check if it's part of a pattern string
 			if (last === pattern) {
@@ -243,7 +275,7 @@ enyo.kind({
 	showAutocompletePopup: function() {
 		this.fillSuggestionList();		// Fill-up the auto-completion list
 		
-		var select = this.$.autocompleteSelect;		
+		var select = this.$.autocompleteSelect;
 		select.nbEntries = select.controls.length;
 		if (select.nbEntries > 0) {
 			var size = Math.max(2, Math.min(select.nbEntries, 10));
@@ -261,6 +293,7 @@ enyo.kind({
 			this.applyStyle("top", pos.pageY + "px");
 			this.applyStyle("left", pos.pageX + "px");
 			this.show();
+			this.popupShown = true;
 		} else {
 			this.hideAutocompletePopup();
 		}
@@ -283,6 +316,7 @@ enyo.kind({
 		}, this);
 	},
 	hideAutocompletePopup: function() {
+		this.popupShown = false;
 		this.hide();
 		this.ace.focus();
 		return true; // Stop the propagation of the event
@@ -300,65 +334,69 @@ enyo.kind({
 		ace.focus();
 		return true; // Stop the propagation of the event
 	},
-	keyPress: function(inSender, inEvent) {
-		var input = this.inputProcessor;
-		input.setInput(inEvent);
-		var code = input.getCharCode();
-		if (code != 0 && code != input.CARRIAGE_RETURN) {	// Just consider regular character except ENTER
-			var pos = enyo.clone(this.popupPosition);		// to refine the selection filtering
-			pos.column += this.input.length;
-			var character = String.fromCharCode(code);
-			this.input += character;
-			this.debug && this.log("Inserting >>" + character + "<< at " + JSON.stringify(pos));
-			this.ace.insertAt(pos, character);
-			this.showAutocompletePopup();
-		}	// else - Don't care
-		return true; // Stop the propagation of the event
+	processChanges: function(inEvent) {
+		this.debug && this.log("Auto-Completion update - ", inEvent.data, this.popupPosition);
+
+		var current, data = inEvent.data;
+		if (data.action === 'insertText') {
+			current = data.range.end;
+		} else if (data.action === 'removeText') {
+			current = data.range.start;
+		} else {
+			throw "Unexpected action: " + data.action;
+		}
+
+		if (current.row !== this.popupPosition.row) { 	// Hide if the line has changed
+			this.hideAutocompletePopup();
+			return;
+		}
+		var len = current.column - this.popupPosition.column;
+		this.debug && this.log("Auto-Completion update - current: " + JSON.stringify(current) + " len: " + len);
+		if (len < 0) {		// Hide if current cursor position is before the popup position
+			this.hideAutocompletePopup();
+			return;
+		}
+
+		// Get the line and the last characters entered
+		line = this.ace.getLine(current.row);
+		this.input = line.substr(this.popupPosition.column, len);
+		this.showAutocompletePopup();
 	},
-	keyDown: function(inSender, inEvent) {
-		var input = this.inputProcessor;
-		input.setInput(inEvent);
-		var key = input.getKeyCode();
-		if (key === input.ARROW_UP) {					// Detect the UP arrow
+	cursorUp: function() {
+		if (this.popupShown) {
 			var select = this.$.autocompleteSelect;
 			var selected = select.getSelected() - 1;
 			if (selected < 0) { selected = select.nbEntries - 1;}
 			select.setSelected(selected);
-		} else if (key === input.ARROW_DOWN) {			// Detect the DOWN arrow
+		} else {
+			this.ace.navigateUp(1);
+		}
+	},
+	cursorDown: function() {
+		if (this.popupShown) {
 			var select = this.$.autocompleteSelect;
 			var selected = (select.getSelected() + 1) % select.nbEntries;
 			select.setSelected(selected);
-		} // else - Don't care
-		return true; // Stop the propagation of the event
+		} else {
+			this.ace.navigateDown(1);
+		}
 	},
-	keyUp: function(inSender, inEvent) {
-		var input = this.inputProcessor;
-		input.setInput(inEvent);
-		var key = input.getKeyCode();
-		if (key === input.ESCAPE_CODE) {				// On ESCAPE, hide the auto-complete popup
-			this.hideAutocompletePopup();
-		} else if (key === input.CARRIAGE_RETURN) {		// On ENTER, insert the current selection
+	keyEscape: function() {
+		this.hideAutocompletePopup();
+	},
+	keyReturn: function() {
+		if (this.popupShown) {
 			this.autocompleteChanged();
-			this.hideAutocompletePopup();				
-		} else if (key === input.BACKSPACE_CODE) {		// On BACKSPACE, refine the selection filtering
-			var str = this.input;
-			if (str.length > 0) {
-				this.input = str.substr(0, str.length -1);
-				this.debug && this.log("Got a backspace ==> input: >>" + this.input + "<<");
-				this.showAutocompletePopup();
-				this.ace.undo();
-			}
-		}// else - Don't care
-
-		this.ace.blur();		// Needed to force ACE to ignore keystrokes after the popup is opened
-
-		return true; // Stop the propagation of the event
+			this.hideAutocompletePopup();
+		} else {
+			this.ace.insertAtCursor("\n");
+		}
 	},
 	enyoIndexerChanged: function() {
 		this.debug && this.log("Enyo analysis ready");
 		var suggestions, pattern, regexp;
 		
-		if (this.enyoIndexer) {	
+		if (this.enyoIndexer) {
 			// Build the suggestion lists as the analyzer just finished its job
 			pattern = this.AUTOCOMP_ENYO, len = pattern.length;
 			regexp = /^enyo\..*$/;
@@ -473,51 +511,6 @@ enyo.kind({
 	}
 });
 
-/**
- * Phobos.InputProcessor takes care of different browser behavior
- * regarding input events.
- * 
- * For example, it filter keypress events on FireFox when
- * a CTRL, ALT or META is pressed while entering a character
- */
-enyo.kind({
-	name : "Phobos.InputProcessor",
-	kind : "enyo.Component",
-	debug: false,
-	CARRIAGE_RETURN: 13,
-	ARROW_UP: 38,
-	ARROW_DOWN: 40,
-	ESCAPE_CODE: 27,
-	BACKSPACE_CODE: 8,
-	setInput: function(inEvent) {
-		this.inEvent = inEvent;
-
-		this.debug && this.log("Got a " + inEvent.type + " ... keyCode: " + inEvent.keyCode + " charCode: " + inEvent.charCode + " Ident:" + inEvent.keyIdentifier);
-		this.debug && this.log("+++++ crtl: " + inEvent.ctrlKey + " alt: " + inEvent.altKey + " shift:" + inEvent.shiftKey + " meta:" + inEvent.metatKey + " isChar: " + inEvent.isChar);
-	},
-	getKeyIdentifier: function() {
-		var value = this.inEvent.keyIdentifier;
-		this.debug && this.log(this.inEvent.type + " --> keyIdentifier: " + value);
-		return value;
-	},
-	getKeyCode: function() {
-		var value = this.inEvent.keyCode;
-		this.debug && this.log(this.inEvent.type + " --> keyCode: " + value);
-		return value;
-	},
-	getCharCode: function() {
-		var event = this.inEvent;
-		var value;
-		if (event.ctrlKey || event.altKey || event.metatKey) {	// Avoid returning a CTRL-XXX on FireFox
-			value = 0;
-		} else {
-			value = event.charCode;
-		}
-		this.debug && this.log(event.type + " --> charCode: " + value);
-		return value;
-	}
-});
-
 enyo.kind({
 	name : "Phobos.Suggestions",
 	kind : "enyo.Component",
@@ -570,14 +563,14 @@ enyo.kind({
 	statics: {
 		objectCounter: 0,
 		nameCompare: function(inA, inB) {
-			var na = inA.name.toLowerCase(), 
+			var na = inA.name.toLowerCase(),
 				nb = inB.name.toLowerCase();
 			if (na < nb) {
 				return -1;
 			}
 			if (na > nb) {
 				return 1;
-			} 
+			}
 			return 0;
 		}
 	}
