@@ -102,10 +102,10 @@ Then wait for the following message in the console:
 	ARES IDE is now running at <http://127.0.0.1:9009/ide/ares/index.html> Press CTRL + C to shutdown
 	[...]
 
-Connect to the IDE using Google Chrome or Chromium (other browserds are not that well tested so far).  The default URL is [http://127.0.0.1:9009/ide/ares/index.html](http://127.0.0.1:9009/ide/ares/index.html)
+Connect to the IDE using Google Chrome or Chromium (other browsers are not that well tested so far).  The default URL is [http://127.0.0.1:9009/ide/ares/index.html](http://127.0.0.1:9009/ide/ares/index.html)
 
 On OSX:
 
 	% open -a "Chromium" http://127.0.0.1:9009/ide/ares/index.html
 
-**Debugging:** You cann add `--debug` or `--debug-brk` to the node command-line in `ide.json` if you want to troubleshoot the service providers, _or_ directly on the main node command line to to troubleshoot the main IDE server.    Then start `node-inspector` as usual.
+**Debugging:** You can add `--debug` or `--debug-brk` to the node command-line in `ide.json` if you want to troubleshoot the service providers, _or_ directly on the main node command line to to troubleshoot the main IDE server.    Then start `node-inspector` as usual.

@@ -162,6 +162,12 @@ enyo.kind({
 	designRendered: function() {
 		this.refreshComponentView();
 		return true; // Stop the propagation of the event
+	},
+	saveComplete: function() {
+		this.docHasChanged = false;
+	},
+	saveNeeded: function() {
+		return this.docHasChanged;
 	}
 });
 
