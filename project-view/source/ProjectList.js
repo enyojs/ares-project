@@ -172,13 +172,13 @@ enyo.kind({
 			} else {
 				this.selected = inEvent.originator.owner;
 			}
-				this.selected.addClass("ares_projectView_projectList_item_selected");
-				this.doProjectSelected({project: project});
+			this.selected.addClass("ares_projectView_projectList_item_selected");
+			this.doProjectSelected({project: project});
 		} else {
 			// ...otherwise let 
-				msg = "Service " + project.serviceId + " not found";
-				this.showErrorPopup(msg);
-				this.error(msg);
+			msg = "Service " + project.serviceId + " not found";
+			this.showErrorPopup(msg);
+			this.error(msg);
 		}
 	},
 	showErrorPopup : function(msg) {
