@@ -1,6 +1,6 @@
 ﻿enyo.depends(
 	"Phobos.js",
 	"AutoComplete.js",
-	"cssbuilder.js",
-	"cssbuilder.css"
+	"cssbuilder.css",
+	"cssbuilder.js"
 );
