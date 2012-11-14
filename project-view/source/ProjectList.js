@@ -46,7 +46,7 @@ enyo.kind({
 				{kind: "ProjectList.Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
 			]}
 		]},
-		{name: "removeProjectPopup", kind: "Ares.ActionPopup", onConfirmDeleteProject: "confirmRemoveProject"},
+		{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
@@ -126,14 +126,38 @@ enyo.kind({
 		}
 	},
 	removeProjectAction: function(inSender, inEvent) {
+		var popup = this.$.removeProjectPopup;
 		if (this.selected) {
-			this.$.removeProjectPopup.setName(
-				"Delete project '" + this.selected.getProjectName() + "' ?");
-			this.$.removeProjectPopup.show();
+			popup.setName("Delete project '" + this.selected.getProjectName() + "' ?");
+			popup.$.nukeFiles.setValue(false) ;
+			popup.show();
 		}
 	},
 	confirmRemoveProject: function(inSender, inEvent) {
+		// use file system service to remove project files (which behaves like a 'rm -rf')
+		// once done,  call removeSelectedProjectData to mop up the remains.
+		var project, nukeFiles ;
 		if (this.selected) {
+			project = this.projects[this.selected.index] ;
+			nukeFiles = this.$.removeProjectPopup.$.nukeFiles.getValue() ;
+			this.log("removing project" +  project.name + ( nukeFiles ? " and its files" : "" )) ;
+			this.debug && this.log(project) ;
+			if (nukeFiles) {
+				// FIXME: shouldn't impl be private stuff ?
+				project.service.impl.remove( project.folderId )
+					.response(this, function(){this.removeSelectedProjectData();})
+					.error(this, function(inError){
+						this.showErrorPopup("Error removing files of project " + project.name + ": " + inError);
+					}) ;
+			}
+			else {
+				this.removeSelectedProjectData() ;
+			}
+		}
+	},
+	removeSelectedProjectData: function() {
+		if (this.selected) {
+			// remove the project from list of project config
 			for (var i = 0; i<this.projectsConfig.length; i++) {
 				if (this.projectsConfig[i].name === this.selected.projectName) {
 					this.projectsConfig.splice(i,1);
@@ -247,4 +271,19 @@ enyo.kind({
 	projectNameChanged: function(inOldValue) {
 		this.$.name.setContent(this.projectName);
 	}
+});
+
+enyo.kind({
+	name: "ProjectDeletePopup",
+	kind: "Ares.ActionPopup",
+	components: [
+		{kind: "Control", tag: "h3", content: " ", name: "title"},
+		{kind: "Control", tag: "br"},
+		{kind: "onyx.Checkbox", checked: false, name: "nukeFiles"},
+		{kind: "Control", tag: "span", style: "padding: 0 4px; vertical-align: middle;", content: "also delete files", fit: true},
+		{kind: "FittableColumns", name: "buttons", components: [
+			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", name: "cancelButton", ontap: "actionCancel"},
+			{kind: "onyx.Button", classes: "onyx-affirmative", content: "Delete", name: "actionButton", ontap: "actionConfirm"}
+		]}
+	]
 });
