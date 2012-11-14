@@ -90,8 +90,7 @@ enyo.kind({
 		});
 		r.error(this, function(inSender, error) {
 			if (error === 404){
-				// no template found -> create an empty file
-				this.createFile(name, folderId, "\n"); 
+				this.$.hermesFileTree.showErrorPopup("No template found for file type " + type );
 			}
 			else {
 				this.error("error while fetching " + templatePath + ': ' + error);
