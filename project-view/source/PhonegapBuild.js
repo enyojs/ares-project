@@ -40,17 +40,20 @@ enyo.kind({
 	 * - Send it to nodejs which will submit the build request
 	 * - Save the appid
 	 * 
-	 * @param {Object} project has at least 3 properties: #name, #config and #service
+	 * @param {Object} project has at least 3 properties: #name, #config and #filesystem
 	 * @param {Function} next is a CommonJS callback
 	 */
 	build: function(project, next) {
-		this.debug && this.log("starting... project:", project);
+		if (!next || !project || !project.name || !project.config || !project.filesystem) {
+			throw new Error("Invalid parameters");
+		}
+		if (this.debug) this.log("starting... project:", project);
 
 		if(!project.config && !project.config.build && !project.config.build.phonegap) {
-			next && next(new Error("Project not configured for Phonegap Build"));
+			next(new Error("Project not configured for Phonegap Build"));
 			return;
 		}
-		this.debug && this.log("appId: " + project.config.build.phonegap.appId);
+		if (this.debug) this.log("appId: " + project.config.build.phonegap.appId);
 
 		this.getToken(project, next);
 	},
@@ -99,10 +102,10 @@ enyo.kind({
 	getFileList: function(project, next) {
 		if (this.debug) this.log("...");
 		var req, fileList = [];
-		req = project.service.impl.listFiles(project.folderId, -1);
+		req = project.filesystem.listFiles(project.folderId, -1);
 		req.response(this, function(inEvent, inData) {
 			this.doBuildStarted({project: project});
-			this.debug && enyo.log("Got the list of files", inData);
+			if (this.debug) enyo.log("Got the list of files", inData);
 			// Extract the list into an array
 			this.buildFileList(inData, fileList);
 			var prefixLen = this.extractPrefixLen(inData);
@@ -147,8 +150,8 @@ enyo.kind({
 		// Still some files to download. Get one.
 		var id = fileList[index].id;
 		var name = fileList[index].path.substr(prefixLen);
-		this.debug && this.log("Fetching " + name + " " + index + "/" + fileList.length);
-		var request = project.service.impl.getFile(id);
+		if (this.debug) this.log("Fetching " + name + " " + index + "/" + fileList.length);
+		var request = project.filesystem.getFile(id);
 		request.response(this, function(inEvent, inData) {
 			// Got a file content: add it to the multipart/form-data
 			var blob = new Blob([inData.content || ""], {type: "application/octet-stream"});
@@ -189,13 +192,19 @@ enyo.kind({
 			method: 'POST',
 			postBody: formData
 		});
-		req.response(this, function(inEvent, inData) {
-			if (this.debug) enyo.log("Phonegapbuild.submitBuildRequest: response", inData);
+		req.response(this, function(inSender, inData) {
+			if (this.debug) enyo.log("Phonegapbuild.submitBuildRequest.response:", inData);
 			project.build.phonegap.appId = inData.appId;
 			next(null, inData);
 		});
-		req.error(this, function(inEvent, inError) {
-			next(new Error("Unable to submit build request: " + inError));
+		req.error(this, function(inSender, inError) {
+			var response = inSender.xhrResponse,
+			    details;
+			if (response.headers['Content-Type'].match('^text/plain')) {
+				details = response.body;
+				enyo.log("Phonegapbuild.submitBuildRequest.error:", details);
+			}
+			next(inError, details);
 		});
 		req.go();
 	}

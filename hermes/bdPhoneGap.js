@@ -91,7 +91,9 @@ function BdPhoneGap(config, next) {
 	 */
 	function errorHandler(err, req, res, next){
 		console.error("errorHandler(): ", err.stack);
-		res.status(err.statusCode || 500).send(err.toString());
+		res.status(err.statusCode || 500);
+		res.contentType('txt'); // direct usage of 'text/plain' does not work
+		res.send(err.toString());
 	}
 
 	if (app.error) {
@@ -227,7 +229,8 @@ function BdPhoneGap(config, next) {
 		// VM <http://nodejs.org/api/vm.html> rather than
 		// child-processes
 		// <http://nodejs.org/api/child_process.html>.
-		var params = [ '--packagejs', path.join(appDir.source, 'package.js'),
+		var params = [ '--verbose',
+			       '--packagejs', path.join(appDir.source, 'package.js'),
 			       '--source', appDir.source,
 			       '--enyo', config.enyoDir,
 			       '--build', appDir.build,
@@ -238,16 +241,17 @@ function BdPhoneGap(config, next) {
 			silent: false
 		});
 		child.on('message', function(msg) {
+			console.log("deploy():", msg);
 			if (msg.error) {
 				console.error("child-process error: ", util.inspect(msg.error));
-				console.error("child-process stack: \n", msg.error.stack);
+				child.errMsg = msg.error;
 			} else {
 				console.error("unexpected child-process message msg=", util.inspect(msg));
 			}
 		});
 		child.on('exit', function(code, signal) {
 			if (code !== 0) {
-				next(new HttpError("child-process failed"));
+				next(new HttpError(child.errMsg || ("child-process failed: '"+ child.toString() + "'")));
 			} else {
 				console.log("deploy(): completed");
 				next();

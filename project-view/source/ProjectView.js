@@ -13,7 +13,7 @@ enyo.kind({
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
 		{kind: "ProjectWizardImport", canGenerate: false, name: "projectWizardImport"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
 		{kind: "ProjectPropertiesPopup", name: "projectPropertiesPopup"},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
 			{kind: "Image", src: "$phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
@@ -41,8 +41,9 @@ enyo.kind({
 		this.showErrorPopup(inEvent.msg);
 		return true; //Stop event propagation
 	},
-	showErrorPopup : function(msg) {
+	showErrorPopup : function(msg, details) {
 		this.$.errorPopup.setErrorMsg(msg);
+		this.$.errorPopup.setDetails(details);
 		this.$.errorPopup.show();
 	},
 	importProjectAction: function(inSender, inEvent) {
@@ -165,6 +166,9 @@ enyo.kind({
 		this.$.waitPopup.hide();
 	},
 	startPhonegapBuild: function(inSender, inEvent) {
+		if (!this.currentProject) {
+			return true; // stop bubble-up
+		}
 		var self = this;
 		if (this.debug) this.log("inEvent", inEvent);
 		this.showWaitPopup("Starting project build");
@@ -173,19 +177,20 @@ enyo.kind({
 		if (bdService) {
 			bdService.build( /*project*/ {
 				name: this.currentProject.name,
-				service: this.currentProject.service,
+				filesystem: this.currentProject.service.impl,
 				folderId: this.currentProject.folderId,
 				config: this.currentProject.config.data // FIXME: use whatever better location
-			}, function(inError) {
+			}, function(inError, inDetails) {
+				self.hideWaitPopup();
 				if (inError) {
-					self.hideWaitPopup();
-					self.showErrorPopup(inError.toString());
+					self.showErrorPopup(inError.toString(), inDetails);
 				}
 			});
 		} else {
 			this.error("No build service defined:", inEvent);
 			this.doError({msg: 'No build service defined'});
 		}
+		return true; // stop bubble-up
 	},
 	phonegapBuildStarted: function(inSender, inEvent) {
 		this.showWaitPopup("Phonegap build started");
