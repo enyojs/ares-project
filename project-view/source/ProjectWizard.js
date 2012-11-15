@@ -123,7 +123,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "ProjectWizardImport",
+	name: "ProjectWizardScan",
 	kind: "ProjectWizardAny",
 	modal: true,
 	centered: true,

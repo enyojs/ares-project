@@ -6,13 +6,13 @@ enyo.kind({
 		{kind: "ProjectList",
 			onModifySettings: "modifySettingsAction",
 			onCreateProject: "createProjectAction",
-			onImportProject: "importProjectAction",
+			onScanProject: "scanProjectAction",
 			onProjectRemoved: "projectRemoved",
 			onProjectSelected: "handleProjectSelected",
 			name: "projectList"},
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
-		{kind: "ProjectWizardImport", canGenerate: false, name: "projectWizardImport"},
+		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{kind: "ProjectConfig", name: "projectConfig"},
 		{kind: "PhonegapBuild"},
@@ -49,8 +49,8 @@ enyo.kind({
 		this.$.errorPopup.setErrorMsg(msg);
 		this.$.errorPopup.show();
 	},
-	importProjectAction: function(inSender, inEvent) {
-		this.$.projectWizardImport.reset().show();
+	scanProjectAction: function(inSender, inEvent) {
+		this.$.projectWizardScan.reset().show();
 		return true; //Stop event propagation
 	},
 	createProjectAction: function(inSender, inEvent) {

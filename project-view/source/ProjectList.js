@@ -4,7 +4,7 @@ enyo.kind({
 	events: {
 		onCreateProject: "",
 		onProjectSelected: "",
-		onImportProject: "",
+		onScanProject: "",
 		onProjectRemoved: "",
 		onModifySettings: "",
 		onFinishProjectConfig: "",
@@ -25,11 +25,11 @@ enyo.kind({
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_new.png", onclick: "doCreateProject"},
-				{kind: "onyx.Tooltip", content: "Create Project..."},
+				{kind: "onyx.Tooltip", content: "Create or Import Project..."},
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_view_edit.png", onclick: "doImportProject"},
-				{kind: "onyx.Tooltip", content: "Import Project..."},
+				{kind: "onyx.IconButton", src: "$project-view/images/project_view_edit.png", onclick: "doScanProject"},
+				{kind: "onyx.Tooltip", content: "Scan for Projects..."},
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_delete.png", onclick: "removeProjectAction"},
