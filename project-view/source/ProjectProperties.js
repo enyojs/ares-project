@@ -42,7 +42,7 @@ enyo.kind({
 					]},
 				]},
 			{content: "PhoneGap ...", style: "width:100%", ontap:"activateDrawer"},
-					{tag: "br"},
+			{tag: "br"},
 					{name: "phoneGapDrawer", kind: "onyx.Drawer", open:false, components: [
 					{kind: "FittableColumns", style: "width:100%", components: [
 						{kind: "Control", content: "Target Build:"},

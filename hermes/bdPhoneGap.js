@@ -115,7 +115,7 @@ function BdPhoneGap(config, next) {
 	// Return the ZIP-ed deployed Enyo application
 	app.post(makeExpressRoute('/deploy'), function(req, res, next) {
 		async.series([
-		 	prepare.bind(this),
+			prepare.bind(this),
 			store.bind(this, req, res),
 			deploy.bind(this, req, res),
 			zip.bind(this, req, res),
@@ -137,7 +137,7 @@ function BdPhoneGap(config, next) {
 	// JSON-encoded response of the service.
 	app.post(makeExpressRoute('/build'), function(req, res, next) {
 		async.series([
-		 	prepare.bind(this),
+			prepare.bind(this),
 			store.bind(this, req, res),
 			deploy.bind(this, req, res),
 			zip.bind(this, req, res),

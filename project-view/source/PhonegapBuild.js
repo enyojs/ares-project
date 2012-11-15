@@ -80,7 +80,7 @@ enyo.kind({
 		});
 		req.response(this, function(inEvent, inData) {
 			this.auth.token = inData.token;
-			this.debug && this.log("Got phonegap token: " + this.token);
+			if (this.debug) this.log("Got phonegap token: " + this.token);
 			
 			// Now get the list of all the files of the project
 			this.getFileList(project, next);
@@ -179,7 +179,7 @@ enyo.kind({
 		formData.append('token', this.auth.token);
 		formData.append('title', project.config.title);
 		if (project.config.build.phonegap.appId) {
-			this.debug && this.log("appId: " + project.config.build.phonegap.appId);
+			if (this.debug) this.log("appId: " + project.config.build.phonegap.appId);
 			formData.append('appId', project.config.build.phonegap.appId);
 		}
 

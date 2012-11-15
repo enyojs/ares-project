@@ -81,7 +81,7 @@ enyo.kind({
 			service: project.service.impl,
 			folderId: project.folderId
 		}, function(err) {
-			err && self.showErrorPopup(err.toString());
+			if (err) self.showErrorPopup(err.toString());
 		});
 		this.currentProject = project;
 		return true; //Stop event propagation
