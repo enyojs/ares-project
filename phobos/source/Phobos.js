@@ -55,9 +55,6 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.buildEnyoDb();
-
-		// Pass to the autocomplete compononent a reference to ace
-		this.$.autocomplete.setAce(this.$.ace);
 	},
 	//
 	//
@@ -69,6 +66,9 @@ enyo.kind({
 		this.hideWaitPopup();
 		this.docHasChanged=false;
 		this.reparseAction();
+	},
+	saveNeeded: function() {
+		return this.docHasChanged;
 	},
 	saveFailed: function(inMsg) {
 		this.hideWaitPopup();
@@ -87,6 +87,8 @@ enyo.kind({
 		if (hasAce) {
 			this.$.ace.setEditingMode(this.mode);
 			this.$.ace.setValue(inCode);
+			// Pass to the autocomplete compononent a reference to ace
+			this.$.autocomplete.setAce(this.$.ace);
 		}
 		else {
 			this.$.imageViewer.setAttribute("src", origin + inFile.pathname);
@@ -485,6 +487,8 @@ enyo.kind({
 				this.dumpInfo(tempo.objects && tempo.objects[tempo.currentObject]);
 			}
 		}
+
+		this.$.autocomplete.cursorChanged(position);
 		return true; // Stop the propagation of the event
 	},
 	startAutoCompletion: function() {

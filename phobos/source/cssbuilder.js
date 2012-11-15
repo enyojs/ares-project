@@ -1,29 +1,29 @@
 enyo.kind({
 	published: {
-	red: '00',
-	blue: '00',
-	green: '00',
-	color: "000000",
-	toggle: ""
+		red: '00',
+		blue: '00',
+		green: '00',
+		color: "000000",
+		toggle: ""
 	},
-	 events: {
-		onInsert: "",
-	 },
+	events: {
+		onInsert: ""
+	},
 	name: "cssBuilder",
 	kind: "enyo.FittableRows", components: [
 		{kind: "onyx.Toolbar", components: [
 			{kind: "onyx.Button", classes: "onyx-affirmative", content: "Insert css", ontap:"newCssAction"},
-			{kind: "onyx.Button", classes: "onyx-negative", content: "Reset", ontap:"reset"},
+			{kind: "onyx.Button", classes: "onyx-negative", content: "Reset", ontap:"reset"}
 		]},
 		{kind: "onyx.Input", name: "input", placeholder: "Enter your class name!..",onchange: "inputChange"},
-		{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 150px; ", classes: "enyo-selectable font",	allowHtml: true, Xstyle: "padding: 10px;", components: [
+		{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 150px; ", classes: "enyo-selectable css_builder_font",	allowHtml: true, Xstyle: "padding: 10px;", components: [
 			{name: "bg", allowHtml: true, style: "font-size: 10px;", content: ""},
 			{name: "dd", allowHtml: true, content:"  ",style: "height: 10px"}
 		]},
 
 		{kind: "Panels", fit:true, classes: "enyo-unselectable",components: [
 			{kind: "enyo.Scroller", classes: "enyo-fit",components: [
-				{classes: "pannel", style: " height: 250px", components: [
+				{classes: "css_builder_pannel", style: " height: 250px", components: [
 					{name: "name", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Color "},
 
 					{name: "redSlider", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
@@ -41,54 +41,54 @@ enyo.kind({
 					},
 
 					{kind: "onyx.RadioGroup", onActivate:"radioActivated", components:[
-						{content:"background", classes: "RadioGroup"},
-						{content:"Font color", classes: "RadioGroup"},
-						{content:"Border color", classes: "RadioGroup"},
-					]},
+						{content:"background", classes: "css_builder_RadioGroup"},
+						{content:"Font color", classes: "css_builder_RadioGroup"},
+						{content:"Border color", classes: "css_builder_RadioGroup"}
+					]}
 				]},
 
-				{classes: "pannel", style: " height: 350px", components: [
+				{classes: "css_builder_pannel", style: " height: 350px", components: [
 					{name: "fonts", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Fonts "},
 					{kind: "onyx.RadioGroup",
 					onActivate:"fontActivated",components:[
 						{tag: "br"},
-						{content:"Serif", style: "font-family: Serif;", classes: "RadioGroup"},
-						{content:"Sans-serif", style: "font-family: Sans-serif;", classes: "RadioGroup"},
+						{content:"Serif", style: "font-family: Serif;", classes: "css_builder_RadioGroup"},
+						{content:"Sans-serif", style: "font-family: Sans-serif;", classes: "css_builder_RadioGroup"},
 
-						{content:"Helvetica  ", style: "font-family: Helvetica;", classes: "RadioGroup"},
-						{content:"Monospace", style: "font-family: Monospace;", classes: "RadioGroup"},
+						{content:"Helvetica  ", style: "font-family: Helvetica;", classes: "css_builder_RadioGroup"},
+						{content:"Monospace", style: "font-family: Monospace;", classes: "css_builder_RadioGroup"},
 
-						{content:" Lucida Sans Unicode ", style: "font-family: Lucida Sans Unicode;", classes: "RadioGroup"},
-						{content:"Times New Roman  ", style: "font-family: Times New Roman;", classes: "RadioGroup"},
+						{content:" Lucida Sans Unicode ", style: "font-family: Lucida Sans Unicode;", classes: "css_builder_RadioGroup"},
+						{content:"Times New Roman  ", style: "font-family: Times New Roman;", classes: "css_builder_RadioGroup"},
 
-						{content:" Courier New ", style: "font-family: Courier New;", classes: "RadioGroup"},
-						{content:" Arial ", style: "font-family: Arial;", classes: "RadioGroup"}
+						{content:" Courier New ", style: "font-family: Courier New;", classes: "css_builder_RadioGroup"},
+						{content:" Arial ", style: "font-family: Arial;", classes: "css_builder_RadioGroup"}
 					]},
 
 					{classes: "onyx-toolbar-inline", components: [
-						{content: "Font Size", classes: "picker"},
+						{content: "Font Size", classes: "css_builder_picker"},
 						{kind: "onyx.PickerDecorator", components: [
 							{style: "min-width: 30px; font-size: 10px;"},
 							{name: "fontSizePicker", kind: "onyx.Picker",onSelect: "fontSize"}
 						]}
 					]},
 					{style: "height: 5px"},
-					{kind: "onyx.Button", classes: "button ", content: "Text Shadow", ontap: "textshadow"}
+					{kind: "onyx.Button", classes: "css_builder_button ", content: "Text Shadow", ontap: "textshadow"}
 				]},
 
-				{classes: "pannel", style: " height: 200px", components: [
+				{classes: "css_builder_pannel", style: " height: 200px", components: [
 					{name: "imageborder", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Border/Margin..."},
 
 					{kind: "enyo.FittableColumns", components: [
 						{classes: "onyx-toolbar-inline", components: [
-							{content: "Height", classes: "picker"},
+							{content: "Height", classes: "css_builder_picker"},
 							{kind: "onyx.PickerDecorator", components: [
 								{style: "min-width: 60px; font-size: 10px;"},
 								{name: "heightSizePicker", kind: "onyx.Picker",onSelect: "heightSize"}
 							]}
 						]},
 						{classes: "onyx-toolbar-inline", components: [
-							{content: "Width", classes: "picker"},
+							{content: "Width", classes: "css_builder_picker"},
 							{kind: "onyx.PickerDecorator", components: [
 								{style: "min-width: 60px; font-size: 10px;"},
 								{name: "widthSizePicker", kind: "onyx.Picker",onSelect: "widthSize"}
@@ -97,7 +97,7 @@ enyo.kind({
 					]},
 					{kind: "enyo.FittableColumns", components: [
 						{classes: "onyx-toolbar-inline", components: [
-							{content: "Margin Size", classes: "picker"},
+							{content: "Margin Size", classes: "css_builder_picker"},
 							{kind: "onyx.PickerDecorator", components: [
 								{style: "min-width: 40px; font-size: 10px;"},
 								{name: "marginSizePicker", kind: "onyx.Picker",onSelect: "marginSize"}
@@ -105,17 +105,17 @@ enyo.kind({
 						]},
 
 						{classes: "onyx-toolbar-inline", components: [
-							{content: "Border Size", classes: "picker"},
+							{content: "Border Size", classes: "css_builder_picker"},
 							{kind: "onyx.PickerDecorator", components: [
 								{style: "min-width: 40px; font-size: 10px;"},
 								{name: "borderSizePicker", kind: "onyx.Picker",onSelect: "borderSize"}
 							]}
-						]},
+						]}
 					]},
 
 					{kind: "enyo.FittableColumns", components: [
 						{classes: "onyx-toolbar-inline", components: [
-							{content: "Radius", classes: "picker"},
+							{content: "Radius", classes: "css_builder_picker"},
 							{kind: "onyx.PickerDecorator", components: [
 								{style: "min-width: 40px; font-size: 10px;"},
 								{name: "Radius", kind: "onyx.Picker",onSelect: "radius"}
@@ -123,68 +123,78 @@ enyo.kind({
 						]},
 
 						{classes: "onyx-toolbar-inline", components: [
-							{content: "Padding", classes: "picker"},
+							{content: "Padding", classes: "css_builder_picker"},
 							{kind: "onyx.PickerDecorator", components: [
 								{style: "min-width: 40px; font-size: 10px;"},
 								{name: "Padding", kind: "onyx.Picker",onSelect: "padding"}
 							]}
-						]},
+						]}
 					]},
-					{kind: "onyx.Button", classes: "button ", content: "Box Shadow", ontap: "boxshadow"}
+					{kind: "onyx.Button", classes: "css_builder_button ", content: "Box Shadow", ontap: "boxshadow"}
 				]},
-				{classes: "pannel", style: " height: 200px", components: [
-					{name: "border", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Images..."},
+				
+				{classes: "css_builder_pannel", style: " height: 200px", components: [
+					{name: "border", style:  "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;", content:"Images..."},
 
 					{style: "height: 5px"},
 					{kind: "onyx.Input", name: "imageInput", placeholder: "Enter image url:...", onchange: "imageInput"},
+				
 					{style: "height: 5px"},
-					{kind: "enyo.FittableRows", components: [
-						//{style: "height: 5px"},
-						{content: "Repeat H"},
-						{kind: "onyx.Checkbox", onchange: "checkboxClicked"},
+					{kind: "enyo.FittableColumns", components: [
+						{kind: "Checkbox",  style: "height: 35px; width: 35px;",onchange: "hrepeat"},
+						{content: "Repeat X"}
+					]},
+					
+					{style: "height: 5px"},
+					{kind: "enyo.FittableColumns", components: [
+						{kind: "Checkbox", style: "height: 35px; width: 35px;", onchange: "vrepeat"},
+						{content: "Repeat Y"}
+					]},
+					
+					{style: "height: 5px"},
 
-					]},
-					{style: "height: 5px"},
-					{kind: "enyo.FittableRows", fit: true, components: [
-						{style: "height: 5px"},
-						{style: "witdh: 75px;", content: "Repeat V"},
-						//{tag: "br"},
-						{kind: "onyx.Checkbox", onchange: "checkboxClicked2"},
-					]},
-				]},
+					{kind: "enyo.FittableColumns", components:[
+						{kind: "Checkbox", style: "height: 35px; width: 35px;", onchange: "norepeat"},
+						{content: "No Repeat"}
+					//	
+						
+						
+					]}
+				
+				]}
 			]}
 		]},
 
 
 
-		{name: "popup", kind: "onyx.Popup", classes: "popup", centered: true, modal: true, floating: true, components: [
+		{name: "textShadowPopup", kind: "onyx.Popup", classes: "css_builder_popup", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
-				{name: "shadowBar", content: "Text Shadow"},
+				{name: "shadowBar", content: "Text Shadow"}
 			]},
 
 			{classes: "onyx-toolbar-inline", components: [
-				{content: "Horizontal shadow", classes: "picker"},
+				{content: "Horizontal shadow", classes: "css_builder_picker"},
 				{kind: "onyx.PickerDecorator", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
 					{name: "TextShadowH", kind: "onyx.Picker",onSelect: "textshadowH"}
 				]}
 			]},
 			{classes: "onyx-toolbar-inline", components: [
-				{content: "Vertical shadow--- ", classes: "picker"},
+				{content: "Vertical shadow--- ", classes: "css_builder_picker"},
 				{kind: "onyx.PickerDecorator", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
 					{name: "TextShadowV", kind: "onyx.Picker",onSelect: "textshadowV"}
 				]}
 			]},
 			{classes: "onyx-toolbar-inline", components: [
-				{content: "Blur distance-------", classes: "picker"},
+				{content: "Blur distance-------", classes: "css_builder_picker"},
 				{kind: "onyx.PickerDecorator", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
 					{name: "TextShadowB", kind: "onyx.Picker",onSelect: "textshadowB"}
 				]}
 			]},
-			{name:"textoutputBox", kind: "enyo.Panels", classes: "outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
-				{content: "Text Shadow Color!"},
+			{name:"textoutputBox", kind: "enyo.Panels", classes: "css_builder_outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
+				{content: "Text Shadow Color!"}
 			]},
 			{kind: "enyo.FittableRows", components: [
 				{name: "redSlider1", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
@@ -201,38 +211,38 @@ enyo.kind({
 				style: "height:10px;  background-color: blue; enyo-unselectable"
 				},
 				{style: "height: 5px"},
-				{kind: "onyx.Button", content: "Close", ontap: "closePopup"},
-			]},
+				{kind: "onyx.Button", content: "Close", ontap: "closePopup"}
+			]}
 		]},
 
-		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "popupp", centered: true, modal: true, floating: true, components: [
+		{name: "boxShadowPopup", kind: "onyx.Popup", classes: "css_builder_popup", centered: true, modal: true, floating: true, components: [
 			{ kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
-				{name: "boxShadowBar", content: "Text Shadow"},
+				{name: "boxShadowBar", content: "Box Shadow"}
 			]},
 
 			{classes: "onyx-toolbar-inline", components: [
-				{content: "Horizontal shadow", classes: "picker"},
+				{content: "Horizontal shadow", classes: "css_builder_picker"},
 				{kind: "onyx.PickerDecorator", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
 					{name: "BoxShadowH", kind: "onyx.Picker",onSelect: "boxshadowH"}
 				]}
 			]},
 			{classes: "onyx-toolbar-inline", components: [
-				{content: "Vertical shadow--- ", classes: "picker"},
+				{content: "Vertical shadow--- ", classes: "css_builder_picker"},
 				{kind: "onyx.PickerDecorator", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
 					{name: "BoxShadowV", kind: "onyx.Picker",onSelect: "boxshadowV"}
 				]}
 			]},
 			{classes: "onyx-toolbar-inline", components: [
-				{content: "Blur distance-------", classes: "picker"},
+				{content: "Blur distance-------", classes: "css_builder_picker"},
 				{kind: "onyx.PickerDecorator", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
 					{name: "BoxShadowB", kind: "onyx.Picker",onSelect: "boxshadowB"}
 				]}
 			]},
-			{name:"outputBox2", kind: "enyo.Panels", classes: "outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
-				{content: "Box Shadow Color"},
+			{name:"outputBox2", kind: "enyo.Panels", classes: "css_builder_outputbox2",	allowHtml: true, Xstyle: "padding: 10px;", components: [
+				{content: "Box Shadow Color"}
 			]},
 			{kind: "enyo.FittableRows", components: [
 				{name: "boxredSlider", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged",
@@ -248,9 +258,9 @@ enyo.kind({
 				{name: "boxblueSlider", kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged",
 				style: "height:10px;  background-color: blue; enyo-unselectable"
 				},
-				{kind: "onyx.Button", content: "Close", ontap: "closePopup"},
-			]},
-		]},
+				{kind: "onyx.Button", content: "Close", ontap: "closePopup"}
+			]}
+		]}
 	],
 
 	create: function() {
@@ -268,15 +278,15 @@ enyo.kind({
 			this.$.BoxShadowB.createComponent({content: i, active: !i});
 		}
 
-		for (var i=5; i<2000; i+=5) {
-			this.$.heightSizePicker.createComponent({content: i, active: !i});
-			this.$.widthSizePicker.createComponent({content: i, active: !i});
+		for (var j=5; j<2000; j+=5) {
+			this.$.heightSizePicker.createComponent({content: j, active: !j});
+			this.$.widthSizePicker.createComponent({content: j, active: !j});
 		}
-		for (var i=-25; i<25; i++) {
-			this.$.TextShadowH.createComponent({content: i, active: !i});
-			this.$.TextShadowV.createComponent({content: i, active: !i});
-			this.$.BoxShadowH.createComponent({content: i, active: !i});
-			this.$.BoxShadowV.createComponent({content: i, active: !i});
+		for (var k=-25; k<25; k++) {
+			this.$.TextShadowH.createComponent({content: k, active: !k});
+			this.$.TextShadowV.createComponent({content: k, active: !k});
+			this.$.BoxShadowH.createComponent({content: k, active: !k});
+			this.$.BoxShadowV.createComponent({content: k, active: !k});
 		}
 
 	},
@@ -375,12 +385,26 @@ enyo.kind({
 	}
 
 	if(this.$.bgImage != null){
-		outPut = outPut  + tab + "bacground-image:url('" + this.$.bgImage +"');<br>";
-		outString = outString + "	" + "bacground-image:url('" + this.$.bgImage + "');\n";
+		outPut = outPut  + tab + "background-image: url('" + this.$.bgImage +"');<br>";
+		outString = outString + "	" + "background-image: url('" + this.$.bgImage + "');\n";
+	}
+	if(this.$.hrepeat != null){
+		outPut = outPut  + tab + "background-image: repeat-x;<br>";
+		outString = outString + "	" + "background-image: repeat-x;\n";	
+	}
+	
+	if(this.$.vrepeat != null){
+		outPut = outPut  + tab + "background-image: repeat-y;<br>";
+		outString = outString + "	" + "background-image: repeat-y;\n";	
+	}
+	
+	if(this.$.norepeat != null){
+		outPut = outPut  + tab + "background-image: no-repeat;<br>";
+		outString = outString + "	" + "background-image: no-repeat;\n";	
 	}
 
 	this.$.bg.setContent(outPut + "<br>}");
-	outString = outString + "\n}"
+	outString = outString + "\n}";
 	this.outPut = outString;
 	},
 
@@ -499,7 +523,7 @@ enyo.kind({
 
 	textshadow: function(inSender, inEvent) {
 		this.$.toggle = "text-shadow",
-		this.$.popup.show();
+		this.$.textShadowPopup.show();
 	},
 	textshadowH: function(inSender, inEvent) {
 			this.$.textshadowH = inEvent.selected.content;
@@ -516,7 +540,7 @@ enyo.kind({
 
 	closePopup: function() {
 		this.updateBox();
-		this.$.popup.hide();
+		this.$.textShadowPopup.hide();
 		this.$.boxShadowPopup.hide();
 	},
 
@@ -539,18 +563,35 @@ enyo.kind({
 
 	imageInput: function(inSender, inEvent) {
 		this.$.bgImage = this.$.imageInput.hasNode().value;
+		this.updateBox();
 		console.log(this.$.bgImage, this.$.imageInput.hasNode().value );
 	},
-	checkboxClicked: function(inSender) {
-		if (inSender.getValue()) {
-			this.log("I've been checked!");
-		}
+	hrepeat: function(inSender) {
+		if (inSender.checked == true ){
+			this.$.hrepeat = true;
+		}else{
+			this.$.hrepeat  = null;
+		}		
+		this.updateBox();
 	},
-	checkboxClicked2: function(inSender) {
-		if (inSender.getValue()) {
-			this.log("I've been checked!2");
-		}
+	vrepeat: function(inSender) {
+		if (inSender.checked == true ){
+			this.$.vrepeat = true;
+		}else{
+			this.$.vrepeat  = null;
+		}		
+		this.updateBox();	
 	},
+	
+	norepeat: function(inSender) {
+		if (inSender.checked == true ){
+			this.$.norepeat = true;
+		}else{
+			this.$.norepeat  = null;
+		}		
+		this.updateBox();
+	},	
+	
 	reset: function(){
 		this.className = null;
 		this.backgroundColor = null;
@@ -566,6 +607,9 @@ enyo.kind({
 		this.$.paddingSize = null;
 		this.$.boxshadowcolor = null;
 		this.$.textshadowcolor = null;
+		this.$.hrepeat = null;
+		this.$.vrepeat = null;
+		this.$.norepeat = null;
 		this.$.outPut = null;
 		outString = "";
 		this.updateBox();
