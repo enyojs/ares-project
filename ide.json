@@ -8,7 +8,7 @@
 			"type": "filesystem",
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"hermes/fsLocal.js", "-P", "/some/files", "-p", "0", "@HOME@"
+				"hermes/fsLocal.js", "-P", "/files", "-p", "0", "@HOME@"
 			],
 			"useJsonp":false,
 			"debug": false,
