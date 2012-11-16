@@ -397,42 +397,6 @@ enyo.kind({
 			this.ace.insertAtCursor("\n");
 		}
 	},
-	enyoIndexerChanged: function() {
-		this.debug && this.log("Enyo analysis ready");
-		var suggestions, pattern, regexp;
-		
-		if (this.enyoIndexer) {
-			// Build the suggestion lists as the analyzer just finished its job
-			pattern = this.AUTOCOMP_ENYO, len = pattern.length;
-			regexp = /^enyo\..*$/;
-			suggestions = new Phobos.Suggestions();
-			
-			enyo.forEach(this.getFunctionList(this.enyoIndexer, regexp, 'public'), function(name) {
-				name = name.substr(len);
-				suggestions.addItem({name: name});
-			}, this);
-			enyo.forEach(this.getKindList(this.enyoIndexer, regexp, 'public'), function(name) {
-				name = name.substr(len);
-				suggestions.addItem({name: name});
-			}, this);
-			this.suggestionsEnyo = suggestions;
-			
-			// Build the suggestion lists as the analyzer just finished its job
-			suggestions = new Phobos.Suggestions();
-			pattern = this.AUTOCOMP_ONYX;
-			regexp = /^onyx\..*$/;
-			len = pattern.length;
-			enyo.forEach(this.getFunctionList(this.enyoIndexer, regexp, 'public'), function(name) {
-				name = name.substr(len);
-				suggestions.addItem({name: name});
-			}, this);
-			enyo.forEach(this.getKindList(this.enyoIndexer, regexp, 'public'), function(name) {
-				name = name.substr(len);
-				suggestions.addItem({name: name});
-			}, this);
-			this.suggestionsOnyx = suggestions;
-		}
-	},
 	projectIndexerChanged: function() {
 		this.debug && this.log("Project analysis ready");
 		// TODO something to do ?
@@ -477,42 +441,64 @@ enyo.kind({
 		return definition;
 	},
 	/**
-	 * Returns a list of all kind names matching the parameter nameRegexp
-	 * and the parameter group
-	 * @parma indexer
-	 * @param nameRegexp
-	 * @param group
-	 * @returns {Array} the list of matching kind name
+	 * Rebuild the enyo and onyx suggestion lists when the enyoIndexer
+	 * property is changed
+	 * @protected
 	 */
-	getKindList: function(indexer, nameRegexp, group) {
-		// TODO this function must be removed when the equivalent will be available in lib/extra/analyzer2
-		this.debug && this.log("getEnyoKindList --> result - regexp: " + nameRegexp + " group: " + group);
-		var list = [];
-		for (var i=0, o; o=indexer.objects[i]; i++) {
-			if ((o.type === 'kind') && (o.token === 'enyo.kind') && (o.group === group) && nameRegexp.test(o.name)) {
-				this.debug && this.log("getEnyoKindList --> this.objects[" + i + "]: type: " + o.type + " token: " + o.token + " group: "+ o.group + " name: " + o.name);
-				list.push(o.name);
-			}
+	enyoIndexerChanged: function() {
+		this.debug && this.log("Enyo analysis ready");
+		var suggestions, regexp;
+		
+		if (this.enyoIndexer) {
+			// Build the suggestion lists for enyo as the analyzer just finished its job
+			suggestions = new Phobos.Suggestions();
+			regexp = /^enyo\..*$/;
+			suggestions.add(this.enyoIndexer.search(this.getFctFilterFn(regexp), this.getMapFn(this.AUTOCOMP_ENYO), this));
+			suggestions.add(this.enyoIndexer.search(this.getKindFilter(regexp), this.getMapFn(this.AUTOCOMP_ENYO), this));
+			this.suggestionsEnyo = suggestions;
+			
+			// Build the suggestion lists for onyx as the analyzer just finished its job
+			suggestions = new Phobos.Suggestions();
+			regexp = /^onyx\..*$/;
+			suggestions.add(this.enyoIndexer.search(this.getFctFilterFn(regexp), this.getMapFn(this.AUTOCOMP_ONYX), this));
+			suggestions.add(this.enyoIndexer.search(this.getKindFilter(regexp), this.getMapFn(this.AUTOCOMP_ONYX), this));
+			this.suggestionsOnyx = suggestions;
 		}
-		return list;
 	},
 	/**
-	 * Returns a list of all function names matching the parameter nameRegexp
-	 * and the parameter group
-	 * @parma indexer
-	 * @param nameRegexp
-	 * @param group
-	 * @returns {Array} the list of matching function name
+	 * Filter function used to filter down the functions found by the {Indexer} from lib/extra
+	 * This function should be passed to {Indexer.search}
+	 * @param  {regexp} regexp: regexp to apply on the name
+	 * @return {boolean} false if the object must be rejected
 	 */
-	getFunctionList: function(indexer, nameRegexp, group) {
-		// TODO this function must be removed when the equivalent will be available in lib/extra/analyzer2
-		var list = [];
-		for (var i=0, o; o=indexer.objects[i]; i++) {
-			if ((o.type === 'function') && (o.group === group) && nameRegexp.test(o.name)) {
-				list.push(o.name);
-			}
-		}
-		return list;
+	getFctFilterFn: function(regexp) {
+		return function(o) {
+			return (o.type === 'function') && (o.group === 'public') && regexp.test(o.name);
+		};
+	},
+	/**
+	 * Filter function used to filter down the kinds found by the {Indexer} from lib/extra
+	 * This function should be passed to {Indexer.search}
+	 * @param  {regexp} regexp: regexp to apply on the name
+	 * @return {boolean} false if the object must be rejected
+	 */
+	getKindFilter: function(regexp) {
+		return function(o) {
+			return (o.type === 'kind') && (o.token === 'enyo.kind') && (o.group === 'public') && regexp.test(o.name);
+		};
+	},
+	/**
+	 * Mapping function used to reformat the object filtered out by the previous functions
+	 * This function should be passed to {Indexer.search}
+	 * @param  {regexp} regexp: regexp to apply on the name
+	 * @return {boolean} false if the object must be rejected
+	 */
+	getMapFn: function(pattern) {
+		var name, len = pattern.length;
+		return function(o) {
+			name = o.name.substr(len);
+			return {name: name};
+		};
 	}
 });
 
@@ -527,6 +513,24 @@ enyo.kind({
 		this.items = {};
 		this.nbItems = 0;
 	},
+	/**
+	 * Adds an array of items (or a single item) to the suggestion list
+	 * @param {Array} items containing the elements for the auto-completion.
+	 * Each item must contain at a name property.
+	 * @public
+	 */
+	add: function(items) {
+		if (items instanceof Array) {
+			enyo.forEach(items, this.addItem, this);
+		} else {
+			this.addItem(items);
+		}
+	},
+	/**
+	 * Adds a single item to the suggestion list
+	 * @param {Object} item must contain at least a name property
+	 * @public
+	 */
 	addItem: function(item) {
 		var name = item.name;
 		if (this.items[name] === undefined) {
@@ -535,11 +539,20 @@ enyo.kind({
 			this.debug && this.log("objectId: " + this.objectId + " added: " + name + " count: " + this.nbItems);
 		}
 	},
+	/**
+	 * Removes all the suggestions
+	 * @public
+	 */
 	reset: function() {
 		this.debug && this.log("objectId: " + this.objectId);
 		this.items = {};
 		this.nbItems = 0;
 	},
+	/**
+	 * Get the suggestions sorted by name
+	 * @return {Array} the suggestions sorted by name
+	 * @public
+	 */
 	getSortedSuggestions: function() {
 		// Transform into an array
 		var suggestions = [];
@@ -550,23 +563,38 @@ enyo.kind({
 		}
 		return suggestions.sort(Phobos.Suggestions.nameCompare);
 	},
+	/**
+	 * [getCount description]
+	 * @return {number} the number of suggestions available
+	 * @public
+	 */
 	getCount: function() {
 		this.debug && this.log("objectId: " + this.objectId + " count: " + this.nbItems);
 		return this.nbItems;
 	},
 	/**
 	 * Concatenate the suggestions passed as parameter to the current object
-	 * @param suggestions must be a Phobos.Suggestions object
+	 * @param suggestions must be a current Phobos.Suggestions object
+	 * @public
 	 */
 	concat: function(suggestions) {
-		this.debug && this.log("objectId: " + suggestions.objectId + " into " + this.objectId);
+		this.d
+		ebug && this.log("objectId: " + suggestions.objectId + " into " + this.objectId);
 		for(var key in suggestions.items) {
 			this.addItem(suggestions.items[key]);
 		}
 		return this;
 	},
 	statics: {
+		//** @protected
 		objectCounter: 0,
+		/**
+		 * Compares two suggestion items (based on name property) for sorting
+		 * @param  {Object} inA first item to compare
+		 * @param  {Object} inB second item to compare
+		 * @return {number}     the result of the comparison
+		 * @protected
+		 */
 		nameCompare: function(inA, inB) {
 			var na = inA.name.toLowerCase(),
 				nb = inB.name.toLowerCase();
