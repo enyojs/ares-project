@@ -82,15 +82,21 @@ enyo.kind({
 			postBody: data,
 			handleAs: "json"
 		});
-		req.response(this, function(inEvent, inData) {
+		req.response(this, function(inSender, inData) {
 			this.auth.token = inData.token;
 			if (this.debug) this.log("Got phonegap token: " + this.token);
 			
 			// Now get the list of all the files of the project
 			this.getFileList(project, next);
 		});
-		req.error(this, function(inEvent, inError) {
-			next(new Error("Unable to get token:" + inError));
+		req.error(this, function(inSender, inError) {
+			var response = inSender.xhrResponse,
+			    contentType = response.headers['Content-Type'],
+			    details;
+			if (contentType && contentType.match('^text/plain')) {
+				details = response.body;
+			}
+			next(new Error("Unable to get PhoneGap application token:" + inError), details);
 		});
 		req.go();
 	},
@@ -207,9 +213,8 @@ enyo.kind({
 			    details;
 			if (contentType && contentType.match('^text/plain')) {
 				details = response.body;
-				enyo.log("Phonegapbuild.submitBuildRequest.error:", details);
 			}
-			next(inError, details);
+			next(new Error("Unable to build application:" + inError), details);
 		});
 		req.go();
 	}

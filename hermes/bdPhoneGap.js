@@ -319,7 +319,7 @@ function BdPhoneGap(config, next) {
 
 	function getToken(req, res, next) {
 		// XXX !!! leave this log commented-out to not log password !!!
-		console.log("getToken(): req.body = ", util.inspect(req.body));
+		//console.log("getToken(): req.body = ", util.inspect(req.body));
 		api.createAuthToken(req.body.username + ':' +req.body.password, {
 			success: function(token) {
 				res.status(200).send({token: token});
