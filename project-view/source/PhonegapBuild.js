@@ -47,13 +47,14 @@ enyo.kind({
 		if (!next || !project || !project.name || !project.config || !project.filesystem) {
 			throw new Error("Invalid parameters");
 		}
+		var config = project.config.getData();
 		if (this.debug) this.log("starting... project:", project);
 
-		if(!project.config && !project.config.build && !project.config.build.phonegap) {
+		if(!config && !config.build && !config.build.phonegap) {
 			next(new Error("Project not configured for Phonegap Build"));
 			return;
 		}
-		if (this.debug) this.log("appId: " + project.config.build.phonegap.appId);
+		if (this.debug) this.log("appId: " + config.build.phonegap.appId);
 
 		this.getToken(project, next);
 	},
@@ -177,13 +178,14 @@ enyo.kind({
 	 * @param {Function} next is a CommonJS callback
 	 */
 	submitBuildRequest: function(project, formData, next) {
+		var config = project.config.getData();
 		if (this.debug) this.log("...");
 		// Add token information in the FormData
 		formData.append('token', this.auth.token);
-		formData.append('title', project.config.title);
-		if (project.config.build.phonegap.appId) {
-			if (this.debug) this.log("appId: " + project.config.build.phonegap.appId);
-			formData.append('appId', project.config.build.phonegap.appId);
+		formData.append('title', config.title);
+		if (config.build.phonegap.appId) {
+			if (this.debug) this.log("appId: " + config.build.phonegap.appId);
+			formData.append('appId', config.build.phonegap.appId);
 		}
 
 		// Ask Hermes PhoneGap Build service to minify and zip the project
@@ -194,13 +196,16 @@ enyo.kind({
 		});
 		req.response(this, function(inSender, inData) {
 			if (this.debug) enyo.log("Phonegapbuild.submitBuildRequest.response:", inData);
-			project.build.phonegap.appId = inData.appId;
+			config.build.phonegap.appId = inData.id;
+			project.config.setData(config);
+			project.config.save();
 			next(null, inData);
 		});
 		req.error(this, function(inSender, inError) {
 			var response = inSender.xhrResponse,
+			    contentType = response.headers['Content-Type'],
 			    details;
-			if (response.headers['Content-Type'].match('^text/plain')) {
+			if (contentType && contentType.match('^text/plain')) {
 				details = response.body;
 				enyo.log("Phonegapbuild.submitBuildRequest.error:", details);
 			}

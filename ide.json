@@ -37,6 +37,10 @@
 			],
 			"useJsonp":false,
 			"debug": false,
+			"auth": {
+				"username":"YOUR_EMAIL",
+				"password":"YOUR_PASSWORD"
+			},
 			"respawn": false
 		}
 	]

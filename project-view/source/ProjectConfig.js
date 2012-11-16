@@ -7,7 +7,7 @@
  * changed.
  * 
  * - Use #setData and #getData to change the in-memory configuration Javascript object.
- * - Use #loadData and #saveData to flush the Javascript object on the disk, as JSON
+ *   Any change in the configuration causes a save-to-storage to happen.
  * 
  * As it is, this kind performs zero checks on the content of the file.
  */
@@ -30,6 +30,7 @@ enyo.kind({
 	 * @param {Object} next is a CommonJS callback
 	 */
 	init: function(inConfig, next) {
+		this.data = null;
 		this.service = inConfig.service;
 		this.folderId = inConfig.folderId;
 		var req = this.service.propfind(this.folderId, 1);
@@ -39,60 +40,69 @@ enyo.kind({
 			});
 			if (prj.length === 0) {
 				// does not exist: create & save it immediatelly
-				this.setData(enyo.clone(ProjectConfig.DEFAULT_PROJECT_CONFIG));
+				this.setData(ProjectConfig.checkConfig());
 				// Use the folder name by default for the project name
 				this.data.name = inResponse.name;
-				this.saveData(next);
+				this.save(next);
 			} else {
 				// already exists: load it
 				this.fileId = prj[0].id;
-				this.loadData(next);
+				this.load(next);
 			}
 		});
 		req.error(this, function(inSender, inError){
 			enyo.error("ProjectConfig.init:", inError);
-			next && next(inError);
+			if (next instanceof Function) next(inError);
 		});
 	},
-	loadData: function(next) {
+	/**
+	 * Force reloading the configuration from the storage
+	 * @param {Function} next CommonJS callback
+	 */
+	load: function(next) {
 		var data,
 		    req = this.service.getFile(this.fileId);
-		this.data = enyo.clone(ProjectConfig.DEFAULT_PROJECT_CONFIG);
-		req.response(this, function(inSender, inResponse) {
-			if (this.debug) enyo.log("ProjectConfig.loadData: response=", inResponse);
+		req.response(this, function(inRequest, inResponse) {
+			if (this.debug) this.log("ProjectConfig.load: file=", inResponse);
 			if (typeof inResponse.content === 'string') {
 				try {
 					data = JSON.parse(inResponse.content);
 				} catch(e) {
-					enyo.error("ProjectConfig.loadData:", e);
-					req.fail(e);
+					enyo.error("ProjectConfig.load:", e);
+					inRequest.fail(e);
 				}
 			} else {
 				data = inResponse.content;
 			}
-			enyo.mixin(this.data, data);
-			if (this.debug) enyo.log("ProjectConfig.loadData data=", this.data);
+			this.data = ProjectConfig.checkConfig(data);
+			if (this.debug) this.log("ProjectConfig.load config=", this.data);
+			if (next instanceof Function) next();
 		});
 		req.error(this, function(inSender, inError) {
-			enyo.error("ProjectConfig.loadData:", inError);
-			next && next(inError);
+			this.error("ProjectConfig.load:", inError);
+			if (next instanceof Function) next(inError);
 		});
 	},
-	saveData: function(next) {
+	/**
+	 * Save the current configuration to storage
+	 * @param {Function} next CommonJS callback
+	 */
+	save: function(next) {
 		var req;
+		if (this.debug) this.log("data=", this.data);
 		if (this.fileId) {
 			req = this.service.putFile(this.fileId, JSON.stringify(this.data));
 		} else {
 			req = this.service.createFile(this.folderId, "project.json", JSON.stringify(this.data));
 		}
 		req.response(this, function(inSender, inResponse) {
-			if (this.debug) enyo.log("saveData response:", inResponse);
+			if (this.debug) enyo.log("ProjectConfig.save: inResponse=", inResponse);
 			this.fileId = inResponse.id;
-			next && next();
+			if (next instanceof Function) next();
 		}); 
 		req.error(this, function(inSender, inError) {
-			enyo.error("ProjectConfig.loadData:", inError);
-			next && next(inError);
+			enyo.error("ProjectConfig.save: error=", inError);
+			if (next instanceof Function) next(inError);
 		});
 	},
 	/**
@@ -103,14 +113,49 @@ enyo.kind({
 		req.response(this, function(inSender, inResponse) {
 			if (this.debug) enyo.log("ProjectConfig.saveXml: response=", inResponse);
 			this.fileId = inResponse.id;
-			next && next();
+			if (next instanceof Function) next();
 		}); 
 		req.error(this, function(inSender, inError) {
 			this.error("***", inError);
-			next && next(inError);
+			if (next instanceof Function) next(inError);
 		});
 	},
 	statics: {
+		checkConfig: function(inConfig) {
+			var config = ProjectConfig.clone(ProjectConfig.DEFAULT_PROJECT_CONFIG);
+			ProjectConfig.extend(config, inConfig);
+			return config;
+		},
+		/**
+		 * Deep-clone given object
+		 * @param {Object} obj object to clone
+		 * @private
+		 */
+		clone: function(obj) {
+			return this.extend(undefined, obj);
+		},
+		/**
+		 * Extend destination object using source object (deep)
+		 * @param {Object} dst destination object
+		 * @param {Object} src source object
+		 * @private
+		 */
+		extend: function(dst, src) {
+			if (dst === undefined) {
+				if (!src) {
+					return src;
+				}
+				dst = (src instanceof Array) ? [] : {};
+			}
+			for (var i in src) {
+				if (typeof src[i] == "object") {
+					dst[i] = this.extend(dst[i], src[i]);
+				} else {
+					dst[i] = src[i];
+				}
+			}
+			return dst;
+		},
 		DEFAULT_PROJECT_CONFIG: {
 			id: "com.examples.apps.MyApp",
 			name: "BUG IF YOU SEE THIS",
@@ -118,10 +163,9 @@ enyo.kind({
 			title: "Example: My Application",
 			description: "Description of My Application",
 			build: {
-				phonegap: null,
-				war: null,
-				zip: null,
-				exe: null
+				phonegap: {
+					enabled: true
+				}
 			}
 		}
 	}

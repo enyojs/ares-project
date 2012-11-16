@@ -179,7 +179,7 @@ enyo.kind({
 				name: this.currentProject.name,
 				filesystem: this.currentProject.service.impl,
 				folderId: this.currentProject.folderId,
-				config: this.currentProject.config.data // FIXME: use whatever better location
+				config: this.currentProject.config
 			}, function(inError, inDetails) {
 				self.hideWaitPopup();
 				if (inError) {

@@ -46,6 +46,11 @@
 					"description": "build.phonegap.com parameters",
 					"required":false,
 					"properties": {
+						"enabled":{
+							"type":"boolean",
+							"description":"Whether PhoneGap build is enabled for this project",
+							"required":true
+						},
 						"appId":{
 							"type": "string",
 							"description": "unique identifier, assigned by build.phonegap.com",

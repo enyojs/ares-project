@@ -1,1 +1,1 @@
-{"format":1,"id":"com.example.myapps.HelloWorld","name":"HelloWorld","title":"My New Application: HelloWorld","description":"","version":"1.0","build":{"phonegap":{}}}
+{"id":"com.example.myapps.HelloWorld","name":"HelloWorld","version":"1.0","title":"My New Application: HelloWorld","description":"","build":{"phonegap":{"enabled":true}},"format":1}
