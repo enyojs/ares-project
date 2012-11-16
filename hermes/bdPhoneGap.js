@@ -117,7 +117,7 @@ function BdPhoneGap(config, next) {
 	// Return the ZIP-ed deployed Enyo application
 	app.post(makeExpressRoute('/deploy'), function(req, res, next) {
 		async.series([
-			prepare.bind(this),
+			prepare.bind(this, req, res),
 			store.bind(this, req, res),
 			deploy.bind(this, req, res),
 			zip.bind(this, req, res),
@@ -139,7 +139,7 @@ function BdPhoneGap(config, next) {
 	// JSON-encoded response of the service.
 	app.post(makeExpressRoute('/build'), function(req, res, next) {
 		async.series([
-			prepare.bind(this),
+			prepare.bind(this, req, res),
 			store.bind(this, req, res),
 			deploy.bind(this, req, res),
 			zip.bind(this, req, res),
@@ -174,21 +174,21 @@ function BdPhoneGap(config, next) {
 		console.log(basename,  " exiting");
 	};
 
-	var appTempDir = temp.path({prefix: 'com.palm.ares.hermes.bdPhoneGap.'}) + '.d';
-	var appDir = {
-		root: appTempDir,
-		source: path.join(appTempDir, 'source'),
-		build: path.join(appTempDir, 'build'),
-		deploy: path.join(appTempDir, 'deploy')
-	};
+	function prepare(req, res, next) {
+		var appTempDir = temp.path({prefix: 'com.palm.ares.hermes.bdPhoneGap.'}) + '.d';
+		req.appDir = {
+			root: appTempDir,
+			source: path.join(appTempDir, 'source'),
+			build: path.join(appTempDir, 'build'),
+			deploy: path.join(appTempDir, 'deploy')
+		};
 
-	function prepare(next) {
-		console.log("prepare(): setting-up " + appDir.root);
+		console.log("prepare(): setting-up " + req.appDir.root);
 		async.series([
-			function(done) { mkdirp(appDir.root, done); },
-			function(done) { fs.mkdir(appDir.source, done); },
-			function(done) { fs.mkdir(appDir.build, done); },
-			function(done) { fs.mkdir(appDir.deploy, done); }
+			function(done) { mkdirp(req.appDir.root, done); },
+			function(done) { fs.mkdir(req.appDir.source, done); },
+			function(done) { fs.mkdir(req.appDir.build, done); },
+			function(done) { fs.mkdir(req.appDir.deploy, done); }
 		], next);
 	}
 
@@ -205,14 +205,14 @@ function BdPhoneGap(config, next) {
 		}
 
 		async.forEachSeries(req.files.file, function(file, cb) {
-			var dir = path.join(appDir.source, path.dirname(file.name));
+			var dir = path.join(req.appDir.source, path.dirname(file.name));
 			//console.log("store(): mkdir -p ", dir);
 			mkdirp(dir, function(err) {
 				//console.log("store(): mv ", file.path, " ", file.name);
 				if (err) {
 					cb(err);
 				} else {
-					fs.rename(file.path, path.join(appDir.source, file.name), function(err) {
+					fs.rename(file.path, path.join(req.appDir.source, file.name), function(err) {
 						console.log("store(): Stored: ", file.name);
 						cb(err);
 					});
@@ -230,11 +230,11 @@ function BdPhoneGap(config, next) {
 		// child-processes
 		// <http://nodejs.org/api/child_process.html>.
 		var params = [ '--verbose',
-			       '--packagejs', path.join(appDir.source, 'package.js'),
-			       '--source', appDir.source,
+			       '--packagejs', path.join(req.appDir.source, 'package.js'),
+			       '--source', req.appDir.source,
 			       '--enyo', config.enyoDir,
-			       '--build', appDir.build,
-			       '--out', appDir.deploy,
+			       '--build', req.appDir.build,
+			       '--out', req.appDir.deploy,
 			       '--less'];
 		console.log("deploy(): Running: '", deployScript, params.join(' '), "'");
 		var child = child_process.fork(deployScript, params, {
@@ -262,10 +262,10 @@ function BdPhoneGap(config, next) {
 	function zip(req, res, next) {
 		//console.log("zip(): ");
 		req.zip = {};
-		req.zip.path = path.join(appDir.root, "app.zip");
+		req.zip.path = path.join(req.appDir.root, "app.zip");
 		req.zip.stream = zipstream.createZip({level: 1});
 		req.zip.stream.pipe(fs.createWriteStream(req.zip.path));
-		_walk.bind(this)(appDir.deploy, "" /*prefix*/, function() {
+		_walk.bind(this)(req.appDir.deploy, "" /*prefix*/, function() {
 			try {
 				req.zip.stream.finalize(function(written){
 					console.log("finished ", req.zip.path);
@@ -405,9 +405,9 @@ function BdPhoneGap(config, next) {
 	}
 
 	function cleanup(req, res, next) {
-		console.log("cleanup(): rm -rf " + appDir.root);
-		rimraf(appDir.root, function(err) {
-			console.log("cleanup(): removed " + appDir.root);
+		console.log("cleanup(): rm -rf " + req.appDir.root);
+		rimraf(req.appDir.root, function(err) {
+			console.log("cleanup(): removed " + req.appDir.root);
 			next(err);
 		});
 	}
@@ -455,10 +455,10 @@ if (path.basename(process.argv[1]) === basename) {
 		port: parseInt(argv.p, 10),
 		enyoDir: argv.e
 	}, function(err, service){
-		err && process.exit(err);
+		if(err) process.exit(err);
 		// process.send() is only available if the
 		// parent-process is also node
-		process.send && process.send(service);
+		if (process.send) process.send(service);
 	});
 
 } else {
