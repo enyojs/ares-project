@@ -4,7 +4,7 @@ enyo.kind({
 	events: {
 		onBuildStarted: ""
 	},
-	debug: true,
+	debug: false,
 	/**
 	 * Set PhoneGap build base parameters.
 	 * 

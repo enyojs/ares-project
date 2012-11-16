@@ -170,7 +170,6 @@ enyo.kind({
 			return true; // stop bubble-up
 		}
 		var self = this;
-		if (this.debug) this.log("inEvent", inEvent);
 		this.showWaitPopup("Starting project build");
 		// [0] assumes a single builder
 		var bdService =	ServiceRegistry.instance.getServicesByType('build')[0];

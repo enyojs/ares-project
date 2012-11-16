@@ -20,7 +20,7 @@ enyo.kind({
 	service: null,		// filesystem service
 	folderId: null,
 	fileId: null,
-	debug: true,
+	debug: false,
 	create: function() {
 		this.inherited(arguments);
 	},
