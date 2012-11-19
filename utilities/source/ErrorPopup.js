@@ -21,6 +21,9 @@ enyo.kind({
         },
         hideErrorPopup: function(inSender, inEvent) {
                 this.hide();
-        }
-        
+        },
+        raise: function(msg) { 
+			this.setErrorMsg(msg);
+			this.show();
+		}
 });
