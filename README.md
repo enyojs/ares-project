@@ -24,9 +24,14 @@ Here are the main features you can start looking at today:
 	* Ares integrates the Ace (Cloud9) code editor for code editing
 * Code intelligence
 	* Upon opening/editing a JavaScript file, Ares will parse the file and display a semantic outline of the code in the right-hand panel (for purposes of demonstrating parser)
-	* In the future, this will be used for advanced features such as code-completion, context-sensitive documentation, etc.
+	* Code completion using symbols from:
+	  * the current project
+	  * the Enyo version that comes with Ares
+	  * the libraries included in the project
+	* In the future, this will be used for advanced features context-sensitive documentation, etc.
 * UI designer for drag and drop UI editing
 	* Component definitions are round-tripped from the Editor to the Designer, meaning that changes made in one will immediately appear in the other.
+* Integration with [PhoneGap online build](http://build.phonegap.com) (_Coming Soon_)
 	
 **Note:**  The current Dropbox interface was implemented with an authentication mechanism that has since been deprecated by Dropbox and for which API keys are no longer available, so most users will not be able to run their own Hermes Dropbox component at the moment.  However, those wishing to test drive the functionality above can open `ares/index.html` which points to a temporary hosted version of the Dropbox Hermes component using a valid API key.  We will be migrating the Dropbox authentication mechanism to the currently recommended scheme.  Note there is not yet a publicly hosted version of Ares.
 	
@@ -89,6 +94,8 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Us
 			"debug": false
 		},
 	[...]
+
+You can also configure a permanent PhoneGap build account, also by editing `ide.json`.
 
 Start the IDE server: (e.g. using the Command Prompt, navigate to the ares directory and type 'node ide.js')
 

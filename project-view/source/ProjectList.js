@@ -13,7 +13,6 @@ enyo.kind({
 	handlers: {
 	},
 	projects: [],
-	projectsConfig: [],
 	debug: false,
 	components: [
 		{kind: "LocalStorage"},
@@ -55,7 +54,6 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
-		this.projectsConfig = [];
 	},
 	/**
 	 * Receive the {onServicesChange} broadcast notification
@@ -158,12 +156,6 @@ enyo.kind({
 	removeSelectedProjectData: function() {
 		if (this.selected) {
 			// remove the project from list of project config
-			for (var i = 0; i<this.projectsConfig.length; i++) {
-				if (this.projectsConfig[i].name === this.selected.projectName) {
-					this.projectsConfig.splice(i,1);
-					break;
-				}
-			}
 			this.projects.splice(this.selected.index, 1);
 			this.storeProjectsInLocalStorage();
 			this.selected = null;
@@ -214,48 +206,6 @@ enyo.kind({
 			return undefined;	// Exclude
 		}
 		return value;	// Accept
-	},
-	storeBaseConfigProject: function (projectName, folderId, projectProperties) {
-		var found = false;
-		var props = JSON.parse(projectProperties);
-		for (var i = 0; i<this.projectsConfig.length; i++) {
-			if (this.projectsConfig[i].name === projectName) {
-				found = true;
-				break;
-			}
-		}
-		if (found === false) {
-			// store basic project properties
-			this.projectsConfig.push({name: projectName, 
-								folderId: folderId, 
-								status: "basic", 
-								properties: props});
-		}
-	},
-	storeCustomConfigProject: function (inData) {
-		// data project store into projectsConfig 
-		for (var i = 0; i<this.projectsConfig.length; i++) {
-			if (this.projectsConfig[i].properties.id === inData.id) {
-				var props = {
-					format: this.projectsConfig[i].properties.format,
-					id: inData.id,
-					name: inData.name,
-					version: this.projectsConfig[i].properties.version,
-					title: inData.title,
-					description: inData.description					
-				}
-				var obj = {
-					name: this.projectsConfig[i].name,
-					folderId: this.projectsConfig[i].folderId,
-					status: "custom",
-					properties: props, 
-				}; 
-				this.projectsConfig.splice(i,1);
-				this.projectsConfig.push(obj);
-				break;
-			}
-		}
-		this.doFinishProjectConfig(obj);
 	}
 });
 
