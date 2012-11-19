@@ -5,6 +5,12 @@ enyo.kind({
 	centered: true,
 	floating: true,
 	autoDismiss: false,
+	published: {
+		headerText: ''  
+	},
+	headerTextChanged: function () {
+		this.$.header.setContent(this.headerText);
+	},
 	components: [
 		{kind: "FittableRows", style: "height: 400px; width: 600px", components: [
 			{kind: "Control", tag: "span", style: "padding: 0 4px; vertical-align: middle;", content: "Select a directory", name: "header"},
