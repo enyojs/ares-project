@@ -50,7 +50,8 @@ enyo.kind({
 		this.$.errorPopup.show();
 	},
 	scanProjectAction: function(inSender, inEvent) {
-		this.$.projectWizardScan.reset().show();
+		this.$.projectWizardScan.setHeaderText('Select a directory containing one or mode project.json');
+		this.$.projectWizardScan.show();
 		return true; //Stop event propagation
 	},
 	createProjectAction: function(inSender, inEvent) {
