@@ -20,7 +20,7 @@ enyo.kind({
 			]},
 			{kind: "FittableColumns", content: "fittableColumns2", isContainer: true, components: [
 				{kind: "Control", content: "Selected: ", fit: true, name: "selectedDir"},
-				{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "doCancel"},
+				{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "cancel"},
 				{kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", isContainer: true, name: "confirm", ontap: "confirmTap"}
 			]}
 		]}
@@ -57,6 +57,10 @@ enyo.kind({
     confirmTap: function(inSender, inEvent) {
         this.doDirectorySelected({serviceId: this.selectedServiceId, directory: this.selectedDir});
         return true; // Stop event propagation 
-    }
+    },
+	cancel: function() {
+		this.hide() ;
+		this.doCancel(); // inform owner
+	}
 });
 
