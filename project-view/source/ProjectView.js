@@ -54,7 +54,7 @@ enyo.kind({
 		return true; //Stop event propagation
 	},
 	createProjectAction: function(inSender, inEvent) {
-		this.$.projectWizardCreate.reset().show();
+		this.$.projectWizardCreate.start();
 		return true; //Stop event propagation
 	},
 	confirmCreateProject: function(inSender, inEvent) {

@@ -7,12 +7,8 @@ enyo.kind({
 	autoDismiss: false,
 
 	classes: "enyo-unselectable",
-	handlers: {
-		onDirectorySelected: "directorySelected"
-	},
-
 	showDirPopup: function(inSender, inEvent) {
-		this.$.selectDirectoryPopup.show();
+		return this.$.selectDirectoryPopup.show();
 	},
 	addProjectInList: function(name, folderId) {
 		this.hide();
@@ -32,93 +28,82 @@ enyo.kind({
 		onConfirmCreateProject: "", 
 		onConfirmConfigProject: ""
 	},
+	handlers: {
+		onDirectorySelected: "customizeNamePopup"
+	},
+
 	components: [
-		{kind: "FittableRows", fit: true, components: [
+		{kind: "FittableRows", canGenerate: true, fit: true, name: "changeNamePopup", components: [
 			{kind: "FittableColumns", components: [
 				{kind: "Control", content: "Project name: "},
 				{kind: "onyx.InputDecorator", components: [
-					{kind: "Input", defaultFocus: true, placeholder: "Enter project name", name: "projectName", oninput: "updateProjectDir"}
+					{kind: "Input", defaultFocus: true, name: "projectName", oninput: "updateProjectDir"}
 				]}
 			]},
 			{kind: "FittableColumns", components: [
-				{kind: "Control", content: "Location:"},
-				{kind: "Control", content: "", name: "projectLocation", fit: true},
-				{kind: "onyx.Button", content: "Browse", ontap: "showDirPopup"}
-			]},
-			{kind: "FittableColumns", name: "fittableColumns4", components: [
-				{kind: "Control", content: "Project directory:"},
-				{kind: "onyx.InputDecorator", components: [
-					{kind: "onyx.Input", name: "projectDirectory", onchange: "enableConfirmButton"}
-				]}
+				{kind: "Control", content: "Directory:"},
+				{kind: "Control", content: "", name: "projectDirectory", fit: true}
 			]},
 			{fit: true},
 			{kind: "FittableColumns", style: "margin-top: 10px", name: "fittableColumns5", components: [
 				{kind: "Control", fit: true},
 				{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "hide"},
-				{kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", name: "confirm", ontap: "createProject"}
+				{kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "createProject"}
 			]}
 		]},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup", onCancel: "cancelDirSelection"}
 	],
 	debug: true,
 	reset: function() {
 		this.$.projectName.setValue("");
-		this.$.projectDirectory.setValue("");
-		this.$.confirm.setDisabled(true);
+		this.$.projectDirectory.setContent("");
 		return this ;
+	},
+	start: function() {
+		this.log("starting") ;
+		this.reset().show();
+		this.$.changeNamePopup.hide() ;
+		this.$.selectDirectoryPopup.$.header.setContent("Select a directory containing the new project") ;
+		this.showDirPopup();
 	},
 	cancelDirSelection: function() {
 		this.$.selectDirectoryPopup.hide();
+		this.hide() ;
 	},
 	createProject: function (inSender, inEvent) {
 		var name = this.$.projectName.getValue();
-		var subDir = this.$.projectDirectory.getValue() ;
+		var subDir = this.$.projectDirectory.getContent() ;
 		var folderId = this.selectedDir.id ;
 		var service = this.selectedDir.service;
-		var matchDirName = function(node){
-			return (node.content === name) ;
+
+		// don't create folder here, just scan content for a project.json
+		var matchFileName = function(node){
+			return (node.content === 'project.json' ) ;
 		};
 		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
-		var matchingNodes = hft.getNodeFiles(hft.selectedNode).filter( matchDirName ) ;
+		var matchingNodes = hft.getNodeFiles(hft.selectedNode).filter( matchFileName ) ;
 			
 		if ( matchingNodes.length === 0 ) {
-			this.debug && this.log("Creating new folder " + name + " into folderId=" + folderId);
-
-			service
-				.createFolder(folderId, subDir)
-				.response(this, function(inSender, newFolderId) {
-					this.createProjectInView(name, newFolderId) ;
-			})
-			.error(this, function(inSender, inError) {
-				// TODO display a popup to notify the error
-				this.log("Error: "+inError);
-				this.$.selectDirectoryPopup.hide();
-			});
+			this.log("Creating new project " + name + " in folderId=" + folderId);
+			this.createProjectInView(name, folderId) ;
 		}
 		else {
-			this.createProjectInView(name, matchingNodes[0].file.id) ;
+			this.hide() ;
+			this.$.errorPopup.raise('Cannot create project: a project.json file already exists');
 		}
 	},
-	directorySelected: function(inSender, inEvent) {
+	customizeNamePopup: function(inSender, inEvent) {
+		this.log("shown") ;
 		this.selectedServiceId = inEvent.serviceId;
 		this.selectedDir = inEvent.directory;
-		this.$.projectLocation.setContent(this.selectedDir.path);
-		this.enableConfirmButton();
+		this.$.projectDirectory.setContent(this.selectedDir.path);
+		this.$.projectName.setValue(this.selectedDir.name);
 		this.$.selectDirectoryPopup.hide();
+		this.$.changeNamePopup.show() ;
 	},
 	updateProjectDir: function() {
-		this.$.projectDirectory.setValue(this.$.projectName.getValue()) ;
-		this.enableConfirmButton() ;
-	},
-	enableConfirmButton: function() {
-		if (	this.$.projectDirectory.getValue() 
-			 && this.$.projectName	   .getValue() 
-			 && this.$.projectLocation .getContent()
-		) {
-			this.$.confirm.setDisabled(false);
-		} else {
-			this.$.confirm.setDisabled(true);
-		}
+		this.$.projectDirectory.setContent(this.$.projectName.getValue()) ;
 	}
 });
 
