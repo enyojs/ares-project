@@ -49,6 +49,7 @@ enyo.kind({
 		this.index=null;
 	},
 	load: function(what) {
+		var maxLen = 0;
 		this.kinds = what;
 		this.$.kindPicker.destroyClientControls();
 		for (var i = 0; i < what.length; i++) {
@@ -58,8 +59,10 @@ enyo.kind({
 				index: i,
 				active: (i==0)
         	});
+			maxLen = Math.max(k.name.length, maxLen);
     	}
 		this.index=null;
+		this.$.kindButton.applyStyle("width", maxLen + "em");
 		this.$.kindPicker.render();
 		this.docHasChanged = false;
 	},
@@ -85,6 +88,7 @@ enyo.kind({
 		}
 
 		this.index=index;
+		this.$.kindButton.setContent(kind.name);
 		this.$.toolbar.reflow();
 		return true; // Stop the propagation of the event
 	},
