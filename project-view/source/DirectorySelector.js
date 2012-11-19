@@ -32,7 +32,7 @@ enyo.kind({
 	selectedDir: undefined,
 	create: function() {
 		this.inherited(arguments);
-		this.$.hermesFileTree.hideFileOpButtons().showNewFolderButton();
+		this.$.hermesFileTree.hideFileOpButtons();
 	},
 	handleSelectProvider: function(inSender, inEvent) {
 		if (inEvent.service) {

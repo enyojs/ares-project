@@ -38,6 +38,10 @@ enyo.kind({
 		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup", onCancel: "hideMe"}
 	],
 	debug: true,
+	create: function() {
+		this.inherited(arguments);
+		this.$.selectDirectoryPopup.$.hermesFileTree.showNewFolderButton();
+	},
 	showDirPopup: function(inSender, inEvent) {
 		return this.$.selectDirectoryPopup.show();
 	},
