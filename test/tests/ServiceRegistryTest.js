@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "ServiceRegistryTest",
-	kind: enyo.TestSuite,
+	kind: ares.TestSuite,
 	components: [
 		{name: "serviceRegistry", kind: "ServiceRegistry"}
 	],

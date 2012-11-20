@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "HermesFileStemTest",
-	kind: enyo.TestSuite,
+	kind: ares.TestSuite,
 	//timeout: 20 * 1000,
 	components: [
 		{name: "serviceRegistry", kind: "ServiceRegistry"},
