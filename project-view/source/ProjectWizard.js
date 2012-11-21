@@ -16,15 +16,36 @@ enyo.kind({
 	},
 
 	components: [
+		{kind: "onyx.Toolbar", name: "toolbar", components: [
+				{kind: "onyx.Button", content: "Project", attributes: {title: 'click to edit project attributes'}},
+				{kind: "onyx.Button", content: "PhoneGap"}
+		]},
 		{kind: "FittableRows", canGenerate: true, fit: true, name: "changeNamePopup", components: [
+			{content: "Project", tag:"h2"},
 			{kind: "FittableColumns", components: [
-				{kind: "Control", content: "Project name: "},
+				{content: "Name: ", style: "margin: 10px"},
 				{kind: "onyx.InputDecorator", components: [
 					{kind: "Input", defaultFocus: true, name: "projectName"}
+				]},
+				{content: "Title: ", style: "margin: 10px"},
+				{kind: "onyx.InputDecorator", components: [
+					{kind: "Input", defaultFocus: true, name: "projectTitle"}
 				]}
 			]},
 			{kind: "FittableColumns", components: [
-				{kind: "Control", content: "Directory:"},
+				{content: "Version: ", style: "margin: 10px"},
+				{kind: "onyx.InputDecorator", components: [
+					{kind: "Input", defaultFocus: true, name: "projectVersion"}
+				]},
+				{content: "Id: ", style: "margin: 10px"},
+				{kind: "onyx.InputDecorator", components: [
+					{kind: "Input", defaultFocus: true, name: "projectId", 
+					 attributes: {title: "Application ID in reverse domain-name format: com.example.apps.myapp"}
+					}
+				]}
+			]},
+			{kind: "FittableColumns", components: [
+				{kind: "Control", content: "Directory:", style: "margin: 10px"},
 				{kind: "Control", content: "", name: "projectDirectory", fit: true}
 			]},
 			{fit: true},
@@ -34,7 +55,13 @@ enyo.kind({
 				{kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "createProject"}
 			]}
 		]},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{kind: "FittableRows", fit: true, name: "phoneGapSettings", components: [
+			{kind: "FittableColumns", components: [
+				{kind: "Control", content: "Directory:"},
+				{kind: "Control", content: "", name: "projectDirectory", fit: true}
+			]}
+		 ]},
+		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"},
 		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup", onCancel: "hideMe"}
 	],
 	debug: true,
