@@ -152,7 +152,8 @@ describe("fsLocal...", function() {
 		myFs = new FsLocal({
 			pathname: "/",
 			root: myFsPath,
-			port: myPort
+			port: myPort,
+			verbose: true
 		}, function(err, service){
 			console.log("service="+util.inspect(service));
 			should.not.exist(err);

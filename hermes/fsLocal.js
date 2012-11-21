@@ -15,7 +15,7 @@ var fs = require("fs"),
     async = require("async"),
     querystring = require("querystring");
 
-var basename = path.basename(__filename);
+var basename = '(' + path.basename(__filename) + ')';
 
 function FsLocal(config, next) {
 
@@ -34,8 +34,7 @@ function FsLocal(config, next) {
 
 	// (simple) parameters checking
 	config.root = path.resolve(config.root);
-	//console.log("config:");
-	//console.dir(config);
+	if (config.verbose) console.log(basename, "config:" + util.inspect(config));
 
 	// express-3.x
 	/*
@@ -166,10 +165,10 @@ function FsLocal(config, next) {
 	});
 
 	function _handleRequest(req, res, next) {
-		console.log(basename, "req.query=" + util.inspect(req.query));
+		if (config.verbose) console.log(basename, "req.query=" + util.inspect(req.query));
 		req.params.id = req.params.id || encodeFileId('/');
 		req.params.path = decodeFileId(req.params.id);
-		console.log("req.params=" + util.inspect(req.params));
+		if (config.verbose) console.log(basename, "req.params=" + util.inspect(req.params));
 		verbs[req.originalMethod][req.method](req, res, respond.bind(this, res));
 	}
 
@@ -191,7 +190,7 @@ function FsLocal(config, next) {
 	 */
 	this.quit = function() {
 		server.close();
-		console.log("fsLocal exiting");
+		console.log(basename, "exiting");
 	};
 
 	// utilities library
@@ -250,7 +249,7 @@ function FsLocal(config, next) {
 				isDir: stat.isDirectory()
 			};
 
-			console.log("depth="+depth+", node="+util.inspect(node));
+			if (config.verbose) console.log(basename, "depth="+depth+", node="+util.inspect(node));
 
 			if (stat.isFile() || !depth) {
 				node.pathname = idsRoot + node.id; // same terminology as location.pathname
@@ -296,7 +295,7 @@ function FsLocal(config, next) {
 	function _getFile(req, res, next) {
 		//debugger;
 		var localPath = path.join(config.root, req.param('path'));
-		console.log("sending localPath=" + localPath);
+		if (config.verbose) console.log(basename, "sending localPath=" + localPath);
 		fs.stat(localPath, function(err, stat) {
 			if (err) {
 				next(err);
@@ -315,12 +314,15 @@ function FsLocal(config, next) {
 	}
 
 	verbs.POST.PUT = function(req, res, next) {
-		console.log("put(): req.headers", req.headers);
-		console.log("put(): req.body", req.body);
+		if (config.verbose) console.log(basename, "put(): req.headers", req.headers);
+		if (config.verbose) console.log(basename, "put(): req.body", req.body);
 
 		if (req.is('application/x-www-form-urlencoded')) {
 			// carry a single file at most
 			return _putWebForm(req, res, next);
+		} else if (req.is('multipart/form-data')) {
+			// can carry several files
+			return _putMultipart(req, res, next);
 		} else {
 			next(new Error("Unhandled upload of content-type='" + req.headers['content-type'] + "'"));
 		}
@@ -366,15 +368,60 @@ function FsLocal(config, next) {
 		if (req.body.content) {
 			buf = new Buffer(req.body.content, 'base64');
 		} else {
-			console.log("putWebForm(): empty file");
+			if (config.verbose) console.log(basename, "putWebForm(): empty file");
 			buf = '';
 		}
 		
-		console.log("putWebForm(): storing file as", relPath);
+		if (config.verbose) console.log(basename, "putWebForm(): storing file as", relPath);
 		fs.writeFile(path.join(config.root, relPath), buf, function(err){
 			next(err, {
 				code: 201, // Created
 				body: [{id: encodeFileId(relPath), path: relPath, isDir: false}]
+			});
+		});
+	}
+
+	/**
+	 * Stores one or more files provided by a multipart form
+	 * 
+	 * The multipart form is a 'multipart/form-data'.  Each of its
+	 * parts follows this field convention, compatible with the
+	 * Express/Connect bodyParser, itself based on the Formidable
+	 * Node.js module.
+	 * 
+	 * @param {HTTPRequest} req 
+	 * @param {HTTPResponse} res
+	 * @param {Function} next(err, data) CommonJS callback 
+	 */
+	function _putMultipart(req, res, next) {
+		if (!req.files.file) {
+			next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
+			return;
+		}
+		var nodes = [];
+		async.forEachSeries(req.files.file, function(file, cb) {
+			var dir = path.join(config.root, path.dirname(file.name));
+			if (config.verbose) console.log(basename, "putMultipart(): mkdir -p ", dir);
+			mkdirp(dir, function(err) {
+				if (config.verbose) console.log(basename, "putMultipart(): mv ", file.path, " ", file.name);
+				if (err) {
+					cb(err);
+					return;
+				}
+				var id = encodeFileId(file.name);
+				fs.rename(file.path, path.join(config.root, file.name), function(err) {
+					if (err) {
+						cb(err);
+						return;
+					}
+					nodes.push({id: id, path: file.path, isDir: false});
+					cb();
+				});
+			});
+		}, function(err){
+			next(err, {
+				code: 201, // Created
+				body: nodes
 			});
 		});
 	}
@@ -611,6 +658,11 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		description: 'help message',
 		boolean: true
 	})
+	.options('v', {
+		alias : 'verbose',
+		description: 'verbose execution mode',
+		boolean: true
+	})
 	.argv;
 	
 	var version = process.version.match(/[0-9]+.[0-9]+/)[0];
@@ -621,6 +673,7 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 	var fsLocal = new FsLocal({
 		pathname: argv.pathname,
 		port: argv.port,
+		verbose: argv.verbose,
 		root: argv._[0]
 	}, function(err, service){
 		err && process.exit(err);
