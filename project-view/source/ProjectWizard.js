@@ -16,51 +16,90 @@ enyo.kind({
 	},
 
 	components: [
-		{kind: "onyx.Toolbar", name: "toolbar", components: [
-				{kind: "onyx.Button", content: "Project", attributes: {title: 'click to edit project attributes'}},
-				{kind: "onyx.Button", content: "PhoneGap"}
+		{kind: "onyx.RadioGroup", onActivate: "switchPanel", name: "thumbnail", components: [
+			{content: "Project", attributes: {title: 'click to edit project attributes'}},
+			{content: "PhoneGap"}
 		]},
-		{kind: "FittableRows", canGenerate: true, fit: true, name: "changeNamePopup", components: [
+		{name: "changeNamePopup", components: [
 			{content: "Project", tag:"h2"},
-			{kind: "FittableColumns", components: [
-				{content: "Name: ", style: "margin: 10px"},
-				{kind: "onyx.InputDecorator", components: [
-					{kind: "Input", defaultFocus: true, name: "projectName"}
+			{tag: 'table', components: [
+				{tag: "tr" , components: [
+					 {tag: "td" , content: "Name: "},
+					 {tag: 'td', components:[
+						  {kind: "onyx.InputDecorator", components: [
+							   {kind: "Input", defaultFocus: true, name: "projectName"}
+						  ]}
+					 ]},
+					 {tag: 'td', content: "Title: "},
+					 {tag: "td" , components: [
+						  {kind: "onyx.InputDecorator", components: [
+							   {kind: "Input", defaultFocus: true, name: "projectTitle"}
+						   ]}
+					  ]}
 				]},
-				{content: "Title: ", style: "margin: 10px"},
-				{kind: "onyx.InputDecorator", components: [
-					{kind: "Input", defaultFocus: true, name: "projectTitle"}
-				]}
-			]},
-			{kind: "FittableColumns", components: [
-				{content: "Version: ", style: "margin: 10px"},
-				{kind: "onyx.InputDecorator", components: [
-					{kind: "Input", defaultFocus: true, name: "projectVersion"}
+				{tag: "tr" , components: [
+					 {tag: "td" , content: "Version: "},
+					 {tag: 'td', components:[
+						  {kind: "onyx.InputDecorator", components: [
+							   {kind: "Input", defaultFocus: true, name: "projectVersion"}
+						  ]}
+					 ]},
+					 {tag: 'td', content: "Id: "},
+					 {tag: "td" , components: [
+						  {kind: "onyx.InputDecorator", components: [
+							   {kind: "Input", defaultFocus: true, name: "projectId", 
+								attributes: {title: "Application ID in reverse domain-name format: com.example.apps.myapp"}}
+						   ]}
+					  ]}
 				]},
-				{content: "Id: ", style: "margin: 10px"},
-				{kind: "onyx.InputDecorator", components: [
-					{kind: "Input", defaultFocus: true, name: "projectId", 
-					 attributes: {title: "Application ID in reverse domain-name format: com.example.apps.myapp"}
-					}
+				{tag: "tr" , components: [
+					 {tag: "td", content: "Directory: "},
+					 {tag: 'td', attributes: {colspan: 3}, content: "", name: "projectDirectory" }
 				]}
-			]},
-			{kind: "FittableColumns", components: [
-				{kind: "Control", content: "Directory:", style: "margin: 10px"},
-				{kind: "Control", content: "", name: "projectDirectory", fit: true}
-			]},
-			{fit: true},
-			{kind: "FittableColumns", style: "margin-top: 10px", components: [
-				{kind: "Control", fit: true},
-				{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "hide"},
-				{kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "createProject"}
 			]}
 		]},
-		{kind: "FittableRows", fit: true, name: "phoneGapSettings", components: [
-			{kind: "FittableColumns", components: [
-				{kind: "Control", content: "Directory:"},
-				{kind: "Control", content: "", name: "projectDirectory", fit: true}
+		{name: "phoneGapSettings", components: [
+			{content: "PhoneGap", tag:"h2"},
+			{kind: "onyx.ToggleButton", onContent: "enabled", offContent: "disabled", onChange: "togglePhonegap"},
+			{tag: 'table', components: [
+				{tag: "tr" , components: [
+					 {tag: "td" , content: "AppId: "},
+					 {tag: 'td', attributes: {colspan: 3}, components:[
+						  {kind: "onyx.InputDecorator", components: [
+							   {kind: "Input", name: "phonegapId"}
+						   ]}
+					 ]}
+				]},
+				{tag: "tr" , components: [
+					 {tag: 'td', content: "Target", attributes: {colspan: 3}}
+				]},
+				{tag: "tr" , components: [
+					{tag: "td" , components: [
+						  {kind: "onyx.ToggleButton", onContent: "Android", offContent: "no Android", onChange: "toggleIos"}
+					]},
+					{tag: "td" , components: [
+						  {kind: "onyx.ToggleButton", onContent: "Ios", offContent: "no Ios", onChange: "toggleIos"}
+					]},
+					{tag: "td" , components: [
+
+						  {kind: "onyx.ToggleButton", onContent: "Winphone", offContent: "no Winphone", onChange: "toggleIos"}
+					]},
+				]},
+				{tag: "tr" , components: [
+					{tag: "td" , components: [
+						  {kind: "onyx.ToggleButton", onContent: "Blackberry", offContent: "no Blackberry", onChange: "toggleIos"}
+					]},
+					{tag: "td" , components: [
+						  {kind: "onyx.ToggleButton", onContent: "Webos", offContent: "no Webos", onChange: "toggleIos"}
+					]}
+				]}
 			]}
-		 ]},
+		]},
+		// FIXME: there should be an HTML/CSS way to avoid using FittableStuff...
+		{kind: "FittableRows", style: "margin-top: 10px; width: 100%", fit: true, components: [
+			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "hide"},
+			{kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "createProject"}
+		]},
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"},
 		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup", onCancel: "hideMe"}
 	],
