@@ -5,6 +5,9 @@ enyo.kind({
 		onAction: "",
 		onMakeInput: ""
 	},
+	published: {
+		filterLevel: Model.F_USEFUL
+	},
 	components: [
 		{kind: "Scroller", classes: "enyo-fit", fit: true, components: [
 			{name: "client", allowHtml: true}
@@ -15,16 +18,41 @@ enyo.kind({
 		ondblclick: "dblclick"
 	},
 	style: "padding: 8px; white-space: nowrap;",
-	noinspect: {owner: 1, container: 1, parent: 1, prepend: 1, events: 1, id: 1},
+	create: function() {
+		this.inherited(arguments);
+		this.filters = Model.filters;
+	},
+	allowed: function(inControl, inType, inName) {
+		var level;
+		try {
+			level = this.filters[inControl.kind][inType][inName];
+			if (level) {
+				this.debug && this.log(inName + " (kind): " + level + " kind: " + inControl);
+				return level >= this.filterLevel;
+			} else {
+				level = this.filters.__default[inType][inName] || Model.F_NORMAL;
+				this.debug && this.log(inName + " (default): " + level + " kind: " + inControl);
+				return level >= this.filterLevel;
+			}
+		} catch(error) {
+			level = this.filters.__default[inType][inName] || Model.F_NORMAL;
+			this.debug && this.log(inName + " (exception): " + level + " kind: " + inControl);
+			return level >= this.filterLevel;
+		}
+	},
 	buildPropList: function(inControl) {
 		var domEvents = ["ontap", "onchange", "ondown", "onup", "ondragstart", "ondrag", "ondragfinish", "onenter", "onleave"]; // from dispatcher/guesture
 		var propMap = {}, eventMap = {};
 		var context = inControl;
 		while (context) {
 			for (var p in context.published) {
-				propMap[p] = true;
+				if (this.allowed(inControl, "properties", p)) {
+					this.debug && this.log("Adding property '" + p + "' from '" + context.kind + "'");
+					propMap[p] = true;
+				}
 			}
 			for (var e in context.events) {
+				this.debug && this.log("Adding event '" + e + "' from '" + context.kind + "'");
 				eventMap[e] = true;
 			}
 			context = context.base && context.base.prototype;
@@ -44,6 +72,7 @@ enyo.kind({
 		return props;
 	},
 	makeEditor: function(inControl, inProperty, inExtra) {
+		this.debug && this.log("Adding entry for '" + inProperty + "'");
 		var h = [];
 		h.push('<div class="inspector-field-caption">', inProperty, ":", '</div>');
 		var v = inControl[inProperty];
@@ -69,9 +98,7 @@ enyo.kind({
 			h.push("<div class=\"onyx-groupbox-header\">Properties</div>");
 			var ps = this.buildPropList(inControl);
 			for (var i=0, p; p=ps[i]; i++) {
-				if (!this.noinspect[p]) {
-					h.push(this.makeEditor(inControl, p));
-				}
+				h.push(this.makeEditor(inControl, p));
 			}
 			ps = ps.events;
 			if (ps.length) {
@@ -114,4 +141,18 @@ enyo.kind({
 			this.doAction({value: v});
 		}
 	}
+});
+
+enyo.kind({
+	name: "Inspector.Filters",
+	events: {
+		onLevelChanged: ""
+	},
+	components: [
+		{kind: "Group", classes: "group", onActivate:"doLevelChanged", highlander: true, components: [
+				{kind:"enyo.Checkbox", value: Model.F_USEFUL, content: "Frequently used", checked: true},
+				{kind:"enyo.Checkbox", value: Model.F_NORMAL, content: "Safe"},
+				{kind:"enyo.Checkbox", value: Model.F_DANGEROUS, content: "All"}
+			]}
+	]
 });
