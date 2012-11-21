@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "ProjectWizardAny",
+	name: "ProjectWizardCreate",
 	kind: "onyx.Popup",
 	modal: true,
 	centered: true,
@@ -7,12 +7,43 @@ enyo.kind({
 	autoDismiss: false,
 
 	classes: "enyo-unselectable",
+	events: {
+		onConfirmCreateProject: "", 
+		onConfirmConfigProject: ""
+	},
 	handlers: {
-		onDirectorySelected: "directorySelected"
+		onDirectorySelected: "customizeNamePopup"
 	},
 
+	components: [
+		{kind: "FittableRows", canGenerate: true, fit: true, name: "changeNamePopup", components: [
+			{kind: "FittableColumns", components: [
+				{kind: "Control", content: "Project name: "},
+				{kind: "onyx.InputDecorator", components: [
+					{kind: "Input", defaultFocus: true, name: "projectName"}
+				]}
+			]},
+			{kind: "FittableColumns", components: [
+				{kind: "Control", content: "Directory:"},
+				{kind: "Control", content: "", name: "projectDirectory", fit: true}
+			]},
+			{fit: true},
+			{kind: "FittableColumns", style: "margin-top: 10px", components: [
+				{kind: "Control", fit: true},
+				{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "hide"},
+				{kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "createProject"}
+			]}
+		]},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup", onCancel: "hideMe"}
+	],
+	debug: true,
+	create: function() {
+		this.inherited(arguments);
+		this.$.selectDirectoryPopup.$.hermesFileTree.showNewFolderButton();
+	},
 	showDirPopup: function(inSender, inEvent) {
-		this.$.selectDirectoryPopup.show();
+		return this.$.selectDirectoryPopup.show();
 	},
 	addProjectInList: function(name, folderId) {
 		this.hide();
@@ -21,110 +52,60 @@ enyo.kind({
 	createProjectInView: function(name, folderId) {
 		this.addProjectInList(name,folderId);
 		this.doConfirmConfigProject({name: name, folderId: folderId, service: this.selectedDir.service});
-	}
-});
-
-enyo.kind({
-	name: "ProjectWizardCreate",
-	kind: "ProjectWizardAny",
-
-	events: {
-		onConfirmCreateProject: "", 
-		onConfirmConfigProject: ""
 	},
-	components: [
-		{kind: "FittableRows", fit: true, components: [
-			{kind: "FittableColumns", components: [
-				{kind: "Control", content: "Project name: "},
-				{kind: "onyx.InputDecorator", components: [
-					{kind: "Input", defaultFocus: true, placeholder: "Enter project name", name: "projectName", oninput: "updateProjectDir"}
-				]}
-			]},
-			{kind: "FittableColumns", components: [
-				{kind: "Control", content: "Location:"},
-				{kind: "Control", content: "", name: "projectLocation", fit: true},
-				{kind: "onyx.Button", content: "Browse", ontap: "showDirPopup"}
-			]},
-			{kind: "FittableColumns", name: "fittableColumns4", components: [
-				{kind: "Control", content: "Project directory:"},
-				{kind: "onyx.InputDecorator", components: [
-					{kind: "onyx.Input", name: "projectDirectory", onchange: "enableConfirmButton"}
-				]}
-			]},
-			{fit: true},
-			{kind: "FittableColumns", style: "margin-top: 10px", name: "fittableColumns5", components: [
-				{kind: "Control", fit: true},
-				{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "hide"},
-				{kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", name: "confirm", ontap: "createProject"}
-			]}
-		]},
-		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup", onCancel: "cancelDirSelection"}
-	],
-	debug: true,
 	reset: function() {
 		this.$.projectName.setValue("");
-		this.$.projectDirectory.setValue("");
-		this.$.confirm.setDisabled(true);
+		this.$.projectDirectory.setContent("");
+		this.$.changeNamePopup.hide() ;
 		return this ;
 	},
-	cancelDirSelection: function() {
-		this.$.selectDirectoryPopup.hide();
+	hideMe: function() {
+		this.hide() ;	
+		return true;
+	},
+	start: function() {
+		this.log("starting") ;
+		this.reset().show();
+		this.$.changeNamePopup.hide() ;
+		this.$.selectDirectoryPopup.$.header.setContent("Select a directory containing the new project") ;
+		this.showDirPopup();
 	},
 	createProject: function (inSender, inEvent) {
 		var name = this.$.projectName.getValue();
-		var subDir = this.$.projectDirectory.getValue() ;
+		var subDir = this.$.projectDirectory.getContent() ;
 		var folderId = this.selectedDir.id ;
 		var service = this.selectedDir.service;
-		var matchDirName = function(node){
-			return (node.content === name) ;
+
+		// don't create folder here, just scan content for a project.json
+		var matchFileName = function(node){
+			return (node.content === 'project.json' ) ;
 		};
 		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
-		var matchingNodes = hft.getNodeFiles(hft.selectedNode).filter( matchDirName ) ;
+		var matchingNodes = hft.getNodeFiles(hft.selectedNode).filter( matchFileName ) ;
 			
 		if ( matchingNodes.length === 0 ) {
-			this.debug && this.log("Creating new folder " + name + " into folderId=" + folderId);
-
-			service
-				.createFolder(folderId, subDir)
-				.response(this, function(inSender, newFolderId) {
-					this.createProjectInView(name, newFolderId) ;
-			})
-			.error(this, function(inSender, inError) {
-				// TODO display a popup to notify the error
-				this.log("Error: "+inError);
-				this.$.selectDirectoryPopup.hide();
-			});
+			this.log("Creating new project " + name + " in folderId=" + folderId);
+			this.createProjectInView(name, folderId) ;
 		}
 		else {
-			this.createProjectInView(name, matchingNodes[0].file.id) ;
+			this.hide() ;
+			this.$.errorPopup.raise('Cannot create project: a project.json file already exists');
 		}
 	},
-	directorySelected: function(inSender, inEvent) {
+	customizeNamePopup: function(inSender, inEvent) {
+		this.log("shown") ;
 		this.selectedServiceId = inEvent.serviceId;
 		this.selectedDir = inEvent.directory;
-		this.$.projectLocation.setContent(this.selectedDir.path);
-		this.enableConfirmButton();
+		this.$.projectDirectory.setContent(this.selectedDir.path);
+		this.$.projectName.setValue(this.selectedDir.name);
 		this.$.selectDirectoryPopup.hide();
-	},
-	updateProjectDir: function() {
-		this.$.projectDirectory.setValue(this.$.projectName.getValue()) ;
-		this.enableConfirmButton() ;
-	},
-	enableConfirmButton: function() {
-		if (	this.$.projectDirectory.getValue() 
-			 && this.$.projectName	   .getValue() 
-			 && this.$.projectLocation .getContent()
-		) {
-			this.$.confirm.setDisabled(false);
-		} else {
-			this.$.confirm.setDisabled(true);
-		}
+		this.$.changeNamePopup.show() ;
 	}
 });
 
 enyo.kind({
-	name: "ProjectWizardImport",
-	kind: "ProjectWizardAny",
+	name: "ProjectWizardScan",
+	kind: "SelectDirectoryPopup",
 	modal: true,
 	centered: true,
 	floating: true,
@@ -132,42 +113,17 @@ enyo.kind({
 
 	classes: "enyo-unselectable",
 	events: {
-		onConfirmCreateProject: "", 
-		onConfirmConfigProject: ""
+		onConfirmCreateProject: ""
 	},
 	handlers: {
-		onDirectorySelected: "directorySelected"
+		onDirectorySelected: "searchProjects"
 	},
-	components: [
-		{kind: "FittableRows", fit: true, components: [
-			{kind: "Control", content:"Select a location containing one or mode project.json"},
-			{fit: true},
-			{kind: "FittableColumns", components: [
-				{kind: "Control", content: "Location:"},
-				{kind: "Control", content: "", name: "projectLocation", fit: true},
-				{kind: "onyx.Button", content: "Browse", ontap: "showDirPopup"}
-			]},
-			{fit: true},
-			{kind: "FittableColumns", style: "margin-top: 10px", name: "fittableColumns5", components: [
-				{kind: "onyx.Button", content: "Cancel", ontap: "hide"},
-				{kind: "Control", fit: true},
-				{kind: "onyx.Button", content: "OK", name: "confirm", ontap: "searchProjects"}
-			]}
-		]},
-		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup", onCancel: "cancelDirSelection"}
-	],
 	debug: false,
-	reset: function() {
-		this.$.confirm.setDisabled(true);
-		return this ;
-	},
-	cancelDirSelection: function() {
-		this.$.selectDirectoryPopup.hide();
-	},
 	searchProjects: function (inSender, inEvent) {
-		var folderId = this.selectedDir.id ;
-		var service = this.selectedDir.service;
-		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
+		var folderId = inEvent.directory.id ;
+		var service = inEvent.directory.service;
+
+		var hft = this.$.hermesFileTree ;
 
 		// we cannot use directly listFiles as this method sends a list of unrelated files
 		// we need to use the file tree to be able to relate a project.json with is parent dir.
@@ -192,7 +148,12 @@ enyo.kind({
 						this.debug && this.log( "file contents: '" + fileStuff.content + "'" ) ;
 						var projectData = JSON.parse(fileStuff.content)  ;
 						this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
-						this.addProjectInList(projectData.name, parentDir.id) ;
+						this.doConfirmCreateProject({
+							name: projectData.name,
+							folderId: parentDir.id, 
+							service: this.selectedDir.service, 
+							serviceId: this.selectedServiceId
+						});
 					}); 
 			}
 			if ( child.isDir ===  true ) { 
@@ -215,21 +176,8 @@ enyo.kind({
 			}
 		} ;
 
-		iter.apply(this) ; // oops. forgot to launch the whole stuff
-	},
-	directorySelected: function(inSender, inEvent) {
-		this.selectedServiceId = inEvent.serviceId;
-		this.selectedDir = inEvent.directory;
-		this.$.projectLocation.setContent(this.selectedDir.path);
-		this.enableConfirmButton();
-		this.$.selectDirectoryPopup.hide();
-	},
-	enableConfirmButton: function() {
-		if ( this.$.projectLocation .getContent()) {
-			this.$.confirm.setDisabled(false);
-		} else {
-			this.$.confirm.setDisabled(true);
-		}
+		iter.apply(this) ; // do not forget to launch the whole stuff
+		this.hide();
 	}
 });
 

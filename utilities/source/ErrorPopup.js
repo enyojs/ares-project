@@ -44,6 +44,9 @@ enyo.kind({
 		this.setErrorMsg();
 		this.setDetails();
                 this.hide();
-        }
-        
+        },
+        raise: function(msg) { 
+			this.setErrorMsg(msg);
+			this.show();
+		}
 });

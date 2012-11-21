@@ -6,13 +6,13 @@ enyo.kind({
 		{kind: "ProjectList",
 			onModifySettings: "modifySettingsAction",
 			onCreateProject: "createProjectAction",
-			onImportProject: "importProjectAction",
+			onScanProject: "scanProjectAction",
 			onProjectRemoved: "projectRemoved",
 			onProjectSelected: "handleProjectSelected",
 			name: "projectList"},
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
-		{kind: "ProjectWizardImport", canGenerate: false, name: "projectWizardImport"},
+		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
 		{kind: "ProjectPropertiesPopup", name: "projectPropertiesPopup"},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
@@ -46,12 +46,13 @@ enyo.kind({
 		this.$.errorPopup.setDetails(details);
 		this.$.errorPopup.show();
 	},
-	importProjectAction: function(inSender, inEvent) {
-		this.$.projectWizardImport.reset().show();
+	scanProjectAction: function(inSender, inEvent) {
+		this.$.projectWizardScan.setHeaderText('Select a directory containing one or more project.json files');
+		this.$.projectWizardScan.show();
 		return true; //Stop event propagation
 	},
 	createProjectAction: function(inSender, inEvent) {
-		this.$.projectWizardCreate.reset().show();
+		this.$.projectWizardCreate.start();
 		return true; //Stop event propagation
 	},
 	confirmCreateProject: function(inSender, inEvent) {
