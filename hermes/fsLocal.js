@@ -407,12 +407,12 @@ function FsLocal(config, next) {
 		} else {
 			files.push(req.files.file);
 		}
+
 		async.forEach(files, function(file, cb) {
 			var relPath = path.join(pathParam, file.name),
 			    absPath = path.join(config.root, relPath),
 			    dir = path.dirname(absPath);
 
-/*
 			async.series([
 				function(cb1) {
 					mkdirp(dir, cb1);
@@ -429,25 +429,6 @@ function FsLocal(config, next) {
 					cb1();
 				}
 			], cb);
-*/
-			mkdirp(dir, function(err) {
-				if (err) {
-					cb(err);
-					return;
-				}
-				fs.rename(file.path, absPath, function(err) {
-					if (err) {
-						cb(err);
-						return;
-					}
-					nodes.push({
-						id: encodeFileId(relPath),
-						path: relPath,
-						isDir: false
-					});
-					cb();
-				});
-			});
 
 		}, function(err){
 			next(err, {
@@ -497,7 +478,7 @@ function FsLocal(config, next) {
 		}
 	};
 
- 	// XXX ENYO-1086: refactor tree walk-down
+	// XXX ENYO-1086: refactor tree walk-down
 	function _rmrf(localPath, next) {
 		// from <https://gist.github.com/1526919>
 		fs.stat(localPath, function(err, stats) {
@@ -544,7 +525,7 @@ function FsLocal(config, next) {
 		_changeNode(req, res, _cpr, next);
 	};
 
- 	// XXX ENYO-1086: refactor tree walk-down
+	// XXX ENYO-1086: refactor tree walk-down
 	function _changeNode(req, res, op, next) {
 		var pathParam = req.param('path'),
 		    nameParam = req.param('name'),
@@ -617,7 +598,7 @@ function FsLocal(config, next) {
 		});
 	}
 
- 	// XXX ENYO-1086: refactor tree walk-down
+	// XXX ENYO-1086: refactor tree walk-down
 	function _cpr(srcPath, dstPath, next) {
 		if (srcPath === dstPath) {
 			return next(new Error("Cannot copy on itself"));
@@ -682,7 +663,7 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 	.options('p', {
 		alias : 'port',
 		description: 'port (o) local IP port of the express server (default: 9009, 0: dynamic)',
-		default : '9009'
+		default: '9009'
 	})
 	.options('h', {
 		alias : 'help',
@@ -707,14 +688,14 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		verbose: argv.verbose,
 		root: argv._[0]
 	}, function(err, service){
-		err && process.exit(err);
+		if (err) process.exit(err);
 		// process.send() is only available if the
 		// parent-process is also node
-		process.send && process.send(service);
+		if (process.send) process.send(service);
 	});
 
 } else {
 
 	// ... otherwise hook into commonJS module systems
 	module.exports = FsLocal;
-};
+}

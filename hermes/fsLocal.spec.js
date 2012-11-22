@@ -748,12 +748,10 @@ describe("fsLocal...", function() {
 		});
 	});
 
-/*
 	it("t100. should stop", function(done) {
 		myFs.quit();
 		rimraf(myFsPath, {gently: myFsPath}, function() {
 			done();
 		});
 	});
-*/
 });
