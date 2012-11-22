@@ -394,30 +394,61 @@ function FsLocal(config, next) {
 	 * @param {Function} next(err, data) CommonJS callback 
 	 */
 	function _putMultipart(req, res, next) {
+		var pathParam = req.param('path');
+		if (config.verbose) console.log(basename, "putMultipart(): req.files=", util.inspect(req.files));
+		if (config.verbose) console.log(basename, "putMultipart(): req.fields=", util.inspect(req.fields));
 		if (!req.files.file) {
 			next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
 			return;
 		}
-		var nodes = [];
-		async.forEachSeries(req.files.file, function(file, cb) {
-			var dir = path.join(config.root, path.dirname(file.name));
-			if (config.verbose) console.log(basename, "putMultipart(): mkdir -p ", dir);
+		var nodes = [], files = [];
+		if (Array.isArray(req.files.file)) {
+			files.concat(req.files.file);
+		} else {
+			files.push(req.files.file);
+		}
+		async.forEach(files, function(file, cb) {
+			var relPath = path.join(pathParam, file.name),
+			    absPath = path.join(config.root, relPath),
+			    dir = path.dirname(absPath);
+
+/*
+			async.series([
+				function(cb1) {
+					mkdirp(dir, cb1);
+				},
+				function(cb1) {
+					fs.rename(file.path, absPath, cb1);
+				},
+				function(cb1) {
+					nodes.push({
+						id: encodeFileId(relPath),
+						path: relPath,
+						isDir: false
+					});
+					cb1();
+				}
+			], cb);
+*/
 			mkdirp(dir, function(err) {
-				if (config.verbose) console.log(basename, "putMultipart(): mv ", file.path, " ", file.name);
 				if (err) {
 					cb(err);
 					return;
 				}
-				var id = encodeFileId(file.name);
-				fs.rename(file.path, path.join(config.root, file.name), function(err) {
+				fs.rename(file.path, absPath, function(err) {
 					if (err) {
 						cb(err);
 						return;
 					}
-					nodes.push({id: id, path: file.path, isDir: false});
+					nodes.push({
+						id: encodeFileId(relPath),
+						path: relPath,
+						isDir: false
+					});
 					cb();
 				});
 			});
+
 		}, function(err){
 			next(err, {
 				code: 201, // Created
