@@ -56,6 +56,7 @@ enyo.kind({
 			msg = JSON.stringify(msg);
 		}
 		this.logMessages.push(msg);
+		enyo.log("*****Ares TestSuite***** ", msg);
 	},
 	// Subclasses can override this method.
 	// It will be called before each test executes.
@@ -138,7 +139,7 @@ enyo.kind({
 		// unless we passed previously and now we're failing.
 		// We will send multiple finish events if we get a success and then a failure -- that counts as a failure.
 		if (this.results) {
-			console.warn("*****Ares Test***** Finish called more than once in test "+this.name);
+			console.warn("*****Ares TestSuite***** Finish called more than once in test "+this.name);
 			if (!this.results.passed || !inMessage) {
 				return;
 			}

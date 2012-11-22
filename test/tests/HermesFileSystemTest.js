@@ -1,221 +1,208 @@
 enyo.kind({
-	name: "HermesFileStemTest",
-	kind: ares.TestSuite,
-	//timeout: 20 * 1000,
-	components: [
-		{name: "serviceRegistry", kind: "ServiceRegistry"},
-		{name: "hermesFileSystem", kind: "HermesFileSystem"}
-	],
-	debug: true,
-	selectedService: "home",
+	name: "HermesFileSystemTest",
+	kind: "ares.TestSuite",
+	debug: false,
+	// TODO folderId needs to be created. ENYO-1473
 	folderId: "%2FAresTests",
-	nameToCreate: "source",
-	nodeToRemove: "%2FAresTests%2Fsource",
+	dirToCreate: "source",
+	nodeDir: "%2FAresTests%2Fsource",
 	fileToCreate: "App.js",
+	nodeFile: "%2FAresTests%2Fsource%2FApp.js",
+	registry: null,
+	services: null,
+	home: null,
 
+	create: function () {
+		this.inherited(arguments);
+		//this.log("create()");
+		this.services = HermesFileSystemTest.services;
+		this.home = HermesFileSystemTest.home;
+	},
 	/**
-	* reload Home service
+	* get Services from registry
+	*/
+	testGetServicesFromRegistry: function() {
+		this.log("Begin called in testGetServicesFromRegitry.");
+		this.registry = ServiceRegistry.instance;
+		this.registry._reloadServices(enyo.bind(this, "cbReloadServices"));
+
+	},
+	cbReloadServices: function(inError) {
+		this.log("Begin called in cbReloadServices.");
+		if (inError) {
+			this.finish("No services loaded!");
+		} else {
+			this.services = this.registry.services;
+			HermesFileSystemTest.services = this.services;
+			if (this.debug) {
+				this.log("HermesFileSystemTest.services: ");
+				console.dir(HermesFileSystemTest.services);
+			}
+			if(this.services.length > 0) {
+				this.finish();
+			} else {
+				this.finish("No Home service found.");
+			}
+		}
+	},
+	/**
+	* get Home service from services
 	*/
 	testGetHomeFromServices: function() {
-		console.log("*****Ares Test***** Begin called in testGetHomeFromServices.");
-		var self = this;
-		this.$.serviceRegistry._reloadServices(function(err) {
-			var service;
-			if (err) {
-				self.finish("no services loaded!");
-			} else {
-				if (self.$.serviceRegistry.services) {
-					service = self.$.serviceRegistry.services.filter(function(s) {
-						if (self.debug) {
-							enyo.log("*****Ares Test***** s.conf.id: "+s.conf.id);
-						}
-						return s.conf.id === self.selectedService;
-					});
-
-					if(service.length !== 1) {
-						self.finish("No Home service found.");
-					} else {
-						self.finish();
-					}
-				}
+		this.log("Begin called in testGetHomeFromServices.");
+		var h = this.services.filter(function(s) {
+			if (this.debug) {
+				this.log("service.conf.id: "+s.conf.id);
 			}
+			return s.conf.id === "home";
 		});
+		if (this.debug) {
+			this.log("home service: ");
+			console.dir(h);
+		}
+		this.home = h;
+		HermesFileSystemTest.home = this.home;
+		if(h.length > 0) {
+			this.finish();
+		} else {
+			this.finish("No Home service found.");
+		}
 	},
 	/**
 	* HermesFileSystem API
 	*/
 	testPropfindAndCreateFolder: function() {
-		console.log("*****Ares Test***** Begin called in testPropfindAndCreateFolder.");
-		var self = this;
-		this.$.serviceRegistry._reloadServices(function(err) {
-			var service;
-			if (err) {
-				self.finish("no services loaded!");
+		this.log("Begin called in testPropfindAndCreateFolder.");
+		/**
+		*	PROPFIND verb used to listFiles of a folderId
+		*/
+		var service = this.home[0];
+		var req = service.impl.propfind(this.folderId, 1);
+		req.response(this, function(inSender, inResponse) {
+			var self = this;
+			var r = inResponse.children.filter(function(node){
+				return node.name === this.dirToCreate;
+			});
+			if (r.length !== 0) {
+				this.finish("folder already exists.");
 			} else {
-				if (self.$.serviceRegistry.services) {
-					service = self.$.serviceRegistry.services.filter(function(s) {
-						return s.conf.id === self.selectedService;
-					});
-					/**
-					*	PROPFIND verb used to listFiles of a folderId
-					*/
-					var req = service[0].impl.propfind(self.folderId, 1);
-					req.response(self, function(inSender, inResponse) {
-						var prj = inResponse.children.filter(function(node){
-							return node.name === self.nameToCreate;
-						});
-						if (prj.length !== 0) {
-							self.finish("folder already exists.");
-						} else {
-							/**
-							* MKCOL verb 
-							*/
-							var req2 = service[0].impl.createFolder(self.folderId, self.nameToCreate);
-							req2.response(function(inSender, inResponse) {
-								enyo.log(inResponse);
-								self.finish();
-							});
-						}
-					});
-					req.error(self, function(inSender, inError) {
-							enyo.log(inError);
-							self.finish("propfind create folder error: "+inError);
-					});
-				}
+				/**
+				* MKCOL verb 
+				*/
+				// want to create @HOME@/AresTests/source directory
+				var req2 = service.impl.createFolder(this.folderId, this.dirToCreate);
+				req2.response(function(inSender, inResponse) {
+					if (this.debug) {
+						this.log(inResponse);						
+					}
+					self.finish();
+				});
+				req2.error(this, function(inSender, inError) {
+					this.log(inError);
+					self.finish("create folder error: "+inError);
+				});
 			}
+		});
+		req.error(this, function(inSender, inError) {
+			if (this.debug) {
+				this.log(inError);				
+			}
+			this.finish("propfind create folder error: "+inError);
 		});
 	},
 
 	testPropfindAndCreateFile: function() {
-		console.log("*****Ares Test***** Begin called in testPropfindAndCreateFile.");
-		var self = this;
-		this.$.serviceRegistry._reloadServices(function(err) {
-			var service;
-			if (err) {
-				self.finish("no services loaded!");
-			} else {
-				if (self.$.serviceRegistry.services) {
-					service = self.$.serviceRegistry.services.filter(function(s) {
-						return s.conf.id === self.selectedService;
-					});
-					/**
-					*	PROPFIND verb used to listFiles of a folderId
-					*/
-					var req = service[0].impl.propfind(self.folderId, 1);
-					req.response(self, function(inSender, inResponse) {
-						var prj = inResponse.children.filter(function(node){
-							return node.name === self.nameToCreate;
-						});
-						if (prj.length !== 0) {
-							var content = {
-								title: "created by the test suite"
-							};
-							/**
-							* PUT Verb
-							*/
-							var req2 = service[0].impl.createFile(self.nodeToRemove, self.fileToCreate, content);
-							req2.response(self, function(inSender, inResponse) {
-								enyo.log(inResponse);
-								self.finish();
-							});
-							req2.error(self, function(inSender, inError) {
-								enyo.log(inError);
-								self.finish("create File error: "+inError);
-							});
-						}
-					});					
-					req.error(self, function(inSender, inError) {
-							enyo.log(inError);
-							self.finish("propfind create file error: "+inError);
-					});
-				}
+		console.log("Begin called in testPropfindAndCreateFile.");
+		/**
+		*	PROPFIND verb used to listFiles of a folderId
+		*/
+		var service = this.home[0];
+		var req = service.impl.propfind(this.nodeDir, 1);
+		req.response(this, function(inSender, inResponse) {
+			var self = this;
+			if (this.debug) {
+				this.log("profind/create file inResponse.children: "+JSON.stringify(inResponse));
 			}
+			var r = inResponse.children.filter(function(node){
+				return node.name === this.dirToCreate;
+			});
+			if (r.length !== 0) {
+				this.finish("file already exists.");
+			} else {
+				var content = {
+					title: "created by the test suite"
+				};
+				/**
+				* PUT Verb
+				*/
+				// want to create @HOME@/AresTests/source/App.js file
+				var req2 = service.impl.createFile(this.nodeDir, this.fileToCreate, content);
+				req2.response(self, function(inSender, inResponse) {
+					if (this.debug) {
+						this.log("create File inResponse: "+JSON.stringify(inResponse));						
+					}
+					self.finish();
+				});
+				req2.error(this, function(inSender, inError) {
+					if (this.debug) {
+						this.log(inError);
+					}
+					self.finish("create file error: "+inError);
+				});
+			}
+		});					
+		req.error(this, function(inSender, inError) {
+			if (this.debug) {
+				this.log(inError);
+			}
+			this.finish("propfind create file error: "+inError);
 		});
 	},
 	testDeleteFile: function() {
-		console.log("*****Ares Test***** Begin called in testDeleteFile.");
-		var self = this;
-		this.$.serviceRegistry._reloadServices(function(err) {
-			var service;
-			if (err) {
-				self.finish("no services loaded!");
-			} else {
-				if (self.$.serviceRegistry.services) {
-					service = self.$.serviceRegistry.services.filter(function(s) {
-						return s.conf.id === self.selectedService;
-					});
-					/**
-					*	PROPFIND verb used to listFiles of a folderId
-					*/
-					var req = service[0].impl.propfind(self.nodeToRemove, 1);
-					req.response(self, function(inSender, inResponse) {
-						var prj = inResponse.children.filter(function(node){
-							return node.name === self.fileToCreate;
-						});
-						if (prj.length !== 0) {
-							/**
-							* DELETE verb
-							*/
-							var req2 = service[0].impl.remove(prj[0].id);;
-							req2.response(self, function(inSender, inResponse) {
-								enyo.log(inResponse);
-								self.finish();
-							});
-							req2.error(self, function(inSender, inError) {
-								enyo.log(inError);
-								self.finish("create File error: "+inError);
-							});
-						}
-					});					
-					req.error(self, function(inSender, inError) {
-							enyo.log(inError);
-							self.finish("propfind create file error: "+inError);
-					});
-				}
+		console.log("Begin called in testDeleteFile.");
+		var service = this.home[0];
+		/**
+		* DELETE verb
+		*/
+		// want to delete @HOME@/AresTests/source/App.js file
+		// nodeFile: "%2FAresTests%2Fsource%2FApp.js"
+		var req2 = service.impl.remove(this.nodeFile);
+		req2.response(this, function(inSender, inResponse) {
+			if (this.debug) {
+				this.log("delete File inResponse: "+JSON.stringify(inResponse));						
 			}
+			this.finish();
+		});
+		req2.error(this, function(inSender, inError) {
+			if (this.debug) {
+				this.log(inError);
+			}
+			this.finish("delete File error: "+inError);
 		});
 	},
 	testDeleteFolder: function() {
-		console.log("*****Ares Test***** Begin called in testDeleteFolder.");
-		var self = this;
-		this.$.serviceRegistry._reloadServices(function(err) {
-			var service;
-			if (err) {
-				self.finish("no services loaded!");
-			} else {
-				if (self.$.serviceRegistry.services) {
-					service = self.$.serviceRegistry.services.filter(function(s) {
-						return s.conf.id === self.selectedService;
-					});
-					/**
-					*	PROPFIND verb used to listFiles of a folderId
-					*/
-					var req = service[0].impl.propfind(self.folderId, 1);
-					req.response(self, function(inSender, inResponse) {
-						var prj = inResponse.children.filter(function(node){
-							return node.name === self.nameToCreate;
-						});
-						if (prj.length !== 0) {
-							/**
-							* DELETE verb
-							*/
-							var req = service[0].impl.remove(prj[0].id);
-							req.response(self, function(inSender, inResponse) {
-								enyo.log(inResponse);
-								self.finish();
-							});
-							req.error(self, function(inSender, inError) {
-								enyo.log(inError);
-								self.finish("delete Folder error: "+inError);
-							});
-						}
-					});					
-					req.error(self, function(inSender, inError) {
-							enyo.log(inError);
-							self.finish("propfind delete folder error: "+inError);
-					});
-				}
-			}
+		console.log("Begin called in testDeleteFolder.");
+		var service = this.home[0];
+		/**
+		* DELETE verb
+		*/
+		// want to delete @HOME@/AresTests/source directory
+		// nodeDir: "%2FAresTests%2Fsource"
+		var req = service.impl.remove(this.nodeDir);
+		req.response(this, function(inSender, inResponse) {
+		if (this.debug) {
+				this.log("delete Folder inResponse: "+JSON.stringify(inResponse));						
+		}		this.finish();
 		});
+		req.error(self, function(inSender, inError) {
+			if (this.debug) {
+				this.log(inError);
+			}
+			this.finish("delete Folder error: "+inError);
+		});
+	},
+	statics: {
+		services: null,
+		home: null
 	}
 });

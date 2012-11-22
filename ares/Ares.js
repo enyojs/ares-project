@@ -19,6 +19,9 @@ enyo.kind({
 		this.setIndex(this.fileViewIndex);
 
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
+		if (this.runTest) {
+			this.createComponent({kind: "ares.TestConsoleRunner", reporterKind: "ares.TestConsoleReporter"});
+		}
 	},
 	draggable: false,
 	handleReloadServices: function(inSender, inEvent) {
