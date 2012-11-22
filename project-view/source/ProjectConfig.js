@@ -25,7 +25,7 @@ enyo.kind({
 		this.inherited(arguments);
 	},
 	/**
-	 * Initializer
+	 * Initializer: load data from project.json file
 	 * @param {Object} inConfig is the configuration data as to be found in the project.json
 	 * @param {Object} next is a CommonJS callback
 	 */
