@@ -61,7 +61,7 @@ enyo.kind({
 		{name: "phoneGapSettings", components: [
 			{content: "PhoneGap", tag:"h2"},
 			{kind: "onyx.ToggleButton", onContent: "enabled", offContent: "disabled", onChange: "togglePhonegap"},
-			{tag: 'table', components: [
+			{tag: 'table', attributes: {'class': 'ares_projectView_table'}, components: [
 				{tag: "tr" , components: [
 					 {tag: "td" , content: "AppId: "},
 					 {tag: 'td', attributes: {colspan: 3}, components:[
@@ -75,22 +75,22 @@ enyo.kind({
 				]},
 				{tag: "tr" , components: [
 					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", onContent: "Android", offContent: "no Android", onChange: "toggleIos"}
+						  {kind: "onyx.ToggleButton", onContent: "Android", offContent: "Android", onChange: "toggleIos"}
 					]},
 					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", onContent: "Ios", offContent: "no Ios", onChange: "toggleIos"}
+						  {kind: "onyx.ToggleButton", onContent: "Ios", offContent: "Ios", onChange: "toggleIos"}
 					]},
 					{tag: "td" , components: [
 
-						  {kind: "onyx.ToggleButton", onContent: "Winphone", offContent: "no Winphone", onChange: "toggleIos"}
+						  {kind: "onyx.ToggleButton", onContent: "Winphone", offContent: "Winphone", onChange: "toggleIos"}
 					]},
 				]},
 				{tag: "tr" , components: [
 					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", onContent: "Blackberry", offContent: "no Blackberry", onChange: "toggleIos"}
+						  {kind: "onyx.ToggleButton", onContent: "Blackberry", offContent: "Blackberry", onChange: "toggleIos"}
 					]},
 					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", onContent: "Webos", offContent: "no Webos", onChange: "toggleIos"}
+						  {kind: "onyx.ToggleButton", onContent: "Webos", offContent: "Webos", onChange: "toggleIos"}
 					]}
 				]}
 			]}

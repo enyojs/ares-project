@@ -107,3 +107,11 @@ body {
     z-index: 145;
 
 }
+
+.ares_projectView_table tr td .onyx-toggle-button {
+	text-transform: none;
+}
+
+.ares_projectView_table tr td .onyx-toggle-button .off {
+	text-decoration: line-through;
+}
