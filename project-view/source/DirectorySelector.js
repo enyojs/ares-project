@@ -5,21 +5,26 @@ enyo.kind({
 	centered: true,
 	floating: true,
 	autoDismiss: false,
-	components: [{
-		kind : "enyo.FittableRows",
-		style: "height: 400px; width: 600px",
-		components : [
+	published: {
+		headerText: ''  
+	},
+	headerTextChanged: function () {
+		this.$.header.setContent(this.headerText);
+	},
+	components: [
+		{kind: "FittableRows", style: "height: 400px; width: 600px", components: [
+			{kind: "Control", tag: "span", style: "padding: 0 4px; vertical-align: middle;", content: "Select a directory", name: "header"},
 			{kind: "FittableColumns", content: "fittableColumns", fit: true, components: [
-				 {kind: "ProviderList", type: "filesystem", onSelectProvider: "handleSelectProvider"},
-				 {kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "selectFile", onFolderClick: "selectFolder"}
-			 ]},
+				{kind: "ProviderList", type: "filesystem", name: "providerList", onSelectProvider: "handleSelectProvider"},
+				{kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "selectFile", onFolderClick: "selectFolder"}
+			]},
 			{kind: "FittableColumns", content: "fittableColumns2", isContainer: true, components: [
-				 {name: "selectedDir", fit: true, content: "Selected: "},
-			{kind: "onyx.Button", content: "Cancel", classes: "onyx-negative", ontap: "doCancel"},
-			{kind: "onyx.Button", content: "OK", classes: "onyx-affirmative", isContainer: true, name: "confirm", ontap: "confirmTap"}
-			 ]}
-		],
-	}],
+				{kind: "Control", content: "Selected: ", fit: true, name: "selectedDir"},
+				{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "cancel"},
+				{kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", isContainer: true, name: "confirm", ontap: "confirmTap"}
+			]}
+		]}
+	],
 	events: {
 		onDirectorySelected: "",
 		onCancel: ""
@@ -27,7 +32,7 @@ enyo.kind({
 	selectedDir: undefined,
 	create: function() {
 		this.inherited(arguments);
-		this.$.hermesFileTree.hideFileOpButtons().showNewFolderButton();
+		this.$.hermesFileTree.hideFileOpButtons();
 	},
 	handleSelectProvider: function(inSender, inEvent) {
 		if (inEvent.service) {
@@ -52,6 +57,10 @@ enyo.kind({
     confirmTap: function(inSender, inEvent) {
         this.doDirectorySelected({serviceId: this.selectedServiceId, directory: this.selectedDir});
         return true; // Stop event propagation 
-    }
+    },
+	cancel: function() {
+		this.hide() ;
+		this.doCancel(); // inform owner
+	}
 });
 
