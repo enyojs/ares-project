@@ -4,8 +4,8 @@ enyo.kind({
 	fit: true,
 	events: {
 		onCustomConfigProject: "",
-		onCancelSettings: "",
 		onSaveGeneratedXml: "",
+		onCanceled: "",
 	},
 	createMode: true,
 	components: [
@@ -56,7 +56,7 @@ enyo.kind({
 			{kind: "FittableColumns", style: "width:100%", components: [
 					{kind: "Control"},
 					{fit: true},
-					{kind: "onyx.Button", content: "Cancel", classes: "onyx-negative", name: "cancel", ontap: "doCancelSettings"},
+					{kind: "onyx.Button", content: "Cancel", classes: "onyx-negative", name: "cancel", ontap: "doCanceled"},
 					{kind: "onyx.Button", content: "OK", classes: "onyx-affirmative", name: "confirm", ontap: "confirmTap"}
 				]}
 		]},
@@ -106,6 +106,9 @@ enyo.kind({
 	name: "ProjectPropertiesPopup",
 	kind: "onyx.Popup",
 	modal: true, centered: true, floating: true, autoDismiss: false,
+	handlers: {
+		onCanceled: "hide"
+	},
 	components: [
 		{kind: "ProjectProperties"}
 	],
