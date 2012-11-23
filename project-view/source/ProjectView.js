@@ -29,11 +29,6 @@ enyo.kind({
 	handlers: {
 		onConfirmCreateProject: "confirmCreateProject",
 		onConfirmConfigProject: "setupConfigProject",
-		onInitConfigProject: "initConfigProject",
-		onCustomConfigProject: "customConfigProject",
-		onFinishProjectConfig: "finishConfigProject",
-		onCancelSettings: "cancelSettings",
-		onSaveGeneratedXml: "saveGeneratedXml",
 		onPhonegapBuild: "startPhonegapBuild",
 		onBuildStarted: "phonegapBuildStarted",
 		onError: "showErrorMsg"
@@ -97,71 +92,9 @@ enyo.kind({
 	projectRemoved: function(inSender, inEvent) {
 		this.$.harmonia.setProject(null);
 	},
-	setupConfigProject: function(inSender, inEvent) {
-		this.log("stubbed");
-		/*
-		try {
-			// data to create the project properties file
-			var projectData = {
-					name: inEvent.name,
-					folderId: inEvent.folderId,
-					service: inEvent.service
-			};
-			this.$.projectConfig.createConfig(projectData)
-				.response(this, function() {
-					// Pass service information to Harmonia
-					// *once* project.json has been created
-					this.$.harmonia.setProject(projectData);
-				}) ;
-		} catch(e) {
-			this.showErrorPopup(e.toString());
-			return false;
-		}
-		// handled here (don't bubble)
-		return true;
-		 */
-	},
-	initConfigProject: function(inSender, inEvent) {
-		this.log("stubbed");
-		/*
-		// push project data in project list
-		this.$.projectList.storeBaseConfigProject(inEvent.name, inEvent.folderId, inEvent.properties);
-		// pre-filled and customized projectPropertiesPopup fields
-		this.$.projectPropertiesPopup.preFillConfig(inEvent.properties);
-	},
-	customConfigProject: function(inSender, inEvent) {
-		// retrieve data modified  and store into projectConfig on FS
-		this.$.projectList.storeCustomConfigProject(inEvent);
-		 */
-	},
-	finishConfigProject: function(inSender, inEvent) {
-		this.log("stubbed");
-		/*
-		// customized project data will be stored on FS into project.json
-		this.$.projectConfig.fsUpdateFile(inEvent);
-		// reset the popup settings
-		this.$.projectPropertiesPopup.reset();
-		this.$.projectPropertiesPopup.hide();
-		// generate the config.xml file
-		this.$.projectPropertiesPopup.generateConfigXML(inEvent);
-		 */
-	},
 	modifySettingsAction: function(inSender, inEvent) {
 		// projectProperties popup - onTap action
-		this.$.projectPropertiesPopup.show();
-		// handled here (don't bubble)
-		return true;
-	},
-	cancelSettings: function(inSender, inEvent) {
-		// projectProperties popup - cancel action
-		this.$.projectPropertiesPopup.hide();
-		// handled here (don't bubble)
-		return true;
-	},
-	saveGeneratedXml: function(inEvent, inSender) {
-		// TODO: MADBH - need to discuss with FiX and Yves
-		// config.xml needs to saved/stored under a target/phonegapbuild directory
-		this.currentProject.config.saveXml(inSender.configXML);
+		this.$.projectPropertiesPopup.preFillConfig(this.currentProject.config.data).show();
 		// handled here (don't bubble)
 		return true;
 	},
