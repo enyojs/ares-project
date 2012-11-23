@@ -74,19 +74,26 @@ enyo.kind({
 		this.$.confirm.setDisabled(true);
 		this.activateDrawer();
 	},
-	enable: function(inData) {
-		// handle the pre-fill values
-		var pjson= JSON.parse(inData);
-		if (pjson.name !== undefined) {
-			this.$.projectId.setValue("com.example.apps."+pjson.name);
+	/**
+	 * pre-fill the widget with configuration data
+	 * @param {Object} config is configuration data (typically from project.json)
+	 *  can be a json string or an object. 
+	 */
+	preFill: function(inData) {
+		this.log(inData) ;
+		var config = typeof inData === 'object' ? inData : JSON.parse(inData) ;
+
+		if (config.name !== undefined) {
+			this.$.projectId.setValue("com.example.apps."+config.name);
 		} else {
 			this.$.projectId.setValue("com.example.apps.myapp");
 		}
-		this.$.projectName.setValue(pjson.name);
-		this.$.projectTitle.setValue(pjson.title);
-		this.$.projectDescription.setValue(pjson.decription);
+		this.$.projectName.setValue(config.name);
+		this.$.projectTitle.setValue(config.title);
+		this.$.projectDescription.setValue(config.description);
 		this.$.confirm.setDisabled(false);
 		this.$.status.setContent(" ");
+		return this ;
 	},
 	confirmTap: function(inSender, inEvent) {
 		// retrieve modified values
@@ -116,6 +123,7 @@ enyo.kind({
 		this.$.projectProperties.reset();
 	},
 	preFillConfig: function(inData) {
-		this.$.projectProperties.enable(inData);
+		this.$.projectProperties.preFill(inData);
+		return this ;
 	},
 });
