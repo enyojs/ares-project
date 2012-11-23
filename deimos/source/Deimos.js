@@ -5,7 +5,6 @@ enyo.kind({
 		{kind: "DragAvatar", components: [
 			{tag: "img", src: "$deimos/images/icon.png", style: "width: 24px; height: 24px;"}
 		]},
-		{kind: "Model"},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 0 10px;", name: "toolbar", components: [
 				{name: "docLabel", content: "Deimos"},

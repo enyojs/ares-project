@@ -6,7 +6,7 @@ enyo.kind({
 		onMakeInput: ""
 	},
 	published: {
-		filterLevel: Model.F_USEFUL
+		filterLevel: null		// Value will be given by Inspector.Filters "checked" item.
 	},
 	components: [
 		{kind: "Scroller", classes: "enyo-fit", fit: true, components: [
@@ -20,27 +20,15 @@ enyo.kind({
 	style: "padding: 8px; white-space: nowrap;",
 	create: function() {
 		this.inherited(arguments);
-		this.filters = Model.filters;
 	},
 	allowed: function(inControl, inType, inName) {
-		var level;
-		try {
-			level = this.filters[inControl.kind][inType][inName];
-			if (level) {
-				this.debug && this.log(inName + " (kind): " + level + " kind: " + inControl);
-				return level >= this.filterLevel;
-			} else {
-				level = this.filters.__default[inType][inName] || Model.F_NORMAL;
-				this.debug && this.log(inName + " (default): " + level + " kind: " + inControl);
-				return level >= this.filterLevel;
-			}
-		} catch(error) {
-			level = this.filters.__default[inType][inName] || Model.F_NORMAL;
-			this.debug && this.log(inName + " (exception): " + level + " kind: " + inControl);
-			return level >= this.filterLevel;
-		}
+		var level = Model.getFilterLevel(inControl.kind, inType, inName);
+		this.debug && this.log("Level: " + level + " for " + inControl.kind + "." + inName);
+		return level >= this.filterLevel;
 	},
 	buildPropList: function(inControl) {
+
+		// TODO: property and event list must come from the Analyzer output.
 		var domEvents = ["ontap", "onchange", "ondown", "onup", "ondragstart", "ondrag", "ondragfinish", "onenter", "onleave"]; // from dispatcher/guesture
 		var propMap = {}, eventMap = {};
 		var context = inControl;
@@ -151,7 +139,7 @@ enyo.kind({
 	components: [
 		{kind: "Group", classes: "group", onActivate:"doLevelChanged", highlander: true, components: [
 				{kind:"enyo.Checkbox", value: Model.F_USEFUL, content: "Frequently used", checked: true},
-				{kind:"enyo.Checkbox", value: Model.F_NORMAL, content: "Safe"},
+				{kind:"enyo.Checkbox", value: Model.F_NORMAL, content: "Normal"},
 				{kind:"enyo.Checkbox", value: Model.F_DANGEROUS, content: "All"}
 			]}
 	]
