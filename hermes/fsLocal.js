@@ -72,7 +72,6 @@ function FsLocal(config, next) {
 
 	// HTTP method overloading
 	app.use(function(req, res, next) {
-		//debugger;
 		req.originalMethod = req.method;
 		if (req.query._method) {
 			req.method = req.query._method.toUpperCase();
@@ -293,7 +292,6 @@ function FsLocal(config, next) {
 	};
 	
 	function _getFile(req, res, next) {
-		//debugger;
 		var localPath = path.join(config.root, req.param('path'));
 		if (config.verbose) console.log(basename, "sending localPath=" + localPath);
 		fs.stat(localPath, function(err, stat) {
@@ -397,6 +395,7 @@ function FsLocal(config, next) {
 		var pathParam = req.param('path');
 		if (config.verbose) console.log(basename, "putMultipart(): req.files=", util.inspect(req.files));
 		if (config.verbose) console.log(basename, "putMultipart(): req.fields=", util.inspect(req.fields));
+		if (config.verbose) console.log(basename, "putMultipart(): pathParam=",pathParam);
 		if (!req.files.file) {
 			next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
 			return;
@@ -412,6 +411,8 @@ function FsLocal(config, next) {
 			var relPath = path.join(pathParam, file.name),
 			    absPath = path.join(config.root, relPath),
 			    dir = path.dirname(absPath);
+
+			if (config.verbose) console.log(basename, "putMultipart(): file.path=" + file.path + ", relPath=" + relPath + ", dir=" + dir);
 
 			async.series([
 				function(cb1) {
