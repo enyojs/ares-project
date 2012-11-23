@@ -35,7 +35,26 @@ enyo.kind({
 		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"}
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{name: "findpop", kind: "enyo.Popup", centered: true, modal: true, floating: true, components: [
+			{kind: "FittableRows", classes:"ares_phobos_findpop", components: [
+				{kind: "FittableColumns", components: [
+					{name: "find", kind: "onyx.Input", placeholder: "Finding?..", onchange: "find"},
+					{fit: true},
+					{name: "findnext", kind: "onyx.Button", classes: "onyx-affirmative", content: "findnext", ontap: "findnext"},
+				]},
+				{kind: "FittableRows", components:[
+					{name: "findreplace", kind: "onyx.Input", placeholder: "Find Replace all .. ->"},
+					{name: "replacewith", kind: "onyx.Input", placeholder: "Replacing with..", onchange: "findreplace"},
+    			]},
+    			{kind: "FittableColumns", components: [
+    				{name: "exitpop", kind: "onyx.Button", classes: "onyx-negative", content: "exit!", ontap: "closepop"},
+    				{fit: true},
+    				{name: "findreplacego", kind: "onyx.Button", classes: "onyx-affirmative", content: "Replace ALL!!", ontap: "findreplace"},
+    			]}
+
+    		]}
+		]}
 	],
 	events: {
 		onSaveDocument: "",
@@ -51,7 +70,7 @@ enyo.kind({
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
 	mode: "",				// js, css, ...
-	file: null,			
+	file: null,
 	create: function() {
 		this.inherited(arguments);
 		this.buildEnyoDb();
@@ -207,10 +226,10 @@ enyo.kind({
 				this.analysis = module;
 				this.$.projectAnalyzer.index.indexModule(module);
 				this.updateObjectsLines(module);
-	
+
 				// dump the object where the cursor is positioned, if it exists
 				this.dumpInfo(module.objects && module.objects[module.currentObject]);
-				
+
 				// Give the information to the autocomplete component
 				this.$.autocomplete.setAnalysis(this.analysis);
 			} catch(error) {
@@ -321,7 +340,7 @@ enyo.kind({
 	},
 	/**
 	 * Recursively lists the handler methods mentioned in the "onXXXX"
-	 * attributes of the components passed as an input parameter 
+	 * attributes of the components passed as an input parameter
 	 * @param components: components to walk thru
 	 * @param declared: list of handler methods already listed
 	 * @returns the list of declared handler methods
@@ -350,22 +369,22 @@ enyo.kind({
 	 * handler functions listed in the "onXXXX" attributes
 	 * @protected
 	 * Note: This implies to reparse/analyze the file before
-	 * and after the operation. 
+	 * and after the operation.
 	 */
 	insertMissingHandlers: function() {
 		if (this.analysis) {
 			// Reparse to get the definition of possibly added onXXXX attributes
 			this.reparseAction();
-			
+
 			/*
 			 * Insert missing handlers starting from the end of the
 			 * file to limit the need of reparsing/reanalysing
-			 * the file 
-			 */  
+			 * the file
+			 */
 			for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
 				this.insertMissingHandlersIntoKind(this.analysis.objects[i]);
 			}
-	
+
 			// Reparse to get the definition of the newly added methods
 			this.reparseAction();
 		} else {
@@ -390,10 +409,10 @@ enyo.kind({
 				existing[p.name] = "";
 			}
 		}
-		
+
 		// List the handler methods declared in the components and in handlers map
 		var declared = this.listHandlers(object, {});
-		
+
 		// Prepare the code to insert
 		var codeToInsert = "";
 		for(var item in declared) {
@@ -401,7 +420,7 @@ enyo.kind({
 				codeToInsert += (commaTerminated ? "" : ",\n");
 				commaTerminated = false;
 				codeToInsert += ("    " + item + ": function(inSender, inEvent) {\n        // TO"
-						+ "DO - Auto-generated code\n    }"); 
+						+ "DO - Auto-generated code\n    }");
 			}
 		}
 
@@ -508,7 +527,27 @@ enyo.kind({
 	 */
 	beforeClosingDocument: function() {
 		this.$.autocomplete.setProjectIndexer(null);
-	}
+	},
+
+	findpop: function(){
+		this.$.findpop.show();
+	},
+
+	closepop: function(){
+		this.$.findpop.hide();
+	},
+
+	find: function(inSender, inEvent){
+		this.$.ace.find(this.$.find.hasNode().value);
+	},
+
+	findnext: function(){
+		this.$.ace.findNext();
+	},
+
+	findreplace: function(){
+		this.$.ace.replaceAll(this.$.findreplace.hasNode().value , this.$.replacewith.hasNode().value)
+	},
 });
 
 enyo.kind({
