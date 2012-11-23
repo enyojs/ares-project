@@ -434,7 +434,7 @@ if (path.basename(process.argv[1]) === basename) {
 				default: "9029"
 			},
 			'e': {
-				description: "Path to the Enyo version to use for mnifying the application",
+				description: "Path to the Enyo version to use for minifying the application",
 				required: false,
 				default: path.resolve(__dirname, '..', 'enyo')
 			},
