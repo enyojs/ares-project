@@ -15,6 +15,7 @@ enyo.kind({
 				{name: "documentLabel", content: "Document"},
 				{name: "saveButton", kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: "New kind", ontap: "newKindAction"},
+				{name: "findButton", kind: "onyx.Button", content: "Search", ontap: "findpop"},
 				{fit: true},
 				{name: "designerButton", kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
