@@ -16,96 +16,13 @@ enyo.kind({
 	},
 
 	components: [
-		{kind: "onyx.RadioGroup", onActivate: "switchPanel", name: "thumbnail", components: [
-			{content: "Project", attributes: {title: 'click to edit project attributes'}},
-			{content: "PhoneGap"}
-		]},
-		{name: "changeNamePopup", components: [
-			{content: "Project", tag:"h2"},
-			{tag: 'table', components: [
-				{tag: "tr" , components: [
-					 {tag: "td" , content: "Name: "},
-					 {tag: 'td', components:[
-						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", defaultFocus: true, name: "projectName"}
-						  ]}
-					 ]},
-					 {tag: 'td', content: "Title: "},
-					 {tag: "td" , components: [
-						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", defaultFocus: true, name: "projectTitle"}
-						   ]}
-					  ]}
-				]},
-				{tag: "tr" , components: [
-					 {tag: "td" , content: "Version: "},
-					 {tag: 'td', components:[
-						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", defaultFocus: true, name: "projectVersion"}
-						  ]}
-					 ]},
-					 {tag: 'td', content: "Id: "},
-					 {tag: "td" , components: [
-						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", defaultFocus: true, name: "projectId", 
-								attributes: {title: "Application ID in reverse domain-name format: com.example.apps.myapp"}}
-						   ]}
-					  ]}
-				]},
-				{tag: "tr" , components: [
-					 {tag: "td", content: "Directory: "},
-					 {tag: 'td', attributes: {colspan: 3}, content: "", name: "projectDirectory" }
-				]}
-			]}
-		]},
-		{name: "phoneGapSettings", components: [
-			{content: "PhoneGap", tag:"h2"},
-			{kind: "onyx.ToggleButton", onContent: "enabled", offContent: "disabled", onChange: "togglePhonegap"},
-			{tag: 'table', attributes: {'class': 'ares_projectView_table'}, components: [
-				{tag: "tr" , components: [
-					 {tag: "td" , content: "AppId: "},
-					 {tag: 'td', attributes: {colspan: 3}, components:[
-						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", name: "phonegapId"}
-						   ]}
-					 ]}
-				]},
-				{tag: "tr" , components: [
-					 {tag: 'td', content: "Target", attributes: {colspan: 3}}
-				]},
-				{tag: "tr" , components: [
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", onContent: "Android", offContent: "Android", onChange: "toggleIos"}
-					]},
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", onContent: "Ios", offContent: "Ios", onChange: "toggleIos"}
-					]},
-					{tag: "td" , components: [
-
-						  {kind: "onyx.ToggleButton", onContent: "Winphone", offContent: "Winphone", onChange: "toggleIos"}
-					]},
-				]},
-				{tag: "tr" , components: [
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", onContent: "Blackberry", offContent: "Blackberry", onChange: "toggleIos"}
-					]},
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", onContent: "Webos", offContent: "Webos", onChange: "toggleIos"}
-					]}
-				]}
-			]}
-		]},
-		// FIXME: there should be an HTML/CSS way to avoid using FittableStuff...
-		{kind: "FittableRows", style: "margin-top: 10px; width: 100%", fit: true, components: [
-			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "hide"},
-			{kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "createProject"}
-		]},
-		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"},
+		{kind: "ProjectProperties", name: "propertiesWidget"},
 		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup", onCancel: "hideMe"}
 	],
 	debug: true,
 	create: function() {
 		this.inherited(arguments);
+		this.$.propertiesWidget.setup_create() ;
 		this.$.selectDirectoryPopup.$.hermesFileTree.showNewFolderButton();
 	},
 	showDirPopup: function(inSender, inEvent) {
@@ -120,9 +37,18 @@ enyo.kind({
 		this.doConfirmConfigProject({name: name, folderId: folderId, service: this.selectedDir.service});
 	},
 	reset: function() {
-		this.$.projectName.setValue("");
-		this.$.projectDirectory.setContent("");
-		this.$.changeNamePopup.hide() ;
+		this.$.propertiesWidget.preFill({
+			id: "",
+			name: "",
+			version: "",
+			title: "",
+			description: "",
+			build: {
+				phonegap: {
+					enabled: true
+				}
+			}
+		}) ;
 		return this ;
 	},
 
@@ -140,7 +66,8 @@ enyo.kind({
 	start: function(config) {
 		this.log("starting") ;
 		this.reset().show();
-		this.$.changeNamePopup.hide() ;
+		this.config = config || new ProjectConfig() ; // is a ProjectConfig object.
+		//this.$.changeNamePopup.hide() ;
 		this.$.selectDirectoryPopup.$.header.setContent("Select a directory containing the new project") ;
 		this.showDirPopup();
 	},
@@ -167,13 +94,14 @@ enyo.kind({
 		}
 	},
 	customizeNamePopup: function(inSender, inEvent) {
+		var propW = this.$.propertiesWidget ;
 		this.log("shown") ;
 		this.selectedServiceId = inEvent.serviceId;
 		this.selectedDir = inEvent.directory;
-		this.$.projectDirectory.setContent(this.selectedDir.path);
-		this.$.projectName.setValue(this.selectedDir.name);
+		propW.$.projectDirectory.setContent(this.selectedDir.path);
+		propW.$.projectName.setValue(this.selectedDir.name);
 		this.$.selectDirectoryPopup.hide();
-		this.$.changeNamePopup.show() ;
+		propW.show() ;
 	}
 });
 
