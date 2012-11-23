@@ -63,13 +63,15 @@ enyo.kind({
 		// FIXME: use true for debug
 		{name: "phoneGapDrawer", kind: "onyx.Drawer", open: false, components: [
 			{content: "PhoneGap", tag:"h2"},
-			{kind: "onyx.ToggleButton", onContent: "enabled", offContent: "disabled", onChange: "togglePhonegap"},
+			{kind: "onyx.ToggleButton", name: 'pgConfEnabled', onContent: "enabled", offContent: "disabled"},
 			{tag: 'table', attributes: {'class': 'ares_projectView_table'}, components: [
 				{tag: "tr" , components: [
 					 {tag: "td" , content: "AppId: "},
 					 {tag: 'td', attributes: {colspan: 3}, components:[
 						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", name: "phonegapId", placeholder: "com.example.myapp"}
+							   {kind: "Input", name: "pgConfId", placeholder: "com.example.myapp",
+								attributes: {title: "unique identifier, assigned by build.phonegap.com"}
+							   }
 						   ]}
 					 ]}
 				]},
@@ -78,22 +80,21 @@ enyo.kind({
 				]},
 				{tag: "tr" , components: [
 					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", onContent: "Android", offContent: "Android", onChange: "togglePhonegapTarget"}
+						  {kind: "onyx.ToggleButton", name: 'androidTarget', onContent: "Android", offContent: "Android"}
 					]},
 					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", onContent: "Ios", offContent: "Ios", onChange: "togglePhonegapTarget"}
+						  {kind: "onyx.ToggleButton", name: 'iosTarget', onContent: "Ios", offContent: "Ios"}
 					]},
 					{tag: "td" , components: [
-
-						  {kind: "onyx.ToggleButton", onContent: "Winphone", offContent: "Winphone", onChange: "togglePhonegapTarget"}
+						  {kind: "onyx.ToggleButton", name: 'winphoneTarget', onContent: "Winphone", offContent: "Winphone"}
 					]}
 				]},
 				{tag: "tr" , components: [
 					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", onContent: "Blackberry", offContent: "Blackberry", onChange: "togglePhonegapTarget"}
+						  {kind: "onyx.ToggleButton", name: 'blackberryTarget', onContent: "Blackberry", offContent: "Blackberry"}
 					]},
 					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", onContent: "Webos", offContent: "Webos", onChange: "togglePhonegapTarget"}
+						  {kind: "onyx.ToggleButton", name: 'webosTarget',onContent: "Webos", offContent: "Webos"}
 					]}
 				]}
 			]}
@@ -134,10 +135,6 @@ enyo.kind({
 		}
 	},
 
-	reset: function(inData) {
-		this.$.confirm.setDisabled(true);
-		this.activateDrawer();
-	},
 	/**
 	 * pre-fill the widget with configuration data
 	 * @param {Object} config is configuration data (typically from project.json)
@@ -146,17 +143,28 @@ enyo.kind({
 	preFill: function(inData) {
 		this.log(inData) ;
 		var config = typeof inData === 'object' ? inData : JSON.parse(inData) ;
+		var pgConf ;
+		var pgTarget ;
 
-		if (config.name !== undefined) {
-			this.$.projectId.setValue("com.example.apps."+config.name);
-		} else {
-			this.$.projectId.setValue("com.example.apps.myapp");
-		}
+		this.$.projectId.setValue(config.id);
+		this.$.projectVersion.setValue(config.version);
 		this.$.projectName.setValue(config.name);
 		this.$.projectTitle.setValue(config.title);
-		// FIXME: creation? this.$.confirm.setDisabled(false);
+
+		if (config.build && config.build.phonegap) {
+		    pgConf = config.build.phonegap ;
+			this.$.pgConfEnabled.setValue(pgConf.enabled);
+			this.$.pgConfId.setValue(pgConf.appId);
+			
+			if (pgConf.targets) {
+				for (pgTarget in pgConf.targets ) {
+					this.$[ pgTarget + 'Target' ].setContent(pgConf.targets[pgTarget]) ;
+				}
+			}
+		}
 		return this ;
 	},
+
 	confirmTap: function(inSender, inEvent) {
 		// retrieve modified values
 		var obj = {
