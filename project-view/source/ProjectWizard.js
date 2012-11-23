@@ -125,11 +125,19 @@ enyo.kind({
 		this.$.changeNamePopup.hide() ;
 		return this ;
 	},
+
+	/**
+	 * Hide the whole widget. Typically called when ok or cancel is clicked
+	 */
 	hideMe: function() {
 		this.hide() ;	
 		return true;
 	},
-	start: function() {
+
+	/**
+	 * start project creation by showing the widget
+	 */
+	start: function(config) {
 		this.log("starting") ;
 		this.reset().show();
 		this.$.changeNamePopup.hide() ;

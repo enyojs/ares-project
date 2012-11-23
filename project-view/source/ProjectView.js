@@ -1,3 +1,9 @@
+/**
+ * This kind is the top kind of project handling. It containts:
+ * - The project list 
+ * - the interface towards the user's file (harmonia)
+ * - Popups to manage projects (create, scan, error ...)
+ */
 enyo.kind({
 	name: "ProjectView",
 	kind: "FittableColumns",
