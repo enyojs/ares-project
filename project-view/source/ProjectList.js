@@ -15,7 +15,6 @@ enyo.kind({
 		onScanProject: "",
 		onProjectRemoved: "",
 		onModifySettings: "",
-		onFinishProjectConfig: "",
 		onPhonegapBuild: ""
 	},
 	handlers: {
