@@ -154,9 +154,7 @@ enyo.kind({
 		}
 		this.$.projectName.setValue(config.name);
 		this.$.projectTitle.setValue(config.title);
-		this.$.projectDescription.setValue(config.description);
-		this.$.confirm.setDisabled(false);
-		this.$.status.setContent(" ");
+		// FIXME: creation? this.$.confirm.setDisabled(false);
 		return this ;
 	},
 	confirmTap: function(inSender, inEvent) {
