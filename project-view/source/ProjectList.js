@@ -18,26 +18,26 @@ enyo.kind({
 		{kind: "LocalStorage"},
 		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
 			{content: "Projects", style: "margin-right: 10px"},
-				{kind: "onyx.TooltipDecorator", components: [
+			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_settings.png", onclick: "doModifySettings"},
-				{kind: "onyx.Tooltip", content: "Settings..."},
+				{kind: "onyx.Tooltip", content: "Settings..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_new.png", onclick: "doCreateProject"},
-				{kind: "onyx.Tooltip", content: "Create or Import Project..."},
+				{kind: "onyx.Tooltip", content: "Create or Import Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_edit.png", onclick: "doScanProject"},
-				{kind: "onyx.Tooltip", content: "Scan for Projects..."},
+				{kind: "onyx.Tooltip", content: "Scan for Projects..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_delete.png", onclick: "removeProjectAction"},
 				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
-				{kind: "onyx.Tooltip", content: "Remove Project..."},
+				{kind: "onyx.Tooltip", content: "Remove Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view/images/project_view_build.png", onclick: "doPhonegapBuild"},
-				{kind: "onyx.Tooltip", content: "Phonegap build"},
+				{kind: "onyx.Tooltip", content: "Phonegap build"}
 			]}
 		]},
 		{kind: "enyo.Scroller", components: [
