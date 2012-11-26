@@ -62,17 +62,25 @@ enyo.singleton({
 			}
 		}
 	},
-	getFilterLevel: function(inKind, inType, inName) {
-		var level;
+	getInfo: function(inKind, inType, inName) {
 		try {
-			level = this.info[inKind][inType][inName].level;
-			if ( ! level) {
-				level = this.info.__default[inType][inName].level || Model.F_NORMAL;
+			return this.info[inKind][inType][inName];
+		} catch(error) {
+			return;		// Return undefined
+		}
+	},
+	getFilterLevel: function(inKind, inType, inName) {
+		var info;
+		try {
+			info = this.getInfo(inKind, inType, inName);
+			if (info && info.level) {
+				return info.level;
+			} else {
+				return this.getInfo("__default", inType, inName).level || Model.F_NORMAL;
 			}
 		} catch(error) {
-			var ref = this.info.__default[inType];
-			level = (ref[inName] && ref[inName].level) || Model.F_NORMAL;
+			info = this.getInfo("__default", inType, inName);
+			return (info && info.level) || Model.F_NORMAL;
 		}
-		return level;
 	}
 });

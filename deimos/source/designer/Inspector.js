@@ -2,22 +2,22 @@ enyo.kind({
 	name: "Inspector",
 	events: {
 		onModify: "",
-		onAction: "",
-		onMakeInput: ""
+		onAction: ""
 	},
 	published: {
 		filterLevel: null		// Value will be given by Inspector.Filters "checked" item.
 	},
 	components: [
 		{kind: "Scroller", classes: "enyo-fit", fit: true, components: [
-			{name: "client", allowHtml: true}
+			{name: "content", kind: "FittableRows"}
 		]}
 	],
 	handlers: {
-		onchange: "change",
-		ondblclick: "dblclick"
+		onChange: "change",
+		onDblClick: "dblclick"
 	},
 	style: "padding: 8px; white-space: nowrap;",
+	debug: false,
 	create: function() {
 		this.inherited(arguments);
 	},
@@ -35,12 +35,12 @@ enyo.kind({
 		while (context) {
 			for (var p in context.published) {
 				if (this.allowed(inControl, "properties", p)) {
-					this.debug && this.log("Adding property '" + p + "' from '" + context.kind + "'");
+					// this.debug && this.log("Adding property '" + p + "' from '" + context.kind + "'");
 					propMap[p] = true;
 				}
 			}
 			for (var e in context.events) {
-				this.debug && this.log("Adding event '" + e + "' from '" + context.kind + "'");
+				// this.debug && this.log("Adding event '" + e + "' from '" + context.kind + "'");
 				eventMap[e] = true;
 			}
 			context = context.base && context.base.prototype;
@@ -59,73 +59,69 @@ enyo.kind({
 		}
 		return props;
 	},
-	makeEditor: function(inControl, inProperty, inExtra) {
-		this.debug && this.log("Adding entry for '" + inProperty + "'");
-		var h = [];
-		h.push('<div class="inspector-field-caption">', inProperty, ":", '</div>');
-		var v = inControl[inProperty];
+	makeEditor: function(inControl, inName, inType) {
+		this.debug && this.log("Adding entry for " + inType + " " + inName);
+		var info = Model.getInfo(inControl.kind, inType, inName);
+		var kind = (info && info.inputKind);
+		var v = inControl[inName];
 		if (v === undefined) {
 			v="";
 		}
-		var inputDiv = this.doMakeInput({property: inProperty, value: v, extra: inExtra});
-		if (inputDiv) {
-			h.push(inputDiv);
+
+		if (kind) {
+			this.$.content.createComponent({kind: kind, fieldName: inName, fieldValue: v, extra: inType});
 		} else if (v === true || v === false) {
-			h.push('<input type="checkbox" class="inspector-field-checkbox" ', v ? ' checked="checked"' : '', ' name="' + inProperty + '"', inExtra || "", '/>');
+			this.$.content.createComponent({kind: "Inspector.Config.Boolean", fieldName: inName, fieldValue: v, extra: inType});
 		} else {
-			h.push('<input class="inspector-field-editor" value="' + v + '" name="' + inProperty + '"', inExtra || "", '/>');
+			this.$.content.createComponent({kind: "Inspector.Config.Text", fieldName: inName, fieldValue: v, extra: inType});
 		}
-		h.push("<br/>");
-		return h.join('');
 	},
 	inspect: function(inControl) {
-		var h = [];
+		this.$.content.destroyComponents();
 		this.selected = inControl;
 		if (inControl) {
-			h.push("<h3>", inControl.name, ' <span class="label label-info">', inControl.kindName, "</span>", "</h3>");
-			h.push("<div class=\"onyx-groupbox-header\">Properties</div>");
+			this.$.content.createComponent({tag: "h3", content: inControl.kindName, classes: "label label-info"});
+			this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Properties"});
 			var ps = this.buildPropList(inControl);
 			for (var i=0, p; p=ps[i]; i++) {
-				h.push(this.makeEditor(inControl, p));
+				this.makeEditor(inControl, p, "properties");
 			}
 			ps = ps.events;
 			if (ps.length) {
-				h.push("<div class=\"onyx-groupbox-header\">Events</div>");
+				this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
 			}
 			for (var i=0, p; p=ps[i]; i++) {
-				h.push(this.makeEditor(inControl, p, " event=true "));
+				this.makeEditor(inControl, p, "events");
 			}
 		}
-		this.$.client.setContent(h.join(''));
+		this.$.content.render();
 	},
 	change: function(inSender, inEvent) {
-		var n = inEvent.target.name;
-		var v = inEvent.target.value;
-		this.log(n, v);
-		if (inEvent.target.type == "checkbox") {
-			v = inEvent.target.checked;
-		} else {
-			var num = parseFloat(v);
-			if (String(num) == v) {
-				v = num;
-			}
+		var n = inEvent.target.fieldName;
+		var v = inEvent.target.fieldValue;
+
+		var num = parseFloat(v);
+		if (String(num) == v) {
+			v = num;
 		}
-		//this.log(n, v);
+
+		this.debug && this.log(n, v);
 		this.selected.setProperty(n, v);
 		this.doModify();
 	},
 	dblclick: function(inSender, inEvent) {
-		if (inEvent.target.getAttribute("event")) {
+		if (inEvent.target.extra === "events") {
 			//this.changeHandler(inSender, inEvent);
-			var n = inEvent.target.name;
-			var v = inEvent.target.value;
+			var n = inEvent.target.fieldName;
+			var v = inEvent.target.fieldValue;
 			// FIXME: hack to supply a default event name
 			if (!v) {
-				v = inEvent.target.value = this.selected.name + enyo.cap(n.slice(2));
+				v = inEvent.target.fieldName = this.selected.name + enyo.cap(n.slice(2));
+				this.debug && this.log("SET handler: " + n + " --> " + v);
 				this.selected.setProperty(n, v);
 				this.change(inSender, inEvent);
+				inEvent.target.setFieldValue(v);
 			}
-			this.log(n, v);
 			this.doAction({value: v});
 		}
 	}
