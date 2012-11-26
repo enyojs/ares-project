@@ -3,6 +3,7 @@ enyo.singleton({
 	kind: "enyo.Component",
 	debug: false,
 	info: {},
+	config: [],
 	defaults: null,				// populated by base-design.js
 
 	F_HIDDEN: -1,
@@ -26,11 +27,14 @@ enyo.singleton({
 		this.addInformation("properties", "__default", this.defaults.properties);
 		this.addInformation("events", "__default", this.defaults.events);
 
-		enyo.forEach(this.palette, function(category) {
-			enyo.forEach(category.items, function(item) {
+		enyo.forEach(this.config, function(item) {
+			if (item.type === "kind") {
+				this.log("Processing: " + item.name, item);
 				this.addInformation("properties", item.name, item.properties);
 				this.addInformation("events", item.name, item.events);
-			}, this);
+			} else {
+				this.log("Unknown data type='" + item.type + "' -- Ignored");
+			}
 		}, this);
 	},
 	addInformation: function(inType, inName, inInfo) {

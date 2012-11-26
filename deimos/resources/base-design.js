@@ -15,6 +15,30 @@ Palette.model.push(
 	]}
 );
 
+Model.config.push(
+	{type: "kind", name: "onyx.RadioGroup",			// TODO: To move to onyx design.js (or .JSON file)
+		properties: {
+			highlander: {filterLevel: "useful", inputKind: "Inspector.Config.Boolean"},
+			content: {filterLevel: "hidden"}
+		},
+		events: {
+			ontap: {filterLevel: "normal"}
+		}
+	},
+	{type: "kind", name: "onyx.Input",				// TODO: To move to onyx design.js (or .JSON file)
+		properties: {
+			value: {filterLevel: "useful", inputKind: "Inspector.Config.Text"},
+			placeholder: {filterLevel: "useful"},
+			type: {filterLevel: "useful", inputKind: {kind: "Inspector.Config.Select", values: ["text", "url", "email", "search", "number"]}},
+			selectOnFocus: {filterLevel: "useful"}
+		},
+		events: {
+			onchange: {filterLevel: "useful"},
+			onDisabledChange: {filterLevel: "useful"}
+		}
+	}
+);
+
 Model.defaults = {
 	properties: {
 		owner: {filterLevel: "hidden"},
@@ -30,7 +54,9 @@ Model.defaults = {
 		content: {filterLevel: "useful", inputKind: "Inspector.Config.Text"},
 		name: {filterLevel: "useful", inputKind: "Inspector.Config.Text"}
 	},
-	event: {}
+	events: {
+		ontap: {filterLevel: "useful"}
+	}
 };
 
 Model.buildInformation();
