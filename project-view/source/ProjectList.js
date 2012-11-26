@@ -141,8 +141,7 @@ enyo.kind({
 			this.log("removing project" +  project.name + ( nukeFiles ? " and its files" : "" )) ;
 			this.debug && this.log(project) ;
 			if (nukeFiles) {
-				// FIXME: shouldn't impl be private stuff ?
-				project.service.impl.remove( project.folderId )
+				project.service.remove( project.folderId )
 					.response(this, function(){this.removeSelectedProjectData();})
 					.error(this, function(inError){
 						this.showErrorPopup("Error removing files of project " + project.name + ": " + inError);
