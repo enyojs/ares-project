@@ -13,7 +13,7 @@ enyo.kind({
 	events: {
 		onCustomConfigProject: "",
 		onSaveGeneratedXml: "",
-		onCanceled: "",
+		onCancel: "",
 	},
 	createMode: true,
 
@@ -102,7 +102,7 @@ enyo.kind({
 
 		// FIXME: there should be an HTML/CSS way to avoid using FittableStuff...
 		{kind: "FittableRows", style: "margin-top: 10px; width: 100%", fit: true, components: [
-			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "doCanceled"},
+			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "doCancel"},
 			{name: "ok", kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "createProject"}
 		]},
 
@@ -184,7 +184,7 @@ enyo.kind({
 	kind: "onyx.Popup",
 	modal: true, centered: true, floating: true, autoDismiss: false,
 	handlers: {
-		onCanceled: "hide"
+		onCancel: "hide"
 	},
 	components: [
 		{kind: "ProjectProperties"}
