@@ -1,0 +1,9 @@
+enyo.depends(
+	"TestRunner.js",
+	"TestConsoleRunner.js",
+	"TestSuite.js",
+	"TestReporter.js",
+	"TestConsoleReporter.js",
+	"TestCase.css",
+	"tests"
+);
