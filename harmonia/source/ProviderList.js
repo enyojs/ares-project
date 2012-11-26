@@ -1,8 +1,12 @@
 enyo.kind({
 	name: "ProviderList",
 	kind: "FittableRows",
+	debug: true,
+
+	properties: [ 'type' ],
 	published: {
 		type: "",
+		propertiesJSON: '["type"]',
 		// use 0 to pre-select the first storage provider of
 		// the list... or get an expection at first load.
 		selected: -1
@@ -26,16 +30,28 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.services = [];
+		try {
+			this.properties = JSON.parse(this.propertiesJSON);
+			if (typeof this.properties[0] !== 'string') {
+				throw new Error('BUG: wrong propertiesJSON=' + this.propertiesJSON);
+			}
+		} catch (err) {
+			this.properties = undefined;
+		}
+		if (this.debug) this.log("type:", this.type, ", properties=", this.properties);
 	},
 	/**
 	 * Receive the {onServicesChange} broadcast notification
 	 * @param {Object} inEvent.serviceRegistry
 	 */
 	handleServicesChange: function(inSender, inEvent) {
-		this.log(inEvent);
-		this.services = inEvent.serviceRegistry.services.filter(function(service) {
-			return (service.conf.type === this.type);
-		}, this);
+		//if (this.debug) this.log("sender:", inSender, "event:", inEvent);
+		// filter-out on service type (if defined)
+		this.services = inEvent.serviceRegistry.filter({
+			properties: this.properties,
+			type: this.type
+		});
+		if (this.debug) this.log("type=" + this.type + ", properties=" + this.properties, "=> services:", this.services);
 		this.$.list.count = this.services.length;
 		this.$.list.render();
 		// re-select the line that was selected before service changed
@@ -45,8 +61,8 @@ enyo.kind({
 		var p = this.services[inEvent.index];
 		if (p) {
 			this.$.item.applyStyle("background-color", inSender.isSelected(inEvent.index) ? "lightblue" : "");
-			this.$.name.setContent(p.conf.name);
-			this.$.icon.setSrc("$harmonia/images/providers/" + p.conf.icon + ".png");
+			this.$.name.setContent(p.config.name);
+			this.$.icon.setSrc("$harmonia/images/providers/" + p.config.icon + ".png");
 			//this.$.auth.setShowing(p.type !== "dropbox" || p.auth);
 		}
 		return true;
