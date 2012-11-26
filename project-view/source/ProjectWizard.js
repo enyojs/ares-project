@@ -12,12 +12,14 @@ enyo.kind({
 		onConfirmConfigProject: ""
 	},
 	handlers: {
-		onDirectorySelected: "customizeNamePopup"
+		onDirectorySelected: "customizeNamePopup",
+		// can be canceled by either of the included components
+		onCancel: "hideMe"
 	},
 
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget"},
-		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup", onCancel: "hideMe"}
+		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup"}
 	],
 	debug: true,
 	create: function() {
