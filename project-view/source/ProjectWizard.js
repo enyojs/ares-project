@@ -14,7 +14,7 @@ enyo.kind({
 	handlers: {
 		onDirectorySelected: "customizeNamePopup",
 		// can be canceled by either of the included components
-		onCancel: "hideMe"
+		onDone: "hideMe"
 	},
 
 	components: [
