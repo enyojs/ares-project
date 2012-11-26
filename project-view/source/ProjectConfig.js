@@ -7,8 +7,9 @@
  * changed.
  * 
  * - Use #setData and #getData to change the in-memory configuration Javascript object.
- *   Any change in the configuration causes a save-to-storage to happen.
- * 
+ *   data is an object containing the *whole* configuration.
+ * - Then use #save to send the whole configuration to remote storage
+ *  
  * As it is, this kind performs zero checks on the content of the file.
  */
 enyo.kind({
