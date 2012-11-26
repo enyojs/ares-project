@@ -40,8 +40,10 @@ enyo.kind({
 				}
 			}
 			for (var e in context.events) {
-				// this.debug && this.log("Adding event '" + e + "' from '" + context.kind + "'");
-				eventMap[e] = true;
+				if (this.allowed(inControl, "events", e)) {
+					// this.debug && this.log("Adding event '" + e + "' from '" + context.kind + "'");
+					eventMap[e] = true;
+				}
 			}
 			context = context.base && context.base.prototype;
 		}
@@ -55,7 +57,9 @@ enyo.kind({
 			props.events.push(n);
 		}
 		for (n=0; n < domEvents.length; n++) {
-			props.events.push(domEvents[n]);
+			if (this.allowed(inControl, "events", domEvents[n])) {
+				props.events.push(domEvents[n]);
+			}
 		}
 		return props;
 	},
@@ -68,7 +72,12 @@ enyo.kind({
 			v="";
 		}
 
-		if (kind) {
+		// Select the good input kind
+		if (kind && kind instanceof Object) {	// User defined kind: as an Object
+			kind = enyo.clone(kind);
+			kind = enyo.mixin(kind, {fieldName: inName, fieldValue: v, extra: inType});
+			this.$.content.createComponent(kind);
+		} else if (kind) {						// User defined kind: We assume it's a String
 			this.$.content.createComponent({kind: kind, fieldName: inName, fieldValue: v, extra: inType});
 		} else if (v === true || v === false) {
 			this.$.content.createComponent({kind: "Inspector.Config.Boolean", fieldName: inName, fieldValue: v, extra: inType});
