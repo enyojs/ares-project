@@ -60,6 +60,10 @@ body {
 	background-position: initial initial;
 	background-repeat: initial initial;
 }
+.ares_phobos_findpop {
+	background-color:	#008400;
+	color: #000000;
+}
 /**/
 .border {
 	background-color: whiteSmoke;
