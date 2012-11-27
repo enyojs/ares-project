@@ -6,27 +6,32 @@ enyo.kind({
 	},
 	debug: false,
 	/**
-	 * Set PhoneGap build base parameters.
+	 * @private
+	 */
+	create: function() {
+		this.inherited(arguments);
+		this.config = {};
+	},
+	/**
+	 * Set PhonegapBuild base parameters.
 	 * 
-	 * If defined, the {auth} property is immediately saved in the
-	 * localStorage.
-	 * 
+	 * This method is not expected to be called by anyone else but
+	 * {ServiceRegistry}.
 	 * @param {Object} inConfig
+	 * @see ServiceRegistry.js
 	 */
 	setConfig: function(inConfig) {
-		if (inConfig.origin && inConfig.pathname) {
-			this.url = inConfig.origin + inConfig.pathname;
-			if (this.debug) this.log("url", this.url);
+		enyo.mixin(this.config, inConfig);
+		if (this.config.origin && this.config.pathname) {
+			this.url = this.config.origin + this.config.pathname;
+			if (this.debug) this.log("url:", this.url);
 		}
-		if (inConfig.id) {
-			this.id = inConfig.id;
-			if (this.debug) this.log("id", this.id);
-		}
-		if (inConfig.auth && inConfig.auth !== this.auth) {
-			this.auth = inConfig.auth;
-			if (this.debug) this.log("auth"); // do not log() auth!
-			ServiceRegistry.instance.setConfig(this.id, {auth: this.auth});
-		}
+	},
+	/**
+	 * @return {Object} the configuration this service was configured by
+	 */
+	getConfig: function() {
+		return this.config;
 	},
 	/**
 	 * initiates the phonegap build of the given project
@@ -66,14 +71,14 @@ enyo.kind({
 	 */
 	getToken: function(project, next) {
 		if (this.debug) this.log("...");
-		if(this.auth && this.auth.token) {
+		if(this.config.auth && this.config.auth.token) {
 			this.getFileList(project, next);
 			return;
 		}
 
 		// Pass credential information to get a phonegapbuild token
-		var data = "username=" + encodeURIComponent(this.auth.username) +
-			    "&password=" + encodeURIComponent(this.auth.password);
+		var data = "username=" + encodeURIComponent(this.config.auth.username) +
+			    "&password=" + encodeURIComponent(this.config.auth.password);
 		
 		// Get a phonegapbuild token for the Hermes build service
 		var req = new enyo.Ajax({
@@ -83,18 +88,19 @@ enyo.kind({
 			handleAs: "json"
 		});
 		req.response(this, function(inSender, inData) {
-			this.auth.token = inData.token;
+			this.config.auth.token = inData.token;
 			if (this.debug) this.log("Got phonegap token: " + this.token);
 			
 			// Now get the list of all the files of the project
 			this.getFileList(project, next);
 		});
 		req.error(this, function(inSender, inError) {
-			var response = inSender.xhrResponse,
-			    contentType = response.headers['Content-Type'],
-			    details;
-			if (contentType && contentType.match('^text/plain')) {
-				details = response.body;
+			var response = inSender.xhrResponse, contentType, details;
+			if (response) {
+				contentType = response.headers['Content-Type'];
+				if (contentType && contentType.match('^text/plain')) {
+					details = response.body;
+				}
 			}
 			next(new Error("Unable to get PhoneGap application token:" + inError), details);
 		});
@@ -187,7 +193,7 @@ enyo.kind({
 		var config = project.config.getData();
 		if (this.debug) this.log("...");
 		// Add token information in the FormData
-		formData.append('token', this.auth.token);
+		formData.append('token', this.config.auth.token);
 		formData.append('title', config.title);
 		if (config.build.phonegap.appId) {
 			if (this.debug) this.log("appId: " + config.build.phonegap.appId);
@@ -208,11 +214,12 @@ enyo.kind({
 			next(null, inData);
 		});
 		req.error(this, function(inSender, inError) {
-			var response = inSender.xhrResponse,
-			    contentType = response.headers['Content-Type'],
-			    details;
-			if (contentType && contentType.match('^text/plain')) {
-				details = response.body;
+			var response = inSender.xhrResponse, contentType, details;
+			if (response) {
+				contentType = response.headers['Content-Type'];
+				if (contentType && contentType.match('^text/plain')) {
+					details = response.body;
+				}
 			}
 			next(new Error("Unable to build application:" + inError), details);
 		});
