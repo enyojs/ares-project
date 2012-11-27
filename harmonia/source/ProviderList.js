@@ -28,6 +28,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.services = [];
+		if (this.debug) this.log("type:", this.type, ", propertiesJSON=", this.propertiesJSON);
 		try {
 			this.properties = JSON.parse(this.propertiesJSON);
 			if (typeof this.properties[0] !== 'string') {
@@ -56,11 +57,13 @@ enyo.kind({
 		this.doSelectProvider({service: this.services[this.selected]});
 	},
 	setupRow: function(inSender, inEvent) {
-		var p = this.services[inEvent.index];
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		var p = this.services[inEvent.index], config;
 		if (p) {
+			config = p.getConfig();
 			this.$.item.applyStyle("background-color", inSender.isSelected(inEvent.index) ? "lightblue" : "");
-			this.$.name.setContent(p.config.name);
-			this.$.icon.setSrc("$harmonia/images/providers/" + p.config.icon + ".png");
+			this.$.name.setContent(config.name);
+			this.$.icon.setSrc("$harmonia/images/providers/" + config.icon + ".png");
 			//this.$.auth.setShowing(p.type !== "dropbox" || p.auth);
 		}
 		return true;
@@ -69,6 +72,7 @@ enyo.kind({
 		this.$.list.getSelection().select(this.selected);
 	},
 	rowSelected: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
 		this.selected = inEvent.key;
 		var p = this.services[this.selected];
 		if (p) {
