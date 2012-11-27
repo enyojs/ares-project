@@ -17,26 +17,36 @@ enyo.kind({
 	components: [
 		{kind: "LocalStorage"},
 		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
-			{content: "Projects", style: "margin-right: 10px"},
+			{kind: "onyx.MenuDecorator", onSelect: "aresMenuItemSelected", components: [
+				{content: "Ares"},
+				{kind: "onyx.Menu", components: [
+					{value: "showAccountConfigurator", components: [
+						{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png"},
+						{content: "Accounts..."}
+					]},
+					{classes: "onyx-menu-divider"},
+					{content: "Properties..."}
+				]}
+			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_settings.png", onclick: "doModifySettings"},
+				{kind: "onyx.IconButton", src: "$project-view/assets/images/project_settings.png", onclick: "doModifySettings"},
 				{kind: "onyx.Tooltip", content: "Settings..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_view_new.png", onclick: "doCreateProject"},
+				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_new.png", onclick: "doCreateProject"},
 				{kind: "onyx.Tooltip", content: "Create or Import Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_view_edit.png", onclick: "doScanProject"},
+				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_edit.png", onclick: "doScanProject"},
 				{kind: "onyx.Tooltip", content: "Scan for Projects..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_view_delete.png", onclick: "removeProjectAction"},
+				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_delete.png", onclick: "removeProjectAction"},
 				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
 				{kind: "onyx.Tooltip", content: "Remove Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_view_build.png", onclick: "doPhonegapBuild"},
+				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_build.png", onclick: "doPhonegapBuild"},
 				{kind: "onyx.Tooltip", content: "Phonegap build"}
 			]}
 		]},
@@ -47,6 +57,7 @@ enyo.kind({
 		]},
 		{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{kind: "AccountsConfigurator", ontap: "hideAccountConfigurator"},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 	PROJECTS_STORAGE_KEY: "com.enyojs.ares.projects",
@@ -54,14 +65,6 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
-	},
-	/**
-	 * Receive the {onServicesChange} broadcast notification
-	 * @param {Object} inEvent.serviceRegistry
-	 */
-	handleServicesChange: function(inSender, inEvent) {
-		if (this.debug) this.log(inEvent);
-		this.serviceRegistry = inEvent.serviceRegistry;
 	},
 	/**
 	 * Callback functions which receives the project list data read from the storage
@@ -178,7 +181,7 @@ enyo.kind({
 			this.selected.removeClass("ares_projectView_projectList_item_selected");
 		}
 		project = this.projects[inEvent.index];
-		project.service = this.serviceRegistry.resolveServiceId(project.serviceId);
+		project.service = ServiceRegistry.instance.resolveServiceId(project.serviceId);
 		if (project.service) {
 			// Highlight a project item if & only if its
 			// filesystem service provider exists.
@@ -194,6 +197,18 @@ enyo.kind({
 			msg = "Service " + project.serviceId + " not found";
 			this.showErrorPopup(msg);
 			this.error(msg);
+		}
+	},
+	showAccountConfigurator: function() {
+		this.$.accountsConfigurator.show();
+	},
+	hideAccountConfigurator: function() {
+		this.$.accountsConfigurator.hide();
+	},
+	aresMenuItemSelected: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		if (typeof this[inEvent.selected.value] === 'function') {
+			this[inEvent.selected.value]();
 		}
 	},
 	showErrorPopup : function(msg) {
