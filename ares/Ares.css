@@ -2,9 +2,12 @@ body {
 	background-color: #aaa;
 }
 /**/
-#ares_harmonia_providerList {
-	width: 320px;
-	border: 2px solid #333;
+.ares_harmonia_providerList {
+	padding: 6px;
+	width: 30%;
+}
+.ares_harmonia_authPanel {
+	padding: 6px;
 }
 #ares_harmonia_hermesFileTree {
 	width: 500px;
