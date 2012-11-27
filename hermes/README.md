@@ -25,14 +25,14 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		├── 0
 		└── 1
 
-… corresponds to the following JSON object returned by `PROPFIND`.
+… corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.
 
 		$ curl "http://127.0.0.1:9009/id/%2F?_method=PROPFIND&depth=10"
 		{
 		    "isDir": true, 
 		    "path": "/", 
 		    "name": "", 
-		    "contents": [
+		    "children": [
 		        {
 		            "isDir": false, 
 		            "path": "/0", 
@@ -49,14 +49,14 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		    "id": "%2F"
 		}
 
-* `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded):
+* `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded).  It returns a JSON-encoded single-level (depth=0) node descriptor of the new folder.
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
 
-* `PUT` creates or overwrite a file resource.
+* `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.
 
 * `DELETE` delete a resource (a file), which might be a collection (a folder).  Status codes:
-  * `200/Ok` success, resource successfully removed.  The method returns the new status (`PROPFIND`) of the parent of the deleted resource.
+  * `200/OK` success, resource successfully removed.  The method returns the new status (`PROPFIND`) of the parent of the deleted resource.
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2Ftata?_method=DELETE"
 
@@ -92,6 +92,12 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 So far, only hermes local filesystem access comes with a (small) test suite, that relies on [Mocha](http://visionmedia.github.com/mocha/) and [Should.js](https://github.com/visionmedia/should.js).  Run it using:
 
 	$ hermes/node_modules/mocha/bin/mocha hermes/fsLocal.spec.js
+
+To stop on the first failing case:
+
+	$ hermes/node_modules/mocha/bin/mocha --bail hermes/fsLocal.spec.js
+
+For more detailled instructions, refer to the [Mocha home page](http://visionmedia.github.com/mocha/).
 
 ## Archive service
 
