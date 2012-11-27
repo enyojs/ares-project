@@ -5,6 +5,7 @@ enyo.kind({
 		onSelect: "newSelect",
 		onDeselect: "newDeselect"
 	},
+	debug: true,
 	components: [
 		{name: "providerList", kind: "ProviderList", type: "filesystem", onSelectProvider: "handleSelectProvider"},
 		{kind: "HermesFileTree", fit: true, onFileClick: "selectFile", onFolderClick: "selectFolder", 
@@ -22,6 +23,7 @@ enyo.kind({
 		}
 	},
 	handleSelectProvider: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
 		if (inEvent.service) {
 			this.$.hermesFileTree.connectService(inEvent.service);
 		}
@@ -29,7 +31,7 @@ enyo.kind({
 		return true; //Stop event propagation
 	},
 	setProject: function(project) {
-		this.log(project);
+		if (this.debug) this.log("project:", project);
 		var config ; 
 		if (project !== null) {
 			config = {
@@ -44,10 +46,10 @@ enyo.kind({
 	},
 	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
 	selectFile: function(inSender, inEvent) {
-		this.log(inEvent.file);
+		if (this.debug) this.log(inEvent.file);
 	},
 	selectFolder: function(inSender, inEvent) {
-		this.log(inEvent.file);
+		if (this.debug) this.log(inEvent.file);
 	},
 	newSelect: function(inSender, inEvent) {
 		if (inSender.name !== "providerList") {
@@ -82,7 +84,7 @@ enyo.kind({
 		};
 		var r = new enyo.Ajax(options);
 		r.response(this, function(inSender, inResponse) {
-			this.debug && this.log("response: "+inResponse.toString());
+			if (this.debug) this.log("response: "+inResponse.toString());
 			for (var n in replacements) {
 				inResponse = inResponse.replace(n, replacements[n]);
 			}
@@ -101,21 +103,21 @@ enyo.kind({
     delayedRefresh: function(msg) {
 		var onDone = new enyo.Async() ;
 		onDone.response(this, function(inSender, toSelectId) {
-			this.log("delayed refresh after " + msg + ' on ' + toSelectId) ;
+			if (this.debug) this.log("delayed refresh after " + msg + ' on ' + toSelectId) ;
 			this.$.hermesFileTree.refreshFileTree(null, toSelectId);
 		}) ;
 		return onDone ;
 	},
 	createFile: function(name, folderId, content) {
-		this.log("Creating new file "+name+" into folderId="+folderId);
+		if (this.debug) this.log("Creating new file "+name+" into folderId="+folderId);
 		var service = this.selectedFile.service;
 		service.createFile(folderId, name, content)
 			.response(this, function(inSender, inResponse) {
-				this.log("Response: "+inResponse);
+				if (this.debug) this.log("Response: "+inResponse);
 				this.delayedRefresh("file creation done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
-				this.log("Error: "+inError);
+				if (this.debug) this.log("Error: "+inError);
 				this.$.hermesFileTree.showErrorPopup("Creating file "+name+" failed:" + inError);
 			});
 	},	
@@ -123,14 +125,14 @@ enyo.kind({
 		var folderId = inEvent.folderId;
 		var name = inEvent.fileName.trim();
 		var service = this.selectedFile.service;
-		this.log("Creating new folder "+name+" into folderId="+folderId);
+		if (this.debug) this.log("Creating new folder "+name+" into folderId="+folderId);
 		service.createFolder(folderId, name)
 			.response(this, function(inSender, inResponse) {
-				this.log("Response: "+inResponse);
+				if (this.debug) this.log("Response: "+inResponse);
 				this.delayedRefresh("folder creation done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
-				this.log("Error: "+inError);
+				if (this.debug) this.log("Error: "+inError);
 				this.$.hermesFileTree.showErrorPopup("Creating folder "+name+" failed:" + inError);
 			});
 	},
@@ -139,48 +141,48 @@ enyo.kind({
 		var oldId = this.selectedFile.id;
 		var newName = inEvent.fileName.trim();
 		var service = this.selectedFile.service;
-		this.log("Renaming file " + oldId + " as " + newName + " at " + path);
+		if (this.debug) this.log("Renaming file " + oldId + " as " + newName + " at " + path);
 		service['rename'](oldId, newName)
 			.response(this, function(inSender, inResponse) {
-				this.log("Response: "+inResponse);
+				if (this.debug) this.log("Response: "+inResponse);
 				this.delayedRefresh("rename done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
-				this.log("Error: "+inError);
+				if (this.debug) this.log("Error: "+inError);
 				this.$.hermesFileTree.showErrorPopup("Renaming file "+oldId+" as " + newName +" failed:" + inError);
 			});
 	},
 	deleteConfirm: function(inSender, inEvent) {
-		this.log(inEvent);
+		if (this.debug) this.log(inEvent);
 		var nodeId = inEvent.nodeId;
-		this.log(this.selectFile);
+		if (this.debug) this.log(this.selectFile);
 		var oldId = this.selectedFile.id;
 		var oldPath = this.selectedFile.path;
 		var method = this.selectedFile.isDir ? "deleteFolder" : "deleteFile";
 		var service = this.selectedFile.service;
 		service.remove(inEvent.nodeId)
 			.response(this, function(inSender, inResponse) {
-				this.log("Response: "+inResponse);
+				if (this.debug) this.log("Response: "+inResponse);
 				this.delayedRefresh("delete done").go() ;
 			})
 			.error(this, function(inSender, inError) {
-				this.log("Error: "+inError);
+				if (this.debug) this.log("Error: "+inError);
 				this.$.hermesFileTree.showErrorPopup("Deleting file "+oldPath+" failed:" + inError);
 			});
 	},
 	copyFileConfirm: function(inSender, inEvent) {
-		this.log(inEvent);
+		if (this.debug) this.log(inEvent);
 		var oldName = this.selectedFile.name;
 		var newName = inEvent.fileName.trim();
 		var service = this.selectedFile.service;
-		this.log("Creating new file " + newName + " as copy of" + this.selectedFile.name);
+		if (this.debug) this.log("Creating new file " + newName + " as copy of" + this.selectedFile.name);
 		service.copy(this.selectedFile.id, newName)
 			.response(this, function(inSender, inResponse) {
-				this.log("Response: "+inResponse);
+				if (this.debug) this.log("Response: "+inResponse);
 				this.delayedRefresh("copy done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
-				this.log("Error: "+inError);
+				if (this.debug) this.log("Error: "+inError);
 				this.$.hermesFileTree.showErrorPopup("Creating file "+newName+" as copy of" + this.selectedFile.name +" failed:" + inError);
 			});
 	}
