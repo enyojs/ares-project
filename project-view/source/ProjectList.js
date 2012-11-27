@@ -57,7 +57,7 @@ enyo.kind({
 		]},
 		{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
-		{kind: "AccountsConfigurator", ontap: "hideAccountConfigurator"},
+		{kind: "AccountsConfigurator"},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 	PROJECTS_STORAGE_KEY: "com.enyojs.ares.projects",
@@ -201,9 +201,6 @@ enyo.kind({
 	},
 	showAccountConfigurator: function() {
 		this.$.accountsConfigurator.show();
-	},
-	hideAccountConfigurator: function() {
-		this.$.accountsConfigurator.hide();
 	},
 	aresMenuItemSelected: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
