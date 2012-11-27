@@ -12,9 +12,9 @@ enyo.kind({
 	classes: "enyo-unselectable",
 	fit: true,
 	events: {
-		onCustomConfigProject: "",
+		onModifiedConfig: "",
 		onSaveGeneratedXml: "",
-		onDone: "",
+		onDone: ""
 	},
 	createMode: true,
 
@@ -104,7 +104,7 @@ enyo.kind({
 		// FIXME: there should be an HTML/CSS way to avoid using FittableStuff...
 		{kind: "FittableRows", style: "margin-top: 10px; width: 100%", fit: true, components: [
 			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "doDone"},
-			{name: "ok", kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "createProject"}
+			{name: "ok", kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "confirmTap"}
 		]},
 
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"}
@@ -166,8 +166,9 @@ enyo.kind({
 			this.$.pgConfId.setValue(pgConf.appId);
 			
 			if (pgConf.targets) {
+				// pgTarget is a key of object pgConf.targets
 				for (pgTarget in pgConf.targets ) {
-					this.$[ pgTarget + 'Target' ].setContent(pgConf.targets[pgTarget]) ;
+					this.$[ pgTarget + 'Target' ].setValue(pgConf.targets[pgTarget]) ;
 				}
 			}
 		}
@@ -176,13 +177,33 @@ enyo.kind({
 
 	confirmTap: function(inSender, inEvent) {
 		// retrieve modified values
-		var obj = {
-			name: this.$.projectName.getValue(),
-			id: this.$.projectId.getValue(),
-			title: this.$.projectTitle.getValue(),
-			description: this.$.projectDescription.getValue()
+		this.log('ok tapped') ;
+		var config = {
+			id:       this.$.projectId.getValue(),
+			version:  this.$.projectVersion.getValue(),
+			name:     this.$.projectName.getValue(),
+			title:    this.$.projectTitle.getValue(),
+			build: {
+				enabled: this.$.pgConfEnabled.getValue(),
+				appId:   this.$.pgConfId.getValue(),
+				phonegap: {
+					targets: {}
+				}
+			}
+		} ;
+
+		var pgConf = config.build.phonegap ;
+		var tglist = ['android','ios','winphone','blackberry','webos'] ;
+		for ( i in tglist) {
+			this.log('copy data from ' + tglist[i] +'Target') ;
+			pgConf.targets[tglist[i]] = this.$[ tglist[i] + 'Target' ].getValue() ;
 		}
-		this.doCustomConfigProject(obj);
+
+		// to be handled by a ProjectWizard
+		this.doModifiedConfig({data: config}) ;
+
+		this.doDone();
+
 		// handled here (don't bubble)
 		return true;
 	}
@@ -204,5 +225,5 @@ enyo.kind({
 	preFillConfig: function(inData) {
 		this.$.projectProperties.preFill(inData);
 		return this ;
-	},
+	}
 });
