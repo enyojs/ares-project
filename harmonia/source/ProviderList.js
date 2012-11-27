@@ -14,15 +14,13 @@ enyo.kind({
 	events: {
 		onSelectProvider: ""
 	},
+	classes: "onyx-dark ares_harmonia_providerList",
 	components: [
-		{kind: "onyx.Toolbar", classes: "ares_harmonia_toolBar", components: [
-			{content: "Storage Services"}
-		]},
 		{fit: true, name: "list", kind: "FlyweightRepeater", toggleSelected: false, onSetupItem: "setupRow", onSelect: "rowSelected", onDeselect: "rowDeselected", components: [
-			{name: "item", classes: "enyo-children-inline", style: "padding: 8px 4px 4px; border-bottom: 1px solid gray;", ontap: "itemTap", ondblclick: "dblClick", /*onConfirm: "removeProvider",*/ components: [
-				{name: "icon", kind: "onyx.Icon", style: "margin-right: 10px"},
-				{name: "name", Xstyle: "width: 80%; display: inline-block;"},
-				{name: "auth", kind: "Image", src: "$harmonia/images/valid-check.png", style: "margin-left: 12px; vertical-align: middle;", showing: false}
+			{name: "item", classes: "enyo-children-inline", ontap: "itemTap", ondblclick: "dblClick", /*onConfirm: "removeProvider",*/ components: [
+				{name: "icon", kind: "onyx.Icon"},
+				{name: "name"},
+				{name: "auth", kind: "Image", src: "$harmonia/images/valid-check.png", showing: false}
 			]}
 		]},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
