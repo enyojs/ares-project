@@ -3,8 +3,10 @@ body {
 }
 /**/
 .ares_harmonia_providerList {
-	padding: 6px;
 	width: 30%;
+}
+.ares_harmonia_providerItems {
+	padding: 6px;
 }
 .ares_harmonia_authPanel {
 	padding: 6px;
@@ -14,7 +16,8 @@ body {
 	border: 2px solid #333;
 }
 .ares_harmonia_toolBar {
-	height: 66px;
+	height: 56px;
+	vertical-align: middle;
 }
 /**/
 #ares_deimos {

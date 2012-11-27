@@ -16,7 +16,7 @@ enyo.kind({
 		{kind: "FittableRows", style: "height: 400px; width: 600px", components: [
 			{kind: "Control", tag: "span", style: "padding: 0 4px; vertical-align: middle;", content: "Select a directory", name: "header"},
 			{kind: "FittableColumns", content: "fittableColumns", fit: true, components: [
-				{kind: "ProviderList", type: "filesystem", name: "providerList", onSelectProvider: "handleSelectProvider"},
+				{kind: "ProviderList", type: "filesystem", name: "providerList", header: "Sources", onSelectProvider: "handleSelectProvider"},
 				{kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "selectFile", onFolderClick: "selectFolder"}
 			]},
 			{kind: "FittableColumns", content: "fittableColumns2", isContainer: true, components: [

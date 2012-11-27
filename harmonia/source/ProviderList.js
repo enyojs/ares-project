@@ -7,6 +7,7 @@ enyo.kind({
 	published: {
 		type: "",
 		propertiesJSON: '["type"]',
+		header: "",
 		// use 0 to pre-select the first storage provider of
 		// the list... or get an expection at first load.
 		selected: -1
@@ -16,7 +17,8 @@ enyo.kind({
 	},
 	classes: "onyx-dark ares_harmonia_providerList",
 	components: [
-		{fit: true, name: "list", kind: "FlyweightRepeater", toggleSelected: false, onSetupItem: "setupRow", onSelect: "rowSelected", onDeselect: "rowDeselected", components: [
+		{name: "header", kind: "onyx.Toolbar", content: "", classes: "onyx-menu-toolbar ares_harmonia_toolBar"},
+		{name: "list", kind: "FlyweightRepeater", classes: "ares_harmonia_providerItems", fit: true, toggleSelected: false, onSetupItem: "setupRow", onSelect: "rowSelected", onDeselect: "rowDeselected", components: [
 			{name: "item", classes: "enyo-children-inline", ontap: "itemTap", ondblclick: "dblClick", /*onConfirm: "removeProvider",*/ components: [
 				{name: "icon", kind: "onyx.Icon"},
 				{name: "name"},
@@ -38,6 +40,12 @@ enyo.kind({
 			this.properties = undefined;
 		}
 		if (this.debug) this.log("type:", this.type, ", properties=", this.properties);
+
+		if (!this.header) {
+			this.$.header.hide();
+		} else {
+			this.$.header.setContent(this.header);
+		}
 	},
 	/**
 	 * Receive the {onServicesChange} broadcast notification

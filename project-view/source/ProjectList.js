@@ -16,7 +16,7 @@ enyo.kind({
 	debug: false,
 	components: [
 		{kind: "LocalStorage"},
-		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
+		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar ares_harmonia_toolBar", isContainer: true, name: "toolbar", components: [
 			{kind: "onyx.MenuDecorator", onSelect: "aresMenuItemSelected", components: [
 				{content: "Ares"},
 				{kind: "onyx.Menu", components: [
