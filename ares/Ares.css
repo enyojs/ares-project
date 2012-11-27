@@ -61,8 +61,6 @@ body {
 	background-repeat: initial initial;
 }
 .ares_phobos_findpop {
-	background-color:	#008400;
-	color: #000000;
 }
 /**/
 .border {
@@ -110,4 +108,9 @@ body {
 #ares_projectView_projectWizardPopup_projectWizard_selectDirectoryPopup {
     z-index: 145;
 
+}
+
+.ares-label {
+	vertical-align: middle;
+	font-weight: bold;
 }

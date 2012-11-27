@@ -37,25 +37,7 @@ enyo.kind({
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
-		{name: "findpop", kind: "enyo.Popup", centered: true, modal: true, floating: true, components: [
-			{kind: "FittableRows", classes:"ares_phobos_findpop", components: [
-				{kind: "FittableColumns", components: [
-					{name: "find", kind: "onyx.Input", placeholder: "Finding?..", onchange: "find"},
-					{fit: true},
-					{name: "findnext", kind: "onyx.Button", classes: "onyx-affirmative", content: "findnext", ontap: "findnext"},
-				]},
-				{kind: "FittableRows", components:[
-					{name: "findreplace", kind: "onyx.Input", placeholder: "Find Replace all .. ->"},
-					{name: "replacewith", kind: "onyx.Input", placeholder: "Replacing with..", onchange: "findreplace"},
-    			]},
-    			{kind: "FittableColumns", components: [
-    				{name: "exitpop", kind: "onyx.Button", classes: "onyx-negative", content: "exit!", ontap: "closepop"},
-    				{fit: true},
-    				{name: "findreplacego", kind: "onyx.Button", classes: "onyx-affirmative", content: "Replace ALL!!", ontap: "findreplace"},
-    			]}
-
-    		]}
-		]}
+		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll"}
 	],
 	events: {
 		onSaveDocument: "",
@@ -529,26 +511,27 @@ enyo.kind({
 	beforeClosingDocument: function() {
 		this.$.autocomplete.setProjectIndexer(null);
 	},
-
 	findpop: function(){
 		this.$.findpop.show();
 	},
-
-	closepop: function(){
-		this.$.findpop.hide();
+	findNext: function(inSender, inEvent){
+		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
+		this.$.ace.find(this.$.findpop.findValue, options);
 	},
 
-	find: function(inSender, inEvent){
-		this.$.ace.find(this.$.find.hasNode().value);
+	findPrevious: function(){
+		var options = {backwards: true, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
+		this.$.ace.find(this.$.findpop.findValue, options);
 	},
 
-	findnext: function(){
-		this.$.ace.findNext();
+	replaceAll: function(){
+		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
-
-	findreplace: function(){
-		this.$.ace.replaceAll(this.$.findreplace.hasNode().value , this.$.replacewith.hasNode().value)
-	},
+	
+	//ACE replace doesn't replace the currently-selected match. Seems less-than-useful
+	replace: function(){
+		//this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
+	}
 });
 
 enyo.kind({
