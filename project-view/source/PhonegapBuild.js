@@ -123,7 +123,7 @@ enyo.kind({
 			this.buildFileList(inData, fileList);
 			var prefixLen = this.extractPrefixLen(inData);
 			// Start downloading files and building the FormData
-			var formData = new FormData();
+			var formData = new enyo.FormData();
 			this.downloadFiles(project, formData, fileList, 0, prefixLen, next);
 		});
 		req.error(this, function(inEvent, inError) {
@@ -167,7 +167,8 @@ enyo.kind({
 		var request = project.filesystem.getFile(id);
 		request.response(this, function(inEvent, inData) {
 			// Got a file content: add it to the multipart/form-data
-			var blob = new Blob([inData.content || ""], {type: "application/octet-stream"});
+			var blob = new enyo.Blob([inData.content || ""], {type: "application/octet-stream"});
+			// 'file' is the form field name, mutually agreed with the Hermes server
 			formData.append('file', blob, name);
 
 			if (++index >= fileList.length) {
