@@ -24,7 +24,7 @@ enyo.kind({
 	debug: true,
 	create: function() {
 		this.inherited(arguments);
-		this.$.propertiesWidget.setup_create() ;
+		this.$.propertiesWidget.setupCreate() ;
 		this.$.selectDirectoryPopup.$.hermesFileTree.showNewFolderButton();
 	},
 	showDirPopup: function(inSender, inEvent) {

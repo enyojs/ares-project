@@ -3,8 +3,9 @@
  * stuff included).
  * 
  * By default, this widget is tuned for project modification.  In case
- * of project *creation*, the method setup_create must be called after
- * construction.
+ * of project *creation*, the method setupCreate must be called after
+ * construction. Since the widgetis re-used between call for creation
+ * or modification, the methos setupModif must be called also.
  */
 enyo.kind({
 	name: "ProjectProperties",
@@ -114,9 +115,17 @@ enyo.kind({
 	/**
 	 * Tune the widget for project creation
 	 */
-	setup_create: function() {
-		this.$.ok.setDisabled(true) ;
+	setupCreate: function() {
+		//this.$.ok.setDisabled(true) ;
 		this.$.directoryEntry.show() ;
+	},
+
+	/**
+	 * Tune the widget for project modification
+	 */
+	setupModif: function() {
+		//this.$.ok.setDisabled(true) ;
+		this.$.directoryEntry.hide() ;
 	},
 
 	/**
