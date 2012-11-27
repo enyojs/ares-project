@@ -8,11 +8,11 @@ enyo.kind({
 
 	classes: "enyo-unselectable",
 	events: {
-		onConfirmCreateProject: "", 
-		onConfirmConfigProject: ""
+		onAddProjectInList: ""
 	},
 	handlers: {
 		onDirectorySelected: "customizeNamePopup",
+		onModifiedConfig: "createProject" ,
 		// can be canceled by either of the included components
 		onDone: "hideMe"
 	},
@@ -29,14 +29,6 @@ enyo.kind({
 	},
 	showDirPopup: function(inSender, inEvent) {
 		return this.$.selectDirectoryPopup.show();
-	},
-	addProjectInList: function(name, folderId) {
-		this.hide();
-		this.doConfirmCreateProject({name: name, folderId: folderId, service: this.selectedDir.service, serviceId: this.selectedServiceId});
-	},
-	createProjectInView: function(name, folderId) {
-		this.addProjectInList(name,folderId);
-		this.doConfirmConfigProject({name: name, folderId: folderId, service: this.selectedDir.service});
 	},
 	reset: function() {
 		this.$.propertiesWidget.preFill({
@@ -58,6 +50,7 @@ enyo.kind({
 	 * Hide the whole widget. Typically called when ok or cancel is clicked
 	 */
 	hideMe: function() {
+		this.config = null ; // forget ProjectConfig object
 		this.hide() ;	
 		return true;
 	},
@@ -65,17 +58,17 @@ enyo.kind({
 	/**
 	 * start project creation by showing the widget
 	 */
-	start: function(config) {
+	start: function() {
 		this.log("starting") ;
 		this.reset().show();
-		this.config = config || new ProjectConfig() ; // is a ProjectConfig object.
+		this.config = new ProjectConfig() ; // is a ProjectConfig object.
 		//this.$.changeNamePopup.hide() ;
 		this.$.selectDirectoryPopup.$.header.setContent("Select a directory containing the new project") ;
 		this.showDirPopup();
 	},
 	createProject: function (inSender, inEvent) {
-		var name = this.$.projectName.getValue();
-		var subDir = this.$.projectDirectory.getContent() ;
+		var name = inEvent.data.name;
+		var subDir = this.$.selectDirectoryPopup.getContent() ;
 		var folderId = this.selectedDir.id ;
 		var service = this.selectedDir.service;
 
@@ -88,22 +81,48 @@ enyo.kind({
 			
 		if ( matchingNodes.length === 0 ) {
 			this.log("Creating new project " + name + " in folderId=" + folderId);
-			this.createProjectInView(name, folderId) ;
+			this.hide();
+			this.doAddProjectInList({
+				name: name,
+				folderId: folderId,
+				service: this.selectedDir.service,
+				serviceId: this.selectedServiceId
+			});
+			this.config.setData(inEvent.data) ;
+			this.config.save() ;
 		}
 		else {
 			this.hide() ;
 			this.$.errorPopup.raise('Cannot create project: a project.json file already exists');
 		}
+
+		return true ; // stop bubble
 	},
 	customizeNamePopup: function(inSender, inEvent) {
 		var propW = this.$.propertiesWidget ;
+		var that = this ;
 		this.log("shown") ;
+
 		this.selectedServiceId = inEvent.serviceId;
 		this.selectedDir = inEvent.directory;
-		propW.$.projectDirectory.setContent(this.selectedDir.path);
-		propW.$.projectName.setValue(this.selectedDir.name);
-		this.$.selectDirectoryPopup.hide();
-		propW.show() ;
+
+		this.config.init({
+			folderId:  this.selectedDir.id,
+			service: this.selectedDir.service
+		}, function(err) {
+			if (err) {
+				that.showErrorPopup(err.toString()) ;
+			}
+			else {
+				propW.$.projectDirectory.setContent(that.selectedDir.path);
+				propW.$.projectName.setValue(that.selectedDir.name);
+				that.$.selectDirectoryPopup.hide();
+				propW.show() ;
+			};
+		});
+	}
+});
+
 	}
 });
 
