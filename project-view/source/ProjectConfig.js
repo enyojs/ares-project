@@ -27,14 +27,14 @@ enyo.kind({
 	},
 	/**
 	 * Initializer: load data from project.json file
-	 * @param {Object} storageData gives information to access project.json
+	 * @param {Object} inLocation gives information to access project.json
 	 *  (expects { service: <object>, folderId: <string>)} )
 	 * @param {Object} next is a CommonJS callback
 	 */
-	init: function(storageData, next) {
+	init: function(inLocation, next) {
 		this.data = null;
-		this.service = storageData.service;
-		this.folderId = storageData.folderId;
+		this.service = inLocation.service;
+		this.folderId = inLocation.folderId;
 		var req = this.service.propfind(this.folderId, 1);
 		req.response(this, function(inSender, inResponse) {
 			var prj = inResponse.children.filter(function(node){
