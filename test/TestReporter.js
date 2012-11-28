@@ -29,10 +29,12 @@ enyo.kind({
 	timeout: 3000,
 	aresIdeW: null,
 	debug: true,
+	contents: [],
 	create: function() {
 		this.inherited(arguments);
 		this.$.title.setContent(this.name);
 		this.aresIdeW = ares.TestReporter.aresIdeW;
+		this.contents = ares.TestReporter.contents;
 		// listen for dispatched messages (received from Ares Ide)
 		window.addEventListener("message", enyo.bind(this, "recMsgFromIde"), false);
 	},
@@ -53,6 +55,32 @@ enyo.kind({
 	},
 	updateTestDisplay: function(inSender, inEvent) {
 		if (this.debug) console.log("updateTestDisplay");
+		// keep unit test identification
+	    var results = inEvent.results;
+	    var e = results.exception;
+	    var info = this.$.group.$[results.name];
+	    var str, res, name, pass;
+
+	    // analyze this.contents; retrieved according to the unit test name
+	    // if failed or passed
+	    for (var i=0; i < this.contents.length; i++) {
+	            var str = this.contents[i];
+	            var sp = str.split(/\s+/);
+	            var name = sp[5];
+	            var pass = sp[7];
+	            if (results.name === name) {
+	                    break;
+	            }
+	    }
+
+	    if (pass === "PASSED") {
+	            results.passed = pass;
+	            results.message = null;
+	    } 
+	    var content = "<b>" + results.name + "</b>: " + (results.passed ? "PASSED" : results.message);
+	    info.setContent(content);
+	    info.setClasses("enyo-testcase-" + (results.passed ? "passed" : "failed"));
+
 	},
 	recMsgFromIde: function(event) {
 		// test bad origin
@@ -66,10 +94,16 @@ enyo.kind({
   		if (event.data === "START") {
   			if (this.debug) console.log("Received START ... Post READY ...");
 			event.source.postMessage("READY", event.origin);
-  		} 
+  		} else {
+  			if (event.data) {
+  				this.contents = event.data;
+  				ares.TestReporter.contents = this.contents;	
+  			}
+  		}
 	},
 	statics: {
 		aresIdeW: null,
+		contents: []
 	}
 });
 

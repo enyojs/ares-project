@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "ares.TestController",
-	kind: enyo.Component,
+	kind: enyo.Control,
 	debug: true,
 	status: "None",
 	create: function() {
@@ -25,6 +25,9 @@ enyo.kind({
 		}
 		setTimeout(repeatPostMsg, 1000);
 
+		// FIXME TestSuite kept on console. Will be removed
+		this.createComponent({name: "runner", kind: "ares.TestCtrlRunner"});
+		this.createComponent({name: "reporter", kind: "ares.TestProxyReporter"});
 	},
 	recMsgFromTestReporter: function(event) {
 		// test bad origin
@@ -35,12 +38,14 @@ enyo.kind({
  			this.status = event.data;
    			if (this.debug) console.log("Received READY ... Communication path established ... Status: "+this.status);
    		}
-  		// start button pressed on Ares Tsest window
+  		// start button pressed on Ares Test window
   		// when event received - retireve result contents and sent them to Test Reporter
   		if (event.data === "RUN") {
-  			this.status = event.data;
-  			this.createComponent({kind: "ares.TestCtrlRunner", reporterKind: "ares.TestProxyReporter"});
-  			if (this.debug) console.log("Received RUN ... Create ares.TestCtrlRunner and ares.TestProxyReporter ... Status: "+this.status);
+  		 	this.status = event.data;
+  		 	if (this.debug) console.log("Received RUN ... Status: "+this.status);
+  		 	var contents = [];
+  		 	contents = this.$.reporter.passContents();
+  		 	event.source.postMessage(contents, event.origin);
   		}
    	}
 });

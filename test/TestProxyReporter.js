@@ -9,8 +9,10 @@ enyo.kind({
 	},
 	classes: "enyo-testcase",
 	timeout: 3000,
+	contents: [],
 	create: function() {
 		this.inherited(arguments);
+		this.contents = ares.TestProxyReporter.contents;
 	},
 	initComponents: function() {
 		this.inherited(arguments);
@@ -35,6 +37,7 @@ enyo.kind({
 	},
 	updateTestDisplay: function(inSender, inEvent) {
 		var results = inEvent.results;
+		// store results for future sent to Ares TestSuite
 		var e = results.exception;
 		var content = "=>Ares Reporter *****" + "Group: " + this.name + " *****test: " + results.name + " " + (results.passed ? "  is            PASSED  " : results.message);
 		if (e) {
@@ -55,6 +58,15 @@ enyo.kind({
 			content += results.logs;
 		}
 		console.dir(content);
+		this.contents.push(content);
+		ares.TestProxyReporter.contents = this.contents;
+
+	},
+	passContents: function() {
+		return this.contents;
+	},
+	statics: {
+		contents: []
 	}
 });
 
