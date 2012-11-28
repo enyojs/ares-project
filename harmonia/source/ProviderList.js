@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "ProviderList",
 	kind: "FittableRows",
-	debug: true,
+	debug: false,
 
 	properties: [ 'type' ],
 	published: {

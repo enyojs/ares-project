@@ -5,7 +5,6 @@ enyo.kind({
 		onSelect: "newSelect",
 		onDeselect: "newDeselect"
 	},
-	debug: true,
 	components: [
 		{name: "providerList", kind: "ProviderList", type: "filesystem", onSelectProvider: "handleSelectProvider"},
 		{kind: "HermesFileTree", fit: true, onFileClick: "selectFile", onFolderClick: "selectFolder", 
@@ -101,7 +100,7 @@ enyo.kind({
 		});
 		r.go();
 	},
-    delayedRefresh: function(msg) {
+	delayedRefresh: function(msg) {
 		var onDone = new enyo.Async() ;
 		onDone.response(this, function(inSender, toSelectId) {
 			if (this.debug) this.log("delayed refresh after " + msg + ' on ' + toSelectId) ;
@@ -143,7 +142,7 @@ enyo.kind({
 		var newName = inEvent.fileName.trim();
 		var service = this.selectedFile.service;
 		if (this.debug) this.log("Renaming file " + oldId + " as " + newName + " at " + path);
-		service['rename'](oldId, newName)
+		service.rename(oldId, newName)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("Response: "+inResponse);
 				this.delayedRefresh("rename done").go(inResponse) ;

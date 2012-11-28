@@ -68,7 +68,7 @@ function post(path, query, content, contentType, next) {
 		} else if (contentType.match(/multipart\/form-data/)) {
 			reqParts = content;
 		} else if (content && contentType instanceof String) {
-			contentType && reqOptions.headers['x-content-type'] = contentType; // original value
+			if (contentType) reqOptions.headers['x-content-type'] = contentType; // original value
 			reqOptions.headers['content-type'] = 'text/plain; charset=x-binary';
 			reqBody = content.toString('x-binary'); // do not decode/encode
 		}
