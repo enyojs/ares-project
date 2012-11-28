@@ -173,6 +173,7 @@ var myFs;
 var myPort = 9009;
 var myFsPath = temp.path({prefix: 'com.palm.ares.hermes.fsLocal'});
 fs.mkdirSync(myFsPath);
+var clean = true;
 
 describe("fsLocal...", function() {
 	
@@ -750,8 +751,12 @@ describe("fsLocal...", function() {
 
 	it("t100. should stop", function(done) {
 		myFs.quit();
-		rimraf(myFsPath, {gently: myFsPath}, function() {
+		if (clean) {
+			rimraf(myFsPath, {gently: myFsPath}, function() {
+				done();
+			});
+		} else {
 			done();
-		});
+		}
 	});
 });
