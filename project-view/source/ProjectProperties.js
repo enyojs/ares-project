@@ -4,7 +4,7 @@
  * 
  * By default, this widget is tuned for project modification.  In case
  * of project *creation*, the method setupCreate must be called after
- * construction. Since the widgetis re-used between call for creation
+ * construction. Since the widget is re-used between call for creation
  * or modification, the methos setupModif must be called also.
  */
 enyo.kind({
@@ -61,7 +61,7 @@ enyo.kind({
 				]}
 			]}
 		]},
-		// FIXME: use true for debug
+
 		{name: "phoneGapDrawer", kind: "onyx.Drawer", open: false, components: [
 			{content: "PhoneGap", tag:"h2"},
 			{kind: "onyx.ToggleButton", name: 'pgConfEnabled', onContent: "enabled", offContent: "disabled"},
@@ -209,21 +209,3 @@ enyo.kind({
 	}
 });
 
-enyo.kind({
-	name: "ProjectPropertiesPopup",
-	kind: "onyx.Popup",
-	modal: true, centered: true, floating: true, autoDismiss: false,
-	handlers: {
-		onDone: "hide"
-	},
-	components: [
-		{kind: "ProjectProperties"}
-	],
-	reset: function() {
-		this.$.projectProperties.reset();
-	},
-	preFillConfig: function(inData) {
-		this.$.projectProperties.preFill(inData);
-		return this ;
-	}
-});
