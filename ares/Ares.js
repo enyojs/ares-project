@@ -3,20 +3,21 @@ enyo.kind({
 	kind: "enyo.Panels",
 	fit: true,
 	components: [
-		{kind: "ServiceRegistry"},
-		{kind: "Harmonia", onFileDblClick: "openDocument"},
+		{kind: "ProjectView", onFileDblClick: "openDocument"},
 		{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"},
 		{kind: "Deimos", onCloseDesigner: "closeDesigner"},
-		{kind: "ProjectView", onFileDblClick: "openDocument"}
+		{kind: "ServiceRegistry"}
 	],
 	//arrangerKind: "CollapsingArranger",
 	handlers: {
 		onReloadServices: "handleReloadServices"
 	},
-	fileViewIndex: 3,
+	projectViewIndex: 0,
+	phobosViewIndex: 1,
+	deimosViewIndex: 2,
 	create: function() {
 		this.inherited(arguments);
-		this.setIndex(this.fileViewIndex);
+		this.setIndex(this.projectViewIndex);
 
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (this.runTest) {
@@ -43,7 +44,7 @@ enyo.kind({
 					inData="";
 				}
 				this.$.phobos.openDoc(origin, f, inData, ext, projectUrl);
-				this.setIndex(1);
+				this.setIndex(this.phobosViewIndex);
 			})
 			.error(this, function(inEvent, inData) {
 				enyo.log("Open failed", inData);
@@ -62,17 +63,17 @@ enyo.kind({
 			});
 	},
 	closeDocument: function(inSender, inEvent) {
-		this.setIndex(this.fileViewIndex);
+		this.setIndex(this.projectViewIndex);
 	},
 	designDocument: function(inSender, inEvent) {
 		this.$.deimos.load(inEvent);
-		this.setIndex(2);
+		this.setIndex(this.deimosViewIndex);
 	},
 	closeDesigner: function(inSender, inEvent) {
 		if (inEvent.docHasChanged) {
 			this.$.phobos.updateComponents(inSender, inEvent);
 		}
-		this.setIndex(1);
+		this.setIndex(this.phobosViewIndex);
 	},
 	handleBeforeUnload: function() {
 		if (window.location.search.indexOf("debug") == -1) {
