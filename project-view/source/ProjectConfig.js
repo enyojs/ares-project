@@ -107,7 +107,7 @@ enyo.kind({
 	},
 	/**
 	 * Generate PhoneGap's config.xml on the fly
-	 *
+	 * 
 	 * @return {String} or undefined if PhoneGap build is disabled
 	 * for this project
 	 */
@@ -232,15 +232,28 @@ enyo.kind({
 			}
 			return dst;
 		},
+		// FIXME: the below should be replaced by proper JSON
+		// schema validation with default values.
 		DEFAULT_PROJECT_CONFIG: {
-			id: "com.examples.apps.MyApp",
+			id: "com.examples.apps.myapp",
 			name: "BUG IF YOU SEE THIS",
 			version: "0.0.1",
 			title: "Example: My Application",
 			description: "Description of My Application",
+			author: {
+				name: "An Example Company",
+				href: "http://www.example.com"
+			},
 			build: {
 				phonegap: {
-					enabled: true
+					enabled: true,
+					icon: {
+						src: "icon.png",
+						role: "default"
+					},
+					preferences: {
+						"phonegap-version": "2.0.0"
+					}
 				}
 			}
 		}
