@@ -201,6 +201,12 @@ enyo.kind({
 			formData.append('appId', config.build.phonegap.appId);
 		}
 
+		// un-comment to NOT submit the ZIP to
+		// build.phonegap.com & rather return the given JSON.
+		// Use a non-JSON string to cause an error on the
+		// server side before submission.
+		//formData.append('testJsonResponse', "make_an_error" /*JSON.stringify({id: config.build.phonegap.appId})*/ );
+
 		// Ask Hermes PhoneGap Build service to minify and zip the project
 		var req = new enyo.Ajax({
 			url: this.url + '/build',
