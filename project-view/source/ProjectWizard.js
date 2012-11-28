@@ -179,6 +179,10 @@ enyo.kind({
 	}
 });
 
+
+/**
+ * This kind will scan a directory. It will create a new project for each project.json found.
+ */
 enyo.kind({
 	name: "ProjectWizardScan",
 	kind: "SelectDirectoryPopup",
@@ -189,12 +193,13 @@ enyo.kind({
 
 	classes: "enyo-unselectable",
 	events: {
-		onConfirmCreateProject: ""
+		onAddProjectInList: ""
 	},
 	handlers: {
 		onDirectorySelected: "searchProjects"
 	},
 	debug: false,
+
 	searchProjects: function (inSender, inEvent) {
 		var folderId = inEvent.directory.id ;
 		var service = inEvent.directory.service;
@@ -224,7 +229,7 @@ enyo.kind({
 						this.debug && this.log( "file contents: '" + fileStuff.content + "'" ) ;
 						var projectData = JSON.parse(fileStuff.content)  ;
 						this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
-						this.doConfirmCreateProject({
+						this.doAddProjectInList({
 							name: projectData.name,
 							folderId: parentDir.id, 
 							service: this.selectedDir.service, 
