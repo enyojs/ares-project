@@ -10,7 +10,6 @@ var querystring = require("querystring");
 var temp = require("temp");
 var rimraf = require("rimraf");
 var should = require("should");
-var FormData = require('form-data');
 var FsLocal = require("./fsLocal");
 var util = require("util"),
     async = require("async");
