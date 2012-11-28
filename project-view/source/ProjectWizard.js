@@ -128,6 +128,54 @@ enyo.kind({
 
 });
 
+/**
+ * This kind handles the project modifications treatment (extracted from ProjectView)
+ */
+enyo.kind({
+	name: "ProjectWizardModify",
+
+	kind: "onyx.Popup",
+	modal: true, centered: true, floating: true, autoDismiss: false,
+
+	handlers: {
+		onDone: "hide",
+		onModifiedConfig: "saveProjectConfig"
+	},
+	components: [
+		{kind: "ProjectProperties", name: "propertiesWidget"}
+	],
+
+	debug: false,
+	targetProject: null ,
+
+	/**
+	 * Step 1: start the modification by showing project properties widget
+	 */
+	start: function(target) {
+		this.targetProject = target ;
+		this.$.propertiesWidget.setupModif() ;
+		this.$.propertiesWidget.preFill(target.config.data);
+		this.show();
+	},
+
+	// step 2:
+	saveProjectConfig: function(inSender, inEvent) {
+		if (this.debug) { this.log("saving project config"); }
+
+		if (! this.targetProject) {
+			this.error("internal error: saveProjectConfig was called without a target project.") ;
+			return true ; // stop bubble
+		}
+
+		// selected project name was modified
+		if ( inEvent.data.name !== this.targetProject.name) {
+			// project name has changed, update project list
+			this.$.projectList.renameSelectedProject(inEvent.data.name) ;
+		}
+		this.targetProject.config.setData(inEvent.data);
+		this.targetProject.config.save() ;
+
+		return true ; // stop bubble
 	}
 });
 
