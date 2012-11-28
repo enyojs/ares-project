@@ -1,5 +1,5 @@
 /**
- * This kind is the top kind of project handling. It containts:
+ * This kind is the top kind of project handling. It contains:
  * - The project list 
  * - the interface towards the user's file (harmonia)
  * - Popups to manage projects (create, scan, error ...)
@@ -19,23 +19,20 @@ enyo.kind({
 		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan"},
+		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
-		{kind: "ProjectPropertiesPopup", name: "projectPropertiesPopup"},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
 			{kind: "Image", src: "$phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
 		]}
 	],
 	handlers: {
-		onConfirmCreateProject: "confirmCreateProject",
-		onConfirmConfigProject: "setupConfigProject",
+		onAddProjectInList: "addProjectInList",
 		onPhonegapBuild: "startPhonegapBuild",
 		onBuildStarted: "phonegapBuildStarted",
 		onError: "showErrorMsg"
 	},
-	create: function() {
-		this.inherited(arguments);
-	},
+
 	showErrorMsg: function(inSender, inEvent) {
 		this.log(inEvent);
 		this.hideWaitPopup();
@@ -47,6 +44,7 @@ enyo.kind({
 		this.$.errorPopup.setDetails(details);
 		this.$.errorPopup.show();
 	},
+
 	scanProjectAction: function(inSender, inEvent) {
 		this.$.projectWizardScan.setHeaderText('Select a directory containing one or more project.json files');
 		this.$.projectWizardScan.show();
@@ -56,7 +54,12 @@ enyo.kind({
 		this.$.projectWizardCreate.start();
 		return true; //Stop event propagation
 	},
-	confirmCreateProject: function(inSender, inEvent) {
+	modifySettingsAction: function(inSender, inEvent) {
+		this.$.projectWizardModify.start(this.currentProject);
+		return true; //Stop event propagation
+	},
+
+	addProjectInList: function(inSender, inEvent) {
 		try {
 			// Add an entry into the project list
 			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
@@ -91,12 +94,6 @@ enyo.kind({
 	},
 	projectRemoved: function(inSender, inEvent) {
 		this.$.harmonia.setProject(null);
-	},
-	modifySettingsAction: function(inSender, inEvent) {
-		// projectProperties popup - onTap action
-		this.$.projectPropertiesPopup.preFillConfig(this.currentProject.config.data).show();
-		// handled here (don't bubble)
-		return true;
 	},
 	showWaitPopup: function(inMessage) {
 		this.$.waitPopupMessage.setContent(inMessage);
