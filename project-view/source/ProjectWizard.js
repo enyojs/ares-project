@@ -85,7 +85,7 @@ enyo.kind({
 			service: this.selectedDir.service
 		}, function(err) {
 			if (err) {
-				that.showErrorPopup(err.toString()) ;
+				that.$.errorPopup.raise(err.toString()) ;
 			}
 			else {
 				// once project.json is created, setup and show project properties widget
