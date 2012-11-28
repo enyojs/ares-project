@@ -15,7 +15,6 @@ enyo.kind({
 				{name: "documentLabel", content: "Document"},
 				{name: "saveButton", kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: "New kind", ontap: "newKindAction"},
-				{name: "findButton", kind: "onyx.Button", content: "Search", ontap: "findpop"},
 				{fit: true},
 				{name: "designerButton", kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
@@ -23,7 +22,7 @@ enyo.kind({
 				{name: "left", kind: "leftPanels", showing: false,	arrangerKind: "CardArranger", onCss: "newcssAction"},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion"},
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -37,7 +36,7 @@ enyo.kind({
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
-		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll"}
+		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor"}
 	],
 	events: {
 		onSaveDocument: "",
@@ -91,6 +90,7 @@ enyo.kind({
 			this.$.ace.setValue(inCode);
 			// Pass to the autocomplete compononent a reference to ace
 			this.$.autocomplete.setAce(this.$.ace);
+			this.focusEditor();
 		}
 		else {
 			this.$.imageViewer.setAttribute("src", origin + inFile.pathname);
@@ -511,8 +511,10 @@ enyo.kind({
 	beforeClosingDocument: function() {
 		this.$.autocomplete.setProjectIndexer(null);
 	},
+	// Show Find popup
 	findpop: function(){
 		this.$.findpop.show();
+		return true;
 	},
 	findNext: function(inSender, inEvent){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
@@ -528,9 +530,13 @@ enyo.kind({
 		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
 	
-	//ACE replace doesn't replace the currently-selected match. Seems less-than-useful
+	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
 	replace: function(){
 		//this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
+	},
+	
+	focusEditor: function(inSender, inEvent) {
+		this.$.ace.focus();
 	}
 });
 

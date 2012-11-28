@@ -2,16 +2,22 @@ body {
 	background-color: #aaa;
 }
 /**/
-#ares_harmonia_providerList {
-	width: 320px;
-	border: 2px solid #333;
+.ares_harmonia_providerList {
+	width: 30%;
+}
+.ares_harmonia_providerItems {
+	padding: 6px;
+}
+.ares_harmonia_authPanel {
+	padding: 6px;
 }
 #ares_harmonia_hermesFileTree {
 	width: 500px;
 	border: 2px solid #333;
 }
 .ares_harmonia_toolBar {
-	height: 66px;
+	height: 56px;
+	vertical-align: middle;
 }
 /**/
 #ares_deimos {
@@ -110,7 +116,14 @@ body {
 
 }
 
-.ares-label {
-	vertical-align: middle;
+.phobos-find-label {
+	line-height: 37px;
 	font-weight: bold;
+	text-align: right;
+	margin-right: 4px;
 }
+
+.phobos-find-field {
+	width: 200px;
+}
+
