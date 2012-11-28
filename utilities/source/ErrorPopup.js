@@ -5,7 +5,7 @@ enyo.kind({
         centered: true,
         floating: true,
         published: {
-        	errorMsg: "unknown error",
+		errorMsg: "unknown error",
 		details: ""
         },
         components: [
@@ -23,7 +23,7 @@ enyo.kind({
                 this.inherited(arguments);
         },
         errorMsgChanged: function (oldVal) {
-        	this.$.msg.setContent(this.errorMsg);
+		this.$.msg.setContent(this.errorMsg);
         },
 	detailsChanged: function(oldVal) {
 		if (this.details) {
@@ -45,8 +45,9 @@ enyo.kind({
 		this.setDetails();
                 this.hide();
         },
-        raise: function(msg) { 
-			this.setErrorMsg(msg);
-			this.show();
-		}
+        raise: function(msg, details) { 
+		this.setErrorMsg(msg);
+		this.setDetails(details);
+		this.show();
+	}
 });
