@@ -51,12 +51,24 @@ enyo.kind({
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
 	mode: "",				// js, css, ...
-	file: null,			
+	file: null,
 	create: function() {
 		this.inherited(arguments);
-		this.buildEnyoDb();
 	},
-	//
+	/**
+	 * Create a path resolver (similar to enyo.path) to resolve
+	 * "$enyo", "$lib", ... when launching the Analyzer on the
+	 * enyo/onyx used by the loaded project.
+	 * @param  inProjectPath
+	 * @protected
+	 */
+	createPathResolver: function(inProjectPath) {
+		this.pathResolver = new enyo.pathResolverFactory();
+		this.pathResolver.addPaths({
+			enyo: inProjectPath + "/enyo",
+			lib: "$enyo/../lib"
+		});
+	},
 	//
 	saveDocAction: function() {
 		this.showWaitPopup("Saving document...");
@@ -94,7 +106,9 @@ enyo.kind({
 			this.$.imageViewer.setAttribute("src", origin + inFile.pathname);
 		}
 		this.reparseAction();
-		this.buildProjectDb(inProjectUrl);
+		this.projectUrl = inProjectUrl;
+		this.createPathResolver(inProjectUrl);
+		this.buildEnyoDb(inProjectUrl, this.pathResolver);	// this.buildProjectDb() will be invoked when enyo analysis is finished
 		this.docHasChanged=false;
 		this.$.documentLabel.setContent(this.file.name);
 	},
@@ -144,16 +158,18 @@ enyo.kind({
 	},
 	//
 	//
-	buildEnyoDb: function() {
-		this.$.enyoAnalyzer.analyze(["$enyo/source", "$lib/layout", "$lib/onyx"]);
+	buildEnyoDb: function(inProjectUrl, inPathResolver) {
+		this.$.enyoAnalyzer.analyze(["$enyo/source", "$lib/onyx", "$lib/layout"], inPathResolver);
 	},
-	buildProjectDb: function(inProjectUrl) {
-		this.debug && this.log("projectUrl: " + inProjectUrl);
-		this.$.projectAnalyzer.analyze([inProjectUrl]);
+	buildProjectDb: function(inProjectUrl, inPathResolver) {
+		this.$.projectAnalyzer.analyze([inProjectUrl], inPathResolver);
 	},
 	enyoIndexReady: function() {
 		// Pass to the autocomplete component a reference to the enyo indexer
 		this.$.autocomplete.setEnyoIndexer(this.$.enyoAnalyzer.index);
+
+		// Start analysis of the project
+		this.buildProjectDb(this.projectUrl, this.pathResolver);	// TODO: exclude enyo/onyx from the analysis
 	},
 	projectIndexReady: function() {
 		// Pass to the autocomplete component a reference to the project indexer
@@ -232,9 +248,9 @@ enyo.kind({
 	updateObjectsLines: function(module) {
 		module.ranges = [];
 		if (module.objects && module.objects.length > 0) {
-			var start = 0;
+			var start = 0, range;
 			for( var idx = 1; idx < module.objects.length ; idx++ ) {
-				var range = { first: start, last: module.objects[idx].line - 1};
+				range = { first: start, last: module.objects[idx].line - 1};
 				module.ranges.push(range);	// Push a range for previous object
 				start = module.objects[idx].line;
 			}
@@ -321,7 +337,7 @@ enyo.kind({
 	},
 	/**
 	 * Recursively lists the handler methods mentioned in the "onXXXX"
-	 * attributes of the components passed as an input parameter 
+	 * attributes of the components passed as an input parameter
 	 * @param components: components to walk thru
 	 * @param declared: list of handler methods already listed
 	 * @returns the list of declared handler methods
@@ -350,7 +366,7 @@ enyo.kind({
 	 * handler functions listed in the "onXXXX" attributes
 	 * @protected
 	 * Note: This implies to reparse/analyze the file before
-	 * and after the operation. 
+	 * and after the operation.
 	 */
 	insertMissingHandlers: function() {
 		if (this.analysis) {
@@ -360,8 +376,8 @@ enyo.kind({
 			/*
 			 * Insert missing handlers starting from the end of the
 			 * file to limit the need of reparsing/reanalysing
-			 * the file 
-			 */  
+			 * the file
+			 */
 			for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
 				this.insertMissingHandlersIntoKind(this.analysis.objects[i]);
 			}
@@ -401,7 +417,7 @@ enyo.kind({
 				codeToInsert += (commaTerminated ? "" : ",\n");
 				commaTerminated = false;
 				codeToInsert += ("    " + item + ": function(inSender, inEvent) {\n        // TO"
-						+ "DO - Auto-generated code\n    }"); 
+						+ "DO - Auto-generated code\n    }");
 			}
 		}
 
