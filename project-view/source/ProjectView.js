@@ -84,7 +84,7 @@ enyo.kind({
 		self = this;
 		project.config = new ProjectConfig();
 		project.config.init({
-			service: project.service.impl,
+			service: project.service,
 			folderId: project.folderId
 		}, function(err) {
 			if (err) self.showErrorPopup(err.toString());
@@ -113,7 +113,7 @@ enyo.kind({
 		if (bdService) {
 			bdService.build( /*project*/ {
 				name: this.currentProject.name,
-				filesystem: this.currentProject.service.impl,
+				filesystem: this.currentProject.service,
 				folderId: this.currentProject.folderId,
 				config: this.currentProject.config
 			}, function(inError, inDetails) {

@@ -5,5 +5,6 @@
 	"Designer.js",
 	"Inspector.css",
 	"Inspector.js",
-	"ComponentView.js"
+	"ComponentView.js",
+	"InspectorConfig.js"
 );

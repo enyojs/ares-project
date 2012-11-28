@@ -58,7 +58,7 @@ function BdPhoneGap(config, next) {
 	app.use(function(req, res, next) {
 		res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
 		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-		res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+		res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control');
 		if ('OPTIONS' == req.method) {
 			res.status(200).end();
 		}
@@ -434,7 +434,7 @@ if (path.basename(process.argv[1]) === basename) {
 				default: "9029"
 			},
 			'e': {
-				description: "Path to the Enyo version to use for mnifying the application",
+				description: "Path to the Enyo version to use for minifying the application",
 				required: false,
 				default: path.resolve(__dirname, '..', 'enyo')
 			},

@@ -1,9 +1,9 @@
 enyo.depends(
 	"$lib/layout/fittable/source/design.js",
 	"$lib/onyx/source/design.js",
-	"base-design.js",
 	"$lib/layout/list/source/design.js",
-	"$lib/layout/panels/source/design.js"
+	"$lib/layout/panels/source/design.js",
 	//"$lib/bootstrap-ui/source",
 	//"$lib/bootstrap-ui/source/design.js",
+	"base-design.js"
 );
