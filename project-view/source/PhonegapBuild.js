@@ -55,7 +55,7 @@ enyo.kind({
 		var config = project.config.getData();
 		if (this.debug) this.log("starting... project:", project);
 
-		if(!config && !config.build && !config.build.phonegap) {
+		if(!config || !config.build || !config.build.phonegap) {
 			next(new Error("Project not configured for Phonegap Build"));
 			return;
 		}
@@ -115,16 +115,15 @@ enyo.kind({
 	getFileList: function(project, next) {
 		if (this.debug) this.log("...");
 		var req, fileList = [];
-		req = project.filesystem.listFiles(project.folderId, -1);
+		req = project.filesystem.propfind(project.folderId, -1 /*infinity*/);
 		req.response(this, function(inEvent, inData) {
 			this.doBuildStarted({project: project});
 			if (this.debug) enyo.log("Got the list of files", inData);
 			// Extract the list into an array
-			this.buildFileList(inData, fileList);
-			var prefixLen = this.extractPrefixLen(inData);
-			// Start downloading files and building the FormData
-			var formData = new enyo.FormData();
-			this.downloadFiles(project, formData, fileList, 0, prefixLen, next);
+			this.buildFileList(inData.children, fileList);
+			var prefix = inData.path;
+			var prefixLen = prefix.length + 1;
+			this.prepareFileList(project, prefix, fileList, 0, prefixLen, next);
 		});
 		req.error(this, function(inEvent, inError) {
 			next(new Error("Unable to get project file list: " + inError));
@@ -149,6 +148,21 @@ enyo.kind({
 	extractPrefixLen: function(inData) {
 		var item = inData[0];
 		return item.path.length - item.name.length;
+	},
+	prepareFileList: function(project, prefix, fileList, index, prefixLen, next) {
+		// Start downloading files and building the FormData
+		var formData = new enyo.FormData();
+		var blob = new enyo.Blob([project.config.getPhoneGapConfigXml() || ""],
+					 {type: "application/octet-stream"});
+		formData.append('file', blob, 'config.xml');
+		// hard-wire config.xml for now. may extend in the future (if needed)
+		var drop = [prefix, "config.xml"].join('/');
+		var newFileList = enyo.filter(fileList, function(file) {
+			return file.path !== drop;
+		}, this);
+		if (this.debug) this.log("dropped: fileList.length:", fileList.length, "=> newFileList.length:", newFileList.length);
+
+		this.downloadFiles(project, formData, newFileList, 0, prefixLen, next);
 	},
 	/**
 	 * Download all the project files and add them into the multipart/form-data
@@ -223,7 +237,7 @@ enyo.kind({
 		req.error(this, function(inSender, inError) {
 			var response = inSender.xhrResponse, contentType, details;
 			if (response) {
-				contentType = response.headers['Content-Type'];
+				contentType = response.headers['content-type'];
 				if (contentType && contentType.match('^text/plain')) {
 					details = response.body;
 				}
