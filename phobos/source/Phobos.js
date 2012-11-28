@@ -22,7 +22,7 @@ enyo.kind({
 				{name: "left", kind: "leftPanels", showing: false,	arrangerKind: "CardArranger", onCss: "newcssAction"},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion"},
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -35,7 +35,8 @@ enyo.kind({
 		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"}
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor"}
 	],
 	events: {
 		onSaveDocument: "",
@@ -101,6 +102,7 @@ enyo.kind({
 			this.$.ace.setValue(inCode);
 			// Pass to the autocomplete compononent a reference to ace
 			this.$.autocomplete.setAce(this.$.ace);
+			this.focusEditor();
 		}
 		else {
 			this.$.imageViewer.setAttribute("src", origin + inFile.pathname);
@@ -223,10 +225,10 @@ enyo.kind({
 				this.analysis = module;
 				this.$.projectAnalyzer.index.indexModule(module);
 				this.updateObjectsLines(module);
-	
+
 				// dump the object where the cursor is positioned, if it exists
 				this.dumpInfo(module.objects && module.objects[module.currentObject]);
-				
+
 				// Give the information to the autocomplete component
 				this.$.autocomplete.setAnalysis(this.analysis);
 			} catch(error) {
@@ -372,7 +374,7 @@ enyo.kind({
 		if (this.analysis) {
 			// Reparse to get the definition of possibly added onXXXX attributes
 			this.reparseAction();
-			
+
 			/*
 			 * Insert missing handlers starting from the end of the
 			 * file to limit the need of reparsing/reanalysing
@@ -381,7 +383,7 @@ enyo.kind({
 			for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
 				this.insertMissingHandlersIntoKind(this.analysis.objects[i]);
 			}
-	
+
 			// Reparse to get the definition of the newly added methods
 			this.reparseAction();
 		} else {
@@ -406,10 +408,10 @@ enyo.kind({
 				existing[p.name] = "";
 			}
 		}
-		
+
 		// List the handler methods declared in the components and in handlers map
 		var declared = this.listHandlers(object, {});
-		
+
 		// Prepare the code to insert
 		var codeToInsert = "";
 		for(var item in declared) {
@@ -524,6 +526,33 @@ enyo.kind({
 	 */
 	beforeClosingDocument: function() {
 		this.$.autocomplete.setProjectIndexer(null);
+	},
+	// Show Find popup
+	findpop: function(){
+		this.$.findpop.show();
+		return true;
+	},
+	findNext: function(inSender, inEvent){
+		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
+		this.$.ace.find(this.$.findpop.findValue, options);
+	},
+
+	findPrevious: function(){
+		var options = {backwards: true, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
+		this.$.ace.find(this.$.findpop.findValue, options);
+	},
+
+	replaceAll: function(){
+		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
+	},
+	
+	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
+	replace: function(){
+		//this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
+	},
+	
+	focusEditor: function(inSender, inEvent) {
+		this.$.ace.focus();
 	}
 });
 
