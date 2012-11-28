@@ -11,7 +11,7 @@ enyo.kind({
 		onAddProjectInList: ""
 	},
 	handlers: {
-		onDirectorySelected: "customizeNamePopup",
+		onDirectorySelected: "showProjectPropPopup",
 		onModifiedConfig: "createProject" ,
 		// can be canceled by either of the included components
 		onDone: "hideMe"
@@ -19,19 +19,13 @@ enyo.kind({
 
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget"},
-		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup"}
+		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup"},
+		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"}
 	],
-	debug: true,
-	create: function() {
-		this.inherited(arguments);
-		this.$.propertiesWidget.setupCreate() ;
-		this.$.selectDirectoryPopup.$.hermesFileTree.showNewFolderButton();
-	},
-	showDirPopup: function(inSender, inEvent) {
-		return this.$.selectDirectoryPopup.show();
-	},
-	reset: function() {
-		this.$.propertiesWidget.preFill({
+	debug: false,
+
+	// used to pre-fill properties of a new project
+	blankConfig: {
 			id: "",
 			name: "",
 			version: "",
@@ -39,73 +33,53 @@ enyo.kind({
 			description: "",
 			build: {
 				phonegap: {
-					enabled: true
+					enabled: false
 				}
 			}
-		}) ;
-		return this ;
-	},
+		},
 
 	/**
-	 * Hide the whole widget. Typically called when ok or cancel is clicked
-	 */
-	hideMe: function() {
-		this.config = null ; // forget ProjectConfig object
-		this.hide() ;	
-		return true;
-	},
-
-	/**
-	 * start project creation by showing the widget
+	 * start project creation by showing direction selection widget
 	 */
 	start: function() {
-		this.log("starting") ;
-		this.reset().show();
-		this.config = new ProjectConfig() ; // is a ProjectConfig object.
-		//this.$.changeNamePopup.hide() ;
-		this.$.selectDirectoryPopup.$.header.setContent("Select a directory containing the new project") ;
-		this.showDirPopup();
-	},
-	createProject: function (inSender, inEvent) {
-		var name = inEvent.data.name;
-		var subDir = this.$.selectDirectoryPopup.getContent() ;
-		var folderId = this.selectedDir.id ;
-		var service = this.selectedDir.service;
+		var dirPopup = this.$.selectDirectoryPopup ;
 
-		// don't create folder here, just scan content for a project.json
+		this.log("starting") ;
+		this.show();
+
+		this.config = new ProjectConfig() ; // is a ProjectConfig object.
+
+		dirPopup.$.header.setContent("Select a directory containing the new project") ;
+		dirPopup.$.hermesFileTree.showNewFolderButton();
+		dirPopup.show();
+	},
+
+	// Step 2: once the directory is selected by user, show the project properties popup
+	// Bail out if a project.json file already exists
+	showProjectPropPopup: function(inSender, inEvent) {
+		var propW = this.$.propertiesWidget ;
+		var that = this ;
+
+		// scan content for a project.json
 		var matchFileName = function(node){
 			return (node.content === 'project.json' ) ;
 		};
 		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
 		var matchingNodes = hft.getNodeFiles(hft.selectedNode).filter( matchFileName ) ;
 			
-		if ( matchingNodes.length === 0 ) {
-			this.log("Creating new project " + name + " in folderId=" + folderId);
-			this.hide();
-			this.doAddProjectInList({
-				name: name,
-				folderId: folderId,
-				service: this.selectedDir.service,
-				serviceId: this.selectedServiceId
-			});
-			this.config.setData(inEvent.data) ;
-			this.config.save() ;
-		}
-		else {
+		if ( matchingNodes.length !== 0 ) {
 			this.hide() ;
 			this.$.errorPopup.raise('Cannot create project: a project.json file already exists');
+			return ;
 		}
 
-		return true ; // stop bubble
-	},
-	customizeNamePopup: function(inSender, inEvent) {
-		var propW = this.$.propertiesWidget ;
-		var that = this ;
-		this.log("shown") ;
+		// ok, we can go on with project properties setup
+		propW.setupCreate() ;
 
 		this.selectedServiceId = inEvent.serviceId;
 		this.selectedDir = inEvent.directory;
 
+		// creates a project.json file
 		this.config.init({
 			folderId:  this.selectedDir.id,
 			service: this.selectedDir.service
@@ -114,13 +88,44 @@ enyo.kind({
 				that.showErrorPopup(err.toString()) ;
 			}
 			else {
+				// once project.json is created, setup and show project properties widget
+				propW.preFill(that.blankConfig),
 				propW.$.projectDirectory.setContent(that.selectedDir.path);
 				propW.$.projectName.setValue(that.selectedDir.name);
 				that.$.selectDirectoryPopup.hide();
 				propW.show() ;
 			};
 		});
+	},
+
+	// step 3: actually create project in ares data structure
+	createProject: function (inSender, inEvent) {
+		var name = inEvent.data.name;
+		var folderId = this.selectedDir.id ;
+		var service = this.selectedDir.service;
+
+		this.log("Creating new project " + name + " in folderId=" + folderId);
+		this.doAddProjectInList({
+			name: name,
+			folderId: folderId,
+			service: this.selectedDir.service,
+			serviceId: this.selectedServiceId
+		});
+		this.config.setData(inEvent.data) ;
+		this.config.save() ;
+
+		return true ; // stop bubble
+	},
+
+	/**
+	 * Hide the whole widget. Typically called when ok or cancel is clicked
+	 */
+	hideMe: function() {
+		this.config = null ; // forget ProjectConfig object
+		this.hide() ;
+		return true;
 	}
+
 });
 
 	}
