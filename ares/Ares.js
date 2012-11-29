@@ -9,12 +9,9 @@ enyo.kind({
 			{kind: "Deimos", onCloseDesigner: "closeDesigner"},
 		]},
 		{kind: "Slideable", style: "height: 100%; width: 100%", layoutKind: "FittableRowsLayout", classes: "onyx", axis: "v", value: 0, min: -500, max: 0, unit: "px", components: [
-			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "openDocument"},
+			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
 			{kind: "onyx.MoreToolbar", components: [
 				{kind: "onyx.Grabber", ontap: "toggleFiles"},
-				{kind: "onyx.RadioGroup", components: [
-				    {content: "file.txt"}
-				]}
 			]}
 		]},
 		{kind: "ServiceRegistry"}
@@ -42,6 +39,20 @@ enyo.kind({
 	draggable: false,
 	handleReloadServices: function(inSender, inEvent) {
 		this.$.serviceRegistry.reloadServices();
+	},
+	doubleclickFile: function(inSender, inEvent) {
+		var f = inEvent.file;
+		this.$.moreToolbar.createComponent({
+			kind: "onyx.Button",
+			classes: "ares-tab-button",
+			components: [
+				{kind: "onyx.IconButton", src: "$lib/onyx/images/progress-button-cancel.png"},
+			    {content: f.name},
+			],
+			ontap: "switchFile",
+			file: f
+		}, {owner: this}).render();
+		this.openDocument(inSender, inEvent);
 	},
 	openDocument: function(inSender, inEvent) {
 		var f = inEvent.file;
@@ -119,5 +130,8 @@ enyo.kind({
 	calcSlideableLimit: function() {
 		var min = this.getBounds().height-this.$.moreToolbar.getBounds().height;
 		this.$.slideable.setMin(-min);
+	},
+	switchFile: function(inSender, inEvent) {
+		this.openDocument(inSender, {file: inSender.file});
 	}
 });
