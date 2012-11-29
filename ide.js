@@ -143,6 +143,7 @@ app.configure(function(){
 	app.use('/ide', express.static(enyojsRoot + '/'));
 	app.use('/enyo', express.static(enyojsRoot + '/enyo'));
 	app.use('/lib', express.static(enyojsRoot + '/lib'));
+	app.use('/test', express.static(enyojsRoot + '/test'));
 	app.get('/res/timestamp', function(req, res) {
 		res.status(200).json({timestamp: ide.res.timestamp});
 	});
