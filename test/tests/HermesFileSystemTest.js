@@ -150,7 +150,7 @@ enyo.kind({
 					self.finish("create file error: "+inError);
 				});
 			}
-		});					
+		});
 		req.error(this, function(inSender, inError) {
 			if (this.debug) {
 				this.log(inError);

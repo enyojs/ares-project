@@ -93,22 +93,22 @@ enyo.kind({
 		if (event.origin !== "http://127.0.0.1:9009")
 			return;
 		// keep the reference 
- 		if (this.aresIdeW === null) {
-  			this.aresIdeW = event.source;
+		if (this.aresIdeW === null) {
+			this.aresIdeW = event.source;
 			ares.TestReporter.aresIdeW = this.aresIdeW;			
-  		}
-  		if (event.data === "START") {
-  			if (this.debug) console.log("Received START ... Post READY ...");
+		}
+		if (event.data === "START") {
+			if (this.debug) console.log("Received START ... Post READY ...");
 			event.source.postMessage("READY", event.origin);
-  		} 
-  		if(event.data.evt === "SEND_TEST_RUNNING") {
+		} 
+		if(event.data.evt === "SEND_TEST_RUNNING") {
 			if (this.debug) console.log("Received SEND_TEST_RUNNING ...");
 			this.testBegun(event.data);
-  		}
-  		if(event.data.evt === "SEND_TEST_RESULT") {
+		}
+		if(event.data.evt === "SEND_TEST_RESULT") {
 			if (this.debug) console.log("Received SEND_TEST_RESULT ...");
 			this.updateTestDisplay(event.data);
-  		}
+		}
 	},
 	statics: {
 		aresIdeW: null,

@@ -30,18 +30,18 @@ enyo.kind({
 		if (event.origin !== "http://127.0.0.1:9009")
 			return;
 		// START and READY enabled the com path between Ide and Test windows
-  		if (event.data === "READY") {
- 			this.status = event.data;
-   			if (this.debug) console.log("Received READY ... Communication path established ... Status: "+this.status);
-   		}
-  		// Start button pressed on Ares Test Reporter
-  		if (event.data === "RUN") {
-  		 	this.status = event.data;
-  		 	if (this.debug) console.log("Received RUN ... Status: "+this.status);
-  		 	// Create TextCtrlRunner and TestProxyReporter components
-  		 	// TestProxyReporter is created by TestCtrlRunner
+		if (event.data === "READY") {
+			this.status = event.data;
+		if (this.debug) console.log("Received READY ... Communication path established ... Status: "+this.status);
+		}
+		// Start button pressed on Ares Test Reporter
+		if (event.data === "RUN") {
+			this.status = event.data;
+			if (this.debug) console.log("Received RUN ... Status: "+this.status);
+			// Create TextCtrlRunner and TestProxyReporter components
+			// TestProxyReporter is created by TestCtrlRunner
 			this.createComponent({name: "runner", kind: "ares.TestCtrlRunner"});
 		}
-   	}
+	}
 });
 
