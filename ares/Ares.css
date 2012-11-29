@@ -116,6 +116,15 @@ body {
 
 }
 
+.ares_projectView_table tr td .onyx-toggle-button {
+	text-transform: none;
+	width: 100%;
+}
+
+.ares_projectView_table tr td .onyx-toggle-button .off {
+	text-decoration: line-through;
+}
+
 .phobos-find-label {
 	line-height: 37px;
 	font-weight: bold;
@@ -127,3 +136,11 @@ body {
 	width: 200px;
 }
 
+.ares-no-padding {
+	padding: 0px;
+	border: 0px;
+}
+
+.ares-scale-background {
+	background-size: 100%;
+}

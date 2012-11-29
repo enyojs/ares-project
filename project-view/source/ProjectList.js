@@ -1,3 +1,11 @@
+/**
+ * This kind provides:
+ * - the project toolbars (with create .. delete)
+ * - the project list
+ * 
+ * The project list is a simple kind that only holds project names. It does not
+ * hold project objects or kinds.
+ */
 enyo.kind({
 	name: "ProjectList",
 	classes: "enyo-unselectable",
@@ -7,7 +15,6 @@ enyo.kind({
 		onScanProject: "",
 		onProjectRemoved: "",
 		onModifySettings: "",
-		onFinishProjectConfig: "",
 		onPhonegapBuild: ""
 	},
 	handlers: {
@@ -16,7 +23,7 @@ enyo.kind({
 	debug: false,
 	components: [
 		{kind: "LocalStorage"},
-		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar ares_harmonia_toolBar", isContainer: true, name: "toolbar", components: [
+		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", isContainer: true, name: "toolbar", components: [
 			{kind: "onyx.MenuDecorator", onSelect: "aresMenuItemSelected", components: [
 				{content: "Ares"},
 				{kind: "onyx.Menu", components: [
@@ -29,7 +36,7 @@ enyo.kind({
 				]}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/assets/images/project_settings.png", onclick: "doModifySettings"},
+				{kind: "onyx.IconButton", classes: "ares-scale-background", src: "$project-view/assets/images/project_settings.png", onclick: "doModifySettings"},
 				{kind: "onyx.Tooltip", content: "Settings..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
@@ -62,6 +69,7 @@ enyo.kind({
 	],
 	PROJECTS_STORAGE_KEY: "com.enyojs.ares.projects",
 	selected: null,
+	debug: false,
 	create: function() {
 		this.inherited(arguments);
 		this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
@@ -125,6 +133,17 @@ enyo.kind({
 			this.$.projectList.setCount(this.projects.length);
 			this.$.projectList.render();
 		}
+	},
+	renameSelectedProject: function(newName) {
+		var old = this.selected.getProjectName; 
+		var p;
+		for (p in this.projects) {
+			if (this.projects[p].name === old ) {
+				this.projects[p].name = newName ;
+			}
+		}
+		this.selected.setProjectName(newName) ;
+		this.storeProjectsInLocalStorage();
 	},
 	removeProjectAction: function(inSender, inEvent) {
 		var popup = this.$.removeProjectPopup;
