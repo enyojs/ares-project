@@ -28,8 +28,11 @@ enyo.kind({
 	classes: "enyo-testcase",
 	timeout: 3000,
 	aresIdeW: null,
-	debug: false,
+	debug: true,
 	create: function() {
+		if (this.debug) {
+			console.log("TestController: create() ...");
+		}
 		this.inherited(arguments);
 		this.$.title.setContent(this.name);
 		this.aresIdeW = ares.TestReporter.aresIdeW;
@@ -41,6 +44,10 @@ enyo.kind({
 	},
 	runTests: function() {
 		if (this.debug) console.log("Post RUN ...");
+		if (this.debug) {
+			console.log("this.aresIdeW: ");
+			console.dir(this.aresIdeW);
+		}
 		this.aresIdeW.postMessage("RUN", "http://127.0.0.1:9009");
 		this.$.runTests.setDisabled(true);
 	},
@@ -92,6 +99,10 @@ enyo.kind({
 		// test bad origin
 		if (event.origin !== "http://127.0.0.1:9009")
 			return;
+		// source must be valid
+		if (event.source === null) {
+			return;
+		}
 		// keep the reference 
 		if (this.aresIdeW === null) {
 			this.aresIdeW = event.source;

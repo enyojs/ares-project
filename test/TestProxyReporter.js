@@ -53,18 +53,6 @@ enyo.kind({
 		var e = results.exception;
 		var content = "=>Ares Proxy Reporter *****" + "Group: " + this.name + " *****test: " + results.name + " " + (results.passed ? "  is            PASSED  " : results.message);
 
-		// Post SEND_TEST_RESULT event with associated results
-		var data = {
-			evt: "SEND_TEST_RESULT",
-			group: this.name,
-			results: results,	
-		};		
-		aresTestW.postMessage(data, "http://127.0.0.1:9009");
-		if (this.debug) {
-			console.log("Post SEND_TEST_RESULT ... "
-				+JSON.stringify(data));
-		}
-
 		// Exception formatting usefull only for console.log here
 		if (e) {
 			// If we have an exception include the stack trace or file/line number.
@@ -83,7 +71,22 @@ enyo.kind({
 		if (!results.passed && results.logs) {
 			content += results.logs;
 		}
+
+		// content printed into Ares Ide console
 		console.dir(content);
+
+		// Post SEND_TEST_RESULT event with associated results
+		var data = {
+			evt: "SEND_TEST_RESULT",
+			group: this.name,
+			results: results,	
+		};		
+		aresTestW.postMessage(data, "http://127.0.0.1:9009");
+		if (this.debug) {
+			console.log("Post SEND_TEST_RESULT ... "
+				+JSON.stringify(data));
+		}
+
 	}
 });
 
