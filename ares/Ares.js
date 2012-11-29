@@ -20,7 +20,8 @@ enyo.kind({
 
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (this.runTest) {
-			this.createComponent({kind: "ares.TestConsoleRunner", reporterKind: "ares.TestConsoleReporter"});
+			// in charge of Ares Test Suite when Ares Ide launch with runTest option
+			this.createComponent({kind: "ares.TestController"});
 		}
 	},
 	draggable: false,

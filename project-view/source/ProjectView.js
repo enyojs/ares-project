@@ -30,19 +30,19 @@ enyo.kind({
 		onAddProjectInList: "addProjectInList",
 		onPhonegapBuild: "startPhonegapBuild",
 		onBuildStarted: "phonegapBuildStarted",
-		onError: "showErrorMsg"
+		onError: "showError"
 	},
-
-	showErrorMsg: function(inSender, inEvent) {
-		this.log(inEvent);
+	create: function() {
+		this.inherited(arguments);
+	},
+	showError: function(inSender, inEvent) {
+		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
 		this.hideWaitPopup();
-		this.showErrorPopup(inEvent.msg);
+		this.showErrorPopup(inEvent.msg, inEvent.details);
 		return true; //Stop event propagation
 	},
 	showErrorPopup : function(msg, details) {
-		this.$.errorPopup.setErrorMsg(msg);
-		this.$.errorPopup.setDetails(details);
-		this.$.errorPopup.show();
+		this.$.errorPopup.raise(msg, details);
 	},
 
 	scanProjectAction: function(inSender, inEvent) {
