@@ -23,7 +23,7 @@ enyo.kind({
 	debug: false,
 	components: [
 		{kind: "LocalStorage"},
-		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar ares_harmonia_toolBar", isContainer: true, name: "toolbar", components: [
+		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", isContainer: true, name: "toolbar", components: [
 			{kind: "onyx.MenuDecorator", onSelect: "aresMenuItemSelected", components: [
 				{content: "Ares"},
 				{kind: "onyx.Menu", components: [
@@ -36,7 +36,7 @@ enyo.kind({
 				]}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/assets/images/project_settings.png", onclick: "doModifySettings"},
+				{kind: "onyx.IconButton", classes: "ares-scale-background", src: "$project-view/assets/images/project_settings.png", onclick: "doModifySettings"},
 				{kind: "onyx.Tooltip", content: "Settings..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
