@@ -28,7 +28,7 @@ enyo.kind({
 	 */
 	create: function() {
 		this.inherited(arguments);
-		this.log("");
+		if (this.debug) this.log("");
 	},
 	/**
 	 * @private
@@ -64,8 +64,14 @@ enyo.kind({
 			if (this.selectedAuthConfig) {
 				this.selectedAuthConfig.show();
 			}
+		} else if (inSender.selected === -1) {
+			// deselection...
+			if (this.selectedAuthConfig) {
+				this.selectedAuthConfig.hide();
+			}
+
 		} else {
-			this.log("provider selected (" + inSender.selected + ") without a suitable service", service);
+			this.warn("provider (" + inSender.selected + ") selected by sender (" + inSender + ") without giving a suitable service", service);
 		}
 		return true; //Stop event propagation
 	},
