@@ -692,9 +692,11 @@ enyo.kind({
 	 * @public
 	 */
 	concat: function(suggestions) {
-		this.debug && this.log("objectId: " + suggestions.objectId + " into " + this.objectId);
-		for(var key in suggestions.items) {
-			this.addItem(suggestions.items[key]);
+		if (suggestions) {
+			this.debug && this.log("objectId: " + suggestions.objectId + " into " + this.objectId);
+			for(var key in suggestions.items) {
+				this.addItem(suggestions.items[key]);
+			}
 		}
 		return this;
 	},
