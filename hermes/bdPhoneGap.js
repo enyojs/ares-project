@@ -345,7 +345,21 @@ function BdPhoneGap(config, next) {
 			_fail(errs.toString());
 			return;
 		}
-		if (req.body.appId) {
+
+		// When the specific field 'testResponse'
+		// (JSON-encoded) is present, the build request is not
+		// presented to the outside build.phonegap.com
+		// service.  This avoids eating build token in a
+		// frequent test scenario.  The Hermes PhoneGap server
+		// rather returns testResponse.
+		if (req.body.testJsonResponse) {
+			try {
+				res.body = JSON.parse(req.body.testJsonResponse);
+				next();
+			} catch(err) {
+				next(err);
+			}
+		} else if (req.body.appId) {
 			console.log("build(): updating appId="+ req.body.appId + " (title='" + req.body.title + "')");
 			api.updateFileBasedApp(req.body.token, req.zip.path, req.body.appId, {
 				success: next,

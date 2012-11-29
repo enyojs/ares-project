@@ -1,3 +1,11 @@
+/**
+ * This kind provides:
+ * - the project toolbars (with create .. delete)
+ * - the project list
+ * 
+ * The project list is a simple kind that only holds project names. It does not
+ * hold project objects or kinds.
+ */
 enyo.kind({
 	name: "ProjectList",
 	classes: "enyo-unselectable",
@@ -7,7 +15,6 @@ enyo.kind({
 		onScanProject: "",
 		onProjectRemoved: "",
 		onModifySettings: "",
-		onFinishProjectConfig: "",
 		onPhonegapBuild: ""
 	},
 	handlers: {
@@ -62,6 +69,7 @@ enyo.kind({
 	],
 	PROJECTS_STORAGE_KEY: "com.enyojs.ares.projects",
 	selected: null,
+	debug: false,
 	create: function() {
 		this.inherited(arguments);
 		this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
@@ -125,6 +133,17 @@ enyo.kind({
 			this.$.projectList.setCount(this.projects.length);
 			this.$.projectList.render();
 		}
+	},
+	renameSelectedProject: function(newName) {
+		var old = this.selected.getProjectName; 
+		var p;
+		for (p in this.projects) {
+			if (this.projects[p].name === old ) {
+				this.projects[p].name = newName ;
+			}
+		}
+		this.selected.setProjectName(newName) ;
+		this.storeProjectsInLocalStorage();
 	},
 	removeProjectAction: function(inSender, inEvent) {
 		var popup = this.$.removeProjectPopup;
