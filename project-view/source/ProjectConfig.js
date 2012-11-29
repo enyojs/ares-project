@@ -7,8 +7,9 @@
  * changed.
  * 
  * - Use #setData and #getData to change the in-memory configuration Javascript object.
- *   Any change in the configuration causes a save-to-storage to happen.
- * 
+ *   data is an object containing the *whole* configuration.
+ * - Then use #save to send the whole configuration to remote storage
+ *  
  * As it is, this kind performs zero checks on the content of the file.
  */
 enyo.kind({
@@ -25,14 +26,15 @@ enyo.kind({
 		this.inherited(arguments);
 	},
 	/**
-	 * Initializer
-	 * @param {Object} inConfig is the configuration data as to be found in the project.json
+	 * Initializer: load data from project.json file
+	 * @param {Object} inLocation gives information to access project.json
+	 *  (expects { service: <object>, folderId: <string>)} )
 	 * @param {Object} next is a CommonJS callback
 	 */
-	init: function(inConfig, next) {
+	init: function(inLocation, next) {
 		this.data = null;
-		this.service = inConfig.service;
-		this.folderId = inConfig.folderId;
+		this.service = inLocation.service;
+		this.folderId = inLocation.folderId;
 		var req = this.service.propfind(this.folderId, 1);
 		req.response(this, function(inSender, inResponse) {
 			var prj = inResponse.children.filter(function(node){
