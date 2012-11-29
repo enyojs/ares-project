@@ -30,21 +30,19 @@ enyo.kind({
 		onSaveGeneratedXml: "saveGeneratedXml",
 		onPhonegapBuild: "startPhonegapBuild",
 		onBuildStarted: "phonegapBuildStarted",
-		onError: "showErrorMsg"
+		onError: "showError"
 	},
 	create: function() {
 		this.inherited(arguments);
 	},
-	showErrorMsg: function(inSender, inEvent) {
-		this.log(inEvent);
+	showError: function(inSender, inEvent) {
+		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
 		this.hideWaitPopup();
-		this.showErrorPopup(inEvent.msg);
+		this.showErrorPopup(inEvent.msg, inEvent.details);
 		return true; //Stop event propagation
 	},
 	showErrorPopup : function(msg, details) {
-		this.$.errorPopup.setErrorMsg(msg);
-		this.$.errorPopup.setDetails(details);
-		this.$.errorPopup.show();
+		this.$.errorPopup.raise(msg, details);
 	},
 	scanProjectAction: function(inSender, inEvent) {
 		this.$.projectWizardScan.setHeaderText('Select a directory containing one or more project.json files');

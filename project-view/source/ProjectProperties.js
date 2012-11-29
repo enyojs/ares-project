@@ -104,33 +104,6 @@ enyo.kind({
 		this.doCustomConfigProject(obj);
 		// handled here (don't bubble)
 		return true;
-	},
-	generate: function(inData) {
-		var props = inData.properties;
-		var pgap = props.phonegapbuild;
-		var strXml = null;
-		var xw = new XMLWriter('UTF-8');
-		xw.indentation = 4;
-		xw.writeStartDocument();
-			xw.writeStartElement( 'widget' );
-				xw.writeAttributeString('xmlns','http://www.w3.org/ns/widgets');
-				xw.writeAttributeString('xmlns:gap','http://phonegap.com/ns/1.0');
-				xw.writeAttributeString('format', props.format);
-				xw.writeAttributeString('id', props.id);
-				xw.writeAttributeString('version',props.version);
-				xw.writeComment('');
-				xw.writeElementString('name', 'PhoneGap Application: '+props.name);
-				xw.writeComment('');
-				xw.writeElementString('description', 'Getting started with PhoneGap development and build.phonegap.com: '+props.description);
-				xw.writeComment('');
-				xw.writeElementString('title', props.title);
-				xw.writeEndElement();
-			xw.writeEndElement();
-		//xw.writeEndDocument(); called by flush()
-		strXml = xw.flush();
-		if (this.debug) console.log(xw.flush());
-
-		this.doSaveGeneratedXml({folderId: inData.folderId, configXML:strXml}); 
 	}
 });
 
