@@ -9,10 +9,9 @@ enyo.kind({
 	},
 	classes: "enyo-testcase",
 	timeout: 3000,
-	contents: [],
+	debug: false,
 	create: function() {
 		this.inherited(arguments);
-		this.contents = ares.TestProxyReporter.contents;
 	},
 	initComponents: function() {
 		this.inherited(arguments);
@@ -22,7 +21,21 @@ enyo.kind({
 		this.$.testSuite.runAllTests();
 	},
 	testBegun: function(inSender, inEvent) {
-		console.log("=>Ares Reporter *****" + "Group: " + this.name + " *****test: " +inEvent.testName + " is running ...");
+		console.log("=>Ares Proxy Reporter *****" + "Group: " + this.name + " *****test: " +inEvent.testName + " is running ...");
+
+		// Post SEND_TEST_RUNNING event with info relate dto the group and the name of the unit test
+		var data = {
+			evt: "SEND_TEST_RUNNING",
+			group: this.name,
+			test: inEvent.testName,
+			state: "RUNNING"
+
+		};
+		aresTestW.postMessage(data, "http://127.0.0.1:9009");
+		if (this.debug) {
+			console.log("Post SEND_TEST_RUNNING ... "
+				+JSON.stringify(data));
+		}
 	},
 	formatStackTrace: function(inStack) {
 		var stack = inStack.split("\n");
@@ -37,9 +50,22 @@ enyo.kind({
 	},
 	updateTestDisplay: function(inSender, inEvent) {
 		var results = inEvent.results;
-		// store results for future sent to Ares TestSuite
 		var e = results.exception;
-		var content = "=>Ares Reporter *****" + "Group: " + this.name + " *****test: " + results.name + " " + (results.passed ? "  is            PASSED  " : results.message);
+		var content = "=>Ares Proxy Reporter *****" + "Group: " + this.name + " *****test: " + results.name + " " + (results.passed ? "  is            PASSED  " : results.message);
+
+		// Post SEND_TEST_RESULT event with associated results
+		var data = {
+			evt: "SEND_TEST_RESULT",
+			group: this.name,
+			results: results,	
+		};		
+		aresTestW.postMessage(data, "http://127.0.0.1:9009");
+		if (this.debug) {
+			console.log("Post SEND_TEST_RESULT ... "
+				+JSON.stringify(data));
+		}
+
+		// Exception formatting usefull only for console.log here
 		if (e) {
 			// If we have an exception include the stack trace or file/line number.
 			if (e.stack) {
@@ -58,15 +84,6 @@ enyo.kind({
 			content += results.logs;
 		}
 		console.dir(content);
-		this.contents.push(content);
-		ares.TestProxyReporter.contents = this.contents;
-
-	},
-	passContents: function() {
-		return this.contents;
-	},
-	statics: {
-		contents: []
 	}
 });
 
