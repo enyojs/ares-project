@@ -10,7 +10,6 @@ var querystring = require("querystring");
 var temp = require("temp");
 var rimraf = require("rimraf");
 var should = require("should");
-var FormData = require('form-data');
 var FsLocal = require("./fsLocal");
 var util = require("util"),
     async = require("async");
@@ -69,7 +68,7 @@ function post(path, query, content, contentType, next) {
 		} else if (contentType.match(/multipart\/form-data/)) {
 			reqParts = content;
 		} else if (content && contentType instanceof String) {
-			contentType && reqOptions.headers['x-content-type'] = contentType; // original value
+			if (contentType) reqOptions.headers['x-content-type'] = contentType; // original value
 			reqOptions.headers['content-type'] = 'text/plain; charset=x-binary';
 			reqBody = content.toString('x-binary'); // do not decode/encode
 		}
@@ -173,6 +172,7 @@ var myFs;
 var myPort = 9009;
 var myFsPath = temp.path({prefix: 'com.palm.ares.hermes.fsLocal'});
 fs.mkdirSync(myFsPath);
+var clean = true;
 
 describe("fsLocal...", function() {
 	
@@ -750,8 +750,12 @@ describe("fsLocal...", function() {
 
 	it("t100. should stop", function(done) {
 		myFs.quit();
-		rimraf(myFsPath, {gently: myFsPath}, function() {
+		if (clean) {
+			rimraf(myFsPath, {gently: myFsPath}, function() {
+				done();
+			});
+		} else {
 			done();
-		});
+		}
 	});
 });

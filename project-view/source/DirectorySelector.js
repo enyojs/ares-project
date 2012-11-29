@@ -28,7 +28,7 @@ enyo.kind({
 	],
 	events: {
 		onDirectorySelected: "",
-		onCancel: ""
+		onDone: ""
 	},
 	selectedDir: undefined,
 	create: function() {
@@ -65,7 +65,7 @@ enyo.kind({
     },
 	cancel: function() {
 		this.hide() ;
-		this.doCancel(); // inform owner
+		this.doDone(); // inform owner
 	}
 });
 

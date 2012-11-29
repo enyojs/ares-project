@@ -54,7 +54,7 @@ enyo.kind({
 			if (this.debug) {
 				this.log("service.conf.id: "+s.conf.id);
 			}
-			return s.conf.id === "home";
+			return s.config.id === "home";
 		});
 		if (this.debug) {
 			this.log("home service: ");
