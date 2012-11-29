@@ -29,11 +29,11 @@ enyo.singleton({
 
 		enyo.forEach(this.config, function(item) {
 			if (item.type === "kind") {
-				this.log("Processing: " + item.name, item);
+				this.debug && this.log("Processing: " + item.name, item);
 				this.addInformation("properties", item.name, item.properties);
 				this.addInformation("events", item.name, item.events);
 			} else {
-				this.log("Unknown data type='" + item.type + "' -- Ignored");
+				enyo.error("Unknown data type='" + item.type + "' -- Ignored");
 			}
 		}, this);
 	},
@@ -46,7 +46,7 @@ enyo.singleton({
 					inData.level = Model.levelMapping[inData.filterLevel];
 					if ( ! inData.level) {
 						inData.level = Model.F_NORMAL;
-						this.log("Invalid filter level for " + inType + " " + inName + "." + inSubName);
+						enyo.error("Invalid filter level for " + inType + " " + inName + "." + inSubName);
 					}
 				} else {
 					inData.level = Model.F_NORMAL;
