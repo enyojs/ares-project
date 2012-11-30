@@ -200,39 +200,9 @@ enyo.kind({
 	},
 	statics: {
 		checkConfig: function(inConfig) {
-			var config = ProjectConfig.clone(ProjectConfig.DEFAULT_PROJECT_CONFIG);
-			ProjectConfig.extend(config, inConfig);
+			var config = ares.clone(ProjectConfig.DEFAULT_PROJECT_CONFIG);
+			ares.extend(config, inConfig);
 			return config;
-		},
-		/**
-		 * Deep-clone given object
-		 * @param {Object} obj object to clone
-		 * @private
-		 */
-		clone: function(obj) {
-			return this.extend(undefined, obj);
-		},
-		/**
-		 * Extend destination object using source object (deep)
-		 * @param {Object} dst destination object
-		 * @param {Object} src source object
-		 * @private
-		 */
-		extend: function(dst, src) {
-			if (dst === undefined) {
-				if (!src) {
-					return src;
-				}
-				dst = (src instanceof Array) ? [] : {};
-			}
-			for (var i in src) {
-				if (typeof src[i] == "object") {
-					dst[i] = this.extend(dst[i], src[i]);
-				} else {
-					dst[i] = src[i];
-				}
-			}
-			return dst;
 		},
 		// FIXME: the below should be replaced by proper JSON
 		// schema validation with default values.
