@@ -29,6 +29,7 @@ This is  temporary solution. This will be fixed by ENYO-1473 - Create an Ares Te
 ARES IDE is now running at <http://127.0.0.1:9009/ide/ares/index.html> Press CTRL + C to shutdown
 * Connect to the Ares Ide in mode test using Google Chrome or Chromium, URL is:
 <http://127.0.0.1:9009/ide/ares/test.html>
+* Ares Test Reporter is spawned then click on start button to start the tests execution.
 
 ## Tests Executed
 
