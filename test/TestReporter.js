@@ -44,12 +44,10 @@ enyo.kind({
 	},
 	runTests: function() {
 		if (this.debug) console.log("Post RUN ...");
-		if (this.debug) {
-			console.log("this.aresIdeW: ");
-			console.dir(this.aresIdeW);
+		if (this.aresIdeW !== null) {
+			this.aresIdeW.postMessage("RUN", "http://127.0.0.1:9009");
+			this.$.runTests.setDisabled(true);
 		}
-		this.aresIdeW.postMessage("RUN", "http://127.0.0.1:9009");
-		this.$.runTests.setDisabled(true);
 	},
 	testBegun: function(inData) {
 		if (this.debug) {
