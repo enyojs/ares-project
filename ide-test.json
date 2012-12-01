@@ -1,0 +1,32 @@
+{
+	"services":[
+		{
+			"active":true,
+			"id":"home",
+			"icon":"server",
+			"name":"Ares Test - Home Directory",
+			"type": "filesystem",
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"hermes/fsLocal.js", "-P", "/files", "-p", "10002", "@CWD@/test/root"
+			],
+			"useJsonp":false,
+			"debug": false,
+			"respawn": false
+		},
+		{
+			"active":true,
+			"id":"arestest",
+			"icon":"arestest",
+			"name":"Ares Test Suite",
+			"type": "test",
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"hermes/test/main.js", "-p", "10001"
+			],
+			"useJsonp":false,
+			"debug": false,
+			"respawn": false
+		}
+	]
+}
