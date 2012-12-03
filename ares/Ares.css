@@ -152,3 +152,8 @@ body {
 .ares-scale-background {
 	background-size: 100%;
 }
+
+.enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-filedrawer {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}

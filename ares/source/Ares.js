@@ -8,11 +8,9 @@ enyo.kind({
 			{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"},
 			{kind: "Deimos", onCloseDesigner: "closeDesigner"},
 		]},
-		{kind: "Slideable", style: "height: 100%; width: 100%", layoutKind: "FittableRowsLayout", classes: "onyx", axis: "v", value: 0, min: -500, max: 0, unit: "px", components: [
+		{kind: "Slideable", style: "height: 100%; width: 100%", layoutKind: "FittableRowsLayout", classes: "onyx", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
 			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
-			{kind: "onyx.MoreToolbar", components: [
-				{kind: "onyx.Grabber", ontap: "toggleFiles"},
-			]}
+			{name: "bottomBar", kind: "DocumentToolbar", onGrabberTap: "toggleFiles", onSwitchFile: "switchFile"}
 		]},
 		{kind: "ServiceRegistry"}
 	],
@@ -42,16 +40,7 @@ enyo.kind({
 	},
 	doubleclickFile: function(inSender, inEvent) {
 		var f = inEvent.file;
-		this.$.moreToolbar.createComponent({
-			kind: "onyx.Button",
-			classes: "ares-tab-button",
-			components: [
-				{kind: "onyx.IconButton", src: "$lib/onyx/images/progress-button-cancel.png"},
-			    {content: f.name},
-			],
-			ontap: "switchFile",
-			file: f
-		}, {owner: this}).render();
+		this.$.bottomBar.createFileTab(f);
 		this.openDocument(inSender, inEvent);
 	},
 	openDocument: function(inSender, inEvent) {
@@ -128,10 +117,17 @@ enyo.kind({
 		}
 	},
 	calcSlideableLimit: function() {
-		var min = this.getBounds().height-this.$.moreToolbar.getBounds().height;
+		var min = this.getBounds().height-this.$.bottomBar.getBounds().height;
 		this.$.slideable.setMin(-min);
 	},
 	switchFile: function(inSender, inEvent) {
-		this.openDocument(inSender, {file: inSender.file});
+		this.openDocument(inSender, {file: inEvent.file});
+	},
+	finishedSliding: function(inSender, inEvent) {
+		if (this.$.slideable.value < 0) {
+			this.$.bottomBar.showControls();
+		} else {
+			this.$.bottomBar.hideControls();
+		}
 	}
 });
