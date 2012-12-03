@@ -26,14 +26,17 @@ enyo.kind({
 
 	// used to pre-fill properties of a new project
 	blankConfig: {
-			id: "",
-			name: "",
-			version: "",
-			title: "",
-			description: "",
+			author: {},
 			build: {
 				phonegap: {
-					enabled: false
+					enabled: false,
+					icon: {
+						src: "icon.png",
+						role: "default"
+					},
+					preferences: {
+						"phonegap-version": "2.0.0"
+					}
 				}
 			}
 		},
@@ -90,6 +93,7 @@ enyo.kind({
 			else {
 				// once project.json is created, setup and show project properties widget
 				propW.preFill(that.blankConfig),
+				//propW.preFill(that.config.getData()),
 				propW.$.projectDirectory.setContent(that.selectedDir.path);
 				propW.$.projectName.setValue(that.selectedDir.name);
 				that.$.selectDirectoryPopup.hide();

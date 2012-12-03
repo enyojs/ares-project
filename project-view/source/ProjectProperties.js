@@ -164,24 +164,26 @@ enyo.kind({
 	/**
 	 * pre-fill the widget with configuration data
 	 * @param {Object} config is configuration data (typically from project.json)
-	 *  can be a json string or an object. 
+	 *  can be a json string or an object.
 	 */
 	preFill: function(inData) {
-		this.log(inData) ;
-		var config = typeof inData === 'object' ? inData : JSON.parse(inData) ;
+		this.config = typeof inData === 'object' ? inData : JSON.parse(inData) ;
 		var pgConf ;
 		var pgTarget ;
 
-		this.$.projectId.setValue(config.id);
-		this.$.projectVersion.setValue(config.version);
-		this.$.projectName.setValue(config.name);
-		this.$.projectTitle.setValue(config.title);
+		 // avoid storing 'undefined' in there
+		this.$.projectId.     setValue(this.config.id || '' );
+		this.$.projectVersion.setValue(this.config.version || '' );
+		this.$.projectName.   setValue(this.config.name || '' );
+		this.$.projectTitle.  setValue(this.config.title || '' );
+		this.$.projectAuthor. setValue(this.config.author.name || '') ;
+		this.$.projectContact.setValue(this.config.author.href || '') ;
 
-		if (config.build && config.build.phonegap) {
-		    pgConf = config.build.phonegap ;
+		if (this.config.build && this.config.build.phonegap) {
+			pgConf = this.config.build.phonegap ;
 			this.$.pgConfEnabled.setValue(pgConf.enabled);
-			this.$.pgConfId.setValue(pgConf.appId);
-			
+			this.$.pgConfId.setValue(pgConf.appId || '' );
+			this.$.pgIconUrl.setValue(pgConf.icon.src || '' );
 			if (pgConf.targets) {
 				// pgTarget is a key of object pgConf.targets
 				for (pgTarget in pgConf.targets ) {
