@@ -37,6 +37,7 @@ enyo.kind({
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
 		var service = inEvent.service;
 		if (service && service.config && service.config.auth) {
+			if (this.debug) this.log("selected service:", service.config.id);
 			var serviceAuthName = service.config.id + "AuthConfig";
 			if (this.selectedAuthConfig) {
 				this.selectedAuthConfig.hide();
@@ -46,7 +47,8 @@ enyo.kind({
 			this.selectedAuthConfig = this.$.authPanel.$[serviceAuthName];
 			if (!this.selectedAuthConfig) {
 				// Basic-Authentication
-				if (service.config.auth.username && service.config.auth.password) {
+				if (service.config.auth.type === 'basic') {
+					if (this.debug) this.log("creating 'basic' auth form");
 					this.$.authPanel.createComponent({
 						kind: "BasicAuthConfig",
 						name: serviceAuthName,
