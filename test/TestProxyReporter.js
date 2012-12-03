@@ -79,7 +79,7 @@ enyo.kind({
 		var data = {
 			evt: "SEND_TEST_RESULT",
 			group: this.name,
-			results: results,	
+			results: JSON.stringify(results),	
 		};		
 		aresTestW.postMessage(data, "http://127.0.0.1:9009");
 		if (this.debug) {

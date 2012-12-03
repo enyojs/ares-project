@@ -71,7 +71,7 @@ enyo.kind({
 		if (this.debug) {
 			console.log("TestReporter: updataTestDisplay: "+JSON.stringify(inData));
 		}
-		var results = inData.results;
+		var results = JSON.parse(inData.results);
 		var e = results.exception;
 		var info = this.$.group.$[results.name];
 		var content = "<b>" + results.name + "</b>: " + (results.passed ? "PASSED" : results.message);
