@@ -24,7 +24,6 @@ enyo.kind({
 			{content: "PhoneGap", attributes: {title: 'phonegap build parameters...'}}
 		]},
 		{name: "projectDrawer", kind: "onyx.Drawer", open:true, components: [
-			{content: "Project", tag:"h2"},
 			{tag: 'table', components: [
 				{tag: "tr" , components: [
 					 {tag: "td" , content: "Name: "},
@@ -50,10 +49,28 @@ enyo.kind({
 					 {tag: 'td', content: "Id: "},
 					 {tag: "td" , components: [
 						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", defaultFocus: true, name: "projectId", 
+							   {kind: "Input", defaultFocus: true, name: "projectId",
 								attributes: {title: "Application ID in reverse domain-name format: com.example.apps.myapp"}}
 						   ]}
 					  ]}
+				]},
+				{tag: "tr" , components: [
+					 {tag: "td" , content: "Author name: "},
+					 {tag: 'td', attributes: {colspan: 1}, components:[
+						  {kind: "onyx.InputDecorator", components: [
+							   {kind: "Input", name: "projectAuthor",
+								attributes: {title: "Vendor / Committer Name"}
+							   }
+						   ]}
+					 ]},
+					 {tag: "td" , content: "Contact: "},
+					 {tag: 'td', attributes: {colspan: 2}, components:[
+						  {kind: "onyx.InputDecorator", components: [
+							   {kind: "Input", name: "projectContact",
+								attributes: {title: "mail address or home page of the author"}
+							   }
+						   ]}
+					 ]}
 				]},
 				{tag: "tr" , name:'directoryEntry', canGenerate:false, components: [
 					 {tag: "td", content: "Directory: "},
@@ -63,41 +80,40 @@ enyo.kind({
 		]},
 
 		{name: "phoneGapDrawer", kind: "onyx.Drawer", open: false, components: [
-			{content: "PhoneGap", tag:"h2"},
-			{kind: "onyx.ToggleButton", name: 'pgConfEnabled', onContent: "enabled", offContent: "disabled"},
-			{tag: 'table', attributes: {'class': 'ares_projectView_table'}, components: [
+			{
+				kind: "onyx.ToggleButton",
+				name: 'pgConfEnabled',
+				onContent: "enabled",
+				offContent: "disabled",
+				style: "margin-top: 10px;"
+			},
+			{tag: 'table', components: [
 				{tag: "tr" , components: [
 					 {tag: "td" , content: "AppId: "},
-					 {tag: 'td', attributes: {colspan: 3}, components:[
+					 {tag: 'td', attributes: {colspan: 1}, components:[
 						  {kind: "onyx.InputDecorator", components: [
 							   {kind: "Input", name: "pgConfId", placeholder: "com.example.myapp",
 								attributes: {title: "unique identifier, assigned by build.phonegap.com"}
 							   }
 						   ]}
+					 ]},
+					 {tag: "td" , content: "Icon URL: "},
+					 {tag: 'td', attributes: {colspan: 2}, components:[
+						  {kind: "onyx.InputDecorator", components: [
+							   {kind: "Input", name: "pgIconUrl",
+								attributes: {title: "Relative location of the application icon. Defaults to Enyo icon."}
+							   }
+						   ]}
 					 ]}
-				]},
-				{tag: "tr" , components: [
-					 {tag: 'td', content: "PhoneGap targets", attributes: {colspan: 3}}
-				]},
-				{tag: "tr" , components: [
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", name: 'androidTarget', onContent: "Android", offContent: "Android"}
-					]},
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", name: 'iosTarget', onContent: "Ios", offContent: "Ios"}
-					]},
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", name: 'winphoneTarget', onContent: "Winphone", offContent: "Winphone"}
-					]}
-				]},
-				{tag: "tr" , components: [
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", name: 'blackberryTarget', onContent: "Blackberry", offContent: "Blackberry"}
-					]},
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", name: 'webosTarget',onContent: "Webos", offContent: "Webos"}
-					]}
 				]}
+			]},
+			{content: "Targets:"},
+			{kind: "FittableRows", attributes: {'class': 'ares_projectView_switches'}, components: [
+				{kind: "onyx.ToggleButton", name: 'androidTarget', onContent: "Android", offContent: "Android"},
+				{kind: "onyx.ToggleButton", name: 'iosTarget', onContent: "Ios", offContent: "Ios"},
+				{kind: "onyx.ToggleButton", name: 'winphoneTarget', onContent: "Winphone", offContent: "Winphone"},
+				{kind: "onyx.ToggleButton", name: 'blackberryTarget', onContent: "Blackberry", offContent: "Blackberry"},
+				{kind: "onyx.ToggleButton", name: 'webosTarget',onContent: "Webos", offContent: "Webos"}
 			]}
 		]},
 
