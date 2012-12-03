@@ -197,21 +197,22 @@ enyo.kind({
 	confirmTap: function(inSender, inEvent) {
 		// retrieve modified values
 		this.log('ok tapped') ;
-		var config = {
-			id:       this.$.projectId.getValue(),
-			version:  this.$.projectVersion.getValue(),
-			name:     this.$.projectName.getValue(),
-			title:    this.$.projectTitle.getValue(),
-			build: {
-				enabled: this.$.pgConfEnabled.getValue(),
-				appId:   this.$.pgConfId.getValue(),
-				phonegap: {
-					targets: {}
-				}
-			}
-		} ;
 
-		var pgConf = config.build.phonegap ;
+		this.config.id       = this.$.projectId     .getValue();
+		this.config.version  = this.$.projectVersion.getValue();
+		this.config.name     = this.$.projectName   .getValue();
+		this.config.title    = this.$.projectTitle  .getValue();
+
+		this.config.author.name = this.$.projectAuthor.getValue();
+		this.config.author.href = this.$.projectContact.getValue();
+
+		this.config.build.enabled = this.$.pgConfEnabled.getValue();
+		this.config.build.appId   = this.$.pgConfId.getValue();
+
+
+		var pgConf = this.config.build.phonegap ;
+		pgConf.icon.src = this.$.pgIconUrl.getValue();
+
 		var tglist = ['android','ios','winphone','blackberry','webos'] ;
 		for ( i in tglist) {
 			this.log('copy data from ' + tglist[i] +'Target') ;
@@ -219,7 +220,7 @@ enyo.kind({
 		}
 
 		// to be handled by a ProjectWizard
-		this.doModifiedConfig({data: config}) ;
+		this.doModifiedConfig({data: this.config}) ;
 
 		this.doDone();
 
