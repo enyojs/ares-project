@@ -14,6 +14,7 @@ enyo.kind({
 				{kind: "FittableColumns", style: "width:100%", components: [
 					{kind: "Control", content: "Ares Test Suite", style: "margin-right: 10px"},
 					{fit:true},
+					{kind: "Control", content: "Click on "},
 					{kind: "onyx.InputDecorator", components: [
 						{name: "runTests", kind: "onyx.IconButton", src: "$test/images/play.png", ontap: "runTests"},
 						{kind: "onyx.Tooltip", content: "Run Ares Test Suite..."},
