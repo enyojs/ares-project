@@ -61,7 +61,7 @@ enyo.kind({
 		var service = f.service;
 		var ext = f.name.split(".").pop();
 		var origin = service.getConfig().origin;
-		var projectUrl = origin + service.getConfig().pathname + "/file" + inEvent.project;
+		var projectUrl = origin + service.getConfig().pathname + "/file" + inEvent.projectPath;
 		this.$.phobos.beginOpenDoc();
 		service.getFile(f.id)
 			.response(this, function(inEvent, inData) {
