@@ -2,7 +2,6 @@ enyo.kind({
 	name: "HermesFileSystemTest",
 	kind: "ares.TestSuite",
 	debug: false,
-	// TODO folderId needs to be created. ENYO-1473
 	folderId: "%2FAresTests",
 	dirToCreate: "source",
 	nodeDir: "%2FAresTests%2Fsource",
@@ -150,7 +149,7 @@ enyo.kind({
 					self.finish("create file error: "+inError);
 				});
 			}
-		});					
+		});
 		req.error(this, function(inSender, inError) {
 			if (this.debug) {
 				this.log(inError);
