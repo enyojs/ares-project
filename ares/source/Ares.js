@@ -6,7 +6,7 @@ enyo.kind({
 	components: [
 		{kind: "Panels", /*arrangerKind: "CarouselArranger",*/ classes: "enyo-fit", components: [
 			{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"},
-			{kind: "Deimos", onCloseDesigner: "closeDesigner"},
+			{kind: "Deimos", onCloseDesigner: "closeDesigner"}
 		]},
 		{kind: "Slideable", style: "height: 100%; width: 100%", layoutKind: "FittableRowsLayout", classes: "onyx", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
 			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
@@ -34,14 +34,20 @@ enyo.kind({
 		this.inherited(arguments);
 		this.calcSlideableLimit();
 	},
+	openFiles: {},
 	draggable: false,
 	handleReloadServices: function(inSender, inEvent) {
 		this.$.serviceRegistry.reloadServices();
 	},
 	doubleclickFile: function(inSender, inEvent) {
 		var f = inEvent.file;
-		this.$.bottomBar.createFileTab(f);
-		this.openDocument(inSender, inEvent);
+		var d = this.openFiles[inEvent.file.id];
+		if (d) {
+			this.switchToDocument(d);
+		} else {
+			this.$.bottomBar.createFileTab(f);
+			this.openDocument(inSender, inEvent);
+		}
 	},
 	openDocument: function(inSender, inEvent) {
 		var f = inEvent.file;
@@ -58,9 +64,18 @@ enyo.kind({
 					// no data? Empty file
 					inData="";
 				}
-				this.$.phobos.openDoc(origin, f, inData, ext, projectUrl);
-				this.$.panels.setIndex(this.phobosViewIndex);
-				this.hideFiles();
+				if (this.openFiles[f.id]) {
+					alert("Duplicate File ID in cache!");
+				}
+				var doc = {
+					origin: origin,
+					file: f,
+					data: inData,
+					extension: ext,
+					projectUrl: projectUrl
+				};
+				this.openFiles[f.id] = doc;
+				this.switchToDocument(doc);
 			})
 			.error(this, function(inEvent, inData) {
 				enyo.log("Open failed", inData);
@@ -121,7 +136,19 @@ enyo.kind({
 		this.$.slideable.setMin(-min);
 	},
 	switchFile: function(inSender, inEvent) {
-		this.openDocument(inSender, {file: inEvent.file});
+		var d = this.openFiles[inEvent.file.id];
+		if (d) {
+			this.switchToDocument(d);
+		} else {
+			alert("File ID not found in cache!");
+			this.openDocument(inSender, {file: inEvent.file});
+		}
+	},
+	switchToDocument: function(d) {
+		this.$.phobos.openDoc(d.origin, d.file, d.data, d.ext, d.projectUrl);
+		this.$.panels.setIndex(this.phobosViewIndex);
+		this.$.bottomBar.activateFileWithId(d.file.id);
+		this.hideFiles();
 	},
 	finishedSliding: function(inSender, inEvent) {
 		if (this.$.slideable.value < 0) {

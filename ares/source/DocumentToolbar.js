@@ -23,7 +23,7 @@ enyo.kind({
 			{name: "tabs", classes: "ares-docbar-tabs", kind: "onyx.RadioGroup"}
 		]}
 	],
-	documents: [],
+	tabs: {},
 	showControls: function() {
 		this.$.drawer.setOpen(true);
 	},
@@ -31,7 +31,8 @@ enyo.kind({
 		this.$.drawer.setOpen(false);
 	},
 	createFileTab: function(file) {
-		this.$.tabs.createComponent({
+		var id = file.id;
+		var c = this.$.tabs.createComponent({
 			classes: "ares-tab-button",
 			file: file,
 			components: [
@@ -41,11 +42,15 @@ enyo.kind({
 			ontap: "switchFile"
 		}, {owner: this}).render();;
 		this.$.container.reflow();
+		this.tabs[id] = c;
 	},
 	switchFile: function(inSender, inEvent) {
 		this.doSwitchFile({file: inSender.file});
 	},
 	closeFile: function(inSender, inEvent) {
-		inSender.parent.destroy();
+		//inSender.parent.destroy();
+	},
+	activateFileWithId: function(id) {
+		this.tabs[id].setActive(true);
 	}
 });
