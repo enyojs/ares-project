@@ -14,9 +14,9 @@ enyo.kind({
 			{kind: "onyx.Grabber", ontap: "doGrabberTap"},
 			{kind: "onyx.Drawer", classes: "ares-filedrawer", orient: "h", open: false, components: [
 				{kind: "FittableColumns", components: [
-					{kind: "onyx.Button", content: "Save", ontap: "doSave"},
-					{kind: "onyx.Button", content: "New Kind", ontap: "doNewKind"},
-					{kind: "onyx.Button", content: "Designer", ontap: "doDesign"}
+					{kind: "onyx.Button", content: "Save", ontap: "saveFile"},
+					{kind: "onyx.Button", content: "New Kind", ontap: "newKind"},
+					{kind: "onyx.Button", content: "Designer", ontap: "designFile"}
 				]}
 			]},
 			{fit: true},
@@ -30,27 +30,43 @@ enyo.kind({
 	hideControls: function() {
 		this.$.drawer.setOpen(false);
 	},
-	createFileTab: function(file) {
-		var id = file.id;
+	createFileTab: function(name, id) {
 		var c = this.$.tabs.createComponent({
 			classes: "ares-tab-button",
-			file: file,
+			fileId: id,
 			components: [
-	    		{content: file.name},
+	    		{content: name},
 				{kind: "onyx.IconButton", classes: "ares-doc-close", src: "$lib/onyx/images/progress-button-cancel.png", ontap: "closeFile"},
 			],
 			ontap: "switchFile"
-		}, {owner: this}).render();;
+		}, {owner: this}).render();
 		this.$.container.reflow();
 		this.tabs[id] = c;
 	},
 	switchFile: function(inSender, inEvent) {
-		this.doSwitchFile({file: inSender.file});
-	},
-	closeFile: function(inSender, inEvent) {
-		//inSender.parent.destroy();
+		this.doSwitchFile({id: inSender.id});
 	},
 	activateFileWithId: function(id) {
 		this.tabs[id].setActive(true);
-	}
+	},
+	closeFile: function(inSender, inEvent) {
+		var id = inSender.fileId;
+		this.doClose({id: id});
+		//inSender.parent.destroy();
+	},
+	saveFile: function(inSender, inEvent) {
+		var id = this.$.tabs.getActive().fileId;
+		this.doSave({id: id});
+		//inSender.parent.destroy();
+	},
+	designFile: function(inSender, inEvent) {
+		var id = this.$.tabs.getActive().fileId;
+		this.doDesign({id: id});
+		//inSender.parent.destroy();
+	},
+	newKind: function(inSender, inEvent) {
+		var id = this.$.tabs.getActive().fileId;
+		this.doNewKind({id: id});
+		//inSender.parent.destroy();
+	},
 });

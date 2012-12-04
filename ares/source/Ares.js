@@ -45,7 +45,7 @@ enyo.kind({
 		if (d) {
 			this.switchToDocument(d);
 		} else {
-			this.$.bottomBar.createFileTab(f);
+			this.$.bottomBar.createFileTab(f.name, f.id);
 			this.openDocument(inSender, inEvent);
 		}
 	},
@@ -136,12 +136,11 @@ enyo.kind({
 		this.$.slideable.setMin(-min);
 	},
 	switchFile: function(inSender, inEvent) {
-		var d = this.openFiles[inEvent.file.id];
+		var d = this.openFiles[inEvent.id];
 		if (d) {
 			this.switchToDocument(d);
 		} else {
 			alert("File ID not found in cache!");
-			this.openDocument(inSender, {file: inEvent.file});
 		}
 	},
 	switchToDocument: function(d) {
