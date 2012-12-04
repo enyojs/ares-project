@@ -147,7 +147,7 @@ enyo.kind({
 		var settings = modes[mode]||modes['text'];
 		this.$.left.setIndex(settings.leftIndex);
 		this.$.right.setIndex(settings.rightIndex);
-
+		this.$.body.reflow();
 		return showSettings.ace ;
 	},
 	showWaitPopup: function(inMessage) {
