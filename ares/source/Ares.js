@@ -10,7 +10,7 @@ enyo.kind({
 		]},
 		{kind: "Slideable", style: "height: 100%; width: 100%", layoutKind: "FittableRowsLayout", classes: "onyx", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
 			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
-			{name: "bottomBar", kind: "DocumentToolbar", onGrabberTap: "toggleFiles", onSwitchFile: "switchFile"}
+			{name: "bottomBar", kind: "DocumentToolbar", onGrabberTap: "toggleFiles", onSwitchFile: "switchFile", onSave: "", onDesign: "", onNewKind: ""}
 		]},
 		{kind: "ServiceRegistry"}
 	],
