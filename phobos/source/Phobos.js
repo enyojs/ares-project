@@ -41,7 +41,8 @@ enyo.kind({
 	events: {
 		onSaveDocument: "",
 		onDesignDocument: "",
-		onCloseDocument: ""
+		onCloseDocument: "",
+		onEditedChanged: ""
 	},
 	handlers: {
 		onCss: "newcssAction",
@@ -78,6 +79,7 @@ enyo.kind({
 	saveComplete: function() {
 		this.hideWaitPopup();
 		this.docHasChanged=false;
+		this.doEditedChanged({id: this.file.id, edited: false});
 		this.reparseAction();
 	},
 	saveNeeded: function() {
@@ -91,7 +93,7 @@ enyo.kind({
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
 	},
-	openDoc: function(origin, inFile, inCode, inExt, inProjectUrl) {
+	openDoc: function(origin, inFile, inCode, inExt, inProjectUrl, changed) {
 		this.hideWaitPopup();
 		this.analysis = null;
 		this.file = inFile;
@@ -111,7 +113,8 @@ enyo.kind({
 		this.projectUrl = inProjectUrl;
 		this.createPathResolver(inProjectUrl);
 		this.buildEnyoDb(inProjectUrl, this.pathResolver);	// this.buildProjectDb() will be invoked when enyo analysis is finished
-		this.docHasChanged=false;
+		this.docHasChanged = changed;
+		this.doEditedChanged({id: this.file.id, edited: changed});
 		this.$.documentLabel.setContent(this.file.name);
 	},
 	adjustPanelsForMode: function(mode) {
@@ -459,6 +462,7 @@ enyo.kind({
 		 */
 		this.insertMissingHandlers();
 		this.docHasChanged = true;
+		this.doEditedChanged({id: this.file.id, edited: true});
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docHasChanged) {
@@ -479,6 +483,7 @@ enyo.kind({
 	},
 	docChanged: function(inSender, inEvent) {
 		this.docHasChanged=true;
+		this.doEditedChanged({id: this.file.id, edited: true});
 
 		if (this.debug) this.log(JSON.stringify(inEvent.data));
 
@@ -553,6 +558,9 @@ enyo.kind({
 	
 	focusEditor: function(inSender, inEvent) {
 		this.$.ace.focus();
+	},
+	getEditorContent: function() {
+		return this.$.ace.getValue();
 	}
 });
 
