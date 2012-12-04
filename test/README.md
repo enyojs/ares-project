@@ -1,42 +1,37 @@
-# Ares Test Suite … Work in progress …
 
-# Overview
 
-### Brief Description
 
-* Ares Test Suite is a Test Package based on the enyo.TestSuite, enyo.TestRunner and enyo.TestReporter kinds, code available under lib/extra/test.
+# Ares Test Suite Environment
 
-* Ares Test Suite collapses tests results. These results are displayed by the Ares Test Reporter window (yellow for running state, green for success, red for failure, expandable stack trace and logging for failures)
+## Objectives
 
-* Cross window messaging is done using window.postMessage. This is a method for safely enabling cross-origin communication.
+* To set up an isolated Ares Test Suite environement,
+* To execute all available Test Suites,
+* to create new Test Suites,
+* To collapse the Test Suite Results like follow; yellow for running state, green for success, red for failure, expandable stack trace and logging for failures,
+* To display these results. The display is done by the Ares Test Reporter window. 
 
-* Ares Test Reporter window is spawned by Ares Ide when the Ares Ide is launched in mode test.
+## Usage
 
-* Ares Test Suite code is available under test directory.
+* Start the IDE server with the argument 'runtest'. The command is: 'node ide.js runtest'
+* Wait for the message:
+Ares IDE is now running at <http://127.0.0.1:9009/ide/ares/test.html> Press CTRL + C to shutdown
+* Connect to the Ares IDE in mode test using Google Chrome or Chromium. The URL is: <http://127.0.0.1:9009/ide/ares/test.html>
+* Wait for the Ares Test Reporter window,
+* Click on start button to fire the execution of the available Test Suites.
 
-###### Warning: As work still in progress … current implementation may change ...
-
-# Run
-
-###### Pre-req: Create a AresTests directory under the root of your local file-system access declared in ide.json (by default Home or My Documents directory).
-
-This is  temporary solution. This will be fixed by ENYO-1473 - Create an Ares Test Service.
-
-## Syntax Execution
-
-* Start the IDE server using the command: 'node ide.js'
-* Wait message:
-ARES IDE is now running at <http://127.0.0.1:9009/ide/ares/index.html> Press CTRL + C to shutdown
-* Connect to the Ares Ide in mode test using Google Chrome or Chromium, URL is:
-<http://127.0.0.1:9009/ide/ares/test.html>
-* Ares Test Reporter is spawned then click on start button to start the tests execution.
-
-## Tests Executed
-
-#### One test group available
-1. HermesFileSystemTest.
-
-####Test Suite related to this group:
+## Adding new tests
+* To add a test case:
+	1. Create a subclass of AresTestCase
+	2. Add file to package.js.
+* To implement the suite of unit tests:
+	1. Create a subkind of ares.TestSuite.
+	2. Any methods in your subkind must begin with 'test' and will be invoked as unit tests when the test runner executes.
+	3. When each test is complete, it should call this.finish().  
+* The code must be located under ares-project/test/tests
+	
+## Notes
+One Test Suite group is currently available; HermesFileSystemTest. The HermesFileSystemTest is composed by the following unit tests:
 
 1. testGetServicesFromRegistry
 2. testGetHomeFromServices
@@ -45,10 +40,10 @@ ARES IDE is now running at <http://127.0.0.1:9009/ide/ares/index.html> Press CTR
 5. testDeleteFile
 6. testDeleteFolder
 
-#### Execution Environment Tested
+Tested sucessfully on Chrome/Chromium.
 
-* Today sucessfully tested on Chrome/Chromium.
-
-###### Will be tested later on Safari, Firefox, Opera, IE
+## TODO
+ 
+* Will be tested later on Safari, Firefox, Opera, IE
 
 
