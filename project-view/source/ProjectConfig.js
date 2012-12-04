@@ -1,15 +1,15 @@
 /**
  * This kind holds the consistency between the project.json and the
  * in-memory representation of the project configuration.
- * 
+ *
  * After creation of the kind, use #init(service, folderId) to
  * set the location of the project.  Those values can no longer be
  * changed.
- * 
+ *
  * - Use #setData and #getData to change the in-memory configuration Javascript object.
  *   data is an object containing the *whole* configuration.
  * - Then use #save to send the whole configuration to remote storage
- *  
+ *
  * As it is, this kind performs zero checks on the content of the file.
  */
 enyo.kind({
@@ -101,7 +101,7 @@ enyo.kind({
 			if (this.debug) enyo.log("ProjectConfig.save: inResponse=", inResponse);
 			this.fileId = inResponse.id;
 			if (next instanceof Function) next();
-		}); 
+		});
 		req.error(this, function(inSender, inError) {
 			enyo.error("ProjectConfig.save: error=", inError);
 			if (next instanceof Function) next(inError);
@@ -109,7 +109,7 @@ enyo.kind({
 	},
 	/**
 	 * Generate PhoneGap's config.xml on the fly
-	 * 
+	 *
 	 * @return {String} or undefined if PhoneGap build is disabled
 	 * for this project
 	 */
