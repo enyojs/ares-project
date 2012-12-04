@@ -248,7 +248,8 @@ enyo.kind({
 					},
 					preferences: {
 						"phonegap-version": "2.0.0"
-					}
+					},
+					targets: {}
 				}
 			}
 		},
