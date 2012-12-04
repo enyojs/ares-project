@@ -10,7 +10,8 @@ enyo.kind({
 		]},
 		{kind: "Slideable", style: "height: 100%; width: 100%", layoutKind: "FittableRowsLayout", classes: "onyx", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
 			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
-			{name: "bottomBar", kind: "DocumentToolbar", onGrabberTap: "toggleFiles", 
+			{name: "bottomBar", kind: "DocumentToolbar", 
+			    onGrabberTap: "toggleFiles", 
 				onSwitchFile: "switchFile", 
 				onSave: "bounceSave", 
 				onDesign: "bounceDesign", 
@@ -101,6 +102,10 @@ enyo.kind({
 			});
 	},
 	closeDocument: function(inSender, inEvent) {
+		var id = inSender.file.id;
+		// remove file from cache
+		this.openFiles[id]=undefined;
+		this.$.bottomBar.removeTab(id);
 		this.showFiles();
 	},
 	designDocument: function(inSender, inEvent) {

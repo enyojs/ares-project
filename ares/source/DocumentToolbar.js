@@ -71,4 +71,8 @@ enyo.kind({
 		this.doNewKind({id: id});
 		return true;
 	},
+	removeTab: function(id) {
+		this.tabs[id].destroy();
+		this.tabs[id] = undefined;
+	}
 });
