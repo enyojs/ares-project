@@ -109,13 +109,17 @@ enyo.kind({
 				]}
 			]},
 			{content: "Targets:"},
-			{kind: "FittableRows", attributes: {'class': 'ares_projectView_switches'}, components: [
-				{kind: "onyx.ToggleButton", name: 'androidTarget', onContent: "Android", offContent: "Android"},
-				{kind: "onyx.ToggleButton", name: 'iosTarget', onContent: "Ios", offContent: "Ios"},
-				{kind: "onyx.ToggleButton", name: 'winphoneTarget', onContent: "Winphone", offContent: "Winphone"},
-				{kind: "onyx.ToggleButton", name: 'blackberryTarget', onContent: "Blackberry", offContent: "Blackberry"},
-				{kind: "onyx.ToggleButton", name: 'webosTarget',onContent: "Webos", offContent: "Webos"}
-			]}
+			{
+				kind: "FittableRows", attributes: {'class': 'ares_projectView_switches'},
+				onChange: "enablePhoneGap",
+				components: [
+					{kind: "onyx.ToggleButton", name: 'androidTarget', onContent: "Android", offContent: "Android"},
+					{kind: "onyx.ToggleButton", name: 'iosTarget', onContent: "Ios", offContent: "Ios"},
+					{kind: "onyx.ToggleButton", name: 'winphoneTarget', onContent: "Winphone", offContent: "Winphone"},
+					{kind: "onyx.ToggleButton", name: 'blackberryTarget', onContent: "Blackberry", offContent: "Blackberry"},
+					{kind: "onyx.ToggleButton", name: 'webosTarget',onContent: "Webos", offContent: "Webos"}
+				]
+			}
 		]},
 
 		// FIXME: there should be an HTML/CSS way to avoid using FittableStuff...
@@ -158,6 +162,13 @@ enyo.kind({
 				this.$.projectDrawer.setOpen(false) ;
 				this.$.phoneGapDrawer.setOpen(true) ;
 			}
+		}
+	},
+
+	// switch Phonegap to "enabled" whenever user validates a target
+	enablePhoneGap: function(inSender, inEvent) {
+		if (inEvent.value === true ) {
+			this.$.pgConfEnabled.setValue(true) ;
 		}
 	},
 
