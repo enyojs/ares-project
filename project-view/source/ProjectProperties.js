@@ -181,27 +181,33 @@ enyo.kind({
 		this.config = typeof inData === 'object' ? inData : JSON.parse(inData) ;
 		var pgConf ;
 		var pgTarget ;
+		var conf = this.config ;
 
 		 // avoid storing 'undefined' in there
-		this.$.projectId.     setValue(this.config.id || '' );
-		this.$.projectVersion.setValue(this.config.version || '' );
-		this.$.projectName.   setValue(this.config.name || '' );
-		this.$.projectTitle.  setValue(this.config.title || '' );
-		this.$.projectAuthor. setValue(this.config.author.name || '') ;
-		this.$.projectContact.setValue(this.config.author.href || '') ;
+		this.$.projectId.     setValue(conf.id      || '' );
+		this.$.projectVersion.setValue(conf.version || '' );
+		this.$.projectName.   setValue(conf.name    || '' );
+		this.$.projectTitle.  setValue(conf.title   || '' );
 
-		if (this.config.build && this.config.build.phonegap) {
-			pgConf = this.config.build.phonegap ;
-			this.$.pgConfEnabled.setValue(pgConf.enabled);
-			this.$.pgConfId.setValue(pgConf.appId || '' );
-			this.$.pgIconUrl.setValue(pgConf.icon.src || '' );
-			if (pgConf.targets) {
-				// pgTarget is a key of object pgConf.targets
-				for (pgTarget in pgConf.targets ) {
-					this.$[ pgTarget + 'Target' ].setValue(pgConf.targets[pgTarget]) ;
-				}
-			}
+		if (! conf.author) { conf.author =  {} ;}
+		this.$.projectAuthor. setValue(conf.author.name || '') ;
+		this.$.projectContact.setValue(conf.author.href || '') ;
+
+		if (! conf.build) {conf.build = {} ;}
+		if (! conf.build.phonegap) { conf.build.phonegap = {}; }
+
+		pgConf = this.config.build.phonegap ;
+		this.$.pgConfEnabled.setValue(pgConf.enabled);
+		this.$.pgConfId.setValue(pgConf.appId || '' );
+		this.$.pgIconUrl.setValue(pgConf.icon.src || '' );
+
+
+		if (! pgConf.targets) { pgConf.targets = {} ;}
+		// pgTarget is a key of object pgConf.targets
+		for (pgTarget in pgConf.targets ) {
+			this.$[ pgTarget + 'Target' ].setValue(pgConf.targets[pgTarget]) ;
 		}
+
 		return this ;
 	},
 
