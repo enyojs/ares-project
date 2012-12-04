@@ -136,6 +136,12 @@ body {
 	width: 200px;
 }
 
+.ares-tab-button {
+	padding-right: 0px;
+	height: 36px;
+}
+
+
 .ares-no-padding {
 	padding: 0px;
 	border: 0px;
@@ -144,3 +150,31 @@ body {
 .ares-scale-background {
 	background-size: 100%;
 }
+
+.ares-doc-close {
+	height: 16px;
+	width: 16px;
+	background-size: 100%;
+	margin-left: 8px;
+}
+
+.ares-docbar-container {
+	margin-top: 0px;
+	margin-bottom: 0px;
+	width: 100%;
+}
+
+.enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-filedrawer {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+.enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-docbar-tabs {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+.enyo-fittable-columns-layout.enyo-stretch > .onyx-grabber {
+	height: 27px;
+}
+
