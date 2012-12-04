@@ -13,10 +13,12 @@
 
 ## Usage
 
-* Start the IDE server with the argument 'runtest'. The command is: 'node ide.js runtest'
+* Start the IDE server with the argument `runtest`. The command is: `node ide.js runtest`
 * Wait for the message:
-Ares IDE is now running at <http://127.0.0.1:9009/ide/ares/test.html> Press CTRL + C to shutdown
-* Connect to the Ares IDE in mode test using Google Chrome or Chromium. The URL is: <http://127.0.0.1:9009/ide/ares/test.html>
+
+		Ares IDE is now running at <http://127.0.0.1:9009/ide/ares/test.html> Press CTRL + C to shutdown
+
+* Connect to the Ares IDE in mode test using Google Chrome or Chromium. The URL is: <http://127.0.0.1:9009/ide/ares/test.html> like on [Google](http://www.google.com).
 * Wait for the Ares Test Reporter window,
 * Click on start button to fire the execution of the available Test Suites.
 
@@ -34,11 +36,12 @@ Ares IDE is now running at <http://127.0.0.1:9009/ide/ares/test.html> Press CTRL
 One Test Suite group is currently available; HermesFileSystemTest. The HermesFileSystemTest is composed by the following unit tests:
 
 1. testGetServicesFromRegistry
-2. testGetHomeFromServices
-3. testPropfindAndCreateFolder
-4. testPropfindAndCreateFile
-5. testDeleteFile
-6. testDeleteFolder
+1. testGetHomeFromServices
+1. testPropfindAndCreateFolder
+1. testPropfindAndCreateFile
+1. testDeleteFile
+1. testDeleteFolder
+
 
 Tested sucessfully on Chrome/Chromium.
 
