@@ -236,9 +236,8 @@ enyo.kind({
 		},
 
 		// used to pre-fill properties of a new project
-		// contains default values and required objects
+		// contains default values
 		PREFILLED_CONFIG_FOR_UI: {
-			author: {},
 			build: {
 				phonegap: {
 					enabled: false,
@@ -248,8 +247,7 @@ enyo.kind({
 					},
 					preferences: {
 						"phonegap-version": "2.0.0"
-					},
-					targets: {}
+					}
 				}
 			}
 		},
