@@ -17,8 +17,13 @@ enyo.kind({
 				{name: "authPanel", classes: "ares_harmonia_authPanel"}
 			], onUpdateAuth: "handleUpdateAuth"},
 			{kind: "onyx.Button", content: "Dismiss", ontap: "dismiss"}
-		]}
+		]},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "", details: "", autoDismiss: false, modal: true}
 	],
+
+	handlers: {
+		onError: "showError"
+	},
 
 	//* @private
 	selectedAuthConfig: undefined,
@@ -57,11 +62,20 @@ enyo.kind({
 						username: service.config.auth.username,
 						password: service.config.auth.password
 					});
-					this.selectedAuthConfig = this.$.authPanel.$[serviceAuthName];
-					this.selectedAuthConfig.render();
+				} else if (service.config.auth.type === 'dropbox') {
+					if (this.debug) this.log("creating 'dropbox' auth form");
+					this.$.authPanel.createComponent({
+						kind: "DropboxAuthConfig",
+						name: serviceAuthName,
+						serviceId: service.config.id,
+						serviceName: service.config.name,
+						auth: ares.clone(service.config.auth)
+					});
 				} else {
 					throw new Error("Unhandled authentication type of service:" + service.config.id);
 				}
+				this.selectedAuthConfig = this.$.authPanel.$[serviceAuthName];
+				this.selectedAuthConfig.render();
 			}
 			if (this.selectedAuthConfig) {
 				this.selectedAuthConfig.show();
@@ -91,5 +105,10 @@ enyo.kind({
 	dismiss: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
 		this.hide();
+	},
+	showError: function(inSender, inEvent) {
+		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
+		this.$.errorPopup.raise(inEvent.msg, inEvent.details);
+		return true; //Stop event propagation
 	}
 });

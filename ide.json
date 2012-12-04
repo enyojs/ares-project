@@ -15,13 +15,20 @@
 			"respawn": false
 		},
 		{
-			"active":false,
-			"id":"dropbox-enyojs",
+			"active":true,
+			"id":"dropbox",
 			"icon":"dropbox",
-			"name":"Dropbox (enyojs.com)",
+			"name":"Dropbox",
 			"type": "filesystem",
 			"provider": "hermes",
-			"command":"@NODE@", "params":["hermes/dropbox/index.js", "0", "http://184.169.139.5:8080"],
+			"Xcommand":"@NODE@", "params":[
+				"hermes/fsDropbox.js", "-P", "/files", "-p", "10002"
+			],
+			"auth": {
+				"type": "dropbox",
+				"appKey": "YOUR_APP_KEY",
+				"appSecret": "YOUR_APP_SECRET"
+			},
 			"useJsonp":false,
 			"debug": false
 		},
