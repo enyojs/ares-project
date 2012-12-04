@@ -1,8 +1,8 @@
 enyo.kind({
 	name: "ares.TestCtrlRunner",
-	kind: enyo.Control,
+	kind: enyo.Component,
 	index: 0,
-	rendered: function() {
+	create: function() {
 		this.inherited(arguments);
 		this.next();
 	},
