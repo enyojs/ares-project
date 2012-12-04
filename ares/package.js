@@ -2,7 +2,7 @@ enyo.depends(
 	"$lib/layout",
 	"$lib/onyx",
 	"$lib/foss",
-	"Ares.js",
+	"source/",
 	"Ares.css",
 	//
 	"$lib/extra/analyzer2",
