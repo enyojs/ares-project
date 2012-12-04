@@ -15,6 +15,10 @@ enyo.kind({
 	},
 	fileViewIndex: 3,
 	create: function() {
+		if (this.runTest) {
+			ProjectList.underTest = true;
+		}
+		
 		this.inherited(arguments);
 		this.setIndex(this.fileViewIndex);
 
