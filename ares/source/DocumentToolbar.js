@@ -30,11 +30,11 @@ enyo.kind({
 	},
 	createFileTab: function(file) {
 		this.$.tabs.createComponent({
-			classes: "onyx-button ares-tab-button",
+			classes: "ares-tab-button",
 			file: file,
 			components: [
 	    		{content: file.name},
-				{kind: "onyx.IconButton", src: "$lib/onyx/images/progress-button-cancel.png", ontap: "closeFile"},
+				{kind: "onyx.IconButton", classes: "ares-doc-close", src: "$lib/onyx/images/progress-button-cancel.png", ontap: "closeFile"},
 			],
 			ontap: "switchFile"
 		}, {owner: this}).render();;
