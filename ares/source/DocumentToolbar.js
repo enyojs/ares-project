@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "DocumentToolbar",
-	kind: "onyx.MoreToolbar",
+	kind: "onyx.Toolbar",
 	events: {
 		onGrabberTap: "",
 		onSwitchFile: "",
@@ -10,16 +10,18 @@ enyo.kind({
 		onDesign: "",
 	},
 	components: [
-		{kind: "onyx.Grabber", ontap: "doGrabberTap"},
-		{kind: "onyx.Drawer", classes: "ares-filedrawer", orient: "h", open: false, components: [
-			{kind: "FittableColumns", components: [
-				{kind: "onyx.Button", content: "Save", ontap: "doSave"},
-				{kind: "onyx.Button", content: "New Kind", ontap: "doNewKind"},
-				{kind: "onyx.Button", content: "Designer", ontap: "doDesign"}
-			]}
-		]},
-		{fit: true},
-		{name: "tabs", classes: "ares-docbar-tabs", kind: "onyx.RadioGroup"}
+		{name: "container", classes: "ares-docbar-container", kind: "FittableColumns", components: [
+			{kind: "onyx.Grabber", ontap: "doGrabberTap"},
+			{kind: "onyx.Drawer", classes: "ares-filedrawer", orient: "h", open: false, components: [
+				{kind: "FittableColumns", components: [
+					{kind: "onyx.Button", content: "Save", ontap: "doSave"},
+					{kind: "onyx.Button", content: "New Kind", ontap: "doNewKind"},
+					{kind: "onyx.Button", content: "Designer", ontap: "doDesign"}
+				]}
+			]},
+			{fit: true},
+			{name: "tabs", classes: "ares-docbar-tabs", kind: "onyx.RadioGroup"}
+		]}
 	],
 	documents: [],
 	showControls: function() {
@@ -38,7 +40,7 @@ enyo.kind({
 			],
 			ontap: "switchFile"
 		}, {owner: this}).render();;
-		this.reflow();
+		this.$.container.reflow();
 	},
 	switchFile: function(inSender, inEvent) {
 		this.doSwitchFile({file: inSender.file});

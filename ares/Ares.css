@@ -138,6 +138,7 @@ body {
 
 .ares-tab-button {
 	padding-right: 0px;
+	height: 36px;
 }
 
 
@@ -157,6 +158,12 @@ body {
 	margin-left: 8px;
 }
 
+.ares-docbar-container {
+	margin-top: 0px;
+	margin-bottom: 0px;
+	width: 100%;
+}
+
 .enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-filedrawer {
 	margin-top: 0px;
 	margin-bottom: 0px;
@@ -166,3 +173,8 @@ body {
 	margin-top: 0px;
 	margin-bottom: 0px;
 }
+
+.enyo-fittable-columns-layout.enyo-stretch > .onyx-grabber {
+	height: 27px;
+}
+
