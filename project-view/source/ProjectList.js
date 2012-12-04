@@ -22,7 +22,6 @@ enyo.kind({
 	projects: [],
 	debug: false,
 	components: [
-		{kind: "LocalStorage"},
 		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", isContainer: true, name: "toolbar", components: [
 			{kind: "onyx.MenuDecorator", onSelect: "aresMenuItemSelected", components: [
 				{content: "Ares"},
@@ -75,7 +74,7 @@ enyo.kind({
 		if (ProjectList.underTest) {
 			this.PROJECTS_STORAGE_KEY = "com.enyojs.ares.tests";
 		} else 
-			this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
+			Ares.LocalStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
 	},
 	/**
 	 * Callback functions which receives the project list data read from the storage
@@ -92,7 +91,7 @@ enyo.kind({
 		} catch(error) {
 			this.error("Unable to retrieve projects information: " + error);	// TODO ENYO-1105
 			console.dir(data);	// Display the offending data in the console
-			this.$.localStorage.remove(this.PROJECTS_STORAGE_KEY); // Remove incorrect projects information
+			Ares.LocalStorage.remove(this.PROJECTS_STORAGE_KEY); // Remove incorrect projects information
 			this.projects = [];
 		}
 	},
@@ -106,7 +105,7 @@ enyo.kind({
 			console.dir(this.projects);		// Display the offending object in the console
 			return;
 		}
-		this.$.localStorage.set(this.PROJECTS_STORAGE_KEY, projectsString, function() {
+		Ares.LocalStorage.set(this.PROJECTS_STORAGE_KEY, projectsString, function() {
 			// WARNING: LocalStorage does not return any information about operation status (success or error)
 			enyo.log("Project list saved");
 		});
