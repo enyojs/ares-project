@@ -36,7 +36,7 @@ enyo.kind({
 			fileId: id,
 			components: [
 	    		{content: name},
-				{kind: "onyx.IconButton", classes: "ares-doc-close", src: "$lib/onyx/images/progress-button-cancel.png", ontap: "closeFile"},
+				{kind: "onyx.IconButton", classes: "ares-doc-close", src: "$lib/onyx/images/progress-button-cancel.png", fileId: id, ontap: "closeFile"},
 			],
 			ontap: "switchFile"
 		}, {owner: this}).render();
@@ -45,6 +45,7 @@ enyo.kind({
 	},
 	switchFile: function(inSender, inEvent) {
 		this.doSwitchFile({id: inSender.fileId});
+		return true;
 	},
 	activateFileWithId: function(id) {
 		this.tabs[id].setActive(true);
@@ -52,21 +53,22 @@ enyo.kind({
 	closeFile: function(inSender, inEvent) {
 		var id = inSender.fileId;
 		this.doClose({id: id});
+		return true;
 		//inSender.parent.destroy();
 	},
 	saveFile: function(inSender, inEvent) {
 		var id = this.$.tabs.getActive().fileId;
 		this.doSave({id: id});
-		//inSender.parent.destroy();
+		return true;
 	},
 	designFile: function(inSender, inEvent) {
 		var id = this.$.tabs.getActive().fileId;
 		this.doDesign({id: id});
-		//inSender.parent.destroy();
+		return true;
 	},
 	newKind: function(inSender, inEvent) {
 		var id = this.$.tabs.getActive().fileId;
 		this.doNewKind({id: id});
-		//inSender.parent.destroy();
+		return true;
 	},
 });

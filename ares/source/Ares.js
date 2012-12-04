@@ -5,12 +5,18 @@ enyo.kind({
 	fit: true,
 	components: [
 		{kind: "Panels", /*arrangerKind: "CarouselArranger",*/ classes: "enyo-fit", components: [
-			{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"},
+			{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onEditedChanged: "documentEdited"},
 			{kind: "Deimos", onCloseDesigner: "closeDesigner"}
 		]},
 		{kind: "Slideable", style: "height: 100%; width: 100%", layoutKind: "FittableRowsLayout", classes: "onyx", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
 			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
-			{name: "bottomBar", kind: "DocumentToolbar", onGrabberTap: "toggleFiles", onSwitchFile: "switchFile", onSave: "", onDesign: "", onNewKind: ""}
+			{name: "bottomBar", kind: "DocumentToolbar", onGrabberTap: "toggleFiles", 
+				onSwitchFile: "switchFile", 
+				onSave: "bounceSave", 
+				onDesign: "bounceDesign", 
+				onNewKind: "bounceNew",
+				onClose: "bounceClose"
+			}
 		]},
 		{kind: "ServiceRegistry"}
 	],
@@ -72,7 +78,8 @@ enyo.kind({
 					file: f,
 					data: inData,
 					extension: ext,
-					projectUrl: projectUrl
+					projectUrl: projectUrl,
+					edited: false
 				};
 				this.openFiles[f.id] = doc;
 				this.switchToDocument(doc);
@@ -144,16 +151,49 @@ enyo.kind({
 		}
 	},
 	switchToDocument: function(d) {
-		this.$.phobos.openDoc(d.origin, d.file, d.data, d.ext, d.projectUrl);
+		// save document state
+		if (this.activeDocument) {
+			this.activeDocument.data = this.$.phobos.getEditorContent();
+		}
+		if (!this.activeDocument || d !== this.activeDocument) {
+			this.$.phobos.openDoc(d.origin, d.file, d.data, d.extension, d.projectUrl, d.edited);
+		}
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.$.bottomBar.activateFileWithId(d.file.id);
 		this.hideFiles();
+		this.activeDocument = d;
 	},
 	finishedSliding: function(inSender, inEvent) {
 		if (this.$.slideable.value < 0) {
 			this.$.bottomBar.showControls();
 		} else {
 			this.$.bottomBar.hideControls();
+		}
+	},
+	// FIXME: This trampoline function probably needs some refactoring
+	bounceSave: function(inSender, inEvent) {
+		this.$.phobos.saveDocAction(inSender, inEvent);
+	},
+	// FIXME: This trampoline function probably needs some refactoring
+	bounceDesign: function(inSender, inEvent) {
+		this.$.phobos.designerAction(inSender, inEvent);
+	},
+	// FIXME: This trampoline function probably needs some refactoring
+	bounceNew: function(inSender, inEvent) {
+		this.$.phobos.newKindAction(inSender, inEvent);
+	},
+	// FIXME: This trampoline function probably needs some refactoring
+	// Close is a special case, because it can be invoked on a document other than the currently-active one
+	bounceClose: function(inSender, inEvent) {
+		this.switchFile(inSender, inEvent);
+		enyo.asyncMethod(this.$.phobos, "closeDocAction");
+	},
+	documentEdited: function(inSender, inEvent) {
+		var id = inEvent.id;
+		if (this.openFiles[id]) {
+			this.openFiles[id].edited = inEvent.edited;
+		} else {
+			alert("File ID not found in cache!");
 		}
 	}
 });
