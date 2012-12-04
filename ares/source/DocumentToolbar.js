@@ -44,7 +44,7 @@ enyo.kind({
 		this.tabs[id] = c;
 	},
 	switchFile: function(inSender, inEvent) {
-		this.doSwitchFile({id: inSender.id});
+		this.doSwitchFile({id: inSender.fileId});
 	},
 	activateFileWithId: function(id) {
 		this.tabs[id].setActive(true);
