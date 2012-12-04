@@ -234,6 +234,25 @@ enyo.kind({
 			}
 			return dst;
 		},
+
+		// used to pre-fill properties of a new project
+		// contains default values and required objects
+		PREFILLED_CONFIG_FOR_UI: {
+			author: {},
+			build: {
+				phonegap: {
+					enabled: false,
+					icon: {
+						src: "icon.png",
+						role: "default"
+					},
+					preferences: {
+						"phonegap-version": "2.0.0"
+					}
+				}
+			}
+		},
+
 		// FIXME: the below should be replaced by proper JSON
 		// schema validation with default values.
 		DEFAULT_PROJECT_CONFIG: {
