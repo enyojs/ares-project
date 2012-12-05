@@ -44,11 +44,18 @@ enyo.kind({
 		this.inherited(arguments);
 	},
 	runTests: function() {
-		if (this.debug) console.log("Post ARES.TEST.RUN ...");
-		if (this.aresIdeW !== null) {
-			this.aresIdeW.postMessage("ARES.TEST.RUN", "http://127.0.0.1:9009");
-			this.$.runTests.setDisabled(true);
+		if (this.debug) {
+			console.log("Post ARES.TEST.RUN ...");
+			if (this.debug) console.log("this.aresIdeW: "+this.aresIdeW);
 		}
+		if (this.aresIdeW !== null) {
+			if (this.debug) console.log("this.aresIdeW: "+this.aresIdeW);
+			this.aresIdeW.postMessage("ARES.TEST.RUN", "http://127.0.0.1:9009");
+		} else {
+			if (this.debug) console.log("window.self.opener ...POST ARES.TEST.RERUN");
+			window.self.opener.postMessage("ARES.TEST.RERUN", "http://127.0.0.1:9009");
+		}
+		this.$.runTests.setDisabled(true);
 	},
 	testBegun: function(inData) {
 		if (this.debug) {

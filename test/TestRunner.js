@@ -14,7 +14,7 @@ enyo.kind({
 	next: function() {
 		var test = Ares.TestSuite.tests[this.index++];
 		if (test) {
-			this.createComponent({name: test.prototype.kindName, kind: Ares.TestReporter, onFinishAll: "next"}).render().runTests();
+			this.createComponent({name: test.prototype.kindName, kind: Ares.TestReporter, onFinishAll: "next"}).render();
 		}
 	}
 });

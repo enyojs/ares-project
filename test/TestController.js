@@ -51,6 +51,16 @@ enyo.kind({
 			// TestProxyReporter is created by TestCtrlRunner
 			this.createComponent({name: "runner", kind: "Ares.TestCtrlRunner", testWindow: "aresTestW"});
 		}
+		if (event.data === "ARES.TEST.RERUN") {
+			if (this.debug) {
+				this.status = event.data;
+				console.log("Received ARES.TEST.RERUN ... Status: "+this.status);
+			}
+			if (this.$.runner) {
+				this.removeComponent(this.$.runner);
+			}
+			this.createComponent({name: "runner", kind: "Ares.TestCtrlRunner", testWindow: "aresTestW"});
+		}
 	}
 });
 
