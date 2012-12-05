@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "ares.TestProxyReporter",
+	name: "Ares.TestProxyReporter",
 	kind: enyo.Component,
 	published: {
 		results: null

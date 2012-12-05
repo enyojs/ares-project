@@ -36,7 +36,7 @@ enyo.kind({
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (this.runTest) {
 			// in charge of Ares Test Suite when Ares Ide launch with runTest option
-			this.createComponent({kind: "ares.TestController"});
+			this.createComponent({kind: "Ares.TestController"});
 		}
 		this.calcSlideableLimit();
 	},

@@ -1,6 +1,6 @@
 // UI kind responsible for creating test component, running tests, receiving & displaying test results.
 enyo.kind({
-	name: "ares.TestReporter",
+	name: "Ares.TestReporter",
 	kind: enyo.Control,
 	published: {
 		results: null
@@ -36,7 +36,7 @@ enyo.kind({
 		}
 		this.inherited(arguments);
 		this.$.title.setContent(this.name);
-		this.aresIdeW = ares.TestReporter.aresIdeW;
+		this.aresIdeW = Ares.TestReporter.aresIdeW;
 		// listen for dispatched messages (received from Ares Ide)
 		window.addEventListener("message", enyo.bind(this, "recMsgFromIde"), false);
 	},
@@ -105,7 +105,7 @@ enyo.kind({
 		// keep the reference 
 		if (this.aresIdeW === null) {
 			this.aresIdeW = event.source;
-			ares.TestReporter.aresIdeW = this.aresIdeW;			
+			Ares.TestReporter.aresIdeW = this.aresIdeW;			
 		}
 		if (event.data === "START") {
 			if (this.debug) console.log("Received START ... Post READY ...");

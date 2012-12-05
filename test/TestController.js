@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "ares.TestController",
+	name: "Ares.TestController",
 	kind: enyo.Component,
 	debug: true,
 	status: "None",
@@ -41,7 +41,7 @@ enyo.kind({
 			if (this.debug) console.log("Received RUN ... Status: "+this.status);
 			// Create TextCtrlRunner and TestProxyReporter components
 			// TestProxyReporter is created by TestCtrlRunner
-			this.createComponent({name: "runner", kind: "ares.TestCtrlRunner", testWindow: "aresTestW"});
+			this.createComponent({name: "runner", kind: "Ares.TestCtrlRunner", testWindow: "aresTestW"});
 		}
 	}
 });
