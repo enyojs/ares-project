@@ -116,12 +116,13 @@ body {
 
 }
 
-.ares_projectView_table tr td .onyx-toggle-button {
+.ares_projectView_switches .onyx-toggle-button {
 	text-transform: none;
-	width: 100%;
+	margin-top: 6px;
+	margin-right: 4px;
 }
 
-.ares_projectView_table tr td .onyx-toggle-button .off {
+.ares_projectView_switches .onyx-toggle-button .off {
 	text-decoration: line-through;
 }
 
