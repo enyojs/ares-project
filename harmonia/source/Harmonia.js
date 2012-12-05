@@ -13,7 +13,7 @@ enyo.kind({
 			onCopyFileConfirm: "copyFileConfirm"}
 	],
 	providerListNeeded: true,
-	debug: true,
+	debug: false,
 	create: function() {
 		this.inherited(arguments);
 		// TODO provider list should probably go out of Harmonia

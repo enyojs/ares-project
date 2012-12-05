@@ -113,10 +113,10 @@ enyo.kind({
 		var bdService =	ServiceRegistry.instance.getServicesByType('build')[0];
 		if (bdService) {
 			bdService.build( /*project*/ {
-				name: this.currentProject.name,
-				filesystem: this.currentProject.service,
-				folderId: this.currentProject.folderId,
-				config: this.currentProject.config
+				name: this.currentProject.getName(),
+				filesystem: this.currentProject.getService(),
+				folderId: this.currentProject.getFolderId(),
+				config: this.currentProject.getConfig()
 			}, function(inError, inDetails) {
 				self.hideWaitPopup();
 				if (inError) {

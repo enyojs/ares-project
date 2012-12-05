@@ -6,11 +6,10 @@ var AresStore = function(name) {
     
 _.extend(AresStore.prototype, {
 
+	debug: false,
 	strExclude: {originator: 1, service: 1, config: 1},
 	stringifyReplacer: function(key, value) {
-		// enyo.log("stringifyReplacer: " + key);
 		if (this.strExclude[key] !== undefined) {
-			// enyo.log("Excluding: " + key);
 			return undefined;	// Exclude
 		}
 		return value;	// Accept
@@ -19,19 +18,16 @@ _.extend(AresStore.prototype, {
 	// Save the current state of the **Store** to *localStorage*.
 	save: function() {
 		try {
-			enyo.log("Store.save: ", this.data);
 			var projectString = JSON.stringify(this.data, enyo.bind(this, this.stringifyReplacer));
 			localStorage.setItem(this.name, projectString);
-			enyo.log("Store.save DONE: " + projectString);
+			this.debug && enyo.log("Store.save DONE: " + projectString);
 		} catch(error) {
 			enyo.log("Exception: ", error);
 		}
 	},
     
-	// Add a model, giving it a (hopefully)-unique GUID, if it doesn't already
-	// have an id of it's own.
+	// Add a model
 	create: function(model) {
-		enyo.log("Store.create");
 		if (!model.id) model.id = model.attributes.id = guid();
 		this.data[model.id] = model;
 		this.save();
@@ -40,7 +36,6 @@ _.extend(AresStore.prototype, {
     
 	// Update a model by replacing its copy in `this.data`.
 	update: function(model) {
-		enyo.log("Store.update");
 		this.data[model.id] = model;
 		this.save();
 		return model;
@@ -48,19 +43,16 @@ _.extend(AresStore.prototype, {
 
 	// Retrieve a model from `this.data` by id.
 	find: function(model) {
-		enyo.log("Store.find");
 		return this.data[model.id];
 	},
     
     // Return the array of all models currently in storage.
     findAll: function() {
-		enyo.log("Store.findAll");
 		return _.values(this.data);
     },
 
     // Delete a model from `this.data`, returning it.
     destroy: function(model) {
-		enyo.log("Store.destroy");
 		delete this.data[model.id];
 		this.save();
 		return model;
@@ -130,7 +122,6 @@ Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collec
 		} else {
 			result = 0;
 		}
-		enyo.log("comparator: " + a.id + " // " + b.id + " ==> " + result);
 		return result;
 	},
 	createProject: function(name, folderId, serviceId) {

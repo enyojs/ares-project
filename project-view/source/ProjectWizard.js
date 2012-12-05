@@ -221,7 +221,7 @@ enyo.kind({
 					response(this, function(inSender, fileStuff) {
 						this.debug && this.log( "file contents: '" + fileStuff.content + "'" ) ;
 						var projectData = JSON.parse(fileStuff.content)  ;
-						this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
+						this.debug && this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
 						this.doAddProjectInList({
 							name: projectData.name,
 							folderId: parentDir.id,

@@ -19,7 +19,7 @@ enyo.kind({
 	},
 	handlers: {
 	},
-	debug: true,
+	debug: false,
 	components: [
 		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", isContainer: true, name: "toolbar", components: [
 			{kind: "onyx.MenuDecorator", onSelect: "aresMenuItemSelected", components: [
@@ -73,7 +73,6 @@ enyo.kind({
 	},
 	projectCountChanged: function() {
 		var count = Ares.WorkspaceData.length;
-		this.log("NEW COUNT: " + count);
 		this.$.projectList.setCount(count);
 		this.$.projectList.render();
 		this.doProjectRemoved();		// To reset the Harmonia view
@@ -85,7 +84,7 @@ enyo.kind({
 		}
 		var known = Ares.WorkspaceData.get(name);
 		if (known) {
-			this.log("Skipped project " + name + " as it is already listed") ;
+			this.debug && this.log("Skipped project " + name + " as it is already listed") ;
 		} else {
 			Ares.WorkspaceData.createProject(name, folderId, serviceId);
 		}
@@ -105,7 +104,7 @@ enyo.kind({
 		if (this.selected) {
 			project = Ares.WorkspaceData.at(this.selected.index);
 			nukeFiles = this.$.removeProjectPopup.$.nukeFiles.getValue() ;
-			this.log("removing project" +  project.getName() + ( nukeFiles ? " and its files" : "" )) ;
+			this.debug && this.log("removing project" +  project.getName() + ( nukeFiles ? " and its files" : "" )) ;
 			this.debug && this.log(project);
 			if (nukeFiles) {
 				project.service.remove( project.folderId )
