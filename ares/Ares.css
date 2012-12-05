@@ -19,6 +19,7 @@ body {
 }
 .ares_harmonia_authPanel {
 	padding: 6px;
+	width: 70%;
 }
 #ares_harmonia_hermesFileTree {
 	width: 500px;

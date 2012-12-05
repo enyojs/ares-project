@@ -4,8 +4,7 @@
  */
 enyo.kind({
 	name: "DropboxAuthConfig",
-	kind: "onyx.Groupbox",
-	classes: "onyx-groupbox enyo-fill",
+	kind: "FittableRows",
 
 	// private members
 	debug: false,
@@ -33,29 +32,33 @@ enyo.kind({
 
 	// static UI elements
 	components: [
-		{kind: "onyx.GroupboxHeader", name: "serviceName"},
-		{components: [
-			{content: "User Name: ", tag: "span"},
-			{name: "userName", content: "...", tag: "span"}
+		{kind: "Ares.Groupbox", components: [
+			{kind: "onyx.GroupboxHeader", name: "serviceName"},
+			{components: [
+				{content: "User Name: ", kind: "Ares.GroupBoxItemKey"},
+				{name: "username", kind: "Ares.GroupBoxItemValue"}
+			]},
+			{components: [
+				{content: "Email: ", kind: "Ares.GroupBoxItemKey"},
+				{name: "email", kind: "Ares.GroupBoxItemValue"}
+			]},
+			{components: [
+				{content: "Country Code:", kind: "Ares.GroupBoxItemKey"},
+				{name: "country", kind: "Ares.GroupBoxItemValue"}
+			]},
+			{components: [
+				{content: "Quota (Max):", kind: "Ares.GroupBoxItemKey"},
+				{name: "quota", kind: "Ares.GroupBoxItemValue"}
+			]},
+			{components: [
+				{content: "Usage (Private):", kind: "Ares.GroupBoxItemKey"},
+				{name: "normal", kind: "Ares.GroupBoxItemValue"}
+			]},
+			{components: [
+				{content: "Usage (Shared):", kind: "Ares.GroupBoxItemKey"},
+				{name: "shared", kind: "Ares.GroupBoxItemValue"}
+			]}
 		]},
-		{components: [
-			{content: "Email: ", tag: "span"},
-			{name: "email", content: "...", tag: "span"}
-		]},
-		{components: [
-			{content: "Country Code:", tag: "span"},
-			{name: "country", content: "...", tag: "span"}
-		]},
-		{components: [
-			{content: "Storage: ", tag: "span"},
-			{name: "usage", tag: "span"},
-			{content: "MB / ", tag: "span"},
-			{name: "quota", tag: "span"},
-			{content: "MB ", tag: "span"},
-			{content: "(Shared:", tag: "span"},
-			{name: "shared", tag: "span"},
-			{content: "MB)", tag: "span"}
-		], classes: "ares-group-box-item"},
 		{kind: "FittableColumns", components: [
 			{name: "renewBtn", kind: "onyx.Button", content: "Renew", disabled: false, ontap: "renew"},
 			{name: "checkBtn", kind: "onyx.Button", content: "Check", disabled: true, ontap: "check"}
@@ -71,13 +74,15 @@ enyo.kind({
 		if (this.auth.headers.authorization) {
 			this.$.checkBtn.setDisabled(false);
 		}
+		this.waitAccountInfo();
 	},
 	check: function() {
 		var self = this;
 		this.$.checkBtn.setDisabled(true);
 		async.series([
+			this.waitAccountInfo.bind(this),
 			this.getAccountInfo.bind(this),
-			this.showAccountInfo.bind(this)
+			this.displayAccountInfo.bind(this)
 		], function(err, results) {
 			enyo.log("DropboxAuthConfig.check: err:", err, "results:", results);
 			self.$.checkBtn.setDisabled(false);
@@ -94,12 +99,13 @@ enyo.kind({
 		// Disable [Renew] button during async processing...
 		this.$.renewBtn.setDisabled(true);
 		async.series([
+			this.waitAccountInfo.bind(this),
 			this.getRequestToken.bind(this),
 			this.authorize.bind(this),
 			this.getAccessToken.bind(this),
 			this.saveAccessToken.bind(this),
 			this.getAccountInfo.bind(this),
-			this.showAccountInfo.bind(this)
+			this.displayAccountInfo.bind(this)
 		], function(err, results) {
 			enyo.log("DropboxAuthConfig.renew: err:", err, "results:", results);
 			// ... and re-enable it after success of failure.
@@ -275,14 +281,26 @@ enyo.kind({
 		});
 		req.go();
 	},
-	showAccountInfo: function(next) {
+	waitAccountInfo: function(next) {
+		this.$.username.setContent("...");
+		this.$.email.setContent("...");
+		this.$.country.setContent("...");
+		this.$.quota.setContent("...");
+		this.$.normal.setContent("...");
+		this.$.shared.setContent("...");
+		if (next) next();
+	},
+	displayAccountInfo: function(next) {
 		this.log("accountInfo:", this.accountInfo);
-		this.$.userName.setContent(this.accountInfo.display_name);
+		this.$.username.setContent(this.accountInfo.display_name);
 		this.$.email.setContent(this.accountInfo.email);
 		this.$.country.setContent(this.accountInfo.country);
-		this.$.quota.setContent(Math.floor(this.accountInfo.quota_info.quota / (1024*1024)));
-		this.$.usage.setContent(Math.floor(this.accountInfo.quota_info.normal / (1024*1024)));
-		this.$.shared.setContent(Math.floor(this.accountInfo.quota_info.shared / (1024*1024)));
+		var quota = Math.floor(this.accountInfo.quota_info.quota / (1024*1024)) + " MB";
+		this.$.quota.setContent(quota);
+		var normal = Math.floor(this.accountInfo.quota_info.normal / (1024*1024)) + " MB";
+		this.$.normal.setContent(normal);
+		var shared = Math.floor(this.accountInfo.quota_info.shared / (1024*1024)) + " MB";
+		this.$.shared.setContent(shared);
 		if (next) next();
 	}
 });
