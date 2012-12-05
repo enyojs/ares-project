@@ -2,6 +2,11 @@ var AresStore = function(name) {
 	this.name = name;
 	var store = localStorage.getItem(this.name);
 	this.data = (store && JSON.parse(store)) || {};
+
+	// Remove data in 'old' format (prior introduction of Ares.WorkspaceData)
+	if (_.isArray(this.data)) {			// TODO: to be removed in a while
+		this.data = {};
+	}
 };
     
 _.extend(AresStore.prototype, {
