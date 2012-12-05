@@ -24,20 +24,6 @@ enyo.kind({
 	],
 	debug: false,
 
-	// used to pre-fill properties of a new project
-	blankConfig: {
-			id: "",
-			name: "",
-			version: "",
-			title: "",
-			description: "",
-			build: {
-				phonegap: {
-					enabled: false
-				}
-			}
-		},
-
 	/**
 	 * start project creation by showing direction selection widget
 	 */
@@ -66,7 +52,7 @@ enyo.kind({
 		};
 		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
 		var matchingNodes = hft.getNodeFiles(hft.selectedNode).filter( matchFileName ) ;
-			
+
 		if ( matchingNodes.length !== 0 ) {
 			this.hide() ;
 			this.$.errorPopup.raise('Cannot create project: a project.json file already exists');
@@ -89,7 +75,7 @@ enyo.kind({
 			}
 			else {
 				// once project.json is created, setup and show project properties widget
-				propW.preFill(that.blankConfig),
+				propW.preFill(ProjectConfig.PREFILLED_CONFIG_FOR_UI),
 				propW.$.projectDirectory.setContent(that.selectedDir.path);
 				propW.$.projectName.setValue(that.selectedDir.name);
 				that.$.selectDirectoryPopup.hide();
@@ -217,11 +203,11 @@ enyo.kind({
 		// we need to use the file tree to be able to relate a project.json with is parent dir.
 		var topDir = hft.selectedNode.file ;
 
-		// construct an (kind of) iterator that will scan all directory of the 
+		// construct an (kind of) iterator that will scan all directory of the
 		// HFT and look for project.json
 		var toScan = [ [ null , topDir ] ]	; // list of parent_dir , child
 		// var this = this ;
-		
+
 		var iter, inIter ;
 
 		inIter = function() {
@@ -229,7 +215,7 @@ enyo.kind({
 			var parentDir = item[0] ;
 			var child = item[1];
 			this.debug && this.log('search iteration on ' + child.name + ' isDir ' + child.isDir ) ;
-			if ( child.name === 'project.json' ) { 
+			if ( child.name === 'project.json' ) {
 				this.debug && this.log('opening project.json from ' + parentDir.name ) ;
 				service.getFile( child.id ).
 					response(this, function(inSender, fileStuff) {
@@ -238,13 +224,13 @@ enyo.kind({
 						this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
 						this.doAddProjectInList({
 							name: projectData.name,
-							folderId: parentDir.id, 
-							service: this.selectedDir.service, 
+							folderId: parentDir.id,
+							service: this.selectedDir.service,
 							serviceId: this.selectedServiceId
 						});
-					}); 
+					});
 			}
-			if ( child.isDir ===  true ) { 
+			if ( child.isDir ===  true ) {
 				this.debug && this.log('opening dir ' + child.name ) ;
 				service.listFiles(child.id)
 					.response(this, function(inSender, inFiles) {

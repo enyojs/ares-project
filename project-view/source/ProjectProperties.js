@@ -1,12 +1,13 @@
 /**
  * This kind provide a widget to tune project properties (phonegap
  * stuff included).
- * 
+ *
  * By default, this widget is tuned for project modification.  In case
  * of project *creation*, the method setupCreate must be called after
  * construction. Since the widget is re-used between call for creation
  * or modification, the methos setupModif must be called also.
  */
+
 enyo.kind({
 	name: "ProjectProperties",
 	classes: "enyo-unselectable",
@@ -24,7 +25,6 @@ enyo.kind({
 			{content: "PhoneGap", attributes: {title: 'phonegap build parameters...'}}
 		]},
 		{name: "projectDrawer", kind: "onyx.Drawer", open:true, components: [
-			{content: "Project", tag:"h2"},
 			{tag: 'table', components: [
 				{tag: "tr" , components: [
 					 {tag: "td" , content: "Name: "},
@@ -50,10 +50,28 @@ enyo.kind({
 					 {tag: 'td', content: "Id: "},
 					 {tag: "td" , components: [
 						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", defaultFocus: true, name: "projectId", 
+							   {kind: "Input", defaultFocus: true, name: "projectId",
 								attributes: {title: "Application ID in reverse domain-name format: com.example.apps.myapp"}}
 						   ]}
 					  ]}
+				]},
+				{tag: "tr" , components: [
+					 {tag: "td" , content: "Author name: "},
+					 {tag: 'td', attributes: {colspan: 1}, components:[
+						  {kind: "onyx.InputDecorator", components: [
+							   {kind: "Input", name: "projectAuthor",
+								attributes: {title: "Vendor / Committer Name"}
+							   }
+						   ]}
+					 ]},
+					 {tag: "td" , content: "Contact: "},
+					 {tag: 'td', attributes: {colspan: 2}, components:[
+						  {kind: "onyx.InputDecorator", components: [
+							   {kind: "Input", name: "projectContact",
+								attributes: {title: "mail address or home page of the author"}
+							   }
+						   ]}
+					 ]}
 				]},
 				{tag: "tr" , name:'directoryEntry', canGenerate:false, components: [
 					 {tag: "td", content: "Directory: "},
@@ -63,42 +81,45 @@ enyo.kind({
 		]},
 
 		{name: "phoneGapDrawer", kind: "onyx.Drawer", open: false, components: [
-			{content: "PhoneGap", tag:"h2"},
-			{kind: "onyx.ToggleButton", name: 'pgConfEnabled', onContent: "enabled", offContent: "disabled"},
-			{tag: 'table', attributes: {'class': 'ares_projectView_table'}, components: [
+			{
+				kind: "onyx.ToggleButton",
+				name: 'pgConfEnabled',
+				onContent: "enabled",
+				offContent: "disabled",
+				style: "margin-top: 10px;"
+			},
+			{tag: 'table', components: [
 				{tag: "tr" , components: [
 					 {tag: "td" , content: "AppId: "},
-					 {tag: 'td', attributes: {colspan: 3}, components:[
+					 {tag: 'td', attributes: {colspan: 1}, components:[
 						  {kind: "onyx.InputDecorator", components: [
 							   {kind: "Input", name: "pgConfId", placeholder: "com.example.myapp",
 								attributes: {title: "unique identifier, assigned by build.phonegap.com"}
 							   }
 						   ]}
+					 ]},
+					 {tag: "td" , content: "Icon URL: "},
+					 {tag: 'td', attributes: {colspan: 2}, components:[
+						  {kind: "onyx.InputDecorator", components: [
+							   {kind: "Input", name: "pgIconUrl",
+								attributes: {title: "Relative location of the application icon. Defaults to Enyo icon."}
+							   }
+						   ]}
 					 ]}
-				]},
-				{tag: "tr" , components: [
-					 {tag: 'td', content: "PhoneGap targets", attributes: {colspan: 3}}
-				]},
-				{tag: "tr" , components: [
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", name: 'androidTarget', onContent: "Android", offContent: "Android"}
-					]},
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", name: 'iosTarget', onContent: "Ios", offContent: "Ios"}
-					]},
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", name: 'winphoneTarget', onContent: "Winphone", offContent: "Winphone"}
-					]}
-				]},
-				{tag: "tr" , components: [
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", name: 'blackberryTarget', onContent: "Blackberry", offContent: "Blackberry"}
-					]},
-					{tag: "td" , components: [
-						  {kind: "onyx.ToggleButton", name: 'webosTarget',onContent: "Webos", offContent: "Webos"}
-					]}
 				]}
-			]}
+			]},
+			{content: "Targets:"},
+			{
+				kind: "FittableRows", attributes: {'class': 'ares_projectView_switches'},
+				onChange: "enablePhoneGap",
+				components: [
+					{kind: "onyx.ToggleButton", name: 'androidTarget', onContent: "Android", offContent: "Android"},
+					{kind: "onyx.ToggleButton", name: 'iosTarget', onContent: "Ios", offContent: "Ios"},
+					{kind: "onyx.ToggleButton", name: 'winphoneTarget', onContent: "Winphone", offContent: "Winphone"},
+					{kind: "onyx.ToggleButton", name: 'blackberryTarget', onContent: "Blackberry", offContent: "Blackberry"},
+					{kind: "onyx.ToggleButton", name: 'webosTarget',onContent: "Webos", offContent: "Webos"}
+				]
+			}
 		]},
 
 		// FIXME: there should be an HTML/CSS way to avoid using FittableStuff...
@@ -144,55 +165,71 @@ enyo.kind({
 		}
 	},
 
+	// switch Phonegap to "enabled" whenever user validates a target
+	enablePhoneGap: function(inSender, inEvent) {
+		if (inEvent.value === true ) {
+			this.$.pgConfEnabled.setValue(true) ;
+		}
+	},
+
 	/**
 	 * pre-fill the widget with configuration data
 	 * @param {Object} config is configuration data (typically from project.json)
-	 *  can be a json string or an object. 
+	 *  can be a json string or an object.
 	 */
 	preFill: function(inData) {
-		this.log(inData) ;
-		var config = typeof inData === 'object' ? inData : JSON.parse(inData) ;
+		this.config = typeof inData === 'object' ? inData : JSON.parse(inData) ;
 		var pgConf ;
 		var pgTarget ;
+		var conf = this.config ;
 
-		this.$.projectId.setValue(config.id);
-		this.$.projectVersion.setValue(config.version);
-		this.$.projectName.setValue(config.name);
-		this.$.projectTitle.setValue(config.title);
+		 // avoid storing 'undefined' in there
+		this.$.projectId.     setValue(conf.id      || '' );
+		this.$.projectVersion.setValue(conf.version || '' );
+		this.$.projectName.   setValue(conf.name    || '' );
+		this.$.projectTitle.  setValue(conf.title   || '' );
 
-		if (config.build && config.build.phonegap) {
-		    pgConf = config.build.phonegap ;
-			this.$.pgConfEnabled.setValue(pgConf.enabled);
-			this.$.pgConfId.setValue(pgConf.appId);
-			
-			if (pgConf.targets) {
-				// pgTarget is a key of object pgConf.targets
-				for (pgTarget in pgConf.targets ) {
-					this.$[ pgTarget + 'Target' ].setValue(pgConf.targets[pgTarget]) ;
-				}
-			}
+		if (! conf.author) { conf.author =  {} ;}
+		this.$.projectAuthor. setValue(conf.author.name || '') ;
+		this.$.projectContact.setValue(conf.author.href || '') ;
+
+		if (! conf.build) {conf.build = {} ;}
+		if (! conf.build.phonegap) { conf.build.phonegap = {}; }
+
+		pgConf = this.config.build.phonegap ;
+		this.$.pgConfEnabled.setValue(pgConf.enabled);
+		this.$.pgConfId.setValue(pgConf.appId || '' );
+		this.$.pgIconUrl.setValue(pgConf.icon.src || '' );
+
+
+		if (! pgConf.targets) { pgConf.targets = {} ;}
+		// pgTarget is a key of object pgConf.targets
+		for (pgTarget in pgConf.targets ) {
+			this.$[ pgTarget + 'Target' ].setValue(pgConf.targets[pgTarget]) ;
 		}
+
 		return this ;
 	},
 
 	confirmTap: function(inSender, inEvent) {
 		// retrieve modified values
 		this.log('ok tapped') ;
-		var config = {
-			id:       this.$.projectId.getValue(),
-			version:  this.$.projectVersion.getValue(),
-			name:     this.$.projectName.getValue(),
-			title:    this.$.projectTitle.getValue(),
-			build: {
-				enabled: this.$.pgConfEnabled.getValue(),
-				appId:   this.$.pgConfId.getValue(),
-				phonegap: {
-					targets: {}
-				}
-			}
-		} ;
 
-		var pgConf = config.build.phonegap ;
+		this.config.id       = this.$.projectId     .getValue();
+		this.config.version  = this.$.projectVersion.getValue();
+		this.config.name     = this.$.projectName   .getValue();
+		this.config.title    = this.$.projectTitle  .getValue();
+
+		this.config.author.name = this.$.projectAuthor.getValue();
+		this.config.author.href = this.$.projectContact.getValue();
+
+		this.config.build.enabled = this.$.pgConfEnabled.getValue();
+		this.config.build.appId   = this.$.pgConfId.getValue();
+
+
+		var pgConf = this.config.build.phonegap ;
+		pgConf.icon.src = this.$.pgIconUrl.getValue();
+
 		var tglist = ['android','ios','winphone','blackberry','webos'] ;
 		for ( i in tglist) {
 			this.log('copy data from ' + tglist[i] +'Target') ;
@@ -200,7 +237,7 @@ enyo.kind({
 		}
 
 		// to be handled by a ProjectWizard
-		this.doModifiedConfig({data: config}) ;
+		this.doModifiedConfig({data: this.config}) ;
 
 		this.doDone();
 
