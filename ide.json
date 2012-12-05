@@ -3,7 +3,7 @@
 		{
 			"active":true,
 			"id":"home",
-			"icon":"server",
+			"icon":"home-32x32",
 			"name":"Home Directory",
 			"type": "filesystem",
 			"provider": "hermes",
@@ -17,7 +17,7 @@
 		{
 			"active":true,
 			"id":"dropbox",
-			"icon":"dropbox",
+			"icon":"dropbox.com-32x32",
 			"name":"Dropbox",
 			"type": "filesystem",
 			"provider": "hermes",
@@ -35,7 +35,7 @@
 		{
 			"active":true,
 			"id":"phonegap",
-			"icon":"phonegap",
+			"icon":"build.phonegap.com-32x32",
 			"name":"PhoneGap Build",
 			"type": "build",
 			"provider": "hermes",
