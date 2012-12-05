@@ -94,7 +94,7 @@ enyo.kind({
 				propW.$.projectName.setValue(that.selectedDir.name);
 				that.$.selectDirectoryPopup.hide();
 				propW.show() ;
-			};
+			}
 		});
 	},
 
@@ -147,17 +147,16 @@ enyo.kind({
 
 	debug: false,
 	targetProject: null,
-	config: null,
 
 	/**
 	 * Step 1: start the modification by showing project properties widget
 	 */
 	start: function(target) {
 		if (target) {
-			this.config = target.getConfig();
+			var config = target.getConfig();
 			this.targetProject = target ;
 			this.$.propertiesWidget.setupModif() ;
-			this.$.propertiesWidget.preFill(this.config.data);
+			this.$.propertiesWidget.preFill(config.data);
 			this.show();
 		}
 	},
@@ -171,14 +170,17 @@ enyo.kind({
 			return true ; // stop bubble
 		}
 
+		// Save the data to project.json
+		var config = this.targetProject.getConfig();
+		config.setData(inEvent.data);
+		config.save();
+
 		// selected project name was modified
-		if ( inEvent.data.name !== this.targetProject.getName()) {
-			// project name has changed, update project list
-			throw new Error("TODO: YDM TBC");
-			this.$.projectList.renameSelectedProject(inEvent.data.name) ;
+		if (inEvent.data.name !== this.targetProject.getName()) {
+			// project name has changed, update project model list
+			var oldName = this.targetProject.getName();
+			Ares.WorkspaceData.renameProject(oldName, inEvent.data.name);
 		}
-		this.config.setData(inEvent.data);
-		this.config.save() ;
 
 		return true ; // stop bubble
 	}

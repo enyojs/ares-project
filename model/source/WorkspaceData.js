@@ -151,11 +151,20 @@ Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collec
 		} else {
 			project.destroy();
 		}
+	},
+	renameProject: function(oldName, newName) {
+		var project, oldProject = this.get(oldName);
+		if (oldProject === undefined) {
+			throw new Error("Project '" + oldName + "'Does not exist");
+		} else {
+			this.createProject(newName, oldProject.getFolderId(), oldProject.getServiceId());
+			oldProject.destroy();
+		}
 	}
 });
 
 // Create the workspace collection of projects and load the data from the local storage
 Ares.WorkspaceData = new Ares.Model.Projects();
-Ares.WorkspaceData.localStorage = Ares.Model.PROJECTS_STORAGE_KEY;
+Ares.WorkspaceData.localStorage = new AresStore(Ares.Model.PROJECTS_STORAGE_KEY);
 Ares.WorkspaceData.fetch();
 

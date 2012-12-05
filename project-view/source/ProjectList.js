@@ -69,25 +69,14 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.$.projectList.setCount(Ares.WorkspaceData.length);
+		Ares.WorkspaceData.on("add remove reset", enyo.bind(this, this.projectCountChanged));
 	},
-	/**
-	 * Callback functions which receives the project list data read from the storage
-	 * @protected
-	 * @param data: the project list in json format
-	 */
-	projectListAvailable: function() {				// TODO: to keep ?
-		try {
-			if (data && data !== "") {
-				this.projects = JSON.parse(data);
-				if (this.debug) console.dir(this.projects);
-			}
-			this.$.projectList.setCount(this.projects.length);
-		} catch(error) {
-			this.error("Unable to retrieve projects information: " + error);	// TODO ENYO-1105
-			console.dir(data);	// Display the offending data in the console
-			Ares.LocalStorage.remove(this.PROJECTS_STORAGE_KEY); // Remove incorrect projects information
-			this.projects = [];
-		}
+	projectCountChanged: function() {
+		var count = Ares.WorkspaceData.length;
+		this.log("NEW COUNT: " + count);
+		this.$.projectList.setCount(count);
+		this.$.projectList.render();
+		this.doProjectRemoved();		// To reset the Harmonia view
 	},
 	addProject: function(name, folderId, service) {
 		var serviceId = service.getConfig().id || "";
@@ -99,20 +88,7 @@ enyo.kind({
 			this.log("Skipped project " + name + " as it is already listed") ;
 		} else {
 			Ares.WorkspaceData.createProject(name, folderId, serviceId);
-			this.$.projectList.setCount(Ares.WorkspaceData.length);
-			this.$.projectList.render();
 		}
-	},
-	renameSelectedProject: function(newName) {
-		var old = this.selected.getProjectName;
-		var p;
-		for (p in this.projects) {
-			if (this.projects[p].name === old ) {
-				this.projects[p].name = newName ;
-			}
-		}
-		this.selected.setProjectName(newName) ;
-		this.storeProjectsInLocalStorage();
 	},
 	removeProjectAction: function(inSender, inEvent) {
 		var popup = this.$.removeProjectPopup;
@@ -149,8 +125,6 @@ enyo.kind({
 			var name = Ares.WorkspaceData.at(this.selected.index).getName();
 			Ares.WorkspaceData.removeProject(name);
 			this.selected = null;
-			this.$.projectList.setCount(Ares.WorkspaceData.length);
-			this.$.projectList.render();
 			this.doProjectRemoved();
 		}
 	},
