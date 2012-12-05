@@ -44,9 +44,9 @@ enyo.kind({
 		this.inherited(arguments);
 	},
 	runTests: function() {
-		if (this.debug) console.log("Post RUN ...");
+		if (this.debug) console.log("Post ARES.TEST.RUN ...");
 		if (this.aresIdeW !== null) {
-			this.aresIdeW.postMessage("RUN", "http://127.0.0.1:9009");
+			this.aresIdeW.postMessage("ARES.TEST.RUN", "http://127.0.0.1:9009");
 			this.$.runTests.setDisabled(true);
 		}
 	},
@@ -54,7 +54,7 @@ enyo.kind({
 		if (this.debug) {
 			console.log("TestReporter: testBegun: "+JSON.stringify(inData));
 		}
-		this.$.group.createComponent({name: inData.test, classes: "enyo-testcase-running", content: inData.test + ": running", allowHtml: true}).render();
+		this.$.group.createComponent({name: inData.data.test, classes: "enyo-testcase-running", content: inData.data.test + ": running", allowHtml: true}).render();
 	},
 	formatStackTrace: function(inStack) {
 		var stack = inStack.split("\n");
@@ -71,7 +71,7 @@ enyo.kind({
 		if (this.debug) {
 			console.log("TestReporter: updataTestDisplay: "+JSON.stringify(inData));
 		}
-		var results = JSON.parse(inData.results);
+		var results = JSON.parse(inData.data.results);
 		var e = results.exception;
 		var info = this.$.group.$[results.name];
 		var content = "<b>" + results.name + "</b>: " + (results.passed ? "PASSED" : results.message);
@@ -107,16 +107,16 @@ enyo.kind({
 			this.aresIdeW = event.source;
 			Ares.TestReporter.aresIdeW = this.aresIdeW;			
 		}
-		if (event.data === "START") {
-			if (this.debug) console.log("Received START ... Post READY ...");
-			event.source.postMessage("READY", event.origin);
+		if (event.data === "ARES.TEST.START") {
+			if (this.debug) console.log("Received ARES.TEST.START ... Post ARES.TEST.READY ...");
+			event.source.postMessage("ARES.TEST.READY", event.origin);
 		} 
-		if(event.data.evt === "SEND_TEST_RUNNING") {
-			if (this.debug) console.log("Received SEND_TEST_RUNNING ...");
+		if(event.data.evt === "ARES.TEST.RUNNING") {
+			if (this.debug) console.log("Received ARES.TEST.RUNNING ...");
 			this.testBegun(event.data);
 		}
-		if(event.data.evt === "SEND_TEST_RESULT") {
-			if (this.debug) console.log("Received SEND_TEST_RESULT ...");
+		if(event.data.evt === "ARES.TEST.RESULT") {
+			if (this.debug) console.log("Received ARES.TEST.RESULT ...");
 			this.updateTestDisplay(event.data);
 		}
 	},
