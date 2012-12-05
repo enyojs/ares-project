@@ -79,7 +79,7 @@ enyo.kind({
 			this.getAccountInfo.bind(this),
 			this.showAccountInfo.bind(this)
 		], function(err, results) {
-			self.log("err:", err, "results:", results);
+			enyo.log("DropboxAuthConfig.check: err:", err, "results:", results);
 			self.$.checkBtn.setDisabled(false);
 			if (err) {
 				self.doError({
@@ -101,7 +101,7 @@ enyo.kind({
 			this.getAccountInfo.bind(this),
 			this.showAccountInfo.bind(this)
 		], function(err, results) {
-			self.log("err:", err, "results:", results);
+			enyo.log("DropboxAuthConfig.renew: err:", err, "results:", results);
 			// ... and re-enable it after success of failure.
 			self.$.renewBtn.setDisabled(false);
 			if (err) {
@@ -166,8 +166,8 @@ enyo.kind({
 			url: this.requestTokenUrl,
 			method: 'POST',
 			handleAs: 'text',
-			noCacheControl: true,
 			headers: {
+				'cache-control': false,
 				Authorization: this.makeOAuthHeader('OAuth', this.makeOAuthRequestTokenObject(this.auth.appKey, this.auth.appSecret))
 			}
 		};
@@ -206,8 +206,8 @@ enyo.kind({
 			url: this.accessTokenUrl,
 			method: 'POST',
 			handleAs: 'text',
-			noCacheControl: true,
 			headers: {
+				'cache-control': false,
 				Authorization: this.makeOAuthHeader('OAuth', this.makeOAuthHeaderObject(this.auth.appKey, this.auth.appSecret, this.requestToken, this.requestTokenSecret))
 			}
 		};
@@ -252,7 +252,6 @@ enyo.kind({
 			method: 'GET',
 			handleAs: 'json',
 			cacheBust: false, // cacheBust query parameter not accepted by Dropbox
-			noCacheControl: true, // 'cache-control' header not accepted by Dropbox
 			headers: {
 				Authorization: this.auth.headers.authorization
 			}
