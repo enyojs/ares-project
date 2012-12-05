@@ -28,7 +28,7 @@ enyo.kind({
 	deimosViewIndex: 1,
 	create: function() {
 		if (this.runTest) {
-			ProjectList.underTest = true;
+			ProjectList.runTest = true;
 		}
 		this.inherited(arguments);
 		this.$.panels.setIndex(this.phobosViewIndex);

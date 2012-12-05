@@ -72,7 +72,7 @@ enyo.kind({
 	debug: false,
 	create: function() {
 		this.inherited(arguments);
-		if (ProjectList.underTest) {
+		if (ProjectList.runTest) {
 			this.PROJECTS_STORAGE_KEY = "com.enyojs.ares.tests";
 		} else 
 			this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
@@ -241,7 +241,7 @@ enyo.kind({
 		return value;	// Accept
 	},
 	statics: {
-		underTest: false
+		runTest: false
 	}
 });
 
