@@ -2,6 +2,15 @@ body {
 	background-color: #aaa;
 }
 /**/
+.ares-groupbox-item-key {
+	padding: 0.5em;
+}
+.ares-groupbox-item-value {
+	width: 50%;
+	color: #000000;
+	float: right
+}
+/**/
 .ares_harmonia_providerList {
 	width: 30%;
 }
