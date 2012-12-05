@@ -19,8 +19,7 @@ enyo.kind({
 	},
 	handlers: {
 	},
-	projects: [],
-	debug: false,
+	debug: true,
 	components: [
 		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", isContainer: true, name: "toolbar", components: [
 			{kind: "onyx.MenuDecorator", onSelect: "aresMenuItemSelected", components: [
@@ -66,22 +65,17 @@ enyo.kind({
 		{kind: "AccountsConfigurator"},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
-	PROJECTS_STORAGE_KEY: "com.enyojs.ares.projects",
 	selected: null,
-	debug: false,
 	create: function() {
 		this.inherited(arguments);
-		if (ProjectList.underTest) {
-			this.PROJECTS_STORAGE_KEY = "com.enyojs.ares.tests";
-		} else 
-			Ares.LocalStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
+		this.$.projectList.setCount(Ares.WorkspaceData.length);
 	},
 	/**
 	 * Callback functions which receives the project list data read from the storage
 	 * @protected
 	 * @param data: the project list in json format
 	 */
-	projectListAvailable: function(data) {
+	projectListAvailable: function() {				// TODO: to keep ?
 		try {
 			if (data && data !== "") {
 				this.projects = JSON.parse(data);
@@ -95,49 +89,22 @@ enyo.kind({
 			this.projects = [];
 		}
 	},
-	storeProjectsInLocalStorage: function() {
-		var projectsString;
-		if (this.debug) console.dir(this.projects);
-		try {
-			projectsString = JSON.stringify(this.projects, enyo.bind(this, this.stringifyReplacer));
-		} catch(error) {
-			this.error("Unable to store the project information: " + error);	// TODO ENYO-1105
-			console.dir(this.projects);		// Display the offending object in the console
-			return;
-		}
-		Ares.LocalStorage.set(this.PROJECTS_STORAGE_KEY, projectsString, function() {
-			// WARNING: LocalStorage does not return any information about operation status (success or error)
-			enyo.log("Project list saved");
-		});
-	},
 	addProject: function(name, folderId, service) {
-		var project = {
-			name: name,
-			folderId: folderId,
-			serviceId: service.getConfig().id
-		};
-		if (!project.serviceId) {
+		var serviceId = service.getConfig().id || "";
+		if (serviceId === "") {
 			throw new Error("Cannot add a project in service=" + service);
 		}
-		var known = 0;
-		var match = function(proj) {
-			if ( proj.name === name) {
-				known = 1;
-			} 
-		} ;
-		enyo.forEach(this.projects, match) ;
+		var known = Ares.WorkspaceData.get(name);
 		if (known) {
 			this.log("Skipped project " + name + " as it is already listed") ;
-		}
-		else {
-			this.projects.push(project);
-			this.storeProjectsInLocalStorage();
-			this.$.projectList.setCount(this.projects.length);
+		} else {
+			Ares.WorkspaceData.createProject(name, folderId, serviceId);
+			this.$.projectList.setCount(Ares.WorkspaceData.length);
 			this.$.projectList.render();
 		}
 	},
 	renameSelectedProject: function(newName) {
-		var old = this.selected.getProjectName; 
+		var old = this.selected.getProjectName;
 		var p;
 		for (p in this.projects) {
 			if (this.projects[p].name === old ) {
@@ -160,10 +127,10 @@ enyo.kind({
 		// once done,  call removeSelectedProjectData to mop up the remains.
 		var project, nukeFiles ;
 		if (this.selected) {
-			project = this.projects[this.selected.index] ;
+			project = Ares.WorkspaceData.at(this.selected.index);
 			nukeFiles = this.$.removeProjectPopup.$.nukeFiles.getValue() ;
-			this.log("removing project" +  project.name + ( nukeFiles ? " and its files" : "" )) ;
-			this.debug && this.log(project) ;
+			this.log("removing project" +  project.getName() + ( nukeFiles ? " and its files" : "" )) ;
+			this.debug && this.log(project);
 			if (nukeFiles) {
 				project.service.remove( project.folderId )
 					.response(this, function(){this.removeSelectedProjectData();})
@@ -179,43 +146,45 @@ enyo.kind({
 	removeSelectedProjectData: function() {
 		if (this.selected) {
 			// remove the project from list of project config
-			this.projects.splice(this.selected.index, 1);
-			this.storeProjectsInLocalStorage();
+			var name = Ares.WorkspaceData.at(this.selected.index).getName();
+			Ares.WorkspaceData.removeProject(name);
 			this.selected = null;
-			this.$.projectList.setCount(this.projects.length);
+			this.$.projectList.setCount(Ares.WorkspaceData.length);
 			this.$.projectList.render();
 			this.doProjectRemoved();
 		}
 	},
 	projectListSetupItem: function(inSender, inEvent) {
-		var project = this.projects[inEvent.index];
+		var project = Ares.WorkspaceData.at(inEvent.index);
 		var item = inEvent.item;
 		// setup the controls for this item.
 		item = item.$.item;
-		item.setProjectName(project.name);
+		item.setProjectName(project.getName());
 		item.setIndex(inEvent.index);
 	},
 	projectListTap: function(inSender, inEvent) {
-		var project, msg;
+		var project, msg, service;
 		// Un-highlight former selection, if any
 		if (this.selected) {
 			this.selected.removeClass("ares_projectView_projectList_item_selected");
 		}
-		project = this.projects[inEvent.index];
-		project.service = ServiceRegistry.instance.resolveServiceId(project.serviceId);
-		if (project.service) {
-			// Highlight a project item if & only if its
-			// filesystem service provider exists.
-			if (inEvent.originator.kind === 'ProjectList.Project') {
-				this.selected = inEvent.originator;
-			} else {
-				this.selected = inEvent.originator.owner;
-			}
-			this.selected.addClass("ares_projectView_projectList_item_selected");
+
+		// Highlight the new project item
+		if (inEvent.originator.kind === 'ProjectList.Project') {
+			this.selected = inEvent.originator;
+		} else {
+			this.selected = inEvent.originator.owner;
+		}
+		this.selected.addClass("ares_projectView_projectList_item_selected");
+
+		project = Ares.WorkspaceData.at(inEvent.index);
+		service = ServiceRegistry.instance.resolveServiceId(project.getServiceId());
+		if (service !== undefined) {
+			project.setService(service);
 			this.doProjectSelected({project: project});
 		} else {
-			// ...otherwise let 
-			msg = "Service " + project.serviceId + " not found";
+			// ...otherwise let
+			msg = "Service " + project.getServiceId() + " not found";
 			this.showErrorPopup(msg);
 			this.error(msg);
 		}

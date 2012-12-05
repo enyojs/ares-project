@@ -146,16 +146,20 @@ enyo.kind({
 	],
 
 	debug: false,
-	targetProject: null ,
+	targetProject: null,
+	config: null,
 
 	/**
 	 * Step 1: start the modification by showing project properties widget
 	 */
 	start: function(target) {
-		this.targetProject = target ;
-		this.$.propertiesWidget.setupModif() ;
-		this.$.propertiesWidget.preFill(target.config.data);
-		this.show();
+		if (target) {
+			this.config = target.getConfig();
+			this.targetProject = target ;
+			this.$.propertiesWidget.setupModif() ;
+			this.$.propertiesWidget.preFill(this.config.data);
+			this.show();
+		}
 	},
 
 	// step 2:
@@ -168,12 +172,13 @@ enyo.kind({
 		}
 
 		// selected project name was modified
-		if ( inEvent.data.name !== this.targetProject.name) {
+		if ( inEvent.data.name !== this.targetProject.getName()) {
 			// project name has changed, update project list
+			throw new Error("TODO: YDM TBC");
 			this.$.projectList.renameSelectedProject(inEvent.data.name) ;
 		}
-		this.targetProject.config.setData(inEvent.data);
-		this.targetProject.config.save() ;
+		this.config.setData(inEvent.data);
+		this.config.save() ;
 
 		return true ; // stop bubble
 	}
