@@ -75,7 +75,6 @@ enyo.kind({
 		this.inherited(arguments);
 		this.$.projectList.setCount(Ares.WorkspaceData.length);
 		Ares.WorkspaceData.on("add remove reset", enyo.bind(this, this.projectCountChanged));
-		} else
 	},
 	projectCountChanged: function() {
 		var count = Ares.WorkspaceData.length;
@@ -89,12 +88,11 @@ enyo.kind({
 			throw new Error("Cannot add a project in service=" + service);
 		}
 		var known = Ares.WorkspaceData.get(name);
-			}
+
 		if (known) {
 			this.debug && this.log("Skipped project " + name + " as it is already listed") ;
 		} else {
 			Ares.WorkspaceData.createProject(name, folderId, serviceId);
-		var old = this.selected.getProjectName;
 		}
 	},
 	removeProjectAction: function(inSender, inEvent) {
