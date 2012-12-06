@@ -80,7 +80,7 @@ enyo.kind({
 				propW.$.projectName.setValue(that.selectedDir.name);
 				that.$.selectDirectoryPopup.hide();
 				propW.show() ;
-			};
+			}
 		});
 	},
 
@@ -132,16 +132,19 @@ enyo.kind({
 	],
 
 	debug: false,
-	targetProject: null ,
+	targetProject: null,
 
 	/**
 	 * Step 1: start the modification by showing project properties widget
 	 */
 	start: function(target) {
-		this.targetProject = target ;
-		this.$.propertiesWidget.setupModif() ;
-		this.$.propertiesWidget.preFill(target.config.data);
-		this.show();
+		if (target) {
+			var config = target.getConfig();
+			this.targetProject = target ;
+			this.$.propertiesWidget.setupModif() ;
+			this.$.propertiesWidget.preFill(config.data);
+			this.show();
+		}
 	},
 
 	// step 2:
@@ -153,13 +156,17 @@ enyo.kind({
 			return true ; // stop bubble
 		}
 
+		// Save the data to project.json
+		var config = this.targetProject.getConfig();
+		config.setData(inEvent.data);
+		config.save();
+
 		// selected project name was modified
-		if ( inEvent.data.name !== this.targetProject.name) {
-			// project name has changed, update project list
-			this.$.projectList.renameSelectedProject(inEvent.data.name) ;
+		if (inEvent.data.name !== this.targetProject.getName()) {
+			// project name has changed, update project model list
+			var oldName = this.targetProject.getName();
+			Ares.WorkspaceData.renameProject(oldName, inEvent.data.name);
 		}
-		this.targetProject.config.setData(inEvent.data);
-		this.targetProject.config.save() ;
 
 		return true ; // stop bubble
 	}
@@ -214,7 +221,7 @@ enyo.kind({
 					response(this, function(inSender, fileStuff) {
 						this.debug && this.log( "file contents: '" + fileStuff.content + "'" ) ;
 						var projectData = JSON.parse(fileStuff.content)  ;
-						this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
+						this.debug && this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
 						this.doAddProjectInList({
 							name: projectData.name,
 							folderId: parentDir.id,

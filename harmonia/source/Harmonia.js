@@ -31,14 +31,14 @@ enyo.kind({
 	},
 	setProject: function(project) {
 		if (this.debug) this.log("project:", project);
-		var config ; 
+		var config;
 		if (project !== null) {
 			config = {
-				filesystem: project.service,
-				nodeName: project.name,
-				folderId: project.folderId
+				filesystem: project.getService(),
+				nodeName: project.getName(),
+				folderId: project.getFolderId()
 			};
-			this.$.hermesFileTree.setConfig(config).showFileOpButtons();		
+			this.$.hermesFileTree.setConfig(config).showFileOpButtons();
 		} else {
 			this.$.hermesFileTree.hideFileOpButtons().clear();
 		}
