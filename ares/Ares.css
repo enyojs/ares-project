@@ -151,7 +151,10 @@ body {
 	background-size: 100%;
 }
 
+/* position: relative and z-index: 10 so Opera will route taps to this control instead of its parent */
 .ares-doc-close {
+	position: relative;
+	z-index: 10;
 	height: 16px;
 	width: 16px;
 	background-size: 100%;
