@@ -36,8 +36,8 @@ enyo.kind({
 				]}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", classes: "ares-scale-background", src: "$project-view/assets/images/project_settings.png", onclick: "doModifySettings"},
-				{kind: "onyx.Tooltip", content: "Settings..."}
+				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_new.png", onclick: "doCreateProject"},
+				{kind: "onyx.Tooltip", content: "Create or Import Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_build.png", onclick: "doPhonegapBuild"},
@@ -48,8 +48,9 @@ enyo.kind({
 				{kind: "onyx.Tooltip", content: "Preview Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_new.png", onclick: "doCreateProject"},
-				{kind: "onyx.Tooltip", content: "Create or Import Project..."}
+				{kind: "onyx.IconButton", classes: "ares-scale-background",
+				 src: "$project-view/assets/images/project_settings.png", onclick: "doModifySettings"},
+				{kind: "onyx.Tooltip", content: "Settings..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_edit.png", onclick: "doScanProject"},
