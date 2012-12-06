@@ -73,5 +73,28 @@ var ares = {
 		}, this);
 		query += "oauth_version=1.0";
 		return query;
+	},
+	/**
+	 * Test whether the browser blocks browser popups for the current location
+	 * 
+	 * @return {true} if browser popups are allowed for the current {window.location}, false otherwise.
+	 */
+	isPopupAllowed: function() {
+		var params = 'height=1,width=1,left=-100,top=-100,location=no,toolbar=no,menubar=no,scrollbars=no,resizable=no,directories=no,status=no';
+		var testWindow = window.open("popupTest.htm", "popupTest", params);
+
+		if ( !testWindow || 
+		     testWindow.closed ||
+		     (typeof testWindow.closed=='undefined') ||
+		     (testWindow.outerHeight === 0) ||
+		     (testWindow.outerWidth === 0)) {
+			  // pop-ups ARE blocked
+			  return true;
+		  }
+		else {
+			// pop-ups are NOT blocked
+			testWindow.close();
+			return false;
+		}
 	}
 };
