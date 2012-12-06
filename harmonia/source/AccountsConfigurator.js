@@ -18,11 +18,17 @@ enyo.kind({
 			], onUpdateAuth: "handleUpdateAuth"},
 			{kind: "onyx.Button", content: "Dismiss", ontap: "dismiss"}
 		]},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "", details: "", autoDismiss: false, modal: true}
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "", details: "", autoDismiss: false, modal: true},
+		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, classes: "ares-waitpopup", components: [
+			{kind: "onyx.Spinner", classes: "onyx-dark"},
+			{name: "waitPopupMsg", content: "Ongoing..."}
+		]}
 	],
 
 	handlers: {
-		onError: "showError"
+		onError: "showError",
+		onStartWaiting: "startWaiting",
+		onStopWaiting: "stopWaiting"
 	},
 
 	//* @private
@@ -108,6 +114,18 @@ enyo.kind({
 	showError: function(inSender, inEvent) {
 		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
 		this.$.errorPopup.raise(inEvent.msg, inEvent.details);
+		return true; //Stop event propagation
+	},
+	startWaiting: function(inSender, inEvent) {
+		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
+		this.$.waitPopupMsg.setContent(inEvent.msg);
+		this.$.waitPopup.show();
+		return true; //Stop event propagation
+	},
+	stopWaiting: function(inSender, inEvent) {
+		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
+		this.$.waitPopupMsg.setContent("");
+		this.$.waitPopup.hide();
 		return true; //Stop event propagation
 	}
 });

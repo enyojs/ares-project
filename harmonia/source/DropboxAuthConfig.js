@@ -8,10 +8,10 @@ enyo.kind({
 
 	// private members
 	debug: false,
-	requestTokenUrl: "https://api.dropbox.com/1/oauth/request_token",
-	authorizeUrl: "https://www.dropbox.com/1/oauth/authorize",
-	accessTokenUrl: "https://api.dropbox.com/1/oauth/access_token",
-	accountInfoUrl: "https://api.dropbox.com/1/account/info",
+	requestTokenUrl:	"https://api.dropbox.com/1/oauth/request_token",
+	authorizeUrl:		"https://www.dropbox.com/1/oauth/authorize",
+	accessTokenUrl:		"https://api.dropbox.com/1/oauth/access_token",
+	accountInfoUrl:		"https://api.dropbox.com/1/account/info",
 
 	requestToken: "",		// from dropbox
 	requestTokenSecret: "",		// from dropbox
@@ -27,7 +27,9 @@ enyo.kind({
 	// emitted events
 	events: {
 		onUpdateAuth: "",
-		onError: ""
+		onError: "",
+		onStartWaiting: "",
+		onStopWaiting: ""
 	},
 
 	// static UI elements
@@ -62,7 +64,8 @@ enyo.kind({
 		{kind: "FittableColumns", components: [
 			{name: "renewBtn", kind: "onyx.Button", content: "Renew", disabled: false, ontap: "renew"},
 			{name: "checkBtn", kind: "onyx.Button", content: "Check", disabled: true, ontap: "check"}
-		]}
+		]},
+		{name: "footnote"}
 	],
 
 	create: function() {
@@ -76,8 +79,17 @@ enyo.kind({
 		}
 		this.waitAccountInfo();
 	},
+	render: function() {
+		if (ares.isPopupAllowed()) {
+			this.$.footnote.setContent("");
+		} else {
+			this.$.footnote.setContent("You need to accept Dropbox popup when asked...");
+		}
+		this.inherited(arguments);
+	},
 	check: function() {
 		var self = this;
+		// Disable [Check] button during async processing...
 		this.$.checkBtn.setDisabled(true);
 		async.series([
 			this.waitAccountInfo.bind(this),
@@ -85,6 +97,8 @@ enyo.kind({
 			this.displayAccountInfo.bind(this)
 		], function(err, results) {
 			enyo.log("DropboxAuthConfig.check: err:", err, "results:", results);
+			self.doStopWaiting();
+			// ... and re-enable it after success of failure.
 			self.$.checkBtn.setDisabled(false);
 			if (err) {
 				self.doError({
@@ -108,6 +122,7 @@ enyo.kind({
 			this.displayAccountInfo.bind(this)
 		], function(err, results) {
 			enyo.log("DropboxAuthConfig.renew: err:", err, "results:", results);
+			self.doStopWaiting();
 			// ... and re-enable it after success of failure.
 			self.$.renewBtn.setDisabled(false);
 			if (err) {
@@ -164,10 +179,11 @@ enyo.kind({
 	//* @private
 	getRequestToken: function(next) {
 		if (!this.auth.appKey || !this.auth.appSecret) {
-			this.error("Ares IDE mis-configuration: missing Dropbox AppKey and/or AppSecret in ide.json");
-			next(new Error("Ares IDE mis-configuration: Contact your Ares administrator"));
+			this.warn("Ares IDE mis-configuration: missing Dropbox AppKey and/or AppSecret in ide.json.  Get those values from https://www.dropbox.com/developers/apps");
+			next(new Error("Ares is not configured as a Dropbox application: Contact your system administrator"));
 			return;
 		}
+		this.doStartWaiting({msg: "Dropbox: waiting for request token..."});
 		var reqOptions = {
 			url: this.requestTokenUrl,
 			method: 'POST',
@@ -194,20 +210,33 @@ enyo.kind({
 		});
 		req.go();
 	},
+	// XXX better offload this popup sequence to a dedicated enyo Object
 	authorize: function(next) {
-		var popup = window.open(this.authorizeUrl + '?oauth_token=' + encodeURIComponent(this.requestToken),
+		this.doStartWaiting({msg: "Dropbox: waiting for user's authorization..."});
+		var url = this.authorizeUrl + '?oauth_token=' + encodeURIComponent(this.requestToken);
+		var popup = window.open(url,
 					"Dropbox Authentication",
 					"resizeable=1,width=1024, height=600");
-		// Check that the popup is closed every seconds.
-		var timer = setInterval(function() {
+		// Check 20s that the popup is closed... otherwise fails
+		var self = this,
+		    delay = 20,
+		    timer = setInterval(function() {
 			if(popup.closed) {
 				clearInterval(timer);
-				enyo.log("Dropbox popup closed");
+				enyo.log("DropboxAuthConfig.waitAuthorization: Dropbox popup closed");
 				next();
+			} else if (!--delay) {
+				clearInterval(timer);
+				enyo.log("DropboxAuthConfig.waitAuthorization: failure: User did not accept or close the authorization window");
+				popup.close();
+				next(new Error("Dropbbox Authorization window did not close"));
+			} else {
+				self.doStartWaiting({msg: "Dropbox: waiting for the accessToken (" + delay + "s left)..."});
 			}
 		}, 1000);
 	},
 	getAccessToken: function(next) {
+		this.doStartWaiting({msg: "Dropbox: waiting for the accessToken..."});
 		var reqOptions = {
 			url: this.accessTokenUrl,
 			method: 'POST',
@@ -253,6 +282,7 @@ enyo.kind({
 		next();
 	},
 	getAccountInfo: function(next) {
+		this.doStartWaiting({msg: "Dropbox: waiting for user's account information..."});
 		var reqOptions = {
 			url: this.accountInfoUrl,
 			method: 'GET',

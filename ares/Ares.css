@@ -8,7 +8,12 @@ body {
 .ares-groupbox-item-value {
 	width: 50%;
 	color: #000000;
-	float: right
+	float: right;
+}
+.ares-waitpopup {
+	margin-left: auto;
+	margin-right: auto;
+	width: 20%; 
 }
 /**/
 .ares_harmonia_providerList {
