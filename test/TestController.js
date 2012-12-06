@@ -3,7 +3,6 @@ enyo.kind({
 	kind: enyo.Component,
 	debug: true,
 	status: "None",
-	aresTestW: null,
 	create: function() {
 		this.inherited(arguments);
 		// listen for dispatched messages (received from Ares Test Reporter)
@@ -49,7 +48,7 @@ enyo.kind({
 			}
 			// Create TextCtrlRunner and TestProxyReporter components
 			// TestProxyReporter is created by TestCtrlRunner
-			this.createComponent({name: "runner", kind: "Ares.TestCtrlRunner", testWindow: "aresTestW"});
+			this.createComponent({name: "runner", kind: "Ares.TestCtrlRunner"});
 		}
 		if (event.data === "ARES.TEST.RERUN") {
 			if (this.debug) {
@@ -59,7 +58,7 @@ enyo.kind({
 			if (this.$.runner) {
 				this.removeComponent(this.$.runner);
 			}
-			this.createComponent({name: "runner", kind: "Ares.TestCtrlRunner", testWindow: "aresTestW"});
+			this.createComponent({name: "runner", kind: "Ares.TestCtrlRunner"});
 		}
 	}
 });
