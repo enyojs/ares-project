@@ -23,7 +23,7 @@ enyo.kind({
 	debug: false,
 	components: [
 		{kind: "LocalStorage"},
-		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", isContainer: true, name: "toolbar", components: [
+		{kind: "onyx.MoreToolbar", classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", isContainer: true, name: "toolbar", components: [
 			{kind: "onyx.MenuDecorator", onSelect: "aresMenuItemSelected", components: [
 				{content: "Ares"},
 				{kind: "onyx.Menu", components: [
@@ -40,6 +40,14 @@ enyo.kind({
 				{kind: "onyx.Tooltip", content: "Settings..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
+				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_build.png", onclick: "doPhonegapBuild"},
+				{kind: "onyx.Tooltip", content: "Phonegap build"}
+			]},
+			{kind: "onyx.TooltipDecorator", components: [
+				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_preview.png", onclick: "doPreview"},
+				{kind: "onyx.Tooltip", content: "Preview Project..."}
+			]},
+			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_new.png", onclick: "doCreateProject"},
 				{kind: "onyx.Tooltip", content: "Create or Import Project..."}
 			]},
@@ -51,10 +59,6 @@ enyo.kind({
 				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_delete.png", onclick: "removeProjectAction"},
 				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
 				{kind: "onyx.Tooltip", content: "Remove Project..."}
-			]},
-			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_build.png", onclick: "doPhonegapBuild"},
-				{kind: "onyx.Tooltip", content: "Phonegap build"}
 			]}
 		]},
 		{kind: "enyo.Scroller", components: [
