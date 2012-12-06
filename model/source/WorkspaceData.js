@@ -108,6 +108,12 @@ Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when
 	},
 	setConfig: function(config) {
 		return this.set("config", config);
+	},
+	getProjectUrl: function() {
+		return this.get("project-url");
+	},
+	setProjectUrl: function(projectUrl) {
+		return this.set("project-url", projectUrl);
 	}
 });
 
