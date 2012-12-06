@@ -1,4 +1,10 @@
 enyo.kind({
+	name: "AresTab",
+	kind: "GroupItem",
+	classes: "onyx-radiobutton ares-tab",
+});
+
+enyo.kind({
 	name: "DocumentToolbar",
 	kind: "onyx.Toolbar",
 	events: {
@@ -32,10 +38,10 @@ enyo.kind({
 	},
 	createFileTab: function(name, id) {
 		var c = this.$.tabs.createComponent({
-			classes: "ares-tab-button",
+			kind: "AresTab",
 			fileId: id,
 			components: [
-	    		{content: name},
+	    		{content: name, classes: "ares-tab-label"},
 				{kind: "onyx.IconButton", classes: "ares-doc-close", src: "$lib/onyx/images/progress-button-cancel.png", fileId: id, ontap: "closeFile"},
 			],
 			ontap: "switchFile"
