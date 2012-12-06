@@ -2,13 +2,13 @@
  * This kind provides:
  * - the project toolbars (with create .. delete)
  * - the project list
- * 
+ *
  * The project list is a simple kind that only holds project names. It does not
  * hold project objects or kinds.
  */
 enyo.kind({
 	name: "ProjectList",
-	classes: "enyo-unselectable",
+	classes: "enyo-unselectable ares_projectList",
 	events: {
 		onCreateProject: "",
 		onProjectSelected: "",
@@ -74,7 +74,7 @@ enyo.kind({
 		this.inherited(arguments);
 		if (ProjectList.underTest) {
 			this.PROJECTS_STORAGE_KEY = "com.enyojs.ares.tests";
-		} else 
+		} else
 			this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
 	},
 	/**
@@ -124,7 +124,7 @@ enyo.kind({
 		var match = function(proj) {
 			if ( proj.name === name) {
 				known = 1;
-			} 
+			}
 		} ;
 		enyo.forEach(this.projects, match) ;
 		if (known) {
@@ -138,7 +138,7 @@ enyo.kind({
 		}
 	},
 	renameSelectedProject: function(newName) {
-		var old = this.selected.getProjectName; 
+		var old = this.selected.getProjectName;
 		var p;
 		for (p in this.projects) {
 			if (this.projects[p].name === old ) {
@@ -215,7 +215,7 @@ enyo.kind({
 			this.selected.addClass("ares_projectView_projectList_item_selected");
 			this.doProjectSelected({project: project});
 		} else {
-			// ...otherwise let 
+			// ...otherwise let
 			msg = "Service " + project.serviceId + " not found";
 			this.showErrorPopup(msg);
 			this.error(msg);
