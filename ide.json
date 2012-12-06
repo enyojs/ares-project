@@ -26,8 +26,8 @@
 			],
 			"auth": {
 				"type": "dropbox",
-				"appKey": "YOUR_APP_KEY",
-				"appSecret": "YOUR_APP_SECRET"
+				"appKey": "",
+				"appSecret": ""
 			},
 			"useJsonp":false,
 			"debug": false
