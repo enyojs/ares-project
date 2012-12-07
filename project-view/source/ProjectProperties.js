@@ -129,7 +129,7 @@ enyo.kind({
 					{tag: "td" , content: "top application file: "},
 					{tag: 'td', attributes: {colspan: 1}, components:[
 						{kind: "onyx.InputDecorator", components: [
-							{kind: "Input", name: "ppEntry",
+							{kind: "Input", name: "ppTopFile",
 							attributes: {title: 'top file of your application. Typically index.html'}
 							}
 						]}
@@ -201,6 +201,7 @@ enyo.kind({
 		var pgConf ;
 		var pgTarget ;
 		var conf = this.config ;
+		var confDefault = ProjectConfig.PREFILLED_CONFIG_FOR_UI ;
 
 		 // avoid storing 'undefined' in there
 		this.$.projectId.     setValue(conf.id      || '' );
@@ -218,8 +219,7 @@ enyo.kind({
 		pgConf = this.config.build.phonegap ;
 		this.$.pgConfEnabled.setValue(pgConf.enabled);
 		this.$.pgConfId.setValue(pgConf.appId || '' );
-		this.$.pgIconUrl.setValue(pgConf.icon.src || '' );
-
+		this.$.pgIconUrl.setValue(pgConf.icon.src || confDefault.icon.src );
 
 		if (! pgConf.targets) { pgConf.targets = {} ;}
 		// pgTarget is a key of object pgConf.targets
@@ -227,10 +227,14 @@ enyo.kind({
 			this.$[ pgTarget + 'Target' ].setValue(pgConf.targets[pgTarget]) ;
 		}
 
+		if (! conf.preview ) {conf.preview = {} ;}
+		this.$.ppTopFile.setValue( conf.preview['top-file'] || confDefault.preview['top-file'] ) ;
+
 		return this ;
 	},
 
 	confirmTap: function(inSender, inEvent) {
+		var pgConf, tglist, ppConf ;
 		// retrieve modified values
 		this.log('ok tapped') ;
 
@@ -246,14 +250,17 @@ enyo.kind({
 		this.config.build.appId   = this.$.pgConfId.getValue();
 
 
-		var pgConf = this.config.build.phonegap ;
+		pgConf = this.config.build.phonegap ;
 		pgConf.icon.src = this.$.pgIconUrl.getValue();
 
-		var tglist = ['android','ios','winphone','blackberry','webos'] ;
+		tglist = ['android','ios','winphone','blackberry','webos'] ;
 		for ( i in tglist) {
 			this.log('copy data from ' + tglist[i] +'Target') ;
 			pgConf.targets[tglist[i]] = this.$[ tglist[i] + 'Target' ].getValue() ;
 		}
+
+		ppConf = this.config.preview ;
+		ppConf['top-file'] = this.$.ppTopFile.getValue();
 
 		// to be handled by a ProjectWizard
 		this.doModifiedConfig({data: this.config}) ;
