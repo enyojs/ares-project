@@ -9,7 +9,7 @@ enyo.kind({
 		onFinishAll: ""
 	},
 	components: [
-		{kind: "FittableRows", fit: true, components: [
+		{kind: "FittableRows", components: [
 			{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar", isContainer: true, components: [
 				{kind: "FittableColumns", style: "width:100%", components: [
 					{kind: "Control", content: "Ares Test Suite", style: "margin-right: 10px"},
@@ -17,13 +17,14 @@ enyo.kind({
 					{kind: "Control", content: "Click on "},
 					{kind: "onyx.InputDecorator", components: [
 						{name: "runTests", kind: "onyx.IconButton", src: "$test/images/play.png", ontap: "runTests"},
-						{kind: "onyx.Tooltip", content: "Run Ares Test Suite..."},
 					]},
 				]},
 
 			]},
+			// TODO: scroller doesn't work - Need to be fixed
 			{kind: enyo.Scroller, name: "group"}
-		]},		
+		]},
+
 	],
 	classes: "enyo-testcase",
 	timeout: 3000,
