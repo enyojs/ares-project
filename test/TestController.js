@@ -4,6 +4,9 @@ enyo.kind({
 	debug: true,
 	status: "None",
 	create: function() {
+		if (this.debug) {
+			console.log("I am Ares Test Controller ...");
+		}
 		this.inherited(arguments);
 		// listen for dispatched messages (received from Ares Test Reporter)
 		window.addEventListener("message", enyo.bind(this, this.recMsgFromTestReporter), false);

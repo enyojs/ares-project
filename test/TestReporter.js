@@ -22,8 +22,7 @@ enyo.kind({
 				]},
 
 			]},
-			{name: "title", classes: "enyo-testcase-title"},
-			{name: "group", classes: "enyo-testcase-group"}
+			{kind: enyo.Scroller, name: "group"}
 		]},		
 	],
 	classes: "enyo-testcase",
@@ -32,30 +31,31 @@ enyo.kind({
 	debug: true,
 	create: function() {
 		if (this.debug) {
-			console.log("TestController: create() ...");
+			console.log("I am Ares Test Reporter ...");
 		}
 		this.inherited(arguments);
-		this.$.title.setContent(this.name);
 		this.aresIdeW = Ares.TestReporter.aresIdeW;
 		// listen for dispatched messages (received from Ares Ide)
 		window.addEventListener("message", enyo.bind(this, "recMsgFromIde"), false);
 	},
-	initComponents: function() {
-		this.inherited(arguments);
-	},
 	runTests: function() {
-		if (this.debug) {
-			console.log("Post ARES.TEST.RUN ...");
-			if (this.debug) console.log("this.aresIdeW: "+this.aresIdeW);
-		}
-		if (this.aresIdeW !== null) {
-			if (this.debug) console.log("this.aresIdeW: "+this.aresIdeW);
+		if (this.aresIdeW !== null) {			
+			if (this.debug) {
+				console.log("Post ARES.TEST.RUN ...");
+				console.log("this.aresIdeW: "+this.aresIdeW);
+			}
 			this.aresIdeW.postMessage("ARES.TEST.RUN", "http://127.0.0.1:9009");
 		} else {
 			if (this.debug) console.log("window.self.opener ...POST ARES.TEST.RERUN");
 			window.self.opener.postMessage("ARES.TEST.RERUN", "http://127.0.0.1:9009");
 		}
 		this.$.runTests.setDisabled(true);
+	},
+	testNameDisplay: function(inData) {
+		if (this.debug) {
+			console.log("TestReporter: testNameDisplay: "+JSON.stringify(inData));
+		}
+		this.$.group.createComponent({classes: "enyo-testcase-title", content: inData.data}).render();
 	},
 	testBegun: function(inData) {
 		if (this.debug) {
@@ -118,6 +118,10 @@ enyo.kind({
 			if (this.debug) console.log("Received ARES.TEST.START ... Post ARES.TEST.READY ...");
 			event.source.postMessage("ARES.TEST.READY", event.origin);
 		} 
+		if(event.data.evt === "ARES.TEST.NAME") {
+			if (this.debug) console.log("Received ARES.TEST.NAME ...");
+			this.testNameDisplay(event.data);
+		}
 		if(event.data.evt === "ARES.TEST.RUNNING") {
 			if (this.debug) console.log("Received ARES.TEST.RUNNING ...");
 			this.testBegun(event.data);

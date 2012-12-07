@@ -12,6 +12,12 @@ enyo.kind({
 	debug: false,
 	create: function() {
 		this.inherited(arguments);
+		// Post ARES.TEST.NAME event to infor the Ares Test Reporter the name of the TestSuite
+		aresTestW.postMessage({evt:"ARES.TEST.NAME", data:this.name}, "http://127.0.0.1:9009");
+		if (this.debug) {
+			console.log("Post ARES.TEST.NAME ...name: "+this.name);
+		}
+
 	},
 	initComponents: function() {
 		this.inherited(arguments);
@@ -23,7 +29,8 @@ enyo.kind({
 	testBegun: function(inSender, inEvent) {
 		console.log("=>Ares Proxy Reporter *****" + "Group: " + this.name + " *****test: " +inEvent.testName + " is running ...");
 
-		// Post ARES.TEST.RUNNING event with info relate dto the group and the name of the unit test
+
+		// Post ARES.TEST.RUNNING event with info related to the group and the name of the unit test
 		var obj = {
 			group: this.name,
 			test: inEvent.testName,
@@ -33,7 +40,7 @@ enyo.kind({
 		aresTestW.postMessage({evt:"ARES.TEST.RUNNING", data:obj}, "http://127.0.0.1:9009");
 		if (this.debug) {
 			console.log("Post ARES.TEST.RUNNING ... "
-				+JSON.stringify(data));
+				+JSON.stringify(obj));
 		}
 	},
 	formatStackTrace: function(inStack) {
@@ -82,7 +89,7 @@ enyo.kind({
 		aresTestW.postMessage({evt:"ARES.TEST.RESULT", data:obj}, "http://127.0.0.1:9009");
 		if (this.debug) {
 			console.log("Post ARES.TEST.RESULT ... "
-				+JSON.stringify(data));
+				+JSON.stringify(obj));
 		}
 
 	}
