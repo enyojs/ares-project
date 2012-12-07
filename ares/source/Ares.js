@@ -8,7 +8,7 @@ enyo.kind({
 			{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onEditedChanged: "documentEdited"},
 			{kind: "Deimos", onCloseDesigner: "closeDesigner"}
 		]},
-		{kind: "Slideable", style: "height: 100%; width: 100%", layoutKind: "FittableRowsLayout", classes: "onyx", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
+		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
 			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
 			{name: "bottomBar", kind: "DocumentToolbar", 
 			    onGrabberTap: "toggleFiles", 

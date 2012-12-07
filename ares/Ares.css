@@ -137,12 +137,6 @@ body {
 	width: 200px;
 }
 
-.ares-tab-button {
-	padding-right: 0px;
-	height: 36px;
-}
-
-
 .ares-no-padding {
 	padding: 0px;
 	border: 0px;
@@ -150,6 +144,15 @@ body {
 
 .ares-scale-background {
 	background-size: 100%;
+}
+
+.ares-tab {
+	display: inline-block;
+	color: black;
+}
+
+.ares-tab-label {
+	display: inline-block;
 }
 
 .ares-doc-close {
@@ -163,6 +166,13 @@ body {
 	margin-top: 0px;
 	margin-bottom: 0px;
 	width: 100%;
+}
+
+/* Why z-index: 11? Because otherwise, on Opera, parts of the editor show through */
+.ares-files-slider {
+	height: 100%;
+	width: 100%;
+	z-index: 11;
 }
 
 .enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-filedrawer {
