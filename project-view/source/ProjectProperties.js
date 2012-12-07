@@ -22,7 +22,8 @@ enyo.kind({
 	components: [
 		{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", components: [
 			{content: "Project", active: true, attributes: {title: 'project attributes...'}},
-			{content: "PhoneGap", attributes: {title: 'phonegap build parameters...'}}
+			{content: "PhoneGap", attributes: {title: 'phonegap build parameters...'}},
+			{content: "Preview", attributes: {title: 'project preview parameters...'}}
 		]},
 		{name: "projectDrawer", kind: "onyx.Drawer", open:true, components: [
 			{tag: 'table', components: [
@@ -80,7 +81,7 @@ enyo.kind({
 			]}
 		]},
 
-		{name: "phoneGapDrawer", kind: "onyx.Drawer", open: false, components: [
+		{name: "phonegapDrawer", kind: "onyx.Drawer", open: false, components: [
 			{
 				kind: "onyx.ToggleButton",
 				name: 'pgConfEnabled',
@@ -122,6 +123,21 @@ enyo.kind({
 			}
 		]},
 
+		{name: "previewDrawer", kind: "onyx.Drawer", open: false, components: [
+			{tag: 'table', components: [
+				{tag: "tr" , components: [
+					{tag: "td" , content: "top application file: "},
+					{tag: 'td', attributes: {colspan: 1}, components:[
+						{kind: "onyx.InputDecorator", components: [
+							{kind: "Input", name: "ppEntry",
+							attributes: {title: 'top file of your application. Typically index.html'}
+							}
+						]}
+					]}
+				]}
+			]}
+		]},
+
 		// FIXME: there should be an HTML/CSS way to avoid using FittableStuff...
 		{kind: "FittableRows", style: "margin-top: 10px; width: 100%", fit: true, components: [
 			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "doDone"},
@@ -154,13 +170,16 @@ enyo.kind({
 	 */
 	switchDrawers: function(inSender, inEvent) {
 		if (inEvent.originator.active === true ) {
-			if (inEvent.originator.getContent() === "Project") {
-				this.$.projectDrawer.setOpen(true) ;
-				this.$.phoneGapDrawer.setOpen(false) ;
-			}
-			else {
-				this.$.projectDrawer.setOpen(false) ;
-				this.$.phoneGapDrawer.setOpen(true) ;
+			var status = {
+				project: false,
+				phonegap: false,
+				preview: false
+			} ;
+
+			status[inEvent.originator.getContent().toLowerCase()] = true ;
+
+			for (drawer in status) {
+				this.$[drawer + 'Drawer'].setOpen(status[drawer]) ;
 			}
 		}
 	},
