@@ -92,7 +92,7 @@ enyo.kind({
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
 	},
-	openDoc: function(origin, inFile, inCode, inExt, inProjectUrl, changed) {
+	openDoc: function(inFile, inCode, inExt, inProjectData, changed) {
 		this.hideWaitPopup();
 		this.analysis = null;
 		this.file = inFile;
@@ -106,12 +106,13 @@ enyo.kind({
 			this.focusEditor();
 		}
 		else {
+			var origin = inProjectData.getService().getConfig().origin;
 			this.$.imageViewer.setAttribute("src", origin + inFile.pathname);
 		}
 		this.reparseAction();
-		this.projectUrl = inProjectUrl;
-		this.createPathResolver(inProjectUrl);
-		this.buildEnyoDb(inProjectUrl, this.pathResolver);	// this.buildProjectDb() will be invoked when enyo analysis is finished
+		this.projectUrl = inProjectData.getProjectUrl();
+		this.createPathResolver(this.projectUrl);
+		this.buildEnyoDb(this.projectUrl, this.pathResolver);	// this.buildProjectDb() will be invoked when enyo analysis is finished
 		this.docHasChanged = changed;
 		this.doEditedChanged({id: this.file.id, edited: changed});
 		this.$.documentLabel.setContent(this.file.name);
