@@ -1,6 +1,6 @@
 /**
  * This kind is the top kind of project handling. It contains:
- * - The project list 
+ * - The project list
  * - the interface towards the user's file (harmonia)
  * - Popups to manage projects (create, scan, error ...)
  */
@@ -30,6 +30,7 @@ enyo.kind({
 		onAddProjectInList: "addProjectInList",
 		onPhonegapBuild: "startPhonegapBuild",
 		onBuildStarted: "phonegapBuildStarted",
+		onPreview: "launchPreview",
 		onError: "showError"
 	},
 	create: function() {
@@ -132,5 +133,21 @@ enyo.kind({
 	phonegapBuildStarted: function(inSender, inEvent) {
 		this.showWaitPopup("Phonegap build started");
 		setTimeout(enyo.bind(this, "hideWaitPopup"), 2000);
+	},
+
+	/**
+	 * Launch a preview widget of the selected project in a separate frame
+	 */
+	launchPreview: function() {
+		if ( this.currentProject ) {
+			window.open(
+				this.currentProject.getProjectUrl() + '/index.html' ,
+				'Project preview',
+				'scrollbars=auto, titlebar=yes, height=640,width=640',
+				false
+			);
+		}
+		return true; // stop the bubble
 	}
+
 });
