@@ -82,12 +82,13 @@ enyo.kind({
 		// is created that would save per-click HTTP traffic
 		// to the FileSystemService.
 		self = this;
-		project.config = new ProjectConfig();
-		project.config.init({
-			service: project.service,
-			folderId: project.folderId
+		var config = new ProjectConfig();
+		config.init({
+			service: project.getService(),
+			folderId: project.getFolderId()
 		}, function(err) {
 			if (err) self.showErrorPopup(err.toString());
+			project.setConfig(config);
 		});
 		this.currentProject = project;
 		return true; //Stop event propagation
@@ -112,10 +113,10 @@ enyo.kind({
 		var bdService =	ServiceRegistry.instance.getServicesByType('build')[0];
 		if (bdService) {
 			bdService.build( /*project*/ {
-				name: this.currentProject.name,
-				filesystem: this.currentProject.service,
-				folderId: this.currentProject.folderId,
-				config: this.currentProject.config
+				name: this.currentProject.getName(),
+				filesystem: this.currentProject.getService(),
+				folderId: this.currentProject.getFolderId(),
+				config: this.currentProject.getConfig()
 			}, function(inError, inDetails) {
 				self.hideWaitPopup();
 				if (inError) {
