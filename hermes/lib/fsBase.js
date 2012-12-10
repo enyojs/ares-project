@@ -13,17 +13,16 @@ var fs = require("fs"),
 module.exports = FsBase;
 
 function FsBase(inConfig, next) {
-	var self = this;
 
 	for (var p in inConfig) {
 		this[p] = inConfig[p];
+		console.log("config: ", p, "=", inConfig[p]);
 	}
 
 	// parameters sanitization
 	this.root = path.resolve(this.root);
 	this.verbose = (this.verbose !== undefined) || (this.verbose !== null);
 
-debugger;
 	// sanity check
 	[
 		// admin methods
@@ -31,29 +30,28 @@ debugger;
 		// filesystem verbs
 		'propfind', 'get', 'put',
 		'mkcol', 'delete', 'move', 'copy'
-	].forEach(function(method) {
-		if ((typeof(self[method]) !== 'function') ||
-		    (self[method].length !== 3)) {
+	].forEach((function(method) {
+		if ((typeof(this[method]) !== 'function') ||
+		    (this[method].length !== 3)) {
 			next(new Error("BUG: method '" + method + "' is not a 3-parameters function"));
 			return;
 		}
-	});
+	}).bind(this));
 
-	var app, server;
 	if (express.version.match(/^2\./)) {
 		// express-2.x
-		app = express.createServer();
-		server = app;
+		this.app = express.createServer();
+		this.server = this.app;
 	} else {
 		// express-3.x
-		app = express();
-		server = http.createServer(app); // XXX replace by HTTP server from config
+		this.app = express();
+		this.server = http.createServer(this.app); // XXX replace by HTTP server from config
 	}
 
-	app.use(express.logger('dev'));
-	app.use(this.cors);
-	app.use(express.cookieParser());
-	app.use(this.auth);
+	this.app.use(express.logger('dev'));
+	this.app.use(this.cors);
+	this.app.use(express.cookieParser());
+	this.app.use(this.auth);
 
 	var verbs = {
 		// verbs that are transmitted over an HTTP GET method
@@ -72,7 +70,7 @@ debugger;
 	};
 
 	// HTTP method tunneling
-	app.use(function(req, res, next) {
+	this.app.use(function(req, res, next) {
 		req.originalMethod = req.method;
 		if (req.query._method) {
 			req.method = req.query._method.toUpperCase();
@@ -93,7 +91,7 @@ debugger;
 	var uploadDir = temp.path({prefix: 'com.palm.ares.services.fs.' + this.name}) + '.d';
 	if (this.verbose) console.log(this.name, "uploadDir:", uploadDir);
 	fs.mkdirSync(uploadDir);
-	app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
+	this.app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
 
 	/**
 	 * Global error handler
@@ -104,12 +102,12 @@ debugger;
 		this.respond(res, err);
 	}
 
-	if (app.error) {
+	if (this.app.error) {
 		// express-2.x: explicit error handler
-		app.error(errorHandler);
+		this.app.error(errorHandler);
 	} else {
 		// express-3.x: middleware with arity === 4 is detected as the error handler
-		app.use(errorHandler);
+		this.app.use(errorHandler);
 	}
 
 	function makeExpressRoute(path) {
@@ -122,13 +120,13 @@ debugger;
 	// HermesClient.
 	this.route1 = makeExpressRoute.bind(this)('/id/');
 	if (this.verbose) console.log(this.name, "ALL:", this.route1);
-	app.all(this.route1, function(req, res) {
-		req.params.id = self.encodeFileId('/');
-		receive.bind(self)(req, res, next);
-	});
+	this.app.all(this.route1, (function(req, res) {
+		req.params.id = this.encodeFileId('/');
+		receive.bind(this)(req, res, next);
+	}).bind(this));
 	var route2 = makeExpressRoute.bind(this)('/id/:id');
 	if (this.verbose) console.log(this.name, "ALL:", route2);
-	app.all(route2, receive.bind(this));
+	this.app.all(route2, receive.bind(this));
 
 	function receive(req, res, next) {
 		if (this.verbose) console.log(this.name, "req.query=" + util.inspect(req.query));
@@ -143,29 +141,28 @@ debugger;
 	// project source code) & by the Ares project preview.
 	var route3 = makeExpressRoute.bind(this)('/file/*');
 	if (this.verbose) console.log(this.name, "GET:", route3);
-	app.get(route3, function(req, res, next) {
+	this.app.get(route3, (function(req, res, next) {
 		req.params.path = req.params[0];
-		self.get(req, res, self.respond.bind(self, res));
-	});
+		this.get(req, res, this.respond.bind(self, res));
+	}).bind(this));
 	
 	// Send back the URL (origin + pathname) to the creator, when
 	// port is bound
-	server.listen(this.port, "127.0.0.1", null /*backlog*/, function() {
-		self.origin = "http://127.0.0.1:"+server.address().port.toString();
+	this.server.listen(this.port, "127.0.0.1", null /*backlog*/, (function() {
+		this.origin = "http://127.0.0.1:"+this.server.address().port.toString();
 		return next(null, {
-			origin: self.origin,
-			pathname: self.pathname
+			origin: this.origin,
+			pathname: this.pathname
 		});
-	});
+	}).bind(this));
 
 	/**
 	 * Terminates express server
 	 */
 	this.quit = function() {
-		server.close();
-		if (self.verbose) console.log(self.name, "exiting");
+		this.server.close();
+		if (this.verbose) console.log(this.name, "exiting");
 	};
-
 }
 
 // CORS -- Cross-Origin Resources Sharing
