@@ -3,5 +3,7 @@ node/.DS_Store
 
 hermes/.DS_Store
 
+test/
+
 .DS_Store
 .project
