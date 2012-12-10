@@ -34,7 +34,7 @@ enyo.kind({
 		this.$.panels.setIndex(this.phobosViewIndex);
 
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
-		if (this.runTest) {
+		if (Ares.TestController) {
 			// in charge of Ares Test Suite when Ares Ide launch with runTest option
 			this.createComponent({kind: "Ares.TestController"});
 		}
