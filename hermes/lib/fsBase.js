@@ -1,0 +1,231 @@
+/**
+ * Base toolkit for Hermes FileSystem providers implemented using Node.js
+ */
+
+var fs = require("fs"),
+    path = require("path"),
+    express = require("express"),
+    http = require("http"),
+    util  = require("util"),
+    temp = require("temp"),
+    HttpError = require("./httpError");
+
+module.exports = FsBase;
+
+function FsBase(inConfig, next) {
+	var self = this;
+
+	for (var p in inConfig) {
+		this[p] = inConfig[p];
+	}
+
+	// parameters sanitization
+	this.root = path.resolve(this.root);
+	this.verbose = (this.verbose !== undefined) || (this.verbose !== null);
+
+debugger;
+	// sanity check
+	[
+		// admin methods
+		'cors', 'auth', 'respond',
+		// filesystem verbs
+		'propfind', 'get', 'put',
+		'mkcol', 'delete', 'move', 'copy'
+	].forEach(function(method) {
+		if ((typeof(self[method]) !== 'function') ||
+		    (self[method].length !== 3)) {
+			next(new Error("BUG: method '" + method + "' is not a 3-parameters function"));
+			return;
+		}
+	});
+
+	var app, server;
+	if (express.version.match(/^2\./)) {
+		// express-2.x
+		app = express.createServer();
+		server = app;
+	} else {
+		// express-3.x
+		app = express();
+		server = http.createServer(app); // XXX replace by HTTP server from config
+	}
+
+	app.use(express.logger('dev'));
+	app.use(this.cors);
+	app.use(express.cookieParser());
+	app.use(this.auth);
+
+	var verbs = {
+		// verbs that are transmitted over an HTTP GET method
+		GET: {
+			PROPFIND: true,
+			GET: true
+		},
+		// verbs that are transmitted over an HTTP POST method
+		POST: {
+			PUT: true,
+			MKCOL: true,
+			DELETE: true,
+			MOVE: true,
+			COPY: true
+		}
+	};
+
+	// HTTP method tunneling
+	app.use(function(req, res, next) {
+		req.originalMethod = req.method;
+		if (req.query._method) {
+			req.method = req.query._method.toUpperCase();
+			delete req.query._method;
+		}
+		if (verbs[req.originalMethod] &&
+		    verbs[req.originalMethod][req.method]) {
+			next();
+		} else {
+			next(new HttpError("unknown originalMethod/method = "+req.originalMethod+"/"+req.method, 400));
+		}
+	});
+
+	// Built-in express form parser: handles:
+	// - 'application/json' => req.body
+	// - 'application/x-www-form-urlencoded' => req.body
+	// - 'multipart/form-data' => req.body.field[] & req.body.file[]
+	var uploadDir = temp.path({prefix: 'com.palm.ares.services.fs.' + this.name}) + '.d';
+	if (this.verbose) console.log(this.name, "uploadDir:", uploadDir);
+	fs.mkdirSync(uploadDir);
+	app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
+
+	/**
+	 * Global error handler
+	 * @private
+	 */
+	function errorHandler(err, req, res, next){
+		console.error(err.stack);
+		this.respond(res, err);
+	}
+
+	if (app.error) {
+		// express-2.x: explicit error handler
+		app.error(errorHandler);
+	} else {
+		// express-3.x: middleware with arity === 4 is detected as the error handler
+		app.use(errorHandler);
+	}
+
+	function makeExpressRoute(path) {
+		return (this.pathname + path)
+			.replace(/\/+/g, "/") // compact "//" into "/"
+			.replace(/(\.\.)+/g, ""); // remove ".."
+	}
+
+	// URL-scheme: ID-based file/folder tree navigation, used by
+	// HermesClient.
+	this.route1 = makeExpressRoute.bind(this)('/id/');
+	if (this.verbose) console.log(this.name, "ALL:", this.route1);
+	app.all(this.route1, function(req, res) {
+		req.params.id = self.encodeFileId('/');
+		receive.bind(self)(req, res, next);
+	});
+	var route2 = makeExpressRoute.bind(this)('/id/:id');
+	if (this.verbose) console.log(this.name, "ALL:", route2);
+	app.all(route2, receive.bind(this));
+
+	function receive(req, res, next) {
+		if (this.verbose) console.log(this.name, "req.query=" + util.inspect(req.query));
+		req.params.id = req.params.id || this.encodeFileId('/');
+		req.params.path = this.decodeFileId(req.params.id);
+		if (this.verbose) console.log(this.name, "req.params=" + util.inspect(req.params));
+		this[req.method.toLowerCase()](req, res, this.respond.bind(this, res));
+	}
+
+	// URL-scheme: WebDAV-like navigation, used by the Enyo loader
+	// (itself used by the Enyo Javacript parser to analyze the
+	// project source code) & by the Ares project preview.
+	var route3 = makeExpressRoute.bind(this)('/file/*');
+	if (this.verbose) console.log(this.name, "GET:", route3);
+	app.get(route3, function(req, res, next) {
+		req.params.path = req.params[0];
+		self.get(req, res, self.respond.bind(self, res));
+	});
+	
+	// Send back the URL (origin + pathname) to the creator, when
+	// port is bound
+	server.listen(this.port, "127.0.0.1", null /*backlog*/, function() {
+		self.origin = "http://127.0.0.1:"+server.address().port.toString();
+		return next(null, {
+			origin: self.origin,
+			pathname: self.pathname
+		});
+	});
+
+	/**
+	 * Terminates express server
+	 */
+	this.quit = function() {
+		server.close();
+		if (self.verbose) console.log(self.name, "exiting");
+	};
+
+}
+
+// CORS -- Cross-Origin Resources Sharing
+FsBase.prototype.cors = function(req, res, next) {
+	res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
+	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control');
+	if ('OPTIONS' == req.method) {
+		res.status(200).end();
+	} else {
+		next();
+	}
+};
+
+FsBase.prototype.auth = function(req, res, next) {
+	if (req.connection.remoteAddress !== "127.0.0.1") {
+		next(new Error("Access denied from IP address "+req.connection.remoteAddress));
+	} else {
+		next();
+	}
+};
+
+FsBase.prototype.respond = function(res, err, response) {
+	var statusCode, body;
+	var statusCodes = {
+		'ENOENT': 404, // Not-Found
+		'EPERM' : 403, // Forbidden
+		'EEXIST': 409  // Conflict
+	};
+	if (err) {
+		if (err instanceof Error) {
+			statusCode = err.statusCode || statusCodes[err.code] ||  403; // Forbidden
+			delete err.statusCode;
+			body = err;
+		} else {
+			statusCode = 500; // Internal Server Error
+			body = new Error(err.toString());
+		}
+		if (this.verbose) console.error("<<<\n"+body.stack);
+	} else if (response) {
+		statusCode = response.code || 200 /*Ok*/;
+		body = response.body;
+	}
+	if (body) {
+		res.status(statusCode).send(body);
+	} else if (statusCode) {
+		res.status(statusCode).end();
+	}
+};
+
+FsBase.prototype.encodeFileId = function(filePath) {
+	// can use this.root, this.origin & this.pathname in addition
+	// to filePath to encode the fileId
+	var fileId = encodeURIComponent(filePath);
+	return fileId;
+};
+
+FsBase.prototype.decodeFileId = function(fileId) {
+	// can use this.root, this.origin & this.pathname in addition
+	// to fileId to decode the fileId
+	var filePath = decodeURIComponent(fileId);
+	return filePath;
+};
