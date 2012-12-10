@@ -119,7 +119,6 @@ Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when
 });
 
 Ares.Model.PROJECTS_STORAGE_KEY = "com.enyojs.ares.projects";
-
 Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collection when possible
 	model: Ares.Model.Project,
 	initiliaze: function() {
@@ -172,6 +171,13 @@ Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collec
 
 // Create the workspace collection of projects and load the data from the local storage
 Ares.WorkspaceData = new Ares.Model.Projects();
-Ares.WorkspaceData.localStorage = new AresStore(Ares.Model.PROJECTS_STORAGE_KEY);
+if (Ares.TestController) {
+	Ares.Model.TEST_STORAGE_KEY = "com.enyojs.ares.test";
+	// reset the test local storage
+	localStorage.setItem(Ares.Model.TEST_STORAGE_KEY, "{}");
+	Ares.WorkspaceData.localStorage = new AresStore(Ares.Model.TEST_STORAGE_KEY);
+} else {
+	Ares.WorkspaceData.localStorage = new AresStore(Ares.Model.PROJECTS_STORAGE_KEY);	
+}
 Ares.WorkspaceData.fetch();
 
