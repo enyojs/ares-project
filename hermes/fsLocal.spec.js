@@ -12,7 +12,8 @@ var rimraf = require("rimraf");
 var should = require("should");
 var FsLocal = require("./fsLocal");
 var util = require("util"),
-    async = require("async");
+    async = require("async"),
+    HttpError = require(__dirname + "/lib/httpError");
 
 function get(path, query, next) {
 	var reqOptions = {
@@ -107,7 +108,7 @@ function call(reqOptions, reqBody, reqParts, next) {
 			}
 			console.log("data="+util.inspect(data));
 			if (data.statusCode < 200 || data.statusCode >= 300) {
-				next(data);
+				next(new HttpError(data.buffer.toString(), data.statusCode));
 			} else {
 				next(null, data);
 			}
@@ -294,6 +295,7 @@ describe("fsLocal...", function() {
 	it("t2.4 should fail to create a folder", function(done) {
 		post('/id/' + encodeFileId('/'), {_method: "MKCOL",name: "toto"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.exist(err);
+			should.exist(err.statusCode);
 			err.statusCode.should.equal(409); // Conflict
 			//should.exist(err.json);
 			//should.exist(err.json.code);

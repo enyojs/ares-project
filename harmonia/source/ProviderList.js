@@ -84,31 +84,7 @@ enyo.kind({
 		this.selected = inEvent.key;
 		var p = this.services[this.selected];
 		if (p) {
-			if (p.type == "dropbox" && !p.auth) {
-				this.authorize(p);
-			} else  {
-				this.doSelectProvider({service: p});
-			}
+			this.doSelectProvider({service: p});
 		}
-	},
-	authorize: function(inProvider) {
-		var c = this.createComponent({kind: "ProviderConfigPopup", floating: true, centered: true, modal: true, autoDismiss: false,  ondragstart: "squelchPopupDrag", components: [
-			{kind: "DropboxConfig", onAuth: "auth"}
-		]});
-		c.render();
-		c.show();
-	},
-	auth: function(inSender) {
-		// TODO: redo when auth is re-activated
-		/*
-		var p = this.services[this.selected];
-		p.auth = inSender.auth;
-		this.serviceRegistry.saveServicesToStorage();
-		 */
-		this.doSelectProvider({service: p});
-	},
-	// FIXME: a floating popup propagates events so if you drag the popup, the panels will drag!
-	squelchPopupDrag: function() {
-		return true;
 	}
 });
