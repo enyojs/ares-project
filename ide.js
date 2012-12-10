@@ -30,6 +30,7 @@ var service = {};
 var subProcesses = [];
 var platformVars = [
 	{regex: /@NODE@/, value: process.argv[0]},
+	{regex: /@CWD@/, value: process.cwd()},
 	{regex: /@HOME@/, value: process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']}
 ];
 function platformSubst(inStr) {
@@ -41,8 +42,17 @@ function platformSubst(inStr) {
 	}
 	return outStr;
 }
+var platformOpen = {
+	win32: "Start",
+	darwin: "open",
+	linux: "xdg-open"
+};
 
-var configPath = process.argv[3] || path.resolve(__dirname, "ide.json");
+if (process.argv[2] === "runtest") {
+	var configPath = path.resolve(__dirname, "ide-test.json");
+} else{
+	var configPath = process.argv[3] || path.resolve(__dirname, "ide.json");
+}
 if (!fs.existsSync(configPath)) {
 	throw "Did not find: '"+configPath+"': ";
 }
@@ -168,9 +178,18 @@ app.configure(function(){
 });
 app.listen(port, addr);
 
+// Open default browser
+
+var page = "index.html";
+if (process.argv[2] === "runtest") {
+	page = "test.html";
+}
+var url = "http://" + addr + ":" + port + "/ide/ares/" + page;
+spawn(platformOpen[process.platform], [url]);
+
 // Exit path
 
-console.info("ARES IDE is now running at <http://" + addr + ":" + port + "/ide/ares/index.html> Press CTRL + C to shutdown");
+console.info("Press CTRL + C to shutdown");
 process.on('exit', function () {
 	console.log('Terminating sub-processes...');
 	subProcesses.forEach(function(process) {

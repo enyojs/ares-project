@@ -24,20 +24,6 @@ enyo.kind({
 	],
 	debug: false,
 
-	// used to pre-fill properties of a new project
-	blankConfig: {
-			id: "",
-			name: "",
-			version: "",
-			title: "",
-			description: "",
-			build: {
-				phonegap: {
-					enabled: false
-				}
-			}
-		},
-
 	/**
 	 * start project creation by showing direction selection widget
 	 */
@@ -66,7 +52,7 @@ enyo.kind({
 		};
 		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
 		var matchingNodes = hft.getNodeFiles(hft.selectedNode).filter( matchFileName ) ;
-			
+
 		if ( matchingNodes.length !== 0 ) {
 			this.hide() ;
 			this.$.errorPopup.raise('Cannot create project: a project.json file already exists');
@@ -89,12 +75,12 @@ enyo.kind({
 			}
 			else {
 				// once project.json is created, setup and show project properties widget
-				propW.preFill(that.blankConfig),
+				propW.preFill(ProjectConfig.PREFILLED_CONFIG_FOR_UI),
 				propW.$.projectDirectory.setContent(that.selectedDir.path);
 				propW.$.projectName.setValue(that.selectedDir.name);
 				that.$.selectDirectoryPopup.hide();
 				propW.show() ;
-			};
+			}
 		});
 	},
 
@@ -146,16 +132,19 @@ enyo.kind({
 	],
 
 	debug: false,
-	targetProject: null ,
+	targetProject: null,
 
 	/**
 	 * Step 1: start the modification by showing project properties widget
 	 */
 	start: function(target) {
-		this.targetProject = target ;
-		this.$.propertiesWidget.setupModif() ;
-		this.$.propertiesWidget.preFill(target.config.data);
-		this.show();
+		if (target) {
+			var config = target.getConfig();
+			this.targetProject = target ;
+			this.$.propertiesWidget.setupModif() ;
+			this.$.propertiesWidget.preFill(config.data);
+			this.show();
+		}
 	},
 
 	// step 2:
@@ -167,13 +156,17 @@ enyo.kind({
 			return true ; // stop bubble
 		}
 
+		// Save the data to project.json
+		var config = this.targetProject.getConfig();
+		config.setData(inEvent.data);
+		config.save();
+
 		// selected project name was modified
-		if ( inEvent.data.name !== this.targetProject.name) {
-			// project name has changed, update project list
-			this.$.projectList.renameSelectedProject(inEvent.data.name) ;
+		if (inEvent.data.name !== this.targetProject.getName()) {
+			// project name has changed, update project model list
+			var oldName = this.targetProject.getName();
+			Ares.WorkspaceData.renameProject(oldName, inEvent.data.name);
 		}
-		this.targetProject.config.setData(inEvent.data);
-		this.targetProject.config.save() ;
 
 		return true ; // stop bubble
 	}
@@ -210,11 +203,11 @@ enyo.kind({
 		// we need to use the file tree to be able to relate a project.json with is parent dir.
 		var topDir = hft.selectedNode.file ;
 
-		// construct an (kind of) iterator that will scan all directory of the 
+		// construct an (kind of) iterator that will scan all directory of the
 		// HFT and look for project.json
 		var toScan = [ [ null , topDir ] ]	; // list of parent_dir , child
 		// var this = this ;
-		
+
 		var iter, inIter ;
 
 		inIter = function() {
@@ -222,22 +215,22 @@ enyo.kind({
 			var parentDir = item[0] ;
 			var child = item[1];
 			this.debug && this.log('search iteration on ' + child.name + ' isDir ' + child.isDir ) ;
-			if ( child.name === 'project.json' ) { 
+			if ( child.name === 'project.json' ) {
 				this.debug && this.log('opening project.json from ' + parentDir.name ) ;
 				service.getFile( child.id ).
 					response(this, function(inSender, fileStuff) {
 						this.debug && this.log( "file contents: '" + fileStuff.content + "'" ) ;
 						var projectData = JSON.parse(fileStuff.content)  ;
-						this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
+						this.debug && this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
 						this.doAddProjectInList({
 							name: projectData.name,
-							folderId: parentDir.id, 
-							service: this.selectedDir.service, 
+							folderId: parentDir.id,
+							service: this.selectedDir.service,
 							serviceId: this.selectedServiceId
 						});
-					}); 
+					});
 			}
-			if ( child.isDir ===  true ) { 
+			if ( child.isDir ===  true ) {
 				this.debug && this.log('opening dir ' + child.name ) ;
 				service.listFiles(child.id)
 					.response(this, function(inSender, inFiles) {

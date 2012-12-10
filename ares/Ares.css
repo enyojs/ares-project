@@ -2,6 +2,20 @@ body {
 	background-color: #aaa;
 }
 /**/
+.ares-groupbox-item-key {
+	padding: 0.5em;
+}
+.ares-groupbox-item-value {
+	width: 50%;
+	color: #000000;
+	float: right;
+}
+.ares-waitpopup {
+	margin-left: auto;
+	margin-right: auto;
+	width: 20%; 
+}
+/**/
 .ares_harmonia_providerList {
 	width: 30%;
 }
@@ -10,6 +24,7 @@ body {
 }
 .ares_harmonia_authPanel {
 	padding: 6px;
+	width: 70%;
 }
 #ares_harmonia_hermesFileTree {
 	width: 500px;
@@ -116,12 +131,13 @@ body {
 
 }
 
-.ares_projectView_table tr td .onyx-toggle-button {
+.ares_projectView_switches .onyx-toggle-button {
 	text-transform: none;
-	width: 100%;
+	margin-top: 6px;
+	margin-right: 4px;
 }
 
-.ares_projectView_table tr td .onyx-toggle-button .off {
+.ares_projectView_switches .onyx-toggle-button .off {
 	text-decoration: line-through;
 }
 

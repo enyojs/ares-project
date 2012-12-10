@@ -1,15 +1,15 @@
 /**
  * This kind holds the consistency between the project.json and the
  * in-memory representation of the project configuration.
- * 
+ *
  * After creation of the kind, use #init(service, folderId) to
  * set the location of the project.  Those values can no longer be
  * changed.
- * 
+ *
  * - Use #setData and #getData to change the in-memory configuration Javascript object.
  *   data is an object containing the *whole* configuration.
  * - Then use #save to send the whole configuration to remote storage
- *  
+ *
  * As it is, this kind performs zero checks on the content of the file.
  */
 enyo.kind({
@@ -101,7 +101,7 @@ enyo.kind({
 			if (this.debug) enyo.log("ProjectConfig.save: inResponse=", inResponse);
 			this.fileId = inResponse.id;
 			if (next instanceof Function) next();
-		}); 
+		});
 		req.error(this, function(inSender, inError) {
 			enyo.error("ProjectConfig.save: error=", inError);
 			if (next instanceof Function) next(inError);
@@ -109,7 +109,7 @@ enyo.kind({
 	},
 	/**
 	 * Generate PhoneGap's config.xml on the fly
-	 * 
+	 *
 	 * @return {String} or undefined if PhoneGap build is disabled
 	 * for this project
 	 */
@@ -200,40 +200,28 @@ enyo.kind({
 	},
 	statics: {
 		checkConfig: function(inConfig) {
-			var config = ProjectConfig.clone(ProjectConfig.DEFAULT_PROJECT_CONFIG);
-			ProjectConfig.extend(config, inConfig);
+			var config = ares.clone(ProjectConfig.DEFAULT_PROJECT_CONFIG);
+			ares.extend(config, inConfig);
 			return config;
 		},
-		/**
-		 * Deep-clone given object
-		 * @param {Object} obj object to clone
-		 * @private
-		 */
-		clone: function(obj) {
-			return this.extend(undefined, obj);
-		},
-		/**
-		 * Extend destination object using source object (deep)
-		 * @param {Object} dst destination object
-		 * @param {Object} src source object
-		 * @private
-		 */
-		extend: function(dst, src) {
-			if (dst === undefined) {
-				if (!src) {
-					return src;
-				}
-				dst = (src instanceof Array) ? [] : {};
-			}
-			for (var i in src) {
-				if (typeof src[i] == "object") {
-					dst[i] = this.extend(dst[i], src[i]);
-				} else {
-					dst[i] = src[i];
+
+		// used to pre-fill properties of a new project
+		// contains default values
+		PREFILLED_CONFIG_FOR_UI: {
+			build: {
+				phonegap: {
+					enabled: false,
+					icon: {
+						src: "icon.png",
+						role: "default"
+					},
+					preferences: {
+						"phonegap-version": "2.0.0"
+					}
 				}
 			}
-			return dst;
 		},
+
 		// FIXME: the below should be replaced by proper JSON
 		// schema validation with default values.
 		DEFAULT_PROJECT_CONFIG: {

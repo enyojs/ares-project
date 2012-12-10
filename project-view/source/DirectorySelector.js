@@ -58,11 +58,11 @@ enyo.kind({
 		this.$.confirm.setDisabled(false);
 		return true; // Stop event propagation
 	},
-    confirmTap: function(inSender, inEvent) {
+	confirmTap: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
-        this.doDirectorySelected({serviceId: this.selectedServiceId, directory: this.selectedDir});
-        return true; // Stop event propagation 
-    },
+		this.doDirectorySelected({serviceId: this.selectedServiceId, directory: this.selectedDir});
+		return true; // Stop event propagation 
+	},
 	cancel: function() {
 		this.hide() ;
 		this.doDone(); // inform owner

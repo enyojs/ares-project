@@ -27,6 +27,9 @@ enyo.kind({
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
 	create: function() {
+		if (this.runTest) {
+			ProjectList.underTest = true;
+		}
 		this.inherited(arguments);
 		this.$.panels.setIndex(this.phobosViewIndex);
 
@@ -58,10 +61,9 @@ enyo.kind({
 	},
 	openDocument: function(inSender, inEvent) {
 		var f = inEvent.file;
-		var service = f.service;
+		var projectData = inEvent.projectData;
+		var service = projectData.getService();
 		var ext = f.name.split(".").pop();
-		var origin = service.getConfig().origin;
-		var projectUrl = origin + service.getConfig().pathname + "/file" + inEvent.project;
 		this.$.phobos.beginOpenDoc();
 		service.getFile(f.id)
 			.response(this, function(inEvent, inData) {
@@ -75,11 +77,10 @@ enyo.kind({
 					alert("Duplicate File ID in cache!");
 				}
 				var doc = {
-					origin: origin,
 					file: f,
 					data: inData,
 					extension: ext,
-					projectUrl: projectUrl,
+					projectData: projectData,
 					edited: false
 				};
 				this.openFiles[f.id] = doc;
@@ -161,7 +162,7 @@ enyo.kind({
 			this.activeDocument.data = this.$.phobos.getEditorContent();
 		}
 		if (!this.activeDocument || d !== this.activeDocument) {
-			this.$.phobos.openDoc(d.origin, d.file, d.data, d.extension, d.projectUrl, d.edited);
+			this.$.phobos.openDoc(d.file, d.data, d.extension, d.projectData, d.edited);
 		}
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.$.bottomBar.activateFileWithId(d.file.id);
