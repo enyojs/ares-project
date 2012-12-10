@@ -180,9 +180,6 @@ enyo.kind({
 			return undefined;	// Exclude
 		}
 		return value;	// Accept
-	},
-	statics: {
-		runTest: false
 	}
 });
 

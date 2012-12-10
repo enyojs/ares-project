@@ -27,15 +27,13 @@ enyo.kind({
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
 	create: function() {
-		if (this.runTest) {
-			ProjectList.runTest = true;
-		}
 		this.inherited(arguments);
 		this.$.panels.setIndex(this.phobosViewIndex);
 
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
+
 		if (Ares.TestController) {
-			// in charge of Ares Test Suite when Ares Ide launch with runTest option
+			// in charge of Ares Test Suite
 			this.createComponent({kind: "Ares.TestController"});
 		}
 		this.calcSlideableLimit();
