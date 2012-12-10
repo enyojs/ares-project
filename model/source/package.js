@@ -1,3 +1,4 @@
 ﻿enyo.depends(
-	"WorkspaceData.js"
+	"WorkspaceData.js",
+	"FileData.js"
 );

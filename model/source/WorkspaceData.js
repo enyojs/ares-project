@@ -98,19 +98,19 @@ Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when
 		return this.get("service");
 	},
 	setService: function(service) {
-		return this.set("service", service);
+		this.set("service", service);
 	},
 	getConfig: function() {
 		return this.get("config");
 	},
 	setConfig: function(config) {
-		return this.set("config", config);
+		this.set("config", config);
 	},
 	getProjectUrl: function() {
 		return this.get("project-url");
 	},
 	setProjectUrl: function(projectUrl) {
-		return this.set("project-url", projectUrl);
+		this.set("project-url", projectUrl);
 	},
 	sync: function(method, model, options) {
 		var store = model.localStorage || model.collection.localStorage;
@@ -174,4 +174,3 @@ Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collec
 Ares.WorkspaceData = new Ares.Model.Projects();
 Ares.WorkspaceData.localStorage = new AresStore(Ares.Model.PROJECTS_STORAGE_KEY);
 Ares.WorkspaceData.fetch();
-

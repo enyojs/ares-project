@@ -40,19 +40,15 @@ enyo.kind({
 	events: {
 		onSaveDocument: "",
 		onDesignDocument: "",
-		onCloseDocument: "",
-		onEditedChanged: ""
+		onCloseDocument: ""
 	},
 	handlers: {
 		onCss: "newcssAction",
 		onReparseAsked: "reparseAction"
 	},
-	docHasChanged: false,
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
-	mode: "",				// js, css, ...
-	file: null,
 	create: function() {
 		this.inherited(arguments);
 	},
@@ -63,7 +59,7 @@ enyo.kind({
 	 * @param  inProjectPath
 	 * @protected
 	 */
-	createPathResolver: function(inProjectPath) {
+	createPathResolver: function(inProjectPath) {					// TODO TBC
 		this.pathResolver = new enyo.pathResolverFactory();
 		this.pathResolver.addPaths({
 			enyo: inProjectPath + "/enyo",
@@ -73,16 +69,15 @@ enyo.kind({
 	//
 	saveDocAction: function() {
 		this.showWaitPopup("Saving document...");
-		this.doSaveDocument({content: this.$.ace.getValue(), file: this.file});
+		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
 	},
 	saveComplete: function() {
 		this.hideWaitPopup();
-		this.docHasChanged=false;
-		this.doEditedChanged({id: this.file.id, edited: false});
+		this.docData.setEdited(false);		// TODO: The user may have switched to another file
 		this.reparseAction();
 	},
 	saveNeeded: function() {
-		return this.docHasChanged;
+		return this.docData.getEdited();
 	},
 	saveFailed: function(inMsg) {
 		this.hideWaitPopup();
@@ -92,30 +87,39 @@ enyo.kind({
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
 	},
-	openDoc: function(inFile, inCode, inExt, inProjectData, changed) {
+	openDoc: function(inDocData) {
+		this.docData = inDocData;
+
+		// Save the value to set it again after data has been loaded into ACE
+		var edited = this.docData.getEdited();
+		this.log("edited: " + this.docData.getEdited());
+
+		var file = this.docData.getFile();
+		var extension = file.name.split(".").pop();
+		var projectData = this.docData.getProjectData();
 		this.hideWaitPopup();
 		this.analysis = null;
-		this.file = inFile;
-		this.mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image"}[inExt] || "text";
-		var hasAce = this.adjustPanelsForMode(this.mode);
+		var mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image"}[extension] || "text";
+		this.docData.setMode(mode);
+		var hasAce = this.adjustPanelsForMode(mode);
 		if (hasAce) {
-			this.$.ace.setEditingMode(this.mode);
-			this.$.ace.setValue(inCode);
+			this.$.ace.setEditingMode(mode);
+			this.$.ace.setValue(inDocData.getData());
 			// Pass to the autocomplete compononent a reference to ace
 			this.$.autocomplete.setAce(this.$.ace);
 			this.focusEditor();
 		}
 		else {
-			var origin = inProjectData.getService().getConfig().origin;
-			this.$.imageViewer.setAttribute("src", origin + inFile.pathname);
+			var origin = projectData.getService().getConfig().origin;
+			this.$.imageViewer.setAttribute("src", origin + file.pathname);
 		}
 		this.reparseAction();
-		this.projectUrl = inProjectData.getProjectUrl();
-		this.createPathResolver(this.projectUrl);
-		this.buildEnyoDb(this.projectUrl, this.pathResolver);	// this.buildProjectDb() will be invoked when enyo analysis is finished
-		this.docHasChanged = changed;
-		this.doEditedChanged({id: this.file.id, edited: changed});
-		this.$.documentLabel.setContent(this.file.name);
+		projectUrl = projectData.getProjectUrl();
+		this.createPathResolver(projectUrl);			// TODO TBC
+		this.buildEnyoDb(projectUrl, this.pathResolver);	// this.buildProjectDb() will be invoked when enyo analysis is finished
+		this.$.documentLabel.setContent(file.name);
+
+		this.docData.setEdited(edited);
 	},
 	adjustPanelsForMode: function(mode) {
 		// whether to show or not a panel, imageViewer and ace cannot be enabled at the same time
@@ -218,9 +222,9 @@ enyo.kind({
 		this.$.right.$.dump.setContent(h$);
 	},
 	reparseAction: function() {
-		if (this.mode === 'javascript') {
+		if (this.docData.getMode() === 'javascript') {
 			var module = {
-				name: this.file.name,
+				name: this.docData.getFile().name,
 				code: this.$.ace.getValue()
 			};
 			try {
@@ -460,29 +464,29 @@ enyo.kind({
 		 * NB: reparseAction() is invoked by insertMissingHandlers()
 		 */
 		this.insertMissingHandlers();
-		this.docHasChanged = true;
-		this.doEditedChanged({id: this.file.id, edited: true});
+		this.docData.setEdited(true);
 	},
 	closeDocAction: function(inSender, inEvent) {
-		if (this.docHasChanged) {
+		this.log("edited: " + this.docData.getEdited());
+		if (this.docData.getEdited() === true) {
 			this.$.savePopup.setName("Document was modified! Save it before closing?");
 			this.$.savePopup.setActionButton("Don't Save");
 			this.$.savePopup.applyStyle("padding-top: 10px");
 			this.$.savePopup.show();
 		} else {
 			this.beforeClosingDocument();
-			this.doCloseDocument({});
+			this.doCloseDocument({id: this.docData.getId()});
 		}
+		return true; // Stop the propagation of the event
 	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
 		this.beforeClosingDocument();
-		this.doCloseDocument({});
+		this.doCloseDocument({id: this.docData.getId()});
 	},
 	docChanged: function(inSender, inEvent) {
-		this.docHasChanged=true;
-		this.doEditedChanged({id: this.file.id, edited: true});
+		this.docData.setEdited(true);
 
 		if (this.debug) this.log(JSON.stringify(inEvent.data));
 
