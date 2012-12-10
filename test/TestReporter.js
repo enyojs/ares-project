@@ -9,21 +9,19 @@ enyo.kind({
 		onFinishAll: ""
 	},
 	components: [
-		{kind: "FittableRows", components: [
-			{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar", isContainer: true, components: [
-				{kind: "FittableColumns", style: "width:100%", components: [
-					{kind: "Control", content: "Ares Test Suite", style: "margin-right: 10px"},
-					{fit:true},
-					{kind: "Control", content: "Click on "},
-					{kind: "onyx.InputDecorator", components: [
-						{name: "runTests", kind: "onyx.IconButton", src: "$test/images/play.png", ontap: "runTests"},
-					]},
-				]},
-
+		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar", isContainer: true, components: [
+			{kind: "FittableColumns", style: "width:100%", components: [
+				{kind: "Control", content: "Ares Test Suite", style: "margin-right: 10px"},
+				{fit:true},
+				{kind: "Control", content: "Click on "},
+				{kind: "onyx.InputDecorator", components: [
+					{name: "runTests", kind: "onyx.IconButton", src: "$test/images/play.png", ontap: "runTests"},
+				]}
 			]},
-			// TODO: scroller doesn't work - Need to be fixed
-			{kind: enyo.Scroller, name: "group"}
+
 		]},
+		// TODO: scroller doesn't work - Need to be fixed
+		{kind: enyo.Scroller, name: "group"}
 
 	],
 	classes: "enyo-testcase",
@@ -57,12 +55,14 @@ enyo.kind({
 			console.log("TestReporter: testNameDisplay: "+JSON.stringify(inData));
 		}
 		this.$.group.createComponent({classes: "enyo-testcase-title", content: inData.data}).render();
+		this.reflow();
 	},
 	testBegun: function(inData) {
 		if (this.debug) {
 			console.log("TestReporter: testBegun: "+JSON.stringify(inData));
 		}
 		this.$.group.createComponent({name: inData.data.test, classes: "enyo-testcase-running", content: inData.data.test + ": running", allowHtml: true}).render();
+		this.reflow();
 	},
 	formatStackTrace: function(inStack) {
 		var stack = inStack.split("\n");
