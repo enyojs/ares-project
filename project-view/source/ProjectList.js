@@ -197,6 +197,8 @@ enyo.kind({
 
 enyo.kind({
 	name: "ProjectList.Project",
+	kind: "onyx.Item",
+	classes: "ares_projectView_projectList_item",
 	published: {
 		projectName: "",
 		index: -1

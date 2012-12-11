@@ -1,5 +1,6 @@
 ﻿enyo.depends(
 	"Palette.js",
+	"Palette.css",
 	"Json.js",
 	"Serializer.js",
 	"Designer.js",
