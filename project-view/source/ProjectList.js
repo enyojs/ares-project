@@ -127,6 +127,7 @@ enyo.kind({
 			Ares.WorkspaceData.removeProject(name);
 			this.selected = null;
 			this.doProjectRemoved();
+			this.enableDisableButtons(false);
 		}
 	},
 	projectListSetupItem: function(inSender, inEvent) {
