@@ -17,7 +17,7 @@ enyo.kind({
 		// Warning: postMessage sent several times to make sure it has been received by Ares Test browser
 		var count = 4;
 		var repeatPostMsg = function() {
-			if (this.debug) console.log("Post START ...");
+			if (this.debug) enyo.log("Post START ...");
 			aresTestW.postMessage("START", "http://127.0.0.1:9009");
 			count--;
 			if (count > 0) {
@@ -33,12 +33,12 @@ enyo.kind({
 		// START and READY enabled the com path between Ide and Test windows
 		if (event.data === "READY") {
 			this.status = event.data;
-		if (this.debug) console.log("Received READY ... Communication path established ... Status: "+this.status);
+		if (this.debug) enyo.log("Received READY ... Communication path established ... Status: "+this.status);
 		}
 		// Start button pressed on Ares Test Reporter
 		if (event.data === "RUN") {
 			this.status = event.data;
-			if (this.debug) console.log("Received RUN ... Status: "+this.status);
+			if (this.debug) enyo.log("Received RUN ... Status: "+this.status);
 			// Create TextCtrlRunner and TestProxyReporter components
 			// TestProxyReporter is created by TestCtrlRunner
 			this.createComponent({name: "runner", kind: "ares.TestCtrlRunner", testWindow: "aresTestW"});

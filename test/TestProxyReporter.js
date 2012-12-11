@@ -21,7 +21,7 @@ enyo.kind({
 		this.$.testSuite.runAllTests();
 	},
 	testBegun: function(inSender, inEvent) {
-		console.log("=>Ares Proxy Reporter *****" + "Group: " + this.name + " *****test: " +inEvent.testName + " is running ...");
+		enyo.log("=>Ares Proxy Reporter *****" + "Group: " + this.name + " *****test: " +inEvent.testName + " is running ...");
 
 		// Post SEND_TEST_RUNNING event with info relate dto the group and the name of the unit test
 		var data = {
@@ -33,7 +33,7 @@ enyo.kind({
 		};
 		aresTestW.postMessage(data, "http://127.0.0.1:9009");
 		if (this.debug) {
-			console.log("Post SEND_TEST_RUNNING ... "
+			enyo.log("Post SEND_TEST_RUNNING ... "
 				+JSON.stringify(data));
 		}
 	},
@@ -73,7 +73,9 @@ enyo.kind({
 		}
 
 		// content printed into Ares Ide console
-		console.dir(content);
+		if (console && console.dir) {
+			console.dir(content);
+		}
 
 		// Post SEND_TEST_RESULT event with associated results
 		var data = {
@@ -83,7 +85,7 @@ enyo.kind({
 		};		
 		aresTestW.postMessage(data, "http://127.0.0.1:9009");
 		if (this.debug) {
-			console.log("Post SEND_TEST_RESULT ... "
+			enyo.log("Post SEND_TEST_RESULT ... "
 				+JSON.stringify(data));
 		}
 
