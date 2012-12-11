@@ -184,7 +184,17 @@ enyo.kind({
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
-		this.$.phobos.designerAction(inSender, inEvent);
+		var editorMode = this.$.panels.getIndex() == this.phobosViewIndex;
+		this.adjustBarMode();
+		if (editorMode) {
+			this.$.phobos.designerAction(inSender, inEvent);
+		} else {
+			this.$.deimos.closeDesignerAction();
+		}
+	},
+	adjustBarMode: function() {
+		var designMode = this.$.panels.getIndex() == this.deimosViewIndex;
+		this.$.bottomBar.setDesignMode(designMode);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {

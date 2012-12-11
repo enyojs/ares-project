@@ -22,7 +22,7 @@ enyo.kind({
 				{kind: "FittableColumns", components: [
 					{kind: "onyx.Button", content: "Save", ontap: "saveFile"},
 					{kind: "onyx.Button", content: "New Kind", ontap: "newKind"},
-					{kind: "onyx.Button", content: "Designer", ontap: "designFile"}
+					{name: "designButton", kind: "onyx.Button", content: "Designer", ontap: "designFile"}
 				]}
 			]},
 			{fit: true},
@@ -32,6 +32,9 @@ enyo.kind({
 	tabs: {},
 	showControls: function() {
 		this.$.drawer.setOpen(true);
+		// lock designButton's width, so it doesn't move when the caption changes
+		var w = this.$.designButton.getBounds().width;
+		this.$.designButton.setBounds({width: w});
 	},
 	hideControls: function() {
 		this.$.drawer.setOpen(false);
@@ -81,5 +84,12 @@ enyo.kind({
 		this.tabs[id].destroy();
 		this.tabs[id] = undefined;
 		this.$.container.reflow();
+	},
+	setDesignMode: function(toDesign) {
+		if (toDesign) {
+			this.$.designButton.setContent("Editor");
+		} else {
+			this.$.designButton.setContent("Designer");
+		}
 	}
 });
