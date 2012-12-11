@@ -13,7 +13,7 @@ enyo.kind({
 		onClose: "",
 		onSave: "",
 		onNewKind: "",
-		onDesign: "",
+		onDesign: ""
 	},
 	components: [
 		{name: "container", classes: "ares-docbar-container", kind: "FittableColumns", components: [
@@ -80,5 +80,6 @@ enyo.kind({
 	removeTab: function(id) {
 		this.tabs[id].destroy();
 		this.tabs[id] = undefined;
+		this.$.container.reflow();
 	}
 });
