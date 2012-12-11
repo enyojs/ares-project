@@ -32,7 +32,7 @@ enyo.kind({
 	debug: true,
 	create: function() {
 		if (this.debug) {
-			console.log("TestController: create() ...");
+			enyo.log("TestController: create() ...");
 		}
 		this.inherited(arguments);
 		this.$.title.setContent(this.name);
@@ -44,7 +44,7 @@ enyo.kind({
 		this.inherited(arguments);
 	},
 	runTests: function() {
-		if (this.debug) console.log("Post RUN ...");
+		if (this.debug) enyo.log("Post RUN ...");
 		if (this.aresIdeW !== null) {
 			this.aresIdeW.postMessage("RUN", "http://127.0.0.1:9009");
 			this.$.runTests.setDisabled(true);
@@ -52,7 +52,7 @@ enyo.kind({
 	},
 	testBegun: function(inData) {
 		if (this.debug) {
-			console.log("TestReporter: testBegun: "+JSON.stringify(inData));
+			enyo.log("TestReporter: testBegun: "+JSON.stringify(inData));
 		}
 		this.$.group.createComponent({name: inData.test, classes: "enyo-testcase-running", content: inData.test + ": running", allowHtml: true}).render();
 	},
@@ -69,7 +69,7 @@ enyo.kind({
 	},
 	updateTestDisplay: function(inData) {
 		if (this.debug) {
-			console.log("TestReporter: updataTestDisplay: "+JSON.stringify(inData));
+			enyo.log("TestReporter: updataTestDisplay: "+JSON.stringify(inData));
 		}
 		var results = JSON.parse(inData.results);
 		var e = results.exception;
@@ -108,15 +108,15 @@ enyo.kind({
 			ares.TestReporter.aresIdeW = this.aresIdeW;			
 		}
 		if (event.data === "START") {
-			if (this.debug) console.log("Received START ... Post READY ...");
+			if (this.debug) enyo.log("Received START ... Post READY ...");
 			event.source.postMessage("READY", event.origin);
 		} 
 		if(event.data.evt === "SEND_TEST_RUNNING") {
-			if (this.debug) console.log("Received SEND_TEST_RUNNING ...");
+			if (this.debug) enyo.log("Received SEND_TEST_RUNNING ...");
 			this.testBegun(event.data);
 		}
 		if(event.data.evt === "SEND_TEST_RESULT") {
-			if (this.debug) console.log("Received SEND_TEST_RESULT ...");
+			if (this.debug) enyo.log("Received SEND_TEST_RESULT ...");
 			this.updateTestDisplay(event.data);
 		}
 	},
