@@ -14,9 +14,15 @@ module.exports = FsBase;
 
 function FsBase(inConfig, next) {
 
+	this.log = function() {
+		if (this.verbose) {
+			console.log.bind(this, this.name).apply(this, arguments);
+		}
+	};
+
 	for (var p in inConfig) {
 		this[p] = inConfig[p];
-		console.log("config: ", p, "=", inConfig[p]);
+		this.log("config: ", p, "=", inConfig[p]);
 	}
 
 	// parameters sanitization
@@ -89,7 +95,7 @@ function FsBase(inConfig, next) {
 	// - 'application/x-www-form-urlencoded' => req.body
 	// - 'multipart/form-data' => req.body.field[] & req.body.file[]
 	var uploadDir = temp.path({prefix: 'com.palm.ares.services.fs.' + this.name}) + '.d';
-	if (this.verbose) console.log(this.name, "uploadDir:", uploadDir);
+	this.log("uploadDir:", uploadDir);
 	fs.mkdirSync(uploadDir);
 	this.app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
 
@@ -104,10 +110,10 @@ function FsBase(inConfig, next) {
 
 	if (this.app.error) {
 		// express-2.x: explicit error handler
-		this.app.error(errorHandler);
+		this.app.error(errorHandler.bind(this));
 	} else {
 		// express-3.x: middleware with arity === 4 is detected as the error handler
-		this.app.use(errorHandler);
+		this.app.use(errorHandler.bind(this));
 	}
 
 	function makeExpressRoute(path) {
@@ -119,20 +125,21 @@ function FsBase(inConfig, next) {
 	// URL-scheme: ID-based file/folder tree navigation, used by
 	// HermesClient.
 	this.route1 = makeExpressRoute.bind(this)('/id/');
-	if (this.verbose) console.log(this.name, "ALL:", this.route1);
+	this.log("ALL:", this.route1);
 	this.app.all(this.route1, (function(req, res) {
 		req.params.id = this.encodeFileId('/');
 		receive.bind(this)(req, res, next);
 	}).bind(this));
+
 	var route2 = makeExpressRoute.bind(this)('/id/:id');
-	if (this.verbose) console.log(this.name, "ALL:", route2);
+	this.log("ALL:", route2);
 	this.app.all(route2, receive.bind(this));
 
 	function receive(req, res, next) {
-		if (this.verbose) console.log(this.name, "req.query=" + util.inspect(req.query));
+		this.log("req.query=" + util.inspect(req.query));
 		req.params.id = req.params.id || this.encodeFileId('/');
 		req.params.path = this.decodeFileId(req.params.id);
-		if (this.verbose) console.log(this.name, "req.params=" + util.inspect(req.params));
+		this.log("req.params=" + util.inspect(req.params));
 		this[req.method.toLowerCase()](req, res, this.respond.bind(this, res));
 	}
 
@@ -140,10 +147,10 @@ function FsBase(inConfig, next) {
 	// (itself used by the Enyo Javacript parser to analyze the
 	// project source code) & by the Ares project preview.
 	var route3 = makeExpressRoute.bind(this)('/file/*');
-	if (this.verbose) console.log(this.name, "GET:", route3);
+	this.log("GET:", route3);
 	this.app.get(route3, (function(req, res, next) {
 		req.params.path = req.params[0];
-		this.get(req, res, this.respond.bind(self, res));
+		this.get(req, res, this.respond.bind(this, res));
 	}).bind(this));
 	
 	// Send back the URL (origin + pathname) to the creator, when
@@ -161,7 +168,7 @@ function FsBase(inConfig, next) {
 	 */
 	this.quit = function() {
 		this.server.close();
-		if (this.verbose) console.log(this.name, "exiting");
+		this.log("exiting");
 	};
 }
 
@@ -201,7 +208,7 @@ FsBase.prototype.respond = function(res, err, response) {
 			statusCode = 500; // Internal Server Error
 			body = new Error(err.toString());
 		}
-		if (this.verbose) console.error("<<<\n"+body.stack);
+		this.log("<<<\n"+body.stack);
 	} else if (response) {
 		statusCode = response.code || 200 /*Ok*/;
 		body = response.body;

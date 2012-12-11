@@ -332,6 +332,7 @@ describe("fsLocal...", function() {
 
 	var textContent = "This is a Text content!";
 	var textContentType = "text/plain; charset=utf-8";
+	var textContentId = "";
 
 	it("t3.1. should create a file (using 'application/x-www-form-urlencoded')", function(done) {
 		post('/id/' + encodeFileId('/toto/titi'), {_method: "PUT",name: "tutu"} /*query*/, new Buffer(textContent), 'application/x-www-form-urlencoded' /*contentType*/, function(err, res) {
@@ -345,11 +346,35 @@ describe("fsLocal...", function() {
 			res.json[0].isDir.should.equal(false);
 			should.exist(res.json[0].path);
 			res.json[0].path.should.equal("/toto/titi/tutu");
+			should.exist(res.json[0].id);
+			textContentId = res.json[0].id;
 			done();
 		});
 	});
 
-	it("t3.2. should download the same file", function(done) {
+	console.log("------------------------");
+
+	it("t3.2. should see created file as a file", function(done) {
+		get('/id/' + textContentId, {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(200);
+			should.exist(res.json);
+			should.exist(res.json.isDir);
+			should.strictEqual(res.json.isDir, false);
+			should.not.exist(res.json.children);
+			should.exist(res.json.path);
+			res.json.path.should.equal("/toto/titi/tutu");
+			should.exist(res.json.id);
+			res.json.id.should.equal(textContentId);
+			done();
+		});
+	});
+
+	console.log("------------------------");
+
+	it("t3.3. should download the same file", function(done) {
 		get('/id/' + encodeFileId('/toto/titi/tutu'), null /*query*/, function(err, res) {
 			var contentStr;
 			should.not.exist(err);

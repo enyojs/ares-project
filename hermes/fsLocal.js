@@ -14,20 +14,11 @@ var fs = require("fs"),
     FsBase = require(__dirname + "/lib/fsBase"),
     HttpError = require(__dirname + "/lib/httpError");
 
-(function() {
-
-var verbose = false;
-
-function log() {
-	if (verbose) console.log("fsLocal:", arguments);
-}
-
 function FsLocal(inConfig, next) {
+	inConfig.name = inConfig.name || "fsLocal";
 
 	// inherits FsBase (step 1/2)
 	FsBase.call(this, inConfig, next);
-
-	verbose = this.verbose;
 }
 
 // inherits FsBase (step 2/2)
@@ -55,8 +46,8 @@ FsLocal.prototype.get = function(req, res, next) {
 };
 
 FsLocal.prototype.put = function(req, res, next) {
-	log("put(): req.headers", req.headers);
-	log("put(): req.body", req.body);
+	this.log("put(): req.headers", req.headers);
+	this.log("put(): req.body", req.body);
 
 	if (req.is('application/x-www-form-urlencoded')) {
 		// carry a single file at most
@@ -106,82 +97,73 @@ FsLocal.prototype['delete'] = function(req, res, next) {
 	}
 };
 
-// XXX ENYO-1086: refactor tree walk-down
 FsLocal.prototype._propfind = function(err, relPath, depth, next) {
-	log("relPath:", relPath);
 	if (err) {
 		next(err);
-	} else {
-		var localPath = path.join(this.root, relPath);
-		if (path.basename(relPath).charAt(0) ===".") {
-			// Skip hidden files & folders (using UNIX
-			// convention: XXX do it for Windows too)
-			return next(null);
-		}
-		_parseNode.bind(this)(relPath, depth, next);
-	}
-	
-	function _parseNode(relPath, depth, next) {
-		var fileId = this.encodeFileId(relPath), self = this;
-		fs.stat(localPath, function(err, stat) {
-			if (err) {
-				next(err);
-				return;
-			}
-		
-			// minimum common set of properties
-			var node = {
-				path: relPath,
-				name: path.basename(relPath),
-				id: fileId,
-				isDir: stat.isDirectory()
-			};
-		
-			log("depth="+depth+", node="+util.inspect(node));
-		
-			if (stat.isFile() || !depth) {
-				next(null, node);
-			} else if (node.isDir) {
-				node.children = [];
-				fs.readdir(localPath, _parseDir.bind(self, node));
-			} else {
-				// skip special files
-				next();
-			}
-		});
+		return;
 	}
 
-	function _parseDir(node, err, files) {
-		if (err) {
-			return next(err); // XXX or skip this directory...
-		}
-		if (!files.length) {
-			return next(null, node);
-		}
-		var count = files.length, self = this;
-		files.forEach(function(name) {
-			_parseNode.bind(self)(path.join(relPath, name), depth-1, function(err, subNode){
-				if (err) {
-					next(err);
-					return;
-				}
-				if (subNode) {
-					node.children.push(subNode);
-				}
-				if (--count === 0) {
-					// return to upper layer only if
-					// every nodes of this layer
-					// were successfully parsed
-					next(null, node);
-				}
-			});
-		});
+	var localPath = path.join(this.root, relPath);
+	if (path.basename(relPath).charAt(0) ===".") {
+		// Skip hidden files & folders (using UNIX
+		// convention: XXX do it for Windows too)
+		return next();
 	}
+
+	fs.stat(localPath, (function(err, stat) {
+		if (err) {
+			return next(err);
+		}
+
+		// minimum common set of properties
+		var node = {
+			path: relPath,
+			name: path.basename(relPath),
+			id: this.encodeFileId(relPath),
+			isDir: stat.isDirectory()
+		};
+
+		this.log("depth="+depth+", node="+util.inspect(node));
+
+		if (stat.isFile() || !depth) {
+			return next(null, node);
+		} else if (node.isDir) {
+			node.children = [];
+			fs.readdir(localPath, (function(err, files) {
+				if (err) {
+					return next(err); // XXX or skip this directory...
+				}
+				if (!files.length) {
+					return next(null, node);
+				}
+				var count = files.length;
+				files.forEach(function(name) {
+					this._propfind(null, path.join(relPath, name), depth-1, function(err, subNode){
+						if (err) {
+							return next(err);
+						}
+						if (subNode) {
+							node.children.push(subNode);
+						}
+						if (--count === 0) {
+							// return to upper layer only if
+							// every nodes of this layer
+							// were successfully parsed
+							return next(null, node);
+						}
+					});
+				}, this);
+			}).bind(this));
+		} else {
+			// skip special files
+			return next();
+		}
+	}).bind(this));
 };
 
 FsLocal.prototype._getFile = function(req, res, next) {
 	var localPath = path.join(this.root, req.param('path'));
-	log("sending localPath=" + localPath);
+	this.log("sending localPath=" + localPath);
 	fs.stat(localPath, function(err, stat) {
 		if (err) {
 			next(err);
@@ -239,11 +221,11 @@ FsLocal.prototype._putWebForm = function(req, res, next) {
 	if (req.body.content) {
 		buf = new Buffer(req.body.content, 'base64');
 	} else {
-		log("putWebForm(): empty file");
+		this.log("putWebForm(): empty file");
 		buf = '';
 	}
 	
-	log("putWebForm(): storing file as", relPath);
+	this.log("putWebForm(): storing file as", relPath);
 	fileId = this.encodeFileId(relPath);
 	fs.writeFile(path.join(this.root, relPath), buf, function(err){
 		next(err, {
@@ -269,9 +251,9 @@ FsLocal.prototype._putMultipart = function(req, res, next) {
 	var pathParam = req.param('path'),
 	    root = this.root,
 	    encodeFileId = this.encodeFileId;
-	log("putMultipart(): req.files=", util.inspect(req.files));
-	log("putMultipart(): req.fields=", util.inspect(req.fields));
-	log("putMultipart(): pathParam=",pathParam);
+	this.log("putMultipart(): req.files=", util.inspect(req.files));
+	this.log("putMultipart(): req.fields=", util.inspect(req.fields));
+	this.log("putMultipart(): pathParam=",pathParam);
 	if (!req.files.file) {
 		next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
 		return;
@@ -283,12 +265,12 @@ FsLocal.prototype._putMultipart = function(req, res, next) {
 		files.push(req.files.file);
 	}
 
-	async.forEach(files, function(file, cb) {
+	async.forEach(files, (function(file, cb) {
 		var relPath = path.join(pathParam, file.name),
 		    absPath = path.join(root, relPath),
 		    dir = path.dirname(absPath);
 
-		log("putMultipart(): file.path=" + file.path + ", relPath=" + relPath + ", dir=" + dir);
+		this.log("putMultipart(): file.path=" + file.path + ", relPath=" + relPath + ", dir=" + dir);
 
 		async.series([
 			function(cb1) {
@@ -307,7 +289,7 @@ FsLocal.prototype._putMultipart = function(req, res, next) {
 			}
 		], cb);
 
-	}, function(err){
+	}).bind(this), function(err){
 		next(err, {
 			code: 201, // Created
 			body: nodes
@@ -328,7 +310,7 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 		}
 
 		var count = 0;
-		fs.readdir(localPath, function(err, files) {
+		fs.readdir(localPath, (function(err, files) {
 			if (err) {
 				next(err);
 			} else if (files.length < 1) {
@@ -346,9 +328,9 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 							return fs.rmdir(localPath, next);
 						}
 					});
-				});
+				}, this);
 			}
-		});
+		}).bind(this));
 	});
 };
 
@@ -473,8 +455,6 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 };
 
 module.exports = FsLocal;
-
-}());
 
 if (path.basename(process.argv[1]) === "fsLocal.js") {
 	// We are main.js: create & run the object...
