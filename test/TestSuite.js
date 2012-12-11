@@ -75,7 +75,7 @@ enyo.kind({
 	// and to make sure that lingering test code that calls finish() at a later time does not affect the state of a different test.
 	runAllTests: function() {
 		if (this.autoRunNextTest) {
-			console.error("TestSuite.runAllTests: Already running.");
+			enyo.error("TestSuite.runAllTests: Already running.");
 			return; // already running.
 		}
 		this.testNames = this.getTestNames();

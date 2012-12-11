@@ -1,9 +1,9 @@
 {
-	"services":[
+	"services": [
 		{
 			"active":true,
 			"id":"home",
-			"icon":"server",
+			"icon":"home-32x32",
 			"name":"Home Directory",
 			"type": "filesystem",
 			"provider": "hermes",
@@ -15,20 +15,27 @@
 			"respawn": false
 		},
 		{
-			"active":false,
-			"id":"dropbox-enyojs",
-			"icon":"dropbox",
-			"name":"Dropbox (enyojs.com)",
+			"active":true,
+			"id":"dropbox",
+			"icon":"dropbox.com-32x32",
+			"name":"Dropbox",
 			"type": "filesystem",
 			"provider": "hermes",
-			"command":"@NODE@", "params":["hermes/dropbox/index.js", "0", "http://184.169.139.5:8080"],
+			"Xcommand":"@NODE@", "params":[
+				"hermes/fsDropbox.js", "-P", "/files", "-p", "10002"
+			],
+			"auth": {
+				"type": "dropbox",
+				"appKey": "",
+				"appSecret": ""
+			},
 			"useJsonp":false,
 			"debug": false
 		},
 		{
 			"active":true,
 			"id":"phonegap",
-			"icon":"phonegap",
+			"icon":"build.phonegap.com-32x32",
 			"name":"PhoneGap Build",
 			"type": "build",
 			"provider": "hermes",
@@ -38,8 +45,7 @@
 			"useJsonp":false,
 			"debug": false,
 			"auth": {
-				"username":"YOUR_EMAIL",
-				"password":"YOUR_PASSWORD"
+				"type": "basic"
 			},
 			"respawn": false
 		}
