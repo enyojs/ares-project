@@ -190,6 +190,25 @@ body {
 	z-index: 11;
 }
 
+.ares-actionpopup {
+	text-align: center;
+	padding: 20px;
+}
+
+.ares-title {
+	font-size: 19px;
+	font-weight: bold;
+}
+
+.ares-message {
+	padding: 8px;
+	vertical-align: middle;
+}
+
+.ares-padleft {
+	padding-left: 8px;
+}
+
 .enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-filedrawer {
 	margin-top: 0px;
 	margin-bottom: 0px;

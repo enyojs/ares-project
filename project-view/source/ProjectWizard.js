@@ -219,11 +219,16 @@ enyo.kind({
 				this.debug && this.log('opening project.json from ' + parentDir.name ) ;
 				service.getFile( child.id ).
 					response(this, function(inSender, fileStuff) {
+						var projectData={};
 						this.debug && this.log( "file contents: '" + fileStuff.content + "'" ) ;
-						var projectData = JSON.parse(fileStuff.content)  ;
+						try {
+							projectData = JSON.parse(fileStuff.content)  ;
+						} catch(e) {
+							this.log("Error parsing project data: "+e.toString());
+						}
 						this.debug && this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
 						this.doAddProjectInList({
-							name: projectData.name,
+							name: projectData.name || parentDir.name,
 							folderId: parentDir.id,
 							service: this.selectedDir.service,
 							serviceId: this.selectedServiceId
