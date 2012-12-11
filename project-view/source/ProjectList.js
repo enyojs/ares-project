@@ -92,7 +92,7 @@ enyo.kind({
 	removeProjectAction: function(inSender, inEvent) {
 		var popup = this.$.removeProjectPopup;
 		if (this.selected) {
-			popup.setName("Delete project '" + this.selected.getProjectName() + "' ?");
+			popup.setName("Remove project '" + this.selected.getProjectName() + "' ?");
 			popup.$.nukeFiles.setValue(false) ;
 			popup.show();
 		}

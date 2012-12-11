@@ -564,7 +564,7 @@ enyo.kind({
 	imageInput: function(inSender, inEvent) {
 		this.$.bgImage = this.$.imageInput.hasNode().value;
 		this.updateBox();
-		console.log(this.$.bgImage, this.$.imageInput.hasNode().value );
+		enyo.log(this.$.bgImage, this.$.imageInput.hasNode().value );
 	},
 	hrepeat: function(inSender) {
 		if (inSender.checked == true ){
