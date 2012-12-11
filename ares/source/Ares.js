@@ -32,6 +32,7 @@ enyo.kind({
 		}
 		this.inherited(arguments);
 		this.$.panels.setIndex(this.phobosViewIndex);
+		this.adjustBarMode();
 
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (this.runTest) {
@@ -114,12 +115,14 @@ enyo.kind({
 	designDocument: function(inSender, inEvent) {
 		this.$.deimos.load(inEvent);
 		this.$.panels.setIndex(this.deimosViewIndex);
+		this.adjustBarMode();
 	},
 	closeDesigner: function(inSender, inEvent) {
 		if (inEvent.docHasChanged) {
 			this.$.phobos.updateComponents(inSender, inEvent);
 		}
 		this.$.panels.setIndex(this.phobosViewIndex);
+		this.adjustBarMode();
 	},
 	handleBeforeUnload: function() {
 		if (window.location.search.indexOf("debug") == -1) {
@@ -167,6 +170,7 @@ enyo.kind({
 			this.$.phobos.openDoc(d.file, d.data, d.extension, d.projectData, d.edited);
 		}
 		this.$.panels.setIndex(this.phobosViewIndex);
+		this.adjustBarMode();
 		this.$.bottomBar.activateFileWithId(d.file.id);
 		this.hideFiles();
 		this.activeDocument = d;
@@ -185,7 +189,6 @@ enyo.kind({
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
 		var editorMode = this.$.panels.getIndex() == this.phobosViewIndex;
-		this.adjustBarMode();
 		if (editorMode) {
 			this.$.phobos.designerAction(inSender, inEvent);
 		} else {
