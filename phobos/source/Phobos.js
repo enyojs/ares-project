@@ -186,7 +186,7 @@ enyo.kind({
 	dumpInfo: function(inObject) {
 		var c = inObject;
 		if (!c || !c.superkinds) {
-		//console.log(this.$.right.$.dump);
+		//enyo.log(this.$.right.$.dump);
 			this.$.right.$.dump.setContent("(no info)");
 			return;
 		}
@@ -394,7 +394,7 @@ enyo.kind({
 			this.reparseAction();
 		} else {
 			// There is no parser data for the current file
-			console.log("Unable to insert missing handler methods");
+			enyo.log("Unable to insert missing handler methods");
 		}
 	},
 	/**
@@ -442,7 +442,7 @@ enyo.kind({
 			}
 		} else {
 			// There is no block information for that kind - Parser is probably not up-to-date
-			console.log("Unable to insert missing handler methods");
+			enyo.log("Unable to insert missing handler methods");
 		}
 	},
 	// called when designer has modified the components

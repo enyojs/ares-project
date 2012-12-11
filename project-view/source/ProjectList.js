@@ -34,24 +34,24 @@ enyo.kind({
 				]}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", classes: "ares-scale-background", src: "$project-view/assets/images/project_settings.png", onclick: "doModifySettings"},
+				{name: "settingsButton", disabled: true, kind: "onyx.IconButton", classes: "ares-scale-background", src: "$project-view/assets/images/project_settings.png", onclick: "doModifySettings"},
 				{kind: "onyx.Tooltip", content: "Settings..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_new.png", onclick: "doCreateProject"},
-				{kind: "onyx.Tooltip", content: "Create or Import Project..."}
+				{kind: "onyx.Tooltip", content: "Create Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_edit.png", onclick: "doScanProject"},
-				{kind: "onyx.Tooltip", content: "Scan for Projects..."}
+				{kind: "onyx.Tooltip", content: "Import or Scan for Projects..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_delete.png", onclick: "removeProjectAction"},
+				{name: "deleteButton", disabled: true, kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_delete.png", onclick: "removeProjectAction"},
 				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
 				{kind: "onyx.Tooltip", content: "Remove Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_build.png", onclick: "doPhonegapBuild"},
+				{name: "phonegapButton", disabled: true, kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_build.png", onclick: "doPhonegapBuild"},
 				{kind: "onyx.Tooltip", content: "Phonegap build"}
 			]}
 		]},
@@ -92,7 +92,7 @@ enyo.kind({
 	removeProjectAction: function(inSender, inEvent) {
 		var popup = this.$.removeProjectPopup;
 		if (this.selected) {
-			popup.setName("Delete project '" + this.selected.getProjectName() + "' ?");
+			popup.setName("Remove project '" + this.selected.getProjectName() + "' from list?");
 			popup.$.nukeFiles.setValue(false) ;
 			popup.show();
 		}
@@ -107,7 +107,9 @@ enyo.kind({
 			this.debug && this.log("removing project" +  project.getName() + ( nukeFiles ? " and its files" : "" )) ;
 			this.debug && this.log(project);
 			if (nukeFiles) {
-				project.service.remove( project.folderId )
+				var service = project.getService();
+				var folder = project.getFolderId();
+				service.remove( folder )
 					.response(this, function(){this.removeSelectedProjectData();})
 					.error(this, function(inError){
 						this.showErrorPopup("Error removing files of project " + project.name + ": " + inError);
@@ -125,6 +127,7 @@ enyo.kind({
 			Ares.WorkspaceData.removeProject(name);
 			this.selected = null;
 			this.doProjectRemoved();
+			this.enableDisableButtons(false);
 		}
 	},
 	projectListSetupItem: function(inSender, inEvent) {
@@ -154,6 +157,7 @@ enyo.kind({
 		service = ServiceRegistry.instance.resolveServiceId(project.getServiceId());
 		if (service !== undefined) {
 			project.setService(service);
+			this.enableDisableButtons(true);
 			this.doProjectSelected({project: project});
 		} else {
 			// ...otherwise let
@@ -161,6 +165,11 @@ enyo.kind({
 			this.showErrorPopup(msg);
 			this.error(msg);
 		}
+	},
+	enableDisableButtons: function(inEnable) {
+		this.$.settingsButton.setDisabled(!inEnable);
+		this.$.deleteButton.setDisabled(!inEnable);
+		this.$.phonegapButton.setDisabled(!inEnable);
 	},
 	showAccountConfigurator: function() {
 		this.$.accountsConfigurator.show();
@@ -204,13 +213,32 @@ enyo.kind({
 	name: "ProjectDeletePopup",
 	kind: "Ares.ActionPopup",
 	components: [
-		{kind: "Control", tag: "h3", content: " ", name: "title"},
-		{kind: "Control", tag: "br"},
-		{kind: "onyx.Checkbox", checked: false, name: "nukeFiles"},
-		{kind: "Control", tag: "span", style: "padding: 0 4px; vertical-align: middle;", content: "also delete files", fit: true},
+		{kind: "Control", classes: "ares-title", content: " ", name: "title"},
+		{kind: "Control", classes: "ares-message", components: [
+			{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "nukeChanged"},
+			{kind: "Control", tag: "span", classes: "ares-padleft", content: "also delete files from disk"},
+		]},
 		{kind: "FittableColumns", name: "buttons", components: [
-			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", name: "cancelButton", ontap: "actionCancel"},
-			{kind: "onyx.Button", classes: "onyx-affirmative", content: "Delete", name: "actionButton", ontap: "actionConfirm"}
+			{kind: "onyx.Button", content: "Cancel", name: "cancelButton", ontap: "actionCancel"},
+			{fit: true},
+			{kind: "onyx.Button", content: "Remove", name: "actionButton", ontap: "actionConfirm"}
 		]}
-	]
+	],
+	handlers: {
+		onShow: "shown"
+	},
+	shown: function(inSender, inEvent) {
+		var w = this.$.actionButton.getBounds().width;
+		this.$.actionButton.setBounds({width: w});
+		this.nukeChanged();
+	},
+	nukeChanged: function(inSender, inEvent) {
+		if (this.$.nukeFiles.checked) {
+			this.$.actionButton.setContent("Delete");
+			this.$.actionButton.addClass("onyx-negative");
+		} else {
+			this.$.actionButton.setContent("Remove");
+			this.$.actionButton.removeClass("onyx-negative");
+		}
+	}
 });
