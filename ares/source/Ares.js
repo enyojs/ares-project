@@ -8,7 +8,7 @@ enyo.kind({
 			{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onEditedChanged: "documentEdited"},
 			{kind: "Deimos", onCloseDesigner: "closeDesigner"}
 		]},
-		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
+		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", draggable: false, onAnimateFinish: "finishedSliding", components: [
 			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
 			{name: "bottomBar", kind: "DocumentToolbar", 
 			    onGrabberTap: "toggleFiles", 
@@ -56,6 +56,7 @@ enyo.kind({
 			this.switchToDocument(d);
 		} else {
 			this.$.bottomBar.createFileTab(f.name, f.id);
+			this.$.slideable.setDraggable(true);
 			this.openDocument(inSender, inEvent);
 		}
 	},
@@ -105,8 +106,9 @@ enyo.kind({
 	closeDocument: function(inSender, inEvent) {
 		var id = inSender.file.id;
 		// remove file from cache
-		this.openFiles[id]=undefined;
+		delete this.openFiles[id];
 		this.$.bottomBar.removeTab(id);
+		this.$.slideable.setDraggable(Object.keys(this.openFiles).count > 0);
 		this.showFiles();
 	},
 	designDocument: function(inSender, inEvent) {
@@ -131,7 +133,7 @@ enyo.kind({
 		this.$.slideable.animateToMax();
 	},
 	toggleFiles: function(inSender, inEvent) {
-		if (this.$.slideable.value < 0) {
+		if (this.$.slideable.value < 0 || Object.keys(this.openFiles).length === 0) {
 			this.showFiles();
 		} else {
 			this.hideFiles();
@@ -182,7 +184,17 @@ enyo.kind({
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
-		this.$.phobos.designerAction(inSender, inEvent);
+		var editorMode = this.$.panels.getIndex() == this.phobosViewIndex;
+		this.adjustBarMode();
+		if (editorMode) {
+			this.$.phobos.designerAction(inSender, inEvent);
+		} else {
+			this.$.deimos.closeDesignerAction();
+		}
+	},
+	adjustBarMode: function() {
+		var designMode = this.$.panels.getIndex() == this.deimosViewIndex;
+		this.$.bottomBar.setDesignMode(designMode);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {
