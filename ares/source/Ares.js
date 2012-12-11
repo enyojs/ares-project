@@ -27,17 +27,17 @@ enyo.kind({
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
 	create: function() {
-		if (this.runTest) {
-			ProjectList.underTest = true;
-		}
 		this.inherited(arguments);
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
 
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
-		if (this.runTest) {
+		if (Ares.TestController) {
+			WorkspaceData.loadProjects("MARIAN-SHOULD-PUT-THE-RIGHT-VALUE", true);
 			// in charge of Ares Test Suite when Ares Ide launch with runTest option
 			this.createComponent({kind: "ares.TestController"});
+		} else {
+			WorkspaceData.loadProjects();
 		}
 		this.calcSlideableLimit();
 	},
@@ -51,8 +51,8 @@ enyo.kind({
 	},
 	doubleclickFile: function(inSender, inEvent) {
 		var f = inEvent.file;
-		var id = Ares.Data.Files.computeId(f);
-		var d = Ares.Data.Files.get(id);
+		var id = WorkspaceData.files.computeId(f);
+		var d = WorkspaceData.files.get(id);
 		if (d) {
 			this.switchToDocument(d);
 		} else {
@@ -63,7 +63,6 @@ enyo.kind({
 	},
 	openDocument: function(inSender, inEvent) {
 		var f = inEvent.file;
-		this.log(f.name);				// TODO: TBR
 		var projectData = inEvent.projectData;
 		var service = projectData.getService();
 		this.$.phobos.beginOpenDoc();
@@ -75,11 +74,11 @@ enyo.kind({
 					// no data? Empty file
 					inData="";
 				}
-				var id = Ares.Data.Files.computeId(f);
-				if (Ares.Data.Files.get(id)) {
+				var id = WorkspaceData.files.computeId(f);
+				if (WorkspaceData.files.get(id)) {
 					alert("Duplicate File ID in cache!");
 				}
-				var doc = Ares.Data.Files.newEntry(f, inData, projectData);
+				var doc = WorkspaceData.files.newEntry(f, inData, projectData);
 				this.switchToDocument(doc);
 			})
 			.error(this, function(inEvent, inData) {
@@ -100,9 +99,9 @@ enyo.kind({
 	},
 	closeDocument: function(inSender, inEvent) {
 		// remove file from cache
-		Ares.Data.Files.removeEntry(inEvent.id);
+		WorkspaceData.files.removeEntry(inEvent.id);
 		this.$.bottomBar.removeTab(inEvent.id);
-		this.$.slideable.setDraggable(Object.keys(this.openFiles).count > 0);
+		this.$.slideable.setDraggable(WorkspaceData.files.length > 0);
 		this.showFiles();
 	},
 	designDocument: function(inSender, inEvent) {
@@ -129,7 +128,7 @@ enyo.kind({
 		this.$.slideable.animateToMax();
 	},
 	toggleFiles: function(inSender, inEvent) {
-		if (this.$.slideable.value < 0 || Object.keys(this.openFiles).length === 0) {
+		if (this.$.slideable.value < 0 || WorkspaceData.files.length === 0) {
 			this.showFiles();
 		} else {
 			this.hideFiles();
@@ -147,7 +146,7 @@ enyo.kind({
 		this.$.slideable.setMin(-min);
 	},
 	switchFile: function(inSender, inEvent) {
-		var d = Ares.Data.Files.get(inEvent.id);
+		var d = WorkspaceData.files.get(inEvent.id);
 		if (d) {
 			this.switchToDocument(d);
 		} else {

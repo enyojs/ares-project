@@ -59,7 +59,7 @@ enyo.kind({
 	 * @param  inProjectPath
 	 * @protected
 	 */
-	createPathResolver: function(inProjectPath) {					// TODO TBC
+	createPathResolver: function(inProjectPath) {					// TODO TBC Should go in this.docData
 		this.pathResolver = new enyo.pathResolverFactory();
 		this.pathResolver.addPaths({
 			enyo: inProjectPath + "/enyo",
@@ -92,7 +92,6 @@ enyo.kind({
 
 		// Save the value to set it again after data has been loaded into ACE
 		var edited = this.docData.getEdited();
-		this.log("edited: " + this.docData.getEdited());
 
 		var file = this.docData.getFile();
 		var extension = file.name.split(".").pop();
@@ -115,7 +114,7 @@ enyo.kind({
 		}
 		this.reparseAction();
 		projectUrl = projectData.getProjectUrl();
-		this.createPathResolver(projectUrl);			// TODO TBC
+		this.createPathResolver(projectUrl);
 		this.buildEnyoDb(projectUrl, this.pathResolver);	// this.buildProjectDb() will be invoked when enyo analysis is finished
 		this.$.documentLabel.setContent(file.name);
 
@@ -467,7 +466,6 @@ enyo.kind({
 		this.docData.setEdited(true);
 	},
 	closeDocAction: function(inSender, inEvent) {
-		this.log("edited: " + this.docData.getEdited());
 		if (this.docData.getEdited() === true) {
 			this.$.savePopup.setName("Document was modified! Save it before closing?");
 			this.$.savePopup.setActionButton("Don't Save");

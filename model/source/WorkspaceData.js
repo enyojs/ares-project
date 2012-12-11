@@ -1,9 +1,9 @@
-var AresStore = function(name) {
+var AresStore = function(name, eraseAll) {
 	this.name = name;
 	var store = localStorage.getItem(this.name);
 	this.data = (store && JSON.parse(store)) || {};
 
-	// Remove data in 'old' format (prior introduction of Ares.WorkspaceData)
+	// Remove data in 'old' format (prior introduction of WorkspaceData.projects)
 	if (_.isArray(this.data)) {			// TODO: to be removed in a while
 		this.data = {};
 	}
@@ -80,10 +80,6 @@ _.extend(AresStore.prototype, {
 	}
 });
 
-if ( ! Ares.Model) {
-	Ares.Model = {};
-}
-
 Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when possible
 	getName: function() {
 		return this.get("id");
@@ -122,9 +118,6 @@ Ares.Model.PROJECTS_STORAGE_KEY = "com.enyojs.ares.projects";
 
 Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collection when possible
 	model: Ares.Model.Project,
-	initiliaze: function() {
-		enyo.log("Ares.Model.WorkspaceData.initialize()");
-	},
 	comparator: function(a, b) {
 		var result;
 		if (a.id > b.id) {
@@ -170,7 +163,20 @@ Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collec
 	}
 });
 
-// Create the workspace collection of projects and load the data from the local storage
-Ares.WorkspaceData = new Ares.Model.Projects();
-Ares.WorkspaceData.localStorage = new AresStore(Ares.Model.PROJECTS_STORAGE_KEY);
-Ares.WorkspaceData.fetch();
+/*
+	WorkspaceData singleton that holds the collections of projects, files, ...
+ */
+enyo.singleton({
+	name: "WorkspaceData",
+	kind: enyo.Component,
+	create: function() {
+		this.inherited(arguments);
+		this.projects = new Ares.Model.Projects();
+		this.files = new Ares.Model.Files();
+	},
+	loadProjects: function(storageKey, eraseAll) {
+		var key = storageKey || Ares.Model.PROJECTS_STORAGE_KEY;
+		this.projects.localStorage = new AresStore(key, eraseAll);
+		this.projects.fetch();
+	}
+});

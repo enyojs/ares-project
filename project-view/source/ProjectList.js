@@ -68,11 +68,11 @@ enyo.kind({
 	selected: null,
 	create: function() {
 		this.inherited(arguments);
-		this.$.projectList.setCount(Ares.WorkspaceData.length);
-		Ares.WorkspaceData.on("add remove reset", enyo.bind(this, this.projectCountChanged));
+		this.$.projectList.setCount(WorkspaceData.projects.length);
+		WorkspaceData.projects.on("add remove reset", enyo.bind(this, this.projectCountChanged));
 	},
 	projectCountChanged: function() {
-		var count = Ares.WorkspaceData.length;
+		var count = WorkspaceData.projects.length;
 		this.$.projectList.setCount(count);
 		this.$.projectList.render();
 		this.doProjectRemoved();		// To reset the Harmonia view
@@ -82,11 +82,11 @@ enyo.kind({
 		if (serviceId === "") {
 			throw new Error("Cannot add a project in service=" + service);
 		}
-		var known = Ares.WorkspaceData.get(name);
+		var known = WorkspaceData.projects.get(name);
 		if (known) {
 			this.debug && this.log("Skipped project " + name + " as it is already listed") ;
 		} else {
-			Ares.WorkspaceData.createProject(name, folderId, serviceId);
+			WorkspaceData.projects.createProject(name, folderId, serviceId);
 		}
 	},
 	removeProjectAction: function(inSender, inEvent) {
@@ -102,7 +102,7 @@ enyo.kind({
 		// once done,  call removeSelectedProjectData to mop up the remains.
 		var project, nukeFiles ;
 		if (this.selected) {
-			project = Ares.WorkspaceData.at(this.selected.index);
+			project = WorkspaceData.projects.at(this.selected.index);
 			nukeFiles = this.$.removeProjectPopup.$.nukeFiles.getValue() ;
 			this.debug && this.log("removing project" +  project.getName() + ( nukeFiles ? " and its files" : "" )) ;
 			this.debug && this.log(project);
@@ -123,15 +123,15 @@ enyo.kind({
 	removeSelectedProjectData: function() {
 		if (this.selected) {
 			// remove the project from list of project config
-			var name = Ares.WorkspaceData.at(this.selected.index).getName();
-			Ares.WorkspaceData.removeProject(name);
+			var name = WorkspaceData.projects.at(this.selected.index).getName();
+			WorkspaceData.projects.removeProject(name);
 			this.selected = null;
 			this.doProjectRemoved();
 			this.enableDisableButtons(false);
 		}
 	},
 	projectListSetupItem: function(inSender, inEvent) {
-		var project = Ares.WorkspaceData.at(inEvent.index);
+		var project = WorkspaceData.projects.at(inEvent.index);
 		var item = inEvent.item;
 		// setup the controls for this item.
 		item = item.$.item;
@@ -153,7 +153,7 @@ enyo.kind({
 		}
 		this.selected.addClass("ares_projectView_projectList_item_selected");
 
-		project = Ares.WorkspaceData.at(inEvent.index);
+		project = WorkspaceData.projects.at(inEvent.index);
 		service = ServiceRegistry.instance.resolveServiceId(project.getServiceId());
 		if (service !== undefined) {
 			project.setService(service);

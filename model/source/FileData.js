@@ -1,3 +1,9 @@
+
+// Create the Ares.Model object if it does not exist yet
+if ( ! Ares.Model) {
+	Ares.Model = {};
+}
+
 Ares.Model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when possible
 	getId: function() {
 		return this.get("id");
@@ -33,9 +39,6 @@ Ares.Model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when po
 
 Ares.Model.Files = Backbone.Collection.extend({		// TODO: move to enyo.Collection when possible
 	model: Ares.Model.File,
-	initiliaze: function() {
-		enyo.log("Ares.Model.Files.initialize()");
-	},
 	newEntry: function(file, data, projectData) {
 		var id = this.computeId(file);
 		var obj = new Ares.Model.File({id: id, file: file, data: data, "project-data": projectData, edited: false});
@@ -47,18 +50,6 @@ Ares.Model.Files = Backbone.Collection.extend({		// TODO: move to enyo.Collectio
 		this.remove(obj);
 	},
 	computeId: function(file) {
-		{
-			var id = file.service.getConfig().id + "-" + file.id;
-			enyo.log("Ares.Model.Files.computeId() ==> " + id);			// TODO: TBR
-		}
-
 		return file.service.getConfig().id + "-" + file.id;
 	}
 });
-
-if ( ! Ares.Data) {
-	Ares.Data = {};
-}
-
-// Create the workspace collection of projects and load the data from the local storage
-Ares.Data.Files = new Ares.Model.Files();
