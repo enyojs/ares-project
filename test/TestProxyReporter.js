@@ -15,7 +15,7 @@ enyo.kind({
 		// Post ARES.TEST.NAME event to infor the Ares Test Reporter the name of the TestSuite
 		aresTestW.postMessage({evt:"ARES.TEST.NAME", data:this.name}, "http://127.0.0.1:9009");
 		if (this.debug) {
-			console.log("Post ARES.TEST.NAME ...name: "+this.name);
+			enyo.log("Post ARES.TEST.NAME ...name: "+this.name);
 		}
 
 	},
@@ -27,7 +27,7 @@ enyo.kind({
 		this.$.testSuite.runAllTests();
 	},
 	testBegun: function(inSender, inEvent) {
-		console.log("=>Ares Proxy Reporter *****" + "Group: " + this.name + " *****test: " +inEvent.testName + " is running ...");
+		enyo.log("=>Ares Proxy Reporter *****" + "Group: " + this.name + " *****test: " +inEvent.testName + " is running ...");
 
 
 		// Post ARES.TEST.RUNNING event with info related to the group and the name of the unit test
@@ -39,7 +39,7 @@ enyo.kind({
 		};
 		aresTestW.postMessage({evt:"ARES.TEST.RUNNING", data:obj}, "http://127.0.0.1:9009");
 		if (this.debug) {
-			console.log("Post ARES.TEST.RUNNING ... "
+			enyo.log("Post ARES.TEST.RUNNING ... "
 				+JSON.stringify(obj));
 		}
 	},
@@ -79,7 +79,9 @@ enyo.kind({
 		}
 
 		// content printed into Ares Ide console
-		console.dir(content);
+		if (console && console.dir) {
+			console.dir(content);
+		}
 
 		// Post ARES.TEST.RESULT event with associated results
 		var obj = {
@@ -88,7 +90,7 @@ enyo.kind({
 		};		
 		aresTestW.postMessage({evt:"ARES.TEST.RESULT", data:obj}, "http://127.0.0.1:9009");
 		if (this.debug) {
-			console.log("Post ARES.TEST.RESULT ... "
+			enyo.log("Post ARES.TEST.RESULT ... "
 				+JSON.stringify(obj));
 		}
 

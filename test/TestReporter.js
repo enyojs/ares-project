@@ -30,7 +30,7 @@ enyo.kind({
 	debug: true,
 	create: function() {
 		if (this.debug) {
-			console.log("I am Ares Test Reporter ...");
+			enyo.log("I am Ares Test Reporter ...");
 		}
 		this.inherited(arguments);
 		this.aresIdeW = Ares.TestReporter.aresIdeW;
@@ -40,26 +40,26 @@ enyo.kind({
 	runTests: function() {
 		if (this.aresIdeW !== null) {			
 			if (this.debug) {
-				console.log("Post ARES.TEST.RUN ...");
-				console.log("this.aresIdeW: "+this.aresIdeW);
+				enyo.log("Post ARES.TEST.RUN ...");
+				enyo.log("this.aresIdeW: "+this.aresIdeW);
 			}
 			this.aresIdeW.postMessage("ARES.TEST.RUN", "http://127.0.0.1:9009");
 		} else {
-			if (this.debug) console.log("window.self.opener ...POST ARES.TEST.RERUN");
+			if (this.debug) enyo.log("window.self.opener ...POST ARES.TEST.RERUN");
 			window.self.opener.postMessage("ARES.TEST.RERUN", "http://127.0.0.1:9009");
 		}
 		this.$.runTests.setDisabled(true);
 	},
 	testNameDisplay: function(inData) {
 		if (this.debug) {
-			console.log("TestReporter: testNameDisplay: "+JSON.stringify(inData));
+			enyo.log("TestReporter: testNameDisplay: "+JSON.stringify(inData));
 		}
 		this.$.group.createComponent({classes: "enyo-testcase-title", content: inData.data}).render();
 		this.reflow();
 	},
 	testBegun: function(inData) {
 		if (this.debug) {
-			console.log("TestReporter: testBegun: "+JSON.stringify(inData));
+			enyo.log("TestReporter: testBegun: "+JSON.stringify(inData));
 		}
 		this.$.group.createComponent({name: inData.data.test, classes: "enyo-testcase-running", content: inData.data.test + ": running", allowHtml: true}).render();
 		this.reflow();
@@ -77,7 +77,7 @@ enyo.kind({
 	},
 	updateTestDisplay: function(inData) {
 		if (this.debug) {
-			console.log("TestReporter: updataTestDisplay: "+JSON.stringify(inData));
+			enyo.log("TestReporter: updataTestDisplay: "+JSON.stringify(inData));
 		}
 		var results = JSON.parse(inData.data.results);
 		var e = results.exception;
@@ -116,19 +116,19 @@ enyo.kind({
 			Ares.TestReporter.aresIdeW = this.aresIdeW;			
 		}
 		if (event.data === "ARES.TEST.START") {
-			if (this.debug) console.log("Received ARES.TEST.START ... Post ARES.TEST.READY ...");
+			if (this.debug) enyo.log("Received ARES.TEST.START ... Post ARES.TEST.READY ...");
 			event.source.postMessage("ARES.TEST.READY", event.origin);
 		} 
 		if(event.data.evt === "ARES.TEST.NAME") {
-			if (this.debug) console.log("Received ARES.TEST.NAME ...");
+			if (this.debug) enyo.log("Received ARES.TEST.NAME ...");
 			this.testNameDisplay(event.data);
 		}
 		if(event.data.evt === "ARES.TEST.RUNNING") {
-			if (this.debug) console.log("Received ARES.TEST.RUNNING ...");
+			if (this.debug) enyo.log("Received ARES.TEST.RUNNING ...");
 			this.testBegun(event.data);
 		}
 		if(event.data.evt === "ARES.TEST.RESULT") {
-			if (this.debug) console.log("Received ARES.TEST.RESULT ...");
+			if (this.debug) enyo.log("Received ARES.TEST.RESULT ...");
 			this.updateTestDisplay(event.data);
 		}
 	},
