@@ -3,7 +3,6 @@ enyo.kind({
 	kind: "enyo.Component",
 	debug: false,
 	published: {
-		phobos: null,
 		projectData: null,
 		pathResolver: null
 	},
@@ -73,8 +72,8 @@ enyo.kind({
 	 * @protected
 	 */
 	enyoIndexReady: function() {
-		// Pass to phobos
-		this.phobos.enyoIndexReady(this, this.$.enyoAnalyzer.index);
+		// Update the model to wake up the listeners
+		this.projectData.setEnyoIndexer(this.$.enyoAnalyzer.index);
 
 		// Start analysis of the project
 		this.buildProjectDb();	// TODO: exclude enyo/onyx from the analysis
@@ -84,8 +83,8 @@ enyo.kind({
 	 * @protected
 	 */
 	projectIndexReady: function() {
-		// Pass to phobos
-		this.phobos.projectIndexReady(this, this.$.projectAnalyzer.index);
+		// Update the model to wake up the listeners
+		this.projectData.setProjectIndexer(this.$.projectAnalyzer.index);
 	},
 	/**
 	 * Reset Phobos and AutoComplete enyo and project databases while the analysis
@@ -94,7 +93,8 @@ enyo.kind({
 	 * @protected
 	 */
 	resetPhobosDb: function() {
-		this.phobos.enyoIndexReady(this, null);
-		this.phobos.projectIndexReady(this, null);
+		// Update the model to wake up the listeners
+		this.projectData.setEnyoIndexer(null);
+		this.projectData.setProjectIndexer(null);
 	}
 });

@@ -49,11 +49,11 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 	},
-	getProjectController: function(projectData) {
-		this.projectCtrl = projectData.getProjectCtrl();
+	getProjectController: function() {
+		this.projectCtrl = this.projectData.getProjectCtrl();
 		if ( ! this.projectCtrl) {
-			this.projectCtrl = new ProjectCtrl({phobos: this, projectData: projectData});
-			projectData.setProjectCtrl(this.projectCtrl);
+			this.projectCtrl = new ProjectCtrl({projectData: this.projectData});
+			this.projectData.setProjectCtrl(this.projectCtrl);
 		}
 	},
 	//
@@ -79,8 +79,9 @@ enyo.kind({
 	},
 	openDoc: function(inDocData) {
 		this.docData = inDocData;
-		var projectData = this.docData.getProjectData();
-		this.getProjectController(projectData);
+		this.projectData = this.docData.getProjectData();
+		this.getProjectController();
+		this.setAutoCompleteData();
 
 		// Save the value to set it again after data has been loaded into ACE
 		var edited = this.docData.getEdited();
@@ -100,7 +101,7 @@ enyo.kind({
 			this.focusEditor();
 		}
 		else {
-			var origin = projectData.getService().getConfig().origin;
+			var origin = this.projectData.getService().getConfig().origin;
 			this.$.imageViewer.setAttribute("src", origin + file.pathname);
 		}
 		this.reparseAction();					// Synchronous call
@@ -153,18 +154,25 @@ enyo.kind({
 		this.$.errorPopup.show();
 	},
 	//
-	//
-	enyoIndexReady: function(originator, index) {
-		if (originator === this.projectCtrl) {		// Only if this corresponds to the being edited
-			// Pass to the autocomplete component a reference to the enyo indexer
-			this.$.autocomplete.setEnyoIndexer(index);
-		}
+	setAutoCompleteData: function() {
+		this.projectData.on('change:enyo-indexer', this.enyoIndexReady, this);
+		this.projectData.on('change:project-indexer', this.projectIndexReady, this);
+		this.$.autocomplete.setEnyoIndexer(this.projectData.getEnyoIndexer());
+		this.$.autocomplete.setProjectIndexer(this.projectData.getProjectIndexer());
 	},
-	projectIndexReady: function(originator, index) {
-		if (originator === this.projectCtrl) {		// Only if this corresponds to the being edited
-			// Pass to the autocomplete component a reference to the project indexer
-			this.$.autocomplete.setProjectIndexer(index);
-		}
+	resetAutoCompleteData: function() {
+		this.projectData.off('change:enyo-indexer', this.enyoIndexReady);
+		this.projectData.off('change:project-indexer', this.projectIndexReady);
+		this.$.autocomplete.setEnyoIndexer(null);
+		this.$.autocomplete.setProjectIndexer(null);
+	},
+	enyoIndexReady: function(model, value, options) {
+		// Pass to the autocomplete component a reference to the enyo indexer
+		this.$.autocomplete.setEnyoIndexer(value);
+	},
+	projectIndexReady: function(model, value, options) {
+		// Pass to the autocomplete component a reference to the project indexer
+		this.$.autocomplete.setProjectIndexer(value);
 	},
 	dumpInfo: function(inObject) {
 		var c = inObject;
@@ -516,7 +524,9 @@ enyo.kind({
 	 * @protected
 	 */
 	beforeClosingDocument: function() {
-		this.$.autocomplete.setProjectIndexer(null);
+		this.resetAutoCompleteData();
+		this.docData = null;
+		this.projectData = null;
 	},
 	// Show Find popup
 	findpop: function(){

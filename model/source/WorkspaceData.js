@@ -120,6 +120,18 @@ Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when
 	setProjectCtrl: function(controller) {
 		this.set("controller", controller);
 	},
+	getEnyoIndexer: function() {
+		return this.get("enyo-indexer");
+	},
+	setEnyoIndexer: function(indexer) {
+		this.set("enyo-indexer", indexer);
+	},
+	getProjectIndexer: function() {
+		return this.get("project-indexer");
+	},
+	setProjectIndexer: function(indexer) {
+		this.set("project-indexer", indexer);
+	},
 	sync: function(method, model, options) {
 		var store = model.localStorage || model.collection.localStorage;
 		store.sync(method, model, options);
