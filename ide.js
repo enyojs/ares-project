@@ -39,8 +39,13 @@ var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applicati
 	})
 	.options('H', {
 		alias : 'host',
-		description: 'host to bind the express server onto (default: 127.0.0.1)',
+		description: 'host to bind the express server onto',
 		default: '127.0.0.1'
+	})
+	.options('c', {
+		alias : 'config',
+		description: 'IDE configuration file',
+		default: path.resolve(__dirname, "ide.json")
 	})
 	.argv;
 
@@ -74,10 +79,11 @@ var platformOpen = {
 	linux: "xdg-open"
 };
 
-if (process.argv[2] === "runtest") {
-	var configPath = path.resolve(__dirname, "ide-test.json");
+var configPath;
+if (argv.runtest) {
+	configPath = path.resolve(__dirname, "ide-test.json");
 } else{
-	var configPath = process.argv[3] || path.resolve(__dirname, "ide.json");
+	configPath = argv.config;
 }
 if (!fs.existsSync(configPath)) {
 	throw "Did not find: '"+configPath+"': ";
@@ -179,6 +185,7 @@ var port = parseInt(argv.port, 10);
 var addr = argv.host;
 
 app.configure(function(){
+
 	app.use('/ide', express.static(enyojsRoot + '/'));
 	app.use('/enyo', express.static(enyojsRoot + '/enyo'));
 	app.use('/lib', express.static(enyojsRoot + '/lib'));
