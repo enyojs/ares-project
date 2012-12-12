@@ -14,20 +14,20 @@ module.exports = FsBase;
 
 function FsBase(inConfig, next) {
 
-	this.log = function() {
-		if (this.verbose) {
-			console.log.bind(this, this.name).apply(this, arguments);
-		}
-	};
-
 	for (var p in inConfig) {
 		this[p] = inConfig[p];
-		this.log("config: ", p, "=", inConfig[p]);
+	}
+
+	if (this.verbose) {
+		this.log = function() {
+			console.log.bind(this, this.name).apply(this, arguments);
+		};
+	} else {
+		this.log = function() {};
 	}
 
 	// parameters sanitization
 	this.root = path.resolve(this.root);
-	this.verbose = (this.verbose !== undefined) || (this.verbose !== null);
 
 	// sanity check
 	[
@@ -55,9 +55,9 @@ function FsBase(inConfig, next) {
 	}
 
 	this.app.use(express.logger('dev'));
-	this.app.use(this.cors);
+	this.app.use(this.cors.bind(this));
 	this.app.use(express.cookieParser());
-	this.app.use(this.auth);
+	this.app.use(this.auth.bind(this));
 
 	var verbs = {
 		// verbs that are transmitted over an HTTP GET method
@@ -153,11 +153,16 @@ function FsBase(inConfig, next) {
 		this.get(req, res, this.respond.bind(this, res));
 	}).bind(this));
 	
-	// Send back the URL (origin + pathname) to the creator, when
-	// port is bound
+	// Send back the service location information (origin,
+	// protocol, host, port, pathname) to the creator, when port
+	// is bound
 	this.server.listen(this.port, "127.0.0.1", null /*backlog*/, (function() {
-		this.origin = "http://127.0.0.1:"+this.server.address().port.toString();
+		this.port = this.server.address().port;
+		this.origin = "http://127.0.0.1:"+ this.port;
 		return next(null, {
+			protocol: 'http',
+			host: '127.0.0.1',
+			port: this.port,
 			origin: this.origin,
 			pathname: this.pathname
 		});
@@ -167,10 +172,21 @@ function FsBase(inConfig, next) {
 	 * Terminates express server
 	 */
 	this.quit = function() {
+		console.log("FsBase.quit()");
 		this.server.close();
 		this.log("exiting");
 	};
+
 }
+
+FsBase.prototype.auth = function(req, res, next) {
+	console.log("FsBase.auth()");
+	if (req.connection.remoteAddress !== "127.0.0.1") {
+		next(new Error("Access denied from IP address "+req.connection.remoteAddress));
+	} else {
+		next();
+	}
+};
 
 // CORS -- Cross-Origin Resources Sharing
 FsBase.prototype.cors = function(req, res, next) {
@@ -179,14 +195,6 @@ FsBase.prototype.cors = function(req, res, next) {
 	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control');
 	if ('OPTIONS' == req.method) {
 		res.status(200).end();
-	} else {
-		next();
-	}
-};
-
-FsBase.prototype.auth = function(req, res, next) {
-	if (req.connection.remoteAddress !== "127.0.0.1") {
-		next(new Error("Access denied from IP address "+req.connection.remoteAddress));
 	} else {
 		next();
 	}

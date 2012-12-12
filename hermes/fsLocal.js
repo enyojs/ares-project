@@ -10,7 +10,6 @@ var fs = require("fs"),
     util  = require("util"),
     mkdirp = require("mkdirp"),
     async = require("async"),
-    querystring = require("querystring"),
     FsBase = require(__dirname + "/lib/fsBase"),
     HttpError = require(__dirname + "/lib/httpError");
 

@@ -14,7 +14,9 @@ var fs = require("fs"),
     express = require(path.resolve(__dirname, "hermes/filesystem/node_modules/express")),
     optimist = require(path.resolve(__dirname, "hermes/node_modules/optimist")),
     util  = require('util'),
-    spawn = require('child_process').spawn;
+    spawn = require('child_process').spawn,
+    querystring = require("querystring"),
+    http = require('http');
 
 var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applications.\nUsage: "$0" [OPTIONS]\n')
 	.options('h', {
@@ -112,14 +114,16 @@ console.dir(ide.res);
 
 function handleMessage(service) {
 	return function(msg) {
-		try {
-			service.origin = msg.origin;
-			service.pathname = msg.pathname;
+		if (msg.protocol && msg.host && msg.port && msg.origin && msg.pathname) {
+			service.dest = msg;
+			service.origin = 'http://' + argv.host + ':' + argv.port;
+			service.pathname = '/res/services/' + service.id;
+			
 			if (service.origin.match(/^https:/)) {
 				console.info("Service['"+service.id+"']: connect to <"+service.origin+"> to accept SSL certificate");
 			}
-		} catch (e) {
-			console.error("Error updating URL for service "+service.id+": "+e);
+		} else {
+			console.error("Error updating URL for service "+service.id);
 		}
 	};
 }
@@ -168,6 +172,45 @@ function startService(service) {
 	subProcesses.push(subProcess);
 }
 
+function proxyServices(req, res, next) {
+	debugger;			// XXX
+	console.dir(req.params);
+	console.dir(req.query);
+	var query = {},
+	    id = req.params.service_id,
+	    service = ide.res.services.filter(function(service) {
+		    return service.id === id;
+	    })[0];
+	for (var key in req.query) {
+		if (key && req.query[key]) {
+			query[key] = req.query[key];
+		}
+	}
+	var options = {
+		// host to forward to
+		host:   service.dest.host,
+		// port to forward to
+		port:   service.dest.port,
+		// path to forward to
+		path:   service.dest.pathname + '/' + req.params[0] + '?' + querystring.stringify(query),
+		// request method
+		method: req.method,
+		// headers to send
+		headers: req.headers
+	};
+
+	var creq = http.request(options, function(cres) {
+		for (var header in cres.headers) {
+			res.header(header, cres.headers[header]);
+		}
+		res.writeHead(cres.statusCode);
+		cres.pipe(res);
+	}).on('error', function(e) {
+		next(e);
+	});
+	creq.end();
+}
+
 ide.res.services.filter(function(service){
 	return service.active;
 }).forEach(function(service){
@@ -190,13 +233,25 @@ app.configure(function(){
 	app.use('/enyo', express.static(enyojsRoot + '/enyo'));
 	app.use('/lib', express.static(enyojsRoot + '/lib'));
 	app.use('/test', express.static(enyojsRoot + '/test'));
-	app.get('/res/timestamp', function(req, res) {
+
+	app.use(express.logger('dev'));
+
+	app.get('/', function(req, res, next) {
+		res.redirect('/ide/ares/');
+	});
+
+	app.get('/res/timestamp', function(req, res, next) {
 		res.status(200).json({timestamp: ide.res.timestamp});
 	});
-	app.get('/res/services', function(req, res) {
+	app.get('/res/services', function(req, res, next) {
+		//var exdate=new Date();
+		//exdate.setDate(exdate.getDate() + 10);
+		
+		//res.cookie('remember', '1', { path: '/', expires: exdate, httpOnly: true });
+
 		res.status(200).json({services: ide.res.services});
 	});
-	app.get('/res/services/:service_id', function(req, res) {
+	app.get('/res/services/:service_id', function(req, res, next) {
 		var serviceId = req.params.serviceId;
 		var service = null;
 		for (var i = 0; i < ide.res.services.length; i++) {
@@ -207,10 +262,8 @@ app.configure(function(){
 		}
 		res.status(200).json({service: service});
 	});
-	app.get('/', function(req, res) {
-		res.redirect('/ide/ares/');
-	});
-	
+	app.all('/res/services/:service_id/*', proxyServices);
+
 });
 app.listen(port, addr);
 
