@@ -277,6 +277,7 @@ enyo.kind({
 		this.reparseAction();
 		if (this.analysis) {
 			var kinds = [];
+			var data = {kinds: kinds, projectData: this.projectData};
 			for (var i=0; i < this.analysis.objects.length; i++) {
 				var o = this.analysis.objects[i];
 				var comps = o.components;
@@ -291,7 +292,7 @@ enyo.kind({
 				}
 			}
 			if (kinds.length > 0) {
-				this.doDesignDocument(kinds);
+				this.doDesignDocument(data);
 				return;
 			}
 		}
