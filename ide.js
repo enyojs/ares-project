@@ -150,6 +150,9 @@ function startService(service) {
 	service.params.forEach(function(inParam){
 		params.push(platformSubst(inParam));
 	});
+	if (service.verbose) {
+		params.push('-v');
+	}
 	console.log("> Service['"+service.id+"']: executing '"+command+" "+params.join(" ")+"'");
 	var subProcess = spawn(command, params, options);
 	subProcess.stderr.on('data', serviceEcho(service));

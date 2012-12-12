@@ -11,7 +11,7 @@
 				"hermes/fsLocal.js", "-P", "/files", "-p", "0", "@HOME@"
 			],
 			"useJsonp":false,
-			"debug": false,
+			"verbose": false,
 			"respawn": false
 		},
 		{
@@ -30,7 +30,7 @@
 				"appSecret": ""
 			},
 			"useJsonp":false,
-			"debug": false
+			"verbose": false
 		},
 		{
 			"active":true,
@@ -43,7 +43,7 @@
 				"hermes/bdPhoneGap.js", "-P", "/phonegap", "-p", "0"
 			],
 			"useJsonp":false,
-			"debug": false,
+			"verbose": false,
 			"auth": {
 				"type": "basic"
 			},
