@@ -1,4 +1,10 @@
 enyo.kind({
+	name: "AresTab",
+	kind: "GroupItem",
+	classes: "onyx-radiobutton ares-tab",
+});
+
+enyo.kind({
 	name: "DocumentToolbar",
 	kind: "onyx.Toolbar",
 	events: {
@@ -7,7 +13,7 @@ enyo.kind({
 		onClose: "",
 		onSave: "",
 		onNewKind: "",
-		onDesign: "",
+		onDesign: ""
 	},
 	components: [
 		{name: "container", classes: "ares-docbar-container", kind: "FittableColumns", components: [
@@ -16,7 +22,7 @@ enyo.kind({
 				{kind: "FittableColumns", components: [
 					{kind: "onyx.Button", content: "Save", ontap: "saveFile"},
 					{kind: "onyx.Button", content: "New Kind", ontap: "newKind"},
-					{kind: "onyx.Button", content: "Designer", ontap: "designFile"}
+					{name: "designButton", kind: "onyx.Button", content: "Designer", ontap: "designFile"}
 				]}
 			]},
 			{fit: true},
@@ -26,16 +32,19 @@ enyo.kind({
 	tabs: {},
 	showControls: function() {
 		this.$.drawer.setOpen(true);
+		// lock designButton's width, so it doesn't move when the caption changes
+		var w = this.$.designButton.getBounds().width;
+		this.$.designButton.setBounds({width: w});
 	},
 	hideControls: function() {
 		this.$.drawer.setOpen(false);
 	},
 	createFileTab: function(name, id) {
 		var c = this.$.tabs.createComponent({
-			classes: "ares-tab-button",
+			kind: "AresTab",
 			fileId: id,
 			components: [
-	    		{content: name},
+	    		{content: name, classes: "ares-tab-label"},
 				{kind: "onyx.IconButton", classes: "ares-doc-close", src: "$lib/onyx/images/progress-button-cancel.png", fileId: id, ontap: "closeFile"},
 			],
 			ontap: "switchFile"
@@ -74,5 +83,13 @@ enyo.kind({
 	removeTab: function(id) {
 		this.tabs[id].destroy();
 		this.tabs[id] = undefined;
+		this.$.container.reflow();
+	},
+	setDesignMode: function(toDesign) {
+		if (toDesign) {
+			this.$.designButton.setContent("Editor");
+		} else {
+			this.$.designButton.setContent("Designer");
+		}
 	}
 });

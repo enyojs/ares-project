@@ -19,7 +19,6 @@ enyo.kind({
 				{name: "designerButton", kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
-				{name: "left", kind: "leftPanels", showing: false,	arrangerKind: "CardArranger", onCss: "newcssAction"},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
 						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop"},
@@ -121,12 +120,12 @@ enyo.kind({
 	adjustPanelsForMode: function(mode) {
 		// whether to show or not a panel, imageViewer and ace cannot be enabled at the same time
 		var showModes = {
-			json:		{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
-			javascript:	{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: true,  designerButton: true ,  right: true  },
-			html:		{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
-			css:		{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: true  },
-			text:		{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
-			image:		{left: false, imageViewer: true , ace: false, saveButton: false, newKindButton: false, designerButton: false,  right: false }
+			json:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
+			javascript:	{imageViewer: false, ace: true , saveButton: true , newKindButton: true,  designerButton: true ,  right: true  },
+			html:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
+			css:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: true  },
+			text:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
+			image:		{imageViewer: true , ace: false, saveButton: false, newKindButton: false, designerButton: false,  right: false }
 		};
 
 		var showSettings = showModes[mode]||showModes['text'];
@@ -134,21 +133,20 @@ enyo.kind({
 			this.$[stuff].setShowing( showSettings[stuff] ) ;
 		}
 
-        // xxxIndex: specify what to show in the "LeftPanels" or "RightPanels" kinds (declared at the end of this file)
+        // xxxIndex: specify what to show in the "RightPanels" kinds (declared at the end of this file)
         // xxxIndex is ignored when matching show setting is false
 		var modes = {
-			json:		{leftIndex: 0, rightIndex: 0},
-			javascript:	{leftIndex: 1, rightIndex: 1},
-			html:		{leftIndex: 2, rightIndex: 2},
-			css:		{leftIndex: 3, rightIndex: 3},
-			text:		{leftIndex: 0, rightIndex: 0},
-			image:		{leftIndex: 0, rightIndex: 0}
+			json:		{rightIndex: 0},
+			javascript:	{rightIndex: 1},
+			html:		{rightIndex: 2},
+			css:		{rightIndex: 3},
+			text:		{rightIndex: 0},
+			image:		{rightIndex: 0}
 		};
 
 		var settings = modes[mode]||modes['text'];
-		this.$.left.setIndex(settings.leftIndex);
 		this.$.right.setIndex(settings.rightIndex);
-
+		this.$.body.reflow();
 		return showSettings.ace ;
 	},
 	showWaitPopup: function(inMessage) {
@@ -184,7 +182,7 @@ enyo.kind({
 	dumpInfo: function(inObject) {
 		var c = inObject;
 		if (!c || !c.superkinds) {
-		//console.log(this.$.right.$.dump);
+		//enyo.log(this.$.right.$.dump);
 			this.$.right.$.dump.setContent("(no info)");
 			return;
 		}
@@ -392,7 +390,7 @@ enyo.kind({
 			this.reparseAction();
 		} else {
 			// There is no parser data for the current file
-			console.log("Unable to insert missing handler methods");
+			enyo.log("Unable to insert missing handler methods");
 		}
 	},
 	/**
@@ -440,7 +438,7 @@ enyo.kind({
 			}
 		} else {
 			// There is no block information for that kind - Parser is probably not up-to-date
-			console.log("Unable to insert missing handler methods");
+			enyo.log("Unable to insert missing handler methods");
 		}
 	},
 	// called when designer has modified the components
@@ -595,17 +593,4 @@ enyo.kind({
 	test: function(inEvent) {
 		this.doCss(inEvent);
 	}
-});
-
-enyo.kind({name: "leftPanels",kind: "Panels", wrap: false,
-	components: [
-		{// left panel for JSON goes here
-		},
-		{// left panel for javascript goes here
-		},
-		{// left panel for HTML goes here
-		},
-		{ // left panel for CSS goes here
-		}
-	]
 });

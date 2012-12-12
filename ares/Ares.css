@@ -2,6 +2,20 @@ body {
 	background-color: #aaa;
 }
 /**/
+.ares-groupbox-item-key {
+	padding: 0.5em;
+}
+.ares-groupbox-item-value {
+	width: 50%;
+	color: #000000;
+	float: right;
+}
+.ares-waitpopup {
+	margin-left: auto;
+	margin-right: auto;
+	width: 20%; 
+}
+/**/
 .ares_harmonia_providerList {
 	width: 30%;
 }
@@ -10,6 +24,7 @@ body {
 }
 .ares_harmonia_authPanel {
 	padding: 6px;
+	width: 70%;
 }
 #ares_harmonia_hermesFileTree {
 	width: 500px;
@@ -137,12 +152,6 @@ body {
 	width: 200px;
 }
 
-.ares-tab-button {
-	padding-right: 0px;
-	height: 36px;
-}
-
-
 .ares-no-padding {
 	padding: 0px;
 	border: 0px;
@@ -150,6 +159,15 @@ body {
 
 .ares-scale-background {
 	background-size: 100%;
+}
+
+.ares-tab {
+	display: inline-block;
+	color: black;
+}
+
+.ares-tab-label {
+	display: inline-block;
 }
 
 .ares-doc-close {
@@ -163,6 +181,32 @@ body {
 	margin-top: 0px;
 	margin-bottom: 0px;
 	width: 100%;
+}
+
+/* Why z-index: 11? Because otherwise, on Opera, parts of the editor show through */
+.ares-files-slider {
+	height: 100%;
+	width: 100%;
+	z-index: 11;
+}
+
+.ares-actionpopup {
+	text-align: center;
+	padding: 20px;
+}
+
+.ares-title {
+	font-size: 19px;
+	font-weight: bold;
+}
+
+.ares-message {
+	padding: 8px;
+	vertical-align: middle;
+}
+
+.ares-padleft {
+	padding-left: 8px;
 }
 
 .enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-filedrawer {

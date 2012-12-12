@@ -61,27 +61,24 @@ _.extend(AresStore.prototype, {
 		delete this.data[model.id];
 		this.save();
 		return model;
-    }
-  });
+    },
+    sync: function(method, model, options) {
+		var resp;
 
-Backbone.sync = function(method, model, options) {
+		switch (method) {
+			case "read":    resp = model.id ? this.find(model) : this.findAll(); break;
+			case "create":  resp = this.create(model);		break;
+			case "update":  resp = this.update(model);      break;
+			case "delete":  resp = this.destroy(model);     break;
+		}
 
-	var resp;
-	var store = model.localStorage || model.collection.localStorage;
-
-    switch (method) {
-		case "read":    resp = model.id ? store.find(model) : store.findAll(); break;
-		case "create":  resp = store.create(model);                            break;
-		case "update":  resp = store.update(model);                            break;
-		case "delete":  resp = store.destroy(model);                           break;
+		if (resp) {
+			options.success(resp);
+		} else {
+			options.error("Record not found");
+		}
 	}
-
-	if (resp) {
-		options.success(resp);
-	} else {
-		options.error("Record not found");
-	}
-};
+});
 
 if ( ! Ares.Model) {
 	Ares.Model = {};
@@ -114,6 +111,10 @@ Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when
 	},
 	setProjectUrl: function(projectUrl) {
 		return this.set("project-url", projectUrl);
+	},
+	sync: function(method, model, options) {
+		var store = model.localStorage || model.collection.localStorage;
+		store.sync(method, model, options);
 	}
 });
 
@@ -162,6 +163,10 @@ Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collec
 			this.createProject(newName, oldProject.getFolderId(), oldProject.getServiceId());
 			oldProject.destroy();
 		}
+	},
+	sync: function(method, model, options) {
+		var store = model.localStorage || model.collection.localStorage;
+		store.sync(method, model, options);
 	}
 });
 

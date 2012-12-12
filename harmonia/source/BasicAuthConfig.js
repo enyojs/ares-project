@@ -2,15 +2,24 @@ enyo.kind({
 	name: "BasicAuthConfig",
 	kind: "onyx.Groupbox",
 	classes: "onyx-groupbox enyo-fill",
+
+	// private members
+	debug: false,
+
+	// public members
 	published: {
-		serviceId: "",
-		serviceName: "",
+		serviceId: "",		// from ide.json
+		serviceName: "",	// from ide.json
 		username: "",
 		password: ""
 	},
+
+	// emitted events
 	events: {
 		onUpdateAuth: ""
 	},
+
+	// static UI elements
 	components: [
 		{kind: "onyx.GroupboxHeader", name: "serviceName"},
 		{content: "User Name:"},
@@ -23,6 +32,7 @@ enyo.kind({
 		]},
 		{kind: "onyx.Button", content: "Save", ontap: "save"}
 	],
+
 	/**
 	 * @protected
 	 */
