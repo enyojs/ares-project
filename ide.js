@@ -51,7 +51,7 @@ var platformOpen = {
 if (process.argv[2] === "runtest") {
 	var configPath = path.resolve(__dirname, "ide-test.json");
 } else{
-	var configPath = process.argv[3] || path.resolve(__dirname, "ide.json");
+	var configPath = process.argv[2] || path.resolve(__dirname, "ide.json");
 }
 if (!fs.existsSync(configPath)) {
 	throw "Did not find: '"+configPath+"': ";
