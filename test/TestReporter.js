@@ -53,7 +53,6 @@ enyo.kind({
 			enyo.log("TestReporter: testBegun: "+JSON.stringify(inData));
 		}
 		this.$.group.createComponent({name: inData.data.test, classes: "enyo-testcase-running", content: inData.data.test + ": running", allowHtml: true}).render();
-		this.reflow();
 	},
 	formatStackTrace: function(inStack) {
 		var stack = inStack.split("\n");
