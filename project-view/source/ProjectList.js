@@ -43,7 +43,23 @@ enyo.kind({
 				{kind: "onyx.Tooltip", content: "Phonegap build"}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_preview.png", onclick: "doPreview"},
+
+				{kind: "onyx.MenuDecorator", onSelect: "launchPreview", components: [
+					 {kind: "onyx.IconButton",
+					  src: "$project-view//assets/images/project_preview.png"
+					 },
+					 {kind: "onyx.Menu", components: [
+						  // value data should be stored elsewhere. Which means that these control
+						  // should be generated used this data from "eleswhere" . not there yet
+						  {content: "iPhone\u2122",      value: { height:  480, width:  320, ppi: 163 }},
+						  {content: "iPhone\u2122 4",    value: { height:  940, width:  660, ppi: 326 }},
+						  {content: "iPhone\u2122 5",    value: { height: 1146, width:  640, ppi: 326 }},
+						  {content: "iPad\u2122 Retina", value: { height: 2048, width: 1536, ppi: 264 }},
+						  {content: "iPad\u2122 2",      value: { height: 1280, width:  800, ppi: 132 }},
+						  {content: "iPad\u2122 mini",   value: { height: 1024, width:  768, ppi: 163 }}
+					  ]}
+
+				]},
 				{kind: "onyx.Tooltip", content: "Preview Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
@@ -187,6 +203,12 @@ enyo.kind({
 			return undefined;	// Exclude
 		}
 		return value;	// Accept
+	},
+	launchPreview: function(inSender, inEvent) {
+		if (inEvent) {
+			this.doPreview(inEvent.originator.value) ;
+		}
+		return true ;
 	},
 	statics: {
 		underTest: false
