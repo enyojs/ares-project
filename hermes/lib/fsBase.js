@@ -223,13 +223,21 @@ FsBase.prototype.respond = function(res, err, response) {
 FsBase.prototype.encodeFileId = function(filePath) {
 	// can use this.root, this.origin & this.pathname in addition
 	// to filePath to encode the fileId
-	var fileId = encodeURIComponent(filePath);
+	var buf = new Buffer(filePath, 'utf-8');
+	var fileId = buf.toString('hex');
+
+	//var fileId = encodeURIComponent(filePath);
+
 	return fileId;
 };
 
 FsBase.prototype.decodeFileId = function(fileId) {
 	// can use this.root, this.origin & this.pathname in addition
 	// to fileId to decode the fileId
-	var filePath = decodeURIComponent(fileId);
+	var buf = new Buffer(fileId, 'hex');
+	var filePath = buf.toString('utf-8');
+
+	//var filePath = decodeURIComponent(fileId);
+
 	return filePath;
 };
