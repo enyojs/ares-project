@@ -10,11 +10,13 @@ enyo.kind({
 		{name: "selectionOutline", kind: "DesignerOutline", style: "border: 5px dotted rgba(255, 146, 38, 0.7);"},
 		{name: "containerOutline", kind: "DesignerOutline", style: "border: 5px solid rgba(24, 24, 255, 0.3);"},
 		{kind: "FittableRows", classes: "deimos_panel_center  enyo-fit", components: [
-			//{kind: "Button", content: "Undo"},
-			//{kind: "Button", content: "Redo"},
-			{kind: "Button", content: "Up", ontap: "upAction"},
-			{kind: "Button", content: "Down", ontap: "downAction"},
-			{kind: "Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
+			{style:"text-align:center;", components: [
+				//{kind: "Button", content: "Undo"},
+				//{kind: "Button", content: "Redo"},
+				{kind: "onyx.Button", content: "Up", ontap: "upAction"},
+				{kind: "onyx.Button", content: "Down", ontap: "downAction"},
+				{kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
+			]},
 			{name: "client", fit: true, kind: "DesignerPanel"}
 		]}
 	],
@@ -64,9 +66,10 @@ enyo.kind({
 	},
 	getSelectedContainer: function() {
 		var s = this.selection;
-		if (s && !s.isContainer) {
-			s = s.container;
-		}
+		// Remove container adjustment for now; makes designer much more usable
+		//if (s && !s.isContainer) {
+		//	s = s.container;
+		//}
 		return s;
 	},
 	select: function(inControl) {
@@ -79,6 +82,7 @@ enyo.kind({
 	},
 	refresh: function() {
 		this.select(this.selection);
+		this.$.client.resized();
 	},
 	load: function(inDocument) {
 		this.proxyArray(inDocument);
@@ -86,6 +90,7 @@ enyo.kind({
 		this.$.model.destroyComponents();
 		this.$.client.createComponents(inDocument, {owner: this.$.model});
 		this.render();
+		this.resized();
 		this.doChange();
 		var c = this.$.client.children[0];
 		if (c) {
@@ -167,6 +172,7 @@ enyo.kind({
 			}
 		}
 		this.$.client.render();
+		this.$.client.resized();
 		//
 		//this.modify();
 		this.select(b);
@@ -180,6 +186,7 @@ enyo.kind({
 		// which is not true in general
 		move(inControl, inIndex, inControl.parent.children);
 		move(inControl, inIndex, inControl.container.controls);
+		this.$.client.resized();
 	},
 	nudgeControl: function(inControl, inDelta) {
 		if (inControl) {

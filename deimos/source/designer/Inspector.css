@@ -13,3 +13,25 @@
 input.inspector-field-checkbox {
 	margin: 6px 0 10px 0;
 }
+
+.onyx-radiobutton.inspector-tabbutton {
+	font-size: 12px;
+	padding: 5px; 
+	background-color: #CCC; 
+	text-transform: uppercase; 
+}
+.onyx-radiobutton.inspector-tabbutton.active {
+	color:black;
+}
+
+.thirds {
+	width:33%;
+}
+
+.thirds:last-child {
+	width:34%;
+}
+
+.halves {
+	width:50%;
+}
