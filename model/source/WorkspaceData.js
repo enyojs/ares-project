@@ -1,7 +1,13 @@
 var AresStore = function(name, eraseAll) {
 	this.name = name;
-	var store = localStorage.getItem(this.name);
-	this.data = (store && JSON.parse(store)) || {};
+
+	if (eraseAll === true) {
+		localStorage.removeItem(this.name);
+		this.data = {};
+	} else {
+		var store = localStorage.getItem(this.name);
+		this.data = (store && JSON.parse(store)) || {};
+	}
 
 	// Remove data in 'old' format (prior introduction of WorkspaceData.projects)
 	if (_.isArray(this.data)) {			// TODO: to be removed in a while
@@ -107,6 +113,12 @@ Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when
 	},
 	setProjectUrl: function(projectUrl) {
 		this.set("project-url", projectUrl);
+	},
+	getProjectCtrl: function() {
+		return this.get("controller");
+	},
+	setProjectCtrl: function(controller) {
+		this.set("controller", controller);
 	},
 	sync: function(method, model, options) {
 		var store = model.localStorage || model.collection.localStorage;
