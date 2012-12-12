@@ -142,7 +142,7 @@ enyo.kind({
 		if ( this.currentProject) {
 			window.open(
 				this.currentProject.getProjectUrl() + '/index.html' ,
-				'Project preview',
+				null, // ensure that a new window is created each time preview is tapped
 				'scrollbars=auto, titlebar=yes, height=' + inEvent.height + ',width=' + inEvent.width,
 				false
 			);
