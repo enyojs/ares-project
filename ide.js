@@ -16,11 +16,37 @@ var fs = require("fs"),
     util  = require('util'),
     spawn = require('child_process').spawn;
 
-var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applications.\nUsage: "$0"\n')
+var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applications.\nUsage: "$0" [OPTIONS]\n')
+	.options('h', {
+		alias : 'help',
+		description: 'help message',
+		boolean: true
+	})
+	.options('T', {
+		alias : 'runtest',
+		description: 'Run the non-regression test suite',
+		boolean: true
+	})
+	.options('b', {
+		alias : 'browser',
+		description: 'Open the default browser on the Ares URL',
+		boolean: true
+	})
+	.options('p', {
+		alias : 'port',
+		description: 'port (o) local IP port of the express server (default: 9009, 0: dynamic)',
+		default: '9009'
+	})
+	.options('H', {
+		alias : 'host',
+		description: 'host to bind the express server onto (default: 127.0.0.1)',
+		default: '127.0.0.1'
+	})
 	.argv;
 
-if ((argv.h) || (argv.help)) {
-	argv.showHelp();
+if (argv.help) {
+	optimist.showHelp();
+	process.exit(0);
 }
 
 // Load IDE configuration & start per-project file servers
@@ -146,8 +172,8 @@ ide.res.services.filter(function(service){
 var enyojsRoot = path.resolve(__dirname,".");
 var app = express.createServer();
 
-var port = parseInt(process.argv[3] || "9009", 10);
-var addr = process.argv[4] || "127.0.0.1";
+var port = parseInt(argv.port, 10);
+var addr = argv.host;
 
 app.configure(function(){
 	app.use('/ide', express.static(enyojsRoot + '/'));
@@ -178,14 +204,21 @@ app.configure(function(){
 });
 app.listen(port, addr);
 
-// Open default browser
+// Run non-regression test suite
 
 var page = "index.html";
-if (process.argv[2] === "runtest") {
+if (argv.runtest) {
 	page = "test.html";
 }
+
+// Open default browser
+
 var url = "http://" + addr + ":" + port + "/ide/ares/" + page;
-spawn(platformOpen[process.platform], [url]);
+if (argv.browser) {
+	spawn(platformOpen[process.platform], [url]);
+} else {
+	console.log("Ares now running at <" + url + ">");
+}
 
 // Exit path
 
