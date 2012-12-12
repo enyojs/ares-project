@@ -9,7 +9,7 @@ enyo.kind({
 	},
 	classes: "enyo-testcase",
 	timeout: 3000,
-	debug: false,
+	debug: true,
 	create: function() {
 		this.inherited(arguments);
 		// Post ARES.TEST.NAME event to infor the Ares Test Reporter the name of the TestSuite
@@ -27,8 +27,9 @@ enyo.kind({
 		this.$.testSuite.runAllTests();
 	},
 	testBegun: function(inSender, inEvent) {
-		enyo.log("=>Ares Proxy Reporter *****" + "Group: " + this.name + " *****test: " +inEvent.testName + " is running ...");
-
+		if (this.debug) {
+			enyo.log("=>Ares Proxy Reporter *****" + "Group: " + this.name + " *****test: " +inEvent.testName + " is running ...");
+		}
 
 		// Post ARES.TEST.RUNNING event with info related to the group and the name of the unit test
 		var obj = {

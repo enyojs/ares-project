@@ -26,28 +26,20 @@ enyo.kind({
 	],
 	classes: "enyo-testcase",
 	timeout: 3000,
-	aresIdeW: null,
 	debug: true,
 	create: function() {
 		if (this.debug) {
-			enyo.log("I am Ares Test Reporter ...");
+			//enyo.log("I am Ares Test Reporter ...");
 		}
 		this.inherited(arguments);
-		this.aresIdeW = Ares.TestReporter.aresIdeW;
 		// listen for dispatched messages (received from Ares Ide)
 		window.addEventListener("message", enyo.bind(this, "recMsgFromIde"), false);
 	},
 	runTests: function() {
-		if (this.aresIdeW !== null) {			
-			if (this.debug) {
-				enyo.log("Post ARES.TEST.RUN ...");
-				enyo.log("this.aresIdeW: "+this.aresIdeW);
-			}
-			this.aresIdeW.postMessage("ARES.TEST.RUN", "http://127.0.0.1:9009");
-		} else {
-			if (this.debug) enyo.log("window.self.opener ...POST ARES.TEST.RERUN");
-			window.self.opener.postMessage("ARES.TEST.RERUN", "http://127.0.0.1:9009");
+		if (this.debug) {
+			enyo.log("Post ARES.TEST.RUN ...");
 		}
+		window.self.opener.postMessage("ARES.TEST.RUN", "http://127.0.0.1:9009");
 		this.$.runTests.setDisabled(true);
 	},
 	testNameDisplay: function(inData) {
@@ -55,7 +47,6 @@ enyo.kind({
 			enyo.log("TestReporter: testNameDisplay: "+JSON.stringify(inData));
 		}
 		this.$.group.createComponent({classes: "enyo-testcase-title", content: inData.data}).render();
-		this.reflow();
 	},
 	testBegun: function(inData) {
 		if (this.debug) {
@@ -110,11 +101,6 @@ enyo.kind({
 		if (event.source === null) {
 			return;
 		}
-		// keep the reference 
-		if (this.aresIdeW === null) {
-			this.aresIdeW = event.source;
-			Ares.TestReporter.aresIdeW = this.aresIdeW;			
-		}
 		if (event.data === "ARES.TEST.START") {
 			if (this.debug) enyo.log("Received ARES.TEST.START ... Post ARES.TEST.READY ...");
 			event.source.postMessage("ARES.TEST.READY", event.origin);
@@ -131,9 +117,6 @@ enyo.kind({
 			if (this.debug) enyo.log("Received ARES.TEST.RESULT ...");
 			this.updateTestDisplay(event.data);
 		}
-	},
-	statics: {
-		aresIdeW: null,
-    }
+	}
 });
 

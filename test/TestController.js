@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "Ares.TestController",
 	kind: enyo.Component,
-	debug: true,
+	debug: false,
 	status: "None",
 	create: function() {
 		if (this.debug) {
@@ -51,13 +51,6 @@ enyo.kind({
 			}
 			// Create TextCtrlRunner and TestProxyReporter components
 			// TestProxyReporter is created by TestCtrlRunner
-			this.createComponent({name: "runner", kind: "Ares.TestCtrlRunner"});
-		}
-		if (event.data === "ARES.TEST.RERUN") {
-			if (this.debug) {
-				this.status = event.data;
-				enyo.log("Received ARES.TEST.RERUN ... Status: "+this.status);
-			}
 			if (this.$.runner) {
 				this.removeComponent(this.$.runner);
 			}
