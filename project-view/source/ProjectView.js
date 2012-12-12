@@ -138,12 +138,12 @@ enyo.kind({
 	/**
 	 * Launch a preview widget of the selected project in a separate frame
 	 */
-	launchPreview: function() {
-		if ( this.currentProject ) {
+	launchPreview: function(inSender, inEvent) {
+		if ( this.currentProject) {
 			window.open(
 				this.currentProject.getProjectUrl() + '/index.html' ,
 				'Project preview',
-				'scrollbars=auto, titlebar=yes, height=640,width=640',
+				'scrollbars=auto, titlebar=yes, height=' + inEvent.height + ',width=' + inEvent.width,
 				false
 			);
 		}
