@@ -2,10 +2,7 @@ enyo.kind({
 	name: "Phobos",
 	classes: "enyo-unselectable",
 	components: [
-		{name: "enyoAnalyzer", kind: "Analyzer", onIndexReady: "enyoIndexReady"},
-		{name: "projectAnalyzer", kind: "Analyzer", onIndexReady: "projectIndexReady"},
-		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
-		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
+		{kind: "Analyzer", name: "fileAnalyzer"},
 		{kind: "DragAvatar", components: [
 			{tag: "img", src: "$deimos/images/icon.png"}
 		]},
@@ -52,19 +49,12 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 	},
-	/**
-	 * Create a path resolver (similar to enyo.path) to resolve
-	 * "$enyo", "$lib", ... when launching the Analyzer on the
-	 * enyo/onyx used by the loaded project.
-	 * @param  inProjectPath
-	 * @protected
-	 */
-	createPathResolver: function(inProjectPath) {					// TODO TBC Should go in this.docData
-		this.pathResolver = new enyo.pathResolverFactory();
-		this.pathResolver.addPaths({
-			enyo: inProjectPath + "/enyo",
-			lib: "$enyo/../lib"
-		});
+	getProjectController: function(projectData) {
+		this.projectCtrl = projectData.getProjectCtrl();
+		if ( ! this.projectCtrl) {
+			this.projectCtrl = new ProjectCtrl({phobos: this, projectData: projectData});
+			projectData.setProjectCtrl(this.projectCtrl);
+		}
 	},
 	//
 	saveDocAction: function() {
@@ -89,13 +79,14 @@ enyo.kind({
 	},
 	openDoc: function(inDocData) {
 		this.docData = inDocData;
+		var projectData = this.docData.getProjectData();
+		this.getProjectController(projectData);
 
 		// Save the value to set it again after data has been loaded into ACE
 		var edited = this.docData.getEdited();
 
 		var file = this.docData.getFile();
 		var extension = file.name.split(".").pop();
-		var projectData = this.docData.getProjectData();
 		this.hideWaitPopup();
 		this.analysis = null;
 		var mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image"}[extension] || "text";
@@ -112,10 +103,8 @@ enyo.kind({
 			var origin = projectData.getService().getConfig().origin;
 			this.$.imageViewer.setAttribute("src", origin + file.pathname);
 		}
-		this.reparseAction();
-		projectUrl = projectData.getProjectUrl();
-		this.createPathResolver(projectUrl);
-		this.buildEnyoDb(projectUrl, this.pathResolver);	// this.buildProjectDb() will be invoked when enyo analysis is finished
+		this.reparseAction();					// Synchronous call
+		this.projectCtrl.buildEnyoDb();			// this.buildProjectDb() will be invoked when enyo analysis is finished
 		this.$.documentLabel.setContent(file.name);
 
 		this.docData.setEdited(edited);
@@ -165,22 +154,17 @@ enyo.kind({
 	},
 	//
 	//
-	buildEnyoDb: function(inProjectUrl, inPathResolver) {
-		this.$.enyoAnalyzer.analyze(["$enyo/source", "$lib/onyx", "$lib/layout"], inPathResolver);
+	enyoIndexReady: function(originator, index) {
+		if (originator === this.projectCtrl) {		// Only if this corresponds to the being edited
+			// Pass to the autocomplete component a reference to the enyo indexer
+			this.$.autocomplete.setEnyoIndexer(index);
+		}
 	},
-	buildProjectDb: function(inProjectUrl, inPathResolver) {
-		this.$.projectAnalyzer.analyze([inProjectUrl], inPathResolver);
-	},
-	enyoIndexReady: function() {
-		// Pass to the autocomplete component a reference to the enyo indexer
-		this.$.autocomplete.setEnyoIndexer(this.$.enyoAnalyzer.index);
-
-		// Start analysis of the project
-		this.buildProjectDb(this.projectUrl, this.pathResolver);	// TODO: exclude enyo/onyx from the analysis
-	},
-	projectIndexReady: function() {
-		// Pass to the autocomplete component a reference to the project indexer
-		this.$.autocomplete.setProjectIndexer(this.$.projectAnalyzer.index);
+	projectIndexReady: function(originator, index) {
+		if (originator === this.projectCtrl) {		// Only if this corresponds to the being edited
+			// Pass to the autocomplete component a reference to the project indexer
+			this.$.autocomplete.setProjectIndexer(index);
+		}
 	},
 	dumpInfo: function(inObject) {
 		var c = inObject;
@@ -228,7 +212,7 @@ enyo.kind({
 			};
 			try {
 				this.analysis = module;
-				this.$.projectAnalyzer.index.indexModule(module);
+				this.$.fileAnalyzer.index.indexModule(module);
 				this.updateObjectsLines(module);
 
 				// dump the object where the cursor is positioned, if it exists
