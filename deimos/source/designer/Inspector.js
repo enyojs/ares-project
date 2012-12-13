@@ -22,9 +22,12 @@ enyo.kind({
 	},
 	style: "padding: 8px; white-space: nowrap;",
 	debug: false,
+	helper: null,			// Analyzer.KindHelper
 	create: function() {
 		this.inherited(arguments);
-		this.helper = new Analyzer.KindHelper();
+		if (Analyzer.KindHelper) {	// TODO: Remove this test after the integration of lib/extra commit c445c64f48b5ea5e12428dba32522146602b83cf
+			this.helper = new Analyzer.KindHelper();
+		}
 	},
 	allowed: function(inControl, inType, inName) {
 		var level = Model.getFilterLevel(inControl.kind, inType, inName);
@@ -33,6 +36,10 @@ enyo.kind({
 	},
 	buildPropList: function(inControl) {
 		var currentKind = inControl.kind;
+
+		if ( ! this.helper) {	// TODO: Remove this code after the integration of lib/extra commit c445c64f48b5ea5e12428dba32522146602b83cf
+			return this.buildPropListFromObject(inControl);
+		}
 
 		var definition = this.getKindDefinition(currentKind);
 		if ( ! definition) {
@@ -55,9 +62,9 @@ enyo.kind({
 			}
 			names = this.helper.getEvents();
 			for (i = 0, p; (p = names[i]); i++) {
-				if (this.allowed(inControl, "events", e)) {
-					this.debug && this.log("Adding event '" + e + "' from '" + currentKind + "'");
-					eventMap[e] = true;
+				if (this.allowed(inControl, "events", p)) {
+					this.debug && this.log("Adding event '" + p + "' from '" + currentKind + "'");
+					eventMap[p] = true;
 				}
 			}
 			currentKind = definition.superkind || "";
@@ -73,7 +80,7 @@ enyo.kind({
 			props.push(propKeys[n]);
 		}
 		props.events = [];
-		for (var n in eventMap) {
+		for (n in eventMap) {
 			props.events.push(n);
 		}
 		for (n=0; n < domEvents.length; n++) {
