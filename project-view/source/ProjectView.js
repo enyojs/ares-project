@@ -140,8 +140,10 @@ enyo.kind({
 	 */
 	launchPreview: function(inSender, inEvent) {
 		if ( this.currentProject) {
+			var config = this.currentProject.getConfig() ;
+			var topFile = config.data.preview.top_file ;
 			window.open(
-				this.currentProject.getProjectUrl() + '/index.html' ,
+				this.currentProject.getProjectUrl() + '/' + topFile ,
 				null, // ensure that a new window is created each time preview is tapped
 				'scrollbars=auto, titlebar=yes, height=' + inEvent.height + ',width=' + inEvent.width,
 				false
