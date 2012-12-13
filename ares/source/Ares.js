@@ -31,17 +31,17 @@ enyo.kind({
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
 	create: function() {
-		if (this.runTest) {
-			ProjectList.underTest = true;
-		}
 		this.inherited(arguments);
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
 
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
-		if (this.runTest) {
+		if (Ares.TestController) {
+			WorkspaceData.loadProjects("MARIAN-SHOULD-PUT-THE-RIGHT-VALUE", true);
 			// in charge of Ares Test Suite when Ares Ide launch with runTest option
 			this.createComponent({kind: "ares.TestController"});
+		} else {
+			WorkspaceData.loadProjects();
 		}
 		this.calcSlideableLimit();
 	},
@@ -49,18 +49,18 @@ enyo.kind({
 		this.inherited(arguments);
 		this.calcSlideableLimit();
 	},
-	openFiles: {},
 	draggable: false,
 	handleReloadServices: function(inSender, inEvent) {
 		this.$.serviceRegistry.reloadServices();
 	},
 	doubleclickFile: function(inSender, inEvent) {
 		var f = inEvent.file;
-		var d = this.openFiles[inEvent.file.id];
+		var id = WorkspaceData.files.computeId(f);
+		var d = WorkspaceData.files.get(id);
 		if (d) {
 			this.switchToDocument(d);
 		} else {
-			this.$.bottomBar.createFileTab(f.name, f.id);
+			this.$.bottomBar.createFileTab(f.name, id);
 			this.$.slideable.setDraggable(true);
 			this.openDocument(inSender, inEvent);
 		}
@@ -69,7 +69,6 @@ enyo.kind({
 		var f = inEvent.file;
 		var projectData = inEvent.projectData;
 		var service = projectData.getService();
-		var ext = f.name.split(".").pop();
 		this.$.phobos.beginOpenDoc();
 		service.getFile(f.id)
 			.response(this, function(inEvent, inData) {
@@ -79,17 +78,11 @@ enyo.kind({
 					// no data? Empty file
 					inData="";
 				}
-				if (this.openFiles[f.id]) {
+				var id = WorkspaceData.files.computeId(f);
+				if (WorkspaceData.files.get(id)) {
 					alert("Duplicate File ID in cache!");
 				}
-				var doc = {
-					file: f,
-					data: inData,
-					extension: ext,
-					projectData: projectData,
-					edited: false
-				};
-				this.openFiles[f.id] = doc;
+				var doc = WorkspaceData.files.newEntry(f, inData, projectData);
 				this.switchToDocument(doc);
 			})
 			.error(this, function(inEvent, inData) {
@@ -109,11 +102,10 @@ enyo.kind({
 			});
 	},
 	closeDocument: function(inSender, inEvent) {
-		var id = inSender.file.id;
 		// remove file from cache
-		delete this.openFiles[id];
-		this.$.bottomBar.removeTab(id);
-		this.$.slideable.setDraggable(Object.keys(this.openFiles).count > 0);
+		WorkspaceData.files.removeEntry(inEvent.id);
+		this.$.bottomBar.removeTab(inEvent.id);
+		this.$.slideable.setDraggable(WorkspaceData.files.length > 0);
 		this.showFiles();
 	},
 	designDocument: function(inSender, inEvent) {
@@ -140,7 +132,7 @@ enyo.kind({
 		this.$.slideable.animateToMax();
 	},
 	toggleFiles: function(inSender, inEvent) {
-		if (this.$.slideable.value < 0 || Object.keys(this.openFiles).length === 0) {
+		if (this.$.slideable.value < 0 || WorkspaceData.files.length === 0) {
 			this.showFiles();
 		} else {
 			this.hideFiles();
@@ -158,7 +150,7 @@ enyo.kind({
 		this.$.slideable.setMin(-min);
 	},
 	switchFile: function(inSender, inEvent) {
-		var d = this.openFiles[inEvent.id];
+		var d = WorkspaceData.files.get(inEvent.id);
 		if (d) {
 			this.switchToDocument(d);
 		} else {
@@ -168,14 +160,14 @@ enyo.kind({
 	switchToDocument: function(d) {
 		// save document state
 		if (this.activeDocument) {
-			this.activeDocument.data = this.$.phobos.getEditorContent();
+			this.activeDocument.setData(this.$.phobos.getEditorContent());
 		}
 		if (!this.activeDocument || d !== this.activeDocument) {
-			this.$.phobos.openDoc(d.file, d.data, d.extension, d.projectData, d.edited);
+			this.$.phobos.openDoc(d);
 		}
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
-		this.$.bottomBar.activateFileWithId(d.file.id);
+		this.$.bottomBar.activateFileWithId(d.getId());
 		this.hideFiles();
 		this.activeDocument = d;
 	},
@@ -212,13 +204,5 @@ enyo.kind({
 	bounceClose: function(inSender, inEvent) {
 		this.switchFile(inSender, inEvent);
 		enyo.asyncMethod(this.$.phobos, "closeDocAction");
-	},
-	documentEdited: function(inSender, inEvent) {
-		var id = inEvent.id;
-		if (this.openFiles[id]) {
-			this.openFiles[id].edited = inEvent.edited;
-		} else {
-			alert("File ID not found in cache!");
-		}
 	}
 });

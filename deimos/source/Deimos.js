@@ -47,7 +47,8 @@ enyo.kind({
 		this.kinds=[];
 		this.index=null;
 	},
-	load: function(what) {
+	load: function(data) {
+		var what = data.kinds;
 		var maxLen = 0;
 		this.kinds = what;
 		this.$.kindPicker.destroyClientControls();
@@ -57,9 +58,9 @@ enyo.kind({
 				content: k.name,
 				index: i,
 				active: (i==0)
-        	});
+			});
 			maxLen = Math.max(k.name.length, maxLen);
-    	}
+		}
 		this.index=null;
 		this.$.kindButton.applyStyle("width", maxLen + "em");
 		this.$.kindPicker.render();

@@ -59,6 +59,8 @@ body {
 .ares_harmonia_toolBar {
 	height: 48px;
 	vertical-align: middle;
+	padding: 0px;
+	border: 0px;
 }
 /**/
 .ares_deimos_left {
@@ -123,8 +125,8 @@ body {
 	height: 400px;
 }
 
-#ares_projectView_projectList {
-	width: 350px;
+.ares_projectList {
+	width: 370px;
 	border-right: 1px solid gray;
 }
 
@@ -165,11 +167,6 @@ body {
 
 .phobos-find-field {
 	width: 200px;
-}
-
-.ares-no-padding {
-	padding: 0px;
-	border: 0px;
 }
 
 .ares-scale-background {
