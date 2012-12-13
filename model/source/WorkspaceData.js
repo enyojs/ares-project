@@ -139,7 +139,6 @@ Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when
 });
 
 Ares.Model.PROJECTS_STORAGE_KEY = "com.enyojs.ares.projects";
-
 Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collection when possible
 	model: Ares.Model.Project,
 	comparator: function(a, b) {

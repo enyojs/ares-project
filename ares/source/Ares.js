@@ -37,11 +37,9 @@ enyo.kind({
 
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
-			WorkspaceData.loadProjects("MARIAN-SHOULD-PUT-THE-RIGHT-VALUE", true);
-			// in charge of Ares Test Suite when Ares Ide launch with runTest option
-			this.createComponent({kind: "ares.TestController"});
-		} else {
-			WorkspaceData.loadProjects();
+			WorkspaceData.loadProjects("com.enyojs.ares.tests", true);
+			// in charge of Ares Test Suite
+			this.createComponent({kind: "Ares.TestController", aresObj: this});
 		}
 		this.calcSlideableLimit();
 	},

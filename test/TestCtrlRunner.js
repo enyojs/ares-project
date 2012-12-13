@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "ares.TestCtrlRunner",
+	name: "Ares.TestCtrlRunner",
 	kind: enyo.Component,
 	index: 0,
 	create: function() {
@@ -7,9 +7,9 @@ enyo.kind({
 		this.next();
 	},
 	next: function() {
-		var test = ares.TestSuite.tests[this.index++];
+		var test = Ares.TestSuite.tests[this.index++];
 		if (test) {
-			var aresRunner = this.createComponent({name: test.prototype.kindName, kind: ares.TestProxyReporter, onFinishAll: "next"});
+			var aresRunner = this.createComponent({name: test.prototype.kindName, kind: Ares.TestProxyReporter, onFinishAll: "next", aresObj: this.aresObj});
 			aresRunner.runTests();
 		}
 	}

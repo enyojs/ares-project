@@ -87,3 +87,9 @@ Start the IDE server: (e.g. using the Command Prompt, navigate to the ares direc
 	C:\Users\johndoe\GIT\ares-project> node ide.js
 
 Normally, your default browser will start to this URL [http://127.0.0.1:9009/ide/ares/index.html](http://127.0.0.1:9009/ide/ares/index.html).  You can start multiple browser to the same URL.
+
+### Test Suite
+
+For all contributions on Ares project and before commit, please execute the available Ares Test Suite and make sure this Ares Test Suite is not broken.
+
+See README.md under ares-project/test.

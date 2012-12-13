@@ -1,6 +1,6 @@
 // UI kind responsible for creating test component, running tests, receiving & displaying test results.
 enyo.kind({
-	name: "ares.TestReporter",
+	name: "Ares.TestReporter",
 	kind: enyo.Control,
 	published: {
 		results: null
@@ -9,52 +9,50 @@ enyo.kind({
 		onFinishAll: ""
 	},
 	components: [
-		{kind: "FittableRows", fit: true, components: [
-			{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar", isContainer: true, components: [
-				{kind: "FittableColumns", style: "width:100%", components: [
-					{kind: "Control", content: "Ares Test Suite", style: "margin-right: 10px"},
-					{fit:true},
-					{kind: "Control", content: "Click on "},
-					{kind: "onyx.InputDecorator", components: [
-						{name: "runTests", kind: "onyx.IconButton", src: "$test/images/play.png", ontap: "runTests"},
-						{kind: "onyx.Tooltip", content: "Run Ares Test Suite..."},
-					]},
-				]},
-
+		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar", isContainer: true, components: [
+			{kind: "FittableColumns", style: "width:100%", components: [
+				{kind: "Control", content: "Ares Test Suite", style: "margin-right: 10px"},
+				{fit:true},
+				{kind: "Control", content: "Click on "},
+				{kind: "onyx.InputDecorator", components: [
+					{name: "runTests", kind: "onyx.IconButton", src: "$test/images/play.png", ontap: "runTests"},
+				]}
 			]},
-			{name: "title", classes: "enyo-testcase-title"},
-			{name: "group", classes: "enyo-testcase-group"}
-		]},		
+
+		]},
+		// TODO: scroller doesn't work - Need to be fixed
+		{kind: enyo.Scroller, name: "group"}
+
 	],
 	classes: "enyo-testcase",
 	timeout: 3000,
-	aresIdeW: null,
 	debug: true,
 	create: function() {
 		if (this.debug) {
-			enyo.log("TestController: create() ...");
+			//enyo.log("I am Ares Test Reporter ...");
 		}
 		this.inherited(arguments);
-		this.$.title.setContent(this.name);
-		this.aresIdeW = ares.TestReporter.aresIdeW;
 		// listen for dispatched messages (received from Ares Ide)
 		window.addEventListener("message", enyo.bind(this, "recMsgFromIde"), false);
 	},
-	initComponents: function() {
-		this.inherited(arguments);
-	},
 	runTests: function() {
-		if (this.debug) enyo.log("Post RUN ...");
-		if (this.aresIdeW !== null) {
-			this.aresIdeW.postMessage("RUN", "http://127.0.0.1:9009");
-			this.$.runTests.setDisabled(true);
+		if (this.debug) {
+			enyo.log("Post ARES.TEST.RUN ...");
 		}
+		window.self.opener.postMessage("ARES.TEST.RUN", "http://127.0.0.1:9009");
+		this.$.runTests.setDisabled(true);
+	},
+	testNameDisplay: function(inData) {
+		if (this.debug) {
+			enyo.log("TestReporter: testNameDisplay: "+JSON.stringify(inData));
+		}
+		this.$.group.createComponent({classes: "enyo-testcase-title", content: inData.data}).render();
 	},
 	testBegun: function(inData) {
 		if (this.debug) {
 			enyo.log("TestReporter: testBegun: "+JSON.stringify(inData));
 		}
-		this.$.group.createComponent({name: inData.test, classes: "enyo-testcase-running", content: inData.test + ": running", allowHtml: true}).render();
+		this.$.group.createComponent({name: inData.data.test, classes: "enyo-testcase-running", content: inData.data.test + ": running", allowHtml: true}).render();
 	},
 	formatStackTrace: function(inStack) {
 		var stack = inStack.split("\n");
@@ -71,7 +69,7 @@ enyo.kind({
 		if (this.debug) {
 			enyo.log("TestReporter: updataTestDisplay: "+JSON.stringify(inData));
 		}
-		var results = JSON.parse(inData.results);
+		var results = JSON.parse(inData.data.results);
 		var e = results.exception;
 		var info = this.$.group.$[results.name];
 		var content = "<b>" + results.name + "</b>: " + (results.passed ? "PASSED" : results.message);
@@ -102,26 +100,22 @@ enyo.kind({
 		if (event.source === null) {
 			return;
 		}
-		// keep the reference 
-		if (this.aresIdeW === null) {
-			this.aresIdeW = event.source;
-			ares.TestReporter.aresIdeW = this.aresIdeW;			
-		}
-		if (event.data === "START") {
-			if (this.debug) enyo.log("Received START ... Post READY ...");
-			event.source.postMessage("READY", event.origin);
+		if (event.data === "ARES.TEST.START") {
+			if (this.debug) enyo.log("Received ARES.TEST.START ... Post ARES.TEST.READY ...");
+			event.source.postMessage("ARES.TEST.READY", event.origin);
 		} 
-		if(event.data.evt === "SEND_TEST_RUNNING") {
-			if (this.debug) enyo.log("Received SEND_TEST_RUNNING ...");
+		if(event.data.evt === "ARES.TEST.NAME") {
+			if (this.debug) enyo.log("Received ARES.TEST.NAME ...");
+			this.testNameDisplay(event.data);
+		}
+		if(event.data.evt === "ARES.TEST.RUNNING") {
+			if (this.debug) enyo.log("Received ARES.TEST.RUNNING ...");
 			this.testBegun(event.data);
 		}
-		if(event.data.evt === "SEND_TEST_RESULT") {
-			if (this.debug) enyo.log("Received SEND_TEST_RESULT ...");
+		if(event.data.evt === "ARES.TEST.RESULT") {
+			if (this.debug) enyo.log("Received ARES.TEST.RESULT ...");
 			this.updateTestDisplay(event.data);
 		}
-	},
-	statics: {
-		aresIdeW: null,
-    }
+	}
 });
 
