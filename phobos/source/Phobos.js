@@ -465,16 +465,18 @@ enyo.kind({
 			this.$.savePopup.applyStyle("padding-top: 10px");
 			this.$.savePopup.show();
 		} else {
+			var docData = this.docData;
 			this.beforeClosingDocument();
-			this.doCloseDocument({id: this.docData.getId()});
+			this.doCloseDocument({id: docData.getId()});
 		}
 		return true; // Stop the propagation of the event
 	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
+		var docData = this.docData;
 		this.beforeClosingDocument();
-		this.doCloseDocument({id: this.docData.getId()});
+		this.doCloseDocument({id: docData.getId()});
 	},
 	docChanged: function(inSender, inEvent) {
 		this.docData.setEdited(true);
