@@ -40,6 +40,8 @@ enyo.kind({
 			WorkspaceData.loadProjects("com.enyojs.ares.tests", true);
 			// in charge of Ares Test Suite
 			this.createComponent({kind: "Ares.TestController", aresObj: this});
+		} else {
+			WorkspaceData.loadProjects();
 		}
 		this.calcSlideableLimit();
 	},
