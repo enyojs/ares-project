@@ -25,21 +25,17 @@ enyo.kind({
 	helper: null,			// Analyzer.KindHelper
 	create: function() {
 		this.inherited(arguments);
-		if (Analyzer.KindHelper) {	// TODO: Remove this test after the integration of lib/extra commit c445c64f48b5ea5e12428dba32522146602b83cf
-			this.helper = new Analyzer.KindHelper();
-		}
+		this.helper = new Analyzer.KindHelper();
 	},
-	allowed: function(inControl, inType, inName) {
-		var level = Model.getFilterLevel(inControl.kind, inType, inName);
-		// this.debug && this.log("Level: " + level + " for " + inControl.kind + "." + inName);
+	allowed: function(inKindName, inType, inName) {
+		var level = Model.getFilterLevel(inKindName, inType, inName);
+		// this.debug && this.log("Level: " + level + " for " + inKindName + "." + inName);
 		return level >= this.filterLevel;
 	},
 	buildPropList: function(inControl) {
-		var currentKind = inControl.kind;
 
-		if ( ! this.helper) {	// TODO: Remove this code after the integration of lib/extra commit c445c64f48b5ea5e12428dba32522146602b83cf
-			return this.buildPropListFromObject(inControl);
-		}
+		var kindName = (inControl.kindName === "Proxy" && inControl.realKind) || inControl.kindName;
+		var currentKind = kindName;
 
 		var definition = this.getKindDefinition(currentKind);
 		if ( ! definition) {
@@ -55,14 +51,14 @@ enyo.kind({
 			this.helper.setDefinition(definition);
 			var names = this.helper.getPublished();
 			for (var i = 0, p; (p = names[i]); i++) {
-				if (this.allowed(inControl, "properties", p)) {
+				if (this.allowed(kindName, "properties", p)) {
 					this.debug && this.log("Adding property '" + p + "' from '" + currentKind + "'");
 					propMap[p] = true;
 				}
 			}
 			names = this.helper.getEvents();
 			for (i = 0, p; (p = names[i]); i++) {
-				if (this.allowed(inControl, "events", p)) {
+				if (this.allowed(kindName, "events", p)) {
 					this.debug && this.log("Adding event '" + p + "' from '" + currentKind + "'");
 					eventMap[p] = true;
 				}
@@ -84,7 +80,7 @@ enyo.kind({
 			props.events.push(n);
 		}
 		for (n=0; n < domEvents.length; n++) {
-			if (this.allowed(inControl, "events", domEvents[n])) {
+			if (this.allowed(kindName, "events", domEvents[n])) {
 				props.events.push(domEvents[n]);
 			}
 		}
@@ -95,15 +91,16 @@ enyo.kind({
 		var domEvents = ["ontap", "onchange", "ondown", "onup", "ondragstart", "ondrag", "ondragfinish", "onenter", "onleave"]; // from dispatcher/guesture
 		var propMap = {}, eventMap = {};
 		var context = inControl;
+		var kindName = inControl.kind;
 		while (context) {
 			for (var p in context.published) {
-				if (this.allowed(inControl, "properties", p)) {
+				if (this.allowed(kindName, "properties", p)) {
 					// this.debug && this.log("Adding property '" + p + "' from '" + context.kind + "'");
 					propMap[p] = true;
 				}
 			}
 			for (var e in context.events) {
-				if (this.allowed(inControl, "events", e)) {
+				if (this.allowed(kindName, "events", e)) {
 					// this.debug && this.log("Adding event '" + e + "' from '" + context.kind + "'");
 					eventMap[e] = true;
 				}
@@ -120,7 +117,7 @@ enyo.kind({
 			props.events.push(n);
 		}
 		for (n=0; n < domEvents.length; n++) {
-			if (this.allowed(inControl, "events", domEvents[n])) {
+			if (this.allowed(kindName, "events", domEvents[n])) {
 				props.events.push(domEvents[n]);
 			}
 		}
@@ -152,7 +149,8 @@ enyo.kind({
 		this.$.content.destroyComponents();
 		this.selected = inControl;
 		if (inControl) {
-			this.$.content.createComponent({tag: "h3", content: inControl.kindName, classes: "label label-info"});
+			var kindName = (inControl.kindName === "Proxy" && inControl.realKind) || inControl.kindName;
+			this.$.content.createComponent({tag: "h3", content: kindName, classes: "label label-info"});
 			this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Properties"});
 			var ps = this.buildPropList(inControl);
 			for (var i=0, p; p=ps[i]; i++) {
