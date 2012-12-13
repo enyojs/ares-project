@@ -286,6 +286,12 @@ if (argv.browser) {
 // Exit path
 
 console.info("Press CTRL + C to shutdown");
+
+process.on('uncaughtException', function (err) {
+	var errMsg = err.toString() + err.stack;
+	console.error(errMsg);
+	process.exit(1);
+});
 process.on('exit', function () {
 	console.log('Terminating sub-processes...');
 	subProcesses.forEach(function(process) {
