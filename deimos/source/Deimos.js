@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "Deimos",
-	classes: "enyo-unselectable",
+	classes: "enyo-unselectable onyx",
 	components: [
 		{kind: "DragAvatar", components: [
 			{tag: "img", src: "$deimos/images/icon.png", style: "width: 24px; height: 24px;"}
@@ -17,18 +17,17 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction"}
 			]},
 			{name: "body", fit: true, classes: "deimos_panel_body",kind: "FittableColumns", components: [
-				{name: "left", kind: "Palette", ondragstart: "dragStart"},
+				{name: "left", classes:"ares_deimos_left", kind: "Palette", ondragstart: "dragStart"},
 				{name: "middle", fit: true, kind: "FittableRows",components: [
 					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart", onDesignRendered: "designRendered"},
-					{name: "code", classes: "deimos_panel", showing: false, components: [
+					{name: "code", classes: "deimos_panel ares_deimos_code", showing: false, components: [
 						{kind: "Scroller", classes: "enyo-selectable", components: [
 							{name: "codeText", tag: "pre", style: "white-space: pre; font-size: smaller; border: none; margin: 0;"}
 						]}
 					]}
 				]},
-				{name: "right", kind: "FittableRows", components: [
-					{kind: "ComponentView", classes: "deimos_panel", onSelect: "componentViewSelect", ondrop: "componentViewDrop"},
-					{kind: "Inspector.Filters", onLevelChanged: "filterLevelChanged"},
+				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
+					{kind: "ComponentView", classes: "deimos_panel ares_deimos_componentView", onSelect: "componentViewSelect", ondrop: "componentViewDrop"},
 					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
 				]}
 			]}
@@ -177,15 +176,6 @@ enyo.kind({
 	},
 	saveNeeded: function() {
 		return this.docHasChanged;
-	},
-	/**
-	 * The inspector's filters have changed.
-	 * @protected
-	 */
-	filterLevelChanged: function(inSender, inEvent) {
-		this.$.inspector.setFilterLevel(inEvent.active.value);
-		this.refreshInspector();
-		return true; // Stop the propagation of the event
 	}
 });
 

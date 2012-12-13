@@ -7,8 +7,7 @@ enyo.kind({
 			{tag: "img", src: "$deimos/images/icon.png"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
-			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
-				{kind: "onyx.Button", content: "Close", ontap: "closeDocAction"},
+			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", components: [
 				{name: "documentLabel", content: "Document"},
 				{name: "saveButton", kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: "New kind", ontap: "newKindAction"},
@@ -109,6 +108,7 @@ enyo.kind({
 		this.$.documentLabel.setContent(file.name);
 
 		this.docData.setEdited(edited);
+		this.$.toolbar.resized();
 	},
 	adjustPanelsForMode: function(mode) {
 		// whether to show or not a panel, imageViewer and ace cannot be enabled at the same time

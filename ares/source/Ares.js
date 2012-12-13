@@ -1,20 +1,24 @@
 enyo.kind({
 	name: "Ares",
 	kind: "Control",
-	classes: "app onyx",
+	classes: "onyx",
 	fit: true,
 	components: [
-		{kind: "Panels", /*arrangerKind: "CarouselArranger",*/ classes: "enyo-fit", components: [
-			{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"},
-			{kind: "Deimos", onCloseDesigner: "closeDesigner"}
+		{kind: "Panels", arrangerKind: "CarouselArranger", classes:"enyo-fit ares-panels", components: [
+			{components: [
+				{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"}
+			]},
+			{components: [
+				{kind: "Deimos", onCloseDesigner: "closeDesigner"}
+			]}
 		]},
-		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", draggable: false, onAnimateFinish: "finishedSliding", components: [
+		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
 			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
-			{name: "bottomBar", kind: "DocumentToolbar",
-				onGrabberTap: "toggleFiles",
-				onSwitchFile: "switchFile",
-				onSave: "bounceSave",
-				onDesign: "bounceDesign",
+			{name: "bottomBar", kind: "DocumentToolbar", 
+				onToggleOpen: "toggleFiles", 
+				onSwitchFile: "switchFile", 
+				onSave: "bounceSave", 
+				onDesign: "bounceDesign", 
 				onNewKind: "bounceNew",
 				onClose: "bounceClose"
 			}
@@ -33,9 +37,9 @@ enyo.kind({
 
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
-			WorkspaceData.loadProjects("MARIAN-SHOULD-PUT-THE-RIGHT-VALUE", true);
-			// in charge of Ares Test Suite when Ares Ide launch with runTest option
-			this.createComponent({kind: "ares.TestController"});
+			WorkspaceData.loadProjects("com.enyojs.ares.tests", true);
+			// in charge of Ares Test Suite
+			this.createComponent({kind: "Ares.TestController", aresObj: this});
 		} else {
 			WorkspaceData.loadProjects();
 		}

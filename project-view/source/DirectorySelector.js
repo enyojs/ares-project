@@ -40,7 +40,7 @@ enyo.kind({
 		if (inEvent.service) {
 			this.$.hermesFileTree
 				.connectService(inEvent.service)
-				.refreshFileTree();
+				.refreshFileTree(null, null,  inEvent.callBack);
 		}
 		return true; //Stop event propagation
 	},

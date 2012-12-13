@@ -1,3 +1,5 @@
 enyo.depends(
-		"HermesFileSystemTest.js"
+		"HermesFileSystemTest.js",
+		"ProjectViewTest.js",
+		"TestSuiteTemplate.js"
 );

@@ -1,5 +1,6 @@
 enyo.kind({
 	name: "Inspector",
+	kind: "FittableRows",
 	events: {
 		onModify: "",
 		onAction: ""
@@ -12,9 +13,14 @@ enyo.kind({
 		projectData: null
 	},
 	components: [
-		{kind: "Scroller", classes: "enyo-fit", fit: true, components: [
+		{kind: "onyx.RadioGroup", fit:false, onActivate:"tabActivated", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton halves", components: [
+			{content:"Properties", active:true},
+			{content:"Events"}
+		]},
+		{kind: "Scroller", fit: true, components: [
 			{name: "content", kind: "FittableRows"}
-		]}
+		]},
+		{kind: "Inspector.Filters", onLevelChanged: "updateFilterLevel"}
 	],
 	handlers: {
 		onChange: "change",
@@ -248,7 +254,17 @@ enyo.kind({
 		}
 		
 		return definition;
+	},
+	/**
+	 * The inspector's filters have changed.
+	 * @protected
+	 */
+	updateFilterLevel: function(inSender, inEvent) {
+		this.setFilterLevel(inEvent.active.value);
+		this.inspect(this.selected);
+		return true; // Stop the propagation of the event
 	}
+
 });
 
 enyo.kind({
@@ -257,10 +273,10 @@ enyo.kind({
 		onLevelChanged: ""
 	},
 	components: [
-		{kind: "Group", classes: "group", onActivate:"doLevelChanged", highlander: true, components: [
-				{kind:"enyo.Checkbox", value: Model.F_USEFUL, content: "Frequently used", checked: true},
-				{kind:"enyo.Checkbox", value: Model.F_NORMAL, content: "Normal"},
-				{kind:"enyo.Checkbox", value: Model.F_DANGEROUS, content: "All"}
-			]}
+		{kind: "onyx.RadioGroup", fit:false, onActivate:"doLevelChanged", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton thirds", components: [
+			{value: Model.F_USEFUL, content: "Frequent", active: true},
+			{value: Model.F_NORMAL, content: "Normal"},
+			{value: Model.F_DANGEROUS, content: "All"}
+		]}
 	]
 });
