@@ -66,6 +66,9 @@ enyo.kind({
 		this.$.kindButton.applyStyle("width", maxLen + "em");
 		this.$.kindPicker.render();
 		this.docHasChanged = false;
+
+		this.$.inspector.setProjectData(data.projectData);
+		this.$.inspector.setFileIndexer(data.fileIndexer);
 	},
 	kindSelected: function(inSender, inEvent) {
 		/* FIXME
@@ -159,6 +162,7 @@ enyo.kind({
 			event.contents[i] = this.kinds[i].content;
 		}
 
+		this.$.inspector.setProjectData(null);
 		this.doCloseDesigner(event);
 		return true; // Stop the propagation of the event
 	},

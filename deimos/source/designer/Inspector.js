@@ -5,7 +5,11 @@ enyo.kind({
 		onAction: ""
 	},
 	published: {
-		filterLevel: null		// Value will be given by Inspector.Filters "checked" item.
+		filterLevel: null,		// Value will be given by Inspector.Filters "checked" item.
+		enyoIndexer: null,
+		projectIndexer: null,
+		fileIndexer: null,
+		projectData: null
 	},
 	components: [
 		{kind: "Scroller", classes: "enyo-fit", fit: true, components: [
@@ -20,15 +24,67 @@ enyo.kind({
 	debug: false,
 	create: function() {
 		this.inherited(arguments);
+		this.helper = new Analyzer.KindHelper();
 	},
 	allowed: function(inControl, inType, inName) {
 		var level = Model.getFilterLevel(inControl.kind, inType, inName);
-		this.debug && this.log("Level: " + level + " for " + inControl.kind + "." + inName);
+		// this.debug && this.log("Level: " + level + " for " + inControl.kind + "." + inName);
 		return level >= this.filterLevel;
 	},
 	buildPropList: function(inControl) {
+		var currentKind = inControl.kind;
 
-		// TODO: property and event list must come from the Analyzer output.
+		var definition = this.getKindDefinition(currentKind);
+		if ( ! definition) {
+			this.debug && this.log("NO DEFINITION found for '" + currentKind + "' inControl: ", inControl);
+			// Revert to the property and event list extracted from the object
+			return this.buildPropListFromObject(inControl);
+		}
+
+		// TODO: event list must come from the Analyzer output.
+		var domEvents = ["ontap", "onchange", "ondown", "onup", "ondragstart", "ondrag", "ondragfinish", "onenter", "onleave"]; // from dispatcher/guesture
+		var propMap = {}, eventMap = {};
+		while (definition) {
+			this.helper.setDefinition(definition);
+			var names = this.helper.getPublished();
+			for (var i = 0, p; (p = names[i]); i++) {
+				if (this.allowed(inControl, "properties", p)) {
+					this.debug && this.log("Adding property '" + p + "' from '" + currentKind + "'");
+					propMap[p] = true;
+				}
+			}
+			names = this.helper.getEvents();
+			for (i = 0, p; (p = names[i]); i++) {
+				if (this.allowed(inControl, "events", e)) {
+					this.debug && this.log("Adding event '" + e + "' from '" + currentKind + "'");
+					eventMap[e] = true;
+				}
+			}
+			currentKind = definition.superkind || "";
+			if (currentKind === "") {
+				definition = null;
+			} else {
+				definition = this.getKindDefinition(currentKind);
+			}
+		}
+		var props = [];
+		var propKeys = Object.keys(propMap).sort();
+		for (var n = 0; n < propKeys.length; n++) {
+			props.push(propKeys[n]);
+		}
+		props.events = [];
+		for (var n in eventMap) {
+			props.events.push(n);
+		}
+		for (n=0; n < domEvents.length; n++) {
+			if (this.allowed(inControl, "events", domEvents[n])) {
+				props.events.push(domEvents[n]);
+			}
+		}
+		return props;
+	},
+	buildPropListFromObject: function(inControl) {
+		// Get the property and event list from the Object as we cannot get it from the analyzer
 		var domEvents = ["ontap", "onchange", "ondown", "onup", "ondragstart", "ondrag", "ondragfinish", "onenter", "onleave"]; // from dispatcher/guesture
 		var propMap = {}, eventMap = {};
 		var context = inControl;
@@ -133,6 +189,60 @@ enyo.kind({
 			}
 			this.doAction({value: v});
 		}
+	},
+	projectDataChanged: function(oldProjectData) {
+		if (this.projectData) {
+			this.projectData.on('change:enyo-indexer', this.enyoIndexReady, this);
+			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
+
+			this.setEnyoIndexer(this.projectData.getEnyoIndexer());
+			this.setProjectIndexer(this.projectData.getProjectIndexer());
+		} else if (oldProjectData) {
+			oldProjectData.off('change:enyo-indexer', this.enyoIndexReady);
+			oldProjectData.off('change:project-indexer', this.projectIndexReady);
+		}
+	},
+	enyoIndexReady: function(model, value, options) {
+		this.setEnyoIndexer(value);
+	},
+	projectIndexReady: function(model, value, options) {
+		this.setProjectIndexer(value);
+	},
+	fileIndexerChanged: function() {
+		this.localKinds = {};	// Reset the list of kind for the currently edited file
+		if (this.fileIndexer && this.fileIndexer.objects) {
+			for(var i = 0, o; (o = this.fileIndexer.objects[i]); i++) {
+				this.localKinds[o.name] = o;
+			}
+		}
+	},
+	/**
+	 * Locates the requested kind name based the following priorties
+	 * - in the analysis of the currently edited file (most accurate)
+	 * - else in the analysis of the project
+	 * - else in the analysis of enyo/ares
+	 * @param name: the kind to search
+	 * @returns the definition of the requested kind or undefined
+	 */
+	getKindDefinition: function(name) {
+		var definition = this.localKinds[name];
+		
+		if (definition === undefined && this.projectIndexer) {
+			// Try to get it from the project analysis
+			definition = this.projectIndexer.findByName(name);
+		}
+
+		if (definition === undefined && this.enyoIndexer) {
+			// Try to get it from the enyo/onyx analysis
+			definition = this.enyoIndexer.findByName(name);
+
+			if (definition === undefined) {
+				// Try again with the enyo prefix as it is optional
+				definition = this.enyoIndexer.findByName("enyo." + name);
+			}
+		}
+		
+		return definition;
 	}
 });
 
