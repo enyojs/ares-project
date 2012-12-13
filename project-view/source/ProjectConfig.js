@@ -219,6 +219,9 @@ enyo.kind({
 						"phonegap-version": "2.0.0"
 					}
 				}
+			},
+			preview: {
+				"top-file": 'index.html'
 			}
 		},
 
@@ -245,6 +248,9 @@ enyo.kind({
 						"phonegap-version": "2.0.0"
 					}
 				}
+			},
+			preview: {
+				"top-file": 'index.html'
 			}
 		}
 	}
