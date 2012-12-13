@@ -21,7 +21,7 @@ enyo.kind({
 	},
 	initComponents: function() {
 		this.inherited(arguments);
-		this.createComponent({name: "testSuite", kind: this.name, onBegin: "testBegun", onFinish: "updateTestDisplay"});
+		this.createComponent({name: "testSuite", kind: this.name, onBegin: "testBegun", onFinish: "updateTestDisplay", aresObj: this.aresObj});
 	},
 	runTests: function() {
 		this.$.testSuite.runAllTests();

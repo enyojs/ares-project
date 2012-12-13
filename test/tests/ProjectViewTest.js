@@ -2,24 +2,64 @@ enyo.kind({
 	name: "ProjectViewTest",
 	kind: "Ares.TestSuite",
 	debug: true,
+	registry: null,
+	home: null,
 
 	create: function () {
 		this.inherited(arguments);
+		this.services = ProjectViewTest.services;
+		this.home = ProjectViewTest.home;
 	},
 	/**
-	*  TODO: under implementation
-	*  just the schema is put in place
+	* onCreateProject event is fired onclick: "doCreateProject" in ProjectList.js
 	*/
-	testCreateNewProject: function() {
-		this.log("Begin called in testCreateNewProject.");
-		this.finish();
+	testDoCreateProjectAction: function() {
+		var pList = this.aresObj.$.projectView.$.projectList;
+		if (pList) {
+			pList.doCreateProject();
+			this.finish();
+		} else {
+			this.finish("ProjectList Object: "+pList+ " is not found!");
+		}
 	},
-	testImportProject: function() {
-		this.log("Begin called in testImportProject.");
-		//this.finish();
+	/**
+	* handleSelectProvider
+	*/
+	testHandleSelectProvider: function(){
+		var dirPopup =  this.aresObj.$.projectView.$.projectWizardCreate.$.selectDirectoryPopup;
+		var pWizard = this.aresObj.$.projectView.$.projectWizardCreate;
+		if (dirPopup) {
+			// retrieve the service
+			var pList = dirPopup.$.providerList;
+			var that = this ;
+			var myService = pList.services[0];
+			//var myService = this.aresObj.$.serviceRegistry.services[0];
+			this.log(myService);
+			pList.$.item.applyStyle("background-color", "red");
+			var userPushOk = function() {
+				// simulate on projectWizardProperties the Ok event which is handled by createProject
+				pWizard.createProject(that,{service: myService });
+				pWizard.$.propertiesWidget.confirmTap(that, {service: myService, callBack: that.finish });
+	
+			};
+			var userSelectDir = function() {
+				var hFileTree = dirPopup.$.hermesFileTree;
+				var nodes = hFileTree.getNodeFiles();
+					
+				// simulate nodeTap & selectFolder
+				hFileTree.doFolderClick(nodes[0]);
+				// simulate confirmTap
+				that.log(dirPopup.selectedServiceId) ;
+				dirPopup.doDirectorySelected({serviceId: dirPopup.selectedDir.id, directory: dirPopup.selectedDir, testCallBack: userPushOk});
+			} ;
+			// selectProvider
+			dirPopup.handleSelectProvider(this, {service: myService, callBack: userSelectDir});
+		} else {
+			this.finish("SelectDirectoryPopup: "+this.aresObj.$.projectView.$.projectWizardCreate.$.SelectDirectoryPopup+ " is not available!");
+		}
 	},
-	testScanProject: function() {
-		this.log("Begin called in testScanProject.");
-		//this.finish();
+	statics: {
+		services: null,
+		home: null
 	}
 });

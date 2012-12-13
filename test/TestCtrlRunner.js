@@ -9,7 +9,7 @@ enyo.kind({
 	next: function() {
 		var test = Ares.TestSuite.tests[this.index++];
 		if (test) {
-			var aresRunner = this.createComponent({name: test.prototype.kindName, kind: Ares.TestProxyReporter, onFinishAll: "next"});
+			var aresRunner = this.createComponent({name: test.prototype.kindName, kind: Ares.TestProxyReporter, onFinishAll: "next", aresObj: this.aresObj});
 			aresRunner.runTests();
 		}
 	}

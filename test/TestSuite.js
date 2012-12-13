@@ -105,7 +105,7 @@ enyo.kind({
 			if (this.$[testName]) {
 				this.$[testName].destroy();
 			}
-			this.createComponent({name: testName, kind:this.kind, onBegin: "childTestBegun", onFinish: "childTestFinished"});
+			this.createComponent({name: testName, kind:this.kind, onBegin: "childTestBegun", onFinish: "childTestFinished", aresObj: this.aresObj});
 			this.$[testName].runTest(testName);
 		} else {
 			this.autoRunNextTest = false;

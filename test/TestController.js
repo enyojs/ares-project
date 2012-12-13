@@ -54,7 +54,7 @@ enyo.kind({
 			if (this.$.runner) {
 				this.removeComponent(this.$.runner);
 			}
-			this.createComponent({name: "runner", kind: "Ares.TestCtrlRunner"});
+			this.createComponent({name: "runner", kind: "Ares.TestCtrlRunner", aresObj: this.aresObj});
 		}
 	}
 });
