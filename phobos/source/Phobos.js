@@ -59,6 +59,7 @@ enyo.kind({
 	//
 	saveDocAction: function() {
 		this.showWaitPopup("Saving document...");
+		this.scrub(this.mode);
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
 	},
 	saveComplete: function() {
@@ -92,6 +93,7 @@ enyo.kind({
 		this.analysis = null;
 		var mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image"}[extension] || "text";
 		this.docData.setMode(mode);
+		this.mode = mode;
 		var hasAce = this.adjustPanelsForMode(mode);
 		if (hasAce) {
 			this.$.ace.setEditingMode(mode);
@@ -546,17 +548,84 @@ enyo.kind({
 	replaceAll: function(){
 		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
-	
+
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
 	replace: function(){
 		//this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
-	
+
 	focusEditor: function(inSender, inEvent) {
 		this.$.ace.focus();
 	},
 	getEditorContent: function() {
 		return this.$.ace.getValue();
+	},
+
+		scrub: function(inSender, inEvent){
+		var lineIn = "";
+		var lineOut = "";
+		var numberOfLines = "";
+		var delay = 0;
+		var tab = "\t";
+		var tabCount = 0;
+		var cutCount = 0;
+		var tabString = "";
+
+		if(inSender === "javascript"){
+			numberOfLines = this.$.ace.getLineCount();
+
+			for(i = 0 ; i< numberOfLines; i++){
+				lineIn = this.$.ace.getLine(i);
+
+				for (var j = 0; j <= this.$.ace.getLength(i); j++){
+
+					if (lineIn.charCodeAt(j) === 123 || lineIn.charCodeAt(j) === 91){			// count { [  -->
+						tabCount++;
+						if(tabCount < 0 ){
+							delay = 0;
+						}else{
+							delay = 1
+						}
+					}
+
+					if (lineIn.charCodeAt(j) === 125|| lineIn.charCodeAt(j) === 93){			// count  } ] <--
+						tabCount--;
+						delay = 0;
+					}
+				}
+
+
+				for (var l = 0; l <= this.$.ace.getLength(i ); l++){
+					if(lineIn.charCodeAt(l) === 32 || lineIn.charCodeAt(l) === 9){
+						cutCount++;
+					}else{
+						break;
+					}
+				}
+
+				lineOut = lineIn.slice(cutCount);											// remove the leading space or tab
+				cutCount =  0;
+
+				if(delay === 1 ){															// a delay for when we get two {  in a row
+					tabCount--
+				}
+
+				for(var k = 0; k < tabCount; k++ ){											// add up our tabs back
+					tabString = tabString + tab;
+				}
+
+				if (delay === 1 ){															// put back the tab that we delay for
+					tabCount++
+				}
+
+				line = tabString + lineOut;													// put tabs back in the line
+				delay = 0;
+				tabString = "";
+				this.$.ace.find(lineIn);
+				this.$.ace.replace(lineIn,line);
+				lineOut = "";
+			}
+		}
 	}
 });
 
