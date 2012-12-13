@@ -1,9 +1,11 @@
-﻿enyo.depends(
+enyo.depends(
 	"FieldDecorator.js",
-	"DropboxConfig.js",
+	"DropboxAuthConfig.js",
 	"ProviderList.js",
 	"Harmonia.js",
 	"NamePopup.js",
 	"DeletePopup.js",
-	"RenamePopup.js"
+	"RenamePopup.js",
+	"AccountsConfigurator.js",
+	"BasicAuthConfig.js"
 );

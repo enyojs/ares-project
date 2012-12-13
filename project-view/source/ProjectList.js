@@ -1,43 +1,82 @@
+/**
+ * This kind provides:
+ * - the project toolbars (with create .. delete)
+ * - the project list
+ *
+ * The project list is a simple kind that only holds project names. It does not
+ * hold project objects or kinds.
+ */
 enyo.kind({
 	name: "ProjectList",
-	classes: "enyo-unselectable",
+	classes: "enyo-unselectable ares_projectList",
 	events: {
 		onCreateProject: "",
 		onProjectSelected: "",
 		onScanProject: "",
 		onProjectRemoved: "",
 		onModifySettings: "",
-		onFinishProjectConfig: "",
-		onPhonegapBuild: ""
+		onPhonegapBuild: "",
+		onPreview: ""
 	},
 	handlers: {
 	},
-	projects: [],
 	debug: false,
 	components: [
-		{kind: "LocalStorage"},
-		{kind: "onyx.Toolbar",	classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
-			{content: "Projects", style: "margin-right: 10px"},
-				{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_settings.png", onclick: "doModifySettings"},
-				{kind: "onyx.Tooltip", content: "Settings..."},
+		{kind: "onyx.MoreToolbar", classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", isContainer: true, name: "toolbar", components: [
+			{kind: "onyx.MenuDecorator", onSelect: "aresMenuItemSelected", components: [
+				{content: "Ares"},
+				{kind: "onyx.Menu", components: [
+					{value: "showAccountConfigurator", components: [
+						{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png"},
+						{content: "Accounts..."}
+					]},
+					{classes: "onyx-menu-divider"},
+					{content: "Properties..."}
+				]}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_view_new.png", onclick: "doCreateProject"},
-				{kind: "onyx.Tooltip", content: "Create or Import Project..."},
+				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_new.png", onclick: "doCreateProject"},
+				{kind: "onyx.Tooltip", content: "Create Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_view_edit.png", onclick: "doScanProject"},
-				{kind: "onyx.Tooltip", content: "Scan for Projects..."},
+				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_edit.png", onclick: "doScanProject"},
+				{kind: "onyx.Tooltip", content: "Import or Scan for Projects..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_view_delete.png", onclick: "removeProjectAction"},
+				{name: "phonegapButton", disabled: true,
+				 kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_build.png", onclick: "doPhonegapBuild"},
+				{kind: "onyx.Tooltip", content: "Phonegap build"}
+			]},
+			{kind: "onyx.TooltipDecorator", components: [
+
+				{kind: "onyx.MenuDecorator", onSelect: "launchPreview", components: [
+					 {kind: "onyx.IconButton",
+					  src: "$project-view//assets/images/project_preview.png"
+					 },
+					 {kind: "onyx.Menu", components: [
+						  // value data should be stored elsewhere. Which means that these control
+						  // should be generated used this data from "eleswhere" . not there yet
+						  {content: "iPhone\u2122",      value: { height:  480, width:  320, ppi: 163 }},
+						  {content: "iPhone\u2122 4",    value: { height:  940, width:  660, ppi: 326 }},
+						  {content: "iPhone\u2122 5",    value: { height: 1146, width:  640, ppi: 326 }},
+						  {content: "iPad\u2122 Retina", value: { height: 2048, width: 1536, ppi: 264 }},
+						  {content: "iPad\u2122 2",      value: { height: 1280, width:  800, ppi: 132 }},
+						  {content: "iPad\u2122 mini",   value: { height: 1024, width:  768, ppi: 163 }}
+					  ]}
+
+				]},
+				{kind: "onyx.Tooltip", content: "Preview Project..."}
+			]},
+			{kind: "onyx.TooltipDecorator", components: [
+				{name: "settingsButton", disabled: true,
+				 kind: "onyx.IconButton", classes: "ares-scale-background",
+				 src: "$project-view/assets/images/project_settings.png", onclick: "doModifySettings"},
+				{kind: "onyx.Tooltip", content: "Settings..."}
+			]},
+			{kind: "onyx.TooltipDecorator", components: [
+				{name: "deleteButton", disabled: true, kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_delete.png", onclick: "removeProjectAction"},
 				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
-				{kind: "onyx.Tooltip", content: "Remove Project..."},
-			]},
-			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view/images/project_view_build.png", onclick: "doPhonegapBuild"},
-				{kind: "onyx.Tooltip", content: "Phonegap build"},
+				{kind: "onyx.Tooltip", content: "Remove Project..."}
 			]}
 		]},
 		{kind: "enyo.Scroller", components: [
@@ -47,86 +86,37 @@ enyo.kind({
 		]},
 		{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{kind: "AccountsConfigurator"},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
-	PROJECTS_STORAGE_KEY: "com.enyojs.ares.projects",
 	selected: null,
 	create: function() {
 		this.inherited(arguments);
-		this.$.localStorage.get(this.PROJECTS_STORAGE_KEY, enyo.bind(this, this.projectListAvailable));
+		this.$.projectList.setCount(WorkspaceData.projects.length);
+		WorkspaceData.projects.on("add remove reset", enyo.bind(this, this.projectCountChanged));
 	},
-	/**
-	 * Receive the {onServicesChange} broadcast notification
-	 * @param {Object} inEvent.serviceRegistry
-	 */
-	handleServicesChange: function(inSender, inEvent) {
-		if (this.debug) this.log(inEvent);
-		this.serviceRegistry = inEvent.serviceRegistry;
-	},
-	/**
-	 * Callback functions which receives the project list data read from the storage
-	 * @protected
-	 * @param data: the project list in json format
-	 */
-	projectListAvailable: function(data) {
-		try {
-			if (data && data !== "") {
-				this.projects = JSON.parse(data);
-				if (this.debug) console.dir(this.projects);
-			}
-			this.$.projectList.setCount(this.projects.length);
-		} catch(error) {
-			this.error("Unable to retrieve projects information: " + error);	// TODO ENYO-1105
-			console.dir(data);	// Display the offending data in the console
-			this.$.localStorage.remove(this.PROJECTS_STORAGE_KEY); // Remove incorrect projects information
-			this.projects = [];
-		}
-	},
-	storeProjectsInLocalStorage: function() {
-		var projectsString;
-		if (this.debug) console.dir(this.projects);
-		try {
-			projectsString = JSON.stringify(this.projects, enyo.bind(this, this.stringifyReplacer));
-		} catch(error) {
-			this.error("Unable to store the project information: " + error);	// TODO ENYO-1105
-			console.dir(this.projects);		// Display the offending object in the console
-			return;
-		}
-		this.$.localStorage.set(this.PROJECTS_STORAGE_KEY, projectsString, function() {
-			// WARNING: LocalStorage does not return any information about operation status (success or error)
-			enyo.log("Project list saved");
-		});
+	projectCountChanged: function() {
+		var count = WorkspaceData.projects.length;
+		this.$.projectList.setCount(count);
+		this.$.projectList.render();
+		this.doProjectRemoved();		// To reset the Harmonia view
 	},
 	addProject: function(name, folderId, service) {
-		var project = {
-			name: name,
-			folderId: folderId,
-			serviceId: service.getConfig().id
-		};
-		if (!project.serviceId) {
+		var serviceId = service.getConfig().id || "";
+		if (serviceId === "") {
 			throw new Error("Cannot add a project in service=" + service);
 		}
-		var known = 0;
-		var match = function(proj) {
-			if ( proj.name === name) {
-				known = 1;
-			} 
-		} ;
-		enyo.forEach(this.projects, match) ;
+		var known = WorkspaceData.projects.get(name);
 		if (known) {
-			this.log("Skipped project " + name + " as it is already listed") ;
-		}
-		else {
-			this.projects.push(project);
-			this.storeProjectsInLocalStorage();
-			this.$.projectList.setCount(this.projects.length);
-			this.$.projectList.render();
+			this.debug && this.log("Skipped project " + name + " as it is already listed") ;
+		} else {
+			WorkspaceData.projects.createProject(name, folderId, serviceId);
 		}
 	},
 	removeProjectAction: function(inSender, inEvent) {
 		var popup = this.$.removeProjectPopup;
 		if (this.selected) {
-			popup.setName("Delete project '" + this.selected.getProjectName() + "' ?");
+			popup.setName("Remove project '" + this.selected.getProjectName() + "' from list?");
 			popup.$.nukeFiles.setValue(false) ;
 			popup.show();
 		}
@@ -136,13 +126,14 @@ enyo.kind({
 		// once done,  call removeSelectedProjectData to mop up the remains.
 		var project, nukeFiles ;
 		if (this.selected) {
-			project = this.projects[this.selected.index] ;
+			project = WorkspaceData.projects.at(this.selected.index);
 			nukeFiles = this.$.removeProjectPopup.$.nukeFiles.getValue() ;
-			this.log("removing project" +  project.name + ( nukeFiles ? " and its files" : "" )) ;
-			this.debug && this.log(project) ;
+			this.debug && this.log("removing project" +  project.getName() + ( nukeFiles ? " and its files" : "" )) ;
+			this.debug && this.log(project);
 			if (nukeFiles) {
-				// FIXME: shouldn't impl be private stuff ?
-				project.service.impl.remove( project.folderId )
+				var service = project.getService();
+				var folder = project.getFolderId();
+				service.remove( folder )
 					.response(this, function(){this.removeSelectedProjectData();})
 					.error(this, function(inError){
 						this.showErrorPopup("Error removing files of project " + project.name + ": " + inError);
@@ -156,45 +147,61 @@ enyo.kind({
 	removeSelectedProjectData: function() {
 		if (this.selected) {
 			// remove the project from list of project config
-			this.projects.splice(this.selected.index, 1);
-			this.storeProjectsInLocalStorage();
+			var name = WorkspaceData.projects.at(this.selected.index).getName();
+			WorkspaceData.projects.removeProject(name);
 			this.selected = null;
-			this.$.projectList.setCount(this.projects.length);
-			this.$.projectList.render();
 			this.doProjectRemoved();
+			this.enableDisableButtons(false);
 		}
 	},
 	projectListSetupItem: function(inSender, inEvent) {
-		var project = this.projects[inEvent.index];
+		var project = WorkspaceData.projects.at(inEvent.index);
 		var item = inEvent.item;
 		// setup the controls for this item.
 		item = item.$.item;
-		item.setProjectName(project.name);
+		item.setProjectName(project.getName());
 		item.setIndex(inEvent.index);
 	},
 	projectListTap: function(inSender, inEvent) {
-		var project, msg;
+		var project, msg, service;
 		// Un-highlight former selection, if any
 		if (this.selected) {
 			this.selected.removeClass("ares_projectView_projectList_item_selected");
 		}
-		project = this.projects[inEvent.index];
-		project.service = this.serviceRegistry.resolveServiceId(project.serviceId);
-		if (project.service) {
-			// Highlight a project item if & only if its
-			// filesystem service provider exists.
-			if (inEvent.originator.kind === 'ProjectList.Project') {
-				this.selected = inEvent.originator;
-			} else {
-				this.selected = inEvent.originator.owner;
-			}
-			this.selected.addClass("ares_projectView_projectList_item_selected");
+
+		// Highlight the new project item
+		if (inEvent.originator.kind === 'ProjectList.Project') {
+			this.selected = inEvent.originator;
+		} else {
+			this.selected = inEvent.originator.owner;
+		}
+		this.selected.addClass("ares_projectView_projectList_item_selected");
+
+		project = WorkspaceData.projects.at(inEvent.index);
+		service = ServiceRegistry.instance.resolveServiceId(project.getServiceId());
+		if (service !== undefined) {
+			project.setService(service);
+			this.enableDisableButtons(true);
 			this.doProjectSelected({project: project});
 		} else {
-			// ...otherwise let 
-			msg = "Service " + project.serviceId + " not found";
+			// ...otherwise let
+			msg = "Service " + project.getServiceId() + " not found";
 			this.showErrorPopup(msg);
 			this.error(msg);
+		}
+	},
+	enableDisableButtons: function(inEnable) {
+		this.$.settingsButton.setDisabled(!inEnable);
+		this.$.deleteButton.setDisabled(!inEnable);
+		this.$.phonegapButton.setDisabled(!inEnable);
+	},
+	showAccountConfigurator: function() {
+		this.$.accountsConfigurator.show();
+	},
+	aresMenuItemSelected: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		if (typeof this[inEvent.selected.value] === 'function') {
+			this[inEvent.selected.value]();
 		}
 	},
 	showErrorPopup : function(msg) {
@@ -206,6 +213,15 @@ enyo.kind({
 			return undefined;	// Exclude
 		}
 		return value;	// Accept
+	},
+	launchPreview: function(inSender, inEvent) {
+		if (inEvent) {
+			this.doPreview(inEvent.originator.value) ;
+		}
+		return true ;
+	},
+	statics: {
+		underTest: false
 	}
 });
 
@@ -227,13 +243,32 @@ enyo.kind({
 	name: "ProjectDeletePopup",
 	kind: "Ares.ActionPopup",
 	components: [
-		{kind: "Control", tag: "h3", content: " ", name: "title"},
-		{kind: "Control", tag: "br"},
-		{kind: "onyx.Checkbox", checked: false, name: "nukeFiles"},
-		{kind: "Control", tag: "span", style: "padding: 0 4px; vertical-align: middle;", content: "also delete files", fit: true},
+		{kind: "Control", classes: "ares-title", content: " ", name: "title"},
+		{kind: "Control", classes: "ares-message", components: [
+			{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "nukeChanged"},
+			{kind: "Control", tag: "span", classes: "ares-padleft", content: "also delete files from disk"},
+		]},
 		{kind: "FittableColumns", name: "buttons", components: [
-			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", name: "cancelButton", ontap: "actionCancel"},
-			{kind: "onyx.Button", classes: "onyx-affirmative", content: "Delete", name: "actionButton", ontap: "actionConfirm"}
+			{kind: "onyx.Button", content: "Cancel", name: "cancelButton", ontap: "actionCancel"},
+			{fit: true},
+			{kind: "onyx.Button", content: "Remove", name: "actionButton", ontap: "actionConfirm"}
 		]}
-	]
+	],
+	handlers: {
+		onShow: "shown"
+	},
+	shown: function(inSender, inEvent) {
+		var w = this.$.actionButton.getBounds().width;
+		this.$.actionButton.setBounds({width: w});
+		this.nukeChanged();
+	},
+	nukeChanged: function(inSender, inEvent) {
+		if (this.$.nukeFiles.checked) {
+			this.$.actionButton.setContent("Delete");
+			this.$.actionButton.addClass("onyx-negative");
+		} else {
+			this.$.actionButton.setContent("Remove");
+			this.$.actionButton.removeClass("onyx-negative");
+		}
+	}
 });

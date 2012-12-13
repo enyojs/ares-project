@@ -9,9 +9,9 @@ enyo.kind({
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 0 10px;", name: "toolbar", components: [
 				{name: "docLabel", content: "Deimos"},
 				{kind: "onyx.PickerDecorator", components: [
-				    {name: "kindButton", kind: "onyx.PickerButton"}, //this uses the defaultKind property of PickerDecorator to inherit from PickerButton
-				    {name: "kindPicker", kind: "onyx.Picker", onChange: "kindSelected", components: [
-				    ]}
+					{name: "kindButton", kind: "onyx.PickerButton"}, //this uses the defaultKind property of PickerDecorator to inherit from PickerButton
+					{name: "kindPicker", kind: "onyx.Picker", onChange: "kindSelected", components: [
+					]}
 				]},
 				{fit: true},
 				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction"}
@@ -28,6 +28,7 @@ enyo.kind({
 				]},
 				{name: "right", kind: "FittableRows", components: [
 					{kind: "ComponentView", classes: "deimos_panel", onSelect: "componentViewSelect", ondrop: "componentViewDrop"},
+					{kind: "Inspector.Filters", onLevelChanged: "filterLevelChanged"},
 					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
 				]}
 			]}
@@ -35,8 +36,7 @@ enyo.kind({
 	],
 	handlers: {
 		ondrag: "drag",
-		ondragfinish: "dragFinish",
-		ondrop: "drop"
+		ondragfinish: "dragFinish"
 	},
 	events: {
 		onCloseDesigner: ""
@@ -48,7 +48,9 @@ enyo.kind({
 		this.kinds=[];
 		this.index=null;
 	},
-	load: function(what) {
+	load: function(data) {
+		var what = data.kinds;
+		var maxLen = 0;
 		this.kinds = what;
 		this.$.kindPicker.destroyClientControls();
 		for (var i = 0; i < what.length; i++) {
@@ -57,9 +59,11 @@ enyo.kind({
 				content: k.name,
 				index: i,
 				active: (i==0)
-        	});
-    	}
+			});
+			maxLen = Math.max(k.name.length, maxLen);
+		}
 		this.index=null;
+		this.$.kindButton.applyStyle("width", maxLen + "em");
 		this.$.kindPicker.render();
 		this.docHasChanged = false;
 	},
@@ -85,6 +89,7 @@ enyo.kind({
 		}
 
 		this.index=index;
+		this.$.kindButton.setContent(kind.name);
 		this.$.toolbar.reflow();
 		return true; // Stop the propagation of the event
 	},
@@ -168,6 +173,15 @@ enyo.kind({
 	},
 	saveNeeded: function() {
 		return this.docHasChanged;
+	},
+	/**
+	 * The inspector's filters have changed.
+	 * @protected
+	 */
+	filterLevelChanged: function(inSender, inEvent) {
+		this.$.inspector.setFilterLevel(inEvent.active.value);
+		this.refreshInspector();
+		return true; // Stop the propagation of the event
 	}
 });
 

@@ -6,27 +6,32 @@ enyo.kind({
 	},
 	debug: false,
 	/**
-	 * Set PhoneGap build base parameters.
+	 * @private
+	 */
+	create: function() {
+		this.inherited(arguments);
+		this.config = {};
+	},
+	/**
+	 * Set PhonegapBuild base parameters.
 	 * 
-	 * If defined, the {auth} property is immediately saved in the
-	 * localStorage.
-	 * 
+	 * This method is not expected to be called by anyone else but
+	 * {ServiceRegistry}.
 	 * @param {Object} inConfig
+	 * @see ServiceRegistry.js
 	 */
 	setConfig: function(inConfig) {
-		if (inConfig.origin && inConfig.pathname) {
-			this.url = inConfig.origin + inConfig.pathname;
-			if (this.debug) this.log("url", this.url);
+		enyo.mixin(this.config, inConfig);
+		if (this.config.origin && this.config.pathname) {
+			this.url = this.config.origin + this.config.pathname;
+			if (this.debug) this.log("url:", this.url);
 		}
-		if (inConfig.id) {
-			this.id = inConfig.id;
-			if (this.debug) this.log("id", this.id);
-		}
-		if (inConfig.auth && inConfig.auth !== this.auth) {
-			this.auth = inConfig.auth;
-			if (this.debug) this.log("auth"); // do not log() auth!
-			ServiceRegistry.instance.setConfig(this.id, {auth: this.auth});
-		}
+	},
+	/**
+	 * @return {Object} the configuration this service was configured by
+	 */
+	getConfig: function() {
+		return this.config;
 	},
 	/**
 	 * initiates the phonegap build of the given project
@@ -50,7 +55,7 @@ enyo.kind({
 		var config = project.config.getData();
 		if (this.debug) this.log("starting... project:", project);
 
-		if(!config && !config.build && !config.build.phonegap) {
+		if(!config || !config.build || !config.build.phonegap) {
 			next(new Error("Project not configured for Phonegap Build"));
 			return;
 		}
@@ -66,14 +71,14 @@ enyo.kind({
 	 */
 	getToken: function(project, next) {
 		if (this.debug) this.log("...");
-		if(this.auth && this.auth.token) {
+		if(this.config.auth && this.config.auth.token) {
 			this.getFileList(project, next);
 			return;
 		}
 
 		// Pass credential information to get a phonegapbuild token
-		var data = "username=" + encodeURIComponent(this.auth.username) +
-			    "&password=" + encodeURIComponent(this.auth.password);
+		var data = "username=" + encodeURIComponent(this.config.auth.username) +
+			    "&password=" + encodeURIComponent(this.config.auth.password);
 		
 		// Get a phonegapbuild token for the Hermes build service
 		var req = new enyo.Ajax({
@@ -83,18 +88,19 @@ enyo.kind({
 			handleAs: "json"
 		});
 		req.response(this, function(inSender, inData) {
-			this.auth.token = inData.token;
+			this.config.auth.token = inData.token;
 			if (this.debug) this.log("Got phonegap token: " + this.token);
 			
 			// Now get the list of all the files of the project
 			this.getFileList(project, next);
 		});
 		req.error(this, function(inSender, inError) {
-			var response = inSender.xhrResponse,
-			    contentType = response.headers['Content-Type'],
-			    details;
-			if (contentType && contentType.match('^text/plain')) {
-				details = response.body;
+			var response = inSender.xhrResponse, contentType, details;
+			if (response) {
+				contentType = response.headers['Content-Type'];
+				if (contentType && contentType.match('^text/plain')) {
+					details = response.body;
+				}
 			}
 			next(new Error("Unable to get PhoneGap application token:" + inError), details);
 		});
@@ -109,16 +115,15 @@ enyo.kind({
 	getFileList: function(project, next) {
 		if (this.debug) this.log("...");
 		var req, fileList = [];
-		req = project.filesystem.listFiles(project.folderId, -1);
+		req = project.filesystem.propfind(project.folderId, -1 /*infinity*/);
 		req.response(this, function(inEvent, inData) {
 			this.doBuildStarted({project: project});
 			if (this.debug) enyo.log("Got the list of files", inData);
 			// Extract the list into an array
-			this.buildFileList(inData, fileList);
-			var prefixLen = this.extractPrefixLen(inData);
-			// Start downloading files and building the FormData
-			var formData = new FormData();
-			this.downloadFiles(project, formData, fileList, 0, prefixLen, next);
+			this.buildFileList(inData.children, fileList);
+			var prefix = inData.path;
+			var prefixLen = prefix.length + 1;
+			this.prepareFileList(project, prefix, fileList, 0, prefixLen, next);
 		});
 		req.error(this, function(inEvent, inError) {
 			next(new Error("Unable to get project file list: " + inError));
@@ -144,6 +149,21 @@ enyo.kind({
 		var item = inData[0];
 		return item.path.length - item.name.length;
 	},
+	prepareFileList: function(project, prefix, fileList, index, prefixLen, next) {
+		// Start downloading files and building the FormData
+		var formData = new enyo.FormData();
+		var blob = new enyo.Blob([project.config.getPhoneGapConfigXml() || ""],
+					 {type: "application/octet-stream"});
+		formData.append('file', blob, 'config.xml');
+		// hard-wire config.xml for now. may extend in the future (if needed)
+		var drop = [prefix, "config.xml"].join('/');
+		var newFileList = enyo.filter(fileList, function(file) {
+			return file.path !== drop;
+		}, this);
+		if (this.debug) this.log("dropped: fileList.length:", fileList.length, "=> newFileList.length:", newFileList.length);
+
+		this.downloadFiles(project, formData, newFileList, 0, prefixLen, next);
+	},
 	/**
 	 * Download all the project files and add them into the multipart/form-data
 	 * @param project
@@ -161,7 +181,8 @@ enyo.kind({
 		var request = project.filesystem.getFile(id);
 		request.response(this, function(inEvent, inData) {
 			// Got a file content: add it to the multipart/form-data
-			var blob = new Blob([inData.content || ""], {type: "application/octet-stream"});
+			var blob = new enyo.Blob([inData.content || ""], {type: "application/octet-stream"});
+			// 'file' is the form field name, mutually agreed with the Hermes server
 			formData.append('file', blob, name);
 
 			if (++index >= fileList.length) {
@@ -187,12 +208,18 @@ enyo.kind({
 		var config = project.config.getData();
 		if (this.debug) this.log("...");
 		// Add token information in the FormData
-		formData.append('token', this.auth.token);
+		formData.append('token', this.config.auth.token);
 		formData.append('title', config.title);
 		if (config.build.phonegap.appId) {
 			if (this.debug) this.log("appId: " + config.build.phonegap.appId);
 			formData.append('appId', config.build.phonegap.appId);
 		}
+
+		// un-comment to NOT submit the ZIP to
+		// build.phonegap.com & rather return the given JSON.
+		// Use a non-JSON string to cause an error on the
+		// server side before submission.
+		//formData.append('testJsonResponse', "make_an_error" /*JSON.stringify({id: config.build.phonegap.appId})*/ );
 
 		// Ask Hermes PhoneGap Build service to minify and zip the project
 		var req = new enyo.Ajax({
@@ -208,11 +235,12 @@ enyo.kind({
 			next(null, inData);
 		});
 		req.error(this, function(inSender, inError) {
-			var response = inSender.xhrResponse,
-			    contentType = response.headers['Content-Type'],
-			    details;
-			if (contentType && contentType.match('^text/plain')) {
-				details = response.body;
+			var response = inSender.xhrResponse, contentType, details;
+			if (response) {
+				contentType = response.headers['content-type'];
+				if (contentType && contentType.match('^text/plain')) {
+					details = response.body;
+				}
 			}
 			next(new Error("Unable to build application:" + inError), details);
 		});

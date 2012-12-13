@@ -58,7 +58,7 @@ function BdPhoneGap(config, next) {
 	app.use(function(req, res, next) {
 		res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
 		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-		res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+		res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control');
 		if ('OPTIONS' == req.method) {
 			res.status(200).end();
 		}
@@ -345,7 +345,21 @@ function BdPhoneGap(config, next) {
 			_fail(errs.toString());
 			return;
 		}
-		if (req.body.appId) {
+
+		// When the specific field 'testResponse'
+		// (JSON-encoded) is present, the build request is not
+		// presented to the outside build.phonegap.com
+		// service.  This avoids eating build token in a
+		// frequent test scenario.  The Hermes PhoneGap server
+		// rather returns testResponse.
+		if (req.body.testJsonResponse) {
+			try {
+				res.body = JSON.parse(req.body.testJsonResponse);
+				next();
+			} catch(err) {
+				next(err);
+			}
+		} else if (req.body.appId) {
 			console.log("build(): updating appId="+ req.body.appId + " (title='" + req.body.title + "')");
 			api.updateFileBasedApp(req.body.token, req.zip.path, req.body.appId, {
 				success: next,
@@ -434,7 +448,7 @@ if (path.basename(process.argv[1]) === basename) {
 				default: "9029"
 			},
 			'e': {
-				description: "Path to the Enyo version to use for mnifying the application",
+				description: "Path to the Enyo version to use for minifying the application",
 				required: false,
 				default: path.resolve(__dirname, '..', 'enyo')
 			},

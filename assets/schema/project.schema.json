@@ -1,3 +1,5 @@
+// -*- javascript -*-
+
 {
 	"name":"project",
 	"description":"JSON Schema of Ares Project File (project.json)",
@@ -5,37 +7,57 @@
 	"properties": {
 		"format": {
 			"type":"number", 
-			"description": "Project file format version",
+			"description": "Ares project file format version (internal)",
 			"required":true
 		},
 		"id": {
 			"type": "string",
-			"description":"Application ID in reverse domain-name format: com.example.apps.myapp" 
+			"description":"Application ID in reverse domain-name format: com.example.apps.myapp",
 			"format": "regex",
 			"pattern": "([a-z0-9]+\.)+[a-z0-9]+",
-			"required":true
+			"required":true,
+			"default": "com.examples.apps.myapp"
 		},
 		"name": {
 			"type": "string",
-			"description": "One-word blank-less name of the application, used for package name.  Often the last term of the application {id}"
+			"description": "One-word blank-less name of the application, used for package name.  Often the last term of the application {id}",
 			"format": "regex",
 			"pattern": "([a-z0-9]+)",
 			"required":true
 		},
 		"title": {
 			"type": "string",
-			"description": "One-line description of the application"
+			"description": "One-line description of the application",
 			"format": "regex",
 			"pattern": "([a-z0-9]+)",
-			"required":true
+			"required":t rue,
+			"default": "Example: My Application"
 		},
 		"version": {
 			"type": "string",
-			"description":"Application version string: usually (M)ajor.(m)inor.(p)atchlevel" 
+			"description":"Application version string: usually (M)ajor.(m)inor.(p)atchlevel" ,
 			"format": "regex",
 			"pattern": "([0-9]+\.)+[0-9]+",
-			"required":true
-		}
+			"required":true,
+			"default": "0.0.1"
+		},
+		"author": {
+			"type": "object",
+			"required": true,
+			"properties": {
+				"href": {
+					"type": "string",
+					"description": "mailto: or http: reference to the author",
+					"default": "http://www.example.com"
+				},
+				"name": {
+					"type": "string",
+					"description": "Vendor / Committer Name",
+					"required": true,
+					"default": "An Example Company"
+				}
+			}
+		}, 
 		"build": {
 			"type": "object",
 			"description": "List of builders",
@@ -56,41 +78,89 @@
 							"description": "unique identifier, assigned by build.phonegap.com",
 							"required":false
 						},
+						"icon": {
+							"type":"object",
+							"required":false,
+							"properties": {
+								"src":{
+									"type": "string",
+									"description": "Relative location of the application icon.  Replaced by Enyo icon is absent.",
+									"format": "url",
+									"required": false,
+									"default": "icon.png"
+								},
+								"role":{
+									"type":"string",
+									"required":false,
+									"default": "default"
+								}
+							},
+						},
+						"features":{
+							"type":"array",
+							"items":{
+								"type":"object",
+								"properties":{
+									"name":{
+										"description":"PhoneGap build properties names are defined by URL",
+										"type":"string",
+										"format":"url"
+									} 
+								}
+							}
+						},
+						"preferences":{
+							"type":"object",
+							"properties":{
+								"phonegap-version":{
+									"description":"Preferred PhoneGap version (default is the latest)",
+									"type": "string",
+									"format": "regex",
+									"pattern": "([0-9]+\.)+[0-9]+",
+									"default": "2.0.0"
+								}
+							}
+						},
 						"targets":{
 							"type":"object",
 							"description":"Selected build targets",
 							"required":false,
 							"properties":{
 								"android":{
-									"type":"object"
+									"type":"object",
 									"description":"android-specific build properties",
 									"required":false,
 									"properties":{
+										"minVersion":{
+											"type":"string",
+											"description":"minimum Android version required by this application.",
+											"required":false
+										}
 									}
 								},
 								"ios":{
-									"type":"object"
+									"type":"object",
 									"description":"ios-specific build properties",
 									"required":false,
 									"properties":{
 									}
 								},
 								"winphone":{
-									"type":"object"
+									"type":"object",
 									"description":"winphone-specific build properties",
 									"required":false,
 									"properties":{
 									}
 								},
 								"blackberry":{
-									"type":"object"
+									"type":"object",
 									"description":"blackberry-specific build properties",
 									"required":false,
 									"properties":{
 									}
 								},
 								"webos":{
-									"type":"object"
+									"type":"object",
 									"description":"webos-specific build properties",
 									"required":false,
 									"properties":{
@@ -101,7 +171,18 @@
 					}
 				}
 			}
+		},
+		preview: {
+			"type":"object",
+			"description":"preview properties",
+			"required":false,
+			"properties": {
+				"top-file": {
+					"type":"object",
+					"description":"index.html like",
+					"required":false,
+				}
+			}
 		}
 	}
 }
-	

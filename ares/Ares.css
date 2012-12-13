@@ -2,16 +2,37 @@ body {
 	background-color: #aaa;
 }
 /**/
-#ares_harmonia_providerList {
-	width: 320px;
-	border: 2px solid #333;
+.ares-groupbox-item-key {
+	padding: 0.5em;
+}
+.ares-groupbox-item-value {
+	width: 50%;
+	color: #000000;
+	float: right;
+}
+.ares-waitpopup {
+	margin-left: auto;
+	margin-right: auto;
+	width: 20%; 
+}
+/**/
+.ares_harmonia_providerList {
+	width: 30%;
+}
+.ares_harmonia_providerItems {
+	padding: 6px;
+}
+.ares_harmonia_authPanel {
+	padding: 6px;
+	width: 70%;
 }
 #ares_harmonia_hermesFileTree {
 	width: 500px;
 	border: 2px solid #333;
 }
 .ares_harmonia_toolBar {
-	height: 66px;
+	height: 56px;
+	vertical-align: middle;
 }
 /**/
 #ares_deimos {
@@ -60,6 +81,8 @@ body {
 	background-position: initial initial;
 	background-repeat: initial initial;
 }
+.ares_phobos_findpop {
+}
 /**/
 .border {
 	background-color: whiteSmoke;
@@ -85,8 +108,8 @@ body {
 	height: 400px;
 }
 
-#ares_projectView_projectList {
-	width: 350px;
+.ares_projectList {
+	width: 370px;
 	border-right: 1px solid gray;
 }
 
@@ -107,3 +130,96 @@ body {
     z-index: 145;
 
 }
+
+.ares_projectView_switches .onyx-toggle-button {
+	text-transform: none;
+	margin-top: 6px;
+	margin-right: 4px;
+}
+
+.ares_projectView_switches .onyx-toggle-button .off {
+	text-decoration: line-through;
+}
+
+.phobos-find-label {
+	line-height: 37px;
+	font-weight: bold;
+	text-align: right;
+	margin-right: 4px;
+}
+
+.phobos-find-field {
+	width: 200px;
+}
+
+.ares-no-padding {
+	padding: 0px;
+	border: 0px;
+}
+
+.ares-scale-background {
+	background-size: 100%;
+}
+
+.ares-tab {
+	display: inline-block;
+	color: black;
+}
+
+.ares-tab-label {
+	display: inline-block;
+}
+
+.ares-doc-close {
+	height: 16px;
+	width: 16px;
+	background-size: 100%;
+	margin-left: 8px;
+}
+
+.ares-docbar-container {
+	margin-top: 0px;
+	margin-bottom: 0px;
+	width: 100%;
+}
+
+/* Why z-index: 11? Because otherwise, on Opera, parts of the editor show through */
+.ares-files-slider {
+	height: 100%;
+	width: 100%;
+	z-index: 11;
+}
+
+.ares-actionpopup {
+	text-align: center;
+	padding: 20px;
+}
+
+.ares-title {
+	font-size: 19px;
+	font-weight: bold;
+}
+
+.ares-message {
+	padding: 8px;
+	vertical-align: middle;
+}
+
+.ares-padleft {
+	padding-left: 8px;
+}
+
+.enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-filedrawer {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+.enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-docbar-tabs {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+.enyo-fittable-columns-layout.enyo-stretch > .onyx-grabber {
+	height: 27px;
+}
+

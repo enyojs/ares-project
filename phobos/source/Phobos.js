@@ -2,10 +2,7 @@ enyo.kind({
 	name: "Phobos",
 	classes: "enyo-unselectable",
 	components: [
-		{name: "enyoAnalyzer", kind: "Analyzer", onIndexReady: "enyoIndexReady"},
-		{name: "projectAnalyzer", kind: "Analyzer", onIndexReady: "projectIndexReady"},
-		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
-		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
+		{kind: "Analyzer", name: "fileAnalyzer"},
 		{kind: "DragAvatar", components: [
 			{tag: "img", src: "$deimos/images/icon.png"}
 		]},
@@ -19,10 +16,9 @@ enyo.kind({
 				{name: "designerButton", kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
-				{name: "left", kind: "leftPanels", showing: false,	arrangerKind: "CardArranger", onCss: "newcssAction"},
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion"},
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -35,7 +31,8 @@ enyo.kind({
 		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"}
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor"}
 	],
 	events: {
 		onSaveDocument: "",
@@ -46,29 +43,31 @@ enyo.kind({
 		onCss: "newcssAction",
 		onReparseAsked: "reparseAction"
 	},
-	docHasChanged: false,
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
-	mode: "",				// js, css, ...
-	file: null,			
 	create: function() {
 		this.inherited(arguments);
-		this.buildEnyoDb();
 	},
-	//
+	getProjectController: function() {
+		this.projectCtrl = this.projectData.getProjectCtrl();
+		if ( ! this.projectCtrl) {
+			this.projectCtrl = new ProjectCtrl({projectData: this.projectData});
+			this.projectData.setProjectCtrl(this.projectCtrl);
+		}
+	},
 	//
 	saveDocAction: function() {
 		this.showWaitPopup("Saving document...");
-		this.doSaveDocument({content: this.$.ace.getValue(), file: this.file});
+		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
 	},
 	saveComplete: function() {
 		this.hideWaitPopup();
-		this.docHasChanged=false;
+		this.docData.setEdited(false);		// TODO: The user may have switched to another file
 		this.reparseAction();
 	},
 	saveNeeded: function() {
-		return this.docHasChanged;
+		return this.docData.getEdited();
 	},
 	saveFailed: function(inMsg) {
 		this.hideWaitPopup();
@@ -78,35 +77,48 @@ enyo.kind({
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
 	},
-	openDoc: function(origin, inFile, inCode, inExt, inProjectUrl) {
+	openDoc: function(inDocData) {
+		this.docData = inDocData;
+		this.projectData = this.docData.getProjectData();
+		this.getProjectController();
+		this.setAutoCompleteData();
+
+		// Save the value to set it again after data has been loaded into ACE
+		var edited = this.docData.getEdited();
+
+		var file = this.docData.getFile();
+		var extension = file.name.split(".").pop();
 		this.hideWaitPopup();
 		this.analysis = null;
-		this.file = inFile;
-		this.mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image"}[inExt] || "text";
-		var hasAce = this.adjustPanelsForMode(this.mode);
+		var mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image"}[extension] || "text";
+		this.docData.setMode(mode);
+		var hasAce = this.adjustPanelsForMode(mode);
 		if (hasAce) {
-			this.$.ace.setEditingMode(this.mode);
-			this.$.ace.setValue(inCode);
+			this.$.ace.setEditingMode(mode);
+			this.$.ace.setValue(inDocData.getData());
 			// Pass to the autocomplete compononent a reference to ace
 			this.$.autocomplete.setAce(this.$.ace);
+			this.focusEditor();
 		}
 		else {
-			this.$.imageViewer.setAttribute("src", origin + inFile.pathname);
+			var origin = this.projectData.getService().getConfig().origin;
+			this.$.imageViewer.setAttribute("src", origin + file.pathname);
 		}
-		this.reparseAction();
-		this.buildProjectDb(inProjectUrl);
-		this.docHasChanged=false;
-		this.$.documentLabel.setContent(this.file.name);
+		this.reparseAction();					// Synchronous call
+		this.projectCtrl.buildEnyoDb();			// this.buildProjectDb() will be invoked when enyo analysis is finished
+		this.$.documentLabel.setContent(file.name);
+
+		this.docData.setEdited(edited);
 	},
 	adjustPanelsForMode: function(mode) {
 		// whether to show or not a panel, imageViewer and ace cannot be enabled at the same time
 		var showModes = {
-			json:		{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
-			javascript:	{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: true,  designerButton: true ,  right: true  },
-			html:		{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
-			css:		{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: true  },
-			text:		{left: false, imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
-			image:		{left: false, imageViewer: true , ace: false, saveButton: false, newKindButton: false, designerButton: false,  right: false }
+			json:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
+			javascript:	{imageViewer: false, ace: true , saveButton: true , newKindButton: true,  designerButton: true ,  right: true  },
+			html:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
+			css:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: true  },
+			text:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
+			image:		{imageViewer: true , ace: false, saveButton: false, newKindButton: false, designerButton: false,  right: false }
 		};
 
 		var showSettings = showModes[mode]||showModes['text'];
@@ -114,21 +126,20 @@ enyo.kind({
 			this.$[stuff].setShowing( showSettings[stuff] ) ;
 		}
 
-        // xxxIndex: specify what to show in the "LeftPanels" or "RightPanels" kinds (declared at the end of this file)
+        // xxxIndex: specify what to show in the "RightPanels" kinds (declared at the end of this file)
         // xxxIndex is ignored when matching show setting is false
 		var modes = {
-			json:		{leftIndex: 0, rightIndex: 0},
-			javascript:	{leftIndex: 1, rightIndex: 1},
-			html:		{leftIndex: 2, rightIndex: 2},
-			css:		{leftIndex: 3, rightIndex: 3},
-			text:		{leftIndex: 0, rightIndex: 0},
-			image:		{leftIndex: 0, rightIndex: 0}
+			json:		{rightIndex: 0},
+			javascript:	{rightIndex: 1},
+			html:		{rightIndex: 2},
+			css:		{rightIndex: 3},
+			text:		{rightIndex: 0},
+			image:		{rightIndex: 0}
 		};
 
 		var settings = modes[mode]||modes['text'];
-		this.$.left.setIndex(settings.leftIndex);
 		this.$.right.setIndex(settings.rightIndex);
-
+		this.$.body.reflow();
 		return showSettings.ace ;
 	},
 	showWaitPopup: function(inMessage) {
@@ -143,26 +154,30 @@ enyo.kind({
 		this.$.errorPopup.show();
 	},
 	//
-	//
-	buildEnyoDb: function() {
-		this.$.enyoAnalyzer.analyze(["$enyo/source", "$lib/layout", "$lib/onyx"]);
+	setAutoCompleteData: function() {
+		this.projectData.on('change:enyo-indexer', this.enyoIndexReady, this);
+		this.projectData.on('change:project-indexer', this.projectIndexReady, this);
+		this.$.autocomplete.setEnyoIndexer(this.projectData.getEnyoIndexer());
+		this.$.autocomplete.setProjectIndexer(this.projectData.getProjectIndexer());
 	},
-	buildProjectDb: function(inProjectUrl) {
-		this.debug && this.log("projectUrl: " + inProjectUrl);
-		this.$.projectAnalyzer.analyze([inProjectUrl]);
+	resetAutoCompleteData: function() {
+		this.projectData.off('change:enyo-indexer', this.enyoIndexReady);
+		this.projectData.off('change:project-indexer', this.projectIndexReady);
+		this.$.autocomplete.setEnyoIndexer(null);
+		this.$.autocomplete.setProjectIndexer(null);
 	},
-	enyoIndexReady: function() {
+	enyoIndexReady: function(model, value, options) {
 		// Pass to the autocomplete component a reference to the enyo indexer
-		this.$.autocomplete.setEnyoIndexer(this.$.enyoAnalyzer.index);
+		this.$.autocomplete.setEnyoIndexer(value);
 	},
-	projectIndexReady: function() {
+	projectIndexReady: function(model, value, options) {
 		// Pass to the autocomplete component a reference to the project indexer
-		this.$.autocomplete.setProjectIndexer(this.$.projectAnalyzer.index);
+		this.$.autocomplete.setProjectIndexer(value);
 	},
 	dumpInfo: function(inObject) {
 		var c = inObject;
 		if (!c || !c.superkinds) {
-		//console.log(this.$.right.$.dump);
+		//enyo.log(this.$.right.$.dump);
 			this.$.right.$.dump.setContent("(no info)");
 			return;
 		}
@@ -198,19 +213,19 @@ enyo.kind({
 		this.$.right.$.dump.setContent(h$);
 	},
 	reparseAction: function() {
-		if (this.mode === 'javascript') {
+		if (this.docData.getMode() === 'javascript') {
 			var module = {
-				name: this.file.name,
+				name: this.docData.getFile().name,
 				code: this.$.ace.getValue()
 			};
 			try {
 				this.analysis = module;
-				this.$.projectAnalyzer.index.indexModule(module);
+				this.$.fileAnalyzer.index.indexModule(module);
 				this.updateObjectsLines(module);
-	
+
 				// dump the object where the cursor is positioned, if it exists
 				this.dumpInfo(module.objects && module.objects[module.currentObject]);
-				
+
 				// Give the information to the autocomplete component
 				this.$.autocomplete.setAnalysis(this.analysis);
 			} catch(error) {
@@ -232,9 +247,9 @@ enyo.kind({
 	updateObjectsLines: function(module) {
 		module.ranges = [];
 		if (module.objects && module.objects.length > 0) {
-			var start = 0;
+			var start = 0, range;
 			for( var idx = 1; idx < module.objects.length ; idx++ ) {
-				var range = { first: start, last: module.objects[idx].line - 1};
+				range = { first: start, last: module.objects[idx].line - 1};
 				module.ranges.push(range);	// Push a range for previous object
 				start = module.objects[idx].line;
 			}
@@ -270,6 +285,7 @@ enyo.kind({
 		this.reparseAction();
 		if (this.analysis) {
 			var kinds = [];
+			var data = {kinds: kinds, projectData: this.projectData};
 			for (var i=0; i < this.analysis.objects.length; i++) {
 				var o = this.analysis.objects[i];
 				var comps = o.components;
@@ -284,7 +300,7 @@ enyo.kind({
 				}
 			}
 			if (kinds.length > 0) {
-				this.doDesignDocument(kinds);
+				this.doDesignDocument(data);
 				return;
 			}
 		}
@@ -321,7 +337,7 @@ enyo.kind({
 	},
 	/**
 	 * Recursively lists the handler methods mentioned in the "onXXXX"
-	 * attributes of the components passed as an input parameter 
+	 * attributes of the components passed as an input parameter
 	 * @param components: components to walk thru
 	 * @param declared: list of handler methods already listed
 	 * @returns the list of declared handler methods
@@ -350,27 +366,27 @@ enyo.kind({
 	 * handler functions listed in the "onXXXX" attributes
 	 * @protected
 	 * Note: This implies to reparse/analyze the file before
-	 * and after the operation. 
+	 * and after the operation.
 	 */
 	insertMissingHandlers: function() {
 		if (this.analysis) {
 			// Reparse to get the definition of possibly added onXXXX attributes
 			this.reparseAction();
-			
+
 			/*
 			 * Insert missing handlers starting from the end of the
 			 * file to limit the need of reparsing/reanalysing
-			 * the file 
-			 */  
+			 * the file
+			 */
 			for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
 				this.insertMissingHandlersIntoKind(this.analysis.objects[i]);
 			}
-	
+
 			// Reparse to get the definition of the newly added methods
 			this.reparseAction();
 		} else {
 			// There is no parser data for the current file
-			console.log("Unable to insert missing handler methods");
+			enyo.log("Unable to insert missing handler methods");
 		}
 	},
 	/**
@@ -390,10 +406,10 @@ enyo.kind({
 				existing[p.name] = "";
 			}
 		}
-		
+
 		// List the handler methods declared in the components and in handlers map
 		var declared = this.listHandlers(object, {});
-		
+
 		// Prepare the code to insert
 		var codeToInsert = "";
 		for(var item in declared) {
@@ -401,7 +417,7 @@ enyo.kind({
 				codeToInsert += (commaTerminated ? "" : ",\n");
 				commaTerminated = false;
 				codeToInsert += ("    " + item + ": function(inSender, inEvent) {\n        // TO"
-						+ "DO - Auto-generated code\n    }"); 
+						+ "DO - Auto-generated code\n    }");
 			}
 		}
 
@@ -418,7 +434,7 @@ enyo.kind({
 			}
 		} else {
 			// There is no block information for that kind - Parser is probably not up-to-date
-			console.log("Unable to insert missing handler methods");
+			enyo.log("Unable to insert missing handler methods");
 		}
 	},
 	// called when designer has modified the components
@@ -440,27 +456,28 @@ enyo.kind({
 		 * NB: reparseAction() is invoked by insertMissingHandlers()
 		 */
 		this.insertMissingHandlers();
-		this.docHasChanged = true;
+		this.docData.setEdited(true);
 	},
 	closeDocAction: function(inSender, inEvent) {
-		if (this.docHasChanged) {
+		if (this.docData.getEdited() === true) {
 			this.$.savePopup.setName("Document was modified! Save it before closing?");
 			this.$.savePopup.setActionButton("Don't Save");
 			this.$.savePopup.applyStyle("padding-top: 10px");
 			this.$.savePopup.show();
 		} else {
 			this.beforeClosingDocument();
-			this.doCloseDocument({});
+			this.doCloseDocument({id: this.docData.getId()});
 		}
+		return true; // Stop the propagation of the event
 	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
 		this.beforeClosingDocument();
-		this.doCloseDocument({});
+		this.doCloseDocument({id: this.docData.getId()});
 	},
 	docChanged: function(inSender, inEvent) {
-		this.docHasChanged=true;
+		this.docData.setEdited(true);
 
 		if (this.debug) this.log(JSON.stringify(inEvent.data));
 
@@ -507,7 +524,39 @@ enyo.kind({
 	 * @protected
 	 */
 	beforeClosingDocument: function() {
-		this.$.autocomplete.setProjectIndexer(null);
+		this.resetAutoCompleteData();
+		this.docData = null;
+		this.projectData = null;
+	},
+	// Show Find popup
+	findpop: function(){
+		this.$.findpop.show();
+		return true;
+	},
+	findNext: function(inSender, inEvent){
+		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
+		this.$.ace.find(this.$.findpop.findValue, options);
+	},
+
+	findPrevious: function(){
+		var options = {backwards: true, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
+		this.$.ace.find(this.$.findpop.findValue, options);
+	},
+
+	replaceAll: function(){
+		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
+	},
+	
+	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
+	replace: function(){
+		//this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
+	},
+	
+	focusEditor: function(inSender, inEvent) {
+		this.$.ace.focus();
+	},
+	getEditorContent: function() {
+		return this.$.ace.getValue();
 	}
 });
 
@@ -541,17 +590,4 @@ enyo.kind({
 	test: function(inEvent) {
 		this.doCss(inEvent);
 	}
-});
-
-enyo.kind({name: "leftPanels",kind: "Panels", wrap: false,
-	components: [
-		{// left panel for JSON goes here
-		},
-		{// left panel for javascript goes here
-		},
-		{// left panel for HTML goes here
-		},
-		{ // left panel for CSS goes here
-		}
-	]
 });

@@ -1,12 +1,13 @@
-﻿enyo.depends(
+enyo.depends(
 	"$lib/layout",
 	"$lib/onyx",
-	"Ares.js",
+	"$lib/foss",
+	"source/",
 	"Ares.css",
 	//
+	"../model/source",
 	"$lib/extra/analyzer2",
 	"../utilities/source",
-	"../lib/foss/ace",
 	"../phobos/source",
 	//
 	"../deimos/source",
