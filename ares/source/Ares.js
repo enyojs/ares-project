@@ -33,7 +33,7 @@ enyo.kind({
 
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
-			WorkspaceData.loadProjects("MARIAN-SHOULD-PUT-THE-RIGHT-VALUE", true);
+			WorkspaceData.loadProjects("com.enyojs.ares.tests", true);
 			// in charge of Ares Test Suite
 			this.createComponent({kind: "Ares.TestController"});
 		} else {
