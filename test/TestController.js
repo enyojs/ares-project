@@ -1,10 +1,12 @@
 enyo.kind({
-	name: "ares.TestController",
+	name: "Ares.TestController",
 	kind: enyo.Component,
-	debug: true,
+	debug: false,
 	status: "None",
-	aresTestW: null,
 	create: function() {
+		if (this.debug) {
+			enyo.log("I am Ares Test Controller ...");
+		}
 		this.inherited(arguments);
 		// listen for dispatched messages (received from Ares Test Reporter)
 		window.addEventListener("message", enyo.bind(this, this.recMsgFromTestReporter), false);
@@ -17,8 +19,8 @@ enyo.kind({
 		// Warning: postMessage sent several times to make sure it has been received by Ares Test browser
 		var count = 4;
 		var repeatPostMsg = function() {
-			if (this.debug) enyo.log("Post START ...");
-			aresTestW.postMessage("START", "http://127.0.0.1:9009");
+			if (this.debug) enyo.log("Post ARES.TEST.START ...");
+			aresTestW.postMessage("ARES.TEST.START", "http://127.0.0.1:9009");
 			count--;
 			if (count > 0) {
 				setTimeout(repeatPostMsg, 1000);
@@ -30,18 +32,29 @@ enyo.kind({
 		// test bad origin
 		if (event.origin !== "http://127.0.0.1:9009")
 			return;
+		// source must be valid
+		if (event.source === null) {
+			return;
+		}
 		// START and READY enabled the com path between Ide and Test windows
-		if (event.data === "READY") {
-			this.status = event.data;
-		if (this.debug) enyo.log("Received READY ... Communication path established ... Status: "+this.status);
+		if (event.data === "ARES.TEST.READY") {
+			if (this.debug) {
+				this.status = event.data;
+				enyo.log("Received ARES.TEST.READY ... Communication path established ... Status: "+this.status);
+			}
 		}
 		// Start button pressed on Ares Test Reporter
-		if (event.data === "RUN") {
-			this.status = event.data;
-			if (this.debug) enyo.log("Received RUN ... Status: "+this.status);
+		if (event.data === "ARES.TEST.RUN") {
+			if (this.debug) {
+				this.status = event.data;
+				enyo.log("Received ARES.TEST.RUN ... Status: "+this.status);
+			}
 			// Create TextCtrlRunner and TestProxyReporter components
 			// TestProxyReporter is created by TestCtrlRunner
-			this.createComponent({name: "runner", kind: "ares.TestCtrlRunner", testWindow: "aresTestW"});
+			if (this.$.runner) {
+				this.removeComponent(this.$.runner);
+			}
+			this.createComponent({name: "runner", kind: "Ares.TestCtrlRunner", aresObj: this.aresObj});
 		}
 	}
 });

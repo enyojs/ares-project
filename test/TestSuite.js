@@ -13,7 +13,7 @@ Jasmine style assert mechanism, so we can have fancy english text for failures
 
 
 /**
-	To implement a suite of unit tests, create a subkind of ares.TestSuite.
+	To implement a suite of unit tests, create a subkind of Ares.TestSuite.
 	Any methods in your subkind that begin with 'test' will be invoked as unit tests when the test runner executes.
 	
 	When each test is complete, it should call this.finish().  
@@ -26,7 +26,7 @@ Jasmine style assert mechanism, so we can have fancy english text for failures
 	
 */
 enyo.kind({
-	name: "ares.TestSuite",
+	name: "Ares.TestSuite",
 	kind: enyo.Component,
 	events: {
 		onBegin: "", // sent with test name as each test begins running.
@@ -105,7 +105,7 @@ enyo.kind({
 			if (this.$[testName]) {
 				this.$[testName].destroy();
 			}
-			this.createComponent({name: testName, kind:this.kind, onBegin: "childTestBegun", onFinish: "childTestFinished"});
+			this.createComponent({name: testName, kind:this.kind, onBegin: "childTestBegun", onFinish: "childTestFinished", aresObj: this.aresObj});
 			this.$[testName].runTest(testName);
 		} else {
 			this.autoRunNextTest = false;
@@ -197,13 +197,13 @@ enyo.kind({
 	
 });
 
-ares.TestSuite.tests = [];
+Ares.TestSuite.tests = [];
 
-ares.TestSuite.subclass = function(ctor, props) {
+Ares.TestSuite.subclass = function(ctor, props) {
 	// make a list of TestSuite subclasses so we can run them automatically
 	// if one needs to make a TestSuite subclass that isn't actually a TestSuite itself,
 	// they should assign a truthy 'testBase' property
 	if (!props.testBase) {
-		ares.TestSuite.tests.push(ctor);
+		Ares.TestSuite.tests.push(ctor);
 	}
 };

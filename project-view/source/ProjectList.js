@@ -2,7 +2,7 @@
  * This kind provides:
  * - the project toolbars (with create .. delete)
  * - the project list
- *
+/*
  * The project list is a simple kind that only holds project names. It does not
  * hold project objects or kinds.
  */
@@ -219,9 +219,6 @@ enyo.kind({
 			this.doPreview(inEvent.originator.value) ;
 		}
 		return true ;
-	},
-	statics: {
-		underTest: false
 	}
 });
 

@@ -45,6 +45,7 @@ enyo.kind({
 	showProjectPropPopup: function(inSender, inEvent) {
 		var propW = this.$.propertiesWidget ;
 		var that = this ;
+		var testCallBack = inEvent.testCallBack ;
 
 		// scan content for a project.json
 		var matchFileName = function(node){
@@ -80,6 +81,9 @@ enyo.kind({
 				propW.$.projectName.setValue(that.selectedDir.name);
 				that.$.selectDirectoryPopup.hide();
 				propW.show() ;
+			}
+			if (testCallBack) {
+				testCallBack();
 			}
 		});
 	},
