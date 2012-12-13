@@ -2,10 +2,7 @@ enyo.kind({
 	name: "Phobos",
 	classes: "enyo-unselectable",
 	components: [
-		{name: "enyoAnalyzer", kind: "Analyzer", onIndexReady: "enyoIndexReady"},
-		{name: "projectAnalyzer", kind: "Analyzer", onIndexReady: "projectIndexReady"},
-		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
-		//{name: "db", kind: "PackageDb", onFinish: "dbReady"},
+		{kind: "Analyzer", name: "fileAnalyzer"},
 		{kind: "DragAvatar", components: [
 			{tag: "img", src: "$deimos/images/icon.png"}
 		]},
@@ -40,49 +37,37 @@ enyo.kind({
 	events: {
 		onSaveDocument: "",
 		onDesignDocument: "",
-		onCloseDocument: "",
-		onEditedChanged: ""
+		onCloseDocument: ""
 	},
 	handlers: {
 		onCss: "newcssAction",
 		onReparseAsked: "reparseAction"
 	},
-	docHasChanged: false,
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
-	mode: "",				// js, css, ...
-	file: null,
 	create: function() {
 		this.inherited(arguments);
 	},
-	/**
-	 * Create a path resolver (similar to enyo.path) to resolve
-	 * "$enyo", "$lib", ... when launching the Analyzer on the
-	 * enyo/onyx used by the loaded project.
-	 * @param  inProjectPath
-	 * @protected
-	 */
-	createPathResolver: function(inProjectPath) {
-		this.pathResolver = new enyo.pathResolverFactory();
-		this.pathResolver.addPaths({
-			enyo: inProjectPath + "/enyo",
-			lib: "$enyo/../lib"
-		});
+	getProjectController: function() {
+		this.projectCtrl = this.projectData.getProjectCtrl();
+		if ( ! this.projectCtrl) {
+			this.projectCtrl = new ProjectCtrl({projectData: this.projectData});
+			this.projectData.setProjectCtrl(this.projectCtrl);
+		}
 	},
 	//
 	saveDocAction: function() {
 		this.showWaitPopup("Saving document...");
-		this.doSaveDocument({content: this.$.ace.getValue(), file: this.file});
+		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
 	},
 	saveComplete: function() {
 		this.hideWaitPopup();
-		this.docHasChanged=false;
-		this.doEditedChanged({id: this.file.id, edited: false});
+		this.docData.setEdited(false);		// TODO: The user may have switched to another file
 		this.reparseAction();
 	},
 	saveNeeded: function() {
-		return this.docHasChanged;
+		return this.docData.getEdited();
 	},
 	saveFailed: function(inMsg) {
 		this.hideWaitPopup();
@@ -92,30 +77,38 @@ enyo.kind({
 	beginOpenDoc: function() {
 		this.showWaitPopup("Opening document...");
 	},
-	openDoc: function(inFile, inCode, inExt, inProjectData, changed) {
+	openDoc: function(inDocData) {
+		this.docData = inDocData;
+		this.projectData = this.docData.getProjectData();
+		this.getProjectController();
+		this.setAutoCompleteData();
+
+		// Save the value to set it again after data has been loaded into ACE
+		var edited = this.docData.getEdited();
+
+		var file = this.docData.getFile();
+		var extension = file.name.split(".").pop();
 		this.hideWaitPopup();
 		this.analysis = null;
-		this.file = inFile;
-		this.mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image"}[inExt] || "text";
-		var hasAce = this.adjustPanelsForMode(this.mode);
+		var mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image"}[extension] || "text";
+		this.docData.setMode(mode);
+		var hasAce = this.adjustPanelsForMode(mode);
 		if (hasAce) {
-			this.$.ace.setEditingMode(this.mode);
-			this.$.ace.setValue(inCode);
+			this.$.ace.setEditingMode(mode);
+			this.$.ace.setValue(inDocData.getData());
 			// Pass to the autocomplete compononent a reference to ace
 			this.$.autocomplete.setAce(this.$.ace);
 			this.focusEditor();
 		}
 		else {
-			var origin = inProjectData.getService().getConfig().origin;
-			this.$.imageViewer.setAttribute("src", origin + inFile.pathname);
+			var origin = this.projectData.getService().getConfig().origin;
+			this.$.imageViewer.setAttribute("src", origin + file.pathname);
 		}
-		this.reparseAction();
-		this.projectUrl = inProjectData.getProjectUrl();
-		this.createPathResolver(this.projectUrl);
-		this.buildEnyoDb(this.projectUrl, this.pathResolver);	// this.buildProjectDb() will be invoked when enyo analysis is finished
-		this.docHasChanged = changed;
-		this.doEditedChanged({id: this.file.id, edited: changed});
-		this.$.documentLabel.setContent(this.file.name);
+		this.reparseAction();					// Synchronous call
+		this.projectCtrl.buildEnyoDb();			// this.buildProjectDb() will be invoked when enyo analysis is finished
+		this.$.documentLabel.setContent(file.name);
+
+		this.docData.setEdited(edited);
 	},
 	adjustPanelsForMode: function(mode) {
 		// whether to show or not a panel, imageViewer and ace cannot be enabled at the same time
@@ -161,23 +154,25 @@ enyo.kind({
 		this.$.errorPopup.show();
 	},
 	//
-	//
-	buildEnyoDb: function(inProjectUrl, inPathResolver) {
-		this.$.enyoAnalyzer.analyze(["$enyo/source", "$lib/onyx", "$lib/layout"], inPathResolver);
+	setAutoCompleteData: function() {
+		this.projectData.on('change:enyo-indexer', this.enyoIndexReady, this);
+		this.projectData.on('change:project-indexer', this.projectIndexReady, this);
+		this.$.autocomplete.setEnyoIndexer(this.projectData.getEnyoIndexer());
+		this.$.autocomplete.setProjectIndexer(this.projectData.getProjectIndexer());
 	},
-	buildProjectDb: function(inProjectUrl, inPathResolver) {
-		this.$.projectAnalyzer.analyze([inProjectUrl], inPathResolver);
+	resetAutoCompleteData: function() {
+		this.projectData.off('change:enyo-indexer', this.enyoIndexReady);
+		this.projectData.off('change:project-indexer', this.projectIndexReady);
+		this.$.autocomplete.setEnyoIndexer(null);
+		this.$.autocomplete.setProjectIndexer(null);
 	},
-	enyoIndexReady: function() {
+	enyoIndexReady: function(model, value, options) {
 		// Pass to the autocomplete component a reference to the enyo indexer
-		this.$.autocomplete.setEnyoIndexer(this.$.enyoAnalyzer.index);
-
-		// Start analysis of the project
-		this.buildProjectDb(this.projectUrl, this.pathResolver);	// TODO: exclude enyo/onyx from the analysis
+		this.$.autocomplete.setEnyoIndexer(value);
 	},
-	projectIndexReady: function() {
+	projectIndexReady: function(model, value, options) {
 		// Pass to the autocomplete component a reference to the project indexer
-		this.$.autocomplete.setProjectIndexer(this.$.projectAnalyzer.index);
+		this.$.autocomplete.setProjectIndexer(value);
 	},
 	dumpInfo: function(inObject) {
 		var c = inObject;
@@ -218,14 +213,14 @@ enyo.kind({
 		this.$.right.$.dump.setContent(h$);
 	},
 	reparseAction: function() {
-		if (this.mode === 'javascript') {
+		if (this.docData.getMode() === 'javascript') {
 			var module = {
-				name: this.file.name,
+				name: this.docData.getFile().name,
 				code: this.$.ace.getValue()
 			};
 			try {
 				this.analysis = module;
-				this.$.projectAnalyzer.index.indexModule(module);
+				this.$.fileAnalyzer.index.indexModule(module);
 				this.updateObjectsLines(module);
 
 				// dump the object where the cursor is positioned, if it exists
@@ -290,6 +285,7 @@ enyo.kind({
 		this.reparseAction();
 		if (this.analysis) {
 			var kinds = [];
+			var data = {kinds: kinds, projectData: this.projectData};
 			for (var i=0; i < this.analysis.objects.length; i++) {
 				var o = this.analysis.objects[i];
 				var comps = o.components;
@@ -304,7 +300,7 @@ enyo.kind({
 				}
 			}
 			if (kinds.length > 0) {
-				this.doDesignDocument(kinds);
+				this.doDesignDocument(data);
 				return;
 			}
 		}
@@ -460,29 +456,28 @@ enyo.kind({
 		 * NB: reparseAction() is invoked by insertMissingHandlers()
 		 */
 		this.insertMissingHandlers();
-		this.docHasChanged = true;
-		this.doEditedChanged({id: this.file.id, edited: true});
+		this.docData.setEdited(true);
 	},
 	closeDocAction: function(inSender, inEvent) {
-		if (this.docHasChanged) {
+		if (this.docData.getEdited() === true) {
 			this.$.savePopup.setName("Document was modified! Save it before closing?");
 			this.$.savePopup.setActionButton("Don't Save");
 			this.$.savePopup.applyStyle("padding-top: 10px");
 			this.$.savePopup.show();
 		} else {
 			this.beforeClosingDocument();
-			this.doCloseDocument({});
+			this.doCloseDocument({id: this.docData.getId()});
 		}
+		return true; // Stop the propagation of the event
 	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
 		this.beforeClosingDocument();
-		this.doCloseDocument({});
+		this.doCloseDocument({id: this.docData.getId()});
 	},
 	docChanged: function(inSender, inEvent) {
-		this.docHasChanged=true;
-		this.doEditedChanged({id: this.file.id, edited: true});
+		this.docData.setEdited(true);
 
 		if (this.debug) this.log(JSON.stringify(inEvent.data));
 
@@ -529,7 +524,9 @@ enyo.kind({
 	 * @protected
 	 */
 	beforeClosingDocument: function() {
-		this.$.autocomplete.setProjectIndexer(null);
+		this.resetAutoCompleteData();
+		this.docData = null;
+		this.projectData = null;
 	},
 	// Show Find popup
 	findpop: function(){

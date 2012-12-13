@@ -577,6 +577,9 @@ enyo.kind({
 			suggestions.add(this.enyoIndexer.search(this.getFctFilterFn(regexp), this.getMapFn(this.AUTOCOMP_ONYX), this));
 			suggestions.add(this.enyoIndexer.search(this.getKindFilter(regexp), this.getMapFn(this.AUTOCOMP_ONYX), this));
 			this.suggestionsOnyx = suggestions;
+		} else {
+			this.suggestionsEnyo = new Phobos.Suggestions();
+			this.suggestionsOnyx = new Phobos.Suggestions();
 		}
 	},
 	/**
