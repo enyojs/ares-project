@@ -177,7 +177,7 @@
 			"description":"preview properties",
 			"required":false,
 			"properties": {
-				"top-file": {
+				"top_file": {
 					"type":"object",
 					"description":"index.html like",
 					"required":false,

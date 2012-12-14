@@ -228,7 +228,7 @@ enyo.kind({
 		}
 
 		if (! conf.preview ) {conf.preview = {} ;}
-		this.$.ppTopFile.setValue( conf.preview['top-file'] || confDefault.preview['top-file'] ) ;
+		this.$.ppTopFile.setValue( conf.preview['top_file'] || confDefault.preview['top-file'] ) ;
 
 		return this ;
 	},
@@ -260,7 +260,7 @@ enyo.kind({
 		}
 
 		ppConf = this.config.preview ;
-		ppConf['top-file'] = this.$.ppTopFile.getValue();
+		ppConf['top_file'] = this.$.ppTopFile.getValue();
 
 		// to be handled by a ProjectWizard
 		this.doModifiedConfig({data: this.config}) ;
