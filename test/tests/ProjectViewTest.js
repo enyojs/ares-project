@@ -31,27 +31,28 @@ enyo.kind({
 		if (dirPopup) {
 			// retrieve the service
 			var pList = dirPopup.$.providerList;
-			var that = this ;
+			var that = this;
 			var myService = pList.services[0];
-			//var myService = this.aresObj.$.serviceRegistry.services[0];
 			this.log(myService);
-			pList.$.item.applyStyle("background-color", "red");
+
 			var userPushOk = function() {
 				// simulate on projectWizardProperties the Ok event which is handled by createProject
 				pWizard.createProject(that,{service: myService });
 				pWizard.$.propertiesWidget.confirmTap(that, {service: myService, callBack: that.finish });
 	
 			};
+
 			var userSelectDir = function() {
 				var hFileTree = dirPopup.$.hermesFileTree;
 				var nodes = hFileTree.getNodeFiles();
 					
 				// simulate nodeTap & selectFolder
 				hFileTree.doFolderClick(nodes[0]);
+				nodes[0].doNodeTap();
+
 				// simulate confirmTap
-				that.log(dirPopup.selectedServiceId) ;
 				dirPopup.doDirectorySelected({serviceId: dirPopup.selectedDir.id, directory: dirPopup.selectedDir, testCallBack: userPushOk});
-			} ;
+			};
 			// selectProvider
 			dirPopup.handleSelectProvider(this, {service: myService, callBack: userSelectDir});
 		} else {
