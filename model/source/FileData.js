@@ -34,6 +34,12 @@ Ares.Model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when po
 	},
 	setMode: function(mode) {
 		this.set("mode", mode);
+	},
+	getAceSession: function() {
+		return this.get("ace-session");
+	},
+	setAceSession: function(session) {
+		this.set("ace-session", session);
 	}
 });
 

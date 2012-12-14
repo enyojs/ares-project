@@ -158,10 +158,7 @@ enyo.kind({
 		}
 	},
 	switchToDocument: function(d) {
-		// save document state
-		if (this.activeDocument) {
-			this.activeDocument.setData(this.$.phobos.getEditorContent());
-		}
+		// We no longer save the data as the ACE edit session will keep the data for us
 		if (!this.activeDocument || d !== this.activeDocument) {
 			this.$.phobos.openDoc(d);
 		}

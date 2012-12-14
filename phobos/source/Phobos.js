@@ -93,8 +93,16 @@ enyo.kind({
 		this.docData.setMode(mode);
 		var hasAce = this.adjustPanelsForMode(mode);
 		if (hasAce) {
-			this.$.ace.setEditingMode(mode);
-			this.$.ace.setValue(inDocData.getData());
+			var aceSession = this.docData.getAceSession();
+			if (aceSession) {
+				this.$.ace.setSession(aceSession);
+			} else {
+				aceSession = this.$.ace.createSession(this.docData.getData(), mode);
+				this.docData.setData(null);			// TODO: needed
+				this.$.ace.setSession(aceSession);
+				this.docData.setAceSession(aceSession);
+			}
+
 			// Pass to the autocomplete compononent a reference to ace
 			this.$.autocomplete.setAce(this.$.ace);
 			this.focusEditor();
@@ -526,6 +534,9 @@ enyo.kind({
 	 * @protected
 	 */
 	beforeClosingDocument: function() {
+		// TODO: This there a way to destroy the edit session ?
+		this.docData.setAceSession(null);		// TODO: needed
+		this.docData.setData(null);				// TODO: needed
 		this.resetAutoCompleteData();
 		this.docData = null;
 		this.projectData = null;
