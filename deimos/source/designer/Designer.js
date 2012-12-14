@@ -303,7 +303,9 @@ enyo.kind({
 		if (inProps) {
 			for (var n in inProps) {
 				if (!ignoreProp[n]) {
+					if (n!="published") {
 					this.published[n] = inProps[n];
+					}
 				}
 			}
 		}
