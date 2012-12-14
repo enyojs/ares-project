@@ -8,7 +8,7 @@ enyo.kind({
 	name: "DocumentToolbar",
 	kind: "onyx.Toolbar",
 	events: {
-		onGrabberTap: "",
+		onToggleOpen: "",
 		onSwitchFile: "",
 		onClose: "",
 		onSave: "",
@@ -16,16 +16,15 @@ enyo.kind({
 		onDesign: ""
 	},
 	components: [
-		{name: "container", classes: "ares-docbar-container", kind: "FittableColumns", components: [
-			{kind: "onyx.Grabber", ontap: "doGrabberTap"},
-			{kind: "onyx.Drawer", classes: "ares-filedrawer", orient: "h", open: false, components: [
+		{name: "container", classes: "ares-docbar-container", kind: "FittableColumns", ontap: "doToggleOpen", components: [
+			{kind: "onyx.Grabber", style:"-webkit-transform:rotate(90deg); padding-right:15px;"},
+			{kind: "onyx.Drawer", classes: "ares-filedrawer", orient: "h", open: false, showing:false, components: [
 				{kind: "FittableColumns", components: [
 					{kind: "onyx.Button", content: "Save", ontap: "saveFile"},
 					{kind: "onyx.Button", content: "New Kind", ontap: "newKind"},
 					{name: "designButton", kind: "onyx.Button", content: "Designer", ontap: "designFile"}
 				]}
 			]},
-			{fit: true},
 			{name: "tabs", classes: "ares-docbar-tabs", kind: "onyx.RadioGroup"}
 		]}
 	],

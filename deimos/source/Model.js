@@ -22,6 +22,10 @@ enyo.singleton({
 			"useful": this.F_USEFUL
 		};
 	},
+	/**
+	 * Build all the information needed by the inspector
+	 * @public
+	 */
 	buildInformation: function() {
 		this.palette = Palette.model,		// TODO: Should replace Palette.model
 		this.addInformation("properties", "__default", this.defaults.properties);

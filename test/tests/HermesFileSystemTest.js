@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "HermesFileSystemTest",
-	kind: "ares.TestSuite",
+	kind: "Ares.TestSuite",
 	debug: false,
 	folderId: "%2FAresTests",
 	dirToCreate: "source",

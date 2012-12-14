@@ -7,8 +7,7 @@ enyo.kind({
 			{tag: "img", src: "$deimos/images/icon.png"}
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
-			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 10px;", components: [
-				{kind: "onyx.Button", content: "Close", ontap: "closeDocAction"},
+			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", components: [
 				{name: "documentLabel", content: "Document"},
 				{name: "saveButton", kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: "New kind", ontap: "newKindAction"},
@@ -109,6 +108,7 @@ enyo.kind({
 		this.$.documentLabel.setContent(file.name);
 
 		this.docData.setEdited(edited);
+		this.$.toolbar.resized();
 	},
 	adjustPanelsForMode: function(mode) {
 		// whether to show or not a panel, imageViewer and ace cannot be enabled at the same time
@@ -285,7 +285,7 @@ enyo.kind({
 		this.reparseAction();
 		if (this.analysis) {
 			var kinds = [];
-			var data = {kinds: kinds, projectData: this.projectData};
+			var data = {kinds: kinds, projectData: this.projectData, fileIndexer: this.analysis};
 			for (var i=0; i < this.analysis.objects.length; i++) {
 				var o = this.analysis.objects[i];
 				var comps = o.components;
@@ -465,16 +465,18 @@ enyo.kind({
 			this.$.savePopup.applyStyle("padding-top: 10px");
 			this.$.savePopup.show();
 		} else {
+			var docData = this.docData;
 			this.beforeClosingDocument();
-			this.doCloseDocument({id: this.docData.getId()});
+			this.doCloseDocument({id: docData.getId()});
 		}
 		return true; // Stop the propagation of the event
 	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
+		var docData = this.docData;
 		this.beforeClosingDocument();
-		this.doCloseDocument({id: this.docData.getId()});
+		this.doCloseDocument({id: docData.getId()});
 	},
 	docChanged: function(inSender, inEvent) {
 		this.docData.setEdited(true);
