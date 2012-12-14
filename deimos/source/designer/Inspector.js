@@ -6,21 +6,19 @@ enyo.kind({
 		onAction: ""
 	},
 	published: {
-		filterLevel: null,		// Value will be given by Inspector.Filters "checked" item.
+		filterLevel: null,		// Value will be given by Inspector.FilterXXX "checked" item.
+		filterType: null,		// Value will be given by Inspector.FilterXXX "checked" item.
 		enyoIndexer: null,
 		projectIndexer: null,
 		fileIndexer: null,
 		projectData: null
 	},
 	components: [
-		{kind: "onyx.RadioGroup", fit:false, onActivate:"tabActivated", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton halves", components: [
-			{content:"Properties", active:true},
-			{content:"Events"}
-		]},
+		{kind: "Inspector.FilterType", onValueChanged: "updateFilterType"},
 		{kind: "Scroller", fit: true, components: [
 			{name: "content", kind: "FittableRows"}
 		]},
-		{kind: "Inspector.Filters", onLevelChanged: "updateFilterLevel"}
+		{kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"}
 	],
 	handlers: {
 		onChange: "change",
@@ -152,22 +150,27 @@ enyo.kind({
 		}
 	},
 	inspect: function(inControl) {
+		var ps, i, p;
 		this.$.content.destroyComponents();
 		this.selected = inControl;
 		if (inControl) {
 			var kindName = (inControl.kindName === "Proxy" && inControl.realKind) || inControl.kindName;
 			this.$.content.createComponent({tag: "h3", content: kindName, classes: "label label-info"});
-			this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Properties"});
-			var ps = this.buildPropList(inControl);
-			for (var i=0, p; p=ps[i]; i++) {
-				this.makeEditor(inControl, p, "properties");
-			}
-			ps = ps.events;
-			if (ps.length) {
-				this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
-			}
-			for (var i=0, p; p=ps[i]; i++) {
-				this.makeEditor(inControl, p, "events");
+			ps = this.buildPropList(inControl);
+
+			if (this.filterType === 'P') {
+				this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Properties"});
+				for (i=0, p; (p=ps[i]); i++) {
+					this.makeEditor(inControl, p, "properties");
+				}
+			} else {
+				ps = ps.events;
+				if (ps.length) {
+					this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
+				}
+				for (i=0, p; (p=ps[i]); i++) {
+					this.makeEditor(inControl, p, "events");
+				}
 			}
 		}
 		this.$.content.render();
@@ -263,20 +266,38 @@ enyo.kind({
 		this.setFilterLevel(inEvent.active.value);
 		this.inspect(this.selected);
 		return true; // Stop the propagation of the event
+	},
+	updateFilterType: function(inSender, inEvent) {
+		this.setFilterType(inEvent.active.value);
+		this.inspect(this.selected);
+		return true; // Stop the propagation of the event
 	}
-
 });
 
 enyo.kind({
-	name: "Inspector.Filters",
+	name: "Inspector.FilterLevel",
 	events: {
-		onLevelChanged: ""
+		onValueChanged: ""
 	},
 	components: [
-		{kind: "onyx.RadioGroup", fit:false, onActivate:"doLevelChanged", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton thirds", components: [
+		{kind: "onyx.RadioGroup", fit:false, onActivate:"doValueChanged", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton thirds", components: [
 			{value: Model.F_USEFUL, content: "Frequent", active: true},
 			{value: Model.F_NORMAL, content: "Normal"},
 			{value: Model.F_DANGEROUS, content: "All"}
 		]}
 	]
 });
+
+enyo.kind({
+	name: "Inspector.FilterType",
+	events: {
+		onValueChanged: ""
+	},
+	components: [
+		{kind: "onyx.RadioGroup", fit:false, onActivate:"doValueChanged", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton halves", components: [
+			{content:"Properties", value: "P", active:true},
+			{content:"Events", value: "E"}
+		]}
+	]
+});
+
