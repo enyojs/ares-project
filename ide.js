@@ -16,7 +16,8 @@ var fs = require("fs"),
     util  = require('util'),
     spawn = require('child_process').spawn,
     querystring = require("querystring"),
-    http = require('http');
+    http = require('http'),
+    HttpError = require(path.resolve(__dirname, "hermes/lib/httpError"));
 
 var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applications.\nUsage: "$0" [OPTIONS]\n')
 	.options('h', {
@@ -61,9 +62,8 @@ if (argv.help) {
 	process.exit(0);
 }
 
-var log = function() {};
-if (argv.verbose) {
-	log = function() {
+function log() {
+	if (argv.verbose) {
 		var arg, msg = arguments.callee.caller.name + '(): ';
 		for (var argi = 0; argi < arguments.length; argi++) {
 			arg = arguments[argi];
@@ -76,7 +76,6 @@ if (argv.verbose) {
 		}
 		console.log(msg);
 	};
-	log('Running Ares in verbose mode');
 }
 
 log("Arguments:", argv);
@@ -201,10 +200,14 @@ function startService(service) {
 function proxyServices(req, res, next) {
 	log("req.params:", req.params, ", req.query:", req.query);
 	var query = {},
-	    id = req.params.service_id,
+	    id = req.params.serviceId,
 	    service = ide.res.services.filter(function(service) {
 		    return service.id === id;
 	    })[0];
+	if (!service) {
+		next(new HttpError('No such service: ' + id, 403));
+		return;
+	}
 	for (var key in req.query) {
 		if (key && req.query[key]) {
 			query[key] = req.query[key];
@@ -216,23 +219,73 @@ function proxyServices(req, res, next) {
 		// port to forward to
 		port:   service.dest.port,
 		// path to forward to
-		path:   service.dest.pathname + '/' + req.params[0] + '?' + querystring.stringify(query),
+		path:   service.dest.pathname +
+			(req.params[0] ? '/' + req.params[0] : '') +
+			'?' + querystring.stringify(query),
 		// request method
 		method: req.method,
 		// headers to send
 		headers: req.headers
 	};
+	log("options:", options);
 
 	var creq = http.request(options, function(cres) {
-		for (var header in cres.headers) {
-			res.header(header, cres.headers[header]);
+		// transmit every header verbatim, but cookies
+		for (var key in cres.headers) {
+			var val = cres.headers[key];
+			if (key.toLowerCase() === 'set-cookie') {
+				var cookies = parseSetCookie(val);
+				cookies.forEach(function(cookie) {
+					cookie.options.domain = ide.res.domain || '127.0.0.1';
+					var oldPath = cookie.options.path;
+					cookie.options.path = service.pathname + (oldPath ? oldPath : '');
+					log("cookie.path:", oldPath, "->", cookie.options.path);
+					log("set-cookie:", cookie);
+					res.cookie(cookie.name, cookie.value, cookie.options);
+				});
+			} else {
+				res.header(key, val);
+			}
 		}
+		// re-write cookies
 		res.writeHead(cres.statusCode);
 		cres.pipe(res);
 	}).on('error', function(e) {
 		next(e);
 	});
 	creq.end();
+}
+
+function parseSetCookie(cookies) {
+	var outCookies = [];
+	if (!Array.isArray(cookies)) {
+		cookies = [ cookies ];
+	}
+	cookies.forEach(function(cookie) {
+		var outCookie = {};
+		var tokens = cookie.split(/; */);
+		log("parseSetCookie(): tokens:", tokens);
+		var namevalStr = tokens.splice(0, 1)[0];
+		if (typeof namevalStr === 'string') {
+			var nameval = namevalStr.split('=');
+			outCookie.name = nameval[0];
+			outCookie.value = nameval[1];
+			outCookie.options = {};
+			tokens.forEach(function(token) {
+				var opt = token.split('=');
+				outCookie.options[opt[0]] = opt[1] || true;
+			});
+			if (typeof outCookie.options.expires === 'string') {
+				outCookie.options.expires = new Date(outCookie.options.expires);
+			}
+			log("parseSetCookie(): outCookie:", outCookie);
+			outCookies.push(outCookie);
+		} else {
+			log("parseSetCookie(): Invalid Set-Cookie header:", namevalStr);
+		}
+	});
+	log("outCookies:", outCookies);
+	return outCookies;
 }
 
 ide.res.services.filter(function(service){
@@ -267,25 +320,10 @@ app.configure(function(){
 		res.status(200).json({timestamp: ide.res.timestamp});
 	});
 	app.get('/res/services', function(req, res, next) {
-		//var exdate=new Date();
-		//exdate.setDate(exdate.getDate() + 10);
-		
-		//res.cookie('remember', '1', { path: '/', expires: exdate, httpOnly: true });
-
 		res.status(200).json({services: ide.res.services});
 	});
-	app.get('/res/services/:service_id', function(req, res, next) {
-		var serviceId = req.params.serviceId;
-		var service = null;
-		for (var i = 0; i < ide.res.services.length; i++) {
-			if (ide.res.services[i].id === serviceId) {
-				service = ide.res.services[i];
-				break;
-			}
-		}
-		res.status(200).json({service: service});
-	});
-	app.all('/res/services/:service_id/*', proxyServices);
+	app.all('/res/services/:serviceId/*', proxyServices);
+	app.all('/res/services/:serviceId', proxyServices);
 
 });
 app.listen(port, addr);

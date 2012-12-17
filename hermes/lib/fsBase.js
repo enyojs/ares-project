@@ -31,8 +31,10 @@ function FsBase(inConfig, next) {
 
 	// sanity check
 	[
+		// middleware methods (always executed)
+		'cors', 'authorize', 'respond',
 		// admin methods
-		'cors', 'auth', 'respond',
+		'getUserInfo', 'setUserInfo',
 		// filesystem verbs
 		'propfind', 'get', 'put',
 		'mkcol', 'delete', 'move', 'copy'
@@ -54,29 +56,47 @@ function FsBase(inConfig, next) {
 		this.server = http.createServer(this.app); // XXX replace by HTTP server from config
 	}
 
+	// middleware that apply to any route
+
 	this.app.use(express.logger('dev'));
 	this.app.use(this.cors.bind(this));
 	this.app.use(express.cookieParser());
-	this.app.use(this.auth.bind(this));
+	this.app.use(this.authorize.bind(this));
 
-	var verbs = {
-		// verbs that are transmitted over an HTTP GET method
-		GET: {
-			PROPFIND: true,
-			GET: true
-		},
-		// verbs that are transmitted over an HTTP POST method
-		POST: {
-			PUT: true,
-			MKCOL: true,
-			DELETE: true,
-			MOVE: true,
-			COPY: true
-		}
-	};
+	// routes definition
 
-	// HTTP method tunneling
-	this.app.use(function(req, res, next) {
+	// URL-scheme: '/' to get/set user credentials
+	this.route0 = makeExpressRoute.bind(this)('');
+	
+	// URL-scheme: ID-based file/folder tree navigation, used by
+	// HermesClient.
+	this.route1 = makeExpressRoute.bind(this)('/id/');
+	var route2 = makeExpressRoute.bind(this)('/id/:id');
+
+	// URL-scheme: WebDAV-like navigation, used by the Enyo loader
+	// (itself used by the Enyo Javacript parser to analyze the
+	// project source code) & by the Ares project preview.
+	var route3 = makeExpressRoute.bind(this)('/file/*');
+
+	// 2. Add route-dependent middleware
+
+	// File-system verbs tunneling
+	function makeVerb(req, res, next) {
+		var verbs = {
+			// verbs that are transmitted over an HTTP GET method
+			GET: {
+				PROPFIND: true,
+				GET: true
+			},
+			// verbs that are transmitted over an HTTP POST method
+			POST: {
+				PUT: true,
+				MKCOL: true,
+				DELETE: true,
+				MOVE: true,
+				COPY: true
+			}
+		};
 		req.originalMethod = req.method;
 		if (req.query._method) {
 			req.method = req.query._method.toUpperCase();
@@ -88,7 +108,10 @@ function FsBase(inConfig, next) {
 		} else {
 			next(new HttpError("unknown originalMethod/method = "+req.originalMethod+"/"+req.method, 400));
 		}
-	});
+	}
+	this.app.use(this.route1, makeVerb.bind(this));
+	this.app.use(route2, makeVerb.bind(this));
+	this.app.use(route3, makeVerb.bind(this));
 
 	// Built-in express form parser: handles:
 	// - 'application/json' => req.body
@@ -100,7 +123,7 @@ function FsBase(inConfig, next) {
 	this.app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
 
 	/**
-	 * Global error handler
+	 * Global error handler (last plumbed middleware)
 	 * @private
 	 */
 	function errorHandler(err, req, res, next){
@@ -116,22 +139,24 @@ function FsBase(inConfig, next) {
 		this.app.use(errorHandler.bind(this));
 	}
 
+	// 3. Handle HTTP verbs
+
 	function makeExpressRoute(path) {
 		return (this.pathname + path)
 			.replace(/\/+/g, "/") // compact "//" into "/"
 			.replace(/(\.\.)+/g, ""); // remove ".."
 	}
 
-	// URL-scheme: ID-based file/folder tree navigation, used by
-	// HermesClient.
-	this.route1 = makeExpressRoute.bind(this)('/id/');
+	this.log("GET/POST:", this.route0);
+	this.app.get(this.route0, this.getUserInfo.bind(this));
+	this.app.post(this.route0, this.setUserInfo.bind(this));
+
 	this.log("ALL:", this.route1);
 	this.app.all(this.route1, (function(req, res) {
 		req.params.id = this.encodeFileId('/');
 		receive.bind(this)(req, res, next);
 	}).bind(this));
 
-	var route2 = makeExpressRoute.bind(this)('/id/:id');
 	this.log("ALL:", route2);
 	this.app.all(route2, receive.bind(this));
 
@@ -143,10 +168,6 @@ function FsBase(inConfig, next) {
 		this[req.method.toLowerCase()](req, res, this.respond.bind(this, res));
 	}
 
-	// URL-scheme: WebDAV-like navigation, used by the Enyo loader
-	// (itself used by the Enyo Javacript parser to analyze the
-	// project source code) & by the Ares project preview.
-	var route3 = makeExpressRoute.bind(this)('/file/*');
 	this.log("GET:", route3);
 	this.app.get(route3, (function(req, res, next) {
 		req.params.path = req.params[0];
@@ -172,17 +193,19 @@ function FsBase(inConfig, next) {
 	 * Terminates express server
 	 */
 	this.quit = function() {
-		console.log("FsBase.quit()");
 		this.server.close();
 		this.log("exiting");
 	};
 
 }
 
-FsBase.prototype.auth = function(req, res, next) {
-	console.log("FsBase.auth()");
+// Middleware
+
+// Authorize
+FsBase.prototype.authorize = function(req, res, next) {
+	this.log("FsBase.getUserInfo(): checking that request comes from 127.0.0.1");
 	if (req.connection.remoteAddress !== "127.0.0.1") {
-		next(new Error("Access denied from IP address "+req.connection.remoteAddress));
+		next(new HttpError("Access denied from IP address "+req.connection.remoteAddress, 401 /*Unauthorized*/));
 	} else {
 		next();
 	}
@@ -199,6 +222,8 @@ FsBase.prototype.cors = function(req, res, next) {
 		next();
 	}
 };
+
+// Utilities
 
 FsBase.prototype.respond = function(res, err, response) {
 	var statusCode, body;
@@ -233,9 +258,6 @@ FsBase.prototype.encodeFileId = function(filePath) {
 	// to filePath to encode the fileId
 	var buf = new Buffer(filePath, 'utf-8');
 	var fileId = buf.toString('hex');
-
-	//var fileId = encodeURIComponent(filePath);
-
 	return fileId;
 };
 
@@ -244,8 +266,28 @@ FsBase.prototype.decodeFileId = function(fileId) {
 	// to fileId to decode the fileId
 	var buf = new Buffer(fileId, 'hex');
 	var filePath = buf.toString('utf-8');
-
-	//var filePath = decodeURIComponent(fileId);
-
 	return filePath;
 };
+
+// Actions
+
+FsBase.prototype.getUserInfo = function(req, res, next) {
+	this.log("FsBase.getUserInfo(): req.query=", req.query);
+	this.log("FsBase.getUserInfo(): req.params=", req.params);
+	this.log("FsBase.getUserInfo(): req.cookies=", req.cookies);
+	next(null, {
+		code: 200 /*Ok*/,
+		body: {}
+	});
+};
+
+FsBase.prototype.setUserInfo = function(req, res, next) {
+	this.log("FsBase.setUserInfo(): req.query=", req.query);
+	this.log("FsBase.setUserInfo(): req.params=", req.params);
+	this.log("FsBase.setUserInfo(): req.cookies=", req.cookies);
+	next(null, {
+		code: 200 /*Ok*/,
+		body: {}
+	});
+};
+
