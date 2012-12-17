@@ -3,12 +3,12 @@
 enyo.kind({
 	name: "$NAME",
 	kind: "Control",
-	components: [
-	],
 	published: {
 	},
 	events: {
 	},
+	components: [
+	],
 	create: function() {
 		this.inherited(arguments);
 		// initialization code goes here
