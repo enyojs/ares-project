@@ -98,7 +98,7 @@ enyo.kind({
 				this.$.ace.setSession(aceSession);
 			} else {
 				aceSession = this.$.ace.createSession(this.docData.getData(), mode);
-				this.docData.setData(null);			// TODO: needed
+				this.docData.setData(null);			// We no longer need this data as it is now handled by the ACE edit session
 				this.$.ace.setSession(aceSession);
 				this.docData.setAceSession(aceSession);
 			}
@@ -534,9 +534,8 @@ enyo.kind({
 	 * @protected
 	 */
 	beforeClosingDocument: function() {
-		// TODO: This there a way to destroy the edit session ?
-		this.docData.setAceSession(null);		// TODO: needed
-		this.docData.setData(null);				// TODO: needed
+		this.$.ace.destroySession(this.docData.getAceSession());
+		this.docData.clear({silent: true});		// Clear all the data for that file
 		this.resetAutoCompleteData();
 		this.docData = null;
 		this.projectData = null;
