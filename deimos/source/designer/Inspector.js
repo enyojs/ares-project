@@ -38,7 +38,7 @@ enyo.kind({
 	},
 	buildPropList: function(inControl) {
 
-		var kindName = (inControl.kindName === "Proxy" && inControl.realKind) || inControl.kindName;
+		var kindName = (inControl.kindName === "Ares.Proxy" && inControl.realKind) || inControl.kindName;
 		var currentKind = kindName;
 
 		var definition = this.getKindDefinition(currentKind);
@@ -154,7 +154,7 @@ enyo.kind({
 		this.$.content.destroyComponents();
 		this.selected = inControl;
 		if (inControl) {
-			var kindName = (inControl.kindName === "Proxy" && inControl.realKind) || inControl.kindName;
+			var kindName = (inControl.kindName === "Ares.Proxy" && inControl.realKind) || inControl.kindName;
 			this.$.content.createComponent({tag: "h3", content: kindName, classes: "label label-info"});
 			ps = this.buildPropList(inControl);
 
