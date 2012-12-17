@@ -49,12 +49,37 @@ var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applicati
 		description: 'IDE configuration file',
 		default: path.resolve(__dirname, "ide.json")
 	})
+	.options('v', {
+		alias : 'verbose',
+		description: 'Increase IDE verbosity in the console',
+		boolean: true
+	})
 	.argv;
 
 if (argv.help) {
 	optimist.showHelp();
 	process.exit(0);
 }
+
+var log = function() {};
+if (argv.verbose) {
+	log = function() {
+		var arg, msg = arguments.callee.caller.name + '(): ';
+		for (var argi = 0; argi < arguments.length; argi++) {
+			arg = arguments[argi];
+			if (typeof arg === 'object') {
+				msg += util.inspect(arg);
+			} else {
+				msg += arg;
+			}
+			msg += ' ';
+		}
+		console.log(msg);
+	};
+	log('Running Ares in verbose mode');
+}
+
+log("Arguments:", argv);
 
 // Load IDE configuration & start per-project file servers
 
@@ -66,6 +91,7 @@ var platformVars = [
 	{regex: /@CWD@/, value: process.cwd()},
 	{regex: /@HOME@/, value: process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']}
 ];
+
 function platformSubst(inStr) {
 	var outStr = inStr;
 	if (outStr) {
@@ -91,7 +117,7 @@ if (!fs.existsSync(configPath)) {
 	throw "Did not find: '"+configPath+"': ";
 }
 
-console.info("Loading ARES configuration from '"+configPath+"'...");
+log("Loading ARES configuration from '"+configPath+"'...");
 var configStats = fs.lstatSync(configPath);
 if (!configStats.isFile()) {
 	throw "Not a file: '"+configPath+"': ";
@@ -110,7 +136,7 @@ if (!ide.res.services || !ide.res.services[0]) {
 
 // configuration age/date is the UTC configuration file last modification date
 ide.res.timestamp = configStats.atime.getTime();
-console.dir(ide.res);
+log(ide.res);
 
 function handleMessage(service) {
 	return function(msg) {
@@ -173,9 +199,7 @@ function startService(service) {
 }
 
 function proxyServices(req, res, next) {
-	debugger;			// XXX
-	console.dir(req.params);
-	console.dir(req.query);
+	log("req.params:", req.params, ", req.query:", req.query);
 	var query = {},
 	    id = req.params.service_id,
 	    service = ide.res.services.filter(function(service) {
@@ -239,7 +263,6 @@ app.configure(function(){
 	app.get('/', function(req, res, next) {
 		res.redirect('/ide/ares/');
 	});
-
 	app.get('/res/timestamp', function(req, res, next) {
 		res.status(200).json({timestamp: ide.res.timestamp});
 	});
@@ -288,8 +311,7 @@ if (argv.browser) {
 console.info("Press CTRL + C to shutdown");
 
 process.on('uncaughtException', function (err) {
-	var errMsg = err.toString() + err.stack;
-	console.error(errMsg);
+	console.error(err.stack);
 	process.exit(1);
 });
 process.on('exit', function () {
