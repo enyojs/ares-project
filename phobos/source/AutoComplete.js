@@ -4,7 +4,7 @@ enyo.kind({
 	centered : false,
 	floating : true,
 	autoDismiss : false,
-	modal : true,
+	modal : false,
 	classes: "ares_phobos_autocomp",
 	published: {
 		ace: null,
@@ -24,6 +24,9 @@ enyo.kind({
 			// options elements will be populated programmatically
 		]
 	} ],
+	handlers: {
+		onHide: "hideAutocompletePopup"
+	},
 	// Constants
 	AUTOCOMP_THIS: 'this.',
 	AUTOCOMP_THIS_DOLLAR: 'this.$.',

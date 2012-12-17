@@ -34,6 +34,12 @@ Ares.Model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when po
 	},
 	setMode: function(mode) {
 		this.set("mode", mode);
+	},
+	getAceSession: function() {
+		return this.get("ace-session");
+	},
+	setAceSession: function(session) {
+		this.set("ace-session", session);
 	}
 });
 
@@ -48,6 +54,7 @@ Ares.Model.Files = Backbone.Collection.extend({		// TODO: move to enyo.Collectio
 	removeEntry: function(id) {
 		var obj = this.get(id);
 		this.remove(obj);
+		obj.clear({silent: true});
 	},
 	computeId: function(file) {
 		return file.service.getConfig().id + "-" + file.id;

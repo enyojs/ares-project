@@ -14,7 +14,7 @@ enyo.kind({
 	_serialize: function(inContainer, inOwner) {
 		var s = [];
 		var c$ = inContainer.getClientControls();
-		for (var i=0, c; c=c$[i]; i++) {
+		for (var i=0, c; (c=c$[i]); i++) {
 			if (c.owner == inOwner) {
 				s.push(this._serializeComponent(c, inOwner));
 			}
@@ -38,14 +38,14 @@ enyo.kind({
 		this.serializeEvents(p, inComponent);
 		return p;
 	},
-	noserialize: {owner: 1, container: 1, parent: 1, id: 1, attributes: 1, selected: 1, active: 1},
+	noserialize: {owner: 1, container: 1, parent: 1, id: 1, attributes: 1, selected: 1, active: 1, isContainer: 1},
 	serializeProps: function(inComponent) {
 		var o = {
 			kind: this.getComponentKindName(inComponent)
 		};
 		var ps = this.buildPropList(inComponent, "published");
 		var proto = inComponent.ctor.prototype;
-		for (var j=0, p; p=ps[j]; j++) {
+		for (var j=0, p; (p=ps[j]); j++) {
 			if (!this.noserialize[p] && proto[p] != inComponent[p]) {
 				o[p] = inComponent[p];
 			}
@@ -62,7 +62,7 @@ enyo.kind({
 	serializeEvents: function(inProps, inComponent) {
 		var ps = this.buildPropList(inComponent, "events");
 		var proto = inComponent.ctor.prototype;
-		for (var j=0, p; p=ps[j]; j++) {
+		for (var j=0, p; (p=ps[j]); j++) {
 			if (!this.noserialize[p] && proto[p] != inComponent[p]) {
 				inProps[p] = inComponent[p];
 			}
