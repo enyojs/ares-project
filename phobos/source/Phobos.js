@@ -17,7 +17,7 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop"},
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -570,6 +570,9 @@ enyo.kind({
 	},
 	getEditorContent: function() {
 		return this.$.ace.getValue();
+	},
+	handleScroll: function(inSender, inEvent) {
+		this.$.autocomplete.hide();
 	}
 });
 

@@ -24,6 +24,9 @@ enyo.kind({
 			// options elements will be populated programmatically
 		]
 	} ],
+	handlers: {
+		onHide: "hideAutocompletePopup"
+	},
 	// Constants
 	AUTOCOMP_THIS: 'this.',
 	AUTOCOMP_THIS_DOLLAR: 'this.$.',
