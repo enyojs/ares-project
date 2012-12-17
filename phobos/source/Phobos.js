@@ -17,7 +17,7 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop"},
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -93,8 +93,16 @@ enyo.kind({
 		this.docData.setMode(mode);
 		var hasAce = this.adjustPanelsForMode(mode);
 		if (hasAce) {
-			this.$.ace.setEditingMode(mode);
-			this.$.ace.setValue(inDocData.getData());
+			var aceSession = this.docData.getAceSession();
+			if (aceSession) {
+				this.$.ace.setSession(aceSession);
+			} else {
+				aceSession = this.$.ace.createSession(this.docData.getData(), mode);
+				this.docData.setData(null);			// We no longer need this data as it is now handled by the ACE edit session
+				this.$.ace.setSession(aceSession);
+				this.docData.setAceSession(aceSession);
+			}
+
 			// Pass to the autocomplete compononent a reference to ace
 			this.$.autocomplete.setAce(this.$.ace);
 			this.focusEditor();
@@ -155,6 +163,7 @@ enyo.kind({
 	},
 	//
 	setAutoCompleteData: function() {
+		this.$.autocomplete.hide();
 		this.projectData.on('change:enyo-indexer', this.enyoIndexReady, this);
 		this.projectData.on('change:project-indexer', this.projectIndexReady, this);
 		this.$.autocomplete.setEnyoIndexer(this.projectData.getEnyoIndexer());
@@ -465,9 +474,9 @@ enyo.kind({
 			this.$.savePopup.applyStyle("padding-top: 10px");
 			this.$.savePopup.show();
 		} else {
-			var docData = this.docData;
+			var id = this.docData.getId();
 			this.beforeClosingDocument();
-			this.doCloseDocument({id: docData.getId()});
+			this.doCloseDocument({id: id});
 		}
 		return true; // Stop the propagation of the event
 	},
@@ -526,6 +535,8 @@ enyo.kind({
 	 * @protected
 	 */
 	beforeClosingDocument: function() {
+		this.$.ace.destroySession(this.docData.getAceSession());
+		// NOTE: docData will be clear when removed from the Ares.Workspace.files collections
 		this.resetAutoCompleteData();
 		this.docData = null;
 		this.projectData = null;
@@ -559,6 +570,9 @@ enyo.kind({
 	},
 	getEditorContent: function() {
 		return this.$.ace.getValue();
+	},
+	handleScroll: function(inSender, inEvent) {
+		this.$.autocomplete.hide();
 	}
 });
 

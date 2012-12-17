@@ -15,7 +15,7 @@ enyo.kind({
 				//{kind: "Button", content: "Redo"},
 				{kind: "onyx.Button", content: "Up", ontap: "upAction"},
 				{kind: "onyx.Button", content: "Down", ontap: "downAction"},
-				{kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
+				{kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"}
 			]},
 			{name: "client", fit: true, kind: "DesignerPanel"}
 		]}
@@ -216,7 +216,7 @@ enyo.kind({
 	proxyUnknownKinds: function(component) {
 		var name = component.kind;
 		if (!enyo.constructorForKind(name)) {
-			component.kind = "Proxy";
+			component.kind = "Ares.Proxy";
 			component.realKind = name;
 			if (component.name) {
 				component.hadName=true;
@@ -293,7 +293,7 @@ enyo.kind({
 	}
 });
 enyo.kind({
-    name: "Proxy",
+    name: "Ares.Proxy",
     content: "Proxy",
 	published: {
 		realKind: "",
@@ -314,5 +314,5 @@ enyo.kind({
 				}
 			}
 		}
-	},
+	}
 });

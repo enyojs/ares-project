@@ -72,7 +72,7 @@ enyo.kind({
 			]},
 			{kind:"onyx.InputDecorator", style:"width:100%; margin-top:10px;", layoutKind:"FittableColumnsLayout", components: [
 				{kind: "onyx.Input", fit:true, placeholder: "filter"},
-				{kind: "onyx.Icon", src:"images/search.png", style:"height:20px;"}
+				{kind: "onyx.Icon", src:"$deimos/images/search-input-search.png", style:"height:20px;"}
 			]}
 		]}
 	],

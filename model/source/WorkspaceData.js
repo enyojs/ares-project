@@ -9,7 +9,7 @@ var AresStore = function(name, eraseAll) {
 		this.data = (store && JSON.parse(store)) || {};
 	}
 
-	// Remove data in 'old' format (prior introduction of WorkspaceData.projects)
+	// Remove data in 'old' format (prior introduction of Ares.Workspace.projects)
 	if (_.isArray(this.data)) {			// TODO: to be removed in a while
 		this.data = {};
 	}
@@ -187,10 +187,10 @@ Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collec
 });
 
 /*
-	WorkspaceData singleton that holds the collections of projects, files, ...
+	Ares.Workspace singleton that holds the collections of projects, files, ...
  */
 enyo.singleton({
-	name: "WorkspaceData",
+	name: "Ares.Workspace",
 	kind: enyo.Component,
 	create: function() {
 		this.inherited(arguments);

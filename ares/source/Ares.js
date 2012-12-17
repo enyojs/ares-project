@@ -37,11 +37,11 @@ enyo.kind({
 
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
-			WorkspaceData.loadProjects("com.enyojs.ares.tests", true);
+			Ares.Workspace.loadProjects("com.enyojs.ares.tests", true);
 			// in charge of Ares Test Suite
 			this.createComponent({kind: "Ares.TestController", aresObj: this});
 		} else {
-			WorkspaceData.loadProjects();
+			Ares.Workspace.loadProjects();
 		}
 		this.calcSlideableLimit();
 	},
@@ -55,8 +55,8 @@ enyo.kind({
 	},
 	doubleclickFile: function(inSender, inEvent) {
 		var f = inEvent.file;
-		var id = WorkspaceData.files.computeId(f);
-		var d = WorkspaceData.files.get(id);
+		var id = Ares.Workspace.files.computeId(f);
+		var d = Ares.Workspace.files.get(id);
 		if (d) {
 			this.switchToDocument(d);
 		} else {
@@ -78,11 +78,11 @@ enyo.kind({
 					// no data? Empty file
 					inData="";
 				}
-				var id = WorkspaceData.files.computeId(f);
-				if (WorkspaceData.files.get(id)) {
+				var id = Ares.Workspace.files.computeId(f);
+				if (Ares.Workspace.files.get(id)) {
 					alert("Duplicate File ID in cache!");
 				}
-				var doc = WorkspaceData.files.newEntry(f, inData, projectData);
+				var doc = Ares.Workspace.files.newEntry(f, inData, projectData);
 				this.switchToDocument(doc);
 			})
 			.error(this, function(inEvent, inData) {
@@ -103,9 +103,9 @@ enyo.kind({
 	},
 	closeDocument: function(inSender, inEvent) {
 		// remove file from cache
-		WorkspaceData.files.removeEntry(inEvent.id);
+		Ares.Workspace.files.removeEntry(inEvent.id);
 		this.$.bottomBar.removeTab(inEvent.id);
-		this.$.slideable.setDraggable(WorkspaceData.files.length > 0);
+		this.$.slideable.setDraggable(Ares.Workspace.files.length > 0);
 		this.showFiles();
 	},
 	designDocument: function(inSender, inEvent) {
@@ -132,7 +132,7 @@ enyo.kind({
 		this.$.slideable.animateToMax();
 	},
 	toggleFiles: function(inSender, inEvent) {
-		if (this.$.slideable.value < 0 || WorkspaceData.files.length === 0) {
+		if (this.$.slideable.value < 0 || Ares.Workspace.files.length === 0) {
 			this.showFiles();
 		} else {
 			this.hideFiles();
@@ -150,7 +150,7 @@ enyo.kind({
 		this.$.slideable.setMin(-min);
 	},
 	switchFile: function(inSender, inEvent) {
-		var d = WorkspaceData.files.get(inEvent.id);
+		var d = Ares.Workspace.files.get(inEvent.id);
 		if (d) {
 			this.switchToDocument(d);
 		} else {
@@ -158,10 +158,7 @@ enyo.kind({
 		}
 	},
 	switchToDocument: function(d) {
-		// save document state
-		if (this.activeDocument) {
-			this.activeDocument.setData(this.$.phobos.getEditorContent());
-		}
+		// We no longer save the data as the ACE edit session will keep the data for us
 		if (!this.activeDocument || d !== this.activeDocument) {
 			this.$.phobos.openDoc(d);
 		}

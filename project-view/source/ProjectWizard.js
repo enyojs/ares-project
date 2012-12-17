@@ -169,7 +169,7 @@ enyo.kind({
 		if (inEvent.data.name !== this.targetProject.getName()) {
 			// project name has changed, update project model list
 			var oldName = this.targetProject.getName();
-			WorkspaceData.projects.renameProject(oldName, inEvent.data.name);
+			Ares.Workspace.projects.renameProject(oldName, inEvent.data.name);
 		}
 
 		return true ; // stop bubble
