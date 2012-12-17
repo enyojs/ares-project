@@ -254,6 +254,7 @@ FsBase.prototype.respond = function(res, err, response) {
 };
 
 FsBase.prototype.encodeFileId = function(filePath) {
+	//this.log("encodeFileId(): filePath:", filePath);
 	// can use this.root, this.origin & this.pathname in addition
 	// to filePath to encode the fileId
 	var buf = new Buffer(filePath, 'utf-8');
@@ -262,6 +263,7 @@ FsBase.prototype.encodeFileId = function(filePath) {
 };
 
 FsBase.prototype.decodeFileId = function(fileId) {
+	//this.log("decodeFileId(): fileId:", fileId);
 	// can use this.root, this.origin & this.pathname in addition
 	// to fileId to decode the fileId
 	var buf = new Buffer(fileId, 'hex');
