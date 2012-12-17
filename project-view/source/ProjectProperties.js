@@ -267,6 +267,10 @@ enyo.kind({
 
 		this.doDone();
 
+		if (inEvent.callBack) {
+			inEvent.callBack() ;
+		}
+
 		// handled here (don't bubble)
 		return true;
 	}
