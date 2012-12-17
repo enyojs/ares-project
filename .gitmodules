@@ -10,3 +10,9 @@
 [submodule "lib/extra"]
 	path = lib/extra
 	url = ../extra
+[submodule "lib/foss/backbone"]
+	path = lib/foss/backbone
+	url = ../../documentcloud/backbone.git
+[submodule "lib/foss/underscore"]
+	path = lib/foss/underscore
+	url = ../../documentcloud/underscore.git

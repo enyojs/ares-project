@@ -17,7 +17,7 @@ enyo.kind({
 			{kind: "Control", tag: "span", style: "padding: 0 4px; vertical-align: middle;", content: "Select a directory", name: "header"},
 			{kind: "FittableColumns", content: "fittableColumns", fit: true, components: [
 				{kind: "ProviderList", type: "filesystem", name: "providerList", header: "Sources", onSelectProvider: "handleSelectProvider"},
-				{kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "selectFile", onFolderClick: "selectFolder"}
+				{kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "selectFile", onFolderClick: "selectFolder", onNewFolderConfirm: "createFolder"}
 			]},
 			{kind: "FittableColumns", content: "fittableColumns2", isContainer: true, components: [
 				{kind: "Control", content: "Selected: ", fit: true, name: "selectedDir"},
@@ -40,7 +40,7 @@ enyo.kind({
 		if (inEvent.service) {
 			this.$.hermesFileTree
 				.connectService(inEvent.service)
-				.refreshFileTree();
+				.refreshFileTree(null, null,  inEvent.callBack);
 		}
 		return true; //Stop event propagation
 	},
@@ -66,6 +66,22 @@ enyo.kind({
 	cancel: function() {
 		this.hide() ;
 		this.doDone(); // inform owner
+	},
+	//FIXME: This is *nearly* identical to the code in Harmonia. Maybe move this into HermesFileTree?
+	createFolder: function(inSender, inEvent) {
+		var folderId = inEvent.folderId;
+		var name = inEvent.fileName.trim();
+		var service = this.selectedDir.service;
+		if (this.debug) this.log("Creating new folder "+name+" into folderId="+folderId);
+		service.createFolder(folderId, name)
+			.response(this, function(inSender, inResponse) {
+				if (this.debug) this.log("Response: "+inResponse);
+				this.$.hermesFileTree.refreshFileTree(null, inResponse);
+			})
+			.error(this, function(inSender, inError) {
+				if (this.debug) this.log("Error: "+inError);
+				this.$.hermesFileTree.showErrorPopup("Creating folder "+name+" failed:" + inError);
+			});
 	}
 });
 

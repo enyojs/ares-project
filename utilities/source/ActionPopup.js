@@ -5,7 +5,7 @@ enyo.kind({
         centered: true,
         floating: true,
         autoDismiss: false,
-        style: "text-align: center; padding: 20px;",
+        classes: "ares-actionpopup",
         published: {
         	name: "",
         	actionButton: ""
@@ -15,10 +15,11 @@ enyo.kind({
     		onAbandonDocAction: "",
     	},
         components: [
-                {name: "title", tag: "h3", content: " "},
-                {tag: "br"},
+                {name: "title", classes: "ares-title", content: " "},
+                {tag: "br", classes: "ares-message"},
                 {name: "buttons", kind: "FittableColumns", components: [
                         {name: "cancelButton", kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "actionCancel"},
+						{fit: true},
         	            {name: "actionButton", kind: "onyx.Button", classes: "onyx-affirmative", content: "Delete", ontap: "actionConfirm"}
                 ]}
 

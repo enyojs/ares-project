@@ -1,13 +1,13 @@
 /**
  * This kind is the top kind of project handling. It contains:
- * - The project list 
+ * - The project list
  * - the interface towards the user's file (harmonia)
  * - Popups to manage projects (create, scan, error ...)
  */
 enyo.kind({
 	name: "ProjectView",
 	kind: "FittableColumns",
-	classes: "enyo-unselectable",
+	classes: "enyo-unselectable shadow-panels",
 	components: [
 		{kind: "ProjectList",
 			onModifySettings: "modifySettingsAction",
@@ -30,6 +30,7 @@ enyo.kind({
 		onAddProjectInList: "addProjectInList",
 		onPhonegapBuild: "startPhonegapBuild",
 		onBuildStarted: "phonegapBuildStarted",
+		onPreview: "launchPreview",
 		onError: "showError"
 	},
 	create: function() {
@@ -82,12 +83,13 @@ enyo.kind({
 		// is created that would save per-click HTTP traffic
 		// to the FileSystemService.
 		self = this;
-		project.config = new ProjectConfig();
-		project.config.init({
-			service: project.service,
-			folderId: project.folderId
+		var config = new ProjectConfig();
+		config.init({
+			service: project.getService(),
+			folderId: project.getFolderId()
 		}, function(err) {
 			if (err) self.showErrorPopup(err.toString());
+			project.setConfig(config);
 		});
 		this.currentProject = project;
 		return true; //Stop event propagation
@@ -112,10 +114,10 @@ enyo.kind({
 		var bdService =	ServiceRegistry.instance.getServicesByType('build')[0];
 		if (bdService) {
 			bdService.build( /*project*/ {
-				name: this.currentProject.name,
-				filesystem: this.currentProject.service,
-				folderId: this.currentProject.folderId,
-				config: this.currentProject.config
+				name: this.currentProject.getName(),
+				filesystem: this.currentProject.getService(),
+				folderId: this.currentProject.getFolderId(),
+				config: this.currentProject.getConfig()
 			}, function(inError, inDetails) {
 				self.hideWaitPopup();
 				if (inError) {
@@ -131,5 +133,23 @@ enyo.kind({
 	phonegapBuildStarted: function(inSender, inEvent) {
 		this.showWaitPopup("Phonegap build started");
 		setTimeout(enyo.bind(this, "hideWaitPopup"), 2000);
+	},
+
+	/**
+	 * Launch a preview widget of the selected project in a separate frame
+	 */
+	launchPreview: function(inSender, inEvent) {
+		if ( this.currentProject) {
+			var config = this.currentProject.getConfig() ;
+			var topFile = config.data.preview.top_file ;
+			window.open(
+				this.currentProject.getProjectUrl() + '/' + topFile ,
+				null, // ensure that a new window is created each time preview is tapped
+				'scrollbars=auto, titlebar=yes, height=' + inEvent.height + ',width=' + inEvent.width,
+				false
+			);
+		}
+		return true; // stop the bubble
 	}
+
 });

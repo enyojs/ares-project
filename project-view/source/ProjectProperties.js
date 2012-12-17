@@ -22,7 +22,8 @@ enyo.kind({
 	components: [
 		{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", components: [
 			{content: "Project", active: true, attributes: {title: 'project attributes...'}},
-			{content: "PhoneGap", attributes: {title: 'phonegap build parameters...'}}
+			{content: "PhoneGap", attributes: {title: 'phonegap build parameters...'}},
+			{content: "Preview", attributes: {title: 'project preview parameters...'}}
 		]},
 		{name: "projectDrawer", kind: "onyx.Drawer", open:true, components: [
 			{tag: 'table', components: [
@@ -80,7 +81,7 @@ enyo.kind({
 			]}
 		]},
 
-		{name: "phoneGapDrawer", kind: "onyx.Drawer", open: false, components: [
+		{name: "phonegapDrawer", kind: "onyx.Drawer", open: false, components: [
 			{
 				kind: "onyx.ToggleButton",
 				name: 'pgConfEnabled',
@@ -122,6 +123,21 @@ enyo.kind({
 			}
 		]},
 
+		{name: "previewDrawer", kind: "onyx.Drawer", open: false, components: [
+			{tag: 'table', components: [
+				{tag: "tr" , components: [
+					{tag: "td" , content: "top application file: "},
+					{tag: 'td', attributes: {colspan: 1}, components:[
+						{kind: "onyx.InputDecorator", components: [
+							{kind: "Input", name: "ppTopFile",
+							attributes: {title: 'top file of your application. Typically index.html'}
+							}
+						]}
+					]}
+				]}
+			]}
+		]},
+
 		// FIXME: there should be an HTML/CSS way to avoid using FittableStuff...
 		{kind: "FittableRows", style: "margin-top: 10px; width: 100%", fit: true, components: [
 			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "doDone"},
@@ -154,13 +170,16 @@ enyo.kind({
 	 */
 	switchDrawers: function(inSender, inEvent) {
 		if (inEvent.originator.active === true ) {
-			if (inEvent.originator.getContent() === "Project") {
-				this.$.projectDrawer.setOpen(true) ;
-				this.$.phoneGapDrawer.setOpen(false) ;
-			}
-			else {
-				this.$.projectDrawer.setOpen(false) ;
-				this.$.phoneGapDrawer.setOpen(true) ;
+			var status = {
+				project: false,
+				phonegap: false,
+				preview: false
+			} ;
+
+			status[inEvent.originator.getContent().toLowerCase()] = true ;
+
+			for (drawer in status) {
+				this.$[drawer + 'Drawer'].setOpen(status[drawer]) ;
 			}
 		}
 	},
@@ -182,6 +201,7 @@ enyo.kind({
 		var pgConf ;
 		var pgTarget ;
 		var conf = this.config ;
+		var confDefault = ProjectConfig.PREFILLED_CONFIG_FOR_UI ;
 
 		 // avoid storing 'undefined' in there
 		this.$.projectId.     setValue(conf.id      || '' );
@@ -199,8 +219,7 @@ enyo.kind({
 		pgConf = this.config.build.phonegap ;
 		this.$.pgConfEnabled.setValue(pgConf.enabled);
 		this.$.pgConfId.setValue(pgConf.appId || '' );
-		this.$.pgIconUrl.setValue(pgConf.icon.src || '' );
-
+		this.$.pgIconUrl.setValue(pgConf.icon.src || confDefault.icon.src );
 
 		if (! pgConf.targets) { pgConf.targets = {} ;}
 		// pgTarget is a key of object pgConf.targets
@@ -208,10 +227,14 @@ enyo.kind({
 			this.$[ pgTarget + 'Target' ].setValue(pgConf.targets[pgTarget]) ;
 		}
 
+		if (! conf.preview ) {conf.preview = {} ;}
+		this.$.ppTopFile.setValue( conf.preview['top_file'] || confDefault.preview['top-file'] ) ;
+
 		return this ;
 	},
 
 	confirmTap: function(inSender, inEvent) {
+		var pgConf, tglist, ppConf ;
 		// retrieve modified values
 		this.log('ok tapped') ;
 
@@ -227,14 +250,17 @@ enyo.kind({
 		this.config.build.appId   = this.$.pgConfId.getValue();
 
 
-		var pgConf = this.config.build.phonegap ;
+		pgConf = this.config.build.phonegap ;
 		pgConf.icon.src = this.$.pgIconUrl.getValue();
 
-		var tglist = ['android','ios','winphone','blackberry','webos'] ;
+		tglist = ['android','ios','winphone','blackberry','webos'] ;
 		for ( i in tglist) {
 			this.log('copy data from ' + tglist[i] +'Target') ;
 			pgConf.targets[tglist[i]] = this.$[ tglist[i] + 'Target' ].getValue() ;
 		}
+
+		ppConf = this.config.preview ;
+		ppConf['top_file'] = this.$.ppTopFile.getValue();
 
 		// to be handled by a ProjectWizard
 		this.doModifiedConfig({data: this.config}) ;

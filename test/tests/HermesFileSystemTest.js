@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "HermesFileSystemTest",
-	kind: "ares.TestSuite",
+	kind: "Ares.TestSuite",
 	debug: false,
 	folderId: "%2FAresTests",
 	dirToCreate: "source",
@@ -35,7 +35,9 @@ enyo.kind({
 			HermesFileSystemTest.services = this.services;
 			if (this.debug) {
 				this.log("HermesFileSystemTest.services: ");
-				console.dir(HermesFileSystemTest.services);
+				if (console && console.dir) {
+					console.dir(HermesFileSystemTest.services);
+				}
 			}
 			if(this.services.length > 0) {
 				this.finish();
@@ -57,7 +59,9 @@ enyo.kind({
 		});
 		if (this.debug) {
 			this.log("home service: ");
-			console.dir(h);
+			if (console && console.dir) {
+				console.dir(h);
+			}
 		}
 		this.home = h;
 		HermesFileSystemTest.home = this.home;
@@ -111,7 +115,7 @@ enyo.kind({
 	},
 
 	testPropfindAndCreateFile: function() {
-		console.log("Begin called in testPropfindAndCreateFile.");
+		enyo.log("Begin called in testPropfindAndCreateFile.");
 		/**
 		*	PROPFIND verb used to listFiles of a folderId
 		*/
@@ -158,7 +162,7 @@ enyo.kind({
 		});
 	},
 	testDeleteFile: function() {
-		console.log("Begin called in testDeleteFile.");
+		enyo.log("Begin called in testDeleteFile.");
 		var service = this.home[0];
 		/**
 		* DELETE verb
@@ -180,7 +184,7 @@ enyo.kind({
 		});
 	},
 	testDeleteFolder: function() {
-		console.log("Begin called in testDeleteFolder.");
+		enyo.log("Begin called in testDeleteFolder.");
 		var service = this.home[0];
 		/**
 		* DELETE verb

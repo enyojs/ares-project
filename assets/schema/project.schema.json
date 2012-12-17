@@ -1,3 +1,5 @@
+// -*- javascript -*-
+
 {
 	"name":"project",
 	"description":"JSON Schema of Ares Project File (project.json)",
@@ -167,6 +169,18 @@
 							}
 						}
 					}
+				}
+			}
+		},
+		preview: {
+			"type":"object",
+			"description":"preview properties",
+			"required":false,
+			"properties": {
+				"top_file": {
+					"type":"object",
+					"description":"index.html like",
+					"required":false,
 				}
 			}
 		}

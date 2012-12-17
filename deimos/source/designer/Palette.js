@@ -1,15 +1,23 @@
 enyo.kind({
 	name: "CategoryItem",
 	components: [
-		{style: " border-radius: 4px; border: 1px solid #D0D0D0; margin-bottom: 1px;", components: [
-			{name: "name", style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;"},
-			{classes: "row-fluid", components: [
+		{classes: "palette-category", components: [
+			{ontap:"toggleDrawer", classes: "palette-category-name", components: [
+				{name: "indicator", tag:"span", content:"v", style:"padding-right:5px;"},
+				{name: "name", tag:"span"}
+			]},
+			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
 				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
 					{kind: "PaletteItem"}
 				]}
 			]}
 		]}
 	],
+	toggleDrawer: function() {
+		var open = this.$.drawer.getOpen();
+		this.$.drawer.setOpen(!open);
+		this.$.indicator.setContent(open ? ">" : "v");
+	},
 	setModel: function(inModel) {
 		this.model = inModel;
 		this.$.name.setContent(this.model.name);
@@ -25,8 +33,8 @@ enyo.kind({
 enyo.kind({
 	name: "PaletteItem",
 	components: [
-		{style: "background-color: #F5F5F5; border-radius: 4px; border-top: 1px solid #D0D0D0; padding: 12px;", components: [
-			{tag: "h5", name: "name"},
+		{classes: "palette-item", components: [
+			{name: "name"},
 			{classes: "row-fluid", name: "client"}
 		]}
 	],
@@ -43,9 +51,10 @@ enyo.kind({
 					}
 				}
 			}
-			if (inModel.inline) {
-				this.createComponent(inModel.inline);
-			}
+			// Avoiding this for a cleaner look for now, will likely revisit
+			//if (inModel.inline) {
+			//	this.createComponent(inModel.inline);
+			//}
 			this.config = inModel.config;
 		}
 	}
@@ -61,8 +70,9 @@ enyo.kind({
 					{kind: "CategoryItem"}
 				]}
 			]},
-			{classes: "well", components: [
-				{kind: "Input", classes: "search-query", value: "filter"}
+			{kind:"onyx.InputDecorator", style:"width:100%; margin-top:10px;", layoutKind:"FittableColumnsLayout", components: [
+				{kind: "onyx.Input", fit:true, placeholder: "filter"},
+				{kind: "onyx.Icon", src:"images/search.png", style:"height:20px;"}
 			]}
 		]}
 	],

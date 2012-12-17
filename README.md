@@ -103,3 +103,10 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Us
 ### Dropbox
 
 In order to use Dropbox as storage service for Ares, follow detailed setup instructions in `hermes/README.md`
+
+
+### Test Suite
+
+For all contributions on Ares project and before commit, please execute the available Ares Test Suite and make sure this Ares Test Suite is not broken.
+
+See README.md under ares-project/test.

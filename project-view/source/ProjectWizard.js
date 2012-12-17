@@ -45,6 +45,7 @@ enyo.kind({
 	showProjectPropPopup: function(inSender, inEvent) {
 		var propW = this.$.propertiesWidget ;
 		var that = this ;
+		var testCallBack = inEvent.testCallBack ;
 
 		// scan content for a project.json
 		var matchFileName = function(node){
@@ -80,7 +81,10 @@ enyo.kind({
 				propW.$.projectName.setValue(that.selectedDir.name);
 				that.$.selectDirectoryPopup.hide();
 				propW.show() ;
-			};
+			}
+			if (testCallBack) {
+				testCallBack();
+			}
 		});
 	},
 
@@ -132,16 +136,19 @@ enyo.kind({
 	],
 
 	debug: false,
-	targetProject: null ,
+	targetProject: null,
 
 	/**
 	 * Step 1: start the modification by showing project properties widget
 	 */
 	start: function(target) {
-		this.targetProject = target ;
-		this.$.propertiesWidget.setupModif() ;
-		this.$.propertiesWidget.preFill(target.config.data);
-		this.show();
+		if (target) {
+			var config = target.getConfig();
+			this.targetProject = target ;
+			this.$.propertiesWidget.setupModif() ;
+			this.$.propertiesWidget.preFill(config.data);
+			this.show();
+		}
 	},
 
 	// step 2:
@@ -153,13 +160,17 @@ enyo.kind({
 			return true ; // stop bubble
 		}
 
+		// Save the data to project.json
+		var config = this.targetProject.getConfig();
+		config.setData(inEvent.data);
+		config.save();
+
 		// selected project name was modified
-		if ( inEvent.data.name !== this.targetProject.name) {
-			// project name has changed, update project list
-			this.$.projectList.renameSelectedProject(inEvent.data.name) ;
+		if (inEvent.data.name !== this.targetProject.getName()) {
+			// project name has changed, update project model list
+			var oldName = this.targetProject.getName();
+			WorkspaceData.projects.renameProject(oldName, inEvent.data.name);
 		}
-		this.targetProject.config.setData(inEvent.data);
-		this.targetProject.config.save() ;
 
 		return true ; // stop bubble
 	}
@@ -212,11 +223,16 @@ enyo.kind({
 				this.debug && this.log('opening project.json from ' + parentDir.name ) ;
 				service.getFile( child.id ).
 					response(this, function(inSender, fileStuff) {
+						var projectData={};
 						this.debug && this.log( "file contents: '" + fileStuff.content + "'" ) ;
-						var projectData = JSON.parse(fileStuff.content)  ;
-						this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
+						try {
+							projectData = JSON.parse(fileStuff.content)  ;
+						} catch(e) {
+							this.log("Error parsing project data: "+e.toString());
+						}
+						this.debug && this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
 						this.doAddProjectInList({
-							name: projectData.name,
+							name: projectData.name || parentDir.name,
 							folderId: parentDir.id,
 							service: this.selectedDir.service,
 							serviceId: this.selectedServiceId

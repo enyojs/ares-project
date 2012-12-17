@@ -1,17 +1,21 @@
 enyo.kind({
 	name: "Ares",
 	kind: "Control",
-	classes: "app onyx",
+	classes: "onyx",
 	fit: true,
 	components: [
-		{kind: "Panels", /*arrangerKind: "CarouselArranger",*/ classes: "enyo-fit", components: [
-			{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onEditedChanged: "documentEdited"},
-			{kind: "Deimos", onCloseDesigner: "closeDesigner"}
+		{kind: "Panels", arrangerKind: "CarouselArranger", classes:"enyo-fit ares-panels", components: [
+			{components: [
+				{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"}
+			]},
+			{components: [
+				{kind: "Deimos", onCloseDesigner: "closeDesigner"}
+			]}
 		]},
-		{kind: "Slideable", style: "height: 100%; width: 100%", layoutKind: "FittableRowsLayout", classes: "onyx", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
+		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
 			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
 			{name: "bottomBar", kind: "DocumentToolbar", 
-			    onGrabberTap: "toggleFiles", 
+				onToggleOpen: "toggleFiles", 
 				onSwitchFile: "switchFile", 
 				onSave: "bounceSave", 
 				onDesign: "bounceDesign", 
@@ -27,16 +31,17 @@ enyo.kind({
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
 	create: function() {
-		if (this.runTest) {
-			ProjectList.underTest = true;
-		}
 		this.inherited(arguments);
 		this.$.panels.setIndex(this.phobosViewIndex);
+		this.adjustBarMode();
 
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
-		if (this.runTest) {
-			// in charge of Ares Test Suite when Ares Ide launch with runTest option
-			this.createComponent({kind: "ares.TestController"});
+		if (Ares.TestController) {
+			WorkspaceData.loadProjects("com.enyojs.ares.tests", true);
+			// in charge of Ares Test Suite
+			this.createComponent({kind: "Ares.TestController", aresObj: this});
+		} else {
+			WorkspaceData.loadProjects();
 		}
 		this.calcSlideableLimit();
 	},
@@ -44,27 +49,26 @@ enyo.kind({
 		this.inherited(arguments);
 		this.calcSlideableLimit();
 	},
-	openFiles: {},
 	draggable: false,
 	handleReloadServices: function(inSender, inEvent) {
 		this.$.serviceRegistry.reloadServices();
 	},
 	doubleclickFile: function(inSender, inEvent) {
 		var f = inEvent.file;
-		var d = this.openFiles[inEvent.file.id];
+		var id = WorkspaceData.files.computeId(f);
+		var d = WorkspaceData.files.get(id);
 		if (d) {
 			this.switchToDocument(d);
 		} else {
-			this.$.bottomBar.createFileTab(f.name, f.id);
+			this.$.bottomBar.createFileTab(f.name, id);
+			this.$.slideable.setDraggable(true);
 			this.openDocument(inSender, inEvent);
 		}
 	},
 	openDocument: function(inSender, inEvent) {
 		var f = inEvent.file;
-		var service = f.service;
-		var ext = f.name.split(".").pop();
-		var origin = service.getConfig().origin;
-		var projectUrl = origin + service.getConfig().pathname + "/file" + inEvent.projectPath;
+		var projectData = inEvent.projectData;
+		var service = projectData.getService();
 		this.$.phobos.beginOpenDoc();
 		service.getFile(f.id)
 			.response(this, function(inEvent, inData) {
@@ -74,18 +78,11 @@ enyo.kind({
 					// no data? Empty file
 					inData="";
 				}
-				if (this.openFiles[f.id]) {
+				var id = WorkspaceData.files.computeId(f);
+				if (WorkspaceData.files.get(id)) {
 					alert("Duplicate File ID in cache!");
 				}
-				var doc = {
-					origin: origin,
-					file: f,
-					data: inData,
-					extension: ext,
-					projectUrl: projectUrl,
-					edited: false
-				};
-				this.openFiles[f.id] = doc;
+				var doc = WorkspaceData.files.newEntry(f, inData, projectData);
 				this.switchToDocument(doc);
 			})
 			.error(this, function(inEvent, inData) {
@@ -105,21 +102,23 @@ enyo.kind({
 			});
 	},
 	closeDocument: function(inSender, inEvent) {
-		var id = inSender.file.id;
 		// remove file from cache
-		this.openFiles[id]=undefined;
-		this.$.bottomBar.removeTab(id);
+		WorkspaceData.files.removeEntry(inEvent.id);
+		this.$.bottomBar.removeTab(inEvent.id);
+		this.$.slideable.setDraggable(WorkspaceData.files.length > 0);
 		this.showFiles();
 	},
 	designDocument: function(inSender, inEvent) {
 		this.$.deimos.load(inEvent);
 		this.$.panels.setIndex(this.deimosViewIndex);
+		this.adjustBarMode();
 	},
 	closeDesigner: function(inSender, inEvent) {
 		if (inEvent.docHasChanged) {
 			this.$.phobos.updateComponents(inSender, inEvent);
 		}
 		this.$.panels.setIndex(this.phobosViewIndex);
+		this.adjustBarMode();
 	},
 	handleBeforeUnload: function() {
 		if (window.location.search.indexOf("debug") == -1) {
@@ -133,7 +132,7 @@ enyo.kind({
 		this.$.slideable.animateToMax();
 	},
 	toggleFiles: function(inSender, inEvent) {
-		if (this.$.slideable.value < 0) {
+		if (this.$.slideable.value < 0 || WorkspaceData.files.length === 0) {
 			this.showFiles();
 		} else {
 			this.hideFiles();
@@ -151,7 +150,7 @@ enyo.kind({
 		this.$.slideable.setMin(-min);
 	},
 	switchFile: function(inSender, inEvent) {
-		var d = this.openFiles[inEvent.id];
+		var d = WorkspaceData.files.get(inEvent.id);
 		if (d) {
 			this.switchToDocument(d);
 		} else {
@@ -161,13 +160,14 @@ enyo.kind({
 	switchToDocument: function(d) {
 		// save document state
 		if (this.activeDocument) {
-			this.activeDocument.data = this.$.phobos.getEditorContent();
+			this.activeDocument.setData(this.$.phobos.getEditorContent());
 		}
 		if (!this.activeDocument || d !== this.activeDocument) {
-			this.$.phobos.openDoc(d.origin, d.file, d.data, d.extension, d.projectUrl, d.edited);
+			this.$.phobos.openDoc(d);
 		}
 		this.$.panels.setIndex(this.phobosViewIndex);
-		this.$.bottomBar.activateFileWithId(d.file.id);
+		this.adjustBarMode();
+		this.$.bottomBar.activateFileWithId(d.getId());
 		this.hideFiles();
 		this.activeDocument = d;
 	},
@@ -184,7 +184,16 @@ enyo.kind({
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
-		this.$.phobos.designerAction(inSender, inEvent);
+		var editorMode = this.$.panels.getIndex() == this.phobosViewIndex;
+		if (editorMode) {
+			this.$.phobos.designerAction(inSender, inEvent);
+		} else {
+			this.$.deimos.closeDesignerAction();
+		}
+	},
+	adjustBarMode: function() {
+		var designMode = this.$.panels.getIndex() == this.deimosViewIndex;
+		this.$.bottomBar.setDesignMode(designMode);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {
@@ -195,13 +204,5 @@ enyo.kind({
 	bounceClose: function(inSender, inEvent) {
 		this.switchFile(inSender, inEvent);
 		enyo.asyncMethod(this.$.phobos, "closeDocAction");
-	},
-	documentEdited: function(inSender, inEvent) {
-		var id = inEvent.id;
-		if (this.openFiles[id]) {
-			this.openFiles[id].edited = inEvent.edited;
-		} else {
-			alert("File ID not found in cache!");
-		}
 	}
 });
