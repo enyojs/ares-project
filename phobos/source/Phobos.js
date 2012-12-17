@@ -163,6 +163,7 @@ enyo.kind({
 	},
 	//
 	setAutoCompleteData: function() {
+		this.$.autocomplete.hide();
 		this.projectData.on('change:enyo-indexer', this.enyoIndexReady, this);
 		this.projectData.on('change:project-indexer', this.projectIndexReady, this);
 		this.$.autocomplete.setEnyoIndexer(this.projectData.getEnyoIndexer());
