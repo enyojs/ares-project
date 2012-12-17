@@ -22,7 +22,7 @@
 			"name":"Dropbox",
 			"type": "filesystem",
 			"provider": "hermes",
-			"Xcommand":"@NODE@", "params":[
+			"command":"@NODE@", "params":[
 				"hermes/fsDropbox.js", "-P", "/files", "-p", "10002"
 			],
 			"auth": {
