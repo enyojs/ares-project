@@ -473,9 +473,9 @@ enyo.kind({
 			this.$.savePopup.applyStyle("padding-top: 10px");
 			this.$.savePopup.show();
 		} else {
-			var docData = this.docData;
+			var id = this.docData.getId();
 			this.beforeClosingDocument();
-			this.doCloseDocument({id: docData.getId()});
+			this.doCloseDocument({id: id});
 		}
 		return true; // Stop the propagation of the event
 	},
@@ -535,7 +535,7 @@ enyo.kind({
 	 */
 	beforeClosingDocument: function() {
 		this.$.ace.destroySession(this.docData.getAceSession());
-		this.docData.clear({silent: true});		// Clear all the data for that file
+		// NOTE: docData will be clear when removed from the Ares.Workspace.files collections
 		this.resetAutoCompleteData();
 		this.docData = null;
 		this.projectData = null;
