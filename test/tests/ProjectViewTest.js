@@ -40,9 +40,12 @@ enyo.kind({
 			var userPushOk = function() {
 				enyo.log("testHandleSelectProvider: user push ok") ;
 				// simulate on projectWizardProperties the Ok event which is handled by createProject
-				pWizard.createProject(that,{service: myService });
-				pWizard.$.propertiesWidget.confirmTap(that, {service: myService, callBack: that.finish });
-	
+				pWizard.$.propertiesWidget.confirmTap(
+					that, {
+						service: myService,
+						callBack: function(){that.finish() ;}
+					}
+				);
 			};
 
 			var userSelectDir = function() {
