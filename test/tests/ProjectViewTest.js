@@ -28,6 +28,8 @@ enyo.kind({
 	testHandleSelectProvider: function(){
 		var dirPopup =  this.aresObj.$.projectView.$.projectWizardCreate.$.selectDirectoryPopup;
 		var pWizard = this.aresObj.$.projectView.$.projectWizardCreate;
+		this.log("testHandleSelectProvider: started") ;
+
 		if (dirPopup) {
 			// retrieve the service
 			var pList = dirPopup.$.providerList;
@@ -36,6 +38,7 @@ enyo.kind({
 			this.log(myService);
 
 			var userPushOk = function() {
+				enyo.log("testHandleSelectProvider: user push ok") ;
 				// simulate on projectWizardProperties the Ok event which is handled by createProject
 				pWizard.createProject(that,{service: myService });
 				pWizard.$.propertiesWidget.confirmTap(that, {service: myService, callBack: that.finish });
@@ -45,15 +48,19 @@ enyo.kind({
 			var userSelectDir = function() {
 				var hFileTree = dirPopup.$.hermesFileTree;
 				var nodes = hFileTree.getNodeFiles();
-					
+
+				enyo.log("testHandleSelectProvider: user select dir") ;
+
 				// simulate nodeTap & selectFolder
 				hFileTree.doFolderClick(nodes[0]);
 				nodes[0].doNodeTap();
 
+				enyo.log("testHandleSelectProvider: user confirms dir") ;
 				// simulate confirmTap
 				dirPopup.doDirectorySelected({serviceId: dirPopup.selectedDir.id, directory: dirPopup.selectedDir, testCallBack: userPushOk});
 			};
 			// selectProvider
+			this.log("testHandleSelectProvider: handleSelectProvider called") ;
 			dirPopup.handleSelectProvider(this, {service: myService, callBack: userSelectDir});
 		} else {
 			this.finish("SelectDirectoryPopup: "+this.aresObj.$.projectView.$.projectWizardCreate.$.SelectDirectoryPopup+ " is not available!");
