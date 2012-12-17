@@ -4,7 +4,7 @@ enyo.kind({
 	centered : false,
 	floating : true,
 	autoDismiss : false,
-	modal : true,
+	modal : false,
 	classes: "ares_phobos_autocomp",
 	published: {
 		ace: null,
