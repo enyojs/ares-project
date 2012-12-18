@@ -197,6 +197,31 @@ enyo.kind({
 	},
 	debug: false,
 
+	importProject: function(service, parentDir, child) {
+		this.debug && this.log('opening project.json from ' + parentDir.name ) ;
+
+		service.getFile( child.id ).
+			response(this, function(inSender, fileStuff) {
+				var projectData={};
+				this.debug && this.log( "file contents: '" + fileStuff.content + "'" ) ;
+
+				try {
+					projectData = JSON.parse(fileStuff.content)  ;
+				} catch(e) {
+					this.log("Error parsing project data: "+e.toString());
+				}
+
+				this.debug && this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
+
+				this.doAddProjectInList({
+					name: projectData.name || parentDir.name,
+					folderId: parentDir.id,
+					service: this.selectedDir.service,
+					serviceId: this.selectedServiceId
+				});
+			});
+	},
+
 	searchProjects: function (inSender, inEvent) {
 		var folderId = inEvent.directory.id ;
 		var service = inEvent.directory.service;
@@ -220,33 +245,19 @@ enyo.kind({
 			var child = item[1];
 			this.debug && this.log('search iteration on ' + child.name + ' isDir ' + child.isDir ) ;
 			if ( child.name === 'project.json' ) {
-				this.debug && this.log('opening project.json from ' + parentDir.name ) ;
-				service.getFile( child.id ).
-					response(this, function(inSender, fileStuff) {
-						var projectData={};
-						this.debug && this.log( "file contents: '" + fileStuff.content + "'" ) ;
-						try {
-							projectData = JSON.parse(fileStuff.content)  ;
-						} catch(e) {
-							this.log("Error parsing project data: "+e.toString());
-						}
-						this.debug && this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
-						this.doAddProjectInList({
-							name: projectData.name || parentDir.name,
-							folderId: parentDir.id,
-							service: this.selectedDir.service,
-							serviceId: this.selectedServiceId
-						});
-					});
+				this.importProject(service, parentDir, child) ;
 			}
 			if ( child.isDir ===  true ) {
 				this.debug && this.log('opening dir ' + child.name ) ;
+
 				service.listFiles(child.id)
 					.response(this, function(inSender, inFiles) {
+
 						enyo.forEach(inFiles, function(v) {
 							this.debug && this.log('pushing ' + v.name + " from " + child.id) ;
 							toScan.push([child,v]);
 						},this) ;
+
 						iter.apply(this) ;
 					}
 				) ;
