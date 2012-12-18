@@ -192,7 +192,6 @@ function BdPhoneGap(config, next) {
 		], next);
 	}
 
-
 	function store(req, res, next) {
 		if (!req.is('multipart/form-data')) {
 			next(new HttpError("Not a multipart request", 415 /*Unsupported Media Type*/));
