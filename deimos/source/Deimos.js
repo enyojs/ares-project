@@ -124,6 +124,9 @@ enyo.kind({
 		var proxy = this.doFindKinds(inEvent);
 		return proxy;
 	},
+	sendkind: function(proxy) {
+		this.$.designer.setCurrentProxy(proxy);
+	},
 	componentViewSelect: function(inSender) {
 		this.$.designer.select(inSender.selection);
 		this.refreshInspector();
