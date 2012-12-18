@@ -4,6 +4,9 @@ enyo.kind({
 		onSelect: "",
 		onChange: ""
 	},
+	published: {
+		currentProxy: {}
+	},
 	components: [
 		{name: "model", kind: "Component"},
 		{kind: "Serializer"},
@@ -216,10 +219,23 @@ enyo.kind({
 	proxyUnknownKinds: function(component) {
 		var name = component.kind;
 		if (!enyo.constructorForKind(name)) {
-			component.kind = "Ares.Proxy";
+			var proxyanalyzed = this.doGetKinds({name: name});
+			if (!proxyanalyzed) {
+			component.kind = "Proxy";
 			component.realKind = name;
 			if (component.name) {
 				component.hadName=true;
+			}
+			}
+			else {
+			var proxy = this.currentProxy;
+			console.log(proxy);
+			component.proxy = proxy;
+			component.kind = "Proxy";
+			component.realKind = proxy.kind;
+			if (component.name) {
+				component.hadName=true;
+			}
 			}
 		}
 		var children = component.components;
@@ -306,11 +322,38 @@ enyo.kind({
 	// override this, and save imported properties
 	importProps: function(inProps) {
 		var ignoreProp = {container: true, owner: true};
+		var addProp = {published: true, events: true};
 		this.inherited(arguments);
+		if (inProps.proxy) {
+			var c = inProps.proxy.allProperties;
+			for (var n in c) {
+				if (addProp[c[n].name]) {
+					this.addProps(c[n].value[0]);
+				}
+			
+			}
+		}
 		if (inProps) {
 			for (var n in inProps) {
+				
 				if (!ignoreProp[n]) {
+					if (n != "published" && n != "proxy") {
 					this.published[n] = inProps[n];
+					if (inProps[n].value != null) {
+					   this.published[n].value = inProps[n].value;
+					}
+					}
+				}
+			}
+		}
+	},
+	addProps: function(c) {
+		var d = c.properties;
+		for (i=0; i<d.length; i++) {
+			if (!this.published[d[i].name] && !this[d[i].name]) {
+				this.published[d[i].name]  = d[i].name;
+				if (d[i].value[0].name != null && d[i].value[0].name != "null" && d[i].value[0].name != '""') {
+					this.published[d[i].name].value = d[i].value[0].name;
 				}
 			}
 		}
