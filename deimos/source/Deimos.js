@@ -19,7 +19,7 @@ enyo.kind({
 			{name: "body", fit: true, classes: "deimos_panel_body",kind: "FittableColumns", components: [
 				{name: "left", classes:"ares_deimos_left", kind: "Palette", ondragstart: "dragStart"},
 				{name: "middle", fit: true, kind: "FittableRows",components: [
-					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart", onDesignRendered: "designRendered"},
+					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart", onDesignRendered: "designRendered", onGetKinds: "getkinds"},
 					{name: "code", classes: "deimos_panel ares_deimos_code", showing: false, components: [
 						{kind: "Scroller", classes: "enyo-selectable", components: [
 							{name: "codeText", tag: "pre", style: "white-space: pre; font-size: smaller; border: none; margin: 0;"}
@@ -119,6 +119,10 @@ enyo.kind({
 		this.refreshInspector();
 		this.$.componentView.select(inSender.selection);
 		return true; // Stop the propagation of the event
+	},
+	getkinds: function(inSender, inEvent) {
+		var proxy = this.doFindKinds(inEvent);
+		return proxy;
 	},
 	componentViewSelect: function(inSender) {
 		this.$.designer.select(inSender.selection);
