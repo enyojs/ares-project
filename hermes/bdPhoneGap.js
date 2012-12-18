@@ -155,14 +155,18 @@ function BdPhoneGap(config, next) {
 		});
 	});
 	
+	// Send back the service location information (origin,
+	// protocol, host, port, pathname) to the creator, when port
+	// is bound
 	server.listen(config.port, "127.0.0.1", null /*backlog*/, function() {
-		// Send back the URL to the parent process, when the
-		// port is assigned
-		var service = {
-			origin: "http://127.0.0.1:"+server.address().port.toString(),
+		var port = server.address().port;
+		return next(null, {
+			protocol: 'http',
+			host: '127.0.0.1',
+			port: port,
+			origin: "http://127.0.0.1:"+ port,
 			pathname: config.pathname
-		};
-		return next(null, service);
+		});
 	});
 
 	/**

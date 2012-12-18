@@ -71,6 +71,24 @@ If you are using a graphical Git client, there may or may not be a way to update
 
 ### Run
 
+Start the IDE server: (e.g. using the Command Prompt, navigate to the ares directory and type 'node ide.js')
+
+	C:\Users\johndoe\GIT\ares-project> node ide.js
+
+Get more information about the options using `-h` or `--help`:
+
+	$ node ide.js --help
+
+	Ares IDE, a front-end designer/editor web applications.
+	Usage: "node ./ide.js" [OPTIONS]
+
+	Options:
+	  -h, --help     help message                                                              [boolean]
+	  -T, --runtest  Run the non-regression test suite                                         [boolean]
+	  -b, --browser  Open the default browser on the Ares URL                                  [boolean]
+	  -p, --port     port (o) local IP port of the express server (default: 9009, 0: dynamic)  [default: "9009"]
+	  -H, --host     host to bind the express server onto (default: 127.0.0.1)                 [default: "127.0.0.1"]
+
 Optionally, configure the `root` of your local file-system access in `ide.json`. By default, the local filesystem service serves the files from your _Home_ or _My Documents_ directory, depending on your operating system. You might want to change this to point to the location of your project files, to make navigation faster & easier. 
 
 For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\User` (if using backslashes [i.e. on Windows], use double slashes for JSON encoding)
@@ -82,11 +100,10 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Us
 	],
 	[...]
 
-Start the IDE server: (e.g. using the Command Prompt, navigate to the ares directory and type 'node ide.js')
+### Dropbox
 
-	C:\Users\johndoe\GIT\ares-project> node ide.js
+In order to use Dropbox as storage service for Ares, follow detailed setup instructions in `hermes/README.md`
 
-Normally, your default browser will start to this URL [http://127.0.0.1:9009/ide/ares/index.html](http://127.0.0.1:9009/ide/ares/index.html).  You can start multiple browser to the same URL.
 
 ### Test Suite
 
