@@ -72,6 +72,7 @@ enyo.kind({
 			this.$.item.applyStyle("background-color", inSender.isSelected(inEvent.index) ? "lightblue" : "");
 			this.$.name.setContent(config.name);
 			this.$.icon.setSrc("$harmonia/images/providers/" + config.icon + ".png");
+			//this.$.auth.setShowing(p.type !== "dropbox" || p.auth);
 		}
 		return true;
 	},
