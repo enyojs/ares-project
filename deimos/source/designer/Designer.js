@@ -2,7 +2,8 @@ enyo.kind({
 	name: "Designer",
 	events: {
 		onSelect: "",
-		onChange: ""
+		onChange: "",
+		onGetKinds: ""
 	},
 	published: {
 		currentProxy: {}
