@@ -183,6 +183,22 @@ enyo.kind({
 		// Pass to the autocomplete component a reference to the project indexer
 		this.$.autocomplete.setProjectIndexer(value);
 	},
+	pullkinds: function(inEvent) {
+		var kind = inEvent.name;
+		if (this.$.projectAnalyzer.index.objects) {
+			for (i=0; i<this.$.projectAnalyzer.index.objects.length; i++) {
+			    if (this.$.projectAnalyzer.index.objects[i].name == kind) {
+				//enyo.log(this.$.projectAnalyzer.index.objects[i]);
+				return this.$.projectAnalyzer.index.objects[i];
+				break;
+			    }
+			}
+			return false;
+		}
+		else {
+		return false;
+		}
+	},
 	dumpInfo: function(inObject) {
 		var c = inObject;
 		if (!c || !c.superkinds) {
