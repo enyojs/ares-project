@@ -51,7 +51,7 @@ enyo.kind({
 		]},
 
 		{kind: "Scroller", fit: true, components: [
-			{name: "serverNode", kind: "Node", classes: "enyo-unselectable", showing: false, file: {id: "", name: "server", isServer: true, service: null}, content: "server", icon: "$service/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onNodeTap: "nodeTap"}
+			{name: "serverNode", kind: "Node", classes: "enyo-unselectable", showing: false, file: {id: "", name: "server", isServer: true, service: null}, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onNodeTap: "nodeTap"}
 		]},
 
 		// track selection of nodes. here, selection Key is file or folderId. Selection value is the node object
