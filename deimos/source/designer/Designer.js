@@ -305,7 +305,7 @@ enyo.kind({
 	//* @protected
 	// override this, and save imported properties
 	importProps: function(inProps) {
-		var ignoreProp = {container: true, owner: true};
+		var ignoreProp = {container: true, owner: true, published: true};
 		this.inherited(arguments);
 		if (inProps) {
 			for (var n in inProps) {
