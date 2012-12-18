@@ -244,24 +244,24 @@ enyo.kind({
 			var parentDir = item[0] ;
 			var child = item[1];
 			this.debug && this.log('search iteration on ' + child.name + ' isDir ' + child.isDir ) ;
-			if ( child.name === 'project.json' ) {
-				this.importProject(service, parentDir, child) ;
-			}
-			if ( child.isDir ===  true ) {
-				this.debug && this.log('opening dir ' + child.name ) ;
 
-				service.listFiles(child.id)
-					.response(this, function(inSender, inFiles) {
+			service.listFiles(child.id)
+				.response(this, function(inSender, inFiles) {
 
-						enyo.forEach(inFiles, function(v) {
+					enyo.forEach(inFiles, function(v) {
+						if ( v.name === 'project.json' ) {
+							this.importProject(service, child, v) ;
+						}
+						if ( v.isDir ===  true ) {
 							this.debug && this.log('pushing ' + v.name + " from " + child.id) ;
 							toScan.push([child,v]);
-						},this) ;
+						}
+						// else skip plain file
+					},this) ;
 
-						iter.apply(this) ;
-					}
-				) ;
-			}
+					iter.apply(this) ;
+				}
+			) ;
 		} ;
 
 		iter = function() {
