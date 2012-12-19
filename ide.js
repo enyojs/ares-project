@@ -141,6 +141,7 @@ function handleMessage(service) {
 	return function(msg) {
 		if (msg.protocol && msg.host && msg.port && msg.origin && msg.pathname) {
 			service.dest = msg;
+			log("will proxy to service.dest:", service.dest);
 			service.origin = 'http://' + argv.host + ':' + argv.port;
 			service.pathname = '/res/services/' + service.id;
 			
@@ -231,18 +232,12 @@ function proxyServices(req, res, next) {
 
 	var creq = http.request(options, function(cres) {
 		// transmit every header verbatim, but cookies
+		log("cres.headers:", cres.headers);
 		for (var key in cres.headers) {
 			var val = cres.headers[key];
 			if (key.toLowerCase() === 'set-cookie') {
 				var cookies = parseSetCookie(val);
-				cookies.forEach(function(cookie) {
-					cookie.options.domain = ide.res.domain || '127.0.0.1';
-					var oldPath = cookie.options.path;
-					cookie.options.path = service.pathname + (oldPath ? oldPath : '');
-					log("cookie.path:", oldPath, "->", cookie.options.path);
-					log("set-cookie:", cookie);
-					res.cookie(cookie.name, cookie.value, cookie.options);
-				});
+				cookies.forEach(translateCookie.bind(this, service, res));
 			} else {
 				res.header(key, val);
 			}
@@ -254,6 +249,15 @@ function proxyServices(req, res, next) {
 		next(e);
 	});
 	creq.end();
+}
+
+function translateCookie(service, res, cookie) {
+	cookie.options.domain = ide.res.domain || '127.0.0.1';
+	var oldPath = cookie.options.path;
+	cookie.options.path = service.pathname + (oldPath ? oldPath : '');
+	log("cookie.path:", oldPath, "->", cookie.options.path);
+	log("set-cookie:", cookie);
+	res.cookie(cookie.name, cookie.value, cookie.options);
 }
 
 function parseSetCookie(cookies) {
