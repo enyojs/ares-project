@@ -222,7 +222,7 @@ enyo.kind({
 		if (!enyo.constructorForKind(name)) {
 			var proxyanalyzed = this.doGetKinds({name: name});
 			if (!proxyanalyzed) {
-			component.kind = "Proxy";
+			component.kind = "Ares.Proxy";
 			component.realKind = name;
 			if (component.name) {
 				component.hadName=true;
@@ -232,7 +232,7 @@ enyo.kind({
 			var proxy = this.currentProxy;
 			console.log(proxy);
 			component.proxy = proxy;
-			component.kind = "Proxy";
+			component.kind = "Ares.Proxy";
 			component.realKind = proxy.kind;
 			if (component.name) {
 				component.hadName=true;
