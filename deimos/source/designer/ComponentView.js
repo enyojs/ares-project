@@ -19,16 +19,17 @@ enyo.kind({
 		this.render();
 	},
 	createEntry: function(inComponent, inIndent) {
+		var kindName = inComponent.kindName === 'Ares.Proxy' ? inComponent.realKind : inComponent.kindName;
 		this.map[inComponent.name] = this.createComponent(
 			{comp: inComponent, style: "padding-left: " + inIndent + "px;", ontap: "itemSelect", ondragover: "itemDragOver", ondragstart: "itemDragStart", components: [
 				{tag: "b", content: inComponent.name},
-				{tag: "span", allowHtml: true, content: "&nbsp;(<i>" + inComponent.kindName + "</i>)"}
+				{tag: "span", allowHtml: true, content: "&nbsp;(<i>" + kindName + "</i>)"}
 			]}
 		);
 	},
 	_visualize: function(inContainer, inOwner, inIndent) {
 		var c$ = inContainer.getClientControls();
-		for (var i=0, c; c=c$[i]; i++) {
+		for (var i=0, c; (c=c$[i]); i++) {
 			if (c.owner == inOwner) {
 				this.createEntry(c, inIndent);
 			}
