@@ -322,7 +322,7 @@ enyo.kind({
 	//* @protected
 	// override this, and save imported properties
 	importProps: function(inProps) {
-		var ignoreProp = {container: true, owner: true};
+		var ignoreProp = {container: true, owner: true, published: true, proxy: true};
 		var addProp = {published: true, events: true};
 		this.inherited(arguments);
 		if (inProps.proxy) {
@@ -338,12 +338,12 @@ enyo.kind({
 			for (var n in inProps) {
 				
 				if (!ignoreProp[n]) {
-					if (n != "published" && n != "proxy") {
+					
 					this.published[n] = inProps[n];
 					if (inProps[n].value != null) {
 					   this.published[n].value = inProps[n].value;
 					}
-					}
+					
 				}
 			}
 		}
