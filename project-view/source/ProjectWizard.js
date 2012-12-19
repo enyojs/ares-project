@@ -262,7 +262,7 @@ enyo.kind({
 					},this) ;
 
 					if (! foundProject ) {
-						// see http://stackoverflow.com/questions/4156101/javascript-push-array-values-into-another-array
+						// black magic required to push the entire array
 						toScan.push.apply(toScan, toPush);
 					}
 
