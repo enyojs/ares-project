@@ -248,7 +248,7 @@ function proxyServices(req, res, next) {
 	}).on('error', function(e) {
 		next(e);
 	});
-	creq.end();
+	req.pipe(creq);
 }
 
 function translateCookie(service, res, cookie) {
