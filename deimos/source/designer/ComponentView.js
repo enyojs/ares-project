@@ -54,6 +54,7 @@ enyo.kind({
 		var c = this.map[inKey];
 		if (c) {
 			c.applyStyle("background-color", inColor);
+			this.$.scroller.scrollToControl(c);
 		}
 	},
 	itemDragStart: function(inSender, inEvent) {
