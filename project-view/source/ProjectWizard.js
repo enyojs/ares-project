@@ -247,17 +247,24 @@ enyo.kind({
 
 			service.listFiles(child.id)
 				.response(this, function(inSender, inFiles) {
-
+					var toPush = [] ;
+					var foundProject = false ;
 					enyo.forEach(inFiles, function(v) {
 						if ( v.name === 'project.json' ) {
+							foundProject = true ;
 							this.importProject(service, child, v) ;
 						}
-						if ( v.isDir ===  true ) {
+						else if ( v.isDir ===  true ) {
 							this.debug && this.log('pushing ' + v.name + " from " + child.id) ;
-							toScan.push([child,v]);
+							toPush.push([child,v]);
 						}
 						// else skip plain file
 					},this) ;
+
+					if (! foundProject ) {
+						// see http://stackoverflow.com/questions/4156101/javascript-push-array-values-into-another-array
+						toScan.push.apply(toScan, toPush);
+					}
 
 					iter.apply(this) ;
 				}
