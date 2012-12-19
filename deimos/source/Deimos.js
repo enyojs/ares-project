@@ -38,7 +38,8 @@ enyo.kind({
 		ondragfinish: "dragFinish"
 	},
 	events: {
-		onCloseDesigner: ""
+		onCloseDesigner: "",
+		onFindKinds: ""
 	},
 	kinds: null,
 	docHasChanged: false,
