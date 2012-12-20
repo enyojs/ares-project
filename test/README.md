@@ -13,7 +13,7 @@
 
 ## Usage
 
-* Start the IDE server with the argument `runtest`. The command is: `node ide.js runtest`
+* Start the IDE server with the argument `runtest`. The command is: `node ide.js --runtest` or `node ide.js -T runtest`
 * Wait for the message:
 
 		Ares IDE is now running at <http://127.0.0.1:9009/ide/ares/test.html> Press CTRL + C to shutdown
