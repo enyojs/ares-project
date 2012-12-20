@@ -8,10 +8,10 @@ enyo.kind({
 	published: {
 		filterLevel: null,		// Value will be given by Inspector.FilterXXX "checked" item.
 		filterType: null,		// Value will be given by Inspector.FilterXXX "checked" item.
-		enyoIndexer: null,
-		projectIndexer: null,
-		fileIndexer: null,
-		projectData: null
+		enyoIndexer: null,		// Analyzer output for enyo/onyx used by the current project
+		projectIndexer: null,	// Analyzer output for the current project
+		fileIndexer: null,		// Analyzer output for the current file
+		projectData: null		// All the project data shared mainly between phobos and deimos
 	},
 	components: [
 		{kind: "Inspector.FilterType", onValueChanged: "updateFilterType"},
@@ -204,6 +204,13 @@ enyo.kind({
 			this.doAction({value: v});
 		}
 	},
+	/**
+	 * Receive the project data reference which allows to access the analyzer
+	 * output for the project's files, enyo/onyx and all the other project
+	 * related information shared between phobos and deimos.
+	 * @param  oldProjectData
+	 * @protected
+	 */
 	projectDataChanged: function(oldProjectData) {
 		if (this.projectData) {
 			this.projectData.on('change:enyo-indexer', this.enyoIndexReady, this);
@@ -211,17 +218,33 @@ enyo.kind({
 
 			this.setEnyoIndexer(this.projectData.getEnyoIndexer());
 			this.setProjectIndexer(this.projectData.getProjectIndexer());
-		} else if (oldProjectData) {
+		}
+		if (oldProjectData) {
 			oldProjectData.off('change:enyo-indexer', this.enyoIndexReady);
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
 		}
 	},
+	/**
+	 * The enyo/onyx analyzer output has changed for the current project
+	 * @param value   the new analyzer output
+	 * @protected
+	 */
 	enyoIndexReady: function(model, value, options) {
 		this.setEnyoIndexer(value);
 	},
+	/**
+	 * The project analyzer output has changed
+	 * @param value   the new analyzer output
+	 * @protected
+	 */
 	projectIndexReady: function(model, value, options) {
 		this.setProjectIndexer(value);
 	},
+	/**
+	 * The current file  analyzer output has changed
+	 * @param value   the new analyzer output
+	 * @protected
+	 */
 	fileIndexerChanged: function() {
 		this.localKinds = {};	// Reset the list of kind for the currently edited file
 		if (this.fileIndexer && this.fileIndexer.objects) {

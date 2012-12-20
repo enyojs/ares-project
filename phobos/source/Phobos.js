@@ -294,6 +294,10 @@ enyo.kind({
 		this.reparseAction();
 		if (this.analysis) {
 			var kinds = [];
+			/*
+				We now pass projectData and fileIndexer which reference various information related to the project.
+				In particular the analyzer output of all the .js projects files as well as for enyo/onyx
+			 */
 			var data = {kinds: kinds, projectData: this.projectData, fileIndexer: this.analysis};
 			for (var i=0; i < this.analysis.objects.length; i++) {
 				var o = this.analysis.objects[i];
