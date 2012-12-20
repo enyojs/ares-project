@@ -99,6 +99,40 @@ To stop on the first failing case:
 
 For more detailled instructions, refer to the [Mocha home page](http://visionmedia.github.com/mocha/).
 
+### Dropbox
+
+**Note:** Dropbox implementation as a back-end is nowhere near to be complete:  currently, only the authentication & authorization is complete, and we have a first version of the `PROPFIND` verb without any caching.
+
+Ares comes with an Hermes service using your Dropbox account as a storage service.    Enable this service in the `ide.json` before starting the IDE server:
+
+	[…]
+	{
+		"active":true,
+		"id":"dropbox",
+		"icon":"dropbox.com-32x32",
+		"name":"Dropbox",
+		"type": "filesystem",
+		"provider": "hermes",
+		"command":"@NODE@", "params":[
+			"hermes/fsDropbox.js", "-P", "/files", "-p", "10002"
+		],
+		"auth": {
+			"type": "dropbox",
+			"appKey": "",
+			"appSecret": ""
+		},
+		"useJsonp":false,
+		"verbose": false
+	[…]
+
+You need to replace the appKey and appSecret entries with the proper values from your Dropbox application entry for Ares(see below).
+
+In order to use Dropbox as storage service for Ares, you need to [create an Ares application in Dropbox](https://www.dropbox.com/developers/apps) & grant Ares the authorization to access this Dropbox application (_Ares_ > _Accounts_ > _Dropbox_ > _Renew_ ).  Popup blockers must be disabled to allow the Dropbox OAuth popup window to appear.
+
+**NOTE:** While Chrome & Firefox will notify you of a blocked popup (hence allowing you to explicitly un-block it), Safari users will need to explicitly allow every popups (unless there is s smarter way  am not aware of) using _Safari_ > _Preferences_ > _Security_ > Un-check _Block pop-up windows_
+
+**NOTE:** Ares gives 20 seconds to the browser to load the Dropbox authorization window & complete the procedure.  In case it takes longer, please press _Renew_ again:  another immediate attempt will be faster as the page will be partially available from the browser cache.
+
 ## Archive service
 
 This is the `arZip.js` service.  It takes 2 arguments:
