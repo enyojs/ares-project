@@ -113,7 +113,19 @@ Ares comes with an Hermes service using your Dropbox account as a storage servic
 		"name":"Dropbox",
 		"type": "filesystem",
 		"provider": "hermes",
+		"command":"@NODE@", "params":[
+			"hermes/fsDropbox.js", "-P", "/files", "-p", "10002"
+		],
+		"auth": {
+			"type": "dropbox",
+			"appKey": "",
+			"appSecret": ""
+		},
+		"useJsonp":false,
+		"verbose": false
 	[…]
+
+You need to replace the appKey and appSecret entries with the proper values from your Dropbox application entry for Ares(see below).
 
 In order to use Dropbox as storage service for Ares, you need to [create an Ares application in Dropbox](https://www.dropbox.com/developers/apps) & grant Ares the authorization to access this Dropbox application (_Ares_ > _Accounts_ > _Dropbox_ > _Renew_ ).  Popup blockers must be disabled to allow the Dropbox OAuth popup window to appear.
 
