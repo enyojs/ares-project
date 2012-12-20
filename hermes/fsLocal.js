@@ -394,7 +394,7 @@ function FsLocal(config, next) {
 	function _putMultipart(req, res, next) {
 		var pathParam = req.param('path');
 		if (config.verbose) console.log(basename, "putMultipart(): req.files=", util.inspect(req.files));
-		if (config.verbose) console.log(basename, "putMultipart(): req.fields=", util.inspect(req.fields));
+		if (config.verbose) console.log(basename, "putMultipart(): req.body=", util.inspect(req.body));
 		if (config.verbose) console.log(basename, "putMultipart(): pathParam=",pathParam);
 		if (!req.files.file) {
 			next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
@@ -405,6 +405,19 @@ function FsLocal(config, next) {
 			files.concat(req.files.file);
 		} else {
 			files.push(req.files.file);
+		}
+		var filenames = [];
+		if (req.body.filename) {
+			if (Array.isArray(req.body.filename)) {
+				filenames.concat(req.body.filename);
+			} else {
+				filenames.push(req.body.filename);
+			}
+			for (var i = 0; i < files.length; i++) {
+				if (filenames[i]) {
+					files[i].name = filenames[i];
+				}
+			}
 		}
 
 		async.forEach(files, function(file, cb) {
