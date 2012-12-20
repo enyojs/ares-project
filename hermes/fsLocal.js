@@ -251,7 +251,7 @@ FsLocal.prototype._putMultipart = function(req, res, next) {
 	    root = this.root,
 	    encodeFileId = this.encodeFileId;
 	this.log("putMultipart(): req.files=", util.inspect(req.files));
-	this.log("putMultipart(): req.fields=", util.inspect(req.fields));
+	this.log("putMultipart(): req.body=", util.inspect(req.body));
 	this.log("putMultipart(): pathParam=",pathParam);
 	if (!req.files.file) {
 		next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
@@ -264,6 +264,19 @@ FsLocal.prototype._putMultipart = function(req, res, next) {
 		files.push(req.files.file);
 	}
 
+	var filenames = [];
+	if (req.body.filename) {
+		if (Array.isArray(req.body.filename)) {
+			filenames.concat(req.body.filename);
+		} else {
+			filenames.push(req.body.filename);
+		}
+		for (var i = 0; i < files.length; i++) {
+			if (filenames[i]) {
+				files[i].name = filenames[i];
+			}
+		}
+	}
 	async.forEach(files, (function(file, cb) {
 		var relPath = path.join(pathParam, file.name),
 		    absPath = path.join(root, relPath),
