@@ -248,9 +248,9 @@ enyo.kind({
 			{kind: "Control", tag: "span", classes: "ares-padleft", content: "also delete files from disk"},
 		]},
 		{kind: "FittableColumns", name: "buttons", components: [
-			{kind: "onyx.Button",  classes: "onyx-negative", content: "Cancel", name: "cancelButton", ontap: "actionCancel"},
+			{kind: "onyx.Button", content: "Cancel", name: "cancelButton", ontap: "actionCancel"},
 			{fit: true},
-			{kind: "onyx.Button", classes: "onyx-affirmative", content: "Remove", name: "actionButton", ontap: "actionConfirm"}
+			{kind: "onyx.Button", content: "Remove", name: "actionButton", ontap: "actionConfirm"}
 		]}
 	],
 	handlers: {
