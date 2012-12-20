@@ -7,653 +7,420 @@
 
 var fs = require("fs"),
     path = require("path"),
-    express = require("express"),
-    http = require("http"),
     util  = require("util"),
-    temp = require("temp"),
     mkdirp = require("mkdirp"),
     async = require("async"),
-    querystring = require("querystring");
+    FsBase = require(__dirname + "/lib/fsBase"),
+    HttpError = require(__dirname + "/lib/httpError");
 
-var basename = '(' + path.basename(__filename) + ')';
+function FsLocal(inConfig, next) {
+	inConfig.name = inConfig.name || "fsLocal";
 
-function FsLocal(config, next) {
+	// inherits FsBase (step 1/2)
+	FsBase.call(this, inConfig, next);
+}
 
-	/**
-	 * Generic HTTP Error
-	 * 
-	 * @private
-	 */
-	function HttpError(msg, statusCode) {
-		Error.captureStackTrace(this, this);
-		this.statusCode = statusCode || 500; // Internal-Server-Error
-		this.message = msg || 'Error';
-	}
-	util.inherits(HttpError, Error);
-	HttpError.prototype.name = "HTTP Error";
+// inherits FsBase (step 2/2)
+util.inherits(FsLocal, FsBase);
 
-	// (simple) parameters checking
-	config.root = path.resolve(config.root);
-	if (config.verbose) console.log(basename, "config:" + util.inspect(config));
-
-	// express-3.x
-	/*
-	var app = express(),
-	    server = http.createServer(app); // XXX replace by HTTP server from config
-	 */
-	// express-2.x
-	var app = express.createServer(),
-	    server = app;
-
-	app.use(express.logger('dev'));
-
-	// CORS -- Cross-Origin Resources Sharing
-	app.use(function(req, res, next) {
-		res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
-		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-		res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control');
-		if ('OPTIONS' == req.method) {
-			res.status(200).end();
-		}
-		else {
-			next();
-		}
+FsLocal.prototype.propfind = function(req, res, next) {
+	// 'infinity' is '-1', 'undefined' is '0'
+	var depthStr = req.param('depth');
+	var depth = depthStr ? (depthStr === 'infinity' ? -1 : parseInt(depthStr, 10)) : 1;
+	this._propfind(null, req.param('path'), depth, function(err, content){
+		next(err, {code: 200 /*Ok*/, body: content});
 	});
+};
 
-	// Authentication
-	app.use(express.cookieParser());
-	app.use(function(req, res, next) {
-		if (req.connection.remoteAddress !== "127.0.0.1") {
-			next(new Error("Access denied from IP address "+req.connection.remoteAddress));
-		} else {
-			next();
-		}
-	});
+FsLocal.prototype.move = function(req, res, next) {
+	this._changeNode(req, res, fs.rename, next);
+};
 
-	// HTTP method overloading
-	app.use(function(req, res, next) {
-		req.originalMethod = req.method;
-		if (req.query._method) {
-			req.method = req.query._method.toUpperCase();
-		}
-		if (!verbs[req.originalMethod] || 
-		    !verbs[req.originalMethod][req.method]) {
-			next(new Error("unknown originalMethod/method = "+req.originalMethod+"/"+req.method));
-		} else {
-			next();
-		}
-	});
+FsLocal.prototype.copy = function(req, res, next) {
+	this._changeNode(req, res, this._cpr, next);
+};
 
-	// Built-in express form parser: handles:
-	// - 'application/json' => req.body
-	// - 'application/x-www-form-urlencoded' => req.body
-	// - 'multipart/form-data' => req.body.field[] & req.body.file[]
-	var uploadDir = temp.path({prefix: 'com.palm.ares.hermes.bdPhoneGap'}) + '.d';
-	fs.mkdirSync(uploadDir);
-	app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
+FsLocal.prototype.get = function(req, res, next) {
+	this._getFile(req, res, next);
+};
 
-	/**
-	 * Global error handler
-	 * @private
-	 */
-	function errorHandler(err, req, res, next){
-		console.error("errorHandler(): ", err.stack);
-		respond(res, err);
-	}
+FsLocal.prototype.put = function(req, res, next) {
+	this.log("put(): req.headers", req.headers);
+	this.log("put(): req.body", req.body);
 
-	if (app.error) {
-		// express-2.x: explicit error handler
-		app.error(errorHandler);
+	if (req.is('application/x-www-form-urlencoded')) {
+		// carry a single file at most
+		return this._putWebForm(req, res, next);
+	} else if (req.is('multipart/form-data')) {
+		// can carry several files
+		return this._putMultipart(req, res, next);
 	} else {
-		// express-3.x: middleware with arity === 4 is detected as the error handler
-		app.use(errorHandler);
+		next(new Error("Unhandled upload of content-type='" + req.headers['content-type'] + "'"));
+	}
+};
+
+FsLocal.prototype.mkcol = function(req, res, next) {
+	var newPath, newId,
+	    pathParam = req.param('path'),
+	    nameParam = req.param('name');
+	if (!nameParam) {
+		next(new HttpError("missing 'name' query parameter", 400 /*Bad-Request*/));
+		return;
+	}
+	newPath = path.join(pathParam, path.basename(nameParam));
+	newId = this.encodeFileId(newPath);
+
+	fs.mkdir(path.join(this.root, newPath), function(err) {
+		next(err, {
+			code: 201, // Created
+			body: {id: newId, path: newPath, isDir: true}
+		});
+	});
+};
+
+FsLocal.prototype['delete'] = function(req, res, next) {
+	var pathParam = req.param('path'),
+	    localPath = path.join(this.root, pathParam);
+	if (localPath === this.root) {
+		next(new HttpError("Not allowed to remove service root", 403 /*Forbidden*/));
+	} else {
+		this._rmrf(path.join(this.root, pathParam), function(err) {
+			// return the new content of the parent folder
+			this._propfind(err, path.dirname(pathParam), 1 /*depth*/, function(err, content) {
+				next(err, {
+					code: 200 /*Ok*/,
+					body: content
+				});
+			});
+		});
+	}
+};
+
+FsLocal.prototype._propfind = function(err, relPath, depth, next) {
+	if (err) {
+		next(err);
+		return;
 	}
 
-	// Success
-	function respond(res, err, response) {
-		var statusCode, body;
-		var statusCodes = {
-			'ENOENT': 404, // Not-Found
-			'EPERM' : 403, // Forbidden
-			'EEXIST': 409  // Conflict
-		};
+	var localPath = path.join(this.root, relPath);
+	if (path.basename(relPath).charAt(0) ===".") {
+		// Skip hidden files & folders (using UNIX
+		// convention: XXX do it for Windows too)
+		return next();
+	}
+
+	fs.stat(localPath, (function(err, stat) {
 		if (err) {
-			if (err instanceof Error) {
-				statusCode = err.statusCode || statusCodes[err.code] ||  403; // Forbidden
-				delete err.statusCode;
-				body = err;
-			} else {
-				statusCode = 500; // Internal Server Error
-				body = new Error(err.toString());
-			}
-			console.error("<<<\n"+body.stack);
-		} else if (response) {
-			statusCode = response.code || 200 /*Ok*/;
-			body = response.body;
+			return next(err);
 		}
-		if (body) {
-			res.status(statusCode).send(body);
-		} else if (statusCode) {
-			res.status(statusCode).end();
-		}
-	}
-	
-	var makeExpressRoute = function(path) {
-		return (config.pathname + path)
-			.replace(/\/+/g, "/") // compact "//" into "/"
-			.replace(/(\.\.)+/g, ""); // remove ".."
-	};
 
-	// URL-scheme: ID-based file/folder tree navigation, used by
-	// HermesClient.
-	var idsRoot = makeExpressRoute('/id/');
-	app.all(idsRoot, function(req, res) {
-		req.params.id = encodeFileId('/');
-		_handleRequest(req, res, next);
-	});
-	app.all(makeExpressRoute('/id/:id'), function(req, res, next) {
-		_handleRequest(req, res, next);
-	});
-
-	// URL-scheme: WebDAV-like navigation, used by the Enyo
-	// loader, itself used by the Enyo Javacript parser to analyze
-	// the project source code.
-	app.get(makeExpressRoute('/file/*'), function(req, res, next) {
-		req.params.path = req.params[0];
-		_getFile(req, res, respond.bind(this, res));
-	});
-
-	function _handleRequest(req, res, next) {
-		if (config.verbose) console.log(basename, "req.query=" + util.inspect(req.query));
-		req.params.id = req.params.id || encodeFileId('/');
-		req.params.path = decodeFileId(req.params.id);
-		if (config.verbose) console.log(basename, "req.params=" + util.inspect(req.params));
-		verbs[req.originalMethod][req.method](req, res, respond.bind(this, res));
-	}
-
-	// start the filesystem (fs) server & notify the IDE server
-	// (parent) where to find it
-
-	server.listen(config.port, "127.0.0.1", null /*backlog*/, function() {
-		// Send back the URL to the IDE server, when port is
-		// actually bound
-		var service = {
-			origin: "http://127.0.0.1:"+server.address().port.toString(),
-			pathname: config.pathname
+		// minimum common set of properties
+		var node = {
+			path: relPath,
+			name: path.basename(relPath),
+			id: this.encodeFileId(relPath),
+			isDir: stat.isDirectory()
 		};
-		return next(null, service);
-	});
 
-	/**
-	 * Terminates express server
-	 */
-	this.quit = function() {
-		server.close();
-		console.log(basename, "exiting");
-	};
+		this.log("depth="+depth+", node="+util.inspect(node));
 
-	// utilities library
-
-	function encodeFileId(relPath) {
-		if (relPath) {
-			return encodeURIComponent(relPath);
-		} else {
-			return undefined;
-		}
-	}
-
-	function decodeFileId(id) {
-		if (id) {
-			return decodeURIComponent(id);
-		} else {
-			return undefined;
-		}
-	}
-
-	// File-System (fs) verbs
-
-	var verbs = {
-		GET: {},	// verbs that are transmitted over an HTTP GET method
-		POST: {}	// verbs that are transmitted over an HTTP POST method
-	};
-	
-	verbs.GET.PROPFIND = function(req, res, next) {
-		// 'infinity' is '-1', 'undefined' is '0'
-		var depthStr = req.param('depth');
-		var depth = depthStr ? (depthStr === 'infinity' ? -1 : parseInt(depthStr, 10)) : 1;
-		_propfind(req.param('path'), depth, function(err, content){
-			next(err, {code: 200 /*Ok*/, body: content});
-		});
-	};
-
-	// XXX ENYO-1086: refactor tree walk-down
-	var _propfind = function(relPath, depth, next) {
-		var localPath = path.join(config.root, relPath);
-		if (path.basename(relPath).charAt(0) ===".") {
-			// Skip hidden files & folders (using UNIX
-			// convention: XXX do it for Windows too)
-			return next(null);
-		}
-
-		fs.stat(localPath, function(err, stat) {
-			if (err) {
-				return next(err);
-			}
-
-			// minimum common set of properties
-			var node = {
-				path: relPath,
-				name: path.basename(relPath),
-				id: encodeFileId(relPath),
-				isDir: stat.isDirectory()
-			};
-
-			if (config.verbose) console.log(basename, "depth="+depth+", node="+util.inspect(node));
-
-			if (stat.isFile() || !depth) {
-				node.pathname = idsRoot + node.id; // same terminology as location.pathname
-				return next(null, node);
-			} else if (node.isDir) {
-				node.children = [];
-				fs.readdir(localPath, function(err, files) {
-					if (err) {
-						return next(err); // XXX or skip this directory...
-					}
-					if (!files.length) {
-						return next(null, node);
-					}
-					var count = files.length;
-					files.forEach(function(name) {
-						_propfind(path.join(relPath, name), depth-1, function(err, subNode){
-							if (err) {
-								return next(err);
-							}
-							if (subNode) {
-								node.children.push(subNode);
-							}
-							if (--count === 0) {
-								// return to upper layer only if
-								// every nodes of this layer
-								// were successfully parsed
-								return next(null, node);
-							}
-						});
-					});
-				});
-			} else {
-				// skip special files
-				return next(null);
-			}
-		});
-	};
-	
-	verbs.GET.GET = function(req, res, next) {
-		_getFile(req, res, next);
-	};
-	
-	function _getFile(req, res, next) {
-		var localPath = path.join(config.root, req.param('path'));
-		if (config.verbose) console.log(basename, "sending localPath=" + localPath);
-		fs.stat(localPath, function(err, stat) {
-			if (err) {
-				next(err);
-				return;
-			}
-			if (stat.isFile()) {
-				res.status(200);
-				res.sendfile(localPath);
-				// return nothing: streaming response
-				// is already in progress.
-				next();
-			} else {
-				next(new Error("not a file: '" + localPath + "'"));
-			}
-		});
-	}
-
-	verbs.POST.PUT = function(req, res, next) {
-		if (config.verbose) console.log(basename, "put(): req.headers", req.headers);
-		if (config.verbose) console.log(basename, "put(): req.body", req.body);
-
-		if (req.is('application/x-www-form-urlencoded')) {
-			// carry a single file at most
-			return _putWebForm(req, res, next);
-		} else if (req.is('multipart/form-data')) {
-			// can carry several files
-			return _putMultipart(req, res, next);
-		} else {
-			next(new Error("Unhandled upload of content-type='" + req.headers['content-type'] + "'"));
-		}
-	};
-
-	/**
-	 * Store a file provided by a web-form
-	 * 
-	 * The web form is a 'application/x-www-form-urlencoded'
-	 * request, which contains the following fields:
-	 * 
-	 * - name (optional) is the name of the file to be created or
-         *   updated.
-	 * - path (mandatory) is the relative path to the storage root
-         *   of the file to be uploaded (if name is absent) or to the
-         *   containing folder (if name is provided).
-	 * - content (mandatory) is the base64-encoded version of the
-         *   file
-	 * 
-	 * @param {HTTPRequest} req 
-	 * @param {HTTPResponse} res
-	 * @param {Function} next(err, data) CommonJS callback 
-	 */
-	function _putWebForm(req, res, next) {
-		// Mutually-agreed encoding of file name & location:
-		// 'path' and 'name'
-		var relPath,
-		    pathParam = req.param('path'),
-		    nameParam = req.param('name');
-		if (!pathParam) {
-			next(new HttpError("Missing 'path' request parameter", 400 /*Bad Request*/));
-			return;
-		}
-		if (nameParam) {
-			relPath = path.join(pathParam, path.basename(nameParam));
-		} else {
-			relPath = pathParam;
-		}
-
-		// Now get the bits: base64-encoded binary in the
-		// 'content' field
-		var buf;
-		if (req.body.content) {
-			buf = new Buffer(req.body.content, 'base64');
-		} else {
-			if (config.verbose) console.log(basename, "putWebForm(): empty file");
-			buf = '';
-		}
-		
-		if (config.verbose) console.log(basename, "putWebForm(): storing file as", relPath);
-		fs.writeFile(path.join(config.root, relPath), buf, function(err){
-			next(err, {
-				code: 201, // Created
-				body: [{id: encodeFileId(relPath), path: relPath, isDir: false}]
-			});
-		});
-	}
-
-	/**
-	 * Stores one or more files provided by a multipart form
-	 * 
-	 * The multipart form is a 'multipart/form-data'.  Each of its
-	 * parts follows this field convention, compatible with the
-	 * Express/Connect bodyParser, itself based on the Formidable
-	 * Node.js module.
-	 * 
-	 * @param {HTTPRequest} req 
-	 * @param {HTTPResponse} res
-	 * @param {Function} next(err, data) CommonJS callback 
-	 */
-	function _putMultipart(req, res, next) {
-		var pathParam = req.param('path');
-		if (config.verbose) console.log(basename, "putMultipart(): req.files=", util.inspect(req.files));
-		if (config.verbose) console.log(basename, "putMultipart(): req.body=", util.inspect(req.body));
-		if (config.verbose) console.log(basename, "putMultipart(): pathParam=",pathParam);
-		if (!req.files.file) {
-			next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
-			return;
-		}
-		var nodes = [], files = [];
-		if (Array.isArray(req.files.file)) {
-			files.concat(req.files.file);
-		} else {
-			files.push(req.files.file);
-		}
-		var filenames = [];
-		if (req.body.filename) {
-			if (Array.isArray(req.body.filename)) {
-				filenames.concat(req.body.filename);
-			} else {
-				filenames.push(req.body.filename);
-			}
-			for (var i = 0; i < files.length; i++) {
-				if (filenames[i]) {
-					files[i].name = filenames[i];
-				}
-			}
-		}
-
-		async.forEach(files, function(file, cb) {
-			var relPath = path.join(pathParam, file.name),
-			    absPath = path.join(config.root, relPath),
-			    dir = path.dirname(absPath);
-
-			if (config.verbose) console.log(basename, "putMultipart(): file.path=" + file.path + ", relPath=" + relPath + ", dir=" + dir);
-
-			async.series([
-				function(cb1) {
-					mkdirp(dir, cb1);
-				},
-				function(cb1) {
-					fs.rename(file.path, absPath, cb1);
-				},
-				function(cb1) {
-					nodes.push({
-						id: encodeFileId(relPath),
-						path: relPath,
-						isDir: false
-					});
-					cb1();
-				}
-			], cb);
-
-		}, function(err){
-			next(err, {
-				code: 201, // Created
-				body: nodes
-			});
-		});
-	}
-
-	verbs.POST.MKCOL = function(req, res, next) {
-		var newPath, newId,
-		    pathParam = req.param('path'),
-		    nameParam = req.param('name');
-		if (!nameParam) {
-			next(new HttpError("missing 'name' query parameter", 400 /*Bad-Request*/));
-			return;
-		}
-		newPath = path.join(pathParam, path.basename(nameParam));
-		newId = encodeFileId(newPath);
-
-		fs.mkdir(path.join(config.root, newPath), function(err) {
-			next(err, {
-				code: 201, // Created
-				body: {id: newId, path: newPath, isDir: true}
-			});
-		});
-	};
-
-	verbs.POST.DELETE = function(req, res, next) {
-		var pathParam = req.param('path'),
-		    localPath = path.join(config.root, pathParam);
-		if (localPath === config.root) {
-			next(new HttpError("Not allowed to remove service root", 403 /*Forbidden*/));
-		} else {
-			_rmrf(path.join(config.root, pathParam), function(err) {
+		if (stat.isFile() || !depth) {
+			return next(null, node);
+		} else if (node.isDir) {
+			node.children = [];
+			fs.readdir(localPath, (function(err, files) {
 				if (err) {
-					next(err);
+					return next(err); // XXX or skip this directory...
 				}
-				// return the new content of the parent folder
-				_propfind(path.dirname(pathParam), 1 /*depth*/, function(err, content) {
-					next(err, {
-						code: 200 /*Ok*/,
-						body: content
-					});
-				});
-			});
-		}
-	};
-
-	// XXX ENYO-1086: refactor tree walk-down
-	function _rmrf(localPath, next) {
-		// from <https://gist.github.com/1526919>
-		fs.stat(localPath, function(err, stats) {
-			if (err) {
-				return next(err);
-			}
-
-			if (!stats.isDirectory()) {
-				return fs.unlink(localPath, next);
-			}
-
-			var count = 0;
-			fs.readdir(localPath, function(err, files) {
-				if (err) {
-					return next(err);
+				if (!files.length) {
+					return next(null, node);
 				}
-
-				if (files.length < 1) {
-					return fs.rmdir(localPath, next);
-				}
-
-				files.forEach(function(file) {
-					var sub = path.join(localPath, file);
-
-					_rmrf(sub, function(err) {
+				var count = files.length;
+				files.forEach(function(name) {
+					this._propfind(null, path.join(relPath, name), depth-1, function(err, subNode){
 						if (err) {
 							return next(err);
 						}
+						if (subNode) {
+							node.children.push(subNode);
+						}
+						if (--count === 0) {
+							// return to upper layer only if
+							// every nodes of this layer
+							// were successfully parsed
+							return next(null, node);
+						}
+					});
+				}, this);
+			}).bind(this));
+		} else {
+			// skip special files
+			return next();
+		}
+	}).bind(this));
+};
 
+FsLocal.prototype._getFile = function(req, res, next) {
+	var localPath = path.join(this.root, req.param('path'));
+	this.log("sending localPath=" + localPath);
+	fs.stat(localPath, function(err, stat) {
+		if (err) {
+			next(err);
+			return;
+		}
+		if (stat.isFile()) {
+			res.status(200);
+			res.sendfile(localPath);
+			// return nothing: streaming response
+			// is already in progress.
+			next();
+		} else {
+			next(new Error("not a file: '" + localPath + "'"));
+		}
+	});
+};
+
+/**
+ * Store a file provided by a web-form
+ * 
+ * The web form is a 'application/x-www-form-urlencoded'
+ * request, which contains the following fields:
+ * 
+ * - name (optional) is the name of the file to be created or
+ *   updated.
+ * - path (mandatory) is the relative path to the storage root
+ *   of the file to be uploaded (if name is absent) or to the
+ *   containing folder (if name is provided).
+ * - content (mandatory) is the base64-encoded version of the
+ *   file
+ * 
+ * @param {HTTPRequest} req 
+ * @param {HTTPResponse} res
+ * @param {Function} next(err, data) CommonJS callback 
+ */
+FsLocal.prototype._putWebForm = function(req, res, next) {
+	// Mutually-agreed encoding of file name & location:
+	// 'path' and 'name'
+	var relPath, fileId,
+	    pathParam = req.param('path'),
+	    nameParam = req.param('name');
+	if (!pathParam) {
+		next(new HttpError("Missing 'path' request parameter", 400 /*Bad Request*/));
+		return;
+	}
+	if (nameParam) {
+		relPath = path.join(pathParam, path.basename(nameParam));
+	} else {
+		relPath = pathParam;
+	}
+
+	// Now get the bits: base64-encoded binary in the
+	// 'content' field
+	var buf;
+	if (req.body.content) {
+		buf = new Buffer(req.body.content, 'base64');
+	} else {
+		this.log("putWebForm(): empty file");
+		buf = '';
+	}
+	
+	this.log("putWebForm(): storing file as", relPath);
+	fileId = this.encodeFileId(relPath);
+	fs.writeFile(path.join(this.root, relPath), buf, function(err){
+		next(err, {
+			code: 201, // Created
+			body: [{id: fileId, path: relPath, isDir: false}]
+		});
+	});
+};
+
+/**
+ * Stores one or more files provided by a multipart form
+ * 
+ * The multipart form is a 'multipart/form-data'.  Each of its
+ * parts follows this field convention, compatible with the
+ * Express/Connect bodyParser, itself based on the Formidable
+ * Node.js module.
+ * 
+ * @param {HTTPRequest} req 
+ * @param {HTTPResponse} res
+ * @param {Function} next(err, data) CommonJS callback 
+ */
+FsLocal.prototype._putMultipart = function(req, res, next) {
+	var pathParam = req.param('path'),
+	    root = this.root,
+	    encodeFileId = this.encodeFileId;
+	this.log("putMultipart(): req.files=", util.inspect(req.files));
+	this.log("putMultipart(): req.body=", util.inspect(req.body));
+	this.log("putMultipart(): pathParam=",pathParam);
+	if (!req.files.file) {
+		next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
+		return;
+	}
+	var nodes = [], files = [];
+	if (Array.isArray(req.files.file)) {
+		files.concat(req.files.file);
+	} else {
+		files.push(req.files.file);
+	}
+
+	var filenames = [];
+	if (req.body.filename) {
+		if (Array.isArray(req.body.filename)) {
+			filenames.concat(req.body.filename);
+		} else {
+			filenames.push(req.body.filename);
+		}
+		for (var i = 0; i < files.length; i++) {
+			if (filenames[i]) {
+				files[i].name = filenames[i];
+			}
+		}
+	}
+	async.forEach(files, (function(file, cb) {
+		var relPath = path.join(pathParam, file.name),
+		    absPath = path.join(root, relPath),
+		    dir = path.dirname(absPath);
+
+		this.log("putMultipart(): file.path=" + file.path + ", relPath=" + relPath + ", dir=" + dir);
+
+		async.series([
+			function(cb1) {
+				mkdirp(dir, cb1);
+			},
+			function(cb1) {
+				fs.rename(file.path, absPath, cb1);
+			},
+			function(cb1) {
+				nodes.push({
+					id: encodeFileId(relPath),
+					path: relPath,
+					isDir: false
+				});
+				cb1();
+			}
+		], cb);
+
+	}).bind(this), function(err){
+		next(err, {
+			code: 201, // Created
+			body: nodes
+		});
+	});
+};
+
+// XXX ENYO-1086: refactor tree walk-down
+FsLocal.prototype._rmrf = function(localPath, next) {
+	// from <https://gist.github.com/1526919>
+	fs.stat(localPath, function(err, stats) {
+		if (err) {
+			return next(err);
+		}
+
+		if (!stats.isDirectory()) {
+			return fs.unlink(localPath, next);
+		}
+
+		var count = 0;
+		fs.readdir(localPath, (function(err, files) {
+			if (err) {
+				next(err);
+			} else if (files.length < 1) {
+				fs.rmdir(localPath, next);
+			} else {
+				files.forEach(function(file) {
+					var sub = path.join(localPath, file);
+					
+					this._rmrf(sub, function(err) {
+						if (err) {
+							return next(err);
+						}
+						
 						if (++count == files.length) {
 							return fs.rmdir(localPath, next);
 						}
 					});
-				});
-			});
-		});
-	}
-
-	verbs.POST.MOVE = function(req, res, next) {
-		_changeNode(req, res, fs.rename, next);
-	};
-
-	verbs.POST.COPY = function(req, res, next) {
-		_changeNode(req, res, _cpr, next);
-	};
-
-	// XXX ENYO-1086: refactor tree walk-down
-	function _changeNode(req, res, op, next) {
-		var pathParam = req.param('path'),
-		    nameParam = req.param('name'),
-		    folderIdParam = req.param('folderId'),
-		    overwriteParam = req.param('overwrite'),
-		    srcPath = path.join(config.root, pathParam);
-		var dstPath, dstRelPath;
-		if (nameParam) {
-			// rename/copy file within the same collection (folder)
-			dstRelPath = path.join(path.dirname(pathParam),
-					       path.basename(nameParam));
-		} else if (folderIdParam) {
-			// move/copy at a new location
-			dstRelPath = path.join(decodeFileId(folderIdParam),
-					       path.basename(pathParam));
-		} else {
-			next(new HttpError("missing query parameter: 'name' or 'folderId'", 400 /*Bad-Request*/));
-			return;
-		}
-		dstPath = path.join(config.root, dstRelPath);
-		if (srcPath === dstPath) {
-			next(new HttpError("trying to move a resource onto itself", 400 /*Bad-Request*/));
-			return;
-		}
-		fs.stat(dstPath, function(err, stat) {
-			// see RFC4918, section 9.9.4 (MOVE Status
-			// Codes) & section 9.8.5 (COPY Status Codes).
-			if (err) {
-				if (err.code === 'ENOENT') {
-					// Destination resource does not exist yet
-					op(srcPath, dstPath, function(err) {
-						if (err) {
-							next(err);
-						} else {
-							// return the new content of the destination path
-							_propfind(dstRelPath, 1 /*depth*/, function(err, content) {
-								next(err, {
-									code: 201 /*Created*/,
-									body: content
-								});
-							});
-						}
-					});
-				} else {
-					next(err);
-				}
-			} else if (stat) {
-				if (overwriteParam) {
-					// Destination resource already exists : destroy it first
-					_rmrf(dstPath, function(err) {
-						op(srcPath, dstPath, function(err) {
-							//next(err, { code: 204 /*No-Content*/ });
-							if (err) {
-								next(err);
-							} else {
-								// return the new content of the destination path
-								_propfind(dstRelPath, 1 /*depth*/, function(err, content) {
-									next(err, {
-										code: 200 /*Ok*/,
-										body: content
-									});
-								});
-							}
-						});
-					});
-				} else {
-					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
-				}
+				}, this);
 			}
-		});
-	}
+		}).bind(this));
+	});
+};
 
-	// XXX ENYO-1086: refactor tree walk-down
-	function _cpr(srcPath, dstPath, next) {
-		if (srcPath === dstPath) {
-			return next(new Error("Cannot copy on itself"));
-		}
-		function _copyFile(srcPath, dstPath, next) {
-			var is, os;
-			is = fs.createReadStream(srcPath);
-			os = fs.createWriteStream(dstPath);
-			util.pump(is, os, next); // XXX should return 201 (Created) on success
-		}
-		function _copyDir(srcPath, dstPath, next) {
-			var count = 0;
-			fs.readdir(srcPath, function(err, files) {
-				if (err) {
-					return next(err);
-				}
-				fs.mkdir(dstPath, function(err) {
-					if (err) {
-						return next(err);
-					}
-					if (files.length >= 1) {
-						files.forEach(function(file) {
-							var sub = path.join(dstPath, file);
-							
-							_cpr(path.join(srcPath, file), path.join(dstPath, file), function(err) {
-								if (err) {
-									return next(err);
-								}
-								
-								if (++count == files.length) {
-									return next(null);
-								}
+// XXX ENYO-1086: refactor tree walk-down
+FsLocal.prototype._changeNode = function(req, res, op, next) {
+	var pathParam = req.param('path'),
+	    nameParam = req.param('name'),
+	    folderIdParam = req.param('folderId'),
+	    overwriteParam = req.param('overwrite'),
+	    srcPath = path.join(this.root, pathParam);
+	var dstPath, dstRelPath;
+	if (nameParam) {
+		// rename/copy file within the same collection (folder)
+		dstRelPath = path.join(path.dirname(pathParam),
+				       path.basename(nameParam));
+	} else if (folderIdParam) {
+		// move/copy at a new location
+		dstRelPath = path.join(this.decodeFileId(folderIdParam),
+				       path.basename(pathParam));
+	} else {
+		next(new HttpError("missing query parameter: 'name' or 'folderId'", 400 /*Bad-Request*/));
+		return;
+	}
+	dstPath = path.join(this.root, dstRelPath);
+	if (srcPath === dstPath) {
+		next(new HttpError("trying to move a resource onto itself", 400 /*Bad-Request*/));
+		return;
+	}
+	fs.stat(dstPath, (function(err, stat) {
+		// see RFC4918, section 9.9.4 (MOVE Status
+		// Codes) & section 9.8.5 (COPY Status Codes).
+		if (err) {
+			if (err.code === 'ENOENT') {
+				// Destination resource does not exist yet
+				op(srcPath, dstPath, (function(err) {
+					// return the new content of the destination path
+					this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
+						next(err, {
+							code: 201 /*Created*/,
+							body: content
+						});
+					});
+				}).bind(this));
+			} else {
+				next(err);
+			}
+		} else if (stat) {
+			if (overwriteParam) {
+				// Destination resource already exists : destroy it first
+				this._rmrf(dstPath, (function(err) {
+					op(srcPath, dstPath, (function(err) {
+						//next(err, { code: 204 /*No-Content*/ });
+						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
+							next(err, {
+								code: 200 /*Ok*/,
+								body: content
 							});
 						});
-					}
-				});
-			});
+					}).bind(this));
+				}).bind(this));
+			} else {
+				next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+			}
 		}
+	}).bind(this));
+};
+
+// XXX ENYO-1086: refactor tree walk-down
+FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
+	if (srcPath === dstPath) {
+		return next(new HttpError("Cannot copy on itself", 400 /*Bad Request*/));
+	}
+	_copyNode(srcPath, dstPath, next);
+	function _copyNode(srcPath, dstPath, next) {
 		fs.stat(srcPath, function(err, stats) {
 			if (err) {
-				return next(err);
+				next(err);
+				return;
 			}
 			if (stats.isDirectory()) {
 				_copyDir(srcPath, dstPath, next);
@@ -662,7 +429,44 @@ function FsLocal(config, next) {
 			}
 		});
 	}
-}
+	function _copyFile(srcPath, dstPath, next) {
+		var is, os;
+		is = fs.createReadStream(srcPath);
+		os = fs.createWriteStream(dstPath);
+		util.pump(is, os, next); // XXX should return 201 (Created) on success
+	}
+	function _copyDir(srcPath, dstPath, next) {
+		var count = 0;
+		fs.readdir(srcPath, function(err, files) {
+			if (err) {
+				next(err);
+				return;
+			}
+			fs.mkdir(dstPath, function(err) {
+				if (err) {
+					next(err);
+					return;
+				}
+				if (files.length >= 1) {
+					files.forEach(function(file) {
+						var sub = path.join(dstPath, file);
+						_copyNode(path.join(srcPath, file), path.join(dstPath, file), function(err) {
+							if (err) {
+								next(err);
+								return;
+							}
+							if (++count == files.length) {
+								next();
+							}
+						});
+					});
+				}
+			});
+		});
+	}
+};
+
+module.exports = FsLocal;
 
 if (path.basename(process.argv[1]) === "fsLocal.js") {
 	// We are main.js: create & run the object...
@@ -708,8 +512,4 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		if (process.send) process.send(service);
 	});
 
-} else {
-
-	// ... otherwise hook into commonJS module systems
-	module.exports = FsLocal;
 }
