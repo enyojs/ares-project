@@ -98,13 +98,6 @@ enyo.kind({
 		return true; //Stop event propagation
 	},
 	/**
-	 * @private
-	 */
-	handleUpdateAuth: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
-		ServiceRegistry.instance.setConfig(inEvent.serviceId, {auth: inEvent.auth});
-	},
-	/**
 	 * @public
 	 */
 	dismiss: function(inSender, inEvent) {
