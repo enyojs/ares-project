@@ -148,14 +148,14 @@ body {
 
 }
 
-.ares_projectView_switches .onyx-toggle-button {
-	text-transform: none;
-	margin-top: 6px;
-	margin-right: 4px;
+.ares_projectview_label {
+	display: inline;
+	font-weight: bold;
+	padding-right: 4px;
 }
 
-.ares_projectView_switches .onyx-toggle-button .off {
-	text-decoration: line-through;
+.ares_projectview_check {
+	margin-right: 16px;
 }
 
 .phobos-find-label {
