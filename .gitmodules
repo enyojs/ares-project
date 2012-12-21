@@ -16,3 +16,6 @@
 [submodule "lib/foss/underscore"]
 	path = lib/foss/underscore
 	url = ../../documentcloud/underscore.git
+[submodule "lib/g11n"]
+	path = lib/g11n
+	url = ../g11n.git
