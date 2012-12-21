@@ -34,34 +34,48 @@ enyo.singleton({
 	storageArea: null,
 	defaultStorageArea: {
 		get: function(inKey, inCallback, self) {
-			inCallback.bind(self)(window.localStorage.getItem(inKey));
+			var outValue = window.localStorage.getItem(inKey);
+			if (inCallback) {
+				var fn = (self ? enyo.bind(self, inCallback) : inCallback);
+				fn(outValue);
+			}
 		},
 		set: function(inKey, inValue, inCallback, self) {
 			window.localStorage.setItem(inKey, inValue);
-			inCallback && inCallback.bind(self)();
+			if (inCallback) {
+				var fn = (self ? enyo.bind(self, inCallback) : inCallback);
+				fn();
+			}
 		},
 		remove: function(inKey, inCallback, self) {
 			window.localStorage.removeItem(inKey);
-			inCallback && inCallback.bind(self)();
+			if (inCallback) {
+				var fn = (self ? enyo.bind(self, inCallback) : inCallback);
+				fn();
+			}
 		}
 	},
 	chromeStorageArea: {
 		get: function(inKey, inCallback, self) {
+			var fn = (self ? enyo.bind(self, inCallback) : inCallback);
 			chrome.storage.local.get(inKey, function(outObj) {
-				inCallback.bind(self)(outObj[inKey]);
+				fn(outObj[inKey]);
 			});
 		},
 		set: function(inKey, inValue, inCallback, self) {
-			var inObj = {};
+			var fn, inObj = {};
+			if (inCallback) {
+				fn = (self ? enyo.bind(self, inCallback) : inCallback);
+			}
 			inObj[inKey] = inValue;
-			chrome.storage.local.set(inObj, function() {
-				inCallback && inCallback.bind(self)();
-			});
+			chrome.storage.local.set(inObj, fn);
 		},
 		remove: function(inKey, inCallback, self) {
-			chrome.storage.local.remove(inKey, function() {
-				inCallback && inCallback.bind(self)();
-			});
+			var fn;
+			if (inCallback) {
+				fn = (self ? enyo.bind(self, inCallback) : inCallback);
+			}
+			chrome.storage.local.remove(inKey, fn);
 		}
 	}
 });
