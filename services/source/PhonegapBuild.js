@@ -21,7 +21,8 @@ enyo.kind({
 	 * @see ServiceRegistry.js
 	 */
 	setConfig: function(inConfig) {
-		enyo.mixin(this.config, inConfig);
+		if (this.debug) this.log("inConfig:", inConfig);
+		ares.extend(this.config, inConfig);
 		if (this.config.origin && this.config.pathname) {
 			this.url = this.config.origin + this.config.pathname;
 			if (this.debug) this.log("url:", this.url);
@@ -32,6 +33,97 @@ enyo.kind({
 	 */
 	getConfig: function() {
 		return this.config;
+	},
+	/**
+	 * Authorize & thne retrieve information about the currently registered user
+	 * @public
+	 */
+	authorize: function(next) {
+		var self = this;
+		if (this.debug) this.log();
+		this._getUserData(function(err, userData) {
+			if (err) {
+				self._getToken(function(err) {
+					if (err) {
+						next(err);
+					} else {
+						self. _getUserData(next);
+					}
+				});
+			} else {
+				next(null, userData);
+			}
+		});
+	},
+	/**
+	 * Get a developer token from user's credentials
+	 * @param {Function} next is a CommonJS callback
+	 * @private
+	 */
+	_getToken: function(next) {
+		if (this.debug) this.log();
+		if(this.config.auth && this.config.auth.token) {
+			next();
+		}
+
+		// Pass credential information to get a phonegapbuild token
+		var data = "username=" + encodeURIComponent(this.config.auth.username) +
+			    "&password=" + encodeURIComponent(this.config.auth.password);
+		
+		// Get a phonegapbuild token for the Hermes build service
+		var req = new enyo.Ajax({
+			url: this.url + '/token',
+			method: 'POST',
+			postBody: data
+		});
+		req.response(this, function(inSender, inData) {
+			this.config.auth.token = inData.token;
+			if (this.debug) this.log("Got phonegap token: " + this.config.auth.token);
+			// store token
+			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
+			next();
+		});
+		req.error(this, function(inSender, inError) {
+			var response = inSender.xhrResponse, contentType, details;
+			if (response) {
+				contentType = response.headers['content-type'];
+				if (contentType && contentType.match('^text/plain')) {
+					details = response.body;
+				}
+			}
+			next(new Error("Unable to get PhoneGap application token (" + inError + ")"), details);
+		});
+		req.go();
+	},
+	/**
+	 * Get a developer account information
+	 * @param {Function} next is a CommonJS callback
+	 * @private
+	 */
+	_getUserData: function(next) {
+		if (this.debug) this.log();
+		var req = new enyo.Ajax({
+			url: this.url + '/api/v1/me'
+		});
+		req.response(this, function(inSender, inData) {
+			if (this.debug) this.log("inData: ", inData);
+			next(null, inData);
+		});
+		req.error(this, function(inSender, inError) {
+			// invalidate token
+			this.config.auth.token = null;
+			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
+			// report the error
+			var response = inSender.xhrResponse, contentType, details;
+			if (response) {
+				contentType = response.headers['content-type'];
+				if (contentType && contentType.match('^text/plain')) {
+					details = response.body;
+				}
+			}
+			next(new Error("Unable to get PhoneGap user data (" + inError + ")"), details);
+		});
+		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
 	},
 	/**
 	 * initiates the phonegap build of the given project
@@ -61,50 +153,7 @@ enyo.kind({
 		}
 		if (this.debug) this.log("appId: " + config.build.phonegap.appId);
 
-		this.getToken(project, next);
-	},
-	/**
-	 * Get a developer token from user's credentials
-	 * @param {Object} project
-	 * @param {Function} next is a CommonJS callback
-	 * @private
-	 */
-	getToken: function(project, next) {
-		if (this.debug) this.log("...");
-		if(this.config.auth && this.config.auth.token) {
-			this.getFileList(project, next);
-			return;
-		}
-
-		// Pass credential information to get a phonegapbuild token
-		var data = "username=" + encodeURIComponent(this.config.auth.username) +
-			    "&password=" + encodeURIComponent(this.config.auth.password);
-		
-		// Get a phonegapbuild token for the Hermes build service
-		var req = new enyo.Ajax({
-			url: this.url + '/token',
-			method: 'POST',
-			postBody: data,
-			handleAs: "json"
-		});
-		req.response(this, function(inSender, inData) {
-			this.config.auth.token = inData.token;
-			if (this.debug) this.log("Got phonegap token: " + this.token);
-			
-			// Now get the list of all the files of the project
-			this.getFileList(project, next);
-		});
-		req.error(this, function(inSender, inError) {
-			var response = inSender.xhrResponse, contentType, details;
-			if (response) {
-				contentType = response.headers['Content-Type'];
-				if (contentType && contentType.match('^text/plain')) {
-					details = response.body;
-				}
-			}
-			next(new Error("Unable to get PhoneGap application token:" + inError), details);
-		});
-		req.go();
+		this.getFileList(project, next);
 	},
 	/**
 	 * Get the list of files of the project for further upload
@@ -223,7 +272,7 @@ enyo.kind({
 
 		// Ask Hermes PhoneGap Build service to minify and zip the project
 		var req = new enyo.Ajax({
-			url: this.url + '/build',
+			url: this.url + '/op/build',
 			method: 'POST',
 			postBody: formData
 		});
@@ -244,6 +293,6 @@ enyo.kind({
 			}
 			next(new Error("Unable to build application:" + inError), details);
 		});
-		req.go();
+		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
 	}
 });
