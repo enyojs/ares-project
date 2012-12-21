@@ -84,7 +84,7 @@ FsLocal.prototype['delete'] = function(req, res, next) {
 	if (localPath === this.root) {
 		next(new HttpError("Not allowed to remove service root", 403 /*Forbidden*/));
 	} else {
-		this._rmrf(path.join(this.root, pathParam), function(err) {
+		this._rmrf(path.join(this.root, pathParam), (function(err) {
 			// return the new content of the parent folder
 			this._propfind(err, path.dirname(pathParam), 1 /*depth*/, function(err, content) {
 				next(err, {
@@ -92,7 +92,7 @@ FsLocal.prototype['delete'] = function(req, res, next) {
 					body: content
 				});
 			});
-		});
+		}).bind(this));
 	}
 };
 
@@ -312,7 +312,7 @@ FsLocal.prototype._putMultipart = function(req, res, next) {
 // XXX ENYO-1086: refactor tree walk-down
 FsLocal.prototype._rmrf = function(localPath, next) {
 	// from <https://gist.github.com/1526919>
-	fs.stat(localPath, function(err, stats) {
+	fs.stat(localPath, (function(err, stats) {
 		if (err) {
 			return next(err);
 		}
@@ -343,7 +343,7 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 				}, this);
 			}
 		}).bind(this));
-	});
+	}).bind(this));
 };
 
 // XXX ENYO-1086: refactor tree walk-down
