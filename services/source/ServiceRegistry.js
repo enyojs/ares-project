@@ -144,6 +144,18 @@ enyo.kind({
 				service.impl = new PhonegapBuild();
 				service.impl.setConfig(service.config);
 			}
+			// If the service does not define an
+			// 'authorize()' entry point (which optionally
+			// returns user acccount information), stub it
+			// using a Common-JS pass-through.
+			if (service.impl && !service.impl.authorize) {
+				if (this.debug) this.log("Adding " + service.config.id + "#authorize() stub");
+				service.impl.authorize = enyo.bind(service.impl, (function(next) {
+					console.log('authorize(): stubbed');
+					if (this.debug) this.log('authorize(): stubbed');
+					next(null, {});
+				}));
+			}
 			next();
 		} catch(err) {
 			next(err);
@@ -161,16 +173,15 @@ enyo.kind({
 	 * to localStorage.
 	 * @param {String} inServiceId
 	 * @param {Object} inConfig
+	 * @param {Function} inCallback a CommonJS callback
 	 */
-	setConfig: function (inServiceId, inConfig) {
+	setConfig: function (inServiceId, inConfig, inCallback) {
 		if (this.debug) this.log("serviceId:", inServiceId, "config:", inConfig);
 		var service = this.resolveServiceId(inServiceId);
 		if (!service) return;	// should we rather fail here?
 		ares.extend(service.config, inConfig);
 		var key = [this.SERVICES_STORAGE_KEY, service.config.id].join('.');
-		// We assume success, so do not really care about the
-		// completion callback
-		Ares.LocalStorage.set(key, JSON.stringify({auth: service.config.auth}));
+		Ares.LocalStorage.set(key, JSON.stringify({auth: service.config.auth}), inCallback);
 	},
 	/**
 	 * @param {String} serviceId
@@ -205,7 +216,7 @@ enyo.kind({
 	 * @public
 	 */
 	filter: function(criteria) {
-		if (this.debug) this.log("criteria:", criteria, ", services:", this.services);
+		//if (this.debug) this.log("criteria:", criteria, ", services:", this.services);
 		var matches = enyo.filter(this.services, function(service){
 			var match = true;
 			if (criteria &&
@@ -226,11 +237,11 @@ enyo.kind({
 			return match;
 		}, this);
 		var services = [];
-		if (this.debug) this.log("matches:", matches);
+		//if (this.debug) this.log("matches:", matches);
 		enyo.forEach(matches, function(match){
 			services.push(match.impl);
 		}, this);
-		if (this.debug) this.log("services:", services);
+		if (this.debug) this.log("criteria:", criteria , " => services:", services);
 		return services;
 	},
 	//* @private
