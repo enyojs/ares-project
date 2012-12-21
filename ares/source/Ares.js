@@ -4,7 +4,7 @@ enyo.kind({
 	classes: "onyx",
 	fit: true,
 	components: [
-		{kind: "Panels", arrangerKind: "CarouselArranger", classes:"enyo-fit ares-panels", components: [
+		{kind: "Panels", arrangerKind: "CarouselArranger", classes:"enyo-fit ares-panels", draggable: false, components: [
 			{components: [
 				{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"}
 			]},
