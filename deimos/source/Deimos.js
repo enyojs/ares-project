@@ -47,6 +47,13 @@ enyo.kind({
 		this.kinds=[];
 		this.index=null;
 	},
+	/**
+	 * Loads the first kind passed thru the data parameter
+	 * @param data contains kinds declaration (enyo.kind format)
+	 *   and project information such as the analyzer output
+	 *   for all the .js files of the project and for enyo/onyx.
+	 * @public
+	 */
 	load: function(data) {
 		var what = data.kinds;
 		var maxLen = 0;
@@ -66,6 +73,7 @@ enyo.kind({
 		this.$.kindPicker.render();
 		this.docHasChanged = false;
 
+		// Pass the project information (analyzer output, ...) to the inspector
 		this.$.inspector.setProjectData(data.projectData);
 		this.$.inspector.setFileIndexer(data.fileIndexer);
 	},
