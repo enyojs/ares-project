@@ -9,10 +9,10 @@ enyo.kind({
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", components: [
 				{name: "documentLabel", content: "Document"},
-				{name: "saveButton", kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
-				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: "New kind", ontap: "newKindAction"},
+				{name: "saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "saveDocAction"},
+				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: $L("New Kind"), ontap: "newKindAction"},
 				{fit: true},
-				{name: "designerButton", kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
+				{name: "designerButton", kind: "onyx.Button", content: $L("Designer"), ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
