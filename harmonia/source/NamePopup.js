@@ -60,6 +60,9 @@ enyo.kind({
 	},
 	nameChanged: function(inSender, inEvent) {
 		this.setFileName(this.$.fileName.getValue());
+		if (inEvent.keyCode === 13 && this.fileName.length > 0) {
+			this.newConfirm();
+		}
 	},
 	fileNameChanged: function() {
 		this.$.fileName.setValue(this.fileName);
