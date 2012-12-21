@@ -40,7 +40,8 @@ enyo.kind({
 	},
 	handlers: {
 		onCss: "newcssAction",
-		onReparseAsked: "reparseAction"
+		onReparseAsked: "reparseAction",
+		ondrag: "dragHandler"
 	},
 	debug: false,
 	// Container of the code to analyze and of the analysis result
@@ -573,6 +574,9 @@ enyo.kind({
 	},
 	handleScroll: function(inSender, inEvent) {
 		this.$.autocomplete.hide();
+	},
+	dragHandler: function() {
+		return true;
 	}
 });
 
