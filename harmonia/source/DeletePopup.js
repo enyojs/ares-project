@@ -19,8 +19,11 @@ enyo.kind({
 		//{name: "path", tag: "p", content: "Path: "},
 		{tag: "br"},
 		{tag: "br"},
-		{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "deleteCancel"},
-		{kind: "onyx.Button", classes: "onyx-affirmative", content: "Delete", ontap: "deleteConfirm"}
+		{kind: "FittableColumns", components: [
+			{kind: "onyx.Button", content: "Cancel", ontap: "deleteCancel"},
+			{fit: true},
+			{kind: "onyx.Button", classes: "onyx-negative", content: "Delete", ontap: "deleteConfirm"}
+		]}
 	],
 	create: function() {
 		this.inherited(arguments);
