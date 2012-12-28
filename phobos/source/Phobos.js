@@ -12,16 +12,18 @@ enyo.kind({
 				{name: "saveButton", kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: "New kind", ontap: "newKindAction"},
 				{fit: true},
-				{name: "designerButton", kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
+				{name: "designerButton", kind: "onyx.Button", content: "Designer", ontap: "designerAction"},				
+				{name: "editorButton", kind: "onyx.Button", content: "Editor Settings", ontap: "editorSettings"}			
+				
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
 						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll"},
-						{name: "imageViewer", kind: "enyo.Image"}
+						{name: "imageViewer", kind: "enyo.Image"}						
 					]}
 				]},
-				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"}
+				{name: "right", kind: "rightPanels", showing: false, arrangerKind: "CardArranger"}
 			]}
 		]},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
@@ -31,7 +33,8 @@ enyo.kind({
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
-		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor"}
+		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor"},		
+		{name: "editorSettingsPopup", kind: "EditorSettings", centered: true, modal: true, floating: true, onChangeTheme: "changeTheme", onChangeHighLight: "changeHighLight", onClose: "closeEditorPop", onWordWrap: "changeWordWrap"}
 	],
 	events: {
 		onSaveDocument: "",
@@ -55,7 +58,7 @@ enyo.kind({
 			this.projectData.setProjectCtrl(this.projectCtrl);
 		}
 	},
-	//
+	
 	saveDocAction: function() {
 		this.showWaitPopup("Saving document...");
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
@@ -81,7 +84,7 @@ enyo.kind({
 		this.projectData = this.docData.getProjectData();
 		this.getProjectController();
 		this.setAutoCompleteData();
-
+		
 		// Save the value to set it again after data has been loaded into ACE
 		var edited = this.docData.getEdited();
 
@@ -148,7 +151,7 @@ enyo.kind({
 		var settings = modes[mode]||modes['text'];
 		this.$.right.setIndex(settings.rightIndex);
 		this.$.body.reflow();
-		return showSettings.ace ;
+		return showSettings.ace;
 	},
 	showWaitPopup: function(inMessage) {
 		this.$.waitPopupMessage.setContent(inMessage);
@@ -573,6 +576,29 @@ enyo.kind({
 	},
 	handleScroll: function(inSender, inEvent) {
 		this.$.autocomplete.hide();
+	},
+	
+	/*  editor setting */
+	
+	editorSettings: function() {
+		this.$.editorSettingsPopup.show();
+	},
+	
+	closeEditorPop: function(){
+		this.$.editorSettingsPopup.hide();
+	},
+	
+	changeHighLight: function(){
+		this.$.ace.highlightActiveLine = this.$.editorSettingsPopup.highlight;
+		this.$.ace.highlightActiveLineChanged();
+	},
+	changeTheme: function() {
+		this.$.ace.theme = this.$.editorSettingsPopup.theme;
+		this.$.ace.themeChanged();
+	},
+	changeWordWrap: function() {
+		this.$.ace.wordWrap = this.$.editorSettingsPopup.wordWrap;
+		this.$.ace.wordWrapChanged();
 	}
 });
 
