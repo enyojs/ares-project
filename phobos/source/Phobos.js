@@ -34,7 +34,8 @@ enyo.kind({
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor"},		
-		{name: "editorSettingsPopup", kind: "EditorSettings", centered: true, modal: true, floating: true, onChangeTheme: "changeTheme", onChangeHighLight: "changeHighLight", onClose: "closeEditorPop", onWordWrap: "changeWordWrap"}
+		{name: "editorSettingsPopup", kind: "EditorSettings", centered: true, modal: true, floating: true, onChangeTheme: "changeTheme", onChangeHighLight: "changeHighLight",
+		onClose: "closeEditorPop", onWordWrap: "changeWordWrap", onFontsizeChange: "changeFont"}
 	],
 	events: {
 		onSaveDocument: "",
@@ -105,7 +106,7 @@ enyo.kind({
 				this.$.ace.setSession(aceSession);
 				this.docData.setAceSession(aceSession);
 			}
-
+			
 			// Pass to the autocomplete compononent a reference to ace
 			this.$.autocomplete.setAce(this.$.ace);
 			this.focusEditor();
@@ -599,6 +600,10 @@ enyo.kind({
 	changeWordWrap: function() {
 		this.$.ace.wordWrap = this.$.editorSettingsPopup.wordWrap;
 		this.$.ace.wordWrapChanged();
+	},
+	changeFont: function(){
+		var fs = this.$.editorSettingsPopup.fontSize;
+		this.$.ace.setFontSize(fs);
 	}
 });
 
