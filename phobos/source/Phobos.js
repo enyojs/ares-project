@@ -9,10 +9,10 @@ enyo.kind({
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", components: [
 				{name: "documentLabel", content: "Document"},
-				{name: "saveButton", kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
-				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: "New kind", ontap: "newKindAction"},
+				{name: "saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "saveDocAction"},
+				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: $L("New Kind"), ontap: "newKindAction"},
 				{fit: true},
-				{name: "designerButton", kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
+				{name: "designerButton", kind: "onyx.Button", content: $L("Designer"), ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
@@ -294,6 +294,10 @@ enyo.kind({
 		this.reparseAction();
 		if (this.analysis) {
 			var kinds = [];
+			/*
+				We now pass projectData and fileIndexer which reference various information related to the project.
+				In particular the analyzer output of all the .js projects files as well as for enyo/onyx
+			 */
 			var data = {kinds: kinds, projectData: this.projectData, fileIndexer: this.analysis};
 			for (var i=0; i < this.analysis.objects.length; i++) {
 				var o = this.analysis.objects[i];
