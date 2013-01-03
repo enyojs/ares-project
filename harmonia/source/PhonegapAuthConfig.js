@@ -7,6 +7,7 @@ enyo.kind({
 	 */
 	create: function() {
 		this.inherited(arguments);
+		this.$.manageBtn.show();
 	},
 	/**
 	 * Display relevant data following account checking
@@ -30,6 +31,16 @@ enyo.kind({
 		this.$.userData.$.pgUserData.setUserData(userData);
 		this.$.userData.show();
 		next();
+	},
+	/**
+	 * Open the Account Management Page at build.phonegap.com
+	 * @protected
+	 */
+	manage: function(inSender, inValue) {
+		if (this.debug) this.log("sender:", inSender, "value:", inValue);
+		var accountPopup = window.open("https://build.phonegap.com/people/edit",
+					       "PhoneGap Build Account Management",
+					       "resizeable=1,width=1024, height=600");
+
 	}
-	
 });
