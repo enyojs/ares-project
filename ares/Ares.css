@@ -39,7 +39,7 @@ body {
 .ares-waitpopup {
 	margin-left: auto;
 	margin-right: auto;
-	width: 20%; 
+	width: 20%;
 }
 /**/
 .ares_harmonia_providerList {
@@ -99,6 +99,17 @@ body {
 	background-repeat: initial initial;
 }
 .ares_phobos_findpop {
+}
+
+/* editor popup css*/
+.ares_editorfont {
+	font-size: 15px;
+}
+.ares_editorpopup{
+	width: 300px;
+}
+.editor-button{
+	width: 135px;
 }
 /**/
 .border {
@@ -176,10 +187,10 @@ body {
 .ares-tab {
 	display: inline-block;
 	padding: 4px 0px 0px 6px;
-	background-color: #888; 
+	background-color: #888;
 }
 .ares-tab.active {
-	background-color: #888; 
+	background-color: #888;
 }
 
 
