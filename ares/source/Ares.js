@@ -26,7 +26,8 @@ enyo.kind({
 		{kind: "ServiceRegistry"}
 	],
 	handlers: {
-		onReloadServices: "handleReloadServices"
+		onReloadServices: "handleReloadServices",
+		onUpdateAuth: "handleUpdateAuth"
 	},
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
@@ -50,8 +51,19 @@ enyo.kind({
 		this.calcSlideableLimit();
 	},
 	draggable: false,
+	/**
+	 * @private
+	 */
 	handleReloadServices: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
 		this.$.serviceRegistry.reloadServices();
+	},
+	/**
+	 * @private
+	 */
+	handleUpdateAuth: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.$.serviceRegistry.setConfig(inEvent.serviceId, {auth: inEvent.auth}, inEvent.next);
 	},
 	doubleclickFile: function(inSender, inEvent) {
 		var f = inEvent.file;
