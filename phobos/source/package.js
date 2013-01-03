@@ -4,5 +4,6 @@
 	"FindPopup.js",
 	"cssbuilder.css",
 	"cssbuilder.js",
-	"ProjectCtrl.js"
+	"ProjectCtrl.js",
+	"EditorSettings.js"
 );
