@@ -1,7 +1,5 @@
 enyo.kind({
 	name: "BasicAuthConfig",
-	kind: "Ares.Groupbox",
-	classes: "onyx-groupbox enyo-fill",
 
 	// private members
 	debug: false,
@@ -21,16 +19,20 @@ enyo.kind({
 
 	// static UI elements
 	components: [
-		{kind: "onyx.GroupboxHeader", name: "serviceName"},
-		{content: "User Name:"},
-		{kind: "onyx.InputDecorator", components: [
-			{name:"username", kind: "onyx.Input", placeholder: "login..."}
+		{kind: "Ares.Groupbox", classes: "onyx-groupbox enyo-fill", components: [
+			{kind: "onyx.GroupboxHeader", name: "serviceName"},
+			{content: "User Name:"},
+			{kind: "onyx.InputDecorator", components: [
+				{name:"username", kind: "onyx.Input", placeholder: "login..."}
+			]},
+			{content: "Password:"},
+			{kind: "onyx.InputDecorator", components: [
+				{name:"password", kind: "onyx.Input", placeholder: "password...", type: "password"}
+			]},
+			{kind: "onyx.Button", name: "checkBtn", content: "Check", ontap: "check"}
 		]},
-		{content: "Password:"},
-		{kind: "onyx.InputDecorator", components: [
-			{name:"password", kind: "onyx.Input", placeholder: "password...", type: "password"}
-		]},
-		{kind: "onyx.Button", name: "checkBtn", content: "Check", ontap: "check"}
+		{tag: "br"},
+		{name: "userData"}
 	],
 
 	/**
@@ -59,6 +61,7 @@ enyo.kind({
 	check: function(inSender, inEvent) {
 		var self = this;
 		this.$.checkBtn.setDisabled(true);
+		this.$.userData.hide();
 		async.waterfall([
 			enyo.bind(this, this.updateAuth),
 			enyo.bind(this.service, this.service.authorize),
@@ -80,7 +83,7 @@ enyo.kind({
 	 * @private
 	 */
 	updateAuth: function(next) {
-		this.log('In progress...');
+		if (this.debug) this.log('In progress...');
 		this.doUpdateAuth({
 			serviceId: this.serviceId,
 			auth: {
@@ -92,6 +95,7 @@ enyo.kind({
 	},
 	/**
 	 * Display relevant data following account checking
+	 * @protected
 	 */
 	display: function(data, next) {
 		this.log(data);

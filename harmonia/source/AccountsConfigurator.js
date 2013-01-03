@@ -68,6 +68,16 @@ enyo.kind({
 						username: service.config.auth.username,
 						password: service.config.auth.password
 					});
+				} else if (service.config.auth.type === 'phonegap') {
+					if (this.debug) this.log("creating 'phonegap' auth form");
+					this.$.authPanel.createComponent({
+						kind: "PhonegapAuthConfig",
+						name: serviceAuthName,
+						serviceId: service.config.id,
+						serviceName: service.config.name,
+						username: service.config.auth.username,
+						password: service.config.auth.password
+					});
 				} else if (service.config.auth.type === 'dropbox') {
 					if (this.debug) this.log("creating 'dropbox' auth form");
 					this.$.authPanel.createComponent({

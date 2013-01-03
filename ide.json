@@ -45,7 +45,7 @@
 			"useJsonp":false,
 			"debug": false,
 			"auth": {
-				"type": "basic"
+				"type": "phonegap"
 			},
 			"respawn": false
 		}
