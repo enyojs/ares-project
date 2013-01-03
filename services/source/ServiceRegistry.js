@@ -166,8 +166,10 @@ enyo.kind({
 	 */
 	SERVICES_STORAGE_KEY: "com.enyojs.ares.services",
 	/**
-	 * Set the given value in the given serviceId configuration &
-	 * save it in the localStorage, if applicable.
+	 * Set the given value in the given serviceId configuration
+	 * 
+	 * Update the living instances & save the modified
+	 * configuration in the localStorage, if applicable.
 	 *
 	 * Today, only auth part of the given config object is saved
 	 * to localStorage.
@@ -180,6 +182,8 @@ enyo.kind({
 		var service = this.resolveServiceId(inServiceId);
 		if (!service) return;	// should we rather fail here?
 		ares.extend(service.config, inConfig);
+		service.setConfig(service.config);
+
 		var key = [this.SERVICES_STORAGE_KEY, service.config.id].join('.');
 		Ares.LocalStorage.set(key, JSON.stringify({auth: service.config.auth}), inCallback);
 	},

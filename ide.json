@@ -1,4 +1,5 @@
 {
+	"domain": null,
 	"services": [
 		{
 			"active":true,
@@ -11,7 +12,7 @@
 				"hermes/fsLocal.js", "-P", "/files", "-p", "0", "@HOME@"
 			],
 			"useJsonp":false,
-			"debug": false,
+			"verbose": false,
 			"respawn": false
 		},
 		{
@@ -21,8 +22,8 @@
 			"name":"Dropbox",
 			"type": "filesystem",
 			"provider": "hermes",
-			"Xcommand":"@NODE@", "params":[
-				"hermes/fsDropbox.js", "-P", "/files", "-p", "10002"
+			"command":"@NODE@", "params":[
+				"hermes/fsDropbox.js", "-v", "-P", "/files", "-p", "0"
 			],
 			"auth": {
 				"type": "dropbox",
@@ -30,7 +31,7 @@
 				"appSecret": ""
 			},
 			"useJsonp":false,
-			"debug": false
+			"verbose": false
 		},
 		{
 			"active":true,
@@ -43,7 +44,7 @@
 				"hermes/bdPhoneGap.js", "-P", "/phonegap", "-p", "0"
 			],
 			"useJsonp":false,
-			"debug": false,
+			"verbose": false,
 			"auth": {
 				"type": "phonegap"
 			},

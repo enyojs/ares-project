@@ -3,8 +3,7 @@ enyo.kind({
 	kind: "enyo.Object",
 	debug: false,
 	events: {
-		onLogin: "",
-		onFailure: ""
+		onLoginFailed: ""
 	},
 	create: function() {
 		this.inherited(arguments);
@@ -16,9 +15,14 @@ enyo.kind({
 	setConfig: function(inConfig) {
 		if (this.debug) this.log(inConfig);
 		this.config = inConfig;
-		if (inConfig.auth) {
-			this.auth = inConfig.auth;
-		}
+		this.authorize(inConfig.auth, enyo.bind(this, function(inError, inValue) {
+			this.log("error:", inError, ", value:", inValue);
+			if (inError) {
+				this.doLoginFailed(inConfig);
+			} else {
+				this.auth = inConfig.auth;
+			}
+		}));
 	},
 	getConfig: function() {
 		return this.config;
@@ -39,23 +43,17 @@ enyo.kind({
 		if (!this.config.origin) {
 			throw "Service URL not yet defined";
 		}
-		if (this.auth) {
-			if (this.debug) this.log(this.auth);
-			inParams = enyo.mixin(inParams, {
-				token: this.auth.token,
-				secret: this.auth.secret
-			});
-		}
-		var url = this.config.origin + this.config.pathname + '/id/' + inNodeId + '?_method=' + inMethod;
+		var url = this.config.origin + this.config.pathname + '/id/' + (inNodeId ? inNodeId : "" ) + '?_method=' + inMethod;
 		var method = this._requestDic[inMethod].verb;
 		if (this.debug) this.log(inMethod+"/"+method+": '"+url+"'");
-		if (this.debug) this.log("params=", inParams);	
-		var req = new enyo.Ajax({
+		if (this.debug) this.log("params=", inParams);
+		var options = {
 			url: url,
 			method: method,
 			handleAs: this._requestDic[inMethod].handleAs,
 			postBody: inParams && inParams.postBody
-		});
+		};
+		var req = new enyo.Ajax(options);
 		if (inParams && inParams.postBody) {
 			delete inParams.postBody;
 		}
@@ -76,6 +74,53 @@ enyo.kind({
 			return inResponse ; // for the daisy chain
 		});
 		return req.go(inParams);
+	},
+	authorize: function(inAuth, next) {
+		var count = 1;
+		if (inAuth && inAuth.headers && inAuth.headers.authorization) {
+			enyo.bind(this, _authorize)();
+		}
+
+		function _authenticate() {
+			if (this.debug) this.log("authenticate(): count:", count);
+			if (count--) {
+				if (this.debug) this.log("authenticate(): authorization:", inAuth.headers.authorization);
+				// POST the Authorization
+				// header/token/credential in a web-form.
+				new enyo.Ajax({
+					url: this.config.origin + this.config.pathname + '/',
+					method: 'POST',
+					handleAs: 'text'
+				})
+				.response(this, _authorize)
+				.error(this, _authFailure)
+				.go({
+					authorization: inAuth.headers.authorization
+				});
+			}
+		}
+		function _authorize() {
+			// GET the Authorization.  This step expects
+			// that the Authorization credentials are
+			// passed as a Cookie set during the
+			// _authenticate() step.
+			if (this.debug) this.log("authorize():");
+			new enyo.Ajax({
+				url: this.config.origin + this.config.pathname + '/',
+				method: 'GET'
+			})
+			.response(this, _authSuccess)
+			.error(this, _authenticate)
+			.go();
+		}
+		function _authSuccess(inXhr, inValue) {
+			if (this.debug) this.log("authSuccess(): inValue:", inValue);
+			next(null, inValue);
+		}
+		function _authFailure(inXhr, inError) {
+			if (this.debug) this.log("authFailure(): inError:", inError, ", body:", (inXhr.xhrResponse ? inXhr.xhrResponse.body : undefined));
+			next(new Error(inError));
+		}
 	},
 	propfind: function(inNodeId, inDepth) {
 		return this._request("PROPFIND", inNodeId, {depth: inDepth} /*inParams*/)
@@ -103,6 +148,16 @@ enyo.kind({
 		// ['/path','.'] resolves to '/path', so using '.'
 		// keeps the file name encoded in inFileId
 		formData.append('file', file, '.' /*filename*/);
+		if (enyo.platform.firefox) {
+			// FormData#append() lacks the third parameter
+			// 'filename', so emulate it using a list of
+			// 'filename'fields of the same size os the
+			// number of files.  This only works if the
+			// other end of the tip is implemented on
+			// server-side.
+			// http://stackoverflow.com/questions/6664967/how-to-give-a-blob-uploaded-as-formdata-a-file-name
+			formData.append('filename', '.');
+		}
 		return this._request("PUT", inFileId, {postBody: formData} /*inParams*/);
 	},
 	createFile: function(inFolderId, inName, inContent) {

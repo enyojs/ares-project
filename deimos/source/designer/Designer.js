@@ -218,6 +218,7 @@ enyo.kind({
 		if (!enyo.constructorForKind(name)) {
 			component.kind = "Ares.Proxy";
 			component.realKind = name;
+			component.content = name;
 			if (component.name) {
 				component.hadName=true;
 			}
@@ -294,7 +295,6 @@ enyo.kind({
 });
 enyo.kind({
     name: "Ares.Proxy",
-    content: "Proxy",
 	published: {
 		realKind: "",
 		hadName: false
@@ -305,7 +305,7 @@ enyo.kind({
 	//* @protected
 	// override this, and save imported properties
 	importProps: function(inProps) {
-		var ignoreProp = {container: true, owner: true};
+		var ignoreProp = {container: true, owner: true, published: true};
 		this.inherited(arguments);
 		if (inProps) {
 			for (var n in inProps) {
