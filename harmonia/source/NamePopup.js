@@ -13,6 +13,9 @@ enyo.kind({
 		onConfirm: "",
 		onCancel: ""
 	},
+	handlers: {
+		onShow: "shown"
+	},
 	modal: true,
 	centered: true,
 	floating: true,
@@ -20,12 +23,15 @@ enyo.kind({
 		{name: "title", tag: "h3", content: "Name for new object"},
 		{name: "path", tag: "p", content: "Path: "},
 		{kind: "onyx.InputDecorator", components: [
-			{name: "fileName", kind: "onyx.Input", onchange: "nameChanged", placeholder: ""}
+			{name: "fileName", kind: "onyx.Input", onkeyup: "nameChanged", placeholder: ""}
 		]},
 		{tag: "br"},
 		{tag: "br"},
-		{name:"cancelButton", kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "newCancel"},
-		{name:"confirmButton", kind: "onyx.Button", classes: "onyx-affirmative", content: "Create", ontap: "newConfirm"}
+		{kind: "FittableColumns", components: [
+			{name:"cancelButton", kind: "onyx.Button", content: "Cancel", ontap: "newCancel"},
+			{fit: true},
+			{name:"confirmButton", kind: "onyx.Button", content: "Create", ontap: "newConfirm"}
+		]}
 	],
 	create: function() {
 		this.inherited(arguments);
@@ -54,11 +60,18 @@ enyo.kind({
 	},
 	nameChanged: function(inSender, inEvent) {
 		this.setFileName(this.$.fileName.getValue());
+		if (inEvent.keyCode === 13 && this.fileName.length > 0) {
+			this.newConfirm();
+		}
 	},
 	fileNameChanged: function() {
 		this.$.fileName.setValue(this.fileName);
+		this.$.confirmButton.setDisabled(this.fileName.length == 0)
 	},
 	placeHolderChanged: function(inSender, inEvent) {
 		this.$.fileName.setPlaceholder(this.placeHolder);
+	},
+	shown: function(inSender, inEvent) {
+		this.$.fileName.focus();
 	}
 });	
