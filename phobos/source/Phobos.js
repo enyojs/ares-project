@@ -109,6 +109,12 @@ enyo.kind({
 			// Pass to the autocomplete compononent a reference to ace
 			this.$.autocomplete.setAce(this.$.ace);
 			this.focusEditor();
+			this.$.ace.highlightActiveLine = localStorage.highlight;
+			if(this.$.ace.highlightActiveLine ===  undefined){
+				this.$.ace.highlightActiveLine = false;
+			}
+			//this.$.ace.highlightActiveLine = false;
+			this.$.ace.highlightActiveLineChanged();
 		}
 		else {
 			var origin = this.projectData.getService().getConfig().origin;
