@@ -178,7 +178,7 @@ enyo.kind({
 
 			status[inEvent.originator.getContent().toLowerCase()] = true ;
 
-			for (drawer in status) {
+			for (var drawer in status) {
 				this.$[drawer + 'Drawer'].setOpen(status[drawer]) ;
 			}
 		}
@@ -228,7 +228,7 @@ enyo.kind({
 		}
 
 		if (! conf.preview ) {conf.preview = {} ;}
-		this.$.ppTopFile.setValue( conf.preview['top_file'] || confDefault.preview['top-file'] ) ;
+		this.$.ppTopFile.setValue(conf.preview.top_file);
 
 		return this ;
 	},
@@ -254,13 +254,13 @@ enyo.kind({
 		pgConf.icon.src = this.$.pgIconUrl.getValue();
 
 		tglist = ['android','ios','winphone','blackberry','webos'] ;
-		for ( i in tglist) {
+		for (var i in tglist) {
 			this.log('copy data from ' + tglist[i] +'Target') ;
 			pgConf.targets[tglist[i]] = this.$[ tglist[i] + 'Target' ].getValue() ;
 		}
 
 		ppConf = this.config.preview ;
-		ppConf['top_file'] = this.$.ppTopFile.getValue();
+		ppConf.top_file = this.$.ppTopFile.getValue();
 
 		// to be handled by a ProjectWizard
 		this.doModifiedConfig({data: this.config}) ;
