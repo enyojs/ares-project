@@ -35,7 +35,9 @@ enyo.kind({
 		return this.config;
 	},
 	/**
-	 * Authorize & thne retrieve information about the currently registered user
+	 * Authorize & then retrieve information about the currently registered user
+	 *
+	 * This includes registered applications & signing keys.
 	 * @public
 	 */
 	authorize: function(next) {
@@ -107,6 +109,7 @@ enyo.kind({
 		});
 		req.response(this, function(inSender, inData) {
 			if (this.debug) this.log("inData: ", inData);
+			this._storeUserData(inData.user);
 			next(null, inData);
 		});
 		req.error(this, function(inSender, inError) {
@@ -124,6 +127,92 @@ enyo.kind({
 			next(new Error("Unable to get PhoneGap user data (" + inError + ")"), details);
 		});
 		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
+	},
+	/**
+	 * Store relevant user account data
+	 * @param {Object} user the PhoneGap account user data
+	 * @return {undefined}
+	 * @private
+	 */
+	_storeUserData: function(user) {
+		this.keys = {};
+		enyo.forEach(enyo.keys(user.keys), function(target) {
+			// reset known keys
+			this.keys[target] = {};
+
+			// reuse known key passwords
+			this.config.auth.keys = this.config.auth.keys || {};
+			this.config.auth.keys[target] = this.config.auth.keys[target] || {};
+
+			var targetKeys = user.keys[target].all;
+			if (target !== 'link') {
+				this.keys[target] = {};
+				enyo.forEach(targetKeys, function(targetKey) {
+					 var key = {
+						id: targetKey.id,
+						name: targetKey.title
+					};
+					enyo.mixin(key, this.config.auth.keys[target][key.id]);
+					this.keys[target][key.id] = key;
+				}, this);
+			}
+		}, this);
+		// XXX do not log 'auth'
+		if (this.debug) this.log("keys:", this.keys);
+
+		// auto-clean: remove key passwords for unknown target platforms
+		enyo.forEach(enyo.keys(this.config.auth.keys), function(target) {
+			if (typeof this.keys[target] !== 'object') {
+				delete this.config.auth.keys[target];
+			}
+		}, this);
+		// XXX do not log 'auth'
+		if (this.debug) this.log("auth keys:", this.config.auth.keys);
+	},
+	/**
+	 * Get the key for the given target & id, or the list of keys for the given target
+	 *
+	 * @param {String} target the build target, one of ['ios', 'android', ...etc] as defined by PhoneGap
+	 * @param {String} id the signing key id, as defined by PhoneGap
+	 *
+	 * @return If the key id is not provided, this method returns
+	 * a list {Object} of keys available for the given platform
+	 * (that may be an empty {Object}).  If the given key id does
+	 * not represent an existing key, this method returns
+	 * undefined.
+	 *
+	 * @public
+	 */
+	getKey: function(target, id) {
+		if (id) {
+			return this.keys && this.keys[target] && this.keys[target][id];
+		} else {
+			return this.keys && this.keys[target];
+		}
+	},
+	/**
+	 * Set the given signing key authentication credential
+	 *
+	 * Nothing happens if the given key id does not exist for the given platform
+	 * @param {String} target the PhoneGap build target
+	 * @param {String} id the PhoneGap key ID
+	 * @param {Object} auth the signing key credential object (here: an {Object} with a single 'password' {String} property)
+	 * @return {undefined}
+	 */
+	setKey: function(target, id, auth) {
+		var key;
+		if (typeof this.keys[target][id] === 'object') {
+			enyo.mixin(this.keys[target][id], auth);
+
+			// Two first levels of the hierarchy are built by #_storeUserData()
+			this.config.auth.keys[target][id] = this.config.auth.keys[target][id] || {};
+			this.config.auth.keys[target][id].auth = auth;
+			// Save the auth part in localStorage
+			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
+		} else {
+			this.warning("no such key id:", id, "for target:", target);
+		}
+		return this;
 	},
 	/**
 	 * initiates the phonegap build of the given project
@@ -254,7 +343,9 @@ enyo.kind({
 	 * @param {Function} next is a CommonJS callback
 	 */
 	submitBuildRequest: function(project, formData, next) {
-		var config = project.config.getData();
+		var config = ares.clone(project.config.getData());
+		var keys = {};
+		var platforms = [];
 		if (this.debug) this.log("...");
 		// Add token information in the FormData
 		formData.append('token', this.config.auth.token);
@@ -262,6 +353,29 @@ enyo.kind({
 		if (config.build.phonegap.appId) {
 			if (this.debug) this.log("appId: " + config.build.phonegap.appId);
 			formData.append('appId', config.build.phonegap.appId);
+		}
+		enyo.forEach(enyo.keys(config.build.phonegap.targets), function(target) {
+			var pgTarget = config.build.phonegap.targets[target];
+			if (pgTarget) {
+				if (this.debug) this.log("platform:", target);
+				platforms.push(target);
+				if (typeof pgTarget === 'object') {
+					var keyId = pgTarget.key;
+					if (keyId) {
+						keys[target] = this.getKey(target, keyId);
+						if (this.debug) this.log("platform:", target, "keys:", keys);
+					}
+				}
+			}
+		}, this);
+		if (enyo.keys(keys).length > 0) {
+			formData.append('keys', JSON.stringify(keys));
+		}
+		if (platforms.length > 0) {
+			formData.append('platforms', JSON.stringify(platforms));
+		} else {
+			next(new Error('No build platform selected'));
+			return;
 		}
 
 		// un-comment to NOT submit the ZIP to
