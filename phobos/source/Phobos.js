@@ -32,7 +32,7 @@ enyo.kind({
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
-		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor"}
+		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor"},
 		{name: "editorSettingsPopup", kind: "EditorSettings", centered: true, modal: true, floating: true, onChangeTheme: "changeTheme", onChangeHighLight: "changeHighLight",
 		onClose: "closeEditorPop", onWordWrap: "changeWordWrap", onFontsizeChange: "changeFont"}
 	],
