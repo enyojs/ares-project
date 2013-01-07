@@ -5,13 +5,10 @@ enyo.kind(
 
 		tag: 'iframe',
 		attributes: {
-			scrolling: 'no',
-			src: "http://www.hp.org" ,
-			width: '1400px',
-			height: '1600px'
+			scrolling: 'no'
 		},
 
-		//style: "border: none;",
+		// FIXME: remove the red border line used for debug
 		style: "border: solid 1px red; position: absolute; overflow: hidden;",
 
 		published: {
