@@ -11,7 +11,7 @@ enyo.kind({
 		onClose: ""
 	},
 	handlers: {
-        onSelect: "itemSelected"
+       // onSelect: "itemSelected"
     },
 	components: [
 		{classes: "ares_editorfont", content: "Editor Settings"},
@@ -23,9 +23,9 @@ enyo.kind({
 		]},
 		{tag: "br"},
 		{ kind: "FittableColumns", classes:"ares_editorfont",components: [
-		//	{classes: "ares_editorfont", content: "Word Wrap"},
-		//	{style: "width: 65px;", content: " "},
-		//	{name: "wordWrapButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "wordWrapToggle"},
+			{classes: "ares_editorfont", content: "Word Wrap"},
+			{style: "width: 65px;", content: " "},
+			{name: "wordWrapButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "wordWrapToggle"},
 		
 		]},
 		
@@ -33,12 +33,12 @@ enyo.kind({
 		{tag: "br"},
 		
 		{ kind: "FittableColumns", classes:"ares_editorfont",components: [
-		//	{classes: "ares_editorfont", content: "Font Size"},
-		//	{style: "width: 90px;", content: " "},
-		//	{kind: "onyx.PickerDecorator", components: [
-			//	{style: "min-width: 30px; font-size: 13px;"},
-			//	{name: "fontSizePicker", kind: "onyx.Picker",onSelect: "fontSize"}
-		//	]}
+			{classes: "ares_editorfont", content: "Font Size"},
+			{style: "width: 90px;", content: " "},
+			{kind: "onyx.PickerDecorator", components: [
+				{style: "min-width: 30px; font-size: 13px;"},
+				{name: "fontSizePicker", kind: "onyx.Picker",onSelect: "fontSize"}
+			]}
 		]},
 		
 		{fit: true, content: " "},
@@ -51,7 +51,7 @@ enyo.kind({
 	
 			components: [
 				{style: "min-width: 150px;"},
-					{name: "themes", kind: "onyx.Picker", components: [
+					{name: "themes", kind: "onyx.Picker", onSelect: "themeSelected", components: [
 					{content: "ambiance", active: true},
 					{content: "chaos"},
 					{content: "chrome "},
@@ -93,24 +93,38 @@ enyo.kind({
 		this.inherited(arguments);
 		
 		this.theme = localStorage.theme;
-		this.highlight = localStorage.highlight;
-		this.wordWrap = localStorage.wordwrap;
+		if(this.theme === undefined){
+			this.theme = "clouds";
+		}
 		this.fSize = localStorage.fontsize;
 		
-		
+		this.highlight = localStorage.highlight;
+		if(this.highlight.indexOf("false") != -1){
+			this.highlight = false;
+		}
 		this.$.highLightButton.value = this.highlight;
-	//	this.$.wordWrapButton.value = this.wordWrap;
+		
+		this.wordWrap = localStorage.wordwrap;
+		if(this.wordWrap.indexOf("false") != -1){
+			this.wordWrap = false;
+		}
+		this.$.wordWrapButton.value = this.wordWrap;
+		
+				
+		
+		
+		
 		
 		// initialization code goes here
 		// lock thems Button's width, so it doesn't move when the caption changes		
 		this.$.themes.setBounds({width: 100 });
 	
 		for (var i=1; i<50; i++) {
-		//	this.$.fontSizePicker.createComponent({content: i, active: !i});			
+			this.$.fontSizePicker.createComponent({content: i, active: !i});			
 		}
 	},
 
-	itemSelected: function(inSender, inEvent) {
+	themeSelected: function(inSender, inEvent) {
         this.theme = inEvent.originator.content;        
         this.doChangeTheme();
     },
