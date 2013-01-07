@@ -68,6 +68,16 @@ enyo.kind({
 						username: service.config.auth.username,
 						password: service.config.auth.password
 					});
+				} else if (service.config.auth.type === 'phonegap') {
+					if (this.debug) this.log("creating 'phonegap' auth form");
+					this.$.authPanel.createComponent({
+						kind: "PhonegapAuthConfig",
+						name: serviceAuthName,
+						serviceId: service.config.id,
+						serviceName: service.config.name,
+						username: service.config.auth.username,
+						password: service.config.auth.password
+					});
 				} else if (service.config.auth.type === 'dropbox') {
 					if (this.debug) this.log("creating 'dropbox' auth form");
 					this.$.authPanel.createComponent({
@@ -96,13 +106,6 @@ enyo.kind({
 			this.warn("provider (" + inSender.selected + ") selected by sender (" + inSender + ") without giving a suitable service", service);
 		}
 		return true; //Stop event propagation
-	},
-	/**
-	 * @private
-	 */
-	handleUpdateAuth: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
-		ServiceRegistry.instance.setConfig(inEvent.serviceId, {auth: inEvent.auth});
 	},
 	/**
 	 * @public

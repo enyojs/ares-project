@@ -3,5 +3,6 @@ enyo.depends(
 	"Groupbox.js",
 	"ActionPopup.js",
 	"ErrorPopup.js",
-	"AsyncError.js"
+	"AsyncError.js",
+	"LocalStorage.js"
 );

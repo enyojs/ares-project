@@ -7,5 +7,7 @@ enyo.depends(
 	"DeletePopup.js",
 	"RenamePopup.js",
 	"AccountsConfigurator.js",
-	"BasicAuthConfig.js"
+	"BasicAuthConfig.js",
+	"PhonegapAuthConfig.js",
+	"PhonegapUserdata.js"
 );
