@@ -142,10 +142,21 @@ enyo.kind({
 		if ( this.currentProject) {
 			var config = this.currentProject.getConfig() ;
 			var topFile = config.data.preview.top_file ;
+			var projectUrl = this.currentProject.getProjectUrl() + '/' + topFile ;
+
+			var winLoc = window.location.toString().replace('index','preview') ;
+			var previewUrl = winLoc
+				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
+				+ 'url=' + encodeURIComponent(projectUrl)
+				+ '&height=' + inEvent.height
+				+ '&width='  + inEvent.width ;
+
+			this.log("preview on URL " + previewUrl) ;
+
 			window.open(
-				this.currentProject.getProjectUrl() + '/' + topFile ,
+				previewUrl,
 				null, // ensure that a new window is created each time preview is tapped
-				'scrollbars=auto, titlebar=yes, height=' + inEvent.height + ',width=' + inEvent.width,
+				'scrollbars=auto, titlebar=yes',
 				false
 			);
 		}
