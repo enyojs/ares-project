@@ -93,9 +93,9 @@ enyo.kind({
 		var req;
 		if (this.debug) this.log("data=", this.data);
 		if (this.fileId) {
-			req = this.service.putFile(this.fileId, JSON.stringify(this.data));
+			req = this.service.putFile(this.fileId, JSON.stringify(this.data, null, 2));
 		} else {
-			req = this.service.createFile(this.folderId, "project.json", JSON.stringify(this.data));
+			req = this.service.createFile(this.folderId, "project.json", JSON.stringify(this.data, null, 2));
 		}
 		req.response(this, function(inSender, inResponse) {
 			if (this.debug) enyo.log("ProjectConfig.save: inResponse=", inResponse);
