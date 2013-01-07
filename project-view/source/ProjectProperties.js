@@ -22,7 +22,7 @@ enyo.kind({
 	components: [
 		{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", components: [
 			{content: "Project", active: true, attributes: {title: 'project attributes...'}},
-			{content: "PhoneGap", attributes: {title: 'phonegap build parameters...'}},
+			{content: "PhoneGap", name: "phonegapTab", attributes: {title: 'phonegap build parameters...'}, showing: false},
 			{content: "Preview", attributes: {title: 'project preview parameters...'}}
 		]},
 		{name: "projectDrawer", kind: "onyx.Drawer", open:true, components: [
@@ -78,49 +78,17 @@ enyo.kind({
 					 {tag: "td", content: "Directory: "},
 					 {tag: 'td', attributes: {colspan: 3}, content: "", name: "projectDirectory" }
 				]}
+			]},
+			{kind: "enyo.FittableColumns", components: [
+				{components: [
+					{tag: "span", content: "PhoneGap Build:"},
+					{name: "phonegapCheckBox", kind: "onyx.Checkbox", onchange: "togglePhoneGap"}
+				]}
 			]}
 		]},
 
 		{name: "phonegapDrawer", kind: "onyx.Drawer", open: false, components: [
-			{
-				kind: "onyx.ToggleButton",
-				name: 'pgConfEnabled',
-				onContent: "enabled",
-				offContent: "disabled",
-				style: "margin-top: 10px;"
-			},
-			{tag: 'table', components: [
-				{tag: "tr" , components: [
-					 {tag: "td" , content: "AppId: "},
-					 {tag: 'td', attributes: {colspan: 1}, components:[
-						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", name: "pgConfId", placeholder: "com.example.myapp",
-								attributes: {title: "unique identifier, assigned by build.phonegap.com"}
-							   }
-						   ]}
-					 ]},
-					 {tag: "td" , content: "Icon URL: "},
-					 {tag: 'td', attributes: {colspan: 2}, components:[
-						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", name: "pgIconUrl",
-								attributes: {title: "Relative location of the application icon. Defaults to Enyo icon."}
-							   }
-						   ]}
-					 ]}
-				]}
-			]},
-			{content: "Targets:"},
-			{
-				kind: "FittableRows", attributes: {'class': 'ares_projectView_switches'},
-				onChange: "enablePhoneGap",
-				components: [
-					{kind: "onyx.ToggleButton", name: 'androidTarget', onContent: "Android", offContent: "Android"},
-					{kind: "onyx.ToggleButton", name: 'iosTarget', onContent: "Ios", offContent: "Ios"},
-					{kind: "onyx.ToggleButton", name: 'winphoneTarget', onContent: "Winphone", offContent: "Winphone"},
-					{kind: "onyx.ToggleButton", name: 'blackberryTarget', onContent: "Blackberry", offContent: "Blackberry"},
-					{kind: "onyx.ToggleButton", name: 'webosTarget',onContent: "Webos", offContent: "Webos"}
-				]
-			}
+			{kind: "PhoneGap.ProjectProperties", name: "phonegap"}
 		]},
 
 		{name: "previewDrawer", kind: "onyx.Drawer", open: false, components: [
@@ -184,10 +152,11 @@ enyo.kind({
 		}
 	},
 
-	// switch Phonegap to "enabled" whenever user validates a target
-	enablePhoneGap: function(inSender, inEvent) {
-		if (inEvent.value === true ) {
-			this.$.pgConfEnabled.setValue(true) ;
+	togglePhoneGap: function(inSender, inEvent) {
+		if (inEvent.originator.checked === true ) {
+			this.$.phonegapTab.show();
+		} else {
+			this.$.phonegapTab.hide();
 		}
 	},
 
@@ -213,19 +182,9 @@ enyo.kind({
 		this.$.projectAuthor. setValue(conf.author.name || '') ;
 		this.$.projectContact.setValue(conf.author.href || '') ;
 
-		if (! conf.build) {conf.build = {} ;}
-		if (! conf.build.phonegap) { conf.build.phonegap = {}; }
-
-		pgConf = this.config.build.phonegap ;
-		this.$.pgConfEnabled.setValue(pgConf.enabled);
-		this.$.pgConfId.setValue(pgConf.appId || '' );
-		this.$.pgIconUrl.setValue(pgConf.icon.src || confDefault.icon.src );
-
-		if (! pgConf.targets) { pgConf.targets = {} ;}
-		// pgTarget is a key of object pgConf.targets
-		for (pgTarget in pgConf.targets ) {
-			this.$[ pgTarget + 'Target' ].setValue(pgConf.targets[pgTarget]) ;
-		}
+		this.$.phonegapCheckBox.setChecked(conf.build.phonegap.enabled);
+		enyo.setObject("conf.build.phonegap", {});
+		this.$.phonegap.setConfig(this.config.build.phonegap);
 
 		if (! conf.preview ) {conf.preview = {} ;}
 		this.$.ppTopFile.setValue(conf.preview.top_file);
@@ -246,18 +205,8 @@ enyo.kind({
 		this.config.author.name = this.$.projectAuthor.getValue();
 		this.config.author.href = this.$.projectContact.getValue();
 
-		this.config.build.enabled = this.$.pgConfEnabled.getValue();
-		this.config.build.appId   = this.$.pgConfId.getValue();
-
-
-		pgConf = this.config.build.phonegap ;
-		pgConf.icon.src = this.$.pgIconUrl.getValue();
-
-		tglist = ['android','ios','winphone','blackberry','webos'] ;
-		for (var i in tglist) {
-			this.log('copy data from ' + tglist[i] +'Target') ;
-			pgConf.targets[tglist[i]] = this.$[ tglist[i] + 'Target' ].getValue() ;
-		}
+		this.config.build.phonegap = this.$.phonegap.getConfig();
+		this.config.build.phonegap.enabled = this.$.phonegapCheckBox.checked;
 
 		ppConf = this.config.preview ;
 		ppConf.top_file = this.$.ppTopFile.getValue();
