@@ -72,8 +72,9 @@ FsDropbox.prototype.getUserInfo = function(req, res, next) {
 	this.log("FsDropbox.getUserInfo(): req.query:", req.query);
 	req.dropbox.url = 'https://api.dropbox.com/1/account/info';
 	request(req.dropbox, (function(err, response, body) {
-		this.log("FsDropbox.getUserInfo(): err:", err, ", statusCode:", response.statusCode, ", body:", body);
-		this.respond(res, err, {code: response.statusCode, body: body});
+		var statusCode = (response && response.statusCode) || 500;
+		this.log("FsDropbox.getUserInfo(): err:", err, ", statusCode:", statusCode, ", body:", body);
+		this.respond(res, err, {code: statusCode, body: body});
 	}).bind(this));
 };
 
@@ -131,10 +132,10 @@ FsDropbox.prototype._propfind = function(err, req, relPath, depth, next) {
 	}
 	this.log("_propfind(): req.dropbox=", req.dropbox);
 	request(req.dropbox, (function(err, response, dbBody) {
-		var arNode, dbNode;
-		this.log("_propfind(): err:", err, ", response:", response.statusCode, ", dbBody:", dbBody, "<<< Dropbox");
+		var arNode, dbNode, statusCode = (response && response.statusCode) || 500;
+		this.log("_propfind(): err:", err, ", response:", statusCode, ", dbBody:", dbBody, "<<< Dropbox");
 		try {
-			if (!err && response.statusCode == 200) {
+			if (!err && statusCode == 200) {
 				dbNode = JSON.parse(dbBody);
 				arNode = _wrapDbNode.bind(this)(dbNode, depth);
 			}
@@ -142,7 +143,7 @@ FsDropbox.prototype._propfind = function(err, req, relPath, depth, next) {
 			err = e;
 		}
 		this.log("_propfind(): arNode:", arNode);
-		next(err, {code: response.statusCode, body: arNode});
+		next(err, {code: statusCode, body: arNode});
 	}).bind(this));
 
 	function _wrapDbNode(dbNode, depth) {
