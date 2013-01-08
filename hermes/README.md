@@ -91,11 +91,11 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 So far, only hermes local filesystem access comes with a (small) test suite, that relies on [Mocha](http://visionmedia.github.com/mocha/) and [Should.js](https://github.com/visionmedia/should.js).  Run it using:
 
-	$ hermes/node_modules/mocha/bin/mocha hermes/fsLocal.spec.js
+	$ test/mocha/bin/mocha hermes/fsLocal.spec.js
 
 To stop on the first failing case:
 
-	$ hermes/node_modules/mocha/bin/mocha --bail hermes/fsLocal.spec.js
+	$ test/mocha/bin/mocha --bail hermes/fsLocal.spec.js
 
 For more detailled instructions, refer to the [Mocha home page](http://visionmedia.github.com/mocha/).
 
