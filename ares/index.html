@@ -13,11 +13,11 @@
 	</head>
 	<body class="enyo-unselectable Xonyx">
 		<script type="text/javascript">
-			if (Ares.isBrowserSupported()) {
-				new Ares().write();
-			} else {
-				alert($L("Browser not supported"));
+			if ( ! Ares.isBrowserSupported()) {
+				alert($L("Ares is designed for the latest version of IE. We recommend that you upgrade your browser or use Chrome"));
 			}
+
+			new Ares().write();
 		</script>
 	</body>
 </html>
