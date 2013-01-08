@@ -12,7 +12,7 @@ enyo.kind({
 		window.addEventListener("message", enyo.bind(this, this.recMsgFromTestReporter), false);
 
 		// Create the new window browser named Ares Test Suite
-		var url = "../test/index.html"
+		var url = "../test/testrunner/index.html"
 		aresTestW = window.open(url, 'Ares Test Suite','scrollbars=auto, titlebar=yes, height=640,width=640', false);
 
 		// Communication path between Ares Test and Ares Ide through postMessage window method
