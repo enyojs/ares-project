@@ -438,12 +438,9 @@ enyo.kind({
 		if (object.block) {
 			if (codeToInsert !== "") {
 				codeToInsert += "\n";
-				var pos = object.block.end - 1;
-				var c = this.$.ace.getValue();
-				var pre = c.substring(0, pos);
-				var post = c.substring(pos);
-				var code = pre + codeToInsert + post;
-				this.$.ace.setValue(code);
+				var range = this.$.ace.mapToLineColumnRange(object.block.end - 1);
+				this.log((object.block.end - 1) + " ==> range: ", range);
+				this.$.ace.replaceRange(range, codeToInsert);
 			}
 		} else {
 			// There is no block information for that kind - Parser is probably not up-to-date
@@ -457,6 +454,8 @@ enyo.kind({
 				// Insert the new version of components
 				var start = this.analysis.objects[i].componentsBlockStart;
 				var end = this.analysis.objects[i].componentsBlockEnd;
+				// Get the corresponding Ace range to replace the component definition
+				// NB: ace.replace() allow to use the undo/redo stack.
 				var range = this.$.ace.mapToLineColumnRange(start, end);
 				this.$.ace.replaceRange(range, inEvent.contents[i]);
 			}
