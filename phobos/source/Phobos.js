@@ -438,8 +438,10 @@ enyo.kind({
 		if (object.block) {
 			if (codeToInsert !== "") {
 				codeToInsert += "\n";
-				var range = this.$.ace.mapToLineColumnRange(object.block.end - 1);
-				this.log((object.block.end - 1) + " ==> range: ", range);
+				// Get the corresponding Ace range to replace/insert the missing code
+				// NB: ace.replace() allow to use the undo/redo stack.
+				var pos = object.block.end - 1;
+				var range = this.$.ace.mapToLineColumnRange(pos, pos);
 				this.$.ace.replaceRange(range, codeToInsert);
 			}
 		} else {
