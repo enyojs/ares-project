@@ -14,11 +14,11 @@ enyo.kind({
 		]},
 		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
 			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
-			{name: "bottomBar", kind: "DocumentToolbar", 
-				onToggleOpen: "toggleFiles", 
-				onSwitchFile: "switchFile", 
-				onSave: "bounceSave", 
-				onDesign: "bounceDesign", 
+			{name: "bottomBar", kind: "DocumentToolbar",
+				onToggleOpen: "toggleFiles",
+				onSwitchFile: "switchFile",
+				onSave: "bounceSave",
+				onDesign: "bounceDesign",
 				onNewKind: "bounceNew",
 				onClose: "bounceClose"
 			}
