@@ -2,6 +2,7 @@ enyo.kind({
 	name: "PhonegapBuild",
 	kind: "enyo.Component",
 	events: {
+		onLoginFailed: "",
 		onBuildStarted: ""
 	},
 	debug: false,
@@ -22,11 +23,27 @@ enyo.kind({
 	 * @see ServiceRegistry.js
 	 */
 	setConfig: function(inConfig) {
-		if (this.debug) this.log("inConfig:", inConfig);
-		ares.extend(this.config, inConfig);
+		var self = this;
+
+		if (this.debug) this.log("config:", this.config, "+", inConfig);
+		this.config = ares.extend(this.config, inConfig);
+		if (this.debug) this.log("config:", this.config);
+
 		if (this.config.origin && this.config.pathname) {
 			this.url = this.config.origin + this.config.pathname;
 			if (this.debug) this.log("url:", this.url);
+		}
+
+		// chain authorization if & only if authentication
+		// credentials are provided as part of the service
+		// configuration.
+		if (this.config.auth && enyo.keys(this.config.auth)) {
+			this.authorize(function(inError, inValue) {
+				self.log("setConfig(): error:", inError, ", value:", inValue);
+				if (inError) {
+					self.doLoginFailed({id: inConfig.id});
+				}
+			});
 		}
 	},
 	/**
@@ -67,6 +84,7 @@ enyo.kind({
 		if (this.debug) this.log();
 		if(this.config.auth && this.config.auth.token) {
 			next();
+			return;
 		}
 
 		// Pass credential information to get a phonegapbuild token
@@ -94,6 +112,7 @@ enyo.kind({
 					details = response.body;
 				}
 			}
+			if (this.debug) this.error("Unable to get PhoneGap application token (" + inError + ")", "response:", response);
 			next(new Error("Unable to get PhoneGap application token (" + inError + ")"), details);
 		});
 		req.go();
@@ -158,6 +177,7 @@ enyo.kind({
 				}, this);
 			}
 		}, this);
+
 		// XXX do not log 'auth'
 		if (this.debug) this.log("keys:", this.keys);
 
@@ -167,6 +187,7 @@ enyo.kind({
 				delete this.config.auth.keys[target];
 			}
 		}, this);
+
 		// XXX do not log 'auth'
 		if (this.debug) this.log("auth keys:", this.config.auth.keys);
 	},
