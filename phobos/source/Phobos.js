@@ -429,8 +429,8 @@ enyo.kind({
 			if (existing[item] === undefined) {
 				codeToInsert += (commaTerminated ? "" : ",\n");
 				commaTerminated = false;
-				codeToInsert += ("    " + item + ": function(inSender, inEvent) {\n        // TO"
-						+ "DO - Auto-generated code\n    }");
+				codeToInsert += ("    " + item + ": function(inSender, inEvent) {\n        // TO");
+				codeToInsert += ("DO - Auto-generated code\n    }");
 			}
 		}
 
@@ -455,13 +455,10 @@ enyo.kind({
 		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
 			if (inEvent.contents[i]) {
 				// Insert the new version of components
-				var c = this.$.ace.getValue();
 				var start = this.analysis.objects[i].componentsBlockStart;
 				var end = this.analysis.objects[i].componentsBlockEnd;
-				var pre = c.substring(0, start);
-				var post = c.substring(end);
-				var code = pre + inEvent.contents[i] + post;
-				this.$.ace.setValue(code);
+				var range = this.$.ace.mapToLineColumnRange(start, end);
+				this.$.ace.replaceRange(range, inEvent.contents[i]);
 			}
 		}
 		/*
