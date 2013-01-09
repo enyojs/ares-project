@@ -5,7 +5,8 @@ enyo.kind({
 		onFindNext:"",
 		onFindPrevious:"",
 		//onReplace:"",
-		onReplaceAll:""
+		onReplaceAll:"",
+		onClose: ""
 	},
 	published: {
 		findValue:"",
@@ -32,6 +33,7 @@ enyo.kind({
 			{tag: "br"},
 			{kind: "FittableColumns", components: [
 				//{name: "replaceOne", kind: "onyx.Button", content: "Replace", ontap: "doReplace"},
+				{name: "close", kind: "onyx.Button", content: "Close", ontap: "doClose"},
 				{name: "replaceAll", kind: "onyx.Button", content: "Replace All", ontap: "doReplaceAll"},
 				{style: "width: 20px"},
 				{name: "findprevious", kind: "onyx.Button", content: "Previous", ontap: "doFindPrevious"},

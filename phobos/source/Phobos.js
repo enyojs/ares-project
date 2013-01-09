@@ -31,7 +31,7 @@ enyo.kind({
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
-		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor"}
+		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "closePopup"}
 	],
 	events: {
 		onSaveDocument: "",
@@ -577,7 +577,11 @@ enyo.kind({
 	},
 	handleScroll: function(inSender, inEvent) {
 		this.$.autocomplete.hide();
-	}
+	},
+		closePopup: function() {
+		console.log("closed");
+		this.$.findpop.hide();
+	},
 });
 
 enyo.kind({
