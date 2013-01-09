@@ -6,7 +6,9 @@ enyo.kind({
 		onLoginFailed: ""
 	},
 	create: function() {
+		if (this.debug) this.log();
 		this.inherited(arguments);
+		this.config = {};
 		this.auth = undefined;
 	},
 	isOk: function() {

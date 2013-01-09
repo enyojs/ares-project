@@ -9,6 +9,7 @@ enyo.kind({
 	 * @private
 	 */
 	create: function() {
+		if (this.debug) this.log();
 		this.inherited(arguments);
 		this.config = {};
 	},
