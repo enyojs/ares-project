@@ -92,8 +92,7 @@ enyo.kind(
 			this.inherited(arguments);
 
 			var param = this.getQueryParams(window.location.search) ;
-			this.log("preview url " + param.url
-					 + " w " + param.width + " h " + param.height) ;
+			this.log("preview url " + param.url) ;
 
 			this.$.iframe.setUrl   (param.url) ;
 		}
