@@ -98,7 +98,7 @@ enyo.kind({
 	 * data in the browser localStorage (for example the 'auth'
 	 * property).  The completion vallbaclk is invoked once every
 	 * configured services are completed.
-	 *
+	 * 
 	 * @param {Function} next a CommonJS callback
 	 * @private
 	 */
@@ -108,15 +108,15 @@ enyo.kind({
 			return function(cb) {
 				var key = [self.SERVICES_STORAGE_KEY, service.config.id].join('.');
 				if (self.debug) self.log("localStorage[" + key + "]...");
-			Ares.LocalStorage.get(key, function(str) {
+				Ares.LocalStorage.get(key, function(str) {
 					if (self.debug) self.log("localStorage[" + key + "] = ", str);
-				var obj;
-				try {
-					obj = JSON.parse(str);
-				} catch(e) {
-					obj = {};
-				}
-				ares.extend(service.config, obj);
+					var obj;
+					try {
+						obj = JSON.parse(str);
+					} catch(e) {
+						obj = {};
+					}
+					ares.extend(service.config, obj);
 					self.instanciate(service, cb);
 				});
 			};
@@ -237,8 +237,8 @@ enyo.kind({
 		var services = [];
 		//if (this.debug) this.log("matches:", matches);
 		enyo.forEach(matches, function(match){
-			if (match.impl) {
-			services.push(match.impl);
+			if (match.impl) { 
+				services.push(match.impl);
 			}
 		}, this);
 		if (this.debug) this.log("criteria:", criteria , " => services:", services);
