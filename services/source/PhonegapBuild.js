@@ -27,23 +27,11 @@ enyo.kind({
 
 		if (this.debug) this.log("config:", this.config, "+", inConfig);
 		this.config = ares.extend(this.config, inConfig);
-		if (this.debug) this.log("config:", this.config);
+		if (this.debug) this.log("=> config:", this.config);
 
 		if (this.config.origin && this.config.pathname) {
 			this.url = this.config.origin + this.config.pathname;
 			if (this.debug) this.log("url:", this.url);
-		}
-
-		// chain authorization if & only if authentication
-		// credentials are provided as part of the service
-		// configuration.
-		if (this.config.auth && enyo.keys(this.config.auth)) {
-			this.authorize(function(inError, inValue) {
-				self.log("setConfig(): error:", inError, ", value:", inValue);
-				if (inError) {
-					self.doLoginFailed({id: inConfig.id});
-				}
-			});
 		}
 	},
 	/**
@@ -65,9 +53,10 @@ enyo.kind({
 			if (err) {
 				self._getToken(function(err) {
 					if (err) {
+						self.doLoginFailed({id: self.config.id});
 						next(err);
 					} else {
-						self. _getUserData(next);
+						self._getUserData(next);
 					}
 				});
 			} else {
@@ -105,6 +94,8 @@ enyo.kind({
 			next();
 		});
 		req.error(this, function(inSender, inError) {
+			// invalidate token
+			this.config.auth.token = null;
 			var response = inSender.xhrResponse, contentType, details;
 			if (response) {
 				contentType = response.headers['content-type'];
@@ -252,8 +243,20 @@ enyo.kind({
 	 * @param {Function} next is a CommonJS callback
 	 */
 	build: function(project, next) {
+		this.authorize(enyo.bind(this, this._getProjectData, project, next));
+	},
+	/**
+	 * Collect & check information about current project
+	 * @private
+	 */
+	_getProjectData: function(project, next, err) {
+		if (err) {
+			next(err);
+			return;
+		}
 		if (!next || !project || !project.name || !project.config || !project.filesystem) {
-			throw new Error("Invalid parameters");
+			next(new Error("Invalid parameters"));
+			return;
 		}
 		var config = project.config.getData();
 		if (this.debug) this.log("starting... project:", project);

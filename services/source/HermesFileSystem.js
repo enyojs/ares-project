@@ -18,19 +18,7 @@ enyo.kind({
 
 		if (this.debug) this.log("config:", this.config, "+", inConfig);
 		this.config = ares.extend(this.config, inConfig);
-		if (this.debug) this.log("config:", this.config);
-
-		// chain authorization if & only if authentication
-		// credentials are provided as part of the service
-		// configuration.
-		if (this.config.auth && enyo.keys(this.config.auth)) {
-			this.authorize(this.config, function(inError, inValue) {
-				self.log("setConfig(): error:", inError, ", value:", inValue);
-				if (inError) {
-					self.doLoginFailed({id: inConfig.id});
-				}
-			});
-		}
+		if (this.debug) this.log("=> config:", this.config);
 	},
 	getConfig: function() {
 		return this.config;
@@ -127,6 +115,7 @@ enyo.kind({
 		}
 		function _authFailure(inXhr, inError) {
 			if (this.debug) this.log("authFailure(): inError:", inError, ", body:", (inXhr.xhrResponse ? inXhr.xhrResponse.body : undefined));
+			self.doLoginFailed({id: this.config.id});
 			next(new Error(inError));
 		}
 	},
