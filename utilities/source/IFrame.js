@@ -5,11 +5,14 @@ enyo.kind(
 
 		tag: 'iframe',
 		attributes: {
-			scrolling: 'no'
+			scrolling: 'no',
+			width: '600px', // must match the default value provided in Preview
+			height: '800px'
 		},
 
-		// FIXME: remove the red border line used for debug
-		style: "border: solid 1px red; position: absolute; overflow: hidden;",
+		classes: "enyo-border-box ares-preview-bezel",
+
+		//style: " overflow: hidden;",
 
 		published: {
 			url: null
@@ -21,6 +24,35 @@ enyo.kind(
 		},
 		urlChanged: function() {
 			if(this.url) this.setAttribute('src', this.url);
+		},
+		setGeometry: function(width, height) {
+			this.setAttribute( 'width',  width) ;
+			this.setAttribute( 'height', height) ;
 		}
+	}
+);
+
+enyo.kind(
+	{
+		name: "ares.ScrolledIFrame",
+		kind: "Scroller",
+
+		classes: "enyo-border-box",
+
+		components: [
+			{
+				kind: "ares.IFrame",
+				name: 'iframe'
+			}
+		],
+
+		setUrl: function(url) {
+			this.$.iframe.setUrl(url);
+		},
+		setGeometry: function(width, height) {
+			this.$.iframe.setGeometry( width, height) ;
+			this.resized() ;
+		}
+
 	}
 );

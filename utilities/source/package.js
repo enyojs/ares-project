@@ -1,7 +1,8 @@
 enyo.depends(
-	"lang.js", 
+	"lang.js",
 	"Groupbox.js",
 	"ActionPopup.js",
 	"ErrorPopup.js",
-	"AsyncError.js"
+	"AsyncError.js",
+	"IFrame.js"
 );
