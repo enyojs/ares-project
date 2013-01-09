@@ -76,15 +76,8 @@ enyo.kind({
 								this.services.push({
 									config: config
 								});
-								next();
 							}, this);
-							this.complete(function(err) {
-								if (err) {
-									self._handleReloadError(err);
-									return;
-								}
-								self.notifyServicesChange();
-							});
+							this.complete(next);
 						}
 					} else {
 						next(new Error("Empty response from Ares IDE Server"));
@@ -103,18 +96,20 @@ enyo.kind({
 	 *
 	 * Complement services loaded from the server with per-service
 	 * data in the browser localStorage (for example the 'auth'
-	 * property).
+	 * property).  The completion vallbaclk is invoked once every
+	 * configured services are completed.
+	 *
 	 * @param {Function} next a CommonJS callback
 	 * @private
 	 */
 	complete: function(next) {
-		var count = 0;
-		enyo.forEach(this.services, function(service){
-			var key = [this.SERVICES_STORAGE_KEY, service.config.id].join('.');
-			if (this.debug) this.log("localStorage[" + key + "]...");
-			++count;
+		var self = this,
+		    tasks = enyo.map(this.services, function(service){
+			return function(cb) {
+				var key = [self.SERVICES_STORAGE_KEY, service.config.id].join('.');
+				if (self.debug) self.log("localStorage[" + key + "]...");
 			Ares.LocalStorage.get(key, function(str) {
-				if (this.debug) this.log("localStorage[" + key + "] = ", str);
+					if (self.debug) self.log("localStorage[" + key + "] = ", str);
 				var obj;
 				try {
 					obj = JSON.parse(str);
@@ -122,42 +117,41 @@ enyo.kind({
 					obj = {};
 				}
 				ares.extend(service.config, obj);
-				this.instanciate(service, function(err) {
-					if (err) {
-						next(err);
-						return;
-					}
-					if (!--count) next();
+					self.instanciate(service, cb);
 				});
-			}, this);
-		}, this);
+			};
+		});
+		async.parallel(tasks, next);
 	},
 	instanciate: function(service, next) {
+		if (this.debug) this.log("id:", service.config.id, "config:", service.config);
 		try {
 			if (service.config.type === "filesystem" && service.config.provider === "hermes") {
 				// hermes type of services use
 				// a common front-end
 				service.impl = new HermesFileSystem();
 				service.impl.notifyFailure = enyo.bind(this, this.serviceFailure, service.config.type, service.config.id);
-				service.impl.setConfig(service.config);
 			} else if (service.config.type === "build" && service.config.provider === "hermes" && service.config.id === "phonegap") {
 				service.impl = new PhonegapBuild();
-				service.impl.setConfig(service.config);
 			}
+			if (this.debug) this.log("id:", service.config.id, "created");
 			// If the service does not define an
 			// 'authorize()' entry point (which optionally
 			// returns user acccount information), stub it
 			// using a Common-JS pass-through.
 			if (service.impl && !service.impl.authorize) {
 				if (this.debug) this.log("Adding " + service.config.id + "#authorize() stub");
-				service.impl.authorize = enyo.bind(service.impl, (function(next) {
+				service.impl.authorize = enyo.bind(service.impl, function(next) {
 					console.log('authorize(): stubbed');
 					if (this.debug) this.log('authorize(): stubbed');
 					next(null, {});
-				}));
+				});
 			}
+			service.impl.setConfig(service.config);
+			if (this.debug) this.log("id:", service.config.id, "configured");
 			next();
 		} catch(err) {
+			this.error(err);
 			next(err);
 		}
 	},
@@ -243,7 +237,9 @@ enyo.kind({
 		var services = [];
 		//if (this.debug) this.log("matches:", matches);
 		enyo.forEach(matches, function(match){
+			if (match.impl) {
 			services.push(match.impl);
+			}
 		}, this);
 		if (this.debug) this.log("criteria:", criteria , " => services:", services);
 		return services;
