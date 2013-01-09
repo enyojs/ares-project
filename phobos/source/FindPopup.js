@@ -18,7 +18,7 @@ enyo.kind({
 	components: [
 		{kind: "FittableRows", classes:"ares_phobos_findpop", components: [
 			{kind: "FittableColumns", components: [
-				{fit: true, content: "Find:", classes: "phobos-find-label"},
+				{content: "Find:", classes: "phobos-find-label"},
 				{kind: "onyx.InputDecorator", components: [
 					{name: "find", kind: "onyx.Input", classes: "phobos-find-field", placeholder: "", onchange: "findChanged"}
 				]},
