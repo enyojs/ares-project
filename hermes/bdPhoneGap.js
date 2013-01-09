@@ -395,6 +395,13 @@ function BdPhoneGap(config, next) {
 			return;
 		}
 
+		// Pick signing keys, if provided
+		try {
+			reqData.keys = JSON.parse(req.body.keys);
+		} catch(e) {
+			console.log("upload(): no valid signing keys");
+		}
+
 		// When the specific field 'testResponse'
 		// (JSON-encoded) is present, the build request is not
 		// presented to the outside build.phonegap.com

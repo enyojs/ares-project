@@ -153,11 +153,7 @@ enyo.kind({
 	},
 
 	togglePhoneGap: function(inSender, inEvent) {
-		if (inEvent.originator.checked === true ) {
-			this.$.phonegapTab.show();
-		} else {
-			this.$.phonegapTab.hide();
-		}
+		this.$.phonegapTab.setShowing(inEvent.originator.checked);
 	},
 
 	/**
@@ -167,8 +163,6 @@ enyo.kind({
 	 */
 	preFill: function(inData) {
 		this.config = typeof inData === 'object' ? inData : JSON.parse(inData) ;
-		var pgConf ;
-		var pgTarget ;
 		var conf = this.config ;
 		var confDefault = ProjectConfig.PREFILLED_CONFIG_FOR_UI ;
 
@@ -182,8 +176,8 @@ enyo.kind({
 		this.$.projectAuthor. setValue(conf.author.name || '') ;
 		this.$.projectContact.setValue(conf.author.href || '') ;
 
+		this.$.phonegapTab.setShowing(conf.build.phonegap.enabled);
 		this.$.phonegapCheckBox.setChecked(conf.build.phonegap.enabled);
-		enyo.setObject("conf.build.phonegap", {});
 		this.$.phonegap.setConfig(this.config.build.phonegap);
 
 		if (! conf.preview ) {conf.preview = {} ;}
@@ -193,7 +187,7 @@ enyo.kind({
 	},
 
 	confirmTap: function(inSender, inEvent) {
-		var pgConf, tglist, ppConf ;
+		var tglist, ppConf ;
 		// retrieve modified values
 		this.log('ok tapped') ;
 

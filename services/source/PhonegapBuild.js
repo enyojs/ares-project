@@ -42,7 +42,7 @@ enyo.kind({
 	},
 	/**
 	 * Authorize & then retrieve information about the currently registered user
-	 *
+	 * 
 	 * This includes registered applications & signing keys.
 	 * @public
 	 */
@@ -184,28 +184,31 @@ enyo.kind({
 	},
 	/**
 	 * Get the key for the given target & id, or the list of keys for the given target
-	 *
+	 * 
 	 * @param {String} target the build target, one of ['ios', 'android', ...etc] as defined by PhoneGap
 	 * @param {String} id the signing key id, as defined by PhoneGap
-	 *
+	 * 
 	 * @return If the key id is not provided, this method returns
 	 * a list {Object} of keys available for the given platform
 	 * (that may be an empty {Object}).  If the given key id does
 	 * not represent an existing key, this method returns
 	 * undefined.
-	 *
+	 * 
 	 * @public
 	 */
 	getKey: function(target, id) {
+		var keys;
 		if (id) {
-			return this.keys && this.keys[target] && this.keys[target][id];
+			keys = this.keys && this.keys[target] && this.keys[target][id];
 		} else {
-			return this.keys && this.keys[target];
+			keys = this.keys && this.keys[target];
 		}
+		if (this.debug) this.log("target:", target, "id:", id, "=> keys:", keys);
+		return keys;
 	},
 	/**
 	 * Set the given signing key authentication credential
-	 *
+	 * 
 	 * Nothing happens if the given key id does not exist for the given platform
 	 * @param {String} target the PhoneGap build target
 	 * @param {String} id the PhoneGap key ID
