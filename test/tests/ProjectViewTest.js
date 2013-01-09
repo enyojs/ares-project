@@ -23,22 +23,23 @@ enyo.kind({
 		}
 	},
 	/**
-	* handleSelectProvider
+	* handleSelectProviderAndCreateProjectjson
 	*/
-	testHandleSelectProvider: function(){
+	testHandleSelectProviderAndCreateProjectjson: function(){
+		enyo.log("Begin called in testHandleSelectProvider.");
+
 		var dirPopup =  this.aresObj.$.projectView.$.projectWizardCreate.$.selectDirectoryPopup;
 		var pWizard = this.aresObj.$.projectView.$.projectWizardCreate;
-		this.log("testHandleSelectProvider: started") ;
 
 		if (dirPopup) {
 			// retrieve the service
 			var pList = dirPopup.$.providerList;
 			var that = this;
 			var myService = pList.services[0];
-			this.log(myService);
+			if (this.debug) enyo.log(myService);
 
 			var userPushOk = function() {
-				enyo.log("testHandleSelectProvider: user push ok") ;
+				if (this.debug) enyo.log("testHandleSelectProvider: user push ok") ;
 				// simulate on projectWizardProperties the Ok event which is handled by createProject
 				pWizard.$.propertiesWidget.confirmTap(
 					that, {
@@ -52,18 +53,18 @@ enyo.kind({
 				var hFileTree = dirPopup.$.hermesFileTree;
 				var nodes = hFileTree.getNodeFiles();
 
-				enyo.log("testHandleSelectProvider: user select dir") ;
+				if (this.debug) enyo.log("testHandleSelectProvider: user select dir") ;
 
 				// simulate nodeTap & selectFolder
 				hFileTree.doFolderClick(nodes[0]);
 				nodes[0].doNodeTap();
 
-				enyo.log("testHandleSelectProvider: user confirms dir") ;
+				if (this.debug) enyo.log("testHandleSelectProvider: user confirms dir") ;
 				// simulate confirmTap
 				dirPopup.doDirectorySelected({serviceId: dirPopup.selectedDir.id, directory: dirPopup.selectedDir, testCallBack: userPushOk});
 			};
 			// selectProvider
-			this.log("testHandleSelectProvider: handleSelectProvider called") ;
+			if (this.debug) enyo.log("testHandleSelectProvider: handleSelectProvider called") ;
 			dirPopup.handleSelectProvider(this, {service: myService, callBack: userSelectDir});
 		} else {
 			this.finish("SelectDirectoryPopup: "+this.aresObj.$.projectView.$.projectWizardCreate.$.SelectDirectoryPopup+ " is not available!");

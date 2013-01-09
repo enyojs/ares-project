@@ -24,22 +24,27 @@
 
 ## Adding new tests
 * To implement a new test suite:
-	1. Create a new subkind of Ares.TestSuite. See template file available, ares-project/test/tests/TestSuiteTemplate.js 
+	1. Create a new subkind of Ares.TestSuite by copying the template file. See template file available, ares-project/test/tests/TestSuiteTemplate.js 
 	1. Add this new file into package.js.
 	1. Any methods in your subkind must begin with 'test' and will be invoked as unit tests when the test runner executes.
 	1. When each test is complete, it should call this.finish().  
 	
 ## Notes
-* One Test Suite group is currently available; HermesFileSystemTest. The HermesFileSystemTest is composed by the following unit tests:
-	1. testGetServicesFromRegistry
-	1. testGetHomeFromServices
-	1. testPropfindAndCreateFolder
-	1. testPropfindAndCreateFile
-	1. testDeleteFile
-	1. testDeleteFolder
+* Two Test Suite groups are currently available; HermesFileSystemTest and ProjectViewTest.
+* The HermesFileSystemTest tests the HermesFileSystem API (API used for Heremes local File system). This test suite is composed by the following unit tests:
+	1. testGetServicesFromRegistry - get the IDE configured services from the registry
+	1. testGetHomeFromServices - get the IDE Home service from the list of services configured
+	1. testPropfindOrCreateFolder - list and/or create directory from the test/root directory
+	1. testPropfindAndCreateFile - list and file
+	1. testDeleteFile - delete file
+	1. testDeleteFolder - delete directory
+	1. testSourceFolderRevial - recreate directory
+
+* The ProjectViewTest tests the ProjectView API (API used for project creation). This test suite is composed by the following unit tests:
+	1. TestDoCreateProjectAction - Action to perform a new create project
+	1. testHandleSelectProviderAndCreateProjectjson - Select the roiver where the new project.json will be created (here is the local file system)
 
 Tested sucessfully on Chrome/Chromium.
-
 ## TODO
  
 * Will be tested later on Safari, Firefox, Opera, IE
