@@ -58,7 +58,7 @@
 		}
 	},
 	to: function(inValue) {
-		return this.value(inValue, "");
+		return this.value(inValue, "\t");
 	},
 	from: function(inJson) {
 		return eval('(' + inJson + ')');
