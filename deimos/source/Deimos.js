@@ -38,7 +38,8 @@ enyo.kind({
 		ondragfinish: "dragFinish"
 	},
 	events: {
-		onCloseDesigner: ""
+		onCloseDesigner: "",
+		onDesignerUpdate: ""
 	},
 	kinds: null,
 	docHasChanged: false,
@@ -121,6 +122,7 @@ enyo.kind({
 		this.refreshComponentView();
 		this.refreshInspector();
 		this.docHasChanged = true;
+		this.doDesignerUpdate(this.prepareDesignerUpdate());
 		return true; // Stop the propagation of the event
 	},
 	designerSelect: function(inSender, inEvent) {
@@ -137,6 +139,7 @@ enyo.kind({
 		this.refreshComponentView();
 		this.$.designer.refresh();
 		this.docHasChanged = true;
+		this.doDesignerUpdate(this.prepareDesignerUpdate());
 		return true; // Stop the propagation of the event
 	},
 	componentViewDrop: function(inSender, inEvent) {
@@ -159,16 +162,22 @@ enyo.kind({
 			return true; // Stop the propagation of the event
 		}
 	},
-	closeDesignerAction: function(inSender, inEvent) {
-		// Get the last modifications
-		this.kinds[this.index].content = this.$.designer.save();
+	prepareDesignerUpdate: function() {
+		if (this.index !== null) {
+			// Get the last modifications
+			this.kinds[this.index].content = this.$.designer.save();
 
-		// Prepare the data for the code editor
-		var event = {docHasChanged: this.docHasChanged, contents: []};
-		for(var i = 0 ; i < this.kinds.length ; i++ ) {
-			event.contents[i] = this.kinds[i].content;
+			// Prepare the data for the code editor
+			var event = {docHasChanged: this.docHasChanged, contents: []};
+			for(var i = 0 ; i < this.kinds.length ; i++ ) {
+				event.contents[i] = this.kinds[i].content;
+			}
+			return event;
 		}
-
+	},
+	closeDesignerAction: function(inSender, inEvent) {
+		// Prepare the data for the code editor
+		var event = this.prepareDesignerUpdate();
 		this.$.inspector.setProjectData(null);
 		this.doCloseDesigner(event);
 		return true; // Stop the propagation of the event
