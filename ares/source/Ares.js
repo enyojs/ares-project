@@ -223,5 +223,14 @@ enyo.kind({
 	bounceClose: function(inSender, inEvent) {
 		this.switchFile(inSender, inEvent);
 		enyo.asyncMethod(this.$.phobos, "closeDocAction");
+	},
+	statics: {
+		isBrowserSupported: function() {
+			if (enyo.platform.ie && enyo.platform.ie <= 8) {
+				return false;
+			} else {
+				return true;
+			}
+		}
 	}
 });
