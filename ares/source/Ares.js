@@ -124,11 +124,13 @@ enyo.kind({
 		this.$.deimos.load(inEvent);
 		this.$.panels.setIndex(this.deimosViewIndex);
 		this.adjustBarMode();
+		this.activeDocument.setCurrentIF('designer');
 	},
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
+		this.activeDocument.setCurrentIF('code');
 	},
 	designerUpdate: function(inSender, inEvent) {
 		if (inEvent && inEvent.docHasChanged) {
@@ -177,11 +179,16 @@ enyo.kind({
 		if (!this.activeDocument || d !== this.activeDocument) {
 			this.$.phobos.openDoc(d);
 		}
-		this.$.panels.setIndex(this.phobosViewIndex);
+		var currentIF = d.getCurrentIF();
+		this.activeDocument = d;
+		if (currentIF === 'code') {
+			this.$.panels.setIndex(this.phobosViewIndex);
+		} else {
+			this.$.phobos.designerAction();
+		}
 		this.adjustBarMode();
 		this.$.bottomBar.activateFileWithId(d.getId());
 		this.hideFiles();
-		this.activeDocument = d;
 	},
 	finishedSliding: function(inSender, inEvent) {
 		if (this.$.slideable.value < 0) {
