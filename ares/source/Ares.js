@@ -9,7 +9,7 @@ enyo.kind({
 				{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"}
 			]},
 			{components: [
-				{kind: "Deimos", onCloseDesigner: "closeDesigner"}
+				{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate"}
 			]}
 		]},
 		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
@@ -126,11 +126,14 @@ enyo.kind({
 		this.adjustBarMode();
 	},
 	closeDesigner: function(inSender, inEvent) {
-		if (inEvent.docHasChanged) {
-			this.$.phobos.updateComponents(inSender, inEvent);
-		}
+		this.designerUpdate(inSender, inEvent);
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
+	},
+	designerUpdate: function(inSender, inEvent) {
+		if (inEvent && inEvent.docHasChanged) {
+			this.$.phobos.updateComponents(inSender, inEvent);
+		}
 	},
 	handleBeforeUnload: function() {
 		if (window.location.search.indexOf("debug") == -1) {
