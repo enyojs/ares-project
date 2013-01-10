@@ -23,7 +23,7 @@
 			"type": "filesystem",
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"hermes/fsDropbox.js", "-P", "/files", "-p", "10002"
+				"hermes/fsDropbox.js", "-v", "-P", "/files", "-p", "0"
 			],
 			"auth": {
 				"type": "dropbox",
@@ -46,7 +46,7 @@
 			"useJsonp":false,
 			"verbose": false,
 			"auth": {
-				"type": "basic"
+				"type": "phonegap"
 			},
 			"respawn": false
 		}

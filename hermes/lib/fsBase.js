@@ -203,11 +203,15 @@ FsBase.prototype.respond = function(res, err, response) {
 	var statusCodes = {
 		'ENOENT': 404, // Not-Found
 		'EPERM' : 403, // Forbidden
-		'EEXIST': 409  // Conflict
+		'EEXIST': 409, // Conflict
+		'ETIMEDOUT': 408 // Request-Timed-Out
 	};
 	if (err) {
 		if (err instanceof Error) {
-			statusCode = err.statusCode || statusCodes[err.code] ||  403; // Forbidden
+			statusCode = err.statusCode ||
+				statusCodes[err.code] ||
+				statusCodes[err.errno] ||
+				403; // Forbidden
 			delete err.statusCode;
 			body = err;
 		} else {

@@ -9,10 +9,10 @@ enyo.kind({
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", components: [
 				{name: "documentLabel", content: "Document"},
-				{name: "saveButton", kind: "onyx.Button", content: "Save", ontap: "saveDocAction"},
-				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: "New kind", ontap: "newKindAction"},
+				{name: "saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "saveDocAction"},
+				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: $L("New Kind"), ontap: "newKindAction"},
 				{fit: true},
-				{name: "designerButton", kind: "onyx.Button", content: "Designer", ontap: "designerAction"}
+				{name: "designerButton", kind: "onyx.Button", content: $L("Designer"), ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
@@ -294,6 +294,10 @@ enyo.kind({
 		this.reparseAction();
 		if (this.analysis) {
 			var kinds = [];
+			/*
+				We now pass projectData and fileIndexer which reference various information related to the project.
+				In particular the analyzer output of all the .js projects files as well as for enyo/onyx
+			 */
 			var data = {kinds: kinds, projectData: this.projectData, fileIndexer: this.analysis};
 			for (var i=0; i < this.analysis.objects.length; i++) {
 				var o = this.analysis.objects[i];
@@ -425,8 +429,8 @@ enyo.kind({
 			if (existing[item] === undefined) {
 				codeToInsert += (commaTerminated ? "" : ",\n");
 				commaTerminated = false;
-				codeToInsert += ("    " + item + ": function(inSender, inEvent) {\n        // TO"
-						+ "DO - Auto-generated code\n    }");
+				codeToInsert += ("    " + item + ": function(inSender, inEvent) {\n        // TO");
+				codeToInsert += ("DO - Auto-generated code\n    }");
 			}
 		}
 
@@ -434,12 +438,11 @@ enyo.kind({
 		if (object.block) {
 			if (codeToInsert !== "") {
 				codeToInsert += "\n";
+				// Get the corresponding Ace range to replace/insert the missing code
+				// NB: ace.replace() allow to use the undo/redo stack.
 				var pos = object.block.end - 1;
-				var c = this.$.ace.getValue();
-				var pre = c.substring(0, pos);
-				var post = c.substring(pos);
-				var code = pre + codeToInsert + post;
-				this.$.ace.setValue(code);
+				var range = this.$.ace.mapToLineColumnRange(pos, pos);
+				this.$.ace.replaceRange(range, codeToInsert);
 			}
 		} else {
 			// There is no block information for that kind - Parser is probably not up-to-date
@@ -451,13 +454,12 @@ enyo.kind({
 		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
 			if (inEvent.contents[i]) {
 				// Insert the new version of components
-				var c = this.$.ace.getValue();
 				var start = this.analysis.objects[i].componentsBlockStart;
 				var end = this.analysis.objects[i].componentsBlockEnd;
-				var pre = c.substring(0, start);
-				var post = c.substring(end);
-				var code = pre + inEvent.contents[i] + post;
-				this.$.ace.setValue(code);
+				// Get the corresponding Ace range to replace the component definition
+				// NB: ace.replace() allow to use the undo/redo stack.
+				var range = this.$.ace.mapToLineColumnRange(start, end);
+				this.$.ace.replaceRange(range, inEvent.contents[i]);
 			}
 		}
 		/*

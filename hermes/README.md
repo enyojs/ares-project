@@ -91,11 +91,11 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 So far, only hermes local filesystem access comes with a (small) test suite, that relies on [Mocha](http://visionmedia.github.com/mocha/) and [Should.js](https://github.com/visionmedia/should.js).  Run it using:
 
-	$ hermes/node_modules/mocha/bin/mocha hermes/fsLocal.spec.js
+	$ test/mocha/bin/mocha hermes/fsLocal.spec.js
 
 To stop on the first failing case:
 
-	$ hermes/node_modules/mocha/bin/mocha --bail hermes/fsLocal.spec.js
+	$ test/mocha/bin/mocha --bail hermes/fsLocal.spec.js
 
 For more detailled instructions, refer to the [Mocha home page](http://visionmedia.github.com/mocha/).
 
@@ -167,36 +167,78 @@ The generated file is expected to look like to below:
 
 ## PhoneGap build service
 
+The entire [build.phonegap.com API](https://build.phonegap.com/docs/api) is wrapped by a dedicated Hermes build service named `bdPhoneGap`.  Reasons are:
+
+1. It is easier (more portable) to manipulate files using Node.js than using HTML5 `File` and `Blob` entities, which are not (yet) fully implemented by the browsers.
+2. build.phonegap.com does not support CORS: It refuses to answer an AJAX query (or at least the one that requests a token) that comes from a web application served from 127.0.0.1 (as Ares is in its standalone version).
+
+		XMLHttpRequest cannot load https://build.phonegap.com/token.
+ 		Origin http://127.0.0.1 is not allowed by Access-Control-Allow-Origin.
+
+
 ### Protocol
 
-The Hermes PhoneGap build services exposes 2 non-cacheable resources, accessible only to `POST` verbs:
 
-* The default `<prefix>` value is `/phonegap`
-* `<prefix>/deploy` run the Enyo `deploy.js` script on the given application.  Application folder tree is encoded as a `multipart/form-data` in the POST request body.  If successfull, the response body is a `application/zip` containing the deployable application.  It is an intermediate step of the `<prefix>/build` operation.
-* `<prefix>/build` uploads the former deployable application to the [PhoneGap Build Service](https://build.phonegap.com) & returns the JSON-encoded answer of this service.  This operation expects some fields (`key=value`) to be passed inlined in the request body.  Each form field is passed verbatim as a property of the JSON requestObject (see [mantatory & optionnal parameters of the PhoneGap write API](https://build.phonegap.com/docs/write_api)). The following two fields are mandatory.
-   * `token` is the PhoneGap build authentication token, obtained by other means.
-   * `title` is the human-readable application name.  It is considered a good practice to reuse the value of the `<name/>` field of the `config.xml`.
+Resources:
+
+* The default `<pathname>` value is `/phonegap`.  Its value can be changed using the `-P` paraemter in the main `ide.json` configuration file.
+* `<pathname>/token`:
+	* `GET` using Basic Authentication, returns a JSON-encoded token object `{"token":"YOUR_TOKEN"}`.  Every other resources are accessible only when passing this token value using on of the following ways:
+	* As a `token` cookie with value `YOUR_TOKEN` (preferred),
+	* As a web-form `token` field (either in `application/x-www-urlencoded` or `multipart/forma-data` format) if applicable to the request format.
+	* As a `token=YOUR_TOKEN` query parameter, in the URL (_least secure, may be removed in the future_).
+* `<pathname>/user`:
+	* `GET`, returns the user account information, using the same format as the one returned by [`GET https://build.phonegap.com/api/v1/me`](https://build.phonegap.com/docs/read_api).
+* `<pathname>/deploy`:
+	* `POST` runs the Enyo `deploy.js` script on the given application.  Application folder tree is encoded as a `multipart/form-data` in the POST request body.  If successfull, the response body is a `application/zip` containing the deployable application.  It is an intermediate step of the `<pathname>/build` operation.
+* `<pathname>/build`:
+	* `POST` uploads the former deployable application to the [PhoneGap Build Service](https://build.phonegap.com) & returns the JSON-encoded answer of this service.  This operation expects some fields (`key=value`) to be passed inlined in the request body (as `multipart/form-data` fields).  Each of those field is passed verbatim as a property of the JSON requestObject (see [mantatory & optionnal parameters of the PhoneGap write API](https://build.phonegap.com/docs/write_api)). The following fields are mandatory.
+   		* `title` is the human-readable application name.  It is considered a good practice to reuse the value of the `<name/>` field of the `config.xml`.
 
 
 ### Development & Test
 
-Manual run (`prefix` an optional parameter):
+**Note:** Most of the commands in this section assume that you are using Mac OSX or Linux.
 
-	$ node hermes/bdPhoneGap.js [prefix]
+Manual run on fixed port 10003 (default is dynamically-assigned port):
 
-Assuming you have a working account build.phonegap.com associated with the email `YOUR_EMAIL`, get your PhoneGap developer token `YOUR_TOKEN`, using:
+	$ node hermes/bdPhoneGap.js -p 10003
 
-	$ curl -u YOUR_EMAIL -X POST -d "" https://build.phonegap.com/token
-	Enter host password for user 'YOUR_EMAIL':
-	{"token":"YOUR_TOKEN"}
+Test `/token`:
 
-Linux & OSX: The following commands generates a POST request carrying a `multipart/form-data` message suitable to test the `bdPhoneGap.js` service:
+* Assuming you have a working account build.phonegap.com associated with the email `YOUR_EMAIL`, get your PhoneGap developer token `YOUR_TOKEN`, using **build.phonegap.com**:
+
+		$ curl -v -u YOUR_EMAIL -X POST -d "" https://build.phonegap.com/token
+		Enter host password for user 'YOUR_EMAIL':
+		{"token":"YOUR_TOKEN"}
+
+* Using **bdPhoneGap**:
+
+		$ curl -v -X POST -d "username=YOUR_EMAIL" -d "password=YOUR_PASSWORD" http://127.0.0.1:10003/phonegap/token
+		{"token":"YOUR_TOKEN"}
+
+Test `/api/v1/me`:
+
+* Using **build.phonegap.com**, use one of the below:
+
+		$ curl -v -u YOUR_EMAIL -X GET -d "" https://build.phonegap.com/api/v1/me
+		$ curl -v -X GET https://build.phonegap.com/api/v1/me?auth_token=YOUR_TOKEN
+
+* Using **bdPhoneGap**:
+
+		$ curl -v -X GET -b "token=YOUR_TOKEN" http://127.0.0.1:10003/phonegap/api/v1/me
+
+Test `/op/deploy`:
+
+* The following commands generates a POST request carrying a `multipart/form-data` message suitable to test the `bdPhoneGap.js` service:
 
 * This one generates a command that returns a minified (deployable) application
 
 		$ find . -type f | \
 			awk 'BEGIN{printf("curl ");}{sub("^\.\/", "", $1); printf("-F \"file=@%s;filename=%s\" ", $1, $1);}END{print(url)}' \
 			url=http://127.0.0.1:9029/phonegap/deploy/
+
+Test `/op/build`:
 
 * This one generates a command that creates a new `appId` using an application located in the current directory.  Note that you must provide the `token` and `title` form fields.  The `<name/>` in the `config.xml` is a suitable value for the `title` form field.
 

@@ -4,6 +4,5 @@ enyo.depends(
 	"ProjectWizard.js",
 	"ProjectView.js",
 	"ProjectConfig.js",
-	"ProjectProperties.js",
-	"PhonegapBuild.js"
+	"ProjectProperties.js"
 );

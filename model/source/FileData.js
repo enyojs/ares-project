@@ -40,6 +40,12 @@ Ares.Model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when po
 	},
 	setAceSession: function(session) {
 		this.set("ace-session", session);
+	},
+	getCurrentIF: function() {
+		return this.get("currentIF");
+	},
+	setCurrentIF: function(currentIF) {
+		this.set("currentIF", currentIF);
 	}
 });
 
@@ -47,7 +53,7 @@ Ares.Model.Files = Backbone.Collection.extend({		// TODO: move to enyo.Collectio
 	model: Ares.Model.File,
 	newEntry: function(file, data, projectData) {
 		var id = this.computeId(file);
-		var obj = new Ares.Model.File({id: id, file: file, data: data, "project-data": projectData, edited: false});
+		var obj = new Ares.Model.File({id: id, file: file, data: data, "project-data": projectData, edited: false, currentIF: "code"});
 		this.add(obj);
 		return obj;
 	},

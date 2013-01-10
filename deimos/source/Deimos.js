@@ -38,7 +38,8 @@ enyo.kind({
 		ondragfinish: "dragFinish"
 	},
 	events: {
-		onCloseDesigner: ""
+		onCloseDesigner: "",
+		onDesignerUpdate: ""
 	},
 	kinds: null,
 	docHasChanged: false,
@@ -47,6 +48,13 @@ enyo.kind({
 		this.kinds=[];
 		this.index=null;
 	},
+	/**
+	 * Loads the first kind passed thru the data parameter
+	 * @param data contains kinds declaration (enyo.kind format)
+	 *   and project information such as the analyzer output
+	 *   for all the .js files of the project and for enyo/onyx.
+	 * @public
+	 */
 	load: function(data) {
 		var what = data.kinds;
 		var maxLen = 0;
@@ -66,6 +74,7 @@ enyo.kind({
 		this.$.kindPicker.render();
 		this.docHasChanged = false;
 
+		// Pass the project information (analyzer output, ...) to the inspector
 		this.$.inspector.setProjectData(data.projectData);
 		this.$.inspector.setFileIndexer(data.fileIndexer);
 	},
@@ -113,6 +122,7 @@ enyo.kind({
 		this.refreshComponentView();
 		this.refreshInspector();
 		this.docHasChanged = true;
+		this.doDesignerUpdate(this.prepareDesignerUpdate());
 		return true; // Stop the propagation of the event
 	},
 	designerSelect: function(inSender, inEvent) {
@@ -129,6 +139,7 @@ enyo.kind({
 		this.refreshComponentView();
 		this.$.designer.refresh();
 		this.docHasChanged = true;
+		this.doDesignerUpdate(this.prepareDesignerUpdate());
 		return true; // Stop the propagation of the event
 	},
 	componentViewDrop: function(inSender, inEvent) {
@@ -151,16 +162,22 @@ enyo.kind({
 			return true; // Stop the propagation of the event
 		}
 	},
-	closeDesignerAction: function(inSender, inEvent) {
-		// Get the last modifications
-		this.kinds[this.index].content = this.$.designer.save();
+	prepareDesignerUpdate: function() {
+		if (this.index !== null) {
+			// Get the last modifications
+			this.kinds[this.index].content = this.$.designer.save();
 
-		// Prepare the data for the code editor
-		var event = {docHasChanged: this.docHasChanged, contents: []};
-		for(var i = 0 ; i < this.kinds.length ; i++ ) {
-			event.contents[i] = this.kinds[i].content;
+			// Prepare the data for the code editor
+			var event = {docHasChanged: this.docHasChanged, contents: []};
+			for(var i = 0 ; i < this.kinds.length ; i++ ) {
+				event.contents[i] = this.kinds[i].content;
+			}
+			return event;
 		}
-
+	},
+	closeDesignerAction: function(inSender, inEvent) {
+		// Prepare the data for the code editor
+		var event = this.prepareDesignerUpdate();
 		this.$.inspector.setProjectData(null);
 		this.doCloseDesigner(event);
 		return true; // Stop the propagation of the event
