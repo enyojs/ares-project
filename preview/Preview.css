@@ -1,4 +1,5 @@
-.ares-preview-bezel {
+.ares-preview-device {
+	background: white ;
 	border: solid 20px black;
 	-moz-border-radius: 20px;
 	-webkit-border-radius: 20px;

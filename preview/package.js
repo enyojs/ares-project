@@ -5,5 +5,6 @@ enyo.depends(
 	"$lib/foss",
 	"source/",
 	"Preview.css",
+	"../ares/Ares.css",
 	"../utilities/source"
 );
