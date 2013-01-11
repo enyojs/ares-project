@@ -13,13 +13,13 @@
 
 ## Usage
 
-* Start the IDE server with the argument `runtest`. The command is: `node ide.js --runtest` or `node ide.js -T runtest`
+* Start the IDE server with the argument `runtest`. The command is: `node ide.js --runtest` or `node ide.js -T`
 * Wait for the message:
 
 		Ares IDE is now running at <http://127.0.0.1:9009/ide/ares/test.html> Press CTRL + C to shutdown
 
 * Connect to the Ares IDE in mode test using Google Chrome or Chromium. The URL is: <http://127.0.0.1:9009/ide/ares/test.html> like on [Google](http://www.google.com).
-* Wait for the Ares Test Reporter window,
+* Wait for the Ares Test Reporter window,  __NB__: Check popup blocker setting if the Test reporter window does not appear.
 * Click on start button to fire the execution of the available Test Suites.
 
 ## Adding new tests
