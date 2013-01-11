@@ -41,6 +41,15 @@ enyo.kind({
 		return this.config;
 	},
 	/**
+	 * @return true when configured, authenticated & authorized
+	 */
+	isOk: function() {
+		return !!(this.config &&
+			  this.config.auth &&
+			  this.config.auth.token &&
+			  this.config.auth.keys);
+	},
+	/**
 	 * Authorize & then retrieve information about the currently registered user
 	 * 
 	 * This includes registered applications & signing keys.
@@ -146,41 +155,38 @@ enyo.kind({
 	 * @private
 	 */
 	_storeUserData: function(user) {
-		this.keys = {};
+		var keys = this.config.auth.keys || {};
 		enyo.forEach(enyo.keys(user.keys), function(target) {
-			// reset known keys
-			this.keys[target] = {};
-
-			// reuse known key passwords
-			this.config.auth.keys = this.config.auth.keys || {};
-			this.config.auth.keys[target] = this.config.auth.keys[target] || {};
-
+			keys[target] = keys[target] || {};
 			var targetKeys = user.keys[target].all;
 			if (target !== 'link') {
-				this.keys[target] = {};
 				enyo.forEach(targetKeys, function(targetKey) {
-					 var key = {
+					keys[target][targetKey.id] = enyo.mixin(keys[target][targetKey.id], {
 						id: targetKey.id,
 						name: targetKey.title
-					};
-					enyo.mixin(key, this.config.auth.keys[target][key.id]);
-					this.keys[target][key.id] = key;
+					});
 				}, this);
 			}
 		}, this);
 
-		// XXX do not log 'auth'
-		if (this.debug) this.log("keys:", this.keys);
+		// FIXME do not log 'auth'
+		//if (this.debug) this.log("keys:", this.config.auth.keys);
 
-		// auto-clean: remove key passwords for unknown target platforms
-		enyo.forEach(enyo.keys(this.config.auth.keys), function(target) {
-			if (typeof this.keys[target] !== 'object') {
-				delete this.config.auth.keys[target];
-			}
+		// auto-clean
+		enyo.forEach(enyo.keys(keys), function(target) {
+			enyo.forEach(keys[target], function(key) {
+				// Remove unknown keys
+				if (typeof user.keys[target][key.id] !== 'object') {
+					delete keys[target][key.id];
+				}
+			}, this);
 		}, this);
 
-		// XXX do not log 'auth'
-		if (this.debug) this.log("auth keys:", this.config.auth.keys);
+		// FIXME do not log 'auth'
+		if (this.debug) this.log("keys:", keys);
+		this.config.auth.keys = keys;
+
+		ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
 	},
 	/**
 	 * Get the key for the given target & id, or the list of keys for the given target
@@ -197,14 +203,14 @@ enyo.kind({
 	 * @public
 	 */
 	getKey: function(target, id) {
-		var keys;
+		var keys = this.config.auth.keys, res;
 		if (id) {
-			keys = this.keys && this.keys[target] && this.keys[target][id];
+			res = keys && keys[target] && keys[target][id];
 		} else {
-			keys = this.keys && this.keys[target];
+			res = keys && keys[target];
 		}
-		if (this.debug) this.log("target:", target, "id:", id, "=> keys:", keys);
-		return keys;
+		if (this.debug) this.log("target:", target, "id:", id, "=> keys:", res);
+		return res;
 	},
 	/**
 	 * Set the given signing key authentication credential
@@ -216,14 +222,11 @@ enyo.kind({
 	 * @return {undefined}
 	 */
 	setKey: function(target, id, auth) {
-		var key;
-		if (typeof this.keys[target][id] === 'object') {
-			enyo.mixin(this.keys[target][id], auth);
-
-			// Two first levels of the hierarchy are built by #_storeUserData()
-			this.config.auth.keys[target][id] = this.config.auth.keys[target][id] || {};
-			this.config.auth.keys[target][id].auth = auth;
-			// Save the auth part in localStorage
+		// FIXME do not log auth
+		if (this.debug) this.log("target:", target, "id:", id, "keys:", auth /*XXX*/);
+		var keys = this.config.auth.keys, key;
+		if (typeof keys[target][id] === 'object') {
+			enyo.mixin(keys[target][id], auth);
 			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
 		} else {
 			this.warning("no such key id:", id, "for target:", target);
