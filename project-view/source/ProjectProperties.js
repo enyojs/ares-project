@@ -111,14 +111,14 @@ enyo.kind({
 			]},
 			{content: "Targets:"},
 			{
-				kind: "FittableRows", attributes: {'class': 'ares_projectView_switches'},
-				onChange: "enablePhoneGap",
+				kind: "FittableRows",
+				onActivate: "enablePhoneGap",
 				components: [
-					{kind: "onyx.ToggleButton", name: 'androidTarget', onContent: "Android", offContent: "Android"},
-					{kind: "onyx.ToggleButton", name: 'iosTarget', onContent: "Ios", offContent: "Ios"},
-					{kind: "onyx.ToggleButton", name: 'winphoneTarget', onContent: "Winphone", offContent: "Winphone"},
-					{kind: "onyx.ToggleButton", name: 'blackberryTarget', onContent: "Blackberry", offContent: "Blackberry"},
-					{kind: "onyx.ToggleButton", name: 'webosTarget',onContent: "Webos", offContent: "Webos"}
+					{content: "Android", classes: "ares_projectview_label"}, {kind: "onyx.Checkbox", classes: "ares_projectview_check", name: 'androidTarget'},
+					{content: "iOS", classes: "ares_projectview_label"}, {kind: "onyx.Checkbox", classes: "ares_projectview_check", name: 'iosTarget'},
+					{content: "WinPhone", classes: "ares_projectview_label"}, {kind: "onyx.Checkbox", classes: "ares_projectview_check", name: 'winphoneTarget'},
+					{content: "Blackberry", classes: "ares_projectview_label"}, {kind: "onyx.Checkbox", classes: "ares_projectview_check", name: 'blackberryTarget'},
+					{content: "WebOS", classes: "ares_projectview_label"}, {kind: "onyx.Checkbox", classes: "ares_projectview_check", name: 'webosTarget'}
 				]
 			}
 		]},
@@ -186,7 +186,7 @@ enyo.kind({
 
 	// switch Phonegap to "enabled" whenever user validates a target
 	enablePhoneGap: function(inSender, inEvent) {
-		if (inEvent.value === true ) {
+		if (inEvent.originator.getValue() === true ) {
 			this.$.pgConfEnabled.setValue(true) ;
 		}
 	},
