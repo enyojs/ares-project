@@ -128,7 +128,7 @@ enyo.kind({
 	components: [
 		{kind: "FittableColumns", components: [
 			{kind: "onyx.InputDecorator", components: [
-				{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "updateDrawer"},
+				{name: "targetChkBx", kind: "onyx.Checkbox", classes: "ares_projectview_check", onchange: "updateDrawer"},
 				{name: "targetLbl", content: ""},
 				{name: "targetDrw", orient: "h", kind: "onyx.Drawer", open: false, components: [
 					
@@ -234,7 +234,7 @@ enyo.kind({
 			{name: "keyPasswd", kind: "onyx.Input", type: "password", placeholder: "Password..."}
 		]},
 		// android-only: keystore password
-		{kind: "onyx.InputDecorator", showing: false, components: [
+		{kind: "onyx.InputDecorator", name: "keystorePasswdFrm", showing: false, components: [
 			{content: "Keystore:"},
 			{name: "keystorePasswd", kind: "onyx.Input", type: "password", placeholder: "Password..."}
 		]},
@@ -288,7 +288,7 @@ enyo.kind({
 			// properties names '.key_pw'and 'keystore_pw' are defined by PhoneGap
 			this.$.keyPasswd.setValue(this.keys[this.activeKeyId].key_pw || "");
 			this.$.keystorePasswd.setValue(this.keys[this.activeKeyId].keystore_pw || "");
-			this.$.keystorePasswd.show();
+			this.$.keystorePasswdFrm.show();
 		}
 	},
 	/**
