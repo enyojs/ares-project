@@ -60,7 +60,7 @@ enyo.kind({
 		var e = results.exception;
 		var content = "=>Ares Proxy Reporter *****" + "Group: " + this.name + " *****test: " + results.name + " " + (results.passed ? "  is            PASSED  " : results.message);
 
-		// Exception formatting usefull only for console.log here
+		// Exception formatting usefull only for logging
 		if (e) {
 			// If we have an exception include the stack trace or file/line number.
 			if (e.stack) {
@@ -79,10 +79,8 @@ enyo.kind({
 			content += results.logs;
 		}
 
-		// content printed into Ares Ide console
-		if (console && console.dir) {
-			console.dir(content);
-		}
+		enyo.log(content);
+
 
 		// Post ARES.TEST.RESULT event with associated results
 		var obj = {
