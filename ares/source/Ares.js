@@ -4,21 +4,21 @@ enyo.kind({
 	classes: "onyx",
 	fit: true,
 	components: [
-		{kind: "Panels", arrangerKind: "CarouselArranger", classes:"enyo-fit ares-panels", components: [
+		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
 			{components: [
 				{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"}
 			]},
 			{components: [
-				{kind: "Deimos", onCloseDesigner: "closeDesigner"}
+				{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate"}
 			]}
 		]},
 		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
 			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
-			{name: "bottomBar", kind: "DocumentToolbar", 
-				onToggleOpen: "toggleFiles", 
-				onSwitchFile: "switchFile", 
-				onSave: "bounceSave", 
-				onDesign: "bounceDesign", 
+			{name: "bottomBar", kind: "DocumentToolbar",
+				onToggleOpen: "toggleFiles",
+				onSwitchFile: "switchFile",
+				onSave: "bounceSave",
+				onDesign: "bounceDesign",
 				onNewKind: "bounceNew",
 				onClose: "bounceClose"
 			}
@@ -124,13 +124,18 @@ enyo.kind({
 		this.$.deimos.load(inEvent);
 		this.$.panels.setIndex(this.deimosViewIndex);
 		this.adjustBarMode();
+		this.activeDocument.setCurrentIF('designer');
 	},
 	closeDesigner: function(inSender, inEvent) {
-		if (inEvent.docHasChanged) {
-			this.$.phobos.updateComponents(inSender, inEvent);
-		}
+		this.designerUpdate(inSender, inEvent);
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
+		this.activeDocument.setCurrentIF('code');
+	},
+	designerUpdate: function(inSender, inEvent) {
+		if (inEvent && inEvent.docHasChanged) {
+			this.$.phobos.updateComponents(inSender, inEvent);
+		}
 	},
 	handleBeforeUnload: function() {
 		if (window.location.search.indexOf("debug") == -1) {
@@ -174,11 +179,16 @@ enyo.kind({
 		if (!this.activeDocument || d !== this.activeDocument) {
 			this.$.phobos.openDoc(d);
 		}
-		this.$.panels.setIndex(this.phobosViewIndex);
+		var currentIF = d.getCurrentIF();
+		this.activeDocument = d;
+		if (currentIF === 'code') {
+			this.$.panels.setIndex(this.phobosViewIndex);
+		} else {
+			this.$.phobos.designerAction();
+		}
 		this.adjustBarMode();
 		this.$.bottomBar.activateFileWithId(d.getId());
 		this.hideFiles();
-		this.activeDocument = d;
 	},
 	finishedSliding: function(inSender, inEvent) {
 		if (this.$.slideable.value < 0) {
@@ -213,5 +223,14 @@ enyo.kind({
 	bounceClose: function(inSender, inEvent) {
 		this.switchFile(inSender, inEvent);
 		enyo.asyncMethod(this.$.phobos, "closeDocAction");
+	},
+	statics: {
+		isBrowserSupported: function() {
+			if (enyo.platform.ie && enyo.platform.ie <= 8) {
+				return false;
+			} else {
+				return true;
+			}
+		}
 	}
 });
