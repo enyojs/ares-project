@@ -39,13 +39,7 @@ enyo.kind({
 	 */
 	create: function() {
 		this.inherited(arguments);
-		this.targets = [
-			{id: 'android',		name: "Google Android"},
-			{id: 'ios',		name: "Apple iOS"},
-			{id: 'winphone',	name: "Microsoft Windows Phone 7"},
-			{id: 'blackberry',	name: "RIM Blackberry"},
-			{id: 'webos',		name: "HP webOS 2"}
-		];
+		this.targets = PhoneGap.ProjectProperties.platforms;
 		enyo.forEach(this.targets, function(target) {
 			this.$.targetsRows.createComponent({
 				name: target.id,
@@ -88,14 +82,7 @@ enyo.kind({
 	 */
 	refresh: function(inSender, inValue) {
 		if (this.debug) this.log("sender:", inSender, "value:", inValue);
-		this.getProvider().authorize(enyo.bind(this, this.updateKeys));
-	},
-	/**
-	 * @protected
-	 */
-	getProvider: function() {
-		this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('phonegap');
-		return this.provider;
+		PhoneGap.ProjectProperties.getProvider().authorize(enyo.bind(this, this.updateKeys));
 	},
 	/**
 	 * @protected
@@ -105,9 +92,22 @@ enyo.kind({
 		if (err) {
 		} else {
 			enyo.forEach(this.targets, function(target) {
-				var keys = this.getProvider().getKey(target.id);
+				var keys = PhoneGap.ProjectProperties.getProvider().getKey(target.id);
 				this.$.targetsRows.$[target.id].updateKeys(keys);
 			}, this);
+		}
+	},
+	statics: {
+		platforms: [
+			{id: 'android',		name: "Google Android"},
+			{id: 'ios',		name: "Apple iOS"},
+			{id: 'winphone',	name: "Microsoft Windows Phone 7"},
+			{id: 'blackberry',	name: "RIM Blackberry"},
+			{id: 'webos',		name: "HP webOS 2"}
+		],
+		getProvider: function() {
+			this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('phonegap');
+			return this.provider;
 		}
 	}
 });
