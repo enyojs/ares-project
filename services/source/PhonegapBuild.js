@@ -157,30 +157,24 @@ enyo.kind({
 	_storeUserData: function(user) {
 		var keys = this.config.auth.keys || {};
 		enyo.forEach(enyo.keys(user.keys), function(target) {
-			keys[target] = keys[target] || {};
-			var targetKeys = user.keys[target].all;
 			if (target !== 'link') {
-				enyo.forEach(targetKeys, function(targetKey) {
-					keys[target][targetKey.id] = enyo.mixin(keys[target][targetKey.id], {
-						id: targetKey.id,
-						name: targetKey.title
-					});
-				}, this);
+				var newKeys,
+				    oldKeys = keys[target],
+				    inKeys = user.keys[target].all;
+				newKeys = enyo.map(inKeys, function(inKey) {
+					var oldKey, newKey;
+					newKey = {
+						id: inKey.id,
+						title: inKey.title
+					};
+					oldKey = enyo.filter(oldKeys, function(oldKey) {
+						return oldKey && (oldKey.id === inKey.id);
+					})[0];
+					return enyo.mixin(newKey, oldKey);
+				});
+				keys[target] = newKeys;
 			}
-		}, this);
-
-		// FIXME do not log 'auth'
-		//if (this.debug) this.log("keys:", this.config.auth.keys);
-
-		// auto-clean
-		enyo.forEach(enyo.keys(keys), function(target) {
-			enyo.forEach(keys[target], function(key) {
-				// Remove unknown keys
-				if (typeof user.keys[target][key.id] !== 'object') {
-					delete keys[target][key.id];
-				}
-			}, this);
-		}, this);
+		});
 
 		// FIXME do not log 'auth'
 		if (this.debug) this.log("keys:", keys);
@@ -195,43 +189,67 @@ enyo.kind({
 	 * @param {String} id the signing key id, as defined by PhoneGap
 	 * 
 	 * @return If the key id is not provided, this method returns
-	 * a list {Object} of keys available for the given platform
-	 * (that may be an empty {Object}).  If the given key id does
-	 * not represent an existing key, this method returns
-	 * undefined.
+	 * an {Array} of keys available for the given platform.  If
+	 * the given key id does not represent an existing key, this
+	 * method returns undefined.
 	 * 
 	 * @public
 	 */
 	getKey: function(target, id) {
-		var keys = this.config.auth.keys, res;
+		var keys = this.config.auth.keys && this.config.auth.keys[target], res;
 		if (id) {
-			res = keys && keys[target] && keys[target][id];
+			res = enyo.filter(keys, function(key) {
+				return (key.id === id);
+			}, this)[0];
 		} else {
-			res = keys && keys[target];
+			res = keys;
 		}
 		if (this.debug) this.log("target:", target, "id:", id, "=> keys:", res);
 		return res;
 	},
 	/**
-	 * Set the given signing key authentication credential
+	 * Set the given signing key for the given platform
 	 * 
-	 * Nothing happens if the given key id does not exist for the given platform
+	 * Unlike the key {Object} stored on PhoneGap build (which
+	 * only has an #id and #title property), the given key is
+	 * expected to contain the necessary credentails properties
+	 * for the current platform (#password for 'ios' and
+	 * 'blackberry', #key_pw and #keystore_pw for 'android').
+	 * 
+	 * This method automatically saves the full signing keys in
+	 * the browser client localStorage.
+	 * 
 	 * @param {String} target the PhoneGap build target
-	 * @param {String} id the PhoneGap key ID
-	 * @param {Object} auth the signing key credential object (here: an {Object} with a single 'password' {String} property)
+	 * @param {Object} key the signing key with credential properties
 	 * @return {undefined}
 	 */
-	setKey: function(target, id, auth) {
-		// FIXME do not log auth
-		if (this.debug) this.log("target:", target, "id:", id, "keys:", auth /*XXX*/);
-		var keys = this.config.auth.keys, key;
-		if (typeof keys[target][id] === 'object') {
-			enyo.mixin(keys[target][id], auth);
-			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
-		} else {
-			this.warning("no such key id:", id, "for target:", target);
+	setKey: function(target, inKey) {
+		var keys, key;
+
+		if (typeof inKey.id !== 'number' || typeof inKey.title !== 'string') {
+			this.warn("Will not store an invalid signing key:", inKey);
+			return;
 		}
-		return this;
+
+		// Sanity
+		this.config.auth.keys = this.config.auth.keys || {};
+		this.config.auth.keys[target] = this.config.auth.keys[target] || [];
+
+		// Look for existing values
+		keys = this.config.auth.keys && this.config.auth.keys[target];
+		key =  enyo.filter(keys, function(key) {
+			return (key.id === inKey.id);
+		}, this)[0];
+		if (key) {
+			enyo.mixin(key, inKey);
+		} else {
+			keys.push(inKey);
+		}
+		if (this.debug) this.log("target:", target, "keys:", keys /*XXX*/);
+		this.config.auth.keys[target] = keys;
+
+		// Save a new authentication values for PhoneGap 
+		ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
 	},
 	/**
 	 * initiates the phonegap build of the given project

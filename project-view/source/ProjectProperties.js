@@ -178,7 +178,7 @@ enyo.kind({
 
 		this.$.phonegapTab.setShowing(conf.build.phonegap.enabled);
 		this.$.phonegapCheckBox.setChecked(conf.build.phonegap.enabled);
-		this.$.phonegap.setConfig(this.config.build.phonegap);
+		this.$.phonegap.setProjectConfig(this.config.build.phonegap);
 
 		if (! conf.preview ) {conf.preview = {} ;}
 		this.$.ppTopFile.setValue(conf.preview.top_file);
@@ -199,7 +199,7 @@ enyo.kind({
 		this.config.author.name = this.$.projectAuthor.getValue();
 		this.config.author.href = this.$.projectContact.getValue();
 
-		this.config.build.phonegap = this.$.phonegap.getConfig();
+		this.config.build.phonegap = this.$.phonegap.getProjectConfig();
 		this.config.build.phonegap.enabled = this.$.phonegapCheckBox.checked;
 
 		ppConf = this.config.preview ;
