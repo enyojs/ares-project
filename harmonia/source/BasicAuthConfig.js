@@ -31,7 +31,6 @@ enyo.kind({
 			]},
 			{name: "accountOps", components: [
 				{kind: "onyx.Button", name: "checkBtn", content: "Check", ontap: "check"},
-				{kind: "onyx.Button", name: "manageBtn", content: "Manage", ontap: "manage", showing: false}
 			]}
 		]},
 		{tag: "br"},
@@ -79,9 +78,6 @@ enyo.kind({
 				});
 			}
 		});
-	},
-	manage: function(inSender, inValue) {
-		if (this.debug) this.log("sender:", inSender, "value:", inValue);
 	},
 	/**
 	 * Update service authentication values
