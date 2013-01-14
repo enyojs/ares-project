@@ -85,10 +85,11 @@ enyo.kind({
 		this.$.client.resized();
 	},
 	load: function(inDocument) {
-		this.proxyArray(inDocument);
+		var components=inDocument.components;
+		this.proxyArray(components);
 		this.hideSelection();
 		this.$.model.destroyComponents();
-		this.$.client.createComponents(inDocument, {owner: this.$.model});
+		this.$.client.createComponents(components, {owner: this.$.model});
 		this.render();
 		this.resized();
 		this.doChange();

@@ -96,7 +96,7 @@ enyo.kind({
 			}
 
 			this.$.inspector.inspect(null);
-			this.$.designer.load(kind.components);
+			this.$.designer.load(kind);
 		}
 
 		this.index=index;
