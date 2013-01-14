@@ -417,7 +417,7 @@ function BdPhoneGap(config, next) {
 			}
 		} else if (req.body.appId) {
 			console.log("upload(): updating appId="+ req.body.appId + " (title='" + req.body.title + "')");
-			api.updateFileBasedApp(req.body.token, req.zip.path, req.body.appId, {
+			api.updateFileBasedApp(req.body.token, req.zip.path, req.body.appId, reqData, {
 				success: next,
 				error: _fail
 			});
@@ -425,7 +425,7 @@ function BdPhoneGap(config, next) {
 			console.log("upload(): creating new appId for title=" + req.body.title + "");
 			reqData.create_method = 'file';
 			for (var p in req.body) {
-				if (typeof p === 'string') {
+				if (!reqData[p] && (typeof p === 'string')) {
 					reqData[p] = req.body[p];
 				}
 			}

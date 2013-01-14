@@ -5,6 +5,7 @@
 
 enyo.kind({
 	name: "PhoneGap.ProjectProperties",
+	debug: false,
 	published: {
 		config: {}
 	},
