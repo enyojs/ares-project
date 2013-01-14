@@ -19,7 +19,7 @@
 		Ares IDE is now running at <http://127.0.0.1:9009/ide/ares/test.html> Press CTRL + C to shutdown
 
 * Connect to the Ares IDE in mode test using Google Chrome or Chromium. The URL is: <http://127.0.0.1:9009/ide/ares/test.html> like on [Google](http://www.google.com).
-* Wait for the Ares Test Reporter window,
+* Wait for the Ares Test Reporter window,  __NB__: Check popup blocker setting if the Test reporter window does not appear.
 * Click on start button to fire the execution of the available Test Suites.
 * Tests are executed under a temporary directory. This directory is located under test/root.
 

@@ -36,10 +36,7 @@ enyo.kind({
 			this.services = this.registry.services;
 			HermesFileSystemTest.services = this.services;
 			if (this.debug) {
-				enyo.log("HermesFileSystemTest.services: ");
-				if (console && console.dir) {
-					console.dir(HermesFileSystemTest.services);
-				}
+				this.log("HermesFileSystemTest.services: ", HermesFileSystemTest.services);
 			}
 			if(this.services.length > 0) {
 				this.finish();
@@ -60,10 +57,7 @@ enyo.kind({
 			return s.config.id === "home";
 		});
 		if (this.debug) {
-			enyo.log("home service: ");
-			if (console && console.dir) {
-				console.dir(h);
-			}
+			this.log("home service: ", h);
 		}
 		this.home = h;
 		HermesFileSystemTest.home = this.home;

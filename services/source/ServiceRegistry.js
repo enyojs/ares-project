@@ -142,7 +142,6 @@ enyo.kind({
 			if (service.impl && !service.impl.authorize) {
 				if (this.debug) this.log("Adding " + service.config.id + "#authorize() stub");
 				service.impl.authorize = enyo.bind(service.impl, function(next) {
-					console.log('authorize(): stubbed');
 					if (this.debug) this.log('authorize(): stubbed');
 					next(null, {});
 				});

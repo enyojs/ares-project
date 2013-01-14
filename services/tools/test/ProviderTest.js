@@ -25,7 +25,7 @@ enyo.kind({
 				;
 		}
 		function confirmFileList(inSender, inResponse) {
-			console.log(inResponse);
+			this.log(inResponse);
 			if (inResponse.length != 0) {
 				this.finish("bad listing");
 			}
