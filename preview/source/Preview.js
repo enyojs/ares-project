@@ -45,7 +45,11 @@ enyo.kind(
 								]
 							}
 						]
-					}
+					},
+					{content: "width: 600px",  name: "devWidth",  style: "margin: 8px"},
+					{content: "height: 800px", name: "devHeight", style: "margin: 8px"},
+					{content: "DPR: 1",        name: "devDPR",    style: "margin: 8px",
+					 attributes: {title: "display pixel ratio"} }
 				]
 			},
 			{
@@ -71,7 +75,12 @@ enyo.kind(
 			var dh = device.value.height / device.value.dpr;
 			this.dlog("size for device " , device.content , " orientation " , orientation.content ) ;
 			var swap = orientation.swap ;
-			this.$.iframe.setGeometry( swap ? dh : dw, swap ? dw : dh) ;
+			var targetW = swap ? dh : dw ;
+			var targetH = swap ? dw : dh ;
+			this.$.iframe.setGeometry( targetW , targetH) ;
+			this.$.devWidth .setContent("width: "  + targetW + 'px') ;
+			this.$.devHeight.setContent("height: " + targetH + 'px') ;
+			this.$.devDPR   .setContent("DPR: "    + device.value.dpr) ;
 			this.resized() ;
 		},
 
