@@ -7,7 +7,7 @@ var path = require('path'),
 
 // Local variables
 var srcDir = process.cwd(),
-	resDir = path.resolve(srcDir, 'test/root/AresTests');
+	resDir = path.resolve(srcDir, 'test/root');
 
 // Create the result directory needed by the Ares Test Suite
 shell.mkdir('-p', path.join(resDir));
