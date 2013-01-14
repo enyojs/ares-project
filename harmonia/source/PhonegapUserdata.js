@@ -44,10 +44,11 @@ enyo.kind({
 		var keys = enyo.keys(userData);
 		enyo.forEach(keys, function(key) {
 			if (this.$[key]) {
+				var val = userData[key] && userData[key].toString();
 				if (this.$[key].setValue) {
-					this.$[key].setValue(userData[key].toString());
+					this.$[key].setValue(val);
 				} else {
-					this.$[key].setContent(userData[key].toString());
+					this.$[key].setContent(val);
 				}
 			} else {
 				this.log("No such display field: '" + key + "'");

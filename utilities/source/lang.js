@@ -5,6 +5,7 @@ var ares = {
 	/**
 	 * Deep-clone given object
 	 * @param {Object} obj object to clone
+	 * @return the deep-cloned {Object}
 	 * @private
 	 */
 	clone: function(obj) {
@@ -14,6 +15,12 @@ var ares = {
 	 * Extend destination object using source object (deep)
 	 * @param {Object} dst destination object
 	 * @param {Object} src source object
+	 * @return the extended {Object}
+	 * 
+	 * This method directly operates on the given dst {Object},
+	 * but it is important to assign the result of this method to
+	 * dst (especially if dst was initially undefined).
+	 * 
 	 * @private
 	 */
 	extend: function(dst, src) {
@@ -21,7 +28,7 @@ var ares = {
 			if (!src) {
 				return src;
 			}
-			dst = (src instanceof Array) ? [] : {};
+			dst = enyo.isArray(src) ? [] : {};
 		}
 		for (var i in src) {
 			if (typeof src[i] == "object") {

@@ -316,12 +316,14 @@ app.configure(function(){
 	app.use(express.logger('dev'));
 
 	app.get('/', function(req, res, next) {
+		log("GET /");
 		res.redirect('/ide/ares/');
 	});
 	app.get('/res/timestamp', function(req, res, next) {
 		res.status(200).json({timestamp: ide.res.timestamp});
 	});
 	app.get('/res/services', function(req, res, next) {
+		log("GET /res/services:", ide.res.services);
 		res.status(200).json({services: ide.res.services});
 	});
 	app.all('/res/services/:serviceId/*', proxyServices);

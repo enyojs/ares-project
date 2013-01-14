@@ -1,28 +1,24 @@
 enyo.kind({
 	name: "HermesFileSystem",
-	kind: "enyo.Object",
+	kind: "enyo.Component",
 	debug: false,
 	events: {
 		onLoginFailed: ""
 	},
 	create: function() {
+		if (this.debug) this.log();
 		this.inherited(arguments);
-		this.auth = undefined;
+		this.config = {};
 	},
 	isOk: function() {
 		return !!this.config.origin;
 	},
 	setConfig: function(inConfig) {
-		if (this.debug) this.log(inConfig);
-		this.config = inConfig;
-		this.authorize(inConfig.auth, enyo.bind(this, function(inError, inValue) {
-			this.log("error:", inError, ", value:", inValue);
-			if (inError) {
-				this.doLoginFailed(inConfig);
-			} else {
-				this.auth = inConfig.auth;
-			}
-		}));
+		var self = this;
+
+		if (this.debug) this.log("config:", this.config, "+", inConfig);
+		this.config = ares.extend(this.config, inConfig);
+		if (this.debug) this.log("=> config:", this.config);
 	},
 	getConfig: function() {
 		return this.config;
@@ -119,6 +115,7 @@ enyo.kind({
 		}
 		function _authFailure(inXhr, inError) {
 			if (this.debug) this.log("authFailure(): inError:", inError, ", body:", (inXhr.xhrResponse ? inXhr.xhrResponse.body : undefined));
+			self.doLoginFailed({id: this.config.id});
 			next(new Error(inError));
 		}
 	},
