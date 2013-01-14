@@ -9,7 +9,6 @@ var fs = require("fs"),
     querystring = require("querystring"),
     temp = require("temp"),
     zipstream = require('zipstream'),
-    formidable = require('formidable'),
     async = require("async"),
     mkdirp = require("mkdirp"),
     rimraf = require("rimraf"),
@@ -43,16 +42,32 @@ function BdPhoneGap(config, next) {
 
 	console.log("config=",  util.inspect(config));
 
+	var app, server;
+	if (express.version.match(/^2\./)) {
+		// express-2.x
+		app = express.createServer();
+		server = app;
+	} else {
+		// express-3.x
+		app = express();
+		server = http.createServer(app);
+	}
+
 	/*
-	// express-3.x
-	var app = express(),
-	    server = http.createServer(app); // XXX replace by HTTP server from config
+	 * Middleware -- applied to every verbs
 	 */
-	// express-2.x
-	var app = express.createServer(),
-	    server = app;
 
 	app.use(express.logger('dev'));
+
+	/**
+	 * Make sane Express matching paths
+	 * @private
+	 */
+	function makeExpressRoute(path) {
+		return (config.pathname + path)
+			.replace(/\/+/g, "/") // compact "//" into "/"
+			.replace(/(\.\.)+/g, ""); // remove ".."
+	}
 
 	// CORS -- Cross-Origin Resources Sharing
 	app.use(function(req, res, next) {
@@ -77,25 +92,36 @@ function BdPhoneGap(config, next) {
 		}
 	});
 
+	function authorize(req, res, next) {
+		console.log("bdPhoneGap.authorize(): req.url:", req.url);
+		console.log("bdPhoneGap.authorize(): req.query:", req.query);
+		console.log("bdPhoneGap.authorize(): req.cookies:", req.cookies);
+		var token = req.cookies.token || req.param('token');
+		if (token) {
+			req.token = token;
+			next();
+		} else {
+			next (new HttpError('Missing authentication token', 401));
+		}
+	}
+	app.use(makeExpressRoute('/op'), authorize.bind(this));
+	app.use(makeExpressRoute('/api'), authorize.bind(this));
+
 	// Built-in express form parser: handles:
 	// - 'application/json' => req.body
 	// - 'application/x-www-form-urlencoded' => req.body
-	// - 'multipart/form-data' => req.body.field[]
+	// - 'multipart/form-data' => req.body.<field>[], req.body.file[]
 	var uploadDir = temp.path({prefix: 'com.palm.ares.hermes.bdPhoneGap'}) + '.d';
 	fs.mkdirSync(uploadDir);
 	app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
 
-	/**
-	 * Global error handler
-	 * @private
-	 */
+	// Global error handler
 	function errorHandler(err, req, res, next){
 		console.error("errorHandler(): ", err.stack);
 		res.status(err.statusCode || 500);
 		res.contentType('txt'); // direct usage of 'text/plain' does not work
 		res.send(err.toString());
 	}
-
 	if (app.error) {
 		// express-2.x: explicit error handler
 		app.error(errorHandler);
@@ -104,18 +130,18 @@ function BdPhoneGap(config, next) {
 		app.use(errorHandler);
 	}
 
-	/**
-	 * Make sane Express matching paths
-	 * @private
+	/*
+	 * Verbs
 	 */
-	function makeExpressRoute(path) {
-		return (config.pathname + path)
-			.replace(/\/+/g, "/") // compact "//" into "/"
-			.replace(/(\.\.)+/g, ""); // remove ".."
-	}
+
+	// '/token' & '/api' -- Wrapped public Phonegap API
+	app.post(makeExpressRoute('/token'), getToken);
+	app.get(makeExpressRoute('/api/v1/me'), getUserData);
+	
+	// '/op' -- localy-implemented operations
 
 	// Return the ZIP-ed deployed Enyo application
-	app.post(makeExpressRoute('/deploy'), function(req, res, next) {
+	app.post(makeExpressRoute('/op/deploy'), function(req, res, next) {
 		async.series([
 			prepare.bind(this, req, res),
 			store.bind(this, req, res),
@@ -132,18 +158,16 @@ function BdPhoneGap(config, next) {
 		});
 	});
 
-	app.post(makeExpressRoute('/token'), getToken);
-	
 	// Upload ZIP-ed deployed Enyo application to the
 	// https://build.phonegap.com online service and return the
 	// JSON-encoded response of the service.
-	app.post(makeExpressRoute('/build'), function(req, res, next) {
+	app.post(makeExpressRoute('/op/build'), function(req, res, next) {
 		async.series([
 			prepare.bind(this, req, res),
 			store.bind(this, req, res),
 			deploy.bind(this, req, res),
 			zip.bind(this, req, res),
-			build.bind(this, req, res),
+			upload.bind(this, req, res),
 			returnBody.bind(this, req, res),
 			cleanup.bind(this, req, res)
 		], function (err, results) {
@@ -195,7 +219,6 @@ function BdPhoneGap(config, next) {
 			function(done) { fs.mkdir(req.appDir.deploy, done); }
 		], next);
 	}
-
 
 	function store(req, res, next) {
 		if (!req.is('multipart/form-data')) {
@@ -326,17 +349,39 @@ function BdPhoneGap(config, next) {
 		//console.log("getToken(): req.body = ", util.inspect(req.body));
 		api.createAuthToken(req.body.username + ':' +req.body.password, {
 			success: function(token) {
-				res.status(200).send({token: token});
-				next();
+				var exdate=new Date();
+				exdate.setDate(exdate.getDate() + 10 /*days*/);
+				var cookieOptions = {
+					domain: '127.0.0.1:' + config.port,
+					path: config.pathname,
+					httpOnly: true,
+					expires: exdate
+					//maxAge: 1000*3600 // 1 hour
+				};
+				res.cookie('token', token, cookieOptions);
+				console.log("Bdphonegap.getToken(): Set-Cookie: token:", token);
+				res.status(200).send({token: token}).end();
 			},
-			error: function(errStr) {
-				next(new Error(errStr));
+			error: function(errStr, statusCode) {
+				next(new HttpError(errStr, statusCode));
 			}
 		});
 	}
 
-	function build(req, res, next) {
-		console.log("build(): fields req.body = ", util.inspect(req.body));
+	function getUserData(req, res, next) {
+		api.getUserData(req.token, {
+			success: function(inValue) {
+				console.log("typeof inValue:", typeof inValue, ", inValue:", inValue);
+				res.status(200).send({user: inValue}).end();
+			},
+			error: function(errStr, statusCode) {
+				next(new HttpError(errStr, statusCode));
+			}
+		});
+	}
+
+	function upload(req, res, next) {
+		console.log("upload(): fields req.body = ", util.inspect(req.body));
 		var reqData = {};
 		var errs = [];
 		var mandatory = ['token', 'title'];
@@ -364,20 +409,20 @@ function BdPhoneGap(config, next) {
 				next(err);
 			}
 		} else if (req.body.appId) {
-			console.log("build(): updating appId="+ req.body.appId + " (title='" + req.body.title + "')");
+			console.log("upload(): updating appId="+ req.body.appId + " (title='" + req.body.title + "')");
 			api.updateFileBasedApp(req.body.token, req.zip.path, req.body.appId, {
 				success: next,
 				error: _fail
 			});
 		} else {
-			console.log("build(): creating new appId for title=" + req.body.title + "");
+			console.log("upload(): creating new appId for title=" + req.body.title + "");
 			reqData.create_method = 'file';
 			for (var p in req.body) {
 				if (typeof p === 'string') {
 					reqData[p] = req.body[p];
 				}
 			}
-			console.log("build(): reqData=", reqData);
+			console.log("upload(): reqData=", reqData);
 			api.createFileBasedApp(req.body.token, req.zip.path, reqData, {
 				success: _success,
 				error: _fail
@@ -386,7 +431,7 @@ function BdPhoneGap(config, next) {
 		
 		function _success(data) {
 			try {
-				console.log("build(): ", util.inspect(data));
+				console.log("upload(): ", util.inspect(data));
 				if (typeof data === 'string') {
 					data = JSON.parse(data);
 				}
@@ -402,7 +447,7 @@ function BdPhoneGap(config, next) {
 		}
 		
 		function _fail(errMsg) {
-			console.error("build(): error ", errMsg);
+			console.error("upload(): error ", errMsg);
 			next(new HttpError("PhoneGap build error: " + errMsg, 400 /*Bad Request*/));
 		}
 	}
