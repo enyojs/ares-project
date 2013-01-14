@@ -27,6 +27,11 @@ enyo.kind({
 					]}
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
+					{kind: "FittableColumns", components: [
+						{kind: "onyx.Button", content: "Up", ontap: "upAction"},
+						{kind: "onyx.Button", content: "Down", ontap: "downAction"},
+						{kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"}
+					]},
 					{kind: "ComponentView", classes: "deimos_panel ares_deimos_componentView", onSelect: "componentViewSelect", ondrop: "componentViewDrop"},
 					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
 				]}
@@ -193,6 +198,15 @@ enyo.kind({
 	},
 	saveNeeded: function() {
 		return this.docHasChanged;
+	},
+	upAction: function(inSender, inEvent) {
+		this.$.designer.upAction(inSender, inEvent);
+	},
+	downAction: function(inSender, inEvent) {
+		this.$.designer.downAction(inSender, inEvent);
+	},
+	deleteAction: function(inSender, inEvent) {
+		this.$.designer.deleteAction(inSender, inEvent);
 	}
 });
 

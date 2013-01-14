@@ -10,13 +10,6 @@ enyo.kind({
 		{name: "selectionOutline", kind: "DesignerOutline", style: "border: 5px dotted rgba(255, 146, 38, 0.7);"},
 		{name: "containerOutline", kind: "DesignerOutline", style: "border: 5px solid rgba(24, 24, 255, 0.3);"},
 		{kind: "FittableRows", classes: "deimos_panel_center  enyo-fit", components: [
-			{style:"text-align:center;", components: [
-				//{kind: "Button", content: "Undo"},
-				//{kind: "Button", content: "Redo"},
-				{kind: "onyx.Button", content: "Up", ontap: "upAction"},
-				{kind: "onyx.Button", content: "Down", ontap: "downAction"},
-				{kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"}
-			]},
 			{name: "client", fit: true, kind: "Sandbox"}
 		]}
 	],
