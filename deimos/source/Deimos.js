@@ -70,7 +70,7 @@ enyo.kind({
 			maxLen = Math.max(k.name.length, maxLen);
 		}
 		this.index=null;
-		this.$.kindButton.applyStyle("width", maxLen + "em");
+		this.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.$.kindPicker.render();
 		this.docHasChanged = false;
 

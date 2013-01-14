@@ -17,7 +17,7 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Down", ontap: "downAction"},
 				{kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"}
 			]},
-			{name: "client", fit: true, kind: "DesignerPanel"}
+			{name: "client", fit: true, kind: "Sandbox"}
 		]}
 	],
 	style: "outline: none; position: relative;",
@@ -283,16 +283,6 @@ enyo.kind({
 	}
 });
 
-enyo.kind({
-	name: "DesignerPanel",
-	classes: "deimos_panel_center",
-	events: {
-		onDesignRendered: ""
-	},
-	rendered: function() {
-		this.doDesignRendered();
-	}
-});
 enyo.kind({
     name: "Ares.Proxy",
 	published: {
