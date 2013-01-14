@@ -51,10 +51,10 @@ enyo.kind({
 	},
 	/**
 	 * Authenticate current user & retreive the associated token
-	 *
+	 * 
 	 * If successful, #username, #password & the token are save to
 	 * the browser client localStorage.
-	 *
+	 * 
 	 * @param {Object} auth contains the properties #username and #password
 	 * @param {Function} next is a CommonJS callback
 	 * @public
@@ -117,7 +117,7 @@ enyo.kind({
 		});
 		req.response(this, function(inSender, inData) {
 			this.config.auth.token = inData.token;
-			if (this.debug) this.log("Got phonegap token: " + this.config.auth.token);
+			if (this.debug) this.log("Got phonegap token:", this.config.auth.token);
 			// store token
 			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
 			next();
@@ -309,7 +309,7 @@ enyo.kind({
 			next(new Error("Project not configured for Phonegap Build"));
 			return;
 		}
-		if (this.debug) this.log("appId: " + config.build.phonegap.appId);
+		if (this.debug) this.log("appId:", config.build.phonegap.appId);
 
 		this.getFileList(project, next);
 	},
@@ -401,7 +401,7 @@ enyo.kind({
 			}
 		});
 		request.error(this, function(inEvent, inData) {
-			this.log("ERROR while downloading files: " + inData);
+			this.log("ERROR while downloading files:", inData);
 			next(new Error("Unable to download project files"));
 		});
 	},
@@ -415,31 +415,41 @@ enyo.kind({
 		var config = ares.clone(project.config.getData());
 		var keys = {};
 		var platforms = [];
-		if (this.debug) this.log("...");
-		// Add token information in the FormData
+		if (this.debug) this.log("config: ", config);
+
+		// mandatory parameters
 		formData.append('token', this.config.auth.token);
 		formData.append('title', config.title);
+
+		// Already-created apps have an appId (to be reused)
 		if (config.build.phonegap.appId) {
-			if (this.debug) this.log("appId: " + config.build.phonegap.appId);
+			if (this.debug) this.log("appId:", config.build.phonegap.appId);
 			formData.append('appId', config.build.phonegap.appId);
 		}
+
+		// Signing keys, if applicable to the target platform
+		// & if chosen by the app developper.
 		enyo.forEach(enyo.keys(config.build.phonegap.targets), function(target) {
 			var pgTarget = config.build.phonegap.targets[target];
 			if (pgTarget) {
 				if (this.debug) this.log("platform:", target);
 				platforms.push(target);
 				if (typeof pgTarget === 'object') {
-					var keyId = pgTarget.key;
+					var keyId = pgTarget.keyId;
 					if (keyId) {
-						keys[target] = this.getKey(target, keyId);
-						if (this.debug) this.log("platform:", target, "keys:", keys);
+						keys[target] = enyo.clone(this.getKey(target, keyId));
+						//delete keys[target].title;
+						//if (this.debug) this.log("platform:", target, "keys:", keys);
 					}
 				}
 			}
 		}, this);
 		if (enyo.keys(keys).length > 0) {
+			if (this.debug) this.log("keys:", keys);
 			formData.append('keys', JSON.stringify(keys));
 		}
+
+		// Target platforms -- defined by the Web API, but not implemented yet
 		if (platforms.length > 0) {
 			formData.append('platforms', JSON.stringify(platforms));
 		} else {

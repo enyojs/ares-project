@@ -100,6 +100,14 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Us
 	],
 	[...]
 
+### PhoneGap Build
+
+Ares includes the ability to package a mobile Enyo application using [PhoneGap Build](https://build.phonegap.com/).  You must have a properly setup account (with signing keys & distribution certificates) before being able to use Ares to build applications using Phone.
+
+Here are a few references to create the necessary signing keys & distribution certificates:
+
+1. [Android Application Signing](http://developer.android.com/tools/publishing/app-signing.html)
+
 ### Dropbox
 
 In order to use Dropbox as storage service for Ares, follow detailed setup instructions in `hermes/README.md`
