@@ -66,7 +66,7 @@ enyo.kind({
 		this.$.checkBtn.setDisabled(true);
 		this.$.userData.hide();
 		async.waterfall([
-			enyo.bind(this, this.updateAuth),
+			enyo.bind(this, this.authenticate),
 			enyo.bind(this.service, this.service.authorize),
 			enyo.bind(this, this.display)
 		], function(err, results) {
@@ -88,16 +88,12 @@ enyo.kind({
 	 * @param {Function} next CommonJS callback, invoked after update is completed
 	 * @private
 	 */
-	updateAuth: function(next) {
-		if (this.debug) this.log('In progress...');
-		this.doUpdateAuth({
-			serviceId: this.serviceId,
-			auth: {
-				username: this.$.username.getValue(),
-				password: this.$.password.getValue()
-			},
-			next: next
-		});
+	authenticate: function(next) {
+		if (this.debug) this.log();
+		this.service.authenticate({
+			username: this.$.username.getValue(),
+			password: this.$.password.getValue()
+		}, next);
 	},
 	/**
 	 * Display relevant data following account checking

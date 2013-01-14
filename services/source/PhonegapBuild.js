@@ -50,6 +50,26 @@ enyo.kind({
 			  this.config.auth.keys);
 	},
 	/**
+	 * Authenticate current user & retreive the associated token
+	 *
+	 * If successful, #username, #password & the token are save to
+	 * the browser client localStorage.
+	 *
+	 * @param {Object} auth contains the properties #username and #password
+	 * @param {Function} next is a CommonJS callback
+	 * @public
+	 */
+	authenticate: function(inAuth, next) {
+		if (this.debug) this.log();
+		if (this.config.auth.username != inAuth.username) {
+			this.config.auth = {
+				username: inAuth.username,
+				password: inAuth.password
+			};
+		}
+		this._getToken(next);
+	},
+	/**
 	 * Authorize & then retrieve information about the currently registered user
 	 * 
 	 * This includes registered applications & signing keys.
