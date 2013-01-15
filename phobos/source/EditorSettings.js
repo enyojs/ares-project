@@ -138,7 +138,6 @@ enyo.kind({
 
 		for (var i=1; i<50; i++) {
 			this.$.fontSizePicker.createComponent({content: i, active: !i});
-			this.$.tabSizePicker.createComponent({content: i, active: !i});
 		}
 	},
 
@@ -155,12 +154,6 @@ enyo.kind({
 	wordWrapToggle: function(inSender, inEvent){
 		this.wordWrap = inEvent.value;
 		this.doWordWrap();
-	},
-
-	softTabToggle: function(inSender, inEvent){
-		console.log("in",inEvent.value)
-		this.softtab = inEvent.value;
-		this.doSoftTabs();
 	},
 
 	oksave: function() {
