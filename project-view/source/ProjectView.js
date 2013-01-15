@@ -144,7 +144,8 @@ enyo.kind({
 			var topFile = config.data.preview.top_file ;
 			var projectUrl = this.currentProject.getProjectUrl() + '/' + topFile ;
 
-			var winLoc = window.location.toString().replace('ares','preview') ;
+			// the last replace method is needed for test environment only
+			var winLoc = window.location.toString().replace('ares','preview').replace('test', 'index') ;
 			var previewUrl = winLoc
 				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
 				+ 'url=' + encodeURIComponent(projectUrl);
