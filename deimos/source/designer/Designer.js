@@ -78,14 +78,12 @@ enyo.kind({
 		this.$.client.resized();
 	},
 	load: function(inDocument) {
-		var components=inDocument.components;
-		this.proxyArray(components);
+		this.proxyUnknownKinds(inDocument);
 		this.hideSelection();
 		this.$.model.destroyComponents();
-		this.$.client.createComponents(components, {owner: this.$.model});
+		this.$.client.createComponents([inDocument], {owner: this.$.model});
 		this.render();
 		this.resized();
-		this.doChange();
 		var c = this.$.client.children[0];
 		if (c) {
 			this.trySelect(c);
@@ -93,7 +91,7 @@ enyo.kind({
 	},
 	save: function() {
 		this.unProxyUnknownKinds(this.$.client);
-		return this.$.serializer.serialize(this.$.client, this.$.model);
+		return this.$.serializer.serialize(this.$.client.children[0], this.$.model);
 	},
 	deleteAction: function() {
 		if (this.selection) {
