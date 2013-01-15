@@ -12,7 +12,8 @@ enyo.kind({
 				{name: "saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "saveDocAction"},
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: $L("New Kind"), ontap: "newKindAction"},
 				{fit: true},
-				{name: "designerButton", kind: "onyx.Button", content: $L("Designer"), ontap: "designerAction"}
+				{name: "designerButton", kind: "onyx.Button", content: $L("Designer"), ontap: "designerAction"},
+				{name: "editorButton", kind: "onyx.Button", content: "Editor Settings", ontap: "editorSettings"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
@@ -31,7 +32,9 @@ enyo.kind({
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
-		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor"}
+		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor"},
+		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "ares_phobos_settingspop", centered: true, modal: true, floating: true,
+		onChangeTheme: "changeTheme", onChangeHighLight: "changeHighLight", onClose: "closeEditorPop", onWordWrap: "changeWordWrap", onFontsizeChange: "changeFont", onTabSizsChange: "tabSize"}
 	],
 	events: {
 		onSaveDocument: "",
@@ -106,6 +109,31 @@ enyo.kind({
 			// Pass to the autocomplete compononent a reference to ace
 			this.$.autocomplete.setAce(this.$.ace);
 			this.focusEditor();
+
+			/* set editor to user pref */
+			this.$.ace.highlightActiveLine = localStorage.highlight;
+			if(this.$.ace.highlightActiveLine ===  undefined){
+				this.$.ace.highlightActiveLine = false;
+			}
+
+			if(this.$.ace.highlightActiveLine.indexOf("false") != -1){
+				this.$.ace.highlightActiveLine = false;
+			}
+			this.$.ace.highlightActiveLineChanged();
+
+			this.$.ace.wordWrap = localStorage.wordwrap;
+
+			if(this.$.ace.wordWrap.indexOf("false") != -1){
+				this.$.ace.wordWrap = false;
+			}
+			this.$.ace.wordWrapChanged();
+
+			this.fSize = localStorage.fontsize;
+			if(this.fSize ===  undefined){
+				this.fSize = "11px";
+			}
+
+			this.$.ace.setFontSize(this.fSize);
 		}
 		else {
 			var origin = this.projectData.getService().getConfig().origin;
@@ -561,12 +589,12 @@ enyo.kind({
 	replaceAll: function(){
 		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
-	
+
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
 	replace: function(){
 		//this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
-	
+
 	focusEditor: function(inSender, inEvent) {
 		this.$.ace.focus();
 	},
@@ -575,7 +603,41 @@ enyo.kind({
 	},
 	handleScroll: function(inSender, inEvent) {
 		this.$.autocomplete.hide();
+	},
+
+	/*  editor setting */
+
+	editorSettings: function() {
+		this.$.editorSettingsPopup.show();
+	},
+
+	closeEditorPop: function(){
+		this.$.editorSettingsPopup.hide();
+	},
+
+	changeHighLight: function(){
+		this.$.ace.highlightActiveLine = this.$.editorSettingsPopup.highlight;
+		this.$.ace.highlightActiveLineChanged();
+	},
+	changeTheme: function() {
+		this.$.ace.theme = this.$.editorSettingsPopup.theme;
+		this.$.ace.themeChanged();
+	},
+	changeWordWrap: function() {
+		this.$.ace.wordWrap = this.$.editorSettingsPopup.wordWrap;
+		this.$.ace.wordWrapChanged();
+	},
+	changeFont: function(){
+		var fs = this.$.editorSettingsPopup.fSize;
+			this.$.ace.setFontSize(fs);
+	},
+
+	tabSize: function() {
+		var ts = this.$.ace.editorSettingsPopup.Tsize;
+		console.log("ts",ts);
+		this.$.ace.setTabSize(ts);
 	}
+
 });
 
 enyo.kind({
