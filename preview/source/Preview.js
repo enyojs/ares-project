@@ -46,14 +46,30 @@ enyo.kind(
 							}
 						]
 					},
-					{content: "width: 600px",  name: "devWidth",  style: "margin: 8px"},
-					{content: "height: 800px", name: "devHeight", style: "margin: 8px"},
-					{content: "DPR: 1",        name: "devDPR",    style: "margin: 8px",
-					 attributes: {title: "display pixel ratio"} }
+					{tag: "br"},
+
+					{
+						kind: 'onyx.Groupbox',
+						components: [
+							{kind: "onyx.GroupboxHeader", content: "Details"},
+							{content: "width: 600px",  name: "devWidth",  style: "margin: 8px"},
+							{content: "height: 800px", name: "devHeight", style: "margin: 8px"},
+							{content: "DPR: 1",        name: "devDPR",    style: "margin: 8px",
+							 attributes: {title: "display pixel ratio"} }
+						]
+					},
+					{tag: "br"},
+					{
+						kind: 'onyx.Groupbox',
+						components: [
+							{kind: "onyx.GroupboxHeader", content: "Zoom"},
+							{kind: "onyx.Slider", value: 100, onChange: 'zoom', onChanging: 'zoom' }
+						]
+					}
 				]
 			},
 			{
-				name: 'iframe',
+				name: 'scrolledIframe',
 				fit: true,
 				kind: "ares.ScrolledIFrame"
 			}
@@ -67,6 +83,14 @@ enyo.kind(
 			}
 		},
 
+		zoom: function(inSender, inEvent) {
+
+			enyo.dom.transformValue(
+				this.$.scrolledIframe.$.iframe, "scale", 0.3 + 0.7 * inSender.getValue() / 100
+			) ;
+			this.resized() ;
+		},
+
 		resize: function() {
 			var device = this.$.device.selected ;
 			var orientation = this .$.orientation.selected ;
@@ -77,7 +101,7 @@ enyo.kind(
 			var swap = orientation.swap ;
 			var targetW = swap ? dh : dw ;
 			var targetH = swap ? dw : dh ;
-			this.$.iframe.setGeometry( targetW , targetH) ;
+			this.$.scrolledIframe.setGeometry( targetW , targetH) ;
 			this.$.devWidth .setContent("width: "  + targetW + 'px') ;
 			this.$.devHeight.setContent("height: " + targetH + 'px') ;
 			this.$.devDPR   .setContent("DPR: "    + device.value.dpr) ;
@@ -103,7 +127,7 @@ enyo.kind(
 			var param = this.getQueryParams(window.location.search) ;
 			this.log("preview url " + param.url) ;
 
-			this.$.iframe.setUrl   (param.url) ;
+			this.$.scrolledIframe.setUrl   (param.url) ;
 		}
 	}
 );
