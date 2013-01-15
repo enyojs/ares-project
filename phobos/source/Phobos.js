@@ -561,12 +561,12 @@ enyo.kind({
 	replaceAll: function(){
 		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
-	
+
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
 	replace: function(){
 		//this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
-	
+
 	focusEditor: function(inSender, inEvent) {
 		this.$.ace.focus();
 	},
@@ -575,7 +575,41 @@ enyo.kind({
 	},
 	handleScroll: function(inSender, inEvent) {
 		this.$.autocomplete.hide();
-	}
+	},
+
+	/*  editor setting */
+
+	editorSettings: function() {
+		this.$.editorSettingsPopup.show();
+	},
+
+	closeEditorPop: function(){
+		this.$.editorSettingsPopup.hide();
+	},
+
+	changeHighLight: function(){
+		this.$.ace.highlightActiveLine = this.$.editorSettingsPopup.highlight;
+		this.$.ace.highlightActiveLineChanged();
+	},
+	changeTheme: function() {
+		this.$.ace.theme = this.$.editorSettingsPopup.theme;
+		this.$.ace.themeChanged();
+	},
+	changeWordWrap: function() {
+		this.$.ace.wordWrap = this.$.editorSettingsPopup.wordWrap;
+		this.$.ace.wordWrapChanged();
+	},
+	changeFont: function(){
+		var fs = this.$.editorSettingsPopup.fSize;
+			this.$.ace.setFontSize(fs);
+	},
+
+	tabSize: function() {
+		var ts = this.$.ace.editorSettingsPopup.Tsize;
+		console.log("ts",ts);
+		this.$.ace.setTabSize(ts);
+	},
+
 });
 
 enyo.kind({
