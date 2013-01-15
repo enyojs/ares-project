@@ -115,7 +115,7 @@ enyo.kind({
 			if(this.$.ace.highlightActiveLine ===  undefined){
 				this.$.ace.highlightActiveLine = false;
 			}
-			
+
 			if(this.$.ace.highlightActiveLine.indexOf("false") != -1){
 				this.$.ace.highlightActiveLine = false;
 			}
@@ -132,7 +132,7 @@ enyo.kind({
 			if(this.fSize ===  undefined){
 				this.fSize = "11px";
 			}
-			
+
 			this.$.ace.setFontSize(this.fSize);
 		}
 		else {
@@ -636,7 +636,7 @@ enyo.kind({
 		var ts = this.$.ace.editorSettingsPopup.Tsize;
 		console.log("ts",ts);
 		this.$.ace.setTabSize(ts);
-	},
+	}
 
 });
 
