@@ -31,7 +31,7 @@ enyo.kind({
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
-		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor"}
+		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose"}
 	],
 	events: {
 		onSaveDocument: "",
@@ -561,12 +561,12 @@ enyo.kind({
 	replaceAll: function(){
 		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
-	
+
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
 	replace: function(){
 		//this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
-	
+
 	focusEditor: function(inSender, inEvent) {
 		this.$.ace.focus();
 	},
@@ -575,7 +575,11 @@ enyo.kind({
 	},
 	handleScroll: function(inSender, inEvent) {
 		this.$.autocomplete.hide();
-	}
+	},
+
+	findClose: function(){
+		this.$.findpop.hide();
+	},
 });
 
 enyo.kind({
