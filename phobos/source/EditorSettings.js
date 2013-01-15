@@ -123,15 +123,6 @@ enyo.kind({
 		}
 		this.$.wordWrapButton.value = this.wordWrap;
 
-		this.softTab = localStorage.softtab;
-		if( this.softTab === undefined){
-			this.softTab = "false";
-		}
-		if(	this.softTab.indexOf("false") != -1){
-			this.softTab = false;
-		}
-		this.$.softTabButton.value = this.softTab;
-
 		// initialization code goes here
 		// lock thems Button's width, so it doesn't move when the caption changes
 		this.$.themes.setBounds({width: 100 });
@@ -162,7 +153,6 @@ enyo.kind({
 		localStorage.wordwrap = this.wordWrap;
 		localStorage.fontsize = this.fSize;
 		localStorage.tabsize = this.tSize;
-		localStorage.softtab = this.softtab;
 		this.doClose();
 	},
 
