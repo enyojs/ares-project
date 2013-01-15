@@ -28,9 +28,9 @@ enyo.kind({
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
 					{kind: "FittableColumns", components: [
-						{kind: "onyx.Button", content: "Up", ontap: "upAction"},
-						{kind: "onyx.Button", content: "Down", ontap: "downAction"},
-						{kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"}
+						{name:"upButton", kind: "onyx.Button", content: "Up", ontap: "upAction"},
+						{name:"downButton", kind: "onyx.Button", content: "Down", ontap: "downAction"},
+						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"}
 					]},
 					{kind: "ComponentView", classes: "deimos_panel ares_deimos_componentView", onSelect: "componentViewSelect", ondrop: "componentViewDrop"},
 					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
@@ -131,13 +131,17 @@ enyo.kind({
 		return true; // Stop the propagation of the event
 	},
 	designerSelect: function(inSender, inEvent) {
+		var c = inSender.selection;
 		this.refreshInspector();
-		this.$.componentView.select(inSender.selection);
+		this.$.componentView.select(c);
+		this.enableDisableButtons(c);
 		return true; // Stop the propagation of the event
 	},
 	componentViewSelect: function(inSender) {
-		this.$.designer.select(inSender.selection);
+		var c = inSender.selection;
+		this.$.designer.select(c);
 		this.refreshInspector();
+		this.enableDisableButtons(c);
 		return true; // Stop the propagation of the event
 	},
 	inspectorModify: function() {
@@ -207,6 +211,12 @@ enyo.kind({
 	},
 	deleteAction: function(inSender, inEvent) {
 		this.$.designer.deleteAction(inSender, inEvent);
+	},
+	enableDisableButtons: function(control) {
+		var disabled = this.$.designer.isRootControl(control);
+		this.$.upButton.setDisabled(disabled);
+		this.$.downButton.setDisabled(disabled);
+		this.$.deleteButton.setDisabled(disabled);
 	}
 });
 

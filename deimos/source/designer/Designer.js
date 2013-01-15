@@ -50,7 +50,7 @@ enyo.kind({
 			c = c.parent;
 		}
 		this.select(c);
-		this.doSelect();
+		this.doSelect({component: c});
 	},
 	selectContainer: function() {
 		if (this.selection) {
@@ -249,6 +249,9 @@ enyo.kind({
 			}
 		}
 		return component;
+	},
+	isRootControl: function(control) {
+		return (control === this.$.client.children[0]);
 	}
 });
 
