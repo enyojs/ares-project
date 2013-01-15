@@ -109,6 +109,27 @@ enyo.kind({
 			// Pass to the autocomplete compononent a reference to ace
 			this.$.autocomplete.setAce(this.$.ace);
 			this.focusEditor();
+
+			/* set editor to user pref */
+			this.$.ace.highlightActiveLine = localStorage.highlight;
+			if(this.$.ace.highlightActiveLine ===  undefined){
+				this.$.ace.highlightActiveLine = false;
+			}
+			//this.$.ace.highlightActiveLine = false;
+			if(this.$.ace.highlightActiveLine.indexOf("false") != -1){
+				this.$.ace.highlightActiveLine = false;
+			}
+			this.$.ace.highlightActiveLineChanged();
+
+			this.$.ace.wordWrap = localStorage.wordwrap;
+
+			if(this.$.ace.wordWrap.indexOf("false") != -1){
+				this.$.ace.wordWrap = false;
+			}
+			this.$.ace.wordWrapChanged();
+
+			this.fSize = localStorage.fontsize;
+			this.$.ace.setFontSize(this.fSize);
 		}
 		else {
 			var origin = this.projectData.getService().getConfig().origin;
