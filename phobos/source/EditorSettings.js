@@ -32,16 +32,7 @@ enyo.kind({
 			{name: "wordWrapButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "wordWrapToggle"},
 
 		]},
-
-		{tag: "br"},
-
-		{ kind: "FittableColumns", classes:"ares_editorfont", components: [
-			{fit: true, classes: "ares_editorfont", content: "Soft Tabs"},
-			{style: "width: 65px;", content: " "},
-			{name: "softTabButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "softTabToggle"},
-
-		]},
-
+		
 		{fit: true, content: " "},
 		{tag: "br"},
 
@@ -152,19 +143,12 @@ enyo.kind({
 		localStorage.highlight = this.highlight;
 		localStorage.wordwrap = this.wordWrap;
 		localStorage.fontsize = this.fSize;
-		localStorage.tabsize = this.tSize;
 		this.doClose();
 	},
 
 	fontSize: function(inSender, inEvent) {
 		this.fSize = inEvent.selected.content + "px";
 		this.doFontsizeChange();
-	},
-
-	tabSize: function(inSender, inEvent) {
-		this.tSize = inEvent.selected.content;
-			console.log("tsize",this.tSize);
-		this.doTabSizeChange();
 	}
 
 });
