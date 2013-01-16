@@ -65,6 +65,14 @@ enyo.kind(
 							{kind: "onyx.GroupboxHeader", content: "Zoom"},
 							{kind: "onyx.Slider", value: 100, onChange: 'zoom', onChanging: 'zoom' }
 						]
+					},
+					{tag: "br"},
+					{
+						kind:"onyx.Button",
+						content: "Detach test",
+						ontap:"detachIframe",
+						style: "padding: 5px; width: 100%",
+						attributes: { title: "detach test device, then right click to enable Ripple emulator"}
 					}
 				]
 			},
@@ -76,6 +84,7 @@ enyo.kind(
 		],
 
 		debug: true ,
+		iframeUrl: null,
 
 		dlog: function() {
 			if (this.debug) {
@@ -126,8 +135,19 @@ enyo.kind(
 
 			var param = this.getQueryParams(window.location.search) ;
 			this.log("preview url " + param.url) ;
+			this.iframeUrl = param.url ;
 
 			this.$.scrolledIframe.setUrl   (param.url) ;
+		},
+
+		detachIframe: function() {
+			window.open(
+				this.iframeUrl ,
+				'_blank', // ensure that a new window is created each time preview is tapped
+				'scrollbars=1,menubar=1',
+				false
+			);
+			window.close();
 		}
 	}
 );
