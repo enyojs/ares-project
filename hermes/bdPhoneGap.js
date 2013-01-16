@@ -395,6 +395,13 @@ function BdPhoneGap(config, next) {
 			return;
 		}
 
+		// Pick signing keys, if provided
+		try {
+			reqData.keys = JSON.parse(req.body.keys);
+		} catch(e) {
+			console.log("upload(): no valid signing keys");
+		}
+
 		// When the specific field 'testResponse'
 		// (JSON-encoded) is present, the build request is not
 		// presented to the outside build.phonegap.com
@@ -410,7 +417,7 @@ function BdPhoneGap(config, next) {
 			}
 		} else if (req.body.appId) {
 			console.log("upload(): updating appId="+ req.body.appId + " (title='" + req.body.title + "')");
-			api.updateFileBasedApp(req.body.token, req.zip.path, req.body.appId, {
+			api.updateFileBasedApp(req.body.token, req.zip.path, req.body.appId, reqData, {
 				success: next,
 				error: _fail
 			});
@@ -418,7 +425,7 @@ function BdPhoneGap(config, next) {
 			console.log("upload(): creating new appId for title=" + req.body.title + "");
 			reqData.create_method = 'file';
 			for (var p in req.body) {
-				if (typeof p === 'string') {
+				if (!reqData[p] && (typeof p === 'string')) {
 					reqData[p] = req.body[p];
 				}
 			}
