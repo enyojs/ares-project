@@ -3,7 +3,7 @@ enyo.kind(
 		name: "Preview",
 		kind: "FittableColumns",
 		classes: "enyo-fit enyo-border-box",
-		style: "margin: 4px",
+		style: "margin: 4px; background-color: #DDD",
 
 		components: [
 			{
@@ -52,9 +52,9 @@ enyo.kind(
 						kind: 'onyx.Groupbox',
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Details"},
-							{content: "width: 600px",  name: "devWidth",  style: "margin: 8px"},
-							{content: "height: 800px", name: "devHeight", style: "margin: 8px"},
-							{content: "DPR: 1",        name: "devDPR",    style: "margin: 8px",
+							{content: "width: 600px",  name: "devWidth",  style: "padding: 8px"},
+							{content: "height: 800px", name: "devHeight", style: "padding: 8px"},
+							{content: "DPR: 1",        name: "devDPR",    style: "padding: 8px",
 							 attributes: {title: "display pixel ratio"} }
 						]
 					},
