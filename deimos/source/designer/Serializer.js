@@ -46,7 +46,7 @@ enyo.kind({
 		var ps = this.buildPropList(inComponent, "published");
 		var proto = inComponent.ctor.prototype;
 		for (var j=0, p; (p=ps[j]); j++) {
-			if (!this.noserialize[p] && proto[p] != inComponent[p]) {
+			if (!this.noserialize[p] && proto[p] != inComponent[p] && inComponent[p] !== "") {
 				o[p] = inComponent[p];
 			}
 		}
@@ -63,13 +63,13 @@ enyo.kind({
 		var ps = this.buildPropList(inComponent, "events");
 		var proto = inComponent.ctor.prototype;
 		for (var j=0, p; (p=ps[j]); j++) {
-			if (!this.noserialize[p] && proto[p] != inComponent[p]) {
+			if (!this.noserialize[p] && proto[p] != inComponent[p] && inComponent[p] !== "") {
 				inProps[p] = inComponent[p];
 			}
 		}
 		// this catches any event handlers added that aren't in the "events" list (e.g. DOM events)
 		for (p in inComponent) {
-			if (inComponent.hasOwnProperty(p) && p.substring(0,2) == "on") {
+			if (inComponent.hasOwnProperty(p) && p.substring(0,2) == "on" && inComponent[p] !== "") {
 				inProps[p] = inComponent[p];
 			}
 		}
