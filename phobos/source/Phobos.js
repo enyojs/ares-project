@@ -426,7 +426,7 @@ enyo.kind({
 		// Prepare the code to insert
 		var codeToInsert = "";
 		for(var item in declared) {
-			if (existing[item] === undefined) {
+			if (item !== "" && existing[item] === undefined) {
 				codeToInsert += (commaTerminated ? "" : ",\n");
 				commaTerminated = false;
 				codeToInsert += ("    " + item + ": function(inSender, inEvent) {\n        // TO");
