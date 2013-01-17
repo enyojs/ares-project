@@ -304,7 +304,7 @@ enyo.kind({
 				var comps = o.components;
 				var name = o.name;
 				var kind = o.superkind;
-				if (comps) { // only include kinds with components block
+				if (o.componentsBlockStart && o.componentsBlockEnd) { // only include kinds with components block
 					var start = o.componentsBlockStart;
 					var end = o.componentsBlockEnd;
 					var js = c.substring(start, end);

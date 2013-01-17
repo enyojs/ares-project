@@ -20,13 +20,13 @@ enyo.kind({
 				{name: "left", classes:"ares_deimos_left", kind: "Palette", ondragstart: "dragStart"},
 				{name: "middle", fit: true, kind: "FittableRows",components: [
 					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart", onDesignRendered: "designRendered"},
-					{name: "code", classes: "deimos_panel ares_deimos_code", showing: false, components: [
-						{kind: "Scroller", classes: "enyo-selectable", components: [
-							{name: "codeText", tag: "pre", style: "white-space: pre; font-size: smaller; border: none; margin: 0;"}
-						]}
-					]}
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
+					{kind: "FittableColumns", components: [
+						{name:"upButton", kind: "onyx.Button", content: "Up", ontap: "upAction"},
+						{name:"downButton", kind: "onyx.Button", content: "Down", ontap: "downAction"},
+						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"}
+					]},
 					{kind: "ComponentView", classes: "deimos_panel ares_deimos_componentView", onSelect: "componentViewSelect", ondrop: "componentViewDrop"},
 					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
 				]}
@@ -70,7 +70,7 @@ enyo.kind({
 			maxLen = Math.max(k.name.length, maxLen);
 		}
 		this.index=null;
-		this.$.kindButton.applyStyle("width", maxLen + "em");
+		this.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.$.kindPicker.render();
 		this.docHasChanged = false;
 
@@ -96,7 +96,7 @@ enyo.kind({
 			}
 
 			this.$.inspector.inspect(null);
-			this.$.designer.load(kind.components);
+			this.$.designer.load(kind);
 		}
 
 		this.index=index;
@@ -104,19 +104,14 @@ enyo.kind({
 		this.$.toolbar.reflow();
 		return true; // Stop the propagation of the event
 	},
-	// called after updating model
-	serializeAction: function() {
-		this.$.codeText.setContent("\t" + this.$.designer.serialize());
-	},
 	refreshInspector: function() {
 		enyo.job("inspect", enyo.bind(this, function() {
 			this.$.inspector.inspect(this.$.designer.selection);
 		}), 200);
 	},
 	refreshComponentView: function() {
-		this.$.componentView.visualize(this.$.designer.$.client, this.$.designer.$.model);
+		this.$.componentView.visualize(this.$.designer.$.sandbox, this.$.designer.$.model);
 		this.$.componentView.select(this.$.designer.selection);
-		this.serializeAction();
 	},
 	designerChange: function(inSender) {
 		this.refreshComponentView();
@@ -126,13 +121,17 @@ enyo.kind({
 		return true; // Stop the propagation of the event
 	},
 	designerSelect: function(inSender, inEvent) {
+		var c = inSender.selection;
 		this.refreshInspector();
-		this.$.componentView.select(inSender.selection);
+		this.$.componentView.select(c);
+		this.enableDisableButtons(c);
 		return true; // Stop the propagation of the event
 	},
 	componentViewSelect: function(inSender) {
-		this.$.designer.select(inSender.selection);
+		var c = inSender.selection;
+		this.$.designer.select(c);
 		this.refreshInspector();
+		this.enableDisableButtons(c);
 		return true; // Stop the propagation of the event
 	},
 	inspectorModify: function() {
@@ -193,6 +192,21 @@ enyo.kind({
 	},
 	saveNeeded: function() {
 		return this.docHasChanged;
+	},
+	upAction: function(inSender, inEvent) {
+		this.$.designer.upAction(inSender, inEvent);
+	},
+	downAction: function(inSender, inEvent) {
+		this.$.designer.downAction(inSender, inEvent);
+	},
+	deleteAction: function(inSender, inEvent) {
+		this.$.designer.deleteAction(inSender, inEvent);
+	},
+	enableDisableButtons: function(control) {
+		var disabled = this.$.designer.isRootControl(control);
+		this.$.upButton.setDisabled(disabled);
+		this.$.downButton.setDisabled(disabled);
+		this.$.deleteButton.setDisabled(disabled);
 	}
 });
 
