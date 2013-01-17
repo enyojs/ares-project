@@ -10,7 +10,7 @@ enyo.kind({
 		{name: "selectionOutline", kind: "DesignerOutline", style: "border: 5px dotted rgba(255, 146, 38, 0.7);"},
 		{name: "containerOutline", kind: "DesignerOutline", style: "border: 5px solid rgba(24, 24, 255, 0.3);"},
 		{kind: "FittableRows", classes: "deimos_panel_center  enyo-fit", components: [
-			{name: "client", fit: true, kind: "Sandbox"}
+			{name: "sandbox", fit: true, kind: "Sandbox"}
 		]}
 	],
 	style: "outline: none; position: relative;",
@@ -24,13 +24,13 @@ enyo.kind({
 		ondrop: "drop"
 	},
 	serialize: function() {
-		return this.$.serializer.serialize(this.$.client, this.$.model);
+		return this.$.serializer.serialize(this.$.sandbox, this.$.model);
 	},
 	getComponents: function() {
-		return this.$.serializer.getComponents(this.$.client, this.$.model);
+		return this.$.serializer.getComponents(this.$.sandbox, this.$.model);
 	},
 	previewDomEvent: function(e) {
-		if (e.type == "down" && (e.dispatchTarget != this.$.outline) && e.dispatchTarget.isDescendantOf(this.$.client)) {
+		if (e.type == "down" && (e.dispatchTarget != this.$.outline) && e.dispatchTarget.isDescendantOf(this.$.sandbox)) {
 			this.trySelect(e.dispatchTarget instanceof enyo.Control ? e.dispatchTarget : null);
 		}
 	},
@@ -66,7 +66,7 @@ enyo.kind({
 		return s;
 	},
 	select: function(inControl) {
-		if (inControl && (inControl == this || !inControl.isDescendantOf(this.$.client))) {
+		if (inControl && (inControl == this || !inControl.isDescendantOf(this.$.sandbox))) {
 			inControl = null;
 		}
 		this.selection = inControl;
@@ -75,23 +75,23 @@ enyo.kind({
 	},
 	refresh: function() {
 		this.select(this.selection);
-		this.$.client.resized();
+		this.$.sandbox.resized();
 	},
 	load: function(inDocument) {
 		this.proxyUnknownKinds(inDocument);
 		this.hideSelection();
 		this.$.model.destroyComponents();
-		this.$.client.createComponents([inDocument], {owner: this.$.model});
+		this.$.sandbox.load(inDocument, this.$.model);
 		this.render();
 		this.resized();
-		var c = this.$.client.children[0];
+		var c = this.$.sandbox.children[0];
 		if (c) {
 			this.trySelect(c);
 		}
 	},
 	save: function() {
-		this.unProxyUnknownKinds(this.$.client);
-		return this.$.serializer.serialize(this.$.client.children[0], this.$.model);
+		this.unProxyUnknownKinds(this.$.sandbox);
+		return this.$.serializer.serialize(this.$.sandbox.children[0], this.$.model);
 	},
 	deleteAction: function() {
 		if (this.selection) {
@@ -140,7 +140,7 @@ enyo.kind({
 		var c = this.getSelectedContainer();
 		if ( ! c) {
 			// There is no object already created
-			c = this.$.client;
+			c = this.$.sandbox;
 		}
 
 		// The selection objects are moved around in the DOM and the nodes can lose sync with the enyo node
@@ -163,8 +163,8 @@ enyo.kind({
 				this.moveControl(b, i + 1);
 			}
 		}
-		this.$.client.render();
-		this.$.client.resized();
+		this.$.sandbox.render();
+		this.$.sandbox.resized();
 		//
 		//this.modify();
 		this.select(b);
@@ -178,7 +178,7 @@ enyo.kind({
 		// which is not true in general
 		move(inControl, inIndex, inControl.parent.children);
 		move(inControl, inIndex, inControl.container.controls);
-		this.$.client.resized();
+		this.$.sandbox.resized();
 	},
 	nudgeControl: function(inControl, inDelta) {
 		if (inControl) {
@@ -251,7 +251,7 @@ enyo.kind({
 		return component;
 	},
 	isRootControl: function(control) {
-		return (control === this.$.client.children[0]);
+		return (control === this.$.sandbox.children[0]);
 	}
 });
 

@@ -110,7 +110,7 @@ enyo.kind({
 		}), 200);
 	},
 	refreshComponentView: function() {
-		this.$.componentView.visualize(this.$.designer.$.client, this.$.designer.$.model);
+		this.$.componentView.visualize(this.$.designer.$.sandbox, this.$.designer.$.model);
 		this.$.componentView.select(this.$.designer.selection);
 	},
 	designerChange: function(inSender) {
