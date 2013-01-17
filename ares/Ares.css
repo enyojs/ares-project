@@ -261,6 +261,11 @@ body {
 	padding:2px 8px;
 	margin:0px;
 }
+.onyx-picker-decorator .onyx-button {
+	padding:2px 8px;
+	margin:0px;
+}
+
 .onyx-radiobutton {
 	font-size: 13px;
 	padding-top: 8px 4px;
