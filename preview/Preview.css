@@ -1,0 +1,8 @@
+.ares-preview-device {
+	background: white ;
+	display: inline-block;
+	border: solid 20px black;
+	-moz-border-radius: 20px;
+	-webkit-border-radius: 20px;
+	border-radius: 20px;
+}
