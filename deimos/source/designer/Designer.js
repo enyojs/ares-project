@@ -10,14 +10,7 @@ enyo.kind({
 		{name: "selectionOutline", kind: "DesignerOutline", style: "border: 5px dotted rgba(255, 146, 38, 0.7);"},
 		{name: "containerOutline", kind: "DesignerOutline", style: "border: 5px solid rgba(24, 24, 255, 0.3);"},
 		{kind: "FittableRows", classes: "deimos_panel_center  enyo-fit", components: [
-			{style:"text-align:center;", components: [
-				//{kind: "Button", content: "Undo"},
-				//{kind: "Button", content: "Redo"},
-				{kind: "onyx.Button", content: "Up", ontap: "upAction"},
-				{kind: "onyx.Button", content: "Down", ontap: "downAction"},
-				{kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"}
-			]},
-			{name: "client", fit: true, kind: "DesignerPanel"}
+			{name: "sandbox", fit: true, kind: "Sandbox"}
 		]}
 	],
 	style: "outline: none; position: relative;",
@@ -31,14 +24,25 @@ enyo.kind({
 		ondrop: "drop"
 	},
 	serialize: function() {
-		return this.$.serializer.serialize(this.$.client, this.$.model);
+		return this.$.serializer.serialize(this.$.sandbox, this.$.model);
 	},
 	getComponents: function() {
-		return this.$.serializer.getComponents(this.$.client, this.$.model);
+		return this.$.serializer.getComponents(this.$.sandbox, this.$.model);
 	},
 	previewDomEvent: function(e) {
-		if (e.type == "down" && (e.dispatchTarget != this.$.outline) && e.dispatchTarget.isDescendantOf(this.$.client)) {
-			this.trySelect(e.dispatchTarget instanceof enyo.Control ? e.dispatchTarget : null);
+		if (e.dispatchTarget.isDescendantOf(this.$.sandbox)) {
+			//TODO: Make this more-sophisticated by using the dispatchTarget to determine what to filter
+			//TODO: In particular, filter "drag" events for slider knobs (but not other controls)
+			if (e.type == "down" || e.type=="tap" || e.type=="click") {
+				this.trySelect(e.dispatchTarget instanceof enyo.Control ? e.dispatchTarget : null);
+				if (e.preventDefault) {
+					e.preventDefault();
+				}
+				return true;
+			} else {
+				//TODO: remove this when we've figured out how to do this a bit better
+				//console.log("ignoring "+e.type+" for "+e.dispatchTarget.name);
+			}
 		}
 	},
 	keyup: function(inSender, inEvent) {
@@ -57,7 +61,7 @@ enyo.kind({
 			c = c.parent;
 		}
 		this.select(c);
-		this.doSelect();
+		this.doSelect({component: c});
 	},
 	selectContainer: function() {
 		if (this.selection) {
@@ -73,7 +77,7 @@ enyo.kind({
 		return s;
 	},
 	select: function(inControl) {
-		if (inControl && (inControl == this || !inControl.isDescendantOf(this.$.client))) {
+		if (inControl && (inControl == this || !inControl.isDescendantOf(this.$.sandbox))) {
 			inControl = null;
 		}
 		this.selection = inControl;
@@ -82,24 +86,23 @@ enyo.kind({
 	},
 	refresh: function() {
 		this.select(this.selection);
-		this.$.client.resized();
+		this.$.sandbox.resized();
 	},
 	load: function(inDocument) {
-		this.proxyArray(inDocument);
+		this.proxyUnknownKinds(inDocument);
 		this.hideSelection();
 		this.$.model.destroyComponents();
-		this.$.client.createComponents(inDocument, {owner: this.$.model});
+		this.$.sandbox.load(inDocument, this.$.model);
 		this.render();
 		this.resized();
-		this.doChange();
-		var c = this.$.client.children[0];
+		var c = this.$.sandbox.children[0];
 		if (c) {
 			this.trySelect(c);
 		}
 	},
 	save: function() {
-		this.unProxyUnknownKinds(this.$.client);
-		return this.$.serializer.serialize(this.$.client, this.$.model);
+		this.unProxyUnknownKinds(this.$.sandbox);
+		return this.$.serializer.serialize(this.$.sandbox.children[0], this.$.model);
 	},
 	deleteAction: function() {
 		if (this.selection) {
@@ -148,7 +151,7 @@ enyo.kind({
 		var c = this.getSelectedContainer();
 		if ( ! c) {
 			// There is no object already created
-			c = this.$.client;
+			c = this.$.sandbox;
 		}
 
 		// The selection objects are moved around in the DOM and the nodes can lose sync with the enyo node
@@ -171,8 +174,8 @@ enyo.kind({
 				this.moveControl(b, i + 1);
 			}
 		}
-		this.$.client.render();
-		this.$.client.resized();
+		this.$.sandbox.render();
+		this.$.sandbox.resized();
 		//
 		//this.modify();
 		this.select(b);
@@ -186,7 +189,7 @@ enyo.kind({
 		// which is not true in general
 		move(inControl, inIndex, inControl.parent.children);
 		move(inControl, inIndex, inControl.container.controls);
-		this.$.client.resized();
+		this.$.sandbox.resized();
 	},
 	nudgeControl: function(inControl, inDelta) {
 		if (inControl) {
@@ -257,6 +260,9 @@ enyo.kind({
 			}
 		}
 		return component;
+	},
+	isRootControl: function(control) {
+		return (control === this.$.sandbox.children[0]);
 	}
 });
 
@@ -283,16 +289,6 @@ enyo.kind({
 	}
 });
 
-enyo.kind({
-	name: "DesignerPanel",
-	classes: "deimos_panel_center",
-	events: {
-		onDesignRendered: ""
-	},
-	rendered: function() {
-		this.doDesignRendered();
-	}
-});
 enyo.kind({
     name: "Ares.Proxy",
 	published: {
