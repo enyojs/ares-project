@@ -5,13 +5,14 @@ enyo.kind({
 		onDesignRendered: ""
 	},
 	rendered: function() {
+		this.inherited(arguments);
 		this.doDesignRendered();
 	},
 	createComponents: function(components, extraProperties) {
 		this.inherited(arguments);
 	},
 	load: function(inDocument, inOwner) {
-		this.wrapChildren(inDocument);
+		//this.wrapChildren(inDocument);
 		this.createComponents([inDocument], {owner: inOwner});
 	},
 	wrapChildren: function(parent) {

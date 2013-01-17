@@ -8,6 +8,5 @@
 	"Inspector.js",
 	"ComponentView.js",
 	"InspectorConfig.js",
-	"Sandbox.js",
-	"Wrapper.js"
+	"Sandbox.js"
 );

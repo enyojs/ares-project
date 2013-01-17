@@ -30,8 +30,18 @@ enyo.kind({
 		return this.$.serializer.getComponents(this.$.sandbox, this.$.model);
 	},
 	previewDomEvent: function(e) {
-		if (e.type == "down" && (e.dispatchTarget != this.$.outline) && e.dispatchTarget.isDescendantOf(this.$.sandbox)) {
-			this.trySelect(e.dispatchTarget instanceof enyo.Control ? e.dispatchTarget : null);
+		if (e.dispatchTarget.isDescendantOf(this.$.sandbox)) {
+			//TODO: Make this more-sophisticated by using the dispatchTarget to determine what to filter
+			if (e.type == "down" || e.type=="tap" || e.type=="click") {
+				this.trySelect(e.dispatchTarget instanceof enyo.Control ? e.dispatchTarget : null);
+				if (e.preventDefault) {
+					e.preventDefault();
+				}
+				return true;
+			} else {
+				//TODO: remove this when we've figured out how to do this a bit better
+				//console.log("ignoring "+e.type+" for "+e.dispatchTarget.name);
+			}
 		}
 	},
 	keyup: function(inSender, inEvent) {
