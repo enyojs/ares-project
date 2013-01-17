@@ -32,6 +32,7 @@ enyo.kind({
 	previewDomEvent: function(e) {
 		if (e.dispatchTarget.isDescendantOf(this.$.sandbox)) {
 			//TODO: Make this more-sophisticated by using the dispatchTarget to determine what to filter
+			//TODO: In particular, filter "drag" events for slider knobs (but not other controls)
 			if (e.type == "down" || e.type=="tap" || e.type=="click") {
 				this.trySelect(e.dispatchTarget instanceof enyo.Control ? e.dispatchTarget : null);
 				if (e.preventDefault) {
