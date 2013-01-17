@@ -20,11 +20,6 @@ enyo.kind({
 				{name: "left", classes:"ares_deimos_left", kind: "Palette", ondragstart: "dragStart"},
 				{name: "middle", fit: true, kind: "FittableRows",components: [
 					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart", onDesignRendered: "designRendered"},
-					{name: "code", classes: "deimos_panel ares_deimos_code", showing: false, components: [
-						{kind: "Scroller", classes: "enyo-selectable", components: [
-							{name: "codeText", tag: "pre", style: "white-space: pre; font-size: smaller; border: none; margin: 0;"}
-						]}
-					]}
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
 					{kind: "FittableColumns", components: [
@@ -109,10 +104,6 @@ enyo.kind({
 		this.$.toolbar.reflow();
 		return true; // Stop the propagation of the event
 	},
-	// called after updating model
-	serializeAction: function() {
-		this.$.codeText.setContent("\t" + this.$.designer.serialize());
-	},
 	refreshInspector: function() {
 		enyo.job("inspect", enyo.bind(this, function() {
 			this.$.inspector.inspect(this.$.designer.selection);
@@ -121,7 +112,6 @@ enyo.kind({
 	refreshComponentView: function() {
 		this.$.componentView.visualize(this.$.designer.$.client, this.$.designer.$.model);
 		this.$.componentView.select(this.$.designer.selection);
-		this.serializeAction();
 	},
 	designerChange: function(inSender) {
 		this.refreshComponentView();
