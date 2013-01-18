@@ -4,17 +4,17 @@
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="viewport" content="width=device-width initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 		<!-- -->
-		<title>AresWithTest</title>
+		<title>Ares project preview</title>
 		<!-- -->
-		<script src="../../enyo/enyo.js" type="text/javascript"></script>
-		<script src="../../ares/package.js" type="text/javascript"></script>
-		<!-- -->
+		<script src="../enyo/enyo.js" type="text/javascript"></script>
+		<!-- load this file until IFrame moves to Enyo -->
+		<script src="../utilities/source/IFrame.js" type="text/javascript"></script>
 		<script src="package.js" type="text/javascript"></script>
 		<!-- -->
 	</head>
-	<body class="enyo-unselectable">
+	<body class="enyo-unselectable Xonyx">
 		<script type="text/javascript">
-			new Ares.TestRunner().renderInto(document.body);
+			new Preview().write();
 		</script>
 	</body>
 </html>

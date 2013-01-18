@@ -99,6 +99,10 @@ body {
 	background-repeat: initial initial;
 }
 .ares_phobos_findpop {
+	width: 300px;
+}
+.ares_phobos_settingspop {
+	width: 300px;
 }
 /**/
 .border {
@@ -261,6 +265,11 @@ body {
 	padding:2px 8px;
 	margin:0px;
 }
+.onyx-picker-decorator .onyx-button {
+	padding:2px 8px;
+	margin:0px;
+}
+
 .onyx-radiobutton {
 	font-size: 13px;
 	padding-top: 8px 4px;
