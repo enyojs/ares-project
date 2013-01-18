@@ -121,8 +121,12 @@ enyo.kind(
 
 		zoom: function(inSender, inEvent) {
 
+			this.scale = 0.3 + 0.7 * inSender.getValue() / 100 ;
+			this.applyScale() ;
+		},
+		applyScale: function() {
 			enyo.dom.transformValue(
-				this.$.scrolledIframe.$.iframe, "scale", 0.3 + 0.7 * inSender.getValue() / 100
+				this.$.scrolledIframe.$.iframe, "scale", this.scale
 			) ;
 			this.resized() ;
 		},
