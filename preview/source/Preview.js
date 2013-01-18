@@ -9,39 +9,53 @@ enyo.kind(
 			{
 				style: "width: 150px; margin: 4px" ,
 				components: [
-					{content: "Orientation", style: "margin: 8px"},
 					{
-						kind: "onyx.PickerDecorator",
-						onSelect: "resize",
-						components:
-						[
-							{style: "width: 100%"}, // A content-less PickerButton
+						kind: 'onyx.Groupbox',
+						style : "margin-top: 8px",
+						components: [
+							{kind: "onyx.GroupboxHeader", content: "Orientation"},
 							{
-								kind: "onyx.Picker", name: "orientation",
-								components: [
-									{content: "portrait", active: true, swap: false},
-									{content: "landscape",              swap: true }
+								kind: "onyx.PickerDecorator",
+								onSelect: "resize",
+								style : "padding: 6px",
+								components:
+								[
+									{style: "width: 100%"}, // A content-less PickerButton
+									{
+										kind: "onyx.Picker", name: "orientation",
+										components: [
+											{content: "portrait", active: true, swap: false},
+											{content: "landscape",              swap: true }
+										]
+									}
 								]
 							}
 						]
 					},
-					{content: "Device", style: "margin: 8px"},
+					{tag: "br"},
 					{
-						kind: "onyx.PickerDecorator",
-						onSelect: "resize",
-						components:
-						[
-							{style: "width: 100%"},
+						 kind: 'onyx.Groupbox',
+						components: [
+							{kind: "onyx.GroupboxHeader", content: "Device"},
 							{
-								kind: "onyx.Picker", name: "device",
-								components: [
-									{content: "default",           value: { height:  800, width:  600, ppi: 163, dpr: 1 }, active: true},
-									{content: "iPhone\u2122",      value: { height:  480, width:  320, ppi: 163, dpr: 1 }},
-									{content: "iPhone\u2122 4",    value: { height:  940, width:  660, ppi: 326, dpr: 2 }},
-									{content: "iPhone\u2122 5",    value: { height: 1146, width:  640, ppi: 326, dpr: 2 }},
-									{content: "iPad\u2122 Retina", value: { height: 2048, width: 1536, ppi: 264, dpr: 2 }},
-									{content: "iPad\u2122 2",      value: { height: 1280, width:  800, ppi: 132, dpr: 1 }},
-									{content: "iPad\u2122 mini",   value: { height: 1024, width:  768, ppi: 163, dpr: 1 }}
+								kind: "onyx.PickerDecorator",
+								onSelect: "resize",
+								style :"padding: 6px",
+								components:
+								[
+									{style: "width: 100%"},
+									{
+										kind: "onyx.Picker", name: "device",
+										components: [
+											{content: "default",           value: { height:  800, width:  600, ppi: 163, dpr: 1 }, active: true},
+											{content: "iPhone\u2122",      value: { height:  480, width:  320, ppi: 163, dpr: 1 }},
+											{content: "iPhone\u2122 4",    value: { height:  940, width:  660, ppi: 326, dpr: 2 }},
+											{content: "iPhone\u2122 5",    value: { height: 1146, width:  640, ppi: 326, dpr: 2 }},
+											{content: "iPad\u2122 Retina", value: { height: 2048, width: 1536, ppi: 264, dpr: 2 }},
+											{content: "iPad\u2122 2",      value: { height: 1280, width:  800, ppi: 132, dpr: 1 }},
+											{content: "iPad\u2122 mini",   value: { height: 1024, width:  768, ppi: 163, dpr: 1 }}
+										]
+									}
 								]
 							}
 						]
