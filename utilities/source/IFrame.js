@@ -46,10 +46,22 @@ enyo.kind(
 			}
 		],
 
+		reload: function() {
+			this.$.iframe.destroy();
+			this.createComponent({name: 'iframe', kind: 'ares.IFrame'}) ;
+			if (this.width) {
+				this.$.iframe.setGeometry( this.width, this.height) ;
+			}
+			this.setUrl(this.url) ;
+			this.render() ;
+		},
 		setUrl: function(url) {
+			this.url = url ;
 			this.$.iframe.setUrl(url);
 		},
 		setGeometry: function(width, height) {
+			this.width = width;
+			this.height = height ;
 			this.$.iframe.setGeometry( width, height) ;
 			this.resized() ;
 		}
