@@ -95,6 +95,15 @@ enyo.kind(
 					},
 					{tag: "br"},
 					{
+						kind: "onyx.Button",
+						ontap:"reload",
+						style: "padding: 5px; width: 100%; margin-bottom: 5px",
+						components: [
+							{tag: 'img', attributes: { src: "assets/images/preview_reload.png"} }
+						]
+					},
+					{tag: "br"},
+					{
 						kind:"onyx.Button",
 						content: "Detach test",
 						ontap:"detachIframe",
@@ -160,7 +169,7 @@ enyo.kind(
 			return params;
 		},
 
-		// retrieve URL from windown and setup iframe url
+		// retrieve URL from window and setup iframe url
 		create: function() {
 			this.inherited(arguments);
 
@@ -169,6 +178,11 @@ enyo.kind(
 			this.iframeUrl = param.url ;
 
 			this.$.scrolledIframe.setUrl   (param.url) ;
+		},
+
+		reload: function() {
+			this.$.scrolledIframe.reload();
+			this.applyScale() ;
 		},
 
 		detachIframe: function() {
