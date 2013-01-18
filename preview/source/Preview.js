@@ -63,7 +63,13 @@ enyo.kind(
 						kind: 'onyx.Groupbox',
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Zoom"},
-							{kind: "onyx.Slider", value: 100, onChange: 'zoom', onChanging: 'zoom' }
+							{
+								// padding required so the gray box is connected to groupbox
+								style: "padding-top: 4px; padding-bottom: 4px",
+								components: [
+									{kind: "onyx.Slider", value: 100, onChange: 'zoom', onChanging: 'zoom' }
+								]
+							}
 						]
 					},
 					{tag: "br"},
