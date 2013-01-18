@@ -11,7 +11,7 @@ enyo.kind({
 	requestTokenUrl:	"https://api.dropbox.com/1/oauth/request_token",
 	authorizeUrl:		"https://www.dropbox.com/1/oauth/authorize",
 	accessTokenUrl:		"https://api.dropbox.com/1/oauth/access_token",
-	accountInfoUrl:		"https://api.dropbox.com/1/account/info",
+	accountInfoUrl:		"/res/services/dropbox",
 
 	requestToken: "",		// from dropbox
 	requestTokenSecret: "",		// from dropbox
@@ -38,7 +38,7 @@ enyo.kind({
 			{kind: "onyx.GroupboxHeader", name: "serviceName"},
 			{components: [
 				{content: "User Name: ", kind: "Ares.GroupBoxItemKey"},
-				{name: "username", kind: "Ares.GroupBoxItemValue"}
+				{name: "name", kind: "Ares.GroupBoxItemValue"}
 			]},
 			{components: [
 				{content: "Email: ", kind: "Ares.GroupBoxItemKey"},
@@ -46,7 +46,7 @@ enyo.kind({
 			]},
 			{components: [
 				{content: "Country Code:", kind: "Ares.GroupBoxItemKey"},
-				{name: "country", kind: "Ares.GroupBoxItemValue"}
+				{name: "countryCode", kind: "Ares.GroupBoxItemValue"}
 			]},
 			{components: [
 				{content: "Quota (Max):", kind: "Ares.GroupBoxItemKey"},
@@ -54,11 +54,11 @@ enyo.kind({
 			]},
 			{components: [
 				{content: "Usage (Private):", kind: "Ares.GroupBoxItemKey"},
-				{name: "normal", kind: "Ares.GroupBoxItemValue"}
+				{name: "privateBytes", kind: "Ares.GroupBoxItemValue"}
 			]},
 			{components: [
 				{content: "Usage (Shared):", kind: "Ares.GroupBoxItemKey"},
-				{name: "shared", kind: "Ares.GroupBoxItemValue"}
+				{name: "sharedBytes", kind: "Ares.GroupBoxItemValue"}
 			]}
 		]},
 		{kind: "FittableColumns", components: [
@@ -93,6 +93,7 @@ enyo.kind({
 		this.$.checkBtn.setDisabled(true);
 		async.series([
 			this.waitAccountInfo.bind(this),
+			this.authenticate.bind(this),
 			this.getAccountInfo.bind(this),
 			this.displayAccountInfo.bind(this)
 		], function(err, results) {
@@ -281,16 +282,48 @@ enyo.kind({
 		this.$.checkBtn.setDisabled(false);
 		next();
 	},
+	/**
+	 * Server round-trip to record the applications credentials as
+	 * a server cookie.  This is the only step where the
+	 * application key is exchanged in clear text between the
+	 * browser client & the ARES server.
+	 */
+	authenticate: function(next) {
+		var reqOptions = {
+			url: this.accountInfoUrl,
+			method: 'POST',
+			handleAs: 'json'
+		};
+		this.log("options:", reqOptions);
+		var req = new enyo.Ajax(reqOptions);
+		req.response(this, function(inSender, inValue) {
+			this.log("response:", inValue);
+			next();
+		});
+		req.error(this, function(inSender, inError) {
+			var errMsg;
+			try {
+				errMsg = JSON.parse(inSender.xhrResponse.body).error; 
+			} catch(e) {
+				errMsg = inError;
+			}
+			this.log("errMsg:", errMsg);
+			next(new Error(errMsg));
+		});
+		req.go({dropboxauth: JSON.stringify({
+			uid: this.auth.uid,
+			appKey: this.auth.appKey,
+			appSecret: this.auth.appSecret,
+			accessToken: this.auth.accessToken,
+			accessTokenSecret: this.auth.accessTokenSecret
+		})});
+	},
 	getAccountInfo: function(next) {
 		this.doStartWaiting({msg: "Dropbox: waiting for user's account information..."});
 		var reqOptions = {
 			url: this.accountInfoUrl,
 			method: 'GET',
-			handleAs: 'json',
-			cacheBust: false, // cacheBust query parameter not accepted by Dropbox
-			headers: {
-				Authorization: this.auth.headers.authorization
-			}
+			handleAs: 'json'
 		};
 		this.log("options:", reqOptions);
 		var req = new enyo.Ajax(reqOptions);
@@ -309,28 +342,33 @@ enyo.kind({
 			this.log("errMsg:", errMsg);
 			next(new Error(errMsg));
 		});
-		req.go();
+		req.go({dropboxauth: JSON.stringify({
+			appKey: this.auth.appKey,
+			appSecret: this.auth.appSecret,
+			accessToken: this.auth.accessToken,
+			accessTokenSecret: this.auth.accessTokenSecret
+		})});
 	},
 	waitAccountInfo: function(next) {
-		this.$.username.setContent("...");
+		this.$.name.setContent("...");
 		this.$.email.setContent("...");
-		this.$.country.setContent("...");
+		this.$.countryCode.setContent("...");
 		this.$.quota.setContent("...");
-		this.$.normal.setContent("...");
-		this.$.shared.setContent("...");
+		this.$.privateBytes.setContent("...");
+		this.$.sharedBytes.setContent("...");
 		if (next) next();
 	},
 	displayAccountInfo: function(next) {
 		this.log("accountInfo:", this.accountInfo);
-		this.$.username.setContent(this.accountInfo.display_name);
+		this.$.name.setContent(this.accountInfo.name);
 		this.$.email.setContent(this.accountInfo.email);
-		this.$.country.setContent(this.accountInfo.country);
-		var quota = Math.floor(this.accountInfo.quota_info.quota / (1024*1024)) + " MB";
+		this.$.countryCode.setContent(this.accountInfo.countryCode);
+		var quota = Math.floor(this.accountInfo.quota / (1024*1024)) + " MB";
 		this.$.quota.setContent(quota);
-		var normal = Math.floor(this.accountInfo.quota_info.normal / (1024*1024)) + " MB";
-		this.$.normal.setContent(normal);
-		var shared = Math.floor(this.accountInfo.quota_info.shared / (1024*1024)) + " MB";
-		this.$.shared.setContent(shared);
+		var privateBytes = Math.floor(this.accountInfo.privateBytes / (1024*1024)) + " MB";
+		this.$.privateBytes.setContent(privateBytes);
+		var sharedBytes = Math.floor(this.accountInfo.sharedBytes / (1024*1024)) + " MB";
+		this.$.sharedBytes.setContent(sharedBytes);
 		if (next) next();
 	}
 });
