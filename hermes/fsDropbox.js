@@ -4,6 +4,7 @@
 
 var util  = require("util"),
     path = require("path"),
+    dropbox = require("dropbox"),
     request = require("request"),
     FsBase = require(__dirname + "/lib/fsBase"),
     HttpError = require(__dirname + "/lib/httpError");
@@ -13,44 +14,72 @@ function FsDropbox(inConfig, next) {
 
 	// inherits FsBase (step 1/2)
 	FsBase.call(this, inConfig, next);
-
-	this.log("1/2");
-	this.test();
 }
 
 // inherits FsBase (step 2/2)
 util.inherits(FsDropbox, FsBase);
 
-FsDropbox.prototype.test = function() {
-	this.log("2/2");
-}
-
 FsDropbox.prototype.authorize = function(req, res, next) {
-	this.log("FsDropbox.authorize(): req.cookies=", util.inspect(req.cookies));
-	if (req.cookies.authorization) {
-		var authorization = decodeURIComponent(req.cookies.authorization);
-		this.log("FsDropbox.auth(): Cookie: authorization:", authorization);
-		req.dropbox = {
-			headers : {
-				authorization: authorization
-			}
-		};
-		next();
-	} else if(req.query.authorization) {
-		// will be dropped if not a POST request to '/'
+	var auth;
+	if (req.cookies.dropboxauth) {
+		this.log("FsDropbox.authorize(): req.cookies=", util.inspect(req.cookies));
+		_authorize(decodeURIComponent(req.cookies.dropboxauth));
+	} else if(req.query.dropboxauth) {
 		this.log("FsDropbox.authorize(): req.query=", util.inspect(req.query));
-		next();
+		_authorize(req.query.dropboxauth);
 	} else {
-		next(new HttpError('Missing Authorization cookie', 401));
+		next(new HttpError('Missing Authorization', 401));
 	}
-}
+
+	function _authorize(authStr) {
+		try {
+			auth = JSON.parse(authStr);
+			console.log("FsDropbox.authorize(): dropboxauth:" + util.inspect(auth));
+		} catch(e) {
+			return next(e);
+		}
+		req.dropbox = new dropbox.Client({
+			key: auth.appKey, secret: auth.appSecret, sandbox: true
+		});
+		req.dropbox.authDriver(new _authDriver(auth));
+		req.dropbox.authenticate(function(err, client) {
+			if (err) {
+				return next(err);
+			}
+			console.log("dropbox:" + util.inspect(client));
+			next();
+		});
+	}
+
+	// see https://github.com/dropbox/dropbox-js/blob/master/doc/auth_drivers.md
+	function _authDriver(auth) {
+		this.url = function() { return ""; };
+		this.doAuthorize = function(authUrl, token, tokenSecret, callback) {
+			console.log("authDriver.doAuthorize(): authUrl:"+ authUrl + " , token:" + token + ", tokenSecret:", tokenSecret);
+			callback();
+		};
+		this.onAuthStateChange = function(client, callback) {
+			console.log("authDriver.onAuthStateChange(): client.authState:" + client.authState);
+			client.setCredentials({
+				uid: auth.uid,
+				key: auth.appKey,
+				secret: auth.appSecret,
+				token: auth.accessToken,
+				tokenSecret: auth.accessTokenSecret
+			});
+			console.log("authDriver.onAuthStateChange(): client.authState:" + client.authState);
+			console.log("authDriver.onAuthStateChange(): client.oauth:" + util.inspect(client.oauth));
+			callback();
+		};
+	}
+};
 
 FsDropbox.prototype.setUserInfo = function(req, res, next) {
 	this.log("FsDropbox.setUserInfo(): req.query=", util.inspect(req.query));
 	this.log("FsDropbox.setUserInfo(): req.params=", util.inspect(req.params));
-	var authorization = req.param('authorization');
-	this.log("FsDropbox.setUserInfo(): authorization:", authorization);
-	if (authorization) {
+	var auth = req.param('dropboxauth');
+	this.log("FsDropbox.setUserInfo(): dropboxauth:", auth);
+	if (auth) {
 		var exdate=new Date();
 		exdate.setDate(exdate.getDate() + 10 /*days*/);
 
@@ -60,8 +89,8 @@ FsDropbox.prototype.setUserInfo = function(req, res, next) {
 			//maxAge: 1000*3600 // 1 hour
 		};
 
-		res.cookie('authorization', authorization, cookieOptions);
-		this.log("FsDropbox.setUserInfo(): Set-Cookie: authorization:", authorization);
+		res.cookie('dropboxauth', auth, cookieOptions);
+		this.log("FsDropbox.setUserInfo(): Set-Cookie: dropboxauth:", auth);
 		res.send(200).end();
 	} else {
 		next(new HttpError('No User Info', 400 /*Bad Request*/));
@@ -70,12 +99,14 @@ FsDropbox.prototype.setUserInfo = function(req, res, next) {
 
 FsDropbox.prototype.getUserInfo = function(req, res, next) {
 	this.log("FsDropbox.getUserInfo(): req.query:", req.query);
-	req.dropbox.url = 'https://api.dropbox.com/1/account/info';
-	request(req.dropbox, (function(err, response, body) {
-		var statusCode = (response && response.statusCode) || 500;
-		this.log("FsDropbox.getUserInfo(): err:", err, ", statusCode:", statusCode, ", body:", body);
-		this.respond(res, err, {code: statusCode, body: body});
-	}).bind(this));
+	req.dropbox.getUserInfo(function(err, userInfo) {
+		console.log("getUserInfo(): err=" + util.inspect(err), ", userInfo=" + util.inspect(userInfo));
+		if (err) {
+			next(err);
+		} else {
+			res.status(200).send(userInfo);
+		}
+	});
 };
 
 FsDropbox.prototype.propfind = function(req, res, next) {
