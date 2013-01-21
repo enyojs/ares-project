@@ -154,41 +154,40 @@ FsDropbox.prototype['delete'] = function(req, res, next) {
 // implementations
 
 FsDropbox.prototype._propfind = function(err, req, relPath, depth, next) {
-	req.dropbox.url = 'https://api.dropbox.com/1/metadata/sandbox/'+ relPath;
-	if (depth) {
-		req.dropbox.qs = {
-			list: true,
-			include_deleted: false
-		};
+	if (depth > 1) {
+		return next(new HttpError("Unsupported depth=" + depth, 403));
 	}
-	this.log("_propfind(): req.dropbox=", req.dropbox);
-	request(req.dropbox, (function(err, response, dbBody) {
-		var arNode, dbNode, statusCode = (response && response.statusCode) || 500;
-		this.log("_propfind(): err:", err, ", response:", statusCode, ", dbBody:", dbBody, "<<< Dropbox");
-		try {
-			if (!err && statusCode == 200) {
-				dbNode = JSON.parse(dbBody);
-				arNode = _wrapDbNode.bind(this)(dbNode, depth);
-			}
-		} catch(e) {
-			err = e;
+
+	req.dropbox.readdir("/", _onReply.bind(this));
+
+	function _onReply(err, entries, dirStat, entriesStat) {
+		var node;
+		this.log("_propfind(): err=", err, "entries:", entries, "dirStat:", dirStat, "entriesStat:", entriesStat);
+		if (err) {
+			next(err);
+		} else {
+			node = _wrapDbNode.bind(this)({
+				path: dirStat.path || '/',
+				contents: entriesStat,
+				isFolder: dirStat.isFolder
+			}, depth);
+			this.log("_propfind(): node:", node);
+			next(null, {code: 200, body: node});
 		}
-		this.log("_propfind(): arNode:", arNode);
-		next(err, {code: statusCode, body: arNode});
-	}).bind(this));
+	}
 
 	function _wrapDbNode(dbNode, depth) {
 		this.log("wrapDbNode(): dbNode:", dbNode);
 		var arNode;
 		if (dbNode) {
 			arNode = {
-				isDir: dbNode.is_dir,
+				isDir: dbNode.isFolder,
 				path: dbNode.path,
 				name: path.basename(dbNode.path),
 				id: this.encodeFileId(dbNode.path)
 			};
-			if (dbNode.hash) {
-				arNode.hash = dbNode.hash;
+			if (dbNode.versionTag) {
+				arNode.hash = dbNode.versionTag;
 			}
 			if (arNode.isDir) {
 				arNode.children = [];
@@ -199,9 +198,12 @@ FsDropbox.prototype._propfind = function(err, req, relPath, depth, next) {
 				}
 			}
 		}
+		this.log("wrapDbNode(): arNode:", arNode);
 		return arNode;
 	}
 };
+
+// modulel/main wrapper
 
 if (path.basename(process.argv[1]) === "fsDropbox.js") {
 	// We are main.js: create & run the object...
