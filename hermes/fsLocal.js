@@ -122,7 +122,12 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 			isDir: stat.isDirectory()
 		};
 
-		this.log("depth="+depth+", node="+util.inspect(node));
+		// Give the top-level node the name (NOT the path) of the mount-point
+		if (node.name === '') {
+			node.name = path.basename(this.root);
+		}
+
+		this.log("relPath=" + relPath + ", depth="+depth+", node="+util.inspect(node));
 
 		if (stat.isFile() || !depth) {
 			return next(null, node);
