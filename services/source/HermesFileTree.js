@@ -75,13 +75,18 @@ enyo.kind({
 		this.inherited(arguments);
 		this.enableDisableButtons();
 	},
-	connectService: function(inService) {
+	connectService: function(inService, next) {
 		this.projectUrlReady = false; // Reset the project information
 		this.clear() ;
 		this.$.service.connect(inService, enyo.bind(this, (function(err) {
-			this.$.serverNode.file = this.$.service.getRootNode();
-			this.$.serverNode.file.isServer = true;
-			this.$.serverNode.setContent(this.$.serverNode.file.name);
+			if (err) {
+				if (next) next(err);
+			} else {
+				this.$.serverNode.file = this.$.service.getRootNode();
+				this.$.serverNode.file.isServer = true;
+				this.$.serverNode.setContent(this.$.serverNode.file.name);
+				if (next) next();
+			}
 		})));
 		return this ;
 	},
@@ -100,33 +105,37 @@ enyo.kind({
 
 		// connects to a service that provides access to a
 		// (possibly remote & always asynchronous) file system
-		this.connectService(service);
-
-		// Get extra info such as project URL
-		var req = this.$.service.propfind(folderId, 0);
-		req.response(this, function(inSender, inValue) {
-			var projectUrl = service.getConfig().origin + service.getConfig().pathname + "/file" + inValue.path;
-			this.projectData.setProjectUrl(projectUrl);
-			this.projectUrlReady = true;
-
-			serverNode.file = inValue;
-			serverNode.file.isServer = true;
-
-			serverNode.setContent(nodeName);
-			this.refreshFileTree();
-			serverNode.render() ;
-		});
-		req.error(this, function(inSender, inError) {
-			this.projectData.setProjectUrl("");
-			this.showErrorPopup("Internal Error (" + inError + ") from filesystem service");
-		});
-		if (this.selectedNode) {
-			this.deselect(null, {data: this.selectedNode});
-		}
-		this.$.selection.clear();
-		this.selectedNode = null;
-		this.selectedFile = null;
-		this.enableDisableButtons();
+		this.connectService(service, enyo.bind(this, (function(inError) {
+			if (inError) {
+				this.showErrorPopup("Internal Error (" + inError + ") from filesystem service");
+			} else {
+				// Get extra info such as project URL
+				var req = this.$.service.propfind(folderId, 0);
+				req.response(this, function(inSender, inValue) {
+					var projectUrl = service.getConfig().origin + service.getConfig().pathname + "/file" + inValue.path;
+					this.projectData.setProjectUrl(projectUrl);
+					this.projectUrlReady = true;
+					
+					serverNode.file = inValue;
+					serverNode.file.isServer = true;
+					
+					serverNode.setContent(nodeName);
+					this.refreshFileTree();
+					serverNode.render() ;
+				});
+				req.error(this, function(inSender, inError) {
+					this.projectData.setProjectUrl("");
+					this.showErrorPopup("Internal Error (" + inError + ") from filesystem service");
+				});
+				if (this.selectedNode) {
+					this.deselect(null, {data: this.selectedNode});
+				}
+				this.$.selection.clear();
+				this.selectedNode = null;
+				this.selectedFile = null;
+				this.enableDisableButtons();
+			}
+		})));
 		return this;
 	},
 	hideFileOpButtons: function() {
