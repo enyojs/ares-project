@@ -214,7 +214,7 @@ enyo.kind({
 					kind: "PhoneGap.ProjectProperties.KeySelector",
 					targetId: this.targetId,
 					keys: keys,
-					activeKeyId: (this.config.keyId)
+					activeKeyId: (this.config && this.config.keyId)
 				});
 				this.$.targetDrw.$.keySelector.render();
 				this.$.targetDrw.$.keySelector.setProvider(provider);
