@@ -35,6 +35,24 @@
 		},
 		{
 			"active":true,
+			"id":"box",
+			"icon":"box",
+			"name":"Box",
+			"type": "filesystem",
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"hermes/fsbox.js", "-v", "-P", "/files", "-p", "0"
+			],
+			"auth": {
+				"type": "box",
+				"appKey": "uxr6ab2ge57318sm3mgbv5e0ntmji52k",
+				"appSecret": ""
+			},
+			"useJsonp":false,
+			"verbose": false
+		},
+		{
+			"active":true,
 			"id":"phonegap",
 			"icon":"build.phonegap.com-32x32",
 			"name":"PhoneGap Build",

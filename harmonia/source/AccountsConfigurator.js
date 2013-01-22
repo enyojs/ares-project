@@ -87,6 +87,15 @@ enyo.kind({
 						serviceName: service.config.name,
 						auth: ares.clone(service.config.auth)
 					});
+				} else if (service.config.auth.type === 'box') {
+					if (this.debug) this.log("creating 'box' auth form");
+					this.$.authPanel.createComponent({
+						kind: "Box",
+						name: serviceAuthName,
+						serviceId: service.config.id,
+						serviceName: service.config.name,
+						auth: ares.clone(service.config.auth)
+					});
 				} else {
 					throw new Error("Unhandled authentication type of service:" + service.config.id);
 				}
