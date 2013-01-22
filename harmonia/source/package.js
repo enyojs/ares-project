@@ -9,5 +9,6 @@ enyo.depends(
 	"AccountsConfigurator.js",
 	"BasicAuthConfig.js",
 	"PhonegapAuthConfig.js",
-	"PhonegapUserdata.js"
+	"PhonegapUserdata.js",
+	"BoxConfig.js"
 );
