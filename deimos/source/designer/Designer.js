@@ -151,7 +151,7 @@ enyo.kind({
 		var c = this.getSelectedContainer();
 		if ( ! c) {
 			// There is no object already created
-			c = this.$.sandbox;
+			c = this.$.sandbox.children[0];
 		}
 
 		// The selection objects are moved around in the DOM and the nodes can lose sync with the enyo node
