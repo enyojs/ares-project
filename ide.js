@@ -11,8 +11,8 @@ if (version <= 0.7) {
 
 var fs = require("fs"),
     path = require("path"),
-    express = require(path.resolve(__dirname, "hermes/filesystem/node_modules/express")),
-    optimist = require(path.resolve(__dirname, "hermes/node_modules/optimist")),
+    express = require("express"),
+    optimist = require("optimist"),
     util  = require('util'),
     spawn = require('child_process').spawn,
     querystring = require("querystring"),

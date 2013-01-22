@@ -163,9 +163,9 @@ function FsBase(inConfig, next) {
 	/**
 	 * Terminates express server
 	 */
-	this.quit = function() {
-		this.server.close();
+	this.quit = function(next) {
 		this.log("exiting");
+		this.server.close(next);
 	};
 
 }

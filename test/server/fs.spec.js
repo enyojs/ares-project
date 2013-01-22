@@ -1,23 +1,49 @@
 /**
-= fsLocal.js test suite
+ * fsXXX.js test suite
  */
 // @see http://visionmedia.github.com/mocha/
 
-var fs = require("fs");
-var path = require("path");
-var http = require("http");
-var querystring = require("querystring");
-var temp = require("temp");
-var rimraf = require("rimraf");
-var should = require("should");
-var FsLocal = require("./fsLocal");
-var util = require("util"),
-    async = require("async");
+var fs = require("fs"),
+    path = require("path"),
+    http = require("http"),
+    querystring = require("querystring"),
+    should = require("should"),
+    util = require("util"),
+    async = require("async"),
+    optimist = require("optimist");
+
+var argv = optimist
+	    .usage('\nAres FileSystem (fs) tester.\nUsage: "$0 [OPTIONS] -F <FS_PATH>"')
+	    .options('F', {
+		    alias : 'filesystem',
+		    description: 'path to the Hermes file-system to test. For example ../../hermes/fsLocal.js',
+		    required: true
+	    })
+	    .options('h', {
+		    alias : 'help',
+		    description: 'help message',
+		    boolean: true
+	    })
+	    .options('v', {
+		    alias : 'verbose',
+		    description: 'verbose execution mode',
+		    boolean: true
+	    })
+	    .argv;
+
+log(argv['$0'] + " running in verbose mode");
+log("argv:", argv);
+
+function log() {
+	if (argv.verbose) {
+		console.log.bind(this, this.name).apply(this, arguments);
+	}
+}
 
 function get(path, query, next) {
 	var reqOptions = {
 		hostname: "127.0.0.1",
-		port: myPort,
+		port: argv.port,
 		method: 'GET',
 		headers: {},
 		path: path
@@ -32,7 +58,7 @@ function post(path, query, content, contentType, next) {
 	var reqContent, reqBody, reqParts;
 	var reqOptions = {
 		hostname: "127.0.0.1",
-		port: myPort,
+		port: argv.port,
 		method: 'POST',
 		headers: {},
 		path: path
@@ -82,8 +108,8 @@ function post(path, query, content, contentType, next) {
 }
 
 function call(reqOptions, reqBody, reqParts, next) {
-	console.log("reqOptions="+util.inspect(reqOptions));
-	console.log("reqBody="+util.inspect(reqBody));
+	log("reqOptions="+util.inspect(reqOptions));
+	log("reqBody="+util.inspect(reqBody));
 	var req = http.request(reqOptions, function(res) {
 		var bufs = [];
 		res.on('data', function(chunk){
@@ -105,7 +131,7 @@ function call(reqOptions, reqBody, reqParts, next) {
 					data.text = data.buffer.toString();
 				}
 			}
-			console.log("data="+util.inspect(data));
+			log("data="+util.inspect(data));
 			if (data.statusCode < 200 || data.statusCode >= 300) {
 				next(data);
 			} else {
@@ -152,22 +178,14 @@ function sendOnePart(req, name, filename, input) {
 	req.end('\r\n--' + boundaryKey + '--'); 
 }
 
+var Fs = require(argv.filesystem);
 var myFs;
-var myPort = 9009;
-var myFsPath = temp.path({prefix: 'com.palm.ares.hermes.fsLocal'});
-fs.mkdirSync(myFsPath);
-var clean = true;
 
-describe("fsLocal...", function() {
+describe("fs...", function() {
 	
 	it("t0. should start", function(done) {
-		myFs = new FsLocal({
-			pathname: "/",
-			root: myFsPath,
-			port: myPort,
-			verbose: true
-		}, function(err, service){
-			console.log("service="+util.inspect(service));
+		myFs = new Fs(argv, function(err, service){
+			log("service="+util.inspect(service));
 			should.not.exist(err);
 			should.exist(service);
 			should.exist(service.origin);
@@ -811,13 +829,6 @@ describe("fsLocal...", function() {
 	});
 
 	it("t100. should stop", function(done) {
-		myFs.quit();
-		if (clean) {
-			rimraf(myFsPath, {gently: myFsPath}, function() {
-				done();
-			});
-		} else {
-			done();
-		}
+		myFs.quit(done);
 	});
 });

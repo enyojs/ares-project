@@ -1,15 +1,8 @@
-
-
-
-# Ares Test Suite Environment
+# Testing Ares Components
 
 ## Objectives
 
-* To set up an isolated Ares Test Suite environement,
-* To execute all available Test Suites,
-* to create new Test Suites,
-* To collapse the Test Suite Results like follow; yellow for running state, green for success, red for failure, expandable stack trace and logging for failures,
-* To display these results. The display is done by the Ares Test Reporter window. 
+Give to the Ares commiter(s) a quick & easy tool to evaluate regressions before comiting a pull-request.
 
 ## Usage
 
