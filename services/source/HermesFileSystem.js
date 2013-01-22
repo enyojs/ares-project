@@ -139,12 +139,19 @@ enyo.kind({
 			});
 	},
 	putFile: function(inFileId, inContent) {
-		var formData = new enyo.FormData(),
-		    file = new enyo.Blob([inContent || ''], {type: "application/octet-stream"});
+		var formData = new enyo.FormData() ;
+		var file = new enyo.Blob([inContent || ''], {type: "application/octet-stream"});
 		if (this.debug) this.log("file:", file);
 		// ['/path','.'] resolves to '/path', so using '.'
 		// keeps the file name encoded in inFileId
 		formData.append('file', file, '.' /*filename*/);
+		return this._request("PUT", inFileId, {postBody: formData} /*inParams*/);
+	},
+	createFile: function(inFolderId, inName, inContent) {
+		var formData = new enyo.FormData() ;
+		var file = new enyo.Blob([inContent || ''], {type: "application/octet-stream"});
+		if (this.debug) this.log("file:", file, "filename:", inName);
+		formData.append('file', file, inName /*filename*/);
 		if (enyo.platform.firefox) {
 			// FormData#append() lacks the third parameter
 			// 'filename', so emulate it using a list of
@@ -153,15 +160,8 @@ enyo.kind({
 			// other end of the tip is implemented on
 			// server-side.
 			// http://stackoverflow.com/questions/6664967/how-to-give-a-blob-uploaded-as-formdata-a-file-name
-			formData.append('filename', '.');
+			formData.append('filename', inName );
 		}
-		return this._request("PUT", inFileId, {postBody: formData} /*inParams*/);
-	},
-	createFile: function(inFolderId, inName, inContent) {
-		var formData = new enyo.FormData(),
-		    file = new enyo.Blob([inContent || ''], {type: "application/octet-stream"});
-		if (this.debug) this.log("file:", file, "filename:", inName);
-		formData.append('file', file, inName /*filename*/);
 		return this._request("PUT", inFolderId, {postBody: formData} /*inParams*/);
 	},
 	createFolder: function(inFolderId, inName) {
