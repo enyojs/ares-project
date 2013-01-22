@@ -1,6 +1,9 @@
 enyo.kind({
 	name: "Deimos",
 	classes: "enyo-unselectable onyx",
+	published: {
+		edited: false
+	},
 	components: [
 		{kind: "DragAvatar", components: [
 			{tag: "img", src: "$deimos/images/icon.png", style: "width: 24px; height: 24px;"}
@@ -42,7 +45,6 @@ enyo.kind({
 		onDesignerUpdate: ""
 	},
 	kinds: null,
-	docHasChanged: false,
 	create: function() {
 		this.inherited(arguments);
 		this.kinds=[];
@@ -69,10 +71,10 @@ enyo.kind({
 			});
 			maxLen = Math.max(k.name.length, maxLen);
 		}
-		this.index=null;
+		//this.index=0; //this is set in KindSelected
 		this.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.$.kindPicker.render();
-		this.docHasChanged = false;
+		this.setEdited(false);
 
 		// Pass the project information (analyzer output, ...) to the inspector
 		this.$.inspector.setProjectData(data.projectData);
@@ -87,16 +89,19 @@ enyo.kind({
 		var index = inSender.getSelected().index;
 		var kind = this.kinds[index];
 
-		if (index != this.index) {
+		if (index !== this.index) {
 
-			if (this.index !== null && this.docHasChanged === true) {
+			if (this.index !== null && this.getEdited()) {
+				// save changes when switching kinds
 				var modified = this.$.designer.getComponents();
 				this.kinds[this.index].components = modified;
 				this.kinds[this.index].content = this.$.designer.save();
+				this.sendUpdateToAres();
 			}
 
 			this.$.inspector.inspect(null);
 			this.$.designer.load(kind);
+			this.refreshComponentView();
 		}
 
 		this.index=index;
@@ -116,8 +121,9 @@ enyo.kind({
 	designerChange: function(inSender) {
 		this.refreshComponentView();
 		this.refreshInspector();
-		this.docHasChanged = true;
-		this.doDesignerUpdate(this.prepareDesignerUpdate());
+		this.setEdited(true);
+		//TODO: Is it "worth it" to send all intermediate updates to the editor?
+		this.sendUpdateToAres();
 		return true; // Stop the propagation of the event
 	},
 	designerSelect: function(inSender, inEvent) {
@@ -137,8 +143,9 @@ enyo.kind({
 	inspectorModify: function() {
 		this.refreshComponentView();
 		this.$.designer.refresh();
-		this.docHasChanged = true;
-		this.doDesignerUpdate(this.prepareDesignerUpdate());
+		this.setEdited(true);
+		//TODO: Is it "worth it" to send all intermediate updates to the editor?
+		this.sendUpdateToAres();
 		return true; // Stop the propagation of the event
 	},
 	componentViewDrop: function(inSender, inEvent) {
@@ -167,7 +174,7 @@ enyo.kind({
 			this.kinds[this.index].content = this.$.designer.save();
 
 			// Prepare the data for the code editor
-			var event = {docHasChanged: this.docHasChanged, contents: []};
+			var event = {docHasChanged: this.getEdited(), contents: []};
 			for(var i = 0 ; i < this.kinds.length ; i++ ) {
 				event.contents[i] = this.kinds[i].content;
 			}
@@ -188,10 +195,7 @@ enyo.kind({
 		return true; // Stop the propagation of the event
 	},
 	saveComplete: function() {
-		this.docHasChanged = false;
-	},
-	saveNeeded: function() {
-		return this.docHasChanged;
+		this.setEdited(false);
 	},
 	upAction: function(inSender, inEvent) {
 		this.$.designer.upAction(inSender, inEvent);
@@ -207,6 +211,19 @@ enyo.kind({
 		this.$.upButton.setDisabled(disabled);
 		this.$.downButton.setDisabled(disabled);
 		this.$.deleteButton.setDisabled(disabled);
+	},
+	editedChanged: function() {
+		// Note: This doesn't look like it does anything, because we send updates to the document to Ares immediately, so a doc is 
+		// only "edited" for a few ms. I left this in here because I was tracking down some cases where the state stayed "edited"
+		if (this.edited) {
+			this.$.docLabel.setContent("Deimos *");
+		} else {
+			this.$.docLabel.setContent("Deimos");
+		}
+	},
+	sendUpdateToAres: function() {
+		this.doDesignerUpdate(this.prepareDesignerUpdate());
+		this.setEdited(false);
 	}
 });
 
