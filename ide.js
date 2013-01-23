@@ -45,6 +45,11 @@ var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applicati
 		description: 'host to bind the express server onto',
 		default: '127.0.0.1'
 	})
+	.options('a', {
+		alias : 'listen_all',
+		description: 'When set, listen to all adresses. By default, listen to the address specified with -H',
+		'boolean': true
+	})
 	.options('c', {
 		alias : 'config',
 		description: 'IDE configuration file',
@@ -330,7 +335,8 @@ app.configure(function(){
 	app.all('/res/services/:serviceId', proxyServices);
 
 });
-app.listen(port, addr);
+
+app.listen(port, argv.listen_all ? null : addr);
 
 // Run non-regression test suite
 
