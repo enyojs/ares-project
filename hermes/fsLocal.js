@@ -471,13 +471,17 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 	}
 };
 
-module.exports = FsLocal;
+// module/main wrapper
 
 if (path.basename(process.argv[1]) === "fsLocal.js") {
 	// We are main.js: create & run the object...
 	
 	var argv = require("optimist")
 	.usage('\nAres FileSystem (fs) provider.\nUsage: "$0 [OPTIONS]"')
+	.options('r', {
+		alias : 'root',
+		description: 'Root directory to serve'
+	})
 	.options('P', {
 		alias : 'pathname',
 		description: 'pathname (M) can be "/", "/res/files/" ...etc'
@@ -485,8 +489,8 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 	.demand('P')
 	.options('p', {
 		alias : 'port',
-		description: 'port (o) local IP port of the express server (default: 9009, 0: dynamic)',
-		default: '9009'
+		description: 'port (o) local IP port of the express server (default: 0 dynamic)',
+		default: '0'
 	})
 	.options('h', {
 		alias : 'help',
@@ -509,7 +513,7 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		pathname: argv.pathname,
 		port: argv.port,
 		verbose: argv.verbose,
-		root: argv._[0]
+		root: argv.root
 	}, function(err, service){
 		if (err) process.exit(err);
 		// process.send() is only available if the
@@ -517,4 +521,6 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		if (process.send) process.send(service);
 	});
 
+} else {
+	module.exports = FsLocal;
 }
