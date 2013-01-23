@@ -264,7 +264,7 @@ FsLocal.prototype._putMultipart = function(req, res, next) {
 	}
 	var nodes = [], files = [];
 	if (Array.isArray(req.files.file)) {
-		files.concat(req.files.file);
+		files.push.apply(files, req.files.file);
 	} else {
 		files.push(req.files.file);
 	}
@@ -272,7 +272,7 @@ FsLocal.prototype._putMultipart = function(req, res, next) {
 	var filenames = [];
 	if (req.body.filename) {
 		if (Array.isArray(req.body.filename)) {
-			filenames.concat(req.body.filename);
+			filenames.push.apply(filenames, req.body.filename);
 		} else {
 			filenames.push(req.body.filename);
 		}

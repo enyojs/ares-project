@@ -32,11 +32,6 @@ enyo.kind({
 	setProject: function(project) {
 		if (this.debug) this.log("project:", project);
 		if (project !== null) {
-			config = {
-				filesystem: project.getService(),
-				nodeName: project.getName(),
-				folderId: project.getFolderId()
-			};
 			this.$.hermesFileTree.setConfig(project).showFileOpButtons();
 		} else {
 			this.$.hermesFileTree.hideFileOpButtons().clear();
