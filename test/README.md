@@ -15,13 +15,22 @@ We test *Server* elements using the Node.js [Mocha](http://visionmedia.github.co
 	$ cd ares-project/test/server
 	$ ./ares.spec.js
 
-Or (verbose)…
+Or (with `-v` or `--verbose`)…
 
 	$ ./ares.spec.js -v
 
 Or (Windows)…
 
 	C:\Users\fxk\GIT\ares-project\test\server> node ares.spec.js
+
+To run a specific test, use the `-g` (or `--grep`) command-line flag.  For example:
+
+	$ ./ares.spec.js -g fsLocal
+
+The complete set of flags is the sum of the `ares.spec.js`-specific flags and the `mocha` flags:
+
+	$ ./ares.spec.js --help
+	$ node_modules/mocha/bin/mocha --help
 
 ## Components
 

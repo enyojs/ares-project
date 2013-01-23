@@ -55,7 +55,9 @@ function FsBase(inConfig, next) {
 	}
 
 	this.app.configure((function() {
-		this.app.use(express.logger('dev'));
+		if (!this.quiet) {
+			this.app.use(express.logger('dev'));
+		}
 		this.app.use(this.cors.bind(this));
 		this.app.use(express.cookieParser());
 		this.app.use(this.authorize.bind(this));

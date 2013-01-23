@@ -38,11 +38,20 @@ var argv = optimist
 		    description: 'verbose execution mode',
 		    boolean: true
 	    })
+	    .options('q', {
+		    alias : 'quiet',
+		    description: 'really quiet',
+		    boolean: true
+	    })
 	    .argv;
 
 if (argv.help) {
 	optimist.showHelp();
 	process.exit(0);
+}
+
+if (argv.quiet) {
+	argv.verbose = false;
 }
 
 var config = {};

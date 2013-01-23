@@ -30,7 +30,21 @@ var argv = optimist
 		    description: 'verbose execution mode',
 		    boolean: true
 	    })
+	    .options('q', {
+		    alias : 'quiet',
+		    description: 'really quiet',
+		    boolean: true
+	    })
 	    .argv;
+
+if (argv.help) {
+	optimist.showHelp();
+	process.exit(0);
+}
+
+if (argv.quiet) {
+	argv.verbose = false;
+}
 
 log("running in verbose mode");
 log("argv:", argv);
@@ -67,9 +81,9 @@ describe("Testing filesystems", function() {
 	it("fsLocal", function(done) {
 		var fsLocal = path.resolve("..", "..", "hermes","fsLocal.js");
 		var myFsPath = temp.path({prefix: 'com.palm.ares.test.fs'});
-
+		
 		shell.mkdir('-p', myFsPath);
-
+		
 		run([mocha, "--bail",
 		     "--reporter", "spec",
 		     "fs.spec.js",
@@ -77,7 +91,7 @@ describe("Testing filesystems", function() {
 		     "--pathname", "/",
 		     "--port", myPort,
 		     "--root", myFsPath]);
-
+		
 		if (!argv.keep) {
 			shell.rm('-rf', myFsPath);
 		}
@@ -98,6 +112,9 @@ function log() {
 function run(args) {
 	if (argv.verbose) {
 		args.push("-v");
+	}
+	if (argv.quiet) {
+		args.push("-q");
 	}
 	// Use '" "' instead of ' ' to let things work on Windows
 	var command = '"' + args.join('" "') + '"';
