@@ -133,6 +133,8 @@ enyo.kind({
 				service.impl.notifyFailure = enyo.bind(this, this.serviceFailure, service.config.type, service.config.id);
 			} else if (service.config.type === "build" && service.config.provider === "hermes" && service.config.id === "phonegap") {
 				service.impl = new PhonegapBuild();
+			} else if (service.config.type === "other" && service.config.provider === "hermes" && service.config.id === "openwebos") {
+				service.impl = new OpenwebosBuild();
 			}
 			if (this.debug) this.log("id:", service.config.id, "created");
 			// If the service does not define an
