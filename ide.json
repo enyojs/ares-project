@@ -25,14 +25,6 @@
 			"command":"@NODE@", "params":[
 				"hermes/fsDropbox.js", "-v", "-P", "/files", "-p", "0"
 			],
-			"auth": {
-				"type": "dropbox",
-				"appKey": "mqycofxfnqyxu7s",
-				"appSecret": "zwvda8zmiftxoby",
-				"uid": "6675248",
-				"accessToken": "knoovyfey85yjq1",
-				"accessTokenSecret": "s785upx9vupu711"
-			},
 			"useJsonp":false,
 			"verbose": false
 		},
