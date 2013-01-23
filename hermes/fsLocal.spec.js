@@ -121,7 +121,16 @@ function call(reqOptions, reqBody, reqParts, next) {
 		req.write(reqBody);
 	}
 	if (reqParts) {
-		sendOnePart(req, reqParts.name, reqParts.filename, reqParts.input);
+		var boundaryKey = generateBoundary();
+		req.setHeader('Content-Type', 'multipart/form-data; boundary="'+boundaryKey+'"');
+		if (Array.isArray(reqParts)) {
+			reqParts.forEach(function(part) {
+				sendOnePart(req, part.name, part.filename, part.input, boundaryKey);
+			});
+		} else {
+			sendOnePart(req, reqParts.name, reqParts.filename, reqParts.input, boundaryKey);
+		}
+		sendClosingBoundary(req, boundaryKey);
 	} else {
 		req.end();
 	}
@@ -138,18 +147,20 @@ function generateBoundary() {
 	return boundary;
 }
 
-function sendOnePart(req, name, filename, input) {
-	var boundaryKey = generateBoundary();
-	req.setHeader('Content-Type', 'multipart/form-data; boundary="'+boundaryKey+'"');
+function sendOnePart(req, name, filename, input, boundaryKey) {
 	req.write('--' + boundaryKey + '\r\n' +
-		  // use your file's mime type here, if known
-		  'Content-Type: application/octet-stream\r\n' +
-		  // "name" is the name of the form field
-		  // "filename" is the name of the original file
-		  'Content-Disposition: form-data; name="' + name + '"; filename="' + filename + '"\r\n' +
-		  'Content-Transfer-Encoding: binary\r\n\r\n');
+		// use your file's mime type here, if known
+		'Content-Type: application/octet-stream\r\n' +
+		// "name" is the name of the form field
+		// "filename" is the name of the original file
+		'Content-Disposition: form-data; name="' + name + '"; filename="' + filename + '"\r\n' +
+		'Content-Transfer-Encoding: binary\r\n\r\n');
 	req.write(input);
-	req.end('\r\n--' + boundaryKey + '--'); 
+	req.write('\r\n');
+}
+
+function sendClosingBoundary(req, boundaryKey) {
+	req.end('--' + boundaryKey + '--');
 }
 
 var myFs;
@@ -337,6 +348,7 @@ describe("fsLocal...", function() {
 	});
 
 	var textContent = "This is a Text content!";
+	var textContent2 = "This is another Text content!";
 	var textContentType = "text/plain; charset=utf-8";
 	var textContentId = "";
 
@@ -507,6 +519,77 @@ describe("fsLocal...", function() {
 			should.exist(res.buffer);
 			contentStr = res.buffer.toString();
 			contentStr.should.equal(textContent);
+			done();
+		});
+	});
+
+	var dir2file0Id;
+	var dir2file1Id;
+
+	it("t4.5. should create 2 files in a relative location (using 'multipart/form-data')", function(done) {
+		var content = [{
+			name: 'file',	// field name
+			filename: 'dir.2/file.0', // file path
+			input: new Buffer(textContent)
+		},{
+			name: 'file',	// field name
+			filename: 'dir.2/file.1', // file path
+			input: new Buffer(textContent2)
+		}];
+		async.waterfall([
+			function(cb) {
+				post('/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
+			},
+			function(res, cb) {
+				should.exist(res);
+				should.exist(res.statusCode);
+				res.statusCode.should.equal(201);
+				should.exist(res.json);
+				// Check first file
+				should.exist(res.json[0]);
+				should.exist(res.json[0].isDir);
+				res.json[0].isDir.should.equal(false);
+				should.exist(res.json[0].path);
+				res.json[0].path.should.equal("/toto/titi/dir.2/file.0");
+				should.exist(res.json[0].id);
+				dir2file0Id = res.json[0].id;
+				// Check second file
+				should.exist(res.json[1]);
+				should.exist(res.json[1].isDir);
+				res.json[1].isDir.should.equal(false);
+				should.exist(res.json[1].path);
+				res.json[1].path.should.equal("/toto/titi/dir.2/file.1");
+				should.exist(res.json[1].id);
+				dir2file1Id = res.json[1].id;
+				cb();
+			}
+		],done);
+	});
+
+	it("t4.6. should download the same file (first one)", function(done) {
+		get('/id/' + dir2file0Id, null /*query*/, function(err, res) {
+			var contentStr;
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(200);
+			should.exist(res.buffer);
+			contentStr = res.buffer.toString();
+			contentStr.should.equal(textContent);
+			done();
+		});
+	});
+
+	it("t4.7. should download the same file (second one)", function(done) {
+		get('/id/' + dir2file1Id, null /*query*/, function(err, res) {
+			var contentStr;
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(200);
+			should.exist(res.buffer);
+			contentStr = res.buffer.toString();
+			contentStr.should.equal(textContent2);
 			done();
 		});
 	});
@@ -817,6 +900,7 @@ describe("fsLocal...", function() {
 				done();
 			});
 		} else {
+			console.log("Temporary directorie: " + myFsPath);
 			done();
 		}
 	});
