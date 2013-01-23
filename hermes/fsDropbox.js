@@ -46,7 +46,7 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 			if (err) {
 				return next(err);
 			}
-			console.log("dropbox:" + util.inspect(client));
+			//console.log("dropbox:" + util.inspect(client));
 			next();
 		});
 	}
@@ -57,14 +57,14 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 		    !auth.appKey || !auth.appSecret ||
 		    !auth.accessToken || !auth.accessTokenSecret) {
 			throw new HttpError("Missing OAuth authorization parameters", 400);
-		}
+		} 
 		this.url = function() { return ""; };
 		this.doAuthorize = function(authUrl, token, tokenSecret, callback) {
 			console.log("authDriver.doAuthorize(): authUrl:"+ authUrl + " , token:" + token + ", tokenSecret:", tokenSecret);
 			callback();
 		};
 		this.onAuthStateChange = function(client, callback) {
-			console.log("authDriver.onAuthStateChange(): client.authState:" + client.authState);
+			//console.log("authDriver.onAuthStateChange(): client.authState:" + client.authState);
 			client.setCredentials({
 				uid: auth.uid,
 				key: auth.appKey,
@@ -72,8 +72,8 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 				token: auth.accessToken,
 				tokenSecret: auth.accessTokenSecret
 			});
-			console.log("authDriver.onAuthStateChange(): client.authState:" + client.authState);
-			console.log("authDriver.onAuthStateChange(): client.oauth:" + util.inspect(client.oauth));
+			//console.log("authDriver.onAuthStateChange(): client.authState:" + client.authState);
+			//console.log("authDriver.onAuthStateChange(): client.oauth:" + util.inspect(client.oauth));
 			callback();
 		};
 	}
@@ -166,6 +166,7 @@ FsDropbox.prototype['delete'] = function(req, res, next) {
 // implementations
 
 FsDropbox.prototype._propfind = function(err, req, relPath, depth, next) {
+	this.log("_propfind(): err=", err, "relPath:", relPath, "depth:", depth);
 	if (depth > 1) {
 		return next(new HttpError("Unsupported depth=" + depth, 403));
 	}
@@ -174,7 +175,7 @@ FsDropbox.prototype._propfind = function(err, req, relPath, depth, next) {
 
 	function _onReply(err, entries, dirStat, entriesStat) {
 		var node;
-		this.log("_propfind(): err=", err, "entries:", entries, "dirStat:", dirStat, "entriesStat:", entriesStat);
+		this.log("_propfind.onReply(): err=", err, "entries:", entries, "dirStat:", dirStat, "entriesStat:", entriesStat);
 		if (err) {
 			next(err);
 		} else {
@@ -183,7 +184,7 @@ FsDropbox.prototype._propfind = function(err, req, relPath, depth, next) {
 				contents: entriesStat,
 				isFolder: dirStat.isFolder
 			}, depth);
-			this.log("_propfind(): node:", node);
+			this.log("_propfind.onReply(): node:", node);
 			next(null, {code: 200, body: node});
 		}
 	}
