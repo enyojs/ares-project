@@ -21,12 +21,12 @@ util.inherits(FsDropbox, FsBase);
 
 FsDropbox.prototype.authorize = function(req, res, next) {
 	var auth;
-	if (req.cookies.dropboxauth) {
+	if (req.cookies.dropbox_auth) {
 		this.log("FsDropbox.authorize(): req.cookies=", util.inspect(req.cookies));
-		_authorize(decodeURIComponent(req.cookies.dropboxauth));
-	} else if(req.query.dropboxauth) {
+		_authorize(decodeURIComponent(req.cookies.dropbox_auth));
+	} else if(req.query.auth) {
 		this.log("FsDropbox.authorize(): req.query=", util.inspect(req.query));
-		_authorize(req.query.dropboxauth);
+		_authorize(req.query.auth);
 	} else {
 		next(new HttpError('Missing Authorization', 401));
 	}
@@ -34,7 +34,7 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 	function _authorize(authStr) {
 		try {
 			auth = JSON.parse(authStr);
-			console.log("FsDropbox.authorize(): dropboxauth:" + util.inspect(auth));
+			console.log("FsDropbox.authorize(): auth:" + util.inspect(auth));
 		} catch(e) {
 			return next(e);
 		}
@@ -53,6 +53,11 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 
 	// see https://github.com/dropbox/dropbox-js/blob/master/doc/auth_drivers.md
 	function _authDriver(auth) {
+		if (!auth || !auth.uid ||
+		    !auth.appKey || !auth.appSecret ||
+		    !auth.accessToken || !auth.accessTokenSecret) {
+			throw new HttpError("Missing OAuth authorization parameters", 400);
+		}
 		this.url = function() { return ""; };
 		this.doAuthorize = function(authUrl, token, tokenSecret, callback) {
 			console.log("authDriver.doAuthorize(): authUrl:"+ authUrl + " , token:" + token + ", tokenSecret:", tokenSecret);
@@ -77,8 +82,8 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 FsDropbox.prototype.setUserInfo = function(req, res, next) {
 	this.log("FsDropbox.setUserInfo(): req.query=", util.inspect(req.query));
 	this.log("FsDropbox.setUserInfo(): req.params=", util.inspect(req.params));
-	var auth = req.param('dropboxauth');
-	this.log("FsDropbox.setUserInfo(): dropboxauth:", auth);
+	var auth = req.param('auth');
+	this.log("FsDropbox.setUserInfo(): auth:", auth);
 	if (auth) {
 		var exdate=new Date();
 		exdate.setDate(exdate.getDate() + 10 /*days*/);
@@ -89,8 +94,8 @@ FsDropbox.prototype.setUserInfo = function(req, res, next) {
 			//maxAge: 1000*3600 // 1 hour
 		};
 
-		res.cookie('dropboxauth', auth, cookieOptions);
-		this.log("FsDropbox.setUserInfo(): Set-Cookie: dropboxauth:", auth);
+		res.cookie('dropbox_auth', auth, cookieOptions);
+		this.log("FsDropbox.setUserInfo(): Set-Cookie: dropbox_auth:", auth);
 		res.send(200).end();
 	} else {
 		next(new HttpError('No User Info', 400 /*Bad Request*/));

@@ -1,16 +1,20 @@
-#!/usr/bin/env node_modules/mocha/bin/mocha
+#!/usr/bin/env node_modules/mocha/bin/mocha --bail
 /**
  * ares.spec.js -- ARES server test suite
  */
-var fs = require("fs"),
-    path = require("path"),
-    rimraf = require("rimraf"),
+var path = require("path"),
+    fs = require("fs"),
     optimist = require("optimist"),
     shell = require('shelljs'),
     temp = require("temp");
 
 var argv = optimist
 	    .usage('\nAres server tester.\nUsage: "$0 [OPTIONS]')
+	    .options('c', {
+		    alias : 'config',
+		    description: 'path to ide.json',
+		    default: path.resolve(__dirname, "..", "..", "ide.json")
+	    })
 	    .options('k', {
 		    alias : 'keep',
 		    description: 'keep temporary files & folders',
@@ -28,30 +32,62 @@ var argv = optimist
 	    })
 	    .argv;
 
-log(argv['$0'] + " running in verbose mode");
+log("running in verbose mode");
 log("argv:", argv);
 
-var myPort = 9019;
-var myFsPath = temp.path({prefix: 'com.palm.ares.test.fs'});
-fs.mkdirSync(myFsPath);
-
 var mocha = path.resolve(__dirname, "node_modules", "mocha", "bin", "mocha");
-var fsLocal = path.resolve("..", "..", "hermes","fsLocal.js");
+var myPort = 9019;
 
-run([mocha, "--bail",
-     "fs.spec.js",
-     "--filesystem", fsLocal,
-     "--pathname", "/",
-     "--root", myFsPath,
-     "--port", myPort]);
+log("loading " + argv.config);
+var config = JSON.parse(fs.readFileSync(argv.config, 'utf8'));
+log("config:", config);
 
-if (!argv.keep) {
-	rimraf(myFsPath, {gently: myFsPath}, function() {
+/*
+ * test suite
+ */
+
+describe("Testing filesystems", function() {
+	it("fsDropbox", function(done) {
+		var dropbox = config.services.filter(function(service) {
+			return service.id === 'dropbox';
+		})[0];
+		if (dropbox && dropbox.auth) {
+			var fsDropbox = path.resolve("..", "..", "hermes","fsDropbox.js");
+			run([mocha, "--bail",
+			     "--timeout", "3000", // This timeout may vary, depending on the network conditions
+			     "--reporter", "spec",
+			     "fs.spec.js",
+			     "--filesystem", fsDropbox,
+			     "--pathname", "/",
+			     "--port", myPort,
+			     "--auth", encodeURIComponent(JSON.stringify(dropbox.auth))]);
+		}
 		done();
 	});
-} else {
-	done();
-}
+	it("fsLocal", function(done) {
+		var fsLocal = path.resolve("..", "..", "hermes","fsLocal.js");
+		var myFsPath = temp.path({prefix: 'com.palm.ares.test.fs'});
+
+		shell.mkdir('-p', myFsPath);
+
+		run([mocha, "--bail",
+		     "--reporter", "spec",
+		     "fs.spec.js",
+		     "--filesystem", fsLocal,
+		     "--pathname", "/",
+		     "--port", myPort,
+		     "--root", myFsPath]);
+
+		if (!argv.keep) {
+			shell.rm('-rf', myFsPath);
+		}
+		done();
+	});
+});
+
+/*
+ * utilities
+ */
 
 function log() {
 	if (argv.verbose) {

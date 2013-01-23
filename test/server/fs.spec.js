@@ -1,3 +1,4 @@
+#!/usr/bin/env node_modules/mocha/bin/mocha --bail
 /**
  * fsXXX.js test suite
  */
@@ -12,12 +13,20 @@ var fs = require("fs"),
     async = require("async"),
     optimist = require("optimist");
 
+/*
+ * parameters parsing
+ */
+
 var argv = optimist
 	    .usage('\nAres FileSystem (fs) tester.\nUsage: "$0 [OPTIONS] -F <FS_PATH>"')
 	    .options('F', {
 		    alias : 'filesystem',
 		    description: 'path to the Hermes file-system to test. For example ../../hermes/fsLocal.js',
 		    required: true
+	    })
+	    .options('A', {
+		    alias : 'auth',
+		    description: 'auth parameter, passed as a single-quoted URL-encoded JSON-formatted Javascript Object'
 	    })
 	    .options('h', {
 		    alias : 'help',
@@ -31,12 +40,31 @@ var argv = optimist
 	    })
 	    .argv;
 
-log(argv['$0'] + " running in verbose mode");
+if (argv.help) {
+	optimist.showHelp();
+	process.exit(0);
+}
+
+var config = {};
+
+config.name = path.basename(argv.filesystem);
+config.prefix = '[fs.spec:' + config.name + ']';
+
+if (argv.auth) {
+	config.auth = JSON.parse(decodeURIComponent(argv.auth));
+}
+
+log("running in verbose mode");
 log("argv:", argv);
+log("config:", config);
+
+/*
+ * utilities
+ */
 
 function log() {
 	if (argv.verbose) {
-		console.log.bind(this, this.name).apply(this, arguments);
+		console.log.bind(this, config.prefix).apply(this, arguments);
 	}
 }
 
@@ -48,9 +76,15 @@ function get(path, query, next) {
 		headers: {},
 		path: path
 	};
+
+	if (config.auth) {
+		query.auth = JSON.stringify(config.auth);
+	}
+
 	if (query && Object.keys(query).length > 0) {
 		reqOptions.path += '?' + querystring.stringify(query);
 	}
+
 	call(reqOptions, undefined /*reqBody*/, undefined /*reqParts*/, next);
 }
 
@@ -98,6 +132,10 @@ function post(path, query, content, contentType, next) {
 			reqOptions.headers['content-type'] = 'text/plain; charset=x-binary';
 			reqBody = content.toString('x-binary'); // do not decode/encode
 		}
+	}
+
+	if (config.auth) {
+		query.auth = JSON.stringify(config.auth);
 	}
 
 	if (query && Object.keys(query).length > 0) {
@@ -179,9 +217,12 @@ function sendOnePart(req, name, filename, input) {
 }
 
 var Fs = require(argv.filesystem);
+if (!Fs) {
+	throw new Error("Unable to load file-system: " + argv.filesystem);
+}
 var myFs;
 
-describe("fs...", function() {
+describe("Testing " + config.name, function() {
 	
 	it("t0. should start", function(done) {
 		myFs = new Fs(argv, function(err, service){
