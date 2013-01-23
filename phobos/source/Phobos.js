@@ -12,8 +12,8 @@ enyo.kind({
 				{name: "saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "saveDocAction"},
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: $L("New Kind"), ontap: "newKindAction"},
 				{fit: true},
-				{name: "designerButton", kind: "onyx.Button", content: $L("Designer"), ontap: "designerAction"},
-				{name: "editorButton", kind: "onyx.Button", content: "Editor Settings", ontap: "editorSettings"}
+				{name: "editorButton", kind: "onyx.Button", content: "Editor Settings", ontap: "editorSettings"},
+				{name: "designerButton", kind: "onyx.Button", content: $L("Designer"), ontap: "designerAction"}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [

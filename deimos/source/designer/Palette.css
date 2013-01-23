@@ -9,10 +9,29 @@
 	background-color: #CCC; 
 	text-transform: uppercase; 
 	font-weight: bold;
+	vertical-align: middle;
 }
 
 .palette-item {
 	background-color: #F5F5F5; 
 	border-bottom: 1px solid #D0D0D0; 
 	padding: 5px;
+}
+
+.palette-item > * {
+	display: inline-block;
+}
+
+.indicator {
+	height: 16px;
+	width: 16px;
+	padding-right: 5px;
+	background-image: url('../../images/triangle.png');
+	background-repeat: no-repeat;
+	background-position-y: 0px;
+	display: inline-block;
+}
+
+.turned {
+	background-position-y: -16px;
 }

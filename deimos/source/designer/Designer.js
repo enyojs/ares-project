@@ -23,11 +23,8 @@ enyo.kind({
 		ondragover: "dragOver",
 		ondrop: "drop"
 	},
-	serialize: function() {
-		return this.$.serializer.serialize(this.$.sandbox, this.$.model);
-	},
 	getComponents: function() {
-		return this.$.serializer.getComponents(this.$.sandbox, this.$.model);
+		return this.$.serializer.getComponents(this.$.sandbox.children[0], this.$.model);
 	},
 	previewDomEvent: function(e) {
 		if (e.dispatchTarget.isDescendantOf(this.$.sandbox)) {
@@ -151,7 +148,7 @@ enyo.kind({
 		var c = this.getSelectedContainer();
 		if ( ! c) {
 			// There is no object already created
-			c = this.$.sandbox;
+			c = this.$.sandbox.children[0];
 		}
 
 		// The selection objects are moved around in the DOM and the nodes can lose sync with the enyo node

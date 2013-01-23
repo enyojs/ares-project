@@ -3,7 +3,7 @@ enyo.kind({
 	components: [
 		{classes: "palette-category", components: [
 			{ontap:"toggleDrawer", classes: "palette-category-name", components: [
-				{name: "indicator", tag:"span", content:"v", style:"padding-right:5px;"},
+				{name: "indicator", classes: "indicator turned"},
 				{name: "name", tag:"span"}
 			]},
 			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
@@ -16,7 +16,7 @@ enyo.kind({
 	toggleDrawer: function() {
 		var open = this.$.drawer.getOpen();
 		this.$.drawer.setOpen(!open);
-		this.$.indicator.setContent(open ? ">" : "v");
+		this.$.indicator.addRemoveClass("turned", !open);
 	},
 	setModel: function(inModel) {
 		this.model = inModel;
@@ -33,9 +33,10 @@ enyo.kind({
 enyo.kind({
 	name: "PaletteItem",
 	components: [
-		{classes: "palette-item", components: [
+		{kind: "Control", classes: "palette-item", components: [
+			{name: "icon", kind: "Image", showing: false},
 			{name: "name"},
-			{classes: "row-fluid", name: "client"}
+			{classes: "row-fluid", name: "client"},
 		]}
 	],
 	setModel: function(inModel) {
@@ -44,17 +45,14 @@ enyo.kind({
 				var c = this.$[n];
 				if (c) {
 					var v = inModel[n];
-					if (c.tag == "img") {
-						c.setSrc("images/" + v);
+					if (c.kind == "Image") {
+						c.setSrc("$deimos/images/" + v);
+						c.setShowing(true);
 					} else {
 						c.setContent(v);
 					}
 				}
 			}
-			// Avoiding this for a cleaner look for now, will likely revisit
-			//if (inModel.inline) {
-			//	this.createComponent(inModel.inline);
-			//}
 			this.config = inModel.config;
 		}
 	}
