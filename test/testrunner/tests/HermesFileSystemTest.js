@@ -5,9 +5,8 @@ enyo.kind({
 	kind: "Ares.TestSuite",
 	debug: true,
 
-	dirToCreate: "source",
+	dirToCreate: "TestRunner",
 	fileToCreate: "App.js",
-	nodeFile: "%2FAresTests%2Fsource%2FApp.js",
 
 	registry: null,
 	services: null,
@@ -82,10 +81,9 @@ enyo.kind({
 			if (this.debug) enyo.log("Got the inResponse for req: ", inResponse);
 			var self = this;
 			/**
-			* MKCOL - want to create test/root/source directory
-			* if test/root/source exists first delete it
+			* MKCOL - want to create test/root/TestRunner directory
+			* if test/root/TestRunner exists first delete it
 			*/
-			if (!inResponse.children[0]) {
 				var req2 = service.impl.createFolder(inResponse.id, this.dirToCreate);
 				req2.response(function(inSender, inResponse) {
 					if (self.debug) enyo.log("Got the inResponse for req2: ", inResponse);
@@ -95,10 +93,7 @@ enyo.kind({
 					enyo.log(inError);
 					self.finish("create "+this.dirToCreate+ " folder failed with error: " +inError);
 				});
-			} else {
-				self.finish();
-			}
-		});
+			});
 		req.error(this, function(inSender, inError) {
 			enyo.log(inError);				
 			this.finish("propfind on root id failed: "+inError);
@@ -119,7 +114,7 @@ enyo.kind({
 				title: "created by the test suite"
 			};
 			/**
-			* PUT Verb - want to create test/root/source/App.js file
+			* PUT Verb - want to create test/root/TestRunner/App.js file
 			*/
 			if (inResponse.children[0].id) {
 				var req2 = service.impl.createFile(inResponse.children[0].id, this.fileToCreate, JSON.stringify(content));
@@ -151,11 +146,11 @@ enyo.kind({
 		req.response(this, function(inSender, inResponse) {
 			if (this.debug) enyo.log("Got the inResponse for req: ", inResponse);
 			/**
-			* DELETE - want to delete test/root/source/App.js file
+			* DELETE - want to delete test/root/TestRunner/App.js file
 			*/
 			if (inResponse.children[0].name === this.dirToCreate) {
 			    /**
-			    * new PROPFIND on test/root/source
+			    * new PROPFIND on test/root/TestRunner
 			    */
 			    var req2 = service.impl.propfind(inResponse.children[0].id, 1);
 			    var self = this;
@@ -201,7 +196,7 @@ enyo.kind({
 			if (this.debug) enyo.log("Got the inResponse for req: ", inResponse);
 			var self = this;
 			/**
-			* DELETE - want to delete test/root/source directory
+			* DELETE - want to delete test/root/TestRunner directory
 			*/
 			if (inResponse.children[0].id) {
 				var req2 = service.impl.remove(inResponse.children[0].id);
@@ -223,7 +218,7 @@ enyo.kind({
 		});
 	},
 	/**
-	* re-create the test/root/source directory 
+	* re-create the test/root/TestRunner directory 
 	* needed for other test suite
 	*/
 	testSourceFolderRevival: function() {
@@ -238,7 +233,7 @@ enyo.kind({
 			if (this.debug) enyo.log("Got the inResponse for req: ", inResponse);
 			var self = this;
 			/**
-			* MKCOL - want to create test/root/source directory
+			* MKCOL - want to create test/root/TestRunner directory
 			*/
 			var req2 = service.impl.createFolder(inResponse.id, this.dirToCreate);
 			req2.response(function(inSender, inResponse) {
