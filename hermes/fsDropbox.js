@@ -149,7 +149,14 @@ FsDropbox.prototype.put = function(req, res, next) {
 };
 
 FsDropbox.prototype.mkcol = function(req, res, next) {
-	next (new HttpError("ENOSYS", 500));
+	var relPath = req.param('path') + req.param('name');
+	this.log("mkcol(): relPath:", relPath);
+	req.dropbox.mkdir(relPath, (function(err, stat) {
+		this.log("mkcol(): dropbox err:", err, "stat:", stat);
+		var node = getNode.bind(this)(stat, 0);
+		this.log("mkcol(): node:", node);
+		next(err, {code: 200, body: node});
+	}).bind(this));
 };
 
 FsDropbox.prototype['delete'] = function(req, res, next) {
@@ -163,7 +170,7 @@ FsDropbox.prototype._propfind = function(err, req, relPath, depth, next) {
 		return next(new HttpError("Unsupported depth=" + depth, 403));
 	}
 
-	req.dropbox.readdir("/", _onReply.bind(this));
+	req.dropbox.readdir("/" + relPath, _onReply.bind(this));
 
 	function _onReply(err, entries, dirStat, entriesStat) {
 		var node;
@@ -171,7 +178,7 @@ FsDropbox.prototype._propfind = function(err, req, relPath, depth, next) {
 		if (err) {
 			next(err);
 		} else {
-			node = _wrapDbNode.bind(this)({
+			node = getNode.bind(this)({
 				path: dirStat.path || '/',
 				contents: entriesStat,
 				isFolder: dirStat.isFolder
@@ -181,34 +188,42 @@ FsDropbox.prototype._propfind = function(err, req, relPath, depth, next) {
 		}
 	}
 
-	function _wrapDbNode(dbNode, depth) {
-		this.log("wrapDbNode(): dbNode:", dbNode);
-		var arNode;
-		if (dbNode) {
-			arNode = {
-				isDir: dbNode.isFolder,
-				path: dbNode.path,
-				name: path.basename(dbNode.path),
-				id: this.encodeFileId(dbNode.path)
-			};
-			if (dbNode.versionTag) {
-				arNode.hash = dbNode.versionTag;
-			}
-			if (arNode.isDir) {
-				arNode.children = [];
-				if (depth) {
-					dbNode.contents.forEach(function(dbNode){
-						arNode.children.push(_wrapDbNode.bind(this)(dbNode, depth-1));
-					}, this);
-				}
-			}
-		}
-		this.log("wrapDbNode(): arNode:", arNode);
-		return arNode;
-	}
 };
 
-// modulel/main wrapper
+/**
+ * Convert a Dropbox#Stat {Object} into an Ares#Node {Object}.
+ */
+function getNode(stat, depth) {
+	this.log("getNode(): stat:", stat);
+	var arNode;
+	if (stat) {
+		arNode = {
+			isDir: stat.isFolder,
+			path: stat.path,
+			name: path.basename(stat.path),
+			id: this.encodeFileId(stat.path)
+		};
+		if (arNode.name === '') {
+			// XXX replace by the Dropbox application folder name?
+			arNode.name = 'dropbox';
+		}
+		if (stat.versionTag) {
+			arNode.hash = stat.versionTag;
+		}
+		if (arNode.isDir) {
+			if (depth) {
+				arNode.children = [];
+				stat.contents.forEach(function(stat){
+					arNode.children.push(getNode.bind(this)(stat, depth-1));
+				}, this);
+			}
+		}
+	}
+	this.log("getNode(): arNode:", arNode);
+	return arNode;
+}
+
+// module/main wrapper
 
 if (path.basename(process.argv[1]) === "fsDropbox.js") {
 	// We are main.js: create & run the object...
@@ -253,4 +268,6 @@ if (path.basename(process.argv[1]) === "fsDropbox.js") {
 		if (process.send) process.send(service);
 	});
 
+} else {
+	module.exports = FsDropbox;
 }

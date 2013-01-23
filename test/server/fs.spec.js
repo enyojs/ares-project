@@ -287,6 +287,7 @@ describe("Testing " + config.name, function() {
 			res.json.isDir.should.equal(true);
 			should.exist(res.json.children);
 			should.exist(res.json.children.length);
+			res.json.children.should.be.an.instanceOf(Array);
 			res.json.children.length.should.equal(0);
 
 			done();
