@@ -2,7 +2,7 @@
 <TestCase seleniumIDEVersion="1.10.0" baseURL="http://127.0.0.1:9009/">
 <selenese>
 	<command>open</command>
-	<target><![CDATA[/ide/ares/test.html?debug]]></target>
+	<target><![CDATA[/ide/ares/test.html?debug=true&norunner=true]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
