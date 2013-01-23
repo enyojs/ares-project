@@ -47,7 +47,8 @@ enyo.kind({
 			url: url,
 			method: method,
 			handleAs: this._requestDic[inMethod].handleAs,
-			postBody: inParams && inParams.postBody
+			postBody: inParams && inParams.postBody,
+			contentType: inParams && inParams.contentType
 		};
 		var req = new enyo.Ajax(options);
 		if (inParams && inParams.postBody) {
@@ -163,6 +164,10 @@ enyo.kind({
 			formData.append('filename', inName );
 		}
 		return this._request("PUT", inFolderId, {postBody: formData} /*inParams*/);
+	},
+	createFiles: function(inFolderId, data) {
+		this.log();
+		return this._request("PUT", inFolderId, {postBody: data.content, contentType: data.ctype} /*inParams*/);
 	},
 	createFolder: function(inFolderId, inName) {
 		var newFolder = inFolderId + "/" + inName;
