@@ -116,8 +116,8 @@ enyo.kind({
 			/**
 			* PUT Verb - want to create test/root/TestRunner/App.js file
 			*/
-			if (inResponse.children[0].id) {
-				var req2 = service.impl.createFile(inResponse.children[0].id, this.fileToCreate, JSON.stringify(content));
+			if (inResponse.children[2].id) {
+				var req2 = service.impl.createFile(inResponse.children[2].id, this.fileToCreate, JSON.stringify(content));
 				req2.response(self, function(inSender, inResponse) {
 					if (self.debug) enyo.log("Got the inResponse for req2: ", inResponse);
 					self.finish();
@@ -127,7 +127,7 @@ enyo.kind({
 					self.finish("create file error: "+inError);
 				});
 			} else {
-				self.finish("folder "+inResponse.children[0].name+ " not found");				
+				self.finish("folder "+inResponse.children[2].name+ " not found");				
 			}
 		});
 		req.error(this, function(inSender, inError) {
@@ -148,11 +148,10 @@ enyo.kind({
 			/**
 			* DELETE - want to delete test/root/TestRunner/App.js file
 			*/
-			if (inResponse.children[0].name === this.dirToCreate) {
 			    /**
 			    * new PROPFIND on test/root/TestRunner
 			    */
-			    var req2 = service.impl.propfind(inResponse.children[0].id, 1);
+			    var req2 = service.impl.propfind(inResponse.children[2].id, 1);
 			    var self = this;
 			    req2.response(self, function(inSender, inResponse) {
 			    	if (self.debug) enyo.log("Got the inResponse for req3: "+JSON.stringify(inResponse));
@@ -176,7 +175,6 @@ enyo.kind({
 					self.finish("delete File error: "+inError);
 				});
 
-			} 
 		});
 		req.error(this, function(inSender, inError) {
 			enyo.log(inError);
@@ -198,18 +196,18 @@ enyo.kind({
 			/**
 			* DELETE - want to delete test/root/TestRunner directory
 			*/
-			if (inResponse.children[0].id) {
-				var req2 = service.impl.remove(inResponse.children[0].id);
+			if ((inResponse.children[2].id) && (inResponse.children[2].name === this.dirToCreate)) {
+				var req2 = service.impl.remove(inResponse.children[2].id);
 				req2.response(self, function(inSender, inResponse) {
 					if (self.debug) enyo.log("Got the inResponse for req2: "+JSON.stringify(inResponse));						
 					self.finish();
 				});
 				req2.error(self, function(inSender, inError) {
 					enyo.log(inError);
-					self.finish("delete "+inResponse.children[0].name+ " folder failed with error: " +inError);
+					self.finish("delete "+inResponse.children[2].name+ " folder failed with error: " +inError);
 				});
 			} else {
-				self.finish("delete "+inResponse.children[0].name+ " folder failed");
+				self.finish("delete "+inResponse.children[2].name+ " folder failed");
 			}
 		});
 		req.error(this, function(inSender, inError) {
