@@ -12,21 +12,26 @@ var shell = require("shelljs");
     var templates = {};
 
     /**
-     * addTemplates allow to add new templates to the list
+     * registerTemplates allow to add new templates to the list
      * of available templates
-     * @param newTemplates: array of templates to add
+     * @param newTemplates: array of local templates to add
      */
-    openwebos.addTemplates = function(newTemplates) {
+    openwebos.registerTemplates = function(newTemplates) {
         newTemplates.forEach(function(entry) {
             templates[entry.id] = entry;
         });
     };
 
+    openwebos.registerRemoteTemplates = function(templatesUrl) {
+        newTemplates.forEach(function(entry) {
+            templates[entry.id] = entry;
+        });
+    };
     openwebos.list = function(callback) {
         callback(null, templates);
     };
 
-    openwebos.generate = function(templateId, substitutions, destination, callback) {
+    openwebos.generate = function(templateId, substitutions, destination, options, callback) {
 
         var source = templates[templateId] && templates[templateId].url;
         if ( ! source) {
@@ -34,7 +39,7 @@ var shell = require("shelljs");
             return;
         }
 
-        // Unzip the template
+        // Unzip the template       // TODO: move to javascript
         var result = shell.exec("unzip " + source + " -d " + destination);
         // console.log("shell.exec: ", result);
 

@@ -28,7 +28,7 @@ function BdOpenwebOS(config, next) {
 	util.inherits(HttpError, Error);
 	HttpError.prototype.name = "HTTP Error";
 
-	tools.addTemplates([
+	tools.registerTemplates([
         {
             id: "enyo_singlepane",
             url: "templates//projects/enyo_singlepane.zip",
@@ -147,7 +147,7 @@ function BdOpenwebOS(config, next) {
 		var destination = temp.path({prefix: 'com.palm.ares.hermes.bdOpenwebOS'}) + '.d';
 		fs.mkdirSync(destination);
 
-		tools.generate(req.body.templateId, JSON.parse(req.body.options), destination, function(inError, inData) {
+		tools.generate(req.body.templateId, JSON.parse(req.body.options), destination, {}, function(inError, inData) {
 			if (inError) {
 				next(new HttpError(inError, 500));
 				return;
@@ -157,8 +157,11 @@ function BdOpenwebOS(config, next) {
 			var form = new FormData();
 			inData.forEach(function(file) {
 				if (fs.statSync(file).isFile()) {
+					var filename = file.substr(destination.length + 1);
+					var options = {};
+					options.header = makePartHeader(filename, form.getBoundary());
 					var stream = fs.createReadStream(file);
-					form.append('file', stream);
+					form.append('file', stream, options);
 				}
 			});
 
@@ -169,6 +172,17 @@ function BdOpenwebOS(config, next) {
 
 			// TODO cleanup the temp dir when the response has been sent
 		});
+	}
+
+	function makePartHeader(filename, boundary) {
+		var header = '--' + boundary + FormData.LINE_BREAK;
+		header += 'Content-Disposition: form-data; name="file"';
+
+		header += '; filename="' + filename + '"' + FormData.LINE_BREAK;
+		header += 'Content-Type: application/octet-stream';
+
+		header += FormData.LINE_BREAK + FormData.LINE_BREAK;
+		return header;
 	}
 }
 
