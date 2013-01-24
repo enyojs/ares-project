@@ -7,23 +7,24 @@ var path = require('path'),
 
 // Local variables
 var srcDir = process.cwd(),
-	runnerDir = path.resolve(srcDir, 'test/root'),
-	seleniumDir = path.resolve(srcDir, 'test/root/TestSelenium'),
-	newpDir = path.resolve(srcDir, 'test/root/TestSelenium/NewProject'),
-	helloTestDir = path.resolve(srcDir, 'test/root/TestSelenium/HelloWorld'),
-	helloDir = path.resolve(srcDir, 'hermes/filesystem/root/HelloWorld'),
-	sourcefile = path.resolve(srcDir, 'enyo'),
-	targetfile = path.resolve(srcDir, 'test/root/TestSelenium/HelloWorld/enyo'),
-	lib = path.resolve(srcDir, 'test/root/TestSelenium/HelloWorld/lib');
+	tDir = path.resolve(srcDir, 'test'),
+	rDir = path.resolve(tDir, 'root'),
+	testDir = path.resolve(srcDir, 'test/root'),
+	newProjectDir = path.resolve(srcDir, 'test/root/NewProject'),
+	helloTestDir = path.resolve(srcDir, 'test/root/HelloWorld'),
+	helloDestDir = path.resolve(srcDir, 'hermes/filesystem/root/HelloWorld'),
+	lib = path.resolve(srcDir, 'test/root/HelloWorld/lib');
 
 // cleanup and set up the dedicated source tree either for TestRunner and Selenium
-shell.rm('-rf', path.join(runnerDir));
-shell.mkdir('-p', path.join(runnerDir));
-shell.mkdir('-p', path.join(newpDir));
+shell.cd(path.join(tDir));
+shell.rm('-rf', path.join(rDir));
+shell.mkdir('-p', path.join(testDir));
+shell.mkdir('-p', path.join(newProjectDir));
+shell.mkdir('-p', path.join(helloTestDir));
 // import the HelloWorld project and dependencies from hermes/filesystem/root
-shell.cp('-R', path.join(helloDir), path.join(seleniumDir));
+shell.cp('-R', path.join(helloDestDir), path.join(testDir));
 shell.cd(path.join(helloTestDir));
 shell.mkdir('-p', path.join(lib));
-shell.exec('/bin/ln -s ../../../../enyo enyo');
-shell.exec('/bin/ln -s ../../../../../lib/layout lib/layout');
-shell.exec('/bin/ln -s ../../../../../lib/onyx lib/onyx');
+shell.exec('/bin/ln -s ../../../enyo enyo');
+shell.exec('/bin/ln -s ../../../../lib/layout lib/layout');
+shell.exec('/bin/ln -s ../../../../lib/onyx lib/onyx');
