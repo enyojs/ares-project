@@ -15,11 +15,6 @@ var argv = optimist
 		    description: 'path to ide.json',
 		    default: path.resolve(__dirname, "..", "..", "ide.json")
 	    })
-	    .options('k', {
-		    alias : 'keep',
-		    description: 'keep temporary files & folders',
-		    boolean: true
-	    })
 	    .options('h', {
 		    alias : 'help',
 		    description: 'help message',
@@ -82,7 +77,7 @@ describe("Testing filesystems", function() {
 		var fsLocal = path.resolve("..", "..", "hermes","fsLocal.js");
 		var myFsPath = temp.path({prefix: 'com.palm.ares.test.fs'});
 		
-		shell.mkdir('-p', myFsPath);
+		fs.mkdirSync(myFsPath);
 		
 		run([mocha, "--bail",
 		     "--reporter", "spec",
@@ -92,10 +87,7 @@ describe("Testing filesystems", function() {
 		     "--port", myPort,
 		     "--root", myFsPath]);
 		
-		if (!argv.keep) {
-			shell.rm('-rf', myFsPath);
-		}
-		done();
+		fs.rmdir(myFsPath, done);
 	});
 });
 
