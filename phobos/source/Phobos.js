@@ -111,6 +111,7 @@ enyo.kind({
 			this.focusEditor();
 
 			/* set editor to user pref */
+			this.$.ace.editingMode = mode;
 			this.$.ace.highlightActiveLine = localStorage.highlight;
 			if(!this.$.ace.highlightActiveLine || this.$.ace.highlightActiveLine.indexOf("false") != -1){
 				this.$.ace.highlightActiveLine = false;
