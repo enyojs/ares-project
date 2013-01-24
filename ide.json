@@ -27,11 +27,8 @@
 			],
 			"auth": {
 				"type": "dropbox",
-				"appKey": "mqycofxfnqyxu7s",
-				"appSecret": "zwvda8zmiftxoby",
-				"uid": "6675248",
-				"accessToken": "knoovyfey85yjq1",
-				"accessTokenSecret": "s785upx9vupu711"
+				"appKey": "",
+				"appSecret": ""
 			},
 			"useJsonp":false,
 			"verbose": false

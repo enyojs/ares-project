@@ -65,7 +65,7 @@ describe("Testing filesystems", function() {
 		var dropbox = config.services.filter(function(service) {
 			return service.id === 'dropbox';
 		})[0];
-		if (dropbox && dropbox.auth) {
+		if (dropbox && dropbox.auth && dropbox.auth.appKey) {
 			var fsDropbox = path.resolve("..", "..", "hermes","fsDropbox.js");
 			run([mocha, "--bail",
 			     "--timeout", "3000", // This timeout may vary, depending on the network conditions
