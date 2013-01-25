@@ -28,7 +28,12 @@ var shell = require("shelljs");
         });
     };
     openwebos.list = function(callback) {
-        callback(null, templates);
+        var keys = Object.keys(templates);
+        var answer = [];
+        keys.forEach(function(key) {
+            answer.push(templates[key]);
+        });
+        callback(null, answer);
     };
 
     openwebos.generate = function(templateId, substitutions, destination, options, callback) {
