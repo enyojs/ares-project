@@ -654,7 +654,7 @@ describe("Testing " + config.name, function() {
 				should.exist(res.json[0].isDir);
 				res.json[0].isDir.should.equal(false);
 				should.exist(res.json[0].path);
-				res.json[0].path.should.equal("/toto/titi/dir.2/file.0");
+				res.json[0].path.should.equal(rootPath + "/toto/titi/dir.2/file.0");
 				should.exist(res.json[0].id);
 				dir2file0Id = res.json[0].id;
 				// Check second file
@@ -662,7 +662,7 @@ describe("Testing " + config.name, function() {
 				should.exist(res.json[1].isDir);
 				res.json[1].isDir.should.equal(false);
 				should.exist(res.json[1].path);
-				res.json[1].path.should.equal("/toto/titi/dir.2/file.1");
+				res.json[1].path.should.equal(rootPath + "/toto/titi/dir.2/file.1");
 				should.exist(res.json[1].id);
 				dir2file1Id = res.json[1].id;
 				cb();

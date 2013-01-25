@@ -53,6 +53,8 @@ log("loading " + argv.config);
 var config = JSON.parse(fs.readFileSync(argv.config, 'utf8'));
 log("config:", config);
 
+var myTestDir = "_test";
+
 /*
  * test suite
  */
@@ -64,13 +66,13 @@ describe("Testing filesystems", function() {
 		})[0];
 		if (dropbox && dropbox.auth && dropbox.auth.appKey) {
 			var fsDropbox = path.resolve("..", "..", "hermes","fsDropbox.js");
-			var myDir = "_test";
+			var myTestDir = "_test";
 			var myDropboxApp = 'com.enyojs.ares';
 			// Assume a user's account grip in the local file-system.
-			var myDirPath = [getHome(), 'Dropbox', 'Apps', myDropboxApp, myDir].join('/');
+			var myTestDirPath = [getHome(), 'Dropbox', 'Apps', myDropboxApp, myTestDir].join('/');
 			async.series([
 				function(next) {
-					rimraf(myDirPath, next);
+					rimraf(myTestDirPath, next);
 				},
 				function(next) {
 					setTimeout(next, 1500);
@@ -83,12 +85,12 @@ describe("Testing filesystems", function() {
 					     "--filesystem", fsDropbox,
 					     "--pathname", "/",
 					     "--port", myPort,
-					     "--dir", myDir,
+					     "--dir", myTestDir,
 					     "--auth", encodeURIComponent(JSON.stringify(dropbox.auth))]);
 					next();
 				},
 				function(next) {
-					rimraf(myDirPath, next);
+					rimraf(myTestDirPath, next);
 				}
 			], function(err) {
 				done();
@@ -107,6 +109,7 @@ describe("Testing filesystems", function() {
 		     "--filesystem", fsLocal,
 		     "--pathname", "/",
 		     "--port", myPort,
+		     "--dir", myTestDir,
 		     "--root", myFsPath]);
 		
 		fs.rmdir(myFsPath, done);

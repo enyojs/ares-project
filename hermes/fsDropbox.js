@@ -156,19 +156,8 @@ FsDropbox.prototype.get = function(req, res, next) {
 	next (new HttpError("ENOSYS", 500));
 };
 
-FsDropbox.prototype.put = function(req, res, next) {
-	this.log("put(): req.headers", req.headers);
-	this.log("put(): req.body", req.body);
-
-	if (req.is('application/x-www-form-urlencoded')) {
-		// carry a single file at most
-		return this._putWebForm(req, res, next);
-	} else if (req.is('multipart/form-data')) {
-		// can carry several files
-		return this._putMultipart(req, res, next);
-	} else {
-		next(new Error("Unhandled upload of content-type='" + req.headers['content-type'] + "'"));
-	}
+FsDropbox.prototype.putFile = function(req, res, next) {
+	next (new HttpError("ENOSYS", 500));
 };
 
 FsDropbox.prototype.mkcol = function(req, res, next) {
