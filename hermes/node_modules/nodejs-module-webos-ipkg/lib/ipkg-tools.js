@@ -1,4 +1,5 @@
-var shell = require("shelljs");
+var shell = require("shelljs"),
+    request = require('request');
 
 (function () {
 
@@ -22,11 +23,29 @@ var shell = require("shelljs");
         });
     };
 
-    openwebos.registerRemoteTemplates = function(templatesUrl) {
-        newTemplates.forEach(function(entry) {
-            templates[entry.id] = entry;
+    openwebos.registerRemoteTemplates = function(templatesUrl, callback) {
+
+        // console.log("Getting remote templates: " + templatesUrl);
+
+        request(templatesUrl, function (error, response, body) {
+          if (!error && response.statusCode == 200) {
+            // console.log("BODY >>" + body + "<<");
+            try {
+                var newTemplates = JSON.parse(body);
+
+                newTemplates.forEach(function(entry) {
+                    // console.log("Adding remote template: " + entry.id);
+                    templates[entry.id] = entry;
+                });
+                callback(null, {done: true});
+            } catch(err) {
+                console.log("Unable to retrieve remote template definition. error=" + err);
+                callback("Unable to retrieve remote template definition. error=" + err);
+            }
+          }
         });
     };
+
     openwebos.list = function(callback) {
         var keys = Object.keys(templates);
         var answer = [];
@@ -51,7 +70,6 @@ var shell = require("shelljs");
         // Apply the substitutions
         if (substitutions) {
             shell.ls('-R', destination).forEach(function(file) {
-                // console.log("LS -R: " + file);
 
                 substitutions.forEach(function(substit) {
                     var regexp = new RegExp(substit.fileRegexp);
@@ -71,15 +89,12 @@ var shell = require("shelljs");
         }
 
         var filelist = shell.find(destination);
-
-        // console.log("generate: substitutions: ", substitutions);
         callback(null, filelist);
     };
 
     applyJsonSubstitutions = function(filename, values) {
         var modified = false;
         var content = shell.cat(filename);
-        // console.log("CONTENT: >>" + content + "<<");
         content = JSON.parse(content);
         var keys = Object.keys(values);
         keys.forEach(function(key) {
@@ -91,14 +106,12 @@ var shell = require("shelljs");
         });
         if (modified) {
             var newContent = shell.echo(JSON.stringify(content));
-            // console.log("WRITING NEW CONTENT: >>" + newContent + "<<");
             newContent.to(filename);
         }
     };
 
     applySedSubstitutions = function(filename, changes) {
         changes.forEach(function(change) {
-            // console.log("SED change from >>" + change.search + "<< to >>" + change.replace + "<<");
             shell.sed('-i', change.search, change.replace, filename);
         });
     };
