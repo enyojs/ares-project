@@ -42,28 +42,13 @@
 </selenese>
 <selenese>
 	<command>assertTextPresent</command>
-	<target><![CDATA[TestSelenium]]></target>
+	<target><![CDATA[NewProject]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectWizardCreate_selectDirectoryPopup_hermesFileTree_serverNode_$TestSelenium_caption]]></target>
+	<target><![CDATA[id=ares_projectView_projectWizardCreate_selectDirectoryPopup_hermesFileTree_serverNode_$NewProject_caption]]></target>
 	<value><![CDATA[]]></value>
-</selenese>
-<selenese>
-	<command>assertTextPresent</command>
-	<target><![CDATA[project1]]></target>
-	<value><![CDATA[]]></value>
-</selenese>
-<selenese>
-	<command>waitForText</command>
-	<target><![CDATA[id=ares_projectView_projectWizardCreate_selectDirectoryPopup_hermesFileTree_serverNode_$TestSelenium_$project1_caption]]></target>
-	<value><![CDATA[project1]]></value>
-</selenese>
-<selenese>
-	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectWizardCreate_selectDirectoryPopup_hermesFileTree_serverNode_$TestSelenium_$project1_caption]]></target>
-	<value><![CDATA[project1]]></value>
 </selenese>
 <selenese>
 	<command>clickAt</command>
@@ -78,7 +63,7 @@
 <selenese>
 	<command>type</command>
 	<target><![CDATA[id=ares_projectView_projectWizardCreate_propertiesWidget_projectTitle]]></target>
-	<value><![CDATA[project1234]]></value>
+	<value><![CDATA[projectForSelenumTest]]></value>
 </selenese>
 <selenese>
 	<command>clickAt</command>
@@ -101,28 +86,8 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$blob_caption]]></target>
-	<value><![CDATA[]]></value>
-</selenese>
-<selenese>
-	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_deleteFileButton]]></target>
-	<value><![CDATA[]]></value>
-</selenese>
-<selenese>
-	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_deletePopup_button2]]></target>
-	<value><![CDATA[]]></value>
-</selenese>
-<selenese>
-	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_caption]]></target>
-	<value><![CDATA[]]></value>
-</selenese>
-<selenese>
-	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectWizardCreate_selectDirectoryPopup_hermesFileTree_serverNode_$TestSelenium_$project1_caption]]></target>
+	<command>waitForText</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_newFileButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -131,23 +96,13 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_inputDecorator]]></target>
-	<value><![CDATA[]]></value>
-</selenese>
-<selenese>
-	<command>fireEvent</command>
+	<command>verifyValue</command>
 	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
-	<value><![CDATA[change]]></value>
+	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
 	<command>type</command>
 	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
 	<value><![CDATA[App1.js]]></value>
-</selenese>
-<selenese>
-	<command>click</command>
-	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton]]></target>
-	<value><![CDATA[]]></value>
 </selenese>
 </TestCase>
