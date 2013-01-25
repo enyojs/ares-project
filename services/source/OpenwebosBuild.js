@@ -40,25 +40,21 @@ enyo.kind({
 	getConfig: function() {
 		return this.config;
 	},
-	getTemplates: function(next) {
+	getTemplates: function() {
 		if (this.debug) this.log();
 
 		var req = new enyo.Ajax({
 			url: this.url + '/templates'
 		});
-		req.response(this, function(inSender, inData) {
-			next(null, inData);
-		});
-		req.error(this, function(inSender, inError) {
-			next(new Error("Unable to get template list (" + inError + ")"));
-		});
-		req.go();
+		return req.go();
 	},
-	generate: function(templateId, options, next) {
+	generate: function(templateId, options) {
 		if (this.debug) this.log();
 
 		var data = "templateId=" + encodeURIComponent(templateId);
 		data +=	("&options=" + encodeURIComponent(JSON.stringify(options)));
+
+		var userreq = new enyo.Async();
 		
 		var req = new enyo.Ajax({
 			url: this.url + '/generate',
@@ -68,11 +64,13 @@ enyo.kind({
 		});
 
 		req.response(this, function(inSender, inData) {
-			next(null, {request: req, content: inData});
+			userreq.respond({ctype: req.xhrResponse.headers['content-type'], content: inData});
 		});
 		req.error(this, function(inSender, inError) {
-			next(new Error("Unable to get the template files (" + inError + ")"));
+			this.log("Unable to get the template files (" + inError + ")");
+			userreq.fail(inError);
 		});
 		req.go();
+		return userreq;
 	}
 });
