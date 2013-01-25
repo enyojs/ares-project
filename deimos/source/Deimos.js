@@ -61,6 +61,9 @@ enyo.kind({
 		var what = data.kinds;
 		var maxLen = 0;
 		this.kinds = what;
+		// Pass the project information (analyzer output, ...) to the designer
+		this.$.designer.setProjectIndexer(data.projectData.getProjectIndexer());
+		this.$.designer.setFileIndexer(data.fileIndexer);
 		this.$.kindPicker.destroyClientControls();
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];

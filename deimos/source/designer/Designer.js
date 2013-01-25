@@ -4,6 +4,10 @@ enyo.kind({
 		onSelect: "",
 		onChange: ""
 	},
+	published: {
+		projectIndexer: null,	// Analyzer output for the current project
+		fileIndexer: null,		// Analyzer output for the current file
+	},
 	components: [
 		{name: "model", kind: "Component"},
 		{kind: "Serializer"},
@@ -216,6 +220,16 @@ enyo.kind({
 	proxyUnknownKinds: function(component) {
 		var name = component.kind;
 		if (!enyo.constructorForKind(name)) {
+			var kind;
+			var components;
+			kind = this.projectIndexer.findByName(name);
+			if (!kind) {
+				kind = this.fileIndexer.findByName(name);
+			}
+			components = Documentor.findByName(kind.properties, "components").value[0].properties;
+			if (kind) {
+				component.kindComponents = this.componentsFromIndex(components);
+			}
 			component.kind = "Ares.Proxy";
 			component.realKind = name;
 			component.content = name;
@@ -224,6 +238,13 @@ enyo.kind({
 			}
 		}
 		var children = component.components;
+		if (children) {
+			var i;
+			for (i=0; i< children.length; i++) {
+				children[i] = this.proxyUnknownKinds(children[i]);
+			}
+		}
+		var children = component.kindComponents;
 		if (children) {
 			var i;
 			for (i=0; i< children.length; i++) {
@@ -260,6 +281,28 @@ enyo.kind({
 	},
 	isRootControl: function(control) {
 		return (control === this.$.sandbox.children[0]);
+	},
+	// Convert an index entry's "components" to actual component definitions
+	componentsFromIndex: function(indexEntry) {
+		var i;
+		var block=[];
+		for (i=0; i < indexEntry.length; i++) {
+			var c = indexEntry[i];
+			var component={name: c.name, kind: c.kind};
+			for (var j=0; j < c.properties.length; j++) {
+				var prop = c.properties[j];
+				if (prop.name === "components") {
+					var kids = prop.value[0].properties;
+					component.components=this.componentsFromIndex(kids);
+				} else {
+					var name = prop.name;
+					var value = Documentor.stripQuotes(prop.value[0].token);
+					component[name] = value;
+				}
+			};
+			block.push(component);
+		}
+		return block;
 	}
 });
 
@@ -307,5 +350,17 @@ enyo.kind({
 				}
 			}
 		}
-	}
+	},
+	initComponents: function() {
+		// The _components_ property in kind declarations is renamed to
+		// _kindComponents_ by the Component subclass mechanism.  This makes it
+		// easy for the developer to distinguish kindComponents from the components
+		// in _this.components_, without having to worry about the actual difference.
+		//
+		// Specifically, the difference is that kindComponents are constructed as
+		// owned by this control (whereas components in _this.components_ are not).
+		// In addition, kindComponents are marked with the _isChrome: true_ flag.
+		this.createChrome(this.kindComponents);
+		this.createClientComponents(this.components);
+	}	
 });
