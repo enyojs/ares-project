@@ -30,7 +30,7 @@ enyo.kind({
 	start: function() {
 		var dirPopup = this.$.selectDirectoryPopup ;
 
-		this.log("starting") ;
+		if (this.debug) this.log("starting") ;
 		this.show();
 
 		this.config = new ProjectConfig() ; // is a ProjectConfig object.

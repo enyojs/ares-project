@@ -8,6 +8,7 @@ var fs = require("fs"),
     http = require("http"),
     util  = require("util"),
     temp = require("temp"),
+    async = require("async"),
     HttpError = require("./httpError");
 
 module.exports = FsBase;
@@ -23,9 +24,6 @@ function FsBase(inConfig, next) {
 			console.log.bind(this, this.name).apply(this, arguments);
 		}
 	};
-
-	// parameters sanitization
-	this.root = path.resolve(this.root);
 
 	// sanity check
 	[
@@ -55,7 +53,10 @@ function FsBase(inConfig, next) {
 	}
 
 	this.app.configure((function() {
-		this.app.use(express.logger('dev'));
+		this.app.use(this.separator.bind(this));
+		if (!this.quiet) {
+			this.app.use(express.logger('dev'));
+		}
 		this.app.use(this.cors.bind(this));
 		this.app.use(express.cookieParser());
 		this.app.use(this.authorize.bind(this));
@@ -163,14 +164,19 @@ function FsBase(inConfig, next) {
 	/**
 	 * Terminates express server
 	 */
-	this.quit = function() {
-		this.server.close();
+	this.quit = function(next) {
 		this.log("exiting");
+		this.server.close(next);
 	};
 
 }
 
-// Middleware
+// Middlewares
+
+FsBase.prototype.separator = function(req, res, next) {
+	this.log("---------------------------------------------------------");
+	next();
+};
 
 // Authorize
 FsBase.prototype.authorize = function(req, res, next) {
@@ -197,43 +203,49 @@ FsBase.prototype.cors = function(req, res, next) {
 
 // Utilities
 
-FsBase.prototype.respond = function(res, err, response) {
-	this.log("FsBase.respond():");
-	var statusCode, body;
-	var statusCodes = {
-		'ENOENT': 404, // Not-Found
-		'EPERM' : 403, // Forbidden
-		'EEXIST': 409, // Conflict
-		'ETIMEDOUT': 408 // Request-Timed-Out
+/**
+ * Turns an {Error} object into a usable response {Object}
+ * 
+ * A response {Object} as #code and #body properties.  This method is
+ * expecyted to be overriden by sub-classes of {FsBase}.
+ * 
+ * @param {Error} err the error object to convert.
+ */
+FsBase.prototype.errorResponse = function(err) {
+	this.log("FsBase.errorResponse(): err:", err);
+	var response = {
+		code: 403,	// Forbidden
+		body: err.toString()
 	};
-	if (err) {
-		if (err instanceof Error) {
-			statusCode = err.statusCode ||
-				statusCodes[err.code] ||
-				statusCodes[err.errno] ||
-				403; // Forbidden
-			delete err.statusCode;
-			body = err;
-		} else {
-			statusCode = 500; // Internal Server Error
-			body = new Error(err.toString());
-		}
-		this.log("<<<\n"+body.stack);
-	} else if (response) {
-		statusCode = response.code || 200 /*Ok*/;
-		body = response.body;
+	if (err instanceof Error) {
+		response.code = err.statusCode || 403 /*Forbidden*/;
+		response.body = err.toString();
+		this.log(err.stack);
 	}
-	if (body) {
-		res.status(statusCode).send(body);
-	} else if (statusCode) {
-		res.status(statusCode).end();
+	this.log("FsBase.errorResponse(): response:", response);
+	return response;
+};
+
+/**
+ * Unified response handler
+ * @param {Object} res the express response {Object}
+ * @param {Object} err the error if any.  Can be any kind of {Error}, such as an { HttpError}
+ * @param {Object} response is an {Object} that has 2 properties: #code (used as the HTTP statusCode) and #body (inlined in the response body, of not falsy)
+ */
+FsBase.prototype.respond = function(res, err, response) {
+	this.log("FsBase.respond(): response:", response);
+	if (err) {
+		response = this.errorResponse(err);
+	}
+	if (response && response.body) {
+		res.status(response.code).send(response.body);
+	} else if (response && response.code) {
+		res.status(response.code).end();
 	}
 };
 
 FsBase.prototype.encodeFileId = function(filePath) {
 	//this.log("encodeFileId(): filePath:", filePath);
-	// can use this.root, this.origin & this.pathname in addition
-	// to filePath to encode the fileId
 	var buf = new Buffer(filePath, 'utf-8');
 	var fileId = buf.toString('hex');
 	return fileId;
@@ -241,8 +253,6 @@ FsBase.prototype.encodeFileId = function(filePath) {
 
 FsBase.prototype.decodeFileId = function(fileId) {
 	//this.log("decodeFileId(): fileId:", fileId);
-	// can use this.root, this.origin & this.pathname in addition
-	// to fileId to decode the fileId
 	var buf = new Buffer(fileId, 'hex');
 	var filePath = buf.toString('utf-8');
 	return filePath;
@@ -273,6 +283,147 @@ FsBase.prototype.setUserInfo = function(req, res, next) {
 	next(null, {
 		code: 200 /*Ok*/,
 		body: {}
+	});
+};
+
+FsBase.prototype.put = function(req, res, next) {
+	this.log("FsBase.put(): req.headers", req.headers);
+	this.log("FsBase.put(): req.body", req.body);
+
+	if (req.is('application/x-www-form-urlencoded')) {
+		// carry a single file at most
+		return this._putWebForm(req, res, next);
+	} else if (req.is('multipart/form-data')) {
+		// can carry several files
+		return this._putMultipart(req, res, next);
+	} else {
+		next(new Error("Unhandled upload of content-type='" + req.headers['content-type'] + "'"));
+	}
+};
+
+/**
+ * Store a file provided by a web-form
+ * 
+ * The web form is a 'application/x-www-form-urlencoded'
+ * request, which contains the following fields:
+ * 
+ * - name (optional) is the name of the file to be created or
+ *   updated.
+ * - path (mandatory) is the relative path to the storage root
+ *   of the file to be uploaded (if name is absent) or to the
+ *   containing folder (if name is provided).
+ * - content (mandatory) is the base64-encoded version of the
+ *   file
+ * 
+ * @param {HTTPRequest} req 
+ * @param {HTTPResponse} res
+ * @param {Function} next(err, data) CommonJS callback 
+ */
+FsBase.prototype._putWebForm = function(req, res, next) {
+	// Mutually-agreed encoding of file name & location:
+	// 'path' and 'name'
+	var relPath, fileId,
+	    pathParam = req.param('path'),
+	    nameParam = req.param('name');
+	this.log("FsBase.putWebForm(): pathParam:", pathParam, "nameParam:", nameParam);
+	if (!pathParam) {
+		next(new HttpError("Missing 'path' request parameter", 400 /*Bad Request*/));
+		return;
+	}
+	if (nameParam) {
+		relPath = pathParam + '/' + nameParam;
+	} else {
+		relPath = pathParam;
+	}
+
+	// Now get the bits: base64-encoded binary in the
+	// 'content' field
+	var buf;
+	if (req.body.content) {
+		buf = new Buffer(req.body.content, 'base64');
+	} else {
+		this.log("FsBase.putWebForm(): empty file");
+		buf = new Buffer('');
+	}
+	
+	this.log("FsBase.putWebForm(): storing file as", relPath);
+	fileId = this.encodeFileId(relPath);
+	this.putFile({
+		name: relPath,
+		buffer: buf
+	}, (function(err){
+		this.log("FsBase.putWebForm(): err:", err);
+		next(err, {
+			code: 201, // Created
+			body: [{id: fileId, path: relPath, isDir: false}]
+		});
+	}).bind(this));
+};
+
+/**
+ * Stores one or more files provided by a multipart form
+ * 
+ * The multipart form is a 'multipart/form-data'.  Each of its
+ * parts follows this field convention, compatible with the
+ * Express/Connect bodyParser, itself based on the Formidable
+ * Node.js module.
+ * 
+ * @param {HTTPRequest} req 
+ * @param {HTTPResponse} res
+ * @param {Function} next(err, data) CommonJS callback 
+ */
+FsBase.prototype._putMultipart = function(req, res, next) {
+	var pathParam = req.param('path');
+	this.log("FsBase.putMultipart(): req.files:", req.files);
+	this.log("FsBase.putMultipart(): req.body:", req.body);
+	this.log("FsBase.putMultipart(): pathParam:", pathParam);
+	if (!req.files.file) {
+		next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
+		return;
+	}
+	var files = [];
+	if (Array.isArray(req.files.file)) {
+		files.push.apply(files, req.files.file);
+	} else {
+		files.push(req.files.file);
+	}
+
+	// work-around firefox bug, that does not incorporate filename
+	// as third parameter of FormData#append().  We then expect a
+	// handful of filename=xxx keyvals, that will complement the
+	// file fields of the FormData.
+	var filenames = [];
+	if (req.body.filename) {
+		if (Array.isArray(req.body.filename)) {
+			filenames.push.apply(filenames, req.body.filename);
+		} else {
+			filenames.push(req.body.filename);
+		}
+		for (var i = 0; i < files.length; i++) {
+			if (filenames[i]) {
+				files[i].name = filenames[i];
+			}
+		}
+	}
+
+	this.log("FsBase.putMultipart(): files", files);
+
+	var nodes = [];
+	async.forEach(files, (function(file, cb) {
+		if (pathParam) {
+			file.name = pathParam + '/' + file.name;
+		}
+		this.putFile(file, (function(err, node) {
+			this.log("FsBase.putMultipart(): node:", node);
+			nodes.push(node);
+			this.log("FsBase.putMultipart(): nodes:", nodes);
+			cb();
+		}).bind(this));
+	}).bind(this), function(err){
+		next(err, {
+			code: 201, // Created
+			body: nodes
+		});
 	});
 };
 

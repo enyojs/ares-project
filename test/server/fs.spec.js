@@ -1,30 +1,99 @@
+#!/usr/bin/env node_modules/mocha/bin/mocha --bail
 /**
-= fsLocal.js test suite
+ * fsXXX.js test suite
  */
 // @see http://visionmedia.github.com/mocha/
 
-var fs = require("fs");
-var path = require("path");
-var http = require("http");
-var querystring = require("querystring");
-var temp = require("temp");
-var rimraf = require("rimraf");
-var should = require("should");
-var FsLocal = require("./fsLocal");
-var util = require("util"),
-    async = require("async");
+var fs = require("fs"),
+    path = require("path"),
+    http = require("http"),
+    querystring = require("querystring"),
+    should = require("should"),
+    util = require("util"),
+    async = require("async"),
+    optimist = require("optimist");
+
+/*
+ * parameters parsing
+ */
+
+var argv = optimist
+	    .usage('\nAres FileSystem (fs) tester.\nUsage: "$0 [OPTIONS] -F <FS_PATH>"')
+	    .options('F', {
+		    alias : 'filesystem',
+		    description: 'path to the Hermes file-system to test. For example ../../hermes/fsLocal.js',
+		    required: true
+	    })
+	    .options('A', {
+		    alias : 'auth',
+		    description: 'auth parameter, passed as a single-quoted URL-encoded JSON-formatted Javascript Object'
+	    })
+	    .options('h', {
+		    alias : 'help',
+		    description: 'help message',
+		    boolean: true
+	    })
+	    .options('v', {
+		    alias : 'verbose',
+		    description: 'verbose execution mode',
+		    boolean: true
+	    })
+	    .options('q', {
+		    alias : 'quiet',
+		    description: 'really quiet',
+		    boolean: true
+	    })
+	    .argv;
+
+if (argv.help) {
+	optimist.showHelp();
+	process.exit(0);
+}
+
+if (argv.quiet) {
+	argv.verbose = false;
+}
+
+var config = {};
+
+config.name = path.basename(argv.filesystem);
+config.prefix = '[fs.spec:' + config.name + ']';
+
+if (argv.auth) {
+	config.auth = JSON.parse(decodeURIComponent(argv.auth));
+}
+
+log("running in verbose mode");
+log("argv:", argv);
+log("config:", config);
+
+/*
+ * utilities
+ */
+
+function log() {
+	if (argv.verbose) {
+		console.log.bind(this, config.prefix).apply(this, arguments);
+	}
+}
 
 function get(path, query, next) {
 	var reqOptions = {
 		hostname: "127.0.0.1",
-		port: myPort,
+		port: argv.port,
 		method: 'GET',
 		headers: {},
 		path: path
 	};
+
+	if (config.auth) {
+		query.auth = JSON.stringify(config.auth);
+	}
+
 	if (query && Object.keys(query).length > 0) {
 		reqOptions.path += '?' + querystring.stringify(query);
 	}
+
 	call(reqOptions, undefined /*reqBody*/, undefined /*reqParts*/, next);
 }
 
@@ -32,7 +101,7 @@ function post(path, query, content, contentType, next) {
 	var reqContent, reqBody, reqParts;
 	var reqOptions = {
 		hostname: "127.0.0.1",
-		port: myPort,
+		port: argv.port,
 		method: 'POST',
 		headers: {},
 		path: path
@@ -74,6 +143,10 @@ function post(path, query, content, contentType, next) {
 		}
 	}
 
+	if (config.auth) {
+		query.auth = JSON.stringify(config.auth);
+	}
+
 	if (query && Object.keys(query).length > 0) {
 		reqOptions.path += '?' + querystring.stringify(query);
 	}
@@ -82,8 +155,8 @@ function post(path, query, content, contentType, next) {
 }
 
 function call(reqOptions, reqBody, reqParts, next) {
-	console.log("reqOptions="+util.inspect(reqOptions));
-	console.log("reqBody="+util.inspect(reqBody));
+	log("reqOptions="+util.inspect(reqOptions));
+	log("reqBody="+util.inspect(reqBody));
 	var req = http.request(reqOptions, function(res) {
 		var bufs = [];
 		res.on('data', function(chunk){
@@ -105,7 +178,7 @@ function call(reqOptions, reqBody, reqParts, next) {
 					data.text = data.buffer.toString();
 				}
 			}
-			console.log("data="+util.inspect(data));
+			log("data="+util.inspect(data));
 			if (data.statusCode < 200 || data.statusCode >= 300) {
 				next(data);
 			} else {
@@ -121,7 +194,16 @@ function call(reqOptions, reqBody, reqParts, next) {
 		req.write(reqBody);
 	}
 	if (reqParts) {
-		sendOnePart(req, reqParts.name, reqParts.filename, reqParts.input);
+		var boundaryKey = generateBoundary();
+		req.setHeader('Content-Type', 'multipart/form-data; boundary="'+boundaryKey+'"');
+		if (Array.isArray(reqParts)) {
+			reqParts.forEach(function(part) {
+				sendOnePart(req, part.name, part.filename, part.input, boundaryKey);
+			});
+		} else {
+			sendOnePart(req, reqParts.name, reqParts.filename, reqParts.input, boundaryKey);
+		}
+		sendClosingBoundary(req, boundaryKey);
 	} else {
 		req.end();
 	}
@@ -138,36 +220,33 @@ function generateBoundary() {
 	return boundary;
 }
 
-function sendOnePart(req, name, filename, input) {
-	var boundaryKey = generateBoundary();
-	req.setHeader('Content-Type', 'multipart/form-data; boundary="'+boundaryKey+'"');
+function sendOnePart(req, name, filename, input, boundaryKey) {
 	req.write('--' + boundaryKey + '\r\n' +
-		  // use your file's mime type here, if known
-		  'Content-Type: application/octet-stream\r\n' +
-		  // "name" is the name of the form field
-		  // "filename" is the name of the original file
-		  'Content-Disposition: form-data; name="' + name + '"; filename="' + filename + '"\r\n' +
-		  'Content-Transfer-Encoding: binary\r\n\r\n');
+		// use your file's mime type here, if known
+		'Content-Type: application/octet-stream\r\n' +
+		// "name" is the name of the form field
+		// "filename" is the name of the original file
+		'Content-Disposition: form-data; name="' + name + '"; filename="' + filename + '"\r\n' +
+		'Content-Transfer-Encoding: binary\r\n\r\n');
 	req.write(input);
-	req.end('\r\n--' + boundaryKey + '--'); 
+	req.write('\r\n');
 }
 
-var myFs;
-var myPort = 9009;
-var myFsPath = temp.path({prefix: 'com.palm.ares.hermes.fsLocal'});
-fs.mkdirSync(myFsPath);
-var clean = true;
+function sendClosingBoundary(req, boundaryKey) {
+	req.end('--' + boundaryKey + '--');
+}
 
-describe("fsLocal...", function() {
+var Fs = require(argv.filesystem);
+if (!Fs) {
+	throw new Error("Unable to load file-system: " + argv.filesystem);
+}
+var myFs;
+
+describe("Testing " + config.name, function() {
 	
 	it("t0. should start", function(done) {
-		myFs = new FsLocal({
-			pathname: "/",
-			root: myFsPath,
-			port: myPort,
-			verbose: true
-		}, function(err, service){
-			console.log("service="+util.inspect(service));
+		myFs = new Fs(argv, function(err, service){
+			log("service="+util.inspect(service));
 			should.not.exist(err);
 			should.exist(service);
 			should.exist(service.origin);
@@ -176,22 +255,75 @@ describe("fsLocal...", function() {
 		});
 	});
 
-	var rootId;
+	it("t0.1. fs root should have the same fileId with and without '/'", function(done) {
+		async.waterfall([
+			function(next) {
+				get('/id/', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
+					should.not.exist(err);
+					should.exist(res);
+					should.exist(res.statusCode);
+					res.statusCode.should.equal(200);
+					should.exist(res.json);
+					should.exist(res.json.isDir);
+					res.json.isDir.should.equal(true);
+					should.not.exist(res.json.children);
+					should.exist(res.json.id);
+					next(null, res.json.id);
+				});
+			},
+			function(fsId, next) {
+				get('/id/' + fsId, {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
+					should.not.exist(err);
+					should.exist(res);
+					should.exist(res.statusCode);
+					res.statusCode.should.equal(200);
+					should.exist(res.json);
+					should.exist(res.json.isDir);
+					res.json.isDir.should.equal(true);
+					should.not.exist(res.json.children);
+					should.exist(res.json.id);
+					res.json.id.should.equal(fsId);
+					next();
+				});
+			}
+		], done);
+	});
 
-	it("t1.0. should have an empty default root-level folder (depth=0)", function(done) {
-		get('/id/', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
-			should.not.exist(err);
-			should.exist(res);
-			should.exist(res.statusCode);
-			res.statusCode.should.equal(200);
-			should.exist(res.json);
-			should.exist(res.json.isDir);
-			res.json.isDir.should.equal(true);
-			should.not.exist(res.json.children);
-			should.exist(res.json.id);
-			rootId = res.json.id;
-			done();
-		});
+	var rootId, rootName = argv.dir, rootPath = '/' + rootName;
+
+	it("t0.2. should create test root folder", function(done) {
+		async.waterfall([
+			function(next) {
+				get('/id/', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
+					should.not.exist(err);
+					should.exist(res);
+					should.exist(res.statusCode);
+					res.statusCode.should.equal(200);
+					should.exist(res.json);
+					should.exist(res.json.isDir);
+					res.json.isDir.should.equal(true);
+					should.not.exist(res.json.children);
+					should.exist(res.json.id);
+					next(null, res.json.id);
+				});
+			},
+			function(fsId, next) {
+				post('/id/' + fsId, {_method: "MKCOL",name: rootPath} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+					should.not.exist(err);
+					should.exist(res);
+					should.exist(res.statusCode);
+					res.statusCode.should.equal(201);
+					should.exist(res.json);
+					should.exist(res.json.isDir);
+					res.json.isDir.should.equal(true);
+					should.exist(res.json.path);
+					should.exist(res.json.id);
+					res.json.path.should.equal(rootPath);
+					rootId = res.json.id;
+					next();
+				});
+			}
+		], done);
 	});
 	
 	it("t1.1. should have an empty root-level folder (depth=0)", function(done) {
@@ -219,25 +351,8 @@ describe("fsLocal...", function() {
 			res.json.isDir.should.equal(true);
 			should.exist(res.json.children);
 			should.exist(res.json.children.length);
+			res.json.children.should.be.an.instanceOf(Array);
 			res.json.children.length.should.equal(0);
-
-			done();
-		});
-	});
-	
-	it("t1.3. should have an empty root-level folder (implicit id, depth=1)", function(done) {
-		get('/id/', {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
-			should.not.exist(err);
-			should.exist(res);
-			should.exist(res.statusCode);
-			res.statusCode.should.equal(200);
-			should.exist(res.json);
-			should.exist(res.json.isDir);
-			res.json.isDir.should.equal(true);
-			should.exist(res.json.children);
-			should.exist(res.json.children.length);
-			res.json.children.length.should.equal(0);
-
 			done();
 		});
 	});
@@ -252,7 +367,7 @@ describe("fsLocal...", function() {
 			should.exist(res.json.isDir);
 			res.json.isDir.should.equal(true);
 			should.exist(res.json.path);
-			res.json.path.should.equal("/toto");
+			res.json.path.should.equal(rootPath + "/toto");
 			done();
 		});
 	});
@@ -274,7 +389,7 @@ describe("fsLocal...", function() {
 			should.exist(res.json.children[0]);
 			should.exist(res.json.children[0].isDir);
 			res.json.children[0].isDir.should.equal(true);
-			res.json.children[0].path.should.equal("/toto");
+			res.json.children[0].path.should.equal(rootPath + "/toto");
 			totoId = res.json.children[0].id;
 			done();
 		});
@@ -320,7 +435,7 @@ describe("fsLocal...", function() {
 			should.exist(res.json.isDir);
 			res.json.isDir.should.equal(true);
 			should.exist(res.json.path);
-			res.json.path.should.equal("/toto/titi");
+			res.json.path.should.equal(rootPath + "/toto/titi");
 			titiId = res.json.id;
 			done();
 		});
@@ -337,6 +452,7 @@ describe("fsLocal...", function() {
 	});
 
 	var textContent = "This is a Text content!";
+	var textContent2 = "This is another Text content!";
 	var textContentType = "text/plain; charset=utf-8";
 	var textContentId = "";
 
@@ -351,7 +467,7 @@ describe("fsLocal...", function() {
 			should.exist(res.json[0].isDir);
 			res.json[0].isDir.should.equal(false);
 			should.exist(res.json[0].path);
-			res.json[0].path.should.equal("/toto/titi/tutu");
+			res.json[0].path.should.equal(rootPath + "/toto/titi/tutu");
 			should.exist(res.json[0].id);
 			textContentId = res.json[0].id;
 			done();
@@ -369,7 +485,7 @@ describe("fsLocal...", function() {
 			should.strictEqual(res.json.isDir, false);
 			should.not.exist(res.json.children);
 			should.exist(res.json.path);
-			res.json.path.should.equal("/toto/titi/tutu");
+			res.json.path.should.equal(rootPath + "/toto/titi/tutu");
 			should.exist(res.json.id);
 			res.json.id.should.equal(textContentId);
 			done();
@@ -404,7 +520,7 @@ describe("fsLocal...", function() {
 			should.exist(res.json[0].isDir);
 			res.json[0].isDir.should.equal(false);
 			should.exist(res.json[0].path);
-			res.json[0].path.should.equal("/toto/titi/empty");
+			res.json[0].path.should.equal(rootPath + "/toto/titi/empty");
 			should.exist(res.json[0].id);
 			emptyContentId = res.json[0].id;
 			done();
@@ -446,7 +562,7 @@ describe("fsLocal...", function() {
 				should.exist(res.json[0].isDir);
 				res.json[0].isDir.should.equal(false);
 				should.exist(res.json[0].path);
-				res.json[0].path.should.equal("/toto/titi/tata");
+				res.json[0].path.should.equal(rootPath + "/toto/titi/tata");
 				should.exist(res.json[0].id);
 				tataId = res.json[0].id;
 				cb();
@@ -489,7 +605,7 @@ describe("fsLocal...", function() {
 				should.exist(res.json[0].isDir);
 				res.json[0].isDir.should.equal(false);
 				should.exist(res.json[0].path);
-				res.json[0].path.should.equal("/toto/titi/dir.1/file.0");
+				res.json[0].path.should.equal(rootPath + "/toto/titi/dir.1/file.0");
 				should.exist(res.json[0].id);
 				dir1file0Id = res.json[0].id;
 				cb();
@@ -507,6 +623,77 @@ describe("fsLocal...", function() {
 			should.exist(res.buffer);
 			contentStr = res.buffer.toString();
 			contentStr.should.equal(textContent);
+			done();
+		});
+	});
+
+	var dir2file0Id;
+	var dir2file1Id;
+
+	it("t4.5. should create 2 files in a relative location (using 'multipart/form-data')", function(done) {
+		var content = [{
+			name: 'file',	// field name
+			filename: 'dir.2/file.0', // file path
+			input: new Buffer(textContent)
+		},{
+			name: 'file',	// field name
+			filename: 'dir.2/file.1', // file path
+			input: new Buffer(textContent2)
+		}];
+		async.waterfall([
+			function(cb) {
+				post('/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
+			},
+			function(res, cb) {
+				should.exist(res);
+				should.exist(res.statusCode);
+				res.statusCode.should.equal(201);
+				should.exist(res.json);
+				// Check first file
+				should.exist(res.json[0]);
+				should.exist(res.json[0].isDir);
+				res.json[0].isDir.should.equal(false);
+				should.exist(res.json[0].path);
+				res.json[0].path.should.equal(rootPath + "/toto/titi/dir.2/file.0");
+				should.exist(res.json[0].id);
+				dir2file0Id = res.json[0].id;
+				// Check second file
+				should.exist(res.json[1]);
+				should.exist(res.json[1].isDir);
+				res.json[1].isDir.should.equal(false);
+				should.exist(res.json[1].path);
+				res.json[1].path.should.equal(rootPath + "/toto/titi/dir.2/file.1");
+				should.exist(res.json[1].id);
+				dir2file1Id = res.json[1].id;
+				cb();
+			}
+		],done);
+	});
+
+	it("t4.6. should download the same file (first one)", function(done) {
+		get('/id/' + dir2file0Id, null /*query*/, function(err, res) {
+			var contentStr;
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(200);
+			should.exist(res.buffer);
+			contentStr = res.buffer.toString();
+			contentStr.should.equal(textContent);
+			done();
+		});
+	});
+
+	it("t4.7. should download the same file (second one)", function(done) {
+		get('/id/' + dir2file1Id, null /*query*/, function(err, res) {
+			var contentStr;
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(200);
+			should.exist(res.buffer);
+			contentStr = res.buffer.toString();
+			contentStr.should.equal(textContent2);
 			done();
 		});
 	});
@@ -616,29 +803,34 @@ describe("fsLocal...", function() {
 	 var toto1Id;
 
 	it("t6.6. should reccursively copy folder in the same folder, as a new folder", function(done) {
-		post('/id/' + totoId, {_method: "COPY", name: "toto.1"} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
-			should.not.exist(err);
-			should.exist(res);
-			should.exist(res.statusCode);
-			should.exist(res.json);
-			should.exist(res.json.name);
-			res.json.name.should.equal('toto.1');
-			should.exist(res.json.id);
-			toto1Id = res.json.id;
-			res.statusCode.should.equal(201); // Created
-
-			get('/file/toto.1/titi/tata', null /*query*/, function(err, res) {
-				var contentStr;
-				should.not.exist(err);
-				should.exist(res);
-				should.exist(res.statusCode);
-				res.statusCode.should.equal(200);
-				should.exist(res.buffer);
-				contentStr = res.buffer.toString();
-				contentStr.should.equal(textContent);
-				done();
-			});
-		});
+		async.waterfall([
+			function(next) {
+				post('/id/' + totoId, {_method: "COPY", name: "toto.1"} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
+					should.not.exist(err);
+					should.exist(res);
+					should.exist(res.statusCode);
+					should.exist(res.json);
+					should.exist(res.json.name);
+					res.json.name.should.equal('toto.1');
+					should.exist(res.json.id);
+					toto1Id = res.json.id;
+					res.statusCode.should.equal(201); // Created
+					next();
+				});
+			}, function(next) {
+				get('/file' + rootPath + '/toto.1/titi/tata', null /*query*/, function(err, res) {
+					var contentStr;
+					should.not.exist(err);
+					should.exist(res);
+					should.exist(res.statusCode);
+					res.statusCode.should.equal(200);
+					should.exist(res.buffer);
+					contentStr = res.buffer.toString();
+					contentStr.should.equal(textContent);
+					next();
+				});
+			}
+		], done);
 	});
 
 	it("t7.1. should rename folder in the same folder, as a new folder", function(done) {
@@ -648,7 +840,7 @@ describe("fsLocal...", function() {
 			should.exist(res.statusCode);
 			res.statusCode.should.equal(201); // Created
 
-			get('/file/toto.2/titi/tata', null /*query*/, function(err, res) {
+			get('/file' + rootPath + '/toto.2/titi/tata', null /*query*/, function(err, res) {
 				var contentStr;
 				should.not.exist(err);
 				should.exist(res);
@@ -658,7 +850,7 @@ describe("fsLocal...", function() {
 				contentStr = res.buffer.toString();
 				contentStr.should.equal(contentStr);
 
-				get('/file//toto.1/titi/tata', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
+				get('/file' + rootPath + '/toto.1/titi/tata', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
 					var contentBuf, contentStr;
 					should.exist(err);
 					should.exist(err.statusCode);
@@ -678,7 +870,7 @@ describe("fsLocal...", function() {
 			should.exist(res.statusCode);
 			res.statusCode.should.equal(201); // Created
 
-			get('/file/toto/titi/tata.2', null /*query*/, function(err, res) {
+			get('/file' + rootPath + '/toto/titi/tata.2', null /*query*/, function(err, res) {
 				var contentStr;
 				should.not.exist(err);
 				should.exist(res);
@@ -688,7 +880,7 @@ describe("fsLocal...", function() {
 				contentStr = res.buffer.toString();
 				contentStr.should.equal(contentStr);
 
-				get('/i/toto/titi/tata.1', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
+				get('/file' + rootPath + '/toto/titi/tata.1', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
 					var contentBuf, contentStr;
 					should.exist(err);
 					should.exist(err.statusCode);
@@ -733,7 +925,7 @@ describe("fsLocal...", function() {
 			should.exist(res.json.isDir);
 			res.json.isDir.should.equal(true);
 			should.exist(res.json.path);
-			res.json.path.should.equal("/toto.3");
+			res.json.path.should.equal(rootPath + "/toto.3");
 			should.exist(res.json.id);
 			toto3Id = res.json.id;
 
@@ -743,7 +935,7 @@ describe("fsLocal...", function() {
 				should.exist(res.statusCode);
 				res.statusCode.should.equal(201); // Created
 
-				get('/file/toto.3/tata', null /*query*/, function(err, res) {
+				get('/file' + rootPath + '/toto.3/tata', null /*query*/, function(err, res) {
 					var contentStr;
 					should.not.exist(err);
 					should.exist(res);
@@ -769,11 +961,11 @@ describe("fsLocal...", function() {
 			should.exist(res.json.isDir);
 			res.json.isDir.should.equal(true);
 			should.exist(res.json.path);
-			res.json.path.should.equal("/toto.4");
+			res.json.path.should.equal(rootPath + "/toto.4");
 			should.exist(res.json.id);
 			var toto4Id = res.json.id;
 
-			get('/file/toto.2/titi', {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
+			get('/file' + rootPath + '/toto.2/titi', {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
 				should.not.exist(err);
 				should.exist(res);
 				should.exist(res.statusCode);
@@ -792,7 +984,7 @@ describe("fsLocal...", function() {
 					should.exist(res.statusCode);
 					res.statusCode.should.equal(201); // Created
 					
-					get('/file/toto.4/titi', {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
+					get('/file' + rootPath + '/toto.4/titi', {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
 						should.not.exist(err);
 						should.exist(res);
 						should.exist(res.statusCode);
@@ -810,14 +1002,17 @@ describe("fsLocal...", function() {
 		});
 	});
 
-	it("t100. should stop", function(done) {
-		myFs.quit();
-		if (clean) {
-			rimraf(myFsPath, {gently: myFsPath}, function() {
-				done();
-			});
-		} else {
+	it("t100.0. should delete test root folder", function(done) {
+		post('/id/' + rootId, {_method: "DELETE"} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(200); // Ok
 			done();
-		}
+		});
+	});
+
+	it("t100.1. should stop", function(done) {
+		myFs.quit(done);
 	});
 });

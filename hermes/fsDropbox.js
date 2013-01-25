@@ -19,14 +19,30 @@ function FsDropbox(inConfig, next) {
 // inherits FsBase (step 2/2)
 util.inherits(FsDropbox, FsBase);
 
+FsDropbox.prototype.errorResponse = function(err) {
+	this.log("FsDropbox.errorResponse(): err:", err);
+	var response;
+	if (err instanceof dropbox.ApiError) {
+		response = {
+			code: err.status,
+			body: err.response
+		};
+		this.log(err.stack);
+	} else {
+		response = FsBase.errorResponse.bind(this, err);
+	}
+	this.log("FsDropbox.errorResponse(): response:", response);
+	return response;
+};
+
 FsDropbox.prototype.authorize = function(req, res, next) {
 	var auth;
-	if (req.cookies.dropboxauth) {
+	if (req.cookies.dropbox_auth) {
 		this.log("FsDropbox.authorize(): req.cookies=", util.inspect(req.cookies));
-		_authorize(decodeURIComponent(req.cookies.dropboxauth));
-	} else if(req.query.dropboxauth) {
+		_authorize(decodeURIComponent(req.cookies.dropbox_auth));
+	} else if(req.query.auth) {
 		this.log("FsDropbox.authorize(): req.query=", util.inspect(req.query));
-		_authorize(req.query.dropboxauth);
+		_authorize(req.query.auth);
 	} else {
 		next(new HttpError('Missing Authorization', 401));
 	}
@@ -34,32 +50,44 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 	function _authorize(authStr) {
 		try {
 			auth = JSON.parse(authStr);
-			console.log("FsDropbox.authorize(): dropboxauth:" + util.inspect(auth));
+			console.log("FsDropbox.authorize(): auth:" + util.inspect(auth));
 		} catch(e) {
 			return next(e);
 		}
 		req.dropbox = new dropbox.Client({
 			key: auth.appKey, secret: auth.appSecret, sandbox: true
 		});
+		req.dropbox.onError.addListener(_onError);
 		req.dropbox.authDriver(new _authDriver(auth));
 		req.dropbox.authenticate(function(err, client) {
 			if (err) {
 				return next(err);
 			}
-			console.log("dropbox:" + util.inspect(client));
+			//console.log("dropbox:" + util.inspect(client));
 			next();
 		});
 	}
 
+	function _onError(err) {
+		debugger;
+		console.error("FsDropbox.onError(): err:", err);
+		console.log("FsDropbox.onError(): log:", util.inspect(err));
+	}
+
 	// see https://github.com/dropbox/dropbox-js/blob/master/doc/auth_drivers.md
 	function _authDriver(auth) {
+		if (!auth || !auth.uid ||
+		    !auth.appKey || !auth.appSecret ||
+		    !auth.accessToken || !auth.accessTokenSecret) {
+			throw new HttpError("Missing OAuth authorization parameters", 400);
+		} 
 		this.url = function() { return ""; };
 		this.doAuthorize = function(authUrl, token, tokenSecret, callback) {
 			console.log("authDriver.doAuthorize(): authUrl:"+ authUrl + " , token:" + token + ", tokenSecret:", tokenSecret);
 			callback();
 		};
 		this.onAuthStateChange = function(client, callback) {
-			console.log("authDriver.onAuthStateChange(): client.authState:" + client.authState);
+			//console.log("authDriver.onAuthStateChange(): client.authState:" + client.authState);
 			client.setCredentials({
 				uid: auth.uid,
 				key: auth.appKey,
@@ -67,8 +95,8 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 				token: auth.accessToken,
 				tokenSecret: auth.accessTokenSecret
 			});
-			console.log("authDriver.onAuthStateChange(): client.authState:" + client.authState);
-			console.log("authDriver.onAuthStateChange(): client.oauth:" + util.inspect(client.oauth));
+			//console.log("authDriver.onAuthStateChange(): client.authState:" + client.authState);
+			//console.log("authDriver.onAuthStateChange(): client.oauth:" + util.inspect(client.oauth));
 			callback();
 		};
 	}
@@ -77,8 +105,8 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 FsDropbox.prototype.setUserInfo = function(req, res, next) {
 	this.log("FsDropbox.setUserInfo(): req.query=", util.inspect(req.query));
 	this.log("FsDropbox.setUserInfo(): req.params=", util.inspect(req.params));
-	var auth = req.param('dropboxauth');
-	this.log("FsDropbox.setUserInfo(): dropboxauth:", auth);
+	var auth = req.param('auth');
+	this.log("FsDropbox.setUserInfo(): auth:", auth);
 	if (auth) {
 		var exdate=new Date();
 		exdate.setDate(exdate.getDate() + 10 /*days*/);
@@ -89,8 +117,8 @@ FsDropbox.prototype.setUserInfo = function(req, res, next) {
 			//maxAge: 1000*3600 // 1 hour
 		};
 
-		res.cookie('dropboxauth', auth, cookieOptions);
-		this.log("FsDropbox.setUserInfo(): Set-Cookie: dropboxauth:", auth);
+		res.cookie('dropbox_auth', auth, cookieOptions);
+		this.log("FsDropbox.setUserInfo(): Set-Cookie: dropbox_auth:", auth);
 		res.send(200).end();
 	} else {
 		next(new HttpError('No User Info', 400 /*Bad Request*/));
@@ -128,23 +156,19 @@ FsDropbox.prototype.get = function(req, res, next) {
 	next (new HttpError("ENOSYS", 500));
 };
 
-FsDropbox.prototype.put = function(req, res, next) {
-	this.log("put(): req.headers", req.headers);
-	this.log("put(): req.body", req.body);
-
-	if (req.is('application/x-www-form-urlencoded')) {
-		// carry a single file at most
-		return this._putWebForm(req, res, next);
-	} else if (req.is('multipart/form-data')) {
-		// can carry several files
-		return this._putMultipart(req, res, next);
-	} else {
-		next(new Error("Unhandled upload of content-type='" + req.headers['content-type'] + "'"));
-	}
+FsDropbox.prototype.putFile = function(req, res, next) {
+	next (new HttpError("ENOSYS", 500));
 };
 
 FsDropbox.prototype.mkcol = function(req, res, next) {
-	next (new HttpError("ENOSYS", 500));
+	var relPath = req.param('path') + '/' + req.param('name');
+	this.log("mkcol(): relPath:", relPath);
+	req.dropbox.mkdir(relPath, (function(err, stat) {
+		this.log("mkcol(): dropbox err:", err, "stat:", stat);
+		var node = getNode.bind(this)(stat, 0);
+		this.log("mkcol(): node:", node);
+		next(err, {code: 201, body: node});
+	}).bind(this));
 };
 
 FsDropbox.prototype['delete'] = function(req, res, next) {
@@ -154,54 +178,65 @@ FsDropbox.prototype['delete'] = function(req, res, next) {
 // implementations
 
 FsDropbox.prototype._propfind = function(err, req, relPath, depth, next) {
-	req.dropbox.url = 'https://api.dropbox.com/1/metadata/sandbox/'+ relPath;
-	if (depth) {
-		req.dropbox.qs = {
-			list: true,
-			include_deleted: false
-		};
+	this.log("_propfind(): err=", err, "relPath:", relPath, "depth:", depth);
+	if (depth > 1) {
+		return next(new HttpError("Unsupported depth=" + depth, 403));
 	}
-	this.log("_propfind(): req.dropbox=", req.dropbox);
-	request(req.dropbox, (function(err, response, dbBody) {
-		var arNode, dbNode, statusCode = (response && response.statusCode) || 500;
-		this.log("_propfind(): err:", err, ", response:", statusCode, ", dbBody:", dbBody, "<<< Dropbox");
-		try {
-			if (!err && statusCode == 200) {
-				dbNode = JSON.parse(dbBody);
-				arNode = _wrapDbNode.bind(this)(dbNode, depth);
-			}
-		} catch(e) {
-			err = e;
-		}
-		this.log("_propfind(): arNode:", arNode);
-		next(err, {code: statusCode, body: arNode});
-	}).bind(this));
 
-	function _wrapDbNode(dbNode, depth) {
-		this.log("wrapDbNode(): dbNode:", dbNode);
-		var arNode;
-		if (dbNode) {
-			arNode = {
-				isDir: dbNode.is_dir,
-				path: dbNode.path,
-				name: path.basename(dbNode.path),
-				id: this.encodeFileId(dbNode.path)
-			};
-			if (dbNode.hash) {
-				arNode.hash = dbNode.hash;
-			}
-			if (arNode.isDir) {
+	req.dropbox.readdir("/" + relPath, _onReply.bind(this));
+
+	function _onReply(err, entries, dirStat, entriesStat) {
+		var node;
+		this.log("_propfind.onReply(): err=", err, "entries:", entries, "dirStat:", dirStat, "entriesStat:", entriesStat);
+		if (err) {
+			next(err);
+		} else {
+			node = getNode.bind(this)({
+				path: dirStat.path || '/',
+				contents: entriesStat,
+				isFolder: dirStat.isFolder
+			}, depth);
+			this.log("_propfind.onReply(): node:", node);
+			next(null, {code: 200, body: node});
+		}
+	}
+
+};
+
+/**
+ * Convert a Dropbox#Stat {Object} into an Ares#Node {Object}.
+ */
+function getNode(stat, depth) {
+	this.log("getNode(): stat:", stat);
+	var arNode;
+	if (stat) {
+		arNode = {
+			isDir: stat.isFolder,
+			path: stat.path,
+			name: path.basename(stat.path),
+			id: this.encodeFileId(stat.path)
+		};
+		if (arNode.name === '') {
+			// XXX replace by the Dropbox application folder name?
+			arNode.name = 'dropbox';
+		}
+		if (stat.versionTag) {
+			arNode.hash = stat.versionTag;
+		}
+		if (arNode.isDir) {
+			if (depth) {
 				arNode.children = [];
-				if (depth) {
-					dbNode.contents.forEach(function(dbNode){
-						arNode.children.push(_wrapDbNode.bind(this)(dbNode, depth-1));
-					}, this);
-				}
+				stat.contents.forEach(function(stat){
+					arNode.children.push(getNode.bind(this)(stat, depth-1));
+				}, this);
 			}
 		}
-		return arNode;
 	}
-};
+	this.log("getNode(): arNode:", arNode);
+	return arNode;
+}
+
+// module/main wrapper
 
 if (path.basename(process.argv[1]) === "fsDropbox.js") {
 	// We are main.js: create & run the object...
@@ -246,4 +281,6 @@ if (path.basename(process.argv[1]) === "fsDropbox.js") {
 		if (process.send) process.send(service);
 	});
 
+} else {
+	module.exports = FsDropbox;
 }

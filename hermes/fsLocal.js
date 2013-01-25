@@ -16,12 +16,42 @@ var fs = require("fs"),
 function FsLocal(inConfig, next) {
 	inConfig.name = inConfig.name || "fsLocal";
 
+	// parameters sanitization
+	this.root = path.resolve(this.root);
+
 	// inherits FsBase (step 1/2)
 	FsBase.call(this, inConfig, next);
 }
 
 // inherits FsBase (step 2/2)
 util.inherits(FsLocal, FsBase);
+
+FsLocal.prototype._statusCodes = {
+	'ENOENT': 404, // Not-Found
+	'EPERM' : 403, // Forbidden
+	'EEXIST': 409, // Conflict
+	'ETIMEDOUT': 408 // Request-Timed-Out
+};
+
+FsLocal.prototype.errorResponse = function(err) {
+	this.log("FsLocal.errorResponse(): err:", err);
+	console.trace('FsLocal.errorResponse()');
+	var response = {
+		code: 403,	// Forbidden
+		body: err.toString()
+	};
+	if (err instanceof Error) {
+		response.code = err.statusCode ||
+			this._statusCodes[err.code] ||
+			this._statusCodes[err.errno] ||
+			403; // Forbidden
+		response.body = err.toString();
+		delete err.statusCode;
+		this.log(err.stack);
+	}
+	this.log("FsLocal.errorResponse(): response:", response);
+	return response;
+};
 
 FsLocal.prototype.propfind = function(req, res, next) {
 	// 'infinity' is '-1', 'undefined' is '0'
@@ -42,21 +72,6 @@ FsLocal.prototype.copy = function(req, res, next) {
 
 FsLocal.prototype.get = function(req, res, next) {
 	this._getFile(req, res, next);
-};
-
-FsLocal.prototype.put = function(req, res, next) {
-	this.log("put(): req.headers", req.headers);
-	this.log("put(): req.body", req.body);
-
-	if (req.is('application/x-www-form-urlencoded')) {
-		// carry a single file at most
-		return this._putWebForm(req, res, next);
-	} else if (req.is('multipart/form-data')) {
-		// can carry several files
-		return this._putMultipart(req, res, next);
-	} else {
-		next(new Error("Unhandled upload of content-type='" + req.headers['content-type'] + "'"));
-	}
 };
 
 FsLocal.prototype.mkcol = function(req, res, next) {
@@ -122,7 +137,12 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 			isDir: stat.isDirectory()
 		};
 
-		this.log("depth="+depth+", node="+util.inspect(node));
+		// Give the top-level node the name (NOT the path) of the mount-point
+		if (node.name === '') {
+			node.name = path.basename(this.root);
+		}
+
+		this.log("relPath=" + relPath + ", depth="+depth+", node="+util.inspect(node));
 
 		if (stat.isFile() || !depth) {
 			return next(null, node);
@@ -180,135 +200,6 @@ FsLocal.prototype._getFile = function(req, res, next) {
 	});
 };
 
-/**
- * Store a file provided by a web-form
- * 
- * The web form is a 'application/x-www-form-urlencoded'
- * request, which contains the following fields:
- * 
- * - name (optional) is the name of the file to be created or
- *   updated.
- * - path (mandatory) is the relative path to the storage root
- *   of the file to be uploaded (if name is absent) or to the
- *   containing folder (if name is provided).
- * - content (mandatory) is the base64-encoded version of the
- *   file
- * 
- * @param {HTTPRequest} req 
- * @param {HTTPResponse} res
- * @param {Function} next(err, data) CommonJS callback 
- */
-FsLocal.prototype._putWebForm = function(req, res, next) {
-	// Mutually-agreed encoding of file name & location:
-	// 'path' and 'name'
-	var relPath, fileId,
-	    pathParam = req.param('path'),
-	    nameParam = req.param('name');
-	if (!pathParam) {
-		next(new HttpError("Missing 'path' request parameter", 400 /*Bad Request*/));
-		return;
-	}
-	if (nameParam) {
-		relPath = path.join(pathParam, path.basename(nameParam));
-	} else {
-		relPath = pathParam;
-	}
-
-	// Now get the bits: base64-encoded binary in the
-	// 'content' field
-	var buf;
-	if (req.body.content) {
-		buf = new Buffer(req.body.content, 'base64');
-	} else {
-		this.log("putWebForm(): empty file");
-		buf = '';
-	}
-	
-	this.log("putWebForm(): storing file as", relPath);
-	fileId = this.encodeFileId(relPath);
-	fs.writeFile(path.join(this.root, relPath), buf, function(err){
-		next(err, {
-			code: 201, // Created
-			body: [{id: fileId, path: relPath, isDir: false}]
-		});
-	});
-};
-
-/**
- * Stores one or more files provided by a multipart form
- * 
- * The multipart form is a 'multipart/form-data'.  Each of its
- * parts follows this field convention, compatible with the
- * Express/Connect bodyParser, itself based on the Formidable
- * Node.js module.
- * 
- * @param {HTTPRequest} req 
- * @param {HTTPResponse} res
- * @param {Function} next(err, data) CommonJS callback 
- */
-FsLocal.prototype._putMultipart = function(req, res, next) {
-	var pathParam = req.param('path'),
-	    root = this.root,
-	    encodeFileId = this.encodeFileId;
-	this.log("putMultipart(): req.files=", util.inspect(req.files));
-	this.log("putMultipart(): req.body=", util.inspect(req.body));
-	this.log("putMultipart(): pathParam=",pathParam);
-	if (!req.files.file) {
-		next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
-		return;
-	}
-	var nodes = [], files = [];
-	if (Array.isArray(req.files.file)) {
-		files.push.apply(files, req.files.file);
-	} else {
-		files.push(req.files.file);
-	}
-
-	var filenames = [];
-	if (req.body.filename) {
-		if (Array.isArray(req.body.filename)) {
-			filenames.push.apply(filenames, req.body.filename);
-		} else {
-			filenames.push(req.body.filename);
-		}
-		for (var i = 0; i < files.length; i++) {
-			if (filenames[i]) {
-				files[i].name = filenames[i];
-			}
-		}
-	}
-	async.forEach(files, (function(file, cb) {
-		var relPath = path.join(pathParam, file.name),
-		    absPath = path.join(root, relPath),
-		    dir = path.dirname(absPath);
-
-		this.log("putMultipart(): file.path=" + file.path + ", relPath=" + relPath + ", dir=" + dir);
-
-		async.series([
-			function(cb1) {
-				mkdirp(dir, cb1);
-			},
-			function(cb1) {
-				fs.rename(file.path, absPath, cb1);
-			},
-			function(cb1) {
-				nodes.push({
-					id: encodeFileId(relPath),
-					path: relPath,
-					isDir: false
-				});
-				cb1();
-			}
-		], cb);
-
-	}).bind(this), function(err){
-		next(err, {
-			code: 201, // Created
-			body: nodes
-		});
-	});
-};
-
 // XXX ENYO-1086: refactor tree walk-down
 FsLocal.prototype._rmrf = function(localPath, next) {
 	// from <https://gist.github.com/1526919>
@@ -343,6 +234,50 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 				}, this);
 			}
 		}).bind(this));
+	}).bind(this));
+};
+
+/**
+ * Write a file in the filesystem
+ * 
+ * Invokes the CommonJs callback with the created {ares.Filesystem.Node}.
+ * 
+ * @param {Object} file contains mandatory #name property, plus either
+ * #buffer (a {Buffer}) or #path (a temporary absolute location).
+ * @param {Function} next a Common-JS callback
+ */
+FsLocal.prototype.putFile = function(file, next) {
+	var absPath = path.join(this.root, file.name),
+	    dir = path.dirname(absPath),
+	    encodeFileId = this.encodeFileId,
+	    node;
+	
+	this.log("FsLocal.putFile(): file:", file, "-> absPath:", absPath);
+	
+	async.series([
+		function(cb1) {
+			mkdirp(dir, cb1);
+		},
+		function(cb1) {
+			if (file.path) {
+				fs.rename(file.path, absPath, cb1);
+			} else if (file.buffer) {
+				fs.writeFile(absPath, file.buffer, cb1);
+			} else {
+				cb1(new HttpError("cannot write file=" + JSON.stringify(file), 400));
+			}
+		},
+		function(cb1) {
+			node = {
+				id: encodeFileId(file.name),
+				path: file.name,
+				isDir: false
+			};
+			cb1();
+		}
+	], (function(err) {
+		this.log("FsLocal.putFile(): node:", node);
+		next(err, node);
 	}).bind(this));
 };
 
@@ -466,13 +401,17 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 	}
 };
 
-module.exports = FsLocal;
+// module/main wrapper
 
 if (path.basename(process.argv[1]) === "fsLocal.js") {
 	// We are main.js: create & run the object...
 	
 	var argv = require("optimist")
 	.usage('\nAres FileSystem (fs) provider.\nUsage: "$0 [OPTIONS]"')
+	.options('r', {
+		alias : 'root',
+		description: 'Root directory to serve'
+	})
 	.options('P', {
 		alias : 'pathname',
 		description: 'pathname (M) can be "/", "/res/files/" ...etc'
@@ -480,8 +419,8 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 	.demand('P')
 	.options('p', {
 		alias : 'port',
-		description: 'port (o) local IP port of the express server (default: 9009, 0: dynamic)',
-		default: '9009'
+		description: 'port (o) local IP port of the express server (default: 0 dynamic)',
+		default: '0'
 	})
 	.options('h', {
 		alias : 'help',
@@ -504,7 +443,7 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		pathname: argv.pathname,
 		port: argv.port,
 		verbose: argv.verbose,
-		root: argv._[0]
+		root: argv.root
 	}, function(err, service){
 		if (err) process.exit(err);
 		// process.send() is only available if the
@@ -512,4 +451,6 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		if (process.send) process.send(service);
 	});
 
+} else {
+	module.exports = FsLocal;
 }
