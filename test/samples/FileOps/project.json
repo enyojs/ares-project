@@ -1,0 +1,26 @@
+{
+  "id": "com.examples.apps.myapp",
+  "name": "FileOps",
+  "version": "0.0.1",
+  "title": "Example: My Application",
+  "description": "Description of My Application",
+  "author": {
+    "name": "An Example Company",
+    "href": "http://www.example.com"
+  },
+  "build": {
+    "phonegap": {
+      "enabled": true,
+      "icon": {
+        "src": "icon.png",
+        "role": "default"
+      },
+      "preferences": {
+        "phonegap-version": "2.0.0"
+      }
+    }
+  },
+  "preview": {
+    "top_file": "index.html"
+  }
+}
