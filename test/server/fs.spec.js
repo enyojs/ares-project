@@ -278,7 +278,7 @@ describe("Testing " + config.name, function() {
 		], done);
 	});
 
-	var rootId, rootName = '_test', rootPath = '/' + rootName;
+	var rootId, rootName = argv.dir, rootPath = '/' + rootName;
 
 	it("t0.2. should create test root folder", function(done) {
 		async.waterfall([

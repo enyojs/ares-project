@@ -199,36 +199,44 @@ FsBase.prototype.cors = function(req, res, next) {
 
 // Utilities
 
-FsBase.prototype.respond = function(res, err, response) {
-	this.log("FsBase.respond():");
-	var statusCode, body;
-	var statusCodes = {
-		'ENOENT': 404, // Not-Found
-		'EPERM' : 403, // Forbidden
-		'EEXIST': 409, // Conflict
-		'ETIMEDOUT': 408 // Request-Timed-Out
+/**
+ * Turns an {Error} object into a usable response {Object}
+ * 
+ * A response {Object} as #code and #body properties.  This method is
+ * expecyted to be overriden by sub-classes of {FsBase}.
+ * 
+ * @param {Error} err the error object to convert.
+ */
+FsBase.prototype.errorResponse = function(err) {
+	this.log("FsBase.errorResponse(): err:", err);
+	var response = {
+		code: 403,	// Forbidden
+		body: err.toString()
 	};
-	if (err) {
-		if (err instanceof Error) {
-			statusCode = err.statusCode ||
-				statusCodes[err.code] ||
-				statusCodes[err.errno] ||
-				403; // Forbidden
-			delete err.statusCode;
-			body = err;
-		} else {
-			statusCode = 500; // Internal Server Error
-			body = new Error(err.toString());
-		}
-		this.log("<<<\n"+body.stack);
-	} else if (response) {
-		statusCode = response.code || 200 /*Ok*/;
-		body = response.body;
+	if (err instanceof Error) {
+		response.code = err.statusCode || 403 /*Forbidden*/;
+		response.body = err.toString();
+		this.log(err.stack);
 	}
-	if (body) {
-		res.status(statusCode).send(body);
-	} else if (statusCode) {
-		res.status(statusCode).end();
+	this.log("FsBase.errorResponse(): response:", response);
+	return response;
+};
+
+/**
+ * Unified response handler
+ * @param {Object} res the express response {Object}
+ * @param {Object} err the error if any.  Can be any kind of {Error}, such as an { HttpError}
+ * @param {Object} response is an {Object} that has 2 properties: #code (used as the HTTP statusCode) and #body (inlined in the response body, of not falsy)
+ */
+FsBase.prototype.respond = function(res, err, response) {
+	this.log("FsBase.respond(): response:", response);
+	if (err) {
+		response = this.errorResponse(err);
+	}
+	if (response && response.body) {
+		res.status(response.code).send(response.body);
+	} else if (response && response.code) {
+		res.status(response.code).end();
 	}
 };
 

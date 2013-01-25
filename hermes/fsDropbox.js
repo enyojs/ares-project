@@ -19,6 +19,22 @@ function FsDropbox(inConfig, next) {
 // inherits FsBase (step 2/2)
 util.inherits(FsDropbox, FsBase);
 
+FsDropbox.prototype.errorResponse = function(err) {
+	this.log("FsDropbox.errorResponse(): err:", err);
+	var response;
+	if (err instanceof dropbox.ApiError) {
+		response = {
+			code: err.status,
+			body: err.response
+		};
+		this.log(err.stack);
+	} else {
+		response = FsBase.errorResponse.bind(this, err);
+	}
+	this.log("FsDropbox.errorResponse(): response:", response);
+	return response;
+};
+
 FsDropbox.prototype.authorize = function(req, res, next) {
 	var auth;
 	if (req.cookies.dropbox_auth) {
@@ -41,6 +57,7 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 		req.dropbox = new dropbox.Client({
 			key: auth.appKey, secret: auth.appSecret, sandbox: true
 		});
+		req.dropbox.onError.addListener(_onError);
 		req.dropbox.authDriver(new _authDriver(auth));
 		req.dropbox.authenticate(function(err, client) {
 			if (err) {
@@ -49,6 +66,12 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 			//console.log("dropbox:" + util.inspect(client));
 			next();
 		});
+	}
+
+	function _onError(err) {
+		debugger;
+		console.error("FsDropbox.onError(): err:", err);
+		console.log("FsDropbox.onError(): log:", util.inspect(err));
 	}
 
 	// see https://github.com/dropbox/dropbox-js/blob/master/doc/auth_drivers.md
@@ -149,13 +172,13 @@ FsDropbox.prototype.put = function(req, res, next) {
 };
 
 FsDropbox.prototype.mkcol = function(req, res, next) {
-	var relPath = req.param('path') + req.param('name');
+	var relPath = req.param('path') + '/' + req.param('name');
 	this.log("mkcol(): relPath:", relPath);
 	req.dropbox.mkdir(relPath, (function(err, stat) {
 		this.log("mkcol(): dropbox err:", err, "stat:", stat);
 		var node = getNode.bind(this)(stat, 0);
 		this.log("mkcol(): node:", node);
-		next(err, {code: 200, body: node});
+		next(err, {code: 201, body: node});
 	}).bind(this));
 };
 

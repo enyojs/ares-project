@@ -6,7 +6,9 @@ var path = require("path"),
     fs = require("fs"),
     optimist = require("optimist"),
     shell = require('shelljs'),
-    temp = require("temp");
+    temp = require("temp"),
+    rimraf = require("rimraf"),
+    async = require("async");
 
 var argv = optimist
 	    .usage('\nAres server tester.\nUsage: "$0 [OPTIONS]')
@@ -62,16 +64,36 @@ describe("Testing filesystems", function() {
 		})[0];
 		if (dropbox && dropbox.auth && dropbox.auth.appKey) {
 			var fsDropbox = path.resolve("..", "..", "hermes","fsDropbox.js");
-			run([mocha, "--bail",
-			     "--timeout", "3000", // This timeout may vary, depending on the network conditions
-			     "--reporter", "spec",
-			     "fs.spec.js",
-			     "--filesystem", fsDropbox,
-			     "--pathname", "/",
-			     "--port", myPort,
-			     "--auth", encodeURIComponent(JSON.stringify(dropbox.auth))]);
+			var myDir = "_test";
+			var myDropboxApp = 'com.enyojs.ares';
+			// Assume a user's account grip in the local file-system.
+			var myDirPath = [getHome(), 'Dropbox', 'Apps', myDropboxApp, myDir].join('/');
+			async.series([
+				function(next) {
+					rimraf(myDirPath, next);
+				},
+				function(next) {
+					setTimeout(next, 1500);
+				},
+				function(next) {
+					run([mocha, "--bail",
+					     "--timeout", "5000", // This timeout may vary, depending on the network conditions
+					     "--reporter", "spec",
+					     "fs.spec.js",
+					     "--filesystem", fsDropbox,
+					     "--pathname", "/",
+					     "--port", myPort,
+					     "--dir", myDir,
+					     "--auth", encodeURIComponent(JSON.stringify(dropbox.auth))]);
+					next();
+				},
+				function(next) {
+					rimraf(myDirPath, next);
+				}
+			], function(err) {
+				done();
+			});
 		}
-		done();
 	});
 	it("fsLocal", function(done) {
 		var fsLocal = path.resolve("..", "..", "hermes","fsLocal.js");
@@ -116,4 +138,8 @@ function run(args) {
 	if (report.code !== 0) {
 		throw new Error("Fail: '" + command + "'\n" + report.output);
 	}
+}
+
+function getHome() {
+	return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
 }

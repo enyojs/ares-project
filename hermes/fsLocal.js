@@ -23,6 +23,32 @@ function FsLocal(inConfig, next) {
 // inherits FsBase (step 2/2)
 util.inherits(FsLocal, FsBase);
 
+FsLocal.prototype._statusCodes = {
+	'ENOENT': 404, // Not-Found
+	'EPERM' : 403, // Forbidden
+	'EEXIST': 409, // Conflict
+	'ETIMEDOUT': 408 // Request-Timed-Out
+};
+
+FsLocal.prototype.errorResponse = function(err) {
+	this.log("FsLocal.errorResponse(): err:", err);
+	var response = {
+		code: 403,	// Forbidden
+		body: err.toString()
+	};
+	if (err instanceof Error) {
+		response.code = err.statusCode ||
+			this._statusCodes[err.code] ||
+			this._statusCodes[err.errno] ||
+			403; // Forbidden
+		response.body = err.toString();
+		delete err.statusCode;
+		this.log(err.stack);
+	}
+	this.log("FsLocal.errorResponse(): response:", response);
+	return response;
+};
+
 FsLocal.prototype.propfind = function(req, res, next) {
 	// 'infinity' is '-1', 'undefined' is '0'
 	var depthStr = req.param('depth');
