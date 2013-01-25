@@ -84,6 +84,15 @@ enyo.kind({
 					{tag: "span", content: "PhoneGap Build:"},
 					{name: "phonegapCheckBox", kind: "onyx.Checkbox", onchange: "togglePhoneGap"}
 				]}
+			]},
+			{kind: "enyo.FittableColumns", components: [
+				{kind: "Control", content: "Template:"},
+				{kind: "onyx.PickerDecorator", fit: true, components: [
+					{name: "templateButton", kind: "onyx.PickerButton", fit: true},
+					{kind: "onyx.FlyweightPicker", name: "templatePicker", components: [
+						{name: "template"}
+					], onSetupItem: "templateSetupItem", onSelect: "templateSelected"}
+				]}
 			]}
 		]},
 
@@ -116,7 +125,9 @@ enyo.kind({
 	],
 
 	debug: false,
-
+	templates: [],
+	TEMPLATE_NONE: "NONE",
+	selectedTemplate: undefined,
 	/**
 	 * Tune the widget for project creation
 	 */
@@ -206,7 +217,7 @@ enyo.kind({
 		ppConf.top_file = this.$.ppTopFile.getValue();
 
 		// to be handled by a ProjectWizard
-		this.doModifiedConfig({data: this.config}) ;
+		this.doModifiedConfig({data: this.config, template: this.selectedTemplate}) ;
 
 		this.doDone();
 
@@ -216,6 +227,28 @@ enyo.kind({
 
 		// handled here (don't bubble)
 		return true;
+	},
+	setTemplateList: function(templates) {
+		this.log(templates);
+		this.$.templateButton.applyStyle("width", "20em");
+		this.templates = [this.TEMPLATE_NONE];
+		enyo.forEach(templates, function(item) {
+			this.templates.push(item.id);
+		}, this);
+		this.$.templatePicker.setCount(this.templates.length);
+		this.$.templatePicker.setSelected(0);
+		this.selectedTemplate = undefined;
+	},
+	templateSetupItem: function(inSender, inEvent) {
+		this.log(inEvent.index);
+		this.$.template.setContent(this.templates[inEvent.index]);
+		return true;
+	},
+	templateSelected: function(inSender, inEvent) {
+		if (inEvent.content === this.TEMPLATE_NONE) {
+			this.selectedTemplate = undefined;
+		} else {
+			this.selectedTemplate = inEvent.content;
+		}
 	}
 });
-
