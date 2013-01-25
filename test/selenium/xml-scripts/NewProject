@@ -105,4 +105,19 @@
 	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
 	<value><![CDATA[App1.js]]></value>
 </selenese>
+<selenese>
+	<command>keyPress</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[s]]></value>
+</selenese>
+<selenese>
+	<command>keyUp</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[s]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
 </TestCase>
