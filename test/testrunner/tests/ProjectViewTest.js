@@ -56,8 +56,8 @@ enyo.kind({
 				if (this.debug) enyo.log("testHandleSelectProvider: user select dir") ;
 
 				// simulate nodeTap & selectFolder
-				hFileTree.doFolderClick(nodes[0]);
-				nodes[0].doNodeTap();
+				hFileTree.doFolderClick(nodes[3]);
+				nodes[3].doNodeTap();
 
 				if (this.debug) enyo.log("testHandleSelectProvider: user confirms dir") ;
 				// simulate confirmTap

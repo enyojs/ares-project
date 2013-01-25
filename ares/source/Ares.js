@@ -39,8 +39,10 @@ enyo.kind({
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
 			Ares.Workspace.loadProjects("com.enyojs.ares.tests", true);
-			// in charge of Ares Test Suite
-			this.createComponent({kind: "Ares.TestController", aresObj: this});
+			if (window.location.search.indexOf("norunner") == -1) {
+				// in charge of Ares Test Suite
+				this.createComponent({kind: "Ares.TestController", aresObj: this});
+			}
 		} else {
 			Ares.Workspace.loadProjects();
 		}

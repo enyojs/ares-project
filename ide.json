@@ -9,7 +9,7 @@
 			"type": "filesystem",
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"hermes/fsLocal.js", "-P", "/files", "-p", "0", "@HOME@"
+				"hermes/fsLocal.js", "--pathname", "/files", "--port", "0", "--root", "@HOME@"
 			],
 			"useJsonp":false,
 			"verbose": false,

@@ -1,0 +1,35 @@
+{
+	"description":"JSON schema of the Dropbox authentication object",
+	"type":"object",
+	"properties":{
+		"type":{
+			"description":"Always have the value 'dropbox'",
+			"type":"string",
+			"required":true
+		},
+		"appKey":{
+			"description":"Dropbox Application Key, as given by https://www.dropbox.com/developers/apps",
+			"type":"string",
+			"required":true
+ 
+		},
+		"appSecret":{
+			"description":"Dropbox Application Key Secret, as given by https://www.dropbox.com/developers/apps",
+			"type":"string",
+			"required":true
+
+		},
+		"uid":{
+			"description":"User Identifier, given by Dropbox during the OAuth dance.  Not normally stored outside of Browser localStorage.",
+			"type":"string" 
+		},
+		"accessToken":{
+			"description":"OAuth Access-Token, given by Dropbox during the OAuth dance.  Not normally stored outside of Browser localStorage.",
+			"type":"string" 
+		},
+		"accessTokenSecret":{
+			"description":"OAuth Access-Token Secret, given by Dropbox during the OAuth dance.  Not normally stored outside of Browser localStorage.",
+			"type":"string" 
+		}
+	}
+};
