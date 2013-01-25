@@ -165,9 +165,8 @@ enyo.kind({
 		}
 		return this._request("PUT", inFolderId, {postBody: formData} /*inParams*/);
 	},
-	createFiles: function(inFolderId, data) {
-		this.log();
-		return this._request("PUT", inFolderId, {postBody: data.content, contentType: data.ctype} /*inParams*/);
+	createFiles: function(inFolderId, inData) {
+		return this._request("PUT", inFolderId, {postBody: inData.content, contentType: inData.ctype} /*inParams*/);
 	},
 	createFolder: function(inFolderId, inName) {
 		var newFolder = inFolderId + "/" + inName;
