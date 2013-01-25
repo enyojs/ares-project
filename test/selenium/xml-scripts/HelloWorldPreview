@@ -2,7 +2,7 @@
 <TestCase seleniumIDEVersion="1.10.0" baseURL="http://127.0.0.1:9009/">
 <selenese>
 	<command>open</command>
-	<target><![CDATA[/ide/ares/test.html?debug]]></target>
+	<target><![CDATA[/ide/ares/test.html?debug=true&norunner=true]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -21,19 +21,29 @@
 	<value><![CDATA[Ares Test - Home Directory]]></value>
 </selenese>
 <selenese>
-	<command>verifyTextPresent</command>
-	<target><![CDATA[TipCalc]]></target>
-	<value><![CDATA[]]></value>
-</selenese>
-<selenese>
 	<command>waitForText</command>
-	<target><![CDATA[id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_$TipCalc_caption]]></target>
-	<value><![CDATA[TipCalc]]></value>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption]]></target>
+	<value><![CDATA[server]]></value>
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_$TipCalc_caption]]></target>
-	<value><![CDATA[TipCalc]]></value>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption]]></target>
+	<value><![CDATA[server]]></value>
+</selenese>
+<selenese>
+	<command>waitForText</command>
+	<target><![CDATA[ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption]]></target>
+	<value><![CDATA[HelloWorld]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption]]></target>
+	<value><![CDATA[HelloWorld]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption]]></target>
+	<value><![CDATA[HelloWorld]]></value>
 </selenese>
 <selenese>
 	<command>waitForText</command>
@@ -48,12 +58,12 @@
 <selenese>
 	<command>waitForText</command>
 	<target><![CDATA[id=ares_projectView_projectList_projectList_ownerProxy_item]]></target>
-	<value><![CDATA[TipCalc]]></value>
+	<value><![CDATA[HelloWorld]]></value>
 </selenese>
 <selenese>
 	<command>clickAt</command>
 	<target><![CDATA[id=ares_projectView_projectList_projectList_ownerProxy_item]]></target>
-	<value><![CDATA[TipCalc]]></value>
+	<value><![CDATA[HelloWorld]]></value>
 </selenese>
 <selenese>
 	<command>waitForText</command>

@@ -19,13 +19,30 @@
 			"id":"arestest",
 			"icon":"arestest",
 			"name":"Ares Test Suite",
-			"type": "test",
+			"type": "filesystem",
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
 				"hermes/test/main.js", "-p", "10001"
 			],
 			"useJsonp":false,
 			"debug": false,
+			"respawn": false
+		},
+		{
+			"active":true,
+			"id":"phonegap",
+			"icon":"build.phonegap.com-32x32",
+			"name":"PhoneGap Build",
+			"type": "build",
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"hermes/bdPhoneGap.js", "-P", "/phonegap", "-p", "0"
+			],
+			"useJsonp":false,
+			"verbose": false,
+			"auth": {
+				"type": "phonegap"
+			},
 			"respawn": false
 		}
 	]
