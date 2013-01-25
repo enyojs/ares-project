@@ -15,9 +15,10 @@ var fs = require("fs"),
     child_process = require("child_process"),
     optimist = require('optimist'),
     tools = require('nodejs-module-webos-ipkg'),
-    FormData = require('form-data');
+    CombinedStream = require('form-data/node_modules/combined-stream');
 
 var basename = path.basename(__filename);
+var FORM_DATA_LINE_BREAK = '\r\n';
 
 function BdOpenwebOS(config, next) {
 	function HttpError(msg, statusCode) {
@@ -27,19 +28,6 @@ function BdOpenwebOS(config, next) {
 	}
 	util.inherits(HttpError, Error);
 	HttpError.prototype.name = "HTTP Error";
-
-	tools.registerTemplates([
-        {
-            id: "enyo_singlepane",
-            url: "templates//projects/enyo_singlepane.zip",
-            description: "Enyo singlepane"
-        },
-        {
-            id: "enyo_multipane",
-            url: "templates//projects/enyo_multipane.zip",
-            description: "Enyo multipane"
-        }
-    ]);
 
 	console.log("config=",  util.inspect(config));
 
@@ -154,35 +142,77 @@ function BdOpenwebOS(config, next) {
 			}
 
 			// Build the multipart/formdata
-			var form = new FormData();
+			var combinedStream = CombinedStream.create();
+			var boundary = generateBoundary();
+			var index = 0;
+			var files = [];
 			inData.forEach(function(file) {
 				if (fs.statSync(file).isFile()) {
-					var filename = file.substr(destination.length + 1);
-					var options = {};
-					options.header = makePartHeader(filename, form.getBoundary());
-					var stream = fs.createReadStream(file);
-					form.append('file', stream, options);
+					files.push(file);
+					// Adding part header
+					combinedStream.append(function(next) {
+						var filename = files[index].substr(destination.length + 1);
+						next(getPartHeader(filename, boundary));
+					});
+					// Adding file data
+					combinedStream.append(function(next) {
+						var filename = files[index].substr(destination.length + 1);
+						next(fs.createReadStream(files[index]));
+						index++;
+					});
+					// Adding part footer
+					combinedStream.append(function(next) {
+						next(getPartFooter());
+					});
 				}
+			});
+
+			// Adding last footer
+			combinedStream.append(function(next) {
+				next(getLastPartFooter(boundary));
 			});
 
 			// Send the files back as a multipart/form-data
 			res.status(200);
-			res.header('Content-Type', 'multipart/form-data; boundary=' + form.getBoundary());
-			form.pipe(res);
+			res.header('Content-Type', getContentTypeHeader(boundary));
+			combinedStream.pipe(res);
 
 			// TODO cleanup the temp dir when the response has been sent
 		});
 	}
 
-	function makePartHeader(filename, boundary) {
-		var header = '--' + boundary + FormData.LINE_BREAK;
+	function generateBoundary() {
+		// This generates a 50 character boundary similar to those used by Firefox.
+		// They are optimized for boyer-moore parsing.
+		var boundary = '--------------------------';
+		for (var i = 0; i < 24; i++) {
+			boundary += Math.floor(Math.random() * 10).toString(16);
+		}
+
+		return boundary;
+	}
+
+	function getContentTypeHeader(boundary) {
+		return 'multipart/form-data; boundary=' + boundary;
+	}
+
+	function getPartHeader(filename, boundary) {
+		var header = '--' + boundary + FORM_DATA_LINE_BREAK;
 		header += 'Content-Disposition: form-data; name="file"';
 
-		header += '; filename="' + filename + '"' + FormData.LINE_BREAK;
+		header += '; filename="' + filename + '"' + FORM_DATA_LINE_BREAK;
 		header += 'Content-Type: application/octet-stream';
 
-		header += FormData.LINE_BREAK + FormData.LINE_BREAK;
+		header += FORM_DATA_LINE_BREAK + FORM_DATA_LINE_BREAK;
 		return header;
+	}
+
+	function getPartFooter() {
+		return FORM_DATA_LINE_BREAK;
+	}
+
+	function getLastPartFooter(boundary) {
+		return '--' + boundary + '--';
 	}
 }
 
