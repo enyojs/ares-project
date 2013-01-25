@@ -23,6 +23,7 @@ enyo.kind({
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"}
 	],
 	debug: false,
+	projectName: "",
 
 	/**
 	 * start project creation by showing direction selection widget
@@ -60,6 +61,19 @@ enyo.kind({
 			return ;
 		}
 
+		// Getting template list
+		propW.setTemplateList([]);
+		var service =	ServiceRegistry.instance.getServicesByType('other')[0];
+		var templateReq = service.getTemplates();
+		templateReq.response(this, function(inSender, inData) {
+			propW.setTemplateList(inData);
+		});
+		templateReq.error(this, function(inSender, inError) {
+			this.log("Unable to get template list (" + inError + ")");
+			this.$.errorPopup.raise('Unable to get template list');
+			propW.setTemplateList([]);
+		});
+
 		// ok, we can go on with project properties setup
 		propW.setupCreate() ;
 
@@ -90,21 +104,65 @@ enyo.kind({
 
 	// step 3: actually create project in ares data structure
 	createProject: function (inSender, inEvent) {
-		var name = inEvent.data.name;
+		this.projectName = inEvent.data.name;
 		var folderId = this.selectedDir.id ;
-		var service = this.selectedDir.service;
+		var template = inEvent.template;
 
-		this.log("Creating new project " + name + " in folderId=" + folderId);
-		this.doAddProjectInList({
-			name: name,
-			folderId: folderId,
-			service: this.selectedDir.service,
-			serviceId: this.selectedServiceId
-		});
+		this.log("Creating new project " + name + " in folderId=" + folderId + " (template: " + template + ")");
 		this.config.setData(inEvent.data) ;
 		this.config.save() ;
 
+		if (template) {
+			this.instanciateTemplate(inEvent);
+		} else {
+			this.projectReady(null, inEvent);
+		}
+
 		return true ; // stop bubble
+	},
+
+	// step 4: populate the project with the selected template
+	instanciateTemplate: function (inEvent) {
+		var template = inEvent.template;
+		var substitutions = [{
+			fileRegexp: "appinfo.json",
+			json: {
+				id: inEvent.data.name,
+				version: inEvent.data.version,
+				title: this.config.title
+			}
+		}];
+
+		var genService = ServiceRegistry.instance.getServicesByType('other')[0];
+		var req = genService.generate(template, substitutions);
+		req.response(this, this.populateProject);
+		req.error(this, function(inSender, inError) {
+			this.log("Unable to get the template files (" + inError + ")");
+			this.$.errorPopup.raise('Unable to instanciate projet content from the template');
+		});
+	},
+
+	// step 5: populate the project with the retrieved template files
+	populateProject: function(inSender, inData) {
+		var folderId = this.selectedDir.id;
+		var service = this.selectedDir.service;
+
+		// Copy the template files into the new project
+		req = service.createFiles(folderId, {content: inData.content, ctype: inData.ctype});
+		req.response(this, this.projectReady);
+		req.error(this, function(inEvent, inData) {
+			this.$.errorPopup.raise('Unable to create projet content from the template');
+		});
+	},
+
+	// step 6: we're done
+	projectReady: function(inSender, inData) {
+		this.doAddProjectInList({
+			name: this.projectName,
+			folderId: this.selectedDir.id,
+			service: this.selectedDir.service,
+			serviceId: this.selectedServiceId
+		});
 	},
 
 	/**
