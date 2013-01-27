@@ -32,7 +32,7 @@ enyo.kind({
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
-		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose"},
+		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
 		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "ares_phobos_settingspop", centered: true, modal: true, floating: true,
 		onChangeTheme: "changeTheme", onChangeHighLight: "changeHighLight", onClose: "closeEditorPop", onWordWrap: "changeWordWrap", onFontsizeChange: "changeFont", onTabSizsChange: "tabSize"}
 	],
@@ -111,6 +111,7 @@ enyo.kind({
 			this.focusEditor();
 
 			/* set editor to user pref */
+			this.$.ace.editingMode = mode;
 			this.$.ace.highlightActiveLine = localStorage.highlight;
 			if(!this.$.ace.highlightActiveLine || this.$.ace.highlightActiveLine.indexOf("false") != -1){
 				this.$.ace.highlightActiveLine = false;
@@ -582,7 +583,15 @@ enyo.kind({
 	},
 
 	replaceAll: function(){
-		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
+		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue, options);
+	},
+	
+	replacefind: function(){
+		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
+		console.log(this.$.findpop.replaceValue);
+	//	console.log(this.$.FindPopup.replaceValue);
+		this.$.ace.replacefind(this.$.findpop.findValue , this.$.findpop.replaceValue, options);	
 	},
 
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful

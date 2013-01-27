@@ -6,6 +6,7 @@ enyo.kind({
 		onFindPrevious:"",
 		//onReplace:"",
 		onReplaceAll:"",
+		onReplaceFind: "",
 		onClose: ""
 	},
 	published: {
@@ -33,11 +34,16 @@ enyo.kind({
 			{tag: "br"},
 			{kind: "FittableColumns", components: [
 				//{name: "replaceOne", kind: "onyx.Button", content: "Replace", ontap: "doReplace"},
-				{name: "close", kind: "onyx.Button", content: "Close", ontap: "doClose"},
+				
 				{name: "replaceAll", kind: "onyx.Button", content: "Replace All", ontap: "doReplaceAll"},
-				{style: "width: 20px"},
+				{tag: "br"},
+				{name: "replaceFind", kind: "onyx.Button", content: "Replace & Find", ontap: "doReplaceFind"},
+				{style: "width: 60px"},
 				{name: "findprevious", kind: "onyx.Button", content: "Previous", ontap: "doFindPrevious"},
 				{name: "findnext", kind: "onyx.Button", content: "Next", ontap: "doFindNext"},
+				{tag: "br"},
+				{tag: "br"},
+				{name: "close", kind: "onyx.Button", content: "Close", ontap: "doClose"},
 			]}
 		]}
 	],
@@ -46,6 +52,7 @@ enyo.kind({
 	},
 	replaceChanged: function(inSender, inEvent) {
 		this.replaceValue = this.$.replace.getValue();
+		console.log(this.replaceValue);
 	},
 	shown: function(inSender, inEvent) {
 		this.$.find.focus();
