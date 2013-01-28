@@ -1,3 +1,4 @@
+/*global alert, Documentor, ProjectCtrl */
 enyo.kind({
 	name: "Phobos",
 	classes: "enyo-unselectable",
@@ -153,7 +154,7 @@ enyo.kind({
 		};
 
 		var showSettings = showModes[mode]||showModes['text'];
-		for (stuff in showSettings) {
+		for (var stuff in showSettings) {
 			this.$[stuff].setShowing( showSettings[stuff] ) ;
 		}
 
@@ -313,6 +314,19 @@ enyo.kind({
 		return -1;
 	},
 	designerAction: function() {
+		var isDesignProperty={
+			layoutKind: true,
+			attributes: true,
+			classes: true,
+			content: true,
+			controlClasses: true,
+			defaultKind: true,
+			fit: true,
+			src: true,
+			style: true,
+			tag: true,
+			name: true,
+		}
 		var c = this.$.ace.getValue();
 		this.reparseAction();
 		if (this.analysis) {
@@ -324,15 +338,27 @@ enyo.kind({
 			var data = {kinds: kinds, projectData: this.projectData, fileIndexer: this.analysis};
 			for (var i=0; i < this.analysis.objects.length; i++) {
 				var o = this.analysis.objects[i];
-				var comps = o.components;
-				var name = o.name;
-				var kind = o.superkind;
 				if (o.componentsBlockStart && o.componentsBlockEnd) { // only include kinds with components block
 					var start = o.componentsBlockStart;
 					var end = o.componentsBlockEnd;
+					var name = o.name;
+					var kind = o.superkind;
 					var js = c.substring(start, end);
-					var o = eval("(" + js + ")"); // Why eval? Because JSON.parse doesn't support unquoted keys...
-					kinds.push({name: name, kind: kind, components: o});
+					var comps = eval("(" + js + ")"); // Why eval? Because JSON.parse doesn't support unquoted keys...
+					var comp = {
+						name: name,
+						kind: kind,
+						components: comps
+					}
+					for (var j=0; j < o.properties.length; j++) {
+						var prop = o.properties[j];
+						var pName = prop.name;
+						if (isDesignProperty[pName]) {
+							var value = Documentor.stripQuotes(prop.value[0].name);
+							comp[pName] = value;
+						}
+					}
+					kinds.push(comp);
 				}
 			}
 			if (kinds.length > 0) {
@@ -632,7 +658,7 @@ enyo.kind({
 
 	tabSize: function() {
 		var ts = this.$.ace.editorSettingsPopup.Tsize;
-		console.log("ts",ts);
+		this.log("ts",ts);
 		this.$.ace.setTabSize(ts);
 	}
 });
