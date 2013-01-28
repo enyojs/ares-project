@@ -237,16 +237,7 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 	}).bind(this));
 };
 
-/**
- * Write a file in the filesystem
- * 
- * Invokes the CommonJs callback with the created {ares.Filesystem.Node}.
- * 
- * @param {Object} file contains mandatory #name property, plus either
- * #buffer (a {Buffer}) or #path (a temporary absolute location).
- * @param {Function} next a Common-JS callback
- */
-FsLocal.prototype.putFile = function(file, next) {
+FsLocal.prototype.putFile = function(req, file, next) {
 	var absPath = path.join(this.root, file.name),
 	    dir = path.dirname(absPath),
 	    encodeFileId = this.encodeFileId,

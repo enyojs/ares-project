@@ -4,6 +4,7 @@
 
 var util  = require("util"),
     path = require("path"),
+    fs = require("fs"),
     dropbox = require("dropbox"),
     request = require("request"),
     FsBase = require(__dirname + "/lib/fsBase"),
@@ -29,7 +30,7 @@ FsDropbox.prototype.errorResponse = function(err) {
 		};
 		this.log(err.stack);
 	} else {
-		response = FsBase.errorResponse.bind(this, err);
+		response = FsBase.prototype.errorResponse.bind(this)(err);
 	}
 	this.log("FsDropbox.errorResponse(): response:", response);
 	return response;
@@ -69,7 +70,6 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 	}
 
 	function _onError(err) {
-		debugger;
 		console.error("FsDropbox.onError(): err:", err);
 		console.log("FsDropbox.onError(): log:", util.inspect(err));
 	}
@@ -145,19 +145,35 @@ FsDropbox.prototype.propfind = function(req, res, next) {
 };
 
 FsDropbox.prototype.move = function(req, res, next) {
-	next (new HttpError("ENOSYS", 500));
+	next (new HttpError("mode: ENOSYS", 500));
 };
 
 FsDropbox.prototype.copy = function(req, res, next) {
-	next (new HttpError("ENOSYS", 500));
+	next (new HttpError("copy: ENOSYS", 500));
 };
 
 FsDropbox.prototype.get = function(req, res, next) {
-	next (new HttpError("ENOSYS", 500));
+	next (new HttpError("get: ENOSYS", 500));
 };
 
-FsDropbox.prototype.putFile = function(req, res, next) {
-	next (new HttpError("ENOSYS", 500));
+FsDropbox.prototype.putFile = function(req, file, next) {
+	var buf = file.buffer;
+	if (file.path) {
+		this.log("FsDropbox.putFile(): uploading file:", file.path);
+		// Dropbox has no Node.js streaming interface, so we
+		// need to load the entire file in memory.
+		fs.readFile(file.path, _writeFile.bind(this));
+	} else {
+		_writeFile.bind(this)(file.buffer);
+	}
+
+	function _writeFile(err, buffer) {
+		if (err) {
+			return next(err);
+		}
+		this.log("FsDropbox.putFile(): bytes:", buffer.length, "->", file.name);
+		req.dropbox.writeFile(file.name, buffer, next);
+	}
 };
 
 FsDropbox.prototype.mkcol = function(req, res, next) {
@@ -172,7 +188,7 @@ FsDropbox.prototype.mkcol = function(req, res, next) {
 };
 
 FsDropbox.prototype['delete'] = function(req, res, next) {
-	next (new HttpError("ENOSYS", 500));
+	next (new HttpError("delete: ENOSYS", 500));
 };
 
 // implementations

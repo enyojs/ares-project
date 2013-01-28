@@ -348,7 +348,7 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 	
 	this.log("FsBase.putWebForm(): storing file as", relPath);
 	fileId = this.encodeFileId(relPath);
-	this.putFile({
+	this.putFile(req, {
 		name: relPath,
 		buffer: buf
 	}, (function(err){
@@ -374,9 +374,9 @@ FsBase.prototype._putWebForm = function(req, res, next) {
  */
 FsBase.prototype._putMultipart = function(req, res, next) {
 	var pathParam = req.param('path');
-	this.log("FsBase.putMultipart(): req.files:", req.files);
-	this.log("FsBase.putMultipart(): req.body:", req.body);
-	this.log("FsBase.putMultipart(): pathParam:", pathParam);
+	//this.log("FsBase.putMultipart(): req.files:", req.files);
+	//this.log("FsBase.putMultipart(): req.body:", req.body);
+	//this.log("FsBase.putMultipart(): pathParam:", pathParam);
 	if (!req.files.file) {
 		next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
 		return;
@@ -406,24 +406,42 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 		}
 	}
 
-	this.log("FsBase.putMultipart(): files", files);
+	//this.log("FsBase.putMultipart(): files", files);
 
 	var nodes = [];
 	async.forEach(files, (function(file, cb) {
 		if (pathParam) {
 			file.name = pathParam + '/' + file.name;
 		}
-		this.putFile(file, (function(err, node) {
-			this.log("FsBase.putMultipart(): node:", node);
-			nodes.push(node);
-			this.log("FsBase.putMultipart(): nodes:", nodes);
+		this.putFile(req, file, (function(err, node) {
+			//this.log("FsBase.putMultipart(): err:", err, "node:", node);
+			if (err) {
+				cb(err);
+			} else if (node) {
+				nodes.push(node);
+			}
 			cb();
 		}).bind(this));
-	}).bind(this), function(err){
+	}).bind(this), (function(err){
+		this.log("FsBase.putMultipart(): nodes:", nodes);
 		next(err, {
 			code: 201, // Created
 			body: nodes
 		});
-	});
+	}).bind(this));
+};
+
+/**
+ * Write a file in the filesystem
+ * 
+ * Invokes the CommonJs callback with the created {ares.Filesystem.Node}.
+ * 
+ * @param {Object} req the express request context
+ * @param {Object} file contains mandatory #name property, plus either
+ * #buffer (a {Buffer}) or #path (a temporary absolute location).
+ * @param {Function} next a Common-JS callback
+ */
+FsBase.prototype.putFile = function(req, file, next) {
+	next (new HttpError("ENOSYS", 500));
 };
 
