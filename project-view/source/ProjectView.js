@@ -31,7 +31,8 @@ enyo.kind({
 		onPhonegapBuild: "startPhonegapBuild",
 		onBuildStarted: "phonegapBuildStarted",
 		onPreview: "launchPreview",
-		onError: "showError"
+		onError: "showError",
+		onShowWaitPopup: "handleShowWaitPopup"
 	},
 	create: function() {
 		this.inherited(arguments);
@@ -61,6 +62,7 @@ enyo.kind({
 	},
 
 	addProjectInList: function(inSender, inEvent) {
+		this.hideWaitPopup();
 		try {
 			// Add an entry into the project list
 			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
@@ -96,6 +98,9 @@ enyo.kind({
 	},
 	projectRemoved: function(inSender, inEvent) {
 		this.$.harmonia.setProject(null);
+	},
+	handleShowWaitPopup: function(inSender, inEvent) {
+		this.showWaitPopup(inEvent.msg);
 	},
 	showWaitPopup: function(inMessage) {
 		this.$.waitPopupMessage.setContent(inMessage);

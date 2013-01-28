@@ -8,7 +8,8 @@ enyo.kind({
 
 	classes: "enyo-unselectable",
 	events: {
-		onAddProjectInList: ""
+		onAddProjectInList: "",
+		onShowWaitPopup: ""
 	},
 	handlers: {
 		onDirectorySelected: "showProjectPropPopup",
@@ -120,10 +121,16 @@ enyo.kind({
 
 		return true ; // stop bubble
 	},
-
+	$LS: function(msg, params) {
+		var tmp = new enyo.g11n.Template($L(msg));
+		return tmp.evaluate(params);
+	},
 	// step 4: populate the project with the selected template
 	instanciateTemplate: function (inEvent) {
+
 		var template = inEvent.template;
+		this.doShowWaitPopup({msg: this.$LS("Creating project from #{template}", {template: template})});
+
 		var substitutions = [{
 			fileRegexp: "appinfo.json",
 			json: {
