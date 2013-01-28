@@ -229,7 +229,6 @@ enyo.kind({
 		return true;
 	},
 	setTemplateList: function(templates) {
-		this.log(templates);
 		this.$.templateButton.applyStyle("width", "20em");
 		this.templates = [this.TEMPLATE_NONE];
 		enyo.forEach(templates, function(item) {
@@ -240,7 +239,6 @@ enyo.kind({
 		this.selectedTemplate = undefined;
 	},
 	templateSetupItem: function(inSender, inEvent) {
-		this.log(inEvent.index);
 		this.$.template.setContent(this.templates[inEvent.index]);
 		return true;
 	},

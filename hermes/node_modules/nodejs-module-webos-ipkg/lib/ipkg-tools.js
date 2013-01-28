@@ -27,24 +27,22 @@ var shell = require("shelljs"),
 
     openwebos.registerRemoteTemplates = function(templatesUrl, callback) {
 
-        // console.log("Getting remote templates: " + templatesUrl);
-
+        // Issue an http request to get the template definition
         request(templatesUrl, function (error, response, body) {
-          if (!error && response.statusCode == 200) {
-            // console.log("BODY >>" + body + "<<");
-            try {
-                var newTemplates = JSON.parse(body);
+            if (!error && response.statusCode == 200) {                       // TODO: finalyze error handling
+                try {
+                    var newTemplates = JSON.parse(body);
 
-                newTemplates.forEach(function(entry) {
-                    // console.log("Adding remote template: " + entry.id);
-                    templates[entry.id] = entry;
-                });
-                callback(null, {done: true});
-            } catch(err) {
-                console.log("Unable to retrieve remote template definition. error=" + err);
-                callback("Unable to retrieve remote template definition. error=" + err);
+                    newTemplates.forEach(function(entry) {
+                        // console.log("Adding remote template: " + entry.id);
+                        templates[entry.id] = entry;
+                    });
+                    callback(null, {done: true});
+                } catch(err) {
+                    console.log("Unable to retrieve remote template definition. error=" + err);
+                    callback("Unable to retrieve remote template definition. error=" + err);
+                }
             }
-          }
         });
     };
 
@@ -72,11 +70,25 @@ var shell = require("shelljs"),
             callback("Extractor ERROR: err=" + err, null);
         });
 
+        // Building the zipStream either from a file or an http request
+        var zipStream;
+        if (source.substr(0, 4) === 'http') {
+            zipStream = request(source);
+        } else {
+            zipStream = fs.createReadStream(source);
+        }
+
         // Pipe the zipped content to the extractor to actually perform the unzip
-        fs.createReadStream(source).pipe(extractor);
- 
+        zipStream.pipe(extractor);
+        
         // Wait for the end of the extraction
-        extractor.on('close', function(err) {
+        extractor.on('close', performSubstitution);
+
+        function performSubstitution(err) {
+            if (err) {
+                callback("An error occured: " + err, null);
+                return;
+            }
 
             // Apply the substitutions
             if (substitutions) {
@@ -102,7 +114,7 @@ var shell = require("shelljs"),
             // Return the list of extracted files
             var filelist = shell.find(destination);
             callback(null, filelist);
-        });
+        }
     };
 
     applyJsonSubstitutions = function(filename, values) {
