@@ -157,6 +157,10 @@ FsDropbox.prototype.get = function(req, res, next) {
 };
 
 FsDropbox.prototype.putFile = function(req, file, next) {
+	var options = {
+		noOverwrite: false,
+		lastVersionTag: undefined
+	};
 	var buf = file.buffer;
 	if (file.path) {
 		this.log("FsDropbox.putFile(): uploading file:", file.path);
@@ -172,7 +176,12 @@ FsDropbox.prototype.putFile = function(req, file, next) {
 			return next(err);
 		}
 		this.log("FsDropbox.putFile(): bytes:", buffer.length, "->", file.name);
-		req.dropbox.writeFile(file.name, buffer, next);
+		req.dropbox.writeFile(file.name, buffer, options, (function(err, stat) {
+			this.log("putFile.writeFile(): dropbox err:", err, "stat:", stat);
+			var node = getNode.bind(this)(stat, 0);
+			this.log("putFile.writeFile(): node:", node);
+			next(err, node);
+		}).bind(this));
 	}
 };
 
