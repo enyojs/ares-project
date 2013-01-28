@@ -210,7 +210,17 @@ FsDropbox.prototype.mkcol = function(req, res, next) {
 };
 
 FsDropbox.prototype['delete'] = function(req, res, next) {
-	next (new HttpError("delete: ENOSYS", 500));
+	var relPath = req.param('path');
+	this.log("FsDropbox.delete(): path:", relPath);
+	req.dropbox.remove(relPath, (function(err, stat) {
+		this.log("FsDropbox.delete(): dropbox err:", err, "stat:", stat);
+		var node = getNode.bind(this)(stat, 0);
+		this.log("FsDropbox.delete(): node:", node);
+		next(err, {
+			code: 200,
+			body: node
+		});
+	}).bind(this));
 };
 
 // implementations
