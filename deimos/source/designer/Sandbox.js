@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "Sandbox",
-	classes: "deimos_panel_center",
+	classes: "deimos_panel_center sandbox",
 	events: {
 		onDesignRendered: ""
 	},
