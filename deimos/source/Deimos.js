@@ -60,6 +60,7 @@ enyo.kind({
 	load: function(data) {
 		var what = data.kinds;
 		var maxLen = 0;
+		this.index=null;
 		this.kinds = what;
 		this.$.kindPicker.destroyClientControls();
 		for (var i = 0; i < what.length; i++) {
