@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCase seleniumIDEVersion="1.10.0" baseURL="http://127.0.0.1:9009/">
+<selenese>
+	<command>open</command>
+	<target><![CDATA[/ide/ares/test.html?debug=true&norunner=true]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>verifyTextPresent</command>
+	<target><![CDATA[Ares]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTitle</command>
+	<target><![CDATA[Ares]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectList_iconButton3]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>verifyTextPresent</command>
+	<target><![CDATA[Ares Test - Home Directory]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[Ares Test - Home Directory]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_providerList_item]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[server]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[FileOps]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_$FileOps_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_confirm]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>waitForText</command>
+	<target><![CDATA[id=ares_projectView_projectList_projectList_ownerProxy_item]]></target>
+	<value><![CDATA[FileOps]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectList_projectList_ownerProxy_item]]></target>
+	<value><![CDATA[FileOps]]></value>
+</selenese>
+<selenese>
+	<command>waitForText</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_caption]]></target>
+	<value><![CDATA[FileOps]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_caption]]></target>
+	<value><![CDATA[FileOps]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$App1.js_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_deleteFileButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>verifyTextPresent</command>
+	<target><![CDATA[exact:Delete file: App1.js?]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_deletePopup_button2]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$App2.js_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_deleteFileButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>verifyTextPresent</command>
+	<target><![CDATA[exact:Delete file: App2.js?]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_deletePopup_button2]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_newFileButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>type</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[package.js]]></value>
+</selenese>
+<selenese>
+	<command>keyPress</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[s]]></value>
+</selenese>
+<selenese>
+	<command>keyUp</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[s]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_newFileButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>type</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[index.html]]></value>
+</selenese>
+<selenese>
+	<command>keyPress</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[l]]></value>
+</selenese>
+<selenese>
+	<command>keyUp</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[l]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_newFileButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>type</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[App.js]]></value>
+</selenese>
+<selenese>
+	<command>keyPress</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[s]]></value>
+</selenese>
+<selenese>
+	<command>keyUp</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[s]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>doubleClickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$App.js_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>pause</command>
+	<target><![CDATA[1]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>waitForText</command>
+	<target><![CDATA[css=div.ace_content]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>verifyElementPresent</command>
+	<target><![CDATA[css=div.ace_content]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[// Copyright 2013, $ORGANIZATION// All rights reserved.]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_bottomBar_iconButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>doubleClickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$index.html_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>waitForText</command>
+	<target><![CDATA[css=div.ace_content]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>verifyElementPresent</command>
+	<target><![CDATA[css=div.ace_content]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[<!doctype html>]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[ares_bottomBar_iconButton2]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>doubleClickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$package.js_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>waitForText</command>
+	<target><![CDATA[css=div.ace_content]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>verifyElementPresent</command>
+	<target><![CDATA[css=div.ace_content]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[enyo.depends]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>contextMenuAt</command>
+	<target><![CDATA[]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+</TestCase>
