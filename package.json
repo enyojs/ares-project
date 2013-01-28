@@ -1,0 +1,15 @@
+{
+	"name": "ares",
+	"version": "0.0.1",
+	"description": "A browser-based code editor and UI designer for Enyo 2 projects",
+	"scripts": {"start": "node ide.js"},
+	"homepage": "https://github.com/enyojs/ares-project",
+	"bugs": "https://enyojs.atlassian.net/browse/ENYO",
+	"bin": "./ide.js",
+	"repository" : { 
+		"type" : "git"
+		, "url" : "http://github.com/enyojs/ares-project.git"
+	}
+
+}
+
