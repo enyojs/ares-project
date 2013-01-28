@@ -31,6 +31,12 @@ function BdOpenwebOS(config, next) {
 
 	console.log("config=",  util.inspect(config));
 
+	tools.registerTemplates([{
+		id: "bootplate-2.1.1",
+		url: "templates/projects/bootplate-2.1.1.zip",
+		description: "Enyo bootplate 2.1.1"
+	}]);
+
 	var app, server;
 	if (express.version.match(/^2\./)) {
 		// express-2.x
