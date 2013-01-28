@@ -1,5 +1,5 @@
 /**
- * Hermes PhoneGap build service
+ * Hermes Open webos build service
  */
 
 var fs = require("fs"),
@@ -15,7 +15,7 @@ var fs = require("fs"),
     child_process = require("child_process"),
     optimist = require('optimist'),
     tools = require('nodejs-module-webos-ipkg'),
-    CombinedStream = require('form-data/node_modules/combined-stream');
+    CombinedStream = require('combined-stream');
 
 var basename = path.basename(__filename);
 var FORM_DATA_LINE_BREAK = '\r\n';
@@ -45,8 +45,9 @@ function BdOpenwebOS(config, next) {
 	/*
 	 * Middleware -- applied to every verbs
 	 */
-
-	app.use(express.logger('dev'));
+	if (!this.quiet) {
+		app.use(express.logger('dev'));
+	}
 
 	/**
 	 * Make sane Express matching paths
