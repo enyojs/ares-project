@@ -1,5 +1,7 @@
 var shell = require("shelljs"),
-    request = require('request');
+    request = require('request'),
+    fs = require("fs"),
+    unzip = require('unzip');
 
 (function () {
 
@@ -63,33 +65,44 @@ var shell = require("shelljs"),
             return;
         }
 
-        // Unzip the template       // TODO: move to javascript
-        var result = shell.exec("unzip " + source + " -d " + destination);
-        // console.log("shell.exec: ", result);
+        // Create an extractor to unzip the template
+        var extractor = unzip.Extract({ path: destination });
+        extractor.on('error', function(err) {
+            console.log("Extractor ERROR: err= ", err);
+            callback("Extractor ERROR: err=" + err, null);
+        });
 
-        // Apply the substitutions
-        if (substitutions) {
-            shell.ls('-R', destination).forEach(function(file) {
+        // Pipe the zipped content to the extractor to actually perform the unzip
+        fs.createReadStream(source).pipe(extractor);
+ 
+        // Wait for the end of the extraction
+        extractor.on('close', function(err) {
 
-                substitutions.forEach(function(substit) {
-                    var regexp = new RegExp(substit.fileRegexp);
-                        if (regexp.test(file)) {
-                        var filename = destination + "/" + file;
-                        if (substit.json) {
-                            // console.log("Applying JSON substitutions to: " + file);
-                            applyJsonSubstitutions(filename, substit.json);
+            // Apply the substitutions
+            if (substitutions) {
+                shell.ls('-R', destination).forEach(function(file) {
+
+                    substitutions.forEach(function(substit) {
+                        var regexp = new RegExp(substit.fileRegexp);
+                            if (regexp.test(file)) {
+                            var filename = destination + "/" + file;
+                            if (substit.json) {
+                                // console.log("Applying JSON substitutions to: " + file);
+                                applyJsonSubstitutions(filename, substit.json);
+                            }
+                            if (substit.sed) {
+                                // console.log("Applying SED substitutions to: " + file);
+                                applySedSubstitutions(filename, substit.sed);
+                            }
                         }
-                        if (substit.sed) {
-                            // console.log("Applying SED substitutions to: " + file);
-                            applySedSubstitutions(filename, substit.sed);
-                        }
-                    }
+                    });
                 });
-            });
-        }
+            }
 
-        var filelist = shell.find(destination);
-        callback(null, filelist);
+            // Return the list of extracted files
+            var filelist = shell.find(destination);
+            callback(null, filelist);
+        });
     };
 
     applyJsonSubstitutions = function(filename, values) {
@@ -116,4 +129,3 @@ var shell = require("shelljs"),
         });
     };
 }());
-
