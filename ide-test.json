@@ -8,7 +8,7 @@
 			"type": "filesystem",
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"hermes/fsLocal.js", "-P", "/files", "-p", "10002", "@CWD@/test/root"
+				"hermes/fsLocal.js", "--pathname", "/files", "--port", "10002", "--root", "@CWD@/test/root"
 			],
 			"useJsonp":false,
 			"debug": false,

@@ -113,8 +113,7 @@ Here are a few references to create the necessary signing keys & distribution ce
 In order to use Dropbox as storage service for Ares, follow detailed setup instructions in `hermes/README.md`
 
 
-### Test Suite
+## Testing
 
-For all contributions on Ares project and before commit, please execute the available Ares Test Suite and make sure this Ares TestRunner Suite is not broken.
+For all contributions on Ares project and before commit, please execute the available Ares Test Suite. See [this page](test/README.md) for more details.
 
-See README.md under ares-project/test/testrunner.

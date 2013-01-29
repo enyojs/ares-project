@@ -1,24 +1,41 @@
 enyo.kind({
 	name: "FileSystemService",
 	kind: "Component",
+	debug: false,
 	events: {
 		onLogin: "",
 		onFailure: ""
 	},
-	create: function() {
-		this.inherited(arguments);
-		this.impl = null;
-	},
-	connect: function(inFsService) {
-		this.impl = inFsService;
-	},
-	isOk: function() {
-		return this.impl && this.impl.isOk();
+	published: {
+		rootNode: null
 	},
 	/**
 	 * @private
 	 */
 	impl: null,
+	create: function() {
+		this.inherited(arguments);
+		this.impl = null;
+	},
+	rootNodeChanged: function(old) {
+		if (this.debug) this.log("rootNode:", this.rootNode, "<-", old);
+	},
+	connect: function(inFsService, next) {
+		this.impl = inFsService;
+		var req = this.impl.propfind(undefined, 0);
+		req.response(this, function(inRequest, inValue) {
+			if (this.debug) this.log("FileSystemService#connect(): connected");
+			this.setRootNode(inValue);
+			if (next) next();
+		});
+		req.error(this, function(inRequest, inError) {
+			if (this.debug) this.error("FileSystemService#connect(): connection failed");
+			if (next) next(new Error(inError));
+		});
+	},
+	isOk: function() {
+		return this.impl && this.rootNode && this.impl.isOk();
+	},
 	/**
 	 * Configure the instance
 	 * @param {Object} conf 
@@ -66,6 +83,12 @@ enyo.kind({
 	 */
 	createFile: function(inFolderId, inName, inContent) {
 		return this.impl.createFile(inFolderId, inName, inContent);
+	},
+	/**
+	 * @return {enyo.Async} 
+	 */
+	createFiles: function(inFolderId, inData) {
+		return this.impl.createFiles(inFolderId, inData);
 	},
 	/**
 	 * @return {enyo.Async} 

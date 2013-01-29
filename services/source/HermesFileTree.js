@@ -51,7 +51,7 @@ enyo.kind({
 		]},
 
 		{kind: "Scroller", fit: true, components: [
-			{name: "serverNode", kind: "Node", classes: "enyo-unselectable", showing: false, file: {id: "", name: "server", isServer: true, service: null}, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onNodeTap: "nodeTap"}
+			{name: "serverNode", kind: "Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onNodeTap: "nodeTap"}
 		]},
 
 		// track selection of nodes. here, selection Key is file or folderId. Selection value is the node object
@@ -75,10 +75,19 @@ enyo.kind({
 		this.inherited(arguments);
 		this.enableDisableButtons();
 	},
-	connectService: function(inService) {
+	connectService: function(inService, next) {
 		this.projectUrlReady = false; // Reset the project information
 		this.clear() ;
-		this.$.service.connect(inService);
+		this.$.service.connect(inService, enyo.bind(this, (function(err) {
+			if (err) {
+				if (next) next(err);
+			} else {
+				this.$.serverNode.file = this.$.service.getRootNode();
+				this.$.serverNode.file.isServer = true;
+				this.$.serverNode.setContent(this.$.serverNode.file.name);
+				if (next) next();
+			}
+		})));
 		return this ;
 	},
 	/**
@@ -96,37 +105,37 @@ enyo.kind({
 
 		// connects to a service that provides access to a
 		// (possibly remote & always asynchronous) file system
-		this.connectService(service);
-
-		// Get extra info such as project URL
-		var req = this.$.service.propfind(folderId, 0);
-		req.response(this, function(inSender, inValue) {
-			var projectUrl = service.getConfig().origin + service.getConfig().pathname + "/file" + inValue.path;
-			this.projectData.setProjectUrl(projectUrl);
-			this.projectUrlReady = true;
-			if (this.$.service.isOk()) {
-				serverNode.setContent(nodeName);
-				serverNode.file = {id: folderId, name: nodeName, isDir: true, isServer:true, path: nodeName, service: null};
-				serverNode.setExpanded(true);
-				serverNode.effectExpanded();
-				this.refreshFileTree();
-				serverNode.render() ;
+		this.connectService(service, enyo.bind(this, (function(inError) {
+			if (inError) {
+				this.showErrorPopup("Internal Error (" + inError + ") from filesystem service");
 			} else {
-				req.fail("Service NOK");
-				this.projectData.setProjectUrl("");
+				// Get extra info such as project URL
+				var req = this.$.service.propfind(folderId, 0);
+				req.response(this, function(inSender, inValue) {
+					var projectUrl = service.getConfig().origin + service.getConfig().pathname + "/file" + inValue.path;
+					this.projectData.setProjectUrl(projectUrl);
+					this.projectUrlReady = true;
+					
+					serverNode.file = inValue;
+					serverNode.file.isServer = true;
+					
+					serverNode.setContent(nodeName);
+					this.refreshFileTree();
+					serverNode.render() ;
+				});
+				req.error(this, function(inSender, inError) {
+					this.projectData.setProjectUrl("");
+					this.showErrorPopup("Internal Error (" + inError + ") from filesystem service");
+				});
+				if (this.selectedNode) {
+					this.deselect(null, {data: this.selectedNode});
+				}
+				this.$.selection.clear();
+				this.selectedNode = null;
+				this.selectedFile = null;
+				this.enableDisableButtons();
 			}
-		});
-		req.error(this, function(inSender, inError) {
-			this.projectData.setProjectUrl("");
-			this.showErrorPopup("Internal Error (" + inError + ") from filesystem service");
-		});
-		if (this.selectedNode) {
-			this.deselect(null, {data: this.selectedNode});
-		}
-		this.$.selection.clear();
-		this.selectedNode = null;
-		this.selectedFile = null;
-		this.enableDisableButtons();
+		})));
 		return this;
 	},
 	hideFileOpButtons: function() {
@@ -224,7 +233,7 @@ enyo.kind({
 	updateNodes: function(inNode) {
 		this.startLoading(inNode);
 		if (this.debug) this.log(inNode) ;
-		return this.$.service.listFiles(inNode.file.id)
+		return this.$.service.listFiles(inNode && inNode.file && inNode.file.id)
 			.response(this, function(inSender, inFiles) {
 				var sortedFiles = inFiles.sort(this.fileNameSort) ;
 				if (inFiles && !this.$.serverNode.showing) {
