@@ -181,23 +181,27 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 };
 
 FsLocal.prototype._getFile = function(req, res, next) {
-	var localPath = path.join(this.root, req.param('path'));
+	var relPath = req.param('path');
+	var localPath = path.join(this.root, relPath);
 	this.log("sending localPath=" + localPath);
-	fs.stat(localPath, function(err, stat) {
+	fs.stat(localPath, (function(err, stat) {
 		if (err) {
 			next(err);
 			return;
 		}
 		if (stat.isFile()) {
-			res.status(200);
-			res.sendfile(localPath);
-			// return nothing: streaming response
-			// is already in progress.
-			next();
+			this._propfind(err, relPath, 0 /*depth*/, function(err, node) {
+				res.setHeader('x-ares-node', JSON.stringify(node));
+				res.status(200);
+				res.sendfile(localPath);
+				// return nothing: streaming response
+				// is already in progress.
+				next();
+			});
 		} else {
 			next(new Error("not a file: '" + localPath + "'"));
 		}
-	});
+	}).bind(this));
 };
 
 // XXX ENYO-1086: refactor tree walk-down

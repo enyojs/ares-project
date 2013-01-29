@@ -230,12 +230,24 @@ FsBase.prototype.errorResponse = function(err) {
  * Unified response handler
  * @param {Object} res the express response {Object}
  * @param {Object} err the error if any.  Can be any kind of {Error}, such as an { HttpError}
- * @param {Object} response is an {Object} that has 2 properties: #code (used as the HTTP statusCode) and #body (inlined in the response body, of not falsy)
+ * @param {Object} response is a response {Object}
+ * 
+ * A response {Object} has:
+ * 
+ * - Two mandatory properties: #code (used as the HTTP statusCode) and
+ * #body (inlined in the response body, of not falsy).
+ * - One optional #headers property is an {Object} of HTTP headers to
+ * be carried into the response message
  */
 FsBase.prototype.respond = function(res, err, response) {
 	this.log("FsBase.respond(): response:", response);
 	if (err) {
 		response = this.errorResponse(err);
+	}
+	if (response && response.headers) {
+		for (var h in Object.keys(response.headers)) {
+			res.setHeader(h, response.headers);
+		}
 	}
 	if (response && response.body) {
 		res.status(response.code).send(response.body);

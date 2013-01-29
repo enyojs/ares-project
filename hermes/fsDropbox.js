@@ -183,7 +183,7 @@ FsDropbox.prototype.get = function(req, res, next) {
 	var relPath = req.param('path');
 	this.log("FsDropbox.get(): path:", relPath);
 	var options = {
-		versionTag: req.param('hash'),
+		versionTag: req.param('versionTag'),
 		arrayBuffer: false, // request 'arraybuffer'
 		blob: false,	    // request 'blob'
 		binary: true,	    // request 'b'
@@ -196,7 +196,10 @@ FsDropbox.prototype.get = function(req, res, next) {
 		this.log("FsDropbox.get(): node:", node);
 		next(err, {
 			code: 200,
-			body: data
+			body: data,
+			headers: {
+				'x-ares-node': JSON.stringify(node)
+			}
 		});
 	}).bind(this));
 };
@@ -302,7 +305,7 @@ function getNode(stat, depth) {
 			arNode.name = 'dropbox';
 		}
 		if (stat.versionTag) {
-			arNode.hash = stat.versionTag;
+			arNode.versionTag = stat.versionTag;
 		}
 		if (arNode.isDir) {
 			if (depth) {

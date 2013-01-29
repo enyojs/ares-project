@@ -25,7 +25,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		├── 0
 		└── 1
 
-… corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.
+… corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.  The node descriptor Object format is defined by [this JSON schema](../assets/schema/com.enyojs.ares.fs.node.schema.json).
 
 		$ curl "http://127.0.0.1:9009/id/%2F?_method=PROPFIND&depth=10"
 		{
@@ -37,22 +37,24 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		            "isDir": false, 
 		            "path": "/0", 
 		            "name": "0", 
-		            "id": "%2F0"
+		            "id": "12efab780"
 		        }, 
 		        {
 		            "isDir": false, 
 		            "path": "/1", 
 		            "name": "1", 
-		            "id": "%2F1"
+		            "id": "0ae12ef56"
 		        }
 		    ], 
-		    "id": "%2F"
+		    "id": "934789346956340",
+		    "versionTag": "af34ef45",
 		}
 
 * `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded).  It returns a JSON-encoded single-level (depth=0) node descriptor of the new folder.
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
 
+* `GET` can be used only on files (not on folders).  The optional query parameter `versionTag` comes from a previous call to `GET` on the same file.  The HTTP header `x-ares-node	`(lowecase) contains a JSON-encoded version of the file's node descriptor (the one returned by `PROPFIND` for this file).  The n
 * `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.
   * `application/x-www-form-urlencoded` contains a single base64-encoded file in the form field named `content`.  The file name and location are provided by `{id}` and optionally `name` query parameter.
   * `multipart/form-data` follows the standard format.  For each file `filename` is interpreted relativelly to the folder `{id}` provided in the URL.  **Note:** To accomodate an issue with old Firefox releases (eg. Firefox 10), fields labelled `filename` overwrite the `filename` in their corresponding `file` fields.  See `fsBase#_putMultipart()` for more details.
