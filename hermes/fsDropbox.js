@@ -139,11 +139,44 @@ FsDropbox.prototype.propfind = function(req, res, next) {
 };
 
 FsDropbox.prototype.move = function(req, res, next) {
-	next (new HttpError("mode: ENOSYS", 500));
+	this.log("FsDropbox.move()");
+	this.copyOrMove(req, res, req.dropbox.move.bind(req.dropbox), next);
 };
 
 FsDropbox.prototype.copy = function(req, res, next) {
-	next (new HttpError("copy: ENOSYS", 500));
+	this.log("FsDropbox.copy()");
+	this.copyOrMove(req, res, req.dropbox.copy.bind(req.dropbox), next);
+};
+
+FsDropbox.prototype.copyOrMove = function(req, res, op, next) {
+	var srcRelPath = req.param('path'),
+	    dstName = req.param('name'),
+	    dstFolderId = req.param('folderId'),
+	    overwriteParam = req.param('overwrite');
+	var dstRelPath;
+	this.log("FsDropbox.copyOrMove(): path:", srcRelPath, "name:", dstName, "folderId:", dstFolderId);
+	if (dstName) {
+		// rename/copy file within the same collection (folder)
+		dstRelPath = path.join(path.dirname(srcRelPath),
+				       path.basename(dstName));
+	} else if (dstFolderId) {
+		// move/copy at a new location
+		dstRelPath = path.join(this.decodeFileId(dstFolderId),
+				       path.basename(srcRelPath));
+	} else {
+		next(new HttpError("missing query parameter: 'name' or 'folderId'", 400 /*Bad-Request*/));
+		return;
+	}
+	this.log("FsDropbox.copyOrMove():", srcRelPath, "-> ", dstRelPath);
+	op(srcRelPath, dstRelPath, (function(err, stat) {
+		this.log("FsDropbox.copyOrMove(): dropbox err:", err, "stat:", stat);
+		var node = getNode.bind(this)(stat, 0);
+		this.log("FsDropbox.copyOrMove(): node:", node);
+		next(err, {
+			code: 200,
+			body: node
+		});
+	}).bind(this));
 };
 
 FsDropbox.prototype.get = function(req, res, next) {
