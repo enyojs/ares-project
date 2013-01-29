@@ -343,9 +343,10 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		return;
 	}
 	if (nameParam === '.'|| !nameParam) {
-		nameParam = undefined;
+		relPath = pathParam;
+	} else {
+		relPath = [pathParam, nameParam].join('/');
 	}
-	relPath = [pathParam, nameParam].join('/');
 
 	// Now get the bits: base64-encoded binary in the
 	// 'content' field
@@ -422,9 +423,8 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 	var nodes = [];
 	async.forEach(files, (function(file, cb) {
 		if (file.name === '.' || !file.name) {
-			file.name = undefined;
-		}
-		if (pathParam) {
+			file.name = pathParam;
+		} else {
 			file.name = [pathParam, file.name].join('/');
 		}
 		this.putFile(req, file, (function(err, node) {
