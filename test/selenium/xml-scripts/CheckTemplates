@@ -266,8 +266,9 @@ enyo.kind({
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>assertTextPresent</command>
-	<target><![CDATA[<!doctype html>
+	<command>assertText</command>
+	<target><![CDATA[css=div.ace_content]]></target>
+	<value><![CDATA[<!doctype html>
 <html>
     <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -284,9 +285,7 @@ enyo.kind({
         <script type="text/javascript">
             new App().renderInto(document.body);
         </script>
-    </body>
-</html>]]></target>
-	<value><![CDATA[]]></value>
+    </body>]]></value>
 </selenese>
 <selenese>
 	<command>clickAt</command>
