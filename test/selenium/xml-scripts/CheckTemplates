@@ -211,18 +211,13 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>doubleClickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$App.js_caption]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>pause</command>
-	<target><![CDATA[1]]></target>
-	<value><![CDATA[]]></value>
-</selenese>
-<selenese>
-	<command>waitForText</command>
-	<target><![CDATA[css=div.ace_content]]></target>
+	<command>doubleClick</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$App.js_caption]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -232,7 +227,22 @@
 </selenese>
 <selenese>
 	<command>assertTextPresent</command>
-	<target><![CDATA[// Copyright 2013, $ORGANIZATION// All rights reserved.]]></target>
+	<target><![CDATA[// Copyright 2013, $ORGANIZATION
+// All rights reserved.
+enyo.kind({
+    name: "App",
+    kind: "Control",
+    published: {
+    },
+    events: {
+    },
+    components: [
+    ],
+    create: function() {
+        this.inherited(arguments);
+        // initialization code goes here
+    }
+});]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -241,13 +251,13 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>doubleClickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$index.html_caption]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>waitForText</command>
-	<target><![CDATA[css=div.ace_content]]></target>
+	<command>doubleClick</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$index.html_caption]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -257,7 +267,25 @@
 </selenese>
 <selenese>
 	<command>assertTextPresent</command>
-	<target><![CDATA[<!doctype html>]]></target>
+	<target><![CDATA[<!doctype html>
+<html>
+    <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <!-- -->
+        <title>Enyo App</title>
+        <!-- -->
+        <script src="../../enyo/enyo.js" type="text/javascript"></script>
+        <!-- -->
+        <script src="package.js" type="text/javascript"></script>
+        <!-- -->
+    </head>
+    <body>
+        <script type="text/javascript">
+            new App().renderInto(document.body);
+        </script>
+    </body>
+</html>]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -266,13 +294,13 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>doubleClickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$package.js_caption]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>waitForText</command>
-	<target><![CDATA[css=div.ace_content]]></target>
+	<command>doubleClick</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$package.js_caption]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -281,13 +309,17 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>assertTextPresent</command>
-	<target><![CDATA[enyo.depends]]></target>
+	<command>verifyTextPresent</command>
+	<target><![CDATA[enyo.depends(
+    "$lib/layout",
+    "$lib/onyx",
+    "source"
+);]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>contextMenuAt</command>
-	<target><![CDATA[]]></target>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_bottomBar_iconButton3]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 </TestCase>
