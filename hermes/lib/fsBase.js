@@ -330,11 +330,10 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		next(new HttpError("Missing 'path' request parameter", 400 /*Bad Request*/));
 		return;
 	}
-	if (nameParam) {
-		relPath = pathParam + '/' + nameParam;
-	} else {
-		relPath = pathParam;
+	if (nameParam === '.'|| !nameParam) {
+		nameParam = undefined;
 	}
+	relPath = [pathParam, nameParam].join('/');
 
 	// Now get the bits: base64-encoded binary in the
 	// 'content' field
@@ -410,8 +409,11 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 
 	var nodes = [];
 	async.forEach(files, (function(file, cb) {
+		if (file.name === '.' || !file.name) {
+			file.name = undefined;
+		}
 		if (pathParam) {
-			file.name = pathParam + '/' + file.name;
+			file.name = [pathParam, file.name].join('/');
 		}
 		this.putFile(req, file, (function(err, node) {
 			//this.log("FsBase.putMultipart(): err:", err, "node:", node);
