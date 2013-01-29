@@ -49,6 +49,19 @@
 				"type": "phonegap"
 			},
 			"respawn": false
+		},
+		{
+			"active": true,
+			"id":"openwebos",
+			"name":"Open webOS Build",
+			"type": "other",
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"hermes/bdOpenwebOS.js", "-P", "/openwebos", "-p", "0"
+			],
+			"useJsonp":false,
+			"verbose": true,
+			"respawn": false
 		}
 	]
 }
