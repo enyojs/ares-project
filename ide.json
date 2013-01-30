@@ -9,7 +9,7 @@
 			"type": "filesystem",
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"hermes/fsLocal.js", "-P", "/files", "-p", "0", "@HOME@"
+				"hermes/fsLocal.js", "--pathname", "/files", "--port", "0", "--root", "@HOME@"
 			],
 			"useJsonp":false,
 			"verbose": false,
@@ -48,6 +48,19 @@
 			"auth": {
 				"type": "phonegap"
 			},
+			"respawn": false
+		},
+		{
+			"active": true,
+			"id":"openwebos",
+			"name":"Open webOS Build",
+			"type": "other",
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"hermes/bdOpenwebOS.js", "-P", "/openwebos", "-p", "0"
+			],
+			"useJsonp":false,
+			"verbose": true,
 			"respawn": false
 		}
 	]

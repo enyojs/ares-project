@@ -12,7 +12,7 @@ Hermes offers several services not available in a Web Browser through one (or se
 #### Resources
 
 * `/id/{id}` resources are accessible via avery verbs described below.  These resources are used to browse the folder tree & get idividual items
-* `/file/*` resources are files that are known to exist.  These resources are used only by the Enyo Javascript parser.  They can only be accessed using `GET`.
+* `/file/*` resources are files that are known to exist.  These resources are used by the Enyo Javascript parser & by the Ares _Project Preview_ feature.  They can only be accessed using `GET`.
 
 #### Verbs
 
@@ -54,6 +54,8 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
 
 * `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.
+  * `application/x-www-form-urlencoded` contains a single base64-encoded file in the form field named `content`.  The file name and location are provided by `{id}` and optionally `name` query parameter.
+  * `multipart/form-data` follows the standard format.  For each file `filename` is interpreted relativelly to the folder `{id}` provided in the URL.  **Note:** To accomodate an issue with old Firefox releases (eg. Firefox 10), fields labelled `filename` overwrite the `filename` in their corresponding `file` fields.  See `fsBase#_putMultipart()` for more details.
 
 * `DELETE` delete a resource (a file), which might be a collection (a folder).  Status codes:
   * `200/OK` success, resource successfully removed.  The method returns the new status (`PROPFIND`) of the parent of the deleted resource.

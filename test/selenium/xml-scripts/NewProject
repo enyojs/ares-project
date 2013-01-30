@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCase seleniumIDEVersion="1.10.0" baseURL="http://127.0.0.1:9009/">
+<selenese>
+	<command>open</command>
+	<target><![CDATA[/ide/ares/test.html?debug=true&norunner=true]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>verifyTextPresent</command>
+	<target><![CDATA[Ares]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTitle</command>
+	<target><![CDATA[Ares]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectList_iconButton2]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>verifyTextPresent</command>
+	<target><![CDATA[Ares Test - Home Directory]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[Ares Test - Home Directory]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectWizardCreate_selectDirectoryPopup_providerList_name]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[server]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[NewProject]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectWizardCreate_selectDirectoryPopup_hermesFileTree_serverNode_$NewProject_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectWizardCreate_selectDirectoryPopup_confirm]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>waitForText</command>
+	<target><![CDATA[id=ares_projectView_projectWizardCreate_propertiesWidget_projectTitle]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>type</command>
+	<target><![CDATA[id=ares_projectView_projectWizardCreate_propertiesWidget_projectTitle]]></target>
+	<value><![CDATA[projectForSelenumTest]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectWizardCreate_propertiesWidget_ok]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectList_projectList_ownerProxy_item]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>waitForText</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_newFileButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_newFileButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>verifyValue</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>type</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[App1.js]]></value>
+</selenese>
+<selenese>
+	<command>keyPress</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[s]]></value>
+</selenese>
+<selenese>
+	<command>keyUp</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[s]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+</TestCase>

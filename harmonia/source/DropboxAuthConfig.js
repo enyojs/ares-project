@@ -310,10 +310,10 @@ enyo.kind({
 			this.log("errMsg:", errMsg);
 			next(new Error(errMsg));
 		});
-		req.go({dropboxauth: JSON.stringify({
-			uid: this.auth.uid,
+		req.go({auth: JSON.stringify({
 			appKey: this.auth.appKey,
 			appSecret: this.auth.appSecret,
+			uid: this.auth.uid,
 			accessToken: this.auth.accessToken,
 			accessTokenSecret: this.auth.accessTokenSecret
 		})});
@@ -342,9 +342,10 @@ enyo.kind({
 			this.log("errMsg:", errMsg);
 			next(new Error(errMsg));
 		});
-		req.go({dropboxauth: JSON.stringify({
+		req.go({auth: JSON.stringify({
 			appKey: this.auth.appKey,
 			appSecret: this.auth.appSecret,
+			uid: this.auth.uid,
 			accessToken: this.auth.accessToken,
 			accessTokenSecret: this.auth.accessTokenSecret
 		})});

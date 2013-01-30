@@ -1,7 +1,4 @@
-// -*- javascript -*-
-
 {
-	"name":"project",
 	"description":"JSON Schema of Ares Project File (project.json)",
 	"type": "object",
 	"properties": {

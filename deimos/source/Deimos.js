@@ -60,6 +60,7 @@ enyo.kind({
 	load: function(data) {
 		var what = data.kinds;
 		var maxLen = 0;
+		this.index=null;
 		this.kinds = what;
 		// Pass the project information (analyzer output, ...) to the designer
 		this.$.designer.setProjectIndexer(data.projectData.getProjectIndexer());
