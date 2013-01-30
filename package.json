@@ -1,5 +1,5 @@
 {
   "name": "nw-demo",
-  "main": "ares/index.html",
+  "main": "nwindex.html",
   "node-remote": "<local>"
 }
