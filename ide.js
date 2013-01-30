@@ -16,8 +16,9 @@ var fs = require("fs"),
     util  = require('util'),
     spawn = require('child_process').spawn,
     querystring = require("querystring"),
-    http = require('http'),
-    HttpError = require(path.resolve(__dirname, "hermes/lib/httpError"));
+    http = require('http') ;
+var myDir = typeof(__dirname) !== 'undefined' ?  __dirname : '.' ;
+var HttpError = require(path.resolve(myDir, "hermes/lib/httpError"));
 
 var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applications.\nUsage: "$0" [OPTIONS]\n')
 	.options('h', {
@@ -53,7 +54,7 @@ var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applicati
 	.options('c', {
 		alias : 'config',
 		description: 'IDE configuration file',
-		default: path.resolve(__dirname, "ide.json")
+		default: path.resolve(myDir, "ide.json")
 	})
 	.options('v', {
 		alias : 'verbose',
@@ -113,7 +114,7 @@ var platformOpen = {
 
 var configPath;
 if (argv.runtest) {
-	configPath = path.resolve(__dirname, "ide-test.json");
+	configPath = path.resolve(myDir, "ide-test.json");
 } else{
 	configPath = argv.config;
 }
@@ -149,7 +150,7 @@ function handleMessage(service) {
 			log("will proxy to service.dest:", service.dest);
 			service.origin = 'http://' + argv.host + ':' + argv.port;
 			service.pathname = '/res/services/' + service.id;
-			
+
 			if (service.origin.match(/^https:/)) {
 				console.info("Service['"+service.id+"']: connect to <"+service.origin+"> to accept SSL certificate");
 			}
@@ -307,7 +308,7 @@ ide.res.services.filter(function(service){
 
 // Start the ide server
 
-var enyojsRoot = path.resolve(__dirname,".");
+var enyojsRoot = path.resolve(myDir,".");
 var app = express.createServer();
 
 var port = parseInt(argv.port, 10);
@@ -352,6 +353,10 @@ if (argv.browser) {
 	spawn(platformOpen[process.platform], [url]);
 } else {
 	console.log("Ares now running at <" + url + ">");
+}
+
+if (window) {
+	window.open(url) ;
 }
 
 // Exit path
