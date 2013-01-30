@@ -115,6 +115,7 @@ function BdOpenwebOS(config, next) {
 
 	app.use(makeExpressRoute('/templates'), getList);
 	app.use(makeExpressRoute('/generate'), generate);
+	app.post(makeExpressRoute('/template-repos/:repoid'), addRepo);
 	
 	// Send back the service location information (origin,
 	// protocol, host, port, pathname) to the creator, when port
@@ -133,6 +134,16 @@ function BdOpenwebOS(config, next) {
 	function getList(req, res, next) {
 		tools.list(function(inError, inData) {
 			res.status(200).send(inData).end();
+		});
+	}
+
+	function addRepo(req, res, next) {
+		tools.registerRemoteTemplates(req.body.url, function(err) {
+			if (err) {
+				next(new HttpError(err, 500));
+				return;
+			}
+			res.status(200).end();
 		});
 	}
 
