@@ -29,7 +29,9 @@ function BdOpenwebOS(config, next) {
 
 	tools.registerTemplates([{
 		id: "bootplate-2.1.1",
-		url: "templates/projects/bootplate-2.1.1.zip",
+		zipfiles: [{
+			url: "templates/projects/bootplate-2.1.1.zip"
+		}],
 		description: "Enyo bootplate 2.1.1"
 	}]);
 
@@ -182,9 +184,6 @@ function BdOpenwebOS(config, next) {
 
 			// cleanup the temp dir when the response has been sent
 			combinedStream.on('end', function() {
-
-
-
 				console.log("cleanup(): starting removal of " + destination);
 				rimraf(destination, function(err) {
 					console.log("cleanup(): removed " + destination);
