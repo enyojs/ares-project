@@ -355,7 +355,7 @@ if (argv.browser) {
 	console.log("Ares now running at <" + url + ">");
 }
 
-if (window) {
+if (typeof( window ) !== 'undefined') {
 	window.open(url) ;
 }
 
