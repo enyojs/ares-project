@@ -14,7 +14,10 @@ enyo.kind({
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: $L("New Kind"), ontap: "newKindAction"},
 				{fit: true},
 				{name: "editorButton", kind: "onyx.Button", content: "Editor Settings", ontap: "editorSettings"},
-				{name: "designerButton", kind: "onyx.Button", content: $L("Designer"), ontap: "designerAction"}
+				{kind: "onyx.TooltipDecorator", components: [
+					{name: "designerButton", kind: "onyx.Button", content: $L("Designer"), ontap: "designerAction"},
+					{name: "designerTooltip", kind: "onyx.Tooltip", content: $L("Please wait, indexing...")}
+				]}
 			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
@@ -203,10 +206,24 @@ enyo.kind({
 	enyoIndexReady: function(model, value, options) {
 		// Pass to the autocomplete component a reference to the enyo indexer
 		this.$.autocomplete.setEnyoIndexer(value);
+		this.checkIndices();
 	},
 	projectIndexReady: function(model, value, options) {
 		// Pass to the autocomplete component a reference to the project indexer
 		this.$.autocomplete.setProjectIndexer(value);
+		this.checkIndices();
+	},
+	/**
+	 	Disable "Designer" button unless project & enyo index are both valid
+	*/
+	checkIndices: function() {
+		var disabled = !(this.$.autocomplete.getProjectIndexer() && this.$.autocomplete.getEnyoIndexer());
+		this.$.designerButton.setDisabled(disabled);
+		if (disabled) {
+			this.$.designerTooltip.setContent($L("Please wait, indexing"));
+		} else {
+			this.$.designerTooltip.setContent($L("Switch to design view"));
+		}
 	},
 	dumpInfo: function(inObject) {
 		var c = inObject;
