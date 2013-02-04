@@ -315,6 +315,17 @@ function parseSetCookie(cookies) {
 	return outCookies;
 }
 
+function onExit() {
+	if (subProcesses.length > 0) {
+		console.log('Terminating sub-processes...');
+		subProcesses.forEach(function(subproc) {
+			process.kill(subproc.pid, 'SIGINT');
+		});
+		subProcesses = [];
+		console.log('Exiting...');
+	}
+}
+
 ide.res.services.filter(function(service){
 	return service.active;
 }).forEach(function(service){
@@ -380,10 +391,5 @@ process.on('uncaughtException', function (err) {
 	console.error(err.stack);
 	process.exit(1);
 });
-process.on('exit', function () {
-	console.log('Terminating sub-processes...');
-	subProcesses.forEach(function(process) {
-		process.kill();
-	});
-	console.log('Exiting...');
-});
+process.on('exit', onExit);
+process.on('SIGINT', onExit);

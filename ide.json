@@ -71,6 +71,10 @@
 			"command":"@NODE@", "params":[
 				"hermes/bdOpenwebOS.js", "-P", "/openwebos", "-p", "0"
 			],
+			"project-template-repositories": [{
+				"id": "bootplate",
+				"url": "http://enyojs.com/archive/ares-project-templates.json"
+			}],
 			"useJsonp":false,
 			"verbose": true,
 			"respawn": false

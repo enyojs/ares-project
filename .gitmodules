@@ -25,3 +25,6 @@
 [submodule "lib/g11n"]
 	path = lib/g11n
 	url = ../g11n.git
+[submodule "hermes/node_modules/nodejs-module-webos-ipkg"]
+	path = hermes/node_modules/nodejs-module-webos-ipkg
+	url = ../nodejs-module-webos-ipkg.git
