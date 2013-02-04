@@ -76,8 +76,8 @@ enyo.kind({
 				propW.setTemplateList([]);
 			});
 		} else {
-			this.log("Unable to get template list (No service defned)");
-			this.$.errorPopup.raise('Unable to get template list (No service defned)');
+			this.log("Unable to get template list (No service defined)");
+			this.$.errorPopup.raise('Unable to get template list (No service defined)');
 			propW.setTemplateList([]);
 		}
 
