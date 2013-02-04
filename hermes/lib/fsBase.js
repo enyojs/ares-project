@@ -59,7 +59,7 @@ function FsBase(inConfig, next) {
 		}
 		this.app.use(this.cors.bind(this));
 		this.app.use(express.cookieParser());
-		this.app.use(this.authorize.bind(this));
+		this.app.use(this.pathname, this.authorize.bind(this));
 		this.app.use(express.methodOverride());
 		
 		this.app.use(this.dump.bind(this));
@@ -91,8 +91,21 @@ function FsBase(inConfig, next) {
 		}
 	}).bind(this));
 
-	// 3. Handle HTTP verbs
+	// outbound http/https traffic
+
+	this.httpAgent = null;
+	this.httpsAgent = null;
+
+	// 2. Dynamic configuration
 	
+	this.app.post('/config', (function(req, res, next) {
+		this.log("req.body:", req.body);
+		var config = req.body && req.body.config;
+		this.configure(config, function(err) {
+			res.status(200).end();
+		});
+	}).bind(this));
+
 	function makeExpressRoute(path) {
 		return (this.pathname + path)
 			.replace(/\/+/g, "/") // compact "//" into "/"
@@ -105,6 +118,8 @@ function FsBase(inConfig, next) {
 	this.log("GET/POST:", this.route0);
 	this.app.get(this.route0, this.getUserInfo.bind(this));
 	this.app.post(this.route0, this.setUserInfo.bind(this));
+
+	// 3. Handle HTTP verbs
 
 	// URL-scheme: ID-based file/folder tree navigation, used by
 	// HermesClient.
@@ -171,7 +186,14 @@ function FsBase(inConfig, next) {
 
 }
 
-// Middlewares
+// Configure -- one per fs instance
+
+FsBase.prototype.configure = function(config, next) {
+	this.log("FsBase.configure(): config:", config);
+	if (next) next();
+};
+
+// Middlewares -- one per session
 
 FsBase.prototype.separator = function(req, res, next) {
 	this.log("---------------------------------------------------------");
@@ -251,8 +273,10 @@ FsBase.prototype.respond = function(res, err, response) {
 	}
 	if (response && response.body) {
 		res.status(response.code).send(response.body);
-	} else if (response && response.code) {
+	} else if (response) {
 		res.status(response.code).end();
+	} else {
+		this.log("FsBase.respond: response sent or being being sent");
 	}
 };
 

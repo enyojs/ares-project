@@ -7,7 +7,7 @@ Ares 2 is a browser-based code editor and UI designer for developing Enyo 2 appl
 The Ares project architecture is divided into several main pieces:
 
 * **Ares** - The front-end designer/editor web application, with the following main components:
-	* **Harmonia** - File system layer
+	* **Harmonia** - File system layer, communicating with the server-side _Hermes_ components.
 	* **Phobos** - Document management
 	* **Deimos** - Visual designer
 * **Hermes Components** - Pluggable server-side components that provide interfaces to Ares clients for cloud-based services such as file storage and build services.  We're leveraging node.js, but Hermes components can use any server-side tech.
@@ -56,16 +56,11 @@ See the [Github.com help](https://help.github.com/articles/set-up-git) for hints
 ####Clone the ares-project repository from GitHub####
 Using git, clone the repository using either the HTTPS or SSH urls (depending on how you have setup Git):
 
-	$ git clone https://github.com/enyojs/ares-project.git
+	$ git clone --recursive https://github.com/enyojs/ares-project.git
 
 or
 
-	$ git clone git@github.com:enyojs/ares-project.git
-
-Then update the submodules (required):
-
-	$ cd ares-project
-	$ git submodule update --init
+	$ git clone --recursive git@github.com:enyojs/ares-project.git
 
 If you are using a graphical Git client, there may or may not be a way to update the submodules from the GUI. If not, then use the commands above.
 

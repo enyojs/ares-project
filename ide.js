@@ -153,6 +153,24 @@ function handleMessage(service) {
 			if (service.origin.match(/^https:/)) {
 				console.info("Service['"+service.id+"']: connect to <"+service.origin+"> to accept SSL certificate");
 			}
+
+			var options = {
+				host:   service.dest.host,
+				port:   service.dest.port,
+				path:   '/config',
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json'
+				}
+			};
+			var creq = http.request(options, function(cres) {
+				console.info("Service['"+service.id+"']: POST /config response.status=" + cres.statusCode);
+			}).on('error', function(e) {
+				throw e;
+			});
+			creq.write(JSON.stringify({config: service}, null, 2));
+			creq.end();
+			
 		} else {
 			console.error("Error updating URL for service "+service.id);
 		}
