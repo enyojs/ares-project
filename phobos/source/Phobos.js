@@ -589,8 +589,6 @@ enyo.kind({
 	
 	replacefind: function(){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
-		console.log(this.$.findpop.replaceValue);
-	//	console.log(this.$.FindPopup.replaceValue);
 		this.$.ace.replacefind(this.$.findpop.findValue , this.$.findpop.replaceValue, options);	
 	},
 
