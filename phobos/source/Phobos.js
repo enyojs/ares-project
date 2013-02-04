@@ -611,6 +611,11 @@ enyo.kind({
 	replaceAll: function(){
 		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
+	
+	replacefind: function(){
+		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
+		this.$.ace.replacefind(this.$.findpop.findValue , this.$.findpop.replaceValue, options);	
+	},
 
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
 	replace: function(){
