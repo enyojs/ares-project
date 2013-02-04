@@ -33,6 +33,11 @@ enyo.kind({
 			this.url = this.config.origin + this.config.pathname;
 			if (this.debug) this.log("url:", this.url);
 		}
+
+		// Populate the repositories on nodejs
+		enyo.forEach(inConfig['project-template-repositories'], function(repository) {
+			this.createRepo(repository);		// TODO: handle the answer
+		}, this);
 	},
 	/**
 	 * @return {Object} the configuration this service was configured by
@@ -72,5 +77,16 @@ enyo.kind({
 		});
 		req.go();
 		return userreq;
+	},
+	createRepo: function(repo) {
+		if (this.debug) this.log();
+		var data = "url=" + encodeURIComponent(repo.url);
+
+		var req = new enyo.Ajax({
+			url: this.url + '/template-repos/' + repo.id,
+			method: 'POST',
+			postBody: data
+		});
+		return req.go();
 	}
 });
