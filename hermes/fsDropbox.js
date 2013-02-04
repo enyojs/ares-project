@@ -25,8 +25,12 @@ util.inherits(FsDropbox, FsBase);
 FsDropbox.prototype.configure = function(config, next) {
 	this.log("FsDropbox.configure(): config:", config);
 	this.parseProxy(config);
-	dropbox.Xhr.Request.nodejsSet(this.httpAgent);
-	dropbox.Xhr.Request.nodejsSet(this.httpsAgent);
+	if (this.httpAgent) {
+		dropbox.Xhr.Request.nodejsSet({httpAgent: this.httpAgent});
+	}
+	if (this.httpsAgent) {
+		dropbox.Xhr.Request.nodejsSet({httpsAgent: this.httpsAgent});
+	}
 	if (next) next();
 };
 
