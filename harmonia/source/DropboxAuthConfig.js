@@ -189,6 +189,7 @@ enyo.kind({
 			url: this.requestTokenUrl,
 			method: 'POST',
 			handleAs: 'text',
+			cacheBust: false,
 			headers: {
 				'cache-control': false,
 				Authorization: this.makeOAuthHeader('OAuth', this.makeOAuthRequestTokenObject(this.auth.appKey, this.auth.appSecret))
@@ -242,6 +243,7 @@ enyo.kind({
 			url: this.accessTokenUrl,
 			method: 'POST',
 			handleAs: 'text',
+			cacheBust: false,
 			headers: {
 				'cache-control': false,
 				Authorization: this.makeOAuthHeader('OAuth', this.makeOAuthHeaderObject(this.auth.appKey, this.auth.appSecret, this.requestToken, this.requestTokenSecret))

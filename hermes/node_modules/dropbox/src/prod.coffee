@@ -34,3 +34,4 @@ dropboxEncodeKey = (key, secret) ->
   key = (String.fromCharCode(key[i]) for i in [0...key.length])
   [btoa(key.join('')), btoa(result.join(''))].join '|'
 
+Dropbox.Util.encodeKey = dropboxEncodeKey
