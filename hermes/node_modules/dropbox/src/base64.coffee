@@ -1,6 +1,6 @@
 # node.js implementation of atob and btoa
 
-if window?
+if typeof window isnt 'undefined'
   if window.atob and window.btoa
     atob = (string) -> window.atob string
     btoa = (base64) -> window.btoa base64
@@ -70,3 +70,6 @@ else
   btoa = (arg) ->
     buffer = new Buffer(arg.charCodeAt(i) for i in [0...arg.length])
     buffer.toString 'base64'
+
+Dropbox.Util.atob = atob
+Dropbox.Util.btoa = btoa

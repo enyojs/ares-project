@@ -18,16 +18,23 @@ base64Sha1 = (string) ->
   arrayToBase64 sha1(stringToArray(string), string.length)
 
 # SHA1 and HMAC-SHA1 versions that use the node.js builtin crypto.
-unless window?
-  crypto = require 'crypto'
-  base64HmacSha1 = (string, key) ->
-    hmac = crypto.createHmac 'sha1', key
-    hmac.update string
-    hmac.digest 'base64'
-  base64Sha1 = (string) ->
-    hash = crypto.createHash 'sha1'
-    hash.update string
-    hash.digest 'base64'
+if typeof require isnt 'undefined'
+  try
+    crypto = require 'crypto'
+    if crypto.createHmac and crypto.createHash
+      base64HmacSha1 = (string, key) ->
+        hmac = crypto.createHmac 'sha1', key
+        hmac.update string
+        hmac.digest 'base64'
+      base64Sha1 = (string) ->
+        hash = crypto.createHash 'sha1'
+        hash.update string
+        hash.digest 'base64'
+  catch requireError
+    # The slow versions defined at the top of the file work everywhere.
+
+Dropbox.Util.hmac = base64HmacSha1
+Dropbox.Util.sha1 = base64Sha1
 
 # HMAC-SHA1 implementation.
 #

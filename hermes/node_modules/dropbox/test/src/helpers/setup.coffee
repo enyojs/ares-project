@@ -2,14 +2,14 @@ if global? and require? and module?
   # Node.JS
   exports = global
 
-  exports.Dropbox = require '../../lib/dropbox'
+  exports.Dropbox = require '../../../lib/dropbox'
   exports.chai = require 'chai'
   exports.sinon = require 'sinon'
   exports.sinonChai = require 'sinon-chai'
 
   exports.authDriver = new Dropbox.Drivers.NodeServer port: 8912
 
-  TokenStash = require './token_stash.js'
+  TokenStash = require '../token_stash.js'
   (new TokenStash()).get (credentials) ->
     exports.testKeys = credentials
   (new TokenStash(fullDropbox: true)).get (credentials) ->

@@ -44,7 +44,7 @@ class WebFileServer
                       'Content-Type, Authorization'
       next()
 
-    @app.use express.static(fs.realpathSync(__dirname + '/../../'),
+    @app.use express.static(fs.realpathSync(__dirname + '/../../../'),
                             { hidden: true })
     options = key: fs.readFileSync 'test/ssl/cert.pem'
     options.cert = options.key

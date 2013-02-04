@@ -5,9 +5,10 @@ class Dropbox.AuthDriver
   # The driver must be able to intercept redirects to the returned URL, in
   # order to know when a user has completed the authorization flow.
   #
+  # @param {String} token the OAuth token that the user is authorizing
   # @return {String} an absolute URL
-  url: ->
-    'https://some.url'
+  url: (token) ->
+    "https://some.url?dboauth_token=#{Dropbox.Xhr.urlEncode(token)}"
 
   # Redirects users to /authorize and waits for them to complete the flow.
   #
@@ -22,10 +23,12 @@ class Dropbox.AuthDriver
   #   user is redirected to the URL returned by the driver's url() method
   # @param {String} tokenSecret the secret associated with the given OAuth
   #   token; the driver may store this together with the token
-  # @param {function()} callback called when users have completed the
+  # @param {function(?Boolean)} callback called when users have completed the
   #   authorization flow; the driver should call this when Dropbox redirects
-  #   users to the URL returned by the url() method, and the 'token' query
-  #   parameter matches the value of the token parameter
+  #   users to the URL returned by the url() method, and the 'oauth_token'
+  #   query parameter matches the value of the token parameter; the callback's
+  #   argument should be true if the user rejected the authorization request,
+  #   and false if everything went well
   doAuthorize: (authUrl, token, tokenSecret, callback) ->
     callback 'oauth-token'
 
