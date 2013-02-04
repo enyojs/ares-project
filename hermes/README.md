@@ -105,8 +105,6 @@ For more detailled instructions, refer to the [Mocha home page](http://visionmed
 
 ### Dropbox
 
-**Note:** Dropbox implementation as a back-end is nowhere near to be complete:  currently, only the authentication & authorization is complete, and we have a first version of the `PROPFIND` verb without any caching.
-
 Ares comes with an Hermes service using your Dropbox account as a storage service.    Enable this service in the `ide.json` before starting the IDE server:
 
 	[…]
