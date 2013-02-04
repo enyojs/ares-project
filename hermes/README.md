@@ -137,6 +137,23 @@ In order to use Dropbox as storage service for Ares, you need to [create an Ares
 
 **NOTE:** Ares gives 20 seconds to the browser to load the Dropbox authorization window & complete the procedure.  In case it takes longer, please press _Renew_ again:  another immediate attempt will be faster as the page will be partially available from the browser cache.
 
+Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to the [GitHub:node-tunnel](https://github.com/koichik/node-tunnel) library.  `fsDropbox` proxy configuration embeds a `node-tunnel` configuration.  For example, fellow-HP-ers can use the below (transform `Xproxy` into `proxy` in the sample ide.json):
+
+			[…]
+			"proxy":{
+				"http":{
+					"tunnel":"OverHttp",
+					"host":"web-proxy.corp.hp.com",
+					"port":8080
+				},
+				"https":{
+					"tunnel":"OverHttp",
+					"host":"web-proxy.corp.hp.com",
+					"port":8080
+				}
+			},
+			[…]
+
 ## Archive service
 
 This is the `arZip.js` service.  It takes 2 arguments:
@@ -179,6 +196,7 @@ The entire [build.phonegap.com API](https://build.phonegap.com/docs/api) is wrap
 		XMLHttpRequest cannot load https://build.phonegap.com/token.
  		Origin http://127.0.0.1 is not allowed by Access-Control-Allow-Origin.
 
+**Note:** Ares PhoneGap Build connector does _not_ work behind an HTTP/HTTPS proxy yet.
 
 ### Protocol
 

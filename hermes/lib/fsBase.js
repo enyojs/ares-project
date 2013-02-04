@@ -6,6 +6,8 @@ var fs = require("fs"),
     path = require("path"),
     express = require("express"),
     http = require("http"),
+    https = require("https"),
+    tunnel = require("tunnel"),
     util  = require("util"),
     temp = require("temp"),
     async = require("async"),
@@ -120,7 +122,7 @@ function FsBase(inConfig, next) {
 	this.app.post(this.route0, this.setUserInfo.bind(this));
 
 	// 3. Handle HTTP verbs
-
+	
 	// URL-scheme: ID-based file/folder tree navigation, used by
 	// HermesClient.
 	this.route1 = makeExpressRoute.bind(this)('/id/');
@@ -292,6 +294,29 @@ FsBase.prototype.decodeFileId = function(fileId) {
 	var buf = new Buffer(fileId, 'hex');
 	var filePath = buf.toString('utf-8');
 	return filePath;
+};
+
+FsBase.prototype.parseProxy = function(config) {
+	var self = this;
+	
+	this.httpAgent = _makeAgent('http', config);
+	this.httpsAgent = _makeAgent('https', config);
+	
+	function _makeAgent(protocol, config) {
+		var proxyConfig = config.proxy && config.proxy[protocol];
+		if (!proxyConfig) {
+			return undefined;
+		}
+		var tunnelConstructor = tunnel[protocol + proxyConfig.tunnel];
+		var agent;
+		if (proxyConfig && typeof tunnelConstructor == 'function') {
+			agent = tunnelConstructor({proxy: proxyConfig});
+			self.log("FsBase.parseProxy(): protocol:", protocol, "agent:", agent);
+		} else {
+			console.warning("FsBase.parseProxy(): protocol:", protocol, "invalid proxy configuration:", config.proxy, "will use default agent");
+		}
+		return agent;
+	}
 };
 
 // Actions

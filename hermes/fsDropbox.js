@@ -5,6 +5,8 @@
 var util  = require("util"),
     path = require("path"),
     fs = require("fs"),
+    http = require("http"),
+    https = require("https"),
     dropbox = require("dropbox"),
     request = require("request"),
     FsBase = require(__dirname + "/lib/fsBase"),
@@ -19,6 +21,14 @@ function FsDropbox(inConfig, next) {
 
 // inherits FsBase (step 2/2)
 util.inherits(FsDropbox, FsBase);
+
+FsDropbox.prototype.configure = function(config, next) {
+	this.log("FsDropbox.configure(): config:", config);
+	this.parseProxy(config);
+	dropbox.Xhr.Request.nodejsSet(this.httpAgent);
+	dropbox.Xhr.Request.nodejsSet(this.httpsAgent);
+	if (next) next();
+};
 
 FsDropbox.prototype.errorResponse = function(err) {
 	this.log("FsDropbox.errorResponse(): err:", err);
@@ -59,13 +69,13 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 			key: auth.appKey, secret: auth.appSecret, sandbox: true
 		});
 		req.dropbox.authDriver(new _authDriver(auth));
-		req.dropbox.authenticate(function(err, client) {
+		req.dropbox.authenticate((function(err, client) {
 			if (err) {
 				return next(err);
 			}
-			//console.log("dropbox:" + util.inspect(client));
+			this.log("dropbox:" + util.inspect(client));
 			next();
-		});
+		}).bind(this));
 	}
 
 	// see https://github.com/dropbox/dropbox-js/blob/master/doc/auth_drivers.md

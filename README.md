@@ -17,7 +17,7 @@ The Ares project architecture is divided into several main pieces:
 Here are the main features you can start looking at today:
 
 * De-centralized file storage
-	* Ares currently connects to a "filesystem" component, to edit local files
+	* Ares currently connects to a filesystem component, to edit local files (via the `fsLocal` Hermes service).  Ares can also be configured to use a per-user Dropbox account (via the `fsDropbox` Hermes service) as file storage.
 	* Key goals with this approach are to avoid forcing users to store files and/or credentials on Ares servers and allow freedom to choose the preferred storage location, whether cloud or local.
 * Code editor
 	* Ares integrates the Ace (Cloud9) code editor for code editing
@@ -37,7 +37,7 @@ Here are the main features you can start looking at today:
 The following features are in the works, and you should see them added as we move forward:
 
 * Code completion and context-sensitive documentation
-* Additional Hermes components to extend the local and cloud file storage options: We plan to add Hermes components for Dropbox (implementation in progress), FTP, Box.net and more
+* Additional Hermes components to extend the local and cloud file storage options: We plan to add Hermes components for FTP, Box.net and more
 * Improvements to the Designer component for greater ease of use
 * ... and more!
 
