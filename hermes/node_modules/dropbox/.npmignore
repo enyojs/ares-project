@@ -16,6 +16,7 @@ test/vendor
 
 # Minified library.
 lib/dropbox.min.js
+lib/dropbox.min.map
 
 # Sample apps.
 samples
