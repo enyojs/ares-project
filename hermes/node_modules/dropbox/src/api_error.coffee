@@ -29,22 +29,22 @@ class Dropbox.ApiError
     if xhr.responseType
       try
         text = xhr.response or xhr.responseText
-      catch e
+      catch xhrError
         try
           text = xhr.responseText
-        catch e
+        catch xhrError
           text = null
     else
       try
         text = xhr.responseText
-      catch e
+      catch xhrError
         text = null
 
     if text
       try
         @responseText = text.toString()
         @response = JSON.parse text
-      catch e
+      catch xhrError
         @response = null
     else
       @responseText = '(no response)'

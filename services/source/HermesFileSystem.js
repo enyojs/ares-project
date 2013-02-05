@@ -61,6 +61,8 @@ enyo.kind({
 				this.fail();
 				return null;
 			} else {
+				var node = this.xhrResponse.headers['x-ares-node'];
+				if (this.debug) this.log("GET x-ares-node:", node);
 				return inValue;
 			}
 		}).error(function(inSender, inResponse) {
