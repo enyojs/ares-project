@@ -1,10 +1,10 @@
 /**
- * UI: PhoneGap pane in the ProjectProperties popup
+ * UI: Phonegap pane in the ProjectProperties popup
  * @name Phonegap.ProjectProperties
  */
 
 enyo.kind({
-	name: "PhoneGap.ProjectProperties",
+	name: "Phonegap.ProjectProperties",
 	debug: false,
 	published: {
 		config: {}
@@ -46,11 +46,11 @@ enyo.kind({
 	 */
 	create: function() {
 		this.inherited(arguments);
-		this.targets = PhoneGap.ProjectProperties.platforms;
+		this.targets = Phonegap.ProjectProperties.platforms;
 		enyo.forEach(this.targets, function(target) {
 			this.$.targetsRows.createComponent({
 				name: target.id,
-				kind: "PhoneGap.ProjectProperties.Target",
+				kind: "Phonegap.ProjectProperties.Target",
 				targetId: target.id,
 				targetName: target.name,
 				enabled: false
@@ -89,7 +89,8 @@ enyo.kind({
 	 */
 	refresh: function(inSender, inValue) {
 		if (this.debug) this.log("sender:", inSender, "value:", inValue);
-		PhoneGap.ProjectProperties.getProvider().authorize(enyo.bind(this, this.loadKeys));
+		var provider = Phonegap.ProjectProperties.getProvider();
+		provider.authorize(enyo.bind(this, this.loadKeys));
 	},
 	/**
 	 * @protected
@@ -106,7 +107,7 @@ enyo.kind({
 		if (err) {
 			this.warn("err:", err);
 		} else {
-			var provider = PhoneGap.ProjectProperties.getProvider();
+			var provider = Phonegap.ProjectProperties.getProvider();
 			enyo.forEach(this.targets, function(target) {
 				this.$.targetsRows.$[target.id].loadKeys(provider);
 			}, this);
@@ -128,10 +129,10 @@ enyo.kind({
 });
 
 /**
- * This widget is aware of the differences between the PhoneGap Build targets.
+ * This widget is aware of the differences between the Phoneap Build targets.
  */
 enyo.kind({
-	name: "PhoneGap.ProjectProperties.Target",
+	name: "Phonegap.ProjectProperties.Target",
 	debug: true,
 	published: {
 		targetId: "",
@@ -211,7 +212,7 @@ enyo.kind({
 			if (keys) {
 				this.$.targetDrw.createComponent({
 					name: "keySelector",
-					kind: "PhoneGap.ProjectProperties.KeySelector",
+					kind: "Phonegap.ProjectProperties.KeySelector",
 					targetId: this.targetId,
 					keys: keys,
 					activeKeyId: (this.config && this.config.keyId)
@@ -231,7 +232,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "PhoneGap.ProjectProperties.KeySelector",
+	name: "Phonegap.ProjectProperties.KeySelector",
 	debug: true,
 	kind: "FittableColumns", 
 	published: {
@@ -298,10 +299,10 @@ enyo.kind({
 		if (key) {
 			// One of the configured keys
 			if (this.targetId === 'ios' || this.targetId === 'blackberry') {
-				// property named '.password' is defined by PhoneGap
+				// property named '.password' is defined by Phonegap
 				this.$.keyPasswd.setValue(key.password || "");
 			} else if (this.targetId === 'android') {
-				// properties named '.key_pw'and 'keystore_pw' are defined by PhoneGap
+				// properties named '.key_pw'and 'keystore_pw' are defined by Phonegap
 				this.$.keyPasswd.setValue(key.key_pw || "");
 				this.$.keystorePasswd.setValue(key.keystore_pw || "");
 				this.$.keystorePasswdFrm.show();
@@ -339,10 +340,10 @@ enyo.kind({
 	getShowingKey: function() {
 		var key = this.getKey(this.activeKeyId);
 		if (this.targetId === 'ios' || this.targetId === 'blackberry') {
-			// property name '.password' is defined by PhoneGap
+			// property name '.password' is defined by Phonegap
 			key.password = this.$.keyPasswd.getValue();
 		} else if (this.targetId === 'android') {
-			// properties names '.key_pw'and 'keystore_pw' are defined by PhoneGap
+			// properties names '.key_pw'and 'keystore_pw' are defined by Phonegap
 			key.key_pw = this.$.keyPasswd.getValue();
 			key.keystore_pw = this.$.keystorePasswd.getValue();
 		}
