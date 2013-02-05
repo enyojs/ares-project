@@ -65,15 +65,21 @@ enyo.kind({
 		// Getting template list
 		propW.setTemplateList([]);
 		var service =	ServiceRegistry.instance.getServicesByType('other')[0];
-		var templateReq = service.getTemplates();
-		templateReq.response(this, function(inSender, inData) {
-			propW.setTemplateList(inData);
-		});
-		templateReq.error(this, function(inSender, inError) {
-			this.log("Unable to get template list (" + inError + ")");
-			this.$.errorPopup.raise('Unable to get template list');
+		if (service) {
+			var templateReq = service.getTemplates();
+			templateReq.response(this, function(inSender, inData) {
+				propW.setTemplateList(inData);
+			});
+			templateReq.error(this, function(inSender, inError) {
+				this.log("Unable to get template list (" + inError + ")");
+				this.$.errorPopup.raise('Unable to get template list');
+				propW.setTemplateList([]);
+			});
+		} else {
+			this.log("Unable to get template list (No service defned)");
+			this.$.errorPopup.raise('Unable to get template list (No service defned)');
 			propW.setTemplateList([]);
-		});
+		}
 
 		// ok, we can go on with project properties setup
 		propW.setupCreate() ;
