@@ -42,16 +42,6 @@
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption]]></target>
-	<value><![CDATA[HelloWorld]]></value>
-</selenese>
-<selenese>
-	<command>waitForText</command>
-	<target><![CDATA[id=ares_projectView_projectWizardScan_confirm]]></target>
-	<value><![CDATA[OK]]></value>
-</selenese>
-<selenese>
-	<command>clickAt</command>
 	<target><![CDATA[id=ares_projectView_projectWizardScan_confirm]]></target>
 	<value><![CDATA[OK]]></value>
 </selenese>
@@ -66,13 +56,58 @@
 	<value><![CDATA[HelloWorld]]></value>
 </selenese>
 <selenese>
-	<command>waitForText</command>
-	<target><![CDATA[id=ares_projectView_projectList_previewButton]]></target>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectList_button]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectList_previewButton]]></target>
+	<target><![CDATA[id=ares_projectView_projectList_menuItem]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectList_accountsConfigurator_accountsList_name]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertText</command>
+	<target><![CDATA[id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_username]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertText</command>
+	<target><![CDATA[id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_password]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_checkBtn]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>waitForText</command>
+	<target><![CDATA[id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId]]></target>
+	<value><![CDATA[126903]]></value>
+</selenese>
+<selenese>
+	<command>assertText</command>
+	<target><![CDATA[id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId]]></target>
+	<value><![CDATA[126903]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>selectWindow</command>
+	<target><![CDATA[name=PhoneGap Build Account Management]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTitle</command>
+	<target><![CDATA[Adobe PhoneGap Build]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 </TestCase>
