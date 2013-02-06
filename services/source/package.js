@@ -3,7 +3,7 @@ enyo.depends(
 	"FileSystemService.js",
 	"HermesFileSystem.js",
 	"HermesFileTree.js",
-	"PhonegapBuild.js",
 	"phonegap/ProjectProperties.js",
+	"phonegap/Build.js",
 	"OpenwebosBuild.js"
 );

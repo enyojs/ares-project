@@ -38,4 +38,4 @@ See [TestRunner](testrunner/README.md).
 
 ## Controls
 
-TBC (reference to a *Selenium* README.md).
+See [Selenium](selenium/README.md).

@@ -10,7 +10,7 @@ var fs = require("fs"),
     http = require("http"),
     optimist = require('optimist'),
     rimraf = require("rimraf"),
-    tools = require('nodejs-module-webos-ipkg'),
+    tools = require(__dirname + "/lib/project-gen"),
     CombinedStream = require('combined-stream');
 
 var basename = path.basename(__filename);
