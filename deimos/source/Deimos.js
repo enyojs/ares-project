@@ -78,6 +78,7 @@ enyo.kind({
 		//this.index=0; //this is set in KindSelected
 		this.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.$.kindPicker.render();
+		this.$.toolbar.resized();
 		this.setEdited(false);
 
 		// Pass the project information (analyzer output, ...) to the inspector
