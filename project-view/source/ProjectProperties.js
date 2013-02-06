@@ -139,7 +139,7 @@ enyo.kind({
 				this.services[service.id] = service;
 			}
 		}));
-		this.log("services:", this.services);
+		if (this.debug) this.log("services:", this.services);
 		enyo.forEach(enyo.keys(this.services), function(serviceId) {
 			var service = this.services[serviceId];
 			var drawer = this.$[service.id + 'Drawer'] || this.createComponent({
@@ -268,7 +268,6 @@ enyo.kind({
 	confirmTap: function(inSender, inEvent) {
 		var tglist, ppConf ;
 		// retrieve modified values
-		this.log('ok tapped') ;
 
 		this.config.id       = this.$.projectId     .getValue();
 		this.config.version  = this.$.projectVersion.getValue();

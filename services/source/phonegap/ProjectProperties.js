@@ -133,7 +133,7 @@ enyo.kind({
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.Target",
-	debug: true,
+	debug: false,
 	published: {
 		targetId: "",
 		targetName: "",
@@ -233,8 +233,8 @@ enyo.kind({
 
 enyo.kind({
 	name: "Phonegap.ProjectProperties.KeySelector",
-	debug: true,
-	kind: "FittableColumns", 
+	debug: false,
+	kind: "FittableColumns",
 	published: {
 		targetId: "",
 		keys: undefined,
@@ -339,7 +339,9 @@ enyo.kind({
 	 */
 	getShowingKey: function() {
 		var key = this.getKey(this.activeKeyId);
-		if (this.targetId === 'ios' || this.targetId === 'blackberry') {
+		if (!key) {
+			return undefined;
+		} else if (this.targetId === 'ios' || this.targetId === 'blackberry') {
 			// property name '.password' is defined by Phonegap
 			key.password = this.$.keyPasswd.getValue();
 		} else if (this.targetId === 'android') {
@@ -353,8 +355,10 @@ enyo.kind({
 	 * @private
 	 */
 	savePassword: function(inSender, inValue) {
-		this.log("sender:", inSender, "value:", inValue);
-		this.provider.setKey(this.targetId, this.getShowingKey());
+		if (this.debug) this.log("sender:", inSender, "value:", inValue);
+		var key = this.getShowingKey();
+		if (this.debug) this.log("targetId:", this.targetId, "key:", key);
+		this.provider.setKey(this.targetId, key);
 	}
 });
 
