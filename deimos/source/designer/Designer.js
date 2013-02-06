@@ -218,6 +218,7 @@ enyo.kind({
 	    }
         return block;
 	},
+	//TODO: Don't lose the original components information
 	proxyUnknownKinds: function(component) {
 		var name = component.kind;
 		var components;
