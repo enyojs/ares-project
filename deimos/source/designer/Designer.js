@@ -218,18 +218,11 @@ enyo.kind({
 	    }
         return block;
 	},
-	//TODO: Don't lose the original components information
 	proxyUnknownKinds: function(component) {
 		var name = component.kind;
 		var components;
-		var newComponent={
-		};
-		if (component.name) {
-			newComponent.name=component.name;
-		}
-		if (component.content) {
-			newComponent.content=component.content;
-		}
+		var newComponent = enyo.clone(component);
+		
 		if (!enyo.constructorForKind(name)) {
 			var kind;
 			kind = this.projectIndexer.findByName(name);
@@ -243,10 +236,8 @@ enyo.kind({
 			}
 			newComponent.kind = "Ares.Proxy";
 			newComponent.realKind = name;
-			//component.content = name;
 			if (component.name) {
 				newComponent.hadName = true;
-				newComponent.name = component.name;
 			}
 		} else {
 			if (name !== undefined) {
@@ -255,7 +246,7 @@ enyo.kind({
 				this.log("undefined kind");
 			}
 		}
-		// components from components block
+		// process components from "components" block
 		components = component.components;
 		if (components) {
 			newComponent.components=[];
