@@ -133,7 +133,7 @@ enyo.kind({
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.Target",
-	debug: true,
+	debug: false,
 	published: {
 		targetId: "",
 		targetName: "",
@@ -233,8 +233,8 @@ enyo.kind({
 
 enyo.kind({
 	name: "Phonegap.ProjectProperties.KeySelector",
-	debug: true,
-	kind: "FittableColumns", 
+	debug: false,
+	kind: "FittableColumns",
 	published: {
 		targetId: "",
 		keys: undefined,
