@@ -19,9 +19,6 @@
 [submodule "hermes/node_modules/phonegapbuildapi"]
 	path = hermes/node_modules/phonegapbuildapi
 	url = ../phonegapbuildapi
-[submodule "node_modules/xmlhttprequest"]
-	path = node_modules/xmlhttprequest
-	url = ../node-XMLHttpRequest.git
 [submodule "lib/g11n"]
 	path = lib/g11n
 	url = ../g11n.git
