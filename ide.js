@@ -17,7 +17,7 @@ var fs = require("fs"),
     spawn = require('child_process').spawn,
     querystring = require("querystring"),
     http = require('http') ;
-var myDir = typeof(__dirname) !== 'undefined' ?  __dirname : '.' ;
+var myDir = typeof(__dirname) !== 'undefined' ?  __dirname : path.resolve('') ;
 var HttpError = require(path.resolve(myDir, "hermes/lib/httpError"));
 
 var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applications.\nUsage: "$0" [OPTIONS]\n')
