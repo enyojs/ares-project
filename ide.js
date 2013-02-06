@@ -319,7 +319,8 @@ app.configure(function(){
 	app.use('/ide', express.static(enyojsRoot + '/'));
 	app.use('/test', express.static(enyojsRoot + '/test'));
 
-	app.use(express.logger('dev'));
+	// broken in node-webkit/windows ?
+	// app.use(express.logger('dev'));
 
 	app.get('/', function(req, res, next) {
 		log("GET /");
