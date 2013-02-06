@@ -332,19 +332,6 @@ enyo.kind({
 		return -1;
 	},
 	designerAction: function() {
-		var isDesignProperty={
-			layoutKind: true,
-			attributes: true,
-			classes: true,
-			content: true,
-			controlClasses: true,
-			defaultKind: true,
-			fit: true,
-			src: true,
-			style: true,
-			tag: true,
-			name: true,
-		}
 		var c = this.$.ace.getValue();
 		this.reparseAction();
 		if (this.analysis) {
@@ -368,14 +355,7 @@ enyo.kind({
 						kind: kind,
 						components: comps
 					}
-					for (var j=0; j < o.properties.length; j++) {
-						var prop = o.properties[j];
-						var pName = prop.name;
-						if (isDesignProperty[pName]) {
-							var value = Documentor.stripQuotes(prop.value[0].name);
-							comp[pName] = value;
-						}
-					}
+					Designer.copyPropertiesFromIndexEntry(comp, o);
 					kinds.push(comp);
 				}
 			}

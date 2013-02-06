@@ -90,10 +90,11 @@ enyo.kind({
 		this.$.sandbox.resized();
 	},
 	load: function(inDocument) {
-		this.proxyUnknownKinds(inDocument);
+		this.originalDocument = inDocument;
+		this.proxyDocument=this.proxyUnknownKinds(inDocument);
 		this.hideSelection();
 		this.$.model.destroyComponents();
-		this.$.sandbox.load(inDocument, this.$.model);
+		this.$.sandbox.load(this.proxyDocument, this.$.model);
 		this.render();
 		this.resized();
 		var c = this.$.sandbox.children[0];
@@ -219,39 +220,57 @@ enyo.kind({
 	},
 	proxyUnknownKinds: function(component) {
 		var name = component.kind;
+		var components;
+		var newComponent={
+		};
+		if (component.name) {
+			newComponent.name=component.name;
+		}
+		if (component.content) {
+			newComponent.content=component.content;
+		}
 		if (!enyo.constructorForKind(name)) {
 			var kind;
-			var components;
 			kind = this.projectIndexer.findByName(name);
 			if (!kind) {
 				kind = this.fileIndexer.findByName(name);
 			}
+			// components from kind definition
 			components = Documentor.findByName(kind.properties, "components").value[0].properties;
 			if (kind) {
-				component.kindComponents = this.componentsFromIndex(components);
+				newComponent.kindComponents = this.componentsFromIndex(components);
 			}
-			component.kind = "Ares.Proxy";
-			component.realKind = name;
-			component.content = name;
+			newComponent.kind = "Ares.Proxy";
+			newComponent.realKind = name;
+			//component.content = name;
 			if (component.name) {
-				component.hadName=true;
+				newComponent.hadName = true;
+				newComponent.name = component.name;
+			}
+		} else {
+			if (name !== undefined) {
+				newComponent.kind=name;
+			} else {
+				this.log("undefined kind");
 			}
 		}
-		var children = component.components;
-		if (children) {
+		// components from components block
+		components = component.components;
+		if (components) {
+			newComponent.components=[];
 			var i;
-			for (i=0; i< children.length; i++) {
-				children[i] = this.proxyUnknownKinds(children[i]);
+			for (i=0; i< components.length; i++) {
+				newComponent.components.push(this.proxyUnknownKinds(components[i]));
 			}
 		}
-		var children = component.kindComponents;
-		if (children) {
+		components = component.kindComponents;
+		if (components) {
 			var i;
-			for (i=0; i< children.length; i++) {
-				children[i] = this.proxyUnknownKinds(children[i]);
+			for (i=0; i < components.length; i++) {
+				newComponent.kindComponents.push(this.proxyUnknownKinds(components[i]));
 			}
 		}
-		return component;
+		return newComponent;
 	},
 	unProxyArray: function(block) {
 	    var i;
@@ -299,11 +318,41 @@ enyo.kind({
 					var value = Documentor.stripQuotes(prop.value[0].token);
 					component[name] = value;
 				}
-			};
+			}
 			block.push(component);
 		}
 		return block;
-	}
+	},
+	projectIndexerChanged: function() {
+		console.log("ready.");
+	},
+	statics: {
+		/** Copy properties from an index entry into a components block object
+		*/
+		copyPropertiesFromIndexEntry: function(comp, o) {
+			var isDesignProperty={
+				layoutKind: true,
+				attributes: true,
+				classes: true,
+				content: true,
+				controlClasses: true,
+				defaultKind: true,
+				fit: true,
+				src: true,
+				style: true,
+				tag: true,
+				name: true
+			};
+			for (var j=0; j < o.properties.length; j++) {
+				var prop = o.properties[j];
+				var pName = prop.name;
+				if (isDesignProperty[pName]) {
+					var value = Documentor.stripQuotes(prop.value[0].name);
+					comp[pName] = value;
+				}
+			}
+		}
+	}	
 });
 
 enyo.kind({
@@ -362,5 +411,5 @@ enyo.kind({
 		// In addition, kindComponents are marked with the _isChrome: true_ flag.
 		this.createChrome(this.kindComponents);
 		this.createClientComponents(this.components);
-	}	
+	},
 });
