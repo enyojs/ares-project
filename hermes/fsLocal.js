@@ -181,23 +181,27 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 };
 
 FsLocal.prototype._getFile = function(req, res, next) {
-	var localPath = path.join(this.root, req.param('path'));
+	var relPath = req.param('path');
+	var localPath = path.join(this.root, relPath);
 	this.log("sending localPath=" + localPath);
-	fs.stat(localPath, function(err, stat) {
+	fs.stat(localPath, (function(err, stat) {
 		if (err) {
 			next(err);
 			return;
 		}
 		if (stat.isFile()) {
-			res.status(200);
-			res.sendfile(localPath);
-			// return nothing: streaming response
-			// is already in progress.
-			next();
+			this._propfind(err, relPath, 0 /*depth*/, function(err, node) {
+				res.setHeader('x-ares-node', JSON.stringify(node));
+				res.status(200);
+				res.sendfile(localPath);
+				// return nothing: streaming response
+				// is already in progress.
+				next();
+			});
 		} else {
 			next(new Error("not a file: '" + localPath + "'"));
 		}
-	});
+	}).bind(this));
 };
 
 // XXX ENYO-1086: refactor tree walk-down
@@ -237,16 +241,7 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 	}).bind(this));
 };
 
-/**
- * Write a file in the filesystem
- * 
- * Invokes the CommonJs callback with the created {ares.Filesystem.Node}.
- * 
- * @param {Object} file contains mandatory #name property, plus either
- * #buffer (a {Buffer}) or #path (a temporary absolute location).
- * @param {Function} next a Common-JS callback
- */
-FsLocal.prototype.putFile = function(file, next) {
+FsLocal.prototype.putFile = function(req, file, next) {
 	var absPath = path.join(this.root, file.name),
 	    dir = path.dirname(absPath),
 	    encodeFileId = this.encodeFileId,

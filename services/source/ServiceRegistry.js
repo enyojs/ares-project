@@ -132,7 +132,7 @@ enyo.kind({
 				service.impl = new HermesFileSystem();
 				service.impl.notifyFailure = enyo.bind(this, this.serviceFailure, service.config.type, service.config.id);
 			} else if (service.config.type === "build" && service.config.provider === "hermes" && service.config.id === "phonegap") {
-				service.impl = new PhonegapBuild();
+				service.impl = new Phonegap.Build();
 			} else if (service.config.type === "other" && service.config.provider === "hermes" && service.config.id === "openwebos") {
 				service.impl = new OpenwebosBuild();
 			}
@@ -148,6 +148,12 @@ enyo.kind({
 					next(null, {});
 				});
 			}
+
+			// Make sure both the service configuration
+			// Object & the resulting implementation
+			// Object know the serviceId.
+			service.impl.id = service.config.id;
+
 			service.impl.setConfig(service.config);
 			if (this.debug) this.log("id:", service.config.id, "configured");
 			next();
@@ -210,7 +216,7 @@ enyo.kind({
 	},
 	/**
 	 * Get {Array} or service matching the given criteria
-	 * @param {Object} criterai
+	 * @param {Object} criteria
 	 * @return {Array} services matching the required criteria
 	 * @public
 	 */
@@ -244,6 +250,22 @@ enyo.kind({
 		}, this);
 		if (this.debug) this.log("criteria:", criteria , " => services:", services);
 		return services;
+	},
+	/**
+	 * Calls the given callback for each instanciated service
+	 * 
+	 * The service implementation instance is the first & only
+	 * parameter of the callback.
+	 * 
+	 * @param {Function} fn the callback
+	 * @return nothing
+	 */
+	forEach: function(fn) {
+		enyo.forEach(this.services, function(service) {
+			if (service.impl) {
+				fn(service.impl);
+			}
+		}, this);
 	},
 	//* @private
 	_handleReloadError: function(err) {

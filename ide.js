@@ -153,6 +153,24 @@ function handleMessage(service) {
 			if (service.origin.match(/^https:/)) {
 				console.info("Service['"+service.id+"']: connect to <"+service.origin+"> to accept SSL certificate");
 			}
+
+			var options = {
+				host:   service.dest.host,
+				port:   service.dest.port,
+				path:   '/config',
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json'
+				}
+			};
+			var creq = http.request(options, function(cres) {
+				console.info("Service['"+service.id+"']: POST /config response.status=" + cres.statusCode);
+			}).on('error', function(e) {
+				throw e;
+			});
+			creq.write(JSON.stringify({config: service}, null, 2));
+			creq.end();
+			
 		} else {
 			console.error("Error updating URL for service "+service.id);
 		}
@@ -297,6 +315,17 @@ function parseSetCookie(cookies) {
 	return outCookies;
 }
 
+function onExit() {
+	if (subProcesses.length > 0) {
+		console.log('Terminating sub-processes...');
+		subProcesses.forEach(function(subproc) {
+			process.kill(subproc.pid, 'SIGINT');
+		});
+		subProcesses = [];
+		console.log('Exiting...');
+	}
+}
+
 ide.res.services.filter(function(service){
 	return service.active;
 }).forEach(function(service){
@@ -362,10 +391,5 @@ process.on('uncaughtException', function (err) {
 	console.error(err.stack);
 	process.exit(1);
 });
-process.on('exit', function () {
-	console.log('Terminating sub-processes...');
-	subProcesses.forEach(function(process) {
-		process.kill();
-	});
-	console.log('Exiting...');
-});
+process.on('exit', onExit);
+process.on('SIGINT', onExit);

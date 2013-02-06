@@ -6,15 +6,11 @@ var fs = require("fs"),
     path = require("path"),
     express = require("express"),
     util  = require("util"),
-    querystring = require("querystring"),
     temp = require("temp"),
-    zipstream = require('zipstream'),
-    async = require("async"),
-    mkdirp = require("mkdirp"),
     http = require("http"),
-    child_process = require("child_process"),
     optimist = require('optimist'),
-    tools = require('nodejs-module-webos-ipkg'),
+    rimraf = require("rimraf"),
+    tools = require(__dirname + "/lib/project-gen"),
     CombinedStream = require('combined-stream');
 
 var basename = path.basename(__filename);
@@ -32,9 +28,11 @@ function BdOpenwebOS(config, next) {
 	console.log("config=",  util.inspect(config));
 
 	tools.registerTemplates([{
-		id: "bootplate-2.1.1",
-		url: "templates/projects/bootplate-2.1.1.zip",
-		description: "Enyo bootplate 2.1.1"
+		id: "bootplate-2.1.1-local",
+		zipfiles: [{
+			url: "templates/projects/bootplate-2.1.1.zip"
+		}],
+		description: "Enyo bootplate 2.1.1 (local)"
 	}]);
 
 	var app, server;
@@ -91,9 +89,9 @@ function BdOpenwebOS(config, next) {
 	// - 'application/json' => req.body
 	// - 'application/x-www-form-urlencoded' => req.body
 	// - 'multipart/form-data' => req.body.<field>[], req.body.file[]
-	var uploadDir = temp.path({prefix: 'com.palm.ares.hermes.bdOpenwebOS'}) + '.d';
-	fs.mkdirSync(uploadDir);
-	app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
+	this.uploadDir = temp.path({prefix: 'com.palm.ares.hermes.bdOpenwebOS'}) + '.d';
+	fs.mkdirSync(this.uploadDir);
+	app.use(express.bodyParser({keepExtensions: true, uploadDir: this.uploadDir}));
 
 	// Global error handler
 	function errorHandler(err, req, res, next){
@@ -117,6 +115,7 @@ function BdOpenwebOS(config, next) {
 
 	app.use(makeExpressRoute('/templates'), getList);
 	app.use(makeExpressRoute('/generate'), generate);
+	app.post(makeExpressRoute('/template-repos/:repoid'), addRepo);
 	
 	// Send back the service location information (origin,
 	// protocol, host, port, pathname) to the creator, when port
@@ -135,6 +134,16 @@ function BdOpenwebOS(config, next) {
 	function getList(req, res, next) {
 		tools.list(function(inError, inData) {
 			res.status(200).send(inData).end();
+		});
+	}
+
+	function addRepo(req, res, next) {
+		tools.registerRemoteTemplates(req.body.url, function(err) {
+			if (err) {
+				next(new HttpError(err, 500));
+				return;
+			}
+			res.status(200).end();
 		});
 	}
 
@@ -184,7 +193,13 @@ function BdOpenwebOS(config, next) {
 			res.header('Content-Type', getContentTypeHeader(boundary));
 			combinedStream.pipe(res);
 
-			// TODO cleanup the temp dir when the response has been sent
+			// cleanup the temp dir when the response has been sent
+			combinedStream.on('end', function() {
+				console.log("cleanup(): starting removal of " + destination);
+				rimraf(destination, function(err) {
+					console.log("cleanup(): removed " + destination);
+				});
+			});
 		});
 	}
 
@@ -222,6 +237,13 @@ function BdOpenwebOS(config, next) {
 		return '--' + boundary + '--';
 	}
 }
+
+BdOpenwebOS.prototype.onExit = function() {
+	var directory = this.uploadDir;
+	rimraf(directory, function(err) {
+		// Nothing to do
+	});
+};
 
 // Main
 if (path.basename(process.argv[1]) === basename) {
@@ -261,7 +283,7 @@ if (path.basename(process.argv[1]) === basename) {
 		process.exit(0);
 	}
 
-	new BdOpenwebOS({
+	var obj = new BdOpenwebOS({
 		pathname: argv.P,
 		port: parseInt(argv.p, 10),
 		enyoDir: argv.e
@@ -272,6 +294,8 @@ if (path.basename(process.argv[1]) === basename) {
 		if (process.send) process.send(service);
 	});
 
+	process.on('SIGINT', obj.onExit.bind(obj));
+	process.on('exit', obj.onExit.bind(obj));
 } else {
 
 	// ... otherwise hook into commonJS module systems

@@ -25,7 +25,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		├── 0
 		└── 1
 
-… corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.
+… corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.  The node descriptor Object format is defined by [this JSON schema](../assets/schema/com.enyojs.ares.fs.node.schema.json).
 
 		$ curl "http://127.0.0.1:9009/id/%2F?_method=PROPFIND&depth=10"
 		{
@@ -37,22 +37,24 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		            "isDir": false, 
 		            "path": "/0", 
 		            "name": "0", 
-		            "id": "%2F0"
+		            "id": "12efab780"
 		        }, 
 		        {
 		            "isDir": false, 
 		            "path": "/1", 
 		            "name": "1", 
-		            "id": "%2F1"
+		            "id": "0ae12ef56"
 		        }
 		    ], 
-		    "id": "%2F"
+		    "id": "934789346956340",
+		    "versionTag": "af34ef45",
 		}
 
 * `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded).  It returns a JSON-encoded single-level (depth=0) node descriptor of the new folder.
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
 
+* `GET` can be used only on files (not on folders).  The optional query parameter `versionTag` comes from a previous call to `GET` on the same file.  The HTTP header `x-ares-node	`(lowecase) contains a JSON-encoded version of the file's node descriptor (the one returned by `PROPFIND` for this file).  The n
 * `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.
   * `application/x-www-form-urlencoded` contains a single base64-encoded file in the form field named `content`.  The file name and location are provided by `{id}` and optionally `name` query parameter.
   * `multipart/form-data` follows the standard format.  For each file `filename` is interpreted relativelly to the folder `{id}` provided in the URL.  **Note:** To accomodate an issue with old Firefox releases (eg. Firefox 10), fields labelled `filename` overwrite the `filename` in their corresponding `file` fields.  See `fsBase#_putMultipart()` for more details.
@@ -62,7 +64,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2Ftata?_method=DELETE"
 
-* `COPY` reccursively copies a resource as a new `name` or `path` provided in the query string (one of them is required).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not.  The method returns the new status (`PROPFIND`) of the target resource.
+* `COPY` reccursively copies a resource as a new `name` or `folderId` provided in the query string (one of them is required, only one is taken into account, `name` takes precedence if both are provided in the query-string).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not.  The method returns the new status (`PROPFIND`) of the target resource.
   * `201/Created` success, a new resource is created
   * `200/Ok` success, an existing resource was successfully overwritten (query parameter `overwrite` was set to `true`)
   * `412/Precondition-Failed` failure, not allowed to copy onto an exising resource
@@ -103,8 +105,6 @@ For more detailled instructions, refer to the [Mocha home page](http://visionmed
 
 ### Dropbox
 
-**Note:** Dropbox implementation as a back-end is nowhere near to be complete:  currently, only the authentication & authorization is complete, and we have a first version of the `PROPFIND` verb without any caching.
-
 Ares comes with an Hermes service using your Dropbox account as a storage service.    Enable this service in the `ide.json` before starting the IDE server:
 
 	[…]
@@ -134,6 +134,23 @@ In order to use Dropbox as storage service for Ares, you need to [create an Ares
 **NOTE:** While Chrome & Firefox will notify you of a blocked popup (hence allowing you to explicitly un-block it), Safari users will need to explicitly allow every popups (unless there is s smarter way  am not aware of) using _Safari_ > _Preferences_ > _Security_ > Un-check _Block pop-up windows_
 
 **NOTE:** Ares gives 20 seconds to the browser to load the Dropbox authorization window & complete the procedure.  In case it takes longer, please press _Renew_ again:  another immediate attempt will be faster as the page will be partially available from the browser cache.
+
+Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to the [GitHub:node-tunnel](https://github.com/koichik/node-tunnel) library.  `fsDropbox` proxy configuration embeds a `node-tunnel` configuration.  For example, fellow-HP-ers can use the below (transform `Xproxy` into `proxy` in the sample ide.json):
+
+			[…]
+			"proxy":{
+				"http":{
+					"tunnel":"OverHttp",
+					"host":"web-proxy.corp.hp.com",
+					"port":8080
+				},
+				"https":{
+					"tunnel":"OverHttp",
+					"host":"web-proxy.corp.hp.com",
+					"port":8080
+				}
+			},
+			[…]
 
 ## Archive service
 
@@ -177,6 +194,7 @@ The entire [build.phonegap.com API](https://build.phonegap.com/docs/api) is wrap
 		XMLHttpRequest cannot load https://build.phonegap.com/token.
  		Origin http://127.0.0.1 is not allowed by Access-Control-Allow-Origin.
 
+**Note:** Ares PhoneGap Build connector does _not_ work behind an HTTP/HTTPS proxy yet.
 
 ### Protocol
 
