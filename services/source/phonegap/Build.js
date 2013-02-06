@@ -259,7 +259,7 @@ enyo.kind({
 	setKey: function(target, inKey) {
 		var keys, key;
 
-		if (typeof inKey.id !== 'number' || typeof inKey.title !== 'string') {
+		if (( ! inKey) || typeof inKey.id !== 'number' || typeof inKey.title !== 'string') {
 			this.warn("Will not store an invalid signing key:", inKey);
 			return;
 		}
