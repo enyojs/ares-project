@@ -103,8 +103,10 @@ enyo.kind({
 		}
 	},
 	save: function() {
-		this.unProxyUnknownKinds(this.$.sandbox);
-		return this.$.serializer.serialize(this.$.sandbox.children[0], this.$.model);
+		//TODO: Maybe use SerializeComponent? We're not going to actually serialize more than one at a time...
+		var comp = this.$.serializer.serialize(this.$.sandbox.children[0], this.$.model)[0];
+		comp = this.unProxyUnknownKinds(comp);
+		return enyo.json.codify.to([comp], null, 4);
 	},
 	deleteAction: function() {
 		if (this.selection) {
@@ -264,14 +266,8 @@ enyo.kind({
 		}
 		return newComponent;
 	},
-	unProxyArray: function(block) {
-	    var i;
-	    for (i=0; i < block.length; i++) {
-	        block[i]=this.unProxyUnknownKinds(block[i]);
-	    }
-        return block;
-	},
-	unProxyUnknownKinds: function(component) {
+	unProxyUnknownKinds: function(inComponent) {
+		var component = enyo.clone(inComponent);
 		if (component.realKind) {
 			component.kindName = component.realKind;
 			component.kind = component.realKind;
@@ -281,12 +277,13 @@ enyo.kind({
 			}
 		}
 		delete component.hadName;
-		var children = component.children;
-		if (children) {
+		if (component.components) {
+			var children = enyo.clone(component.components);
 			var i;
 			for (i=0; i< children.length; i++) {
 				children[i] = this.unProxyUnknownKinds(children[i]);
 			}
+			component.components = children;
 		}
 		return component;
 	},

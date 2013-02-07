@@ -4,7 +4,7 @@ enyo.kind({
 	//* public
 	serialize: function(inContainer, inOwner) {
 		var s = this._serialize(inContainer, inOwner);
-		return enyo.json.codify.to(s, null, 4);
+		return s;
 	},
 	//* public
 	getComponents: function(inContainer, inOwner) {
