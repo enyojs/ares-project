@@ -291,6 +291,7 @@ enyo.kind({
 		return (control === this.$.sandbox.children[0]);
 	},
 	// Convert an index entry's "components" to actual component definitions
+	// TODO: fix handling of non-quoted values, maybe merge with copyPropertiesFromIndexEntry?
 	componentsFromIndex: function(indexEntry) {
 		var i;
 		var block=[];
