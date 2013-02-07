@@ -1,0 +1,206 @@
+2013-01-30 09:41:50 [info] Executing: |open | /ide/ares/test.html?debug=true&norunner=true |  |
+2013-01-30 09:42:03 [info] Executing: |assertTitle | Ares |  |
+2013-01-30 09:42:04 [info] Executing: |clickAt | id=ares_projectView_projectList_iconButton3 |  |
+2013-01-30 09:42:05 [info] Executing: |clickAt | id=ares_projectView_projectWizardScan_providerList_item | Ares Test - Home Directory |
+2013-01-30 09:42:06 [info] Executing: |waitForText | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | root |
+2013-01-30 09:42:07 [info] Executing: |clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | root |
+2013-01-30 09:42:08 [info] Executing: |waitForText | ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption | HelloWorld |
+2013-01-30 09:42:09 [info] Executing: |clickAt | ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption | HelloWorld |
+2013-01-30 09:42:10 [info] Executing: |clickAt | ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption | HelloWorld |
+2013-01-30 09:42:11 [info] Executing: |waitForText | id=ares_projectView_projectWizardScan_confirm | OK |
+2013-01-30 09:42:12 [info] Executing: |clickAt | id=ares_projectView_projectWizardScan_confirm | OK |
+2013-01-30 09:42:13 [info] Executing: |waitForText | id=ares_projectView_projectList_projectList_ownerProxy_item | HelloWorld |
+2013-01-30 09:42:14 [info] Executing: |clickAt | id=ares_projectView_projectList_projectList_ownerProxy_item | HelloWorld |
+2013-01-30 09:42:15 [info] Executing: |waitForText | id=ares_projectView_projectList_previewButton |  |
+2013-01-30 09:42:16 [info] Executing: |clickAt | id=ares_projectView_projectList_previewButton |  |
+2013-01-30 09:42:16 [warn] Opening window '_blank', which is not a real window name.  Randomizing target to be: selenium_blank66603
+2013-01-30 09:42:16 [info] Changed test case
+2013-01-30 09:42:17 [info] Executing: |open | /ide/ares/test.html?debug=true&norunner=true |  |
+2013-01-30 09:42:20 [info] Executing: |verifyTextPresent | Ares |  |
+2013-01-30 09:42:21 [info] Executing: |assertTitle | Ares |  |
+2013-01-30 09:42:22 [info] Executing: |clickAt | id=ares_projectView_projectList_iconButton2 |  |
+2013-01-30 09:42:23 [info] Executing: |verifyTextPresent | Ares Test - Home Directory |  |
+2013-01-30 09:42:24 [info] Executing: |assertTextPresent | Ares Test - Home Directory |  |
+2013-01-30 09:42:25 [info] Executing: |clickAt | id=ares_projectView_projectWizardCreate_selectDirectoryPopup_providerList_name |  |
+2013-01-30 09:42:26 [info] Executing: |assertTextPresent | root |  |
+2013-01-30 09:42:27 [info] Executing: |assertTextPresent | NewProject |  |
+2013-01-30 09:42:28 [info] Executing: |clickAt | id=ares_projectView_projectWizardCreate_selectDirectoryPopup_hermesFileTree_serverNode_$NewProject_caption |  |
+2013-01-30 09:42:30 [info] Executing: |clickAt | id=ares_projectView_projectWizardCreate_selectDirectoryPopup_confirm |  |
+2013-01-30 09:42:31 [info] Executing: |waitForText | id=ares_projectView_projectWizardCreate_propertiesWidget_projectTitle |  |
+2013-01-30 09:42:32 [info] Executing: |type | id=ares_projectView_projectWizardCreate_propertiesWidget_projectTitle | projectForSelenumTest |
+2013-01-30 09:42:33 [info] Executing: |clickAt | id=ares_projectView_projectWizardCreate_propertiesWidget_ok |  |
+2013-01-30 09:42:34 [info] Executing: |clickAt | id=ares_projectView_projectList_projectList_ownerProxy_item |  |
+2013-01-30 09:42:35 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption |  |
+2013-01-30 09:42:36 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption |  |
+2013-01-30 09:42:37 [info] Executing: |waitForText | id=ares_projectView_harmonia_hermesFileTree_newFileButton |  |
+2013-01-30 09:42:38 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_newFileButton |  |
+2013-01-30 09:42:39 [info] Executing: |verifyValue | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName |  |
+2013-01-30 09:42:40 [info] Executing: |type | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | App1.js |
+2013-01-30 09:42:41 [info] Executing: |keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s |
+2013-01-30 09:42:42 [info] Executing: |keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s |
+2013-01-30 09:42:43 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton |  |
+2013-01-30 09:42:43 [info] Changed test case
+2013-01-30 09:42:44 [info] Executing: |open | /ide/ares/test.html?debug=true&norunner=true |  |
+2013-01-30 09:42:46 [info] Executing: |verifyTextPresent | Ares |  |
+2013-01-30 09:42:47 [info] Executing: |assertTitle | Ares |  |
+2013-01-30 09:42:48 [info] Executing: |clickAt | id=ares_projectView_projectList_iconButton3 |  |
+2013-01-30 09:42:49 [info] Executing: |verifyTextPresent | Ares Test - Home Directory |  |
+2013-01-30 09:42:50 [info] Executing: |assertTextPresent | Ares Test - Home Directory |  |
+2013-01-30 09:42:51 [info] Executing: |clickAt | id=ares_projectView_projectWizardScan_providerList_item |  |
+2013-01-30 09:42:52 [info] Executing: |assertTextPresent | root |  |
+2013-01-30 09:42:53 [info] Executing: |assertTextPresent | FileOps |  |
+2013-01-30 09:42:54 [info] Executing: |clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_$FileOps_caption |  |
+2013-01-30 09:42:55 [info] Executing: |clickAt | id=ares_projectView_projectWizardScan_confirm |  |
+2013-01-30 09:42:56 [info] Executing: |waitForText | id=ares_projectView_projectList_projectList_ownerProxy_item | FileOps |
+2013-01-30 09:42:58 [info] Executing: |clickAt | id=ares_projectView_projectList_projectList_ownerProxy_item | FileOps |
+2013-01-30 09:42:59 [info] Executing: |waitForText | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | FileOps |
+2013-01-30 09:43:00 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | FileOps |
+2013-01-30 09:43:01 [info] Executing: |waitForText | id=ares_projectView_harmonia_hermesFileTree_newFolderButton |  |
+2013-01-30 09:43:02 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_newFolderButton |  |
+2013-01-30 09:43:03 [info] Executing: |waitForText | id=ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName |  |
+2013-01-30 09:43:04 [info] Executing: |type | id=ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName | Source |
+2013-01-30 09:43:05 [info] Executing: |keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName | e |
+2013-01-30 09:43:06 [info] Executing: |keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName | e |
+2013-01-30 09:43:07 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_nameFolderPopup_confirmButton |  |
+2013-01-30 09:43:08 [info] Executing: |verifyElementPresent | id=ares_projectView_harmonia_hermesFileTree_serverNode_$Source_caption |  |
+2013-01-30 09:43:09 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_$Source_caption | Source |
+2013-01-30 09:43:10 [info] Executing: |clickAt | ares_projectView_harmonia_hermesFileTree_deleteFileButton |  |
+2013-01-30 09:43:11 [info] Executing: |waitForText | id=ares_projectView_harmonia_hermesFileTree_deletePopup_title | exact:Delete folder: Source? |
+2013-01-30 09:43:12 [info] Executing: |clickAt | ares_projectView_harmonia_hermesFileTree_deletePopup_button2 |  |
+2013-01-30 09:43:13 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption |  |
+2013-01-30 09:43:14 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_newFileButton |  |
+2013-01-30 09:43:15 [info] Executing: |type | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | App1.js |
+2013-01-30 09:43:16 [info] Executing: |keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s |
+2013-01-30 09:43:17 [info] Executing: |keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s |
+2013-01-30 09:43:18 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton |  |
+2013-01-30 09:43:19 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption |  |
+2013-01-30 09:43:20 [info] Executing: |waitForText | id=ares_projectView_harmonia_hermesFileTree_serverNode_$App1.js_caption | App1.js |
+2013-01-30 09:43:21 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_$App1.js_caption |  |
+2013-01-30 09:43:22 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_copyFileButton |  |
+2013-01-30 09:43:23 [info] Executing: |keyPress | id=ares_projectView_harmonia_hermesFileTree_copyFileButton | s |
+2013-01-30 09:43:24 [info] Executing: |keyUp | id=ares_projectView_harmonia_hermesFileTree_copyFileButton | s |
+2013-01-30 09:43:25 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_nameCopyPopup_confirmButton |  |
+2013-01-30 09:43:26 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_$Copy of App1.js_caption |  |
+2013-01-30 09:43:27 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_renameFileButton |  |
+2013-01-30 09:43:28 [info] Executing: |type | id=ares_projectView_harmonia_hermesFileTree_renamePopup_fileName | App2.js |
+2013-01-30 09:43:29 [info] Executing: |keyPress | id=ares_projectView_harmonia_hermesFileTree_renamePopup_fileName | s |
+2013-01-30 09:43:30 [info] Executing: |keyUp | id=ares_projectView_harmonia_hermesFileTree_renamePopup_fileName | s |
+2013-01-30 09:43:31 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_renamePopup_confirmButton |  |
+2013-01-30 09:43:31 [info] Changed test case
+2013-01-30 09:43:32 [info] Executing: |open | /ide/ares/test.html?debug=true&norunner=true |  |
+2013-01-30 09:43:35 [info] Executing: |verifyTextPresent | Ares |  |
+2013-01-30 09:43:36 [info] Executing: |assertTitle | Ares |  |
+2013-01-30 09:43:37 [info] Executing: |clickAt | id=ares_projectView_projectList_iconButton3 |  |
+2013-01-30 09:43:38 [info] Executing: |verifyTextPresent | Ares Test - Home Directory |  |
+2013-01-30 09:43:39 [info] Executing: |assertTextPresent | Ares Test - Home Directory |  |
+2013-01-30 09:43:40 [info] Executing: |clickAt | id=ares_projectView_projectWizardScan_providerList_item |  |
+2013-01-30 09:43:41 [info] Executing: |assertTextPresent | root |  |
+2013-01-30 09:43:42 [info] Executing: |assertTextPresent | FileOps |  |
+2013-01-30 09:43:43 [info] Executing: |clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_$FileOps_caption |  |
+2013-01-30 09:43:44 [info] Executing: |clickAt | id=ares_projectView_projectWizardScan_confirm |  |
+2013-01-30 09:43:45 [info] Executing: |waitForText | id=ares_projectView_projectList_projectList_ownerProxy_item | FileOps |
+2013-01-30 09:43:46 [info] Executing: |clickAt | id=ares_projectView_projectList_projectList_ownerProxy_item | FileOps |
+2013-01-30 09:43:47 [info] Executing: |waitForText | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | FileOps |
+2013-01-30 09:43:48 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | FileOps |
+2013-01-30 09:43:49 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_$App1.js_caption |  |
+2013-01-30 09:43:50 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_deleteFileButton |  |
+2013-01-30 09:43:51 [info] Executing: |verifyTextPresent | exact:Delete file: App1.js? |  |
+2013-01-30 09:43:52 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_deletePopup_button2 |  |
+2013-01-30 09:43:53 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_$App2.js_caption |  |
+2013-01-30 09:43:54 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_deleteFileButton |  |
+2013-01-30 09:43:55 [info] Executing: |verifyTextPresent | exact:Delete file: App2.js? |  |
+2013-01-30 09:43:56 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_deletePopup_button2 |  |
+2013-01-30 09:43:57 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption |  |
+2013-01-30 09:43:58 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_newFileButton |  |
+2013-01-30 09:43:59 [info] Executing: |type | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | package.js |
+2013-01-30 09:44:00 [info] Executing: |keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s |
+2013-01-30 09:44:01 [info] Executing: |keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s |
+2013-01-30 09:44:02 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton |  |
+2013-01-30 09:44:03 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption |  |
+2013-01-30 09:44:04 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_newFileButton |  |
+2013-01-30 09:44:05 [info] Executing: |type | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | index.html |
+2013-01-30 09:44:06 [info] Executing: |keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | l |
+2013-01-30 09:44:07 [info] Executing: |keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | l |
+2013-01-30 09:44:08 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton |  |
+2013-01-30 09:44:09 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_newFileButton |  |
+2013-01-30 09:44:10 [info] Executing: |type | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | App.js |
+2013-01-30 09:44:11 [info] Executing: |keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s |
+2013-01-30 09:44:12 [info] Executing: |keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s |
+2013-01-30 09:44:13 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton |  |
+2013-01-30 09:44:14 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption |  |
+2013-01-30 09:44:15 [info] Executing: |clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption |  |
+2013-01-30 09:44:16 [info] Executing: |click | id=ares_projectView_harmonia_hermesFileTree_serverNode_$App.js_caption |  |
+2013-01-30 09:44:17 [info] Executing: |doubleClick | id=ares_projectView_harmonia_hermesFileTree_serverNode_$App.js_caption |  |
+2013-01-30 09:44:18 [info] Executing: |verifyElementPresent | css=div.ace_content |  |
+2013-01-30 09:44:19 [info] Executing: |assertTextPresent | // Copyright 2013, $ORGANIZATION
+// All rights reserved.
+enyo.kind({
+    name: "App",
+    kind: "Control",
+    published: {
+    },
+    events: {
+    },
+    components: [
+    ],
+    create: function() {
+        this.inherited(arguments);
+        // initialization code goes here
+    }
+}); |  |
+2013-01-30 09:44:20 [info] Executing: |clickAt | id=ares_bottomBar_iconButton |  |
+2013-01-30 09:44:21 [info] Executing: |click | id=ares_projectView_harmonia_hermesFileTree_serverNode_$index.html_caption |  |
+2013-01-30 09:44:22 [info] Executing: |doubleClick | id=ares_projectView_harmonia_hermesFileTree_serverNode_$index.html_caption |  |
+2013-01-30 09:44:23 [info] Executing: |verifyElementPresent | css=div.ace_content |  |
+2013-01-30 09:44:24 [info] Executing: |assertTextPresent | <!doctype html>
+<html>
+    <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <!-- -->
+        <title>Enyo App</title>
+        <!-- -->
+        <script src="../../enyo/enyo.js" type="text/javascript"></script>
+        <!-- -->
+        <script src="package.js" type="text/javascript"></script>
+        <!-- -->
+    </head>
+    <body>
+        <script type="text/javascript">
+            new App().renderInto(document.body);
+        </script>
+    </body>
+</html> |  |
+2013-01-30 09:44:25 [info] Executing: |clickAt | id=ares_bottomBar_iconButton2 |  |
+2013-01-30 09:44:26 [info] Executing: |click | id=ares_projectView_harmonia_hermesFileTree_serverNode_$package.js_caption |  |
+2013-01-30 09:44:27 [info] Executing: |doubleClick | id=ares_projectView_harmonia_hermesFileTree_serverNode_$package.js_caption |  |
+2013-01-30 09:44:28 [info] Executing: |verifyElementPresent | css=div.ace_content |  |
+2013-01-30 09:44:29 [info] Executing: |verifyTextPresent | enyo.depends(
+    "$lib/layout",
+    "$lib/onyx",
+    "source"
+); |  |
+2013-01-30 09:44:30 [info] Executing: |clickAt | id=ares_bottomBar_iconButton3 |  |
+2013-01-30 09:44:30 [info] Changed test case
+2013-01-30 09:44:31 [info] Executing: |open | /ide/ares/test.html?debug=true&norunner=true |  |
+2013-01-30 09:44:34 [info] Executing: |assertTitle | Ares |  |
+2013-01-30 09:44:35 [info] Executing: |clickAt | id=ares_projectView_projectList_iconButton3 |  |
+2013-01-30 09:44:36 [info] Executing: |clickAt | id=ares_projectView_projectWizardScan_providerList_item | Ares Test - Home Directory |
+2013-01-30 09:44:37 [info] Executing: |waitForText | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | root |
+2013-01-30 09:44:38 [info] Executing: |clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | root |
+2013-01-30 09:44:39 [info] Executing: |waitForText | ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption | HelloWorld |
+2013-01-30 09:44:40 [info] Executing: |clickAt | ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption | HelloWorld |
+2013-01-30 09:44:41 [info] Executing: |clickAt | id=ares_projectView_projectWizardScan_confirm | OK |
+2013-01-30 09:44:42 [info] Executing: |waitForText | id=ares_projectView_projectList_projectList_ownerProxy_item | HelloWorld |
+2013-01-30 09:44:43 [info] Executing: |clickAt | id=ares_projectView_projectList_projectList_ownerProxy_item | HelloWorld |
+2013-01-30 09:44:44 [info] Executing: |clickAt | id=ares_projectView_projectList_button |  |
+2013-01-30 09:44:45 [info] Executing: |clickAt | id=ares_projectView_projectList_menuItem |  |
+2013-01-30 09:44:46 [info] Executing: |clickAt | id=ares_projectView_projectList_accountsConfigurator_accountsList_name |  |
+2013-01-30 09:44:47 [info] Executing: |assertText | id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_username |  |
+2013-01-30 09:44:48 [info] Executing: |assertText | id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_password |  |
+2013-01-30 09:44:49 [info] Executing: |clickAt | ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_checkBtn |  |
+2013-01-30 09:44:50 [info] Executing: |waitForText | id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId | 126903 |
+2013-01-30 09:44:53 [info] Executing: |assertText | id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId | 126903 |
+2013-01-30 09:44:54 [info] Executing: |clickAt | id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId |  |
+2013-01-30 09:44:55 [info] Executing: |selectWindow | name=PhoneGap Build Account Management |  |
+2013-01-30 09:44:56 [info] Executing: |assertTitle | Adobe PhoneGap Build |  |

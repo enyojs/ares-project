@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "PhonegapBuild",
+	name: "Phonegap.Build",
 	kind: "enyo.Component",
 	events: {
 		onLoginFailed: "",
@@ -15,7 +15,7 @@ enyo.kind({
 		this.config = {};
 	},
 	/**
-	 * Set PhonegapBuild base parameters.
+	 * Set Phonegap.Build base parameters.
 	 * 
 	 * This method is not expected to be called by anyone else but
 	 * {ServiceRegistry}.
@@ -39,6 +39,19 @@ enyo.kind({
 	 */
 	getConfig: function() {
 		return this.config;
+	},
+	/**
+	 * @return the human-friendly name of this service
+	 */
+	getName: function() {
+		return this.config.name || this.config.id;
+	},
+	/**
+	 * Name of the kind to show in the {ProjectProperties} UI
+	 * @return the Enyo kind to use to set Phonegap project properties
+	 */
+	getProjectPropertiesKind: function() {
+		return "Phonegap.ProjectProperties";
 	},
 	/**
 	 * @return true when configured, authenticated & authorized
@@ -246,7 +259,7 @@ enyo.kind({
 	setKey: function(target, inKey) {
 		var keys, key;
 
-		if (typeof inKey.id !== 'number' || typeof inKey.title !== 'string') {
+		if (( ! inKey) || typeof inKey.id !== 'number' || typeof inKey.title !== 'string') {
 			this.warn("Will not store an invalid signing key:", inKey);
 			return;
 		}
