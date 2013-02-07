@@ -14,7 +14,7 @@ var fs = require("fs"),
     express = require("express"),
     optimist = require("optimist"),
     util  = require('util'),
-    spawn = require('child_process').spawn,
+    childProcess = require('child_process'),
     querystring = require("querystring"),
     http = require('http') ;
 var myDir = typeof(__dirname) !== 'undefined' ?  __dirname : path.resolve('') ;
@@ -196,7 +196,7 @@ function startService(service) {
 		params.push('-v');
 	}
 	console.log("> Service['"+service.id+"']: executing '"+command+" "+params.join(" ")+"'");
-	var subProcess = spawn(command, params, options);
+	var subProcess = childProcess.spawn(command, params, options);
 	subProcess.stderr.on('data', serviceEcho(service));
 	subProcess.stdout.on('data', serviceEcho(service));
 	subProcess.on('exit', handleServiceExit(service));
@@ -351,7 +351,7 @@ if (argv.runtest) {
 
 var url = "http://" + addr + ":" + port + "/ide/ares/" + page;
 if (argv.browser) {
-	spawn(platformOpen[process.platform], [url]);
+	childProcess.spawn(platformOpen[process.platform], [url]);
 } else {
 	console.log("Ares now running at <" + url + ">");
 }
