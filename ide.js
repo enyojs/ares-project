@@ -356,6 +356,14 @@ if (argv.browser) {
 	console.log("Ares now running at <" + url + ">");
 }
 
+var mopUp = function () {
+	console.log('Terminating sub-processes...');
+	subProcesses.forEach(function(process) {
+		process.kill();
+	});
+	console.log('Exiting...');
+};
+
 if (typeof( window ) !== 'undefined') {
 	window.open(url) ;
 }
@@ -368,10 +376,4 @@ process.on('uncaughtException', function (err) {
 	console.error(err.stack);
 	process.exit(1);
 });
-process.on('exit', function () {
-	console.log('Terminating sub-processes...');
-	subProcesses.forEach(function(process) {
-		process.kill();
-	});
-	console.log('Exiting...');
-});
+process.on('exit', mopUp );
