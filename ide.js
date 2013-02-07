@@ -366,6 +366,7 @@ var mopUp = function () {
 
 if (typeof( window ) !== 'undefined') {
 	window.open(url) ;
+	window.on('close', mopUp) ;
 }
 
 // Exit path
