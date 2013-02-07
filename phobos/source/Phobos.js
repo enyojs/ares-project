@@ -19,7 +19,7 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll"},
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onF1: "f1"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -661,6 +661,11 @@ enyo.kind({
 		var ts = this.$.ace.editorSettingsPopup.Tsize;
 		this.log("ts",ts);
 		this.$.ace.setTabSize(ts);
+	},
+	
+	f1: function() {
+		console.log("weee",this.$.prof1);
+		this.$.ace.insertAtCursor(this.$.prof1);
 	}
 });
 
