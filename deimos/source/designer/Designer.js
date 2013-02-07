@@ -1,3 +1,4 @@
+/*global enyo, Designer, Documentor*/
 enyo.kind({
 	name: "Designer",
 	events: {
@@ -6,7 +7,7 @@ enyo.kind({
 	},
 	published: {
 		projectIndexer: null,	// Analyzer output for the current project
-		fileIndexer: null,		// Analyzer output for the current file
+		fileIndexer: null		// Analyzer output for the current file
 	},
 	components: [
 		{name: "model", kind: "Component"},
@@ -224,6 +225,7 @@ enyo.kind({
 		var name = component.kind;
 		var components;
 		var newComponent = enyo.clone(component);
+		var i;
 		
 		if (!enyo.constructorForKind(name)) {
 			var kind;
@@ -252,14 +254,12 @@ enyo.kind({
 		components = component.components;
 		if (components) {
 			newComponent.components=[];
-			var i;
 			for (i=0; i< components.length; i++) {
 				newComponent.components.push(this.proxyUnknownKinds(components[i]));
 			}
 		}
 		components = component.kindComponents;
 		if (components) {
-			var i;
 			for (i=0; i < components.length; i++) {
 				newComponent.kindComponents.push(this.proxyUnknownKinds(components[i]));
 			}
@@ -312,10 +312,29 @@ enyo.kind({
 		}
 		return block;
 	},
-	projectIndexerChanged: function() {
-		console.log("ready.");
-	},
 	statics: {
+		isQuoted: function(string) {
+			var start = string.charAt(0);
+			var end = string.charAt(string.length-1);
+			if (start === end) {
+				if (start == "'" || start == '"') {
+					return true;
+				}
+			}
+			return false;
+		},
+		convertPropertyValue: function(prop) {
+			var value = prop.value[0].token;
+			if (Designer.isQuoted(value)) {
+				return Documentor.stripQuotes(value);
+			} else if (value === "true") {
+				return true;
+			} else if (value === "false") {
+				return false;
+			} else {
+				return parseFloat(value);
+			}
+		},
 		/** Copy properties from an index entry into a components block object
 		*/
 		copyPropertiesFromIndexEntry: function(comp, o) {
@@ -336,7 +355,7 @@ enyo.kind({
 				var prop = o.properties[j];
 				var pName = prop.name;
 				if (isDesignProperty[pName]) {
-					var value = Documentor.stripQuotes(prop.value[0].name);
+					var value = Designer.convertPropertyValue(prop);
 					comp[pName] = value;
 				}
 			}
@@ -400,5 +419,5 @@ enyo.kind({
 		// In addition, kindComponents are marked with the _isChrome: true_ flag.
 		this.createChrome(this.kindComponents);
 		this.createClientComponents(this.components);
-	},
+	}
 });
