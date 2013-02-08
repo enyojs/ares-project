@@ -225,6 +225,7 @@ enyo.kind({
 		var name = component.kind;
 		var components;
 		var newComponent = enyo.clone(component);
+		newComponent._ares = {};
 		var i;
 		
 		if (!enyo.constructorForKind(name)) {
@@ -240,15 +241,16 @@ enyo.kind({
 			}
 			newComponent.kind = "Ares.Proxy";
 			newComponent.realKind = name;
-			if (component.name) {
-				newComponent.hadName = true;
-			}
 		} else {
 			if (name !== undefined) {
 				newComponent.kind=name;
 			} else {
 				this.log("undefined kind");
 			}
+		}
+		// remember if this component had an explicit name
+		if (component.name) {
+			newComponent._ares.nameSet = true;
 		}
 		// process components from "components" block
 		components = component.components;
@@ -268,15 +270,15 @@ enyo.kind({
 	},
 	unProxyUnknownKinds: function(inComponent) {
 		var component = enyo.clone(inComponent);
+		component._ares = enyo.clone(inComponent._ares);
 		if (component.realKind) {
 			component.kindName = component.realKind;
 			component.kind = component.realKind;
 			delete component.realKind;
 		}
-		if (!component.hadName) {
+		if (!component._ares.nameSet) {
 			delete component.name;
 		}
-		delete component.hadName;
 		if (component.components) {
 			var children = enyo.clone(component.components);
 			var i;
@@ -285,6 +287,7 @@ enyo.kind({
 			}
 			component.components = children;
 		}
+		delete component._ares;
 		return component;
 	},
 	isRootControl: function(control) {
@@ -391,7 +394,6 @@ enyo.kind({
     name: "Ares.Proxy",
 	published: {
 		realKind: "",
-		hadName: false
 	},
 	create: function() {
 		this.inherited(arguments);

@@ -44,10 +44,15 @@ enyo.kind({
 			kind: this.getComponentKindName(inComponent)
 		};
 		var ps = this.buildPropList(inComponent, "published");
+		ps.push("_ares");
 		var proto = inComponent.ctor.prototype;
 		for (var j=0, p; (p=ps[j]); j++) {
 			if (!this.noserialize[p] && proto[p] != inComponent[p] && inComponent[p] !== "") {
-				o[p] = inComponent[p];
+				if (p == "_ares") {
+					o[p] = enyo.clone(inComponent[p]);
+				} else {
+					o[p] = inComponent[p];
+				}
 			}
 		}
 		return o;
