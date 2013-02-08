@@ -280,7 +280,6 @@ enyo.kind({
 		var component = enyo.clone(inComponent);
 		component._ares = enyo.clone(inComponent._ares);
 		if (component.realKind) {
-			component.kindName = component.realKind;
 			component.kind = component.realKind;
 			delete component.realKind;
 		}
