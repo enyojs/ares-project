@@ -107,9 +107,9 @@ function platformSubst(inStr) {
 	return outStr;
 }
 var platformOpen = {
-	win32: "Start",
-	darwin: "open",
-	linux: "xdg-open"
+	win32: [ "cmd" , '/c', 'start' ],
+	darwin:[ "open" ],
+	linux: [ "xdg-open" ]
 };
 
 var configPath;
@@ -351,7 +351,8 @@ if (argv.runtest) {
 
 var url = "http://" + addr + ":" + port + "/ide/ares/" + page;
 if (argv.browser) {
-	childProcess.spawn(platformOpen[process.platform], [url]);
+	var info = platformOpen[process.platform] ;
+	childProcess.spawn(info[0], info.slice(1).concat([url]));
 } else {
 	console.log("Ares now running at <" + url + ">");
 }
