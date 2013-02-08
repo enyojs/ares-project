@@ -105,9 +105,9 @@ enyo.kind({
 	},
 	save: function() {
 		//TODO: Maybe use SerializeComponent? We're not going to actually serialize more than one at a time...
-		var comp = this.$.serializer.serialize(this.$.sandbox.children[0], this.$.model)[0];
-		comp = this.unProxyUnknownKinds(comp);
-		return enyo.json.codify.to([comp], null, 4);
+		var comp = this.$.serializer.serialize(this.$.sandbox.children[0], this.$.model);
+		comp = this.unProxyArray(comp);
+		return enyo.json.codify.to(comp, null, 4);
 	},
 	deleteAction: function() {
 		if (this.selection) {
@@ -267,6 +267,14 @@ enyo.kind({
 			}
 		}
 		return newComponent;
+	},
+	unProxyArray: function(inArray) {
+	    var i;
+		var a=[];
+	    for (i=0; i < inArray.length; i++) {
+	        a[i]=this.unProxyUnknownKinds(inArray[i]);
+	    }
+        return a;
 	},
 	unProxyUnknownKinds: function(inComponent) {
 		var component = enyo.clone(inComponent);
