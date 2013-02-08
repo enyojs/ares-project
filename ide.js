@@ -355,10 +355,6 @@ if (argv.browser) {
 	console.log("Ares now running at <" + url + ">");
 }
 
-if (window) {
-	window.open(url) ;
-}
-
 // Exit path
 
 console.info("Press CTRL + C to shutdown");
