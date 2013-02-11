@@ -184,12 +184,15 @@ enyo.kind({
 			v = num;
 		}
 
+		var previous = this.selected.getProperty(n);
 		this.debug && this.log(n, v);
 		this.selected.setProperty(n, v);
 		if (n==="name") {
 			this.selected._ares.nameSet=true;
 		}
-		this.doModify();
+		if (previous !== v) {
+			this.doModify();
+		}
 	},
 	dblclick: function(inSender, inEvent) {
 		if (inEvent.target.extra === "events") {
