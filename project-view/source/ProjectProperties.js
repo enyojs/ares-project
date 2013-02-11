@@ -254,6 +254,20 @@ enyo.kind({
 		return this ;
 	},
 
+	update: function(inData) {
+		var conf = this.config ;
+
+		enyo.forEach(enyo.keys(inData), function(key) {
+			conf[key] = inData[key];
+		});
+		this.$.projectId.     setValue(conf.id      || '' );
+		this.$.projectVersion.setValue(conf.version || '' );
+		this.$.projectTitle.  setValue(conf.title   || '' );
+
+		return this ;
+	},
+
+
 	showService: function(serviceId) {
 		var service = this.services[serviceId];
 		var config = this.config && this.config.build &&
