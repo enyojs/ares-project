@@ -16,7 +16,6 @@ enyo.kind({
 		onSaveGeneratedXml: "",
 		onDone: ""
 	},
-	createMode: true,
 
 	components: [
 		{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", components: [
@@ -78,7 +77,7 @@ enyo.kind({
 				]}
 			]},
 			{kind: "enyo.FittableColumns", name: "servicesList"},
-			{kind: "enyo.FittableColumns", components: [
+			{kind: "enyo.FittableColumns", name: "templatesEntry", showing: false, components: [
 				{kind: "Control", content: "Template:"},
 				{kind: "onyx.PickerDecorator", fit: true, components: [
 					{name: "templateButton", kind: "onyx.PickerButton", fit: true},
@@ -199,6 +198,7 @@ enyo.kind({
 	setupCreate: function() {
 		//this.$.ok.setDisabled(true) ;
 		this.$.directoryEntry.show() ;
+		this.$.templatesEntry.show();
 	},
 
 	/**
@@ -207,6 +207,7 @@ enyo.kind({
 	setupModif: function() {
 		//this.$.ok.setDisabled(true) ;
 		this.$.directoryEntry.hide() ;
+		this.$.templatesEntry.hide();
 	},
 
 	/**
