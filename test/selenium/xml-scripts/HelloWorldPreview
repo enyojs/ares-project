@@ -23,12 +23,12 @@
 <selenese>
 	<command>waitForText</command>
 	<target><![CDATA[id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption]]></target>
-	<value><![CDATA[server]]></value>
+	<value><![CDATA[root]]></value>
 </selenese>
 <selenese>
 	<command>clickAt</command>
 	<target><![CDATA[id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption]]></target>
-	<value><![CDATA[server]]></value>
+	<value><![CDATA[root]]></value>
 </selenese>
 <selenese>
 	<command>waitForText</command>
