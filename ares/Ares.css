@@ -104,6 +104,10 @@ body {
 .ares_phobos_settingspop {
 	width: 300px;
 }
+.ares_phobos_esb {
+	width: 45px;
+}
+
 /**/
 .border {
 	background-color: whiteSmoke;
