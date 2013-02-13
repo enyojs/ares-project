@@ -32,7 +32,8 @@ enyo.kind({
 		onBuildStarted: "phonegapBuildStarted",
 		onPreview: "launchPreview",
 		onError: "showError",
-		onShowWaitPopup: "handleShowWaitPopup"
+		onShowWaitPopup: "handleShowWaitPopup",
+		onHideWaitPopup: "hideWaitPopup"
 	},
 	create: function() {
 		this.inherited(arguments);
