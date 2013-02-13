@@ -9,7 +9,8 @@ enyo.kind({
 	classes: "enyo-unselectable",
 	events: {
 		onAddProjectInList: "",
-		onShowWaitPopup: ""
+		onShowWaitPopup: "",
+		onHideWaitPopup: ""
 	},
 	handlers: {
 		onDirectorySelected: "prepareShowProjectPropPopup",
@@ -183,8 +184,19 @@ enyo.kind({
 
 	waitOk:function(err, results) {
 		if (err) {
-			this.log("An error occured: ", err);
+			var showError = true;
+			if (err.handled && (err.handled === true)) {
+				showError = false;
+			}
+
+			if (showError) {
+				this.$.selectDirectoryPopup.hide();
+				this.hideMe();
+				this.log("An error occured: ", err);
+				this.$.errorPopup.raise(err.msg);
+			}
 		}
+		// Else: nothing to do
 	},
 
 	// step 3: actually create project in ares data structure
@@ -230,6 +242,7 @@ enyo.kind({
 		req.error(this, function(inSender, inError) {
 			this.log("Unable to get the template files (" + inError + ")");
 			this.$.errorPopup.raise('Unable to instanciate projet content from the template');
+			this.doHideWaitPopup();
 		});
 	},
 
@@ -243,6 +256,7 @@ enyo.kind({
 		req.response(this, this.projectReady);
 		req.error(this, function(inEvent, inData) {
 			this.$.errorPopup.raise('Unable to create projet content from the template');
+			this.doHideWaitPopup();
 		});
 	},
 
