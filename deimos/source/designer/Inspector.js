@@ -38,7 +38,7 @@ enyo.kind({
 	},
 	buildPropList: function(inControl) {
 
-		var kindName = (inControl.kindName === "Ares.Proxy" && inControl.realKind) || inControl.kindName;
+		var kindName = inControl.kind;
 		var currentKind = kindName;
 
 		var definition = this.getKindDefinition(currentKind);
@@ -154,7 +154,7 @@ enyo.kind({
 		this.$.content.destroyComponents();
 		this.selected = inControl;
 		if (inControl) {
-			var kindName = (inControl.kindName === "Ares.Proxy" && inControl.realKind) || inControl.kindName;
+			var kindName = inControl.kind;
 			this.$.content.createComponent({tag: "h3", content: kindName, classes: "label label-info"});
 			ps = this.buildPropList(inControl);
 
@@ -185,8 +185,8 @@ enyo.kind({
 		}
 
 		this.debug && this.log(n, v);
-		this.selected.setProperty(n, v);
-		this.doModify();
+		//this.selected.setProperty(n, v);
+		this.doModify({name: n, value: v});
 	},
 	dblclick: function(inSender, inEvent) {
 		if (inEvent.target.extra === "events") {
@@ -246,7 +246,7 @@ enyo.kind({
 	 * @protected
 	 */
 	fileIndexerChanged: function() {
-		this.localKinds = {};	// Reset the list of kind for the currently edited file
+		this.localKinds = {};	// Reset the list of kinds for the currently edited file
 		if (this.fileIndexer && this.fileIndexer.objects) {
 			for(var i = 0, o; (o = this.fileIndexer.objects[i]); i++) {
 				this.localKinds[o.name] = o;

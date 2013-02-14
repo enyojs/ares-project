@@ -21,8 +21,10 @@ enyo.kind({
 			]},
 			{name: "body", fit: true, classes: "deimos_panel_body",kind: "FittableColumns", components: [
 				{name: "left", classes:"ares_deimos_left", kind: "Palette", ondragstart: "dragStart"},
-				{name: "middle", fit: true, kind: "FittableRows",components: [
-					{kind: "Designer", fit: true, onChange: "designerChange", onSelect: "designerSelect", ondragstart: "dragStart", onDesignRendered: "designRendered"},
+				{name: "middle", fit: true, kind: "FittableRows", style: "border:2px solid yellow;", components: [
+					{kind: "IFrameDesigner", name: "designer", fit: true,
+						onChange: "designerChange", onSelect: "designerSelect", onSelected: "designerSelected", ondragstart: "dragStart", onDesignRendered: "designRendered"
+					},
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
 					{kind: "FittableColumns", components: [
@@ -30,7 +32,8 @@ enyo.kind({
 						{name:"downButton", kind: "onyx.Button", content: "Down", ontap: "downAction"},
 						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"}
 					]},
-					{kind: "ComponentView", classes: "deimos_panel ares_deimos_componentView", onSelect: "componentViewSelect", ondrop: "componentViewDrop"},
+					{kind: "ComponentView", classes: "deimos_panel ares_deimos_componentView",
+						onSelect: "componentViewSelect", onHighlightDropTarget: "highlightDesignerDropTarget", onUnHighlightDropTargets: "unhighlightDesignerDropTargets", onDrop: "componentViewDrop"},
 					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
 				]}
 			]}
@@ -80,6 +83,8 @@ enyo.kind({
 		// Pass the project information (analyzer output, ...) to the inspector
 		this.$.inspector.setProjectData(data.projectData);
 		this.$.inspector.setFileIndexer(data.fileIndexer);
+		// Pass the project URL to the designer
+		this.$.designer.updateSource(data.projectData.attributes["project-url"]);
 	},
 	kindSelected: function(inSender, inEvent) {
 		/* FIXME
@@ -89,9 +94,8 @@ enyo.kind({
 		 */
 		var index = inSender.getSelected().index;
 		var kind = this.kinds[index];
-
 		if (index !== this.index) {
-
+		
 			if (this.index !== null && this.getEdited()) {
 				// save changes when switching kinds
 				var modified = this.$.designer.getComponents();
@@ -99,13 +103,12 @@ enyo.kind({
 				this.kinds[this.index].content = this.$.designer.save();
 				this.sendUpdateToAres();
 			}
-
+			
 			this.$.inspector.inspect(null);
-			this.$.designer.load(kind);
-			this.refreshComponentView();
+			this.$.designer.setCurrentKind(kind);
 		}
-
-		this.index=index;
+		
+		this.index = index;
 		this.$.kindButton.setContent(kind.name);
 		this.$.toolbar.reflow();
 		return true; // Stop the propagation of the event
@@ -115,9 +118,9 @@ enyo.kind({
 			this.$.inspector.inspect(this.$.designer.selection);
 		}), 200);
 	},
-	refreshComponentView: function() {
-		this.$.componentView.visualize(this.$.designer.$.sandbox, this.$.designer.$.model);
-		this.$.componentView.select(this.$.designer.selection);
+	refreshComponentView: function(inComponents) {
+		this.$.componentView.visualize(inComponents);
+		// TODO this.$.componentView.select(this.$.designer.selection);
 	},
 	designerChange: function(inSender) {
 		this.refreshComponentView();
@@ -125,23 +128,40 @@ enyo.kind({
 		this.setEdited(true);
 		//TODO: Is it "worth it" to send all intermediate updates to the editor?
 		this.sendUpdateToAres();
-		return true; // Stop the propagation of the event
+		return true;
 	},
 	designerSelect: function(inSender, inEvent) {
 		var c = inSender.selection;
 		this.refreshInspector();
 		this.$.componentView.select(c);
 		this.enableDisableButtons(c);
-		return true; // Stop the propagation of the event
+		return true;
 	},
-	componentViewSelect: function(inSender) {
-		var c = inSender.selection;
-		this.$.designer.select(c);
+	designerSelected: function(inSender, inEvent) {
 		this.refreshInspector();
-		this.enableDisableButtons(c);
-		return true; // Stop the propagation of the event
+		return true;
 	},
-	inspectorModify: function() {
+	componentViewSelect: function(inSender, inEvent) {
+		this.$.designer.select(inEvent.component);
+		// TODO this.enableDisableButtons(c);
+		return true;
+	},
+	highlightDesignerDropTarget: function(inSender, inEvent) {
+		this.$.designer.highlightDropTarget(inEvent.component);
+		return true;
+	},
+	unhighlightDesignerDropTargets: function(inSender, inEvent) {
+		this.$.designer.unHighlightDropTargets();
+		return true;
+	},
+	componentViewDrop: function(inSender, inEvent) {
+		return this.$.designer.drop(inEvent);
+	},
+	inspectorModify: function(inSender, inEvent) {
+		this.log(inEvent);
+		this.$.designer.modifyProperty(inEvent.name, inEvent.value);
+		return;
+		
 		this.refreshComponentView();
 		this.$.designer.refresh();
 		this.setEdited(true);
@@ -149,13 +169,12 @@ enyo.kind({
 		this.sendUpdateToAres();
 		return true; // Stop the propagation of the event
 	},
-	componentViewDrop: function(inSender, inEvent) {
-		return this.$.designer.drop(inSender, inEvent);
-	},
 	dragStart: function(inSender, inEvent) {
+		this.log();
 		return true; // Stop the propagation of the event
 	},
 	drag: function(inSender, inEvent) {
+		this.log();
 		if (inEvent.dragInfo) {
 			this.$.dragAvatar.drag(inEvent);
 			return true; // Stop the propagation of the event
@@ -191,8 +210,8 @@ enyo.kind({
 	},
 	// When the designer finishes rendering, re-build the components view
 	// TODO: Build this from the Model, not by trawling the view hierarchy...
-	designRendered: function() {
-		this.refreshComponentView();
+	designRendered: function(inSender, inEvent) {
+		this.refreshComponentView(inEvent.components);
 		return true; // Stop the propagation of the event
 	},
 	saveComplete: function() {

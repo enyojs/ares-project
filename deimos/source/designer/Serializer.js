@@ -2,35 +2,44 @@ enyo.kind({
 	name: "Serializer",
 	kind: "Component",
 	//* public
-	serialize: function(inContainer, inOwner) {
-		var s = this._serialize(inContainer, inOwner);
+	serialize: function(inContainer) {
+		var s = this._serialize(inContainer);
 		return enyo.json.codify.to(s, null, 4);
 	},
-	//* public
-	getComponents: function(inContainer, inOwner) {
-		return this._serialize(inContainer, inOwner);
+	getComponents: function(inContainer) {
+		return this._serialize(inContainer);
+	},
+	serializeComponent: function(inComponent) {
+		var s = this._serializeComponent(inComponent);
+		return enyo.json.codify.to(s, null, 4);
 	},
 	//* protected
-	_serialize: function(inContainer, inOwner) {
-		var s = [];
-		var c$ = inContainer.getClientControls();
+	_serialize: function(inContainer) {
+		var s = [],
+			c$ = this.getAresComponents(inContainer);
+		
 		for (var i=0, c; (c=c$[i]); i++) {
-			if (c.owner == inOwner) {
-				s.push(this._serializeComponent(c, inOwner));
-			}
+			s.push(this._serializeComponent(c));
 		}
+		
 		return s;
 	},
-	//* public
-	serializeComponent: function(inComponent, inOwner) {
-		var s = this._serializeComponent(inComponent, inOwner);
-		return enyo.json.codify.to(s, null, 4);
+	getAresComponents: function(inContainer) {
+		var a = [],
+			c$  = inContainer.controls;
+		
+		for(var i=0, c;(c=c$[i]);i++) {
+			if(c.aresComponent == "true") {
+				a.push(c);
+			}
+		}
+		
+		return a;
 	},
-	//* protected
-	_serializeComponent: function(inComponent, inOwner) {
+	_serializeComponent: function(inComponent) {
 		var p = this.serializeProps(inComponent);
 		if (inComponent instanceof enyo.Control) {
-			var cs = this._serialize(inComponent, inOwner);
+			var cs = this._serialize(inComponent);
 			if (cs && cs.length) {
 				p.components = cs;
 			}
@@ -38,7 +47,7 @@ enyo.kind({
 		this.serializeEvents(p, inComponent);
 		return p;
 	},
-	noserialize: {owner: 1, container: 1, parent: 1, id: 1, attributes: 1, selected: 1, active: 1, isContainer: 1},
+	noserialize: {owner: 1, container: 1, parent: 1, id: 0, attributes: 1, selected: 1, active: 1, isContainer: 1},
 	serializeProps: function(inComponent) {
 		var o = {
 			kind: this.getComponentKindName(inComponent)
