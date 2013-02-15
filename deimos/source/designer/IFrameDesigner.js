@@ -17,7 +17,7 @@ enyo.kind({
 	],
 	baseSource: "../deimos/source/designer/iframe.html",
 	selection: null,
-	this.sandboxData: null,
+	sandboxData: null,
 	rendered: function() {
 		this.inherited(arguments);
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);

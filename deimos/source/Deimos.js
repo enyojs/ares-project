@@ -19,9 +19,7 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction", style: "float:right;"}
 			]},
 			{name: "body", fit: true, classes: "deimos_panel_body",kind: "FittableColumns", components: [
-				{name: "left", classes:"ares_deimos_left", kind: "Palette",
-					//ondown: "paletteDown", ondragstart: "paletteDragstart", ondragover: "paletteDragover", ondragleave: "paletteDragleave", ondrop: "paletteDrop"
-				},
+				{name: "left", classes:"ares_deimos_left", kind: "Palette"},
 				{name: "middle", fit: true, kind: "FittableRows", style: "border:2px solid yellow;", components: [
 					{kind: "IFrameDesigner", name: "designer", fit: true,
 						onDesignChange: "designerChange", onSelect: "designerSelect", onSelected: "designerSelected", onDesignRendered: "designRendered", onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
@@ -121,9 +119,6 @@ enyo.kind({
 	},
 	designerChange: function(inSender) {
 		this.setEdited(true);
-		
-		//TODO: Is it "worth it" to send all intermediate updates to the editor?
-		this.sendUpdateToAres();
 		return true;
 	},
 	// New selected item triggered in iframe. Synchronize component view and refresh inspector.
@@ -166,8 +161,6 @@ enyo.kind({
 		this.$.designer.refresh();
 		this.setEdited(true);
 		
-		//TODO: Is it "worth it" to send all intermediate updates to the editor?
-		this.sendUpdateToAres();
 		return true; // Stop the propagation of the event
 	},
 	prepareDesignerUpdate: function() {
@@ -185,6 +178,7 @@ enyo.kind({
 	},
 	closeDesignerAction: function(inSender, inEvent) {
 		// Prepare the data for the code editor
+		this.sendUpdateToAres();
 		var event = this.prepareDesignerUpdate();
 		this.$.inspector.setProjectData(null);
 		this.doCloseDesigner(event);
