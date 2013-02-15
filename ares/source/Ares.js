@@ -137,6 +137,7 @@ enyo.kind({
 	designerUpdate: function(inSender, inEvent) {
 		if (inEvent && inEvent.docHasChanged) {
 			this.$.phobos.updateComponents(inSender, inEvent);
+			this.$.phobos.saveDocAction();	// <--- Should we save here?
 		}
 	},
 	handleBeforeUnload: function() {

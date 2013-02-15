@@ -8,7 +8,7 @@ enyo.kind({
 		{kind: "DragAvatar", components: [
 			{tag: "img", src: "$deimos/images/icon.png", style: "width: 24px; height: 24px;"}
 		]},
-		{kind: "FittableRows", classes: "enyo-fit", components: [
+		{classes: "enyo-fit", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 0 10px;", name: "toolbar", components: [
 				{name: "docLabel", content: "Deimos"},
 				{kind: "onyx.PickerDecorator", components: [
@@ -16,8 +16,7 @@ enyo.kind({
 					{name: "kindPicker", kind: "onyx.Picker", onChange: "kindSelected", components: [
 					]}
 				]},
-				{fit: true},
-				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction"}
+				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction", style: "float:right;"}
 			]},
 			{name: "body", fit: true, classes: "deimos_panel_body",kind: "FittableColumns", components: [
 				{name: "left", classes:"ares_deimos_left", kind: "Palette",
@@ -25,7 +24,7 @@ enyo.kind({
 				},
 				{name: "middle", fit: true, kind: "FittableRows", style: "border:2px solid yellow;", components: [
 					{kind: "IFrameDesigner", name: "designer", fit: true,
-						onChange: "designerChange", onSelect: "designerSelect", onSelected: "designerSelected", onDesignRendered: "designRendered", onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
+						onDesignChange: "designerChange", onSelect: "designerSelect", onSelected: "designerSelected", onDesignRendered: "designRendered", onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
 					},
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
@@ -41,12 +40,6 @@ enyo.kind({
 			]}
 		]}
 	],
-	/*
-	handlers: {
-		ondrag: "drag",
-		ondragfinish: "dragFinish"
-	},
-	*/
 	events: {
 		onCloseDesigner: "",
 		onDesignerUpdate: ""
@@ -125,12 +118,10 @@ enyo.kind({
 	},
 	refreshComponentView: function(inComponents) {
 		this.$.componentView.visualize(inComponents);
-		// TODO this.$.componentView.select(this.$.designer.selection);
 	},
 	designerChange: function(inSender) {
-		this.refreshComponentView();
-		this.refreshInspector();
 		this.setEdited(true);
+		
 		//TODO: Is it "worth it" to send all intermediate updates to the editor?
 		this.sendUpdateToAres();
 		return true;
@@ -168,35 +159,16 @@ enyo.kind({
 		return this.$.designer.drop(inEvent);
 	},
 	inspectorModify: function(inSender, inEvent) {
-		this.log(inEvent);
 		this.$.designer.modifyProperty(inEvent.name, inEvent.value);
 		return;
 		
 		this.refreshComponentView();
 		this.$.designer.refresh();
 		this.setEdited(true);
+		
 		//TODO: Is it "worth it" to send all intermediate updates to the editor?
 		this.sendUpdateToAres();
 		return true; // Stop the propagation of the event
-	},
-	dragStart: function(inSender, inEvent) {
-		this.log();
-		return true; // Stop the propagation of the event
-	},
-	drag: function(inSender, inEvent) {
-		this.log();
-		if (inEvent.dragInfo) {
-			this.$.dragAvatar.drag(inEvent);
-			return true; // Stop the propagation of the event
-		}
-	},
-	dragFinish: function(inSender, inEvent) {
-		if (inEvent.dragInfo) {
-			inEvent.preventTap();
-			this.$.dragAvatar.hide();
-			//this.refreshInspector();
-			return true; // Stop the propagation of the event
-		}
 	},
 	prepareDesignerUpdate: function() {
 		if (this.index !== null) {

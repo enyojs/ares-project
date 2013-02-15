@@ -14,6 +14,7 @@ enyo.kind({
 		return enyo.json.codify.to(s, null, 4);
 	},
 	//* protected
+	noserialize: {owner: 1, container: 1, parent: 1, id: 0, attributes: 1, selected: 1, active: 1, isContainer: 1},
 	_serialize: function(inContainer) {
 		var s = [],
 			c$ = this.getAresComponents(inContainer);
@@ -47,7 +48,6 @@ enyo.kind({
 		this.serializeEvents(p, inComponent);
 		return p;
 	},
-	noserialize: {owner: 1, container: 1, parent: 1, id: 0, attributes: 1, selected: 1, active: 1, isContainer: 1},
 	serializeProps: function(inComponent) {
 		var o = {
 			kind: this.getComponentKindName(inComponent)

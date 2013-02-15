@@ -133,7 +133,11 @@ enyo.kind({
 		var kind = (info && info.inputKind);
 		var v = inControl[inName];
 		if (v === undefined) {
-			v="";
+			v = enyo.constructorForKind(inControl.kind).prototype[inName];	// <--- TODO - this is using the Ares code rather than the project
+			/* Need to do analyzer check here to find prototype for this kind */
+			if(v === undefined) {
+				v = "";
+			}
 		}
 
 		// Select the good input kind

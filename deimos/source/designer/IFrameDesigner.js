@@ -8,7 +8,8 @@ enyo.kind({
 		onDesignRendered: "",
 		onSelect: "",
 		onSelected: "",
-		onSyncDropTargetHighlighting: ""
+		onSyncDropTargetHighlighting: "",
+		onDesignChange: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", style: "width:100%;height:100%;border:none;"},
@@ -16,6 +17,7 @@ enyo.kind({
 	],
 	baseSource: "../deimos/source/designer/iframe.html",
 	selection: null,
+	this.sandboxData: null,
 	rendered: function() {
 		this.inherited(arguments);
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
@@ -43,8 +45,9 @@ enyo.kind({
 			this.setIframeReady(true);
 			this.renderCurrentKind();
 		} else if(msg.op === "rendered") {
-			this.log(enyo.json.codify.from(msg.val));
+			this.sandboxData = msg.val;
 			this.doDesignRendered({components: enyo.json.codify.from(msg.val)});
+			this.doDesignChange(); // TODO <---- only do this when a change occurs
 		// Select event sent from here was completed successfully. Set _this.selection_.
 		} else if(msg.op === "selected") {
 			this.selection = enyo.json.codify.from(msg.val);
@@ -92,5 +95,8 @@ enyo.kind({
 	},
 	modifyProperty: function(inProperty, inValue) {
 		this.sendMessage({op: "modify", val: {property: inProperty, value: inValue}});
-	}
+	},
+	save: function() {
+		return this.sandboxData;
+	},
 });

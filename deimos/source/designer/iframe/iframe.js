@@ -48,20 +48,29 @@ enyo.kind({
 		}
 	},
 	
-	//* Highlight the specified conrol and send a message with a serialized copy of the control
+	/**
+		Response to message sent from Deimos. Highlight the specified conrol
+		and send a message with a serialized copy of the control.
+	*/
 	selectItem: function(inItem) {
 		this.selectedItem = null;
 		
 		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
 			if(c.id === inItem.id) {
 				this.selectedItem = c;
-				this.highlightDragItem(c);
+				this.highlightSelectedItem();
 			} else {
 				this.unHighlightItem(c);
 			}
 		}
 		
 		this.sendMessage({op: "selected", val: this.$.serializer.serializeComponent(this.selectedItem)});
+	},
+	//* Set _inItem_ to _this.selected_ and notify Deimos
+	directSelectItem: function(inItem) {
+		this.selectedItem = inItem;
+		this.highlightSelectedItem();
+		this.sendMessage({op: "select", val: this.$.serializer.serializeComponent(this.selectedItem)});
 	},
 	highlightItem: function(inItem) {
 		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
@@ -208,8 +217,7 @@ enyo.kind({
 			return false;
 		}
 		
-		this.selectItem(inEvent.originator);
-		this.sendMessage({op: "select", val: this.$.serializer.serializeComponent(this.selectedItem)});
+		this.directSelectItem(inEvent.originator);
 	},
 	dragstart: function(inSender, inEvent) {
 		if(!inEvent.dataTransfer) {
@@ -314,10 +322,16 @@ enyo.kind({
 			inComponent.applyStyle("background","#cedafe");
 		}
 	},
-	highlightDragItem: function(inComponent) {
-		if(typeof inComponent.origBackground === "undefined") {
-			inComponent.origBackground = inComponent.domStyles.background || null;
-			inComponent.applyStyle("background","orange");
+	//* Highlight _this.selectedItem_ and unhighlight everything else
+	highlightSelectedItem: function() {
+		if(typeof this.selectedItem.origBackground === "undefined") {
+			this.selectedItem.origBackground = this.selectedItem.domStyles.background || null;
+			this.selectedItem.applyStyle("background","orange");
+		}
+		for(var i=0, c;(c = this.flattenChildren(this.$.client.children)[i]);i++) {
+			if(c !== this.selectedItem) {
+				this.unHighlightItem(c);
+			}
 		}
 	},
 	unHighlightItem: function(inComponent) {
@@ -332,54 +346,46 @@ enyo.kind({
 	},
 	
 	
-	
+	/**
+		Create an object copy of the _inDroppedControl_, then destroy and recreate it
+		as a child of _inTargetControl_
+	*/
 	dropControl: function(inDroppedControl, inTargetControl) {
-		this.log("Drop item ", inDroppedControl.name, " onto item ", inTargetControl.name);
-		var droppedControlClone = enyo.clone(inDroppedControl),
-			controls = inDroppedControl.parent.controls,
-			children = inDroppedControl.parent.children,
-			control,
-			child,
-			controlIndex,
-			childIndex;
+		var droppedControlCopy = this.getSerializedCopyOfComponent(inDroppedControl),
+			newComponent;
 		
-		// Get this control's index in _parent.controls_
-		for(var i=0;(control = controls[i]);i++) {
-			if(control === inDroppedControl) {
-				controlIndex = i;
-				break;
-			}
-		}
+		inDroppedControl.destroy();
 		
-		// Remove this control from _parent.controls_ and add it to _inTargetControl.controls_
-		inDroppedControl.parent.controls.splice(controlIndex, 1);
-		inTargetControl.controls.push(inDroppedControl);
-		
-		// Get this control's index in _parent.children_
-		for(var i=0;(child = children[i]);i++) {
-			if(child === inDroppedControl) {
-				childIndex = i;
-				break;
-			}
-		}
-		
-		// Remove this control from _parent.children and add it to _inTargetControl.children_
-		inDroppedControl.parent.children.splice(controlIndex, 1);
-		inTargetControl.children.push(inDroppedControl);
+		// Add needed flags to new component
+		this.makeComponentDraggable(droppedControlCopy);
+		this.flagAresComponent(droppedControlCopy);
+		newComponent = inTargetControl.createComponent(droppedControlCopy, {owner: this.parentInstance});
 		
 		this.refreshClient();
+		// Maintain selected state
+		this.directSelectItem(newComponent);
 	},
+	/**
+		Create a new component, brought in from the Palette. This component's initial properties
+		are defined in the design.js file associated with the current library.
+	*/
 	createNewComponent: function(inNewComponent, inDropTarget) {
 		this.makeComponentDraggable(inNewComponent);
 		this.flagAresComponent(inNewComponent);
 		
 		var newComponent = inDropTarget.createComponent(inNewComponent, {owner: this.parentInstance});
+		
+		// If we have a placeholder name, set it accordingly
 		if(newComponent.getContent() === "$name") {
 			newComponent.setContent(newComponent.name);
 		}
 
 		this.refreshClient();
-		this.selectItem(newComponent);
+		// Select the newly added item
+		this.directSelectItem(newComponent);
+	},
+	getSerializedCopyOfComponent: function(inComponent) {
+		return enyo.json.codify.from(this.$.serializer.serializeComponent(inComponent));
 	},
 	refreshClient: function() {
 		this.$.client.render();
