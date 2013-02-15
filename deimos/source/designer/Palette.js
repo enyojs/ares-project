@@ -25,7 +25,7 @@ enyo.kind({
 		this.$.list.build();
 	},
 	setupItem: function(inSender, inEvent) {
-		inEvent.item.$.paletteItem.setModel(this.model.items[inEvent.index]);
+		inEvent.item.$.paletteItem.setModel(this.model.items[inEvent.index]); // <---- TODO - sibling reference, should be fixed up
 		return true;
 	}
 });
@@ -33,12 +33,23 @@ enyo.kind({
 enyo.kind({
 	name: "PaletteItem",
 	components: [
-		{kind: "Control", classes: "palette-item", components: [
+		{kind: "Control", classes: "palette-item", attributes: {draggable: true}, components: [
 			{name: "icon", kind: "Image", showing: false},
 			{name: "name"},
 			{classes: "row-fluid", name: "client"},
 		]}
 	],
+	handlers: {
+		ondragstart: "decorateDragEvent"
+	},
+	//* On dragstart, add _this.config_ data to drag event
+	decorateDragEvent: function(inSender, inEvent) {
+		if(!inEvent.dataTransfer) {
+			return true;
+		}
+		
+		inEvent.config = this.config;
+	},
 	setModel: function(inModel) {
 		if (inModel) {
 			for (var n in inModel) {
@@ -72,7 +83,8 @@ enyo.kind({
 				{kind: "onyx.Input", fit:true, placeholder: "filter"},
 				{kind: "onyx.Icon", src:"$deimos/images/search-input-search.png", style:"height:20px;"}
 			]}
-		]}
+		]},
+		{name: "serializer", kind: "Serializer"}
 	],
 	statics: {
 		model: []
@@ -112,13 +124,15 @@ enyo.kind({
 		return true;
 	},
 	dragstart: function(inSender, inEvent) {
-		var o = inEvent.originator;
-		while (o && o != this) {
-			if (o instanceof PaletteItem) {
-				inEvent.dragInfo = o.config;
-				return true;
-			}
-			o = o.parent;
+		if(!inEvent.dataTransfer) {
+			return false;
 		}
+		
+		var configInfo = inEvent.config;
+		configInfo.op = "newControl";
+		configInfo = enyo.json.codify.to(configInfo);
+		
+		inEvent.dataTransfer.setData("Text", configInfo);
+        return true;
 	}
 });

@@ -7,7 +7,8 @@ enyo.kind({
 	events: {
 		onDesignRendered: "",
 		onSelect: "",
-		onSelected: ""
+		onSelected: "",
+		onSyncDropTargetHighlighting: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", style: "width:100%;height:100%;border:none;"},
@@ -19,38 +20,54 @@ enyo.kind({
 		this.inherited(arguments);
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
 	},
+	currentKindChanged: function() {
+		this.inherited(arguments);
+		this.renderCurrentKind();
+	},
+	
 	updateSource: function(inSource) {
 		this.setIframeReady(false);
 		this.$.client.hasNode().src = this.baseSource + "?src=" + inSource;
 	},
+	
+	//* Send message via communicator
 	sendMessage: function(inMessage) {
 		this.$.communicator.sendMessage(inMessage);
 	},
+	//* Respond to message from communicator
 	receiveMessage: function(inSender, inEvent) {
 		var msg = inEvent.message;
+		
+		// Iframe is loaded and ready to do work.
 		if(msg.op === "state" && msg.val === "ready") {
 			this.setIframeReady(true);
 			this.renderCurrentKind();
 		} else if(msg.op === "rendered") {
-			// Re-codify json string and bubble
+			this.log(enyo.json.codify.from(msg.val));
 			this.doDesignRendered({components: enyo.json.codify.from(msg.val)});
+		// Select event sent from here was completed successfully. Set _this.selection_.
 		} else if(msg.op === "selected") {
 			this.selection = enyo.json.codify.from(msg.val);
 			this.doSelected({component: this.selection});
+		// New select event triggered in iframe. Set _this.selection_ and bubble.
+		} else if(msg.op === "select") {
+			this.selection = enyo.json.codify.from(msg.val);
+			this.doSelect({component: this.selection});
+		// Highlight drop target to minic what's happening in iframe
+		} else if(msg.op === "syncDropTargetHighlighting") {
+			this.doSyncDropTargetHighlighting({component: enyo.json.codify.from(msg.val)});
 		}
 	},
+	
+	//* Tell iFrame to render the current kind
 	renderCurrentKind: function() {
 		if(!this.getIframeReady()) {
-			this.log("Can't render current kind - iFrame not ready.")
 			return;
 		}
 		
 		this.sendMessage({op: "render", val: this.getCurrentKind()});
 	},
-	currentKindChanged: function() {
-		this.inherited(arguments);
-		this.renderCurrentKind();
-	},
+	
 	select: function(inControl) {
 		this.sendMessage({op: "select", val: inControl});
 		return;
@@ -75,36 +92,5 @@ enyo.kind({
 	},
 	modifyProperty: function(inProperty, inValue) {
 		this.sendMessage({op: "modify", val: {property: inProperty, value: inValue}});
-	}
-});
-
-
-enyo.kind({
-	name: "RPCCommunicator",
-	kind: "enyo.Component",
-	published: {
-		remote: window.parent
-	},
-	events: {
-		onMessage: ""
-	},
-	sendMessage: function(inMessage) {
-		//this.log("designer sending message:", inMessage);
-		this.getRemote().postMessage({message: inMessage}, "*");
-	},
-	//* @protected
-	create: function() {
-		this.inherited(arguments);
-		this.setupRPC();
-	},
-	remoteChanged: function() {
-		this.inherited(arguments);
-	},
-	setupRPC: function() {
-		enyo.dispatcher.listen(window, "message", enyo.bind(this, "receiveMessage"));
-	},
-	receiveMessage: function(inMessage) {
-		//this.log("designer receiving message:", inMessage);
-		this.doMessage(inMessage.data);
 	}
 });

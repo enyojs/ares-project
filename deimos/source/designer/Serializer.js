@@ -29,7 +29,7 @@ enyo.kind({
 			c$  = inContainer.controls;
 		
 		for(var i=0, c;(c=c$[i]);i++) {
-			if(c.aresComponent == "true") {
+			if(c.aresComponent) {
 				a.push(c);
 			}
 		}

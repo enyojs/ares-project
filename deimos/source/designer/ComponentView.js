@@ -17,11 +17,6 @@ enyo.kind({
 		]}
 	],
 	indent: 32,
-	//* On create, add HTML5 drag-and-drop handlers
-	create: function() {
-		this.inherited(arguments);
-		this.addHandlers();
-	},
 	
 	//* Component view events
 	drag: function(inSender, inEvent) {
@@ -31,12 +26,14 @@ enyo.kind({
 		return true;
 	},
 	
+	//* Draw component view visualization of component tree
 	visualize: function(inComponents) {
 		this.map = {};
 		this.destroyClientControls();
 		this._visualize(inComponents, 0);
 		this.render();
 	},
+	//* Create an entry in the component view
 	createEntry: function(inComponent, inIndent) {
 		this.map[inComponent.name] = this.createComponent(
 			{comp: inComponent, style: "padding-left: " + inIndent + "px;", attributes: {draggable: "true", dropTarget: "true"},
@@ -48,6 +45,7 @@ enyo.kind({
 			}
 		);
 	},
+	//* Create component view representation of designer
 	_visualize: function(inComponents, inIndent) {
 		for (var i=0, c; (c=inComponents[i]); i++) {
 			this.createEntry(c, inIndent);
@@ -56,7 +54,7 @@ enyo.kind({
 			}
 		}
 	},
-	
+	//* Unhighlight existing selection and set _this.selection_ to _inComponent_
 	select: function(inComponent) {
 		if(this.selection) {
 			this.unHighlightItem(this.selection);
@@ -64,6 +62,15 @@ enyo.kind({
 		
 		this.selection = inComponent;
 		this.highlightDragItem(this.selection);
+	},
+	//* Select control with _comp.id_ that matches _inComponent_
+	setSelected: function(inComponent) {
+		for(var i=0, c;(c=this.getClientControls()[i]);i++) {
+			if(c.comp.id === inComponent.id) {
+				this.select(c);
+				return;
+			}
+		}
 	},
 	
 	//* Item events
@@ -144,15 +151,15 @@ enyo.kind({
 			inComponent.origBackground = undefined;
 		}
 	},
-	
-	//* Add dispatch for native drag events
-	addHandlers: function(inSender, inEvent) {
-		document.ondragstart = enyo.dispatch;
-		document.ondrag =      enyo.dispatch;
-		document.ondragenter = enyo.dispatch;
-		document.ondragleave = enyo.dispatch;
-		document.ondragover =  enyo.dispatch;
-		document.ondrop =      enyo.dispatch;
-		document.ondragend =   enyo.dispatch;
+	syncDropTargetHighlighting: function(inComponent) {
+		var id = inComponent ? inComponent.id : null;
+		
+		for(var i=0, c;(c=this.getClientControls()[i]);i++) {
+			if(c.comp.id === id) {
+				this.highlightDropTarget(c);
+			} else if(c !== this.selection) {
+				this.unHighlightItem(c);
+			}
+		}
 	}
 });

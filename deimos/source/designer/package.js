@@ -9,5 +9,6 @@
 	"ComponentView.js",
 	"InspectorConfig.js",
 	"Sandbox.js",
-	"IFrameDesigner.js"
+	"IFrameDesigner.js",
+	"RPCCommunicator.js"
 );

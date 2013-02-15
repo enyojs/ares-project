@@ -3,18 +3,19 @@ enyo.kind({
 	kind: "FittableColumns",
 	classes: "enyo-fit",
 	handlers: {
-		ondown:			"down",
-		ondragstart:	"dragstart",
-		ondragover: 	"dragover",
-		ondragleave:	"dragleave",
-		ondrop:			"drop"
+		ondragleave: "iframeDragleave"
 	},
 	components: [
-		{name: "client", fit: true, classes:"enyo-fit"},
+		{name: "client", fit: true, classes:"enyo-fit",
+			ondragleave: "dragleave", ondown: "down", ondragstart: "dragstart", ondragover: "dragover", ondrop: "drop"
+		},
 		{name: "serializer", kind: "Serializer"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"}
 	],
+	
 	selectedItem: null,
+	parentInstance: null,
+	
 	create: function() {
 		this.inherited(arguments);
 		this.addHandlers();
@@ -32,8 +33,7 @@ enyo.kind({
 		
 		if(msg.op === "render") {
 			if(this.renderKind(msg.val.name)) {
-				var c = this.$.client.getClientControls()[0];
-				this.sendMessage({op: "rendered", val: this.$.serializer.serialize(c)});
+				this.kindUpdated();
 			}
 		} else if(msg.op === "select") {
 			this.selectItem(msg.val);
@@ -95,11 +95,17 @@ enyo.kind({
 		}
 		
 		this.unhighlightDropTargets();
+		
+		// Make sure item wasn't dropped on itself or it's children (TODO)
+		if(target === null || item === target) {
+			return;
+		}
+		
 		this.dropControl(item, target);
 	},
 	modifyProperty: function(inData) {
 		this.selectedItem[inData.property] = inData.value;
-		this.$.client.render();
+		this.refreshClient();
 	},
 	
 	//* Render the specified kind into the iFrame
@@ -119,9 +125,13 @@ enyo.kind({
 		this.makeKindComponentsDraggable(kindComponents);
 		this.flagAresComponents(kindComponents);
 		
-		this.$.client.createComponent({kind: inKindName}).render();
+		this.parentInstance = this.$.client.createComponent({kind: inKindName}).render();
 		
 		return true;
+	},
+	//* Send update to Deimos with serialized copy of current kind component structure
+	kindUpdated: function() {
+		this.sendMessage({op: "rendered", val: this.$.serializer.serialize(this.parentInstance)});
 	},
 	
 	//* Get each kind component individually
@@ -163,38 +173,50 @@ enyo.kind({
 	//* Add the attribute _draggable="true"_ to each kind component
 	makeKindComponentsDraggable: function(inComponents) {
 		for(var i=0,child;(child = inComponents[i]);i++) {
-			if(child.attributes) {
-				child.attributes.draggable = "true";
-				child.attributes.dropTarget = "true";
-			} else {
-				child.attributes = {
-					draggable: "true",
-					dropTarget: "true"
-				};
-			}
+			this.makeComponentDraggable(child);
 		}
 	},
-	
+	makeComponentDraggable: function(inComponent) {
+		if(inComponent.attributes) {
+			inComponent.attributes.draggable =  true;
+			inComponent.attributes.dropTarget = true;
+		} else {
+			inComponent.attributes = {
+				draggable:  true,
+				dropTarget: true
+			};
+		}
+	},
+	//* Flag components that are interactive in the designer with _aresComponent=true_
 	flagAresComponents: function(inComponents) {
 		for(var i=0, c;(c = inComponents[i]);i++) {
-			c.aresComponent = "true";
+			this.flagAresComponent(c);
 		}
+	},
+	flagAresComponent: function(inComponent) {
+		inComponent.aresComponent = true;
 	},
 	getAresComponents: function(inContainer) {
 		// TODO
 	},
 	
 	down: function(inSender, inEvent) {
+		// If this item isn't an ares component, find it's parent that is
+		inEvent.originator = this.updateDragOriginator(inEvent.originator);
 		
+		if(!inEvent.originator || !inEvent.originator.aresComponent) {
+			return false;
+		}
+		
+		this.selectItem(inEvent.originator);
+		this.sendMessage({op: "select", val: this.$.serializer.serializeComponent(this.selectedItem)});
 	},
 	dragstart: function(inSender, inEvent) {
 		if(!inEvent.dataTransfer) {
 			return false;
 		}
 
-		this.draggingItem = inEvent.originator;
-		
-		inEvent.dataTransfer.setData('Text', this.$.serializer.serializeComponent(this.draggingItem));
+		inEvent.dataTransfer.setData('Text', this.$.serializer.serializeComponent(this.selectedItem));
         return true;
 	},
 	dragover: function(inSender, inEvent) {
@@ -202,15 +224,24 @@ enyo.kind({
 			return false;
 		}
 		
+		inEvent.preventDefault();
+		
 		inEvent.originator = this.updateDragOriginator(inEvent.originator);
 		
-		if(!inEvent.originator || inEvent.originator === this.draggingItem) {
+		if(!inEvent.originator || inEvent.originator === this.selectedItem) {
+			this.currentDropTarget = null;
+			this.syncDropTargetHighlighting();
 			return false;
 		}
 		
-		this.highlightDropTarget(inEvent.originator);
+		if(this.currentDropTarget && this.currentDropTarget === inEvent.originator) {
+			return false;
+		}
 		
-		inEvent.preventDefault();
+		this.currentDropTarget = inEvent.originator;
+		this.highlightDropTarget(this.currentDropTarget);
+		this.syncDropTargetHighlighting();
+		
 		return true;
 	},
 	dragleave: function(inSender, inEvent) {
@@ -220,61 +251,59 @@ enyo.kind({
 		
 		inEvent.originator = this.updateDragOriginator(inEvent.originator);
 		
-		if(!inEvent.originator || inEvent.originator === this.draggingItem) {
+		if(!inEvent.originator || inEvent.originator === this.selectedItem) {
 			return false;
 		}
 		
 		this.unHighlightItem(inEvent.originator);
+		this.syncDropTargetHighlighting();
 		
 		return true;
 	},
+	iframeDragleave: function(inSender, inEvent) {
+		// TODO - unhighlight all when dragging out of iframe.
+	},
 	drop: function(inSender, inEvent) {
+		var dropData;
+		
 		if(!inEvent.dataTransfer) {
 			return false;
 		}
 		
 		inEvent.originator = this.updateDragOriginator(inEvent.originator);
 		
-		if(!inEvent.originator || inEvent.originator === this.draggingItem) {
+		if(!inEvent.originator || inEvent.originator === this.selectedItem) {
 			return false;
 		}
 		
-		this.unhighlightDropTargets();
+		dropData = enyo.json.codify.from(inEvent.dataTransfer.getData("Text"));
 		
-		/*
-			If we have a dragging Item (i.e. the drag came from within the iframe),
-			use it for the drop. Otherwise look at the dataTransfer data to find
-			the dragging item.
-		*/
-		if(this.draggingItem) {
-			this.dropControl(this.draggingItem, inEvent.originator);
-			this.draggingItem = null;
-		} else {
-			this.foreignDrop(enyo.json.codify.from(inEvent.dataTransfer.getData("Text")), inEvent.originator);
+		this.currentDropTarget = null;
+		
+		this.unhighlightDropTargets();
+		this.syncDropTargetHighlighting();
+		
+		if(dropData.id) {
+			this.dropControl(this.getControlById(dropData.id), inEvent.originator);
+		} else if(dropData.op && dropData.op === "newControl") {
+			this.createNewComponent(dropData, inEvent.originator);
 		}
 		
         return true;
 	},
-	//* Handle a drop that came from outside of the iframe
-	foreignDrop: function(inDropData, inDropTarget) {
-		var draggedItem,
-			c,
-			i;
-		
-		for(i=0;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
-			if(c.id === inDropData.id) {
-				draggedItem = c;
+	getControlById: function(inId) {
+		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
+			if(c.id === inId) {
+				return c;
 			}
 		}
-		
-		this.dropControl(draggedItem, inDropTarget);
 	},
 	
 	updateDragOriginator: function(inComponent) {
 		return (!this.isDropTarget(inComponent)) ? this.findNextDropTarget(inComponent) : inComponent;
 	},
 	isDropTarget: function(inComponent) {
-		return (inComponent.attributes && inComponent.attributes.dropTarget && inComponent.attributes.dropTarget == "true");
+		return (inComponent.attributes && inComponent.attributes.dropTarget);
 	},
 	findNextDropTarget: function(inComponent) {
 		return (!inComponent.owner) ? null : (this.isDropTarget(inComponent.owner)) ? inComponent.owner : this.findNextDropTarget(inComponent.owner);
@@ -297,13 +326,65 @@ enyo.kind({
 			inComponent.origBackground = undefined;
 		}
 	},
+	syncDropTargetHighlighting: function() {
+		var dropTarget = this.currentDropTarget ? this.$.serializer.serializeComponent(this.currentDropTarget) : null;
+		this.sendMessage({op: "syncDropTargetHighlighting", val: dropTarget});
+	},
 	
 	
 	
 	dropControl: function(inDroppedControl, inTargetControl) {
 		this.log("Drop item ", inDroppedControl.name, " onto item ", inTargetControl.name);
+		var droppedControlClone = enyo.clone(inDroppedControl),
+			controls = inDroppedControl.parent.controls,
+			children = inDroppedControl.parent.children,
+			control,
+			child,
+			controlIndex,
+			childIndex;
+		
+		// Get this control's index in _parent.controls_
+		for(var i=0;(control = controls[i]);i++) {
+			if(control === inDroppedControl) {
+				controlIndex = i;
+				break;
+			}
+		}
+		
+		// Remove this control from _parent.controls_ and add it to _inTargetControl.controls_
+		inDroppedControl.parent.controls.splice(controlIndex, 1);
+		inTargetControl.controls.push(inDroppedControl);
+		
+		// Get this control's index in _parent.children_
+		for(var i=0;(child = children[i]);i++) {
+			if(child === inDroppedControl) {
+				childIndex = i;
+				break;
+			}
+		}
+		
+		// Remove this control from _parent.children and add it to _inTargetControl.children_
+		inDroppedControl.parent.children.splice(controlIndex, 1);
+		inTargetControl.children.push(inDroppedControl);
+		
+		this.refreshClient();
 	},
-	
+	createNewComponent: function(inNewComponent, inDropTarget) {
+		this.makeComponentDraggable(inNewComponent);
+		this.flagAresComponent(inNewComponent);
+		
+		var newComponent = inDropTarget.createComponent(inNewComponent, {owner: this.parentInstance});
+		if(newComponent.getContent() === "$name") {
+			newComponent.setContent(newComponent.name);
+		}
+
+		this.refreshClient();
+		this.selectItem(newComponent);
+	},
+	refreshClient: function() {
+		this.$.client.render();
+		this.kindUpdated();
+	},
 	
 	
 	//* Add dispatch for native drag events
@@ -315,35 +396,5 @@ enyo.kind({
 		document.ondragover =  enyo.dispatch;
 		document.ondrop =      enyo.dispatch;
 		document.ondragend =   enyo.dispatch;
-	}
-});
-
-enyo.kind({
-	name: "RPCCommunicator",
-	kind: "enyo.Component",
-	published: {
-		remote: window.parent
-	},
-	events: {
-		onMessage: ""
-	},
-	sendMessage: function(inMessage) {
-		//this.log("iframe sending message:", inMessage);
-		this.getRemote().postMessage({message: inMessage}, "*");
-	},
-	//* @protected
-	create: function() {
-		this.inherited(arguments);
-		this.setupRPC();
-	},
-	remoteChanged: function() {
-		this.inherited(arguments);
-	},
-	setupRPC: function() {
-		enyo.dispatcher.listen(window, "message", enyo.bind(this, "receiveMessage"));
-	},
-	receiveMessage: function(inMessage) {
-		//this.log("iframe receiving message:", inMessage);
-		this.doMessage(inMessage.data);
 	}
 });

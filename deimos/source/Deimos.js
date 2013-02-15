@@ -20,10 +20,12 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction"}
 			]},
 			{name: "body", fit: true, classes: "deimos_panel_body",kind: "FittableColumns", components: [
-				{name: "left", classes:"ares_deimos_left", kind: "Palette", ondragstart: "dragStart"},
+				{name: "left", classes:"ares_deimos_left", kind: "Palette",
+					//ondown: "paletteDown", ondragstart: "paletteDragstart", ondragover: "paletteDragover", ondragleave: "paletteDragleave", ondrop: "paletteDrop"
+				},
 				{name: "middle", fit: true, kind: "FittableRows", style: "border:2px solid yellow;", components: [
 					{kind: "IFrameDesigner", name: "designer", fit: true,
-						onChange: "designerChange", onSelect: "designerSelect", onSelected: "designerSelected", ondragstart: "dragStart", onDesignRendered: "designRendered"
+						onChange: "designerChange", onSelect: "designerSelect", onSelected: "designerSelected", onDesignRendered: "designRendered", onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
 					},
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
@@ -39,10 +41,12 @@ enyo.kind({
 			]}
 		]}
 	],
+	/*
 	handlers: {
 		ondrag: "drag",
 		ondragfinish: "dragFinish"
 	},
+	*/
 	events: {
 		onCloseDesigner: "",
 		onDesignerUpdate: ""
@@ -52,6 +56,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.kinds=[];
 		this.index=null;
+		this.addHandlers();
 	},
 	/**
 	 * Loads the first kind passed thru the data parameter
@@ -130,13 +135,15 @@ enyo.kind({
 		this.sendUpdateToAres();
 		return true;
 	},
+	// New selected item triggered in iframe. Synchronize component view and refresh inspector.
 	designerSelect: function(inSender, inEvent) {
 		var c = inSender.selection;
 		this.refreshInspector();
-		this.$.componentView.select(c);
-		this.enableDisableButtons(c);
+		this.$.componentView.setSelected(c);
+		// TODO this.enableDisableButtons(c);
 		return true;
 	},
+	// Select event triggered by component view was completed. Refresh inspector.
 	designerSelected: function(inSender, inEvent) {
 		this.refreshInspector();
 		return true;
@@ -145,6 +152,9 @@ enyo.kind({
 		this.$.designer.select(inEvent.component);
 		// TODO this.enableDisableButtons(c);
 		return true;
+	},
+	syncComponentViewDropTargetHighlighting: function(inSender, inEvent) {
+		this.$.componentView.syncDropTargetHighlighting(inEvent.component);
 	},
 	highlightDesignerDropTarget: function(inSender, inEvent) {
 		this.$.designer.highlightDropTarget(inEvent.component);
@@ -244,6 +254,17 @@ enyo.kind({
 	sendUpdateToAres: function() {
 		this.doDesignerUpdate(this.prepareDesignerUpdate());
 		this.setEdited(false);
+	},
+	
+	//* Add dispatch for native drag events
+	addHandlers: function(inSender, inEvent) {
+		document.ondragstart = enyo.dispatch;
+		document.ondrag =      enyo.dispatch;
+		document.ondragenter = enyo.dispatch;
+		document.ondragleave = enyo.dispatch;
+		document.ondragover =  enyo.dispatch;
+		document.ondrop =      enyo.dispatch;
+		document.ondragend =   enyo.dispatch;
 	}
 });
 
