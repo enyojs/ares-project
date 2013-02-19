@@ -1,6 +1,6 @@
---- ./HelloWorldPhoneGapSettings.java	2013-02-15 15:50:22.000000000 +0100
-+++ /Users/mariandebonis/Documents/workspace/Selenium-Ares-TestSuite/src/AresTestSuite/HelloWorldPhoneGapSettings.java	2013-02-15 16:03:11.000000000 +0100
-@@ -1,97 +1,195 @@
+--- HelloWorldPhoneGapSettings.java	2013-02-15 15:50:22.000000000 +0100
++++ /Users/mariandebonis/Documents/workspace/Selenium-Ares-TestSuite/src/AresTestSuite/HelloWorldPhoneGapSettings.java	2013-02-19 14:07:28.000000000 +0100
+@@ -1,97 +1,204 @@
 -package com.example.tests;
 +package AresTestSuite;
  
@@ -10,7 +10,9 @@
 +import static org.junit.Assert.fail;
 +
 +import java.io.File;
++import java.io.FileInputStream;
 +import java.io.IOException;
++import java.util.Properties;
  import java.util.concurrent.TimeUnit;
 -import org.junit.*;
 -import static org.junit.Assert.*;
@@ -118,31 +120,38 @@
 -    }
 -  }
 +	
-+	private static String OS = System.getProperty("os.name").toLowerCase();
 +	private static ChromeDriverService service;
 +	private static WebDriver driver;
 +	private static String baseUrl = null;
 +	private static WebElement element = null;
 +	private static StringBuffer verificationErrors = new StringBuffer();
 +	private static Actions action = null;
-+
++	private static Properties props = new Properties();
++	private static String str = null;
++	private static char s;
 +
 +	@SuppressWarnings("deprecation")
 +	@BeforeClass (description="Driver start and Server start which creates a service that manage the driver server.")
 +	public static void StartDriver() throws IOException {
-+		// IE on Windows only
-+		if ( isWindows() ) {
-+			File file = new File("C:\\Users\\marian\\Downloads\\IEDriverServer_x64_2.29.1\\IEDriverServer.exe");
++ 		//load a properties file
++        props.loadFromXML(new FileInputStream("resources/AresTestSuite/AresConfig.xml"));
++        System.out.println(props.getProperty("AresConfig.xml file:"));
++        System.out.println("-> browserDriverPath -> "+props.getProperty("browserDriverPath"));
++        System.out.println("-> browserDriverName -> "+props.getProperty("browserDriverName"));
++        System.out.println("-> os -> "+props.getProperty("os"));           
++        // TODO: review browser and platform testability
++		// IE on Windows only, Chrome tested on mac, FF tested using xml-scripts
++		if ( (props.getProperty("browserDriverName").equals("IE")) ) {
++			File file = new File(props.getProperty("browserDriverPath"));
 +			System.setProperty("webdriver.ie.driver", file.getAbsolutePath());	
 +			DesiredCapabilities capabilities = DesiredCapabilities.internetExplorer();
 +			capabilities.setCapability(InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS, true); 
 +			driver = new InternetExplorerDriver(capabilities);
-+			driver.manage().timeouts().implicitlyWait(90, TimeUnit.SECONDS);
 +			
 +		} else {
 +			// createAndStartService
 +			service = new ChromeDriverService.Builder()
-+			.usingChromeDriverExecutable(new File("/usr/local/bin/chromedriver"))
++			.usingChromeDriverExecutable(new File(props.getProperty("browserDriverPath")))
 +			.usingAnyFreePort()
 +			.build();
 +			service.start();
@@ -170,7 +179,7 @@
 +		if (!"".equals(verificationErrorString)) {
 +			fail(verificationErrorString);
 +		}
-+		if ( isMac() ) {
++		if ( props.getProperty("os").equals("mac") ) {
 +			service.stop();
 +		}
 +	}
@@ -247,14 +256,20 @@
 +			getObject(".//*[@id='ares_projectView_projectList_accountsConfigurator_accountsList_name']").click();
 +
 +		    driver.findElement(By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_username")).clear();
-+		    driver.findElement(By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_username")).sendKeys("foo@hp.com");
++		    driver.findElement(By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_username")).sendKeys(props.getProperty("phoneGap.username"));
 +		    
 +		    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_password | ]]
 +			getObject(".//*[@id='ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_password']").click();
 +		    driver.findElement(By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_password")).clear();
-+		    driver.findElement(By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_password")).sendKeys("foo");
-+			action = new Actions(driver);
-+			action.keyDown(Keys.CONTROL).sendKeys("o").keyUp(Keys.CONTROL).perform(); 
++			str = props.getProperty("phoneGap.password");
++		    driver.findElement(By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_password")).sendKeys(str);
++			action = new Actions(driver);			
++			if ( props.getProperty("os").equals("windows") ) {					
++				action.keyDown(Keys.CONTROL).keyUp(Keys.CONTROL).perform();
++			} else {
++				s = str.charAt(str.length() - 1);				
++				action.keyDown(Keys.CONTROL).sendKeys(""+ s).keyUp(Keys.CONTROL).perform(); 
++			}				
 +
 +		    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_checkBtn | ]]
 +		    driver.findElement(By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_checkBtn")).click();
@@ -280,11 +295,5 @@
 +			return null;
 +
 +		}
-+	}
-+	public static boolean isWindows() {	 
-+		return (OS.indexOf("win") >= 0);
-+	}
-+	public static boolean isMac() {
-+		return (OS.indexOf("mac") >= 0);
 +	}
  }

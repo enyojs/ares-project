@@ -1,6 +1,6 @@
---- ./CheckTemplates.java	2013-02-15 15:49:10.000000000 +0100
-+++ /Users/mariandebonis/Documents/workspace/Selenium-Ares-TestSuite/src/AresTestSuite/CheckTemplates.java	2013-02-14 19:11:25.000000000 +0100
-@@ -1,172 +1,410 @@
+--- CheckTemplates.java	2013-02-15 15:49:10.000000000 +0100
++++ /Users/mariandebonis/Documents/workspace/Selenium-Ares-TestSuite/src/AresTestSuite/CheckTemplates.java	2013-02-19 13:38:55.000000000 +0100
+@@ -1,172 +1,411 @@
 -package com.example.tests;
 +package AresTestSuite;
  
@@ -10,8 +10,10 @@
 +import static org.junit.Assert.fail;
 +
 +import java.io.File;
++import java.io.FileInputStream;
 +import java.io.IOException;
 +import java.util.List;
++import java.util.Properties;
  import java.util.concurrent.TimeUnit;
 -import org.junit.*;
 -import static org.junit.Assert.*;
@@ -197,39 +199,45 @@
 -    }
 -  }
 +	
-+	private static String OS = System.getProperty("os.name").toLowerCase();
 +	private static ChromeDriverService service;
 +	private static WebDriver driver;
 +	private static String baseUrl = null;
 +	private WebElement element = null;
 +	private static StringBuffer verificationErrors = new StringBuffer();
 +	private Actions action = null;
++    private static Properties props = new Properties();
 +
 +
 +	@SuppressWarnings("deprecation")
 +	@BeforeClass (description="Driver start and Server start which creates a service that manage the driver server.")
 +	public static void StartDriver() throws IOException {
-+		// IE on Windows only
-+		if ( isWindows() ) {
-+			File file = new File("C:\\Users\\marian\\Downloads\\IEDriverServer_x64_2.29.1\\IEDriverServer.exe");
++ 		//load a properties file
++        props.loadFromXML(new FileInputStream("resources/AresTestSuite/AresConfig.xml"));
++        System.out.println(props.getProperty("AresConfig.xml file:"));
++        System.out.println("-> browserDriverPath -> "+props.getProperty("browserDriverPath"));
++        System.out.println("-> browserDriverName -> "+props.getProperty("browserDriverName"));
++        System.out.println("-> os -> "+props.getProperty("os"));           
++        // TODO: review browser and platform testability
++		// IE on Windows only, Chrome tested on mac, FF tested using xml-scripts
++		if ( (props.getProperty("browserDriverName").equals("IE")) ) {
++			File file = new File(props.getProperty("browserDriverPath"));
 +			System.setProperty("webdriver.ie.driver", file.getAbsolutePath());	
 +			DesiredCapabilities capabilities = DesiredCapabilities.internetExplorer();
 +			capabilities.setCapability(InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS, true); 
 +			driver = new InternetExplorerDriver(capabilities);
-+			driver.manage().timeouts().implicitlyWait(90, TimeUnit.SECONDS);
 +			
 +		} else {
 +			// createAndStartService
 +			service = new ChromeDriverService.Builder()
-+			.usingChromeDriverExecutable(new File("/usr/local/bin/chromedriver"))
++			.usingChromeDriverExecutable(new File(props.getProperty("browserDriverPath")))
 +			.usingAnyFreePort()
 +			.build();
 +			service.start();
 +			// createDriver
 +			driver = new RemoteWebDriver(service.getUrl(),
 +					DesiredCapabilities.chrome());
-+		}
-+		
++		}		
++				
 +		// Ares URL; http://127.0.0.1:9009/ide/ares/test.html?debug=true&norunner=true
 +		baseUrl = "http://127.0.0.1:9009/";
 +		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
@@ -249,7 +257,7 @@
 +		if (!"".equals(verificationErrorString)) {
 +			fail(verificationErrorString);
 +		}
-+		if ( isMac() ) {
++		if ( props.getProperty("os").equals("mac") ) {
 +			service.stop();
 +		}
 +	}
@@ -376,7 +384,7 @@
 +				// ERROR: Caught exception [ERROR: Unsupported command [keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
 +				// ERROR: Caught exception [ERROR: Unsupported command [keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
 +				action = new Actions(driver);
-+				if ( isWindows() ) {
++				if ( props.getProperty("os").equals("windows") ) {
 +					action.keyDown(Keys.CONTROL).keyUp(Keys.CONTROL).perform(); 
 +				} else {
 +					action.keyDown(Keys.CONTROL).sendKeys("s").keyUp(Keys.CONTROL).perform(); 
@@ -409,7 +417,7 @@
 +				// ERROR: Caught exception [ERROR: Unsupported command [keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | l]]
 +				// ERROR: Caught exception [ERROR: Unsupported command [keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | l]]
 +				action = new Actions(driver);
-+				if ( isWindows() ) {
++				if ( props.getProperty("os").equals("windows") ) {
 +					action.keyDown(Keys.CONTROL).keyUp(Keys.CONTROL).perform(); 
 +				} else {
 +					action.keyDown(Keys.CONTROL).sendKeys("l").keyUp(Keys.CONTROL).perform(); 
@@ -440,7 +448,7 @@
 +				// ERROR: Caught exception [ERROR: Unsupported command [keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
 +				// ERROR: Caught exception [ERROR: Unsupported command [keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
 +				action = new Actions(driver);
-+				if ( isWindows() ) {
++				if ( props.getProperty("os").equals("windows") ) {
 +					action.keyDown(Keys.CONTROL).keyUp(Keys.CONTROL).perform();
 +				} else {
 +					action.keyDown(Keys.CONTROL).sendKeys("s").keyUp(Keys.CONTROL).perform();
@@ -570,11 +578,4 @@
 +
 +		}
 +	}
-+	public static boolean isWindows() {	 
-+		return (OS.indexOf("win") >= 0);
-+	}
-+	public static boolean isMac() {
-+		return (OS.indexOf("mac") >= 0);
-+	}
-+
  }
