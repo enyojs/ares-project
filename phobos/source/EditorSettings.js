@@ -81,10 +81,10 @@ enyo.kind({
 		{kind: "onyx.Groupbox", name: "groupbox7", components: [
 				{kind: "onyx.GroupboxHeader", content: "Programble buttons", fit: true, name: "groupboxHeader7", components: [
 						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-1", name: "F1", ontap: "showPopup"},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-2", name: "F2", ontap: "showPopup", disabled: true},
+						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-2", name: "F2", ontap: "showPopup"},
 						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-3", name: "F3", ontap: "showPopup"},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-4", name: "F4", ontap: "showPopup", disabled: true},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-5", name: "F5", ontap: "showPopup", disabled: true},
+						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-4", name: "F4", ontap: "showPopup"},
+						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-5", name: "F5", ontap: "showPopup"},
 						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-6", name: "F6", ontap: "showPopup"},
 						{kind: "Control", tag: "br", name: "control5"},
 						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-7", name: "F7", ontap: "showPopup"},
@@ -99,12 +99,18 @@ enyo.kind({
 		{kind: "onyx.Button", content: "Close", name: "close", ontap: "doClose"},
 		{kind: "onyx.Button", content: "OK/Save", name: "change", ontap: "oksave"},
 		{kind: "onyx.Popup", modal: true, floating: true, centered: true, classes: "onyx-sample-popup", canGenerate: false, name: "modalPopup", components: [
-				{kind: "onyx.InputDecorator", name: "inputDecorator3", components: [
-						{kind: "onyx.Input", style: "width: 200px;", name: "proKey", onchange:"inputChanged", placeholder: "Set key here"}
-					]},
+			{classes: "onyx-toolbar-inline", components: [
+				{kind: "onyx.InputDecorator", components: [
+					{kind: "onyx.TextArea", placeholder: "Enter text here", onchange:"inputChanged"}
+				]},
 				{kind: "Control", tag: "br", name: "control6"},
+				{kind: "onyx.Button", content: "Close", name: "close", ontap: "closeModalPopup"},
+				{kind: "onyx.Button", content: "OK/Save", name: "change", ontap: "inputChanged"},
+			]},
+			{kind: "Control", tag: "br", name: "control6"},
 	
-			], onShow: "popupShown", onHide: "popupHidden"}
+		]},
+			//onShow: "popupShown", onHide: "popupHidden"}
 	],
 	create: function() {
 		this.inherited(arguments);
