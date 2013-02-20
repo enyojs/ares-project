@@ -28,7 +28,7 @@
 
 #### Ares Test Suite
 
-The selenium TestSuite for Ares is located `ares-project/test/selenium/xml-scripts`
+The selenium TestSuite for Ares is located `./ares-project/test/selenium/xml-scripts`
 
 	$ cd ./ares-project/test/selenium/xml-scripts
 	$ ll
@@ -42,6 +42,7 @@ The selenium TestSuite for Ares is located `ares-project/test/selenium/xml-scrip
 	
 ##### To run it
 
+* Before the teste execution, start the Ares IDE node server: `node ide.js -T`
 * Open under ares-project/test/selenium/xml-scripts/AresTestSuite file
   
   **Note: ** AresTestSuite is composed by the following TestCases; HelloWorldPreview, NewProject, FileOps, CheckTemplates and HelloWorldPhoneGapSettings.
@@ -51,7 +52,7 @@ The selenium TestSuite for Ares is located `ares-project/test/selenium/xml-scrip
 
 ### Your Contribution is required to extend the Selenium TestSuite for Ares
 
-Give to the Ares committer(s) a chance to update the test wish list file (`ares-project/test/selenium/WISH-TESTS-LIST.md`) with new Test Case to implement.
+Give to the Ares committer(s) a chance to update the test wish list file (`./ares-project/test/selenium/WISH-TESTS-LIST.md`) with new Test Case to implement.
 
 The objective is to test the new controls coming with Ares committer pull-requests.
 
@@ -170,10 +171,12 @@ To create the TestNG AresTestSuite, a testng.xml needs to be created;
 
 ##### to execute the Ares TestNG TestCase
 
+* Before the teste execution, start the Ares IDE node server: `node ide.js -T`
 * click right on src/AresTestSuite java file > run as> TestNG Test
 
 ##### to execute the TestNG AresTesSuite
 
+* Before the teste execution, start the Ares IDE node server: `node ide.js -T`
 * click right on src/testng.xml > run as > TestNG Suite
 * the src/test-output/index.html shows the results of the TestNG Test Suite execution.
 
