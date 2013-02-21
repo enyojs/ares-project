@@ -6,23 +6,24 @@ enyo.kind({
 		ondragleave: "iframeDragleave"
 	},
 	components: [
-		{name: "client", fit: true, classes:"enyo-fit",
-			ondragleave: "dragleave", ondown: "down", ondragstart: "dragstart", ondragover: "dragover", ondrop: "drop"
-		},
+		{name: "client", fit: true, classes:"enyo-fit"},
 		{name: "serializer", kind: "Serializer"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"}
 	],
 	
 	selectedItem: null,
 	parentInstance: null,
+	containerData: null,
+	aresComponents: [],
 	
 	create: function() {
 		this.inherited(arguments);
 		this.addHandlers();
+		this.addDispatcherFeature();
 	},
 	rendered: function() {
 		this.inherited(arguments);
-		this.sendMessage({op: "state", val: "ready"});
+		this.sendMessage({op: "state", val: "initialized"});
 	},
 	
 	sendMessage: function(inMessage) {
@@ -31,14 +32,14 @@ enyo.kind({
 	receiveMessage: function(inSender, inEvent) {
 		var msg = inEvent.message;
 		
-		if(msg.op === "render") {
-			if(this.renderKind(msg.val.name)) {
-				this.kindUpdated();
-			}
+		if(msg.op === "containerData") {
+			this.setContainerData(msg.val);
+		} else if(msg.op === "render") {
+			this.renderKind(msg.val);
 		} else if(msg.op === "select") {
 			this.selectItem(msg.val);
 		} else if(msg.op === "highlight") {
-			this.highlightItem(msg.val);
+			this.highlightDropTarget(this.getControlById(msg.val.id));
 		} else if(msg.op === "modify") {
 			this.modifyProperty(msg.val);
 		} else if(msg.op === "unhighlight") {
@@ -48,99 +49,75 @@ enyo.kind({
 		}
 	},
 	
+	//* Save _inData_ as _this.containerData_ to use as a reference when creating drop targets.
+	setContainerData: function(inData) {
+		this.containerData = inData;
+		this.sendMessage({op: "state", val: "ready"});
+	},
+	//* Render the specified kind
+	renderKind: function(inKindName) {
+		var kindConstructor = enyo.constructorForKind(inKindName);
+		
+		if(!kindConstructor) {
+			this.log("No constructor exists for ", inKindName);
+			return;
+		} else if(!kindConstructor.prototype) {
+			this.log("No prototype exists for ", inKindName);
+			return;
+		}
+		
+		// Clean up after previous kind
+		if(this.parentInstance) {
+			this.cleanUpPreviousKind();
+		}
+		
+		// Save this kind's _kindComponents_ array
+		this.aresComponents = this.flattenKindComponents(kindConstructor.prototype.kindComponents);
+		
+		// Enable drag/drop on all of _this.aresComponents_
+		this.makeAresComponentsDragAndDrop();
+		
+		// Save reference to the parent instance currently rendered
+		this.parentInstance = this.$.client.createComponent({kind: inKindName}).render();
+		
+		// Notify Deimos that the kind rendered successfully
+		this.kindUpdated();
+	},
+	//* Clean up previously rendered kind
+	cleanUpPreviousKind: function() {
+		// Save changes made to components into previously rendered kind's _kindComponents_ array
+		enyo.constructorForKind(this.parentInstance.kind).prototype.kindComponents = enyo.json.codify.from(this.$.serializer.serialize(this.parentInstance));
+		
+		// Reset flags on previously rendered kind's _kindComponents_ array
+		this.unflagAresComponents();
+		
+		// Clear previously rendered kind
+		this.$.client.destroyClientControls();
+	},
 	/**
 		Response to message sent from Deimos. Highlight the specified conrol
 		and send a message with a serialized copy of the control.
 	*/
 	selectItem: function(inItem) {
-		this.selectedItem = null;
-		
 		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
 			if(c.id === inItem.id) {
-				this.selectedItem = c;
-				this.highlightSelectedItem();
-			} else {
-				this.unHighlightItem(c);
-			}
-		}
-		
-		this.sendMessage({op: "selected", val: this.$.serializer.serializeComponent(this.selectedItem)});
-	},
-	//* Set _inItem_ to _this.selected_ and notify Deimos
-	directSelectItem: function(inItem) {
-		this.selectedItem = inItem;
-		this.highlightSelectedItem();
-		this.sendMessage({op: "select", val: this.$.serializer.serializeComponent(this.selectedItem)});
-	},
-	highlightItem: function(inItem) {
-		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
-			if(c.id === inItem.id) {
-				this.highlightDropTarget(c);
-			} else if(c !== this.selectedItem) {
-				this.unHighlightItem(c);
+				this._selectItem(c);
+				return;
 			}
 		}
 	},
-	unhighlightDropTargets: function(inItem) {
-		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
-			if(c !== this.selectedItem) {
-				this.unHighlightItem(c);
-			}
-		}
-	},
-	//* When a drop happens in the component view, translate that to a drop in this iframe.
-	simulateDrop: function(inDropData) {
-		var itemId   = inDropData.item,
-			targetId = inDropData.target,
-			item = null,
-			target = null;
-		
-		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
-			if(c.id === itemId) {
-				item = c;
-			} else if(c.id === targetId) {
-				target = c;
-			}
-		}
-		
-		this.unhighlightDropTargets();
-		
-		// Make sure item wasn't dropped on itself or it's children (TODO)
-		if(target === null || item === target) {
-			return;
-		}
-		
-		this.dropControl(item, target);
-	},
+	//* Update _this.selectedItem_ property value based on change in Inspector
 	modifyProperty: function(inData) {
 		this.selectedItem[inData.property] = inData.value;
 		this.refreshClient();
 	},
-	
-	//* Render the specified kind into the iFrame
-	renderKind: function(inKindName) {
-		var kindConstructor = window[inKindName];
+	//* When a drop happens in the component view, translate that to a drop in this iframe.
+	simulateDrop: function(inDropData) {
+		var dropTarget = this.getControlById(inDropData.target);
 		
-		if(!kindConstructor) {
-			this.log("No constructor exists for ", inKindName);
-			return false;
-		} else if(!kindConstructor.prototype) {
-			this.log("No prototype exists for ", inKindName);
-			return false;
+		if(this.isValidDropTarget(dropTarget)) {
+			this.dropControl(this.getControlById(inDropData.item), dropTarget);
 		}
-		
-		this.$.client.destroyClientControls();
-		var kindComponents = this.flattenKindComponents(kindConstructor.prototype.kindComponents);
-		this.makeKindComponentsDraggable(kindComponents);
-		this.flagAresComponents(kindComponents);
-		
-		this.parentInstance = this.$.client.createComponent({kind: inKindName}).render();
-		
-		return true;
-	},
-	//* Send update to Deimos with serialized copy of current kind component structure
-	kindUpdated: function() {
-		this.sendMessage({op: "rendered", val: this.$.serializer.serialize(this.parentInstance)});
 	},
 	
 	//* Get each kind component individually
@@ -148,6 +125,10 @@ enyo.kind({
 		var ret = [],
 			cs,
 			c;
+		
+		if(!inComponents) {
+			return ret;
+		}
 		
 		for (var i=0;(c = inComponents[i]);i++) {
 			ret.push(c);
@@ -161,6 +142,7 @@ enyo.kind({
 		
 		return ret;
 	},
+	// TODO - merge this with flattenKindComponents()
 	flattenChildren: function(inComponents) {
 		var ret = [],
 			cs,
@@ -179,125 +161,151 @@ enyo.kind({
 		return ret;
 	},
 	
-	//* Add the attribute _draggable="true"_ to each kind component
-	makeKindComponentsDraggable: function(inComponents) {
-		for(var i=0,child;(child = inComponents[i]);i++) {
-			this.makeComponentDraggable(child);
+	//* Set up drag and drop attributes for all kind components
+	makeAresComponentsDragAndDrop: function() {
+		for(var i=0,child;(child = this.aresComponents[i]);i++) {
+			this.makeComponentDragAndDrop(child);
 		}
 	},
+	//* Set up drag and drop for _inComponent_
+	makeComponentDragAndDrop: function(inComponent) {
+		this.makeComponentDraggable(inComponent);
+		this.makeComponentADropTarget(inComponent);
+		this.flagAresComponent(inComponent);
+	},
+	//* Add the attribute _draggable="true"_ to _inComponent_
 	makeComponentDraggable: function(inComponent) {
 		if(inComponent.attributes) {
 			inComponent.attributes.draggable =  true;
-			inComponent.attributes.dropTarget = true;
 		} else {
 			inComponent.attributes = {
-				draggable:  true,
-				dropTarget: true
+				draggable:  true
 			};
 		}
 	},
-	//* Flag components that are interactive in the designer with _aresComponent=true_
-	flagAresComponents: function(inComponents) {
-		for(var i=0, c;(c = inComponents[i]);i++) {
-			this.flagAresComponent(c);
+	/**
+		Add the attribute _dropTarget="true"_ to _inComponent_ if it wasn't explicitly set
+		to false in the design.js file (works as an opt out).
+	*/
+	makeComponentADropTarget: function(inComponent) {
+		if(inComponent.attributes) {
+			inComponent.attributes.dropTarget = (this.containerData[inComponent.kind] !== false);
+		} else {
+			inComponent.attributes = {
+				dropTarget: (this.containerData[inComponent.kind] !== false)
+			};
 		}
 	},
 	flagAresComponent: function(inComponent) {
 		inComponent.aresComponent = true;
 	},
-	getAresComponents: function(inContainer) {
-		// TODO
+	//* Remove _aresComponent_ flag from previously used _this.aresComponents_ array
+	unflagAresComponents: function() {
+		for(var i=0, component;(component = this.aresComponents[i]);i++) {
+			delete component.aresComponent;
+		}
 	},
 	
-	down: function(inSender, inEvent) {
-		// If this item isn't an ares component, find it's parent that is
-		inEvent.originator = this.updateDragOriginator(inEvent.originator);
+	//* On down, select the nearest draggable item
+	down: function(e) {
+		var dragTarget = this.getEventDragTarget(e.dispatchTarget);
 		
-		if(!inEvent.originator || !inEvent.originator.aresComponent) {
-			return false;
+		if(dragTarget && dragTarget.aresComponent) {
+			this._selectItem(dragTarget);
 		}
-		
-		this.directSelectItem(inEvent.originator);
 	},
-	dragstart: function(inSender, inEvent) {
-		if(!inEvent.dataTransfer) {
+	//* On drag start, set the event _dataTransfer_ property to contain a serialized copy of _this.selctedItem_
+	dragstart: function(e) {
+		if(!e.dataTransfer) {
 			return false;
 		}
-
-		inEvent.dataTransfer.setData('Text', this.$.serializer.serializeComponent(this.selectedItem));
+		
+		e.dataTransfer.setData('Text', this.$.serializer.serializeComponent(this.selectedItem));
         return true;
 	},
-	dragover: function(inSender, inEvent) {
-		if(!inEvent.dataTransfer) {
+	//* On drag over, enable HTML5 drag-and-drop if there is a valid drop target
+	dragover: function(e) {
+		var dropTarget;
+		
+		if(!e.dataTransfer) {
 			return false;
 		}
 		
-		inEvent.preventDefault();
+		dropTarget = this.getEventDropTarget(e.dispatchTarget);
 		
-		inEvent.originator = this.updateDragOriginator(inEvent.originator);
-		
-		if(!inEvent.originator || inEvent.originator === this.selectedItem) {
+		if(!this.isValidDropTarget(dropTarget)) {
 			this.currentDropTarget = null;
 			this.syncDropTargetHighlighting();
 			return false;
 		}
+
+		e.preventDefault();
 		
-		if(this.currentDropTarget && this.currentDropTarget === inEvent.originator) {
+		// If dragging on current drop target, do nothing (redundant)
+		if(this.currentDropTarget && this.currentDropTarget === dropTarget) {
 			return false;
 		}
 		
-		this.currentDropTarget = inEvent.originator;
+		this.currentDropTarget = dropTarget;
 		this.highlightDropTarget(this.currentDropTarget);
 		this.syncDropTargetHighlighting();
 		
 		return true;
 	},
-	dragleave: function(inSender, inEvent) {
-		if(!inEvent.dataTransfer) {
+	//* On drag leave, unhighlight previous drop target
+	dragleave: function(e) {
+		var dropTarget;
+		
+		if(!e.dataTransfer) {
 			return false;
 		}
 		
-		inEvent.originator = this.updateDragOriginator(inEvent.originator);
-		
-		if(!inEvent.originator || inEvent.originator === this.selectedItem) {
+		dropTarget = this.getEventDropTarget(e.dispatchTarget);
+
+		if(!this.isValidDropTarget(dropTarget)) {
 			return false;
 		}
 		
-		this.unHighlightItem(inEvent.originator);
+		this.currentDropTarget = null;
+		this.unHighlightItem(dropTarget);
 		this.syncDropTargetHighlighting();
 		
 		return true;
 	},
-	iframeDragleave: function(inSender, inEvent) {
-		// TODO - unhighlight all when dragging out of iframe.
-	},
-	drop: function(inSender, inEvent) {
-		var dropData;
+	/**
+		On drop, either move _this.selectedItem_ or create a new component (if
+		dragged component came from outside of iFrame and thus doesn't have an id).
+	*/
+	drop: function(e) {
+		var dropData,
+			dropTarget;
 		
-		if(!inEvent.dataTransfer) {
+		if(!e.dataTransfer) {
 			return false;
 		}
 		
-		inEvent.originator = this.updateDragOriginator(inEvent.originator);
+		dropTarget = this.getEventDropTarget(e.dispatchTarget);
 		
-		if(!inEvent.originator || inEvent.originator === this.selectedItem) {
+		if(!this.isValidDropTarget(dropTarget)) {
 			return false;
 		}
 		
-		dropData = enyo.json.codify.from(inEvent.dataTransfer.getData("Text"));
+		dropData = enyo.json.codify.from(e.dataTransfer.getData("Text"));
 		
 		this.currentDropTarget = null;
 		
-		this.unhighlightDropTargets();
-		this.syncDropTargetHighlighting();
-		
 		if(dropData.id) {
-			this.dropControl(this.getControlById(dropData.id), inEvent.originator);
+			this.dropControl(this.getControlById(dropData.id), dropTarget);
 		} else if(dropData.op && dropData.op === "newControl") {
-			this.createNewComponent(dropData, inEvent.originator);
+			this.createNewComponent(dropData, dropTarget);
 		}
 		
+		this.syncDropTargetHighlighting();
+		
         return true;
+	},
+	isValidDropTarget: function(inControl) {
+		return (inControl && inControl !== this.selectedItem && !inControl.isDescendantOf(this.selectedItem));
 	},
 	getControlById: function(inId) {
 		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
@@ -307,28 +315,37 @@ enyo.kind({
 		}
 	},
 	
-	updateDragOriginator: function(inComponent) {
-		return (!this.isDropTarget(inComponent)) ? this.findNextDropTarget(inComponent) : inComponent;
+	getEventDragTarget: function(inComponent) {
+		return (!inComponent) ? null : (!this.isDraggable(inComponent)) ? this.getEventDragTarget(inComponent.parent) : inComponent;
+	},
+	getEventDropTarget: function(inComponent) {
+		return (!inComponent) ? null : (inComponent === this.parentInstance) ? this.parentInstance : (!this.isDropTarget(inComponent)) ? this.getEventDropTarget(inComponent.parent) : inComponent;
+	},
+	isDraggable: function(inComponent) {
+		return (inComponent.attributes && inComponent.attributes.draggable);
 	},
 	isDropTarget: function(inComponent) {
 		return (inComponent.attributes && inComponent.attributes.dropTarget);
 	},
-	findNextDropTarget: function(inComponent) {
-		return (!inComponent.owner) ? null : (this.isDropTarget(inComponent.owner)) ? inComponent.owner : this.findNextDropTarget(inComponent.owner);
-	},
+	
+	//* Highlight _inComponent_ with drop target styling, and unhighlight everything else
 	highlightDropTarget: function(inComponent) {
+		this.unhighlightDropTargets();
 		if(typeof inComponent.origBackground === "undefined") {
 			inComponent.origBackground = inComponent.domStyles.background || null;
 			inComponent.applyStyle("background","#cedafe");
 		}
 	},
-	//* Highlight _this.selectedItem_ and unhighlight everything else
+	//* Highlight _this.selectedItem_ with selected styling, and unhighlight everything else
 	highlightSelectedItem: function() {
+		this.unhighlightDropTargets();
 		if(typeof this.selectedItem.origBackground === "undefined") {
 			this.selectedItem.origBackground = this.selectedItem.domStyles.background || null;
 			this.selectedItem.applyStyle("background","orange");
 		}
-		for(var i=0, c;(c = this.flattenChildren(this.$.client.children)[i]);i++) {
+	},
+	unhighlightDropTargets: function() {
+		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
 			if(c !== this.selectedItem) {
 				this.unHighlightItem(c);
 			}
@@ -345,7 +362,12 @@ enyo.kind({
 		this.sendMessage({op: "syncDropTargetHighlighting", val: dropTarget});
 	},
 	
-	
+	//* Set _inItem_ to _this.selected_ and notify Deimos
+	_selectItem: function(inItem) {
+		this.selectedItem = inItem;
+		this.highlightSelectedItem();
+		this.sendMessage({op: "select", val: this.$.serializer.serializeComponent(this.selectedItem)});
+	},
 	/**
 		Create an object copy of the _inDroppedControl_, then destroy and recreate it
 		as a child of _inTargetControl_
@@ -356,33 +378,59 @@ enyo.kind({
 		
 		inDroppedControl.destroy();
 		
-		// Add needed flags to new component
-		this.makeComponentDraggable(droppedControlCopy);
-		this.flagAresComponent(droppedControlCopy);
+		// Create a clone of the moved control
 		newComponent = inTargetControl.createComponent(droppedControlCopy, {owner: this.parentInstance});
 		
+		// Make sure all moved controls are draggable/droppable as appropriate
+		this.setupControlDragAndDrop(newComponent);
+		
+		// Re-render client
 		this.refreshClient();
+		
 		// Maintain selected state
-		this.directSelectItem(newComponent);
+		this._selectItem(newComponent);
+	},
+	/**
+		Find any children in _inControl_ that match kind components of the parent instance,
+		and make them drag/droppable (if appropriate)
+	*/
+	setupControlDragAndDrop: function(inControl) {
+		var childComponents = this.flattenChildren(inControl.children),
+			i,
+			j;
+		
+		this.makeComponentDragAndDrop(inControl);
+		
+		for(i=0;i<childComponents.length;i++) {
+			for(j=0;j<this.aresComponents.length;j++) {
+				if(childComponents[i].id === this.aresComponents[j].id) {
+					this.makeComponentDragAndDrop(childComponents[i]);
+				}
+			}
+		}
 	},
 	/**
 		Create a new component, brought in from the Palette. This component's initial properties
 		are defined in the design.js file associated with the current library.
 	*/
 	createNewComponent: function(inNewComponent, inDropTarget) {
-		this.makeComponentDraggable(inNewComponent);
-		this.flagAresComponent(inNewComponent);
-		
 		var newComponent = inDropTarget.createComponent(inNewComponent, {owner: this.parentInstance});
+		
+		// Add the new component to _this.aresComponents_ for future reference
+		this.aresComponents.push(newComponent);
+		
+		// Make sure all moved controls are draggable/droppable as appropriate
+		this.setupControlDragAndDrop(newComponent);
 		
 		// If we have a placeholder name, set it accordingly
 		if(newComponent.getContent() === "$name") {
 			newComponent.setContent(newComponent.name);
 		}
-
+		
+		// Re-render client
 		this.refreshClient();
 		// Select the newly added item
-		this.directSelectItem(newComponent);
+		this._selectItem(newComponent);
 	},
 	getSerializedCopyOfComponent: function(inComponent) {
 		return enyo.json.codify.from(this.$.serializer.serializeComponent(inComponent));
@@ -391,7 +439,10 @@ enyo.kind({
 		this.$.client.render();
 		this.kindUpdated();
 	},
-	
+	//* Send update to Deimos with serialized copy of current kind component structure
+	kindUpdated: function() {
+		this.sendMessage({op: "rendered", val: this.$.serializer.serialize(this.parentInstance)});
+	},
 	
 	//* Add dispatch for native drag events
 	addHandlers: function(inSender, inEvent) {
@@ -402,5 +453,20 @@ enyo.kind({
 		document.ondragover =  enyo.dispatch;
 		document.ondrop =      enyo.dispatch;
 		document.ondragend =   enyo.dispatch;
+	},
+	
+	//* Add feature to dispatcher to catch drag-and-drop-related events
+	addDispatcherFeature: function() {
+		var _this = this;
+		
+		enyo.dispatcher.features.push(
+			function(e) {
+				if (_this[e.type]) {
+					_this[e.type](e)
+					e.preventDispatch = true;
+					return true;
+				}
+			}
+		);
 	}
 });

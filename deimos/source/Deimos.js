@@ -8,19 +8,19 @@ enyo.kind({
 		{kind: "DragAvatar", components: [
 			{tag: "img", src: "$deimos/images/icon.png", style: "width: 24px; height: 24px;"}
 		]},
-		{classes: "enyo-fit", components: [
-			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", Xstyle: "margin: 0 10px;", name: "toolbar", components: [
+		{kind: "FittableRows", classes: "enyo-fit", components: [
+			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", name: "toolbar", components: [
 				{name: "docLabel", content: "Deimos"},
 				{kind: "onyx.PickerDecorator", components: [
-					{name: "kindButton", kind: "onyx.PickerButton"}, //this uses the defaultKind property of PickerDecorator to inherit from PickerButton
+					{name: "kindButton", kind: "onyx.PickerButton"},
 					{name: "kindPicker", kind: "onyx.Picker", onChange: "kindSelected", components: [
 					]}
 				]},
 				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction", style: "float:right;"}
 			]},
-			{name: "body", fit: true, classes: "deimos_panel_body",kind: "FittableColumns", components: [
+			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
 				{name: "left", classes:"ares_deimos_left", kind: "Palette"},
-				{name: "middle", fit: true, kind: "FittableRows", style: "border:2px solid yellow;", components: [
+				{name: "middle", fit: true, kind: "FittableRows", style: "border:1px solid #D0D0D0;margin:0px 4px;", components: [
 					{kind: "IFrameDesigner", name: "designer", fit: true,
 						onDesignChange: "designerChange", onSelect: "designerSelect", onSelected: "designerSelected", onDesignRendered: "designRendered", onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
 					},
@@ -32,7 +32,8 @@ enyo.kind({
 						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"}
 					]},
 					{kind: "ComponentView", classes: "deimos_panel ares_deimos_componentView",
-						onSelect: "componentViewSelect", onHighlightDropTarget: "highlightDesignerDropTarget", onUnHighlightDropTargets: "unhighlightDesignerDropTargets", onDrop: "componentViewDrop"},
+						onSelect: "componentViewSelect", onHighlightDropTarget: "highlightDesignerDropTarget", onUnHighlightDropTargets: "unhighlightDesignerDropTargets", onDrop: "componentViewDrop"
+					},
 					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
 				]}
 			]}
@@ -71,7 +72,7 @@ enyo.kind({
 			});
 			maxLen = Math.max(k.name.length, maxLen);
 		}
-		//this.index=0; //this is set in KindSelected
+
 		this.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.$.kindPicker.render();
 		this.setEdited(false);
@@ -90,8 +91,9 @@ enyo.kind({
 		 */
 		var index = inSender.getSelected().index;
 		var kind = this.kinds[index];
-		if (index !== this.index) {
 		
+		if (index !== this.index) {
+			
 			if (this.index !== null && this.getEdited()) {
 				// save changes when switching kinds
 				var modified = this.$.designer.getComponents();
@@ -178,10 +180,10 @@ enyo.kind({
 	},
 	closeDesignerAction: function(inSender, inEvent) {
 		// Prepare the data for the code editor
-		this.sendUpdateToAres();
 		var event = this.prepareDesignerUpdate();
 		this.$.inspector.setProjectData(null);
 		this.doCloseDesigner(event);
+		this.setEdited(false);
 		return true; // Stop the propagation of the event
 	},
 	// When the designer finishes rendering, re-build the components view

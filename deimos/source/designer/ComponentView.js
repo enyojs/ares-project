@@ -17,6 +17,15 @@ enyo.kind({
 		]}
 	],
 	indent: 32,
+	containerData: null,
+	
+	rendered: function() {
+		this.inherited(arguments);
+		this.getContainerData();
+	},
+	getContainerData: function() {
+		this.containerData = Model.getFlattenedContainerInfo();
+	},
 	
 	//* Component view events
 	drag: function(inSender, inEvent) {
@@ -36,7 +45,7 @@ enyo.kind({
 	//* Create an entry in the component view
 	createEntry: function(inComponent, inIndent) {
 		this.map[inComponent.name] = this.createComponent(
-			{comp: inComponent, style: "padding-left: " + inIndent + "px;", attributes: {draggable: "true", dropTarget: "true"},
+			{comp: inComponent, style: "padding-left: " + inIndent + "px;", attributes: {draggable: "true"},
 				ondown: "itemDown", ondragstart: "itemDragstart", ondragover: "itemDragover", ondragleave: "itemDragleave", ondrop: "itemDrop",
 				components: [
 					{tag: "b", content: inComponent.name, style: "pointer-events: none;"},
@@ -44,6 +53,9 @@ enyo.kind({
 				]
 			}
 		);
+		
+		// Set _dropTarget_ attribute based on _this.containerData_
+		this.map[inComponent.name].setAttribute("dropTarget", this.containerData[inComponent.kind] !== false);
 	},
 	//* Create component view representation of designer
 	_visualize: function(inComponents, inIndent) {
@@ -91,21 +103,21 @@ enyo.kind({
 			return false;
 		}
 		
-		inEvent.preventDefault();
-		
-		// If sender is the current selection, set drop target to null (so highlighting still works properly)
-		if(inSender === this.selection) {
+		// If sender is not a valid drop target, set _this.currentDropTarget_ to null (so highlighting still works properly)
+		if(!this.isValidDropTarget(inSender)) {
 			this.currentDropTarget = null;
 			this.doUnHighlightDropTargets();
 			return false;
 		}
 		
-		//* Prevent repetitive events
+		inEvent.preventDefault();
+		
+		// If dragging on current drop target, do nothing (redundant)
 		if(this.currentDropTarget && this.currentDropTarget === inSender) {
 			return true;
-		} else {
-			this.currentDropTarget = inSender;
 		}
+		
+		this.currentDropTarget = inSender;
 		
 		this.highlightDropTarget(this.currentDropTarget);
 		this.doHighlightDropTarget({component: this.currentDropTarget.comp});
@@ -131,6 +143,16 @@ enyo.kind({
 			target: inSender.comp.id
 		});
 		return true;
+	},
+	
+	isValidDropTarget: function(inComponent) {
+		// TODO - descendents are not valid targets for their parents
+		return inComponent !== this.selection && inComponent.getAttribute("dropTarget") === "true";
+	},
+	//* Save _inData_ as _this.containerData_ to use as a reference when creating drop targets.
+	setContainerData: function(inData) {
+		this.containerData = inData;
+		this.sendMessage({op: "state", val: "ready"});
 	},
 	
 	highlightDropTarget: function(inComponent) {

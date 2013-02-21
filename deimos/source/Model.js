@@ -40,6 +40,8 @@ enyo.singleton({
 				enyo.error("Unknown data type='" + item.type + "' -- Ignored");
 			}
 		}, this);
+		
+		//this.buildProjectInformation();
 	},
 	addInformation: function(inType, inName, inInfo) {
 		if (inInfo) {
@@ -90,5 +92,20 @@ enyo.singleton({
 			info = this.getInfo("__default", inType, inName);
 			return (info && info.level) || Model.F_NORMAL;
 		}
+	},
+	getFlattenedContainerInfo: function() {
+		var returnObject = {},
+			group,
+			item,
+			i,
+			j;
+		
+		for(i=0;(group = this.palette[i]);i++) {
+			for(j=0;(item = group.items[j]);j++) {
+				returnObject[item.name] = (item.config && typeof item.config.isContainer !== "undefined" && item.config.isContainer === false) ? false : true;
+			}
+		}
+		
+		return returnObject;
 	}
 });

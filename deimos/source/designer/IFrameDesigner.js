@@ -41,13 +41,15 @@ enyo.kind({
 		var msg = inEvent.message;
 		
 		// Iframe is loaded and ready to do work.
-		if(msg.op === "state" && msg.val === "ready") {
+		if(msg.op === "state" && msg.val === "initialized") {
+			this.sendIframeContainerData();
+		} else if(msg.op === "state" && msg.val === "ready") {
 			this.setIframeReady(true);
 			this.renderCurrentKind();
 		} else if(msg.op === "rendered") {
 			this.sandboxData = msg.val;
 			this.doDesignRendered({components: enyo.json.codify.from(msg.val)});
-			this.doDesignChange(); // TODO <---- only do this when a change occurs
+			this.doDesignChange();
 		// Select event sent from here was completed successfully. Set _this.selection_.
 		} else if(msg.op === "selected") {
 			this.selection = enyo.json.codify.from(msg.val);
@@ -62,33 +64,27 @@ enyo.kind({
 		}
 	},
 	
+	//* Pass _isContainer_ info down to iframe
+	sendIframeContainerData: function() {
+		this.sendMessage({op: "containerData", val: Model.getFlattenedContainerInfo()});
+	},
 	//* Tell iFrame to render the current kind
 	renderCurrentKind: function() {
 		if(!this.getIframeReady()) {
 			return;
 		}
 		
-		this.sendMessage({op: "render", val: this.getCurrentKind()});
+		this.sendMessage({op: "render", val: this.getCurrentKind().name});
 	},
 	
 	select: function(inControl) {
 		this.sendMessage({op: "select", val: inControl});
-		return;
-		
-		if (inControl && (inControl == this || !inControl.isDescendantOf(this.$.sandbox))) {
-			inControl = null;
-		}
-		this.selection = inControl;
-		this.$.selectionOutline.outlineControl(this.selection);
-		this.$.containerOutline.outlineControl(this.getSelectedContainer());
 	},
 	highlightDropTarget: function(inControl) {
 		this.sendMessage({op: "highlight", val: inControl});
-		return;
 	},
 	unHighlightDropTargets: function() {
 		this.sendMessage({op: "unhighlight"});
-		return;
 	},
 	drop: function(inDropData) {
 		this.sendMessage({op: "drop", val: {item: inDropData.item, target: inDropData.target}});

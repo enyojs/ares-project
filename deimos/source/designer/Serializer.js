@@ -27,7 +27,11 @@ enyo.kind({
 	},
 	getAresComponents: function(inContainer) {
 		var a = [],
-			c$  = inContainer.controls;
+			c$  = inContainer.controls || inContainer.children;
+		
+		if(!c$) {
+			return a;
+		}
 		
 		for(var i=0, c;(c=c$[i]);i++) {
 			if(c.aresComponent) {
