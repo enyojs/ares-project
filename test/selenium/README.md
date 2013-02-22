@@ -56,49 +56,41 @@ Give to the Ares committer(s) a chance to update the test wish list file (`./are
 
 The objective is to test the new controls coming with Ares committer pull-requests.
 
-## 2- HOWTO execute the ARES TESTSUITE using Selenium WEBDRIVER 
+## 2- HOWTO execute the ARES TEST SUITE using Selenium 2.0 WEBDRIVER API
 
-	only windows environment is described for now
-	mac enviroment will be updated with follow-up JIRA ENYO-1910
+* The Ares Test Suite xml-scripts will be converted into java files to use either Chrome or IE Selenium 2.0 webdriver APIs. 
+* A patch java will be applied to obtain the final Ares Test Suite java code.
+* It will be found in the patch, the upload of AresConfig.xml file where are declared properties the Test Suite is executed (i.e. webdriver name, webdriver path, os …) as this code which is not generated automatically by the formatter.
 
-* The Ares Test Suite xml-scripts will be converted into java files to use either Chrome or IE Selenium webdriver APIs. 
-* Specific java modifications will be applied using patch mechanism to obtain the complete Ares Test Suite java code (load AresConfig.xml file where are declared properties in which conditions the Ares Test Suite is executed  - webdriver name, webdriver path, os …)
+**WARNING:**
 
-**Note:** IE was tested on Windows, Chrome was tested on mac.
+* Only xml-scripts, AresTestCasesSha1 and AresTestJava.patch files are pushed on gitHub. 
+* The Java code will not.
+* Reasons are; expecting to find an XML to javascript Formatter and avoid two source code for the same test.
 
-### Xml-scripts - java conversion 
+### XML to JAVA conversion 
 
 * Open the xml-scripts in Selenium IDE (**Back to:**  Opening And Configuring the IDE),
-* From the xml-scripts, apply the JAVA/Junit 4/WEbDriver formatter conversion. 
-* All the ./ares-project/test/selenium/xml-scripts java converted will saved under a temporary directory ./ares-project/test/selenium/webdriver-java-diff-patch/temp.
+* From the xml-scripts;
 
-### Verify SHA1 checksum
-
-* The ./ares-project/test/selenium/webdriver-java-diff-patch/AresTestCasesSha1 file contains the SHA1 signature generated against the orginal xml-scripts java converted.
-* Verify, using `inhash.exe` (<http://www.windows7download.com/free-win7-sha1>) or another windows tool the SHA1 checksum for the freshly java files generated.
-
-### Patch to apply ontop of the freshly java files generated
-
-* The ./ares-project/test/selenium/webdriver-java-diff-patch directory contains patches to apply ontop of the freshly java generated.
-* The patches represent manual modifications added like the upload of the Ares properties configuration.
-* Using `/usr/bin/quilt` on Windows by way of Cygwin (<http://www.cygwin.com/>)
-
-Steps:
-
-	$ cd ./ares-project/test/selenium/webdriver-java-diff-patch
-	$ quilt import HelloWorldPhoneGapSettings.patch CheckTemplates.patch FileOps.patch HelloWorldPhoneGapSettings.patch HelloWorldPreview.patch NewProject.patch
-  	 	 	 	 	
-	Importing patch HelloWorldPhoneGapSettings.patch (stored as patches/HelloWorldPhoneGapSettings.patch)
-	…
+ 
+	apply the JAVA/Junit 4/WEbDriver formatter conversion. 
 	
-	$ quilt series
-	patches/HelloWorldPhoneGapSettings.patch
-	patches/CheckTemplates.patch
-	patches/FileOps.patch
-	patches/NewProject.patch
-	patches/HelloWorldPreview.patch
+	store java converted file under a temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`
+	
+	**Note:** For example, the XML NewProject file be converted into NewProject.java … etc.
 
-	$ quilt push -a
+* The `./ares-project/test/selenium/webdriver-java-diff-patch/AresTestCasesSha1` file contains the SHA1 signature to validate the xml-scripts java converted.
+
+### Apply AresTestJava.patch 
+
+* To verify the SHA1 against the xml-scripts java converted found under the temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref` (either using `inhas.exe` or `/usr/bin/shasum`).
+
+Apply the patch:
+
+	$ cd ./ares-project/test/selenium/test/selenium/webdriver-java-diff-patch/java-ref
+	$ patch -p1 < ../AresTestJava.patch
+	
 
 
 ### Eclipse Ares Test Suite project setup
@@ -112,19 +104,23 @@ Steps:
 * Selenium-java-2.30.0.zip java bindings (<http://code.google.com/p/selenium/downloads/list>)
 
 #### Eclipse project setup
-* create the Selenium Ares TestSuite java project
-* create the AresTestSuite package,
-* create src (java code) and resources (AresConfig.xml) sub-folders
-* configure build-path; JRE system library and TestNG eclipse plugin
-* configure the libraries build-path; add external jars retrieved from selenium-java-2.30.0.zip java bindings
+* To create the Selenium Ares TestSuite java project
+* To create the AresTestSuite package,
+* To create src (java code) and resources (AresConfig.xml) sub-folders
+* To configure build-path; JRE system library and TestNG eclipse plugin
+* To configure the libraries build-path; add external jars retrieved from selenium-java-2.30.0.zip java bindings
 
-##### src/AresTestSuite
+##### Under src/AresTestSuite
 
-* import the java code generated from xml-scripts and patched into the Ares Test Suite Project (NewProject.java, FileOps.java …).
+* To import the patched java code located under `./ares-project/test/selenium/test/selenium/webdriver-java-diff-patch/java-ref` into the Ares TestSuite project
 
-##### resources/AresTestSuite/AresConfig.xml file
+##### Under resources/AresTestSuite
 
-To configure the Ares Test Suite properties in AresConfig.xml.
+* To create and AresConfig.xml file
+* Here is one example of the AresConfig.xml.
+
+
+ .
 
 	<?xml version="1.0" encoding="UTF-8"?>`
 	<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
@@ -136,6 +132,12 @@ To configure the Ares Test Suite properties in AresConfig.xml.
 	<entry key="phoneGap.username">jdoe@hp.com</entry>
 	<entry key="phoneGap.password">xxxxx</entry>
 	</properties>
+
+**Note:** acceptable values are:
+
+* for `browserDriverName` key are either `Chrome` or `IE`
+* for `os` key are either `mac` or `windows`
+
 
 ##### src/testng.xml 
 To create the TestNG AresTestSuite, a testng.xml needs to be created;
@@ -169,16 +171,16 @@ To create the TestNG AresTestSuite, a testng.xml needs to be created;
 	</test>
 	</suite>
 
-##### to execute the Ares TestNG TestCase
+##### To execute the Ares TestNG TestCase
 
-* Before the teste execution, start the Ares IDE node server: `node ide.js -T`
-* click right on src/AresTestSuite java file > run as> TestNG Test
+* To run TestCases, start the Ares IDE node server: `node ide.js -T`
+* Click right on src/AresTestSuite java file > run as> TestNG Test
 
-##### to execute the TestNG AresTesSuite
+##### To execute the TestNG AresTesSuite
 
-* Before the teste execution, start the Ares IDE node server: `node ide.js -T`
-* click right on src/testng.xml > run as > TestNG Suite
-* the src/test-output/index.html shows the results of the TestNG Test Suite execution.
+* To run TestSuite, start the Ares IDE node server: `node ide.js -T`
+* Click right on src/testng.xml > run as > TestNG Suite
+* The src/test-output/index.html shows the results of the TestNG Test Suite execution after a refresh on src/test-output.
 
 
-
+**Note:** IE was tested on Windows, Chrome was tested on mac.
