@@ -1,0 +1,2478 @@
+diff -Naur -x '.*' -x '*Sha1' java-ref/CheckTemplates.java java-modif/CheckTemplates.java
+--- java-ref/CheckTemplates.java	2013-02-22 14:26:02.000000000 +0100
++++ java-modif/CheckTemplates.java	2013-02-22 09:46:07.000000000 +0100
+@@ -1,172 +1,604 @@
+-package com.example.tests;
++package AresTestSuite;
+ 
+-import java.util.regex.Pattern;
++import static org.junit.Assert.assertEquals;
++import static org.junit.Assert.assertTrue;
++import static org.junit.Assert.fail;
++
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.IOException;
++import java.util.List;
++import java.util.Properties;
+ import java.util.concurrent.TimeUnit;
+-import org.junit.*;
+-import static org.junit.Assert.*;
+-import static org.hamcrest.CoreMatchers.*;
+-import org.openqa.selenium.*;
+-import org.openqa.selenium.firefox.FirefoxDriver;
+-import org.openqa.selenium.support.ui.Select;
++
++import org.openqa.selenium.By;
++import org.openqa.selenium.Keys;
++import org.openqa.selenium.NoSuchElementException;
++import org.openqa.selenium.WebDriver;
++import org.openqa.selenium.WebElement;
++import org.openqa.selenium.chrome.ChromeDriverService;
++import org.openqa.selenium.ie.InternetExplorerDriver;
++import org.openqa.selenium.interactions.Actions;
++import org.openqa.selenium.remote.DesiredCapabilities;
++import org.openqa.selenium.remote.RemoteWebDriver;
++import org.openqa.selenium.support.ui.ExpectedConditions;
++import org.openqa.selenium.support.ui.WebDriverWait;
++import org.testng.annotations.AfterClass;
++import org.testng.annotations.BeforeClass;
++import org.testng.annotations.Test;
+ 
+ public class CheckTemplates {
+-  private WebDriver driver;
+-  private String baseUrl;
+-  private boolean acceptNextAlert = true;
+-  private StringBuffer verificationErrors = new StringBuffer();
+-
+-  @Before
+-  public void setUp() throws Exception {
+-    driver = new FirefoxDriver();
+-    baseUrl = "http://127.0.0.1:9009/";
+-    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+-  }
+-
+-  @Test
+-  public void testCheckTemplates() throws Exception {
+-    driver.get(baseUrl + "/ide/ares/test.html?debug=true&norunner=true");
+-    // Warning: verifyTextPresent may require manual changes
+-    try {
+-      assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares[\\s\\S]*$"));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    assertEquals("Ares", driver.getTitle());
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_iconButton3 | ]]
+-    // Warning: verifyTextPresent may require manual changes
+-    try {
+-      assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    // Warning: assertTextPresent may require manual changes
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_providerList_item | ]]
+-    // Warning: assertTextPresent may require manual changes
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*root[\\s\\S]*$"));
+-    // Warning: assertTextPresent may require manual changes
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*FileOps[\\s\\S]*$"));
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_$FileOps_caption | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_confirm | ]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("FileOps".equals(driver.findElement(By.id("ares_projectView_projectList_projectList_ownerProxy_item")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_projectList_ownerProxy_item | FileOps]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("FileOps".equals(driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | FileOps]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_$App1.js_caption | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_deleteFileButton | ]]
+-    // Warning: verifyTextPresent may require manual changes
+-    try {
+-      assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Delete file: App1\\.js[\\s\\S][\\s\\S]*$"));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_deletePopup_button2 | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_$App2.js_caption | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_deleteFileButton | ]]
+-    // Warning: verifyTextPresent may require manual changes
+-    try {
+-      assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Delete file: App2\\.js[\\s\\S][\\s\\S]*$"));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_deletePopup_button2 | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_newFileButton | ]]
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).clear();
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).sendKeys("package.js");
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_newFileButton | ]]
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).clear();
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).sendKeys("index.html");
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | l]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | l]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_newFileButton | ]]
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).clear();
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).sendKeys("App.js");
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_serverNode_$App.js_caption")).click();
+-    // ERROR: Caught exception [ERROR: Unsupported command [doubleClick | id=ares_projectView_harmonia_hermesFileTree_serverNode_$App.js_caption | ]]
+-    try {
+-      assertTrue(isElementPresent(By.cssSelector("div.ace_content")));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    // Warning: assertTextPresent may require manual changes
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*// Copyright 2013, \\$ORGANIZATION\n// All rights reserved\\.\nenyo\\.kind\\(\\{\n    name: \"App\",\n    kind: \"Control\",\n    published: \\{\n    \\},\n    events: \\{\n    \\},\n    components: \\[\n    \\],\n    create: function\\(\\) \\{\n        this\\.inherited\\(arguments\\);\n        // initialization code goes here\n    \\}\n\\}\\);[\\s\\S]*$"));
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_bottomBar_iconButton | ]]
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_serverNode_$index.html_caption")).click();
+-    // ERROR: Caught exception [ERROR: Unsupported command [doubleClick | id=ares_projectView_harmonia_hermesFileTree_serverNode_$index.html_caption | ]]
+-    try {
+-      assertTrue(isElementPresent(By.cssSelector("div.ace_content")));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    // Warning: assertTextPresent may require manual changes
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*<!doctype html>\n<html>\n    <head>\n        <meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />\n        <meta name=\"viewport\" content=\"width=device-width initial-scale=1\\.0, maximum-scale=1\\.0, user-scalable=no\" />\n        <!-- -->\n        <title>Enyo App</title>\n        <!-- -->\n        <script src=\"\\.\\./\\.\\./enyo/enyo\\.js\" type=\"text/javascript\"></script>\n        <!-- -->\n        <script src=\"package\\.js\" type=\"text/javascript\"></script>\n        <!-- -->\n    </head>\n    <body>\n        <script type=\"text/javascript\">\n            new App\\(\\)\\.renderInto\\(document\\.body\\);\n        </script>\n    </body>\n</html>[\\s\\S]*$"));
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_bottomBar_iconButton2 | ]]
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_serverNode_$package.js_caption")).click();
+-    // ERROR: Caught exception [ERROR: Unsupported command [doubleClick | id=ares_projectView_harmonia_hermesFileTree_serverNode_$package.js_caption | ]]
+-    try {
+-      assertTrue(isElementPresent(By.cssSelector("div.ace_content")));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    // Warning: verifyTextPresent may require manual changes
+-    try {
+-      assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*enyo\\.depends\\(\n    \"\\$lib/layout\",\n    \"\\$lib/onyx\",\n    \"source\"\n\\);[\\s\\S]*$"));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_bottomBar_iconButton3 | ]]
+-  }
+-
+-  @After
+-  public void tearDown() throws Exception {
+-    driver.quit();
+-    String verificationErrorString = verificationErrors.toString();
+-    if (!"".equals(verificationErrorString)) {
+-      fail(verificationErrorString);
+-    }
+-  }
+-
+-  private boolean isElementPresent(By by) {
+-    try {
+-      driver.findElement(by);
+-      return true;
+-    } catch (NoSuchElementException e) {
+-      return false;
+-    }
+-  }
+-
+-  private String closeAlertAndGetItsText() {
+-    try {
+-      Alert alert = driver.switchTo().alert();
+-      if (acceptNextAlert) {
+-        alert.accept();
+-      } else {
+-        alert.dismiss();
+-      }
+-      return alert.getText();
+-    } finally {
+-      acceptNextAlert = true;
+-    }
+-  }
++
++	private static ChromeDriverService service;
++	private static WebDriver driver;
++	private static String baseUrl = null;
++	private WebElement element = null;
++	private static StringBuffer verificationErrors = new StringBuffer();
++	private Actions action = null;
++	private static Properties props = new Properties();
++
++	@SuppressWarnings("deprecation")
++	@BeforeClass(description = "Driver start and Server start which creates a service that manage the driver server.")
++	public static void StartDriver() throws IOException {
++		// load a properties file
++		props.loadFromXML(new FileInputStream(
++				"resources/AresTestSuite/AresConfig.xml"));
++		System.out.println(props.getProperty("AresConfig.xml file:"));
++		System.out.println("-> browserDriverPath -> "
++				+ props.getProperty("browserDriverPath"));
++		System.out.println("-> browserDriverName -> "
++				+ props.getProperty("browserDriverName"));
++		System.out.println("-> os -> " + props.getProperty("os"));
++		// TODO: review browser and platform testability
++		// IE on Windows only, Chrome tested on mac, FF tested using xml-scripts
++		if ((props.getProperty("browserDriverName").equals("IE"))) {
++			File file = new File(props.getProperty("browserDriverPath"));
++			System.setProperty("webdriver.ie.driver", file.getAbsolutePath());
++			DesiredCapabilities capabilities = DesiredCapabilities
++					.internetExplorer();
++			capabilities
++					.setCapability(
++							InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS,
++							true);
++			driver = new InternetExplorerDriver(capabilities);
++
++		} else {
++			// createAndStartService
++			service = new ChromeDriverService.Builder()
++					.usingChromeDriverExecutable(
++							new File(props.getProperty("browserDriverPath")))
++					.usingAnyFreePort().build();
++			service.start();
++			// createDriver
++			driver = new RemoteWebDriver(service.getUrl(),
++					DesiredCapabilities.chrome());
++		}
++
++		// Ares URL;
++		// http://127.0.0.1:9009/ide/ares/test.html?debug=true&norunner=true
++		baseUrl = "http://127.0.0.1:9009/";
++		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
++		driver.get(baseUrl + "ide/ares/test.html?debug=true&norunner=true");
++		try {
++			assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
++					.matches("^[\\s\\S]*Ares[\\s\\S]*$"));
++		} catch (Error e) {
++			verificationErrors.append(e.toString());
++		}
++		assertEquals("Ares", driver.getTitle());
++	}
++
++	@AfterClass(description = "Driver quit and Server stop")
++	public static void StopDriver() throws InterruptedException {
++		driver.quit();
++		String verificationErrorString = verificationErrors.toString();
++		if (!"".equals(verificationErrorString)) {
++			fail(verificationErrorString);
++		}
++		if (props.getProperty("os").equals("mac")) {
++			service.stop();
++		}
++	}
++
++	@Test(description = "Check Templates format for index.html, package.js and App.js creation")
++	public void testCheckTemplates() throws InterruptedException {
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectList_iconButton3 | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectList_iconButton3']")) != null) {
++			element.click();
++			try {
++				// Assert Text is Present - Ares Test - Home Directory
++				assertTrue(driver
++						.findElement(By.cssSelector("BODY"))
++						.getText()
++						.matches(
++								"^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++			Thread.sleep(1000);
++		}
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardScan_providerList_item | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_providerList_item']")) != null) {
++			element.click();
++			Thread.sleep(1000);
++			// Assert Text is Present
++			assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
++					.matches("^[\\s\\S]*root[\\s\\S]*$"));
++			// Assert Text is Present
++			assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
++					.matches("^[\\s\\S]*FileOps[\\s\\S]*$"));
++			Thread.sleep(1000);
++		}
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_$FileOps_caption
++		// | ]]
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardScan_confirm | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_hermesFileTree_serverNode_$FileOps_caption']")) != null) {
++			element.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_projectWizardScan_confirm | ]]
++			if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_confirm']")) != null) {
++				element.click();
++				for (int second = 0;; second++) {
++					if (second >= 60)
++						fail("timeout");
++					try {
++						if ("FileOps"
++								.equals(driver
++										.findElement(
++												By.id("ares_projectView_projectList_projectList_ownerProxy_item"))
++										.getText()))
++							break;
++					} catch (Exception e) {
++					}
++					Thread.sleep(1000);
++				}
++			}
++
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_projectList_projectList_ownerProxy_item |
++			// FileOps]]
++			if ((element = getObject(".//*[@id='ares_projectView_projectList_projectList_ownerProxy_item']")) != null) {
++				element.click();
++				for (int second = 0;; second++) {
++					if (second >= 60)
++						fail("timeout");
++					try {
++						if ("FileOps"
++								.equals(driver
++										.findElement(
++												By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption"))
++										.getText()))
++							break;
++					} catch (Exception e) {
++					}
++					Thread.sleep(1000);
++				}
++			}
++
++		}
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_harmonia_hermesFileTree_serverNode_caption |
++		// FileOps]]
++		if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_caption']")) != null) {
++			element.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("".equals(driver
++							.findElement(
++									By.id("ares_projectView_harmonia_hermesFileTree_deleteFileButton"))
++							.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++		}
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_harmonia_hermesFileTree_serverNode_$App1.js_caption
++		// | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_caption']")) != null) {
++			element.click();
++			Thread.sleep(1000);
++			driver.findElement(
++					By.id("ares_projectView_harmonia_hermesFileTree_serverNode_$App1.js_caption"))
++					.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_harmonia_hermesFileTree_deleteFileButton | ]]
++			if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_deleteFileButton']")) != null) {
++				element.click();
++				try {
++					assertTrue(driver
++							.findElement(By.cssSelector("BODY"))
++							.getText()
++							.matches(
++									"^[\\s\\S]*Delete file: App1\\.js[\\s\\S][\\s\\S]*$"));
++				} catch (Error e) {
++					verificationErrors.append(e.toString());
++				}
++			}
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_harmonia_hermesFileTree_deletePopup_button2 |
++			// ]]
++			driver.findElement(
++					By.id("ares_projectView_harmonia_hermesFileTree_deletePopup_button2"))
++					.click();
++		}
++		if ((element = getObject(".//*[@id='ares_projectView_projectList_projectList_ownerProxy_item']")) != null) {
++			element.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("FileOps"
++							.equals(driver
++									.findElement(
++											By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption"))
++									.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++			// workaround the refreshFileTree, click on project name to display
++			// project node into hermeFileTree
++			// click twice on object
++			// id=ares_projectView_harmonia_hermesFileTree_serverNode_caption
++			driver.findElement(
++					By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption"))
++					.click();
++			driver.findElement(
++					By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption"))
++					.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_harmonia_hermesFileTree_serverNode_$App2.js_caption
++			// | ]]
++			// workaround the refreshFileTree, click twice on object id
++			Thread.sleep(1000);
++			driver.findElement(
++					By.id("ares_projectView_harmonia_hermesFileTree_serverNode_$App2.js_caption"))
++					.click();
++			driver.findElement(
++					By.id("ares_projectView_harmonia_hermesFileTree_serverNode_$App2.js_caption"))
++					.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_harmonia_hermesFileTree_deleteFileButton | ]]
++			// as result, display object
++			// id=ares_projectView_harmonia_hermesFileTree_deleteFileButton
++			if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_deleteFileButton']")) != null) {
++				element.click();
++				try {
++					assertTrue(driver
++							.findElement(By.cssSelector("BODY"))
++							.getText()
++							.matches(
++									"^[\\s\\S]*Delete file: App2\\.js[\\s\\S][\\s\\S]*$"));
++				} catch (Error e) {
++					verificationErrors.append(e.toString());
++				}
++			}
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_harmonia_hermesFileTree_deletePopup_button2 |
++			// ]]
++			driver.findElement(
++					By.id("ares_projectView_harmonia_hermesFileTree_deletePopup_button2"))
++					.click();
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_caption']")) != null) {
++			element.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_harmonia_hermesFileTree_newFileButton | ]]
++			if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_newFileButton']")) != null) {
++				element.click();
++				try {
++					assertEquals(
++							"",
++							driver.findElement(
++									By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++									.getAttribute("value"));
++				} catch (Error e) {
++					verificationErrors.append(e.toString());
++				}
++
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++						.clear();
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++						.sendKeys("package.js");
++
++				// ERROR: Caught exception [ERROR: Unsupported command [keyPress
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName
++				// | s]]
++				// ERROR: Caught exception [ERROR: Unsupported command [keyUp |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName
++				// | s]]
++				action = new Actions(driver);
++				if (props.getProperty("os").equals("windows")) {
++					action.keyDown(Keys.CONTROL).keyUp(Keys.CONTROL).perform();
++				} else {
++					action.keyDown(Keys.CONTROL).sendKeys("s")
++							.keyUp(Keys.CONTROL).perform();
++				}
++				// ERROR: Caught exception [ERROR: Unsupported command [clickAt
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton
++				// | ]]
++				if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton']")) != null) {
++					element.click();
++					Thread.sleep(1000);
++					driver.findElement(
++							By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption"))
++							.click();
++					Thread.sleep(1000);
++				}
++			}
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_caption']")) != null) {
++			element.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_harmonia_hermesFileTree_newFileButton | ]]
++			if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_newFileButton']")) != null) {
++				element.click();
++				try {
++					assertEquals(
++							"",
++							driver.findElement(
++									By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++									.getAttribute("value"));
++				} catch (Error e) {
++					verificationErrors.append(e.toString());
++				}
++
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++						.clear();
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++						.sendKeys("index.html");
++
++				// ERROR: Caught exception [ERROR: Unsupported command [keyPress
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName
++				// | l]]
++				// ERROR: Caught exception [ERROR: Unsupported command [keyUp |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName
++				// | l]]
++				action = new Actions(driver);
++				if (props.getProperty("os").equals("windows")) {
++					action.keyDown(Keys.CONTROL).keyUp(Keys.CONTROL).perform();
++				} else {
++					action.keyDown(Keys.CONTROL).sendKeys("l")
++							.keyUp(Keys.CONTROL).perform();
++				}
++				// ERROR: Caught exception [ERROR: Unsupported command [clickAt
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton
++				// | ]]
++				if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton']")) != null) {
++					element.click();
++					Thread.sleep(1000);
++					driver.findElement(
++							By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption"))
++							.click();
++					Thread.sleep(1000);
++				}
++			}
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_caption']")) != null) {
++			element.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_harmonia_hermesFileTree_newFileButton | ]]
++			if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_newFileButton']")) != null) {
++				element.click();
++				try {
++					assertEquals(
++							"",
++							driver.findElement(
++									By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++									.getAttribute("value"));
++				} catch (Error e) {
++					verificationErrors.append(e.toString());
++				}
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++						.clear();
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++						.sendKeys("App.js");
++				// ERROR: Caught exception [ERROR: Unsupported command [keyPress
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName
++				// | s]]
++				// ERROR: Caught exception [ERROR: Unsupported command [keyUp |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName
++				// | s]]
++				action = new Actions(driver);
++				if (props.getProperty("os").equals("windows")) {
++					action.keyDown(Keys.CONTROL).keyUp(Keys.CONTROL).perform();
++				} else {
++					action.keyDown(Keys.CONTROL).sendKeys("s")
++							.keyUp(Keys.CONTROL).perform();
++				}
++				// ERROR: Caught exception [ERROR: Unsupported command [clickAt
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton
++				// | ]]
++				if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton']")) != null) {
++					element.click();
++					Thread.sleep(1000);
++					driver.findElement(
++							By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption"))
++							.click();
++					Thread.sleep(1000);
++				}
++			}
++		}
++
++		if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_$App.js_caption']")) != null) {
++			element.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [doubleClick
++			// |
++			// id=ares_projectView_harmonia_hermesFileTree_serverNode_$App.js_caption
++			// | ]]
++			action = new Actions(driver);
++			action.doubleClick(element);
++			action.perform();
++			try {
++				assertTrue(isElementPresent(By.cssSelector("div.ace_content")));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++			assertTrue(driver
++					.findElement(By.cssSelector("BODY"))
++					.getText()
++					.matches(
++							"^[\\s\\S]*// Copyright 2013, \\$ORGANIZATION\n// All rights reserved\\.\nenyo\\.kind\\(\\{\n    name: \"App\",\n    kind: \"Control\",\n    published: \\{\n    \\},\n    events: \\{\n    \\},\n    components: \\[\n    \\],\n    create: function\\(\\) \\{\n        this\\.inherited\\(arguments\\);\n        // initialization code goes here\n    \\}\n\\}\\);[\\s\\S]*$"));
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_bottomBar_iconButton | ]]
++			try {
++				assertTrue(isElementPresent(By
++						.cssSelector("div.ares-doc-close")));
++				assertTrue(isElementPresent(By
++						.xpath(".//*[@id='ares_bottomBar_iconButton']")));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++
++			List<WebElement> AllSearchResults = driver.findElements(By
++					.id("ares_bottomBar_iconButton"));
++			for (WebElement eachResult : AllSearchResults) {
++				if (eachResult.isDisplayed()) {
++					eachResult.click();
++				}
++			}
++			Thread.sleep(2000);
++		}
++
++		if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_$index.html_caption']")) != null) {
++			element.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [doubleClick
++			// |
++			// id=ares_projectView_harmonia_hermesFileTree_serverNode_$index.html_caption
++			// | ]]
++			action = new Actions(driver);
++			action.doubleClick(element);
++			action.perform();
++			try {
++				assertTrue(isElementPresent(By.cssSelector("div.ace_content")));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++			assertTrue(driver
++					.findElement(By.cssSelector("BODY"))
++					.getText()
++					.matches(
++							"^[\\s\\S]*<!doctype html>\n<html>\n    <head>\n        <meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />\n        <meta name=\"viewport\" content=\"width=device-width initial-scale=1\\.0, maximum-scale=1\\.0, user-scalable=no\" />\n        <!-- -->\n        <title>Enyo App</title>\n        <!-- -->\n        <script src=\"\\.\\./\\.\\./enyo/enyo\\.js\" type=\"text/javascript\"></script>\n        <!-- -->\n        <script src=\"package\\.js\" type=\"text/javascript\"></script>\n        <!-- -->\n    </head>\n    <body>\n        <script type=\"text/javascript\">\n            new App\\(\\)\\.renderInto\\(document\\.body\\);\n        </script>\n    </body>\n</html>[\\s\\S]*$"));
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_bottomBar_iconButton2 | ]]
++			try {
++				assertTrue(isElementPresent(By
++						.cssSelector("div.ares-doc-close")));
++				assertTrue(isElementPresent(By
++						.xpath(".//*[@id='ares_bottomBar_iconButton2']")));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++
++			List<WebElement> AllSearchResults = driver.findElements(By
++					.id("ares_bottomBar_iconButton2"));
++			for (WebElement eachResult : AllSearchResults) {
++				if (eachResult.isDisplayed()) {
++					eachResult.click();
++				}
++			}
++			Thread.sleep(2000);
++		}
++
++		if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_$package.js_caption']")) != null) {
++			element.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [doubleClick
++			// |
++			// id=ares_projectView_harmonia_hermesFileTree_serverNode_$package.js_caption
++			// | ]]
++			action = new Actions(driver);
++			action.doubleClick(element);
++			action.perform();
++			try {
++				assertTrue(isElementPresent(By.cssSelector("div.ace_content")));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++			try {
++				assertTrue(driver
++						.findElement(By.cssSelector("BODY"))
++						.getText()
++						.matches(
++								"^[\\s\\S]*enyo\\.depends\\(\n    \"\\$lib/layout\",\n    \"\\$lib/onyx\",\n    \"source\"\n\\);[\\s\\S]*$"));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_bottomBar_iconButton3 | ]]
++			try {
++				assertTrue(isElementPresent(By
++						.cssSelector("div.ares-doc-close")));
++				assertTrue(isElementPresent(By
++						.xpath(".//*[@id='ares_bottomBar_iconButton3']")));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++
++			List<WebElement> AllSearchResults = driver.findElements(By
++					.id("ares_bottomBar_iconButton3"));
++			for (WebElement eachResult : AllSearchResults) {
++				if (eachResult.isDisplayed()) {
++					eachResult.click();
++				}
++			}
++			Thread.sleep(2000);
++		}
++
++	}
++
++	private boolean isElementPresent(By by) {
++		try {
++			driver.findElement(by);
++			return true;
++		} catch (NoSuchElementException e) {
++			return false;
++		}
++	}
++
++	public WebElement getObject(String xpathKey) {
++		WebElement elt = null;
++		try {
++			driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
++			WebDriverWait wait = new WebDriverWait(driver, 20);
++			wait.until(ExpectedConditions.visibilityOfElementLocated(By
++					.xpath(xpathKey)));
++			elt = driver.findElement(By.xpath(xpathKey));
++			System.out.println(elt);
++			return elt;
++		} catch (Throwable t) {
++			System.out.println("Cannot find object with key--" + xpathKey);
++			return null;
++
++		}
++	}
+ }
+diff -Naur -x '.*' -x '*Sha1' java-ref/FileOps.java java-modif/FileOps.java
+--- java-ref/FileOps.java	2013-02-22 15:14:23.000000000 +0100
++++ java-modif/FileOps.java	2013-02-22 09:46:26.000000000 +0100
+@@ -1,156 +1,456 @@
+-package com.example.tests;
++package AresTestSuite;
+ 
+-import java.util.regex.Pattern;
++import static org.junit.Assert.assertEquals;
++import static org.junit.Assert.assertTrue;
++import static org.junit.Assert.fail;
++
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.IOException;
++import java.util.Properties;
+ import java.util.concurrent.TimeUnit;
+-import org.junit.*;
+-import static org.junit.Assert.*;
+-import static org.hamcrest.CoreMatchers.*;
+-import org.openqa.selenium.*;
+-import org.openqa.selenium.firefox.FirefoxDriver;
+-import org.openqa.selenium.support.ui.Select;
++
++import org.openqa.selenium.By;
++import org.openqa.selenium.Keys;
++import org.openqa.selenium.NoSuchElementException;
++import org.openqa.selenium.WebDriver;
++import org.openqa.selenium.WebElement;
++import org.openqa.selenium.chrome.ChromeDriverService;
++import org.openqa.selenium.ie.InternetExplorerDriver;
++import org.openqa.selenium.interactions.Actions;
++import org.openqa.selenium.remote.DesiredCapabilities;
++import org.openqa.selenium.remote.RemoteWebDriver;
++import org.testng.annotations.AfterClass;
++import org.testng.annotations.BeforeClass;
++import org.testng.annotations.Test;
+ 
+ public class FileOps {
+-  private WebDriver driver;
+-  private String baseUrl;
+-  private boolean acceptNextAlert = true;
+-  private StringBuffer verificationErrors = new StringBuffer();
+-
+-  @Before
+-  public void setUp() throws Exception {
+-    driver = new FirefoxDriver();
+-    baseUrl = "http://127.0.0.1:9009/";
+-    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+-  }
+-
+-  @Test
+-  public void testFileOps() throws Exception {
+-    driver.get(baseUrl + "/ide/ares/test.html?debug=true&norunner=true");
+-    // Warning: verifyTextPresent may require manual changes
+-    try {
+-      assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares[\\s\\S]*$"));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    assertEquals("Ares", driver.getTitle());
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_iconButton3 | ]]
+-    // Warning: verifyTextPresent may require manual changes
+-    try {
+-      assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    // Warning: assertTextPresent may require manual changes
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_providerList_item | ]]
+-    // Warning: assertTextPresent may require manual changes
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*root[\\s\\S]*$"));
+-    // Warning: assertTextPresent may require manual changes
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*FileOps[\\s\\S]*$"));
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_$FileOps_caption | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_confirm | ]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("FileOps".equals(driver.findElement(By.id("ares_projectView_projectList_projectList_ownerProxy_item")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_projectList_ownerProxy_item | FileOps]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("FileOps".equals(driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | FileOps]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("".equals(driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_newFolderButton")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_newFolderButton | ]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("".equals(driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName")).clear();
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName")).sendKeys("Source");
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName | e]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName | e]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_nameFolderPopup_confirmButton | ]]
+-    try {
+-      assertTrue(isElementPresent(By.id("ares_projectView_harmonia_hermesFileTree_serverNode_$Source_caption")));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_$Source_caption | Source]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | ares_projectView_harmonia_hermesFileTree_deleteFileButton | ]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if (driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_deletePopup_title")).getText().matches("^exact:Delete folder: Source[\\s\\S]$")) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | ares_projectView_harmonia_hermesFileTree_deletePopup_button2 | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_newFileButton | ]]
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).clear();
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).sendKeys("App1.js");
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("App1.js".equals(driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_serverNode_$App1.js_caption")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_$App1.js_caption | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_copyFileButton | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyPress | id=ares_projectView_harmonia_hermesFileTree_copyFileButton | s]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyUp | id=ares_projectView_harmonia_hermesFileTree_copyFileButton | s]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_nameCopyPopup_confirmButton | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_$Copy of App1.js_caption | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_renameFileButton | ]]
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_renamePopup_fileName")).clear();
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_renamePopup_fileName")).sendKeys("App2.js");
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyPress | id=ares_projectView_harmonia_hermesFileTree_renamePopup_fileName | s]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyUp | id=ares_projectView_harmonia_hermesFileTree_renamePopup_fileName | s]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_renamePopup_confirmButton | ]]
+-  }
+-
+-  @After
+-  public void tearDown() throws Exception {
+-    driver.quit();
+-    String verificationErrorString = verificationErrors.toString();
+-    if (!"".equals(verificationErrorString)) {
+-      fail(verificationErrorString);
+-    }
+-  }
+-
+-  private boolean isElementPresent(By by) {
+-    try {
+-      driver.findElement(by);
+-      return true;
+-    } catch (NoSuchElementException e) {
+-      return false;
+-    }
+-  }
+-
+-  private String closeAlertAndGetItsText() {
+-    try {
+-      Alert alert = driver.switchTo().alert();
+-      if (acceptNextAlert) {
+-        alert.accept();
+-      } else {
+-        alert.dismiss();
+-      }
+-      return alert.getText();
+-    } finally {
+-      acceptNextAlert = true;
+-    }
+-  }
++
++	private static ChromeDriverService service;
++	private static WebDriver driver;
++	private static String baseUrl = null;
++	private WebElement element = null;
++	private static StringBuffer verificationErrors = new StringBuffer();
++	private Actions action = null;
++	private static Properties props = new Properties();
++
++	@SuppressWarnings("deprecation")
++	@BeforeClass(description = "Driver start and Server start which creates a service that manage the driver server.")
++	public static void StartDriver() throws IOException {
++		// load a properties file
++		props.loadFromXML(new FileInputStream(
++				"resources/AresTestSuite/AresConfig.xml"));
++		System.out.println(props.getProperty("AresConfig.xml file:"));
++		System.out.println("-> browserDriverPath -> "
++				+ props.getProperty("browserDriverPath"));
++		System.out.println("-> browserDriverName -> "
++				+ props.getProperty("browserDriverName"));
++		System.out.println("-> os -> " + props.getProperty("os"));
++		// TODO: review browser and platform testability
++		// IE on Windows only, Chrome tested on mac, FF tested using xml-scripts
++		if ((props.getProperty("browserDriverName").equals("IE"))) {
++			File file = new File(props.getProperty("browserDriverPath"));
++			System.setProperty("webdriver.ie.driver", file.getAbsolutePath());
++			DesiredCapabilities capabilities = DesiredCapabilities
++					.internetExplorer();
++			capabilities
++					.setCapability(
++							InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS,
++							true);
++			driver = new InternetExplorerDriver(capabilities);
++
++		} else {
++			// createAndStartService
++			service = new ChromeDriverService.Builder()
++					.usingChromeDriverExecutable(
++							new File(props.getProperty("browserDriverPath")))
++					.usingAnyFreePort().build();
++			service.start();
++			// createDriver
++			driver = new RemoteWebDriver(service.getUrl(),
++					DesiredCapabilities.chrome());
++		}
++
++		// Ares URL;
++		// http://127.0.0.1:9009/ide/ares/test.html?debug=true&norunner=true
++		baseUrl = "http://127.0.0.1:9009/";
++		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
++		driver.get(baseUrl + "ide/ares/test.html?debug=true&norunner=true");
++		try {
++			assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
++					.matches("^[\\s\\S]*Ares[\\s\\S]*$"));
++		} catch (Error e) {
++			verificationErrors.append(e.toString());
++		}
++		assertEquals("Ares", driver.getTitle());
++	}
++
++	@AfterClass(description = "Driver quit and Server stop")
++	public static void StopDriver() throws InterruptedException {
++		driver.quit();
++		String verificationErrorString = verificationErrors.toString();
++		if (!"".equals(verificationErrorString)) {
++			fail(verificationErrorString);
++		}
++		if (props.getProperty("os").equals("mac")) {
++			service.stop();
++		}
++	}
++
++	@Test(description = "Test all File Operations like New Folder, New File, Rename, Copy and Delete")
++	public void testFileOps() throws InterruptedException {
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectList_iconButton3 | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectList_iconButton3']")) != null) {
++			element.click();
++			try {
++				assertTrue(driver
++						.findElement(By.cssSelector("BODY"))
++						.getText()
++						.matches(
++								"^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++			Thread.sleep(1000);
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardScan_providerList_item | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_providerList_item']")) != null) {
++			element.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("root"
++							.equals(driver
++									.findElement(
++											By.id("ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption"))
++									.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++
++			assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
++					.matches("^[\\s\\S]*root[\\s\\S]*$"));
++			assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
++					.matches("^[\\s\\S]*FileOps[\\s\\S]*$"));
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_$FileOps_caption
++		// | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_hermesFileTree_serverNode_$FileOps_caption']")) != null) {
++			element.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_projectWizardScan_confirm | ]]
++			if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_confirm']")) != null) {
++				element.click();
++				for (int second = 0;; second++) {
++					if (second >= 60)
++						fail("timeout");
++					try {
++						if ("FileOps"
++								.equals(driver
++										.findElement(
++												By.id("ares_projectView_projectList_projectList_ownerProxy_item"))
++										.getText()))
++							break;
++					} catch (Exception e) {
++					}
++					Thread.sleep(1000);
++				}
++			}
++
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_projectList_projectList_ownerProxy_item |
++			// FileOps]]
++			if ((element = getObject(".//*[@id='ares_projectView_projectList_projectList_ownerProxy_item']")) != null) {
++				element.click();
++				for (int second = 0;; second++) {
++					if (second >= 60)
++						fail("timeout");
++					try {
++						if ("FileOps"
++								.equals(driver
++										.findElement(
++												By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption"))
++										.getText()))
++							break;
++					} catch (Exception e) {
++					}
++					Thread.sleep(1000);
++				}
++			}
++
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_harmonia_hermesFileTree_serverNode_caption |
++		// FileOps]]
++		if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_caption']")) != null) {
++			element.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("".equals(driver
++							.findElement(
++									By.id("ares_projectView_harmonia_hermesFileTree_newFolderButton"))
++							.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++		}
++
++		if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_caption']")) != null) {
++			element.click();
++
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_harmonia_hermesFileTree_newFolderButton | ]]
++			if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_newFolderButton']")) != null) {
++				element.click();
++				for (int second = 0;; second++) {
++					if (second >= 60)
++						fail("timeout");
++					try {
++						if ("".equals(driver
++								.findElement(
++										By.id("ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName"))
++								.getText()))
++							break;
++					} catch (Exception e) {
++					}
++					Thread.sleep(1000);
++				}
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName"))
++						.clear();
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName"))
++						.sendKeys("Source");
++				// ERROR: Caught exception [ERROR: Unsupported command [keyPress
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName
++				// | e]]
++				// ERROR: Caught exception [ERROR: Unsupported command [keyUp |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFolderPopup_fileName
++				// | e]]
++				action = new Actions(driver);
++				if (props.getProperty("os").equals("windows")) {
++					action.keyDown(Keys.CONTROL).keyUp(Keys.CONTROL).perform();
++				} else {
++					action.keyDown(Keys.CONTROL).sendKeys("e")
++							.keyUp(Keys.CONTROL).perform();
++				}
++				// ERROR: Caught exception [ERROR: Unsupported command [clickAt
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFolderPopup_confirmButton
++				// | ]]
++				if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_nameFolderPopup_confirmButton']")) != null) {
++					element.click();
++					try {
++						assertTrue(isElementPresent(By
++								.id("ares_projectView_harmonia_hermesFileTree_serverNode_$Source_caption")));
++					} catch (Error e) {
++						verificationErrors.append(e.toString());
++					}
++				}
++			}
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_harmonia_hermesFileTree_serverNode_$Source_caption
++		// | Source]]
++		if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_$Source_caption']")) != null) {
++			element.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// ares_projectView_harmonia_hermesFileTree_deleteFileButton | ]]
++			if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_deleteFileButton']")) != null) {
++				element.click();
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_deletePopup_button2"))
++						.click();
++			}
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_harmonia_hermesFileTree_newFileButton | ]]
++		// WA: need to refresh somehow the hermeFileTree
++		if ((element = getObject(".//*[@id='ares_projectView_projectList_projectList_ownerProxy_item']")) != null) {
++			element.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("FileOps"
++							.equals(driver
++									.findElement(
++											By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption"))
++									.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++
++			if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_caption']")) != null) {
++				Thread.sleep(1000);
++				element.click();
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_newFileButton"))
++						.click();
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++						.clear();
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++						.sendKeys("App1.js");
++				// ERROR: Caught exception [ERROR: Unsupported command [keyPress
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName
++				// | s]]
++				// ERROR: Caught exception [ERROR: Unsupported command [keyUp |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName
++				// | s]]
++				action = new Actions(driver);
++				if (props.getProperty("os").equals("windows")) {
++					action.keyDown(Keys.CONTROL).keyUp(Keys.CONTROL).perform();
++				} else {
++					action.keyDown(Keys.CONTROL).sendKeys("s")
++							.keyUp(Keys.CONTROL).perform();
++				}
++				// ERROR: Caught exception [ERROR: Unsupported command [clickAt
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton
++				// | ]]
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton"))
++						.click();
++			}
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectList_projectList_ownerProxy_item']")) != null) {
++			element.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("FileOps"
++							.equals(driver
++									.findElement(
++											By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption"))
++									.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++
++			if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_caption']")) != null) {
++				element.click();
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_serverNode_$App1.js_caption"))
++						.click();
++				// ERROR: Caught exception [ERROR: Unsupported command [clickAt
++				// | id=ares_projectView_harmonia_hermesFileTree_copyFileButton
++				// | ]]
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_copyFileButton"))
++						.click();
++				// ERROR: Caught exception [ERROR: Unsupported command [keyPress
++				// | id=ares_projectView_harmonia_hermesFileTree_copyFileButton
++				// | s]]
++				// ERROR: Caught exception [ERROR: Unsupported command [keyUp |
++				// id=ares_projectView_harmonia_hermesFileTree_copyFileButton |
++				// s]]
++				action = new Actions(driver);
++				if (props.getProperty("os").equals("windows")) {
++					action.keyDown(Keys.CONTROL).keyUp(Keys.CONTROL).perform();
++				} else {
++					action.keyDown(Keys.CONTROL).sendKeys("s")
++							.keyUp(Keys.CONTROL).perform();
++				}
++				// ERROR: Caught exception [ERROR: Unsupported command [clickAt
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_nameCopyPopup_confirmButton
++				// | ]]
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameCopyPopup_confirmButton"))
++						.click();
++			}
++
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_harmonia_hermesFileTree_serverNode_$Copy of
++			// App1.js_caption | ]]
++			if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_$Copy of App1.js_caption']")) != null) {
++				element.click();
++				// ERROR: Caught exception [ERROR: Unsupported command [clickAt
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_renameFileButton
++				// | ]]
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_renameFileButton"))
++						.click();
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_renamePopup_fileName"))
++						.clear();
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_renamePopup_fileName"))
++						.sendKeys("App2.js");
++				// ERROR: Caught exception [ERROR: Unsupported command [keyPress
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_renamePopup_fileName
++				// | s]]
++				// ERROR: Caught exception [ERROR: Unsupported command [keyUp |
++				// id=ares_projectView_harmonia_hermesFileTree_renamePopup_fileName
++				// | s]]
++				action = new Actions(driver);
++				if (props.getProperty("os").equals("windows")) {
++					action.keyDown(Keys.CONTROL).keyUp(Keys.CONTROL).perform();
++				} else {
++					action.keyDown(Keys.CONTROL).sendKeys("s")
++							.keyUp(Keys.CONTROL).perform();
++				}
++				// ERROR: Caught exception [ERROR: Unsupported command [clickAt
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_renamePopup_confirmButton
++				// | ]]
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_renamePopup_confirmButton"))
++						.click();
++			}
++		}
++	}
++
++	private boolean isElementPresent(By by) {
++		try {
++			driver.findElement(by);
++			return true;
++		} catch (NoSuchElementException e) {
++			System.out.println("No Such Element:" + by);
++			return false;
++		}
++	}
++
++	public WebElement getObject(String xpathKey) {
++		WebElement elt = null;
++		try {
++			elt = driver.findElement(By.xpath(xpathKey));
++			return elt;
++		} catch (Throwable t) {
++			System.out.println("Cannot find object with key--" + xpathKey);
++			return null;
++		}
++	}
+ }
+diff -Naur -x '.*' -x '*Sha1' java-ref/HelloWorldPhoneGapSettings.java java-modif/HelloWorldPhoneGapSettings.java
+--- java-ref/HelloWorldPhoneGapSettings.java	2013-02-22 15:15:58.000000000 +0100
++++ java-modif/HelloWorldPhoneGapSettings.java	2013-02-22 09:46:44.000000000 +0100
+@@ -1,97 +1,299 @@
+-package com.example.tests;
++package AresTestSuite;
+ 
+-import java.util.regex.Pattern;
++import static org.junit.Assert.assertEquals;
++import static org.junit.Assert.assertTrue;
++import static org.junit.Assert.fail;
++
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.IOException;
++import java.util.Properties;
+ import java.util.concurrent.TimeUnit;
+-import org.junit.*;
+-import static org.junit.Assert.*;
+-import static org.hamcrest.CoreMatchers.*;
+-import org.openqa.selenium.*;
+-import org.openqa.selenium.firefox.FirefoxDriver;
+-import org.openqa.selenium.support.ui.Select;
++
++import org.openqa.selenium.By;
++import org.openqa.selenium.Keys;
++import org.openqa.selenium.WebDriver;
++import org.openqa.selenium.WebElement;
++import org.openqa.selenium.chrome.ChromeDriverService;
++import org.openqa.selenium.ie.InternetExplorerDriver;
++import org.openqa.selenium.interactions.Actions;
++import org.openqa.selenium.remote.DesiredCapabilities;
++import org.openqa.selenium.remote.RemoteWebDriver;
++import org.testng.annotations.AfterClass;
++import org.testng.annotations.BeforeClass;
++import org.testng.annotations.Test;
+ 
+ public class HelloWorldPhoneGapSettings {
+-  private WebDriver driver;
+-  private String baseUrl;
+-  private boolean acceptNextAlert = true;
+-  private StringBuffer verificationErrors = new StringBuffer();
+-
+-  @Before
+-  public void setUp() throws Exception {
+-    driver = new FirefoxDriver();
+-    baseUrl = "http://127.0.0.1:9009/";
+-    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+-  }
+-
+-  @Test
+-  public void testHelloWorldPhoneGapSettings() throws Exception {
+-    driver.get(baseUrl + "/ide/ares/test.html?debug=true&norunner=true");
+-    assertEquals("Ares", driver.getTitle());
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_iconButton3 | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_providerList_item | Ares Test - Home Directory]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("root".equals(driver.findElement(By.id("ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | root]]
+-    // ERROR: Caught exception [Error: locator strategy either id or name must be specified explicitly.]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption | HelloWorld]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_confirm | OK]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("HelloWorld".equals(driver.findElement(By.id("ares_projectView_projectList_projectList_ownerProxy_item")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_projectList_ownerProxy_item | HelloWorld]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_button | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_menuItem | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_accountsConfigurator_accountsList_name | ]]
+-    assertEquals("", driver.findElement(By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_username")).getText());
+-    assertEquals("", driver.findElement(By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_password")).getText());
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_checkBtn | ]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("126903".equals(driver.findElement(By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    assertEquals("126903", driver.findElement(By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId")).getText());
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [selectWindow | name=PhoneGap Build Account Management | ]]
+-    assertEquals("Adobe PhoneGap Build", driver.getTitle());
+-  }
+-
+-  @After
+-  public void tearDown() throws Exception {
+-    driver.quit();
+-    String verificationErrorString = verificationErrors.toString();
+-    if (!"".equals(verificationErrorString)) {
+-      fail(verificationErrorString);
+-    }
+-  }
+-
+-  private boolean isElementPresent(By by) {
+-    try {
+-      driver.findElement(by);
+-      return true;
+-    } catch (NoSuchElementException e) {
+-      return false;
+-    }
+-  }
+-
+-  private String closeAlertAndGetItsText() {
+-    try {
+-      Alert alert = driver.switchTo().alert();
+-      if (acceptNextAlert) {
+-        alert.accept();
+-      } else {
+-        alert.dismiss();
+-      }
+-      return alert.getText();
+-    } finally {
+-      acceptNextAlert = true;
+-    }
+-  }
++
++	private static ChromeDriverService service;
++	private static WebDriver driver;
++	private static String baseUrl = null;
++	private static WebElement element = null;
++	private static StringBuffer verificationErrors = new StringBuffer();
++	private static Actions action = null;
++	private static Properties props = new Properties();
++	private static String str = null;
++	private static char s;
++
++	@SuppressWarnings("deprecation")
++	@BeforeClass(description = "Driver start and Server start which creates a service that manage the driver server.")
++	public static void StartDriver() throws IOException {
++		// load a properties file
++		props.loadFromXML(new FileInputStream(
++				"resources/AresTestSuite/AresConfig.xml"));
++		System.out.println(props.getProperty("AresConfig.xml file:"));
++		System.out.println("-> browserDriverPath -> "
++				+ props.getProperty("browserDriverPath"));
++		System.out.println("-> browserDriverName -> "
++				+ props.getProperty("browserDriverName"));
++		System.out.println("-> os -> " + props.getProperty("os"));
++		// TODO: review browser and platform testability
++		// IE on Windows only, Chrome tested on mac, FF tested using xml-scripts
++		if ((props.getProperty("browserDriverName").equals("IE"))) {
++			File file = new File(props.getProperty("browserDriverPath"));
++			System.setProperty("webdriver.ie.driver", file.getAbsolutePath());
++			DesiredCapabilities capabilities = DesiredCapabilities
++					.internetExplorer();
++			capabilities
++					.setCapability(
++							InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS,
++							true);
++			driver = new InternetExplorerDriver(capabilities);
++
++		} else {
++			// createAndStartService
++			service = new ChromeDriverService.Builder()
++					.usingChromeDriverExecutable(
++							new File(props.getProperty("browserDriverPath")))
++					.usingAnyFreePort().build();
++			service.start();
++			// createDriver
++			driver = new RemoteWebDriver(service.getUrl(),
++					DesiredCapabilities.chrome());
++		}
++
++		// Ares URL;
++		// http://127.0.0.1:9009/ide/ares/test.html?debug=true&norunner=true
++		baseUrl = "http://127.0.0.1:9009/";
++		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
++		driver.get(baseUrl + "ide/ares/test.html?debug=true&norunner=true");
++		try {
++			assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
++					.matches("^[\\s\\S]*Ares[\\s\\S]*$"));
++		} catch (Error e) {
++			verificationErrors.append(e.toString());
++		}
++		assertEquals("Ares", driver.getTitle());
++	}
++
++	@AfterClass(description = "Driver quit and Server stop")
++	public static void StopDriver() throws InterruptedException {
++		driver.quit();
++		String verificationErrorString = verificationErrors.toString();
++		if (!"".equals(verificationErrorString)) {
++			fail(verificationErrorString);
++		}
++		if (props.getProperty("os").equals("mac")) {
++			service.stop();
++		}
++	}
++
++	@Test(description = "Get Ares URL; http://127.0.0.1:9009/ide/ares/test.html?debug=true&norunner=true, "
++			+ "Prepare HelloWorld Project Before To Check PhoneGapAccount,"
++			+ "Test the HelloWorld PhoneGap Settings like PhoneGap build credentials")
++	public static void testPhoneGapSettings() throws IOException,
++			InterruptedException {
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectList_iconButton3 | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectList_iconButton3']")) != null) {
++			element.click();
++			try {
++				assertTrue(driver
++						.findElement(By.cssSelector("BODY"))
++						.getText()
++						.matches(
++								"^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++			Thread.sleep(1000);
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardScan_providerList_item | Ares Test -
++		// Home Directory]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_providerList_item']")) != null) {
++			element.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("root"
++							.equals(driver
++									.findElement(
++											By.id("ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption"))
++									.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption
++		// | root]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption']")) != null) {
++			element.click();
++			getObject(
++					".//*[@id='ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption']")
++					.getAttribute("root");
++			getObject(
++					".//*[@id='ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption']")
++					.click();
++			try {
++				assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
++						.matches("^[\\s\\S]*HelloWorld[\\s\\S]*$"));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++			Thread.sleep(1000);
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption
++		// | HelloWorld]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption']")) != null) {
++			element.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("OK".equals(driver
++							.findElement(
++									By.id("ares_projectView_projectWizardScan_confirm"))
++							.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardScan_confirm | OK]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_confirm']")) != null) {
++			element.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("HelloWorld"
++							.equals(driver
++									.findElement(
++											By.id("ares_projectView_projectList_projectList_ownerProxy_item"))
++									.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectList_projectList_ownerProxy_item |
++		// HelloWorld]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectList_projectList_ownerProxy_item']")) != null) {
++			element.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_projectList_button | ]]
++			getObject(".//*[@id='ares_projectView_projectList_button']")
++					.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_projectList_menuItem | ]]
++			getObject(".//*[@id='ares_projectView_projectList_menuItem']")
++					.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_projectList_accountsConfigurator_accountsList_name
++			// | ]]
++			getObject(
++					".//*[@id='ares_projectView_projectList_accountsConfigurator_accountsList_name']")
++					.click();
++
++			driver.findElement(
++					By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_username"))
++					.clear();
++			driver.findElement(
++					By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_username"))
++					.sendKeys(props.getProperty("phoneGap.username"));
++
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_password
++			// | ]]
++			getObject(
++					".//*[@id='ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_password']")
++					.click();
++			driver.findElement(
++					By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_password"))
++					.clear();
++			str = props.getProperty("phoneGap.password");
++			driver.findElement(
++					By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_password"))
++					.sendKeys(str);
++			action = new Actions(driver);
++			if (props.getProperty("os").equals("windows")) {
++				action.keyDown(Keys.CONTROL).keyUp(Keys.CONTROL).perform();
++			} else {
++				s = str.charAt(str.length() - 1);
++				action.keyDown(Keys.CONTROL).sendKeys("" + s)
++						.keyUp(Keys.CONTROL).perform();
++			}
++
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_checkBtn
++			// | ]]
++			driver.findElement(
++					By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_checkBtn"))
++					.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("126903"
++							.equals(driver
++									.findElement(
++											By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId"))
++									.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++			assertEquals(
++					"126903",
++					driver.findElement(
++							By.id("ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId"))
++							.getText());
++
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId
++			// | ]]
++			getObject(
++					".//*[@id='ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId']")
++					.click();
++		}
++	}
++
++	public static WebElement getObject(String xpathKey) {
++		WebElement elt = null;
++		try {
++			elt = driver.findElement(By.xpath(xpathKey));
++			System.out.println(elt);
++			return elt;
++		} catch (Throwable t) {
++			System.out.println("Cannot find object with key--" + xpathKey);
++			return null;
++
++		}
++	}
+ }
+diff -Naur -x '.*' -x '*Sha1' java-ref/HelloWorldPreview.java java-modif/HelloWorldPreview.java
+--- java-ref/HelloWorldPreview.java	2013-02-22 15:18:19.000000000 +0100
++++ java-modif/HelloWorldPreview.java	2013-02-22 09:47:04.000000000 +0100
+@@ -1,95 +1,234 @@
+-package com.example.tests;
++package AresTestSuite;
+ 
+-import java.util.regex.Pattern;
++import static org.junit.Assert.assertEquals;
++import static org.junit.Assert.assertTrue;
++import static org.junit.Assert.fail;
++
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.IOException;
++import java.util.Properties;
+ import java.util.concurrent.TimeUnit;
+-import org.junit.*;
+-import static org.junit.Assert.*;
+-import static org.hamcrest.CoreMatchers.*;
+-import org.openqa.selenium.*;
+-import org.openqa.selenium.firefox.FirefoxDriver;
+-import org.openqa.selenium.support.ui.Select;
++
++import org.openqa.selenium.By;
++import org.openqa.selenium.WebDriver;
++import org.openqa.selenium.WebElement;
++import org.openqa.selenium.chrome.ChromeDriverService;
++import org.openqa.selenium.ie.InternetExplorerDriver;
++import org.openqa.selenium.remote.DesiredCapabilities;
++import org.openqa.selenium.remote.RemoteWebDriver;
++import org.testng.annotations.AfterClass;
++import org.testng.annotations.BeforeClass;
++import org.testng.annotations.Test;
+ 
+ public class HelloWorldPreview {
+-  private WebDriver driver;
+-  private String baseUrl;
+-  private boolean acceptNextAlert = true;
+-  private StringBuffer verificationErrors = new StringBuffer();
+-
+-  @Before
+-  public void setUp() throws Exception {
+-    driver = new FirefoxDriver();
+-    baseUrl = "http://127.0.0.1:9009/";
+-    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+-  }
+-
+-  @Test
+-  public void testHelloWorldPreview() throws Exception {
+-    driver.get(baseUrl + "/ide/ares/test.html?debug=true&norunner=true");
+-    assertEquals("Ares", driver.getTitle());
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_iconButton3 | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_providerList_item | Ares Test - Home Directory]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("root".equals(driver.findElement(By.id("ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | root]]
+-    // ERROR: Caught exception [Error: locator strategy either id or name must be specified explicitly.]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption | HelloWorld]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption | HelloWorld]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("OK".equals(driver.findElement(By.id("ares_projectView_projectWizardScan_confirm")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_confirm | OK]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("HelloWorld".equals(driver.findElement(By.id("ares_projectView_projectList_projectList_ownerProxy_item")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_projectList_ownerProxy_item | HelloWorld]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("".equals(driver.findElement(By.id("ares_projectView_projectList_previewButton")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_previewButton | ]]
+-  }
+-
+-  @After
+-  public void tearDown() throws Exception {
+-    driver.quit();
+-    String verificationErrorString = verificationErrors.toString();
+-    if (!"".equals(verificationErrorString)) {
+-      fail(verificationErrorString);
+-    }
+-  }
+-
+-  private boolean isElementPresent(By by) {
+-    try {
+-      driver.findElement(by);
+-      return true;
+-    } catch (NoSuchElementException e) {
+-      return false;
+-    }
+-  }
+-
+-  private String closeAlertAndGetItsText() {
+-    try {
+-      Alert alert = driver.switchTo().alert();
+-      if (acceptNextAlert) {
+-        alert.accept();
+-      } else {
+-        alert.dismiss();
+-      }
+-      return alert.getText();
+-    } finally {
+-      acceptNextAlert = true;
+-    }
+-  }
++
++	private static ChromeDriverService service;
++	private static WebDriver driver;
++	private static String baseUrl = null;
++	private WebElement element = null;
++	private static StringBuffer verificationErrors = new StringBuffer();
++	private static Properties props = new Properties();
++
++	@SuppressWarnings("deprecation")
++	@BeforeClass(description = "Driver start and Server start which creates a service that manage the driver server.")
++	public static void StartDriver() throws IOException {
++		// load a properties file
++		props.loadFromXML(new FileInputStream(
++				"resources/AresTestSuite/AresConfig.xml"));
++		System.out.println(props.getProperty("AresConfig.xml file:"));
++		System.out.println("-> browserDriverPath -> "
++				+ props.getProperty("browserDriverPath"));
++		System.out.println("-> browserDriverName -> "
++				+ props.getProperty("browserDriverName"));
++		System.out.println("-> os -> " + props.getProperty("os"));
++		// TODO: review browser and platform testability
++		// IE on Windows only, Chrome tested on mac, FF tested using xml-scripts
++		if ((props.getProperty("browserDriverName").equals("IE"))) {
++			File file = new File(props.getProperty("browserDriverPath"));
++			System.setProperty("webdriver.ie.driver", file.getAbsolutePath());
++			DesiredCapabilities capabilities = DesiredCapabilities
++					.internetExplorer();
++			capabilities
++					.setCapability(
++							InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS,
++							true);
++			driver = new InternetExplorerDriver(capabilities);
++
++		} else {
++			// createAndStartService
++			service = new ChromeDriverService.Builder()
++					.usingChromeDriverExecutable(
++							new File(props.getProperty("browserDriverPath")))
++					.usingAnyFreePort().build();
++			service.start();
++			// createDriver
++			driver = new RemoteWebDriver(service.getUrl(),
++					DesiredCapabilities.chrome());
++		}
++	}
++
++	@AfterClass(description = "Driver quit and Server stop")
++	public static void StopDriver() throws InterruptedException {
++		driver.quit();
++		String verificationErrorString = verificationErrors.toString();
++		if (!"".equals(verificationErrorString)) {
++			fail(verificationErrorString);
++		}
++		if (props.getProperty("os").equals("mac")) {
++			service.stop();
++		}
++	}
++
++	@Test(description = "Get Ares URL; http://127.0.0.1:9009/ide/ares/test.html?debug=true&norunner=true")
++	public static void testGetAresUrl() throws IOException {
++		baseUrl = "http://127.0.0.1:9009/";
++		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
++		driver.get(baseUrl + "ide/ares/test.html?debug=true&norunner=true");
++		try {
++			assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
++					.matches("^[\\s\\S]*Ares[\\s\\S]*$"));
++		} catch (Error e) {
++			verificationErrors.append(e.toString());
++		}
++		assertEquals("Ares", driver.getTitle());
++	}
++
++	@Test(description = "Import HelloWorld project into the project list")
++	public void testImportHelloWorldProject() throws Exception {
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectList_iconButton3 | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectList_iconButton3']")) != null) {
++			element.click();
++			try {
++				assertTrue(driver
++						.findElement(By.cssSelector("BODY"))
++						.getText()
++						.matches(
++								"^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++			Thread.sleep(1000);
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardScan_providerList_item | Ares Test -
++		// Home Directory]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_providerList_item']")) != null) {
++			element.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("root"
++							.equals(driver
++									.findElement(
++											By.id("ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption"))
++									.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption
++		// | root]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption']")) != null) {
++			element.click();
++			getObject(
++					".//*[@id='ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption']")
++					.getAttribute("root");
++			getObject(
++					".//*[@id='ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption']")
++					.click();
++			try {
++				assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
++						.matches("^[\\s\\S]*HelloWorld[\\s\\S]*$"));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++			Thread.sleep(1000);
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption
++		// | HelloWorld]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption']")) != null) {
++			element.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("OK".equals(driver
++							.findElement(
++									By.id("ares_projectView_projectWizardScan_confirm"))
++							.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++		}
++
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardScan_confirm | OK]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardScan_confirm']")) != null) {
++			element.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("HelloWorld"
++							.equals(driver
++									.findElement(
++											By.id("ares_projectView_projectList_projectList_ownerProxy_item"))
++									.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++		}
++	}
++
++	@Test(description = "Preview HelloWorld project listed the project list")
++	public void testPreviewHelloWorldProject() throws Exception {
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectList_projectList_ownerProxy_item |
++		// HelloWorld]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectList_projectList_ownerProxy_item']")) != null) {
++			element.click();
++			for (int second = 0;; second++) {
++				if (second >= 60)
++					fail("timeout");
++				try {
++					if ("".equals(driver
++							.findElement(
++									By.id("ares_projectView_projectList_previewButton"))
++							.getText()))
++						break;
++				} catch (Exception e) {
++				}
++				Thread.sleep(1000);
++			}
++		}
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectList_previewButton | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectList_previewButton']")) != null) {
++			element.click();
++		}
++		Thread.sleep(10000);
++	}
++
++	public WebElement getObject(String xpathKey) {
++		try {
++			return driver.findElement(By.xpath(xpathKey));
++		} catch (Throwable t) {
++			System.out.println("Cannot find object with key--" + xpathKey);
++			return null;
++		}
++	}
+ }
+diff -Naur -x '.*' -x '*Sha1' java-ref/NewProject.java java-modif/NewProject.java
+--- java-ref/NewProject.java	2013-02-22 15:19:33.000000000 +0100
++++ java-modif/NewProject.java	2013-02-22 09:47:25.000000000 +0100
+@@ -1,113 +1,257 @@
+-package com.example.tests;
++package AresTestSuite;
+ 
+-import java.util.regex.Pattern;
++import static org.junit.Assert.assertEquals;
++import static org.junit.Assert.assertTrue;
++import static org.junit.Assert.fail;
++
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.FileNotFoundException;
++import java.io.IOException;
++import java.util.Properties;
+ import java.util.concurrent.TimeUnit;
+-import org.junit.*;
+-import static org.junit.Assert.*;
+-import static org.hamcrest.CoreMatchers.*;
+-import org.openqa.selenium.*;
+-import org.openqa.selenium.firefox.FirefoxDriver;
+-import org.openqa.selenium.support.ui.Select;
++
++import org.openqa.selenium.By;
++import org.openqa.selenium.Keys;
++import org.openqa.selenium.WebDriver;
++import org.openqa.selenium.WebElement;
++import org.openqa.selenium.chrome.ChromeDriverService;
++import org.openqa.selenium.ie.InternetExplorerDriver;
++import org.openqa.selenium.interactions.Actions;
++import org.openqa.selenium.remote.DesiredCapabilities;
++import org.openqa.selenium.remote.RemoteWebDriver;
++import org.testng.annotations.AfterClass;
++import org.testng.annotations.BeforeClass;
++import org.testng.annotations.Test;
+ 
+ public class NewProject {
+-  private WebDriver driver;
+-  private String baseUrl;
+-  private boolean acceptNextAlert = true;
+-  private StringBuffer verificationErrors = new StringBuffer();
+-
+-  @Before
+-  public void setUp() throws Exception {
+-    driver = new FirefoxDriver();
+-    baseUrl = "http://127.0.0.1:9009/";
+-    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+-  }
+-
+-  @Test
+-  public void testNewProject() throws Exception {
+-    driver.get(baseUrl + "/ide/ares/test.html?debug=true&norunner=true");
+-    // Warning: verifyTextPresent may require manual changes
+-    try {
+-      assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares[\\s\\S]*$"));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    assertEquals("Ares", driver.getTitle());
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_iconButton2 | ]]
+-    // Warning: verifyTextPresent may require manual changes
+-    try {
+-      assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    // Warning: assertTextPresent may require manual changes
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardCreate_selectDirectoryPopup_providerList_name | ]]
+-    // Warning: assertTextPresent may require manual changes
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*root[\\s\\S]*$"));
+-    // Warning: assertTextPresent may require manual changes
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*NewProject[\\s\\S]*$"));
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardCreate_selectDirectoryPopup_hermesFileTree_serverNode_$NewProject_caption | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardCreate_selectDirectoryPopup_confirm | ]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("".equals(driver.findElement(By.id("ares_projectView_projectWizardCreate_propertiesWidget_projectTitle")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    driver.findElement(By.id("ares_projectView_projectWizardCreate_propertiesWidget_projectTitle")).clear();
+-    driver.findElement(By.id("ares_projectView_projectWizardCreate_propertiesWidget_projectTitle")).sendKeys("projectForSelenumTest");
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardCreate_propertiesWidget_ok | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_projectList_ownerProxy_item | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
+-    for (int second = 0;; second++) {
+-    	if (second >= 60) fail("timeout");
+-    	try { if ("".equals(driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_newFileButton")).getText())) break; } catch (Exception e) {}
+-    	Thread.sleep(1000);
+-    }
+-
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_newFileButton | ]]
+-    try {
+-      assertEquals("", driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).getAttribute("value"));
+-    } catch (Error e) {
+-      verificationErrors.append(e.toString());
+-    }
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).clear();
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).sendKeys("App1.js");
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
+-    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton | ]]
+-  }
+-
+-  @After
+-  public void tearDown() throws Exception {
+-    driver.quit();
+-    String verificationErrorString = verificationErrors.toString();
+-    if (!"".equals(verificationErrorString)) {
+-      fail(verificationErrorString);
+-    }
+-  }
+-
+-  private boolean isElementPresent(By by) {
+-    try {
+-      driver.findElement(by);
+-      return true;
+-    } catch (NoSuchElementException e) {
+-      return false;
+-    }
+-  }
+-
+-  private String closeAlertAndGetItsText() {
+-    try {
+-      Alert alert = driver.switchTo().alert();
+-      if (acceptNextAlert) {
+-        alert.accept();
+-      } else {
+-        alert.dismiss();
+-      }
+-      return alert.getText();
+-    } finally {
+-      acceptNextAlert = true;
+-    }
+-  }
++
++	private static ChromeDriverService service;
++	private static WebDriver driver;
++	private static String baseUrl = null;
++	private WebElement element = null;
++	private static StringBuffer verificationErrors = new StringBuffer();
++	private Actions action = null;
++	private static Properties props = new Properties();
++
++	@SuppressWarnings("deprecation")
++	@BeforeClass(description = "Driver start and Server start which creates a service that manage the driver server.")
++	public static void StartDriver() throws FileNotFoundException, IOException {
++		// load a properties file
++		props.loadFromXML(new FileInputStream(
++				"resources/AresTestSuite/AresConfig.xml"));
++		System.out.println(props.getProperty("AresConfig.xml file:"));
++		System.out.println("-> browserDriverPath -> "
++				+ props.getProperty("browserDriverPath"));
++		System.out.println("-> browserDriverName -> "
++				+ props.getProperty("browserDriverName"));
++		System.out.println("-> os -> " + props.getProperty("os"));
++		// TODO: review browser and platform testability
++		// IE on Windows only, Chrome tested on mac, FF tested using xml-scripts
++		if ((props.getProperty("browserDriverName").equals("IE"))) {
++			File file = new File(props.getProperty("browserDriverPath"));
++			System.setProperty("webdriver.ie.driver", file.getAbsolutePath());
++			DesiredCapabilities capabilities = DesiredCapabilities
++					.internetExplorer();
++			capabilities
++					.setCapability(
++							InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS,
++							true);
++			driver = new InternetExplorerDriver(capabilities);
++
++		} else {
++			// createAndStartService
++			service = new ChromeDriverService.Builder()
++					.usingChromeDriverExecutable(
++							new File(props.getProperty("browserDriverPath")))
++					.usingAnyFreePort().build();
++			service.start();
++			// createDriver
++			driver = new RemoteWebDriver(service.getUrl(),
++					DesiredCapabilities.chrome());
++		}
++	}
++
++	@AfterClass(description = "Driver quit and Server stop")
++	public static void StopDriver() throws InterruptedException {
++		driver.quit();
++		String verificationErrorString = verificationErrors.toString();
++		if (!"".equals(verificationErrorString)) {
++			fail(verificationErrorString);
++		}
++		if (props.getProperty("os").equals("mac")) {
++			service.stop();
++		}
++	}
++
++	@Test(description = "Get Ares URL; http://127.0.0.1:9009/ide/ares/test.html?debug=true&norunner=true")
++	public static void testGetAresUrl() throws IOException {
++		baseUrl = "http://127.0.0.1:9009/";
++		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
++		driver.get(baseUrl + "ide/ares/test.html?debug=true&norunner=true");
++		try {
++			assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
++					.matches("^[\\s\\S]*Ares[\\s\\S]*$"));
++		} catch (Error e) {
++			verificationErrors.append(e.toString());
++		}
++		assertEquals("Ares", driver.getTitle());
++	}
++
++	@Test(description = "Create a New Project, List this new project into the project list, expand it into the hermesFileTree")
++	public void testNewProject() throws Exception {
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectList_iconButton2 | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectList_iconButton2']")) != null) {
++			element.click();
++			try {
++				// Assert Text is Present - Ares Test - Home Directory
++				assertTrue(driver
++						.findElement(By.cssSelector("BODY"))
++						.getText()
++						.matches(
++								"^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
++			} catch (Error e) {
++				verificationErrors.append(e.toString());
++			}
++			Thread.sleep(1000);
++		}
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardCreate_selectDirectoryPopup_providerList_name
++		// | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardCreate_selectDirectoryPopup_providerList_name']")) != null) {
++			element.click();
++			Thread.sleep(1000);
++			// Assert Text is Present
++			assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
++					.matches("^[\\s\\S]*root[\\s\\S]*$"));
++			// Assert Text is Present
++			assertTrue(driver.findElement(By.cssSelector("BODY")).getText()
++					.matches("^[\\s\\S]*NewProject[\\s\\S]*$"));
++			Thread.sleep(1000);
++		}
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardCreate_selectDirectoryPopup_hermesFileTree_serverNode_$NewProject_caption
++		// | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardCreate_selectDirectoryPopup_hermesFileTree_serverNode_$NewProject_caption']")) != null) {
++			element.click();
++			Thread.sleep(1000);
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_projectWizardCreate_selectDirectoryPopup_confirm
++			// | ]]
++			if ((element = getObject(".//*[@id='ares_projectView_projectWizardCreate_selectDirectoryPopup_confirm']")) != null) {
++				element.click();
++				for (int second = 0;; second++) {
++					if (second >= 60)
++						fail("timeout");
++					// wait for text projectTitle available into widget
++					// ares_projectView_projectWizardCreate_propertiesWidget
++					try {
++						if ("".equals(driver
++								.findElement(
++										By.id("ares_projectView_projectWizardCreate_propertiesWidget_projectTitle"))
++								.getText()))
++							break;
++					} catch (Exception e) {
++					}
++					Thread.sleep(1000);
++				}
++			}
++
++			driver.findElement(
++					By.id("ares_projectView_projectWizardCreate_propertiesWidget_projectTitle"))
++					.clear();
++			driver.findElement(
++					By.id("ares_projectView_projectWizardCreate_propertiesWidget_projectTitle"))
++					.sendKeys("projectForSelenumTest");
++
++		}
++		// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++		// id=ares_projectView_projectWizardCreate_propertiesWidget_ok | ]]
++		if ((element = getObject(".//*[@id='ares_projectView_projectWizardCreate_propertiesWidget_ok']")) != null) {
++			element.click();
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_projectList_projectList_ownerProxy_item | ]]
++			// as result, the NewProject is expanded into hermesFileTree
++			if ((element = getObject(".//*[@id='ares_projectView_projectList_projectList_ownerProxy_item']")) != null) {
++				element.click();
++				for (int second = 0;; second++) {
++					if (second >= 60)
++						fail("timeout");
++					try {
++						if ("NewProject"
++								.equals(driver
++										.findElement(
++												By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption"))
++										.getText()))
++							break;
++					} catch (Exception e) {
++					}
++					Thread.sleep(1000);
++				}
++				if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_serverNode_caption']")) != null) {
++					element.click();
++				}
++			}
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_harmonia_hermesFileTree_newFileButton | ]]
++			if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_newFileButton']")) != null) {
++				element.click();
++				try {
++					assertEquals(
++							"",
++							driver.findElement(
++									By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++									.getAttribute("value"));
++				} catch (Error e) {
++					verificationErrors.append(e.toString());
++				}
++
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++						.clear();
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
++						.sendKeys("App1.js");
++
++				// ERROR: Caught exception [ERROR: Unsupported command [keyPress
++				// |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName
++				// | s]]
++				// ERROR: Caught exception [ERROR: Unsupported command [keyUp |
++				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName
++				// | s]]
++				action = new Actions(driver);
++				if (props.getProperty("os").equals("windows")) {
++					action.keyDown(Keys.CONTROL).keyUp(Keys.CONTROL).perform();
++				} else {
++					action.keyDown(Keys.CONTROL).sendKeys("s")
++							.keyUp(Keys.CONTROL).perform();
++				}
++			}
++			// ERROR: Caught exception [ERROR: Unsupported command [clickAt |
++			// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton
++			// | ]]
++			if ((element = getObject(".//*[@id='ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton']")) != null) {
++				element.click();
++				Thread.sleep(1000);
++				driver.findElement(
++						By.id("ares_projectView_harmonia_hermesFileTree_serverNode_caption"))
++						.click();
++				Thread.sleep(1000);
++			}
++		}
++	}
++
++	public WebElement getObject(String xpathKey) {
++		WebElement elt = null;
++		try {
++			elt = driver.findElement(By.xpath(xpathKey));
++			System.out.println(elt);
++			return elt;
++		} catch (Throwable t) {
++			System.out.println("Cannot find object with key--" + xpathKey);
++			return null;
++		}
++	}
+ }
