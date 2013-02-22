@@ -4,7 +4,8 @@ enyo.kind({
 		onSelect: "",
 		onHighlightDropTarget: "",
 		onUnHighlightDropTargets: "",
-		onDrop: ""
+		onDrop: "",
+		onPaletteDrop: ""
 	},
 	style: "position: relative;",
 	components: [
@@ -124,11 +125,18 @@ enyo.kind({
 			return true;
 		}
 		
-		this.unHighlightItem(inSender);
-		this.doDrop({
-			item:   enyo.json.codify.from(inEvent.dataTransfer.getData("Text")).id,
-			target: inSender.comp.id
-		});
+		var dropData = enyo.json.codify.from(inEvent.dataTransfer.getData("Text")),
+			targetId = inSender.comp.id;
+		
+		if(dropData.op && dropData.op === "newControl") {
+			this.doPaletteDrop(enyo.mixin(dropData, {target: targetId}));
+		} else {
+			this.doDrop({
+				item:     dropData.id,
+				targetId: inSender.comp.id
+			});
+		}
+		
 		return true;
 	},
 	

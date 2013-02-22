@@ -75,6 +75,8 @@ enyo.kind({
 			this.unhighlightDropTargets();
 		} else if(msg.op === "drop") {
 			this.simulateDrop(msg.val);
+		} else if(msg.op === "newControl") {
+			this.simulateCreateNewComponent(msg);
 		} else if(msg.op === "codeUpdate") {
 			this.codeUpdate(msg.val);
 		} else if(msg.op === "cleanUp") {
@@ -257,6 +259,14 @@ enyo.kind({
 		
 		if(this.isValidDropTarget(dropTarget)) {
 			this.dropControl(this.getControlById(inDropData.item), dropTarget);
+		}
+	},
+	//* When an item is dragged from the Palette to the ComponentView, translate that to create a component in this iframe.
+	simulateCreateNewComponent: function(inDropData) {
+		var dropTarget = this.getControlById(inDropData.target);
+		
+		if(this.isValidDropTarget(dropTarget)) {
+			this.createNewComponent(inDropData, dropTarget);
 		}
 	},
 	

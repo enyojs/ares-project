@@ -33,7 +33,6 @@ enyo.kind({
 		this.$.client.hasNode().src = this.baseSource + "?src=" + inSource;
 	},
 	reloadIFrame: function() {
-		this.log();
 		this.updateSource(this.projectSource);
 	},
 	
@@ -89,8 +88,21 @@ enyo.kind({
 	unHighlightDropTargets: function() {
 		this.sendMessage({op: "unhighlight"});
 	},
+	//* Control was dropped the ComponentView - simulate drop in iframe
 	drop: function(inDropData) {
 		this.sendMessage({op: "drop", val: {item: inDropData.item, target: inDropData.target}});
+	},
+	//* Control was dragged from the Palette to the ComponentView - simulate dropping from Palette to iframe
+	createNewControl: function(inDropData) {
+		// Clean up drop data for RPC
+		if(inDropData.originator) {
+			delete inDropData.originator;
+		}
+		if(inDropData["__proto__"]) {
+			delete inDropData["__proto__"];
+		}
+		
+		this.sendMessage(inDropData);
 	},
 	modifyProperty: function(inProperty, inValue) {
 		this.sendMessage({op: "modify", val: {property: inProperty, value: inValue}});

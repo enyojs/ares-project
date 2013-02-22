@@ -22,7 +22,10 @@ enyo.kind({
 				{name: "left", classes:"ares_deimos_left", kind: "Palette"},
 				{name: "middle", fit: true, kind: "FittableRows", style: "border:1px solid #D0D0D0;margin:0px 4px;", components: [
 					{kind: "IFrameDesigner", name: "designer", fit: true,
-						onSelect: "designerSelect", onSelected: "designerSelected", onDesignRendered: "designRendered", onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
+						onSelect: "designerSelect",
+						onSelected: "designerSelected",
+						onDesignRendered: "designRendered",
+						onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
 					},
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
@@ -32,7 +35,11 @@ enyo.kind({
 						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"}
 					]},
 					{kind: "ComponentView", classes: "deimos_panel ares_deimos_componentView",
-						onSelect: "componentViewSelect", onHighlightDropTarget: "highlightDesignerDropTarget", onUnHighlightDropTargets: "unhighlightDesignerDropTargets", onDrop: "componentViewDrop"
+						onSelect: "componentViewSelect",
+						onHighlightDropTarget: "highlightDesignerDropTarget",
+						onUnHighlightDropTargets: "unhighlightDesignerDropTargets",
+						onDrop: "componentViewDrop",
+						onPaletteDrop: "componentViewPaletteDrop"
 					},
 					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
 				]}
@@ -150,8 +157,13 @@ enyo.kind({
 		this.$.designer.unHighlightDropTargets();
 		return true;
 	},
+	//* A control was dropped on the component view
 	componentViewDrop: function(inSender, inEvent) {
 		return this.$.designer.drop(inEvent);
+	},
+	//* A control from the Palette was dropped on the component view
+	componentViewPaletteDrop: function(inSender, inEvent) {
+		this.$.designer.createNewControl(inEvent);
 	},
 	inspectorModify: function(inSender, inEvent) {
 		this.$.designer.modifyProperty(inEvent.name, inEvent.value);

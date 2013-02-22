@@ -30,6 +30,28 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.helper = new Analyzer.KindHelper();
+		
+		
+		//* TODO - should be moved to KindHelper.js.
+		this.helper.getPublishedWithValues = function() {
+			this.checkDefAvail();
+			var published = [];
+
+			obj = this.definition.properties;
+			for (i=0; i<obj.length; i++) {
+				if (obj[i].token === "published") {
+					p = obj[i].value[0].properties;
+					for (var j=0; j < p.length; j++) {
+						published.push({
+							name:   p[j].name,
+							value:  p[j].value[0].token
+						});
+					}
+				}
+			}
+
+			return published;
+		}
 	},
 	allowed: function(inKindName, inType, inName) {
 		var level = Model.getFilterLevel(inKindName, inType, inName);

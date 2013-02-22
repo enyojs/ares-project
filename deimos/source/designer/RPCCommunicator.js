@@ -37,9 +37,7 @@ enyo.kind({
 		*/
 		onMessage: ""
 	},
-	/** Send message _inMessage_ to _this.remote_. It is recommended that _inMessage_
-		is text or a json object.
-	*/
+	//* Send (text string) message _inMessage_ to _this.remote_.
 	sendMessage: function(inMessage) {
 		this.getRemote().postMessage({message: inMessage}, "*");
 	},

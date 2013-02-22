@@ -128,11 +128,7 @@ enyo.kind({
 			return false;
 		}
 		
-		var configInfo = inEvent.config;
-		configInfo.op = "newControl";
-		configInfo = enyo.json.codify.to(configInfo);
-		
-		inEvent.dataTransfer.setData("Text", configInfo);
+		inEvent.dataTransfer.setData("Text", enyo.json.codify.to(enyo.mixin(inEvent.config, {op: "newControl"})));
         return true;
 	}
 });
