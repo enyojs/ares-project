@@ -36,13 +36,13 @@ enyo.kind({
 		// this.debug && this.log("Level: " + level + " for " + inKindName + "." + inName);
 		return level >= this.filterLevel;
 	},
+	//* Return complete list of published properties for _inControl_
 	buildPropList: function(inControl) {
-
 		var kindName = inControl.kind;
 		var currentKind = kindName;
 
 		var definition = this.getKindDefinition(currentKind);
-		if ( ! definition) {
+		if (!definition) {
 			this.debug && this.log("NO DEFINITION found for '" + currentKind + "' inControl: ", inControl);
 			// Revert to the property and event list extracted from the object
 			return this.buildPropListFromObject(inControl);
@@ -52,33 +52,48 @@ enyo.kind({
 		var domEvents = ["ontap", "onchange", "ondown", "onup", "ondragstart", "ondrag", "ondragfinish", "onenter", "onleave"]; // from dispatcher/guesture
 		var propMap = {}, eventMap = {};
 		while (definition) {
+			// Setup helper with current definition
 			this.helper.setDefinition(definition);
-			var names = this.helper.getPublished();
-			for (var i = 0, p; (p = names[i]); i++) {
-				if (this.allowed(kindName, "properties", p)) {
-					this.debug && this.log("Adding property '" + p + "' from '" + currentKind + "'");
-					propMap[p] = true;
+			
+			// Get all published properties for this kind
+			var publishedProperties = this.helper.getPublishedWithValues();
+			
+			// Add an entry to _propMap[]_ for each property found in _publishedProperties_
+			for (var i = 0, p; (p = publishedProperties[i]); i++) {
+				if (this.allowed(kindName, "properties", p.name)) {
+					this.debug && this.log("Adding property '" + p.name + "' from '" + currentKind + "'");
+					propMap[p.name] = p.value;
 				}
 			}
-			names = this.helper.getEvents();
-			for (i = 0, p; (p = names[i]); i++) {
+			
+			// Get all events for this kind
+			var events = this.helper.getEvents();
+			
+			// Add an entry to _eventMap[]_ for each event found in _events_
+			for (i = 0, p; (p = events[i]); i++) {
 				if (this.allowed(kindName, "events", p)) {
 					this.debug && this.log("Adding event '" + p + "' from '" + currentKind + "'");
 					eventMap[p] = true;
 				}
 			}
+			
+			// Set _currentKind_ to the next superkind (if exists)
 			currentKind = definition.superkind || "";
+			
 			if (currentKind === "") {
 				definition = null;
 			} else {
 				definition = this.getKindDefinition(currentKind);
 			}
 		}
-		var props = [];
-		var propKeys = Object.keys(propMap).sort();
-		for (var n = 0; n < propKeys.length; n++) {
-			props.push(propKeys[n]);
-		}
+		
+		var props = propMap;
+		//var propKeys = Object.keys(propMap).sort();
+		
+		//for (var n = 0; n < propKeys.length; n++) {
+		//	props.push(propKeys[n]);
+		//}
+		
 		props.events = [];
 		for (n in eventMap) {
 			props.events.push(n);
@@ -88,6 +103,7 @@ enyo.kind({
 				props.events.push(domEvents[n]);
 			}
 		}
+		
 		return props;
 	},
 	buildPropListFromObject: function(inControl) {
@@ -127,19 +143,18 @@ enyo.kind({
 		}
 		return props;
 	},
-	makeEditor: function(inControl, inName, inType) {
-		this.debug && this.log("Adding entry for " + inType + " " + inName);
+	makeEditor: function(inControl, inName, inDefaultValue, inType) {
+		this.debug && this.log("Adding entry for " + inType + " " + inName + " : " + inDefaultValue);
+		
+		if(inName === "events") {
+			return;
+		}
+		
 		var info = Model.getInfo(inControl.kind, inType, inName);
 		var kind = (info && info.inputKind);
+		
 		var v = inControl[inName];
-		if (v === undefined) {
-			v = enyo.constructorForKind(inControl.kind).prototype[inName];	// <--- TODO - this is using the Ares code rather than the project
-			/* Need to do analyzer check here to find prototype for this kind */
-			if(v === undefined) {
-				v = "";
-			}
-		}
-
+		
 		// Select the good input kind
 		if (kind && kind instanceof Object) {	// User defined kind: as an Object
 			kind = enyo.clone(kind);
@@ -147,8 +162,8 @@ enyo.kind({
 			this.$.content.createComponent(kind);
 		} else if (kind) {						// User defined kind: We assume it's a String
 			this.$.content.createComponent({kind: kind, fieldName: inName, fieldValue: v, extra: inType});
-		} else if (v === true || v === false) {
-			this.$.content.createComponent({kind: "Inspector.Config.Boolean", fieldName: inName, fieldValue: v, extra: inType});
+		} else if (inDefaultValue === true || inDefaultValue === false || inDefaultValue === "true" || inDefaultValue === "false") {
+			this.$.content.createComponent({kind: "Inspector.Config.Boolean", fieldName: inName, fieldValue: inDefaultValue, extra: inType});
 		} else {
 			this.$.content.createComponent({kind: "Inspector.Config.Text", fieldName: inName, fieldValue: v, extra: inType});
 		}
@@ -161,11 +176,10 @@ enyo.kind({
 			var kindName = inControl.kind;
 			this.$.content.createComponent({tag: "h3", content: kindName, classes: "label label-info"});
 			ps = this.buildPropList(inControl);
-
 			if (this.filterType === 'P') {
 				this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Properties"});
-				for (i=0, p; (p=ps[i]); i++) {
-					this.makeEditor(inControl, p, "properties");
+				for (p in ps) {
+					this.makeEditor(inControl, p, ps[p], "properties");
 				}
 			} else {
 				ps = ps.events;
@@ -272,7 +286,7 @@ enyo.kind({
 			// Try to get it from the project analysis
 			definition = this.projectIndexer.findByName(name);
 		}
-
+		
 		if (definition === undefined && this.enyoIndexer) {
 			// Try to get it from the enyo/onyx analysis
 			definition = this.enyoIndexer.findByName(name);

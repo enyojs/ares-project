@@ -22,7 +22,7 @@ enyo.kind({
 				{name: "left", classes:"ares_deimos_left", kind: "Palette"},
 				{name: "middle", fit: true, kind: "FittableRows", style: "border:1px solid #D0D0D0;margin:0px 4px;", components: [
 					{kind: "IFrameDesigner", name: "designer", fit: true,
-						onDesignChange: "designerChange", onSelect: "designerSelect", onSelected: "designerSelected", onDesignRendered: "designRendered", onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
+						onSelect: "designerSelect", onSelected: "designerSelected", onDesignRendered: "designRendered", onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
 					},
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
@@ -60,9 +60,13 @@ enyo.kind({
 	load: function(data) {
 		var what = data.kinds;
 		var maxLen = 0;
-		this.index=null;
+		
+		this.index = null;
 		this.kinds = what;
 		this.$.kindPicker.destroyClientControls();
+		
+		this.$.designer.loadPhobosCode(data.fileIndexer.code);
+		
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
 			this.$.kindPicker.createComponent({
@@ -76,12 +80,10 @@ enyo.kind({
 		this.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.$.kindPicker.render();
 		this.setEdited(false);
-
+		
 		// Pass the project information (analyzer output, ...) to the inspector
 		this.$.inspector.setProjectData(data.projectData);
 		this.$.inspector.setFileIndexer(data.fileIndexer);
-		// Pass the project URL to the designer
-		this.$.designer.updateSource(data.projectData.attributes["project-url"]);
 	},
 	kindSelected: function(inSender, inEvent) {
 		/* FIXME
@@ -119,10 +121,6 @@ enyo.kind({
 	refreshComponentView: function(inComponents) {
 		this.$.componentView.visualize(inComponents);
 	},
-	designerChange: function(inSender) {
-		this.setEdited(true);
-		return true;
-	},
 	// New selected item triggered in iframe. Synchronize component view and refresh inspector.
 	designerSelect: function(inSender, inEvent) {
 		var c = inSender.selection;
@@ -157,13 +155,7 @@ enyo.kind({
 	},
 	inspectorModify: function(inSender, inEvent) {
 		this.$.designer.modifyProperty(inEvent.name, inEvent.value);
-		return;
-		
-		this.refreshComponentView();
-		this.$.designer.refresh();
-		this.setEdited(true);
-		
-		return true; // Stop the propagation of the event
+		return true;
 	},
 	prepareDesignerUpdate: function() {
 		if (this.index !== null) {
@@ -180,6 +172,7 @@ enyo.kind({
 	},
 	closeDesignerAction: function(inSender, inEvent) {
 		// Prepare the data for the code editor
+		this.$.designer.cleanUp();
 		var event = this.prepareDesignerUpdate();
 		this.$.inspector.setProjectData(null);
 		this.doCloseDesigner(event);
@@ -190,6 +183,7 @@ enyo.kind({
 	// TODO: Build this from the Model, not by trawling the view hierarchy...
 	designRendered: function(inSender, inEvent) {
 		this.refreshComponentView(inEvent.components);
+		this.setEdited(true);
 		return true; // Stop the propagation of the event
 	},
 	saveComplete: function() {
@@ -222,6 +216,14 @@ enyo.kind({
 	sendUpdateToAres: function() {
 		this.doDesignerUpdate(this.prepareDesignerUpdate());
 		this.setEdited(false);
+	},
+	//* Called by Ares when ProjectView has new project selected
+	projectSelected: function(inProject) {
+		this.$.designer.updateSource(inProject.getProjectUrl());
+	},
+	//*
+	reloadIFrame: function() {
+		this.$.designer.reloadIFrame();
 	},
 	
 	//* Add dispatch for native drag events

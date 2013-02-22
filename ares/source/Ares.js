@@ -13,7 +13,7 @@ enyo.kind({
 			]}
 		]},
 		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
-			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
+			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile", onProjectSelected: "projectSelected"},
 			{name: "bottomBar", kind: "DocumentToolbar",
 				onToggleOpen: "toggleFiles",
 				onSwitchFile: "switchFile",
@@ -79,9 +79,14 @@ enyo.kind({
 			this.openDocument(inSender, inEvent);
 		}
 	},
+	projectSelected: function() {
+		setTimeout(enyo.bind(this, function() { this.$.deimos.projectSelected(this.$.projectView.currentProject); }), 500);	// <-- TODO - using timeout here because project url is set asynchronously
+		return true;
+	},
 	openDocument: function(inSender, inEvent) {
 		var f = inEvent.file;
 		var projectData = inEvent.projectData;
+		
 		var service = projectData.getService();
 		this.$.phobos.beginOpenDoc();
 		service.getFile(f.id)
@@ -192,6 +197,8 @@ enyo.kind({
 		this.adjustBarMode();
 		this.$.bottomBar.activateFileWithId(d.getId());
 		this.hideFiles();
+		// TODO - should we reload the iFrame every time we change docs?
+		//this.$.deimos.reloadIFrame();
 	},
 	finishedSliding: function(inSender, inEvent) {
 		if (this.$.slideable.value < 0) {

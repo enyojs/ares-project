@@ -8,14 +8,14 @@ enyo.kind({
 		onDesignRendered: "",
 		onSelect: "",
 		onSelected: "",
-		onSyncDropTargetHighlighting: "",
-		onDesignChange: ""
+		onSyncDropTargetHighlighting: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", style: "width:100%;height:100%;border:none;"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"}
 	],
 	baseSource: "../deimos/source/designer/iframe.html",
+	projectSource: null,
 	selection: null,
 	sandboxData: null,
 	rendered: function() {
@@ -29,7 +29,12 @@ enyo.kind({
 	
 	updateSource: function(inSource) {
 		this.setIframeReady(false);
+		this.projectSource = inSource;
 		this.$.client.hasNode().src = this.baseSource + "?src=" + inSource;
+	},
+	reloadIFrame: function() {
+		this.log();
+		this.updateSource(this.projectSource);
 	},
 	
 	//* Send message via communicator
@@ -45,11 +50,9 @@ enyo.kind({
 			this.sendIframeContainerData();
 		} else if(msg.op === "state" && msg.val === "ready") {
 			this.setIframeReady(true);
-			this.renderCurrentKind();
 		} else if(msg.op === "rendered") {
 			this.sandboxData = msg.val;
 			this.doDesignRendered({components: enyo.json.codify.from(msg.val)});
-			this.doDesignChange();
 		// Select event sent from here was completed successfully. Set _this.selection_.
 		} else if(msg.op === "selected") {
 			this.selection = enyo.json.codify.from(msg.val);
@@ -95,4 +98,12 @@ enyo.kind({
 	save: function() {
 		return this.sandboxData;
 	},
+	//* Pass the current code in Phobos down to the iFrame (to avoid needing to reload the iFrame)
+	loadPhobosCode: function(inCode) {
+		this.sendMessage({op: "codeUpdate", val: inCode});
+	},
+	//* Clean up the iframe before closing designer
+	cleanUp: function() {
+		this.sendMessage({op: "cleanUp"});
+	}
 });

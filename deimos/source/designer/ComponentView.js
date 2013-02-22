@@ -6,10 +6,6 @@ enyo.kind({
 		onUnHighlightDropTargets: "",
 		onDrop: ""
 	},
-	handlers: {
-		ondrag:	"drag",
-		ondrop:	"drop"
-	},
 	style: "position: relative;",
 	components: [
 		{kind: "Scroller", classes: "enyo-fit", components: [
@@ -25,14 +21,6 @@ enyo.kind({
 	},
 	getContainerData: function() {
 		this.containerData = Model.getFlattenedContainerInfo();
-	},
-	
-	//* Component view events
-	drag: function(inSender, inEvent) {
-		return true;
-	},
-	drop: function(inSender, inEvent) {
-		return true;
 	},
 	
 	//* Draw component view visualization of component tree
@@ -87,7 +75,6 @@ enyo.kind({
 	
 	//* Item events
 	itemDown: function(inSender, inEvent) {
-		this.select(inSender);
 		this.doSelect({component: inSender.comp});
 	},
 	itemDragstart: function(inSender, inEvent) {
@@ -146,7 +133,7 @@ enyo.kind({
 	},
 	
 	isValidDropTarget: function(inComponent) {
-		// TODO - descendents are not valid targets for their parents
+		// TODO - descendents are not valid targets for their parents (currently this is validated by the iframe)
 		return inComponent !== this.selection && inComponent.getAttribute("dropTarget") === "true";
 	},
 	//* Save _inData_ as _this.containerData_ to use as a reference when creating drop targets.
