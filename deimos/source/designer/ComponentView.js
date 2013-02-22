@@ -132,8 +132,8 @@ enyo.kind({
 			this.doPaletteDrop(enyo.mixin(dropData, {target: targetId}));
 		} else {
 			this.doDrop({
-				item:     dropData.id,
-				targetId: inSender.comp.id
+				item:   dropData.id,
+				target: targetId
 			});
 		}
 		
