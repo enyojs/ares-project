@@ -104,10 +104,10 @@ enyo.kind({
 					{kind: "onyx.TextArea", placeholder: "Enter text here", onchange:"inputChanged"}
 				]},
 				{kind: "Control", tag: "br", name: "control6"},
-				{kind: "onyx.Button", content: "Close", name: "close", ontap: "closeModalPopup"},
-				{kind: "onyx.Button", content: "OK/Save", name: "change", ontap: "inputChanged"},
+				{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
+				{kind: "onyx.Button", content: "OK/Save", name: "oksave", ontap: "inputChanged"},
 			]},
-			{kind: "Control", tag: "br", name: "control6"},
+			{kind: "Control", tag: "br", name: "control7"},
 	
 		]},
 			//onShow: "popupShown", onHide: "popupHidden"}
