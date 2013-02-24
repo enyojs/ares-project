@@ -78,39 +78,38 @@ enyo.kind({
 					]}
 			]},
 		{kind: "Control", tag: "br", name: "control56"},
-		{kind: "onyx.Groupbox", name: "groupbox7", components: [
-				{kind: "onyx.GroupboxHeader", content: "Programble buttons", fit: true, name: "groupboxHeader7", components: [
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-1", name: "F1", ontap: "showPopup"},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-2", name: "F2", ontap: "showPopup"},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-3", name: "F3", ontap: "showPopup"},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-4", name: "F4", ontap: "showPopup"},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-5", name: "F5", ontap: "showPopup"},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-6", name: "F6", ontap: "showPopup"},
-						{kind: "Control", tag: "br", name: "control5"},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-7", name: "F7", ontap: "showPopup"},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-8", name: "F8", ontap: "showPopup"},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-9", name: "F9", ontap: "showPopup"},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-10", name: "F10", ontap: "showPopup"},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-11", name: "F11", ontap: "showPopup"},
-						{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-12", name: "F12", ontap: "showPopup"}
-					]}
-			]},
-		{kind: "Control", tag: "br", name: "control48"},
-		{kind: "onyx.Button", content: "Close", name: "close", ontap: "doClose"},
-		{kind: "onyx.Button", content: "OK/Save", name: "change", ontap: "oksave"},
-		{kind: "onyx.Popup", modal: true, floating: true, centered: true, classes: "onyx-sample-popup", canGenerate: false, name: "modalPopup", components: [
-			{classes: "onyx-toolbar-inline", components: [
-				{kind: "onyx.InputDecorator", components: [
-					{kind: "onyx.TextArea", placeholder: "Enter text here", onchange:"inputChanged"}
-				]},
-				{kind: "Control", tag: "br", name: "control6"},
-				{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
-				{kind: "onyx.Button", content: "OK/Save", name: "oksave", ontap: "inputChanged"},
-			]},
-			{kind: "Control", tag: "br", name: "control7"},
-	
+		{kind: "FittableColumns", name: "groupbox7", components: [
+			{kind: "Control", content: "Programmable buttons Alt F1 to Alt F12"},
+			{kind: "Control", tag: "br"},
+			{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-1", name: "F1", ontap: "showPopup"},
+			{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-2", name: "F2", ontap: "showPopup"},
+			{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-3", name: "F3", ontap: "showPopup"},
+			{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-4", name: "F4", ontap: "showPopup"},
+			{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-5", name: "F5", ontap: "showPopup"},
+			{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-6", name: "F6", ontap: "showPopup"},
+			{kind: "Control", tag: "br", name: "control5"},
+			{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-7", name: "F7", ontap: "showPopup"},
+			{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-8", name: "F8", ontap: "showPopup"},
+			{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-9", name: "F9", ontap: "showPopup"},
+			{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-10", name: "F10", ontap: "showPopup"},
+			{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-11", name: "F11", ontap: "showPopup"},
+			{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-12", name: "F12", ontap: "showPopup"}
 		]},
-			//onShow: "popupShown", onHide: "popupHidden"}
+	{kind: "Control", tag: "br", name: "control48"},
+	{kind: "onyx.Button", content: "Close", name: "close", ontap: "doClose"},
+	{kind: "onyx.Button", content: "OK/Save", name: "change", ontap: "oksave"},
+	{kind: "onyx.Popup", modal: true, floating: true, centered: true, canGenerate: false, name: "modalPopup", components: [
+		{classes: "onyx-toolbar-inline", components: [
+			{kind: "onyx.InputDecorator",classes: "alt_button_input", components: [
+				{kind: "onyx.TextArea", placeholder: "Enter text here", onchange:"inputChanged"}
+			]},
+		{kind: "Control", tag: "br", name: "control6"},
+			{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
+			{kind: "onyx.Button", content: "OK/Save", name: "oksave", ontap: "inputChanged"},
+		]},
+	{kind: "Control", tag: "br", name: "control7"},
+	]},
+		
 	],
 	create: function() {
 		this.inherited(arguments);
