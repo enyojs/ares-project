@@ -107,6 +107,12 @@ body {
 .ares_phobos_esb {
 	width: 45px;
 }
+.alt_button_input {
+	width: 400px;
+}
+.ares_phobos_settingfont {
+	font-size: 12px;
+}
 
 /**/
 .border {
