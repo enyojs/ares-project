@@ -1,7 +1,7 @@
 
 **PAGE STILL UNDER CONSTRUCTION**
 
-## 1- HOWTO execute the ARES TEST SUITE using Selenium IDE 
+## 1- HOWTO execute the ARES TEST SUITE using Selenium 2.0 IDE and XML-API 
 
 **FYI:** The ARES TEST SUITE is written using IDE-API XML Formatter and Selenese commands.
 	
@@ -15,8 +15,9 @@
 			
 ### Opening And Configuring the IDE
 
-* To run the Selenium-IDE, select it from the Firefox Tools menu. It opens with an empty script-editing window and a menu for loading, or creating new test cases.
-* Check "Enable experimental features" in Options > General, in order to be able to select Options > Formatter > XML Formatter (See **Note:** below)
+* To run the Selenium-IDE, select it from the Firefox Tools menu (or Web developer menu). It opens with an empty script-editing window and a menu for loading, or creating new test cases.
+* Check "Enable experimental features" in Options > General, te enable next step
+* select Options > Formatter > XML Formatter (See **Note:** below)
 * The toolbar contains buttons for controlling the execution of the test suite/test cases.
 * The left-most button, Speed Control: controls how fast your test case runs. **This button needs to be positionned to slow**.
 
@@ -43,7 +44,7 @@ The selenium TestSuite for Ares is located `./ares-project/test/selenium/xml-scr
 ##### To run it
 
 * Before the teste execution, start the Ares IDE node server: `node ide.js -T`
-* Open under ares-project/test/selenium/xml-scripts/AresTestSuite file
+* Open under ares-project/test/selenium/xml-scripts/AresTestSuite file *with* "Open Test Suite" menu entry
   
   **Note: ** AresTestSuite is composed by the following TestCases; HelloWorldPreview, NewProject, FileOps, CheckTemplates and HelloWorldPhoneGapSettings.
   
@@ -65,26 +66,22 @@ The objective is to test the new controls coming with Ares committer pull-reques
 **WARNING:**
 
 * Only xml-scripts, AresTestCasesSha1 and AresTestJava.patch files are pushed on gitHub. 
-* The Java code will not.
+* The Java code is not.
 * Reasons are; expecting to find an XML to javascript Formatter and avoid two source code for the same test.
 
 ### XML to JAVA conversion 
 
 * Open the xml-scripts in Selenium IDE (**Back to:**  Opening And Configuring the IDE),
-* From the xml-scripts;
 
- 
-	apply the JAVA/Junit 4/WEbDriver formatter conversion. 
+* Export _each_ test case with JAVA/Junit 4/WEbDriver formatter and save the file under `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`
 	
-	store java converted file under a temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`
-	
-	**Note:** For example, the XML NewProject file be converted into NewProject.java … etc.
+**Note:** For example, the NewProject test case be converted into NewProject.java … etc.
 
-* The `./ares-project/test/selenium/webdriver-java-diff-patch/AresTestCasesSha1` file contains the SHA1 signature to validate the xml-scripts java converted.
+The `.../webdriver-java-diff-patch/AresTestCases.sha1` and `.../webdriver-java-diff-patch/AresTestCases.md5` files contains the digests to validate the java files converted from XML scripts.
 
 ### Apply AresTestJava.patch 
 
-* To verify the SHA1 against the xml-scripts java converted found under the temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref` (either using `inhas.exe` or `/usr/bin/shasum`).
+* To verify the SHA1 against the xml-scripts java converted found under the temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref` (either using `md5sum`, `inhash.exe` or `/usr/bin/shasum`).
 
 Apply the patch:
 
@@ -97,8 +94,8 @@ Apply the patch:
 
 #### Eclipse Project Pre-requisites
 
+* JAVA jdk 1.6 (or upper) (<http://www.oracle.com/technetwork/java/javase/downloads/index.html>)
 * Eclipse IDE for JAVA EE (<http://www.eclipse.org/downloads/>)
-* JAVA sdk 1.6 (or upper) (<http://www.oracle.com/technetwork/java/javase/downloads/index.html>)
 * TestNG plugin within eclipse (<http://testng.org/doc/download.html>)
 * InternetExplorerDriver standalone server for 64-bit IE (<http://code.google.com/p/selenium/downloads/list>)
 * Selenium-java-2.30.0.zip java bindings (<http://code.google.com/p/selenium/downloads/list>)
