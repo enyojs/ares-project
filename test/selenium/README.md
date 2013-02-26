@@ -1,6 +1,4 @@
 
-**PAGE STILL UNDER CONSTRUCTION**
-
 ## 1- HOWTO execute the ARES TEST SUITE using Selenium 2.0 IDE and XML-API 
 
 **FYI:** The ARES TEST SUITE is written using IDE-API XML Formatter and Selenese commands
@@ -40,6 +38,10 @@ The selenium TestSuite for Ares is located `./ares-project/test/selenium/xml-scr
 	-rw-r--r--  1 mariandebonis  staff   4095 29 jan 14:03 HelloWorldPhoneGapSettings
 	-rw-r--r--  1 mariandebonis  staff   2722 29 jan 14:03 HelloWorldPreview
 	-rw-r--r--  1 mariandebonis  staff   4114 29 jan 14:03 NewProject
+	-rw-r--r--  1 mariandebonis  staff   2909 21 fév 19:06 PhobosDocumentLabel
+	-rw-r--r--  1 mariandebonis  staff   5810 21 fév 11:36 PhobosEditorSettings
+	-rw-r--r--  1 mariandebonis  staff   3458 21 fév 18:02 PhobosNewKind
+	-rw-r--r--  1 mariandebonis  staff   3380 25 fév 08:52 PhobosSaveAndQuit
 	
 ##### To run it
 
@@ -66,7 +68,7 @@ Main tasks:
 
 **WARNING:**
 
-* Only xml-scripts, md5/sha1 sum files and AresTestJava.patch files are pushed on gitHub. 
+* Only xml-scripts, md5sum-file and AresTestJava.patch file are pushed on gitHub. 
 * The Java code is not.
 * Reasons are; expecting to find an XML to javascript Formatter and avoid two source code for the same test.
 
@@ -78,11 +80,11 @@ Main tasks:
 	
 **Note:** For example, the NewProject test case will be converted into NewProject.java … etc.
 
-The `.../webdriver-java-diff-patch/AresTestCases.sha1` and `.../webdriver-java-diff-patch/AresTestCases.md5` files contains the digests to validate the java files converted from XML scripts.
+The `.../webdriver-java-diff-patch/AresTestCases.md5` file contains the digests to validate the java files converted from XML scripts.
 
 ### Verify generated Java files
 
-Depending on your system, use either `md5sum`, `inhash.exe` or `/usr/bin/shasum` to verify the md5 or sha1 digests against the Java files converted from the XML scripts. This files are found under the temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`.
+Depending on your system, use either `md5sum` to verify the md5 digests against the Java files converted from the XML scripts. This files are found under the temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`.
 
 ### Apply AresTestJava.patch 
 
@@ -99,6 +101,7 @@ Install the following softwares:
 * JAVA jdk 1.6 (or upper) (<http://www.oracle.com/technetwork/java/javase/downloads/index.html>)
 * Eclipse IDE for JAVA EE (<http://www.eclipse.org/downloads/>)
 * TestNG plugin within eclipse (<http://testng.org/doc/download.html>)
+* Chromedriver standalone server (<http://code.google.com/p/chromedriver/downloads/list>)
 * InternetExplorerDriver standalone server for 64-bit IE (<http://code.google.com/p/selenium/downloads/list>)
 * Selenium-java-2.30.0.zip java bindings (<http://code.google.com/p/selenium/downloads/list>)
 
@@ -161,8 +164,28 @@ Create `testng.xml` file directly user AresTestSuite project:
 	</test>
 	<test name="AresTestSuite.HelloWorldPhoneGapSettings">
         <classes>
-                <class name="AresTestSuite.HelloWorldPhoneGapSettings"></	class>
+                <class name="AresTestSuite.HelloWorldPhoneGapSettings">                </	class>
     </classes>
+	</test>	
+	<test name="AresTestSuite.PhobosDocumentLabel">
+        <classes>
+                <class name="AresTestSuite.PhobosDocumentLabel"></class>
+        </classes>
+	</test>
+	<test name="AresTestSuite.PhobosEditorSettings">
+        <classes>
+                <class name="AresTestSuite.PhobosEditorSettings"></class>
+        </classes>
+	</test>
+	<test name="AresTestSuite.PhobosNewKind">
+        <classes>
+                <class name="AresTestSuite.PhobosNewKind"></class>
+        </classes>
+	</test>
+	<test name="AresTestSuite.PhobosSaveAndQuit">
+        <classes>
+                <class name="AresTestSuite.PhobosSaveAndQuit"></class>
+        </classes>
 	</test>
 	</suite>
 
@@ -178,4 +201,12 @@ Create `testng.xml` file directly user AresTestSuite project:
 * The src/test-output/index.html file shows the results of the TestNG Test Suite execution after a refresh on src/test-output.
 
 
-**Note:** IE was tested on Windows, Chrome was tested on mac.
+**Note:** 
+
+* IE was tested on Windows, 
+* Chrome was tested either on Windows and mac.
+
+
+## Future Plan
+
+* Switch on WebDriverJS (<https://code.google.com/p/selenium/wiki/WebDriverJs#WebDriverJS_User’s_Guide>)
