@@ -2,15 +2,15 @@
 
 ## Abstract
 
-ARES2 is made of several element classes, each of them needing a different test framework.  The objective of this page is to explain how each of the classes are tested & how to enrich the test suite easily.
+ARES2 is made of several compoennts, each of them needing a different test framework.  The objective of this page is to explain how each component is tested & how to enrich the test suite easily.
 
-* **Server** elements run into the so-called *IDE Server* or one of its child Node.js processes (also called services).
-* Enyo **Components** are head-less (chrome-less) client side Javascript elements (Enyo Components kinds)
+* **Ares IDE Server** is run in a nodejs process that forks several Node.js processes (also called services).
+* Enyo **Components** are client side Javascript elements (Enyo Components kinds) without user interface.
 * Enyo **Controls** are client-side UI elements
 
-## Server
+## Ares IDE Server test
 
-We test *Server* elements using the Node.js [Mocha](http://visionmedia.github.com/mocha/) test tool.  Several moch test suites are aggregated into the top-level `ares.spec.js` script.
+We test *Server* elements using Node.js [Mocha](http://visionmedia.github.com/mocha/) test tool.  Several mocha test suites are aggregated into the top-level `ares.spec.js` script.
 
 	$ cd ares-project/test/server
 	$ ./ares.spec.js
@@ -32,10 +32,10 @@ The complete set of flags is the sum of the `ares.spec.js`-specific flags and th
 	$ ./ares.spec.js --help
 	$ node_modules/mocha/bin/mocha --help
 
-## Components
+## Ares Components test
 
 See [TestRunner](testrunner/README.md).
 
-## Controls
+## Ares Controls test
 
 See [Selenium](selenium/README.md).
