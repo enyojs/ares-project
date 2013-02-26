@@ -3,25 +3,25 @@
 
 ## 1- HOWTO execute the ARES TEST SUITE using Selenium 2.0 IDE and XML-API 
 
-**FYI:** The ARES TEST SUITE is written using IDE-API XML Formatter and Selenese commands.
-	
+**FYI:** The ARES TEST SUITE is written using IDE-API XML Formatter and Selenese commands
+
 ### Firefox Prerequisites
 
-* First, download the Selenium IDE Plugin (Record, edit and play Selenium tests) from the SeleniumHQ; <http://seleniumhq.org/projects/ide>
-* Second, download the Selenium XML Formatter-IDE API (custome XML Formatter for Selenium-IDE) from; <https://addons.mozilla.org/en-US/firefox/addon/selenium-xml-formatter/?src=api>
+* First, download the Selenium IDE Plugin (Record, edit and play Selenium tests) from the SeleniumHQ: <http://seleniumhq.org/projects/ide>
+* Second, download the Selenium XML Formatter-IDE API (custome XML Formatter for Selenium-IDE) from: <https://addons.mozilla.org/en-US/firefox/addon/selenium-xml-formatter/?src=api>
 * Firefox will protect you from installing addons from unfamiliar locations, so you will need to click ‘Allow’ to proceed with the installation
-* When the download is complete, restart Firefox. After Firefox reboots you will find the Selenium-IDE listed under the Firefox Tools menu.
+* When the download is complete, restart Firefox. Once restarted, Firefox will list Selenium-IDE under Firefox Tools menu.
 
 			
 ### Opening And Configuring the IDE
 
 * To run the Selenium-IDE, select it from the Firefox Tools menu (or Web developer menu). It opens with an empty script-editing window and a menu for loading, or creating new test cases.
 * Check "Enable experimental features" in Options > General, te enable next step
-* select Options > Formatter > XML Formatter (See **Note:** below)
+* select Options &rarr; Formatter &rarr; XML Formatter (See **Note:** below)
 * The toolbar contains buttons for controlling the execution of the test suite/test cases.
-* The left-most button, Speed Control: controls how fast your test case runs. **This button needs to be positionned to slow**.
+* The left-most button, Speed Control, controls how fast your test case runs. **This button needs to be positionned to slow**.
 
-* **Note:** The Options > Formatter menu links to this article, describing why changing formats is disabled by default: <http://blog.reallysimplethoughts.com/2011/06/10/does-selenium-ide-v1-0-11-support-changing-formats>
+* **Note:** The Options &rarr; Formatter menu links to this article, describing why changing formats is disabled by default: <http://blog.reallysimplethoughts.com/2011/06/10/does-selenium-ide-v1-0-11-support-changing-formats>
 
 ### How to run Selenium IDE Ares Test Suite
 * **Note:** Selenium distinguishes test cases and test suites.
@@ -44,28 +44,29 @@ The selenium TestSuite for Ares is located `./ares-project/test/selenium/xml-scr
 ##### To run it
 
 * Before the teste execution, start the Ares IDE node server: `node ide.js -T`
-* Open under ares-project/test/selenium/xml-scripts/AresTestSuite file *with* "Open Test Suite" menu entry
+* Open ares-project/test/selenium/xml-scripts/AresTestSuite file *with* "Open Test Suite" menu entry
   
   **Note: ** AresTestSuite is composed by the following TestCases; HelloWorldPreview, NewProject, FileOps, CheckTemplates and HelloWorldPhoneGapSettings.
   
-* To run this AresTestSuite, click the Run All button (from the left of the IDE, 7th button) to run all the test cases in AresTestSuite, the currently loaded test suite.
+* To run AresTestSuite, click the `Run All` button (from the left of the IDE, 7th button) to run all the test cases in AresTestSuite, the currently loaded test suite.
 * To run individually each TestCase, open it and click the "Play current testcase" (from the left of the IDE, 8th button).
 
 ### Your Contribution is required to extend the Selenium TestSuite for Ares
 
 Give to the Ares committer(s) a chance to update the test wish list file (`./ares-project/test/selenium/WISH-TESTS-LIST.md`) with new Test Case to implement.
 
-The objective is to test the new controls coming with Ares committer pull-requests.
+The objective is to test new controls coming with Ares pull-requests.
 
 ## 2- HOWTO execute the ARES TEST SUITE using Selenium 2.0 WEBDRIVER API
 
-* The Ares Test Suite xml-scripts will be converted into java files to use either Chrome or IE Selenium 2.0 webdriver APIs. 
-* A patch java will be applied to obtain the final Ares Test Suite java code.
-* It will be found in the patch, the upload of AresConfig.xml file where are declared properties the Test Suite is executed (i.e. webdriver name, webdriver path, os …) as this code which is not generated automatically by the formatter.
+Main tasks:
+* Ares Test Suite xml-scripts will be converted into Java files to use either Chrome or IE Selenium 2.0 webdriver APIs. 
+* A patch needs to be applied to Java files to obtain the final Ares Test Suite java code. This patch is archived on Github
+* Create AresConfig.xml to declare the Test Suite properties (i.e. webdriver name, webdriver path, os …). This XML file is not generated automatically by the formatter.
 
 **WARNING:**
 
-* Only xml-scripts, AresTestCasesSha1 and AresTestJava.patch files are pushed on gitHub. 
+* Only xml-scripts, md5/sha1 sum files and AresTestJava.patch files are pushed on gitHub. 
 * The Java code is not.
 * Reasons are; expecting to find an XML to javascript Formatter and avoid two source code for the same test.
 
@@ -75,24 +76,25 @@ The objective is to test the new controls coming with Ares committer pull-reques
 
 * Export _each_ test case with JAVA/Junit 4/WEbDriver formatter and save the file under `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`
 	
-**Note:** For example, the NewProject test case be converted into NewProject.java … etc.
+**Note:** For example, the NewProject test case will be converted into NewProject.java … etc.
 
 The `.../webdriver-java-diff-patch/AresTestCases.sha1` and `.../webdriver-java-diff-patch/AresTestCases.md5` files contains the digests to validate the java files converted from XML scripts.
 
+### Verify generated Java files
+
+Depending on your system, use either `md5sum`, `inhash.exe` or `/usr/bin/shasum` to verify the md5 or sha1 digests against the Java files converted from the XML scripts. This files are found under the temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`.
+
 ### Apply AresTestJava.patch 
-
-* To verify the SHA1 against the xml-scripts java converted found under the temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref` (either using `md5sum`, `inhash.exe` or `/usr/bin/shasum`).
-
-Apply the patch:
 
 	$ cd ./ares-project/test/selenium/test/selenium/webdriver-java-diff-patch/java-ref
 	$ patch -p1 < ../AresTestJava.patch
-	
 
 
 ### Eclipse Ares Test Suite project setup
 
 #### Eclipse Project Pre-requisites
+
+Install the following softwares:
 
 * JAVA jdk 1.6 (or upper) (<http://www.oracle.com/technetwork/java/javase/downloads/index.html>)
 * Eclipse IDE for JAVA EE (<http://www.eclipse.org/downloads/>)
@@ -101,23 +103,18 @@ Apply the patch:
 * Selenium-java-2.30.0.zip java bindings (<http://code.google.com/p/selenium/downloads/list>)
 
 #### Eclipse project setup
-* To create the Selenium Ares TestSuite java project
-* To create the AresTestSuite package,
-* To create src (java code) and resources (AresConfig.xml) sub-folders
-* To configure build-path; JRE system library and TestNG eclipse plugin
-* To configure the libraries build-path; add external jars retrieved from selenium-java-2.30.0.zip java bindings
 
-##### Under src/AresTestSuite
+In Eclipse:
 
-* To import the patched java code located under `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref` into the Ares TestSuite project
+* create the Selenium Ares TestSuite java project
+* create the AresTestSuite package,
+* create src (java code) and resources (AresConfig.xml) sub-folders
+* configure build-path; JRE system library and TestNG eclipse plugin
+* configure the libraries build-path; add external jars retrieved from selenium-java-2.30.0.zip java bindings
+* In `src/AresTestSuite`, import the patched java code located under `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref` into the Ares TestSuite project
+* In `resources/AresTestSuite`, create `AresConfig.xml` file. 
 
-##### Under resources/AresTestSuite
-
-* To create and AresConfig.xml file
-
-Here is one example of the AresConfig.xml:
-
-
+Here is one example of the AresConfig.xml, modify it to suit your setup:
 
 	<?xml version="1.0" encoding="UTF-8"?>
 	<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
@@ -136,9 +133,9 @@ Here is one example of the AresConfig.xml:
 * for `browserDriverName` key are either `Chrome` or `IE`
 * for `os` key are either `mac` or `windows`
 
+#### TestNG suite setup
 
-##### src/testng.xml 
-To create the TestNG AresTestSuite, a testng.xml needs to be created;
+Create `testng.xml` file directly user AresTestSuite project:
 
 	<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 	<suite name="AresTestSuite">
@@ -169,16 +166,16 @@ To create the TestNG AresTestSuite, a testng.xml needs to be created;
 	</test>
 	</suite>
 
-##### To execute the Ares TestNG TestCase
+##### Execute the Ares TestNG TestCase
 
-* To run TestCases, start the Ares IDE node server: `node ide.js -T`
-* Click right on src/AresTestSuite java file > run as> TestNG Test
+* In a terminal, start the Ares IDE node server: `node ide.js -T`
+* Click right on src/AresTestSuite java file, &rarr; run as &rarr; TestNG Test
 
-##### To execute the TestNG AresTesSuite
+##### Execute the TestNG AresTesSuite
 
-* To run TestSuite, start the Ares IDE node server: `node ide.js -T`
-* Click right on src/testng.xml > run as > TestNG Suite
-* The src/test-output/index.html shows the results of the TestNG Test Suite execution after a refresh on src/test-output.
+* In a terminal, start the Ares IDE node server: `node ide.js -T`
+* Click right on src/testng.xml &rarr; run as &rarr; TestNG Suite
+* The src/test-output/index.html file shows the results of the TestNG Test Suite execution after a refresh on src/test-output.
 
 
 **Note:** IE was tested on Windows, Chrome was tested on mac.
