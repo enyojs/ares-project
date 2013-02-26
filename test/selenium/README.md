@@ -109,17 +109,17 @@ Apply the patch:
 
 ##### Under src/AresTestSuite
 
-* To import the patched java code located under `./ares-project/test/selenium/test/selenium/webdriver-java-diff-patch/java-ref` into the Ares TestSuite project
+* To import the patched java code located under `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref` into the Ares TestSuite project
 
 ##### Under resources/AresTestSuite
 
 * To create and AresConfig.xml file
-* Here is one example of the AresConfig.xml.
+
+Here is one example of the AresConfig.xml:
 
 
- .
 
-	<?xml version="1.0" encoding="UTF-8"?>`
+	<?xml version="1.0" encoding="UTF-8"?>
 	<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 	<properties>
 	<comment>AresTestSuite Configuration file</comment>
@@ -129,6 +129,7 @@ Apply the patch:
 	<entry key="phoneGap.username">jdoe@hp.com</entry>
 	<entry key="phoneGap.password">xxxxx</entry>
 	</properties>
+
 
 **Note:** acceptable values are:
 
