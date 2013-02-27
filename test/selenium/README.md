@@ -68,7 +68,7 @@ Main tasks:
 
 **WARNING:**
 
-* Only xml-scripts, md5sum-file and AresTestJava.patch file are pushed on gitHub. 
+* Only xml-scripts, md5/sha1 sum-files and AresTestJava.patch file are pushed on gitHub. 
 * The Java code is not.
 * Reasons are; expecting to find an XML to javascript Formatter and avoid two source code for the same test.
 
@@ -80,11 +80,13 @@ Main tasks:
 	
 **Note:** For example, the NewProject test case will be converted into NewProject.java … etc.
 
-The `.../webdriver-java-diff-patch/AresTestCases.md5` file contains the digests to validate the java files converted from XML scripts.
+The `.../webdriver-java-diff-patch/AresTestCases.sha1` and `.../webdriver-java-diff-patch/AresTestCases.md5` files contains the digests to validate the java files converted from XML scripts.
 
 ### Verify generated Java files
 
-Depending on your system, use either `md5sum` to verify the md5 digests against the Java files converted from the XML scripts. This files are found under the temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`.
+Depending on your system, use either `/usr/bin/md5sum`, or `/usr/bin/shasum` to verify the md5 or sha1 digests against the Java files converted from the XML scripts. This files are found under the temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`.
+
+**Note:** On windows `/usr/bin/md5sum`, or `/usr/bin/shasum` can be available by installing Cygwin.
 
 ### Apply AresTestJava.patch 
 
@@ -124,7 +126,7 @@ Here is one example of the AresConfig.xml, modify it to suit your setup:
 	<properties>
 	<comment>AresTestSuite Configuration file</comment>
 	<entry key="browserDriverName">IE</entry>
-	<entry key="browserDriverPath">C:\\Users\\marian\\Downloads\\IEDriverServer_x64_2.29.1\\IEDriverServer.exe</entry>
+	<entry key="browserDriverPath">C:\\Users\\jdoe\\Downloads\\IEDriverServer_x64_2.29.1\\IEDriverServer.exe</entry>
 	<entry key="os">windows</entry>
 	<entry key="phoneGap.username">jdoe@hp.com</entry>
 	<entry key="phoneGap.password">xxxxx</entry>
@@ -190,6 +192,8 @@ credentials:
 		</classes>
 	</test>	
 	</suite>
+
+**Note:** If a new java code testcase is imported, `testng.xml` needs to be updated.
 
 ##### Execute the Ares TestNG TestCase
 
