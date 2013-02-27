@@ -138,7 +138,8 @@ Here is one example of the AresConfig.xml, modify it to suit your setup:
 
 #### TestNG suite setup
 
-Create `testng.xml` file directly user AresTestSuite project:
+Create `testng.xml` file directly user AresTestSuite project. Skip the last test if you do not have phonegap
+credentials:
 
 	<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 	<suite name="AresTestSuite">
@@ -182,6 +183,7 @@ Create `testng.xml` file directly user AresTestSuite project:
 				<class name="AresTestSuite.PhobosSaveAndQuit"></class>
 		</classes>
 	</test>
+	<!-- skip this test if you don't have phonegap credentials >
 	<test name="AresTestSuite.HelloWorldPhoneGapSettings">
 		<classes>
 				<class name="AresTestSuite.HelloWorldPhoneGapSettings"></class>
