@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "OpenwebosBuild",
+	name: "ProjectToolkit",
 	kind: "enyo.Component",
 	events: {
 		onLoginFailed: "",
@@ -15,7 +15,7 @@ enyo.kind({
 		this.config = {};
 	},
 	/**
-	 * Set Open webOS build base parameters.
+	 * Set project toolkit base parameters.
 	 *
 	 * This method is not expected to be called by anyone else but
 	 * {ServiceRegistry}.
