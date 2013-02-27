@@ -133,29 +133,35 @@ enyo.kind({
 				service.impl.notifyFailure = enyo.bind(this, this.serviceFailure, service.config.type, service.config.id);
 			} else if (service.config.type === "build" && service.config.provider === "hermes" && service.config.id === "phonegap") {
 				service.impl = new Phonegap.Build();
-			} else if (service.config.type === "other" && service.config.provider === "hermes" && service.config.id === "openwebos") {
-				service.impl = new OpenwebosBuild();
+			} else if (service.config.type === "other" && service.config.provider === "hermes" && service.config.id === "prj-toolkit") {
+				service.impl = new ProjectToolkit();
+			} else if (service.config.type === "plugin") {
+				// TODO: TBC
 			}
-			if (this.debug) this.log("id:", service.config.id, "created");
-			// If the service does not define an
-			// 'authorize()' entry point (which optionally
-			// returns user acccount information), stub it
-			// using a Common-JS pass-through.
-			if (service.impl && !service.impl.authorize) {
-				if (this.debug) this.log("Adding " + service.config.id + "#authorize() stub");
-				service.impl.authorize = enyo.bind(service.impl, function(next) {
-					if (this.debug) this.log('authorize(): stubbed');
-					next(null, {});
-				});
+			if (service.impl) {
+				if (this.debug) this.log("id:", service.config.id, "created");
+				// If the service does not define an
+				// 'authorize()' entry point (which optionally
+				// returns user acccount information), stub it
+				// using a Common-JS pass-through.
+				if (service.impl && !service.impl.authorize) {
+					if (this.debug) this.log("Adding " + service.config.id + "#authorize() stub");
+					service.impl.authorize = enyo.bind(service.impl, function(next) {
+						if (this.debug) this.log('authorize(): stubbed');
+						next(null, {});
+					});
+				}
+
+				// Make sure both the service configuration
+				// Object & the resulting implementation
+				// Object know the serviceId.
+				service.impl.id = service.config.id;
+
+				service.impl.setConfig(service.config);
+				if (this.debug) this.log("id:", service.config.id, "configured");
+			} else {
+				this.log("Ignoring service: " + service.config.id);
 			}
-
-			// Make sure both the service configuration
-			// Object & the resulting implementation
-			// Object know the serviceId.
-			service.impl.id = service.config.id;
-
-			service.impl.setConfig(service.config);
-			if (this.debug) this.log("id:", service.config.id, "configured");
 			next();
 		} catch(err) {
 			this.error(err);
