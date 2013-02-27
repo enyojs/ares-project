@@ -143,50 +143,50 @@ Create `testng.xml` file directly user AresTestSuite project:
 	<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 	<suite name="AresTestSuite">
 	<test name="AresTestSuite.HelloWorldPreview">
-        <classes>
-                <class name="AresTestSuite.HelloWorldPreview"></class>
-        </classes>
+		<classes>
+				<class name="AresTestSuite.HelloWorldPreview"></class>
+		</classes>
 	</test>
 	<test name="AresTestSuite.NewProject">
-        <classes>
-                <class name="AresTestSuite.NewProject"></class>
-        </classes>
+		<classes>
+				<class name="AresTestSuite.NewProject"></class>
+		</classes>
 	</test>
 	<test name="AresTestSuite.FileOps">
-        <classes>
-                <class name="AresTestSuite.FileOps"></class>
-        </classes>
+		<classes>
+				<class name="AresTestSuite.FileOps"></class>
+		</classes>
 	</test>
 	<test name="AresTestSuite.CheckTemplates">
-        <classes>
-                <class name="AresTestSuite.CheckTemplates"></class>
-        </classes>
+		<classes>
+				<class name="AresTestSuite.CheckTemplates"></class>
+		</classes>
 	</test>
-	<test name="AresTestSuite.HelloWorldPhoneGapSettings">
-        <classes>
-                <class name="AresTestSuite.HelloWorldPhoneGapSettings">                </	class>
-    </classes>
-	</test>	
 	<test name="AresTestSuite.PhobosDocumentLabel">
-        <classes>
-                <class name="AresTestSuite.PhobosDocumentLabel"></class>
-        </classes>
+		<classes>
+				<class name="AresTestSuite.PhobosDocumentLabel"></class>
+		</classes>
 	</test>
 	<test name="AresTestSuite.PhobosEditorSettings">
-        <classes>
-                <class name="AresTestSuite.PhobosEditorSettings"></class>
-        </classes>
+		<classes>
+				<class name="AresTestSuite.PhobosEditorSettings"></class>
+		</classes>
 	</test>
 	<test name="AresTestSuite.PhobosNewKind">
-        <classes>
-                <class name="AresTestSuite.PhobosNewKind"></class>
-        </classes>
+		<classes>
+				<class name="AresTestSuite.PhobosNewKind"></class>
+		</classes>
 	</test>
 	<test name="AresTestSuite.PhobosSaveAndQuit">
-        <classes>
-                <class name="AresTestSuite.PhobosSaveAndQuit"></class>
-        </classes>
+		<classes>
+				<class name="AresTestSuite.PhobosSaveAndQuit"></class>
+		</classes>
 	</test>
+	<test name="AresTestSuite.HelloWorldPhoneGapSettings">
+		<classes>
+				<class name="AresTestSuite.HelloWorldPhoneGapSettings"></class>
+		</classes>
+	</test>	
 	</suite>
 
 ##### Execute the Ares TestNG TestCase
