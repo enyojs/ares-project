@@ -131,13 +131,31 @@ enyo.kind({
 				// a common front-end
 				service.impl = new HermesFileSystem();
 				service.impl.notifyFailure = enyo.bind(this, this.serviceFailure, service.config.type, service.config.id);
+				this.configureService(service, next);
 			} else if (service.config.type === "build" && service.config.provider === "hermes" && service.config.id === "phonegap") {
 				service.impl = new Phonegap.Build();
+				this.configureService(service, next);
 			} else if (service.config.type === "other" && service.config.provider === "hermes" && service.config.id === "prj-toolkit") {
 				service.impl = new ProjectToolkit();
+				this.configureService(service, next);
 			} else if (service.config.type === "plugin") {
-				// TODO: TBC
+				if (this.debug) this.log("Loading browser side code: " + service.config.plugin.browsercode);
+				enyo.load(service.config.plugin.browsercode, function() {
+					if (this.debug) this.log("LOADED browser side code: " + service.config.plugin.browsercode);
+				}.bind(this));
+				next();		// configuration will be applied later on
+			} else {
+				if (this.debug) this.log("Ignoring service: " + service.config.id);
+				next();
 			}
+		} catch(err) {
+			this.error(err);
+			next(err);
+		}
+	},
+	configureService: function(service, next) {
+		if (this.debug) this.log("id:", service.config.id, "config:", service.config);
+		try {
 			if (service.impl) {
 				if (this.debug) this.log("id:", service.config.id, "created");
 				// If the service does not define an
@@ -160,7 +178,7 @@ enyo.kind({
 				service.impl.setConfig(service.config);
 				if (this.debug) this.log("id:", service.config.id, "configured");
 			} else {
-				this.log("Ignoring service: " + service.config.id);
+				if (this.debug) this.log("Ignoring service: " + service.config.id);
 			}
 			next();
 		} catch(err) {
@@ -226,7 +244,8 @@ enyo.kind({
 	 * @return {Array} services matching the required criteria
 	 * @public
 	 */
-	filter: function(criteria) {
+	filter: function(criteria, withNoImpl) {
+		withNoImpl = withNoImpl || false;
 		//if (this.debug) this.log("criteria:", criteria, ", services:", this.services);
 		var matches = enyo.filter(this.services, function(service){
 			var match = true;
@@ -250,11 +269,13 @@ enyo.kind({
 		var services = [];
 		//if (this.debug) this.log("matches:", matches);
 		enyo.forEach(matches, function(match){
-			if (match.impl) { 
+			if (match.impl)  {
 				services.push(match.impl);
+			} else if (withNoImpl === true) {
+				services.push(match);
 			}
 		}, this);
-		if (this.debug) this.log("criteria:", criteria , " => services:", services);
+		if (this.debug) this.log("withNoImpl:", withNoImpl, "criteria:", criteria , " => services:", services);
 		return services;
 	},
 	/**
@@ -290,6 +311,24 @@ enyo.kind({
 	notifyServicesChange: function() {
 		if (this.debug) this.log("sending signal...");
 		enyo.Signals.send("onServicesChange", {serviceRegistry: this});
+	},
+	pluginReady: function(id, impl) {
+		if (this.debug) this.log("New plugin ready: " + id);
+		var services = this.filter({properties: ['id'], id: id}, true);
+		var error = true;
+		if (services.length === 1) {
+			var service = services[0];
+			if (service.config.type === 'plugin' && ( ! service.impl)) {
+				error = false;
+				service.impl = impl;
+				impl.setConfig(service.config);
+				if (this.debug) this.log("New plugin registered: " + id);
+			}
+		}
+
+		if (error) {
+			if (this.debug) this.log("Unexpected plugin ready request for: " + id);
+		}
 	},
 	statics: {
 		instance: null
