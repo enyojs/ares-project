@@ -68,7 +68,7 @@ Main tasks:
 
 **WARNING:**
 
-* Only xml-scripts, md5sum-file and AresTestJava.patch file are pushed on gitHub. 
+* Only xml-scripts, md5/sha1 sum-file and AresTestJava.patch file are pushed on gitHub. 
 * The Java code is not.
 * Reasons are; expecting to find an XML to javascript Formatter and avoid two source code for the same test.
 
@@ -80,11 +80,11 @@ Main tasks:
 	
 **Note:** For example, the NewProject test case will be converted into NewProject.java … etc.
 
-The `.../webdriver-java-diff-patch/AresTestCases.md5` file contains the digests to validate the java files converted from XML scripts.
+The `.../webdriver-java-diff-patch/AresTestCases.sha1` and `.../webdriver-java-diff-patch/AresTestCases.md5` files contains the digests to validate the java files converted from XML scripts.
 
 ### Verify generated Java files
 
-Depending on your system, use either `md5sum` to verify the md5 digests against the Java files converted from the XML scripts. This files are found under the temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`.
+Depending on your system, use either `md5sum`, `inhash.exe` or `/usr/bin/shasum` to verify the md5 or sha1 digests against the Java files converted from the XML scripts. This files are found under the temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`.
 
 ### Apply AresTestJava.patch 
 
