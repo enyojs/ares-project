@@ -42,13 +42,20 @@ enyo.kind({
 	},
 	//* Respond to message from communicator
 	receiveMessage: function(inSender, inEvent) {
+		if(!inEvent.message || !inEvent.message.op) {
+			enyo.warn("Deimos designer received invalid message data:", msg);
+			return;
+		}
+		
 		var msg = inEvent.message;
 		
 		// Iframe is loaded and ready to do work.
 		if(msg.op === "state" && msg.val === "initialized") {
 			this.sendIframeContainerData();
+		// Iframe received container data
 		} else if(msg.op === "state" && msg.val === "ready") {
 			this.setIframeReady(true);
+		// The current kind was successfully rendered in the iframe
 		} else if(msg.op === "rendered") {
 			this.sandboxData = msg.val;
 			this.doDesignRendered({components: enyo.json.codify.from(msg.val)});
@@ -63,6 +70,9 @@ enyo.kind({
 		// Highlight drop target to minic what's happening in iframe
 		} else if(msg.op === "syncDropTargetHighlighting") {
 			this.doSyncDropTargetHighlighting({component: enyo.json.codify.from(msg.val)});
+		// Default case
+		} else {
+			enyo.warn("Deimos designer received unknown message op:", msg);
 		}
 	},
 	

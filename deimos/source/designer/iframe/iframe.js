@@ -59,6 +59,11 @@ enyo.kind({
 	},
 	//* Receive message from Deimos
 	receiveMessage: function(inSender, inEvent) {
+		if(!inEvent.message || !inEvent.message.op) {
+			enyo.warn("Deimos iframe received invalid message data:", msg);
+			return;
+		}
+		
 		var msg = inEvent.message;
 		
 		if(msg.op === "containerData") {
@@ -81,6 +86,8 @@ enyo.kind({
 			this.codeUpdate(msg.val);
 		} else if(msg.op === "cleanUp") {
 			this.cleanUpKind();
+		} else {
+			enyo.warn("Deimos iframe received unknown message op:", msg);
 		}
 	},
 	//* On down, set _this.selection_
