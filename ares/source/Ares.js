@@ -128,6 +128,7 @@ enyo.kind({
 		this.showFiles();
 	},
 	designDocument: function(inSender, inEvent) {
+		this.syncEditedFiles();
 		this.$.deimos.load(inEvent);
 		this.$.panels.setIndex(this.deimosViewIndex);
 		this.adjustBarMode();
@@ -197,8 +198,6 @@ enyo.kind({
 		this.adjustBarMode();
 		this.$.bottomBar.activateFileWithId(d.getId());
 		this.hideFiles();
-		// TODO - should we reload the iFrame every time we change docs?
-		//this.$.deimos.reloadIFrame();
 	},
 	finishedSliding: function(inSender, inEvent) {
 		if (this.$.slideable.value < 0) {
@@ -233,6 +232,39 @@ enyo.kind({
 	bounceClose: function(inSender, inEvent) {
 		this.switchFile(inSender, inEvent);
 		enyo.asyncMethod(this.$.phobos, "closeDocAction");
+	},
+	//* Update code running in designer
+	syncEditedFiles: function() {
+		var files = Ares.Workspace.files,
+			model,
+			i;
+		
+		for(i=0;i<files.models.length;i++) {
+			model = files.models[i];
+			
+			if(model.getFile().name === "package.js") {
+				continue;
+			}
+
+			this.updateCode(files.get(model.id));
+		}
+	},
+	updateCode: function(inDoc) {
+		var filename = inDoc.getFile().path,
+			code = inDoc.getAceSession().getValue();
+
+		if(filename.slice(-4) === ".css") {
+			doc = inDoc;
+			this.syncCSSFile(filename, code);
+		} else if(filename.slice(-3) === ".js") {
+			this.syncJSFile(code);
+		}
+	},
+	syncCSSFile: function(inFilename, inCode) {
+		this.$.deimos.syncCSSFile(inFilename, inCode);
+	},
+	syncJSFile: function(inCode) {
+		this.$.deimos.syncJSFile(inCode);
 	},
 	statics: {
 		isBrowserSupported: function() {

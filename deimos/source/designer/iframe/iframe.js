@@ -84,6 +84,8 @@ enyo.kind({
 			this.simulateCreateNewComponent(msg);
 		} else if(msg.op === "codeUpdate") {
 			this.codeUpdate(msg.val);
+		} else if(msg.op === "cssUpdate") {
+			this.cssUpdate(msg.val);
 		} else if(msg.op === "cleanUp") {
 			this.cleanUpKind();
 		} else {
@@ -506,5 +508,48 @@ enyo.kind({
 	//* Eval code passed in by designer
 	codeUpdate: function(inCode) {
 		eval(inCode);
+	},
+	//* Update CSS by replacing the link/style tag in the head with an updated style tag
+	cssUpdate: function(inData) {
+		if(!inData.filename || !inData.code) {
+			enyo.warn("Invalid data sent for CSS update:", inData);
+			return;
+		}
+		
+		var filename = inData.filename,
+			code = inData.code,
+			head = document.getElementsByTagName("head")[0],
+			links = head.getElementsByTagName("link"),
+			styles = head.getElementsByTagName("style"),
+			el,
+			i;
+		
+		// Look through link tags for a linked stylesheet with a filename matching _filename_
+		for(var i=0;(el = links[i]);i++) {
+			if(el.getAttribute("rel") === "stylesheet" && el.getAttribute("type") === "text/css" && el.getAttribute("href") === filename) {
+				this.updateStyle(filename, code, el);
+				return;
+			}
+		}
+		
+		// Look through style tags for a tag with a data-href property matching _filename_
+		for(var i=0;(el = styles[i]);i++) {
+			if(el.getAttribute("data-href") === filename) {
+				this.updateStyle(filename, code, el);
+				return;
+			}
+		}
+	},
+	//* Replace _inElementToReplace_ with a new style tag containing _inNewCode_
+	updateStyle: function(inFilename, inNewCode, inElementToReplace) {
+		var head = document.getElementsByTagName("head")[0],
+			newTag = document.createElement("style");
+		
+		newTag.setAttribute("type", "text/css");
+		newTag.setAttribute("data-href", inFilename);
+		newTag.innerHTML = inNewCode;
+		
+		head.insertBefore(newTag, inElementToReplace);
+		head.removeChild(inElementToReplace);
 	}
 });

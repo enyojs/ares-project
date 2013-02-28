@@ -72,8 +72,6 @@ enyo.kind({
 		this.kinds = what;
 		this.$.kindPicker.destroyClientControls();
 		
-		this.$.designer.loadPhobosCode(data.fileIndexer.code);
-		
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
 			this.$.kindPicker.createComponent({
@@ -231,13 +229,18 @@ enyo.kind({
 	},
 	//* Called by Ares when ProjectView has new project selected
 	projectSelected: function(inProject) {
-		this.$.designer.updateSource(inProject.getProjectUrl());
+		this.$.designer.updateSource(inProject);
 	},
 	//*
 	reloadIFrame: function() {
 		this.$.designer.reloadIFrame();
 	},
-	
+	syncCSSFile: function(inFilename, inCode) {
+		this.$.designer.syncCSSFile(inFilename, inCode);
+	},
+	syncJSFile: function(inCode) {
+		this.$.designer.syncJSFile(inCode);
+	},
 	//* Add dispatch for native drag events
 	addHandlers: function(inSender, inEvent) {
 		document.ondragstart = enyo.dispatch;

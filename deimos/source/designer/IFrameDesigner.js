@@ -28,9 +28,11 @@ enyo.kind({
 	},
 	
 	updateSource: function(inSource) {
+		var serviceConfig = inSource.getService().config;
 		this.setIframeReady(false);
-		this.projectSource = inSource;
-		this.$.client.hasNode().src = this.baseSource + "?src=" + inSource;
+		this.projectSource = inSource.getProjectUrl();
+		this.projectPath = serviceConfig.origin + serviceConfig.pathname + "/file";
+		this.$.client.hasNode().src = this.baseSource + "?src=" + this.projectSource;
 	},
 	reloadIFrame: function() {
 		this.updateSource(this.projectSource);
@@ -120,12 +122,16 @@ enyo.kind({
 	save: function() {
 		return this.sandboxData;
 	},
-	//* Pass the current code in Phobos down to the iFrame (to avoid needing to reload the iFrame)
-	loadPhobosCode: function(inCode) {
-		this.sendMessage({op: "codeUpdate", val: inCode});
-	},
 	//* Clean up the iframe before closing designer
 	cleanUp: function() {
 		this.sendMessage({op: "cleanUp"});
+	},
+	//* Pass inCode down to the iFrame (to avoid needing to reload the iFrame)
+	syncJSFile: function(inCode) {
+		this.sendMessage({op: "codeUpdate", val: inCode});
+	},
+	//* Sync the CSS in inCode with the iFrame (to avoid needing to reload the iFrame)
+	syncCSSFile: function(inFilename, inCode) {
+		this.sendMessage({op: "cssUpdate", val: {filename: this.projectPath + inFilename, code: inCode}});
 	}
 });
