@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCase seleniumIDEVersion="1.10.0" baseURL="http://127.0.0.1:9009/">
+<selenese>
+	<command>open</command>
+	<target><![CDATA[/ide/ares/test.html?debug=true&norunner=true]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTitle</command>
+	<target><![CDATA[Ares]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>echo</command>
+	<target><![CDATA[import HelloWorld project]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectList_iconButton3]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[Ares Test - Home Directory
+
+
+
+Ares Test Suite]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_providerList_item]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_$HelloWorld_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_confirm]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertElementPresent</command>
+	<target><![CDATA[id=ares_projectView_projectList]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectList_projectList_ownerProxy_item]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$source_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>click</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$source_$App.js_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>doubleClick</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$source_$App.js_caption]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertElementPresent</command>
+	<target><![CDATA[css=div.ace_content]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>waitForText</command>
+	<target><![CDATA[id=ares_phobos_editorButton]]></target>
+	<value><![CDATA[Editor Settings]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_phobos_editorButton]]></target>
+	<value><![CDATA[Editor Settings]]></value>
+</selenese>
+<selenese>
+	<command>assertText</command>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_control3]]></target>
+	<value><![CDATA[High light active line]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[Off]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_highLightButton_control]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[On]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertText</command>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_control6]]></target>
+	<value><![CDATA[Word Wrap]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[Off]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_wordWrapButton_control]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[On]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>assertText</command>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_control10]]></target>
+	<value><![CDATA[Font Size]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_pickerButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_fontSizePicker_menuItem2]]></target>
+	<value><![CDATA[10]]></value>
+</selenese>
+<selenese>
+	<command>assertText</command>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_control14]]></target>
+	<value><![CDATA[Editor Themes]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[ambiance]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>click</command>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_pickerButton2]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_menuItem6]]></target>
+	<value><![CDATA[cobalt]]></value>
+</selenese>
+<selenese>
+	<command>assertTextPresent</command>
+	<target><![CDATA[cobalt]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>echo</command>
+	<target><![CDATA[no needs to save - assertions are here to validate the settings]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_close]]></target>
+	<value><![CDATA[Close]]></value>
+</selenese>
+</TestCase>
