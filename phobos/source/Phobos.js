@@ -137,7 +137,7 @@ enyo.kind({
 			this.$.imageViewer.setAttribute("src", origin + file.pathname);
 		}
 		this.reparseAction();					// Synchronous call
-		this.projectCtrl.buildEnyoDb();			// this.buildProjectDb() will be invoked when enyo analysis is finished
+		this.projectCtrl.buildProjectDb();
 		this.$.documentLabel.setContent(file.name);
 
 		this.docData.setEdited(edited);
@@ -189,20 +189,12 @@ enyo.kind({
 	//
 	setAutoCompleteData: function() {
 		this.$.autocomplete.hide();
-		this.projectData.on('change:enyo-indexer', this.enyoIndexReady, this);
 		this.projectData.on('change:project-indexer', this.projectIndexReady, this);
-		this.$.autocomplete.setEnyoIndexer(this.projectData.getEnyoIndexer());
 		this.$.autocomplete.setProjectIndexer(this.projectData.getProjectIndexer());
 	},
 	resetAutoCompleteData: function() {
-		this.projectData.off('change:enyo-indexer', this.enyoIndexReady);
 		this.projectData.off('change:project-indexer', this.projectIndexReady);
-		this.$.autocomplete.setEnyoIndexer(null);
 		this.$.autocomplete.setProjectIndexer(null);
-	},
-	enyoIndexReady: function(model, value, options) {
-		// Pass to the autocomplete component a reference to the enyo indexer
-		this.$.autocomplete.setEnyoIndexer(value);
 	},
 	projectIndexReady: function(model, value, options) {
 		// Pass to the autocomplete component a reference to the project indexer

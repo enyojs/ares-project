@@ -9,7 +9,6 @@ enyo.kind({
 	published: {
 		ace: null,
 		analysis: null,
-		enyoIndexer: null,
 		projectIndexer: null
 	},
 	components : [ {
@@ -512,7 +511,26 @@ enyo.kind({
 	 */
 	projectIndexerChanged: function() {
 		this.debug && this.log("Project analysis ready");
-		// TODO something to do ?
+		var suggestions, regexp;
+		
+		if (this.projectIndexer) {
+			// Build the suggestion lists for enyo as the analyzer just finished its job
+			suggestions = new Phobos.Suggestions();
+			regexp = /^enyo\..*$/;
+			suggestions.add(this.projectIndexer.search(this.getFctFilterFn(regexp), this.getMapFn(this.AUTOCOMP_ENYO), this));
+			suggestions.add(this.projectIndexer.search(this.getKindFilter(regexp), this.getMapFn(this.AUTOCOMP_ENYO), this));
+			this.suggestionsEnyo = suggestions;
+			
+			// Build the suggestion lists for onyx as the analyzer just finished its job
+			suggestions = new Phobos.Suggestions();
+			regexp = /^onyx\..*$/;
+			suggestions.add(this.projectIndexer.search(this.getFctFilterFn(regexp), this.getMapFn(this.AUTOCOMP_ONYX), this));
+			suggestions.add(this.projectIndexer.search(this.getKindFilter(regexp), this.getMapFn(this.AUTOCOMP_ONYX), this));
+			this.suggestionsOnyx = suggestions;
+		} else {
+			this.suggestionsEnyo = new Phobos.Suggestions();
+			this.suggestionsOnyx = new Phobos.Suggestions();
+		}
 	},
 	/**
 	 * Callback invoked when the parsing of the currently edited file is done
@@ -543,47 +561,12 @@ enyo.kind({
 		if (definition === undefined && this.projectIndexer) {
 			// Try to get it from the project analysis
 			definition = this.projectIndexer.findByName(name);
-		}
-		
-		if (definition === undefined && this.enyoIndexer) {
-			// Try to get it from the enyo/onyx analysis
-			definition = this.enyoIndexer.findByName(name);
-			
 			if (definition === undefined) {
 				// Try again with the enyo prefix as it is optional
-				definition = this.enyoIndexer.findByName(this.AUTOCOMP_ENYO + name);
+				definition = this.projectIndexer.findByName(this.AUTOCOMP_ENYO + name);
 			}
 		}
-		
 		return definition;
-	},
-	/**
-	 * Rebuild the enyo and onyx suggestion lists when the enyoIndexer
-	 * property is changed
-	 * @protected
-	 */
-	enyoIndexerChanged: function() {
-		this.debug && this.log("Enyo analysis ready");
-		var suggestions, regexp;
-		
-		if (this.enyoIndexer) {
-			// Build the suggestion lists for enyo as the analyzer just finished its job
-			suggestions = new Phobos.Suggestions();
-			regexp = /^enyo\..*$/;
-			suggestions.add(this.enyoIndexer.search(this.getFctFilterFn(regexp), this.getMapFn(this.AUTOCOMP_ENYO), this));
-			suggestions.add(this.enyoIndexer.search(this.getKindFilter(regexp), this.getMapFn(this.AUTOCOMP_ENYO), this));
-			this.suggestionsEnyo = suggestions;
-			
-			// Build the suggestion lists for onyx as the analyzer just finished its job
-			suggestions = new Phobos.Suggestions();
-			regexp = /^onyx\..*$/;
-			suggestions.add(this.enyoIndexer.search(this.getFctFilterFn(regexp), this.getMapFn(this.AUTOCOMP_ONYX), this));
-			suggestions.add(this.enyoIndexer.search(this.getKindFilter(regexp), this.getMapFn(this.AUTOCOMP_ONYX), this));
-			this.suggestionsOnyx = suggestions;
-		} else {
-			this.suggestionsEnyo = new Phobos.Suggestions();
-			this.suggestionsOnyx = new Phobos.Suggestions();
-		}
 	},
 	/**
 	 * Filter function used to filter down the functions found by the {Indexer} from lib/extra
