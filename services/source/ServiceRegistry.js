@@ -126,7 +126,13 @@ enyo.kind({
 	instanciate: function(service, next) {
 		if (this.debug) this.log("id:", service.config.id, "config:", service.config);
 		try {
-			if (service.config.type === "filesystem" && service.config.provider === "hermes") {
+			if (service.config.mode === "plugin") {
+				if (this.debug) this.log("Loading browser side code: " + service.config.plugin.browsercode);
+				enyo.load(service.config.plugin.browsercode, function() {
+					if (this.debug) this.log("LOADED browser side code: " + service.config.plugin.browsercode);
+				}.bind(this));
+				next();		// configuration will be applied later on
+			} else if (service.config.type === "filesystem" && service.config.provider === "hermes") {
 				// hermes type of services use
 				// a common front-end
 				service.impl = new HermesFileSystem();
@@ -138,12 +144,6 @@ enyo.kind({
 			} else if (service.config.type === "other" && service.config.provider === "hermes" && service.config.id === "prj-toolkit") {
 				service.impl = new ProjectToolkit();
 				this.configureService(service, next);
-			} else if (service.config.type === "plugin") {
-				if (this.debug) this.log("Loading browser side code: " + service.config.plugin.browsercode);
-				enyo.load(service.config.plugin.browsercode, function() {
-					if (this.debug) this.log("LOADED browser side code: " + service.config.plugin.browsercode);
-				}.bind(this));
-				next();		// configuration will be applied later on
 			} else {
 				if (this.debug) this.log("Ignoring service: " + service.config.id);
 				next();
@@ -318,7 +318,7 @@ enyo.kind({
 		var error = true;
 		if (services.length === 1) {
 			var service = services[0];
-			if (service.config.type === 'plugin' && ( ! service.impl)) {
+			if (service.config.mode === 'plugin' && ( ! service.impl)) {
 				error = false;
 				service.impl = impl;
 				impl.setConfig(service.config);
