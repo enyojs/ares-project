@@ -8,7 +8,6 @@ enyo.kind({
 	published: {
 		filterLevel: null,		// Value will be given by Inspector.FilterXXX "checked" item.
 		filterType: null,		// Value will be given by Inspector.FilterXXX "checked" item.
-		enyoIndexer: null,		// Analyzer output for enyo/onyx used by the current project
 		projectIndexer: null,	// Analyzer output for the current project
 		fileIndexer: null,		// Analyzer output for the current file
 		projectData: null		// All the project data shared mainly between phobos and deimos
@@ -253,24 +252,12 @@ enyo.kind({
 	 */
 	projectDataChanged: function(oldProjectData) {
 		if (this.projectData) {
-			this.projectData.on('change:enyo-indexer', this.enyoIndexReady, this);
 			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
-
-			this.setEnyoIndexer(this.projectData.getEnyoIndexer());
 			this.setProjectIndexer(this.projectData.getProjectIndexer());
 		}
 		if (oldProjectData) {
-			oldProjectData.off('change:enyo-indexer', this.enyoIndexReady);
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
 		}
-	},
-	/**
-	 * The enyo/onyx analyzer output has changed for the current project
-	 * @param value   the new analyzer output
-	 * @protected
-	 */
-	enyoIndexReady: function(model, value, options) {
-		this.setEnyoIndexer(value);
 	},
 	/**
 	 * The project analyzer output has changed
@@ -307,18 +294,12 @@ enyo.kind({
 		if (definition === undefined && this.projectIndexer) {
 			// Try to get it from the project analysis
 			definition = this.projectIndexer.findByName(name);
-		}
-		
-		if (definition === undefined && this.enyoIndexer) {
-			// Try to get it from the enyo/onyx analysis
-			definition = this.enyoIndexer.findByName(name);
 
 			if (definition === undefined) {
 				// Try again with the enyo prefix as it is optional
-				definition = this.enyoIndexer.findByName("enyo." + name);
+				definition = this.projectIndexer.findByName("enyo." + name);
 			}
 		}
-		
 		return definition;
 	},
 	/**

@@ -19,7 +19,7 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction", style: "float:right;"}
 			]},
 			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
-				{name: "left", classes:"ares_deimos_left", kind: "Palette"},
+				{name: "left", classes:"ares_deimos_left", kind: "Palette", name:"palette"},
 				{name: "middle", fit: true, kind: "FittableRows", style: "border:1px solid #D0D0D0;margin:0px 4px;", components: [
 					{kind: "IFrameDesigner", name: "designer", fit: true,
 						onSelect: "designerSelect",
@@ -89,6 +89,8 @@ enyo.kind({
 		// Pass the project information (analyzer output, ...) to the inspector
 		this.$.inspector.setProjectData(data.projectData);
 		this.$.inspector.setFileIndexer(data.fileIndexer);
+		// Pass the analyzer output to the palette
+		this.$.palette.setProjectData(data.projectData);
 	},
 	kindSelected: function(inSender, inEvent) {
 		/* FIXME

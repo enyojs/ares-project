@@ -4,8 +4,25 @@ enyo.singleton({
 	debug: false,
 	info: {},
 	config: [],
-	defaults: null,				// populated by base-design.js
-
+	defaults: {
+		properties: {
+			owner: {filterLevel: "hidden"},
+			container: {filterLevel: "hidden"},
+			parent: {filterLevel: "hidden"},
+			prepend: {filterLevel: "hidden"},
+			events: {filterLevel: "hidden"},
+			id: {filterLevel: "hidden"},
+			isContainer: {filterLevel: "hidden"},
+			controlParentName: {filterLevel: "hidden"},
+			layoutKind: {filterLevel: "hidden"},
+			canGenerate: {filterLevel: "dangerous", inputKind: "Inspector.Config.Boolean"},
+			content: {filterLevel: "useful", inputKind: "Inspector.Config.Text"},
+			name: {filterLevel: "useful", inputKind: "Inspector.Config.Text"}
+		},
+		events: {
+			ontap: {filterLevel: "useful"}
+		}
+	},
 	F_HIDDEN: -1,
 	F_DANGEROUS: 1,
 	F_NORMAL: 2,
@@ -26,6 +43,7 @@ enyo.singleton({
 	 * Build all the information needed by the inspector
 	 * @public
 	 */
+	palette: [],
 	buildInformation: function() {
 		this.palette = Palette.model,		// TODO: Should replace Palette.model
 		this.addInformation("properties", "__default", this.defaults.properties);
