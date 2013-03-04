@@ -1,6 +1,5 @@
 enyo.kind({
 	name: "Ares.App",
-	kind: "FittableColumns",
 	classes: "enyo-fit",
 	handlers: {
 		ondragleave: "iframeDragleave"
@@ -8,7 +7,9 @@ enyo.kind({
 	components: [
 		{name: "client", fit: true, classes:"enyo-fit"},
 		{name: "serializer", kind: "Serializer"},
-		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"}
+		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"},
+		{name: "selectHighlight", style:"height:0; width:0; pointer-events: none; background-color:rgba(255,187,0,0.3); border:1px solid orange; box-sizing:border-box; position:absolute; z-index:9999;"},
+		{name: "dropHighlight", style:"height:0; width:0; pointer-events: none; background-color:rgba(0,110,255,0.3); border:1px solid blue; box-sizing:border-box; position:absolute; z-index:9999;"}
 	],
 	
 	selection: null,
@@ -348,7 +349,8 @@ enyo.kind({
 	*/
 	makeComponentADropTarget: function(inComponent) {
 		if(inComponent.attributes) {
-			inComponent.attributes.dropTarget = (this.containerData[inComponent.kind] !== false);
+			// TODO: Revisit this, once indexer's propertyMetaData is integrated
+			inComponent.attributes.dropTarget = true; //(this.containerData[inComponent.kind] !== false);
 		} else {
 			inComponent.attributes = {
 				dropTarget: (this.containerData[inComponent.kind] !== false)
@@ -388,29 +390,49 @@ enyo.kind({
 	isDropTarget: function(inComponent) {
 		return (inComponent.attributes && inComponent.attributes.dropTarget);
 	},
-	
+
 	//* Highlight _inComponent_ with drop target styling, and unhighlight everything else
 	highlightDropTarget: function(inComponent) {
-		this.unhighlightDropTargets();
-		if(typeof inComponent.origBackground === "undefined") {
-			inComponent.origBackground = inComponent.domStyles.background || null;
-			inComponent.applyStyle("background","#cedafe");
-		}
+		this.$.dropHighlight.setShowing(true);
+		this.$.dropHighlight.setBounds(this.getControlAbsoluteBounds(inComponent));
 	},
 	//* Highlight _this.selection_ with selected styling, and unhighlight everything else
 	highlightSelection: function() {
 		this.unhighlightDropTargets();
-		if(typeof this.selection.origBackground === "undefined") {
-			this.selection.origBackground = this.selection.domStyles.background || null;
-			this.selection.applyStyle("background","orange");
+		if (this.selection) {
+			this.$.selectHighlight.setBounds(this.getControlAbsoluteBounds(this.selection));
 		}
 	},
-	unhighlightDropTargets: function() {
-		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
-			if(c !== this.selection) {
-				this.unHighlightItem(c);
-			}
+	/**
+	 * Returns the absolute bounds of the control, taking into account any parent offsets.
+	 * enyo.Control will be getting a similar instance method, but duplicating it here
+	 * removes a dependency that Ares use a bleeding-edge version of enyo/bootplate. 
+	 * @protected
+	 */
+	getControlAbsoluteBounds: function(inControl) {
+		var l = 0,
+			t = 0,
+			n = inControl.hasNode(),
+			w = n ? n.offsetWidth : 0,
+			h = n ? n.offsetHeight : 0;
+
+		while(n) {
+			l += n.offsetLeft - (n.offsetParent ? n.offsetParent.scrollLeft : 0);
+			t += n.offsetTop  - (n.offsetParent ? n.offsetParent.scrollTop  : 0);
+			n = n.offsetParent;
 		}
+
+		return {
+			top		: t,
+			left	: l,
+			bottom	: document.body.offsetHeight - t - h,
+			right	: document.body.offsetWidth  - l - w,
+			height	: h,
+			width	: w
+		};
+	},	
+	unhighlightDropTargets: function() {
+		this.$.dropHighlight.setShowing(false);
 	},
 	unHighlightItem: function(inComponent) {
 		if(typeof inComponent.origBackground !== "undefined") {
@@ -497,6 +519,7 @@ enyo.kind({
 	//* Rerender client and (optionally) notify Deimos
 	refreshClient: function(noMessage) {
 		this.$.client.render();
+		this.highlightSelection();
 		if(!noMessage) {
 			this.kindUpdated();
 		}
