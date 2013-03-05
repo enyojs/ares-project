@@ -13,7 +13,7 @@ enyo.kind({
 
 		// Create the new window browser named Ares Test Suite
 		var url = "../test/testrunner/index.html"
-		aresTestW = window.open(url, 'Ares Test Suite','scrollbars=auto, titlebar=yes, height=640,width=640', false);
+		aresTestW = window.open(url, 'Ares-Test-Suite','scrollbars=auto, titlebar=yes, height=640,width=640', false);
 
 		// Communication path between Ares Test and Ares Ide through postMessage window method
 		// Warning: postMessage sent several times to make sure it has been received by Ares Test browser
