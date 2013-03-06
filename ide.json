@@ -25,7 +25,7 @@
 			"command":"@NODE@", "params":[
 				"hermes/fsDropbox.js", "-P", "/files", "-p", "0"
 			],
-			"auth": {
+			"Xauth": {
 				"type": "dropbox",
 				"appKey": "",
 				"appSecret": ""

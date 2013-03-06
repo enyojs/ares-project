@@ -1,4 +1,4 @@
-#!/usr/bin/env node_modules/mocha/bin/mocha --bail
+#!/usr/bin/env ../../node_modules/mocha/bin/mocha --bail
 /**
  * fsXXX.js test suite
  */
