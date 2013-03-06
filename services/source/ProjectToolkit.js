@@ -60,16 +60,17 @@ enyo.kind({
 		data +=	("&options=" + encodeURIComponent(JSON.stringify(options)));
 
 		var userreq = new enyo.Async();
-		
+
 		var req = new enyo.Ajax({
 			url: this.url + '/generate',
 			method: 'POST',
 			handleAs: "text",
-			postBody: data
+			postBody: data,
+			mimeType: 'text/plain; charset=x-user-defined'
 		});
 
 		req.response(this, function(inSender, inData) {
-			userreq.respond({ctype: req.xhrResponse.headers['content-type'], content: inData});
+			userreq.respond({ctype: req.xhrResponse.headers['x-content-type'], content: inData});
 		});
 		req.error(this, function(inSender, inError) {
 			this.log("Unable to get the template files (" + inError + ")");

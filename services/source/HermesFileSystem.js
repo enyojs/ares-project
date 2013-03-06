@@ -50,6 +50,11 @@ enyo.kind({
 			postBody: inParams && inParams.postBody,
 			contentType: inParams && inParams.contentType
 		};
+
+		if (inMethod === 'GET') {
+			options.mimeType = 'text/plain; charset=x-user-defined';
+		}
+
 		var req = new enyo.Ajax(options);
 		if (inParams && inParams.postBody) {
 			delete inParams.postBody;
