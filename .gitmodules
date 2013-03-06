@@ -18,7 +18,7 @@
 	url = ../../documentcloud/underscore.git
 [submodule "node_modules/phonegapbuildapi"]
 	path = node_modules/phonegapbuildapi
-	url = ../phonegapbuildapi
+	url = git@github.com:enyojs/phonegapbuildapi
 [submodule "lib/g11n"]
 	path = lib/g11n
 	url = ../g11n.git
