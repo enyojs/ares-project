@@ -16,8 +16,8 @@
 [submodule "lib/foss/underscore"]
 	path = lib/foss/underscore
 	url = ../../documentcloud/underscore.git
-[submodule "hermes/node_modules/phonegapbuildapi"]
-	path = hermes/node_modules/phonegapbuildapi
+[submodule "node_modules/phonegapbuildapi"]
+	path = node_modules/phonegapbuildapi
 	url = ../phonegapbuildapi
 [submodule "lib/g11n"]
 	path = lib/g11n
