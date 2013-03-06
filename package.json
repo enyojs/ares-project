@@ -1,0 +1,22 @@
+{
+	"name": "ares",
+	"version": "0.0.1",
+	"dependencies": {
+		"async": "0.1.22",
+		"express": "2.5.8",
+		"optimist": "0.3.5",
+		"rimraf": "1.0.6",
+		"temp": "0.4.0"
+	},
+	"bundledDependencies": [
+		"async",
+		"express",
+		"optimist",
+		"rimraf",
+		"temp"
+	],
+	"scripts" : {
+	},
+	"files": [
+	]
+}
