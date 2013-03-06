@@ -1,150 +1,218 @@
-# Selenium Exploration for Ares
-## Introduction
-* Selenium is a suite of tools to automate web browsers across different platforms; <http://http://seleniumhq.org/>
-* Test scripts written with Selenium are portable. They can be run from browsers (using Selenium IDE) or from TestNG (using Selenium RC).
-* Selenium is composed by the following main components:
-	1. Selenium IDE (FF plugin) which is used to record testcase, based on manual interactions with the browser; <http://seleniumhq.org/download/>
-	2. Selenium Remote Controler (RC) which executes instructions fired by the Selenium testcases against the native browsers (IE, FF, Safari …); <http://seleniumhq.org/download/>
-	3. TestNG (Junit/Nunit based) which is a unit testing framwwork toolkit; <http://testng.org/doc/index.html>
-	4. JDK (as Selenium is not sticked to one programing language - testcases can be written in .net, perl, java …); <http://www.oracle.com/technetwork/java/javase/downloads/index.html>
-	
-## Prerequisite
 
-* Selenium IDE FF plugin
-* Eclipse IDE; <http://www.eclipse.org/downloads/>
-* Sun JDK 1.6 or above
-* TestNG 5
-* Eclipse TestNG plugin
+## 1- HOWTO execute the ARES TEST SUITE using Selenium 2.0 IDE and XML-API 
 
-##### Selenium IDE FireFox plugin
+**FYI:** The ARES TEST SUITE is written using IDE-API XML Formatter and Selenese commands
 
-* Under FF>Tools>Add-ons; Search and install for available Selenium IDE add-ons.
+### Firefox Prerequisites
 
-##### Eclipse IDE
-* Create an eclipse java project to run Selenium TestSuites. 
-* Configure build path with the following external jars:
+* First, download the Selenium IDE Plugin (Record, edit and play Selenium tests) from the SeleniumHQ: <http://seleniumhq.org/projects/ide>
+* Second, download the Selenium XML Formatter-IDE API (custome XML Formatter for Selenium-IDE) from: <https://addons.mozilla.org/en-US/firefox/addon/selenium-xml-formatter/?src=api>
+* Firefox will protect you from installing addons from unfamiliar locations, so you will need to click ‘Allow’ to proceed with the installation
+* When the download is complete, restart Firefox. Once restarted, Firefox will list Selenium-IDE under Firefox Tools menu.
 
-		selenium-java-client-driver-1.0.1.jar (interact with the Selenium Server RC)
-		testng-5.jar
-		selenium-java-testng-helper-1.0.1.jar
-
-##### TestNG 5
-* ant installation as prerequisite
-
-		$ sudo port install apache-ant		
-* TestNG is hosted on GitHub
-
-		$ git clone git://github.com/cbeust/testng.git
-		$ cd testng
-		$ cp ivy-2.1.0.jar ~/.ant/lib
-		$ ant
-The testng-5.jar file in the target director.
-
-##### Eclipse TestNG plugin
-* Eclipse plug-in
-
-		Select Help / Install New Software ...
-		Enter http://beust.com/eclipse.
-		Eclipse will then guide through the process.
-		
-##### selenium-java-client-driver
-* Provides the Selenium Java Client Driver classes.These classes are intended to be used together with the Selenium Server.
-* To download from Maven Central Repository
-
-		<http://search.maven.org/#search%7Cga%7C1%7C
-		
-##### 
-
-* To download from Maven Central Repository
-
-		<http://search.maven.org/#search%7Cga%7C1%7C>
 			
-## How to build a testcase scenario
+### Opening And Configuring the IDE
 
-##### Ares URL launch Example
-* The following 4 testcases represent 1 Test Suite
+* To run the Selenium-IDE, select it from the Firefox Tools menu (or Web developer menu). It opens with an empty script-editing window and a menu for loading, or creating new test cases.
+* Check "Enable experimental features" in Options > General, te enable next step
+* select Options &rarr; Formatter &rarr; XML Formatter (See **Note:** below)
+* The toolbar contains buttons for controlling the execution of the test suite/test cases.
+* The left-most button, Speed Control, controls how fast your test case runs. **This button needs to be positionned to slow**.
 
-		1. Launches the http://127.0.0.1:9009/ide/ares/index.html?debug=true"
-		2. Wait for Page Load
-		3. Get the Title of the Page loaded
-		4. Assert the title is Ares
+* **Note:** The Options &rarr; Formatter menu links to this article, describing why changing formats is disabled by default: <http://blog.reallysimplethoughts.com/2011/06/10/does-selenium-ide-v1-0-11-support-changing-formats>
 
-##### Script created using Selenium IDE
-* Open <http://127.0.0.1:9009/ide/ares/index.html?debug=true">
-* Start Selenium IDE from Firefox Tools->Selenium IDE. 
-* Click red button to start recording
-* Scripting is a pair of command/target
+### How to run Selenium IDE Ares Test Suite
+* **Note:** Selenium distinguishes test cases and test suites.
+* When open an existing test case or suite, Selenium-IDE displays its Selenium commands in the Test Case Pane.
 
-		1. open /ide/ares/index.html?debug=true
-		2. waitForPageToLoad 30000
-		3. verifyTextPresent Ares
-		4. assertTextPresent Ares
-* Now click red button to stop recording.
-* Export the test script as java file by Selenium IDE File->Export Test As->Java - Selenium RC 
-* Then close your Firefox Selenium ID.
+#### Ares Test Suite
 
-##### Run the generated TestNG Java code in Eclipse IDE
-###### PreReq: start Selenium RC server
-* Allows to develop test cases and test suites in Java (supports JUnit & NGUnit), PHP, Ruby, Python, Perl and even .NET. 
-* Downloaded from Maven Central Repository	
-* Start Selenium RC server
+The selenium TestSuite for Ares is located `./ares-project/test/selenium/xml-scripts`
 
-		java -jar selenium-server-standalone-2.25.0.jar
+	$ cd ./ares-project/test/selenium/xml-scripts
+	$ ll
+	total 120
+	-rw-r--r--  1 mariandebonis  staff    495 29 jan 01:50 AresTestSuite
+	-rw-r--r--  1 mariandebonis  staff  10438 29 jan 14:04 CheckTemplates
+	-rw-r--r--  1 mariandebonis  staff   7998 29 jan 14:03 FileOps	
+	-rw-r--r--  1 mariandebonis  staff   4095 29 jan 14:03 HelloWorldPhoneGapSettings
+	-rw-r--r--  1 mariandebonis  staff   2722 29 jan 14:03 HelloWorldPreview
+	-rw-r--r--  1 mariandebonis  staff   4114 29 jan 14:03 NewProject
+	-rw-r--r--  1 mariandebonis  staff   2909 21 fév 19:06 PhobosDocumentLabel
+	-rw-r--r--  1 mariandebonis  staff   5810 21 fév 11:36 PhobosEditorSettings
+	-rw-r--r--  1 mariandebonis  staff   3458 21 fév 18:02 PhobosNewKind
+	-rw-r--r--  1 mariandebonis  staff   3380 25 fév 08:52 PhobosSaveAndQuit
+	
+##### To run it
 
-		Output:
-			Dec 20, 2012 6:43:41 AM org.openqa.grid.selenium.GridLauncher main
-			INFO: Launching a standalone server
-			06:43:46.794 INFO - Java: Apple Inc. 20.12-b01-434
-			06:43:46.796 INFO - OS: Mac OS X 10.8.2 x86_64
-			06:43:46.803 INFO - v2.25.0, with Core v2.25.0. Built from revision 17482
-			06:43:46.915 INFO - RemoteWebDriver instances should connect to: http://127.0.0.1:4444/wd/hub
-			06:43:46.916 INFO - Version Jetty/5.1.x
-			06:43:46.917 INFO - Started HttpContext[/selenium-server/driver,/selenium-server/driver]
-			06:43:46.917 INFO - Started HttpContext[/selenium-server,/selenium-server]
-			06:43:46.918 INFO - Started HttpContext[/,/]
-			06:43:46.968 INFO - Started org.openqa.jetty.jetty.servlet.ServletHandler@6542bece
-			06:43:46.969 INFO - Started HttpContext[/wd,/wd]
-			06:43:46.977 INFO - Started SocketListener on 0.0.0.0:4444
-			06:43:46.977 INFO - Started org.openqa.jetty.jetty.Server@690da5eb
+* Before the teste execution, start the Ares IDE node server: `node ide.js -T`
+* Open ares-project/test/selenium/xml-scripts/AresTestSuite file *with* "Open Test Suite" menu entry
+  
+  **Note: ** AresTestSuite is composed by the following TestCases; HelloWorldPreview, NewProject, FileOps, CheckTemplates and HelloWorldPhoneGapSettings.
+  
+* To run AresTestSuite, click the `Run All` button (from the left of the IDE, 7th button) to run all the test cases in AresTestSuite, the currently loaded test suite.
+* To run individually each TestCase, open it and click the "Play current testcase" (from the left of the IDE, 8th button).
 
-###### Java code generated 
-* Create a TESTNG class with 
+### Your Contribution is required to extend the Selenium TestSuite for Ares
 
-			@Test (description="Launches the http://127.0.0.1:9009/ide/ares/index.html?debug=true")
-			public void launchAresTestCase() throws Exception {
-				selenium.open("http://127.0.0.1:9009/ide/ares/index.html?debug=true");
-				selenium.waitForPageToLoad("30000");
-				assertEquals(selenium.getTitle(), "Ares");
-			}
-* Click right run as TestNG
-* Console output: 
+Give to the Ares committer(s) a chance to update the test wish list file (`./ares-project/test/selenium/WISH-TESTS-LIST.md`) with new Test Case to implement.
 
-			[TestNG] Running:
-  			/private/var/folders/bs/kh34y13d0p7d1hjf0v1d_9zh0000gq/T/testng-eclipse-187538220/testng-customsuite.xml
- 			PASSED: launchAresTestCase
-        	Launches the http://127.0.0.1:9009/ide/ares/index.html?debug=true
-        	
+The objective is to test new controls coming with Ares pull-requests.
 
-* Tests ares executed against FF browser
-* Selenium RC server output:
+## 2- HOWTO execute the ARES TEST SUITE using Selenium 2.0 WEBDRIVER API
 
-		15:00:00.355 INFO - Command request: getNewBrowserSession[*firefox, http://localhost:4444, ] on session null
-		15:00:00.356 INFO - creating new remote session
-		15:00:00.356 INFO - Allocated session 2a63d984795c4349883847c7908ef4fd for http://localhost:4444, launching...
-		jar:file:/Users/mariandebonis/Desktop/GIT/ares-project/selenium/utils/selenium-server-standalone-2.25.0.jar!/customProfileDirCUSTFFCHROME
-		15:00:00.403 INFO - Preparing Firefox profile...
-		15:00:01.468 INFO - Launching Firefox...
-		15:00:04.426 INFO - Got result: OK,2a63d984795c4349883847c7908ef4fd on session 2a63d984795c4349883847c7908ef4fd
-		15:00:04.439 INFO - Command request: setContext[TipCalcTestCase.launchAresTestCase, ] on session 2a63d984795c4349883847c7908ef4fd
-		15:00:04.448 INFO - Got result: OK on session 2a63d984795c4349883847c7908ef4fd
-		15:00:04.477 INFO - Command request: open[http://127.0.0.1:9009/ide/ares/index.html?debug=true, ] on session 2a63d984795c4349883847c7908ef4fd
-		15:00:05.734 INFO - Got result: OK on session 2a63d984795c4349883847c7908ef4fd
-		15:00:05.736 INFO - Command request: waitForPageToLoad[30000, ] on session 2a63d984795c4349883847c7908ef4fd
-		15:00:05.765 INFO - Got result: OK on session 2a63d984795c4349883847c7908ef4fd
-		15:00:05.767 INFO - Command request: getTitle[, ] on session 2a63d984795c4349883847c7908ef4fd
-		15:00:05.776 INFO - Got result: OK,Ares on session 2a63d984795c4349883847c7908ef4fd
-		15:00:05.789 INFO - Command request: selectWindow[null, ] on session 2a63d984795c4349883847c7908ef4fd
-		15:00:05.817 INFO - Got result: OK on session 2a63d984795c4349883847c7908ef4fd
-		15:00:05.820 INFO - Command request: testComplete[, ] on session 2a63d984795c4349883847c7908ef4fd
-		15:00:05.820 INFO - Killing Firefox...
-		15:00:05.936 INFO - Got result: OK on session 2a63d984795c4349883847c7908ef4fd
+Main tasks:
+* Ares Test Suite xml-scripts will be converted into Java files to use either Chrome or IE Selenium 2.0 webdriver APIs. 
+* A patch needs to be applied to Java files to obtain the final Ares Test Suite java code. This patch is archived on Github
+* Create AresConfig.xml to declare the Test Suite properties (i.e. webdriver name, webdriver path, os …). This XML file is not generated automatically by the formatter.
+
+**WARNING:**
+
+* Only xml-scripts, md5/sha1 sum-files and AresTestJava.patch file are pushed on gitHub. 
+* The Java code is not.
+* Reasons are; expecting to find an XML to javascript Formatter and avoid two source code for the same test.
+
+### XML to JAVA conversion 
+
+* Open the xml-scripts in Selenium IDE (**Back to:**  Opening And Configuring the IDE),
+
+* Export _each_ test case with JAVA/Junit 4/WEbDriver formatter and save the file under `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`
+	
+**Note:** For example, the NewProject test case will be converted into NewProject.java … etc.
+
+The `.../webdriver-java-diff-patch/AresTestCases.sha1` and `.../webdriver-java-diff-patch/AresTestCases.md5` files contains the digests to validate the java files converted from XML scripts.
+
+### Verify generated Java files
+
+Depending on your system, use either `/usr/bin/md5sum`, or `/usr/bin/shasum` to verify the md5 or sha1 digests against the Java files converted from the XML scripts. This files are found under the temporary directory `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`.
+
+**Note:** On windows `/usr/bin/md5sum`, or `/usr/bin/shasum` can be available by installing Cygwin.
+
+### Apply AresTestJava.patch 
+
+	$ cd ./ares-project/test/selenium/test/selenium/webdriver-java-diff-patch/java-ref
+	$ patch -p1 < ../AresTestJava.patch
+
+
+### Eclipse Ares Test Suite project setup
+
+#### Eclipse Project Pre-requisites
+
+Install the following softwares:
+
+* JAVA jdk 1.6 (or upper) (<http://www.oracle.com/technetwork/java/javase/downloads/index.html>)
+* Eclipse IDE for JAVA EE (<http://www.eclipse.org/downloads/>)
+* TestNG plugin within eclipse (<http://testng.org/doc/download.html>)
+* Chromedriver standalone server (<http://code.google.com/p/chromedriver/downloads/list>)
+* InternetExplorerDriver standalone server for 64-bit IE (<http://code.google.com/p/selenium/downloads/list>)
+* Selenium-java-2.30.0.zip java bindings (<http://code.google.com/p/selenium/downloads/list>)
+
+#### Eclipse project setup
+
+In Eclipse:
+
+* create the Selenium Ares TestSuite java project
+* create the AresTestSuite package,
+* create src (java code) and resources (AresConfig.xml) sub-folders
+* configure build-path; JRE system library and TestNG eclipse plugin
+* configure the libraries build-path; add external jars retrieved from selenium-java-2.30.0.zip java bindings
+* In `src/AresTestSuite`, import the patched java code located under `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref` into the Ares TestSuite project
+* In `resources/AresTestSuite`, create `AresConfig.xml` file. 
+
+Here is one example of the AresConfig.xml, modify it to suit your setup:
+
+	<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+	<properties>
+	<comment>AresTestSuite Configuration file</comment>
+	<entry key="browserDriverName">IE</entry>
+	<entry key="browserDriverPath">C:\\Users\\jdoe\\Downloads\\IEDriverServer_x64_2.29.1\\IEDriverServer.exe</entry>
+	<entry key="os">windows</entry>
+	<entry key="phoneGap.username">jdoe@hp.com</entry>
+	<entry key="phoneGap.password">xxxxx</entry>
+	</properties>
+
+
+**Note:** acceptable values are:
+
+* for `browserDriverName` key are either `Chrome` or `IE`
+* for `os` key are either `mac` or `windows`
+
+#### TestNG suite setup
+
+Create `testng.xml` file directly user AresTestSuite project. Skip the last test if you do not have phonegap
+credentials:
+
+	<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+	<suite name="AresTestSuite">
+	<test name="AresTestSuite.HelloWorldPreview">
+		<classes>
+				<class name="AresTestSuite.HelloWorldPreview"></class>
+		</classes>
+	</test>
+	<test name="AresTestSuite.NewProject">
+		<classes>
+				<class name="AresTestSuite.NewProject"></class>
+		</classes>
+	</test>
+	<test name="AresTestSuite.FileOps">
+		<classes>
+				<class name="AresTestSuite.FileOps"></class>
+		</classes>
+	</test>
+	<test name="AresTestSuite.CheckTemplates">
+		<classes>
+				<class name="AresTestSuite.CheckTemplates"></class>
+		</classes>
+	</test>
+	<test name="AresTestSuite.PhobosDocumentLabel">
+		<classes>
+				<class name="AresTestSuite.PhobosDocumentLabel"></class>
+		</classes>
+	</test>
+	<test name="AresTestSuite.PhobosEditorSettings">
+		<classes>
+				<class name="AresTestSuite.PhobosEditorSettings"></class>
+		</classes>
+	</test>
+	<test name="AresTestSuite.PhobosNewKind">
+		<classes>
+				<class name="AresTestSuite.PhobosNewKind"></class>
+		</classes>
+	</test>
+	<test name="AresTestSuite.PhobosSaveAndQuit">
+		<classes>
+				<class name="AresTestSuite.PhobosSaveAndQuit"></class>
+		</classes>
+	</test>
+	<!-- skip this test if you don't have phonegap credentials >
+	<test name="AresTestSuite.HelloWorldPhoneGapSettings">
+		<classes>
+				<class name="AresTestSuite.HelloWorldPhoneGapSettings"></class>
+		</classes>
+	</test>	
+	</suite>
+
+**Note:** If a new java code testcase is imported, `testng.xml` needs to be updated.
+
+##### Execute the Ares TestNG TestCase
+
+* In a terminal, start the Ares IDE node server: `node ide.js -T`
+* Click right on src/AresTestSuite java file, &rarr; run as &rarr; TestNG Test
+
+##### Execute the TestNG AresTesSuite
+
+* In a terminal, start the Ares IDE node server: `node ide.js -T`
+* Click right on src/testng.xml &rarr; run as &rarr; TestNG Suite
+* The src/test-output/index.html file shows the results of the TestNG Test Suite execution after a refresh on src/test-output.
+
+
+**Note:** 
+
+* IE was tested on Windows, 
+* Chrome was tested either on Windows and mac.
+
+
+## Future Plan
+
+* Switch on WebDriverJS (<https://code.google.com/p/selenium/wiki/WebDriverJs#WebDriverJS_User’s_Guide>)

@@ -87,6 +87,12 @@ enyo.kind({
 	/**
 	 * @return {enyo.Async} 
 	 */
+	createFiles: function(inFolderId, inData) {
+		return this.impl.createFiles(inFolderId, inData);
+	},
+	/**
+	 * @return {enyo.Async} 
+	 */
 	createFolder: function(inFolderId, inName) {
 		return this.impl.createFolder(inFolderId, inName);
 	},

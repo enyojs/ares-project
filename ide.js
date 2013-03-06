@@ -16,8 +16,9 @@ var fs = require("fs"),
     util  = require('util'),
     spawn = require('child_process').spawn,
     querystring = require("querystring"),
-    http = require('http'),
-    HttpError = require(path.resolve(__dirname, "hermes/lib/httpError"));
+    http = require('http') ;
+var myDir = typeof(__dirname) !== 'undefined' ?  __dirname : path.resolve('') ;
+var HttpError = require(path.resolve(myDir, "hermes/lib/httpError"));
 
 var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applications.\nUsage: "$0" [OPTIONS]\n')
 	.options('h', {
@@ -53,7 +54,7 @@ var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applicati
 	.options('c', {
 		alias : 'config',
 		description: 'IDE configuration file',
-		default: path.resolve(__dirname, "ide.json")
+		default: path.resolve(myDir, "ide.json")
 	})
 	.options('v', {
 		alias : 'verbose',
@@ -106,14 +107,14 @@ function platformSubst(inStr) {
 	return outStr;
 }
 var platformOpen = {
-	win32: "Start",
-	darwin: "open",
-	linux: "xdg-open"
+	win32: [ "cmd" , '/c', 'start' ],
+	darwin:[ "open" ],
+	linux: [ "xdg-open" ]
 };
 
 var configPath;
 if (argv.runtest) {
-	configPath = path.resolve(__dirname, "ide-test.json");
+	configPath = path.resolve(myDir, "ide-test.json");
 } else{
 	configPath = argv.config;
 }
@@ -149,10 +150,28 @@ function handleMessage(service) {
 			log("will proxy to service.dest:", service.dest);
 			service.origin = 'http://' + argv.host + ':' + argv.port;
 			service.pathname = '/res/services/' + service.id;
-			
+
 			if (service.origin.match(/^https:/)) {
 				console.info("Service['"+service.id+"']: connect to <"+service.origin+"> to accept SSL certificate");
 			}
+
+			var options = {
+				host:   service.dest.host,
+				port:   service.dest.port,
+				path:   '/config',
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json'
+				}
+			};
+			var creq = http.request(options, function(cres) {
+				console.info("Service['"+service.id+"']: POST /config response.status=" + cres.statusCode);
+			}).on('error', function(e) {
+				throw e;
+			});
+			creq.write(JSON.stringify({config: service}, null, 2));
+			creq.end();
+			
 		} else {
 			console.error("Error updating URL for service "+service.id);
 		}
@@ -297,6 +316,17 @@ function parseSetCookie(cookies) {
 	return outCookies;
 }
 
+function onExit() {
+	if (subProcesses.length > 0) {
+		console.log('Terminating sub-processes...');
+		subProcesses.forEach(function(subproc) {
+			process.kill(subproc.pid, 'SIGINT');
+		});
+		subProcesses = [];
+		console.log('Exiting...');
+	}
+}
+
 ide.res.services.filter(function(service){
 	return service.active;
 }).forEach(function(service){
@@ -307,7 +337,7 @@ ide.res.services.filter(function(service){
 
 // Start the ide server
 
-var enyojsRoot = path.resolve(__dirname,".");
+var enyojsRoot = path.resolve(myDir,".");
 var app = express.createServer();
 
 var port = parseInt(argv.port, 10);
@@ -349,7 +379,8 @@ if (argv.runtest) {
 
 var url = "http://" + addr + ":" + port + "/ide/ares/" + page;
 if (argv.browser) {
-	spawn(platformOpen[process.platform], [url]);
+	var info = platformOpen[process.platform] ;
+	spawn(info[0], info.slice(1).concat([url]));
 } else {
 	console.log("Ares now running at <" + url + ">");
 }
@@ -362,10 +393,5 @@ process.on('uncaughtException', function (err) {
 	console.error(err.stack);
 	process.exit(1);
 });
-process.on('exit', function () {
-	console.log('Terminating sub-processes...');
-	subProcesses.forEach(function(process) {
-		process.kill();
-	});
-	console.log('Exiting...');
-});
+process.on('exit', onExit);
+process.on('SIGINT', onExit);

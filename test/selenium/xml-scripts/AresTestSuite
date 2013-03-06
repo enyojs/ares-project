@@ -1,0 +1,19 @@
+<html>
+<head>
+<title>Ares Test Suite - Functionality Tests</title>
+</head>
+<body>
+<table>
+  <tr><td><b>Suite Of Tests</b></td></tr>
+  <tr><td><a href="./HelloWorldPreview">HelloWorldPreview</a></td></tr>
+  <tr><td><a href="./NewProject">NewProject</a></td></tr>
+  <tr><td><a href="./FileOps">FileOps</a></td></tr>
+  <tr><td><a href="./CheckTemplates">CheckTemplates</a></td></tr>
+  <tr><td><a href="./HelloWorldPhoneGapSettings">HelloWorldPhoneGapSettings</a></td></tr>
+  <tr><td><a href="./PhobosDocumentLabel">PhobosDocumentLabel</a></td></tr>
+  <tr><td><a href="./PhobosSaveAndQuit">PhobosSaveAndQuit</a></td></tr>
+  <tr><td><a href="./PhobosNewKind">PhobosNewKind</a></td></tr>
+  <tr><td><a href="./PhobosEditorSettings">PhobosEditorSettings</a></td></tr>
+</table>
+</body>
+</html>

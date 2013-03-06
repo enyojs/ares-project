@@ -23,12 +23,24 @@
 			"type": "filesystem",
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"hermes/fsDropbox.js", "-v", "-P", "/files", "-p", "0"
+				"hermes/fsDropbox.js", "-P", "/files", "-p", "0"
 			],
 			"auth": {
 				"type": "dropbox",
 				"appKey": "",
 				"appSecret": ""
+			},
+			"Xproxy":{
+				"http":{
+					"tunnel":"OverHttp",
+					"host":"web-proxy.corp.hp.com",
+					"port":8080
+				},
+				"https":{
+					"tunnel":"OverHttp",
+					"host":"web-proxy.corp.hp.com",
+					"port":8080
+				}
 			},
 			"useJsonp":false,
 			"verbose": false
@@ -48,6 +60,23 @@
 			"auth": {
 				"type": "phonegap"
 			},
+			"respawn": false
+		},
+		{
+			"active": true,
+			"id":"openwebos",
+			"name":"Open webOS Build",
+			"type": "other",
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"hermes/bdOpenwebOS.js", "-P", "/openwebos", "-p", "0"
+			],
+			"project-template-repositories": [{
+				"id": "bootplate",
+				"url": "http://enyojs.com/archive/ares-project-templates.json"
+			}],
+			"useJsonp":false,
+			"verbose": true,
 			"respawn": false
 		}
 	]

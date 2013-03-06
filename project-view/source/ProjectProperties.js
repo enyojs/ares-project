@@ -1,6 +1,5 @@
 /**
- * This kind provide a widget to tune project properties (phonegap
- * stuff included).
+ * This kind provide a widget to tune project properties
  *
  * By default, this widget is tuned for project modification.  In case
  * of project *creation*, the method setupCreate must be called after
@@ -17,13 +16,11 @@ enyo.kind({
 		onSaveGeneratedXml: "",
 		onDone: ""
 	},
-	createMode: true,
 
 	components: [
 		{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", components: [
-			{content: "Project", active: true, attributes: {title: 'project attributes...'}},
-			{content: "PhoneGap", name: "phonegapTab", attributes: {title: 'phonegap build parameters...'}, showing: false},
-			{content: "Preview", attributes: {title: 'project preview parameters...'}}
+			{content: "Project", serviceId: "project", active: true, attributes: {title: 'project attributes...'}},
+			{content: "Preview", serviceId: "preview", attributes: {title: 'project preview parameters...'}}
 		]},
 		{name: "projectDrawer", kind: "onyx.Drawer", open:true, components: [
 			{tag: 'table', components: [
@@ -79,16 +76,16 @@ enyo.kind({
 					 {tag: 'td', attributes: {colspan: 3}, content: "", name: "projectDirectory" }
 				]}
 			]},
-			{kind: "enyo.FittableColumns", components: [
-				{components: [
-					{tag: "span", content: "PhoneGap Build:"},
-					{name: "phonegapCheckBox", kind: "onyx.Checkbox", onchange: "togglePhoneGap"}
+			{kind: "enyo.FittableColumns", name: "servicesList"},
+			{kind: "enyo.FittableColumns", name: "templatesEntry", showing: false, components: [
+				{kind: "Control", content: "Template:"},
+				{kind: "onyx.PickerDecorator", fit: true, components: [
+					{name: "templateButton", kind: "onyx.PickerButton", fit: true},
+					{kind: "onyx.FlyweightPicker", name: "templatePicker", components: [
+						{name: "template"}
+					], onSetupItem: "templateSetupItem", onSelect: "templateSelected"}
 				]}
 			]}
-		]},
-
-		{name: "phonegapDrawer", kind: "onyx.Drawer", open: false, components: [
-			{kind: "PhoneGap.ProjectProperties", name: "phonegap"}
 		]},
 
 		{name: "previewDrawer", kind: "onyx.Drawer", open: false, components: [
@@ -112,17 +109,96 @@ enyo.kind({
 			{name: "ok", kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "confirmTap"}
 		]},
 
-		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"}
+		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"},
+		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 
 	debug: false,
+	templates: [],
+	TEMPLATE_NONE: "NONE",
+	selectedTemplate: undefined,
 
+	services: {},
+
+	/**
+	 * Receive the {onServicesChange} broadcast notification
+	 * @param {Object} inEvent.serviceRegistry
+	 */
+	handleServicesChange: function(inSender, inEvent) {
+		if (this.debug) this.log();
+		this.services = this.services || {};
+		inEvent.serviceRegistry.forEach(enyo.bind(this, function(inService) {
+			var service = {
+				id: inService.id,
+				name: inService.getName() || inService.getId(),
+				kind: inService.getProjectPropertiesKind && inService.getProjectPropertiesKind()
+			};
+			if (this.debug) this.log("service:", service);
+			if (service.kind) {
+				this.services[service.id] = service;
+			}
+		}));
+		if (this.debug) this.log("services:", this.services);
+		enyo.forEach(enyo.keys(this.services), function(serviceId) {
+			var service = this.services[serviceId];
+			var drawer = this.$[service.id + 'Drawer'] || this.createComponent({
+				name: service.id + 'Drawer',
+				kind: "onyx.Drawer",
+				open: false
+			});
+			service.panel = drawer.$[service.id] || drawer.createComponent({
+				name: service.id,
+				kind: service.kind
+			});
+			service.tab = this.$.thumbnail[service.id + 'Tab'] || this.$.thumbnail.createComponent({
+				name: service.id + 'Tab',
+				content: service.name,
+				serviceId: service.id,
+				showing: false
+			});
+			this.$.servicesList.createComponent({
+				name: service.id + 'Frame'
+			});
+			if (!service.frame) {
+				service.frame = this.$.servicesList.$[service.id + 'Frame'];
+				service.frame.createComponent({
+					tag: 'span',
+					content: service.name
+				});
+				service.checkBox = service.frame.createComponent({
+					kind: 'onyx.Checkbox',
+					name: service.id + 'CheckBox',
+					onchange: 'toggleService',
+					serviceId: service.id
+				}, {
+					owner: this
+				});
+			}
+
+			// Take the project configuration into account
+			// to show the service or not
+			this.showService(serviceId);
+		}, this);
+	},
+	/**
+	 * Toggle a service panel
+	 */
+	toggleService: function(inSender, inEvent) {
+		var serviceId = inEvent.originator.serviceId,
+		    checked = inEvent.originator.checked;
+		this.log("serviceId:", serviceId, 'checked:', checked);
+		var service = this.services[serviceId];
+		if (service.tab) {
+			service.tab.setShowing(checked);
+		}
+	},
 	/**
 	 * Tune the widget for project creation
 	 */
 	setupCreate: function() {
 		//this.$.ok.setDisabled(true) ;
 		this.$.directoryEntry.show() ;
+		this.$.templatesEntry.show();
 	},
 
 	/**
@@ -131,6 +207,7 @@ enyo.kind({
 	setupModif: function() {
 		//this.$.ok.setDisabled(true) ;
 		this.$.directoryEntry.hide() ;
+		this.$.templatesEntry.hide();
 	},
 
 	/**
@@ -138,22 +215,11 @@ enyo.kind({
 	 */
 	switchDrawers: function(inSender, inEvent) {
 		if (inEvent.originator.active === true ) {
-			var status = {
-				project: false,
-				phonegap: false,
-				preview: false
-			} ;
-
-			status[inEvent.originator.getContent().toLowerCase()] = true ;
-
-			for (var drawer in status) {
-				this.$[drawer + 'Drawer'].setOpen(status[drawer]) ;
-			}
+			enyo.forEach(inEvent.originator.parent.children, function(tab) {
+				var activate = (tab.serviceId === inEvent.originator.serviceId);
+				this.$[tab.serviceId + 'Drawer'].setOpen(activate);
+			}, this);
 		}
-	},
-
-	togglePhoneGap: function(inSender, inEvent) {
-		this.$.phonegapTab.setShowing(inEvent.originator.checked);
 	},
 
 	/**
@@ -176,9 +242,11 @@ enyo.kind({
 		this.$.projectAuthor. setValue(conf.author.name || '') ;
 		this.$.projectContact.setValue(conf.author.href || '') ;
 
-		this.$.phonegapTab.setShowing(conf.build.phonegap.enabled);
-		this.$.phonegapCheckBox.setChecked(conf.build.phonegap.enabled);
-		this.$.phonegap.setProjectConfig(this.config.build.phonegap);
+		// Load each builder service configuration into its
+		// respective ProjectProperties panel
+		enyo.forEach(enyo.keys(this.services), function(serviceId) {
+			this.showService(serviceId);
+		}, this);
 
 		if (! conf.preview ) {conf.preview = {} ;}
 		this.$.ppTopFile.setValue(conf.preview.top_file);
@@ -186,10 +254,35 @@ enyo.kind({
 		return this ;
 	},
 
+	update: function(inData) {
+		var conf = this.config ;
+
+		enyo.forEach(enyo.keys(inData), function(key) {
+			conf[key] = inData[key];
+		});
+		this.$.projectId.     setValue(conf.id      || '' );
+		this.$.projectVersion.setValue(conf.version || '' );
+		this.$.projectTitle.  setValue(conf.title   || '' );
+
+		return this ;
+	},
+
+
+	showService: function(serviceId) {
+		var service = this.services[serviceId];
+		var config = this.config && this.config.build &&
+			    this.config.build[serviceId];
+		var enabled = config && config.enabled;
+		service.checkBox.setChecked(enabled);
+		service.tab.setShowing(enabled);
+		if (config) {
+			service.panel.setProjectConfig(config);
+		}
+	},
+
 	confirmTap: function(inSender, inEvent) {
 		var tglist, ppConf ;
 		// retrieve modified values
-		this.log('ok tapped') ;
 
 		this.config.id       = this.$.projectId     .getValue();
 		this.config.version  = this.$.projectVersion.getValue();
@@ -199,14 +292,19 @@ enyo.kind({
 		this.config.author.name = this.$.projectAuthor.getValue();
 		this.config.author.href = this.$.projectContact.getValue();
 
-		this.config.build.phonegap = this.$.phonegap.getProjectConfig();
-		this.config.build.phonegap.enabled = this.$.phonegapCheckBox.checked;
+		// Dump each builder service configuration panel into
+		// the project configuration.
+		enyo.forEach(enyo.keys(this.services), function(serviceId) {
+			var service = this.services[serviceId];
+			this.config.build[service.id] = service.panel.getProjectConfig();
+			this.config.build[service.id].enabled = service.checkBox.checked;
+		}, this);
 
 		ppConf = this.config.preview ;
 		ppConf.top_file = this.$.ppTopFile.getValue();
 
 		// to be handled by a ProjectWizard
-		this.doModifiedConfig({data: this.config}) ;
+		this.doModifiedConfig({data: this.config, template: this.selectedTemplate}) ;
 
 		this.doDone();
 
@@ -216,6 +314,26 @@ enyo.kind({
 
 		// handled here (don't bubble)
 		return true;
+	},
+	setTemplateList: function(templates) {
+		this.$.templateButton.applyStyle("width", "20em");
+		this.templates = [this.TEMPLATE_NONE];
+		enyo.forEach(templates, function(item) {
+			this.templates.push(item.id);
+		}, this);
+		this.$.templatePicker.setCount(this.templates.length);
+		this.$.templatePicker.setSelected(0);
+		this.selectedTemplate = undefined;
+	},
+	templateSetupItem: function(inSender, inEvent) {
+		this.$.template.setContent(this.templates[inEvent.index]);
+		return true;
+	},
+	templateSelected: function(inSender, inEvent) {
+		if (inEvent.content === this.TEMPLATE_NONE) {
+			this.selectedTemplate = undefined;
+		} else {
+			this.selectedTemplate = inEvent.content;
+		}
 	}
 });
-
