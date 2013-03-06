@@ -1,6 +1,6 @@
-diff -Naur -x '.*' -x '*.md5' java-ref-orig/CheckTemplates.java java-ref/CheckTemplates.java
---- java-ref-orig/CheckTemplates.java	2013-02-25 08:46:07.000000000 +0100
-+++ java-ref/CheckTemplates.java	2013-02-26 17:22:23.000000000 +0100
+diff -Naur -x '.*' -x '*.sha1' -x '*.md5' java-ref/CheckTemplates.java java-modif/CheckTemplates.java
+--- java-ref/CheckTemplates.java	2013-03-06 14:03:28.000000000 +0100
++++ java-modif/CheckTemplates.java	2013-03-06 15:17:41.000000000 +0100
 @@ -1,172 +1,603 @@
 -package com.example.tests;
 +package AresTestSuite;
@@ -772,9 +772,9 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/CheckTemplates.java java-ref/CheckTe
 +		}
 +	}
  }
-diff -Naur -x '.*' -x '*.md5' java-ref-orig/FileOps.java java-ref/FileOps.java
---- java-ref-orig/FileOps.java	2013-02-25 08:46:08.000000000 +0100
-+++ java-ref/FileOps.java	2013-02-26 17:22:23.000000000 +0100
+diff -Naur -x '.*' -x '*.sha1' -x '*.md5' java-ref/FileOps.java java-modif/FileOps.java
+--- java-ref/FileOps.java	2013-03-06 14:03:03.000000000 +0100
++++ java-modif/FileOps.java	2013-03-06 15:17:41.000000000 +0100
 @@ -1,156 +1,455 @@
 -package com.example.tests;
 +package AresTestSuite;
@@ -898,7 +898,7 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/FileOps.java java-ref/FileOps.java
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_caption | ]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_newFileButton | ]]
 -    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).clear();
--    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).sendKeys("App1.js");
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName")).sendKeys("App3.js");
 -    // ERROR: Caught exception [ERROR: Unsupported command [keyPress | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [keyUp | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName | s]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton | ]]
@@ -917,7 +917,7 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/FileOps.java java-ref/FileOps.java
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_serverNode_$Copy of App1.js_caption | ]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_renameFileButton | ]]
 -    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_renamePopup_fileName")).clear();
--    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_renamePopup_fileName")).sendKeys("App2.js");
+-    driver.findElement(By.id("ares_projectView_harmonia_hermesFileTree_renamePopup_fileName")).sendKeys("App4.js");
 -    // ERROR: Caught exception [ERROR: Unsupported command [keyPress | id=ares_projectView_harmonia_hermesFileTree_renamePopup_fileName | s]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [keyUp | id=ares_projectView_harmonia_hermesFileTree_renamePopup_fileName | s]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_harmonia_hermesFileTree_renamePopup_confirmButton | ]]
@@ -1241,7 +1241,7 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/FileOps.java java-ref/FileOps.java
 +						.clear();
 +				driver.findElement(
 +						By.id("ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName"))
-+						.sendKeys("App1.js");
++						.sendKeys("App3.js");
 +				// ERROR: Caught exception [ERROR: Unsupported command [keyPress
 +				// |
 +				// id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName
@@ -1335,7 +1335,7 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/FileOps.java java-ref/FileOps.java
 +						.clear();
 +				driver.findElement(
 +						By.id("ares_projectView_harmonia_hermesFileTree_renamePopup_fileName"))
-+						.sendKeys("App2.js");
++						.sendKeys("App4.js");
 +				// ERROR: Caught exception [ERROR: Unsupported command [keyPress
 +				// |
 +				// id=ares_projectView_harmonia_hermesFileTree_renamePopup_fileName
@@ -1382,9 +1382,9 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/FileOps.java java-ref/FileOps.java
 +		}
 +	}
  }
-diff -Naur -x '.*' -x '*.md5' java-ref-orig/HelloWorldPhoneGapSettings.java java-ref/HelloWorldPhoneGapSettings.java
---- java-ref-orig/HelloWorldPhoneGapSettings.java	2013-02-25 08:46:08.000000000 +0100
-+++ java-ref/HelloWorldPhoneGapSettings.java	2013-02-26 17:22:23.000000000 +0100
+diff -Naur -x '.*' -x '*.sha1' -x '*.md5' java-ref/HelloWorldPhoneGapSettings.java java-modif/HelloWorldPhoneGapSettings.java
+--- java-ref/HelloWorldPhoneGapSettings.java	2013-03-06 14:04:00.000000000 +0100
++++ java-modif/HelloWorldPhoneGapSettings.java	2013-03-06 15:17:41.000000000 +0100
 @@ -1,97 +1,298 @@
 -package com.example.tests;
 +package AresTestSuite;
@@ -1776,9 +1776,9 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/HelloWorldPhoneGapSettings.java java
 +		}
 +	}
  }
-diff -Naur -x '.*' -x '*.md5' java-ref-orig/HelloWorldPreview.java java-ref/HelloWorldPreview.java
---- java-ref-orig/HelloWorldPreview.java	2013-02-25 08:46:08.000000000 +0100
-+++ java-ref/HelloWorldPreview.java	2013-02-26 17:22:23.000000000 +0100
+diff -Naur -x '.*' -x '*.sha1' -x '*.md5' java-ref/HelloWorldPreview.java java-modif/HelloWorldPreview.java
+--- java-ref/HelloWorldPreview.java	2013-03-06 14:02:15.000000000 +0100
++++ java-modif/HelloWorldPreview.java	2013-03-06 15:17:41.000000000 +0100
 @@ -1,95 +1,233 @@
 -package com.example.tests;
 +package AresTestSuite;
@@ -2103,9 +2103,9 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/HelloWorldPreview.java java-ref/Hell
 +		}
 +	}
  }
-diff -Naur -x '.*' -x '*.md5' java-ref-orig/NewProject.java java-ref/NewProject.java
---- java-ref-orig/NewProject.java	2013-02-25 08:46:08.000000000 +0100
-+++ java-ref/NewProject.java	2013-02-26 17:22:23.000000000 +0100
+diff -Naur -x '.*' -x '*.sha1' -x '*.md5' java-ref/NewProject.java java-modif/NewProject.java
+--- java-ref/NewProject.java	2013-03-06 14:02:44.000000000 +0100
++++ java-modif/NewProject.java	2013-03-06 15:17:41.000000000 +0100
 @@ -1,113 +1,256 @@
 -package com.example.tests;
 +package AresTestSuite;
@@ -2471,9 +2471,9 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/NewProject.java java-ref/NewProject.
 +		}
 +	}
  }
-diff -Naur -x '.*' -x '*.md5' java-ref-orig/PhobosDocumentLabel.java java-ref/PhobosDocumentLabel.java
---- java-ref-orig/PhobosDocumentLabel.java	2013-02-25 08:49:21.000000000 +0100
-+++ java-ref/PhobosDocumentLabel.java	2013-02-26 17:22:23.000000000 +0100
+diff -Naur -x '.*' -x '*.sha1' -x '*.md5' java-ref/PhobosDocumentLabel.java java-modif/PhobosDocumentLabel.java
+--- java-ref/PhobosDocumentLabel.java	2013-03-06 14:04:26.000000000 +0100
++++ java-modif/PhobosDocumentLabel.java	2013-03-06 15:17:41.000000000 +0100
 @@ -1,78 +1,282 @@
 -package com.example.tests;
 +package AresTestSuite;
@@ -2529,7 +2529,7 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/PhobosDocumentLabel.java java-ref/Ph
 -    System.out.println("import HelloWorld project");
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_iconButton3 | ]]
 -    // Warning: assertTextPresent may require manual changes
--    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory\n\n\n\nAres Test Suite[\\s\\S]*$"));
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_providerList_item | ]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | ]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | ]]
@@ -2830,9 +2830,9 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/PhobosDocumentLabel.java java-ref/Ph
 +		}
 +	}
  }
-diff -Naur -x '.*' -x '*.md5' java-ref-orig/PhobosEditorSettings.java java-ref/PhobosEditorSettings.java
---- java-ref-orig/PhobosEditorSettings.java	2013-02-25 08:57:19.000000000 +0100
-+++ java-ref/PhobosEditorSettings.java	2013-02-26 17:22:23.000000000 +0100
+diff -Naur -x '.*' -x '*.sha1' -x '*.md5' java-ref/PhobosEditorSettings.java java-modif/PhobosEditorSettings.java
+--- java-ref/PhobosEditorSettings.java	2013-03-06 14:22:35.000000000 +0100
++++ java-modif/PhobosEditorSettings.java	2013-03-06 15:17:41.000000000 +0100
 @@ -1,108 +1,376 @@
 -package com.example.tests;
 +package AresTestSuite;
@@ -2888,7 +2888,7 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/PhobosEditorSettings.java java-ref/P
 -    System.out.println("import HelloWorld project");
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_iconButton3 | ]]
 -    // Warning: assertTextPresent may require manual changes
--    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory\n\n\n\nAres Test Suite[\\s\\S]*$"));
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_providerList_item | ]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | ]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | ]]
@@ -3313,9 +3313,9 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/PhobosEditorSettings.java java-ref/P
 +		}
 +	}
  }
-diff -Naur -x '.*' -x '*.md5' java-ref-orig/PhobosNewKind.java java-ref/PhobosNewKind.java
---- java-ref-orig/PhobosNewKind.java	2013-02-25 08:53:43.000000000 +0100
-+++ java-ref/PhobosNewKind.java	2013-02-26 17:22:23.000000000 +0100
+diff -Naur -x '.*' -x '*.sha1' -x '*.md5' java-ref/PhobosNewKind.java java-modif/PhobosNewKind.java
+--- java-ref/PhobosNewKind.java	2013-03-06 14:22:07.000000000 +0100
++++ java-modif/PhobosNewKind.java	2013-03-06 15:17:41.000000000 +0100
 @@ -1,85 +1,302 @@
 -package com.example.tests;
 +package AresTestSuite;
@@ -3371,7 +3371,7 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/PhobosNewKind.java java-ref/PhobosNe
 -    System.out.println("import HelloWorld project");
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_iconButton3 | ]]
 -    // Warning: assertTextPresent may require manual changes
--    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory\n\n\n\nAres Test Suite[\\s\\S]*$"));
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_providerList_item | ]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | ]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | ]]
@@ -3699,10 +3699,10 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/PhobosNewKind.java java-ref/PhobosNe
 +	}
 +
  }
-diff -Naur -x '.*' -x '*.md5' java-ref-orig/PhobosSaveAndQuit.java java-ref/PhobosSaveAndQuit.java
---- java-ref-orig/PhobosSaveAndQuit.java	2013-02-25 08:52:49.000000000 +0100
-+++ java-ref/PhobosSaveAndQuit.java	2013-02-26 17:22:23.000000000 +0100
-@@ -1,82 +1,319 @@
+diff -Naur -x '.*' -x '*.sha1' -x '*.md5' java-ref/PhobosSaveAndQuit.java java-modif/PhobosSaveAndQuit.java
+--- java-ref/PhobosSaveAndQuit.java	2013-03-06 14:06:23.000000000 +0100
++++ java-modif/PhobosSaveAndQuit.java	2013-03-06 15:17:41.000000000 +0100
+@@ -1,83 +1,319 @@
 -package com.example.tests;
 +package AresTestSuite;
  
@@ -3756,7 +3756,7 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/PhobosSaveAndQuit.java java-ref/Phob
 -    System.out.println("import HelloWorld project");
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectList_iconButton3 | ]]
 -    // Warning: assertTextPresent may require manual changes
--    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory\n\n\n\nAres Test Suite[\\s\\S]*$"));
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Ares Test - Home Directory[\\s\\S]*$"));
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_providerList_item | ]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | ]]
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_projectView_projectWizardScan_hermesFileTree_serverNode_caption | ]]
@@ -3770,8 +3770,9 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/PhobosSaveAndQuit.java java-ref/Phob
 -    assertTrue(isElementPresent(By.cssSelector("div.ace_content")));
 -    assertEquals("App.js\nSaveNew Kind\nEditor SettingsDesigner", driver.findElement(By.id("ares_phobos_toolbar")).getText());
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_phobos_saveButton | ]]
--    // Warning: assertTextNotPresent may require manual changes
--    assertFalse(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Oh, no![\\s\\S]Unable to save the file\n\nOk[\\s\\S]*$"));
+-    // following assertion because enable to save in phobos JIRA-2021
+-    // Warning: assertTextPresent may require manual changes
+-    assertTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Oh, no![\\s\\S]Unable to save the file\n\nOk[\\s\\S]*$"));
 -    // ERROR: Caught exception [ERROR: Unsupported command [clickAt | id=ares_bottomBar_iconButton | ]]
 -  }
 -
@@ -4099,13 +4100,3 @@ diff -Naur -x '.*' -x '*.md5' java-ref-orig/PhobosSaveAndQuit.java java-ref/Phob
 +		}
 +	}
  }
-diff -Naur -x '.*' -x '*.md5' java-ref-orig/package-info.java java-ref/package-info.java
---- java-ref-orig/package-info.java	1970-01-01 01:00:00.000000000 +0100
-+++ java-ref/package-info.java	2013-02-26 17:22:23.000000000 +0100
-@@ -0,0 +1,5 @@
-+/**
-+ * @author mariandebonis
-+ *
-+ */
-+package AresTestSuite;
-\ No newline at end of file
