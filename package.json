@@ -1,22 +1,33 @@
 {
-	"name": "ares",
+	"name": "ares-ide",
 	"version": "0.0.2",
 	"description": "A browser-based code editor and UI designer for Enyo 2 projects",
+	"keywords": ["ide", "enyo", "phonegap", "android", "ios", "windowsphone", "blackberry", "webos", "html5"],
 	"homepage": "https://github.com/enyojs/ares-project",
 	"bugs": {
 		"url": "https://enyojs.atlassian.net/browse/ENYO"
 	},
 	"bin": "./ide.js",
 	"repository" : { 
-		"type" : "git"
-		, "url" : "http://github.com/enyojs/ares-project.git"
+		"type" : "git",
+		"url" : "http://github.com/enyojs/ares-project.git"
 	},
+	"engines": {
+		"node" : "0.8.x",
+		"npm": "1.2.x"
+	},
+	"engineStrict": true,
+	"os" : [ "darwin", "linux", "win32" ],
 	"dependencies": {
 		"async": ">= 0.1.22",
+		"combined-stream": ">=0.0.3",
 		"dropbox": ">= 0.9.1-beta2",
 		"express": ">= 2.5.8",
-		"phonegapbuildapi": ">= 1.0.2",
+		"form-data": ">=0.0.6",
+		"mime": ">=1.2.7",
+		"mkdirp": ">=0.3.0",
 		"optimist": ">= 0.3.5",
+		"phonegapbuildapi": ">= 1.0.2",
 		"request": ">= 2.12.0",
 		"rimraf": ">= 1.0.6",
 		"shelljs": ">= 0.1.2",
@@ -27,10 +38,14 @@
 	},
 	"bundledDependencies": [
 		"async",
+		"combined-stream",
 		"dropbox",
 		"express",
-		"phonegapbuildapi",
+		"form-data",
+		"mime",
+		"mkdirp",
 		"optimist",
+		"phonegapbuildapi",
 		"request",
 		"rimraf",
 		"shelljs",
@@ -39,8 +54,33 @@
 		"unzip",
 		"zipstream"
 	],
+	"devDependencies": {
+		"mocha": ">=1.4.2",
+		"should": ">=1.1.0"
+	},
 	"scripts" : {
+		"start": "node ide.js"
 	},
 	"files": [
+		"LICENSE-2.0.txt",
+		"ares",
+		"assets",
+		"deimos",
+		"enyo",
+		"harmonia",
+		"hermes",
+		"ide-test.json",
+		"ide.js",
+		"ide.json",
+		"lib",
+		"model",
+		"phobos",
+		"preview",
+		"project-view",
+		"runares.bat",
+		"services",
+		"templates",
+		"test",
+		"utilities"
 	]
 }
