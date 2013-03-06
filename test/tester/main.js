@@ -1,7 +1,6 @@
 var path = require('path'),
     fs = require('fs'),
     os = require('os'),
-    npmlog = require('./../../node_modules/npmlog'),
 	shell = require('./../../enyo/tools/node_modules/shelljs');
 
 var srcDir = process.cwd(),
@@ -21,10 +20,6 @@ var enyoDir = path.resolve(tDir, '../enyo'),
  	lib = path.resolve(testDir, 'HelloWorld/lib');
 
 (function() {
-
-        var log = npmlog;
-        log.heading = 'installer';
-        log.level = 'warn';
 
         var tester = {
         	setup: function(req, res, next) {
@@ -61,9 +56,6 @@ var enyoDir = path.resolve(tDir, '../enyo'),
 
 				console.log('Ares Test setup done!');
 				res.status(200);
-				next();
-			},
-			cleanup: function(req, res, next) {
 				next();
 			}
 		};
