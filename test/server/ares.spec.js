@@ -1,4 +1,4 @@
-#!/usr/bin/env node_modules/mocha/bin/mocha --bail
+#!/usr/bin/env ../../node_modules/mocha/bin/mocha --bail
 /**
  * ares.spec.js -- ARES server test suite
  */
@@ -46,7 +46,7 @@ if (argv.quiet) {
 log("running in verbose mode");
 log("argv:", argv);
 
-var mocha = path.resolve(__dirname, "node_modules", "mocha", "bin", "mocha");
+var mocha = path.resolve(__dirname, "..", "..", "node_modules", "mocha", "bin", "mocha");
 var myPort = 9019;
 
 log("loading " + argv.config);
@@ -60,11 +60,11 @@ var myTestDir = "_test";
  */
 
 describe("Testing filesystems", function() {
-	it("fsDropbox", function(done) {
-		var dropbox = config.services.filter(function(service) {
-			return service.id === 'dropbox';
-		})[0];
-		if (dropbox && dropbox.auth && dropbox.auth.appKey) {
+	var dropbox = config.services.filter(function(service) {
+		return service.id === 'dropbox';
+	})[0];
+	if (dropbox && dropbox.auth && dropbox.auth.appKey) {
+		it("fsDropbox", function(done) {
 			var fsDropbox = path.resolve("..", "..", "hermes","fsDropbox.js");
 			var myTestDir = "_test";
 			var myDropboxApp = 'com.enyojs.ares';
@@ -95,8 +95,8 @@ describe("Testing filesystems", function() {
 			], function(err) {
 				done();
 			});
-		}
-	});
+		});
+	}
 	it("fsLocal", function(done) {
 		var fsLocal = path.resolve("..", "..", "hermes","fsLocal.js");
 		var myFsPath = temp.path({prefix: 'com.palm.ares.test.fs'});

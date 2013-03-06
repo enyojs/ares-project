@@ -43,26 +43,26 @@ The following features are in the works, and you should see them added as we mov
 
 **Note:**  An up-to-date view of the ongoing activities is available from The [ARES JIRA](https://enyojs.atlassian.net/browse/ENYO/component/10302), itself available from the [EnyoJS JIRA](https://enyojs.atlassian.net/browse/ENYO).
 
-### Setup
+### Install
 
-There is not yet a packaged (installable) version of Ares or a publicly hosted version.  You need to get the source, using the procedure below.
+1. Install Node.js & NPM 0.8.x.  Preferably from the [Official Download Page](http://nodejs.org/#download).
+1. Run:
 
-####Install Node.js 0.8 or later####
-Preferably from the [Official Download Page](http://nodejs.org/#download).
+		$ npm install ares-ide
 
-####Install git (or a graphical git client)####
-See the [Github.com help](https://help.github.com/articles/set-up-git) for hints
+### Develop
 
-####Clone the ares-project repository from GitHub####
-Using git, clone the repository using either the HTTPS or SSH urls (depending on how you have setup Git):
+1. Install Node.js & NPM 0.8.x.  Preferably from the [Official Download Page](http://nodejs.org/#download).
+1. Install git (or a graphical git client).  See the [Github.com help](https://help.github.com/articles/set-up-git) for hints
+1. Pick a GitHub account & clone the ares-project repository from GitHub.  Using git, clone the repository using either the HTTPS or SSH urls (depending on how you have setup Git):
 
-	$ git clone --recursive https://github.com/enyojs/ares-project.git
+		$ git clone --recursive git@github.com:enyojs/ares-project.git
+		
+   If you are using a graphical Git client, there may or may not be a way to update the submodules from the GUI. If not, then use the commands above.
 
-or
-
-	$ git clone --recursive git@github.com:enyojs/ares-project.git
-
-If you are using a graphical Git client, there may or may not be a way to update the submodules from the GUI. If not, then use the commands above.
+1. Install NPM developpment dependencies
+   
+   		$ npm install
 
 ### Run
 
@@ -95,9 +95,37 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Us
 	],
 	[...]
 
+### Build
+
+In order to produce Ares on a build server:
+
+1. Make sure Node and NPM are installed on the build server.  Version 0.8.x is known to work
+1. In the build script, run:
+
+		$ npm pack
+
+	This produces a package like the below:
+  
+		$ tar tzvf ares-0.0.2.tgz | less
+		
+		-rw-r--r--  0 506    20       1496 Mar  6 13:48 package/package.json
+		-rw-r--r--  0 506    20       6004 Mar  6 14:11 package/README.md
+		-rwxr-xr-x  0 506    20      10397 Mar  6 14:12 package/ide.js
+		-rw-r--r--  0 506    20         74 Jun 18  2012 package/deimos/package.js
+		[…]
+
+	You can then un-gzip & un-tar before repacking with a different folder name than `package/` & re-pack with your prefered packaging tool.
+1. You may optionally test that the NPM-generated package works.  The following sequence is supposed to successfully install Ares from the generated package & start Ares.
+
+		$ mkdir ../test && cd ../test
+		$ npm install ../ares-project/ares-ide-0.0.2.tgz
+		$ node_modules/.bin/ares-ide
+
+## Features
+
 ### PhoneGap Build
 
-Ares includes the ability to package a mobile Enyo application using [PhoneGap Build](https://build.phonegap.com/).  You must have a properly setup account (with signing keys & distribution certificates) before being able to use Ares to build applications using Phone.
+Ares includes the ability to package a mobile Enyo application using [PhoneGap Build](https://build.phonegap.com/).  You must have a properly setup account (with signing keys & distribution certificates) before being able to use Ares to build applications using PhoneGap Build.
 
 Here are a few references to create the necessary signing keys & distribution certificates:
 
