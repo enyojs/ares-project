@@ -54,6 +54,8 @@ The following features are in the works, and you should see them added as we mov
 
 ### Develop
 
+In case you do not yet have a development environment:
+
 1. Install Node.js & NPM 0.8.x.  Preferably from the [Official Download Page](http://nodejs.org/#download).
 1. Install git (or a graphical git client).  See the [Github.com help](https://help.github.com/articles/set-up-git) for hints
 1. Pick a GitHub account & clone the ares-project repository from GitHub.  Using git, clone the repository using either the HTTPS or SSH urls (depending on how you have setup Git):
@@ -64,7 +66,15 @@ The following features are in the works, and you should see them added as we mov
 
 1. Install NPM developpment dependencies
    
-   		$ npm -d install
+		$ npm -d install
+
+If you already have a working environment:
+
+		$ git pull origin master
+		$ git submodule update --init
+		$ npm -d install
+
+**Note:** Until recently, `ares-project/node_modules` contained 3rd-party modules directly archived into `ares-project` own Git repository.  So existing repository owners _may_ need to run `rm -rf ares-project/node_modules` to properly update their trees.
 
 ### Run
 
