@@ -45,14 +45,14 @@ The following features are in the works, and you should see them added as we mov
 
 ### Install
 
-1. Install Node.js & NPM 0.8.x.  Preferably from the [Official Download Page](http://nodejs.org/#download).
+1. Install Node.js & NPM 0.8.x (>= 0.8.19).  Preferably from the [Official Download Page](http://nodejs.org/#download).
 1. Run:
 
 		$ npm install ares-ide
 
 ### Develop
 
-1. Install Node.js & NPM 0.8.x.  Preferably from the [Official Download Page](http://nodejs.org/#download).
+1. Install Node.js & NPM 0.8.x (>= 0.8.19).  Preferably from the [Official Download Page](http://nodejs.org/#download).
 1. Install git (or a graphical git client).  See the [Github.com help](https://help.github.com/articles/set-up-git) for hints
 1. Pick a GitHub account & clone the ares-project repository from GitHub.  Using git, clone the repository using either the HTTPS or SSH urls (depending on how you have setup Git):
 
