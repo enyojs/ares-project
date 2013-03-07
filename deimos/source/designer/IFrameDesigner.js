@@ -8,6 +8,7 @@ enyo.kind({
 		onDesignRendered: "",
 		onSelect: "",
 		onSelected: "",
+		onCreateComponent: "",
 		onSyncDropTargetHighlighting: ""
 	},
 	components: [
@@ -17,7 +18,6 @@ enyo.kind({
 	baseSource: "../deimos/source/designer/iframe.html",
 	projectSource: null,
 	selection: null,
-	sandboxData: null,
 	rendered: function() {
 		this.inherited(arguments);
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
@@ -59,8 +59,7 @@ enyo.kind({
 			this.setIframeReady(true);
 		// The current kind was successfully rendered in the iframe
 		} else if(msg.op === "rendered") {
-			this.sandboxData = msg.val;
-			this.doDesignRendered({components: enyo.json.codify.from(msg.val)});
+			this.kindRendered(msg.val);
 		// Select event sent from here was completed successfully. Set _this.selection_.
 		} else if(msg.op === "selected") {
 			this.selection = enyo.json.codify.from(msg.val);
@@ -72,6 +71,9 @@ enyo.kind({
 		// Highlight drop target to minic what's happening in iframe
 		} else if(msg.op === "syncDropTargetHighlighting") {
 			this.doSyncDropTargetHighlighting({component: enyo.json.codify.from(msg.val)});
+		// New component dropped in iframe
+		} else if(msg.op === "createNewComponent") {
+			this.doCreateComponent(msg.val);
 		// Default case
 		} else {
 			enyo.warn("Deimos designer received unknown message op:", msg);
@@ -88,7 +90,8 @@ enyo.kind({
 			return;
 		}
 		
-		this.sendMessage({op: "render", val: this.getCurrentKind().name});
+		var currentKind = this.getCurrentKind();
+		this.sendMessage({op: "render", val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components)}});
 	},
 	
 	select: function(inControl) {
@@ -113,14 +116,16 @@ enyo.kind({
 		if(inDropData["__proto__"]) {
 			delete inDropData["__proto__"];
 		}
-		
+
 		this.sendMessage(inDropData);
 	},
+	//* Property was modified in Inspector, update iframe.
 	modifyProperty: function(inProperty, inValue) {
 		this.sendMessage({op: "modify", val: {property: inProperty, value: inValue}});
 	},
-	save: function() {
-		return this.sandboxData;
+	//* Send message to Deimos with components from iframe
+	kindRendered: function(content) {
+		this.doDesignRendered({content: content});
 	},
 	//* Clean up the iframe before closing designer
 	cleanUp: function() {

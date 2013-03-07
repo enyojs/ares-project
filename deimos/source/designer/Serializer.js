@@ -2,25 +2,25 @@ enyo.kind({
 	name: "Serializer",
 	kind: "Component",
 	//* public
-	serialize: function(inContainer) {
-		var s = this._serialize(inContainer);
+	serialize: function(inContainer, inIncludeAresId) {
+		var s = this._serialize(inContainer, inIncludeAresId);
 		return enyo.json.codify.to(s, null, 4);
 	},
-	getComponents: function(inContainer) {
-		return this._serialize(inContainer);
+	getComponents: function(inContainer, inIncludeAresId) {
+		return this._serialize(inContainer, inIncludeAresId);
 	},
-	serializeComponent: function(inComponent) {
-		var s = this._serializeComponent(inComponent);
+	serializeComponent: function(inComponent, inIncludeAresId) {
+		var s = this._serializeComponent(inComponent, inIncludeAresId);
 		return enyo.json.codify.to(s, null, 4);
 	},
 	//* protected
-	noserialize: {owner: 1, container: 1, parent: 1, id: 0, attributes: 1, selected: 1, active: 1, isContainer: 1},
-	_serialize: function(inContainer) {
+	noserialize: {owner: 1, container: 1, parent: 1, id: 1, attributes: 1, selected: 1, active: 1, isContainer: 1},
+	_serialize: function(inContainer, inIncludeAresId) {
 		var s = [],
 			c$ = this.getAresComponents(inContainer);
 		
 		for (var i=0, c; (c=c$[i]); i++) {
-			s.push(this._serializeComponent(c));
+			s.push(this._serializeComponent(c, inIncludeAresId));
 		}
 		
 		return s;
@@ -41,10 +41,10 @@ enyo.kind({
 		
 		return a;
 	},
-	_serializeComponent: function(inComponent) {
-		var p = this.serializeProps(inComponent);
+	_serializeComponent: function(inComponent, inIncludeAresId) {
+		var p = this.serializeProps(inComponent, inIncludeAresId);
 		if (inComponent instanceof enyo.Control) {
-			var cs = this._serialize(inComponent);
+			var cs = this._serialize(inComponent, inIncludeAresId);
 			if (cs && cs.length) {
 				p.components = cs;
 			}
@@ -52,7 +52,7 @@ enyo.kind({
 		this.serializeEvents(p, inComponent);
 		return p;
 	},
-	serializeProps: function(inComponent) {
+	serializeProps: function(inComponent, inIncludeAresId) {
 		var o = {
 			kind: this.getComponentKindName(inComponent)
 		};
@@ -62,6 +62,9 @@ enyo.kind({
 			if (!this.noserialize[p] && proto[p] != inComponent[p] && inComponent[p] !== "") {
 				o[p] = inComponent[p];
 			}
+		}
+		if (inIncludeAresId) {
+			o.aresId = inComponent.aresId;
 		}
 		return o;
 	},

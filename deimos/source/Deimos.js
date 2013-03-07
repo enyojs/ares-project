@@ -25,7 +25,8 @@ enyo.kind({
 						onSelect: "designerSelect",
 						onSelected: "designerSelected",
 						onDesignRendered: "designRendered",
-						onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
+						onCreateComponent: "designerCreateComponent",
+						onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting"
 					},
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
@@ -81,7 +82,7 @@ enyo.kind({
 			});
 			maxLen = Math.max(k.name.length, maxLen);
 		}
-
+		
 		this.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.$.kindPicker.render();
 		this.setEdited(false);
@@ -89,25 +90,21 @@ enyo.kind({
 		// Pass the project information (analyzer output, ...) to the inspector
 		this.$.inspector.setProjectData(data.projectData);
 		this.$.inspector.setFileIndexer(data.fileIndexer);
+		
 		// Pass the analyzer output to the palette
 		this.$.palette.setProjectData(data.projectData);
 	},
 	kindSelected: function(inSender, inEvent) {
-		/* FIXME
-		 * Strange: this function is always called twice for each change
-		 * If we return true, it is called only once
-		 * but the PickerButton is not rendered correctly.
-		 */
 		var index = inSender.getSelected().index;
 		var kind = this.kinds[index];
 		
+		this.addAresIds(this.kinds[index].components);
+		this.$.inspector.initUserDefinedAttributes(this.kinds[index].components);
+		
 		if (index !== this.index) {
 			
+			// If edited, save these changes in Ares TODO
 			if (this.index !== null && this.getEdited()) {
-				// save changes when switching kinds
-				var modified = this.$.designer.getComponents();
-				this.kinds[this.index].components = modified;
-				this.kinds[this.index].content = this.$.designer.save();
 				this.sendUpdateToAres();
 			}
 			
@@ -118,7 +115,13 @@ enyo.kind({
 		this.index = index;
 		this.$.kindButton.setContent(kind.name);
 		this.$.toolbar.reflow();
-		return true; // Stop the propagation of the event
+		
+		return true;
+	},
+	//* Rerender current kind
+	rerenderKind: function() {
+		this.$.designer.setCurrentKind(this.kinds[this.index]);
+		this.$.designer.renderCurrentKind();
 	},
 	refreshInspector: function() {
 		enyo.job("inspect", enyo.bind(this, function() {
@@ -171,44 +174,152 @@ enyo.kind({
 	},
 	prepareDesignerUpdate: function() {
 		if (this.index !== null) {
-			// Get the last modifications
-			this.kinds[this.index].content = this.$.designer.save();
-
 			// Prepare the data for the code editor
 			var event = {docHasChanged: this.getEdited(), contents: []};
-			for(var i = 0 ; i < this.kinds.length ; i++ ) {
+			for(var i = 0 ; i < this.kinds.length ; i++) {
 				event.contents[i] = this.kinds[i].content;
 			}
 			return event;
 		}
 	},
 	closeDesignerAction: function(inSender, inEvent) {
-		// Prepare the data for the code editor
 		this.$.designer.cleanUp();
+		
 		var event = this.prepareDesignerUpdate();
 		this.$.inspector.setProjectData(null);
 		this.doCloseDesigner(event);
 		this.setEdited(false);
-		return true; // Stop the propagation of the event
+		
+		return true;
 	},
 	// When the designer finishes rendering, re-build the components view
-	// TODO: Build this from the Model, not by trawling the view hierarchy...
 	designRendered: function(inSender, inEvent) {
-		this.refreshComponentView(inEvent.components);
+		var components = enyo.json.codify.from(inEvent.content);
+
+		this.refreshComponentView(components);
 		this.setEdited(true);
-		return true; // Stop the propagation of the event
+		
+		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
+		this.kinds[this.index].content = enyo.json.codify.to(this.cleanUpComponents(components));
+		
+		return true;
+	},
+	//* When a control is dropped in the iframe, pass the data up to Deimos for processing
+	designerCreateComponent: function(inSender, inEvent) {
+		var newComponent = inEvent.component,
+			target = inEvent.target;
+		
+		// Give the new component an _aresId_
+		newComponent.aresId = this.generateNewAresId();
+
+		// If _aresId_ add to appropriate components array
+		if(target.aresId) {
+			this.addPaletteComponent(newComponent, target, this.kinds[this.index].components);
+		// If no _aresId_ then add to topmost component
+		} else {
+			this.kinds[this.index].components.push(newComponent);
+		}
+		
+		// Update user defined values
+		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
+		
+		// Rerender
+		this.rerenderKind();
+	},
+	addPaletteComponent: function(inNewComponent, inParentComponent, inComponents) {
+		for (var i = 0, component; (component = inComponents[i]); i++) {
+			if(component.aresId === inParentComponent.aresId) {
+				if(component.components) {
+					component.components.push(inNewComponent);
+				} else {
+					component.components = [inNewComponent];
+				}
+			}
+			if(component.components) {
+				this.addPaletteComponent(inNewComponent, inParentComponent, component.components);
+			}
+		}
+	},
+	cleanUpComponents: function(inComponents) {
+		var component,
+			ret = [],
+			i;
+		
+		for (i=0; (component = inComponents[i]); i++) {
+			ret.push(this.cleanUpComponent(component));
+		}
+		
+		return ret;
+	},
+	cleanUpComponent: function(inComponent) {
+		var aresId = inComponent.aresId,
+			childComponents = [],
+			cleanComponent = {},
+			atts,
+			att,
+			i;
+		
+		if (!aresId) {
+			return cleanComponent;
+		}
+		
+		atts = this.$.inspector.userDefinedAttributes[aresId];
+		
+		if (!atts) {
+			return cleanComponent;
+		}
+		
+		// Copy each user-defined property from _atts_ to the cleaned component
+		for (att in atts) {
+			if (att !== "aresId" && att !== "components") {
+				cleanComponent[att] = atts[att];
+			}
+		}
+		
+		// If this component has any child components, add them to components[] block
+		if (inComponent.components) {
+			
+			// Recurse through child components
+			for (var i=0; i<inComponent.components.length; i++) {
+				childComponents.push(this.cleanUpComponent(inComponent.components[i]));
+			}
+			
+			if (childComponents.length > 0) {
+				cleanComponent.components = childComponents;
+			}
+		}
+		
+		return cleanComponent;
 	},
 	saveComplete: function() {
 		this.setEdited(false);
 	},
 	upAction: function(inSender, inEvent) {
-		this.$.designer.upAction(inSender, inEvent);
+		this.$.componentView.upAction(inSender, inEvent);
 	},
 	downAction: function(inSender, inEvent) {
-		this.$.designer.downAction(inSender, inEvent);
+		this.$.componentView.downAction(inSender, inEvent);
 	},
 	deleteAction: function(inSender, inEvent) {
-		this.$.designer.deleteAction(inSender, inEvent);
+		if(!this.$.designer.selection) {
+			return;
+		}
+		
+		this.deleteComponentByAresId(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		this.log(enyo.json.codify.to(this.kinds[this.index].components));
+		this.rerenderKind();
+	},
+	deleteComponentByAresId: function(inAresId, inComponents) {
+		for (var i = 0; i < inComponents.length; i++) {
+			if (inComponents[i].aresId === inAresId) {
+				inComponents.splice(i, 1);
+				return;
+			}
+			
+			if (inComponents[i].components) {
+				this.deleteComponentByAresId(inAresId, inComponents[i].components);
+			}
+		}
 	},
 	enableDisableButtons: function(control) {
 		var disabled = this.$.designer.isRootControl(control);
@@ -237,11 +348,27 @@ enyo.kind({
 	reloadIFrame: function() {
 		this.$.designer.reloadIFrame();
 	},
+	syncJSFile: function(inCode) {
+		this.$.designer.syncJSFile(inCode);
+	},
 	syncCSSFile: function(inFilename, inCode) {
 		this.$.designer.syncCSSFile(inFilename, inCode);
 	},
-	syncJSFile: function(inCode) {
-		this.$.designer.syncJSFile(inCode);
+	addAresIds: function(inComponents) {
+		for(var i = 0; i < inComponents.length; i++) {
+			
+			if (!inComponents[i].aresId) {
+				inComponents[i].aresId = this.generateNewAresId();
+			}
+			
+			if (inComponents[i].components) {
+				this.addAresIds(inComponents[i].components);
+			}
+		}
+	},
+	//* Generate new ares id using timestamp
+	generateNewAresId: function() {
+		return "ares_"+Math.floor((Math.random()*new Date().getTime())+1);
 	},
 	//* Add dispatch for native drag events
 	addHandlers: function(inSender, inEvent) {

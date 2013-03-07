@@ -1,13 +1,12 @@
 .inspector-field-caption {
 	display: inline-block;
-	width: 7rem;
+	width: 120px;
 	text-align: right;
-	/*color: gray;*/
-	padding-right: 0.5rem;
+	padding-right: 4px;
 }
 
 .inspector-field-editor {
-	width: 10rem;
+	width: 7rem;
 }
 
 input.inspector-field-checkbox {
@@ -25,13 +24,31 @@ input.inspector-field-checkbox {
 }
 
 .thirds {
-	width:33%;
+	width: 33%;
 }
 
 .thirds:last-child {
-	width:34%;
+	width: 34%;
 }
 
 .halves {
-	width:50%;
+	width: 50%;
+}
+
+.ares-inspector-row {
+	border-bottom: 1px solid #ddd;
+	padding: 4px;
+}
+
+.ares-inspector-row * {
+	display: inline-block;
+}
+
+
+.ares-inspector-row.disabled .enyo-checkbox,
+.ares-inspector-row.disabled > div {
+	opacity: 1;
+}
+.ares-inspector-row.disabled * {
+	opacity: 0.6;
 }

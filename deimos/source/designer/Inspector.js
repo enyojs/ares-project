@@ -15,7 +15,7 @@ enyo.kind({
 	components: [
 		{kind: "Inspector.FilterType", onValueChanged: "updateFilterType"},
 		{kind: "Scroller", fit: true, components: [
-			{name: "content", kind: "FittableRows"}
+			{name: "content", kind: "FittableRows", onActivate: "inheritAttributeToggle"}
 		]},
 		{kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"}
 	],
@@ -26,10 +26,10 @@ enyo.kind({
 	style: "padding: 8px; white-space: nowrap;",
 	debug: false,
 	helper: null,			// Analyzer.KindHelper
+	userDefinedAttributes: {},
 	create: function() {
 		this.inherited(arguments);
 		this.helper = new Analyzer.KindHelper();
-		
 		
 		//* TODO - should be moved to KindHelper.js.
 		this.helper.getPublishedWithValues = function() {
@@ -43,7 +43,7 @@ enyo.kind({
 					for (var j=0; j < p.length; j++) {
 						published.push({
 							name:   p[j].name,
-							value:  p[j].value[0].token
+							value:  eval(p[j].value[0].token) // <---- TODO - shouldn't have to eval() here. Strings come back with double double quotes ("""")
 						});
 					}
 				}
@@ -109,11 +109,6 @@ enyo.kind({
 		}
 		
 		var props = propMap;
-		//var propKeys = Object.keys(propMap).sort();
-		
-		//for (var n = 0; n < propKeys.length; n++) {
-		//	props.push(propKeys[n]);
-		//}
 		
 		props.events = [];
 		for (n in eventMap) {
@@ -136,13 +131,13 @@ enyo.kind({
 		while (context) {
 			for (var p in context.published) {
 				if (this.allowed(kindName, "properties", p)) {
-					// this.debug && this.log("Adding property '" + p + "' from '" + context.kind + "'");
+					this.debug && this.log("Adding property '" + p + "' from '" + context.kind + "'");
 					propMap[p] = true;
 				}
 			}
 			for (var e in context.events) {
 				if (this.allowed(kindName, "events", e)) {
-					// this.debug && this.log("Adding event '" + e + "' from '" + context.kind + "'");
+					this.debug && this.log("Adding event '" + e + "' from '" + context.kind + "'");
 					eventMap[e] = true;
 				}
 			}
@@ -165,29 +160,40 @@ enyo.kind({
 		return props;
 	},
 	makeEditor: function(inControl, inName, inDefaultValue, inType) {
-		this.debug && this.log("Adding entry for " + inType + " " + inName + " : " + inDefaultValue);
-		
 		if(inName === "events") {
 			return;
 		}
 		
-		var info = Model.getInfo(inControl.kind, inType, inName);
-		var kind = (info && info.inputKind);
+		this.debug && this.log("Adding entry for " + inType + " " + inName + " : " + inDefaultValue);
 		
-		var v = inControl[inName];
+		var inherited = !(inControl.aresId && this.userDefinedAttributes && this.userDefinedAttributes[inControl.aresId] && this.userDefinedAttributes[inControl.aresId][inName]),
+			value = (inherited) ? inDefaultValue : this.userDefinedAttributes[inControl.aresId][inName],
+			classList = "ares-inspector-row",
+			attributeRow,
+			info,
+			kind,
+			attributeKind;
 		
-		// Select the good input kind
-		if (kind && kind instanceof Object) {	// User defined kind: as an Object
+		attributeRow = this.$.content.createComponent({classes: classList});
+		attributeRow.createComponent({kind: "InhertCheckbox", checked: inherited, prop: inName});
+		
+		info = Model.getInfo(inControl.kind, inType, inName);
+		kind = (info && info.inputKind);
+		
+		// User defined kind: as an Object
+		if (kind && kind instanceof Object) {
 			kind = enyo.clone(kind);
-			kind = enyo.mixin(kind, {fieldName: inName, fieldValue: v, extra: inType});
-			this.$.content.createComponent(kind);
-		} else if (kind) {						// User defined kind: We assume it's a String
-			this.$.content.createComponent({kind: kind, fieldName: inName, fieldValue: v, extra: inType});
-		} else if (inDefaultValue === true || inDefaultValue === false || inDefaultValue === "true" || inDefaultValue === "false") {
-			this.$.content.createComponent({kind: "Inspector.Config.Boolean", fieldName: inName, fieldValue: inDefaultValue, extra: inType});
-		} else {
-			this.$.content.createComponent({kind: "Inspector.Config.Text", fieldName: inName, fieldValue: v, extra: inType});
+			kind = enyo.mixin(kind, {name: "attributeVal", fieldName: inName, fieldValue: value, extra: inType});
+			attributeRow.createComponent(kind);
 		}
+		
+		attributeKind = (kind)
+			?	kind
+			:	(value === true || value === false || value === "true" || value === "false")
+				?	"Inspector.Config.Boolean"
+				:	"Inspector.Config.Text";
+		
+		attributeRow.createComponent({name: "attributeVal", kind: attributeKind, fieldName: inName, fieldValue: value, extra: inType, disabled: inherited});
 	},
 	inspect: function(inControl) {
 		var ps, i, p;
@@ -224,7 +230,13 @@ enyo.kind({
 		}
 
 		this.debug && this.log(n, v);
-		//this.selected.setProperty(n, v);
+		
+		// Save each change to _this.userDefinedAttributes_
+		if(!this.userDefinedAttributes[this.selected.aresId]) {
+			this.userDefinedAttributes[this.selected.aresId] = {};
+		}
+		this.userDefinedAttributes[this.selected.aresId][n] = v;
+		
 		this.doModify({name: n, value: v});
 	},
 	dblclick: function(inSender, inEvent) {
@@ -280,6 +292,36 @@ enyo.kind({
 			}
 		}
 	},
+	initUserDefinedAttributes: function(inComponents) {
+		this.userDefinedAttributes = {};
+		
+		var components = this.flattenComponents(inComponents);
+		
+		for(var i = 0, component; (component = components[i]); i++) {
+			this.userDefinedAttributes[component.aresId] = component;
+		}
+	},
+	flattenComponents: function(inComponents) {
+		var ret = [],
+			cs,
+			c;
+		
+		if(!inComponents) {
+			return ret;
+		}
+		
+		for (var i = 0; (c = inComponents[i]); i++) {
+			ret.push(c);
+			if(c.components) {
+				cs = this.flattenComponents(c.components);
+				for (var j = 0; (c = cs[j]); j++) {
+					ret.push(c);
+				}
+			}
+		}
+		
+		return ret;
+	},
 	/**
 	 * Locates the requested kind name based the following priorties
 	 * - in the analysis of the currently edited file (most accurate)
@@ -309,12 +351,33 @@ enyo.kind({
 	updateFilterLevel: function(inSender, inEvent) {
 		this.setFilterLevel(inEvent.active.value);
 		this.inspect(this.selected);
-		return true; // Stop the propagation of the event
+		return true;
 	},
 	updateFilterType: function(inSender, inEvent) {
 		this.setFilterType(inEvent.active.value);
 		this.inspect(this.selected);
-		return true; // Stop the propagation of the event
+		return true;
+	},
+	inheritAttributeToggle: function(inSender, inEvent) {
+		var originator = inEvent.originator,
+			row = originator.parent,
+			attribute = originator.prop;
+		
+		if(!this.userDefinedAttributes[this.selected.aresId]) {
+			this.userDefinedAttributes[this.selected.aresId] = {};
+		}
+		
+		if (originator.active === true) {
+			row.$.attributeVal.setFieldValue(this.buildPropList(this.selected)[attribute]);
+			row.$.attributeVal.setDisabled(true);
+			delete this.userDefinedAttributes[this.selected.aresId][attribute];
+			
+			// Remove this attribute from the rendered instance in the iframe by setting it to _undefined_
+			this.doModify({name: attribute, value: undefined});
+		} else {
+			row.$.attributeVal.setDisabled(false);
+			this.userDefinedAttributes[this.selected.aresId][attribute] = row.$.attributeVal.getFieldValue();
+		}
 	}
 });
 
@@ -343,5 +406,27 @@ enyo.kind({
 			{content:"Events", value: "E"}
 		]}
 	]
+});
+
+enyo.kind({
+	name: "InhertCheckbox",
+	kind: "enyo.Checkbox",
+	published: {
+		prop: null
+	},
+	handlers: {
+		onActivate: "handleActivate"
+	},
+	allowActivate: false,
+	rendered: function() {
+		this.inherited(arguments);
+		this.allowActivate = true;
+	},
+	//* Stop extraneous activate event from being fired when box is initially checked
+	handleActivate: function(inSender, inEvent) {
+		if(!this.allowActivate) {
+			return true;
+		}
+	}
 });
 

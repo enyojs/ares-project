@@ -1,6 +1,7 @@
 enyo.kind({
 	name: "Ares.App",
 	classes: "enyo-fit",
+	id: "aresApp",
 	handlers: {
 		ondragleave: "iframeDragleave"
 	},
@@ -8,8 +9,8 @@ enyo.kind({
 		{name: "client", fit: true, classes:"enyo-fit"},
 		{name: "serializer", kind: "Serializer"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"},
-		{name: "selectHighlight", style:"height:0; width:0; pointer-events: none; background-color:rgba(255,187,0,0.3); border:1px solid orange; box-sizing:border-box; position:absolute; z-index:9999;"},
-		{name: "dropHighlight", style:"height:0; width:0; pointer-events: none; background-color:rgba(0,110,255,0.3); border:1px solid blue; box-sizing:border-box; position:absolute; z-index:9999;"}
+		{name: "selectHighlight", style: "height:0; width:0; pointer-events: none; background-color:rgba(255,187,0,0.3); border:1px solid orange; box-sizing:border-box; position:absolute; z-index:9999;"},
+		{name: "dropHighlight", style: "height:0; width:0; pointer-events: none; background-color:rgba(0,110,255,0.3); border:1px solid blue; box-sizing:border-box; position:absolute; z-index:9999;"}
 	],
 	
 	selection: null,
@@ -74,7 +75,7 @@ enyo.kind({
 		} else if(msg.op === "select") {
 			this.selectItem(msg.val);
 		} else if(msg.op === "highlight") {
-			this.highlightDropTarget(this.getControlById(msg.val.id));
+			this.highlightDropTarget(this.getControlById(msg.val.aresId));
 		} else if(msg.op === "modify") {
 			this.modifyProperty(msg.val);
 		} else if(msg.op === "unhighlight") {
@@ -107,7 +108,7 @@ enyo.kind({
 			return false;
 		}
 		
-		e.dataTransfer.setData('Text', this.$.serializer.serializeComponent(this.selection));
+		e.dataTransfer.setData('Text', this.$.serializer.serializeComponent(this.selection, true));
         return true;
 	},
 	//* On drag over, enable HTML5 drag-and-drop if there is a valid drop target
@@ -154,7 +155,6 @@ enyo.kind({
 		}
 		
 		this.currentDropTarget = null;
-		this.unHighlightItem(dropTarget);
 		this.syncDropTargetHighlighting();
 		
 		return true;
@@ -181,10 +181,10 @@ enyo.kind({
 		
 		this.currentDropTarget = null;
 		
-		if(dropData.id) {
-			this.dropControl(this.getControlById(dropData.id), dropTarget);
+		if(dropData.aresId) {
+			this.dropControl(this.getControlById(dropData.aresId), dropTarget);
 		} else if(dropData.op && dropData.op === "newControl") {
-			this.createNewComponent(dropData, dropTarget);
+			this.createNewComponent({kind: dropData.kind}, dropTarget);
 		}
 		
 		this.syncDropTargetHighlighting();
@@ -198,61 +198,81 @@ enyo.kind({
 		this.sendMessage({op: "state", val: "ready"});
 	},
 	//* Render the specified kind
-	renderKind: function(inKindName) {
-		var kindConstructor = enyo.constructorForKind(inKindName);
+	renderKind: function(inKind) {
+		var kindConstructor = enyo.constructorForKind(inKind.name);
 		
+		// Saftey first
 		if(!kindConstructor) {
-			this.log("No constructor exists for ", inKindName);
+			enyo.warn("No constructor exists for ", inKind.name);
 			return;
 		} else if(!kindConstructor.prototype) {
-			this.log("No prototype exists for ", inKindName);
+			enyo.warn("No prototype exists for ", inKind.name);
 			return;
 		}
 		
+		// Stomp on existing _kindComponents_ to ensure that we render exactly what the user
+		// has defined. If components came in as a string, convert to object first.
+		kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.components) : inKind.components;
+		
 		// Clean up after previous kind
 		if(this.parentInstance) {
-			this.cleanUpPreviousKind();
+			this.cleanUpPreviousKind(inKind.name);
 		}
 		
 		// Save this kind's _kindComponents_ array
 		this.aresComponents = this.flattenKindComponents(kindConstructor.prototype.kindComponents);
 		
 		// Enable drag/drop on all of _this.aresComponents_
-		this.makeAresComponentsDragAndDrop();
+		this.makeComponentsDragAndDrop(this.aresComponents);
 		
 		// Save reference to the parent instance currently rendered
-		this.parentInstance = this.$.client.createComponent({kind: inKindName}).render();
+		this.parentInstance = this.$.client.createComponent({kind: inKind.name}).render();
 		
 		// Notify Deimos that the kind rendered successfully
 		this.kindUpdated();
+	},
+	//* Rerender current selection
+	rerenderKind: function() {
+		this.renderKind({name: this.parentInstance.kind, components: this.getSerializedCopyOfComponent(this.parentInstance).components});
 	},
 	//* When the designer is closed, clean up the last rendered kind
 	cleanUpKind: function() {
 		// Clean up after previous kind
 		if(this.parentInstance) {
-			this.cleanUpPreviousKind();
+			this.cleanUpPreviousKind(null);
 			this.parentInstance = null;
+			this.selection = null;
 		}
 		
 	},
 	//* Clean up previously rendered kind
-	cleanUpPreviousKind: function() {
+	cleanUpPreviousKind: function(inKindName) {
 		// Save changes made to components into previously rendered kind's _kindComponents_ array
-		enyo.constructorForKind(this.parentInstance.kind).prototype.kindComponents = enyo.json.codify.from(this.$.serializer.serialize(this.parentInstance));
+		if(this.parentInstance.kind !== inKindName) {
+			enyo.constructorForKind(this.parentInstance.kind).prototype.kindComponents = enyo.json.codify.from(this.$.serializer.serialize(this.parentInstance, true));
+		}
 		
 		// Reset flags on previously rendered kind's _kindComponents_ array
 		this.unflagAresComponents();
 		
 		// Clear previously rendered kind
 		this.$.client.destroyClientControls();
+		
+		// Remove selection and drop highlighting
+		this.hideSelectHighlight();
+		this.unhighlightDropTargets();
 	},
 	/**
 		Response to message sent from Deimos. Highlight the specified conrol
 		and send a message with a serialized copy of the control.
 	*/
 	selectItem: function(inItem) {
+		if(!inItem) {
+			return;
+		}
+		
 		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
-			if(c.id === inItem.id) {
+			if(c.aresId === inItem.aresId) {
 				this._selectItem(c);
 				return;
 			}
@@ -260,8 +280,24 @@ enyo.kind({
 	},
 	//* Update _this.selection_ property value based on change in Inspector
 	modifyProperty: function(inData) {
-		this.selection[inData.property] = inData.value;
-		this.refreshClient(true);
+		if (typeof inData.value === "undefined") {
+			this.removeProperty(inData.property);
+		} else {
+			this.updateProperty(inData.property, inData.value);
+		}
+		
+		if(inData.property === "id") {
+			this.rerenderKind();
+			this.selectItem(this.selection);
+		} else {
+			this.refreshClient();
+		}
+	},
+	removeProperty: function(inProperty) {
+		delete this.selection[inProperty];
+	},
+	updateProperty: function(inProperty, inValue) {
+		this.selection.setProperty(inProperty, inValue);
 	},
 	//* When a drop happens in the component view, translate that to a drop in this iframe.
 	simulateDrop: function(inDropData) {
@@ -276,7 +312,7 @@ enyo.kind({
 		var dropTarget = this.getControlById(inDropData.target);
 		
 		if(this.isValidDropTarget(dropTarget)) {
-			this.createNewComponent(inDropData, dropTarget);
+			this.createNewComponent({kind: inDropData.kind}, dropTarget);
 		}
 	},
 	
@@ -321,10 +357,10 @@ enyo.kind({
 		return ret;
 	},
 	
-	//* Set up drag and drop attributes for all kind components
-	makeAresComponentsDragAndDrop: function() {
-		for(var i=0,child;(child = this.aresComponents[i]);i++) {
-			this.makeComponentDragAndDrop(child);
+	//* Set up drag and drop attributes for component in _inComponents_
+	makeComponentsDragAndDrop: function(inComponents) {
+		for(var i=0, component;(component = inComponents[i]);i++) {
+			this.makeComponentDragAndDrop(component);
 		}
 	},
 	//* Set up drag and drop for _inComponent_
@@ -372,7 +408,7 @@ enyo.kind({
 	},
 	getControlById: function(inId) {
 		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
-			if(c.id === inId) {
+			if(c.aresId === inId) {
 				return c;
 			}
 		}
@@ -390,65 +426,35 @@ enyo.kind({
 	isDropTarget: function(inComponent) {
 		return (inComponent.attributes && inComponent.attributes.dropTarget);
 	},
-
+	
 	//* Highlight _inComponent_ with drop target styling, and unhighlight everything else
 	highlightDropTarget: function(inComponent) {
 		this.$.dropHighlight.setShowing(true);
-		this.$.dropHighlight.setBounds(this.getControlAbsoluteBounds(inComponent));
+		this.$.dropHighlight.setBounds(inComponent.hasNode().getBoundingClientRect());
+	},
+	unhighlightDropTargets: function() {
+		this.$.dropHighlight.setShowing(false);
 	},
 	//* Highlight _this.selection_ with selected styling, and unhighlight everything else
 	highlightSelection: function() {
 		this.unhighlightDropTargets();
-		if (this.selection) {
-			this.$.selectHighlight.setBounds(this.getControlAbsoluteBounds(this.selection));
-		}
+		this.renderSelectHighlight();
 	},
-	/**
-	 * Returns the absolute bounds of the control, taking into account any parent offsets.
-	 * enyo.Control will be getting a similar instance method, but duplicating it here
-	 * removes a dependency that Ares use a bleeding-edge version of enyo/bootplate. 
-	 * @protected
-	 */
-	getControlAbsoluteBounds: function(inControl) {
-		var l = 0,
-			t = 0,
-			n = inControl.hasNode(),
-			w = n ? n.offsetWidth : 0,
-			h = n ? n.offsetHeight : 0;
-
-		while(n) {
-			l += n.offsetLeft - (n.offsetParent ? n.offsetParent.scrollLeft : 0);
-			t += n.offsetTop  - (n.offsetParent ? n.offsetParent.scrollTop  : 0);
-			n = n.offsetParent;
-		}
-
-		return {
-			top		: t,
-			left	: l,
-			bottom	: document.body.offsetHeight - t - h,
-			right	: document.body.offsetWidth  - l - w,
-			height	: h,
-			width	: w
-		};
-	},	
-	unhighlightDropTargets: function() {
-		this.$.dropHighlight.setShowing(false);
+	renderSelectHighlight: function() {
+		this.$.selectHighlight.setBounds(this.selection.hasNode().getBoundingClientRect());
 	},
-	unHighlightItem: function(inComponent) {
-		if(typeof inComponent.origBackground !== "undefined") {
-			inComponent.applyStyle("background", inComponent.origBackground);
-			inComponent.origBackground = undefined;
-		}
+	hideSelectHighlight: function() {
+		this.$.selectHighlight.setBounds({width: 0, height: 0});
 	},
 	syncDropTargetHighlighting: function() {
-		var dropTarget = this.currentDropTarget ? this.$.serializer.serializeComponent(this.currentDropTarget) : null;
+		var dropTarget = this.currentDropTarget ? this.$.serializer.serializeComponent(this.currentDropTarget, true) : null;
 		this.sendMessage({op: "syncDropTargetHighlighting", val: dropTarget});
 	},
 	//* Set _inItem_ to _this.selected_ and notify Deimos
 	_selectItem: function(inItem) {
 		this.selection = inItem;
 		this.highlightSelection();
-		this.sendMessage({op: "select", val: this.$.serializer.serializeComponent(this.selection)});
+		this.sendMessage({op: "select",	 val: this.$.serializer.serializeComponent(this.selection, true)});
 	},
 	/**
 		Create an object copy of the _inDroppedControl_, then destroy and recreate it
@@ -484,49 +490,36 @@ enyo.kind({
 		
 		for(i=0;i<childComponents.length;i++) {
 			for(j=0;j<this.aresComponents.length;j++) {
-				if(childComponents[i].id === this.aresComponents[j].id) {
+				if(childComponents[i].aresId === this.aresComponents[j].aresId) {
 					this.makeComponentDragAndDrop(childComponents[i]);
 				}
 			}
 		}
 	},
 	/**
-		Create a new component, brought in from the Palette. This component's initial properties
+		Tell Deimos to create a new component, brought in from the Palette. This component's initial properties
 		are defined in the design.js file associated with the current library.
 	*/
 	createNewComponent: function(inNewComponent, inDropTarget) {
-		var newComponent = inDropTarget.createComponent(inNewComponent, {owner: this.parentInstance});
-		
-		// Add the new component to _this.aresComponents_ for future reference
-		this.aresComponents.push(newComponent);
-		
-		// Make sure all moved controls are draggable/droppable as appropriate
-		this.setupControlDragAndDrop(newComponent);
-		
-		// If we have a placeholder name, set it accordingly
-		if(newComponent.getContent() === "$name") {
-			newComponent.setContent(newComponent.name);
-		}
-		
-		this.refreshClient();
-		// Select the newly added item
-		this._selectItem(newComponent);
+		this.sendMessage({op: "createNewComponent", val: {component: inNewComponent, target: this.getSerializedCopyOfComponent(inDropTarget)}});
 	},
 	//* Create object that is a copy of the passed in component
 	getSerializedCopyOfComponent: function(inComponent) {
-		return enyo.json.codify.from(this.$.serializer.serializeComponent(inComponent));
+		return enyo.json.codify.from(this.$.serializer.serializeComponent(inComponent, true));
 	},
-	//* Rerender client and (optionally) notify Deimos
+	//* Rerender client, reselect _this.selection_, and notify Deimos
 	refreshClient: function(noMessage) {
 		this.$.client.render();
-		this.highlightSelection();
+		
 		if(!noMessage) {
 			this.kindUpdated();
 		}
+		
+		this.selectItem(this.selection);
 	},
 	//* Send update to Deimos with serialized copy of current kind component structure
 	kindUpdated: function() {
-		this.sendMessage({op: "rendered", val: this.$.serializer.serialize(this.parentInstance)});
+		this.sendMessage({op: "rendered", val: this.$.serializer.serialize(this.parentInstance, true)});
 	},
 	//* Eval code passed in by designer
 	codeUpdate: function(inCode) {
@@ -548,7 +541,7 @@ enyo.kind({
 			i;
 		
 		// Look through link tags for a linked stylesheet with a filename matching _filename_
-		for(var i=0;(el = links[i]);i++) {
+		for(i=0;(el = links[i]);i++) {
 			if(el.getAttribute("rel") === "stylesheet" && el.getAttribute("type") === "text/css" && el.getAttribute("href") === filename) {
 				this.updateStyle(filename, code, el);
 				return;
@@ -556,7 +549,7 @@ enyo.kind({
 		}
 		
 		// Look through style tags for a tag with a data-href property matching _filename_
-		for(var i=0;(el = styles[i]);i++) {
+		for(i=0;(el = styles[i]);i++) {
 			if(el.getAttribute("data-href") === filename) {
 				this.updateStyle(filename, code, el);
 				return;

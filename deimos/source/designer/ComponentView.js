@@ -64,10 +64,10 @@ enyo.kind({
 		this.selection = inComponent;
 		this.highlightDragItem(this.selection);
 	},
-	//* Select control with _comp.id_ that matches _inComponent_
+	//* Select control with _comp.aresId_ that matches _inComponent_
 	setSelected: function(inComponent) {
 		for(var i=0, c;(c=this.getClientControls()[i]);i++) {
-			if(c.comp.id === inComponent.id) {
+			if(c.comp.aresId === inComponent.aresId) {
 				this.select(c);
 				return;
 			}
@@ -126,13 +126,13 @@ enyo.kind({
 		}
 		
 		var dropData = enyo.json.codify.from(inEvent.dataTransfer.getData("Text")),
-			targetId = inSender.comp.id;
+			targetId = inSender.comp.aresId;
 		
 		if(dropData.op && dropData.op === "newControl") {
 			this.doPaletteDrop(enyo.mixin(dropData, {target: targetId}));
 		} else {
 			this.doDrop({
-				item:   dropData.id,
+				item:   dropData.aresId,
 				target: targetId
 			});
 		}
@@ -169,14 +169,42 @@ enyo.kind({
 		}
 	},
 	syncDropTargetHighlighting: function(inComponent) {
-		var id = inComponent ? inComponent.id : null;
+		var id = inComponent ? inComponent.aresId : null;
 		
 		for(var i=0, c;(c=this.getClientControls()[i]);i++) {
-			if(c.comp.id === id) {
+			if(c.comp.aresId === id) {
 				this.highlightDropTarget(c);
 			} else if(c !== this.selection) {
 				this.unHighlightItem(c);
 			}
 		}
+	},
+	
+	upAction: function() {
+		var index = this.getIndexOfComponent(this.selection);
+		this.doSelect({component: this.getClientControls()[this.clamp(index + 1)].comp});
+	},
+	downAction: function() {
+		var index = this.getIndexOfComponent(this.selection);
+		this.doSelect({component: this.getClientControls()[this.clamp(index - 1)].comp});
+	},
+	getIndexOfComponent: function(inComponent) {
+		var controls = this.getClientControls(),
+			i;
+		
+		for(i = 0; i < controls.length; i++) {
+			if(controls[i] === inComponent) {
+				return i;
+			}
+		}
+		
+		return -1;
+	},
+	clamp: function(inIndex) {
+		var controls = this.getClientControls(),
+			max = controls.length - 1,
+			min = 0;
+		
+		return (inIndex <= min) ? min : (inIndex >= max) ? max : inIndex;
 	}
 });
