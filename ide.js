@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  *  ARES IDE server
  */
@@ -94,6 +96,7 @@ var subProcesses = [];
 var platformVars = [
 	{regex: /@NODE@/, value: process.argv[0]},
 	{regex: /@CWD@/, value: process.cwd()},
+	{regex: /@INSTALLDIR@/, value: __dirname},
 	{regex: /@HOME@/, value: process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']}
 ];
 
@@ -112,8 +115,9 @@ var platformOpen = {
 	linux: [ "xdg-open" ]
 };
 
-var configPath;
+var configPath, tester;
 if (argv.runtest) {
+	tester = require('./test/tester/main.js');
 	configPath = path.resolve(myDir, "ide-test.json");
 } else{
 	configPath = argv.config;
@@ -363,6 +367,11 @@ app.configure(function(){
 	});
 	app.all('/res/services/:serviceId/*', proxyServices);
 	app.all('/res/services/:serviceId', proxyServices);
+
+	if (tester) {
+		app.post('/res/tester', tester.setup);
+		app['delete']('/res/tester', tester.cleanup);
+	}
 
 });
 

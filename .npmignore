@@ -1,3 +1,4 @@
+.git*
 .DS_Store
 .project
 *~
@@ -8,5 +9,3 @@
 .*.orig
 .*.rej
 $*
-node_modules/plugin-ares-*
-test/root
