@@ -167,24 +167,31 @@ function BdOpenwebOS(config, next) {
 					var filename = file.substr(destination.length + 1);
 					var filepath = file;
 					// Adding part header
-					combinedStream.append(function(next) {
-						next(getPartHeader(filename, boundary));
+					combinedStream.append(function(nextDataChunk) {
+						nextDataChunk(getPartHeader(filename, boundary));
 					});
 					// Adding file data
-					combinedStream.append(function(next) {
-						next(fs.createReadStream(filepath, {encoding: 'base64'}));
+					combinedStream.append(function(nextDataChunk) {
+						fs.readFile(filepath, 'base64', function (err, data) {
+							if (err) {
+								next(new HttpError('Unable to read ' + filename, 500));
+								nextDataChunk('INVALID CONTENT');
+								return;
+							}
+							nextDataChunk(data);
+						});
 					});
 					// Adding part footer
-					combinedStream.append(function(next) {
-						next(getPartFooter());
+					combinedStream.append(function(nextDataChunk) {
+						nextDataChunk(getPartFooter());
 					});
 					index++;
 				}
 			});
 
 			// Adding last footer
-			combinedStream.append(function(next) {
-				next(getLastPartFooter(boundary));
+			combinedStream.append(function(nextDataChunk) {
+				nextDataChunk(getLastPartFooter(boundary));
 			});
 
 			// Send the files back as a multipart/form-data
