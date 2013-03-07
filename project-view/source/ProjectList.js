@@ -35,11 +35,11 @@ enyo.kind({
 				]}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_new.png", onclick: "doCreateProject"},
+				{name: "createProjectButton", kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_new.png", onclick: "doCreateProject"},
 				{kind: "onyx.Tooltip", content: "Create Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_edit.png", onclick: "doScanProject"},
+				{name: "importProjectButton", kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_edit.png", onclick: "doScanProject"},
 				{kind: "onyx.Tooltip", content: "Import or Scan for Projects..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
