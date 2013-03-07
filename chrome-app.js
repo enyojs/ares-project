@@ -1,4 +1,4 @@
-/**
+g/**
  * Ares Chrome Packaged Application Background Page
  * 
  * ares/ares-chrome-background.js
