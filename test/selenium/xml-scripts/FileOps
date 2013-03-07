@@ -148,7 +148,7 @@
 <selenese>
 	<command>type</command>
 	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
-	<value><![CDATA[App1.js]]></value>
+	<value><![CDATA[App3.js]]></value>
 </selenese>
 <selenese>
 	<command>keyPress</command>
@@ -213,7 +213,7 @@
 <selenese>
 	<command>type</command>
 	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_renamePopup_fileName]]></target>
-	<value><![CDATA[App2.js]]></value>
+	<value><![CDATA[App4.js]]></value>
 </selenese>
 <selenese>
 	<command>keyPress</command>

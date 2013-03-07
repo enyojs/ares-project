@@ -112,8 +112,9 @@ var platformOpen = {
 	linux: [ "xdg-open" ]
 };
 
-var configPath;
+var configPath, tester;
 if (argv.runtest) {
+	tester = require('./test/tester/main.js');
 	configPath = path.resolve(myDir, "ide-test.json");
 } else{
 	configPath = argv.config;
@@ -363,6 +364,11 @@ app.configure(function(){
 	});
 	app.all('/res/services/:serviceId/*', proxyServices);
 	app.all('/res/services/:serviceId', proxyServices);
+
+	if (tester) {
+		app.post('/res/tester', tester.setup);
+		app['delete']('/res/tester', tester.cleanup);
+	}
 
 });
 
