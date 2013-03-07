@@ -162,25 +162,23 @@ function BdOpenwebOS(config, next) {
 			var combinedStream = CombinedStream.create();
 			var boundary = generateBoundary();
 			var index = 0;
-			var files = [];
 			inData.forEach(function(file) {
 				if (fs.statSync(file).isFile()) {
-					files.push(file);
+					var filename = file.substr(destination.length + 1);
+					var filepath = file;
 					// Adding part header
 					combinedStream.append(function(next) {
-						var filename = files[index].substr(destination.length + 1);
 						next(getPartHeader(filename, boundary));
 					});
 					// Adding file data
 					combinedStream.append(function(next) {
-						var filename = files[index].substr(destination.length + 1);
-						next(fs.createReadStream(files[index], {encoding: 'base64'}));
-						index++;
+						next(fs.createReadStream(filepath, {encoding: 'base64'}));
 					});
 					// Adding part footer
 					combinedStream.append(function(next) {
 						next(getPartFooter());
 					});
+					index++;
 				}
 			});
 
