@@ -367,7 +367,6 @@ app.configure(function(){
 
 	if (tester) {
 		app.post('/res/tester', tester.setup);
-		// cleanup not yet impemented
 		app['delete']('/res/tester', tester.cleanup);
 	}
 

@@ -22,13 +22,10 @@ var enyoDir = path.resolve(tDir, '../enyo'),
 (function() {
 
         var tester = {
-        	setup: function(req, res, next) {
- 				// cleanup and set up the dedicated source tree either for TestRunner and Selenium
-				// console.log("os.type(): "+ os.type());
-				// cleanup test/root
-				shell.cd(path.join(tDir));
-				shell.rm('-rf', path.join(rDir));
+			setup: function(req, res, next) {
 
+				// cleanup
+				tester.cleanup();
 				// setup test/root and sub-directories
 				shell.mkdir('-p', path.join(testDir));
 				shell.mkdir('-p', path.join(newProjectDir));
@@ -54,9 +51,14 @@ var enyoDir = path.resolve(tDir, '../enyo'),
 				shell.cd(path.join(fopsTestDir));
 				shell.cp('-R', path.join(fopsSrcDir), path.join(testDir));
 
-				console.log('Ares Test setup done!');
+				console.info('AresTest Setup done!');
 				res.status(200);
 				next();
+			},
+			cleanup: function(next) {
+				// cleanup test/root
+				shell.cd(path.join(tDir));
+				shell.rm('-rf', path.join(rDir));
 			}
 		};
 
