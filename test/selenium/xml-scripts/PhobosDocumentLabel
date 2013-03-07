@@ -22,11 +22,7 @@
 </selenese>
 <selenese>
 	<command>assertTextPresent</command>
-	<target><![CDATA[Ares Test - Home Directory
-
-
-
-Ares Test Suite]]></target>
+	<target><![CDATA[Ares Test - Home Directory]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
