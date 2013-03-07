@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  *  ARES IDE server
  */
@@ -94,6 +96,7 @@ var subProcesses = [];
 var platformVars = [
 	{regex: /@NODE@/, value: process.argv[0]},
 	{regex: /@CWD@/, value: process.cwd()},
+	{regex: /@INSTALLDIR@/, value: __dirname},
 	{regex: /@HOME@/, value: process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']}
 ];
 
