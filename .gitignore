@@ -8,6 +8,7 @@
 .*.orig
 .*.rej
 $*
+/node_modules/.bin
 /node_modules/async
 /node_modules/combined-stream
 /node_modules/dropbox
