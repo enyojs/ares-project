@@ -7,26 +7,41 @@ enyo.kind({
 		if (this.debug) {
 			enyo.log("I am Ares Test Controller ...");
 		}
-		this.inherited(arguments);
-		// listen for dispatched messages (received from Ares Test Reporter)
-		window.addEventListener("message", enyo.bind(this, this.recMsgFromTestReporter), false);
 
-		// Create the new window browser named Ares Test Suite
-		var url = "../test/testrunner/index.html"
-		aresTestW = window.open(url, 'Ares Test Suite','scrollbars=auto, titlebar=yes, height=640,width=640', false);
+		// in charge the setup&cleanup test environment
+		var req = new enyo.Ajax({
+			url: '/res/tester',
+			method: 'POST',
+			handleAs: "text"
+		});
+		req.error(this, function(inSender, inError) {
+			this.log("Ares test setup failed ... (" + inError + ")");
+		});
+		req.go();                
 
-		// Communication path between Ares Test and Ares Ide through postMessage window method
-		// Warning: postMessage sent several times to make sure it has been received by Ares Test browser
-		var count = 4;
-		var repeatPostMsg = function() {
-			if (this.debug) enyo.log("Post ARES.TEST.START ...");
-			aresTestW.postMessage("ARES.TEST.START", "http://127.0.0.1:9009");
-			count--;
-			if (count > 0) {
-				setTimeout(repeatPostMsg, 1000);
+		// in charge of Ares TestRunner Test Suite
+		if (window.location.search.indexOf("norunner") == -1) {
+			this.inherited(arguments);
+			// listen for dispatched messages (received from Ares Test Reporter)
+			window.addEventListener("message", enyo.bind(this, this.recMsgFromTestReporter), false);
+
+			// Create the new window browser named Ares Test Suite
+			var url = "../test/testrunner/index.html"
+			aresTestW = window.open(url, 'Ares Test Suite','scrollbars=auto, titlebar=yes, height=640,width=640', false);
+
+			// Communication path between Ares Test and Ares Ide through postMessage window method
+			// Warning: postMessage sent several times to make sure it has been received by Ares Test browser
+			var count = 4;
+			var repeatPostMsg = function() {
+				if (this.debug) enyo.log("Post ARES.TEST.START ...");
+				aresTestW.postMessage("ARES.TEST.START", "http://127.0.0.1:9009");
+				count--;
+				if (count > 0) {
+					setTimeout(repeatPostMsg, 1000);
+				}
 			}
+			setTimeout(repeatPostMsg, 1000);
 		}
-		setTimeout(repeatPostMsg, 1000);
 	},
 	recMsgFromTestReporter: function(event) {
 		// test bad origin

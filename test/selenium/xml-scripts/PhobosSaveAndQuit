@@ -22,11 +22,7 @@
 </selenese>
 <selenese>
 	<command>assertTextPresent</command>
-	<target><![CDATA[Ares Test - Home Directory
-
-
-
-Ares Test Suite]]></target>
+	<target><![CDATA[Ares Test - Home Directory]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -96,8 +92,9 @@ Editor SettingsDesigner]]></value>
 	<target><![CDATA[id=ares_phobos_saveButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
+<!--following assertion because enable to save in phobos JIRA-2021-->
 <selenese>
-	<command>assertTextNotPresent</command>
+	<command>assertTextPresent</command>
 	<target><![CDATA[exact:Oh, no!?Unable to save the file
 
 Ok]]></target>

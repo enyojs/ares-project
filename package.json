@@ -13,7 +13,7 @@
 		"url" : "http://github.com/enyojs/ares-project.git"
 	},
 	"engines": {
-		"node" : "0.8.x",
+		"node" : "0.8.x >=0.8.19",
 		"npm": "1.2.x"
 	},
 	"engineStrict": true,
