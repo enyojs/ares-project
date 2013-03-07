@@ -48,7 +48,9 @@ The following features are in the works, and you should see them added as we mov
 1. Install Node.js & NPM 0.8.x.  Preferably from the [Official Download Page](http://nodejs.org/#download).
 1. Run:
 
-		$ npm install ares-ide
+		$ npm -d install ares-ide
+
+	The `-d` options gives some minimal troubleshooting information, which is pretty useful as `ares-ide` is a heavy package (more than 12 MB).
 
 ### Develop
 
@@ -62,7 +64,7 @@ The following features are in the works, and you should see them added as we mov
 
 1. Install NPM developpment dependencies
    
-   		$ npm install
+   		$ npm -d install
 
 ### Run
 

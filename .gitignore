@@ -8,7 +8,6 @@
 .*.orig
 .*.rej
 $*
-/node_modules/uninstall
 /node_modules/async
 /node_modules/combined-stream
 /node_modules/dropbox
