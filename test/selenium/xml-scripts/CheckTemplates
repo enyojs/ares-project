@@ -17,7 +17,7 @@
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectList_iconButton3]]></target>
+	<target><![CDATA[id=ares_projectView_projectList_importProjectButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -92,7 +92,7 @@
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_deletePopup_button2]]></target>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_deletePopup_deleteDeleteButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -112,7 +112,7 @@
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_deletePopup_button2]]></target>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_deletePopup_deleteDeleteButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -247,7 +247,7 @@ enyo.kind({
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_bottomBar_iconButton]]></target>
+	<target><![CDATA[id=ares_bottomBar_closeFileButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -290,7 +290,7 @@ enyo.kind({
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_bottomBar_iconButton2]]></target>
+	<target><![CDATA[id=ares_bottomBar_closeFileButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -319,7 +319,7 @@ enyo.kind({
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_bottomBar_iconButton3]]></target>
+	<target><![CDATA[id=ares_bottomBar_closeFileButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 </TestCase>
