@@ -8,6 +8,8 @@ var submodules = [
 
 var mwd = process.cwd();
 
+//console.log(process.env);
+
 // pick every known arguments from the npm caller command
 var argv = JSON.parse(process.env.npm_config_argv);
 var args = argv.cooked.filter(function(cooked) {
@@ -15,15 +17,18 @@ var args = argv.cooked.filter(function(cooked) {
 		return (cooked === remain);
 	}).length === 0;
 });
+args.unshift(process.env.npm_execpath);
 
-function install() {
+//console.log(args);
+
+function run() {
 	var submodule = submodules.shift();
-	var msg = 'cd ' + submodule + ' && npm ' + args.join(' ') + '...';
+	var msg = 'cd ' + submodule + ' && ' + process.env.npm_node_execpath + ' ' + args.join(' ') + '...';
 	if (!submodule) {
 		process.exit(0);
 	}
 	console.log(msg);
-	var outBuf = '', errBuf = '', child = spawn('npm', args, {
+	var outBuf = '', errBuf = '', child = spawn(process.env.npm_node_execpath, args, {
 		cwd: path.resolve(mwd, submodule)
 	});
 	child.stdout.on('data', function(data) {
@@ -52,8 +57,8 @@ function install() {
 		}
 		console.log(msg + 'ok');
 
-		install();
+		run();
 	});
 }
 
-install();
+run();
