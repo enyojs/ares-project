@@ -6,10 +6,10 @@ enyo.kind({
 	components: [
 		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
 			{components: [
-				{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"}
+				{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
 			]},
 			{components: [
-				{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate"}
+				{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
 			]}
 		]},
 		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
@@ -134,17 +134,29 @@ enyo.kind({
 		this.adjustBarMode();
 		this.activeDocument.setCurrentIF('designer');
 	},
+	//* A code change happened in Phobos - push change to Deimos
+	phobosUpdate: function(inSender, inEvent) {
+		this.$.deimos.load(inEvent);
+	},
+	//* A design change happened in Deimos - push change to Phobos
+	designerUpdate: function(inSender, inEvent) {
+		if (inEvent && inEvent.docHasChanged) {
+			this.$.phobos.updateComponents(inSender, inEvent);
+		}
+	},
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
 		this.activeDocument.setCurrentIF('code');
 	},
-	designerUpdate: function(inSender, inEvent) {
-		if (inEvent && inEvent.docHasChanged) {
-			this.$.phobos.updateComponents(inSender, inEvent);
-			this.$.phobos.saveDocAction();	// <--- Should we save here?
-		}
+	//* Undo event from Deimos
+	designerUndo: function(inSender, inEvent) {
+		this.$.phobos.undoAndUpdate();
+	},
+	//* Redo event from Deimos
+	designerRedo: function(inSender, inEvent) {
+		this.$.phobos.redoAndUpdate();
 	},
 	handleBeforeUnload: function() {
 		if (window.location.search.indexOf("debug") == -1) {

@@ -40,7 +40,8 @@ enyo.kind({
 	events: {
 		onSaveDocument: "",
 		onDesignDocument: "",
-		onCloseDocument: ""
+		onCloseDocument: "",
+		onUpdate: ""
 	},
 	handlers: {
 		onCss: "newcssAction",
@@ -96,6 +97,7 @@ enyo.kind({
 		var mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image"}[extension] || "text";
 		this.docData.setMode(mode);
 		var hasAce = this.adjustPanelsForMode(mode);
+		
 		if (hasAce) {
 			var aceSession = this.docData.getAceSession();
 			if (aceSession) {
@@ -106,7 +108,7 @@ enyo.kind({
 				this.$.ace.setSession(aceSession);
 				this.docData.setAceSession(aceSession);
 			}
-
+			
 			// Pass to the autocomplete compononent a reference to ace
 			this.$.autocomplete.setAce(this.$.ace);
 			this.focusEditor();
@@ -306,29 +308,37 @@ enyo.kind({
 		}
 		return -1;
 	},
+	//* Navigate from Phobos to Deimos. Pass Deimos all relevant info.
 	designerAction: function() {
-		var isDesignProperty={
-			layoutKind: true,
-			attributes: true,
-			classes: true,
-			content: true,
-			controlClasses: true,
-			defaultKind: true,
-			fit: true,
-			src: true,
-			style: true,
-			tag: true,
-			name: true,
+		var kinds = this.extractKindsData(),
+			data = {kinds: kinds, projectData: this.projectData, fileIndexer: this.analysis};
+		if (kinds.length > 0) {
+			this.doDesignDocument(data);
+		} else {
+			alert("No kinds found in this file");
 		}
-		var c = this.$.ace.getValue();
+	},
+	//* Extract kinds from the current file
+	extractKindsData: function() {
+		var isDesignProperty = {
+				layoutKind: true,
+				attributes: true,
+				classes: true,
+				content: true,
+				controlClasses: true,
+				defaultKind: true,
+				fit: true,
+				src: true,
+				style: true,
+				tag: true,
+				name: true,
+			},
+			c = this.$.ace.getValue(),
+			kinds = [];
+		
 		this.reparseAction();
+		
 		if (this.analysis) {
-			var kinds = [];
-			/*
-				We now pass projectData and fileIndexer which reference various information related to the project.
-				In particular the analyzer output of all the .js projects files as well as for enyo/onyx
-			 */
-			var data = {kinds: kinds, projectData: this.projectData, fileIndexer: this.analysis};
 			for (var i=0; i < this.analysis.objects.length; i++) {
 				var o = this.analysis.objects[i];
 				if (o.componentsBlockStart && o.componentsBlockEnd) { // only include kinds with components block
@@ -354,12 +364,9 @@ enyo.kind({
 					kinds.push(comp);
 				}
 			}
-			if (kinds.length > 0) {
-				this.doDesignDocument(data);
-				return;
-			}
 		}
-		alert("No kinds found in this file");
+		
+		return kinds;
 	},
 	/**
 	 * Lists the handler methods mentioned in the "handlers"
@@ -656,8 +663,27 @@ enyo.kind({
 
 	tabSize: function() {
 		var ts = this.$.ace.editorSettingsPopup.Tsize;
-		this.log("ts",ts);
 		this.$.ace.setTabSize(ts);
+	},
+	
+	//* Trigger an Ace undo and bubble updated code
+	undoAndUpdate: function() {
+		this.$.ace.undo();
+		this.bubbleCodeUpdate();
+	},
+	//* Trigger an Ace undo and bubble updated code
+	redoAndUpdate: function() {
+		this.$.ace.redo();
+		this.bubbleCodeUpdate();
+	},
+	//* Send up an updated copy of the code
+	bubbleCodeUpdate: function() {
+		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
+		if (data.kinds.length > 0) {
+			this.doUpdate(data);
+		} else {
+			enyo.warn("No kinds found in this file");
+		}
 	}
 });
 

@@ -34,7 +34,9 @@ enyo.kind({
 					{kind: "FittableColumns", components: [
 						{name:"upButton", kind: "onyx.Button", content: "Up", ontap: "upAction"},
 						{name:"downButton", kind: "onyx.Button", content: "Down", ontap: "downAction"},
-						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"}
+						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
+						{name:"undoButton", kind: "onyx.Button", content: "Undo", classes: "btn-danger",  ontap: "undoAction"},
+						{name:"redoButton", kind: "onyx.Button", content: "Redo", classes: "btn-danger",  ontap: "redoAction"}
 					]},
 					{kind: "ComponentView", classes: "deimos_panel ares_deimos_componentView",
 						onSelect: "componentViewSelect",
@@ -50,7 +52,9 @@ enyo.kind({
 	],
 	events: {
 		onCloseDesigner: "",
-		onDesignerUpdate: ""
+		onDesignerUpdate: "",
+		onUndo: "",
+		onRedo: ""
 	},
 	kinds: null,
 	create: function() {
@@ -106,7 +110,7 @@ enyo.kind({
 			
 			// If edited, save these changes in Ares TODO
 			if (this.index !== null && this.getEdited()) {
-				this.sendUpdateToAres();
+				this.designerUpdate();
 			}
 			
 			this.$.inspector.inspect(null);
@@ -123,6 +127,7 @@ enyo.kind({
 	rerenderKind: function() {
 		this.$.designer.setCurrentKind(this.kinds[this.index]);
 		this.$.designer.renderCurrentKind();
+		this.designerUpdate();
 	},
 	refreshInspector: function() {
 		enyo.job("inspect", enyo.bind(this, function() {
@@ -334,6 +339,12 @@ enyo.kind({
 	downAction: function(inSender, inEvent) {
 		this.$.componentView.downAction(inSender, inEvent);
 	},
+	undoAction: function(inSender, inEvent) {
+		this.doUndo();
+	},
+	redoAction: function(inSender, inEvent) {
+		this.doRedo();
+	},
 	deleteAction: function(inSender, inEvent) {
 		if(!this.$.designer.selection) {
 			return;
@@ -363,9 +374,8 @@ enyo.kind({
 			this.$.docLabel.setContent("Deimos");
 		}
 	},
-	sendUpdateToAres: function() {
+	designerUpdate: function() {
 		this.doDesignerUpdate(this.prepareDesignerUpdate());
-		this.setEdited(false);
 	},
 	//* Called by Ares when ProjectView has new project selected
 	projectSelected: function(inProject) {
