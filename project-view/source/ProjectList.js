@@ -45,7 +45,7 @@ enyo.kind({
 			{kind: "onyx.TooltipDecorator", components: [
 				{name: "phonegapButton", disabled: true,
 				 kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_build.png", onclick: "doPhonegapBuild"},
-				{kind: "onyx.Tooltip", content: "Phonegap build"}
+				{kind: "onyx.Tooltip", content: "Build Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", name: "previewButton", disabled: true,
