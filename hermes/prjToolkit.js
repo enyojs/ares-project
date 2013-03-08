@@ -15,6 +15,7 @@ var fs = require("fs"),
 
 var basename = path.basename(__filename);
 var FORM_DATA_LINE_BREAK = '\r\n';
+var performCleanup = true;
 
 function BdOpenwebOS(config, next) {
 	function HttpError(msg, statusCode) {
@@ -161,44 +162,54 @@ function BdOpenwebOS(config, next) {
 			var combinedStream = CombinedStream.create();
 			var boundary = generateBoundary();
 			var index = 0;
-			var files = [];
 			inData.forEach(function(file) {
 				if (fs.statSync(file).isFile()) {
-					files.push(file);
+					var filename = file.substr(destination.length + 1);
+					var filepath = file;
 					// Adding part header
-					combinedStream.append(function(next) {
-						var filename = files[index].substr(destination.length + 1);
-						next(getPartHeader(filename, boundary));
+					combinedStream.append(function(nextDataChunk) {
+						nextDataChunk(getPartHeader(filename, boundary));
 					});
 					// Adding file data
-					combinedStream.append(function(next) {
-						var filename = files[index].substr(destination.length + 1);
-						next(fs.createReadStream(files[index]));
-						index++;
+					combinedStream.append(function(nextDataChunk) {
+						fs.readFile(filepath, 'base64', function (err, data) {
+							if (err) {
+								next(new HttpError('Unable to read ' + filename, 500));
+								nextDataChunk('INVALID CONTENT');
+								return;
+							}
+							nextDataChunk(data);
+						});
 					});
 					// Adding part footer
-					combinedStream.append(function(next) {
-						next(getPartFooter());
+					combinedStream.append(function(nextDataChunk) {
+						nextDataChunk(getPartFooter());
 					});
+					index++;
 				}
 			});
 
 			// Adding last footer
-			combinedStream.append(function(next) {
-				next(getLastPartFooter(boundary));
+			combinedStream.append(function(nextDataChunk) {
+				nextDataChunk(getLastPartFooter(boundary));
 			});
 
 			// Send the files back as a multipart/form-data
 			res.status(200);
 			res.header('Content-Type', getContentTypeHeader(boundary));
+			res.header('X-Content-Type', getContentTypeHeader(boundary));
 			combinedStream.pipe(res);
 
 			// cleanup the temp dir when the response has been sent
 			combinedStream.on('end', function() {
-				console.log("cleanup(): starting removal of " + destination);
-				rimraf(destination, function(err) {
-					console.log("cleanup(): removed " + destination);
-				});
+				if (performCleanup) {
+					console.log("cleanup(): starting removal of " + destination);
+					rimraf(destination, function(err) {
+						console.log("cleanup(): removed " + destination);
+					});
+				} else {
+					console.log("cleanup(): skipping removal of " + destination);
+				}
 			});
 		});
 	}
@@ -223,7 +234,7 @@ function BdOpenwebOS(config, next) {
 		header += 'Content-Disposition: form-data; name="file"';
 
 		header += '; filename="' + filename + '"' + FORM_DATA_LINE_BREAK;
-		header += 'Content-Type: application/octet-stream';
+		header += 'Content-Type: application/octet-stream; x-encoding=base64';
 
 		header += FORM_DATA_LINE_BREAK + FORM_DATA_LINE_BREAK;
 		return header;
