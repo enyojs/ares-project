@@ -53,6 +53,11 @@ enyo.kind({
 				'x-http-method-override': inMethod
 			}
 		};
+
+		if (inMethod === 'GET') {
+			options.mimeType = 'text/plain; charset=x-user-defined';
+		}
+
 		var req = new enyo.Ajax(options);
 		if (inParams && inParams.postBody) {
 			delete inParams.postBody;
