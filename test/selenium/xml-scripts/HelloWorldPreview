@@ -12,7 +12,7 @@
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectList_iconButton3]]></target>
+	<target><![CDATA[id=ares_projectView_projectList_importProjectButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>

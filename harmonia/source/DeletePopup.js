@@ -20,9 +20,9 @@ enyo.kind({
 		{tag: "br"},
 		{tag: "br"},
 		{kind: "FittableColumns", components: [
-			{kind: "onyx.Button", content: "Cancel", ontap: "deleteCancel"},
+			{name: "deleteCancelButton", kind: "onyx.Button", content: "Cancel", ontap: "deleteCancel"},
 			{fit: true},
-			{kind: "onyx.Button", classes: "onyx-negative", content: "Delete", ontap: "deleteConfirm"}
+			{name: "deleteDeleteButton", kind: "onyx.Button", classes: "onyx-negative", content: "Delete", ontap: "deleteConfirm"}
 		]}
 	],
 	create: function() {
