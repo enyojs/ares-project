@@ -48,9 +48,13 @@ The following features are in the works, and you should see them added as we mov
 1. Install Node.js & NPM 0.8.x (>= 0.8.19).  Preferably from the [Official Download Page](http://nodejs.org/#download).
 1. Run:
 
-		$ npm install ares-ide
+		$ npm -d install ares-ide
+
+	The `-d` options gives some minimal troubleshooting information, which is pretty useful as `ares-ide` is a heavy package (more than 12 MB).
 
 ### Develop
+
+In case you do not yet have a development environment:
 
 1. Install Node.js & NPM 0.8.x (>= 0.8.19).  Preferably from the [Official Download Page](http://nodejs.org/#download).
 1. Install git (or a graphical git client).  See the [Github.com help](https://help.github.com/articles/set-up-git) for hints
@@ -62,7 +66,15 @@ The following features are in the works, and you should see them added as we mov
 
 1. Install NPM developpment dependencies
    
-   		$ npm install
+		$ npm -d install
+
+If you already have a working environment:
+
+		$ git pull origin master
+		$ git submodule update --init
+		$ npm -d install
+
+**Note:** Until recently, `ares-project/node_modules` contained 3rd-party modules directly archived into `ares-project` own Git repository.  So existing repository owners _may_ need to run `rm -rf ares-project/node_modules` to properly update their trees.
 
 ### Run
 
@@ -120,6 +132,20 @@ In order to produce Ares on a build server:
 		$ mkdir ../test && cd ../test
 		$ npm install ../ares-project/ares-ide-0.0.2.tgz
 		$ node_modules/.bin/ares-ide
+
+### Publish
+
+_This section is for Ares commiters only_
+
+1. Tag the version you intend to publish, with the exact same string as the `version: ` in `package.json` & upload this tag.
+1. Checkout a fresh copy _on a Linux (virtual) machine_ 
+	* Publishing from a Windows machine will break UNIX (Linux & OSX) installations [NPM Issue 2097](https://github.com/isaacs/npm/issues/2097)
+	* Packing from an OSX machine misses some files [NPM Issue 2619](https://github.com/isaacs/npm/issues/2619)
+1. If not already done run `npm adduser` to allow your self to publish from this machine
+1. Run `npm -d pack`
+1. Publish the generated tarball `npm -d publish <ares-ide-x.y.z.tgz>`
+	It is also possible to directly publish (skip the intemediate `pack`, but this one gives you a chance to verify the content of the publish archive without the need for a roundtrip with the NPM registry).
+1. Check [ares-ide on the NPM registry](https://npmjs.org/package/ares-ide).
 
 ## Features
 

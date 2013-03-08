@@ -22,3 +22,6 @@
 [submodule "lib/g11n"]
 	path = lib/g11n
 	url = ../g11n.git
+[submodule "node_modules/unzip"]
+	path = node_modules/unzip
+	url = ../node-unzip.git
