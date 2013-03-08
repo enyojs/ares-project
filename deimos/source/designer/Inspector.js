@@ -54,7 +54,7 @@ enyo.kind({
 	},
 	allowed: function(inKindName, inType, inName) {
 		var level = Model.getFilterLevel(inKindName, inType, inName);
-		// this.debug && this.log("Level: " + level + " for " + inKindName + "." + inName);
+		this.debug && this.log("Level: " + level + " for " + inKindName + "." + inName);
 		return level >= this.filterLevel;
 	},
 	//* Return complete list of published properties for _inControl_
@@ -166,16 +166,17 @@ enyo.kind({
 		
 		this.debug && this.log("Adding entry for " + inType + " " + inName + " : " + inDefaultValue);
 		
-		var inherited = !(inControl.aresId && this.userDefinedAttributes && this.userDefinedAttributes[inControl.aresId] && this.userDefinedAttributes[inControl.aresId][inName]),
+		var inherited = !(inControl.aresId && this.userDefinedAttributes && this.userDefinedAttributes[inControl.aresId] && typeof this.userDefinedAttributes[inControl.aresId][inName] !== "undefined"),
 			value = (inherited) ? inDefaultValue : this.userDefinedAttributes[inControl.aresId][inName],
 			classList = "ares-inspector-row",
 			attributeRow,
 			info,
 			kind,
-			attributeKind;
+			attributeKind,
+			attributeFieldName = "attributeVal";
 		
 		attributeRow = this.$.content.createComponent({classes: classList});
-		attributeRow.createComponent({kind: "InhertCheckbox", checked: inherited, prop: inName});
+		attributeRow.createComponent({kind: "InheritCheckbox", checked: !inherited, prop: inName});
 		
 		info = Model.getInfo(inControl.kind, inType, inName);
 		kind = (info && info.inputKind);
@@ -183,17 +184,17 @@ enyo.kind({
 		// User defined kind: as an Object
 		if (kind && kind instanceof Object) {
 			kind = enyo.clone(kind);
-			kind = enyo.mixin(kind, {name: "attributeVal", fieldName: inName, fieldValue: value, extra: inType});
+			kind = enyo.mixin(kind, {name: attributeFieldName, fieldName: inName, fieldValue: value, extra: inType});
 			attributeRow.createComponent(kind);
+		} else {
+			attributeKind = (kind)
+				?	kind
+				:	(value === true || value === false || value === "true" || value === "false")
+					?	"Inspector.Config.Boolean"
+					:	"Inspector.Config.Text";
+		
+			attributeRow.createComponent({name: attributeFieldName, kind: attributeKind, fieldName: inName, fieldValue: value, extra: inType, disabled: inherited});
 		}
-		
-		attributeKind = (kind)
-			?	kind
-			:	(value === true || value === false || value === "true" || value === "false")
-				?	"Inspector.Config.Boolean"
-				:	"Inspector.Config.Text";
-		
-		attributeRow.createComponent({name: "attributeVal", kind: attributeKind, fieldName: inName, fieldValue: value, extra: inType, disabled: inherited});
 	},
 	inspect: function(inControl) {
 		var ps, i, p;
@@ -223,7 +224,7 @@ enyo.kind({
 	change: function(inSender, inEvent) {
 		var n = inEvent.target.fieldName;
 		var v = inEvent.target.fieldValue;
-
+		
 		var num = parseFloat(v);
 		if (String(num) == v) {
 			v = num;
@@ -358,25 +359,29 @@ enyo.kind({
 		this.inspect(this.selected);
 		return true;
 	},
+	//* When an inherit checkbox is toggled, enable/disable the attribute
 	inheritAttributeToggle: function(inSender, inEvent) {
 		var originator = inEvent.originator,
 			row = originator.parent,
 			attribute = originator.prop;
 		
+		// Make sure this attribute exists in _this.userDefinedAttributes_
 		if(!this.userDefinedAttributes[this.selected.aresId]) {
 			this.userDefinedAttributes[this.selected.aresId] = {};
 		}
 		
 		if (originator.active === true) {
+			row.$.attributeVal.setDisabled(false);
+			
+			// Add this attribute to the rendered instance
+			this.userDefinedAttributes[this.selected.aresId][attribute] = row.$.attributeVal.getFieldValue();
+		} else {
 			row.$.attributeVal.setFieldValue(this.buildPropList(this.selected)[attribute]);
 			row.$.attributeVal.setDisabled(true);
 			delete this.userDefinedAttributes[this.selected.aresId][attribute];
 			
 			// Remove this attribute from the rendered instance in the iframe by setting it to _undefined_
 			this.doModify({name: attribute, value: undefined});
-		} else {
-			row.$.attributeVal.setDisabled(false);
-			this.userDefinedAttributes[this.selected.aresId][attribute] = row.$.attributeVal.getFieldValue();
 		}
 	}
 });
@@ -409,7 +414,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "InhertCheckbox",
+	name: "InheritCheckbox",
 	kind: "enyo.Checkbox",
 	published: {
 		prop: null

@@ -8,11 +8,12 @@ enyo.kind({
 		onDesignRendered: "",
 		onSelect: "",
 		onSelected: "",
-		onCreateComponent: "",
+		onCreateItem: "",
+		onMoveItem: "",
 		onSyncDropTargetHighlighting: ""
 	},
 	components: [
-		{name: "client", tag: "iframe", style: "width:100%;height:100%;border:none;"},
+		{name: "client", tag: "iframe", classes: "ares-iframe-client"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"}
 	],
 	baseSource: "../deimos/source/designer/iframe.html",
@@ -72,8 +73,11 @@ enyo.kind({
 		} else if(msg.op === "syncDropTargetHighlighting") {
 			this.doSyncDropTargetHighlighting({component: enyo.json.codify.from(msg.val)});
 		// New component dropped in iframe
-		} else if(msg.op === "createNewComponent") {
-			this.doCreateComponent(msg.val);
+		} else if(msg.op === "createItem") {
+			this.doCreateItem(msg.val);
+		// Existing component dropped in iframe
+		} else if(msg.op === "moveItem") {
+			this.doMoveItem(msg.val);
 		// Default case
 		} else {
 			enyo.warn("Deimos designer received unknown message op:", msg);
@@ -102,22 +106,6 @@ enyo.kind({
 	},
 	unHighlightDropTargets: function() {
 		this.sendMessage({op: "unhighlight"});
-	},
-	//* Control was dropped the ComponentView - simulate drop in iframe
-	drop: function(inDropData) {
-		this.sendMessage({op: "drop", val: {item: inDropData.item, target: inDropData.target}});
-	},
-	//* Control was dragged from the Palette to the ComponentView - simulate dropping from Palette to iframe
-	createNewControl: function(inDropData) {
-		// Clean up drop data for RPC
-		if(inDropData.originator) {
-			delete inDropData.originator;
-		}
-		if(inDropData["__proto__"]) {
-			delete inDropData["__proto__"];
-		}
-
-		this.sendMessage(inDropData);
 	},
 	//* Property was modified in Inspector, update iframe.
 	modifyProperty: function(inProperty, inValue) {

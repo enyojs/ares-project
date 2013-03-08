@@ -1,3 +1,4 @@
 enyo.depends(
-	"iframe.js"
+	"iframe.js",
+	"iframe.css"
 );

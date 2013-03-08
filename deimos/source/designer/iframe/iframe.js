@@ -9,8 +9,8 @@ enyo.kind({
 		{name: "client", fit: true, classes:"enyo-fit"},
 		{name: "serializer", kind: "Serializer"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"},
-		{name: "selectHighlight", style: "height:0; width:0; pointer-events: none; background-color:rgba(255,187,0,0.3); border:1px solid orange; box-sizing:border-box; position:absolute; z-index:9999;"},
-		{name: "dropHighlight", style: "height:0; width:0; pointer-events: none; background-color:rgba(0,110,255,0.3); border:1px solid blue; box-sizing:border-box; position:absolute; z-index:9999;"}
+		{name: "selectHighlight", classes: "iframe-highlight iframe-select-highlight"},
+		{name: "dropHighlight", classes: "iframe-highlight iframe-drop-highlight"}
 	],
 	
 	selection: null,
@@ -68,30 +68,37 @@ enyo.kind({
 		
 		var msg = inEvent.message;
 		
-		if(msg.op === "containerData") {
-			this.setContainerData(msg.val);
-		} else if(msg.op === "render") {
-			this.renderKind(msg.val);
-		} else if(msg.op === "select") {
-			this.selectItem(msg.val);
-		} else if(msg.op === "highlight") {
-			this.highlightDropTarget(this.getControlById(msg.val.aresId));
-		} else if(msg.op === "modify") {
-			this.modifyProperty(msg.val);
-		} else if(msg.op === "unhighlight") {
-			this.unhighlightDropTargets();
-		} else if(msg.op === "drop") {
-			this.simulateDrop(msg.val);
-		} else if(msg.op === "newControl") {
-			this.simulateCreateNewComponent(msg);
-		} else if(msg.op === "codeUpdate") {
-			this.codeUpdate(msg.val);
-		} else if(msg.op === "cssUpdate") {
-			this.cssUpdate(msg.val);
-		} else if(msg.op === "cleanUp") {
-			this.cleanUpKind();
-		} else {
-			enyo.warn("Deimos iframe received unknown message op:", msg);
+		switch(msg.op) {
+			case "containerData":
+				this.setContainerData(msg.val);
+				break;
+			case "render":
+				this.renderKind(msg.val);
+				break;
+			case "select":
+				this.selectItem(msg.val);
+				break;
+			case "highlight":
+				this.highlightDropTarget(this.getControlById(msg.val.aresId));
+				break;
+			case "unhighlight":
+				this.unhighlightDropTargets(msg.val);
+				break;
+			case "modify":
+				this.modifyProperty(msg.val);
+				break;
+			case "codeUpdate":
+				this.codeUpdate(msg.val);
+				break;
+			case "cssUpdate":
+				this.cssUpdate(msg.val);
+				break;
+			case "cleanUp":
+				this.cleanUpKind();
+				break;
+			default:
+				enyo.warn("Deimos iframe received unknown message op:", msg);
+				break;
 		}
 	},
 	//* On down, set _this.selection_
@@ -108,7 +115,7 @@ enyo.kind({
 			return false;
 		}
 		
-		e.dataTransfer.setData('Text', this.$.serializer.serializeComponent(this.selection, true));
+		e.dataTransfer.setData('ares/moveitem', this.$.serializer.serializeComponent(this.selection, true));
         return true;
 	},
 	//* On drag over, enable HTML5 drag-and-drop if there is a valid drop target
@@ -159,37 +166,37 @@ enyo.kind({
 		
 		return true;
 	},
-	/**
-		On drop, either move _this.selection_ or create a new component (if
-		dragged component came from outside of iFrame and thus doesn't have an id).
-	*/
-	drop: function(e) {
-		var dropData,
-			dropTarget;
-		
-		if(!e.dataTransfer) {
-			return false;
+	
+	//* On drop, either move _this.selection_ or create a new component
+	drop: function(inEvent) {
+		if(!inEvent.dataTransfer) {
+			return true;
 		}
 		
-		dropTarget = this.getEventDropTarget(e.dispatchTarget);
+		var dataType = inEvent.dataTransfer.types[0],
+			dropData = enyo.json.codify.from(inEvent.dataTransfer.getData(dataType)),
+			dropTarget = this.getEventDropTarget(inEvent.dispatchTarget);
+		
+		this.currentDropTarget = null;
+		this.syncDropTargetHighlighting();
 		
 		if(!this.isValidDropTarget(dropTarget)) {
 			return false;
 		}
 		
-		dropData = enyo.json.codify.from(e.dataTransfer.getData("Text"));
-		
-		this.currentDropTarget = null;
-		
-		if(dropData.aresId) {
-			this.dropControl(this.getControlById(dropData.aresId), dropTarget);
-		} else if(dropData.op && dropData.op === "newControl") {
-			this.createNewComponent({kind: dropData.kind}, dropTarget);
+		switch(dataType) {
+			case "ares/moveitem":
+				this.sendMessage({op: "moveItem", val: {itemId: dropData.aresId, targetId: dropTarget.aresId}});
+				break;
+			case "ares/createitem":
+				this.sendMessage({op: "createItem", val: {config: dropData.config, targetId: dropTarget.aresId}});
+				break;
+			default:
+				enyo.warn("Component view received unknown drop: ", dataType, dropData);
+				break;
 		}
 		
-		this.syncDropTargetHighlighting();
-		
-        return true;
+		return true;
 	},
 	
 	//* Save _inData_ as _this.containerData_ to use as a reference when creating drop targets.
@@ -298,22 +305,6 @@ enyo.kind({
 	},
 	updateProperty: function(inProperty, inValue) {
 		this.selection.setProperty(inProperty, inValue);
-	},
-	//* When a drop happens in the component view, translate that to a drop in this iframe.
-	simulateDrop: function(inDropData) {
-		var dropTarget = this.getControlById(inDropData.target);
-		
-		if(this.isValidDropTarget(dropTarget)) {
-			this.dropControl(this.getControlById(inDropData.item), dropTarget);
-		}
-	},
-	//* When an item is dragged from the Palette to the ComponentView, translate that to create a component in this iframe.
-	simulateCreateNewComponent: function(inDropData) {
-		var dropTarget = this.getControlById(inDropData.target);
-		
-		if(this.isValidDropTarget(dropTarget)) {
-			this.createNewComponent({kind: inDropData.kind}, dropTarget);
-		}
 	},
 	
 	//* Get each kind component individually
@@ -441,7 +432,9 @@ enyo.kind({
 		this.renderSelectHighlight();
 	},
 	renderSelectHighlight: function() {
-		this.$.selectHighlight.setBounds(this.selection.hasNode().getBoundingClientRect());
+		if(this.selection && this.selection.hasNode()) {
+			this.$.selectHighlight.setBounds(this.selection.hasNode().getBoundingClientRect());
+		}
 	},
 	hideSelectHighlight: function() {
 		this.$.selectHighlight.setBounds({width: 0, height: 0});
@@ -495,13 +488,6 @@ enyo.kind({
 				}
 			}
 		}
-	},
-	/**
-		Tell Deimos to create a new component, brought in from the Palette. This component's initial properties
-		are defined in the design.js file associated with the current library.
-	*/
-	createNewComponent: function(inNewComponent, inDropTarget) {
-		this.sendMessage({op: "createNewComponent", val: {component: inNewComponent, target: this.getSerializedCopyOfComponent(inDropTarget)}});
 	},
 	//* Create object that is a copy of the passed in component
 	getSerializedCopyOfComponent: function(inComponent) {

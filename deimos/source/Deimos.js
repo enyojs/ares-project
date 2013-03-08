@@ -25,7 +25,8 @@ enyo.kind({
 						onSelect: "designerSelect",
 						onSelected: "designerSelected",
 						onDesignRendered: "designRendered",
-						onCreateComponent: "designerCreateComponent",
+						onMoveItem: "moveItem",
+						onCreateItem: "createItem",
 						onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting"
 					},
 				]},
@@ -39,8 +40,8 @@ enyo.kind({
 						onSelect: "componentViewSelect",
 						onHighlightDropTarget: "highlightDesignerDropTarget",
 						onUnHighlightDropTargets: "unhighlightDesignerDropTargets",
-						onDrop: "componentViewDrop",
-						onPaletteDrop: "componentViewPaletteDrop"
+						onMoveItem: "moveItem",
+						onCreateItem: "createItem"
 					},
 					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
 				]}
@@ -136,7 +137,6 @@ enyo.kind({
 		var c = inSender.selection;
 		this.refreshInspector();
 		this.$.componentView.setSelected(c);
-		// TODO this.enableDisableButtons(c);
 		return true;
 	},
 	// Select event triggered by component view was completed. Refresh inspector.
@@ -146,7 +146,6 @@ enyo.kind({
 	},
 	componentViewSelect: function(inSender, inEvent) {
 		this.$.designer.select(inEvent.component);
-		// TODO this.enableDisableButtons(c);
 		return true;
 	},
 	syncComponentViewDropTargetHighlighting: function(inSender, inEvent) {
@@ -159,14 +158,6 @@ enyo.kind({
 	unhighlightDesignerDropTargets: function(inSender, inEvent) {
 		this.$.designer.unHighlightDropTargets();
 		return true;
-	},
-	//* A control was dropped on the component view
-	componentViewDrop: function(inSender, inEvent) {
-		return this.$.designer.drop(inEvent);
-	},
-	//* A control from the Palette was dropped on the component view
-	componentViewPaletteDrop: function(inSender, inEvent) {
-		this.$.designer.createNewControl(inEvent);
 	},
 	inspectorModify: function(inSender, inEvent) {
 		this.$.designer.modifyProperty(inEvent.name, inEvent.value);
@@ -204,39 +195,82 @@ enyo.kind({
 		
 		return true;
 	},
-	//* When a control is dropped in the iframe, pass the data up to Deimos for processing
-	designerCreateComponent: function(inSender, inEvent) {
-		var newComponent = inEvent.component,
-			target = inEvent.target;
+	//* Create item from palette (via drag-and-drop from Palette into Designer or Component View)
+	createItem: function(inSender, inEvent) {
+		var config = inEvent.config,
+			targetId = inEvent.targetId;
 		
-		// Give the new component an _aresId_
-		newComponent.aresId = this.generateNewAresId();
-
-		// If _aresId_ add to appropriate components array
-		if(target.aresId) {
-			this.addPaletteComponent(newComponent, target, this.kinds[this.index].components);
-		// If no _aresId_ then add to topmost component
+		if(!config) {
+			enyo.warn("Could not create new item - bad data: ", inEvent);
+			return true;
+		}
+		
+		// Give the new component a fresh _aresId_
+		config.aresId = this.generateNewAresId();
+		
+		// If target has an id, add to appropriate components array. Otherwise add to topmost component.
+		if(targetId) {
+			this.createItemOnTarget(config, targetId, this.kinds[this.index].components);
 		} else {
-			this.kinds[this.index].components.push(newComponent);
+			this.kinds[this.index].components.push(config);
 		}
 		
 		// Update user defined values
 		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
 		
-		// Rerender
 		this.rerenderKind();
+		
+		return true;
 	},
-	addPaletteComponent: function(inNewComponent, inParentComponent, inComponents) {
+	createItemOnTarget: function(inConfig, inTargetId, inComponents) {
 		for (var i = 0, component; (component = inComponents[i]); i++) {
-			if(component.aresId === inParentComponent.aresId) {
+			if(component.aresId === inTargetId) {
 				if(component.components) {
-					component.components.push(inNewComponent);
+					component.components.push(inConfig);
 				} else {
-					component.components = [inNewComponent];
+					component.components = [inConfig];
 				}
 			}
 			if(component.components) {
-				this.addPaletteComponent(inNewComponent, inParentComponent, component.components);
+				this.createItemOnTarget(inConfig, inTargetId, component.components);
+			}
+		}
+	},
+	//* Move item with _inEvent.itemId_ into item with _inEvent.targetId_
+	moveItem: function(inSender, inEvent) {
+		var clone = enyo.clone(this.getItemById(inEvent.itemId, this.kinds[this.index].components)),
+			target = (inEvent.targetId) ? this.getItemById(inEvent.targetId, this.kinds[this.index].components) : this.kinds[this.index];
+		
+		this.removeItemById(inEvent.itemId, this.kinds[this.index].components);
+		
+		target.components = target.components || [];
+		target.components.push(clone);
+		
+		this.rerenderKind();
+		
+		return true;
+	},
+	getItemById: function(inId, inComponents) {
+		for (var i = 0, component, item; (component = inComponents[i]); i++) {
+			if (component.aresId === inId) {
+				item = inComponents[i];
+			} else if (component.components) {
+				item = this.getItemById(inId, component.components);
+			}
+			if(item) {
+				return item;
+			}
+		}
+	},
+	//* Look through _inComponents_ recursively and splice out the item with an _aresId_ matching _inId_
+	removeItemById: function(inId, inComponents) {
+		for (var i = 0, component; (component = inComponents[i]); i++) {
+			if (component.aresId === inId) {
+				inComponents.splice(i, 1);
+				return;
+			}
+			if (component.components) {
+				this.removeItemById(inId, component.components);
 			}
 		}
 	},
@@ -306,7 +340,6 @@ enyo.kind({
 		}
 		
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, this.kinds[this.index].components);
-		this.log(enyo.json.codify.to(this.kinds[this.index].components));
 		this.rerenderKind();
 	},
 	deleteComponentByAresId: function(inAresId, inComponents) {
@@ -320,12 +353,6 @@ enyo.kind({
 				this.deleteComponentByAresId(inAresId, inComponents[i].components);
 			}
 		}
-	},
-	enableDisableButtons: function(control) {
-		var disabled = this.$.designer.isRootControl(control);
-		this.$.upButton.setDisabled(disabled);
-		this.$.downButton.setDisabled(disabled);
-		this.$.deleteButton.setDisabled(disabled);
 	},
 	editedChanged: function() {
 		// Note: This doesn't look like it does anything, because we send updates to the document to Ares immediately, so a doc is 

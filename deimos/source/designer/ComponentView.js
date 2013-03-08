@@ -4,8 +4,8 @@ enyo.kind({
 		onSelect: "",
 		onHighlightDropTarget: "",
 		onUnHighlightDropTargets: "",
-		onDrop: "",
-		onPaletteDrop: ""
+		onMoveItem: "",
+		onCreateItem: ""
 	},
 	style: "position: relative;",
 	components: [
@@ -35,7 +35,7 @@ enyo.kind({
 	createEntry: function(inComponent, inIndent) {
 		this.map[inComponent.name] = this.createComponent(
 			{comp: inComponent, style: "padding-left: " + inIndent + "px;", attributes: {draggable: "true"},
-				ondown: "itemDown", ondragstart: "itemDragstart", ondragover: "itemDragover", ondragleave: "itemDragleave", ondrop: "itemDrop",
+				ondown: "itemDown", ondragstart: "itemDragstart", ondragover: "itemDragover", ondragleave: "itemDragleave", ondrop: "drop",
 				components: [
 					{tag: "b", content: inComponent.name, style: "pointer-events: none;"},
 					{tag: "span", allowHtml: true, style: "pointer-events: none;", content: "&nbsp;(<i>" + inComponent.kind + "</i>)"}
@@ -83,7 +83,7 @@ enyo.kind({
 			return true;
 		}
 		
-		inEvent.dataTransfer.setData("Text", enyo.json.codify.to(inSender.comp));
+		inEvent.dataTransfer.setData("ares/moveitem", enyo.json.codify.to(inSender.comp));
 		return true;
 	},
 	itemDragover: function(inSender, inEvent) {
@@ -120,34 +120,38 @@ enyo.kind({
 		this.unHighlightItem(inSender);
 		return true;
 	},
-	itemDrop: function(inSender, inEvent) {
+	drop: function(inSender, inEvent) {
 		if(!inEvent.dataTransfer) {
 			return true;
 		}
 		
-		var dropData = enyo.json.codify.from(inEvent.dataTransfer.getData("Text")),
+		var dataType = inEvent.dataTransfer.types[0],
+			dropData = enyo.json.codify.from(inEvent.dataTransfer.getData(dataType)),
 			targetId = inSender.comp.aresId;
 		
-		if(dropData.op && dropData.op === "newControl") {
-			this.doPaletteDrop(enyo.mixin(dropData, {target: targetId}));
-		} else {
-			this.doDrop({
-				item:   dropData.aresId,
-				target: targetId
-			});
+		switch(dataType) {
+			case "ares/moveitem":
+				this.doMoveItem({
+					itemId:   dropData.aresId,
+					targetId: targetId
+				});
+				break;
+			case "ares/createitem":
+				this.doCreateItem({
+					config:   dropData.config,
+					targetId: targetId
+				});
+				break;
+			default:
+				enyo.warn("Component view received unknown drop: ", dataType, dropData);
+				break;
 		}
 		
 		return true;
 	},
-	
 	isValidDropTarget: function(inComponent) {
 		// TODO - descendents are not valid targets for their parents (currently this is validated by the iframe)
 		return inComponent !== this.selection && inComponent.getAttribute("dropTarget") === "true";
-	},
-	//* Save _inData_ as _this.containerData_ to use as a reference when creating drop targets.
-	setContainerData: function(inData) {
-		this.containerData = inData;
-		this.sendMessage({op: "state", val: "ready"});
 	},
 	
 	highlightDropTarget: function(inComponent) {
@@ -181,24 +185,12 @@ enyo.kind({
 	},
 	
 	upAction: function() {
-		var index = this.getIndexOfComponent(this.selection);
-		this.doSelect({component: this.getClientControls()[this.clamp(index + 1)].comp});
+		var controls = this.getClientControls();
+		this.doSelect({component: controls[this.clamp(controls.indexOf(this.selection) + 1)].comp});
 	},
 	downAction: function() {
-		var index = this.getIndexOfComponent(this.selection);
-		this.doSelect({component: this.getClientControls()[this.clamp(index - 1)].comp});
-	},
-	getIndexOfComponent: function(inComponent) {
-		var controls = this.getClientControls(),
-			i;
-		
-		for(i = 0; i < controls.length; i++) {
-			if(controls[i] === inComponent) {
-				return i;
-			}
-		}
-		
-		return -1;
+		var controls = this.getClientControls();
+		this.doSelect({component: controls[this.clamp(controls.indexOf(this.selection) - 1)].comp});
 	},
 	clamp: function(inIndex) {
 		var controls = this.getClientControls(),

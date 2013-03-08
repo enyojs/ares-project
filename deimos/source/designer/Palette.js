@@ -106,8 +106,8 @@ enyo.kind({
 		if(!inEvent.dataTransfer) {
 			return false;
 		}
-
-		inEvent.dataTransfer.setData("Text", enyo.json.codify.to(enyo.mixin(inEvent.config, {op: "newControl"})));
+		
+		inEvent.dataTransfer.setData("ares/createitem", enyo.json.codify.to({config: inEvent.config}));
         return true;
 	},
 	/**
@@ -175,6 +175,7 @@ enyo.kind({
 		}).sort(function(a,b) {
 			return a.name.localeCompare(b.name);
 		});
+		
 		// Add components to catch-all categories per namespace
 		enyo.forEach(catchAllKinds, function(kind) {
 			// Create palette item for kind
