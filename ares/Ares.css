@@ -105,15 +105,18 @@ body {
 	width: 300px;
 }
 .ares_phobos_esb {
+	background-color: red;
 	width: 45px;
 }
+.phobos_editorsettings_buttoninput {
+	width: 450px;
+}
 .alt_button_input {
-	width: 400px;
+	width: 425px;
 }
 .ares_phobos_settingfont {
 	font-size: 12px;
 }
-
 /**/
 .border {
 	background-color: whiteSmoke;
