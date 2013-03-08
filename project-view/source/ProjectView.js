@@ -116,6 +116,7 @@ enyo.kind({
 		}
 		var self = this;
 		this.showWaitPopup("Starting project build");
+		// TODO: Must be reworked to allow the selection of builder in the UI - ENYO-2049
 		var services = ServiceRegistry.instance.getServicesByType('build');
 		var bdService =	services[services.length - 1];
 		if (bdService) {
