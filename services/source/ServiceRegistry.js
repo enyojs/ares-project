@@ -141,7 +141,7 @@ enyo.kind({
 			} else if (service.config.type === "build" && service.config.provider === "hermes" && service.config.id === "phonegap") {
 				service.impl = new Phonegap.Build();
 				this.configureService(service, next);
-			} else if (service.config.type === "other" && service.config.provider === "hermes" && service.config.id === "prj-toolkit") {
+			} else if (service.config.type === "generate" && service.config.provider === "hermes" && service.config.id === "prj-toolkit") {
 				service.impl = new ProjectToolkit();
 				this.configureService(service, next);
 			} else {
