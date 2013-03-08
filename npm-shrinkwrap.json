@@ -1,10 +1,10 @@
 {
   "name": "ares-ide",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "dependencies": {
     "async": {
       "version": "0.1.22",
-      "from": "async"
+      "from": "async@0.1.22"
     },
     "combined-stream": {
       "version": "0.0.3",
@@ -18,37 +18,90 @@
     },
     "dropbox": {
       "version": "0.9.1-beta2",
-      "from": "dropbox",
+      "from": "dropbox@0.9.1-beta2",
       "dependencies": {
         "open": {
           "version": "0.0.3",
-          "from": "open@>= 0.0.3"
+          "from": "open@0.0.3"
         },
         "xhr2": {
           "version": "0.0.5",
-          "from": "xhr2@>= 0.0.5"
+          "from": "xhr2@0.0.5"
         }
       }
     },
     "express": {
-      "version": "2.5.8",
+      "version": "3.1.0",
+      "from": "express@3.1.0",
+      "resolved": "https://registry.npmjs.org/express/-/express-3.1.0.tgz",
       "dependencies": {
         "connect": {
-          "version": "1.8.7",
+          "version": "2.7.2",
+          "from": "connect@2.7.2",
           "dependencies": {
+            "qs": {
+              "version": "0.5.1",
+              "from": "qs@0.5.1"
+            },
             "formidable": {
-              "version": "1.0.9"
+              "version": "1.0.11",
+              "from": "formidable@1.0.11"
+            },
+            "bytes": {
+              "version": "0.1.0",
+              "from": "bytes@0.1.0"
+            },
+            "pause": {
+              "version": "0.0.1",
+              "from": "pause@0.0.1"
             }
           }
         },
-        "mime": {
-          "version": "1.2.4"
+        "commander": {
+          "version": "0.6.1",
+          "from": "commander@0.6.1"
         },
-        "qs": {
-          "version": "0.4.2"
+        "range-parser": {
+          "version": "0.0.4",
+          "from": "range-parser@0.0.4"
         },
         "mkdirp": {
-          "version": "0.3.0"
+          "version": "0.3.3",
+          "from": "mkdirp@0.3.3"
+        },
+        "cookie": {
+          "version": "0.0.5",
+          "from": "cookie@0.0.5"
+        },
+        "buffer-crc32": {
+          "version": "0.1.1",
+          "from": "buffer-crc32@0.1.1"
+        },
+        "fresh": {
+          "version": "0.1.0",
+          "from": "fresh@0.1.0"
+        },
+        "methods": {
+          "version": "0.0.1",
+          "from": "methods@0.0.1"
+        },
+        "send": {
+          "version": "0.1.0",
+          "from": "send@0.1.0",
+          "dependencies": {
+            "mime": {
+              "version": "1.2.6",
+              "from": "mime@1.2.6"
+            }
+          }
+        },
+        "cookie-signature": {
+          "version": "0.0.1",
+          "from": "cookie-signature@0.0.1"
+        },
+        "debug": {
+          "version": "0.7.2",
+          "from": "debug@*"
         }
       }
     },
@@ -58,29 +111,87 @@
     },
     "mime": {
       "version": "1.2.7",
-      "from": "mime"
+      "from": "mime@1.2.7"
     },
     "mkdirp": {
       "version": "0.3.4",
-      "from": "mkdirp"
+      "from": "mkdirp@0.3.4"
     },
     "optimist": {
       "version": "0.3.5",
-      "from": "optimist",
+      "from": "optimist@0.3.5",
       "dependencies": {
         "wordwrap": {
           "version": "0.0.2",
-          "from": "wordwrap@~0.0.2"
+          "from": "wordwrap@0.0.2"
         }
       }
     },
     "phonegapbuildapi": {
-      "version": "1.0.2"
+      "version": "1.0.2",
+      "dependencies": {
+        "request": {
+          "version": "2.14.0",
+          "from": "https://registry.npmjs.org/request/-/request-2.14.0.tgz",
+          "resolved": "https://registry.npmjs.org/request/-/request-2.14.0.tgz",
+          "dependencies": {
+            "form-data": {
+              "version": "0.0.7",
+              "from": "form-data@~0.0.3",
+              "dependencies": {
+                "combined-stream": {
+                  "version": "0.0.4",
+                  "from": "combined-stream@~0.0.4",
+                  "dependencies": {
+                    "delayed-stream": {
+                      "version": "0.0.5",
+                      "from": "delayed-stream@0.0.5"
+                    }
+                  }
+                },
+                "async": {
+                  "version": "0.1.22",
+                  "from": "async@~0.1.9"
+                }
+              }
+            },
+            "mime": {
+              "version": "1.2.9",
+              "from": "mime@~1.2.7"
+            }
+          }
+        },
+        "mime": {
+          "version": "1.2.9",
+          "from": "https://registry.npmjs.org/mime/-/mime-1.2.9.tgz",
+          "resolved": "https://registry.npmjs.org/mime/-/mime-1.2.9.tgz"
+        }
+      }
     },
     "request": {
       "version": "2.12.0",
-      "from": "request",
+      "from": "request@2.12.0",
       "dependencies": {
+        "form-data": {
+          "version": "0.0.3",
+          "from": "form-data",
+          "dependencies": {
+            "combined-stream": {
+              "version": "0.0.3",
+              "from": "combined-stream@0.0.3",
+              "dependencies": {
+                "delayed-stream": {
+                  "version": "0.0.5",
+                  "from": "delayed-stream@0.0.5"
+                }
+              }
+            },
+            "async": {
+              "version": "0.1.9",
+              "from": "async@0.1.9"
+            }
+          }
+        },
         "mime": {
           "version": "1.2.7",
           "from": "mime"
@@ -88,35 +199,39 @@
       }
     },
     "rimraf": {
-      "version": "1.0.6"
+      "version": "1.0.6",
+      "from": "rimraf@1.0.6"
     },
     "shelljs": {
       "version": "0.1.2",
-      "from": "shelljs"
+      "from": "shelljs@0.1.2"
     },
     "temp": {
       "version": "0.4.0",
-      "from": "temp"
+      "from": "temp@0.4.0"
     },
     "tunnel": {
       "version": "0.0.2",
-      "from": "tunnel"
+      "from": "tunnel@0.0.2"
     },
     "unzip": {
-      "version": "0.1.2",
-      "from": "unzip",
+      "version": "0.1.3",
       "dependencies": {
         "fstream": {
-          "version": "0.1.21",
+          "version": "0.1.22",
           "from": "fstream@~0.1.21",
           "dependencies": {
             "rimraf": {
-              "version": "2.1.2",
+              "version": "2.1.4",
               "from": "rimraf@2"
             },
+            "mkdirp": {
+              "version": "0.3.5",
+              "from": "mkdirp@0.3"
+            },
             "graceful-fs": {
-              "version": "1.1.14",
-              "from": "graceful-fs@~1.1.2"
+              "version": "1.2.0",
+              "from": "graceful-fs@~1.2.0"
             },
             "inherits": {
               "version": "1.0.0",
@@ -125,14 +240,8 @@
           }
         },
         "pullstream": {
-          "version": "0.0.6",
-          "from": "pullstream@~0.0.6",
-          "dependencies": {
-            "over": {
-              "version": "0.0.5",
-              "from": "over@~0.0.5"
-            }
-          }
+          "version": "0.1.0",
+          "from": "pullstream@~0.1.0"
         },
         "binary": {
           "version": "0.3.0",
@@ -147,10 +256,6 @@
                   "from": "traverse@>=0.3.0 <0.4"
                 }
               }
-            },
-            "buffers": {
-              "version": "0.1.1",
-              "from": "buffers@~0.1.1"
             }
           }
         },
@@ -161,20 +266,148 @@
         "setimmediate": {
           "version": "1.0.1",
           "from": "setimmediate@~1.0.1"
+        },
+        "buffers": {
+          "version": "0.1.1",
+          "from": "buffers@~0.1.1"
+        },
+        "over": {
+          "version": "0.0.5",
+          "from": "over@0.0.5"
+        },
+        "stream-buffers": {
+          "version": "0.2.4",
+          "from": "stream-buffers@~0.2.3"
+        },
+        "temp": {
+          "version": "0.4.0",
+          "from": "temp@~0.4.0"
+        },
+        "dirdiff": {
+          "version": "0.0.1",
+          "from": "dirdiff@~0.0.1",
+          "dependencies": {
+            "glob": {
+              "version": "3.1.21",
+              "from": "glob@~3.1.12",
+              "dependencies": {
+                "minimatch": {
+                  "version": "0.2.11",
+                  "from": "minimatch@~0.2.11",
+                  "dependencies": {
+                    "lru-cache": {
+                      "version": "2.2.2",
+                      "from": "lru-cache@2"
+                    },
+                    "sigmund": {
+                      "version": "1.0.0",
+                      "from": "sigmund@~1.0.0"
+                    }
+                  }
+                },
+                "graceful-fs": {
+                  "version": "1.2.0",
+                  "from": "graceful-fs@~1.2.0"
+                },
+                "inherits": {
+                  "version": "1.0.0",
+                  "from": "inherits@1"
+                }
+              }
+            }
+          }
+        },
+        "tap": {
+          "version": "0.3.3",
+          "from": "tap@~0.3.0",
+          "dependencies": {
+            "inherits": {
+              "version": "1.0.0"
+            },
+            "yamlish": {
+              "version": "0.0.5"
+            },
+            "slide": {
+              "version": "1.1.3",
+              "from": "slide@*"
+            },
+            "runforcover": {
+              "version": "0.0.2",
+              "from": "runforcover@~0.0.2",
+              "dependencies": {
+                "bunker": {
+                  "version": "0.1.2",
+                  "from": "bunker@0.1.X",
+                  "dependencies": {
+                    "burrito": {
+                      "version": "0.2.12",
+                      "from": "burrito@>=0.2.5 <0.3",
+                      "dependencies": {
+                        "traverse": {
+                          "version": "0.5.2",
+                          "from": "traverse@~0.5.1"
+                        },
+                        "uglify-js": {
+                          "version": "1.1.1",
+                          "from": "uglify-js@~1.1.1"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "nopt": {
+              "version": "2.1.1",
+              "from": "nopt@~2",
+              "dependencies": {
+                "abbrev": {
+                  "version": "1.0.4",
+                  "from": "abbrev@1"
+                }
+              }
+            },
+            "mkdirp": {
+              "version": "0.3.5",
+              "from": "mkdirp@~0.3"
+            },
+            "difflet": {
+              "version": "0.2.3",
+              "from": "difflet@~0.2.0",
+              "dependencies": {
+                "traverse": {
+                  "version": "0.6.3",
+                  "from": "traverse@0.6.x"
+                },
+                "charm": {
+                  "version": "0.0.8",
+                  "from": "charm@0.0.x"
+                }
+              }
+            },
+            "deep-equal": {
+              "version": "0.0.0",
+              "from": "deep-equal@~0.0.0"
+            },
+            "buffer-equal": {
+              "version": "0.0.0",
+              "from": "buffer-equal@~0.0.0"
+            }
+          }
         }
       }
     },
     "zipstream": {
       "version": "0.2.1",
-      "from": "zipstream"
+      "from": "zipstream@0.2.1"
     },
     "should": {
       "version": "1.1.0",
-      "from": "should"
+      "from": "should@1.1.0"
     },
     "mocha": {
       "version": "1.4.2",
-      "from": "mocha",
+      "from": "mocha@1.4.2",
       "dependencies": {
         "commander": {
           "version": "0.6.1",
@@ -182,7 +415,7 @@
         },
         "growl": {
           "version": "1.5.1",
-          "from": "growl@1.5.x"
+          "from": "growl@1.5.1"
         },
         "jade": {
           "version": "0.26.3",
@@ -200,7 +433,7 @@
         },
         "debug": {
           "version": "0.7.0",
-          "from": "debug@*"
+          "from": "debug@0.7.0"
         },
         "mkdirp": {
           "version": "0.3.3",
