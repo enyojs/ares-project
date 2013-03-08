@@ -15,7 +15,7 @@ var fs = require("fs"),
 
 var basename = path.basename(__filename);
 var FORM_DATA_LINE_BREAK = '\r\n';
-var performCleanup = false;
+var performCleanup = true;
 
 function BdOpenwebOS(config, next) {
 	function HttpError(msg, statusCode) {

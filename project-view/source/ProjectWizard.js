@@ -132,7 +132,7 @@ enyo.kind({
 	getTemplates: function(inSender, inEvent, next) {
 		var propW = this.$.propertiesWidget;
 		// Getting template list
-		var service = ServiceRegistry.instance.getServicesByType('other')[0];
+		var service = ServiceRegistry.instance.getServicesByType('generate')[0];
 		if (service) {
 			var templateReq = service.getTemplates();
 			templateReq.response(this, function(inSender, inData) {
@@ -236,7 +236,7 @@ enyo.kind({
 			}
 		}];
 
-		var genService = ServiceRegistry.instance.getServicesByType('other')[0];
+		var genService = ServiceRegistry.instance.getServicesByType('generate')[0];
 		var req = genService.generate(template, substitutions);
 		req.response(this, this.populateProject);
 		req.error(this, function(inSender, inError) {
