@@ -39,7 +39,7 @@ enyo.kind({
 		if (!this.config.origin) {
 			throw "Service URL not yet defined";
 		}
-		var url = this.config.origin + this.config.pathname + '/id/' + (inNodeId ? inNodeId : "" ) + '?_method=' + inMethod;
+		var url = this.config.origin + this.config.pathname + '/id/' + (inNodeId ? inNodeId : "" );
 		var method = this._requestDic[inMethod].verb;
 		if (this.debug) this.log(inMethod+"/"+method+": '"+url+"'");
 		if (this.debug) this.log("params=", inParams);
@@ -48,7 +48,10 @@ enyo.kind({
 			method: method,
 			handleAs: this._requestDic[inMethod].handleAs,
 			postBody: inParams && inParams.postBody,
-			contentType: inParams && inParams.contentType
+			contentType: inParams && inParams.contentType,
+			headers: {
+				'x-http-method-override': inMethod
+			}
 		};
 		var req = new enyo.Ajax(options);
 		if (inParams && inParams.postBody) {
