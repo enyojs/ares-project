@@ -86,6 +86,11 @@ function get(path, query, next) {
 		path: path
 	};
 
+	if (query && query._method) {
+		reqOptions.headers['x-http-method-override'] = query._method;
+		query._method = undefined;
+	}
+
 	if (config.auth) {
 		query.auth = JSON.stringify(config.auth);
 	}
@@ -106,6 +111,11 @@ function post(path, query, content, contentType, next) {
 		headers: {},
 		path: path
 	};
+
+	if (query && query._method) {
+		reqOptions.headers['x-http-method-override'] = query._method;
+		query._method = undefined;
+	}
 
 	if (contentType) {
 		if (!contentType instanceof String) throw new Error("bad parameter: missing contentType");
@@ -128,11 +138,6 @@ function post(path, query, content, contentType, next) {
 			}	
 			if (Object.keys(query).length > 0) {
 				reqBody = querystring.stringify(query);
-			}
-			// every query parameters are passsed in the body, but
-			// the '_method' (if any), that sticks into the URL
-			if (query._method) {
-				query = {_method: query._method};
 			}
 		} else if (contentType.match(/multipart\/form-data/)) {
 			reqParts = content;
