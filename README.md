@@ -133,6 +133,20 @@ In order to produce Ares on a build server:
 		$ npm install ../ares-project/ares-ide-0.0.2.tgz
 		$ node_modules/.bin/ares-ide
 
+### Publish
+
+_This section is for Ares commiters only_
+
+1. Tag the version you intend to publish, with the exact same string as the `version: ` in `package.json` & upload this tag.
+1. Checkout a fresh copy _on a Linux (virtual) machine_ 
+	* Publishing from a Windows machine will break UNIX (Linux & OSX) installations [NPM Issue 2097](https://github.com/isaacs/npm/issues/2097)
+	* Packing from an OSX machine misses some files [NPM Issue 2619](https://github.com/isaacs/npm/issues/2619)
+1. If not already done run `npm adduser` to allow your self to publish from this machine
+1. Run `npm -d pack`
+1. Publish the generated tarball `npm -d publish <ares-ide-x.y.z.tgz>`
+	It is also possible to directly publish (skip the intemediate `pack`, but this one gives you a chance to verify the content of the publish archive without the need for a roundtrip with the NPM registry).
+1. Check [ares-ide on the NPM registry](https://npmjs.org/package/ares-ide).
+
 ## Features
 
 ### PhoneGap Build
