@@ -230,9 +230,9 @@ enyo.kind({
 		var substitutions = [{
 			fileRegexp: "appinfo.json",
 			json: {
-				id: inEvent.data.name,
+				id: inEvent.data.id,
 				version: inEvent.data.version,
-				title: this.config.title
+				title: inEvent.data.title
 			}
 		}];
 
