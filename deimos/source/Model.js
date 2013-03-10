@@ -44,12 +44,11 @@ enyo.singleton({
 	 * @public
 	 */
 	palette: [],
-	buildInformation: function() {
-		this.palette = Palette.model,		// TODO: Should replace Palette.model
+	buildInformation: function(projectIndexer) {
 		this.addInformation("properties", "__default", this.defaults.properties);
 		this.addInformation("events", "__default", this.defaults.events);
 
-		enyo.forEach(this.config, function(item) {
+		enyo.forEach(projectIndexer.propertyMetaData, function(item) {
 			if (item.type === "kind") {
 				this.debug && this.log("Processing: " + item.name, item);
 				this.addInformation("properties", item.name, item.properties);
