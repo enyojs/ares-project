@@ -46,19 +46,19 @@ enyo.kind({
 	buildProjectDb: function() {
 		if (this.analysisDone(this.$.projectAnalyzer.index)) {
 			this.debug && this.log("Project DB already available - index: ", this.$.projectAnalyzer.index);
-			this.projectIndexReady();
 		} else {
 			this.debug && this.log("Starting project analysis for " + this.projectUrl);
 			this.$.projectAnalyzer.analyze([this.projectUrl + "/enyo/source", this.projectUrl], this.pathResolver);
 		}
+		this.projectData.setProjectIndexer(this.$.projectAnalyzer.index);
 	},
 	/**
-	 * Passes the analyzer data to Phobos
+	 * Notifies modules dependent on the indexer that it has updated
 	 * @protected
 	 */
 	projectIndexReady: function() {
 		// Update the model to wake up the listeners
-		this.projectData.setProjectIndexer(this.$.projectAnalyzer.index);
+		this.projectData.updateProjectIndexer();
 	},
 	/**
 	 * Reset Phobos and AutoComplete enyo and project databases while the analysis

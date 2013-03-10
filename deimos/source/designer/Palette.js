@@ -36,7 +36,7 @@ enyo.kind({
 		{kind: "Control", classes: "palette-item", attributes: {draggable: true}, components: [
 			{name: "icon", kind: "Image", showing: false},
 			{name: "name"},
-			{classes: "row-fluid", name: "client"},
+			{classes: "row-fluid", name: "client"}
 		]}
 	],
 	handlers: {
@@ -120,10 +120,12 @@ enyo.kind({
 	projectDataChanged: function(oldProjectData) {
 		if (this.projectData) {
 			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
+			this.projectData.on('update:project-indexer', this.projectIndexerChanged, this);
 			this.setProjectIndexer(this.projectData.getProjectIndexer());
 		}
 		if (oldProjectData) {
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
+			oldProjectData.off('update:project-indexer', this.projectIndexerChanged);
 		}
 	},
 	/**

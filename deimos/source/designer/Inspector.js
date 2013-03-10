@@ -9,7 +9,6 @@ enyo.kind({
 		filterLevel: null,		// Value will be given by Inspector.FilterXXX "checked" item.
 		filterType: null,		// Value will be given by Inspector.FilterXXX "checked" item.
 		projectIndexer: null,	// Analyzer output for the current project
-		fileIndexer: null,		// Analyzer output for the current file
 		projectData: null		// All the project data shared mainly between phobos and deimos
 	},
 	components: [
@@ -280,19 +279,6 @@ enyo.kind({
 	projectIndexReady: function(model, value, options) {
 		this.setProjectIndexer(value);
 	},
-	/**
-	 * The current file  analyzer output has changed
-	 * @param value   the new analyzer output
-	 * @protected
-	 */
-	fileIndexerChanged: function() {
-		this.localKinds = {};	// Reset the list of kinds for the currently edited file
-		if (this.fileIndexer && this.fileIndexer.objects) {
-			for(var i = 0, o; (o = this.fileIndexer.objects[i]); i++) {
-				this.localKinds[o.name] = o;
-			}
-		}
-	},
 	initUserDefinedAttributes: function(inComponents) {
 		this.userDefinedAttributes = {};
 		
@@ -332,16 +318,10 @@ enyo.kind({
 	 * @returns the definition of the requested kind or undefined
 	 */
 	getKindDefinition: function(name) {
-		var definition = this.localKinds[name];
-		
-		if (definition === undefined && this.projectIndexer) {
-			// Try to get it from the project analysis
-			definition = this.projectIndexer.findByName(name);
-
-			if (definition === undefined) {
-				// Try again with the enyo prefix as it is optional
-				definition = this.projectIndexer.findByName("enyo." + name);
-			}
+		var definition = this.projectIndexer.findByName(name);
+		if (definition === undefined) {
+			// Try again with the enyo prefix as it is optional
+			definition = this.projectIndexer.findByName("enyo." + name);
 		}
 		return definition;
 	},
@@ -350,13 +330,17 @@ enyo.kind({
 	 * @protected
 	 */
 	updateFilterLevel: function(inSender, inEvent) {
-		this.setFilterLevel(inEvent.active.value);
-		this.inspect(this.selected);
+		if (inEvent.active) {
+			this.setFilterLevel(inEvent.active.value);
+			this.inspect(this.selected);
+		}
 		return true;
 	},
 	updateFilterType: function(inSender, inEvent) {
-		this.setFilterType(inEvent.active.value);
-		this.inspect(this.selected);
+		if (inEvent.active) {
+			this.setFilterType(inEvent.active.value);
+			this.inspect(this.selected);
+		}
 		return true;
 	},
 	//* When an inherit checkbox is toggled, enable/disable the attribute
@@ -393,8 +377,8 @@ enyo.kind({
 	},
 	components: [
 		{kind: "onyx.RadioGroup", fit:false, onActivate:"doValueChanged", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton thirds", components: [
-			{value: Model.F_USEFUL, content: "Frequent", active: true},
-			{value: Model.F_NORMAL, content: "Normal"},
+			{value: Model.F_USEFUL, content: "Frequent"},
+			{value: Model.F_NORMAL, content: "Normal", active: true},
 			{value: Model.F_DANGEROUS, content: "All"}
 		]}
 	]

@@ -9,6 +9,7 @@ enyo.kind({
 	published: {
 		ace: null,
 		analysis: null,
+		projectData: null,
 		projectIndexer: null
 	},
 	components : [ {
@@ -506,13 +507,40 @@ enyo.kind({
 		}
 	},
 	/**
-	 * Callback invoked when the parsing of the project's files is done
+	 * Receive the project data reference which allows to access the analyzer
+	 * output for the project's files, enyo/onyx and all the other project
+	 * related information shared between phobos and deimos.
+	 * @param  oldProjectData
+	 * @protected
+	 */
+	projectDataChanged: function(oldProjectData) {
+		if (this.projectData) {
+			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
+			this.projectData.on('update:project-indexer', this.projectIndexerChanged, this);
+		}
+		if (oldProjectData) {
+			oldProjectData.off('change:project-indexer', this.projectIndexReady);
+			oldProjectData.off('update:project-indexer', this.projectIndexerChanged);
+		}
+	},
+	/**
+	 * The project analyzer output has changed
+	 * @param value   the new analyzer output
+	 * @protected
+	 */
+	projectIndexReady: function(model, value, options) {
+		this.setProjectIndexer(value);
+	},
+	/**
+	 * The current project analyzer output has changed
+	 * Re-scan the indexer
+	 * @param value   the new analyzer output
 	 * @protected
 	 */
 	projectIndexerChanged: function() {
 		this.debug && this.log("Project analysis ready");
 		var suggestions, regexp;
-		
+
 		if (this.projectIndexer) {
 			// Build the suggestion lists for enyo as the analyzer just finished its job
 			suggestions = new Phobos.Suggestions();
@@ -520,7 +548,7 @@ enyo.kind({
 			suggestions.add(this.projectIndexer.search(this.getFctFilterFn(regexp), this.getMapFn(this.AUTOCOMP_ENYO), this));
 			suggestions.add(this.projectIndexer.search(this.getKindFilter(regexp), this.getMapFn(this.AUTOCOMP_ENYO), this));
 			this.suggestionsEnyo = suggestions;
-			
+
 			// Build the suggestion lists for onyx as the analyzer just finished its job
 			suggestions = new Phobos.Suggestions();
 			regexp = /^onyx\..*$/;

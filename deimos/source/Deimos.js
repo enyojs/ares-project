@@ -92,11 +92,8 @@ enyo.kind({
 		this.$.kindPicker.render();
 		this.setEdited(false);
 		
-		// Pass the project information (analyzer output, ...) to the inspector
+		// Pass the project information (analyzer output, ...) to the inspector and palette
 		this.$.inspector.setProjectData(data.projectData);
-		this.$.inspector.setFileIndexer(data.fileIndexer);
-		
-		// Pass the analyzer output to the palette
 		this.$.palette.setProjectData(data.projectData);
 	},
 	kindSelected: function(inSender, inEvent) {
@@ -173,7 +170,7 @@ enyo.kind({
 			// Prepare the data for the code editor
 			var event = {docHasChanged: this.getEdited(), contents: []};
 			for(var i = 0 ; i < this.kinds.length ; i++) {
-				event.contents[i] = this.kinds[i].content;
+				event.contents[i] = this.kinds[i].updatedComponents;
 			}
 			return event;
 		}
@@ -196,7 +193,7 @@ enyo.kind({
 		this.setEdited(true);
 		
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
-		this.kinds[this.index].content = enyo.json.codify.to(this.cleanUpComponents(components));
+		this.kinds[this.index].updatedComponents = enyo.json.codify.to(this.cleanUpComponents(components));
 		
 		return true;
 	},
