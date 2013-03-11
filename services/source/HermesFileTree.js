@@ -263,9 +263,9 @@ enyo.kind({
 		// Add dir property to files, which is a project-relative path
 		enyo.forEach(files, function(f) {
 			if (f.isDir) {
-				f.dir = inNode.file.dir + f.name + "/";
+				f.dir = (inNode.file.dir || "/") + f.name + "/";
 			} else {
-				f.dir = inNode.file.dir;
+				f.dir = (inNode.file.dir || "/");
 			}
 		});
 		rfiles = this.filesToNodes(files) ; // with prefix in name
@@ -435,11 +435,6 @@ enyo.kind({
 		if (this.debug) this.log(this) ;
 		var target = node || this.$.serverNode ;
 		var inTop = 0;
-
-		if (!node) {
-			// Initialize project-relative root dir
-			target.file.dir = "/";
-		}
 
 		if (! tracker) {
 			inTop++ ;
