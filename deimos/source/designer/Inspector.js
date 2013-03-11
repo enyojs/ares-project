@@ -265,10 +265,12 @@ enyo.kind({
 	projectDataChanged: function(oldProjectData) {
 		if (this.projectData) {
 			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
+			this.projectData.on('update:project-indexer', this.projectIndexUpdated, this);
 			this.setProjectIndexer(this.projectData.getProjectIndexer());
 		}
 		if (oldProjectData) {
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
+			oldProjectData.off('update:project-indexer', this.projectIndexUpdated);
 		}
 	},
 	/**
@@ -278,6 +280,9 @@ enyo.kind({
 	 */
 	projectIndexReady: function(model, value, options) {
 		this.setProjectIndexer(value);
+	},
+	projectIndexUpdated: function() {
+		Model.buildInformation(this.projectIndexer);
 	},
 	initUserDefinedAttributes: function(inComponents) {
 		this.userDefinedAttributes = {};
