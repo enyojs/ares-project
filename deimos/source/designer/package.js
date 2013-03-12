@@ -7,7 +7,6 @@
 	"Inspector.js",
 	"ComponentView.js",
 	"InspectorConfig.js",
-	"Sandbox.js",
 	"IFrameDesigner.js",
 	"designer.css",
 	"RPCCommunicator.js"
