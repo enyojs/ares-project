@@ -4,8 +4,25 @@ enyo.singleton({
 	debug: false,
 	info: {},
 	config: [],
-	defaults: null,				// populated by base-design.js
-
+	defaults: {
+		properties: {
+			owner: {filterLevel: "hidden"},
+			container: {filterLevel: "hidden"},
+			parent: {filterLevel: "hidden"},
+			prepend: {filterLevel: "hidden"},
+			events: {filterLevel: "hidden"},
+			id: {filterLevel: "hidden"},
+			isContainer: {filterLevel: "hidden"},
+			controlParentName: {filterLevel: "hidden"},
+			layoutKind: {filterLevel: "hidden"},
+			canGenerate: {filterLevel: "dangerous", inputKind: "Inspector.Config.Boolean"},
+			content: {filterLevel: "useful", inputKind: "Inspector.Config.Text"},
+			name: {filterLevel: "useful", inputKind: "Inspector.Config.Text"}
+		},
+		events: {
+			ontap: {filterLevel: "useful"}
+		}
+	},
 	F_HIDDEN: -1,
 	F_DANGEROUS: 1,
 	F_NORMAL: 2,
@@ -26,12 +43,12 @@ enyo.singleton({
 	 * Build all the information needed by the inspector
 	 * @public
 	 */
-	buildInformation: function() {
-		this.palette = Palette.model,		// TODO: Should replace Palette.model
+	palette: [],
+	buildInformation: function(projectIndexer) {
 		this.addInformation("properties", "__default", this.defaults.properties);
 		this.addInformation("events", "__default", this.defaults.events);
 
-		enyo.forEach(this.config, function(item) {
+		enyo.forEach(projectIndexer.propertyMetaData, function(item) {
 			if (item.type === "kind") {
 				this.debug && this.log("Processing: " + item.name, item);
 				this.addInformation("properties", item.name, item.properties);
@@ -40,6 +57,8 @@ enyo.singleton({
 				enyo.error("Unknown data type='" + item.type + "' -- Ignored");
 			}
 		}, this);
+		
+		//this.buildProjectInformation();
 	},
 	addInformation: function(inType, inName, inInfo) {
 		if (inInfo) {
@@ -90,5 +109,20 @@ enyo.singleton({
 			info = this.getInfo("__default", inType, inName);
 			return (info && info.level) || Model.F_NORMAL;
 		}
+	},
+	getFlattenedContainerInfo: function() {
+		var returnObject = {},
+			group,
+			item,
+			i,
+			j;
+		
+		for(i=0;(group = this.palette[i]);i++) {
+			for(j=0;(item = group.items[j]);j++) {
+				returnObject[item.name] = (item.config && typeof item.config.isContainer !== "undefined" && item.config.isContainer === false) ? false : true;
+			}
+		}
+		
+		return returnObject;
 	}
 });

@@ -6,14 +6,14 @@ enyo.kind({
 	components: [
 		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
 			{components: [
-				{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument"}
+				{kind: "Phobos", onSaveDocument: "saveDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
 			]},
 			{components: [
-				{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate"}
+				{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
 			]}
 		]},
 		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
-			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile"},
+			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "doubleclickFile", onProjectSelected: "projectSelected"},
 			{name: "bottomBar", kind: "DocumentToolbar",
 				onToggleOpen: "toggleFiles",
 				onSwitchFile: "switchFile",
@@ -76,9 +76,14 @@ enyo.kind({
 			this.openDocument(inSender, inEvent);
 		}
 	},
+	projectSelected: function() {
+		setTimeout(enyo.bind(this, function() { this.$.deimos.projectSelected(this.$.projectView.currentProject); }), 500);	// <-- TODO - using timeout here because project url is set asynchronously
+		return true;
+	},
 	openDocument: function(inSender, inEvent) {
 		var f = inEvent.file;
 		var projectData = inEvent.projectData;
+		
 		var service = projectData.getService();
 		this.$.phobos.beginOpenDoc();
 		service.getFile(f.id)
@@ -120,10 +125,21 @@ enyo.kind({
 		this.showFiles();
 	},
 	designDocument: function(inSender, inEvent) {
+		this.syncEditedFiles();
 		this.$.deimos.load(inEvent);
 		this.$.panels.setIndex(this.deimosViewIndex);
 		this.adjustBarMode();
 		this.activeDocument.setCurrentIF('designer');
+	},
+	//* A code change happened in Phobos - push change to Deimos
+	phobosUpdate: function(inSender, inEvent) {
+		this.$.deimos.load(inEvent);
+	},
+	//* A design change happened in Deimos - push change to Phobos
+	designerUpdate: function(inSender, inEvent) {
+		if (inEvent && inEvent.docHasChanged) {
+			this.$.phobos.updateComponents(inSender, inEvent);
+		}
 	},
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
@@ -131,10 +147,13 @@ enyo.kind({
 		this.adjustBarMode();
 		this.activeDocument.setCurrentIF('code');
 	},
-	designerUpdate: function(inSender, inEvent) {
-		if (inEvent && inEvent.docHasChanged) {
-			this.$.phobos.updateComponents(inSender, inEvent);
-		}
+	//* Undo event from Deimos
+	designerUndo: function(inSender, inEvent) {
+		this.$.phobos.undoAndUpdate();
+	},
+	//* Redo event from Deimos
+	designerRedo: function(inSender, inEvent) {
+		this.$.phobos.redoAndUpdate();
 	},
 	handleBeforeUnload: function() {
 		if (window.location.search.indexOf("debug") == -1) {
@@ -222,6 +241,39 @@ enyo.kind({
 	bounceClose: function(inSender, inEvent) {
 		this.switchFile(inSender, inEvent);
 		enyo.asyncMethod(this.$.phobos, "closeDocAction");
+	},
+	//* Update code running in designer
+	syncEditedFiles: function() {
+		var files = Ares.Workspace.files,
+			model,
+			i;
+		
+		for(i=0;i<files.models.length;i++) {
+			model = files.models[i];
+			
+			if(model.getFile().name === "package.js") {
+				continue;
+			}
+
+			this.updateCode(files.get(model.id));
+		}
+	},
+	updateCode: function(inDoc) {
+		var filename = inDoc.getFile().path,
+			code = inDoc.getAceSession().getValue();
+
+		if(filename.slice(-4) === ".css") {
+			doc = inDoc;
+			this.syncCSSFile(filename, code);
+		} else if(filename.slice(-3) === ".js") {
+			this.syncJSFile(code);
+		}
+	},
+	syncCSSFile: function(inFilename, inCode) {
+		this.$.deimos.syncCSSFile(inFilename, inCode);
+	},
+	syncJSFile: function(inCode) {
+		this.$.deimos.syncJSFile(inCode);
 	},
 	statics: {
 		isBrowserSupported: function() {
