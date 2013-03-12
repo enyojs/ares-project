@@ -144,7 +144,7 @@ enyo.kind({
 			var m = require("ace/mode/" + inMode).Mode;
 			inSession.setMode(new m());
 		} catch(e) {
-			enyo.log(e);
+			this.warn(e);
 		}
 	},
 	updateSessionSettings: function(inSession) {
