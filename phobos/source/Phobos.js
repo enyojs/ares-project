@@ -93,7 +93,26 @@ enyo.kind({
 		var extension = file.name.split(".").pop();
 		this.hideWaitPopup();
 		this.analysis = null;
-		var mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image"}[extension] || "text";
+		var mode = {
+			json: "json",
+			js: "javascript",
+			html: "html",
+			css: "css",
+			coffee: "coffee",
+			dot: "dot",
+			patch: "diff",
+			diff: "diff",
+			jade: "jade",
+			less: "less",
+			md: "markdown",
+			markdown: "markdown",
+			svg: "svg",
+			xml: "xml",
+			jpeg: "image",
+			jpg: "image",
+			png: "image",
+			gif: "image"
+		}[extension] || "text";
 		this.docData.setMode(mode);
 		var hasAce = this.adjustPanelsForMode(mode);
 		if (hasAce) {
