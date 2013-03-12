@@ -332,7 +332,9 @@ enyo.kind({
 	},
 	//* Navigate from Phobos to Deimos. Pass Deimos all relevant info.
 	designerAction: function() {
-		// Request to design the current document, passing info about all kinds in the file
+		// Update the projectIndexer and notify watchers
+		this.reparseAction();
+		
 		var kinds = this.extractKindsData(),
 			data = {
 				kinds: kinds,
@@ -341,6 +343,7 @@ enyo.kind({
 			};
 		
 		if (kinds.length > 0) {
+			// Request to design the current document, passing info about all kinds in the file
 			this.doDesignDocument(data);
 		} else {
 			alert("No kinds found in this file");
@@ -363,9 +366,6 @@ enyo.kind({
 			},
 			c = this.$.ace.getValue(),
 			kinds = [];
-		
-		// Update the projectIndexer and notify watchers
-		this.reparseAction();
 		
 		if (this.analysis) {
 			for (var i=0; i < this.analysis.objects.length; i++) {
@@ -475,7 +475,6 @@ enyo.kind({
 					this.insertMissingHandlersIntoKind(obj);
 				}
 			}
-
 			// Reparse to get the definition of the newly added methods
 			this.reparseAction(true);
 		} else {
@@ -721,6 +720,9 @@ enyo.kind({
 	},
 	//* Send up an updated copy of the code
 	bubbleCodeUpdate: function() {
+		// Update the projectIndexer and notify watchers
+		this.reparseAction(true);
+		
 		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
 		if (data.kinds.length > 0) {
 			this.doUpdate(data);

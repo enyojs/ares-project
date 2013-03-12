@@ -434,10 +434,11 @@ enyo.kind({
 	renderSelectHighlight: function() {
 		if(this.selection && this.selection.hasNode()) {
 			this.$.selectHighlight.setBounds(this.selection.hasNode().getBoundingClientRect());
+			this.$.selectHighlight.show();
 		}
 	},
 	hideSelectHighlight: function() {
-		this.$.selectHighlight.setBounds({width: 0, height: 0});
+		this.$.selectHighlight.hide();
 	},
 	syncDropTargetHighlighting: function() {
 		var dropTarget = this.currentDropTarget ? this.$.serializer.serializeComponent(this.currentDropTarget, true) : null;

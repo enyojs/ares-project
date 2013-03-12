@@ -124,7 +124,6 @@ enyo.kind({
 	rerenderKind: function() {
 		this.$.designer.setCurrentKind(this.kinds[this.index]);
 		this.$.designer.renderCurrentKind();
-		this.designerUpdate();
 	},
 	refreshInspector: function() {
 		enyo.job("inspect", enyo.bind(this, function() {
@@ -194,6 +193,8 @@ enyo.kind({
 		
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
 		this.kinds[this.index].updatedComponents = enyo.json.codify.to(this.cleanUpComponents(components));
+
+		this.designerUpdate();
 		
 		return true;
 	},
