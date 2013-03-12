@@ -332,11 +332,14 @@ enyo.kind({
 	},
 	//* Navigate from Phobos to Deimos. Pass Deimos all relevant info.
 	designerAction: function() {
-		// Update the projectIndexer and notify watchers
-		this.reparseAction();
 		// Request to design the current document, passing info about all kinds in the file
 		var kinds = this.extractKindsData(),
-			data = {kinds: kinds, projectData: this.projectData, fileIndexer: this.analysis};
+			data = {
+				kinds: kinds,
+				projectData: this.projectData,
+				fileIndexer: this.analysis
+			};
+		
 		if (kinds.length > 0) {
 			this.doDesignDocument(data);
 		} else {
@@ -360,7 +363,10 @@ enyo.kind({
 			},
 			c = this.$.ace.getValue(),
 			kinds = [];
-
+		
+		// Update the projectIndexer and notify watchers
+		this.reparseAction();
+		
 		if (this.analysis) {
 			for (var i=0; i < this.analysis.objects.length; i++) {
 				var o = this.analysis.objects[i];
