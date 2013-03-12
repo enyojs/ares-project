@@ -7,7 +7,7 @@
 	"Inspector.js",
 	"ComponentView.js",
 	"InspectorConfig.js",
-	"IFrameDesigner.js",
+	"Designer.js",
 	"designer.css",
 	"RPCCommunicator.js"
 );
