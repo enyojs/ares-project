@@ -20,34 +20,30 @@ enyo.kind({
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan"},
 		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
-		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
-			{kind: "Image", src: "$phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
-			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
-		]}
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""}
 	],
 	handlers: {
 		onAddProjectInList: "addProjectInList",
 		onPhonegapBuild: "startPhonegapBuild",
-		onBuildStarted: "phonegapBuildStarted",
 		onPreview: "launchPreview",
-		onError: "showError",
-		onShowWaitPopup: "handleShowWaitPopup",
-		onHideWaitPopup: "hideWaitPopup"
+		onError: "showError"
+	},
+	events: {
+		onHideWaitPopup: "",
+		onShowWaitPopup: ""
 	},
 	create: function() {
 		this.inherited(arguments);
 	},
 	showError: function(inSender, inEvent) {
 		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
-		this.hideWaitPopup();
+		this.doHideWaitPopup();
 		this.showErrorPopup(inEvent.msg, inEvent.details);
 		return true; //Stop event propagation
 	},
 	showErrorPopup : function(msg, details) {
 		this.$.errorPopup.raise(msg, details);
 	},
-
 	scanProjectAction: function(inSender, inEvent) {
 		this.$.projectWizardScan.setHeaderText('Select a directory containing one or more project.json files');
 		this.$.projectWizardScan.show();
@@ -63,7 +59,7 @@ enyo.kind({
 	},
 
 	addProjectInList: function(inSender, inEvent) {
-		this.hideWaitPopup();
+		this.doHideWaitPopup();
 		try {
 			// Add an entry into the project list
 			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
@@ -100,22 +96,12 @@ enyo.kind({
 	projectRemoved: function(inSender, inEvent) {
 		this.$.harmonia.setProject(null);
 	},
-	handleShowWaitPopup: function(inSender, inEvent) {
-		this.showWaitPopup(inEvent.msg);
-	},
-	showWaitPopup: function(inMessage) {
-		this.$.waitPopupMessage.setContent(inMessage);
-		this.$.waitPopup.show();
-	},
-	hideWaitPopup: function() {
-		this.$.waitPopup.hide();
-	},
 	startPhonegapBuild: function(inSender, inEvent) {
 		if (!this.currentProject) {
 			return true; // stop bubble-up
 		}
 		var self = this;
-		this.showWaitPopup("Starting project build");
+		this.doShowWaitPopup({msg: "Starting project build"});
 		// TODO: Must be reworked to allow the selection of builder in the UI - ENYO-2049
 		var services = ServiceRegistry.instance.getServicesByType('build');
 		var bdService =	services[services.length - 1];
@@ -126,7 +112,7 @@ enyo.kind({
 				folderId: this.currentProject.getFolderId(),
 				config: this.currentProject.getConfig()
 			}, function(inError, inDetails) {
-				self.hideWaitPopup();
+				self.doHideWaitPopup();
 				if (inError) {
 					self.showErrorPopup(inError.toString(), inDetails);
 				}
@@ -137,11 +123,6 @@ enyo.kind({
 		}
 		return true; // stop bubble-up
 	},
-	phonegapBuildStarted: function(inSender, inEvent) {
-		this.showWaitPopup("Phonegap build started");
-		setTimeout(enyo.bind(this, "hideWaitPopup"), 2000);
-	},
-
 	/**
 	 * Launch a preview widget of the selected project in a separate frame
 	 */
@@ -168,5 +149,4 @@ enyo.kind({
 		}
 		return true; // stop the bubble
 	}
-
 });
