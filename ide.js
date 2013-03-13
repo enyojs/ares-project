@@ -3,13 +3,7 @@
 /**
  *  ARES IDE server
  */
-
-//extract major version
-var version = process.version.match(/[0-9]+.[0-9]+/)[0];
-if (version <= 0.7) {
-	console.error("Ares ide.js is only supported on Node.js version 0.8 and above");
-	process.exit(1);
-}
+require('./hermes/lib/checkNodeVersion');	// Check nodejs version
 
 var fs = require("fs"),
     path = require("path"),
