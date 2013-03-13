@@ -89,13 +89,13 @@ enyo.kind({
 		this.sendMessage({op: "containerData", val: Model.getFlattenedContainerInfo()});
 	},
 	//* Tell iFrame to render the current kind
-	renderCurrentKind: function() {
+	renderCurrentKind: function(inSelectId) {
 		if(!this.getIframeReady()) {
 			return;
 		}
 		
 		var currentKind = this.getCurrentKind();
-		this.sendMessage({op: "render", val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components)}});
+		this.sendMessage({op: "render", val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components), selectId: inSelectId}});
 	},
 	
 	select: function(inControl) {

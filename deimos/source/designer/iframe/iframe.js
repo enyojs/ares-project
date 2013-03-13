@@ -125,6 +125,14 @@ enyo.kind({
 		if(!e.dataTransfer) {
 			return false;
 		}
+
+		// Deselect the currently selected item if we're creating a new item, so all items are droppable
+		if (e.dataTransfer.types[0] == "ares/createitem") {
+			// TODO: Should probably have a proper "deselect" operation that is synched
+			// with the component view and inspector; for now just null it out
+			this.selection = null;
+			this.hideSelectHighlight();
+		}
 		
 		dropTarget = this.getEventDropTarget(e.dispatchTarget);
 		
@@ -237,6 +245,11 @@ enyo.kind({
 		
 		// Notify Deimos that the kind rendered successfully
 		this.kindUpdated();
+
+		// Select a control if so requested
+		if (inKind.selectId) {
+			this.selectItem({aresId: inKind.selectId});
+		}
 	},
 	//* Rerender current selection
 	rerenderKind: function() {

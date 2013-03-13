@@ -121,9 +121,9 @@ enyo.kind({
 		return true;
 	},
 	//* Rerender current kind
-	rerenderKind: function() {
+	rerenderKind: function(inSelectId) {
 		this.$.designer.setCurrentKind(this.kinds[this.index]);
-		this.$.designer.renderCurrentKind();
+		this.$.designer.renderCurrentKind(inSelectId);
 	},
 	refreshInspector: function() {
 		enyo.job("inspect", enyo.bind(this, function() {
@@ -221,7 +221,7 @@ enyo.kind({
 		// Update user defined values
 		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
 		
-		this.rerenderKind();
+		this.rerenderKind(config.aresId);
 		
 		return true;
 	},
@@ -249,7 +249,7 @@ enyo.kind({
 		target.components = target.components || [];
 		target.components.push(clone);
 		
-		this.rerenderKind();
+		this.rerenderKind(inEvent.itemId);
 		
 		return true;
 	},
