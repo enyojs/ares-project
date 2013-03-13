@@ -17,7 +17,7 @@
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectList_iconButton3]]></target>
+	<target><![CDATA[id=ares_projectView_projectList_importProjectButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -92,7 +92,7 @@
 </selenese>
 <selenese>
 	<command>assertText</command>
-	<target><![CDATA[id=ares_phobos_editorSettingsPopup_control3]]></target>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_highLightLabel]]></target>
 	<value><![CDATA[High light active line]]></value>
 </selenese>
 <selenese>
@@ -112,7 +112,7 @@
 </selenese>
 <selenese>
 	<command>assertText</command>
-	<target><![CDATA[id=ares_phobos_editorSettingsPopup_control6]]></target>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_wordWrapLabel]]></target>
 	<value><![CDATA[Word Wrap]]></value>
 </selenese>
 <selenese>
@@ -132,7 +132,7 @@
 </selenese>
 <selenese>
 	<command>assertText</command>
-	<target><![CDATA[id=ares_phobos_editorSettingsPopup_control10]]></target>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_fontSizeLabel]]></target>
 	<value><![CDATA[Font Size]]></value>
 </selenese>
 <selenese>
@@ -147,7 +147,7 @@
 </selenese>
 <selenese>
 	<command>assertText</command>
-	<target><![CDATA[id=ares_phobos_editorSettingsPopup_control14]]></target>
+	<target><![CDATA[id=ares_phobos_editorSettingsPopup_editorThemesLabel]]></target>
 	<value><![CDATA[Editor Themes]]></value>
 </selenese>
 <selenese>
