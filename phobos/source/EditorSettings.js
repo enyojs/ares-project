@@ -16,8 +16,8 @@ enyo.kind({
 	components: [
 		{classes: "ares_editorfont", content: "Editor Settings"},
 		{tag: "br"},
-		{ kind: "FittableColumns", classes:"ares_editorpopup", components: [
-			{fit: true, classes: "ares_editorfont", content: "High light active line"},
+		{name: "phobosEditorPopup", kind: "FittableColumns", classes:"ares_editorpopup", components: [
+			{name: "highLightLabel", fit: true, classes: "ares_editorfont", content: "High light active line"},
 			{style: "width: 15px;", content: " "},
 			{name: "highLightButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "buttonToggle"},
 		]},
@@ -25,7 +25,7 @@ enyo.kind({
 		{tag: "br"},
 
 		{ kind: "FittableColumns", classes:"ares_editorfont", components: [
-			{fit: true, classes: "ares_editorfont", content: "Word Wrap"},
+			{name: "wordWrapLabel", fit: true, classes: "ares_editorfont", content: "Word Wrap"},
 			{style: "width: 65px;", content: " "},
 			{name: "wordWrapButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "wordWrapToggle"},
 
@@ -35,7 +35,7 @@ enyo.kind({
 		{tag: "br"},
 
 		{ kind: "FittableColumns", classes:"ares_editorfont", components: [
-			{fit: true, classes: "ares_editorfont", content: "Font Size"},
+			{name: "fontSizeLabel", fit: true, classes: "ares_editorfont", content: "Font Size"},
 			{style: "width: 90px;", content: " "},
 			{kind: "onyx.PickerDecorator", components: [
 				{style: "min-width: 100px; font-size: 13px;"},
@@ -47,7 +47,7 @@ enyo.kind({
 		{tag: "br"},
 
 		{ kind: "FittableColumns", classes:"ares_editorfont", components: [
-			{fit: true, classes: "ares_editorfont", content: "Editor Themes"},
+			{name: "editorThemesLabel", fit: true, classes: "ares_editorfont", content: "Editor Themes"},
 			{style: "width: 15px;", content: " "},
 			{name : "themesPicker", kind: "onyx.PickerDecorator",
 

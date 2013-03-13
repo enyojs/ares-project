@@ -1,14 +1,5 @@
-#deimos_left {
-	width: 280px;
-}
-#deimos_right {
-	width: 320px;
-}
-#deimos_componentView {
-	height: 240px;
-}
-#deimos_code {
-	height: 240px;
+.deimos-designer-wrapper {
+	margin: 4px 0px 0px;
 }
 /**/
 .deimos_panel {
@@ -37,7 +28,6 @@
 
 	min-height: 20px;
 	margin: 8px 8px 8px 8px;
-	//padding: 8px;
 	box-sizing: border-box;
 	border: 1px solid #EEE;
 	border: 1px solid rgba(0, 0, 0, 0.05);
@@ -74,4 +64,28 @@
 	top: 0;
 	right: 0;
 	bottom: 0;
+}
+
+.deimos-toolbar.onyx-toolbar {
+	padding-top:    4px;
+	padding-bottom: 4px;
+	font-size: 14px;
+}
+.deimos-designer-toolbar-spacing {
+	margin: 0px 30px 0px 0px !important;
+}
+.deimos-device-picker {
+	width: 160px;
+}
+.deimos-designer-input {
+	width: 3em;
+	text-align: center;
+}
+.onyx-button.deimos-swap-dimensions-button {
+	line-height: 0.5em;
+}
+.deimos-zoom-slider {
+	width: 100px;
+	margin-right: 10px;
+	margin-left:  10px;
 }
