@@ -2,6 +2,8 @@
  * Hermes PhoneGap build service
  */
 
+require('./lib/checkNodeVersion');		// Check nodejs version
+
 var fs = require("fs"),
     path = require("path"),
     express = require("express"),
@@ -485,11 +487,6 @@ function BdPhoneGap(config, next) {
 
 if (path.basename(process.argv[1]) === basename) {
 	// We are main.js: create & run the object...
-
-	var version = process.version.match(/[0-9]+.[0-9]+/)[0];
-	if (version <= 0.7) {
-		process.exit("Only supported on Node.js version 0.8 and above");
-	}
 
 	var argv = optimist.usage(
 		"Ares PhoneGap build service\nUsage: $0 [OPTIONS]", {
