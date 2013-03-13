@@ -260,6 +260,14 @@ enyo.kind({
 	},
     updateNodeContent: function(inNode, files) {
 		var i = 0 , nfiles, rfiles, res, modified = 0, newControl ;
+		// Add dir property to files, which is a project-relative path
+		enyo.forEach(files, function(f) {
+			if (f.isDir) {
+				f.dir = (inNode.file.dir || "/") + f.name + "/";
+			} else {
+				f.dir = (inNode.file.dir || "/");
+			}
+		});
 		rfiles = this.filesToNodes(files) ; // with prefix in name
 		nfiles = this.getNodeFiles(inNode) ;
 

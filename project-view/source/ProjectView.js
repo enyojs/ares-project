@@ -95,7 +95,6 @@ enyo.kind({
 			project.setConfig(config);
 		});
 		this.currentProject = project;
-		return true; //Stop event propagation
 	},
 	projectRemoved: function(inSender, inEvent) {
 		this.$.harmonia.setProject(null);

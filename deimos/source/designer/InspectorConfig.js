@@ -28,18 +28,23 @@ enyo.kind({
 	published: {
 		fieldName: "",
 		fieldValue: "",
-		extra: ""
+		extra: "",
+		disabled: false
 	},
 	create: function() {
 		this.inherited(arguments);
 		this.fieldNameChanged();
 		this.fieldValueChanged();
+		this.disabledChanged();
 	},
 	fieldNameChanged: function() {
 		this.$.title.setContent(this.fieldName);
 	},
 	fieldValueChanged: function() {
 		this.$.value.setValue(this.fieldValue);
+	},
+	disabledChanged: function() {
+		this.$.value.setDisabled(this.getDisabled());
 	}
 });
 
@@ -51,10 +56,18 @@ enyo.kind({
 		{classes: "inspector-field-caption", name: "title"},
 		{kind: "enyo.Checkbox", classes: "inspector-field-checkbox", name: "value", onActivate: "handleChange"}
 	],
+	allowActivate: false,
+	rendered: function() {
+		this.inherited(arguments);
+		this.allowActivate = true;
+	},
 	handleChange: function(inSender, inEvent) {
+		if(!this.allowActivate) {
+			return true;
+		}
 		this.fieldValue = this.$.value.getChecked();
 		this.doChange({target: this});
-		return true; // Stop propagation
+		return true;
 	}
 });
 
@@ -70,15 +83,17 @@ enyo.kind({
 		{classes: "inspector-field-caption", name: "title"},
 		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
 	],
+	
+	//* Stop extraneous activate event from being fired when box is initially checked
 	handleChange: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
 		this.doChange({target: this});
-		return true; // Stop propagation
+		return true;
 	},
 	handleDblClick: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
 		this.doDblClick({target: this});
-		return true; // Stop propagation
+		return true;
 	}
 });
 
@@ -104,7 +119,7 @@ enyo.kind({
 	handleChange: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
 		this.doChange({target: this});
-		return true; // Stop propagation
+		return true;
 	},
 	fieldValueChanged: function() {
 		enyo.forEach(this.values, function(value) {

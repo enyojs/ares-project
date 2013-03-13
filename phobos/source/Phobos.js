@@ -3,7 +3,6 @@ enyo.kind({
 	name: "Phobos",
 	classes: "enyo-unselectable",
 	components: [
-		{kind: "Analyzer", name: "fileAnalyzer"},
 		{kind: "DragAvatar", components: [
 			{tag: "img", src: "$deimos/images/icon.png"}
 		]},
@@ -40,7 +39,8 @@ enyo.kind({
 	events: {
 		onSaveDocument: "",
 		onDesignDocument: "",
-		onCloseDocument: ""
+		onCloseDocument: "",
+		onUpdate: ""
 	},
 	handlers: {
 		onCss: "newcssAction",
@@ -81,6 +81,12 @@ enyo.kind({
 		this.showWaitPopup("Opening document...");
 	},
 	openDoc: function(inDocData) {
+		// If we are changing documents, reparse any changes into the current projectIndexer
+		if (this.docData && this.docData.getEdited()) {
+			this.reparseAction(true);
+		}
+
+		// Set up the new doucment
 		this.docData = inDocData;
 		this.projectData = this.docData.getProjectData();
 		this.getProjectController();
@@ -93,9 +99,10 @@ enyo.kind({
 		var extension = file.name.split(".").pop();
 		this.hideWaitPopup();
 		this.analysis = null;
-		var mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image"}[extension] || "text";
+		var mode = {json: "json", js: "javascript", html: "html", css: "css", jpg: "image", png: "image", gif: "image", design: "json"}[extension] || "text";
 		this.docData.setMode(mode);
 		var hasAce = this.adjustPanelsForMode(mode);
+		
 		if (hasAce) {
 			var aceSession = this.docData.getAceSession();
 			if (aceSession) {
@@ -106,7 +113,7 @@ enyo.kind({
 				this.$.ace.setSession(aceSession);
 				this.docData.setAceSession(aceSession);
 			}
-
+			
 			// Pass to the autocomplete compononent a reference to ace
 			this.$.autocomplete.setAce(this.$.ace);
 			this.focusEditor();
@@ -136,8 +143,8 @@ enyo.kind({
 			var origin = this.projectData.getService().getConfig().origin;
 			this.$.imageViewer.setAttribute("src", origin + file.pathname);
 		}
-		this.reparseAction();					// Synchronous call
-		this.projectCtrl.buildEnyoDb();			// this.buildProjectDb() will be invoked when enyo analysis is finished
+		this.projectCtrl.buildProjectDb();
+		this.reparseAction(true);
 		this.$.documentLabel.setContent(file.name);
 
 		this.docData.setEdited(edited);
@@ -189,20 +196,10 @@ enyo.kind({
 	//
 	setAutoCompleteData: function() {
 		this.$.autocomplete.hide();
-		this.projectData.on('change:enyo-indexer', this.enyoIndexReady, this);
-		this.projectData.on('change:project-indexer', this.projectIndexReady, this);
-		this.$.autocomplete.setEnyoIndexer(this.projectData.getEnyoIndexer());
-		this.$.autocomplete.setProjectIndexer(this.projectData.getProjectIndexer());
+		this.$.autocomplete.setProjectData(this.projectData);
 	},
 	resetAutoCompleteData: function() {
-		this.projectData.off('change:enyo-indexer', this.enyoIndexReady);
-		this.projectData.off('change:project-indexer', this.projectIndexReady);
-		this.$.autocomplete.setEnyoIndexer(null);
-		this.$.autocomplete.setProjectIndexer(null);
-	},
-	enyoIndexReady: function(model, value, options) {
-		// Pass to the autocomplete component a reference to the enyo indexer
-		this.$.autocomplete.setEnyoIndexer(value);
+		this.$.autocomplete.setProjectData(null);
 	},
 	projectIndexReady: function(model, value, options) {
 		// Pass to the autocomplete component a reference to the project indexer
@@ -246,30 +243,49 @@ enyo.kind({
 		//
 		this.$.right.$.dump.setContent(h$);
 	},
-	reparseAction: function() {
-		if (this.docData.getMode() === 'javascript') {
-			var module = {
-				name: this.docData.getFile().name,
-				code: this.$.ace.getValue()
-			};
-			try {
-				this.analysis = module;
-				this.$.fileAnalyzer.index.indexModule(module);
-				this.updateObjectsLines(module);
+	//* Updates the projectIndexer (notifying watchers by default) and resets the local analysis file
+	reparseAction: function(inhibitUpdate) {
+		var mode = this.docData.getMode();
+		var module = {
+			name: this.docData.getFile().name,
+			code: this.$.ace.getValue(),
+			path: this.projectCtrl.projectUrl + this.docData.getFile().dir + this.docData.getFile().name
+		};
+		switch(mode) {
+			case "javascript":
+				try {
+					this.analysis = module;
+					this.projectData.getProjectIndexer().reIndexModule(module);
+					if (inhibitUpdate !== true) {
+						this.projectData.updateProjectIndexer();
+					}
+					this.updateObjectsLines(module);
 
-				// dump the object where the cursor is positioned, if it exists
-				this.dumpInfo(module.objects && module.objects[module.currentObject]);
+					// dump the object where the cursor is positioned, if it exists
+					this.dumpInfo(module.objects && module.objects[module.currentObject]);
 
-				// Give the information to the autocomplete component
-				this.$.autocomplete.setAnalysis(this.analysis);
-			} catch(error) {
-				enyo.log("An error occured during the code analysis: " + error);
-				this.dumpInfo(null);
+					// Give the information to the autocomplete component
+					this.$.autocomplete.setAnalysis(this.analysis);
+				} catch(error) {
+					enyo.log("An error occured during the code analysis: " + error);
+					this.dumpInfo(null);
+					this.$.autocomplete.setAnalysis(null);
+				}
+				break;
+			case "json":
+				if (module.name.slice(-7) == ".design") {
+					this.projectData.getProjectIndexer().reIndexDesign(module);
+					if (inhibitUpdate !== true) {
+						this.projectData.updateProjectIndexer();
+					}
+				}
+				this.analysis = null;
 				this.$.autocomplete.setAnalysis(null);
-			}
-		} else {
-			this.analysis = null;
-			this.$.autocomplete.setAnalysis(null);
+				break;
+			default:
+				this.analysis = null;
+				this.$.autocomplete.setAnalysis(null);
+				break;
 		}
 	},
 	/**
@@ -314,60 +330,72 @@ enyo.kind({
 		}
 		return -1;
 	},
+	//* Navigate from Phobos to Deimos. Pass Deimos all relevant info.
 	designerAction: function() {
-		var isDesignProperty={
-			layoutKind: true,
-			attributes: true,
-			classes: true,
-			content: true,
-			controlClasses: true,
-			defaultKind: true,
-			fit: true,
-			src: true,
-			style: true,
-			tag: true,
-			name: true,
-		}
-		var c = this.$.ace.getValue();
+		// Update the projectIndexer and notify watchers
 		this.reparseAction();
+		
+		var kinds = this.extractKindsData(),
+			data = {
+				kinds: kinds,
+				projectData: this.projectData,
+				fileIndexer: this.analysis
+			};
+		
+		if (kinds.length > 0) {
+			// Request to design the current document, passing info about all kinds in the file
+			this.doDesignDocument(data);
+		} else {
+			alert("No kinds found in this file");
+		}
+	},
+	//* Extract info about kinds from the current file needed by the designer
+	extractKindsData: function() {
+		var isDesignProperty = {
+				layoutKind: true,
+				attributes: true,
+				classes: true,
+				content: true,
+				controlClasses: true,
+				defaultKind: true,
+				fit: true,
+				src: true,
+				style: true,
+				tag: true,
+				name: true
+			},
+			c = this.$.ace.getValue(),
+			kinds = [];
+		
 		if (this.analysis) {
-			var kinds = [];
-			/*
-				We now pass projectData and fileIndexer which reference various information related to the project.
-				In particular the analyzer output of all the .js projects files as well as for enyo/onyx
-			 */
-			var data = {kinds: kinds, projectData: this.projectData, fileIndexer: this.analysis};
 			for (var i=0; i < this.analysis.objects.length; i++) {
 				var o = this.analysis.objects[i];
-				if (o.componentsBlockStart && o.componentsBlockEnd) { // only include kinds with components block
-					var start = o.componentsBlockStart;
-					var end = o.componentsBlockEnd;
-					var name = o.name;
-					var kind = o.superkind;
+				var start = o.componentsBlockStart;
+				var end = o.componentsBlockEnd;
+				var name = o.name;
+				var kind = o.superkind;
+				var comps = [];
+				if (start && end) {
 					var js = c.substring(start, end);
-					var comps = eval("(" + js + ")"); // Why eval? Because JSON.parse doesn't support unquoted keys...
-					var comp = {
-						name: name,
-						kind: kind,
-						components: comps
-					}
-					for (var j=0; j < o.properties.length; j++) {
-						var prop = o.properties[j];
-						var pName = prop.name;
-						if (isDesignProperty[pName]) {
-							var value = Documentor.stripQuotes(prop.value[0].name);
-							comp[pName] = value;
-						}
-					}
-					kinds.push(comp);
+					comps = eval("(" + js + ")"); // Why eval? Because JSON.parse doesn't support unquoted keys...
 				}
-			}
-			if (kinds.length > 0) {
-				this.doDesignDocument(data);
-				return;
+				var comp = {
+					name: name,
+					kind: kind,
+					components: comps
+				};
+				for (var j=0; j < o.properties.length; j++) {
+					var prop = o.properties[j];
+					var pName = prop.name;
+					if (isDesignProperty[pName]) {
+						var value = Documentor.stripQuotes(prop.value[0].name);
+						comp[pName] = value;
+					}
+				}
+				kinds.push(comp);
 			}
 		}
-		alert("No kinds found in this file");
+		return kinds;
 	},
 	/**
 	 * Lists the handler methods mentioned in the "handlers"
@@ -434,7 +462,7 @@ enyo.kind({
 	insertMissingHandlers: function() {
 		if (this.analysis) {
 			// Reparse to get the definition of possibly added onXXXX attributes
-			this.reparseAction();
+			this.reparseAction(true);
 
 			/*
 			 * Insert missing handlers starting from the end of the
@@ -442,11 +470,13 @@ enyo.kind({
 			 * the file
 			 */
 			for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
-				this.insertMissingHandlersIntoKind(this.analysis.objects[i]);
+				var obj = this.analysis.objects[i];
+				if (obj.components) {
+					this.insertMissingHandlersIntoKind(obj);
+				}
 			}
-
 			// Reparse to get the definition of the newly added methods
-			this.reparseAction();
+			this.reparseAction(true);
 		} else {
 			// There is no parser data for the current file
 			enyo.log("Unable to insert missing handler methods");
@@ -479,18 +509,17 @@ enyo.kind({
 			if (item !== "" && existing[item] === undefined) {
 				codeToInsert += (commaTerminated ? "" : ",\n");
 				commaTerminated = false;
-				codeToInsert += ("    " + item + ": function(inSender, inEvent) {\n        // TO");
-				codeToInsert += ("DO - Auto-generated code\n    }");
+				codeToInsert += ("\t" + item + ": function(inSender, inEvent) {\n\t\t// TO");
+				codeToInsert += ("DO - Auto-generated code\n\t}");
 			}
 		}
 
 		// insert the missing handler methods code in the editor
 		if (object.block) {
 			if (codeToInsert !== "") {
-				codeToInsert += "\n";
 				// Get the corresponding Ace range to replace/insert the missing code
 				// NB: ace.replace() allow to use the undo/redo stack.
-				var pos = object.block.end - 1;
+				var pos = object.block.end - 2;
 				var range = this.$.ace.mapToLineColumnRange(pos, pos);
 				this.$.ace.replaceRange(range, codeToInsert);
 			}
@@ -503,13 +532,25 @@ enyo.kind({
 	updateComponents: function(inSender, inEvent) {
 		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
 			if (inEvent.contents[i]) {
-				// Insert the new version of components
-				var start = this.analysis.objects[i].componentsBlockStart;
-				var end = this.analysis.objects[i].componentsBlockEnd;
+				// Insert the new version of components (replace components block, or insert at end)
+				var obj = this.analysis.objects[i];
+				var comps = inEvent.contents[i];
+				var start = obj.componentsBlockStart;
+				var end = obj.componentsBlockEnd;
+				if (!(start && end)) {
+					// If this kind doesn't have a components block yet, insert a new one
+					// at the end of the file
+					var last = obj.properties[obj.properties.length-1];
+					if (last) {
+						comps = (last.commaTerminated ? "" : ",") + "\n\t" + "components: " + comps;
+						start = obj.block.end - 2;
+						end = obj.block.end - 2;
+					}
+				}
 				// Get the corresponding Ace range to replace the component definition
 				// NB: ace.replace() allow to use the undo/redo stack.
 				var range = this.$.ace.mapToLineColumnRange(start, end);
-				this.$.ace.replaceRange(range, inEvent.contents[i]);
+				this.$.ace.replaceRange(range, comps);
 			}
 		}
 		/*
@@ -664,8 +705,30 @@ enyo.kind({
 
 	tabSize: function() {
 		var ts = this.$.ace.editorSettingsPopup.Tsize;
-		this.log("ts",ts);
 		this.$.ace.setTabSize(ts);
+	},
+	
+	//* Trigger an Ace undo and bubble updated code
+	undoAndUpdate: function() {
+		this.$.ace.undo();
+		this.bubbleCodeUpdate();
+	},
+	//* Trigger an Ace undo and bubble updated code
+	redoAndUpdate: function() {
+		this.$.ace.redo();
+		this.bubbleCodeUpdate();
+	},
+	//* Send up an updated copy of the code
+	bubbleCodeUpdate: function() {
+		// Update the projectIndexer and notify watchers
+		this.reparseAction(true);
+		
+		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
+		if (data.kinds.length > 0) {
+			this.doUpdate(data);
+		} else {
+			enyo.warn("No kinds found in this file");
+		}
 	}
 });
 

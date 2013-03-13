@@ -1,0 +1,18 @@
+
+.iframe-highlight {
+	height: 0;
+	width: 0;
+	pointer-events: none;
+	box-sizing: border-box;
+	position: absolute;
+	z-index: 9999;
+}
+.iframe-select-highlight {
+	background-color: rgba(255,187,0,0.3);
+	border: 1px solid orange;
+}
+
+.iframe-drop-highlight {
+	background-color: rgba(0,110,255,0.3);
+	border:1px solid blue;
+}
