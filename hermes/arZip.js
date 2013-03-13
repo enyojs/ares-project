@@ -2,6 +2,8 @@
  * Hermes ZIP archival service
  */
 
+require('./lib/checkNodeVersion');		// Check nodejs version
+
 var fs = require("fs");
 var path = require("path");
 var express = require("express");
@@ -178,11 +180,6 @@ function ArZip(config, next) {
 
 if (path.basename(process.argv[1]) === "arZip.js") {
 	// We are main.js: create & run the object...
-
-	var version = process.version.match(/[0-9]+.[0-9]+/)[0];
-	if (version <= 0.7) {
-		process.exit("Only supported on Node.js version 0.8 and above");
-	}
 
 	var arZip = new ArZip({
 		// pathname (M) can be '/', '/zip/' ...etc
