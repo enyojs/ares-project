@@ -2,7 +2,9 @@ enyo.kind({
 	name: "IFrameDesigner",
 	published: {
 		iframeReady: false,
-		currentKind: null
+		currentKind: null,
+		height: null,
+		width: null
 	},
 	events: {
 		onDesignRendered: "",
@@ -10,7 +12,8 @@ enyo.kind({
 		onSelected: "",
 		onCreateItem: "",
 		onMoveItem: "",
-		onSyncDropTargetHighlighting: ""
+		onSyncDropTargetHighlighting: "",
+		onReloadComplete: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", classes: "ares-iframe-client"},
@@ -19,6 +22,8 @@ enyo.kind({
 	baseSource: "../deimos/source/designer/iframe.html",
 	projectSource: null,
 	selection: null,
+	scale: 1,
+	reloading: false,
 	rendered: function() {
 		this.inherited(arguments);
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
@@ -27,15 +32,42 @@ enyo.kind({
 		this.inherited(arguments);
 		this.renderCurrentKind();
 	},
+	heightChanged: function() {
+		this.$.client.applyStyle("height", this.getHeight()+"px");
+		this.resizeClient();
+		this.repositionClient();
+	},
+	widthChanged: function() {
+		this.$.client.applyStyle("width", this.getWidth()+"px");
+		this.resizeClient();
+		this.repositionClient();
+	},
+	zoom: function(inScale) {
+		this.scale = (inScale >= 0) ? Math.max(inScale / 100, 0.2) : 1;
+		enyo.dom.transformValue(this.$.client, "scale", this.scale);
+		this.$.client.resized();
+		this.repositionClient();
+	},
+	repositionClient: function() {
+		var height = this.getHeight(),
+			width = this.getWidth(),
+			scaledHeight = height * this.scale,
+			scaledWidth =  width  * this.scale,
+			y = -1*(height - scaledHeight)/2,
+			x = -1*(width  - scaledWidth)/2;
+		
+		this.$.client.addStyles("top: " + y + "px; left: " + x + "px");
+	},
 	
 	updateSource: function(inSource) {
 		var serviceConfig = inSource.getService().config;
 		this.setIframeReady(false);
-		this.projectSource = inSource.getProjectUrl();
+		this.projectSource = inSource;
 		this.projectPath = serviceConfig.origin + serviceConfig.pathname + "/file";
-		this.$.client.hasNode().src = this.baseSource + "?src=" + this.projectSource;
+		this.$.client.hasNode().src = this.baseSource + "?src=" + this.projectSource.getProjectUrl();
 	},
-	reloadIFrame: function() {
+	reload: function() {
+		this.reloading = true;
 		this.updateSource(this.projectSource);
 	},
 	
@@ -58,6 +90,10 @@ enyo.kind({
 		// Iframe received container data
 		} else if(msg.op === "state" && msg.val === "ready") {
 			this.setIframeReady(true);
+			if(this.reloading) {
+				this.doReloadComplete();
+				this.reloading = false;
+			}
 		// The current kind was successfully rendered in the iframe
 		} else if(msg.op === "rendered") {
 			this.kindRendered(msg.val);
@@ -97,7 +133,6 @@ enyo.kind({
 		var currentKind = this.getCurrentKind();
 		this.sendMessage({op: "render", val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components), selectId: inSelectId}});
 	},
-	
 	select: function(inControl) {
 		this.sendMessage({op: "select", val: inControl});
 	},
@@ -126,5 +161,8 @@ enyo.kind({
 	//* Sync the CSS in inCode with the iFrame (to avoid needing to reload the iFrame)
 	syncCSSFile: function(inFilename, inCode) {
 		this.sendMessage({op: "cssUpdate", val: {filename: this.projectPath + inFilename, code: inCode}});
+	},
+	resizeClient: function() {
+		this.sendMessage({op: "resize"});
 	}
 });

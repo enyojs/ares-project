@@ -20,18 +20,47 @@ enyo.kind({
 			]},
 			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
 				{name: "left", classes:"ares_deimos_left", kind: "Palette", name:"palette"},
-				{name: "middle", fit: true, kind: "FittableRows", style: "border:1px solid #D0D0D0;margin:0px 4px;", components: [
-					{kind: "IFrameDesigner", name: "designer", fit: true,
-						onSelect: "designerSelect",
-						onSelected: "designerSelected",
-						onDesignRendered: "designRendered",
-						onMoveItem: "moveItem",
-						onCreateItem: "createItem",
-						onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting"
-					},
+				{name: "middle", fit: true, kind: "FittableRows", components: [
+					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
+						{kind: "onyx.Button", name: "reloadDesignerButton", classes: "deimos-designer-toolbar-spacing", content: "Reload", ontap: "reloadDesigner"},
+						{content: "Size:"},
+						{kind: "onyx.PickerDecorator", classes: "deimos-device-picker deimos-designer-toolbar-spacing", components: [
+							{style: "width:100%;"},
+							{kind: "onyx.Picker", name: "devicePicker", ontap: "deviceChosen", components: [
+								{content: "(600 x 800) Default",			value: { height:  800, width:  600 }},
+								{content: "(1920 x 1080) HDTV",				value: { height:  1080, width:  1920 }},
+								{content: "(320 x 480) iPhone\u2122",		value: { height:  480, width:  320 }},
+								{content: "(320 x 573) iPhone\u2122 5",		value: { height: 573, width:  320 }},
+								{content: "(1024 x 768) iPad\u2122",	value: { height: 768, width: 1024 }},
+								{content: "Custom"}
+							]}
+						]},
+						{content: "Width:"},
+						{kind: "onyx.InputDecorator", components: [
+							{kind: "onyx.Input", name: "designerWidthInput", classes: "deimos-designer-input", placeholder: "Auto", onchange: "updateWidth"}
+						]},
+						{kind: "onyx.Button", name: "swapDesignerDimensionsButton", classes: "deimos-swap-dimensions-button", allowHtml: true, content: "&larr;<br/>&rarr;", ontap: "swapDesignerDimensions"},
+						{content: "Height:"},
+						{kind: "onyx.InputDecorator", classes: "deimos-designer-toolbar-spacing", components: [
+							{kind: "onyx.Input", name: "designerHeightInput", classes: "deimos-designer-input", placeholder: "Auto", onchange: "updateHeight"}
+						]},
+						{content: "Zoom:"},
+						{kind: "onyx.Slider", classes: "deimos-zoom-slider", value: 100, onChange: 'zoomDesigner', onChanging: 'zoomDesigner' }
+					]},
+					{kind: "Scroller", classes: "deimos-designer-wrapper", fit: true, components: [
+						{kind: "IFrameDesigner", name: "designer",
+							onSelect: "designerSelect",
+							onSelected: "designerSelected",
+							onDesignRendered: "designRendered",
+							onMoveItem: "moveItem",
+							onCreateItem: "createItem",
+							onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
+							onReloadComplete: "reloadComplete"
+						},
+					]}
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
-					{kind: "FittableColumns", components: [
+					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar deimos-toolbar-margined-buttons", components: [
 						{name:"upButton", kind: "onyx.Button", content: "Up", ontap: "upAction"},
 						{name:"downButton", kind: "onyx.Button", content: "Down", ontap: "downAction"},
 						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
@@ -50,18 +79,31 @@ enyo.kind({
 			]}
 		]}
 	],
+	/**
+		Select the first item in _this.$.picker_ to iniitalize (do this after
+		rendering to avoid error with setting values of width/height fields)
+	*/
 	events: {
 		onCloseDesigner: "",
 		onDesignerUpdate: "",
 		onUndo: "",
 		onRedo: ""
 	},
-	kinds: null,
+	kinds: [],
+	index: null,
 	create: function() {
 		this.inherited(arguments);
-		this.kinds=[];
-		this.index=null;
 		this.addHandlers();
+	},
+	rendered: function() {
+		this.inherited(arguments);
+		this.initializeDesignerToolbar();
+	},
+	//* Initialize _devicePicker_ in the toolbar at render time
+	initializeDesignerToolbar: function() {
+		var initItem = this.$.devicePicker.getClientControls()[0];
+		this.$.devicePicker.setSelected(initItem);
+		this.deviceChosen(null, {selected: initItem});
 	},
 	/**
 	 * Loads the first kind passed thru the data parameter
@@ -379,9 +421,11 @@ enyo.kind({
 	projectSelected: function(inProject) {
 		this.$.designer.updateSource(inProject);
 	},
-	//*
-	reloadIFrame: function() {
-		this.$.designer.reloadIFrame();
+	reloadDesigner: function() {
+		this.$.designer.reload();
+	},
+	reloadComplete: function() {
+		this.rerenderKind();
 	},
 	syncJSFile: function(inCode) {
 		this.$.designer.syncJSFile(inCode);
@@ -404,6 +448,70 @@ enyo.kind({
 	//* Generate new ares id using timestamp
 	generateNewAresId: function() {
 		return "ares_"+Math.floor((Math.random()*new Date().getTime())+1);
+	},
+	//* When a device is chosen in the designer toolbar, set the appropriate heights/widths
+	deviceChosen: function() {
+		var selected = this.$.devicePicker.getSelected();
+		
+		if(!selected.value) {
+			return;
+		}
+		
+		// Update fields with predefined values
+		this.$.designerWidthInput.setValue(selected.value.width);
+		this.$.designerHeightInput.setValue(selected.value.height);
+		
+		// Force height/width value updates (change event isn't triggered)
+		this.$.designer.setWidth(selected.value.width);
+		this.$.designer.setHeight(selected.value.height);
+		
+		return true;
+	},
+	updateHeight: function(inSender, inEvent) {
+		this.$.designer.setHeight(inSender.getValue());
+		this.findDeviceDimensionMatch();
+	},
+	updateWidth: function(inSender, inEvent) {
+		this.$.designer.setWidth(inSender.getValue());
+		this.findDeviceDimensionMatch();
+	},
+	findDeviceDimensionMatch: function() {
+		var items = this.$.devicePicker.getClientControls(),
+			item,
+			h = this.$.designerHeightInput.getValue(),
+			w = this.$.designerWidthInput.getValue(),
+			i;
+		
+		for(i=0, item; (item = items[i]); i++) {
+			if(item.value && ((h == item.value.height && w == item.value.width) || (h == item.value.width && w == item.value.height))) {
+				this.$.devicePicker.setSelected(item);
+				return;
+			}
+		}
+		
+		// If no match, set selected item to custom
+		for(i=0, item; (item = items[i]); i++) {
+			if(item.value) {
+				continue;
+			}
+			
+			this.$.devicePicker.setSelected(item);
+		}
+	},
+	// Swap width and height values
+	swapDesignerDimensions: function(inSender, inEvent) {
+		var h = this.$.designerHeightInput.getValue(),
+			w = this.$.designerWidthInput.getValue();
+		
+		this.$.designerHeightInput.setValue(w);
+		this.$.designerWidthInput.setValue(h);
+		
+		// Force height/width value updates (change event isn't triggered)
+		this.$.designer.setWidth(this.$.designerWidthInput.getValue());
+		this.$.designer.setHeight(this.$.designerHeightInput.getValue());
+	},
+	zoomDesigner: function(inSender, inEvent) {
+		this.$.designer.zoom(inSender.getValue());
 	},
 	//* Add dispatch for native drag events
 	addHandlers: function(inSender, inEvent) {

@@ -96,6 +96,9 @@ enyo.kind({
 			case "cleanUp":
 				this.cleanUpKind();
 				break;
+			case "resize":
+				this.resized();
+				break;
 			default:
 				enyo.warn("Deimos iframe received unknown message op:", msg);
 				break;
@@ -281,6 +284,10 @@ enyo.kind({
 		// Remove selection and drop highlighting
 		this.hideSelectHighlight();
 		this.unhighlightDropTargets();
+	},
+	resized: function() {
+		this.inherited(arguments);
+		this.highlightSelection();
 	},
 	/**
 		Response to message sent from Deimos. Highlight the specified conrol
