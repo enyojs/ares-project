@@ -421,7 +421,7 @@ enyo.kind({
 			line = session.getLine(lineIdx);
 			nbBytes = line.length;
 
-			if (bytesCount + nbBytes > streamPos) {
+			if (bytesCount + nbBytes >= streamPos) {
 				// this.log(streamPos + " --> line: " + (lineIdx + 1) + " column: " + (streamPos - bytesCount));
 				positions.push({row: lineIdx, column: (streamPos - bytesCount)});
 				streamIdx++;

@@ -470,21 +470,44 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 	//this.log("FsBase.putMultipart(): files", files);
 
 	var nodes = [];
-	async.forEach(files, (function(file, cb) {
+	async.forEachSeries(files, (function(file, cb) {
+
 		if (file.name === '.' || !file.name) {
 			file.name = pathParam;
 		} else {
 			file.name = [pathParam, file.name].join('/');
 		}
-		this.putFile(req, file, (function(err, node) {
-			//this.log("FsBase.putMultipart(): err:", err, "node:", node);
+
+		var putCallback = function(err, node) {
+			this.log("FsBase.putMultipart(): err:", err, "node:", node);
 			if (err) {
 				cb(err);
 			} else if (node) {
 				nodes.push(node);
 			}
 			cb();
-		}).bind(this));
+		};
+
+		if (file.type.match(/x-encoding=base64/)) {
+			fs.readFile(file.path, function(err, data) {
+				if (err) {
+					console.log("transcoding: error" + file.path, err);
+					cb(err);
+					return;
+				}
+				try {
+					delete file.path;													// TODO: Should we remove the file ?
+					file.buffer = new Buffer(data.toString('ascii'), 'base64');			// TODO: This works but I don't like it
+
+					this.putFile(req, file, putCallback.bind(this));
+				} catch(transcodeError) {
+					console.log("transcoding error: " + file.path, transcodeError);
+					cb(transcodeError);
+				}
+			}.bind(this));
+		} else {
+			this.putFile(req, file, putCallback.bind(this));
+		}
 	}).bind(this), (function(err){
 		this.log("FsBase.putMultipart(): nodes:", nodes);
 		next(err, {

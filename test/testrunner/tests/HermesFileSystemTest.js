@@ -95,7 +95,53 @@ enyo.kind({
 				});
 			});
 		req.error(this, function(inSender, inError) {
-			enyo.log(inError);				
+			enyo.log(inError);
+			this.finish("propfind on root id failed: "+inError);
+		});
+	},
+	testGetDebugHtml: function() {
+		this.__testGetFile('/HelloWorld/debug.html', 344);
+	},
+	testGetIconPng: function() {
+		this.__testGetFile('/HelloWorld/icon.png', 7115);
+	},
+	__testGetFile: function(inFilePath, inExpectedSize) {
+		this.log("Begin called in __testGetFile: " + inFilePath);
+		var service = this.home[0];
+		if (this.debug) this.log("Got the Service: ", service);
+		/**
+		* PROPFIND on the root id (test/root defined into ide-test.json)
+		*/
+		var req = service.impl.propfind("", -1);
+		req.response(this, function(inSender, inResponse) {
+			if (this.debug) enyo.log("Got the inResponse for req: ", inResponse);
+
+			enyo.forEach(inResponse.children, function(item) {
+				if (item.isDir) {
+					enyo.forEach(item.children, function(file) {
+						if (( ! file.isDir) && file.path == inFilePath) {
+							var req2 = service.impl.getFile(file.id);
+							req2.response(this, function(inSender, inResponse) {
+								if (this.debug) enyo.log("Got the inResponse for req2: ", inResponse);
+								var fileSize = inResponse.content.length;
+								if (this.debug) enyo.log("file size: " + fileSize + " bytes");
+								if (fileSize === inExpectedSize) {
+									this.finish();
+								} else {
+									this.finish("Bad size: expected: " + inExpectedSize + " got: " + fileSize);
+								}
+							});
+							req2.error(this, function(inSender, inError) {
+								enyo.log(inError);
+								this.finish("get " + filePath + " failed with error: " +inError);
+							});
+						}
+					}, this);
+				}
+			}, this);
+		});
+		req.error(this, function(inSender, inError) {
+			enyo.log(inError);
 			this.finish("propfind on root id failed: "+inError);
 		});
 	},
@@ -127,7 +173,7 @@ enyo.kind({
 					self.finish("create file error: "+inError);
 				});
 			} else {
-				self.finish("folder "+inResponse.children[3].name+ " not found");				
+				self.finish("folder "+inResponse.children[3].name+ " not found");
 			}
 		});
 		req.error(this, function(inSender, inError) {

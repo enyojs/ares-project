@@ -5,6 +5,8 @@
  * and a working sample for other implementations.
  */
 
+require('./lib/checkNodeVersion');		// Check nodejs version
+
 var fs = require("fs"),
     path = require("path"),
     util  = require("util"),
@@ -415,7 +417,7 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 	.options('p', {
 		alias : 'port',
 		description: 'port (o) local IP port of the express server (default: 0 dynamic)',
-		default: '0'
+		'default': '0'
 	})
 	.options('h', {
 		alias : 'help',
@@ -428,11 +430,6 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		boolean: true
 	})
 	.argv;
-	
-	var version = process.version.match(/[0-9]+.[0-9]+/)[0];
-	if (version <= 0.7) {
-		process.exit("Only supported on Node.js version 0.8 and above");
-	}
 
 	var fsLocal = new FsLocal({
 		pathname: argv.pathname,

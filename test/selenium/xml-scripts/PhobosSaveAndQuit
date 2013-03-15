@@ -17,7 +17,7 @@
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectList_iconButton3]]></target>
+	<target><![CDATA[id=ares_projectView_projectList_importProjectButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -102,7 +102,12 @@ Ok]]></target>
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_bottomBar_iconButton]]></target>
+	<target><![CDATA[id=ares_phobos_errorPopup_okButton]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_bottomBar_closeFileButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 </TestCase>

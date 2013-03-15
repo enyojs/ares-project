@@ -35,17 +35,17 @@ enyo.kind({
 				]}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_new.png", onclick: "doCreateProject"},
+				{name: "createProjectButton", kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_new.png", onclick: "doCreateProject"},
 				{kind: "onyx.Tooltip", content: "Create Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_edit.png", onclick: "doScanProject"},
+				{name: "importProjectButton", kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_edit.png", onclick: "doScanProject"},
 				{kind: "onyx.Tooltip", content: "Import or Scan for Projects..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{name: "phonegapButton", disabled: true,
 				 kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_build.png", onclick: "doPhonegapBuild"},
-				{kind: "onyx.Tooltip", content: "Phonegap build"}
+				{kind: "onyx.Tooltip", content: "Build Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", name: "previewButton", disabled: true,

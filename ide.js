@@ -3,13 +3,7 @@
 /**
  *  ARES IDE server
  */
-
-//extract major version
-var version = process.version.match(/[0-9]+.[0-9]+/)[0];
-if (version <= 0.7) {
-	console.error("Ares ide.js is only supported on Node.js version 0.8 and above");
-	process.exit(1);
-}
+require('./hermes/lib/checkNodeVersion');	// Check nodejs version
 
 var fs = require("fs"),
     path = require("path"),
@@ -116,32 +110,67 @@ var platformOpen = {
 };
 
 var configPath, tester;
+var configStats;
+
 if (argv.runtest) {
 	tester = require('./test/tester/main.js');
 	configPath = path.resolve(myDir, "ide-test.json");
 } else{
 	configPath = argv.config;
 }
-if (!fs.existsSync(configPath)) {
-	throw "Did not find: '"+configPath+"': ";
+
+function loadMainConfig(configFile) {
+	if (!fs.existsSync(configFile)) {
+		throw "Did not find: '"+configFile+"': ";
+	}
+
+	log("Loading ARES configuration from '"+configFile+"'...");
+	configStats = fs.lstatSync(configFile);
+	if (!configStats.isFile()) {
+		throw "Not a file: '"+configFile+"': ";
+	}
+
+	var configContent = fs.readFileSync(configFile, 'utf8');
+	try {
+		ide.res = JSON.parse(configContent);
+	} catch(e) {
+		throw "Improper JSON: "+configContent;
+	}
+
+	if (!ide.res.services || !ide.res.services[0]) {
+		throw "Corrupted '"+configFile+"': no storage services defined";
+	}
 }
 
-log("Loading ARES configuration from '"+configPath+"'...");
-var configStats = fs.lstatSync(configPath);
-if (!configStats.isFile()) {
-	throw "Not a file: '"+configPath+"': ";
+function appendPluginConfig(configFile) {
+	log("Loading ARES plugin configuration from '"+configFile+"'...");
+	var pluginData;
+	var configContent = fs.readFileSync(configFile, 'utf8');
+	try {
+		pluginData = JSON.parse(configContent);
+	} catch(e) {
+		throw "Improper JSON in " + configFile + " : "+configContent;
+	}
+
+	pluginData.services.forEach(function(service) {
+		log("Adding service '" + service.name + "' to ARES configuration");
+		ide.res.services.push(service);
+	});
 }
 
-var configContent = fs.readFileSync(configPath, 'utf8');
-try {
-	ide.res = JSON.parse(configContent);
-} catch(e) {
-	throw "Improper JSON: "+configContent;
+function loadPluginConfigFiles() {
+	var base = path.join(myDir, 'node_modules');
+	var directories = fs.readdirSync(base);
+	directories.forEach(function(directory) {
+		var filename = path.join(base, directory, 'ide.json');
+		if (fs.existsSync(filename)) {
+			appendPluginConfig(filename);
+		}
+	});
 }
 
-if (!ide.res.services || !ide.res.services[0]) {
-	throw "Corrupted '"+configPath+"': no storage services defined";
-}
+loadMainConfig(configPath);
+loadPluginConfigFiles();
 
 // configuration age/date is the UTC configuration file last modification date
 ide.res.timestamp = configStats.atime.getTime();

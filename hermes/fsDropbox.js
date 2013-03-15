@@ -2,6 +2,8 @@
  * fsDropbox.js -- Ares FileSystem (fs) provider, using Dropbox
  */
 
+require('./lib/checkNodeVersion');		// Check nodejs version
+
 var util  = require("util"),
     path = require("path"),
     fs = require("fs"),
@@ -362,11 +364,6 @@ if (path.basename(process.argv[1]) === "fsDropbox.js") {
 		boolean: true
 	})
 	.argv;
-	
-	var version = process.version.match(/[0-9]+.[0-9]+/)[0];
-	if (version <= 0.7) {
-		process.exit("Only supported on Node.js version 0.8 and above");
-	}
 
 	var fsDropbox = new FsDropbox({
 		pathname: argv.pathname,

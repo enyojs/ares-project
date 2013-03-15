@@ -64,12 +64,12 @@
 		},
 		{
 			"active": true,
-			"id":"openwebos",
-			"name":"Open webOS Build",
-			"type": "other",
+			"id":"prj-toolkit",
+			"name":"Project toolkit",
+			"type": "generate",
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/bdOpenwebOS.js", "-P", "/openwebos", "-p", "0"
+				"@INSTALLDIR@/hermes/prjToolkit.js", "-P", "/prj-toolkit", "-p", "0"
 			],
 			"project-template-repositories": [{
 				"id": "bootplate",

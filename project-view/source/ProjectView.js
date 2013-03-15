@@ -95,7 +95,6 @@ enyo.kind({
 			project.setConfig(config);
 		});
 		this.currentProject = project;
-		return true; //Stop event propagation
 	},
 	projectRemoved: function(inSender, inEvent) {
 		this.$.harmonia.setProject(null);
@@ -116,8 +115,9 @@ enyo.kind({
 		}
 		var self = this;
 		this.showWaitPopup("Starting project build");
-		// [0] assumes a single builder
-		var bdService =	ServiceRegistry.instance.getServicesByType('build')[0];
+		// TODO: Must be reworked to allow the selection of builder in the UI - ENYO-2049
+		var services = ServiceRegistry.instance.getServicesByType('build');
+		var bdService =	services[services.length - 1];
 		if (bdService) {
 			bdService.build( /*project*/ {
 				name: this.currentProject.getName(),

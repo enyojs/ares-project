@@ -33,12 +33,12 @@
 		},
 		{
 			"active": true,
-			"id":"openwebos",
-			"name":"Open webOS Build",
-			"type": "other",
+			"id":"prj-toolkit",
+			"name":"Project toolkit",
+			"type": "generate",
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"hermes/bdOpenwebOS.js", "-P", "/openwebos", "-p", "0"
+				"hermes/prjToolkit.js", "-P", "/prj-toolkit", "-p", "0"
 			],
 			"useJsonp":false,
 			"verbose": true,

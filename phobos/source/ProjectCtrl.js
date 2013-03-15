@@ -7,7 +7,6 @@ enyo.kind({
 		pathResolver: null
 	},
 	components: [
-		{name: "enyoAnalyzer", kind: "Analyzer", onIndexReady: "enyoIndexReady"},
 		{name: "projectAnalyzer", kind: "Analyzer", onIndexReady: "projectIndexReady"}
 	],
 	create: function() {
@@ -33,20 +32,6 @@ enyo.kind({
 		}
 	},
 	/**
-	 * Start the enyo/onyx analysis if not already done for the project
-	 * @public
-	 */
-	buildEnyoDb: function() {
-		if (this.analysisDone(this.$.enyoAnalyzer.index)) {
-			this.debug && this.log("ENYO DB already available - index: ", this.$.enyoAnalyzer.index);
-			this.enyoIndexReady();
-		} else {
-			this.debug && this.log("Starting enyo analysis for " + this.projectUrl);
-			this.resetPhobosDb();
-			this.$.enyoAnalyzer.analyze(["$enyo/source", "$lib/onyx", "$lib/layout"], this.pathResolver);
-		}
-	},
-	/**
 	 * Verify if the analysis was already done
 	 * @param  index the index to check
 	 * @protected
@@ -60,31 +45,20 @@ enyo.kind({
 	 */
 	buildProjectDb: function() {
 		if (this.analysisDone(this.$.projectAnalyzer.index)) {
-			this.debug && this.log("Project DB already available - index: ", this.$.enyoAnalyzer.index);
-			this.projectIndexReady();
+			this.debug && this.log("Project DB already available - index: ", this.$.projectAnalyzer.index);
 		} else {
 			this.debug && this.log("Starting project analysis for " + this.projectUrl);
-			this.$.projectAnalyzer.analyze([this.projectUrl], this.pathResolver);
+			this.$.projectAnalyzer.analyze([this.projectUrl + "/enyo/source", this.projectUrl], this.pathResolver);
 		}
+		this.projectData.setProjectIndexer(this.$.projectAnalyzer.index);
 	},
 	/**
-	 * Passes the analyzer data to Phobos and start the project analysis
-	 * @protected
-	 */
-	enyoIndexReady: function() {
-		// Update the model to wake up the listeners
-		this.projectData.setEnyoIndexer(this.$.enyoAnalyzer.index);
-
-		// Start analysis of the project
-		this.buildProjectDb();	// TODO: exclude enyo/onyx from the analysis
-	},
-	/**
-	 * Passes the analyzer data to Phobos
+	 * Notifies modules dependent on the indexer that it has updated
 	 * @protected
 	 */
 	projectIndexReady: function() {
 		// Update the model to wake up the listeners
-		this.projectData.setProjectIndexer(this.$.projectAnalyzer.index);
+		this.projectData.updateProjectIndexer();
 	},
 	/**
 	 * Reset Phobos and AutoComplete enyo and project databases while the analysis
@@ -94,7 +68,6 @@ enyo.kind({
 	 */
 	resetPhobosDb: function() {
 		// Update the model to wake up the listeners
-		this.projectData.setEnyoIndexer(null);
 		this.projectData.setProjectIndexer(null);
 	}
 });
