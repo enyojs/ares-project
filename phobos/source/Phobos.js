@@ -95,6 +95,7 @@ enyo.kind({
 		this.analysis = null;
 		var mode = {
 			json: "json",
+			design: "json",
 			js: "javascript",
 			html: "html",
 			css: "css",
