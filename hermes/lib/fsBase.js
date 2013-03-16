@@ -496,7 +496,9 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 					return;
 				}
 				try {
-					delete file.path;													// TODO: Should we remove the file ?
+					var fpath = file.path;
+					delete file.path;
+					fs.unlink(fpath, function(err) { /* Nothing to do */ });
 					file.buffer = new Buffer(data.toString('ascii'), 'base64');			// TODO: This works but I don't like it
 
 					this.putFile(req, file, putCallback.bind(this));
