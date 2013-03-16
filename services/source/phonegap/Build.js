@@ -3,7 +3,7 @@ enyo.kind({
 	kind: "enyo.Component",
 	events: {
 		onLoginFailed: "",
-		onBuildStarted: ""
+		onShowWaitPopup: ""
 	},
 	debug: false,
 	/**
@@ -337,7 +337,7 @@ enyo.kind({
 		var req, fileList = [];
 		req = project.filesystem.propfind(project.folderId, -1 /*infinity*/);
 		req.response(this, function(inEvent, inData) {
-			this.doBuildStarted({project: project});
+			this.doShowWaitPopup({msg: $L("Phonegap build started")});
 			if (this.debug) enyo.log("Got the list of files", inData);
 			// Extract the list into an array
 			this.buildFileList(inData.children, fileList);

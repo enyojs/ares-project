@@ -23,11 +23,17 @@ enyo.kind({
 				onClose: "bounceClose"
 			}
 		]},
+		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
+			{kind: "Image", src: "$phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
+			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
+		]},
 		{kind: "ServiceRegistry"}
 	],
 	handlers: {
 		onReloadServices: "handleReloadServices",
-		onUpdateAuth: "handleUpdateAuth"
+		onUpdateAuth: "handleUpdateAuth",
+		onShowWaitPopup: "handleShowWaitPopup",
+		onHideWaitPopup: "hideWaitPopup"
 	},
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
@@ -44,6 +50,7 @@ enyo.kind({
 			Ares.Workspace.loadProjects();
 		}
 		this.calcSlideableLimit();
+		Ares.instance = this;
 	},
 	rendered: function() {
 		this.inherited(arguments);
@@ -275,6 +282,16 @@ enyo.kind({
 	syncJSFile: function(inCode) {
 		this.$.deimos.syncJSFile(inCode);
 	},
+	handleShowWaitPopup: function(inSender, inEvent) {
+		this.showWaitPopup(inEvent.msg);
+	},
+	showWaitPopup: function(inMessage) {
+		this.$.waitPopupMessage.setContent(inMessage);
+		this.$.waitPopup.show();
+	},
+	hideWaitPopup: function() {
+		this.$.waitPopup.hide();
+	},
 	statics: {
 		isBrowserSupported: function() {
 			if (enyo.platform.ie && enyo.platform.ie <= 8) {
@@ -282,6 +299,7 @@ enyo.kind({
 			} else {
 				return true;
 			}
-		}
+		},
+		instance: null
 	}
 });
