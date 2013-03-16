@@ -40,14 +40,22 @@ enyo.kind({
 				if (obj[i].token === "published") {
 					p = obj[i].value[0].properties;
 					for (var j=0; j < p.length; j++) {
-						published.push({
-							name:   p[j].name,
-							value:  eval(p[j].value[0].token) // <---- TODO - shouldn't have to eval() here. Strings come back with double double quotes ("""")
-						});
+						if (p[j].value[0].type != "array") {
+							var val = "";
+							try {
+								// TODO - shouldn't have to eval() here. Strings come back with double double quotes ("""")
+								val = eval(p[j].value[0].token);
+							} catch(err) {
+								enyo.warn("Invalid value for property '" + p[j].name +"': " +  p[j].value[0].token);
+							}
+							published.push({
+								name:   p[j].name,
+								value:  val
+							});
+						}
 					}
 				}
 			}
-
 			return published;
 		}
 	},

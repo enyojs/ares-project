@@ -250,8 +250,11 @@ enyo.kind({
 			return true;
 		}
 		
-		// Give the new component a fresh _aresId_
+		// Give the new component (and any children) a fresh _aresId_
 		config.aresId = this.generateNewAresId();
+		if (config.components) {
+			this.addAresIds(config.components);
+		}
 		
 		// If target has an id, add to appropriate components array. Otherwise add to topmost component.
 		if(targetId) {
