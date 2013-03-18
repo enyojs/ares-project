@@ -198,5 +198,12 @@ enyo.kind({
 	},
 	copy: function(inNodeId, inNewName) {
 		return this._request("COPY", inNodeId, {name: inNewName}  /*inParams*/);
+	},
+	exportAs: function(inNodeId, inDepth) {
+		return this._request("GET", inNodeId, {depth: inDepth, format: "base64"} /*inParams*/)
+			.response(function(inSender, inValue) {
+				if (this.debug) this.log(inValue);
+				return inValue;
+			});
 	}
 });
