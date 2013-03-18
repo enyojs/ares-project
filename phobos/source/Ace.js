@@ -140,7 +140,6 @@ enyo.kind({
 		this.editor.setReadOnly(this.readonly);
 	},
 	setSessionMode: function(inSession, inMode) {
-		this.log("mode:", inMode);
 		try {
 			inSession.setMode("ace/mode/" + inMode);
 		} catch(e) {
