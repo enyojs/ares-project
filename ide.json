@@ -6,7 +6,7 @@
 			"id":"home",
 			"icon":"home-32x32",
 			"name":"Home Directory",
-			"type": "filesystem",
+			"type": ["filesystem"],
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/hermes/fsLocal.js", "--pathname", "/files", "--port", "0", "--root", "@HOME@"
@@ -20,8 +20,7 @@
 			"id":"dropbox",
 			"icon":"dropbox.com-32x32",
 			"name":"Dropbox",
-			"type": "filesystem",
-			"provider": "hermes",
+			"type": ["filesystem"],
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/hermes/fsDropbox.js", "-P", "/files", "-p", "0"
 			],
@@ -50,8 +49,7 @@
 			"id":"phonegap",
 			"icon":"build.phonegap.com-32x32",
 			"name":"PhoneGap Build",
-			"type": "build",
-			"provider": "hermes",
+			"type": ["build"],
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/hermes/bdPhoneGap.js", "-P", "/phonegap", "-p", "0"
 			],
@@ -64,14 +62,13 @@
 		},
 		{
 			"active": true,
-			"id":"prj-toolkit",
+			"id":"genZip",
 			"name":"Project toolkit",
-			"type": "generate",
-			"provider": "hermes",
+			"type": ["generate"],
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/hermes/prjToolkit.js", "-P", "/prj-toolkit", "-p", "0"
 			],
-			"project-template-repositories": [{
+			"projectTemplateRepositories": [{
 				"id": "bootplate",
 				"url": "http://enyojs.com/archive/ares-project-templates.json"
 			}],
