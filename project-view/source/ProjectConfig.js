@@ -221,7 +221,7 @@ enyo.kind({
 				}
 			},
 			preview: {
-				"top_file": 'index.html'
+				"top_file": 'debug.html'
 			}
 		},
 
@@ -250,7 +250,7 @@ enyo.kind({
 				}
 			},
 			preview: {
-				"top_file": 'index.html'
+				"top_file": 'debug.html'
 			}
 		}
 	}
