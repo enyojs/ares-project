@@ -88,7 +88,10 @@ enyo.kind({
 		]},
 		{kind: "Control", tag: "br"},
 		{kind: "FittableColumns", name: "groupbox7", components: [
-				{kind: "Control", content: "Programmable buttons Ctrl-SHIFT F1 to Alt F12"},
+				{kind: "Control", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
+				{kind: "Control", tag: "br"},
+				{kind: "Control", content: "Mac Programmable buttons Command  F1 to F12"},
+				{kind: "Control", tag: "br"},
 				{kind: "Control", tag: "br"},
 				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-1", name: "F1", ontap: "showPopup"},
 				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-2", name: "F2", ontap: "showPopup"},
