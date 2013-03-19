@@ -35,7 +35,7 @@ enyo.kind({
 		}
 
 		// Populate the repositories on nodejs
-		enyo.forEach(inConfig['project-template-repositories'], function(repository) {
+		enyo.forEach(inConfig.projectTemplateRepositories, function(repository) {
 			this.createRepo(repository);		// TODO: handle the answer
 		}, this);
 	},

@@ -21,6 +21,7 @@
 			"icon":"dropbox.com-32x32",
 			"name":"Dropbox",
 			"type": ["filesystem"],
+			"provider": "hermes",
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/hermes/fsDropbox.js", "-P", "/files", "-p", "0"
 			],

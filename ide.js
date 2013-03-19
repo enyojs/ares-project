@@ -111,6 +111,7 @@ var platformOpen = {
 
 var configPath, tester;
 var configStats;
+var serviceMap = {};
 
 if (argv.runtest) {
 	tester = require('./test/tester/main.js');
@@ -142,6 +143,10 @@ function loadMainConfig(configFile) {
 	}
 }
 
+function mergePluginConfig(service) {
+	log("Merging service '" + (service.name || service.id) + "' to ARES configuration");
+}
+
 function appendPluginConfig(configFile) {
 	log("Loading ARES plugin configuration from '"+configFile+"'...");
 	var pluginData;
@@ -153,12 +158,24 @@ function appendPluginConfig(configFile) {
 	}
 
 	pluginData.services.forEach(function(service) {
-		log("Adding service '" + service.name + "' to ARES configuration");
-		ide.res.services.push(service);
+		if (serviceMap[service.id]) {
+			mergePluginConfig(service);
+		} else {
+			log("Adding new service '" + service.name + "' to ARES configuration");
+			ide.res.services.push(service);
+			serviceMap.id = service;
+		}
 	});
 }
 
 function loadPluginConfigFiles() {
+
+	// Build a service map to merge the plugin services later on
+	ide.res.services.forEach(function(entry) {
+		serviceMap[entry.id] = entry;
+	});
+
+	// Find and load the plugins configuration
 	var base = path.join(myDir, 'node_modules');
 	var directories = fs.readdirSync(base);
 	directories.forEach(function(directory) {
@@ -204,7 +221,6 @@ function handleMessage(service) {
 			});
 			creq.write(JSON.stringify({config: service}, null, 2));
 			creq.end();
-			
 		} else {
 			console.error("Error updating URL for service "+service.id);
 		}
