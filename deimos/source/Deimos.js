@@ -61,8 +61,6 @@ enyo.kind({
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar deimos-toolbar-margined-buttons", components: [
-						{name:"upButton", kind: "onyx.Button", content: "Up", ontap: "upAction"},
-						{name:"downButton", kind: "onyx.Button", content: "Down", ontap: "downAction"},
 						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
 						{name:"undoButton", kind: "onyx.Button", content: "Undo", classes: "btn-danger",  ontap: "undoAction"},
 						{name:"redoButton", kind: "onyx.Button", content: "Redo", classes: "btn-danger",  ontap: "redoAction"}
@@ -286,24 +284,81 @@ enyo.kind({
 	},
 	//* Move item with _inEvent.itemId_ into item with _inEvent.targetId_
 	moveItem: function(inSender, inEvent) {
-		var clone = enyo.clone(this.getItemById(inEvent.itemId, this.kinds[this.index].components)),
-			target = (inEvent.targetId) ? this.getItemById(inEvent.targetId, this.kinds[this.index].components) : this.kinds[this.index];
+		var movedItem = this.getItemById(inEvent.itemId, this.kinds[this.index].components),
+			clone = enyo.clone(movedItem),
+			beforeId = inEvent.beforeId || null,
+			target = (inEvent.targetId)
+					?	this.getItemById(inEvent.targetId, this.kinds[this.index].components)
+					:	this.kinds[this.index];
 		
+		if(target === movedItem) {
+			return true;
+		}
+		
+		// If moving item before itself, do nothing
+		if(beforeId !== null && beforeId === inEvent.itemId) {
+			return true;
+		}
+		
+		// Remove existing item
 		this.removeItemById(inEvent.itemId, this.kinds[this.index].components);
 		
-		target.components = target.components || [];
-		target.components.push(clone);
+		if(beforeId) {
+			this.insertItemBefore(clone, target, beforeId);
+		} else {
+			this.insertItem(clone, target);
+		}
 		
 		this.rerenderKind(inEvent.itemId);
-		
 		return true;
 	},
+	insertItem: function(inClone, inTarget) {
+		inTarget.components = inTarget.components || [];
+		inTarget.components.push(inClone);
+	},
+	insertItemBefore: function(inClone, inTarget, inBeforeId) {
+		var beforeIndex = -1,
+			component,
+			i;
+		
+		inTarget.components = inTarget.components || [];
+		
+		for(i = 0; (component = inTarget.components[i]); i++) {
+			if(component.aresId === inBeforeId) {
+				beforeIndex = i;
+				break;
+			}
+		}
+		
+		if(beforeIndex === -1) {
+			enyo.warn("Couldn't find id: "+inBeforeId+" in ", inTarget);
+			return;
+		}
+		
+		inTarget.components.splice(beforeIndex, 0, inClone);
+	},
 	getItemById: function(inId, inComponents) {
+		if(inComponents.length === 0) {
+			return;
+		}
+		
 		for (var i = 0, component, item; (component = inComponents[i]); i++) {
 			if (component.aresId === inId) {
 				item = inComponents[i];
 			} else if (component.components) {
 				item = this.getItemById(inId, component.components);
+			}
+			if(item) {
+				return item;
+			}
+		}
+	},
+	getParentOfId: function(inChildId, inParent) {
+		for (var i = 0, component, item; (component = inParent.components[i]); i++) {
+			if (component.aresId === inChildId) {
+				item = inParent;
+			} else if (component.components) {
+				item = this.getParentOfId(inChildId, component);
 			}
 			if(item) {
 				return item;
@@ -375,12 +430,6 @@ enyo.kind({
 	},
 	saveComplete: function() {
 		this.setEdited(false);
-	},
-	upAction: function(inSender, inEvent) {
-		this.$.componentView.upAction(inSender, inEvent);
-	},
-	downAction: function(inSender, inEvent) {
-		this.$.componentView.downAction(inSender, inEvent);
 	},
 	undoAction: function(inSender, inEvent) {
 		this.doUndo();
