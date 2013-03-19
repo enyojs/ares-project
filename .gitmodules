@@ -25,3 +25,6 @@
 [submodule "node_modules/unzip"]
 	path = node_modules/unzip
 	url = ../node-unzip.git
+[submodule "lib/foss/ace-builds"]
+	path = lib/foss/ace-builds
+	url = ../../ajaxorg/ace-builds.git
