@@ -241,7 +241,11 @@ enyo.kind({
 	//* Create item from palette (via drag-and-drop from Palette into Designer or Component View)
 	createItem: function(inSender, inEvent) {
 		var config = inEvent.config,
-			targetId = inEvent.targetId;
+			targetId = inEvent.targetId,
+			beforeId = inEvent.beforeId,
+			target = (targetId)
+					?	this.getItemById(targetId, this.kinds[this.index].components)
+					:	this.kinds[this.index];
 		
 		if(!config) {
 			enyo.warn("Could not create new item - bad data: ", inEvent);
@@ -254,33 +258,17 @@ enyo.kind({
 			this.addAresIds(config.components);
 		}
 		
-		// If target has an id, add to appropriate components array. Otherwise add to topmost component.
-		if(targetId) {
-			this.createItemOnTarget(config, targetId, this.kinds[this.index].components);
+		if(beforeId) {
+			this.insertItemBefore(config, target, beforeId);
 		} else {
-			this.kinds[this.index].components.push(config);
+			this.insertItem(config, target);
 		}
 		
 		// Update user defined values
 		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
 		
 		this.rerenderKind(config.aresId);
-		
 		return true;
-	},
-	createItemOnTarget: function(inConfig, inTargetId, inComponents) {
-		for (var i = 0, component; (component = inComponents[i]); i++) {
-			if(component.aresId === inTargetId) {
-				if(component.components) {
-					component.components.push(inConfig);
-				} else {
-					component.components = [inConfig];
-				}
-			}
-			if(component.components) {
-				this.createItemOnTarget(inConfig, inTargetId, component.components);
-			}
-		}
 	},
 	//* Move item with _inEvent.itemId_ into item with _inEvent.targetId_
 	moveItem: function(inSender, inEvent) {
@@ -312,11 +300,11 @@ enyo.kind({
 		this.rerenderKind(inEvent.itemId);
 		return true;
 	},
-	insertItem: function(inClone, inTarget) {
+	insertItem: function(inItem, inTarget) {
 		inTarget.components = inTarget.components || [];
-		inTarget.components.push(inClone);
+		inTarget.components.push(inItem);
 	},
-	insertItemBefore: function(inClone, inTarget, inBeforeId) {
+	insertItemBefore: function(inItem, inTarget, inBeforeId) {
 		var beforeIndex = -1,
 			component,
 			i;
@@ -335,7 +323,7 @@ enyo.kind({
 			return;
 		}
 		
-		inTarget.components.splice(beforeIndex, 0, inClone);
+		inTarget.components.splice(beforeIndex, 0, inItem);
 	},
 	getItemById: function(inId, inComponents) {
 		if(inComponents.length === 0) {
