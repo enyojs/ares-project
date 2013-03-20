@@ -38,7 +38,9 @@ enyo.kind({
 		for(var repoId in inConfig.projectTemplateRepositories) {
 			var repository = inConfig.projectTemplateRepositories[repoId];
 			repository.id = repoId;
-			this.createRepo(repository);		// TODO: handle the answer
+			if (repository.url) {
+				this.createRepo(repository);		// TODO: handle the answer
+			}
 		}
 	},
 	/**
@@ -82,7 +84,7 @@ enyo.kind({
 		return userreq;
 	},
 	createRepo: function(repo) {
-		if (this.debug) this.log();
+		if (this.debug) this.log(repo);
 		var data = "url=" + encodeURIComponent(repo.url);
 
 		var req = new enyo.Ajax({
