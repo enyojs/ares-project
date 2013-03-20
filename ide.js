@@ -143,8 +143,40 @@ function loadMainConfig(configFile) {
 	}
 }
 
-function mergePluginConfig(service) {
+function getObjectType(object) {
+	return util.isArray(object) ? "array" : typeof object;
+}
+
+function mergePluginConfig(service, newdata, configFile) {
 	log("Merging service '" + (service.name || service.id) + "' to ARES configuration");
+	try {
+		for(var key in newdata) {
+			var srcType = getObjectType(service[key]);
+			var dstType = getObjectType(newdata[key]);
+
+			if (srcType === 'undefined') {
+				service[key] = newdata[key];
+			} else if (srcType !== dstType) {
+				throw "Incompatible elements '" + key + "'. Unable to merge " + configFile;
+			} else if (srcType === 'array') {
+				for(var idx = 0; idx < newdata[key].length; idx++) {
+					service[key].push(newdata[key][idx]);
+				}
+			} else if (srcType === 'object') {
+				for(var subkey in newdata[key]) {
+					console.log("Adding or replacing " + subkey + " in " + key);
+					service[key][subkey] = newdata[key][subkey];
+				}
+			} else {
+				service[key] = newdata[key];
+			}
+		}
+
+		log("Merged service: " + JSON.stringify(service, null, 2));
+	} catch(err) {
+		console.log(err);
+		throw "Unable to merge " + configFile;
+	}
 }
 
 function appendPluginConfig(configFile) {
@@ -157,13 +189,13 @@ function appendPluginConfig(configFile) {
 		throw "Improper JSON in " + configFile + " : "+configContent;
 	}
 
-	pluginData.services.forEach(function(service) {
-		if (serviceMap[service.id]) {
-			mergePluginConfig(service);
+	pluginData.services.forEach(function(pluginData) {
+		if (serviceMap[pluginData.id]) {
+			mergePluginConfig(serviceMap[pluginData.id], pluginData, configFile);
 		} else {
-			log("Adding new service '" + service.name + "' to ARES configuration");
-			ide.res.services.push(service);
-			serviceMap.id = service;
+			log("Adding new service '" + pluginData.name + "' to ARES configuration");
+			ide.res.services.push(pluginData);
+			serviceMap[pluginData.id] = pluginData;
 		}
 	});
 }
