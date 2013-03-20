@@ -191,7 +191,14 @@ enyo.kind({
 				// Object know the serviceId.
 				service.impl.id = service.config.id;
 
-				service.impl.setConfig(service.config);
+				try {
+					service.impl.setConfig(service.config);
+				} catch(pluginError) {
+					var msg = "Unexpected error in setConfig() of service '" + service.config.id + "'";
+					this.error(msg, pluginError);
+					pluginError.msg = msg;
+					throw pluginError;
+				}
 				if (this.debug) this.log("id:", service.config.id, "configured");
 			} else {
 				if (this.debug) this.log("Ignoring service: " + service.config.id);
