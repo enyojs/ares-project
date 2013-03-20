@@ -163,7 +163,6 @@ function BdOpenwebOS(config, next) {
 			// Build the multipart/formdata
 			var combinedStream = CombinedStream.create();
 			var boundary = generateBoundary();
-			var index = 0;
 			inData.forEach(function(file) {
 				if (fs.statSync(file).isFile()) {
 					var filename = file.substr(destination.length + 1);
@@ -187,7 +186,6 @@ function BdOpenwebOS(config, next) {
 					combinedStream.append(function(nextDataChunk) {
 						nextDataChunk(getPartFooter());
 					});
-					index++;
 				}
 			});
 
@@ -242,7 +240,7 @@ function BdOpenwebOS(config, next) {
 		return header;
 	}
 
-	function getPartFooter() {
+	function getPartFooter() {				// TODO: Switch to SimpleFormData
 		return FORM_DATA_LINE_BREAK;
 	}
 
@@ -301,9 +299,6 @@ if (path.basename(process.argv[1]) === basename) {
 		// parent-process is also node
 		if (process.send) process.send(service);
 	});
-
-	process.on('SIGINT', obj.onExit.bind(obj));
-	process.on('exit', obj.onExit.bind(obj));
 } else {
 
 	// ... otherwise hook into commonJS module systems

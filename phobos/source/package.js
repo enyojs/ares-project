@@ -5,5 +5,8 @@ enyo.depends(
 	"cssbuilder.css",
 	"cssbuilder.js",
 	"ProjectCtrl.js",
-	"EditorSettings.js"
+	"EditorSettings.js",
+	"AceScroller.js",
+	"Ace.js",
+	"Ace.css"
 );
