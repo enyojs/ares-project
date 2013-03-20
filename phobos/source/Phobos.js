@@ -8,8 +8,24 @@ enyo.kind({
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", components: [
-				{name: "documentLabel", content: "Document"},
-				{name: "saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "saveDocAction"},
+				{kind: "onyx.MenuDecorator", onSelect: "fileMenuItemSelected", components: [
+					{content: "File"},
+					{kind: "onyx.Menu", components: [
+						{name: "saveButton", value: "saveDocAction", components: [
+							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save.png"},
+							{content: $L("Save")}
+						]},
+						{name: "saveAsButton", value: "saveAsDocAction", components: [
+							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save.png"},
+							{content: $L("Save as...")}
+						]},
+						{classes: "onyx-menu-divider"},
+						{name: "closeButton", value: "closeDocAction", components: [
+							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
+							{content: $L("Close")}
+						]}
+					]}
+				]},
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: $L("New Kind"), ontap: "newKindAction"},
 				{fit: true},
 				{name: "editorButton", kind: "onyx.Button", content: "Editor Settings", ontap: "editorSettings"},
@@ -26,7 +42,7 @@ enyo.kind({
 			]}
 		]},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
-			{kind: "Image", src: "$phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
+			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 			{name: "waitPopupMessage", content: "Saving document...", style: "padding-top: 10px;"}
 		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
@@ -59,9 +75,16 @@ enyo.kind({
 			this.projectData.setProjectCtrl(this.projectCtrl);
 		}
 	},
-	//
+	fileMenuItemSelected: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		if (typeof this[inEvent.selected.value] === 'function') {
+			this[inEvent.selected.value]();
+		} else {
+			this.warn("Unexpected event or missing function: event:", inEvent);
+		}
+	},
 	saveDocAction: function() {
-		this.showWaitPopup("Saving document...");
+		this.showWaitPopup($L("Saving ..."));
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
 	},
 	saveComplete: function() {
@@ -165,25 +188,52 @@ enyo.kind({
 		}
 		this.projectCtrl.buildProjectDb();
 		this.reparseAction(true);
-		this.$.documentLabel.setContent(file.name);
 
 		this.docData.setEdited(edited);
 		this.$.toolbar.resized();
 	},
 	adjustPanelsForMode: function(mode) {
+		if (this.debug) this.log("mode:", mode);
 		// whether to show or not a panel, imageViewer and ace cannot be enabled at the same time
 		var showModes = {
-			json:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
-			javascript:	{imageViewer: false, ace: true , saveButton: true , newKindButton: true,  designerButton: true ,  right: true  },
-			html:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
-			css:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: true  },
-			text:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
-			image:		{imageViewer: true , ace: false, saveButton: false, newKindButton: false, designerButton: false,  right: false }
+			javascript: {
+				imageViewer: false,
+				ace: true,
+				saveButton: true,
+				saveAsButton: true,
+				newKindButton: true,
+				designerButton: true,
+				right: true
+			},
+			image: {
+				imageViewer: true,
+				ace: false,
+				saveButton: false,
+				saveAsButton: false,
+				newKindButton: false,
+				designerButton: false,
+				right: false
+			},
+			text: {
+				imageViewer: false,
+				ace: true,
+				saveButton: true,
+				saveAsButton: true,
+				newKindButton: false,
+				designerButton: false,
+				right: false
+			}
 		};
 
-		var showSettings = showModes[mode]||showModes['text'];
+		var showStuff, showSettings = showModes[mode]||showModes['text'];
 		for (var stuff in showSettings) {
-			this.$[stuff].setShowing( showSettings[stuff] ) ;
+			showStuff = showSettings[stuff];
+			if (this.debug) this.log("show", stuff, ":", showStuff);
+			if (typeof this.$[stuff].setShowing === 'function') {
+				this.$[stuff].setShowing(showStuff) ;
+			} else {
+				this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
+			}
 		}
 
         // xxxIndex: specify what to show in the "RightPanels" kinds (declared at the end of this file)
