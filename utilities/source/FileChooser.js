@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "SelectDirectoryPopup",
+	name: "Ares.FileChooser",
 	kind: "onyx.Popup",
 	modal: true,
 	centered: true,
@@ -13,8 +13,8 @@ enyo.kind({
 		this.$.header.setContent(this.headerText);
 	},
 	components: [
-		{kind: "FittableRows", style: "height: 400px; width: 600px", components: [
-			{kind: "Control", tag: "span", style: "padding: 0 4px; vertical-align: middle;", content: "Select a directory", name: "header"},
+		{kind: "FittableRows", classes: "ares-filechooser", components: [
+			{kind: "Control", tag: "span", classes: "ares-filechooser-header", content: "Select a directory", name: "header"},
 			{kind: "FittableColumns", content: "fittableColumns", fit: true, components: [
 				{kind: "ProviderList", type: "filesystem", name: "providerList", header: "Sources", onSelectProvider: "handleSelectProvider"},
 				{kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "selectFile", onFolderClick: "selectFolder", onNewFolderConfirm: "createFolder"}

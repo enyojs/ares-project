@@ -28,6 +28,19 @@ body {
 }
 
 /**/
+
+.ares-filechooser {
+	height: 400px;
+	width: 600px;
+}
+
+.ares-filechooser-header {
+	padding: 0 4px;
+	vertical-align: middle;
+}
+
+/**/
+
 .ares-groupbox-item-key {
 	padding: 0.5em;
 }

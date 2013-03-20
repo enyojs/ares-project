@@ -21,7 +21,7 @@ enyo.kind({
 
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget"},
-		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup"},
+		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup"},
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"}
 	],
 	debug: false,
@@ -345,7 +345,7 @@ enyo.kind({
  */
 enyo.kind({
 	name: "ProjectWizardScan",
-	kind: "SelectDirectoryPopup",
+	kind: "Ares.FileChooser",
 	modal: true,
 	centered: true,
 	floating: true,
