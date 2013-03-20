@@ -321,7 +321,7 @@ enyo.kind({
 		if (this.debug) this.log("sending signal...");
 		enyo.Signals.send("onServicesChange", {serviceRegistry: this});
 	},
-	pluginReady: function(serviceId, impl) {
+	pluginReady: function(serviceId, kindInformation) {
 		if (this.debug) this.log("New plugin ready: " + serviceId);
 		var services = this.filter(function(service) {
 			return service.config.id === serviceId;
@@ -330,10 +330,17 @@ enyo.kind({
 		if (services.length === 1) {
 			var service = services[0];
 			if (service.config.pluginUrl && ( ! service.impl)) {
-				error = false;
-				service.impl = impl;
-				impl.setConfig(service.config);
-				if (this.debug) this.log("New plugin registered: " + serviceId);
+				try {
+					this.log("YDM:       ", kindInformation);
+					var plugImplementaion = Ares.instance.createComponent(kindInformation);
+					service.impl = plugImplementaion;
+					plugImplementaion.setConfig(service.config);
+					error = false;
+					if (this.debug) this.log("New plugin registered: " + serviceId);
+				} catch(err) {
+					this.error("Unexpected error while creating '" + kindInformation.kind + "' for service " + serviceId , err);
+					return;
+				}
 			}
 		}
 
