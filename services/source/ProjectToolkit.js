@@ -35,9 +35,11 @@ enyo.kind({
 		}
 
 		// Populate the repositories on nodejs
-		enyo.forEach(inConfig.projectTemplateRepositories, function(repository) {
+		for(var repoId in inConfig.projectTemplateRepositories) {
+			var repository = inConfig.projectTemplateRepositories[repoId];
+			repository.id = repoId;
 			this.createRepo(repository);		// TODO: handle the answer
-		}, this);
+		}
 	},
 	/**
 	 * @return {Object} the configuration this service was configured by

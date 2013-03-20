@@ -69,10 +69,12 @@
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/hermes/prjToolkit.js", "-P", "/prj-toolkit", "-p", "0"
 			],
-			"projectTemplateRepositories": [{
-				"id": "bootplate",
-				"url": "http://enyojs.com/archive/ares-project-templates.json"
-			}],
+			"projectTemplateRepositories": {
+				"bootplate": {
+					"description": "Standard Enyo template",
+					"url": "http://enyojs.com/archive/ares-project-templates.json"
+				}
+			},
 			"useJsonp":false,
 			"verbose": false,
 			"respawn": false
