@@ -16,7 +16,7 @@ enyo.kind({
 			onProjectRemoved: "projectRemoved",
 			onProjectSelected: "handleProjectSelected",
 			name: "projectList"},
-		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
+		{kind: "Harmonia", fit:true, name: "harmonia"},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan"},
 		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"},
