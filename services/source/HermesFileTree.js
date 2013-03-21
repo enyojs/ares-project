@@ -51,7 +51,7 @@ enyo.kind({
 		]},
 
 		{kind: "Scroller", fit: true, components: [
-			{name: "serverNode", kind: "Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onNodeTap: "nodeTap"}
+			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onAresNodeTap: "aresNodeTap", onForceView: "adjustScroll" }
 		]},
 
 		// track selection of nodes. here, selection Key is file or folderId. Selection value is the node object
@@ -70,7 +70,7 @@ enyo.kind({
 	// return an object (hash) which needs to be scanned to retrieve the selected value
 	selectedFile: null,
 	selectedNode: null,
-	debug: false,
+	debug: true,
 	create: function() {
 		this.inherited(arguments);
 		this.enableDisableButtons();
@@ -101,6 +101,7 @@ enyo.kind({
 		var nodeName = inProjectData.getName();
 		var folderId = inProjectData.getFolderId();
 		var service = inProjectData.getService();
+		this.$.serverNode.setService(service);
 		serverNode.hide();
 
 		// connects to a service that provides access to a
@@ -115,13 +116,13 @@ enyo.kind({
 					var projectUrl = service.getConfig().origin + service.getConfig().pathname + "/file" + inValue.path;
 					this.projectData.setProjectUrl(projectUrl);
 					this.projectUrlReady = true;
-					
+
+					//
 					serverNode.file = inValue;
 					serverNode.file.isServer = true;
-					
+
 					serverNode.setContent(nodeName);
 					this.refreshFileTree();
-					serverNode.render() ;
 				});
 				req.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");
@@ -164,7 +165,7 @@ enyo.kind({
 		var server = this.$.serverNode;
 		if (this.debug) this.log("clearing serverNode") ;
 		enyo.forEach(
-			this.getNodeFiles(server) ,
+			server.getNodeFiles() ,
 			function(n){
 				n.destroy();
 			}
@@ -180,21 +181,20 @@ enyo.kind({
 		}
 		return this ;
 	},
-	//
-	// probably should be in a Tree kind
-	nodeTap: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
+
+	aresNodeTap: function(inSender, inEvent) {
 		var node = inEvent.originator;
 		this.$.selection.select(node.file.id, node);
-		if (!node.file.isDir) {
-			this.doFileClick({file: node.file});
-		} else {
-			this.doFolderClick({file: node.file});
-		}
-		// handled here (don't bubble)
 		return true;
 	},
-	nodeDblClick: function(inSender, inEvent) {
+
+	adjustScroll: function (inSender, inEvent) {
+		var node = inEvent.originator;
+		this.$.scroller.scrollIntoView(node, true);
+		return true;
+	},
+
+	xxnodeDblClick: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		var node = inEvent.originator;
 		// projectUrl in this.projectData is set asynchonously.  Do not try to
@@ -230,7 +230,7 @@ enyo.kind({
 		return true;
 	},
 	// Note: this function does not recurse
-	updateNodes: function(inNode) {
+	xxupdateNodes: function(inNode) {
 		this.startLoading(inNode);
 		if (this.debug) this.log(inNode) ;
 		return this.$.service.listFiles(inNode && inNode.file && inNode.file.id)
@@ -252,13 +252,13 @@ enyo.kind({
 			})
 			;
 	},
-	startLoading: function(inNode) {
+	xxstartLoading: function(inNode) {
 		inNode.$.extra.setContent('&nbsp;<img src="' + enyo.path.rewrite("$services/assets/images/busy.gif") + '"/>');
 	},
-	stopLoading: function(inNode) {
+	xxstopLoading: function(inNode) {
 		inNode.$.extra.setContent("");
 	},
-    updateNodeContent: function(inNode, files) {
+    xxupdateNodeContent: function(inNode, files) {
 		var i = 0 , nfiles, rfiles, res, modified = 0, newControl ;
 		// Add dir property to files, which is a project-relative path
 		enyo.forEach(files, function(f) {
@@ -316,7 +316,7 @@ enyo.kind({
 			inNode.$.client.render();
 		}
 	},
-	compareFiles: function(inFilesA, inFilesB) {
+	xxcompareFiles: function(inFilesA, inFilesB) {
 		if (inFilesA.length != inFilesB.length) {
 			return false;
 		}
@@ -330,7 +330,7 @@ enyo.kind({
 	},
 	// Sort files by name, case-insensitively
 	// TODO: I18N, and possibly platform-specific sort order
-	fileNameSort: function(a, b) {
+	xxfileNameSort: function(a, b) {
 		var lowA, lowB;
 		lowA=a.name.toLowerCase();
 		lowB=b.name.toLowerCase();
@@ -350,15 +350,15 @@ enyo.kind({
 			}
 		}
 	},
-	getNodeFiles: function(inNode) {
+	xxgetNodeFiles: function(inNode) {
 		var target = inNode || this.$.serverNode ;
-		var hasPrefix = function(e){ 
+		var hasPrefix = function(e){
 			return (e.name.slice(0,1) === '$') ;
 		} ;
 		// getComponents only return the graphical items
 		return target.getControls().filter( hasPrefix ).sort(this.fileNameSort) ;
 	},
-	filesToNodes: function(inFiles) {
+	xxfilesToNodes: function(inFiles) {
 		var nodes = [];
 		inFiles.sort(this.fileNameSort); // TODO: Other sort orders
 		for (var i=0, f; f=inFiles[i]; i++) {
@@ -372,7 +372,7 @@ enyo.kind({
 		}
 		return nodes;
 	},
-	nodeExpand: function(inSender, inEvent) {
+	xxnodeExpand: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 
 		// the originating node is arbitrarily deep
@@ -424,69 +424,26 @@ enyo.kind({
 	},
 
 	// All parameters are optional.
-	// - node is null for the "top" refresh call. Node is also used for inner (async)
-	//   recursive calls.
-	// - toSelectId is optional. refresh will select this entry if specified.
-	//   Nothing is selected otherwise.
     // - callBack is optional. Will be called when the refresh is completely done,
 	//   i.e. when the aync events fireworks are finished
-	// - tracker is an internal parameter used in inner refreshFileTree calls
-	refreshFileTree: function(node, toSelectId, callBack, tracker) {
-		if (this.debug) this.log(this) ;
-		var target = node || this.$.serverNode ;
-		var inTop = 0;
-
-		if (! tracker) {
-			inTop++ ;
-			tracker = this.asyncTracker(callBack) ;
+	refreshFileTree: function(callBack, trash, oldCallBack) {
+		// deprecation warning
+		if (oldCallBack) {
+			this.warn("deprecated refreshFileTree signature. Callback is now the first and only parameter");
+			callBack = oldCallBack ;
 		}
 
-		if (target.kind !== 'Node') {
-			this.showErrorPopup("Internal Error");
-			this.error("called with kind " + target.kind + " instead of Node");
-			return ;
-		}
-		if (this.debug) this.log('running refreshFileTree on ' + target.kind + ' with ' +
-					 target.controls.length + ' controls with content ' + target.content +
-					 ' force select ' + toSelectId );
+		var tracker = this.asyncTracker(
+			function() {
+				this.$.serverNode.render() ;
+				if (callBack) { callBack() ; }
+			}.bind(this)
+		) ;
 
-		tracker.inc() ; // for updadeNodes
-		this.updateNodes(target).
-			response(this, function(inSender, inFiles) {
-				// expand node if it has clients (sub-nodes) and is expanded
-				target.effectExpanded();
+		if (this.debug) this.log("refreshFileTree called") ;
 
-				enyo.forEach(this.getNodeFiles(target), function(f) {
-					var c = target.$[f.name] ; // c is a node
-					if (this.debug) this.log('running INNER function of refreshFileTree on ' + f.name +
-								 ' id ' + c.file.id);
-					if ( c.file.id === toSelectId ) {
-						if (this.debug) this.log('force select of ' + c.file.id);
-						this.$.selection.select(c.file.id, c);
-						this.$.scroller.scrollIntoView(c, true);
-						// force a "click" event when the item is selected
-						this.doFolderClick({file: c.file});
-					}
-					c.effectExpanded() ;
-					if (f.expanded) {
-						tracker.inc() ; // for inner calls to refreshFileTree
-						this.refreshFileTree(c,toSelectId, null, tracker );
-					}
-				}, this);
-				tracker.dec(); // end updateNodes
-			}).
-			error(this, function(inSender, inError) {
-				var errMsg = "Error refreshing the file list (" + inError + ")";
-				try {
-					errMsg += ": " + JSON.parse(inSender.xhrResponse.body).message;
-				} catch(e) {
-				}
-				this.showErrorPopup(errMsg);
-			});
+		this.$.serverNode.refreshTree(tracker,0) ;
 
-		if( ! inTop ) {
-			tracker.dec(); // run only for inner calls to refreshFileTree
-		}
 		this.debug && this.log("refreshFileTree done") ;
 	},
 	// Get nearest parent directory for file ref
