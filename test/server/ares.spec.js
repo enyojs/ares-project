@@ -1,4 +1,4 @@
-#!/usr/bin/env ../../node_modules/mocha/bin/mocha --bail
+#!/usr/bin/env ../../node_modules/mocha/bin/mocha
 /**
  * ares.spec.js -- ARES server test suite
  */
@@ -46,7 +46,7 @@ if (argv.quiet) {
 log("running in verbose mode");
 log("argv:", argv);
 
-var mocha = path.resolve(__dirname, "..", "..", "node_modules", "mocha", "bin", "mocha");
+var mocha = argv['$0'];
 var myPort = 9019;
 
 log("loading " + argv.config);
@@ -65,7 +65,7 @@ describe("Testing filesystems", function() {
 	})[0];
 	if (dropbox && dropbox.auth && dropbox.auth.appKey) {
 		it("fsDropbox", function(done) {
-			var fsDropbox = path.resolve("..", "..", "hermes","fsDropbox.js");
+			var fsDropbox = path.resolve(__dirname, "..", "..", "hermes","fsDropbox.js");
 			var myTestDir = "_test";
 			var myDropboxApp = 'com.enyojs.ares';
 			// Assume a user's account grip in the local file-system.
@@ -81,7 +81,7 @@ describe("Testing filesystems", function() {
 					run([mocha, "--bail",
 					     "--timeout", "5000", // This timeout may vary, depending on the network conditions
 					     "--reporter", "spec",
-					     "fs.spec.js",
+					     path.resolve(__dirname, "fs.spec.js"),
 					     "--filesystem", fsDropbox,
 					     "--pathname", "/",
 					     "--port", myPort,
@@ -98,14 +98,14 @@ describe("Testing filesystems", function() {
 		});
 	}
 	it("fsLocal", function(done) {
-		var fsLocal = path.resolve("..", "..", "hermes","fsLocal.js");
+		var fsLocal = path.resolve(__dirname, "..", "..", "hermes","fsLocal.js");
 		var myFsPath = temp.path({prefix: 'com.palm.ares.test.fs'});
 		
 		fs.mkdirSync(myFsPath);
 		
 		run([mocha, "--bail",
 		     "--reporter", "spec",
-		     "fs.spec.js",
+		     path.resolve(__dirname, "fs.spec.js"),
 		     "--filesystem", fsLocal,
 		     "--pathname", "/",
 		     "--port", myPort,
@@ -134,7 +134,7 @@ function run(args) {
 		args.push("-q");
 	}
 	// Use '" "' instead of ' ' to let things work on Windows
-	var command = '"' + args.join('" "') + '"';
+	var command = args.shift() + ' "' + args.join('" "') + '"';
 	log("Running: '", command, "' from '", process.cwd(), "'");
 
 	var report = shell.exec(command, { silent: false });
