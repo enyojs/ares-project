@@ -21,7 +21,8 @@ Or (with `-v` or `--verbose`)…
 
 Or (Windows)…
 
-	C:\Users\fxk\GIT\ares-project\test\server> node ares.spec.js
+	C:\> cd c:\path\to\ares-project
+	C:\> node_modules\.bin\mocha.cmd test\server\ares.spec.js
 
 To run a specific test, use the `-g` (or `--grep`) command-line flag.  For example:
 

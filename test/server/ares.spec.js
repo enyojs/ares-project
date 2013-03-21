@@ -98,6 +98,8 @@ describe("Testing filesystems", function() {
 		});
 	}
 	it("fsLocal", function(done) {
+		this.timeout(15000);
+
 		var fsLocal = path.resolve(__dirname, "..", "..", "hermes","fsLocal.js");
 		var myFsPath = temp.path({prefix: 'com.palm.ares.test.fs'});
 		
