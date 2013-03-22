@@ -51,7 +51,7 @@ enyo.kind({
 		]},
 
 		{kind: "Scroller", fit: true, components: [
-			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onAresNodeTap: "aresNodeTap", onForceView: "adjustScroll" }
+			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll" }
 		]},
 
 		// track selection of nodes. here, selection Key is file or folderId. Selection value is the node object
@@ -182,27 +182,35 @@ enyo.kind({
 		return this ;
 	},
 
-	aresNodeTap: function(inSender, inEvent) {
-		var node = inEvent.originator;
-		this.$.selection.select(node.file.id, node);
-		return true;
-	},
-
 	adjustScroll: function (inSender, inEvent) {
 		var node = inEvent.originator;
 		this.$.scroller.scrollIntoView(node, true);
 		return true;
 	},
 
-	xxnodeDblClick: function(inSender, inEvent) {
+	nodeTap: function(inSender, inEvent) {
+		if (this.debug) this.log('noteTap: ',inSender, "=>", inEvent);
+		var node = inEvent.originator;
+		this.$.selection.select(node.file.id, node);
+		if (!node.file.isDir) {
+			this.doFileClick({file: node.file});
+		} else {
+			this.doFolderClick({file: node.file});
+		}
+		// handled here (don't bubble)
+		return true;
+	},
+
+	nodeDblClick: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		var node = inEvent.originator;
-		// projectUrl in this.projectData is set asynchonously.  Do not try to
+		// projectUrl in this.projectData is set asynchronously.  Do not try to
 		// open anything before it is available.  Also do not
 		// try to open top-level root & folders.
 		if (!node.file.isDir && !node.file.isServer && this.projectUrlReady) {
 			this.doFileDblClick({file: node.file, projectData: this.projectData});
 		}
+
 		// handled here (don't bubble)
 		return true;
 	},

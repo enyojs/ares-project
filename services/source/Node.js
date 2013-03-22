@@ -5,12 +5,7 @@ enyo.kind({
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
-		onAresNodeTap: "",
 		onAdjustScroll: ""
-	},
-	handlers: {
-		onNodeDblClick: "nodeDblClick",
-		onNodeTap: "nodeTap"
 	},
 	published: {
 		service: null
@@ -18,30 +13,6 @@ enyo.kind({
 
 	debug: true,
 
-
-	nodeTap: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		this.doAresNodeTap() ;
-		if (!this.file.isDir) {
-			this.doFileClick({file: this.file});
-		} else {
-			this.doFolderClick({file: this.file});
-		}
-		// handled here (don't bubble)
-		return true;
-	},
-
-	nodeDblClick: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		// projectUrl in this.projectData is set asynchonously.  Do not try to
-		// open anything before it is available.  Also do not
-		// try to open top-level root & folders.
-		if (!this.file.isDir && !this.file.isServer && this.projectUrlReady) {
-			this.doFileDblClick({file: this.file, projectData: this.projectData});
-		}
-		// handled here (don't bubble)
-		return true;
-	},
 
 	// Note: this function does not recurse
 	updateNodes: function() {
