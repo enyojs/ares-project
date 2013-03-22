@@ -207,9 +207,10 @@ function loadPluginConfigFiles() {
 		serviceMap[entry.id] = entry;
 	});
 
-	// Find and load the plugins configuration
+	// Find and load the plugins configuration, sorted in folder
+	// names lexicographical order.
 	var base = path.join(myDir, 'node_modules');
-	var directories = fs.readdirSync(base);
+	var directories = fs.readdirSync(base).sort();
 	directories.forEach(function(directory) {
 		var filename = path.join(base, directory, 'ide.json');
 		if (fs.existsSync(filename)) {
