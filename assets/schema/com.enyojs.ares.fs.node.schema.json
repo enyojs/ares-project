@@ -13,7 +13,7 @@
 			"required":true
 		},
 		"path":{
-			"description":"Human & Browser-readable file location in the current file-system",
+			"description":"Human & Browser-readable file location in the current file-system.  Using URL folder separator (UNIX-like, not Windows-like)",
 			"type":"string",
 			"required":true
 		},
