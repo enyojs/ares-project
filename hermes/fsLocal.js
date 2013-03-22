@@ -79,7 +79,7 @@ FsLocal.prototype.get = function(req, res, next) {
 };
 
 FsLocal.prototype.mkcol = function(req, res, next) {
-	var newPath, newId,
+	var newPath, newId, self = this,
 	    pathParam = req.param('path'),
 	    nameParam = req.param('name');
 	if (!nameParam) {
@@ -92,7 +92,7 @@ FsLocal.prototype.mkcol = function(req, res, next) {
 	fs.mkdir(path.join(this.root, newPath), function(err) {
 		next(err, {
 			code: 201, // Created
-			body: {id: newId, path: newPath, isDir: true}
+			body: {id: newId, path: self.normalize(newPath), isDir: true}
 		});
 	});
 };
@@ -121,7 +121,8 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 		return;
 	}
 
-	var localPath = path.join(this.root, relPath);
+	var localPath = path.join(this.root, relPath),
+                        urlPath = this.normalize(relPath);
 	if (path.basename(relPath).charAt(0) ===".") {
 		// Skip hidden files & folders (using UNIX
 		// convention: XXX do it for Windows too)
@@ -135,9 +136,9 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 
 		// minimum common set of properties
 		var node = {
-			path: relPath,
-			name: path.basename(relPath),
-			id: this.encodeFileId(relPath),
+			path: urlPath,
+			name: path.basename(urlPath),
+			id: this.encodeFileId(urlPath),
 			isDir: stat.isDirectory()
 		};
 
@@ -308,6 +309,7 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 
 FsLocal.prototype.putFile = function(req, file, next) {
 	var absPath = path.join(this.root, file.name),
+            urlPath = this.normalize(file.name),
 	    dir = path.dirname(absPath),
 	    encodeFileId = this.encodeFileId,
 	    node;
@@ -329,8 +331,8 @@ FsLocal.prototype.putFile = function(req, file, next) {
 		},
 		function(cb1) {
 			node = {
-				id: encodeFileId(file.name),
-				path: file.name,
+				id: encodeFileId(urlPath),
+				path: urlPath,
 				isDir: false
 			};
 			cb1();

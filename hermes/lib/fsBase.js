@@ -228,6 +228,20 @@ FsBase.prototype.cors = function(req, res, next) {
 // Utilities
 
 /**
+ * Normalize a path using only `/`, to make it usable in URL's
+ * @param {String} p the path to normalize
+ */
+if (process.platform === 'win32') {
+FsBase.prototype.normalize = function(p) {
+	return path.normalize(p).replace(/\\/g,'/');
+}
+} else {
+FsBase.prototype.normalize = function(p) {
+	return path.normalize(p);
+};
+}
+
+/**
  * Turns an {Error} object into a usable response {Object}
  * 
  * A response {Object} as #code and #body properties.  This method is
@@ -407,8 +421,9 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		buf = new Buffer('');
 	}
 	
-	this.log("FsBase.putWebForm(): storing file as", relPath);
-	fileId = this.encodeFileId(relPath);
+	var urlPath = this.normalize(relPath);
+	this.log("FsBase.putWebForm(): storing file as", urlPath);
+	fileId = this.encodeFileId(urlPath);
 	this.putFile(req, {
 		name: relPath,
 		buffer: buf
@@ -416,7 +431,7 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		this.log("FsBase.putWebForm(): err:", err);
 		next(err, {
 			code: 201, // Created
-			body: [{id: fileId, path: relPath, isDir: false}]
+			body: [{id: fileId, path: urlPath, isDir: false}]
 		});
 	}).bind(this));
 };
