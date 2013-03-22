@@ -50,9 +50,9 @@ enyo.kind({
 		return this.service.listFiles(this.file && this.file.id)
 			.response(this, function(inSender, inFiles) {
 				var sortedFiles = inFiles.sort(this.fileNameSort) ;
-//				if (inFiles && !this.$.serverNode.showing) {
-//					this.$.serverNode.show();
-//				}
+				if (inFiles && !this.showing) {
+					this.show();
+				}
 
 				if (this.debug) this.log("updating node content of ", this.name, this," with ", sortedFiles ) ;
 				this.updateNodeContent(sortedFiles);
