@@ -330,7 +330,7 @@ enyo.kind({
 			var service = services[0];
 			if (service.config.pluginUrl && ( ! service.impl)) {
 				try {
-					var plugImplementaion = Ares.instance.createComponent(kindInformation);
+					var plugImplementaion = ServiceRegistry.instance.createComponent(kindInformation);
 					service.impl = plugImplementaion;
 					plugImplementaion.setConfig(service.config);
 					error = false;
