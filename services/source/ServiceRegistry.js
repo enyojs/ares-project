@@ -320,30 +320,32 @@ enyo.kind({
 		if (this.debug) this.log("sending signal...");
 		enyo.Signals.send("onServicesChange", {serviceRegistry: this});
 	},
-	pluginReady: function(serviceId, kindInformation) {
+	/**
+	 * Called by loaded plugins to complete registration in Ares
+	 * @param {String} serviceId
+	 * @param {Object} kindInformation the parameter for enyo.createComponent
+	 * @param {Function} next commonJS callback
+	 */
+	pluginReady: function(serviceId, kindInformation, next) {
 		if (this.debug) this.log("New plugin ready: " + serviceId);
+		next = next || function(err) {
+			if (err) enyo.error(err);
+		};
 		var services = this.filter(function(service) {
 			return service.config.id === serviceId;
 		}, true);
-		var error = true;
 		if (services.length === 1) {
 			var service = services[0];
-			if (service.config.pluginUrl && ( ! service.impl)) {
+			if (service.config.pluginUrl &&  (! service.impl)) {
 				try {
-					var plugImplementaion = ServiceRegistry.instance.createComponent(kindInformation);
-					service.impl = plugImplementaion;
-					plugImplementaion.setConfig(service.config);
-					error = false;
+					service.impl = ServiceRegistry.instance.createComponent(kindInformation);
+					this.configureService(service, next);
 					if (this.debug) this.log("New plugin registered: " + serviceId);
 				} catch(err) {
 					this.error("Unexpected error while creating '" + kindInformation.kind + "' for service " + serviceId , err);
-					return;
+					next(err);
 				}
 			}
-		}
-
-		if (error) {
-			this.error("Unexpected plugin ready request for: " + serviceId);
 		}
 	},
 	statics: {
