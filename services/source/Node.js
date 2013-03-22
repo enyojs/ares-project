@@ -165,16 +165,17 @@ enyo.kind({
 	nodeExpand: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 
-		if (this.debug) this.log("nodeExpand called while node Expanded is " + this.expanded) ;
+		var subnode = inEvent.originator;
+		if (this.debug) this.log("nodeExpand called while node Expanded is " + subnode.expanded) ;
 		// update icon for expanded state
-		if (this.file.isDir) {
-			this.setIcon("$services/assets/images/" + (this.expanded ? "folder-open.png" : "folder.png"));
+		if (subnode.file.isDir) {
+			subnode.setIcon("$services/assets/images/" + (subnode.expanded ? "folder-open.png" : "folder.png"));
 		}
 		// handle lazy-load when expanding
-		if (this.expanded) {
-			this.updateNodes().
+		if (subnode.expanded) {
+			subnode.updateNodes().
 				response(this, function() {
-					this.effectExpanded();
+					subnode.effectExpanded();
 				});
 			// tell the event originator that node expansion should be deferred
 			inEvent.wait = true;
