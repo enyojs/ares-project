@@ -10,18 +10,24 @@ ARES2 is made of several compoennts, each of them needing a different test frame
 
 ## Ares IDE Server test
 
-We test *Server* elements using Node.js [Mocha](http://visionmedia.github.com/mocha/) test tool.  Several mocha test suites are aggregated into the top-level `ares.spec.js` script.
+We test *Server* elements using Node.js [Mocha](http://visionmedia.github.com/mocha/) test tool.  Several mocha test suites are aggregated into the top-level `ares.spec.js` script.  On OSX & Linux, run:
 
-	$ cd ares-project/test/server
+	$ cd /path/to/ares-project
+	$ node_modules/.bin/mocha test/server/ares.spec.js
+
+Or (OSX & Linux):
+
+	$ cd /path/to/ares-project/test/server
 	$ ./ares.spec.js
+
+Or (Windows)…
+
+	C:\> cd c:\path\to\ares-project
+	C:\> node_modules\.bin\mocha.cmd test\server\ares.spec.js
 
 Or (with `-v` or `--verbose`)…
 
 	$ ./ares.spec.js -v
-
-Or (Windows)…
-
-	C:\Users\fxk\GIT\ares-project\test\server> node ares.spec.js
 
 To run a specific test, use the `-g` (or `--grep`) command-line flag.  For example:
 
