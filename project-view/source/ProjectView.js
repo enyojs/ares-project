@@ -16,7 +16,7 @@ enyo.kind({
 			onProjectRemoved: "projectRemoved",
 			onProjectSelected: "handleProjectSelected",
 			name: "projectList"},
-		{kind: "Harmonia", fit:true, name: "harmonia", providerListNeeded: false},
+		{kind: "Harmonia", fit:true, name: "harmonia"},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan"},
 		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"},
@@ -24,7 +24,7 @@ enyo.kind({
 	],
 	handlers: {
 		onAddProjectInList: "addProjectInList",
-		onPhonegapBuild: "startPhonegapBuild",
+		onStartBuild: "startBuild",
 		onPreview: "launchPreview",
 		onError: "showError"
 	},
@@ -95,7 +95,7 @@ enyo.kind({
 	projectRemoved: function(inSender, inEvent) {
 		this.$.harmonia.setProject(null);
 	},
-	startPhonegapBuild: function(inSender, inEvent) {
+	startBuild: function(inSender, inEvent) {
 		if (!this.currentProject) {
 			return true; // stop bubble-up
 		}
