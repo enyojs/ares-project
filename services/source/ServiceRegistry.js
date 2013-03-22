@@ -120,17 +120,9 @@ enyo.kind({
 					// Add an helper function to check interfaces implemented by a service
 					ares.extend(service, {
 						implementsType: function(expected) {
-							var types = this.config.type;
-							if (types.length === 0) {
-								return false;
-							} else {
-								for(var idx = 0 ; idx < types.length ; idx++) {
-									if (types[idx] === expected) {
-										return true;
-									}
-								}
-								return false;
-							}
+							return enyo.filter(this.config.type, function(type) {
+								return type === expected;
+							}).length > 0;
 						}
 					});
 					self.instanciate(service, cb);
