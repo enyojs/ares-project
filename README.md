@@ -68,7 +68,7 @@ In case you do not yet have a development environment:
    
 		$ npm -d install
 
-If you already have a working environment (with a remote named `origin`), runt he following sequence.
+If you already have a working environment (with a remote named `origin`), run the following sequence.
 
 		$ git fetch origin
 		$ git submodule foreach git fetch origin
