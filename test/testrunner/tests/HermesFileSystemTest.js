@@ -3,7 +3,7 @@
 enyo.kind({
 	name: "HermesFileSystemTest",
 	kind: "Ares.TestSuite",
-	debug: true,
+	debug: false,
 
 	dirToCreate: "TestRunner",
 	fileToCreate: "App.js",
@@ -22,13 +22,12 @@ enyo.kind({
 	* get Services from Registry
 	*/
 	testGetServicesFromRegistry: function() {
-		enyo.log("Begin called in testGetServicesFromRegitry.");
 		this.registry = ServiceRegistry.instance;
 		this.registry._reloadServices(enyo.bind(this, "cbReloadServices"));
 
 	},
 	cbReloadServices: function(inError) {
-		enyo.log("Begin called in cbReloadServices.");
+		enyo.log("Begin called in testGetServicesFromRegitry/cbReloadServices.");
 		if (inError) {
 			this.finish("No services loaded!");
 		} else {
