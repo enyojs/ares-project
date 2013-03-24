@@ -11,6 +11,17 @@ enyo.kind({
 		if (test) {
 			var aresRunner = this.createComponent({name: test.prototype.kindName, kind: Ares.TestProxyReporter, onFinishAll: "next", aresObj: this.aresObj});
 			aresRunner.runTests();
-		}
+		} else {
+            // No new test to run, we need to remove the temp test/root directory
+            var req = new enyo.Ajax({
+                url: '/res/tester',
+                method: 'DELETE',
+                handleAs: "text"
+            });
+            req.error(this, function(inSender, inError) {
+	            this.log("Ares test cleanup failed ... (" + inError + ")");
+            });
+            req.go();
+        }
 	}
 });
