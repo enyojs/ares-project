@@ -7,7 +7,7 @@ enyo.kind({
 	autoDismiss: false,
 	debug: false,
 	published: {
-		headerText: ''  
+		headerText: ''
 	},
 	headerTextChanged: function () {
 		this.$.header.setContent(this.headerText);
@@ -16,7 +16,7 @@ enyo.kind({
 		{kind: "FittableRows", classes: "ares-filechooser", components: [
 			{kind: "Control", tag: "span", classes: "ares-filechooser-header", content: "Select a directory", name: "header"},
 			{kind: "FittableColumns", content: "fittableColumns", fit: true, components: [
-				{kind: "ProviderList", type: "filesystem", name: "providerList", header: "Sources", onSelectProvider: "handleSelectProvider"},
+				{kind: "ProviderList", selector: ["type", "filesystem"], name: "providerList", header: "Sources", onSelectProvider: "handleSelectProvider"},
 				{kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "selectFile", onFolderClick: "selectFolder", onNewFolderConfirm: "createFolder"}
 			]},
 			{kind: "FittableColumns", content: "fittableColumns2", isContainer: true, components: [
