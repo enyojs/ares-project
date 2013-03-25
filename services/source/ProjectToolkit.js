@@ -35,9 +35,13 @@ enyo.kind({
 		}
 
 		// Populate the repositories on nodejs
-		enyo.forEach(inConfig['project-template-repositories'], function(repository) {
-			this.createRepo(repository);		// TODO: handle the answer
-		}, this);
+		for(var repoId in inConfig.projectTemplateRepositories) {
+			var repository = inConfig.projectTemplateRepositories[repoId];
+			repository.id = repoId;
+			if (repository.url) {
+				this.createRepo(repository);		// TODO: handle the answer
+			}
+		}
 	},
 	/**
 	 * @return {Object} the configuration this service was configured by
@@ -80,7 +84,7 @@ enyo.kind({
 		return userreq;
 	},
 	createRepo: function(repo) {
-		if (this.debug) this.log();
+		if (this.debug) this.log(repo);
 		var data = "url=" + encodeURIComponent(repo.url);
 
 		var req = new enyo.Ajax({
