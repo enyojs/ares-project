@@ -15,7 +15,7 @@ enyo.kind({
 		onScanProject: "",
 		onProjectRemoved: "",
 		onModifySettings: "",
-		onPhonegapBuild: "",
+		onStartBuild: "",
 		onPreview: ""
 	},
 	handlers: {
@@ -43,8 +43,8 @@ enyo.kind({
 				{kind: "onyx.Tooltip", content: "Import or Scan for Projects..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
-				{name: "phonegapButton", disabled: true,
-				 kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_build.png", onclick: "doPhonegapBuild"},
+				{name: "buildButton", disabled: true,
+					kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_build.png", onclick: "doStartBuild"},
 				{kind: "onyx.Tooltip", content: "Build Project..."}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
@@ -73,8 +73,7 @@ enyo.kind({
 		]},
 		{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
-		{kind: "AccountsConfigurator"},
-		{kind: "Signals", onServicesChange: "handleServicesChange"}
+		{kind: "AccountsConfigurator"}
 	],
 	selected: null,
 	create: function() {
@@ -180,7 +179,7 @@ enyo.kind({
 	enableDisableButtons: function(inEnable) {
 		this.$.settingsButton.setDisabled(!inEnable);
 		this.$.deleteButton.setDisabled(!inEnable);
-		this.$.phonegapButton.setDisabled(!inEnable);
+		this.$.buildButton.setDisabled(!inEnable);
 		this.$.previewButton.setDisabled(!inEnable);
 	},
 	showAccountConfigurator: function() {

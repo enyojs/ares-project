@@ -2,11 +2,8 @@ enyo.kind({
 	name: "ProviderList",
 	kind: "FittableRows",
 	debug: false,
-
-	properties: [ 'type' ],
 	published: {
-		type: "",
-		propertiesJSON: '["type"]',
+		selector: [],
 		header: "",
 		// use 0 to pre-select the first storage provider of
 		// the list... or get an expection at first load.
@@ -30,17 +27,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.services = [];
-		if (this.debug) this.log("type:", this.type, ", propertiesJSON=", this.propertiesJSON);
-		try {
-			this.properties = JSON.parse(this.propertiesJSON);
-			if (typeof this.properties[0] !== 'string') {
-				throw new Error('BUG: wrong propertiesJSON=' + this.propertiesJSON);
-			}
-		} catch (err) {
-			this.properties = undefined;
-		}
-		if (this.debug) this.log("type:", this.type, ", properties=", this.properties);
-
+		if (this.debug) this.log("selector=", this.selector);
 		if (!this.header) {
 			this.$.header.hide();
 		} else {
@@ -53,12 +40,22 @@ enyo.kind({
 	 */
 	handleServicesChange: function(inSender, inEvent) {
 		//if (this.debug) this.log("sender:", inSender, "event:", inEvent);
-		// filter-out on service type (if defined)
-		this.services = inEvent.serviceRegistry.filter({
-			properties: this.properties,
-			type: this.type
-		});
-		if (this.debug) this.log("type=" + this.type + ", properties=" + this.properties, "=> services:", this.services);
+		// filter-out on this.selector
+		if (this.selector.length === 0) {
+			this.error("Unexpected selector value: ", this.selector);
+			this.services = [];
+		} else if (this.selector[0] === 'type') {
+			this.services = inEvent.serviceRegistry.getServicesByType(this.selector[1]);
+		} else if (this.selector[0] === 'auth') {
+			this.services = inEvent.serviceRegistry.filter(function(service) {
+				return service.config.auth;
+			});
+		} else {
+			this.error("Unexpected selector value: ", this.selector);
+			this.services = [];
+		}
+		if (this.debug) this.log("selector=", this.selector + " ==> services: ", this.services);
+
 		this.$.list.count = this.services.length;
 		this.$.list.render();
 		// re-select the line that was selected before service changed

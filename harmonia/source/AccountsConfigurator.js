@@ -13,7 +13,7 @@ enyo.kind({
 		{kind: "FittableRows", style: "height: 400px; width: 600px", fit: true, components: [
 			{content: "Accounts", classes:"onyx-toolbar"},
 			{kind: "FittableColumns", fit: true, components: [
-				{kind: "ProviderList", name: "accountsList", propertiesJSON: '["type","auth"]', onSelectProvider: "handleSelectProvider"},
+				{kind: "ProviderList", name: "accountsList", selector: ["auth"], onSelectProvider: "handleSelectProvider"},
 				{name: "authPanel", classes: "ares_harmonia_authPanel"}
 			], onUpdateAuth: "handleUpdateAuth"},
 			{kind: "onyx.Button", content: "Dismiss", ontap: "dismiss"}
