@@ -111,6 +111,7 @@ var platformOpen = {
 
 var configPath, tester;
 var configStats;
+var serviceMap = {};
 
 if (argv.runtest) {
 	tester = require('./test/tester/main.js');
@@ -142,6 +143,42 @@ function loadMainConfig(configFile) {
 	}
 }
 
+function getObjectType(object) {
+	return util.isArray(object) ? "array" : typeof object;
+}
+
+function mergePluginConfig(service, newdata, configFile) {
+	log("Merging service '" + (service.name || service.id) + "' to ARES configuration");
+	try {
+		for(var key in newdata) {
+			var srcType = getObjectType(service[key]);
+			var dstType = getObjectType(newdata[key]);
+
+			if (srcType === 'undefined') {
+				service[key] = newdata[key];
+			} else if (srcType !== dstType) {
+				throw "Incompatible elements '" + key + "'. Unable to merge " + configFile;
+			} else if (srcType === 'array') {
+				for(var idx = 0; idx < newdata[key].length; idx++) {
+					service[key].push(newdata[key][idx]);
+				}
+			} else if (srcType === 'object') {
+				for(var subkey in newdata[key]) {
+					console.log("Adding or replacing " + subkey + " in " + key);
+					service[key][subkey] = newdata[key][subkey];
+				}
+			} else {
+				service[key] = newdata[key];
+			}
+		}
+
+		log("Merged service: " + JSON.stringify(service, null, 2));
+	} catch(err) {
+		console.log(err);
+		throw "Unable to merge " + configFile;
+	}
+}
+
 function appendPluginConfig(configFile) {
 	log("Loading ARES plugin configuration from '"+configFile+"'...");
 	var pluginData;
@@ -152,15 +189,28 @@ function appendPluginConfig(configFile) {
 		throw "Improper JSON in " + configFile + " : "+configContent;
 	}
 
-	pluginData.services.forEach(function(service) {
-		log("Adding service '" + service.name + "' to ARES configuration");
-		ide.res.services.push(service);
+	pluginData.services.forEach(function(pluginData) {
+		if (serviceMap[pluginData.id]) {
+			mergePluginConfig(serviceMap[pluginData.id], pluginData, configFile);
+		} else {
+			log("Adding new service '" + pluginData.name + "' to ARES configuration");
+			ide.res.services.push(pluginData);
+			serviceMap[pluginData.id] = pluginData;
+		}
 	});
 }
 
 function loadPluginConfigFiles() {
+
+	// Build a service map to merge the plugin services later on
+	ide.res.services.forEach(function(entry) {
+		serviceMap[entry.id] = entry;
+	});
+
+	// Find and load the plugins configuration, sorted in folder
+	// names lexicographical order.
 	var base = path.join(myDir, 'node_modules');
-	var directories = fs.readdirSync(base);
+	var directories = fs.readdirSync(base).sort();
 	directories.forEach(function(directory) {
 		var filename = path.join(base, directory, 'ide.json');
 		if (fs.existsSync(filename)) {
@@ -204,7 +254,6 @@ function handleMessage(service) {
 			});
 			creq.write(JSON.stringify({config: service}, null, 2));
 			creq.end();
-			
 		} else {
 			console.error("Error updating URL for service "+service.id);
 		}
