@@ -22,6 +22,7 @@ enyo.kind({
 	* get Services from Registry
 	*/
 	testGetServicesFromRegistry: function() {
+		this.resetTimeout(10000);
 		this.registry = ServiceRegistry.instance;
 		this.registry._reloadServices(enyo.bind(this, "cbReloadServices"));
 
@@ -230,6 +231,7 @@ enyo.kind({
 	testDeleteFolder: function() {
 		enyo.log("Begin called in testDeleteFolder.");
 		var service = this.home[0];
+		this.resetTimeout(10000);
 		if (this.debug) enyo.log("Got the Service: ", service);
 		/**
 		* PROPFIND on the root id (test/root defined into ide-test.json)
