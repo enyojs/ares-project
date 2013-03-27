@@ -70,7 +70,7 @@ enyo.kind({
 	// return an object (hash) which needs to be scanned to retrieve the selected value
 	selectedFile: null,
 	selectedNode: null,
-	debug: true,
+	debug: false,
 	create: function() {
 		this.inherited(arguments);
 		this.enableDisableButtons();
