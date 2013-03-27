@@ -1,7 +1,3 @@
-body {
-	background-color: #aaa;
-}
-
 .ares-panels {
 	margin-top: 48px;
 }
@@ -103,6 +99,15 @@ body {
 }
 .ares_phobos_settingspop {
 	width: 300px;
+}
+.ares_phobos_esb {
+	width: 45px;
+}
+.phobos_editorsettings_buttoninput {
+	width: 450px;
+}
+.alt_button_input {
+	width: 425px;
 }
 /**/
 .border {
