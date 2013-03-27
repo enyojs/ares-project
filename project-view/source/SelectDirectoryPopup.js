@@ -7,7 +7,7 @@ enyo.kind({
 	autoDismiss: false,
 	debug: false,
 	published: {
-		headerText: ''  
+		headerText: ''
 	},
 	headerTextChanged: function () {
 		this.$.header.setContent(this.headerText);
@@ -66,7 +66,7 @@ enyo.kind({
 	confirmTap: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
 		this.doDirectorySelected({serviceId: this.selectedServiceId, directory: this.selectedDir});
-		return true; // Stop event propagation 
+		return true; // Stop event propagation
 	},
 	cancel: function() {
 		this.hide() ;
