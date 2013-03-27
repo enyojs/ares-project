@@ -75,6 +75,7 @@ enyo.kind({
 			"$NAME": nameStem,
 			"$YEAR": new Date().getFullYear()
 		};
+		// retrieve template from server
 		var r = new enyo.Ajax(options);
 		r.response(this, function(inSender, inResponse) {
 			if (this.debug) this.log("response: "+inResponse.toString());
