@@ -225,7 +225,7 @@ enyo.kind({
 								 ' id ' + c.file.id);
 					if ( c.file.id === toSelectId ) {
 						if (this.debug) this.log('force select of ' + c.file.id);
-						c.doAresNodeTap();
+						c.doNodeTap();
 						this.doAdjustScroll() ;
 						// force a "click" event when the item is selected
 						this.doFolderClick({file: c.file});
