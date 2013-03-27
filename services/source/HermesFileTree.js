@@ -76,6 +76,7 @@ enyo.kind({
 		this.enableDisableButtons();
 	},
 	connectService: function(inService, next) {
+		if (this.debug) this.log("connect to service: ", inService);
 		this.projectUrlReady = false; // Reset the project information
 		this.clear() ;
 		this.$.service.connect(inService, enyo.bind(this, (function(err) {
@@ -85,6 +86,7 @@ enyo.kind({
 				this.$.serverNode.file = this.$.service.getRootNode();
 				this.$.serverNode.file.isServer = true;
 				this.$.serverNode.setContent(this.$.serverNode.file.name);
+				this.$.serverNode.setService(inService);
 				if (next) next();
 			}
 		})));
@@ -101,7 +103,6 @@ enyo.kind({
 		var nodeName = inProjectData.getName();
 		var folderId = inProjectData.getFolderId();
 		var service = inProjectData.getService();
-		this.$.serverNode.setService(service);
 		serverNode.hide();
 
 		// connects to a service that provides access to a

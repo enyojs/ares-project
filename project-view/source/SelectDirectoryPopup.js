@@ -37,10 +37,15 @@ enyo.kind({
 	},
 	handleSelectProvider: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		var hft = this.$.hermesFileTree ;
 		if (inEvent.service) {
-			this.$.hermesFileTree
-				.connectService(inEvent.service)
-				.refreshFileTree(null, null,  inEvent.callBack);
+			async.series(
+				[
+					hft.connectService.bind(hft,inEvent.service),
+					hft.refreshFileTree.bind(hft),
+					inEvent.callBack
+				]
+			);
 		}
 		return true; //Stop event propagation
 	},
