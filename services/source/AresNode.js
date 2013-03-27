@@ -162,7 +162,7 @@ enyo.kind({
 		var hasPrefix = function(e){
 			return (e.name === '$'+ name) ;
 		} ;
-		return this.getControls().filter( hasPrefix );
+		return this.getControls().filter( hasPrefix )[0];
 	},
 
 	filesToNodes: function(inFiles) {
