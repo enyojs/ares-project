@@ -1,6 +1,6 @@
 enyo.depends(
 	"ProjectList.js",
-	"DirectorySelector.js",
+	"SelectDirectoryPopup.js",
 	"ProjectWizard.js",
 	"ProjectView.js",
 	"ProjectConfig.js",
