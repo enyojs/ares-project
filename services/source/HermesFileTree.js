@@ -267,13 +267,19 @@ enyo.kind({
 		};
 	},
 
-	// All parameters are optional.
-    // - callBack is optional. Will be called when the refresh is completely done,
-	//   i.e. when the aync events fireworks are finished
-	refreshFileTree: function(callBack, trash, oldCallBack) {
+	/**
+	 *
+	 * @ public
+	 *  All parameters are optional.
+	 *  - callBack is optional. Will be called when the refresh is completely done,
+	 *    i.e. when the aync events fireworks are finished
+	 *  - toSelectId: when set, will force an entry to be selected. Use an id as return
+	 *    by fsService (or any other service)
+	 */
+	refreshFileTree: function(callBack, toSelectId, oldCallBack) {
 		// deprecation warning
 		if (oldCallBack) {
-			this.warn("deprecated refreshFileTree signature. Callback is now the first and only parameter");
+			this.warn("deprecated refreshFileTree signature. Callback is now the first parameter");
 			callBack = oldCallBack ;
 		}
 
@@ -286,7 +292,7 @@ enyo.kind({
 
 		if (this.debug) this.log("refreshFileTree called") ;
 
-		this.$.serverNode.refreshTree(tracker,0) ;
+		this.$.serverNode.refreshTree(tracker,0, toSelectId) ;
 
 		this.debug && this.log("refreshFileTree done") ;
 	},
