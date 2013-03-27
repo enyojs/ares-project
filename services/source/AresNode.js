@@ -18,7 +18,11 @@ enyo.kind({
 		service: null
 	},
 
-	debug: true,
+	// expandable nodes may only be opened by tapping the icon; tapping the content label
+	// will fire the nodeTap event, but will not expand the node.
+	onlyIconExpands: true,
+
+	debug: false,
 
 
 	// Note: this function does not recurse
