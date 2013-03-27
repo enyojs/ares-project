@@ -1,3 +1,10 @@
+/**
+ *
+ * ares.Node kind represents a direcroty or a file in HermesFileTree.
+ * this kind inherits from enyo.Node
+ *
+ */
+
 enyo.kind({
 	name: "ares.Node",
 	kind: "Node",
@@ -148,6 +155,16 @@ enyo.kind({
 		// getComponents only return the graphical items
 		return this.getControls().filter( hasPrefix ).sort(this.fileNameSort) ;
 	},
+
+	//* @public
+	//* getNodeNames returns a ares.Node for a file or a directory named passed in parameter
+	getNodeNamed: function(name) {
+		var hasPrefix = function(e){
+			return (e.name === '$'+ name) ;
+		} ;
+		return this.getControls().filter( hasPrefix );
+	},
+
 	filesToNodes: function(inFiles) {
 		var nodes = [];
 		inFiles.sort(this.fileNameSort); // TODO: Other sort orders
