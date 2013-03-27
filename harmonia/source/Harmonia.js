@@ -95,11 +95,12 @@ enyo.kind({
 		});
 		r.go();
 	},
-	delayedRefresh: function(msg) {
+	delayedRefresh: function(msg, forceSelect) {
 		var onDone = new enyo.Async() ;
 		onDone.response(this, function(inSender, toSelectId) {
-			if (this.debug) this.log("delayed refresh after " + msg + ' on ' + toSelectId) ;
-			this.$.hermesFileTree.refreshFileTree(null, toSelectId);
+			var select = forceSelect || toSelectId ;
+			if (this.debug) this.log("delayed refresh after " + msg + ' on ' + forceSelect) ;
+			this.$.hermesFileTree.refreshFileTree(null, forceSelect);
 		}) ;
 		return onDone ;
 	},
@@ -108,14 +109,20 @@ enyo.kind({
 		var service = this.selectedFile.service;
 		service.createFile(folderId, name, content)
 			.response(this, function(inSender, inResponse) {
-				if (this.debug) this.log("Response: "+inResponse);
-				this.delayedRefresh("file creation done").go(inResponse) ;
+				if (this.debug) this.log("createFile response: ",inResponse);
+				this.packageAdd(
+					folderId, name,
+					function () {
+						// passing the id from response will make hermeFileTree select the new file
+						this.delayedRefresh("file creation done", inResponse[0].id).go(inResponse) ;
+					}.bind(this)
+				) ;
 			})
 			.error(this, function(inSender, inError) {
 				if (this.debug) this.log("Error: "+inError);
 				this.$.hermesFileTree.showErrorPopup("Creating file "+name+" failed:" + inError);
 			});
-	},	
+	},
 	newFolderConfirm: function(inSender, inEvent) {
 		var folderId = inEvent.folderId;
 		var name = inEvent.fileName.trim();
@@ -180,5 +187,67 @@ enyo.kind({
 				if (this.debug) this.log("Error: "+inError);
 				this.$.hermesFileTree.showErrorPopup("Creating file "+newName+" as copy of" + this.selectedFile.name +" failed:" + inError);
 			});
+	},
+
+	// package.js munging section
+	packageAdd: function (folderId, name, callback)  {
+		if ( ! name.match(RegExp(/\.(js|css)$/) ) ) {
+			return ; // skip non js non css files.
+		}
+
+		// need to read package.js from same dir
+		var hft = this.$.hermesFileTree;
+		var selectedDirNode = hft.selectedNode ;
+		var pkgNode = selectedDirNode.getNodeNamed('package.js') ;
+
+		if (! pkgNode ) {
+			return ; // skip operation when no package.js is found
+		}
+
+		var service = selectedDirNode.getService();
+		var pkgId =  pkgNode.file.id ;
+
+		async.waterfall(
+			[
+				this.packageRead.bind(this, service, pkgId),
+				this.packageAppend.bind(this, name),
+				this.packageSave.bind(this, service, pkgId),
+				callback
+			],
+			function (err) {
+				that.log("package add done, err is",err);
+			}
+		) ;
+	},
+
+	packageRead: function (service, pkgId, callback) {
+		service.getFile(pkgId). response(
+			this,
+			function(inSender, inContent) {
+				callback (null, inContent.content);
+			}
+		) ;
+	},
+
+	packageAppend: function ( name, pkgContent, callback ) {
+		var toMatch = name.replace(/\./, "\.") ; // replace '.' with '\.'
+		var re = RegExp(/\btoMatch\b/) ;
+		var result ;
+		if (pkgContent.match(re)) {
+			callback(null) ;
+		}
+		else {
+			result = pkgContent.replace(/\n+\)/,',\n\t"' + name + '"\n)') ;
+			callback(null,result);
+		}
+	},
+
+	packageSave: function ( service, pkgId, pkgContent,callback) {
+		service.putFile(pkgId, pkgContent) .response(
+			this,
+			function() {
+				callback(null) ;
+			}
+		);
 	}
 });
