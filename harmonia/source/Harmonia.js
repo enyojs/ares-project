@@ -13,6 +13,8 @@ enyo.kind({
 			onCopyFileConfirm: "copyFileConfirm"}
 	],
 	providerListNeeded: true,
+	service: null,
+
 	debug: false,
 	create: function() {
 		this.inherited(arguments);
@@ -24,6 +26,7 @@ enyo.kind({
 	handleSelectProvider: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
 		if (inEvent.service) {
+			this.service = inEvent.service ;
 			this.$.hermesFileTree.connectService(inEvent.service);
 		}
 		this.$.hermesFileTree.hideFileOpButtons();
@@ -33,6 +36,7 @@ enyo.kind({
 		if (this.debug) this.log("project:", project);
 		if (project !== null) {
 			this.$.hermesFileTree.setConfig(project).showFileOpButtons();
+			this.service = project.getService();
 		} else {
 			this.$.hermesFileTree.hideFileOpButtons().clear();
 		}
@@ -106,8 +110,7 @@ enyo.kind({
 	},
 	createFile: function(name, folderId, content) {
 		if (this.debug) this.log("Creating new file "+name+" into folderId="+folderId);
-		var service = this.selectedFile.service;
-		service.createFile(folderId, name, content)
+		this.service.createFile(folderId, name, content)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("createFile response: ",inResponse);
 				this.packageAdd(
@@ -126,9 +129,8 @@ enyo.kind({
 	newFolderConfirm: function(inSender, inEvent) {
 		var folderId = inEvent.folderId;
 		var name = inEvent.fileName.trim();
-		var service = this.selectedFile.service;
 		if (this.debug) this.log("Creating new folder "+name+" into folderId="+folderId);
-		service.createFolder(folderId, name)
+		this.service.createFolder(folderId, name)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("Response: "+inResponse);
 				this.delayedRefresh("folder creation done").go(inResponse) ;
@@ -142,9 +144,8 @@ enyo.kind({
 		var path = inEvent.path;
 		var oldId = this.selectedFile.id;
 		var newName = inEvent.fileName.trim();
-		var service = this.selectedFile.service;
 		if (this.debug) this.log("Renaming file " + oldId + " as " + newName + " at " + path);
-		service.rename(oldId, newName)
+		this.service.rename(oldId, newName)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("Response: "+inResponse);
 				this.delayedRefresh("rename done").go(inResponse) ;
@@ -161,8 +162,8 @@ enyo.kind({
 		var oldId = this.selectedFile.id;
 		var oldPath = this.selectedFile.path;
 		var method = this.selectedFile.isDir ? "deleteFolder" : "deleteFile";
-		var service = this.selectedFile.service;
-		service.remove(inEvent.nodeId)
+		var upperDir = this.$.hermesFileTree.getParentOfSelected() ;
+		this.service.remove(inEvent.nodeId)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("Response: "+inResponse);
 				this.delayedRefresh("delete done").go() ;
@@ -176,9 +177,8 @@ enyo.kind({
 		if (this.debug) this.log(inEvent);
 		var oldName = this.selectedFile.name;
 		var newName = inEvent.fileName.trim();
-		var service = this.selectedFile.service;
 		if (this.debug) this.log("Creating new file " + newName + " as copy of" + this.selectedFile.name);
-		service.copy(this.selectedFile.id, newName)
+		this.service.copy(this.selectedFile.id, newName)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("Response: "+inResponse);
 				this.delayedRefresh("copy done").go(inResponse) ;
@@ -204,14 +204,13 @@ enyo.kind({
 			return ; // skip operation when no package.js is found
 		}
 
-		var service = selectedDirNode.getService();
 		var pkgId =  pkgNode.file.id ;
 
 		async.waterfall(
 			[
-				this.packageRead.bind(this, service, pkgId),
+				this.packageRead.bind(this, pkgId),
 				this.packageAppend.bind(this, name),
-				this.packageSave.bind(this, service, pkgId),
+				this.packageSave.bind(this, pkgId),
 				callback
 			],
 			function (err) {
@@ -220,8 +219,8 @@ enyo.kind({
 		) ;
 	},
 
-	packageRead: function (service, pkgId, callback) {
-		service.getFile(pkgId). response(
+	packageRead: function (pkgId, callback) {
+		this.service.getFile(pkgId). response(
 			this,
 			function(inSender, inContent) {
 				callback (null, inContent.content);
@@ -242,8 +241,8 @@ enyo.kind({
 		}
 	},
 
-	packageSave: function ( service, pkgId, pkgContent,callback) {
-		service.putFile(pkgId, pkgContent) .response(
+	packageSave: function ( pkgId, pkgContent,callback) {
+		this.service.putFile(pkgId, pkgContent) .response(
 			this,
 			function() {
 				callback(null) ;
