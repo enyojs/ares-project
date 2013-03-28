@@ -41,10 +41,6 @@ enyo.kind({
 				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"}
 			]}
 		]},
-		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
-			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
-			{name: "waitPopupMessage", content: "Saving document...", style: "padding-top: 10px;"}
-		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
@@ -53,7 +49,10 @@ enyo.kind({
 		onChangeTheme: "changeTheme", onChangeHighLight: "changeHighLight", onClose: "closeEditorPop", onWordWrap: "changeWordWrap", onFontsizeChange: "changeFont", onTabSizsChange: "tabSize"}
 	],
 	events: {
+		onShowWaitPopup: "",
+		onHideWaitPopup: "",
 		onSaveDocument: "",
+		onSaveAsDocument: "",
 		onDesignDocument: "",
 		onCloseDocument: "",
 		onUpdate: ""
@@ -100,8 +99,6 @@ enyo.kind({
 		this.log("Save failed: " + inMsg);
 		this.showErrorPopup("Unable to save the file");
 	},
-	beginOpenDoc: function() {
-		this.showWaitPopup("Opening document...");
 	},
 	openDoc: function(inDocData) {
 		// If we are changing documents, reparse any changes into the current projectIndexer
@@ -253,11 +250,10 @@ enyo.kind({
 		return showSettings.ace ;
 	},
 	showWaitPopup: function(inMessage) {
-		this.$.waitPopupMessage.setContent(inMessage);
-		this.$.waitPopup.show();
+		this.doShowWaitPopup({msg: inMessage});
 	},
 	hideWaitPopup: function() {
-		this.$.waitPopup.hide();
+		this.doHideWaitPopup();
 	},
 	showErrorPopup : function(msg) {
 		this.$.errorPopup.setErrorMsg(msg);

@@ -32,7 +32,7 @@ enyo.kind({
 	handlers: {
 		onReloadServices: "handleReloadServices",
 		onUpdateAuth: "handleUpdateAuth",
-		onShowWaitPopup: "handleShowWaitPopup",
+		onShowWaitPopup: "showWaitPopup",
 		onHideWaitPopup: "hideWaitPopup"
 	},
 	phobosViewIndex: 0,
@@ -282,11 +282,8 @@ enyo.kind({
 	syncJSFile: function(inCode) {
 		this.$.deimos.syncJSFile(inCode);
 	},
-	handleShowWaitPopup: function(inSender, inEvent) {
-		this.showWaitPopup(inEvent.msg);
-	},
-	showWaitPopup: function(inMessage) {
-		this.$.waitPopupMessage.setContent(inMessage);
+	showWaitPopup: function(inSender, inEvent) {
+		this.$.waitPopupMessage.setContent(inEvent.msg);
 		this.$.waitPopup.show();
 	},
 	hideWaitPopup: function() {
