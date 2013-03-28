@@ -304,6 +304,15 @@ enyo.kind({
 		}
 		return folder;
 	},
+
+	/**
+	 * @public
+	 * Returns a file data structure for the parent node of the currently selected node
+	 */
+	getParentOfSelected: function() {
+		return this.selectedNode.container.file; // is a folder...
+	},
+
 	// User Interaction for New File op
 	newFileClick: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
