@@ -540,7 +540,7 @@ enyo.kind({
 	},
 	newFolderConfirm: function(inSender, inEvent) {
 		var folderId = inEvent.folderId;
-		var name = inEvent.fileName.trim();
+		var name = inSender.fileName.trim();
 		if (this.debug) this.log("Creating new folder "+name+" into folderId="+folderId);
 		this.$.service.createFolder(folderId, name)
 			.response(this, function(inSender, inResponse) {
@@ -555,7 +555,7 @@ enyo.kind({
 	renameConfirm: function(inSender, inEvent) {
 		var path = inEvent.path;
 		var oldId = this.selectedFile.id;
-		var newName = inEvent.fileName.trim();
+		var newName = inSender.fileName.trim();
 		if (this.debug) this.log("Renaming file " + oldId + " as " + newName + " at " + path);
 		this.$.service.rename(oldId, newName)
 			.response(this, function(inSender, inResponse) {
@@ -569,7 +569,7 @@ enyo.kind({
 	},
 	deleteConfirm: function(inSender, inEvent) {
 		if (this.debug) this.log(inEvent);
-		var nodeId = inEvent.nodeId;
+		var nodeId = inSender.nodeId;
 		if (this.debug) this.log(this.selectedFile);
 		var oldId = this.selectedFile.id;
 		var name = this.selectedFile.name ;
@@ -593,7 +593,7 @@ enyo.kind({
 	copyFileConfirm: function(inSender, inEvent) {
 		if (this.debug) this.log(inEvent);
 		var oldName = this.selectedFile.name;
-		var newName = inEvent.fileName.trim();
+		var newName = inSender.fileName.trim();
 		if (this.debug) this.log("Creating new file " + newName + " as copy of" + this.selectedFile.name);
 		this.$.service.copy(this.selectedFile.id, newName)
 			.response(this, function(inSender, inResponse) {
