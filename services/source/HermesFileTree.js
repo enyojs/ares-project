@@ -56,7 +56,8 @@ enyo.kind({
 			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll" }
 		]},
 
-		// track selection of nodes. here, selection Key is file or folderId. Selection value is the node object
+		// track selection of nodes. here, selection Key is file or folderId.
+		// Selection value is the node object. Is an Enyo kind
 		{kind: "Selection", onSelect: "select", onDeselect: "deselect"},
 
 		// service provide connection to file storage
@@ -282,7 +283,7 @@ enyo.kind({
 	 *  All parameters are optional.
 	 *  - callBack is optional. Will be called when the refresh is completely done,
 	 *    i.e. when the aync events fireworks are finished
-	 *  - toSelectId: when set, will force an entry to be selected. Use an id as return
+	 *  - toSelectId: when set, will force an entry to be selected. Use an id as returned
 	 *    by fsService (or any other service)
 	 */
 	refreshFileTree: function(callBack, toSelectId, oldCallBack) {
