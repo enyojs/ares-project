@@ -158,11 +158,13 @@ enyo.kind({
 	deleteConfirm: function(inSender, inEvent) {
 		if (this.debug) this.log(inEvent);
 		var nodeId = inEvent.nodeId;
-		if (this.debug) this.log(this.selectFile);
+		if (this.debug) this.log(this.selectedFile);
 		var oldId = this.selectedFile.id;
+		var name = this.selectedFile.name ;
 		var oldPath = this.selectedFile.path;
 		var method = this.selectedFile.isDir ? "deleteFolder" : "deleteFile";
 		var upperDir = this.$.hermesFileTree.getParentOfSelected() ;
+		if (this.debug) this.log(method + ' ' + name + " in folder " + upperDir.name);
 		this.service.remove(inEvent.nodeId)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("Response: "+inResponse);
