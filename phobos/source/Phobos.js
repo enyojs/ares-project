@@ -42,6 +42,7 @@ enyo.kind({
 			]}
 		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
+		{name: "saveAsPopup", kind: "Ares.FileChooser", showing: false, headerText: $L("Save as..."), folderChooser: false, onFileChosen: "saveAsFileChosen"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
@@ -79,7 +80,7 @@ enyo.kind({
 		if (typeof this[inEvent.selected.value] === 'function') {
 			this[inEvent.selected.value]();
 		} else {
-			this.warn("Unexpected event or missing function: event:", inEvent);
+			this.warn("Unexpected event or missing function: event:", inEvent.selected.value);
 		}
 	},
 	saveDocAction: function() {
@@ -99,6 +100,33 @@ enyo.kind({
 		this.log("Save failed: " + inMsg);
 		this.showErrorPopup("Unable to save the file");
 	},
+	saveAsDocAction: function() {
+		var file = this.docData.getFile();
+		this.$.saveAsPopup.setSelectedName(file.name);
+		this.$.saveAsPopup.show();
+	},
+	saveAsFileChosen: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+
+		if (!inEvent.file) {
+			// no file or folder chosen
+			return;
+		}
+		var self = this;
+		this.showWaitPopup($L("Saving ..."));
+		this.doSaveAsDocument({
+			docId: this.docData.getId(),
+			projectData: this.projectData,
+			file: inEvent.file,
+			name: inEvent.name,
+			content: this.$.ace.getValue(),
+			next: function(err) {
+				self.hideWaitPopup();
+				if (typeof inEvent.next === 'function') {
+					inEvent.next();
+				}
+			}
+		});
 	},
 	openDoc: function(inDocData) {
 		// If we are changing documents, reparse any changes into the current projectIndexer
