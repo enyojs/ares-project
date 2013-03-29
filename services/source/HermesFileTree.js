@@ -422,6 +422,15 @@ enyo.kind({
 			}
 		};
 	},
+	/**
+	 * Refresh the current {HermesFileTree} view, if applicable
+	 * @param {Object} changedFile
+	 */
+	refreshFile: function(changedFile) {
+		// FIXME: not cleanly implemented: should check wether
+		// a refresh is necessary first.
+		this.refreshFileTree();
+	},
 
 	// All parameters are optional.
 	// - node is null for the "top" refresh call. Node is also used for inner (async)
@@ -497,6 +506,15 @@ enyo.kind({
 		}
 		return folder;
 	},
+
+	/**
+	 * @public
+	 * Returns a file data structure for the parent node of the currently selected node
+	 */
+	getParentOfSelected: function() {
+		return this.selectedNode.container.file; // is a folder...
+	},
+
 	// User Interaction for New File op
 	newFileClick: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);

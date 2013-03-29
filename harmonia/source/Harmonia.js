@@ -88,6 +88,13 @@ enyo.kind({
 		});
 		r.go();
 	},
+	/**
+	 * Refresh the {HermesFileTree} (if relevant), following a change of the given file
+	 * @param {Object} changedFile
+	 */
+	refreshFile: function(changedFile) {
+		this.$.hermesFileTree.refreshFile(changedFile);
+	},
 	delayedRefresh: function(msg) {
 		var onDone = new enyo.Async() ;
 		onDone.response(this, function(inSender, toSelectId) {
