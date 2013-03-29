@@ -5,7 +5,7 @@ enyo.kind({
 	centered: true,
 	floating: true,
 	autoDismiss: false,
-	debug: true,
+	debug: false,
 	published: {
 		/**
 		 * When true (the default), allow to pick only a
