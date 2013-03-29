@@ -67,7 +67,7 @@ enyo.kind({
 	],
 	events: {
 		/**
-		 * Emitted once the end-user clicks cnacel or when a
+		 * Emitted once the end-user clicks cancel or when a
 		 * file/folder is chosen.
 		 * 
 		 * If none is chosen (the end-user tapped "Cancel"),
