@@ -502,7 +502,7 @@ enyo.kind({
 		r.error(this, function(inSender, error) {
 			if (error === 404){
 				this.createFile(name, folderId);
-				this.$.hermesFileTree.showErrorPopup("No template found for '." + type + "' files.  Created an empty one.");
+				this.showErrorPopup("No template found for '." + type + "' files.  Created an empty one.");
 			}
 			else {
 				this.error("error while fetching " + templatePath + ': ' + error);
@@ -515,7 +515,7 @@ enyo.kind({
 		onDone.response(this, function(inSender, toSelectId) {
 			var select = forceSelect || toSelectId ;
 			if (this.debug) this.log("delayed refresh after " + msg + ' on ' + forceSelect) ;
-			this.$.hermesFileTree.refreshFileTree(null, forceSelect);
+			this.refreshFileTree(null, forceSelect);
 		}) ;
 		return onDone ;
 	},
@@ -534,7 +534,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				if (this.debug) this.log("Error: "+inError);
-				this.$.hermesFileTree.showErrorPopup("Creating file "+name+" failed:" + inError);
+				this.showErrorPopup("Creating file "+name+" failed:" + inError);
 			});
 	},
 	newFolderConfirm: function(inSender, inEvent) {
@@ -548,7 +548,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				if (this.debug) this.log("Error: "+inError);
-				this.$.hermesFileTree.showErrorPopup("Creating folder "+name+" failed:" + inError);
+				this.showErrorPopup("Creating folder "+name+" failed:" + inError);
 			});
 	},
 	renameConfirm: function(inSender, inEvent) {
@@ -563,7 +563,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				if (this.debug) this.log("Error: "+inError);
-				this.$.hermesFileTree.showErrorPopup("Renaming file "+oldId+" as " + newName +" failed:" + inError);
+				this.showErrorPopup("Renaming file "+oldId+" as " + newName +" failed:" + inError);
 			});
 	},
 	deleteConfirm: function(inSender, inEvent) {
@@ -586,7 +586,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				if (this.debug) this.log("Error: "+inError);
-				this.$.hermesFileTree.showErrorPopup("Deleting file "+oldPath+" failed:" + inError);
+				this.showErrorPopup("Deleting file "+oldPath+" failed:" + inError);
 			});
 	},
 	copyFileConfirm: function(inSender, inEvent) {
@@ -601,7 +601,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				if (this.debug) this.log("Error: "+inError);
-				this.$.hermesFileTree.showErrorPopup("Creating file "+newName+" as copy of" + this.selectedFile.name +" failed:" + inError);
+				this.showErrorPopup("Creating file "+newName+" as copy of" + this.selectedFile.name +" failed:" + inError);
 			});
 	},
 
@@ -620,8 +620,7 @@ enyo.kind({
 		}
 
 		// need to read package.js from same dir
-		var hft = this.$.hermesFileTree;
-		var selectedDirNode = hft.selectedNode ; // FIXME: not good when removing a file
+		var selectedDirNode = this.selectedNode ; // FIXME: not good when removing a file
 		var pkgNode = selectedDirNode.getNodeNamed('package.js') ;
 
 		if (! pkgNode ) {
