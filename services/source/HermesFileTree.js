@@ -574,7 +574,7 @@ enyo.kind({
 		var name = this.selectedFile.name ;
 		var oldPath = this.selectedFile.path;
 		var method = this.selectedFile.isDir ? "deleteFolder" : "deleteFile";
-		var upperDir = this.$.hermesFileTree.getParentOfSelected() ;
+		var upperDir = this.getParentOfSelected() ;
 		if (this.debug) this.log(method + ' ' + name + " in folder " + upperDir.name);
 		this.service.remove(inEvent.nodeId)
 			.response(this, function(inSender, inResponse) {
