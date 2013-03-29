@@ -48,7 +48,7 @@ enyo.kind({
 	 * Refresh the {ProjectView} (if relevant), following a change of the given file
 	 * @param {Object} changedFile
 	 */
-	refreshFileTree: function(changedFile) {
+	refreshFile: function(changedFile) {
 		this.$.harmonia.refreshFile(changedFile);
 	},
 	scanProjectAction: function(inSender, inEvent) {
