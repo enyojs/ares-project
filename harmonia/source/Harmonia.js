@@ -238,7 +238,9 @@ enyo.kind({
 			callback(null) ;
 		}
 		else {
-			result = pkgContent.replace(/\n+\)/,',\n\t"' + name + '"\n)') ;
+			result = pkgContent
+				.replace(/\)/,'\t"' + name + '"\n)') // insert new name
+				.replace(/("|')(\s*)"/,'$1,$2"');    // add potentially missing comma
 			callback(null,result);
 		}
 	},
