@@ -446,6 +446,8 @@ var addr = argv.host;
 
 app.configure(function(){
 
+	app.use(express.favicon(__dirname + '/ares/assets/images/ares_48x48.ico'));
+
 	app.use('/ide', express.static(enyojsRoot + '/'));
 	app.use('/test', express.static(enyojsRoot + '/test'));
 

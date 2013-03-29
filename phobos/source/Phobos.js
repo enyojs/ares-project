@@ -8,8 +8,24 @@ enyo.kind({
 		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", components: [
-				{name: "documentLabel", content: "Document"},
-				{name: "saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "saveDocAction"},
+				{kind: "onyx.MenuDecorator", onSelect: "fileMenuItemSelected", components: [
+					{content: "File"},
+					{kind: "onyx.Menu", components: [
+						{name: "saveButton", value: "saveDocAction", components: [
+							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save.png"},
+							{content: $L("Save")}
+						]},
+						{name: "saveAsButton", value: "saveAsDocAction", components: [
+							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save.png"},
+							{content: $L("Save as...")}
+						]},
+						{classes: "onyx-menu-divider"},
+						{name: "closeButton", value: "closeDocAction", components: [
+							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
+							{content: $L("Close")}
+						]}
+					]}
+				]},
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: $L("New Kind"), ontap: "newKindAction"},
 				{fit: true},
 				{name: "editorButton", kind: "onyx.Button", content: "Editor Settings", ontap: "editorSettings"},
@@ -25,11 +41,8 @@ enyo.kind({
 				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"}
 			]}
 		]},
-		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
-			{kind: "Image", src: "$phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
-			{name: "waitPopupMessage", content: "Saving document...", style: "padding-top: 10px;"}
-		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
+		{name: "saveAsPopup", kind: "Ares.FileChooser", showing: false, headerText: $L("Save as..."), folderChooser: false, onFileChosen: "saveAsFileChosen"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
@@ -37,7 +50,10 @@ enyo.kind({
 		onChangeTheme: "changeTheme", onChangeHighLight: "changeHighLight", onClose: "closeEditorPop", onWordWrap: "changeWordWrap", onFontsizeChange: "changeFont", onTabSizsChange: "tabSize"}
 	],
 	events: {
+		onShowWaitPopup: "",
+		onHideWaitPopup: "",
 		onSaveDocument: "",
+		onSaveAsDocument: "",
 		onDesignDocument: "",
 		onCloseDocument: "",
 		onUpdate: ""
@@ -59,9 +75,16 @@ enyo.kind({
 			this.projectData.setProjectCtrl(this.projectCtrl);
 		}
 	},
-	//
+	fileMenuItemSelected: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		if (typeof this[inEvent.selected.value] === 'function') {
+			this[inEvent.selected.value]();
+		} else {
+			this.warn("Unexpected event or missing function: event:", inEvent.selected.value);
+		}
+	},
 	saveDocAction: function() {
-		this.showWaitPopup("Saving document...");
+		this.showWaitPopup($L("Saving ..."));
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
 	},
 	saveComplete: function() {
@@ -77,8 +100,33 @@ enyo.kind({
 		this.log("Save failed: " + inMsg);
 		this.showErrorPopup("Unable to save the file");
 	},
-	beginOpenDoc: function() {
-		this.showWaitPopup("Opening document...");
+	saveAsDocAction: function() {
+		var file = this.docData.getFile();
+		this.$.saveAsPopup.setSelectedName(file.name);
+		this.$.saveAsPopup.show();
+	},
+	saveAsFileChosen: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+
+		if (!inEvent.file) {
+			// no file or folder chosen
+			return;
+		}
+		var self = this;
+		this.showWaitPopup($L("Saving ..."));
+		this.doSaveAsDocument({
+			docId: this.docData.getId(),
+			projectData: this.projectData,
+			file: inEvent.file,
+			name: inEvent.name,
+			content: this.$.ace.getValue(),
+			next: function(err) {
+				self.hideWaitPopup();
+				if (typeof inEvent.next === 'function') {
+					inEvent.next();
+				}
+			}
+		});
 	},
 	openDoc: function(inDocData) {
 		// If we are changing documents, reparse any changes into the current projectIndexer
@@ -165,25 +213,52 @@ enyo.kind({
 		}
 		this.projectCtrl.buildProjectDb();
 		this.reparseAction(true);
-		this.$.documentLabel.setContent(file.name);
 
 		this.docData.setEdited(edited);
 		this.$.toolbar.resized();
 	},
 	adjustPanelsForMode: function(mode) {
+		if (this.debug) this.log("mode:", mode);
 		// whether to show or not a panel, imageViewer and ace cannot be enabled at the same time
 		var showModes = {
-			json:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
-			javascript:	{imageViewer: false, ace: true , saveButton: true , newKindButton: true,  designerButton: true ,  right: true  },
-			html:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
-			css:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: true  },
-			text:		{imageViewer: false, ace: true , saveButton: true , newKindButton: false, designerButton: false,  right: false },
-			image:		{imageViewer: true , ace: false, saveButton: false, newKindButton: false, designerButton: false,  right: false }
+			javascript: {
+				imageViewer: false,
+				ace: true,
+				saveButton: true,
+				saveAsButton: true,
+				newKindButton: true,
+				designerButton: true,
+				right: true
+			},
+			image: {
+				imageViewer: true,
+				ace: false,
+				saveButton: false,
+				saveAsButton: false,
+				newKindButton: false,
+				designerButton: false,
+				right: false
+			},
+			text: {
+				imageViewer: false,
+				ace: true,
+				saveButton: true,
+				saveAsButton: true,
+				newKindButton: false,
+				designerButton: false,
+				right: false
+			}
 		};
 
-		var showSettings = showModes[mode]||showModes['text'];
+		var showStuff, showSettings = showModes[mode]||showModes['text'];
 		for (var stuff in showSettings) {
-			this.$[stuff].setShowing( showSettings[stuff] ) ;
+			showStuff = showSettings[stuff];
+			if (this.debug) this.log("show", stuff, ":", showStuff);
+			if (typeof this.$[stuff].setShowing === 'function') {
+				this.$[stuff].setShowing(showStuff) ;
+			} else {
+				this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
+			}
 		}
 
         // xxxIndex: specify what to show in the "RightPanels" kinds (declared at the end of this file)
@@ -203,11 +278,10 @@ enyo.kind({
 		return showSettings.ace ;
 	},
 	showWaitPopup: function(inMessage) {
-		this.$.waitPopupMessage.setContent(inMessage);
-		this.$.waitPopup.show();
+		this.doShowWaitPopup({msg: inMessage});
 	},
 	hideWaitPopup: function() {
-		this.$.waitPopup.hide();
+		this.doHideWaitPopup();
 	},
 	showErrorPopup : function(msg) {
 		this.$.errorPopup.setErrorMsg(msg);
