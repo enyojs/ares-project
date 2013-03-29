@@ -336,12 +336,6 @@ enyo.kind({
 			this.showErrorPopup("Select a parent folder first");
 		}
 	},
-	newFileConfirm: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		this.doNewFileConfirm(inSender, inEvent);
-		// handled here (don't bubble)
-		return true;
-	},
 	newFileCancel: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		if (this.debug) this.log("New File canceled.");
@@ -359,12 +353,6 @@ enyo.kind({
 			this.showErrorPopup("Select a parent folder first");
 		}
 	},
-	newFolderConfirm: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		this.doNewFolderConfirm(inSender, inEvent);
-		// handled here (don't bubble)
-		return true;
-	},
 	newFolderCancel: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 	},
@@ -380,12 +368,6 @@ enyo.kind({
 		} else {
 			this.showErrorPopup("Select a file or folder to copy first");
 		}
-	},
-	copyFileConfirm: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		this.doCopyFileConfirm(inSender, inEvent);
-		// handled here (don't bubble)
-		return true;
 	},
 	copyFileCancel: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
@@ -403,12 +385,6 @@ enyo.kind({
 			this.showErrorPopup("Select a file or folder to rename first");
 		}
 	},
-	renameConfirm: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		this.doRenameConfirm(inSender, inEvent);
-		// handled here (don't bubble)
-		return true;
-	},
 	renameCancel: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 	},
@@ -424,12 +400,6 @@ enyo.kind({
 		} else {
 			this.showErrorPopup("Select a file or folder to delete first");
 		}
-	},
-	deleteConfirm: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		this.doDeleteConfirm(inSender, inEvent);
-		// handled here (don't bubble)
-		return true;
 	},
 	deleteCancel: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
