@@ -168,7 +168,10 @@ enyo.kind({
 		this.service.remove(inEvent.nodeId)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("Response: "+inResponse);
-				this.delayedRefresh("delete done").go() ;
+				this.packageRemove(
+					upperDir.id, name,
+					function () {this.delayedRefresh("delete done").go() ;}.bind(this)
+				);
 			})
 			.error(this, function(inSender, inError) {
 				if (this.debug) this.log("Error: "+inError);
@@ -193,13 +196,21 @@ enyo.kind({
 
 	// package.js munging section
 	packageAdd: function (folderId, name, callback)  {
+		this.packageOp(folderId, name, this.packageAppend.bind(this, name), callback);
+	},
+
+	packageRemove: function (folderId, name, callback)  {
+		this.packageOp(folderId, name, this.packageChop.bind(this, name), callback);
+	},
+
+	packageOp: function (folderId, name, op, callback)  {
 		if ( ! name.match(RegExp(/\.(js|css)$/) ) ) {
 			return ; // skip non js non css files.
 		}
 
 		// need to read package.js from same dir
 		var hft = this.$.hermesFileTree;
-		var selectedDirNode = hft.selectedNode ;
+		var selectedDirNode = hft.selectedNode ; // FIXME: not good when removing a file
 		var pkgNode = selectedDirNode.getNodeNamed('package.js') ;
 
 		if (! pkgNode ) {
@@ -211,7 +222,7 @@ enyo.kind({
 		async.waterfall(
 			[
 				this.packageRead.bind(this, pkgId),
-				this.packageAppend.bind(this, name),
+				op,
 				this.packageSave.bind(this, pkgId),
 				callback
 			],
@@ -245,7 +256,24 @@ enyo.kind({
 		}
 	},
 
+	packageChop: function ( name, pkgContent, callback ) {
+		var toMatch = name.replace(/\./, "\.") ; // replace '.' with '\.'
+		var re = RegExp(/\btoMatch\b/) ;
+		var result ;
+		if (pkgContent.match(re)) {
+			result = pkgContent
+				.replace(/("|')toMatch("|')/,'') // remove name
+				.replace(/,\s*(,|\)/,"$1");      // remove extra comma
+		}
+		callback(null);
+	},
+
 	packageSave: function ( pkgId, pkgContent,callback) {
+		if (typeof pkgContent === undefined) {
+			callback(null);
+			return;
+		}
+
 		this.service.putFile(pkgId, pkgContent) .response(
 			this,
 			function() {
