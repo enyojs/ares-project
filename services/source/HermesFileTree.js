@@ -14,7 +14,6 @@ enyo.kind({
 		onRenameConfirm: "",
 		onNewFolderConfirm: "",
 		onCopyFileConfirm: ""
-
 	},
 	handlers: {
 		onNodeDblClick: "nodeDblClick"
@@ -23,6 +22,8 @@ enyo.kind({
 		serverName: ""
 	},
 	components: [
+
+		// Hermes Tool bar
 		{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", components: [
 			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 				{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
@@ -50,6 +51,7 @@ enyo.kind({
 			]}
 		]},
 
+		// Hermes tree
 		{kind: "Scroller", fit: true, components: [
 			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll" }
 		]},
@@ -57,20 +59,27 @@ enyo.kind({
 		// track selection of nodes. here, selection Key is file or folderId. Selection value is the node object
 		{kind: "Selection", onSelect: "select", onDeselect: "deselect"},
 
+		// service provide connection to file storage
 		{name: "service", kind: "FileSystemService"},
+
+		// Hermes popups
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "Service returned an error"},
 		{name: "nameFilePopup", kind: "NamePopup", type: "file", fileName:"", placeHolder: "File Name", onCancel: "newFileCancel", onConfirm: "newFileConfirm"},
 		{name: "nameFolderPopup", kind: "NamePopup", type: "folder", fileName: "", placeHolder: "Folder Name", onCancel: "newFolderCancel", onConfirm: "newFolderConfirm"},
 		{name: "nameCopyPopup", kind: "NamePopup", title: "Name for copy of", fileName: "Copy of foo.js", onCancel: "copyFileCancel", onConfirm: "copyFileConfirm"},
 		{name: "deletePopup", kind: "DeletePopup", onCancel: "deleteCancel", onConfirm: "deleteConfirm"},
 		{name: "renamePopup", kind: "RenamePopup", title: "New name for ", fileName: "foo.js", onCancel: "renameCancel", onConfirm: "renameConfirm"}
+
 	],
+
 	// warning: this variable duplicates an information otherwise stored in this.$.selection
 	// BUT, retrieving it through this.$.selection.getSelected is not handy as this function
 	// return an object (hash) which needs to be scanned to retrieve the selected value
 	selectedFile: null,
 	selectedNode: null,
+
 	debug: false,
+
 	create: function() {
 		this.inherited(arguments);
 		this.enableDisableButtons();
