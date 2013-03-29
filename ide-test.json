@@ -1,14 +1,15 @@
 {
+	"domain": null,
 	"services":[
 		{
 			"active":true,
 			"id":"home",
-			"icon":"server",
+			"icon":"home-32x32",
 			"name":"Ares Test - Home Directory",
-			"type": "filesystem",
+			"type": ["filesystem"],
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"hermes/fsLocal.js", "--pathname", "/files", "--port", "10002", "--root", "@CWD@/test/root"
+				"@INSTALLDIR@/hermes/fsLocal.js", "--pathname", "/files", "--port", "10002", "--root", "@CWD@/test/root"
 			],
 			"useJsonp":false,
 			"debug": false,
@@ -19,30 +20,34 @@
 			"id":"phonegap",
 			"icon":"build.phonegap.com-32x32",
 			"name":"PhoneGap Build",
-			"type": "build",
-			"provider": "hermes",
+			"type": ["build"],
 			"command":"@NODE@", "params":[
-				"hermes/bdPhoneGap.js", "-P", "/phonegap", "-p", "0"
+			        "@INSTALLDIR@/hermes/bdPhoneGap.js", "-P", "/phonegap", "-p", "0"
 			],
 			"useJsonp":false,
 			"verbose": false,
 			"auth": {
-				"type": "phonegap"
+			        "type": "phonegap"
 			},
 			"respawn": false
 		},
 		{
 			"active": true,
-			"id":"prj-toolkit",
+			"id":"genZip",
 			"name":"Project toolkit",
-			"type": "generate",
-			"provider": "hermes",
+			"type": ["generate"],
 			"command":"@NODE@", "params":[
-				"hermes/prjToolkit.js", "-P", "/prj-toolkit", "-p", "0"
+			        "@INSTALLDIR@/hermes/prjToolkit.js", "-P", "/prj-toolkit", "-p", "0"
 			],
+			"projectTemplateRepositories": {
+			        "bootplate": {
+			            "description": "Standard Enyo template",
+			            "url": "http://enyojs.com/archive/ares-project-templates.json"
+			        }
+			},
 			"useJsonp":false,
-			"verbose": true,
+			"verbose": false,
 			"respawn": false
-		}
+        }
 	]
 }

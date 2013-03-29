@@ -8,7 +8,7 @@ enyo.kind({
 			enyo.log("I am Ares Test Controller ...");
 		}
 
-		// in charge the setup&cleanup test environment
+		// in charge of the setup&cleanup test environment
 		var req = new enyo.Ajax({
 			url: '/res/tester',
 			method: 'POST',
@@ -22,25 +22,37 @@ enyo.kind({
 		// in charge of Ares TestRunner Test Suite
 		if (window.location.search.indexOf("norunner") == -1) {
 			this.inherited(arguments);
-			// listen for dispatched messages (received from Ares Test Reporter)
-			window.addEventListener("message", enyo.bind(this, this.recMsgFromTestReporter), false);
+			// postMessage API is not correctly supported by IE
+			var tmp = enyo.platform.chrome;
+			if (!enyo.platform.ie) {
+				// listen for dispatched messages (received from Ares Test Reporter)
+				window.addEventListener("message", enyo.bind(this, this.recMsgFromTestReporter), false);
 
-			// Create the new window browser named Ares Test Suite
-			var url = "../test/testrunner/index.html"
-			aresTestW = window.open(url, 'Ares-Test-Suite','scrollbars=auto, titlebar=yes, height=640,width=640', false);
+				// Create the new window browser named Ares Test Suite
+				var url = "../test/testrunner/index.html"
+				aresTestW = window.open(url, 'Ares-Test-Suite','scrollbars=auto, titlebar=yes, height=640,width=640', false);
 
-			// Communication path between Ares Test and Ares Ide through postMessage window method
-			// Warning: postMessage sent several times to make sure it has been received by Ares Test browser
-			var count = 4;
-			var repeatPostMsg = function() {
-				if (this.debug) enyo.log("Post ARES.TEST.START ...");
-				aresTestW.postMessage("ARES.TEST.START", "http://127.0.0.1:9009");
-				count--;
-				if (count > 0) {
-					setTimeout(repeatPostMsg, 1000);
+				// Communication path between Ares Test and Ares Ide through postMessage window method
+				// Warning: postMessage sent several times to make sure it has been received by Ares Test browser
+				var count = 4;
+				var repeatPostMsg = function() {
+					if (this.debug) enyo.log("Post ARES.TEST.START ...");
+						aresTestW.postMessage("ARES.TEST.START", "http://127.0.0.1:9009");
+						count--;
+						if (count > 0) {
+							setTimeout(repeatPostMsg, 1000);
+						}
 				}
+				setTimeout(repeatPostMsg, 1000);
+			} else {
+				aresTestW = null;
+				// Create TextCtrlRunner and TestProxyReporter components
+				// TestProxyReporter is created by TestCtrlRunner
+				if (this.$.runner) {
+					this.removeComponent(this.$.runner);
+				}
+				this.createComponent({name: "runner", kind: "Ares.TestCtrlRunner", aresObj: this.aresObj});
 			}
-			setTimeout(repeatPostMsg, 1000);
 		}
 	},
 	recMsgFromTestReporter: function(event) {

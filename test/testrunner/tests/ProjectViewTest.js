@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "ProjectViewTest",
 	kind: "Ares.TestSuite",
-	debug: true,
+	debug: false,
 	registry: null,
 	home: null,
 
