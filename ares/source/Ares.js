@@ -146,44 +146,46 @@ enyo.kind({
 		    content = inEvent.content;
 
 		if (!file) {
-			_footer(new Error("missing file/folder description"));
+			_footer(new Error("Internal error: missing file/folder description"));
 			return;
 		}
 
 		async.waterfall([
 			this._closeDocument.bind(this, inEvent.docId),
-			function(next) {
-				var where, err;
-				if (file.isDir && name) {
-					// create given file in given dir
-					where = {
-						service: file.service,
-						folderId: file.id,
-						name: name
-					};
-				} else if (!file.isDir && !name) {
-					// overwrite the given file
-					where = {
-						service: file.service,
-						fileId: file.id
-					};
-				} else if (!file.isDir && name) {
-					// create a new file in the same folder as the
-					// given file
-					where = {
-						service: file.service,
-						folderId: file.parent.id,
-						name: name
-					};
-				} else {
-					err = new Error("wrong file/folder description");
-				}
-				next(err, where);
-			},
+			_prepareNewLocation.bind(this),
 			this._saveDocument.bind(this, inEvent.content),
 			_savedToOpen.bind(this),
 			this._openDocument.bind(this, inEvent.projectData)
 		], _footer);
+
+		function _prepareNewLocation(next) {
+			var where, err;
+			if (file.isDir && name) {
+				// create given file in given dir
+				where = {
+					service: file.service,
+					folderId: file.id,
+					name: name
+				};
+			} else if (!file.isDir && !name) {
+				// overwrite the given file
+				where = {
+					service: file.service,
+					fileId: file.id
+				};
+			} else if (!file.isDir && name) {
+				// create a new file in the same folder as the
+				// given file
+				where = {
+					service: file.service,
+					folderId: file.parent.id,
+					name: name
+				};
+			} else {
+				err = new Error("Internal error: wrong file/folder description");
+			}
+			next(err, where);
+		}
 
 		function _savedToOpen(inData, next) {
 			this.$.projectView.refreshFile(file);
