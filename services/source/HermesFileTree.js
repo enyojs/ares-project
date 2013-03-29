@@ -469,10 +469,11 @@ enyo.kind({
 	},
 	// File Operations
 	newFileConfirm: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
 		var folderId = inEvent.folderId;
-		var name = inEvent.fileName.trim();
-		var nameStem = name.substring(0, name.lastIndexOf("."));
-		var type = name.substring(name.lastIndexOf(".")+1);
+		var name = inEvent.name.trim();
+		var nameStem = name.substring(0, name.lastIndexOf(".")); // aka basename
+		var type = name.substring(name.lastIndexOf(".")+1); // aka suffix
 		var templatePath;
 		var location = window.location.toString();
 		var prefix = location.substring(0, location.lastIndexOf("/")+1);
@@ -493,7 +494,7 @@ enyo.kind({
 		// retrieve template from server
 		var r = new enyo.Ajax(options);
 		r.response(this, function(inSender, inResponse) {
-			if (this.debug) this.log("response: "+inResponse.toString());
+			if (this.debug) this.log("newFileConfirm response: ", inResponse);
 			for (var n in replacements) {
 				inResponse = inResponse.replace(n, replacements[n]);
 			}
