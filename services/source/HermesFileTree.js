@@ -422,6 +422,15 @@ enyo.kind({
 			}
 		};
 	},
+	/**
+	 * Refresh the current {HermesFileTree} view, if applicable
+	 * @param {Object} changedFile
+	 */
+	refreshFile: function(changedFile) {
+		// FIXME: not cleanly implemented: should check wether
+		// a refresh is necessary first.
+		this.refreshFileTree();
+	},
 
 	// All parameters are optional.
 	// - node is null for the "top" refresh call. Node is also used for inner (async)

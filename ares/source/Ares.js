@@ -13,7 +13,7 @@ enyo.kind({
 			]}
 		]},
 		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
-			{kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "openDocument", onProjectSelected: "projectSelected"},
+			{name: "projectView", kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "openDocument", onProjectSelected: "projectSelected"},
 			{name: "bottomBar", kind: "DocumentToolbar",
 				onToggleOpen: "toggleFiles",
 				onSwitchFile: "switchFile",
@@ -181,11 +181,12 @@ enyo.kind({
 				next(err, where);
 			},
 			this._saveDocument.bind(this, inEvent.content),
-			_savedToOpen,
+			_savedToOpen.bind(this),
 			this._openDocument.bind(this, inEvent.projectData)
 		], _footer);
 
 		function _savedToOpen(inData, next) {
+			this.$.projectView.refreshFile(file);
 			// FIXME: only HermesFileTree report built-in file#service
 			var hermesFile = inData[0];
 			hermesFile.service = file.service;

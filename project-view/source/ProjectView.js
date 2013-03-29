@@ -44,6 +44,13 @@ enyo.kind({
 	showErrorPopup : function(msg, details) {
 		this.$.errorPopup.raise(msg, details);
 	},
+	/**
+	 * Refresh the {ProjectView} (if relevant), following a change of the given file
+	 * @param {Object} changedFile
+	 */
+	refreshFileTree: function(changedFile) {
+		this.$.harmonia.refreshFile(changedFile);
+	},
 	scanProjectAction: function(inSender, inEvent) {
 		this.$.projectWizardScan.setHeaderText('Select a directory containing one or more project.json files');
 		this.$.projectWizardScan.show();
