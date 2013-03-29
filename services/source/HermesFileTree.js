@@ -522,7 +522,7 @@ enyo.kind({
 	},
 	createFile: function(name, folderId, content) {
 		if (this.debug) this.log("Creating new file "+name+" into folderId="+folderId);
-		this.service.createFile(folderId, name, content)
+		this.$.service.createFile(folderId, name, content)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("createFile response: ",inResponse);
 				this.packageAdd(
@@ -542,7 +542,7 @@ enyo.kind({
 		var folderId = inEvent.folderId;
 		var name = inEvent.fileName.trim();
 		if (this.debug) this.log("Creating new folder "+name+" into folderId="+folderId);
-		this.service.createFolder(folderId, name)
+		this.$.service.createFolder(folderId, name)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("Response: "+inResponse);
 				this.delayedRefresh("folder creation done").go(inResponse) ;
@@ -557,7 +557,7 @@ enyo.kind({
 		var oldId = this.selectedFile.id;
 		var newName = inEvent.fileName.trim();
 		if (this.debug) this.log("Renaming file " + oldId + " as " + newName + " at " + path);
-		this.service.rename(oldId, newName)
+		this.$.service.rename(oldId, newName)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("Response: "+inResponse);
 				this.delayedRefresh("rename done").go(inResponse) ;
@@ -577,7 +577,7 @@ enyo.kind({
 		var method = this.selectedFile.isDir ? "deleteFolder" : "deleteFile";
 		var upperDir = this.getParentOfSelected() ;
 		if (this.debug) this.log(method + ' ' + name + " in folder " + upperDir.name);
-		this.service.remove(inEvent.nodeId)
+		this.$.service.remove(inEvent.nodeId)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("Response: "+inResponse);
 				this.packageRemove(
@@ -595,7 +595,7 @@ enyo.kind({
 		var oldName = this.selectedFile.name;
 		var newName = inEvent.fileName.trim();
 		if (this.debug) this.log("Creating new file " + newName + " as copy of" + this.selectedFile.name);
-		this.service.copy(this.selectedFile.id, newName)
+		this.$.service.copy(this.selectedFile.id, newName)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("Response: "+inResponse);
 				this.delayedRefresh("copy done").go(inResponse) ;
@@ -644,7 +644,7 @@ enyo.kind({
 	},
 
 	packageRead: function (pkgId, callback) {
-		this.service.getFile(pkgId). response(
+		this.$.service.getFile(pkgId). response(
 			this,
 			function(inSender, inContent) {
 				callback (null, inContent.content);
@@ -685,7 +685,7 @@ enyo.kind({
 			return;
 		}
 
-		this.service.putFile(pkgId, pkgContent) .response(
+		this.$.service.putFile(pkgId, pkgContent) .response(
 			this,
 			function() {
 				callback(null) ;
