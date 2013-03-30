@@ -108,11 +108,15 @@ Get more information about the options using `-h` or `--help`:
 	Usage: "node ./ide.js" [OPTIONS]
 
 	Options:
-	  -h, --help     help message                                                              [boolean]
-	  -T, --runtest  Run the non-regression test suite                                         [boolean]
-	  -b, --browser  Open the default browser on the Ares URL                                  [boolean]
-	  -p, --port     port (o) local IP port of the express server (default: 9009, 0: dynamic)  [default: "9009"]
-	  -H, --host     host to bind the express server onto (default: 127.0.0.1)                 [default: "127.0.0.1"]
+	  -h, --help        help message                                                                           [boolean]
+	  -T, --runtest     Run the non-regression test suite                                                      [boolean]
+	  -b, --browser     Open the default browser on the Ares URL                                               [boolean]
+	  -p, --port        port (o) local IP port of the express server (default: 9009, 0: dynamic)               [default: "9009"]
+	  -H, --host        host to bind the express server onto                                                   [default: "127.0.0.1"]
+	  -a, --listen_all  When set, listen to all adresses. By default, listen to the address specified with -H  [boolean]
+	  -c, --config      IDE configuration file                                                                 [default: "/Users/kowalskif/Desktop/GIT/enyojs/ares-project/ide.json"]
+	  -l, --level       IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')                  [default: "http"]
+	  -L, --log         Log IDE debug to ./ide.log                                                             [boolean]
 
 Optionally, configure the `root` of your local file-system access in `ide.json`. By default, the local filesystem service serves the files from your _Home_ or _My Documents_ directory, depending on your operating system. You might want to change this to point to the location of your project files, to make navigation faster & easier. 
 
@@ -124,6 +128,14 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Us
 		"hermes/fsLocal.js", "-P", "/files", "-p", "0", "@HOME@"
 	],
 	[...]
+
+#### Reporting Issues
+
+Be sure to run Ares with `--log` (or `-L`) to capture the Ares server output in the file name `ide.log`.  Attach this log-file to you bug report on the [ARES JIRA](https://enyojs.atlassian.net/browse/ENYO/component/10302).
+
+You may also want to increase the log verbosity, in order to better understand what is going wrong by yourself.  The default verbosity level is `http`.  You may want o increase to `info` or even `verbose`.  Lowest layer `silly` is usually for Ares core developers.
+
+	$ node ide.js --level=info
 
 ### Build
 

@@ -8,6 +8,7 @@ require('./hermes/lib/checkNodeVersion');	// Check nodejs version
 var fs = require("fs"),
     path = require("path"),
     express = require("express"),
+    npmlog = require('npmlog'),
     optimist = require("optimist"),
     util  = require('util'),
     spawn = require('child_process').spawn,
@@ -15,6 +16,10 @@ var fs = require("fs"),
     http = require('http') ;
 var myDir = typeof(__dirname) !== 'undefined' ?  __dirname : path.resolve('') ;
 var HttpError = require(path.resolve(myDir, "hermes/lib/httpError"));
+
+var log = npmlog;
+log.heading = 'ares';
+log.level = 'warn';
 
 var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applications.\nUsage: "$0" [OPTIONS]\n')
 	.options('h', {
@@ -52,9 +57,14 @@ var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applicati
 		description: 'IDE configuration file',
 		default: path.resolve(myDir, "ide.json")
 	})
-	.options('v', {
-		alias : 'verbose',
-		description: 'Increase IDE verbosity in the console',
+	.options('l', {
+		alias : 'level',
+		description: "IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')",
+		default: 'http'
+	})
+	.options('L', {
+		alias : 'log',
+		description: "Log IDE debug to ./ide.log",
 		boolean: true
 	})
 	.argv;
@@ -64,23 +74,35 @@ if (argv.help) {
 	process.exit(0);
 }
 
-function log() {
-	if (argv.verbose) {
-		var arg, msg = arguments.callee.caller.name + '(): ';
-		for (var argi = 0; argi < arguments.length; argi++) {
-			arg = arguments[argi];
-			if (typeof arg === 'object') {
-				msg += util.inspect(arg);
-			} else {
-				msg += arg;
-			}
-			msg += ' ';
-		}
-		console.log(msg);
-	};
+log.level = argv.level || 'http';
+if (argv.log) {
+	log.stream = fs.createWriteStream('ide.log');
 }
 
-log("Arguments:", argv);
+function m() {
+	var arg, msg = '';
+	for (var argi = 0; argi < arguments.length; argi++) {
+		arg = arguments[argi];
+		if (typeof arg === 'object') {
+			msg += util.inspect(arg);
+		} else {
+			msg += arg;
+		}
+			msg += ' ';
+	}
+	return msg;
+}
+
+log.info('main', m("Arguments:", argv));
+
+// Exit path
+
+process.on('uncaughtException', function (err) {
+	log.error('main', err.stack);
+	process.exit(1);
+});
+process.on('exit', onExit);
+process.on('SIGINT', onExit);
 
 // Load IDE configuration & start per-project file servers
 
@@ -125,7 +147,7 @@ function loadMainConfig(configFile) {
 		throw "Did not find: '"+configFile+"': ";
 	}
 
-	log("Loading ARES configuration from '"+configFile+"'...");
+	log.verbose('loadMainConfig()', "Loading ARES configuration from '"+configFile+"'...");
 	configStats = fs.lstatSync(configFile);
 	if (!configStats.isFile()) {
 		throw "Not a file: '"+configFile+"': ";
@@ -148,7 +170,7 @@ function getObjectType(object) {
 }
 
 function mergePluginConfig(service, newdata, configFile) {
-	log("Merging service '" + (service.name || service.id) + "' to ARES configuration");
+	log.verbose('mergePluginConfig()', "Merging service '" + (service.name || service.id) + "' to ARES configuration");
 	try {
 		for(var key in newdata) {
 			var srcType = getObjectType(service[key]);
@@ -164,7 +186,7 @@ function mergePluginConfig(service, newdata, configFile) {
 				}
 			} else if (srcType === 'object') {
 				for(var subkey in newdata[key]) {
-					console.log("Adding or replacing " + subkey + " in " + key);
+					log.verbose('mergePluginConfig()', "Adding or replacing " + subkey + " in " + key);
 					service[key][subkey] = newdata[key][subkey];
 				}
 			} else {
@@ -172,15 +194,15 @@ function mergePluginConfig(service, newdata, configFile) {
 			}
 		}
 
-		log("Merged service: " + JSON.stringify(service, null, 2));
+		log.info('mergePluginConfig()', "Merged service: " + JSON.stringify(service, null, 2));
 	} catch(err) {
-		console.log(err);
+		log.error('mergePluginConfig()', err);
 		throw "Unable to merge " + configFile;
 	}
 }
 
 function appendPluginConfig(configFile) {
-	log("Loading ARES plugin configuration from '"+configFile+"'...");
+	log.verbose('appendPluginConfig()', "Loading ARES plugin configuration from '"+configFile+"'...");
 	var pluginData;
 	var configContent = fs.readFileSync(configFile, 'utf8');
 	try {
@@ -193,7 +215,7 @@ function appendPluginConfig(configFile) {
 		if (serviceMap[pluginData.id]) {
 			mergePluginConfig(serviceMap[pluginData.id], pluginData, configFile);
 		} else {
-			log("Adding new service '" + pluginData.name + "' to ARES configuration");
+			log.verbose('appendPluginConfig()', "Adding new service '" + pluginData.name + "' to ARES configuration");
 			ide.res.services.push(pluginData);
 			serviceMap[pluginData.id] = pluginData;
 		}
@@ -224,18 +246,18 @@ loadPluginConfigFiles();
 
 // configuration age/date is the UTC configuration file last modification date
 ide.res.timestamp = configStats.atime.getTime();
-log(ide.res);
+log.verbose('main', ide.res);
 
 function handleMessage(service) {
 	return function(msg) {
 		if (msg.protocol && msg.host && msg.port && msg.origin && msg.pathname) {
 			service.dest = msg;
-			log("will proxy to service.dest:", service.dest);
+			log.info(service.id , m("will proxy to service.dest:", service.dest));
 			service.origin = 'http://' + argv.host + ':' + argv.port;
 			service.pathname = '/res/services/' + service.id;
 
 			if (service.origin.match(/^https:/)) {
-				console.info("Service['"+service.id+"']: connect to <"+service.origin+"> to accept SSL certificate");
+				log.http(service.id, "connect to <"+service.origin+"> to accept SSL certificate");
 			}
 
 			var options = {
@@ -248,35 +270,41 @@ function handleMessage(service) {
 				}
 			};
 			var creq = http.request(options, function(cres) {
-				console.info("Service['"+service.id+"']: POST /config response.status=" + cres.statusCode);
+				log.http(service.id, "POST /config response.status=" + cres.statusCode);
 			}).on('error', function(e) {
 				throw e;
 			});
 			creq.write(JSON.stringify({config: service}, null, 2));
 			creq.end();
 		} else {
-			console.error("Error updating URL for service "+service.id);
+			log.error(service.id, "Error updating service URL");
 		}
 	};
 }
 
-function serviceEcho(service) {
+function serviceOut(service) {
 	return function(data){
-		console.log("> Service['"+service.id+"']: "+data);
+		log.http(service.id, data.toString());
+	};
+}
+
+function serviceErr(service) {
+	return function(data){
+		log.warn(service.id, data.toString());
 	};
 }
 
 function handleServiceExit(service) {
 	return function(code, signal) {
 		if (signal) {
-			console.log("> Service['"+service.id+"']: killed (signal="+signal+")");
+			log.warn(service.id, "killed (signal="+signal+")");
 		} else {
-			console.error("*** Service['"+service.id+"']: abnormal exit (code="+code+")");
+			log.warn(service.id, "abnormal exit (code="+code+")");
 			if (service.respawn) {
-				console.error("*** Service['"+service.id+"']: respawning...");
+				log.warn(service.id, "respawning...");
 				startService(service);
 			} else {
-				console.error("*** Exiting...");
+				log.error('handleServiceExit()', "*** Exiting...");
 				process.exit(code);
 			}
 		}
@@ -295,17 +323,17 @@ function startService(service) {
 	if (service.verbose) {
 		params.push('-v');
 	}
-	console.log("> Service['"+service.id+"']: executing '"+command+" "+params.join(" ")+"'");
+	log.info(service.id, "executing '"+command+" "+params.join(" ")+"'");
 	var subProcess = spawn(command, params, options);
-	subProcess.stderr.on('data', serviceEcho(service));
-	subProcess.stdout.on('data', serviceEcho(service));
+	subProcess.stderr.on('data', serviceErr(service));
+	subProcess.stdout.on('data', serviceOut(service));
 	subProcess.on('exit', handleServiceExit(service));
 	subProcess.on('message', handleMessage(service));
 	subProcesses.push(subProcess);
 }
 
 function proxyServices(req, res, next) {
-	log("req.params:", req.params, ", req.query:", req.query);
+	log.verbose('proxyServices()', m("req.params:", req.params, ", req.query:", req.query));
 	var query = {},
 	    id = req.params.serviceId,
 	    service = ide.res.services.filter(function(service) {
@@ -334,11 +362,11 @@ function proxyServices(req, res, next) {
 		// headers to send
 		headers: req.headers
 	};
-	log("options:", options);
+	log.verbose('proxyServices()', m("options:", options));
 
 	var creq = http.request(options, function(cres) {
 		// transmit every header verbatim, but cookies
-		log("cres.headers:", cres.headers);
+		log.verbose('proxyServices()', m("cres.headers:", cres.headers));
 		for (var key in cres.headers) {
 			var val = cres.headers[key];
 			if (key.toLowerCase() === 'set-cookie') {
@@ -361,8 +389,8 @@ function translateCookie(service, res, cookie) {
 	cookie.options.domain = ide.res.domain || '127.0.0.1';
 	var oldPath = cookie.options.path;
 	cookie.options.path = service.pathname + (oldPath ? oldPath : '');
-	log("cookie.path:", oldPath, "->", cookie.options.path);
-	log("set-cookie:", cookie);
+	log.silly('translateCookie()', m("cookie.path:", oldPath, "->", cookie.options.path));
+	log.silly('translateCookie()', m("set-cookie:", cookie));
 	res.cookie(cookie.name, cookie.value, cookie.options);
 }
 
@@ -374,7 +402,7 @@ function parseSetCookie(cookies) {
 	cookies.forEach(function(cookie) {
 		var outCookie = {};
 		var tokens = cookie.split(/; */);
-		log("parseSetCookie(): tokens:", tokens);
+		log.silly("parseSetCookie()", m("tokens:", tokens));
 		var namevalStr = tokens.splice(0, 1)[0];
 		if (typeof namevalStr === 'string') {
 			var nameval = namevalStr.split('=');
@@ -388,24 +416,24 @@ function parseSetCookie(cookies) {
 			if (typeof outCookie.options.expires === 'string') {
 				outCookie.options.expires = new Date(outCookie.options.expires);
 			}
-			log("parseSetCookie(): outCookie:", outCookie);
+			log.silly("parseSetCookie()", m("outCookie:", outCookie));
 			outCookies.push(outCookie);
 		} else {
-			log("parseSetCookie(): Invalid Set-Cookie header:", namevalStr);
+			log.silly("parseSetCookie()", m("Invalid Set-Cookie header:", namevalStr));
 		}
 	});
-	log("outCookies:", outCookies);
+	log.silly("parseSetCookie()", m("outCookies:", outCookies));
 	return outCookies;
 }
 
 function onExit() {
 	if (subProcesses.length > 0) {
-		console.log('Terminating sub-processes...');
+		log.info('onExit()', 'Terminating sub-processes...');
 		subProcesses.forEach(function(subproc) {
 			process.kill(subproc.pid, 'SIGINT');
 		});
 		subProcesses = [];
-		console.log('Exiting...');
+		log.info('onExit()', 'Exiting...');
 	}
 }
 
@@ -435,14 +463,14 @@ app.configure(function(){
 	app.use(express.logger('dev'));
 
 	app.get('/', function(req, res, next) {
-		log("GET /");
+		log.http('main', "GET /");
 		res.redirect('/ide/ares/');
 	});
 	app.get('/res/timestamp', function(req, res, next) {
 		res.status(200).json({timestamp: ide.res.timestamp});
 	});
 	app.get('/res/services', function(req, res, next) {
-		log("GET /res/services:", ide.res.services);
+		log.http('main', m("GET /res/services:", ide.res.services));
 		res.status(200).json({services: ide.res.services});
 	});
 	app.all('/res/services/:serviceId/*', proxyServices);
@@ -471,16 +499,7 @@ if (argv.browser) {
 	var info = platformOpen[process.platform] ;
 	spawn(info[0], info.slice(1).concat([url]));
 } else {
-	console.log("Ares now running at <" + url + ">");
+	log.http('main', "Ares now running at <" + url + ">");
 }
 
-// Exit path
-
-console.info("Press CTRL + C to shutdown");
-
-process.on('uncaughtException', function (err) {
-	console.error(err.stack);
-	process.exit(1);
-});
-process.on('exit', onExit);
-process.on('SIGINT', onExit);
+log.info('main', "Press CTRL + C to shutdown");
