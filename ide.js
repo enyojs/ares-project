@@ -75,7 +75,7 @@ if (argv.help) {
 }
 
 log.level = argv.level || 'http';
-if (argv.out) {
+if (argv.log) {
 	log.stream = fs.createWriteStream('ide.log');
 }
 
@@ -94,6 +94,15 @@ function m() {
 }
 
 log.info('main', m("Arguments:", argv));
+
+// Exit path
+
+process.on('uncaughtException', function (err) {
+	log.error('main', err.stack);
+	process.exit(1);
+});
+process.on('exit', onExit);
+process.on('SIGINT', onExit);
 
 // Load IDE configuration & start per-project file servers
 
@@ -275,13 +284,13 @@ function handleMessage(service) {
 
 function serviceOut(service) {
 	return function(data){
-		log.info(service.id, data);
+		log.http(service.id, data.toString());
 	};
 }
 
 function serviceErr(service) {
 	return function(data){
-		log.warn(service.id, data);
+		log.warn(service.id, data.toString());
 	};
 }
 
@@ -493,13 +502,4 @@ if (argv.browser) {
 	log.http('main', "Ares now running at <" + url + ">");
 }
 
-// Exit path
-
 log.info('main', "Press CTRL + C to shutdown");
-
-process.on('uncaughtException', function (err) {
-	console.error(err.stack);
-	process.exit(1);
-});
-process.on('exit', onExit);
-process.on('SIGINT', onExit);
