@@ -38,13 +38,14 @@ enyo.kind({
 	handleSelectProvider: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
 		var hft = this.$.hermesFileTree ;
+		var next = inEvent.callBack ;
 		if (inEvent.service) {
 			async.series(
 				[
 					hft.connectService.bind(hft,inEvent.service),
-					hft.refreshFileTree.bind(hft),
-					inEvent.callBack
-				]
+					hft.refreshFileTree.bind(hft)
+				],
+				next
 			);
 		}
 		return true; //Stop event propagation
