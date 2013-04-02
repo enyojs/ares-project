@@ -160,8 +160,14 @@ enyo.kind({
 		return this.getControls().filter( hasPrefix ).sort(this.fileNameSort) ;
 	},
 
-	//* @public
-	//* getNodeNames returns a ares.Node for a file or a directory named passed in parameter
+	/**
+	 * getNodeNamed
+	 * @public
+	 * @param {String} name
+	 * @return a ares.Node for a file or a directory named passed in parameter
+	 *
+	 */
+
 	getNodeNamed: function(name) {
 		var hasPrefix = function(e){
 			return (e.name === '$'+ name) ;
