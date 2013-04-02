@@ -193,9 +193,9 @@ enyo.kind({
 				this.$.ace.highlightActiveLine = false;
 			}
 			this.$.ace.highlightActiveLineChanged();
-			this.$.ace.wordWrap = localStorage.wordwrap;
-
-			if(!this.$.ace.wordwrap || this.$.ace.wordWrap.indexOf("false") != -1){
+			
+			this.$.ace.wordWrap = localStorage.wordwrap;			
+			if(!this.$.ace.wordWrap || this.$.ace.wordWrap.indexOf("false") != -1 && this.$.ace.wordWrap !== "true"){
 				this.$.ace.wordWrap = false;
 			}
 			this.$.ace.wordWrapChanged();
