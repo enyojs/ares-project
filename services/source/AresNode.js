@@ -175,6 +175,21 @@ enyo.kind({
 		return this.getControls().filter( hasPrefix )[0];
 	},
 
+	/**
+	 * getNodeNamed
+	 * @public
+	 * @param {String} id
+	 * @return a ares.Node for a file or a directory id passed in parameter
+	 *
+	 */
+
+	getNodeWithId: function (id) {
+		var idMatch = function(e){
+			return (e.file && e.file.id === id) ;
+		} ;
+		return this.getControls().filter( idMatch )[0];
+	},
+
 	filesToNodes: function(inFiles) {
 		var nodes = [];
 		inFiles.sort(this.fileNameSort); // TODO: Other sort orders
