@@ -367,6 +367,7 @@ enyo.kind({
 	newFolderClick: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		var folder = this.getFolder();
+		if (this.debug) this.log("on folder ",folder);
 		if (folder && folder.isDir) {
 			this.$.nameFolderPopup.setFileName("");
 			this.$.nameFolderPopup.setFolderId(folder.id);
@@ -536,13 +537,14 @@ enyo.kind({
 				this.showErrorPopup("Creating file "+name+" failed:" + inError);
 			});
 	},
+
 	newFolderConfirm: function(inSender, inEvent) {
 		var folderId = inEvent.folderId;
 		var name = inSender.fileName.trim();
 		if (this.debug) this.log("Creating new folder "+name+" into folderId="+folderId);
 		this.$.service.createFolder(folderId, name)
 			.response(this, function(inSender, inResponse) {
-				if (this.debug) this.log("Response: "+inResponse);
+				if (this.debug) this.log("newFolderConfirm Response: "+inResponse);
 				this.delayedRefresh("folder creation done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
@@ -550,6 +552,7 @@ enyo.kind({
 				this.showErrorPopup("Creating folder "+name+" failed:" + inError);
 			});
 	},
+
 	renameConfirm: function(inSender, inEvent) {
 		var path = inEvent.path;
 		var oldId = this.selectedFile.id;
