@@ -573,14 +573,18 @@ enyo.kind({
 		var name = this.selectedFile.name ;
 		var oldPath = this.selectedFile.path;
 		var method = this.selectedFile.isDir ? "deleteFolder" : "deleteFile";
-		var upperDir = this.getParentOfSelected() ;
-		if (this.debug) this.log(method + ' ' + name + " in folder " + upperDir.name);
+		var upperDirNode = this.getParentNodeOfSelected() ;
+		if (this.debug) this.log(method + ' ' + name + " in folder " + upperDirNode.name, upperDirNode);
+
 		this.$.service.remove(inEvent.nodeId)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("Response: "+inResponse);
-				this.packageRemove(
-					upperDir.id, name,
-					function () {this.delayedRefresh("delete done").go() ;}.bind(this)
+				var that = this ;
+				this.packageMunge(
+					upperDirNode,
+					name,
+					this.packageChop,
+					function () {that.delayedRefresh("delete done").go() ;}
 				);
 			})
 			.error(this, function(inSender, inError) {
@@ -605,9 +609,6 @@ enyo.kind({
 	},
 
 	// package.js munging section
-	packageRemove: function (folderId, name, callback)  {
-		this.packageOp(folderId, name, this.packageChop.bind(this, name), callback);
-	},
 
 	packageMunge: function (folderNode, name, op, callback)  {
 		if ( ! name.match(RegExp(/\.(js|css)$/) ) ) {
@@ -667,15 +668,20 @@ enyo.kind({
 	},
 
 	packageChop: function ( name, pkgContent, callback ) {
-		var toMatch = name.replace(/\./, "\.") ; // replace '.' with '\.'
-		var re = RegExp(/\btoMatch\b/) ;
+		var toMatch = name.replace(/\./, "\\.") ; // replace '.' with '\.'
+		if (this.debug) this.log(' called for file ' + name + ' regexp is ' , toMatch) ;
+		var re = new RegExp("(\"|')" + toMatch + "(\"|')") ;
 		var result ;
 		if (pkgContent.match(re)) {
 			result = pkgContent
-				.replace(/("|')toMatch("|')/,'') // remove name
-				.replace(/,\s*(,|\)/,"$1");      // remove extra comma
+				.replace(re,'')            // remove name
+				.replace(/,\s*,/,",")      // remove duplicated comma
+				.replace(/,\s*\)/,"\n)");  // remove comma before ')'
+			callback(null,result);
 		}
-		callback(null);
+		else  {
+			callback('cannot find ' + name + ' in package.js');
+		}
 	},
 
 	packageSave: function ( pkgId, pkgContent,callback) {
