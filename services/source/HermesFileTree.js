@@ -504,6 +504,7 @@ enyo.kind({
 		});
 		r.go();
 	},
+
 	delayedRefresh: function(msg, forceSelect) {
 		var onDone = new enyo.Async() ;
 		onDone.response(this, function(inSender, toSelectId) {
@@ -513,17 +514,21 @@ enyo.kind({
 		}) ;
 		return onDone ;
 	},
+
 	createFile: function(name, folderId, content) {
 		if (this.debug) this.log("Creating new file "+name+" into folderId="+folderId);
 		this.$.service.createFile(folderId, name, content)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("createFile response: ",inResponse);
-				this.packageAdd(
-					folderId, name,
+				var that = this ;
+				this.packageMunge(
+					this.getFolderOfSelectedNode(),
+					name,
+					this.packageAppend,
 					function () {
 						// passing the id from response will make hermeFileTree select the new file
-						this.delayedRefresh("file creation done", inResponse[0].id).go(inResponse) ;
-					}.bind(this)
+						that.delayedRefresh("file creation done", inResponse[0].path).go(inResponse) ;
+					}
 				) ;
 			})
 			.error(this, function(inSender, inError) {
@@ -600,38 +605,38 @@ enyo.kind({
 	},
 
 	// package.js munging section
-	packageAdd: function (folderId, name, callback)  {
-		this.packageOp(folderId, name, this.packageAppend.bind(this, name), callback);
-	},
-
 	packageRemove: function (folderId, name, callback)  {
 		this.packageOp(folderId, name, this.packageChop.bind(this, name), callback);
 	},
 
-	packageOp: function (folderId, name, op, callback)  {
+	packageMunge: function (folderNode, name, op, callback)  {
 		if ( ! name.match(RegExp(/\.(js|css)$/) ) ) {
+			if (this.debug) this.log(' skipped: ' + name + ' is not a js or css file' ) ;
 			return ; // skip non js non css files.
 		}
 
 		// need to read package.js from same dir
-		var selectedDirNode = this.selectedNode ; // FIXME: not good when removing a file
-		var pkgNode = selectedDirNode.getNodeNamed('package.js') ;
+		var pkgNode = folderNode.getNodeNamed('package.js') ;
 
 		if (! pkgNode ) {
+			if (this.debug) this.log(' skipped: for ' + name + '. No package.js file found' ) ;
 			return ; // skip operation when no package.js is found
 		}
 
 		var pkgId =  pkgNode.file.id ;
+		var that = this ;
 
 		async.waterfall(
 			[
 				this.packageRead.bind(this, pkgId),
-				op,
-				this.packageSave.bind(this, pkgId),
-				callback
+				op.bind(this, name),
+				this.packageSave.bind(this, pkgId)
 			],
 			function (err) {
-				that.log("package add done, err is",err);
+				if (err) {
+					that.log("package op NOT done, err is",err);
+				}
+				callback() ;
 			}
 		) ;
 	},
@@ -646,11 +651,12 @@ enyo.kind({
 	},
 
 	packageAppend: function ( name, pkgContent, callback ) {
-		var toMatch = name.replace(/\./, "\.") ; // replace '.' with '\.'
-		var re = RegExp(/\btoMatch\b/) ;
+		if (this.debug) this.log(' called for file ' + name ) ;
+		var toMatch = name.replace(/\./, "\\.") ; // replace '.' with '\.'
+		var re = new RegExp("\\b" + toMatch + "\\b") ;
 		var result ;
 		if (pkgContent.match(re)) {
-			callback(null) ;
+			callback('file ' + name + ' is already is package.js') ;
 		}
 		else {
 			result = pkgContent
