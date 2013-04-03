@@ -104,7 +104,7 @@ enyo.kind({
 		]},
 
 		// FIXME: there should be an HTML/CSS way to avoid using FittableStuff...
-		{kind: "FittableRows", style: "margin-top: 10px; width: 100%", fit: true, components: [
+		{name: "toolbarId", kind: "onyx.Toolbar", components: [
 			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "doDone"},
 			{name: "ok", kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "confirmTap"}
 		]},
@@ -145,7 +145,7 @@ enyo.kind({
 				name: service.id + 'Drawer',
 				kind: "onyx.Drawer",
 				open: false
-			});
+			},{addBefore: this.$.toolbarId});
 			service.panel = drawer.$[service.id] || drawer.createComponent({
 				name: service.id,
 				kind: service.kind
