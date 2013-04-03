@@ -310,13 +310,24 @@ enyo.kind({
 
 		this.debug && this.log("refreshFileTree done") ;
 	},
-	// Get nearest parent directory for file ref
+
+	/**
+	 * @public
+	 * Returns selected dir or container dir data
+	 */
 	getFolder: function() {
-		var folder = this.selectedFile;
-		if (folder && !folder.isDir) {
-			folder = this.selectedNode.container.file;
-		}
-		return folder;
+		var node = this.getFolderOfSelectedNode() ;
+		return node ? node.file : null ;
+	},
+
+	/**
+	 * @public
+	 * Returns selected dir or container dir node
+	 */
+	getFolderOfSelectedNode: function() {
+		var node = this.selectedNode;
+		return node && !node.file.isDir ? this.selectedNode.container
+		     : node;
 	},
 
 	/**
