@@ -169,10 +169,10 @@ enyo.kind({
 	 */
 
 	getNodeNamed: function(name) {
-		var hasPrefix = function(e){
+		var nameMatch = function(e){
 			return (e.name === '$'+ name) ;
 		} ;
-		return this.getControls().filter( hasPrefix )[0];
+		return this.getControls().filter( nameMatch )[0];
 	},
 
 	/**
