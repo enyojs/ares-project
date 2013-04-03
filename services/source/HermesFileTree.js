@@ -293,6 +293,10 @@ enyo.kind({
 			callBack = oldCallBack ;
 		}
 
+		if (toSelectId && toSelectId.match(/[^\da-f]/) ) {
+			this.warn("refreshFileTree: internal error, toSelectId " + toSelectId + " does not look like an Id");
+		}
+
 		var tracker = this.asyncTracker(
 			function() {
 				this.$.serverNode.render() ;
