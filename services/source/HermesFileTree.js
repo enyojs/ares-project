@@ -317,6 +317,14 @@ enyo.kind({
 
 	/**
 	 * @public
+	 * Returns a node structure for the parent node of the currently selected node
+	 */
+	getParentNodeOfSelected: function() {
+		return this.selectedNode.container ;
+	},
+
+	/**
+	 * @public
 	 * Returns a file data structure for the parent node of the currently selected node
 	 */
 	getParentOfSelected: function() {
