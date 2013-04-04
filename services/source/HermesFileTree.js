@@ -510,8 +510,8 @@ enyo.kind({
 		var onDone = new enyo.Async() ;
 		onDone.response(this, function(inSender, toSelectId) {
 			var select = forceSelect || toSelectId ;
-			if (this.debug) this.log("delayed refresh after " + msg + ' on ' + forceSelect) ;
-			this.refreshFileTree(null, forceSelect);
+			if (this.debug) this.log("delayed refresh after " + msg + ' on ' + select) ;
+			this.refreshFileTree(null, select);
 		}) ;
 		return onDone ;
 	},
