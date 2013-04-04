@@ -85,11 +85,44 @@ enyo.kind({
 					{content: "xcode"},
 				]}
 			]},
-
 		]},
+		{kind: "Control", tag: "br"},
+		{kind: "FittableColumns", name: "groupbox7", components: [
+				{kind: "Control", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
+				{kind: "Control", tag: "br"},
+				{kind: "Control", content: "Mac Programmable buttons Command  F1 to F12"},
+				{kind: "Control", tag: "br"},
+				{kind: "Control", tag: "br"},
+				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-1", name: "F1", ontap: "showPopup"},
+				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-2", name: "F2", ontap: "showPopup"},
+				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-3", name: "F3", ontap: "showPopup"},
+				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-4", name: "F4", ontap: "showPopup"},
+				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-5", name: "F5", ontap: "showPopup"},
+				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-6", name: "F6", ontap: "showPopup"},
+				{kind: "Control", tag: "br"},
+				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-7", name: "F7", ontap: "showPopup"},
+				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-8", name: "F8", ontap: "showPopup"},
+				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-9", name: "F9", ontap: "showPopup"},
+				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-10", name: "F10", ontap: "showPopup"},
+				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-11", name: "F11", ontap: "showPopup"},
+				{kind: "onyx.Button", classes: "ares_phobos_esb", content: "F-12", name: "F12", ontap: "showPopup"}
+			]},
+		
 		{tag: "br"},
 		{name: "close", kind: "onyx.Button", content: "Close", ontap: "doClose"},
-		{name: "change", kind: "onyx.Button", content: "OK/Save", ontap: "oksave"}
+		{name: "change", kind: "onyx.Button", content: "OK/Save", ontap: "oksave"},
+		
+		{kind: "onyx.Popup", modal: true, floating: true, centered: true, canGenerate: false, name: "modalPopup", components: [
+			{kind: "Control", classes: "onyx-toolbar-inline", name: "altInputbox", components: [
+					{kind: "onyx.InputDecorator", classes: "phobos_editorsettings_buttoninput", name: "inputDecorator", components: [
+							{kind: "onyx.TextArea", placeholder: "Enter text here", classes: "alt_button_input", name: "textArea", onchange: "inputChanged"}
+						]},
+					{kind: "Control", tag: "br"},
+					{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
+					{kind: "onyx.Button", content: "OK/Save", name: "oksave", ontap: "inputChanged"}
+				]},
+			{kind: "Control", tag: "br"}
+		]}
 	],
 	create: function() {
 		this.inherited(arguments);
@@ -146,6 +179,26 @@ enyo.kind({
 	fontSize: function(inSender, inEvent) {
 		this.fSize = inEvent.selected.content + "px";
 		this.doFontsizeChange();
+	},
+	
+	showPopup: function(inSender) {
+		this.key = inSender.name;
+		this.$.modalPopup.show();
+	},
+	
+	closeModalPopup: function(inSender) {
+		this.$.modalPopup.hide();
+	},	
+	
+	inputChanged: function(inSender, inEvent) {
+		var key = this.key;
+	
+		if (/^F\d+/.test(key)) {
+			localStorage[key] = inSender.getValue();
+		}
+			
+		this.$.modalPopup.hide();
+		
 	}
 
 });

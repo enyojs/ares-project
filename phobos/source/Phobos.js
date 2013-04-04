@@ -34,7 +34,8 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll"},
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll",
+							onF1: "f1", onF2: "f2", onF3: "f3", onF4: "f4", onF5: "f5", onF6: "f6", onF7: "f7", onF8: "f8", onF9: "f9", onF10: "f10", onF11: "f11", onF12: "f12"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -800,6 +801,66 @@ enyo.kind({
 	tabSize: function() {
 		var ts = this.$.ace.editorSettingsPopup.Tsize;
 		this.$.ace.setTabSize(ts);
+	},
+	
+	f1: function(inSender, inEvent) {
+		this.f1key = localStorage.F1;
+		this.$.ace.insertAtCursor(this.f1key);
+	},
+	
+	f2: function(inSender, inEvent) {
+		this.f2key = localStorage.F2;
+		this.$.ace.insertAtCursor(this.f2key);
+	},
+	
+	f3: function(inSender, inEvent) {
+		this.f3key = localStorage.F3;	
+		this.$.ace.insertAtCursor(this.f3key);
+	},
+	
+	f4: function(inSender, inEvent) {
+		this.f4key = localStorage.F4;	
+		this.$.ace.insertAtCursor(this.f4key);
+	},
+	
+	f5: function(inSender, inEvent) {
+		this.f5key = localStorage.F5;
+		this.$.ace.insertAtCursor(this.f5key);
+	},
+	
+	f6: function(inSender, inEvent) {
+		this.f6key = localStorage.F6;	
+		this.$.ace.insertAtCursor(this.f6key);
+	},
+	
+	f7: function(inSender, inEvent) {
+		this.f7key = localStorage.F7;
+		this.$.ace.insertAtCursor(this.f7key);
+	},
+	
+	f8: function(inSender, inEvent) {
+		this.f8key = localStorage.F8;
+		this.$.ace.insertAtCursor(this.f8key);
+	},
+		
+	f9: function(inSender, inEvent) {
+		this.f9key = localStorage.F9;
+		this.$.ace.insertAtCursor(this.f9key);
+	},
+	
+	f10: function(inSender, inEvent) {
+			this.f10key = localStorage.F10;
+		this.$.ace.insertAtCursor(this.f10key);
+	},
+	
+	f11: function(inSender, inEvent) {
+		this.f11key = localStorage.F11;
+		this.$.ace.insertAtCursor(this.f11key);
+	},
+	
+	f12: function(inSender, inEvent) {
+		this.f12key = localStorage.F12;
+		this.$.ace.insertAtCursor(this.f12key);
 	},
 	
 	//* Trigger an Ace undo and bubble updated code

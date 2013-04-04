@@ -21,6 +21,18 @@ enyo.kind({
 		onSave: "",
 		onAutoCompletion: "",
 		onFind: "",
+		onF1: "",
+		onF2: "",
+		onF3: "",
+		onF4: "",
+		onF5: "",
+		onF6: "",
+		onF7: "",
+		onF8: "",
+		onF9: "",
+		onF10: "",
+		onF11: "",
+		onF12: "",
 		/// FIXME just add these for now
 		onSetBreakpoint: "",
 		onClearBreakpoint: ""
@@ -81,6 +93,90 @@ enyo.kind({
 			name: "find",
 			bindKey: {win: "Ctrl-F", mac: "Command-F"},
 			exec: enyo.bind(this, "doFind")
+		});
+		
+				// Add keybinding for F1
+		commands.addCommand({
+			name: "f1",
+			bindKey: {win: "Ctrl-SHIFT-F1", mac: "Command-F1"},
+			exec: enyo.bind(this, "doF1")
+		});
+		
+		// Add keybinding for F2
+		commands.addCommand({
+			name: "f2",
+			bindKey: {win: "Ctrl-SHIFT-F2", mac: "Command-F2"},
+			exec: enyo.bind(this, "doF2")
+		});
+		
+		// Add keybinding for F3
+		commands.addCommand({
+			name: "f3",
+			bindKey: {win: "Ctrl-SHIFT-F3", mac: "Command-F3"},
+			exec: enyo.bind(this, "doF3")
+		});
+		
+		// Add keybinding for F4
+		commands.addCommand({
+			name: "f4",
+			bindKey: {win: "Ctrl-SHIFT-F4", mac: "Command-F4"},
+			exec: enyo.bind(this, "doF4")
+		});
+		
+		// Add keybinding for F5
+		commands.addCommand({
+			name: "f5",
+			bindKey: {win: "Ctrl-SHIFT-F5", mac: "Command-F5"},
+			exec: enyo.bind(this, "doF5")
+		});
+		
+		// Add keybinding for F6
+		commands.addCommand({
+			name: "f6",
+			bindKey: {win: "Ctrl-SHIFT-F6", mac: "Command-F6"},
+			exec: enyo.bind(this, "doF6")
+		});
+		
+		// Add keybinding for F7
+		commands.addCommand({
+			name: "f7",
+			bindKey: {win: "Ctrl-SHIFT-F7", mac: "Command-F7"},
+			exec: enyo.bind(this, "doF7")
+		});
+		
+		// Add keybinding for F8
+		commands.addCommand({
+			name: "f8",
+			bindKey: {win: "Ctrl-SHIFT-F8", mac: "Command-F8"},
+			exec: enyo.bind(this, "doF8")
+		});
+		
+		// Add keybinding for F9
+		commands.addCommand({
+			name: "f9",
+			bindKey: {win: "Ctrl-SHIFT-F9", mac: "Command-F9"},
+			exec: enyo.bind(this, "doF9")
+		});
+		
+		// Add keybinding for F10
+		commands.addCommand({
+			name: "f2",
+			bindKey: {win: "Ctrl-SHIFT-F10", mac: "Command-F10"},
+			exec: enyo.bind(this, "doF10")
+		});
+		
+		// Add keybinding for F11
+		commands.addCommand({
+			name: "f11",
+			bindKey: {win: "Ctrl-SHIFT-F11", mac: "Command-F11"},
+			exec: enyo.bind(this, "doF11")
+		});
+		
+		// Add keybinding for F12
+		commands.addCommand({
+			name: "f12",
+			bindKey: {win: "Ctrl-SHIFT-F12", mac: "Command-F12"},
+			exec: enyo.bind(this, "doF12")
 		});
 	},
 	/**
