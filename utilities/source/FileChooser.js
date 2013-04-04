@@ -48,7 +48,7 @@ enyo.kind({
 		{kind: "FittableRows", classes: "onyx-popup ares-filechooser", components: [
 			{kind: "Control", tag: "span", classes: "ares-title ares-filechooser-header", content: "Select a directory", name: "header"},
 			{kind: "FittableColumns", classes: "onyx-light", fit: true, components: [
-				{kind: "ProviderList", selector: ["type", "filesystem"], name: "providerList", header: "Toto", onSelectProvider: "handleSelectProvider"},
+				{kind: "ProviderList", selector: ["type", "filesystem"], name: "providerList", header: "Sources", onSelectProvider: "handleSelectProvider"},
 				{kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "_selectFile", onFolderClick: "_selectFolder", onNewFolderConfirm: "createFolder"}
 			]},
 			{kind: "FittableColumns", classes: "onyx-light ares-filechooser-footer", isContainer: true, components: [
