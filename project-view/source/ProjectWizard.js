@@ -382,7 +382,7 @@ enyo.kind({
 				this.doAddProjectInList({
 					name: projectData.name || parentDir.name,
 					folderId: parentDir.id,
-					service: this.selectedDir.service
+					service: this.selectedFile.service
 				});
 			});
 	},
