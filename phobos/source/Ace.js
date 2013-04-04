@@ -87,7 +87,7 @@ enyo.kind({
 		// Add keybinding for Word wrap
 		commands.addCommand({
 			name: "Wordwrap",
-			bindKey: {win: "Alt-W", mac: "Command-W"},
+			bindKey: {win: "Alt-W", mac: "Alt-W"},
 			exec: enyo.bind(this, "doWordwrap")
 		});
 	},
