@@ -142,10 +142,6 @@ body {
 	padding: 19px;
 	box-sizing: border-box;
 }
-.ares_pview_popup {
-	width: 600px;
-	height: 400px;
-}
 
 .ares_projectList {
 	width: 370px;
@@ -174,10 +170,6 @@ body {
 	display: inline;
 	font-weight: bold;
 	padding-right: 4px;
-}
-
-.ares_projectview_check {
-	margin-right: 16px;
 }
 
 .phobos-find-label {
@@ -298,6 +290,7 @@ body {
 .onyx-radiobutton {
 	font-size: 13px;
 	padding-top: 8px 4px;
+	margin-bottom: 15px;
 }
 .onyx-toolbar .onyx-button {
 	height: 28px;
@@ -305,4 +298,47 @@ body {
 .onyx-item {
 	padding:10px;
 	line-height: 13px;
+}
+
+.onyx-input-decorator {
+	background-image: url("../ares/assets/images/bgInput.png");
+	background-repeat: repeat-x;
+	border-radius: 0.5em;
+}
+
+.onyx-input-decorator.onyx-focused {
+	background-image: none;
+}
+
+.ares-bordered-toolbar{
+	margin-top:8px;
+	text-align: right;
+}
+
+.ares-toolbar {
+	text-align: right;
+	background-image: none;
+	background-color: #4C4C4C;
+	border: none;
+}
+
+.ares-label {
+	margin-right: 4px;
+	padding-left: 8px;
+}
+.ares-bullet {
+    width: 11px;
+    padding-top: 11px;
+    background-image:url("../ares/assets/images/bullet.png");
+}
+.ares-bullet-label {
+	margin: 0 4px;
+}
+
+.ares-row {
+	padding: 3px 0;
+}
+
+.enyo-fittable-columns-layout  > [id*="ares_projectView_projectWizardModify"]{
+	vertical-align: middle;
 }
