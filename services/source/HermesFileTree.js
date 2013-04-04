@@ -544,7 +544,7 @@ enyo.kind({
 		if (this.debug) this.log("Creating new folder "+name+" into folderId="+folderId);
 		this.$.service.createFolder(folderId, name)
 			.response(this, function(inSender, inResponse) {
-				if (this.debug) this.log("newFolderConfirm Response: "+inResponse);
+				if (this.debug) this.log("newFolderConfirm Response: ", inResponse);
 				this.delayedRefresh("folder creation done").go(inResponse) ;
 			})
 			.error(this, function(inSender, inError) {
