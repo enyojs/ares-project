@@ -252,49 +252,69 @@ function BdPhoneGap(config, next) {
 
 	function deploy(req, res, next) {
 		console.log("deploy(): started");
-		// Execute the deploy.js script that comes with Enyo.
-		// 
-		// TODO: scalable processing is better acheived using
-		// VM <http://nodejs.org/api/vm.html> rather than
-		// child-processes
-		// <http://nodejs.org/api/child_process.html>.
-		var params = [ '--verbose',
-			       '--packagejs', path.join(req.appDir.source, 'package.js'),
-			       '--source', req.appDir.source,
-			       '--enyo', config.enyoDir,
-			       '--build', req.appDir.build,
-			       '--out', req.appDir.deploy,
-			       '--less'];
-		console.log("deploy(): Running: '", deployScript, params.join(' '), "'");
-		var child = child_process.fork(deployScript, params, {
-			silent: false
-		});
-		child.on('message', function(msg) {
-			console.log("deploy():", msg);
-			if (msg.error) {
-				console.error("child-process error: ", util.inspect(msg.error));
-				child.errMsg = msg.error;
-			} else {
-				console.error("unexpected child-process message msg=", util.inspect(msg));
-			}
-		});
-		child.on('exit', function(code, signal) {
-			if (code !== 0) {
-				next(new HttpError(child.errMsg || ("child-process failed: '"+ child.toString() + "'")));
-			} else {
-				console.log("deploy(): completed");
+
+		var appManifest = path.join(req.appDir.source, 'package.js');
+		fs.stat(appManifest, function(err) {
+			if (err) {
+				// No top-level package.js: this is
+				// not a Bootplate-based Enyo
+				// application & we have no clue on
+				// wether it is even an Enyo
+				// application, so we cannot `deploy`
+				// it easily.
+				console.log("no '" + appManifest + "': not an Enyo Bootplate-based application");
+				req.appDir.zipRoot = req.appDir.source;
 				next();
+			} else {
+				req.AppDir.zipRoot = req.appDir.deploy;
+
+				// Execute the deploy.js script that comes with Enyo.
+				// 
+				// TODO: scalable processing is better acheived using
+				// VM <http://nodejs.org/api/vm.html> rather than
+				// child-processes
+				// <http://nodejs.org/api/child_process.html>.
+				var params = [ '--verbose',
+					       '--packagejs', path.join(req.appDir.source, 'package.js'),
+					       '--source', req.appDir.source,
+					       '--enyo', config.enyoDir,
+					       '--build', req.appDir.build,
+					       '--out', req.appDir.deploy,
+					       '--less'];
+				console.log("deploy(): Running: '", deployScript, params.join(' '), "'");
+				var child = child_process.fork(deployScript, params, {
+					silent: false
+				});
+				child.on('message', function(msg) {
+					console.log("deploy():", msg);
+					if (msg.error) {
+						console.error("child-process error: ", util.inspect(msg.error));
+						child.errMsg = msg.error;
+					} else {
+						console.error("unexpected child-process message msg=", util.inspect(msg));
+					}
+				});
+				child.on('exit', function(code, signal) {
+					if (code !== 0) {
+						next(new HttpError(child.errMsg || ("child-process failed: '"+ child.toString() + "'")));
+					} else {
+						console.log("deploy(): completed");
+						next();
+					}
+				});
 			}
 		});
 	}
 
 	function zip(req, res, next) {
+		console.log("zip(): Zipping '" + req.appDir.zipRoot + "'");
+
 		//console.log("zip(): ");
 		req.zip = {};
 		req.zip.path = path.join(req.appDir.root, "app.zip");
 		req.zip.stream = zipstream.createZip({level: 1});
 		req.zip.stream.pipe(fs.createWriteStream(req.zip.path));
-		_walk.bind(this)(req.appDir.deploy, "" /*prefix*/, function() {
+		_walk.bind(this)(req.appDir.zipRoot, "" /*prefix*/, function() {
 			try {
 				req.zip.stream.finalize(function(written){
 					console.log("finished ", req.zip.path);
