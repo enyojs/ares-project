@@ -103,8 +103,7 @@ enyo.kind({
 			]}
 		]},
 
-		// FIXME: there should be an HTML/CSS way to avoid using FittableStuff...
-		{name: "toolbarId", kind: "onyx.Toolbar", components: [
+		{name: "toolbarId", classes: "ares-bordered-toolbar", kind: "onyx.Toolbar", components: [
 			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "doDone"},
 			{name: "ok", kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "confirmTap"}
 		]},

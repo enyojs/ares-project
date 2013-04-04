@@ -13,28 +13,23 @@ enyo.kind({
 		onConfigure: ""
 	},
 	components: [
-		{tag: 'table', components: [
-			{tag: "tr" , components: [
-				{tag: "td" , content: "AppId: "},
-				{tag: 'td', attributes: {colspan: 1}, components:[
-					{kind: "onyx.InputDecorator", components: [
-						{kind: "Input", name: "pgConfId",
-						 attributes: {title: "unique identifier, assigned by build.phonegap.com"}
-						}
-					]}
-				]},
-				{tag: "td" , content: "Icon URL: "},
-				{tag: 'td', attributes: {colspan: 2}, components:[
-					{kind: "onyx.InputDecorator", components: [
-						{kind: "Input", name: "pgIconUrl",
-						 attributes: {title: "Relative location of the application icon. Defaults to Enyo icon."}
-						}
-					]}
-				]}
+		{kind: "FittableColumns", components: [
+			{kind: "Control", classes: "ares-label", content: "AppId:"},
+			{kind: "onyx.InputDecorator", components: [
+				{kind: "Input", name: "pgConfId",
+					attributes: {title: "unique identifier, assigned by build.phonegap.com"}
+				}
+			]},
+			{kind: "Control", classes: "ares-label", content: "Icon URL:"},
+			{kind: "onyx.InputDecorator", components: [
+				{kind: "Input", name: "pgIconUrl",
+					attributes: {title: "Relative location of the application icon. Defaults to Enyo icon."}
+				}
 			]}
 		]},
+
 		{content: "Targets:", components: [
-			{kind: "FittableColumns", components: [
+			{ kind: "onyx.Toolbar", classes: "ares-toolbar", components: [
 				{kind: "onyx.Button", content: "Refresh...", ontap: "refresh"},
 				{kind: "onyx.Button", content: "Configure", ontap: "configure"}
 			]}
@@ -50,6 +45,7 @@ enyo.kind({
 		enyo.forEach(this.targets, function(target) {
 			this.$.targetsRows.createComponent({
 				name: target.id,
+				classes:"ares-row",
 				kind: "Phonegap.ProjectProperties.Target",
 				targetId: target.id,
 				targetName: target.name,
@@ -143,12 +139,12 @@ enyo.kind({
 	},
 	components: [
 		{kind: "FittableColumns", components: [
-			{kind: "onyx.InputDecorator", components: [
-				{name: "targetChkBx", kind: "onyx.Checkbox", classes: "ares_projectview_check", onchange: "updateDrawer"},
-				{name: "targetLbl", content: ""},
-				{name: "targetDrw", orient: "h", kind: "onyx.Drawer", open: false, components: [
+			{components: [
+				{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "updateDrawer"}
+			]},
+			{name: "targetLbl", classes:"ares-label", content: ""},
+			{name: "targetDrw", orient: "h", kind: "onyx.Drawer", open: false, components: [
 					
-				]}
 			]}
 		]}
 	],
@@ -242,7 +238,8 @@ enyo.kind({
 		provider: undefined
 	},
 	components: [
-		{content: "Signing Key: "},
+		{tag:"span", classes: "ares-bullet"},
+		{classes : "ares-bullet-label", content: "Signing Key: "},
 		{name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey", components: [
 			{kind: "onyx.PickerButton", content: "Choose..."},
 			{kind: "onyx.Picker", name: "keys"}
@@ -288,7 +285,6 @@ enyo.kind({
 				active: (key.id === this.activeKeyId)
 			});
 		}, this);
-		this.$.keys.render();
 	},
 	/**
 	 * @private
