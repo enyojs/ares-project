@@ -528,7 +528,7 @@ enyo.kind({
 					this.packageAppend,
 					function () {
 						// passing the id from response will make hermeFileTree select the new file
-						that.delayedRefresh("file creation done", inResponse[0].path).go(inResponse) ;
+						that.delayedRefresh("file creation done", inResponse[0].path).go(inResponse[0].id) ;
 					}
 				) ;
 			})
