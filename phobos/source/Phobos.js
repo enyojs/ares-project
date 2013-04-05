@@ -34,7 +34,7 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll"},
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -193,9 +193,9 @@ enyo.kind({
 				this.$.ace.highlightActiveLine = false;
 			}
 			this.$.ace.highlightActiveLineChanged();
-			this.$.ace.wordWrap = localStorage.wordwrap;
-
-			if(!this.$.ace.wordwrap || this.$.ace.wordWrap.indexOf("false") != -1){
+			
+			this.$.ace.wordWrap = localStorage.wordwrap;			
+			if(!this.$.ace.wordWrap || this.$.ace.wordWrap.indexOf("false") != -1 && this.$.ace.wordWrap !== "true"){
 				this.$.ace.wordWrap = false;
 			}
 			this.$.ace.wordWrapChanged();
@@ -791,6 +791,18 @@ enyo.kind({
 	changeWordWrap: function() {
 		this.$.ace.wordWrap = this.$.editorSettingsPopup.wordWrap;
 		this.$.ace.wordWrapChanged();
+	},
+	toggleww: function(){		
+		if(this.$.ace.wordWrap === "true" || this.$.ace.wordWrap === true){
+			this.$.ace.wordWrap = false;
+			this.$.ace.wordWrapChanged();
+			console.log("wee false");
+		}else{
+			this.$.ace.wordWrap = true;
+			this.$.ace.wordWrapChanged();
+		}
+		
+
 	},
 	changeFont: function(){
 		var fs = this.$.editorSettingsPopup.fSize;
