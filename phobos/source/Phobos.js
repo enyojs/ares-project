@@ -796,7 +796,6 @@ enyo.kind({
 		if(this.$.ace.wordWrap === "true" || this.$.ace.wordWrap === true){
 			this.$.ace.wordWrap = false;
 			this.$.ace.wordWrapChanged();
-			console.log("wee false");
 		}else{
 			this.$.ace.wordWrap = true;
 			this.$.ace.wordWrapChanged();
