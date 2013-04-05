@@ -38,7 +38,7 @@ enyo.kind({
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
-				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"}
+				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
