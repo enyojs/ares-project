@@ -81,15 +81,20 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>assertText</command>
-	<target><![CDATA[id=ares_phobos_toolbar]]></target>
-	<value><![CDATA[App.js
-SaveNew Kind
-Editor SettingsDesigner]]></value>
+	<command>assertTextPresent</command>
+	<target><![CDATA[File
+New Kind
+Editor SettingsDesigner]]></target>
+	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_phobos_saveButton]]></target>
+	<target><![CDATA[id=ares_phobos_button]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[ares_phobos_saveButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <!--following assertion because enable to save in phobos JIRA-2021-->
