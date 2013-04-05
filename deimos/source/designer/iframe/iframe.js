@@ -307,7 +307,13 @@ enyo.kind({
 		this.makeComponentsDragAndDrop(this.aresComponents);
 		
 		// Save reference to the parent instance currently rendered
-		this.parentInstance = this.$.client.createComponent({kind: inKind.name}).render();
+		this.parentInstance = this.$.client.createComponent({kind: inKind.name});
+		
+		// Mimic top-level app fitting (as if this was rendered with renderInto or write)
+		if (this.parentInstance.fit) {
+			this.parentInstance.addClass("enyo-fit enyo-clip");
+		}		
+		this.parentInstance.render();
 		
 		// Notify Deimos that the kind rendered successfully
 		this.kindUpdated();

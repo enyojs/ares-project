@@ -40,6 +40,22 @@ var ares = {
 		return dst;
 	},
 	/**
+	 * Extract the filename of the given path
+	 * @param {String} the path to extract the basename from
+	 * @return the path basename
+	 */
+	basename: function(path) {
+		return path.replace(/\\/g,'/').replace( /.*\//, '' );
+	},
+	/**
+	 * Extract the containing folder of the given path
+	 * @param {String} the path to extract the dirname from
+	 * @return the path dirname
+	 */
+ 	dirname: function (path) {
+		return path.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');;
+	},
+	/**
 	 * Decode an 'application/x-www-urlencoded' string into an {Object}
 	 * 
 	 * @param {String} s the string to parse

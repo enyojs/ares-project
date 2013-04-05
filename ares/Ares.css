@@ -28,6 +28,24 @@ body {
 }
 
 /**/
+
+.ares-filechooser {
+	height: 400px;
+	width: 600px;
+}
+
+.ares-filechooser-header {
+	padding: 0 0.5em;
+	vertical-align: middle;
+}
+
+.ares-filechooser-footer {
+	padding: 0 0.5em;
+	vertical-align: middle;
+}
+
+/**/
+
 .ares-groupbox-item-key {
 	padding: 0.5em;
 }
@@ -259,6 +277,13 @@ body {
 }
 .onyx-popup {
 	font-size: 13px;
+}
+.onyx-input-decorator > input {
+	font-size: 13px;
+}
+.onyx-input-decorator {
+	padding:2px 8px;
+	margin:0px;
 }
 .onyx-button {
 	font-size: 13px;
