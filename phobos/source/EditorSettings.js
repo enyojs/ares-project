@@ -182,8 +182,7 @@ enyo.kind({
 	fontSize: function(inSender, inEvent) {
 		this.fSize = inEvent.selected.content + "px";
 		this.doFontsizeChange();
-	},
-	
+	},	
 	
 	inputChanged: function(inSender, inEvent) {
 		var key = this.key;	
@@ -191,6 +190,11 @@ enyo.kind({
 			localStorage[key] = inSender.getValue();
 		}			
 		this.$.modalPopup.hide();		
-	}
+	},
+	
+	showPopup: function(inSender) {
+		this.key = inSender.name;
+		this.$.modalPopup.show();
+	},
 
 });
