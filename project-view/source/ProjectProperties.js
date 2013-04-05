@@ -22,92 +22,83 @@ enyo.kind({
 			{content: "Project", serviceId: "project", active: true, attributes: {title: 'project attributes...'}},
 			{content: "Preview", serviceId: "preview", attributes: {title: 'project preview parameters...'}}
 		]},
-		{name: "projectDrawer", kind: "onyx.Drawer", open:true, components: [
-			{tag: 'table', components: [
-				{tag: "tr" , components: [
-					 {tag: "td" , content: "Name: "},
-					 {tag: 'td', components:[
-						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", defaultFocus: true, name: "projectName"}
-						  ]}
-					 ]},
-					 {tag: 'td', content: "Title: "},
-					 {tag: "td" , components: [
-						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", defaultFocus: true, name: "projectTitle"}
-						   ]}
-					  ]}
-				]},
-				{tag: "tr" , components: [
-					 {tag: "td" , content: "Version: "},
-					 {tag: 'td', components:[
-						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", defaultFocus: true, name: "projectVersion"}
-						  ]}
-					 ]},
-					 {tag: 'td', content: "Id: "},
-					 {tag: "td" , components: [
-						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", defaultFocus: true, name: "projectId",
-								attributes: {title: "Application ID in reverse domain-name format: com.example.apps.myapp"}}
-						   ]}
-					  ]}
-				]},
-				{tag: "tr" , components: [
-					 {tag: "td" , content: "Author name: "},
-					 {tag: 'td', attributes: {colspan: 1}, components:[
-						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", name: "projectAuthor",
-								attributes: {title: "Vendor / Committer Name"}
-							   }
-						   ]}
-					 ]},
-					 {tag: "td" , content: "Contact: "},
-					 {tag: 'td', attributes: {colspan: 2}, components:[
-						  {kind: "onyx.InputDecorator", components: [
-							   {kind: "Input", name: "projectContact",
-								attributes: {title: "mail address or home page of the author"}
-							   }
-						   ]}
-					 ]}
-				]},
-				{tag: "tr" , name:'directoryEntry', canGenerate:false, components: [
-					 {tag: "td", content: "Directory: "},
-					 {tag: 'td', attributes: {colspan: 3}, content: "", name: "projectDirectory" }
-				]}
-			]},
-			{kind: "enyo.FittableColumns", name: "servicesList"},
-			{kind: "enyo.FittableColumns", name: "templatesEntry", showing: false, components: [
-				{kind: "Control", content: "Template:"},
-				{kind: "onyx.PickerDecorator", fit: true, components: [
-					{name: "templateButton", kind: "onyx.PickerButton", fit: true},
-					{kind: "onyx.FlyweightPicker", name: "templatePicker", components: [
-						{name: "template"}
-					], onSetupItem: "templateSetupItem", onSelect: "templateSelected"}
-				]}
-			]}
-		]},
-
-		{name: "previewDrawer", kind: "onyx.Drawer", open: false, components: [
-			{tag: 'table', components: [
-				{tag: "tr" , components: [
-					{tag: "td" , content: "top application file: "},
-					{tag: 'td', attributes: {colspan: 1}, components:[
+		{name: "projectDrawer", kind: "onyx.Drawer", open:true, components: [		
+			{kind:"FittableColumns", components: [
+				{kind:"FittableRows", components: [
+					{classes: "ares-row", components: [
+						{tag:"label", classes : "ares-fixed-label", content: "Name: "},
 						{kind: "onyx.InputDecorator", components: [
-							{kind: "Input", name: "ppTopFile",
-							attributes: {title: 'top file of your application. Typically index.html'}
-							}
+							{kind: "Input", defaultFocus: true, name: "projectName"}
+						]}
+					]},
+					{classes: "ares-row", components: [
+						{tag:"label", classes : "ares-fixed-label", content:"Version: "},
+						{kind: "onyx.InputDecorator", components: [
+							{kind: "Input", defaultFocus: true, name: "projectVersion"}
+						]}
+					]},
+					{classes: "ares-row", components: [
+						{tag:"label", classes : "ares-fixed-label", content:"Author name: "},
+					  	{kind: "onyx.InputDecorator", components: [
+						   {kind: "Input", name: "projectAuthor", attributes: {title: "Vendor / Committer Name"}}
+					  	]}
+
+					]},
+					{classes:"ares-row", name: "templatesEntry", showing: false, components: [
+						{tag:"label", classes:"ares-fixed-label", content:"Template:"},
+						{kind: "onyx.PickerDecorator", fit: true, components: [
+							{name: "templateButton", classes:"ares-fixed-input", kind: "onyx.PickerButton", fit: true},
+							{kind: "onyx.FlyweightPicker", name: "templatePicker", components: [
+								{name: "template"}
+							], onSetupItem: "templateSetupItem", onSelect: "templateSelected"}
 						]}
 					]}
+				]},
+				{kind:"FittableRows", components: [
+					{classes: "ares-row", components: [
+						{tag:"label", classes : "ares-fixed-label", content: "Title: "},
+				  		{kind: "onyx.InputDecorator", components: [
+					   		{kind: "Input", defaultFocus: true, name: "projectTitle"}
+				   		]}
+					]},
+					{classes: "ares-row", components: [
+						{tag:"label", classes : "ares-fixed-label", content:"Id: "},
+				  		{kind: "onyx.InputDecorator", components: [
+					   		{kind: "Input", defaultFocus: true, name: "projectId",
+							attributes: {title: "Application ID in reverse domain-name format: com.example.apps.myapp"}}
+				   		]}
+					]},
+					{classes: "ares-row", components: [
+						{tag:"label", classes : "ares-fixed-label", content:"Contact: "},
+					   	{kind: "onyx.InputDecorator", components: [
+						   {kind: "Input", name: "projectContact",
+							attributes: {title: "mail address or home page of the author"}
+						   }
+					   ]}
+					]}
+				]}				
+			]},
+			{name:'directoryEntry', canGenerate:false, components: [
+				 {content: "Directory: "},
+				 {content: "", name: "projectDirectory" }
+			]},
+			{tag:"p", classes:"break"},
+			{kind: "enyo.FittableColumns", classes:"ares-row", name: "servicesList"},
+		]},
+		{name: "previewDrawer", kind: "onyx.Drawer", open: false, components: [
+			{kind: 'FittableColumns', classes:"ares-row", components: [
+				{tag: "label" , classes:"ares-fixed-label more-width", content: "Top application file: "},
+				{kind: "onyx.InputDecorator", components: [
+					{kind: "Input", name: "ppTopFile",
+						attributes: {title: 'top file of your application. Typically index.html'}
+					}
 				]}
 			]}
 		]},
-
 		{name: "toolbarId", classes: "ares-bordered-toolbar", kind: "onyx.Toolbar", components: [
 			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "doDone"},
 			{name: "ok", kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "confirmTap"}
 		]},
-
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
@@ -144,7 +135,7 @@ enyo.kind({
 				name: service.id + 'Drawer',
 				kind: "onyx.Drawer",
 				open: false
-			});
+			},{addBefore: this.$.toolbarId});
 			service.panel = drawer.$[service.id] || drawer.createComponent({
 				name: service.id,
 				kind: service.kind
@@ -160,10 +151,6 @@ enyo.kind({
 			});
 			if (!service.frame) {
 				service.frame = this.$.servicesList.$[service.id + 'Frame'];
-				service.frame.createComponent({
-					tag: 'span',
-					content: service.name
-				});
 				service.checkBox = service.frame.createComponent({
 					kind: 'onyx.Checkbox',
 					name: service.id + 'CheckBox',
@@ -171,6 +158,11 @@ enyo.kind({
 					serviceId: service.id
 				}, {
 					owner: this
+				});
+				service.frame.createComponent({
+					tag: 'label',
+					classes: 'ares-label',
+					content: service.name
 				});
 			}
 
@@ -315,7 +307,6 @@ enyo.kind({
 		return true;
 	},
 	setTemplateList: function(templates) {
-		this.$.templateButton.applyStyle("width", "20em");
 		this.templates = [this.TEMPLATE_NONE];
 		enyo.forEach(templates, function(item) {
 			this.templates.push(item.id);
