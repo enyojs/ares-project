@@ -144,7 +144,7 @@ enyo.kind({
 				name: service.id + 'Drawer',
 				kind: "onyx.Drawer",
 				open: false
-			},{addBefore: this.$.toolbarId});
+			});
 			service.panel = drawer.$[service.id] || drawer.createComponent({
 				name: service.id,
 				kind: service.kind
