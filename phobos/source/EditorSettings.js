@@ -151,7 +151,6 @@ enyo.kind({
 	
 	right: function(inSender, inEvent){
 		this.rightpane = inEvent.value;	
-		console.log(this.rightpane);
 	},
 
 	oksave: function() {
