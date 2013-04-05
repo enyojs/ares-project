@@ -60,8 +60,8 @@ enyo.kind({
 					{content: $L("As") + ":", fit: true},
 					{name: "selectedName", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("File"), selectOnFocus: true, onchange: "updateSelectedName"}
 				]},
-				{name: "cancelButton", kind: "onyx.Button", classes: "onyx-negative", content: $L("Cancel"), ontap: "cancel"},
-				{name: "confirmButton", kind: "onyx.Button", classes: "onyx-affirmative", content: $L("OK"), ontap: "confirm"}
+				{name: "cancel", kind: "onyx.Button", classes: "onyx-negative", content: $L("Cancel"), ontap: "cancel"},
+				{name: "confirm", kind: "onyx.Button", classes: "onyx-affirmative", content: $L("OK"), ontap: "confirm"}
 			]}
 		]}
 	],
