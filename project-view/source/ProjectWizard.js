@@ -13,7 +13,7 @@ enyo.kind({
 		onHideWaitPopup: ""
 	},
 	handlers: {
-		onDirectorySelected: "prepareShowProjectPropPopup",
+		onFileChosen: "prepareShowProjectPropPopup",
 		onModifiedConfig: "createProject" ,
 		// can be canceled by either of the included components
 		onDone: "hideMe"
@@ -21,7 +21,7 @@ enyo.kind({
 
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget"},
-		{kind: "SelectDirectoryPopup", canGenerate: false, name: "selectDirectoryPopup"},
+		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", folderChooser: true},
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"}
 	],
 	debug: false,
@@ -46,10 +46,14 @@ enyo.kind({
 	// Step 2: once the directory is selected by user, show the project properties popup
 	// Bail out if a project.json file already exists
 	prepareShowProjectPropPopup: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		if (!inEvent.file) {
+			this.hideMe();
+			return;
+		}
 
 		var propW = this.$.propertiesWidget;
-		this.selectedServiceId = inEvent.serviceId;
-		this.selectedDir = inEvent.directory;
+		this.selectedDir = inEvent.file;
 		propW.setupCreate();
 		propW.setTemplateList([]);		// Reset template list
 
@@ -267,8 +271,7 @@ enyo.kind({
 		this.doAddProjectInList({
 			name: this.projectName,
 			folderId: this.selectedDir.id,
-			service: this.selectedDir.service,
-			serviceId: this.selectedServiceId
+			service: this.selectedDir.service
 		});
 	},
 
@@ -347,7 +350,7 @@ enyo.kind({
  */
 enyo.kind({
 	name: "ProjectWizardScan",
-	kind: "SelectDirectoryPopup",
+	kind: "Ares.FileChooser",
 	modal: true,
 	centered: true,
 	floating: true,
@@ -358,7 +361,7 @@ enyo.kind({
 		onAddProjectInList: ""
 	},
 	handlers: {
-		onDirectorySelected: "searchProjects"
+		onFileChosen: "searchProjects"
 	},
 	debug: false,
 
@@ -381,15 +384,19 @@ enyo.kind({
 				this.doAddProjectInList({
 					name: projectData.name || parentDir.name,
 					folderId: parentDir.id,
-					service: this.selectedDir.service,
-					serviceId: this.selectedServiceId
+					service: this.selectedFile.service
 				});
 			});
 	},
 
 	searchProjects: function (inSender, inEvent) {
-		var folderId = inEvent.directory.id ;
-		var service = inEvent.directory.service;
+		if (!inEvent.file) {
+			this.hide();
+			return;
+		}
+
+		var folderId = inEvent.file.id ;
+		var service = inEvent.file.service;
 
 		var hft = this.$.hermesFileTree ;
 

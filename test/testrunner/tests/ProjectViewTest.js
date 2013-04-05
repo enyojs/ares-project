@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "ProjectViewTest",
 	kind: "Ares.TestSuite",
-	debug: true,
+	debug: false,
 	registry: null,
 	home: null,
 
@@ -67,7 +67,7 @@ enyo.kind({
 			if (this.debug) enyo.log("testHandleSelectProvider: handleSelectProvider called") ;
 			dirPopup.handleSelectProvider(this, {service: myService, callBack: userSelectDir});
 		} else {
-			this.finish("SelectDirectoryPopup: "+this.aresObj.$.projectView.$.projectWizardCreate.$.SelectDirectoryPopup+ " is not available!");
+			this.finish("Ares.FileChooser: "+this.aresObj.$.projectView.$.projectWizardCreate.$.selectDirectoryPopup+ " is not available!");
 		}
 	},
 	statics: {

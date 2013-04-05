@@ -20,12 +20,12 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 * `PROPFIND` lists properties of a resource.  It recurses into the collections according to the `depth` parameter, which may be 0, 1, … etc plus `infinity`.  For example, the following directory structure:
 
-		$ tree 1/
-		1/
-		├── 0
-		└── 1
+		$ tree dir1/
+		dir1/
+		├── file0
+		└── file1
 
-… corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.  The node descriptor Object format is defined by [this JSON schema](../assets/schema/com.enyojs.ares.fs.node.schema.json).
+… corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.  The node descriptor Object format is defined by [this JSON schema](../assets/schema/com.enyojs.ares.fs.node.schema.json).  The `path` property is node location absolute to the Hermes file-system server root:  it uses URL notation: UNIX-type folder separator (`/`), not Windows-like (`\\`).
 
 		$ curl "http://127.0.0.1:9009/id/%2F?_method=PROPFIND&depth=10"
 		{
@@ -34,17 +34,25 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		    "name": "", 
 		    "children": [
 		        {
-		            "isDir": false, 
-		            "path": "/0", 
-		            "name": "0", 
-		            "id": "12efab780"
+		            "isDir": true, 
+		            "path": "/dir1", 
+		            "name": "dir1", 
+		            "id": "12efa4560"
+		            "children": [
+		                {
+		                    "isDir": false, 
+		                    "path": "/dir1/file0", 
+		                    "name": "file0", 
+		                    "id": "12efab780"
+		                }, 
+		                {
+		                    "isDir": false, 
+		                    "path": "/dir1/file1", 
+		                    "name": "file1", 
+		                    "id": "0ae12ef56"
+		                }
+		            ]
 		        }, 
-		        {
-		            "isDir": false, 
-		            "path": "/1", 
-		            "name": "1", 
-		            "id": "0ae12ef56"
-		        }
 		    ], 
 		    "id": "934789346956340",
 		    "versionTag": "af34ef45",

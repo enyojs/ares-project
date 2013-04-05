@@ -278,6 +278,15 @@ enyo.kind({
 			}
 		};
 	},
+	/**
+	 * Refresh the current {HermesFileTree} view, if applicable
+	 * @param {Object} changedFile
+	 */
+	refreshFile: function(changedFile) {
+		// FIXME: not cleanly implemented: should check wether
+		// a refresh is necessary first.
+		this.refreshFileTree();
+	},
 
 	/**
 	 *

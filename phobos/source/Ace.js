@@ -21,6 +21,7 @@ enyo.kind({
 		onSave: "",
 		onAutoCompletion: "",
 		onFind: "",
+		onWordwrap: "",
 		/// FIXME just add these for now
 		onSetBreakpoint: "",
 		onClearBreakpoint: ""
@@ -81,6 +82,13 @@ enyo.kind({
 			name: "find",
 			bindKey: {win: "Ctrl-F", mac: "Command-F"},
 			exec: enyo.bind(this, "doFind")
+		});
+		
+		// Add keybinding for Word wrap
+		commands.addCommand({
+			name: "Wordwrap",
+			bindKey: {win: "Alt-W", mac: "Alt-W"},
+			exec: enyo.bind(this, "doWordwrap")
 		});
 	},
 	/**

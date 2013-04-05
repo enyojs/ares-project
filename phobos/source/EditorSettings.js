@@ -56,7 +56,7 @@ enyo.kind({
 					{name: "themes", kind: "onyx.Picker", onSelect: "themeSelected", components: [
 					{content: "ambiance", active: true},
 					{content: "chaos"},
-					{content: "chrome "},
+					{content: "chrome"},
 					{content: "clouds"},
 					{content: "clouds_midnight"},
 					{content: "cobalt"},
