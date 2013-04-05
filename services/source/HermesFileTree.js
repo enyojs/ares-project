@@ -521,6 +521,10 @@ enyo.kind({
 		this.$.service.createFile(folderId, name, content)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("createFile response: ",inResponse);
+				// work-around ENYO-2133 and possible fallout
+				var fileId = Array.isArray(inResponse)      ? inResponse[0].id
+						   : typeof inResponse === 'object' ? inResponse.id
+						   :                                  inResponse ;
 				var that = this ;
 				this.packageMunge(
 					this.getFolderOfSelectedNode(),
@@ -528,7 +532,7 @@ enyo.kind({
 					this.packageAppend,
 					function () {
 						// passing the id from response will make hermeFileTree select the new file
-						that.delayedRefresh("file creation done", inResponse[0].path).go(inResponse[0].id) ;
+						that.delayedRefresh("file " + name + " creation done").go(fileId) ;
 					}
 				) ;
 			})
@@ -545,7 +549,11 @@ enyo.kind({
 		this.$.service.createFolder(folderId, name)
 			.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("newFolderConfirm Response: ", inResponse);
-				this.delayedRefresh("folder creation done").go(inResponse) ;
+				// work-around ENYO-2133 and possible fallout
+				var folderId = Array.isArray(inResponse)      ? inResponse[0].id
+							 : typeof inResponse === 'object' ? inResponse.id
+							 :                                  inResponse ;
+				this.delayedRefresh("folder creation done").go(folderId) ;
 			})
 			.error(this, function(inSender, inError) {
 				if (this.debug) this.log("Error: "+inError);
