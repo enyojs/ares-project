@@ -113,6 +113,7 @@ enyo.kind({
 		var nodeName = inProjectData.getName();
 		var folderId = inProjectData.getFolderId();
 		var service = inProjectData.getService();
+		var that = this ;
 		serverNode.hide();
 
 		// connects to a service that provides access to a
@@ -121,6 +122,14 @@ enyo.kind({
 			if (inError) {
 				this.showErrorPopup("Internal Error (" + inError + ") from filesystem service");
 			} else {
+				if (this.selectedNode) {
+					this.deselect(null, {data: this.selectedNode});
+				}
+				this.$.selection.clear();
+				this.selectedNode = null;
+				this.selectedFile = null;
+				this.enableDisableButtons();
+
 				// Get extra info such as project URL
 				var req = this.$.service.propfind(folderId, 0);
 				req.response(this, function(inSender, inValue) {
@@ -133,19 +142,12 @@ enyo.kind({
 					serverNode.file.isServer = true;
 
 					serverNode.setContent(nodeName);
-					this.refreshFileTree();
+					this.refreshFileTree(function(){ that.select(null, { data: serverNode } ) ; });
 				});
 				req.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");
 					this.showErrorPopup("Internal Error (" + inError + ") from filesystem service");
 				});
-				if (this.selectedNode) {
-					this.deselect(null, {data: this.selectedNode});
-				}
-				this.$.selection.clear();
-				this.selectedNode = null;
-				this.selectedFile = null;
-				this.enableDisableButtons();
 			}
 		})));
 		return this;
