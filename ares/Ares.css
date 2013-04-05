@@ -326,11 +326,28 @@ body {
 	margin-right: 4px;
 	padding-left: 8px;
 }
+
+.ares-fixed-label{
+	width: 82px;
+	padding: 0 4px;
+	text-align: right;
+	display: inline-block;
+}
+
+.more-width{
+	width: 118px;
+}
+
+.ares-fixed-input{
+	width: 160px;
+}
+
 .ares-bullet {
     width: 11px;
     padding-top: 11px;
     background-image:url("../ares/assets/images/bullet.png");
 }
+
 .ares-bullet-label {
 	margin: 0 4px;
 }
@@ -339,6 +356,11 @@ body {
 	padding: 3px 0;
 }
 
+p.break{
+	padding: 1px 0;
+}
+
+/*FIXME : valign : top in Fittables colums behavior */
 .enyo-fittable-columns-layout  > [id*="ares_projectView_projectWizardModify"]{
 	vertical-align: middle;
 }
