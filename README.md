@@ -11,6 +11,12 @@ The Ares project architecture is divided into several main pieces:
 	* **Phobos** - Document management
 	* **Deimos** - Visual designer
 * **Hermes Components** - Pluggable server-side components that provide interfaces to Ares clients for cloud-based services such as file storage and build services.  We're leveraging node.js, but Hermes components can use any server-side tech.
+* **Ares plugins** - Based on Hermes pluggable server-side components, Ares plugins can bring:  
+  * New server-side services with their own configuration
+  * The corresponding browser side code that will be loaded into the Ares IDE  
+See [Ares plugins](#ares-plugins) for more details.
+ 
+
 
 ### Current status
 
@@ -163,6 +169,46 @@ Here are a few references to create the necessary signing keys & distribution ce
 
 In order to use Dropbox as storage service for Ares, follow detailed setup instructions in `hermes/README.md`.  The Dropbox connector is not usable without following those instructions.
 
+### [Ares plugins](id:ares-plugins)
+
+Ares plugins can bring additional functionality and configuration to Ares.
+An Ares plugin must follow these rules to be loaded as a plugin:
+
+ * It must be installed in a directory under "_ares-project/node_modules_".  
+ * It must have an "_ide.json_" in its main directory, which:
+   * defines a new service entry
+   * can define the client side code to load in the browser
+   * can update some previously defined services (e.g.: modify/add project templates) 
+
+#### Startup of "node ide.js"
+
+At startup, the process "node ide.js":
+
+ * loads the file "ide.json"
+ * locates the files "node_modules/*/ide.json"
+ * sorts then into the lexicographical order
+ * merges them into the loaded configuration following the algorythm described in the next section.
+ * starts the services defined in the resulting loaded configuration
+
+#### [Merging Ares plugin configuration](id:merging-configuration)
+
+Ares plugin configuration are merged as follow:
+
+ * New service entries are simply added to the current configuration
+ * Service entries already existing in the current configuration are merged property by property as follow:
+ 	* New properties are simply added to the existing service entry
+ 	* For array, array entries are added to the corresponding array in the existing service
+ 	* For objects, object properties are applied to the corresponding object in the existing service
+ 	* Other properties of same type are applied to overwrite the corresponding entries in the existing service
+ 	* Properties with same name but different types are considered as errors and stop the startup process.
+ * Other top level properties are not yet taken into account
+
+#### Client side Ares plugin
+
+The client code of an Ares plugin is defined by the property "`pluginUrl`" of a service entry in "ide.json".  
+During the initialization process of Ares within the browser, the 'ServiceRegistry' will perform an 'enyo.load' of the javascript file (Usually a 'package.js' file) specified by the property "`pluginUrl`".  
+After being loaded, the new code must invoke `ServiceRegistry.instance.pluginReady();` to notify Ares that the client side code is ready.  
+See the function 'pluginReady' in the file 'services/source/ServiceRegistry.js'.
 
 ## Testing
 
