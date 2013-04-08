@@ -141,7 +141,7 @@ enyo.kind({
 	components: [
 			{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "updateDrawer"},
 			{tag:"label", name: "targetLbl", classes:"ares-label", content: ""},
-			{name: "targetDrw", classes: "ares-drawer", orient: "v", kind: "onyx.Drawer", open: false, components: [
+			{name: "targetDrw", orient: "v", kind: "onyx.Drawer", open: false, components: [
 					
 			]}
 	],
