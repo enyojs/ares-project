@@ -266,7 +266,7 @@ function BdPhoneGap(config, next) {
 				req.appDir.zipRoot = req.appDir.source;
 				next();
 			} else {
-				req.AppDir.zipRoot = req.appDir.deploy;
+				req.appDir.zipRoot = req.appDir.deploy;
 
 				// Execute the deploy.js script that comes with Enyo.
 				// 
