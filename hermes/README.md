@@ -54,7 +54,13 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
 
-* `GET` can be used only on files (not on folders).  The optional query parameter `versionTag` comes from a previous call to `GET` on the same file.  The HTTP header `x-ares-node	`(lowecase) contains a JSON-encoded version of the file's node descriptor (the one returned by `PROPFIND` for this file).  The n
+* `GET` can be used:
+    * ***`On files:`*** to get the content of a particular file.  
+    The optional query parameter `versionTag` comes from a previous call to `GET` on the same file.  	The HTTP header `x-ares-node` (lowecase) contains a JSON-encoded version of the file's node descriptor (the one returned by `PROPFIND` for this file).
+    * ***`On folders:`*** to get the content of all the files of the folder encoded in base64 into a single FormData.  
+    Other encoding may be added later on.
+
+	
 * `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.
   * `application/x-www-form-urlencoded` contains a single base64-encoded file in the form field named `content`.  The file name and location are provided by `{id}` and optionally `name` query parameter.
   * `multipart/form-data` follows the standard format.  For each file `filename` is interpreted relativelly to the folder `{id}` provided in the URL.  **Note:** To accomodate an issue with old Firefox releases (eg. Firefox 10), fields labelled `filename` overwrite the `filename` in their corresponding `file` fields.  See `fsBase#_putMultipart()` for more details.
