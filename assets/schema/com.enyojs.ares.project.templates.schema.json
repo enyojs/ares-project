@@ -1,0 +1,66 @@
+{
+	"description": "Project templates definition",
+	"type": "array",
+	"required": true,
+	"items": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "string",
+				"description": "Project template ID. ex: bootplate-2.1.1",
+				"format": "regex",
+				"pattern": "([a-zA-Z0-9-]+)",
+				"required": true
+			},
+			"description": {
+				"type": "string",
+				"description": "One-line description of the project template",
+				"format": "regex",
+				"pattern": "([a-zA-Z0-9- ]+)",
+				"required": true,
+				"default": "Enyo bootplate 2.1.1"
+			},
+			"zipfiles": {
+				"description": "List of zip files part of a project templates definition",
+				"type": "array",
+				"required": true,
+				"items": {
+					"type":"object",
+					"properties": {
+						"url": {
+							"type": "string",
+							"description": "filename or http url of the zip file",
+							"format": "regex",
+							"pattern": "([a-zA-Z0-9:-/]+)",
+							"required": true
+						},
+						"alternateUrl": {
+							"type": "string",
+							"description": "http url of the zip file",
+							"format": "regex",
+							"pattern": "(http://[a-zA-Z0-9:-/]+)",
+							"required": false
+						},
+						"prefixToRemove": {
+							"type": "string",
+							"description": "Directory prefix to remove from the extracted files. ex: bootplate",
+							"format": "regex",
+							"pattern": "([a-zA-Z0-9:-/]+)",
+							"required": false
+						},
+						"excluded": {
+							"type": "array",
+							"required": false,
+							"items": {
+								"type": "string",
+								"description": "Directory prefix to remove from the extracted files. ex: bootplate/api",
+								"format": "regex",
+								"pattern": "([a-zA-Z0-9-/]+)",
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
