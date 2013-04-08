@@ -190,6 +190,45 @@ The generated file is expected to look like to below:
 	 --------                   -------
 	     4068                   2 files
 
+## Project template service
+
+The service "***genZip***" defined in "ide.json" of ares-project or of Ares plugins allows to intanciate new Ares project from project templates such as "**bootplate**".
+
+`IMPORTANT:` Project templates can be updated or modified by Ares plugins configuration. See [Merging Ares plugin configuration](#merging-configuration).
+
+### Project template configuration
+
+The property "***projectTemplateRepositories***" of the service "**genZip**" lists the template definitions that are available at project creation time.
+
+The property "***projectTemplateRepositories***" of the service "**genZip**" is defined in the "***ide.json***" of ares-project.
+
+		{
+			"id":"genZip",
+			"projectTemplateRepositories": {
+				"bootplate": {
+					"description": "Standard Enyo template",
+					"url": "http://enyojs.com/archive/ares-project-templates.json"
+				}
+			},
+			...
+		}
+
+Ares plugins can add or modify this list of templates.
+
+		{
+			"id": "genZip",
+			"projectTemplateRepositories": {
+				"bootplate": {
+				},
+				"my-templates": {
+					"url": "http://xyz.com/my-templates.json",
+					"description": "My Templates"
+				}
+	        }
+		}
+
+As a result, `"bootplate": {}` will remove the entry defined in ide.js of ares-project and `http://xyz.com/my-templates.json` will add a new list of templates named 'my-templates'.
+
 ## PhoneGap build service
 
 The entire [build.phonegap.com API](https://build.phonegap.com/docs/api) is wrapped by a dedicated Hermes build service named `bdPhoneGap`.  Reasons are:
