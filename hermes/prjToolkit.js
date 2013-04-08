@@ -12,7 +12,7 @@ var fs = require("fs"),
     http = require("http"),
     optimist = require('optimist'),
     rimraf = require("rimraf"),
-    tools = require(__dirname + "/lib/project-gen"),
+    ptools = require(__dirname + "/lib/project-gen"),
     CombinedStream = require('combined-stream');
 
 var basename = path.basename(__filename);
@@ -30,14 +30,7 @@ function BdOpenwebOS(config, next) {
 
 	console.log("config=",  util.inspect(config));
 
-	tools.registerTemplates([{
-		id: "bootplate-2.1.1-local",
-		zipfiles: [{
-			url: "templates/projects/bootplate-2.1.1.zip"
-		}],
-		description: "Enyo bootplate 2.1.1 (local)"
-	}]);
-
+	tools = new ptools.Generator();
 	var app, server;
 	if (express.version.match(/^2\./)) {
 		// express-2.x
@@ -119,7 +112,7 @@ function BdOpenwebOS(config, next) {
 	app.use(makeExpressRoute('/templates'), getList);
 	app.use(makeExpressRoute('/generate'), generate);
 	app.post(makeExpressRoute('/template-repos/:repoid'), addRepo);
-	
+
 	// Send back the service location information (origin,
 	// protocol, host, port, pathname) to the creator, when port
 	// is bound
@@ -283,7 +276,7 @@ if (path.basename(process.argv[1]) === basename) {
 				required: false
 			}
 		}).argv;
-	
+
 	if (argv.h) {
 		optimist.showHelp();
 		process.exit(0);
