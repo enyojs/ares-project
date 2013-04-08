@@ -2,18 +2,25 @@ enyo.kind({
 	name: "HermesFileTree",
 	kind: "FittableRows",
 	events: {
+		// FIXME: check which events are still used
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
 		onProjectFound: "",
 		onConfirm: "",
-		onSelect: "",
-		onDeselect: "",
 		onNewFileConfirm: "",
 		onDeleteConfirm: "",
 		onRenameConfirm: "",
 		onNewFolderConfirm: "",
 		onCopyFileConfirm: ""
+
+	/*
+	 * from Harmonia
+	 * onFolderClick: "selectFolder",
+	 	onNewFolderConfirm: "newFolderConfirm",
+			onRenameConfirm: "renameConfirm",
+			onCopyFileConfirm: "copyFileConfirm"
+*/
 	},
 	handlers: {
 		onNodeDblClick: "nodeDblClick"
@@ -79,7 +86,7 @@ enyo.kind({
 	selectedFile: null,
 	selectedNode: null,
 
-	debug: false,
+	debug: true,
 
 	create: function() {
 		this.inherited(arguments);
@@ -233,7 +240,7 @@ enyo.kind({
 		this.selectedFile=inEvent.data.file;
 		inEvent.data.file.service = this.$.service;
 		inEvent.data.$.caption.applyStyle("background-color", "lightblue");
-		this.doSelect({file: this.selectedFile});
+		// this.doSelect({file: this.selectedFile});
 		this.enableDisableButtons();
 		// handled here (don't bubble)
 		return true;
@@ -243,7 +250,7 @@ enyo.kind({
 		if (inEvent.data && inEvent.data.$.caption) {
 			inEvent.data.$.caption.applyStyle("background-color", null);
 		}
-		this.doDeselect({file: this.selectedFile});
+		//this.doDeselect({file: this.selectedFile});
 		this.selectedNode=null;
 		this.selectedFile=null;
 		this.enableDisableButtons();
@@ -458,21 +465,24 @@ enyo.kind({
 
 
 	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
-	selectFile: function(inSender, inEvent) {
+	xxselectFile: function(inSender, inEvent) {
 		if (this.debug) this.log(inEvent.file);
 	},
-	selectFolder: function(inSender, inEvent) {
+	xxselectFolder: function(inSender, inEvent) {
 		if (this.debug) this.log(inEvent.file);
 	},
-	newSelect: function(inSender, inEvent) {
+	xxnewSelect: function(inSender, inEvent) {
 		if (inSender.name !== "providerList") {
 			this.selectedFile=inEvent.file;
 		}
 	},
-	newDeselect: function(inSender, inEvent) {
+	xxnewDeselect: function(inSender, inEvent) {
 		this.selectedFile=inEvent.file;
 	},
+
 	// File Operations
+
+	// called when user has clicked 'ok'
 	newFileConfirm: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		var folderId = inEvent.folderId;
@@ -564,7 +574,20 @@ enyo.kind({
 				var folderId = Array.isArray(inResponse)      ? inResponse[0].id
 							 : typeof inResponse === 'object' ? inResponse.id
 							 :                                  inResponse ;
-				this.delayedRefresh("folder creation done").go(folderId) ;
+				var that = this ;
+				// FIXME: run the 2 followings functions in parrallel and call delayedRefresh when they are done
+				// add new directory in current package.js
+				this.packageMunge(
+					this.getFolderOfSelectedNode(),
+					name,
+					this.packageAppend,
+					function () {that.delayedRefresh("folder creation done").go(folderId) ;}
+				);
+
+				// Create empty package.js
+				this.packageCreate (
+					inResponse // new folder id
+				) ;
 			})
 			.error(this, function(inSender, inError) {
 				if (this.debug) this.log("Error: "+inError);
@@ -718,7 +741,17 @@ enyo.kind({
 				callback(null) ;
 			}
 		);
-	}
+	},
 
+	packageCreate: function (folderId, callback) {
+		this.$.service.createFile(inResponse, "package.js", "enyo.depends(\n)\n")
+			.response(this, function(inSender, inResponse) {
+				if (this.debug) this.log("package.js create response: ",inResponse);
+			})
+			.error(this, function(inSender, inError) {
+				if (this.debug) this.log("Error: "+inError);
+				this.showErrorPopup("Creating file package.js failed:" + inError);
+			});
+	}
 });
 
