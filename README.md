@@ -175,7 +175,7 @@ In order to use Dropbox as storage service for Ares, follow detailed setup instr
  
 ### [Project templates](id:project-templates)
 
-The service "***genZip***" defined in "ide.json" allows to intanciate new Ares project from project templates such as "**bootplate**".
+The service "***genZip***" defined in "ide.json" of ares-project or of Ares plugins allows to intanciate new Ares project from project templates such as "**bootplate**".
 
 `IMPORTANT:` Project templates can be updated or modified by Ares plugins configuration. See [Merging Ares plugin configuration](#merging-configuration).
 
