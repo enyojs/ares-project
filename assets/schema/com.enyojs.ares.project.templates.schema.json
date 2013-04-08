@@ -9,7 +9,7 @@
 				"type": "string",
 				"description": "Project template ID. ex: bootplate-2.1.1",
 				"format": "regex",
-				"pattern": "([a-zA-Z0-9-]+)",
+				"pattern": "([-_.a-zA-Z0-9]+)",
 				"required": true
 			},
 			"description": {
@@ -31,21 +31,21 @@
 							"type": "string",
 							"description": "filename or http url of the zip file",
 							"format": "regex",
-							"pattern": "([a-zA-Z0-9:-/]+)",
+							"pattern": "([-._a-zA-Z0-9:/]+)",
 							"required": true
 						},
 						"alternateUrl": {
 							"type": "string",
 							"description": "http url of the zip file",
 							"format": "regex",
-							"pattern": "(http://[a-zA-Z0-9:-/]+)",
+							"pattern": "(http://[-._a-zA-Z0-9:/]+)",
 							"required": false
 						},
 						"prefixToRemove": {
 							"type": "string",
 							"description": "Directory prefix to remove from the extracted files. ex: bootplate",
 							"format": "regex",
-							"pattern": "([a-zA-Z0-9:-/]+)",
+							"pattern": "([a-zA-Z0-9]+)",
 							"required": false
 						},
 						"excluded": {
