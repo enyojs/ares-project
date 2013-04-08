@@ -2,6 +2,8 @@
 
 Ares 2 is a browser-based code editor and UI designer for developing Enyo 2 applications.  Although Ares is still a work in progress, we have reached the point where we are opening the repo and will do further development in the open, so we encourage you to follow our progress and give us feedback as we push Ares forward.
 
+You can give us feedback either via the [Ares category of the EnyoJS Forums](http://forums.enyojs.com/categories/ares) or via the [EnyoJS JIRA](https://enyojs.atlassian.net/) (using the `ares` component).
+
 ### Basic architecture
 
 The Ares project architecture is divided into several main pieces:
@@ -46,14 +48,14 @@ Here are the main features you can start looking at today:
 
 The following features are in the works, and you should see them added as we move forward:
 
-* Code completion and context-sensitive documentation
+* More code completion and context-sensitive documentation
 * Additional Hermes components to extend the local and cloud file storage options: We plan to add Hermes components for FTP, Box.net and more
 * Improvements to the Designer component for greater ease of use
 * ... and more!
 
 **Note:**  An up-to-date view of the ongoing activities is available from The [ARES JIRA](https://enyojs.atlassian.net/browse/ENYO/component/10302), itself available from the [EnyoJS JIRA](https://enyojs.atlassian.net/browse/ENYO).
 
-### Install
+### Install Ares
 
 1. Install Node.js & NPM 0.8.x (>= 0.8.19).  Preferably from the [Official Download Page](http://nodejs.org/#download).
 1. Run:
@@ -62,13 +64,18 @@ The following features are in the works, and you should see them added as we mov
 
 	The `-d` options gives some minimal troubleshooting information, which is pretty useful as `ares-ide` is a heavy package (more than 12 MB).
 
-### Develop
+1. Once installed, run it using `node_modules/.bin/ares-ide` (or `node_modules\.bin\ares-ide.cmd`) on Windows.
+1. Please report the issues you find in our JIRA at [https://enyojs.atlassian.net/](https://enyojs.atlassian.net/) against the component named `ares`.
 
-In case you do not yet have a development environment:
+### Develop Ares
 
 1. Install Node.js & NPM 0.8.x (>= 0.8.19).  Preferably from the [Official Download Page](http://nodejs.org/#download).
 1. Install git (or a graphical git client).  See the [Github.com help](https://help.github.com/articles/set-up-git) for hints
-1. Pick a GitHub account & clone the ares-project repository from GitHub.  Using git, clone the repository using either the HTTPS or SSH urls (depending on how you have setup Git):
+1. Pick a GitHub account
+
+**Fresh workspace**, in case you do not yet have a development environment:
+
+1. Clone the ares-project repository from GitHub.  Using git, clone the repository using either the HTTPS or SSH urls (depending on how you have setup Git):
 
 		$ git clone --recursive git@github.com:enyojs/ares-project.git
 		
@@ -78,35 +85,48 @@ In case you do not yet have a development environment:
    
 		$ npm -d install
 
-If you already have a working environment (with a remote named `origin`), run the following sequence.
+1. Run Ares using `node ide.js` from the GitHub root folder
+
+**Update workspace** if you already have a working environment (with a remote named `origin`), run the following sequence.
 
 		$ git fetch origin
 		$ git submodule foreach git fetch origin
 		$ git merge origin/master
-		$ git submodule update --init
+		$ git submodule update --init  --recursive
 		$ npm -d install
 
-**Note:** Until recently, `ares-project/node_modules` contained 3rd-party modules directly archived into `ares-project` own Git repository.  So existing repository owners _may_ need to run `rm -rf ares-project/node_modules` to properly update their trees.
+**Note:** 
 
-### Run
+1. Until recently, `ares-project/node_modules` contained 3rd-party modules directly archived into `ares-project` own Git repository.  So existing repository owners _may_ need to run `rm -rf ares-project/node_modules` to properly update their trees.
+2. Do **NOT** use Node.js 0.10.0: Ares does not work yet using this brand new version of Node.  [We are aware of the issue](https://enyojs.atlassian.net/browse/ENYO-2063).
 
-Start the IDE server: (e.g. using the Command Prompt, navigate to the ares directory and type 'node ide.js')
+### Use Ares to Develop Applications
 
-	C:\Users\johndoe\GIT\ares-project> node ide.js
+Start the IDE server: (e.g. using the Command Prompt, navigate to the ares directory and type 'node ide.js')… 
+
+	C:\Users\johndoe\node_modules\.bin> ares-ide.cmd
+
+… or (Mac & Linux):
+
+	$ node_modules/.bin/ares-ide
 
 Get more information about the options using `-h` or `--help`:
 
-	$ node ide.js --help
+	$ ares-ide --help
 
 	Ares IDE, a front-end designer/editor web applications.
 	Usage: "node ./ide.js" [OPTIONS]
 
 	Options:
-	  -h, --help     help message                                                              [boolean]
-	  -T, --runtest  Run the non-regression test suite                                         [boolean]
-	  -b, --browser  Open the default browser on the Ares URL                                  [boolean]
-	  -p, --port     port (o) local IP port of the express server (default: 9009, 0: dynamic)  [default: "9009"]
-	  -H, --host     host to bind the express server onto (default: 127.0.0.1)                 [default: "127.0.0.1"]
+	  -h, --help        help message                                                                           [boolean]
+	  -T, --runtest     Run the non-regression test suite                                                      [boolean]
+	  -b, --browser     Open the default browser on the Ares URL                                               [boolean]
+	  -p, --port        port (o) local IP port of the express server (default: 9009, 0: dynamic)               [default: "9009"]
+	  -H, --host        host to bind the express server onto                                                   [default: "127.0.0.1"]
+	  -a, --listen_all  When set, listen to all adresses. By default, listen to the address specified with -H  [boolean]
+	  -c, --config      IDE configuration file                                                                 [default: "/Users/kowalskif/Desktop/GIT/enyojs/ares-project/ide.json"]
+	  -l, --level       IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')                  [default: "http"]
+	  -L, --log         Log IDE debug to ./ide.log                                                             [boolean]
 
 Optionally, configure the `root` of your local file-system access in `ide.json`. By default, the local filesystem service serves the files from your _Home_ or _My Documents_ directory, depending on your operating system. You might want to change this to point to the location of your project files, to make navigation faster & easier. 
 
@@ -118,6 +138,14 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Us
 		"hermes/fsLocal.js", "-P", "/files", "-p", "0", "@HOME@"
 	],
 	[...]
+
+#### Reporting Issues
+
+Be sure to run Ares with `--log` (or `-L`) to capture the Ares server output in the file name `ide.log`.  Attach this log-file to you bug report on the [ARES JIRA](https://enyojs.atlassian.net/browse/ENYO/component/10302).
+
+You may also want to increase the log verbosity, in order to better understand what is going wrong by yourself.  The default verbosity level is `http`.  You may want o increase to `info` or even `verbose`.  Lowest layer `silly` is usually for Ares core developers.
+
+	$ node ide.js --level=info
 
 ### Build
 
@@ -145,7 +173,7 @@ In order to produce Ares on a build server:
 		$ npm install ../ares-project/ares-ide-0.0.2.tgz
 		$ node_modules/.bin/ares-ide
 
-### Publish
+### Release & Publish
 
 _This section is for Ares commiters only_
 
