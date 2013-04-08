@@ -86,12 +86,14 @@ enyo.kind({
 			{kind: "enyo.FittableColumns", classes:"ares-row", name: "servicesList"},
 		]},
 		{name: "previewDrawer", kind: "onyx.Drawer", open: false, components: [
-			{kind: 'FittableColumns', classes:"ares-row", components: [
-				{tag: "label" , classes:"ares-fixed-label more-width", content: "Top application file: "},
-				{kind: "onyx.InputDecorator", components: [
-					{kind: "Input", name: "ppTopFile",
-						attributes: {title: 'top file of your application. Typically index.html'}
-					}
+			{kind: 'FittableRows', components: [
+				{classes:"ares-row", components:[
+					{tag: "label" , classes:"ares-fixed-label more-width", content: "Top application file: "},
+					{kind: "onyx.InputDecorator", components: [
+						{kind: "Input", name: "ppTopFile",
+							attributes: {title: 'top file of your application. Typically index.html'}
+						}
+					]}
 				]}
 			]}
 		]},

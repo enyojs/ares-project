@@ -267,21 +267,31 @@ body {
 .onyx {
 	font-size: 13px;
 }
+
 .onyx-popup {
 	font-size: 13px;
 }
+
 .onyx-input-decorator > input {
 	font-size: 13px;
 }
+
 .onyx-input-decorator {
 	padding:2px 8px;
 	margin:0px;
 }
+
 .onyx-button {
 	font-size: 13px;
 	padding:2px 8px;
 	margin:0px;
 }
+
+/* display : inline-block missing on onyx.PickerDecorator ? */
+.onyx-picker-decorator{
+	display: inline-block;
+}
+
 .onyx-picker-decorator .onyx-button {
 	padding:2px 8px;
 	margin:0px;
@@ -295,6 +305,7 @@ body {
 .onyx-toolbar .onyx-button {
 	height: 28px;
 }
+
 .onyx-item {
 	padding:10px;
 	line-height: 13px;
@@ -342,14 +353,8 @@ body {
 	width: 160px;
 }
 
-.ares-bullet {
-    width: 11px;
-    padding-top: 11px;
-    background-image:url("../ares/assets/images/bullet.png");
-}
-
 .ares-bullet-label {
-	margin: 0 4px;
+	margin-left: 40px;
 }
 
 .ares-row {
@@ -360,7 +365,3 @@ p.break{
 	padding: 1px 0;
 }
 
-/*FIXME : valign : top in Fittables colums behavior */
-.enyo-fittable-columns-layout  > [id*="ares_projectView_projectWizardModify"]{
-	vertical-align: middle;
-}

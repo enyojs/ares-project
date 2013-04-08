@@ -13,18 +13,20 @@ enyo.kind({
 		onConfigure: ""
 	},
 	components: [
-		{kind: "FittableColumns", components: [
-			{kind: "Control", classes: "ares-label", content: "AppId:"},
-			{kind: "onyx.InputDecorator", components: [
-				{kind: "Input", name: "pgConfId",
-					attributes: {title: "unique identifier, assigned by build.phonegap.com"}
-				}
-			]},
-			{kind: "Control", classes: "ares-label", content: "Icon URL:"},
-			{kind: "onyx.InputDecorator", components: [
-				{kind: "Input", name: "pgIconUrl",
-					attributes: {title: "Relative location of the application icon. Defaults to Enyo icon."}
-				}
+		{kind: "FittableRows", components: [
+			{classes:"ares-row", components :[
+				{tag:"label", classes: "ares-label", content: "AppId:"},
+				{kind: "onyx.InputDecorator", components: [
+					{kind: "Input", name: "pgConfId",
+						attributes: {title: "unique identifier, assigned by build.phonegap.com"}
+					}
+				]},
+				{tag:"label", classes: "ares-label", content: "Icon URL:"},
+				{kind: "onyx.InputDecorator", components: [
+					{kind: "Input", name: "pgIconUrl",
+						attributes: {title: "Relative location of the application icon. Defaults to Enyo icon."}
+					}
+				]}
 			]}
 		]},
 
@@ -66,7 +68,6 @@ enyo.kind({
 		enyo.forEach(this.targets, function(target) {
 			this.$.targetsRows.$[target.id].setProjectConfig(this.config.targets[target.id]);
 		}, this);
-
 		this.refresh();
 	},
 	getProjectConfig: function() {
@@ -76,7 +77,7 @@ enyo.kind({
 		enyo.forEach(this.targets, function(target) {
 			this.config.targets[target.id] = this.$.targetsRows.$[target.id].getProjectConfig();
 		}, this);
-
+		
 		if (this.debug) this.log("config:", this.config);
 		return this.config;
 	},
@@ -138,15 +139,11 @@ enyo.kind({
 		config: {}
 	},
 	components: [
-		{kind: "FittableColumns", components: [
-			{components: [
-				{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "updateDrawer"}
-			]},
-			{name: "targetLbl", classes:"ares-label", content: ""},
-			{name: "targetDrw", orient: "h", kind: "onyx.Drawer", open: false, components: [
+			{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "updateDrawer"},
+			{tag:"label", name: "targetLbl", classes:"ares-label", content: ""},
+			{name: "targetDrw", classes: "ares-drawer", orient: "v", kind: "onyx.Drawer", open: false, components: [
 					
 			]}
-		]}
 	],
 	/**
 	 * @private
@@ -230,7 +227,7 @@ enyo.kind({
 enyo.kind({
 	name: "Phonegap.ProjectProperties.KeySelector",
 	debug: false,
-	kind: "FittableColumns",
+	kind: "FittableRows",
 	published: {
 		targetId: "",
 		keys: undefined,
@@ -238,23 +235,24 @@ enyo.kind({
 		provider: undefined
 	},
 	components: [
-		{tag:"span", classes: "ares-bullet"},
-		{classes : "ares-bullet-label", content: "Signing Key: "},
-		{name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey", components: [
-			{kind: "onyx.PickerButton", content: "Choose..."},
-			{kind: "onyx.Picker", name: "keys"}
-		]},
-		// android, ios & blackberry: key password
-		{kind: "onyx.InputDecorator", components: [
-			{content: "Key:"},
-			{name: "keyPasswd", kind: "onyx.Input", type: "password", placeholder: "Password..."}
-		]},
-		// android-only: keystore password
-		{kind: "onyx.InputDecorator", name: "keystorePasswdFrm", showing: false, components: [
-			{content: "Keystore:"},
-			{name: "keystorePasswd", kind: "onyx.Input", type: "password", placeholder: "Password..."}
-		]},
-		{kind: "onyx.Button", content: "Save", ontap: "savePassword"}
+		{ classes:"ares-row", components: [
+			{tag: "label", classes : "ares-bullet-label", content: "Signing Key: "},
+			{name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey", components: [
+				{kind: "onyx.PickerButton", content: "Choose..."},
+				{kind: "onyx.Picker", name: "keys"}
+			]},
+			// android, ios & blackberry: key password
+			{kind: "onyx.InputDecorator", components: [
+				{content: "Key:"},
+				{name: "keyPasswd", kind: "onyx.Input", type: "password", placeholder: "Password..."}
+			]},
+			// android-only: keystore password
+			{kind: "onyx.InputDecorator", name: "keystorePasswdFrm", showing: false, components: [
+				{content: "Keystore:"},
+				{name: "keystorePasswd", kind: "onyx.Input", type: "password", placeholder: "Password..."}
+			]},
+			{kind: "onyx.Button", content: "Save", ontap: "savePassword"}
+		]}
 	],
 	create: function() {
 		this.inherited(arguments);
