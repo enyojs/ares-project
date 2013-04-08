@@ -37,6 +37,10 @@ Here are the main features you can start looking at today:
 * UI designer for drag and drop UI editing
 	* Component definitions are round-tripped from the Editor to the Designer, meaning that changes made in one will immediately appear in the other.
 * Integration with [PhoneGap online build](http://build.phonegap.com)
+* Project templates
+	* Allow creation of new projects based on bootplate templates.
+	* Allow creation of new projects based on your own project templates.
+	* See [Project templates](#project-templates) for more information
 	
 ### Future plans
 
@@ -168,6 +172,16 @@ Here are a few references to create the necessary signing keys & distribution ce
 ### Dropbox
 
 In order to use Dropbox as storage service for Ares, follow detailed setup instructions in `hermes/README.md`.  The Dropbox connector is not usable without following those instructions.
+ 
+### [Project templates](id:project-templates)
+
+The service "***genZip***" defined in "ide.json" allows to intanciate new Ares project from project templates such as "**bootplate**".
+
+`IMPORTANT:` Project templates can be updated or modified by Ares plugins configuration. See [Merging Ares plugin configuration](#merging-configuration).
+
+The property "***projectTemplateRepositories***" of the service "**genZip**" lists the template definitions that are available at project creation time.
+
+See the section "**Project template service**" in [hermes/README.md](hermes/README.md) for more information.
 
 ### [Ares plugins](id:ares-plugins)
 
