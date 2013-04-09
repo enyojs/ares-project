@@ -449,10 +449,17 @@ ide.res.services.filter(function(service){
 // Start the ide server
 
 var enyojsRoot = path.resolve(myDir,".");
-var app = express.createServer();
 
-var port = parseInt(argv.port, 10);
-var addr = argv.host;
+var app, server;
+if (express.version.match(/^2\./)) {
+	// express-2.x
+	app = express.createServer();
+	server = app;
+} else {
+	// express-3.x
+	app = express();
+	server = http.createServer(app);
+}
 
 app.configure(function(){
 
@@ -484,8 +491,6 @@ app.configure(function(){
 
 });
 
-app.listen(port, argv.listen_all ? null : addr);
-
 // Run non-regression test suite
 
 var page = "index.html";
@@ -493,14 +498,16 @@ if (argv.runtest) {
 	page = "test.html";
 }
 
-// Open default browser
-
-var url = "http://" + addr + ":" + port + "/ide/ares/" + page;
-if (argv.browser) {
-	var info = platformOpen[process.platform] ;
-	spawn(info[0], info.slice(1).concat([url]));
-} else {
-	log.http('main', "Ares now running at <" + url + ">");
-}
+server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, function () {
+	var tcpAddr = server.address();
+	var url = "http://" + tcpAddr.address + ":" + tcpAddr.port + "/ide/ares/" + page;
+	if (argv.browser) {
+		// Open default browser
+		var info = platformOpen[process.platform] ;
+		spawn(info[0], info.slice(1).concat([url]));
+	} else {
+		log.http('main', "Ares now running at <" + url + ">");
+	}
+});
 
 log.info('main', "Press CTRL + C to shutdown");
