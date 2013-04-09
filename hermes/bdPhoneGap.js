@@ -184,12 +184,12 @@ function BdPhoneGap(config, next) {
 	// protocol, host, port, pathname) to the creator, when port
 	// is bound
 	server.listen(config.port, "127.0.0.1", null /*backlog*/, function() {
-		var port = server.address().port;
+		var tcpAddr = server.address();
 		return next(null, {
 			protocol: 'http',
-			host: '127.0.0.1',
-			port: port,
-			origin: "http://127.0.0.1:"+ port,
+			host: tcpAddr.address,
+			port: tcpAddr.port,
+			origin: "http://" + tcpAddr.address + ":"+ tcpAddr.port,
 			pathname: config.pathname
 		});
 	});

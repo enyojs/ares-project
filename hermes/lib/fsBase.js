@@ -167,11 +167,13 @@ function FsBase(inConfig, next) {
 	// protocol, host, port, pathname) to the creator, when port
 	// is bound
 	this.server.listen(this.port, "127.0.0.1", null /*backlog*/, (function() {
-		this.port = this.server.address().port;
-		this.origin = "http://127.0.0.1:"+ this.port;
+		var tcpAddr = this.server.address();
+		this.host = tcpAddr.address;
+		this.port = tcpAddr.port;
+		this.origin = "http://" + this.host + ":"+ this.port;
 		return next(null, {
 			protocol: 'http',
-			host: '127.0.0.1',
+			host: this.host,
 			port: this.port,
 			origin: this.origin,
 			pathname: this.pathname
