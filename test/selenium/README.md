@@ -38,7 +38,7 @@ The selenium TestSuite for Ares is located `./ares-project/test/selenium/xml-scr
 	-rw-r--r--  1 mariandebonis  staff   4095 29 jan 14:03 HelloWorldPhoneGapSettings
 	-rw-r--r--  1 mariandebonis  staff   2722 29 jan 14:03 HelloWorldPreview
 	-rw-r--r--  1 mariandebonis  staff   4114 29 jan 14:03 NewProject
-	-rw-r--r--  1 mariandebonis  staff   2909 21 fév 19:06 PhobosDocumentLabel
+	-rw-r--r--  1 mariandebonis  staff   2909 21 fév 19:06 PhobosFileButton
 	-rw-r--r--  1 mariandebonis  staff   5810 21 fév 11:36 PhobosEditorSettings
 	-rw-r--r--  1 mariandebonis  staff   3458 21 fév 18:02 PhobosNewKind
 	-rw-r--r--  1 mariandebonis  staff   3380 25 fév 08:52 PhobosSaveAndQuit
@@ -165,9 +165,9 @@ credentials:
 				<class name="AresTestSuite.CheckTemplates"></class>
 		</classes>
 	</test>
-	<test name="AresTestSuite.PhobosDocumentLabel">
+	<test name="AresTestSuite.PhobosFileButton">
 		<classes>
-				<class name="AresTestSuite.PhobosDocumentLabel"></class>
+				<class name="AresTestSuite.PhobosFileButton"></class>
 		</classes>
 	</test>
 	<test name="AresTestSuite.PhobosEditorSettings">
