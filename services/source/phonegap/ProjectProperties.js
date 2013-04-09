@@ -235,7 +235,7 @@ enyo.kind({
 		provider: undefined
 	},
 	components: [
-		{ classes:"ares-row", components: [
+		{ classes:"ares-row ares-drawer", components: [
 			{tag: "label", classes : "ares-bullet-label", content: "Signing Key: "},
 			{name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey", components: [
 				{kind: "onyx.PickerButton", content: "Choose..."},

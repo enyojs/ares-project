@@ -88,7 +88,7 @@ enyo.kind({
 		{name: "previewDrawer", kind: "onyx.Drawer", open: false, components: [
 			{kind: 'FittableRows', components: [
 				{classes:"ares-row", components:[
-					{tag: "label" , classes:"ares-fixed-label more-width", content: "Top application file: "},
+					{tag: "label" , classes:"ares-fixed-label", content: "Top application file: "},
 					{kind: "onyx.InputDecorator", components: [
 						{kind: "Input", name: "ppTopFile",
 							attributes: {title: 'top file of your application. Typically index.html'}
