@@ -20,10 +20,10 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 * `PROPFIND` lists properties of a resource.  It recurses into the collections according to the `depth` parameter, which may be 0, 1, … etc plus `infinity`.  For example, the following directory structure:
 
-		$ tree dir1/
-		dir1/
-		├── file0
-		└── file1
+		$ tree 1/
+		1/
+		├── 0
+		└── 1
 
 … corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.  The node descriptor Object format is defined by [this JSON schema](../assets/schema/com.enyojs.ares.fs.node.schema.json).  The `path` property is node location absolute to the Hermes file-system server root:  it uses URL notation: UNIX-type folder separator (`/`), not Windows-like (`\\`).
 
@@ -34,25 +34,17 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		    "name": "", 
 		    "children": [
 		        {
-		            "isDir": true, 
-		            "path": "/dir1", 
-		            "name": "dir1", 
-		            "id": "12efa4560"
-		            "children": [
-		                {
-		                    "isDir": false, 
-		                    "path": "/dir1/file0", 
-		                    "name": "file0", 
-		                    "id": "12efab780"
-		                }, 
-		                {
-		                    "isDir": false, 
-		                    "path": "/dir1/file1", 
-		                    "name": "file1", 
-		                    "id": "0ae12ef56"
-		                }
-		            ]
+		            "isDir": false, 
+		            "path": "/0", 
+		            "name": "0", 
+		            "id": "12efab780"
 		        }, 
+		        {
+		            "isDir": false, 
+		            "path": "/1", 
+		            "name": "1", 
+		            "id": "0ae12ef56"
+		        }
 		    ], 
 		    "id": "934789346956340",
 		    "versionTag": "af34ef45",
@@ -200,11 +192,16 @@ The generated file is expected to look like to below:
 
 ## Project template service
 
-The service "***genZip***" defined in "ide.json" of ares-project or of Ares plugins allows to intanciate new Ares project from project templates such as "**bootplate**".
+The service "***genZip***" allows to intanciate new Ares project from project templates such as "**bootplate**" or any customer specific project templates.
+These project templates can be defined:  
 
-`IMPORTANT:` Project templates can be updated or modified by Ares plugins configuration. See [Merging Ares plugin configuration](#merging-configuration).
+* in "ide.json" of ares-project  
+* or in "ide.json" of Ares plugins  
 
-### Project template configuration
+
+`IMPORTANT:` See [Project template configuration](#project-template-config) and [Merging Ares plugin configuration](../README.md#merging-configuration) for more information.
+
+### [Project template configuration](id:project-template-config)
 
 The property "***projectTemplateRepositories***" of the service "**genZip**" lists the template definitions that are available at project creation time.
 
@@ -235,7 +232,44 @@ Ares plugins can add or modify this list of templates.
 	        }
 		}
 
-As a result, `"bootplate": {}` will remove the entry defined in ide.js of ares-project and `http://xyz.com/my-templates.json` will add a new list of templates named 'my-templates'.
+As a result, `"bootplate": {}` will remove the entry defined in ide.js of ares-project and `"my-templates": { "url" : "http://xyz.com/my-templates.json", …}` will add a new list of templates named 'my-templates'.
+
+### [Project template definition](id:project-template-definition)
+
+A project template definition (defined by the property "url" in "projectTemplateRepositories" must respect the json schema [com.enyojs.ares.project.templates.schema.json](../assets/schema/com.enyojs.ares.project.templates.schema.json).
+
+The compliance of a project template definition file with the json schema is not yet enforced but could be checked via [http://jsonschemalint.com/](http://jsonschemalint.com/).
+
+	[
+	  {
+	    "id": "bootplate-2.2.0",
+	    "zipfiles": [
+	      {
+	        "url": "bootplate-2.2.0.zip",
+	        "alternateUrl": "http://enyojs.com/archive/bootplate-2.2.0.zip",
+	        "prefixToRemove": "bootplate",
+	        "excluded": [
+	          "bootplate/api"
+	        ]
+	      },
+	   	  {
+	   	  	"url": ...
+	   	  }
+	    ],
+	    "description": "Enyo bootplate 2.2.0"
+	  },
+	  {
+	  	"id": ...
+	  }
+	]
+
+Each project definition defined by "id" can reference **several zip files** defined in the array "zipfiles". The zip files are extracted in the order they are specified.  
+
+Each zip file entry:
+
+* must define an "url" and/or "alternateUrl". The url is tried first and can refer either a file stored locally on the filesystem or an http url. If the "url" references a file which does not exist the "alternateUrl" is used.
+* can define a "prefixToRemove". This prefix must correspond to one or several directory level that must be removed.
+* can define in the array "excluded" a list of files or directories to be excluded when the zip file is extracted.
 
 ## PhoneGap build service
 
