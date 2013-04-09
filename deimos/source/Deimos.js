@@ -247,7 +247,7 @@ enyo.kind({
 					?	this.getItemById(targetId, this.kinds[this.index].components)
 					:	this.kinds[this.index];
 		
-		if(!config) {
+		if (!config) {
 			enyo.warn("Could not create new item - bad data: ", inEvent);
 			return true;
 		}
@@ -258,7 +258,7 @@ enyo.kind({
 			this.addAresIds(config.components);
 		}
 		
-		if(beforeId) {
+		if (beforeId) {
 			this.insertItemBefore(config, target, beforeId);
 		} else {
 			this.insertItem(config, target);
@@ -271,7 +271,7 @@ enyo.kind({
 		return true;
 	},
 	//* Move item with _inEvent.itemId_ into item with _inEvent.targetId_
-	moveItem: function(inSender, inEvent) {
+	moveItem: function (inSender, inEvent) {
 		var movedItem = this.getItemById(inEvent.itemId, this.kinds[this.index].components),
 			clone = enyo.clone(movedItem),
 			beforeId = inEvent.beforeId || null,
@@ -279,20 +279,22 @@ enyo.kind({
 					?	this.getItemById(inEvent.targetId, this.kinds[this.index].components)
 					:	this.kinds[this.index];
 		
-		if(target === movedItem) {
+		if (target === movedItem) {
 			return true;
 		}
 		
 		// If moving item before itself, do nothing
-		if(beforeId !== null && beforeId === inEvent.itemId) {
+		if (beforeId !== null && beforeId === inEvent.itemId) {
 			return true;
 		}
 		
 		// Remove existing item
 		this.removeItemById(inEvent.itemId, this.kinds[this.index].components);
 		
-		if(beforeId) {
-			this.insertItemBefore(clone, target, beforeId);
+		if (beforeId) {
+			if (!this.insertItemBefore(clone, target, beforeId)) {
+				return true;
+			}
 		} else {
 			this.insertItem(clone, target);
 		}
@@ -311,22 +313,23 @@ enyo.kind({
 		
 		inTarget.components = inTarget.components || [];
 		
-		for(i = 0; (component = inTarget.components[i]); i++) {
+		for (i = 0; (component = inTarget.components[i]); i++) {
 			if(component.aresId === inBeforeId) {
 				beforeIndex = i;
 				break;
 			}
 		}
 		
-		if(beforeIndex === -1) {
+		if (beforeIndex === -1) {
 			enyo.warn("Couldn't find id: "+inBeforeId+" in ", inTarget);
-			return;
+			return false;
 		}
 		
 		inTarget.components.splice(beforeIndex, 0, inItem);
+		return true;
 	},
 	getItemById: function(inId, inComponents) {
-		if(inComponents.length === 0) {
+		if (inComponents.length === 0) {
 			return;
 		}
 		

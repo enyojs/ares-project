@@ -173,14 +173,14 @@ enyo.kind({
 		return true;
 	},
 	//* On drag leave, unhighlight previous drop target
-	dragleave: function(e) {
+	dragleave: function(inEvent) {
 		var dropTarget;
 		
-		if (!e.dataTransfer) {
+		if (!inEvent.dataTransfer) {
 			return false;
 		}
 		
-		dropTarget = this.getEventDropTarget(e.dispatchTarget);
+		dropTarget = this.getEventDropTarget(inEvent.dispatchTarget);
 
 		if (!this.isValidDropTarget(dropTarget)) {
 			return false;
@@ -201,15 +201,17 @@ enyo.kind({
 		var dataType = inEvent.dataTransfer.types[0],
 			dropData = enyo.json.codify.from(inEvent.dataTransfer.getData(dataType)),
 			dropTargetId,
+			dropTarget = this.getEventDropTarget(inEvent.dispatchTarget),
 			beforeId;
 		
 		switch (dataType) {
 			case "ares/moveitem":
 				if (this.selection) {
-					dropTargetId = this.selection.parent.aresId;
+					// If no drop target found, use current selection's parent
+					dropTargetId = (dropTarget) ? dropTarget.aresId : this.selection.parent.aresId;
 					beforeId = this.selection.addBefore ? this.selection.addBefore.aresId : null;
 				} else {
-					this.log("UH OH!"); // TODO
+					this.log("UH OH!"); // TODO - we moved an item but there is no selection..?
 				}
 				
 				this.sendMessage({op: "moveItem", val: {itemId: dropData.aresId, targetId: dropTargetId, beforeId: beforeId}});
@@ -243,6 +245,14 @@ enyo.kind({
 	resetHoldoverTimeout: function() {
 		clearTimeout(this.holdoverTimeout);
 		this.holdoverTimeout = null;
+		
+		if (this.selection && this.selection.addBefore) {
+			this.resetAddBefore();
+		}
+	},
+	//* Reset the control currently set as _addBefore_ on _this.selection_
+	resetAddBefore: function() {
+		this.selection.addBefore = null;
 	},
 	mouseMoved: function(inEvent) {
 		return (this.prevX !== inEvent.clientX || this.prevY !== inEvent.clientY);
@@ -660,7 +670,8 @@ enyo.kind({
 	
 	
 	
-	
+	moveControlSecs: 0.2,
+	edgeThresholdPx: 10,
 	holdOver: function(inEvent) {
 		var x = inEvent.clientX,
 			y = inEvent.clientY,
@@ -690,7 +701,6 @@ enyo.kind({
 		this.setBeforeItem(newBeforeItem);
 		this.prerenderDrop();
 	},
-	moveControlSecs: 0.2,
 	prerenderDrop: function() {
 		var movedControls, movedInstances;
 		
@@ -805,8 +815,8 @@ enyo.kind({
 			container   = this.getControlById(containerId),
 			beforeId    = (this.getBeforeItem()) ? this.getBeforeItem().aresId : null,
 			before      = (beforeId) ? this.getControlById(beforeId) : null,
-			clone       = this.cloneControl(this.selection);
-	
+			clone       = this.cloneControl(this.selection); //this.createSelectionGhost(this.selection);
+		
 		if (before) {
 			clone = enyo.mixin(clone, {beforeId: beforeId, addBefore: before});
 		}
@@ -824,37 +834,38 @@ enyo.kind({
 		this.$.flightArea.destroyClientControls();
 		
 		// Create a copy of each control that is being moved
-		for (var i = 0; i < inControls.length; i++) {
-			// Copy over relevant properties
-			var control = this.$.flightArea.createComponent(
-				{
-					kind:     inControls[i].comp.kind,
-					content:  inControls[i].comp.getContent(),
-					aresId:   inControls[i].comp.aresId,
-					// classes:  inControls[i].comp.classes,
-					// style:    inControls[i].comp.style,
-					// components: inControls[i].comp.getClientControls(),// TODO - can we move copies of the children?
-					moveTo:   inControls[i].newRect,
-					newStyle: inControls[i].newStyle
-				}
-			);
+		for (var i = 0, control; i < inControls.length; i++) {
+			if (inControls[i].comp.aresId === this.selection.aresId) {
+				control = this.$.flightArea.createComponent(
+					{
+						kind:     "enyo.Control",
+						aresId:   inControls[i].comp.aresId,
+						moveTo:   inControls[i].newRect,
+						newStyle: inControls[i].newStyle
+					}
+				);
+				control.addStyles("z-index:1000;");
+			} else {
+				control = this.$.flightArea.createComponent(
+					{
+						kind:     inControls[i].comp.kind,
+						content:  inControls[i].comp.getContent(),
+						aresId:   inControls[i].comp.aresId,
+						moveTo:   inControls[i].newRect,
+						newStyle: inControls[i].newStyle
+					}
+				);
+			}
 			
 			// Set the starting top/left values and props to enable animation
 			control.addStyles(
 				inControls[i].origStyle +
 				"position: absolute; " +
-				//"height: " + inControls[i].origRect.height + "px; " +
-				//"width: "  + inControls[i].origRect.width  + "px; " +
 				"top: "  + inControls[i].origRect.top  + "px; " +
 				"left: " + inControls[i].origRect.left + "px; " +
 				"-webkit-transition-duration: " + this.moveControlSecs + "s; " +
 				"-webkit-transition-property: all; "
 			);
-			
-			// If this is the selected item, move it to the top
-			if (inControls[i].comp.aresId === this.selection.aresId) {
-				control.addStyles("z-index:1000;");
-			}
 		}
 		
 		// Render animated controls
@@ -891,7 +902,7 @@ enyo.kind({
 			beforeId    = (this.getBeforeItem()) ? this.getBeforeItem().aresId : null,
 			before      = (beforeId) ? this.getControlById(beforeId, this.$.cloneArea) : null,
 			selection   = this.getControlById(this.selection.aresId, this.$.cloneArea),
-			clone       = this.cloneControl(selection);
+			clone       = this.cloneControl(this.selection); //this.createSelectionGhost(selection);
 		
 		if (before) {
 			clone = enyo.mixin(clone, {beforeId: beforeId, addBefore: before});
@@ -903,6 +914,35 @@ enyo.kind({
 	hideUpdatedAppClone: function() {
 		this.$.cloneArea.destroyClientControls();
 		this.$.cloneArea.hide();
+	},
+	//* TODO - This createSelectionGhost is WIP
+	createSelectionGhost: function (inItem) {
+		var computedStyle = enyo.dom.getComputedStyle(inItem.hasNode()),
+			rect = inItem.hasNode().getBoundingClientRect(),
+			borderWidth = 1,
+			height,
+			style;
+		
+		if (!computedStyle) {
+			enyo.warn("Attempted to clone item with no node: ", inItem);
+			return null;
+		}
+		
+		this.log("h: ", parseInt(computedStyle.height), "w: ", parseInt(computedStyle.width), "p: ", parseInt(computedStyle.padding), "m: ", parseInt(computedStyle.margin));
+		
+		style = "width: "   + computedStyle.width + "; " +
+				"height: "  + computedStyle.height + "; " +
+				//"margin: "  + computedStyle.margin + "; " +
+				//"padding: " + computedStyle.padding + "; " +
+				"border: "  + borderWidth + "px dotted black; " +
+				"display: " + computedStyle.display + "; " +
+				"background: rgba(255,255,255,0.8); ";
+		
+		return {
+			kind:   "enyo.Control",
+			aresId: inItem.aresId,
+			style:  style
+		};
 	},
 	cloneControl: function(inSelection) {
 		return {
@@ -928,7 +968,6 @@ enyo.kind({
 	rectsAreEqual: function(inRectA, inRectB) {
 		return (inRectA.top === inRectB.top && inRectA.left === inRectB.left && inRectA.bottom === inRectB.bottom && inRectA.right === inRectB.right && inRectA.height === inRectB.height && inRectA.width === inRectB.width);
 	},
-	edgeThresholdPx: 10,
 	checkDragOverBoundary: function(inContainer, x, y) {
 		if (!inContainer) {
 			return 0;
