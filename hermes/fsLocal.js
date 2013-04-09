@@ -476,12 +476,12 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		"help":		Boolean
 	};
 	var shortHands = {
-		"r": "root",
-		"p": "port",
-		"P": "pathname",
+		"r": "--root",
+		"p": "--port",
+		"P": "--pathname",
 		"l": "--level",
 		"v": "--level verbose",
-		"h": "help"
+		"h": "--help"
 	};
 	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	argv.pathname = argv.pathname || "/files";

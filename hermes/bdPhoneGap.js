@@ -514,11 +514,11 @@ if (path.basename(process.argv[1]) === basename) {
 		"help":		Boolean
 	};
 	var shortHands = {
-		"p": "port",
-		"P": "pathname",
+		"p": "--port",
+		"P": "--pathname",
 		"l": "--level",
 		"v": "--level verbose",
-		"h": "help"
+		"h": "--help"
 	};
 	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	argv.pathname = argv.pathname || "/phonegap";
