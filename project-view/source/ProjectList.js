@@ -31,7 +31,8 @@ enyo.kind({
 						{content: "Accounts..."}
 					]},
 					{classes: "onyx-menu-divider"},
-					{content: "Properties..."}
+					{content: "Properties..."},
+					{tag: "a", content: "Enterprise Portal", href: "https://enterprise.palmws.com/#/Login/Show", target: "ep_frame" }
 				]}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [

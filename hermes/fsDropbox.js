@@ -341,34 +341,36 @@ function getNode(stat, depth) {
 if (path.basename(process.argv[1]) === "fsDropbox.js") {
 	// We are main.js: create & run the object...
 	
-	var argv = require("optimist")
-	.usage('\nAres FileSystem (fs) provider.\nUsage: "$0 [OPTIONS]"')
-	.options('P', {
-		alias : 'pathname',
-		description: 'pathname (M) can be "/", "/res/files/" ...etc'
-	})
-	.demand('P')
-	.options('p', {
-		alias : 'port',
-		description: 'port (o) local IP port of the express server (default: 9009, 0: dynamic)',
-		default: '9010'
-	})
-	.options('h', {
-		alias : 'help',
-		description: 'help message',
-		boolean: true
-	})
-	.options('v', {
-		alias : 'verbose',
-		description: 'verbose execution mode',
-		boolean: true
-	})
-	.argv;
+	var knownOpts = {
+		"port":		Number,
+		"pathname":	String,
+		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
+		"help":		Boolean
+	};
+	var shortHands = {
+		"p": "port",
+		"P": "pathname",
+		"l": "--level",
+		"v": "--level verbose",
+		"h": "help"
+	};
+	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
+	argv.pathname = argv.pathname || "/files";
+	argv.port = argv.port || 0;
+	argv.level = argv.level || "http";
+	if (argv.help) {
+		console.log("Usage: node " + basename + "\n" +
+			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)         [default: '0']\n" +
+			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                    [default: '/files']\n" +
+			    "  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error') [default: 'http']\n" +
+			    "  -h, --help        This message\n");
+		process.exit(0);
+	}
 
 	var fsDropbox = new FsDropbox({
 		pathname: argv.pathname,
 		port: argv.port,
-		verbose: argv.verbose
+		verbose: (argv.level === 'verbose') // FIXME: rather use npm.log() directly
 	}, function(err, service){
 		if (err) process.exit(err);
 		// process.send() is only available if the

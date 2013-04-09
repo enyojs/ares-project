@@ -10,7 +10,6 @@ var fs = require("fs"),
     util  = require("util"),
     temp = require("temp"),
     http = require("http"),
-    optimist = require('optimist'),
     rimraf = require("rimraf"),
     tools = require(__dirname + "/lib/project-gen"),
     CombinedStream = require('combined-stream');
@@ -260,39 +259,36 @@ BdOpenwebOS.prototype.onExit = function() {
 if (path.basename(process.argv[1]) === basename) {
 	// We are main.js: create & run the object...
 
-	var argv = optimist.usage(
-		"Ares Open webOS build service\nUsage: $0 [OPTIONS]", {
-			'P': {
-				description: "URL pathname prefix (before /deploy and /build",
-				required: false,
-				"default": "/openwebos"
-			},
-			'p': {
-				description: "TCP port number",
-				required: false,
-				"default": "9029"
-			},
-			'e': {
-				description: "Path to the Enyo version to use for minifying the application",
-				required: false,
-				"default": path.resolve(__dirname, '..', 'enyo')
-			},
-			'h': {
-				description: "Display help",
-				boolean: true,
-				required: false
-			}
-		}).argv;
-	
-	if (argv.h) {
-		optimist.showHelp();
+	var knownOpts = {
+		"port":		Number,
+		"pathname":	String,
+		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
+		"help":		Boolean
+	};
+	var shortHands = {
+		"p": "port",
+		"P": "pathname",
+		"l": "--level",
+		"v": "--level verbose",
+		"h": "help"
+	};
+	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
+	argv.pathname = argv.pathname || "/prj-toolkit";
+	argv.port = argv.port || 0;
+	argv.level = argv.level || "http";
+	if (argv.help) {
+		console.log("Usage: node " + basename + "\n" +
+			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)         [default: '0']\n" +
+			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                    [default: '/prj-toolkit']\n" +
+			    "  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error') [default: 'http']\n" +
+			    "  -h, --help        This message\n");
 		process.exit(0);
 	}
 
 	var obj = new BdOpenwebOS({
-		pathname: argv.P,
-		port: parseInt(argv.p, 10),
-		enyoDir: argv.e
+		pathname: argv.pathname,
+		port: argv.port,
+		enyoDir: path.resolve(__dirname, '..', 'enyo')
 	}, function(err, service){
 		if(err) process.exit(err);
 		// process.send() is only available if the
