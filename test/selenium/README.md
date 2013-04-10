@@ -23,9 +23,9 @@
 
 **WARNING:** IDE limitations:
 
-* Don't expect Selenium to work as you expect it to 100% of the time. For instance, sometimes it doesn't know when the page has finished loading (because of AJAX running in the background).
-* It can't use a proxy to connect to any website That's because Selenium, technically is already a proxy, and you can't really configure it to go through another proxy.
-* Buggy with IE, Opera, and even Google Chrome. For the most part, most of the functionality interacting with the GUI will work in Firefox. Not so much with the other browsers.
+* Don't expect Selenium to work as you expect 100% of the time. For instance, sometimes it doesn't know when the page has finished loading (because of AJAX running in the background).
+* Selenium IDE can't use a proxy to connect to any website. That's because Selenium, technically is already a proxy, and you can't really configure it to go through another proxy.
+* Selenium IDE is buggy with IE, Opera, and even Google Chrome. For the most part, most of the functionality interacting with the GUI will work in Firefox. Not so much with the other browsers.
 
 ### How to run Selenium IDE Ares Test Suite
 * **Note:** Selenium distinguishes test cases and test suites.
@@ -102,7 +102,7 @@ Depending on your system, use either `/usr/bin/md5sum`, or `/usr/bin/shasum` to 
 
 ### Scenari written only in Java webdriver based API
 
-**Note:** This is due to the lack of support of selelnium IDE API (see IDE limitations)
+**Note:** This is due to the lack of support of selenium IDE API (see IDE limitations)
 
 	$ cd ./ares-project/test/selenium/test/selenium/webdriver-java
 	$ ll
@@ -114,7 +114,7 @@ This autocompletion scenario was written directly in java for the follwing reaso
 * IDE scripts are against FF only (buggy with other browsers),
 * FF found issues:
 	1. Cannot obtain text focus. The focus is often lost.
-	1. autocompletion is Phobos is illustrated by a drop down boxe; the option selection into dropdown box is not working correclty on FF.
+	1. autocompletion is Phobos is shown by a dropdown box; the option selection into dropdown box is not working correctly on FF.
 	 
 ### Eclipse Ares Test Suite project setup
 
@@ -248,7 +248,7 @@ credentials:
 
 ## References
 
-WebDriver presents an object-based API for automating the web from a real users perspective, such as clicking elements on a page and typing into text fields. 
+WebDriver presents an object-based API for automating the web from a real user's perspective, such as clicking elements on a page and typing into text fields. 
 
 The WebDriver API is available for many popular browsers. Each browser has its own driver, with ChromeDriver, of course, supporting the WebDriver API for Google Chrome. Unlike other drivers which are maintained by the open source Selenium/WebDriver team, ChromeDriver is developed by Chromium<http://www.chromium.org/>, the open source project that Google Chrome is based on.
 
