@@ -27,6 +27,8 @@ enyo.kind({
 	aresComponents: [],
 	prevX: null,
 	prevY: null,
+	dragoverTimeout: null,
+	holdoverTimeout: null,
 	
 	create: function() {
 		this.inherited(arguments);
@@ -115,6 +117,9 @@ enyo.kind({
 			case "resize":
 				this.resized();
 				break;
+			case "prerenderDrop":
+				this.foreignPrerenderDrop(msg.val);
+				break;
 			default:
 				enyo.warn("Deimos iframe received unknown message op:", msg);
 				break;
@@ -137,7 +142,6 @@ enyo.kind({
 		e.dataTransfer.setData('ares/moveitem', this.$.serializer.serializeComponent(this.selection, true));
         return true;
 	},
-	dragoverTimeout: null,
 	//* On drag over, enable HTML5 drag-and-drop if there is a valid drop target
 	dragover: function(inEvent) {
 		var dropTarget,
@@ -155,12 +159,11 @@ enyo.kind({
 			this._dragover(inEvent);
 		}
 	},
-	holdoverTimeout: null,
 	_dragover: function(inEvent) {
 		// Update dragover highlighting
 		this.dragoverHighlighting(inEvent);
 		
-		// If mouse didn't move, throttle _this.preprocessDrop
+		// If mouse actually moved, begin timer for holdover
 		if (this.mouseMoved(inEvent)) {
 			this.resetHoldoverTimeout();
 		} else if (!this.holdoverTimeout) {
@@ -701,6 +704,15 @@ enyo.kind({
 		this.setBeforeItem(newBeforeItem);
 		this.prerenderDrop();
 	},
+	//* Handle drop that has been trigged from outside of the iframe
+	foreignPrerenderDrop: function (inData) {
+		var containerItem = this.getControlById(inData.targetId),
+			beforeItem    = inData.beforeId ? this.getControlById(inData.beforeId) : null;
+		
+		this.setContainerItem(containerItem);
+		this.setBeforeItem(beforeItem);
+		this.prerenderDrop();
+	},
 	prerenderDrop: function() {
 		var movedControls, movedInstances;
 		
@@ -711,7 +723,7 @@ enyo.kind({
 		
 		// Create copy of app in post-move state
 		this.renderUpdatedAppClone();
-
+		
 		// Figure which controls need to move to get to the new state
 		movedControls = this.getMovedControls();
 		

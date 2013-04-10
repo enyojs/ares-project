@@ -164,5 +164,9 @@ enyo.kind({
 	},
 	resizeClient: function() {
 		this.sendMessage({op: "resize"});
+	},
+	//* Prerender simulated drop in iFrame
+	prerenderDrop: function(inTargetId, inBeforeId) {
+		this.sendMessage({op: "prerenderDrop", val: {targetId: inTargetId, beforeId: inBeforeId}});
 	}
 });

@@ -70,7 +70,8 @@ enyo.kind({
 						onHighlightDropTarget: "highlightDesignerDropTarget",
 						onUnHighlightDropTargets: "unhighlightDesignerDropTargets",
 						onMoveItem: "moveItem",
-						onCreateItem: "createItem"
+						onCreateItem: "createItem",
+						onHoldOver: "holdOver"
 					},
 					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
 				]}
@@ -301,6 +302,10 @@ enyo.kind({
 		
 		this.rerenderKind(inEvent.itemId);
 		return true;
+	},
+	//* Holdover event from ComponentView - simulate drop in designer
+	holdOver: function(inSender, inEvent) {
+		this.$.designer.prerenderDrop(inEvent.targetId, inEvent.beforeId);
 	},
 	insertItem: function(inItem, inTarget) {
 		inTarget.components = inTarget.components || [];

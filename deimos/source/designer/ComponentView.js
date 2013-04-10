@@ -5,7 +5,8 @@ enyo.kind({
 		onHighlightDropTarget: "",
 		onUnHighlightDropTargets: "",
 		onMoveItem: "",
-		onCreateItem: ""
+		onCreateItem: "",
+		onHoldOver: ""
 	},
 	handlers: {
 		onItemDown: "itemDown",
@@ -20,6 +21,9 @@ enyo.kind({
 			{name: "client", style: "padding: 8px;"}
 		]}
 	],
+	
+	holdoverTimeout:   null,
+	holdoverTimeoutMS: 500,
 	
 	//* Draw component view visualization of component tree
 	visualize: function(inComponents) {
@@ -73,7 +77,11 @@ enyo.kind({
 	},
 	itemDragover: function(inSender, inEvent) {
 		var target = inEvent.targetComponent,
-			dropDetails;
+			dropDetails,
+			dropTarget,
+			dropTargetId,
+			beforeItem,
+			beforeId = null;
 		
 		if (!this.isValidDropTarget(target)) {
 			this.resetDropDetails();
@@ -92,16 +100,27 @@ enyo.kind({
 		}
 		
 		this.dropDetails = dropDetails;
+		dropTarget = dropDetails.target;
 		
+		// Clear the placeholder on every dragover
 		this.destroyPlaceholder();
 		
-		if (this.dropDetails.pos === "center") {
-			this.highlightDropTarget(this.dropDetails.target);
+		// Reset the holdover timeout on every dragover
+		this.resetHoldoverTimeout();
+		
+		if (dropDetails.pos === "center") {
+			this.highlightDropTarget(dropTarget);
+			dropTargetId = dropTarget.comp.aresId;
 		} else {
 			this.unhighlightDropTargets();
-			this.createDropPlaceholder(this.dropDetails.target, this.dropDetails.pos);
+			this.createDropPlaceholder(dropTarget, dropDetails.pos);
+			// TODO - owner should always have a getAresId() function - currently fails if owner is the app.
+			dropTargetId = dropTarget.owner.getAresId ? dropTarget.owner.getAresId() : null;
+			beforeItem = this.findControlBeforeTarget(dropTarget, dropDetails.pos).comp;
+			beforeId = beforeItem ? beforeItem.aresId : null;
 		}
 		
+		this.setHoldoverTimeout(dropTargetId, beforeId);
 		return true;
 	}, 
 	//* When a component is dropped on another component
@@ -181,6 +200,12 @@ enyo.kind({
 		
 		this.resetDropDetails();
 	},
+	setHoldoverTimeout: function (inTargetId, inBeforeId) {
+		this.holdoverTimeout = setTimeout(enyo.bind(this, function() { this.holdOver(inTargetId, inBeforeId); }), this.holdoverTimeoutMS);
+	},
+	holdOver: function (inTargetId, inBeforeId) {
+		this.doHoldOver({targetId: inTargetId, beforeId: inBeforeId});
+	},
 	isValidDropTarget: function(inComponent) {
 		return (inComponent !== this.selection && inComponent.getAttribute("dropTarget") === "true" && !inComponent.isDescendantOf(this.selection));
 	},
@@ -237,7 +262,10 @@ enyo.kind({
 	resetDropDetails: function() {
 		this.dropDetails = null;
 	},
-	
+	resetHoldoverTimeout: function() {
+		clearTimeout(this.holdoverTimeout);
+		this.holdoverTimeout = null;
+	},
 	highlightDropTarget: function(inComponent) {
 		inComponent.$.label.applyStyle("background","#cedafe"); // TODO
 		this.doHighlightDropTarget({component: inComponent.comp});
