@@ -17,7 +17,7 @@ enyo.kind({
 	},
 	components: [
 		{name: "container", classes: "ares-docbar-container", kind: "FittableColumns", ontap: "doToggleOpen", components: [
-			{kind: "onyx.Grabber", style:"-webkit-transform:rotate(90deg); padding-right:15px;"},
+			{kind: "onyx.Grabber", classes:"ares-graber"},
 			{kind: "onyx.Drawer", classes: "ares-filedrawer", orient: "h", open: false, showing:false, components: [
 				{kind: "FittableColumns", components: [
 					{kind: "onyx.Button", content: "Save", ontap: "saveFile"},

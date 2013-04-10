@@ -23,9 +23,9 @@ enyo.kind({
 				onClose: "bounceClose"
 			}
 		]},
-		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
-			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
-			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
+		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, classes:"ares-local-waitpopup", components: [
+			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif"},
+			{name: "waitPopupMessage", classes:"message", content: "Ongoing..."}
 		]},
 		{kind: "ServiceRegistry"}
 	],

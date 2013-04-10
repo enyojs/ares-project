@@ -18,22 +18,18 @@ enyo.kind(
 	{
 		name: "Preview",
 		kind: "FittableColumns",
-		classes: "enyo-fit enyo-border-box",
-		style: "margin: 4px; background-color: #DDD",
-
+		classes: "enyo-fit enyo-border-box ares-preview",
 		components: [
 			{
-				style: "width: 150px; margin: 4px" ,
+				classes: "ares-device-config" ,
 				components: [
 					{
 						kind: 'onyx.Groupbox',
-						style : "margin-top: 8px",
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Orientation"},
 							{
 								kind: "onyx.PickerDecorator",
 								onSelect: "resize",
-								style : "padding: 6px",
 								components:
 								[
 									{style: "width: 100%"}, // A content-less PickerButton
@@ -56,7 +52,6 @@ enyo.kind(
 							{
 								kind: "onyx.PickerDecorator",
 								onSelect: "resize",
-								style :"padding: 6px",
 								components:
 								[
 									{style: "width: 100%"}, // A content-less PickerButton
@@ -73,9 +68,9 @@ enyo.kind(
 						kind: 'onyx.Groupbox',
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Details"},
-							{content: "width: 600px",  name: "devWidth",  style: "padding: 8px"},
-							{content: "height: 800px", name: "devHeight", style: "padding: 8px"},
-							{content: "DPR: 1",        name: "devDPR",    style: "padding: 8px",
+							{content: "width: 600px",  name: "devWidth"},
+							{content: "height: 800px", name: "devHeight"},
+							{content: "DPR: 1",        name: "devDPR",
 							 attributes: {title: "display pixel ratio"} }
 						]
 					},
@@ -85,8 +80,7 @@ enyo.kind(
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Zoom"},
 							{
-								// padding required so the gray box is connected to groupbox
-								style: "padding-top: 4px; padding-bottom: 4px",
+								classes:"ares-zoom",
 								components: [
 									{kind: "onyx.Slider", value: 100, onChange: 'zoom', onChanging: 'zoom' }
 								]
@@ -96,8 +90,8 @@ enyo.kind(
 					{tag: "br"},
 					{
 						kind: "onyx.Button",
+						classes: "ares-preview-button",
 						ontap:"reload",
-						style: "padding: 5px; width: 100%; margin-bottom: 5px",
 						components: [
 							{tag: 'img', attributes: { src: "assets/images/preview_reload.png"} }
 						]
@@ -105,9 +99,9 @@ enyo.kind(
 					{tag: "br"},
 					{
 						kind:"onyx.Button",
+						classes: "ares-preview-button",
 						content: "Detach test",
 						ontap:"detachIframe",
-						style: "padding: 5px; width: 100%",
 						attributes: { title: "detach test device, then right click to enable Ripple emulator"}
 					}
 				]

@@ -54,11 +54,13 @@ body {
 	color: #000000;
 	float: right;
 }
+/*onyx spinner gif*/
 .ares-waitpopup {
 	margin-left: auto;
 	margin-right: auto;
 	width: 20%; 
 }
+
 /**/
 .ares_harmonia_providerList {
 	width: 30%;
@@ -221,6 +223,12 @@ body {
 	margin-bottom: 0px;
 	width: 100%;
 }
+.ares-docbar-container .ares-graber{
+	padding-right:15px;
+	-webkit-transform:rotate(90deg); 
+	-moz-transform:rotate(90deg); 
+	-o-transform:rotate(90deg); 
+}
 
 /* Why z-index: 11? Because otherwise, on Opera, parts of the editor show through */
 .ares-files-slider {
@@ -306,3 +314,20 @@ body {
 	padding:10px;
 	line-height: 13px;
 }
+
+/*Place all inline styles of ares project here*/
+
+/* wait popup phobos/assets/images/save-spinner.gif */
+.ares-local-waitpopup { text-align: center; padding: 20px; }
+.ares-local-waitpopup img {	width: 54px; height: 55px; }
+.ares-local-waitpopup .message { padding-top: 10px; }
+
+.ares-filter { width:100%; margin-top:10px; }
+.ares-filter .onyx-icon.search { height: 20px; }
+
+.ares-preview { margin: 4px; background-color: #DDD; }
+.ares-preview .ares-device-config { width: 150px; margin: 4px; }
+.ares-device-config>:first-child {padding-top: 8px; }
+.ares-device-config .onyx-groupbox> *:not(.onyx-groupbox-header) { padding: 7px;}
+.ares-device-config .onyx-groupbox .ares-zoom { padding: 4px 0px;}
+.ares-device-config .onyx-button.ares-preview-button { padding: 5px; width: 100%; margin-bottom: 5px;}
