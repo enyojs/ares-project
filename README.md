@@ -226,9 +226,9 @@ At startup, the process "node ide.js":
 
  * loads the file "ide.json"
  * locates the files "node_modules/*/ide.json"
- * sorts then into the lexicographical order
- * merges them into the loaded configuration following the algorythm described in the next section.
- * starts the services defined in the resulting loaded configuration
+ * sorts then in lexicographical order
+ * merges them into the loaded configuration following the algorithm described in the next section.
+ * starts services defined in the resulting loaded configuration
 
 #### [Merging Ares plugin configuration](id:merging-configuration)
 
