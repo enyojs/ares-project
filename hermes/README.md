@@ -66,6 +66,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
     * ***`On files:`*** to get the content of a particular file.  
     The optional query parameter `versionTag` comes from a previous call to `GET` on the same file.  	The HTTP header `x-ares-node` (lowecase) contains a JSON-encoded version of the file's node descriptor (the one returned by `PROPFIND` for this file).
     * ***`On folders:`*** to get the content of all the files of the folder encoded in base64 into a single FormData.  
+    An additional query parameter "format" set to "base64" is expected. An error will be returned if this "format" query parameter is not present or is not equal to "base64".  
     Other encoding may be added later on.
 
 	
@@ -200,7 +201,7 @@ The generated file is expected to look like to below:
 
 ## Project template service
 
-The service "***genZip***" allows to intanciate new Ares project from project templates such as "**bootplate**" or any customer specific project templates.
+The service "***genZip***" allows to intanciate new Ares project from project templates such as "**[bootplate](https://github.com/enyojs/enyo/wiki/Bootplate)**" or any customer specific project templates.
 These project templates can be defined:  
 
 * in "ide.json" of ares-project  
@@ -278,6 +279,26 @@ Each zip file entry:
 * must define an "url" and/or "alternateUrl". The url is tried first and can refer either a file stored locally on the filesystem or an http url. If the "url" references a file which does not exist the "alternateUrl" is used.
 * can define a "prefixToRemove". This prefix must correspond to one or several directory level that must be removed.
 * can define in the array "excluded" a list of files or directories to be excluded when the zip file is extracted.
+
+### Protocol
+
+
+#### Resources
+
+The default `<pathname>` value is `/genzip`.  Its value can be changed using the `-P` paraemter in the main `ide.json` configuration file.
+
+* `<pathname>/templates`:
+	* `GET` returns a JSON-encoded array of all the available project templates.
+* `<pathname>/template-repos/:repo-id`:
+	* `POST` creates a new repo entry with the key `repo-id`. The POST body must contain the `url` of the new project template repository.
+* `<pathname>/generate`:
+	* `POST` returns a FormData containing all the files, encoded in base64, of the selected project template.  
+		* The POST body must contain:
+			* the `templateId` of the selected project template.  
+			* the `substitutions` needed as a JSON stringified object.
+		* It's up to the caller to extract and base64 decode the files to create a new project.  
+		In Ares, this is achieved by forwarding the FormData to Hermes filesystem service via a PUT method.
+
 
 ## PhoneGap build service
 
