@@ -21,6 +21,12 @@
 
 * **Note:** The Options &rarr; Formatter menu links to this article, describing why changing formats is disabled by default: <http://blog.reallysimplethoughts.com/2011/06/10/does-selenium-ide-v1-0-11-support-changing-formats>
 
+**WARNING:** IDE limitations:
+
+* Don't expect Selenium to work as you expect it to 100% of the time. For instance, sometimes it doesn't know when the page has finished loading (because of AJAX running in the background).
+* It can't use a proxy to connect to any website That's because Selenium, technically is already a proxy, and you can't really configure it to go through another proxy.
+* Buggy with IE, Opera, and even Google Chrome. For the most part, most of the functionality interacting with the GUI will work in Firefox. Not so much with the other browsers.
+
 ### How to run Selenium IDE Ares Test Suite
 * **Note:** Selenium distinguishes test cases and test suites.
 * When open an existing test case or suite, Selenium-IDE displays its Selenium commands in the Test Case Pane.
@@ -72,6 +78,7 @@ Main tasks:
 * The Java code is not.
 * Reasons are; expecting to find an XML to javascript Formatter and avoid two source code for the same test.
 
+
 ### XML to JAVA conversion 
 
 * Open the xml-scripts in Selenium IDE (**Back to:**  Opening And Configuring the IDE),
@@ -93,7 +100,22 @@ Depending on your system, use either `/usr/bin/md5sum`, or `/usr/bin/shasum` to 
 	$ cd ./ares-project/test/selenium/test/selenium/webdriver-java-diff-patch/java-ref
 	$ patch -p1 < ../AresTestJava.patch
 
+### Scenari written only in Java webdriver based API
 
+**Note:** This is due to the lack of support of selelnium IDE API (see IDE limitations)
+
+	$ cd ./ares-project/test/selenium/test/selenium/webdriver-java
+	$ ll
+	$ total 32
+    -rw-r--r--  1 mariandebonis  staff  13111 10 avr 08:51 PhobosAutoCompletion.java
+
+This autocompletion scenario was written directly in java for the follwing reasons:
+
+* IDE scripts are against FF only (buggy with other browsers),
+* FF found issues:
+	1. Cannot obtain text focus. The focus is often lost.
+	1. autocompletion is Phobos is illustrated by a drop down boxe; the option selection into dropdown box is not working correclty on FF.
+	 
 ### Eclipse Ares Test Suite project setup
 
 #### Eclipse Project Pre-requisites
@@ -117,6 +139,7 @@ In Eclipse:
 * configure build-path; JRE system library and TestNG eclipse plugin
 * configure the libraries build-path; add external jars retrieved from selenium-java-2.30.0.zip java bindings
 * In `src/AresTestSuite`, import the patched java code located under `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref` into the Ares TestSuite project
+* In `src/AresTestSuite`, import the java code available under `./ares-project/test/selenium/webdriver-java`
 * In `resources/AresTestSuite`, create `AresConfig.xml` file. 
 
 Here is one example of the AresConfig.xml, modify it to suit your setup:
@@ -185,6 +208,11 @@ credentials:
 				<class name="AresTestSuite.PhobosSaveAndQuit"></class>
 		</classes>
 	</test>
+	<test name="AresTestSuite.PhobosAutoCompletion">
+		<classes>
+				<class name="AresTestSuite.PhobosAutoCompletion"></class>
+		</classes>
+	</test>
 	<!-- skip this test if you don't have phonegap credentials >
 	<test name="AresTestSuite.HelloWorldPhoneGapSettings">
 		<classes>
@@ -215,4 +243,22 @@ credentials:
 
 ## Future Plan
 
+* Remove the xml-scripts, keep only the webdriver based java code.
 * Switch on WebDriverJS (<https://code.google.com/p/selenium/wiki/WebDriverJs#WebDriverJS_User’s_Guide>)
+
+## References
+
+WebDriver presents an object-based API for automating the web from a real users perspective, such as clicking elements on a page and typing into text fields. 
+
+The WebDriver API is available for many popular browsers. Each browser has its own driver, with ChromeDriver, of course, supporting the WebDriver API for Google Chrome. Unlike other drivers which are maintained by the open source Selenium/WebDriver team, ChromeDriver is developed by Chromium<http://www.chromium.org/>, the open source project that Google Chrome is based on.
+
+**See:**
+
+* WebDriver API: <http://google-opensource.blogspot.com/2009/05/introducing-webdriver.html>
+* Selenum Wiki getting started: <http://code.google.com/p/selenium/w/list>
+* Frequently asked questions: <https://code.google.com/p/selenium/wiki/FrequentlyAskedQuestions>
+* Forum: <http://www.seleniumwebdriver.com/google-selenium-webdriver/>
+* Selenium home project: <http://code.google.com/p/selenium/>
+* Selenium documentation: <http://docs.seleniumhq.org/docs/03_webdriver.jsp>, <http://selenium.googlecode.com/svn/trunk/docs/api/rb/_index.html>
+   
+   
