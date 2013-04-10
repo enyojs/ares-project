@@ -60,8 +60,8 @@ enyo.kind({
 					{content: $L("As") + ":", fit: true},
 					{name: "selectedName", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("File"), selectOnFocus: true, onchange: "updateSelectedName"}
 				]},
-				{name: "cancelButton", kind: "onyx.Button", classes: "onyx-negative", content: $L("Cancel"), ontap: "cancel"},
-				{name: "confirmButton", kind: "onyx.Button", classes: "onyx-affirmative", content: $L("OK"), ontap: "confirm"}
+				{name: "cancel", kind: "onyx.Button", classes: "onyx-negative", content: $L("Cancel"), ontap: "cancel"},
+				{name: "confirm", kind: "onyx.Button", classes: "onyx-affirmative", content: $L("OK"), ontap: "confirm"}
 			]}
 		]}
 	],
@@ -138,7 +138,7 @@ enyo.kind({
 		} else {
 			this.selectedFile = inEvent.file;
 			this.selectedFile.parent = this.$.hermesFileTree.getParentOfSelected();
-			this.$.confirmButton.setDisabled(false);
+			this.$.confirm.setDisabled(false);
 		}
 		this.$.selectedFolder.setValue(ares.basename(ares.dirname(inEvent.file.path)));
 		this.setSelectedName(inEvent.file.name);
@@ -152,9 +152,9 @@ enyo.kind({
 		this.selectedFile = inEvent.file;
 		this.selectedFile.parent = this.$.hermesFileTree.getParentOfSelected();
 		if (this.folderChooser) {
-			this.$.confirmButton.setDisabled(false);
+			this.$.confirm.setDisabled(false);
 		} else {
-			this.$.confirmButton.setDisabled(true);
+			this.$.confirm.setDisabled(true);
 		}
 		this.$.selectedFolder.setValue(inEvent.file.name);
 		this.updateConfirmButton();
@@ -162,14 +162,14 @@ enyo.kind({
 	},
 	updateSelectedName: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
-		this.$.confirmButton.setDisabled(false);
+		this.$.confirm.setDisabled(false);
 		this.setSelectedName(inSender.getValue());
 	},
 	updateConfirmButton: function() {
 		if (this.folderChooser) {
-			this.$.confirmButton.setDisabled(!(this.selectedFile && this.selectedFile.isDir));
+			this.$.confirm.setDisabled(!(this.selectedFile && this.selectedFile.isDir));
 		} else {
-			this.$.confirmButton.setDisabled(!(this.selectedFile && this.selectedName));
+			this.$.confirm.setDisabled(!(this.selectedFile && this.selectedName));
 		}
 	},
 	/** @private */
