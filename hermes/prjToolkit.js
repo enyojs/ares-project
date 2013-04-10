@@ -147,7 +147,7 @@ function BdOpenwebOS(config, next) {
 		var destination = temp.path({prefix: 'com.palm.ares.hermes.bdOpenwebOS'}) + '.d';
 		fs.mkdirSync(destination);
 
-		tools.generate(req.body.templateId, JSON.parse(req.body.options), destination, {}, function(inError, inData) {
+		tools.generate(req.body.templateId, JSON.parse(req.body.substitutions), destination, {}, function(inError, inData) {
 			if (inError) {
 				next(new HttpError(inError, 500));
 				return;
