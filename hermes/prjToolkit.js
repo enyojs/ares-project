@@ -11,7 +11,7 @@ var fs = require("fs"),
     temp = require("temp"),
     http = require("http"),
     rimraf = require("rimraf"),
-    tools = require(__dirname + "/lib/project-gen"),
+    ptools = require("./lib/project-gen"),
     CombinedStream = require('combined-stream');
 
 var basename = path.basename(__filename);
@@ -29,14 +29,7 @@ function BdOpenwebOS(config, next) {
 
 	console.log("config=",  util.inspect(config));
 
-	tools.registerTemplates([{
-		id: "bootplate-2.1.1-local",
-		zipfiles: [{
-			url: "templates/projects/bootplate-2.1.1.zip"
-		}],
-		description: "Enyo bootplate 2.1.1 (local)"
-	}]);
-
+	tools = new ptools.Generator();
 	var app, server;
 	if (express.version.match(/^2\./)) {
 		// express-2.x
@@ -118,7 +111,7 @@ function BdOpenwebOS(config, next) {
 	app.use(makeExpressRoute('/templates'), getList);
 	app.use(makeExpressRoute('/generate'), generate);
 	app.post(makeExpressRoute('/template-repos/:repoid'), addRepo);
-	
+
 	// Send back the service location information (origin,
 	// protocol, host, port, pathname) to the creator, when port
 	// is bound
@@ -153,7 +146,7 @@ function BdOpenwebOS(config, next) {
 		var destination = temp.path({prefix: 'com.palm.ares.hermes.bdOpenwebOS'}) + '.d';
 		fs.mkdirSync(destination);
 
-		tools.generate(req.body.templateId, JSON.parse(req.body.options), destination, {}, function(inError, inData) {
+		tools.generate(req.body.templateId, JSON.parse(req.body.substitutions), destination, {}, function(inError, inData) {
 			if (inError) {
 				next(new HttpError(inError, 500));
 				return;

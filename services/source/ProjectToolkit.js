@@ -57,11 +57,11 @@ enyo.kind({
 		});
 		return req.go();
 	},
-	generate: function(templateId, options) {
+	generate: function(templateId, substitutions) {
 		if (this.debug) this.log();
 
 		var data = "templateId=" + encodeURIComponent(templateId);
-		data +=	("&options=" + encodeURIComponent(JSON.stringify(options)));
+		data +=	("&substitutions=" + encodeURIComponent(JSON.stringify(substitutions)));
 
 		var userreq = new enyo.Async();
 

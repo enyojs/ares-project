@@ -62,7 +62,14 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
 
-* `GET` can be used only on files (not on folders).  The optional query parameter `versionTag` comes from a previous call to `GET` on the same file.  The HTTP header `x-ares-node	`(lowecase) contains a JSON-encoded version of the file's node descriptor (the one returned by `PROPFIND` for this file).  The n
+* `GET` can be used:
+    * ***`On files:`*** to get the content of a particular file.  
+    The optional query parameter `versionTag` comes from a previous call to `GET` on the same file.  	The HTTP header `x-ares-node` (lowecase) contains a JSON-encoded version of the file's node descriptor (the one returned by `PROPFIND` for this file).
+    * ***`On folders:`*** to get the content of all the files of the folder encoded in base64 into a single FormData.  
+    An additional query parameter "format" set to "base64" is expected. An error will be returned if this "format" query parameter is not present or is not equal to "base64".  
+    Other encoding may be added later on.
+
+	
 * `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.
   * `application/x-www-form-urlencoded` contains a single base64-encoded file in the form field named `content`.  The file name and location are provided by `{id}` and optionally `name` query parameter.
   * `multipart/form-data` follows the standard format.  For each file `filename` is interpreted relativelly to the folder `{id}` provided in the URL.  **Note:** To accomodate an issue with old Firefox releases (eg. Firefox 10), fields labelled `filename` overwrite the `filename` in their corresponding `file` fields.  See `fsBase#_putMultipart()` for more details.
@@ -191,6 +198,107 @@ The generated file is expected to look like to below:
 	     3126  10-17-12 17:26   images/icon.png
 	 --------                   -------
 	     4068                   2 files
+
+## Project template service
+
+The service "***genZip***" allows to intanciate new Ares project from project templates such as "**[bootplate](https://github.com/enyojs/enyo/wiki/Bootplate)**" or any customer specific project templates.
+These project templates can be defined:  
+
+* in "ide.json" of ares-project  
+* or in "ide.json" of Ares plugins  
+
+
+`IMPORTANT:` See [Project template configuration](#project-template-config) and [Merging Ares plugin configuration](../README.md#merging-configuration) for more information.
+
+### [Project template configuration](id:project-template-config)
+
+The property "***projectTemplateRepositories***" of the service "**genZip**" lists the template definitions that are available at project creation time.
+
+The property "***projectTemplateRepositories***" of the service "**genZip**" is defined in the "***ide.json***" of ares-project.
+
+		{
+			"id":"genZip",
+			"projectTemplateRepositories": {
+				"bootplate": {
+					"description": "Standard Enyo template",
+					"url": "http://enyojs.com/archive/ares-project-templates.json"
+				}
+			},
+			...
+		}
+
+Ares plugins can add or modify this list of templates.
+
+		{
+			"id": "genZip",
+			"projectTemplateRepositories": {
+				"bootplate": {
+				},
+				"my-templates": {
+					"url": "http://xyz.com/my-templates.json",
+					"description": "My Templates"
+				}
+	        }
+		}
+
+As a result, `"bootplate": {}` will remove the entry defined in ide.js of ares-project and `"my-templates": { "url" : "http://xyz.com/my-templates.json", …}` will add a new list of templates named 'my-templates'.
+
+### [Project template definition](id:project-template-definition)
+
+A project template definition (defined by the property "url" in "projectTemplateRepositories" must respect the json schema [com.enyojs.ares.project.templates.schema.json](../assets/schema/com.enyojs.ares.project.templates.schema.json).
+
+The compliance of a project template definition file with the json schema is not yet enforced but could be checked via [http://jsonschemalint.com/](http://jsonschemalint.com/).
+
+	[
+	  {
+	    "id": "bootplate-2.2.0",
+	    "zipfiles": [
+	      {
+	        "url": "bootplate-2.2.0.zip",
+	        "alternateUrl": "http://enyojs.com/archive/bootplate-2.2.0.zip",
+	        "prefixToRemove": "bootplate",
+	        "excluded": [
+	          "bootplate/api"
+	        ]
+	      },
+	   	  {
+	   	  	"url": ...
+	   	  }
+	    ],
+	    "description": "Enyo bootplate 2.2.0"
+	  },
+	  {
+	  	"id": ...
+	  }
+	]
+
+Each project definition defined by "id" can reference **several zip files** defined in the array "zipfiles". The zip files are extracted in the order they are specified.  
+
+Each zip file entry:
+
+* must define an "url" and/or "alternateUrl". The url is tried first and can refer either a file stored locally on the filesystem or an http url. If the "url" references a file which does not exist the "alternateUrl" is used.
+* can define a "prefixToRemove". This prefix must correspond to one or several directory level that must be removed.
+* can define in the array "excluded" a list of files or directories to be excluded when the zip file is extracted.
+
+### Protocol
+
+
+#### Resources
+
+The default `<pathname>` value is `/genzip`.  Its value can be changed using the `-P` paraemter in the main `ide.json` configuration file.
+
+* `<pathname>/templates`:
+	* `GET` returns a JSON-encoded array of all the available project templates.
+* `<pathname>/template-repos/:repo-id`:
+	* `POST` creates a new repo entry with the key `repo-id`. The POST body must contain the `url` of the new project template repository.
+* `<pathname>/generate`:
+	* `POST` returns a FormData containing all the files, encoded in base64, of the selected project template.  
+		* The POST body must contain:
+			* the `templateId` of the selected project template.  
+			* the `substitutions` needed as a JSON stringified object.
+		* It's up to the caller to extract and base64 decode the files to create a new project.  
+		In Ares, this is achieved by forwarding the FormData to Hermes filesystem service via a PUT method.
+
 
 ## PhoneGap build service
 

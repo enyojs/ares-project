@@ -37,7 +37,7 @@
 			"name":"Project toolkit",
 			"type": ["generate"],
 			"command":"@NODE@", "params":[
-			        "@INSTALLDIR@/hermes/prjToolkit.js", "-P", "/prj-toolkit", "-p", "0"
+			        "@INSTALLDIR@/hermes/prjToolkit.js", "-P", "/genzip", "-p", "0"
 			],
 			"projectTemplateRepositories": {
 			        "bootplate": {
