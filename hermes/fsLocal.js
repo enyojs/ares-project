@@ -468,39 +468,39 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 if (path.basename(process.argv[1]) === "fsLocal.js") {
 	// We are main.js: create & run the object...
 	
-	var argv = require("optimist")
-	.usage('\nAres FileSystem (fs) provider.\nUsage: "$0 [OPTIONS]"')
-	.options('r', {
-		alias : 'root',
-		description: 'Root directory to serve'
-	})
-	.options('P', {
-		alias : 'pathname',
-		description: 'pathname (M) can be "/", "/res/files/" ...etc'
-	})
-	.demand('P')
-	.options('p', {
-		alias : 'port',
-		description: 'port (o) local IP port of the express server (default: 0 dynamic)',
-		'default': '0'
-	})
-	.options('h', {
-		alias : 'help',
-		description: 'help message',
-		boolean: true
-	})
-	.options('v', {
-		alias : 'verbose',
-		description: 'verbose execution mode',
-		boolean: true
-	})
-	.argv;
+	var knownOpts = {
+		"root":		path,
+		"port":		Number,
+		"pathname":	String,
+		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
+		"help":		Boolean
+	};
+	var shortHands = {
+		"r": "--root",
+		"p": "--port",
+		"P": "--pathname",
+		"l": "--level",
+		"v": "--level verbose",
+		"h": "--help"
+	};
+	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
+	argv.pathname = argv.pathname || "/files";
+	argv.port = argv.port || 0;
+	argv.level = argv.level || "http";
+	if (argv.help) {
+		console.log("Usage: node " + basename + "\n" +
+			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)         [default: '0']\n" +
+			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                    [default: '/files']\n" +
+			    "  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error') [default: 'http']\n" +
+			    "  -h, --help        This message\n");
+		process.exit(0);
+	}
 
 	var fsLocal = new FsLocal({
+		root: argv.root,
 		pathname: argv.pathname,
 		port: argv.port,
-		verbose: argv.verbose,
-		root: argv.root
+		verbose: (argv.level === 'verbose') // FIXME: rather use npm.log() directly
 	}, function(err, service){
 		if (err) process.exit(err);
 		// process.send() is only available if the

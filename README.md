@@ -83,6 +83,7 @@ The following features are in the works, and you should see them added as we mov
 
 1. Install NPM developpment dependencies
    
+		$ cd ares-project
 		$ npm -d install
 
 1. Run Ares using `node ide.js` from the GitHub root folder

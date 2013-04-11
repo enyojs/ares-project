@@ -2,7 +2,8 @@
 
 ## Objectives
 
-Give to the Ares commiter(s) a quick & easy tool to evaluate regressions before comiting a pull-request.
+
+Give to the Ares commiter(s) a quick & easy tool to evaluate regressions before commiting a pull-request.
 
 ## Usage
 
@@ -13,7 +14,8 @@ Give to the Ares commiter(s) a quick & easy tool to evaluate regressions before 
 
 * Connect to the Ares IDE in mode test using Google Chrome or Chromium. The URL is: <http://127.0.0.1:9009/ide/ares/test.html> like on [Google](http://www.google.com).
 * Wait for the Ares Test Reporter window,  __NB__: Check popup blocker setting if the Test reporter window does not appear.
-* Click on start button to fire the execution of the available Test Suites.
+* Text exchange between the `2 windows` Ares IDE and Ares Test Reporter is done using postMessage API.
+* Click on start button to fire the execution of the available Test Suite.
 * Tests are executed under a temporary directory. This directory is located under test/root.
 
 ## Adding new tests
@@ -24,7 +26,7 @@ Give to the Ares commiter(s) a quick & easy tool to evaluate regressions before 
 	1. When each test is complete, it should call this.finish().  
 	
 ## Notes
-* Two Test Suite groups are currently available; HermesFileSystemTest and ProjectViewTest.
+* The Test Suite groups currently available is; HermesFileSystemTest.
 * The HermesFileSystemTest tests the HermesFileSystem API (API used for Heremes local File system). This test suite is composed by the following unit tests:
 	1. testGetServicesFromRegistry - get the IDE configured services from the registry
 	1. testGetHomeFromServices - get the IDE Home service from the list of services configured
@@ -32,15 +34,14 @@ Give to the Ares commiter(s) a quick & easy tool to evaluate regressions before 
 	1. testPropfindAndCreateFile - list and file
 	1. testDeleteFile - delete file
 	1. testDeleteFolder - delete directory
-	1. testSourceFolderRevial - recreate directory
+	1. testSourceFolderRevial - recreate directory	
 
-* The ProjectViewTest tests the ProjectView API (API used for project creation). This test suite is composed by the following unit tests:
-	1. TestDoCreateProjectAction - Action to perform a new create project
-	1. testHandleSelectProviderAndCreateProjectjson - Select the roiver where the new project.json will be created (here is the local file system)
+Tested sucessfully on Chrome/Chromium, and Firefox.
 
-Tested sucessfully on Chrome/Chromium.
-## TODO
- 
-* Will be tested later on Safari, Firefox, Opera, IE
+__NB__: 
+
+* On IE, no Ares Test Reporter window is spawned. 
+* The test reporting in done on the console. This is due to the postMessage lack of support on IE. See <http://blogs.msdn.com/b/ieinternals/archive/2009/09/16/bugs-in-ie8-support-for-html5-postmessage-sessionstorage-and-localstorage.aspx>
+
 
 
