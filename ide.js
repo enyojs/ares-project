@@ -500,7 +500,7 @@ if (argv.runtest) {
 
 server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, function () {
 	var tcpAddr = server.address();
-	var url = "http://" + tcpAddr.address + ":" + tcpAddr.port + "/ide/ares/" + page;
+	var url = "http://" + (argv.host || "127.0.0.1") + ":" + tcpAddr.port + "/ide/ares/" + page;
 	if (argv.browser) {
 		// Open default browser
 		var info = platformOpen[process.platform] ;
