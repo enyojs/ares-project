@@ -1,6 +1,6 @@
 {
   "name": "ares-ide",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "dependencies": {
     "async": {
       "version": "0.1.22",
@@ -116,6 +116,16 @@
       "version": "0.3.4",
       "from": "mkdirp@0.3.4"
     },
+    "nopt": {
+      "version": "2.1.1",
+      "from": "nopt@",
+      "dependencies": {
+        "abbrev": {
+          "version": "1.0.4",
+          "from": "abbrev@1"
+        }
+      }
+    },
     "npmlog": {
       "version": "0.0.2",
       "from": "npmlog@",
@@ -123,16 +133,6 @@
         "ansi": {
           "version": "0.1.2",
           "from": "ansi@~0.1.2"
-        }
-      }
-    },
-    "optimist": {
-      "version": "0.3.5",
-      "from": "optimist@0.3.5",
-      "dependencies": {
-        "wordwrap": {
-          "version": "0.0.2",
-          "from": "wordwrap@0.0.2"
         }
       }
     },

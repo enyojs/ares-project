@@ -9,70 +9,69 @@ var fs = require("fs"),
     path = require("path"),
     express = require("express"),
     npmlog = require('npmlog'),
-    optimist = require("optimist"),
+    nopt = require('nopt'),
     util  = require('util'),
     spawn = require('child_process').spawn,
     querystring = require("querystring"),
-    http = require('http') ;
+    http = require('http');
+
 var myDir = typeof(__dirname) !== 'undefined' ?  __dirname : path.resolve('') ;
 var HttpError = require(path.resolve(myDir, "hermes/lib/httpError"));
 
-var log = npmlog;
-log.heading = 'ares';
-log.level = 'warn';
+/**********************************************************************/
 
-var argv = optimist.usage('\nAres IDE, a front-end designer/editor web applications.\nUsage: "$0" [OPTIONS]\n')
-	.options('h', {
-		alias : 'help',
-		description: 'help message',
-		boolean: true
-	})
-	.options('T', {
-		alias : 'runtest',
-		description: 'Run the non-regression test suite',
-		boolean: true
-	})
-	.options('b', {
-		alias : 'browser',
-		description: 'Open the default browser on the Ares URL',
-		boolean: true
-	})
-	.options('p', {
-		alias : 'port',
-		description: 'port (o) local IP port of the express server (default: 9009, 0: dynamic)',
-		default: '9009'
-	})
-	.options('H', {
-		alias : 'host',
-		description: 'host to bind the express server onto',
-		default: '127.0.0.1'
-	})
-	.options('a', {
-		alias : 'listen_all',
-		description: 'When set, listen to all adresses. By default, listen to the address specified with -H',
-		'boolean': true
-	})
-	.options('c', {
-		alias : 'config',
-		description: 'IDE configuration file',
-		default: path.resolve(myDir, "ide.json")
-	})
-	.options('l', {
-		alias : 'level',
-		description: "IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')",
-		default: 'http'
-	})
-	.options('L', {
-		alias : 'log',
-		description: "Log IDE debug to ./ide.log",
-		boolean: true
-	})
-	.argv;
+var knownOpts = {
+	"help":		Boolean,
+	"runtest":	Boolean,
+	"browser":	Boolean,
+	"port":		Number,
+	"host":		String,
+	"listen_all":	Boolean,
+	"config":	path,
+	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
+	"log":		Boolean
+};
+var shortHands = {
+	"h": ["--help"],
+	"T": ["--runtest"],
+	"b": ["--browser"],
+	"p": ["--port"],
+	"H": ["--host"],
+	"a": ["--listen_all"],
+	"c": ["--config"],
+	"l": ["--level"],
+	"L": ["--log"]
+};
+var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ide.js'*/);
+
+argv.config = argv.config || path.join(__dirname, "ide.json");
+argv.host = argv.host || "127.0.0.1";
+argv.port = argv.port || 9009;
 
 if (argv.help) {
-	optimist.showHelp();
+	console.log("\n" +
+		"Ares IDE, a front-end designer/editor web applications.\n" +
+		"\n" +
+		"Usage: 'node ./ide.js' [OPTIONS]\n" +
+		"\n" +
+		"OPTIONS:\n" +
+		"  -h, --help        help message                                                                           [boolean]\n" +
+		"  -T, --runtest     Run the non-regression test suite                                                      [boolean]\n" +
+		"  -b, --browser     Open the default browser on the Ares URL                                               [boolean]\n" +
+		"  -p, --port        port (o) local IP port of the express server (default: 9009, 0: dynamic)               [default: '9009']\n" +
+		"  -H, --host        host to bind the express server onto                                                   [default: '127.0.0.1']\n" +
+		"  -a, --listen_all  When set, listen to all adresses. By default, listen to the address specified with -H  [boolean]\n" +
+		"  -c, --config      IDE configuration file                                                                 [default: './ide.json']\n" +
+		"  -l, --level       IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')                  [default: 'http']\n" +
+		"  -L, --log         Log IDE debug to ./ide.log                                                             [boolean]\n");
 	process.exit(0);
 }
+
+/**********************************************************************/
+
+var log = npmlog;
+log.heading = 'ares';
+log.level = 'http';
 
 log.level = argv.level || 'http';
 if (argv.log) {
@@ -94,6 +93,8 @@ function m() {
 }
 
 log.info('main', m("Arguments:", argv));
+
+/**********************************************************************/
 
 // Exit path
 
@@ -448,10 +449,17 @@ ide.res.services.filter(function(service){
 // Start the ide server
 
 var enyojsRoot = path.resolve(myDir,".");
-var app = express.createServer();
 
-var port = parseInt(argv.port, 10);
-var addr = argv.host;
+var app, server;
+if (express.version.match(/^2\./)) {
+	// express-2.x
+	app = express.createServer();
+	server = app;
+} else {
+	// express-3.x
+	app = express();
+	server = http.createServer(app);
+}
 
 app.configure(function(){
 
@@ -483,8 +491,6 @@ app.configure(function(){
 
 });
 
-app.listen(port, argv.listen_all ? null : addr);
-
 // Run non-regression test suite
 
 var page = "index.html";
@@ -492,14 +498,16 @@ if (argv.runtest) {
 	page = "test.html";
 }
 
-// Open default browser
-
-var url = "http://" + addr + ":" + port + "/ide/ares/" + page;
-if (argv.browser) {
-	var info = platformOpen[process.platform] ;
-	spawn(info[0], info.slice(1).concat([url]));
-} else {
-	log.http('main', "Ares now running at <" + url + ">");
-}
+server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, function () {
+	var tcpAddr = server.address();
+	var url = "http://" + (argv.host || "127.0.0.1") + ":" + tcpAddr.port + "/ide/ares/" + page;
+	if (argv.browser) {
+		// Open default browser
+		var info = platformOpen[process.platform] ;
+		spawn(info[0], info.slice(1).concat([url]));
+	} else {
+		log.http('main', "Ares now running at <" + url + ">");
+	}
+});
 
 log.info('main', "Press CTRL + C to shutdown");
