@@ -81,8 +81,14 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
+	<command>echo</command>
+	<target><![CDATA[ares_phobos_document_label replace by ares_phobos_button]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<!--old assertion: assertText | id=ares_phobos_documentLabel | App.js-->
+<selenese>
 	<command>assertText</command>
-	<target><![CDATA[id=ares_phobos_documentLabel]]></target>
-	<value><![CDATA[App.js]]></value>
+	<target><![CDATA[id=ares_phobos_button]]></target>
+	<value><![CDATA[File]]></value>
 </selenese>
 </TestCase>
