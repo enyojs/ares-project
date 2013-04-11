@@ -83,7 +83,7 @@ enyo.kind({
 					{kind: "CategoryItem"}
 				]}
 			]},
-			{kind:"onyx.InputDecorator",classes:"ares-filter", layoutKind:"FittableColumnsLayout", components: [
+			{kind:"onyx.InputDecorator",classes:"deimos-filter", layoutKind:"FittableColumnsLayout", components: [
 				{kind: "onyx.Input", fit:true, placeholder: "filter"},
 				{kind: "onyx.Icon", src:"$deimos/images/search-input-search.png", classes:"search"}
 			]}

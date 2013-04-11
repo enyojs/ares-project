@@ -89,3 +89,5 @@
 	margin-right: 10px;
 	margin-left:  10px;
 }
+.deimos-filter { width:100%; margin-top:10px; }
+.deimos-filter .onyx-icon.search { height: 20px; }

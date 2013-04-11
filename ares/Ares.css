@@ -321,13 +321,3 @@ body {
 .ares-local-waitpopup { text-align: center; padding: 20px; }
 .ares-local-waitpopup img {	width: 54px; height: 55px; }
 .ares-local-waitpopup .message { padding-top: 10px; }
-
-.ares-filter { width:100%; margin-top:10px; }
-.ares-filter .onyx-icon.search { height: 20px; }
-
-.ares-preview { margin: 4px; background-color: #DDD; }
-.ares-preview .ares-device-config { width: 150px; margin: 4px; }
-.ares-device-config>:first-child {padding-top: 8px; }
-.ares-device-config .onyx-groupbox> *:not(.onyx-groupbox-header) { padding: 7px;}
-.ares-device-config .onyx-groupbox .ares-zoom { padding: 4px 0px;}
-.ares-device-config .onyx-button.ares-preview-button { padding: 5px; width: 100%; margin-bottom: 5px;}

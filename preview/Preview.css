@@ -6,3 +6,9 @@
 	-webkit-border-radius: 20px;
 	border-radius: 20px;
 }
+.ares-preview { margin: 4px; background-color: #DDD; }
+.ares-preview .ares-device-config { width: 150px; margin: 4px; }
+.ares-device-config>:first-child {padding-top: 8px; }
+.ares-device-config .onyx-groupbox> *:not(.onyx-groupbox-header) { padding: 7px;}
+.ares-device-config .onyx-groupbox .ares-zoom { padding: 4px 0px;}
+.ares-device-config .onyx-button.ares-preview-button { padding: 5px; width: 100%; margin-bottom: 5px;}
