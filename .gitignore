@@ -29,4 +29,5 @@ $*
 /node_modules/tunnel
 /node_modules/zipstream
 /node_modules/npmlog
+test/root
 /project.json
