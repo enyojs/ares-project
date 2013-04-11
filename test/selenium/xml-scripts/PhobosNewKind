@@ -87,15 +87,10 @@
 </selenese>
 <selenese>
 	<command>assertTextPresent</command>
-	<target><![CDATA[App.js
-SaveNew Kind
+	<target><![CDATA[File
+New Kind
 Editor SettingsDesigner]]></target>
 	<value><![CDATA[]]></value>
-</selenese>
-<selenese>
-	<command>assertText</command>
-	<target><![CDATA[id=ares_phobos_documentLabel]]></target>
-	<value><![CDATA[App.js]]></value>
 </selenese>
 <selenese>
 	<command>clickAt</command>
