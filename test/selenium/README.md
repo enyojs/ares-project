@@ -83,7 +83,7 @@ Main tasks:
 
 * Open the xml-scripts in Selenium IDE (**Back to:**  Opening And Configuring the IDE),
 
-* Export _each_ test case with JAVA/Junit 4/WEbDriver formatter and save the file under `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref`
+* Export _each_ test case with JAVA/Junit 4/WEbDriver formatter and save the file under `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref` directory. Note: Be sure to *double-click* on a test case before exporting it. (if the test case name is not in bold font, you have forgotten to double-click)
 	
 **Note:** For example, the NewProject test case will be converted into NewProject.java … etc.
 
@@ -131,16 +131,19 @@ Install the following softwares:
 
 #### Eclipse project setup
 
-In Eclipse:
+In Eclipse, on first intall:
 
 * create the Selenium Ares TestSuite java project
 * create the AresTestSuite package,
 * create src (java code) and resources (AresConfig.xml) sub-folders
 * configure build-path; JRE system library and TestNG eclipse plugin
 * configure the libraries build-path; add external jars retrieved from selenium-java-2.30.0.zip java bindings
+* In `resources/AresTestSuite`, create `AresConfig.xml` file. 
+
+In Eclipse, on first install *and* update of test suite:
+
 * In `src/AresTestSuite`, import the patched java code located under `./ares-project/test/selenium/webdriver-java-diff-patch/java-ref` into the Ares TestSuite project
 * In `src/AresTestSuite`, import the java code available under `./ares-project/test/selenium/webdriver-java`
-* In `resources/AresTestSuite`, create `AresConfig.xml` file. 
 
 Here is one example of the AresConfig.xml, modify it to suit your setup:
 
@@ -163,7 +166,7 @@ Here is one example of the AresConfig.xml, modify it to suit your setup:
 
 #### TestNG suite setup
 
-Create `testng.xml` file directly user AresTestSuite project. Skip the last test if you do not have phonegap
+Create or update `testng.xml` file directly user AresTestSuite project. Skip the last test if you do not have phonegap
 credentials:
 
 	<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
