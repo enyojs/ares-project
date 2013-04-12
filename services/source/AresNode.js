@@ -1,8 +1,8 @@
 /**
- *
- * ares.Node kind represents a direcroty or a file in HermesFileTree.
- * this kind inherits from enyo.Node
- *
+ * Represents a directory or a file in {HermesFileTree}
+ * 
+ * @class ares.Node
+ * @augments {enyo.Node}
  */
 
 enyo.kind({
@@ -54,7 +54,7 @@ enyo.kind({
 	stopLoading: function() {
 		this.$.extra.setContent("");
 	},
-    updateNodeContent: function(files) {
+	updateNodeContent: function(files) {
 		var i = 0 , nfiles, rfiles, res, modified = 0, newControl ;
 
 		if (this.debug) this.log("updateNodeContent on",this) ;
@@ -176,7 +176,7 @@ enyo.kind({
 	},
 
 	/**
-	 * getNodeNamed
+	 * getNodeWithId
 	 * @public
 	 * @param {String} id
 	 * @return a ares.Node for a file or a directory id passed in parameter
@@ -264,12 +264,12 @@ enyo.kind({
 				tracker.dec(); // end updateNodes
 			}).
 			error(this, function(inSender, inError) {
-				var errMsg = "Error refreshing the file list (" + inError + ")";
+				var errMsg = "*** Error refreshing the file list (" + inError + ")";
 				try {
 					errMsg += ": " + JSON.parse(inSender.xhrResponse.body).message;
 				} catch(e) {
 				}
-				this.showErrorPopup(errMsg);
+				this.log(errMsg);
 			});
 
 		if( belowTop ) {

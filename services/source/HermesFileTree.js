@@ -2,25 +2,10 @@ enyo.kind({
 	name: "HermesFileTree",
 	kind: "FittableRows",
 	events: {
-		// FIXME: check which events are still used
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
-		onProjectFound: "",
-		onConfirm: "",
-		onNewFileConfirm: "",
-		onDeleteConfirm: "",
-		onRenameConfirm: "",
-		onNewFolderConfirm: "",
-		onCopyFileConfirm: ""
-
-	/*
-	 * from Harmonia
-	 * onFolderClick: "selectFolder",
-	 	onNewFolderConfirm: "newFolderConfirm",
-			onRenameConfirm: "renameConfirm",
-			onCopyFileConfirm: "copyFileConfirm"
-*/
+		onTreeChanged: ""
 	},
 	handlers: {
 		onNodeDblClick: "nodeDblClick"
@@ -29,8 +14,6 @@ enyo.kind({
 		serverName: ""
 	},
 	components: [
-
-		// Hermes Tool bar
 		{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", components: [
 			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 				{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
@@ -73,10 +56,10 @@ enyo.kind({
 		// Hermes popups
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "Service returned an error"},
 		{name: "nameFilePopup", kind: "NamePopup", type: "file", fileName:"", placeHolder: "File Name", onCancel: "newFileCancel", onConfirm: "newFileConfirm"},
-		{name: "nameFolderPopup", kind: "NamePopup", type: "folder", fileName: "", placeHolder: "Folder Name", onCancel: "newFolderCancel", onConfirm: "newFolderConfirm"},
+		{name: "nameFolderPopup", kind: "NamePopup", type: "folder", fileName: "", placeHolder: "Folder Name", onCancel: "_newFolderCancel", onConfirm: "_newFolderConfirm"},
 		{name: "nameCopyPopup", kind: "NamePopup", title: "Name for copy of", fileName: "Copy of foo.js", onCancel: "copyFileCancel", onConfirm: "copyFileConfirm"},
 		{name: "deletePopup", kind: "DeletePopup", onCancel: "deleteCancel", onConfirm: "deleteConfirm"},
-		{name: "renamePopup", kind: "RenamePopup", title: "New name for ", fileName: "foo.js", onCancel: "renameCancel", onConfirm: "renameConfirm"}
+		{name: "renamePopup", kind: "RenamePopup", title: "New name for ", fileName: "foo.js", onCancel: "_renameCancel", onConfirm: "_renameConfirm"}
 
 	],
 
@@ -340,7 +323,7 @@ enyo.kind({
 
 	/**
 	 * @public
-	 * Returns selected dir or container dir node
+	 * @returns selected folder {Ares.Node} or containing folder {Ares.Node}
 	 */
 	getFolderOfSelectedNode: function() {
 		var node = this.selectedNode;
@@ -350,18 +333,18 @@ enyo.kind({
 
 	/**
 	 * @public
-	 * Returns a node structure for the parent node of the currently selected node
+	 * @returns a node structure for the parent node of the currently selected node
 	 */
 	getParentNodeOfSelected: function() {
-		return this.selectedNode.container ;
+		return this.selectedNode && this.selectedNode.container ;
 	},
 
 	/**
 	 * @public
-	 * Returns a file data structure for the parent node of the currently selected node
+	 * @returns a file data structure for the parent node of the currently selected node
 	 */
 	getParentOfSelected: function() {
-		return this.selectedNode.container.file; // is a folder...
+		return this.selectedNode && this.selectedNode.container && this.selectedNode.container.file;
 	},
 
 	// User Interaction for New File op
@@ -395,9 +378,6 @@ enyo.kind({
 			this.showErrorPopup("Select a parent folder first");
 		}
 	},
-	newFolderCancel: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-	},
 	// User Interaction for Copy File/Folder op
 	copyClick: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
@@ -426,9 +406,6 @@ enyo.kind({
 		} else {
 			this.showErrorPopup("Select a file or folder to rename first");
 		}
-	},
-	renameCancel: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
 	},
 	// User Interaction for Delete File/Folder op
 	deleteClick: function(inSender, inEvent) {
@@ -463,26 +440,6 @@ enyo.kind({
 		}
 	},
 
-
-	//TODO: How much of the file manipulation code lives here, vs. in HermesFileTree?
-	xxselectFile: function(inSender, inEvent) {
-		if (this.debug) this.log(inEvent.file);
-	},
-	xxselectFolder: function(inSender, inEvent) {
-		if (this.debug) this.log(inEvent.file);
-	},
-	xxnewSelect: function(inSender, inEvent) {
-		if (inSender.name !== "providerList") {
-			this.selectedFile=inEvent.file;
-		}
-	},
-	xxnewDeselect: function(inSender, inEvent) {
-		this.selectedFile=inEvent.file;
-	},
-
-	// File Operations
-
-	// called when user has clicked 'ok'
 	newFileConfirm: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		var folderId = inEvent.folderId;
@@ -492,7 +449,7 @@ enyo.kind({
 		var templatePath;
 		var location = window.location.toString();
 		var prefix = location.substring(0, location.lastIndexOf("/")+1);
-		if (name == "package.js") {
+		if (name === "package.js") {
 			templatePath = prefix+"../templates/package.js";
 		} else {
 			templatePath = prefix+"../templates/template."+type;
@@ -540,217 +497,139 @@ enyo.kind({
 	createFile: function(name, folderId, content) {
 		if (this.debug) this.log("Creating new file "+name+" into folderId="+folderId);
 		this.$.service.createFile(folderId, name, content)
-			.response(this, function(inSender, inResponse) {
-				if (this.debug) this.log("createFile response: ",inResponse);
-				// work-around ENYO-2133 and possible fallout
-				var fileId = Array.isArray(inResponse)      ? inResponse[0].id
-						   : typeof inResponse === 'object' ? inResponse.id
-						   :                                  inResponse ;
-				var that = this ;
-				this.packageMunge(
-					this.getFolderOfSelectedNode(),
-					name,
-					this.packageAppend,
-					function () {
-						// passing the id from response will make hermeFileTree select the new file
-						that.delayedRefresh("file " + name + " creation done").go(fileId) ;
+			.response(this, function(inSender, inNodes) {
+				if (this.debug) this.log("inNodes: ",inNodes);
+				var parentNode = this.getFolderOfSelectedNode(),
+				    pkgNode = parentNode.getNodeNamed('package.js');
+				this.doTreeChanged({
+					addNode: {
+						service: this.$.service,
+						parentNode: parentNode && parentNode.file,
+						pkgNode: pkgNode && pkgNode.file,
+						node: inNodes[0]
 					}
-				) ;
+				});
+				this.refreshFileTree(null, inNodes[0].id);
 			})
 			.error(this, function(inSender, inError) {
-				if (this.debug) this.log("Error: "+inError);
+				this.warn("Unable to create file:", name, inError);
 				this.showErrorPopup("Creating file "+name+" failed:" + inError);
 			});
 	},
-
-	newFolderConfirm: function(inSender, inEvent) {
+	/** @private */
+	_newFolderCancel: function(inSender, inEvent) {
+		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
+	},
+	/** @private */
+	_newFolderConfirm: function(inSender, inEvent) {
+		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
 		var folderId = inEvent.folderId;
 		var name = inSender.fileName.trim();
 		if (this.debug) this.log("Creating new folder "+name+" into folderId="+folderId);
 		this.$.service.createFolder(folderId, name)
-			.response(this, function(inSender, inResponse) {
-				if (this.debug) this.log("newFolderConfirm Response: ", inResponse);
-				// work-around ENYO-2133 and possible fallout
-				var folderId = Array.isArray(inResponse)      ? inResponse[0].id
-							 : typeof inResponse === 'object' ? inResponse.id
-							 :                                  inResponse ;
-				var that = this ;
-				// FIXME: run the 2 followings functions in parrallel and call delayedRefresh when they are done
-				// add new directory in current package.js
-				this.packageMunge(
-					this.getFolderOfSelectedNode(),
-					name,
-					this.packageAppend,
-					function () {that.delayedRefresh("folder creation done").go(folderId) ;}
-				);
-
-				// Create empty package.js
-				this.packageCreate (
-					inResponse // new folder id
-				) ;
+			.response(this, function(inSender, inFolder) {
+				if (this.debug) this.log("newFolderConfirm inFolder: ", inFolder);
+				var parentNode = this.getFolderOfSelectedNode(),
+				    pkgNode = parentNode.getNodeNamed('package.js');
+				this.doTreeChanged({
+					addNode: {
+						service: this.$.service,
+						parentNode: parentNode && parentNode.file,
+						pkgNode: pkgNode && pkgNode.file,
+						node: inFolder
+					}
+				});
+				this.refreshFileTree(null, inFolder.id /*selectId*/);
 			})
 			.error(this, function(inSender, inError) {
-				if (this.debug) this.log("Error: "+inError);
+				this.warn("Unable to create folder:", name, inError);
 				this.showErrorPopup("Creating folder "+name+" failed:" + inError);
 			});
 	},
-
-	renameConfirm: function(inSender, inEvent) {
-		var path = inEvent.path;
-		var oldId = this.selectedFile.id;
+	/** @private */
+	_renameCancel: function(inSender, inEvent) {
+		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
+	},
+	/** @private */
+	_renameConfirm: function(inSender, inEvent) {
+		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
 		var newName = inSender.fileName.trim();
-		if (this.debug) this.log("Renaming file " + oldId + " as " + newName + " at " + path);
-		this.$.service.rename(oldId, newName)
-			.response(this, function(inSender, inResponse) {
-				if (this.debug) this.log("Response: "+inResponse);
-				this.delayedRefresh("rename done").go(inResponse) ;
+		if (this.debug) this.log("Renaming '" + this.selectedFile + "' as '" + newName + "'");
+		this.$.service.rename(this.selectedFile.id, newName)
+			.response(this, function(inSender, inNode) {
+				if (this.debug) this.log("inNode: "+inNode);
+				var parentNode = this.getParentNodeOfSelected(),
+				    pkgNode = parentNode.getNodeNamed('package.js');
+				this.doTreeChanged({
+					removeNode: {
+						service: this.$.service,
+						parentNode: parentNode && parentNode.file,
+						pkgNode: pkgNode && pkgNode.file,
+						node: this.selectedFile
+					},
+					addNode: {
+						service: this.$.service,
+						parentNode: parentNode && parentNode.file,
+						pkgNode: pkgNode && pkgNode.file,
+						node: inNode
+					}
+				});
+				this.refreshFileTree(null, inNode.id /*selectId*/);
 			})
 			.error(this, function(inSender, inError) {
-				if (this.debug) this.log("Error: "+inError);
-				this.showErrorPopup("Renaming file "+oldId+" as " + newName +" failed:" + inError);
+				this.warn("Unable to rename:", this.selectedFile, "into", newName, inError);
+				this.showErrorPopup("Renaming file '" + this.selectedFile.name + "' as '" + newName +"' failed");
 			});
 	},
-	deleteConfirm: function(inSender, inEvent) {
-		if (this.debug) this.log(inEvent);
-		var nodeId = inSender.nodeId;
-		if (this.debug) this.log(this.selectedFile);
-		var oldId = this.selectedFile.id;
-		var name = this.selectedFile.name ;
-		var oldPath = this.selectedFile.path;
-		var method = this.selectedFile.isDir ? "deleteFolder" : "deleteFile";
-		var upperDirNode = this.getParentNodeOfSelected() ;
-		if (this.debug) this.log(method + ' ' + name + " in folder " + upperDirNode.name, upperDirNode);
 
-		this.$.service.remove(inEvent.nodeId)
-			.response(this, function(inSender, inResponse) {
-				if (this.debug) this.log("Response: "+inResponse);
-				var that = this ;
-				this.packageMunge(
-					upperDirNode,
-					name,
-					this.packageChop,
-					function () {that.delayedRefresh("delete done").go() ;}
-				);
+	deleteConfirm: function(inSender, inEvent) {
+		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
+		if (this.debug) this.log("selectedFile:", this.selectedFile);
+		var parentNode = this.getParentNodeOfSelected(),
+		    pkgNode = parentNode.getNodeNamed('package.js');
+		if (this.debug) this.log("parentNode:", parentNode, "pkgNode:", pkgNode);
+		this.$.service.remove(this.selectedFile.id)
+			.response(this, function(inSender, inParentFolder) {
+				if (this.debug) this.log("inParentFolder: ", inParentFolder);
+				this.doTreeChanged({
+					removeNode: {
+						service: this.$.service,
+						parentNode: parentNode && parentNode.file,
+						pkgNode: pkgNode && pkgNode.file,
+						node: this.selectedFile
+					}
+				});
+				this.refreshFileTree(null, inParentFolder.id /*selectId*/);
 			})
 			.error(this, function(inSender, inError) {
-				if (this.debug) this.log("Error: "+inError);
-				this.showErrorPopup("Deleting file "+oldPath+" failed:" + inError);
+				this.warn("Unable to delete:", this.selectedFile, inError);
+				this.showErrorPopup("Deleting '" + this.selectedFile.name + "' failed");
 			});
 	},
+
 	copyFileConfirm: function(inSender, inEvent) {
 		if (this.debug) this.log(inEvent);
 		var oldName = this.selectedFile.name;
 		var newName = inSender.fileName.trim();
 		if (this.debug) this.log("Creating new file " + newName + " as copy of" + this.selectedFile.name);
 		this.$.service.copy(this.selectedFile.id, newName)
-			.response(this, function(inSender, inResponse) {
-				if (this.debug) this.log("Response: "+inResponse);
-				this.delayedRefresh("copy done").go(inResponse) ;
+			.response(this, function(inSender, inFsNode) {
+				if (this.debug) this.log("inNode: "+inFsNode);
+				var parentNode = this.getParentNodeOfSelected(),
+				    pkgNode = parentNode.getNodeNamed('package.js');
+				this.doTreeChanged({
+					addNode: {
+						service: this.$.service,
+						parentNode: parentNode && parentNode.file,
+						pkgNode: pkgNode && pkgNode.file,
+						node: inFsNode
+					}
+				});
+				this.refreshFileTree(null, inFsNode.id /*selectId*/);
 			})
 			.error(this, function(inSender, inError) {
-				if (this.debug) this.log("Error: "+inError);
+				this.warn("Unable to copy:", this.selectedFile, "as", newName, inError);
 				this.showErrorPopup("Creating file "+newName+" as copy of" + this.selectedFile.name +" failed:" + inError);
-			});
-	},
-
-	// package.js munging section
-
-	packageMunge: function (folderNode, name, op, callback)  {
-		if ( ! name.match(RegExp(/\.(js|css)$/) ) ) {
-			if (this.debug) this.log(' skipped: ' + name + ' is not a js or css file' ) ;
-			return ; // skip non js non css files.
-		}
-
-		// need to read package.js from same dir
-		var pkgNode = folderNode.getNodeNamed('package.js') ;
-
-		if (! pkgNode ) {
-			if (this.debug) this.log(' skipped: for ' + name + '. No package.js file found' ) ;
-			return ; // skip operation when no package.js is found
-		}
-
-		var pkgId =  pkgNode.file.id ;
-		var that = this ;
-
-		async.waterfall(
-			[
-				this.packageRead.bind(this, pkgId),
-				op.bind(this, name),
-				this.packageSave.bind(this, pkgId)
-			],
-			function (err) {
-				if (err) {
-					that.log("package op NOT done, err is",err);
-				}
-				callback() ;
-			}
-		) ;
-	},
-
-	packageRead: function (pkgId, callback) {
-		this.$.service.getFile(pkgId). response(
-			this,
-			function(inSender, inContent) {
-				callback (null, inContent.content);
-			}
-		) ;
-	},
-
-	packageAppend: function ( name, pkgContent, callback ) {
-		if (this.debug) this.log(' called for file ' + name ) ;
-		var toMatch = name.replace(/\./, "\\.") ; // replace '.' with '\.'
-		var re = new RegExp("\\b" + toMatch + "\\b") ;
-		var result ;
-		if (pkgContent.match(re)) {
-			callback('file ' + name + ' is already is package.js') ;
-		}
-		else {
-			result = pkgContent
-				.replace(/\)/,'\t"' + name + '"\n)') // insert new name
-				.replace(/("|')(\s*)"/,'$1,$2"');    // add potentially missing comma
-			callback(null,result);
-		}
-	},
-
-	packageChop: function ( name, pkgContent, callback ) {
-		var toMatch = name.replace(/\./, "\\.") ; // replace '.' with '\.'
-		if (this.debug) this.log(' called for file ' + name + ' regexp is ' , toMatch) ;
-		var re = new RegExp("(\"|')" + toMatch + "(\"|')") ;
-		var result ;
-		if (pkgContent.match(re)) {
-			result = pkgContent
-				.replace(re,'')            // remove name
-				.replace(/,\s*,/,",")      // remove duplicated comma
-				.replace(/,\s*\)/,"\n)");  // remove comma before ')'
-			callback(null,result);
-		}
-		else  {
-			callback('cannot find ' + name + ' in package.js');
-		}
-	},
-
-	packageSave: function ( pkgId, pkgContent,callback) {
-		if (typeof pkgContent === undefined) {
-			callback(null);
-			return;
-		}
-
-		this.$.service.putFile(pkgId, pkgContent) .response(
-			this,
-			function() {
-				callback(null) ;
-			}
-		);
-	},
-
-	packageCreate: function (folderId, callback) {
-		this.$.service.createFile(inResponse, "package.js", "enyo.depends(\n)\n")
-			.response(this, function(inSender, inResponse) {
-				if (this.debug) this.log("package.js create response: ",inResponse);
-			})
-			.error(this, function(inSender, inError) {
-				if (this.debug) this.log("Error: "+inError);
-				this.showErrorPopup("Creating file package.js failed:" + inError);
 			});
 	}
 });

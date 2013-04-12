@@ -79,20 +79,26 @@ FsLocal.prototype.get = function(req, res, next) {
 };
 
 FsLocal.prototype.mkcol = function(req, res, next) {
-	var newPath, newId, self = this,
+	var newPath, newId, newName, self = this,
 	    pathParam = req.param('path'),
 	    nameParam = req.param('name');
 	if (!nameParam) {
 		next(new HttpError("missing 'name' query parameter", 400 /*Bad-Request*/));
 		return;
 	}
-	newPath = path.join(pathParam, path.basename(nameParam));
+	newName = path.basename(nameParam);
+	newPath = path.join(pathParam, newName);
 	newId = this.encodeFileId(newPath);
 
 	fs.mkdir(path.join(this.root, newPath), function(err) {
 		next(err, {
 			code: 201, // Created
-			body: {id: newId, path: self.normalize(newPath), isDir: true}
+			body: {
+				id: newId,
+				path: self.normalize(newPath),
+				name: newName,
+				isDir: true
+			}
 		});
 	});
 };
@@ -126,7 +132,8 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 	if (path.basename(relPath).charAt(0) ===".") {
 		// Skip hidden files & folders (using UNIX
 		// convention: XXX do it for Windows too)
-		return next();
+		next();
+		return;
 	}
 
 	fs.stat(localPath, (function(err, stat) {
@@ -333,6 +340,7 @@ FsLocal.prototype.putFile = function(req, file, next) {
 			node = {
 				id: encodeFileId(urlPath),
 				path: urlPath,
+				name: path.basename(urlPath),
 				isDir: false
 			};
 			cb1();
@@ -350,7 +358,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 	    folderIdParam = req.param('folderId'),
 	    overwriteParam = req.param('overwrite'),
 	    srcPath = path.join(this.root, pathParam);
-	var dstPath, dstRelPath;
+	var dstPath, dstRelPath, srcNode;
 	if (nameParam) {
 		// rename/copy file within the same collection (folder)
 		dstRelPath = path.join(path.dirname(pathParam),

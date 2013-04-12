@@ -3,6 +3,7 @@ enyo.kind({
 	kind: "Control",
 	classes: "onyx",
 	fit: true,
+	debug: true,
 	components: [
 		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
 			{components: [
@@ -27,13 +28,15 @@ enyo.kind({
 			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
 		]},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "Service returned an error"},
 		{kind: "ServiceRegistry"}
 	],
 	handlers: {
 		onReloadServices: "handleReloadServices",
 		onUpdateAuth: "handleUpdateAuth",
 		onShowWaitPopup: "showWaitPopup",
-		onHideWaitPopup: "hideWaitPopup"
+		onHideWaitPopup: "hideWaitPopup",
+		onTreeChanged: "_treeChanged"
 	},
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
@@ -374,6 +377,27 @@ enyo.kind({
 	hideWaitPopup: function() {
 		this.$.waitPopup.hide();
 	},
+	showErrorPopup : function(msg) {
+		this.$.errorPopup.setErrorMsg(msg);
+		this.$.errorPopup.show();
+	},
+	hideErrorPopup: function() {
+		this.$.errorPopup.hide();
+	},
+	/**
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent as defined by calls to HermesFileTree#doTreeChanged
+	 */
+	_treeChanged: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		Ares.PackageMunger.changeNodes(inEvent, (function(err) {
+			if (err) {
+				this.warn(err);
+			}
+		}).bind(this));
+	},
+
 	statics: {
 		isBrowserSupported: function() {
 			if (enyo.platform.ie && enyo.platform.ie <= 8) {

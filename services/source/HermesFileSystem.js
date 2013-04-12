@@ -182,12 +182,8 @@ enyo.kind({
 		var newFolder = inFolderId + "/" + inName;
 		return this._request("MKCOL", inFolderId, {name: inName} /*inParams*/)
 			.response(function(inSender, inResponse) {
-				// FIXME: id of created folder needs to be returned from service
-				// FTP node server returns an object, includes 'id' field
-				// DROPBOX node server returns an object, has no 'id' field
-				//this.log("AresProvider.createFolder: inResponse = ", inResponse);
 				if (this.debug) this.log(inResponse);
-				return inResponse.id || inResponse.path || newFolder;
+				return inResponse;
 			});
 	},
 	remove: function(inNodeId) {
