@@ -29,7 +29,8 @@ enyo.kind({
 			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
 		]},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "Service returned an error"},
-		{kind: "ServiceRegistry"}
+		{kind: "ServiceRegistry"},
+		{kind: "Ares.PackageMunger", name: "packageMunger"}
 	],
 	handlers: {
 		onReloadServices: "handleReloadServices",
@@ -392,7 +393,7 @@ enyo.kind({
 	 */
 	_treeChanged: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
-		Ares.PackageMunger.changeNodes(inEvent, (function(err) {
+		this.$.packageMunger.changeNodes(inEvent, (function(err) {
 			if (err) {
 				this.warn(err);
 			}

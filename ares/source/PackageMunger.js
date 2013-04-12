@@ -4,7 +4,7 @@
  * @class Ares.PackageMunger
  * @augments enyo.Component
  */
-enyo.singleton({
+enyo.kind({
 	name: "Ares.PackageMunger",
 	kind: "enyo.Component",
 	debug: true,
