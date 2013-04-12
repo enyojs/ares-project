@@ -8,6 +8,9 @@ enyo.kind({
 	name: "Ares.PackageMunger",
 	kind: "enyo.Component",
 	debug: true,
+	events: {
+		onChangingNode: ""
+	},
 	/**
 	 * Handle a sequence of nodes addition and removal
 	 */
@@ -151,6 +154,8 @@ enyo.kind({
 		}
 		if (newContent === pkgContent) {
 			newContent = null;
+		} else {
+			this.doChangingNode({node: pkgNode});
 		}
 		next(null, pkgNode, newContent);
 	},
@@ -171,6 +176,8 @@ enyo.kind({
 		}
 		if (newContent === pkgContent) {
 			newContent = null;
+		} else {
+			this.doChangingNode({node: pkgNode});
 		}
 		next(null, pkgNode, newContent);
 	},

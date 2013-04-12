@@ -37,7 +37,8 @@ enyo.kind({
 		onUpdateAuth: "handleUpdateAuth",
 		onShowWaitPopup: "showWaitPopup",
 		onHideWaitPopup: "hideWaitPopup",
-		onTreeChanged: "_treeChanged"
+		onTreeChanged: "_treeChanged",
+		onChangingNode: "_nodeChanging"
 	},
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
@@ -97,9 +98,11 @@ enyo.kind({
 				self.hideWaitPopup();
 				if (inErr) {
 					self.warn("Open failed", inErr);
+					if (typeof next === 'function') next(inErr);
 				} else {
 					fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
 					self.switchToDocument(fileData);
+					if (typeof next === 'function') next();
 				}
 			});
 		}
@@ -209,7 +212,10 @@ enyo.kind({
 	},
 	closeDocument: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
-		this._closeDocument(inEvent.id, function() {});
+		var self = this;
+		this._closeDocument(inEvent.id, function() {
+			self.showFiles();
+		});
 	},
 	/** @private */
 	_closeDocument: function(docId, next) {
@@ -398,6 +404,16 @@ enyo.kind({
 				this.warn(err);
 			}
 		}).bind(this));
+	},
+	/**
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent as defined by calls to Ares.PackageMunger#doChangingNode
+	 */
+	_nodeChanging: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		var docId = Ares.Workspace.files.computeId(inEvent.node);
+		this._closeDocument(docId);
 	},
 
 	statics: {
