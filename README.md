@@ -13,6 +13,12 @@ The Ares project architecture is divided into several main pieces:
 	* **Phobos** - Document management
 	* **Deimos** - Visual designer
 * **Hermes Components** - Pluggable server-side components that provide interfaces to Ares clients for cloud-based services such as file storage and build services.  We're leveraging node.js, but Hermes components can use any server-side tech.
+* **Ares plugins** - Based on Hermes pluggable server-side components, Ares plugins can bring:  
+  * New server-side services with their own configuration
+  * The corresponding browser side code that will be loaded into the Ares IDE  
+See [Ares plugins](#ares-plugins) for more details.
+ 
+
 
 ### Current status
 
@@ -33,6 +39,10 @@ Here are the main features you can start looking at today:
 * UI designer for drag and drop UI editing
 	* Component definitions are round-tripped from the Editor to the Designer, meaning that changes made in one will immediately appear in the other.
 * Integration with [PhoneGap online build](http://build.phonegap.com)
+* Project templates
+	* Allow creation of new projects based on bootplate templates.
+	* Allow creation of new projects based on your own project templates.
+	* See [Project templates](#project-templates) for more information
 	
 ### Future plans
 
@@ -73,6 +83,7 @@ The following features are in the works, and you should see them added as we mov
 
 1. Install NPM developpment dependencies
    
+		$ cd ares-project
 		$ npm -d install
 
 1. Run Ares using `node ide.js` from the GitHub root folder
@@ -190,7 +201,55 @@ Here are a few references to create the necessary signing keys & distribution ce
 ### Dropbox
 
 In order to use Dropbox as storage service for Ares, follow detailed setup instructions in `hermes/README.md`.  The Dropbox connector is not usable without following those instructions.
+ 
+### [Project templates](id:project-templates)
 
+The service "***genZip***" defined in "ide.json" of ares-project or "ide.json" of Ares plugins allows to intanciate new Ares project from project templates such as "**bootplate**" or any customer specific project templates.
+
+The property "***projectTemplateRepositories***" of the service "**genZip**" lists the template definitions that are available at project creation time.
+
+See the section "**Project template service**" in [hermes/README.md](hermes/README.md) for more information.
+
+### [Ares plugins](id:ares-plugins)
+
+Ares plugins can bring additional functionality and configuration to Ares.
+An Ares plugin must follow these rules to be loaded as a plugin:
+
+ * It must be installed in a directory under "_ares-project/node_modules_".  
+ * It must have an "_ide.json_" in its main directory, which:
+   * defines a new service entry
+   * can define the client side code to load in the browser
+   * can update some previously defined services (e.g.: modify/add project templates) 
+
+#### Startup of "node ide.js"
+
+At startup, the process "node ide.js":
+
+ * loads the file "ide.json"
+ * locates the files "node_modules/*/ide.json"
+ * sorts then in lexicographical order
+ * merges them into the loaded configuration following the algorithm described in the next section.
+ * starts services defined in the resulting loaded configuration
+
+#### [Merging Ares plugin configuration](id:merging-configuration)
+
+Ares plugin configuration are merged as follow:
+
+ * New service entries are simply added to the current configuration
+ * Service entries already existing in the current configuration are merged property by property as follow:
+ 	* New properties are simply added to the existing service entry
+ 	* For array, array entries are added to the corresponding array in the existing service
+ 	* For objects, object properties are applied to the corresponding object in the existing service
+ 	* Other properties of same type are applied to overwrite the corresponding entries in the existing service
+ 	* Properties with same name but different types are considered as errors and stop the startup process.
+ * Other top level properties are not yet taken into account
+
+#### Client side Ares plugin
+
+The client code of an Ares plugin is defined by the property "`pluginUrl`" of a service entry in "ide.json".  
+During the initialization process of Ares within the browser, the 'ServiceRegistry' will perform an 'enyo.load' of the javascript file (Usually a 'package.js' file) specified by the property "`pluginUrl`".  
+After being loaded, the new code must invoke `ServiceRegistry.instance.pluginReady();` to notify Ares that the client side code is ready.  
+See the function 'pluginReady' in the file 'services/source/ServiceRegistry.js'.
 
 ## Testing
 

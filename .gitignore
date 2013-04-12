@@ -18,7 +18,8 @@ $*
 /node_modules/mkdirp
 /node_modules/mocha
 /node_modules/nodejs-module-webos-ipkg
-/node_modules/optimist
+/node_modules/nopt/
+/node_modules/npmlog/
 /node_modules/plugin-ares-*
 /node_modules/request
 /node_modules/rimraf
@@ -27,3 +28,6 @@ $*
 /node_modules/temp
 /node_modules/tunnel
 /node_modules/zipstream
+/node_modules/npmlog
+test/root
+/project.json

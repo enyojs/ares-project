@@ -142,10 +142,6 @@ body {
 	padding: 19px;
 	box-sizing: border-box;
 }
-.ares_pview_popup {
-	width: 600px;
-	height: 400px;
-}
 
 .ares_projectList {
 	width: 370px;
@@ -174,10 +170,6 @@ body {
 	display: inline;
 	font-weight: bold;
 	padding-right: 4px;
-}
-
-.ares_projectview_check {
-	margin-right: 16px;
 }
 
 .phobos-find-label {
@@ -275,21 +267,31 @@ body {
 .onyx {
 	font-size: 13px;
 }
+
 .onyx-popup {
 	font-size: 13px;
 }
+
 .onyx-input-decorator > input {
 	font-size: 13px;
 }
+
 .onyx-input-decorator {
 	padding:2px 8px;
 	margin:0px;
 }
+
 .onyx-button {
 	font-size: 13px;
 	padding:2px 8px;
 	margin:0px;
 }
+
+/* display : inline-block missing on onyx.PickerDecorator ? */
+.onyx-picker-decorator{
+	display: inline-block;
+}
+
 .onyx-picker-decorator .onyx-button {
 	padding:2px 8px;
 	margin:0px;
@@ -298,11 +300,89 @@ body {
 .onyx-radiobutton {
 	font-size: 13px;
 	padding-top: 8px 4px;
+	margin-bottom: 15px;
 }
 .onyx-toolbar .onyx-button {
 	height: 28px;
 }
+
 .onyx-item {
 	padding:10px;
 	line-height: 13px;
 }
+
+.onyx-input-decorator {
+	background-image: url("../ares/assets/images/bgInput.png");
+	background-repeat: repeat;
+	border-radius: 4px;
+	border-top: 1px solid rgba(0,0,0, 0.3);
+
+}
+
+.onyx-input-decorator.onyx-focused {
+	background-image: none;
+}
+
+.ares-bordered-toolbar{
+	margin-top:8px;
+	text-align: right;
+}
+
+.ares-toolbar {
+	text-align: right;
+	background-image: none;
+	background-color: #4C4C4C;
+	border: none;
+}
+
+.ares-label {
+	margin-right: 4px;
+	padding-left: 8px;
+}
+
+.ares-fixed-label{
+	min-width: 82px;
+	padding: 0 4px;
+	text-align: right;
+	display: inline-block;
+}
+
+.ares-fixed-input{
+	width: 161px;
+}
+
+.ares-bullet-label {
+	margin-left: 40px;
+}
+
+.ares-row {
+	padding: 3px 0;
+}
+
+.ares-drawer{
+	margin-top: 9px;
+	background-color: #3A3A3A;
+	border-radius: 0.5em;
+	padding:4px;
+	text-align: right;
+}
+
+.ares-drawer>*{
+	margin-right: 5px;
+}
+
+.ares-drawer:before{
+    position: absolute;
+    border-color: transparent transparent #3A3A3A;
+    border-style: solid;
+    border-width: 0 7px 10px;
+    content: "";
+    display: block;
+    top: -9px;
+    left: 9px;
+}
+
+p.break{
+	padding: 1px 0;
+}
+
