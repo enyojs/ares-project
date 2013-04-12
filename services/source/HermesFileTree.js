@@ -502,7 +502,7 @@ enyo.kind({
 				var parentNode = this.getFolderOfSelectedNode(),
 				    pkgNode = parentNode.getNodeNamed('package.js');
 				this.doTreeChanged({
-					addNode: {
+					add: {
 						service: this.$.service,
 						parentNode: parentNode && parentNode.file,
 						pkgNode: pkgNode && pkgNode.file,
@@ -532,7 +532,7 @@ enyo.kind({
 				var parentNode = this.getFolderOfSelectedNode(),
 				    pkgNode = parentNode.getNodeNamed('package.js');
 				this.doTreeChanged({
-					addNode: {
+					add: {
 						service: this.$.service,
 						parentNode: parentNode && parentNode.file,
 						pkgNode: pkgNode && pkgNode.file,
@@ -561,13 +561,13 @@ enyo.kind({
 				var parentNode = this.getParentNodeOfSelected(),
 				    pkgNode = parentNode.getNodeNamed('package.js');
 				this.doTreeChanged({
-					removeNode: {
+					remove: {
 						service: this.$.service,
 						parentNode: parentNode && parentNode.file,
 						pkgNode: pkgNode && pkgNode.file,
 						node: this.selectedFile
 					},
-					addNode: {
+					add: {
 						service: this.$.service,
 						parentNode: parentNode && parentNode.file,
 						pkgNode: pkgNode && pkgNode.file,
@@ -592,7 +592,7 @@ enyo.kind({
 			.response(this, function(inSender, inParentFolder) {
 				if (this.debug) this.log("inParentFolder: ", inParentFolder);
 				this.doTreeChanged({
-					removeNode: {
+					remove: {
 						service: this.$.service,
 						parentNode: parentNode && parentNode.file,
 						pkgNode: pkgNode && pkgNode.file,
@@ -618,7 +618,7 @@ enyo.kind({
 				var parentNode = this.getParentNodeOfSelected(),
 				    pkgNode = parentNode.getNodeNamed('package.js');
 				this.doTreeChanged({
-					addNode: {
+					add: {
 						service: this.$.service,
 						parentNode: parentNode && parentNode.file,
 						pkgNode: pkgNode && pkgNode.file,

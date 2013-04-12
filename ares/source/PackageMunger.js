@@ -12,13 +12,14 @@ enyo.kind({
 	 * Handle a sequence of nodes addition and removal
 	 */
 	changeNodes: function(inOps, next) {
-		var tasks = [];
+		var tasks = [], fn;
 		// Build a list of tasks to be executed one by one by
 		// async.  The key name is expected to be a function
 		// name available in Ares.PackageMunger
 		for (var key in inOps) {
-			if (typeof Ares.PackageMunger[key] === 'function') {
-				tasks.push(Ares.PackageMunger[key].bind(Ares.PackageMunger, inOps[key]));
+			fn = '_' + key + 'Node';
+			if (typeof this[fn] === 'function') {
+				tasks.push(this[fn].bind(this, inOps[key]));
 			}
 		}
 		async.series(tasks, next);
@@ -32,9 +33,9 @@ enyo.kind({
 	 * @property inParam {com.enyojs.ares.fs.node} pkgNode the package.js file node (my be falsy if not defined)
 	 * @property inParam {com.enyojs.ares.fs.node} node the node of the file/folder to be added
 	 * @param {Function} next common-JS callback
-	 * @public
+	 * @private
 	 */
-	addNode: function(inParam, next) {
+	_addNode: function(inParam, next) {
 		if (this.debug) this.log("inParam:", inParam);
 		if (!this._isHandledInPackage(inParam)) {
 			if (this.debug) this.log('skipped:' + inParam.node.name + ' is not handled by package.js');
@@ -59,9 +60,9 @@ enyo.kind({
 	 * @property inParam {com.enyojs.ares.fs.node} pkgNode the package.js file node (my be falsy if not defined)
 	 * @property inParam {com.enyojs.ares.fs.node} node the node of the file/folder to be added
 	 * @param {Function} next common-JS callback
-	 * @public
+	 * @private
 	 */
-	removeNode: function(inParam, next) {
+	_removeNode: function(inParam, next) {
 		if (this.debug) this.log("inParam:", inParam);
 		if (!this._isHandledInPackage(inParam)) {
 			if (this.debug) this.log('skipped:' + inParam.node.name + ' is not handled by package.js');
