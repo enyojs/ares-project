@@ -212,12 +212,13 @@ enyo.kind({
 	},
 	/** @private */
 	_closeDocument: function(docId, next) {
-		// remove file from cache
-		Ares.Workspace.files.removeEntry(docId);
-		this.$.bottomBar.removeTab(docId);
-		this.$.slideable.setDraggable(Ares.Workspace.files.length > 0);
-		this.showFiles();
-		next();
+		if (docId) {
+			// remove file from cache
+			Ares.Workspace.files.removeEntry(docId);
+			this.$.bottomBar.removeTab(docId);
+			this.$.slideable.setDraggable(Ares.Workspace.files.length > 0);
+		}
+		if (typeof next === 'function') next();
 	},
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();

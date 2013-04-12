@@ -80,9 +80,11 @@ enyo.kind({
 		return true;
 	},
 	removeTab: function(id) {
-		this.tabs[id].destroy();
-		this.tabs[id] = undefined;
-		this.$.container.reflow();
+		if (this.tabs[id]) {
+			this.tabs[id].destroy();
+			this.tabs[id] = undefined;
+			this.$.container.reflow();
+		}
 	},
 	setDesignMode: function(toDesign) {
 		if (toDesign) {

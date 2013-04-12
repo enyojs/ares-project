@@ -59,10 +59,12 @@ Ares.Model.Files = Backbone.Collection.extend({		// TODO: move to enyo.Collectio
 	},
 	removeEntry: function(id) {
 		var obj = this.get(id);
-		this.remove(obj);
-		obj.clear({silent: true});
+		if (obj) {
+			this.remove(obj);
+			obj.clear({silent: true});
+		}
 	},
 	computeId: function(file) {
-		return file.service.getConfig().id + "-" + file.id;
+		return file && file.service && file.id && (file.service.getConfig().id + "-" + file.id);
 	}
 });
