@@ -1,7 +1,13 @@
+/**
+ * Manages registered Hermes services
+ * 
+ * @class ServiceRegistry
+ * @augments enyo.Component
+ */
 enyo.kind({
 	name: "ServiceRegistry",
 	debug: false,
-	kind: enyo.Component,
+	kind: "enyo.Component",
 	events: {
 		onServicesChange: ""
 	},
