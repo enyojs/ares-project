@@ -6,6 +6,7 @@
 	"Inspector.css",
 	"Inspector.js",
 	"ComponentView.js",
+	"ComponentView.css",
 	"InspectorConfig.js",
 	"Designer.js",
 	"designer.css",

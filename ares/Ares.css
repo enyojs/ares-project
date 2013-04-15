@@ -287,11 +287,6 @@ body {
 	margin:0px;
 }
 
-/* display : inline-block missing on onyx.PickerDecorator ? */
-.onyx-picker-decorator{
-	display: inline-block;
-}
-
 .onyx-picker-decorator .onyx-button {
 	padding:2px 8px;
 	margin:0px;
@@ -369,6 +364,10 @@ body {
 
 .ares-drawer>*{
 	margin-right: 5px;
+}
+
+.ares-row .onyx-picker-decorator{
+	display: inline-block;
 }
 
 .ares-drawer:before{
