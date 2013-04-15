@@ -156,6 +156,16 @@ enyo.kind({
 		// ['/path','.'] resolves to '/path', so using '.'
 		// keeps the file name encoded in inFileId
 		formData.append('file', file, '.' /*filename*/);
+		if (enyo.platform.firefox) {
+			// FormData#append() lacks the third parameter
+			// 'filename', so emulate it using a list of
+			// 'filename'fields of the same size os the
+			// number of files.  This only works if the
+			// other end of the tip is implemented on
+			// server-side.
+			// http://stackoverflow.com/questions/6664967/how-to-give-a-blob-uploaded-as-formdata-a-file-name
+			formData.append('filename', "." );
+		}
 		return this._request("PUT", inFileId, {postBody: formData} /*inParams*/);
 	},
 	createFile: function(inFolderId, inName, inContent) {
