@@ -3,7 +3,7 @@ enyo.kind({
 	kind: "Control",
 	classes: "onyx",
 	fit: true,
-	debug: true,
+	debug: false,
 	components: [
 		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
 			{components: [

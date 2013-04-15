@@ -69,7 +69,7 @@ enyo.kind({
 	selectedFile: null,
 	selectedNode: null,
 
-	debug: true,
+	debug: false,
 
 	create: function() {
 		this.inherited(arguments);
@@ -262,7 +262,7 @@ enyo.kind({
 				count-- ;
 				that.debug && that.log("tracker dec", count) ;
 				if (count === 0 && callBack) {
-					that.log("running tracker call-back") ;
+					that.debug && that.log("running tracker call-back") ;
 					callBack() ;
 				}
 			}

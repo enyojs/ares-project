@@ -7,7 +7,7 @@
 enyo.kind({
 	name: "Ares.PackageMunger",
 	kind: "enyo.Component",
-	debug: true,
+	debug: false,
 	events: {
 		onChangingNode: ""
 	},
