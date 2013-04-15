@@ -61,8 +61,6 @@ enyo.kind({
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar deimos-toolbar-margined-buttons", components: [
-						{name:"upButton", kind: "onyx.Button", content: "Up", ontap: "upAction"},
-						{name:"downButton", kind: "onyx.Button", content: "Down", ontap: "downAction"},
 						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
 						{name:"undoButton", kind: "onyx.Button", content: "Undo", classes: "btn-danger",  ontap: "undoAction"},
 						{name:"redoButton", kind: "onyx.Button", content: "Redo", classes: "btn-danger",  ontap: "redoAction"}
@@ -72,7 +70,8 @@ enyo.kind({
 						onHighlightDropTarget: "highlightDesignerDropTarget",
 						onUnHighlightDropTargets: "unhighlightDesignerDropTargets",
 						onMoveItem: "moveItem",
-						onCreateItem: "createItem"
+						onCreateItem: "createItem",
+						onHoldOver: "holdOver"
 					},
 					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
 				]}
@@ -243,9 +242,13 @@ enyo.kind({
 	//* Create item from palette (via drag-and-drop from Palette into Designer or Component View)
 	createItem: function(inSender, inEvent) {
 		var config = inEvent.config,
-			targetId = inEvent.targetId;
+			targetId = inEvent.targetId,
+			beforeId = inEvent.beforeId,
+			target = (targetId)
+					?	this.getItemById(targetId, this.kinds[this.index].components)
+					:	this.kinds[this.index];
 		
-		if(!config) {
+		if (!config) {
 			enyo.warn("Could not create new item - bad data: ", inEvent);
 			return true;
 		}
@@ -256,54 +259,102 @@ enyo.kind({
 			this.addAresIds(config.components);
 		}
 		
-		// If target has an id, add to appropriate components array. Otherwise add to topmost component.
-		if(targetId) {
-			this.createItemOnTarget(config, targetId, this.kinds[this.index].components);
+		if (beforeId) {
+			this.insertItemBefore(config, target, beforeId);
 		} else {
-			this.kinds[this.index].components.push(config);
+			this.insertItem(config, target);
 		}
 		
 		// Update user defined values
 		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
 		
 		this.rerenderKind(config.aresId);
-		
 		return true;
 	},
-	createItemOnTarget: function(inConfig, inTargetId, inComponents) {
-		for (var i = 0, component; (component = inComponents[i]); i++) {
-			if(component.aresId === inTargetId) {
-				if(component.components) {
-					component.components.push(inConfig);
-				} else {
-					component.components = [inConfig];
-				}
-			}
-			if(component.components) {
-				this.createItemOnTarget(inConfig, inTargetId, component.components);
-			}
-		}
-	},
 	//* Move item with _inEvent.itemId_ into item with _inEvent.targetId_
-	moveItem: function(inSender, inEvent) {
-		var clone = enyo.clone(this.getItemById(inEvent.itemId, this.kinds[this.index].components)),
-			target = (inEvent.targetId) ? this.getItemById(inEvent.targetId, this.kinds[this.index].components) : this.kinds[this.index];
+	moveItem: function (inSender, inEvent) {
+		var movedItem = this.getItemById(inEvent.itemId, this.kinds[this.index].components),
+			clone = enyo.clone(movedItem),
+			beforeId = inEvent.beforeId || null,
+			target = (inEvent.targetId)
+					?	this.getItemById(inEvent.targetId, this.kinds[this.index].components)
+					:	this.kinds[this.index];
 		
+		if (target === movedItem) {
+			return true;
+		}
+		
+		// If moving item before itself, do nothing
+		if (beforeId !== null && beforeId === inEvent.itemId) {
+			return true;
+		}
+		
+		// Remove existing item
 		this.removeItemById(inEvent.itemId, this.kinds[this.index].components);
 		
-		target.components = target.components || [];
-		target.components.push(clone);
+		if (beforeId) {
+			if (!this.insertItemBefore(clone, target, beforeId)) {
+				return true;
+			}
+		} else {
+			this.insertItem(clone, target);
+		}
 		
 		this.rerenderKind(inEvent.itemId);
+		return true;
+	},
+	//* Holdover event from ComponentView - simulate drop in designer
+	holdOver: function(inSender, inEvent) {
+		this.$.designer.prerenderDrop(inEvent.targetId, inEvent.beforeId);
+	},
+	insertItem: function(inItem, inTarget) {
+		inTarget.components = inTarget.components || [];
+		inTarget.components.push(inItem);
+	},
+	insertItemBefore: function(inItem, inTarget, inBeforeId) {
+		var beforeIndex = -1,
+			component,
+			i;
 		
+		inTarget.components = inTarget.components || [];
+		
+		for (i = 0; (component = inTarget.components[i]); i++) {
+			if(component.aresId === inBeforeId) {
+				beforeIndex = i;
+				break;
+			}
+		}
+		
+		if (beforeIndex === -1) {
+			enyo.warn("Couldn't find id: "+inBeforeId+" in ", inTarget);
+			return false;
+		}
+		
+		inTarget.components.splice(beforeIndex, 0, inItem);
 		return true;
 	},
 	getItemById: function(inId, inComponents) {
+		if (inComponents.length === 0) {
+			return;
+		}
+		
 		for (var i = 0, component, item; (component = inComponents[i]); i++) {
 			if (component.aresId === inId) {
 				item = inComponents[i];
 			} else if (component.components) {
 				item = this.getItemById(inId, component.components);
+			}
+			if(item) {
+				return item;
+			}
+		}
+	},
+	getParentOfId: function(inChildId, inParent) {
+		for (var i = 0, component, item; (component = inParent.components[i]); i++) {
+			if (component.aresId === inChildId) {
+				item = inParent;
+			} else if (component.components) {
+				item = this.getParentOfId(inChildId, component);
 			}
 			if(item) {
 				return item;
@@ -375,12 +426,6 @@ enyo.kind({
 	},
 	saveComplete: function() {
 		this.setEdited(false);
-	},
-	upAction: function(inSender, inEvent) {
-		this.$.componentView.upAction(inSender, inEvent);
-	},
-	downAction: function(inSender, inEvent) {
-		this.$.componentView.downAction(inSender, inEvent);
 	},
 	undoAction: function(inSender, inEvent) {
 		this.doUndo();
