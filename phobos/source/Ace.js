@@ -22,6 +22,8 @@ enyo.kind({
 		onAutoCompletion: "",
 		onFind: "",
 		onWordwrap: "",
+		onFkey: "",
+		
 		/// FIXME just add these for now
 		onSetBreakpoint: "",
 		onClearBreakpoint: ""
@@ -90,6 +92,18 @@ enyo.kind({
 			bindKey: {win: "Alt-W", mac: "Alt-W"},
 			exec: enyo.bind(this, "doWordwrap")
 		});
+		
+		// Add keybinding for F1 t F12
+		var i,key;
+		for (i=1; i<13; i++) {
+			key = 'F' + i;
+			//console.log(key);
+			commands.addCommand({
+				name: key,
+				bindKey: { win: "Ctrl-SHIFT-"+key, mac: "command-SHIFT-"+key },
+				exec: enyo.bind(this, 'doFkey' , [key])
+			});
+		}	
 	},
 	/**
 	 * Add a new command with key kinding
