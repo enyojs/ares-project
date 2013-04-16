@@ -21,11 +21,11 @@ body {
 	border-radius: 5px;
 	position:relative;
 }
-.shadow-panels > * {
+/*.shadow-panels > * {
 	-moz-box-shadow: -4px 0 4px rgba(0,0,0,0.3);
 	-webkit-box-shadow: -4px 0 4px rgba(0,0,0,0.3);
 	box-shadow: -4px 0 4px rgba(0,0,0,0.3);
-}
+}*/
 
 /**/
 
@@ -343,7 +343,7 @@ body {
 }
 
 .ares-fixed-input{
-	width: 161px;
+	width: 161px; 
 }
 
 .ares-bullet-label {

@@ -22,8 +22,8 @@ enyo.kind({
 	},
 	debug: false,
 	components: [
-		{kind: "onyx.MoreToolbar", classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", isContainer: true, name: "toolbar", components: [
-			{kind: "onyx.MenuDecorator", onSelect: "aresMenuItemSelected", components: [
+		{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar /*ares_harmonia_toolBar ares-no-padding*/", isContainer: true, name: "toolbar", components: [
+			{id: "aresmenu",kind: "onyx.MenuDecorator", onSelect: "aresMenuItemSelected", components: [
 				{content: "Ares"},
 				{kind: "onyx.Menu", components: [
 					{value: "showAccountConfigurator", components: [
@@ -66,11 +66,14 @@ enyo.kind({
 				{kind: "onyx.Tooltip", content: "Remove Project..."}
 			]}
 		]},
+		{name:"project-list-title", content:"Project list", classes:"title-gradient"},
 		{kind: "enyo.Scroller", components: [
-			{kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
-				{kind: "ProjectList.Project", name: "item", classes: "enyo-children-inline ares_projectView_projectList_item"}
+			{tag:"ul", kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", onmouseover:"projectOver", onmouseout:"projectOut", onmousedown:"projectPress", onmouseup:"ProjectUp", components: [
+				//{tag:"li",kind: "ProjectList.Project", name: "item", classes: "/*enyo-children-inline ares_projectView_projectList_item*/"}
+				{tag:"li",kind: "ProjectList.Project", name: "item"}
 			]}
 		]},
+		{classes:"hangar"},
 		{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{kind: "AccountsConfigurator"}
@@ -151,17 +154,30 @@ enyo.kind({
 	projectListTap: function(inSender, inEvent) {
 		var project, msg, service;
 		// Un-highlight former selection, if any
-		if (this.selected) {
+/*		if (this.selected) {
 			this.selected.removeClass("ares_projectView_projectList_item_selected");
-		}
+		}*/
 
-		// Highlight the new project item
+/*		// Highlight the new project item
 		if (inEvent.originator.kind === 'ProjectList.Project') {
 			this.selected = inEvent.originator;
 		} else {
 			this.selected = inEvent.originator.owner;
 		}
-		this.selected.addClass("ares_projectView_projectList_item_selected");
+		this.selected.addClass("ares_projectView_projectList_item_selected");*/
+
+		// Highlight the new project item
+		if (this.selected) {
+			//this.selected.addClass("ares_projectView_projectList_item_selected");
+			//this.selected.removeClass("hover");
+			this.selected.removeClass("on");
+		}
+		if (inEvent.originator.kind === 'ProjectList.Project') {
+			this.selected = inEvent.originator;
+		} else {
+			this.selected = inEvent.originator.owner;
+		}
+		this.selected.addClass("on");
 
 		project = Ares.Workspace.projects.at(inEvent.index);
 		service = ServiceRegistry.instance.resolveServiceId(project.getServiceId());
@@ -174,6 +190,36 @@ enyo.kind({
 			msg = "Service " + project.getServiceId() + " not found";
 			this.showErrorPopup(msg);
 			this.error(msg);
+		}
+	},
+	projectOver: function(inSender, inEvent) {
+		if (inEvent.originator.kind === 'ProjectList.Project') {
+			inEvent.originator.addClass('hover');
+		} else {
+			inEvent.originator.owner.addClass('hover');
+		}
+	},
+	projectOut: function(inSender, inEvent) {
+		if (inEvent.originator.kind === 'ProjectList.Project') {
+			inEvent.originator.removeClass('hover');
+			inEvent.originator.removeClass('active');
+		} else {
+			inEvent.originator.owner.removeClass('hover');
+			inEvent.originator.owner.removeClass('active');
+		}
+	},
+	projectPress: function(inSender, inEvent) {
+		if (inEvent.originator.kind === 'ProjectList.Project') {
+			inEvent.originator.addClass('active');
+		} else {
+			inEvent.originator.owner.addClass('active');
+		}
+	},
+	projectUp: function(inSender, inEvent) {
+		if (inEvent.originator.kind === 'ProjectList.Project') {
+			inEvent.originator.removeClass('active');
+		} else {
+			inEvent.originator.owner.removeClass('active');
 		}
 	},
 	enableDisableButtons: function(inEnable) {
@@ -212,7 +258,7 @@ enyo.kind({
 enyo.kind({
 	name: "ProjectList.Project",
 	kind: "onyx.Item",
-	classes: "ares_projectView_projectList_item",
+	//classes: "/*ares_projectView_projectList_item*/",
 	published: {
 		projectName: "",
 		index: -1

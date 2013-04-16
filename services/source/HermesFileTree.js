@@ -23,7 +23,7 @@ enyo.kind({
 		serverName: ""
 	},
 	components: [
-		{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", components: [
+		{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar /*ares_harmonia_toolBar ares-no-padding*/", components: [
 			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 				{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
 				{kind: "onyx.Tooltip", content: "New Folder..."}
@@ -51,7 +51,10 @@ enyo.kind({
 		]},
 
 		{kind: "Scroller", fit: true, components: [
-			{name: "serverNode", kind: "Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onNodeTap: "nodeTap"}
+			/*{classes:"title-gradient", components:[*/
+				{name: "serverNode", kind: "Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", 
+				expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onNodeTap: "nodeTap"}
+			/*]}*/	
 		]},
 
 		// track selection of nodes. here, selection Key is file or folderId. Selection value is the node object
@@ -85,6 +88,7 @@ enyo.kind({
 				this.$.serverNode.file = this.$.service.getRootNode();
 				this.$.serverNode.file.isServer = true;
 				this.$.serverNode.setContent(this.$.serverNode.file.name);
+				//this.$.serverNode.applyStyle("background-color", "red");
 				if (next) next();
 			}
 		})));

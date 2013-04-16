@@ -1,0 +1,11 @@
+#ares_projectView_projectList_projectList { list-style-type:none; padding:0px; margin:0px; }
+#ares_projectView_projectList_projectList li { padding:0px 0px 0px 15px; cursor:hand; cursor:pointer; height:50px; border-bottom:1px solid #B7B7B7; font-size:16px; font-weight:light; color:#666666; text-shadow:0 1px 0 #FFFFFF; line-height:50px; white-space:nowrap; overflow:hidden; width:auto; } 
+#ares_projectView_projectList_projectList li.on { box-shadow:inset 0px 0px 30px rgba(0,0,0,0.2); background: #dedede;} 
+#ares_projectView_projectList_projectList li.hover { background-color:#EEEEEE; } 
+#ares_projectView_projectList_projectList li.active { background-color:#AAAAAA; box-shadow: inset 0px 0px 30px rgba(0,0,0,0.3); }
+#ares_projectView_projectList_projectList li.selected { background-color:#CCCCCC; }
+
+
+#ares_projectView_projectList_projectListli.on.selected { background-color:inherit; } 
+#ares_projectView_projectList_projectList li.on.hover { background-color:inherit; } 
+#ares_projectView_projectList_projectList li.on.active { background-color:inherit; }
