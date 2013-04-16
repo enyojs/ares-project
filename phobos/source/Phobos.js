@@ -34,7 +34,7 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww"},
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -796,7 +796,6 @@ enyo.kind({
 		if(this.$.ace.wordWrap === "true" || this.$.ace.wordWrap === true){
 			this.$.ace.wordWrap = false;
 			this.$.ace.wordWrapChanged();
-			console.log("wee false");
 		}else{
 			this.$.ace.wordWrap = true;
 			this.$.ace.wordWrapChanged();
@@ -812,6 +811,11 @@ enyo.kind({
 	tabSize: function() {
 		var ts = this.$.ace.editorSettingsPopup.Tsize;
 		this.$.ace.setTabSize(ts);
+	},
+	
+	fkeypressed: function(inSender, inEvent) {
+		var key = inEvent;
+		this.$.ace.insertAtCursor (localStorage[ key ]) ;
 	},
 	
 	//* Trigger an Ace undo and bubble updated code
