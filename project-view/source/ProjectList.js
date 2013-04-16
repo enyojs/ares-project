@@ -23,15 +23,12 @@ enyo.kind({
 	debug: false,
 	components: [
 		{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar /*ares_harmonia_toolBar ares-no-padding*/", isContainer: true, name: "toolbar", components: [
-			{id: "aresmenu",kind: "onyx.MenuDecorator", onSelect: "aresMenuItemSelected", components: [
-				{content: "Ares"},
-				{kind: "onyx.Menu", components: [
-					{value: "showAccountConfigurator", components: [
-						{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png"},
-						{content: "Accounts..."}
-					]},
-					{classes: "onyx-menu-divider"},
-					{content: "Properties..."}
+			{id: "aresmenu" , components: [
+				{tag:'span', content:'Ares', ontap: "aresMenuTapped"},
+				{classes:'lsmallDownArrow', ontap: "aresMenuTapped",},
+				{name: 'amenu', id: 'amenu', tag:'ul', components:[
+					{name: 'account',   id:'account', tag:'li', kind: 'control.Link', content: "Accounts...", ontap:"showAccountConfigurator", onmouseup:"aresMenuHide"},
+					{name: 'properties',   id:'properties',   tag:'li', kind: 'control.Link', content: "Properties..."}
 				]}
 			]},
 			{kind: "onyx.TooltipDecorator", components: [
@@ -68,8 +65,7 @@ enyo.kind({
 		]},
 		{name:"project-list-title", content:"Project list", classes:"title-gradient"},
 		{kind: "enyo.Scroller", components: [
-			{tag:"ul", kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", onmouseover:"projectOver", onmouseout:"projectOut", onmousedown:"projectPress", onmouseup:"ProjectUp", components: [
-				//{tag:"li",kind: "ProjectList.Project", name: "item", classes: "/*enyo-children-inline ares_projectView_projectList_item*/"}
+			{tag:"ul", kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
 				{tag:"li",kind: "ProjectList.Project", name: "item"}
 			]}
 		]},
@@ -83,6 +79,18 @@ enyo.kind({
 		this.inherited(arguments);
 		this.$.projectList.setCount(Ares.Workspace.projects.length);
 		Ares.Workspace.projects.on("add remove reset", enyo.bind(this, this.projectCountChanged));
+	},
+	aresMenuTapped: function() {
+		this.$.amenu.show();
+		if(this.$.amenu.hasClass('on')) {
+			this.$.amenu.removeClass('on');
+		}
+		else {
+			this.$.amenu.addClass('on');
+		}
+	},
+	aresMenuHide: function() {
+		this.$.amenu.hide();
 	},
 	projectCountChanged: function() {
 		var count = Ares.Workspace.projects.length;
@@ -153,23 +161,8 @@ enyo.kind({
 	},
 	projectListTap: function(inSender, inEvent) {
 		var project, msg, service;
-		// Un-highlight former selection, if any
-/*		if (this.selected) {
-			this.selected.removeClass("ares_projectView_projectList_item_selected");
-		}*/
-
-/*		// Highlight the new project item
-		if (inEvent.originator.kind === 'ProjectList.Project') {
-			this.selected = inEvent.originator;
-		} else {
-			this.selected = inEvent.originator.owner;
-		}
-		this.selected.addClass("ares_projectView_projectList_item_selected");*/
-
 		// Highlight the new project item
 		if (this.selected) {
-			//this.selected.addClass("ares_projectView_projectList_item_selected");
-			//this.selected.removeClass("hover");
 			this.selected.removeClass("on");
 		}
 		if (inEvent.originator.kind === 'ProjectList.Project') {
@@ -192,36 +185,6 @@ enyo.kind({
 			this.error(msg);
 		}
 	},
-	projectOver: function(inSender, inEvent) {
-		if (inEvent.originator.kind === 'ProjectList.Project') {
-			inEvent.originator.addClass('hover');
-		} else {
-			inEvent.originator.owner.addClass('hover');
-		}
-	},
-	projectOut: function(inSender, inEvent) {
-		if (inEvent.originator.kind === 'ProjectList.Project') {
-			inEvent.originator.removeClass('hover');
-			inEvent.originator.removeClass('active');
-		} else {
-			inEvent.originator.owner.removeClass('hover');
-			inEvent.originator.owner.removeClass('active');
-		}
-	},
-	projectPress: function(inSender, inEvent) {
-		if (inEvent.originator.kind === 'ProjectList.Project') {
-			inEvent.originator.addClass('active');
-		} else {
-			inEvent.originator.owner.addClass('active');
-		}
-	},
-	projectUp: function(inSender, inEvent) {
-		if (inEvent.originator.kind === 'ProjectList.Project') {
-			inEvent.originator.removeClass('active');
-		} else {
-			inEvent.originator.owner.removeClass('active');
-		}
-	},
 	enableDisableButtons: function(inEnable) {
 		this.$.settingsButton.setDisabled(!inEnable);
 		this.$.deleteButton.setDisabled(!inEnable);
@@ -230,12 +193,7 @@ enyo.kind({
 	},
 	showAccountConfigurator: function() {
 		this.$.accountsConfigurator.show();
-	},
-	aresMenuItemSelected: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
-		if (typeof this[inEvent.selected.value] === 'function') {
-			this[inEvent.selected.value]();
-		}
+		//this.$.amenu.hide();
 	},
 	showErrorPopup : function(msg) {
 		this.$.errorPopup.setErrorMsg(msg);
@@ -257,8 +215,7 @@ enyo.kind({
 
 enyo.kind({
 	name: "ProjectList.Project",
-	kind: "onyx.Item",
-	//classes: "/*ares_projectView_projectList_item*/",
+	kind: "control.Link",
 	published: {
 		projectName: "",
 		index: -1

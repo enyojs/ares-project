@@ -9,6 +9,7 @@ enyo.depends(
 	"assets/css/layout.css",
 	"assets/css/effects.css",
 	"assets/css/control.css",
+	"assets/css/sprites.css",
 	"$lib/extra/analyzer2",
 	"../utilities/source",
 	"../services/source",

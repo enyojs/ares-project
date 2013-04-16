@@ -19,7 +19,7 @@ body { font-family:"HPSimplified"; }
 #ares_projectView_projectList { width: 300px; }
 #ares_projectView_projectList .hangar {width:7px; position:absolute; left:293px; top:0px; bottom:0px; right:0px;}
 
-/*#aresmenu{ position:absolute; top:0px; right:20px; z-index:11; text-align:right;}
+#aresmenu{z-index:11; text-align:center; margin: 0px 6px}
 #aresmenu span { line-height:65px; color:#FFF; width:85px; cursor:pointer; cursor:hand; font-size:12px; font-weight:normal; text-shadow:0 -1px 0 #000000;}
 #aresmenu ul {  
     display: none;
@@ -31,7 +31,7 @@ body { font-family:"HPSimplified"; }
     overflow: hidden;
     padding: 0;
     position: absolute;
-    right: 0;
+    left: 0;
     text-align: left;
     top: 50%;
     width: 120px;
@@ -49,4 +49,5 @@ body { font-family:"HPSimplified"; }
     -ms-box-shadow: inset 0px 0px 20px 0px rgba(0,0,0, 0.5); 
     -webkit-box-shadow: inset 0px 0px 20px 0px rgba(0,0,0, 0.5); 
     box-shadow: inset 0px 0px 20px 0px rgba(0,0,0, 0.5); 
-}*/
+}
+.hide { display:none; }
