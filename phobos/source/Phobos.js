@@ -38,7 +38,7 @@ enyo.kind({
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
-				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"}
+				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
@@ -220,6 +220,10 @@ enyo.kind({
 	adjustPanelsForMode: function(mode) {
 		if (this.debug) this.log("mode:", mode);
 		// whether to show or not a panel, imageViewer and ace cannot be enabled at the same time
+		var r = localStorage.rightpane;
+		if(!r || r.indexOf("false") != -1){
+			r = false;
+		}
 		var showModes = {
 			javascript: {
 				imageViewer: false,
@@ -228,7 +232,7 @@ enyo.kind({
 				saveAsButton: true,
 				newKindButton: true,
 				designerButton: true,
-				right: true
+				right: r
 			},
 			image: {
 				imageViewer: true,

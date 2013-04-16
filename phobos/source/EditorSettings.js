@@ -35,6 +35,15 @@ enyo.kind({
 		{tag: "br"},
 
 		{ kind: "FittableColumns", classes:"ares_editorfont", components: [
+			{name: "rightpane", fit: true, classes: "ares_editorfont", content: "Right Pane "},
+			{style: "width: 65px;", content: " "},
+			{name: "rightPane", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "right"},
+		]},
+		
+		{fit: true, content: " "},
+		{tag: "br"},
+
+		{ kind: "FittableColumns", classes:"ares_editorfont", components: [
 			{name: "fontSizeLabel", fit: true, classes: "ares_editorfont", content: "Font Size"},
 			{style: "width: 90px;", content: " "},
 			{kind: "onyx.PickerDecorator", components: [
@@ -111,6 +120,11 @@ enyo.kind({
 			this.wordWrap = false;
 		}
 		this.$.wordWrapButton.value = this.wordWrap;
+		
+		this.rightpane = localStorage.rightpane;
+		if(!this.rightpane || this.rightpane.indexOf("false") != -1){
+			this.rightpane = false;
+		}
 
 		// lock thems Button's width, so it doesn't move when the caption changes
 		this.$.themes.setBounds({width: 100 });
@@ -134,12 +148,17 @@ enyo.kind({
 		this.wordWrap = inEvent.value;
 		this.doWordWrap();
 	},
+	
+	right: function(inSender, inEvent){
+		this.rightpane = inEvent.value;	
+	},
 
 	oksave: function() {
 		localStorage.theme = this.theme;
 		localStorage.highlight = this.highlight;
 		localStorage.wordwrap = this.wordWrap;
 		localStorage.fontsize = this.fSize;
+		localStorage.rightpane = this.rightpane;
 		this.doClose();
 	},
 
