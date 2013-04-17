@@ -4,6 +4,7 @@
  */
 
 var  semver = require('semver'),
+	path = require('path'),
 	fs = require('fs');
 
 (function () {
@@ -15,17 +16,34 @@ var  semver = require('semver'),
 	}
 
 	var pkgInfo = null;
-	var loggr = null;
+	var logger = null;
 
+	/**
+	 * Set the npmlogger for the module
+	 * @param log: an npm logger
+	 */
 	vtools.setLogger = function(log) {
 		logger = log;
 	};
 
+	/**
+	 * Display the version extracted from the
+	 * property "version" of the package.json.
+	 * Perform a process.exit()
+	 * @public
+	 */
 	vtools.showVersionAndExit = function() {
 		console.log("Version: " + getPackageVersion());
 		process.exit(0);
 	};
 
+	/**
+	 * Checks the version of nodejs against the allowed
+	 * version in package.json in property "engines".
+	 * 
+	 * @return none
+	 * @public
+	 */
 	vtools.checkNodeVersion = function() {
 		var range = getAllowedNodeVersion();
 		var expectedRange = semver.validRange(range);
@@ -42,8 +60,12 @@ var  semver = require('semver'),
 		}
 	};
 
-	// Private methods
-
+	/**
+	 * Get the allowed nodejs 
+	 * version in package.json in property "engines".
+	 * @return the range of allowed nodejs versions
+	 * @private
+	 */
 	function getAllowedNodeVersion() {
 		if ( ! pkgInfo) {
 			loadPackageJson();
@@ -51,9 +73,16 @@ var  semver = require('semver'),
 		return (pkgInfo && pkgInfo.engines && pkgInfo.engines.node) || "";
 	}
 
+	/**
+	 * Load and parse the package.json from
+	 * the current working directory.
+	 * 
+	 * @return nothing but the variable pkgInfo is set
+	 * @private
+	 */
 	function loadPackageJson() {
 		if ( ! pkgInfo) {
-			var filename = 'package.json';
+			var filename = path.resolve(__dirname, "..", "..", "package.json");
 			try {
 				var data = fs.readFileSync(filename);
 				pkgInfo = JSON.parse(data);
@@ -64,6 +93,12 @@ var  semver = require('semver'),
 		}
 	}
 
+	/**
+	 * Get the version from the package.json file
+	 * in the current working directory.
+	 * @return version
+	 * @private
+	 */
 	function getPackageVersion() {
 		if ( ! pkgInfo) {
 			loadPackageJson();
