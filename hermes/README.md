@@ -75,16 +75,16 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
   * `multipart/form-data` follows the standard format.  For each file `filename` is interpreted relativelly to the folder `{id}` provided in the URL.  **Note:** To accomodate an issue with old Firefox releases (eg. Firefox 10), fields labelled `filename` overwrite the `filename` in their corresponding `file` fields.  See `fsBase#_putMultipart()` for more details.
 
 * `DELETE` delete a resource (a file), which might be a collection (a folder).  Status codes:
-  * `200/OK` success, resource successfully removed.  The method returns the new status (`PROPFIND`) of the parent of the deleted resource.
+  * `200/OK` success, resource successfully removed.  The method returns the new node descriptor (as `PROPFIND` would return) of the parent of the deleted resource.
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2Ftata?_method=DELETE"
 
-* `COPY` reccursively copies a resource as a new `name` or `folderId` provided in the query string (one of them is required, only one is taken into account, `name` takes precedence if both are provided in the query-string).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not.  The method returns the new status (`PROPFIND`) of the target resource.
+* `COPY` reccursively copies a resource as a new `name` or `folderId` provided in the query string (one of them is required, only one is taken into account, `name` takes precedence if both are provided in the query-string).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not.  The method returns the node descriptor (as `PROPFIND` would return) of the new resource.
   * `201/Created` success, a new resource is created
   * `200/Ok` success, an existing resource was successfully overwritten (query parameter `overwrite` was set to `true`)
   * `412/Precondition-Failed` failure, not allowed to copy onto an exising resource
 
-* `MOVE` has the exact same parameters and return codes as `COPY`
+* `MOVE` has the exact same parameters and return code & value as `COPY`
 
 #### Parameters
 
