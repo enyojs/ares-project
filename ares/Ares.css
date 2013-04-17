@@ -266,6 +266,7 @@ body {
 
 .onyx {
 	font-size: 13px;
+	font-family:"HPSimplified";
 }
 
 .onyx-popup {
@@ -281,10 +282,24 @@ body {
 	margin:0px;
 }
 
-.onyx-button {
+.onyx-button { 
 	font-size: 13px;
-	padding:2px 8px;
-	margin:0px;
+	line-height:16px; 
+	cursor:hand; 
+	cursor:pointer;  
+    border:1px solid #999999; /* rgba(15,15,15,0.2); */ 
+    background: url(../images/hp_ep_sprite_horizontal.png) repeat-x 0px 0px #a7a9ac; 
+    min-width:75px; position:relative;
+    box-shadow: inset 0px .5px 0px rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-weight: 100;
+	-moz-border-radius:6px;
+    -webkit-border-radius:6px;
+    border-radius:6px;
+    -pie-border-radius:6px;
+}
+.onyx-button[disabled] {
+	opacity:0.25; filter: alpha(opacity=25); zoom:1;
 }
 
 .onyx-picker-decorator .onyx-button {
