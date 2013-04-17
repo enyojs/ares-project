@@ -3,7 +3,6 @@
 /**
  *  ARES IDE server
  */
-require('./hermes/lib/checkNodeVersion');	// Check nodejs version
 
 var fs = require("fs"),
     path = require("path"),
@@ -13,6 +12,7 @@ var fs = require("fs"),
     util  = require('util'),
     spawn = require('child_process').spawn,
     querystring = require("querystring"),
+    versionTools = require('./hermes/lib/version-tools'),
     http = require('http');
 
 var myDir = typeof(__dirname) !== 'undefined' ?  __dirname : path.resolve('') ;
@@ -29,7 +29,8 @@ var knownOpts = {
 	"listen_all":	Boolean,
 	"config":	path,
 	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
-	"log":		Boolean
+	"log":		Boolean,
+	"version":	Boolean
 };
 var shortHands = {
 	"h": ["--help"],
@@ -40,7 +41,8 @@ var shortHands = {
 	"a": ["--listen_all"],
 	"c": ["--config"],
 	"l": ["--level"],
-	"L": ["--log"]
+	"L": ["--log"],
+	"V": ["--version"]
 };
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ide.js'*/);
 
@@ -77,6 +79,13 @@ log.level = argv.level || 'http';
 if (argv.log) {
 	log.stream = fs.createWriteStream('ide.log');
 }
+
+versionTools.setLogger(log);
+if (argv.version) {
+	versionTools.showVersionAndExit();
+}
+
+versionTools.checkNodeVersion();		// Exit in case of error
 
 function m() {
 	var arg, msg = '';
