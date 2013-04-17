@@ -385,6 +385,8 @@ enyo.kind({
 		this.$.waitPopup.hide();
 	},
 	/**
+	 * Event handler for user-initiated file or folder changes
+	 * 
 	 * @private
 	 * @param {Object} inSender
 	 * @param {Object} inEvent as defined by calls to HermesFileTree#doTreeChanged
@@ -398,6 +400,8 @@ enyo.kind({
 		}).bind(this));
 	},
 	/**
+	 * Event handler for system-initiated file or folder changes
+	 * 
 	 * @private
 	 * @param {Object} inSender
 	 * @param {Object} inEvent as defined by calls to Ares.PackageMunger#doChangingNode
