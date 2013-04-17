@@ -312,14 +312,28 @@ function handleServiceExit(service) {
 	};
 }
 
+function applyRegexp(data) {
+	for(var key in data) {
+		var pType = getObjectType(data[key]);
+		if (pType === 'string') {
+			data[key] = platformSubst(data[key]);
+		} else if (pType === 'array') {
+			applyRegexp(data[key]);
+		} else if (pType === 'object') {
+			applyRegexp(data[key]);
+		}	// else - Nothing to do
+	}
+}
+
 function startService(service) {
-	var command = platformSubst(service.command);
+	applyRegexp(service);		// Apply regexp to all properties
+	var command = service.command;
 	var params = [];
 	var options = {
 		stdio: ['ignore', 'pipe', 'pipe', 'ipc']
 	};
 	service.params.forEach(function(inParam){
-		params.push(platformSubst(inParam));
+		params.push(inParam);
 	});
 	if (service.verbose) {
 		params.push('-v');
