@@ -28,7 +28,6 @@ enyo.kind({
 			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
 		]},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "Service returned an error"},
 		{kind: "ServiceRegistry"},
 		{kind: "Ares.PackageMunger", name: "packageMunger"}
 	],
@@ -384,13 +383,6 @@ enyo.kind({
 	},
 	hideWaitPopup: function() {
 		this.$.waitPopup.hide();
-	},
-	showErrorPopup : function(msg) {
-		this.$.errorPopup.setErrorMsg(msg);
-		this.$.errorPopup.show();
-	},
-	hideErrorPopup: function() {
-		this.$.errorPopup.hide();
 	},
 	/**
 	 * @private
