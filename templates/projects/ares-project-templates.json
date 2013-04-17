@@ -3,7 +3,8 @@
 	"id": "bootplate-nightly",
 	"zipfiles": [
       {
-      	"url": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
+        "url": "bootplate-latest.zip",
+      	"alternateUrl": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
       	"prefixToRemove": "bootplate",
       	"excluded": [
           "bootplate/api"
@@ -16,7 +17,8 @@
     "id": "bootplate-2.2.0",
     "zipfiles": [
       {
-        "url": "http://enyojs.com/archive/bootplate-2.2.0.zip",
+        "url": "bootplate-2.2.0.zip",
+        "alternateUrl": "http://enyojs.com/archive/bootplate-2.2.0.zip",
         "prefixToRemove": "bootplate",
         "excluded": [
           "bootplate/api"
@@ -29,7 +31,8 @@
     "id": "bootplate-2.1.1",
     "zipfiles": [
       {
-        "url": "http://enyojs.com/archive/bootplate-2.1.1.zip",
+        "url": "bootplate-2.1.1.zip",
+        "alternateUrl": "http://enyojs.com/archive/bootplate-2.1.1.zip",
         "prefixToRemove": "bootplate",
         "excluded": [
           "bootplate/api"
@@ -37,20 +40,5 @@
       }
     ],
     "description": "Enyo bootplate 2.1.1"
-  },
-  {
-    "id": "bootplate-2.1",
-    "zipfiles": [
-      {
-        "url": "http://enyojs.com/archive/bootplate-2.1.zip",
-        "prefixToRemove": "bootplate",
-        "excluded": [
-          "bootplate/api",
-          "bootplate/build",
-          "bootplate/deploy"
-        ]
-      }
-    ],
-    "description": "Enyo bootplate 2.1"
   }
 ]
