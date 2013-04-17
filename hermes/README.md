@@ -212,9 +212,9 @@ These project templates can be defined:
 
 ### [Project template configuration](id:project-template-config)
 
-The property "***projectTemplateRepositories***" of the service "**genZip**" lists the template definitions that are available at project creation time.
+The property `projectTemplateRepositories` of the service "**genZip**" lists the template definitions that are available at project creation time.
 
-The property "***projectTemplateRepositories***" of the service "**genZip**" is defined in the "***ide.json***" of ares-project.
+The property `projectTemplateRepositories` of the service "**genZip**" is defined in the "***ide.json***" of ares-project.
 
 		{
 			"id":"genZip",
@@ -226,6 +226,11 @@ The property "***projectTemplateRepositories***" of the service "**genZip**" is 
 			},
 			...
 		}
+
+The `url` property above can either be an http url or a an absolute filename such as:  
+NB: @INSTALLDIR@, @HOME@, … will be subsituted by the right value when "node ide.js" is started.
+
+	"url": "@INSTALLDIR@/templates/projects/ares-project-templates.json"
 
 Ares plugins can add or modify this list of templates.
 
@@ -245,7 +250,7 @@ As a result, `"bootplate": {}` will remove the entry defined in ide.js of ares-p
 
 ### [Project template definition](id:project-template-definition)
 
-A project template definition (defined by the property "url" in "projectTemplateRepositories" must respect the json schema [com.enyojs.ares.project.templates.schema.json](../assets/schema/com.enyojs.ares.project.templates.schema.json).
+A project template definition (defined by the property `url` in `projectTemplateRepositories` must respect the json schema [com.enyojs.ares.project.templates.schema.json](../assets/schema/com.enyojs.ares.project.templates.schema.json).
 
 The compliance of a project template definition file with the json schema is not yet enforced but could be checked via [http://jsonschemalint.com/](http://jsonschemalint.com/).
 
@@ -272,13 +277,21 @@ The compliance of a project template definition file with the json schema is not
 	  }
 	]
 
-Each project definition defined by "id" can reference **several zip files** defined in the array "zipfiles". The zip files are extracted in the order they are specified.  
+Each project definition defined by `id` can reference **several zip files** defined in the array `zipfiles`. The zip files are extracted in the order they are specified.  
 
 Each zip file entry:
 
-* must define an "url" and/or "alternateUrl". The url is tried first and can refer either a file stored locally on the filesystem or an http url. If the "url" references a file which does not exist the "alternateUrl" is used.
-* can define a "prefixToRemove". This prefix must correspond to one or several directory level that must be removed.
-* can define in the array "excluded" a list of files or directories to be excluded when the zip file is extracted.
+* must define an `url` and optionally an `alternateUrl`. The `url` is tried first and can refer to either:
+
+	* a file stored locally on the filesystem.  
+	NB: the filename must be relative to the directory where the project templates definition file is stored (See property `url` in `projectTemplateRepositories` above).  
+
+	* or an http url.
+	
+	If the `url` references a file which does not exist the `alternateUrl` is used.
+
+* can define a `prefixToRemove`. This prefix must correspond to one or several directory level that must be removed.
+* can define in the array `excluded` a list of files or directories to be excluded when the zip file is extracted.
 
 ### Protocol
 
