@@ -72,7 +72,7 @@
 			"projectTemplateRepositories": {
 				"bootplate": {
 					"description": "Standard Enyo template",
-					"url": "templates/projects/ares-project-templates.json"
+					"url": "@INSTALLDIR@/templates/projects/ares-project-templates.json"
 				}
 			},
 			"useJsonp":false,
