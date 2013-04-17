@@ -16,5 +16,5 @@ enyo.depends(
 	"../phobos/source",
 	"../deimos/source",
 	"../harmonia/source",
-	"../project-view/source"
+	"../project-view"
 );

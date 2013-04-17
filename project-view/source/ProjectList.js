@@ -8,7 +8,7 @@
  */
 enyo.kind({
 	name: "ProjectList",
-	classes: "enyo-unselectable ares_projectList",
+	classes: "enyo-unselectable ares-project-list",
 	events: {
 		onCreateProject: "",
 		onProjectSelected: "",
@@ -22,11 +22,11 @@ enyo.kind({
 	},
 	debug: false,
 	components: [
-		{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar /*ares_harmonia_toolBar ares-no-padding*/", isContainer: true, name: "toolbar", components: [
-			{id: "aresmenu" , components: [
+		{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
+			{classes: "aresmenu" , components: [
 				{tag:'span', content:'Ares', ontap: "aresMenuTapped"},
 				{classes:'lsmallDownArrow', ontap: "aresMenuTapped",},
-				{name: 'amenu', id: 'amenu', tag:'ul', components:[
+				{name: 'amenu', tag:'ul', components:[
 					{name: 'account',   id:'account', tag:'li', kind: 'control.Link', content: "Accounts...", ontap:"showAccountConfigurator", onmouseup:"aresMenuHide"},
 					{name: 'properties',   id:'properties',   tag:'li', kind: 'control.Link', content: "Properties..."}
 				]}
@@ -63,7 +63,7 @@ enyo.kind({
 				{kind: "onyx.Tooltip", content: "Remove Project..."}
 			]}
 		]},
-		{name:"project-list-title", content:"Project list", classes:"title-gradient"},
+		{content:"Project list", classes:"project-list-title title-gradient"},
 		{kind: "enyo.Scroller", components: [
 			{tag:"ul", kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
 				{tag:"li",kind: "ProjectList.Project", name: "item"}
@@ -193,7 +193,6 @@ enyo.kind({
 	},
 	showAccountConfigurator: function() {
 		this.$.accountsConfigurator.show();
-		//this.$.amenu.hide();
 	},
 	showErrorPopup : function(msg) {
 		this.$.errorPopup.setErrorMsg(msg);
