@@ -5,7 +5,7 @@
  * and a working sample for other implementations.
  */
 
-require('./lib/checkNodeVersion');		// Check nodejs version
+// nodejs version checking is done in parent process ide.js
 
 var fs = require("fs"),
     path = require("path"),
