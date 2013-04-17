@@ -118,8 +118,8 @@ enyo.kind({
 			this.debug && this.log(project);
 			if (nukeFiles) {
 				var service = project.getService();
-				var folder = project.getFolderId();
-				service.remove( folder )
+				var folderId = project.getFolderId();
+				service.remove( folderId )
 					.response(this, function(){this.removeSelectedProjectData();})
 					.error(this, function(inError){
 						this.showErrorPopup("Error removing files of project " + project.name + ": " + inError);

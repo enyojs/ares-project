@@ -77,7 +77,8 @@ enyo.kind({
 			return (node.content === 'project.json' ) ;
 		};
 		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
-		var matchingNodes = hft.getNodeFiles(hft.selectedNode).filter(matchFileName) ;
+		var topNode = hft.$.serverNode ;
+		var matchingNodes = topNode.getNodeFiles(hft.selectedNode).filter(matchFileName) ;
 
 		if (matchingNodes.length !== 0) {
 			this.hide();
@@ -95,8 +96,9 @@ enyo.kind({
 		var matchFileName = function(node){
 			return (node.content === 'appinfo.json' ) ;
 		};
-		hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
-		matchingNodes = hft.getNodeFiles(hft.selectedNode).filter( matchFileName ) ;
+		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
+		var topNode = hft.$.serverNode ;
+		var matchingNodes = topNode.getNodeFiles(hft.selectedNode).filter( matchFileName ) ;
 
 		if (matchingNodes.length === 1) {
 			this.log("There is an appinfo.json", matchingNodes);

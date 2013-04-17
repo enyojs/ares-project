@@ -433,7 +433,12 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		this.log("FsBase.putWebForm(): err:", err);
 		next(err, {
 			code: 201, // Created
-			body: [{id: fileId, path: urlPath, isDir: false}]
+			body: [{
+				id: fileId,
+				path: urlPath,
+				name: path.basename(urlPath),
+				isDir: false
+			}]
 		});
 	}).bind(this));
 };
