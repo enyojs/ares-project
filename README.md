@@ -57,7 +57,9 @@ The following features are in the works, and you should see them added as we mov
 
 ### Install Ares
 
-1. Install Node.js & NPM 0.8.x (>= 0.8.21).  Preferably from the [Official Download Page](http://nodejs.org/#download).
+1. Install Node.js & NPM 0.8.x (>= 0.8.21).  
+Recommended version is node 0.8.23 and can be downloaded from: [node 0.8.23](http://nodejs.org/dist/v0.8.23/).  
+`NOTE`: Ares does not currently work with node 0.10.x.
 1. Run:
 
 		$ npm -d install ares-ide
