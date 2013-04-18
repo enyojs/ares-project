@@ -254,15 +254,7 @@ body {
 
 .onyx-popup {
 	font-size: 13px;
-}
-
-.onyx-input-decorator > input {
-	font-size: 13px;
-}
-
-.onyx-input-decorator {
-	padding:2px 8px;
-	margin:0px;
+	font-family:"HPSimplified";
 }
 
 .onyx-button { 
@@ -324,22 +316,28 @@ body {
 	height: 28px;
 }
 
+.onyx-toolbar .onyx-button { height: 28px; }
 .onyx-item {
 	padding:10px;
 	line-height: 13px;
 }
 
+.onyx-item { padding:10px; line-height: 13px; }
+
 .onyx-input-decorator {
-	background-image: url("../ares/assets/images/bgInput.png");
-	background-repeat: repeat;
-	border-radius: 4px;
-	border-top: 1px solid rgba(0,0,0, 0.3);
-
+	overflow: visible; 
+    position: relative; 
+    background-color: #CCCCCC;  
+    padding: 5px 5px 3px 8px; 
+    border: 1px solid #CCCCCC;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border-radius: 6px;
+    -pie-border-radius: 6px;
+    box-shadow: 0 1px 0 #F2F2F2, 0 -1px 0 #CCCCCC;
 }
 
-.onyx-input-decorator.onyx-focused {
-	background-image: none;
-}
+.onyx-input-decorator > input { font-size: 13px; border:none; background:none; height:20px;  color:#000000; width:200px; outline:none;}
 
 .ares-bordered-toolbar{
 	margin-top:8px;
