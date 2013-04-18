@@ -286,8 +286,33 @@ body {
 }
 
 .onyx-picker-decorator .onyx-button {
-	padding:2px 8px;
-	margin:0px;
+	padding:6px 18px; /*needs to be specifyed, without It herits of padding of onyx-picker-decorator in onyx.css*/
+	width: 200px;
+}
+
+.onyx-picker-decorator .onyx-button:before{ 
+	position: relatve; 
+	content: url(../ares/assets/images/smallArrowDown.png); 
+	width:25px; 
+	vertical-align: middle; 
+	display: inline-block;
+	float:right;
+	margin-right: -20px;
+}
+
+.onyx-picker{ 
+	padding:0px;z-index:10; 
+	text-align:left; 
+	background-color:#FFFFFF; 
+	font-size:13px; 
+	color:#8C8C8C;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    -moz-border-radius:4px;
+    -webkit-border-radius:4px;
+    border-radius:4px;
+    -pie-border-radius:4px;
+    overflow:hidden; 
+    min-width:160px;
 }
 
 .onyx-radiobutton {
