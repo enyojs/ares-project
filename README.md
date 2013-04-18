@@ -180,6 +180,18 @@ In order to produce Ares on a build server:
 
 _This section is for Ares commiters only_
 
+Before publishing a few steps and checkings are mandatory:
+
+1. Commit your changes
+2. In package.json, update the `dependencies` and `bundledDependencies` if your changes introduce/change node module dependencies.
+3. Execute `npm-shrinkwrap` to update the file `npm-shrinkwrap.json`.
+4. Execute `npm pack`
+5. In a tenporary directory, execute `npm install <path-to>/ares-ide-<version>.tgz` to verfy that the generated .tgz file if correct.
+6. Perform a few tests to verify that everything works.
+7. Commit your changes and start the publish process described above.
+
+To publish:
+
 1. Tag the version you intend to publish, with the exact same string as the `version: ` in `package.json` & upload this tag.
 1. Checkout a fresh copy _on a Linux (virtual) machine_ 
 	* Publishing from a Windows machine will break UNIX (Linux & OSX) installations [NPM Issue 2097](https://github.com/isaacs/npm/issues/2097)
