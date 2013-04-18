@@ -96,7 +96,7 @@ Recommended version is node 0.8.23 and can be downloaded from: [node 0.8.23](htt
 		$ git submodule foreach git fetch origin
 		$ git merge origin/master
 		$ git submodule update --init  --recursive
-		$ npm -d install
+		$ npm -d install						# Be sure to run "git submodule update ..." before "npm install"	
 
 **Note:** 
 
