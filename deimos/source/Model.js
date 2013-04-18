@@ -1,9 +1,8 @@
 enyo.singleton({
 	name: "Model",
 	kind: "enyo.Component",
-	debug: false,
+	debug: true,
 	info: {},
-	config: [],
 	defaults: {
 		properties: {
 			owner: {filterLevel: "hidden"},
@@ -43,8 +42,10 @@ enyo.singleton({
 	 * Build all the information needed by the inspector
 	 * @public
 	 */
-	palette: [],
+	palette: [], //TODO still used?
 	buildInformation: function(projectIndexer) {
+		this.debug && enyo.log("Model.buildInformation: Indexer: ", projectIndexer);
+		this.info = {};
 		this.addInformation("properties", "__default", this.defaults.properties);
 		this.addInformation("events", "__default", this.defaults.events);
 
@@ -62,7 +63,7 @@ enyo.singleton({
 	},
 	addInformation: function(inType, inName, inInfo) {
 		if (inInfo) {
-			this.debug && this.log("Adding " + inType + " information for " + inName);
+			this.debug && enyo.log("Model.addInformation: Adding " + inType + " information for " + inName);
 
 			var fn = function(inType, inName, inSubName, inData) {
 				if (inData.filterLevel) {
@@ -74,7 +75,7 @@ enyo.singleton({
 				} else {
 					inData.level = Model.F_NORMAL;
 				}
-				this.debug && this.log("Setting level " + inData.level + " for " + inType + " " + inName + "." + inSubName);
+				this.debug && enyo.log("Model.addInformation: Setting level " + inData.level + " for " + inType + " " + inName + "." + inSubName);
 			};
 			var addFilterLevel = enyo.bind(this, fn, inType, inName);
 
