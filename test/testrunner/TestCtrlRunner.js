@@ -44,7 +44,7 @@ enyo.kind({
 			{tag: "h3", content: "The results of the Ares TestRunner are available in the console!!"},
 			{tag: "br"},
 			{kind: "FittableColumns", components: [
-				{name: "cancelButton", kind: "onyx.Button", classes: "onyx-affirmative", content: "cancel", ontap: "deleteCancel"},
+				{name: "cancelButton", kind: "onyx.Button", content: "cancel", ontap: "deleteCancel"},
 				{fit: true},
 			]}
 		],

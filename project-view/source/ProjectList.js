@@ -253,10 +253,8 @@ enyo.kind({
 	nukeChanged: function(inSender, inEvent) {
 		if (this.$.nukeFiles.checked) {
 			this.$.actionButton.setContent("Delete");
-			this.$.actionButton.addClass("onyx-negative");
 		} else {
 			this.$.actionButton.setContent("Remove");
-			this.$.actionButton.removeClass("onyx-negative");
 		}
 	}
 });
