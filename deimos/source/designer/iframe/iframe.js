@@ -29,6 +29,7 @@ enyo.kind({
 	prevY: null,
 	dragoverTimeout: null,
 	holdoverTimeout: null,
+	debug: true,
 	
 	create: function() {
 		this.inherited(arguments);
@@ -75,17 +76,20 @@ enyo.kind({
 	},
 	//* Send message to Deimos via _this.$.communicator_
 	sendMessage: function(inMessage) {
+		this.debug && enyo.log("**** iFrame RPCCommunicator **** - sendMessage: ", inMessage);
 		this.$.communicator.sendMessage(inMessage);
 	},
 	//* Receive message from Deimos
 	receiveMessage: function(inSender, inEvent) {
+		this.debug && enyo.log("**** iFrame RPCCommunicator **** - receiveMessage: ", inEvent.message, " op: ", inEvent.message.op, " val: ", inEvent.message.val);
+
+		var msg = inEvent.message;
+
 		if (!inEvent.message || !inEvent.message.op) {
 			enyo.warn("Deimos iframe received invalid message data:", msg);
 			return;
-		}
-		
-		var msg = inEvent.message;
-		
+		}		
+			
 		switch (msg.op) {
 			case "containerData":
 				this.setContainerData(msg.val);
@@ -406,6 +410,7 @@ enyo.kind({
 		delete this.selection[inProperty];
 	},
 	updateProperty: function(inProperty, inValue) {
+		this.debug && enyo.log("**** iFrame RPCCommunicator **** - updateProperty: property: ", inProperty, " value: ", inValue);
 		this.selection.setProperty(inProperty, inValue);
 	},
 	

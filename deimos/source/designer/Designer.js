@@ -72,11 +72,13 @@ enyo.kind({
 	},
 	
 	//* Send message via communicator
-	sendMessage: function(inMessage) {
+	sendMessage: function(inMessage) {		 
+		this.debug && enyo.log("**** Designer sendMessage **** msg: ", inMessage);
 		this.$.communicator.sendMessage(inMessage);
 	},
 	//* Respond to message from communicator
 	receiveMessage: function(inSender, inEvent) {
+		this.debug && enyo.log("**** Designer receiveMessage **** inSender: ", inSender, " inEvent: ", inEvent);
 		if(!inEvent.message || !inEvent.message.op) {
 			enyo.warn("Deimos designer received invalid message data:", msg);
 			return;
