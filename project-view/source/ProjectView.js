@@ -19,30 +19,20 @@ enyo.kind({
 		{kind: "Harmonia", fit:true, name: "harmonia"},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan"},
-		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""}
+		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"}
 	],
 	handlers: {
 		onAddProjectInList: "addProjectInList",
 		onStartBuild: "startBuild",
-		onPreview: "launchPreview",
-		onError: "showError"
+		onPreview: "launchPreview"
 	},
 	events: {
 		onHideWaitPopup: "",
-		onShowWaitPopup: ""
+		onShowWaitPopup: "",
+		onError: ""
 	},
 	create: function() {
 		this.inherited(arguments);
-	},
-	showError: function(inSender, inEvent) {
-		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
-		this.doHideWaitPopup();
-		this.showErrorPopup(inEvent.msg, inEvent.details);
-		return true; //Stop event propagation
-	},
-	showErrorPopup : function(msg, details) {
-		this.$.errorPopup.raise(msg, details);
 	},
 	/**
 	 * Refresh the {ProjectView} (if relevant), following a change of the given file
@@ -72,8 +62,8 @@ enyo.kind({
 			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
 		} catch(e) {
 				var msg = e.toString();
-				this.showErrorPopup(msg);
 				this.error(msg);
+				this.doError({msg: msg});
 				return false;
 		}
 		return true; //Stop event propagation
@@ -94,7 +84,7 @@ enyo.kind({
 			service: project.getService(),
 			folderId: project.getFolderId()
 		}, function(err) {
-			if (err) self.showErrorPopup(err.toString());
+			if (err) self.doError({msg: err.toString(), err: err});
 			project.setConfig(config);
 		});
 		this.currentProject = project;
@@ -119,9 +109,7 @@ enyo.kind({
 				config: this.currentProject.getConfig()
 			}, function(inError, inDetails) {
 				self.doHideWaitPopup();
-				if (inError) {
-					self.showErrorPopup(inError.toString(), inDetails);
-				}
+				self.doError({msg: inError.toString(), err: inError, details: inDetails});
 			});
 		} else {
 			this.error("No build service defined:", inEvent);

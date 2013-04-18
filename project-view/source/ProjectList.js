@@ -16,9 +16,8 @@ enyo.kind({
 		onProjectRemoved: "",
 		onModifySettings: "",
 		onStartBuild: "",
-		onPreview: ""
-	},
-	handlers: {
+		onPreview: "",
+		onError: ""
 	},
 	debug: false,
 	components: [
@@ -72,7 +71,6 @@ enyo.kind({
 			]}
 		]},
 		{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{kind: "AccountsConfigurator"}
 	],
 	selected: null,
@@ -122,7 +120,7 @@ enyo.kind({
 				service.remove( folderId )
 					.response(this, function(){this.removeSelectedProjectData();})
 					.error(this, function(inError){
-						this.showErrorPopup("Error removing files of project " + project.name + ": " + inError);
+						this.doError({msg: "Error removing files of project " + project.name + ": " + inError.toString(), err: inError});
 					}) ;
 			}
 			else {
@@ -172,7 +170,7 @@ enyo.kind({
 		} else {
 			// ...otherwise let
 			msg = "Service " + project.getServiceId() + " not found";
-			this.showErrorPopup(msg);
+			this.doError({msg: msg});
 			this.error(msg);
 		}
 	},
@@ -190,10 +188,6 @@ enyo.kind({
 		if (typeof this[inEvent.selected.value] === 'function') {
 			this[inEvent.selected.value]();
 		}
-	},
-	showErrorPopup : function(msg) {
-		this.$.errorPopup.setErrorMsg(msg);
-		this.$.errorPopup.show();
 	},
 	stringifyReplacer: function(key, value) {
 		if (key === "originator") {
