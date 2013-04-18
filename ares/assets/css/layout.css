@@ -1,6 +1,5 @@
-body { font-family:"HPSimplified"; } 
-.onyx { font-family:"HPSimplified"; }/* Fixme: is used to delete a weight of .onyx used on onyx.InputDecorator kind*/
-#ares_bottomBar {height:35px; background-color:#0A0A0A; border-top: 1px solid #050505; padding:4px;}
+
+#ares_bottomBar {height:40px; background-color:#0A0A0A; border-top: 1px solid #050505; padding:4px;}
 #ares_projectView_projectList_toolbar, #ares_projectView_harmonia_hermesFileTree_toolbar { 
     height:62px; 
     border-bottom: 1px solid #222; 
@@ -9,45 +8,4 @@ body { font-family:"HPSimplified"; }
 }
 #ares_projectView_harmonia_hermesFileTree_toolbar { height:64px; border-left: 0px; }
 #ares_projectView_projectList_toolbar { border-right: 0px; }
-.ares_projectList { border-right: 0px; }
-
-#ares_projectView_projectList [id*="project-list-title"] {line-height:50px; height:50px; top:0px; left:0px; right:0px; text-transform:uppercase; color:#000000; text-align:center; font-size:19px;}
-/*#ares_projectView_projectList [id*="project-list-title"], #ares_projectView_harmonia_hermesFileTree_scroller [id$="serverNode_caption"]{line-height:50px; height:50px; top:0px; left:0px; right:0px; text-transform:uppercase; color:#000000; text-align:center; font-size:19px;}
-#ares_projectView_harmonia_hermesFileTree_scroller [id$="serverNode"] {height:50px; border-bottom:1px solid #FFFFFF; background: url(../images/hp_ep_sprite_horizontal.png) repeat-x 0px -72px;}*/
-#ares_projectView_harmonia_hermesFileTree_scroller [id$="serverNode_caption"]:{padding: 0px;}#ares_projectView_projectList .hangar { }
-
-#ares_projectView_projectList { width: 300px; }
-#ares_projectView_projectList .hangar {width:7px; position:absolute; left:293px; top:0px; bottom:0px; right:0px;}
-
-#aresmenu{z-index:11; text-align:center; margin: 0px 6px}
-#aresmenu span { line-height:65px; color:#FFF; width:85px; cursor:pointer; cursor:hand; font-size:12px; font-weight:normal; text-shadow:0 -1px 0 #000000;}
-#aresmenu ul {  
-    display: none;
-    background-color: #FFFFFF;
-    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.5);
-    color: #8C8C8C;
-    list-style-type: none;
-    margin: 15px 0 0;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    left: 0;
-    text-align: left;
-    top: 50%;
-    width: 120px;
-    border-radius: 4px;
-    -moz-border-radius:4px;
-    -webkit-border-radius:4px;   
-    -pie-border-radius: 4px;
-    z-index: 5;
-}
-#aresmenu ul.on { display:block;}
-#aresmenu ul li { font-size:14px; float: left; background-color:#FFFFFF; margin: 0px; padding:0px 15px 0px 15px; cursor:pointer; cursor:hand; line-height:30px; color:#000000; width:100%;}
-#aresmenu ul li.hover { 
-    -o-box-shadow: inset 0px 0px 20px 0px rgba(0,0,0, 0.5); 
-    -moz-box-shadow: inset 0px 0px 20px 0px rgba(0,0,0, 0.5); 
-    -ms-box-shadow: inset 0px 0px 20px 0px rgba(0,0,0, 0.5); 
-    -webkit-box-shadow: inset 0px 0px 20px 0px rgba(0,0,0, 0.5); 
-    box-shadow: inset 0px 0px 20px 0px rgba(0,0,0, 0.5); 
-}
-.hide { display:none; }
+#ares_projectView_harmonia_hermesFileTree_scroller [id$="serverNode_caption"]:{padding: 0px;}
