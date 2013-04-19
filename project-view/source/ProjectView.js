@@ -23,8 +23,8 @@ enyo.kind({
 	],
 	handlers: {
 		onAddProjectInList: "addProjectInList",
-		onStartBuild: "startBuild",
-		onPreview: "launchPreview"
+		onPreviewProject: "previewProjectAction",
+		onBuildProject: "buildProjectAction"
 	},
 	events: {
 		onHideWaitPopup: "",
@@ -92,8 +92,16 @@ enyo.kind({
 	projectRemoved: function(inSender, inEvent) {
 		this.$.harmonia.setProject(null);
 	},
-	startBuild: function(inSender, inEvent) {
-		if (!this.currentProject) {
+	/**
+	 * Event handler: Select the project builder
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project 
+	 * @private
+	 */
+	buildProjectAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (!project) {
 			return true; // stop bubble-up
 		}
 		var self = this;
@@ -103,10 +111,10 @@ enyo.kind({
 		var bdService =	services[services.length - 1];
 		if (bdService) {
 			bdService.build( /*project*/ {
-				name: this.currentProject.getName(),
-				filesystem: this.currentProject.getService(),
-				folderId: this.currentProject.getFolderId(),
-				config: this.currentProject.getConfig()
+				name: project.getName(),
+				filesystem: project.getService(),
+				folderId: project.getFolderId(),
+				config: project.getConfig()
 			}, function(inError, inDetails) {
 				self.doHideWaitPopup();
 				self.doError({msg: inError.toString(), err: inError, details: inDetails});
@@ -118,13 +126,18 @@ enyo.kind({
 		return true; // stop bubble-up
 	},
 	/**
-	 * Launch a preview widget of the selected project in a separate frame
+	 * Event handler: Launch a preview widget of the selected project in a separate frame
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project 
+	 * @private
 	 */
-	launchPreview: function(inSender, inEvent) {
-		if ( this.currentProject) {
-			var config = this.currentProject.getConfig() ;
+	previewProjectAction: function(inSender, inEvent) {
+		var project = inEvent.project;
+		if ( project) {
+			var config = project.getConfig() ;
 			var topFile = config.data.preview.top_file ;
-			var projectUrl = this.currentProject.getProjectUrl() + '/' + topFile ;
+			var projectUrl = project.getProjectUrl() + '/' + topFile ;
 
 			// the last replace method is needed for test environment only
 			var winLoc = window.location.toString().replace('ares','preview').replace('test', 'index') ;
@@ -132,7 +145,7 @@ enyo.kind({
 				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
 				+ 'url=' + encodeURIComponent(projectUrl);
 
-			this.log("preview on URL " + previewUrl) ;
+			if (this.debug) this.log("preview on URL " + previewUrl) ;
 
 			window.open(
 				previewUrl,
