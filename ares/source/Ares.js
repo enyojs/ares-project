@@ -28,6 +28,7 @@ enyo.kind({
 			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
 		]},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
 		{kind: "ServiceRegistry"},
 		{kind: "Ares.PackageMunger", name: "packageMunger"}
 	],
@@ -36,6 +37,7 @@ enyo.kind({
 		onUpdateAuth: "handleUpdateAuth",
 		onShowWaitPopup: "showWaitPopup",
 		onHideWaitPopup: "hideWaitPopup",
+		onError: "showError",
 		onTreeChanged: "_treeChanged",
 		onChangingNode: "_nodeChanging"
 	},
@@ -383,6 +385,15 @@ enyo.kind({
 	},
 	hideWaitPopup: function() {
 		this.$.waitPopup.hide();
+	},
+	showError: function(inSender, inEvent) {
+		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
+		this.hideWaitPopup();
+		this.showErrorPopup(inEvent);
+		return true; //Stop event propagation
+	},
+	showErrorPopup : function(msg, details) {
+		this.$.errorPopup.raise(msg, details);
 	},
 	/**
 	 * Event handler for user-initiated file or folder changes
