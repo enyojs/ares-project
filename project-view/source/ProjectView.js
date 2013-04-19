@@ -19,30 +19,20 @@ enyo.kind({
 		{kind: "Harmonia", fit:true, name: "harmonia"},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan"},
-		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""}
+		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"}
 	],
 	handlers: {
 		onAddProjectInList: "addProjectInList",
-		onStartBuild: "startBuild",
-		onPreview: "launchPreview",
-		onError: "showError"
+		onPreviewProject: "previewProjectAction",
+		onBuildProject: "buildProjectAction"
 	},
 	events: {
 		onHideWaitPopup: "",
-		onShowWaitPopup: ""
+		onShowWaitPopup: "",
+		onError: ""
 	},
 	create: function() {
 		this.inherited(arguments);
-	},
-	showError: function(inSender, inEvent) {
-		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
-		this.doHideWaitPopup();
-		this.showErrorPopup(inEvent.msg, inEvent.details);
-		return true; //Stop event propagation
-	},
-	showErrorPopup : function(msg, details) {
-		this.$.errorPopup.raise(msg, details);
 	},
 	/**
 	 * Refresh the {ProjectView} (if relevant), following a change of the given file
@@ -72,8 +62,8 @@ enyo.kind({
 			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
 		} catch(e) {
 				var msg = e.toString();
-				this.showErrorPopup(msg);
 				this.error(msg);
+				this.doError({msg: msg});
 				return false;
 		}
 		return true; //Stop event propagation
@@ -94,7 +84,7 @@ enyo.kind({
 			service: project.getService(),
 			folderId: project.getFolderId()
 		}, function(err) {
-			if (err) self.showErrorPopup(err.toString());
+			if (err) self.doError({msg: err.toString(), err: err});
 			project.setConfig(config);
 		});
 		this.currentProject = project;
@@ -102,8 +92,16 @@ enyo.kind({
 	projectRemoved: function(inSender, inEvent) {
 		this.$.harmonia.setProject(null);
 	},
-	startBuild: function(inSender, inEvent) {
-		if (!this.currentProject) {
+	/**
+	 * Event handler: Select the project builder
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project 
+	 * @private
+	 */
+	buildProjectAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (!project) {
 			return true; // stop bubble-up
 		}
 		var self = this;
@@ -113,14 +111,14 @@ enyo.kind({
 		var bdService =	services[services.length - 1];
 		if (bdService) {
 			bdService.build( /*project*/ {
-				name: this.currentProject.getName(),
-				filesystem: this.currentProject.getService(),
-				folderId: this.currentProject.getFolderId(),
-				config: this.currentProject.getConfig()
+				name: project.getName(),
+				filesystem: project.getService(),
+				folderId: project.getFolderId(),
+				config: project.getConfig()
 			}, function(inError, inDetails) {
 				self.doHideWaitPopup();
 				if (inError) {
-					self.showErrorPopup(inError.toString(), inDetails);
+					self.doError({msg: inError.toString(), err: inError, details: inDetails});
 				}
 			});
 		} else {
@@ -130,13 +128,18 @@ enyo.kind({
 		return true; // stop bubble-up
 	},
 	/**
-	 * Launch a preview widget of the selected project in a separate frame
+	 * Event handler: Launch a preview widget of the selected project in a separate frame
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project 
+	 * @private
 	 */
-	launchPreview: function(inSender, inEvent) {
-		if ( this.currentProject) {
-			var config = this.currentProject.getConfig() ;
+	previewProjectAction: function(inSender, inEvent) {
+		var project = inEvent.project;
+		if ( project) {
+			var config = project.getConfig() ;
 			var topFile = config.data.preview.top_file ;
-			var projectUrl = this.currentProject.getProjectUrl() + '/' + topFile ;
+			var projectUrl = project.getProjectUrl() + '/' + topFile ;
 
 			// the last replace method is needed for test environment only
 			var winLoc = window.location.toString().replace('ares','preview').replace('test', 'index') ;
@@ -144,7 +147,7 @@ enyo.kind({
 				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
 				+ 'url=' + encodeURIComponent(projectUrl);
 
-			this.log("preview on URL " + previewUrl) ;
+			if (this.debug) this.log("preview on URL " + previewUrl) ;
 
 			window.open(
 				previewUrl,

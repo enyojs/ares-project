@@ -9,7 +9,7 @@ enyo.kind({
 		details: ""
         },
         components: [
-                {tag: "h3", content: "Oh, no!?"},
+                {tag: "h3", content: "Error"},
                 {name: "msg"},
                 {tag: "br"},
                 {name: "okButton", kind: "onyx.Button", content: "Ok", ontap: "hideErrorPopup"},
@@ -45,7 +45,13 @@ enyo.kind({
 		this.setDetails();
                 this.hide();
         },
-        raise: function(msg, details) { 
+        raise: function(msg, details) {
+		var evt;
+		if (typeof msg === 'object') {
+			evt = msg;
+			msg = evt.msg || (evt.err && evt.err.toString());
+			details = evt.details || (evt.err && evt.err.stack);
+		}
 		this.setErrorMsg(msg);
 		this.setDetails(details);
 		this.show();

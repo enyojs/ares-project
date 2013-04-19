@@ -29,7 +29,7 @@
 					"properties": {
 						"url": {
 							"type": "string",
-							"description": "filename or http url of the zip file",
+							"description": "filename or http url of the zip file. In case of filename, it must be relative to the directory where the project templates definition file is stored",
 							"format": "regex",
 							"pattern": "([-._a-zA-Z0-9:/]+)",
 							"required": true

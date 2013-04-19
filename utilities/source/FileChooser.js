@@ -69,24 +69,24 @@ enyo.kind({
 		/**
 		 * Emitted once the end-user clicks cancel or when a
 		 * file/folder is chosen.
-		 * 
+		 *
 		 * If none is chosen (the end-user tapped "Cancel"),
 		 * this event does not contain the {file} property.
-		 * 
+		 *
 		 * If a folder is chosen, the event contains the
 		 * {file} property, itself having a true {isDir}
 		 * property.
-		 * 
+		 *
 		 * If a file is chosen, one of the below is true:
-		 * 
+		 *
 		 * 1. {event#file} exists, {event#file#isDir} is false
 		 * and {event#name} is falsy: the user selected the
 		 * existing file {event#file}.
-		 * 
+		 *
 		 * 2. {event#file} exists, {event#file#isDir} is true
 		 * and the {event#name} is set: The file {event#name}
 		 * is to be created in the folder {event#file}
-		 * 
+		 *
 		 * 3. {event#file} exists, {event#file#isDir} is false
 		 * and {event#name} is set: the file {event#name} is
 		 * to be created in the same folder as the file
@@ -119,10 +119,16 @@ enyo.kind({
 	},
 	handleSelectProvider: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		var hft = this.$.hermesFileTree ;
+		var next = inEvent.callBack ;
 		if (inEvent.service) {
-			this.$.hermesFileTree
-				.connectService(inEvent.service)
-				.refreshFileTree(null, null,  inEvent.callBack);
+			async.series(
+				[
+					hft.connectService.bind(hft,inEvent.service),
+					hft.refreshFileTree.bind(hft)
+				],
+				next
+			);
 		}
 		return true; //Stop event propagation
 	},
@@ -181,14 +187,14 @@ enyo.kind({
 			file: this.selectedFile,
 			name: (this.selectedName === this.selectedFile.name ? undefined : this.selectedName)
 		});
-		return true; // Stop event propagation 
+		return true; // Stop event propagation
 	},
 	/** @private */
 	cancel: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
 		this.hide() ;
 		this.doFileChosen();
-		return true; // Stop event propagation 
+		return true; // Stop event propagation
 	},
 	//FIXME: This is *nearly* identical to the code in Harmonia. Maybe move this into HermesFileTree?
 	createFolder: function(inSender, inEvent) {

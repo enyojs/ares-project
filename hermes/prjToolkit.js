@@ -2,7 +2,7 @@
  * Hermes Open webos build service
  */
 
-require('./lib/checkNodeVersion');		// Check nodejs version
+// nodejs version checking is done in parent process ide.js
 
 var fs = require("fs"),
     path = require("path"),
@@ -17,6 +17,7 @@ var fs = require("fs"),
 var basename = path.basename(__filename);
 var FORM_DATA_LINE_BREAK = '\r\n';
 var performCleanup = true;
+var tools = new ptools.Generator();
 
 function BdOpenwebOS(config, next) {
 	function HttpError(msg, statusCode) {
@@ -29,7 +30,7 @@ function BdOpenwebOS(config, next) {
 
 	console.log("config=",  util.inspect(config));
 
-	tools = new ptools.Generator();
+
 	var app, server;
 	if (express.version.match(/^2\./)) {
 		// express-2.x

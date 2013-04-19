@@ -2,7 +2,7 @@
  * Hermes ZIP archival service
  */
 
-require('./lib/checkNodeVersion');		// Check nodejs version
+// nodejs version checking is done in parent process ide.js
 
 var fs = require("fs");
 var path = require("path");

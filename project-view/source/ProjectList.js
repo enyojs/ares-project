@@ -15,52 +15,83 @@ enyo.kind({
 		onScanProject: "",
 		onProjectRemoved: "",
 		onModifySettings: "",
-		onStartBuild: "",
-		onPreview: ""
+		onBuildProject: "",
+		//onInstallProject: "",
+		//onRunProject: "",
+		//onDebugProject: "",
+		onPreviewProject: "",
+		onError: ""
 	},
-	handlers: {
-	},
-	debug: false,
+	debug: true,
 	components: [
-		{kind: "onyx.Toolbar", classes: "onyx-toolbar onyx-menu-toolbar ares-top-toolbar", isContainer: true, name: "toolbar", components: [
+		/*{kind: "onyx.Toolbar", classes: "onyx-toolbar onyx-menu-toolbar ares-top-toolbar", isContainer: true, name: "toolbar", components: [
 			{classes: "aresmenu" , components: [
 				{tag:'span', content:'Ares', ontap: "aresMenuTapped"},
 				{classes:'lsmallDownArrow', ontap: "aresMenuTapped",},
 				{name: 'amenu', tag:'ul', components:[
 					{name: 'account',   id:'account', tag:'li', kind: 'control.Link', content: "Accounts...", ontap:"showAccountConfigurator", onmouseup:"aresMenuHide"},
-					{name: 'properties',   id:'properties',   tag:'li', kind: 'control.Link', content: "Properties..."}
+					{name: 'properties',   id:'properties',   tag:'li', kind: 'control.Link', content: "Properties..."}*/
+		{kind: "onyx.MoreToolbar", classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", isContainer: true, name: "toolbar", components: [
+			{kind: "onyx.MenuDecorator", onSelect: "menuItemSelected", components: [
+				{content: "Ares"},
+				{kind: "onyx.Menu", components: [
+					{value: "showAccountConfigurator", components: [
+						{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png"},
+						{content: "Accounts..."}
+					]},
+					{classes: "onyx-menu-divider"},
+					{content: "Properties..."}
 				]}
 			]},
-			{kind: "onyx.TooltipDecorator", components: [
-				{name: "createProjectButton", kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_new.png", onclick: "doCreateProject"},
-				{kind: "onyx.Tooltip", content: "Create Project..."}
+			{kind: "onyx.MenuDecorator", onSelect: "menuItemSelected", components: [
+				{content: "Edit"},
+				{kind: "onyx.Menu", components: [
+					{value: "doCreateProject", components: [
+						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_new.png"},
+						{content: "Create..."}
+					]},
+					{value: "doScanProject", components: [
+						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_import.png"},
+						{content: "Import..."}
+					]},
+					{classes: "onyx-menu-divider"},
+					{value: "removeProjectAction", components: [
+						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_delete.png"},
+						{content: "Delete"}
+					]}
+				]}
 			]},
-			{kind: "onyx.TooltipDecorator", components: [
-				{name: "importProjectButton", kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_edit.png", onclick: "doScanProject"},
-				{kind: "onyx.Tooltip", content: "Import or Scan for Projects..."}
-			]},
-			{kind: "onyx.TooltipDecorator", components: [
-				{name: "buildButton", disabled: true,
-					kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_build.png", onclick: "doStartBuild"},
-				{kind: "onyx.Tooltip", content: "Build Project..."}
-			]},
-			{kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", name: "previewButton", disabled: true,
-				 src: "$project-view//assets/images/project_preview.png",
-				 onclick: "doPreview"
-				},
-				{kind: "onyx.Tooltip", content: "Preview Project..."}
-			]},
-			{kind: "onyx.TooltipDecorator", components: [
-				{name: "settingsButton", disabled: true,
-				 kind: "onyx.IconButton", classes: "ares-scale-background",
-				 src: "$project-view/assets/images/project_settings.png", onclick: "doModifySettings"},
-				{kind: "onyx.Tooltip", content: "Settings..."}
-			]},
-			{kind: "onyx.TooltipDecorator", components: [
-				{name: "deleteButton", disabled: true, kind: "onyx.IconButton", src: "$project-view//assets/images/project_view_delete.png", onclick: "removeProjectAction"},
-				// FIXME: tooltip goes under File Toolbar, there's an issue with z-index stuff
-				{kind: "onyx.Tooltip", content: "Remove Project..."}
+			{kind: "onyx.MenuDecorator", onSelect: "menuItemSelected", components: [
+				{content: "Project", name: "projectMenu", disabled: true},
+				{kind: "onyx.Menu", components: [
+					{value: "doModifySettings", components: [
+						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_edit.png"},
+						{content: "Edit..."}
+					]},
+					{classes: "onyx-menu-divider"},
+					{value: "doPreviewProject", components: [
+						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_preview.png"},
+						{content: "Preview"}
+					]},
+					{classes: "onyx-menu-divider"},
+					{value: "doBuildProject", components: [
+						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_build.png"},
+						{content: "Build..."}
+					]},
+					{value: "doInstallProject", components: [
+						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_install.png"},
+						{content: "Install..."}
+					]},
+					{value: "doRunProject", components: [
+						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_run.png"},
+						{content: "Run..."}
+					]},
+					{classes: "onyx-menu-divider"},
+					{value: "doDebugProject", components: [
+						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_debug.png"},
+						{content: "Debug...", classes: "onyx-disabled" }
+					]}
+				]}
 			]}
 		]},
 		{content:"Project list", classes:"project-list-title title-gradient"},
@@ -71,7 +102,6 @@ enyo.kind({
 		]},
 		{classes:"hangar"},
 		{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{kind: "AccountsConfigurator"}
 	],
 	selected: null,
@@ -97,6 +127,19 @@ enyo.kind({
 		this.$.projectList.setCount(count);
 		this.$.projectList.render();
 		this.doProjectRemoved();		// To reset the Harmonia view
+	},
+	/**
+	 * Generic event handler
+	 * @private
+	 */
+	menuItemSelected: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		var fn = inEvent && inEvent.selected && inEvent.selected.value;
+		if (typeof this[fn] === 'function') {
+			this[fn]({project: this.selectedProject});
+		} else {
+			if (this.debug) this.log("*** BUG: '" + fn + "' is not a known function");
+		}
 	},
 	addProject: function(name, folderId, service) {
 		var serviceId = service.getConfig().id || "";
@@ -129,11 +172,11 @@ enyo.kind({
 			this.debug && this.log(project);
 			if (nukeFiles) {
 				var service = project.getService();
-				var folder = project.getFolderId();
-				service.remove( folder )
+				var folderId = project.getFolderId();
+				service.remove( folderId )
 					.response(this, function(){this.removeSelectedProjectData();})
 					.error(this, function(inError){
-						this.showErrorPopup("Error removing files of project " + project.name + ": " + inError);
+						this.doError({msg: "Error removing files of project " + project.name + ": " + inError.toString(), err: inError});
 					}) ;
 			}
 			else {
@@ -148,7 +191,7 @@ enyo.kind({
 			Ares.Workspace.projects.removeProject(name);
 			this.selected = null;
 			this.doProjectRemoved();
-			this.enableDisableButtons(false);
+			this.$.projectMenu.setDisabled(true);
 		}
 	},
 	projectListSetupItem: function(inSender, inEvent) {
@@ -176,28 +219,25 @@ enyo.kind({
 		service = ServiceRegistry.instance.resolveServiceId(project.getServiceId());
 		if (service !== undefined) {
 			project.setService(service);
-			this.enableDisableButtons(true);
+			this.$.projectMenu.setDisabled(false);
+			this.selectedProject = project;
 			this.doProjectSelected({project: project});
 		} else {
 			// ...otherwise let
 			msg = "Service " + project.getServiceId() + " not found";
-			this.showErrorPopup(msg);
+			this.doError({msg: msg});
 			this.error(msg);
 		}
-	},
-	enableDisableButtons: function(inEnable) {
-		this.$.settingsButton.setDisabled(!inEnable);
-		this.$.deleteButton.setDisabled(!inEnable);
-		this.$.buildButton.setDisabled(!inEnable);
-		this.$.previewButton.setDisabled(!inEnable);
 	},
 	showAccountConfigurator: function() {
 		this.$.accountsConfigurator.show();
 	},
+	
 	showErrorPopup : function(msg) {
 		this.$.errorPopup.setErrorMsg(msg);
 		this.$.errorPopup.show();
 	},
+
 	stringifyReplacer: function(key, value) {
 		if (key === "originator") {
 			return undefined;	// Exclude

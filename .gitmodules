@@ -28,3 +28,6 @@
 [submodule "lib/foss/ace-builds"]
 	path = lib/foss/ace-builds
 	url = ../../ajaxorg/ace-builds.git
+[submodule "node_modules/semver"]
+	path = node_modules/semver
+	url = ../../isaacs/node-semver.git
