@@ -117,7 +117,9 @@ enyo.kind({
 				config: project.getConfig()
 			}, function(inError, inDetails) {
 				self.doHideWaitPopup();
-				self.doError({msg: inError.toString(), err: inError, details: inDetails});
+				if (inError) {
+					self.doError({msg: inError.toString(), err: inError, details: inDetails});
+				}
 			});
 		} else {
 			this.error("No build service defined:", inEvent);
