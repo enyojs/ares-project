@@ -23,7 +23,7 @@ enyo.kind({
 		serverName: ""
 	},
 	components: [
-		{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar /*ares_harmonia_toolBar ares-no-padding*/", components: [
+		{kind: "onyx.Toolbar", classes: "ares-top-toolbar  hermesFileTree-toolbar", components: [
 			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 				{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
 				{kind: "onyx.Tooltip", content: "New Folder..."}

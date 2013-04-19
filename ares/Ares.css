@@ -169,14 +169,56 @@ body {
 .ares-scale-background {
 	background-size: 100%;
 }
+.ares-top-toolbar{ 
+	border-right: 0px;
+    width: 100%;
+    height:43px; 
+    border-bottom: 1px solid #222; 
+    background:url(../ares/assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px -123px;
+    background-size: auto; /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
+}
+
+.hermesFileTree-toolbar { height:64px; border-left: 0px; }
+
+.ares-bottom-bar {height:40px; background-color:#0A0A0A; border-top: 1px solid #050505; padding:0px;}
+
+.ares-docbar-tabs {
+	overflow:auto; 
+	margin:0px; 
+	padding:0px 0px 0px 15px;
+}
+
+.enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-docbar-tabs {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
 
 .ares-tab {
-	display: inline-block;
-	padding: 4px 0px 0px 6px;
-	background-color: #888; 
+	background-color: #0A0A0A;
+	float: left; 
+	margin: 0px; 
+	padding:7px 0px; 
+	text-align:center; 
+	cursor:pointer; 
+	cursor:hand; 
+	color:#FFF; 
+	overflow:hidden; 
+	font-size:12px; 
+	font-weight:bold; 
+	text-shadow:0 -1px 0 #000000; 
+	min-width:100px;
+	box-shadow: none; 
+	border:none;
+	height:24px;
 }
 .ares-tab.active {
-	background-color: #888; 
+	-o-box-shadow: inset 0px 0px 40px 0px #000000; 
+    -moz-box-shadow: inset 0px 0px 40px 0px #000000;
+    -ms-box-shadow: inset 0px 0px 40px 0px #000000;
+    -webkit-box-shadow: inset 0px 0px 40px 0px #000000;
+    box-shadow: inset 0px 0px 40px 0px #000000; 
+    background: #333; 
+    border:none;
 }
 
 
@@ -231,14 +273,7 @@ body {
 	margin-bottom: 0px;
 }
 
-.ares-docbar-tabs {
-	padding-left:15px;
-}
 
-.enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-docbar-tabs {
-	margin-top: 0px;
-	margin-bottom: 0px;
-}
 
 .enyo-fittable-columns-layout.enyo-stretch > .onyx-grabber {
 	height: 27px;
@@ -311,9 +346,6 @@ body {
 	font-size: 13px;
 	padding-top: 8px 4px;
 	margin-bottom: 15px;
-}
-.onyx-toolbar .onyx-button {
-	height: 28px;
 }
 
 .onyx-toolbar .onyx-button { height: 28px; }

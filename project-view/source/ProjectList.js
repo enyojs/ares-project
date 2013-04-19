@@ -22,7 +22,7 @@ enyo.kind({
 	},
 	debug: false,
 	components: [
-		{kind: "onyx.Toolbar", classes: "onyx-menu-toolbar", isContainer: true, name: "toolbar", components: [
+		{kind: "onyx.Toolbar", classes: "onyx-toolbar onyx-menu-toolbar ares-top-toolbar", isContainer: true, name: "toolbar", components: [
 			{classes: "aresmenu" , components: [
 				{tag:'span', content:'Ares', ontap: "aresMenuTapped"},
 				{classes:'lsmallDownArrow', ontap: "aresMenuTapped",},
