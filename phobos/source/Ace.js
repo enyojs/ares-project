@@ -106,8 +106,11 @@ enyo.kind({
 	addSessionListeners: function() {
 		this.getSession().on("change", enyo.bind(this, "doChange"));
 		this.getSession().selection.on("changeCursor", enyo.bind(this, "doCursorChange"));
-		this.getSession().on("changeScrollLeft", enyo.bind(this, "doScroll"));
-		this.getSession().on("changeScrollTop", enyo.bind(this, "doScroll"));
+		this.getSession().on("changeScrollLeft", enyo.bind(this, "handleScroll"));
+		this.getSession().on("changeScrollTop", enyo.bind(this, "handleScroll"));
+	},
+	handleScroll: function(/* Dont handle parameters as we dont need them yet */) {
+		this.doScroll();
 	},
 	saveDocAction: function() {
 		this.doSave();
