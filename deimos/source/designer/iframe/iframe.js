@@ -406,7 +406,7 @@ enyo.kind({
 		delete this.selection[inProperty];
 	},
 	updateProperty: function(inProperty, inValue) {
-		this.selection.setProperty(inProperty, inValue);
+		this.selection[inProperty] = inValue;
 	},
 	
 	//* Get each kind component individually
