@@ -410,8 +410,7 @@ enyo.kind({
 		delete this.selection[inProperty];
 	},
 	updateProperty: function(inProperty, inValue) {
-		this.debug && enyo.log("**** iFrame RPCCommunicator **** - updateProperty: property: ", inProperty, " value: ", inValue);
-		this.selection.setProperty(inProperty, inValue);
+		this.selection[inProperty] = inValue;
 	},
 	
 	//* Get each kind component individually
