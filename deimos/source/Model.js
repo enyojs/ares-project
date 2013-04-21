@@ -42,7 +42,6 @@ enyo.singleton({
 	 * Build all the information needed by the inspector
 	 * @public
 	 */
-	palette: [], //TODO still used?
 	buildInformation: function(projectIndexer) {
 		this.debug && enyo.log("Model.buildInformation: Indexer: ", projectIndexer);
 		this.info = {};
@@ -59,7 +58,6 @@ enyo.singleton({
 			}
 		}, this);
 		
-		//this.buildProjectInformation();
 	},
 	addInformation: function(inType, inName, inInfo) {
 		if (inInfo) {
@@ -111,19 +109,9 @@ enyo.singleton({
 			return (info && info.level) || Model.F_NORMAL;
 		}
 	},
-	getFlattenedContainerInfo: function() {
-		var returnObject = {},
-			group,
-			item,
-			i,
-			j;
-		
-		for(i=0;(group = this.palette[i]);i++) {
-			for(j=0;(item = group.items[j]);j++) {
-				returnObject[item.name] = (item.config && typeof item.config.isContainer !== "undefined" && item.config.isContainer === false) ? false : true;
-			}
-		}
-		
-		return returnObject;
+	getFlattenedContainerInfo: function() {		
+		// TODO FiX me - ???
+		// function called by the IFrameDesigner.sendIframeContainerData()
+		return null;
 	}
 });
