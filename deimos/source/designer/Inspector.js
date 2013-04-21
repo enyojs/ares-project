@@ -90,7 +90,8 @@ enyo.kind({
 			
 			// Add an entry to _propMap[]_ for each property found in _publishedProperties_
 			for (var i = 0, p; (p = publishedProperties[i]); i++) {
-				if (this.allowed(kindName, "properties", p.name)) {
+				if (((this.allowed(kindName, "properties", p.name)) || 
+					(this.userDefinedAttributes[inControl.aresId].hasOwnProperty(p.name)))) {
 					this.debug && this.log("Adding property '" + p.name + "' from '" + currentKind + "'");
 					propMap[p.name] = p.value;
 				}
@@ -101,7 +102,8 @@ enyo.kind({
 			
 			// Add an entry to _eventMap[]_ for each event found in _events_
 			for (i = 0, p; (p = events[i]); i++) {
-				if (this.allowed(kindName, "events", p)) {
+				if (((this.allowed(kindName, "events", p)) ||
+					(this.userDefinedAttributes[inControl.aresId].hasOwnProperty(p)))) {
 					this.debug && this.log("Adding event '" + p + "' from '" + currentKind + "'");
 					eventMap[p] = true;
 				}
