@@ -23,7 +23,7 @@ enyo.kind({
 		onDblClick: "dblclick"
 	},
 	style: "padding: 8px; white-space: nowrap;",
-	debug: true,
+	debug: false,
 	helper: null,			// Analyzer.KindHelper
 	userDefinedAttributes: {},
 	create: function() {
@@ -61,7 +61,7 @@ enyo.kind({
 	},
 	allowed: function(inKindName, inType, inName) {
 		var level = Model.getFilterLevel(inKindName, inType, inName);
-		this.debug && this.log("Level: " + level + " for " + inKindName + "." + inName);
+		this.debug && this.log("Level: " + level + " for " + inKindName + "." + inName);			
 		return level >= this.filterLevel;
 	},
 	//* Return complete list of published properties for _inControl_
@@ -85,7 +85,8 @@ enyo.kind({
 			
 			// Get all published properties for this kind
 			var publishedProperties = this.helper.getPublishedWithValues();
-			this.debug && enyo.log("###################### Inspector.buildPropList: publishedProperties", publishedProperties);
+			this.debug && 
+			enyo.log("Inspector.buildPropList: publishedProperties", publishedProperties);
 			
 			// Add an entry to _propMap[]_ for each property found in _publishedProperties_
 			for (var i = 0, p; (p = publishedProperties[i]); i++) {
@@ -128,7 +129,7 @@ enyo.kind({
 			}
 		}
 		
-		this.debug && enyo.log("###################### Inspector.buildPropList: props", props);
+		this.debug && enyo.log("Inspector.buildPropList: props", props);
 		return props;
 	},
 	buildPropListFromObject: function(inControl) {
@@ -274,14 +275,13 @@ enyo.kind({
 	 */
 	projectDataChanged: function(oldProjectData) {
 		if (this.projectData) {
-			this.debug && enyo.log("###################### Inspector.projectDataChanged: projectData", this.projectData);
+			this.debug && enyo.log("Inspector.projectDataChanged: projectData", this.projectData);
 			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
 			this.projectData.on('update:project-indexer', this.projectIndexUpdated, this);
 			this.setProjectIndexer(this.projectData.getProjectIndexer());
 			Model.buildInformation(this.projectIndexer);
 		}
 		if (oldProjectData) {
-			this.debug && enyo.log("###################### Inspector.projectDataChanged: oldProjectData", oldProjectData);
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
 			oldProjectData.off('update:project-indexer', this.projectIndexUpdated);
 		}
@@ -292,11 +292,11 @@ enyo.kind({
 	 * @protected
 	 */
 	projectIndexReady: function(model, value, options) {
-		this.debug &&  enyo.log("###################### Inspector.projectIndexReady: ", value);
+		this.debug &&  enyo.log("Inspector.projectIndexReady: ", value);
 		this.setProjectIndexer(value);
 	},
 	projectIndexUpdated: function() {
-		this.debug &&  enyo.log("###################### Inspector.projectIndexUpdated: for projectIndexer: ", this.projectIndexer);
+		this.debug &&  enyo.log("Inspector.projectIndexUpdated: for projectIndexer: ", this.projectIndexer);
 		Model.buildInformation(this.projectIndexer);
 	},
 	initUserDefinedAttributes: function(inComponents) {

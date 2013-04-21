@@ -29,7 +29,7 @@ enyo.kind({
 	prevY: null,
 	dragoverTimeout: null,
 	holdoverTimeout: null,
-	debug: true,
+	debug: false,
 	
 	create: function() {
 		this.inherited(arguments);
