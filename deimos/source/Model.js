@@ -1,7 +1,7 @@
 enyo.singleton({
 	name: "Model",
 	kind: "enyo.Component",
-	debug: true,
+	debug: false,
 	info: {},
 	defaults: {
 		properties: {
