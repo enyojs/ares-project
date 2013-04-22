@@ -76,12 +76,10 @@ enyo.kind({
 	},
 	//* Send message to Deimos via _this.$.communicator_
 	sendMessage: function(inMessage) {
-		this.debug && enyo.log("**** iFrame RPCCommunicator **** - sendMessage: ", inMessage);
 		this.$.communicator.sendMessage(inMessage);
 	},
 	//* Receive message from Deimos
 	receiveMessage: function(inSender, inEvent) {
-		this.debug && enyo.log("**** iFrame RPCCommunicator **** - receiveMessage: ", inEvent.message, " op: ", inEvent.message.op, " val: ", inEvent.message.val);
 
 		var msg = inEvent.message;
 

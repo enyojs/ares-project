@@ -43,14 +43,14 @@ enyo.singleton({
 	 * @public
 	 */
 	buildInformation: function(projectIndexer) {
-		this.debug && enyo.log("Model.buildInformation: Indexer: ", projectIndexer);
+		if (this.debug)  { this.log("buildInformation: Indexer: ", projectIndexer); }
 		this.info = {};
 		this.addInformation("properties", "__default", this.defaults.properties);
 		this.addInformation("events", "__default", this.defaults.events);
 
 		enyo.forEach(projectIndexer.propertyMetaData, function(item) {
 			if (item.type === "kind") {
-				this.debug && this.log("Processing: " + item.name, item);
+				if (this.debug) { this.log("Processing: " + item.name, item); }
 				this.addInformation("properties", item.name, item.properties);
 				this.addInformation("events", item.name, item.events);
 			} else {
@@ -61,7 +61,7 @@ enyo.singleton({
 	},
 	addInformation: function(inType, inName, inInfo) {
 		if (inInfo) {
-			this.debug && enyo.log("Model.addInformation: Adding " + inType + " information for " + inName);
+			if (this.debug) { this.log("addInformation: Adding " + inType + " information for " + inName); }
 
 			var fn = function(inType, inName, inSubName, inData) {
 				if (inData.filterLevel) {
@@ -73,7 +73,7 @@ enyo.singleton({
 				} else {
 					inData.level = Model.F_NORMAL;
 				}
-				this.debug && enyo.log("Model.addInformation: Setting level " + inData.level + " for " + inType + " " + inName + "." + inSubName);
+				if (this.debug) { this.log("addInformation: Setting level " + inData.level + " for " + inType + " " + inName + "." + inSubName); }
 			};
 			var addFilterLevel = enyo.bind(this, fn, inType, inName);
 
