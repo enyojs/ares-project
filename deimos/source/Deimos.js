@@ -19,7 +19,7 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction", style: "float:right;"}
 			]},
 			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
-				{name: "left", classes:"ares_deimos_left", kind: "Palette", name:"palette"},
+				{classes:"ares_deimos_left", kind: "Palette", name:"palette"},
 				{name: "middle", fit: true, kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
 						{kind: "onyx.Button", name: "reloadDesignerButton", classes: "deimos-designer-toolbar-spacing", content: "Reload", ontap: "reloadDesigner"},
@@ -56,7 +56,7 @@ enyo.kind({
 							onCreateItem: "createItem",
 							onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
 							onReloadComplete: "reloadComplete"
-						},
+						}
 					]}
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [

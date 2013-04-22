@@ -47,7 +47,6 @@ enyo.kind({
 		this.setupRPC();
 	},
 	remoteChanged: function() {
-		this.inherited(arguments);
 	},
 	setupRPC: function() {
 		enyo.dispatcher.listen(window, "message", enyo.bind(this, "receiveMessage"));
