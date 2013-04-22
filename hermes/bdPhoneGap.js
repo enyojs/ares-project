@@ -43,16 +43,10 @@ function BdPhoneGap(config, next) {
 
 	console.log("config=",  util.inspect(config));
 
+	// express 3.x: app is not a server
 	var app, server;
-	if (express.version.match(/^2\./)) {
-		// express-2.x
-		app = express.createServer();
-		server = app;
-	} else {
-		// express-3.x
-		app = express();
-		server = http.createServer(app);
-	}
+	app = express();
+	server = http.createServer(app);
 
 	/*
 	 * Middleware -- applied to every verbs
@@ -123,13 +117,8 @@ function BdPhoneGap(config, next) {
 		res.contentType('txt'); // direct usage of 'text/plain' does not work
 		res.send(err.toString());
 	}
-	if (app.error) {
-		// express-2.x: explicit error handler
-		app.error(errorHandler);
-	} else {
-		// express-3.x: middleware with arity === 4 is detected as the error handler
-		app.use(errorHandler);
-	}
+	// express-3.x: middleware with arity === 4 is detected as the error handler
+	app.use(errorHandler);
 
 	/*
 	 * Verbs
