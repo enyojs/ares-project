@@ -3,7 +3,6 @@ enyo.singleton({
 	kind: "enyo.Component",
 	debug: false,
 	info: {},
-	config: [],
 	defaults: {
 		properties: {
 			owner: {filterLevel: "hidden"},
@@ -43,14 +42,15 @@ enyo.singleton({
 	 * Build all the information needed by the inspector
 	 * @public
 	 */
-	palette: [],
 	buildInformation: function(projectIndexer) {
+		if (this.debug)  { this.log("buildInformation: Indexer: ", projectIndexer); }
+		this.info = {};
 		this.addInformation("properties", "__default", this.defaults.properties);
 		this.addInformation("events", "__default", this.defaults.events);
 
 		enyo.forEach(projectIndexer.propertyMetaData, function(item) {
 			if (item.type === "kind") {
-				this.debug && this.log("Processing: " + item.name, item);
+				if (this.debug) { this.log("Processing: " + item.name, item); }
 				this.addInformation("properties", item.name, item.properties);
 				this.addInformation("events", item.name, item.events);
 			} else {
@@ -58,11 +58,10 @@ enyo.singleton({
 			}
 		}, this);
 		
-		//this.buildProjectInformation();
 	},
 	addInformation: function(inType, inName, inInfo) {
 		if (inInfo) {
-			this.debug && this.log("Adding " + inType + " information for " + inName);
+			if (this.debug) { this.log("addInformation: Adding " + inType + " information for " + inName); }
 
 			var fn = function(inType, inName, inSubName, inData) {
 				if (inData.filterLevel) {
@@ -74,7 +73,7 @@ enyo.singleton({
 				} else {
 					inData.level = Model.F_NORMAL;
 				}
-				this.debug && this.log("Setting level " + inData.level + " for " + inType + " " + inName + "." + inSubName);
+				if (this.debug) { this.log("addInformation: Setting level " + inData.level + " for " + inType + " " + inName + "." + inSubName); }
 			};
 			var addFilterLevel = enyo.bind(this, fn, inType, inName);
 
@@ -110,19 +109,9 @@ enyo.singleton({
 			return (info && info.level) || Model.F_NORMAL;
 		}
 	},
-	getFlattenedContainerInfo: function() {
-		var returnObject = {},
-			group,
-			item,
-			i,
-			j;
-		
-		for(i=0;(group = this.palette[i]);i++) {
-			for(j=0;(item = group.items[j]);j++) {
-				returnObject[item.name] = (item.config && typeof item.config.isContainer !== "undefined" && item.config.isContainer === false) ? false : true;
-			}
-		}
-		
-		return returnObject;
+	getFlattenedContainerInfo: function() {		
+		// TODO FiX me - ???
+		// function called by the IFrameDesigner.sendIframeContainerData()
+		return null;
 	}
 });
