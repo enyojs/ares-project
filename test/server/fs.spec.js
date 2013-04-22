@@ -422,19 +422,7 @@ describe("Testing " + config.name, function() {
 		});
 	});
 	
-	it("t2.4 should fail to create a folder", function(done) {
-		post('/id/' + rootId, {_method: "MKCOL",name: "toto"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
-			should.exist(err);
-			err.statusCode.should.equal(409); // Conflict
-			//should.exist(err.json);
-			//should.exist(err.json.code);
-			//err.json.code.should.equal('EEXIST');
-			should.not.exist(res);
-			done();
-		});
-	});
-
-	 var titiId;
+	var titiId;
 
 	it("t2.5. should create a sub-folder", function(done) {
 		post('/id/' + totoId, {_method: "MKCOL",name: "titi"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {

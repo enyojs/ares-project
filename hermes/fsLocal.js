@@ -81,15 +81,23 @@ FsLocal.prototype.mkcol = function(req, res, next) {
 	var newPath, newId, newName, self = this,
 	    pathParam = req.param('path'),
 	    nameParam = req.param('name');
+	this.log("pathParam:", pathParam);
+	this.log("nameParam:", nameParam);
 	if (!nameParam) {
 		next(new HttpError("missing 'name' query parameter", 400 /*Bad-Request*/));
 		return;
 	}
-	newName = path.basename(nameParam);
-	newPath = path.join(pathParam, newName);
+	newPath = path.relative('.', path.join('.', pathParam, nameParam));
+	this.log("newPath:", newPath);
+	if (newPath[0] === '.') {
+		next(new HttpError("Attempt to navigate beyond the root folder: '" + newPath + "'", 403 /*Forbidden*/));
+		return;
+	}
+	newPath = '/' + newPath;
+	newName = path.basename(newPath);
 	newId = this.encodeFileId(newPath);
 
-	fs.mkdir(path.join(this.root, newPath), function(err) {
+	mkdirp(path.join(this.root, newPath), function(err) {
 		next(err, {
 			code: 201, // Created
 			body: {
@@ -127,7 +135,7 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 	}
 
 	var localPath = path.join(this.root, relPath),
-                        urlPath = this.normalize(relPath);
+            urlPath = this.normalize(relPath);
 	if (path.basename(relPath).charAt(0) ===".") {
 		// Skip hidden files & folders (using UNIX
 		// convention: XXX do it for Windows too)
