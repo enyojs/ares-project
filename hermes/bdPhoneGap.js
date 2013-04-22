@@ -142,9 +142,13 @@ function BdPhoneGap(config, next) {
 		], function (err, results) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
-				cleanup.bind(this)(req, res, next.bind(this, err));
-				return;
+				cleanup.bind(this)(req, res, function() {
+					next(err);
+				});
 			}
+			// we do not invoke error-less next() here
+			// because that would try to return 200 with
+			// an empty body, while we have already sent
 		});
 	});
 
@@ -163,9 +167,14 @@ function BdPhoneGap(config, next) {
 		], function (err, results) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
-				cleanup.bind(this)(req, res, next.bind(this, err));
-				return;
+				cleanup.bind(this)(req, res, function() {
+					next(err);
+				});
 			}
+			// we do not invoke error-less next() here
+			// because that would try to return 200 with
+			// an empty body, while we have already sent
+			// back the response.
 		});
 	});
 	
