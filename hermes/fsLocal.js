@@ -39,7 +39,6 @@ FsLocal.prototype._statusCodes = {
 
 FsLocal.prototype.errorResponse = function(err) {
 	this.log("FsLocal.errorResponse(): err:", err);
-	console.trace('FsLocal.errorResponse()');
 	var response = {
 		code: 403,	// Forbidden
 		body: err.toString()

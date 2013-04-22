@@ -8,51 +8,61 @@ var fs = require("fs"),
     path = require("path"),
     http = require("http"),
     querystring = require("querystring"),
+    npmlog = require('npmlog'),
     should = require("should"),
     util = require("util"),
-    async = require("async"),
-    optimist = require("optimist");
+    async = require("async");
 
 /*
  * parameters parsing
  */
 
-var argv = optimist
-	    .usage('\nAres FileSystem (fs) tester.\nUsage: "$0 [OPTIONS] -F <FS_PATH>"')
-	    .options('F', {
-		    alias : 'filesystem',
-		    description: 'path to the Hermes file-system to test. For example ../../hermes/fsLocal.js',
-		    required: true
-	    })
-	    .options('A', {
-		    alias : 'auth',
-		    description: 'auth parameter, passed as a single-quoted URL-encoded JSON-formatted Javascript Object'
-	    })
-	    .options('h', {
-		    alias : 'help',
-		    description: 'help message',
-		    boolean: true
-	    })
-	    .options('v', {
-		    alias : 'verbose',
-		    description: 'verbose execution mode',
-		    boolean: true
-	    })
-	    .options('q', {
-		    alias : 'quiet',
-		    description: 'really quiet',
-		    boolean: true
-	    })
-	    .argv;
+var knownOpts = {
+	"filesystem":	path,
+	"auth":		String,
+	"pathname":	path,
+	"port":		Number,
+	"dir":		String,
+	"root":		path,
+	"help":		Boolean,
+	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
+};
+var shortHands = {
+	"F": "--filesystem",
+	"A": "--auth",
+	"h": "--help",
+	"l": "--level",
+	"v": "--level verbose"
+};
+var helpString = [
+	"",
+	"Ares FileSystem (fs) tester.",
+	"Usage: '" + process.argv[0] + " " + process.argv[1] + " [OPTIONS] -F <FS_PATH>'",
+	"",
+	"Options:",
+	"  -F, --filesystem  path to the Hermes file-system to test. For example ../../hermes/fsLocal.js           ",
+	"  -A, --auth        auth parameter, passed as a single-quoted URL-encoded JSON-formatted Javascript Object",
+	"  -p, --port        IP port to bind the stest service onto                                                  [0]",
+	"  -h, --help        help message                                                                            [boolean]",
+	"  -v, --verbose     verbose execution mode                                                                  [boolean]",
+	"  -q, --quiet       really quiet                                                                            [boolean]",
+	""
+];
+var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
+argv.port = argv.port || 0;
 
 if (argv.help) {
-	optimist.showHelp();
+	helpString.forEach(function(s) { console.log(s); });
 	process.exit(0);
 }
 
-if (argv.quiet) {
-	argv.verbose = false;
-}
+/**********************************************************************/
+
+var log = npmlog;
+log.heading = 'fs.spec';
+log.level = argv.level || 'error';
+
+/**********************************************************************/
 
 var config = {};
 
@@ -63,19 +73,13 @@ if (argv.auth) {
 	config.auth = JSON.parse(decodeURIComponent(argv.auth));
 }
 
-log("running in verbose mode");
-log("argv:", argv);
-log("config:", config);
+log.verbose('main', "running in verbose mode");
+log.verbose('main', "argv:", argv);
+log.verbose('main', "config:", config);
 
 /*
  * utilities
  */
-
-function log() {
-	if (argv.verbose) {
-		console.log.bind(this, config.prefix).apply(this, arguments);
-	}
-}
 
 function get(path, query, next) {
 	var reqOptions = {
@@ -88,7 +92,7 @@ function get(path, query, next) {
 
 	if (query && query._method) {
 		reqOptions.headers['x-http-method-override'] = query._method;
-		query._method = undefined;
+		delete query._method;
 	}
 
 	if (config.auth) {
@@ -114,7 +118,7 @@ function post(path, query, content, contentType, next) {
 
 	if (query && query._method) {
 		reqOptions.headers['x-http-method-override'] = query._method;
-		query._method = undefined;
+		delete query._method;
 	}
 
 	if (contentType) {
@@ -160,8 +164,8 @@ function post(path, query, content, contentType, next) {
 }
 
 function call(reqOptions, reqBody, reqParts, next) {
-	log("reqOptions="+util.inspect(reqOptions));
-	log("reqBody="+util.inspect(reqBody));
+	log.verbose('main', "reqOptions="+util.inspect(reqOptions));
+	log.verbose('main', "reqBody="+util.inspect(reqBody));
 	var req = http.request(reqOptions, function(res) {
 		var bufs = [];
 		res.on('data', function(chunk){
@@ -183,7 +187,7 @@ function call(reqOptions, reqBody, reqParts, next) {
 					data.text = data.buffer.toString();
 				}
 			}
-			log("data="+util.inspect(data));
+			log.verbose('main', "data="+util.inspect(data));
 			if (data.statusCode < 200 || data.statusCode >= 300) {
 				next(data);
 			} else {
@@ -247,11 +251,13 @@ if (!Fs) {
 }
 var myFs;
 
+argv.verbose = (log.level === 'verbose' || log.level === 'silly');
+
 describe("Testing " + config.name, function() {
 	
 	it("t0. should start", function(done) {
 		myFs = new Fs(argv, function(err, service){
-			log("service="+util.inspect(service));
+			log.verbose('main', "service="+util.inspect(service));
 			should.not.exist(err);
 			should.exist(service);
 			should.exist(service.origin);
@@ -313,7 +319,7 @@ describe("Testing " + config.name, function() {
 				});
 			},
 			function(fsId, next) {
-				post('/id/' + fsId, {_method: "MKCOL",name: rootPath} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+				post('/id/' + fsId, {_method: "MKCOL", name: rootName} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 					should.not.exist(err);
 					should.exist(res);
 					should.exist(res.statusCode);
