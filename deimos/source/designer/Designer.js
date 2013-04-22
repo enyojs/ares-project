@@ -24,6 +24,7 @@ enyo.kind({
 	selection: null,
 	scale: 1,
 	reloading: false,
+	debug: false,
 	rendered: function() {
 		this.inherited(arguments);
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
@@ -73,6 +74,7 @@ enyo.kind({
 	
 	//* Send message via communicator
 	sendMessage: function(inMessage) {
+		if (this.debug) this.log("Op: " + inMessage.op, inMessage);
 		this.$.communicator.sendMessage(inMessage);
 	},
 	//* Respond to message from communicator
@@ -83,7 +85,7 @@ enyo.kind({
 		}
 		
 		var msg = inEvent.message;
-		
+		if (this.debug) this.log("Op: " + msg.op, msg);
 		// Iframe is loaded and ready to do work.
 		if(msg.op === "state" && msg.val === "initialized") {
 			this.sendIframeContainerData();
