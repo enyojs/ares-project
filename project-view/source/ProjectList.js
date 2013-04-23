@@ -22,7 +22,7 @@ enyo.kind({
 		onPreview: "",
 		onError: ""
 	},
-	debug: true,
+	debug: false,
 	components: [
 		{kind: "onyx.MoreToolbar", classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", isContainer: true, name: "toolbar", components: [
 			{kind: "onyx.MenuDecorator", onSelect: "menuItemSelected", components: [
