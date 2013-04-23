@@ -25,6 +25,7 @@ var tools = new ptools.Generator();
 
 process.on('uncaughtException', function (err) {
 	log.error(basename, err.stack);
+	process.exit(1);
 });
 
 function GenZip(config, next) {
@@ -37,7 +38,7 @@ function GenZip(config, next) {
 	HttpError.prototype.name = "HTTP Error";
 
 	
-	log.verbose('GenZip', config);
+	log.info('GenZip', "config:", config);
 
 	// express-3.x
 	var app, server;
