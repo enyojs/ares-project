@@ -309,7 +309,6 @@ body {
 	-moz-border-radius:6px;
     -webkit-border-radius:6px;
     border-radius:6px;
-    -pie-border-radius:6px;
 }
 .onyx-button[disabled] {
 	opacity:0.25; filter: alpha(opacity=25); zoom:1;
@@ -340,7 +339,6 @@ body {
     -moz-border-radius:4px;
     -webkit-border-radius:4px;
     border-radius:4px;
-    -pie-border-radius:4px;
     overflow:hidden; 
     min-width:160px;
 }
@@ -368,7 +366,6 @@ body {
     -moz-border-radius: 6px;
     -webkit-border-radius: 6px;
     border-radius: 6px;
-    -pie-border-radius: 6px;
     box-shadow: 0 1px 0 #F2F2F2, 0 -1px 0 #CCCCCC;
 }
 
