@@ -65,7 +65,9 @@ enyo.kind({
 		this.setIframeReady(false);
 		this.projectSource = inSource;
 		this.projectPath = serviceConfig.origin + serviceConfig.pathname + "/file";
-		this.$.client.hasNode().src = this.baseSource + "?src=" + this.projectSource.getProjectUrl();
+		var iframeUrl = this.baseSource + "?src=" + this.projectSource.getProjectUrl();
+		if (this.debug) { this.log("Setting iframe url: " + iframeUrl); }
+		this.$.client.hasNode().src = iframeUrl;
 	},
 	reload: function() {
 		this.reloading = true;
