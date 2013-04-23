@@ -296,8 +296,9 @@ enyo.kind({
 	 * - Send it to nodejs which will submit the build request
 	 * - Save the appid
 	 * 
-	 * @param {Object} project has at least 3 properties: #name, #config and #filesystem
+	 * @param {Ares.Model.Project} project
 	 * @param {Function} next is a CommonJS callback
+	 * @public
 	 */
 	build: function(project, next) {
 		this.authorize(enyo.bind(this, this._getProjectData, project, next));
@@ -311,11 +312,11 @@ enyo.kind({
 			next(err);
 			return;
 		}
-		if (!next || !project || !project.name || !project.config || !project.filesystem) {
+		if (!next || !project instanceof Ares.Model.Project) {
 			next(new Error("Invalid parameters"));
 			return;
 		}
-		var config = project.config.getData();
+		var config = project.getConfig().getData();
 		if (this.debug) this.log("starting... project:", project);
 
 		if(!config || !config.build || !config.build.phonegap) {
@@ -335,7 +336,7 @@ enyo.kind({
 	getFileList: function(project, next) {
 		if (this.debug) this.log("...");
 		var req, fileList = [];
-		req = project.filesystem.propfind(project.folderId, -1 /*infinity*/);
+		req = project.getService().propfind(project.getFolderId(), -1 /*infinity*/);
 		req.response(this, function(inEvent, inData) {
 			this.doShowWaitPopup({msg: $L("Phonegap build started")});
 			if (this.debug) enyo.log("Got the list of files", inData);
@@ -372,7 +373,7 @@ enyo.kind({
 	prepareFileList: function(project, prefix, fileList, index, prefixLen, next) {
 		// Start downloading files and building the FormData
 		var formData = new enyo.FormData();
-		var blob = new enyo.Blob([project.config.getPhoneGapConfigXml() || ""],
+		var blob = new enyo.Blob([project.getConfig().getPhoneGapConfigXml() || ""],
 					 {type: "application/octet-stream"});
 		formData.append('file', blob, 'config.xml');
 		// hard-wire config.xml for now. may extend in the future (if needed)
@@ -398,7 +399,7 @@ enyo.kind({
 		var id = fileList[index].id;
 		var name = fileList[index].path.substr(prefixLen);
 		if (this.debug) this.log("Fetching " + name + " " + index + "/" + fileList.length);
-		var request = project.filesystem.getFile(id);
+		var request = project.getService().getFile(id);
 		request.response(this, function(inEvent, inData) {
 			// Got a file content: add it to the multipart/form-data
 			var blob = new enyo.Blob([inData.content || ""], {type: "application/octet-stream"});
@@ -425,7 +426,7 @@ enyo.kind({
 	 * @param {Function} next is a CommonJS callback
 	 */
 	submitBuildRequest: function(project, formData, next) {
-		var config = ares.clone(project.config.getData());
+		var config = ares.clone(project.getConfig().getData());
 		var keys = {};
 		var platforms = [];
 		if (this.debug) this.log("config: ", config);
@@ -485,8 +486,9 @@ enyo.kind({
 		req.response(this, function(inSender, inData) {
 			if (this.debug) enyo.log("Phonegapbuild.submitBuildRequest.response:", inData);
 			config.build.phonegap.appId = inData.id;
-			project.config.setData(config);
-			project.config.save();
+			var configKind = project.getConfig();
+			configKind.setData(config);
+			configKind.save();
 			next(null, inData);
 		});
 		req.error(this, function(inSender, inError) {

@@ -15,11 +15,11 @@ enyo.kind({
 		onScanProject: "",
 		onProjectRemoved: "",
 		onModifySettings: "",
-		onBuildProject: "",
-		//onInstallProject: "",
-		//onRunProject: "",
-		//onDebugProject: "",
-		onPreviewProject: "",
+		onBuild: "",
+		onInstall: "",
+		onRun: "",
+		onRunDebug: "",
+		onPreview: "",
 		onError: ""
 	},
 	debug: true,
@@ -62,27 +62,26 @@ enyo.kind({
 						{content: "Edit..."}
 					]},
 					{classes: "onyx-menu-divider"},
-					{value: "doPreviewProject", components: [
+					{value: "doPreview", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_preview.png"},
 						{content: "Preview"}
 					]},
-					{classes: "onyx-menu-divider"},
-					{value: "doBuildProject", components: [
+					{value: "doBuild", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_build.png"},
 						{content: "Build..."}
 					]},
-					{value: "doInstallProject", components: [
+					{classes: "onyx-menu-divider"},
+					{value: "doInstall", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_install.png"},
 						{content: "Install..."}
 					]},
-					{value: "doRunProject", components: [
+					{value: "doRun", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_run.png"},
 						{content: "Run..."}
 					]},
-					{classes: "onyx-menu-divider"},
-					{value: "doDebugProject", components: [
+					{value: "doRunDebug", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_debug.png"},
-						{content: "Debug...", classes: "onyx-disabled" }
+						{content: "Debug..." }
 					]}
 				]}
 			]}
