@@ -57,7 +57,7 @@ enyo.kind({
 			]},
 			{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
 				{content: "Project", name: "projectMenu", disabled: true},
-				{kind: "onyx.Menu", components: [
+				{kind: "onyx.Menu", maxHeight:"100%", components: [
 					{value: "doModifySettings", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_edit.png"},
 						{content: "Edit..."}
@@ -92,7 +92,7 @@ enyo.kind({
 		]},
 		{content:"Project list", classes:"project-list-title title-gradient"},
 		{kind: "enyo.Scroller", components: [
-			{tag:"ul", kind: "enyo.Repeater", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
+			{tag:"ul", kind: "enyo.Repeater", classes:"ares-project-list-menu", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
 				{tag:"li",kind: "ProjectList.Project", name: "item"}
 			]}
 		]},
