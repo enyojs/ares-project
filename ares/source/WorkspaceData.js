@@ -31,9 +31,9 @@ _.extend(AresStore.prototype, {
 		try {
 			var projectString = JSON.stringify(this.data, enyo.bind(this, this.stringifyReplacer));
 			localStorage.setItem(this.name, projectString);
-			this.debug && enyo.log("Store.save DONE: " + projectString);
+			this.debug && enyo.log("Ares.Store#save(): ", projectString);
 		} catch(error) {
-			enyo.log("Exception: ", error);
+			enyo.error("Ares.Store#save():", error);
 		}
 	},
     

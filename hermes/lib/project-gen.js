@@ -246,7 +246,7 @@ var shell = require("shelljs"),
         next();
     }
 
-    applyJsonSubstitutions = function(filename, values) {
+    function applyJsonSubstitutions(filename, values) {
         var modified = false;
         var content = shell.cat(filename);
         content = JSON.parse(content);
@@ -264,7 +264,7 @@ var shell = require("shelljs"),
         }
     };
 
-    applySedSubstitutions = function(filename, changes) {
+    function applySedSubstitutions(filename, changes) {
         changes.forEach(function(change) {                  // TODO: move to asynchronous processing
             shell.sed('-i', change.search, change.replace, filename);
         });
