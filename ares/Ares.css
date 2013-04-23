@@ -274,6 +274,10 @@ body {
 	margin-bottom: 0px;
 }
 
+/*temporary used to reduce global css impacts*/
+.file-chooser-input{
+	width: 155px;
+}
 
 
 .enyo-fittable-columns-layout.enyo-stretch > .onyx-grabber {
