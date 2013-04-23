@@ -24,16 +24,9 @@ enyo.kind({
 	},
 	debug: true,
 	components: [
-		/*{kind: "onyx.Toolbar", classes: "onyx-toolbar onyx-menu-toolbar ares-top-toolbar", isContainer: true, name: "toolbar", components: [
-			{classes: "aresmenu" , components: [
-				{tag:'span', content:'Ares', ontap: "aresMenuTapped"},
-				{classes:'lsmallDownArrow', ontap: "aresMenuTapped",},
-				{name: 'amenu', tag:'ul', components:[
-					{name: 'account',   id:'account', tag:'li', kind: 'control.Link', content: "Accounts...", ontap:"showAccountConfigurator", onmouseup:"aresMenuHide"},
-					{name: 'properties',   id:'properties',   tag:'li', kind: 'control.Link', content: "Properties..."}*/
-		{kind: "onyx.MoreToolbar", classes: "onyx-menu-toolbar ares_harmonia_toolBar ares-no-padding", isContainer: true, name: "toolbar", components: [
-			{kind: "onyx.MenuDecorator", onSelect: "menuItemSelected", components: [
-				{content: "Ares"},
+		{kind: "onyx.MoreToolbar", classes: "onyx-menu-toolbar ares-top-toolbar", isContainer: true, name: "toolbar", components: [
+			{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
+				{tag:"button", content: "Ares"},
 				{kind: "onyx.Menu", components: [
 					{value: "showAccountConfigurator", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png"},
@@ -43,13 +36,14 @@ enyo.kind({
 					{content: "Properties..."}
 				]}
 			]},
-			{kind: "onyx.MenuDecorator", onSelect: "menuItemSelected", components: [
+			{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
 				{content: "Edit"},
 				{kind: "onyx.Menu", components: [
 					{value: "doCreateProject", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_new.png"},
 						{content: "Create..."}
 					]},
+					{classes: "onyx-menu-divider"},
 					{value: "doScanProject", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_import.png"},
 						{content: "Import..."}
@@ -61,7 +55,7 @@ enyo.kind({
 					]}
 				]}
 			]},
-			{kind: "onyx.MenuDecorator", onSelect: "menuItemSelected", components: [
+			{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
 				{content: "Project", name: "projectMenu", disabled: true},
 				{kind: "onyx.Menu", components: [
 					{value: "doModifySettings", components: [
@@ -78,10 +72,12 @@ enyo.kind({
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_build.png"},
 						{content: "Build..."}
 					]},
+					{classes: "onyx-menu-divider"},
 					{value: "doInstallProject", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_install.png"},
 						{content: "Install..."}
 					]},
+					{classes: "onyx-menu-divider"},
 					{value: "doRunProject", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_run.png"},
 						{content: "Run..."}
