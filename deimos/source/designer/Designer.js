@@ -13,7 +13,8 @@ enyo.kind({
 		onCreateItem: "",
 		onMoveItem: "",
 		onSyncDropTargetHighlighting: "",
-		onReloadComplete: ""
+		onReloadComplete: "",
+		onError: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", classes: "ares-iframe-client"},
@@ -118,12 +119,14 @@ enyo.kind({
 		// Existing component dropped in iframe
 		} else if(msg.op === "moveItem") {
 			this.doMoveItem(msg.val);
+		// Existing component dropped in iframe
+		} else if(msg.op === "error") {
+			this.doError(msg.val);
 		// Default case
 		} else {
 			enyo.warn("Deimos designer received unknown message op:", msg);
 		}
 	},
-	
 	//* Pass _isContainer_ info down to iframe
 	sendIframeContainerData: function() {
 		this.sendMessage({op: "containerData", val: Model.getFlattenedContainerInfo()});

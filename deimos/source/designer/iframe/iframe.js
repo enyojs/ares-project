@@ -292,48 +292,52 @@ enyo.kind({
 	},
 	//* Render the specified kind
 	renderKind: function(inKind) {
-		var kindConstructor = enyo.constructorForKind(inKind.name);
-		
-		if (!kindConstructor) {
-			enyo.warn("No constructor exists for ", inKind.name);
-			return;
-		} else if(!kindConstructor.prototype) {
-			enyo.warn("No prototype exists for ", inKind.name);
-			return;
-		}
-		
-		/*
-			Stomp on existing _kindComponents_ to ensure that we render exactly what the user
-			has defined. If components came in as a string, convert to object first.
-		*/
-		kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.components) : inKind.components;
-		
-		// Clean up after previous kind
-		if (this.parentInstance) {
-			this.cleanUpPreviousKind(inKind.name);
-		}
-		
-		// Save this kind's _kindComponents_ array
-		this.aresComponents = this.flattenKindComponents(kindConstructor.prototype.kindComponents);
-		
-		// Enable drag/drop on all of _this.aresComponents_
-		this.makeComponentsDragAndDrop(this.aresComponents);
-		
-		// Save reference to the parent instance currently rendered
-		this.parentInstance = this.$.client.createComponent({kind: inKind.name});
-		
-		// Mimic top-level app fitting (as if this was rendered with renderInto or write)
-		if (this.parentInstance.fit) {
-			this.parentInstance.addClass("enyo-fit enyo-clip");
-		}		
-		this.parentInstance.render();
-		
-		// Notify Deimos that the kind rendered successfully
-		this.kindUpdated();
-		
-		// Select a control if so requested
-		if (inKind.selectId) {
-			this.selectItem({aresId: inKind.selectId});
+		try {
+			var kindConstructor = enyo.constructorForKind(inKind.name);
+
+			if (!kindConstructor) {
+				enyo.warn("No constructor exists for ", inKind.name);
+				return;
+			} else if(!kindConstructor.prototype) {
+				enyo.warn("No prototype exists for ", inKind.name);
+				return;
+			}
+
+			/*
+				Stomp on existing _kindComponents_ to ensure that we render exactly what the user
+				has defined. If components came in as a string, convert to object first.
+			*/
+			kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.components) : inKind.components;
+
+			// Clean up after previous kind
+			if (this.parentInstance) {
+				this.cleanUpPreviousKind(inKind.name);
+			}
+
+			// Save this kind's _kindComponents_ array
+			this.aresComponents = this.flattenKindComponents(kindConstructor.prototype.kindComponents);
+
+			// Enable drag/drop on all of _this.aresComponents_
+			this.makeComponentsDragAndDrop(this.aresComponents);
+
+			// Save reference to the parent instance currently rendered
+			this.parentInstance = this.$.client.createComponent({kind: inKind.name});
+
+			// Mimic top-level app fitting (as if this was rendered with renderInto or write)
+			if (this.parentInstance.fit) {
+				this.parentInstance.addClass("enyo-fit enyo-clip");
+			}
+			this.parentInstance.render();
+
+			// Notify Deimos that the kind rendered successfully
+			this.kindUpdated();
+
+			// Select a control if so requested
+			if (inKind.selectId) {
+				this.selectItem({aresId: inKind.selectId});
+			}
+		} catch(error) {
+			this.sendMessage({op: "error", val: {msg: "Unable to render kind", error: "ERROR"}});
 		}
 	},
 	//* Rerender current selection
