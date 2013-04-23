@@ -56,7 +56,7 @@ enyo.kind({
 			]},
 			{kind: "onyx.MenuDecorator", onSelect: "menuItemSelected", components: [
 				{content: "Project", name: "projectMenu", disabled: true},
-				{kind: "onyx.Menu", components: [
+				{kind: "onyx.Menu", maxHeight: "100%", components: [
 					{value: "doModifySettings", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_edit.png"},
 						{content: "Edit..."}
@@ -217,12 +217,6 @@ enyo.kind({
 			return undefined;	// Exclude
 		}
 		return value;	// Accept
-	},
-	launchPreview: function(inSender, inEvent) {
-		if (inEvent) {
-			this.doPreview(inEvent.originator.value) ;
-		}
-		return true ;
 	}
 });
 
