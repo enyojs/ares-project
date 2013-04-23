@@ -1,7 +1,18 @@
+.ares-project-list-menu { list-style-type:none; padding:0px; margin:0px; }
+.ares-project-list-menu li { padding:0px 0px 0px 15px; cursor:hand; cursor:pointer; height:50px; border-bottom:1px solid #B7B7B7; font-size:16px; font-weight:light; color:#666666; text-shadow:0 1px 0 #FFFFFF; line-height:50px; white-space:nowrap; overflow:hidden; width:auto; } 
+.ares-project-list-menu li.on { box-shadow:inset 0px 0px 30px rgba(0,0,0,0.2); background: #dedede;} 
+.ares-project-list-menu li.hover { background-color:#EEEEEE; } 
+.ares-project-list-menu li.active { background-color:#AAAAAA; box-shadow: inset 0px 0px 30px rgba(0,0,0,0.3); }
+.ares-project-list-menu li.selected { background-color:#CCCCCC; }
+.ares-project-list-menu li.on.selected { background-color:inherit; } 
+.ares-project-list-menu-menu li.on.hover { background-color:inherit; } 
+.ares-project-list-menu li.on.active { background-color:inherit; }
+
 .aresmenu {z-index:11; text-align:center; margin: 0px ! important;}
 .ares-project-list { width: 300px;}
 .ares-project-list .hangar {width:7px; position:absolute; left:293px; top:0px; bottom:0px; right:0px;}
 .ares-project-list .project-list-title {line-height:50px; height:50px; top:0px; left:0px; right:0px; text-transform:uppercase; color:#000000; text-align:center; font-size:19px;}
+
 .aresmenu .onyx-button {color:#FFF; width:80px; cursor:pointer; cursor:hand; font-size:12px; font-weight:normal; text-shadow:0 -1px 0 #000000; border:none; background: none; text-align:left; padding:6px 0px; box-shadow:none;border-radius:0px; }
 .aresmenu .onyx-button.active, .aresmenu .onyx-button.pressed {border:none; background: transparent; box-shadow:none; border-radius:0px;}
 .aresmenu .onyx-button:after{ 
