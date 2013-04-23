@@ -2,7 +2,7 @@
  * fsDropbox.js -- Ares FileSystem (fs) provider, using Dropbox
  */
 
-require('./lib/checkNodeVersion');		// Check nodejs version
+// nodejs version checking is done in parent process ide.js
 
 var util  = require("util"),
     path = require("path"),

@@ -62,6 +62,9 @@ enyo.kind({
 		onCss: "newcssAction",
 		onReparseAsked: "reparseAction"
 	},
+	published: {
+		projectData: null
+	},
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
@@ -136,7 +139,7 @@ enyo.kind({
 
 		// Set up the new doucment
 		this.docData = inDocData;
-		this.projectData = this.docData.getProjectData();
+		this.setProjectData(this.docData.getProjectData());
 		this.getProjectController();
 		this.setAutoCompleteData();
 
@@ -211,8 +214,9 @@ enyo.kind({
 			var origin = this.projectData.getService().getConfig().origin;
 			this.$.imageViewer.setAttribute("src", origin + file.pathname);
 		}
-		this.projectCtrl.buildProjectDb();
+		this.manageDesignerButton();
 		this.reparseAction(true);
+		this.projectCtrl.buildProjectDb();
 
 		this.docData.setEdited(edited);
 		this.$.toolbar.resized();
@@ -295,13 +299,43 @@ enyo.kind({
 	setAutoCompleteData: function() {
 		this.$.autocomplete.hide();
 		this.$.autocomplete.setProjectData(this.projectData);
+		this.manageDesignerButton();
 	},
 	resetAutoCompleteData: function() {
 		this.$.autocomplete.setProjectData(null);
 	},
-	projectIndexReady: function(model, value, options) {
-		// Pass to the autocomplete component a reference to the project indexer
-		this.$.autocomplete.setProjectIndexer(value);
+	/**
+	 	Disable "Designer" button unless project & enyo index are both valid
+	*/
+	manageDesignerButton: function() {
+		// var disabled = !(this.$.autocomplete.getProjectIndexer() && this.$.autocomplete.getEnyoIndexer());
+		var disabled = ! this.projectCtrl.fullAnalysisDone;
+		this.$.designerButton.setDisabled(disabled);
+	},
+	/**
+	 * Receive the project data reference which allows to access the analyzer
+	 * output for the project's files, enyo/onyx and all the other project
+	 * related information shared between phobos and deimos.
+	 * @param  oldProjectData
+	 * @protected
+	 */
+	projectDataChanged: function(oldProjectData) {
+		if (this.projectData) {
+			this.projectData.on('update:project-indexer', this.projectIndexerChanged, this);
+		}
+		if (oldProjectData) {
+			oldProjectData.off('update:project-indexer', this.projectIndexerChanged);
+		}
+	},
+	/**
+	 * The current project analyzer output has changed
+	 * Re-scan the indexer
+	 * @param value   the new analyzer output
+	 * @protected
+	 */
+	projectIndexerChanged: function() {
+		this.debug && this.log("Project analysis ready");
+		this.manageDesignerButton();
 	},
 	dumpInfo: function(inObject) {
 		var c = inObject;
@@ -730,7 +764,7 @@ enyo.kind({
 		// NOTE: docData will be clear when removed from the Ares.Workspace.files collections
 		this.resetAutoCompleteData();
 		this.docData = null;
-		this.projectData = null;
+		this.setProjectData(null);
 	},
 	// Show Find popup
 	findpop: function(){
@@ -750,10 +784,9 @@ enyo.kind({
 	replaceAll: function(){
 		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
-	
 	replacefind: function(){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
-		this.$.ace.replacefind(this.$.findpop.findValue , this.$.findpop.replaceValue, options);	
+		this.$.ace.replacefind(this.$.findpop.findValue , this.$.findpop.replaceValue, options);
 	},
 
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful

@@ -3,6 +3,7 @@ enyo.kind({
 	kind: "Control",
 	classes: "onyx",
 	fit: true,
+	debug: false,
 	components: [
 		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
 			{components: [
@@ -27,13 +28,18 @@ enyo.kind({
 			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
 		]},
-		{kind: "ServiceRegistry"}
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
+		{kind: "ServiceRegistry"},
+		{kind: "Ares.PackageMunger", name: "packageMunger"}
 	],
 	handlers: {
 		onReloadServices: "handleReloadServices",
 		onUpdateAuth: "handleUpdateAuth",
 		onShowWaitPopup: "showWaitPopup",
-		onHideWaitPopup: "hideWaitPopup"
+		onHideWaitPopup: "hideWaitPopup",
+		onError: "showError",
+		onTreeChanged: "_treeChanged",
+		onChangingNode: "_nodeChanging"
 	},
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
@@ -93,9 +99,11 @@ enyo.kind({
 				self.hideWaitPopup();
 				if (inErr) {
 					self.warn("Open failed", inErr);
+					if (typeof next === 'function') next(inErr);
 				} else {
 					fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
 					self.switchToDocument(fileData);
+					if (typeof next === 'function') next();
 				}
 			});
 		}
@@ -205,16 +213,20 @@ enyo.kind({
 	},
 	closeDocument: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
-		this._closeDocument(inEvent.id, function() {});
+		var self = this;
+		this._closeDocument(inEvent.id, function() {
+			self.showFiles();
+		});
 	},
 	/** @private */
 	_closeDocument: function(docId, next) {
-		// remove file from cache
-		Ares.Workspace.files.removeEntry(docId);
-		this.$.bottomBar.removeTab(docId);
-		this.$.slideable.setDraggable(Ares.Workspace.files.length > 0);
-		this.showFiles();
-		next();
+		if (docId) {
+			// remove file from cache
+			Ares.Workspace.files.removeEntry(docId);
+			this.$.bottomBar.removeTab(docId);
+			this.$.slideable.setDraggable(Ares.Workspace.files.length > 0);
+		}
+		if (typeof next === 'function') next();
 	},
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();
@@ -374,6 +386,43 @@ enyo.kind({
 	hideWaitPopup: function() {
 		this.$.waitPopup.hide();
 	},
+	showError: function(inSender, inEvent) {
+		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
+		this.hideWaitPopup();
+		this.showErrorPopup(inEvent);
+		return true; //Stop event propagation
+	},
+	showErrorPopup : function(msg, details) {
+		this.$.errorPopup.raise(msg, details);
+	},
+	/**
+	 * Event handler for user-initiated file or folder changes
+	 * 
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent as defined by calls to HermesFileTree#doTreeChanged
+	 */
+	_treeChanged: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.$.packageMunger.changeNodes(inEvent, (function(err) {
+			if (err) {
+				this.warn(err);
+			}
+		}).bind(this));
+	},
+	/**
+	 * Event handler for system-initiated file or folder changes
+	 * 
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent as defined by calls to Ares.PackageMunger#doChangingNode
+	 */
+	_nodeChanging: function(inSender, inEvent) {
+		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		var docId = Ares.Workspace.files.computeId(inEvent.node);
+		this._closeDocument(docId);
+	},
+
 	statics: {
 		isBrowserSupported: function() {
 			if (enyo.platform.ie && enyo.platform.ie <= 8) {

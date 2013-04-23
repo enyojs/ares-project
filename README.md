@@ -57,7 +57,9 @@ The following features are in the works, and you should see them added as we mov
 
 ### Install Ares
 
-1. Install Node.js & NPM 0.8.x (>= 0.8.19).  Preferably from the [Official Download Page](http://nodejs.org/#download).
+1. Install Node.js & NPM 0.8.x (>= 0.8.21).  
+Recommended version is node 0.8.23 and can be downloaded from: [node 0.8.23](http://nodejs.org/dist/v0.8.23/).  
+`NOTE`: Ares does not currently work with node 0.10.x.
 1. Run:
 
 		$ npm -d install ares-ide
@@ -94,7 +96,7 @@ The following features are in the works, and you should see them added as we mov
 		$ git submodule foreach git fetch origin
 		$ git merge origin/master
 		$ git submodule update --init  --recursive
-		$ npm -d install
+		$ npm -d install						# Be sure to run "git submodule update ..." before "npm install"	
 
 **Note:** 
 
@@ -177,6 +179,18 @@ In order to produce Ares on a build server:
 ### Release & Publish
 
 _This section is for Ares commiters only_
+
+Before publishing a few steps and checkings are mandatory:
+
+1. Commit your changes
+2. In package.json, update the `dependencies` and `bundledDependencies` if your changes introduce/change node module dependencies.
+3. Execute `npm-shrinkwrap` to update the file `npm-shrinkwrap.json`.
+4. Execute `npm pack`
+5. In a tenporary directory, execute `npm install <path-to>/ares-ide-<version>.tgz` to verfy that the generated .tgz file if correct.
+6. Perform a few tests to verify that everything works.
+7. Commit your changes and start the publish process described above.
+
+To publish:
 
 1. Tag the version you intend to publish, with the exact same string as the `version: ` in `package.json` & upload this tag.
 1. Checkout a fresh copy _on a Linux (virtual) machine_ 

@@ -44,7 +44,7 @@ enyo.kind({
 			fileId: id,
 			components: [
 	    		{content: name, classes: "ares-tab-label"},
-				{name: "closeFileButton", kind: "onyx.IconButton", classes: "ares-doc-close", src: "$lib/onyx/images/progress-button-cancel.png", fileId: id, ontap: "closeFile"},
+				{name: "close-"+id, kind: "onyx.IconButton", classes: "ares-doc-close", src: "$lib/onyx/images/progress-button-cancel.png", fileId: id, ontap: "closeFile"}
 			],
 			ontap: "switchFile"
 		}, {owner: this}).render();
@@ -80,9 +80,11 @@ enyo.kind({
 		return true;
 	},
 	removeTab: function(id) {
-		this.tabs[id].destroy();
-		this.tabs[id] = undefined;
-		this.$.container.reflow();
+		if (this.tabs[id]) {
+			this.tabs[id].destroy();
+			this.tabs[id] = undefined;
+			this.$.container.reflow();
+		}
 	},
 	setDesignMode: function(toDesign) {
 		if (toDesign) {

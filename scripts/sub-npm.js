@@ -3,7 +3,8 @@ var path = require('path'),
 
 var submodules = [
 	'node_modules/phonegapbuildapi',
-	'node_modules/unzip'
+	'node_modules/unzip',
+	'node_modules/semver'
 ];
 
 var mwd = process.cwd();
