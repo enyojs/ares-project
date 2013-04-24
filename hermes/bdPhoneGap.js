@@ -472,9 +472,13 @@ function BdPhoneGap(config, next) {
 			}
 		}
 		
-		function _fail(errMsg) {
-			console.error("upload(): error ", errMsg);
-			next(new HttpError("PhoneGap build error: " + errMsg, 400 /*Bad Request*/));
+		function _fail(err) {
+			if (err instanceof Error) {
+				console.error(err.stack);
+			} else {
+				console.error("upload(): error ", err);
+			}
+			next(new HttpError("PhoneGap build error: " + err.toString(), 400 /*Bad Request*/));
 		}
 	}
 	
