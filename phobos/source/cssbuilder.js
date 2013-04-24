@@ -12,8 +12,8 @@ enyo.kind({
 	name: "cssBuilder",
 	kind: "enyo.FittableRows", components: [
 		{kind: "onyx.Toolbar", components: [
-			{kind: "onyx.Button", classes: "onyx-affirmative", content: "Insert css", ontap:"newCssAction"},
-			{kind: "onyx.Button", classes: "onyx-negative", content: "Reset", ontap:"reset"}
+			{kind: "onyx.Button", content: "Insert css", ontap:"newCssAction"},
+			{kind: "onyx.Button", content: "Reset", ontap:"reset"}
 		]},
 		{kind: "onyx.Input", name: "input", placeholder: "Enter your class name!..",onchange: "inputChange"},
 		{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 150px; ", classes: "enyo-selectable css_builder_font",	allowHtml: true, Xstyle: "padding: 10px;", components: [
