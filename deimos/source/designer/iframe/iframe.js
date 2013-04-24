@@ -292,14 +292,19 @@ enyo.kind({
 	},
 	//* Render the specified kind
 	renderKind: function(inKind) {
+		var errMsg;
 		try {
 			var kindConstructor = enyo.constructorForKind(inKind.name);
 
 			if (!kindConstructor) {
-				enyo.warn("No constructor exists for ", inKind.name);
+				errMsg = "No constructor exists for ";
+				enyo.warn(errMsg, inKind.name);
+				this.sendMessage({op: "error", val: {msg: errMsg + inKind.name}});
 				return;
 			} else if(!kindConstructor.prototype) {
-				enyo.warn("No prototype exists for ", inKind.name);
+				errMsg = "No prototype exists for ";
+				enyo.warn(errMsg, inKind.name);
+				this.sendMessage({op: "error", val: {msg: errMsg + inKind.name}});
 				return;
 			}
 
@@ -337,7 +342,9 @@ enyo.kind({
 				this.selectItem({aresId: inKind.selectId});
 			}
 		} catch(error) {
-			this.sendMessage({op: "error", val: {msg: "Unable to render kind", error: "ERROR"}});
+			errMsg = "Unable to render " + inKind.name;
+			this.error(errMsg, error);
+			this.sendMessage({op: "error", val: {msg: errMsg}});
 		}
 	},
 	//* Rerender current selection
