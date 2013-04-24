@@ -36,6 +36,16 @@ enyo.kind({
 		for(var i=0, c;(c=c$[i]);i++) {
 			if(c.aresComponent) {
 				a.push(c);
+			} else if (c.kind === 'enyo.OwnerProxy') {
+				/*
+					We are processing the child pf a Repeater or List.
+					So, just skip the "enyo.OwnerProxy", but serialize
+					the embedded components.
+				 */
+				var other = c.controls || c.children;
+				for(var idx = 0 ; idx < other.length ; idx++) {
+					c$.push(other[idx]);
+				}
 			}
 		}
 		
