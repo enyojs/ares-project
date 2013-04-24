@@ -54,14 +54,14 @@ enyo.kind({
 			{kind: "FittableColumns", classes: "onyx-light ares-filechooser-footer", isContainer: true, components: [
 				{name: "folderSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline", components: [
 					{content: $L("Where") + ":", fit: true},
-					{name: "selectedFolder", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("Folder")}
+					{name: "selectedFolder", kind: "onyx.Input", classes: "only-light file-chooser-input", disabled: true, placeholder: $L("Folder")}
 				]},
-				{name: "nameSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline", showing: false, components: [
+				{name: "nameSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline file-chooser-input", showing: false, components: [
 					{content: $L("As") + ":", fit: true},
 					{name: "selectedName", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("File"), selectOnFocus: true, onchange: "updateSelectedName"}
 				]},
-				{name: "cancel", kind: "onyx.Button", classes: "onyx-negative", content: $L("Cancel"), ontap: "cancel"},
-				{name: "confirm", kind: "onyx.Button", classes: "onyx-affirmative", content: $L("OK"), ontap: "confirm"}
+				{name: "cancel", kind: "onyx.Button", content: $L("Cancel"), ontap: "cancel"},
+				{name: "confirm", kind: "onyx.Button", content: $L("OK"), ontap: "confirm"}
 			]}
 		]}
 	],
