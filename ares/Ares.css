@@ -279,6 +279,8 @@ body {
 .enyo-fittable-columns-layout.enyo-stretch > .onyx-grabber {
 	height: 27px;
 	-webkit-transform:rotate(90deg);
+	-ms-transform:rotate(90deg);
+	transform:rotate(90deg);
 	padding-top:40px;
 }
 
