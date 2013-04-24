@@ -485,10 +485,12 @@ enyo.kind({
 		});
 		req.response(this, function(inSender, inData) {
 			if (this.debug) enyo.log("Phonegapbuild.submitBuildRequest.response:", inData);
-			config.build.phonegap.appId = inData.id;
-			var configKind = project.getConfig();
-			configKind.setData(config);
-			configKind.save();
+			if (inData) {
+				config.build.phonegap.appId = inData.id;
+				var configKind = project.getConfig();
+				configKind.setData(config);
+				configKind.save();
+			}
 			next(null, inData);
 		});
 		req.error(this, function(inSender, inError) {
