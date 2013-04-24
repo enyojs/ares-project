@@ -31,7 +31,6 @@ enyo.kind({
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
 	},
 	currentKindChanged: function() {
-		this.inherited(arguments);
 		this.renderCurrentKind();
 	},
 	heightChanged: function() {
