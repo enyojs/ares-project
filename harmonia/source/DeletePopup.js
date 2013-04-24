@@ -22,7 +22,7 @@ enyo.kind({
 		{kind: "FittableColumns", components: [
 			{name: "deleteCancelButton", kind: "onyx.Button", content: "Cancel", ontap: "deleteCancel"},
 			{fit: true},
-			{name: "deleteDeleteButton", kind: "onyx.Button", classes: "onyx-negative", content: "Delete", ontap: "deleteConfirm"}
+			{name: "deleteDeleteButton", kind: "onyx.Button", content: "Delete", ontap: "deleteConfirm"}
 		]}
 	],
 	create: function() {

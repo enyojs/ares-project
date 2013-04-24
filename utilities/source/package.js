@@ -6,5 +6,6 @@ enyo.depends(
 	"AsyncError.js",
 	"IFrame.js",
 	"LocalStorage.js",
-	"FileChooser.js" 
+	"FileChooser.js",
+	"LinkController.js" 
 );

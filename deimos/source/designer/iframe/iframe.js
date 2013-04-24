@@ -29,6 +29,7 @@ enyo.kind({
 	prevY: null,
 	dragoverTimeout: null,
 	holdoverTimeout: null,
+	debug: false,
 	
 	create: function() {
 		this.inherited(arguments);
@@ -79,13 +80,14 @@ enyo.kind({
 	},
 	//* Receive message from Deimos
 	receiveMessage: function(inSender, inEvent) {
+
+		var msg = inEvent.message;
+
 		if (!inEvent.message || !inEvent.message.op) {
 			enyo.warn("Deimos iframe received invalid message data:", msg);
 			return;
-		}
-		
-		var msg = inEvent.message;
-		
+		}		
+			
 		switch (msg.op) {
 			case "containerData":
 				this.setContainerData(msg.val);
@@ -417,7 +419,7 @@ enyo.kind({
 		delete this.selection[inProperty];
 	},
 	updateProperty: function(inProperty, inValue) {
-		this.selection.setProperty(inProperty, inValue);
+		this.selection[inProperty] = inValue;
 	},
 	
 	//* Get each kind component individually

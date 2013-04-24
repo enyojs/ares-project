@@ -7,7 +7,7 @@
 enyo.kind({
 	name: "ProjectView",
 	kind: "FittableColumns",
-	classes: "enyo-unselectable shadow-panels",
+	classes: "enyo-unselectable /*shadow-panels*/",
 	components: [
 		{kind: "ProjectList",
 			onModifySettings: "modifySettingsAction",

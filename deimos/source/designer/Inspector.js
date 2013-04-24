@@ -61,7 +61,7 @@ enyo.kind({
 	},
 	allowed: function(inKindName, inType, inName) {
 		var level = Model.getFilterLevel(inKindName, inType, inName);
-		this.debug && this.log("Level: " + level + " for " + inKindName + "." + inName);
+		if (this.debug) { this.log("Level: " + level + " for " + inKindName + "." + inName); }		
 		return level >= this.filterLevel;
 	},
 	//* Return complete list of published properties for _inControl_
@@ -71,7 +71,7 @@ enyo.kind({
 
 		var definition = this.getKindDefinition(currentKind);
 		if (!definition) {
-			this.debug && this.log("NO DEFINITION found for '" + currentKind + "' inControl: ", inControl);
+			if (this.debug) { this.log("NO DEFINITION found for '" + currentKind + "' inControl: ", inControl); }
 			// Revert to the property and event list extracted from the object
 			return this.buildPropListFromObject(inControl);
 		}
@@ -85,11 +85,15 @@ enyo.kind({
 			
 			// Get all published properties for this kind
 			var publishedProperties = this.helper.getPublishedWithValues();
+			if (this.debug) {
+				this.log("buildPropList: publishedProperties", publishedProperties);
+			}
 			
 			// Add an entry to _propMap[]_ for each property found in _publishedProperties_
 			for (var i = 0, p; (p = publishedProperties[i]); i++) {
-				if (this.allowed(kindName, "properties", p.name)) {
-					this.debug && this.log("Adding property '" + p.name + "' from '" + currentKind + "'");
+				if (((this.allowed(kindName, "properties", p.name)) || 
+					(this.userDefinedAttributes[inControl.aresId].hasOwnProperty(p.name)))) {
+					if (this.debug) { this.log("Adding property '" + p.name + "' from '" + currentKind + "'"); }
 					propMap[p.name] = p.value;
 				}
 			}
@@ -99,8 +103,9 @@ enyo.kind({
 			
 			// Add an entry to _eventMap[]_ for each event found in _events_
 			for (i = 0, p; (p = events[i]); i++) {
-				if (this.allowed(kindName, "events", p)) {
-					this.debug && this.log("Adding event '" + p + "' from '" + currentKind + "'");
+				if (((this.allowed(kindName, "events", p)) ||
+					(this.userDefinedAttributes[inControl.aresId].hasOwnProperty(p)))) {
+					if (this.debug) { this.log("Adding event '" + p + "' from '" + currentKind + "'"); }
 					eventMap[p] = true;
 				}
 			}
@@ -127,6 +132,7 @@ enyo.kind({
 			}
 		}
 		
+		if (this.debug) { this.log("buildPropList: props", props); }
 		return props;
 	},
 	buildPropListFromObject: function(inControl) {
@@ -138,13 +144,13 @@ enyo.kind({
 		while (context) {
 			for (var p in context.published) {
 				if (this.allowed(kindName, "properties", p)) {
-					this.debug && this.log("Adding property '" + p + "' from '" + context.kind + "'");
+					if (this.debug) { this.log("Adding property '" + p + "' from '" + context.kind + "'"); }
 					propMap[p] = true;
 				}
 			}
 			for (var e in context.events) {
 				if (this.allowed(kindName, "events", e)) {
-					this.debug && this.log("Adding event '" + e + "' from '" + context.kind + "'");
+					if (this.debug) { this.log("Adding event '" + e + "' from '" + context.kind + "'"); }
 					eventMap[e] = true;
 				}
 			}
@@ -171,7 +177,7 @@ enyo.kind({
 			return;
 		}
 		
-		this.debug && this.log("Adding entry for " + inType + " " + inName + " : " + inDefaultValue);
+		if (this.debug) { this.log("Adding entry for " + inType + " " + inName + " : " + inDefaultValue); }
 		
 		var inherited = !(inControl.aresId && this.userDefinedAttributes && this.userDefinedAttributes[inControl.aresId] && typeof this.userDefinedAttributes[inControl.aresId][inName] !== "undefined"),
 			value = (inherited) ? inDefaultValue : this.userDefinedAttributes[inControl.aresId][inName],
@@ -237,14 +243,14 @@ enyo.kind({
 			v = num;
 		}
 
-		this.debug && this.log(n, v);
+		if (this.debug) { this.log(n, v); }
 		
 		// Save each change to _this.userDefinedAttributes_
 		if(!this.userDefinedAttributes[this.selected.aresId]) {
 			this.userDefinedAttributes[this.selected.aresId] = {};
 		}
 		this.userDefinedAttributes[this.selected.aresId][n] = v;
-		
+
 		this.doModify({name: n, value: v});
 	},
 	dblclick: function(inSender, inEvent) {
@@ -255,7 +261,7 @@ enyo.kind({
 			// FIXME: hack to supply a default event name
 			if (!v) {
 				v = inEvent.target.fieldName = this.selected.name + enyo.cap(n.slice(2));
-				this.debug && this.log("SET handler: " + n + " --> " + v);
+				if (this.debug) { this.log("SET handler: " + n + " --> " + v); }
 				this.selected.setProperty(n, v);
 				this.change(inSender, inEvent);
 				inEvent.target.setFieldValue(v);
@@ -272,9 +278,11 @@ enyo.kind({
 	 */
 	projectDataChanged: function(oldProjectData) {
 		if (this.projectData) {
+			if (this.debug) { this.log("projectDataChanged: projectData", this.projectData); }
 			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
 			this.projectData.on('update:project-indexer', this.projectIndexUpdated, this);
 			this.setProjectIndexer(this.projectData.getProjectIndexer());
+			Model.buildInformation(this.projectIndexer);
 		}
 		if (oldProjectData) {
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
@@ -287,9 +295,11 @@ enyo.kind({
 	 * @protected
 	 */
 	projectIndexReady: function(model, value, options) {
+		if (this.debug) { this.log("projectIndexReady: ", value); }
 		this.setProjectIndexer(value);
 	},
 	projectIndexUpdated: function() {
+		if (this.debug) { this.log("projectIndexUpdated: for projectIndexer: ", this.projectIndexer); }
 		Model.buildInformation(this.projectIndexer);
 	},
 	initUserDefinedAttributes: function(inComponents) {

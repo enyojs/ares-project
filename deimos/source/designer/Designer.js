@@ -76,18 +76,21 @@ enyo.kind({
 	
 	//* Send message via communicator
 	sendMessage: function(inMessage) {
-		if (this.debug) this.log("Op: " + inMessage.op, inMessage);
+		if (this.debug) { this.log("Op: " + inMessage.op, inMessage); }
 		this.$.communicator.sendMessage(inMessage);
 	},
 	//* Respond to message from communicator
 	receiveMessage: function(inSender, inEvent) {
-		if(!inEvent.message || !inEvent.message.op) {
+		
+		var msg = inEvent.message;
+
+		if (this.debug) { this.log("Op: " + msg.op, msg); }
+
+		if(!msg || !msg.op) {
 			enyo.warn("Deimos designer received invalid message data:", msg);
 			return;
 		}
 		
-		var msg = inEvent.message;
-		if (this.debug) this.log("Op: " + msg.op, msg);
 		// Iframe is loaded and ready to do work.
 		if(msg.op === "state" && msg.val === "initialized") {
 			this.sendIframeContainerData();
