@@ -228,7 +228,7 @@ The property `projectTemplateRepositories` of the service "**genZip**" is define
 		}
 
 The `url` property above can either be an http url or a an absolute filename such as:  
-NB: @INSTALLDIR@, @HOME@, … will be subsituted by the right value when "node ide.js" is started.
+NB: Within the `ide.json` configuration file, the variables `@NODE@`, `@CWD@`, `@INSTALLDIR@`, `@HOME@` and `@PLUGINDIR@` will be subsituted by the right value when `node ide.js` is started.
 
 	"url": "@INSTALLDIR@/templates/projects/ares-project-templates.json"
 
