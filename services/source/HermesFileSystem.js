@@ -64,15 +64,9 @@ enyo.kind({
 		}
 		req.response(function(inSender, inValue){
 			if (this.debug) this.log("inValue=", inValue);
-			if (this.xhr.status === 0 && !inValue) {
-				// work-around ENYO-970
-				this.fail();
-				return null;
-			} else {
-				var node = this.xhrResponse.headers['x-ares-node'];
-				if (this.debug) this.log("GET x-ares-node:", node);
-				return inValue;
-			}
+			var node = this.xhrResponse.headers['x-ares-node'];
+			if (this.debug) this.log("x-ares-node:", node);
+			return inValue;
 		}).error(function(inSender, inResponse) {
 			this.error("status="+ inResponse);
 			if (inResponse === 0 && this.notifyFailure) {

@@ -8,7 +8,7 @@ enyo.kind({
 		fullAnalysisDone: false
 	},
 	components: [
-		{name: "projectAnalyzer", kind: "Analyzer", onIndexReady: "projectIndexReady"}
+		{name: "projectAnalyzer", kind: "analyzer.Analyzer", onIndexReady: "projectIndexReady"}
 	],
 	create: function() {
 		this.inherited(arguments);

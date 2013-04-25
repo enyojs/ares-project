@@ -64,10 +64,10 @@
 		{
 			"active": true,
 			"id":"genZip",
-			"name":"Project toolkit",
+			"name":"ZIP-files Project Generator",
 			"type": ["generate"],
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/prjToolkit.js", "-P", "/genzip", "-p", "0"
+				"@INSTALLDIR@/hermes/genZip.js", "-P", "/genzip", "-p", "0"
 			],
 			"projectTemplateRepositories": {
 				"bootplate": {

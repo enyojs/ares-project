@@ -6,5 +6,5 @@ enyo.depends(
 	"HermesFileTree.js",
 	"phonegap/ProjectProperties.js",
 	"phonegap/Build.js",
-	"ProjectToolkit.js"
+	"GenZip.js"
 );
