@@ -4,54 +4,61 @@
  */
 var path = require("path"),
     fs = require("fs"),
-    optimist = require("optimist"),
     shell = require('shelljs'),
+    npmlog = require('npmlog'),
     temp = require("temp"),
     rimraf = require("rimraf"),
     async = require("async");
 
-var argv = optimist
-	    .usage('\nAres server tester.\nUsage: "$0 [OPTIONS]')
-	    .options('c', {
-		    alias : 'config',
-		    description: 'path to ide.json',
-		    default: path.resolve(__dirname, "..", "..", "ide.json")
-	    })
-	    .options('h', {
-		    alias : 'help',
-		    description: 'help message',
-		    boolean: true
-	    })
-	    .options('v', {
-		    alias : 'verbose',
-		    description: 'verbose execution mode',
-		    boolean: true
-	    })
-	    .options('q', {
-		    alias : 'quiet',
-		    description: 'really quiet',
-		    boolean: true
-	    })
-	    .argv;
+var knownOpts = {
+	"config":	path,
+	"help":		Boolean,
+	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
+};
+var shortHands = {
+	"c": "--config",
+	"h": "--help",
+	"l": "--level",
+	"v": "--level verbose"
+};
+var helpString = [
+	"",
+	"Ares server tester.",
+	"Usage: '" + process.argv[0] + " " + process.argv[1] + " [OPTIONS]",
+	"",
+	"Options:",
+	"  -c, --config   path to ide.json        [default: '" + path.resolve(__dirname, "..", "..", "ide.json") + "]",
+	"  -h, --help     help message            [boolean]",
+	"  -v, --verbose  verbose execution mode  [boolean]",
+	"  -q, --quiet    really quiet            [boolean]",
+	""
+];
+
+var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
+argv.config = argv.config || path.resolve(__dirname, "..", "..", "ide.json");
 
 if (argv.help) {
-	optimist.showHelp();
+	helpString.forEach(function(s) { console.log(s); });
 	process.exit(0);
 }
 
-if (argv.quiet) {
-	argv.verbose = false;
-}
+/**********************************************************************/
 
-log("running in verbose mode");
-log("argv:", argv);
+var log = npmlog;
+log.heading = 'ares.spec';
+log.level = argv.level || 'error';
 
-var mocha = argv['$0'];
+/**********************************************************************/
+
+log.verbose("main", "running in verbose mode");
+log.verbose("main", "argv:", argv);
+
+var mocha = process.argv[1];
 var myPort = 9019;
 
-log("loading " + argv.config);
+log.verbose("main", "loading " + argv.config);
 var config = JSON.parse(fs.readFileSync(argv.config, 'utf8'));
-log("config:", config);
+log.verbose("main", "config:", config);
 
 var myTestDir = "_test";
 
@@ -82,6 +89,7 @@ describe("Testing filesystems", function() {
 					     "--timeout", "5000", // This timeout may vary, depending on the network conditions
 					     "--reporter", "spec",
 					     path.resolve(__dirname, "fs.spec.js"),
+					     "--level", argv.level,
 					     "--filesystem", fsDropbox,
 					     "--pathname", "/",
 					     "--port", myPort,
@@ -108,6 +116,7 @@ describe("Testing filesystems", function() {
 		run([mocha, "--bail",
 		     "--reporter", "spec",
 		     path.resolve(__dirname, "fs.spec.js"),
+		     "--level", log.level,
 		     "--filesystem", fsLocal,
 		     "--pathname", "/",
 		     "--port", myPort,
@@ -122,22 +131,10 @@ describe("Testing filesystems", function() {
  * utilities
  */
 
-function log() {
-	if (argv.verbose) {
-		console.log.bind(this, this.name).apply(this, arguments);
-	}
-}
-
 function run(args) {
-	if (argv.verbose) {
-		args.push("-v");
-	}
-	if (argv.quiet) {
-		args.push("-q");
-	}
 	// Use '" "' instead of ' ' to let things work on Windows
 	var command = args.shift() + ' "' + args.join('" "') + '"';
-	log("Running: '", command, "' from '", process.cwd(), "'");
+	log.verbose("main", "Running: '", command, "' from '", process.cwd(), "'");
 
 	var report = shell.exec(command, { silent: false });
 	if (report.code !== 0) {

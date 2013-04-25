@@ -1,5 +1,5 @@
 /**
- * Hermes Open webos build service
+ * Project Generator based on ZIP-files
  */
 
 // nodejs version checking is done in parent process ide.js
@@ -8,18 +8,27 @@ var fs = require("fs"),
     path = require("path"),
     express = require("express"),
     util  = require("util"),
+    log = require('npmlog'),
     temp = require("temp"),
     http = require("http"),
     rimraf = require("rimraf"),
     ptools = require("./lib/project-gen"),
     CombinedStream = require('combined-stream');
 
-var basename = path.basename(__filename);
+var basename = path.basename(__filename, '.js');
+log.heading = basename;
+log.level = 'http';
+
 var FORM_DATA_LINE_BREAK = '\r\n';
 var performCleanup = true;
 var tools = new ptools.Generator();
 
-function BdOpenwebOS(config, next) {
+process.on('uncaughtException', function (err) {
+	log.error(basename, err.stack);
+	process.exit(1);
+});
+
+function GenZip(config, next) {
 	function HttpError(msg, statusCode) {
 		Error.captureStackTrace(this, this);
 		this.statusCode = statusCode || 500; // Internal-Server-Error
@@ -28,19 +37,13 @@ function BdOpenwebOS(config, next) {
 	util.inherits(HttpError, Error);
 	HttpError.prototype.name = "HTTP Error";
 
-	console.log("config=",  util.inspect(config));
+	
+	log.info('GenZip', "config:", config);
 
-
+	// express-3.x
 	var app, server;
-	if (express.version.match(/^2\./)) {
-		// express-2.x
-		app = express.createServer();
-		server = app;
-	} else {
-		// express-3.x
-		app = express();
-		server = http.createServer(app);
-	}
+	app = express();
+	server = http.createServer(app);
 
 	/*
 	 * Middleware -- applied to every verbs
@@ -85,25 +88,20 @@ function BdOpenwebOS(config, next) {
 	// - 'application/json' => req.body
 	// - 'application/x-www-form-urlencoded' => req.body
 	// - 'multipart/form-data' => req.body.<field>[], req.body.file[]
-	this.uploadDir = temp.path({prefix: 'com.palm.ares.hermes.bdOpenwebOS'}) + '.d';
+	this.uploadDir = temp.path({prefix: 'com.palm.ares.hermes.genZip'}) + '.d';
 	fs.mkdirSync(this.uploadDir);
 	app.use(express.bodyParser({keepExtensions: true, uploadDir: this.uploadDir}));
 
 	// Global error handler
 	function errorHandler(err, req, res, next){
-		console.error("errorHandler(): ", err.stack);
+		log.error("errorHandler(): ", err.stack);
 		res.status(err.statusCode || 500);
 		res.contentType('txt'); // direct usage of 'text/plain' does not work
 		res.send(err.toString());
 	}
-
-	if (app.error) {
-		// express-2.x: explicit error handler
-		app.error(errorHandler);
-	} else {
-		// express-3.x: middleware with arity === 4 is detected as the error handler
-		app.use(errorHandler);
-	}
+	
+	// express-3.x: middleware with arity === 4 is detected as the error handler
+	app.use(errorHandler);
 
 	/*
 	 * Verbs
@@ -144,7 +142,7 @@ function BdOpenwebOS(config, next) {
 	}
 
 	function generate(req, res, next) {
-		var destination = temp.path({prefix: 'com.palm.ares.hermes.bdOpenwebOS'}) + '.d';
+		var destination = temp.path({prefix: 'com.palm.ares.hermes.genZip'}) + '.d';
 		fs.mkdirSync(destination);
 
 		tools.generate(req.body.templateId, JSON.parse(req.body.substitutions), destination, {}, function(inError, inData) {
@@ -196,12 +194,12 @@ function BdOpenwebOS(config, next) {
 			// cleanup the temp dir when the response has been sent
 			combinedStream.on('end', function() {
 				if (performCleanup) {
-					console.log("cleanup(): starting removal of " + destination);
+					log.verbose("cleanup", "starting removal of " + destination);
 					rimraf(destination, function(err) {
-						console.log("cleanup(): removed " + destination);
+						log.verbose("cleanup", "removed " + destination);
 					});
 				} else {
-					console.log("cleanup(): skipping removal of " + destination);
+					log.verbose("cleanup", "skipping removal of " + destination);
 				}
 			});
 		});
@@ -242,7 +240,7 @@ function BdOpenwebOS(config, next) {
 	}
 }
 
-BdOpenwebOS.prototype.onExit = function() {
+GenZip.prototype.onExit = function() {
 	var directory = this.uploadDir;
 	rimraf(directory, function(err) {
 		// Nothing to do
@@ -250,7 +248,7 @@ BdOpenwebOS.prototype.onExit = function() {
 };
 
 // Main
-if (path.basename(process.argv[1]) === basename) {
+if (path.basename(process.argv[1], '.js') === basename) {
 	// We are main.js: create & run the object...
 
 	var knownOpts = {
@@ -267,22 +265,23 @@ if (path.basename(process.argv[1]) === basename) {
 		"h": "help"
 	};
 	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
-	argv.pathname = argv.pathname || "/prj-toolkit";
+	argv.pathname = argv.pathname || "/genZip";
 	argv.port = argv.port || 0;
 	argv.level = argv.level || "http";
 	if (argv.help) {
 		console.log("Usage: node " + basename + "\n" +
 			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)         [default: '0']\n" +
-			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                    [default: '/prj-toolkit']\n" +
+			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                    [default: '/genZip']\n" +
 			    "  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error') [default: 'http']\n" +
 			    "  -h, --help        This message\n");
 		process.exit(0);
 	}
 
-	var obj = new BdOpenwebOS({
+	log.level = argv.level || 'http';
+
+	var obj = new GenZip({
 		pathname: argv.pathname,
-		port: argv.port,
-		enyoDir: path.resolve(__dirname, '..', 'enyo')
+		port: argv.port
 	}, function(err, service){
 		if(err) process.exit(err);
 		// process.send() is only available if the
@@ -292,5 +291,5 @@ if (path.basename(process.argv[1]) === basename) {
 } else {
 
 	// ... otherwise hook into commonJS module systems
-	module.exports = BdOpenwebOS;
+	module.exports = GenZip;
 }

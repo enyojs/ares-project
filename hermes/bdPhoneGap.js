@@ -43,16 +43,10 @@ function BdPhoneGap(config, next) {
 
 	console.log("config=",  util.inspect(config));
 
+	// express 3.x: app is not a server
 	var app, server;
-	if (express.version.match(/^2\./)) {
-		// express-2.x
-		app = express.createServer();
-		server = app;
-	} else {
-		// express-3.x
-		app = express();
-		server = http.createServer(app);
-	}
+	app = express();
+	server = http.createServer(app);
 
 	/*
 	 * Middleware -- applied to every verbs
@@ -123,13 +117,8 @@ function BdPhoneGap(config, next) {
 		res.contentType('txt'); // direct usage of 'text/plain' does not work
 		res.send(err.toString());
 	}
-	if (app.error) {
-		// express-2.x: explicit error handler
-		app.error(errorHandler);
-	} else {
-		// express-3.x: middleware with arity === 4 is detected as the error handler
-		app.use(errorHandler);
-	}
+	// express-3.x: middleware with arity === 4 is detected as the error handler
+	app.use(errorHandler);
 
 	/*
 	 * Verbs
@@ -153,9 +142,13 @@ function BdPhoneGap(config, next) {
 		], function (err, results) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
-				cleanup.bind(this)(req, res, next.bind(this, err));
-				return;
+				cleanup.bind(this)(req, res, function() {
+					next(err);
+				});
 			}
+			// we do not invoke error-less next() here
+			// because that would try to return 200 with
+			// an empty body, while we have already sent
 		});
 	});
 
@@ -174,9 +167,14 @@ function BdPhoneGap(config, next) {
 		], function (err, results) {
 			if (err) {
 				// cleanup & run express's next() : the errorHandler
-				cleanup.bind(this)(req, res, next.bind(this, err));
-				return;
+				cleanup.bind(this)(req, res, function() {
+					next(err);
+				});
 			}
+			// we do not invoke error-less next() here
+			// because that would try to return 200 with
+			// an empty body, while we have already sent
+			// back the response.
 		});
 	});
 	
@@ -474,9 +472,13 @@ function BdPhoneGap(config, next) {
 			}
 		}
 		
-		function _fail(errMsg) {
-			console.error("upload(): error ", errMsg);
-			next(new HttpError("PhoneGap build error: " + errMsg, 400 /*Bad Request*/));
+		function _fail(err) {
+			if (err instanceof Error) {
+				console.error(err.stack);
+			} else {
+				console.error("upload(): error ", err);
+			}
+			next(new HttpError("PhoneGap build error: " + err.toString(), 400 /*Bad Request*/));
 		}
 	}
 	

@@ -15,14 +15,14 @@ enyo.kind({
 		onScanProject: "",
 		onProjectRemoved: "",
 		onModifySettings: "",
-		onBuildProject: "",
-		//onInstallProject: "",
-		//onRunProject: "",
-		//onDebugProject: "",
-		onPreviewProject: "",
+		onBuild: "",
+		onInstall: "",
+		onRun: "",
+		onRunDebug: "",
+		onPreview: "",
 		onError: ""
 	},
-	debug: true,
+	debug: false,
 	components: [
 		{kind: "onyx.MoreToolbar", classes: "onyx-menu-toolbar ares-top-toolbar", isContainer: true, name: "toolbar", components: [
 			{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
@@ -57,35 +57,33 @@ enyo.kind({
 			]},
 			{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
 				{content: "Project", name: "projectMenu", disabled: true},
-				{kind: "onyx.Menu", maxHeight:"100%", components: [
+				{kind: "onyx.Menu", maxHeight: "100%", components: [
 					{value: "doModifySettings", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_edit.png"},
 						{content: "Edit..."}
 					]},
 					{classes: "onyx-menu-divider"},
-					{value: "doPreviewProject", components: [
+					{value: "doPreview", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_preview.png"},
 						{content: "Preview"}
 					]},
-					{classes: "onyx-menu-divider"},
-					{value: "doBuildProject", components: [
+					{value: "doBuild", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_build.png"},
 						{content: "Build..."}
 					]},
 					{classes: "onyx-menu-divider"},
-					{value: "doInstallProject", components: [
+					{value: "doInstall", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_install.png"},
 						{content: "Install..."}
 					]},
 					{classes: "onyx-menu-divider"},
-					{value: "doRunProject", components: [
+					{value: "doRun", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_run.png"},
 						{content: "Run..."}
 					]},
-					{classes: "onyx-menu-divider"},
-					{value: "doDebugProject", components: [
+					{value: "doRunDebug", components: [
 						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_debug.png"},
-						{content: "Debug...", classes: "onyx-disabled" }
+						{content: "Debug..." }
 					]}
 				]}
 			]}
@@ -228,23 +226,11 @@ enyo.kind({
 	showAccountConfigurator: function() {
 		this.$.accountsConfigurator.show();
 	},
-	
-	showErrorPopup : function(msg) {
-		this.$.errorPopup.setErrorMsg(msg);
-		this.$.errorPopup.show();
-	},
-
 	stringifyReplacer: function(key, value) {
 		if (key === "originator") {
 			return undefined;	// Exclude
 		}
 		return value;	// Accept
-	},
-	launchPreview: function(inSender, inEvent) {
-		if (inEvent) {
-			this.doPreview(inEvent.originator.value) ;
-		}
-		return true ;
 	}
 });
 
