@@ -13,10 +13,11 @@ var fs = require("fs"),
     spawn = require('child_process').spawn,
     querystring = require("querystring"),
     versionTools = require('./hermes/lib/version-tools'),
-    http = require('http');
+    http = require('http'),
+    HttpError = require("./hermes/lib/httpError");
 
+// __dirname is not defined by node-webkit
 var myDir = typeof(__dirname) !== 'undefined' ?  __dirname : path.resolve('') ;
-var HttpError = require(path.resolve(myDir, "hermes/lib/httpError"));
 
 /**********************************************************************/
 
@@ -46,7 +47,7 @@ var shortHands = {
 };
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ide.js'*/);
 
-argv.config = argv.config || path.join(__dirname, "ide.json");
+argv.config = argv.config || path.join(myDir, "ide.json");
 argv.host = argv.host || "127.0.0.1";
 argv.port = argv.port || 9009;
 
@@ -122,7 +123,7 @@ var subProcesses = [];
 var platformVars = [
 	{regex: /@NODE@/, value: process.argv[0]},
 	{regex: /@CWD@/, value: process.cwd()},
-	{regex: /@INSTALLDIR@/, value: __dirname},
+	{regex: /@INSTALLDIR@/, value: myDir},
 	{regex: /@HOME@/, value: process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']}
 ];
 
