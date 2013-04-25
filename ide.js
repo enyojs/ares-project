@@ -253,7 +253,7 @@ function loadPluginConfigFiles() {
 		var filename = path.join(modDir, directory, 'ide-plugin.json');
 		if (fs.existsSync(filename)) {
 			nPlugins++;
-			log.info('loadPluginConfigFiles()', "loading '" + directory + "/ide.json'");
+			log.info('loadPluginConfigFiles()', "loading '" + directory + "/ide-plugin.json'");
 			appendPluginConfig(filename);
 		}
 	});
