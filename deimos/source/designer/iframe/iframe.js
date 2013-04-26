@@ -10,6 +10,7 @@ enyo.kind({
 		containerItem: null,
 		beforeItem: null,
 		currentDropTarget: null,
+		createPaletteItem: null
 	},
 	components: [
 		{name: "client", classes:"enyo-fit"},
@@ -29,6 +30,8 @@ enyo.kind({
 	prevY: null,
 	dragoverTimeout: null,
 	holdoverTimeout: null,
+	moveControlSecs: 0.2,
+	edgeThresholdPx: 10,
 	debug: false,
 	
 	create: function() {
@@ -46,7 +49,6 @@ enyo.kind({
 		}
 		this.syncDropTargetHighlighting();
 	},
-	
 	//* Add dispatch handling for native drag events
 	addHandlers: function(inSender, inEvent) {
 		document.ondragstart = enyo.dispatch;
@@ -83,7 +85,7 @@ enyo.kind({
 
 		var msg = inEvent.message;
 
-		if (!inEvent.message || !inEvent.message.op) {
+		if (!msg || !msg.op) {
 			enyo.warn("Deimos iframe received invalid message data:", msg);
 			return;
 		}		
@@ -121,6 +123,12 @@ enyo.kind({
 				break;
 			case "prerenderDrop":
 				this.foreignPrerenderDrop(msg.val);
+				break;
+			case "enterCreateMode":
+				this.enterCreateMode(msg.val);
+				break;
+			case "leaveCreateMode":
+				this.leaveCreateMode();
 				break;
 			default:
 				enyo.warn("Deimos iframe received unknown message op:", msg);
@@ -165,7 +173,7 @@ enyo.kind({
 		// Update dragover highlighting
 		this.dragoverHighlighting(inEvent);
 		
-		// If mouse actually moved, begin timer for holdover
+		// If mouse actually moved, reset timer for holdover
 		if (this.mouseMoved(inEvent)) {
 			this.resetHoldoverTimeout();
 		} else if (!this.holdoverTimeout) {
@@ -271,7 +279,7 @@ enyo.kind({
 		
 		// Deselect the currently selected item if we're creating a new item, so all items are droppable
 		if (inEvent.dataTransfer.types[0] == "ares/createitem") {
-			this.selection = null;
+			//this.selection = null;
 			this.hideSelectHighlight();
 		}
 		
@@ -627,6 +635,12 @@ enyo.kind({
 		head.insertBefore(newTag, inElementToReplace);
 		head.removeChild(inElementToReplace);
 	},
+	enterCreateMode: function(inData) {
+		this.setCreatePaletteItem(inData);
+	},
+	leaveCreateMode: function() {
+		this.setCreatePaletteItem(null);
+	},
 	
 	
 	
@@ -639,8 +653,7 @@ enyo.kind({
 	
 	
 	
-	moveControlSecs: 0.2,
-	edgeThresholdPx: 10,
+	
 	holdOver: function(inEvent) {
 		var x = inEvent.clientX,
 			y = inEvent.clientY,
@@ -668,9 +681,15 @@ enyo.kind({
 		
 		this.setContainerItem(newContainer);
 		this.setBeforeItem(newBeforeItem);
+		
+		// If we are creating a new item and the current selection is not equal to the new item, set _this.selection_
+		if (this.getCreatePaletteItem() && (!this.selection || this.selection.aresId !== this.getCreatePaletteItem().aresId)) {
+			this.selection = this.getContainerItem().createComponent(this.getCreatePaletteItem()).render();
+		}
+		
 		this.prerenderDrop();
 	},
-	//* Handle drop that has been trigged from outside of the iframe
+	//* Handle drop that has been trigged from outside of the iframe (i.e. in the ComponentView)
 	foreignPrerenderDrop: function (inData) {
 		var containerItem = this.getControlById(inData.targetId),
 			beforeItem    = inData.beforeId ? this.getControlById(inData.beforeId) : null;
@@ -708,7 +727,7 @@ enyo.kind({
 		
 		// Create copies of controls that need to move, and animate them to the new posiitions
 		this.animateMovedControls(movedControls);
-
+		
 		// When animation completes, udpate parent instance to reflect changes. TODO - don't use setTimeout, do this on an event when the animation completes
 		setTimeout(enyo.bind(this, function() { this.prerenderMoveComplete(movedInstances); }), this.moveControlSecs*1000 + 100);
 	},
@@ -717,16 +736,47 @@ enyo.kind({
 		this.$.flightArea.hide();
 		// Show hidden controls in app
 		this.showMovedControls(inInstances);
-		// Update parent instance with moved controls
+		// Point _this.parentInstance_ to current client controls
 		this.parentInstance = this.$.client.getClientControls()[0];
 	},
 	legalDrop: function() {
 		var containerId = (this.getContainerItem()) ? this.getContainerItem().aresId : null,
 			beforeId    = (this.getBeforeItem())    ? this.getBeforeItem().aresId    : null;
-		if ((!this.getContainerItem() || !this.selection) || (this.selection.aresId === containerId || this.selection.aresId === beforeId)) {
+		
+		// If creating a new item, drop is legal
+		if (this.getCreatePaletteItem()) {
+			return true;
+		}
+		
+		if ((!this.getContainerItem() || !this.selection) || this.selection.aresId === containerId || this.selection.aresId === beforeId) {
 			return false;
 		}
+		
 		return true;
+	},
+	//* Render updated copy of the parentInstance into _cloneArea_
+	renderUpdatedAppClone: function() {
+		this.$.cloneArea.destroyClientControls();
+		this.$.cloneArea.createComponent({kind: this.parentInstance.kind});
+		this.$.cloneArea.applyStyle("display", "block");
+		this.$.cloneArea.render();
+		
+		var containerId = (this.getContainerItem()) ? this.getContainerItem().aresId : null,
+			container   = this.getControlById(containerId, this.$.cloneArea),
+			beforeId    = (this.getBeforeItem()) ? this.getBeforeItem().aresId : null,
+			before      = (beforeId) ? this.getControlById(beforeId, this.$.cloneArea) : null,
+			selection   = this.getControlById(this.selection.aresId, this.$.cloneArea),
+			clone       = this.cloneControl(this.selection); //this.createSelectionGhost(selection);
+		
+		if (before) {
+			clone = enyo.mixin(clone, {beforeId: beforeId, addBefore: before});
+		}
+		
+		container.createComponent(clone).render();
+		
+		if (selection) {
+			selection.destroy();
+		}
 	},
 	//* Return all controls that will be affected by this move
 	getMovedControls: function() {
@@ -887,7 +937,9 @@ enyo.kind({
 		}
 		
 		container.createComponent(clone).render();
-		selection.destroy();
+		if (selection) {
+			selection.destroy();
+		}
 	},
 	hideUpdatedAppClone: function() {
 		this.$.cloneArea.destroyClientControls();
@@ -936,7 +988,7 @@ enyo.kind({
 			positions = [];
 		
 		for(var i=0;i<controls.length;i++) {
-			if (controls[i].aresId) {
+			if (controls[i].aresId && controls[i].hasNode()) {
 				positions.push({comp: controls[i], rect: controls[i].hasNode().getBoundingClientRect()});
 			}
 		}
