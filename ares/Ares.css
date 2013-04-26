@@ -288,10 +288,12 @@ body {
 /* Global onyx overrides for Ares, for a more desktop look/feel */
 
 .onyx {
+	font-family: Arial,'Helvetica Neue', 'Nimbus Sans L', sans-serif;
 	font-size: 13px;
 }
 
 .onyx-popup {
+	font-family: Arial,'Helvetica Neue', 'Nimbus Sans L', sans-serif;
 	font-size: 13px;
 }
 
