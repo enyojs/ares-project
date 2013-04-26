@@ -39,15 +39,22 @@ enyo.singleton({
 		};
 	},
 	/**
+	 * Reset the Model Information to default
+	 * @public
+	 */
+	resetInformation: function() {
+		if (this.debug)  { this.log("resetInformation!"); }
+		this.info = {};
+		this.addInformation("properties", "__default", this.defaults.properties);
+		this.addInformation("events", "__default", this.defaults.events);		
+	},
+	/**
 	 * Build all the information needed by the inspector
 	 * @public
 	 */
 	buildInformation: function(projectIndexer) {
 		if (this.debug)  { this.log("buildInformation: Indexer: ", projectIndexer); }
-		this.info = {};
-		this.addInformation("properties", "__default", this.defaults.properties);
-		this.addInformation("events", "__default", this.defaults.events);
-
+		this.resetInformation();
 		enyo.forEach(projectIndexer.propertyMetaData, function(item) {
 			if (item.type === "kind") {
 				if (this.debug) { this.log("Processing: " + item.name, item); }
