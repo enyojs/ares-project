@@ -47,7 +47,7 @@ enyo.kind({
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
 		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "ares_phobos_settingspop", centered: true, modal: true, floating: true,
-		onChangeTheme: "changeTheme", onChangeHighLight: "changeHighLight", onClose: "closeEditorPop", onWordWrap: "changeWordWrap", onFontsizeChange: "changeFont", onTabSizsChange: "tabSize"}
+		onChangeTheme: "changeTheme", onChangeHighLight: "changeHighLight", onChangeRightPane: "changeRightPane", onClose: "closeEditorPop", onWordWrap: "changeWordWrap", onFontsizeChange: "changeFont", onTabSizsChange: "tabSize"}
 	],
 	events: {
 		onShowWaitPopup: "",
@@ -132,6 +132,7 @@ enyo.kind({
 		});
 	},
 	openDoc: function(inDocData) {
+
 		// If we are changing documents, reparse any changes into the current projectIndexer
 		if (this.docData && this.docData.getEdited()) {
 			this.reparseAction(true);
@@ -148,8 +149,10 @@ enyo.kind({
 
 		var file = this.docData.getFile();
 		var extension = file.name.split(".").pop();
+
 		this.hideWaitPopup();
 		this.analysis = null;
+
 		var mode = {
 			json: "json",
 			design: "json",
@@ -171,7 +174,9 @@ enyo.kind({
 			png: "image",
 			gif: "image"
 		}[extension] || "text";
+
 		this.docData.setMode(mode);
+
 		var hasAce = this.adjustPanelsForMode(mode);
 		
 		if (hasAce) {
@@ -190,25 +195,9 @@ enyo.kind({
 			this.focusEditor();
 
 			/* set editor to user pref */
+			this.$.ace.applySettings(this.$.editorSettingsPopup.getAceSettings());
+
 			this.$.ace.editingMode = mode;
-			this.$.ace.highlightActiveLine = localStorage.highlight;
-			if(!this.$.ace.highlightActiveLine || this.$.ace.highlightActiveLine.indexOf("false") != -1){
-				this.$.ace.highlightActiveLine = false;
-			}
-			this.$.ace.highlightActiveLineChanged();
-			
-			this.$.ace.wordWrap = localStorage.wordwrap;			
-			if(!this.$.ace.wordWrap || this.$.ace.wordWrap.indexOf("false") != -1 && this.$.ace.wordWrap !== "true"){
-				this.$.ace.wordWrap = false;
-			}
-			this.$.ace.wordWrapChanged();
-
-			this.fSize = localStorage.fontsize;
-			if(this.fSize ===  undefined){
-				this.fSize = "11px";
-			}
-
-			this.$.ace.setFontSize(this.fSize);
 		}
 		else {
 			var origin = this.projectData.getService().getConfig().origin;
@@ -221,13 +210,11 @@ enyo.kind({
 		this.docData.setEdited(edited);
 		this.$.toolbar.resized();
 	},
+
 	adjustPanelsForMode: function(mode) {
+
 		if (this.debug) this.log("mode:", mode);
-		// whether to show or not a panel, imageViewer and ace cannot be enabled at the same time
-		var r = localStorage.rightpane;
-		if(!r || r.indexOf("false") != -1){
-			r = false;
-		}
+		var r = this.$.editorSettingsPopup.otherSettings.rightpane;
 		var showModes = {
 			javascript: {
 				imageViewer: false,
@@ -818,15 +805,19 @@ enyo.kind({
 	},
 
 	changeHighLight: function(){
-		this.$.ace.highlightActiveLine = this.$.editorSettingsPopup.highlight;
+		this.$.ace.highlightActiveLine = this.$.editorSettingsPopup.aceSettings.highlight;
 		this.$.ace.highlightActiveLineChanged();
 	},
+	//showing =
+	changeRightPane: function(){
+		this.adjustPanelsForMode(this.docData.getMode());
+	},
 	changeTheme: function() {
-		this.$.ace.theme = this.$.editorSettingsPopup.theme;
+		this.$.ace.theme = this.$.editorSettingsPopup.aceSettings.theme;
 		this.$.ace.themeChanged();
 	},
 	changeWordWrap: function() {
-		this.$.ace.wordWrap = this.$.editorSettingsPopup.wordWrap;
+		this.$.ace.wordWrap = this.$.editorSettingsPopup.aceSettings.wordWrap;
 		this.$.ace.wordWrapChanged();
 	},
 	toggleww: function(){		
@@ -841,7 +832,7 @@ enyo.kind({
 
 	},
 	changeFont: function(){
-		var fs = this.$.editorSettingsPopup.fSize;
+		var fs = this.$.editorSettingsPopup.aceSettings.fontsize;
 			this.$.ace.setFontSize(fs);
 	},
 
@@ -852,7 +843,7 @@ enyo.kind({
 	
 	fkeypressed: function(inSender, inEvent) {
 		var key = inEvent;
-		this.$.ace.insertAtCursor (localStorage[ key ]) ;
+		this.$.ace.insertAtCursor(this.$.editorSettingsPopup.otherSettings.keys[ key ]);
 	},
 	
 	//* Trigger an Ace undo and bubble updated code

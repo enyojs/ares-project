@@ -36,10 +36,7 @@ enyo.kind({
 	rendered: function() {
 		this.inherited(arguments);
 		
-		this.theme = localStorage.theme;
-		if(this.theme === undefined){
-			this.theme = "clouds";
-		}
+		//FIXME : to do something to apply ES
 		
 		var n = this.hasNode();
 		if (n) {
@@ -57,6 +54,16 @@ enyo.kind({
 			this.addSessionListeners();
 			this.addKeyBindings();
 		}
+	},
+	/**
+	 * Apply settings from editor settings popup
+	 * @public
+	 */
+	applySettings: function(settings) {
+			this.setTheme(settings.theme);
+			this.setFontSize(settings.fontsize);
+			this.setHighlightActiveLine(settings.highlight);
+			this.setWordWrap(settings.wordwrap);
 	},
 	/**
 	 * Register some specific commands for save, ...

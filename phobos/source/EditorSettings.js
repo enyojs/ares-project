@@ -3,6 +3,7 @@ enyo.kind({
 	kind: "onyx.Popup",
 	events: {
 		onChangeHighLight: "",
+		onChangeRightPane: "",
 		onChangeTheme: "",
 		onWordWrap: "",
 		onFontsizeChange: "",
@@ -13,6 +14,20 @@ enyo.kind({
 	handlers: {
        // onSelect: "itemSelected"
     },
+   published: {
+		aceSettings: {
+	 		theme:"clouds",
+	 		highlight:false,
+	 		fontsize:"",
+	 		wordwrap:false
+	 	},
+	 	otherSettings: {
+	 		rightpane:false,
+	 		keys:{ }
+	 	}
+	},
+	SETTINGS_STORAGE_KEY_ACE: "com.enyojs.editor.settings.ace",
+	SETTINGS_STORAGE_KEY_OTHER: "com.enyojs.editor.settings.other",
 	components: [
 		{classes: "ares_editorfont", content: "Editor Settings"},
 		{tag: "br"},
@@ -37,7 +52,7 @@ enyo.kind({
 		{ kind: "FittableColumns", classes:"ares_editorfont", components: [
 			{name: "rightpane", fit: true, classes: "ares_editorfont", content: "Right Pane "},
 			{style: "width: 65px;", content: " "},
-			{name: "rightPane", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "right"},
+			{name: "rightPane", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "rightPaneChanged"},
 		]},
 		
 		{fit: true, content: " "},
@@ -63,7 +78,7 @@ enyo.kind({
 			components: [
 				{style: "min-width: 150px;"},
 					{name: "themes", kind: "onyx.Picker", onSelect: "themeSelected", components: [
-					{content: "ambiance", active: true},
+					{content: "ambiance"},
 					{content: "chaos"},
 					{content: "chrome"},
 					{content: "clouds"},
@@ -122,12 +137,12 @@ enyo.kind({
 		
 		{tag: "br"},
 		{name: "close", kind: "onyx.Button", content: "Close", ontap: "doClose"},
-		{name: "change", kind: "onyx.Button", content: "OK/Save", ontap: "oksave"},		
+		{name: "change", kind: "onyx.Button", content: "OK/Save", ontap: "saveSettings"},		
 		
 		{kind: "onyx.Popup", modal: true, floating: true, centered: true, canGenerate: false, name: "modalPopup", components: [
 			{kind: "Control", classes: "onyx-toolbar-inline", name: "altInputbox", components: [
 					{kind: "onyx.InputDecorator", classes: "phobos_editorsettings_buttoninput", name: "inputDecorator", components: [
-							{kind: "onyx.TextArea", placeholder: "Enter text here", classes: "alt_button_input", name: "textArea", onchange: "inputChanged"}
+							{kind: "onyx.TextArea", placeholder: "Enter text here", classes: "alt_button_input", name: "textArea"}
 						]},
 					{kind: "Control", tag: "br"},
 					{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
@@ -136,84 +151,112 @@ enyo.kind({
 			{kind: "Control", tag: "br"}
 		]}
 	],
+	/**
+	 * @private
+	 */
+	
 	create: function() {
 		this.inherited(arguments);
+		//reading Editor Settings values from localStorage
+		var self = this;
+		Ares.LocalStorage.get(this.SETTINGS_STORAGE_KEY_ACE, function(str) {
+			if (self.debug) self.log("localStorage[" + self.SETTINGS_STORAGE_KEY_ACE + "] = ", str);
+			try {
+				if(str !== null && str !== undefined){
+					self.aceSettings = JSON.parse(str);
+				}		
+			} catch(e) {
+				Ares.LocalStorage.remove(self.SETTINGS_STORAGE_KEY_ACE);
+			}
+		});
 
-		this.theme = localStorage.theme;
-		if(this.theme === undefined){
-			this.theme = "clouds";
-		}
-		this.fSize = localStorage.fontsize;
+		Ares.LocalStorage.get(self.SETTINGS_STORAGE_KEY_OTHER, function(str) {
+			if (self.debug) self.log("localStorage[" + self.SETTINGS_STORAGE_KEY_OTHER + "] = ", str);
+			try {
+				if(str !== null && str !== undefined){
+					self.otherSettings = JSON.parse(str);
+				}		
+			} catch(e) {
+				Ares.LocalStorage.remove(self.SETTINGS_STORAGE_KEY_OTHER);
+			}
+		});
 
-		this.highlight = localStorage.highlight;
-		if(!this.highlight || this.highlight.indexOf("false") != -1){
-			this.highlight = false;
-		}
-		this.$.highLightButton.value = this.highlight;
+		//set UI items with values from localStorage
+		this.$.highLightButton.value = this.aceSettings.highlight;
 
-		this.wordWrap = localStorage.wordwrap;
-		if(!this.wordWrap || this.wordWrap.indexOf("false") != -1){
-			this.wordWrap = false;
-		}
-		this.$.wordWrapButton.value = this.wordWrap;
+		this.$.wordWrapButton.value = this.aceSettings.wordwrap;
 		
-		this.rightpane = localStorage.rightpane;
-		if(!this.rightpane || this.rightpane.indexOf("false") != -1){
-			this.rightpane = false;
+		for(i in this.$.themes.getClientControls()){
+			if(this.$.themes.getClientControls()[i].content == this.aceSettings.theme){
+				this.$.themes.setSelected(this.$.themes.getClientControls()[i]);
+			}
 		}
+
+		var sizes = [6, 8, 10, 12, 13, 16, 20, 24, 30, 36];
+		for (var i=1; i<sizes.length; i++) {
+			this.$.fontSizePicker.createComponent({
+				  content: sizes[i], 
+				  active: (sizes[i] == this.aceSettings.fontsize)
+				});
+		}
+		
+		this.$.rightPane.value = this.otherSettings.rightpane;
 
 		// lock thems Button's width, so it doesn't move when the caption changes
 		this.$.themes.setBounds({width: 100 });
-		var sizes = [6, 8, 10, 12, 13, 16, 20, 24, 30, 36];
-		for (var i=1; i<sizes.length; i++) {
-			this.$.fontSizePicker.createComponent({content: sizes[i], active: (i==this.fSize)});
-		}
 	},
 
 	themeSelected: function(inSender, inEvent) {
-        this.theme = inEvent.originator.content;
+        this.aceSettings.theme = inEvent.originator.content;
         this.doChangeTheme();
     },
 
 	buttonToggle: function(inSender, inEvent) {
-		this.highlight = inEvent.value;
+		this.aceSettings.highlight = inEvent.value;
 		this.doChangeHighLight();
 	},
 
 	wordWrapToggle: function(inSender, inEvent){
-		this.wordWrap = inEvent.value;
+		this.aceSettings.wordwrap = inEvent.value;
 		this.doWordWrap();
-	},
-	
-	right: function(inSender, inEvent){
-		this.rightpane = inEvent.value;	
-	},
-
-	oksave: function() {
-		localStorage.theme = this.theme;
-		localStorage.highlight = this.highlight;
-		localStorage.wordwrap = this.wordWrap;
-		localStorage.fontsize = this.fSize;
-		localStorage.rightpane = this.rightpane;
-		this.doClose();
 	},
 
 	fontSize: function(inSender, inEvent) {
-		this.fSize = inEvent.selected.content + "px";
+		this.aceSettings.fontsize = inEvent.selected.content;
 		this.doFontsizeChange();
 	},	
 	
+	rightPaneChanged: function(inSender, inEvent){
+		this.otherSettings.rightpane = inEvent.value;
+		this.doChangeRightPane();	
+	},
+
+
 	inputChanged: function(inSender, inEvent) {
 		var key = this.key;	
 		if (/^F\d+/.test(key)) {
-			localStorage[key] = inSender.getValue();
-		}			
+			this.otherSettings.keys[key] = this.$.textArea.value;
+		}	
 		this.$.modalPopup.hide();		
 	},
-	
+
+	closeModalPopup: function(inSender){
+		this.$.modalPopup.hide();
+	},
+
 	showPopup: function(inSender) {
 		this.key = inSender.name;
+		if (/^F\d+/.test(this.key)) {
+			if(this.otherSettings.keys[this.key] === undefined){
+				this.$.textArea.setValue("");
+			} else this.$.textArea.setValue(this.otherSettings.keys[this.key]);
+		}
 		this.$.modalPopup.show();
 	},
 
+	saveSettings: function() {
+		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY_ACE, JSON.stringify(this.aceSettings));
+		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY_OTHER, JSON.stringify(this.otherSettings));
+		this.doClose();
+	}
 });
