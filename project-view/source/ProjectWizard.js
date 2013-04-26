@@ -109,7 +109,7 @@ enyo.kind({
 					info = JSON.parse(fileStuff.content);
 				} catch(err) {
 					this.hide();
-					this.log( "Unable to partse appinfo.json >>" + fileStuff.content + "<<");
+					this.log( "Unable to parse appinfo.json >>" + fileStuff.content + "<<");
 					var msg = 'Unable to parse appinfo.json: ' + err;
 					this.$.errorPopup.raise(msg);
 					next({handled: true, msg: msg});
