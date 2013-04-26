@@ -173,5 +173,13 @@ enyo.kind({
 	//* Prerender simulated drop in iFrame
 	prerenderDrop: function(inTargetId, inBeforeId) {
 		this.sendMessage({op: "prerenderDrop", val: {targetId: inTargetId, beforeId: inBeforeId}});
+	},
+	//* Enter create mode (i.e. began dragging control in from Palette)
+	enterCreateMode: function(inConfig) {
+		this.sendMessage({op: "enterCreateMode", val: inConfig});
+	},
+	//* Leave create mode (i.e. finished dragging control in from Palette)
+	leaveCreateMode: function() {
+		this.sendMessage({op: "leaveCreateMode"});
 	}
 });

@@ -4,7 +4,6 @@ enyo.depends(
 	"$lib/onyx",
 	"$lib/foss",
 	"source/",
-	"assets/webfonts/font.css",
 	"Ares.css",
 	"assets/css/effects.css",
 	"assets/css/sprites.css",
