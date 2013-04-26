@@ -92,7 +92,7 @@ enyo.kind({
 				{kind: "onyx.Icon", src:"$deimos/images/search-input-search.png", style:"height:20px;"}
 			]}
 		]},
-		{name: "serializer", kind: "Serializer"}
+		{name: "serializer", kind: "Ares.Serializer"}
 	],
 	statics: {
 		model: []

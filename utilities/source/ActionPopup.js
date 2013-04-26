@@ -18,9 +18,9 @@ enyo.kind({
                 {name: "title", classes: "ares-title", content: " "},
                 {tag: "br", classes: "ares-message"},
                 {name: "buttons", kind: "FittableColumns", components: [
-                        {name: "cancelButton", kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "actionCancel"},
+                        {name: "cancelButton", kind: "onyx.Button", content: "Cancel", ontap: "actionCancel"},
 						{fit: true},
-        	            {name: "actionButton", kind: "onyx.Button", classes: "onyx-affirmative", content: "Delete", ontap: "actionConfirm"}
+        	            {name: "actionButton", kind: "onyx.Button", content: "Delete", ontap: "actionConfirm"}
                 ]}
 
         ],

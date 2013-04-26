@@ -156,7 +156,7 @@ enyo.kind({
 				service.impl = new Phonegap.Build();
 				this.configureService(service, next);
 			} else if (service.implementsType("generate") && service.config.id === "genZip") {
-				service.impl = new ProjectToolkit();
+				service.impl = new GenZip();
 				this.configureService(service, next);
 			} else {
 				this.log("Ignoring service: " + service.config.id);

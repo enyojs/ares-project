@@ -312,8 +312,45 @@ The default `<pathname>` value is `/genzip`.  Its value can be changed using the
 		* It's up to the caller to extract and base64 decode the files to create a new project.  
 		In Ares, this is achieved by forwarding the FormData to Hermes filesystem service via a PUT method.
 
+## Build services
 
-## PhoneGap build service
+### Ares IDE - Javascript API
+
+1. `MyBuildService#buildPkg(project)` where `project` is an instance of `Ares.Model.Project` as found in the `ProjectView`.  This kind has (among others) the following entry points:
+	* `Ares.Model.Project#getName()`: Application Name
+	* `Ares.Model.Project#getService()`: File-System service hosting the application project (source code)
+	* `Ares.Model.Project#getFolderId()`: File-System service folderId of the application project (source code) root folder
+	* `Ares.Model.Project#getConfig`: Application project configuration (from `project.json`) for that specific builder (from `build.<builderName>`, as set by the service UI)
+
+### Web Resources
+
+Although it can rely on other remote or local resources, Ares build services may share a maximum amount of source code with other build services by implementing the following resources using a shared semantic.
+
+The following resources 
+
+* `<pathname>/config`:
+	* POST: pass the `ide.json` consolidated content for this specific service.  This resource is only accessed from the Ares server: it is not proxied to the Ares IDE.
+		* Query-Params: n/a
+		* Request-Headers: n/a
+		* Request-Body:
+			* `application/json` the consolidated `ide.json` for this specific service
+		* Response-Headers: n/a
+		* Response-Body: n/a
+* `<pathname>/user`:
+	* GET: return user account information.  Might be used to set a client-side cookie with proper authentication.  This resource is generally called from the Ares _Accounts_ configuration wizard (the Ares IDE plugin that comes with a build service).
+* `<pathname>/op/build`
+	* POST: start a new build
+		* Query-Params: n/a
+		* Request-Headers: `Content-Type:` (`Authorization:` or `Cookies:` headers may also be present)
+		* Request-Body:
+			* `multipart/form-data` sequence of files that constitute the application source code.  The relative file location is encoded the URL-way (with `/` directory separator) in each part `filename` field.  The per-part `content-type` is always ignored & considered as `application/octet-stream` in order to not modifiy the original application source code before passing to the back-end build service.
+		* Response-Headers: n/a
+		* Response-Body:
+			* `text/plain` build has failed (see HTTP response code) or is asynchronous
+			* `multipart/form-data` generated application package is the first returned part of the multipart response
+			
+
+### PhoneGap build service
 
 The entire [build.phonegap.com API](https://build.phonegap.com/docs/api) is wrapped by a dedicated Hermes build service named `bdPhoneGap`.  Reasons are:
 
@@ -325,7 +362,7 @@ The entire [build.phonegap.com API](https://build.phonegap.com/docs/api) is wrap
 
 **Note:** Ares PhoneGap Build connector does _not_ work behind an HTTP/HTTPS proxy yet.
 
-### Protocol
+#### Protocol
 
 
 Resources:
@@ -345,7 +382,7 @@ Resources:
    		* `title` is the human-readable application name.  It is considered a good practice to reuse the value of the `<name/>` field of the `config.xml`.
 
 
-### Development & Test
+#### Development & Test
 
 **Note:** Most of the commands in this section assume that you are using Mac OSX or Linux.
 
@@ -407,6 +444,19 @@ Test `/op/build`:
 			url=http://127.0.0.1:9029/phonegap/build/
 
 **Note:** In case you are working from behind the HP firewall (without ), you may need to prefix the `curl` and `node` commands above with `env https_proxy=web-proxy.corp.hp.com:8080`.
+
+## Test services
+
+### Javascript API - Ares IDE
+
+**TBC**
+
+* `MyTestService#runApp(project)`
+* `MyTestService#debugApp(project)`
+
+### Web Resources
+
+**TBC**
 
 ## Debug
 

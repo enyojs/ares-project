@@ -12,7 +12,7 @@ enyo.kind({
                 {tag: "h3", content: "Error"},
                 {name: "msg"},
                 {tag: "br"},
-                {name: "okButton", kind: "onyx.Button", classes: "onyx-affirmative", content: "Ok", ontap: "hideErrorPopup"},
+                {name: "okButton", kind: "onyx.Button", content: "Ok", ontap: "hideErrorPopup"},
                 {name: "detailsBtn", kind: "onyx.Button", content: "Details...", ontap: "toggleDetails", showing: false},
                 {tag: "br"},
 		{name: "detailsDrw", kind: "onyx.Drawer", open: false, showing:false, components: [

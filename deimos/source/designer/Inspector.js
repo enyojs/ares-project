@@ -28,7 +28,7 @@ enyo.kind({
 	userDefinedAttributes: {},
 	create: function() {
 		this.inherited(arguments);
-		this.helper = new Analyzer.KindHelper();
+		this.helper = new analyzer.Analyzer.KindHelper();
 		
 		//* TODO - should be moved to KindHelper.js.
 		this.helper.getPublishedWithValues = function() {
