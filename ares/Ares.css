@@ -6,12 +6,14 @@ body {
 .ares-panels {
 	margin-top: 48px;
 }
+
 .ares-panels > * {
 	width: 100%;
 	height: 100%;
 	padding: 10px;
 	box-sizing:border-box;
 }
+
 .ares-panels > * > * {
 	width: 100%;
 	height: 100%;
@@ -22,13 +24,6 @@ body {
 	border-radius: 5px;
 	position:relative;
 }
-.shadow-panels > * {
-	-moz-box-shadow: -4px 0 4px rgba(0,0,0,0.3);
-	-webkit-box-shadow: -4px 0 4px rgba(0,0,0,0.3);
-	box-shadow: -4px 0 4px rgba(0,0,0,0.3);
-}
-
-/**/
 
 .ares-filechooser {
 	height: 400px;
@@ -70,10 +65,6 @@ body {
 .ares_harmonia_authPanel {
 	padding: 6px;
 	width: 70%;
-}
-#ares_harmonia_hermesFileTree {
-	width: 500px;
-	border: 2px solid #333;
 }
 .ares_harmonia_toolBar {
 	height: 48px;
@@ -154,18 +145,6 @@ body {
 	box-sizing: border-box;
 }
 
-.ares_projectList {
-	width: 370px;
-	border-right: 1px solid gray;
-}
-
-.ares_projectView_projectList_item {
-	padding: 20px 4px 4px; border-bottom: 1px solid gray;
-}
-
-.ares_projectView_projectList_item_selected {
-	background-color: lightblue;
-}
 
 #ares_projectView_projectWizardPopup {
     z-index: 140;
@@ -197,14 +176,57 @@ body {
 .ares-scale-background {
 	background-size: 100%;
 }
+.ares-top-toolbar{ 
+	border-right: 0px;
+    width: 100%;
+    height:43px; 
+    line-height: 30px;
+    border-bottom: 1px solid #222; 
+    background:url(../ares/assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px -123px;
+    background-size: auto; /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
+}
+
+.hermesFileTree-toolbar { height:64px; border-left: 0px; }
+
+.ares-bottom-bar {height:40px; background-color:#0A0A0A; border-top: 1px solid #050505; padding:0px;}
+
+.ares-docbar-tabs {
+	overflow:auto; 
+	margin:0px; 
+	padding:0px 0px 0px 15px;
+}
+
+.enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-docbar-tabs {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
 
 .ares-tab {
-	display: inline-block;
-	padding: 4px 0px 0px 6px;
-	background-color: #888; 
+	background-color: #0A0A0A;
+	float: left; 
+	margin: 0px; 
+	padding:7px 0px; 
+	text-align:center; 
+	cursor:pointer; 
+	cursor:hand; 
+	color:#FFF; 
+	overflow:hidden; 
+	font-size:12px; 
+	font-weight:bold; 
+	text-shadow:0 -1px 0 #000000; 
+	min-width:100px;
+	box-shadow: none; 
+	border:none;
+	height:24px;
 }
 .ares-tab.active {
-	background-color: #888; 
+	-o-box-shadow: inset 0px 0px 40px 0px #000000; 
+    -moz-box-shadow: inset 0px 0px 40px 0px #000000;
+    -ms-box-shadow: inset 0px 0px 40px 0px #000000;
+    -webkit-box-shadow: inset 0px 0px 40px 0px #000000;
+    box-shadow: inset 0px 0px 40px 0px #000000; 
+    background: #333; 
+    border:none;
 }
 
 
@@ -259,17 +281,18 @@ body {
 	margin-bottom: 0px;
 }
 
-.ares-docbar-tabs {
-	padding-left:15px;
+/*temporary used to reduce global css impacts*/
+.file-chooser-input{
+	width: 155px;
 }
 
-.enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-docbar-tabs {
-	margin-top: 0px;
-	margin-bottom: 0px;
-}
 
 .enyo-fittable-columns-layout.enyo-stretch > .onyx-grabber {
 	height: 27px;
+	-webkit-transform:rotate(90deg);
+	-ms-transform:rotate(90deg);
+	transform:rotate(90deg);
+	padding-top:40px;
 }
 
 
@@ -277,30 +300,60 @@ body {
 
 .onyx {
 	font-size: 13px;
+	font-family:"HPSimplified";
 }
 
 .onyx-popup {
 	font-size: 13px;
+	font-family:"HPSimplified";
 }
 
-.onyx-input-decorator > input {
+.onyx-button { 
 	font-size: 13px;
+	line-height:16px; 
+	cursor:hand; 
+	cursor:pointer;  
+    border:1px solid #999999; /* rgba(15,15,15,0.2); */ 
+    background: url(../ares/assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px 0px #a7a9ac; 
+    min-width:75px; position:relative;
+    box-shadow: inset 0px .5px 0px rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-weight: 100;
+	-moz-border-radius:6px;
+    -webkit-border-radius:6px;
+    border-radius:6px;
 }
-
-.onyx-input-decorator {
-	padding:2px 8px;
-	margin:0px;
-}
-
-.onyx-button {
-	font-size: 13px;
-	padding:2px 8px;
-	margin:0px;
+.onyx-button[disabled] {
+	opacity:0.25; filter: alpha(opacity=25); zoom:1;
 }
 
 .onyx-picker-decorator .onyx-button {
-	padding:2px 8px;
-	margin:0px;
+	padding:6px 18px; /*needs to be specifyed, without It herits of padding of onyx-picker-decorator in onyx.css*/
+	width: 200px;
+}
+
+.onyx-picker-decorator .onyx-button:before{ 
+	position: relatve; 
+	content: url(../ares/assets/images/smallArrowDown.png); 
+	width:25px; 
+	vertical-align: middle; 
+	display: inline-block;
+	float:right;
+	margin-right: -20px;
+}
+
+.onyx-picker{ 
+	padding:0px;z-index:10; 
+	text-align:left; 
+	background-color:#FFFFFF; 
+	font-size:13px; 
+	color:#8C8C8C;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    -moz-border-radius:4px;
+    -webkit-border-radius:4px;
+    border-radius:4px;
+    overflow:hidden; 
+    min-width:160px;
 }
 
 .onyx-radiobutton {
@@ -308,26 +361,28 @@ body {
 	padding-top: 8px 4px;
 	margin-bottom: 15px;
 }
-.onyx-toolbar .onyx-button {
-	height: 28px;
-}
 
+.onyx-toolbar .onyx-button { height: 28px; }
 .onyx-item {
 	padding:10px;
 	line-height: 13px;
 }
 
+.onyx-item { padding:10px; line-height: 13px; }
+
 .onyx-input-decorator {
-	background-image: url("../ares/assets/images/bgInput.png");
-	background-repeat: repeat;
-	border-radius: 4px;
-	border-top: 1px solid rgba(0,0,0, 0.3);
-
+	overflow: visible; 
+    position: relative; 
+    background-color: #CCCCCC;  
+    padding: 5px 5px 3px 8px; 
+    border: 1px solid #CCCCCC;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border-radius: 6px;
+    box-shadow: 0 1px 0 #F2F2F2, 0 -1px 0 #CCCCCC;
 }
 
-.onyx-input-decorator.onyx-focused {
-	background-image: none;
-}
+.onyx-input-decorator > input { font-size: 13px; border:none; background:none; height:20px;  color:#000000; width:200px; outline:none;}
 
 .ares-bordered-toolbar{
 	margin-top:8px;
@@ -354,7 +409,7 @@ body {
 }
 
 .ares-fixed-input{
-	width: 161px;
+	width: 161px; 
 }
 
 .ares-bullet-label {

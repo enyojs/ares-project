@@ -76,6 +76,7 @@ enyo.kind({
 		projectData: "",
 		projectIndexer: ""
 	},
+	debug: false,
 	components: [
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{kind: "Scroller", fit: true, components: [
@@ -88,7 +89,7 @@ enyo.kind({
 				{kind: "onyx.Icon", src:"$deimos/images/search-input-search.png", style:"height:20px;"}
 			]}
 		]},
-		{name: "serializer", kind: "Serializer"}
+		{name: "serializer", kind: "Ares.Serializer"}
 	],
 	statics: {
 		model: []
@@ -119,11 +120,13 @@ enyo.kind({
 	 */
 	projectDataChanged: function(oldProjectData) {
 		if (this.projectData) {
+			if (this.debug)  { this.log("projectDataChanged: projectData: ", this.projectData); }
 			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
 			this.projectData.on('update:project-indexer', this.projectIndexerChanged, this);
 			this.setProjectIndexer(this.projectData.getProjectIndexer());
 		}
 		if (oldProjectData) {
+			if (this.debug)  { this.log("projectDataChanged: oldProjectData: ", oldProjectData); }
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
 			oldProjectData.off('update:project-indexer', this.projectIndexerChanged);
 		}
@@ -134,6 +137,7 @@ enyo.kind({
 	 * @protected
 	 */
 	projectIndexReady: function(model, value, options) {
+		if (this.debug)  { this.log("projectIndexReady: ", value); }
 		this.setProjectIndexer(value);
 	},
 	/**
@@ -143,6 +147,7 @@ enyo.kind({
 	 * @protected
 	 */
 	projectIndexerChanged: function() {
+		if (this.debug)  { this.log("projectIndexerChanged: rebuilt the palette "); }
 		var catchAllPalette = this.buildCatchAllPalette();
 		this.palette = catchAllPalette.concat(this.projectIndexer.palette || []);
 		this.palette.sort(function(a,b) {

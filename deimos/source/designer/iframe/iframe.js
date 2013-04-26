@@ -15,7 +15,7 @@ enyo.kind({
 		{name: "client", classes:"enyo-fit"},
 		{name: "cloneArea", style: "background:rgba(0,200,0,0.5); display:none; opacity: 0;", classes: "enyo-fit"},
 		{name: "flightArea", style: "display:none;", classes: "enyo-fit"},
-		{name: "serializer", kind: "Serializer"},
+		{name: "serializer", kind: "Ares.Serializer"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"},
 		{name: "selectHighlight", classes: "iframe-highlight iframe-select-highlight"},
 		{name: "dropHighlight", classes: "iframe-highlight iframe-drop-highlight"}
@@ -29,6 +29,7 @@ enyo.kind({
 	prevY: null,
 	dragoverTimeout: null,
 	holdoverTimeout: null,
+	debug: false,
 	
 	create: function() {
 		this.inherited(arguments);
@@ -79,13 +80,14 @@ enyo.kind({
 	},
 	//* Receive message from Deimos
 	receiveMessage: function(inSender, inEvent) {
+
+		var msg = inEvent.message;
+
 		if (!inEvent.message || !inEvent.message.op) {
 			enyo.warn("Deimos iframe received invalid message data:", msg);
 			return;
-		}
-		
-		var msg = inEvent.message;
-		
+		}		
+			
 		switch (msg.op) {
 			case "containerData":
 				this.setContainerData(msg.val);
@@ -406,7 +408,7 @@ enyo.kind({
 		delete this.selection[inProperty];
 	},
 	updateProperty: function(inProperty, inValue) {
-		this.selection.setProperty(inProperty, inValue);
+		this.selection[inProperty] = inValue;
 	},
 	
 	//* Get each kind component individually

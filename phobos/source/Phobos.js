@@ -520,7 +520,7 @@ enyo.kind({
 					var prop = o.properties[j];
 					var pName = prop.name;
 					if (isDesignProperty[pName]) {
-						var value = Documentor.stripQuotes(prop.value[0].name);
+						var value = analyzer.Documentor.stripQuotes(prop.value[0].name);
 						comp[pName] = value;
 					}
 				}

@@ -15,7 +15,7 @@ enyo.kind({
 		]},
 		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
 			{name: "projectView", kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "openDocument", onProjectSelected: "projectSelected"},
-			{name: "bottomBar", kind: "DocumentToolbar",
+			{name: "bottomBar", classes:"ares-bottom-bar", kind: "DocumentToolbar",
 				onToggleOpen: "toggleFiles",
 				onSwitchFile: "switchFile",
 				onSave: "bounceSave",

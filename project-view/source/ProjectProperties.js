@@ -98,8 +98,8 @@ enyo.kind({
 			]}
 		]},
 		{name: "toolbarId", classes: "ares-bordered-toolbar", kind: "onyx.Toolbar", components: [
-			{kind: "onyx.Button", classes: "onyx-negative", content: "Cancel", ontap: "doDone"},
-			{name: "ok", kind: "onyx.Button", classes: "onyx-affirmative", content: "OK", ontap: "confirmTap"}
+			{kind: "onyx.Button", content: "Cancel", ontap: "doDone"},
+			{name: "ok", kind: "onyx.Button", content: "OK", ontap: "confirmTap"}
 		]},
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}

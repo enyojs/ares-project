@@ -18,7 +18,7 @@ var AresStore = function(name, eraseAll) {
 _.extend(AresStore.prototype, {
 
 	debug: false,
-	strExclude: {originator: 1, service: 1, config: 1},
+	strExclude: {originator: 1, service: 1, config: 1, build: 1, test: 1},
 	stringifyReplacer: function(key, value) {
 		if (this.strExclude[key] !== undefined) {
 			return undefined;	// Exclude
@@ -31,9 +31,9 @@ _.extend(AresStore.prototype, {
 		try {
 			var projectString = JSON.stringify(this.data, enyo.bind(this, this.stringifyReplacer));
 			localStorage.setItem(this.name, projectString);
-			this.debug && enyo.log("Store.save DONE: " + projectString);
+			this.debug && enyo.log("Ares.Store#save(): ", projectString);
 		} catch(error) {
-			enyo.log("Exception: ", error);
+			enyo.error("Ares.Store#save():", error);
 		}
 	},
     
@@ -87,6 +87,24 @@ _.extend(AresStore.prototype, {
 });
 
 Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when possible
+	_getProp: function(name) {
+		var parts = name.split("."),
+		    v = {};
+		v.key = parts[0],
+		v.obj = this.get(v.key) || {};
+		parts.shift(1);
+		v.name = parts.join(".");
+		return v;
+	},
+	getObject: function(name) {
+		var v = this._getProp(name);
+		return ares.getObject(v.name, false /*create*/, v.obj);
+	},
+	setObject: function(name, value) {
+		var v = this._getProp(name);
+		ares.setObject(v.name, value, v.obj);
+		this.set(v.key, v.obj);
+	},
 	getName: function() {
 		return this.get("id");
 	},
