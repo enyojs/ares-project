@@ -287,6 +287,7 @@ enyo.kind({
 		if (oldProjectData) {
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
 			oldProjectData.off('update:project-indexer', this.projectIndexUpdated);
+			Model.resetInformation();
 		}
 	},
 	/**
