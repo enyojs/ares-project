@@ -21,11 +21,13 @@ function FsBase(inConfig, next) {
 		this[p] = inConfig[p];
 	}
 
-	this.log = function() {
-		if (this.verbose) {
+	if (this.level === 'verbose' || this.level === 'silly') {
+		this.log = function() {
 			console.log.bind(this, this.name).apply(this, arguments);
-		}
-	};
+		};
+	} else {
+		this.log = function(){};
+	}
 
 	// sanity check
 	[
@@ -56,7 +58,7 @@ function FsBase(inConfig, next) {
 
 	this.app.configure((function() {
 		this.app.use(this.separator.bind(this));
-		if (!this.quiet) {
+		if (this.level !== 'error') {
 			this.app.use(express.logger('dev'));
 		}
 		this.app.use(this.cors.bind(this));

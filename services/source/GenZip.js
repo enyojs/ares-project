@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "ProjectToolkit",
+	name: "GenZip",
 	kind: "enyo.Component",
 	events: {
 		onLoginFailed: "",

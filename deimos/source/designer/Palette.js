@@ -76,6 +76,9 @@ enyo.kind({
 		projectData: "",
 		projectIndexer: ""
 	},
+	events: {
+		onPaletteItemDragStart: ""
+	},
 	debug: false,
 	components: [
 		{kind: "FittableRows", classes: "enyo-fit", components: [
@@ -89,7 +92,7 @@ enyo.kind({
 				{kind: "onyx.Icon", src:"$deimos/images/search-input-search.png", style:"height:20px;"}
 			]}
 		]},
-		{name: "serializer", kind: "Serializer"}
+		{name: "serializer", kind: "Ares.Serializer"}
 	],
 	statics: {
 		model: []
@@ -105,11 +108,10 @@ enyo.kind({
 	},
 	dragstart: function(inSender, inEvent) {
 		if(!inEvent.dataTransfer) {
-			return false;
+			return true;
 		}
 		
 		inEvent.dataTransfer.setData("ares/createitem", enyo.json.codify.to({config: inEvent.config}));
-        return true;
 	},
 	/**
 	 * Receive the project data reference which allows to access the analyzer

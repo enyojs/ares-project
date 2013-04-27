@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "Serializer",
+	name: "Ares.Serializer",
 	kind: "Component",
 	//* public
 	serialize: function(inContainer, inIncludeAresId) {

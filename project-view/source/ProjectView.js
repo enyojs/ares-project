@@ -8,6 +8,7 @@ enyo.kind({
 	name: "ProjectView",
 	kind: "FittableColumns",
 	classes: "enyo-unselectable /*shadow-panels*/",
+	debug: false,
 	components: [
 		{kind: "ProjectList",
 			onModifySettings: "modifySettingsAction",
@@ -23,8 +24,11 @@ enyo.kind({
 	],
 	handlers: {
 		onAddProjectInList: "addProjectInList",
-		onPreviewProject: "previewProjectAction",
-		onBuildProject: "buildProjectAction"
+		onPreview: "previewAction",
+		onBuild: "buildAction",
+		onInstall: "installAction",
+		onRun: "runAction",
+		onRunDebug: "runDebugAction"
 	},
 	events: {
 		onHideWaitPopup: "",
@@ -93,39 +97,83 @@ enyo.kind({
 		this.$.harmonia.setProject(null);
 	},
 	/**
-	 * Event handler: Select the project builder
+	 * Event handler: handle build project action (select provider & run action)
 	 * @param {enyo.Component} inSender
 	 * @param {Object} inEvent
 	 * @property inEvent {Ares.Model.Project} project 
 	 * @private
 	 */
-	buildProjectAction: function(inSender, inEvent) {
+	buildAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
-		if (!project) {
-			return true; // stop bubble-up
+		if (project) {
+			this.projectAction(project, 'build', 'build');
 		}
+		return true; // stop bubble-up
+	},
+	/**
+	 * Event handler: handle install application action (select provider & run action)
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project
+	 * @private
+	 */
+	installAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (project) {
+			this.projectAction(project, 'test', 'install');
+		}
+		return true; // stop bubble-up
+	},
+	/**
+	 * Event handler: handle run application action (select provider & run action)
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project
+	 * @private
+	 */
+	runAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (project) {
+			this.projectAction(project, 'test', 'run');
+		}
+		return true; // stop bubble-up
+	},
+	/**
+	 * Event handler: handle debug application action (select provider & run action)
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project
+	 * @private
+	 */
+	runDebugAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (project) {
+			this.projectAction(project, 'test', 'runDebug');
+		}
+		return true; // stop bubble-up
+	},
+	/**
+	 * @private
+	 */
+	projectAction: function(project, serviceType, action) {
 		var self = this;
-		this.doShowWaitPopup({msg: "Starting project build"});
-		// TODO: Must be reworked to allow the selection of builder in the UI - ENYO-2049
-		var services = ServiceRegistry.instance.getServicesByType('build');
-		var bdService =	services[services.length - 1];
-		if (bdService) {
-			bdService.build( /*project*/ {
-				name: project.getName(),
-				filesystem: project.getService(),
-				folderId: project.getFolderId(),
-				config: project.getConfig()
-			}, function(inError, inDetails) {
+		this.doShowWaitPopup({msg: "Starting: " + action});
+		// TODO: Must be reworked to allow the selection of builder/tester in the UI - ENYO-2049
+		var services = ServiceRegistry.instance.getServicesByType(serviceType);
+		var provider =	services[services.length - 1];
+		if (!provider) {
+			this.doError({msg: 'No ' + serviceType + ' service available'});
+		} else if (typeof provider[action] !== 'function') {
+			this.doError({msg: 'Service ' + provider.name + ' does not provide action: ' + action});
+		} else {
+			provider[action](project, function(inError, inDetails) {
 				self.doHideWaitPopup();
+				self.refreshFile(project.getFolderId());
 				if (inError) {
 					self.doError({msg: inError.toString(), err: inError, details: inDetails});
 				}
 			});
-		} else {
-			this.error("No build service defined:", inEvent);
-			this.doError({msg: 'No build service defined'});
 		}
-		return true; // stop bubble-up
 	},
 	/**
 	 * Event handler: Launch a preview widget of the selected project in a separate frame
@@ -134,7 +182,7 @@ enyo.kind({
 	 * @property inEvent {Ares.Model.Project} project 
 	 * @private
 	 */
-	previewProjectAction: function(inSender, inEvent) {
+	previewAction: function(inSender, inEvent) {
 		var project = inEvent.project;
 		if ( project) {
 			var config = project.getConfig() ;

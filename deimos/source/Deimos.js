@@ -19,7 +19,7 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction", style: "float:right;"}
 			]},
 			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
-				{classes:"ares_deimos_left", kind: "Palette", name:"palette"},
+				{classes:"ares_deimos_left", kind: "Palette", name: "palette", ondragstart: "paletteDragstart", ondragend: "paletteDragend"},
 				{name: "middle", fit: true, kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
 						{kind: "onyx.Button", name: "reloadDesignerButton", classes: "deimos-designer-toolbar-spacing", content: "Reload", ontap: "reloadDesigner"},
@@ -136,6 +136,14 @@ enyo.kind({
 		// Pass the project information (analyzer output, ...) to the inspector and palette
 		this.$.inspector.setProjectData(data.projectData);
 		this.$.palette.setProjectData(data.projectData);
+	},
+	//* When a drag starts in the palette, notify Designer and ComponentView
+	paletteDragstart: function(inSender, inEvent) {
+		inEvent = enyo.mixin(inEvent.config, {aresId: this.generateNewAresId()});
+		this.$.designer.enterCreateMode(inEvent);
+	},
+	paletteDragend: function(inSender, inEvent) {
+		this.$.designer.leaveCreateMode(inEvent.config);
 	},
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
