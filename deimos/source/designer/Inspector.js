@@ -277,17 +277,18 @@ enyo.kind({
 	 * @protected
 	 */
 	projectDataChanged: function(oldProjectData) {
+		if (oldProjectData) {
+			oldProjectData.off('change:project-indexer', this.projectIndexReady);
+			oldProjectData.off('update:project-indexer', this.projectIndexUpdated);
+			Model.resetInformation();
+		}
+
 		if (this.projectData) {
 			if (this.debug) { this.log("projectDataChanged: projectData", this.projectData); }
 			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
 			this.projectData.on('update:project-indexer', this.projectIndexUpdated, this);
 			this.setProjectIndexer(this.projectData.getProjectIndexer());
 			Model.buildInformation(this.projectIndexer);
-		}
-		if (oldProjectData) {
-			oldProjectData.off('change:project-indexer', this.projectIndexReady);
-			oldProjectData.off('update:project-indexer', this.projectIndexUpdated);
-			Model.resetInformation();
 		}
 	},
 	/**
