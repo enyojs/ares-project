@@ -91,6 +91,9 @@ enyo.kind({
 		
 		// Iframe is loaded and ready to do work.
 		if(msg.op === "state" && msg.val === "initialized") {
+			this.sendIframeContainerData();
+		// Iframe received container data
+		} else if(msg.op === "state" && msg.val === "ready") {
 			this.setIframeReady(true);
 			if(this.reloading) {
 				this.doReloadComplete();
@@ -122,6 +125,10 @@ enyo.kind({
 		}
 	},
 	
+	//* Pass _isContainer_ info down to iframe
+	sendIframeContainerData: function() {
+		this.sendMessage({op: "containerData", val: Model.getFlattenedContainerInfo()});
+	},
 	//* Tell iFrame to render the current kind
 	renderCurrentKind: function(inSelectId) {
 		if(!this.getIframeReady()) {
