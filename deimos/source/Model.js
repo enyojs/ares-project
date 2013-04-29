@@ -115,5 +115,10 @@ enyo.singleton({
 			info = this.getInfo("__default", inType, inName);
 			return (info && info.level) || Model.F_NORMAL;
 		}
+	},
+	getFlattenedContainerInfo: function() {		
+		// TODO: item containerData is set to null, revisit this,
+		// function called by the IFrameDesigner.sendIframeContainerData()
+		return null;
 	}
 });
