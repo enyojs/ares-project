@@ -11,7 +11,6 @@ enyo.kind({
 	debug: false,
 	components: [
 		{kind: "ProjectList",
-			style: "height: 100%;",
 			onModifySettings: "modifySettingsAction",
 			onCreateProject: "createProjectAction",
 			onScanProject: "scanProjectAction",

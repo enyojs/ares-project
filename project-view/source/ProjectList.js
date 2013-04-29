@@ -89,7 +89,7 @@ enyo.kind({
 			]}
 		]},
 		{content:"Project list", classes:"project-list-title title-gradient"},
-		{kind: "enyo.Scroller", components: [
+		{kind: "enyo.Scroller", classes: "enyo-fit", style: " width: 300px; top: 115px;", components: [
 			{tag:"ul", kind: "enyo.Repeater", classes:"ares-project-list-menu", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
 				{tag:"li",kind: "ProjectList.Project", name: "item"}
 			]}
