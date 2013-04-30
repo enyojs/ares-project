@@ -180,7 +180,7 @@ enyo.kind({
 		// Get list of all public Components from indexer without palette meta-data, sorted by name
 		var catchAllKinds = enyo.filter(this.projectIndexer.objects, function(o) {
 			return (o.type == "kind") && (enyo.indexOf("enyo.Component", o.superkinds) >= 0) &&
-					&& (o.group == "public");
+				(o.group == "public");
 		}).sort(function(a,b) {
 			return a.name.localeCompare(b.name);
 		});
