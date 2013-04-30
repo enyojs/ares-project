@@ -151,7 +151,7 @@ enyo.kind({
 	projectIndexerChanged: function() {
 		if (this.debug)  { this.log("projectIndexerChanged: rebuilt the palette "); }
 		var catchAllPalette = this.buildCatchAllPalette();
-		this.palette = catchAllPalette.concat(this.projectIndexer.palette || []);
+		this.palette = catchAllPalette.concat(this.projectIndexer.design.palette || []);
 		this.palette.sort(function(a,b) {
 			return (a.order || 0) - (b.order || 0);
 		});
