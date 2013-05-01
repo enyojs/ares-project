@@ -329,6 +329,8 @@ enyo.kind({
 				this.cleanUpPreviousKind(inKind.name);
 			}
 
+			// Proxy Repeater and List
+			this.manageComponentsOptions(kindConstructor.prototype.kindComponents);
 			// Save this kind's _kindComponents_ array
 			this.aresComponents = this.flattenKindComponents(kindConstructor.prototype.kindComponents);
 
@@ -451,6 +453,34 @@ enyo.kind({
 		}
 		
 		return ret;
+	},
+	manageComponentsOptions: function(inComponents) {
+		try {
+			var c;
+			for (var i=0;(c = inComponents[i]);i++) {
+				this.manageComponentOptions(c);
+				if (c.components) {
+					this.manageComponentsOptions(c.components);
+				}
+			}
+		} catch(err) {
+			this.log(err);
+		}
+	},
+	manageComponentOptions: function(inComponent) {
+		if (inComponent.__aresOptions) {
+			var options = inComponent.__aresOptions;
+			if (options.isRepeater === true) {
+				/*
+					We are handling a Repeater or a List.
+					Force "count" to 1 and invalidate "onSetupItem" to
+					manage them correctly in the Designer
+				 */
+				if (this.debug) this.log("Manage repeater " + inComponent.kind, inComponent);
+				inComponent.count = 1;
+				inComponent.onSetupItem = "aresUnImplemetedFunction";
+			}
+		}
 	},
 	// TODO - merge this with flattenKindComponents()
 	flattenChildren: function(inComponents) {

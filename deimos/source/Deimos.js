@@ -150,6 +150,7 @@ enyo.kind({
 		var kind = this.kinds[index];
 		
 		this.addAresIds(this.kinds[index].components);
+		this.addAresKindOptions(this.kinds[index].components);
 		this.$.inspector.initUserDefinedAttributes(this.kinds[index].components);
 		
 		if (index !== this.index) {
@@ -412,7 +413,7 @@ enyo.kind({
 		
 		// Copy each user-defined property from _atts_ to the cleaned component
 		for (att in atts) {
-			if (att !== "aresId" && att !== "components") {
+			if (att !== "aresId" && att !== "components" && att !== "__aresOptions") {
 				cleanComponent[att] = atts[att];
 			}
 		}
@@ -500,6 +501,17 @@ enyo.kind({
 				this.addAresIds(inComponents[i].components);
 			}
 		}
+	},
+	addAresKindOptions: function(inComponents) {
+		for(var i = 0; i < inComponents.length; i++) {
+			this.addOptionsToComponent(inComponents[i]);
+			if (inComponents[i].components) {
+				this.addAresKindOptions(inComponents[i].components);
+			}
+		}
+	},
+	addOptionsToComponent: function(inComponent) {
+		// TODO: insert kind specific options
 	},
 	//* Generate new ares id using timestamp
 	generateNewAresId: function() {
