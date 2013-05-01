@@ -3,6 +3,7 @@ enyo.singleton({
 	kind: "enyo.Component",
 	debug: false,
 	info: {},
+	kindOptions: {},
 	defaults: {
 		properties: {
 			owner: {filterLevel: "hidden"},
@@ -21,6 +22,9 @@ enyo.singleton({
 		events: {
 			ontap: {filterLevel: "useful"}
 		}
+	},
+	defaultKindOptions: {
+		"enyo.Repeater": {"isRepeater": true}
 	},
 	F_HIDDEN: -1,
 	F_DANGEROUS: 1,
@@ -46,7 +50,9 @@ enyo.singleton({
 		if (this.debug)  { this.log("resetInformation!"); }
 		this.info = {};
 		this.addInformation("properties", "__default", this.defaults.properties);
-		this.addInformation("events", "__default", this.defaults.events);		
+		this.addInformation("events", "__default", this.defaults.events);
+
+		this.kindOptions = enyo.clone(this.defaultKindOptions);
 	},
 	/**
 	 * Build all the information needed by the inspector
@@ -64,7 +70,20 @@ enyo.singleton({
 				enyo.error("Unknown data type='" + item.type + "' -- Ignored");
 			}
 		}, this);
-		
+
+		this.addKindOptions(projectIndexer.palette);
+	},
+	addKindOptions: function(palette) {
+		enyo.forEach(palette, function(category) {
+			enyo.forEach(category.items, function(item) {
+				if (item.options) {
+					this.kindOptions[item.kind] = item.options;
+				}
+			}, this);
+		}, this);
+	},
+	getKindOptions: function(name) {
+		return this.kindOptions[name] || this.kindOptions["enyo." + name];
 	},
 	addInformation: function(inType, inName, inInfo) {
 		if (inInfo) {

@@ -118,7 +118,11 @@ enyo.kind({
 		this.index = null;
 		this.kinds = what;
 		this.$.kindPicker.destroyClientControls();
-		
+
+		// Pass the project information (analyzer output, ...) to the inspector and palette
+		this.$.inspector.setProjectData(data.projectData);
+		this.$.palette.setProjectData(data.projectData);
+
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
 			this.$.kindPicker.createComponent({
@@ -132,10 +136,6 @@ enyo.kind({
 		this.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.$.kindPicker.render();
 		this.setEdited(false);
-		
-		// Pass the project information (analyzer output, ...) to the inspector and palette
-		this.$.inspector.setProjectData(data.projectData);
-		this.$.palette.setProjectData(data.projectData);
 	},
 	//* When a drag starts in the palette, notify Designer and ComponentView
 	paletteDragstart: function(inSender, inEvent) {
@@ -276,6 +276,7 @@ enyo.kind({
 		
 		// Update user defined values
 		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
+		this.addAresKindOptions(this.kinds[this.index].components);
 		
 		this.rerenderKind(config.aresId);
 		return true;
@@ -512,7 +513,10 @@ enyo.kind({
 		}
 	},
 	addOptionsToComponent: function(inComponent) {
-		// TODO: insert kind specific options
+		var options = Model.getKindOptions(inComponent.kind);
+		if (options) {
+			inComponent.__aresOptions = options;
+		}
 	},
 	//* Generate new ares id using timestamp
 	generateNewAresId: function() {
