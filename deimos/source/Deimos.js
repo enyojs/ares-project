@@ -480,6 +480,7 @@ enyo.kind({
 	},
 	reloadDesigner: function() {
 		this.$.designer.reload();
+		this.$.inspector.inspect(null);
 	},
 	reloadComplete: function() {
 		this.rerenderKind();

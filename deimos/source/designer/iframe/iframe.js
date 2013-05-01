@@ -417,13 +417,8 @@ enyo.kind({
 		} else {
 			this.updateProperty(inData.property, inData.value);
 		}
-		
-		if(inData.property === "id") {
-			this.rerenderKind();
-			this.selectItem(this.selection);
-		} else {
-			this.refreshClient();
-		}
+		this.rerenderKind();
+		this.selectItem(this.selection);
 	},
 	removeProperty: function(inProperty) {
 		delete this.selection[inProperty];
@@ -608,27 +603,6 @@ enyo.kind({
 		this.sendMessage({op: "select",	 val: this.$.serializer.serializeComponent(this.selection, true)});
 	},
 	/**
-		Create an object copy of the _inDroppedControl_, then destroy and recreate it
-		as a child of _inTargetControl_
-	*/
-	dropControl: function(inDroppedControl, inTargetControl) {
-		var droppedControlCopy = this.getSerializedCopyOfComponent(inDroppedControl),
-			newComponent;
-		
-		inDroppedControl.destroy();
-		
-		// Create a clone of the moved control
-		newComponent = inTargetControl.createComponent(droppedControlCopy, {owner: this.parentInstance});
-		
-		// Make sure all moved controls are draggable/droppable as appropriate
-		this.setupControlDragAndDrop(newComponent);
-		
-		this.refreshClient();
-		
-		// Maintain selected state
-		this._selectItem(newComponent);
-	},
-	/**
 		Find any children in _inControl_ that match kind components of the parent instance,
 		and make them drag/droppable (if appropriate)
 	*/
@@ -650,16 +624,6 @@ enyo.kind({
 	//* Create object that is a copy of the passed in component
 	getSerializedCopyOfComponent: function(inComponent) {
 		return enyo.json.codify.from(this.$.serializer.serializeComponent(inComponent, true));
-	},
-	//* Rerender client, reselect _this.selection_, and notify Deimos
-	refreshClient: function(noMessage) {
-		this.$.client.render();
-		
-		if(!noMessage) {
-			this.kindUpdated();
-		}
-		
-		this.selectItem(this.selection);
 	},
 	//* Send update to Deimos with serialized copy of current kind component structure
 	kindUpdated: function() {
