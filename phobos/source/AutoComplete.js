@@ -519,6 +519,7 @@ enyo.kind({
 		if (this.projectData) {
 			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
 			this.projectData.on('update:project-indexer', this.projectIndexerChanged, this);
+			this.setProjectIndexer(this.projectData.getProjectIndexer());
 		}
 		if (oldProjectData) {
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
