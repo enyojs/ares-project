@@ -98,6 +98,32 @@ enyo.kind({
 });
 
 /**
+ * This kind generates a "onDblClick" event usable for events
+ * edition.
+ */
+enyo.kind({
+	name: "Inspector.Config.Event",
+	kind: "Inspector.Config.IF",
+	// events and published are defined by the base kind
+	components: [
+		{classes: "inspector-field-caption", name: "title"},
+		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
+	],
+
+	//* Stop extraneous activate event from being fired when box is initially checked
+	handleChange: function(inSender, inEvent) {
+		this.fieldValue = this.$.value.getValue();
+		this.doChange({target: this});
+		return true;
+	},
+	handleDblClick: function(inSender, inEvent) {
+		this.fieldValue = this.$.value.getValue();
+		this.doDblClick({target: this});
+		return true;
+	}
+});
+
+/**
  * This kind allows to select a value defined in the
  * "values" property of this kind.
  *

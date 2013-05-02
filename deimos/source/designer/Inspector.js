@@ -190,9 +190,15 @@ enyo.kind({
 		
 		attributeRow = this.$.content.createComponent({classes: classList});
 		attributeRow.createComponent({kind: "InheritCheckbox", checked: !inherited, prop: inName});
+
+		if (inType === 'events') {
+			kind = "Inspector.Config.Event";
+		}
 		
 		info = Model.getInfo(inControl.kind, inType, inName);
-		kind = (info && info.inputKind);
+		kind = (info && info.inputKind) || kind;
+
+
 		
 		// User defined kind: as an Object
 		if (kind && kind instanceof Object) {
