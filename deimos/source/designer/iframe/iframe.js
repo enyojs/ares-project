@@ -450,16 +450,12 @@ enyo.kind({
 		return ret;
 	},
 	manageComponentsOptions: function(inComponents) {
-		try {
-			var c;
-			for (var i=0;(c = inComponents[i]);i++) {
-				this.manageComponentOptions(c);
-				if (c.components) {
-					this.manageComponentsOptions(c.components);
-				}
+		var c;
+		for (var i=0;(c = inComponents[i]);i++) {
+			this.manageComponentOptions(c);
+			if (c.components) {
+				this.manageComponentsOptions(c.components);
 			}
-		} catch(err) {
-			this.log(err);
 		}
 	},
 	manageComponentOptions: function(inComponent) {
