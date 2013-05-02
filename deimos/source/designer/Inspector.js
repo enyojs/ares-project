@@ -2,8 +2,7 @@ enyo.kind({
 	name: "Inspector",
 	kind: "FittableRows",
 	events: {
-		onModify: "",
-		onAction: ""
+		onModify: ""
 	},
 	published: {
 		filterLevel: null,		// Value will be given by Inspector.FilterXXX "checked" item.
@@ -262,19 +261,14 @@ enyo.kind({
 		}
 	},
 	dblclick: function(inSender, inEvent) {
-		if (inEvent.target.extra === "events") {
-			//this.changeHandler(inSender, inEvent);
+		if (inEvent.target.fieldType === "events") {
 			var n = inEvent.target.fieldName;
 			var v = inEvent.target.fieldValue;
-			// FIXME: hack to supply a default event name
 			if (!v) {
-				v = inEvent.target.fieldName = this.selected.name + enyo.cap(n.slice(2));
+				v = inEvent.target.fieldValue = this.selected.name + enyo.cap(n.slice(2));
 				if (this.debug) { this.log("SET handler: " + n + " --> " + v); }
-				this.selected.setProperty(n, v);
 				this.change(inSender, inEvent);
-				inEvent.target.setFieldValue(v);
 			}
-			this.doAction({value: v});
 		}
 	},
 	/**
