@@ -424,7 +424,14 @@ enyo.kind({
 		delete this.selection[inProperty];
 	},
 	updateProperty: function(inProperty, inValue) {
-		this.selection[inProperty] = inValue;
+		var options = this.selection.__aresOptions;
+		if (options && options.isRepeater && (inProperty === "onSetupItem" || inProperty === "count")) {
+			// DO NOT APPLY changes to the properties mentionned above
+			// TODO: could be managed later on thru config in .design files if more than one kind need special processings.
+			if (this.debug) this.log("Skipping modification of \"" + inProperty + "\"");
+		} else {
+			this.selection[inProperty] = inValue;
+		}
 	},
 	
 	//* Get each kind component individually
