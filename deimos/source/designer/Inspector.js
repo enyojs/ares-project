@@ -214,7 +214,7 @@ enyo.kind({
 		this.$.content.destroyComponents();
 		this.selected = inControl;
 		if (inControl) {
-			var kindName = inControl.kind;
+			var kindName = inControl.name + " (" + inControl.kind + ")";
 			this.$.content.createComponent({tag: "h3", content: kindName, classes: "label label-info"});
 			ps = this.buildPropList(inControl);
 			if (this.filterType === 'P') {
@@ -228,7 +228,7 @@ enyo.kind({
 					this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
 				}
 				for (i=0, p; (p=ps[i]); i++) {
-					this.makeEditor(inControl, p, "events");
+					this.makeEditor(inControl, p, "", "events");
 				}
 			}
 		}
