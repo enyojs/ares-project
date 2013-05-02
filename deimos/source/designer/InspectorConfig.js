@@ -28,7 +28,7 @@ enyo.kind({
 	published: {
 		fieldName: "",
 		fieldValue: "",
-		extra: "",
+		fieldType: "",
 		disabled: false
 	},
 	create: function() {

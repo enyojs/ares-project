@@ -197,7 +197,7 @@ enyo.kind({
 		// User defined kind: as an Object
 		if (kind && kind instanceof Object) {
 			kind = enyo.clone(kind);
-			kind = enyo.mixin(kind, {name: attributeFieldName, fieldName: inName, fieldValue: value, extra: inType});
+			kind = enyo.mixin(kind, {name: attributeFieldName, fieldName: inName, fieldValue: value, fieldType: inType});
 			attributeRow.createComponent(kind);
 		} else {
 			attributeKind = (kind)
@@ -206,7 +206,7 @@ enyo.kind({
 					?	"Inspector.Config.Boolean"
 					:	"Inspector.Config.Text";
 		
-			attributeRow.createComponent({name: attributeFieldName, kind: attributeKind, fieldName: inName, fieldValue: value, extra: inType, disabled: inherited});
+			attributeRow.createComponent({name: attributeFieldName, kind: attributeKind, fieldName: inName, fieldValue: value, fieldType: inType, disabled: inherited});
 		}
 	},
 	inspect: function(inControl) {
@@ -251,7 +251,9 @@ enyo.kind({
 		}
 		this.userDefinedAttributes[this.selected.aresId][n] = v;
 
-		this.doModify({name: n, value: v});
+		if (inEvent.target.fieldType !== "events") {
+			this.doModify({name: n, value: v});
+		}
 	},
 	dblclick: function(inSender, inEvent) {
 		if (inEvent.target.extra === "events") {
