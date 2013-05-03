@@ -179,9 +179,18 @@ enyo.kind({
 		};
 		// Get list of all public Components from indexer without palette meta-data, sorted by name
 		var catchAllKinds = enyo.filter(this.projectIndexer.objects, function(o) {
-			return (o.type == "kind") && (enyo.indexOf("enyo.Component", o.superkinds) >= 0) &&
-				(o.group == "public");
-		}).sort(function(a,b) {
+			// check if package namespace is present into standard palette
+			var dot = o.name.lastIndexOf(".");
+			var pkg = o.name.substring(0, dot);
+			var keys = Object.keys(this.projectIndexer.design.palette);
+			enyo.forEach(keys, function(i) {
+				return inPalette = this.projectIndexer.design.palette[i].name === pkg;
+			}, this);			
+			return ((dot < 0) || (inPalette == "undefined")) && 
+					(o.type == "kind") && 
+					(enyo.indexOf("enyo.Component", o.superkinds) >= 0) &&
+					(o.group == "public");
+		}, this).sort(function(a,b) {
 			return a.name.localeCompare(b.name);
 		});
 		
