@@ -118,7 +118,7 @@ enyo.kind({
 					if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_THIS)) {
 						suggestions = this.fillSuggestionsDoEvent(this.kindName, suggestions);
 						suggestions = this.fillSuggestionsGettersSetters(this.kindName, suggestions);
-						suggestions = this.fillSuggestionsProperties(this.kindName, suggestions);
+						suggestions = this.fillSuggestionsProperties(this.kindName, suggestions, this.AUTOCOMP_THIS);
 					}
 
 					if (this.isCompletionAvailable(inEvent, this.AUTOCOMP_ENYO)) {
@@ -202,7 +202,7 @@ enyo.kind({
 		
 				this.fillSuggestionsDoEvent(o.kind, suggestions);
 				this.fillSuggestionsGettersSetters(o.kind, suggestions);
-				this.fillSuggestionsProperties(o.kind, suggestions);
+				this.fillSuggestionsProperties(o.kind, suggestions, pattern);
 				return;
 			}
 		}
@@ -286,7 +286,7 @@ enyo.kind({
 	 * @return {Phobos.Suggestions} the updated suggestions
 	 * @protected
 	 */
-	fillSuggestionsProperties: function(kindName, suggestions) {
+	fillSuggestionsProperties: function(kindName, suggestions, pattern) {
 		var definition, obj, i, name;
 		// retrieve the kindName definition
 		definition = this.getKindDefinition(kindName);
@@ -297,12 +297,14 @@ enyo.kind({
 			obj = definition.allProperties;
 			for (i=0; i<obj.length; i++) {
 				if (obj[i].value[0].token === "function") {
-					name = obj[i].name;
-					suggestions.addItem({name: name, kind: kindName});
+				    if(obj[i].value[0].group === "public" || pattern == this.AUTOCOMP_THIS){
+    				    name = obj[i].name;
+	    				suggestions.addItem({name: name, kind: kindName});
+					}
 				}
 			}
 			// support super-kind published/properties/functions
-			return this.fillSuggestionsProperties(definition.superkind, suggestions);
+			return this.fillSuggestionsProperties(definition.superkind, suggestions, pattern);
 		}
 		return suggestions;
 	},
@@ -517,6 +519,7 @@ enyo.kind({
 		if (this.projectData) {
 			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
 			this.projectData.on('update:project-indexer', this.projectIndexerChanged, this);
+			this.setProjectIndexer(this.projectData.getProjectIndexer());
 		}
 		if (oldProjectData) {
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
