@@ -8,9 +8,8 @@
  */
 enyo.kind({
 	name: "ProjectList",
-	kind: "FittableRows",
+	kind: "FittableColumns",
 	classes: "enyo-unselectable ares-project-list",
-	style: "background-color: red width 300px;",
 	events: {
 		onCreateProject: "",
 		onProjectSelected: "",
@@ -26,79 +25,81 @@ enyo.kind({
 	},
 	debug: false,
 	components: [
-		{kind: "onyx.MoreToolbar", 
-			classes: "onyx-menu-toolbar ares-top-toolbar", isContainer: true, name: "toolbar", components: [
-			{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
-				{tag:"button", content: "Ares"},
-				{kind: "onyx.Menu", components: [
-					{value: "showAccountConfigurator", components: [
-						{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png"},
-						{content: "Accounts..."}
+		{kind:"FittableRows", classes:"project-list", components:[
+			{kind: "onyx.MoreToolbar", classes: "onyx-menu-toolbar ares-top-toolbar", isContainer: true, name: "toolbar", components: [
+					{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
+						{tag:"button", content: "Ares"},
+						{kind: "onyx.Menu", components: [
+							{value: "showAccountConfigurator", components: [
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png"},
+								{content: "Accounts..."}
+							]},
+							{classes: "onyx-menu-divider"},
+							{content: "Properties..."}
+						]}
 					]},
-					{classes: "onyx-menu-divider"},
-					{content: "Properties..."}
+					{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
+						{content: "Edit"},
+						{kind: "onyx.Menu", components: [
+							{value: "doCreateProject", components: [
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_new.png"},
+								{content: "Create..."}
+							]},
+							{classes: "onyx-menu-divider"},
+							{value: "doScanProject", components: [
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_import.png"},
+								{content: "Import..."}
+							]},
+							{classes: "onyx-menu-divider"},
+							{value: "removeProjectAction", components: [
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_delete.png"},
+								{content: "Delete"}
+							]}
+						]}
+					]},
+					{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
+						{content: "Project", name: "projectMenu", disabled: true},
+						{kind: "onyx.Menu", maxHeight: "100%", components: [
+							{value: "doModifySettings", components: [
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_edit.png"},
+								{content: "Edit..."}
+							]},
+							{classes: "onyx-menu-divider"},
+							{value: "doPreview", components: [
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_preview.png"},
+								{content: "Preview"}
+							]},
+							{value: "doBuild", components: [
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_build.png"},
+								{content: "Build..."}
+							]},
+							{classes: "onyx-menu-divider"},
+							{value: "doInstall", components: [
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_install.png"},
+								{content: "Install..."}
+							]},
+							{classes: "onyx-menu-divider"},
+							{value: "doRun", components: [
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_run.png"},
+								{content: "Run..."}
+							]},
+							{value: "doRunDebug", components: [
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_debug.png"},
+								{content: "Debug..." }
+							]}
+						]}
+					]}
+			]},
+			{content:"Project list", classes:"project-list-title title-gradient"},
+			{kind: "enyo.Scroller", fit: true,components: [
+				{tag:"ul", kind: "enyo.Repeater", classes:"ares-project-list-menu", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
+					{tag:"li",kind: "ProjectList.Project", name: "item"}
 				]}
 			]},
-			{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
-				{content: "Edit"},
-				{kind: "onyx.Menu", components: [
-					{value: "doCreateProject", components: [
-						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_new.png"},
-						{content: "Create..."}
-					]},
-					{classes: "onyx-menu-divider"},
-					{value: "doScanProject", components: [
-						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_import.png"},
-						{content: "Import..."}
-					]},
-					{classes: "onyx-menu-divider"},
-					{value: "removeProjectAction", components: [
-						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_delete.png"},
-						{content: "Delete"}
-					]}
-				]}
-			]},
-			{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
-				{content: "Project", name: "projectMenu", disabled: true},
-				{kind: "onyx.Menu", maxHeight: "100%", components: [
-					{value: "doModifySettings", components: [
-						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_edit.png"},
-						{content: "Edit..."}
-					]},
-					{classes: "onyx-menu-divider"},
-					{value: "doPreview", components: [
-						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_preview.png"},
-						{content: "Preview"}
-					]},
-					{value: "doBuild", components: [
-						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_build.png"},
-						{content: "Build..."}
-					]},
-					{classes: "onyx-menu-divider"},
-					{value: "doInstall", components: [
-						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_install.png"},
-						{content: "Install..."}
-					]},
-					{classes: "onyx-menu-divider"},
-					{value: "doRun", components: [
-						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_run.png"},
-						{content: "Run..."}
-					]},
-					{value: "doRunDebug", components: [
-						{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_debug.png"},
-						{content: "Debug..." }
-					]}
-				]}
-			]}
+			{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
+			{kind: "AccountsConfigurator"}
 		]},
-		{content:"Project list", classes:"project-list-title title-gradient"},
-		{kind: "enyo.Scroller", fit: true,components: [
-			{tag:"ul", kind: "enyo.Repeater", classes:"ares-project-list-menu", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
-				{tag:"li",kind: "ProjectList.Project", name: "item"}
-			]}
-		]},
-		{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
-		{kind: "AccountsConfigurator"}
+		{classes:"hangar"},
 	],
 	selected: null,
 	create: function() {
