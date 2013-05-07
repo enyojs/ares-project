@@ -125,7 +125,7 @@ enyo.kind({
 		
 		{kind: "Control", tag: "br"},
 	
-		{kind: "FittableColumns", name: "groupbox7", components: [
+		{kind: "FittableColumns", name: "groupbox7", classes:"keys", components: [
 				{kind: "Control", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
 				{kind: "Control", tag: "br"},
 				{kind: "Control", content: "Mac Programmable buttons Command-SHIFT  F1 to F12"},
