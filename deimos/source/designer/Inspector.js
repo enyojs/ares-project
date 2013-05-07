@@ -242,31 +242,29 @@ enyo.kind({
 	change: function(inSender, inEvent) {
 		var n = inEvent.target.fieldName;
 		var v = inEvent.target.fieldValue;
-		
+
 		var num = parseFloat(v);
 		if (String(num) == v) {
 			v = num;
 		}
 
-		if (this.debug) { this.log(n, v); }
-		
+		if (this.debug) { this.log("Set property: " + n + " --> ", v); }
+
 		// Save each change to _this.userDefinedAttributes_
 		if(!this.userDefinedAttributes[this.selected.aresId]) {
 			this.userDefinedAttributes[this.selected.aresId] = {};
 		}
 		this.userDefinedAttributes[this.selected.aresId][n] = v;
-
-		if (inEvent.target.fieldType !== "events") {
-			this.doModify({name: n, value: v});
-		}
+		this.doModify({name: n, value: v, type: inEvent.target.fieldType});
 	},
 	dblclick: function(inSender, inEvent) {
 		if (inEvent.target.fieldType === "events") {
 			var n = inEvent.target.fieldName;
 			var v = inEvent.target.fieldValue;
 			if (!v) {
-				v = inEvent.target.fieldValue = this.selected.name + enyo.cap(n.slice(2));
+				v = this.selected.name + enyo.cap(n.slice(2));
 				if (this.debug) { this.log("SET handler: " + n + " --> " + v); }
+				inEvent.target.setFieldValue(v);
 				this.change(inSender, inEvent);
 			}
 		}
