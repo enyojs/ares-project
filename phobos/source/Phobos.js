@@ -34,7 +34,7 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onFkey: "fkeypressed"},
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -793,6 +793,16 @@ enyo.kind({
 	findClose: function(){
 		this.$.findpop.hide();
 	},
+	toggleww: function(){
+	    if(this.$.ace.wordWrap === "true" || this.$.ace.wordWrap === true){
+			this.$.ace.wordWrap = false;
+			this.$.ace.wordWrapChanged();
+	    }else{
+			this.$.ace.wordWrap = true;
+			this.$.ace.wordWrapChanged();
+		}
+	},
+
 	/*  editor setting */
 
 	editorSettings: function() {
