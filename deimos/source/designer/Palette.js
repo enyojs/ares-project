@@ -151,7 +151,7 @@ enyo.kind({
 	projectIndexerChanged: function() {
 		if (this.debug)  { this.log("projectIndexerChanged: rebuilt the palette "); }
 		var catchAllPalette = this.buildCatchAllPalette();
-		this.palette = catchAllPalette.concat(this.projectIndexer.palette || []);
+		this.palette = catchAllPalette.concat(this.projectIndexer.design.palette || []);
 		this.palette.sort(function(a,b) {
 			return (a.order || 0) - (b.order || 0);
 		});
@@ -177,14 +177,26 @@ enyo.kind({
 				items: []
 			}
 		};
+		// Get all kinds from .design files if .design exist
+		var catchKindListInPalette = [];
+		if (this.projectIndexer.design.hasOwnProperty("palette")) {
+			var keys = Object.keys(this.projectIndexer.design.palette);
+ 			enyo.forEach(keys, function(o) {
+ 				if (this.projectIndexer.design.palette[o]) {
+					var keys = Object.keys(this.projectIndexer.design.palette[o].items);
+					enyo.forEach(keys, function(item) {
+						catchKindListInPalette.push(this.projectIndexer.design.palette[o].items[item].kind);
+					}, this);
+				}
+			}, this);
+		}
 		// Get list of all public Components from indexer without palette meta-data, sorted by name
 		var catchAllKinds = enyo.filter(this.projectIndexer.objects, function(o) {
-			return (o.type == "kind") && (enyo.indexOf("enyo.Component", o.superkinds) >= 0) &&
-					!o.hasPalette && (o.group == "public");
+			return  (o.type == "kind") && (enyo.indexOf("enyo.Component", o.superkinds) >= 0) &&
+				(o.group == "public") && (!(catchKindListInPalette.indexOf(o.name) > -1));
 		}).sort(function(a,b) {
 			return a.name.localeCompare(b.name);
 		});
-		
 		// Add components to catch-all categories per namespace
 		enyo.forEach(catchAllKinds, function(kind) {
 			// Create palette item for kind
