@@ -299,10 +299,12 @@ body {
 /* Global onyx overrides for Ares, for a more desktop look/feel */
 
 .onyx {
+	font-family: Arial,'Helvetica Neue', 'Nimbus Sans L', sans-serif;
 	font-size: 13px;
 }
 
 .onyx-popup {
+	font-family: Arial,'Helvetica Neue', 'Nimbus Sans L', sans-serif;
 	font-size: 13px;
 }
 
@@ -312,8 +314,10 @@ body {
 	cursor:hand; 
 	cursor:pointer;  
     border:1px solid #999999; /* rgba(15,15,15,0.2); */ 
-    background: url(../ares/assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px 0px #a7a9ac; 
-    min-width:75px; position:relative;
+    background: url(../ares/assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px 0px #a7a9ac;
+    background-size: auto; 
+    min-width:75px; 
+    position:relative;
     box-shadow: inset 0px .5px 0px rgba(255, 255, 255, 0.2);
     color: #fff;
     font-weight: 100;

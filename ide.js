@@ -13,10 +13,11 @@ var fs = require("fs"),
     spawn = require('child_process').spawn,
     querystring = require("querystring"),
     versionTools = require('./hermes/lib/version-tools'),
-    http = require('http');
+    http = require('http'),
+    HttpError = require("./hermes/lib/httpError");
 
+// __dirname is not defined by node-webkit
 var myDir = typeof(__dirname) !== 'undefined' ?  __dirname : path.resolve('') ;
-var HttpError = require(path.resolve(myDir, "hermes/lib/httpError"));
 
 /**********************************************************************/
 
@@ -46,7 +47,7 @@ var shortHands = {
 };
 var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ide.js'*/);
 
-argv.config = argv.config || path.join(__dirname, "ide.json");
+argv.config = argv.config || path.join(myDir, "ide.json");
 argv.host = argv.host || "127.0.0.1";
 argv.port = argv.port || 9009;
 
@@ -122,19 +123,10 @@ var subProcesses = [];
 var platformVars = [
 	{regex: /@NODE@/, value: process.argv[0]},
 	{regex: /@CWD@/, value: process.cwd()},
-	{regex: /@INSTALLDIR@/, value: __dirname},
+	{regex: /@INSTALLDIR@/, value: myDir},
 	{regex: /@HOME@/, value: process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']}
 ];
 
-function platformSubst(inStr) {
-	var outStr = inStr;
-	if (outStr) {
-		platformVars.forEach(function(subst){
-			outStr = outStr.replace(subst.regex,subst.value);
-		});
-	}
-	return outStr;
-}
 var platformOpen = {
 	win32: [ "cmd" , '/c', 'start' ],
 	darwin:[ "open" ],
@@ -204,51 +196,68 @@ function mergePluginConfig(service, newdata, configFile) {
 			}
 		}
 
-		log.info('mergePluginConfig()', "Merged service: " + JSON.stringify(service, null, 2));
+		log.verbose('mergePluginConfig()', "Merged service: " + JSON.stringify(service, null, 2));
 	} catch(err) {
-		log.error('mergePluginConfig()', err);
-		throw "Unable to merge " + configFile;
+		log.warn('mergePluginConfig()', err);
+		throw new Error("Unable to merge '" + configFile + "'");
 	}
 }
 
 function appendPluginConfig(configFile) {
 	log.verbose('appendPluginConfig()', "Loading ARES plugin configuration from '"+configFile+"'...");
-	var pluginData;
+	var pluginData, pluginDir = path.dirname(configFile);
 	var configContent = fs.readFileSync(configFile, 'utf8');
 	try {
 		pluginData = JSON.parse(configContent);
 	} catch(e) {
 		throw "Improper JSON in " + configFile + " : "+configContent;
 	}
+	
 
-	pluginData.services.forEach(function(pluginData) {
-		if (serviceMap[pluginData.id]) {
-			mergePluginConfig(serviceMap[pluginData.id], pluginData, configFile);
+	pluginData.services.forEach(function(service) {
+		// Apply regexp to all properties
+		substVars(service, [{regex: /@PLUGINDIR@/, value: pluginDir}]);
+		if (serviceMap[service.id]) {
+			mergePluginConfig(serviceMap[service.id], service, configFile);
 		} else {
-			log.verbose('appendPluginConfig()', "Adding new service '" + pluginData.name + "' to ARES configuration");
-			ide.res.services.push(pluginData);
-			serviceMap[pluginData.id] = pluginData;
+			log.verbose('appendPluginConfig()', "Adding new service '" + service.name + "' to ARES configuration");
+			ide.res.services.push(service);
+			serviceMap[service.id] = service;
 		}
 	});
 }
 
 function loadPluginConfigFiles() {
+	var modDir, nPlugins = 0;
 
 	// Build a service map to merge the plugin services later on
 	ide.res.services.forEach(function(entry) {
 		serviceMap[entry.id] = entry;
 	});
 
+	// After 'npm install', 'ares-ide' & its potential plugins are
+	// located into the same folder named 'node_modules', so we
+	// first try this runtime configuration.  If not found, we
+	// revert to the development one (look for plugins into under
+	// the 'ares-project/node_modules').
+	modDir = path.resolve(myDir, "..");
+	if (path.basename(modDir) !== 'node_modules') {
+		modDir = path.join(myDir, 'node_modules');
+	}
+	log.info('loadPluginConfigFiles()', "loading plugins from '" + modDir + "'");
+
 	// Find and load the plugins configuration, sorted in folder
 	// names lexicographical order.
-	var base = path.join(myDir, 'node_modules');
-	var directories = fs.readdirSync(base).sort();
+	var directories = fs.readdirSync(modDir).sort();
 	directories.forEach(function(directory) {
-		var filename = path.join(base, directory, 'ide.json');
+		var filename = path.join(modDir, directory, 'ide-plugin.json');
 		if (fs.existsSync(filename)) {
+			nPlugins++;
+			log.info('loadPluginConfigFiles()', "loading '" + directory + "/ide-plugin.json'");
 			appendPluginConfig(filename);
 		}
 	});
+	log.info('loadPluginConfigFiles()', "loaded " + nPlugins + " plugins");
 }
 
 loadMainConfig(configPath);
@@ -321,21 +330,31 @@ function handleServiceExit(service) {
 	};
 }
 
-function applyRegexp(data) {
+function substVars(data, vars) {
+	var s;
 	for(var key in data) {
 		var pType = getObjectType(data[key]);
 		if (pType === 'string') {
-			data[key] = platformSubst(data[key]);
+			s = data[key];
+			vars.forEach(function(subst){
+				s = s.replace(subst.regex,subst.value);
+			});
+			data[key] = s;
 		} else if (pType === 'array') {
-			applyRegexp(data[key]);
+			substVars(data[key], vars);
 		} else if (pType === 'object') {
-			applyRegexp(data[key]);
-		}	// else - Nothing to do
+			substVars(data[key], vars);
+		}
+		// else - Nothing to do (no substitution on non-string
+		// properties)
 	}
 }
 
 function startService(service) {
-	applyRegexp(service);		// Apply regexp to all properties
+	// substitute platform variables
+	substVars(service, platformVars);
+
+	// prepare command
 	var command = service.command;
 	var params = [];
 	var options = {
@@ -347,6 +366,8 @@ function startService(service) {
 	if (service.verbose) {
 		params.push('-v');
 	}
+
+	// run the command
 	log.info(service.id, "executing '"+command+" "+params.join(" ")+"'");
 	var subProcess = spawn(command, params, options);
 	subProcess.stderr.on('data', serviceErr(service));
@@ -486,7 +507,7 @@ if (express.version.match(/^2\./)) {
 
 app.configure(function(){
 
-	app.use(express.favicon(__dirname + '/ares/assets/images/ares_48x48.ico'));
+	app.use(express.favicon(myDir + '/ares/assets/images/ares_48x48.ico'));
 
 	app.use('/ide', express.static(enyojsRoot + '/'));
 	app.use('/test', express.static(enyojsRoot + '/test'));

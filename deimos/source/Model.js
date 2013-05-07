@@ -39,16 +39,23 @@ enyo.singleton({
 		};
 	},
 	/**
+	 * Reset the Model Information to default
+	 * @public
+	 */
+	resetInformation: function() {
+		if (this.debug)  { this.log("resetInformation!"); }
+		this.info = {};
+		this.addInformation("properties", "__default", this.defaults.properties);
+		this.addInformation("events", "__default", this.defaults.events);		
+	},
+	/**
 	 * Build all the information needed by the inspector
 	 * @public
 	 */
 	buildInformation: function(projectIndexer) {
 		if (this.debug)  { this.log("buildInformation: Indexer: ", projectIndexer); }
-		this.info = {};
-		this.addInformation("properties", "__default", this.defaults.properties);
-		this.addInformation("events", "__default", this.defaults.events);
-
-		enyo.forEach(projectIndexer.propertyMetaData, function(item) {
+		this.resetInformation();
+		enyo.forEach(projectIndexer.design.inspector, function(item) {
 			if (item.type === "kind") {
 				if (this.debug) { this.log("Processing: " + item.name, item); }
 				this.addInformation("properties", item.name, item.properties);
@@ -110,7 +117,7 @@ enyo.singleton({
 		}
 	},
 	getFlattenedContainerInfo: function() {		
-		// TODO FiX me - ???
+		// TODO: item containerData is set to null, revisit this,
 		// function called by the IFrameDesigner.sendIframeContainerData()
 		return null;
 	}
