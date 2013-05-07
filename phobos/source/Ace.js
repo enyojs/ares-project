@@ -4,6 +4,7 @@ enyo.kind({
 	published: {
 		value: "",
 		theme: "clouds",
+		fontSize: "",
 		wordWrap: false,
 		readonly: false,
 		highlightActiveLine: false,
@@ -35,16 +36,11 @@ enyo.kind({
 	],
 	rendered: function() {
 		this.inherited(arguments);
-		
-		//FIXME : to do something to apply ES
-		
 		var n = this.hasNode();
 		if (n) {
 			this.editor = ace.edit(this.$.aceEditor.id);
-			this.themeChanged();
 			this.valueChanged();
 			this.updateSessionSettings(this.getSession());
-			this.highlightActiveLineChanged();
 			this.readonlyChanged();
 			this.showPrintMarginChanged();
 			this.persistentHScrollChanged();
@@ -59,7 +55,7 @@ enyo.kind({
 	 * Apply settings from editor settings popup
 	 * @public
 	 */
-	applySettings: function(settings) {
+	applyAceSettings: function(settings) {
 			this.setTheme(settings.theme);
 			this.setFontSize(settings.fontsize);
 			this.setHighlightActiveLine(settings.highlight);
@@ -494,8 +490,9 @@ enyo.kind({
 	replaceRange: function(range, text) {
 		this.getSession().replace(range, text);
 	},
+	
 	setFontSize: function(size){
 		var s = size;
 		this.editor.setFontSize(s);
-	},
+	}
 });

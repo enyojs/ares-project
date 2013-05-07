@@ -2,32 +2,34 @@ enyo.kind({
 	name: "EditorSettings",
 	kind: "onyx.Popup",
 	events: {
-		onChangeHighLight: "",
-		onChangeRightPane: "",
-		onChangeTheme: "",
-		onWordWrap: "",
-		onFontsizeChange: "",
 		onClose: "",
+		onChangeRightPane: "",
 		onTabSizeChange: "",
-		onSoftTabs: ""
+		onSoftTabs: "",
+		onChangeSettings:""
 	},
 	handlers: {
        // onSelect: "itemSelected"
     },
-   published: {
-		aceSettings: {
+   	published: {
+	 	settings: {
 	 		theme:"clouds",
 	 		highlight:false,
-	 		fontsize:"",
-	 		wordwrap:false
+	 		fontsize:16,
+	 		wordwrap:false,
+	 		rightpane:false,
+	 		keys:{ }
 	 	},
-	 	otherSettings: {
+	 	previewSettings: {
+	 		theme:"clouds",
+	 		highlight:false,
+	 		fontsize:16,
+	 		wordwrap:false,
 	 		rightpane:false,
 	 		keys:{ }
 	 	}
 	},
-	SETTINGS_STORAGE_KEY_ACE: "com.enyojs.editor.settings.ace",
-	SETTINGS_STORAGE_KEY_OTHER: "com.enyojs.editor.settings.other",
+	SETTINGS_STORAGE_KEY: "com.enyojs.editor.settings",
 	components: [
 		{classes: "ares_editorfont", content: "Editor Settings"},
 		{tag: "br"},
@@ -52,7 +54,7 @@ enyo.kind({
 		{ kind: "FittableColumns", classes:"ares_editorfont", components: [
 			{name: "rightpane", fit: true, classes: "ares_editorfont", content: "Right Pane "},
 			{style: "width: 65px;", content: " "},
-			{name: "rightPane", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "rightPaneChanged"},
+			{name: "rightPaneButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "rightPaneChanged"},
 		]},
 		
 		{fit: true, content: " "},
@@ -63,7 +65,18 @@ enyo.kind({
 			{style: "width: 90px;", content: " "},
 			{kind: "onyx.PickerDecorator", components: [
 				{style: "min-width: 100px; font-size: 13px;"},
-				{name: "fontSizePicker", kind: "onyx.Picker", onSelect: "fontSize"}
+				{name: "fontSizePicker", kind: "onyx.Picker", onSelect: "fontSize", components:[
+					{content: 6},
+					{content: 8},
+					{content: 10},
+					{content: 12},
+					{content: 13},
+					{content: 16},
+					{content: 20},
+					{content: 24},
+					{content: 30},
+					{content: 36},
+				]}
 			]}
 		]},
 
@@ -73,9 +86,7 @@ enyo.kind({
 		{ kind: "FittableColumns", classes:"ares_editorfont", components: [
 			{name: "editorThemesLabel", fit: true, classes: "ares_editorfont", content: "Editor Themes"},
 			{style: "width: 15px;", content: " "},
-			{name : "themesPicker", kind: "onyx.PickerDecorator",
-
-			components: [
+			{name : "themesPicker", kind: "onyx.PickerDecorator", components: [
 				{style: "min-width: 150px;"},
 					{name: "themes", kind: "onyx.Picker", onSelect: "themeSelected", components: [
 					{content: "ambiance"},
@@ -136,8 +147,8 @@ enyo.kind({
 			]},
 		
 		{tag: "br"},
-		{name: "close", kind: "onyx.Button", content: "Close", ontap: "doClose"},
-		{name: "change", kind: "onyx.Button", content: "OK/Save", ontap: "saveSettings"},		
+		{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "doClose"},
+		{name: "change", kind: "onyx.Button", content: "Save", ontap: "saveSettings"},		
 		
 		{kind: "onyx.Popup", modal: true, floating: true, centered: true, canGenerate: false, name: "modalPopup", components: [
 			{kind: "Control", classes: "onyx-toolbar-inline", name: "altInputbox", components: [
@@ -146,7 +157,7 @@ enyo.kind({
 						]},
 					{kind: "Control", tag: "br"},
 					{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
-					{kind: "onyx.Button", content: "OK/Save", name: "oksave", ontap: "inputChanged"}
+					{kind: "onyx.Button", content: "OK", name: "oksave", ontap: "inputChanged"}
 				]},
 			{kind: "Control", tag: "br"}
 		]}
@@ -157,77 +168,84 @@ enyo.kind({
 	
 	create: function() {
 		this.inherited(arguments);
-		//reading Editor Settings values from localStorage
-		var self = this;
-		Ares.LocalStorage.get(this.SETTINGS_STORAGE_KEY_ACE, function(str) {
-			if (self.debug) self.log("localStorage[" + self.SETTINGS_STORAGE_KEY_ACE + "] = ", str);
-			try {
-				if(str !== null && str !== undefined){
-					self.aceSettings = JSON.parse(str);
-				}		
-			} catch(e) {
-				Ares.LocalStorage.remove(self.SETTINGS_STORAGE_KEY_ACE);
-			}
-		});
-
-		Ares.LocalStorage.get(self.SETTINGS_STORAGE_KEY_OTHER, function(str) {
-			if (self.debug) self.log("localStorage[" + self.SETTINGS_STORAGE_KEY_OTHER + "] = ", str);
-			try {
-				if(str !== null && str !== undefined){
-					self.otherSettings = JSON.parse(str);
-				}		
-			} catch(e) {
-				Ares.LocalStorage.remove(self.SETTINGS_STORAGE_KEY_OTHER);
-			}
-		});
-
-		//set UI items with values from localStorage
-		this.$.highLightButton.value = this.aceSettings.highlight;
-
-		this.$.wordWrapButton.value = this.aceSettings.wordwrap;
-		
-		for(i in this.$.themes.getClientControls()){
-			if(this.$.themes.getClientControls()[i].content == this.aceSettings.theme){
+		this.getValuesFromLocalStorage();
+		// lock thems Button's width, so it doesn't move when the caption changes
+		this.$.themes.setBounds({width: 100 });
+		this.$.highLightButton.value = this.settings.highlight;
+		this.$.wordWrapButton.value = this.settings.wordwrap;
+		this.$.rightPaneButton.value = this.settings.rightpane;
+		for (var i in this.$.themes.getClientControls()){
+			if(this.$.themes.getClientControls()[i].content == this.settings.theme){
 				this.$.themes.setSelected(this.$.themes.getClientControls()[i]);
 			}
 		}
-
-		var sizes = [6, 8, 10, 12, 13, 16, 20, 24, 30, 36];
-		for (var i=1; i<sizes.length; i++) {
-			this.$.fontSizePicker.createComponent({
-				  content: sizes[i], 
-				  active: (sizes[i] == this.aceSettings.fontsize)
-				});
+		for (var i in this.$.fontSizePicker.getClientControls()){
+			if(this.$.fontSizePicker.getClientControls()[i].content == this.settings.fontsize){
+				this.$.fontSizePicker.setSelected(this.$.fontSizePicker.getClientControls()[i]);
+			}
 		}
-		
-		this.$.rightPane.value = this.otherSettings.rightpane;
+		this.previewSettings = JSON.parse(JSON.stringify(this.settings));
 
-		// lock thems Button's width, so it doesn't move when the caption changes
-		this.$.themes.setBounds({width: 100 });
+	},
+
+	getValuesFromLocalStorage:function(){
+		var self = this;
+		Ares.LocalStorage.get(this.SETTINGS_STORAGE_KEY, function(str) {
+			if (self.debug) self.log("localStorage[" + self.SETTINGS_STORAGE_KEY + "] = ", str);
+			try {
+				if(str !== null && str !== undefined){
+					self.settings = JSON.parse(str);
+				}		
+			} catch(e) {
+				Ares.LocalStorage.remove(self.SETTINGS_STORAGE_KEY);
+			}
+		});
+	},
+
+	initSettingsPopupFromLocalStorage:function(){
+		//set UI items with values from localStorage
+		//change value of toggle button programmaticaly fire event onChange
+		//onyx toggle button API says that it not working when the value is changed programmatically
+		this.$.highLightButton.setValue(this.settings.highlight);
+		this.$.wordWrapButton.setValue(this.settings.wordwrap);
+
+		for (var i in this.$.themes.getClientControls()){
+			if(this.$.themes.getClientControls()[i].content == this.settings.theme){
+				this.$.themes.setSelected(this.$.themes.getClientControls()[i]);
+			}
+		}
+		for (var i in this.$.fontSizePicker.getClientControls()){
+			if(this.$.fontSizePicker.getClientControls()[i].content == this.settings.fontsize){
+				this.$.fontSizePicker.setSelected(this.$.fontSizePicker.getClientControls()[i]);
+			}
+		}
+		this.$.rightPaneButton.setValue(this.settings.rightpane);
+		//deep copy: settings in previewSettings
+		this.previewSettings = JSON.parse(JSON.stringify(this.settings));
 	},
 
 	themeSelected: function(inSender, inEvent) {
-        this.aceSettings.theme = inEvent.originator.content;
-        this.doChangeTheme();
+        this.previewSettings.theme = inEvent.originator.content;
+        this.doChangeSettings();
     },
 
 	buttonToggle: function(inSender, inEvent) {
-		this.aceSettings.highlight = inEvent.value;
-		this.doChangeHighLight();
+		this.previewSettings.highlight = inEvent.value;
+		this.doChangeSettings();
 	},
 
 	wordWrapToggle: function(inSender, inEvent){
-		this.aceSettings.wordwrap = inEvent.value;
-		this.doWordWrap();
+		this.previewSettings.wordwrap = inEvent.value;
+		this.doChangeSettings();
 	},
 
 	fontSize: function(inSender, inEvent) {
-		this.aceSettings.fontsize = inEvent.selected.content;
-		this.doFontsizeChange();
+		this.previewSettings.fontsize = inEvent.selected.content;
+		this.doChangeSettings();
 	},	
 	
 	rightPaneChanged: function(inSender, inEvent){
-		this.otherSettings.rightpane = inEvent.value;
+		this.previewSettings.rightpane = inEvent.value;
 		this.doChangeRightPane();	
 	},
 
@@ -235,7 +253,7 @@ enyo.kind({
 	inputChanged: function(inSender, inEvent) {
 		var key = this.key;	
 		if (/^F\d+/.test(key)) {
-			this.otherSettings.keys[key] = this.$.textArea.value;
+			this.previewSettings.keys[key] = this.$.textArea.value;
 		}	
 		this.$.modalPopup.hide();		
 	},
@@ -247,16 +265,18 @@ enyo.kind({
 	showPopup: function(inSender) {
 		this.key = inSender.name;
 		if (/^F\d+/.test(this.key)) {
-			if(this.otherSettings.keys[this.key] === undefined){
+			if(this.previewSettings.keys[this.key] === undefined){
 				this.$.textArea.setValue("");
-			} else this.$.textArea.setValue(this.otherSettings.keys[this.key]);
+			} else this.$.textArea.setValue(this.previewSettings.keys[this.key]);
 		}
 		this.$.modalPopup.show();
 	},
 
 	saveSettings: function() {
-		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY_ACE, JSON.stringify(this.aceSettings));
-		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY_OTHER, JSON.stringify(this.otherSettings));
+		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, JSON.stringify(this.previewSettings));
+		//Local storage modified, reading new settings from local storage
+		this.getValuesFromLocalStorage();
+		this.initSettingsPopupFromLocalStorage();
 		this.doClose();
 	}
 });
