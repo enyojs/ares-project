@@ -304,7 +304,6 @@ enyo.kind({
 	 	Disable "Designer" button unless project & enyo index are both valid
 	*/
 	manageDesignerButton: function() {
-		// var disabled = !(this.$.autocomplete.getProjectIndexer() && this.$.autocomplete.getEnyoIndexer());
 		var disabled = ! this.projectCtrl.fullAnalysisDone;
 		this.$.designerButton.setDisabled(disabled);
 	},

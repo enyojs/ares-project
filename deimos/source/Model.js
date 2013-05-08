@@ -61,7 +61,7 @@ enyo.singleton({
 	buildInformation: function(projectIndexer) {
 		if (this.debug)  { this.log("buildInformation: Indexer: ", projectIndexer); }
 		this.resetInformation();
-		enyo.forEach(projectIndexer.propertyMetaData, function(item) {
+		enyo.forEach(projectIndexer.design.inspector, function(item) {
 			if (item.type === "kind") {
 				if (this.debug) { this.log("Processing: " + item.name, item); }
 				this.addInformation("properties", item.name, item.properties);
