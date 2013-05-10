@@ -186,7 +186,7 @@ Before publishing a few steps and checkings are mandatory:
 2. In package.json, update the `dependencies` and `bundledDependencies` if your changes introduce/change node module dependencies.
 3. Execute `npm-shrinkwrap` to update the file `npm-shrinkwrap.json`.
 4. Execute `npm pack`
-5. In a tenporary directory, execute `npm install <path-to>/ares-ide-<version>.tgz` to verfy that the generated .tgz file if correct.
+5. In a temporary directory, execute `npm install <path-to>/ares-ide-<version>.tgz` to verfy that the generated .tgz file if correct.
 6. Perform a few tests to verify that everything works.
 7. Commit your changes and start the publish process described above.
 
@@ -199,7 +199,7 @@ To publish:
 1. If not already done run `npm adduser` to allow your self to publish from this machine
 1. Run `npm -d pack`
 1. Publish the generated tarball `npm -d publish <ares-ide-x.y.z.tgz>`
-	It is also possible to directly publish (skip the intemediate `pack`, but this one gives you a chance to verify the content of the publish archive without the need for a roundtrip with the NPM registry).
+	It is also possible to directly publish (skip the intermediate `pack`, but this one gives you a chance to verify the content of the publish archive without the need for a roundtrip with the NPM registry).
 1. Check [ares-ide on the NPM registry](https://npmjs.org/package/ares-ide).
 
 ## Features
