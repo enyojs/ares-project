@@ -101,7 +101,7 @@ enyo.kind({
 	 *
 	 * Complement services loaded from the server with per-service
 	 * data in the browser localStorage (for example the 'auth'
-	 * property).  The completion vallbaclk is invoked once every
+	 * property).  The completion callback is invoked once every
 	 * configured services are completed.
 	 * 
 	 * @param {Function} next a CommonJS callback
