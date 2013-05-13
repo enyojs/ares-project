@@ -8,7 +8,9 @@
  */
 enyo.kind({
 	name: "ProjectList",
+	kind: "FittableRows",
 	classes: "enyo-unselectable ares-project-list",
+	style: "background-color: red width 300px;",
 	events: {
 		onCreateProject: "",
 		onProjectSelected: "",
@@ -24,7 +26,8 @@ enyo.kind({
 	},
 	debug: false,
 	components: [
-		{kind: "onyx.MoreToolbar", classes: "onyx-menu-toolbar ares-top-toolbar", isContainer: true, name: "toolbar", components: [
+		{kind: "onyx.MoreToolbar", 
+			classes: "onyx-menu-toolbar ares-top-toolbar", isContainer: true, name: "toolbar", components: [
 			{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
 				{tag:"button", content: "Ares"},
 				{kind: "onyx.Menu", components: [
@@ -89,12 +92,11 @@ enyo.kind({
 			]}
 		]},
 		{content:"Project list", classes:"project-list-title title-gradient"},
-		{kind: "enyo.Scroller", components: [
+		{kind: "enyo.Scroller", fit: true,components: [
 			{tag:"ul", kind: "enyo.Repeater", classes:"ares-project-list-menu", controlParentName: "client", fit: true, name: "projectList", onSetupItem: "projectListSetupItem", ontap: "projectListTap", components: [
 				{tag:"li",kind: "ProjectList.Project", name: "item"}
 			]}
 		]},
-		{classes:"hangar"},
 		{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
 		{kind: "AccountsConfigurator"}
 	],
