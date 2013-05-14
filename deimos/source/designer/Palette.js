@@ -94,9 +94,6 @@ enyo.kind({
 		]},
 		{name: "serializer", kind: "Ares.Serializer"}
 	],
-	statics: {
-		model: []
-	},
 	handlers: {
 		ondragstart: "dragstart"
 	},

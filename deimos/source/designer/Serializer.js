@@ -14,7 +14,7 @@ enyo.kind({
 		return enyo.json.codify.to(s, null, 4);
 	},
 	//* protected
-	noserialize: {owner: 1, container: 1, parent: 1, id: 1, attributes: 1, selected: 1, active: 1, isContainer: 1},
+	noserialize: {owner: 1, container: 1, parent: 1, id: 1, attributes: 1, selected: 1, active: 1, isContainer: 1, __aresOptions: 1},
 	_serialize: function(inContainer, inIncludeAresId) {
 		var s = [],
 			c$ = this.getAresComponents(inContainer);
@@ -36,6 +36,18 @@ enyo.kind({
 		for(var i=0, c;(c=c$[i]);i++) {
 			if(c.aresComponent) {
 				a.push(c);
+			} else if (c.kind === 'enyo.OwnerProxy') {
+				/*
+					We are processing the child of a Repeater or List.
+					So, just skip the "enyo.OwnerProxy", but serialize
+					the embedded components.
+				 */
+				var other = c.controls || c.children;
+				for(var idx = 0 ; idx < other.length ; idx++) {
+					if (other[idx].aresComponent) {
+						a.push(other[idx]);
+					}
+				}
 			}
 		}
 		

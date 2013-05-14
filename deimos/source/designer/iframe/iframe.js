@@ -302,48 +302,61 @@ enyo.kind({
 	},
 	//* Render the specified kind
 	renderKind: function(inKind) {
-		var kindConstructor = enyo.constructorForKind(inKind.name);
-		
-		if (!kindConstructor) {
-			enyo.warn("No constructor exists for ", inKind.name);
-			return;
-		} else if(!kindConstructor.prototype) {
-			enyo.warn("No prototype exists for ", inKind.name);
-			return;
-		}
-		
-		/*
-			Stomp on existing _kindComponents_ to ensure that we render exactly what the user
-			has defined. If components came in as a string, convert to object first.
-		*/
-		kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.components) : inKind.components;
-		
-		// Clean up after previous kind
-		if (this.parentInstance) {
-			this.cleanUpPreviousKind(inKind.name);
-		}
-		
-		// Save this kind's _kindComponents_ array
-		this.aresComponents = this.flattenKindComponents(kindConstructor.prototype.kindComponents);
-		
-		// Enable drag/drop on all of _this.aresComponents_
-		this.makeComponentsDragAndDrop(this.aresComponents);
-		
-		// Save reference to the parent instance currently rendered
-		this.parentInstance = this.$.client.createComponent({kind: inKind.name});
-		
-		// Mimic top-level app fitting (as if this was rendered with renderInto or write)
-		if (this.parentInstance.fit) {
-			this.parentInstance.addClass("enyo-fit enyo-clip");
-		}		
-		this.parentInstance.render();
-		
-		// Notify Deimos that the kind rendered successfully
-		this.kindUpdated();
-		
-		// Select a control if so requested
-		if (inKind.selectId) {
-			this.selectItem({aresId: inKind.selectId});
+		var errMsg;
+		try {
+			var kindConstructor = enyo.constructorForKind(inKind.name);
+
+			if (!kindConstructor) {
+				errMsg = "No constructor exists for ";
+				enyo.warn(errMsg, inKind.name);
+				this.sendMessage({op: "error", val: {msg: errMsg + inKind.name}});
+				return;
+			} else if(!kindConstructor.prototype) {
+				errMsg = "No prototype exists for ";
+				enyo.warn(errMsg, inKind.name);
+				this.sendMessage({op: "error", val: {msg: errMsg + inKind.name}});
+				return;
+			}
+
+			/*
+				Stomp on existing _kindComponents_ to ensure that we render exactly what the user
+				has defined. If components came in as a string, convert to object first.
+			*/
+			kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.components) : inKind.components;
+
+			// Clean up after previous kind
+			if (this.parentInstance) {
+				this.cleanUpPreviousKind(inKind.name);
+			}
+
+			// Proxy Repeater and List
+			this.manageComponentsOptions(kindConstructor.prototype.kindComponents);
+			// Save this kind's _kindComponents_ array
+			this.aresComponents = this.flattenKindComponents(kindConstructor.prototype.kindComponents);
+
+			// Enable drag/drop on all of _this.aresComponents_
+			this.makeComponentsDragAndDrop(this.aresComponents);
+
+			// Save reference to the parent instance currently rendered
+			this.parentInstance = this.$.client.createComponent({kind: inKind.name});
+
+			// Mimic top-level app fitting (as if this was rendered with renderInto or write)
+			if (this.parentInstance.fit) {
+				this.parentInstance.addClass("enyo-fit enyo-clip");
+			}
+			this.parentInstance.render();
+
+			// Notify Deimos that the kind rendered successfully
+			this.kindUpdated();
+
+			// Select a control if so requested
+			if (inKind.selectId) {
+				this.selectItem({aresId: inKind.selectId});
+			}
+		} catch(error) {
+			errMsg = "Unable to render " + inKind.name;
+			this.error(errMsg, error);
+			this.sendMessage({op: "error", val: {msg: errMsg}});
 		}
 	},
 	//* Rerender current selection
@@ -411,7 +424,14 @@ enyo.kind({
 		delete this.selection[inProperty];
 	},
 	updateProperty: function(inProperty, inValue) {
-		this.selection[inProperty] = inValue;
+		var options = this.selection.__aresOptions;
+		if (options && options.isRepeater && (inProperty === "onSetupItem" || inProperty === "count")) {
+			// DO NOT APPLY changes to the properties mentionned above
+			// TODO: could be managed later on thru config in .design files if more than one kind need special processings.
+			if (this.debug) this.log("Skipping modification of \"" + inProperty + "\"");
+		} else {
+			this.selection[inProperty] = inValue;
+		}
 	},
 	
 	//* Get each kind component individually
@@ -435,6 +455,30 @@ enyo.kind({
 		}
 		
 		return ret;
+	},
+	manageComponentsOptions: function(inComponents) {
+		var c;
+		for (var i=0;(c = inComponents[i]);i++) {
+			this.manageComponentOptions(c);
+			if (c.components) {
+				this.manageComponentsOptions(c.components);
+			}
+		}
+	},
+	manageComponentOptions: function(inComponent) {
+		if (inComponent.__aresOptions) {
+			var options = inComponent.__aresOptions;
+			if (options.isRepeater === true) {
+				/*
+					We are handling a Repeater or a List.
+					Force "count" to 1 and invalidate "onSetupItem" to
+					manage them correctly in the Designer
+				 */
+				if (this.debug) this.log("Manage repeater " + inComponent.kind, inComponent);
+				inComponent.count = 1;
+				inComponent.onSetupItem = "aresUnImplemetedFunction";
+			}
+		}
 	},
 	// TODO - merge this with flattenKindComponents()
 	flattenChildren: function(inComponents) {
