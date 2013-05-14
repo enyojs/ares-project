@@ -24,6 +24,7 @@ enyo.kind({
 		onFind: "",
 		onWordwrap: "",
 		onFkey: "",
+		onRpane: "",
 		
 		/// FIXME just add these for now
 		onSetBreakpoint: "",
@@ -96,12 +97,18 @@ enyo.kind({
 			exec: enyo.bind(this, "doWordwrap")
 		});
 		
+		// Add keybinding for Right Pane
+		commands.addCommand({
+			name: "Rightpane",
+			bindKey: {win: "Alt-r", mac: "Alt-r"},
+			exec: enyo.bind(this, "doRpane")
+		});
+		
 		// Add keybinding for F1 t F12
 		var i,key;
 		for (i=1; i<13; i++) {
 			key = 'F' + i;
-			//console.log(key);
-			commands.addCommand({
+				commands.addCommand({
 				name: key,
 				bindKey: { win: "Ctrl-SHIFT-"+key, mac: "command-SHIFT-"+key },
 				exec: enyo.bind(this, 'doFkey' , [key])
