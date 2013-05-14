@@ -71,7 +71,7 @@ enyo.singleton({
 			}
 		}, this);
 
-		this.addKindOptions(projectIndexer.palette);
+		this.addKindOptions(projectIndexer.design.palette);
 	},
 	addKindOptions: function(palette) {
 		enyo.forEach(palette, function(category) {
