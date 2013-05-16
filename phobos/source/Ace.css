@@ -29,7 +29,17 @@
 	right: 0;
 }
 
-.keys > button{
-	min-width: 50px;
-	padding: 6px;
+.ace-keys > *> button{
+	min-width: 68px;
+}
+
+.ace-label{
+	width:83px;
+}
+
+.small-picker{
+	width: 77px;
+}
+.large-picker{
+	width: 150px;
 }
