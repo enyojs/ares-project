@@ -68,7 +68,7 @@ enyo.kind({
 			config = p.getConfig();
 			this.$.item.applyStyle("background-color", inSender.isSelected(inEvent.index) ? "lightblue" : "");
 			this.$.name.setContent(config.name);
-			this.$.icon.setSrc("$harmonia/images/providers/" + config.icon + ".png");
+			this.$.icon.setSrc(config.icon);
 		}
 		return true;
 	},
