@@ -9,6 +9,7 @@
 
 enyo.kind({
 	name: "ProjectProperties",
+	debug: false,
 	classes: "enyo-unselectable",
 	fit: true,
 	events: {
@@ -83,7 +84,7 @@ enyo.kind({
 				 {content: "", name: "projectDirectory" }
 			]},
 			{tag:"p", classes:"break"},
-			{kind: "enyo.FittableColumns", classes:"ares-row", name: "servicesList"},
+			{kind: "enyo.FittableColumns", classes:"ares-row", name: "servicesList"}
 		]},
 		{name: "previewDrawer", kind: "onyx.Drawer", open: false, components: [
 			{kind: 'FittableRows', components: [
@@ -105,7 +106,6 @@ enyo.kind({
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 
-	debug: false,
 	templates: [],
 	TEMPLATE_NONE: "NONE",
 	selectedTemplate: undefined,
@@ -130,30 +130,31 @@ enyo.kind({
 				this.services[service.id] = service;
 			}
 		}));
-		if (this.debug) this.log("services:", this.services);
 		enyo.forEach(enyo.keys(this.services), function(serviceId) {
 			var service = this.services[serviceId];
 			var drawer = this.$[service.id + 'Drawer'] || this.createComponent({
 				name: service.id + 'Drawer',
 				kind: "onyx.Drawer",
 				open: false
-			},{addBefore: this.$.toolbarId});
+			},{
+				addBefore: this.$.toolbarId
+			});
 			service.panel = drawer.$[service.id] || drawer.createComponent({
 				name: service.id,
 				kind: service.kind
 			});
-			service.tab = this.$.thumbnail[service.id + 'Tab'] || this.$.thumbnail.createComponent({
+			service.tab = this.$.thumbnail.$[service.id + 'Tab'] || this.$.thumbnail.createComponent({
 				name: service.id + 'Tab',
 				content: service.name,
 				serviceId: service.id,
 				showing: false
 			});
-			this.$.servicesList.createComponent({
-				name: service.id + 'Frame'
-			});
-			if (!service.frame) {
-				service.frame = this.$.servicesList.$[service.id + 'Frame'];
-				service.checkBox = service.frame.createComponent({
+			var frame = this.$.servicesList.$[service.id + 'Frame'];
+			if (typeof frame !== 'object') {
+				frame = this.$.servicesList.createComponent({
+					name: service.id + 'Frame'
+				});
+				frame.createComponent({
 					kind: 'onyx.Checkbox',
 					name: service.id + 'CheckBox',
 					onchange: 'toggleService',
@@ -161,17 +162,19 @@ enyo.kind({
 				}, {
 					owner: this
 				});
-				service.frame.createComponent({
+				frame.createComponent({
 					tag: 'label',
 					classes: 'ares-label',
 					content: service.name
 				});
 			}
+			service.checkBox = this.$[service.id + 'CheckBox'];
 
 			// Take the project configuration into account
 			// to show the service or not
 			this.showService(serviceId);
 		}, this);
+		if (this.debug) this.log("services:", this.services);
 	},
 	/**
 	 * Toggle a service panel
