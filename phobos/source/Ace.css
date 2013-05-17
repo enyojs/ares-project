@@ -29,8 +29,12 @@
 	right: 0;
 }
 
-.ace-keys > *> button{
+.ace-keys>button{
 	min-width: 68px;
+}
+
+.ace-alt-button-input {
+	width: 425px;
 }
 
 .ace-label{

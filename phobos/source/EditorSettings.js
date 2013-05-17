@@ -109,41 +109,36 @@ enyo.kind({
 		]},
 		{tag:"p", classes:"break"},
 		{kind:"FittableRows", components: [
-				{name: "groupbox7", classes:"ares-row", components: [
-						{kind: "Control", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
-						{kind: "Control", content: "Mac Programmable buttons Command-SHIFT  F1 to F12"},
-						{tag:"p", classes:"break"},
-						{kind: "onyx.MenuDecorator", name:"program_buttons", classes:"ace-keys", components: [
-							{ kind: "FittableColumns", components:[
-								{kind: "onyx.Button", content: "F-1", name: "F1", ontap: "showPopup"},
-								{kind: "onyx.Button", content: "F-2", name: "F2", ontap: "showPopup"},
-								{kind: "onyx.Button", content: "F-3", name: "F3", ontap: "showPopup"},
-								{kind: "onyx.Button", content: "F-4", name: "F4", ontap: "showPopup"},
-								{kind: "onyx.Button", content: "F-5", name: "F5", ontap: "showPopup"},
-								{kind: "onyx.Button", content: "F-6", name: "F6", ontap: "showPopup"},
-							]},
-							{ kind: "FittableColumns", components:[
-								{kind: "onyx.Button", content: "F-7", name: "F7", ontap: "showPopup"},
-								{kind: "onyx.Button", content: "F-8", name: "F8", ontap: "showPopup"},
-								{kind: "onyx.Button", content: "F-9", name: "F9", ontap: "showPopup"},
-								{kind: "onyx.Button", content: "F-10", name: "F10", ontap: "showPopup"},
-								{kind: "onyx.Button", content: "F-11", name: "F11", ontap: "showPopup"},
-								{kind: "onyx.Button", content: "F-12", name: "F12", ontap: "showPopup"},
-								
-							]}
-						]},
-
-						{kind: "onyx.Popup", name: "modalPopup", modal:"false", onHide:"restoreButton", classes:"ace-contextual-popup", canGenerate: false,
-							components: [
-								{kind: "Control", classes: "onyx-toolbar-inline", name: "altInputbox", components: [
-									{kind: "onyx.InputDecorator", classes: "phobos_editorsettings_buttoninput", name: "inputDecorator", components: [
-										{kind: "onyx.TextArea", placeholder: "Enter text here", classes: "alt_button_input", name: "textArea"}
-									]},
-									{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
-									{kind: "onyx.Button", content: "OK", name: "oksave", ontap: "inputChanged"}
-								]}
-   						]}
+			{kind: "Control", classes:"ares-row", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
+			{kind: "Control", classes:"ares-row", content: "Mac Programmable buttons Command-SHIFT  F1 to F12"},
+			{kind: "onyx.MenuDecorator", name:"program_buttons", classes:"ares-row", components: [
+				{ kind: "FittableColumns", classes:"ace-keys", components:[
+					{kind: "onyx.Button", content: "F-1", name: "F1", ontap: "showPopup"},
+					{kind: "onyx.Button", content: "F-2", name: "F2", ontap: "showPopup"},
+					{kind: "onyx.Button", content: "F-3", name: "F3", ontap: "showPopup"},
+					{kind: "onyx.Button", content: "F-4", name: "F4", ontap: "showPopup"},
+					{kind: "onyx.Button", content: "F-5", name: "F5", ontap: "showPopup"},
+					{kind: "onyx.Button", content: "F-6", name: "F6", ontap: "showPopup"},
+				]},
+				{ kind: "FittableColumns", classes:"ace-keys", components:[
+					{kind: "onyx.Button", content: "F-7", name: "F7", ontap: "showPopup"},
+					{kind: "onyx.Button", content: "F-8", name: "F8", ontap: "showPopup"},
+					{kind: "onyx.Button", content: "F-9", name: "F9", ontap: "showPopup"},
+					{kind: "onyx.Button", content: "F-10", name: "F10", ontap: "showPopup"},
+					{kind: "onyx.Button", content: "F-11", name: "F11", ontap: "showPopup"},
+					{kind: "onyx.Button", content: "F-12", name: "F12", ontap: "showPopup"},
 				]}
+			]}
+		]},
+		{kind: "onyx.Popup", name: "modalPopup", modal: true, autoDismiss: false, onHide:"restoreButton", classes:" enyo-unselectable ace-contextual-popup", canGenerate: false,
+		components: [
+			{kind: "Control", classes: "onyx-toolbar-inline", name: "altInputbox", components: [
+				{kind: "onyx.InputDecorator", classes: "phobos_editorsettings_buttoninput", name: "inputDecorator", components: [
+					{kind: "onyx.TextArea", placeholder: "Enter text here", classes: "ace-alt-button-input", name: "textArea"}
+				]},
+				{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
+				{kind: "onyx.Button", content: "OK", name: "oksave", ontap: "inputChanged"}
+			]}
 		]},
 		{tag:"p", classes:"break"},
 		{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "doClose"},
@@ -210,8 +205,8 @@ enyo.kind({
 	},
 
 	themeSelected: function(inSender, inEvent) {
-        this.previewSettings.theme = inEvent.originator.content;
-        this.doChangeSettings();
+		this.previewSettings.theme = inEvent.originator.content;
+		this.doChangeSettings();
     },
 
 	buttonToggle: function(inSender, inEvent) {
@@ -227,6 +222,7 @@ enyo.kind({
 	fontSize: function(inSender, inEvent) {
 		this.previewSettings.fontsize = inEvent.selected.content;
 		this.doChangeSettings();
+
 	},	
 	
 	rightPaneChanged: function(inSender, inEvent){
