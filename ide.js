@@ -205,18 +205,25 @@ function mergePluginConfig(service, newdata, configFile) {
 
 function appendPluginConfig(configFile) {
 	log.verbose('appendPluginConfig()', "Loading ARES plugin configuration from '"+configFile+"'...");
-	var pluginData, pluginDir = path.dirname(configFile);
-	var configContent = fs.readFileSync(configFile, 'utf8');
+	var pluginDir = path.dirname(configFile),
+	    pluginUrl = '../' + path.relative(myDir, pluginDir).replace('\\','/');
+	log.verbose('appendPluginConfig()', 'pluginDir:', pluginDir);
+	log.verbose('appendPluginConfig()', 'pluginUrl:', pluginUrl);
+
+	var pluginData,
+	    configContent = fs.readFileSync(configFile, 'utf8');
 	try {
 		pluginData = JSON.parse(configContent);
 	} catch(e) {
 		throw "Improper JSON in " + configFile + " : "+configContent;
 	}
 	
-
 	pluginData.services.forEach(function(service) {
 		// Apply regexp to all properties
-		substVars(service, [{regex: /@PLUGINDIR@/, value: pluginDir}]);
+		substVars(service, [
+			{regex: /@PLUGINDIR@/, value: pluginDir},
+			{regex: /@PLUGINURL@/, value: pluginUrl}
+		]);
 		if (serviceMap[service.id]) {
 			mergePluginConfig(serviceMap[service.id], service, configFile);
 		} else {
