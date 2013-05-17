@@ -322,7 +322,6 @@ body {
 
 .onyx-picker-decorator .onyx-button {
 	padding:6px 18px; /*needs to be specifyed, without It herits of padding of onyx-picker-decorator in onyx.css*/
-	width: 200px;
 }
 
 .onyx-picker-decorator .onyx-button:before{ 
@@ -346,7 +345,6 @@ body {
     -webkit-border-radius:4px;
     border-radius:4px;
     overflow:hidden; 
-    min-width:160px;
 }
 
 .onyx-radiobutton {
