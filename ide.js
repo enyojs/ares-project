@@ -512,8 +512,20 @@ if (express.version.match(/^2\./)) {
 	server = http.createServer(app);
 }
 
+function cors(req, res, next) {
+	/*
+	 * - Lowercase HTTP headers, work-around an iPhone bug
+	 * - Overrriden by each individual service behind '/res/services/:service'
+	 */
+	res.header('access-control-allow-origin', '*' /*FIXME: config.allowedDomains*/);
+	res.header('access-control-allow-methods', 'GET,POST');
+	res.header('access-control-allow-headers', 'Content-Type');
+	next();
+}
+
 app.configure(function(){
 
+	app.use(cors);
 	app.use(express.favicon(myDir + '/ares/assets/images/ares_48x48.ico'));
 
 	app.use('/ide', express.static(enyojsRoot + '/'));
