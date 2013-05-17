@@ -249,16 +249,17 @@ enyo.kind({
 
 	restoreButton: function(inSender) {
 		this.$[this.key].removeClass("active");
+		return true;
 	},
 
 	showPopup: function(inSender) {
 		this.key = inSender.name;
-
 		if (/^F\d+/.test(this.key)) {
 			if(this.previewSettings.keys[this.key] === undefined){
 				this.$.textArea.setValue("");
 			} else this.$.textArea.setValue(this.previewSettings.keys[this.key]);
 		}
+		this.$[this.key].addClass("active");
 		this.$.modalPopup.show();	
 	},
 
