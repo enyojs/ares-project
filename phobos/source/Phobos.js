@@ -34,7 +34,7 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onRpane: "changeRightPane", onFkey: "fkeypressed"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -801,6 +801,7 @@ enyo.kind({
 			this.$.ace.wordWrapChanged();
 		}
 	},
+	
 
 	/*  editor setting */
 
@@ -818,7 +819,16 @@ enyo.kind({
 	},
 
 	//showing =
-	changeRightPane: function(){
+	changeRightPane: function(inSender, inEvent){
+		if(inSender.name === "ace"){
+			if(this.$.editorSettingsPopup.getPreviewSettings().rightpane === "true" || this.$.editorSettingsPopup.getPreviewSettings().rightpane === true ){
+				this.$.editorSettingsPopup.getPreviewSettings().rightpane = false;				
+				this.adjustPanelsForMode( this.docData.getMode(), "false" );
+			}else{
+				this.$.editorSettingsPopup.getPreviewSettings().rightpane = true;
+				this.adjustPanelsForMode( this.docData.getMode(), "true" );
+			}
+		}		
 		this.adjustPanelsForMode(this.docData.getMode(), this.$.editorSettingsPopup.getPreviewSettings().rightpane);
 	},
 
