@@ -10,15 +10,23 @@ var fs = require("fs"),
     util  = require("util"),
     querystring = require("querystring"),
     temp = require("temp"),
+    request = require('request'),
     zipstream = require('zipstream'),
     async = require("async"),
     mkdirp = require("mkdirp"),
     rimraf = require("rimraf"),
     http = require("http"),
     child_process = require("child_process"),
-    api = require("phonegapbuildapi");
+    client = require("phonegap-build-api");
 
 var basename = path.basename(__filename);
+
+var url = 'build.phonegap.com';
+
+process.on('uncaughtException', function (err) {
+	log.error(basename, err.stack);
+	process.exit(1);
+});
 
 function BdPhoneGap(config, next) {
 	function HttpError(msg, statusCode) {
@@ -79,6 +87,21 @@ function BdPhoneGap(config, next) {
 
 	// Authentication
 	app.use(express.cookieParser());
+
+	function addCookie(res, key, value) {
+		var exdate=new Date();
+		exdate.setDate(exdate.getDate() + 10 /*days*/);
+		var cookieOptions = {
+			domain: '127.0.0.1:' + config.port,
+			path: config.pathname,
+			httpOnly: true,
+			expires: exdate
+			//maxAge: 1000*3600 // 1 hour
+		};
+		res.cookie(key, value, cookieOptions);
+		console.log("Bdphonegap.makeCookie(): Set-Cookie: " + key + ":", value || "");
+	}
+
 	app.use(function(req, res, next) {
 		if (req.connection.remoteAddress !== "127.0.0.1") {
 			next(new Error("Access denied from IP address "+req.connection.remoteAddress));
@@ -109,16 +132,6 @@ function BdPhoneGap(config, next) {
 	var uploadDir = temp.path({prefix: 'com.palm.ares.hermes.bdPhoneGap'}) + '.d';
 	fs.mkdirSync(uploadDir);
 	app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
-
-	// Global error handler
-	function errorHandler(err, req, res, next){
-		console.error("errorHandler(): ", err.stack);
-		res.status(err.statusCode || 500);
-		res.contentType('txt'); // direct usage of 'text/plain' does not work
-		res.send(err.toString());
-	}
-	// express-3.x: middleware with arity === 4 is detected as the error handler
-	app.use(errorHandler);
 
 	/*
 	 * Verbs
@@ -178,6 +191,40 @@ function BdPhoneGap(config, next) {
 		});
 	});
 	
+	// Global error handler (last app.xxx(), with 4 parameters)
+	function errorHandler(err, req, res, next){
+		console.error("errorHandler(): err:", util.inspect(err));
+		if (err instanceof Error) {
+			var msg;
+			try {
+				msg = JSON.parse(err.message).error;
+			} catch(e) {
+				msg = err.message;
+			}
+			if ("Invalid authentication token." === msg) {
+				_respond(new HttpError(msg, 401));
+			} else {
+				_respond(new HttpError(msg, 400));
+			}
+		} else {
+			_respond(new Error(err.toString()));
+		}
+
+		function _respond(err) {
+			console.error("errorHandler#_respond(): ", err.stack);
+			res.status(err.statusCode || 500);
+			if (err.statusCode === 401) {
+				// invalidate token cookie
+				addCookie(res, 'token', null);
+			}
+			res.contentType('txt'); // direct usage of 'text/plain' does not work
+			res.send(err.toString());
+		}
+	}
+
+	// express-3.x: middleware with arity === 4 is detected as the error handler
+	app.use(errorHandler);
+
 	// Send back the service location information (origin,
 	// protocol, host, port, pathname) to the creator, when port
 	// is bound
@@ -366,37 +413,50 @@ function BdPhoneGap(config, next) {
 	function getToken(req, res, next) {
 		// XXX !!! leave this log commented-out to not log password !!!
 		//console.log("getToken(): req.body = ", util.inspect(req.body));
-		api.createAuthToken(req.body.username + ':' +req.body.password, {
-			success: function(token) {
-				var exdate=new Date();
-				exdate.setDate(exdate.getDate() + 10 /*days*/);
-				var cookieOptions = {
-					domain: '127.0.0.1:' + config.port,
-					path: config.pathname,
-					httpOnly: true,
-					expires: exdate
-					//maxAge: 1000*3600 // 1 hour
-				};
-				res.cookie('token', token, cookieOptions);
-				console.log("Bdphonegap.getToken(): Set-Cookie: token:", token);
-				res.status(200).send({token: token}).end();
-			},
-			error: function(errStr, statusCode) {
-				next(new HttpError(errStr, statusCode));
+
+		var auth, options;
+		auth = "Basic " + new Buffer(req.body.username + ':' +req.body.password).toString("base64");
+		options = {
+			url : 'https://' + url + "/token",
+			headers : { "Authorization" : auth }
+		};
+		request.post(options, function(err1, response, body) {
+			try {
+				console.log("Bdphonegap.getToken(): response.statusCode:", response.statusCode);
+				if (err1) {
+					console.log(err1);
+					next(new HttpError(err1.toString(), response.statusCode));
+				} else {
+					console.log("Bdphonegap.getToken(): body:", body);
+					var data = JSON.parse(body);
+					if (data.error) {
+						next(new HttpError(data.error, 401));
+					} else {
+						addCookie(res, 'token', data.token);
+						res.status(200).send(data).end();
+					}
+				}
+			} catch(err0) {
+				next(err0);
 			}
 		});
 	}
 
 	function getUserData(req, res, next) {
-		api.getUserData(req.token, {
-			success: function(inValue) {
-				console.log("typeof inValue:", typeof inValue, ", inValue:", inValue);
-				res.status(200).send({user: inValue}).end();
-			},
-			error: function(errStr, statusCode) {
-				next(new HttpError(errStr, statusCode));
+		client.auth({ token: req.token }, function(err1, api) {
+			if (err1) {
+				next(err1);
+			} else {
+				api.get('/me', function(err2, userData) {
+					if (err2) {
+						next(err2);
+					} else {
+						console.log("Bdphonegap.getUserData(): userData:", util.inspect(userData));
+						res.status(200).send({user: userData}).end();
+					}
+				});
 			}
-		});
+		});;
 	}
 
 	function upload(req, res, next) {
