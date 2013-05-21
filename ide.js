@@ -25,6 +25,7 @@ var knownOpts = {
 	"help":		Boolean,
 	"runtest":	Boolean,
 	"browser":	Boolean,
+	"chromium":	Boolean,
 	"port":		Number,
 	"host":		String,
 	"listen_all":	Boolean,
@@ -37,6 +38,7 @@ var shortHands = {
 	"h": ["--help"],
 	"T": ["--runtest"],
 	"b": ["--browser"],
+	"B": ["--chromium"],
 	"p": ["--port"],
 	"H": ["--host"],
 	"a": ["--listen_all"],
@@ -61,6 +63,7 @@ if (argv.help) {
 		"  -h, --help        help message                                                                           [boolean]\n" +
 		"  -T, --runtest     Run the non-regression test suite                                                      [boolean]\n" +
 		"  -b, --browser     Open the default browser on the Ares URL                                               [boolean]\n" +
+		"  -B, --chromium    Open the included Chromium browser on the Ares URL                                     [boolean]\n" +
 		"  -p, --port        port (o) local IP port of the express server (default: 9009, 0: dynamic)               [default: '9009']\n" +
 		"  -H, --host        host to bind the express server onto                                                   [default: '127.0.0.1']\n" +
 		"  -a, --listen_all  When set, listen to all adresses. By default, listen to the address specified with -H  [boolean]\n" +
@@ -131,6 +134,12 @@ var platformOpen = {
 	win32: [ "cmd" , '/c', 'start' ],
 	darwin:[ "open" ],
 	linux: [ "xdg-open" ]
+};
+
+var chromiumOpen = {
+	win32: [ path.resolve ( myDir + "../../chromium/" + "chrome.exe" ) ],
+	darwin:[ path.resolve ( myDir + "../../../../bin/chromium/" + "Chromium.app" ), "--args" ],
+	linux: [ path.resolve ( myDir + "../../../../bin/chromium/" + "chrome" ) ]
 };
 
 var configPath, tester;
@@ -548,6 +557,10 @@ server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, f
 	if (argv.browser) {
 		// Open default browser
 		var info = platformOpen[process.platform] ;
+		spawn(info[0], info.slice(1).concat([url]));
+	} else if (argv.chromium) {
+		//	open bundled Chromium
+		var info = platformOpen[process.platform].concat(chromiumOpen[process.platform]);
 		spawn(info[0], info.slice(1).concat([url]));
 	} else {
 		log.http('main', "Ares now running at <" + url + ">");
