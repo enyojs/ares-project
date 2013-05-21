@@ -2,8 +2,7 @@ enyo.kind({
 	name: "Inspector",
 	kind: "FittableRows",
 	events: {
-		onModify: "",
-		onAction: ""
+		onModify: ""
 	},
 	published: {
 		filterLevel: null,		// Value will be given by Inspector.FilterXXX "checked" item.
@@ -190,14 +189,20 @@ enyo.kind({
 		
 		attributeRow = this.$.content.createComponent({classes: classList});
 		attributeRow.createComponent({kind: "InheritCheckbox", checked: !inherited, prop: inName});
+
+		if (inType === 'events') {
+			kind = "Inspector.Config.Event";
+		}
 		
 		info = Model.getInfo(inControl.kind, inType, inName);
-		kind = (info && info.inputKind);
+		kind = (info && info.inputKind) || kind;
+
+
 		
 		// User defined kind: as an Object
 		if (kind && kind instanceof Object) {
 			kind = enyo.clone(kind);
-			kind = enyo.mixin(kind, {name: attributeFieldName, fieldName: inName, fieldValue: value, extra: inType});
+			kind = enyo.mixin(kind, {name: attributeFieldName, fieldName: inName, fieldValue: value, fieldType: inType});
 			attributeRow.createComponent(kind);
 		} else {
 			attributeKind = (kind)
@@ -206,7 +211,7 @@ enyo.kind({
 					?	"Inspector.Config.Boolean"
 					:	"Inspector.Config.Text";
 		
-			attributeRow.createComponent({name: attributeFieldName, kind: attributeKind, fieldName: inName, fieldValue: value, extra: inType, disabled: inherited});
+			attributeRow.createComponent({name: attributeFieldName, kind: attributeKind, fieldName: inName, fieldValue: value, fieldType: inType, disabled: inherited});
 		}
 	},
 	inspect: function(inControl) {
@@ -214,7 +219,7 @@ enyo.kind({
 		this.$.content.destroyComponents();
 		this.selected = inControl;
 		if (inControl) {
-			var kindName = inControl.kind;
+			var kindName = inControl.name + " (" + inControl.kind + ")";
 			this.$.content.createComponent({tag: "h3", content: kindName, classes: "label label-info"});
 			ps = this.buildPropList(inControl);
 			if (this.filterType === 'P') {
@@ -228,7 +233,7 @@ enyo.kind({
 					this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
 				}
 				for (i=0, p; (p=ps[i]); i++) {
-					this.makeEditor(inControl, p, "events");
+					this.makeEditor(inControl, p, "", "events");
 				}
 			}
 		}
@@ -237,36 +242,31 @@ enyo.kind({
 	change: function(inSender, inEvent) {
 		var n = inEvent.target.fieldName;
 		var v = inEvent.target.fieldValue;
-		
+
 		var num = parseFloat(v);
 		if (String(num) == v) {
 			v = num;
 		}
 
-		if (this.debug) { this.log(n, v); }
-		
+		if (this.debug) { this.log("Set property: " + n + " --> ", v); }
+
 		// Save each change to _this.userDefinedAttributes_
 		if(!this.userDefinedAttributes[this.selected.aresId]) {
 			this.userDefinedAttributes[this.selected.aresId] = {};
 		}
 		this.userDefinedAttributes[this.selected.aresId][n] = v;
-
-		this.doModify({name: n, value: v});
+		this.doModify({name: n, value: v, type: inEvent.target.fieldType});
 	},
 	dblclick: function(inSender, inEvent) {
-		if (inEvent.target.extra === "events") {
-			//this.changeHandler(inSender, inEvent);
+		if (inEvent.target.fieldType === "events") {
 			var n = inEvent.target.fieldName;
 			var v = inEvent.target.fieldValue;
-			// FIXME: hack to supply a default event name
 			if (!v) {
-				v = inEvent.target.fieldName = this.selected.name + enyo.cap(n.slice(2));
+				v = this.selected.name + enyo.cap(n.slice(2));
 				if (this.debug) { this.log("SET handler: " + n + " --> " + v); }
-				this.selected.setProperty(n, v);
-				this.change(inSender, inEvent);
 				inEvent.target.setFieldValue(v);
+				this.change(inSender, inEvent);
 			}
-			this.doAction({value: v});
 		}
 	},
 	/**
