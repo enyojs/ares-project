@@ -17,9 +17,11 @@ $*
 /node_modules/mime
 /node_modules/mkdirp
 /node_modules/mocha
-/node_modules/nodejs-module-webos-ipkg
-/node_modules/nopt/
-/node_modules/npmlog/
+/node_modules/ares-webos-sdk
+/node_modules/hpacs-ares-plugin
+/node_modules/nopt
+/node_modules/npmlog
+/node_modules/phonegap-build-api
 /node_modules/plugin-ares-*
 /node_modules/request
 /node_modules/rimraf
