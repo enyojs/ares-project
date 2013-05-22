@@ -461,63 +461,84 @@ function BdPhoneGap(config, next) {
 
 	function upload(req, res, next) {
 		console.log("upload(): fields req.body = ", util.inspect(req.body));
-		var reqData = {};
-		var errs = [];
-		var mandatory = ['token', 'title'];
-		mandatory.forEach(function(field) {
-			if (!req.body[field]) {
-				errs.push("missing form field: '" + field + "'");
+
+		async.waterfall([
+			client.auth.bind(this, { token: req.token }),
+			_prepare.bind(this),
+			_unlockKeys.bind(this),
+			_uploadApp.bind(this),
+			_success.bind(this)
+		], function(err, result) {
+			if (err) {
+				_fail(err);
+			} else {
+				next();
 			}
 		});
-		if (errs.length > 0) {
-			_fail(errs.toString());
-			return;
-		}
 
-		// Pick signing keys, if provided
-		try {
-			reqData.keys = JSON.parse(req.body.keys);
-		} catch(e) {
-			console.log("upload(): no valid signing keys");
-		}
-
-		// When the specific field 'testResponse'
-		// (JSON-encoded) is present, the build request is not
-		// presented to the outside build.phonegap.com
-		// service.  This avoids eating build token in a
-		// frequent test scenario.  The Hermes PhoneGap server
-		// rather returns testResponse.
-		if (req.body.testJsonResponse) {
-			try {
-				res.body = JSON.parse(req.body.testJsonResponse);
-				next();
-			} catch(err) {
-				next(err);
-			}
-		} else if (req.body.appId) {
-			console.log("upload(): updating appId="+ req.body.appId + " (title='" + req.body.title + "')");
-			api.updateFileBasedApp(req.body.token, req.zip.path, req.body.appId, reqData, {
-				success: next,
-				error: _fail
+		function _prepare(api, next) {
+			var keys, appData = {}, errs = [];
+			// check mandatory parameters
+			var mandatory = ['token', 'title'];
+			mandatory.forEach(function(field) {
+				if (!req.body[field]) {
+					errs.push("missing form field: '" + field + "'");
+				}
 			});
-		} else {
-			console.log("upload(): creating new appId for title=" + req.body.title + "");
-			reqData.create_method = 'file';
+			if (errs.length > 0) {
+				next(new HttpError(errs.toString(), 400));
+				return;
+			}
+			// picks signing keys ID's, if any
+			try {
+				keys = JSON.parse(req.body.keys);
+			} catch(e) {
+				console.log("upload(): un-signed build requested (did not find a valid signing key)");
+			}
+			// pass other form parameters as 1st-level
+			// property of the build request object.
 			for (var p in req.body) {
-				if (!reqData[p] && (typeof p === 'string')) {
-					reqData[p] = req.body[p];
+				if (!appData[p] && (typeof p === 'string')) {
+					appData[p] = req.body[p];
 				}
 			}
-			console.log("upload(): reqData=", reqData);
-			api.createFileBasedApp(req.body.token, req.zip.path, reqData, {
-				success: _success,
-				error: _fail
-			});
+			console.log("upload#_prepare(): appData:", appData, "keys:", keys);
+			next(null, api, appData, keys);
 		}
-		
-		function _success(data) {
+
+		function _unlockKeys(api, appData, keys, next) {
+			if (keys) {
+				console.log("upload#_uploadKeys(): keys:", util.inspect(keys));
+				api.post('/keys', { keys: keys }, function(err, response) {
+					console.log("upload#_uploadKeys(): response:", util.inspect(response));
+					next(err, api, appData);
+				});
+			} else {
+				next(null, api, appData);
+			}
+		}
+
+		function _uploadApp(api, appData, next) {
+			var options = {
+				form: {
+					data: appData,
+					file: req.zip.path
+				}
+			};
+			if (appData.appId) {
+				console.log("upload#_uploadApp(): updating appId="+ appData.appId + " (title='" + appData.title + "')");
+				api.put('/apps/' + appData.appId, options, next);
+
+			} else {
+				console.log("upload#_uploadApp(): creating new appId (title='" + appData.title + "')");
+				options.form.data.create_method = 'file';
+				api.post('/apps', options, next);
+			}
+		}
+
+		function _success(data, next) {
 			try {
-				console.log("upload(): ", util.inspect(data));
+				console.log("upload#_success(): data", util.inspect(data));
 				if (typeof data === 'string') {
 					data = JSON.parse(data);
 				}
@@ -528,7 +549,7 @@ function BdPhoneGap(config, next) {
 				res.body = data;
 				next();
 			} catch(e) {
-				_fail(e.toString());
+				_fail(e);
 			}
 		}
 		
@@ -550,7 +571,7 @@ function BdPhoneGap(config, next) {
 	}
 
 	function returnBody(req, res, next) {
-		console.log("returnBody(): ", res.body);
+		console.log("returnBody(): body:", res.body);
 		res.status(200).send(res.body);
 		delete res.body;
 		delete req.zip;
