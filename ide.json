@@ -52,7 +52,7 @@
 			"name":"PhoneGap Build",
 			"type": ["build"],
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/bdPhoneGap.js", "-P", "/phonegap", "-p", "0"
+				"@INSTALLDIR@/hermes/bdPhoneGap.js", "--level", "http", "-P", "/phonegap", "-p", "0"
 			],
 			"useJsonp":false,
 			"verbose": false,
