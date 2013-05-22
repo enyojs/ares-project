@@ -143,8 +143,12 @@ enyo.kind({
 		]}
 	],
 	handleChange: function(inSender, inEvent) {
-		this.fieldValue = this.$.value.getValue();
-		this.doChange({target: this});
+		if (this.disabled) {
+			this.fieldValueChanged();
+		} else {
+			this.fieldValue = this.$.value.getValue();
+			this.doChange({target: this});
+		}
 		return true;
 	},
 	fieldValueChanged: function() {
@@ -152,5 +156,8 @@ enyo.kind({
 			this.$.value.createComponent({content: value, value: value});
 		}, this);
 		this.$.value.setSelected(Math.max(0, this.values.indexOf(this.fieldValue)));
+	},
+	disabledChanged: function() {
+		// Nothing to do as this is not possible to disable a "Select"
 	}
 });

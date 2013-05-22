@@ -202,7 +202,7 @@ enyo.kind({
 		// User defined kind: as an Object
 		if (kind && kind instanceof Object) {
 			kind = enyo.clone(kind);
-			kind = enyo.mixin(kind, {name: attributeFieldName, fieldName: inName, fieldValue: value, fieldType: inType});
+			kind = enyo.mixin(kind, {name: attributeFieldName, fieldName: inName, fieldValue: value, fieldType: inType, disabled: inherited});
 			attributeRow.createComponent(kind);
 		} else {
 			attributeKind = (kind)
