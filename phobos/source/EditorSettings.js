@@ -267,6 +267,7 @@ enyo.kind({
 	},
 
 	closeModalPopup: function(inSender){
+		this.$.textArea.setValue(""); //needs to be set here to avoid disappearance of placeholder in FF21
 		this.$.modalPopup.hide();
 	},
 
@@ -274,7 +275,7 @@ enyo.kind({
 		this.key = inSender.name;
 		if (/^F\d+/.test(this.key)) {
 			if(this.previewSettings.keys[this.key] === undefined){
-				this.$.textArea.setValue("");
+				this.$.textArea.setValue(""); //TO DO : remove setValue from here if autodismiss of popup is false
 			} else this.$.textArea.setValue(this.previewSettings.keys[this.key]);
 		}
 		this.$.modalPopup.show();
