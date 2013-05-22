@@ -862,7 +862,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "rightPanels",kind: "Panels", wrap: false,
+	name: "rightPanels",kind: "Panels", wrap: false, draggable:false,
 	events: {
 		onCss: "",
 		onReparseAsked: ""
