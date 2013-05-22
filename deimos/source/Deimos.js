@@ -161,6 +161,7 @@ enyo.kind({
 			}
 			
 			this.$.inspector.inspect(null);
+			this.$.inspector.setCurrentKindName(kind.name);
 			this.$.designer.setCurrentKind(kind);
 		}
 		

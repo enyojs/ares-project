@@ -52,3 +52,11 @@ input.inspector-field-checkbox {
 .ares-inspector-row.disabled * {
 	opacity: 0.6;
 }
+
+.event-menu-item {
+  display: block;
+  padding: 2px;
+}
+.event-menu-item:hover {
+  background: #284152;
+}

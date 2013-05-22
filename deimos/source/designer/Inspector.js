@@ -191,13 +191,11 @@ enyo.kind({
 		attributeRow.createComponent({kind: "InheritCheckbox", checked: !inherited, prop: inName});
 
 		if (inType === 'events') {
-			kind = "Inspector.Config.Event";
+			kind = {kind: "Inspector.Config.Event", values: this.kindFunctions};
 		}
 		
 		info = Model.getInfo(inControl.kind, inType, inName);
 		kind = (info && info.inputKind) || kind;
-
-
 		
 		// User defined kind: as an Object
 		if (kind && kind instanceof Object) {
@@ -392,6 +390,14 @@ enyo.kind({
 			// Remove this attribute from the rendered instance in the iframe by setting it to _undefined_
 			this.doModify({name: attribute, value: undefined});
 		}
+	},
+	//* @public
+	setCurrentKindName: function(kindname) {
+		var definition = this.getKindDefinition(kindname);
+		this.helper.setDefinition(definition);
+
+		// Get the list of handler methods
+		this.kindFunctions = this.helper.getFunctions();
 	}
 });
 
