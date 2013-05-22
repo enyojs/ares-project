@@ -131,18 +131,9 @@ Get more information about the options using `-h` or `--help`:
 	  -l, --level       IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')                  [default: "http"]
 	  -L, --log         Log IDE debug to ./ide.log                                                             [boolean]
 
-Optionally, configure the `root` of your local file-system access in `ide.json`. By default, the local filesystem service serves the files from your _Home_ or _My Documents_ directory, depending on your operating system. You might want to change this to point to the location of your project files, to make navigation faster & easier. 
+In case you want to access other parts of your machine's file-system, refer to the [local filesystem service configuration](hermes/README.md#local-filesystem-service)
 
-For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\User` (if using backslashes [i.e. on Windows], use double slashes for JSON encoding)
-
-	% vi ide.json
-	[...]
-	"command":"@NODE@", "params":[
-		"hermes/fsLocal.js", "-P", "/files", "-p", "0", "@HOME@"
-	],
-	[...]
-
-#### Reporting Issues
+#### [Reporting Issues](id:reporting-issues)
 
 Be sure to run Ares with `--log` (or `-L`) to capture the Ares server output in the file name `ide.log`.  Attach this log-file to you bug report on the [ARES JIRA](https://enyojs.atlassian.net/browse/ENYO/component/10302).
 
@@ -206,15 +197,11 @@ To publish:
 
 ### PhoneGap Build
 
-Ares includes the ability to package a mobile Enyo application using [PhoneGap Build](https://build.phonegap.com/).  You must have a properly setup account (with signing keys & distribution certificates) before being able to use Ares to build applications using PhoneGap Build.
-
-Here are a few references to create the necessary signing keys & distribution certificates:
-
-1. [Android Application Signing](http://developer.android.com/tools/publishing/app-signing.html)
+See [Hermes README: PhoneGap build service](hermes/README.md#phonegap-build-service).
 
 ### Dropbox
 
-In order to use Dropbox as storage service for Ares, follow detailed setup instructions in `hermes/README.md`.  The Dropbox connector is not usable without following those instructions.
+See [Hermes README: Dropbox File-System service](hermes/README.md#dropbox-filesystem-service).
  
 ### [Project templates](id:project-templates)
 

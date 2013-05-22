@@ -41,10 +41,12 @@ function BdPhoneGap(config, next) {
 	util.inherits(HttpError, Error);
 	HttpError.prototype.name = "HTTP Error";
 
-	// (simple) parameters checking
-	config.pathname = config.pathname || '/phonegap';
+	this.config = config;
 
-	var deployScript = path.join(config.enyoDir, 'tools', 'deploy.js');
+	// (simple) parameters checking
+	this.config.pathname = config.pathname || '/phonegap';
+
+	var deployScript = path.join(this.config.enyoDir, 'tools', 'deploy.js');
 	try {
 		var stat = fs.statSync(deployScript);
 		if (!stat.isFile()) throw "Not a file";
@@ -53,7 +55,7 @@ function BdPhoneGap(config, next) {
 		next(new Error("Not a suitable Enyo: it does not contain a usable 'tools/deploy.js'"));
 	}
 
-	log.verbose('main', "config",  config);
+	log.verbose('main', "config",  this.config);
 
 	// express 3.x: app is not a server
 	var app, server;
@@ -92,20 +94,6 @@ function BdPhoneGap(config, next) {
 	// Authentication
 	app.use(express.cookieParser());
 
-	function setCookie(res, key, value) {
-		var exdate=new Date();
-		exdate.setDate(exdate.getDate() + 10 /*days*/);
-		var cookieOptions = {
-			domain: '127.0.0.1:' + config.port,
-			path: config.pathname,
-			httpOnly: true,
-			expires: exdate
-			//maxAge: 1000*3600 // 1 hour
-		};
-		res.cookie(key, value, cookieOptions);
-		log.info('setCookie()', "Set-Cookie: " + key + ":", value || "");
-	}
-
 	app.use(function(req, res, next) {
 		if (req.connection.remoteAddress !== "127.0.0.1") {
 			next(new Error("Access denied from IP address "+req.connection.remoteAddress));
@@ -141,14 +129,20 @@ function BdPhoneGap(config, next) {
 	 * Verbs
 	 */
 
+	app.post('/config', (function(req, res, next) {
+		this.configure(req.body && req.body.config, function(err) {
+			res.status(200).end();
+		});
+	}).bind(this));
+
 	// '/token' & '/api' -- Wrapped public Phonegap API
-	app.post(makeExpressRoute('/token'), getToken);
-	app.get(makeExpressRoute('/api/v1/me'), getUserData);
+	app.post(makeExpressRoute('/token'), getToken.bind(this));
+	app.get(makeExpressRoute('/api/v1/me'), getUserData.bind(this));
 	
 	// '/op' -- localy-implemented operations
 
 	// Return the ZIP-ed deployed Enyo application
-	app.post(makeExpressRoute('/op/deploy'), function(req, res, next) {
+	app.post(makeExpressRoute('/op/deploy'), (function(req, res, next) {
 		async.series([
 			prepare.bind(this, req, res),
 			store.bind(this, req, res),
@@ -167,12 +161,12 @@ function BdPhoneGap(config, next) {
 			// because that would try to return 200 with
 			// an empty body, while we have already sent
 		});
-	});
+	}).bind(this));
 
 	// Upload ZIP-ed deployed Enyo application to the
 	// https://build.phonegap.com online service and return the
 	// JSON-encoded response of the service.
-	app.post(makeExpressRoute('/op/build'), function(req, res, next) {
+	app.post(makeExpressRoute('/op/build'), (function(req, res, next) {
 		async.series([
 			prepare.bind(this, req, res),
 			store.bind(this, req, res),
@@ -193,7 +187,7 @@ function BdPhoneGap(config, next) {
 			// an empty body, while we have already sent
 			// back the response.
 		});
-	});
+	}).bind(this));
 	
 	// Global error handler (last app.xxx(), with 4 parameters)
 	function errorHandler(err, req, res, next){
@@ -219,7 +213,7 @@ function BdPhoneGap(config, next) {
 			res.status(err.statusCode || 500);
 			if (err.statusCode === 401) {
 				// invalidate token cookie
-				setCookie(res, 'token', null);
+				this.setCookie(res, 'token', null);
 			}
 			res.contentType('txt'); // direct usage of 'text/plain' does not work
 			res.send(err.toString());
@@ -227,21 +221,21 @@ function BdPhoneGap(config, next) {
 	}
 
 	// express-3.x: middleware with arity === 4 is detected as the error handler
-	app.use(errorHandler);
+	app.use(errorHandler.bind(this));
 
 	// Send back the service location information (origin,
 	// protocol, host, port, pathname) to the creator, when port
 	// is bound
-	server.listen(config.port, "127.0.0.1", null /*backlog*/, function() {
+	server.listen(this.config.port, "127.0.0.1", null /*backlog*/, (function() {
 		var tcpAddr = server.address();
 		return next(null, {
 			protocol: 'http',
 			host: tcpAddr.address,
 			port: tcpAddr.port,
 			origin: "http://" + tcpAddr.address + ":"+ tcpAddr.port,
-			pathname: config.pathname
+			pathname: this.config.pathname
 		});
-	});
+	}).bind(this));
 
 	/**
 	 * Terminates express server & clean-up the plate
@@ -323,7 +317,7 @@ function BdPhoneGap(config, next) {
 				var params = [ '--verbose',
 					       '--packagejs', path.join(req.appDir.source, 'package.js'),
 					       '--source', req.appDir.source,
-					       '--enyo', config.enyoDir,
+					       '--enyo', this.config.enyoDir,
 					       '--build', req.appDir.build,
 					       '--out', req.appDir.deploy,
 					       '--less'];
@@ -419,10 +413,11 @@ function BdPhoneGap(config, next) {
 		auth = "Basic " + new Buffer(req.body.username + ':' +req.body.password).toString("base64");
 		options = {
 			url : 'https://' + url + "/token",
-			headers : { "Authorization" : auth }
+			headers : { "Authorization" : auth },
+			proxy: this.config.proxyUrl
 		};
 		log.http("getToken()", "POST /token");
-		request.post(options, function(err1, response, body) {
+		request.post(options, (function(err1, response, body) {
 			try {
 				log.verbose("getToken()", "response.statusCode:", response.statusCode);
 				if (err1) {
@@ -434,18 +429,21 @@ function BdPhoneGap(config, next) {
 					if (data.error) {
 						next(new HttpError(data.error, 401));
 					} else {
-						setCookie(res, 'token', data.token);
+						this.setCookie(res, 'token', data.token);
 						res.status(200).send(data).end();
 					}
 				}
 			} catch(err0) {
 				next(err0);
 			}
-		});
+		}).bind(this));
 	}
 
 	function getUserData(req, res, next) {
-		client.auth({ token: req.token }, function(err1, api) {
+		client.auth({
+			token: req.token,
+			proxy: this.config.proxyUrl
+		}, function(err1, api) {
 			if (err1) {
 				next(err1);
 			} else {
@@ -465,7 +463,10 @@ function BdPhoneGap(config, next) {
 		log.info("upload()", "title:", req.body.title, ", platforms:", req.body.platforms, ", appId:", req.body.appId);
 
 		async.waterfall([
-			client.auth.bind(this, { token: req.token }),
+			client.auth.bind(this, {
+				token: req.token,
+				proxy: this.config.proxyUrl
+			}),
 			_prepare.bind(this),
 			_uploadApp.bind(this),
 			_success.bind(this)
@@ -568,6 +569,26 @@ function BdPhoneGap(config, next) {
 		});
 	}
 }
+
+BdPhoneGap.prototype.configure = function(config, next) {
+	util._extend(this.config, config);
+	log.verbose("configure()", "config:", this.config);
+	next();
+};
+
+BdPhoneGap.prototype.setCookie = function(res, key, value) {
+	var exdate=new Date();
+	exdate.setDate(exdate.getDate() + 10 /*days*/);
+	var cookieOptions = {
+		domain: '127.0.0.1:' + this.config.port,
+		path: this.config.pathname,
+		httpOnly: true,
+		expires: exdate
+		//maxAge: 1000*3600 // 1 hour
+	};
+	res.cookie(key, value, cookieOptions);
+	log.info('setCookie()', "Set-Cookie: " + key + ":", value || "");
+};
 
 if (path.basename(process.argv[1], '.js') === basename) {
 	// We are main.js: create & run the object...

@@ -56,6 +56,7 @@
 			],
 			"useJsonp":false,
 			"verbose": false,
+			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
 			"auth": {
 				"type": "phonegap"
 			},

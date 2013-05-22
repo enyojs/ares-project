@@ -2,10 +2,11 @@
 
 Hermes offers several services not available in a Web Browser through one (or several) Node.js processes:
 
-* File-system abstraction for the Ares IDE.
-* Archive service (used by the PhoneGap build service).
+* [File-system services](#filesystem-services) (Local, [Dropbox](#dropbox-filesystem-service))
+* [Project templates services](#project-template-services)
+* [Build Services](#build-services) ([PhoneGap Build](#phonegap-build-service), …)
 
-## Filesystem service
+## Filesystem services
 
 ### Protocol
 
@@ -118,7 +119,24 @@ To stop on the first failing case:
 
 For more detailled instructions, refer to the [Mocha home page](http://visionmedia.github.com/mocha/).
 
-### Dropbox
+### [Local](id:local-filesystem-service)
+
+The `fsLocal` service is simply serves your local machine's filesystem to the browser, which has otherwise no access outside the web sandbox (or exclusivelly via direct user interaction).
+
+Optionally, configure the `root` of your local file-system access in `ide.json`. By default, the local filesystem service serves the files from your _Home_ directory, depending on your operating system. You might want to change this to point to the location of your project files, to make navigation faster & easier. 
+
+For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Me` (if using backslashes [i.e. on Windows], use double slashes for JSON encoding)
+
+	% vi ide.json
+	[...]
+	"command":"@NODE@", "params":[
+		"hermes/fsLocal.js", "-P", "/files", "-p", "0", "@HOME@"
+	],
+	[...]
+
+**NOTE:** `fsLocal` is currently broken if you bind it to a folder whose name (or whose parents's names contain a space.  For example "New folder" breaks `fsLocal`.  We are aware of the issue.
+
+### [Dropbox](id:dropbox-filesystem-service)
 
 Ares comes with an Hermes service using your Dropbox account as a storage service.    Enable this service in the `ide.json` before starting the IDE server:
 
@@ -167,39 +185,7 @@ Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to th
 			},
 			[…]
 
-## Archive service
-
-This is the `arZip.js` service.  It takes 2 arguments:
-
-* `pathname`
-* `port`
-
-It can be started standlone using the following command-line (or a similar one):
-
-
-…in which case it can be tested using `curl` by a command-line like the following one:
-
-	$ curl \
-		-F "file=@config.xml;filename=config.xml" \
-		-F "file=@icon.png;filename=images/icon.png" \
-		-F "archive=myapp.zip" \
-		"http://127.0.0.1:9019/arZip" > /tmp/toto.zip
-	  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-	                                 Dload  Upload   Total   Spent    Left  Speed
-	100  8387    0  3860  100  4527   216k   253k --:--:-- --:--:-- --:--:--  276k
-
-The generated file is expected to look like to below:
-
-	$ unzip -l /tmp/toto.zip 
-	Archive:  /tmp/toto.zip
-	  Length     Date   Time    Name
-	 --------    ----   ----    ----
-	      942  10-17-12 17:26   config.xml
-	     3126  10-17-12 17:26   images/icon.png
-	 --------                   -------
-	     4068                   2 files
-
-## Project template service
+## [Project template service](id:project-template-services)
 
 The service "***genZip***" allows to intanciate new Ares project from project templates such as "**[bootplate](https://github.com/enyojs/enyo/wiki/Bootplate)**" or any customer specific project templates.
 These project templates can be defined:  
@@ -312,7 +298,7 @@ The default `<pathname>` value is `/genzip`.  Its value can be changed using the
 		* It's up to the caller to extract and base64 decode the files to create a new project.  
 		In Ares, this is achieved by forwarding the FormData to Hermes filesystem service via a PUT method.
 
-## Build services
+## [Build services](id:build-services)
 
 ### Ares IDE - Javascript API
 
@@ -350,20 +336,65 @@ The following resources
 			* `multipart/form-data` generated application package is the first returned part of the multipart response
 			
 
-### PhoneGap build service
+### [Archive build service](id:archive-build-service)
 
-The entire [build.phonegap.com API](https://build.phonegap.com/docs/api) is wrapped by a dedicated Hermes build service named `bdPhoneGap`.  Reasons are:
+This is the `arZip.js` service.  It takes 2 arguments:
 
-1. It is easier (more portable) to manipulate files using Node.js than using HTML5 `File` and `Blob` entities, which are not (yet) fully implemented by the browsers.
-2. build.phonegap.com does not support CORS: It refuses to answer an AJAX query (or at least the one that requests a token) that comes from a web application served from 127.0.0.1 (as Ares is in its standalone version).
+* `pathname`
+* `port`
 
-		XMLHttpRequest cannot load https://build.phonegap.com/token.
- 		Origin http://127.0.0.1 is not allowed by Access-Control-Allow-Origin.
+It can be started standlone using the following command-line (or a similar one):
 
-**Note:** Ares PhoneGap Build connector does _not_ work behind an HTTP/HTTPS proxy yet.
+
+…in which case it can be tested using `curl` by a command-line like the following one:
+
+	$ curl \
+		-F "file=@config.xml;filename=config.xml" \
+		-F "file=@icon.png;filename=images/icon.png" \
+		-F "archive=myapp.zip" \
+		"http://127.0.0.1:9019/arZip" > /tmp/toto.zip
+	  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+	                                 Dload  Upload   Total   Spent    Left  Speed
+	100  8387    0  3860  100  4527   216k   253k --:--:-- --:--:-- --:--:--  276k
+
+The generated file is expected to look like to below:
+
+	$ unzip -l /tmp/toto.zip 
+	Archive:  /tmp/toto.zip
+	  Length     Date   Time    Name
+	 --------    ----   ----    ----
+	      942  10-17-12 17:26   config.xml
+	     3126  10-17-12 17:26   images/icon.png
+	 --------                   -------
+	     4068                   2 files
+
+### [PhoneGap build service](id:phonegap-build-service)
+
+
+Ares includes the ability to package a mobile Enyo application using [PhoneGap Build](https://build.phonegap.com/).  You must have a properly setup account (with signing keys & distribution certificates) before being able to use Ares to build applications using PhoneGap Build.
+
+Here are a few references to create the necessary signing keys & distribution certificates:
+
+1. [Android Application Signing](http://developer.android.com/tools/publishing/app-signing.html)
+
+#### Configuration
+
+The Ares PhoneGap build service does not need any configuration but the HTTP/HTTPS proxy, if needed.  In `ide.json`, replace `XproxyUrl` by `proxyUrl` and a proxy protocol, host & port that match your needs.
+
+```
+			"useJsonp":false,
+			"verbose": false,
+			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
+			"auth": {
+```
+
+**NOTE:** Ares does not currently work behind a password-protected proxy.  Should you need this feature, please report it via JIRA or on our user's forum.
+
+#### Implementation
+
+The entire [build.phonegap.com API](https://build.phonegap.com/docs/api) is wrapped by a dedicated Hermes build service named `bdPhoneGap` that use a [PhoneGap-provided Node.js client library](https://github.com/phonegap/phonegap-build-api-js#phonegap-build-api-js-).
 
 #### Protocol
-
 
 Resources:
 
