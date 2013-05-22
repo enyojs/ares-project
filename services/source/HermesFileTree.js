@@ -12,17 +12,17 @@ enyo.kind({
 		//
 		/*
 		//onSetupItem:"handleSetup",
-    onhold:"handleHold",
-    ondragfinish:"handleDragFinish",
-    onup:"handleRelease",
-		ondrag:"handleDrag",
+    //onhold:"handleHold",
+    //ondragfinish:"handleDragFinish",
+    //onup:"handleRelease",
+		//ondrag:"handleDrag",
     //onresize:"handleResize",
     ondragstart:"handleDragStart",
-    onselectstart:"handleSelectStart",
+    //onselectstart:"handleSelectStart",
     onrelease:"handleSlowRelease",*/
-		/*ondragstart:"dragStart",
+		ondragstart:"dragStart",
 		ondrag:"drag",
-		ondragfinish:"dragFinish",*/
+		ondragfinish:"dragFinish",
 	},
 	published: {
 		serverName: ""
@@ -57,7 +57,9 @@ enyo.kind({
 		
 		// Hermes tree
 		{kind: "Scroller", fit: true, components: [
-			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", draggable: false, expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll" },
+			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", 
+				//draggable: false, 
+				expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll" },
 			// DragAvatar use
 			/*{name:"dragAvatar", kind:"DragAvatar",
 				//components: [{tag: "img", src: "$deimos/images/icon.png"}]
@@ -240,26 +242,35 @@ enyo.kind({
 		return true;
 	},
 	//
-	/*dragStart: function(inSender, inEvent) {
+	dragStart: function(inSender, inEvent) {
 		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
+		//this.log(inSender, "=>", inEvent);
+		
+		//this.log("start file path=", inEvent.originator.file.path);
+		this.log("start file id=", inEvent.originator.file.id);
 		
 		return true;
 	},
 	drag: function(inSender, inEvent) {
 		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		this.$.dragAvatar.drag(inEvent);
+		//this.log(inSender, "=>", inEvent);
+		//this.$.dragAvatar.drag(inEvent);
+		
+		//this.log("drag file path=", inEvent.originator.file.path);
+		//this.log("drag file id=", inEvent.originator.file.id);
 		
 		return true;
 	},
 	dragFinish: function(inSender, inEvent) {
 		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		this.$.dragAvatar.hide();
+		//this.log(inSender, "=>", inEvent);
+		//this.$.dragAvatar.hide();
+		
+		//this.log("finish file path=", inEvent.originator.file.path);
+		this.log("finish file id=", inEvent.originator.file.id);
 		
 		return true;
-	},*/
+	},
 	/*handleHold:function(inSender, inEvent) {
 		//if (this.debug) 
 		this.log(inSender, "=>", inEvent);

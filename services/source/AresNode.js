@@ -18,12 +18,14 @@ enyo.kind({
 		service: null
 	},
 	handlers: {
-		ondragstart:"dragStart",
-		ondrag:"drag",
+		/*ondragstart:"dragStart",
 		ondragfinish:"dragFinish",
-		//ondrop: "drop",
+		ondrag:"drag",
+		ondrop: "drop",*/
 		//ondragover: "dragover",
 		//ondragout: "dropout",
+		//onhold: "hold",
+		//onrelease: "release",
 	},
 	attributes: {
 		draggable: true, 
@@ -35,33 +37,44 @@ enyo.kind({
 
 	debug: false,
 
-	dragStart: function(inSender, inEvent) {
+	/*dragStart: function(inSender, inEvent) {
 		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		this.log("originator=", inEvent.originator);
+		//this.log(inSender, "=>", inEvent);
+		//this.log("originator=", inEvent.originator);
+		this.log("start file path=", inEvent.originator.file.path);
+		this.log("start file id=", inEvent.originator.file.id);
+		
+		return true;
+	},
+	dragFinish: function(inSender, inEvent) {
+		//if (this.debug) 
+		//this.log(inSender, "=>", inEvent);
+		//this.log("originator=", inEvent.originator);
+		
+		this.log("finish file path=", inEvent.originator.file.path);
+		this.log("finish file id=", inEvent.originator.file.id);
 		
 		return true;
 	},
 	drag: function(inSender, inEvent) {
 		//if (this.debug) 
 		//this.log(inSender, "=>", inEvent);
-		
-		return true;
-	},
-	dragFinish: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		this.log("originator=", inEvent.originator);
+		//this.log("originator=", inEvent.originator);
+		this.log("drag file path=", inEvent.originator.file.path);
+		this.log("drag file id=", inEvent.originator.file.id);
 		
 		return true;
 	},
 	drop: function(inSender, inEvent) {
 		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
+		//this.log(inSender, "=>", inEvent);
+		
+		this.log("drop file path=", inEvent.originator.file.path);
+		this.log("drop file id=", inEvent.originator.file.id);
 		
 		return true;
-	},
-	dragover: function(inSender, inEvent) {
+	},*/
+	/*dragover: function(inSender, inEvent) {
 		//if (this.debug) 
 		this.log(inSender, "=>", inEvent);
 		
@@ -73,6 +86,24 @@ enyo.kind({
 		
 		return true;
 	},
+	hold: function(inSender, inEvent) {
+		//if (this.debug) 
+		//this.log(inSender, "=>", inEvent);
+		
+		this.log("hold file path=", inEvent.originator.file.path);
+		this.log("hold file id=", inEvent.originator.file.id);
+		
+		return true;
+	},
+	release: function(inSender, inEvent) {
+		//if (this.debug) 
+		//this.log(inSender, "=>", inEvent);
+		
+		this.log("release file path=", inEvent.originator.file.path);
+		this.log("release file id=", inEvent.originator.file.id);
+		
+		return true;
+	},*/
 	
 	// Note: this function does not recurse
 	updateNodes: function() {
@@ -248,6 +279,7 @@ enyo.kind({
 				name: '$' + f.name, // prefix avoids clobberring non-files components like icon
 				content: f.name,
 				expandable: f.isDir,
+				//draggable: true,
 				icon: "$services/assets/images/" + (f.isDir ? "folder.png" : "file.png")
 			});
 		}
