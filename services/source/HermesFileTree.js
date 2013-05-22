@@ -8,7 +8,21 @@ enyo.kind({
 		onTreeChanged: ""
 	},
 	handlers: {
-		onNodeDblClick: "nodeDblClick"
+		onNodeDblClick: "nodeDblClick",
+		//
+		/*
+		//onSetupItem:"handleSetup",
+    onhold:"handleHold",
+    ondragfinish:"handleDragFinish",
+    onup:"handleRelease",
+		ondrag:"handleDrag",
+    //onresize:"handleResize",
+    ondragstart:"handleDragStart",
+    onselectstart:"handleSelectStart",
+    onrelease:"handleSlowRelease",*/
+		/*ondragstart:"dragStart",
+		ondrag:"drag",
+		ondragfinish:"dragFinish",*/
 	},
 	published: {
 		serverName: ""
@@ -40,10 +54,15 @@ enyo.kind({
 				{kind: "onyx.Tooltip", content: "Delete..."}
 			]}
 		]},
-
+		
 		// Hermes tree
 		{kind: "Scroller", fit: true, components: [
-			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll" }
+			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", draggable: false, expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll" },
+			// DragAvatar use
+			/*{name:"dragAvatar", kind:"DragAvatar",
+				//components: [{tag: "img", src: "$deimos/images/icon.png"}]
+				components: [{tag: "img", src: "$services/assets/images/move.png"}]
+			},*/
 		]},
 
 		// track selection of nodes. here, selection Key is file or folderId.
@@ -59,8 +78,7 @@ enyo.kind({
 		{name: "nameFolderPopup", kind: "NamePopup", type: "folder", fileName: "", placeHolder: "Folder Name", onCancel: "_newFolderCancel", onConfirm: "_newFolderConfirm"},
 		{name: "nameCopyPopup", kind: "NamePopup", title: "Name for copy of", fileName: "Copy of foo.js", onCancel: "copyFileCancel", onConfirm: "copyFileConfirm"},
 		{name: "deletePopup", kind: "DeletePopup", onCancel: "deleteCancel", onConfirm: "deleteConfirm"},
-		{name: "renamePopup", kind: "RenamePopup", title: "New name for ", fileName: "foo.js", onCancel: "_renameCancel", onConfirm: "_renameConfirm"}
-
+		{name: "renamePopup", kind: "RenamePopup", title: "New name for ", fileName: "foo.js", onCancel: "_renameCancel", onConfirm: "_renameConfirm"},
 	],
 
 	// warning: this variable duplicates an information otherwise stored in this.$.selection
@@ -68,6 +86,10 @@ enyo.kind({
 	// return an object (hash) which needs to be scanned to retrieve the selected value
 	selectedFile: null,
 	selectedNode: null,
+	
+	//
+	//draggedNode: null,
+	//overDraggedNode: null,
 
 	debug: false,
 
@@ -217,7 +239,140 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
+	//
+	/*dragStart: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	drag: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		this.$.dragAvatar.drag(inEvent);
+		
+		return true;
+	},
+	dragFinish: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		this.$.dragAvatar.hide();
+		
+		return true;
+	},*/
+	/*handleHold:function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	handleDragFinish:function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	handleDrag:function(inSender, inEvent) {
+		//if (this.debug) 
+		//this.log(inSender, "=>", inEvent);
+		
+		// check if the node to drag is not the node over the cursor is
+		if (draggedNode != inEvent.originator.parent) {
+			// check if the cursor is no more hovering over the last node over hovered
+			if (overDraggedNode != inEvent.originator.parent) {
+				// check if the cursor is not between two nodes (so not over their related container)
+				//if(inEvent.originator.parent.node == null) {
+					// check if the cursor is not over a file node
+					//if (inEvent.originator.parent.file) {
+						if (overDraggedNode) {
+							overDraggedNode.children[1].applyStyle("background-color", null);
+						}
+						overDraggedNode = inEvent.originator.parent;
+						this.log("overDraggedNode folder changed");
+						overDraggedNode.children[1].applyStyle("background-color", "red");
+						this.log("inEvent=>", inEvent);
+						this.log("originator(parent)=>", inEvent.originator.parent);
+					/*} else {
+						if (overDraggedNode) {
+							overDraggedNode.children[1].applyStyle("background-color", null);
+						}
+						this.log("overDraggedNode file");
+						overDraggedNode = null;
+					}*/
+				/*} else {
+					if (overDraggedNode) {
+						overDraggedNode.children[1].applyStyle("background-color", null);
+					}
+					this.log("overDraggedNode father");
+					overDraggedNode = null;
+					this.log("inEvent=>", inEvent);
+					this.log("originator(parent)=>", inEvent.originator.parent);
+				}*/
+	/*		} else {
+				this.log("overDraggedNode same");
+			}
+		} else { 
+			if (overDraggedNode) {
+				overDraggedNode.children[1].applyStyle("background-color", null);
+			}
+			this.log("overDraggedNode itself");
+			overDraggedNode = null;
+		}
+		
+		return true;
+	},
+	handleRelease:function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		if (overDraggedNode) {
+			overDraggedNode.children[1].applyStyle("background-color", null);
+		}
+		overDraggedNode = null;
+		
+		draggedNode = null;
+		
+		this.log("draggedNode released");
+		
+		return true;
+	},
+	handleDragStart:function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		draggedNode = inEvent.originator.parent;
+		overDraggedNode = null;
+		this.log("draggedNode captured");
+		this.log("inEvent=>", inEvent);
+		this.log("originator(parent)=>", inEvent.originator.parent);
+		
+		this.enableDisableButtons();
+		
+		return true;
+	},
+	handleSelectStart:function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	handleSlowRelease:function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},*/
+	/*nodeExpand:function(inSender, inEvent) {
+		this.log("HermesFileTree", inSender, "=>", inEvent);
+		if (draggedNode==null) this.inherited(arguments);
+		else return true;
+	},*/
+	//
 	select: function(inSender, inEvent) {
+		// initialisation of the handler about the node over hovered by the cursor during a drag mode action.
+		//overDraggedNode = null;
+		//draggedNode = null;
+	
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		this.selectedNode=inEvent.data;
 		this.selectedFile=inEvent.data.file;
@@ -230,6 +385,7 @@ enyo.kind({
 	},
 	deselect: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
+		
 		if (inEvent.data && inEvent.data.$.caption) {
 			inEvent.data.$.caption.applyStyle("background-color", null);
 		}

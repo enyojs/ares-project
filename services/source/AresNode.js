@@ -17,14 +17,63 @@ enyo.kind({
 	published: {
 		service: null
 	},
-
+	handlers: {
+		ondragstart:"dragStart",
+		ondrag:"drag",
+		ondragfinish:"dragFinish",
+		//ondrop: "drop",
+		//ondragover: "dragover",
+		//ondragout: "dropout",
+	},
+	attributes: {
+		draggable: true, 
+	},
+	
 	// expandable nodes may only be opened by tapping the icon; tapping the content label
 	// will fire the nodeTap event, but will not expand the node.
 	onlyIconExpands: true,
 
 	debug: false,
 
-
+	dragStart: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		this.log("originator=", inEvent.originator);
+		
+		return true;
+	},
+	drag: function(inSender, inEvent) {
+		//if (this.debug) 
+		//this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	dragFinish: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		this.log("originator=", inEvent.originator);
+		
+		return true;
+	},
+	drop: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	dragover: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	dragout: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	
 	// Note: this function does not recurse
 	updateNodes: function() {
 		this.startLoading(this);
@@ -206,6 +255,7 @@ enyo.kind({
 	},
 	nodeExpand: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
+		this.log(inSender, "=>", inEvent);
 
 		var subnode = inEvent.originator;
 		if (this.debug) this.log("nodeExpand called while node Expanded is " + subnode.expanded) ;
