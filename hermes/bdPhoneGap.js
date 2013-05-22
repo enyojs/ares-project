@@ -24,7 +24,7 @@ var basename = path.basename(__filename);
 var url = 'build.phonegap.com';
 
 process.on('uncaughtException', function (err) {
-	log.error(basename, err.stack);
+	console.error(err.stack);
 	process.exit(1);
 });
 
@@ -465,7 +465,6 @@ function BdPhoneGap(config, next) {
 		async.waterfall([
 			client.auth.bind(this, { token: req.token }),
 			_prepare.bind(this),
-			_unlockKeys.bind(this),
 			_uploadApp.bind(this),
 			_success.bind(this)
 		], function(err, result) {
@@ -477,7 +476,7 @@ function BdPhoneGap(config, next) {
 		});
 
 		function _prepare(api, next) {
-			var keys, appData = {}, errs = [];
+			var appData = {}, errs = [];
 			// check mandatory parameters
 			var mandatory = ['token', 'title'];
 			mandatory.forEach(function(field) {
@@ -491,7 +490,7 @@ function BdPhoneGap(config, next) {
 			}
 			// picks signing keys ID's, if any
 			try {
-				keys = JSON.parse(req.body.keys);
+				appData.keys = JSON.parse(req.body.keys);
 			} catch(e) {
 				console.log("upload(): un-signed build requested (did not find a valid signing key)");
 			}
@@ -502,22 +501,9 @@ function BdPhoneGap(config, next) {
 					appData[p] = req.body[p];
 				}
 			}
-			console.log("upload#_prepare(): appData:", appData, "keys:", keys);
-			next(null, api, appData, keys);
+			console.log("upload#_prepare(): appData:", appData);
+			next(null, api, appData);
 		}
-
-		function _unlockKeys(api, appData, keys, next) {
-			if (keys) {
-				console.log("upload#_uploadKeys(): keys:", util.inspect(keys));
-				api.post('/keys', { keys: keys }, function(err, response) {
-					console.log("upload#_uploadKeys(): response:", util.inspect(response));
-					next(err, api, appData);
-				});
-			} else {
-				next(null, api, appData);
-			}
-		}
-
 		function _uploadApp(api, appData, next) {
 			var options = {
 				form: {
