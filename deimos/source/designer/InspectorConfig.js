@@ -169,6 +169,10 @@ enyo.kind({
 			// Will be filled at create() time
 		]}
 	],
+	create: function() {
+		this.values = [""].concat(this.values);		// Add a "empty value"
+		this.inherited(arguments);
+	},
 	handleChange: function(inSender, inEvent) {
 		if (this.disabled) {
 			this.fieldValueChanged();	// Re-set the same previous value
