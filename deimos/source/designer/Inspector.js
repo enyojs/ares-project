@@ -2,7 +2,8 @@ enyo.kind({
 	name: "Inspector",
 	kind: "FittableRows",
 	events: {
-		onModify: ""
+		onModify: "",
+		onAction: ""
 	},
 	published: {
 		filterLevel: null,		// Value will be given by Inspector.FilterXXX "checked" item.
@@ -13,9 +14,9 @@ enyo.kind({
 	components: [
 		{kind: "Inspector.FilterType", onValueChanged: "updateFilterType"},
 		{kind: "Scroller", fit: true, components: [
-			{name: "content", kind: "FittableRows", onActivate: "inheritAttributeToggle"}
+			{name: "content", kind: "FittableRows", onActivate: "inheritAttributeToggle", onToggleSide: "handleToggleSide"}
 		]},
-		{kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"}
+		{name: "filterLevel", kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"}
 	],
 	handlers: {
 		onChange: "change",
@@ -210,9 +211,210 @@ enyo.kind({
 				:	(value === true || value === false || value === "true" || value === "false")
 					?	"Inspector.Config.Boolean"
 					:	"Inspector.Config.Text";
-		
-			attributeRow.createComponent({name: attributeFieldName, kind: attributeKind, fieldName: inName, fieldValue: value, fieldType: inType, disabled: inherited});
+			
+			var values = info ? info.values : null;
+			var comp = {name: attributeFieldName, kind: attributeKind, fieldName: inName, fieldValue: value, extra: inType, disabled: inherited};
+			
+			if (values) {
+				comp.values = values;
+			}
+			
+			attributeRow.createComponent(comp);
 		}
+	},
+	makeLayoutEditor: function(inControl, inPropList) {
+		var layoutKinds = this.getLayoutKinds(),
+			layoutKindInherited = !(
+				inControl.aresId &&
+				this.userDefinedAttributes &&
+				this.userDefinedAttributes[inControl.aresId] &&
+				typeof this.userDefinedAttributes[inControl.aresId]["layoutKind"] !== "undefined"
+			),
+			layoutKind = (layoutKindInherited) ? "" : this.userDefinedAttributes[inControl.aresId]["layoutKind"],
+			row
+		;
+		
+		this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Layout Kind"});
+		row = this.$.content.createComponent({classes: "ares-inspector-row"});
+		row.createComponent({
+			name: 		"attributeVal-layoutKind",
+			kind: 		"Inspector.Config.Select",
+			classes: 	"layout-kind-select",
+			fieldName: 	"layoutKind",
+			fieldValue: layoutKind,
+			disabled: 	false,
+			values: 	layoutKinds,
+			onChange:	"layoutKindUpdate"
+		}, {owner: this});
+		
+		// Only draw absolute positioning controls if layoutKind === "AbsolutePositioningLayout"
+		if (layoutKind === "AbsolutePositioningLayout") {
+			this.makeAbsolutePositioningEditor(this.$.content, inControl);
+		}
+		
+		this.$.content.render();
+	},
+	makeAbsolutePositioningEditor: function(inContainer, inControl) {
+		var controlStyle = (inControl.aresId && this.userDefinedAttributes && this.userDefinedAttributes[inControl.aresId]) ? this.userDefinedAttributes[inControl.aresId].style : null,
+			styleProps = (controlStyle) ? this.createStyleArrayFromString(controlStyle) : [],
+			properties = {
+				position : {
+					val: "static",
+					disabled: false
+				},
+				top : {
+					val: "",
+					disabled: true
+				},
+				left : {
+					val: "",
+					disabled: true
+				},
+				bottom : {
+					val: "",
+					disabled: true
+				},
+				right : {
+					val: "",
+					disabled: true
+				}
+			},
+			prop,
+			row,
+			i
+		;
+		
+		// Look for matching properties in current style
+		for (i = 0; i < styleProps.length; i++) {
+			prop = styleProps[i][0];
+			if (prop.match(/position/) || prop.match(/top/) || prop.match(/right/) || prop.match(/bottom/) || prop.match(/left/)) {
+				properties[prop].val = styleProps[i][1];
+				properties[prop].disabled = false;
+			}
+		}
+		
+		inContainer.createComponent({classes: "onyx-groupbox-header", content: "Position"});
+		inContainer.createComponent({kind: "Inspector.PositionEditor", props: properties});
+		
+		inContainer.createComponent({classes: "onyx-groupbox-header", content: "Properties"})
+		for (prop in properties) {
+			row = inContainer.createComponent({classes: "ares-inspector-row"});
+			row.createComponent(
+				{
+					name: 		"attributeVal-" + prop,
+					kind: 		"Inspector.Config.Text",
+					fieldName: 	prop,
+					fieldValue: properties[prop].val,
+					disabled: 	properties[prop].disabled,
+					onChange: 	"decoratePositionChangeEvent"
+				},
+				{owner: this}
+			);
+		}
+	},
+	//* Return sorted list of all layout kind names from indexer
+	getLayoutKinds: function() {
+		var layoutKinds = enyo.filter(this.projectIndexer.objects, function(o) {
+			return (o.type == "kind") && (o.name == "enyo.Layout" || enyo.indexOf("enyo.Layout", o.superkinds) >= 0);
+		});
+		
+		layoutKinds.push({name: ""}, {name: "AbsolutePositioningLayout"});
+		
+		layoutKinds.sort(function(a,b) {
+			return a.name.localeCompare(b.name);
+		});
+		
+		for (var i = 0; i < layoutKinds.length; i++) {
+			layoutKinds[i] = layoutKinds[i].name;
+		}
+		
+		return layoutKinds;
+	},
+	decoratePositionChangeEvent: function(inSender, inEvent) {
+		var controlStyle = (this.selected.aresId && this.userDefinedAttributes && this.userDefinedAttributes[this.selected.aresId]) ? this.userDefinedAttributes[this.selected.aresId].style : null,
+			// Get this control's style as an array
+			styleProps = (controlStyle) ? this.createStyleArrayFromString(controlStyle) : [],
+			originator = this.getAttributeVal(inEvent.target),
+			n = originator.fieldName,
+			v = originator.fieldValue,
+			match = false,
+			prop
+		;
+		
+		// Look for matching properties in current style
+		for (i = 0; i < styleProps.length; i++) {
+			prop = styleProps[i][0];
+			if (prop.match(n)) {
+				if (v === "") {
+					styleProps.splice(i, 1);
+				} else {
+					styleProps[i][1] = v;
+				}
+				
+				match = true;
+				break;
+			}
+		}
+		
+		// If match not found, add the new style
+		if (!match && v !== "") {
+			styleProps.push([n, v])
+		}
+		
+		// Update event values
+		originator.fieldName = "style";
+		originator.fieldValue = this.createStyleStringFromArray(styleProps);
+	},
+	createStyleArrayFromString: function(inStyleStr) {
+		var styleProps = inStyleStr.split(";");
+		
+		for (var i = 0; i < styleProps.length; i++) {
+			styleProps[i] = styleProps[i].split(":");
+			if (styleProps[i].length <= 1) {
+				styleProps.splice(i,1);
+				i--;
+				continue;
+			}
+			
+			// Trim whitespace from prop and val
+			styleProps[i][0] = this.trimWhitespace(styleProps[i][0]);
+			styleProps[i][1] = this.trimWhitespace(styleProps[i][1]);
+		}
+		
+		return styleProps;
+	},
+	createStyleStringFromArray: function(inStyleArray) {
+		var styleStr = "",
+			i;
+		
+		// Compose style string
+		for (i = 0; i < inStyleArray.length; i++) {
+			if (i > 0) {
+				styleStr += " ";
+			}
+			
+			styleStr += inStyleArray[i][0] + ": " + inStyleArray[i][1] + ";";
+		}
+		
+		return styleStr;
+	},
+	trimWhitespace: function(inStr) {
+		return inStr.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+	},
+	//* Catch _onToggleSide_ event sent from position editor
+	handleToggleSide: function(inSender, inEvent) {
+		var $field = this.$["attributeVal-" + inEvent.side];
+		
+		if (inEvent.enabled) {
+			$field.setDisabled(false);
+			$field.focus();
+		} else {
+			$field.setDisabled(true);
+			$field.setFieldValue("");
+			$field.doChange({target: $field});
+		}
+		
+		return true;
 	},
 	inspect: function(inControl) {
 		var ps, i, p;
@@ -227,22 +429,35 @@ enyo.kind({
 				for (p in ps) {
 					this.makeEditor(inControl, p, ps[p], "properties");
 				}
-			} else {
+				this.$.filterLevel.show();
+			} else if (this.filterType === 'E') {
 				ps = ps.events;
 				if (ps.length) {
 					this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
 				}
 				for (i=0, p; (p=ps[i]); i++) {
-					this.makeEditor(inControl, p, "", "events");
+					this.makeEditor(inControl, p, "events");
 				}
+				this.$.filterLevel.show();
+			} else if (this.filterType === 'L') {
+				this.makeLayoutEditor(inControl, ps);
+				this.$.filterLevel.hide();
 			}
 		}
+		
 		this.$.content.render();
+		// Resize to adjust content container height for filterLevel hide/show
+		this.resized();
 	},
 	change: function(inSender, inEvent) {
-		var n = inEvent.target.fieldName;
-		var v = inEvent.target.fieldValue;
-
+		if (!inEvent.target) {
+			return true;
+		}
+		
+		var originator = this.getAttributeVal(inEvent.target),
+			n = originator.fieldName,
+			v = originator.fieldValue;
+		
 		var num = parseFloat(v);
 		if (String(num) == v) {
 			v = num;
@@ -255,7 +470,18 @@ enyo.kind({
 			this.userDefinedAttributes[this.selected.aresId] = {};
 		}
 		this.userDefinedAttributes[this.selected.aresId][n] = v;
+		
 		this.doModify({name: n, value: v, type: inEvent.target.fieldType});
+		
+		return true;
+	},
+	//* Recurse through parents to find config control
+	getAttributeVal: function(inComponent) {
+		if (inComponent instanceof Inspector.Config.IF) {
+			return inComponent;
+		} else if (inComponent.parent) {
+			return this.getAttributeVal(inComponent.parent);
+		}
 	},
 	dblclick: function(inSender, inEvent) {
 		if (inEvent.target.fieldType === "events") {
@@ -372,10 +598,15 @@ enyo.kind({
 	inheritAttributeToggle: function(inSender, inEvent) {
 		var originator = inEvent.originator,
 			row = originator.parent,
-			attribute = originator.prop;
+			attribute = originator.prop,
+			attributeVal;
+		
+		if (!row.$.attributeVal) {
+			return;
+		}
 		
 		// Make sure this attribute exists in _this.userDefinedAttributes_
-		if(!this.userDefinedAttributes[this.selected.aresId]) {
+		if (!this.userDefinedAttributes[this.selected.aresId]) {
 			this.userDefinedAttributes[this.selected.aresId] = {};
 		}
 		
@@ -415,9 +646,10 @@ enyo.kind({
 		onValueChanged: ""
 	},
 	components: [
-		{kind: "onyx.RadioGroup", fit:false, onActivate:"doValueChanged", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton halves", components: [
+		{kind: "onyx.RadioGroup", fit:false, onActivate:"doValueChanged", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton thirds", components: [
 			{content:"Properties", value: "P", active:true},
-			{content:"Events", value: "E"}
+			{content:"Events", value: "E"},
+			{content:"Layout", value: "L"}
 		]}
 	]
 });
@@ -441,6 +673,91 @@ enyo.kind({
 		if(!this.allowActivate) {
 			return true;
 		}
+	}
+});
+
+enyo.kind({
+	name: "Inspector.PositionEditor",
+	classes: "ares-inspector-position-editor",
+	published: {
+		top: 	false,
+		right: 	false,
+		bottom: false,
+		left: 	false,
+		props:  null
+	},
+	handlers: {
+		ontap: "handleTap"
+	},
+	events: {
+		onToggleSide: ""
+	},
+	components: [
+		{name: "topToggle", classes: "top-toggle anchor-toggle", side: "top", components: [{classes: "anchor-line"}]},
+		{name: "rightToggle", classes: "right-toggle anchor-toggle", side: "right", components: [{classes: "anchor-line"}]},
+		{name: "bottomToggle", classes: "bottom-toggle anchor-toggle", side: "bottom", components: [{classes: "anchor-line"}]},
+		{name: "leftToggle", classes: "left-toggle anchor-toggle", side: "left", components: [{classes: "anchor-line"}]},
+		{name: "innerBox", classes: "ares-inspector-position-editor-inner-box"}
+	],
+	create: function() {
+		this.inherited(arguments);
+		this.propsChanged();
+	},
+	propsChanged: function() {
+		this.top = 		!this.props.top.disabled;
+		this.right = 	!this.props.right.disabled;
+		this.bottom = 	!this.props.bottom.disabled;
+		this.left = 	!this.props.left.disabled;
+		
+		this.topChanged();
+		this.rightChanged();
+		this.bottomChanged();
+		this.leftChanged();
+	},
+	topChanged: function() {
+		this.$.topToggle.getClientControls()[0].addRemoveClass("disabled", !this.top);
+	},
+	rightChanged: function() {
+		this.$.rightToggle.getClientControls()[0].addRemoveClass("disabled", !this.right);
+	},
+	bottomChanged: function() {
+		this.$.bottomToggle.getClientControls()[0].addRemoveClass("disabled", !this.bottom);
+	},
+	leftChanged: function() {
+		this.$.leftToggle.getClientControls()[0].addRemoveClass("disabled", !this.left);
+	},
+	handleTap: function(inSender, inEvent) {
+		if (inSender.side) {
+			this.toggleSide(inSender.side);
+		}
+		
+		return true;
+	},
+	toggleSide: function(inSide) {
+		var enabled;
+		
+		switch (inSide) {
+			case "top":
+				this.setTop(!this.top);
+				enabled = this.top;
+				break;
+			case "right":
+				this.setRight(!this.right);
+				enabled = this.right;
+				break;
+			case "bottom":
+				this.setBottom(!this.bottom);
+				enabled = this.bottom;
+				break;
+			case "left":
+				this.setLeft(!this.left);
+				enabled = this.left;
+				break;
+			default:
+				break;
+		}
+		
+		this.doToggleSide({side: inSide, enabled: enabled});
 	}
 });
 

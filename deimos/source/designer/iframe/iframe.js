@@ -14,7 +14,7 @@ enyo.kind({
 	},
 	components: [
 		{name: "client", classes:"enyo-fit"},
-		{name: "cloneArea", style: "background:rgba(0,200,0,0.5); display:none; opacity: 0;", classes: "enyo-fit"},
+		{name: "cloneArea", style: "background:rgba(0,200,0,0.5); display:none; opacity: 0;", classes: "enyo-fit enyo-clip"},
 		{name: "flightArea", style: "display:none;", classes: "enyo-fit"},
 		{name: "serializer", kind: "Ares.Serializer"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"},
@@ -68,6 +68,7 @@ enyo.kind({
 		
 		enyo.dispatcher.features.push(
 			function(e) {
+				//console.log("-->", e.type);
 				if (_this[e.type]) {
 					_this[e.type](e)
 				}
@@ -149,33 +150,45 @@ enyo.kind({
 			return false;
 		}
 		
+		// Set drag data
 		e.dataTransfer.setData('ares/moveitem', this.$.serializer.serializeComponent(this.selection, true));
+
+		// Hide the drag image ghost
+		e.dataTransfer.setDragImage(this.createDragImage(), 0, 0);
+
         return true;
 	},
 	//* On drag over, enable HTML5 drag-and-drop if there is a valid drop target
 	dragover: function(inEvent) {
 		var dropTarget,
-			mouseMoved;
+			mouseMoved,
+			dataType;
 		
-		if (!inEvent.dataTransfer) {
+			if (!inEvent.dataTransfer) {
 			return false;
 		}
 		
+		// Enable HTML5 drag-and-drop
 		inEvent.preventDefault();
 		
-		// Throttle dragover event TODO - use enyo.job here?
-		if (!this.dragoverTimeout) {
-			this.dragoverTimeout = setTimeout(enyo.bind(this, "resetDragoverTimeout"), 100);
-			this._dragover(inEvent);
-		}
-	},
-	_dragover: function(inEvent) {
 		// Update dragover highlighting
 		this.dragoverHighlighting(inEvent);
 		
-		// If mouse actually moved, reset timer for holdover
-		if (this.mouseMoved(inEvent)) {
+		// If dragging in an absolute positioning container, go straight to _holdOver()_
+		if (this.absolutePositioningMode(this.getCurrentDropTarget())) {
+			
+			// If this is an item from the palette, do nothing (until drop)
+			if (inEvent.dataTransfer.types[0] === "ares/createitem") {
+				return true;
+			}
+			
+			this.holdOver(inEvent);
+			
+			// If mouse actually moved, begin timer for holdover
+		} else if (this.mouseMoved(inEvent)) {
 			this.resetHoldoverTimeout();
+			
+			// If mouse hasn't moved and timer isn't yet set, set it
 		} else if (!this.holdoverTimeout) {
 			this.holdoverTimeout = setTimeout(enyo.bind(this, function() { this.holdOver(inEvent); }), 200);
 		}
@@ -184,6 +197,10 @@ enyo.kind({
 		this.saveMouseLocation(inEvent);
 		
 		return true;
+	},
+	dragenter: function(inEvent) {
+		// Enable HTML5 drag-and-drop
+		inEvent.preventDefault();
 	},
 	//* On drag leave, unhighlight previous drop target
 	dragleave: function(inEvent) {
@@ -215,26 +232,22 @@ enyo.kind({
 			dropData = enyo.json.codify.from(inEvent.dataTransfer.getData(dataType)),
 			dropTargetId,
 			dropTarget = this.getEventDropTarget(inEvent.dispatchTarget),
-			beforeId;
+			beforeId
+		;
 		
 		switch (dataType) {
 			case "ares/moveitem":
-				if (this.selection) {
-					// If no drop target found, use current selection's parent
-					dropTargetId = (dropTarget) ? dropTarget.aresId : this.selection.parent.aresId;
-					beforeId = this.selection.addBefore ? this.selection.addBefore.aresId : null;
-				} else {
-					this.log("UH OH!"); // TODO - we moved an item but there is no selection..?
-				}
-				
-				this.sendMessage({op: "moveItem", val: {itemId: dropData.aresId, targetId: dropTargetId, beforeId: beforeId}});
+				dropTargetId = (dropTarget) ? dropTarget.aresId : this.selection.parent.aresId;
+				beforeId = this.selection.addBefore ? this.selection.addBefore.aresId : null;
+				this.sendMessage({op: "moveItem", val: {itemId: dropData.aresId, targetId: dropTargetId, beforeId: beforeId, layoutData: this.getLayoutData(inEvent)}});
 				break;
+			
 			case "ares/createitem":
 				dropTargetId = this.getContainerItem() ? this.getContainerItem().aresId : this.getEventDropTarget(inEvent.dispatchTarget).aresId;
 				beforeId = this.getBeforeItem() ? this.getBeforeItem().aresId : null;
-				
 				this.sendMessage({op: "createItem", val: {config: dropData.config, targetId: dropTargetId, beforeId: beforeId}});
 				break;
+			
 			default:
 				enyo.warn("Component view received unknown drop: ", dataType, dropData);
 				break;
@@ -248,13 +261,16 @@ enyo.kind({
 	dragend: function() {
 		this.setCurrentDropTarget(null);
 		this.syncDropTargetHighlighting();
-		this.unhighlightDropTargets(); // TODO - do we need this here?
+		this.unhighlightDropTargets();
+		this.clearDragImage();
 	},
-	
-	resetDragoverTimeout: function() {
-		clearTimeout(this.dragoverTimeout);
-		this.dragoverTimeout = null;
+	createDragImage: function() {
+		this.dragImage = document.createElement();
+		return this.dragImage;
 	},
+	clearDragImage: function() {
+		this.dragImage = null;
+	},	
 	resetHoldoverTimeout: function() {
 		clearTimeout(this.holdoverTimeout);
 		this.holdoverTimeout = null;
@@ -279,7 +295,7 @@ enyo.kind({
 		
 		// Deselect the currently selected item if we're creating a new item, so all items are droppable
 		if (inEvent.dataTransfer.types[0] == "ares/createitem") {
-			//this.selection = null;
+			this.selection = null;
 			this.hideSelectHighlight();
 		}
 		
@@ -291,10 +307,9 @@ enyo.kind({
 		
 		// If drop target has changed, update drop target highlighting
 		if (!(this.currentDropTarget && this.currentDropTarget === dropTarget)) {
-			this.setCurrentDropTarget(dropTarget); // todo - rename currentDropTarget to highlightTarget
+			this.setCurrentDropTarget(dropTarget);
 		}
 	},
-	
 	//* Save _inData_ as _this.containerData_ to use as a reference when creating drop targets.
 	setContainerData: function(inData) {
 		this.containerData = inData;
@@ -303,6 +318,7 @@ enyo.kind({
 	//* Render the specified kind
 	renderKind: function(inKind) {
 		var errMsg;
+		
 		try {
 			var kindConstructor = enyo.constructorForKind(inKind.name);
 
@@ -345,10 +361,10 @@ enyo.kind({
 				this.parentInstance.addClass("enyo-fit enyo-clip");
 			}
 			this.parentInstance.render();
-
+			
 			// Notify Deimos that the kind rendered successfully
 			this.kindUpdated();
-
+			
 			// Select a control if so requested
 			if (inKind.selectId) {
 				this.selectItem({aresId: inKind.selectId});
@@ -426,9 +442,9 @@ enyo.kind({
 	updateProperty: function(inProperty, inValue) {
 		var options = this.selection.__aresOptions;
 		if (options && options.isRepeater && (inProperty === "onSetupItem" || inProperty === "count")) {
-			// DO NOT APPLY changes to the properties mentionned above
+			// DO NOT APPLY changes to the properties mentioned above
 			// TODO: could be managed later on thru config in .design files if more than one kind need special processings.
-			if (this.debug) this.log("Skipping modification of \"" + inProperty + "\"");
+			this.debug && this.log("Skipping modification of \"" + inProperty + "\"");
 		} else {
 			this.selection[inProperty] = inValue;
 		}
@@ -474,7 +490,7 @@ enyo.kind({
 					Force "count" to 1 and invalidate "onSetupItem" to
 					manage them correctly in the Designer
 				 */
-				if (this.debug) this.log("Manage repeater " + inComponent.kind, inComponent);
+				this.debug && this.log("Manage repeater " + inComponent.kind, inComponent);
 				inComponent.count = 1;
 				inComponent.onSetupItem = "aresUnImplemetedFunction";
 			}
@@ -628,6 +644,16 @@ enyo.kind({
 	getSerializedCopyOfComponent: function(inComponent) {
 		return enyo.json.codify.from(this.$.serializer.serializeComponent(inComponent, true));
 	},
+	//* Rerender client, reselect _this.selection_, and notify Deimos
+	refreshClient: function(noMessage) {
+		this.$.client.render();
+		
+		if(!noMessage) {
+			this.kindUpdated();
+		}
+		
+		this.selectItem(this.selection);
+	},
 	//* Send update to Deimos with serialized copy of current kind component structure
 	kindUpdated: function() {
 		this.sendMessage({op: "rendered", val: this.$.serializer.serialize(this.parentInstance, true)});
@@ -649,7 +675,8 @@ enyo.kind({
 			links = head.getElementsByTagName("link"),
 			styles = head.getElementsByTagName("style"),
 			el,
-			i;
+			i
+		;
 		
 		// Look through link tags for a linked stylesheet with a filename matching _filename_
 		for(i=0;(el = links[i]);i++) {
@@ -699,50 +726,159 @@ enyo.kind({
 	
 	
 	holdOver: function(inEvent) {
-		var x = inEvent.clientX,
-			y = inEvent.clientY,
-			currentContainerItem = this.getContainerItem(),
-			currentBeforeItem = this.getBeforeItem(),
-			newBeforeItem,
-			newContainer,
-			container = this.getCurrentDropTarget(),
-			onEdge = this.checkDragOverBoundary(container, x, y);
+		var container = this.getCurrentDropTarget();
 		
 		if (!container) {
 			return;
 		}
 		
-		if (onEdge < 0) {
-			newContainer = container.parent;
-			newBeforeItem = container;
-		} else if (onEdge > 0) {
-			newContainer = container.parent;
-			newBeforeItem = this.findAfterItem(newContainer, container, x, y);
+		if (this.absolutePositioningMode(container)) {
+			this.absolutePositioningHoldover(inEvent, container);
 		} else {
-			newContainer = container;
-			newBeforeItem = (container.children.length > 0) ? this.findBeforeItem(container, x, y) : null;
+			this.staticPositioningHoldover(inEvent, container);
 		}
-		
-		this.setContainerItem(newContainer);
-		this.setBeforeItem(newBeforeItem);
-		
-		// If we are creating a new item and the current selection is not equal to the new item, set _this.selection_
-		if (this.getCreatePaletteItem() && (!this.selection || this.selection.aresId !== this.getCreatePaletteItem().aresId)) {
-			this.selection = this.getContainerItem().createComponent(this.getCreatePaletteItem()).render();
-		}
-		
-		this.prerenderDrop();
 	},
-	//* Handle drop that has been trigged from outside of the iframe (i.e. in the ComponentView)
-	foreignPrerenderDrop: function (inData) {
+	absolutePositioningHoldover: function(inEvent, inContainer) {
+		this.setContainerItem(inContainer);
+		this.setBeforeItem(null);
+		this.absolutePrerenderDrop(inEvent);
+	},
+	absolutePrerenderDrop: function(inEvent) {
+		var x = this.getAbsoluteXPosition(inEvent),
+			y = this.getAbsoluteYPosition(inEvent)
+		;
+		
+		this.moveSelectionToAbsolutePosition(x, y);
+	},
+	// Move selection to new position
+	moveSelectionToAbsolutePosition: function(inX, inY) {
+		var container   = this.getContainerItem(),
+			containerId = container ? container.aresId : null,
+			clone       = this.cloneControl(this.selection), //this.createSelectionGhost(this.selection)
+			styleProps	= this.createStyleArrayFromString(this.selection.style),
+			topMatched 	= rightMatched = bottomMatched = leftMatched = false
+		;
+		
+		this.hideSelectHighlight();
+		
+		this.selection.destroy();
+		this.selection = container.createComponent(clone).render();
+		this.selection.applyStyle("position", "absolute");
+		this.selection.applyStyle("pointer-events", "none");
+		this.addVerticalPositioning(this.selection, inY);
+		this.addHorizontalPositioning(this.selection, inX);
+	},
+	//* Add appropriate vertical positioning to _inControl_ based on _inY_
+	addVerticalPositioning: function(inControl, inY) {
+		var container 		= this.getContainerItem(),
+			styleProps 		= this.createStyleArrayFromString(inControl.style),
+			containerBounds = this.getRelativeBounds(container),
+			controlBounds 	= this.getRelativeBounds(inControl),
+			topMatched 		= this.findStyleMatch(styleProps, "top"),
+			bottomMatched 	= this.findStyleMatch(styleProps, "bottom")
+		;
+		
+		if (bottomMatched) {
+			inControl.applyStyle("bottom", (containerBounds.height - inY - controlBounds.height) + "px");
+		}
+		if (topMatched || (!topMatched && !bottomMatched)) {
+			inControl.applyStyle("top", inY + "px");
+		}
+	},
+	//* Add appropriate horizontal positioning to _inControl_ based on _inX_
+	addHorizontalPositioning: function(inControl, inX) {
+		var container 		= this.getContainerItem(),
+			styleProps 		= this.createStyleArrayFromString(inControl.style),
+			containerBounds = this.getRelativeBounds(container),
+			controlBounds 	= this.getRelativeBounds(inControl),
+			leftMatched	 	= this.findStyleMatch(styleProps, "left"),
+			rightMatched 	= this.findStyleMatch(styleProps, "right")
+		;
+		
+		if (rightMatched) {
+			inControl.applyStyle("right", (containerBounds.width - inX - controlBounds.width) + "px");
+		}
+		if (leftMatched || (!leftMatched && !rightMatched)) {
+			inControl.applyStyle("left", inX + "px");
+		}
+	},
+	createStyleArrayFromString: function(inStyleStr) {
+		var styleProps = inStyleStr.split(";");
+		
+		for (var i = 0; i < styleProps.length; i++) {
+			styleProps[i] = styleProps[i].split(":");
+			if (styleProps[i].length <= 1) {
+				styleProps.splice(i,1);
+				i--;
+				continue;
+			}
+			
+			// Trim whitespace from prop and val
+			styleProps[i][0] = this.trimWhitespace(styleProps[i][0]);
+			styleProps[i][1] = this.trimWhitespace(styleProps[i][1]);
+		}
+		
+		return styleProps;
+	},
+	createStyleStringFromArray: function(inStyleArray) {
+		var styleStr = "",
+			i;
+		
+		// Compose style string
+		for (i = 0; i < inStyleArray.length; i++) {
+			if (i > 0) {
+				styleStr += " ";
+			}
+			
+			styleStr += inStyleArray[i][0] + ": " + inStyleArray[i][1] + ";";
+		}
+		
+		return styleStr;
+	},
+	trimWhitespace: function(inStr) {
+		return inStr.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+	},
+	//* Look for a property in styleArr that matches inProp
+	findStyleMatch: function(inStyleArr, inProp) {
+		for (var i = 0; i < inStyleArr.length; i++) {
+			if (inStyleArr[i][0].match(inProp)) {
+				return true;
+			}
+		}
+		return false;
+	},
+	staticPositioningHoldover: function(inEvent, inContainer) {
+		var x = inEvent.clientX,
+			y = inEvent.clientY,
+			onEdge = this.checkDragOverBoundary(inContainer, x, y),
+			beforeItem;
+		
+		if (onEdge < 0) {
+			beforeItem = inContainer;
+			inContainer = inContainer.parent;
+		} else if (onEdge > 0) {
+			beforeItem = this.findAfterItem(inContainer.parent, inContainer, x, y);
+			inContainer = inContainer.parent;
+		} else {
+			beforeItem = (inContainer.children.length > 0) ? this.findBeforeItem(inContainer, x, y) : null;
+			inContainer = inContainer;
+		}
+		
+		this.setContainerItem(inContainer);
+		this.setBeforeItem(beforeItem);
+		this.staticPrerenderDrop();
+	},
+	//* Handle drop that has been trigged from outside of the iframe
+	foreignPrerenderDrop: function(inData) {
 		var containerItem = this.getControlById(inData.targetId),
 			beforeItem    = inData.beforeId ? this.getControlById(inData.beforeId) : null;
 		
+		// TODO - assumption here that it's static positioning
 		this.setContainerItem(containerItem);
 		this.setBeforeItem(beforeItem);
-		this.prerenderDrop();
+		this.staticPrerenderDrop();
 	},
-	prerenderDrop: function() {
+	staticPrerenderDrop: function() {
 		var movedControls, movedInstances;
 		
 		// If not a legal drop, do nothing
@@ -771,7 +907,7 @@ enyo.kind({
 		
 		// Create copies of controls that need to move, and animate them to the new posiitions
 		this.animateMovedControls(movedControls);
-		
+
 		// When animation completes, udpate parent instance to reflect changes. TODO - don't use setTimeout, do this on an event when the animation completes
 		setTimeout(enyo.bind(this, function() { this.prerenderMoveComplete(movedInstances); }), this.moveControlSecs*1000 + 100);
 	},
@@ -797,30 +933,6 @@ enyo.kind({
 		}
 		
 		return true;
-	},
-	//* Render updated copy of the parentInstance into _cloneArea_
-	renderUpdatedAppClone: function() {
-		this.$.cloneArea.destroyClientControls();
-		this.$.cloneArea.createComponent({kind: this.parentInstance.kind});
-		this.$.cloneArea.applyStyle("display", "block");
-		this.$.cloneArea.render();
-		
-		var containerId = (this.getContainerItem()) ? this.getContainerItem().aresId : null,
-			container   = this.getControlById(containerId, this.$.cloneArea),
-			beforeId    = (this.getBeforeItem()) ? this.getBeforeItem().aresId : null,
-			before      = (beforeId) ? this.getControlById(beforeId, this.$.cloneArea) : null,
-			selection   = this.getControlById(this.selection.aresId, this.$.cloneArea),
-			clone       = this.cloneControl(this.selection); //this.createSelectionGhost(selection);
-		
-		if (before) {
-			clone = enyo.mixin(clone, {beforeId: beforeId, addBefore: before});
-		}
-		
-		container.createComponent(clone).render();
-		
-		if (selection) {
-			selection.destroy();
-		}
 	},
 	//* Return all controls that will be affected by this move
 	getMovedControls: function() {
@@ -889,12 +1001,39 @@ enyo.kind({
 			before      = (beforeId) ? this.getControlById(beforeId) : null,
 			clone       = this.cloneControl(this.selection); //this.createSelectionGhost(this.selection);
 		
+		// If the selection should be moved before another item, use the _addBefore_ property
 		if (before) {
 			clone = enyo.mixin(clone, {beforeId: beforeId, addBefore: before});
 		}
 		
+		// If the selection has absolute positioning applied, remove it
+		if (clone.style) {
+			clone.style = this.removeAbsolutePositioningStyle(clone);
+		}
+		
 		this.selection.destroy();
 		this.selection = container.createComponent(clone).render();
+	},
+	removeAbsolutePositioningStyle: function(inControl) {
+		var currentStyle = inControl.style || "",
+			styleProps = currentStyle.split(";"),
+			updatedProps = [],
+			prop,
+			i;
+		
+		for (i = 0; i < styleProps.length; i++) {
+			prop = styleProps[i].split(":");
+			if (prop[0].match(/position/) || prop[0].match(/top/) || prop[0].match(/left/)) {
+				continue;
+			}
+			updatedProps.push(styleProps[i]);
+		}
+		
+		for (i = 0, currentStyle = ""; i < updatedProps.length; i++) {
+			currentStyle += updatedProps[i];
+		}
+		
+		return currentStyle;
 	},
 	//* Draw controls that will do aniumating at starting points and then kick off animation
 	animateMovedControls: function(inControls) {
@@ -963,10 +1102,16 @@ enyo.kind({
 			inControls[i].applyStyle("opacity", "1");
 		}
 	},
+	//* Render updated copy of the parentInstance into _cloneArea_
 	renderUpdatedAppClone: function() {
 		this.$.cloneArea.destroyClientControls();
-		this.$.cloneArea.createComponent({kind: this.parentInstance.kind});
 		this.$.cloneArea.applyStyle("display", "block");
+		var appClone = this.$.cloneArea.createComponent(this.cloneControl(this.parentInstance));
+		
+		// Mimic top-level app fitting (as if this was rendered with renderInto or write)
+		if (this.parentInstance.fit) {
+			appClone.addClass("enyo-fit enyo-clip");
+		}
 		this.$.cloneArea.render();
 		
 		var containerId = (this.getContainerItem()) ? this.getContainerItem().aresId : null,
@@ -980,14 +1125,20 @@ enyo.kind({
 			clone = enyo.mixin(clone, {beforeId: beforeId, addBefore: before});
 		}
 		
+		// If the selection has absolute positioning applied, remove it
+		if (clone.style) {
+			clone.style = this.removeAbsolutePositioningStyle(clone);
+		}
+		
 		container.createComponent(clone).render();
+		
 		if (selection) {
 			selection.destroy();
 		}
 	},
 	hideUpdatedAppClone: function() {
 		this.$.cloneArea.destroyClientControls();
-		this.$.cloneArea.hide();
+		this.$.cloneArea.applyStyle("display", "none");
 	},
 	//* TODO - This createSelectionGhost is WIP
 	createSelectionGhost: function (inItem) {
@@ -1020,11 +1171,12 @@ enyo.kind({
 	},
 	cloneControl: function(inSelection) {
 		return {
-			kind:     inSelection.kind,
-			content:  inSelection.getContent(),
-			aresId:   inSelection.aresId,
-			classes:  inSelection.classes,
-			style:    inSelection.style
+			kind:       inSelection.kind,
+			layoutKind: inSelection.layoutKind,
+			content:    inSelection.getContent(),
+			aresId:     inSelection.aresId,
+			classes:    inSelection.classes,
+			style:      inSelection.style
 		};
 	},
 	getControlPositions: function(inComponents) {
@@ -1032,7 +1184,7 @@ enyo.kind({
 			positions = [];
 		
 		for(var i=0;i<controls.length;i++) {
-			if (controls[i].aresId && controls[i].hasNode()) {
+			if (controls[i].aresId) {
 				positions.push({comp: controls[i], rect: controls[i].hasNode().getBoundingClientRect()});
 			}
 		}
@@ -1231,5 +1383,89 @@ enyo.kind({
 		return inA.concat(inB).filter(function(elem, pos, self) {
 	    	return self.indexOf(elem) !== pos;
 		});
+	},
+	absolutePositioningMode: function(inControl) {
+		return inControl && inControl.layoutKind === "AbsolutePositioningLayout";
+	},
+	getLayoutData: function(inEvent) {
+		var layoutKind = this.selection.parent ? this.selection.parent.layoutKind : null;
+		
+		switch (layoutKind) {
+			case "AbsolutePositioningLayout":
+				var bounds = this.getRelativeBounds(this.selection);
+				
+				return {
+					layoutKind: layoutKind,
+					bounds: bounds
+				};
+			default:
+				return null;
+		}
+	},
+	getAbsoluteXPosition: function(inEvent) {
+		return this.getAbsolutePosition(inEvent, "x");
+	},
+	getAbsoluteYPosition: function(inEvent) {
+		return this.getAbsolutePosition(inEvent, "y");
+	},
+	getAbsolutePosition: function(inEvent, inAxis) {
+		var containerBounds = this.getAbsoluteBounds(this.getContainerItem());
+		return (inAxis === "x") ? inEvent.clientX - containerBounds.left : inEvent.clientY - containerBounds.top;
+	},
+	getRelativeBounds: function(inControl) {
+		if (!inControl) {
+			return {top: 0, right: 0, bottom: 0, left: 0, width: 0, height: 0};
+		}
+		
+		var bounds = inControl.getBounds();
+		var absoluteBounds = this.getAbsoluteBounds(inControl);
+		var parentBounds = this.getAbsoluteBounds(inControl.parent);
+		
+		bounds.right = parentBounds.width - bounds.left - absoluteBounds.width;
+		bounds.bottom = parentBounds.height - bounds.top - absoluteBounds.height;
+		
+		return bounds;
+	},
+	getAbsoluteBounds: function(inControl) {
+		var left 			= 0,
+			top 			= 0,
+			match			= null,
+			node 			= inControl.hasNode(),
+			width 			= node.offsetWidth,
+			height 			= node.offsetHeight,
+			transformProp 	= enyo.dom.getStyleTransformProp(),
+			xRegEx 		= /translateX\((-?\d+)px\)/i,
+			yRegEx 		= /translateY\((-?\d+)px\)/i;
+
+		if (node.offsetParent) {
+			do {
+				// Fix for FF (GF-2036), offsetParent is working differently between FF and chrome 
+				if (enyo.platform.firefox) {					
+					left += node.offsetLeft;
+					top  += node.offsetTop;
+				} else {
+					left += node.offsetLeft - (node.offsetParent ? node.offsetParent.scrollLeft : 0);
+					top  += node.offsetTop  - (node.offsetParent ? node.offsetParent.scrollTop  : 0);	
+				}
+				if (transformProp) {
+					match = node.style[transformProp].match(xRegEx);
+					if (match && typeof match[1] != 'undefined' && match[1]) {
+						left += parseInt(match[1], 10);
+					}
+					match = node.style[transformProp].match(yRegEx);
+					if (match && typeof match[1] != 'undefined' && match[1]) {
+						top += parseInt(match[1], 10);
+					}
+				}
+			} while (node = node.offsetParent);
+		}
+		return {
+			top		: top,
+			left	: left,
+			bottom	: document.body.offsetHeight - top  - height,
+			right	: document.body.offsetWidth  - left - width,
+			height	: height,
+			width	: width
+		};
 	}
 });
