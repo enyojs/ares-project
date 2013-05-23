@@ -4,7 +4,7 @@
 		{
 			"active":true,
 			"id":"home",
-			"icon":"home-32x32",
+			"icon":"$harmonia/images/providers/home-32x32.png",
 			"name":"Home Directory",
 			"type": ["filesystem"],
 			"provider": "hermes",
@@ -18,7 +18,7 @@
 		{
 			"active":true,
 			"id":"dropbox",
-			"icon":"dropbox.com-32x32",
+			"icon":"$harmonia/images/providers/dropbox.com-32x32.png",
 			"name":"Dropbox",
 			"type": ["filesystem"],
 			"provider": "hermes",
@@ -48,7 +48,7 @@
 		{
 			"active":true,
 			"id":"phonegap",
-			"icon":"build.phonegap.com-32x32",
+			"icon":"$harmonia/images/providers/build.phonegap.com-32x32.png",
 			"name":"PhoneGap Build",
 			"type": ["build"],
 			"command":"@NODE@", "params":[
