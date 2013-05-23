@@ -22,6 +22,7 @@ enyo.kind({
     onrelease:"handleSlowRelease",*/
 		ondragstart:"dragStart",
 		ondrag:"drag",
+		ondrop:"drop",
 		ondragfinish:"dragFinish",
 	},
 	published: {
@@ -244,7 +245,7 @@ enyo.kind({
 	//
 	dragStart: function(inSender, inEvent) {
 		//if (this.debug) 
-		//this.log(inSender, "=>", inEvent);
+		this.log(inSender, "=>", inEvent);
 		
 		//this.log("start file path=", inEvent.originator.file.path);
 		this.log("start file id=", inEvent.originator.file.id);
@@ -253,7 +254,7 @@ enyo.kind({
 	},
 	drag: function(inSender, inEvent) {
 		//if (this.debug) 
-		//this.log(inSender, "=>", inEvent);
+		this.log(inSender, "=>", inEvent);
 		//this.$.dragAvatar.drag(inEvent);
 		
 		//this.log("drag file path=", inEvent.originator.file.path);
@@ -261,9 +262,18 @@ enyo.kind({
 		
 		return true;
 	},
+	drop: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		//this.log("drop file path=", inEvent.originator.file.path);
+		//this.log("drop file id=", inEvent.originator.file.id);
+		
+		return true;
+	},
 	dragFinish: function(inSender, inEvent) {
 		//if (this.debug) 
-		//this.log(inSender, "=>", inEvent);
+		this.log(inSender, "=>", inEvent);
 		//this.$.dragAvatar.hide();
 		
 		//this.log("finish file path=", inEvent.originator.file.path);
