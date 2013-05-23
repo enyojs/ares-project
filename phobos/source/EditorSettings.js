@@ -52,7 +52,7 @@ enyo.kind({
 		{tag: "br"},
 
 		{ kind: "FittableColumns", classes:"ares_editorfont", components: [
-			{name: "rightpane", fit: true, classes: "ares_editorfont", content: "Right Pane "},
+			{name: "rightpane", fit: true, classes: "ares_editorfont", content: "Right Pane (only displayed on js files)"},
 			{style: "width: 65px;", content: " "},
 			{name: "rightPaneButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "rightPaneChanged"},
 		]},
