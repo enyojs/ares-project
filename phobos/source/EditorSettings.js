@@ -31,6 +31,7 @@ enyo.kind({
 	},
 	SETTINGS_STORAGE_KEY: "com.enyojs.editor.settings",
 	components: [
+<<<<<<< HEAD
 		{tag:"h3", content: "Editor Settings"},
 		{kind:"FittableColumns", components: [	
 			{kind:"FittableRows", components: [
@@ -41,7 +42,6 @@ enyo.kind({
 				{classes: "ares-row", components: [
 					{name: "wordWrapLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Word Wrap"},
 					{name: "wordWrapButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "wordWrapToggle"},
-
 				]},
 				{classes: "ares-row", components: [
 					{name: "rightpane",tag:"label",  classes: "ares-fixed-label ace-label", content: "Right Pane "},
@@ -154,16 +154,20 @@ enyo.kind({
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
 		this.$.rightPaneButton.value = this.settings.rightpane;
-		for (var i in this.$.themes.getClientControls()){
-			if(this.$.themes.getClientControls()[i].content == this.settings.theme){
-				this.$.themes.setSelected(this.$.themes.getClientControls()[i]);
+
+		var themesControls = this.$.themes.getClientControls();
+		enyo.forEach(themesControls, function(control) {
+			if (control.content == this.settings.theme) {
+				this.$.themes.setSelected(control);
 			}
-		}
-		for (var i in this.$.fontSizePicker.getClientControls()){
-			if(this.$.fontSizePicker.getClientControls()[i].content == this.settings.fontsize){
-				this.$.fontSizePicker.setSelected(this.$.fontSizePicker.getClientControls()[i]);
+		}, this);
+
+		var fontSizeControls = this.$.fontSizePicker.getClientControls();
+		enyo.forEach(fontSizeControls, function(control) {
+			if (control.content == this.settings.fontsize) {
+				this.$.fontSizePicker.setSelected(control);
 			}
-		}
+		}, this);
 		this.previewSettings = JSON.parse(JSON.stringify(this.settings));
 
 	},
@@ -189,16 +193,20 @@ enyo.kind({
 		this.$.highLightButton.setValue(this.settings.highlight);
 		this.$.wordWrapButton.setValue(this.settings.wordwrap);
 
-		for (var i in this.$.themes.getClientControls()){
-			if(this.$.themes.getClientControls()[i].content == this.settings.theme){
-				this.$.themes.setSelected(this.$.themes.getClientControls()[i]);
+		var themesControls = this.$.themes.getClientControls();
+		enyo.forEach(themesControls, function(control) {
+			if (control.content == this.settings.theme) {
+				this.$.themes.setSelected(control);
 			}
-		}
-		for (var i in this.$.fontSizePicker.getClientControls()){
-			if(this.$.fontSizePicker.getClientControls()[i].content == this.settings.fontsize){
-				this.$.fontSizePicker.setSelected(this.$.fontSizePicker.getClientControls()[i]);
+		}, this);
+
+		var fontSizeControls = this.$.fontSizePicker.getClientControls();
+		enyo.forEach(fontSizeControls, function(control) {
+			if (control.content == this.settings.fontsize) {
+				this.$.fontSizePicker.setSelected(control);
 			}
-		}
+		}, this);
+
 		this.$.rightPaneButton.setValue(this.settings.rightpane);
 		//deep copy: settings in previewSettings
 		this.previewSettings = JSON.parse(JSON.stringify(this.settings));
@@ -239,7 +247,8 @@ enyo.kind({
 		this.$.modalPopup.hide();		
 	},
 
-	closeModalPopup: function(inSender, inEvent){
+	closeModalPopup: function(inSender){
+		this.$.textArea.setValue(""); //needs to be set here to avoid disappearance of placeholder in FF21
 		this.$.modalPopup.hide();
 	},
 
@@ -252,7 +261,7 @@ enyo.kind({
 		this.key = inSender.name;
 		if (/^F\d+/.test(this.key)) {
 			if(this.previewSettings.keys[this.key] === undefined){
-				this.$.textArea.setValue("");
+				this.$.textArea.setValue(""); //TO DO : remove setValue from here if autodismiss of popup is false
 			} else this.$.textArea.setValue(this.previewSettings.keys[this.key]);
 		}
 		this.$[this.key].addClass("active");
