@@ -162,9 +162,10 @@ enyo.kind({
 	dragover: function(inEvent) {
 		var dropTarget,
 			mouseMoved,
-			dataType;
+			dataType
+		;
 		
-			if (!inEvent.dataTransfer) {
+		if (!inEvent.dataTransfer) {
 			return false;
 		}
 		
@@ -174,14 +175,13 @@ enyo.kind({
 		// Update dragover highlighting
 		this.dragoverHighlighting(inEvent);
 		
+		// Don't do holdover if item is being dragged in from the palette
+		if (inEvent.dataTransfer.types[0] === "ares/createitem") {
+			return true;
+		}
+		
 		// If dragging in an absolute positioning container, go straight to _holdOver()_
 		if (this.absolutePositioningMode(this.getCurrentDropTarget())) {
-			
-			// If this is an item from the palette, do nothing (until drop)
-			if (inEvent.dataTransfer.types[0] === "ares/createitem") {
-				return true;
-			}
-			
 			this.holdOver(inEvent);
 			
 			// If mouse actually moved, begin timer for holdover
@@ -871,12 +871,16 @@ enyo.kind({
 	//* Handle drop that has been trigged from outside of the iframe
 	foreignPrerenderDrop: function(inData) {
 		var containerItem = this.getControlById(inData.targetId),
-			beforeItem    = inData.beforeId ? this.getControlById(inData.beforeId) : null;
+			beforeItem    = inData.beforeId ? this.getControlById(inData.beforeId) : null
+		;
 		
-		// TODO - assumption here that it's static positioning
 		this.setContainerItem(containerItem);
 		this.setBeforeItem(beforeItem);
-		this.staticPrerenderDrop();
+		
+		// Do static prerender drop if not an AbsolutePositioningLayout container
+		if (!(containerItem && containerItem.layoutKind === "AbsolutePositioningLayout")) {
+			this.staticPrerenderDrop();
+		}
 	},
 	staticPrerenderDrop: function() {
 		var movedControls, movedInstances;
