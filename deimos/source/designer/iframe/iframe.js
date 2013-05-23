@@ -754,7 +754,7 @@ enyo.kind({
 	moveSelectionToAbsolutePosition: function(inX, inY) {
 		var container   = this.getContainerItem(),
 			containerId = container ? container.aresId : null,
-			clone       = this.cloneControl(this.selection), //this.createSelectionGhost(this.selection)
+			clone       = this.cloneControl(this.selection, true), //this.createSelectionGhost(this.selection)
 			styleProps	= this.createStyleArrayFromString(this.selection.style),
 			topMatched 	= rightMatched = bottomMatched = leftMatched = false
 		;
@@ -1003,7 +1003,7 @@ enyo.kind({
 			container   = this.getControlById(containerId),
 			beforeId    = (this.getBeforeItem()) ? this.getBeforeItem().aresId : null,
 			before      = (beforeId) ? this.getControlById(beforeId) : null,
-			clone       = this.cloneControl(this.selection); //this.createSelectionGhost(this.selection);
+			clone       = this.cloneControl(this.selection, true); //this.createSelectionGhost(this.selection);
 		
 		// If the selection should be moved before another item, use the _addBefore_ property
 		if (before) {
@@ -1116,14 +1116,14 @@ enyo.kind({
 		if (this.parentInstance.fit) {
 			appClone.addClass("enyo-fit enyo-clip");
 		}
-		this.$.cloneArea.render();
 		
 		var containerId = (this.getContainerItem()) ? this.getContainerItem().aresId : null,
 			container   = this.getControlById(containerId, this.$.cloneArea),
 			beforeId    = (this.getBeforeItem()) ? this.getBeforeItem().aresId : null,
 			before      = (beforeId) ? this.getControlById(beforeId, this.$.cloneArea) : null,
 			selection   = this.getControlById(this.selection.aresId, this.$.cloneArea),
-			clone       = this.cloneControl(this.selection); //this.createSelectionGhost(selection);
+			clone       = this.cloneControl(this.selection, true)
+		;
 		
 		if (before) {
 			clone = enyo.mixin(clone, {beforeId: beforeId, addBefore: before});
@@ -1133,12 +1133,14 @@ enyo.kind({
 		if (clone.style) {
 			clone.style = this.removeAbsolutePositioningStyle(clone);
 		}
-		
-		container.createComponent(clone).render();
+
+		container.createComponent(clone);
 		
 		if (selection) {
 			selection.destroy();
 		}
+
+		this.$.cloneArea.render();
 	},
 	hideUpdatedAppClone: function() {
 		this.$.cloneArea.destroyClientControls();
@@ -1173,15 +1175,34 @@ enyo.kind({
 			style:  style
 		};
 	},
-	cloneControl: function(inSelection) {
-		return {
+	cloneControl: function(inSelection, inCloneChildren) {
+		var clone = {
 			kind:       inSelection.kind,
 			layoutKind: inSelection.layoutKind,
-			content:    inSelection.getContent(),
+			content:    inSelection.content,
 			aresId:     inSelection.aresId,
 			classes:    inSelection.classes,
 			style:      inSelection.style
 		};
+		
+		if (inCloneChildren) {
+			clone.components = this.cloneChildComponents(inSelection.components);
+		}
+		
+		return clone;
+	},
+	cloneChildComponents: function(inComponents) {
+		var childComponents = [];
+		
+		if (!inComponents || inComponents.length === 0) {
+			return childComponents;
+		}
+		
+		for (var i = 0, comp; (comp = inComponents[i]); i++) {
+			childComponents.push(this.cloneControl(comp, true));
+		}
+		
+		return childComponents;
 	},
 	getControlPositions: function(inComponents) {
 		var controls = this.flattenChildren(inComponents),
