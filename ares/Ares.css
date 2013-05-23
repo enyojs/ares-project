@@ -111,6 +111,7 @@ body {
 .ares_phobos_findpop {
 	width: 300px;
 }
+
 .phobos_editorsettings_buttoninput {
 	width: 450px;
 }
@@ -397,6 +398,8 @@ body {
 	padding: 0 4px;
 	text-align: right;
 	display: inline-block;
+	vertical-align: middle;
+	overflow: hidden;
 }
 
 .ares-fixed-input{
