@@ -22,21 +22,23 @@ var myDir = typeof(__dirname) !== 'undefined' ?  __dirname : path.resolve('') ;
 /**********************************************************************/
 
 var knownOpts = {
-	"help":		Boolean,
-	"runtest":	Boolean,
-	"browser":	Boolean,
-	"port":		Number,
-	"host":		String,
-	"listen_all":	Boolean,
-	"config":	path,
-	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
-	"log":		Boolean,
-	"version":	Boolean
+        "help":            Boolean,
+        "runtest":         Boolean,
+        "browser":         Boolean,
+        "bundled-browser": Boolean,
+        "port":            Number,
+        "host":            String,
+        "listen_all":      Boolean,
+        "config":          path,
+        "level":           ['silly', 'verbose', 'info', 'http', 'warn', 'error'],
+        "log":             Boolean,
+        "version":         Boolean
 };
 var shortHands = {
 	"h": ["--help"],
 	"T": ["--runtest"],
 	"b": ["--browser"],
+	"B": ["--bundled-browser"],
 	"p": ["--port"],
 	"H": ["--host"],
 	"a": ["--listen_all"],
@@ -58,15 +60,16 @@ if (argv.help) {
 		"Usage: 'node ./ide.js' [OPTIONS]\n" +
 		"\n" +
 		"OPTIONS:\n" +
-		"  -h, --help        help message                                                                           [boolean]\n" +
-		"  -T, --runtest     Run the non-regression test suite                                                      [boolean]\n" +
-		"  -b, --browser     Open the default browser on the Ares URL                                               [boolean]\n" +
-		"  -p, --port        port (o) local IP port of the express server (default: 9009, 0: dynamic)               [default: '9009']\n" +
-		"  -H, --host        host to bind the express server onto                                                   [default: '127.0.0.1']\n" +
-		"  -a, --listen_all  When set, listen to all adresses. By default, listen to the address specified with -H  [boolean]\n" +
-		"  -c, --config      IDE configuration file                                                                 [default: './ide.json']\n" +
-		"  -l, --level       IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')                  [default: 'http']\n" +
-		"  -L, --log         Log IDE debug to ./ide.log                                                             [boolean]\n");
+		"  -h, --help            help message                                                                          [boolean]\n" +
+		"  -T, --runtest         Run the non-regression test suite                                                     [boolean]\n" +
+		"  -b, --browser         Open the default browser on the Ares URL                                              [boolean]\n" +
+		"  -B, --bundled-browser Open the included browser on the Ares URL                                             [boolean]\n" +
+		"  -p, --port        b   port (o) local IP port of the express server (default: 9009, 0: dynamic)              [default: '9009']\n" +
+		"  -H, --host        b   host to bind the express server onto                                                  [default: '127.0.0.1']\n" +
+		"  -a, --listen_all  b   When set, listen to all adresses. By default, listen to the address specified with -H [boolean]\n" +
+		"  -c, --config      b   IDE configuration file                                                                [default: './ide.json']\n" +
+		"  -l, --level       b   IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')                 [default: 'http']\n" +
+		"  -L, --log         b   Log IDE debug to ./ide.log                                                            [boolean]\n");
 	process.exit(0);
 }
 
@@ -131,6 +134,12 @@ var platformOpen = {
 	win32: [ "cmd" , '/c', 'start' ],
 	darwin:[ "open" ],
 	linux: [ "xdg-open" ]
+};
+
+var bundledBrowser = {
+	win32: [ path.resolve ( myDir + "../../chromium/" + "chrome.exe" ) ],
+	darwin:[ path.resolve ( myDir + "../../../../bin/chromium/" + "Chromium.app" ), "--args" ],
+	linux: [ path.resolve ( myDir + "../../../../bin/chromium/" + "chrome" ) ]
 };
 
 var configPath, tester;
@@ -567,6 +576,10 @@ server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, f
 	if (argv.browser) {
 		// Open default browser
 		var info = platformOpen[process.platform] ;
+		spawn(info[0], info.slice(1).concat([url]));
+	} else if (argv['bundled-browser']) {
+		// Open bundled browser
+		var info = platformOpen[process.platform].concat(bundledBrowser[process.platform]);
 		spawn(info[0], info.slice(1).concat([url]));
 	} else {
 		log.http('main', "Ares now running at <" + url + ">");
