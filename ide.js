@@ -302,14 +302,24 @@ function handleMessage(service) {
 }
 
 function serviceOut(service) {
+	var line = "";
 	return function(data){
-		log.http(service.id, data.toString());
+		line += data.toString();
+		if (line[line.length-1] === '\n') {
+			log.http(service.id, line);
+			line = "";
+		}
 	};
 }
 
 function serviceErr(service) {
+	var line = "";
 	return function(data){
-		log.warn(service.id, data.toString());
+		line += data.toString();
+		if (line[line.length-1] === '\n') {
+			log.warn(service.id, line);
+			line = "";
+		}
 	};
 }
 
@@ -370,8 +380,13 @@ function startService(service) {
 	// run the command
 	log.info(service.id, "executing '"+command+" "+params.join(" ")+"'");
 	var subProcess = spawn(command, params, options);
+	
 	subProcess.stderr.on('data', serviceErr(service));
 	subProcess.stdout.on('data', serviceOut(service));
+	/*
+	subProcess.stderr.pipe(process.stderr);
+	subProcess.stdout.pipe(process.stdout);
+	 */
 	subProcess.on('exit', handleServiceExit(service));
 	subProcess.on('message', handleMessage(service));
 	subProcesses.push(subProcess);

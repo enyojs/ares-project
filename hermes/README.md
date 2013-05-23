@@ -187,20 +187,18 @@ Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to th
 
 ## [Project template service](id:project-template-services)
 
-The service "***genZip***" allows to intanciate new Ares project from project templates such as "**[bootplate](https://github.com/enyojs/enyo/wiki/Bootplate)**" or any customer specific project templates.
-These project templates can be defined:  
+The service **genZip** allows to intanciate new Ares project from project templates such as [Enyo Bootplate](https://github.com/enyojs/enyo/wiki/Bootplate) or any customer specific project templates.
 
-* in "ide.json" of ares-project  
-* or in "ide.json" of Ares plugins  
+These project templates can be defined in:  
 
+* `ide.json` located in the `ares-project` installation directory
+* `ide-plugin.json` located in _each_ Ares plugin installation directory
 
-`IMPORTANT:` See [Project template configuration](#project-template-config) and [Merging Ares plugin configuration](../README.md#merging-configuration) for more information.
+See [Project template configuration](#project-template-config) and [Merging Ares plugin configuration](../README.md#merging-configuration) for more information.
 
 ### [Project template configuration](id:project-template-config)
 
-The property `projectTemplateRepositories` of the service "**genZip**" lists the template definitions that are available at project creation time.
-
-The property `projectTemplateRepositories` of the service "**genZip**" is defined in the "***ide.json***" of ares-project.
+The property `projectTemplateRepositories` of the service **genZip** lists the template definitions that are available at project creation time.  It is defined in the `ide.json` of ares-project.
 
 		{
 			"id":"genZip",
@@ -214,11 +212,10 @@ The property `projectTemplateRepositories` of the service "**genZip**" is define
 		}
 
 The `url` property above can either be an http url or a an absolute filename such as:  
-NB: Within the `ide.json` configuration file, the variables `@NODE@`, `@CWD@`, `@INSTALLDIR@`, `@HOME@` and `@PLUGINDIR@` will be subsituted by the right value when `node ide.js` is started.
 
 	"url": "@INSTALLDIR@/templates/projects/ares-project-templates.json"
 
-Ares plugins can add or modify this list of templates.
+Ares plugins can add or modify this list of templates, from their own `ide-plugin.json`.
 
 		{
 			"id": "genZip",
@@ -232,13 +229,13 @@ Ares plugins can add or modify this list of templates.
 	        }
 		}
 
-As a result, `"bootplate": {}` will remove the entry defined in ide.js of ares-project and `"my-templates": { "url" : "http://xyz.com/my-templates.json", …}` will add a new list of templates named 'my-templates'.
+In the example above, `"bootplate": {}` will remove the entry defined in the main `ide.json` and `"my-templates": { "url" : "http://xyz.com/my-templates.json", …}` will add a new list of templates named 'my-templates'.
 
 ### [Project template definition](id:project-template-definition)
 
 A project template definition (defined by the property `url` in `projectTemplateRepositories` must respect the json schema [com.enyojs.ares.project.templates.schema.json](../assets/schema/com.enyojs.ares.project.templates.schema.json).
 
-The compliance of a project template definition file with the json schema is not yet enforced but could be checked via [http://jsonschemalint.com/](http://jsonschemalint.com/).
+**NOTE:** Ares does not (yet) enforce JSON-schema compliance.  Plugin developers can check their own `ide-plugin.json` via [http://jsonschemalint.com/](http://jsonschemalint.com/).
 
 	[
 	  {
@@ -263,11 +260,11 @@ The compliance of a project template definition file with the json schema is not
 	  }
 	]
 
-Each project definition defined by `id` can reference **several zip files** defined in the array `zipfiles`. The zip files are extracted in the order they are specified.  
+Each project definition defined by `id` can reference **several** zip files defined in the array `zipfiles`. The zip files are extracted in the order they are specified:  files extracted from a ZIP-file possibly overwrite those that were extracted from earlier ZIP-files.
 
 Each zip file entry:
 
-* must define an `url` and optionally an `alternateUrl`. The `url` is tried first and can refer to either:
+* **MUST** define an `url` and optionally an `alternateUrl`. The `url` is tried first and can refer to either:
 
 	* a file stored locally on the filesystem.  
 	NB: the filename must be relative to the directory where the project templates definition file is stored (See property `url` in `projectTemplateRepositories` above).  
@@ -344,7 +341,6 @@ This is the `arZip.js` service.  It takes 2 arguments:
 * `port`
 
 It can be started standlone using the following command-line (or a similar one):
-
 
 …in which case it can be tested using `curl` by a command-line like the following one:
 
