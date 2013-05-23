@@ -33,7 +33,7 @@ enyo.kind({
 						{content: "Accounts..."}
 					]},
 					{classes: "onyx-menu-divider"},
-					{content: "Properties..."}
+					{value: "showAresProperties", content: "Properties..."}
 				]}
 			]},
 			{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
@@ -96,7 +96,8 @@ enyo.kind({
 		]},
 		{classes:"hangar"},
 		{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
-		{kind: "AccountsConfigurator"}
+		{kind: "AccountsConfigurator"},
+		{kind: "AresProperties"}
 	],
 	selected: null,
 	create: function() {
@@ -225,6 +226,9 @@ enyo.kind({
 	},
 	showAccountConfigurator: function() {
 		this.$.accountsConfigurator.show();
+	},
+	showAresProperties: function(){
+		this.$.aresProperties.show();
 	},
 	stringifyReplacer: function(key, value) {
 		if (key === "originator") {

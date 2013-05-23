@@ -101,7 +101,7 @@ enyo.kind({
 	 *
 	 * Complement services loaded from the server with per-service
 	 * data in the browser localStorage (for example the 'auth'
-	 * property).  The completion vallbaclk is invoked once every
+	 * property).  The completion callback is invoked once every
 	 * configured services are completed.
 	 * 
 	 * @param {Function} next a CommonJS callback
@@ -347,6 +347,7 @@ enyo.kind({
 					service.impl = ServiceRegistry.instance.createComponent(kindInformation);
 					this.configureService(service, next);
 					if (this.debug) this.log("New plugin registered: " + serviceId);
+					enyo.Signals.send("onPluginRegist", {pluginService: service.impl});
 				} catch(err) {
 					this.error("Unexpected error while creating '" + kindInformation.kind + "' for service " + serviceId , err);
 					next(err);
