@@ -28,3 +28,8 @@
 	left: 0;
 	right: 0;
 }
+
+.keys > button{
+	min-width: 50px;
+	padding: 6px;
+}
