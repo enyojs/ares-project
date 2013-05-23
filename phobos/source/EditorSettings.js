@@ -31,7 +31,6 @@ enyo.kind({
 	},
 	SETTINGS_STORAGE_KEY: "com.enyojs.editor.settings",
 	components: [
-<<<<<<< HEAD
 		{tag:"h3", content: "Editor Settings"},
 		{kind:"FittableColumns", components: [	
 			{kind:"FittableRows", components: [
@@ -44,7 +43,7 @@ enyo.kind({
 					{name: "wordWrapButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "wordWrapToggle"},
 				]},
 				{classes: "ares-row", components: [
-					{name: "rightpane",tag:"label",  classes: "ares-fixed-label ace-label", content: "Right Pane "},
+					{name: "rightpane",tag:"label",  classes: "ares-fixed-label ace-label", content: "Right Panel (only for js files)"},
 					{name: "rightPaneButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "rightPaneChanged"},
 				]}
 			]},
