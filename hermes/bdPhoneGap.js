@@ -76,15 +76,19 @@ BdPhoneGap.prototype.route = function() {
 };
 	
 BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
+	var self = this;
 	log.info("errorHandler()", "err:", err);
-	if (err instanceof Error) {
+	if (err instanceof HttpError) {
+		_respond(err);
+	} else if (err instanceof Error) {
 		var msg;
 		try {
 			msg = JSON.parse(err.message).error;
 		} catch(e) {
 			msg = err.message;
 		}
-		if ("Invalid authentication token." === msg) {
+		if (("Invalid authentication token." === msg) ||
+			("Missing authentication token" === msg)){
 			_respond(new HttpError(msg, 401));
 		} else {
 			_respond(new HttpError(msg, 400));
@@ -98,7 +102,7 @@ BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 		res.status(err.statusCode || 500);
 		if (err.statusCode === 401) {
 			// invalidate token cookie
-			this.setCookie(res, 'token', null);
+			self.setCookie(res, 'token', null);
 		}
 		res.contentType('txt'); // direct usage of 'text/plain' does not work
 		res.send(err.toString());

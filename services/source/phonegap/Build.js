@@ -5,7 +5,7 @@ enyo.kind({
 		onLoginFailed: "",
 		onShowWaitPopup: ""
 	},
-	debug: true,
+	debug: false,
 	/**
 	 * @private
 	 */
