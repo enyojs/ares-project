@@ -247,7 +247,7 @@ enyo.kind({
 		if (/^F\d+/.test(key)) {
 			this.previewSettings.keys[key] = this.$.textArea.value;
 		}	
-		this.$.modalPopup.hide();		
+		this.closeModalPopup();
 	},
 
 	closeModalPopup: function(inSender){
@@ -263,9 +263,9 @@ enyo.kind({
 	showPopup: function(inSender) {
 		this.key = inSender.name;
 		if (/^F\d+/.test(this.key)) {
-			if(this.previewSettings.keys[this.key] === undefined){
-				this.$.textArea.setValue(""); //TO DO : remove setValue from here if autodismiss of popup is false
-			} else this.$.textArea.setValue(this.previewSettings.keys[this.key]);
+			if(this.previewSettings.keys[this.key] !== undefined){
+				this.$.textArea.setValue(this.previewSettings.keys[this.key]);
+			}
 		}
 		this.$[this.key].addClass("active");
 		this.$.modalPopup.show();	
