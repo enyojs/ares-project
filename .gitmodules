@@ -16,9 +16,6 @@
 [submodule "lib/foss/underscore"]
 	path = lib/foss/underscore
 	url = ../../documentcloud/underscore.git
-[submodule "node_modules/phonegapbuildapi"]
-	path = node_modules/phonegapbuildapi
-	url = ../../enyojs/phonegapbuildapi
 [submodule "lib/g11n"]
 	path = lib/g11n
 	url = ../../enyojs/g11n.git

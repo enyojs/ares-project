@@ -1,3 +1,4 @@
+/**/
 body {
 	background-color: #aaa;
 }
@@ -89,7 +90,7 @@ body {
 	width: 280px;
 }
 .ares_phobos_right {
-	width: 360px;
+	width: 280px;
 }
 .ares_phobos_autocomp {
 	position: absolute;
@@ -113,6 +114,16 @@ body {
 .ares_phobos_settingspop {
 	width: 300px;
 }
+.ares_phobos_esb {
+	width: 45px;
+}
+.phobos_editorsettings_buttoninput {
+	width: 450px;
+}
+.alt_button_input {
+	width: 425px;
+}
+
 /**/
 .border {
 	background-color: whiteSmoke;

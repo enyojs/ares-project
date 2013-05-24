@@ -2,7 +2,6 @@ var path = require('path'),
     spawn = require('child_process').spawn;
 
 var submodules = [
-	'node_modules/phonegapbuildapi',
 	'node_modules/unzip',
 	'node_modules/semver'
 ];
