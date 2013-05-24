@@ -294,7 +294,7 @@ function BdPhoneGap(config, next) {
 
 	function deploy(req, res, next) {
 		var appManifest = path.join(req.appDir.source, 'package.js');
-		fs.stat(appManifest, function(err) {
+		fs.stat(appManifest, (function(err) {
 			if (err) {
 				// No top-level package.js: this is
 				// not a Bootplate-based Enyo
@@ -343,7 +343,7 @@ function BdPhoneGap(config, next) {
 					}
 				});
 			}
-		});
+		}).bind(this));
 	}
 
 	function zip(req, res, next) {
@@ -608,10 +608,10 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	};
 	var helpString = [
 		"Usage: node " + basename,
-		"  -p, --port        port (o) local IP port of the express server (0: dynamic)         [default: '0']",
-		"  -P, --pathname    URL pathname prefix (before /deploy and /build                    [default: '/phonegap']",
-		"  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error') [default: 'http']",
-		"  -h, --help        This message"
+		"  -p, --port	     port (o) local IP port of the express server (0: dynamic)	       [default: '0']",
+		"  -P, --pathname    URL pathname prefix (before /deploy and /build		       [default: '/phonegap']",
+		"  -l, --level	     debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error') [default: 'http']",
+		"  -h, --help	     This message"
 	];
 	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	argv.pathname = argv.pathname || "/phonegap";
