@@ -411,7 +411,7 @@ enyo.kind({
 		this.helper.setDefinition(definition);
 
 		// Get the list of handler methods
-		this.kindFunctions = this.helper.getFunctions();
+		this.kindFunctions = this.helper.getFunctions().sort();
 	}
 });
 
