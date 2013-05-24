@@ -57,8 +57,21 @@ enyo.kind({
 			// Cache created AuthConfig in the AuthPanel
 			this.selectedAuthConfig = this.$.authPanel.$[serviceAuthName];
 			if (!this.selectedAuthConfig) {
-				// Basic-Authentication
-				if (service.config.auth.type === 'basic') {
+				if (service.config.auth.type === 'plugin') {
+					if (this.debug) this.log("creating 'custom' auth form");
+					var provider, authFormKind;
+					provider = ServiceRegistry.instance.resolveServiceId(service.config.id);
+					authFormKind = provider.getAuthConfigKind();
+					if (this.debug) this.log("auth form using kind:", authFormKind);
+					this.$.authPanel.createComponent({
+						kind: authFormKind,
+						name: serviceAuthName,
+						serviceId: service.config.id,
+						serviceName: service.config.name,
+						username: service.config.auth.username,
+						password: service.config.auth.password
+					});
+				} else if (service.config.auth.type === 'basic') {
 					if (this.debug) this.log("creating 'basic' auth form");
 					this.$.authPanel.createComponent({
 						kind: "BasicAuthConfig",
