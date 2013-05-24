@@ -68,8 +68,10 @@ enyo.kind({
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
+	helper: null,			// Analyzer.KindHelper
 	create: function() {
 		this.inherited(arguments);
+		this.helper = new analyzer.Analyzer.KindHelper();
 	},
 	getProjectController: function() {
 		this.projectCtrl = this.projectData.getProjectCtrl();
@@ -533,51 +535,12 @@ enyo.kind({
 	 * @returns the list of declared handler methods
 	 */
 	listHandlers: function(object, declared) {
-		declared = this.listDeclaredComponentsHandlers(object.components, declared);
-		for(var i = 0; i < object.properties.length; i++) {
-			var p = object.properties[i];
-			try {
-				if (p.name === 'handlers') {
-					for(var j = 0; i < p.value[0].properties.length; j++) {
-						var q = p.value[0].properties[j];
-						var name = q.value[0].name;
-						name = name.replace(/["']{1}/g, '');
-						if (name.substr(0, 2) !== 'do') {	// Exclude doXXXX methods
-							declared[name] = "";
-						}
-					}
-				}
-			} catch(error) {
-				enyo.log("Unexpected error: " + error);		// TODO TBC
-			}
+		try {
+			this.helper.setDefinition(object);
+			return this.helper.listHandlers(declared);
+		} catch(error) {
+			enyo.log("Unexpected error: " + error);		// TODO TBC
 		}
-		return declared;
-	},
-	/**
-	 * Recursively lists the handler methods mentioned in the "onXXXX"
-	 * attributes of the components passed as an input parameter
-	 * @param components: components to walk thru
-	 * @param declared: list of handler methods already listed
-	 * @returns the list of declared handler methods
-	 * @protected
-	 */
-	listDeclaredComponentsHandlers: function(components, declared) {
-		for(var i = 0; i < components.length; i++) {
-			var c = components[i];
-			for(var k = 0 ; k < c.properties.length ; k++) {
-				var p = c.properties[k];
-				if (p.name.substr(0, 2) === 'on') {
-					var name = p.value[0].name.replace(/["']{1}/g, '');
-					if (name.substr(0, 2) !== 'do') {	// Exclude doXXXX methods
-						declared[name] = "";
-					}
-				}
-			}
-			if (components.components) {
-				this.listDeclaredComponentsHandlers(components.components, declared);
-			}
-		}
-		return declared;
 	},
 	/**
 	 * This function checks all the kinds and add the missing
