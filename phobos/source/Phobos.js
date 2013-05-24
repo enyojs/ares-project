@@ -34,11 +34,11 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww"},
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
-				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"}
+				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
@@ -47,7 +47,7 @@ enyo.kind({
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
 		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "ares_phobos_settingspop", centered: true, modal: true, floating: true,
-		onChangeTheme: "changeTheme", onChangeHighLight: "changeHighLight", onClose: "closeEditorPop", onWordWrap: "changeWordWrap", onFontsizeChange: "changeFont", onTabSizsChange: "tabSize"}
+		onChangeSettings:"applySettings", onChangeRightPane: "changeRightPane", onClose: "closeEditorPop", onTabSizsChange: "tabSize"}
 	],
 	events: {
 		onShowWaitPopup: "",
@@ -132,6 +132,7 @@ enyo.kind({
 		});
 	},
 	openDoc: function(inDocData) {
+
 		// If we are changing documents, reparse any changes into the current projectIndexer
 		if (this.docData && this.docData.getEdited()) {
 			this.reparseAction(true);
@@ -148,8 +149,10 @@ enyo.kind({
 
 		var file = this.docData.getFile();
 		var extension = file.name.split(".").pop();
+
 		this.hideWaitPopup();
 		this.analysis = null;
+
 		var mode = {
 			json: "json",
 			design: "json",
@@ -171,8 +174,10 @@ enyo.kind({
 			png: "image",
 			gif: "image"
 		}[extension] || "text";
+
 		this.docData.setMode(mode);
-		var hasAce = this.adjustPanelsForMode(mode);
+
+		var hasAce = this.adjustPanelsForMode(mode, this.$.editorSettingsPopup.getSettings().rightpane);
 		
 		if (hasAce) {
 			var aceSession = this.docData.getAceSession();
@@ -190,25 +195,9 @@ enyo.kind({
 			this.focusEditor();
 
 			/* set editor to user pref */
+			this.$.ace.applyAceSettings(this.$.editorSettingsPopup.getSettings());
+
 			this.$.ace.editingMode = mode;
-			this.$.ace.highlightActiveLine = localStorage.highlight;
-			if(!this.$.ace.highlightActiveLine || this.$.ace.highlightActiveLine.indexOf("false") != -1){
-				this.$.ace.highlightActiveLine = false;
-			}
-			this.$.ace.highlightActiveLineChanged();
-			
-			this.$.ace.wordWrap = localStorage.wordwrap;			
-			if(!this.$.ace.wordWrap || this.$.ace.wordWrap.indexOf("false") != -1 && this.$.ace.wordWrap !== "true"){
-				this.$.ace.wordWrap = false;
-			}
-			this.$.ace.wordWrapChanged();
-
-			this.fSize = localStorage.fontsize;
-			if(this.fSize ===  undefined){
-				this.fSize = "11px";
-			}
-
-			this.$.ace.setFontSize(this.fSize);
 		}
 		else {
 			var origin = this.projectData.getService().getConfig().origin;
@@ -221,9 +210,10 @@ enyo.kind({
 		this.docData.setEdited(edited);
 		this.$.toolbar.resized();
 	},
-	adjustPanelsForMode: function(mode) {
+
+	adjustPanelsForMode: function(mode, rightpane) {
+
 		if (this.debug) this.log("mode:", mode);
-		// whether to show or not a panel, imageViewer and ace cannot be enabled at the same time
 		var showModes = {
 			javascript: {
 				imageViewer: false,
@@ -232,7 +222,7 @@ enyo.kind({
 				saveAsButton: true,
 				newKindButton: true,
 				designerButton: true,
-				right: true
+				right: rightpane
 			},
 			image: {
 				imageViewer: true,
@@ -802,6 +792,16 @@ enyo.kind({
 	findClose: function(){
 		this.$.findpop.hide();
 	},
+	toggleww: function(){
+	    if(this.$.ace.wordWrap === "true" || this.$.ace.wordWrap === true){
+			this.$.ace.wordWrap = false;
+			this.$.ace.wordWrapChanged();
+	    }else{
+			this.$.ace.wordWrap = true;
+			this.$.ace.wordWrapChanged();
+		}
+	},
+
 	/*  editor setting */
 
 	editorSettings: function() {
@@ -809,41 +809,32 @@ enyo.kind({
 	},
 
 	closeEditorPop: function(){
+
+		this.$.editorSettingsPopup.initSettingsPopupFromLocalStorage();
+		//apply changes only saved on Ace
+		this.$.ace.applyAceSettings(this.$.editorSettingsPopup.getSettings());
+		this.adjustPanelsForMode(this.docData.getMode(), this.$.editorSettingsPopup.getSettings().rightpane);
 		this.$.editorSettingsPopup.hide();
 	},
 
-	changeHighLight: function(){
-		this.$.ace.highlightActiveLine = this.$.editorSettingsPopup.highlight;
-		this.$.ace.highlightActiveLineChanged();
+	//showing =
+	changeRightPane: function(){
+		this.adjustPanelsForMode(this.docData.getMode(), this.$.editorSettingsPopup.getPreviewSettings().rightpane);
 	},
-	changeTheme: function() {
-		this.$.ace.theme = this.$.editorSettingsPopup.theme;
-		this.$.ace.themeChanged();
-	},
-	changeWordWrap: function() {
-		this.$.ace.wordWrap = this.$.editorSettingsPopup.wordWrap;
-		this.$.ace.wordWrapChanged();
-	},
-	toggleww: function(){		
-		if(this.$.ace.wordWrap === "true" || this.$.ace.wordWrap === true){
-			this.$.ace.wordWrap = false;
-			this.$.ace.wordWrapChanged();
-			console.log("wee false");
-		}else{
-			this.$.ace.wordWrap = true;
-			this.$.ace.wordWrapChanged();
-		}
-		
 
-	},
-	changeFont: function(){
-		var fs = this.$.editorSettingsPopup.fSize;
-			this.$.ace.setFontSize(fs);
+	applySettings:function(){
+		//apply Ace settings
+		this.$.ace.applyAceSettings(this.$.editorSettingsPopup.getPreviewSettings());
 	},
 
 	tabSize: function() {
 		var ts = this.$.ace.editorSettingsPopup.Tsize;
 		this.$.ace.setTabSize(ts);
+	},
+	
+	fkeypressed: function(inSender, inEvent) {
+		var key = inEvent;
+		this.$.ace.insertAtCursor(this.$.editorSettingsPopup.settings.keys[ key ]);
 	},
 	
 	//* Trigger an Ace undo and bubble updated code
@@ -871,7 +862,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "rightPanels",kind: "Panels", wrap: false,
+	name: "rightPanels",kind: "Panels", wrap: false, draggable:false,
 	events: {
 		onCss: "",
 		onReparseAsked: ""

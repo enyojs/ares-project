@@ -28,7 +28,7 @@ Here are the main features you can start looking at today:
 	* Ares currently connects to a filesystem component, to edit local files (via the `fsLocal` Hermes service).  Ares can also be configured to use a per-user Dropbox account (via the `fsDropbox` Hermes service) as file storage.  See below for more details.
 	* Key goals with this approach are to avoid forcing users to store files and/or credentials on Ares servers and allow freedom to choose the preferred storage location, whether cloud or local.
 * Code editor
-	* Ares integrates the Ace (Cloud9) code editor for code editing
+	* Ares integrates the ACE (Ajax Cloud Editor, used by Cloud9 & Mozilla) code editor for code editing
 * Code intelligence
 	* Upon opening/editing a JavaScript file, Ares will parse the file and display a semantic outline of the code in the right-hand panel (for purposes of demonstrating parser)
 	* Code completion using symbols from:
@@ -59,7 +59,7 @@ The following features are in the works, and you should see them added as we mov
 
 1. Install Node.js & NPM 0.8.x (>= 0.8.21).  
 Recommended version is node 0.8.23 and can be downloaded from: [node 0.8.23](http://nodejs.org/dist/v0.8.23/).  
-`NOTE`: Ares does not currently work with node 0.10.x.
+	`NOTE`: Ares does not currently work with node 0.10.x.
 1. Run:
 
 		$ npm -d install ares-ide
@@ -226,10 +226,19 @@ An Ares plugin must follow these rules to be loaded as a plugin:
 
 At startup, the process "node ide.js":
 
- * loads the file "ide.json"
- * locates the files "node_modules/*/ide.json"
+ * loads the file `ide.json`
+ * locates the plugins, using the first of the below method that works:
+ 	1. files `../../node_modules/*/ide-plugin.json` (production environment: npm installs Ares plugins aside Ares)
+ 	1. files `node_modules/*/ide-plugin.json` (development environment: npm installed Ares plugin under the Ares source tree)
  * sorts then in lexicographical order
- * merges them into the loaded configuration following the algorithm described in the next section.
+ * merges them into the loaded configuration following the algorithm described in the next section.  While merging each plugin into the global configuration, the following variables are substituted:
+ 	* `@PLUGINDIR@`: the absolute location of each plugin root folder in the Ares server file-system.
+ 	* `@PLUGINURL@`: the URL to the plugin root URL, taken relatively to the Ares main page.
+ * Globally substitute the following variables in the merged configuration:
+ 	* `@NODE@`: the path to the Node.js executable in use.  This is useful to start sub-process using the same executable
+ 	* `@CWD@`: Current-Working-Directory of the Ares process
+	* `@INSTALLDIR@`: Root folder of `ares-project`, as it is loaded by Node.js.  This is the expected location of the `ide.js` main script.
+	* `@HOME@`: the user's `$HOME` folder on Mac OSX & Linux, `%USERPROFILE%` on Windows.
  * starts services defined in the resulting loaded configuration
 
 #### [Merging Ares plugin configuration](id:merging-configuration)
@@ -251,6 +260,12 @@ The client code of an Ares plugin is defined by the property "`pluginUrl`" of a 
 During the initialization process of Ares within the browser, the 'ServiceRegistry' will perform an 'enyo.load' of the javascript file (Usually a 'package.js' file) specified by the property "`pluginUrl`".  
 After being loaded, the new code must invoke `ServiceRegistry.instance.pluginReady();` to notify Ares that the client side code is ready.  
 See the function 'pluginReady' in the file 'services/source/ServiceRegistry.js'.
+
+## Security
+
+Ares does not store any security token or credentials on the server.  Client-side security tokens & credentials are stored either using Cookies or using HTML5 `localStorage`.
+
+See [Hermes Security: Authentication](hermes/README.md#security).
 
 ## Testing
 

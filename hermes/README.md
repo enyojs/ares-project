@@ -6,6 +6,20 @@ Hermes offers several services not available in a Web Browser through one (or se
 * [Project templates services](#project-template-services)
 * [Build Services](#build-services) ([PhoneGap Build](#phonegap-build-service), …)
 
+## [Security](id:security)
+
+### Authentication
+
+Each service may need an individual authentication to access a back-end in the cloud.  For example, PhoneGap Build (PGB) uses a simple per-user token that is provided as a query parameter with every request to the build service.  Another example is more complex example is Dropbox, which requires both an application OAuth token pair (for Ares itself), plus a per-user account (the one users use to access their private data on Dropbox).  There are a variety of possible 
+
+While authentications token are generally used by the Node.js-based Ares services (rather than by the Ares client application runnin in the Browser), the server server stores them locally:  they ares stored in the Browser sandbox (cookies, localStorage… etc) and passed to the service when needed.
+
+The elements of the authentication token that are tight to the server (rather than to the end-user) are set on the server in the `"auth":{…}` of `ide.json`, for each service.  This section is saved under `localStorage` key `com.hp.ares.services.<service name>.auth` in the Browser. The value associated with this key expands as the user feeds necessary credentails to each service.
+
+The actual properties stored within each `"auth":{…}` are essentially service-specific.
+
+**NOTE:** The `localStorage` values are not encrypted.  This could be changed if proven to be useful.
+
 ## Filesystem services
 
 ### Protocol
