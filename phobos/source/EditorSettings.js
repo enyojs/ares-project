@@ -36,15 +36,15 @@ enyo.kind({
 			{kind:"FittableRows", components: [
 				{classes: "ares-row", components: [
 					{name: "highLightLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "High light active line"},
-					{name: "highLightButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "buttonToggle"},
+					{name: "highLightButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "buttonToggle"}
 				]},
 				{classes: "ares-row", components: [
 					{name: "wordWrapLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Word Wrap"},
-					{name: "wordWrapButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "wordWrapToggle"},
+					{name: "wordWrapButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "wordWrapToggle"}
 				]},
 				{classes: "ares-row", components: [
 					{name: "rightpane",tag:"label",  classes: "ares-fixed-label ace-label", content: "Right Panel (only for js files)"},
-					{name: "rightPaneButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "rightPaneChanged"},
+					{name: "rightPaneButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "rightPaneChanged"}
 				]}
 			]},
 			{kind:"FittableRows", components: [
@@ -81,7 +81,7 @@ enyo.kind({
 						{content: "tomorrow_night_eighties"},
 						{content: "twilight"},
 						{content: "vibrant_ink"},
-						{content: "xcode"},
+						{content: "xcode"}
 						]}
 					]}
 				]},
@@ -99,7 +99,7 @@ enyo.kind({
 							{content: 20},
 							{content: 24},
 							{content: 30},
-							{content: 36},
+							{content: 36}
 						]}
 					]}
 				]}
@@ -116,7 +116,7 @@ enyo.kind({
 					{kind: "onyx.Button", content: "F-3", name: "F3", ontap: "showPopup"},
 					{kind: "onyx.Button", content: "F-4", name: "F4", ontap: "showPopup"},
 					{kind: "onyx.Button", content: "F-5", name: "F5", ontap: "showPopup"},
-					{kind: "onyx.Button", content: "F-6", name: "F6", ontap: "showPopup"},
+					{kind: "onyx.Button", content: "F-6", name: "F6", ontap: "showPopup"}
 				]},
 				{ kind: "FittableColumns", classes:"ace-keys", components:[
 					{kind: "onyx.Button", content: "F-7", name: "F7", ontap: "showPopup"},
@@ -124,7 +124,7 @@ enyo.kind({
 					{kind: "onyx.Button", content: "F-9", name: "F9", ontap: "showPopup"},
 					{kind: "onyx.Button", content: "F-10", name: "F10", ontap: "showPopup"},
 					{kind: "onyx.Button", content: "F-11", name: "F11", ontap: "showPopup"},
-					{kind: "onyx.Button", content: "F-12", name: "F12", ontap: "showPopup"},
+					{kind: "onyx.Button", content: "F-12", name: "F12", ontap: "showPopup"}
 				]}
 			]}
 		]},
