@@ -309,7 +309,7 @@ The default `<pathname>` value is `/genzip`.  Its value can be changed using the
 		* It's up to the caller to extract and base64 decode the files to create a new project.  
 		In Ares, this is achieved by forwarding the FormData to Hermes filesystem service via a PUT method.
 
-## Build services
+## [Build services](id:build-services)
 
 ### Ares IDE - Javascript API
 
@@ -347,20 +347,64 @@ The following resources
 			* `multipart/form-data` generated application package is the first returned part of the multipart response
 			
 
-### PhoneGap build service
+### [Archive build service](id:archive-build-service)
 
-The entire [build.phonegap.com API](https://build.phonegap.com/docs/api) is wrapped by a dedicated Hermes build service named `bdPhoneGap`.  Reasons are:
+This is the `arZip.js` service.  It takes 2 arguments:
 
-1. It is easier (more portable) to manipulate files using Node.js than using HTML5 `File` and `Blob` entities, which are not (yet) fully implemented by the browsers.
-2. build.phonegap.com does not support CORS: It refuses to answer an AJAX query (or at least the one that requests a token) that comes from a web application served from 127.0.0.1 (as Ares is in its standalone version).
+* `pathname`
+* `port`
 
-		XMLHttpRequest cannot load https://build.phonegap.com/token.
-		Origin http://127.0.0.1 is not allowed by Access-Control-Allow-Origin.
+It can be started standlone using the following command-line (or a similar one):
 
-**Note:** Ares PhoneGap Build connector does _not_ work behind an HTTP/HTTPS proxy yet.
+…in which case it can be tested using `curl` by a command-line like the following one:
+
+	$ curl \
+		-F "file=@config.xml;filename=config.xml" \
+		-F "file=@icon.png;filename=images/icon.png" \
+		-F "archive=myapp.zip" \
+		"http://127.0.0.1:9019/arZip" > /tmp/toto.zip
+	  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+	                                 Dload  Upload   Total   Spent    Left  Speed
+	100  8387    0  3860  100  4527   216k   253k --:--:-- --:--:-- --:--:--  276k
+
+The generated file is expected to look like to below:
+
+	$ unzip -l /tmp/toto.zip 
+	Archive:  /tmp/toto.zip
+	  Length     Date   Time    Name
+	 --------    ----   ----    ----
+	      942  10-17-12 17:26   config.xml
+	     3126  10-17-12 17:26   images/icon.png
+	 --------                   -------
+	     4068                   2 files
+
+### [PhoneGap build service](id:phonegap-build-service)
+
+
+Ares includes the ability to package a mobile Enyo application using [PhoneGap Build](https://build.phonegap.com/).  You must have a properly setup account (with signing keys & distribution certificates) before being able to use Ares to build applications using PhoneGap Build.
+
+Here are a few references to create the necessary signing keys & distribution certificates:
+
+1. [Android Application Signing](http://developer.android.com/tools/publishing/app-signing.html)
+
+#### Configuration
+
+The Ares PhoneGap build service does not need any configuration but the HTTP/HTTPS proxy, if needed.  In `ide.json`, replace `XproxyUrl` by `proxyUrl` and a proxy protocol, host & port that match your needs.
+
+```
+			"useJsonp":false,
+			"verbose": false,
+			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
+			"auth": {
+```
+
+**NOTE:** Ares does not currently work behind a password-protected proxy.  Should you need this feature, please report it via JIRA or on our user's forum.
+
+#### Implementation
+
+The entire [build.phonegap.com API](https://build.phonegap.com/docs/api) is wrapped by a dedicated Hermes build service named `bdPhoneGap` that use a [PhoneGap-provided Node.js client library](https://github.com/phonegap/phonegap-build-api-js#phonegap-build-api-js-).
 
 #### Protocol
-
 
 Resources:
 
