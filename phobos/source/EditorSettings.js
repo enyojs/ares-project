@@ -108,8 +108,7 @@ enyo.kind({
 		]},
 		{tag:"p", classes:"break"},
 		{kind:"FittableRows", components: [
-			{kind: "Control", classes:"ares-row", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
-			{kind: "Control", classes:"ares-row", content: "Mac Programmable buttons Command-SHIFT  F1 to F12"},
+			{kind: "Control", name:"osMessage", classes:"ares-row", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
 			{kind: "onyx.MenuDecorator", name:"program_buttons", classes:"ares-row", components: [
 				{ kind: "FittableColumns", classes:"ace-keys", components:[
 					{kind: "onyx.Button", content: "F-1", name: "F1", ontap: "showPopup"},
@@ -167,6 +166,11 @@ enyo.kind({
 				this.$.fontSizePicker.setSelected(control);
 			}
 		}, this);
+
+		if(/Macintosh/.test(navigator.userAgent)){
+			this.$.osMessage.content = "Programmable buttons Command-SHIFT  F1 to F12";
+		};
+
 		this.previewSettings = JSON.parse(JSON.stringify(this.settings));
 
 	},
