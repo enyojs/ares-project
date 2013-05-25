@@ -464,9 +464,7 @@ enyo.kind({
 		if (kinds.length > 0) {
 			// Request to design the current document, passing info about all kinds in the file
 			this.doDesignDocument(data);
-		} else {
-			alert("No kinds found in this file");
-		}
+		} // else - THe error has been displayed by extractKindsData()
 	},
 	//* Extract info about kinds from the current file needed by the designer
 	extractKindsData: function() {
@@ -485,10 +483,29 @@ enyo.kind({
 			},
 			c = this.$.ace.getValue(),
 			kinds = [];
-		
+
 		if (this.analysis) {
-			for (var i=0; i < this.analysis.objects.length; i++) {
-				var o = this.analysis.objects[i];
+			var nbKinds = 0;
+			var errorMsg;
+			var i, o;
+			for (i=0; i < this.analysis.objects.length; i++) {
+				o = this.analysis.objects[i];
+				if (o.type !== "kind") {
+					errorMsg = $L("Ares does not support methods out of a kind. Please place '" + o.name + "' into a separate .js file");
+				} else {
+					nbKinds++;
+				}
+			}
+			if (nbKinds === 0) {
+				errorMsg = $L("No kinds found in this file");
+			}
+			if (errorMsg) {
+				this.showErrorPopup(errorMsg);
+				return [];
+			}
+
+			for (i=0; i < this.analysis.objects.length; i++) {
+				o = this.analysis.objects[i];
 				var start = o.componentsBlockStart;
 				var end = o.componentsBlockEnd;
 				var name = o.name;
@@ -818,9 +835,7 @@ enyo.kind({
 		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
 		if (data.kinds.length > 0) {
 			this.doUpdate(data);
-		} else {
-			enyo.warn("No kinds found in this file");
-		}
+		} // else - THe error has been displayed by extractKindsData()
 	}
 });
 
