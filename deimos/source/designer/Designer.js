@@ -14,6 +14,7 @@ enyo.kind({
 		onMoveItem: "",
 		onSyncDropTargetHighlighting: "",
 		onReloadComplete: "",
+		onResizeItem: "",
 		onError: ""
 	},
 	components: [
@@ -124,6 +125,9 @@ enyo.kind({
 		// Existing component dropped in iframe
 		} else if(msg.op === "error") {
 			this.doError(msg.val);
+		// Existing component resized
+		} else if(msg.op === "resize") {
+			this.doResizeItem(msg.val);
 		// Default case
 		} else {
 			enyo.warn("Deimos designer received unknown message op:", msg);

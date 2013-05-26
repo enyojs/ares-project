@@ -61,7 +61,8 @@ enyo.kind({
 							onMoveItem: "moveItem",
 							onCreateItem: "createItem",
 							onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
-							onReloadComplete: "reloadComplete"
+							onReloadComplete: "reloadComplete",
+							onResizeItem: "resizeItem"
 						},
 					]}
 				]},
@@ -283,7 +284,7 @@ enyo.kind({
 		inComponent.layoutKind && delete inComponent.layoutKind;
 		this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind && delete this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind;
 	},
-	//* Update _inComponent_._inProp_ to be _inValue_
+	//* Update _inComponent.style.inProp_ to be _inValue_
 	addReplaceStyleProp: function(inComponent, inProp, inValue) {
 		var currentStyle = inComponent.style || "",
 			styleProps = this.createStyleArrayFromString(currentStyle),
@@ -395,6 +396,7 @@ enyo.kind({
 		
 		// Apply any special layout rules
 		clone = this.applyLayoutKindRules(inEvent.layoutData, clone);
+		
 		// Copy clone style props to inspector
 		this.$.inspector.userDefinedAttributes[clone.aresId].style = clone.style;
 		
@@ -407,6 +409,18 @@ enyo.kind({
 		}
 		
 		this.rerenderKind(inEvent.itemId);
+		
+		return true;
+	},
+	resizeItem: function(inSender, inEvent) {
+		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		
+		for (var prop in inEvent.sizeData) {
+			this.addReplaceStyleProp(item, prop, inEvent.sizeData[prop]);
+		}
+		
+		this.rerenderKind(item.aresId);
+		
 		return true;
 	},
 	applyLayoutKindRules: function(inLayoutData, inControl) {

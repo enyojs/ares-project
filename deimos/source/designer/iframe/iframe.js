@@ -18,8 +18,14 @@ enyo.kind({
 		{name: "flightArea", style: "display:none;", classes: "enyo-fit"},
 		{name: "serializer", kind: "Ares.Serializer"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"},
-		{name: "selectHighlight", classes: "iframe-highlight iframe-select-highlight"},
-		{name: "dropHighlight", classes: "iframe-highlight iframe-drop-highlight"}
+		{name: "selectHighlight", classes: "iframe-highlight iframe-select-highlight", showing: false},
+		{name: "dropHighlight", classes: "iframe-highlight iframe-drop-highlight"},
+		
+		//* Resize handles
+		{name: "topLeftResizeHandle",     classes: "iframe-resize-handle", showing: false, sides: {top: true, left: true},     style: "top: 0px; left: 0px;"},
+		{name: "topRightResizeHandle",    classes: "iframe-resize-handle", showing: false, sides: {top: true, right: true},    style: "top: 0px; right: 0px;"},
+		{name: "bottomLeftResizeHandle",  classes: "iframe-resize-handle", showing: false, sides: {bottom: true, left: true},  style: "bottom: 0px; left: 0px;"},
+		{name: "bottomRightResizeHandle", classes: "iframe-resize-handle", showing: false, sides: {bottom: true, right: true}, style: "bottom: 0px; right: 0px;"}
 	],
 	
 	selection: null,
@@ -68,7 +74,6 @@ enyo.kind({
 		
 		enyo.dispatcher.features.push(
 			function(e) {
-				//console.log("-->", e.type);
 				if (_this[e.type]) {
 					_this[e.type](e)
 				}
@@ -147,6 +152,7 @@ enyo.kind({
 	//* On drag start, set the event _dataTransfer_ property to contain a serialized copy of _this.selection_
 	dragstart: function(e) {
 		if (!e.dataTransfer) {
+			this.resizing = this.getActiveResizingHandle(e);
 			return false;
 		}
 		
@@ -198,6 +204,11 @@ enyo.kind({
 		
 		return true;
 	},
+	drag: function(inEvent) {
+		if (this.resizing) {
+			this.resize(inEvent);
+		}
+	},
 	dragenter: function(inEvent) {
 		// Enable HTML5 drag-and-drop
 		inEvent.preventDefault();
@@ -225,6 +236,9 @@ enyo.kind({
 	//* On drop, either move _this.selection_ or create a new component
 	drop: function(inEvent) {
 		if (!inEvent.dataTransfer) {
+			if (this.resizing) {
+				this.resizeComplete();
+			}
 			return true;
 		}
 		
@@ -270,7 +284,7 @@ enyo.kind({
 	},
 	clearDragImage: function() {
 		this.dragImage = null;
-	},	
+	},
 	resetHoldoverTimeout: function() {
 		clearTimeout(this.holdoverTimeout);
 		this.holdoverTimeout = null;
@@ -603,10 +617,20 @@ enyo.kind({
 		if(this.selection && this.selection.hasNode()) {
 			this.$.selectHighlight.setBounds(this.selection.hasNode().getBoundingClientRect());
 			this.$.selectHighlight.show();
+			
+			// Resize handle rendering
+			this.hideAllResizeHandles();
+			
+			if (this.absolutePositioningMode(this.selection.parent)) {
+				this.showAllResizeHandles();
+			} else {
+				this.showBottomRightResizeHandle();
+			}
 		}
 	},
 	hideSelectHighlight: function() {
 		this.$.selectHighlight.hide();
+		this.hideAllResizeHandles();
 	},
 	syncDropTargetHighlighting: function() {
 		var dropTarget = this.currentDropTarget ? this.$.serializer.serializeComponent(this.currentDropTarget, true) : null;
@@ -755,8 +779,7 @@ enyo.kind({
 		var container   = this.getContainerItem(),
 			containerId = container ? container.aresId : null,
 			clone       = this.cloneControl(this.selection, true), //this.createSelectionGhost(this.selection)
-			styleProps	= this.createStyleArrayFromString(this.selection.style),
-			topMatched 	= rightMatched = bottomMatched = leftMatched = false
+			styleProps	= this.createStyleArrayFromString(this.selection.style)
 		;
 		
 		this.hideSelectHighlight();
@@ -878,7 +901,7 @@ enyo.kind({
 		this.setBeforeItem(beforeItem);
 		
 		// Do static prerender drop if not an AbsolutePositioningLayout container
-		if (!(containerItem && containerItem.layoutKind === "AbsolutePositioningLayout")) {
+		if (!this.absolutePositioningMode(containerItem)) {
 			this.staticPrerenderDrop();
 		}
 	},
@@ -1492,5 +1515,176 @@ enyo.kind({
 			height	: height,
 			width	: width
 		};
+	},
+	
+	//****** RESIZING CODE ******//
+	
+	getActiveResizingHandle: function(inEvent) {
+		if (inEvent.dispatchTarget.sides) {
+			this.$resizeHandle = inEvent.dispatchTarget;
+			this.intialDragBounds = this.getRelativeBounds(this.selection);
+			this.selectionDragAnchors = this.getDragAnchors(this.selection, this.$resizeHandle);
+			return true;
+		}
+		
+		return false;
+	},
+	resize: function(inEvent) {
+		this.resizeWidth(inEvent.dx);
+		this.resizeHeight(inEvent.dy);
+		this.renderSelectHighlight();
+	},
+	resizeWidth: function(inDelta) {
+		if (this.selectionDragAnchors.left) {
+			this.selection.applyStyle("left", (this.intialDragBounds.left + inDelta) + "px");
+		} else if (this.selectionDragAnchors.right) {
+			this.selection.applyStyle("right", (this.intialDragBounds.right - inDelta) + "px");
+		}
+		if (this.selectionDragAnchors.width) {
+			this.selection.applyStyle("width", (
+				(this.$resizeHandle.sides.left) ? this.intialDragBounds.width - inDelta : this.intialDragBounds.width + inDelta
+			) + "px");
+		}
+	},
+	resizeHeight: function(inDelta) {
+		if (this.selectionDragAnchors.top) {
+			this.selection.applyStyle("top", (this.intialDragBounds.top + inDelta) + "px");
+		} else if (this.selectionDragAnchors.bottom) {
+			this.selection.applyStyle("bottom", (this.intialDragBounds.bottom - inDelta) + "px");
+		}
+		if (this.selectionDragAnchors.height) {
+			this.selection.applyStyle("height", (
+				(this.$resizeHandle.sides.top) ? this.intialDragBounds.height - inDelta : this.intialDragBounds.height + inDelta
+			) + "px");
+		}
+	},
+	getDragAnchors: function(inResizeComponent, inHandle) {
+		var styleProps = this.createStyleArrayFromString(inResizeComponent.style),
+			anchors = {
+				top: this.findStyleMatch(styleProps, "top"),
+				right: this.findStyleMatch(styleProps, "right"),
+				bottom: this.findStyleMatch(styleProps, "bottom"),
+				left: this.findStyleMatch(styleProps, "left")
+			}
+		;
+		
+		if (inHandle.sides.top) {
+			if (anchors.top) {
+				if (anchors.bottom) {
+					anchors.height = false;
+					anchors.bottom = false;
+				} else {
+					anchors.height = true;
+				}
+			} else {
+				anchors.height = true;
+				anchors.bottom = false;
+			}
+		} else if (inHandle.sides.bottom) {
+			if (anchors.bottom) {
+				if (anchors.top) {
+					anchors.height = false;
+					anchors.top = false;
+				} else {
+					anchors.height = true;
+				}
+			} else {
+				anchors.height = true;
+				anchors.top = false;
+			}
+		}
+		
+		if (inHandle.sides.left) {
+			if (anchors.left) {
+				if (anchors.right) {
+					anchors.width = false;
+					anchors.right = false;
+				} else {
+					anchors.width = true;
+				}
+			} else {
+				anchors.width = true;
+				anchors.right = false;
+			}
+		} else if (inHandle.sides.right) {
+			if (anchors.right) {
+				if (anchors.left) {
+					anchors.width = false;
+					anchors.left = false;
+				} else {
+					anchors.width = true;
+				}
+			} else {
+				anchors.width = true;
+				anchors.left = false;
+			}
+		}
+		
+		return anchors;
+	},
+	showAllResizeHandles: function() {
+		var bounds = this.getRelativeBounds(this.$.selectHighlight);
+		this.showTopLeftResizeHandle(bounds);
+		this.showTopRightResizeHandle(bounds);
+		this.showBottomRightResizeHandle(bounds);
+		this.showBottomLeftResizeHandle(bounds);
+	},
+	showTopLeftResizeHandle: function(inBounds) {
+		inBounds = inBounds || this.getRelativeBounds(this.$.selectHighlight);
+		this.$.topLeftResizeHandle.applyStyle("top", inBounds.top + "px");
+		this.$.topLeftResizeHandle.applyStyle("left", inBounds.left + "px");
+		this.$.topLeftResizeHandle.show();
+	},
+	showTopRightResizeHandle: function(inBounds) {
+		inBounds = inBounds || this.getRelativeBounds(this.$.selectHighlight);
+		this.$.topRightResizeHandle.applyStyle("top", inBounds.top + "px");
+		this.$.topRightResizeHandle.applyStyle("right", inBounds.right + "px");
+		this.$.topRightResizeHandle.show();
+	},
+	showBottomRightResizeHandle: function(inBounds) {
+		inBounds = inBounds || this.getRelativeBounds(this.$.selectHighlight);
+		this.$.bottomRightResizeHandle.applyStyle("bottom", inBounds.bottom + "px");
+		this.$.bottomRightResizeHandle.applyStyle("right", inBounds.right + "px");
+		this.$.bottomRightResizeHandle.show();
+	},
+	showBottomLeftResizeHandle: function(inBounds) {
+		inBounds = inBounds || this.getRelativeBounds(this.$.selectHighlight);
+		this.$.bottomLeftResizeHandle.applyStyle("bottom", inBounds.bottom + "px");
+		this.$.bottomLeftResizeHandle.applyStyle("left", inBounds.left + "px");
+		this.$.bottomLeftResizeHandle.show();
+	},
+	hideAllResizeHandles: function() {
+		this.$.topLeftResizeHandle.hide();
+		this.$.topRightResizeHandle.hide();
+		this.$.bottomLeftResizeHandle.hide();
+		this.$.bottomRightResizeHandle.hide();
+	},
+	resizeComplete: function() {
+		this.sendMessage({op: "resize", val: {itemId: this.selection.aresId, sizeData: this.getResizeCompleteData()}});
+	},
+	getResizeCompleteData: function() {
+		var bounds = this.getRelativeBounds(this.$.selectHighlight);
+		var sizeData = {};
+		
+		if (this.selectionDragAnchors.top) {
+			sizeData.top = bounds.top + "px";
+		}
+		if (this.selectionDragAnchors.right) {
+			sizeData.right = bounds.right + "px";
+		}
+		if (this.selectionDragAnchors.bottom) {
+			sizeData.bottom = bounds.bottom + "px";
+		}
+		if (this.selectionDragAnchors.left) {
+			sizeData.left = bounds.left + "px";
+		}
+		if (this.selectionDragAnchors.height) {
+			sizeData.height = bounds.height + "px";
+		}
+		if (this.selectionDragAnchors.width) {
+			sizeData.width = bounds.width + "px";
+		}
+
+		return sizeData;
 	}
 });
