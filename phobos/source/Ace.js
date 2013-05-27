@@ -4,6 +4,7 @@ enyo.kind({
 	published: {
 		value: "",
 		theme: "clouds",
+		fontSize: "",
 		wordWrap: false,
 		readonly: false,
 		highlightActiveLine: false,
@@ -22,6 +23,8 @@ enyo.kind({
 		onAutoCompletion: "",
 		onFind: "",
 		onWordwrap: "",
+		onFkey: "",
+		
 		/// FIXME just add these for now
 		onSetBreakpoint: "",
 		onClearBreakpoint: ""
@@ -33,19 +36,11 @@ enyo.kind({
 	],
 	rendered: function() {
 		this.inherited(arguments);
-		
-		this.theme = localStorage.theme;
-		if(this.theme === undefined){
-			this.theme = "clouds";
-		}
-		
 		var n = this.hasNode();
 		if (n) {
 			this.editor = ace.edit(this.$.aceEditor.id);
-			this.themeChanged();
 			this.valueChanged();
 			this.updateSessionSettings(this.getSession());
-			this.highlightActiveLineChanged();
 			this.readonlyChanged();
 			this.showPrintMarginChanged();
 			this.persistentHScrollChanged();
@@ -55,6 +50,16 @@ enyo.kind({
 			this.addSessionListeners();
 			this.addKeyBindings();
 		}
+	},
+	/**
+	 * Apply settings from editor settings popup
+	 * @public
+	 */
+	applyAceSettings: function(settings) {
+			this.setTheme(settings.theme);
+			this.setFontSize(settings.fontsize);
+			this.setHighlightActiveLine(settings.highlight);
+			this.setWordWrap(settings.wordwrap);
 	},
 	/**
 	 * Register some specific commands for save, ...
@@ -90,6 +95,18 @@ enyo.kind({
 			bindKey: {win: "Alt-W", mac: "Alt-W"},
 			exec: enyo.bind(this, "doWordwrap")
 		});
+		
+		// Add keybinding for F1 t F12
+		var i,key;
+		for (i=1; i<13; i++) {
+			key = 'F' + i;
+			//console.log(key);
+			commands.addCommand({
+				name: key,
+				bindKey: { win: "Ctrl-SHIFT-"+key, mac: "command-SHIFT-"+key },
+				exec: enyo.bind(this, 'doFkey' , [key])
+			});
+		}	
 	},
 	/**
 	 * Add a new command with key kinding
@@ -473,8 +490,9 @@ enyo.kind({
 	replaceRange: function(range, text) {
 		this.getSession().replace(range, text);
 	},
+	
 	setFontSize: function(size){
 		var s = size;
 		this.editor.setFontSize(s);
-	},
+	}
 });

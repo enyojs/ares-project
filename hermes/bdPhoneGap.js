@@ -8,17 +8,29 @@ var fs = require("fs"),
     path = require("path"),
     express = require("express"),
     util  = require("util"),
+    npmlog = require('npmlog'),
     querystring = require("querystring"),
     temp = require("temp"),
+    request = require('request'),
     zipstream = require('zipstream'),
     async = require("async"),
     mkdirp = require("mkdirp"),
     rimraf = require("rimraf"),
     http = require("http"),
     child_process = require("child_process"),
-    api = require("phonegapbuildapi");
+    client = require("phonegap-build-api");
 
-var basename = path.basename(__filename);
+var basename = path.basename(__filename, '.js'),
+    log = npmlog;
+log.heading = basename;
+log.level = 'warn';
+
+var url = 'build.phonegap.com';
+
+process.on('uncaughtException', function (err) {
+	log.error('uncaughtException', err.stack);
+	process.exit(1);
+});
 
 function BdPhoneGap(config, next) {
 	function HttpError(msg, statusCode) {
@@ -29,10 +41,12 @@ function BdPhoneGap(config, next) {
 	util.inherits(HttpError, Error);
 	HttpError.prototype.name = "HTTP Error";
 
-	// (simple) parameters checking
-	config.pathname = config.pathname || '/phonegap';
+	this.config = config;
 
-	var deployScript = path.join(config.enyoDir, 'tools', 'deploy.js');
+	// (simple) parameters checking
+	this.config.pathname = config.pathname || '/phonegap';
+
+	var deployScript = path.join(this.config.enyoDir, 'tools', 'deploy.js');
 	try {
 		var stat = fs.statSync(deployScript);
 		if (!stat.isFile()) throw "Not a file";
@@ -41,7 +55,7 @@ function BdPhoneGap(config, next) {
 		next(new Error("Not a suitable Enyo: it does not contain a usable 'tools/deploy.js'"));
 	}
 
-	console.log("config=",  util.inspect(config));
+	log.verbose('main', "config",  this.config);
 
 	// express 3.x: app is not a server
 	var app, server;
@@ -79,6 +93,7 @@ function BdPhoneGap(config, next) {
 
 	// Authentication
 	app.use(express.cookieParser());
+
 	app.use(function(req, res, next) {
 		if (req.connection.remoteAddress !== "127.0.0.1") {
 			next(new Error("Access denied from IP address "+req.connection.remoteAddress));
@@ -88,9 +103,9 @@ function BdPhoneGap(config, next) {
 	});
 
 	function authorize(req, res, next) {
-		console.log("bdPhoneGap.authorize(): req.url:", req.url);
-		console.log("bdPhoneGap.authorize(): req.query:", req.query);
-		console.log("bdPhoneGap.authorize(): req.cookies:", req.cookies);
+		log.verbose("authorize()", "req.url:", req.url);
+		log.verbose("authorize()", "req.query:", req.query);
+		log.verbose("authorize()", "req.cookies:", req.cookies);
 		var token = req.cookies.token || req.param('token');
 		if (token) {
 			req.token = token;
@@ -110,28 +125,24 @@ function BdPhoneGap(config, next) {
 	fs.mkdirSync(uploadDir);
 	app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
 
-	// Global error handler
-	function errorHandler(err, req, res, next){
-		console.error("errorHandler(): ", err.stack);
-		res.status(err.statusCode || 500);
-		res.contentType('txt'); // direct usage of 'text/plain' does not work
-		res.send(err.toString());
-	}
-	// express-3.x: middleware with arity === 4 is detected as the error handler
-	app.use(errorHandler);
-
 	/*
 	 * Verbs
 	 */
 
+	app.post('/config', (function(req, res, next) {
+		this.configure(req.body && req.body.config, function(err) {
+			res.status(200).end();
+		});
+	}).bind(this));
+
 	// '/token' & '/api' -- Wrapped public Phonegap API
-	app.post(makeExpressRoute('/token'), getToken);
-	app.get(makeExpressRoute('/api/v1/me'), getUserData);
+	app.post(makeExpressRoute('/token'), getToken.bind(this));
+	app.get(makeExpressRoute('/api/v1/me'), getUserData.bind(this));
 	
 	// '/op' -- localy-implemented operations
 
 	// Return the ZIP-ed deployed Enyo application
-	app.post(makeExpressRoute('/op/deploy'), function(req, res, next) {
+	app.post(makeExpressRoute('/op/deploy'), (function(req, res, next) {
 		async.series([
 			prepare.bind(this, req, res),
 			store.bind(this, req, res),
@@ -150,12 +161,12 @@ function BdPhoneGap(config, next) {
 			// because that would try to return 200 with
 			// an empty body, while we have already sent
 		});
-	});
+	}).bind(this));
 
 	// Upload ZIP-ed deployed Enyo application to the
 	// https://build.phonegap.com online service and return the
 	// JSON-encoded response of the service.
-	app.post(makeExpressRoute('/op/build'), function(req, res, next) {
+	app.post(makeExpressRoute('/op/build'), (function(req, res, next) {
 		async.series([
 			prepare.bind(this, req, res),
 			store.bind(this, req, res),
@@ -176,21 +187,55 @@ function BdPhoneGap(config, next) {
 			// an empty body, while we have already sent
 			// back the response.
 		});
-	});
+	}).bind(this));
 	
+	// Global error handler (last app.xxx(), with 4 parameters)
+	function errorHandler(err, req, res, next){
+		log.info("errorHandler()", "err:", err);
+		if (err instanceof Error) {
+			var msg;
+			try {
+				msg = JSON.parse(err.message).error;
+			} catch(e) {
+				msg = err.message;
+			}
+			if ("Invalid authentication token." === msg) {
+				_respond(new HttpError(msg, 401));
+			} else {
+				_respond(new HttpError(msg, 400));
+			}
+		} else {
+			_respond(new Error(err.toString()));
+		}
+
+		function _respond(err) {
+			log.warn("errorHandler#_respond():", err.stack);
+			res.status(err.statusCode || 500);
+			if (err.statusCode === 401) {
+				// invalidate token cookie
+				this.setCookie(res, 'token', null);
+			}
+			res.contentType('txt'); // direct usage of 'text/plain' does not work
+			res.send(err.toString());
+		}
+	}
+
+	// express-3.x: middleware with arity === 4 is detected as the error handler
+	app.use(errorHandler.bind(this));
+
 	// Send back the service location information (origin,
 	// protocol, host, port, pathname) to the creator, when port
 	// is bound
-	server.listen(config.port, "127.0.0.1", null /*backlog*/, function() {
+	server.listen(this.config.port, "127.0.0.1", null /*backlog*/, (function() {
 		var tcpAddr = server.address();
 		return next(null, {
 			protocol: 'http',
 			host: tcpAddr.address,
 			port: tcpAddr.port,
 			origin: "http://" + tcpAddr.address + ":"+ tcpAddr.port,
-			pathname: config.pathname
+			pathname: this.config.pathname
 		});
-	});
+	}).bind(this));
 
 	/**
 	 * Terminates express server & clean-up the plate
@@ -198,7 +243,7 @@ function BdPhoneGap(config, next) {
 	this.quit = function(cb) {
 		app.close();
 		rimraf(uploadDir, cb);
-		console.log(basename,  " exiting");
+		log.info('quit()',  "exiting");
 	};
 
 	function prepare(req, res, next) {
@@ -210,7 +255,7 @@ function BdPhoneGap(config, next) {
 			deploy: path.join(appTempDir, 'deploy')
 		};
 
-		console.log("prepare(): setting-up " + req.appDir.root);
+		log.verbose("prepare()", "setting-up " + req.appDir.root);
 		async.series([
 			function(done) { mkdirp(req.appDir.root, done); },
 			function(done) { fs.mkdir(req.appDir.source, done); },
@@ -232,14 +277,14 @@ function BdPhoneGap(config, next) {
 
 		async.forEachSeries(req.files.file, function(file, cb) {
 			var dir = path.join(req.appDir.source, path.dirname(file.name));
-			//console.log("store(): mkdir -p ", dir);
+			log.silly("store()", "mkdir -p ", dir);
 			mkdirp(dir, function(err) {
-				//console.log("store(): mv ", file.path, " ", file.name);
+				log.silly("store()", "mv ", file.path, " ", file.name);
 				if (err) {
 					cb(err);
 				} else {
 					fs.rename(file.path, path.join(req.appDir.source, file.name), function(err) {
-						console.log("store(): Stored: ", file.name);
+						log.verbose("store()", "Stored: ", file.name);
 						cb(err);
 					});
 				}
@@ -248,10 +293,8 @@ function BdPhoneGap(config, next) {
 	}
 
 	function deploy(req, res, next) {
-		console.log("deploy(): started");
-
 		var appManifest = path.join(req.appDir.source, 'package.js');
-		fs.stat(appManifest, function(err) {
+		fs.stat(appManifest, (function(err) {
 			if (err) {
 				// No top-level package.js: this is
 				// not a Bootplate-based Enyo
@@ -259,7 +302,7 @@ function BdPhoneGap(config, next) {
 				// wether it is even an Enyo
 				// application, so we cannot `deploy`
 				// it easily.
-				console.log("no '" + appManifest + "': not an Enyo Bootplate-based application");
+				log.info("deploy()", "no '" + appManifest + "': not an Enyo Bootplate-based application");
 				req.appDir.zipRoot = req.appDir.source;
 				next();
 			} else {
@@ -274,39 +317,38 @@ function BdPhoneGap(config, next) {
 				var params = [ '--verbose',
 					       '--packagejs', path.join(req.appDir.source, 'package.js'),
 					       '--source', req.appDir.source,
-					       '--enyo', config.enyoDir,
+					       '--enyo', this.config.enyoDir,
 					       '--build', req.appDir.build,
 					       '--out', req.appDir.deploy,
 					       '--less'];
-				console.log("deploy(): Running: '", deployScript, params.join(' '), "'");
+				log.info("deploy()", "Running: '", deployScript, params.join(' '), "'");
 				var child = child_process.fork(deployScript, params, {
 					silent: false
 				});
 				child.on('message', function(msg) {
-					console.log("deploy():", msg);
+					log.verbose("deploy()", msg);
 					if (msg.error) {
-						console.error("child-process error: ", util.inspect(msg.error));
+						log.error("deploy()", "child-process error: ", msg.error);
 						child.errMsg = msg.error;
 					} else {
-						console.error("unexpected child-process message msg=", util.inspect(msg));
+						log.warn("deploy()", "unexpected child-process message msg=", msg);
 					}
 				});
 				child.on('exit', function(code, signal) {
 					if (code !== 0) {
 						next(new HttpError(child.errMsg || ("child-process failed: '"+ child.toString() + "'")));
 					} else {
-						console.log("deploy(): completed");
+						log.info("deploy(): completed");
 						next();
 					}
 				});
 			}
-		});
+		}).bind(this));
 	}
 
 	function zip(req, res, next) {
-		console.log("zip(): Zipping '" + req.appDir.zipRoot + "'");
+		log.info("zip()", "Zipping '" + req.appDir.zipRoot + "'");
 
-		//console.log("zip(): ");
 		req.zip = {};
 		req.zip.path = path.join(req.appDir.root, "app.zip");
 		req.zip.stream = zipstream.createZip({level: 1});
@@ -314,7 +356,7 @@ function BdPhoneGap(config, next) {
 		_walk.bind(this)(req.appDir.zipRoot, "" /*prefix*/, function() {
 			try {
 				req.zip.stream.finalize(function(written){
-					console.log("finished ", req.zip.path);
+					log.verbose("zip()", "finished ", req.zip.path);
 					next();
 				});
 			} catch(e) {
@@ -326,18 +368,18 @@ function BdPhoneGap(config, next) {
 			// TODO that _thing_ probably needs a bit of
 			// refactoring by someone that feels easy with
 			// node-async _arcanes_.
-			//console.log("zip._walk(): Parsing: ", relParent);
+			log.silly("zip._walk()", "Parsing: ", relParent);
 			async.waterfall([
 				function(cb2) {
-					//console.log("zip._walk(): readdir: ", absParent);
+					log.silly("zip._walk()", "readdir: ", absParent);
 					fs.readdir(absParent, cb2);
 				},
 				function(nodes, cb2) {
-					//console.log("zip._walk(): nodes.forEach");
+					log.silly("zip._walk()", "nodes.forEach");
 					async.forEachSeries(nodes, function(name, cb3) {
 						var absPath = path.join(absParent, name),
 						    relPath = path.join(relParent, name);
-						//console.log("zip._walk(): stat: ", absPath);
+						log.silly("zip._walk()", "stat: ", absPath);
 						fs.stat(absPath, function(err, stat) {
 							if (err) {
 								cb3(err);
@@ -346,10 +388,10 @@ function BdPhoneGap(config, next) {
 							if (stat.isDirectory()) {
 								_walk(absPath, relPath, cb3);
 							} else {
-								console.log("zip._walk(): Adding: ", relPath);
+								log.silly("zip._walk()", "Adding: ", relPath);
 								try {
 									req.zip.stream.addFile(fs.createReadStream(absPath), { name: relPath }, function(err) {
-										console.log("zip._walk(): Added: ", relPath, "(err=", err, ")");
+										log.verbose("zip._walk()", "Added: ", relPath, "(err=", err, ")");
 										cb3(err);
 									});
 								} catch(e) {
@@ -365,99 +407,128 @@ function BdPhoneGap(config, next) {
 
 	function getToken(req, res, next) {
 		// XXX !!! leave this log commented-out to not log password !!!
-		//console.log("getToken(): req.body = ", util.inspect(req.body));
-		api.createAuthToken(req.body.username + ':' +req.body.password, {
-			success: function(token) {
-				var exdate=new Date();
-				exdate.setDate(exdate.getDate() + 10 /*days*/);
-				var cookieOptions = {
-					domain: '127.0.0.1:' + config.port,
-					path: config.pathname,
-					httpOnly: true,
-					expires: exdate
-					//maxAge: 1000*3600 // 1 hour
-				};
-				res.cookie('token', token, cookieOptions);
-				console.log("Bdphonegap.getToken(): Set-Cookie: token:", token);
-				res.status(200).send({token: token}).end();
-			},
-			error: function(errStr, statusCode) {
-				next(new HttpError(errStr, statusCode));
+		//log.silly("getToken()", "req.body:", req.body);
+
+		var auth, options;
+		auth = "Basic " + new Buffer(req.body.username + ':' +req.body.password).toString("base64");
+		options = {
+			url : 'https://' + url + "/token",
+			headers : { "Authorization" : auth },
+			proxy: this.config.proxyUrl
+		};
+		log.http("getToken()", "POST /token");
+		request.post(options, (function(err1, response, body) {
+			try {
+				log.verbose("getToken()", "response.statusCode:", response.statusCode);
+				if (err1) {
+					log.warn("getToken()", err1.toString());
+					next(new HttpError(err1.toString(), response.statusCode));
+				} else {
+					log.verbose("getToken()", "response body:", body);
+					var data = JSON.parse(body);
+					if (data.error) {
+						next(new HttpError(data.error, 401));
+					} else {
+						this.setCookie(res, 'token', data.token);
+						res.status(200).send(data).end();
+					}
+				}
+			} catch(err0) {
+				next(err0);
 			}
-		});
+		}).bind(this));
 	}
 
 	function getUserData(req, res, next) {
-		api.getUserData(req.token, {
-			success: function(inValue) {
-				console.log("typeof inValue:", typeof inValue, ", inValue:", inValue);
-				res.status(200).send({user: inValue}).end();
-			},
-			error: function(errStr, statusCode) {
-				next(new HttpError(errStr, statusCode));
+		client.auth({
+			token: req.token,
+			proxy: this.config.proxyUrl
+		}, function(err1, api) {
+			if (err1) {
+				next(err1);
+			} else {
+				api.get('/me', function(err2, userData) {
+					if (err2) {
+						next(err2);
+					} else {
+						log.info("getUserData()", "userData:", userData);
+						res.status(200).send({user: userData}).end();
+					}
+				});
 			}
-		});
+		});;
 	}
 
 	function upload(req, res, next) {
-		console.log("upload(): fields req.body = ", util.inspect(req.body));
-		var reqData = {};
-		var errs = [];
-		var mandatory = ['token', 'title'];
-		mandatory.forEach(function(field) {
-			if (!req.body[field]) {
-				errs.push("missing form field: '" + field + "'");
+		log.info("upload()", "title:", req.body.title, ", platforms:", req.body.platforms, ", appId:", req.body.appId);
+
+		async.waterfall([
+			client.auth.bind(this, {
+				token: req.token,
+				proxy: this.config.proxyUrl
+			}),
+			_prepare.bind(this),
+			_uploadApp.bind(this),
+			_success.bind(this)
+		], function(err, result) {
+			if (err) {
+				_fail(err);
+			} else {
+				next();
 			}
 		});
-		if (errs.length > 0) {
-			_fail(errs.toString());
-			return;
-		}
 
-		// Pick signing keys, if provided
-		try {
-			reqData.keys = JSON.parse(req.body.keys);
-		} catch(e) {
-			console.log("upload(): no valid signing keys");
-		}
-
-		// When the specific field 'testResponse'
-		// (JSON-encoded) is present, the build request is not
-		// presented to the outside build.phonegap.com
-		// service.  This avoids eating build token in a
-		// frequent test scenario.  The Hermes PhoneGap server
-		// rather returns testResponse.
-		if (req.body.testJsonResponse) {
-			try {
-				res.body = JSON.parse(req.body.testJsonResponse);
-				next();
-			} catch(err) {
-				next(err);
-			}
-		} else if (req.body.appId) {
-			console.log("upload(): updating appId="+ req.body.appId + " (title='" + req.body.title + "')");
-			api.updateFileBasedApp(req.body.token, req.zip.path, req.body.appId, reqData, {
-				success: next,
-				error: _fail
+		function _prepare(api, next) {
+			var appData = {}, errs = [];
+			// check mandatory parameters
+			var mandatory = ['token', 'title'];
+			mandatory.forEach(function(field) {
+				if (!req.body[field]) {
+					errs.push("Missing form field: '" + field + "'");
+				}
 			});
-		} else {
-			console.log("upload(): creating new appId for title=" + req.body.title + "");
-			reqData.create_method = 'file';
+			if (errs.length > 0) {
+				next(new HttpError(errs.toString(), 400));
+				return;
+			}
+			// picks signing keys ID's, if any
+			try {
+				appData.keys = JSON.parse(req.body.keys);
+			} catch(e) {
+				log.info("upload#_prepare()", "un-signed build requested (did not find a valid signing key)");
+			}
+			// pass other form parameters as 1st-level
+			// property of the build request object.
 			for (var p in req.body) {
-				if (!reqData[p] && (typeof p === 'string')) {
-					reqData[p] = req.body[p];
+				if (!appData[p] && (typeof p === 'string')) {
+					appData[p] = req.body[p];
 				}
 			}
-			console.log("upload(): reqData=", reqData);
-			api.createFileBasedApp(req.body.token, req.zip.path, reqData, {
-				success: _success,
-				error: _fail
-			});
+			//WARNING: enabling this trace shows-up the signing keys passwords
+			log.silly("upload#_prepare(): appData:", appData);
+			next(null, api, appData);
 		}
-		
-		function _success(data) {
+		function _uploadApp(api, appData, next) {
+			var options = {
+				form: {
+					data: appData,
+					file: req.zip.path
+				}
+			};
+			if (appData.appId) {
+				log.http("upload#_uploadApp()", "PUT /apps/" + appData.appId + " (title='" + appData.title + "')");
+				api.put('/apps/' + appData.appId, options, next);
+
+			} else {
+				log.http("upload#_uploadApp()", "POST /apps (title='" + appData.title + "')");
+				options.form.data.create_method = 'file';
+				api.post('/apps', options, next);
+			}
+		}
+
+		function _success(data, next) {
 			try {
-				console.log("upload(): ", util.inspect(data));
+				log.verbose("upload#_success()", "data", data);
 				if (typeof data === 'string') {
 					data = JSON.parse(data);
 				}
@@ -468,45 +539,58 @@ function BdPhoneGap(config, next) {
 				res.body = data;
 				next();
 			} catch(e) {
-				_fail(e.toString());
+				_fail(e);
 			}
 		}
 		
 		function _fail(err) {
-			if (err instanceof Error) {
-				console.error(err.stack);
-			} else {
-				console.error("upload(): error ", err);
-			}
+			log.warn("upload#_fail()", "error ", err);
 			next(new HttpError("PhoneGap build error: " + err.toString(), 400 /*Bad Request*/));
 		}
 	}
 	
 	function returnZip(req, res, next) {
-		console.log("returnZip(): ", res.body);
 		res.status(200).sendfile(req.zip.path);
 		delete req.zip;
 		next();
 	}
 
 	function returnBody(req, res, next) {
-		console.log("returnBody(): ", res.body);
 		res.status(200).send(res.body);
 		delete res.body;
-		delete req.zip;
 		next();
 	}
 
 	function cleanup(req, res, next) {
-		console.log("cleanup(): rm -rf " + req.appDir.root);
+		log.info("cleanup()", "rm -rf " + req.appDir.root);
 		rimraf(req.appDir.root, function(err) {
-			console.log("cleanup(): removed " + req.appDir.root);
+			log.verbose("cleanup()", "removed " + req.appDir.root);
 			next(err);
 		});
 	}
 }
 
-if (path.basename(process.argv[1]) === basename) {
+BdPhoneGap.prototype.configure = function(config, next) {
+	util._extend(this.config, config);
+	log.verbose("configure()", "config:", this.config);
+	next();
+};
+
+BdPhoneGap.prototype.setCookie = function(res, key, value) {
+	var exdate=new Date();
+	exdate.setDate(exdate.getDate() + 10 /*days*/);
+	var cookieOptions = {
+		domain: '127.0.0.1:' + this.config.port,
+		path: this.config.pathname,
+		httpOnly: true,
+		expires: exdate
+		//maxAge: 1000*3600 // 1 hour
+	};
+	res.cookie(key, value, cookieOptions);
+	log.info('setCookie()', "Set-Cookie: " + key + ":", value || "");
+};
+
+if (path.basename(process.argv[1], '.js') === basename) {
 	// We are main.js: create & run the object...
 
 	var knownOpts = {
@@ -522,16 +606,21 @@ if (path.basename(process.argv[1]) === basename) {
 		"v": "--level verbose",
 		"h": "--help"
 	};
+	var helpString = [
+		"Usage: node " + basename,
+		"  -p, --port	     port (o) local IP port of the express server (0: dynamic)	       [default: '0']",
+		"  -P, --pathname    URL pathname prefix (before /deploy and /build		       [default: '/phonegap']",
+		"  -l, --level	     debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error') [default: 'http']",
+		"  -h, --help	     This message"
+	];
 	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	argv.pathname = argv.pathname || "/phonegap";
 	argv.port = argv.port || 0;
-	argv.level = argv.level || "http";
+	log.level = argv.level || "http";
 	if (argv.help) {
-		console.log("Usage: node " + basename + "\n" +
-			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)         [default: '0']\n" +
-			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                    [default: '/phonegap']\n" +
-			    "  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error') [default: 'http']\n" +
-			    "  -h, --help        This message\n");
+		helpString.forEach(function(line) {
+			console.log(line);
+		});
 		process.exit(0);
 	}
 

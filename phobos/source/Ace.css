@@ -28,3 +28,22 @@
 	left: 0;
 	right: 0;
 }
+
+.ace-keys>button{
+	min-width: 68px;
+}
+
+.ace-alt-button-input {
+	width: 425px;
+}
+
+.ace-label{
+	width:83px;
+}
+
+.small-picker{
+	width: 77px;
+}
+.large-picker{
+	width: 150px;
+}

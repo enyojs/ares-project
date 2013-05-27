@@ -13,7 +13,8 @@ enyo.kind({
 		onCreateItem: "",
 		onMoveItem: "",
 		onSyncDropTargetHighlighting: "",
-		onReloadComplete: ""
+		onReloadComplete: "",
+		onError: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", classes: "ares-iframe-client"},
@@ -30,7 +31,6 @@ enyo.kind({
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
 	},
 	currentKindChanged: function() {
-		this.inherited(arguments);
 		this.renderCurrentKind();
 	},
 	heightChanged: function() {
@@ -65,7 +65,9 @@ enyo.kind({
 		this.setIframeReady(false);
 		this.projectSource = inSource;
 		this.projectPath = serviceConfig.origin + serviceConfig.pathname + "/file";
-		this.$.client.hasNode().src = this.baseSource + "?src=" + this.projectSource.getProjectUrl();
+		var iframeUrl = this.baseSource + "?src=" + this.projectSource.getProjectUrl();
+		if (this.debug) { this.log("Setting iframe url: " + iframeUrl); }
+		this.$.client.hasNode().src = iframeUrl;
 	},
 	reload: function() {
 		this.reloading = true;
@@ -73,7 +75,7 @@ enyo.kind({
 	},
 	
 	//* Send message via communicator
-	sendMessage: function(inMessage) {		 
+	sendMessage: function(inMessage) {
 		if (this.debug) { this.log("Op: " + inMessage.op, inMessage); }
 		this.$.communicator.sendMessage(inMessage);
 	},
@@ -119,12 +121,14 @@ enyo.kind({
 		// Existing component dropped in iframe
 		} else if(msg.op === "moveItem") {
 			this.doMoveItem(msg.val);
+		// Existing component dropped in iframe
+		} else if(msg.op === "error") {
+			this.doError(msg.val);
 		// Default case
 		} else {
 			enyo.warn("Deimos designer received unknown message op:", msg);
 		}
 	},
-	
 	//* Pass _isContainer_ info down to iframe
 	sendIframeContainerData: function() {
 		this.sendMessage({op: "containerData", val: Model.getFlattenedContainerInfo()});

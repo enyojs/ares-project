@@ -348,7 +348,9 @@ enyo.kind({
 					service.impl = ServiceRegistry.instance.createComponent(kindInformation);
 					this.configureService(service, next);
 					if (this.debug) this.log("New plugin registered: " + serviceId);
+					// FIXME: refactor notifyServicesChange() to carry only one service (like plugins).
 					enyo.Signals.send("onPluginRegist", {pluginService: service.impl});
+					this.notifyServicesChange();
 				} catch(err) {
 					this.error("Unexpected error while creating '" + kindInformation.kind + "' for service " + serviceId , err);
 					next(err);

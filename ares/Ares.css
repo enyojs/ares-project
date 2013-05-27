@@ -1,3 +1,4 @@
+/**/
 body {
 	background-color: #aaa;
 }
@@ -89,7 +90,7 @@ body {
 	width: 280px;
 }
 .ares_phobos_right {
-	width: 360px;
+	width: 280px;
 }
 .ares_phobos_autocomp {
 	position: absolute;
@@ -110,9 +111,11 @@ body {
 .ares_phobos_findpop {
 	width: 300px;
 }
-.ares_phobos_settingspop {
-	width: 300px;
+
+.phobos_editorsettings_buttoninput {
+	width: 450px;
 }
+
 /**/
 .border {
 	background-color: whiteSmoke;
@@ -168,7 +171,7 @@ body {
 .ares-top-toolbar{ 
 	border-right: 0px;
     width: 100%;
-    height:43px; 
+    height:64px; 
     line-height: 30px;
     border-bottom: 1px solid #222; 
     background:url(../ares/assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px -123px;
@@ -320,7 +323,6 @@ body {
 
 .onyx-picker-decorator .onyx-button {
 	padding:6px 18px; /*needs to be specifyed, without It herits of padding of onyx-picker-decorator in onyx.css*/
-	width: 200px;
 }
 
 .onyx-picker-decorator .onyx-button:before{ 
@@ -344,7 +346,6 @@ body {
     -webkit-border-radius:4px;
     border-radius:4px;
     overflow:hidden; 
-    min-width:160px;
 }
 
 .onyx-radiobutton {
@@ -397,6 +398,8 @@ body {
 	padding: 0 4px;
 	text-align: right;
 	display: inline-block;
+	vertical-align: middle;
+	overflow: hidden;
 }
 
 .ares-fixed-input{

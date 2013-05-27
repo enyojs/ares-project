@@ -19,7 +19,7 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction", style: "float:right;"}
 			]},
 			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
-				{name: "left", classes:"ares_deimos_left", kind: "Palette", name: "palette", ondragstart: "paletteDragstart", ondragend: "paletteDragend"},
+				{classes:"ares_deimos_left", kind: "Palette", name: "palette", ondragstart: "paletteDragstart", ondragend: "paletteDragend"},
 				{name: "middle", fit: true, kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
 						{kind: "onyx.Button", name: "reloadDesignerButton", classes: "deimos-designer-toolbar-spacing", content: "Reload", ontap: "reloadDesigner"},
@@ -56,7 +56,7 @@ enyo.kind({
 							onCreateItem: "createItem",
 							onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
 							onReloadComplete: "reloadComplete"
-						},
+						}
 					]}
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
@@ -118,7 +118,11 @@ enyo.kind({
 		this.index = null;
 		this.kinds = what;
 		this.$.kindPicker.destroyClientControls();
-		
+
+		// Pass the project information (analyzer output, ...) to the inspector and palette
+		this.$.inspector.setProjectData(data.projectData);
+		this.$.palette.setProjectData(data.projectData);
+
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
 			this.$.kindPicker.createComponent({
@@ -132,10 +136,6 @@ enyo.kind({
 		this.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.$.kindPicker.render();
 		this.setEdited(false);
-		
-		// Pass the project information (analyzer output, ...) to the inspector and palette
-		this.$.inspector.setProjectData(data.projectData);
-		this.$.palette.setProjectData(data.projectData);
 	},
 	//* When a drag starts in the palette, notify Designer and ComponentView
 	paletteDragstart: function(inSender, inEvent) {
@@ -150,6 +150,7 @@ enyo.kind({
 		var kind = this.kinds[index];
 		
 		this.addAresIds(this.kinds[index].components);
+		this.addAresKindOptions(this.kinds[index].components);
 		this.$.inspector.initUserDefinedAttributes(this.kinds[index].components);
 		
 		if (index !== this.index) {
@@ -275,6 +276,7 @@ enyo.kind({
 		
 		// Update user defined values
 		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
+		this.addAresKindOptions(this.kinds[this.index].components);
 		
 		this.rerenderKind(config.aresId);
 		return true;
@@ -412,7 +414,7 @@ enyo.kind({
 		
 		// Copy each user-defined property from _atts_ to the cleaned component
 		for (att in atts) {
-			if (att !== "aresId" && att !== "components") {
+			if (att !== "aresId" && att !== "components" && att !== "__aresOptions") {
 				cleanComponent[att] = atts[att];
 			}
 		}
@@ -500,6 +502,20 @@ enyo.kind({
 			if (inComponents[i].components) {
 				this.addAresIds(inComponents[i].components);
 			}
+		}
+	},
+	addAresKindOptions: function(inComponents) {
+		for(var i = 0; i < inComponents.length; i++) {
+			this.addOptionsToComponent(inComponents[i]);
+			if (inComponents[i].components) {
+				this.addAresKindOptions(inComponents[i].components);
+			}
+		}
+	},
+	addOptionsToComponent: function(inComponent) {
+		var options = Model.getKindOptions(inComponent.kind);
+		if (options) {
+			inComponent.__aresOptions = options;
 		}
 	},
 	//* Generate new ares id using timestamp

@@ -15,7 +15,7 @@ enyo.kind({
 	components: [
 		{kind: "FittableRows", components: [
 			{classes:"ares-row", components :[
-				{tag:"label", classes: "ares-label", content: "AppId:"},
+				{tag:"label", classes: "ares-label", content: "PhoneGap App ID:"},
 				{kind: "onyx.InputDecorator", components: [
 					{kind: "Input", name: "pgConfId",
 						attributes: {title: "unique identifier, assigned by build.phonegap.com"}
