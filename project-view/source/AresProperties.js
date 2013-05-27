@@ -1,10 +1,5 @@
 /**
- * This kind provide a widget to tune project properties
- *
- * By default, this widget is tuned for project modification.  In case
- * of project *creation*, the method setupCreate must be called after
- * construction. Since the widget is re-used between call for creation
- * or modification, the methos setupModif must be called also.
+ * This kind provide a widget to tune global properties
  */
 
 enyo.kind({
@@ -67,7 +62,7 @@ enyo.kind({
 			pluginServiceId: pluginService.id,
 			showing: true,
 			active: true
-		})
+		});
 	},
 
 	// /**

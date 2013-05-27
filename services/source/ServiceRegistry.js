@@ -139,13 +139,14 @@ enyo.kind({
 	},
 	instanciate: function(service, next) {
 		if (this.debug) this.log("id:", service.config.id, "config:", service.config);
+		var self = this;
 		try {
 			if (service.config.pluginUrl) {
 				if (this.debug) this.log("Loading browser side code: " + service.config.pluginUrl);
-				enyo.load(service.config.pluginUrl, function() {
-					if (this.debug) this.log("LOADED browser side code: " + service.config.pluginUrl);
-				}.bind(this));
-				next();		// configuration will be applied later on
+				enyo.load(service.config.pluginUrl, function loaded() {
+					if (self.debug) self.log("ServiceRegistry#instanciate(): Loaded browser side code: " + service.config.pluginUrl);
+					next();	// configuration will be applied later on
+				});
 			} else if (service.config.provider === 'hermes' && service.implementsType("filesystem")) {
 				// hermes type of services use
 				// a common front-end
