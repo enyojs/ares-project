@@ -222,20 +222,30 @@ enyo.kind({
 			var kindName = inControl.name + " (" + inControl.kind + ")";
 			this.$.content.createComponent({tag: "h3", content: kindName, classes: "label label-info"});
 			ps = this.buildPropList(inControl);
-			if (this.filterType === 'P') {
-				this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Properties"});
-				for (p in ps) {
+			switch(this.filterType) {
+				case 'P':
+					this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Properties"});
+					for (p in ps) {
 					this.makeEditor(inControl, p, ps[p], "properties");
-				}
-			} else {
-				ps = ps.events;
-				if (ps.length) {
-					this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
-				}
-				for (i=0, p; (p=ps[i]); i++) {
-					this.makeEditor(inControl, p, "", "events");
-				}
+					}
+				break;
+				case 'E':
+						ps = ps.events;
+						if (ps.length) {
+						        this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
+						}
+						for (i=0, p; (p=ps[i]); i++) {
+						        this.makeEditor(inControl, p, "", "events");
+						}
+						break;
+				case 'S':
+						// TODO
+						break;
+				default:
+						enyo.warn("Inspector has unknown filterType: ", filterType);
+						break;
 			}
+
 		}
 		this.$.content.render();
 	},
@@ -364,6 +374,11 @@ enyo.kind({
 	updateFilterType: function(inSender, inEvent) {
 		if (inEvent.active) {
 			this.setFilterType(inEvent.active.value);
+			if (inEvent.active.value === "S") {
+				this.$.filterLevel.hide();				
+			} else {
+				this.$.filterLevel.show();
+			}
 			this.inspect(this.selected);
 		}
 		return true;
@@ -415,9 +430,10 @@ enyo.kind({
 		onValueChanged: ""
 	},
 	components: [
-		{kind: "onyx.RadioGroup", fit:false, onActivate:"doValueChanged", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton halves", components: [
+		{kind: "onyx.RadioGroup", fit:false, onActivate:"doValueChanged", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton thirds", components: [
 			{content:"Properties", value: "P", active:true},
-			{content:"Events", value: "E"}
+			{content:"Events", value: "E"},
+			{content:"Style", value: "S"}
 		]}
 	]
 });
