@@ -88,12 +88,10 @@ enyo.kind({
 	 */
 	authenticate: function(inAuth, next) {
 		if (this.debug) this.log();
-		if (this.config.auth.username != inAuth.username) {
-			this.config.auth = {
-				username: inAuth.username,
-				password: inAuth.password
-			};
-		}
+		this.config.auth = {
+			username: inAuth.username,
+			password: inAuth.password
+		};
 		this._getToken(next);
 	},
 	/**
@@ -131,6 +129,7 @@ enyo.kind({
 	_getToken: function(next) {
 		if (this.debug) this.log();
 		if(this.config.auth && this.config.auth.token) {
+			if (this.debug) this.log("skipping token obtention");
 			next();
 			return;
 		}
