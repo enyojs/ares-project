@@ -444,14 +444,15 @@ enyo.kind({
 			next(null, inData);
 		});
 		req.error(this, function(inSender, inError) {
-			var response = inSender.xhrResponse, contentType, details;
+			var response = inSender.xhrResponse, contentType,
+			    message = "Unable to build application";
 			if (response) {
 				contentType = response.headers['content-type'];
 				if (contentType && contentType.match('^text/plain')) {
-					details = response.body;
+					message = response.body;
 				}
 			}
-			next(new Error("Unable to build application:" + inError), details);
+			next(new Error(message + " (" + inError + ")"));
 		});
 		req.go(query);
 	},

@@ -88,7 +88,7 @@ BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 			msg = err.message;
 		}
 		if (("Invalid authentication token." === msg) ||
-			("Missing authentication token" === msg)){
+		    ("Missing authentication token" === msg)){
 			_respond(new HttpError(msg, 401));
 		} else {
 			_respond(new HttpError(msg, 400));
@@ -271,8 +271,14 @@ BdBase.prototype.build = function(req, res, next) {
 		}
 		
 		function _fail(err) {
-			log.warn("build#_upload#_fail()", "error ", err);
-			next(new HttpError("PhoneGap build error: " + err.toString(), 400 /*Bad Request*/));
+			var msg;
+			try {
+				msg = JSON.parse(err.message).error;
+			} catch(e) {
+				msg = err.message;
+			}
+			log.warn("build#_upload#_fail()", "error:", msg);
+			next(new HttpError(msg, 400 /*Bad Request*/));
 		}
 	}
 };
