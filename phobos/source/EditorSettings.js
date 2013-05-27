@@ -13,7 +13,7 @@ enyo.kind({
 	 	settings: {
 	 		theme:"clouds",
 	 		highlight:false,
-	 		fontsize:16,
+	 		fontsize:12,
 	 		wordwrap:false,
 	 		rightpane:false,
 	 		keys:{ }
@@ -21,7 +21,7 @@ enyo.kind({
 	 	previewSettings: {
 	 		theme:"clouds",
 	 		highlight:false,
-	 		fontsize:16,
+	 		fontsize:12,
 	 		wordwrap:false,
 	 		rightpane:false,
 	 		keys:{ }
