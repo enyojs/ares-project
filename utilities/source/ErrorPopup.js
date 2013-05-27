@@ -8,16 +8,24 @@ enyo.kind({
 		errorMsg: "unknown error",
 		details: ""
         },
+        classes:"ares-classic-popup",
         components: [
-                {tag: "h3", content: "Error"},
-                {name: "msg"},
-                {tag: "br"},
-                {name: "okButton", kind: "onyx.Button", content: "Ok", ontap: "hideErrorPopup"},
-                {name: "detailsBtn", kind: "onyx.Button", content: "Details...", ontap: "toggleDetails", showing: false},
-                {tag: "br"},
-		{name: "detailsDrw", kind: "onyx.Drawer", open: false, showing:false, components: [
-			{name: "detailsTxt", kind: "onyx.TextArea", disabled: true, fit:true, classes:"ajax-sample-source"}
-		]}
+            {tag: "div", classes:"title", content: "Error"},
+			{kind: "enyo.Scroller", classes:"ares-error-popup", fit: true, components: [
+				{name: "msg"},
+				{classes:"ares-error-details", components:[
+					{classes:"button", components:[
+						{tag:"label", classes:"label", name: "detailsBtn", content: "Details", ontap: "toggleDetails", showing: false},
+						{name:"detailsArrow", classes:"optionDownArrow", ontap: "toggleDetails", showing: false},
+						{name: "detailsDrw", kind: "onyx.Drawer", open: false, showing:false, classes:"ares-error-drawer", components: [
+							{name: "detailsTxt", kind: "onyx.TextArea", disabled: true, fit:true, classes:"ares-error-text"}
+						]}
+					]}
+				]}
+			]},
+			{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+				{name: "okButton", kind: "onyx.Button", content: "Close", ontap: "hideErrorPopup"}
+			]}
         ],
         create: function() {
                 this.inherited(arguments);
@@ -28,11 +36,13 @@ enyo.kind({
 	detailsChanged: function(oldVal) {
 		if (this.details) {
 			this.$.detailsBtn.show();
+			this.$.detailsArrow.show();
 			this.$.detailsDrw.show();
 			this.$.detailsDrw.setOpen(false);
 			this.$.detailsTxt.setValue(this.details);
 		} else {
 			this.$.detailsBtn.hide();
+			this.$.detailsArrow.hide();
 			this.$.detailsDrw.hide();
 			this.$.detailsTxt.setValue("");
 		}
