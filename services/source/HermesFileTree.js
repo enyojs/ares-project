@@ -9,21 +9,7 @@ enyo.kind({
 	},
 	handlers: {
 		onNodeDblClick: "nodeDblClick",
-		//
-		/*
-		//onSetupItem:"handleSetup",
-    //onhold:"handleHold",
-    //ondragfinish:"handleDragFinish",
-    //onup:"handleRelease",
-		//ondrag:"handleDrag",
-    //onresize:"handleResize",
-    ondragstart:"handleDragStart",
-    //onselectstart:"handleSelectStart",
-    onrelease:"handleSlowRelease",*/
-		ondragstart:"dragStart",
-		ondrag:"drag",
-		ondrop:"drop",
-		ondragfinish:"dragFinish",
+		//onNodeMove: "nodeMove",
 	},
 	published: {
 		serverName: ""
@@ -59,13 +45,8 @@ enyo.kind({
 		// Hermes tree
 		{kind: "Scroller", fit: true, components: [
 			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", 
-				//draggable: false, 
-				expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll" },
-			// DragAvatar use
-			/*{name:"dragAvatar", kind:"DragAvatar",
-				//components: [{tag: "img", src: "$deimos/images/icon.png"}]
-				components: [{tag: "img", src: "$services/assets/images/move.png"}]
-			},*/
+				//attributes {draggable: false,},
+				expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll", onNodeMove: "moveNode" },
 		]},
 
 		// track selection of nodes. here, selection Key is file or folderId.
@@ -90,10 +71,6 @@ enyo.kind({
 	selectedFile: null,
 	selectedNode: null,
 	
-	//
-	//draggedNode: null,
-	//overDraggedNode: null,
-
 	debug: false,
 
 	create: function() {
@@ -242,158 +219,8 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
-	//
-	dragStart: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		
-		//this.log("start file path=", inEvent.originator.file.path);
-		this.log("start file id=", inEvent.originator.file.id);
-		
-		return true;
-	},
-	drag: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		//this.$.dragAvatar.drag(inEvent);
-		
-		//this.log("drag file path=", inEvent.originator.file.path);
-		//this.log("drag file id=", inEvent.originator.file.id);
-		
-		return true;
-	},
-	drop: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		
-		//this.log("drop file path=", inEvent.originator.file.path);
-		//this.log("drop file id=", inEvent.originator.file.id);
-		
-		return true;
-	},
-	dragFinish: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		//this.$.dragAvatar.hide();
-		
-		//this.log("finish file path=", inEvent.originator.file.path);
-		this.log("finish file id=", inEvent.originator.file.id);
-		
-		return true;
-	},
-	/*handleHold:function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		
-		return true;
-	},
-	handleDragFinish:function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		
-		return true;
-	},
-	handleDrag:function(inSender, inEvent) {
-		//if (this.debug) 
-		//this.log(inSender, "=>", inEvent);
-		
-		// check if the node to drag is not the node over the cursor is
-		if (draggedNode != inEvent.originator.parent) {
-			// check if the cursor is no more hovering over the last node over hovered
-			if (overDraggedNode != inEvent.originator.parent) {
-				// check if the cursor is not between two nodes (so not over their related container)
-				//if(inEvent.originator.parent.node == null) {
-					// check if the cursor is not over a file node
-					//if (inEvent.originator.parent.file) {
-						if (overDraggedNode) {
-							overDraggedNode.children[1].applyStyle("background-color", null);
-						}
-						overDraggedNode = inEvent.originator.parent;
-						this.log("overDraggedNode folder changed");
-						overDraggedNode.children[1].applyStyle("background-color", "red");
-						this.log("inEvent=>", inEvent);
-						this.log("originator(parent)=>", inEvent.originator.parent);
-					/*} else {
-						if (overDraggedNode) {
-							overDraggedNode.children[1].applyStyle("background-color", null);
-						}
-						this.log("overDraggedNode file");
-						overDraggedNode = null;
-					}*/
-				/*} else {
-					if (overDraggedNode) {
-						overDraggedNode.children[1].applyStyle("background-color", null);
-					}
-					this.log("overDraggedNode father");
-					overDraggedNode = null;
-					this.log("inEvent=>", inEvent);
-					this.log("originator(parent)=>", inEvent.originator.parent);
-				}*/
-	/*		} else {
-				this.log("overDraggedNode same");
-			}
-		} else { 
-			if (overDraggedNode) {
-				overDraggedNode.children[1].applyStyle("background-color", null);
-			}
-			this.log("overDraggedNode itself");
-			overDraggedNode = null;
-		}
-		
-		return true;
-	},
-	handleRelease:function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		
-		if (overDraggedNode) {
-			overDraggedNode.children[1].applyStyle("background-color", null);
-		}
-		overDraggedNode = null;
-		
-		draggedNode = null;
-		
-		this.log("draggedNode released");
-		
-		return true;
-	},
-	handleDragStart:function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		
-		draggedNode = inEvent.originator.parent;
-		overDraggedNode = null;
-		this.log("draggedNode captured");
-		this.log("inEvent=>", inEvent);
-		this.log("originator(parent)=>", inEvent.originator.parent);
-		
-		this.enableDisableButtons();
-		
-		return true;
-	},
-	handleSelectStart:function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		
-		return true;
-	},
-	handleSlowRelease:function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		
-		return true;
-	},*/
-	/*nodeExpand:function(inSender, inEvent) {
-		this.log("HermesFileTree", inSender, "=>", inEvent);
-		if (draggedNode==null) this.inherited(arguments);
-		else return true;
-	},*/
-	//
-	select: function(inSender, inEvent) {
-		// initialisation of the handler about the node over hovered by the cursor during a drag mode action.
-		//overDraggedNode = null;
-		//draggedNode = null;
 	
+	select: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		this.selectedNode=inEvent.data;
 		this.selectedFile=inEvent.data.file;
@@ -808,6 +635,73 @@ enyo.kind({
 				this.warn("Unable to copy:", this.selectedFile, "as", newName, inError);
 				this.showErrorPopup("Creating file "+newName+" as copy of" + this.selectedFile.name +" failed:" + inError);
 			});
-	}
+	},
+	
+	/**
+	 * moveNode
+	 * @public
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {ares.Node} oldNode
+	 * @property inEvent {ares.Node} newParent
+	 * @return null
+	 *
+	 */
+	moveNode: function(inSender, inEvent) {
+		if (this.debug) this.log("inEvent", inEvent);
+		
+		var oldNode=inEvent.oldNode;
+		var newParent=inEvent.newParent;
+		
+		var oldNodeFile = oldNode.file;
+		var newParentFile = newParent.file;
+		
+		if (oldNodeFile != newParentFile) {
+			if (newParentFile.isDir) {
+				if (oldNode.container.file.id != newParentFile.id) {
+					if (!oldNodeFile.isDir || newParentFile.dir.indexOf(oldNodeFile.dir) == -1) {
+						return this.$.service.rename(oldNodeFile.id, {folderId: newParentFile.id})
+							.response(this, function(inSender, inValue) {
+								/*this.log("inValue=", inValue);
+								var parentNode = oldNode.container,
+										pkgNode = parentNode.getNodeNamed('package.js');
+								this.doTreeChanged({
+									remove: {
+										service: this.$.service,
+										parentNode: parentNode && parentNode.file,
+										pkgNode: pkgNode && pkgNode.file,
+										node: oldNode,
+									},
+								});
+								parentNode = newParent;
+								pkgNode = parentNode.getNodeNamed('package.js');
+								
+								this.doTreeChanged({
+									add: {
+										service: this.$.service,
+										parentNode: parentNode && parentNode.file,
+										pkgNode: pkgNode && pkgNode.file,
+										node: parentNode.getNodeWithId(inValue.id),
+									}
+								});*/
+								this.refreshFileTree();
+							})
+							.error(this, function(inSender, inError) {
+								this.warn("Unable to move the node:", oldNodeFile.name, inError);
+								this.showErrorPopup("Moving node "+oldNodeFile.name+" failed:" + inError);
+							});
+					} else {
+						if (this.debug) this.log("target node is a child node");
+					}
+				} else {
+					if (this.debug) this.log("target node is its own parent node");
+				}
+			} else {
+				if (this.debug) this.log("target node is a file");
+			}
+		} else {
+			if (this.debug) this.log("target node is itself");
+		}
+	},
 });
 

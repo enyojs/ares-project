@@ -12,23 +12,18 @@ enyo.kind({
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
-		onAdjustScroll: ""
+		onAdjustScroll: "",
+		onNodeMove: "",
 	},
 	published: {
 		service: null
 	},
 	handlers: {
-		/*ondragstart:"dragStart",
-		ondragfinish:"dragFinish",
-		ondrag:"drag",
-		ondrop: "drop",*/
-		//ondragover: "dragover",
-		//ondragout: "dropout",
-		//onhold: "hold",
-		//onrelease: "release",
-	},
-	attributes: {
-		draggable: true, 
+		ondragstart: "dragStart",
+		ondrop: "drop",
+		ondragover: "dragOver",
+		ondragout: "dragOut",
+		//onholdpulse: "holdPulse",
 	},
 	
 	// expandable nodes may only be opened by tapping the icon; tapping the content label
@@ -36,74 +31,113 @@ enyo.kind({
 	onlyIconExpands: true,
 
 	debug: false,
+	
+	node: null,
 
 	dragStart: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		//this.log("originator=", inSender.originator);
-		//this.log("start file path=", inSender.originator.file.path);
-		//this.log("start file id=", inSender.originator.file.id);
+		if (inEvent instanceof MouseEvent) return true;
 		
-		return true;
-	},
-	dragFinish: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		//this.log("originator=", inSender.originator);
+		if (this.debug) this.log(inSender, "=>", inEvent);
 		
-		//this.log("finish file path=", inSender.originator.file.path);
-		//this.log("finish file id=", inSender.originator.file.id);
+		// Enable HTML5 drop
+		//inEvent.preventDefault();
 		
-		return true;
-	},
-	drag: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		//this.log("originator=", inSender.originator);
-		//this.log("drag file path=", inSender.originator.file.path);
-		//this.log("drag file id=", inSender.originator.file.id);
+		node = null;
+		
+		if (inSender.kind == "ares.Node") {
+			node = inSender;
+		} else {
+			node = inSender.container;
+		}
 		
 		return true;
 	},
 	drop: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		var newParentNode = "";
+		
+		if (inSender.kind == "ares.Node") {
+			newParentNode = inSender;
+		} else {
+			// Control or Image...
+			newParentNode = inSender.container;
+		}
+		
+		this.doNodeMove({oldNode: node, newParent: newParentNode});
+		
+		inSender.applyStyle("cursor", "default");
+		
+		node = null;
+		
+		return true;
+	},
+	holdPulse: function(inSender, inEvent) {
 		//if (this.debug) 
 		this.log(inSender, "=>", inEvent);
 		
-		//this.log("drop file path=", inEvent.originator.file.path);
-		//this.log("drop file id=", inEvent.originator.file.id);
+		
+	},
+	dragOver: function(inSender, inEvent) {
+		if (inEvent instanceof MouseEvent) return true;
+		
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		var newParentNode = "";
+		
+		if (inSender.kind == "ares.Node") {
+			newParentNode = inSender;
+		} else {
+			// Control or Image...
+			newParentNode = inSender.container;
+		}
+		
+		var nodeFile = node.file;
+		var newParentFile = newParentNode.file;
+		
+		/*if (newParentFile.isDir && !newParentNode.expanded) {
+			// expand
+			this.log("to expand");
+			
+			newParentNode.doNodeTap();
+		}*/
+				
+		if (nodeFile != newParentFile) {
+			if (newParentFile.isDir) {
+				if (node.container.file.id != newParentFile.id) {
+					if (!nodeFile.isDir || newParentFile.dir.indexOf(nodeFile.dir) == -1) {
+						newParentNode.children[1].applyStyle("cursor", "pointer");
+					} else {
+						if (this.debug) this.log("target node is a child node");
+						newParentNode.children[1].applyStyle("cursor", "no-drop");
+					}
+				} else {
+					if (this.debug) this.log("target node is its own parent node");
+					newParentNode.children[1].applyStyle("cursor", "no-drop");
+				}
+			} else {
+				if (this.debug) this.log("target node is a file");
+				newParentNode.children[1].applyStyle("cursor", "no-drop");
+			}
+		} else {
+			if (this.debug) this.log("target node is itself");
+			newParentNode.children[1].applyStyle("cursor", "no-drop");
+		}
 		
 		return true;
 	},
-	/*dragover: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
+	dragOut: function(inSender, inEvent) {
+		//if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		if (inSender.kind == "ares.Node") {
+			inSender.children[1].applyStyle("cursor", "default");	
+		} else {
+			// Control or Image...
+			inSender.applyStyle("cursor", "default");	
+		}
 		
 		return true;
 	},
-	dragout: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		
-		return true;
-	},
-	hold: function(inSender, inEvent) {
-		//if (this.debug) 
-		//this.log(inSender, "=>", inEvent);
-		
-		this.log("hold file path=", inSender.originator.file.path);
-		this.log("hold file id=", inSender.originator.file.id);
-		
-		return true;
-	},
-	release: function(inSender, inEvent) {
-		//if (this.debug) 
-		//this.log(inSender, "=>", inEvent);
-		
-		this.log("release file path=", inSender.originator.file.path);
-		this.log("release file id=", inSender.originator.file.id);
-		
-		return true;
-	},*/
 	
 	// Note: this function does not recurse
 	updateNodes: function() {
@@ -174,7 +208,10 @@ enyo.kind({
 
 				case 1: // file added
 				    if (this.debug) this.log(rfiles[i].name + " was added") ;
-					newControl = this.createComponent( rfiles[i], {kind: "ares.Node"} ) ;
+					newControl = this.createComponent( rfiles[i], {kind: "ares.Node", 
+						//Turn draggable attribute to true
+						//attributes: {draggable: true,},
+						} ) ;
 					if (this.debug) this.log("updateNodeContent created ", newControl) ;
 					newControl.setService(this.service);
 					nfiles = this.getNodeFiles() ;
@@ -279,7 +316,6 @@ enyo.kind({
 				name: '$' + f.name, // prefix avoids clobberring non-files components like icon
 				content: f.name,
 				expandable: f.isDir,
-				//draggable: true,
 				icon: "$services/assets/images/" + (f.isDir ? "folder.png" : "file.png")
 			});
 		}
@@ -358,7 +394,6 @@ enyo.kind({
 			tracker.dec(); // run only for inner calls to refreshTree
 		}
 		this.debug && this.log("refreshTree done") ;
-	}
-
+	},
 });
 
