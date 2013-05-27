@@ -33,10 +33,6 @@
 	min-width: 68px;
 }
 
-.ace-alt-button-input {
-	width: 425px;
-}
-
 .ace-label{
 	width:83px;
 }
@@ -47,3 +43,5 @@
 .large-picker{
 	width: 150px;
 }
+.ace-input-popup { width:409px; height:62px; padding: 5px 10px; }
+.ace-input-textarea { width: 395px; }
