@@ -347,6 +347,7 @@ enyo.kind({
 					service.impl = ServiceRegistry.instance.createComponent(kindInformation);
 					this.configureService(service, next);
 					if (this.debug) this.log("New plugin registered: " + serviceId);
+					this.notifyServicesChange();
 				} catch(err) {
 					this.error("Unexpected error while creating '" + kindInformation.kind + "' for service " + serviceId , err);
 					next(err);
