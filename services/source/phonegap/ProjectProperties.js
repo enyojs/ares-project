@@ -1264,12 +1264,16 @@ enyo.kind({
 		targetName: "",
 		enabled: "",
 		keys: {},
-		config: {}
+		config: {},
+    
+        fold: true
 	},
   
 	components: [
-			{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "updateDrawer"},
+			{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "checkBoxChange"},
 			{tag:"label", name: "targetLbl", classes:"ares-label", content: ""},
+             {kind: "onyx.Button", content: "Details", ontap: "unfold", 
+             style:"float:right;"},
 			{name: "targetDrw", orient: "v", kind: "onyx.Drawer", open: false,
             classes:"ares-row ares-drawer",  components: [
 					
@@ -1310,13 +1314,37 @@ enyo.kind({
 	enabledChanged: function(old) {
 		if (this.debug) this.log("id:", this.targetId, old, "->", this.enabled);
 		this.$.targetChkBx.setChecked(this.enabled);
-		this.updateDrawer();
+		//this.updateDrawer();
 		if (this.enabled) {
+                          this.log("Enabled");
 			this.config = this.config || {};
 		} else {
+               this.log("Disabled")
 			this.config = false;
 		}
 	},
+ 
+ 
+    /**
+     * @private
+     */
+    unfold: function (){
+     this.$.targetDrw.setOpen(this.fold);
+     
+      if(this.fold === true){
+                  this.fold = false;    
+	}else {
+          this.fold = true;
+       } 
+     
+     
+          
+    },
+    checkBoxChange: function(old){
+                    this.enabled = !this.enabled;
+       if (this.debug) this.log("id:", this.targetId, old, "->", this.enabled);              
+    },
+                 
 	/**
 	 * @protected
 	 */
@@ -1348,11 +1376,16 @@ enyo.kind({
 	/**
 	 * @private
 	 */
-	updateDrawer: function() {
-		this.$.targetDrw.setOpen(this.$.targetChkBx.checked);
-		this.setEnabled(this.$.targetChkBx.checked);
-	}
-});
+/*	updateDrawer: function() {
+		this.$.targetDrw.setOpen(this.fold);
+		//this.setEnabled(this.$.targetChkBx.checked);
+     if(this.fold === true){
+                  this.fold = false;    
+	}else {
+          this.fold = true;
+       } 
+    } */
+    });
 
 enyo.kind({
 	name: "Phonegap.ProjectProperties.KeySelector",
