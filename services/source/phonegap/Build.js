@@ -47,8 +47,16 @@ enyo.kind({
 		return this.config.name || this.config.id;
 	},
 	/**
+	 * Name of the kind to show in the {AresProperties} UI
+	 * @return the Enyo kind to use to set service-specific Ares-wide properties
+	 * @public
+	 */
+	//getAresPropertiesKind: function() {},
+
+	/**
 	 * Name of the kind to show in the {ProjectProperties} UI
-	 * @return the Enyo kind to use to set Phonegap project properties
+	 * @return the Enyo kind to use to set service-specific project properties
+	 * @public
 	 */
 	getProjectPropertiesKind: function() {
 		return "Phonegap.ProjectProperties";
