@@ -464,7 +464,7 @@ enyo.kind({
 		if (kinds.length > 0) {
 			// Request to design the current document, passing info about all kinds in the file
 			this.doDesignDocument(data);
-		} // else - THe error has been displayed by extractKindsData()
+		} // else - The error has been displayed by extractKindsData()
 	},
 	//* Extract info about kinds from the current file needed by the designer
 	extractKindsData: function() {
@@ -835,7 +835,7 @@ enyo.kind({
 		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
 		if (data.kinds.length > 0) {
 			this.doUpdate(data);
-		} // else - THe error has been displayed by extractKindsData()
+		} // else - The error has been displayed by extractKindsData()
 	}
 });
 
