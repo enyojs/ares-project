@@ -473,10 +473,10 @@ p.break{
 	border-radius:0px 0px 6px 6px;
 }
 .bottom-toolbar>.onyx-button { background-color: transparent; border: 1px solid #999999;}
-.ares-small-popup {width:400px; height:150px; padding: 5px 10px;}
-.ares-error-details { position:relative; width: 77% }
+.ares-small-popup {width:320px; height:150px; padding: 5px 10px;}
+.ares-error-details { position:relative; width: 300px }
 .ares-error-details .button { padding-top: 10px; position:relative; }
 .ares-error-details .label { border: none; color:#000000; background: transparent; height: auto; padding-left:10px; text-align: left; }
-.ares-error-text { width: 98%; margin:5px 0px;}
+.ares-error-text { width: 98%; margin:5px 0px; resize: vertical;}
 .right { float: right; }
 .ares-content-popup { width:409px; height:240px; padding: 5px 10px; }
