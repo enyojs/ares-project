@@ -23,7 +23,7 @@ enyo.kind({
 		ondrop: "drop",
 		ondragover: "dragOver",
 		ondragout: "dragOut",
-		//onholdpulse: "holdPulse",
+		//onhold: "hold",
 	},
 	
 	// expandable nodes may only be opened by tapping the icon; tapping the content label
@@ -33,6 +33,7 @@ enyo.kind({
 	debug: false,
 	
 	node: null,
+	trigger: 0,
 
 	dragStart: function(inSender, inEvent) {
 		if (inEvent instanceof MouseEvent) return true;
@@ -43,6 +44,7 @@ enyo.kind({
 		//inEvent.preventDefault();
 		
 		node = null;
+		trigger = 0;
 		
 		if (inSender.kind == "ares.Node") {
 			node = inSender;
@@ -72,12 +74,6 @@ enyo.kind({
 		
 		return true;
 	},
-	holdPulse: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		
-		
-	},
 	dragOver: function(inSender, inEvent) {
 		if (inEvent instanceof MouseEvent) return true;
 		
@@ -95,17 +91,22 @@ enyo.kind({
 		var nodeFile = node.file;
 		var newParentFile = newParentNode.file;
 		
+		// FIXME: ENYO-2435: expand a collapsed node during the DnD feature
 		/*if (newParentFile.isDir && !newParentNode.expanded) {
 			// expand
-			this.log("to expand");
-			
-			newParentNode.doNodeTap();
+			if (trigger == 20 ) {
+				this.log("to expand");
+				//newParentNode.doNodeTap();
+			} else {
+				this.log("to expand ?");
+				trigger++;
+			}		
 		}*/
 				
 		if (nodeFile != newParentFile) {
 			if (newParentFile.isDir) {
 				if (node.container.file.id != newParentFile.id) {
-					if (!nodeFile.isDir || newParentFile.dir.indexOf(nodeFile.dir) == -1) {
+						if (!nodeFile.isDir || newParentFile.isServer || newParentFile.dir.indexOf(nodeFile.dir) == -1) {
 						newParentNode.children[1].applyStyle("cursor", "pointer");
 					} else {
 						if (this.debug) this.log("target node is a child node");
@@ -127,7 +128,7 @@ enyo.kind({
 		return true;
 	},
 	dragOut: function(inSender, inEvent) {
-		//if (this.debug) this.log(inSender, "=>", inEvent);
+		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		if (inSender.kind == "ares.Node") {
 			inSender.children[1].applyStyle("cursor", "default");	
@@ -135,9 +136,16 @@ enyo.kind({
 			// Control or Image...
 			inSender.applyStyle("cursor", "default");	
 		}
+		trigger = 0;
 		
 		return true;
 	},
+	/*hold: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},*/
 	
 	// Note: this function does not recurse
 	updateNodes: function() {
@@ -209,6 +217,7 @@ enyo.kind({
 				case 1: // file added
 				    if (this.debug) this.log(rfiles[i].name + " was added") ;
 					newControl = this.createComponent( rfiles[i], {kind: "ares.Node", 
+						//FIXME: ENYO-2151 use of draggable attributes to enhance DnD feature
 						//Turn draggable attribute to true
 						//attributes: {draggable: true,},
 						} ) ;
