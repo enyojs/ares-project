@@ -11,7 +11,7 @@ enyo.kind({
         classes:"ares-classic-popup",
         components: [
             {tag: "div", classes:"title", content: "Error"},
-			{kind: "enyo.Scroller", classes:"ares-error-popup", fit: true, components: [
+			{kind: "enyo.Scroller", classes:"ares-small-popup", fit: true, components: [
 				{name: "msg"},
 				{classes:"ares-error-details", components:[
 					{classes:"button", components:[

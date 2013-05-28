@@ -473,7 +473,7 @@ p.break{
 	border-radius:0px 0px 6px 6px;
 }
 .bottom-toolbar>.onyx-button { background-color: transparent; border: 1px solid #999999;}
-.ares-error-popup {width:400px; height:150px; padding: 5px 10px;}
+.ares-small-popup {width:400px; height:150px; padding: 5px 10px;}
 .ares-error-details { position:relative; width: 77% }
 .ares-error-details .button { padding-top: 10px; position:relative; }
 .ares-error-details .label { border: none; color:#000000; background: transparent; height: auto; padding-left:10px; text-align: left; }
