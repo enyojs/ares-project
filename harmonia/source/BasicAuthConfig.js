@@ -96,7 +96,7 @@ enyo.kind({
 	 * @protected
 	 */
 	display: function(data, next) {
-		this.log(data);
+		if (this.debug) this.log(data);
 		next();
 	}
 });
