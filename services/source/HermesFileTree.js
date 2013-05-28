@@ -8,7 +8,8 @@ enyo.kind({
 		onTreeChanged: ""
 	},
 	handlers: {
-		onNodeDblClick: "nodeDblClick"
+		onNodeDblClick: "nodeDblClick",
+		//onNodeMove: "nodeMove",
 	},
 	published: {
 		serverName: ""
@@ -40,10 +41,12 @@ enyo.kind({
 				{kind: "onyx.Tooltip", content: "Delete..."}
 			]}
 		]},
-
+		
 		// Hermes tree
 		{kind: "Scroller", fit: true, components: [
-			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll" }
+			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", 
+				//attributes {draggable: false,},
+				expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll", onNodeMove: "moveNode" },
 		]},
 
 		// track selection of nodes. here, selection Key is file or folderId.
@@ -59,8 +62,7 @@ enyo.kind({
 		{name: "nameFolderPopup", kind: "NamePopup", type: "folder", fileName: "", placeHolder: "Folder Name", onCancel: "_newFolderCancel", onConfirm: "_newFolderConfirm"},
 		{name: "nameCopyPopup", kind: "NamePopup", title: "Name for copy of", fileName: "Copy of foo.js", onCancel: "copyFileCancel", onConfirm: "copyFileConfirm"},
 		{name: "deletePopup", kind: "DeletePopup", onCancel: "deleteCancel", onConfirm: "deleteConfirm"},
-		{name: "renamePopup", kind: "RenamePopup", title: "New name for ", fileName: "foo.js", onCancel: "_renameCancel", onConfirm: "_renameConfirm"}
-
+		{name: "renamePopup", kind: "RenamePopup", title: "New name for ", fileName: "foo.js", onCancel: "_renameCancel", onConfirm: "_renameConfirm"},
 	],
 
 	// warning: this variable duplicates an information otherwise stored in this.$.selection
@@ -68,7 +70,7 @@ enyo.kind({
 	// return an object (hash) which needs to be scanned to retrieve the selected value
 	selectedFile: null,
 	selectedNode: null,
-
+	
 	debug: false,
 
 	create: function() {
@@ -217,6 +219,7 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
+	
 	select: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		this.selectedNode=inEvent.data;
@@ -230,6 +233,7 @@ enyo.kind({
 	},
 	deselect: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
+		
 		if (inEvent.data && inEvent.data.$.caption) {
 			inEvent.data.$.caption.applyStyle("background-color", null);
 		}
@@ -631,6 +635,73 @@ enyo.kind({
 				this.warn("Unable to copy:", this.selectedFile, "as", newName, inError);
 				this.showErrorPopup("Creating file "+newName+" as copy of" + this.selectedFile.name +" failed:" + inError);
 			});
-	}
+	},
+	
+	/**
+	 * moveNode
+	 * @public
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {ares.Node} oldNode
+	 * @property inEvent {ares.Node} newParent
+	 * @return null
+	 *
+	 */
+	moveNode: function(inSender, inEvent) {
+		if (this.debug) this.log("inEvent", inEvent);
+		
+		var oldNode=inEvent.oldNode;
+		var newParent=inEvent.newParent;
+		
+		var oldNodeFile = oldNode.file;
+		var newParentFile = newParent.file;
+		
+		if (oldNodeFile != newParentFile) {
+			if (newParentFile.isDir) {
+				if (oldNode.container.file.id != newParentFile.id) {
+					if (!oldNodeFile.isDir || newParentFile.isServer || newParentFile.dir.indexOf(oldNodeFile.dir) == -1) {
+						return this.$.service.rename(oldNodeFile.id, {folderId: newParentFile.id})
+							.response(this, function(inSender, inValue) {
+								// ENYO-2435: 'pakages.js" files update... 
+								// FIXME: do not work for folder nodes, do not remove file entry, add entry like "$"+name...
+								/*var removedParentNode = oldNode.container,
+										removePkgNode = removedParentNode.getNodeNamed('package.js');
+								var addParentNode = newParent,
+										addPkgNode = addParentNode.getNodeNamed('package.js');
+										
+								this.doTreeChanged({
+									remove: {
+										service: this.$.service,
+										parentNode: removedParentNode && removedParentNode.file,
+										pkgNode: removePkgNode && removePkgNode.file,
+										node: oldNode,
+									},
+									add: {
+										service: this.$.service,
+										parentNode: addParentNode && addParentNode.file,
+										pkgNode: addPkgNode && addPkgNode.file,
+										node: oldNode,
+									}
+								});*/
+								
+								this.refreshFileTree();
+							})
+							.error(this, function(inSender, inError) {
+								this.warn("Unable to move the node:", oldNodeFile.name, inError);
+								this.showErrorPopup("Moving node "+oldNodeFile.name+" failed:" + inError);
+							});
+					} else {
+						if (this.debug) this.log("target node is a child node");
+					}
+				} else {
+					if (this.debug) this.log("target node is its own parent node");
+				}
+			} else {
+				if (this.debug) this.log("target node is a file");
+			}
+		} else {
+			if (this.debug) this.log("target node is itself");
+		}
+	},
 });
 
