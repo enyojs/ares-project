@@ -103,14 +103,23 @@ enyo.kind({
 					{kind: "Input", name: "pgConfId",
 					 attributes: {title: "unique identifier, assigned by build.phonegap.com"}
 					}				]},
-				{tag:"label", classes: "ares-label", content: "Icon URL:"},
-				{kind: "onyx.InputDecorator", components: [
+                {kind: "onyx.Button", content: "Refresh...",
+                style: "margin-left: 50px", 
+                ontap: "refresh"},
+				{tag:"label", classes: "ares-label", 
+                content: "Icon URL:",
+                style: "visibility:hidden;"},
+				{kind: "onyx.InputDecorator",
+                style: "visibility:hidden;", 
+                components: [
 					{kind: "Input", name: "pgIconUrl",
+                     
 						attributes: {title: "Relative location of the application icon. Defaults to Enyo icon."}
 					}
 				]}
 			]}
 		]},
+ 
     
        {name: "targetsRows", kind: "FittableRows", 
         classes: 'ares_projectView_switches'},
@@ -123,6 +132,9 @@ enyo.kind({
 	 */
 	create: function() {
 		this.inherited(arguments);
+        
+        
+        
         this.targets = Phonegap.ProjectProperties.platforms;
         enyo.forEach(this.targets, function(target) {
 			this.$.targetsRows.createComponent({
@@ -133,9 +145,18 @@ enyo.kind({
 				targetName: target.name,
 				enabled: false
 			});
-		}, this); 
+		}, this);
+    
         
- 
+         this.$.targetsRows.$.general.$.targetChkBx.setActive(true);
+         this.$.targetsRows.$.permissions.$.targetChkBx.setActive(true);
+      
+        this.$.targetsRows.$.general.$.targetChkBx.
+        addStyles("visibility:hidden;"); 
+        this.$.targetsRows.$.permissions.$.targetChkBx.
+        addStyles("visibility:hidden;");
+        
+         
  
         
         /*
@@ -203,6 +224,7 @@ enyo.kind({
        
          name: "VersionChoiceRow",
           kind: "FittableColumns",
+          style: "margin-top: 10px;",
           components:  [
       
         
@@ -249,7 +271,8 @@ enyo.kind({
      createDeviceOrientationRow : function(){
         this.$.targetsRows.$.general.$.targetDrw.createComponent({
         name: "OrientationChoiceRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
       
         
@@ -283,7 +306,8 @@ enyo.kind({
     createFullScreenModeRow: function(){
          this.$.targetsRows.$.general.$.targetDrw.createComponent({
           name: "FullScreenModeRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Fullscreen mode", 
              style: "width: 13em; margin-left:3em;"},
@@ -315,30 +339,38 @@ enyo.kind({
      */
       
      createBatteryPermissionRow: function(){
+       this.$.targetsRows.$.permissions.$.targetDrw.
+        addStyles("text-align: left;"); 
+                                 
        this.$.targetsRows.$.permissions.$.targetDrw.createComponent({
             name: "BatteryPermissionRow",                                    
-            kind: "FittableRows",      
+            kind: "FittableRows",
+            style: "margin-top: 10px;",      
             components:  [
-             
-          	{tag: "label", content: "Battery", 
-             style: "width: 13em; margin-left:3em; margin-right: 10em;"},
              {kind: "onyx.Checkbox",
-              name: "BaterryPermissionChkBx", 
-              onchange: ""}
+              name: "BaterryPermissionChkBx",
+              style: "margin-left: 30px; margin-right: 50px;",
+              onchange: ""},
+          	{tag: "label", content: "Battery"}
+             
            ]});                                   
      },
      
      createCameraPermissionRow: function(){
       this.$.targetsRows.$.permissions.$.targetDrw.createComponent({
             name: "CameraPermissionRow",                                    
-            kind: "FittableRows",      
+            kind: "FittableRows",
+            style: "margin-top: 10px;",     
             components:  [
              
-          	{tag: "label", content: "Camera", 
-             style: "width: 13em; margin-left:3em; margin-right: 10em;"},
              {kind: "onyx.Checkbox",
-              name: "CameraPermissionChkBx", 
-              onchange: ""}
+              name: "CameraPermissionChkBx",
+              style: "margin-left: 30px; margin-right: 50px;", 
+              onchange: ""},
+             
+          	{tag: "label", content: "Camera"}
+        
+             
            ]}); 
                                 
      },
@@ -346,14 +378,17 @@ enyo.kind({
      createContactPermissionRow: function(){
          this.$.targetsRows.$.permissions.$.targetDrw.createComponent({
             name: "ContactPermissionRow",                                    
-            kind: "FittableRows",      
+            kind: "FittableRows",
+            style: "margin-top: 10px;",      
             components:  [
+            
+            {kind: "onyx.Checkbox",
+              name: "ContactPermissionChkBx",
+              style: "margin-left: 30px; margin-right: 50px;",
+               onchange: ""},
              
-          	{tag: "label", content: "Contact", 
-             style: "width: 13em; margin-left:3em; margin-right: 10em;"},
-             {kind: "onyx.Checkbox",
-              name: "ContactPermissionChkBx", 
-              onchange: ""}
+          	{tag: "label", content: "Contact"}
+             
            ]}); 
                                 
      },
@@ -361,13 +396,15 @@ enyo.kind({
      createFilePermissionRow: function(){
        this.$.targetsRows.$.permissions.$.targetDrw.createComponent({
             name: "FilePermissionRow",                                    
-            kind: "FittableRows",      
+            kind: "FittableRows",
+            style: "margin-top: 10px;",       
             components:  [
-             {tag: "label", content: "File", 
-             style: "width: 13em; margin-left:3em; margin-right: 10em;"},
              {kind: "onyx.Checkbox",
-              name: "FilePermissionChkBx", 
-              onchange: ""}
+              name: "FilePermissionChkBx",
+              style: "margin-left: 30px; margin-right: 50px;",  
+              onchange: ""},
+             {tag: "label", content: "File"},
+             
           	
            ]}); 
                                 
@@ -376,13 +413,15 @@ enyo.kind({
      createGeolocationRow: function(){
         this.$.targetsRows.$.permissions.$.targetDrw.createComponent({
             name: "GeolocationPermissionRow",                                    
-            kind: "FittableRows",      
+            kind: "FittableRows",
+            style: "margin-top: 10px;",       
             components:  [
-             {tag: "label", content: "Geolocation", 
-             style: "width: 13em; margin-left:3em; margin-right: 10em;"},
-             {kind: "onyx.Checkbox",
+              {kind: "onyx.Checkbox",
               name: "GeolocationPermissionChkBx", 
-              onchange: ""}
+              style: "margin-left: 30px; margin-right: 50px;",
+              onchange: ""},
+             {tag: "label", content: "Geolocation"}
+           
            ]});                     
                                 
      },
@@ -390,13 +429,15 @@ enyo.kind({
      createMediaRow: function(){
         this.$.targetsRows.$.permissions.$.targetDrw.createComponent({
             name: "MediaPermissionRow",                                    
-            kind: "FittableRows",      
+            kind: "FittableRows",
+            style: "margin-top: 10px;",       
             components:  [
-            {tag: "label", content: "Media: ", 
-             style: "width: 13em; margin-left:3em; margin-right: 10em;" },
-             {kind: "onyx.Checkbox",
-              name: "MediaPermissionChkBx", 
-              onchange: ""}
+            {kind: "onyx.Checkbox",
+              name: "MediaPermissionChkBx",
+              style: "margin-left: 30px; margin-right: 50px;", 
+              onchange: ""},
+            {tag: "label", content: "Media "}
+             
           	
            ]}); 
                                 
@@ -405,13 +446,16 @@ enyo.kind({
      createNetworkRow: function(){
        this.$.targetsRows.$.permissions.$.targetDrw.createComponent({
             name: "NetworkPermissionRow",                                    
-            kind: "FittableRows",      
+            kind: "FittableRows",
+            style: "margin-top: 10px;",       
             components:  [
-             {tag: "label", content: "Network", 
-             style: "width: 13em; margin-left:3em; margin-right: 10em;"},
              {kind: "onyx.Checkbox",
-              name: "NetworkPermissionChkBx", 
-              onchange: ""}
+              name: "NetworkPermissionChkBx",
+              style: "margin-left: 30px; margin-right: 50px;",  
+              onchange: ""},
+            
+             {tag: "label", content: "Network"}
+             
            ]});
                                 
      },
@@ -419,14 +463,18 @@ enyo.kind({
      createNotificationRow: function(){
        this.$.targetsRows.$.permissions.$.targetDrw.createComponent({
             name: "NotificationPermissionRow",                                    
-            kind: "FittableRows",      
+            kind: "FittableRows", 
+            style: "margin-top: 10px;", 
+                  
             components:  [
              
-          	{tag: "label", content: "Notification", 
-             style: "width: 13em; margin-left:3em; margin-right: 10em;"},
+          	,
              {kind: "onyx.Checkbox",
-              name: "NotificationPermissionChkBx", 
-              onchange: ""}
+              name: "NotificationPermissionChkBx",
+              style: "margin-left: 30px; margin-right: 50px;", 
+              onchange: ""},
+              
+              {tag: "label", content: "Notification"}
            ]});
                                 
      },
@@ -434,14 +482,16 @@ enyo.kind({
      createDeviceRow: function(){
        this.$.targetsRows.$.permissions.$.targetDrw.createComponent({
             name: "DevicePermissionRow",                                    
-            kind: "FittableRows",      
+            kind: "FittableRows",
+            style: "margin-top: 10px;",       
             components:  [
+            {kind: "onyx.Checkbox",
+              name: "DevicePermissionChkBx",
+              style: "margin-left: 30px; margin-right: 50px;",  
+              onchange: ""}, 
              
-          	{tag: "label", content: "Device", 
-             style: "width: 13em; margin-left:3em; margin-right: 10em;"},
-             {kind: "onyx.Checkbox",
-              name: "DevicePermissionChkBx", 
-              onchange: ""} 
+          	{tag: "label", content: "Device"}
+              
            ]});
                                 
      },  
@@ -455,14 +505,15 @@ enyo.kind({
           this.$.targetsRows.$.android.$.targetDrw.createComponent({
           name: "MinSdkRow",
           kind: "FittableColumns",
-          //style: "margin-top:10px; margin-bottom: 10px;", 
+          style: "margin-top: 10px;", 
               
           components:  [
         	{tag: "label", content: "Minimum SDK version",
-            classes : "ares-bullet-label"},
+             style: "width: 13em; margin-left:3em;"},
+        
             {kind: "onyx.InputDecorator", 
               components: [
-                  {kind: "onyx.Input", name: "MinSdkInput"}
+                  {kind: "onyx.Input", name: "MinSdkInput", value: "7"}
                    ]}
             ]                                               
         });       
@@ -473,13 +524,14 @@ enyo.kind({
           
           this.$.targetsRows.$.android.$.targetDrw.createComponent({
           name: "MaxSdkRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",       
           components:  [
         	{tag: "label", content: "Maximum SDK version", 
              style: "width: 13em; margin-left:3em;"},
             {kind: "onyx.InputDecorator", 
               components: [
-                  {kind: "onyx.Input", name: "MaxSdkInput"}
+                  {kind: "onyx.Input", name: "MaxSdkInput", value: "15"}
                    ]}
             ]                                               
         });       
@@ -489,7 +541,8 @@ enyo.kind({
       createInstallLocationRow: function(){
        this.$.targetsRows.$.android.$.targetDrw.createComponent({
           name: "InstallLocationRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns", 
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Install location", 
              style: "width: 13em; margin-left:3em;"},
@@ -520,13 +573,15 @@ enyo.kind({
       createSplashScreenDurationRow: function(){
        this.$.targetsRows.$.android.$.targetDrw.createComponent({
           name: "SplashScreenDurationRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Splash screen duration", 
              style: "width: 13em; margin-left:3em;"},
             {kind: "onyx.InputDecorator", 
               components: [
-                  {kind: "onyx.Input", name:"SplashScreenDurationInput"}
+                  {kind: "onyx.Input", name:"SplashScreenDurationInput", 
+                  value: "4000"}
                    ]}
             ]                                               
         });                                     
@@ -535,13 +590,14 @@ enyo.kind({
       createUrlTimeOutRow: function(){
        this.$.targetsRows.$.android.$.targetDrw.createComponent({
           name: "UrlTimeOutRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",
           components:  [
         	{tag: "label", content: "Load URL timeout", 
              style: "width: 13em; margin-left:3em;"},
             {kind: "onyx.InputDecorator", 
               components: [
-                  {kind: "onyx.Input", name:"UrlTimeOutInput"}
+                  {kind: "onyx.Input", name:"UrlTimeOutInput", value: "6000"}
                    ]}
             ]                                               
         });                                     
@@ -551,13 +607,15 @@ enyo.kind({
       createAndroidDefaultIconRow: function(){
        this.$.targetsRows.$.android.$.targetDrw.createComponent({
           name: "AndroidDefaultIconRow",
+          style: "margin-top: 10px;",
           kind: "FittableColumns",      
           components:  [
         	{tag: "label", content: "Default icon", 
              style: "width: 13em; margin-left:3em;"},
             {kind: "onyx.InputDecorator", 
               components: [
-                  {kind: "onyx.Input", name:"AndroidDefaultIconInput"}
+                  {kind: "onyx.Input", name:"AndroidDefaultIconInput",
+                   value: "icon.png"}
                    ]}
             ]                                               
         });                                     
@@ -566,13 +624,15 @@ enyo.kind({
       createLdpiIconRow: function(){
         this.$.targetsRows.$.android.$.targetDrw.createComponent({
           name: "LdpiIconRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Ldpi icon", 
              style: "width: 13em; margin-left:3em;"},
             {kind: "onyx.InputDecorator", 
               components: [
-                  {kind: "onyx.Input", name:"LdpiIconInput"}
+                  {kind: "onyx.Input", name:"LdpiIconInput",
+                   value: "icon.png"}
                    ]}
             ]                                               
         });                 
@@ -581,13 +641,15 @@ enyo.kind({
       createMdpiIconRow: function(){
         this.$.targetsRows.$.android.$.targetDrw.createComponent({
           name: "MdpiIconRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",
           components:  [
         	{tag: "label", content: "Mdpi icon", 
              style: "width: 13em; margin-left:3em;"},
             {kind: "onyx.InputDecorator", 
               components: [
-                  {kind: "onyx.Input", name:"MdpiIconInput"}
+                  {kind: "onyx.Input", name:"MdpiIconInput",
+                   value: "icon.png"}
                    ]}
             ]                                               
         });                 
@@ -596,13 +658,15 @@ enyo.kind({
       createHdpiIconRow: function(){
         this.$.targetsRows.$.android.$.targetDrw.createComponent({
           name: "HdpiIconRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns", 
+          style: "margin-top: 10px;",
           components:  [
         	{tag: "label", content: "Hdpi icon", 
              style: "width: 13em; margin-left:3em;"},
             {kind: "onyx.InputDecorator", 
               components: [
-                  {kind: "onyx.Input", name:"HdpiIconInput"}
+                  {kind: "onyx.Input", name:"HdpiIconInput",
+                   value: "icon.png"}
                    ]}
             ]                                               
         });                 
@@ -611,13 +675,15 @@ enyo.kind({
       createXdpiIconRow: function(){
         this.$.targetsRows.$.android.$.targetDrw.createComponent({
           name: "XdpiIconRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Xdpi icon", 
              style: "width: 13em; margin-left:3em;"},
             {kind: "onyx.InputDecorator", 
               components: [
-                  {kind: "onyx.Input", name:"XdpiIconInput"}
+                  {kind: "onyx.Input", name:"XdpiIconInput",
+                   value: "icon.png"}
                    ]}
             ]                                               
         });                 
@@ -633,7 +699,8 @@ enyo.kind({
      createWebViewBounceRow: function(){
          this.$.targetsRows.$.ios.$.targetDrw.createComponent({
           name: "WebViewBounceRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Web view bounce", 
              style: "width: 13em; margin-left:3em;"},
@@ -662,7 +729,8 @@ enyo.kind({
        createPrerenderedIconRow: function(){
          this.$.targetsRows.$.ios.$.targetDrw.createComponent({
           name: "prerenderedIconRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Prerendred icon", 
              style: "width: 13em; margin-left:3em;"},
@@ -691,7 +759,8 @@ enyo.kind({
      createOpenLinkWebViewRow: function(){
         this.$.targetsRows.$.ios.$.targetDrw.createComponent({
           name: "openLinkWebViewRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Open all links in web view", 
              style: "width: 13em; margin-left:3em;"},
@@ -721,7 +790,8 @@ enyo.kind({
      createStatusBarStyleRow: function(){
       this.$.targetsRows.$.ios.$.targetDrw.createComponent({
           name: "StatusBarStyleRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Status Bar style", 
              style: "width: 13em; margin-left:3em;"},
@@ -751,7 +821,8 @@ enyo.kind({
      createDetectDataTypeRow: function(){
          this.$.targetsRows.$.ios.$.targetDrw.createComponent({
           name: "DetectDataTypeRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Detect Data type", 
              style: "width: 13em; margin-left:3em;"},
@@ -782,7 +853,8 @@ enyo.kind({
      createExitOnSuspendRow: function(){
          this.$.targetsRows.$.ios.$.targetDrw.createComponent({
           name: "ExitOnSuspendRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Exit on suspend", 
              style: "width: 13em; margin-left:3em;"},
@@ -812,7 +884,8 @@ enyo.kind({
      createSplashScreenSpinner: function(){
       this.$.targetsRows.$.ios.$.targetDrw.createComponent({
           name: "SplashScreenSpinnerRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Show splash screen spinner", 
              style: "width: 13em; margin-left:3em;"},
@@ -842,7 +915,8 @@ enyo.kind({
      createAutoHideSplashScreen: function(){
       this.$.targetsRows.$.ios.$.targetDrw.createComponent({
           name: "AutoHideSplashScreenRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Auto hide splash screen", 
              style: "width: 13em; margin-left:3em;"},
@@ -871,13 +945,14 @@ enyo.kind({
      createIosIcon: function(){
       this.$.targetsRows.$.ios.$.targetDrw.createComponent({
           name: "IosIconRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
-            {tag: "label", content: "Icon: ", 
+            {tag: "label", content: "Icon ", 
              style: "width: 13em; margin-left:3em;"},
             {kind: "onyx.InputDecorator", 
               components: [
-                  {kind: "onyx.Input", name: "IosIconInput"}
+                  {kind: "onyx.Input", name: "IosIconInput", value:"icon.png"}
                    ]}
              ]                                               
         });                      
@@ -890,7 +965,8 @@ enyo.kind({
       createDisableCursorRow: function(){                              
        this.$.targetsRows.$.blackberry.$.targetDrw.createComponent({
           name: "DisableCursorRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
         	{tag: "label", content: "Disable cursor", 
              style: "width: 13em; margin-left:3em;"},
@@ -921,13 +997,15 @@ enyo.kind({
       createBlackBerryIconRow: function(){
          this.$.targetsRows.$.blackberry.$.targetDrw.createComponent({
           name: "BlackBerryIconRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
             {tag: "label", content: "Icon", 
              style: "width: 13em; margin-left:3em;"},
             {kind: "onyx.InputDecorator", 
               components: [
-                  {kind: "onyx.Input", name: "BlackBerryIconInput"}
+                  {kind: "onyx.Input", name: "BlackBerryIconInput", 
+                   value: "icon.png"}
                    ]}
              ]                                               
         });                            
@@ -936,125 +1014,21 @@ enyo.kind({
       createIconHoverStateRow: function(){
          this.$.targetsRows.$.blackberry.$.targetDrw.createComponent({
           name: "IconHoverStateRow",
-          kind: "FittableColumns",      
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
           components:  [
             {tag: "label", content: "Icon hover state", 
              style: "width: 13em; margin-left:3em;"},
             {kind: "onyx.InputDecorator", 
               components: [
-                  {kind: "onyx.Input", name: "IconHoverStateInput"}
+                  {kind: "onyx.Input", name: "IconHoverStateInput",
+                  value: "icon.png"}
                    ]}
              ]                                               
         });                            
       },
     
-    
  
-     /*
-        functions to show/hide the Drawer and to manage the
-        associated check box. 
-     */                          
-     updateGeneralDrawer: function(){            
-        this.$.GeneralDrawer.setOpen(this.$.GeneralChkBx.checked);
-		this.setGeneralEnabled(this.$.GeneralChkBx.checked);           
-     },          
-     
-     
-     updatePermissionsDrawer: function(){            
-        this.$.PermissionsDrawer.setOpen(this.$.PermissionsChkBx.checked);
-		this.setPermissionsEnabled(this.$.PermissionsChkBx.checked);           
-     },
-     
-     
-     updateAndroidDrawer: function(){            
-        this.$.AndroidDrawer.setOpen(this.$.AndroidChkBx.checked);
-		this.setAndroidEnabled(this.$.AndroidChkBx.checked);           
-     },
-     
-     
-     updateIOSDrawer: function(){            
-        this.$.IosDrawer.setOpen(this.$.IOSChkBx.checked);
-		this.setIosEnabled(this.$.IOSChkBx.checked);           
-     },
-     
-     updateBlackBerryDrawer: function(){            
-        this.$.BlackBerryDrawer.setOpen(this.$.BlackBerryChkBx.checked);
-		this.setBlackBerryEnabled(this.$.BlackBerryChkBx.checked);           
-     }, 
-     
-     
-               
-     
-                            
-                              
-   		                                     
-  	 generalEnabledChanged: function(old) {         
-    		if (this.debug){
-              this.log("id:", this.targetId, old, "->", this.generalEnabled); 
-              }  
-    		this.$.GeneralChkBx.setChecked(this.generalEnabled);   
-    		this.updateGeneralDrawer();                  
-    	/*	if (this.enabled) {                   
-    			this.config = this.config || {};   
-    		} else {                              
-    			this.config = false;               
-    		} */                                    
-    	 }, 
-       
-     permissionsEnabledChanged: function(old) {         
-  		if (this.debug){
-            this.log("id:", this.targetId, old, "->", this.permissionsEnabled); 
-            }  
-  		this.$.PermissionsChkBx.setChecked(this.permissionsEnabled);   
-  		this.updatePermissionsDrawer();                  
-  	/*	if (this.enabled) {                   
-  			this.config = this.config || {};   
-  		} else {                              
-  			this.config = false;               
-  		} */                                    
-  	 },
-       
-       androidEnabledChanged: function(old) {         
-  		if (this.debug){
-            this.log("id:", this.targetId, old, "->", this.androidEnabled); 
-            }  
-  		this.$.AndroidChkBx.setChecked(this.androidEnabled);   
-  		this.updateAndroidDrawer();                  
-  	/*	if (this.enabled) {                   
-  			this.config = this.config || {};   
-  		} else {                              
-  			this.config = false;               
-  		} */                                    
-  	 },   
-       
-        iosEnabledChanged: function(old) {         
-  		if (this.debug){
-            this.log("id:", this.targetId, old, "->", this.iosEnabled); 
-            }  
-  		this.$.IOSChkBx.setChecked(this.iosEnabled);   
-  		this.updateIOSDrawer();                  
-  	/*	if (this.enabled) {                   
-  			this.config = this.config || {};   
-  		} else {                              
-  			this.config = false;               
-  		} */                                    
-  	 },   
-       
-       blackBerryEnabledChanged: function(old) {         
-  		if (this.debug){
-            this.log("id:", this.targetId, old, "->", this.blackBerryEnabled); 
-            }  
-  		this.$.BlackBerryChkBx.setChecked(this.blackBerryEnabled);   
-  		this.updateBlackBerryDrawer();                  
-  	/*	if (this.enabled) {                   
-  			this.config = this.config || {};   
-  		} else {                              
-  			this.config = false;               
-  		} */                                    
-  	 }, 
-     
-     
-       
       /*
         Handlers for the "GeneralDrawer".
       */                                     
@@ -1327,6 +1301,7 @@ enyo.kind({
  
     /**
      * @private
+     * For Folding/Unfolding a drawer after pressing the button "Details".     
      */
     unfold: function (){
      this.$.targetDrw.setOpen(this.fold);
@@ -1372,25 +1347,15 @@ enyo.kind({
 				this.$.targetDrw.$.keySelector.setProvider(provider);
 			}
 		}
-	},
-	/**
-	 * @private
-	 */
-/*	updateDrawer: function() {
-		this.$.targetDrw.setOpen(this.fold);
-		//this.setEnabled(this.$.targetChkBx.checked);
-     if(this.fold === true){
-                  this.fold = false;    
-	}else {
-          this.fold = true;
-       } 
-    } */
+	}
+
     });
 
 enyo.kind({
 	name: "Phonegap.ProjectProperties.KeySelector",
 	debug: false,
 	kind: "FittableRows",
+    style: "margin-top: 10px; postion: relative; left: -14em;",
 	published: {
 		targetId: "",
 		keys: undefined,
@@ -1399,22 +1364,40 @@ enyo.kind({
 	},
 	components: [
 		{ components: [
-			{tag: "label", classes : "ares-bullet-label", content: "Signing Key: "},
-			{name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey", components: [
-				{kind: "onyx.PickerButton", content: "Choose..."},
+			{tag: "label",
+            style: "width: 13em;",  
+            content: "Signing Key "},
+			
+            {name: "keyPicker", kind: "onyx.PickerDecorator",
+            style:"margin-left: 20px;", 
+            onSelect: "selectKey", components: [
+				{kind: "onyx.PickerButton",
+                  
+                content: "Choose..."},
 				{kind: "onyx.Picker", name: "keys"}
 			]},
-			// android, ios & blackberry: key password
-			{kind: "onyx.InputDecorator", components: [
+			
+            // android, ios & blackberry: key password
+			{kind: "onyx.InputDecorator",
+            style:"margin-left: 20px;", 
+            components: [
 				{content: "Key:"},
-				{name: "keyPasswd", kind: "onyx.Input", type: "password", placeholder: "Password..."}
+				{name: "keyPasswd", kind: "onyx.Input", type: "password", 
+                placeholder: "Password..."}
 			]},
-			// android-only: keystore password
-			{kind: "onyx.InputDecorator", name: "keystorePasswdFrm", showing: false, components: [
+			
+            // android-only: keystore password
+			{kind: "onyx.InputDecorator", name: "keystorePasswdFrm",
+            style:"margin-left: 20px;", 
+            showing: false, components: [
 				{content: "Keystore:"},
-				{name: "keystorePasswd", kind: "onyx.Input", type: "password", placeholder: "Password..."}
+				{name: "keystorePasswd", kind: "onyx.Input", type: "password", 
+                placeholder: "Password..."}
 			]},
-			{kind: "onyx.Button", content: "Save", ontap: "savePassword"}
+			
+            {kind: "onyx.Button", content: "Save",
+            style:"margin-left: 20px;", 
+            ontap: "savePassword"}
 		]}
 	],
 	create: function() {
