@@ -68,8 +68,10 @@ enyo.kind({
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
+	helper: null,			// Analyzer.KindHelper
 	create: function() {
 		this.inherited(arguments);
+		this.helper = new analyzer.Analyzer.KindHelper();
 	},
 	getProjectController: function() {
 		this.projectCtrl = this.projectData.getProjectCtrl();
@@ -462,9 +464,7 @@ enyo.kind({
 		if (kinds.length > 0) {
 			// Request to design the current document, passing info about all kinds in the file
 			this.doDesignDocument(data);
-		} else {
-			alert("No kinds found in this file");
-		}
+		} // else - The error has been displayed by extractKindsData()
 	},
 	//* Extract info about kinds from the current file needed by the designer
 	extractKindsData: function() {
@@ -483,10 +483,29 @@ enyo.kind({
 			},
 			c = this.$.ace.getValue(),
 			kinds = [];
-		
+
 		if (this.analysis) {
-			for (var i=0; i < this.analysis.objects.length; i++) {
-				var o = this.analysis.objects[i];
+			var nbKinds = 0;
+			var errorMsg;
+			var i, o;
+			for (i=0; i < this.analysis.objects.length; i++) {
+				o = this.analysis.objects[i];
+				if (o.type !== "kind") {
+					errorMsg = $L("Ares does not support methods out of a kind. Please place '" + o.name + "' into a separate .js file");
+				} else {
+					nbKinds++;
+				}
+			}
+			if (nbKinds === 0) {
+				errorMsg = $L("No kinds found in this file");
+			}
+			if (errorMsg) {
+				this.showErrorPopup(errorMsg);
+				return [];
+			}
+
+			for (i=0; i < this.analysis.objects.length; i++) {
+				o = this.analysis.objects[i];
 				var start = o.componentsBlockStart;
 				var end = o.componentsBlockEnd;
 				var name = o.name;
@@ -523,51 +542,12 @@ enyo.kind({
 	 * @returns the list of declared handler methods
 	 */
 	listHandlers: function(object, declared) {
-		declared = this.listDeclaredComponentsHandlers(object.components, declared);
-		for(var i = 0; i < object.properties.length; i++) {
-			var p = object.properties[i];
-			try {
-				if (p.name === 'handlers') {
-					for(var j = 0; i < p.value[0].properties.length; j++) {
-						var q = p.value[0].properties[j];
-						var name = q.value[0].name;
-						name = name.replace(/["']{1}/g, '');
-						if (name.substr(0, 2) !== 'do') {	// Exclude doXXXX methods
-							declared[name] = "";
-						}
-					}
-				}
-			} catch(error) {
-				enyo.log("Unexpected error: " + error);		// TODO TBC
-			}
+		try {
+			this.helper.setDefinition(object);
+			return this.helper.listHandlers(declared);
+		} catch(error) {
+			enyo.log("Unexpected error: " + error);		// TODO TBC
 		}
-		return declared;
-	},
-	/**
-	 * Recursively lists the handler methods mentioned in the "onXXXX"
-	 * attributes of the components passed as an input parameter
-	 * @param components: components to walk thru
-	 * @param declared: list of handler methods already listed
-	 * @returns the list of declared handler methods
-	 * @protected
-	 */
-	listDeclaredComponentsHandlers: function(components, declared) {
-		for(var i = 0; i < components.length; i++) {
-			var c = components[i];
-			for(var k = 0 ; k < c.properties.length ; k++) {
-				var p = c.properties[k];
-				if (p.name.substr(0, 2) === 'on') {
-					var name = p.value[0].name.replace(/["']{1}/g, '');
-					if (name.substr(0, 2) !== 'do') {	// Exclude doXXXX methods
-						declared[name] = "";
-					}
-				}
-			}
-			if (components.components) {
-				this.listDeclaredComponentsHandlers(components.components, declared);
-			}
-		}
-		return declared;
 	},
 	/**
 	 * This function checks all the kinds and add the missing
@@ -855,9 +835,7 @@ enyo.kind({
 		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
 		if (data.kinds.length > 0) {
 			this.doUpdate(data);
-		} else {
-			enyo.warn("No kinds found in this file");
-		}
+		} // else - The error has been displayed by extractKindsData()
 	}
 });
 
