@@ -42,12 +42,14 @@ enyo.kind({
        maxSdk: "",
        installLocation: "",
        splashScreenDuration: "",
+       androidSplash: "",
        urlTimeOut: "",
        androidDefaultIcon: "",
        ldpiIcon: "",
        mdpiIcon: "",
        hdpiIcon: "",
        xdpiIcon: "",
+       
       
       
       /*
@@ -63,7 +65,7 @@ enyo.kind({
       autoHideSplashScreen: "",
       iosIcon: "",
       retinaIcon: "",
-      
+      iosSplash: "",
       /*
         Variables for the Drawer "Black Berry Specific".
       */
@@ -186,6 +188,7 @@ enyo.kind({
          this.createMinSdkRow();
          this.createMaxSdkRow();
          this.createInstallLocationRow();
+         this.createAndroidSplash();
          this.createSplashScreenDurationRow();
          this.createUrlTimeOutRow();
          this.createAndroidDefaultIconRow();
@@ -193,6 +196,7 @@ enyo.kind({
          this.createMdpiIconRow();
          this.createHdpiIconRow();
          this.createXdpiIconRow(); 
+         
          
          /*
            Create IOS specifc configuration row.
@@ -205,14 +209,21 @@ enyo.kind({
         this.createExitOnSuspendRow();
         this.createSplashScreenSpinner();
         this.createAutoHideSplashScreen();
-        this.createIosIcon();   
+        this.createIosIcon(); 
+        this.createIosSplash();  
         
         /*
           Create Black Berry specific configuration row.
         */ 
         this.createDisableCursorRow();
         this.createBlackBerryIconRow();
-        this.createIconHoverStateRow();  
+        this.createIconHoverStateRow();
+        this.createBlackBerrySplash();
+        
+        /*
+          Create Windows Phone configuration row
+        */  
+        //this.createWinphoneSplash();
     
 
 	},
@@ -243,7 +254,8 @@ enyo.kind({
                              },
                   
                   components: [
-                  {content: "2.5.0",active: true},
+                  {content: "2.7.0",active: true},
+                  {content: "2.5.0"},
                   {content: "2.3.0"},
                   {content: "2.2.0"},
                   {content: "2.1.0"},
@@ -688,6 +700,40 @@ enyo.kind({
             ]                                               
         });                 
       },
+      
+      createAndroidSplash: function(){
+         this.$.targetsRows.$.android.$.targetDrw.createComponent({
+          name: "AndroidSplashRow",
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
+          components:  [
+            {tag: "label", content: "Splash screen url", 
+             style: "width: 13em; margin-left:3em;"},
+            {kind: "onyx.InputDecorator", 
+              components: [
+                  {kind: "onyx.Input", name: "AndroidSplashInput", 
+                  value: "splash.png"}
+                   ]},
+             {tag: "label", content: "width", 
+              style: "width: 3em; margin-left:3em; vertical-align: middle;"},
+             {kind: "onyx.InputDecorator", 
+              components: [
+                  {kind: "onyx.Input",
+                  style: "width: 60px;", 
+                  name: "AndroidSplashWidth", value: "640"}
+                   ]},
+              
+              {tag: "label", content: "height", 
+               style: "width: 3em; margin-left:3em;  vertical-align: middle;"},
+                {kind: "onyx.InputDecorator", 
+                 components: [
+                  {kind: "onyx.Input",
+                   style: "width: 60px;",  
+                   name: "AndroidSplashHeight", value: "960"}
+                   ]}
+             ]                                               
+        });                      
+     },
      
      
      
@@ -918,7 +964,7 @@ enyo.kind({
           kind: "FittableColumns",
           style: "margin-top: 10px;",      
           components:  [
-        	{tag: "label", content: "Auto hide splash screen", 
+        	{tag: "label", content: "Auto-hide splash screen", 
              style: "width: 13em; margin-left:3em;"},
             {kind: "onyx.PickerDecorator",
                 name: "AutoHideSplashScreenPD", 
@@ -957,6 +1003,42 @@ enyo.kind({
              ]                                               
         });                      
      },
+     
+     createIosSplash: function(){
+         this.$.targetsRows.$.ios.$.targetDrw.createComponent({
+          name: "IosSplashRow",
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
+          components:  [
+            {tag: "label", content: "Splash screen url", 
+             style: "width: 13em; margin-left:3em;"},
+            {kind: "onyx.InputDecorator", 
+              components: [
+                  {kind: "onyx.Input", name: "IosSplashInput", 
+                  value: "splash.png"}
+                   ]},
+             {tag: "label", content: "width", 
+              style: "width: 3em; margin-left:3em; vertical-align: middle;"},
+             {kind: "onyx.InputDecorator", 
+              components: [
+                  {kind: "onyx.Input",
+                  style: "width: 60px;", 
+                  name: "IosSplashWidth", value: "640"}
+                   ]},
+              
+              {tag: "label", content: "height", 
+               style: "width: 3em; margin-left:3em;  vertical-align: middle;"},
+                {kind: "onyx.InputDecorator", 
+                 components: [
+                  {kind: "onyx.Input",
+                   style: "width: 60px;",  
+                   name: "IosSplashHeight", value: "960"}
+                   ]}
+             ]                                               
+        });                      
+     },             
+                      
+    
      
      
      /*
@@ -1027,6 +1109,23 @@ enyo.kind({
              ]                                               
         });                            
       },
+      createBlackBerrySplash: function(){
+         this.$.targetsRows.$.blackberry.$.targetDrw.createComponent({
+          name: "BlackBerrySplashRow",
+          kind: "FittableColumns",
+          style: "margin-top: 10px;",      
+          components:  [
+            {tag: "label", content: "Splash screen url", 
+             style: "width: 13em; margin-left:3em;"},
+            {kind: "onyx.InputDecorator", 
+              components: [
+                  {kind: "onyx.Input", name: "BlackBerrySplashInput", 
+                  value: "splash.png"}
+                   ]},
+           
+             ]                                               
+        });                      
+     },
     
  
       /*
@@ -1244,7 +1343,8 @@ enyo.kind({
 	},
   
 	components: [
-			{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "checkBoxChange"},
+			{name: "targetChkBx", kind: "onyx.Checkbox", 
+             onchange: "checkBoxChange"},
 			{tag:"label", name: "targetLbl", classes:"ares-label", content: ""},
              {kind: "onyx.Button", content: "Details", ontap: "unfold", 
              style:"float:right;"},
@@ -1355,7 +1455,7 @@ enyo.kind({
 	name: "Phonegap.ProjectProperties.KeySelector",
 	debug: false,
 	kind: "FittableRows",
-    style: "margin-top: 10px; postion: relative; left: -14em;",
+    style: "margin-top: 10px;",
 	published: {
 		targetId: "",
 		keys: undefined,
@@ -1365,11 +1465,11 @@ enyo.kind({
 	components: [
 		{ components: [
 			{tag: "label",
-            style: "width: 13em;",  
+            style: "width: 13em; margin-left:3em;",
             content: "Signing Key "},
 			
             {name: "keyPicker", kind: "onyx.PickerDecorator",
-            style:"margin-left: 20px;", 
+            style:"margin-left:7.5em;", 
             onSelect: "selectKey", components: [
 				{kind: "onyx.PickerButton",
                   
@@ -1382,17 +1482,23 @@ enyo.kind({
             style:"margin-left: 20px;", 
             components: [
 				{content: "Key:"},
-				{name: "keyPasswd", kind: "onyx.Input", type: "password", 
-                placeholder: "Password..."}
+				{name: "keyPasswd", 
+                 kind: "onyx.Input", 
+                 type: "password", 
+                 style:"margin-right: 20px; width: 60px;", 
+                 placeholder: "Password"}
 			]},
 			
             // android-only: keystore password
 			{kind: "onyx.InputDecorator", name: "keystorePasswdFrm",
-            style:"margin-left: 20px;", 
-            showing: false, components: [
+                   style:"margin-left: 40px;",
+             showing: false, components: [
 				{content: "Keystore:"},
-				{name: "keystorePasswd", kind: "onyx.Input", type: "password", 
-                placeholder: "Password..."}
+				{name: "keystorePasswd", 
+                kind: "onyx.Input",
+                type: "password",
+                style: "width: 60px;",                                
+                placeholder: "Password"}
 			]},
 			
             {kind: "onyx.Button", content: "Save",
