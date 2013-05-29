@@ -3,6 +3,7 @@ var shell = require("shelljs"),
     fs = require("fs"),
     util = require('util'),
     path = require("path"),
+    log = require('npmlog'),
     async = require("async"),
     unzip = require('unzip');
 
@@ -19,8 +20,15 @@ var shell = require("shelljs"),
 	// Hashmap for available templates
 	var templates = {};
 
-	function Generator() {
+	function Generator(config, next) {
+		this.config = config;
+		log.level = this.config.level || 'http';
 		this.objectId = objectCounter++;
+		log.verbose("Generator()", "config:", this.config);
+
+		// TODO: Populate the repositories here (from GenZip#sentConfig() & GenZip#createRepo()).
+
+		next();
 	}
 
 	generator.Generator = Generator;
@@ -52,8 +60,13 @@ var shell = require("shelljs"),
 		registerRemoteTemplates: function(templatesUrl, next) {
 			try {
 				if (templatesUrl.substr(0, 4) === 'http') {
+					var reqOptions = {
+						url: templatesUrl,
+						proxy: this.config.proxyUrl
+					};
 					// Issue an http request to get the template definition
-					request(templatesUrl, function (error, response, body) {
+					log.http("GET " + templatesUrl);
+					request(reqOptions, function (error, response, body) {
 						if (!error && response.statusCode == 200) {
 							parseInsertTemplates(body, templatesUrl, next);
 						} else if (error) {
@@ -159,7 +172,7 @@ var shell = require("shelljs"),
 				}
 			}
 
-			if (options.log) options.log.verbose("unzipFile", "Unzipping " + source + " to " + destination);
+			log.verbose("unzipFile", "Unzipping " + source + " to " + destination);
 
 			// Create an extractor to unzip the template
 			var extractor = unzip.Extract({ path: destination });
@@ -168,7 +181,12 @@ var shell = require("shelljs"),
 			// Building the zipStream either from a file or an http request
 			var zipStream;
 			if (source.substr(0, 4) === 'http') {
-				zipStream = request(source);
+				var reqOptions = {
+					url: source,
+					proxy: config.proxyUrl
+				};
+				log.http("GET " + source);
+				zipStream = request(reqOptions);
 			} else {
 				zipStream = fs.createReadStream(source);
 			}
@@ -185,12 +203,12 @@ var shell = require("shelljs"),
 
 	function removeExcludedFiles(item, destination, options, next) {
 		if (item.excluded) {            // TODO: move to asynchronous processing
-			if (options.log) options.log.verbose("removeExcludedFiles", "removing excluded files");
+			log.verbose("removeExcludedFiles", "removing excluded files");
 			shell.ls('-R', destination).forEach(function(file) {
 				item.excluded.forEach(function(pattern) {
 					var regexp = new RegExp(pattern);
 					if (regexp.test(file)) {
-						if (options.log) options.log.verbose("removeExcludedFiles", "removing: " + file);
+						log.verbose("removeExcludedFiles", "removing: " + file);
 						var filename = path.join(destination, file);
 						shell.rm('-rf', filename);
 					}
@@ -229,11 +247,11 @@ var shell = require("shelljs"),
 					if (regexp.test(file)) {
 						var filename = path.join(destination, file);
 						if (substit.json) {
-							if (options.log) options.log.verbose("performSubstitution", "Applying JSON substitutions to: " + file);
+							log.verbose("performSubstitution()", "Applying JSON substitutions to: " + file);
 							applyJsonSubstitutions(filename, substit.json);
 						}
 						if (substit.sed) {
-							if (options.log) options.log.verbose("performSubstitution", "Applying SED substitutions to: " + file);
+							log.verbose("performSubstitution()", "Applying SED substitutions to: " + file);
 							applySedSubstitutions(filename, substit.sed);
 						}
 					}

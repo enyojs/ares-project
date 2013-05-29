@@ -22,7 +22,6 @@ log.level = 'http';
 
 var FORM_DATA_LINE_BREAK = '\r\n';
 var performCleanup = true;
-var tools = new ptools.Generator();
 
 process.on('uncaughtException', function (err) {
 	log.error(basename, err.stack);
@@ -30,7 +29,9 @@ process.on('uncaughtException', function (err) {
 });
 
 function GenZip(config, next) {
-	log.info('GenZip', "config:", config);
+	var self = this;
+	this.config = config;
+	log.info('GenZip', "config:", this.config);
 
 	// express-3.x
 	var app, server;
@@ -84,7 +85,28 @@ function GenZip(config, next) {
 	fs.mkdirSync(this.uploadDir);
 	app.use(express.bodyParser({keepExtensions: true, uploadDir: this.uploadDir}));
 
-	// Global error handler
+	/*
+	 * Verbs
+	 */
+
+	app.post(makeExpressRoute('/template-repos/:repoid'), addRepo.bind(this));
+	app.use(makeExpressRoute('/templates'), getList.bind(this));
+	app.use(makeExpressRoute('/generate'), generate.bind(this));
+
+	app.post('/config', (function(req, res, next) {
+		log.verbose("req.body:", req.body);
+		var config = req.body && req.body.config;
+		this.config = util._extend(this.config, config);
+		this.configure(this.config, function(err) {
+			res.status(200).end();
+		});
+	}).bind(this));
+
+	/*
+	 * Error handling, in last position, to be used by both
+	 * middleware & verbs
+	 */
+
 	function errorHandler(err, req, res, next){
 		log.error("errorHandler(): ", err.stack);
 		res.status(err.statusCode || 500);
@@ -92,16 +114,13 @@ function GenZip(config, next) {
 		res.send(err.toString());
 	}
 	
-	// express-3.x: middleware with arity === 4 is detected as the error handler
+	// express-3.x: middleware with arity === 4 is detected as the
+	// error handler (.)
 	app.use(errorHandler);
 
 	/*
-	 * Verbs
+	 * HTTP server
 	 */
-
-	app.use(makeExpressRoute('/templates'), getList);
-	app.use(makeExpressRoute('/generate'), generate);
-	app.post(makeExpressRoute('/template-repos/:repoid'), addRepo);
 
 	// Send back the service location information (origin,
 	// protocol, host, port, pathname) to the creator, when port
@@ -117,29 +136,40 @@ function GenZip(config, next) {
 		});
 	});
 
-	function getList(req, res, next) {
-		tools.list(function(inError, inData) {
-			res.status(200).send(inData).end();
-		});
-	}
+	/*
+	 * Methods
+	 */
 
 	function addRepo(req, res, next) {
-		tools.registerRemoteTemplates(req.body.url, function(err) {
+		log.info("addRepo()", "url:", req.body.url);
+		self.tools.registerRemoteTemplates(req.body.url, function(err) {
 			if (err) {
-				next(new HttpError(err, 500));
-				return;
+				next(err);
+			} else {
+				res.status(200).end();
 			}
-			res.status(200).end();
+		});
+	}
+	
+	function getList(req, res, next) {
+		log.info("getList()");
+		self.tools.list(function(err, list) {
+			if (err) {
+				next(err);
+			} else {
+				log.info("getList()", "list:", list);
+				res.status(200).send(list).end();
+			}
 		});
 	}
 
 	function generate(req, res, next) {
-		var destination = temp.path({prefix: 'com.palm.ares.hermes.genZip'}) + '.d';
-		fs.mkdirSync(destination);
+		log.info("generate()");
 
-		tools.generate(req.body.templateId, JSON.parse(req.body.substitutions), destination, {}, function(inError, inData) {
+		var destination = temp.mkdirSync({prefix: 'com.hp.ares.genZip'});
+		self.tools.generate(req.body.templateId, JSON.parse(req.body.substitutions), destination, {}, function(inError, inData) {
 			if (inError) {
-				next(new HttpError(inError, 500));
+				next(inError);
 				return;
 			}
 
@@ -158,7 +188,7 @@ function GenZip(config, next) {
 					combinedStream.append(function(nextDataChunk) {
 						fs.readFile(filepath, 'base64', function (err, data) {
 							if (err) {
-								next(new HttpError('Unable to read ' + filename, 500));
+								next(err);
 								nextDataChunk('INVALID CONTENT');
 								return;
 							}
@@ -232,6 +262,10 @@ function GenZip(config, next) {
 	}
 }
 
+GenZip.prototype.configure = function(config, next) {
+	this.tools = new ptools.Generator(config, next);
+};
+
 GenZip.prototype.onExit = function() {
 	var directory = this.uploadDir;
 	rimraf(directory, function(err) {
@@ -273,7 +307,8 @@ if (path.basename(process.argv[1], '.js') === basename) {
 
 	var obj = new GenZip({
 		pathname: argv.pathname,
-		port: argv.port
+		port: argv.port,
+		level: argv.level
 	}, function(err, service){
 		if(err) process.exit(err);
 		// process.send() is only available if the
