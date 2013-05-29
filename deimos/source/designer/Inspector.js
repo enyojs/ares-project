@@ -226,24 +226,28 @@ enyo.kind({
 				case 'P':
 					this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Properties"});
 					for (p in ps) {
-					this.makeEditor(inControl, p, ps[p], "properties");
+						this.makeEditor(inControl, p, ps[p], "properties");
 					}
-				break;
+					break;
 				case 'E':
-						ps = ps.events;
-						if (ps.length) {
-						        this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
-						}
-						for (i=0, p; (p=ps[i]); i++) {
-						        this.makeEditor(inControl, p, "", "events");
-						}
-						break;
+					ps = ps.events;
+					if (ps.length) {
+				        this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
+					}
+					for (i=0, p; (p=ps[i]); i++) {
+				        this.makeEditor(inControl, p, "", "events");
+					}
+					break;
 				case 'S':
-						// TODO
-						break;
+					var style = "";
+					if (inControl && inControl.style !== undefined) {
+						style = inControl.style;
+					}
+					this.$.content.createComponent({kind: "CssEditor", currentControlStyle: style});
+					break;
 				default:
-						enyo.warn("Inspector has unknown filterType: ", filterType);
-						break;
+					enyo.warn("Inspector has unknown filterType: ", filterType);
+					break;
 			}
 
 		}
