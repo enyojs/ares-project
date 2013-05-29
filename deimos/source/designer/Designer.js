@@ -123,7 +123,11 @@ enyo.kind({
 			this.doMoveItem(msg.val);
 		// Existing component dropped in iframe
 		} else if(msg.op === "error") {
-			this.doError(msg.val);
+			if (( ! msg.val.hasOwnProperty('popup')) || msg.val.popup === true) {
+				this.doError(msg.val);
+			} else {
+				// TODO: We should store the error into a kind of rotating error log - ENYO-2462
+			}
 		// Default case
 		} else {
 			enyo.warn("Deimos designer received unknown message op:", msg);

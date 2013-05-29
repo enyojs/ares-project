@@ -354,9 +354,9 @@ enyo.kind({
 				this.selectItem({aresId: inKind.selectId});
 			}
 		} catch(error) {
-			errMsg = "Unable to render " + inKind.name;
-			this.error(errMsg, error);
-			this.sendMessage({op: "error", val: {msg: errMsg}});
+			errMsg = "Unable to render kind '" + inKind.name + "':" + error.message;
+			this.error(errMsg, error.stack);
+			this.sendMessage({op: "error", val: {msg: errMsg, details: error.stack}});
 		}
 	},
 	//* Rerender current selection
