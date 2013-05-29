@@ -27,7 +27,7 @@ enyo.kind({
 	},
 	setupItem: function(inSender, inEvent) {
 		var prop = (this.propList) && (this.propList).split(",");
-		inEvent.item.$.styleItem.setFieldName(prop[inEvent.index]+":");
+		inEvent.item.$.styleItem.setFieldName(prop[inEvent.index]);
 
 		if (this.propUser !== "" || this.propUser !== null) {
 			var p = this.propUser.split(";");
@@ -44,13 +44,17 @@ enyo.kind({
 		}
 		return true;
 	}
+
 });
 
 enyo.kind({
 	name: "CssEditor",
 	kind: "FittableRows",
 	events: {
-		onChange: ""
+		onModif: ""
+	},
+	handlers: {
+		onChange: "change",
 	},
 	cssEditorConfig: [
 		{cssStyleName: "Background-Style", properties: "background-color,background-image,background-position"},
@@ -66,5 +70,11 @@ enyo.kind({
 			var category = this.createComponent({kind: "CategoryStyle", propUser: this.currentControlStyle});
 			category.setModel(this.cssEditorConfig[o]);
 		}, this);
+	},	
+	change: function(inSender, inEvent) {
+		var n = inEvent.target.fieldName;
+		var v = inEvent.target.fieldValue;
+
+		this.doModif({name: n, value: v, type: inEvent.target.fieldType});
 	}
 });
