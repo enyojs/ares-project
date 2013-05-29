@@ -101,17 +101,29 @@ var shell = require("shelljs"),
 		},
 
 		generate: function(templateId, substitutions, destination, options, next) {
-
-			if ( ! templates[templateId]) {
-				next("Requested template does not exists", null);
+			log.info("generate()", "using:",  templateId);
+			var tmpl = templates && templates[templateId];
+			if (!tmpl) {
+				next(new Error("Requested templateId (" + templateId + ") does not exist"));
 				return;
 			}
+			tmpl.zipfiles = tmpl.zipfiles || [];
 
 			// Process all the files
 			async.forEachSeries(templates[templateId].zipfiles, processZipFile, notifyCaller);
 
 			function processZipFile(item, next) {
-				if (options.log) options.log.verbose("generate#processZipFile", "Processing " + item.url);
+				log.info("generate#processZipFile()", "Processing " + item.url);
+
+				temp.mkdir({prefix: 'com.hp.ares.gen.processZipFile'}, (function(err, zipDir) {
+					async.series([
+						unzipFile.bind(this, item, options, this.config, zipDir),
+						removeExcludedFiles.bind(this, item, options, zipDir),
+						performSubstitution.bind(this, substitutions, options, zipDir),
+						prefix.bind(this, item, options, zipDir, destination)
+					], next);
+				}).bind(this));
+			}
 
 				async.series([
 					unzipFile.bind(this, item, destination, options),
@@ -158,7 +170,7 @@ var shell = require("shelljs"),
 		}
 	}
 
-	function unzipFile(item, destination, options, next) {
+	function unzipFile(item, options, config, destination, next) {
 		try {
 			var source = item.url;
 
@@ -200,7 +212,7 @@ var shell = require("shelljs"),
 		}
 	}
 
-	function removeExcludedFiles(item, destination, options, next) {
+	function removeExcludedFiles(item, options, destination, next) {
 		if (item.excluded) {            // TODO: move to asynchronous processing
 			log.verbose("removeExcludedFiles", "removing excluded files");
 			shell.ls('-R', destination).forEach(function(file) {
@@ -217,34 +229,48 @@ var shell = require("shelljs"),
 		next();
         }
 
-	function removePrefix(item, destination, options, next) {
-		if (item.prefixToRemove) {
-			if (options.log) options.log.verbose("removePrefix", "removing prefix: " + item.prefixToRemove);
-
-			var source = path.join(destination, item.prefixToRemove);
-
-			shell.ls(source).forEach(function(file) {
-				var target = path.join(source, file);
-				shell.mv(target, destination);
-			});
-
+	function prefix(item, options, srcDir, dstDir, next) {
+		log.verbose("generate#prefix()", "item:", item);
+		if (!item.prefixToRemove && !item.prefixToAdd) {
+			log.verbose("generate#prefix()", "skipping prefix changes");
 			next();
-		} else {
-			next();             // Nothing to do
+			return;
+		}
+
+		var src = path.join(srcDir, item.prefixToRemove);
+		var dst = path.join(dstDir, item.prefixToAdd);
+		log.verbose("generate#prefix()", "src:", src, "-> dst:", dst);
+
+		async.waterfall([
+			mkdirp.bind(this, dst),
+			function(data, next) { fs.readdir(src, next); },
+			_mv.bind(this)
+		], next);
+
+		function _mv(files, next) {
+			log.silly("generate#prefix#_mv()", "files:", files);
+			async.forEach(files, function(file, next) {
+				log.silly("generate#prefix#_mv()", file + " -> " + dst);
+				fs.rename(path.join(src, file), path.join(dst, file), next);
+			}, next);
 		}
 	}
 
-	function performSubstitution(substitutions, destination, options, next) {
-		if (options.log) options.log.verbose("performSubstitution", "performing substitutions");
+	function installAs(item, next) {
+		next(new Error("Not yet implemented"));
+	}
+
+	function performSubstitution(substitutions, options, workDir, next) {
+		log.verbose("performSubstitution()", "performing substitutions");
 
 		// Apply the substitutions                  // TODO: move to asynchronous processing
 		if (substitutions) {
-			shell.ls('-R', destination).forEach(function(file) {
+			shell.ls('-R', workDir).forEach(function(file) {
 
 				substitutions.forEach(function(substit) {
 					var regexp = new RegExp(substit.fileRegexp);
 					if (regexp.test(file)) {
-						var filename = path.join(destination, file);
+						var filename = path.join(workDir, file);
 						if (substit.json) {
 							log.verbose("performSubstitution()", "Applying JSON substitutions to: " + file);
 							applyJsonSubstitutions(filename, substit.json);

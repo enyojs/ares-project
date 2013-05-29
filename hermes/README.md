@@ -288,6 +288,7 @@ Each zip file entry:
 	If the `url` references a file which does not exist the `alternateUrl` is used.
 
 * can define a `prefixToRemove`. This prefix must correspond to one or several directory level that must be removed.
+* can define a `prefixToAdd`. This prefix defines a folder (it can be a path of nested folders, like `another/path/to`) to be prepended to the root of the ZIP archive 
 * can define in the array `excluded` a list of files or directories to be excluded when the zip file is extracted.
 
 ### Protocol
