@@ -1,6 +1,7 @@
 enyo.kind({
 	name: "FindPopup",
 	kind: "onyx.Popup",
+	classes:"ares-classic-popup",
 	events: {
 		onFindNext:"",
 		onFindPrevious:"",
@@ -17,36 +18,41 @@ enyo.kind({
 		onShow: "shown"
 	},
 	components: [
-		{kind: "FittableRows", classes:"ares_phobos_findpop", components: [
-			{kind: "FittableColumns", style: "margin-bottom: 10px", components: [
-				{fit: true, content: "Find:", classes: "phobos-find-label"},
-				{kind: "onyx.InputDecorator", components: [
-					{name: "find", kind: "onyx.Input", classes: "phobos-find-field", placeholder: "", onchange: "findChanged"}
+		{classes:"title", content: "FIND/REPLACE"},
+		{classes:"ace-find-popup", components: [
+			{kind: "FittableRows", components: [
+				{classes: "ares-row", components: [
+					{tag:"label", classes: "ares-fixed-label ace-find-label", content: "Find:"},
+					{kind: "onyx.InputDecorator", components: [
+						{name: "find", kind: "onyx.Input", onchange: "findChanged"}
+					]}
+				]},
+				{classes: "ares-row", components: [
+					{tag:"label", classes: "ares-fixed-label ace-find-label",  content: "Replace:"},
+					{kind: "onyx.InputDecorator", components: [
+						{name: "replace", kind: "onyx.Input", onchange: "replaceChanged"}
+					]}
+				]},
+				{tag:"p", classes:"break"},
+				{classes: "ares-row", components: [
+					{kind: "FittableColumns", classes:"ace-find-left", fit: true, components: [
+						{name: "findnext", kind: "onyx.Button", classes:"ace-find-button", content: "Find", ontap: "doFindNext"},
+						{name: "findprevious", kind: "onyx.Button", classes:"ace-find-button", content: "Find Prev", ontap: "doFindPrevious"}
+					]}
+				]},
+				{classes: "ares-row", components: [
+					{kind: "FittableColumns", classes:"ace-find-left", fit: true, components: [
+						{name: "replaceFind", kind: "onyx.Button", classes:"ace-find-button", disabled: true, content: "Replace/Find", ontap: "doReplaceFind"},
+						//DO NOT REMOVE replaceOne button, it is not implemented for the moment, why?
+						//{name: "replaceOne", kind: "onyx.Button", classes:"ace-find-button", content: "Replace", ontap: "doReplace"},
+						//]},
+						{name: "replaceAll", kind: "onyx.Button", classes:"ace-find-button", disabled: true, content: "Replace All", ontap: "doReplaceAll"}
+					]}
 				]}
-			]},
-			{kind: "FittableColumns", style: "margin-bottom: 10px", components:[
-				{fit: true, content: "Replace:", classes: "phobos-find-label"},
-				{kind: "onyx.InputDecorator", components: [
-					{name: "replace", kind: "onyx.Input", classes: "phobos-find-field", placeholder: "", onchange: "replaceChanged"}
-				]}
-			]},
-			{kind: "FittableColumns", style: "margin-bottom: 10px", components: [
-				//{name: "replaceOne", kind: "onyx.Button", content: "Replace", ontap: "doReplace"},
-
-				{fit: true},
-				{name: "replaceAll", kind: "onyx.Button", disabled: true, style: "margin-right: 10px",
-				 content: "Replace All", ontap: "doReplaceAll"},
-				{name: "replaceFind", kind: "onyx.Button", disabled: true, content: "Replace & Find", ontap: "doReplaceFind"}
-			]},
-			{kind: "FittableColumns", style: "margin-bottom: 10px", components: [
-				{fit: true},
-				{name: "findprevious", kind: "onyx.Button", content: "Previous", style: "margin-right: 10px", ontap: "doFindPrevious"},
-				{name: "findnext", kind: "onyx.Button", content: "Next", ontap: "doFindNext"}
-			]},
-			{kind: "FittableColumns", components: [
-				{name: "close", kind: "onyx.Button", content: "Close", ontap: "doClose"},
-				{fit: true}
 			]}
+		]},
+		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+			{name: "close", kind: "onyx.Button", content: "Close", ontap: "doClose"},
 		]}
 	],
 	findChanged: function(inSender, inEvent) {

@@ -47,8 +47,16 @@ enyo.kind({
 		return this.config.name || this.config.id;
 	},
 	/**
+	 * Name of the kind to show in the {AresProperties} UI
+	 * @return the Enyo kind to use to set service-specific Ares-wide properties
+	 * @public
+	 */
+	//getAresPropertiesKind: function() {},
+
+	/**
 	 * Name of the kind to show in the {ProjectProperties} UI
-	 * @return the Enyo kind to use to set Phonegap project properties
+	 * @return the Enyo kind to use to set service-specific project properties
+	 * @public
 	 */
 	getProjectPropertiesKind: function() {
 		return "Phonegap.ProjectProperties";
@@ -63,6 +71,20 @@ enyo.kind({
 			  this.config.auth.keys);
 	},
 	/**
+	 * Shared enyo.Ajax error handler
+	 * @private
+	 */
+	_handleServiceError: function(msg, next, inSender, inError) {
+		var response = inSender.xhrResponse, contentType, details;
+		if (response) {
+			contentType = response.headers['content-type'];
+			if (contentType && contentType.match('^text/plain')) {
+				details = response.body;
+			}
+		}
+		next(new Error(msg + inError.toString()), details);
+	},
+	/**
 	 * Authenticate current user & retreive the associated token
 	 * 
 	 * If successful, #username, #password & the token are save to
@@ -74,12 +96,10 @@ enyo.kind({
 	 */
 	authenticate: function(inAuth, next) {
 		if (this.debug) this.log();
-		if (this.config.auth.username != inAuth.username) {
-			this.config.auth = {
-				username: inAuth.username,
-				password: inAuth.password
-			};
-		}
+		this.config.auth = {
+			username: inAuth.username,
+			password: inAuth.password
+		};
 		this._getToken(next);
 	},
 	/**
@@ -87,6 +107,9 @@ enyo.kind({
 	 * 
 	 * This includes registered applications & signing keys.
 	 * @public
+	 * @param {Function} next
+	 * @param next {Error} err
+	 * @param next {Object} userData user account data as returned by PhoneGap Build
 	 */
 	authorize: function(next) {
 		var self = this;
@@ -114,6 +137,7 @@ enyo.kind({
 	_getToken: function(next) {
 		if (this.debug) this.log();
 		if(this.config.auth && this.config.auth.token) {
+			if (this.debug) this.log("skipping token obtention");
 			next();
 			return;
 		}
@@ -301,18 +325,22 @@ enyo.kind({
 	 * @public
 	 */
 	build: function(project, next) {
-		this.authorize(enyo.bind(this, this._getProjectData, project, next));
+		if (this.debug) this.log("Starting phonegap build: " + this.url + '/build');
+		async.waterfall([
+			enyo.bind(this, this.authorize),
+			enyo.bind(this, this._getProjectData, project),
+			enyo.bind(this, this._getFilesData, project),
+			enyo.bind(this, this._submitBuildRequest, project),
+			enyo.bind(this, this._prepareStore, project),
+			enyo.bind(this, this._store, project)
+		], next);
 	},
 	/**
 	 * Collect & check information about current project
 	 * @private
 	 */
-	_getProjectData: function(project, next, err) {
-		if (err) {
-			next(err);
-			return;
-		}
-		if (!next || !project instanceof Ares.Model.Project) {
+	_getProjectData: function(project, userData, next) {
+		if (!project instanceof Ares.Model.Project) {
 			next(new Error("Invalid parameters"));
 			return;
 		}
@@ -324,8 +352,7 @@ enyo.kind({
 			return;
 		}
 		if (this.debug) this.log("appId:", config.build.phonegap.appId);
-
-		this.getFileList(project, next);
+		next();
 	},
 	/**
 	 * Get the list of files of the project for further upload
@@ -333,91 +360,17 @@ enyo.kind({
 	 * @param {Function} next is a CommonJS callback
 	 * @private
 	 */
-	getFileList: function(project, next) {
+	_getFilesData: function(project, next) {
 		if (this.debug) this.log("...");
 		var req, fileList = [];
-		req = project.getService().propfind(project.getFolderId(), -1 /*infinity*/);
-		req.response(this, function(inEvent, inData) {
-			this.doShowWaitPopup({msg: $L("Phonegap build started")});
-			if (this.debug) enyo.log("Got the list of files", inData);
-			// Extract the list into an array
-			this.buildFileList(inData.children, fileList);
-			var prefix = inData.path;
-			var prefixLen = prefix.length + 1;
-			this.prepareFileList(project, prefix, fileList, 0, prefixLen, next);
+		this.doShowWaitPopup({msg: $L("Fetching application source code")});
+		req = project.getService().exportAs(project.getFolderId(), -1 /*infinity*/);
+		req.response(this, function(inSender, inData) {
+			if (this.debug) this.log("Phonegap.Build#_getFilesData()", "Got the files data");
+			var ctype = req.xhrResponse.headers['x-content-type'];
+			next(null, {content: inData, ctype: ctype});
 		});
-		req.error(this, function(inEvent, inError) {
-			next(new Error("Unable to get project file list: " + inError));
-		});
-	},
-	buildFileList: function(inData, fileList) {
-		var item;
-		for(item in inData) {
-			this.listAllFiles(inData[item], fileList);
-		}
-	},
-	listAllFiles: function(inData, fileList) {
-		if (inData.isDir) {
-			for(var item in inData.children) {
-				this.listAllFiles(inData.children[item], fileList);
-			}
-		} else {
-			var obj = {path: inData.path, id: inData.id};
-			fileList.push(obj);
-		}
-	},
-	extractPrefixLen: function(inData) {
-		var item = inData[0];
-		return item.path.length - item.name.length;
-	},
-	prepareFileList: function(project, prefix, fileList, index, prefixLen, next) {
-		// Start downloading files and building the FormData
-		var formData = new enyo.FormData();
-		var blob = new enyo.Blob([project.getConfig().getPhoneGapConfigXml() || ""],
-					 {type: "application/octet-stream"});
-		formData.append('file', blob, 'config.xml');
-		// hard-wire config.xml for now. may extend in the future (if needed)
-		var drop = [prefix, "config.xml"].join('/');
-		var newFileList = enyo.filter(fileList, function(file) {
-			return file.path !== drop;
-		}, this);
-		if (this.debug) this.log("dropped: fileList.length:", fileList.length, "=> newFileList.length:", newFileList.length);
-
-		this.downloadFiles(project, formData, newFileList, 0, prefixLen, next);
-	},
-	/**
-	 * Download all the project files and add them into the multipart/form-data
-	 * @param project
-	 * @param {FormData} formData
-	 * @param fileList
-	 * @param index
-	 * @param prefixLen
-	 * @param {Function} next a CommonJS callback
-	 */
-	downloadFiles: function(project, formData, fileList, index, prefixLen, next) {
-		// Still some files to download. Get one.
-		var id = fileList[index].id;
-		var name = fileList[index].path.substr(prefixLen);
-		if (this.debug) this.log("Fetching " + name + " " + index + "/" + fileList.length);
-		var request = project.getService().getFile(id);
-		request.response(this, function(inEvent, inData) {
-			// Got a file content: add it to the multipart/form-data
-			var blob = new enyo.Blob([inData.content || ""], {type: "application/octet-stream"});
-			// 'file' is the form field name, mutually agreed with the Hermes server
-			formData.append('file', blob, name);
-
-			if (++index >= fileList.length) {
-				// No more file to download: submit the build request
-				this.submitBuildRequest(project, formData, next);
-			} else {
-				// Get the next file (will submit the build if no more file to get)
-				this.downloadFiles(project, formData, fileList, index, prefixLen, next);
-			}
-		});
-		request.error(this, function(inEvent, inData) {
-			this.log("ERROR while downloading files:", inData);
-			next(new Error("Unable to download project files"));
-		});
+		req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
 	},
 	/**
 	 * @private
@@ -425,20 +378,23 @@ enyo.kind({
 	 * @param {FormData} formData
 	 * @param {Function} next is a CommonJS callback
 	 */
-	submitBuildRequest: function(project, formData, next) {
+	_submitBuildRequest: function(project, data, next) {
 		var config = ares.clone(project.getConfig().getData());
+		if (this.debug) this.log("config: ", config);
 		var keys = {};
 		var platforms = [];
-		if (this.debug) this.log("config: ", config);
 
 		// mandatory parameters
-		formData.append('token', this.config.auth.token);
-		formData.append('title', config.title);
+		var query = {
+			//provided by the cookie
+			//token: this.config.auth.token,
+			title: config.title
+		};
 
 		// Already-created apps have an appId (to be reused)
 		if (config.build.phonegap.appId) {
 			if (this.debug) this.log("appId:", config.build.phonegap.appId);
-			formData.append('appId', config.build.phonegap.appId);
+			query.appId = config.build.phonegap.appId;
 		}
 
 		// Signing keys, if applicable to the target platform
@@ -460,12 +416,12 @@ enyo.kind({
 		}, this);
 		if (enyo.keys(keys).length > 0) {
 			if (this.debug) this.log("keys:", keys);
-			formData.append('keys', JSON.stringify(keys));
+			query.keys = JSON.stringify(keys);
 		}
 
 		// Target platforms -- defined by the Web API, but not implemented yet
 		if (platforms.length > 0) {
-			formData.append('platforms', JSON.stringify(platforms));
+			query.platforms = JSON.stringify(platforms);
 		} else {
 			next(new Error('No build platform selected'));
 			return;
@@ -481,10 +437,11 @@ enyo.kind({
 		var req = new enyo.Ajax({
 			url: this.url + '/op/build',
 			method: 'POST',
-			postBody: formData
+			postBody: data.content,
+			contentType: data.ctype
 		});
 		req.response(this, function(inSender, inData) {
-			if (this.debug) enyo.log("Phonegapbuild.submitBuildRequest.response:", inData);
+			if (this.debug) enyo.log("Phonegap.Build#_submitBuildRequest(): response:", inData);
 			if (inData) {
 				config.build.phonegap.appId = inData.id;
 				var configKind = project.getConfig();
@@ -494,15 +451,54 @@ enyo.kind({
 			next(null, inData);
 		});
 		req.error(this, function(inSender, inError) {
-			var response = inSender.xhrResponse, contentType, details;
+			var response = inSender.xhrResponse, contentType,
+			    message = "Unable to build application";
 			if (response) {
 				contentType = response.headers['content-type'];
 				if (contentType && contentType.match('^text/plain')) {
-					details = response.body;
+					message = response.body;
 				}
 			}
-			next(new Error("Unable to build application:" + inError), details);
+			next(new Error(message + " (" + inError + ")"));
 		});
-		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
+		req.go(query);
+	},
+
+	/**
+	 * Prepare the folder where to store the built package
+	 * @private
+	 */
+	_prepareStore: function(project, inData, next) {
+		var folderKey = "build." + this.getName() + ".target.folderId",
+		    folderPath = "target/" + this.getName();
+		this.doShowWaitPopup({msg: $L("Storing webOS application package")});
+		var folderId = project.getObject(folderKey);
+		if (folderId) {
+			next(null, folderId, inData);
+		} else {
+			var req = project.getService().createFolder(project.getFolderId(), folderPath);
+			req.response(this, function(inSender, inResponse) {
+				if (this.debug) this.log("response received ", inResponse);
+				folderId = inResponse.id;
+				project.setObject(folderKey, folderId);
+				next(null, folderId, inData);
+			});
+			req.error(this, this._handleServiceError.bind(this, "Unable to prepare package storage", next));
+		}
+	},
+
+	/**
+	 * @private
+	 */
+	_store: function(project, folderId, appData, next) {
+		var appKey = "build." + this.getName() + ".app";
+		if (this.debug) this.log("appData: ", appData);
+		project.setObject(appKey, appData);
+		// TODO: the project Model object does not
+		// persist from one Ares run to another,
+		// because it also contains transiant data.
+		// This is to be fixed as part of the
+		// ENYO-2217 user-story.
+		next();
 	}
 });
