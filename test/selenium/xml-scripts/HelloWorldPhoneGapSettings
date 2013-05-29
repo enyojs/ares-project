@@ -12,7 +12,12 @@
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectList_importProjectButton]]></target>
+	<target><![CDATA[id=ares_projectView_projectList_button2]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectList_menuItem6]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -88,12 +93,12 @@
 <selenese>
 	<command>waitForText</command>
 	<target><![CDATA[id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId]]></target>
-	<value><![CDATA[126903]]></value>
+	<value><![CDATA[212334]]></value>
 </selenese>
 <selenese>
 	<command>assertText</command>
 	<target><![CDATA[id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId]]></target>
-	<value><![CDATA[126903]]></value>
+	<value><![CDATA[212334]]></value>
 </selenese>
 <selenese>
 	<command>clickAt</command>
@@ -101,8 +106,8 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>selectWindow</command>
-	<target><![CDATA[name=PhoneGap Build Account Management]]></target>
+	<command>selectPopUp</command>
+	<target><![CDATA[Adobe PhoneGap Build]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>

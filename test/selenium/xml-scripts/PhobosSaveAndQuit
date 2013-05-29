@@ -17,7 +17,12 @@
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectList_importProjectButton]]></target>
+	<target><![CDATA[id=ares_projectView_projectList_button2]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>clickAt</command>
+	<target><![CDATA[id=ares_projectView_projectList_menuItem6]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -62,7 +67,7 @@
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$source_caption]]></target>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$source_icon]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -94,25 +99,7 @@ Editor SettingsDesigner]]></target>
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[ares_phobos_saveButton]]></target>
-	<value><![CDATA[]]></value>
-</selenese>
-<!--following assertion because enable to save in phobos JIRA-2021-->
-<selenese>
-	<command>assertTextPresent</command>
-	<target><![CDATA[exact:Oh, no!?Unable to save the file
-
-Ok]]></target>
-	<value><![CDATA[]]></value>
-</selenese>
-<selenese>
-	<command>clickAt</command>
-	<target><![CDATA[id=ares_phobos_errorPopup_okButton]]></target>
-	<value><![CDATA[]]></value>
-</selenese>
-<selenese>
-	<command>clickAt</command>
-	<target><![CDATA[id=ares_bottomBar_closeFileButton]]></target>
+	<target><![CDATA[id=ares_phobos_saveButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 </TestCase>
