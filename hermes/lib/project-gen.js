@@ -118,13 +118,12 @@ var shell = require("shelljs"),
 					removeExcludedFiles.bind(this, item, destination, options),
 					removePrefix.bind(this, item, destination, options),
 					performSubstitution.bind(this, substitutions, destination, options)
-				],
-					     next);
+				], next);
 			}
 
 			function notifyCaller(err) {
 				if (err) {
-					next(err, null);
+					next(err);
 					return;
 				}
 
@@ -260,29 +259,29 @@ var shell = require("shelljs"),
 		}
 
 		next();
-	}
 
-	function applyJsonSubstitutions(filename, values) {
-		var modified = false;
-		var content = shell.cat(filename);
-		content = JSON.parse(content);
-		var keys = Object.keys(values);
-		keys.forEach(function(key) {
-			if (content.hasOwnProperty(key)) {
-				content[key] = values[key];
-				modified = true;
+		function applyJsonSubstitutions(filename, values) {
+			var modified = false;
+			var content = shell.cat(filename);
+			content = JSON.parse(content);
+			var keys = Object.keys(values);
+			keys.forEach(function(key) {
+				if (content.hasOwnProperty(key)) {
+					content[key] = values[key];
+					modified = true;
+				}
+			});
+			if (modified) {
+				var newContent = JSON.stringify(content, null, 2);
+				fs.writeFileSync(filename, newContent);         // TODO: move to asynchronous processing
 			}
-		});
-		if (modified) {
-			var newContent = JSON.stringify(content, null, 2);
-			fs.writeFileSync(filename, newContent);         // TODO: move to asynchronous processing
-		}
-	};
+		};
 
-	function applySedSubstitutions(filename, changes) {
-		changes.forEach(function(change) {                  // TODO: move to asynchronous processing
-			shell.sed('-i', change.search, change.replace, filename);
-		});
-	};
+		function applySedSubstitutions(filename, changes) {
+			changes.forEach(function(change) {                  // TODO: move to asynchronous processing
+				shell.sed('-i', change.search, change.replace, filename);
+			});
+		};
+	}
 
 }());
