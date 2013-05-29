@@ -23,7 +23,6 @@ enyo.kind({
 		ondrop: "drop",
 		ondragover: "dragOver",
 		ondragout: "dragOut",
-		//onhold: "hold",
 	},
 	
 	// expandable nodes may only be opened by tapping the icon; tapping the content label
@@ -33,7 +32,6 @@ enyo.kind({
 	debug: false,
 	
 	node: null,
-	trigger: 0,
 
 	dragStart: function(inSender, inEvent) {
 		// Prevent MouseEvents in case of us of the draggable attribute
@@ -45,7 +43,6 @@ enyo.kind({
 		//inEvent.preventDefault();
 		
 		node = null;
-		//trigger = 0;
 		
 		// look for the related ares.Node
 		if (inSender.kind == "ares.Node") {
@@ -97,18 +94,6 @@ enyo.kind({
 		var nodeFile = node.file;
 		var newParentFile = newParentNode.file;
 		
-		// FIXME: ENYO-2446: expand a collapsed node during the DnD feature
-		/*if (newParentFile.isDir && !newParentNode.expanded) {
-			// expand
-			if (trigger == 20 ) {
-				this.log("to expand");
-				//newParentNode.doNodeTap();
-			} else {
-				this.log("to expand ?");
-				trigger++;
-			}		
-		}*/
-		
 		// Applaying the related DnD style
 		if (nodeFile != newParentFile) {
 			if (newParentFile.isDir) {
@@ -151,16 +136,9 @@ enyo.kind({
 			inSender.container.applyStyle("cursor", "default");
 			if (inSender.container.file.isDir && inSender.container.expanded) inSender.container.applyStyle("background-color", null);			
 		}
-		//trigger = 0;
 		
 		return true;
 	},
-	/*hold: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		
-		return true;
-	},*/
 	
 	// Note: this function does not recurse
 	updateNodes: function() {
@@ -366,7 +344,7 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
-
+	
 	// All parameters are optional.
 	// - toSelectId is optional. refresh will select this entry if specified.
 	//   Nothing is selected otherwise.
@@ -419,4 +397,3 @@ enyo.kind({
 		this.debug && this.log("refreshTree done") ;
 	},
 });
-
