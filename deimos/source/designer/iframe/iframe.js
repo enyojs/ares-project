@@ -1663,9 +1663,9 @@ enyo.kind({
 		this.sendMessage({op: "resize", val: {itemId: this.selection.aresId, sizeData: this.getResizeCompleteData()}});
 	},
 	getResizeCompleteData: function() {
-		var bounds = this.getRelativeBounds(this.$.selectHighlight);
+		var bounds = this.getRelativeBounds(this.selection);
 		var sizeData = {};
-		
+				
 		if (this.selectionDragAnchors.top) {
 			sizeData.top = bounds.top + "px";
 		}
