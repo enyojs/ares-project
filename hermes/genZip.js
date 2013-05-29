@@ -13,6 +13,7 @@ var fs = require("fs"),
     http = require("http"),
     rimraf = require("rimraf"),
     ptools = require("./lib/project-gen"),
+    HttpError = require("./lib/httpError"),
     CombinedStream = require('combined-stream');
 
 var basename = path.basename(__filename, '.js');
@@ -29,15 +30,6 @@ process.on('uncaughtException', function (err) {
 });
 
 function GenZip(config, next) {
-	function HttpError(msg, statusCode) {
-		Error.captureStackTrace(this, this);
-		this.statusCode = statusCode || 500; // Internal-Server-Error
-		this.message = msg || 'Error';
-	}
-	util.inherits(HttpError, Error);
-	HttpError.prototype.name = "HTTP Error";
-
-	
 	log.info('GenZip', "config:", config);
 
 	// express-3.x
