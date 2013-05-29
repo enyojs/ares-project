@@ -4,8 +4,11 @@ var shell = require("shelljs"),
     util = require('util'),
     path = require("path"),
     log = require('npmlog'),
+    temp = require("temp"),
     async = require("async"),
-    unzip = require('unzip');
+    mkdirp = require("mkdirp"),
+    unzip = require('unzip'),
+    copyFile = require('./copyFile');
 
 (function () {
 
@@ -108,31 +111,38 @@ var shell = require("shelljs"),
 				return;
 			}
 			tmpl.zipfiles = tmpl.zipfiles || [];
+			tmpl.files = tmpl.files || [];
 
 			// Process all the files
-			async.forEachSeries(templates[templateId].zipfiles, processZipFile, notifyCaller);
+			async.series([
+				async.forEachSeries.bind(this, tmpl.zipfiles, processZipFile.bind(this)),
+				async.forEachSeries.bind(this, tmpl.files, processFile.bind(this)),
+				performSubstitution.bind(this, substitutions, options, destination)
+			], notifyCaller.bind(this));
 
 			function processZipFile(item, next) {
 				log.info("generate#processZipFile()", "Processing " + item.url);
-
+				
 				temp.mkdir({prefix: 'com.hp.ares.gen.processZipFile'}, (function(err, zipDir) {
 					async.series([
 						unzipFile.bind(this, item, options, this.config, zipDir),
 						removeExcludedFiles.bind(this, item, options, zipDir),
-						performSubstitution.bind(this, substitutions, options, zipDir),
 						prefix.bind(this, item, options, zipDir, destination)
 					], next);
 				}).bind(this));
 			}
 
+			function processFile(item, next) {
+				log.info("generate#processFile()", "Processing " + item.url);
+				var src = item.url,
+				    dst = path.join(destination, item.installAs);
+				log.verbose('generate#processFile()', src + ' -> ' + dst);
 				async.series([
-					unzipFile.bind(this, item, destination, options),
-					removeExcludedFiles.bind(this, item, destination, options),
-					removePrefix.bind(this, item, destination, options),
-					performSubstitution.bind(this, substitutions, destination, options)
+					mkdirp.bind(this, path.dirname(dst)),
+					copyFile.bind(this, src, dst)
 				], next);
 			}
-
+			
 			function notifyCaller(err) {
 				if (err) {
 					next(err);
@@ -155,10 +165,17 @@ var shell = require("shelljs"),
 			var base = (templatesUrl.substr(0, 4) !== 'http') && path.dirname(templatesUrl);
 
 			newTemplates.forEach(function(entry) {
-
+				entry.zipfiles = entry.zipfiles || [];
 				entry.zipfiles.forEach(function(zipfile) {
 					if (zipfile.url.substr(0, 4) !== 'http') {
 						zipfile.url = path.resolve(base, zipfile.url);
+					}
+				});
+
+				entry.files = entry.files || [];
+				entry.files.forEach(function(file) {
+					if (file.url.substr(0, 4) !== 'http') {
+						file.url = path.resolve(base, file.url);
 					}
 				});
 
@@ -256,10 +273,6 @@ var shell = require("shelljs"),
 		}
 	}
 
-	function installAs(item, next) {
-		next(new Error("Not yet implemented"));
-	}
-
 	function performSubstitution(substitutions, options, workDir, next) {
 		log.verbose("performSubstitution()", "performing substitutions");
 
@@ -302,7 +315,7 @@ var shell = require("shelljs"),
 				fs.writeFileSync(filename, newContent);         // TODO: move to asynchronous processing
 			}
 		};
-
+		
 		function applySedSubstitutions(filename, changes) {
 			changes.forEach(function(change) {                  // TODO: move to asynchronous processing
 				shell.sed('-i', change.search, change.replace, filename);
