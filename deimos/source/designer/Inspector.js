@@ -3,7 +3,9 @@ enyo.kind({
 	kind: "FittableRows",
 	events: {
 		onModify: "",
-		onAction: ""
+		onAction: "",
+		onRequestPositionValue: "",
+		onPositionDataUpdated: ""
 	},
 	published: {
 		filterLevel: null,		// Value will be given by Inspector.FilterXXX "checked" item.
@@ -14,7 +16,7 @@ enyo.kind({
 	components: [
 		{kind: "Inspector.FilterType", onValueChanged: "updateFilterType"},
 		{kind: "Scroller", fit: true, components: [
-			{name: "content", kind: "FittableRows", onActivate: "inheritAttributeToggle", onToggleSide: "handleToggleSide"}
+			{name: "content", kind: "FittableRows", onActivate: "inheritAttributeToggle", onUpdateProps: "handleUpdateProps"}
 		]},
 		{name: "filterLevel", kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"}
 	],
@@ -277,6 +279,14 @@ enyo.kind({
 				right : {
 					val: "",
 					disabled: true
+				},
+				width : {
+					val: "",
+					disabled: true
+				},
+				height : {
+					val: "",
+					disabled: true
 				}
 			},
 			prop,
@@ -287,7 +297,7 @@ enyo.kind({
 		// Look for matching properties in current style
 		for (i = 0; i < styleProps.length; i++) {
 			prop = styleProps[i][0];
-			if (prop.match(/position/) || prop.match(/top/) || prop.match(/right/) || prop.match(/bottom/) || prop.match(/left/)) {
+			if (prop.match(/position/) || prop.match(/top/) || prop.match(/right/) || prop.match(/bottom/) || prop.match(/left/) || prop.match(/width/) || prop.match(/height/)) {
 				properties[prop].val = styleProps[i][1];
 				properties[prop].disabled = false;
 			}
@@ -401,20 +411,64 @@ enyo.kind({
 	trimWhitespace: function(inStr) {
 		return inStr.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 	},
-	//* Catch _onToggleSide_ event sent from position editor
-	handleToggleSide: function(inSender, inEvent) {
-		var $field = this.$["attributeVal-" + inEvent.side];
+	//* Catch _onUpdateProps_ event sent from position editor
+	handleUpdateProps: function(inSender, inEvent) {
+		var $field,
+			requestData,
+			focused
+		;
 		
-		if (inEvent.enabled) {
-			$field.setDisabled(false);
-			$field.focus();
-		} else {
-			$field.setDisabled(true);
-			$field.setFieldValue("");
-			$field.doChange({target: $field});
+		for(var i = 0, prop; (prop = inEvent.changedProps[i]); i++) {
+			$field = this.$["attributeVal-" + prop];
+			if (inEvent.props[prop].disabled) {
+				$field.setDisabled(true);
+				$field.setFieldValue("");
+			} else {
+				$field.setDisabled(false);
+				if (inEvent.changedSide === prop && inEvent.changedProps.length <= 1) {
+					$field.focus();
+					focused = true;
+				} else {
+					requestData = {prop: prop};
+				}
+			}
+		}
+		
+		if (requestData) {
+			this.doRequestPositionValue(requestData);
+		} else if (!focused) {
+			this.dataPositionUpdated();
 		}
 		
 		return true;
+	},
+	//* Set the requested position value
+	setRequestedPositionValue: function(inProp, inValue) {
+		var $field = this.$["attributeVal-" + inProp];
+		$field.setFieldValue(inValue + "px");
+		this.dataPositionUpdated();
+	},
+	//* Update position data
+	dataPositionUpdated: function() {
+		var $field,
+			value,
+			props = {
+				top: "",
+				right: "",
+				bottom: "",
+				left: "",
+				height: "",
+				width: ""
+			}
+		;
+		
+		for (var prop in props) {
+			$field = this.$["attributeVal-" + prop];
+			value = $field.getFieldValue();
+			props[prop] = value;
+		}
+		
+		this.doPositionDataUpdated({props: props});
 	},
 	inspect: function(inControl) {
 		var ps, i, p;
@@ -680,84 +734,160 @@ enyo.kind({
 	name: "Inspector.PositionEditor",
 	classes: "ares-inspector-position-editor",
 	published: {
-		top: 	false,
-		right: 	false,
-		bottom: false,
-		left: 	false,
 		props:  null
 	},
-	handlers: {
-		ontap: "handleTap"
-	},
 	events: {
-		onToggleSide: ""
+		onUpdateProps: ""
 	},
 	components: [
-		{name: "topToggle", classes: "top-toggle anchor-toggle", side: "top", components: [{classes: "anchor-line"}]},
-		{name: "rightToggle", classes: "right-toggle anchor-toggle", side: "right", components: [{classes: "anchor-line"}]},
-		{name: "bottomToggle", classes: "bottom-toggle anchor-toggle", side: "bottom", components: [{classes: "anchor-line"}]},
-		{name: "leftToggle", classes: "left-toggle anchor-toggle", side: "left", components: [{classes: "anchor-line"}]},
-		{name: "innerBox", classes: "ares-inspector-position-editor-inner-box"}
+		{name: "topToggle", classes: "top-toggle anchor-toggle", side: "top", components: [{classes: "anchor-line"}], ontap: "toggleSide"},
+		{name: "rightToggle", classes: "right-toggle anchor-toggle", side: "right", components: [{classes: "anchor-line"}], ontap: "toggleSide"},
+		{name: "bottomToggle", classes: "bottom-toggle anchor-toggle", side: "bottom", components: [{classes: "anchor-line"}], ontap: "toggleSide"},
+		{name: "leftToggle", classes: "left-toggle anchor-toggle", side: "left", components: [{classes: "anchor-line"}], ontap: "toggleSide"},
+		{name: "innerBox", classes: "ares-inspector-position-editor-inner-box", components: [
+			{name: "widthToggle", classes: "width-toggle anchor-toggle", side: "width", components: [{classes: "anchor-line"}], ontap: "toggleSide"},
+			{name: "heightToggle", classes: "height-toggle anchor-toggle", side: "height", components: [{classes: "anchor-line"}], ontap: "toggleSide"},
+		]}
 	],
 	create: function() {
 		this.inherited(arguments);
 		this.propsChanged();
 	},
 	propsChanged: function() {
-		this.top = 		!this.props.top.disabled;
-		this.right = 	!this.props.right.disabled;
-		this.bottom = 	!this.props.bottom.disabled;
-		this.left = 	!this.props.left.disabled;
-		
 		this.topChanged();
 		this.rightChanged();
 		this.bottomChanged();
 		this.leftChanged();
+		this.widthChanged();
+		this.heightChanged();
 	},
 	topChanged: function() {
-		this.$.topToggle.getClientControls()[0].addRemoveClass("disabled", !this.top);
+		this.$.topToggle.getClientControls()[0].addRemoveClass("disabled", this.props.top.disabled);
 	},
 	rightChanged: function() {
-		this.$.rightToggle.getClientControls()[0].addRemoveClass("disabled", !this.right);
+		this.$.rightToggle.getClientControls()[0].addRemoveClass("disabled", this.props.right.disabled);
 	},
 	bottomChanged: function() {
-		this.$.bottomToggle.getClientControls()[0].addRemoveClass("disabled", !this.bottom);
+		this.$.bottomToggle.getClientControls()[0].addRemoveClass("disabled", this.props.bottom.disabled);
 	},
 	leftChanged: function() {
-		this.$.leftToggle.getClientControls()[0].addRemoveClass("disabled", !this.left);
+		this.$.leftToggle.getClientControls()[0].addRemoveClass("disabled", this.props.left.disabled);
 	},
-	handleTap: function(inSender, inEvent) {
-		if (inSender.side) {
-			this.toggleSide(inSender.side);
-		}
-		
-		return true;
+	widthChanged: function() {
+		this.$.widthToggle.getClientControls()[0].addRemoveClass("disabled", this.props.width.disabled);
 	},
-	toggleSide: function(inSide) {
-		var enabled;
+	heightChanged: function() {
+		this.$.heightToggle.getClientControls()[0].addRemoveClass("disabled", this.props.height.disabled);
+	},
+	toggleSide: function(inSender, inEvent) {
+		var side = inSender.side,
+			props = this.props,
+			changedProps = [side]
+		;
 		
-		switch (inSide) {
+		props[side].disabled = !props[side].disabled;
+		
+		switch (side) {
 			case "top":
-				this.setTop(!this.top);
-				enabled = this.top;
+				// If turning off top, turn on bottom
+				if (props.top.disabled) {
+					if (props.bottom.disabled) {
+						props.bottom.disabled = false;
+						changedProps.push("bottom");
+					}
+				
+				// If top and bottom, disable height
+				} else {
+					if (!props.bottom.disabled) {
+						if (!props.height.disabled) {
+							props.height.disabled = true;
+							changedProps.push("height");
+						}
+					}
+				}
 				break;
 			case "right":
-				this.setRight(!this.right);
-				enabled = this.right;
+				// If turning off right, turn on left
+				if (props.right.disabled) {
+					if (props.left.disabled) {
+						props.left.disabled = false;
+						changedProps.push("left");
+					}
+				
+				// If left and right, disable width
+				} else {
+					if (!props.left.disabled) {
+						if (!props.width.disabled) {
+							props.width.disabled = true;
+							changedProps.push("width");
+						}
+					}
+				}
 				break;
 			case "bottom":
-				this.setBottom(!this.bottom);
-				enabled = this.bottom;
+				// If turning off bottom, turn on top
+				if (props.bottom.disabled) {
+					if (props.top.disabled) {
+						props.top.disabled = false;
+						changedProps.push("top");
+					}
+				
+				// If top and bottom, disable height
+				} else {
+					if (!props.top.disabled) {
+						if (!props.height.disabled) {
+							props.height.disabled = true;
+							changedProps.push("height");
+						}
+					}
+				}
 				break;
 			case "left":
-				this.setLeft(!this.left);
-				enabled = this.left;
+				// If turning off left, turn on right
+				if (props.left.disabled) {
+					if (props.right.disabled) {
+						props.right.disabled = false;
+						changedProps.push("right");
+					}
+				
+				// If left and right, disable width
+				} else {
+					if (!props.right.disabled) {
+						if (!props.width.disabled) {
+							props.width.disabled = true;
+							changedProps.push("width");
+						}
+					}
+				}
+				break;
+			case "width":
+				// If width and left, disable right
+				if (!props.width.disabled) {
+					if (!props.left.disabled) {
+						if (!props.right.disabled) {
+							props.right.disabled = true;
+							changedProps.push("right");
+						}
+					}
+				}
+				break;
+			case "height":
+				// If height and top, disable bottom
+				if (!props.height.disabled) {
+					if (!props.top.disabled) {
+						if (!props.bottom.disabled) {
+							props.bottom.disabled = true;
+							changedProps.push("bottom");
+						}
+					}
+				}
 				break;
 			default:
 				break;
 		}
 		
-		this.doToggleSide({side: inSide, enabled: enabled});
+		 this.propsChanged();
+		 this.doUpdateProps({changedSide: side, changedProps: changedProps, props: props});
 	}
 });
 

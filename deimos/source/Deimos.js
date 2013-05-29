@@ -62,7 +62,8 @@ enyo.kind({
 							onCreateItem: "createItem",
 							onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
 							onReloadComplete: "reloadComplete",
-							onResizeItem: "resizeItem"
+							onResizeItem: "resizeItem",
+							onReturnPositionValue: "designerReturnPositionValue"
 						},
 					]}
 				]},
@@ -85,7 +86,11 @@ enyo.kind({
 						onHoldOver: "holdOver"
 					},
 					
-					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
+					{kind: "Inspector", fit: true, classes: "deimos_panel",
+						onModify: "inspectorModify",
+						onRequestPositionValue: "inspectorRequestPositionValue",
+						onPositionDataUpdated: "inspectorPositionDataUpdated"
+					}
 				]}
 			]}
 		]}
@@ -229,6 +234,22 @@ enyo.kind({
 		
 		this.$.designer.modifyProperty(inEvent.name, inEvent.value);
 		return true;
+	},
+	inspectorRequestPositionValue: function(inSender, inEvent) {
+		this.$.designer.requestPositionValue(inEvent.prop);
+	},
+	inspectorPositionDataUpdated: function(inSender, inEvent) {
+		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components),
+			prop,
+			val
+		;
+		
+		for (prop in inEvent.props) {
+			val = inEvent.props[prop];
+			this.addReplaceStyleProp(item, prop, inEvent.props[prop]);
+		}
+
+		this.rerenderKind(item.aresId);
 	},
 	layoutKindUpdated: function(inLayoutKind) {
 		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
@@ -422,6 +443,15 @@ enyo.kind({
 		this.rerenderKind(item.aresId);
 		
 		return true;
+	},
+	//* Called when the iFrame has retrieved a requested absolute position value
+	designerReturnPositionValue: function(inSender, inEvent) {
+		this.$.inspector.setRequestedPositionValue(inEvent.prop, inEvent.value);
+		return true;
+		
+		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		this.addReplaceStyleProp(item, inEvent.prop, inEvent.value + "px");
+		this.rerenderKind(item.aresId);
 	},
 	applyLayoutKindRules: function(inLayoutData, inControl) {
 		var layoutKind = inLayoutData && inLayoutData.layoutKind;

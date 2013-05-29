@@ -15,7 +15,8 @@ enyo.kind({
 		onSyncDropTargetHighlighting: "",
 		onReloadComplete: "",
 		onResizeItem: "",
-		onError: ""
+		onError: "",
+		onReturnPositionValue: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", classes: "ares-iframe-client"},
@@ -128,6 +129,9 @@ enyo.kind({
 		// Existing component resized
 		} else if(msg.op === "resize") {
 			this.doResizeItem(msg.val);
+		// Returning requested position value
+		} else if(msg.op === "returnPositionValue") {
+			this.doReturnPositionValue(msg.val);
 		// Default case
 		} else {
 			enyo.warn("Deimos designer received unknown message op:", msg);
@@ -189,5 +193,9 @@ enyo.kind({
 	//* Leave create mode (i.e. finished dragging control in from Palette)
 	leaveCreateMode: function() {
 		this.sendMessage({op: "leaveCreateMode"});
+	},
+	//* Request auto-generated position value from iframe
+	requestPositionValue: function(inProp) {
+		this.sendMessage({op: "requestPositionValue", val: inProp});
 	}
 });

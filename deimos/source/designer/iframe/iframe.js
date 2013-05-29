@@ -136,6 +136,9 @@ enyo.kind({
 			case "leaveCreateMode":
 				this.leaveCreateMode();
 				break;
+			case "requestPositionValue":
+				this.requestPositionValue(msg.val);
+				break;
 			default:
 				enyo.warn("Deimos iframe received unknown message op:", msg);
 				break;
@@ -1686,5 +1689,9 @@ enyo.kind({
 		}
 
 		return sizeData;
+	},
+	//* Return value of prop on _inSender_
+	requestPositionValue: function(inProp) {
+		this.sendMessage({op: "returnPositionValue", val: {prop: inProp, value: this.getRelativeBounds(this.selection)[inProp]}});
 	}
 });

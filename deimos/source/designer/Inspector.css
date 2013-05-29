@@ -74,49 +74,75 @@ input.inspector-field-checkbox {
 	left: 69px;
 }
 
-.ares-inspector-position-editor > .anchor-toggle {
+.ares-inspector-position-editor .anchor-toggle {
 	cursor: pointer;
 }
 
-.ares-inspector-position-editor > .top-toggle,
-.ares-inspector-position-editor > .bottom-toggle {
+.ares-inspector-position-editor .top-toggle,
+.ares-inspector-position-editor .bottom-toggle {
 	width: 50px;
 	position: absolute;
 	left: 115px;
 }
-.ares-inspector-position-editor > .top-toggle {
+.ares-inspector-position-editor .top-toggle {
 	height: 49px;
 	top: 0px;
 }
-.ares-inspector-position-editor > .bottom-toggle {
+.ares-inspector-position-editor .bottom-toggle {
 	height: 47px;
 	bottom: 0px;
 }
-.ares-inspector-position-editor > .top-toggle > *,
-.ares-inspector-position-editor > .bottom-toggle > * {
+.ares-inspector-position-editor .top-toggle > *,
+.ares-inspector-position-editor .bottom-toggle > * {
 	margin: auto;
 	width: 1px;
 	height: inherit;
 }
 
-.ares-inspector-position-editor > .left-toggle,
-.ares-inspector-position-editor > .right-toggle {
+.ares-inspector-position-editor .left-toggle,
+.ares-inspector-position-editor .right-toggle {
 	width: 69px;
 	height: 50px;
 	position: absolute;
 	top: 75px;
 }
-.ares-inspector-position-editor > .left-toggle {
+.ares-inspector-position-editor .left-toggle {
 	left: 0px;
 }
-.ares-inspector-position-editor > .right-toggle {
+.ares-inspector-position-editor .right-toggle {
 	right: 0px;
 }
-.ares-inspector-position-editor > .left-toggle > *,
-.ares-inspector-position-editor > .right-toggle > * {
+.ares-inspector-position-editor .left-toggle > *,
+.ares-inspector-position-editor .right-toggle > * {
 	margin: 25px 0px;
 	height: 1px;
 	width: inherit;
+}
+
+.ares-inspector-position-editor .width-toggle {
+	width: 140px;
+	height: 50px;
+	position: absolute;
+	top: 25px;
+	left: 0px;
+}
+.ares-inspector-position-editor .width-toggle > * {
+	margin: 25px 0px;
+	height: 1px;
+	width: inherit;
+}
+
+.ares-inspector-position-editor .height-toggle {
+	width: 69px;
+	height: 100px;
+	position: absolute;
+	top: 0px;
+	left: 36px;
+}
+.ares-inspector-position-editor .height-toggle > * {
+	margin: auto;
+	width: 1px;
+	height: inherit;
 }
 
 .ares-inspector-position-editor .anchor-line {
