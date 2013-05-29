@@ -358,6 +358,7 @@ enyo.kind({
 			errMsg = "Unable to render kind '" + inKind.name + "':" + error.message;
 			this.error(errMsg, error.stack);
 			this.sendMessage({op: "error", val: {msg: errMsg, details: error.stack}});
+			this.sendMessage({op: "reloadNeeded"});
 		}
 	},
 	//* Rerender current selection
