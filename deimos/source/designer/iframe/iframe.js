@@ -333,6 +333,7 @@ enyo.kind({
 			this.manageComponentsOptions(kindConstructor.prototype.kindComponents);
 			// Save this kind's _kindComponents_ array
 			this.aresComponents = this.flattenKindComponents(kindConstructor.prototype.kindComponents);
+			this.checkXtorForAllKinds(this.aresComponents);
 
 			// Enable drag/drop on all of _this.aresComponents_
 			this.makeComponentsDragAndDrop(this.aresComponents);
@@ -362,6 +363,16 @@ enyo.kind({
 	//* Rerender current selection
 	rerenderKind: function() {
 		this.renderKind({name: this.parentInstance.kind, components: this.getSerializedCopyOfComponent(this.parentInstance).components});
+	},
+	checkXtorForAllKinds: function(kinds) {
+		enyo.forEach(kinds, function(kindDefinition) {
+			var name = kindDefinition.kind;
+			if ( ! enyo.constructorForKind(name)) {
+				errMsg = 'No constructor found for kind "' + name + "'";
+				this.log(errMsg);
+				this.sendMessage({op: "error", val: {msg: errMsg}});
+			}
+		}, this);
 	},
 	//* When the designer is closed, clean up the last rendered kind
 	cleanUpKind: function() {
