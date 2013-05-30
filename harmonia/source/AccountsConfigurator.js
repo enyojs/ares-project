@@ -10,7 +10,7 @@ enyo.kind({
 	classes: "enyo-popup onyx-light",
 
 	components: [
-		{kind: "FittableRows", style: "height: 400px; width: 600px", fit: true, components: [
+		{kind: "FittableRows", style: "height: 400px; width: 650px", fit: true, components: [
 			{content: "Accounts", classes:"onyx-toolbar"},
 			{kind: "FittableColumns", fit: true, components: [
 				{kind: "ProviderList", name: "accountsList", selector: ["auth"], onSelectProvider: "handleSelectProvider"},

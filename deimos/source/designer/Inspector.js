@@ -26,6 +26,7 @@ enyo.kind({
 	debug: false,
 	helper: null,			// Analyzer.KindHelper
 	userDefinedAttributes: {},
+	//* @protected
 	create: function() {
 		this.inherited(arguments);
 		this.helper = new analyzer.Analyzer.KindHelper();
@@ -59,12 +60,14 @@ enyo.kind({
 			return published;
 		}
 	},
+	//* @protected
 	allowed: function(inKindName, inType, inName) {
 		var level = Model.getFilterLevel(inKindName, inType, inName);
 		if (this.debug) { this.log("Level: " + level + " for " + inKindName + "." + inName); }		
 		return level >= this.filterLevel;
 	},
 	//* Return complete list of published properties for _inControl_
+	//* @protected
 	buildPropList: function(inControl) {
 		var kindName = inControl.kind;
 		var currentKind = kindName;
@@ -135,6 +138,7 @@ enyo.kind({
 		if (this.debug) { this.log("buildPropList: props", props); }
 		return props;
 	},
+	//* @protected
 	buildPropListFromObject: function(inControl) {
 		// Get the property and event list from the Object as we cannot get it from the analyzer
 		var domEvents = ["ontap", "onchange", "ondown", "onup", "ondragstart", "ondrag", "ondragfinish", "onenter", "onleave"]; // from dispatcher/guesture
@@ -172,6 +176,7 @@ enyo.kind({
 		}
 		return props;
 	},
+	//* @protected
 	makeEditor: function(inControl, inName, inDefaultValue, inType) {
 		if(inName === "events") {
 			return;
@@ -192,18 +197,16 @@ enyo.kind({
 		attributeRow.createComponent({kind: "InheritCheckbox", checked: !inherited, prop: inName});
 
 		if (inType === 'events') {
-			kind = "Inspector.Config.Event";
+			kind = {kind: "Inspector.Config.Event", values: this.kindFunctions};
 		}
 		
 		info = Model.getInfo(inControl.kind, inType, inName);
 		kind = (info && info.inputKind) || kind;
-
-
 		
 		// User defined kind: as an Object
 		if (kind && kind instanceof Object) {
 			kind = enyo.clone(kind);
-			kind = enyo.mixin(kind, {name: attributeFieldName, fieldName: inName, fieldValue: value, fieldType: inType});
+			kind = enyo.mixin(kind, {name: attributeFieldName, fieldName: inName, fieldValue: value, fieldType: inType, disabled: inherited});
 			attributeRow.createComponent(kind);
 		} else {
 			attributeKind = (kind)
@@ -215,6 +218,7 @@ enyo.kind({
 			attributeRow.createComponent({name: attributeFieldName, kind: attributeKind, fieldName: inName, fieldValue: value, fieldType: inType, disabled: inherited});
 		}
 	},
+	//* @public
 	inspect: function(inControl) {
 		var ps, i, p;
 		this.$.content.destroyComponents();
@@ -254,6 +258,7 @@ enyo.kind({
 		}
 		this.$.content.render();
 	},
+	//* @protected
 	change: function(inSender, inEvent) {
 		var n = inEvent.target.fieldName;
 		var v = inEvent.target.fieldValue;
@@ -354,10 +359,12 @@ enyo.kind({
 		if (this.debug) { this.log("projectIndexReady: ", value); }
 		this.setProjectIndexer(value);
 	},
+	//* @protected
 	projectIndexUpdated: function() {
 		if (this.debug) { this.log("projectIndexUpdated: for projectIndexer: ", this.projectIndexer); }
 		Model.buildInformation(this.projectIndexer);
 	},
+	//* @public
 	initUserDefinedAttributes: function(inComponents) {
 		this.userDefinedAttributes = {};
 		
@@ -367,6 +374,7 @@ enyo.kind({
 			this.userDefinedAttributes[component.aresId] = component;
 		}
 	},
+	//* @protected
 	flattenComponents: function(inComponents) {
 		var ret = [],
 			cs,
@@ -395,6 +403,7 @@ enyo.kind({
 	 * - else in the analysis of enyo/ares
 	 * @param name: the kind to search
 	 * @returns the definition of the requested kind or undefined
+	 * @protected
 	 */
 	getKindDefinition: function(name) {
 		var definition = this.projectIndexer.findByName(name);
@@ -415,6 +424,7 @@ enyo.kind({
 		}
 		return true;
 	},
+	//* @protected
 	updateFilterType: function(inSender, inEvent) {
 		if (inEvent.active) {
 			this.setFilterType(inEvent.active.value);
@@ -428,6 +438,7 @@ enyo.kind({
 		return true;
 	},
 	//* When an inherit checkbox is toggled, enable/disable the attribute
+	//* @protected
 	inheritAttributeToggle: function(inSender, inEvent) {
 		var originator = inEvent.originator,
 			row = originator.parent,
@@ -451,6 +462,14 @@ enyo.kind({
 			// Remove this attribute from the rendered instance in the iframe by setting it to _undefined_
 			this.doModify({name: attribute, value: undefined});
 		}
+	},
+	//* @public
+	setCurrentKindName: function(kindname) {
+		var definition = this.getKindDefinition(kindname);
+		this.helper.setDefinition(definition);
+
+		// Get the list of handler methods
+		this.kindFunctions = this.helper.getFunctions().sort();
 	}
 });
 
