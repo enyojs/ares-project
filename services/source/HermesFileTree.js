@@ -661,11 +661,9 @@ enyo.kind({
 					if (!oldNodeFile.isDir || newParentFile.isServer || newParentFile.dir.indexOf(oldNodeFile.dir) == -1) {
 						return this.$.service.rename(oldNodeFile.id, {folderId: newParentFile.id})
 							.response(this, function(inSender, inValue) {
-								// ENYO-2435: 'packages.js" files update... 
-								// FIXME: do not work for folder nodes, do not remove file entry, add entry like "$"+name...
-								/*var removedParentNode = oldNode.container,
-										removePkgNode = removedParentNode.getNodeNamed('package.js');
-								var addParentNode = newParent,
+								var removedParentNode = oldNode.container,
+										removePkgNode = removedParentNode.getNodeNamed('package.js'),
+										addParentNode = newParent,
 										addPkgNode = addParentNode.getNodeNamed('package.js');
 										
 								this.doTreeChanged({
@@ -673,15 +671,15 @@ enyo.kind({
 										service: this.$.service,
 										parentNode: removedParentNode && removedParentNode.file,
 										pkgNode: removePkgNode && removePkgNode.file,
-										node: oldNode,
+										node: oldNode.file,
 									},
 									add: {
 										service: this.$.service,
 										parentNode: addParentNode && addParentNode.file,
 										pkgNode: addPkgNode && addPkgNode.file,
-										node: oldNode,
+										node: oldNode.file,
 									}
-								});*/
+								});
 								
 								this.refreshFileTree();
 							})
