@@ -415,7 +415,7 @@ body {
 	background-color: #3A3A3A;
 	border-radius: 0.5em;
 	padding:4px;
-	text-align: right;
+	/*text-align: right;*/
 }
 
 .ares-drawer>*{
