@@ -276,18 +276,19 @@ enyo.kind({
 		}
 
 		var u = this.userDefinedAttributes[this.selected.aresId][n];
-		if (u.indexOf(v) === -1) {
+		if (u !== undefined && u.indexOf(v) === -1) {
 			this.userDefinedAttributes[this.selected.aresId][n] = v;
 		}
 		this.doModify({name: n, value: v, type: inEvent.target.fieldType});
 	},
+	//* @protected
 	cssModify: function(inSender, inEvent) {
 		var n = "style";
 			
 			if (inEvent.value !== "" &&
 				inEvent.name) {
 					v = (inEvent.name) + ":" + (inEvent.value) + ";";				
-			}
+			} else v = "";
 
 			var u = this.userDefinedAttributes[this.selected.aresId][n];
 			var p = (u !== undefined) && (u.split(";"));
