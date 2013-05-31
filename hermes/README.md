@@ -253,12 +253,13 @@ A project template definition (defined by the property `url` in `projectTemplate
 
 	[
 	  {
-	    "id": "bootplate-2.2.0",
+	    "id": "my-bootplate-2.2.0",
 	    "zipfiles": [
 	      {
 	        "url": "bootplate-2.2.0.zip",
 	        "alternateUrl": "http://enyojs.com/archive/bootplate-2.2.0.zip",
 	        "prefixToRemove": "bootplate",
+	        "prefixToAdd": "2.2.0",
 	        "excluded": [
 	          "bootplate/api"
 	        ]
@@ -267,6 +268,16 @@ A project template definition (defined by the property `url` in `projectTemplate
 	   	  	"url": ...
 	   	  }
 	    ],
+	    "files": [
+	      {
+	      	url: "lib/package.js.js",
+	      	installAs: "source/widgets/package.js"
+	      },
+	      {
+	      	url: "lib/MyWidget.js",
+	      	installAs: "source/widgets/MyWidget.js"
+	      }
+	    ],
 	    "description": "Enyo bootplate 2.2.0"
 	  },
 	  {
@@ -274,21 +285,25 @@ A project template definition (defined by the property `url` in `projectTemplate
 	  }
 	]
 
-Each project definition defined by `id` can reference **several** zip files defined in the array `zipfiles`. The zip files are extracted in the order they are specified:  files extracted from a ZIP-file possibly overwrite those that were extracted from earlier ZIP-files.
+Each project definition defined by `id` can reference one or several zip files defined in the array `zipfiles`, plus one or several files. The zip files are extracted in the order they are specified:  files extracted from a ZIP-file possibly overwrite those that were extracted from earlier ZIP-files.
 
-Each zip file entry:
+Each `zipfiles` entry is an `Object` which:
 
-* **MUST** define an `url` and optionally an `alternateUrl`. The `url` is tried first and can refer to either:
+* _MUST_ define an `url` and optionally an `alternateUrl`. The `url` is tried first and can refer to either:
 
-	* a file stored locally on the filesystem.  
-	NB: the filename must be relative to the directory where the project templates definition file is stored (See property `url` in `projectTemplateRepositories` above).  
+	* a `Filename`: file stored locally on the filesystem (see below).
+	* an HTTP URL.  If the `url` references a file which does not exist the `alternateUrl` is used.
 
-	* or an http url.
-	
-	If the `url` references a file which does not exist the `alternateUrl` is used.
+* _MAY_ define a `prefixToRemove`. This prefix must correspond to one or several directory level that must be removed.
+* _MAY_ define a `prefixToAdd`. This prefix defines a folder (it can be a path of nested folders, like `another/path/to`) to be prepended to the root of the ZIP archive 
+* _MAY_ define in the array `excluded` a list of files or directories to be excluded when the zip file is extracted.
 
-* can define a `prefixToRemove`. This prefix must correspond to one or several directory level that must be removed.
-* can define in the array `excluded` a list of files or directories to be excluded when the zip file is extracted.
+Each `files` entry is an `Object` which:
+
+* _MUST_ define an `url:` property, which is currently a `Filename` value
+* _MUST_ define an `installAs:` property that defines where the file is to be installed relatively to the root of the application project within Ares.
+
+**NOTE:** `Filename` values are to be relative to the directory where the project templates definition file is stored (See property `url` in `projectTemplateRepositories` above).
 
 ### Protocol
 
