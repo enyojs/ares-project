@@ -462,7 +462,7 @@ p.break{
 .ares-error-details .button { padding-top: 10px; position:relative; }
 .ares-error-details .label { border: none; color:#000000; background: transparent; height: auto; padding-left:10px; text-align: left; }
 .ares-error-text { width: 98%; margin:5px 0px; resize: vertical;}
-.right { float: right; }
+.right {position: absolute; right: 0; }
 .ares-masked-content-popup { background: none; box-shadow: none; border:none;}
 
 /*file chooser*/
@@ -475,10 +475,13 @@ p.break{
     text-align: center;
     text-transform: uppercase;
 }
+.ares-left-pane-file-chooser{
+	background-color:#FFFFFF;
+}
 .ares-left-pane-file-chooser > .ares_harmonia_providerList{
     height: 245px;
     width: 100%;
-    background-color: #FFFFFF;
+    background-color: transparent;
     border-right: 1px solid #999999;
 }
 .ares-file-choser-row { border-top: 1px solid #999999;}
