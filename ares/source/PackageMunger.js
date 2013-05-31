@@ -171,7 +171,8 @@ enyo.kind({
 				.replace(re,'')            // remove name
 				.replace(/,\s*,/,",")      // remove duplicated comma
 				.replace(/\(\s*,/,"(")     // remove comma after '('
-				.replace(/,\s*\)/,"\n)");  // remove comma before ')'
+				.replace(/,\s*\)/,"\n)")   // remove comma before ')'
+				.replace(/\(\s*\)/,"(\n)"); // remove blank line between ( )
 		} else  {
 			if (this.debug) this.log('cannot find ' + name + ' in package.js');
 		}
