@@ -115,7 +115,7 @@ enyo.kind({
 		if (pkgNode) {
 			next(null, pkgNode);
 		} else if (parentNode.isDir) {
-			service.createFile(parentNode.id, "package.js", "enyo.depends(\n)\n")
+			service.createFile(parentNode.id, "package.js", "enyo.depends(\n);\n")
 				.response(this, function(inRequest, inFsNode) {
 					if (this.debug) enyo.log("PackageMunger._packageCreate(): package.js inFsNode[0]:", inFsNode[0]);
 					next(null, inFsNode[0]);
