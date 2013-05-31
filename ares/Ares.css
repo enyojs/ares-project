@@ -25,21 +25,6 @@ body {
 	position:relative;
 }
 
-.ares-filechooser {
-	height: 400px;
-	width: 600px;
-}
-
-.ares-filechooser-header {
-	padding: 0 0.5em;
-	vertical-align: middle;
-}
-
-.ares-filechooser-footer {
-	padding: 0 0.5em;
-	vertical-align: middle;
-}
-
 /**/
 
 .ares-groupbox-item-key {
@@ -269,9 +254,8 @@ body {
 	margin-bottom: 0px;
 }
 
-/*temporary used to reduce global css impacts*/
 .file-chooser-input{
-	width: 155px;
+	width: 470px;
 }
 
 
@@ -479,4 +463,23 @@ p.break{
 .ares-error-details .label { border: none; color:#000000; background: transparent; height: auto; padding-left:10px; text-align: left; }
 .ares-error-text { width: 98%; margin:5px 0px; resize: vertical;}
 .right { float: right; }
-.ares-content-popup { width:409px; height:240px; padding: 5px 10px; }
+.ares-masked-content-popup { background: none; box-shadow: none; border:none;}
+
+/*file chooser*/
+.ares-filechooser { height: 400px; width: 625px; }
+.ares-filechooser-header { padding: 0 0.5em; vertical-align: middle; }
+.ares-filechooser-footer { vertical-align: middle; background: #FFFFFF; }
+.ares-create-sources {
+    height: 24%;
+    width: 100%;
+    text-align: center;
+    text-transform: uppercase;
+}
+.ares-left-pane-file-chooser > .ares_harmonia_providerList{
+    height: 245px;
+    width: 100%;
+    background-color: #FFFFFF;
+    border-right: 1px solid #999999;
+}
+.ares-file-choser-row { border-top: 1px solid #999999;}
+.ares-file-chooser-label { min-width: 127px; }
