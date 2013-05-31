@@ -43,9 +43,7 @@ enyo.kind({
 		
 		// Hermes tree
 		{kind: "Scroller", fit: true, components: [
-			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", 
-				//attributes {draggable: false,},
-				expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll", onNodeMove: "moveNode" }
+			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll", onNodeMove: "moveNode" }
 		]},
 
 		// track selection of nodes. here, selection Key is file or folderId.
@@ -649,11 +647,10 @@ enyo.kind({
 	moveNode: function(inSender, inEvent) {
 		if (this.debug) this.log("inEvent", inEvent);
 		
-		var oldNode=inEvent.oldNode;
-		var newParent=inEvent.newParent;
-		
-		var oldNodeFile = oldNode.file;
-		var newParentFile = newParent.file;
+		var oldNode=inEvent.oldNode,
+				newParent=inEvent.newParent,		
+				oldNodeFile = oldNode.file,
+				newParentFile = newParent.file;
 		
 		if (oldNodeFile != newParentFile) {
 			if (newParentFile.isDir) {
@@ -671,13 +668,13 @@ enyo.kind({
 										service: this.$.service,
 										parentNode: removedParentNode && removedParentNode.file,
 										pkgNode: removePkgNode && removePkgNode.file,
-										node: oldNode.file,
+										node: oldNode.file
 									},
 									add: {
 										service: this.$.service,
 										parentNode: addParentNode && addParentNode.file,
 										pkgNode: addPkgNode && addPkgNode.file,
-										node: oldNode.file,
+										node: oldNode.file
 									}
 								});
 								
