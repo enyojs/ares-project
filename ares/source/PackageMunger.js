@@ -170,6 +170,7 @@ enyo.kind({
 			newContent = pkgContent
 				.replace(re,'')            // remove name
 				.replace(/,\s*,/,",")      // remove duplicated comma
+				.replace(/\(\s*,/,"(")     // remove comma after '('
 				.replace(/,\s*\)/,"\n)");  // remove comma before ')'
 		} else  {
 			if (this.debug) this.log('cannot find ' + name + ' in package.js');
