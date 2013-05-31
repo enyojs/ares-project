@@ -11,14 +11,19 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_projectList_button2]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_projectList_menuItem6]]></target>
 	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>waitForText</command>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_providerList_name]]></target>
+	<value><![CDATA[Ares Test - Home Directory]]></value>
 </selenese>
 <selenese>
 	<command>clickAt</command>
@@ -101,7 +106,7 @@
 	<value><![CDATA[212334]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
+	<command>clickAndWait</command>
 	<target><![CDATA[id=ares_projectView_projectList_accountsConfigurator_authPanel_phonegapAuthConfig_userData_pgUserData_userId]]></target>
 	<value><![CDATA[]]></value>
 </selenese>

@@ -21,6 +21,11 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
+	<command>waitForText</command>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_providerList_name]]></target>
+	<value><![CDATA[Ares Test - Home Directory]]></value>
+</selenese>
+<selenese>
 	<command>click</command>
 	<target><![CDATA[id=ares_projectView_projectWizardScan_providerList_item]]></target>
 	<value><![CDATA[Ares Test - Home Directory]]></value>
