@@ -23,7 +23,7 @@ enyo.kind({
 	baseSource: "../deimos/source/designer/iframe.html",
 	projectSource: null,
 	selection: null,
-	reloadNeeded: true,
+	reloadNeeded: false,
 	scale: 1,
 	reloading: false,
 	debug: true,

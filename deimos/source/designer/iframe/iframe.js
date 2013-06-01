@@ -230,7 +230,8 @@ enyo.kind({
 				this.sendMessage({op: "moveItem", val: {itemId: dropData.aresId, targetId: dropTargetId, beforeId: beforeId}});
 				break;
 			case "ares/createitem":
-				dropTargetId = this.getContainerItem() ? this.getContainerItem().aresId : this.getEventDropTarget(inEvent.dispatchTarget).aresId;
+				dropTargetId = this.getContainerItem() ? this.getContainerItem() : this.getEventDropTarget(inEvent.dispatchTarget);
+				dropTargetId = (dropTargetId && dropTargetId.aresId) || null;
 				beforeId = this.getBeforeItem() ? this.getBeforeItem().aresId : null;
 				
 				this.sendMessage({op: "createItem", val: {config: dropData.config, targetId: dropTargetId, beforeId: beforeId}});
