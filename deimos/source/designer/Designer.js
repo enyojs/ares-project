@@ -26,7 +26,7 @@ enyo.kind({
 	reloadNeeded: false,
 	scale: 1,
 	reloading: false,
-	debug: true,
+	debug: false,
 	rendered: function() {
 		this.inherited(arguments);
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
