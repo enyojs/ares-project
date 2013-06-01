@@ -16,9 +16,19 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectList_importProjectButton]]></target>
+	<command>click</command>
+	<target><![CDATA[id=ares_projectView_projectList_button2]]></target>
 	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>click</command>
+	<target><![CDATA[id=ares_projectView_projectList_menuItem6]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>waitForText</command>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_providerList_name]]></target>
+	<value><![CDATA[Ares Test - Home Directory]]></value>
 </selenese>
 <selenese>
 	<command>assertTextPresent</command>
@@ -62,7 +72,7 @@
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$source_caption]]></target>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_$source_icon]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>

@@ -8,8 +8,7 @@ enyo.kind({
 		onTreeChanged: ""
 	},
 	handlers: {
-		onNodeDblClick: "nodeDblClick",
-		//onNodeMove: "nodeMove",
+		onNodeDblClick: "nodeDblClick"
 	},
 	published: {
 		serverName: ""
@@ -46,7 +45,7 @@ enyo.kind({
 		{kind: "Scroller", fit: true, components: [
 			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", 
 				//attributes {draggable: false,},
-				expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll", onNodeMove: "moveNode" },
+				expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll", onNodeMove: "moveNode" }
 		]},
 
 		// track selection of nodes. here, selection Key is file or folderId.
@@ -62,7 +61,7 @@ enyo.kind({
 		{name: "nameFolderPopup", kind: "NamePopup", type: "folder", fileName: "", placeHolder: "Folder Name", onCancel: "_newFolderCancel", onConfirm: "_newFolderConfirm"},
 		{name: "nameCopyPopup", kind: "NamePopup", title: "Name for copy of", fileName: "Copy of foo.js", onCancel: "copyFileCancel", onConfirm: "copyFileConfirm"},
 		{name: "deletePopup", kind: "DeletePopup", onCancel: "deleteCancel", onConfirm: "deleteConfirm"},
-		{name: "renamePopup", kind: "RenamePopup", title: "New name for ", fileName: "foo.js", onCancel: "_renameCancel", onConfirm: "_renameConfirm"},
+		{name: "renamePopup", kind: "RenamePopup", title: "New name for ", fileName: "foo.js", onCancel: "_renameCancel", onConfirm: "_renameConfirm"}
 	],
 
 	// warning: this variable duplicates an information otherwise stored in this.$.selection
@@ -662,7 +661,7 @@ enyo.kind({
 					if (!oldNodeFile.isDir || newParentFile.isServer || newParentFile.dir.indexOf(oldNodeFile.dir) == -1) {
 						return this.$.service.rename(oldNodeFile.id, {folderId: newParentFile.id})
 							.response(this, function(inSender, inValue) {
-								// ENYO-2435: 'pakages.js" files update... 
+								// ENYO-2435: 'packages.js" files update... 
 								// FIXME: do not work for folder nodes, do not remove file entry, add entry like "$"+name...
 								/*var removedParentNode = oldNode.container,
 										removePkgNode = removedParentNode.getNodeNamed('package.js');
@@ -702,6 +701,5 @@ enyo.kind({
 		} else {
 			if (this.debug) this.log("target node is itself");
 		}
-	},
+	}
 });
-
