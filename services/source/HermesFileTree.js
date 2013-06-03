@@ -88,8 +88,7 @@ enyo.kind({
 		return true;
 	},
 	itemDragover: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
+		//if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		// look for the related ares.Node
 		var targetNode = inEvent.originator;
@@ -152,12 +151,14 @@ enyo.kind({
 		this.holdoverTimeout = setTimeout(enyo.bind(this, function() { this.holdOver(inTargetNode); }), this.holdoverTimeoutMS);
 	},
 	holdOver: function (inTargetNode) {
-		//if (this.debug) 
-		this.log("inTargetNode=", inTargetNode);
+		//if (this.debug) this.log("inTargetNode=", inTargetNode);
 		
 		//this.doHoldOver({targetId: inTargetId, beforeId: inBeforeId});
 		// node to expand...
-		
+		if (inTargetNode.file.isDir && !inTargetNode.expanded) {
+			//this.expandNode(inTargetNode);
+			this.log("expand node=");
+		}
 	},
 	isValidDropTarget: function(inNode) {
 		if (this.debug) this.log("inNode=", inNode);
