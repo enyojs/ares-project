@@ -9,6 +9,11 @@ enyo.kind({
 	name: "ares.Node",
 	kind: "Node",
 	events: {
+		onItemDown: "",
+		onItemDragover: "",
+		onItemDrop: "",
+		onItemDragend: "",
+		onItemDragstart: "",
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
@@ -19,10 +24,16 @@ enyo.kind({
 		service: null
 	},
 	handlers: {
-		ondragstart: "dragStart",
+		ondown: "down",
+		ondragstart: "dragstart",
+		ondragover: "dragover",
+		ondragleave: "dragleave",
+		ondrop: "drop",
+		ondragend: "dragend"
+		/*ondragstart: "dragStart",
 		ondrop: "drop",
 		ondragover: "dragOver",
-		ondragout: "dragOut"
+		ondragout: "dragOut"*/
 	},
 	
 	// expandable nodes may only be opened by tapping the icon; tapping the content label
@@ -33,7 +44,48 @@ enyo.kind({
 	
 	node: null,
 
-	dragStart: function(inSender, inEvent) {
+	down: function(inSender, inEvent) {
+		this.doItemDown(inEvent);
+		return true;
+	},
+	dragstart: function(inSender, inEvent) {
+		if(!inEvent.dataTransfer) {
+			return true;
+		}
+		// ???
+		//inEvent.dataTransfer.setData("ares/moveitem", enyo.json.codify.to(inEvent.originator));
+		this.doItemDragstart(inEvent);
+		return true;
+	},
+	dragover: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
+		}
+		//inEvent.targetComponent = this;
+		this.doItemDragover(inEvent);
+		return true;
+	},
+	dragleave: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
+		}
+	},
+	drop: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
+		}
+		this.doItemDrop(inEvent);
+		return true;
+	},
+	dragend: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
+		}
+		this.doItemDragend(inEvent);
+		return true;
+	},
+	
+	/*dragStart: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		node = null;
@@ -135,7 +187,7 @@ enyo.kind({
 		}
 		
 		return true;
-	},
+	},*/
 	
 	// Note: this function does not recurse
 	updateNodes: function() {
@@ -206,7 +258,7 @@ enyo.kind({
 
 				case 1: // file added
 				    if (this.debug) this.log(rfiles[i].name + " was added") ;
-					newControl = this.createComponent( rfiles[i], {kind: "ares.Node"} ) ;
+					newControl = this.createComponent( rfiles[i], {kind: "ares.Node", attributes: {draggable : true}} ) ;
 					if (this.debug) this.log("updateNodeContent created ", newControl) ;
 					newControl.setService(this.service);
 					nfiles = this.getNodeFiles() ;

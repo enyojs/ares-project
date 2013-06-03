@@ -8,6 +8,11 @@ enyo.kind({
 		onTreeChanged: ""
 	},
 	handlers: {
+		onItemDown: "itemDown",
+		onItemDragover: "itemDragover",
+		onItemDrop: "itemDrop",
+		onItemDragend: "itemDragend",
+		onItemDragstart: "itemDragstart",
 		onNodeDblClick: "nodeDblClick"
 	},
 	published: {
@@ -69,7 +74,119 @@ enyo.kind({
 	selectedNode: null,
 	
 	debug: false,
-
+	
+	//draggedItem: null,
+	draggedNode: null,
+	
+	holdoverTimeout:   null,
+	holdoverTimeoutMS: 500,
+	
+	itemDown: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	itemDragover: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		// look for the related ares.Node
+		var targetNode = inEvent.originator;
+		if (inEvent.kind !== "ares.Node") {
+			targetNode = targetNode.parent;
+		}
+		
+		/*if (targetNode.file.isDir && targetNode.expanded) {
+			targetNode.applyStyle("background-color", "grey");
+		}*/
+		
+		if (!this.isValidDropTarget(targetNode)) {
+			if (this.debug) this.log("over: target not valid");
+			//targetNode.applyStyle("cursor", "no-drop");
+		} else {
+			if (this.debug) this.log("over: target valid");
+			//targetNode.applyStyle("cursor", "pointer");
+		}
+		
+		this.setHoldoverTimeout(targetNode);
+		
+		return true;
+	},
+	itemDrop: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	itemDragend: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		// get the related ares.Node
+		var targetNode = inEvent.originator;
+		
+		/*targetNode.applyStyle("cursor", "default");
+		if (targetNode.file.isDir && targetNode.expanded) {
+			targetNode.applyStyle("background-color", null);
+		}*/
+		
+		if (!this.isValidDropTarget(targetNode)) {
+			if (this.debug) this.log("end: target not valid");
+		} else {
+			if (this.debug) this.log("end: target valid");
+		}
+		
+		return true;
+	},
+	itemDragstart: function(inSender, inEvent) {
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		// get the related ares.Node
+		draggedNode = inEvent.originator;
+		
+		return true;
+	},
+	setHoldoverTimeout: function (inTargetNode) {
+		this.holdoverTimeout = setTimeout(enyo.bind(this, function() { this.holdOver(inTargetNode); }), this.holdoverTimeoutMS);
+	},
+	holdOver: function (inTargetNode) {
+		//if (this.debug) 
+		this.log("inTargetNode=", inTargetNode);
+		
+		//this.doHoldOver({targetId: inTargetId, beforeId: inBeforeId});
+		// node to expand...
+		
+	},
+	isValidDropTarget: function(inNode) {
+		if (this.debug) this.log("inNode=", inNode);
+		
+		var draggedFile = draggedNode.file,
+				inFile = inNode.file
+		
+		if (draggedFile != inFile) {
+			if (inFile.isDir) {
+				if (draggedNode.container.file.id != inFile.id) {
+					if (!draggedFile.isDir || inFile.isServer || inFile.dir.indexOf(draggedFile.dir) == -1) {
+						if (this.debug) this.log("target node");
+						return true;
+					} else {
+						if (this.debug) this.log("target node is a child node");
+					}
+				} else {
+					if (this.debug) this.log("target node is its own parent node");
+				}
+			} else {
+				if (this.debug) this.log("target node is a file");
+			}
+		} else {
+			if (this.debug) this.log("target node is itself");
+		}
+	
+		return false;
+	},
+	
 	create: function() {
 		this.inherited(arguments);
 		this.enableDisableButtons();
