@@ -51,30 +51,60 @@ enyo.kind({
 	name: "CssEditor",
 	kind: "FittableRows",
 	events: {
-		onModif: ""
-	},
-	handlers: {
-		onChange: "change",
+		onChange: ""
 	},
 	cssEditorConfig: [
-		{cssStyleName: "Background-Style", properties: "background-color,background-image,background-position"},
-		{cssStyleName: "Border-Style", properties: "border-style,border-width"},
+		{cssStyleName: "Background-Style", properties: "background-color"},
+		{cssStyleName: "Border-Style", properties: "border-style,border-width,border-color"},
 		{cssStyleName: "Font-Style", properties: "font-size,font-family"},
-		{cssStyleName: "Text-Style", properties: "text-indent"},
-		{cssStyleName: "Position-Style", properties: "top,left,right,bottom"}
+		{cssStyleName: "Paddings-Margins", properties: "padding,margin"},
+		{cssStyleName: "Text-Style", properties: "text-indent"}
 	],
+	fieldName: null,
+	fieldValue: null,
 	create: function() {
 		this.inherited(arguments);
 		var keys = Object.keys(this.cssEditorConfig);
 		enyo.forEach(keys, function(o) {
-			var category = this.createComponent({kind: "CategoryStyle", propUser: this.currentControlStyle});
+			var category = this.createComponent({kind: "CategoryStyle", propUser: this.currentControlStyle, onChange: "change"});
 			category.setModel(this.cssEditorConfig[o]);
 		}, this);
 	},	
 	change: function(inSender, inEvent) {
-		var n = inEvent.target.fieldName;
-		var v = inEvent.target.fieldValue;
+		this.fieldName = "style";
+		this.fieldValue = "";	
+		if (inEvent.target.fieldValue !== "" &&
+			inEvent.target.fieldName) {
+				this.fieldValue = (inEvent.target.fieldName) + ":" + (inEvent.target.fieldValue) + ";";				
+		}
 
-		this.doModif({name: n, value: v, type: inEvent.target.fieldType});
+		var u = this.currentControlStyle;
+		var p = (u !== undefined) && (u.split(";"));
+		if (!p) {
+			// no style property defined, add one 
+			this.currentControlStyle = v;
+		} else {
+			if (p.length <= 2 && 
+				p[0].search(inEvent.target.fieldName) > -1 &&
+				(this.fieldValue === "" || this.fieldValue === null)) {
+				// remove the existing css style property
+				this.currentControlStyle = "";
+			} else {
+				var added = false;
+				// modify the value of the existing css style property list
+				for (i=0; i < p.length; i++) {
+					if (p[i].search(inEvent.target.fieldName) > -1) {
+						this.currentControlStyle = u.replace(p[i]+";", this.fieldValue);
+						added = true;
+					}
+				}
+				if (!added) {
+					this.currentControlStyle = u + this.fieldValue;
+				}															
+			}
+		}
+		this.fieldValue = this.currentControlStyle;
+		this.doChange({target: this});
+		return true;
 	}
 });
