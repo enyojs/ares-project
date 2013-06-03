@@ -226,20 +226,34 @@ enyo.kind({
 			var kindName = inControl.name + " (" + inControl.kind + ")";
 			this.$.content.createComponent({tag: "h3", content: kindName, classes: "label label-info"});
 			ps = this.buildPropList(inControl);
-			if (this.filterType === 'P') {
-				this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Properties"});
-				for (p in ps) {
-					this.makeEditor(inControl, p, ps[p], "properties");
-				}
-			} else {
-				ps = ps.events;
-				if (ps.length) {
-					this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
-				}
-				for (i=0, p; (p=ps[i]); i++) {
-					this.makeEditor(inControl, p, "", "events");
-				}
+			switch(this.filterType) {
+				case 'P':
+					this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Properties"});
+					for (p in ps) {
+						this.makeEditor(inControl, p, ps[p], "properties");
+					}
+					break;
+				case 'E':
+					ps = ps.events;
+					if (ps.length) {
+				        this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
+					}
+					for (i=0, p; (p=ps[i]); i++) {
+				        this.makeEditor(inControl, p, "", "events");
+					}
+					break;
+				case 'S':
+					var style = "";
+					if (inControl && inControl.style !== undefined) {
+						style = inControl.style;
+					}
+					this.$.content.createComponent({kind: "CssEditor", currentControlStyle: style});
+					break;
+				default:
+					enyo.warn("Inspector has unknown filterType: ", filterType);
+					break;
 			}
+
 		}
 		this.$.content.render();
 	},
@@ -259,10 +273,14 @@ enyo.kind({
 		if(!this.userDefinedAttributes[this.selected.aresId]) {
 			this.userDefinedAttributes[this.selected.aresId] = {};
 		}
-		this.userDefinedAttributes[this.selected.aresId][n] = v;
+		if (v === "") {
+			delete this.userDefinedAttributes[this.selected.aresId][n];
+		} else {
+			this.userDefinedAttributes[this.selected.aresId][n] = v;			
+		}
+	 
 		this.doModify({name: n, value: v, type: inEvent.target.fieldType});
 	},
-	//* @protected
 	dblclick: function(inSender, inEvent) {
 		if (inEvent.target.fieldType === "events") {
 			var n = inEvent.target.fieldName;
@@ -375,6 +393,11 @@ enyo.kind({
 	updateFilterType: function(inSender, inEvent) {
 		if (inEvent.active) {
 			this.setFilterType(inEvent.active.value);
+			if (inEvent.active.value === "S") {
+				this.$.filterLevel.hide();				
+			} else {
+				this.$.filterLevel.show();
+			}
 			this.inspect(this.selected);
 		}
 		return true;
@@ -435,9 +458,10 @@ enyo.kind({
 		onValueChanged: ""
 	},
 	components: [
-		{kind: "onyx.RadioGroup", fit:false, onActivate:"doValueChanged", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton halves", components: [
+		{kind: "onyx.RadioGroup", fit:false, onActivate:"doValueChanged", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton thirds", components: [
 			{content:"Properties", value: "P", active:true},
-			{content:"Events", value: "E"}
+			{content:"Events", value: "E"},
+			{content:"Style", value: "S"}
 		]}
 	]
 });
