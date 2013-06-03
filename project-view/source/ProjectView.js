@@ -14,6 +14,7 @@ enyo.kind({
 			onModifySettings: "modifySettingsAction",
 			onCreateProject: "createProjectAction",
 			onScanProject: "scanProjectAction",
+			onDuplicateProject: "duplicateProjectAction",
 			onProjectRemoved: "projectRemoved",
 			onProjectSelected: "handleProjectSelected",
 			name: "projectList"},
@@ -48,6 +49,10 @@ enyo.kind({
 	scanProjectAction: function(inSender, inEvent) {
 		this.$.projectWizardScan.setHeaderText('Select a directory containing one or more project.json files');
 		this.$.projectWizardScan.show();
+		return true; //Stop event propagation
+	},
+	duplicateProjectAction: function(InSender, inEvent) {
+		this.log(inEvent);
 		return true; //Stop event propagation
 	},
 	createProjectAction: function(inSender, inEvent) {

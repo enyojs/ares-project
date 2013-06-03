@@ -14,6 +14,7 @@ enyo.kind({
 		onCreateProject: "",
 		onProjectSelected: "",
 		onScanProject: "",
+		onDuplicateProject: "",
 		onProjectRemoved: "",
 		onModifySettings: "",
 		onBuild: "",
@@ -49,6 +50,11 @@ enyo.kind({
 							{value: "doScanProject", components: [
 								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_import.png"},
 								{content: "Import..."}
+							]},
+							{classes: "onyx-menu-divider"},
+							{value: "doDuplicateProject", components: [
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_import.png"},
+								{content: "Duplicate..."}
 							]},
 							{classes: "onyx-menu-divider"},
 							{value: "removeProjectAction", components: [
