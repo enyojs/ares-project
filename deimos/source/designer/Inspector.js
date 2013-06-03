@@ -422,8 +422,8 @@ enyo.kind({
 	},
 	components: [
 		{kind: "onyx.RadioGroup", fit:false, onActivate:"doValueChanged", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton thirds", components: [
-			{value: Model.F_USEFUL, content: "Frequent"},
-			{value: Model.F_NORMAL, content: "Normal", active: true},
+			{value: Model.F_USEFUL, content: "Frequent", active: true},
+			{value: Model.F_NORMAL, content: "Normal"},
 			{value: Model.F_DANGEROUS, content: "All"}
 		]}
 	]

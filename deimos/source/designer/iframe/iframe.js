@@ -230,7 +230,8 @@ enyo.kind({
 				this.sendMessage({op: "moveItem", val: {itemId: dropData.aresId, targetId: dropTargetId, beforeId: beforeId}});
 				break;
 			case "ares/createitem":
-				dropTargetId = this.getContainerItem() ? this.getContainerItem().aresId : this.getEventDropTarget(inEvent.dispatchTarget).aresId;
+				dropTargetId = this.getContainerItem() ? this.getContainerItem() : this.getEventDropTarget(inEvent.dispatchTarget);
+				dropTargetId = (dropTargetId && dropTargetId.aresId) || null;
 				beforeId = this.getBeforeItem() ? this.getBeforeItem().aresId : null;
 				
 				this.sendMessage({op: "createItem", val: {config: dropData.config, targetId: dropTargetId, beforeId: beforeId}});
@@ -333,6 +334,7 @@ enyo.kind({
 			this.manageComponentsOptions(kindConstructor.prototype.kindComponents);
 			// Save this kind's _kindComponents_ array
 			this.aresComponents = this.flattenKindComponents(kindConstructor.prototype.kindComponents);
+			this.checkXtorForAllKinds(this.aresComponents);
 
 			// Enable drag/drop on all of _this.aresComponents_
 			this.makeComponentsDragAndDrop(this.aresComponents);
@@ -354,14 +356,25 @@ enyo.kind({
 				this.selectItem({aresId: inKind.selectId});
 			}
 		} catch(error) {
-			errMsg = "Unable to render " + inKind.name;
-			this.error(errMsg, error);
-			this.sendMessage({op: "error", val: {msg: errMsg}});
+			errMsg = "Unable to render kind '" + inKind.name + "':" + error.message;
+			this.error(errMsg, error.stack);
+			this.sendMessage({op: "error", val: {msg: errMsg, details: error.stack}});
+			this.sendMessage({op: "reloadNeeded"});
 		}
 	},
 	//* Rerender current selection
 	rerenderKind: function() {
 		this.renderKind({name: this.parentInstance.kind, components: this.getSerializedCopyOfComponent(this.parentInstance).components});
+	},
+	checkXtorForAllKinds: function(kinds) {
+		enyo.forEach(kinds, function(kindDefinition) {
+			var name = kindDefinition.kind;
+			if ( ! enyo.constructorForKind(name)) {
+				errMsg = 'No constructor found for kind "' + name + "'";
+				this.log(errMsg);
+				this.sendMessage({op: "error", val: {msg: errMsg}});
+			}
+		}, this);
 	},
 	//* When the designer is closed, clean up the last rendered kind
 	cleanUpKind: function() {

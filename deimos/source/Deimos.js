@@ -141,9 +141,11 @@ enyo.kind({
 	paletteDragstart: function(inSender, inEvent) {
 		inEvent = enyo.mixin(inEvent.config, {aresId: this.generateNewAresId()});
 		this.$.designer.enterCreateMode(inEvent);
+		this.$.componentView.setCreateMode(true);
 	},
 	paletteDragend: function(inSender, inEvent) {
 		this.$.designer.leaveCreateMode(inEvent.config);
+		this.$.componentView.setCreateMode(false);
 	},
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
