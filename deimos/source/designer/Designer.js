@@ -23,6 +23,7 @@ enyo.kind({
 	baseSource: "../deimos/source/designer/iframe.html",
 	projectSource: null,
 	selection: null,
+	reloadNeeded: false,
 	scale: 1,
 	reloading: false,
 	debug: false,
@@ -31,7 +32,13 @@ enyo.kind({
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
 	},
 	currentKindChanged: function() {
-		this.renderCurrentKind();
+		if (this.debug) this.log("reloadNeeded", this.reloadNeeded);
+		if (this.reloadNeeded) {
+			this.reloadNeeded = false;
+			this.reload();
+		} else {
+			this.renderCurrentKind();
+		}
 	},
 	heightChanged: function() {
 		this.$.client.applyStyle("height", this.getHeight()+"px");
@@ -121,9 +128,15 @@ enyo.kind({
 		// Existing component dropped in iframe
 		} else if(msg.op === "moveItem") {
 			this.doMoveItem(msg.val);
+		} else if (msg.op === "reloadNeeded") {
+			this.reloadNeeded = true;
 		// Existing component dropped in iframe
 		} else if(msg.op === "error") {
-			this.doError(msg.val);
+			if (( ! msg.val.hasOwnProperty('popup')) || msg.val.popup === true) {
+				this.doError(msg.val);
+			} else {
+				// TODO: We should store the error into a kind of rotating error log - ENYO-2462
+			}
 		// Default case
 		} else {
 			enyo.warn("Deimos designer received unknown message op:", msg);

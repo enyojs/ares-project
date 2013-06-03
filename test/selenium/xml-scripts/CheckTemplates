@@ -16,9 +16,19 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectList_importProjectButton]]></target>
+	<command>click</command>
+	<target><![CDATA[id=ares_projectView_projectList_button2]]></target>
 	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>click</command>
+	<target><![CDATA[id=ares_projectView_projectList_menuItem6]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>waitForText</command>
+	<target><![CDATA[id=ares_projectView_projectWizardScan_providerList_name]]></target>
+	<value><![CDATA[Ares Test - Home Directory]]></value>
 </selenese>
 <selenese>
 	<command>verifyTextPresent</command>
@@ -247,7 +257,7 @@ enyo.kind({
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_bottomBar_closeFileButton]]></target>
+	<target><![CDATA[css=div.ares-doc-close]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -290,7 +300,7 @@ enyo.kind({
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_bottomBar_closeFileButton]]></target>
+	<target><![CDATA[css=div.ares-doc-close]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -319,7 +329,7 @@ enyo.kind({
 </selenese>
 <selenese>
 	<command>clickAt</command>
-	<target><![CDATA[id=ares_bottomBar_closeFileButton]]></target>
+	<target><![CDATA[css=div.ares-doc-close]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 </TestCase>

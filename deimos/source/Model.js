@@ -118,7 +118,11 @@ enyo.singleton({
 		try {
 			return this.info[inKind][inType][inName];
 		} catch(error) {
-			return;		// Return undefined
+			try {
+				return this.info["enyo." + inKind][inType][inName];
+			} catch(err2) {
+				return;		// Return undefined
+			}
 		}
 	},
 	getFilterLevel: function(inKind, inType, inName) {

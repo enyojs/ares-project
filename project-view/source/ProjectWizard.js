@@ -6,6 +6,7 @@ enyo.kind({
 	floating: true,
 	autoDismiss: false,
 
+
 	classes: "enyo-unselectable",
 	events: {
 		onAddProjectInList: "",
@@ -21,7 +22,7 @@ enyo.kind({
 
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget"},
-		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", folderChooser: true},
+		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true},
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"}
 	],
 	debug: false,
