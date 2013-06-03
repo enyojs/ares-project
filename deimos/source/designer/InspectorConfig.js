@@ -83,7 +83,7 @@ enyo.kind({
 		{classes: "inspector-field-caption", name: "title"},
 		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
 	],
-	
+
 	//* Stop extraneous activate event from being fired when box is initially checked
 	handleChange: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
@@ -107,9 +107,26 @@ enyo.kind({
 	// events and published are defined by the base kind
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
-		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
+		{kind: "onyx.MenuDecorator", onSelect: "itemSelected", components: [
+				{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
+				{kind: "enyo.Button", name: "button", classes:"inspector-event-button"},
+				{kind: "onyx.Menu", name: "menu", floating: true, components: [
+					// Will be filled at create() time
+				]}
+			]}
 	],
-
+	handlers: {
+		onActivate: "preventMenuActivation"
+	},
+	fieldValueChanged: function() {
+		enyo.forEach(this.values, function(value) {
+			this.$.menu.createComponent({content: value, classes: "event-menu-item"});
+		}, this);
+		this.$.value.setValue(this.fieldValue);
+	},
+	preventMenuActivation: function(inSender, inEvent) {
+		return true;
+	},
 	//* Stop extraneous activate event from being fired when box is initially checked
 	handleChange: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
@@ -120,6 +137,16 @@ enyo.kind({
 		this.fieldValue = this.$.value.getValue();
 		this.doDblClick({target: this});
 		return true;
+	},
+	itemSelected: function(inSender, inEvent) {
+		this.fieldValue = inEvent.content;
+		this.$.value.setValue(inEvent.content);
+		this.doChange({target: this});
+		return true;
+	},
+	disabledChanged: function() {
+		this.inherited(arguments);
+		this.$.button.setDisabled(this.getDisabled());
 	}
 });
 
@@ -142,9 +169,17 @@ enyo.kind({
 			// Will be filled at create() time
 		]}
 	],
+	create: function() {
+		this.values = [""].concat(this.values);		// Add a "empty value"
+		this.inherited(arguments);
+	},
 	handleChange: function(inSender, inEvent) {
-		this.fieldValue = this.$.value.getValue();
-		this.doChange({target: this});
+		if (this.disabled) {
+			this.fieldValueChanged();	// Re-set the same previous value
+		} else {
+			this.fieldValue = this.$.value.getValue();
+			this.doChange({target: this});
+		}
 		return true;
 	},
 	fieldValueChanged: function() {
@@ -152,5 +187,8 @@ enyo.kind({
 			this.$.value.createComponent({content: value, value: value});
 		}, this);
 		this.$.value.setSelected(Math.max(0, this.values.indexOf(this.fieldValue)));
+	},
+	disabledChanged: function() {
+		// Nothing to do as this is not possible to disable a "Select"
 	}
 });

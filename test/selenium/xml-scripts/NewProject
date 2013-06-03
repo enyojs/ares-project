@@ -16,8 +16,13 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
-	<target><![CDATA[id=ares_projectView_projectList_createProjectButton]]></target>
+	<command>click</command>
+	<target><![CDATA[id=ares_projectView_projectList_button2]]></target>
+	<value><![CDATA[]]></value>
+</selenese>
+<selenese>
+	<command>click</command>
+	<target><![CDATA[id=ares_projectView_projectList_menuItem4]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
@@ -31,7 +36,7 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_projectWizardCreate_selectDirectoryPopup_providerList_name]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
@@ -46,12 +51,12 @@
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_projectWizardCreate_selectDirectoryPopup_hermesFileTree_serverNode_$NewProject_caption]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_projectWizardCreate_selectDirectoryPopup_confirm]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
@@ -66,32 +71,27 @@
 	<value><![CDATA[projectForSelenumTest]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_projectWizardCreate_propertiesWidget_ok]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_projectList_projectList_ownerProxy_item]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_caption]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_serverNode_caption]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
 <selenese>
-	<command>waitForText</command>
-	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_newFileButton]]></target>
-	<value><![CDATA[]]></value>
-</selenese>
-<selenese>
-	<command>clickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_newFileButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>
@@ -106,6 +106,11 @@
 	<value><![CDATA[App1.js]]></value>
 </selenese>
 <selenese>
+	<command>typeKeys</command>
+	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
+	<value><![CDATA[\119]]></value>
+</selenese>
+<selenese>
 	<command>keyPress</command>
 	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_fileName]]></target>
 	<value><![CDATA[s]]></value>
@@ -116,7 +121,7 @@
 	<value><![CDATA[s]]></value>
 </selenese>
 <selenese>
-	<command>clickAt</command>
+	<command>click</command>
 	<target><![CDATA[id=ares_projectView_harmonia_hermesFileTree_nameFilePopup_confirmButton]]></target>
 	<value><![CDATA[]]></value>
 </selenese>

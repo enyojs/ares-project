@@ -34,11 +34,11 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww"},
+						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
-				{name: "right", kind: "rightPanels", showing: false,	arrangerKind: "CardArranger"}
+				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
@@ -46,8 +46,8 @@ enyo.kind({
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
-		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "ares_phobos_settingspop", centered: true, modal: true, floating: true,
-		onChangeTheme: "changeTheme", onChangeHighLight: "changeHighLight", onClose: "closeEditorPop", onWordWrap: "changeWordWrap", onFontsizeChange: "changeFont", onTabSizsChange: "tabSize"}
+		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "enyo-unselectable", centered: true, modal: true, floating: true, autoDismiss: false,
+		onChangeSettings:"applySettings", onChangeRightPane: "changeRightPane", onClose: "closeEditorPop", onHide:"hideTest", onTabSizsChange: "tabSize"}
 	],
 	events: {
 		onShowWaitPopup: "",
@@ -68,8 +68,10 @@ enyo.kind({
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
+	helper: null,			// Analyzer.KindHelper
 	create: function() {
 		this.inherited(arguments);
+		this.helper = new analyzer.Analyzer.KindHelper();
 	},
 	getProjectController: function() {
 		this.projectCtrl = this.projectData.getProjectCtrl();
@@ -132,6 +134,7 @@ enyo.kind({
 		});
 	},
 	openDoc: function(inDocData) {
+
 		// If we are changing documents, reparse any changes into the current projectIndexer
 		if (this.docData && this.docData.getEdited()) {
 			this.reparseAction(true);
@@ -148,8 +151,10 @@ enyo.kind({
 
 		var file = this.docData.getFile();
 		var extension = file.name.split(".").pop();
+
 		this.hideWaitPopup();
 		this.analysis = null;
+
 		var mode = {
 			json: "json",
 			design: "json",
@@ -171,8 +176,10 @@ enyo.kind({
 			png: "image",
 			gif: "image"
 		}[extension] || "text";
+
 		this.docData.setMode(mode);
-		var hasAce = this.adjustPanelsForMode(mode);
+
+		var hasAce = this.adjustPanelsForMode(mode, this.$.editorSettingsPopup.getSettings().rightpane);
 		
 		if (hasAce) {
 			var aceSession = this.docData.getAceSession();
@@ -190,25 +197,9 @@ enyo.kind({
 			this.focusEditor();
 
 			/* set editor to user pref */
+			this.$.ace.applyAceSettings(this.$.editorSettingsPopup.getSettings());
+
 			this.$.ace.editingMode = mode;
-			this.$.ace.highlightActiveLine = localStorage.highlight;
-			if(!this.$.ace.highlightActiveLine || this.$.ace.highlightActiveLine.indexOf("false") != -1){
-				this.$.ace.highlightActiveLine = false;
-			}
-			this.$.ace.highlightActiveLineChanged();
-			
-			this.$.ace.wordWrap = localStorage.wordwrap;			
-			if(!this.$.ace.wordWrap || this.$.ace.wordWrap.indexOf("false") != -1 && this.$.ace.wordWrap !== "true"){
-				this.$.ace.wordWrap = false;
-			}
-			this.$.ace.wordWrapChanged();
-
-			this.fSize = localStorage.fontsize;
-			if(this.fSize ===  undefined){
-				this.fSize = "11px";
-			}
-
-			this.$.ace.setFontSize(this.fSize);
 		}
 		else {
 			var origin = this.projectData.getService().getConfig().origin;
@@ -221,9 +212,10 @@ enyo.kind({
 		this.docData.setEdited(edited);
 		this.$.toolbar.resized();
 	},
-	adjustPanelsForMode: function(mode) {
+
+	adjustPanelsForMode: function(mode, rightpane) {
+
 		if (this.debug) this.log("mode:", mode);
-		// whether to show or not a panel, imageViewer and ace cannot be enabled at the same time
 		var showModes = {
 			javascript: {
 				imageViewer: false,
@@ -232,7 +224,7 @@ enyo.kind({
 				saveAsButton: true,
 				newKindButton: true,
 				designerButton: true,
-				right: true
+				right: rightpane
 			},
 			image: {
 				imageViewer: true,
@@ -472,9 +464,7 @@ enyo.kind({
 		if (kinds.length > 0) {
 			// Request to design the current document, passing info about all kinds in the file
 			this.doDesignDocument(data);
-		} else {
-			alert("No kinds found in this file");
-		}
+		} // else - The error has been displayed by extractKindsData()
 	},
 	//* Extract info about kinds from the current file needed by the designer
 	extractKindsData: function() {
@@ -493,10 +483,29 @@ enyo.kind({
 			},
 			c = this.$.ace.getValue(),
 			kinds = [];
-		
+
 		if (this.analysis) {
-			for (var i=0; i < this.analysis.objects.length; i++) {
-				var o = this.analysis.objects[i];
+			var nbKinds = 0;
+			var errorMsg;
+			var i, o;
+			for (i=0; i < this.analysis.objects.length; i++) {
+				o = this.analysis.objects[i];
+				if (o.type !== "kind") {
+					errorMsg = $L("Ares does not support methods out of a kind. Please place '" + o.name + "' into a separate .js file");
+				} else {
+					nbKinds++;
+				}
+			}
+			if (nbKinds === 0) {
+				errorMsg = $L("No kinds found in this file");
+			}
+			if (errorMsg) {
+				this.showErrorPopup(errorMsg);
+				return [];
+			}
+
+			for (i=0; i < this.analysis.objects.length; i++) {
+				o = this.analysis.objects[i];
 				var start = o.componentsBlockStart;
 				var end = o.componentsBlockEnd;
 				var name = o.name;
@@ -533,51 +542,12 @@ enyo.kind({
 	 * @returns the list of declared handler methods
 	 */
 	listHandlers: function(object, declared) {
-		declared = this.listDeclaredComponentsHandlers(object.components, declared);
-		for(var i = 0; i < object.properties.length; i++) {
-			var p = object.properties[i];
-			try {
-				if (p.name === 'handlers') {
-					for(var j = 0; i < p.value[0].properties.length; j++) {
-						var q = p.value[0].properties[j];
-						var name = q.value[0].name;
-						name = name.replace(/["']{1}/g, '');
-						if (name.substr(0, 2) !== 'do') {	// Exclude doXXXX methods
-							declared[name] = "";
-						}
-					}
-				}
-			} catch(error) {
-				enyo.log("Unexpected error: " + error);		// TODO TBC
-			}
+		try {
+			this.helper.setDefinition(object);
+			return this.helper.listHandlers(declared);
+		} catch(error) {
+			enyo.log("Unexpected error: " + error);		// TODO TBC
 		}
-		return declared;
-	},
-	/**
-	 * Recursively lists the handler methods mentioned in the "onXXXX"
-	 * attributes of the components passed as an input parameter
-	 * @param components: components to walk thru
-	 * @param declared: list of handler methods already listed
-	 * @returns the list of declared handler methods
-	 * @protected
-	 */
-	listDeclaredComponentsHandlers: function(components, declared) {
-		for(var i = 0; i < components.length; i++) {
-			var c = components[i];
-			for(var k = 0 ; k < c.properties.length ; k++) {
-				var p = c.properties[k];
-				if (p.name.substr(0, 2) === 'on') {
-					var name = p.value[0].name.replace(/["']{1}/g, '');
-					if (name.substr(0, 2) !== 'do') {	// Exclude doXXXX methods
-						declared[name] = "";
-					}
-				}
-			}
-			if (components.components) {
-				this.listDeclaredComponentsHandlers(components.components, declared);
-			}
-		}
-		return declared;
 	},
 	/**
 	 * This function checks all the kinds and add the missing
@@ -802,6 +772,16 @@ enyo.kind({
 	findClose: function(){
 		this.$.findpop.hide();
 	},
+	toggleww: function(){
+	    if(this.$.ace.wordWrap === "true" || this.$.ace.wordWrap === true){
+			this.$.ace.wordWrap = false;
+			this.$.ace.wordWrapChanged();
+	    }else{
+			this.$.ace.wordWrap = true;
+			this.$.ace.wordWrapChanged();
+		}
+	},
+
 	/*  editor setting */
 
 	editorSettings: function() {
@@ -809,41 +789,32 @@ enyo.kind({
 	},
 
 	closeEditorPop: function(){
+
+		this.$.editorSettingsPopup.initSettingsPopupFromLocalStorage();
+		//apply changes only saved on Ace
+		this.$.ace.applyAceSettings(this.$.editorSettingsPopup.getSettings());
+		this.adjustPanelsForMode(this.docData.getMode(), this.$.editorSettingsPopup.getSettings().rightpane);
 		this.$.editorSettingsPopup.hide();
 	},
 
-	changeHighLight: function(){
-		this.$.ace.highlightActiveLine = this.$.editorSettingsPopup.highlight;
-		this.$.ace.highlightActiveLineChanged();
+	//showing =
+	changeRightPane: function(){
+		this.adjustPanelsForMode(this.docData.getMode(), this.$.editorSettingsPopup.getPreviewSettings().rightpane);
 	},
-	changeTheme: function() {
-		this.$.ace.theme = this.$.editorSettingsPopup.theme;
-		this.$.ace.themeChanged();
-	},
-	changeWordWrap: function() {
-		this.$.ace.wordWrap = this.$.editorSettingsPopup.wordWrap;
-		this.$.ace.wordWrapChanged();
-	},
-	toggleww: function(){		
-		if(this.$.ace.wordWrap === "true" || this.$.ace.wordWrap === true){
-			this.$.ace.wordWrap = false;
-			this.$.ace.wordWrapChanged();
-			console.log("wee false");
-		}else{
-			this.$.ace.wordWrap = true;
-			this.$.ace.wordWrapChanged();
-		}
-		
 
-	},
-	changeFont: function(){
-		var fs = this.$.editorSettingsPopup.fSize;
-			this.$.ace.setFontSize(fs);
+	applySettings:function(){
+		//apply Ace settings
+		this.$.ace.applyAceSettings(this.$.editorSettingsPopup.getPreviewSettings());
 	},
 
 	tabSize: function() {
 		var ts = this.$.ace.editorSettingsPopup.Tsize;
 		this.$.ace.setTabSize(ts);
+	},
+	
+	fkeypressed: function(inSender, inEvent) {
+		var key = inEvent;
+		this.$.ace.insertAtCursor(this.$.editorSettingsPopup.settings.keys[ key ]);
 	},
 	
 	//* Trigger an Ace undo and bubble updated code
@@ -864,14 +835,12 @@ enyo.kind({
 		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
 		if (data.kinds.length > 0) {
 			this.doUpdate(data);
-		} else {
-			enyo.warn("No kinds found in this file");
-		}
+		} // else - The error has been displayed by extractKindsData()
 	}
 });
 
 enyo.kind({
-	name: "rightPanels",kind: "Panels", wrap: false,
+	name: "rightPanels",kind: "Panels", wrap: false, draggable:false,
 	events: {
 		onCss: "",
 		onReparseAsked: ""

@@ -1,3 +1,4 @@
+/**/
 body {
 	background-color: #aaa;
 }
@@ -66,7 +67,7 @@ body {
 	width: 70%;
 }
 .ares_harmonia_toolBar {
-	height: 48px;
+	height: 64px;
 	vertical-align: middle;
 	padding: 0px;
 	border: 0px;
@@ -89,7 +90,7 @@ body {
 	width: 280px;
 }
 .ares_phobos_right {
-	width: 360px;
+	width: 280px;
 }
 .ares_phobos_autocomp {
 	position: absolute;
@@ -110,9 +111,7 @@ body {
 .ares_phobos_findpop {
 	width: 300px;
 }
-.ares_phobos_settingspop {
-	width: 300px;
-}
+
 /**/
 .border {
 	background-color: whiteSmoke;
@@ -320,7 +319,6 @@ body {
 
 .onyx-picker-decorator .onyx-button {
 	padding:6px 18px; /*needs to be specifyed, without It herits of padding of onyx-picker-decorator in onyx.css*/
-	width: 200px;
 }
 
 .onyx-picker-decorator .onyx-button:before{ 
@@ -344,7 +342,6 @@ body {
     -webkit-border-radius:4px;
     border-radius:4px;
     overflow:hidden; 
-    min-width:160px;
 }
 
 .onyx-radiobutton {
@@ -397,6 +394,8 @@ body {
 	padding: 0 4px;
 	text-align: right;
 	display: inline-block;
+	vertical-align: middle;
+	overflow: hidden;
 }
 
 .ares-fixed-input{
@@ -442,3 +441,42 @@ p.break{
 	padding: 1px 0;
 }
 
+.ares-classic-popup {
+	box-shadow:0px 0px 10px #000000;
+	background-color:#FFFFFF;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	color: #000000;
+	padding:0px;
+}
+
+.ares-classic-popup > .title {
+	height: 48px;
+	line-height: 48px;
+	font-size: 16px;
+	padding-left: 20px;
+	background-color: #CCCCCC;
+	text-transform: uppercase;
+	border-bottom: 2px solid #999999;
+	border-radius: 6px 6px 0px 0px;
+}
+
+.ares-classic-popup > .bottom-toolbar {
+	background-image: none;
+	background-color: #CCCCCC;
+	padding: 7px;
+	border:0px;
+	border-top: 1px solid #999999;
+	-moz-border-radius:0px 0px 6px 6px;
+	-webkit-border-radius:0px 0px 6px 6px;
+	border-radius:0px 0px 6px 6px;
+}
+.bottom-toolbar>.onyx-button { background-color: transparent; border: 1px solid #999999;}
+.ares-small-popup {width:320px; height:150px; padding: 5px 10px;}
+.ares-error-details { position:relative; width: 300px }
+.ares-error-details .button { padding-top: 10px; position:relative; }
+.ares-error-details .label { border: none; color:#000000; background: transparent; height: auto; padding-left:10px; text-align: left; }
+.ares-error-text { width: 98%; margin:5px 0px; resize: vertical;}
+.right { float: right; }
+.ares-content-popup { width:409px; height:240px; padding: 5px 10px; }

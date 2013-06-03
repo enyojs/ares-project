@@ -5,6 +5,7 @@
 
 enyo.kind({
 	name: "Phonegap.ProjectProperties",
+	kind: "Ares.ProjectProperties",
 	debug: false,
 	published: {
 		config: {}
@@ -15,7 +16,7 @@ enyo.kind({
 	components: [
 		{kind: "FittableRows", components: [
 			{classes:"ares-row", components :[
-				{tag:"label", classes: "ares-label", content: "AppId:"},
+				{tag:"label", classes: "ares-label", content: "PhoneGap App ID:"},
 				{kind: "onyx.InputDecorator", components: [
 					{kind: "Input", name: "pgConfId",
 						attributes: {title: "unique identifier, assigned by build.phonegap.com"}
@@ -55,6 +56,7 @@ enyo.kind({
 			});
 		}, this);
 	},
+	/** public */
 	setProjectConfig: function(config) {
 		this.config = config;
 		if (this.debug) this.log("config:", this.config);
@@ -70,6 +72,7 @@ enyo.kind({
 		}, this);
 		this.refresh();
 	},
+	/** public */
 	getProjectConfig: function() {
 		this.config.appId   = this.$.pgConfId.getValue();
 		this.config.icon.src = this.$.pgIconUrl.getValue();
