@@ -109,7 +109,7 @@ enyo.kind({
 		{classes: "inspector-field-caption", name: "title"},
 		{kind: "onyx.MenuDecorator", onSelect: "itemSelected", components: [
 				{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
-				{content: "v", allowHtml: true, kind: "enyo.Button", name: "button"},
+				{kind: "enyo.Button", name: "button", classes:"inspector-event-button"},
 				{kind: "onyx.Menu", name: "menu", floating: true, components: [
 					// Will be filled at create() time
 				]}
