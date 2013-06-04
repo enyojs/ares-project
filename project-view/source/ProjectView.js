@@ -20,7 +20,7 @@ enyo.kind({
 			name: "projectList"},
 		{kind: "Harmonia", fit:true, name: "harmonia"},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
-		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan"},
+		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan", classes:"ares-masked-content-popup"},
 		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"},
 		{kind: "ProjectWizardCopy", name: "projectWizardCopy"}
 	],

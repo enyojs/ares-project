@@ -10,5 +10,7 @@
 	"InspectorConfig.js",
 	"Designer.js",
 	"designer.css",
-	"RPCCommunicator.js"
+	"RPCCommunicator.js",
+	"CssEditor.js",
+	"CssEditor.css"	
 );

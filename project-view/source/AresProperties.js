@@ -38,6 +38,10 @@ enyo.kind({
 	 */
 	handlePluginRegist: function(inSender, inEvent) {
 		if (this.debug) this.log();
+
+		if (typeof inEvent.pluginService.getAresPropertiesKind !== 'function') {
+			return true;
+		}
 		
 		var pluginService = {
 			id: inEvent.pluginService.id,
