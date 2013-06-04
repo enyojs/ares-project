@@ -14,13 +14,15 @@ enyo.kind({
 			onModifySettings: "modifySettingsAction",
 			onCreateProject: "createProjectAction",
 			onScanProject: "scanProjectAction",
+			onDuplicateProject: "duplicateProjectAction",
 			onProjectRemoved: "projectRemoved",
 			onProjectSelected: "handleProjectSelected",
 			name: "projectList"},
 		{kind: "Harmonia", fit:true, name: "harmonia"},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan", classes:"ares-masked-content-popup"},
-		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"}
+		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"},
+		{kind: "ProjectWizardCopy", name: "projectWizardCopy"}
 	],
 	handlers: {
 		onAddProjectInList: "addProjectInList",
@@ -48,6 +50,10 @@ enyo.kind({
 	scanProjectAction: function(inSender, inEvent) {
 		this.$.projectWizardScan.setHeaderText('Select a directory containing one or more project.json files');
 		this.$.projectWizardScan.show();
+		return true; //Stop event propagation
+	},
+	duplicateProjectAction: function(InSender, inEvent) {
+		this.$.projectWizardCopy.start(this.currentProject);
 		return true; //Stop event propagation
 	},
 	createProjectAction: function(inSender, inEvent) {
