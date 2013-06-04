@@ -21,7 +21,8 @@ enyo.kind({
 		{kind: "Harmonia", fit:true, name: "harmonia"},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan"},
-		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"}
+		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"},
+		{kind: "ProjectWizardCopy", name: "projectWizardCopy"}
 	],
 	handlers: {
 		onAddProjectInList: "addProjectInList",
@@ -52,7 +53,7 @@ enyo.kind({
 		return true; //Stop event propagation
 	},
 	duplicateProjectAction: function(InSender, inEvent) {
-		this.log(inEvent);
+		this.$.projectWizardCopy.start(this.currentProject);
 		return true; //Stop event propagation
 	},
 	createProjectAction: function(inSender, inEvent) {

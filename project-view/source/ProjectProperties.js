@@ -201,7 +201,6 @@ enyo.kind({
 	 * Tune the widget for project modification
 	 */
 	setupModif: function() {
-		//this.$.ok.setDisabled(true) ;
 		this.$.directoryEntry.hide() ;
 		this.$.templatesEntry.hide();
 	},
