@@ -229,5 +229,5 @@ enyo.kind({
 				if (this.debug) this.log(inValue);
 				return inValue;
 			});
-	},
+	}
 });
