@@ -30,6 +30,9 @@ enyo.kind({
 		ondrop: "drop",
 		ondragend: "dragend"
 	},
+	attributes: {
+		dropTarget: "true"
+	},
 	
 	// expandable nodes may only be opened by tapping the icon; tapping the content label
 	// will fire the nodeTap event, but will not expand the node.

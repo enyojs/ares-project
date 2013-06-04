@@ -79,7 +79,7 @@ enyo.kind({
 	targetNode: null,
 	
 	holdoverTimeout:   null,
-	holdoverTimeoutMS: 500,
+	holdoverTimeoutMS: 1000,
 	
 	itemDown: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
@@ -88,6 +88,11 @@ enyo.kind({
 	},
 	itemDragover: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		// Enable HTML5 drop
+		if (inEvent.preventDefault) {
+			inEvent.preventDefault();
+		}
 		
 		// look for the related ares.Node
 		var tempNode = inEvent.originator;
@@ -99,13 +104,15 @@ enyo.kind({
 			return true;
 		}
 		
-		//this.targetNode.applystyle("pointer-events", fill);
-		if (this.targetNode !== null && this.targetNode.file.isDir && this.targetNode.expanded) {
-			this.targetNode.applyStyle("background-color", null);
-		}
+		if (this.targetNode !== null) {
+			inEvent.dataTransfer.effectAllowed = "none";
 		
-		// Enable HTML5 drop
-		inEvent.preventDefault();
+			if (this.targetNode.file.isDir && this.targetNode.expanded) {
+				this.targetNode.applyStyle("border-color", null);
+				this.targetNode.applyStyle("border-style", "none");
+				this.targetNode.applyStyle("border-width", "0px");
+			}
+		}
 		
 		this.resetHoldoverTimeout();
 		
@@ -113,13 +120,19 @@ enyo.kind({
 		this.targetNode = tempNode;
 		
 		if (this.targetNode.file.isDir && this.targetNode.expanded) {
-			this.targetNode.applyStyle("background-color", "grey");
+			this.targetNode.applyStyle("border-color", "grey");
+			this.targetNode.applyStyle("border-style", "dotted");
+			this.targetNode.applyStyle("border-width", "1px");
 		}
+		
+		this.innerHTML = inEvent.dataTransfer.getData('text/html');
 		
 		if (!this.isValidDropTarget(this.targetNode)) {
 			if (this.debug) this.log("over: target not valid");
+			inEvent.dataTransfer.effectAllowed = "none";
 		} else {
 			if (this.debug) this.log("over: target valid");
+			inEvent.dataTransfer.effectAllowed = "move";
 		}
 		
 		this.setHoldoverTimeout(this.targetNode);
@@ -128,27 +141,31 @@ enyo.kind({
 	itemDrop: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
+		if (!this.isValidDropTarget(this.targetNode)) {
+			if (this.debug) this.log("end: target not valid");
+		} else {
+			if (this.debug) this.log("end: target valid");
+			if (this.draggedNode.content != "package.js") {
+				this.moveNode(this.draggedNode, this.targetNode);
+			} else {
+				if (this.debug) this.log("package.js files cannot be moved");
+			}
+		}
+
 		return true;
 	},
 	itemDragend: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
-		if (!this.isValidDropTarget(this.targetNode)) {
-			if (this.debug) this.log("end: target not valid");
-		} else {
-			if (this.debug) this.log("end: target valid");
-			this.moveNode(this.draggedNode, this.targetNode);
-		}
-
-		/*targetNode.applyStyle("cursor", "default");*/
-		//this.targetNode.applystyle("pointer-events", fill);
 		if (this.targetNode.file.isDir && this.targetNode.expanded) {
-			this.targetNode.applyStyle("background-color", null);
+			this.targetNode.applyStyle("border-color", null);
+			this.targetNode.applyStyle("border-style", "none");
+			this.targetNode.applyStyle("border-width", "0px");
 		}
 		
 		this.resetHoldoverTimeout();
 		this.draggedNode = null;
-		this.targetNode = null;	
+		this.targetNode = null;
 		
 		return true;
 	},
@@ -158,6 +175,13 @@ enyo.kind({
 		// get the related ares.Node
 		this.draggedNode = inEvent.originator;
 		this.targetNode = this.draggedNode;
+		
+		if (this.draggedNode.content == "package.js") {
+			inEvent.dataTransfer.effectAllowed = "none";
+		} else {
+			inEvent.dataTransfer.effectAllowed = "move";
+		}
+		inEvent.dataTransfer.setData('text/html', this.innerHTML);
 		
 		return true;
 	},
@@ -172,7 +196,7 @@ enyo.kind({
 		if (this.debug) this.log("inTargetNode=", inTargetNode);
 		
 		// expanding closed folder node...
-		if (inTargetNode.file.isDir && !inTargetNode.expanded) {
+		if (inTargetNode != this.draggedNode && inTargetNode.file.isDir && !inTargetNode.expanded) {
 			this.$.scroller.scrollIntoView(inTargetNode, true);
 			this.$.selection.select(inTargetNode.file.id, inTargetNode);
 			
@@ -790,8 +814,7 @@ enyo.kind({
 	 *
 	 */
 	moveNode: function(inNode, inTarget) {
-		//if (this.debug) 
-		this.log("inNode", inNode, "inTarget", inTarget);
+		if (this.debug) this.log("inNode", inNode, "inTarget", inTarget);
 		
 		return this.$.service.rename(inNode.file.id, {folderId: inTarget.file.id})
 			.response(this, function(inSender, inValue) {
