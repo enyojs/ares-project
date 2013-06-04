@@ -3,6 +3,7 @@ var fs = require("fs"),
     express = require("express"),
     util  = require("util"),
     child_process = require("child_process"),
+    createDomain = require('domain').create,
     log = require('npmlog'),
     temp = require("temp"),
     http = require("http"),
@@ -57,6 +58,21 @@ function BdBase(config, next) {
 	if (this.config.level !== 'error' && this.config.level !== 'warn') {
 		this.app.use(express.logger('dev'));
 	}
+
+	/*
+	 * Error Handling - Wrap exceptions in delayed handlers
+	 */
+	this.app.use(function(req, res, next) {
+		var domain = createDomain();
+
+		domain.on('error', function(err) {
+			next(err);
+			domain.dispose();
+		});
+
+		domain.enter();
+		next();
+	});
 
 	// CORS -- Cross-Origin Resources Sharing
 	this.app.use(function(req, res, next) {
