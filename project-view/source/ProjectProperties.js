@@ -118,7 +118,7 @@ enyo.kind({
 	 */
 	handleServicesChange: function(inSender, inEvent) {
 		if (this.debug) this.log();
-		this.services = this.services || {};
+		this.services = enyo.clone(this.services) || {};
 		inEvent.serviceRegistry.forEach(enyo.bind(this, function(inService) {
 			var service = {
 				id: inService.id,
