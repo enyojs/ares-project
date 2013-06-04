@@ -48,7 +48,7 @@ enyo.kind({
 		
 		// Hermes tree
 		{kind: "Scroller", fit: true, components: [
-			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll", onNodeMove: "moveNode" }
+			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll" }
 		]},
 
 		// track selection of nodes. here, selection Key is file or folderId.
@@ -75,100 +75,127 @@ enyo.kind({
 	
 	debug: false,
 	
-	//draggedItem: null,
 	draggedNode: null,
+	targetNode: null,
 	
 	holdoverTimeout:   null,
 	holdoverTimeoutMS: 500,
 	
 	itemDown: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
+		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		return true;
 	},
 	itemDragover: function(inSender, inEvent) {
-		//if (this.debug) this.log(inSender, "=>", inEvent);
+		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		// look for the related ares.Node
-		var targetNode = inEvent.originator;
-		if (inEvent.kind !== "ares.Node") {
-			targetNode = targetNode.parent;
+		var tempNode = inEvent.originator;
+		if (tempNode.kind !== "ares.Node") {
+			tempNode = tempNode.parent;
 		}
 		
-		/*if (targetNode.file.isDir && targetNode.expanded) {
-			targetNode.applyStyle("background-color", "grey");
-		}*/
+		if (this.targetNode === tempNode) {
+			return true;
+		}
 		
-		if (!this.isValidDropTarget(targetNode)) {
+		//this.targetNode.applystyle("pointer-events", fill);
+		if (this.targetNode !== null && this.targetNode.file.isDir && this.targetNode.expanded) {
+			this.targetNode.applyStyle("background-color", null);
+		}
+		
+		// Enable HTML5 drop
+		inEvent.preventDefault();
+		
+		this.resetHoldoverTimeout();
+		
+		// targetNode update
+		this.targetNode = tempNode;
+		
+		if (this.targetNode.file.isDir && this.targetNode.expanded) {
+			this.targetNode.applyStyle("background-color", "grey");
+		}
+		
+		if (!this.isValidDropTarget(this.targetNode)) {
 			if (this.debug) this.log("over: target not valid");
-			//targetNode.applyStyle("cursor", "no-drop");
 		} else {
 			if (this.debug) this.log("over: target valid");
-			//targetNode.applyStyle("cursor", "pointer");
 		}
 		
-		this.setHoldoverTimeout(targetNode);
-		
+		this.setHoldoverTimeout(this.targetNode);
 		return true;
 	},
 	itemDrop: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
+		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		return true;
 	},
 	itemDragend: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
+		if (this.debug) this.log(inSender, "=>", inEvent);
 		
-		// get the related ares.Node
-		var targetNode = inEvent.originator;
-		
-		/*targetNode.applyStyle("cursor", "default");
-		if (targetNode.file.isDir && targetNode.expanded) {
-			targetNode.applyStyle("background-color", null);
-		}*/
-		
-		if (!this.isValidDropTarget(targetNode)) {
+		if (!this.isValidDropTarget(this.targetNode)) {
 			if (this.debug) this.log("end: target not valid");
 		} else {
 			if (this.debug) this.log("end: target valid");
+			this.moveNode(this.draggedNode, this.targetNode);
 		}
+
+		/*targetNode.applyStyle("cursor", "default");*/
+		//this.targetNode.applystyle("pointer-events", fill);
+		if (this.targetNode.file.isDir && this.targetNode.expanded) {
+			this.targetNode.applyStyle("background-color", null);
+		}
+		
+		this.resetHoldoverTimeout();
+		this.draggedNode = null;
+		this.targetNode = null;	
 		
 		return true;
 	},
 	itemDragstart: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
+		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		// get the related ares.Node
-		draggedNode = inEvent.originator;
+		this.draggedNode = inEvent.originator;
+		this.targetNode = this.draggedNode;
 		
 		return true;
 	},
-	setHoldoverTimeout: function (inTargetNode) {
-		this.holdoverTimeout = setTimeout(enyo.bind(this, function() { this.holdOver(inTargetNode); }), this.holdoverTimeoutMS);
+	setHoldoverTimeout: function (inTarget) {
+		this.holdoverTimeout = setTimeout(enyo.bind(this, function() { this.holdOver(inTarget); }), this.holdoverTimeoutMS);
+	},
+	resetHoldoverTimeout: function() {
+		clearTimeout(this.holdoverTimeout);
+		this.holdoverTimeout = null;
 	},
 	holdOver: function (inTargetNode) {
-		//if (this.debug) this.log("inTargetNode=", inTargetNode);
+		if (this.debug) this.log("inTargetNode=", inTargetNode);
 		
-		//this.doHoldOver({targetId: inTargetId, beforeId: inBeforeId});
-		// node to expand...
+		// expanding closed folder node...
 		if (inTargetNode.file.isDir && !inTargetNode.expanded) {
-			//this.expandNode(inTargetNode);
-			this.log("expand node=");
+			this.$.scroller.scrollIntoView(inTargetNode, true);
+			this.$.selection.select(inTargetNode.file.id, inTargetNode);
+			
+			inTargetNode.expanded = true;
+			// update icon for expanded state
+			inTargetNode.setIcon("$services/assets/images/folder-open.png");
+			
+			// handle lazy-load when expanding
+			inTargetNode.updateNodes().
+				response(this, function() {
+					inTargetNode.effectExpanded();
+				});
 		}
 	},
 	isValidDropTarget: function(inNode) {
 		if (this.debug) this.log("inNode=", inNode);
 		
-		var draggedFile = draggedNode.file,
+		var draggedFile = this.draggedNode.file,
 				inFile = inNode.file
 		
 		if (draggedFile != inFile) {
 			if (inFile.isDir) {
-				if (draggedNode.container.file.id != inFile.id) {
+				if (this.draggedNode.container.file.id != inFile.id) {
 					if (!draggedFile.isDir || inFile.isServer || inFile.dir.indexOf(draggedFile.dir) == -1) {
 						if (this.debug) this.log("target node");
 						return true;
@@ -762,57 +789,37 @@ enyo.kind({
 	 * @return null
 	 *
 	 */
-	moveNode: function(inSender, inEvent) {
-		if (this.debug) this.log("inEvent", inEvent);
+	moveNode: function(inNode, inTarget) {
+		//if (this.debug) 
+		this.log("inNode", inNode, "inTarget", inTarget);
 		
-		var oldNode=inEvent.oldNode,
-				newParent=inEvent.newParent,		
-				oldNodeFile = oldNode.file,
-				newParentFile = newParent.file;
-		
-		if (oldNodeFile != newParentFile) {
-			if (newParentFile.isDir) {
-				if (oldNode.container.file.id != newParentFile.id) {
-					if (!oldNodeFile.isDir || newParentFile.isServer || newParentFile.dir.indexOf(oldNodeFile.dir) == -1) {
-						return this.$.service.rename(oldNodeFile.id, {folderId: newParentFile.id})
-							.response(this, function(inSender, inValue) {
-								var removedParentNode = oldNode.container,
-										removePkgNode = removedParentNode.getNodeNamed('package.js'),
-										addParentNode = newParent,
-										addPkgNode = addParentNode.getNodeNamed('package.js');
-										
-								this.doTreeChanged({
-									remove: {
-										service: this.$.service,
-										parentNode: removedParentNode && removedParentNode.file,
-										pkgNode: removePkgNode && removePkgNode.file,
-										node: oldNode.file
-									},
-									add: {
-										service: this.$.service,
-										parentNode: addParentNode && addParentNode.file,
-										pkgNode: addPkgNode && addPkgNode.file,
-										node: oldNode.file
-									}
-								});
-								
-								this.refreshFileTree();
-							})
-							.error(this, function(inSender, inError) {
-								this.warn("Unable to move the node:", oldNodeFile.name, inError);
-								this.showErrorPopup("Moving node "+oldNodeFile.name+" failed:" + inError);
-							});
-					} else {
-						if (this.debug) this.log("target node is a child node");
+		return this.$.service.rename(inNode.file.id, {folderId: inTarget.file.id})
+			.response(this, function(inSender, inValue) {
+				var removedParentNode = inNode.container,
+						removePkgNode = removedParentNode.getNodeNamed('package.js'),
+						addParentNode = inTarget,
+						addPkgNode = addParentNode.getNodeNamed('package.js');
+						
+				this.doTreeChanged({
+					remove: {
+						service: this.$.service,
+						parentNode: removedParentNode && removedParentNode.file,
+						pkgNode: removePkgNode && removePkgNode.file,
+						node: inNode.file
+					},
+					add: {
+						service: this.$.service,
+						parentNode: addParentNode && addParentNode.file,
+						pkgNode: addPkgNode && addPkgNode.file,
+						node: inNode.file
 					}
-				} else {
-					if (this.debug) this.log("target node is its own parent node");
-				}
-			} else {
-				if (this.debug) this.log("target node is a file");
-			}
-		} else {
-			if (this.debug) this.log("target node is itself");
-		}
+				});
+				
+				this.refreshFileTree();
+			})
+			.error(this, function(inSender, inError) {
+				this.warn("Unable to move the node:", inNode.file.name, inError);
+				this.showErrorPopup("Moving node "+inNode.file.name+" failed:" + inError);
+			});
 	}
 });
