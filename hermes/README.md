@@ -2,10 +2,25 @@
 
 Hermes offers several services not available in a Web Browser through one (or several) Node.js processes:
 
-* File-system abstraction for the Ares IDE.
-* Archive service (used by the PhoneGap build service).
+* [File-system services](#filesystem-services) (Local, [Dropbox](#dropbox-filesystem-service))
+* [Project templates services](#project-template-services)
+* [Build Services](#build-services) ([PhoneGap Build](#phonegap-build-service), …)
 
-## Filesystem service
+## [Security](id:security)
+
+### Authentication
+
+Each service may need an individual authentication to access a back-end in the cloud.  For example, PhoneGap Build (PGB) uses a simple per-user token that is provided as a query parameter with every request to the build service.  Another example is more complex example is Dropbox, which requires both an application OAuth token pair (for Ares itself), plus a per-user account (the one users use to access their private data on Dropbox).  There are a variety of possible 
+
+While authentications token are generally used by the Node.js-based Ares services (rather than by the Ares client application runnin in the Browser), the server server stores them locally:  they ares stored in the Browser sandbox (cookies, localStorage… etc) and passed to the service when needed.
+
+The elements of the authentication token that are tight to the server (rather than to the end-user) are set on the server in the `"auth":{…}` of `ide.json`, for each service.  This section is saved under `localStorage` key `com.hp.ares.services.<service name>.auth` in the Browser. The value associated with this key expands as the user feeds necessary credentails to each service.
+
+The actual properties stored within each `"auth":{…}` are essentially service-specific.
+
+**NOTE:** The `localStorage` values are not encrypted.  This could be changed if proven to be useful.
+
+## Filesystem services
 
 ### Protocol
 
@@ -118,7 +133,24 @@ To stop on the first failing case:
 
 For more detailled instructions, refer to the [Mocha home page](http://visionmedia.github.com/mocha/).
 
-### Dropbox
+### [Local](id:local-filesystem-service)
+
+The `fsLocal` service is simply serves your local machine's filesystem to the browser, which has otherwise no access outside the web sandbox (or exclusivelly via direct user interaction).
+
+Optionally, configure the `root` of your local file-system access in `ide.json`. By default, the local filesystem service serves the files from your _Home_ directory, depending on your operating system. You might want to change this to point to the location of your project files, to make navigation faster & easier. 
+
+For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Me` (if using backslashes [i.e. on Windows], use double slashes for JSON encoding)
+
+	% vi ide.json
+	[...]
+	"command":"@NODE@", "params":[
+		"hermes/fsLocal.js", "-P", "/files", "-p", "0", "@HOME@"
+	],
+	[...]
+
+**NOTE:** `fsLocal` is currently broken if you bind it to a folder whose name (or whose parents's names contain a space.  For example "New folder" breaks `fsLocal`.  We are aware of the issue.
+
+### [Dropbox](id:dropbox-filesystem-service)
 
 Ares comes with an Hermes service using your Dropbox account as a storage service.    Enable this service in the `ide.json` before starting the IDE server:
 
@@ -167,54 +199,20 @@ Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to th
 			},
 			[…]
 
-## Archive service
+## [Project template service](id:project-template-services)
 
-This is the `arZip.js` service.  It takes 2 arguments:
+The service **genZip** allows to intanciate new Ares project from project templates such as [Enyo Bootplate](https://github.com/enyojs/enyo/wiki/Bootplate) or any customer specific project templates.
 
-* `pathname`
-* `port`
+These project templates can be defined in:  
 
-It can be started standlone using the following command-line (or a similar one):
+* `ide.json` located in the `ares-project` installation directory
+* `ide-plugin.json` located in _each_ Ares plugin installation directory
 
-
-…in which case it can be tested using `curl` by a command-line like the following one:
-
-	$ curl \
-		-F "file=@config.xml;filename=config.xml" \
-		-F "file=@icon.png;filename=images/icon.png" \
-		-F "archive=myapp.zip" \
-		"http://127.0.0.1:9019/arZip" > /tmp/toto.zip
-	  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-	                                 Dload  Upload   Total   Spent    Left  Speed
-	100  8387    0  3860  100  4527   216k   253k --:--:-- --:--:-- --:--:--  276k
-
-The generated file is expected to look like to below:
-
-	$ unzip -l /tmp/toto.zip 
-	Archive:  /tmp/toto.zip
-	  Length     Date   Time    Name
-	 --------    ----   ----    ----
-	      942  10-17-12 17:26   config.xml
-	     3126  10-17-12 17:26   images/icon.png
-	 --------                   -------
-	     4068                   2 files
-
-## Project template service
-
-The service "***genZip***" allows to intanciate new Ares project from project templates such as "**[bootplate](https://github.com/enyojs/enyo/wiki/Bootplate)**" or any customer specific project templates.
-These project templates can be defined:  
-
-* in "ide.json" of ares-project  
-* or in "ide.json" of Ares plugins  
-
-
-`IMPORTANT:` See [Project template configuration](#project-template-config) and [Merging Ares plugin configuration](../README.md#merging-configuration) for more information.
+See [Project template configuration](#project-template-config) and [Merging Ares plugin configuration](../README.md#merging-configuration) for more information.
 
 ### [Project template configuration](id:project-template-config)
 
-The property `projectTemplateRepositories` of the service "**genZip**" lists the template definitions that are available at project creation time.
-
-The property `projectTemplateRepositories` of the service "**genZip**" is defined in the "***ide.json***" of ares-project.
+The property `projectTemplateRepositories` of the service **genZip** lists the template definitions that are available at project creation time.  It is defined in the `ide.json` of ares-project.
 
 		{
 			"id":"genZip",
@@ -228,11 +226,10 @@ The property `projectTemplateRepositories` of the service "**genZip**" is define
 		}
 
 The `url` property above can either be an http url or a an absolute filename such as:  
-NB: Within the `ide.json` configuration file, the variables `@NODE@`, `@CWD@`, `@INSTALLDIR@`, `@HOME@` and `@PLUGINDIR@` will be subsituted by the right value when `node ide.js` is started.
 
 	"url": "@INSTALLDIR@/templates/projects/ares-project-templates.json"
 
-Ares plugins can add or modify this list of templates.
+Ares plugins can add or modify this list of templates, from their own `ide-plugin.json`.
 
 		{
 			"id": "genZip",
@@ -246,22 +243,23 @@ Ares plugins can add or modify this list of templates.
 	        }
 		}
 
-As a result, `"bootplate": {}` will remove the entry defined in ide.js of ares-project and `"my-templates": { "url" : "http://xyz.com/my-templates.json", …}` will add a new list of templates named 'my-templates'.
+In the example above, `"bootplate": {}` will remove the entry defined in the main `ide.json` and `"my-templates": { "url" : "http://xyz.com/my-templates.json", …}` will add a new list of templates named 'my-templates'.
 
 ### [Project template definition](id:project-template-definition)
 
 A project template definition (defined by the property `url` in `projectTemplateRepositories` must respect the json schema [com.enyojs.ares.project.templates.schema.json](../assets/schema/com.enyojs.ares.project.templates.schema.json).
 
-The compliance of a project template definition file with the json schema is not yet enforced but could be checked via [http://jsonschemalint.com/](http://jsonschemalint.com/).
+**NOTE:** Ares does not (yet) enforce JSON-schema compliance.  Plugin developers can check their own `ide-plugin.json` via [http://jsonschemalint.com/](http://jsonschemalint.com/).
 
 	[
 	  {
-	    "id": "bootplate-2.2.0",
+	    "id": "my-bootplate-2.2.0",
 	    "zipfiles": [
 	      {
 	        "url": "bootplate-2.2.0.zip",
 	        "alternateUrl": "http://enyojs.com/archive/bootplate-2.2.0.zip",
 	        "prefixToRemove": "bootplate",
+	        "prefixToAdd": "2.2.0",
 	        "excluded": [
 	          "bootplate/api"
 	        ]
@@ -270,6 +268,16 @@ The compliance of a project template definition file with the json schema is not
 	   	  	"url": ...
 	   	  }
 	    ],
+	    "files": [
+	      {
+	      	url: "lib/package.js.js",
+	      	installAs: "source/widgets/package.js"
+	      },
+	      {
+	      	url: "lib/MyWidget.js",
+	      	installAs: "source/widgets/MyWidget.js"
+	      }
+	    ],
 	    "description": "Enyo bootplate 2.2.0"
 	  },
 	  {
@@ -277,21 +285,25 @@ The compliance of a project template definition file with the json schema is not
 	  }
 	]
 
-Each project definition defined by `id` can reference **several zip files** defined in the array `zipfiles`. The zip files are extracted in the order they are specified.  
+Each project definition defined by `id` can reference one or several zip files defined in the array `zipfiles`, plus one or several files. The zip files are extracted in the order they are specified:  files extracted from a ZIP-file possibly overwrite those that were extracted from earlier ZIP-files.
 
-Each zip file entry:
+Each `zipfiles` entry is an `Object` which:
 
-* must define an `url` and optionally an `alternateUrl`. The `url` is tried first and can refer to either:
+* _MUST_ define an `url` and optionally an `alternateUrl`. The `url` is tried first and can refer to either:
 
-	* a file stored locally on the filesystem.  
-	NB: the filename must be relative to the directory where the project templates definition file is stored (See property `url` in `projectTemplateRepositories` above).  
+	* a `Filename`: file stored locally on the filesystem (see below).
+	* an HTTP URL.  If the `url` references a file which does not exist the `alternateUrl` is used.
 
-	* or an http url.
-	
-	If the `url` references a file which does not exist the `alternateUrl` is used.
+* _MAY_ define a `prefixToRemove`. This prefix must correspond to one or several directory level that must be removed.
+* _MAY_ define a `prefixToAdd`. This prefix defines a folder (it can be a path of nested folders, like `another/path/to`) to be prepended to the root of the ZIP archive 
+* _MAY_ define in the array `excluded` a list of files or directories to be excluded when the zip file is extracted.
 
-* can define a `prefixToRemove`. This prefix must correspond to one or several directory level that must be removed.
-* can define in the array `excluded` a list of files or directories to be excluded when the zip file is extracted.
+Each `files` entry is an `Object` which:
+
+* _MUST_ define an `url:` property, which is currently a `Filename` value
+* _MUST_ define an `installAs:` property that defines where the file is to be installed relatively to the root of the application project within Ares.
+
+**NOTE:** `Filename` values are to be relative to the directory where the project templates definition file is stored (See property `url` in `projectTemplateRepositories` above).
 
 ### Protocol
 
@@ -312,7 +324,7 @@ The default `<pathname>` value is `/genzip`.  Its value can be changed using the
 		* It's up to the caller to extract and base64 decode the files to create a new project.  
 		In Ares, this is achieved by forwarding the FormData to Hermes filesystem service via a PUT method.
 
-## Build services
+## [Build services](id:build-services)
 
 ### Ares IDE - Javascript API
 
@@ -350,20 +362,64 @@ The following resources
 			* `multipart/form-data` generated application package is the first returned part of the multipart response
 			
 
-### PhoneGap build service
+### [Archive build service](id:archive-build-service)
 
-The entire [build.phonegap.com API](https://build.phonegap.com/docs/api) is wrapped by a dedicated Hermes build service named `bdPhoneGap`.  Reasons are:
+This is the `arZip.js` service.  It takes 2 arguments:
 
-1. It is easier (more portable) to manipulate files using Node.js than using HTML5 `File` and `Blob` entities, which are not (yet) fully implemented by the browsers.
-2. build.phonegap.com does not support CORS: It refuses to answer an AJAX query (or at least the one that requests a token) that comes from a web application served from 127.0.0.1 (as Ares is in its standalone version).
+* `pathname`
+* `port`
 
-		XMLHttpRequest cannot load https://build.phonegap.com/token.
- 		Origin http://127.0.0.1 is not allowed by Access-Control-Allow-Origin.
+It can be started standlone using the following command-line (or a similar one):
 
-**Note:** Ares PhoneGap Build connector does _not_ work behind an HTTP/HTTPS proxy yet.
+…in which case it can be tested using `curl` by a command-line like the following one:
+
+	$ curl \
+		-F "file=@config.xml;filename=config.xml" \
+		-F "file=@icon.png;filename=images/icon.png" \
+		-F "archive=myapp.zip" \
+		"http://127.0.0.1:9019/arZip" > /tmp/toto.zip
+	  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+	                                 Dload  Upload   Total   Spent    Left  Speed
+	100  8387    0  3860  100  4527   216k   253k --:--:-- --:--:-- --:--:--  276k
+
+The generated file is expected to look like to below:
+
+	$ unzip -l /tmp/toto.zip 
+	Archive:  /tmp/toto.zip
+	  Length     Date   Time    Name
+	 --------    ----   ----    ----
+	      942  10-17-12 17:26   config.xml
+	     3126  10-17-12 17:26   images/icon.png
+	 --------                   -------
+	     4068                   2 files
+
+### [PhoneGap build service](id:phonegap-build-service)
+
+
+Ares includes the ability to package a mobile Enyo application using [PhoneGap Build](https://build.phonegap.com/).  You must have a properly setup account (with signing keys & distribution certificates) before being able to use Ares to build applications using PhoneGap Build.
+
+Here are a few references to create the necessary signing keys & distribution certificates:
+
+1. [Android Application Signing](http://developer.android.com/tools/publishing/app-signing.html)
+
+#### Configuration
+
+The Ares PhoneGap build service does not need any configuration but the HTTP/HTTPS proxy, if needed.  In `ide.json`, replace `XproxyUrl` by `proxyUrl` and a proxy protocol, host & port that match your needs.
+
+```
+			"useJsonp":false,
+			"verbose": false,
+			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
+			"auth": {
+```
+
+**NOTE:** Ares does not currently work behind a password-protected proxy.  Should you need this feature, please report it via JIRA or on our user's forum.
+
+#### Implementation
+
+The entire [build.phonegap.com API](https://build.phonegap.com/docs/api) is wrapped by a dedicated Hermes build service named `bdPhoneGap` that use a [PhoneGap-provided Node.js client library](https://github.com/phonegap/phonegap-build-api-js#phonegap-build-api-js-).
 
 #### Protocol
-
 
 Resources:
 

@@ -116,9 +116,26 @@ enyo.kind({
 	// events and published are defined by the base kind
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
-		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
+		{kind: "onyx.MenuDecorator", onSelect: "itemSelected", components: [
+				{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
+				{kind: "enyo.Button", name: "button", classes:"inspector-event-button"},
+				{kind: "onyx.Menu", name: "menu", floating: true, components: [
+					// Will be filled at create() time
+				]}
+			]}
 	],
-
+	handlers: {
+		onActivate: "preventMenuActivation"
+	},
+	fieldValueChanged: function() {
+		enyo.forEach(this.values, function(value) {
+			this.$.menu.createComponent({content: value, classes: "event-menu-item"});
+		}, this);
+		this.$.value.setValue(this.fieldValue);
+	},
+	preventMenuActivation: function(inSender, inEvent) {
+		return true;
+	},
 	//* Stop extraneous activate event from being fired when box is initially checked
 	handleChange: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
@@ -129,6 +146,16 @@ enyo.kind({
 		this.fieldValue = this.$.value.getValue();
 		this.doDblClick({target: this});
 		return true;
+	},
+	itemSelected: function(inSender, inEvent) {
+		this.fieldValue = inEvent.content;
+		this.$.value.setValue(inEvent.content);
+		this.doChange({target: this});
+		return true;
+	},
+	disabledChanged: function() {
+		this.inherited(arguments);
+		this.$.button.setDisabled(this.getDisabled());
 	}
 });
 
@@ -191,5 +218,30 @@ enyo.kind({
 		var selectedIndex = Math.max(0, this.values.indexOf(this.fieldValue));
 		var selected = this.$.value.getClientControls()[selectedIndex];
 		this.$.value.setSelected(selected);
+	}
+});
+
+/**
+ *
+ */
+enyo.kind({
+	name: "Inspector.Config.Number",
+	kind: "Inspector.Config.IF",
+	// events and published are defined by the base kind
+	components: [
+		{classes: "inspector-field-caption", name: "title"},
+		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
+	],
+	
+	//* Stop extraneous activate event from being fired when box is initially checked
+	handleChange: function(inSender, inEvent) {
+		this.fieldValue = this.$.value.getValue();
+		this.doChange({target: this});
+		return true;
+	},
+	handleDblClick: function(inSender, inEvent) {
+		this.fieldValue = this.$.value.getValue();
+		this.doDblClick({target: this});
+		return true;
 	}
 });

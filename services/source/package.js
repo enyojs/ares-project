@@ -4,6 +4,7 @@ enyo.depends(
 	"AresNode.js",
 	"HermesFileSystem.js",
 	"HermesFileTree.js",
+	"ProjectProperties.js",
 	"phonegap/ProjectProperties.js",
 	"phonegap/Build.js",
 	"GenZip.js"

@@ -15,6 +15,9 @@ enyo.kind({
 		onItemDrop: "itemDrop",
 		onItemDragend: "itemDragend"
 	},
+	published: {
+		createMode: false
+	},
 	style: "position: relative;",
 	components: [
 		{kind: "Scroller", classes: "enyo-fit", components: [
@@ -82,6 +85,11 @@ enyo.kind({
 			dropTargetId,
 			beforeItem,
 			beforeId = null;
+
+		if ((this.createMode === true) && this.selection) {
+			this.unHighlightItem(this.selection);
+			this.selection = null;
+		}
 		
 		if (!this.isValidDropTarget(target)) {
 			this.resetDropDetails();

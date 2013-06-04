@@ -12,19 +12,131 @@ enyo.kind({
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
-		onAdjustScroll: ""
+		onAdjustScroll: "",
+		onNodeMove: ""
 	},
 	published: {
 		service: null
 	},
-
+	handlers: {
+		ondragstart: "dragStart",
+		ondrop: "drop",
+		ondragover: "dragOver",
+		ondragout: "dragOut"
+	},
+	
 	// expandable nodes may only be opened by tapping the icon; tapping the content label
 	// will fire the nodeTap event, but will not expand the node.
 	onlyIconExpands: true,
 
 	debug: false,
+	
+	node: null,
 
-
+	dragStart: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		node = null;
+		
+		// look for the related ares.Node
+		if (inSender.kind === "ares.Node") {
+			node = inSender;
+		} else {
+			node = inSender.container;
+		}
+		
+		return true;
+	},
+	drop: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		var newParentNode = "";
+		
+		// look for the related ares.Node
+		if (inSender.kind === "ares.Node") {
+			newParentNode = inSender;
+		} else {
+			// Control or Image...
+			newParentNode = inSender.container;
+		}
+		
+		this.doNodeMove({oldNode: node, newParent: newParentNode});
+		
+		newParentNode.applyStyle("cursor", "default");
+		if (newParentNode.file.isDir && newParentNode.expanded) {
+			newParentNode.applyStyle("background-color", null);
+		}
+		
+		node = null;
+		
+		return true;
+	},
+	dragOver: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		var newParentNode = "";
+		
+		// look for the related ares.Node
+		if (inSender.kind === "ares.Node") {
+			newParentNode = inSender;
+		} else {
+			// Control or Image...
+			newParentNode = inSender.container;
+		}
+		
+		var nodeFile = node.file;
+		var newParentFile = newParentNode.file;
+		
+		// Applying the related DnD style
+		if (nodeFile != newParentFile) {
+			if (newParentFile.isDir) {
+				if (node.container.file.id != newParentFile.id) {
+						if (!nodeFile.isDir || newParentFile.isServer || newParentFile.dir.indexOf(nodeFile.dir) == -1) {
+						newParentNode.applyStyle("cursor", "pointer");
+					} else {
+						if (this.debug) this.log("target node is a child node");
+						newParentNode.applyStyle("cursor", "no-drop");
+					}
+				} else {
+					if (this.debug) this.log("target node is its own parent node");
+					newParentNode.applyStyle("cursor", "no-drop");
+				}
+			} else {
+				if (this.debug) this.log("target node is a file");
+				newParentNode.applyStyle("cursor", "no-drop");
+			}
+		} else {
+			if (this.debug) this.log("target node is itself");
+			newParentNode.applyStyle("cursor", "no-drop");
+		}
+		
+		if (newParentNode.file.isDir && newParentNode.expanded) {
+			newParentNode.applyStyle("background-color", "grey");
+		}
+				
+		return true;
+	},
+	dragOut: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		var isNode = null;
+		
+		// look for the related ares.Node to apply the DnD style
+		if (inSender.kind === "ares.Node") {
+			isNode = inSender;
+		} else {
+			// Control or Image...
+			isNode = inSender.container;
+		}
+		
+		isNode.applyStyle("cursor", "default");
+		if (isNode.file.isDir && isNode.expanded) {
+			isNode.applyStyle("background-color", null);
+		}
+		
+		return true;
+	},
+	
 	// Note: this function does not recurse
 	updateNodes: function() {
 		this.startLoading(this);
@@ -206,7 +318,7 @@ enyo.kind({
 	},
 	nodeExpand: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
-
+		
 		var subnode = inEvent.originator;
 		if (this.debug) this.log("nodeExpand called while node Expanded is " + subnode.expanded) ;
 		// update icon for expanded state
@@ -225,7 +337,7 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
-
+	
 	// All parameters are optional.
 	// - toSelectId is optional. refresh will select this entry if specified.
 	//   Nothing is selected otherwise.
@@ -277,6 +389,4 @@ enyo.kind({
 		}
 		this.debug && this.log("refreshTree done") ;
 	}
-
 });
-
