@@ -23,16 +23,17 @@ input.inspector-field-checkbox {
 	color:black;
 }
 
+.halves {
+	width: 50%;
+}
 .thirds {
 	width: 33%;
 }
-
 .thirds:last-child {
 	width: 34%;
 }
-
-.halves {
-	width: 50%;
+.fourths {
+	width: 25%;
 }
 
 .ares-inspector-row {

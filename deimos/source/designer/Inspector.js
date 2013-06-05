@@ -512,7 +512,7 @@ enyo.kind({
 					style = inControl.style;
 				}
 				this.$.content.createComponent({kind: "CssEditor", currentControlStyle: style});
-				this.$.filterLevel.show();
+				this.$.filterLevel.hide();
 				break;
 			case 'L':
 				this.makeLayoutEditor(inControl, ps);
@@ -751,7 +751,7 @@ enyo.kind({
 		{kind: "onyx.RadioGroup", fit:false, onActivate:"doValueChanged", style:"display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton fourths", components: [
 			{content:"Properties", value: "P", active:true},
 			{content:"Events", value: "E"},
-			{content:"Layout", value: "L"}
+			{content:"Layout", value: "L"},
 			{content:"Style", value: "S"}
 		]}
 	]
