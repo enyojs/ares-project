@@ -76,7 +76,7 @@ enyo.kind({
 							{tag:"label", classes : "ares-fixed-label ares-small-label", content:"Contact: "},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", name: "projectContact",
-									attributes: {title: "mail address or home page of the author"}, placeholder:"john.doe@example.com / http://example.com/support"
+									attributes: {title: "mail address or home page of the author"}, placeholder:"support@example.com"
 								}
 							]}
 						]}
