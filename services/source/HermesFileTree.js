@@ -9,12 +9,12 @@ enyo.kind({
 	},
 	handlers: {
 		onItemDown: "itemDown",
-		onItemDragover: "itemDragover",
-		onItemDrop: "itemDrop",
-		onItemDragend: "itemDragend",
 		onItemDragstart: "itemDragstart",
 		onItemDragenter: "itemDragenter",
+		onItemDragover: "itemDragover",
 		onItemDragleave: "itemDragleave",
+		onItemDrop: "itemDrop",
+		onItemDragend: "itemDragend",
 		onNodeDblClick: "nodeDblClick"
 	},
 	published: {
@@ -88,147 +88,7 @@ enyo.kind({
 		
 		return true;
 	},
-	/*itemDragover: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		
-		// Enable HTML5 drop
-		if (inEvent.preventDefault) {
-			inEvent.preventDefault();
-		}
-		
-		// look for the related ares.Node
-		var tempNode = inEvent.originator;
-		if (tempNode.kind !== "ares.Node") {
-			tempNode = tempNode.parent;
-		}
-		
-		if (this.targetNode === tempNode) {
-			return true;
-		}
-		
-		if (this.targetNode !== null) {
-			//inEvent.dataTransfer.effectAllowed = "none";
-			inEvent.dataTransfer.dropEffect = "none";
-		
-			if (this.targetNode.file.isDir && this.targetNode.expanded) {
-				this.$.selection.deselect(this.targetNode.file.id, this.targetNode);
-				this.targetNode.applyStyle("border-color", null);
-				this.targetNode.applyStyle("border-style", "none");
-				this.targetNode.applyStyle("border-width", "0px");
-			}
-		}
-		
-		this.resetHoldoverTimeout();
-		
-		// targetNode update
-		this.targetNode = tempNode;
-		
-		if (this.targetNode.file.isDir && this.targetNode.expanded) {
-			this.targetNode.applyStyle("border-color", "grey");
-			this.targetNode.applyStyle("border-style", "dotted");
-			this.targetNode.applyStyle("border-width", "1px");
-		}
-		
-		this.innerHTML = inEvent.dataTransfer.getData('text/html');
-		
-		if (!this.isValidDropTarget(this.targetNode)) {
-			if (this.debug) this.log("over: target not valid");
-			inEvent.dataTransfer.dropEffect = "none";
-		} else {
-			if (this.debug) this.log("over: target valid");
-			inEvent.preventDefault();
-			inEvent.dataTransfer.dropEffect = "move";
-		}
-		
-		this.setHoldoverTimeout(this.targetNode);
-		return true;
-	},*/
-	itemDragover: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		
-		// Enable HTML5 drop
-		if (inEvent.preventDefault) {
-			inEvent.preventDefault();
-		}
-		
-		// look for the related ares.Node
-		var tempNode = inEvent.originator;
-		if (tempNode.kind !== "ares.Node") {
-			tempNode = tempNode.parent;
-		}
-		
-		if (this.targetNode === tempNode) {
-			this.log("escape dragover");
-			return true;
-		}
-		
-		/*if (this.targetNode !== null) {
-			//inEvent.dataTransfer.effectAllowed = "none";
-			inEvent.dataTransfer.dropEffect = "none";
-		
-			if (this.targetNode.file.isDir && this.targetNode.expanded) {
-				this.targetNode.applyStyle("border-color", null);
-				this.targetNode.applyStyle("border-style", "none");
-				this.targetNode.applyStyle("border-width", "0px");
-			}
-		}*/
-		
-		/*this.resetHoldoverTimeout();
-		this.log("reset timeout dragover");
-		
-		// targetNode update
-		this.targetNode = tempNode;*/
-		
-		if (this.targetNode.file.isDir && this.targetNode.expanded) {
-			this.targetNode.applyStyle("border-color", "grey");
-			this.targetNode.applyStyle("border-style", "dotted");
-			this.targetNode.applyStyle("border-width", "1px");
-		}
-		
-		this.innerHTML = inEvent.dataTransfer.getData('text/html');
-		
-		/*if (!this.isValidDropTarget(this.targetNode)) {
-			if (this.debug) this.log("over: target not valid");
-			//inEvent.dataTransfer.dropEffect = "none";
-		} else {
-			if (this.debug) this.log("over: target valid");
-			//inEvent.preventDefault();
-			//inEvent.dataTransfer.dropEffect = "move";
-		}*/
-		
-		return true;
-	},
-	itemDrop: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		
-		if (!this.isValidDropTarget(this.targetNode)) {
-			if (this.debug) this.log("end: target not valid");
-		} else {
-			if (this.debug) this.log("end: target valid");
-			if (this.draggedNode.content != "package.js") {
-				this.moveNode(this.draggedNode, this.targetNode);
-			} else {
-				if (this.debug) this.log("package.js files cannot be moved");
-			}
-		}
-
-		return true;
-	},
-	itemDragend: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		
-		/*if (this.targetNode.file.isDir && this.targetNode.expanded) {
-			this.targetNode.applyStyle("border-color", null);
-			this.targetNode.applyStyle("border-style", "none");
-			this.targetNode.applyStyle("border-width", "0px");
-		}*/
-		
-		this.resetHoldoverTimeout();
-		this.draggedNode = null;
-		this.targetNode = null;
-		
-		return true;
-	},
+	
 	itemDragstart: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
@@ -246,8 +106,7 @@ enyo.kind({
 		return true;
 	},
 	itemDragenter: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
+		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		// look for the related ares.Node
 		var tempNode = inEvent.originator;
@@ -256,35 +115,11 @@ enyo.kind({
 		}
 		
 		if (this.targetNode === tempNode) {
-			this.log("escape dragenter");
 			return true;
 		}
 		
-		this.resetHoldoverTimeout();
-		this.log("reset timeout dragenter");
-		
-		// targetNode update
-		this.targetNode = tempNode;
-		
-		if (!this.isValidDropTarget(this.targetNode)) {
-			if (this.debug) this.log("over: target not valid");
-			//inEvent.dataTransfer.dropEffect = "none";
-			inEvent.dataTransfer.effectAllowed = "none";
-		} else {
-			if (this.debug) this.log("over: target valid");
-			//inEvent.preventDefault();
-			//inEvent.dataTransfer.dropEffect = "move";
-			inEvent.dataTransfer.effectAllowed = "move";
-		}
-		
-		return true;
-	},
-	itemDragleave: function(inSender, inEvent) {
-		//if (this.debug) 
-		this.log(inSender, "=>", inEvent);
-		
 		if (this.targetNode !== null) {
-			//inEvent.dataTransfer.effectAllowed = "none";
+			inEvent.dataTransfer.effectAllowed = "none";
 			inEvent.dataTransfer.dropEffect = "none";
 		
 			if (this.targetNode.file.isDir && this.targetNode.expanded) {
@@ -295,8 +130,95 @@ enyo.kind({
 			}
 		}
 		
+		this.resetHoldoverTimeout();
+		
+		// targetNode update
+		this.targetNode = tempNode;
+		
+		if (this.targetNode.file.isDir && this.targetNode.expanded) {
+			this.targetNode.applyStyle("border-color", "grey");
+			this.targetNode.applyStyle("border-style", "dotted");
+			this.targetNode.applyStyle("border-width", "1px");
+		}
+		
+		if (!this.isValidDropTarget(this.targetNode)) {
+			if (this.debug) this.log("enter: target not valid");
+			inEvent.dataTransfer.dropEffect = "none";
+			inEvent.dataTransfer.effectAllowed = "none";
+		} else {
+			if (this.debug) this.log("enter: target valid");
+			inEvent.dataTransfer.dropEffect = "move";
+			inEvent.dataTransfer.effectAllowed = "move";
+		}
+		
 		this.setHoldoverTimeout(this.targetNode);
-		this.log("set timeout dragleave");
+		
+		return true;
+	},
+	itemDragover: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		// Enable HTML5 drop
+		//if (inEvent.preventDefault) {
+			inEvent.preventDefault();
+		//}
+		
+		// look for the related ares.Node
+		var tempNode = inEvent.originator;
+		if (tempNode.kind !== "ares.Node") {
+			tempNode = tempNode.parent;
+		}
+		
+		if (this.targetNode === tempNode) {
+			return true;
+		}
+			
+		/*if (!this.isValidDropTarget(this.targetNode)) {
+			if (this.debug) this.log("over: target not valid");
+			//inEvent.dataTransfer.dropEffect = "none";
+		} else {
+			if (this.debug) this.log("over: target valid");
+			//inEvent.dataTransfer.dropEffect = "move";
+		}*/
+		
+		return true;
+	},
+	itemDragleave: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	itemDrop: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		if (!this.isValidDropTarget(this.targetNode)) {
+			if (this.debug) this.log("end: target not valid");
+		} else {
+			if (this.debug) this.log("end: target valid");
+			if (this.draggedNode.content != "package.js") {
+				this.moveNode(this.draggedNode, this.targetNode);
+			} else {
+				if (this.debug) this.log("package.js files cannot be moved");
+			}
+		}
+		
+		this.innerHTML = inEvent.dataTransfer.getData('text/html');
+
+		return true;
+	},
+	itemDragend: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		if (this.targetNode.file.isDir && this.targetNode.expanded) {
+			this.targetNode.applyStyle("border-color", null);
+			this.targetNode.applyStyle("border-style", "none");
+			this.targetNode.applyStyle("border-width", "0px");
+			this.$.selection.deselect(this.targetNode.file.id, this.targetNode);
+		}
+		
+		this.resetHoldoverTimeout();
+		this.draggedNode = null;
+		this.targetNode = null;
 		
 		return true;
 	},
@@ -308,8 +230,7 @@ enyo.kind({
 		this.holdoverTimeout = null;
 	},
 	holdOver: function (inTargetNode) {
-		//if (this.debug) 
-		this.log("inTargetNode=", inTargetNode);
+		if (this.debug) this.log("inTargetNode=", inTargetNode);
 		
 		// expanding closed folder node...
 		if (inTargetNode != this.draggedNode && inTargetNode.file.isDir && !inTargetNode.expanded) {
