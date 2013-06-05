@@ -191,6 +191,7 @@ body {
 	box-shadow: none; 
 	border:none;
 	height:24px;
+	color:#999999;
 }
 .ares-tab.active {
 	-o-box-shadow: inset 0px 0px 40px 0px #000000; 
