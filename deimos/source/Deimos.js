@@ -311,26 +311,17 @@ enyo.kind({
 	//* Update _inComponent.style.inProp_ to be _inValue_
 	addReplaceStyleProp: function(inComponent, inProp, inValue) {
 		var currentStyle = inComponent.style || "",
-			styleProps = this.createStyleArrayFromString(currentStyle),
-			match,
-			i
+			styleProps = {}
 		;
 		
-		// Look for property in style and replace if found
-		for (i = 0; i < styleProps.length; i++) {
-			if (styleProps[i][0].match(inProp)) {
-				styleProps[i][1] = inValue;
-				match = true;
-			}
-		}
+		// Convert css string to hash
+		enyo.Control.cssTextToDomStyles(this.trimWhitespace(currentStyle), styleProps);
 		
-		// If property wasn't matched, add it to style
-		if (!match) {
-			styleProps.push([inProp, inValue]);
-		}
+		// Add/replace inProp with inValue
+		styleProps[inProp] = inValue;
 		
 		// Convert back to a string
-		inComponent.style = this.createStyleStringFromArray(styleProps);
+		inComponent.style = enyo.Control.domStylesToCssText(styleProps);
 		this.$.inspector.userDefinedAttributes[inComponent.aresId].style = inComponent.style;
 	},
 	prepareDesignerUpdate: function() {
@@ -473,110 +464,55 @@ enyo.kind({
 	//* Add absolute positioning styling
 	addAbsolutePositioningStyle: function(inLayoutData, inControl) {
 		var currentStyle = inControl.style || "",
-			styleProps = this.createStyleArrayFromString(currentStyle),
-			positionMatched = topMatched = rightMatched = bottomMatched = leftMatched = false,
+			styleProps = {}
+		;
+		
+		// Convert css string to hash
+		enyo.Control.cssTextToDomStyles(this.trimWhitespace(currentStyle), styleProps);
+		
+		// Add absolute positioning styles (default to top and left)
+		styleProps.position = "absolute";
+		
+		// If only top property, or no top or bottom property, add top
+		if (styleProps.top || (!styleProps.top && !styleProps.bottom)) {
+			styleProps.top = inLayoutData.bounds.top + "px";
+		}
+		// If bottom add bottom
+		if (styleProps.bottom) {
+			styleProps.bottom = inLayoutData.bounds.bottom + "px";
+		}
+		
+		// If only left property, or no left or right property, add left
+		if (styleProps.left || (!styleProps.left && !styleProps.right)) {
+			styleProps.left = inLayoutData.bounds.left + "px";
+		}
+		// If right add right
+		if (styleProps.right) {
+			styleProps.right = inLayoutData.bounds.right + "px";
+		}
+		
+		// Convert back to a string and return
+		return enyo.Control.domStylesToCssText(styleProps);
+	},
+	removeAbsolutePositioningStyle: function(inControl) {
+		var currentStyle = inControl.style || "",
+			styleProps = {},
 			prop,
 			i
 		;
 		
-		// Look for matching properties in current style
-		for (i = 0; i < styleProps.length; i++) {
-			prop = styleProps[i][0];
-			if (prop.match(/position/)) {
-				positionMatched = true;
-				styleProps[i][1] = "absolute";
-			} else if (prop.match(/top/)) {
-				topMatched = true;
-				styleProps[i][1] = inLayoutData.bounds.top + "px";
-			} else if (prop.match(/right/)) {
-				rightMatched = true;
-				styleProps[i][1] = inLayoutData.bounds.right + "px";
-			} else if (prop.match(/bottom/)) {
-				bottomMatched = true;
-				styleProps[i][1] = inLayoutData.bounds.bottom + "px";
-			} else if (prop.match(/left/)) {
-				leftMatched = true;
-				styleProps[i][1] = inLayoutData.bounds.left + "px";
-			}
-		}
+		// Convert css string to hash
+		enyo.Control.cssTextToDomStyles(this.trimWhitespace(currentStyle), styleProps);
 		
-		// If any properties weren't matched, add them to style
-		if (!positionMatched) {
-			styleProps.push(["position", "absolute"]);
-		}
-		if (!topMatched && !bottomMatched) {
-			styleProps.push(["top", inLayoutData.bounds.top + "px"]);
-		}
-		if (!leftMatched && !rightMatched) {
-			styleProps.push(["left", inLayoutData.bounds.left + "px"]);
-		}
+		// Remove absolute positioning styles
+		styleProps.position = styleProps.top = styleProps.right = styleProps.bottom = styleProps.left = "";
 		
-		// Convert back to a string
-		currentStyle = this.createStyleStringFromArray(styleProps);
-		
-		return currentStyle;
-	},
-	removeAbsolutePositioningStyle: function(inControl) {
-		var currentStyle = inControl.style || "",
-			styleProps = this.createStyleArrayFromString(currentStyle),
-			prop,
-			i;
-		
-		// Look for position properties in current style and splice them out
-		for (i = 0; i < styleProps.length; i++) {
-			prop = styleProps[i][0];
-			if (prop.match(/position/) || prop.match(/top/) || prop.match(/left/)) {
-				styleProps.splice(i,1);
-				i--;
-				continue;
-			}
-		}
-		
-		// Convert back to a string
-		currentStyle = this.createStyleStringFromArray(styleProps);
-		
-		return currentStyle;
-	},
-	createStyleArrayFromString: function(inStyleStr) {
-		var styleProps = inStyleStr.split(";");
-		
-		for (var i = 0; i < styleProps.length; i++) {
-			styleProps[i] = styleProps[i].split(":");
-			if (styleProps[i].length <= 1) {
-				styleProps.splice(i,1);
-				i--;
-				continue;
-			}
-			
-			// Trim whitespace from prop and val
-			styleProps[i][0] = this.trimWhitespace(styleProps[i][0]);
-			styleProps[i][1] = this.trimWhitespace(styleProps[i][1]);
-		}
-		
-		return styleProps;
-	},
-	createStyleStringFromArray: function(inStyleArray) {
-		var styleStr = "",
-			i;
-		
-		// Compose style string
-		for (i = 0; i < inStyleArray.length; i++) {
-			if (i > 0) {
-				styleStr += " ";
-			}
-			
-			// Skip blank styles
-			if (inStyleArray[i][1] === "") {
-				continue;
-			}
-			
-			styleStr += inStyleArray[i][0] + ": " + inStyleArray[i][1] + ";";
-		}
-		
-		return styleStr;
+		// Convert back to a string and return
+		return enyo.Control.domStylesToCssText(styleProps);
 	},
 	trimWhitespace: function(inStr) {
-		return inStr.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+		inStr = inStr || "";
+		return inStr.replace(/\s/g, "");
 	},
 	//* Holdover event from ComponentView - simulate drop in designer
 	holdOver: function(inSender, inEvent) {

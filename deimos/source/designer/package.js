@@ -12,5 +12,7 @@
 	"designer.css",
 	"RPCCommunicator.js",
 	"CssEditor.js",
-	"CssEditor.css"	
+	"CssEditor.css",
+	"LayoutEditor.js",
+	"LayoutEditor.css"
 );

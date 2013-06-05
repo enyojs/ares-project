@@ -794,8 +794,7 @@ enyo.kind({
 	moveSelectionToAbsolutePosition: function(inX, inY) {
 		var container   = this.getContainerItem(),
 			containerId = container ? container.aresId : null,
-			clone       = this.cloneControl(this.selection, true), //this.createSelectionGhost(this.selection)
-			styleProps	= this.createStyleArrayFromString(this.selection.style)
+			clone       = this.cloneControl(this.selection, true) //this.createSelectionGhost(this.selection)
 		;
 		
 		this.hideSelectHighlight();
@@ -810,81 +809,42 @@ enyo.kind({
 	//* Add appropriate vertical positioning to _inControl_ based on _inY_
 	addVerticalPositioning: function(inControl, inY) {
 		var container 		= this.getContainerItem(),
-			styleProps 		= this.createStyleArrayFromString(inControl.style),
 			containerBounds = this.getRelativeBounds(container),
 			controlBounds 	= this.getRelativeBounds(inControl),
-			topMatched 		= this.findStyleMatch(styleProps, "top"),
-			bottomMatched 	= this.findStyleMatch(styleProps, "bottom")
+			styleProps		= {}
 		;
 		
-		if (bottomMatched) {
-			inControl.applyStyle("bottom", (containerBounds.height - inY - controlBounds.height) + "px");
-		}
-		if (topMatched || (!topMatched && !bottomMatched)) {
+		// Convert css string to hash
+		enyo.Control.cssTextToDomStyles(this.trimWhitespace(inControl.style), styleProps);
+		
+		if (styleProps.top || (!styleProps.top && !styleProps.bottom)) {
 			inControl.applyStyle("top", inY + "px");
+		}
+		if (styleProps.bottom) {
+			inControl.applyStyle("bottom", (containerBounds.height - inY - controlBounds.height) + "px");
 		}
 	},
 	//* Add appropriate horizontal positioning to _inControl_ based on _inX_
 	addHorizontalPositioning: function(inControl, inX) {
 		var container 		= this.getContainerItem(),
-			styleProps 		= this.createStyleArrayFromString(inControl.style),
 			containerBounds = this.getRelativeBounds(container),
 			controlBounds 	= this.getRelativeBounds(inControl),
-			leftMatched	 	= this.findStyleMatch(styleProps, "left"),
-			rightMatched 	= this.findStyleMatch(styleProps, "right")
+			styleProps		= {}
 		;
 		
-		if (rightMatched) {
-			inControl.applyStyle("right", (containerBounds.width - inX - controlBounds.width) + "px");
-		}
-		if (leftMatched || (!leftMatched && !rightMatched)) {
+		// Convert css string to hash
+		enyo.Control.cssTextToDomStyles(this.trimWhitespace(inControl.style), styleProps);
+		
+		if (styleProps.left || (!styleProps.left && !styleProps.right)) {
 			inControl.applyStyle("left", inX + "px");
 		}
-	},
-	createStyleArrayFromString: function(inStyleStr) {
-		var styleProps = inStyleStr.split(";");
-		
-		for (var i = 0; i < styleProps.length; i++) {
-			styleProps[i] = styleProps[i].split(":");
-			if (styleProps[i].length <= 1) {
-				styleProps.splice(i,1);
-				i--;
-				continue;
-			}
-			
-			// Trim whitespace from prop and val
-			styleProps[i][0] = this.trimWhitespace(styleProps[i][0]);
-			styleProps[i][1] = this.trimWhitespace(styleProps[i][1]);
+		if (styleProps.right) {
+			inControl.applyStyle("right", (containerBounds.width - inX - controlBounds.width) + "px");
 		}
-		
-		return styleProps;
-	},
-	createStyleStringFromArray: function(inStyleArray) {
-		var styleStr = "",
-			i;
-		
-		// Compose style string
-		for (i = 0; i < inStyleArray.length; i++) {
-			if (i > 0) {
-				styleStr += " ";
-			}
-			
-			styleStr += inStyleArray[i][0] + ": " + inStyleArray[i][1] + ";";
-		}
-		
-		return styleStr;
 	},
 	trimWhitespace: function(inStr) {
+		inStr = inStr || "";
 		return inStr.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-	},
-	//* Look for a property in styleArr that matches inProp
-	findStyleMatch: function(inStyleArr, inProp) {
-		for (var i = 0; i < inStyleArr.length; i++) {
-			if (inStyleArr[i][0].match(inProp)) {
-				return true;
-			}
-		}
-		return false;
 	},
 	staticPositioningHoldover: function(inEvent, inContainer) {
 		var x = inEvent.clientX,
@@ -1575,15 +1535,20 @@ enyo.kind({
 		}
 	},
 	getDragAnchors: function(inResizeComponent, inHandle) {
-		var styleProps = this.createStyleArrayFromString(inResizeComponent.style),
-			anchors = {
-				top: this.findStyleMatch(styleProps, "top"),
-				right: this.findStyleMatch(styleProps, "right"),
-				bottom: this.findStyleMatch(styleProps, "bottom"),
-				left: this.findStyleMatch(styleProps, "left")
-			}
+		var styleProps = {},
+			anchors = {}
 		;
 		
+		// Convert css string to hash
+		enyo.Control.cssTextToDomStyles(this.trimWhitespace(inResizeComponent.style), styleProps);
+		
+		// Setup anchors hash
+		anchors.top = (styleProps.top != undefined && this.trimWhitespace(styleProps.top) != "");
+		anchors.right = (styleProps.right != undefined && this.trimWhitespace(styleProps.right) != "");
+		anchors.bottom = (styleProps.bottom != undefined && this.trimWhitespace(styleProps.bottom) != "");
+		anchors.left = (styleProps.left != undefined && this.trimWhitespace(styleProps.left) != "");
+		
+		// Select top/bottom side to be adjusted based on the corner the user is dragging
 		if (inHandle.sides.top) {
 			if (anchors.top) {
 				if (anchors.bottom) {
@@ -1610,6 +1575,7 @@ enyo.kind({
 			}
 		}
 		
+		// Select left/right side to be adjusted based on the corner the user is dragging
 		if (inHandle.sides.left) {
 			if (anchors.left) {
 				if (anchors.right) {

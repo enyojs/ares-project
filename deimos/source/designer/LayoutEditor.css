@@ -1,0 +1,104 @@
+.ares-inspector-position-editor {
+	width: 280px;
+	height: 160px;
+	border: 1px solid #4c4c4c;
+	position: relative;
+	margin: 10px auto;
+	display: block;
+}
+
+.ares-inspector-position-editor-inner-box {
+	width: 140px;
+	height: 80px;
+	border: 1px solid #4c4c4c;
+	position: absolute;
+	top: 39px;
+	left: 69px;
+}
+
+.ares-inspector-position-editor .anchor-toggle {
+	cursor: pointer;
+}
+
+.ares-inspector-position-editor .top-toggle,
+.ares-inspector-position-editor .bottom-toggle {
+	width: 50px;
+	position: absolute;
+	left: 115px;
+}
+.ares-inspector-position-editor .top-toggle {
+	height: 39px;
+	top: 0px;
+}
+.ares-inspector-position-editor .bottom-toggle {
+	height: 39px;
+	bottom: 0px;
+}
+.ares-inspector-position-editor .top-toggle > *,
+.ares-inspector-position-editor .bottom-toggle > * {
+	margin: auto;
+	width: 1px;
+	height: inherit;
+}
+
+.ares-inspector-position-editor .left-toggle,
+.ares-inspector-position-editor .right-toggle {
+	width: 69px;
+	height: 40px;
+	position: absolute;
+	top: 59px;
+}
+.ares-inspector-position-editor .left-toggle {
+	left: 0px;
+}
+.ares-inspector-position-editor .right-toggle {
+	right: 0px;
+}
+.ares-inspector-position-editor .left-toggle > *,
+.ares-inspector-position-editor .right-toggle > * {
+	margin: 20px 0px 19px;
+	height: 1px;
+	width: inherit;
+}
+
+.ares-inspector-position-editor .width-toggle {
+	width: 140px;
+	height: 40px;
+	position: absolute;
+	top: 19px;
+	left: 0px;
+}
+.ares-inspector-position-editor .width-toggle > * {
+	margin: 20px 0px 19px;
+	height: 1px;
+	width: inherit;
+}
+
+.ares-inspector-position-editor .height-toggle {
+	width: 40px;
+	height: 80px;
+	position: absolute;
+	top: 0px;
+	left: 50px;
+}
+.ares-inspector-position-editor .height-toggle > * {
+	margin: auto;
+	width: 1px;
+	height: inherit;
+}
+
+.ares-inspector-position-editor .anchor-line {
+	background: #4c4c4c;
+}
+.ares-inspector-position-editor .anchor-line.disabled {
+	background: #ccc;
+}
+
+
+/* ------- LayoutKind Popup ------- */
+.layout-kind-select .onyx-popup-decorator {
+	display: inline-block;
+}
+.layout-kind-select .onyx-picker-decorator .onyx-button {
+	width: 155px;
+}
