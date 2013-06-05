@@ -157,10 +157,11 @@ enyo.kind({
 		}
 		
 		if (this.targetNode === tempNode) {
+			this.log("escape dragover");
 			return true;
 		}
 		
-		if (this.targetNode !== null) {
+		/*if (this.targetNode !== null) {
 			//inEvent.dataTransfer.effectAllowed = "none";
 			inEvent.dataTransfer.dropEffect = "none";
 		
@@ -169,12 +170,13 @@ enyo.kind({
 				this.targetNode.applyStyle("border-style", "none");
 				this.targetNode.applyStyle("border-width", "0px");
 			}
-		}
+		}*/
 		
-		this.resetHoldoverTimeout();
+		/*this.resetHoldoverTimeout();
+		this.log("reset timeout dragover");
 		
 		// targetNode update
-		this.targetNode = tempNode;
+		this.targetNode = tempNode;*/
 		
 		if (this.targetNode.file.isDir && this.targetNode.expanded) {
 			this.targetNode.applyStyle("border-color", "grey");
@@ -184,16 +186,15 @@ enyo.kind({
 		
 		this.innerHTML = inEvent.dataTransfer.getData('text/html');
 		
-		if (!this.isValidDropTarget(this.targetNode)) {
+		/*if (!this.isValidDropTarget(this.targetNode)) {
 			if (this.debug) this.log("over: target not valid");
-			inEvent.dataTransfer.dropEffect = "none";
+			//inEvent.dataTransfer.dropEffect = "none";
 		} else {
 			if (this.debug) this.log("over: target valid");
-			inEvent.preventDefault();
-			inEvent.dataTransfer.dropEffect = "move";
-		}
+			//inEvent.preventDefault();
+			//inEvent.dataTransfer.dropEffect = "move";
+		}*/
 		
-		this.setHoldoverTimeout(this.targetNode);
 		return true;
 	},
 	itemDrop: function(inSender, inEvent) {
@@ -215,11 +216,11 @@ enyo.kind({
 	itemDragend: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
-		if (this.targetNode.file.isDir && this.targetNode.expanded) {
+		/*if (this.targetNode.file.isDir && this.targetNode.expanded) {
 			this.targetNode.applyStyle("border-color", null);
 			this.targetNode.applyStyle("border-style", "none");
 			this.targetNode.applyStyle("border-width", "0px");
-		}
+		}*/
 		
 		this.resetHoldoverTimeout();
 		this.draggedNode = null;
@@ -244,29 +245,36 @@ enyo.kind({
 		return true;
 	},
 	itemDragenter: function(inSender, inEvent) {
-		//if (this.debug) this.log(inSender, "=>", inEvent);
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
 		
 		// look for the related ares.Node
-		/*var tempNode = inEvent.originator;
+		var tempNode = inEvent.originator;
 		if (tempNode.kind !== "ares.Node") {
 			tempNode = tempNode.parent;
 		}
 		
-		if (!this.isValidDropTarget(tempNode)) {
-			//if (this.debug) 
-			this.log("enter: target not valid");
-			inEvent.dataTransfer.effectAllowed = "none";
+		if (this.targetNode === tempNode) {
+			this.log("escape dragenter");
+			return true;
+		}
+		
+		this.resetHoldoverTimeout();
+		this.log("reset timeout dragenter");
+		
+		// targetNode update
+		this.targetNode = tempNode;
+		
+		if (!this.isValidDropTarget(this.targetNode)) {
+			if (this.debug) this.log("over: target not valid");
 			//inEvent.dataTransfer.dropEffect = "none";
-			//return false;
+			inEvent.dataTransfer.effectAllowed = "none";
 		} else {
-			//if (this.debug) 
-			this.log("enter: target valid");
-			//if (inEvent.preventDefault) {
-			inEvent.preventDefault();
-			//}
-			inEvent.dataTransfer.effectAllowed = "move";
+			if (this.debug) this.log("over: target valid");
+			//inEvent.preventDefault();
 			//inEvent.dataTransfer.dropEffect = "move";
-		} */
+			inEvent.dataTransfer.effectAllowed = "move";
+		}
 		
 		return true;
 	},
@@ -274,7 +282,7 @@ enyo.kind({
 		//if (this.debug) 
 		this.log(inSender, "=>", inEvent);
 		
-		/*if (this.targetNode !== null) {
+		if (this.targetNode !== null) {
 			//inEvent.dataTransfer.effectAllowed = "none";
 			inEvent.dataTransfer.dropEffect = "none";
 		
@@ -282,10 +290,12 @@ enyo.kind({
 				this.targetNode.applyStyle("border-color", null);
 				this.targetNode.applyStyle("border-style", "none");
 				this.targetNode.applyStyle("border-width", "0px");
+				this.$.selection.deselect(this.targetNode.file.id, this.targetNode);
 			}
 		}
 		
-		this.resetHoldoverTimeout();*/
+		this.setHoldoverTimeout(this.targetNode);
+		this.log("set timeout dragleave");
 		
 		return true;
 	},
@@ -297,7 +307,8 @@ enyo.kind({
 		this.holdoverTimeout = null;
 	},
 	holdOver: function (inTargetNode) {
-		if (this.debug) this.log("inTargetNode=", inTargetNode);
+		//if (this.debug) 
+		this.log("inTargetNode=", inTargetNode);
 		
 		// expanding closed folder node...
 		if (inTargetNode != this.draggedNode && inTargetNode.file.isDir && !inTargetNode.expanded) {
