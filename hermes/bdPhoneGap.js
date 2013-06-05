@@ -54,6 +54,8 @@ BdPhoneGap.prototype.use = function() {
 	this.app.use(express.cookieParser());
 	this.app.use(this.makeExpressRoute('/op'), authorize.bind(this));
 	this.app.use(this.makeExpressRoute('/api'), authorize.bind(this));
+	
+
 	function authorize(req, res, next) {
 		log.verbose("authorize()", "req.url:", req.url);
 		log.verbose("authorize()", "req.query:", req.query);
@@ -73,6 +75,9 @@ BdPhoneGap.prototype.route = function() {
 	// '/token' & '/api' -- Wrapped public Phonegap API
 	this.app.post(this.makeExpressRoute('/token'), this.getToken.bind(this));
 	this.app.get(this.makeExpressRoute('/api/v1/me'), this.getUserData.bind(this));
+	this.app.get(this.makeExpressRoute('/api/v1/apps/:applicationID'), this.getAppStatus.bind(this));
+	this.app.get(this.makeExpressRoute('/api/v1/apps/:appID/:pf/'),
+				 this.downloadApp.bind(this));
 };
 	
 BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
@@ -163,6 +168,27 @@ BdPhoneGap.prototype.getUserData = function(req, res, next) {
 		}
 	});;
 };
+BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
+	client.auth({
+		token: req.token,
+		proxy: this.config.proxyUrl
+	}, function(err1, api) {
+		if (err1) {
+			next(err1);
+		} else {
+			var appID = req.params.applicationID;
+					
+			api.get('/apps/' + appID, function(err2, userData) {
+				if (err2) {
+					next(err2);
+				} else {
+					log.info("getAppStatus()", "appStatus:", userData);
+					res.status(200).send({user: userData}).end();
+			 	}
+			});	
+		}
+	});
+};
 
 BdBase.prototype.build = function(req, res, next) {
 	var appData = {}, query = req.query;
@@ -215,7 +241,51 @@ BdBase.prototype.build = function(req, res, next) {
 		//WARNING: enabling this trace shows-up the signing keys passwords
 		log.silly("build#_parse(): appData:", appData);
 		next();
-	}
+	};
+
+
+
+
+	BdPhoneGap.prototype.downloadApp = function(req, res, next){
+
+		client.auth({
+		token: req.token,
+		proxy: this.config.proxyUrl
+	}, function(err1, api) {
+		if (err1) {
+			next(err1);
+		} else {
+			var appID = req.params.applicationID;
+			var platform = req.params.pf
+						
+			api.get('/apps/' + appID, function(err2, userData) {
+				if (err2) {
+					next(err2);
+				} else {
+					log.info("downladApp()", "downlading:", userData);
+					switch(platform){
+						case "android": {
+							api.get('/apps/' +appID +'/android', 
+							function(err2, userData) {
+								if (err2) {
+									next(err2);
+								} else {
+									log.info("getAppStatus()", "appStatus:", userData);
+									res.status(200).send({user: userData}).end();
+							 	}
+							}).pipe(fs.createWriteStream('app.apk'));
+
+							default: log.info("Another platform");
+
+
+						}
+					
+				}
+			});
+		}
+	});
+
+	};
 
 	function _upload(next) {
 		log.info("build#_upload()");

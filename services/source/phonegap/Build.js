@@ -5,7 +5,7 @@ enyo.kind({
 		onLoginFailed: "",
 		onShowWaitPopup: ""
 	},
-	debug: false,
+	debug: true,
 	/**
 	 * @private
 	 */
@@ -205,6 +205,109 @@ enyo.kind({
 		});
 		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
 	},
+	
+	/**
+	 * 
+	 */
+	_getBuildStatus: function(project, next){
+		
+		var config = project.getConfig().getData();
+		var appId = config.build.phonegap.appId;
+		
+
+		var url = this.url + '/api/v1/apps/' + appId;
+
+		var req = new enyo.Ajax({
+			url: url
+		});
+
+		this.log("l'url de la requête: ", url);
+
+
+		req.response(this, function(inSender, inData) {
+			if (this.debug) this.log("inData: ", inData);
+			
+			this.log("inData: ", inData);
+			// activate the pop up to view the results
+
+			next(null, inData);
+		});
+		req.error(this, function(inSender, inError) {
+			// invalidate token
+			this.config.auth.token = null;
+			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
+			// report the error
+			var response = inSender.xhrResponse, contentType, details;
+			if (response) {
+				contentType = response.headers['content-type'];
+				if (contentType && contentType.match('^text/plain')) {
+					details = response.body;
+				}
+			}
+			next(new Error("Unable to get PhoneGap user data (" + inError + ")"), details);
+		});
+		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
+
+	
+	},
+
+
+
+	_getInData: function(project){
+
+		var config = project.getConfig().getData();
+		var appId = config.build.phonegap.appId;
+		var data;
+
+		var url = this.url + '/api/v1/apps/' + appId;
+
+		var req = new enyo.Ajax({
+			url: url
+		});
+
+		this.log("l'url de la requête: ", url);
+
+
+		req.response(this, function(inSender, inData) {
+			if (this.debug) this.log("inData: ", inData);
+			data = inData;
+			this.log("inData: ", inData);
+			// activate the pop up to view the results
+
+		});
+		req.error(this, function(inSender, inError) {
+			// invalidate token
+			this.config.auth.token = null;
+			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
+			// report the error
+			var response = inSender.xhrResponse, contentType, details;
+			if (response) {
+				contentType = response.headers['content-type'];
+				if (contentType && contentType.match('^text/plain')) {
+					details = response.body;
+				}
+			}
+			next(new Error("Unable to get PhoneGap user data (" + inError + ")"), details);
+		});
+		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
+
+		},
+
+	_showBuildStatus: function(project, next){
+	 	
+
+	 	//this.log("the next object: ", next.user); 
+	 	var inUserData = next.user;
+
+	 	/*
+		 *show the pop-up containing informations about the previous 
+		 *build of the selected project.
+		 */
+		var buildStatusPopup = new Phonegap.BuildStatusUI();
+		
+	 	buildStatusPopup.showPopup(inUserData);
+	 	},
+
 	/**
 	 * Store relevant user account data
 	 * @param {Object} user the PhoneGap account user data
@@ -335,6 +438,17 @@ enyo.kind({
 			enyo.bind(this, this._store, project)
 		], next);
 	},
+	buildStatus: function(project, next) {
+		if (this.debug) this.log("Getting build status:  " + this.url + '/build');
+		async.waterfall([
+			enyo.bind(this, this.authorize),
+			enyo.bind(this, this._getProjectData, project),
+			enyo.bind(this, this._getBuildStatus, project),
+			enyo.bind(this, this._showBuildStatus, project)
+		], next);
+		 
+	},
+
 	/**
 	 * Collect & check information about current project
 	 * @private
@@ -448,6 +562,7 @@ enyo.kind({
 				configKind.setData(config);
 				configKind.save();
 			}
+			//xxxx
 			next(null, inData);
 		});
 		req.error(this, function(inSender, inError) {
@@ -464,6 +579,64 @@ enyo.kind({
 		req.go(query);
 	},
 
+	
+	_prepareDownloadApplication: function(project, inData, next){
+
+		if (this.debug) this.log("appData.status: ", appData.status);
+		var platforms = ["android", "ios", "winphone", "blackberry", "symbian", "webos"];
+		var targetPlatformNumber=0;
+
+		//Number of the completed build.
+		var completedBuild=0;
+		
+		//count the number of the platforms selected for the build.
+		for(key in appData.status){
+			targetPlatformNumber++;	
+		}
+		if (this.debug) this.log("Number of targeted platforms: ", targetPlatformNumber);
+
+
+
+
+		
+
+	},
+
+	_sendDownloadRequest: function(project, inData, next){
+		var url ="https://build.phonegap.com";
+		var config = project.getConfig().getData();
+		for(key in appData.download){
+			var req = new enyo.Ajax({
+			url: url
+		});
+
+		this.log("l'url de la requête: ", url);
+
+		req.response(this, function(inSender, inData) {
+			if (this.debug) this.log("inData: ", inData);
+			
+			this.log("inData: ", inData);
+			next(null, inData);
+		});
+		req.error(this, function(inSender, inError) {
+			// invalidate token
+			this.config.auth.token = null;
+			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
+			// report the error
+			var response = inSender.xhrResponse, contentType, details;
+			if (response) {
+				contentType = response.headers['content-type'];
+				if (contentType && contentType.match('^text/plain')) {
+					details = response.body;
+				}
+			}
+			next(new Error("Unable to get PhoneGap user data (" + inError + ")"), details);
+		});
+		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
+		}
+
+	},
+
 	/**
 	 * Prepare the folder where to store the built package
 	 * @private
@@ -471,7 +644,7 @@ enyo.kind({
 	_prepareStore: function(project, inData, next) {
 		var folderKey = "build." + this.getName() + ".target.folderId",
 		    folderPath = "target/" + this.getName();
-		this.doShowWaitPopup({msg: $L("Storing webOS application package")});
+		this.doShowWaitPopup({msg: $L("Storing Phonegap application package")});
 		var folderId = project.getObject(folderKey);
 		if (folderId) {
 			next(null, folderId, inData);
@@ -487,18 +660,82 @@ enyo.kind({
 		}
 	},
 
+	
 	/**
+	 * After checking that the building of the project is finished in Phongap platform, this 
+	 * function send an ajax request to the server side of Ares in order to launch
+	 * the download of the packaged application. 
+	 * If the server side of Ares succed in the downloading of this application, 
+	 * an Ajax response is piped to the client side of Ares in order to save the
+	 * file in the folder "Target" of the curent built project.
+	 * @param  {[type]}   project  [description]
+	 * @param  {[type]}   folderId [description]
+	 * @param  {[type]}   appData  [description]
+	 * @param  {Function} next     [description]
+	 * @return {[type]}            [description]
 	 * @private
 	 */
 	_store: function(project, folderId, appData, next) {
+	
 		var appKey = "build." + this.getName() + ".app";
-		if (this.debug) this.log("appData: ", appData);
+		this.log("checkpoint");
+		this.log("Entering _store function"+
+			"project: ", project, 
+			" folderId: ", folderId,
+			 ", appData:  ", appData);
+
 		project.setObject(appKey, appData);
-		// TODO: the project Model object does not
-		// persist from one Ares run to another,
-		// because it also contains transiant data.
-		// This is to be fixed as part of the
-		// ENYO-2217 user-story.
-		next();
-	}
+				
+		var self = this;
+
+		//setTimeout(next, 10000);
+		//self._getBuildStatus(project, next);
+		
+		var platforms = ["android", "ios", "winphone", "blackberry", "symbian", "webos"];
+
+		
+		//TODO : launch a parallel request (using async foreach) 
+		// in each platform use async whilst
+			 
+		
+		async.forEach(appData.status,
+			    function(platform, next) {
+			    	enyo.log("asyn.forEach first loop: ", platform);
+			        async.whilst(
+			        	function() {
+
+	   		    			return appData.status[platform] !== "pending"
+
+			        	},
+		   		    	function (next) {
+		   		    		async.waterfall([
+		   		    			function (next) {
+
+		   		        			setTimeout(next, 3000);
+		   		    			},
+		   		    			function (next) {
+		   		    				enyo.log("sending another _getBuildStatus request");
+		   		    				self._getBuildStatus(project, next);
+		   		    			},
+		   		    			function(inData, next) {
+		   		    				appData = inData;
+		   		    				next();
+		   		    			}
+		   		    		], next);
+		   		    	},
+		   		    	function(err) {
+		   		    		if (err) {
+		   		    			next(err);
+		   		    			enyo.log("check point 02");
+		   		    		} else {
+		   		    			//enyo.log("check point");
+		   		    			// success: the package is ready for download
+		   		    			// url: appData.download[platform]
+		   		    			//TODO: XXX invoke fetch & store for one package
+		   		    		}
+		   		    	})
+			    }, next);
+		
+}
 });
+
