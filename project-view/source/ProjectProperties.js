@@ -17,91 +17,98 @@ enyo.kind({
 		onSaveGeneratedXml: "",
 		onDone: ""
 	},
-
+	classes:"ares-classic-popup",
 	components: [
-		{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", components: [
-			{content: "Project", serviceId: "project", active: true, attributes: {title: 'project attributes...'}},
-			{content: "Preview", serviceId: "preview", attributes: {title: 'project preview parameters...'}}
+		{classes:"title left-align", content:"Project properties", components:[
+			{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", classes:"ares-radio-group", components: [
+				{serviceId: "project", active: true, attributes: {title: 'project attributes...'}, components:[{classes:"large-fixed", content:"Project"},{tag:"span", classes:"ares-bottom-check"}]},
+				{serviceId: "preview", attributes: {title: 'project preview parameters...'}, components:[{classes:"large-fixed", content:"Preview"},{tag:"span", classes:"ares-bottom-check"}]}
+			]},
 		]},
 		{name: "projectDrawer", kind: "onyx.Drawer", open:true, components: [		
-			{kind:"FittableColumns", components: [
-				{kind:"FittableRows", components: [
-					{classes: "ares-row", components: [
-						{tag:"label", classes : "ares-fixed-label", content: "Name: "},
-						{kind: "onyx.InputDecorator", components: [
-							{kind: "Input", defaultFocus: true, name: "projectName"}
-						]}
-					]},
-					{classes: "ares-row", components: [
-						{tag:"label", classes : "ares-fixed-label", content:"Version: "},
-						{kind: "onyx.InputDecorator", components: [
-							{kind: "Input", defaultFocus: true, name: "projectVersion"}
-						]}
-					]},
-					{classes: "ares-row", components: [
-						{tag:"label", classes : "ares-fixed-label", content:"Author name: "},
-					  	{kind: "onyx.InputDecorator", components: [
-						   {kind: "Input", name: "projectAuthor", attributes: {title: "Vendor / Committer Name"}}
-					  	]}
+			{classes:"ares-project-properties",components:[
+				{kind:"FittableColumns", components: [
+					{kind:"FittableRows", components: [
+						{classes: "ares-row", components: [
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: "Name: "},
+							{kind: "onyx.InputDecorator", components: [
+								{kind: "Input", defaultFocus: true, name: "projectName"}
+							]}
+						]},
+						{classes: "ares-row", components: [
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content:"Version: "},
+							{kind: "onyx.InputDecorator", components: [
+								{kind: "Input", defaultFocus: true, name: "projectVersion", placeholder:"0.0.1"}
+							]}
+						]},
+						{classes: "ares-row", components: [
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content:"Author name: "},
+							{kind: "onyx.InputDecorator", components: [
+								{kind: "Input", name: "projectAuthor", attributes: {title: "Vendor / Committer Name"}, placeholder:"My Company"}
+							]}
 
+						]},
+						{classes:"ares-row", name: "templatesEntry", showing: false, components: [
+							{tag:"label", classes:"ares-fixed-label ares-small-label", content:"Template:"},
+							{kind: "onyx.PickerDecorator", fit: true, components: [
+								{name: "templateButton", classes:"very-large-width", kind: "onyx.PickerButton", fit: true},
+								{kind: "onyx.FlyweightPicker", name: "templatePicker", components: [
+									{name: "template"}
+								], onSetupItem: "templateSetupItem", onSelect: "templateSelected"}
+							]}
+						]}
 					]},
-					{classes:"ares-row", name: "templatesEntry", showing: false, components: [
-						{tag:"label", classes:"ares-fixed-label", content:"Template:"},
-						{kind: "onyx.PickerDecorator", fit: true, components: [
-							{name: "templateButton", classes:"ares-fixed-input", kind: "onyx.PickerButton", fit: true},
-							{kind: "onyx.FlyweightPicker", name: "templatePicker", components: [
-								{name: "template"}
-							], onSetupItem: "templateSetupItem", onSelect: "templateSelected"}
+					{kind:"FittableRows", components: [
+						{classes: "ares-row", components: [
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: "Title: "},
+							{kind: "onyx.InputDecorator", components: [
+								{kind: "Input", defaultFocus: true, name: "projectTitle", placeholder:"My Example App"}
+							]}
+						]},
+						{classes: "ares-row", components: [
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content:"Id: "},
+							{kind: "onyx.InputDecorator", components: [
+								{kind: "Input", defaultFocus: true, name: "projectId",
+								attributes: {title: "Application ID in reverse domain-name format: com.example.apps.myapp"}, placeholder:"com.example.apps.myapp"}
+							]}
+						]},
+						{classes: "ares-row", components: [
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content:"Contact: "},
+							{kind: "onyx.InputDecorator", components: [
+								{kind: "Input", name: "projectContact",
+									attributes: {title: "mail address or home page of the author"}, placeholder:"support@example.com"
+								}
+							]}
 						]}
 					]}
 				]},
-				{kind:"FittableRows", components: [
-					{classes: "ares-row", components: [
-						{tag:"label", classes : "ares-fixed-label", content: "Title: "},
-				  		{kind: "onyx.InputDecorator", components: [
-					   		{kind: "Input", defaultFocus: true, name: "projectTitle"}
-				   		]}
-					]},
-					{classes: "ares-row", components: [
-						{tag:"label", classes : "ares-fixed-label", content:"Id: "},
-				  		{kind: "onyx.InputDecorator", components: [
-					   		{kind: "Input", defaultFocus: true, name: "projectId",
-							attributes: {title: "Application ID in reverse domain-name format: com.example.apps.myapp"}}
-				   		]}
-					]},
-					{classes: "ares-row", components: [
-						{tag:"label", classes : "ares-fixed-label", content:"Contact: "},
-					   	{kind: "onyx.InputDecorator", components: [
-						   {kind: "Input", name: "projectContact",
-							attributes: {title: "mail address or home page of the author"}
-						   }
-					   ]}
-					]}
-				]}				
-			]},
-			{name:'directoryEntry', canGenerate:false, components: [
-				 {content: "Directory: "},
-				 {content: "", name: "projectDirectory" }
-			]},
-			{tag:"p", classes:"break"},
-			{kind: "enyo.FittableColumns", classes:"ares-row", name: "servicesList"}
+				{name:'directoryEntry', canGenerate:false, components: [
+					{content: "Directory: "},
+					{content: "", name: "projectDirectory" }
+				]},
+				{tag:"p", classes:"break"},
+				{kind: "enyo.FittableColumns", classes:"ares-row", name: "servicesList"}
+			]}
 		]},
 		{name: "previewDrawer", kind: "onyx.Drawer", open: false, components: [
-			{kind: 'FittableRows', components: [
-				{classes:"ares-row", components:[
-					{tag: "label" , classes:"ares-fixed-label", content: "Top application file: "},
-					{kind: "onyx.InputDecorator", components: [
-						{kind: "Input", name: "ppTopFile",
-							attributes: {title: 'top file of your application. Typically index.html'}
-						}
+			{classes:"ares-project-properties",components:[
+				{kind: 'FittableRows', components: [
+					{classes:"ares-row", components:[
+						{tag: "label" , classes:"ares-fixed-label", content: "Top application file: "},
+						{kind: "onyx.InputDecorator", components: [
+							{kind: "Input", name: "ppTopFile",
+								attributes: {title: 'top file of your application. Typically index.html'}
+							}
+						]}
 					]}
 				]}
 			]}
 		]},
-		{name: "toolbarId", classes: "ares-bordered-toolbar", kind: "onyx.Toolbar", components: [
+		{name: "toolbarId", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
 			{kind: "onyx.Button", content: "Cancel", ontap: "doDone"},
-			{name: "ok", kind: "onyx.Button", content: "OK", ontap: "confirmTap"}
+			{name: "ok", kind: "onyx.Button", content: "OK", classes:"right", ontap: "confirmTap"}
 		]},
+
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
@@ -145,9 +152,9 @@ enyo.kind({
 			});
 			service.tab = this.$.thumbnail.$[service.id + 'Tab'] || this.$.thumbnail.createComponent({
 				name: service.id + 'Tab',
-				content: service.name,
 				serviceId: service.id,
-				showing: false
+				showing: false,
+				components:[{content:service.name, classes:"large-fixed"},{tag:"span", classes:"ares-bottom-check"}]
 			});
 			var frame = this.$.servicesList.$[service.id + 'Frame'];
 			if (typeof frame !== 'object') {
