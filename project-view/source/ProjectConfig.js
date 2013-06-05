@@ -245,7 +245,7 @@ enyo.kind({
 						role: "default"
 					},
 					preferences: {
-						"phonegap-version": "2.0.0"
+						"phonegap-version": "2.5.0"
 					}
 				}
 			},
