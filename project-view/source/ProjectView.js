@@ -22,7 +22,7 @@ enyo.kind({
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate", classes:"ares-masked-content-popup"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan", classes:"ares-masked-content-popup"},
 		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"},
-		{kind: "ProjectWizardCopy", name: "projectWizardCopy"}
+		{kind: "ProjectWizardCopy", name: "projectWizardCopy", classes:"ares-masked-content-popup"}
 	],
 	handlers: {
 		onAddProjectInList: "addProjectInList",
