@@ -141,16 +141,6 @@ enyo.kind({
 			this.targetNode.applyStyle("border-width", "1px");
 		}
 		
-		if (!this.isValidDropTarget(this.targetNode)) {
-			if (this.debug) this.log("enter: target not valid");
-			inEvent.dataTransfer.dropEffect = "none";
-			inEvent.dataTransfer.effectAllowed = "none";
-		} else {
-			if (this.debug) this.log("enter: target valid");
-			inEvent.dataTransfer.dropEffect = "move";
-			inEvent.dataTransfer.effectAllowed = "move";
-		}
-		
 		this.setHoldoverTimeout(this.targetNode);
 		
 		return true;
@@ -158,28 +148,9 @@ enyo.kind({
 	itemDragover: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
-		// Enable HTML5 drop
-		//if (inEvent.preventDefault) {
+		if (this.isValidDropTarget(this.targetNode)) {
 			inEvent.preventDefault();
-		//}
-		
-		// look for the related ares.Node
-		var tempNode = inEvent.originator;
-		if (tempNode.kind !== "ares.Node") {
-			tempNode = tempNode.parent;
 		}
-		
-		if (this.targetNode === tempNode) {
-			return true;
-		}
-			
-		/*if (!this.isValidDropTarget(this.targetNode)) {
-			if (this.debug) this.log("over: target not valid");
-			//inEvent.dataTransfer.dropEffect = "none";
-		} else {
-			if (this.debug) this.log("over: target valid");
-			//inEvent.dataTransfer.dropEffect = "move";
-		}*/
 		
 		return true;
 	},
