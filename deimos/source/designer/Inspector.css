@@ -59,7 +59,7 @@ input.inspector-field-checkbox {
 /* ------- Position Editor ------- */
 .ares-inspector-position-editor {
 	width: 280px;
-	height: 200px;
+	height: 160px;
 	border: 1px solid #4c4c4c;
 	position: relative;
 	margin: 10px auto;
@@ -68,10 +68,10 @@ input.inspector-field-checkbox {
 
 .ares-inspector-position-editor-inner-box {
 	width: 140px;
-	height: 100px;
+	height: 80px;
 	border: 1px solid #4c4c4c;
 	position: absolute;
-	top: 49px;
+	top: 39px;
 	left: 69px;
 }
 
@@ -86,11 +86,11 @@ input.inspector-field-checkbox {
 	left: 115px;
 }
 .ares-inspector-position-editor .top-toggle {
-	height: 49px;
+	height: 39px;
 	top: 0px;
 }
 .ares-inspector-position-editor .bottom-toggle {
-	height: 47px;
+	height: 39px;
 	bottom: 0px;
 }
 .ares-inspector-position-editor .top-toggle > *,
@@ -103,9 +103,9 @@ input.inspector-field-checkbox {
 .ares-inspector-position-editor .left-toggle,
 .ares-inspector-position-editor .right-toggle {
 	width: 69px;
-	height: 50px;
+	height: 40px;
 	position: absolute;
-	top: 75px;
+	top: 59px;
 }
 .ares-inspector-position-editor .left-toggle {
 	left: 0px;
@@ -115,30 +115,30 @@ input.inspector-field-checkbox {
 }
 .ares-inspector-position-editor .left-toggle > *,
 .ares-inspector-position-editor .right-toggle > * {
-	margin: 25px 0px;
+	margin: 20px 0px 19px;
 	height: 1px;
 	width: inherit;
 }
 
 .ares-inspector-position-editor .width-toggle {
 	width: 140px;
-	height: 50px;
+	height: 40px;
 	position: absolute;
-	top: 25px;
+	top: 19px;
 	left: 0px;
 }
 .ares-inspector-position-editor .width-toggle > * {
-	margin: 25px 0px;
+	margin: 20px 0px 19px;
 	height: 1px;
 	width: inherit;
 }
 
 .ares-inspector-position-editor .height-toggle {
-	width: 69px;
-	height: 100px;
+	width: 40px;
+	height: 80px;
 	position: absolute;
 	top: 0px;
-	left: 36px;
+	left: 50px;
 }
 .ares-inspector-position-editor .height-toggle > * {
 	margin: auto;
