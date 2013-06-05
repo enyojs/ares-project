@@ -88,6 +88,60 @@ enyo.kind({
 		
 		return true;
 	},
+	/*itemDragover: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		// Enable HTML5 drop
+		if (inEvent.preventDefault) {
+			inEvent.preventDefault();
+		}
+		
+		// look for the related ares.Node
+		var tempNode = inEvent.originator;
+		if (tempNode.kind !== "ares.Node") {
+			tempNode = tempNode.parent;
+		}
+		
+		if (this.targetNode === tempNode) {
+			return true;
+		}
+		
+		if (this.targetNode !== null) {
+			//inEvent.dataTransfer.effectAllowed = "none";
+			inEvent.dataTransfer.dropEffect = "none";
+		
+			if (this.targetNode.file.isDir && this.targetNode.expanded) {
+				this.targetNode.applyStyle("border-color", null);
+				this.targetNode.applyStyle("border-style", "none");
+				this.targetNode.applyStyle("border-width", "0px");
+			}
+		}
+		
+		this.resetHoldoverTimeout();
+		
+		// targetNode update
+		this.targetNode = tempNode;
+		
+		if (this.targetNode.file.isDir && this.targetNode.expanded) {
+			this.targetNode.applyStyle("border-color", "grey");
+			this.targetNode.applyStyle("border-style", "dotted");
+			this.targetNode.applyStyle("border-width", "1px");
+		}
+		
+		this.innerHTML = inEvent.dataTransfer.getData('text/html');
+		
+		if (!this.isValidDropTarget(this.targetNode)) {
+			if (this.debug) this.log("over: target not valid");
+			inEvent.dataTransfer.dropEffect = "none";
+		} else {
+			if (this.debug) this.log("over: target valid");
+			inEvent.preventDefault();
+			inEvent.dataTransfer.dropEffect = "move";
+		}
+		
+		this.setHoldoverTimeout(this.targetNode);
+		return true;
+	},*/
 	itemDragover: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
@@ -217,7 +271,21 @@ enyo.kind({
 		return true;
 	},
 	itemDragleave: function(inSender, inEvent) {
-		//if (this.debug) this.log(inSender, "=>", inEvent);
+		//if (this.debug) 
+		this.log(inSender, "=>", inEvent);
+		
+		/*if (this.targetNode !== null) {
+			//inEvent.dataTransfer.effectAllowed = "none";
+			inEvent.dataTransfer.dropEffect = "none";
+		
+			if (this.targetNode.file.isDir && this.targetNode.expanded) {
+				this.targetNode.applyStyle("border-color", null);
+				this.targetNode.applyStyle("border-style", "none");
+				this.targetNode.applyStyle("border-width", "0px");
+			}
+		}
+		
+		this.resetHoldoverTimeout();*/
 		
 		return true;
 	},
