@@ -848,9 +848,8 @@ enyo.kind({
 				});
 				
 				this.refreshFileTree(function() {
-					that.$.scroller.scrollIntoView(inTarget, true);
-					return true;
-				}, inTarget.file.id);
+						that.$.scroller.scrollIntoView(inTarget, true);
+					}, inTarget.file.id);
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to move the node:", inNode.file.name, inError);
