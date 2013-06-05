@@ -14,6 +14,8 @@ enyo.kind({
 		onItemDrop: "",
 		onItemDragend: "",
 		onItemDragstart: "",
+		onItemDragenter: "",
+		onItemDragleave: "",
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
@@ -27,6 +29,7 @@ enyo.kind({
 		ondragstart: "dragstart",
 		ondragover: "dragover",
 		ondragleave: "dragleave",
+		ondragenter: "dragenter",
 		ondrop: "drop",
 		ondragend: "dragend"
 	},
@@ -65,6 +68,16 @@ enyo.kind({
 			return true;
 		}
 		
+		this.doItemDragleave(inEvent);
+		return true;
+	},
+	dragenter: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
+		}
+		
+		this.doItemDragenter(inEvent);
+		return true;
 	},
 	drop: function(inSender, inEvent) {
 		if (!inEvent.dataTransfer) {

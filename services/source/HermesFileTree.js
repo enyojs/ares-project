@@ -13,6 +13,8 @@ enyo.kind({
 		onItemDrop: "itemDrop",
 		onItemDragend: "itemDragend",
 		onItemDragstart: "itemDragstart",
+		onItemDragenter: "itemDragenter",
+		onItemDragleave: "itemDragleave",
 		onNodeDblClick: "nodeDblClick"
 	},
 	published: {
@@ -105,7 +107,8 @@ enyo.kind({
 		}
 		
 		if (this.targetNode !== null) {
-			inEvent.dataTransfer.effectAllowed = "none";
+			//inEvent.dataTransfer.effectAllowed = "none";
+			inEvent.dataTransfer.dropEffect = "none";
 		
 			if (this.targetNode.file.isDir && this.targetNode.expanded) {
 				this.targetNode.applyStyle("border-color", null);
@@ -129,10 +132,11 @@ enyo.kind({
 		
 		if (!this.isValidDropTarget(this.targetNode)) {
 			if (this.debug) this.log("over: target not valid");
-			inEvent.dataTransfer.effectAllowed = "none";
+			inEvent.dataTransfer.dropEffect = "none";
 		} else {
 			if (this.debug) this.log("over: target valid");
-			inEvent.dataTransfer.effectAllowed = "move";
+			inEvent.preventDefault();
+			inEvent.dataTransfer.dropEffect = "move";
 		}
 		
 		this.setHoldoverTimeout(this.targetNode);
@@ -182,6 +186,38 @@ enyo.kind({
 			inEvent.dataTransfer.effectAllowed = "move";
 		}
 		inEvent.dataTransfer.setData('text/html', this.innerHTML);
+		
+		return true;
+	},
+	itemDragenter: function(inSender, inEvent) {
+		//if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		// look for the related ares.Node
+		/*var tempNode = inEvent.originator;
+		if (tempNode.kind !== "ares.Node") {
+			tempNode = tempNode.parent;
+		}
+		
+		if (!this.isValidDropTarget(tempNode)) {
+			//if (this.debug) 
+			this.log("enter: target not valid");
+			inEvent.dataTransfer.effectAllowed = "none";
+			//inEvent.dataTransfer.dropEffect = "none";
+			//return false;
+		} else {
+			//if (this.debug) 
+			this.log("enter: target valid");
+			//if (inEvent.preventDefault) {
+			inEvent.preventDefault();
+			//}
+			inEvent.dataTransfer.effectAllowed = "move";
+			//inEvent.dataTransfer.dropEffect = "move";
+		} */
+		
+		return true;
+	},
+	itemDragleave: function(inSender, inEvent) {
+		//if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		return true;
 	},
