@@ -300,6 +300,7 @@ enyo.kind({
 		onDone: "hide",
 		onModifiedConfig: "saveProjectConfig"
 	},
+	classes:"ares-masked-content-popup",
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget"}
 	],
