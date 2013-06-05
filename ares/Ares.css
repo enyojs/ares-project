@@ -496,7 +496,7 @@ p.break{
 
 /*Project properties popup*/
 .ares-project-properties { height: 215px; width: 590px; padding: 5px 10px; margin-top: 15px; }
-.ares-radio-group{ padding-top: 6px; }
+.ares-radio-group{ padding-top: 7px; }
 .ares-radio-group>button{
 	line-height: 30px;
 	padding: 0px;
@@ -521,7 +521,7 @@ p.break{
 	border-bottom: 8px solid #EAEAEA;
 	border-left: 8px solid transparent;
 	border-right: 8px solid transparent;
-	bottom: -7px;
+	bottom: -6px;
 	right: 43%;
 }
 
