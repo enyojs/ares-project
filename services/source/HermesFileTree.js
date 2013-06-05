@@ -301,7 +301,6 @@ enyo.kind({
 		
 		// expanding closed folder node...
 		if (inTargetNode != this.draggedNode && inTargetNode.file.isDir && !inTargetNode.expanded) {
-			this.$.scroller.scrollIntoView(inTargetNode, true);
 			this.$.selection.select(inTargetNode.file.id, inTargetNode);
 			
 			inTargetNode.expanded = true;
