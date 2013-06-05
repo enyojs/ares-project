@@ -8,6 +8,11 @@ enyo.kind({
 		onTreeChanged: ""
 	},
 	handlers: {
+		onItemDown: "itemDown",
+		onItemDragover: "itemDragover",
+		onItemDrop: "itemDrop",
+		onItemDragend: "itemDragend",
+		onItemDragstart: "itemDragstart",
 		onNodeDblClick: "nodeDblClick"
 	},
 	published: {
@@ -43,7 +48,7 @@ enyo.kind({
 		
 		// Hermes tree
 		{kind: "Scroller", fit: true, components: [
-			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll", onNodeMove: "moveNode" }
+			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll" }
 		]},
 
 		// track selection of nodes. here, selection Key is file or folderId.
@@ -69,7 +74,171 @@ enyo.kind({
 	selectedNode: null,
 	
 	debug: false,
+	
+	draggedNode: null,
+	targetNode: null,
+	
+	holdoverTimeout:   null,
+	holdoverTimeoutMS: 1000,
+	
+	itemDown: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	itemDragover: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		// Enable HTML5 drop
+		if (inEvent.preventDefault) {
+			inEvent.preventDefault();
+		}
+		
+		// look for the related ares.Node
+		var tempNode = inEvent.originator;
+		if (tempNode.kind !== "ares.Node") {
+			tempNode = tempNode.parent;
+		}
+		
+		if (this.targetNode === tempNode) {
+			return true;
+		}
+		
+		if (this.targetNode !== null) {
+			inEvent.dataTransfer.effectAllowed = "none";
+		
+			if (this.targetNode.file.isDir && this.targetNode.expanded) {
+				this.$.selection.deselect(this.targetNode.file.id, this.targetNode);
+				this.targetNode.applyStyle("border-color", null);
+				this.targetNode.applyStyle("border-style", "none");
+				this.targetNode.applyStyle("border-width", "0px");
+			}
+		}
+		
+		this.resetHoldoverTimeout();
+		
+		// targetNode update
+		this.targetNode = tempNode;
+		
+		if (this.targetNode.file.isDir && this.targetNode.expanded) {
+			this.targetNode.applyStyle("border-color", "grey");
+			this.targetNode.applyStyle("border-style", "dotted");
+			this.targetNode.applyStyle("border-width", "1px");
+		}
+		
+		this.innerHTML = inEvent.dataTransfer.getData('text/html');
+		
+		if (!this.isValidDropTarget(this.targetNode)) {
+			if (this.debug) this.log("over: target not valid");
+			inEvent.dataTransfer.effectAllowed = "none";
+		} else {
+			if (this.debug) this.log("over: target valid");
+			inEvent.dataTransfer.effectAllowed = "move";
+		}
+		
+		this.setHoldoverTimeout(this.targetNode);
+		return true;
+	},
+	itemDrop: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		if (!this.isValidDropTarget(this.targetNode)) {
+			if (this.debug) this.log("end: target not valid");
+		} else {
+			if (this.debug) this.log("end: target valid");
+			if (this.draggedNode.content != "package.js") {
+				this.moveNode(this.draggedNode, this.targetNode);
+			} else {
+				if (this.debug) this.log("package.js files cannot be moved");
+			}
+		}
 
+		return true;
+	},
+	itemDragend: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		if (this.targetNode.file.isDir && this.targetNode.expanded) {
+			this.targetNode.applyStyle("border-color", null);
+			this.targetNode.applyStyle("border-style", "none");
+			this.targetNode.applyStyle("border-width", "0px");
+		}
+		
+		this.resetHoldoverTimeout();
+		this.draggedNode = null;
+		this.targetNode = null;
+		
+		return true;
+	},
+	itemDragstart: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		// get the related ares.Node
+		this.draggedNode = inEvent.originator;
+		this.targetNode = this.draggedNode;
+		
+		if (this.draggedNode.content == "package.js") {
+			inEvent.dataTransfer.effectAllowed = "none";
+		} else {
+			inEvent.dataTransfer.effectAllowed = "move";
+		}
+		inEvent.dataTransfer.setData('text/html', this.innerHTML);
+		
+		return true;
+	},
+	setHoldoverTimeout: function (inTarget) {
+		this.holdoverTimeout = setTimeout(enyo.bind(this, function() { this.holdOver(inTarget); }), this.holdoverTimeoutMS);
+	},
+	resetHoldoverTimeout: function() {
+		clearTimeout(this.holdoverTimeout);
+		this.holdoverTimeout = null;
+	},
+	holdOver: function (inTargetNode) {
+		if (this.debug) this.log("inTargetNode=", inTargetNode);
+		
+		// expanding closed folder node...
+		if (inTargetNode != this.draggedNode && inTargetNode.file.isDir && !inTargetNode.expanded) {
+			this.$.selection.select(inTargetNode.file.id, inTargetNode);
+			
+			inTargetNode.expanded = true;
+			// update icon for expanded state
+			inTargetNode.setIcon("$services/assets/images/folder-open.png");
+			
+			// handle lazy-load when expanding
+			inTargetNode.updateNodes().
+				response(this, function() {
+					inTargetNode.effectExpanded();
+				});
+		}
+	},
+	isValidDropTarget: function(inNode) {
+		if (this.debug) this.log("inNode=", inNode);
+		
+		var draggedFile = this.draggedNode.file,
+				inFile = inNode.file
+		
+		if (draggedFile != inFile) {
+			if (inFile.isDir) {
+				if (this.draggedNode.container.file.id != inFile.id) {
+					if (!draggedFile.isDir || inFile.isServer || inFile.dir.indexOf(draggedFile.dir) == -1) {
+						if (this.debug) this.log("target node");
+						return true;
+					} else {
+						if (this.debug) this.log("target node is a child node");
+					}
+				} else {
+					if (this.debug) this.log("target node is its own parent node");
+				}
+			} else {
+				if (this.debug) this.log("target node is a file");
+			}
+		} else {
+			if (this.debug) this.log("target node is itself");
+		}
+	
+		return false;
+	},
+	
 	create: function() {
 		this.inherited(arguments);
 		this.enableDisableButtons();
@@ -644,57 +813,41 @@ enyo.kind({
 	 * @return null
 	 *
 	 */
-	moveNode: function(inSender, inEvent) {
-		if (this.debug) this.log("inEvent", inEvent);
+	moveNode: function(inNode, inTarget) {
+		if (this.debug) this.log("inNode", inNode, "inTarget", inTarget);
 		
-		var oldNode=inEvent.oldNode,
-				newParent=inEvent.newParent,		
-				oldNodeFile = oldNode.file,
-				newParentFile = newParent.file;
+		var that = this ;
 		
-		if (oldNodeFile != newParentFile) {
-			if (newParentFile.isDir) {
-				if (oldNode.container.file.id != newParentFile.id) {
-					if (!oldNodeFile.isDir || newParentFile.isServer || newParentFile.dir.indexOf(oldNodeFile.dir) == -1) {
-						return this.$.service.rename(oldNodeFile.id, {folderId: newParentFile.id})
-							.response(this, function(inSender, inValue) {
-								var removedParentNode = oldNode.container,
-										removePkgNode = removedParentNode.getNodeNamed('package.js'),
-										addParentNode = newParent,
-										addPkgNode = addParentNode.getNodeNamed('package.js');
-										
-								this.doTreeChanged({
-									remove: {
-										service: this.$.service,
-										parentNode: removedParentNode && removedParentNode.file,
-										pkgNode: removePkgNode && removePkgNode.file,
-										node: oldNode.file
-									},
-									add: {
-										service: this.$.service,
-										parentNode: addParentNode && addParentNode.file,
-										pkgNode: addPkgNode && addPkgNode.file,
-										node: oldNode.file
-									}
-								});
-								
-								this.refreshFileTree();
-							})
-							.error(this, function(inSender, inError) {
-								this.warn("Unable to move the node:", oldNodeFile.name, inError);
-								this.showErrorPopup("Moving node "+oldNodeFile.name+" failed:" + inError);
-							});
-					} else {
-						if (this.debug) this.log("target node is a child node");
+		return this.$.service.rename(inNode.file.id, {folderId: inTarget.file.id})
+			.response(this, function(inSender, inValue) {
+				var removedParentNode = inNode.container,
+						removePkgNode = removedParentNode.getNodeNamed('package.js'),
+						addParentNode = inTarget,
+						addPkgNode = addParentNode.getNodeNamed('package.js');
+						
+				this.doTreeChanged({
+					remove: {
+						service: this.$.service,
+						parentNode: removedParentNode && removedParentNode.file,
+						pkgNode: removePkgNode && removePkgNode.file,
+						node: inNode.file
+					},
+					add: {
+						service: this.$.service,
+						parentNode: addParentNode && addParentNode.file,
+						pkgNode: addPkgNode && addPkgNode.file,
+						node: inNode.file
 					}
-				} else {
-					if (this.debug) this.log("target node is its own parent node");
-				}
-			} else {
-				if (this.debug) this.log("target node is a file");
-			}
-		} else {
-			if (this.debug) this.log("target node is itself");
-		}
+				});
+				
+				this.refreshFileTree(function() {
+					that.$.scroller.scrollIntoView(inTarget, true);
+					return true;
+				}, inTarget.file.id);
+			})
+			.error(this, function(inSender, inError) {
+				this.warn("Unable to move the node:", inNode.file.name, inError);
+				this.showErrorPopup("Moving node "+inNode.file.name+" failed:" + inError);
+			});
 	}
 });
