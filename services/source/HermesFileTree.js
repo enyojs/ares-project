@@ -111,6 +111,7 @@ enyo.kind({
 			inEvent.dataTransfer.dropEffect = "none";
 		
 			if (this.targetNode.file.isDir && this.targetNode.expanded) {
+				this.$.selection.deselect(this.targetNode.file.id, this.targetNode);
 				this.targetNode.applyStyle("border-color", null);
 				this.targetNode.applyStyle("border-style", "none");
 				this.targetNode.applyStyle("border-width", "0px");
@@ -930,6 +931,8 @@ enyo.kind({
 	moveNode: function(inNode, inTarget) {
 		if (this.debug) this.log("inNode", inNode, "inTarget", inTarget);
 		
+		var that = this ;
+		
 		return this.$.service.rename(inNode.file.id, {folderId: inTarget.file.id})
 			.response(this, function(inSender, inValue) {
 				var removedParentNode = inNode.container,
@@ -952,7 +955,10 @@ enyo.kind({
 					}
 				});
 				
-				this.refreshFileTree();
+				this.refreshFileTree(function() {
+					that.$.scroller.scrollIntoView(inTarget, true);
+					return true;
+				}, inTarget.file.id);
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to move the node:", inNode.file.name, inError);
