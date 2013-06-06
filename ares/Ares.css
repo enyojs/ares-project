@@ -465,9 +465,9 @@ p.break{
 }
 .bottom-toolbar>.onyx-button { background-color: transparent; border: 1px solid #999999; margin:0px;}
 .ares-small-popup {width:320px; height:150px; padding: 5px 10px;}
-.ares-error-details { position:relative; width: 300px }
-.ares-error-details .button { padding-top: 10px; position:relative; }
-.ares-error-details .label { border: none; color:#000000; background: transparent; height: auto; padding-left:10px; text-align: left; }
+.ares-small-popup-details { position:relative; width: 300px; word-wrap: break-word;}
+.ares-small-popup-details .button { padding-top: 10px; position:relative; }
+.ares-small-popup-details .label { border: none; color:#000000; background: transparent; height: auto; padding-left:10px; text-align: left; }
 .ares-error-text { width: 98%; margin:5px 0px; resize: vertical;}
 .bottom-toolbar>.onyx-button.right {position: absolute; right: 7px; }
 .ares-masked-content-popup { background: none; box-shadow: none; border:none;}
