@@ -36,7 +36,7 @@ enyo.kind({
 		this.service = inLocation.service;
 		this.folderId = inLocation.folderId;
 		var req = this.service.propfind(this.folderId, 1);
-		req.response(this, function(inSender, inResponse) {
+		req.response(this, function _projectLoaded(inSender, inResponse) {
 			var prj = inResponse.children.filter(function(node){
 				return node.name === "project.json";
 			});
@@ -64,7 +64,7 @@ enyo.kind({
 	load: function(next) {
 		var data,
 		    req = this.service.getFile(this.fileId);
-		req.response(this, function(inRequest, inResponse) {
+		req.response(this, function _projectReloaded(inRequest, inResponse) {
 			if (this.debug) this.log("ProjectConfig.load: file=", inResponse);
 			if (typeof inResponse.content === 'string') {
 				try {
@@ -97,7 +97,7 @@ enyo.kind({
 		} else {
 			req = this.service.createFile(this.folderId, "project.json", JSON.stringify(this.data, null, 2));
 		}
-		req.response(this, function(inSender, inResponse) {
+		req.response(this, function _projectSaved(inSender, inResponse) {
 			if (this.debug) enyo.log("ProjectConfig.save: inResponse=", inResponse);
 			this.fileId = inResponse.id;
 			if (next instanceof Function) next();
@@ -106,97 +106,6 @@ enyo.kind({
 			enyo.error("ProjectConfig.save: error=", inError);
 			if (next instanceof Function) next(inError);
 		});
-	},
-	/**
-	 * Generate PhoneGap's config.xml on the fly
-	 *
-	 * @return {String} or undefined if PhoneGap build is disabled
-	 * for this project
-	 */
-	getPhoneGapConfigXml: function() {
-		var phonegap = this.data.build.phonegap;
-		if (!phonegap) {
-			this.log("PhoneGap build disabled: will not generate the XML");
-			return undefined;
-		}
-
-		// See http://flesler.blogspot.fr/2008/03/xmlwriter-for-javascript.html
-
-		var str, xw = new XMLWriter('UTF-8');
-		xw.indentation = 4;
-		xw.writeStartDocument();
-
-		xw.writeStartElement( 'widget' );
-		xw.writeComment('*** This is an automatically generated document.' +
-				' Do not edit it: your changes would be automatically overwritten **');
-
-		xw.writeAttributeString('xmlns','http://www.w3.org/ns/widgets');
-		xw.writeAttributeString('xmlns:gap','http://phonegap.com/ns/1.0');
-
-		xw.writeAttributeString('id', this.data.id);
-		xw.writeAttributeString('version',this.data.version);
-
-		// we use 'title' (one-line description) here because
-		// 'name' is made to be used by package names
-		xw.writeElementString('name', this.data.title);
-
-		// we have no multi-line 'description' of the
-		// application, so use our one-line description
-		xw.writeElementString('description', this.data.title);
-
-		xw.writeStartElement( 'icon' );
-		// If the project does not define an icon, use Enyo's
-		// one
-		xw.writeAttributeString('src', phonegap.icon.src || 'icon.png');
-		xw.writeAttributeString('role', phonegap.icon.role || 'default');
-		xw.writeEndElement();	// icon
-
-		xw.writeStartElement( 'author' );
-		xw.writeAttributeString('href', this.data.author.href);
-		xw.writeString(this.data.author.name);
-		xw.writeEndElement();	// author
-
-		// skip completelly the 'platforms' tags if we target
-		// all of them
-		if (phonegap.targets && (enyo.keys(phonegap.targets).length > 0)) {
-			xw.writeStartElement('platforms', 'gap');
-			for (var platformName in phonegap.targets) {
-				var platform = phonegap.targets[platformName];
-				xw.writeStartElement('platform', 'gap');
-				xw.writeAttributeString('name', platformName);
-				for (var propName in platform) {
-					xw.writeAttributeString(propName, platform[propName]);
-				}
-				xw.writeEndElement(); // gap:platform
-			}
-			xw.writeEndElement();	// gap:platforms
-		}
-
-		// UI should be helpful to define the features so that
-		// the URL's are correct... I am not sure whether it
-		// is possible to have them enforced by a JSON schema,
-		// unless we hard-code a discrete list of URL's...
-		enyo.forEach(phonegap.features, function(feature) {
-			xw.writeStartElement('feature');
-			xw.writeAttributeString('name', feature.name);
-			xw.writeEndElement(); // feature
-		}, this);
-
-		// ...same for preferences
-		for (var prefName in phonegap.preferences) {
-			xw.writeStartElement('preference');
-			xw.writeAttributeString('name', prefName);
-			xw.writeAttributeString('value', phonegap.preferences[prefName]);
-			xw.writeEndElement(); // preference
-		}
-
-		xw.writeEndElement();	// widget
-
-		//xw.writeEndDocument(); called by flush()
-		str = xw.flush();
-		xw.close();
-		if (this.debug) this.log("xml:", str);
-		return str;
 	},
 	statics: {
 		checkConfig: function(inConfig) {
@@ -216,7 +125,12 @@ enyo.kind({
 						role: "default"
 					},
 					preferences: {
-						"phonegap-version": "2.0.0"
+						"phonegap-version": "2.5.0"
+					},
+					plugins: {
+						"ChildBrowser": {
+							version: "2.5.0"
+						}
 					}
 				}
 			},
@@ -246,6 +160,11 @@ enyo.kind({
 					},
 					preferences: {
 						"phonegap-version": "2.5.0"
+					},
+					plugins: {
+						"ChildBrowser": {
+							version: "2.5.0"
+						}
 					}
 				}
 			},
