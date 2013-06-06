@@ -352,7 +352,7 @@ enyo.kind({
 					enyo.Signals.send("onPluginRegist", {pluginService: service.impl});
 					this.notifyServicesChange();
 				} catch(err) {
-					this.error("Unexpected error while creating '" + kindInformation.kind + "' for service " + serviceId , err);
+					this.error("Unexpected error while creating '" + kindInformation.kind + "' for service '" + serviceId + "': ", err.stack);
 					next(err);
 				}
 			}
