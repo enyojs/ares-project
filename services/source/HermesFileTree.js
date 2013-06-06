@@ -108,7 +108,7 @@ enyo.kind({
 		if (this.draggedNode.content == "package.js") {
 			inEvent.dataTransfer.effectAllowed = "none";
 		} else {
-			inEvent.dataTransfer.effectAllowed = "move";
+			inEvent.dataTransfer.effectAllowed = "linkMove";
 		}
 		inEvent.dataTransfer.setData('text/html', this.innerHTML);
 		
@@ -128,9 +128,6 @@ enyo.kind({
 		}
 		
 		if (this.targetNode !== null) {
-			inEvent.dataTransfer.effectAllowed = "none";
-			inEvent.dataTransfer.dropEffect = "none";
-		
 			if (this.targetNode.file.isDir && this.targetNode.expanded) {
 				this.targetNode.applyStyle("border-color", null);
 				this.targetNode.applyStyle("border-style", "none");
@@ -157,7 +154,12 @@ enyo.kind({
 	itemDragover: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
-		if (this.isValidDropTarget(this.targetNode)) {
+		if (this.draggedNode.content != "package.js") {
+			if (this.isValidDropTarget(this.targetNode)) {
+				inEvent.dataTransfer.dropEffect = "link";
+			} else {
+				inEvent.dataTransfer.dropEffect = "move";
+			}
 			inEvent.preventDefault();
 		}
 		
