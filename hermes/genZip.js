@@ -8,6 +8,7 @@ var fs = require("fs"),
     path = require("path"),
     express = require("express"),
     util  = require("util"),
+    createDomain = require('domain').create,
     log = require('npmlog'),
     temp = require("temp"),
     http = require("http"),
@@ -22,11 +23,6 @@ log.level = 'http';
 
 var FORM_DATA_LINE_BREAK = '\r\n';
 var performCleanup = true;
-
-process.on('uncaughtException', function (err) {
-	log.error(basename, err.stack);
-	process.exit(1);
-});
 
 function GenZip(config, next) {
 	var self = this;
@@ -44,6 +40,21 @@ function GenZip(config, next) {
 	if (!this.quiet) {
 		app.use(express.logger('dev'));
 	}
+
+	/*
+	 * Error Handling - Wrap exceptions in delayed handlers
+	 */
+	app.use(function(req, res, next) {
+		var domain = createDomain();
+
+		domain.on('error', function(err) {
+			next(err);
+			domain.dispose();
+		});
+
+		domain.enter();
+		next();
+	});
 
 	/**
 	 * Make sane Express matching paths

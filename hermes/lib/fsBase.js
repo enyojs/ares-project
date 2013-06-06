@@ -9,6 +9,7 @@ var fs = require("fs"),
     https = require("https"),
     tunnel = require("tunnel"),
     util  = require("util"),
+    createDomain = require('domain').create,
     temp = require("temp"),
     async = require("async"),
     HttpError = require("./httpError");
@@ -46,21 +47,31 @@ function FsBase(inConfig, next) {
 		}
 	}).bind(this));
 
-	if (express.version.match(/^2\./)) {
-		// express-2.x
-		this.app = express.createServer();
-		this.server = this.app;
-	} else {
-		// express-3.x
-		this.app = express();
-		this.server = http.createServer(this.app);
-	}
+	// express-3.x
+	this.app = express();
+	this.server = http.createServer(this.app);
 
 	this.app.configure((function() {
 		this.app.use(this.separator.bind(this));
 		if (this.level !== 'error') {
 			this.app.use(express.logger('dev'));
 		}
+
+	/*
+	 * Error Handling - Wrap exceptions in delayed handlers
+	 */
+	this.app.use(function(req, res, next) {
+		var domain = createDomain();
+
+		domain.on('error', function(err) {
+			next(err);
+			domain.dispose();
+		});
+
+		domain.enter();
+		next();
+	});
+
 		this.app.use(this.cors.bind(this));
 		this.app.use(express.cookieParser());
 		this.app.use(this.pathname, this.authorize.bind(this));
@@ -86,13 +97,9 @@ function FsBase(inConfig, next) {
 			this.respond(res, err);
 		}
 		
-		if (this.app.error) {
-			// express-2.x: explicit error handler
-			this.app.error(errorHandler.bind(this));
-		} else {
-			// express-3.x: middleware with arity === 4 is detected as the error handler
-			this.app.use(errorHandler.bind(this));
-		}
+		// express-3.x: middleware with arity === 4 is
+		// detected as the error handler
+		this.app.use(errorHandler.bind(this));
 	}).bind(this));
 
 	// outbound http/https traffic
