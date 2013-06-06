@@ -433,7 +433,8 @@ enyo.kind({
 		var query = {
 			//provided by the cookie
 			//token: this.config.auth.token,
-			title: config.title
+			title: config.title,
+			debug: true
 		};
 
 		// Already-created apps have an appId (to be reused)
@@ -444,22 +445,24 @@ enyo.kind({
 
 		// Signing keys, if applicable to the target platform
 		// & if chosen by the app developper.
-		enyo.forEach(enyo.keys(config.providers.phonegap.targets), function(target) {
-			var pgTarget = config.providers.phonegap.targets[target];
-			if (pgTarget) {
-				if (this.debug) this.log("platform:", target);
-				platforms.push(target);
-				if (typeof pgTarget === 'object') {
-					var keyId = pgTarget.keyId;
-					if (keyId) {
-						keys[target] = enyo.clone(this.getKey(target, keyId));
-						//delete keys[target].title;
-						//if (this.debug) this.log("platform:", target, "keys:", keys);
+		if (typeof config.providers.phonegap.targets === 'object') {
+			enyo.forEach(enyo.keys(config.providers.phonegap.targets), function(target) {
+				var pgTarget = config.providers.phonegap.targets[target];
+				if (pgTarget) {
+					if (this.debug) this.log("platform:", target);
+					platforms.push(target);
+					if (typeof pgTarget === 'object') {
+						var keyId = pgTarget.keyId;
+						if (keyId) {
+							keys[target] = enyo.clone(this.getKey(target, keyId));
+							//delete keys[target].title;
+							//if (this.debug) this.log("platform:", target, "keys:", keys);
+						}
 					}
 				}
-			}
-		}, this);
-		if (enyo.keys(keys).length > 0) {
+			}, this);
+		}
+		if (typeof keys ==='object' && enyo.keys(keys).length > 0) {
 			if (this.debug) this.log("keys:", keys);
 			query.keys = JSON.stringify(keys);
 		}
