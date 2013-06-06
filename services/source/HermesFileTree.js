@@ -18,7 +18,9 @@ enyo.kind({
 		onNodeDblClick: "nodeDblClick"
 	},
 	published: {
-		serverName: ""
+		serverName: "",
+		// allows filetree to have draggable subnodes or not (not per default).
+		dragAllowed: false
 	},
 	components: [
 		{kind: "onyx.Toolbar", classes: "ares-top-toolbar  hermesFileTree-toolbar", components: [
@@ -48,10 +50,8 @@ enyo.kind({
 			]}
 		]},
 		
-		// Hermes tree
-		{kind: "Scroller", fit: true, components: [
-			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll" }
-		]},
+		// Hermes tree, "serverNode" component will be added as HermesFileTree is created
+		{name: "scroller", kind: "Scroller", fit: true},
 
 		// track selection of nodes. here, selection Key is file or folderId.
 		// Selection value is the node object. Is an Enyo kind
@@ -82,6 +82,15 @@ enyo.kind({
 	
 	holdoverTimeout:   null,
 	holdoverTimeoutMS: 1000,
+			
+	create: function() {
+		this.inherited(arguments);
+		
+		this.enableDisableButtons();
+		this.createComponent(
+			{name: "serverNode", container: this.$.scroller, kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed, onExpand: "nodeExpand", onForceView: "adjustScroll" }
+		);
+	},
 	
 	itemDown: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
@@ -246,10 +255,6 @@ enyo.kind({
 		return false;
 	},
 	
-	create: function() {
-		this.inherited(arguments);
-		this.enableDisableButtons();
-	},
 	connectService: function(inService, next) {
 		if (this.debug) this.log("connect to service: ", inService);
 		this.projectUrlReady = false; // Reset the project information

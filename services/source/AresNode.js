@@ -22,7 +22,10 @@ enyo.kind({
 		onAdjustScroll: ""
 	},
 	published: {
-		service: null
+		service: null,
+		
+		// allows subnodes to be draggable or not (not per default).
+		dragAllowed: false
 	},
 	handlers: {
 		ondown: "down",
@@ -40,7 +43,7 @@ enyo.kind({
 	// expandable nodes may only be opened by tapping the icon; tapping the content label
 	// will fire the nodeTap event, but will not expand the node.
 	onlyIconExpands: true,
-
+	
 	debug: false,
 	
 	down: function(inSender, inEvent) {
@@ -164,8 +167,12 @@ enyo.kind({
 					break ;
 
 				case 1: // file added
-				    if (this.debug) this.log(rfiles[i].name + " was added") ;
-					newControl = this.createComponent( rfiles[i], {kind: "ares.Node", attributes: {draggable : true}} ) ;
+				  if (this.debug) this.log(rfiles[i].name + " was added") ;
+					if (this.dragAllowed) {
+						newControl = this.createComponent( rfiles[i], {kind: "ares.Node", dragAllowed: true, attributes: {draggable : true}} ) ;
+					} else {
+						newControl = this.createComponent( rfiles[i], {kind: "ares.Node"} ) ;
+					}
 					if (this.debug) this.log("updateNodeContent created ", newControl) ;
 					newControl.setService(this.service);
 					nfiles = this.getNodeFiles() ;
