@@ -160,7 +160,8 @@ enyo.kind({
 	removeProjectAction: function(inSender, inEvent) {
 		var popup = this.$.removeProjectPopup;
 		if (this.selected) {
-			popup.setName("Remove project '" + this.selected.getProjectName() + "' from list?");
+			popup.setName("Remove project");
+			popup.setMessage("Remove project '" + this.selected.getProjectName() + "' from list?");
 			popup.$.nukeFiles.setValue(false) ;
 			popup.show();
 		}
@@ -265,24 +266,20 @@ enyo.kind({
 enyo.kind({
 	name: "ProjectDeletePopup",
 	kind: "Ares.ActionPopup",
-	components: [
-		{kind: "Control", classes: "ares-title", content: " ", name: "title"},
-		{kind: "Control", classes: "ares-message", components: [
-			{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "nukeChanged"},
-			{kind: "Control", tag: "span", classes: "ares-padleft", content: "also delete files from disk"},
-		]},
-		{kind: "FittableColumns", name: "buttons", components: [
-			{kind: "onyx.Button", content: "Cancel", name: "cancelButton", ontap: "actionCancel"},
-			{fit: true},
-			{kind: "onyx.Button", content: "Remove", name: "actionButton", ontap: "actionConfirm"}
-		]}
-	],
 	handlers: {
 		onShow: "shown"
 	},
+	create: function() {
+ 		this.inherited(arguments);
+ 		this.log(this.$.message);
+ 		this.createComponent(
+ 				{container:this.$.popupContent, classes:"ares-more-row", components:[
+ 					{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "nukeChanged"},
+ 					{kind: "Control", tag: "span", classes: "ares-padleft", content: "also delete files from disk"}
+ 				]}
+			);
+ 	},
 	shown: function(inSender, inEvent) {
-		var w = this.$.actionButton.getBounds().width;
-		this.$.actionButton.setBounds({width: w});
 		this.nukeChanged();
 	},
 	nukeChanged: function(inSender, inEvent) {

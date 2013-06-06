@@ -5,23 +5,27 @@ enyo.kind({
         centered: true,
         floating: true,
         autoDismiss: false,
-        classes: "ares-actionpopup",
+        classes:"ares-classic-popup",
         published: {
         	name: "",
-        	actionButton: ""
+            actionButton: "",
+            message: ""
         },
     	events: {
     		onConfirmDeleteProject: "",
     		onAbandonDocAction: "",
     	},
         components: [
-                {name: "title", classes: "ares-title", content: " "},
-                {tag: "br", classes: "ares-message"},
-                {name: "buttons", kind: "FittableColumns", components: [
-                        {name: "cancelButton", kind: "onyx.Button", content: "Cancel", ontap: "actionCancel"},
-						{fit: true},
-        	            {name: "actionButton", kind: "onyx.Button", content: "Delete", ontap: "actionConfirm"}
+            {tag: "div", name: "title", classes:"title", content: " "},
+            {kind: "enyo.Scroller",  classes:"ares-small-popup", fit: true, components: [
+                {classes:"ares-small-popup-details", name:"popupContent", components:[
+                    {name:"message"}
                 ]}
+            ]},
+            {kind: "onyx.Toolbar", classes:"bottom-toolbar", name: "buttons", components: [
+                {name:"cancelButton", kind: "onyx.Button", content: "Cancel", ontap: "actionCancel"},
+                {name:"actionButton", classes:"right", kind: "onyx.Button", content: "Delete", ontap: "actionConfirm"}
+            ]}
 
         ],
         create: function() {
@@ -30,6 +34,9 @@ enyo.kind({
     	nameChanged: function(oldVal) {
     		this.$.title.setContent(this.name);
     	},
+        messageChanged:function(oldVal) {
+            this.$.message.setContent(this.message);
+        },
     	actionButtonChanged: function(oldVal) {
     		this.$.actionButton.setContent(this.actionButton);
     	},
