@@ -467,7 +467,9 @@ enyo.kind({
 		onModifiedConfig: "copyProject"
 	},
 	events: {
-		onError: ""
+		onError: "",
+		onShowWaitPopup: "",
+		onHideWaitPopup: ""
 	},
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget"}
@@ -495,6 +497,7 @@ enyo.kind({
 	// step 2:
 	copyProject: function(inSender, inEvent) {
 		if (this.debug) { this.log("Copying project", this.targetProject.getConfig().data.name); }
+		this.doShowWaitPopup({msg: "Duplicating project"});
 
 		var service = this.targetProject.getService();
 		var folderId = this.targetProject.getFolderId();
@@ -545,5 +548,6 @@ enyo.kind({
 
 		// Create the project entry in the project list
 		Ares.Workspace.projects.createProject(this.newConfigData.name, this.newFolderId, serviceId);
+		this.doHideWaitPopup();
 	}
 });
