@@ -78,7 +78,11 @@ enyo.kind({
 			}
 			this.data = ProjectConfig.checkConfig(data);
 			if (this.debug) this.log("ProjectConfig.load config=", this.data);
-			if (next instanceof Function) next();
+			if (this.data !== data) {
+				this.save(next);
+			} else {
+				if (typeof next === 'function') next();
+			}
 		});
 		req.error(this, function(inSender, inError) {
 			this.error("ProjectConfig.load:", inError);
@@ -110,30 +114,33 @@ enyo.kind({
 	statics: {
 		checkConfig: function(inConfig) {
 			var config = ares.clone(ProjectConfig.DEFAULT_PROJECT_CONFIG);
+
+			// Get default project configuration for each service that can
+			ServiceRegistry.instance.forEach(function(provider) {
+				if ((typeof provider.getDefaultProjectConfig === 'function') &&
+				    (typeof provider.getId === 'function')) {
+					var providerId = provider.getId();
+					config.providers[providerId] = provider.getDefaultProjectConfig();
+				}
+			});
+
+			// backward compatibility: turn "build: {}" into "providers: {}"
+			if (inConfig && inConfig.build) {
+				inConfig.providers = inConfig.build;
+				delete inConfig.providers;
+			}
+
+			// Overlay the actual configuration over the default one
 			ares.extend(config, inConfig);
+
+			enyo.log("ProjectConfig#checkConfig()", "checked config:", config);
 			return config;
 		},
 
 		// used to pre-fill properties of a new project
 		// contains default values
 		PREFILLED_CONFIG_FOR_UI: {
-			build: {
-				phonegap: {
-					enabled: false,
-					icon: {
-						src: "icon.png",
-						role: "default"
-					},
-					preferences: {
-						"phonegap-version": "2.5.0"
-					},
-					plugins: {
-						"ChildBrowser": {
-							version: "2.5.0"
-						}
-					}
-				}
-			},
+			providers: {},
 			preview: {
 				"top_file": 'debug.html'
 			}
@@ -151,23 +158,7 @@ enyo.kind({
 				name: "An Example Company",
 				href: "http://www.example.com"
 			},
-			build: {
-				phonegap: {
-					enabled: true,
-					icon: {
-						src: "icon.png",
-						role: "default"
-					},
-					preferences: {
-						"phonegap-version": "2.5.0"
-					},
-					plugins: {
-						"ChildBrowser": {
-							version: "2.5.0"
-						}
-					}
-				}
-			},
+			providers: {},
 			preview: {
 				"top_file": 'debug.html'
 			}

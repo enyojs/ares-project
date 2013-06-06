@@ -14,6 +14,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.config = {};
 	},
+
 	/**
 	 * Set Phonegap.Build base parameters.
 	 * 
@@ -34,18 +35,42 @@ enyo.kind({
 			if (this.debug) this.log("url:", this.url);
 		}
 	},
+
 	/**
 	 * @return {Object} the configuration this service was configured by
 	 */
 	getConfig: function() {
 		return this.config;
 	},
+
+	/**
+	 * @return the computer-friendly name of this service
+	 */
+	getId: function() {
+		return this.config.id;
+	},
+
 	/**
 	 * @return the human-friendly name of this service
 	 */
 	getName: function() {
 		return this.config.name || this.config.id;
 	},
+
+	/**
+	 * Default configuration used when a new project is created.
+	 * The Project configuration is transformed into a config.xml
+	 * file at each build.  It is later expected to be modified by
+	 * the UI kind returned by
+	 * {PhoneGap.Build#getProjectPropertiesKind}.
+	 * 
+	 * @public
+	 */
+	getDefaultProjectConfig: function() {
+		var config = Phonegap.Build.DEFAULT_PROJECT_CONFIG;
+		return config;
+	},
+
 	/**
 	 * Name of the kind to show in the {AresProperties} UI
 	 * @return the Enyo kind to use to set service-specific Ares-wide properties
@@ -61,6 +86,7 @@ enyo.kind({
 	getProjectPropertiesKind: function() {
 		return "Phonegap.ProjectProperties";
 	},
+
 	/**
 	 * @return true when configured, authenticated & authorized
 	 */
@@ -70,6 +96,7 @@ enyo.kind({
 			  this.config.auth.token &&
 			  this.config.auth.keys);
 	},
+
 	/**
 	 * Shared enyo.Ajax error handler
 	 * @private
@@ -84,6 +111,7 @@ enyo.kind({
 		}
 		next(new Error(msg + inError.toString()), details);
 	},
+
 	/**
 	 * Authenticate current user & retreive the associated token
 	 * 
@@ -102,6 +130,7 @@ enyo.kind({
 		};
 		this._getToken(next);
 	},
+
 	/**
 	 * Authorize & then retrieve information about the currently registered user
 	 * 
@@ -129,6 +158,7 @@ enyo.kind({
 			}
 		});
 	},
+
 	/**
 	 * Get a developer token from user's credentials
 	 * @param {Function} next is a CommonJS callback
@@ -174,6 +204,7 @@ enyo.kind({
 		});
 		req.go();
 	},
+
 	/**
 	 * Get a developer account information
 	 * @param {Function} next is a CommonJS callback
@@ -205,6 +236,7 @@ enyo.kind({
 		});
 		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
 	},
+
 	/**
 	 * Store relevant user account data
 	 * @param {Object} user the PhoneGap account user data
@@ -239,6 +271,7 @@ enyo.kind({
 
 		ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
 	},
+
 	/**
 	 * Get the key for the given target & id, or the list of keys for the given target
 	 * 
@@ -264,6 +297,7 @@ enyo.kind({
 		if (this.debug) this.log("target:", target, "id:", id, "=> keys:", res);
 		return res;
 	},
+
 	/**
 	 * Set the given signing key for the given platform
 	 * 
@@ -308,6 +342,7 @@ enyo.kind({
 		// Save a new authentication values for PhoneGap 
 		ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
 	},
+
 	/**
 	 * initiates the phonegap build of the given project
 	 * @see HermesBuild.js
@@ -335,6 +370,7 @@ enyo.kind({
 			enyo.bind(this, this._store, project)
 		], next);
 	},
+
 	/**
 	 * Collect & check information about current project, update config.xml
 	 * @private
@@ -347,11 +383,11 @@ enyo.kind({
 		var config = project.getConfig().getData();
 		if (this.debug) this.log("starting... project:", project);
 
-		if(!config || !config.build || !config.build.phonegap) {
+		if(!config || !config.providers || !config.providers.phonegap) {
 			next(new Error("Project not configured for Phonegap Build"));
 			return;
 		}
-		if (this.debug) this.log("PhoneGap App Id:", config.build.phonegap.appId);
+		if (this.debug) this.log("PhoneGap App Id:", config.providers.phonegap.appId);
 
 		var req = project.getService().createFile(project.getFolderId(), "config.xml", this._generateConfigXml(config));
 		req.response(this, function _savedConfigXml(inSender, inData) {
@@ -361,6 +397,7 @@ enyo.kind({
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
 	},
+
 	/**
 	 * Get the list of files of the project for further upload
 	 * @param {Object} project
@@ -379,6 +416,7 @@ enyo.kind({
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
 	},
+
 	/**
 	 * @private
 	 * @param {Object} project
@@ -399,15 +437,15 @@ enyo.kind({
 		};
 
 		// Already-created apps have an appId (to be reused)
-		if (config.build.phonegap.appId) {
-			if (this.debug) this.log("appId:", config.build.phonegap.appId);
-			query.appId = config.build.phonegap.appId;
+		if (config.providers.phonegap.appId) {
+			if (this.debug) this.log("appId:", config.providers.phonegap.appId);
+			query.appId = config.providers.phonegap.appId;
 		}
 
 		// Signing keys, if applicable to the target platform
 		// & if chosen by the app developper.
-		enyo.forEach(enyo.keys(config.build.phonegap.targets), function(target) {
-			var pgTarget = config.build.phonegap.targets[target];
+		enyo.forEach(enyo.keys(config.providers.phonegap.targets), function(target) {
+			var pgTarget = config.providers.phonegap.targets[target];
 			if (pgTarget) {
 				if (this.debug) this.log("platform:", target);
 				platforms.push(target);
@@ -434,12 +472,6 @@ enyo.kind({
 			return;
 		}
 
-		// un-comment to NOT submit the ZIP to
-		// build.phonegap.com & rather return the given JSON.
-		// Use a non-JSON string to cause an error on the
-		// server side before submission.
-		//formData.append('testJsonResponse', "make_an_error" /*JSON.stringify({id: config.build.phonegap.appId})*/ );
-
 		// Ask Hermes PhoneGap Build service to minify and zip the project
 		var req = new enyo.Ajax({
 			url: this.url + '/op/build',
@@ -450,7 +482,7 @@ enyo.kind({
 		req.response(this, function(inSender, inData) {
 			if (this.debug) enyo.log("Phonegap.Build#_submitBuildRequest(): response:", inData);
 			if (inData) {
-				config.build.phonegap.appId = inData.id;
+				config.providers.phonegap.appId = inData.id;
 				var configKind = project.getConfig();
 				configKind.setData(config);
 				configKind.save();
@@ -516,7 +548,7 @@ enyo.kind({
 	 * FIXME: define a JSON schema
 	 */
 	_generateConfigXml: function(config) {
-		var phonegap = config.build.phonegap;
+		var phonegap = config.providers.phonegap;
 		if (!phonegap) {
 			this.log("PhoneGap build disabled: will not generate the XML");
 			return undefined;
@@ -616,26 +648,20 @@ enyo.kind({
 		if (this.debug) this.log("xml:", str);
 		return str;
 	},
-	/**
-	 * @public
-	 */
-	getDefaultProjectBuilderConfig: function() {
-		var config = Phonegap.Build.DEFAULT_CONFIG;
-		return config;
-	},
+
 	statics: {
-		DEFAULT_CONFIG: {
+		DEFAULT_PROJECT_CONFIG: {
 			enabled: false,
 			icon: {
 				src: "icon.png",
 				role: "default"
 			},
 			preferences: {
-				"phonegap-version": "2.5.0"
+				"phonegap-version": "2.1.0"
 			},
 			plugins: {
 				"ChildBrowser": {
-					version: "2.5.0"
+					version: "2.1.0"
 				}
 			}
 		}
