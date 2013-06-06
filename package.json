@@ -35,7 +35,7 @@
 		"shelljs": "0.1.x",
 		"temp": "0.4.x",
 		"tunnel": "0.0.x",
-		"unzip": "0.1.x",
+		"unzip": "0.1.3",
 		"zipstream": "0.2.x"
 	},
 	"bundledDependencies": [

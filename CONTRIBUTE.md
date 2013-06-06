@@ -1,6 +1,8 @@
 Contribute to Ares
 ==================
 
+The master version of this page is located [here](https://github.com/enyojs/ares-project/blob/master/CONTRIBUTE.md).
+
 Basic architecture
 ------------------
 
@@ -30,7 +32,7 @@ Real stuff - Code
 
 1. Clone the ares-project repository from GitHub.  Using git, clone the repository using either the HTTPS or SSH urls (depending on how you have setup Git):
 
-		$ git clone --recursive git@github.com:enyojs/ares-project.git
+		$ git clone --recursive git@github.com:enyojs/ares-project.git		
 		
    If you are using a graphical Git client, there may or may not be a way to update the submodules from the GUI. If not, then use the commands above.
 
@@ -53,6 +55,10 @@ Real stuff - Code
 
 1. Until recently, `ares-project/node_modules` contained 3rd-party modules directly archived into `ares-project` own Git repository.  So existing repository owners _may_ need to run `rm -rf ares-project/node_modules` to properly update their trees.
 2. Do **NOT** use Node.js 0.10.0: Ares does not work yet using this brand new version of Node.  [We are aware of the issue](https://enyojs.atlassian.net/browse/ENYO-2063).
+
+### Coding
+
+Ares 2 is part of the EnyoJS ecosystem.  Before contributing code to Ares or Enyo, you want to read the [Contributors Guide](http://enyojs.com/community/contribute/).  Source-code contributions to the core Ares code are expected to follow the [Enyo Style Guide](https://github.com/enyojs/enyo/wiki/Style-Guide).
 
 ### Testing
 

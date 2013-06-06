@@ -25,21 +25,6 @@ body {
 	position:relative;
 }
 
-.ares-filechooser {
-	height: 400px;
-	width: 600px;
-}
-
-.ares-filechooser-header {
-	padding: 0 0.5em;
-	vertical-align: middle;
-}
-
-.ares-filechooser-footer {
-	padding: 0 0.5em;
-	vertical-align: middle;
-}
-
 /**/
 
 .ares-groupbox-item-key {
@@ -206,6 +191,7 @@ body {
 	box-shadow: none; 
 	border:none;
 	height:24px;
+	color:#999999;
 }
 .ares-tab.active {
 	-o-box-shadow: inset 0px 0px 40px 0px #000000; 
@@ -269,9 +255,8 @@ body {
 	margin-bottom: 0px;
 }
 
-/*temporary used to reduce global css impacts*/
 .file-chooser-input{
-	width: 155px;
+	width: 470px;
 }
 
 
@@ -401,7 +386,10 @@ body {
 .ares-fixed-input{
 	width: 161px; 
 }
-
+.ares-small-label{
+	min-width: 60px;
+	width: 60px;
+}
 .ares-bullet-label {
 	margin-left: 40px;
 }
@@ -412,8 +400,8 @@ body {
 
 .ares-drawer{
 	margin-top: 9px;
-	background-color: #3A3A3A;
-	border-radius: 0.5em;
+	background-color: #eaeaea;
+	border-radius: 3px;
 	padding:4px;
 	text-align: right;
 }
@@ -428,7 +416,7 @@ body {
 
 .ares-drawer:before{
     position: absolute;
-    border-color: transparent transparent #3A3A3A;
+    border-color: transparent transparent #eaeaea;
     border-style: solid;
     border-width: 0 7px 10px;
     content: "";
@@ -462,7 +450,10 @@ p.break{
 	border-radius: 6px 6px 0px 0px;
 }
 
+.ares-classic-popup >.title.left-align{ padding-left: 6px; }
+
 .ares-classic-popup > .bottom-toolbar {
+	position: relative;
 	background-image: none;
 	background-color: #CCCCCC;
 	padding: 7px;
@@ -472,11 +463,75 @@ p.break{
 	-webkit-border-radius:0px 0px 6px 6px;
 	border-radius:0px 0px 6px 6px;
 }
-.bottom-toolbar>.onyx-button { background-color: transparent; border: 1px solid #999999;}
+.bottom-toolbar>.onyx-button { background-color: transparent; border: 1px solid #999999; margin:0px;}
 .ares-small-popup {width:320px; height:150px; padding: 5px 10px;}
 .ares-error-details { position:relative; width: 300px }
 .ares-error-details .button { padding-top: 10px; position:relative; }
 .ares-error-details .label { border: none; color:#000000; background: transparent; height: auto; padding-left:10px; text-align: left; }
 .ares-error-text { width: 98%; margin:5px 0px; resize: vertical;}
-.right { float: right; }
+.bottom-toolbar>.onyx-button.right {position: absolute; right: 7px; }
+.ares-masked-content-popup { background: none; box-shadow: none; border:none;}
+
+/*file chooser*/
+.ares-filechooser { height: 400px; width: 625px; }
+.ares-filechooser-header { padding: 0 0.5em; vertical-align: middle; }
+.ares-filechooser-footer { vertical-align: middle; background: #FFFFFF; }
+.ares-create-sources {
+    height: 24%;
+    width: 100%;
+    text-align: center;
+    text-transform: uppercase;
+}
+.ares-left-pane-file-chooser{
+	background-color:#FFFFFF;
+}
+.ares-left-pane-file-chooser > .ares_harmonia_providerList{
+    height: 245px;
+    width: 100%;
+    background-color: transparent;
+    border-right: 1px solid #999999;
+}
+.ares-file-choser-row { border-top: 1px solid #999999;}
+.ares-file-chooser-label { min-width: 127px; }
 .ares-content-popup { width:409px; height:240px; padding: 5px 10px; }
+
+/*Project properties popup*/
+.ares-project-properties { height: 215px; width: 590px; padding: 5px 10px; margin-top: 15px; }
+.ares-radio-group{ padding-top: 7px; }
+.ares-radio-group>button{
+	line-height: 30px;
+	padding: 0px;
+	margin:0px;
+	background-image: none;
+	color: #666666;
+	border: 1px solid #999999;
+	width: 182px;
+}
+.ares-radio-group>button.active{
+	background-image: none;
+	background-color: #0088C2;
+	color: #FFFFFF;
+	border: 1px solid #0A3654;
+	box-shadow: inset 0px 0px 15px #0B4063;	
+}
+
+.ares-bottom-check{
+	height: 8px;
+	width: 0px;
+	position: relative;
+	border-bottom: 8px solid #EAEAEA;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	bottom: -6px;
+	right: 43%;
+}
+
+.ares-align-right{ text-align: right;}
+.ares-align-right>button{margin-left:5px;}
+input.ares-small-input{	width: 75px;}
+.ares-margin-right{ margin-right: 3px;}
+.small-picker{ width: 77px; }
+.large-picker{ width: 150px; }
+.middle-width{ width: 140px; }
+.very-large-width{ width: 217px; }
+div.large-fixed{ width: 80%; }

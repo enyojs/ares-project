@@ -6,6 +6,7 @@ enyo.kind({
 	floating: true,
 	autoDismiss: false,
 
+
 	classes: "enyo-unselectable",
 	events: {
 		onAddProjectInList: "",
@@ -21,7 +22,7 @@ enyo.kind({
 
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget"},
-		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", folderChooser: true},
+		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true},
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"}
 	],
 	debug: false,
@@ -299,6 +300,7 @@ enyo.kind({
 		onDone: "hide",
 		onModifiedConfig: "saveProjectConfig"
 	},
+	classes:"ares-masked-content-popup",
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget"}
 	],
@@ -454,3 +456,94 @@ enyo.kind({
 	}
 });
 
+enyo.kind({
+	name: "ProjectWizardCopy",
+
+	kind: "onyx.Popup",
+	modal: true, centered: true, floating: true, autoDismiss: false,
+
+	handlers: {
+		onDone: "hide",
+		onModifiedConfig: "copyProject"
+	},
+	events: {
+		onError: ""
+	},
+	components: [
+		{kind: "ProjectProperties", name: "propertiesWidget"}
+	],
+
+	debug: false,
+	targetProject: null,
+
+	/**
+	 * Step 1: start the modification by showing project properties widget
+	 */
+	start: function(target) {
+		if (target) {
+			var data = enyo.clone(target.getConfig().data);
+			// TODO: Verify that the project name and dir does not exist
+			data.name = data.name + "-Copy";
+
+			this.targetProject = target;
+			this.$.propertiesWidget.setupModif() ;
+			this.$.propertiesWidget.preFill(data);
+			this.show();
+		}
+	},
+
+	// step 2:
+	copyProject: function(inSender, inEvent) {
+		if (this.debug) { this.log("Copying project", this.targetProject.getConfig().data.name); }
+
+		var service = this.targetProject.getService();
+		var folderId = this.targetProject.getFolderId();
+		this.newConfigData = inEvent.data;
+
+		var destination = inEvent.data.name;
+
+		var req = service.copy(folderId, destination);
+		req.response(this, this.saveProjectJson);
+		req.error(this, function(inSender, inData) {
+			var msg = "Unable to duplicate the project";
+			this.log(msg, inData);
+			this.doError({msg: msg});
+		});
+
+		return true ; // stop bubble
+	},
+	saveProjectJson: function(inSender, inData) {
+		if (this.debug) { this.log(inData); }
+		var folderId = inData.id;
+		this.newFolderId = folderId;
+		var service = this.targetProject.getService();
+		var fileId;
+		enyo.forEach(inData.children, function(entry) {
+			if (entry.name === "project.json") {
+				fileId = entry.id;
+			}
+		});
+
+		if (! fileId) {
+			var msg = "Unable to duplicate the project, no 'project.json' found";
+			this.log(msg, inData);
+			this.doError({msg: msg});
+			return;
+		}
+
+		var req = service.putFile(fileId, JSON.stringify(this.newConfigData, null, 2));
+		req.response(this, this.createProjectEntry);
+		req.error(this, function(inSender, inData) {
+			var msg = "Unable to duplicate the project, unable to update 'project.json'";
+			this.log(msg, inData);
+			this.doError({msg: msg});
+		});
+	},
+	createProjectEntry: function(inSender, inData) {
+		if (this.debug) { this.log(inData); }
+		var serviceId = this.targetProject.getServiceId();
+
+		// Create the project entry in the project list
+		Ares.Workspace.projects.createProject(this.newConfigData.name, this.newFolderId, serviceId);
+	}
+});
