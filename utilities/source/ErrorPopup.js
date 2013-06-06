@@ -13,7 +13,7 @@ enyo.kind({
             {tag: "div", classes:"title", content: "Error"},
 			{kind: "enyo.Scroller", classes:"ares-small-popup", fit: true, components: [
 				{name: "msg"},
-				{classes:"ares-error-details", components:[
+				{classes:"ares-small-popup-details", components:[
 					{classes:"button", components:[
 						{tag:"label", classes:"label", name: "detailsBtn", content: "Details", ontap: "toggleDetails", showing: false},
 						{name:"detailsArrow", classes:"optionDownArrow", ontap: "toggleDetails", showing: false},
