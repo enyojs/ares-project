@@ -2,7 +2,7 @@ enyo.kind({
 	name: "Harmonia",
 	kind: "FittableColumns",
 	components: [
-		{kind: "HermesFileTree", fit: true}
+		{kind: "HermesFileTree", fit: true, dragAllowed: true}
 	],
 	debug: false,
 	create: function() {
