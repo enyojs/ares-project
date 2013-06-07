@@ -230,9 +230,9 @@ enyo.kind({
 	 *  can be a json string or an object.
 	 */
 	preFill: function(inData) {
-		this.config = typeof inData === 'object' ? inData : JSON.parse(inData) ;
-		var conf = this.config ;
-		var confDefault = ProjectConfig.PREFILLED_CONFIG_FOR_UI ;
+		var conf = typeof inData === 'object' ? inData : JSON.parse(inData);
+		conf = ProjectConfig.checkConfig(conf);
+		this.config =  conf;
 
 		 // avoid storing 'undefined' in there
 		this.$.projectId.     setValue(conf.id      || '' );
@@ -244,7 +244,7 @@ enyo.kind({
 		this.$.projectAuthor. setValue(conf.author.name || '') ;
 		this.$.projectContact.setValue(conf.author.href || '') ;
 
-		// Load each builder service configuration into its
+		// Load each provider service configuration into its
 		// respective ProjectProperties panel
 		enyo.forEach(enyo.keys(this.services), function(serviceId) {
 			this.showService(serviceId);
@@ -272,8 +272,8 @@ enyo.kind({
 
 	showService: function(serviceId) {
 		var service = this.services[serviceId];
-		var config = this.config && this.config.build &&
-			    this.config.build[serviceId];
+		var config = this.config && this.config.providers &&
+			    this.config.providers[serviceId];
 		var enabled = config && config.enabled;
 		service.checkBox.setChecked(enabled);
 		service.tab.setShowing(enabled);
@@ -294,12 +294,12 @@ enyo.kind({
 		this.config.author.name = this.$.projectAuthor.getValue();
 		this.config.author.href = this.$.projectContact.getValue();
 
-		// Dump each builder service configuration panel into
+		// Dump each provider service configuration panel into
 		// the project configuration.
 		enyo.forEach(enyo.keys(this.services), function(serviceId) {
 			var service = this.services[serviceId];
-			this.config.build[service.id] = service.panel.getProjectConfig();
-			this.config.build[service.id].enabled = service.checkBox.checked;
+			this.config.providers[service.id] = service.panel.getProjectConfig();
+			this.config.providers[service.id].enabled = service.checkBox.checked;
 		}, this);
 
 		ppConf = this.config.preview ;
