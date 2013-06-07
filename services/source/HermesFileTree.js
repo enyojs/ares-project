@@ -9,14 +9,18 @@ enyo.kind({
 	},
 	handlers: {
 		onItemDown: "itemDown",
+		onItemDragstart: "itemDragstart",
+		onItemDragenter: "itemDragenter",
 		onItemDragover: "itemDragover",
+		onItemDragleave: "itemDragleave",
 		onItemDrop: "itemDrop",
 		onItemDragend: "itemDragend",
-		onItemDragstart: "itemDragstart",
 		onNodeDblClick: "nodeDblClick"
 	},
 	published: {
-		serverName: ""
+		serverName: "",
+		// allows filetree to have draggable subnodes or not (not per default).
+		dragAllowed: false
 	},
 	components: [
 		{kind: "onyx.Toolbar", classes: "ares-top-toolbar  hermesFileTree-toolbar", components: [
@@ -46,10 +50,8 @@ enyo.kind({
 			]}
 		]},
 		
-		// Hermes tree
-		{kind: "Scroller", fit: true, components: [
-			{name: "serverNode", kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, onExpand: "nodeExpand", onForceView: "adjustScroll" }
-		]},
+		// Hermes tree, "serverNode" component will be added as HermesFileTree is created
+		{name: "scroller", kind: "Scroller", fit: true},
 
 		// track selection of nodes. here, selection Key is file or folderId.
 		// Selection value is the node object. Is an Enyo kind
@@ -80,19 +82,40 @@ enyo.kind({
 	
 	holdoverTimeout:   null,
 	holdoverTimeoutMS: 1000,
+			
+	create: function() {
+		this.inherited(arguments);
+		
+		this.enableDisableButtons();
+		this.createComponent(
+			{name: "serverNode", container: this.$.scroller, kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed, onExpand: "nodeExpand", onForceView: "adjustScroll" }
+		);
+	},
 	
 	itemDown: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		return true;
 	},
-	itemDragover: function(inSender, inEvent) {
+	
+	itemDragstart: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
-		// Enable HTML5 drop
-		if (inEvent.preventDefault) {
-			inEvent.preventDefault();
+		// get the related ares.Node
+		this.draggedNode = inEvent.originator;
+		this.targetNode = this.draggedNode;
+		
+		if (this.draggedNode.content == "package.js") {
+			inEvent.dataTransfer.effectAllowed = "none";
+		} else {
+			inEvent.dataTransfer.effectAllowed = "linkMove";
 		}
+		inEvent.dataTransfer.setData('text/html', this.innerHTML);
+		
+		return true;
+	},
+	itemDragenter: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		// look for the related ares.Node
 		var tempNode = inEvent.originator;
@@ -105,13 +128,11 @@ enyo.kind({
 		}
 		
 		if (this.targetNode !== null) {
-			inEvent.dataTransfer.effectAllowed = "none";
-		
 			if (this.targetNode.file.isDir && this.targetNode.expanded) {
-				this.$.selection.deselect(this.targetNode.file.id, this.targetNode);
 				this.targetNode.applyStyle("border-color", null);
 				this.targetNode.applyStyle("border-style", "none");
 				this.targetNode.applyStyle("border-width", "0px");
+				this.$.selection.deselect(this.targetNode.file.id, this.targetNode);
 			}
 		}
 		
@@ -126,17 +147,27 @@ enyo.kind({
 			this.targetNode.applyStyle("border-width", "1px");
 		}
 		
-		this.innerHTML = inEvent.dataTransfer.getData('text/html');
+		this.setHoldoverTimeout(this.targetNode);
 		
-		if (!this.isValidDropTarget(this.targetNode)) {
-			if (this.debug) this.log("over: target not valid");
-			inEvent.dataTransfer.effectAllowed = "none";
-		} else {
-			if (this.debug) this.log("over: target valid");
-			inEvent.dataTransfer.effectAllowed = "move";
+		return true;
+	},
+	itemDragover: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
+		if (this.draggedNode.content != "package.js") {
+			if (this.isValidDropTarget(this.targetNode)) {
+				inEvent.dataTransfer.dropEffect = "link";
+			} else {
+				inEvent.dataTransfer.dropEffect = "move";
+			}
+			inEvent.preventDefault();
 		}
 		
-		this.setHoldoverTimeout(this.targetNode);
+		return true;
+	},
+	itemDragleave: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		
 		return true;
 	},
 	itemDrop: function(inSender, inEvent) {
@@ -152,6 +183,8 @@ enyo.kind({
 				if (this.debug) this.log("package.js files cannot be moved");
 			}
 		}
+		
+		this.innerHTML = inEvent.dataTransfer.getData('text/html');
 
 		return true;
 	},
@@ -162,27 +195,12 @@ enyo.kind({
 			this.targetNode.applyStyle("border-color", null);
 			this.targetNode.applyStyle("border-style", "none");
 			this.targetNode.applyStyle("border-width", "0px");
+			this.$.selection.deselect(this.targetNode.file.id, this.targetNode);
 		}
 		
 		this.resetHoldoverTimeout();
 		this.draggedNode = null;
 		this.targetNode = null;
-		
-		return true;
-	},
-	itemDragstart: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		
-		// get the related ares.Node
-		this.draggedNode = inEvent.originator;
-		this.targetNode = this.draggedNode;
-		
-		if (this.draggedNode.content == "package.js") {
-			inEvent.dataTransfer.effectAllowed = "none";
-		} else {
-			inEvent.dataTransfer.effectAllowed = "move";
-		}
-		inEvent.dataTransfer.setData('text/html', this.innerHTML);
 		
 		return true;
 	},
@@ -239,10 +257,6 @@ enyo.kind({
 		return false;
 	},
 	
-	create: function() {
-		this.inherited(arguments);
-		this.enableDisableButtons();
-	},
 	connectService: function(inService, next) {
 		if (this.debug) this.log("connect to service: ", inService);
 		this.projectUrlReady = false; // Reset the project information
@@ -841,9 +855,8 @@ enyo.kind({
 				});
 				
 				this.refreshFileTree(function() {
-					that.$.scroller.scrollIntoView(inTarget, true);
-					return true;
-				}, inTarget.file.id);
+						that.$.scroller.scrollIntoView(inTarget, true);
+					}, inTarget.file.id);
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to move the node:", inNode.file.name, inError);
