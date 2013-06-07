@@ -5,6 +5,14 @@ enyo.kind({
 		onLoginFailed: "",
 		onShowWaitPopup: ""
 	},
+	published: {
+		application: ""
+	},
+	components: [
+		{kind: "Phonegap.BuildStatusUI",
+		 name: "buildStatusPopup"
+		}
+	],
 	debug: true,
 	/**
 	 * @private
@@ -204,38 +212,38 @@ enyo.kind({
 			next(new Error("Unable to get PhoneGap user data (" + inError + ")"), details);
 		});
 		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
-	},
-	
+	},	
 	/**
+	 * This function send an Ajax request to node.js in order to get all the
+	 * details about the project built in Phongap platform.
 	 * 
+	 * @param  {[type]}   project contain informations about the Ares project
+	 * @param  {Function} next    is a CommonJS callback
+	 * @private
 	 */
 	_getBuildStatus: function(project, next){
 		
 		var config = project.getConfig().getData();
 		var appId = config.build.phonegap.appId;
-		
-
 		var url = this.url + '/api/v1/apps/' + appId;
-
+		
+		//Creation of the Ajax request
 		var req = new enyo.Ajax({
 			url: url
 		});
 
-		this.log("l'url de la requête: ", url);
-
-
+		//in case of sucess send the obtained JSON object to the next function
+		//in the Async.waterfall.
 		req.response(this, function(inSender, inData) {
-			if (this.debug) this.log("inData: ", inData);
-			
-			this.log("inData: ", inData);
-			// activate the pop up to view the results
-
-			next(null, inData);
+		
+		  // activate the pop up to view the results
+		  next(null, inData);
 		});
 		req.error(this, function(inSender, inError) {
 			// invalidate token
 			this.config.auth.token = null;
 			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
+			
 			// report the error
 			var response = inSender.xhrResponse, contentType, details;
 			if (response) {
@@ -247,38 +255,40 @@ enyo.kind({
 			next(new Error("Unable to get PhoneGap user data (" + inError + ")"), details);
 		});
 		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
-
-	
 	},
-
-
-
-	_getInData: function(project){
-
+	/**
+	 * This function do the same thing as the function _getBuildStatus except
+	 * the fact that it's binded in the "buildStatus" function.
+	 * @Me this function should be refactored. 
+	 * 
+	 * @param  {JSON}   project [description]
+	 * @param  {Function} next    CommonJs callback
+	 * @protected 
+	 */
+	_getBuildStatusPopup: function(project, next){
+		
 		var config = project.getConfig().getData();
 		var appId = config.build.phonegap.appId;
-		var data;
-
 		var url = this.url + '/api/v1/apps/' + appId;
-
+		
+		//Creation of the Ajax request
 		var req = new enyo.Ajax({
 			url: url
 		});
 
-		this.log("l'url de la requête: ", url);
-
-
+		//in case of sucess send the obtained JSON object to the next function
+		//in the Async.waterfall.
 		req.response(this, function(inSender, inData) {
-			if (this.debug) this.log("inData: ", inData);
-			data = inData;
-			this.log("inData: ", inData);
-			// activate the pop up to view the results
-
+			//this.log("the sender: ", inSender);
+		
+		  // activate the pop up to view the results
+		  next(null, inData);
 		});
 		req.error(this, function(inSender, inError) {
 			// invalidate token
 			this.config.auth.token = null;
 			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
+			
 			// report the error
 			var response = inSender.xhrResponse, contentType, details;
 			if (response) {
@@ -290,28 +300,36 @@ enyo.kind({
 			next(new Error("Unable to get PhoneGap user data (" + inError + ")"), details);
 		});
 		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
-
-		},
-
+	},
+	/**
+	 * show the pop-up containing informations about the previous  build of the 
+	 * selected project from the project list view.
+	 * 
+	 * @param  {JSON}   project contain a description about the current selected
+	 *                          project
+	 * @param  {Function} next    is a CommonJs callback
+	 * @private
+	 */
 	_showBuildStatus: function(project, next){
 	 	
-
-	 	//this.log("the next object: ", next.user); 
-	 	var inUserData = next.user;
-
-	 	/*
-		 *show the pop-up containing informations about the previous 
-		 *build of the selected project.
-		 */
-		var buildStatusPopup = new Phonegap.BuildStatusUI();
-		
-	 	buildStatusPopup.showPopup(inUserData);
-	 	},
-
+	 	self = this;
+	 	async.series([
+    		function(callback){
+        		var inUserData = next.user;
+	 			self.$.buildStatusPopup.showPopup(project, inUserData);
+        		callback(null, 'one');
+   			 },
+    		function(callback){
+        		next();
+        		callback(null, 'two');
+   			 }
+		]);
+	 	
+	 },
 	/**
 	 * Store relevant user account data
+	 * 
 	 * @param {Object} user the PhoneGap account user data
-	 * @return {undefined}
 	 * @private
 	 */
 	_storeUserData: function(user) {
@@ -435,20 +453,28 @@ enyo.kind({
 			enyo.bind(this, this._getFilesData, project),
 			enyo.bind(this, this._submitBuildRequest, project),
 			enyo.bind(this, this._prepareStore, project),
-			enyo.bind(this, this._store, project)
+			enyo.bind(this, this._store, project),
 		], next);
 	},
+	/**
+	 * Communicate with Phonegap build in order to get the curent status of the
+	 * built project. This status are showen in a Pop-up defined in the file
+	 * BuildStatusUI.js
+	 * 
+	 * @param  {JSON}   project contain a description about the current selected
+	 *                          project
+	 * @param  {Function} next    is a CommonJS Callback
+	 * @public
+	 */
 	buildStatus: function(project, next) {
 		if (this.debug) this.log("Getting build status:  " + this.url + '/build');
 		async.waterfall([
 			enyo.bind(this, this.authorize),
 			enyo.bind(this, this._getProjectData, project),
-			enyo.bind(this, this._getBuildStatus, project),
+			enyo.bind(this, this._getBuildStatusPopup, project),			
 			enyo.bind(this, this._showBuildStatus, project)
 		], next);
-		 
 	},
-
 	/**
 	 * Collect & check information about current project
 	 * @private
@@ -458,6 +484,7 @@ enyo.kind({
 			next(new Error("Invalid parameters"));
 			return;
 		}
+		
 		var config = project.getConfig().getData();
 		if (this.debug) this.log("starting... project:", project);
 
@@ -466,7 +493,7 @@ enyo.kind({
 			return;
 		}
 		if (this.debug) this.log("appId:", config.build.phonegap.appId);
-		next();
+		next(null);
 	},
 	/**
 	 * Get the list of files of the project for further upload
@@ -487,10 +514,11 @@ enyo.kind({
 		req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
 	},
 	/**
-	 * @private
+	 * 
 	 * @param {Object} project
 	 * @param {FormData} formData
 	 * @param {Function} next is a CommonJS callback
+	 * @private
 	 */
 	_submitBuildRequest: function(project, data, next) {
 		var config = ares.clone(project.getConfig().getData());
@@ -579,49 +607,47 @@ enyo.kind({
 		req.go(query);
 	},
 
-	
-	_prepareDownloadApplication: function(project, inData, next){
-
-		if (this.debug) this.log("appData.status: ", appData.status);
-		var platforms = ["android", "ios", "winphone", "blackberry", "symbian", "webos"];
-		var targetPlatformNumber=0;
-
-		//Number of the completed build.
-		var completedBuild=0;
+	/**
+	 * Send an Ajax request to Node.js in order to initiate the download of an
+	 * application in a specific mobile platform.
+	 * 
+	 * @param  {JSON}   project contain a description about the current selected
+	 *                          project
+	 * @param  {[type]}   inURL   is a url suffixe that contains: AppID, the
+	 *                            targeted build platform, an the title of the
+	 *                            application.
+	 * @param  {Function} next    is a CommunJS callback.
+	 * @private
+	 */
+	_sendDownloadRequest: function(project, inURL, next){
 		
-		//count the number of the platforms selected for the build.
-		for(key in appData.status){
-			targetPlatformNumber++;	
-		}
-		if (this.debug) this.log("Number of targeted platforms: ", targetPlatformNumber);
-
-
-
-
-		
-
-	},
-
-	_sendDownloadRequest: function(project, inData, next){
-		var url ="https://build.phonegap.com";
 		var config = project.getConfig().getData();
-		for(key in appData.download){
-			var req = new enyo.Ajax({
-			url: url
-		});
+		var url =this.url+ '/api/v1/apps/' + inURL;
+		if (this.debug){
+			this.log("download URL is : ", url);
+		}
+		
+		//Definition of the Ajax request 
+		var req = new enyo.Ajax({
+			url: url,
+			handleAs: 'text'
+		});		
 
-		this.log("l'url de la requête: ", url);
-
+		//Handling a successfull response
 		req.response(this, function(inSender, inData) {
-			if (this.debug) this.log("inData: ", inData);
-			
-			this.log("inData: ", inData);
-			next(null, inData);
+			if (this.debug) this.log("response: received " + inData.length + " bytes typeof: " + (typeof inData));
+			var ctype = req.xhrResponse.headers['content-type'];
+			if (this.debug) this.log("response: received ctype: " + ctype);
+			next(null, {content: inData, ctype: ctype});			
 		});
+
+		//Handling a failure response
 		req.error(this, function(inSender, inError) {
 			// invalidate token
 			this.config.auth.token = null;
-			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
+			ServiceRegistry.instance.setConfig(this.config.id, 
+				{auth: this.config.auth});
+			
 			// report the error
 			var response = inSender.xhrResponse, contentType, details;
 			if (response) {
@@ -629,22 +655,25 @@ enyo.kind({
 				if (contentType && contentType.match('^text/plain')) {
 					details = response.body;
 				}
-			}
-			next(new Error("Unable to get PhoneGap user data (" + inError + ")"), details);
+			}			
 		});
-		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
-		}
 
-	},
-
+		//Execution of the Ajax request
+		req.go({token: this.config.auth.token}); 
+		// FIXME: remove the token as soon as the cookie works...
+	},	
 	/**
 	 * Prepare the folder where to store the built package
+	 * @param  {JSON}   project contain a description about the current selected
+	 *                          project
+	 * @param  {[type]}   inData  [description]
+	 * @param  {Function} next    [description]
 	 * @private
 	 */
 	_prepareStore: function(project, inData, next) {
 		var folderKey = "build." + this.getName() + ".target.folderId",
 		    folderPath = "target/" + this.getName();
-		this.doShowWaitPopup({msg: $L("Storing Phonegap application package")});
+
 		var folderId = project.getObject(folderKey);
 		if (folderId) {
 			next(null, folderId, inData);
@@ -659,83 +688,176 @@ enyo.kind({
 			req.error(this, this._handleServiceError.bind(this, "Unable to prepare package storage", next));
 		}
 	},
+	/**
+	 * Create a file in the target repository of the project form a multipart/form
+	 * data.
+	 * 
+	 * * @param  {JSON}   project contain a description about the current selected
+	 *                            project
+	 * @param  {String}   folderId id used in Hermes File system to identify the 
+	 *                             target folder where the downloaded applications
+	 *                             will be stored.
+	 * @param  {JSON}   inData   contains detailed information about the build of
+	 *                           the project.
+	 * @param  {Function} next     a CommonJs callback.
+	 * @private            
+	 */
+	_storePkg: function(project, folderId, inData, next) {
+		if(this.debug){		
+			this.log("**data content.ctype: ", inData.ctype);	
+		}	
 
-	
+		var req = project.getService().createFiles(folderId, 
+			{content: inData.content, ctype: inData.ctype});
+
+		req.response(this, function(inSender, inData) {
+			if (this.debug) this.log("response received ", inData);
+			var config = project.getService().config;
+			var pkgUrl = config.origin + config.pathname + '/file' + inData[0].path; // TODO: YDM: shortcut to be refined
+			project.setObject("build.phonegap.target.pkgUrl", pkgUrl);
+			next();
+		});
+		req.error(this, this._handleServiceError.bind(this, "Unable to store pkg", next));
+	},	
 	/**
 	 * After checking that the building of the project is finished in Phongap platform, this 
-	 * function send an ajax request to the server side of Ares in order to launch
+	 * function send an ajax request to the Node.js in order to launch
 	 * the download of the packaged application. 
-	 * If the server side of Ares succed in the downloading of this application, 
-	 * an Ajax response is piped to the client side of Ares in order to save the
-	 * file in the folder "Target" of the curent built project.
-	 * @param  {[type]}   project  [description]
-	 * @param  {[type]}   folderId [description]
-	 * @param  {[type]}   appData  [description]
-	 * @param  {Function} next     [description]
-	 * @return {[type]}            [description]
+	 * Node.js succeed in the downloading of this application, 
+	 * an Ajax response is sent back in order to save the
+	 * file (contained in a multipart data form)in the folder 
+	 * "Target/Phonegap build" of the curent built project.
+	 * 
+	 * @param  {JSON}   project contain a description about the current selected
+	 *                          project
+	 * @param  {[type]}   folderId id of the target folder where to store the
+	 *                             packaged file.
+	 * @param  {[type]}   appData  multipart data form containing the application
+	 *                             to store
+	 * @param  {Function} next     a CommonJs callback
+	 
 	 * @private
 	 */
 	_store: function(project, folderId, appData, next) {
 	
+		enyo.Signals.send("onUpdateAppData", {appData: appData});
+		
 		var appKey = "build." + this.getName() + ".app";
-		this.log("checkpoint");
-		this.log("Entering _store function"+
+		if(this.debug){
+		 this.log("Entering _store function"+
 			"project: ", project, 
 			" folderId: ", folderId,
-			 ", appData:  ", appData);
+			",appData:  ", appData);
+		}
 
 		project.setObject(appKey, appData);
-				
+		//saving the context of this kind.		
 		var self = this;
-
-		//setTimeout(next, 10000);
-		//self._getBuildStatus(project, next);
 		
+		//Mobile platforms supported by Phonegap build service.
 		var platforms = ["android", "ios", "winphone", "blackberry", "symbian", "webos"];
 
-		
-		//TODO : launch a parallel request (using async foreach) 
-		// in each platform use async whilst
-			 
-		
-		async.forEach(appData.status,
-			    function(platform, next) {
-			    	enyo.log("asyn.forEach first loop: ", platform);
-			        async.whilst(
-			        	function() {
-
-	   		    			return appData.status[platform] !== "pending"
-
-			        	},
-		   		    	function (next) {
-		   		    		async.waterfall([
-		   		    			function (next) {
-
-		   		        			setTimeout(next, 3000);
-		   		    			},
-		   		    			function (next) {
-		   		    				enyo.log("sending another _getBuildStatus request");
-		   		    				self._getBuildStatus(project, next);
-		   		    			},
-		   		    			function(inData, next) {
-		   		    				appData = inData;
-		   		    				next();
-		   		    			}
-		   		    		], next);
-		   		    	},
-		   		    	function(err) {
-		   		    		if (err) {
-		   		    			next(err);
-		   		    			enyo.log("check point 02");
-		   		    		} else {
-		   		    			//enyo.log("check point");
-		   		    			// success: the package is ready for download
-		   		    			// url: appData.download[platform]
-		   		    			//TODO: XXX invoke fetch & store for one package
-		   		    		}
-		   		    	})
-			    }, next);
-		
-}
+		/* 
+		* Parallel tasks are lauched to check the build status in each platform.
+		* A status can be : complete, pending or error.
+		* 	- completed: a request is made to node.js to 
+		*	 			download the application.
+		*	- pending: another request is sent to phonegap to check for an
+		*	           updated status.
+		*	- error: an error message is displayed.		
+		*/	
+		async.forEach(platforms,
+		    function(platform, next) {
+		    	self.log("Send request for the platform: ", platform);
+		        async.whilst(
+		        	function() {
+		        		//Truthfull condition to send a new check status request
+		        		//to Phongap build. 
+   		    			return appData.status[platform] === "pending";
+		        	},
+	   		    	function (next) {
+	   		    		async.waterfall([
+	   		    			function (next) {
+	   		    				//Timeout before sending a new check status request
+	   		        			setTimeout(next, 3000);
+	   		    			},
+	   		    			function (next) {
+	   		    				if(this.debug){
+	   		    					self.log("sending another get Status check request");
+	   		    				}
+	   		    				self._getBuildStatus(project, next);
+	   		    			},
+	   		    			function(inData, next) {
+	   		    				//get the result from the previous status check request
+	   		    				appData = inData.user;
+	   		    				if(this.debug){
+	   		    				self.log("the new appData for "+platform+
+	   		    					     " is : ", appData);
+	   		    				}
+	   		    				next();
+	   		    			}
+	   		    		], next);
+	   		    	},
+	   		    	//This function is run when the whilst condition in no longer
+	   		    	//satisfied
+	   		    	function(err) {
+	   		    		//in the case of exception.
+	   		    		if (err) {
+	   		    			next(err);
+	   		    			if(this.debug){
+	   		    				self.error("error occured in the request:"+
+	   		    				     " when checking for the Application status");
+	   		    			}
+	   		    		} else {
+	   		    			//if the status is complete then a download request
+	   		    			//is sent to Node.js server.
+	   		    			if (appData.status[platform] === "complete"){
+	   		    				async.waterfall([
+	   		    					function(next){
+	   		    						//make the download request.
+	   		    						appID = appData.id;
+	   		    						title = appData.title;
+	   		    						if (appData.version != null){
+	   		    						   version = appData.version;
+	   		    						} else{
+	   		    							version = "SNAPSHOT_1";
+	   		    						}
+	   		    						
+	   		    						    						
+	   		    						var url_suffixe = appID +
+	   		    								  '/' + platform +
+	   		    								  '/' + title + 
+	   		    								  '/' + version;
+	   		    						if(self.debug){
+		   		    						self.log("Application "+ platform
+		   		    					     +" ready for download");
+	   		    						}
+	   		    						self._sendDownloadRequest(project, 
+	   		    							url_suffixe, next);
+	   		    					},
+	   		    					//inData is a multipart/form containing the
+	   		    					//built application
+	   		    					function(inData, next){
+	   		    						self._storePkg(project, folderId, 
+	   		    						inData, next);
+	   		    						
+	   		    					}
+	   		    				], next);
+	   		    			}
+	   		    			else if (appData.status[platform] === "error") {
+	   		    				if(self.debug){
+	   		    					//Display the cause of the failure of the build
+	   		    					//this information is contained in the JSON
+	   		    					//object reterned by the check status request
+	   		    					self.log("Error: ", appData.error[platform]);
+	   		    				}
+	   		    			}		   		    			    			
+	   		    		}
+	   		    	}
+	   		    );		       
+		    }, 
+		next);
+	}	
 });
+
 

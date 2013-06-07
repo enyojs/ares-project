@@ -10,15 +10,58 @@ enyo.kind({
 	floating: true,
 	autoDismiss: false,
 	debug: true,
-	style:"width: 500px; height: 350px;",
+	style:"width: 500px; height: 280px;",
 	published: {
-		url: "https://build.phonegap.com"
-		
-		},
+		pgUrl: "",
+	},
 	handlers: {
 		onDismissPopup: "hidePopup"
-
 	}, 
+
+	components: [
+
+			{kind:"BuildStatusTopToolBar",
+			 name: "TopTB"
+			},	   			
+
+			{kind: "FittableRows",
+    		name:"AllStatus",
+    		components: [
+
+    			{kind: "StatusRow",
+    			 name: "AndroidStatus",
+    			 ontap: "manageApps"
+    			 },	    		
+	    		
+    			{kind: "StatusRow",
+    			 name: "IosStatus",
+    			 ontap: "manageApps"
+    			 },
+
+		    	{kind: "StatusRow",
+    			 name: "BlackBerryStatus",
+    			 ontap: "manageApps"
+    			},
+
+		    	{kind: "StatusRow",
+    			 name: "SymbianStatus",
+    			 ontap: "manageApps"
+    			 },
+
+		    	{kind: "StatusRow",
+    			 name: "WebosStatus",
+    			 ontap: "manageApps"
+    			},
+
+		    	{kind: "StatusRow",
+    			 name: "WinphoneStatus",
+    			 ontap: "manageApps"
+    			},
+		      ]
+		},
+			{kind: "BuildStatusBotomToolBar",
+			name: "BottomTB"}
+	],
 
 	/**
 	 * Show the status informations about the selected project
@@ -26,170 +69,67 @@ enyo.kind({
 	 * @return {boolean} show the pop-up
 	 */
 	
-	showPopup: function(inSender) {
-		enyo.log("the pop up is shown :)");
-		this.getBuildStatusData(inSender);
-		this.show();
-    },
+	create: function(){
+		this.inherited(arguments);
+	
+		this.$.AndroidStatus.setLabelValue("Android");
+		this.$.IosStatus.setLabelValue("IOS");
+		this.$.BlackBerryStatus.setLabelValue("BlackBerry");
+		this.$.SymbianStatus.setLabelValue("Symbian");
+		this.$.WebosStatus.setLabelValue("WebOS");
+		this.$.WinphoneStatus.setLabelValue("Windows Phone 7");
+	},
+
+	manageApps: function(inSender, inValue) {
+		if (this.debug) this.log("sender:", inSender, "value:", inValue);
+		var accountPopup = window.open(this.pgUrl,
+					       "PhoneGap Build Account Management",
+					       "resizeable=1,width=1024, height=600", 'self');
+	},
 
     hidePopup: function(){
     	this.hide();
-    	//return true; //stop the bubbling
+    	return true; //stop the bubbling
     },
-    
-    
-    
+
+    showPopup: function(project, inUserData){
+    	this.setUpHeader(inUserData);
+    	this.setUpStatus(inUserData);
+    	this.pgUrl = "https://build.phonegap.com/apps/"+inUserData.id+"/builds";
+    	this.log("the user data are: ", inUserData);
+    	this.show();
+    },
+
+    setUpHeader: function(inData){
+    	this.$.TopTB.setTitle(inData.title);
+    	this.$.TopTB.setVersion(inData.phonegap_version);
+    	this.$.TopTB.setOwner(inData.collaborators.active[0].person);
+    },
+
+
+    setUpStatus: function(inData){
+    	this.$.AndroidStatus.setStatusValue(inData.status["android"]);
+		this.$.IosStatus.setStatusValue(inData.status["ios"]);
+		this.$.BlackBerryStatus.setStatusValue(inData.status["blackberry"]);
+		this.$.SymbianStatus.setStatusValue(inData.status["symbian"]);
+		this.$.WebosStatus.setStatusValue(inData.status["webos"]);
+		this.$.WinphoneStatus.setStatusValue(inData.status["winphone"]);
+
+    },
+
+
+ 
     getBuildStatusData: function(inData){
+		
+		if(this.debug){
 
-    	this.createComponent(
-    		{name: "BuildStatusTopToolBar", 
-    		kind: "onyx.Toolbar",
-
-
-    		components: [
-				{tag: "Status", 
-				content: "Application: " + inData.title},
-				{tag: "br"},
-
-				{tag:"Owner",
-	    		style: "font-size: 70%;",
-	    		content:"Owned by : "+ inData.collaborators.
-	    		active[0].person+"\n" },
-	    		{tag: "br"},
-
-	    		{tag:"PhonegapVersion",
-	    		style: "font-size: 70%;", 
-	    		content:"Phonegap version : "+ 
-	    		inData.phonegap_version},
-	    		{tag: "br"},
-			]}
-    	);
-    	
-
-    	this.createComponent(
-
-    		{kind: "onyx.Groupbox", 
-    		style: "margin-right: 5px; margin-left: 5px;", 
-    		components: [
-   			{kind: "onyx.GroupboxHeader",
-   			//style: "float:left;", 
-   			content: "Status"},
-
-   			{kind: "onyx.Toolbar", 
-   			components: [
-
-
-    		{kind: "FittableRows",
-    		name:"AllStatus",
-    		components: [
-	    		
-	    		
-    			{kind: "FittableColumns",
-    			 style: "margin-top: 10px;",
-				 components: [
-		    		{style: "width: 150px;",
-		    		content:"Android"},
-
-		    		{style: "width: 150px;",
-		    		content: inData.status.android},
-		    		{tag: "br"}
-	    		 ]
-		    	},
-
-		    	{kind: "FittableColumns",
-		    	 style: "margin-top: 10px;",		    	
-			 	 components: [
-
-		    		{style: "width: 150px;",
-		    		content:"IOS "},
-
-		    		{style: "width: 150px;",
-		    		content: inData.status.ios},
-		    		{tag: "br"}
-		    	 ]
-		    	},
-
-		    	{kind: "FittableColumns",
-		    	style: "margin-top: 10px;",
-		    	 components: [
-
-		    		{style: "width: 150px;",
-		    		content:"BlackBerry "},
-
-		    		{style: "width: 150px;",
-		    		content: inData.status.blackberry},
-		    		{tag: "br"}
-			     ]
-		    	},
-
-		    	{kind: "FittableColumns",
-		    	style: "margin-top: 10px;",
-		    	 	components: [
-			    		{style: "width: 150px;",
-			    		content:"Symbian"},
-
-			    		{style: "width: 150px;",
-			    		content: inData.status.symbian},
-			    		{tag: "br"}
-			    	]
-		    	},
-
-		    	{kind: "FittableColumns",
-		    	style: "margin-top: 10px;",
-		    	components: [
-		    		{style: "width: 150px;",
-		    		content:"WebOS"},
-
-		    		{style: "width: 150px;",
-		    		content: inData.status.webos},
-		    		{tag: "br"}
-			    ]
-		    	},
-
-		    	{kind: "FittableColumns",
-		    	style: "margin-top: 10px;",
-			 	components: [
-		    		{style: "width: 150px;",
-		    		content:"Windows Phone 7"},
-
-		    		{style: "width: 150px;",
-		    		content: inData.status.winphone},
-		    		{tag: "br"}
-		    	 ]
-		    	},
-		    ]}]}]}
-
-
-	    		);
-
-		this.createComponent(
-		   {name: "BuildStatusBotomToolBar", 
-	    	 classes: "ares-bordered-toolbar", 
-	    	 kind: "onyx.Toolbar",
-	    	 components: [
-			   { name: "ok", 
-			     kind: "onyx.Button", 
-			     content: "OK",
-			     handlers: { 
-			     	ontap: 'tapped'
-                  }, 
-			     tapped: function(){
-			 		this.bubble("onDismissPopup");
-			 		this.bubble("onHideWaitPopup");	
-				 }
-			    }
-			 ],
-			 
-			}
-		);
-    	if(this.debug){
     		enyo.log("the user data are : ", inData );
     		enyo.log("Phonegap version used for the build: ", 
-    		      inData.phonegap_version);
+    		      'inData.phonegap_version');
     		//enyo.log("The AppID is: ", inData.id);
     		enyo.log("Owned by: ",
-    			  inData.collaborators.active[0].person);
-    		enyo.log("The title is: ",inData.title);
+    			  'inData.collaborators.active[0].person');
+    		enyo.log("The title is: ",'title');
     		
     		
     		
@@ -199,12 +139,131 @@ enyo.kind({
     		this.log("Symbian download: ", this.url + inData.download.symbian);
     		this.log("WebOS download: ", this.url + inData.download.webos);
     		this.log("Windows Phone 7 download: ", this.url + inData.download.winphone);
-    	}
- 	
-    	
-    },
+		}
+	},
     popupHidden: function(inSender, inEvent) {
         // do something
     }
 });
 
+
+enyo.kind({
+	name: "BuildStatusTopToolBar", 
+	kind: "onyx.Toolbar",
+	published: {
+		title: "",
+		version: "",
+		owner: ""
+	},
+
+	components: [
+		{content: "Application: "
+		},
+
+		{name: "TitleLabel",
+		 content: "initializing title"
+		},
+		
+		{tag: "br"},
+
+		{style: "font-size: 70%;", 
+		 content:"Phonegap version : "
+		},
+
+		{name: "PhonegapVersionLabel",
+		 style: "font-size: 70%;",
+		 content: "initializing version"
+		},
+		
+		{tag: "br"},
+	], 
+
+	create: function(){
+		this.inherited(arguments);
+	},
+
+	titleChanged: function(){
+		this.$.TitleLabel.setContent(this.title);
+	},
+
+	versionChanged: function(){
+		this.$.PhonegapVersionLabel.setContent(this.version);
+	}
+	
+});
+
+
+enyo.kind({
+	name: "StatusRow",
+	kind: "FittableColumns",
+	style: "margin-top: 10px;",
+	published: {
+		labelValue: "Platform",
+		statusValue: "Status"
+	},
+	 components: [
+	 		{name: "StatusRow_platform",
+		  	 style: "width: 150px;"
+		    },
+     		{name: "StatusRow_status",
+    	     style: "width: 150px;"
+    	    },
+
+		
+		{tag: "br"}
+	 ], 
+
+	 create: function(){
+	 	this.inherited(arguments);
+	 	this.labelValueChanged();
+	 	this.statusValueChanged();
+	 },
+
+	 labelValueChanged: function(){
+	 	this.$.StatusRow_platform.setContent(this.labelValue);
+	 	if(this.debug){
+	 		this.log("Platform name is: ", this.labelValue);
+	 	}
+	 },
+
+	 statusValueChanged: function(){
+	 	this.$.StatusRow_status.setContent(this.statusValue);
+	 	if(this.debug){
+	 		this.log("status value is:", this.statusValue);
+	 	}
+	 }
+
+
+		    	
+});
+
+enyo.kind({
+	name: "BuildStatusBotomToolBar", 
+	 classes: "ares-bordered-toolbar", 
+	 kind: "onyx.Toolbar",
+	 components: [
+	   { name: "ok", 
+	     kind: "onyx.Button", 
+	     content: "OK",
+	     handlers: { 
+	     	ontap: 'tapped'
+	      }, 
+	     tapped: function(){
+	 		this.bubble("onDismissPopup");
+	 		//this.bubble("onHideWaitPopup");	
+		 }
+	    }
+	 ],
+	 
+});
+
+
+
+
+
+
+
+
+
+
+  

@@ -18,7 +18,10 @@ var fs = require("fs"),
     http = require("http"),
     client = require("phonegap-build-api"),
     BdBase = require("./lib/bdBase"),
-    HttpError = require("./lib/httpError");
+    HttpError = require("./lib/httpError"),
+    CombinedStream = require('combined-stream');
+
+
 
 var basename = path.basename(__filename, '.js'),
     log = npmlog;
@@ -76,7 +79,7 @@ BdPhoneGap.prototype.route = function() {
 	this.app.post(this.makeExpressRoute('/token'), this.getToken.bind(this));
 	this.app.get(this.makeExpressRoute('/api/v1/me'), this.getUserData.bind(this));
 	this.app.get(this.makeExpressRoute('/api/v1/apps/:applicationID'), this.getAppStatus.bind(this));
-	this.app.get(this.makeExpressRoute('/api/v1/apps/:appID/:pf/'),
+	this.app.get(this.makeExpressRoute('/api/v1/apps/:applicationID/:pf/:title/:version'),
 				 this.downloadApp.bind(this));
 };
 	
@@ -166,7 +169,7 @@ BdPhoneGap.prototype.getUserData = function(req, res, next) {
 				}
 			});
 		}
-	});;
+	});
 };
 BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
 	client.auth({
@@ -190,7 +193,210 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
 	});
 };
 
-BdBase.prototype.build = function(req, res, next) {
+/**
+ * When a download request is received from "Build.js",
+ * this function is called to do the following actions : 
+ * 	- Create the appropriate file name
+ * 	- Download the built project from Phonegap build using the 
+ * 	  API-Phonegap-Build
+ * 	- When the download is done, the file is piped to "Ares client"
+ * 	  using a multipart/form Post request
+ *   
+ * @param  {JSON}   req  Contain the request attributes
+ * @param  {JSON}   res  Contain the response attributes
+ * @param  {Function} next a CommonJs callback
+ * 
+ */
+BdPhoneGap.prototype.downloadApp = function(req, res, next){
+	
+	var appID = req.params.applicationID;
+	var platform = req.params.pf;
+	var requestURL = '/apps/' + appID + '/'+ platform;
+	var FORM_DATA_LINE_BREAK = '\r\n';
+
+ 	returnBody(req, res, function() {});
+
+
+
+	/*
+	 *the extensions for the downloaded file 
+	 *	apk for Android
+	 *	ipa for iOS
+	 * 	ipk for webOS
+	 *	jad for unsigned BlackBerry builds; 
+	 *	zip if you've uploaded your BlackBerry signing keys
+	 *	wgz for Symbian
+	 *	xap for Windows Phone
+	 * 
+	 */
+
+ 	function returnBody(req, res, next) {
+ 		//Getting the needed informations from the parsed URL
+ 		//to generate the name of the built application.
+ 		var title = req.params.title;
+		var platform = req.params.pf;
+		var appID = req.params.applicationID;
+		var version = req.params.version;
+		var packagedFile = fs.createWriteStream(filename);
+
+		//Definition of the extension of the file based on
+		//the targeted platform.
+		switch(platform){
+			case "android": {
+				var fn = title +"_"+ version +".apk"; 
+			} break;
+
+			case "ios": {
+				var fn = title +"_"+ version +".ipa"; 
+			} break;
+
+			case "webos": {
+				var fn = title +"_"+ version +".ipk"; 
+			} break;
+
+			case "symbian": {
+				var fn = title +"_"+ version +".wgz"; 
+			} break;
+
+			case "winphone": {
+				var fn = title +"_"+ version +".xap"; 
+			} break;
+
+			case "blackberry": {
+				var fn = title +"_"+ version +".jad"; 
+			} break;
+
+			default: {
+				var fn = "platform.ext";
+				log.error("Incorrect platform is used for the build");
+			}
+		}
+ 			
+ 		//This is a temporary code used to test the download function 
+ 		//It will be replaced by the below commented code as soon as 
+ 		//the "api.get()" works correctly.
+ 		//IMPORTANT : change the file name path of the attribute 
+ 		//			 "filename" to another file stored on your computer
+ 		//Begining of the temporrary code.
+		var filename = "C:\\Users\\adiche\\ares-project.new\\harmonia\\source\\AccountsConfigurator.js";
+		var stats = fs.statSync(filename);
+		log.verbose("returnBody()", "size: " + stats.size + " bytes", filename);
+
+		// Build the multipart/formdata
+		var combinedStream = CombinedStream.create();
+		var boundary = generateBoundary();
+
+		// Adding part header
+		combinedStream.append(getPartHeader(fn, boundary));
+		// Adding file data
+		combinedStream.append(function(nextDataChunk) {
+			fs.readFile(filename, 'base64', function (err, data) {
+				if (err) {
+					next('Unable to read ' + filename);
+					nextDataChunk('INVALID CONTENT');
+				} else {
+					nextDataChunk(data);
+				}
+			});
+		});
+		//Ending of the temporrary code.
+		/* TODO: Un comment this part a comment the temporrary code
+				 as soon as the "api.get()" function works.
+		client.auth({
+			token: req.token,
+			//proxy: this.config.proxyUrl
+		}, function(err1, api) {
+			if (err1) {
+				next(err1);
+			} else {
+				packagedFile = api.get('/apps/appID/platform', function(err2, userData){
+					if (err2) {
+						next(err2);
+					} else {packagedFile.close();
+						createMultipartData(userData);
+					}
+				});
+			}
+		});
+
+
+		function createMultipartData(userData){
+			// Build the multipart/formdata
+			var combinedStream = CombinedStream.create();
+			var boundary = generateBoundary();
+
+			// Adding part header
+			combinedStream.append(getPartHeader(filename, boundary));
+			// Adding file data
+			combinedStream.append(function(){
+				fs.readFile(filename, 'base64', function (err, packagedFile) {
+					if (err) {
+						next('Unable to read ' + filename);
+						nextDataChunk('INVALID CONTENT');
+					} else {
+						nextDataChunk(packagedFile);
+					}
+				});
+			});
+		 */
+
+		// Adding part footer
+		combinedStream.append(getPartFooter());
+
+		// Adding last footer
+		combinedStream.append(getLastPartFooter(boundary));
+
+		// Send the files back as a multipart/form-data
+		log.verbose("check01: res"+ getContentTypeHeader(boundary));
+		res.status(200);
+		res.header('Content-Type', getContentTypeHeader(boundary));
+		combinedStream.pipe(res);
+
+		// cleanup the temp dir when the response has been sent
+		combinedStream.on('end', function() {
+			next();
+		});
+	}
+
+	function generateBoundary() {
+		// This generates a 50 character boundary similar to those used by Firefox.
+		// They are optimized for boyer-moore parsing.
+		var boundary = '--------------------------';
+		for (var i = 0; i < 24; i++) {
+			boundary += Math.floor(Math.random() * 10).toString(16);
+		}
+
+		return boundary;
+	}
+
+	function getContentTypeHeader(boundary) {
+		return 'multipart/form-data; boundary=' + boundary;
+	}
+
+	function getPartHeader(filename, boundary) {
+		var header = '--' + boundary + FORM_DATA_LINE_BREAK;
+		header += 'Content-Disposition: form-data; name="file"';
+
+		header += '; filename="' + filename + '"' + FORM_DATA_LINE_BREAK;
+		header += 'Content-Type: application/octet-stream; x-encoding=base64';
+
+		header += FORM_DATA_LINE_BREAK + FORM_DATA_LINE_BREAK;
+		return header;
+	}
+
+	function getPartFooter() {
+		return FORM_DATA_LINE_BREAK;
+	}
+
+	function getLastPartFooter(boundary) {
+		return '--' + boundary + '--';
+	}
+
+};
+
+
+
+BdPhoneGap.prototype.build = function(req, res, next) {
 	var appData = {}, query = req.query;
 	log.info("build()", "title:", query.title, ", platforms:", query.platforms, ", appId:", query.appId);
 	async.series([
@@ -243,49 +449,6 @@ BdBase.prototype.build = function(req, res, next) {
 		next();
 	};
 
-
-
-
-	BdPhoneGap.prototype.downloadApp = function(req, res, next){
-
-		client.auth({
-		token: req.token,
-		proxy: this.config.proxyUrl
-	}, function(err1, api) {
-		if (err1) {
-			next(err1);
-		} else {
-			var appID = req.params.applicationID;
-			var platform = req.params.pf
-						
-			api.get('/apps/' + appID, function(err2, userData) {
-				if (err2) {
-					next(err2);
-				} else {
-					log.info("downladApp()", "downlading:", userData);
-					switch(platform){
-						case "android": {
-							api.get('/apps/' +appID +'/android', 
-							function(err2, userData) {
-								if (err2) {
-									next(err2);
-								} else {
-									log.info("getAppStatus()", "appStatus:", userData);
-									res.status(200).send({user: userData}).end();
-							 	}
-							}).pipe(fs.createWriteStream('app.apk'));
-
-							default: log.info("Another platform");
-
-
-						}
-					
-				}
-			});
-		}
-	});
-
-	};
 
 	function _upload(next) {
 		log.info("build#_upload()");
