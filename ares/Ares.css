@@ -397,7 +397,9 @@ body {
 .ares-row {
 	padding: 3px 0;
 }
-
+.ares-more-row{
+	padding: 10px 0;
+}
 .ares-drawer{
 	margin-top: 9px;
 	background-color: #eaeaea;
