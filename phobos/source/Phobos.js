@@ -659,9 +659,9 @@ enyo.kind({
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
-			this.$.savePopup.setName("Document was modified! Save it before closing?");
+			this.$.savePopup.setName("Document was modified!");
+			this.$.savePopup.setMessage("Save it before closing?");
 			this.$.savePopup.setActionButton("Don't Save");
-			this.$.savePopup.applyStyle("padding-top: 10px");
 			this.$.savePopup.show();
 		} else {
 			var id = this.docData.getId();
