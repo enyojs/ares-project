@@ -162,10 +162,17 @@ enyo.kind({
 					//	inNode.controls.splice(i+4, 0, justAdded);
 					//}
 				    modified = 1;
+				/*
+				 FIXME: allow to manually change
+				 PhoneGap parameters from Ares.
+				 DEMANDS to relad Ares after each
+				 project.json manual change
+
 					if (nfiles[i].name === '$project.json') {
 						// project.json file is internal to Ares
 						nfiles[i].hide();
 					}
+				 */
 					i++ ;
 					break ;
 			}

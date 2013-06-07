@@ -41,7 +41,22 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.inherited(arguments);
-		this.sendMessage({op: "state", val: "initialized"});
+		this.adjustFrameworkFeatures();
+		enyo.load("$enyo/../source/package.js", enyo.bind(this, function() {
+			this.sendMessage({op: "state", val: "initialized"});
+		}));
+	},
+	//* Any core features of the framework that need to be overridden/diesabled happens here
+	adjustFrameworkFeatures: function() {
+		// Allow overriding kind definitions
+		enyo.kind.allowOverride = true;
+		// Disable autoStart/autoRender features of enyo.Application
+		if (enyo.Application) {
+			enyo.Application.prototype.start = enyo.nop;
+			enyo.Application.prototype.render = enyo.nop;
+		}
+		// Disable controller instancing
+		enyo.Control.prototype.controllerFindAndInstance = enyo.nop;
 	},
 	currentDropTargetChanged: function() {
 		if (this.getCurrentDropTarget()) {
