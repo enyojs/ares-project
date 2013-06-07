@@ -311,14 +311,51 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
+	/** @public */
 	setTemplateList: function(templates) {
 		this.templates = [this.TEMPLATE_NONE];
 		enyo.forEach(templates, function(item) {
+			// TODO: also keep track of the template description
 			this.templates.push(item.id);
 		}, this);
 		this.$.templatePicker.setCount(this.templates.length);
 		this.$.templatePicker.setSelected(0);
 		this.selectedTemplate = undefined;
+	},
+	/** @public */
+	setLibsList: function(inLibs) {
+		this.libs = this.libs || [];
+		enyo.forEach(inLibs, function(inLib) {
+			inLib = enyo.filter(this.libs, function(lib) {
+				return inLib.id !== lib.id;
+			})[0];
+			if (inLib) {
+				// new lib
+				this.libs.push(inLib.id);
+				this.$.libsChecker.createComponent({
+					kind: "ProjectProperties.LibCheckBox",
+					name: inLib.id + "Checker",
+					lib: inLib
+				}, {
+					onLibChecked: "_onLibCheckedAction",
+					owner: this
+				});
+			}
+		}, this);
+
+	},
+	_onLibCheckedAction: function(inSender, inEvent) {
+		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
+		var selectedLibs = [];
+		enyo.forEach(this.libs, function(lib) {
+			if (lib.id === inEvent.lib.id) {
+				lib.selected = inEvent.checked;
+			}
+			if (lib.selected) {
+				selectedLibs.push(lib.id);
+			}
+		}, this);
+		this.setSelectedLibs(selectedLibs);
 	},
 	templateSetupItem: function(inSender, inEvent) {
 		this.$.template.setContent(this.templates[inEvent.index]);
@@ -332,3 +369,26 @@ enyo.kind({
 		}
 	}
 });
+
+enyo.kind({
+	name: "ProjectProperties.LibCheckBox",
+	classes:"ares-row",
+	published: {
+		lib: ""
+	},
+	events: {
+		onLibChecked: ""
+	},
+	components: [
+		{name: "chkBx", kind: "onyx.Checkbox", onchange: "onCheckedAction"},
+		{tag:"label", classes:"ares-label", content: ""}
+	],
+	onCheckedAction: function(inSender, inEvent) {
+		this.doLibChecked({
+			lib: this.lib,
+			use: this.$.chkBx.checked
+		});
+		return true;
+	}
+});
+

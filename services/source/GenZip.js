@@ -34,7 +34,7 @@ enyo.kind({
 			if (this.debug) this.log("url:", this.url);
 		}
 
-		// Populate the repositories on nodejs
+		// Populate the repositories on the Ares server
 		for(var repoId in inConfig.projectTemplateRepositories) {
 			var repository = inConfig.projectTemplateRepositories[repoId];
 			repository.id = repoId;
@@ -49,19 +49,21 @@ enyo.kind({
 	getConfig: function() {
 		return this.config;
 	},
-	getTemplates: function() {
+	/** @public */
+	getConfig: function() {
 		if (this.debug) this.log();
 
 		var req = new enyo.Ajax({
-			url: this.url + '/templates'
+			url: this.url + '/config'
 		});
 		return req.go();
 	},
-	generate: function(templateId, substitutions) {
+	generate: function(options) {
 		if (this.debug) this.log();
 
-		var data = "templateId=" + encodeURIComponent(templateId);
-		data +=	("&substitutions=" + encodeURIComponent(JSON.stringify(substitutions)));
+		var data = "templateId=" + encodeURIComponent(options.templateId);
+		data +=	("&substitutions=" + encodeURIComponent(JSON.stringify(options.substitutions)));
+		data +=	("&libs=" + encodeURIComponent(JSON.stringify(options.libs)));
 
 		var userreq = new enyo.Async();
 

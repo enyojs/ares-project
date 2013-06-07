@@ -90,8 +90,7 @@ function GenZip(config, next) {
 	 */
 
 	app.post(makeExpressRoute('/template-repos/:repoid'), addRepo.bind(this));
-	app.use(makeExpressRoute('/templates'), getList.bind(this));
-	app.use(makeExpressRoute('/generate'), generate.bind(this));
+	app.post(makeExpressRoute('/generate'), generate.bind(this));
 
 	app.post('/config', (function(req, res, next) {
 		log.verbose("req.body:", req.body);
@@ -101,6 +100,8 @@ function GenZip(config, next) {
 			res.status(200).end();
 		});
 	}).bind(this));
+
+	app.get(makeExpressRoute('/config'), getConfig.bind(this));
 
 	/*
 	 * Error handling, in last position, to be used by both
@@ -151,14 +152,14 @@ function GenZip(config, next) {
 		});
 	}
 	
-	function getList(req, res, next) {
-		log.info("getList()");
-		self.tools.list(function(err, list) {
+	function getConfig(req, res, next) {
+		log.info("getTemplates()");
+		self.tools.getConfig(function(err, config) {
 			if (err) {
 				next(err);
 			} else {
-				log.info("getList()", "list:", list);
-				res.status(200).send(list).end();
+				log.info("getConfig()", "config:", config);
+				res.status(200).send(config).end();
 			}
 		});
 	}
@@ -167,7 +168,7 @@ function GenZip(config, next) {
 		log.info("generate()");
 
 		var destination = temp.mkdirSync({prefix: 'com.hp.ares.genZip'});
-		self.tools.generate(req.body.templateId, JSON.parse(req.body.substitutions), destination, {}, function(inError, inData) {
+		self.tools.generate(req.body.templateId, JSON.parse(req.body.libs), JSON.parse(req.body.substitutions), destination, {}, function(inError, inData) {
 			if (inError) {
 				next(inError);
 				return;
