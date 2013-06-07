@@ -127,13 +127,12 @@ enyo.kind({
 			// backward compatibility: turn "build: {}" into "providers: {}"
 			if (inConfig && inConfig.build) {
 				inConfig.providers = inConfig.build;
-				delete inConfig.providers;
+				delete inConfig.build;
 			}
 
 			// Overlay the actual configuration over the default one
-			ares.extend(config, inConfig);
+			config = ares.extend(config, inConfig);
 
-			enyo.log("ProjectConfig#checkConfig()", "checked config:", config);
 			return config;
 		},
 
