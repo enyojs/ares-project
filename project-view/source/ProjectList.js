@@ -271,7 +271,6 @@ enyo.kind({
 	},
 	create: function() {
  		this.inherited(arguments);
- 		this.log(this.$.message);
  		this.createComponent(
  				{container:this.$.popupContent, classes:"ares-more-row", components:[
  					{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "nukeChanged"},
