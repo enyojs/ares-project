@@ -129,9 +129,7 @@ enyo.kind({
 		
 		if (this.targetNode !== null) {
 			if (this.targetNode.file.isDir && this.targetNode.expanded) {
-				this.targetNode.applyStyle("border-color", null);
-				this.targetNode.applyStyle("border-style", "none");
-				this.targetNode.applyStyle("border-width", "0px");
+				this.targetNode.removeClass("hermesFileTree-folder-highlight");
 				this.$.selection.deselect(this.targetNode.file.id, this.targetNode);
 			}
 		}
@@ -142,9 +140,7 @@ enyo.kind({
 		this.targetNode = tempNode;
 		
 		if (this.targetNode.file.isDir && this.targetNode.expanded) {
-			this.targetNode.applyStyle("border-color", "grey");
-			this.targetNode.applyStyle("border-style", "dotted");
-			this.targetNode.applyStyle("border-width", "1px");
+			this.targetNode.addClass("hermesFileTree-folder-highlight");
 		}
 		
 		this.setHoldoverTimeout(this.targetNode);
@@ -192,9 +188,7 @@ enyo.kind({
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		if (this.targetNode.file.isDir && this.targetNode.expanded) {
-			this.targetNode.applyStyle("border-color", null);
-			this.targetNode.applyStyle("border-style", "none");
-			this.targetNode.applyStyle("border-width", "0px");
+			this.targetNode.removeClass("hermesFileTree-folder-highlight");
 			this.$.selection.deselect(this.targetNode.file.id, this.targetNode);
 		}
 		
@@ -405,7 +399,7 @@ enyo.kind({
 		this.selectedNode=inEvent.data;
 		this.selectedFile=inEvent.data.file;
 		inEvent.data.file.service = this.$.service;
-		inEvent.data.$.caption.applyStyle("background-color", "lightblue");
+		inEvent.data.$.caption.addClass("hermesFileTree-select-highlight");
 		// this.doSelect({file: this.selectedFile});
 		this.enableDisableButtons();
 		// handled here (don't bubble)
@@ -415,7 +409,7 @@ enyo.kind({
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		if (inEvent.data && inEvent.data.$.caption) {
-			inEvent.data.$.caption.applyStyle("background-color", null);
+			inEvent.data.$.caption.removeClass("hermesFileTree-select-highlight");
 		}
 		//this.doDeselect({file: this.selectedFile});
 		this.selectedNode=null;
@@ -820,10 +814,8 @@ enyo.kind({
 	/**
 	 * moveNode
 	 * @public
-	 * @param {Object} inSender
-	 * @param {Object} inEvent
-	 * @property inEvent {ares.Node} oldNode
-	 * @property inEvent {ares.Node} newParent
+	 * @param {Object} inNode
+	 * @param {Object} inTarget
 	 * @return null
 	 *
 	 */
