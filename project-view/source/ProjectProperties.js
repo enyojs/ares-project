@@ -15,7 +15,8 @@ enyo.kind({
 	events: {
 		onModifiedConfig: "",
 		onSaveGeneratedXml: "",
-		onDone: ""
+		onDone: "",
+		onSelectPreviewTopFile: ""
 	},
 	classes:"ares-classic-popup",
 	components: [
@@ -96,7 +97,7 @@ enyo.kind({
 					{classes:"ares-row", components:[
 						{tag: "label" , classes:"ares-fixed-label", content: "Top application file: "},
 						{kind: "onyx.InputDecorator", components: [
-							{kind: "Input", name: "ppTopFile",
+							{kind: "Input", name: "ppTopFile", ontap: "doSelectPreviewTopFile",
 								attributes: {title: 'top file of your application. Typically index.html'}
 							}
 						]}
@@ -112,6 +113,9 @@ enyo.kind({
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
+	published: {
+		topFile: ""
+	},
 
 	templates: [],
 	TEMPLATE_NONE: "NONE",
@@ -336,5 +340,8 @@ enyo.kind({
 		} else {
 			this.selectedTemplate = inEvent.content;
 		}
+	},
+	topFileChanged: function() {
+		this.$.ppTopFile.setValue(this.topFile);
 	}
 });

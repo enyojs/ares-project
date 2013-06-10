@@ -284,7 +284,6 @@ enyo.kind({
 		this.hide() ;
 		return true;
 	}
-
 });
 
 /**
@@ -298,11 +297,13 @@ enyo.kind({
 
 	handlers: {
 		onDone: "hide",
-		onModifiedConfig: "saveProjectConfig"
+		onModifiedConfig: "saveProjectConfig",
+		onSelectPreviewTopFile: "selectTopFile"
 	},
 	classes:"ares-masked-content-popup",
 	components: [
-		{kind: "ProjectProperties", name: "propertiesWidget"}
+		{kind: "ProjectProperties", name: "propertiesWidget"},
+		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Select top file..."), folderChooser: false, onFileChosen: "selectFileChosen"}
 	],
 
 	debug: false,
@@ -343,6 +344,25 @@ enyo.kind({
 		}
 
 		return true ; // stop bubble
+	},
+	selectTopFile: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+
+		var config = this.targetProject.getConfig();
+		var top_file = config.data.preview.top_file;
+
+		this.$.selectFilePopup.setSelectedName(top_file);
+		this.$.selectFilePopup.show();
+	},
+	selectFileChosen: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+
+		if (!inEvent.file) {
+			// no file or folder chosen
+			return;
+		}
+
+		this.$.propertiesWidget.setTopFile(inEvent.file.name);
 	}
 });
 
