@@ -511,8 +511,8 @@ enyo.kind({
 	 * @private
 	 */
 	_prepareStore: function(project, inData, next) {
-		var folderKey = "build." + this.getName() + ".target.folderId",
-		    folderPath = "target/" + this.getName();
+		var folderKey = "build." + this.getId() + ".target.folderId",
+		    folderPath = "target/" + this.getId();
 		this.doShowWaitPopup({msg: $L("Storing webOS application package")});
 		var folderId = project.getObject(folderKey);
 		if (folderId) {
@@ -533,7 +533,7 @@ enyo.kind({
 	 * @private
 	 */
 	_store: function(project, folderId, appData, next) {
-		var appKey = "build." + this.getName() + ".app";
+		var appKey = "build." + this.getId() + ".app";
 		if (this.debug) this.log("appData: ", appData);
 		project.setObject(appKey, appData);
 		// TODO: the project Model object does not
