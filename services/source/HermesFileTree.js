@@ -122,6 +122,10 @@ enyo.kind({
 		if (tempNode.kind !== "ares.Node") {
 			tempNode = tempNode.parent;
 		}
+
+		if (!tempNode.file.isDir) {
+			tempNode = tempNode.container;
+		}
 		
 		if (this.targetNode === tempNode) {
 			return true;
