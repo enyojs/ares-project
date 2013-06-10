@@ -119,7 +119,8 @@ BdPhoneGap.prototype.getToken = function(req, res, next) {
 	options = {
 		url : 'https://' + url + "/token",
 		headers : { "Authorization" : auth },
-		proxy: this.config.proxyUrl
+		proxy: this.config.proxyUrl,
+		timeout: this.config.timeout || 7000
 	};
 	log.http("getToken()", "POST /token");
 	request.post(options, (function(err1, response, body) {
@@ -149,7 +150,8 @@ BdPhoneGap.prototype.getToken = function(req, res, next) {
 BdPhoneGap.prototype.getUserData = function(req, res, next) {
 	client.auth({
 		token: req.token,
-		proxy: this.config.proxyUrl
+		proxy: this.config.proxyUrl,
+		timeout: this.config.timeout || 7000
 	}, function(err1, api) {
 		if (err1) {
 			next(err1);
@@ -225,7 +227,8 @@ BdBase.prototype.build = function(req, res, next) {
 		async.waterfall([
 			client.auth.bind(this, {
 				token: req.token,
-				proxy: this.config.proxyUrl
+				proxy: this.config.proxyUrl,
+				timeout: this.config.timeout || 7000
 			}),
 			_uploadApp.bind(this),
 			_success.bind(this)
