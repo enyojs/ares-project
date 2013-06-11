@@ -15,11 +15,13 @@ enyo.kind({
 	classes: "onyx-dark ares_harmonia_providerList",
 	components: [
 		{name: "header", kind: "onyx.Toolbar", content: "", classes: "onyx-menu-toolbar ares_harmonia_toolBar"},
-		{name: "list", kind: "FlyweightRepeater", classes: "ares_harmonia_providerItems", fit: true, toggleSelected: false, onSetupItem: "setupRow", onSelect: "rowSelected", onDeselect: "rowDeselected", components: [
-			{name: "item", classes: "enyo-children-inline", ontap: "itemTap", ondblclick: "dblClick", /*onConfirm: "removeProvider",*/ components: [
-				{name: "icon", kind: "onyx.Icon"},
-				{name: "name"},
-				{name: "auth", kind: "Image", src: "$harmonia/images/valid-check.png", showing: false}
+		{kind: "enyo.Scroller", fit:true, components:[
+			{name: "list", kind: "FlyweightRepeater", classes: "ares_harmonia_providerItems", fit: true, toggleSelected: false, onSetupItem: "setupRow", onSelect: "rowSelected", onDeselect: "rowDeselected", components: [
+				{name: "item", classes: "enyo-children-inline", ontap: "itemTap", ondblclick: "dblClick", /*onConfirm: "removeProvider",*/ components: [
+					{name: "icon", kind: "onyx.Icon"},
+					{name: "name"},
+					{name: "auth", kind: "Image", src: "$harmonia/images/valid-check.png", showing: false}
+				]}
 			]}
 		]},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
