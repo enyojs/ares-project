@@ -9,131 +9,93 @@ enyo.kind({
 	name: "ares.Node",
 	kind: "Node",
 	events: {
+		onItemDown: "",
+		onItemDragstart: "",
+		onItemDragenter: "",
+		onItemDragover: "",
+		onItemDragleave: "",
+		onItemDrop: "",
+		onItemDragend: "",
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
-		onAdjustScroll: "",
-		onNodeMove: ""
+		onAdjustScroll: ""
 	},
 	published: {
-		service: null
+		service: null,
+		
+		// allows subnodes to be draggable or not (not per default).
+		dragAllowed: false
 	},
 	handlers: {
-		ondragstart: "dragStart",
+		ondown: "down",
+		ondragstart: "dragstart",
+		ondragenter: "dragenter",
+		ondragover: "dragover",
+		ondragleave: "dragleave",
 		ondrop: "drop",
-		ondragover: "dragOver",
-		ondragout: "dragOut"
+		ondragend: "dragend"
+	},
+	attributes: {
+		dropTarget: "true"
 	},
 	
 	// expandable nodes may only be opened by tapping the icon; tapping the content label
 	// will fire the nodeTap event, but will not expand the node.
 	onlyIconExpands: true,
-
+	
 	debug: false,
 	
-	node: null,
-
-	dragStart: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		
-		node = null;
-		
-		// look for the related ares.Node
-		if (inSender.kind === "ares.Node") {
-			node = inSender;
-		} else {
-			node = inSender.container;
+	down: function(inSender, inEvent) {
+		this.doItemDown(inEvent);
+		return true;
+	},
+	dragstart: function(inSender, inEvent) {
+		if(!inEvent.dataTransfer) {
+			return true;
 		}
 		
+		this.doItemDragstart(inEvent);
+		return true;
+	},
+	dragenter: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
+		}
+		
+		this.doItemDragenter(inEvent);
+		return true;
+	},
+	dragover: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
+		}
+		
+		this.doItemDragover(inEvent);
+		return true;
+	},
+	dragleave: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
+		}
+		
+		this.doItemDragleave(inEvent);
 		return true;
 	},
 	drop: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		
-		var newParentNode = "";
-		
-		// look for the related ares.Node
-		if (inSender.kind === "ares.Node") {
-			newParentNode = inSender;
-		} else {
-			// Control or Image...
-			newParentNode = inSender.container;
+		if (!inEvent.dataTransfer) {
+			return true;
 		}
 		
-		this.doNodeMove({oldNode: node, newParent: newParentNode});
-		
-		newParentNode.applyStyle("cursor", "default");
-		if (newParentNode.file.isDir && newParentNode.expanded) {
-			newParentNode.applyStyle("background-color", null);
-		}
-		
-		node = null;
-		
+		this.doItemDrop(inEvent);
 		return true;
 	},
-	dragOver: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		
-		var newParentNode = "";
-		
-		// look for the related ares.Node
-		if (inSender.kind === "ares.Node") {
-			newParentNode = inSender;
-		} else {
-			// Control or Image...
-			newParentNode = inSender.container;
+	dragend: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
 		}
 		
-		var nodeFile = node.file;
-		var newParentFile = newParentNode.file;
-		
-		// Applying the related DnD style
-		if (nodeFile != newParentFile) {
-			if (newParentFile.isDir) {
-				if (node.container.file.id != newParentFile.id) {
-						if (!nodeFile.isDir || newParentFile.isServer || newParentFile.dir.indexOf(nodeFile.dir) == -1) {
-						newParentNode.applyStyle("cursor", "pointer");
-					} else {
-						if (this.debug) this.log("target node is a child node");
-						newParentNode.applyStyle("cursor", "no-drop");
-					}
-				} else {
-					if (this.debug) this.log("target node is its own parent node");
-					newParentNode.applyStyle("cursor", "no-drop");
-				}
-			} else {
-				if (this.debug) this.log("target node is a file");
-				newParentNode.applyStyle("cursor", "no-drop");
-			}
-		} else {
-			if (this.debug) this.log("target node is itself");
-			newParentNode.applyStyle("cursor", "no-drop");
-		}
-		
-		if (newParentNode.file.isDir && newParentNode.expanded) {
-			newParentNode.applyStyle("background-color", "grey");
-		}
-				
-		return true;
-	},
-	dragOut: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		
-		var isNode = null;
-		
-		// look for the related ares.Node to apply the DnD style
-		if (inSender.kind === "ares.Node") {
-			isNode = inSender;
-		} else {
-			// Control or Image...
-			isNode = inSender.container;
-		}
-		
-		isNode.applyStyle("cursor", "default");
-		if (isNode.file.isDir && isNode.expanded) {
-			isNode.applyStyle("background-color", null);
-		}
-		
+		this.doItemDragend(inEvent);
 		return true;
 	},
 	
@@ -205,8 +167,12 @@ enyo.kind({
 					break ;
 
 				case 1: // file added
-				    if (this.debug) this.log(rfiles[i].name + " was added") ;
-					newControl = this.createComponent( rfiles[i], {kind: "ares.Node"} ) ;
+				  if (this.debug) this.log(rfiles[i].name + " was added") ;
+					if (this.dragAllowed) {
+						newControl = this.createComponent( rfiles[i], {kind: "ares.Node", dragAllowed: true, attributes: {draggable : true}} ) ;
+					} else {
+						newControl = this.createComponent( rfiles[i], {kind: "ares.Node"} ) ;
+					}
 					if (this.debug) this.log("updateNodeContent created ", newControl) ;
 					newControl.setService(this.service);
 					nfiles = this.getNodeFiles() ;
@@ -216,10 +182,17 @@ enyo.kind({
 					//	inNode.controls.splice(i+4, 0, justAdded);
 					//}
 				    modified = 1;
+				/*
+				 FIXME: allow to manually change
+				 PhoneGap parameters from Ares.
+				 DEMANDS to relad Ares after each
+				 project.json manual change
+
 					if (nfiles[i].name === '$project.json') {
 						// project.json file is internal to Ares
 						nfiles[i].hide();
 					}
+				 */
 					i++ ;
 					break ;
 			}

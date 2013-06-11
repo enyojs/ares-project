@@ -107,8 +107,9 @@ BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 	
 	function _respond(err) {
 		log.warn("errorHandler#_respond():", err.stack);
-		res.status(err.statusCode || 500);
-		if (err.statusCode === 401) {
+		var statusCode = (err && err.statusCode) || 500;
+		res.status(statusCode);
+		if (statusCode === 401) {
 			// invalidate token cookie
 			self.setCookie(res, 'token', null);
 		}
@@ -131,11 +132,12 @@ BdPhoneGap.prototype.getToken = function(req, res, next) {
 	log.http("getToken()", "POST /token");
 	request.post(options, (function(err1, response, body) {
 		try {
-			log.verbose("getToken()", "response.statusCode:", response.statusCode);
-			if (err1 || response.statusCode != 200) {
-				var msg = (err1 && err1.toString()) || http.STATUS_CODES[response.statusCode] || "Error";
+			var statusCode = (response && response.statusCode) || 0;
+			log.verbose("getToken()", "statusCode:", statusCode);
+			if (err1 || statusCode != 200) {
+				var msg = (err1 && err1.toString()) || http.STATUS_CODES[statusCode] || "Error";
 				log.warn("getToken()", msg);
-				next(new HttpError(msg, response.statusCode));
+				next(new HttpError(msg, statusCode));
 			} else {
 				log.verbose("getToken()", "response body:", body);
 				var data = JSON.parse(body);

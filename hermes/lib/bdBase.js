@@ -299,7 +299,7 @@ BdBase.prototype.minify = function(req, res, next) {
 	var enyoDir = this.config.enyoDir,
 	    minifyScript = this.config.minifyScript;
 
-	if (req.query["no-minify"]) {
+	if (req.query["debug"]) {
 		_noMinify();
 		return;
 	}
@@ -320,8 +320,20 @@ BdBase.prototype.minify = function(req, res, next) {
 	});
 
 	function _noMinify() {
+		log.info("_noMinify()", "Skipping minification");
 		req.appDir.zipRoot = req.appDir.source;
-		next();
+		var index = path.join(req.appDir.zipRoot, "index.html"),
+		    debug = path.join(req.appDir.zipRoot, "debug.html");
+		async.waterfall([
+			fs.stat.bind(this, debug),
+			function(stat, next) {
+				fs.unlink(index, next);
+			},
+			fs.rename.bind(this, debug, index)
+		], function(err) {
+			log.verbose("expected err:", err);
+			next();
+		});
 	}
 
 	function _minify() {
@@ -340,7 +352,7 @@ BdBase.prototype.minify = function(req, res, next) {
 			       '--build', req.appDir.build,
 			       '--out', req.appDir.minify,
 			       '--less'];
-		log.info("minify()", "Running: '", minifyScript, params.join(' '), "'");
+		log.info("_minify()", "Running: '", minifyScript, params.join(' '), "'");
 		var child = child_process.fork(minifyScript, params, {
 			silent: false
 		});

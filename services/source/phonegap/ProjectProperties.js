@@ -14,30 +14,29 @@ enyo.kind({
 		onConfigure: ""
 	},
 	components: [
-		{kind: "FittableRows", components: [
-			{classes:"ares-row", components :[
-				{tag:"label", classes: "ares-label", content: "PhoneGap App ID:"},
-				{kind: "onyx.InputDecorator", components: [
-					{kind: "Input", name: "pgConfId",
-						attributes: {title: "unique identifier, assigned by build.phonegap.com"}
-					}
+		{kind:"enyo.Scroller", fit:"true", classes:"ares-project-properties",components:[
+			{kind: "FittableRows", components: [
+				{classes:"ares-row ares-align-right", components :[
+					{tag:"label", classes: "ares-fixed-label ares-small-label", content: "PhoneGap App ID:"},
+					{kind: "onyx.InputDecorator", components: [
+						{kind: "Input", name: "pgConfId",
+							attributes: {title: "unique identifier, assigned by build.phonegap.com"}
+						}
+					]},
+					{tag:"label", classes: "ares-fixed-label ares-small-label", content: "Icon URL:"},
+					{kind: "onyx.InputDecorator", components: [
+						{kind: "Input", name: "pgIconUrl",
+							attributes: {title: "Relative location of the application icon. Defaults to Enyo icon."}
+						}
+					]}
 				]},
-				{tag:"label", classes: "ares-label", content: "Icon URL:"},
-				{kind: "onyx.InputDecorator", components: [
-					{kind: "Input", name: "pgIconUrl",
-						attributes: {title: "Relative location of the application icon. Defaults to Enyo icon."}
-					}
-				]}
+				{content: "Targets:", classes:"ares-row ares-align-right", components: [
+					{kind: "onyx.Button", content: "Refresh...", ontap: "refresh"},
+					{kind: "onyx.Button", content: "Configure", ontap: "configure"}
+				]},
+				{name: "targetsRows", kind: "FittableRows", classes: 'ares_projectView_switches'}
 			]}
-		]},
-
-		{content: "Targets:", components: [
-			{ kind: "onyx.Toolbar", classes: "ares-toolbar", components: [
-				{kind: "onyx.Button", content: "Refresh...", ontap: "refresh"},
-				{kind: "onyx.Button", content: "Configure", ontap: "configure"}
-			]}
-		]},
-		{name: "targetsRows", kind: "FittableRows", classes: 'ares_projectView_switches'}
+		]}
 	],
 	/**
 	 * @private
@@ -238,23 +237,25 @@ enyo.kind({
 		provider: undefined
 	},
 	components: [
-		{ classes:"ares-row ares-drawer", components: [
-			{tag: "label", classes : "ares-bullet-label", content: "Signing Key: "},
-			{name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey", components: [
-				{kind: "onyx.PickerButton", content: "Choose..."},
-				{kind: "onyx.Picker", name: "keys"}
-			]},
-			// android, ios & blackberry: key password
-			{kind: "onyx.InputDecorator", components: [
-				{content: "Key:"},
-				{name: "keyPasswd", kind: "onyx.Input", type: "password", placeholder: "Password..."}
-			]},
-			// android-only: keystore password
-			{kind: "onyx.InputDecorator", name: "keystorePasswdFrm", showing: false, components: [
-				{content: "Keystore:"},
-				{name: "keystorePasswd", kind: "onyx.Input", type: "password", placeholder: "Password..."}
-			]},
-			{kind: "onyx.Button", content: "Save", ontap: "savePassword"}
+		{classes:"ares-row ares-drawer", components: [
+			{classes:"ares-row", components:[
+				{tag: "label", classes:"ares-fixed-label ares-small-label", content: "Signing Key: "},
+				{name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey", components: [
+					{kind: "onyx.PickerButton", content: "Choose...", classes:"middle-width ares-margin-right"},
+					{kind: "onyx.Picker", name: "keys"}
+				]},
+				// android, ios & blackberry: key password
+				{kind: "onyx.InputDecorator", classes:"ares-margin-right", components: [
+					{content: "Key:"},
+					{name: "keyPasswd", kind: "onyx.Input", classes:"ares-small-input", type: "password", placeholder: "Password"}
+				]},
+				// android-only: keystore password
+				{kind: "onyx.InputDecorator", name: "keystorePasswdFrm", classes:"ares-margin-right", showing: false, components: [
+					{content: "Keystore:"},
+					{name: "keystorePasswd", kind: "onyx.Input", classes:"ares-small-input", type: "password", placeholder: "Password"}
+				]},
+				{kind: "onyx.Button", content: "Save", ontap: "savePassword"}
+			]}
 		]}
 	],
 	create: function() {
