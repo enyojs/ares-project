@@ -103,6 +103,9 @@ enyo.kind({
 		
 		// get the related ares.Node
 		this.draggedNode = inEvent.originator;
+		if (this.draggedNode.kind !== "ares.Node") {			
+			this.draggedNode = this.draggedNode.parent;
+		}
 		this.targetNode = this.draggedNode;
 		
 		if (this.draggedNode.content == "package.js") {
