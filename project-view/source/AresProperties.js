@@ -44,8 +44,8 @@ enyo.kind({
 		}
 		
 		var pluginService = {
-			id: inEvent.pluginService.id,
-			name: inEvent.pluginService.getName() || inEvent.pluginService.getId(),
+			id: inEvent.pluginService.getServiceId(),
+			name: inEvent.pluginService.getName() || inEvent.pluginService.getServiceId(),
 			kind: inEvent.pluginService.getAresPropertiesKind()
 		};
 
