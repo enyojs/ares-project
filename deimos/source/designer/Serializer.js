@@ -15,6 +15,7 @@ enyo.kind({
 	},
 	//* protected
 	noserialize: {owner: 1, container: 1, parent: 1, id: 1, attributes: 1, selected: 1, active: 1, isContainer: 1, __aresOptions: 1},
+	kindCatProps: {"classes": "kindClasses", "style": "kindStyle"},
 	_serialize: function(inContainer, inIncludeAresId) {
 		var s = [],
 			c$ = this.getAresComponents(inContainer);
@@ -64,15 +65,24 @@ enyo.kind({
 		this.serializeEvents(p, inComponent);
 		return p;
 	},
-	serializeProps: function(inComponent, inIncludeAresId) {
+	serializeProps: function(inComponent, inIncludeAresId, isPrototype) {
 		var o = {
 			kind: this.getComponentKindName(inComponent)
 		};
 		var ps = this.buildPropList(inComponent, "published");
-		var proto = inComponent.ctor.prototype;
+		var proto = isPrototype ? inComponent.base.prototype : inComponent.ctor.prototype;
 		for (var j=0, p; (p=ps[j]); j++) {
 			if (!this.noserialize[p] && proto[p] != inComponent[p] && inComponent[p] !== "") {
 				o[p] = inComponent[p];
+			}
+			if (isPrototype && this.kindCatProps[p]) {
+				// Unconcatenate concatenated kind properties
+				var kp = this.kindCatProps[p];
+				if (inComponent[kp] && proto[kp]) {
+					var len = proto[kp].length;
+					len = len > 0 ? len + 1 : len; // include concatenation delimiter
+					o[p] = inComponent[kp].substring(len);
+				}
 			}
 		}
 		if (inIncludeAresId) {

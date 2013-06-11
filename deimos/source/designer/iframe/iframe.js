@@ -41,7 +41,19 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.inherited(arguments);
-		this.sendMessage({op: "state", val: "initialized"});
+		this.adjustFrameworkFeatures();
+		enyo.load(window._ares_app_url + "/source/package.js", enyo.bind(this, function() {
+			this.sendMessage({op: "state", val: "initialized"});
+		}));
+	},
+	adjustFrameworkFeatures: function() {
+		// Allow overriding kind definitions
+		enyo.kind.allowOverride = true;
+		// Disable autoStart/autoRender features of enyo.Application
+		if (enyo.Application) {
+			enyo.Application.prototype.start = enyo.nop;
+			enyo.Application.prototype.render = enyo.nop;
+		}
 	},
 	currentDropTargetChanged: function() {
 		if (this.getCurrentDropTarget()) {
@@ -339,6 +351,7 @@ enyo.kind({
 
 			// Save reference to the parent instance currently rendered
 			this.parentInstance = this.$.client.createComponent({kind: inKind.name});
+			this.parentInstance.aresId = "top";
 
 			// Mimic top-level app fitting (as if this was rendered with renderInto or write)
 			if (this.parentInstance.fit) {
@@ -403,7 +416,7 @@ enyo.kind({
 			return;
 		}
 		
-		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
+		for(var i=0, c, c$=this.flattenChildren(this.$.client.children); c=c$[i]; i++) {
 			if(c.aresId === inItem.aresId) {
 				this._selectItem(c);
 				return;
@@ -431,6 +444,9 @@ enyo.kind({
 			if (this.debug) this.log("Skipping modification of \"" + inProperty + "\"");
 		} else {
 			this.selection[inProperty] = inValue;
+			if (this.selection.aresId == "top") {
+				enyo.constructorForKind(this.parentInstance.kind).prototype[inProperty] = inValue;
+			}
 		}
 	},
 	
@@ -585,8 +601,12 @@ enyo.kind({
 	},
 	renderSelectHighlight: function() {
 		if(this.selection && this.selection.hasNode()) {
-			this.$.selectHighlight.setBounds(this.selection.hasNode().getBoundingClientRect());
-			this.$.selectHighlight.show();
+			if (this.selection instanceof enyo.UiComponent) {
+				this.$.selectHighlight.setBounds(this.selection.hasNode().getBoundingClientRect());
+				this.$.selectHighlight.show();
+			} else {
+				this.$.selectHighlight.hide();
+			}
 		}
 	},
 	hideSelectHighlight: function() {
@@ -630,7 +650,10 @@ enyo.kind({
 	},
 	//* Send update to Deimos with serialized copy of current kind component structure
 	kindUpdated: function() {
-		this.sendMessage({op: "rendered", val: this.$.serializer.serialize(this.parentInstance, true)});
+		this.sendMessage({op: "rendered", val: {
+			components: this.$.serializer.serialize(this.parentInstance, true),
+			top: enyo.mixin(this.$.serializer.serializeProps(enyo.constructorForKind(this.parentInstance.kind).prototype, false, true), {aresId:"top"})
+		}});
 	},
 	//* Eval code passed in by designer
 	codeUpdate: function(inCode) {

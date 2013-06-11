@@ -658,26 +658,56 @@ enyo.kind({
 	// called when designer has modified the components
 	updateComponents: function(inSender, inEvent) {
 		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
+			var obj = this.analysis.objects[i];
+			var newProps = "";
+			var range;
 			if (inEvent.contents[i]) {
 				// Insert the new version of components (replace components block, or insert at end)
-				var obj = this.analysis.objects[i];
 				var comps = inEvent.contents[i];
 				var start = obj.componentsBlockStart;
 				var end = obj.componentsBlockEnd;
 				if (!(start && end)) {
-					// If this kind doesn't have a components block yet, insert a new one
-					// at the end of the file
-					var last = obj.properties[obj.properties.length-1];
-					if (last) {
-						comps = (last.commaTerminated ? "" : ",") + "\n\t" + "components: " + comps;
-						start = obj.block.end - 2;
-						end = obj.block.end - 2;
+					newProps = "components: " + comps;
+				} else {
+					// Get the corresponding Ace range to replace the component definition
+					// NB: ace.replace() allow to use the undo/redo stack.
+					range = this.$.ace.mapToLineColumnRange(start, end);
+					this.$.ace.replaceRange(range, comps);
+				}
+			}
+			if (inEvent.topKinds[i]) {
+				var kind = inEvent.topKinds[i];
+				for (var p in kind) {
+					if (p in {"kind":"", "aresId":""}) {
+						continue;
+					}
+					var val = kind[p];
+					val = enyo.isString(val) ? "\"" + val + "\"" : val;
+					var propDefined = false;
+					for (var j=0; j<obj.properties.length; j++) {
+						var prop = obj.properties[j];
+						if (p == prop.name) {
+							if (val != prop.value[0].token) {
+								range = this.$.ace.mapToLineColumnRange(prop.value.start, prop.value.end);
+								this.$.ace.replaceRange(range, val);
+							}
+							propDefined = true;
+							break;
+						}
+					}
+					if (!propDefined) {
+						newProps += (newProps ? ",\n\t" : "") + p + ": " + val;
 					}
 				}
-				// Get the corresponding Ace range to replace the component definition
-				// NB: ace.replace() allow to use the undo/redo stack.
-				var range = this.$.ace.mapToLineColumnRange(start, end);
-				this.$.ace.replaceRange(range, comps);
+			}
+			if (newProps) {
+				// Insert any new properties at the end of the file
+				var lastProp = obj.properties[obj.properties.length-1];
+				if (lastProp) {
+					newProps = (lastProp.commaTerminated ? "" : ",") + "\n\t" + newProps;
+				}
+				range = this.$.ace.mapToLineColumnRange(obj.block.end - 2, obj.block.end - 2);
+				this.$.ace.replaceRange(range, newProps);
 			}
 		}
 		/*

@@ -304,14 +304,15 @@ enyo.kind({
 		if (this.debug) { this.log("projectIndexUpdated: for projectIndexer: ", this.projectIndexer); }
 		Model.buildInformation(this.projectIndexer);
 	},
-	initUserDefinedAttributes: function(inComponents) {
+	initUserDefinedAttributes: function(inKind) {
 		this.userDefinedAttributes = {};
 		
-		var components = this.flattenComponents(inComponents);
+		var components = this.flattenComponents(inKind.components);
 		
 		for(var i = 0, component; (component = components[i]); i++) {
 			this.userDefinedAttributes[component.aresId] = component;
 		}
+		this.userDefinedAttributes["top"] = inKind;
 	},
 	flattenComponents: function(inComponents) {
 		var ret = [],

@@ -26,9 +26,10 @@ enyo.kind({
 	holdoverTimeoutMS: 500,
 	
 	//* Draw component view visualization of component tree
-	visualize: function(inComponents) {
+	visualize: function(inComponents, inTop) {
 		this.destroyClientControls();
-		this._visualize(inComponents, this);
+		var top = this.createComponent(this.createEntry(inTop));
+		this._visualize(inComponents, top);
 		this.render();
 	},
 	//* Create component view representation of designer
@@ -355,8 +356,15 @@ enyo.kind({
 	},
 	compChanged: function() {
 		this.$.label.comp = this.getComp();
-		this.$.componentName.setContent(this.getComp().name);
-		this.$.componentKind.setContent("&nbsp;(<i>"+this.getComp().kind+"</i>)");
+		this.$.componentName.setContent(this.getComp().aresId == "top" ? this.getComp().kind : this.getComp().name);
+		this.$.componentKind.setContent(this.getComp().aresId == "top" ? "" : "&nbsp;(<i>"+ this.getComp().kind +"</i>)");
+		// Top-level component is special; it doesn't participate in drag & drop
+		if (this.getComp().aresId == "top") {
+			this.attributes.dropTarget = false;
+			this.handlers = {
+				ondown: "down"
+			};
+		}
 	},
 	getAresId: function() {
 		return this.getComp().aresId;

@@ -27,11 +27,11 @@ enyo.kind({
 						{kind: "onyx.PickerDecorator", classes: "deimos-device-picker deimos-designer-toolbar-spacing", components: [
 							{style: "width:100%;"},
 							{kind: "onyx.Picker", name: "devicePicker", ontap: "deviceChosen", components: [
-								{content: "(600 x 800) Default",			value: { height:  800, width:  600 }},
-								{content: "(1920 x 1080) HDTV",				value: { height:  1080, width:  1920 }},
-								{content: "(320 x 480) iPhone\u2122",		value: { height:  480, width:  320 }},
-								{content: "(320 x 573) iPhone\u2122 5",		value: { height: 573, width:  320 }},
-								{content: "(1024 x 768) iPad\u2122",	value: { height: 768, width: 1024 }},
+								{content: "600 x 800 (Default)",        value: { height:  600, width:  800 }},
+								{content: "1920 x 1080 (HDTV)",         value: { height: 1080, width: 1920 }},
+								{content: "320 x 480 (iPhone\u2122)",   value: { height:  480, width:  320 }},
+								{content: "320 x 573 (iPhone\u2122 5)", value: { height:  573, width:  320 }},
+								{content: "1024 x 768 (iPad\u2122)",    value: { height:  768, width: 1024 }},
 								{content: "Custom"}
 							]}
 						]},
@@ -151,7 +151,7 @@ enyo.kind({
 		
 		this.addAresIds(this.kinds[index].components);
 		this.addAresKindOptions(this.kinds[index].components);
-		this.$.inspector.initUserDefinedAttributes(this.kinds[index].components);
+		this.$.inspector.initUserDefinedAttributes(kind);
 		
 		if (index !== this.index) {
 			
@@ -180,8 +180,8 @@ enyo.kind({
 			this.$.inspector.inspect(this.$.designer.selection);
 		}), 200);
 	},
-	refreshComponentView: function(inComponents) {
-		this.$.componentView.visualize(inComponents);
+	refreshComponentView: function(inComponents, inTop) {
+		this.$.componentView.visualize(inComponents, inTop);
 	},
 	// New selected item triggered in iframe. Synchronize component view and refresh inspector.
 	designerSelect: function(inSender, inEvent) {
@@ -217,9 +217,10 @@ enyo.kind({
 	prepareDesignerUpdate: function() {
 		if (this.index !== null) {
 			// Prepare the data for the code editor
-			var event = {docHasChanged: this.getEdited(), contents: []};
+			var event = {docHasChanged: this.getEdited(), contents: [], topKinds: []};
 			for(var i = 0 ; i < this.kinds.length ; i++) {
 				event.contents[i] = this.kinds[i].updatedComponents;
+				event.topKinds[i] = this.kinds[i].updatedTopKind;
 			}
 			return event;
 		}
@@ -238,11 +239,12 @@ enyo.kind({
 	designRendered: function(inSender, inEvent) {
 		var components = enyo.json.codify.from(inEvent.content);
 
-		this.refreshComponentView(components);
+		this.refreshComponentView(components, inEvent.top);
 		this.setEdited(true);
 		
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
 		this.kinds[this.index].updatedComponents = enyo.json.codify.to(this.cleanUpComponents(components));
+		this.kinds[this.index].updatedTopKind = inEvent.top;
 
 		this.designerUpdate();
 		
@@ -275,7 +277,7 @@ enyo.kind({
 		}
 		
 		// Update user defined values
-		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
+		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index]);
 		this.addAresKindOptions(this.kinds[this.index].components);
 		
 		this.rerenderKind(config.aresId);

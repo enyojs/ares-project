@@ -103,7 +103,7 @@ enyo.kind({
 			}
 		// The current kind was successfully rendered in the iframe
 		} else if(msg.op === "rendered") {
-			this.kindRendered(msg.val);
+			this.kindRendered(msg.val.components, msg.val.top);
 		// Select event sent from here was completed successfully. Set _this.selection_.
 		} else if(msg.op === "selected") {
 			this.selection = enyo.json.codify.from(msg.val);
@@ -156,8 +156,8 @@ enyo.kind({
 		this.sendMessage({op: "modify", val: {property: inProperty, value: inValue}});
 	},
 	//* Send message to Deimos with components from iframe
-	kindRendered: function(content) {
-		this.doDesignRendered({content: content});
+	kindRendered: function(content, top) {
+		this.doDesignRendered({content: content, top:top});
 	},
 	//* Clean up the iframe before closing designer
 	cleanUp: function() {

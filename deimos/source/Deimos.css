@@ -77,8 +77,8 @@
 .deimos-device-picker {
 	width: 160px;
 }
-.deimos-designer-input {
-	width: 3em;
+.onyx-input-decorator > .deimos-designer-input {
+	width: 50px;
 	text-align: center;
 }
 .onyx-button.deimos-swap-dimensions-button {
