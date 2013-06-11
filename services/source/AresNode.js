@@ -94,7 +94,7 @@ enyo.kind({
 		if (!inEvent.dataTransfer) {
 			return true;
 		}
-		
+
 		this.doItemDragend(inEvent);
 		return true;
 	},
