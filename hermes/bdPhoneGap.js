@@ -78,8 +78,8 @@ BdPhoneGap.prototype.route = function() {
 	// '/token' & '/api' -- Wrapped public Phonegap API
 	this.app.post(this.makeExpressRoute('/token'), this.getToken.bind(this));
 	this.app.get(this.makeExpressRoute('/api/v1/me'), this.getUserData.bind(this));
-	this.app.get(this.makeExpressRoute('/api/v1/apps/:applicationID'), this.getAppStatus.bind(this));
-	this.app.get(this.makeExpressRoute('/api/v1/apps/:applicationID/:pf/:title/:version'),
+	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId'), this.getAppStatus.bind(this));
+	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId/:platform/:title/:version'),
 				 this.downloadApp.bind(this));
 };
 	
@@ -181,7 +181,7 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
 		if (err1) {
 			next(err1);
 		} else {
-			var appID = req.params.applicationID;
+			var appId = req.params.appId;
 					
 			api.get('/apps/' + appID, function(err2, userData) {
 				if (err2) {
@@ -204,16 +204,16 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
  * 	- When the download is done, the file is piped to "Ares client"
  * 	  using a multipart/form Post request
  *   
- * @param  {JSON}   req  Contain the request attributes
- * @param  {JSON}   res  Contain the response attributes
+ * @param  {Object}   req  Contain the request attributes
+ * @param  {Object}   res  Contain the response attributes
  * @param  {Function} next a CommonJs callback
  * 
  */
 BdPhoneGap.prototype.downloadApp = function(req, res, next){
 	
-	var appID = req.params.applicationID;
+	var appID = req.params.appId;
 	var platform = req.params.pf;
-	var requestURL = '/apps/' + appID + '/'+ platform;
+	var requestURL = '/apps/' + appId + '/'+ platform;
 	var FORM_DATA_LINE_BREAK = '\r\n';
 
  	returnBody(req, res, function() {});
@@ -236,8 +236,8 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
  		//Getting the needed informations from the parsed URL
  		//to generate the name of the built application.
  		var title = req.params.title;
-		var platform = req.params.pf;
-		var appID = req.params.applicationID;
+		var platform = req.params.platform;
+		var appId = req.params.appId;
 		var version = req.params.version;
 		var packagedFile = fs.createWriteStream(filename);
 
@@ -311,7 +311,7 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 			if (err1) {
 				next(err1);
 			} else {
-				packagedFile = api.get('/apps/appID/platform', function(err2, userData){
+				packagedFile = api.get("/apps/" + appId + "/"+ platform, function(err2, userData){
 					if (err2) {
 						next(err2);
 					} else {packagedFile.close();

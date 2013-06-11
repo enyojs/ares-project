@@ -4,16 +4,13 @@ enyo.kind({
 	events: {
 		onLoginFailed: "",
 		onShowWaitPopup: ""
-	},
-	published: {
-		application: ""
-	},
+	},	
 	components: [
 		{kind: "Phonegap.BuildStatusUI",
 		 name: "buildStatusPopup"
 		}
 	],
-	debug: true,
+	debug: false,
 	/**
 	 * @private
 	 */
@@ -207,8 +204,8 @@ enyo.kind({
 					details = response.body;
 				}
 			}
-			if (this.debug) this.error("Unable to get PhoneGap application token (" + inError + ")", "response:", response);
-			next(new Error("Unable to get PhoneGap application token (" + inError + ")"), details);
+			if (this.debug) this.error("Unable to get PhoneGap application token (" + details || inError + ")", "response:", response);
+			next(new Error("Unable to get PhoneGap application token (" + details || inError + ")"), details);
 		});
 		req.go();
 	},
@@ -240,9 +237,9 @@ enyo.kind({
 					details = response.body;
 				}
 			}
-			next(new Error("Unable to get PhoneGap user data (" + inError + ")"), details);
+			next(new Error("Unable to get PhoneGap user data (" + details || inError + ")"), details);
 		});
-		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
+		req.go();
 	},	
 
 	/**
@@ -284,9 +281,9 @@ enyo.kind({
 					details = response.body;
 				}
 			}
-			next(new Error("Unable to get PhoneGap user data (" + inError + ")"), details);
+			next(new Error("Unable to get PhoneGap user data (" + details || inError + ")"), details);
 		});
-		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
+		req.go(); 
 	},
 	/**
 	 * This function do the same thing as the function _getBuildStatus except
@@ -329,9 +326,9 @@ enyo.kind({
 					details = response.body;
 				}
 			}
-			next(new Error("Unable to get PhoneGap user data (" + inError + ")"), details);
+			next(new Error("Unable to get PhoneGap user data (" + details || inError + ")"), details);
 		});
-		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
+		req.go(); 
 	},
 	/**
 	 * show the pop-up containing informations about the previous  build of the 
@@ -644,7 +641,7 @@ enyo.kind({
 					message = response.body;
 				}
 			}
-			next(new Error(message + " (" + inError + ")"));
+			next(new Error(message + " (" + details || inError + ")"));
 		});
 		req.go(query);
 	},
@@ -701,8 +698,8 @@ enyo.kind({
 		});
 
 		//Execution of the Ajax request
-		req.go({token: this.config.auth.token}); 
-		// FIXME: remove the token as soon as the cookie works...
+		req.go(); 
+		
 	},	
 	/**
 	 * Prepare the folder where to store the built package
@@ -770,11 +767,11 @@ enyo.kind({
 	 * file (contained in a multipart data form)in the folder 
 	 * "Target/Phonegap build" of the curent built project.
 	 * 
-	 * @param  {JSON}   project contain a description about the current selected
+	 * @param  {Object}   project contain a description about the current selected
 	 *                          project
-	 * @param  {[type]}   folderId id of the target folder where to store the
+	 * @param  {Object}   folderId id of the target folder where to store the
 	 *                             packaged file.
-	 * @param  {[type]}   appData  multipart data form containing the application
+	 * @param  {Object}   appData  multipart data form containing the application
 	 *                             to store
 	 * @param  {Function} next     a CommonJs callback
 	 
