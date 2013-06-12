@@ -118,8 +118,8 @@ enyo.kind({
 			// Get default project configuration for each service that can
 			ServiceRegistry.instance.forEach(function(provider) {
 				if ((typeof provider.getDefaultProjectConfig === 'function') &&
-				    (typeof provider.getServiceId === 'function')) {
-					var providerId = provider.getServiceId();
+				    (typeof provider.getId === 'function')) {
+					var providerId = provider.getId();
 					config.providers[providerId] = provider.getDefaultProjectConfig();
 				}
 			});

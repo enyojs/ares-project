@@ -128,8 +128,8 @@ enyo.kind({
 		this.services = enyo.clone(this.services) || {};
 		inEvent.serviceRegistry.forEach(enyo.bind(this, function(inService) {
 			var service = {
-				id: inService.getServiceId(),
-				name: inService.getName() || inService.getServiceId(),
+				id: inService.id,
+				name: inService.getName() || inService.getId(),
 				kind: inService.getProjectPropertiesKind && inService.getProjectPropertiesKind()
 			};
 			if (this.debug) this.log("service:", service);
