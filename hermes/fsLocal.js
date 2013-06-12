@@ -505,7 +505,7 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		root: argv.root,
 		pathname: argv.pathname,
 		port: argv.port,
-		verbose: (argv.level === 'verbose') // FIXME: rather use npm.log() directly
+		level: argv.level
 	}, function(err, service){
 		if (err) process.exit(err);
 		// process.send() is only available if the
