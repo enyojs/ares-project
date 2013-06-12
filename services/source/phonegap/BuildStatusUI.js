@@ -161,7 +161,6 @@ enyo.kind({
 		},
 
 		{name: "TitleLabel",
-		 content: "initializing title"
 		},
 		
 		{tag: "br"},
@@ -172,7 +171,6 @@ enyo.kind({
 
 		{name: "PhonegapVersionLabel",
 		 style: "font-size: 70%;",
-		 content: "initializing version"
 		},
 		
 		{tag: "br"},

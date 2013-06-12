@@ -162,6 +162,7 @@ BdPhoneGap.prototype.getUserData = function(req, res, next) {
 		if (err1) {
 			next(err1);
 		} else {
+			log.http("getUserData()", "GET /apps/me");
 			api.get('/me', function(err2, userData) {
 				if (err2) {
 					next(err2);
@@ -182,8 +183,8 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
 			next(err1);
 		} else {
 			var appId = req.params.appId;
-					
-			api.get('/apps/' + appID, function(err2, userData) {
+			log.http("getAppStatus()", "GET /apps/" + appId);					
+			api.get('/apps/' + appId, function(err2, userData) {
 				if (err2) {
 					next(err2);
 				} else {
@@ -211,8 +212,8 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
  */
 BdPhoneGap.prototype.downloadApp = function(req, res, next){
 	
-	var appID = req.params.appId;
-	var platform = req.params.pf;
+	var appId = req.params.appId;
+	var platform = req.params.platform;
 	var requestURL = '/apps/' + appId + '/'+ platform;
 	var FORM_DATA_LINE_BREAK = '\r\n';
 
@@ -400,7 +401,7 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 
 BdPhoneGap.prototype.build = function(req, res, next) {
 	var appData = {}, query = req.query;
-	log.info("build()", "title:", query.title, ", platforms:", query.platforms, ", appId:", query.appId);
+	log.info("build()", "title:", query.title,"platforms:", query.platforms, ", appId:", query.appId);
 	async.series([
 		this.prepare.bind(this, req, res),
 		this.store.bind(this, req, res),

@@ -10,7 +10,7 @@ enyo.kind({
 		 name: "buildStatusPopup"
 		}
 	],
-	debug: false,
+	debug: true,
 	/**
 	 * @private
 	 */
@@ -51,9 +51,9 @@ enyo.kind({
 	/**
 	 * @return the computer-friendly name of this service
 	 */
-	getId: function() {
+	/*getServiceId: function() {
 		return this.config.id;
-	},
+	},*/
 
 	/**
 	 * @return the human-friendly name of this service
@@ -253,7 +253,7 @@ enyo.kind({
 	_getBuildStatus: function(project, next){
 		
 		var config = project.getConfig().getData();
-		var appId = config.build.phonegap.appId;
+		var appId = config.providers.phonegap.appId;
 		var url = this.url + '/api/v1/apps/' + appId;
 		
 		//Creation of the Ajax request
@@ -297,7 +297,7 @@ enyo.kind({
 	_getBuildStatusPopup: function(project, next){
 		
 		var config = project.getConfig().getData();
-		var appId = config.build.phonegap.appId;
+		var appId = config.providers.phonegap.appId;
 		var url = this.url + '/api/v1/apps/' + appId;
 		
 		//Creation of the Ajax request
@@ -312,7 +312,7 @@ enyo.kind({
 		
 		  // activate the pop up to view the results
 		  next(null, inData);
-		});
+		 });
 		req.error(this, function(inSender, inError) {
 			// invalidate token
 			this.config.auth.token = null;
@@ -343,16 +343,15 @@ enyo.kind({
 	 	
 	 	self = this;
 	 	async.series([
-    		function(callback){
-        		var inUserData = next.user;
+	 		function(){
+    			var inUserData = next.user;
 	 			self.$.buildStatusPopup.showPopup(project, inUserData);
-        		callback(null, 'one');
-   			 },
-    		function(callback){
-        		next();
-        		callback(null, 'two');
-   			 }
-		]);
+	 			self.log('_showBuildStatus()#async.series :', next );
+	 			next();
+
+        ], function (err, results) {
+        	enyo.log("BuildStatus() err:", err, "results:", results);
+        });
 	 	
 	 },
 	/**
@@ -502,7 +501,7 @@ enyo.kind({
 		if (this.debug) this.log("Getting build status:  " + this.url + '/build');
 		async.waterfall([
 			enyo.bind(this, this.authorize),
-			enyo.bind(this, this._getProjectData, project),
+			enyo.bind(this, this._updateConfigXml, project),
 			enyo.bind(this, this._getBuildStatusPopup, project),			
 			enyo.bind(this, this._showBuildStatus, project)
 		], next);
@@ -567,13 +566,11 @@ enyo.kind({
 		if (this.debug) this.log("config: ", config);
 		var keys = {};
 		var platforms = [];
-
 		// mandatory parameters
 		var query = {
 			//provided by the cookie
 			//token: this.config.auth.token,
-			title: config.title,
-			debug: true
+			title: config.title			
 		};
 
 		// Already-created apps have an appId (to be reused)
@@ -629,7 +626,6 @@ enyo.kind({
 				configKind.setData(config);
 				configKind.save();
 			}
-			//xxxx
 			next(null, inData);
 		});
 		req.error(this, function(inSender, inError) {
@@ -639,6 +635,7 @@ enyo.kind({
 				contentType = response.headers['content-type'];
 				if (contentType && contentType.match('^text/plain')) {
 					message = response.body;
+
 				}
 			}
 			next(new Error(message + " (" + details || inError + ")"));
@@ -780,13 +777,19 @@ enyo.kind({
 	_store: function(project, folderId, appData, next) {
 	
 		enyo.Signals.send("onUpdateAppData", {appData: appData});
+
+
+		var config = ares.clone(project.getConfig().getData());
+		var applicationId = config.id;
+	
 		
 		var appKey = "build." + this.getName() + ".app";
 		if(this.debug){
 		 this.log("Entering _store function"+
 			"project: ", project, 
 			" folderId: ", folderId,
-			",appData:  ", appData);
+			",appData:  ", appData
+			 );
 		}
 
 		project.setObject(appKey, appData);
@@ -842,11 +845,12 @@ enyo.kind({
 	   		    	function(err) {
 	   		    		//in the case of exception.
 	   		    		if (err) {
-	   		    			next(err);
+	   		    			
 	   		    			if(this.debug){
 	   		    				self.error("error occured in the request:"+
 	   		    				     " when checking for the Application status");
 	   		    			}
+	   		    			next(err);
 	   		    		} else {
 	   		    			//if the status is complete then a download request
 	   		    			//is sent to Node.js server.
@@ -854,8 +858,8 @@ enyo.kind({
 	   		    				async.waterfall([
 	   		    					function(next){
 	   		    						//make the download request.
-	   		    						appID = appData.id;
-	   		    						title = appData.title;
+	   		    						appId = appData.id;
+	   		    						title = applicationId;
 	   		    						if (appData.version != null){
 	   		    						   version = appData.version;
 	   		    						} else{
@@ -863,7 +867,7 @@ enyo.kind({
 	   		    						}
 
 
-	   		    						var url_suffixe = appID +
+	   		    						var url_suffixe = appId +
 	   		    								  '/' + platform +
 	   		    								  '/' + title + 
 	   		    								  '/' + version;
@@ -883,13 +887,15 @@ enyo.kind({
 	   		    					}
 	   		    				], next);
 	   		    			}
-	   		    			else if (appData.status[platform] === "error") {
+	   		    			else {
+	   		    				
 	   		    				if(self.debug){
 	   		    					//Display the cause of the failure of the build
 	   		    					//this information is contained in the JSON
 	   		    					//object reterned by the check status request
-	   		    					self.log("Error: ", appData.error[platform]);
+	   		    					self.log("Error: ", appData && appData.error && appData.error[platform]);
 	   		    				}
+	   		    				next();
 	   		    			}
 	   		    		}
 	   		    	}
