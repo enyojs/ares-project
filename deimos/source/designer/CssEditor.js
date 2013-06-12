@@ -54,11 +54,84 @@ enyo.kind({
 		onChange: ""
 	},
 	cssEditorConfig: [
-		{cssStyleName: "Background-Style", properties: "background-color"},
-		{cssStyleName: "Border-Style", properties: "border-style,border-width,border-color"},
-		{cssStyleName: "Font-Style", properties: "font-size,font-family"},
-		{cssStyleName: "Paddings-Margins", properties: "padding,margin"},
-		{cssStyleName: "Text-Style", properties: "text-indent"}
+		// {cssStyleName: "Background-Style", properties: "background-color"},
+		{cssStyleName: "Border-Style",
+		properties: [
+			{name: "border-color",
+			config: {"text": true, 
+				"palette": true, 
+				"picker": null, 
+				"slider": false,
+				"unit": false},
+			},
+			{name: "border-style",
+			config: {"text": true, 
+				"palette": false, 
+				"picker": true, 
+				"slider": false,
+				"unit": false},
+			pickerItems: ["", "dotted", "dashed", "double", "groove", "hidden", 
+							"ridge",  "solid", "inset", "outset" ]
+			},
+			{name: "border-width",
+			config: {"text": true, 
+				"palette": false, 
+				"picker": null, 
+				"slider": true,
+				"unit": true}
+			}
+		]
+		},
+		{cssStyleName: "Font-Style",
+		properties: [
+			{name: "font-size",
+			config: {"text": true, 
+				"palette": false, 
+				"picker": null, 
+				"slider": true,
+				"unit": true}
+			},
+			{name: "font-family",
+			config: {"text": true, 
+				"palette": false, 
+				"picker": true, 
+				"slider": false,
+				"unit": false},
+			pickerItems: ["", "arial", "arial black", "comic sans ms", "courier new", "georgia", 
+							"helvetica",  "times new roman", "trebuchet ms", "verdana" ]
+			},
+		]
+		},
+		{cssStyleName: "Paddings-Margins",
+		properties: [
+			{name: "padding",
+			config: {"text": true, 
+				"palette": false, 
+				"picker": null, 
+				"slider": true,
+				"unit": true}
+			},
+			{name: "margin",
+			config: {"text": true, 
+				"palette": false, 
+				"picker": null, 
+				"slider": true,
+				"unit": true}
+			}
+		]
+		},
+		{cssStyleName: "Text-Style",
+		properties: [
+			{
+				name: "text-indent",
+				config: {"text": true, 
+					"palette": false, 
+					"picker": null, 
+					"slider": true,
+					"unit": true}
+			}
+		]
+		}
 	],
 	fieldName: null,
 	fieldValue: null,
