@@ -1,2 +1,2 @@
 .lsmallDownArrow { height:25px; width:25px; background: url(../images/hp_ep_sprite.png) -130px -60px no-repeat; vertical-align: middle; display: inline-block; }
-.optionDownArrow { position:absolute; margin-top:2px; right:0px; top:8px; height: 12px; width: 15px; background: url(../images/hp_ep_sprite.png) -136px -88px no-repeat; vertical-align: middle; display: inline-block; border: 1px solid gray;padding-top: 4px; }
+.optionDownArrow { position:absolute; margin-top:2px; right:1px; top:8px; height: 1em; width: 1.5em; background: url(../images/hp_ep_sprite.png) -134px -88px no-repeat; vertical-align: middle; display: inline-block; border: 1px solid gray;padding-top: 4px; }
