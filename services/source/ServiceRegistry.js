@@ -204,7 +204,7 @@ enyo.kind({
 			}
 			next();
 		} catch(err) {
-			this.error(err);
+			this.error("Unable to configure service '" + service.config.id + "':", err.stack);
 			next(err);
 		}
 	},
