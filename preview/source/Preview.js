@@ -7,9 +7,10 @@ enyo.kind(
 			{content: "iPhone\u2122",      value: { height:  480, width:  320, ppi: 163, dpr: 1 }},
 			{content: "iPhone\u2122 4",    value: { height:  960, width:  640, ppi: 326, dpr: 2 }},
 			{content: "iPhone\u2122 5",    value: { height: 1136, width:  640, ppi: 326, dpr: 2 }},
-			{content: "iPad\u2122 Retina", value: { height: 2048, width: 1536, ppi: 264, dpr: 2 }},
-			{content: "iPad\u2122 2",      value: { height: 1024, width:  768, ppi: 132, dpr: 1 }},
-			{content: "iPad\u2122 mini",   value: { height: 1024, width:  768, ppi: 163, dpr: 1 }}
+
+			{content: "iPad\u2122 Retina", value: { width: 2048, height: 1536, ppi: 264, dpr: 2 }},
+			{content: "iPad\u2122 2",      value: { width: 1024, height:  768, ppi: 132, dpr: 1 }},
+			{content: "iPad\u2122 mini",   value: { width: 1024, height:  768, ppi: 163, dpr: 1 }}
 		]
 	}
 );
