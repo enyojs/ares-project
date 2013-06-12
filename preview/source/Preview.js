@@ -50,7 +50,7 @@ enyo.kind(
 					},
 					{tag: "br"},
 					{
-						 kind: 'onyx.Groupbox',
+						kind: 'onyx.Groupbox',
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Device"},
 							{
