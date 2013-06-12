@@ -30,29 +30,6 @@ enyo.kind(
 						kind: 'onyx.Groupbox',
 						style : "margin-top: 8px",
 						components: [
-							{kind: "onyx.GroupboxHeader", content: "Orientation"},
-							{
-								kind: "onyx.PickerDecorator",
-								onSelect: "resize",
-								style : "padding: 6px",
-								components:
-								[
-									{style: "width: 100%"}, // A content-less PickerButton
-									{
-										kind: "onyx.Picker", name: "orientation",
-										components: [
-											{content: "portrait", active: true, swap: false},
-											{content: "landscape",              swap: true }
-										]
-									}
-								]
-							}
-						]
-					},
-					{tag: "br"},
-					{
-						kind: 'onyx.Groupbox',
-						components: [
 							{kind: "onyx.GroupboxHeader", content: "Device"},
 							{
 								kind: "onyx.PickerDecorator",
@@ -77,6 +54,22 @@ enyo.kind(
 						kind: 'onyx.Groupbox',
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Screen"},
+							{
+								kind: "onyx.PickerDecorator",
+								onSelect: "resize",
+								style : "padding: 6px",
+								components:
+								[
+									{style: "width: 100%"}, // A content-less PickerButton
+									{
+										kind: "onyx.Picker", name: "orientation",
+										components: [
+											{content: "portrait", active: true },
+											{content: "landscape"              }
+										]
+									}
+								]
+							},
 							{content: "width: 600 px",  name: "screenWidth",  style: "padding: 8px",
 							 attributes: { title: "device width divided by DPR" }
 							},
