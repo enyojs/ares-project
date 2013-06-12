@@ -152,9 +152,13 @@ enyo.kind(
 			this.$.devHeight.setContent("height: " + dh + ' px') ;
 			this.$.devDPR   .setContent("DPR: "    + dpr) ;
 
-			var swap = orientation.swap ;
-			var targetW = ( swap ? dh : dw ) / dpr ;
-			var targetH = ( swap ? dw : dh ) / dpr ;
+			// there's no logical xor in javascript. Emulate one :-/
+			var wantWide = orientation.content === 'landscape' ;
+			var isWide   = dw > dh ;
+			var swap     = wantWide ^ isWide ; // bitwise xor works fine with boolean
+
+			var targetW  = ( swap ? dh : dw ) / dpr ;
+			var targetH  = ( swap ? dw : dh ) / dpr ;
 
 			this.$.scrolledIframe.setGeometry( targetW , targetH) ;
 			this.$.screenWidth .setContent("width: "  + targetW + 'px') ;
