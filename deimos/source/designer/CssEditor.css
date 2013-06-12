@@ -35,3 +35,14 @@
 .turned {
 	background-position-y: -16px;
 }
+
+.css-editor-field-caption {
+	display: inline-block;
+	width: 80px;
+	text-align: right;
+	padding-right: 4px;
+}
+
+.css-editor-field-editor {
+	width: 4rem;
+}

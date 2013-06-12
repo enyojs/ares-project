@@ -197,14 +197,26 @@ enyo.kind({
  *
  */
 enyo.kind({
-	name: "Inspector.Config.Number",
+	name: "Inspector.Config.MultiType",
 	kind: "Inspector.Config.IF",
 	// events and published are defined by the base kind
 	components: [
-		{classes: "inspector-field-caption", name: "title"},
-		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
-	],
-	
+		{name: "title", classes: "inspector-field-caption"},
+		{name: "text", kind: "enyo.Input", classes: "css-editor-field-editor", name: "value", onchange: "handleChange", 
+										ondblclick: "handleDblClick"},
+		{name: "unit", kind: "Select", style:"display:inline; width:50px;", components: [
+				{content: "px", active: true},
+				{content: " "},
+				{content: "cm"},
+				{content: "em"},
+				{content: "ern"},
+				{content: "%"}
+		]},
+		{name: "picker", kind: "Select", style:"display: inline; width:50px;", onchange: "pickerChanged"},
+		{name: "slider", kind: "onyx.Slider", value: 0, style:"width:90%", onChanging:"sliderChanged", 
+										onChange:"sliderChanged"},
+		{name: "palette", kind: "PalettePicker", onchange: "colorChanged"}
+	],	
 	//* Stop extraneous activate event from being fired when box is initially checked
 	handleChange: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
@@ -214,6 +226,21 @@ enyo.kind({
 	handleDblClick: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
 		this.doDblClick({target: this});
+		return true;
+	},
+	pickerChanged: function(inSender, inEvent) {
+		this.fieldValue = inSender.getValue();
+		this.doChange({target: this});
+		return true;
+	},
+	sliderChanged: function(inSender, inEvent) {
+		this.fieldValue = Math.round(inSender.getValue()) + "px";
+		this.doChange({target: this});
+		return true;
+	},
+	colorChanged: function(inSender, inEvent) {
+		//TODO
+		this.doChange({target: this});
 		return true;
 	}
 });

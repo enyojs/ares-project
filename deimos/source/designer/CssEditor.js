@@ -8,43 +8,77 @@ enyo.kind({
 			]},
 			{name:"drawer", kind: "onyx.Drawer", open:true, components: [
 				{name: "list", kind: "Repeater", onSetupItem: "setupItem", components: [
-					{name: "styleItem", kind: "Inspector.Config.Number"}
+					{name: "styleItem", kind: "Inspector.Config.MultiType"}
 				]}
 			]}
 		]}
 	],
-	propList: [],
+	cssConfig: null,
 	toggleDrawer: function() {
 		var open = this.$.drawer.getOpen();
 		this.$.drawer.setOpen(!open);
 		this.$.indicator.addRemoveClass("turned", !open);
 	},
 	setModel: function(inCategory) {
-		this.propList = inCategory.properties;
+		this.cssConfig = inCategory;
 		this.$.name.setContent(inCategory.cssStyleName);
-		this.$.list.setCount(((inCategory.properties).split(",")).length);
+		this.$.list.setCount((inCategory.properties).length);
 		this.$.list.build();			
 	},
 	setupItem: function(inSender, inEvent) {
-		var prop = (this.propList) && (this.propList).split(",");
-		inEvent.item.$.styleItem.setFieldName(prop[inEvent.index]);
+		var prop = this.cssConfig.properties;
+		inEvent.item.$.styleItem.setFieldName(prop[inEvent.index].name);
 
+		var keys = Object.keys(prop[inEvent.index].config);
+		enyo.forEach(keys, function(o) {
+			// build the correct styleItem object
+			if (prop[inEvent.index].config[o] !== true) {
+				inEvent.item.$.styleItem.$[o].destroy();
+			}				
+			// build the picker list if needed
+			if (o === "picker" && prop[inEvent.index].config[o]) {
+				inEvent.item.$.styleItem.$.picker.values = this.getListItems(prop[inEvent.index].pickerItems);
+				this.setUpPickerList(inEvent.item.$.styleItem.$.picker);
+			}
+		}, this);
+
+		// display properties and values associated to the styleItem object freshly built
 		if (this.propUser !== "" || this.propUser !== null) {
 			var p = this.propUser.split(";");
-			var keys = Object.keys(p);
+			keys = Object.keys(p);
 			enyo.forEach(keys, function(o) {
-				if (p[o].indexOf(prop[inEvent.index]) > -1) {
+				if (p[o].indexOf(prop[inEvent.index].name) > -1) {
 					var s = p[o].split(":");
 					for (i=0; i < s.length; i++) {
-						inEvent.item.$.styleItem.setFieldValue(s[i] || "");	
+						// filled-up text kind
+						inEvent.item.$.styleItem.setFieldValue(s[i] || "");
+						// filled-up slider kind
+						if (inEvent.item.$.styleItem.$.slider !== undefined) {
+							var val = s[i].match(/\d+\.?\d*/g);
+							inEvent.item.$.styleItem.$.slider.setValue(val);   
+							inEvent.item.$.styleItem.$.slider.setProgress(val);	
+						}
 					}
 				}
 			}, this);
 
 		}
 		return true;
+	},
+	getListItems: function(inList)  {
+		var items = [];
+		keys = Object.keys(inList);
+		enyo.forEach(keys, function(o) {
+			items.push(inList[o]);
+		}, this);	
+		return items;
+	},
+	setUpPickerList: function(inList)  {
+		keys = Object.keys(inList.values);
+		enyo.forEach(keys, function(o) {
+				inList.createComponent({content: inList.values[o]});
+		}, this);
 	}
-
 });
 
 enyo.kind({
