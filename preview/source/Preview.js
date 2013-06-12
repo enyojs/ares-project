@@ -64,19 +64,24 @@ enyo.kind(
 										kind: "PreviewDevicePicker", name: "device"
 									}
 								]
-							}
+							},
+							{content: "width: 600 px",  name: "devWidth",  style: "padding: 8px"},
+							{content: "height: 800 px", name: "devHeight", style: "padding: 8px"},
+							{content: "DPR: 1",        name: "devDPR",    style: "padding: 8px",
+							 attributes: {title: "display pixel ratio"} }
 						]
 					},
 					{tag: "br"},
-
 					{
 						kind: 'onyx.Groupbox',
 						components: [
-							{kind: "onyx.GroupboxHeader", content: "Details"},
-							{content: "width: 600px",  name: "devWidth",  style: "padding: 8px"},
-							{content: "height: 800px", name: "devHeight", style: "padding: 8px"},
-							{content: "DPR: 1",        name: "devDPR",    style: "padding: 8px",
-							 attributes: {title: "display pixel ratio"} }
+							{kind: "onyx.GroupboxHeader", content: "Screen"},
+							{content: "width: 600 px",  name: "screenWidth",  style: "padding: 8px",
+							 attributes: { title: "device width divided by DPR" }
+							},
+							{content: "height: 800 px", name: "screenHeight", style: "padding: 8px",
+							 attributes: { title: "device height divided by DPR" }
+							}
 						]
 					},
 					{tag: "br"},
@@ -144,16 +149,22 @@ enyo.kind(
 			var device = this.$.device.selected ;
 			var orientation = this .$.orientation.selected ;
 
-			var dw = device.value.width / device.value.dpr;
-			var dh = device.value.height / device.value.dpr;
 			this.dlog("size for device " , device.content , " orientation " , orientation.content ) ;
+
+			var dw  = device.value.width ;
+			var dh  = device.value.height ;
+			var dpr = device.value.dpr ;
+			this.$.devWidth .setContent("width: "  + dw + ' px') ;
+			this.$.devHeight.setContent("height: " + dh + ' px') ;
+			this.$.devDPR   .setContent("DPR: "    + dpr) ;
+
 			var swap = orientation.swap ;
-			var targetW = swap ? dh : dw ;
-			var targetH = swap ? dw : dh ;
+			var targetW = ( swap ? dh : dw ) / dpr ;
+			var targetH = ( swap ? dw : dh ) / dpr ;
+
 			this.$.scrolledIframe.setGeometry( targetW , targetH) ;
-			this.$.devWidth .setContent("width: "  + targetW + 'px') ;
-			this.$.devHeight.setContent("height: " + targetH + 'px') ;
-			this.$.devDPR   .setContent("DPR: "    + device.value.dpr) ;
+			this.$.screenWidth .setContent("width: "  + targetW + 'px') ;
+			this.$.screenHeight.setContent("height: " + targetH + 'px') ;
 			this.resized() ;
 		},
 
