@@ -10,7 +10,7 @@ enyo.kind({
 		 name: "buildStatusPopup"
 		}
 	],
-	debug: true,
+	debug: false,
 	/**
 	 * @private
 	 */
@@ -290,11 +290,12 @@ enyo.kind({
 	 * the fact that it's binded in the "buildStatus" function.
 	 * @Me this function should be refactored. 
 	 * 
-	 * @param  {JSON}   project [description]
+	 * @param  {Object}   project [description]
+	 * @param  {Object} inData
 	 * @param  {Function} next    CommonJs callback
 	 * @protected 
 	 */
-	_getBuildStatusPopup: function(project, next){
+	_getBuildStatusPopup: function(project, inData,  next){
 		
 		var config = project.getConfig().getData();
 		var appId = config.providers.phonegap.appId;
@@ -339,21 +340,11 @@ enyo.kind({
 	 * @param  {Function} next    is a CommonJs callback
 	 * @private
 	 */
-	_showBuildStatus: function(project, next){
-	 	
-	 	self = this;
-	 	async.series([
-	 		function(){
-    			var inUserData = next.user;
-	 			self.$.buildStatusPopup.showPopup(project, inUserData);
-	 			self.log('_showBuildStatus()#async.series :', next );
-	 			next();
-
-        ], function (err, results) {
-        	enyo.log("BuildStatus() err:", err, "results:", results);
-        });
-	 	
-	 },
+	_showBuildStatus: function(project, appData, next){
+	 		 	
+		this.$.buildStatusPopup.showPopup(project, appData.user);
+		next();
+     },
 	/**
 	 * Store relevant user account data
 	 * 
@@ -501,7 +492,6 @@ enyo.kind({
 		if (this.debug) this.log("Getting build status:  " + this.url + '/build');
 		async.waterfall([
 			enyo.bind(this, this.authorize),
-			enyo.bind(this, this._updateConfigXml, project),
 			enyo.bind(this, this._getBuildStatusPopup, project),			
 			enyo.bind(this, this._showBuildStatus, project)
 		], next);
@@ -728,7 +718,7 @@ enyo.kind({
 	 * Create a file in the target repository of the project form a multipart/form
 	 * data.
 	 * 
-	 * * @param  {JSON}   project contain a description about the current selected
+	 * @param  {JSON}   project contain a description about the current selected
 	 *                            project
 	 * @param  {String}   folderId id used in Hermes File system to identify the 
 	 *                             target folder where the downloaded applications

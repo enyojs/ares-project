@@ -103,7 +103,7 @@ enyo.kind({
     setUpHeader: function(inData){
     	this.$.TopTB.setTitle(inData.title);
     	this.$.TopTB.setVersion(inData.phonegap_version);
-    	this.$.TopTB.setOwner(inData.collaborators.active[0].person);
+    	//this.$.TopTB.setOwner(inData.collaborators.active[0].person);
     },
 
 
