@@ -25,7 +25,8 @@ var basename = path.basename(__filename, '.js'),
 log.heading = basename;
 log.level = 'http';
 
-var url = 'build.phonegap.com';
+var PGB_URL = 'https://build.phonegap.com',
+    PGB_TIMEOUT = 7000;
 
 process.on('uncaughtException', function (err) {
 	log.error('uncaughtException', err.stack);
@@ -117,10 +118,10 @@ BdPhoneGap.prototype.getToken = function(req, res, next) {
 	var auth, options;
 	auth = "Basic " + new Buffer(req.body.username + ':' +req.body.password).toString("base64");
 	options = {
-		url : 'https://' + url + "/token",
+		url : PGB_URL + "/token",
 		headers : { "Authorization" : auth },
 		proxy: this.config.proxyUrl,
-		timeout: this.config.timeout || 7000
+		timeout: this.config.timeout || PGB_TIMEOUT
 	};
 	log.http("getToken()", "POST /token");
 	request.post(options, (function(err1, response, body) {
@@ -151,7 +152,7 @@ BdPhoneGap.prototype.getUserData = function(req, res, next) {
 	client.auth({
 		token: req.token,
 		proxy: this.config.proxyUrl,
-		timeout: this.config.timeout || 7000
+		timeout: this.config.timeout || PGB_TIMEOUT
 	}, function(err1, api) {
 		if (err1) {
 			next(err1);
@@ -228,7 +229,7 @@ BdBase.prototype.build = function(req, res, next) {
 			client.auth.bind(this, {
 				token: req.token,
 				proxy: this.config.proxyUrl,
-				timeout: this.config.timeout || 7000
+				timeout: this.config.timeout || PGB_TIMEOUT
 			}),
 			_uploadApp.bind(this),
 			_success.bind(this)
