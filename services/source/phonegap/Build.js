@@ -199,8 +199,8 @@ enyo.kind({
 					details = response.body;
 				}
 			}
-			if (this.debug) this.error("Unable to get PhoneGap application token (" + inError + ")", "response:", response);
-			next(new Error("Unable to get PhoneGap application token (" + inError + ")"), details);
+			if (this.debug) this.error("Unable to get PhoneGap application token (" + details || inError + ")", "response:", response);
+			next(new Error("Unable to get PhoneGap application token (" + details || inError + ")"));
 		});
 		req.go();
 	},
