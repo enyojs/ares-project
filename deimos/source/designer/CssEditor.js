@@ -25,7 +25,7 @@ enyo.kind({
 				{name: "indicator", classes: "indicator turned"},
 				{name: "name", tag:"span"},
 			]},
-			{name:"drawer", kind: "onyx.Drawer", open:true, components: [
+			{name:"drawer", kind: "onyx.Drawer", open:false, components: [
 				{name: "list", kind: "Repeater", onSetupItem: "setupItem", components: [
 					{name: "styleItem", kind: "Inspector.Config.MultiType"}
 				]}
@@ -36,7 +36,7 @@ enyo.kind({
 	toggleDrawer: function() {
 		var open = this.$.drawer.getOpen();
 		this.$.drawer.setOpen(!open);
-		this.$.indicator.addRemoveClass("turned", !open);
+		this.$.indicator.addRemoveClass("turned", open);
 	},
 	setModel: function(inCategory) {
 		this.cssConfig = inCategory;
