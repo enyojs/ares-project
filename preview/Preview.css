@@ -5,4 +5,7 @@
 	-moz-border-radius: 20px;
 	-webkit-border-radius: 20px;
 	border-radius: 20px;
+	transition-property: width,height;
+	transition-duration: 0.5s;
+	transition-timing-function: ease;
 }
