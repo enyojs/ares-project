@@ -504,12 +504,22 @@ enyo.kind({
 		this.newConfigData = inEvent.data;
 
 		var destination = inEvent.data.name;
+		var known = Ares.Workspace.projects.get(destination);
+		if (known) {
+			var msg = "Unable to duplicate the project, the project '" +
+											destination + "' already exists";
+			this.doError({msg: msg});
+			return true ; // stop bubble			
+		}
 
 		var req = service.copy(folderId, destination);
 		req.response(this, this.saveProjectJson);
-		req.error(this, function(inSender, inData) {
+		req.error(this, function(inSender, status) {
 			var msg = "Unable to duplicate the project";
-			this.log(msg, inData);
+			if (status === 412 /*Precondition-Failed*/) {
+				msg = "Unable to duplicate the project, directory '" + destination + "' already exists";
+			}
+			this.log(msg, status);
 			this.doError({msg: msg});
 		});
 
