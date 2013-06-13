@@ -16,10 +16,10 @@ enyo.kind({
 	components: [
 		{classes: "css-editor-category", components: [
 			{ontap:"toggleDrawer", classes: "css-editor-category-name", components: [
-				{name: "indicator", classes: "indicator turned"},
+				{name: "indicator", classes: "indicator"},
 				{name: "name", tag:"span"},
 			]},
-			{name:"drawer", kind: "onyx.Drawer", open:true, components: [
+			{name:"drawer", kind: "onyx.Drawer", open:false, components: [
 				{name: "list", kind: "Repeater", onSetupItem: "setupItem", components: [
 					{name: "styleItem", kind: "Inspector.Config.MultiType"}
 				]}
@@ -101,7 +101,17 @@ enyo.kind({
 		onChange: ""
 	},
 	cssEditorConfig: [
-		// {cssStyleName: "Background-Style", properties: "background-color"},
+		{cssStyleName: "Background-Style", 
+		properties: [
+			{name: "background-color",
+			config: {"text": true, 
+				"palette": true, 
+				"picker": null, 
+				"slider": false,
+				"unit": false},
+			}
+		]
+		},
 		{cssStyleName: "Border-Style",
 		properties: [
 			{name: "border-color",
