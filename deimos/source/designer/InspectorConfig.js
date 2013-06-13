@@ -215,7 +215,7 @@ enyo.kind({
 		{name: "picker", kind: "Select", classes: "css-editor-select", onchange: "pickerChanged"},
 		{name: "slider", kind: "onyx.Slider", value: 0, style:"width:90%", onChanging:"sliderChanged", 
 										onChange:"sliderChanged"},
-		{name: "palette", kind: "PalettePicker", onchange: "colorChanged"}
+		{name: "palette", kind: "PalettePicker", onChange: "colorChanged"}
 	],	
 	//* Stop extraneous activate event from being fired when box is initially checked
 	handleChange: function(inSender, inEvent) {
@@ -239,7 +239,7 @@ enyo.kind({
 		return true;
 	},
 	colorChanged: function(inSender, inEvent) {
-		//TODO
+		this.fieldValue = inEvent.originator.$.colorPicker.color;
 		this.doChange({target: this});
 		return true;
 	}

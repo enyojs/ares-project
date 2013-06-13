@@ -4,10 +4,16 @@ enyo.kind({
 		{kind: "ColorPicker", onColorPick: "onPick", onColorSlide: "onPick"},
 		{name: "colorPicked", content: "Color Picked: "}
 	],
+	events: {
+		onChange: ""
+	},
 	onPick: function(inSender, color){
 		if (this.$.colorPicked){
 			this.$.colorPicked.setContent("Color Picked: " + inSender.color);
 		}
+		this.doChange({target:this.$.colorPicker});
+		return true;
+
 	}
 });
 
@@ -16,10 +22,10 @@ enyo.kind({
 	components: [
 		{classes: "css-editor-category", components: [
 			{ontap:"toggleDrawer", classes: "css-editor-category-name", components: [
-				{name: "indicator", classes: "indicator"},
+				{name: "indicator", classes: "indicator turned"},
 				{name: "name", tag:"span"},
 			]},
-			{name:"drawer", kind: "onyx.Drawer", open:false, components: [
+			{name:"drawer", kind: "onyx.Drawer", open:true, components: [
 				{name: "list", kind: "Repeater", onSetupItem: "setupItem", components: [
 					{name: "styleItem", kind: "Inspector.Config.MultiType"}
 				]}
