@@ -504,8 +504,6 @@ enyo.kind({
 		this.newConfigData = inEvent.data;
 
 		var destination = inEvent.data.name;
-		this.log("DEST", destination);
-
 		var known = Ares.Workspace.projects.get(destination);
 		if (known) {
 			var msg = "Unable to duplicate the project, the project '" +
