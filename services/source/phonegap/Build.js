@@ -48,12 +48,7 @@ enyo.kind({
 		return this.config;
 	},
 
-	/**
-	 * @return the computer-friendly name of this service
-	 */
-	/*getServiceId: function() {
-		return this.config.id;
-	},*/
+
 
 	/**
 	 * @return the human-friendly name of this service
@@ -246,7 +241,7 @@ enyo.kind({
 	 * This function send an Ajax request to node.js in order to get all the
 	 * details about the project built in Phongap platform.
 	 * 
-	 * @param  {[type]}   project contain informations about the Ares project
+	 * @param  {Object}   project contain informations about the Ares project
 	 * @param  {Function} next    is a CommonJS callback
 	 * @private
 	 */
@@ -335,7 +330,7 @@ enyo.kind({
 	 * show the pop-up containing informations about the previous  build of the 
 	 * selected project from the project list view.
 	 * 
-	 * @param  {JSON}   project contain a description about the current selected
+	 * @param  {Object}   project contain a description about the current selected
 	 *                          project
 	 * @param  {Function} next    is a CommonJs callback
 	 * @private
@@ -483,7 +478,7 @@ enyo.kind({
 	 * built project. This status are showen in a Pop-up defined in the file
 	 * BuildStatusUI.js
 	 * 
-	 * @param  {JSON}   project contain a description about the current selected
+	 * @param  {Object}   project contain a description about the current selected
 	 *                          project
 	 * @param  {Function} next    is a CommonJS Callback
 	 * @public
@@ -637,9 +632,9 @@ enyo.kind({
 	 * Send an Ajax request to Node.js in order to initiate the download of an
 	 * application in a specific mobile platform.
 	 * 
-	 * @param  {JSON}   project contain a description about the current selected
+	 * @param  {Object}   project contain a description about the current selected
 	 *                          project
-	 * @param  {[type]}   inURL   is a url suffixe that contains: AppID, the
+	 * @param  {Object}   inURL   is a url suffixe that contains: AppID, the
 	 *                            targeted build platform, an the title of the
 	 *                            application.
 	 * @param  {Function} next    is a CommunJS callback.
@@ -690,9 +685,9 @@ enyo.kind({
 	},	
 	/**
 	 * Prepare the folder where to store the built package
-	 * @param  {JSON}   project contain a description about the current selected
+	 * @param  {Object}   project contain a description about the current selected
 	 *                          project
-	 * @param  {[type]}   inData  [description]
+	 * @param  {Object}   inData  [description]
 	 * @param  {Function} next    [description]
 	 * @private
 	 */
@@ -718,12 +713,12 @@ enyo.kind({
 	 * Create a file in the target repository of the project form a multipart/form
 	 * data.
 	 * 
-	 * @param  {JSON}   project contain a description about the current selected
+	 * @param  {Object}   project contain a description about the current selected
 	 *                            project
 	 * @param  {String}   folderId id used in Hermes File system to identify the 
 	 *                             target folder where the downloaded applications
 	 *                             will be stored.
-	 * @param  {JSON}   inData   contains detailed information about the build of
+	 * @param  {Object}   inData   contains detailed information about the build of
 	 *                           the project.
 	 * @param  {Function} next     a CommonJs callback.
 	 * @private            

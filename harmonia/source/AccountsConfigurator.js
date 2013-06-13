@@ -6,17 +6,17 @@ enyo.kind({
 	floating: true,
 	autoDismiss: false,
 	debug: false,
-
-	classes: "enyo-popup onyx-light",
-
+	classes:"ares-classic-popup",
 	components: [
-		{kind: "FittableRows", style: "height: 400px; width: 650px", fit: true, components: [
-			{content: "Accounts", classes:"onyx-toolbar"},
+		{tag: "div", classes:"title", content: "Accounts"},
+		{kind: "FittableRows", classes:"ares-phonegap-config", fit: true, components: [
 			{kind: "FittableColumns", fit: true, components: [
 				{kind: "ProviderList", name: "accountsList", selector: ["auth"], onSelectProvider: "handleSelectProvider"},
 				{name: "authPanel", classes: "ares_harmonia_authPanel"}
 			], onUpdateAuth: "handleUpdateAuth"},
-			{kind: "onyx.Button", content: "Dismiss", ontap: "dismiss"}
+		]},
+		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+			{kind: "onyx.Button", content: "Cancel", ontap: "dismiss"}
 		]},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "", details: "", autoDismiss: false, modal: true},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, classes: "ares-waitpopup", components: [

@@ -27,14 +27,11 @@ body {
 
 /**/
 
-.ares-groupbox-item-key {
-	padding: 0.5em;
-}
-.ares-groupbox-item-value {
+.ares-groupbox-item-key, .ares-groupbox-item-value {
 	width: 50%;
-	color: #000000;
-	float: right;
+	display: inline-block;
 }
+
 .ares-waitpopup {
 	margin-left: auto;
 	margin-right: auto;
@@ -43,6 +40,8 @@ body {
 /**/
 .ares_harmonia_providerList {
 	width: 30%;
+	background-color: transparent;
+    border-right: 1px solid #999999;
 }
 .ares_harmonia_providerItems {
 	padding: 6px;
@@ -357,6 +356,10 @@ body {
 
 .onyx-input-decorator > input { font-size: 13px; border:none; background:none; height:20px;  color:#000000; width:200px; outline:none;}
 
+.onyx-groupbox >* {
+	font-size: 13px;
+}
+
 .ares-bordered-toolbar{
 	margin-top:8px;
 	text-align: right;
@@ -465,17 +468,24 @@ p.break{
 	-webkit-border-radius:0px 0px 6px 6px;
 	border-radius:0px 0px 6px 6px;
 }
+
 .bottom-toolbar>.onyx-button { background-color: transparent; border: 1px solid #999999; margin:0px;}
 .ares-small-popup {width:320px; height:150px; padding: 5px 10px;}
 .ares-small-popup-details { position:relative; width: 300px; word-wrap: break-word;}
-.ares-small-popup-details .button { padding-top: 10px; position:relative; }
-.ares-small-popup-details .label { border: none; color:#000000; background: transparent; height: auto; padding-left:10px; text-align: left; }
-.ares-error-text { width: 98%; margin:5px 0px; resize: vertical;}
+.ares-small-popup-details { padding-top: 10px; position:relative; }
+.ares-small-popup-details { border: none; color:#000000; background: transparent; height: auto; padding-left:10px; text-align: left; }
+/*error popup*/
+.ares-error-popup { width:340px; min-height:170px; padding: 5px 10px;}
+.ares-error-text { width: 98%; margin:5px 0px; height: 105px; resize: vertical;}
+.ares-error-details .button { padding-top: 10px; position:relative; }
+.ares-error-details .label { border: none; color:#000000; background: transparent; height: auto; padding-left:10px; text-align: left; }
+.ares-error-drawer {padding-top:3px;}
+
 .bottom-toolbar>.onyx-button.right {position: absolute; right: 7px; }
 .ares-masked-content-popup { background: none; box-shadow: none; border:none;}
 
 /*file chooser*/
-.ares-filechooser { height: 400px; width: 625px; }
+.ares-filechooser, .ares-phonegap-config { height: 400px; width: 625px; }
 .ares-filechooser-header { padding: 0 0.5em; vertical-align: middle; }
 .ares-filechooser-footer { vertical-align: middle; background: #FFFFFF; }
 .ares-create-sources {
@@ -490,9 +500,8 @@ p.break{
 .ares-left-pane-file-chooser > .ares_harmonia_providerList{
     height: 245px;
     width: 100%;
-    background-color: transparent;
-    border-right: 1px solid #999999;
 }
+
 .ares-file-choser-row { border-top: 1px solid #999999;}
 .ares-file-chooser-label { min-width: 127px; }
 .ares-content-popup { width:409px; height:240px; padding: 5px 10px; }
@@ -537,3 +546,14 @@ input.ares-small-input{	width: 75px;}
 .middle-width{ width: 140px; }
 .very-large-width{ width: 217px; }
 div.large-fixed{ width: 80%; }
+
+.ares-large-content{ height: 390px; }
+.ares-datas>div:not([class="onyx-groupbox-header"]) {cursor:pointer; background-color:rgb(230, 228, 228);; }
+.ares-datas>div.hover { background-color:#EEEEEE; }
+.ares-datas>.active { background-color:#AAAAAA; box-shadow: inset 0px 0px 30px rgba(0,0,0,0.3); }
+.ares-group-box>div {
+	padding-left: 3px;
+	line-height: 1.9;
+}
+.ares-group-box>.onyx-input-decorator{ box-shadow: none; }
+

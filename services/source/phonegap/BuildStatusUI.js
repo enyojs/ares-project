@@ -11,13 +11,9 @@ enyo.kind({
 	autoDismiss: false,
 	debug: true,
 	style:"width: 500px; height: 280px;",
-	published: {
-		pgUrl: "",
-	},
 	handlers: {
 		onDismissPopup: "hidePopup"
 	}, 
-
 	components: [
 
 			{kind:"BuildStatusTopToolBar",
@@ -29,43 +25,38 @@ enyo.kind({
     		components: [
 
     			{kind: "StatusRow",
-    			 name: "AndroidStatus",
-    			 ontap: "manageApps"
-    			 },	    		
+    			 name: "AndroidStatus"    			 
+    			},	    		
 	    		
     			{kind: "StatusRow",
-    			 name: "IosStatus",
-    			 ontap: "manageApps"
-    			 },
-
-		    	{kind: "StatusRow",
-    			 name: "BlackBerryStatus",
-    			 ontap: "manageApps"
+    			 name: "IosStatus"  		
     			},
 
 		    	{kind: "StatusRow",
-    			 name: "SymbianStatus",
-    			 ontap: "manageApps"
-    			 },
-
-		    	{kind: "StatusRow",
-    			 name: "WebosStatus",
-    			 ontap: "manageApps"
+    			 name: "BlackBerryStatus"    			
     			},
 
 		    	{kind: "StatusRow",
-    			 name: "WinphoneStatus",
-    			 ontap: "manageApps"
+    			 name: "SymbianStatus"
+    			},
+
+		    	{kind: "StatusRow",
+    			 name: "WebosStatus"
+    			},
+
+		    	{kind: "StatusRow",
+    			 name: "WinphoneStatus"
     			},
 		      ]
 		},
-			{kind: "BuildStatusBotomToolBar",
-			name: "BottomTB"}
+	    {kind: "BuildStatusBotomToolBar",
+		 name: "BottomTB"
+		}
 	],
 
 	/**
 	 * Show the status informations about the selected project
-	 * @param  {JSON} inSender contain the status informations
+	 * @param  {Object} inSender contain the status informations
 	 * @return {boolean} show the pop-up
 	 */
 	
@@ -80,13 +71,7 @@ enyo.kind({
 		this.$.WinphoneStatus.setLabelValue("Windows Phone 7");
 	},
 
-	manageApps: function(inSender, inValue) {
-		if (this.debug) this.log("sender:", inSender, "value:", inValue);
-		var accountPopup = window.open(this.pgUrl,
-					       "PhoneGap Build Account Management",
-					       "resizeable=1,width=1024, height=600", 'self');
-	},
-
+	
     hidePopup: function(){
     	this.hide();
     	return true; //stop the bubbling
@@ -95,8 +80,8 @@ enyo.kind({
     showPopup: function(project, inUserData){
     	this.setUpHeader(inUserData);
     	this.setUpStatus(inUserData);
-    	this.pgUrl = "https://build.phonegap.com/apps/"+inUserData.id+"/builds";
-    	this.log("the user data are: ", inUserData);
+    	this.log("BuildStatusUI#showPopup()#inUserData", inUserData.id);
+    	this.$.AndroidStatus.setAppId(inUserData.id);
     	this.show();
     },
 
@@ -126,7 +111,6 @@ enyo.kind({
     		enyo.log("the user data are : ", inData );
     		enyo.log("Phonegap version used for the build: ", 
     		      'inData.phonegap_version');
-    		//enyo.log("The AppID is: ", inData.id);
     		enyo.log("Owned by: ",
     			  'inData.collaborators.active[0].person');
     		enyo.log("The title is: ",'title');
@@ -140,10 +124,7 @@ enyo.kind({
     		this.log("WebOS download: ", this.url + inData.download.webos);
     		this.log("Windows Phone 7 download: ", this.url + inData.download.winphone);
 		}
-	},
-    popupHidden: function(inSender, inEvent) {
-        // do something
-    }
+	}   
 });
 
 
@@ -160,20 +141,21 @@ enyo.kind({
 		{content: "Application: "
 		},
 
-		{name: "TitleLabel",
+		{name: "TitleLabel"
 		},
 		
-		{tag: "br"},
+		
 
 		{style: "font-size: 70%;", 
-		 content:"Phonegap version : "
+		 content:"Phonegap version : ",
+		 tag: "br"
 		},
 
 		{name: "PhonegapVersionLabel",
-		 style: "font-size: 70%;",
+		 style: "font-size: 70%;"
 		},
 		
-		{tag: "br"},
+		
 	], 
 
 	create: function(){
@@ -197,42 +179,48 @@ enyo.kind({
 	style: "margin-top: 10px;",
 	published: {
 		labelValue: "Platform",
-		statusValue: "Status"
+		statusValue: "Status",
+		appId: "",
+		pgUrl: ""
 	},
-	 components: [
+	handlers: {
+		ontap: "manageApps"
+	},
+	debug: true,
+	components: [
 	 		{name: "StatusRow_platform",
 		  	 style: "width: 150px;"
 		    },
      		{name: "StatusRow_status",
     	     style: "width: 150px;"
     	    },
-
-		
-		{tag: "br"}
-	 ], 
-
-	 create: function(){
+			{tag: "br"}
+	 ],
+	create: function(){
 	 	this.inherited(arguments);
+	 	
 	 	this.labelValueChanged();
 	 	this.statusValueChanged();
-	 },
+	},
 
-	 labelValueChanged: function(){
+	labelValueChanged: function(){
 	 	this.$.StatusRow_platform.setContent(this.labelValue);
-	 	if(this.debug){
-	 		this.log("Platform name is: ", this.labelValue);
-	 	}
-	 },
-
-	 statusValueChanged: function(){
+	},
+	appIdChanged: function(){
+		if(this.debug){
+			this.log("BuildStatusUI#appIdChanged(): ", this.appId);
+		}
+		this.pgUrl = "https://build.phonegap.com/apps/" + 
+	 				  this.appId + "/builds";
+	},
+	manageApps: function(inSender, inValue) {
+		var accountPopup = window.open(this.pgUrl,
+					       "PhoneGap Build Account Management",
+					       "resizeable=1,width=1024, height=600", 'self');
+	},
+	statusValueChanged: function(){
 	 	this.$.StatusRow_status.setContent(this.statusValue);
-	 	if(this.debug){
-	 		this.log("status value is:", this.statusValue);
-	 	}
-	 }
-
-
-		    	
+	}		    	
 });
 
 enyo.kind({
@@ -240,19 +228,17 @@ enyo.kind({
 	 classes: "ares-bordered-toolbar", 
 	 kind: "onyx.Toolbar",
 	 components: [
-	   { name: "ok", 
-	     kind: "onyx.Button", 
-	     content: "OK",
-	     handlers: { 
-	     	ontap: 'tapped'
-	      }, 
-	     tapped: function(){
-	 		this.bubble("onDismissPopup");
-	 		//this.bubble("onHideWaitPopup");	
-		 }
+		   {name: "ok", 
+		    kind: "onyx.Button", 
+		    content: "OK",
+		    handlers: { 
+		    	ontap: 'tapped'
+		     }, 
+		    tapped: function(){
+		 		this.bubble("onDismissPopup");
+		 	}
 	    }
-	 ],
-	 
+	 ]	 
 });
 
 

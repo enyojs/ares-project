@@ -1,37 +1,37 @@
 enyo.kind({
 	name: "PhonegapUserdata",
 	kind: "Ares.Groupbox",
-	classes: "onyx-groupbox enyo-fill",
+	classes: "ares-group-box ares-datas ",
 	published: {
 		userData: {}
 	},
 	components: [
 		{kind: "onyx.GroupboxHeader", content: "PhoneGap Account"},
-		{components: [
+		{kind:"control.Link", components: [
 			{content: "User ID:", kind: "Ares.GroupBoxItemKey"},
 			{name: "userId", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageAccount"},
-		{components: [
+		{kind:"control.Link", components: [
 			{content: "User Login: ", kind: "Ares.GroupBoxItemKey"},
 			{name: "username", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageAccount"},
-		{components: [
+		{kind:"control.Link", components: [
 			{content: "User Email: ", kind: "Ares.GroupBoxItemKey"},
 			{name: "email", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageAccount"},
-		{components: [
+		{kind:"control.Link", components: [
 			{content: "Signing Keys (Android):", kind: "Ares.GroupBoxItemKey"},
 			{name: "androidKeys", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageAccount"},
-		{components: [
+		{kind:"control.Link", components: [
 			{content: "Signing Keys (Blackberry):", kind: "Ares.GroupBoxItemKey"},
 			{name: "blackberryKeys", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageAccount"},
-		{components: [
+		{kind:"control.Link", components: [
 			{content: "Signing Keys (iOS):", kind: "Ares.GroupBoxItemKey"},
 			{name: "iosKeys", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageAccount"},
-		{components: [
+		{kind:"control.Link", components: [
 			{content: "Registered Applications:", kind: "Ares.GroupBoxItemKey"},
 			{name: "apps", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageApps"}

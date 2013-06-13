@@ -28,7 +28,8 @@ var basename = path.basename(__filename, '.js'),
 log.heading = basename;
 log.level = 'http';
 
-var url = 'build.phonegap.com';
+var PGB_URL = 'https://build.phonegap.com',
+    PGB_TIMEOUT = 7000;
 
 process.on('uncaughtException', function (err) {
 	log.error('uncaughtException', err.stack);
@@ -125,9 +126,10 @@ BdPhoneGap.prototype.getToken = function(req, res, next) {
 	var auth, options;
 	auth = "Basic " + new Buffer(req.body.username + ':' +req.body.password).toString("base64");
 	options = {
-		url : 'https://' + url + "/token",
+		url : PGB_URL + "/token",
 		headers : { "Authorization" : auth },
-		proxy: this.config.proxyUrl
+		proxy: this.config.proxyUrl,
+		timeout: this.config.timeout || PGB_TIMEOUT
 	};
 	log.http("getToken()", "POST /token");
 	request.post(options, (function(err1, response, body) {
@@ -157,7 +159,8 @@ BdPhoneGap.prototype.getToken = function(req, res, next) {
 BdPhoneGap.prototype.getUserData = function(req, res, next) {
 	client.auth({
 		token: req.token,
-		proxy: this.config.proxyUrl
+		proxy: this.config.proxyUrl,
+		timeout: this.config.timeout || PGB_TIMEOUT
 	}, function(err1, api) {
 		if (err1) {
 			next(err1);
@@ -240,50 +243,37 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 		var platform = req.params.platform;
 		var appId = req.params.appId;
 		var version = req.params.version;
-		var packagedFile = fs.createWriteStream(filename);
-
-		//Definition of the extension of the file based on
-		//the targeted platform.
-		switch(platform){
-			case "android": {
-				var fn = title +"_"+ version +".apk"; 
-			} break;
-
-			case "ios": {
-				var fn = title +"_"+ version +".ipa"; 
-			} break;
-
-			case "webos": {
-				var fn = title +"_"+ version +".ipk"; 
-			} break;
-
-			case "symbian": {
-				var fn = title +"_"+ version +".wgz"; 
-			} break;
-
-			case "winphone": {
-				var fn = title +"_"+ version +".xap"; 
-			} break;
-
-			case "blackberry": {
-				var fn = title +"_"+ version +".jad"; 
-			} break;
-
-			default: {
-				var fn = "platform.ext";
-				log.error("Incorrect platform is used for the build");
-			}
+		
+		//Array containing the mapping between the name of
+		// the targeted platform and the file's extension
+		// of the built application 
+		var extensions = {
+			"android": ".apk",
+			"ios": ".ipa",
+			"webos": ".ipk",
+			"symbian": ".wgz",
+			"winphone": ".xap",
+			"blackberry": ".jad"
 		}
- 			
- 		//This is a temporary code used to test the download function 
+
+		try{
+			fn = title +"_"+ version +extensions[platform]; 
+
+		} catch (err){
+			//************** expose this error in another way
+			fn = "platform.ext";
+				log.error("Incorrect platform is used for the build");
+		}
+		//This is a temporary code used to test the download function 
  		//It will be replaced by the below commented code as soon as 
  		//the "api.get()" works correctly.
  		//IMPORTANT : change the file name path of the attribute 
- 		//			 "filename" to another file stored on your computer
- 		//Begining of the temporrary code.
-		var filename = "C:\\Users\\adiche\\ares-project.new\\harmonia\\source\\AccountsConfigurator.js";
-		var stats = fs.statSync(filename);
-		log.verbose("returnBody()", "size: " + stats.size + " bytes", filename);
+ 		//			 "tempFileName" to another file stored on your computer
+ 		//***** Begining of the temporrary code *****
+ 		
+ 		var tempFileName = "C:\\Users\\adiche\\ares-project.new\\harmonia\\source\\AccountsConfigurator.js";
+		var packagedFile = fs.createWriteStream(tempFileName);
+		log.verbose("returnBody()", tempFileName);
 
 		// Build the multipart/formdata
 		var combinedStream = CombinedStream.create();
@@ -293,16 +283,16 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 		combinedStream.append(getPartHeader(fn, boundary));
 		// Adding file data
 		combinedStream.append(function(nextDataChunk) {
-			fs.readFile(filename, 'base64', function (err, data) {
+			fs.readFile(tempFileName, 'base64', function (err, data) {
 				if (err) {
-					next('Unable to read ' + filename);
+					next('Unable to read ' + tempFileName);
 					nextDataChunk('INVALID CONTENT');
 				} else {
 					nextDataChunk(data);
 				}
 			});
 		});
-		//Ending of the temporrary code.
+		//****** Ending of the temporrary code. *********
 		/* TODO: Un comment this part a comment the temporrary code
 				 as soon as the "api.get()" function works.
 		client.auth({
@@ -329,12 +319,12 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 			var boundary = generateBoundary();
 
 			// Adding part header
-			combinedStream.append(getPartHeader(filename, boundary));
+			combinedStream.append(getPartHeader(tempFileName, boundary));
 			// Adding file data
 			combinedStream.append(function(){
-				fs.readFile(filename, 'base64', function (err, packagedFile) {
+				fs.readFile(tempFileName, 'base64', function (err, packagedFile) {
 					if (err) {
-						next('Unable to read ' + filename);
+						next('Unable to read ' + tempFileName);
 						nextDataChunk('INVALID CONTENT');
 					} else {
 						nextDataChunk(packagedFile);
@@ -459,7 +449,8 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		async.waterfall([
 			client.auth.bind(this, {
 				token: req.token,
-				proxy: this.config.proxyUrl
+				proxy: this.config.proxyUrl,
+				timeout: this.config.timeout || PGB_TIMEOUT
 			}),
 			_uploadApp.bind(this),
 			_success.bind(this)
