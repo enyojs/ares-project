@@ -204,7 +204,7 @@ enyo.kind({
 		{name: "title", classes: "inspector-field-caption"},
 		{name: "text", kind: "enyo.Input", classes: "css-editor-field-editor", name: "value", onchange: "handleChange", 
 										ondblclick: "handleDblClick"},
-		{name: "unit", kind: "Select", style:"display:inline; width:50px;", components: [
+		{name: "unit", kind: "Select", classes: "css-editor-select", components: [
 				{content: "px", active: true},
 				{content: " "},
 				{content: "cm"},
@@ -212,7 +212,7 @@ enyo.kind({
 				{content: "ern"},
 				{content: "%"}
 		]},
-		{name: "picker", kind: "Select", style:"display: inline; width:50px;", onchange: "pickerChanged"},
+		{name: "picker", kind: "Select", classes: "css-editor-select", onchange: "pickerChanged"},
 		{name: "slider", kind: "onyx.Slider", value: 0, style:"width:90%", onChanging:"sliderChanged", 
 										onChange:"sliderChanged"},
 		{name: "palette", kind: "PalettePicker", onchange: "colorChanged"}

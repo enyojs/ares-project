@@ -46,3 +46,8 @@
 .css-editor-field-editor {
 	width: 4rem;
 }
+
+.css-editor-select {
+	display: inline; 
+	width:50px;
+}
