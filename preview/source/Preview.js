@@ -5,11 +5,12 @@ enyo.kind(
 		components: [
 			{content: "default",           value: { height:  800, width:  600, ppi: 163, dpr: 1 }, active: true},
 			{content: "iPhone\u2122",      value: { height:  480, width:  320, ppi: 163, dpr: 1 }},
-			{content: "iPhone\u2122 4",    value: { height:  940, width:  660, ppi: 326, dpr: 2 }},
-			{content: "iPhone\u2122 5",    value: { height: 1146, width:  640, ppi: 326, dpr: 2 }},
-			{content: "iPad\u2122 Retina", value: { height: 2048, width: 1536, ppi: 264, dpr: 2 }},
-			{content: "iPad\u2122 2",      value: { height: 1280, width:  800, ppi: 132, dpr: 1 }},
-			{content: "iPad\u2122 mini",   value: { height: 1024, width:  768, ppi: 163, dpr: 1 }}
+			{content: "iPhone\u2122 4",    value: { height:  960, width:  640, ppi: 326, dpr: 2 }},
+			{content: "iPhone\u2122 5",    value: { height: 1136, width:  640, ppi: 326, dpr: 2 }},
+
+			{content: "iPad\u2122 Retina", value: { width: 2048, height: 1536, ppi: 264, dpr: 2 }},
+			{content: "iPad\u2122 2",      value: { width: 1024, height:  768, ppi: 132, dpr: 1 }},
+			{content: "iPad\u2122 mini",   value: { width: 1024, height:  768, ppi: 163, dpr: 1 }}
 		]
 	}
 );
@@ -29,29 +30,6 @@ enyo.kind(
 						kind: 'onyx.Groupbox',
 						style : "margin-top: 8px",
 						components: [
-							{kind: "onyx.GroupboxHeader", content: "Orientation"},
-							{
-								kind: "onyx.PickerDecorator",
-								onSelect: "resize",
-								style : "padding: 6px",
-								components:
-								[
-									{style: "width: 100%"}, // A content-less PickerButton
-									{
-										kind: "onyx.Picker", name: "orientation",
-										components: [
-											{content: "portrait", active: true, swap: false},
-											{content: "landscape",              swap: true }
-										]
-									}
-								]
-							}
-						]
-					},
-					{tag: "br"},
-					{
-						 kind: 'onyx.Groupbox',
-						components: [
 							{kind: "onyx.GroupboxHeader", content: "Device"},
 							{
 								kind: "onyx.PickerDecorator",
@@ -64,19 +42,40 @@ enyo.kind(
 										kind: "PreviewDevicePicker", name: "device"
 									}
 								]
-							}
+							},
+							{content: "width: 600 px",  name: "devWidth",  style: "padding: 8px"},
+							{content: "height: 800 px", name: "devHeight", style: "padding: 8px"},
+							{content: "DPR: 1",        name: "devDPR",    style: "padding: 8px",
+							 attributes: {title: "display pixel ratio"} }
 						]
 					},
 					{tag: "br"},
-
 					{
 						kind: 'onyx.Groupbox',
 						components: [
-							{kind: "onyx.GroupboxHeader", content: "Details"},
-							{content: "width: 600px",  name: "devWidth",  style: "padding: 8px"},
-							{content: "height: 800px", name: "devHeight", style: "padding: 8px"},
-							{content: "DPR: 1",        name: "devDPR",    style: "padding: 8px",
-							 attributes: {title: "display pixel ratio"} }
+							{kind: "onyx.GroupboxHeader", content: "Screen"},
+							{
+								kind: "onyx.PickerDecorator",
+								onSelect: "resize",
+								style : "padding: 6px",
+								components:
+								[
+									{style: "width: 100%"}, // A content-less PickerButton
+									{
+										kind: "onyx.Picker", name: "orientation",
+										components: [
+											{content: "portrait", active: true },
+											{content: "landscape"              }
+										]
+									}
+								]
+							},
+							{content: "width: 600 px",  name: "screenWidth",  style: "padding: 8px",
+							 attributes: { title: "device width divided by DPR" }
+							},
+							{content: "height: 800 px", name: "screenHeight", style: "padding: 8px",
+							 attributes: { title: "device height divided by DPR" }
+							}
 						]
 					},
 					{tag: "br"},
@@ -144,16 +143,26 @@ enyo.kind(
 			var device = this.$.device.selected ;
 			var orientation = this .$.orientation.selected ;
 
-			var dw = device.value.width / device.value.dpr;
-			var dh = device.value.height / device.value.dpr;
 			this.dlog("size for device " , device.content , " orientation " , orientation.content ) ;
-			var swap = orientation.swap ;
-			var targetW = swap ? dh : dw ;
-			var targetH = swap ? dw : dh ;
+
+			var dw  = device.value.width ;
+			var dh  = device.value.height ;
+			var dpr = device.value.dpr ;
+			this.$.devWidth .setContent("width: "  + dw + ' px') ;
+			this.$.devHeight.setContent("height: " + dh + ' px') ;
+			this.$.devDPR   .setContent("DPR: "    + dpr) ;
+
+			// there's no logical xor in javascript. Emulate one :-/
+			var wantWide = orientation.content === 'landscape' ;
+			var isWide   = dw > dh ;
+			var swap     = wantWide ^ isWide ; // bitwise xor works fine with boolean
+
+			var targetW  = ( swap ? dh : dw ) / dpr ;
+			var targetH  = ( swap ? dw : dh ) / dpr ;
+
 			this.$.scrolledIframe.setGeometry( targetW , targetH) ;
-			this.$.devWidth .setContent("width: "  + targetW + 'px') ;
-			this.$.devHeight.setContent("height: " + targetH + 'px') ;
-			this.$.devDPR   .setContent("DPR: "    + device.value.dpr) ;
+			this.$.screenWidth .setContent("width: "  + targetW + 'px') ;
+			this.$.screenHeight.setContent("height: " + targetH + 'px') ;
 			this.resized() ;
 		},
 
