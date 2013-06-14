@@ -256,135 +256,104 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 			"blackberry": ".jad"
 		}
 
-		try{
-			fn = title +"_"+ version +extensions[platform]; 
-
-		} catch (err){
-			//************** expose this error in another way
-			fn = "platform.ext";
-				log.error("Incorrect platform is used for the build");
-		}
+		fn = title +"_"+ version +extensions[platform]; 
+	
 		//This is a temporary code used to test the download function 
  		//It will be replaced by the below commented code as soon as 
  		//the "api.get()" works correctly.
  		//IMPORTANT : change the file name path of the attribute 
  		//			 "tempFileName" to another file stored on your computer
  		//***** Begining of the temporrary code *****
+ 		var tempFileName = temp.path({prefix: 'com.palm.ares.hermes.phonegap'});
  		
- 		var tempFileName = "C:\\Users\\adiche\\ares-project.new\\harmonia\\source\\AccountsConfigurator.js";
-		var packagedFile = fs.createWriteStream(tempFileName);
-		log.verbose("returnBody()", tempFileName);
-
-		// Build the multipart/formdata
-		var combinedStream = CombinedStream.create();
-		var boundary = generateBoundary();
-
-		// Adding part header
-		combinedStream.append(getPartHeader(fn, boundary));
-		// Adding file data
-		combinedStream.append(function(nextDataChunk) {
-			fs.readFile(tempFileName, 'base64', function (err, data) {
-				if (err) {
-					next('Unable to read ' + tempFileName);
-					nextDataChunk('INVALID CONTENT');
-				} else {
-					nextDataChunk(data);
-				}
-			});
-		});
-		//****** Ending of the temporrary code. *********
-		/* TODO: Un comment this part a comment the temporrary code
-				 as soon as the "api.get()" function works.
 		client.auth({
-			token: req.token,
-			//proxy: this.config.proxyUrl
+			token: req.token			
 		}, function(err1, api) {
 			if (err1) {
 				next(err1);
 			} else {
-				packagedFile = api.get("/apps/" + appId + "/"+ platform, function(err2, userData){
-					if (err2) {
-						next(err2);
-					} else {packagedFile.close();
-						createMultipartData(userData);
-					}
-				});
+				var os = fs.createWriteStream(tempFileName);
+				os.on('close', createMultipartData);
+				api.get("/apps/" + appId + "/"+ platform).pipe(os);
 			}
 		});
 
 
-		function createMultipartData(userData){
+		function createMultipartData(){
 			// Build the multipart/formdata
 			var combinedStream = CombinedStream.create();
 			var boundary = generateBoundary();
 
 			// Adding part header
-			combinedStream.append(getPartHeader(tempFileName, boundary));
+			combinedStream.append(getPartHeader(fn, boundary));
 			// Adding file data
-			combinedStream.append(function(){
-				fs.readFile(tempFileName, 'base64', function (err, packagedFile) {
+			combinedStream.append(function(nextDataChunk){
+				
+				fs.readFile(tempFileName/*"C:\\TrucMush_0.1.apk"*/, 'base64', function (err, packagedFile) {
+					fs.unlink(tempFileName);
 					if (err) {
 						next('Unable to read ' + tempFileName);
 						nextDataChunk('INVALID CONTENT');
 					} else {
-						nextDataChunk(packagedFile);
+						log.verbose("downloadApp()#returnBody()#createMultipartData(): ", packagedFile.length);
+						nextDataChunk(packagedFile);						
 					}
 				});
+			});	
+
+			// Adding part footer
+			combinedStream.append(getPartFooter());
+
+			// Adding last footer
+			combinedStream.append(getLastPartFooter(boundary));
+
+			// Send the files back as a multipart/form-data
+			log.verbose("check01: res"+ getContentTypeHeader(boundary));
+			res.status(200);
+			res.header('Content-Type', getContentTypeHeader(boundary));
+			combinedStream.pipe(res);
+
+			// cleanup the temp dir when the response has been sent
+			combinedStream.on('end', function() {
+
+				next();
 			});
-		 */
-
-		// Adding part footer
-		combinedStream.append(getPartFooter());
-
-		// Adding last footer
-		combinedStream.append(getLastPartFooter(boundary));
-
-		// Send the files back as a multipart/form-data
-		log.verbose("check01: res"+ getContentTypeHeader(boundary));
-		res.status(200);
-		res.header('Content-Type', getContentTypeHeader(boundary));
-		combinedStream.pipe(res);
-
-		// cleanup the temp dir when the response has been sent
-		combinedStream.on('end', function() {
-			next();
-		});
-	}
-
-	function generateBoundary() {
-		// This generates a 50 character boundary similar to those used by Firefox.
-		// They are optimized for boyer-moore parsing.
-		var boundary = '--------------------------';
-		for (var i = 0; i < 24; i++) {
-			boundary += Math.floor(Math.random() * 10).toString(16);
 		}
 
-		return boundary;
+		function generateBoundary() {
+			// This generates a 50 character boundary similar to those used by Firefox.
+			// They are optimized for boyer-moore parsing.
+			var boundary = '--------------------------';
+			for (var i = 0; i < 24; i++) {
+				boundary += Math.floor(Math.random() * 10).toString(16);
+			}
+
+			return boundary;
+		}
+
+		function getContentTypeHeader(boundary) {
+			return 'multipart/form-data; boundary=' + boundary;
+		}
+
+		function getPartHeader(filename, boundary) {
+			var header = '--' + boundary + FORM_DATA_LINE_BREAK;
+			header += 'Content-Disposition: form-data; name="file"';
+
+			header += '; filename="' + filename + '"' + FORM_DATA_LINE_BREAK;
+			header += 'Content-Type: application/octet-stream; x-encoding=base64';
+
+			header += FORM_DATA_LINE_BREAK + FORM_DATA_LINE_BREAK;
+			return header;
+		}
+
+		function getPartFooter() {
+			return FORM_DATA_LINE_BREAK;
+		}
+
+		function getLastPartFooter(boundary) {
+			return '--' + boundary + '--';
+		}
 	}
-
-	function getContentTypeHeader(boundary) {
-		return 'multipart/form-data; boundary=' + boundary;
-	}
-
-	function getPartHeader(filename, boundary) {
-		var header = '--' + boundary + FORM_DATA_LINE_BREAK;
-		header += 'Content-Disposition: form-data; name="file"';
-
-		header += '; filename="' + filename + '"' + FORM_DATA_LINE_BREAK;
-		header += 'Content-Type: application/octet-stream; x-encoding=base64';
-
-		header += FORM_DATA_LINE_BREAK + FORM_DATA_LINE_BREAK;
-		return header;
-	}
-
-	function getPartFooter() {
-		return FORM_DATA_LINE_BREAK;
-	}
-
-	function getLastPartFooter(boundary) {
-		return '--' + boundary + '--';
-	}
-
 };
 
 

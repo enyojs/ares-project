@@ -10,7 +10,7 @@ enyo.kind({
 		 name: "buildStatusPopup"
 		}
 	],
-	debug: false,
+	debug: true,
 	/**
 	 * @private
 	 */
@@ -27,7 +27,7 @@ enyo.kind({
 	 * {ServiceRegistry}.
 	 * @param {Object} inConfig
 	 * @see ServiceRegistry.js
-	 */
+	 */	
 	setConfig: function(inConfig) {
 		var self = this;
 
@@ -47,8 +47,6 @@ enyo.kind({
 	getConfig: function() {
 		return this.config;
 	},
-
-
 
 	/**
 	 * @return the human-friendly name of this service
@@ -70,13 +68,6 @@ enyo.kind({
 		var config = Phonegap.Build.DEFAULT_PROJECT_CONFIG;
 		return config;
 	},
-
-	/**
-	 * Name of the kind to show in the {AresProperties} UI
-	 * @return the Enyo kind to use to set service-specific Ares-wide properties
-	 * @public
-	 */
-	//getAresPropertiesKind: function() {},
 
 	/**
 	 * Name of the kind to show in the {ProjectProperties} UI
@@ -245,8 +236,7 @@ enyo.kind({
 	 * @param  {Function} next    is a CommonJS callback
 	 * @private
 	 */
-	_getBuildStatus: function(project, next){
-		
+	_getBuildStatus: function(project, inData, next){
 		var config = project.getConfig().getData();
 		var appId = config.providers.phonegap.appId;
 		var url = this.url + '/api/v1/apps/' + appId;
@@ -263,52 +253,6 @@ enyo.kind({
 		  // activate the pop up to view the results
 		  next(null, inData);
 		});
-		req.error(this, function(inSender, inError) {
-			// invalidate token
-			this.config.auth.token = null;
-			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
-			
-			// report the error
-			var response = inSender.xhrResponse, contentType, details;
-			if (response) {
-				contentType = response.headers['content-type'];
-				if (contentType && contentType.match('^text/plain')) {
-					details = response.body;
-				}
-			}
-			next(new Error("Unable to get PhoneGap user data (" + details || inError + ")"), details);
-		});
-		req.go(); 
-	},
-	/**
-	 * This function do the same thing as the function _getBuildStatus except
-	 * the fact that it's binded in the "buildStatus" function.
-	 * @Me this function should be refactored. 
-	 * 
-	 * @param  {Object}   project [description]
-	 * @param  {Object} inData
-	 * @param  {Function} next    CommonJs callback
-	 * @protected 
-	 */
-	_getBuildStatusPopup: function(project, inData,  next){
-		
-		var config = project.getConfig().getData();
-		var appId = config.providers.phonegap.appId;
-		var url = this.url + '/api/v1/apps/' + appId;
-		
-		//Creation of the Ajax request
-		var req = new enyo.Ajax({
-			url: url
-		});
-
-		//in case of sucess send the obtained JSON object to the next function
-		//in the Async.waterfall.
-		req.response(this, function(inSender, inData) {
-			//this.log("the sender: ", inSender);
-		
-		  // activate the pop up to view the results
-		  next(null, inData);
-		 });
 		req.error(this, function(inSender, inError) {
 			// invalidate token
 			this.config.auth.token = null;
@@ -341,8 +285,7 @@ enyo.kind({
 		next();
      },
 	/**
-	 * Store relevant user account data
-	 * 
+	 * Store relevant user account data 
 	 * @param {Object} user the PhoneGap account user data
 	 * @private
 	 */
@@ -447,7 +390,7 @@ enyo.kind({
 	},
 
 	/**
-	 * initiates the phonegap build of the given project
+	 * Initiates the phonegap build of the given project
 	 * @see HermesBuild.js
 	 *
 	 * The following actions will be performed:
@@ -473,6 +416,7 @@ enyo.kind({
 			enyo.bind(this, this._store, project),
 		], next);
 	},
+
 	/**
 	 * Communicate with Phonegap build in order to get the curent status of the
 	 * built project. This status are showen in a Pop-up defined in the file
@@ -487,7 +431,7 @@ enyo.kind({
 		if (this.debug) this.log("Getting build status:  " + this.url + '/build');
 		async.waterfall([
 			enyo.bind(this, this.authorize),
-			enyo.bind(this, this._getBuildStatusPopup, project),			
+			enyo.bind(this, this._getBuildStatus, project),			
 			enyo.bind(this, this._showBuildStatus, project)
 		], next);
 	},
@@ -628,61 +572,8 @@ enyo.kind({
 		req.go(query);
 	},
 
-	/**
-	 * Send an Ajax request to Node.js in order to initiate the download of an
-	 * application in a specific mobile platform.
-	 * 
-	 * @param  {Object}   project contain a description about the current selected
-	 *                          project
-	 * @param  {Object}   inURL   is a url suffixe that contains: AppID, the
-	 *                            targeted build platform, an the title of the
-	 *                            application.
-	 * @param  {Function} next    is a CommunJS callback.
-	 * @private
-	 */
-	_sendDownloadRequest: function(project, inURL, next){
-		
-		var config = project.getConfig().getData();
-		var url =this.url+ '/api/v1/apps/' + inURL;
-		if (this.debug){
-			this.log("download URL is : ", url);
-		}
-		
-		//Definition of the Ajax request 
-		var req = new enyo.Ajax({
-			url: url,
-			handleAs: 'text'
-		});		
+	
 
-		//Handling a successfull response
-		req.response(this, function(inSender, inData) {
-			if (this.debug) this.log("response: received " + inData.length + " bytes typeof: " + (typeof inData));
-			var ctype = req.xhrResponse.headers['content-type'];
-			if (this.debug) this.log("response: received ctype: " + ctype);
-			next(null, {content: inData, ctype: ctype});			
-		});
-
-		//Handling a failure response
-		req.error(this, function(inSender, inError) {
-			// invalidate token
-			this.config.auth.token = null;
-			ServiceRegistry.instance.setConfig(this.config.id, 
-				{auth: this.config.auth});
-			
-			// report the error
-			var response = inSender.xhrResponse, contentType, details;
-			if (response) {
-				contentType = response.headers['content-type'];
-				if (contentType && contentType.match('^text/plain')) {
-					details = response.body;
-				}
-			}			
-		});
-
-		//Execution of the Ajax request
-		req.go(); 
-		
-	},	
 	/**
 	 * Prepare the folder where to store the built package
 	 * @param  {Object}   project contain a description about the current selected
@@ -709,6 +600,7 @@ enyo.kind({
 			req.error(this, this._handleServiceError.bind(this, "Unable to prepare package storage", next));
 		}
 	},
+
 	/**
 	 * Create a file in the target repository of the project form a multipart/form
 	 * data.
@@ -725,7 +617,7 @@ enyo.kind({
 	 */
 	_storePkg: function(project, folderId, inData, next) {
 		if(this.debug){		
-			this.log("**data content.ctype: ", inData.ctype);	
+			this.log("data content.ctype: ", inData.ctype);	
 		}	
 
 		var req = project.getService().createFiles(folderId, 
@@ -740,6 +632,7 @@ enyo.kind({
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to store pkg", next));
 	},	
+
 	/**
 	 * After checking that the building of the project is finished in Phongap platform, this 
 	 * function send an ajax request to the Node.js in order to launch
@@ -749,10 +642,9 @@ enyo.kind({
 	 * file (contained in a multipart data form)in the folder 
 	 * "Target/Phonegap build" of the curent built project.
 	 * 
-	 * @param  {Object}   project contain a description about the current selected
+	 * @param  {Object}   project contain a description of the current selected
 	 *                          project
-	 * @param  {Object}   folderId id of the target folder where to store the
-	 *                             packaged file.
+	 * @param  {Object}   folderId unique identifier of the project in Ares
 	 * @param  {Object}   appData  multipart data form containing the application
 	 *                             to store
 	 * @param  {Function} next     a CommonJs callback
@@ -778,116 +670,230 @@ enyo.kind({
 		}
 
 		project.setObject(appKey, appData);
-		//saving the context of this kind.		
-		var self = this;
+			
+		this._getAllApplications(project, appData, folderId, next);
+	},
+	
+	/**
+	 * 
+	 * @param  {Object}   project  contain a description of the current selected
+	 *                             project
+	 * @param  {Object}   appData  meta-data on the build of the actuel
+	 *                             project
+	 * @param  {String}   folderId unique identifier of the project in Ares
+	 * @param  {Function} next     a CommonJS callback
+	 * @private
+	 */
+	_getAllApplications: function(project, appData, folderId, next){
+	
+		var platforms = [];
+
+		var builder = this;
 		
-		//Mobile platforms supported by Phonegap build service.
-		var platforms = ["android", "ios", "winphone", "blackberry", "symbian", "webos"];
+
+		//Setting the targeted platforms for the build from the those
+		//presented in the object appData.
+		enyo.forEach(enyo.keys(appData.status),
+			function(platform){
+				platforms.push(platform);
+			}, this);
 
 		/* 
-		* Parallel tasks are lauched to check the build status in each platform.
-		* A status can be : complete, pending or error.
-		* 	- completed: a request is made to node.js to 
-		*	 			download the application.
-		*	- pending: another request is sent to phonegap to check for an
-		*	           updated status.
-		*	- error: an error message is displayed.		
-		*/	
+		 * Parallel tasks are lauched to check the build status in each platform.
+		 * A status can be : complete, pending or error.
+		 * 	- completed: a request is made to node.js to 
+		 *	 			download the application.
+		 *	- pending: another request is sent to phonegap to check for an
+		 *	           updated status.
+		 *	- error: an error message is displayed.		
+		*/		
 		async.forEach(platforms,
 		    function(platform, next) {
-		    	self.log("Send request for the platform: ", platform);
-		        async.whilst(
-		        	function() {
-		        		//Truthfull condition to send a new check status request
-		        		//to Phongap build. 
-   		    			return appData.status[platform] === "pending";
-		        	},
-	   		    	function (next) {
-	   		    		async.waterfall([
-	   		    			function (next) {
-	   		    				//Timeout before sending a new check status request
-	   		        			setTimeout(next, 3000);
-	   		    			},
-	   		    			function (next) {
-	   		    				if(this.debug){
-	   		    					self.log("sending another get Status check request");
-	   		    				}
-	   		    				self._getBuildStatus(project, next);
-	   		    			},
-	   		    			function(inData, next) {
-	   		    				//get the result from the previous status check request
-	   		    				appData = inData.user;
-	   		    				if(this.debug){
-	   		    				self.log("the new appData for "+platform+
-	   		    					     " is : ", appData);
-	   		    				}
-	   		    				next();
-	   		    			}
-	   		    		], next);
-	   		    	},
-	   		    	//This function is run when the whilst condition in no longer
-	   		    	//satisfied
-	   		    	function(err) {
-	   		    		//in the case of exception.
-	   		    		if (err) {
-	   		    			
-	   		    			if(this.debug){
-	   		    				self.error("error occured in the request:"+
-	   		    				     " when checking for the Application status");
-	   		    			}
-	   		    			next(err);
-	   		    		} else {
-	   		    			//if the status is complete then a download request
-	   		    			//is sent to Node.js server.
-	   		    			if (appData.status[platform] === "complete"){
-	   		    				async.waterfall([
-	   		    					function(next){
-	   		    						//make the download request.
-	   		    						appId = appData.id;
-	   		    						title = applicationId;
-	   		    						if (appData.version != null){
-	   		    						   version = appData.version;
-	   		    						} else{
-	   		    							version = "SNAPSHOT_1";
-	   		    						}
+		    	if(this.debug){
+		    		this.log("Send request for the platform: ", platform);
+		    	}
+		    	_getApplicationForPlatform(platform, next);
+	       },next);
+	
+		/**
+		 * Check continuously the build status of the build in a targeted mobile platform on Phongap  build
+		 * service and launch the appropriate action when the returned status of the build is
+		 * "complete" or "error". 
+		 * @param  {Object}   project  contain a description of the current selected
+		 *                             project
+		 * @param  {String}   platform targeted platfrom for the build
+		 * @param  {Object}   appData  meta-data on the build of the actuel
+		 *                             project
+		 * @param  {Object}   folderId unique identifier of the project in Ares
+		 * @param  {Function} next     a CommonJS callback
+		 * @private
+		 */
+		function _getApplicationForPlatform(platform, next){
+			async.whilst(
+		    	function() {
+		    		//Truthfull condition to send a new check status request
+		    		//to Phongap build. 
+		    			return appData.status[platform] === "pending";
+		    	},
+		    	_waitForApp,
+		    	//This function is run when the whilst condition in no longer
+		    	//satisfied
+		    	_downloadApp
+		   	);
 
+		   	/**
+			 * Nested function that check the build status of the application 
+			 * and update the appData each 3 sec
+			 * @param  {Function} next a CommonJS callback
+			 * @private
+			 */
+			function _waitForApp (next){
 
-	   		    						var url_suffixe = appId +
-	   		    								  '/' + platform +
-	   		    								  '/' + title + 
-	   		    								  '/' + version;
-	   		    						if(self.debug){
-		   		    						self.log("Application "+ platform
-		   		    					     +" ready for download");
-	   		    						}
-	   		    						self._sendDownloadRequest(project, 
-	   		    							url_suffixe, next);
-	   		    					},
-	   		    					//inData is a multipart/form containing the
-	   		    					//built application
-	   		    					function(inData, next){
-	   		    						self._storePkg(project, folderId, 
-	   		    						inData, next);
+				async.waterfall([
+	    			function (next) {
+	    				//Timeout before sending a new check status request
+	        			setTimeout(next, 3000);
+	    			},
+	    			function (next) {
+	    				if(appData.status[platform] === "pending"){
+	    					builder._getBuildStatus(project, appData, next);
+	    				} else{
+	    					next(null, null);
+	    				}
+	    				
+	    			},
+	    			function(inData, next) {
+	    				//get the result from the previous status check request
+	    				if (inData !== null){
+	    					appData = inData.user;
+	    				}	    				
+	    				next();
+	    			}
+	    		], next);	    			
+			}
+			/**
+			 * Launch the appropirate action when an exception occure or when the status
+			 * is no longer pending.
+			 * @param  {Object} err 
+			 * @private
+			 */
+			function _downloadApp(err){
+				if (err) {
+					next(err);
+	    		} else {
+	    			//if the status is complete then a download request
+	    			//is sent to Node.js server.
+	    			if (appData.status[platform] === "complete"){
+	    				_setApplicationToDownload(next);
+	    			}
+	    			else {
+	    				next();
+	    			}
+	    		}
+			}
 
-	   		    					}
-	   		    				], next);
-	   		    			}
-	   		    			else {
-	   		    				
-	   		    				if(self.debug){
-	   		    					//Display the cause of the failure of the build
-	   		    					//this information is contained in the JSON
-	   		    					//object reterned by the check status request
-	   		    					self.log("Error: ", appData && appData.error && appData.error[platform]);
-	   		    				}
-	   		    				next();
-	   		    			}
-	   		    		}
-	   		    	}
-	   		    );
-		    }, 
-		next);
+			/**
+			 * [ description]
+			 * @param  {Object}   project  contain a description of the current selected
+			 *                             project
+			 * @param  {String}   folderId unique identifier of the project in Ares
+			 * @param  {String}   platform targeted platfrom for the build
+			 * @param  {Object}   appData  meta-data on the build of the actuel
+			 *                             project
+			 * @param  {Function} next     a CommonJS callback
+			 * @private
+			 */
+			 function _setApplicationToDownload(next){
+				var config = ares.clone(project.getConfig().getData());
+				var packageName = config.id;
+
+				async.waterfall([
+					function(next){
+						//make the download request.
+						appId = appData.id;
+						title = packageName;
+					    version = appData.version || "SNAPSHOT";
+						
+						var urlSuffix = appId +
+								  '/' + platform +
+								  '/' + title + 
+								  '/' + version;
+						if(builder.debug){
+							builder.log("Application "+ platform
+						     +" ready for download");
+						}
+						_sendDownloadRequest.bind(builder)( 
+							urlSuffix, next);
+					},
+					//inData is a multipart/form containing the
+					//built application
+					function(inData, next){
+						builder._storePkg(project, folderId, 
+						inData, next);
+					}
+				], next);
+			}
+
+			/**
+			 * Send an Ajax request to Node.js in order to initiate the download of an
+			 * application in a specific mobile platform.
+			 * 
+			 * @param  {Object}   project contain a description about the current selected
+			 *                          project
+			 * @param  {Object}   urlSuffix   is a url suffixe that contains: AppID, the
+			 *                            targeted build platform, an the title of the
+			 *                            application.
+			 * @param  {Function} next    is a CommunJS callback.
+			 * @private
+			 */
+			function _sendDownloadRequest(urlSuffix, next){
+				
+				var config = project.getConfig().getData();
+
+				var url = this.url + '/api/v1/apps/' + urlSuffix;
+				if (this.debug){
+					this.log("download URL is : ", url);
+				}
+				
+				//Definition of the Ajax request 
+				var req = new enyo.Ajax({
+					url: url,
+					handleAs: 'text'
+				});		
+
+				//Handling a successfull response
+				req.response(this, function(inSender, inData) {
+					if (this.debug) this.log("response: received " + inData.length + " bytes typeof: " + (typeof inData));
+					var ctype = req.xhrResponse.headers['content-type'];
+					if (this.debug) this.log("response: received ctype: " + ctype);
+					next(null, {content: inData, ctype: ctype});			
+				});
+
+				//Handling a failure response
+				req.error(this, function(inSender, inError) {
+					// invalidate token
+					this.config.auth.token = null;
+					ServiceRegistry.instance.setConfig(this.config.id, 
+						{auth: this.config.auth});
+					
+					// report the error
+					var response = inSender.xhrResponse, contentType, details;
+					if (response) {
+						contentType = response.headers['content-type'];
+						if (contentType && contentType.match('^text/plain')) {
+							details = response.body;
+						}
+					}			
+				});
+
+				//Execution of the Ajax request
+				req.go(); 
+			}	
+		}
 	},
+
+	
+
 	/**
 	 * Generate PhoneGap's config.xml on the fly
 	 * @param {Object} config PhoneGap Build config, as a Javascript object
@@ -998,6 +1004,7 @@ enyo.kind({
 	},
 
 	statics: {
+		platforms: ["android", "ios", "winphone", "blackberry", "symbian", "webos"],
 		DEFAULT_PROJECT_CONFIG: {
 			enabled: false,
 			icon: {
