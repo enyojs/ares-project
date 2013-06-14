@@ -28,12 +28,12 @@
 	padding-right: 5px;
 	background-image: url('../../images/triangle.png');
 	background-repeat: no-repeat;
-	background-position-y: -16px;
+	background-position-y: 0px;
 	display: inline-block;
 }
 
 .turned {
-	background-position-y: 0px;
+	background-position-y: -16px;
 }
 
 .css-editor-field-caption {
@@ -48,6 +48,18 @@
 }
 
 .css-editor-select {
-	display: inline; 
-	width:50px;
+	display: inline-block; 
+	width:30px;
+}
+
+
+.css-editor-select-box {
+	display: inline-block;
+	width: 60px;
+	white-space:normal;
+	
+}
+
+.css-editor-select-box > .inspector-field-editor {
+	width: 4rem;
 }

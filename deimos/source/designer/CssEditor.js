@@ -1,19 +1,14 @@
 enyo.kind({
 	name: "PalettePicker",
 	components: [
-		{kind: "ColorPicker", onColorPick: "onPick", onColorSlide: "onPick"},
-		{name: "colorPicked", content: "Color Picked: "}
+		{kind: "ColorPicker", onColorPick: "onPick", onColorSlide: "onPick"}
 	],
 	events: {
 		onChange: ""
 	},
 	onPick: function(inSender, color){
-		if (this.$.colorPicked){
-			this.$.colorPicked.setContent("Color Picked: " + inSender.color);
-		}
 		this.doChange({target:this.$.colorPicker});
 		return true;
-
 	}
 });
 
@@ -25,7 +20,7 @@ enyo.kind({
 				{name: "indicator", classes: "indicator turned"},
 				{name: "name", tag:"span"},
 			]},
-			{name:"drawer", kind: "onyx.Drawer", open:false, components: [
+			{name:"drawer", kind: "onyx.Drawer", open:true, components: [
 				{name: "list", kind: "Repeater", onSetupItem: "setupItem", components: [
 					{name: "styleItem", kind: "Inspector.Config.MultiType"}
 				]}
@@ -36,7 +31,7 @@ enyo.kind({
 	toggleDrawer: function() {
 		var open = this.$.drawer.getOpen();
 		this.$.drawer.setOpen(!open);
-		this.$.indicator.addRemoveClass("turned", open);
+		this.$.indicator.addRemoveClass("turned", !open);
 	},
 	setModel: function(inCategory) {
 		this.cssConfig = inCategory;
@@ -46,57 +41,11 @@ enyo.kind({
 	},
 	setupItem: function(inSender, inEvent) {
 		var prop = this.cssConfig.properties;
-		inEvent.item.$.styleItem.setFieldName(prop[inEvent.index].name);
-
-		var keys = Object.keys(prop[inEvent.index].config);
-		enyo.forEach(keys, function(o) {
-			// build the correct styleItem object
-			if (prop[inEvent.index].config[o] !== true) {
-				inEvent.item.$.styleItem.$[o].destroy();
-			}				
-			// build the picker list if needed
-			if (o === "picker" && prop[inEvent.index].config[o]) {
-				inEvent.item.$.styleItem.$.picker.values = this.getListItems(prop[inEvent.index].pickerItems);
-				this.setUpPickerList(inEvent.item.$.styleItem.$.picker);
-			}
-		}, this);
-
-		// display properties and values associated to the styleItem object freshly built
-		if (this.propUser !== "" || this.propUser !== null) {
-			var p = this.propUser.split(";");
-			keys = Object.keys(p);
-			enyo.forEach(keys, function(o) {
-				if (p[o].indexOf(prop[inEvent.index].name) > -1) {
-					var s = p[o].split(":");
-					for (i=0; i < s.length; i++) {
-						// filled-up text kind
-						inEvent.item.$.styleItem.setFieldValue(s[i] || "");
-						// filled-up slider kind
-						if (inEvent.item.$.styleItem.$.slider !== undefined) {
-							var val = s[i].match(/\d+\.?\d*/g);
-							inEvent.item.$.styleItem.$.slider.setValue(val);   
-							inEvent.item.$.styleItem.$.slider.setProgress(val);	
-						}
-					}
-				}
-			}, this);
-
-		}
+		var item = inEvent.item.$.styleItem;
+		item.setFieldName(prop[inEvent.index].name);
+		item.setConfig(this.cssConfig.properties[inEvent.index], item);		
+		item.setValues(this.cssConfig.properties[inEvent.index], this.propUser, item);
 		return true;
-	},
-	getListItems: function(inList)  {
-		var items = [];
-		keys = Object.keys(inList);
-		enyo.forEach(keys, function(o) {
-			items.push(inList[o]);
-		}, this);	
-		return items;
-	},
-	setUpPickerList: function(inList)  {
-		keys = Object.keys(inList.values);
-		enyo.forEach(keys, function(o) {
-				inList.createComponent({content: inList.values[o]});
-		}, this);
 	}
 });
 
@@ -112,9 +61,11 @@ enyo.kind({
 			{name: "background-color",
 			config: {"text": true, 
 				"palette": true, 
-				"picker": null, 
+				"aspect": false, 
+				"family": false, 
 				"slider": false,
-				"unit": false},
+				"unit": false,
+				"colorUnit": true},
 			}
 		]
 		},
@@ -123,25 +74,29 @@ enyo.kind({
 			{name: "border-color",
 			config: {"text": true, 
 				"palette": true, 
-				"picker": null, 
+				"aspect": false, 
+				"family": false, 
 				"slider": false,
-				"unit": false},
+				"unit": false,
+				"colorUnit": true}
 			},
 			{name: "border-style",
 			config: {"text": true, 
 				"palette": false, 
-				"picker": true, 
+				"aspect": false, 
+				"family": false, 
 				"slider": false,
-				"unit": false},
-			pickerItems: ["", "dotted", "dashed", "double", "groove", "hidden", 
-							"ridge",  "solid", "inset", "outset" ]
+				"unit": false,
+				"colorUnit": false}
 			},
 			{name: "border-width",
 			config: {"text": true, 
 				"palette": false, 
-				"picker": null, 
+				"aspect": false, 
+				"family": false, 
 				"slider": true,
-				"unit": true}
+				"unit": true,
+				"colorUnit": false}
 			}
 		]
 		},
@@ -150,18 +105,20 @@ enyo.kind({
 			{name: "font-size",
 			config: {"text": true, 
 				"palette": false, 
-				"picker": null, 
+				"aspect": false, 
+				"family": false, 
 				"slider": true,
-				"unit": true}
+				"unit": true,
+				"colorUnit": false}
 			},
 			{name: "font-family",
 			config: {"text": true, 
 				"palette": false, 
-				"picker": true, 
+				"aspect": false, 
+				"family": false, 
 				"slider": false,
-				"unit": false},
-			pickerItems: ["", "arial", "arial black", "comic sans ms", "courier new", "georgia", 
-							"helvetica",  "times new roman", "trebuchet ms", "verdana" ]
+				"unit": false,
+				"colorUnit": false}
 			},
 		]
 		},
@@ -170,16 +127,20 @@ enyo.kind({
 			{name: "padding",
 			config: {"text": true, 
 				"palette": false, 
-				"picker": null, 
+				"aspect": false, 
+				"family": false, 
 				"slider": true,
-				"unit": true}
+				"unit": true,
+				"colorUnit": false}
 			},
 			{name: "margin",
 			config: {"text": true, 
 				"palette": false, 
-				"picker": null, 
+				"aspect": false, 
+				"family": false, 
 				"slider": true,
-				"unit": true}
+				"unit": true,
+				"colorUnit": false}
 			}
 		]
 		},
@@ -188,10 +149,12 @@ enyo.kind({
 			{
 				name: "text-indent",
 				config: {"text": true, 
-					"palette": false, 
-					"picker": null, 
-					"slider": true,
-					"unit": true}
+				"palette": false, 
+				"aspect": false, 
+				"family": false, 
+				"slider": true,
+				"unit": true,
+				"colorUnit": false}
 			}
 		]
 		}

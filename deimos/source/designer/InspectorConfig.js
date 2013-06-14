@@ -204,32 +204,35 @@ enyo.kind({
 		{name: "title", classes: "inspector-field-caption"},
 		{name: "text", kind: "enyo.Input", classes: "css-editor-field-editor", name: "value", onchange: "handleChange", 
 										ondblclick: "handleDblClick"},
-		{name: "unit", kind: "Select", classes: "css-editor-select", components: [
-				{content: "px", active: true},
-				{content: " "},
-				{content: "cm"},
-				{content: "em"},
-				{content: "ern"},
-				{content: "%"}
-		]},
-		{name: "picker", kind: "Select", classes: "css-editor-select", onchange: "pickerChanged"},
+		{name: "colorUnit", content: "color or #value", style: "display:inline;"},
+		{name: "unit", kind: "Inspector.Config.Select", classes: "css-editor-select-box", values: ["px","cm","em","ern","rem", "%"], onChange: "unitChanged"},
+		{name: "aspect", kind: "Inspector.Config.Select",  classes: "css-editor-select-box", values: ["dotted", "dashed", "double", "groove", "hidden",
+                                                        "ridge",  "solid", "inset", "outset"], onChange: "pickerChanged"},
+		{name: "family", kind: "Inspector.Config.Select", classes: "css-editor-select-box", values: ["arial", "arial black", "comic sans ms", "courier new", "georgia", 
+							"helvetica",  "times new roman", "trebuchet ms", "verdana" ], onChange: "pickerChanged"},
 		{name: "slider", kind: "onyx.Slider", value: 0, style:"width:90%", onChanging:"sliderChanged", 
 										onChange:"sliderChanged"},
-		{name: "palette", kind: "PalettePicker", onChange: "colorChanged"}
-	],	
-	//* Stop extraneous activate event from being fired when box is initially checked
-	handleChange: function(inSender, inEvent) {
-		this.fieldValue = this.$.value.getValue();
+	],
+   //* Stop extraneous activate event from being fired when box is initially checked
+    handleChange: function(inSender, inEvent) {
+            this.fieldValue = this.$.value.getValue();
+            this.doChange({target: this});
+            return true;
+    },
+    handleDblClick: function(inSender, inEvent) {
+            this.fieldValue = this.$.value.getValue();
+            this.doDblClick({target: this});
+            return true;
+    },
+	unitChanged: function(inSender, inEvent) {
+		this.fieldValue = inSender.getValue();
+		this.$.value.setValue();
 		this.doChange({target: this});
-		return true;
-	},
-	handleDblClick: function(inSender, inEvent) {
-		this.fieldValue = this.$.value.getValue();
-		this.doDblClick({target: this});
 		return true;
 	},
 	pickerChanged: function(inSender, inEvent) {
 		this.fieldValue = inSender.getValue();
+		this.$.value.setValue();
 		this.doChange({target: this});
 		return true;
 	},
@@ -242,5 +245,76 @@ enyo.kind({
 		this.fieldValue = inEvent.originator.$.colorPicker.color;
 		this.doChange({target: this});
 		return true;
-	}
+	},
+	setConfig: function(inConfigProperties, inItem) {
+		var keys = Object.keys(inConfigProperties.config);
+		var oneP = false;
+		enyo.forEach(keys, function(o) {
+			// build the correct styleItem object
+			if (inConfigProperties.config[o] !== true) {
+				if (o !== "palette") {
+					inItem.$[o].destroy();					
+				}
+				var needed = (inConfigProperties.name === "background-color") || (inConfigProperties.name === "border-color")		
+				if (needed  && !oneP) {
+					inItem.createComponent({name: "palette", kind: "PalettePicker", onChange: "colorChanged"});
+					oneP = true;
+				}
+			}			
+		}, this);	
+	},
+	setValues: function(inConfigProperties, inUserProperties, inItem) {
+		if (inUserProperties !== "" || inUserProperties !== null) {
+			var p = inUserProperties.split(";");
+			var keys = Object.keys(p);
+			enyo.forEach(keys, function(obj) {
+				if (p[obj].indexOf(inConfigProperties.name) > -1) {
+					var s = p[obj].split(":");
+					for (i=0; i < s.length; i++) {
+						var val = s[i].match(/\d+\.?\d*/g);
+						if (!this.done && val) {
+							var unit = s[i].replace(val, "");
+							this.done = true;
+						}
+						var k = Object.keys(inConfigProperties.config);
+						enyo.forEach(k, function(o) {
+							if (inConfigProperties.config[o] === true) {
+								switch(o) {
+								case 'aspect':
+									// TODO will be implemented in JIRA-2560
+									break;
+								case 'colorUnit':
+									// nothing to do
+									break;
+								case 'family':
+									// TODO will be implemented in JIRA-2560
+									break;
+								case 'palette':
+									// nothing to do
+									break;
+								case 'slider':
+                                    inItem.$[o].setValue(val);
+                                    inItem.$[o].setProgress(val);
+									break;
+								case 'text':
+									inItem.setFieldValue(s[i]);
+									break;
+								case 'unit':
+									if(!inItem.$[o].$.value.getSelected() && this.done) {
+										inItem.$[o].$.value.setSelected(inItem.$[o].values.indexOf(unit));
+									}
+									break;
+								default:
+									enyo.warn("cssEditor has unknown config property: ", o);
+									break;
+								}
+							}			
+						}, this);
+
+					}
+				}
+			}, this);	
+		}
+	},
+	
 });
