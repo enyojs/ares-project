@@ -88,7 +88,7 @@ enyo.kind({
 		
 		this.enableDisableButtons();
 		this.createComponent(
-			{name: "serverNode", container: this.$.scroller, kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed, onExpand: "nodeExpand", onForceView: "adjustScroll" }
+			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed, onExpand: "nodeExpand", onForceView: "adjustScroll" }
 		);
 	},
 	
@@ -101,9 +101,9 @@ enyo.kind({
 	itemDragstart: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
-		// get the related ares.Node
+		// get the related hermes.Node
 		this.draggedNode = inEvent.originator;
-		if (this.draggedNode.kind !== "ares.Node") {			
+		if (this.draggedNode.kind !== "hermes.Node") {			
 			this.draggedNode = this.draggedNode.parent;
 		}
 		this.targetNode = this.draggedNode;
@@ -120,9 +120,9 @@ enyo.kind({
 	itemDragenter: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
-		// look for the related ares.Node
+		// look for the related hermes.Node
 		var tempNode = inEvent.originator;
-		if (tempNode.kind !== "ares.Node") {
+		if (tempNode.kind !== "hermes.Node") {
 			tempNode = tempNode.parent;
 		}
 
@@ -508,7 +508,7 @@ enyo.kind({
 
 	/**
 	 * @public
-	 * @returns selected folder {Ares.Node} or containing folder {Ares.Node}
+	 * @returns selected folder {hermes.Node} or containing folder {hermes.Node}
 	 */
 	getFolderOfSelectedNode: function() {
 		var node = this.selectedNode;
