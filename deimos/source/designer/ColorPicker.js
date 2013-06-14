@@ -18,7 +18,7 @@ enyo.kind({
 	},
 	components: [
 		{classes: "onyx-groupbox", ontap: "colorTapped", components:[
-			{name: "colorBox", style: "height: 10px; border: 1px solid Black; margin: 5px;"}
+			{name: "colorBox", style: "height: 15px; border: 1px solid Black; margin: 5px;"}
 		]}
 	],
 	create: function() {
@@ -189,8 +189,7 @@ enyo.kind({
 	components: [
 		{kind: "DefaultColorsBoxes"},
 		{classes: "onyx-groupbox", components:[
-			{name: "colorBox", ontap: "mainColorPicked", 
-			style: "height: 8px; border: 1px solid Black; margin: 10px;"}
+			{name: "colorBox", ontap: "mainColorPicked"}
 		]}
 	],
 	create: function() {
@@ -211,7 +210,6 @@ enyo.kind({
 	},
 	updateColor: function(){
 		var c = '#' + (this.red + this.green + this.blue).toUpperCase();
-		this.$.colorBox.applyStyle("background-color", c);
 		this.color = c;
 	},
 	redChanged: function(inSender, inEvent){
