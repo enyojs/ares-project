@@ -1,12 +1,12 @@
 /**
  * Represents a directory or a file in {HermesFileTree}
  * 
- * @class ares.Node
+ * @class hermes.Node
  * @augments {enyo.Node}
  */
 
 enyo.kind({
-	name: "ares.Node",
+	name: "hermes.Node",
 	kind: "Node",
 	events: {
 		onItemDown: "",
@@ -169,9 +169,9 @@ enyo.kind({
 				case 1: // file added
 				  if (this.debug) this.log(rfiles[i].name + " was added") ;
 					if (this.dragAllowed) {
-						newControl = this.createComponent( rfiles[i], {kind: "ares.Node", dragAllowed: true, attributes: {draggable : true}} ) ;
+						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", dragAllowed: true, attributes: {draggable : true}} ) ;
 					} else {
-						newControl = this.createComponent( rfiles[i], {kind: "ares.Node"} ) ;
+						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node"} ) ;
 					}
 					if (this.debug) this.log("updateNodeContent created ", newControl) ;
 					newControl.setService(this.service);
@@ -249,7 +249,7 @@ enyo.kind({
 	 * getNodeNamed
 	 * @public
 	 * @param {String} name
-	 * @return a ares.Node for a file or a directory named passed in parameter
+	 * @return a hermes.Node for a file or a directory named passed in parameter
 	 *
 	 */
 
@@ -264,7 +264,7 @@ enyo.kind({
 	 * getNodeWithId
 	 * @public
 	 * @param {String} id
-	 * @return a ares.Node for a file or a directory id passed in parameter
+	 * @return a hermes.Node for a file or a directory id passed in parameter
 	 *
 	 */
 

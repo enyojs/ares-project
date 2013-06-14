@@ -15,3 +15,11 @@
 .iframe-drop-highlight {
 	border:1px solid blue;
 }
+
+/* Width/height handles */
+.iframe-resize-handle {
+	position: absolute;
+	width: 10px;
+	height: 10px;
+	background: orange;
+}

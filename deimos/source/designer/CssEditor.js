@@ -62,6 +62,7 @@ enyo.kind({
 	],
 	fieldName: null,
 	fieldValue: null,
+	
 	create: function() {
 		this.inherited(arguments);
 		var keys = Object.keys(this.cssEditorConfig);
@@ -71,40 +72,36 @@ enyo.kind({
 		}, this);
 	},	
 	change: function(inSender, inEvent) {
-		this.fieldName = "style";
-		this.fieldValue = "";	
-		if (inEvent.target.fieldValue !== "" &&
-			inEvent.target.fieldName) {
-				this.fieldValue = (inEvent.target.fieldName) + ":" + (inEvent.target.fieldValue) + ";";				
+		if (!inEvent.target) {
+			return true;
 		}
+		
+		var v = this.trimWhitespace(inEvent.target.fieldValue),
+			n = this.trimWhitespace(inEvent.target.fieldName),
+			styleProps = {},
+			updatedProp = {}
+		;
+		
+		// If no fieldname, something is wrong
+		if (n == "") {
+			return true;
+		}
+		
+		// Convert css string to hash
+		enyo.Control.cssTextToDomStyles(this.trimWhitespace(this.currentControlStyle), styleProps);
 
-		var u = this.currentControlStyle;
-		var p = (u !== undefined) && (u.split(";"));
-		if (!p) {
-			// no style property defined, add one 
-			this.currentControlStyle = v;
-		} else {
-			if (p.length <= 2 && 
-				p[0].search(inEvent.target.fieldName) > -1 &&
-				(this.fieldValue === "" || this.fieldValue === null)) {
-				// remove the existing css style property
-				this.currentControlStyle = "";
-			} else {
-				var added = false;
-				// modify the value of the existing css style property list
-				for (i=0; i < p.length; i++) {
-					if (p[i].search(inEvent.target.fieldName) > -1) {
-						this.currentControlStyle = u.replace(p[i]+";", this.fieldValue);
-						added = true;
-					}
-				}
-				if (!added) {
-					this.currentControlStyle = u + this.fieldValue;
-				}															
-			}
-		}
-		this.fieldValue = this.currentControlStyle;
-		this.doChange({target: this});
-		return true;
+		// Add/replace new style
+		styleProps[n] = v;
+		
+		// Set relevant properties
+		this.fieldName = "style";
+		this.fieldValue = enyo.Control.domStylesToCssText(styleProps);
+		
+		// Update change event target
+		inEvent.target = this;
+	},
+	trimWhitespace: function(inStr) {
+		inStr = inStr || "";
+		return inStr.replace(/\s/g, "");
 	}
 });
