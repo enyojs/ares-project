@@ -116,7 +116,7 @@ enyo.kind({
 				this.setContainerData(msg.val);
 				break;
 			case "render":
-				// Add "$app" for image path (src attribute) resolution when the app is running into Ares Designer.
+				// Add "$app" to enyo.path for image path (src attribute) resolution when the app is running into Ares Designer.
 				enyo.path.addPath("app", enyo.path.rewrite("$enyo/.."));
 
 				this.renderKind(msg.val);
