@@ -24,8 +24,20 @@ var shell = require("shelljs"),
 	var templates = {};
 
 	function Generator(config, next) {
+		// optionnal application libraries
+		var libs = config.libs || [];
+		config.libs = libs.filter(function(lib) {
+			// Each library need to provide a unique "id",
+			// a "description" (which does not need to be
+			// unique), plus either a "zipfiles"(which is
+			// an {Array} of ZIP-files descriptor) and/or
+			// a "files" (which is an {Array} of files
+			// descriptor)
+			return lib.id && lib.description && (lib.zipfiles || lib.files);
+		});
+
 		this.config = config;
-		log.level = this.config.level || 'http';
+		log.level = config.level || 'http';
 		this.objectId = objectCounter++;
 		log.verbose("Generator()", "config:", this.config);
 
@@ -94,16 +106,25 @@ var shell = require("shelljs"),
 			}
 		},
 
-		list: function(next) {
-			var keys = Object.keys(templates);
-			var answer = [];
-			keys.forEach(function(key) {
-				answer.push(templates[key]);
+		getConfig: function(next) {
+			var config = {};
+			config.templates = templates.map(function(template) {
+				return {
+					id: template.id,
+					description: template.description,
+					libs: template.libs
+				};
 			});
-			next(null, answer);
+			config.libs = this.config.libs.map(function(lib) {
+				return {
+					id: lib.id,
+					description: lib.description
+				};
+			});
+			next(null, config);
 		},
 
-		generate: function(templateId, substitutions, destination, options, next) {
+		generate: function(templateId, libs, substitutions, destination, options, next) {
 			log.info("generate()", "using:",  templateId);
 			var tmpl = templates && templates[templateId];
 			if (!tmpl) {
@@ -113,10 +134,32 @@ var shell = require("shelljs"),
 			tmpl.zipfiles = tmpl.zipfiles || [];
 			tmpl.files = tmpl.files || [];
 
+			// extend built-in substitutions using plugin-provided ones
+			/*
+			log.verbose("generate()", "tmpl.substitutions:", tmpl.substitutions);
+			if (tmpl.substitutions) {
+				var sm = Object.keys(substitutions).concat(Object.keys(tmpl.substitutions));
+				sm.forEach(function(m) {
+					var s = substitutions[m],
+					    ts = tmpl.substitutions[m];
+					if (Array.isArray(ts)) {
+						if (Array.isArray(s)) {
+							s = s.concat(ts);
+						} else {
+							s = ts;
+						}
+					}
+					substitutions[m] = s;
+				});
+			}
+			 */
+			log.info("generate()", "substitutions:", substitutions);
+
 			// Process all the files
 			async.series([
 				async.forEachSeries.bind(this, tmpl.zipfiles, processZipFile.bind(this)),
 				async.forEachSeries.bind(this, tmpl.files, processFile.bind(this)),
+				async.forEachSeries.bind(this, libs, addLib.bind(this)),
 				performSubstitution.bind(this, substitutions, options, destination)
 			], notifyCaller.bind(this));
 
@@ -143,6 +186,15 @@ var shell = require("shelljs"),
 				], next);
 			}
 			
+			function addLib(libId, next) {
+				log.info("generate#addLib()", "Adding library " + libId);
+				var lib = this.config.libs..filter
+				async.series([
+					async.forEachSeries.bind(this, lib.zipfiles, processZipFile.bind(this)),
+					async.forEachSeries.bind(this, lib.files, processFile.bind(this))
+				], next);
+			}
+
 			function notifyCaller(err) {
 				if (err) {
 					next(err);
@@ -283,14 +335,20 @@ var shell = require("shelljs"),
 				substitutions.forEach(function(substit) {
 					var regexp = new RegExp(substit.fileRegexp);
 					if (regexp.test(file)) {
+						log.verbose("performSubstitution()", "substit:", substit, "on file:", file);
 						var filename = path.join(workDir, file);
 						if (substit.json) {
 							log.verbose("performSubstitution()", "Applying JSON substitutions to: " + file);
 							applyJsonSubstitutions(filename, substit.json);
 						}
+						//FIXME: to refactor: sed is UNIX-only, rather use Javascript's replace
 						if (substit.sed) {
 							log.verbose("performSubstitution()", "Applying SED substitutions to: " + file);
 							applySedSubstitutions(filename, substit.sed);
+						}
+						if (substit.vars) {
+							log.verbose("performSubstitution()", "Applying VARS substitutions to: " + file);
+							applyVarsSubstitutions(filename, substit.vars);
 						}
 					}
 				});
@@ -301,7 +359,7 @@ var shell = require("shelljs"),
 
 		function applyJsonSubstitutions(filename, values) {
 			var modified = false;
-			var content = shell.cat(filename);
+			var content = fs.readFileSync(filename);
 			content = JSON.parse(content);
 			var keys = Object.keys(values);
 			keys.forEach(function(key) {
@@ -316,10 +374,23 @@ var shell = require("shelljs"),
 			}
 		};
 		
+		//FIXME: to refactor: sed is UNIX-only, rather use Javascript's replace
 		function applySedSubstitutions(filename, changes) {
 			changes.forEach(function(change) {                  // TODO: move to asynchronous processing
 				shell.sed('-i', change.search, change.replace, filename);
 			});
+		};
+		
+		function applyVarsSubstitutions(filename, changes) {
+			// TODO: move to asynchronous processing
+			log.verbose("applyVarsSubstitutions()", "substituting variables in '" + filename + "'");
+			var content = fs.readFileSync(filename, "utf8" /*force String return*/);
+			Object.keys(changes).forEach(function(key) {
+				var value = changes[key];
+				log.silly("applyVarsSubstitutions()", "key=" + key + " -> value=" + value);
+				content = content.replace("\$\{" + key + "\}", value);
+			});
+			fs.writeFileSync(filename, content, "utf8");
 		};
 	}
 
