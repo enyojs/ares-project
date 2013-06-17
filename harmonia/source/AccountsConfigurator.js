@@ -12,7 +12,7 @@ enyo.kind({
 		{kind: "FittableRows", classes:"ares-phonegap-config", fit: true, components: [
 			{kind: "FittableColumns", fit: true, components: [
 				{kind: "ProviderList", name: "accountsList", selector: ["auth"], onSelectProvider: "handleSelectProvider"},
-				{name: "authPanel", classes: "ares_harmonia_authPanel"}
+				{name: "authPanel", classes: "ares_harmonia_authPanel ares_harmonia_providerItems"}
 			], onUpdateAuth: "handleUpdateAuth"},
 		]},
 		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
