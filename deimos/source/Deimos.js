@@ -154,16 +154,6 @@ enyo.kind({
 		this.$.kindPicker.render();
 		this.setEdited(false);
 	},
-	//* When a drag starts in the palette, notify Designer and ComponentView
-	paletteDragstart: function(inSender, inEvent) {
-		inEvent = enyo.mixin(inEvent.config, {aresId: this.generateNewAresId()});
-		this.$.designer.enterCreateMode(inEvent);
-		this.$.componentView.setCreateMode(true);
-	},
-	paletteDragend: function(inSender, inEvent) {
-		this.$.designer.leaveCreateMode(inEvent.config);
-		this.$.componentView.setCreateMode(false);
-	},
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
 		var kind = this.kinds[index];

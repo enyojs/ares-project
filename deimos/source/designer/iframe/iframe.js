@@ -145,12 +145,6 @@ enyo.kind({
 			case "prerenderDrop":
 				this.foreignPrerenderDrop(msg.val);
 				break;
-			case "enterCreateMode":
-				this.enterCreateMode(msg.val);
-				break;
-			case "leaveCreateMode":
-				this.leaveCreateMode();
-				break;
 			case "requestPositionValue":
 				this.requestPositionValue(msg.val);
 				break;
@@ -761,25 +755,6 @@ enyo.kind({
 		head.insertBefore(newTag, inElementToReplace);
 		head.removeChild(inElementToReplace);
 	},
-	enterCreateMode: function(inData) {
-		this.setCreatePaletteItem(inData);
-	},
-	leaveCreateMode: function() {
-		this.setCreatePaletteItem(null);
-	},
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	holdOver: function(inEvent) {
 		var container = this.getCurrentDropTarget();
 		
