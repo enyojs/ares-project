@@ -1,4 +1,5 @@
 enyo.depends(
+	"$lib/g11n",
 	"FieldDecorator.js",
 	"DropboxAuthConfig.js",
 	"ProviderList.js",
@@ -6,6 +7,7 @@ enyo.depends(
 	"NamePopup.js",
 	"DeletePopup.js",
 	"RenamePopup.js",
+	"RevertPopup.js",
 	"AccountsConfigurator.js",
 	"BasicAuthConfig.js",
 	"PhonegapAuthConfig.js",

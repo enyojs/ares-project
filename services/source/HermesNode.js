@@ -275,6 +275,25 @@ enyo.kind({
 		return this.getControls().filter( idMatch )[0];
 	},
 
+	/**
+	 * getChildren
+	 * @public
+	 * @param {hermes.Node} inNode
+	 * Update the inNode node content
+	 *
+	 */
+	
+	getChildren: function (inNode) {
+		return this.service.listFiles(inNode.file && inNode.file.id)
+			.response(this, function(inSender, inFiles) {
+				var sortedFiles = inFiles.sort(this.fileNameSort) ;
+				this.updateNodeContent(sortedFiles);
+			})
+			.error(this, function() {
+				this.log("Child nodes not found");
+			});
+	},
+
 	filesToNodes: function(inFiles) {
 		var nodes = [];
 		inFiles.sort(this.fileNameSort); // TODO: Other sort orders
