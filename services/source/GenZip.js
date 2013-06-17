@@ -33,15 +33,6 @@ enyo.kind({
 			this.url = this.config.origin + this.config.pathname;
 			if (this.debug) this.log("url:", this.url);
 		}
-
-		// Populate the repositories on the Ares server
-		for(var repoId in inConfig.projectTemplateRepositories) {
-			var repository = inConfig.projectTemplateRepositories[repoId];
-			repository.id = repoId;
-			if (repository.url) {
-				this.createRepo(repository);		// TODO: handle the answer
-			}
-		}
 	},
 	/**
 	 * @return {Object} the configuration this service was configured by
@@ -50,25 +41,24 @@ enyo.kind({
 		return this.config;
 	},
 	/** @public */
-	getConfig: function() {
+	getSources: function(type) {
 		if (this.debug) this.log();
 
 		var req = new enyo.Ajax({
-			url: this.url + '/config'
+			url: this.url + '/config/sources'
 		});
-		return req.go();
+		return req.go({type: type});
 	},
 	generate: function(options) {
 		if (this.debug) this.log();
 
-		var data = "templateId=" + encodeURIComponent(options.templateId);
+		var data = "sourceIds=" + encodeURIComponent(JSON.stringify(options.sourceIds));
 		data +=	("&substitutions=" + encodeURIComponent(JSON.stringify(options.substitutions)));
-		data +=	("&libs=" + encodeURIComponent(JSON.stringify(options.libs)));
 
 		var userreq = new enyo.Async();
 
 		var req = new enyo.Ajax({
-			url: this.url + '/generate',
+			url: this.url + '/op/generate',
 			method: 'POST',
 			handleAs: "text",
 			postBody: data,
@@ -84,16 +74,5 @@ enyo.kind({
 		});
 		req.go();
 		return userreq;
-	},
-	createRepo: function(repo) {
-		if (this.debug) this.log(repo);
-		var data = "url=" + encodeURIComponent(repo.url);
-
-		var req = new enyo.Ajax({
-			url: this.url + '/template-repos/' + repo.id,
-			method: 'POST',
-			postBody: data
-		});
-		return req.go();
 	}
 });
