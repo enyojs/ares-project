@@ -164,23 +164,46 @@ var shell = require("shelljs"),
 
 			var base = (templatesUrl.substr(0, 4) !== 'http') && path.dirname(templatesUrl);
 
-			newTemplates.forEach(function(entry) {
-				entry.zipfiles = entry.zipfiles || [];
-				entry.zipfiles.forEach(function(zipfile) {
-					if (zipfile.url.substr(0, 4) !== 'http') {
-						zipfile.url = path.resolve(base, zipfile.url);
-					}
-				});
+			//FIXME: project-templats.json can have 'templates' property for template in short period.
+			//       this is related to ENYO-2345, 
+			//       this will be changed in ENYO-2562.
+			if (newTemplates.hasOwnProperty('templates')) {
+				newTemplates.templates.forEach(function(entry) {
+						entry.zipfiles = entry.zipfiles || [];
+						entry.zipfiles.forEach(function(zipfile) {
+							if (zipfile.url.substr(0, 4) !== 'http') {
+							zipfile.url = path.resolve(base, zipfile.url);
+							}
+							});
 
-				entry.files = entry.files || [];
-				entry.files.forEach(function(file) {
-					if (file.url.substr(0, 4) !== 'http') {
-						file.url = path.resolve(base, file.url);
-					}
-				});
+						entry.files = entry.files || [];
+						entry.files.forEach(function(file) {
+							if (file.url.substr(0, 4) !== 'http') {
+							file.url = path.resolve(base, file.url);
+							}
+							});
 
-				templates[entry.id] = entry;
-			});
+						templates[entry.id] = entry;
+						});
+			} else {
+				newTemplates.forEach(function(entry) {
+						entry.zipfiles = entry.zipfiles || [];
+						entry.zipfiles.forEach(function(zipfile) {
+							if (zipfile.url.substr(0, 4) !== 'http') {
+							zipfile.url = path.resolve(base, zipfile.url);
+							}
+							});
+
+						entry.files = entry.files || [];
+						entry.files.forEach(function(file) {
+							if (file.url.substr(0, 4) !== 'http') {
+							file.url = path.resolve(base, file.url);
+							}
+							});
+
+						templates[entry.id] = entry;
+						});
+			}
 			next(null, {done: true});
 		} catch(err) {
 			next(new Error("Unable to parse remote template definition. error=" + err.toString()));
@@ -248,11 +271,16 @@ var shell = require("shelljs"),
 
 	function prefix(item, options, srcDir, dstDir, next) {
 		log.verbose("generate#prefix()", "item:", item);
+		//FIXME: blocked prfix check condition since ares-webos-sdk still use zip files 
+		//       doesn't have prefixToAdd or prefixToRemove like webos-app-config.zip
+		//       which contains appinfo.json file.
+		/*
 		if (!item.prefixToRemove && !item.prefixToAdd) {
 			log.verbose("generate#prefix()", "skipping prefix changes");
 			next();
 			return;
 		}
+		*/
 
 		var src = path.join(srcDir, item.prefixToRemove);
 		var dst = path.join(dstDir, item.prefixToAdd);
