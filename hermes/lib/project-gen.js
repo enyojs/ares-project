@@ -255,7 +255,6 @@ var shell = require("shelljs"),
 
 	function prefix(item, options, srcDir, dstDir, next) {
 		log.verbose("generate#prefix()", "item:", item);
-		
 		var src = path.join(srcDir, item.prefixToRemove);
 		var dst = path.join(dstDir, item.prefixToAdd);
 		log.verbose("generate#prefix()", "src:", src, "-> dst:", dst);
