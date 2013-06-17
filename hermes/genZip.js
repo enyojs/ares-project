@@ -13,7 +13,7 @@ var fs = require("fs"),
     temp = require("temp"),
     http = require("http"),
     rimraf = require("rimraf"),
-    ptools = require("./lib/project-gen"),
+    ptools = require("ares-generator"),
     HttpError = require("./lib/httpError"),
     CombinedStream = require('combined-stream');
 

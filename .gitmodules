@@ -28,3 +28,6 @@
 [submodule "node_modules/semver"]
 	path = node_modules/semver
 	url = ../../isaacs/node-semver.git
+[submodule "node_modules/ares-generator"]
+	path = node_modules/ares-generator
+	url = ../../enyojs/ares-generator.git
