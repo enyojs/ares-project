@@ -1,3 +1,7 @@
+/**
+ * Kind to manage the life cycle of building a mobile application using 
+ * the service Phonegap build.
+ */
 enyo.kind({
 	name: "Phonegap.Build",
 	kind: "enyo.Component",
@@ -10,7 +14,7 @@ enyo.kind({
 		 name: "buildStatusPopup"
 		}
 	],
-	debug: true,
+	debug: false,
 	/**
 	 * @private
 	 */
@@ -229,7 +233,7 @@ enyo.kind({
 	},	
 
 	/**
-	 * This function send an Ajax request to node.js in order to get all the
+	 * This function send an Ajax request to Node.js in order to get all the
 	 * details about the project built in Phongap platform.
 	 * 
 	 * @param  {Object}   project contain informations about the Ares project
@@ -270,8 +274,9 @@ enyo.kind({
 		});
 		req.go(); 
 	},
+	
 	/**
-	 * show the pop-up containing informations about the previous  build of the 
+	 * Show the pop-up containing informations about the previous  build of the 
 	 * selected project from the project list view.
 	 * 
 	 * @param  {Object}   project contain a description about the current selected
@@ -284,6 +289,7 @@ enyo.kind({
 		this.$.buildStatusPopup.showPopup(project, appData.user);
 		next();
      },
+	
 	/**
 	 * Store relevant user account data 
 	 * @param {Object} user the PhoneGap account user data
@@ -419,11 +425,11 @@ enyo.kind({
 
 	/**
 	 * Communicate with Phonegap build in order to get the curent status of the
-	 * built project. This status are showen in a Pop-up defined in the file
-	 * BuildStatusUI.js
+	 * built project for all targeted platforms. This status are showen in a 
+	 * Pop-up defined in the file BuildStatusUI.js
 	 * 
 	 * @param  {Object}   project contain a description about the current selected
-	 *                          project
+	 *                            project
 	 * @param  {Function} next    is a CommonJS Callback
 	 * @public
 	 */
@@ -602,8 +608,8 @@ enyo.kind({
 	},
 
 	/**
-	 * Create a file in the target repository of the project form a multipart/form
-	 * data.
+	 * Create a the built application file in the target directory of the project.
+	 *
 	 * 
 	 * @param  {Object}   project contain a description about the current selected
 	 *                            project
@@ -716,11 +722,12 @@ enyo.kind({
 	       },next);
 	
 		/**
-		 * Check continuously the build status of the build in a targeted mobile platform on Phongap  build
-		 * service and launch the appropriate action when the returned status of the build is
+		 * Check continuously the build status of the build in a targeted mobile
+		 * platform on Phongap  build service and launch the appropriate action 
+		 * when the returned status of the build is
 		 * "complete" or "error". 
-		 * @param  {Object}   project  contain a description of the current selected
-		 *                             project
+		 * @param  {Object}   project  contain a description of the current 
+		 *                             selected project
 		 * @param  {String}   platform targeted platfrom for the build
 		 * @param  {Object}   appData  meta-data on the build of the actuel
 		 *                             project
@@ -772,8 +779,8 @@ enyo.kind({
 	    		], next);	    			
 			}
 			/**
-			 * Launch the appropirate action when an exception occure or when the status
-			 * is no longer pending.
+			 * Launch the appropirate action when an exception occure or when 
+			 * the status is no longer in the pending state.
 			 * @param  {Object} err 
 			 * @private
 			 */
@@ -793,9 +800,11 @@ enyo.kind({
 			}
 
 			/**
-			 * [ description]
-			 * @param  {Object}   project  contain a description of the current selected
-			 *                             project
+			 * Create the URL to send the build request to Node.js
+			 * This URL contain the data to create the packaged file name.
+			 *  
+			 * @param  {Object}   project  contain a description of the current 
+			 *                             selected project
 			 * @param  {String}   folderId unique identifier of the project in Ares
 			 * @param  {String}   platform targeted platfrom for the build
 			 * @param  {Object}   appData  meta-data on the build of the actuel
@@ -835,14 +844,15 @@ enyo.kind({
 			}
 
 			/**
-			 * Send an Ajax request to Node.js in order to initiate the download of an
-			 * application in a specific mobile platform.
+			 * Send an Ajax request to Node.js in order to initiate the download 
+			 * of an application in a specific mobile platform.
 			 * 
-			 * @param  {Object}   project contain a description about the current selected
-			 *                          project
-			 * @param  {Object}   urlSuffix   is a url suffixe that contains: AppID, the
-			 *                            targeted build platform, an the title of the
-			 *                            application.
+			 * @param  {Object}   project contain a description about the 
+			 *                            current selected project
+			 * @param  {Object}   urlSuffix   is a url suffixe that contains:
+			 *                                the appId, the targeted build 
+			 *                                platform, the title of the 
+			 *                                application and its version.
 			 * @param  {Function} next    is a CommunJS callback.
 			 * @private
 			 */
@@ -863,9 +873,14 @@ enyo.kind({
 
 				//Handling a successfull response
 				req.response(this, function(inSender, inData) {
-					if (this.debug) this.log("response: received " + inData.length + " bytes typeof: " + (typeof inData));
+					if (this.debug){
+						this.log("response: received " + inData.length + 
+							" bytes typeof: " + (typeof inData));
+					}
 					var ctype = req.xhrResponse.headers['content-type'];
-					if (this.debug) this.log("response: received ctype: " + ctype);
+					if (this.debug){
+						this.log("response: received ctype: " + ctype);
+					}
 					next(null, {content: inData, ctype: ctype});			
 				});
 
@@ -896,6 +911,7 @@ enyo.kind({
 
 	/**
 	 * Generate PhoneGap's config.xml on the fly
+	 * 
 	 * @param {Object} config PhoneGap Build config, as a Javascript object
 	 * @return {String} or undefined if PhoneGap build is disabled for this project
 	 * @private
