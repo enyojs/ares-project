@@ -7,147 +7,25 @@ body {
 	margin-top: 48px;
 }
 
-.ares-panels > * {
-	width: 100%;
-	height: 100%;
+.ares-content-panel {
 	padding: 10px;
 	box-sizing:border-box;
 }
 
-.ares-panels > * > * {
-	width: 100%;
-	height: 100%;
+.ares-content-panel > div {
+	position:relative;
 	border: 1px solid #555;
 	-moz-box-shadow: 0 0 20px rgba(0,0,0,0.6);
 	-webkit-box-shadow: 0 0 20px rgba(0,0,0,0.6);
 	box-shadow: 0 0 20px rgba(0,0,0,0.6);
 	border-radius: 5px;
-	position:relative;
 }
 
-/**/
-
-.ares-groupbox-item-key, .ares-groupbox-item-value {
-	width: 50%;
-	display: inline-block;
+.ares-full-display {
+	width: 100%;
+	height: 100%;
 }
 
-.ares-waitpopup {
-	margin-left: auto;
-	margin-right: auto;
-	width: 20%; 
-}
-/**/
-.ares_harmonia_providerList {
-	width: 30%;
-	background-color: transparent;
-    border-right: 1px solid #999999;
-}
-.ares_harmonia_providerItems {
-	padding: 6px;
-}
-.ares_harmonia_authPanel {
-	padding: 6px;
-	width: 70%;
-}
-.ares_harmonia_toolBar {
-	height: 64px;
-	vertical-align: middle;
-	padding: 0px;
-	border: 0px;
-}
-/**/
-.ares_deimos_left {
-	width: 280px;
-}
-.ares_deimos_right {
-	width: 340px;
-}
-.ares_deimos_componentView {
-	height: 200px;
-}
-.ares_deimos_code {
-	height: 240px;
-}
-/**/
-.ares_phobos_left {
-	width: 280px;
-}
-.ares_phobos_right {
-	width: 280px;
-}
-.ares_phobos_autocomp {
-	position: absolute;
-	z-index: 100;
-	width: 140px;
-	height: 0px;
-	padding: 0px;
-	border: 0px;
-}
-.ares_phobos_autocomp_select {
-	z-index: 100;
-	width: 140px;
-	display: block;
-	background-color: white;
-	background-position: initial initial;
-	background-repeat: initial initial;
-}
-.ares_phobos_findpop {
-	width: 300px;
-}
-
-/**/
-.border {
-	background-color: whiteSmoke;
-	border: 1px solid #EEE;
-	border: 1px solid rgba(0, 0, 0, 0.4);
-	/**/
-	-webkit-border-radius: 4px;
-	-moz-border-radius: 4px;
-	border-radius: 4px;
-	/**/
-	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-}
-.panel {
-	position: relative;
-	min-height: 20px;
-	padding: 19px;
-	box-sizing: border-box;
-}
-
-
-#ares_projectView_projectWizardPopup {
-    z-index: 140;
-
-}
-
-#ares_projectView_projectWizardPopup_projectWizard_selectDirectoryPopup {
-    z-index: 145;
-
-}
-
-.ares_projectview_label {
-	display: inline;
-	font-weight: bold;
-	padding-right: 4px;
-}
-
-.phobos-find-label {
-	line-height: 37px;
-	font-weight: bold;
-	text-align: right;
-	margin-right: 4px;
-}
-
-.phobos-find-field {
-	width: 200px;
-}
-
-.ares-scale-background {
-	background-size: 100%;
-}
 .ares-top-toolbar{ 
 	border-right: 0px;
     width: 100%;
@@ -166,11 +44,6 @@ body {
 	overflow:auto; 
 	margin:0px; 
 	padding:0px 0px 0px 15px;
-}
-
-.enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-docbar-tabs {
-	margin-top: 0px;
-	margin-bottom: 0px;
 }
 
 .ares-tab {
@@ -192,6 +65,7 @@ body {
 	height:24px;
 	color:#999999;
 }
+
 .ares-tab.active {
 	-o-box-shadow: inset 0px 0px 40px 0px #000000; 
     -moz-box-shadow: inset 0px 0px 40px 0px #000000;
@@ -202,12 +76,11 @@ body {
     border:none;
 }
 
-
 .ares-tab-label {
 	display: inline-block;
 }
 
-.onyx-toolbar .ares-doc-close {
+.ares-tab > .ares-doc-close {
 	height: 22px;
 	width: 22px;
 	background-size: 100%;
@@ -222,49 +95,14 @@ body {
 
 /* Why z-index: 11? Because otherwise, on Opera, parts of the editor show through */
 .ares-files-slider {
-	height: 100%;
-	width: 100%;
 	z-index: 11;
 	-moz-box-shadow: 0 0 20px rgba(0,0,0,0.6);
 	-webkit-box-shadow: 0 0 20px rgba(0,0,0,0.6);
 	box-shadow: 0 0 20px rgba(0,0,0,0.6);
 }
 
-.ares-actionpopup {
-	text-align: center;
-	padding: 20px;
-}
-
-.ares-title {
-	font-size: 19px;
-	font-weight: bold;
-}
-
-.ares-message {
-	padding: 8px;
-	vertical-align: middle;
-}
-
 .ares-padleft {
 	padding-left: 8px;
-}
-
-.enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-filedrawer {
-	margin-top: 0px;
-	margin-bottom: 0px;
-}
-
-.file-chooser-input{
-	width: 470px;
-}
-
-
-.enyo-fittable-columns-layout.enyo-stretch > .onyx-grabber {
-	height: 27px;
-	-webkit-transform:rotate(90deg);
-	-ms-transform:rotate(90deg);
-	transform:rotate(90deg);
-	padding-top:40px;
 }
 
 
@@ -316,7 +154,8 @@ body {
 }
 
 .onyx-picker{ 
-	padding:0px;z-index:10; 
+	padding:0px;
+	z-index:10;
 	text-align:left; 
 	background-color:#FFFFFF; 
 	font-size:13px; 
@@ -343,10 +182,10 @@ body {
 .onyx-item { padding:10px; line-height: 13px; }
 
 .onyx-input-decorator {
-	overflow: visible; 
-    position: relative; 
-    background-color: #CCCCCC;  
-    padding: 5px 5px 3px 8px; 
+	overflow: visible;
+    position: relative;
+    background-color: #CCCCCC;
+    padding: 5px 5px 3px 8px;
     border: 1px solid #CCCCCC;
     -moz-border-radius: 6px;
     -webkit-border-radius: 6px;
@@ -354,22 +193,33 @@ body {
     box-shadow: 0 1px 0 #F2F2F2, 0 -1px 0 #CCCCCC;
 }
 
-.onyx-input-decorator > input { font-size: 13px; border:none; background:none; height:20px;  color:#000000; width:200px; outline:none;}
+.onyx-input-decorator > input {
+	font-size: 13px;
+	border:none;
+	background:none;
+	height:20px;
+	color:#000000;
+	width:200px;
+	outline:none;
+}
 
-.onyx-groupbox >* {
+.onyx-groupbox > div {
 	font-size: 13px;
 }
 
-.ares-bordered-toolbar{
-	margin-top:8px;
-	text-align: right;
+.enyo-fittable-columns-layout.enyo-stretch > .onyx-grabber {
+	height: 27px;
+	-webkit-transform:rotate(90deg);
+	-ms-transform:rotate(90deg);
+	transform:rotate(90deg);
+	padding-top:40px;
 }
 
-.ares-toolbar {
+/*end of onyx items*/
+
+.ares-right-toolbar {
+	margin-top:8px;
 	text-align: right;
-	background-image: none;
-	background-color: #4C4C4C;
-	border: none;
 }
 
 .ares-label {
@@ -377,7 +227,7 @@ body {
 	padding-left: 8px;
 }
 
-.ares-fixed-label{
+.ares-fixed-label {
 	min-width: 82px;
 	padding: 0 4px;
 	text-align: right;
@@ -386,24 +236,24 @@ body {
 	overflow: hidden;
 }
 
-.ares-fixed-input{
-	width: 161px; 
-}
-.ares-small-label{
+.ares-small-label {
 	min-width: 60px;
 	width: 60px;
-}
-.ares-bullet-label {
-	margin-left: 40px;
 }
 
 .ares-row {
 	padding: 3px 0;
 }
-.ares-more-row{
+
+.ares-more-row {
 	padding: 10px 0;
 }
-.ares-drawer{
+
+.ares-row .onyx-picker-decorator{
+	display: inline-block;
+}
+
+.ares-drawer {
 	margin-top: 9px;
 	background-color: #eaeaea;
 	border-radius: 3px;
@@ -411,12 +261,8 @@ body {
 	text-align: right;
 }
 
-.ares-drawer>*{
+.ares-drawer>div {
 	margin-right: 5px;
-}
-
-.ares-row .onyx-picker-decorator{
-	display: inline-block;
 }
 
 .ares-drawer:before{
@@ -430,86 +276,39 @@ body {
     left: 9px;
 }
 
-p.break{
-	padding: 1px 0;
-}
-
-.ares-classic-popup {
-	box-shadow:0px 0px 10px #000000;
-	background-color:#FFFFFF;
-	-moz-border-radius:6px;
-	-webkit-border-radius:6px;
-	border-radius:6px;
-	color: #000000;
-	padding:0px;
-}
-
-.ares-classic-popup > .title {
-	height: 48px;
-	line-height: 48px;
-	font-size: 16px;
-	padding-left: 20px;
-	background-color: #CCCCCC;
-	text-transform: uppercase;
-	border-bottom: 2px solid #999999;
-	border-radius: 6px 6px 0px 0px;
-}
-
-.ares-classic-popup >.title.left-align{ padding-left: 6px; }
-
-.ares-classic-popup > .bottom-toolbar {
-	position: relative;
-	background-image: none;
-	background-color: #CCCCCC;
-	padding: 7px;
-	border:0px;
-	border-top: 1px solid #999999;
-	-moz-border-radius:0px 0px 6px 6px;
-	-webkit-border-radius:0px 0px 6px 6px;
-	border-radius:0px 0px 6px 6px;
-}
-
-.bottom-toolbar>.onyx-button { background-color: transparent; border: 1px solid #999999; margin:0px;}
-.ares-small-popup {width:320px; height:150px; padding: 5px 10px;}
-.ares-small-popup-details { position:relative; width: 300px; word-wrap: break-word;}
-.ares-small-popup-details { padding-top: 10px; position:relative; }
-.ares-small-popup-details { border: none; color:#000000; background: transparent; height: auto; padding-left:10px; text-align: left; }
-/*error popup*/
-.ares-error-popup { width:340px; min-height:170px; padding: 5px 10px;}
-.ares-error-text { width: 98%; margin:5px 0px; height: 105px; resize: vertical;}
-.ares-error-details .button { padding-top: 10px; position:relative; }
-.ares-error-details .label { border: none; color:#000000; background: transparent; height: auto; padding-left:10px; text-align: left; }
-.ares-error-drawer {padding-top:3px;}
-
-.bottom-toolbar>.onyx-button.right {position: absolute; right: 7px; }
-.ares-masked-content-popup { background: none; box-shadow: none; border:none;}
-
 /*file chooser*/
 .ares-filechooser, .ares-phonegap-config { height: 400px; width: 625px; }
+
 .ares-filechooser-header { padding: 0 0.5em; vertical-align: middle; }
-.ares-filechooser-footer { vertical-align: middle; background: #FFFFFF; }
+
+.ares-filechooser-footer { vertical-align: middle; background: #ffffff; }
+
 .ares-create-sources {
     height: 24%;
     width: 100%;
     text-align: center;
     text-transform: uppercase;
 }
+
 .ares-left-pane-file-chooser{
 	background-color:#FFFFFF;
 }
+
 .ares-left-pane-file-chooser > .ares_harmonia_providerList{
     height: 245px;
     width: 100%;
 }
 
-.ares-file-choser-row { border-top: 1px solid #999999;}
+.ares-file-choser-row { border-top: 1px solid #999999; }
+
 .ares-file-chooser-label { min-width: 127px; }
-.ares-content-popup { width:409px; height:240px; padding: 5px 10px; }
 
 /*Project properties popup*/
 .ares-project-properties { height: 215px; width: 590px; padding: 5px 10px; margin-top: 15px; }
+
 .ares-radio-group{ padding-top: 7px; }
-.ares-radio-group>button{
+
+.ares-radio-group>button {
 	line-height: 30px;
 	padding: 0px;
 	margin:0px;
@@ -518,7 +317,8 @@ p.break{
 	border: 1px solid #999999;
 	width: 182px;
 }
-.ares-radio-group>button.active{
+
+.ares-radio-group>button.active {
 	background-image: none;
 	background-color: #0088C2;
 	color: #FFFFFF;
@@ -526,9 +326,9 @@ p.break{
 	box-shadow: inset 0px 0px 15px #0B4063;	
 }
 
-.ares-bottom-check{
+.ares-bottom-check {
 	height: 8px;
-	width: 0px;
+	width: 0;
 	position: relative;
 	border-bottom: 8px solid #EAEAEA;
 	border-left: 8px solid transparent;
@@ -537,23 +337,46 @@ p.break{
 	right: 43%;
 }
 
-.ares-align-right{ text-align: right;}
-.ares-align-right>button{margin-left:5px;}
-input.ares-small-input{	width: 75px;}
-.ares-margin-right{ margin-right: 3px;}
-.small-picker{ width: 77px; }
-.large-picker{ width: 150px; }
-.middle-width{ width: 140px; }
-.very-large-width{ width: 217px; }
-div.large-fixed{ width: 80%; }
+p.break { padding: 1px 0; }
 
-.ares-large-content{ height: 390px; }
-.ares-datas>div:not([class="onyx-groupbox-header"]) {cursor:pointer; background-color:rgb(230, 228, 228);; }
-.ares-datas>div.hover { background-color:#EEEEEE; }
-.ares-datas>.active { background-color:#AAAAAA; box-shadow: inset 0px 0px 30px rgba(0,0,0,0.3); }
+.file-chooser-input { width: 470px; }
+
+.ares-align-right { text-align: right; }
+
+.ares-align-right>button { margin-left:5px; }
+
+input.ares-small-input { width: 75px;}
+
+.ares-margin-right { margin-right: 3px;}
+
+.small-picker { width: 77px; }
+
+.large-picker { width: 150px; }
+
+.middle-width { width: 140px; }
+
+.very-large-width { width: 217px; }
+
+div.large-fixed { width: 80%; }
+
+.ares-large-content { height: 390px; }
+
+.ares-datas>div:not([class="onyx-groupbox-header"]) { cursor:pointer; background-color:rgb(230, 228, 228);}
+
+.ares-datas>div.hover { background-color:#eeeeee; }
+
+.ares-datas>.active {
+	background-color:#aaaaaa;
+	box-shadow: inset 0px 0px 30px rgba(0,0,0,0.3); }
+
 .ares-group-box>div {
 	padding-left: 3px;
 	line-height: 1.9;
 }
-.ares-group-box>.onyx-input-decorator{ box-shadow: none; }
 
+.ares-group-box>.onyx-input-decorator { box-shadow: none; }
+
+.ares-groupbox-item-key, .ares-groupbox-item-value {
+	width: 50%;
+	display: inline-block;
+}
