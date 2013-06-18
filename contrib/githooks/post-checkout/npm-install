@@ -1,0 +1,10 @@
+#!/bin/bash
+
+case "${1}" in
+    --about )
+        echo "Install npm modules."
+        ;;
+    * )
+		npm -d install
+        ;;
+esac
