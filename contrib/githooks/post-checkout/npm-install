@@ -5,6 +5,6 @@ case "${1}" in
         echo "Install npm modules."
         ;;
     * )
-		TMP=/home/domi/tmp PATH=$ENYOBIN:$PATH npm -d install
+		npm -d install
         ;;
 esac
