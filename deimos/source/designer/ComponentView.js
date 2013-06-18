@@ -15,6 +15,9 @@ enyo.kind({
 		onItemDrop: "itemDrop",
 		onItemDragend: "itemDragend"
 	},
+	published: {
+		createMode: false
+	},
 	style: "position: relative;",
 	components: [
 		{kind: "Scroller", classes: "enyo-fit", components: [
@@ -82,6 +85,11 @@ enyo.kind({
 			dropTargetId,
 			beforeItem,
 			beforeId = null;
+
+		if ((this.createMode === true) && this.selection) {
+			this.unHighlightItem(this.selection);
+			this.selection = null;
+		}
 		
 		if (!this.isValidDropTarget(target)) {
 			this.resetDropDetails();
@@ -371,7 +379,12 @@ enyo.kind({
 			return true;
 		}
 		
+		// Set drag data
 		inEvent.dataTransfer.setData("ares/moveitem", enyo.json.codify.to(inEvent.originator.comp));
+		
+		// Hide the drag image ghost
+		inEvent.dataTransfer.setDragImage(this.createDragImage(), 0, 0);
+
 		return true;
 	},
 	dragover: function(inSender, inEvent) {
@@ -400,6 +413,10 @@ enyo.kind({
 		}
 		this.doItemDragend(inEvent);
 		return true;
+	},
+	createDragImage: function() {
+		this.dragImage = document.createElement();
+		return this.dragImage;
 	}
 })
 

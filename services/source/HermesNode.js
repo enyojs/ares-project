@@ -1,30 +1,104 @@
 /**
  * Represents a directory or a file in {HermesFileTree}
  * 
- * @class ares.Node
+ * @class hermes.Node
  * @augments {enyo.Node}
  */
 
 enyo.kind({
-	name: "ares.Node",
+	name: "hermes.Node",
 	kind: "Node",
 	events: {
+		onItemDown: "",
+		onItemDragstart: "",
+		onItemDragenter: "",
+		onItemDragover: "",
+		onItemDragleave: "",
+		onItemDrop: "",
+		onItemDragend: "",
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
 		onAdjustScroll: ""
 	},
 	published: {
-		service: null
+		service: null,
+		
+		// allows subnodes to be draggable or not (not per default).
+		dragAllowed: false
 	},
-
+	handlers: {
+		ondown: "down",
+		ondragstart: "dragstart",
+		ondragenter: "dragenter",
+		ondragover: "dragover",
+		ondragleave: "dragleave",
+		ondrop: "drop",
+		ondragend: "dragend"
+	},
+	attributes: {
+		dropTarget: "true"
+	},
+	
 	// expandable nodes may only be opened by tapping the icon; tapping the content label
 	// will fire the nodeTap event, but will not expand the node.
 	onlyIconExpands: true,
-
+	
 	debug: false,
-
-
+	
+	down: function(inSender, inEvent) {
+		this.doItemDown(inEvent);
+		return true;
+	},
+	dragstart: function(inSender, inEvent) {
+		if(!inEvent.dataTransfer) {
+			return true;
+		}
+		
+		this.doItemDragstart(inEvent);
+		return true;
+	},
+	dragenter: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
+		}
+		
+		this.doItemDragenter(inEvent);
+		return true;
+	},
+	dragover: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
+		}
+		
+		this.doItemDragover(inEvent);
+		return true;
+	},
+	dragleave: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
+		}
+		
+		this.doItemDragleave(inEvent);
+		return true;
+	},
+	drop: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
+		}
+		
+		this.doItemDrop(inEvent);
+		return true;
+	},
+	dragend: function(inSender, inEvent) {
+		if (!inEvent.dataTransfer) {
+			return true;
+		}
+		
+		this.doItemDragend(inEvent);
+		return true;
+	},
+	
 	// Note: this function does not recurse
 	updateNodes: function() {
 		this.startLoading(this);
@@ -93,8 +167,12 @@ enyo.kind({
 					break ;
 
 				case 1: // file added
-				    if (this.debug) this.log(rfiles[i].name + " was added") ;
-					newControl = this.createComponent( rfiles[i], {kind: "ares.Node"} ) ;
+				  if (this.debug) this.log(rfiles[i].name + " was added") ;
+					if (this.dragAllowed) {
+						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", dragAllowed: true, attributes: {draggable : true}} ) ;
+					} else {
+						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node"} ) ;
+					}
 					if (this.debug) this.log("updateNodeContent created ", newControl) ;
 					newControl.setService(this.service);
 					nfiles = this.getNodeFiles() ;
@@ -104,10 +182,17 @@ enyo.kind({
 					//	inNode.controls.splice(i+4, 0, justAdded);
 					//}
 				    modified = 1;
+				/*
+				 FIXME: allow to manually change
+				 PhoneGap parameters from Ares.
+				 DEMANDS to relad Ares after each
+				 project.json manual change
+
 					if (nfiles[i].name === '$project.json') {
 						// project.json file is internal to Ares
 						nfiles[i].hide();
 					}
+				 */
 					i++ ;
 					break ;
 			}
@@ -164,7 +249,7 @@ enyo.kind({
 	 * getNodeNamed
 	 * @public
 	 * @param {String} name
-	 * @return a ares.Node for a file or a directory named passed in parameter
+	 * @return a hermes.Node for a file or a directory named passed in parameter
 	 *
 	 */
 
@@ -179,7 +264,7 @@ enyo.kind({
 	 * getNodeWithId
 	 * @public
 	 * @param {String} id
-	 * @return a ares.Node for a file or a directory id passed in parameter
+	 * @return a hermes.Node for a file or a directory id passed in parameter
 	 *
 	 */
 
@@ -206,7 +291,7 @@ enyo.kind({
 	},
 	nodeExpand: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
-
+		
 		var subnode = inEvent.originator;
 		if (this.debug) this.log("nodeExpand called while node Expanded is " + subnode.expanded) ;
 		// update icon for expanded state
@@ -225,7 +310,7 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
-
+	
 	// All parameters are optional.
 	// - toSelectId is optional. refresh will select this entry if specified.
 	//   Nothing is selected otherwise.
@@ -277,6 +362,4 @@ enyo.kind({
 		}
 		this.debug && this.log("refreshTree done") ;
 	}
-
 });
-

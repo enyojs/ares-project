@@ -5,15 +5,17 @@ enyo.kind({
 		onLoginFailed: "",
 		onShowWaitPopup: ""
 	},
-	debug: false,
+	debug: true,
 	/**
 	 * @private
 	 */
 	create: function() {
-		if (this.debug) this.log();
+		
 		this.inherited(arguments);
 		this.config = {};
+
 	},
+
 	/**
 	 * Set Phonegap.Build base parameters.
 	 * 
@@ -34,18 +36,35 @@ enyo.kind({
 			if (this.debug) this.log("url:", this.url);
 		}
 	},
+
 	/**
 	 * @return {Object} the configuration this service was configured by
 	 */
 	getConfig: function() {
 		return this.config;
 	},
+
 	/**
 	 * @return the human-friendly name of this service
 	 */
 	getName: function() {
 		return this.config.name || this.config.id;
 	},
+
+	/**
+	 * Default configuration used when a new project is created.
+	 * The Project configuration is transformed into a config.xml
+	 * file at each build.  It is later expected to be modified by
+	 * the UI kind returned by
+	 * {PhoneGap.Build#getProjectPropertiesKind}.
+	 * 
+	 * @public
+	 */
+	getDefaultProjectConfig: function() {
+		var config = Phonegap.Build.DEFAULT_PROJECT_CONFIG;
+		return config;
+	},
+
 	/**
 	 * Name of the kind to show in the {AresProperties} UI
 	 * @return the Enyo kind to use to set service-specific Ares-wide properties
@@ -61,6 +80,7 @@ enyo.kind({
 	getProjectPropertiesKind: function() {
 		return "Phonegap.ProjectProperties";
 	},
+
 	/**
 	 * @return true when configured, authenticated & authorized
 	 */
@@ -70,6 +90,7 @@ enyo.kind({
 			  this.config.auth.token &&
 			  this.config.auth.keys);
 	},
+
 	/**
 	 * Shared enyo.Ajax error handler
 	 * @private
@@ -84,6 +105,7 @@ enyo.kind({
 		}
 		next(new Error(msg + inError.toString()), details);
 	},
+
 	/**
 	 * Authenticate current user & retreive the associated token
 	 * 
@@ -102,6 +124,7 @@ enyo.kind({
 		};
 		this._getToken(next);
 	},
+
 	/**
 	 * Authorize & then retrieve information about the currently registered user
 	 * 
@@ -129,6 +152,7 @@ enyo.kind({
 			}
 		});
 	},
+
 	/**
 	 * Get a developer token from user's credentials
 	 * @param {Function} next is a CommonJS callback
@@ -169,11 +193,12 @@ enyo.kind({
 					details = response.body;
 				}
 			}
-			if (this.debug) this.error("Unable to get PhoneGap application token (" + inError + ")", "response:", response);
-			next(new Error("Unable to get PhoneGap application token (" + inError + ")"), details);
+			if (this.debug) this.error("Unable to get PhoneGap application token (" + details || inError + ")", "response:", response);
+			next(new Error("Unable to get PhoneGap application token (" + details || inError + ")"));
 		});
 		req.go();
 	},
+
 	/**
 	 * Get a developer account information
 	 * @param {Function} next is a CommonJS callback
@@ -205,6 +230,7 @@ enyo.kind({
 		});
 		req.go({token: this.config.auth.token}); // FIXME: remove the token as soon as the cookie works...
 	},
+
 	/**
 	 * Store relevant user account data
 	 * @param {Object} user the PhoneGap account user data
@@ -239,6 +265,7 @@ enyo.kind({
 
 		ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
 	},
+
 	/**
 	 * Get the key for the given target & id, or the list of keys for the given target
 	 * 
@@ -264,6 +291,7 @@ enyo.kind({
 		if (this.debug) this.log("target:", target, "id:", id, "=> keys:", res);
 		return res;
 	},
+
 	/**
 	 * Set the given signing key for the given platform
 	 * 
@@ -308,6 +336,7 @@ enyo.kind({
 		// Save a new authentication values for PhoneGap 
 		ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
 	},
+
 	/**
 	 * initiates the phonegap build of the given project
 	 * @see HermesBuild.js
@@ -328,18 +357,19 @@ enyo.kind({
 		if (this.debug) this.log("Starting phonegap build: " + this.url + '/build');
 		async.waterfall([
 			enyo.bind(this, this.authorize),
-			enyo.bind(this, this._getProjectData, project),
-			enyo.bind(this, this._getFilesData, project),
+			enyo.bind(this, this._updateConfigXml, project),
+			enyo.bind(this, this._getFiles, project),
 			enyo.bind(this, this._submitBuildRequest, project),
 			enyo.bind(this, this._prepareStore, project),
 			enyo.bind(this, this._store, project)
 		], next);
 	},
+
 	/**
-	 * Collect & check information about current project
+	 * Collect & check information about current project, update config.xml
 	 * @private
 	 */
-	_getProjectData: function(project, userData, next) {
+	_updateConfigXml: function(project, userData, next) {
 		if (!project instanceof Ares.Model.Project) {
 			next(new Error("Invalid parameters"));
 			return;
@@ -347,31 +377,40 @@ enyo.kind({
 		var config = project.getConfig().getData();
 		if (this.debug) this.log("starting... project:", project);
 
-		if(!config || !config.build || !config.build.phonegap) {
+		if(!config || !config.providers || !config.providers.phonegap) {
 			next(new Error("Project not configured for Phonegap Build"));
 			return;
 		}
-		if (this.debug) this.log("appId:", config.build.phonegap.appId);
-		next();
+		if (this.debug) this.log("PhoneGap App Id:", config.providers.phonegap.appId);
+
+		var req = project.getService().createFile(project.getFolderId(), "config.xml", this._generateConfigXml(config));
+		req.response(this, function _savedConfigXml(inSender, inData) {
+			if (this.debug) this.log("Phonegap.Build#_updateConfigXml()", "updated config.xml:", inData);
+			var ctype = req.xhrResponse.headers['x-content-type'];
+			next();
+		});
+		req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
 	},
+
 	/**
 	 * Get the list of files of the project for further upload
 	 * @param {Object} project
 	 * @param {Function} next is a CommonJS callback
 	 * @private
 	 */
-	_getFilesData: function(project, next) {
+	_getFiles: function(project, next) {
 		if (this.debug) this.log("...");
 		var req, fileList = [];
 		this.doShowWaitPopup({msg: $L("Fetching application source code")});
 		req = project.getService().exportAs(project.getFolderId(), -1 /*infinity*/);
-		req.response(this, function(inSender, inData) {
-			if (this.debug) this.log("Phonegap.Build#_getFilesData()", "Got the files data");
+		req.response(this, function _gotFiles(inSender, inData) {
+			if (this.debug) this.log("Phonegap.Build#_getFiles()", "Got the files data");
 			var ctype = req.xhrResponse.headers['x-content-type'];
 			next(null, {content: inData, ctype: ctype});
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
 	},
+
 	/**
 	 * @private
 	 * @param {Object} project
@@ -388,33 +427,36 @@ enyo.kind({
 		var query = {
 			//provided by the cookie
 			//token: this.config.auth.token,
-			title: config.title
+			title: config.title,
+			debug: true
 		};
 
 		// Already-created apps have an appId (to be reused)
-		if (config.build.phonegap.appId) {
-			if (this.debug) this.log("appId:", config.build.phonegap.appId);
-			query.appId = config.build.phonegap.appId;
+		if (config.providers.phonegap.appId) {
+			if (this.debug) this.log("appId:", config.providers.phonegap.appId);
+			query.appId = config.providers.phonegap.appId;
 		}
 
 		// Signing keys, if applicable to the target platform
 		// & if chosen by the app developper.
-		enyo.forEach(enyo.keys(config.build.phonegap.targets), function(target) {
-			var pgTarget = config.build.phonegap.targets[target];
-			if (pgTarget) {
-				if (this.debug) this.log("platform:", target);
-				platforms.push(target);
-				if (typeof pgTarget === 'object') {
-					var keyId = pgTarget.keyId;
-					if (keyId) {
-						keys[target] = enyo.clone(this.getKey(target, keyId));
-						//delete keys[target].title;
-						//if (this.debug) this.log("platform:", target, "keys:", keys);
+		if (typeof config.providers.phonegap.targets === 'object') {
+			enyo.forEach(enyo.keys(config.providers.phonegap.targets), function(target) {
+				var pgTarget = config.providers.phonegap.targets[target];
+				if (pgTarget) {
+					if (this.debug) this.log("platform:", target);
+					platforms.push(target);
+					if (typeof pgTarget === 'object') {
+						var keyId = pgTarget.keyId;
+						if (keyId) {
+							keys[target] = enyo.clone(this.getKey(target, keyId));
+							//delete keys[target].title;
+							//if (this.debug) this.log("platform:", target, "keys:", keys);
+						}
 					}
 				}
-			}
-		}, this);
-		if (enyo.keys(keys).length > 0) {
+			}, this);
+		}
+		if (typeof keys ==='object' && enyo.keys(keys).length > 0) {
 			if (this.debug) this.log("keys:", keys);
 			query.keys = JSON.stringify(keys);
 		}
@@ -427,12 +469,6 @@ enyo.kind({
 			return;
 		}
 
-		// un-comment to NOT submit the ZIP to
-		// build.phonegap.com & rather return the given JSON.
-		// Use a non-JSON string to cause an error on the
-		// server side before submission.
-		//formData.append('testJsonResponse', "make_an_error" /*JSON.stringify({id: config.build.phonegap.appId})*/ );
-
 		// Ask Hermes PhoneGap Build service to minify and zip the project
 		var req = new enyo.Ajax({
 			url: this.url + '/op/build',
@@ -443,7 +479,7 @@ enyo.kind({
 		req.response(this, function(inSender, inData) {
 			if (this.debug) enyo.log("Phonegap.Build#_submitBuildRequest(): response:", inData);
 			if (inData) {
-				config.build.phonegap.appId = inData.id;
+				config.providers.phonegap.appId = inData.id;
 				var configKind = project.getConfig();
 				configKind.setData(config);
 				configKind.save();
@@ -469,8 +505,8 @@ enyo.kind({
 	 * @private
 	 */
 	_prepareStore: function(project, inData, next) {
-		var folderKey = "build." + this.getName() + ".target.folderId",
-		    folderPath = "target/" + this.getName();
+		var folderKey = "build." + this.config.id + ".target.folderId",
+		    folderPath = "target/" + this.config.id;
 		this.doShowWaitPopup({msg: $L("Storing webOS application package")});
 		var folderId = project.getObject(folderKey);
 		if (folderId) {
@@ -491,7 +527,7 @@ enyo.kind({
 	 * @private
 	 */
 	_store: function(project, folderId, appData, next) {
-		var appKey = "build." + this.getName() + ".app";
+		var appKey = "build." + this.config.id + ".app";
 		if (this.debug) this.log("appData: ", appData);
 		project.setObject(appKey, appData);
 		// TODO: the project Model object does not
@@ -500,5 +536,210 @@ enyo.kind({
 		// This is to be fixed as part of the
 		// ENYO-2217 user-story.
 		next();
+	},
+	/**
+	 * Generate PhoneGap's config.xml on the fly
+	 * @param {Object} config PhoneGap Build config, as a Javascript object
+	 * @return {String} or undefined if PhoneGap build is disabled for this project
+	 * @private
+	 * FIXME: define a JSON schema
+	 */
+	_generateConfigXml: function(config) {
+		var phonegap = config.providers.phonegap;
+		if (!phonegap) {
+			this.log("PhoneGap build disabled: will not generate the XML");
+			return undefined;
+		}
+
+		// See http://flesler.blogspot.fr/2008/03/xmlwriter-for-javascript.html
+
+		var str, xw = new XMLWriter('UTF-8');
+		xw.indentation = 4;
+		xw.writeStartDocument();
+		xw.writeComment('***                              WARNING                            ***');
+		xw.writeComment('***            This is an automatically generated document.         ***');
+		xw.writeComment('*** Do not edit it: your changes would be automatically overwritten ***');
+
+		xw.writeStartElement( 'widget' );
+
+		xw.writeAttributeString('xmlns','http://www.w3.org/ns/widgets');
+		xw.writeAttributeString('xmlns:gap','http://phonegap.com/ns/1.0');
+
+		xw.writeAttributeString('id', config.id);
+		xw.writeAttributeString('version',config.version);
+
+		// we use 'title' (one-line description) here because
+		// 'name' is made to be used by package names
+		xw.writeElementString('name', config.title);
+
+		// we have no multi-line 'description' of the
+		// application, so use our one-line description
+		xw.writeElementString('description', config.title);
+
+		xw.writeStartElement( 'icon' );
+		// If the project does not define an icon, use Enyo's
+		// one
+		xw.writeAttributeString('src', phonegap.icon.src || 'icon.png');
+		xw.writeAttributeString('role', phonegap.icon.role || 'default');
+		xw.writeEndElement();	// icon
+
+		xw.writeStartElement( 'author' );
+		xw.writeAttributeString('href', config.author.href);
+		xw.writeString(config.author.name);
+		xw.writeEndElement();	// author
+
+		// skip completelly the 'platforms' tags if we target
+		// all of them
+		if (phonegap.targets && (enyo.keys(phonegap.targets).length > 0)) {
+			xw.writeStartElement('platforms', 'gap');
+			for (var platformName in phonegap.targets) {
+				var platform = phonegap.targets[platformName];
+				xw.writeStartElement('platform', 'gap');
+				xw.writeAttributeString('name', platformName);
+				for (var propName in platform) {
+					xw.writeAttributeString(propName, platform[propName]);
+				}
+				xw.writeEndElement(); // gap:platform
+			}
+			xw.writeEndElement();	// gap:platforms
+		}
+
+		// plugins
+		if (typeof phonegap.plugins === 'object') {
+			for (var pluginName in phonegap.plugins) {
+				xw.writeStartElement('plugin', 'gap');
+				xw.writeAttributeString('name', pluginName);
+				var plugin = phonegap.plugins[pluginName];
+				if (typeof plugin === 'object') {
+					for (var attr in plugin) {
+						xw.writeAttributeString(attr, plugin[attr]);
+					}
+				}
+				xw.writeEndElement(); // gap:plugin
+			}
+		}
+
+		// UI should be helpful to define the features so that
+		// the URL's are correct... I am not sure whether it
+		// is possible to have them enforced by a JSON schema,
+		// unless we hard-code a discrete list of URL's...
+		/*
+		enyo.forEach(phonegap.features, function(feature) {
+			xw.writeStartElement('feature');
+			xw.writeAttributeString('name', feature.name);
+			xw.writeEndElement(); // feature
+		}, this);
+
+		*/
+
+		
+		permissions = Phonegap.Build.DEFAULT_PROJECT_CONFIG.features;
+		this.log ("permissions: ", permissions); 
+		for(var feature in permissions){
+			if (permissions[feature]){
+				xw.writeStartElement('feature');
+				xw.writeAttributeString('name',"http://api.phonegap.com/1.0/"+feature);
+				xw.writeEndElement(); // feature
+			}
+		}
+		
+
+
+		// ...same for preferences
+		for (var prefName in phonegap.preferences) {
+			xw.writeStartElement('preference');
+			xw.writeAttributeString('name', prefName);
+			xw.writeAttributeString('value', phonegap.preferences[prefName]);
+			xw.writeEndElement(); // preference
+		}
+
+		xw.writeEndElement();	// widget
+
+		//xw.writeEndDocument(); called by flush()
+		str = xw.flush();
+		xw.close();
+		if (this.debug) this.log("xml:", str);
+		return str;
+	},
+
+	statics: {
+		DEFAULT_PROJECT_CONFIG: {
+			enabled: false,
+			icon: {
+				src: "icon.png",
+				role: "default"
+			},
+			features: {
+				battery: false,
+				camera: false,
+				contact: false,
+				file: false,
+				geolocation: false,
+				media: false,
+				network: false,
+				notification: false,
+				device: false
+			},
+			preferences: {
+				"phonegap-version": "2.1.0"
+			},
+			plugins: {
+				"ChildBrowser": {
+					version: "2.1.0"
+				}
+			}
+		}
 	}
+});
+
+
+enyo.kind({
+	name: "phongap.configData",
+	statics: {
+		metaData: {
+			id: "",
+			versionCode: "",
+			version: ""
+		},
+		preferences: {
+			phonegapVersion: "2.7.0",
+			orientation: "both",
+			targetDevice: "universal",
+			fullScreen: "true"
+		},
+		features: {
+			battery: "false",
+			camera: "false",
+			contact: "false",
+			file: "false",
+			geolocation: "false",
+			media: "false",
+			network: "false",
+			notification: "false",
+			device: "false"
+		},
+		iosSpecific: {
+			webviewBounce: "true",
+			prerenderedIcon: "false",
+			statusBarStyle: "default",
+			detectDataTypes: "true", //Pg 2.0.0 or above
+			exitOnSuspend: "false",
+			showSplashScreenSpinner: "true",
+			autoHideSplashScreen: "true"
+		},
+		blackBerrySpecific: {
+			disableCursor: "false"
+		},
+		androidSpecific: {
+			minSDK: "7",
+			maxSDK: "",
+			installLocation: "internalOnly",
+			splashScreenDuration: "5000", //Pg 2.1.0 or above
+			loadUrlTimeout: "20000"
+
+		}
+
+
+	}
+
 });

@@ -10,7 +10,7 @@ enyo.kind(
 			height: '800px'
 		},
 
-		classes: "enyo-border-box ares-preview-device",
+		classes: "ares-preview-device",
 
 		//style: " overflow: hidden;",
 

@@ -1,6 +1,7 @@
 enyo.kind({
 	name: "EditorSettings",
 	kind: "onyx.Popup",
+	classes:"ares-classic-popup",
 	events: {
 		onClose: "",
 		onChangeRightPane: "",
@@ -8,14 +9,11 @@ enyo.kind({
 		onSoftTabs: "",
 		onChangeSettings:""
 	},
-	handlers: {
-       // onSelect: "itemSelected"
-    },
    	published: {
 	 	settings: {
 	 		theme:"clouds",
 	 		highlight:false,
-	 		fontsize:16,
+	 		fontsize:12,
 	 		wordwrap:false,
 	 		rightpane:false,
 	 		keys:{ }
@@ -23,7 +21,7 @@ enyo.kind({
 	 	previewSettings: {
 	 		theme:"clouds",
 	 		highlight:false,
-	 		fontsize:16,
+	 		fontsize:12,
 	 		wordwrap:false,
 	 		rightpane:false,
 	 		keys:{ }
@@ -31,116 +29,120 @@ enyo.kind({
 	},
 	SETTINGS_STORAGE_KEY: "com.enyojs.editor.settings",
 	components: [
-		{tag:"h3", content: "Editor Settings"},
-		{kind:"FittableColumns", components: [	
-			{kind:"FittableRows", components: [
-				{classes: "ares-row", components: [
-					{name: "highLightLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "High light active line"},
-					{name: "highLightButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "buttonToggle"}
+		{classes:"title", content: "EDITOR GLOBAL SETTINGS"},
+		{classes:"ace-settings-popup", components: [
+			{kind:"FittableColumns", components: [
+				{kind:"FittableRows", components: [
+					{classes: "ares-row", components: [
+						{name: "highLightLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "High light active line"},
+						{name: "highLightButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "buttonToggle"}
+					]},
+					{classes: "ares-row", components: [
+						{name: "wordWrapLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Word Wrap"},
+						{name: "wordWrapButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "wordWrapToggle"}
+					]},
+					{classes: "ares-row", components: [
+						{name: "rightpane",tag:"label",  classes: "ares-fixed-label ace-label", content: "Right Panel (only for js files)"},
+						{name: "rightPaneButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "rightPaneChanged"}
+					]}
 				]},
-				{classes: "ares-row", components: [
-					{name: "wordWrapLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Word Wrap"},
-					{name: "wordWrapButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "wordWrapToggle"}
-				]},
-				{classes: "ares-row", components: [
-					{name: "rightpane",tag:"label",  classes: "ares-fixed-label ace-label", content: "Right Panel (only for js files)"},
-					{name: "rightPaneButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "rightPaneChanged"}
+				{kind:"FittableRows", components: [
+					{classes: "ares-row", components: [
+						{name: "editorThemesLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Editor Themes"},
+						{name : "themesPicker", kind: "onyx.PickerDecorator", components: [
+							{classes:"large-picker"},
+							{name: "themes", kind: "onyx.Picker", onSelect: "themeSelected", components: [
+							{content: "ambiance"},
+							{content: "chaos"},
+							{content: "chrome"},
+							{content: "clouds"},
+							{content: "clouds_midnight"},
+							{content: "cobalt"},
+							{content: "crimson_editor"},
+							{content: "dawn"},
+							{content: "dreamweaver"},
+							{content: "eclipse"},
+							{content: "github"},
+							{content: "idle_fingers"},
+							{content: "kr_theme"},
+							{content: "merbivore"},
+							{content: "merbivore_soft"},
+							{content: "mono_industrial"},
+							{content: "monokai"},
+							{content: "pastel_on_dark"},
+							{content: "solarized_dark"},
+							{content: "solarized_light"},
+							{content: "textmate"},
+							{content: "tomorrow"},
+							{content: "tomorrow_night"},
+							{content: "tomorrow_night_blue"},
+							{content: "tomorrow_night_bright"},
+							{content: "tomorrow_night_eighties"},
+							{content: "twilight"},
+							{content: "vibrant_ink"},
+							{content: "xcode"}
+							]}
+						]}
+					]},
+					{classes: "ares-row", components: [
+						{name: "fontSizeLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Font Size"},
+						{kind: "onyx.PickerDecorator", components: [
+							{classes:"small-picker"},
+							{name: "fontSizePicker",  kind: "onyx.Picker", onSelect: "fontSize", components:[
+								{content: 6},
+								{content: 8},
+								{content: 10},
+								{content: 12},
+								{content: 13},
+								{content: 16},
+								{content: 20},
+								{content: 24},
+								{content: 30},
+								{content: 36}
+							]}
+						]}
+					]}
 				]}
 			]},
+			{tag:"p", classes:"break"},
 			{kind:"FittableRows", components: [
-				{classes: "ares-row", components: [
-					{name: "editorThemesLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Editor Themes"},
-					{name : "themesPicker", kind: "onyx.PickerDecorator", components: [
-						{classes:"large-picker"},
-						{name: "themes", kind: "onyx.Picker", onSelect: "themeSelected", components: [
-						{content: "ambiance"},
-						{content: "chaos"},
-						{content: "chrome"},
-						{content: "clouds"},
-						{content: "clouds_midnight"},
-						{content: "cobalt"},
-						{content: "crimson_editor"},
-						{content: "dawn"},
-						{content: "dreamweaver"},
-						{content: "eclipse"},
-						{content: "github"},
-						{content: "idle_fingers"},
-						{content: "kr_theme"},
-						{content: "merbivore"},
-						{content: "merbivore_soft"},
-						{content: "mono_industrial"},
-						{content: "monokai"},
-						{content: "pastel_on_dark"},
-						{content: "solarized_dark"},
-						{content: "solarized_light"},
-						{content: "textmate"},
-						{content: "tomorrow"},
-						{content: "tomorrow_night"},
-						{content: "tomorrow_night_blue"},
-						{content: "tomorrow_night_bright"},
-						{content: "tomorrow_night_eighties"},
-						{content: "twilight"},
-						{content: "vibrant_ink"},
-						{content: "xcode"}
-						]}
-					]}
-				]},
-				{classes: "ares-row", components: [
-					{name: "fontSizeLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Font Size"},
-					{kind: "onyx.PickerDecorator", components: [
-						{classes:"small-picker"},
-						{name: "fontSizePicker",  kind: "onyx.Picker", onSelect: "fontSize", components:[
-							{content: 6},
-							{content: 8},
-							{content: 10},
-							{content: 12},
-							{content: 13},
-							{content: 16},
-							{content: 20},
-							{content: 24},
-							{content: 30},
-							{content: 36}
-						]}
+				{kind: "Control", name:"osMessage", classes:"ares-row", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
+				{kind: "onyx.MenuDecorator", name:"program_buttons", classes:"ares-row", components: [
+					{ kind: "FittableColumns", classes:"ace-keys", components:[
+						{kind: "onyx.Button", content: "F-1", name: "F1", ontap: "showPopup"},
+						{kind: "onyx.Button", content: "F-2", name: "F2", ontap: "showPopup"},
+						{kind: "onyx.Button", content: "F-3", name: "F3", ontap: "showPopup"},
+						{kind: "onyx.Button", content: "F-4", name: "F4", ontap: "showPopup"},
+						{kind: "onyx.Button", content: "F-5", name: "F5", ontap: "showPopup"},
+						{kind: "onyx.Button", content: "F-6", name: "F6", ontap: "showPopup"}
+					]},
+					{ kind: "FittableColumns", classes:"ace-keys", components:[
+						{kind: "onyx.Button", content: "F-7", name: "F7", ontap: "showPopup"},
+						{kind: "onyx.Button", content: "F-8", name: "F8", ontap: "showPopup"},
+						{kind: "onyx.Button", content: "F-9", name: "F9", ontap: "showPopup"},
+						{kind: "onyx.Button", content: "F-10", name: "F10", ontap: "showPopup"},
+						{kind: "onyx.Button", content: "F-11", name: "F11", ontap: "showPopup"},
+						{kind: "onyx.Button", content: "F-12", name: "F12", ontap: "showPopup"}
 					]}
 				]}
-			]}
-			
-		]},
-		{tag:"p", classes:"break"},
-		{kind:"FittableRows", components: [
-			{kind: "Control", name:"osMessage", classes:"ares-row", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
-			{kind: "onyx.MenuDecorator", name:"program_buttons", classes:"ares-row", components: [
-				{ kind: "FittableColumns", classes:"ace-keys", components:[
-					{kind: "onyx.Button", content: "F-1", name: "F1", ontap: "showPopup"},
-					{kind: "onyx.Button", content: "F-2", name: "F2", ontap: "showPopup"},
-					{kind: "onyx.Button", content: "F-3", name: "F3", ontap: "showPopup"},
-					{kind: "onyx.Button", content: "F-4", name: "F4", ontap: "showPopup"},
-					{kind: "onyx.Button", content: "F-5", name: "F5", ontap: "showPopup"},
-					{kind: "onyx.Button", content: "F-6", name: "F6", ontap: "showPopup"}
+			]},
+			{kind: "onyx.Popup", name: "modalPopup", modal: true, autoDismiss: false, onHide:"restoreButton", classes:" enyo-unselectable ace-contextual-popup ares-classic-popup",
+			components: [
+				{kind: "Control", classes: "ace-input-popup", name: "altInputbox", components: [
+					{kind: "onyx.InputDecorator", classes: "ace-input-textarea", name: "inputDecorator", components: [
+						{kind: "onyx.TextArea", placeholder: "Enter text here", name: "textArea"}
+					]}
 				]},
-				{ kind: "FittableColumns", classes:"ace-keys", components:[
-					{kind: "onyx.Button", content: "F-7", name: "F7", ontap: "showPopup"},
-					{kind: "onyx.Button", content: "F-8", name: "F8", ontap: "showPopup"},
-					{kind: "onyx.Button", content: "F-9", name: "F9", ontap: "showPopup"},
-					{kind: "onyx.Button", content: "F-10", name: "F10", ontap: "showPopup"},
-					{kind: "onyx.Button", content: "F-11", name: "F11", ontap: "showPopup"},
-					{kind: "onyx.Button", content: "F-12", name: "F12", ontap: "showPopup"}
+				{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+					{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
+					{kind: "onyx.Button", classes:"right", content: "Update", name: "oksave", ontap: "inputChanged"}
 				]}
 			]}
 		]},
-		{kind: "onyx.Popup", name: "modalPopup", modal: true, autoDismiss: false, onHide:"restoreButton", classes:" enyo-unselectable ace-contextual-popup", canGenerate: false,
-		components: [
-			{kind: "Control", classes: "onyx-toolbar-inline", name: "altInputbox", components: [
-				{kind: "onyx.InputDecorator", classes: "phobos_editorsettings_buttoninput", name: "inputDecorator", components: [
-					{kind: "onyx.TextArea", placeholder: "Enter text here", classes: "ace-alt-button-input", name: "textArea"}
-				]},
-				{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
-				{kind: "onyx.Button", content: "OK", name: "oksave", ontap: "inputChanged"}
-			]}
-		]},
-		{tag:"p", classes:"break"},
-		{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "doClose"},
-		{name: "change", kind: "onyx.Button", content: "Save", ontap: "saveSettings"},		
+		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+			{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "doClose"},
+			{name: "change", kind: "onyx.Button", classes:"right", content: "Save", ontap: "saveSettings"}
+		]}
 	],
 	/**
 	 * @private
@@ -252,12 +254,24 @@ enyo.kind({
 
 	closeModalPopup: function(inSender){
 		this.$.textArea.setValue(""); //needs to be set here to avoid disappearance of placeholder in FF21
+		this.disableKeys(false);
 		this.$.modalPopup.hide();
 	},
 
 	restoreButton: function(inSender) {
 		this.$[this.key].removeClass("active");
 		return true;
+	},
+
+	disableKeys: function(disable){
+		var i,key;
+		for (i=1; i<13; i++) {
+			key = 'F' + i;
+			this.$[key].setAttribute("disabled", disable);
+		}
+		if(disable){
+			this.$[this.key].setAttribute("disabled", !disable);
+		}
 	},
 
 	showPopup: function(inSender) {
@@ -268,6 +282,7 @@ enyo.kind({
 			}
 		}
 		this.$[this.key].addClass("active");
+		this.disableKeys(true);
 		this.$.modalPopup.show();	
 	},
 

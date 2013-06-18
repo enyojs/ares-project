@@ -42,7 +42,7 @@ enyo.kind({
 			]}
 		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
-		{name: "saveAsPopup", kind: "Ares.FileChooser", showing: false, headerText: $L("Save as..."), folderChooser: false, onFileChosen: "saveAsFileChosen"},
+		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, onFileChosen: "saveAsFileChosen"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
@@ -659,9 +659,9 @@ enyo.kind({
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
-			this.$.savePopup.setName("Document was modified! Save it before closing?");
+			this.$.savePopup.setName("Document was modified!");
+			this.$.savePopup.setMessage("Save it before closing?");
 			this.$.savePopup.setActionButton("Don't Save");
-			this.$.savePopup.applyStyle("padding-top: 10px");
 			this.$.savePopup.show();
 		} else {
 			var id = this.docData.getId();

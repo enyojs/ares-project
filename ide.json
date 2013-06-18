@@ -9,7 +9,7 @@
 			"type": ["filesystem"],
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--pathname", "/files", "--port", "0", "--root", "@HOME@"
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@"
 			],
 			"useJsonp":false,
 			"verbose": false,
@@ -57,6 +57,7 @@
 			"useJsonp":false,
 			"verbose": false,
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
+			"timeout": 7000,
 			"auth": {
 				"type": "phonegap"
 			},
@@ -68,8 +69,9 @@
 			"name":"ZIP-files Project Generator",
 			"type": ["generate"],
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/genZip.js", "-P", "/genzip", "-p", "0"
+				"@INSTALLDIR@/hermes/genZip.js", "--level", "http", "-P", "/genzip", "-p", "0"
 			],
+			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
 			"projectTemplateRepositories": {
 				"bootplate": {
 					"description": "Standard Enyo template",
@@ -77,7 +79,6 @@
 				}
 			},
 			"useJsonp":false,
-			"verbose": false,
 			"respawn": false
 		}
 	]

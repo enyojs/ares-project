@@ -16,21 +16,24 @@ enyo.kind({
 	handlers: {
 		onShow: "shown"
 	},
+	classes:"ares-classic-popup",
 	modal: true,
 	centered: true,
 	floating: true,
 	components: [
-		{name: "title", tag: "h3", content: "Name for new object"},
-		{name: "path", tag: "p", content: "Path: "},
-		{kind: "onyx.InputDecorator", components: [
-			{name: "fileName", kind: "onyx.Input", onkeyup: "nameChanged", placeholder: ""}
+		{tag: "div", name: "title", classes:"title", content: "Name for new object"},
+		{kind: "enyo.Scroller", classes:"ares-small-popup", fit: true, components: [
+			{tag:"p", classes:"break"},
+			{kind: "onyx.InputDecorator", components: [
+				{name: "fileName", kind: "onyx.Input", onkeyup: "nameChanged", placeholder: ""}
+			]},
+			{classes:"ares-small-popup-details", components:[
+				{name: "path", tag: "p", content: "Path: "}
+			]}
 		]},
-		{tag: "br"},
-		{tag: "br"},
-		{kind: "FittableColumns", components: [
+		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
 			{name:"cancelButton", kind: "onyx.Button", content: "Cancel", ontap: "newCancel"},
-			{fit: true},
-			{name:"confirmButton", kind: "onyx.Button", content: "Create", ontap: "newConfirm"}
+			{name:"confirmButton", classes:"right", kind: "onyx.Button", content: "Create", ontap: "newConfirm"}
 		]}
 	],
 	create: function() {
@@ -41,10 +44,18 @@ enyo.kind({
 		this.placeHolderChanged();
 	},
 	typeChanged: function() {
-		this.$.title.setContent(this.title+" "+this.type);
+		var typeForTitle = "";
+		if(this.type !== undefined){
+			typeForTitle = this.type;
+		}
+		this.$.title.setContent(this.title+" "+typeForTitle);
 	},
 	titleChanged: function() {
-		this.$.title.setContent(this.title+" "+this.type);
+		var typeForTitle = "";
+		if(this.type !== undefined){
+			typeForTitle = this.type;
+		}
+		this.$.title.setContent(this.title+" "+typeForTitle);
 	},
 	pathChanged: function() {
 		this.$.path.setContent("in "+this.path);

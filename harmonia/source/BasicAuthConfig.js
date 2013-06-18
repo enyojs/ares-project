@@ -19,22 +19,23 @@ enyo.kind({
 
 	// static UI elements
 	components: [
-		{kind: "Ares.Groupbox", classes: "onyx-groupbox enyo-fill", components: [
-			{kind: "onyx.GroupboxHeader", name: "serviceName"},
-			{content: "User Name:"},
-			{kind: "onyx.InputDecorator", components: [
-				{name:"username", kind: "onyx.Input", placeholder: "login..."}
+		{kind:"enyo.Scroller", fit:true, classes:"ares-large-content", components:[
+			{kind: "Ares.Groupbox", classes:"ares-group-box", components: [
+				{kind: "onyx.GroupboxHeader", name: "serviceName"},
+				{content: "User Name:"},
+				{kind: "onyx.InputDecorator", components: [
+					{name:"username", kind: "onyx.Input", placeholder: "login"}
+				]},
+				{content: "Password:"},
+				{kind: "onyx.InputDecorator", components: [
+					{name:"password", kind: "onyx.Input", placeholder: "password", type: "password"}
+				]}
 			]},
-			{content: "Password:"},
-			{kind: "onyx.InputDecorator", components: [
-				{name:"password", kind: "onyx.Input", placeholder: "password...", type: "password"}
-			]},
-			{name: "accountOps", components: [
+			{name: "accountOps", classes:"ares-align-right ares-row", components: [
 				{kind: "onyx.Button", name: "checkBtn", content: "Check", ontap: "check"},
-			]}
-		]},
-		{tag: "br"},
-		{name: "userData"}
+			]},
+			{name: "userData"}
+		]}
 	],
 
 	/**

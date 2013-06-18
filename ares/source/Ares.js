@@ -5,15 +5,15 @@ enyo.kind({
 	fit: true,
 	debug: false,
 	components: [
-		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
-			{components: [
-				{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
+		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels ares-full-display", components: [
+			{classes:"ares-content-panel ares-full-display", components: [
+				{kind: "Phobos", classes:"ares-full-display", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
 			]},
-			{components: [
-				{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
+			{classes:"ares-content-panel ares-full-display", components: [
+				{kind: "Deimos", classes:"ares-full-display", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
 			]}
 		]},
-		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
+		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider ares-full-display", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
 			{name: "projectView", kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "openDocument", onProjectSelected: "projectSelected"},
 			{name: "bottomBar", classes:"ares-bottom-bar", kind: "DocumentToolbar",
 				onToggleOpen: "toggleFiles",

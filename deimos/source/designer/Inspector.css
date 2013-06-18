@@ -23,16 +23,17 @@ input.inspector-field-checkbox {
 	color:black;
 }
 
+.halves {
+	width: 50%;
+}
 .thirds {
 	width: 33%;
 }
-
 .thirds:last-child {
 	width: 34%;
 }
-
-.halves {
-	width: 50%;
+.fourths {
+	width: 25%;
 }
 
 .ares-inspector-row {
@@ -42,6 +43,7 @@ input.inspector-field-checkbox {
 
 .ares-inspector-row * {
 	display: inline-block;
+	vertical-align: middle;
 }
 
 
@@ -56,4 +58,9 @@ input.inspector-field-checkbox {
 .event-menu-item {
   display: block;
   padding: 2px;
+}
+
+.inspector-event-button { width: 22px; height: 22px; padding:3px;}
+.inspector-event-button:before {
+	content: url(../../../ares/assets/images/smallArrowDown.png);
 }

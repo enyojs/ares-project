@@ -45,23 +45,33 @@ enyo.kind({
 		this.$.header.setContent(this.headerText);
 	},
 	components: [
-		{kind: "FittableRows", classes: "onyx-popup ares-filechooser", components: [
-			{kind: "Control", tag: "span", classes: "ares-title ares-filechooser-header", content: "Select a directory", name: "header"},
+		{kind: "FittableRows", classes: "onyx-popup ares-filechooser ares-classic-popup", components: [
+			{tag: "div", name: "header", classes:"title", content: "Select a directory"},
 			{kind: "FittableColumns", classes: "onyx-light", fit: true, components: [
-				{kind: "ProviderList", selector: ["type", "filesystem"], name: "providerList", header: "Sources", onSelectProvider: "handleSelectProvider"},
+				{kind:"FittableRows", classes:"ares-left-pane-file-chooser", components:[
+					{kind: "onyx.Toolbar", classes: "ares-top-toolbar  hermesFileTree-toolbar", components: [
+						{content:"Sources", classes:"ares-create-sources"}
+					]},
+					{kind: "ProviderList", selector: ["type", "filesystem"], name: "providerList", classes:"ares-provider-list",/*style:"border: 3px solid yellow;", header: "Sources",*/ onSelectProvider: "handleSelectProvider"}
+				]},
 				{kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "_selectFile", onFolderClick: "_selectFolder", onNewFolderConfirm: "createFolder"}
 			]},
-			{kind: "FittableColumns", classes: "onyx-light ares-filechooser-footer", isContainer: true, components: [
-				{name: "folderSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline", components: [
+			{kind: "FittableRows", classes: "onyx-light ares-filechooser-footer", isContainer: true, components: [
+				//TO DO : make possible to scroll on the selected folder in the file tree
+				/*{name: "folderSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline", components: [
 					{content: $L("Where") + ":", fit: true},
 					{name: "selectedFolder", kind: "onyx.Input", classes: "only-light file-chooser-input", disabled: true, placeholder: $L("Folder")}
-				]},
-				{name: "nameSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline file-chooser-input", showing: false, components: [
-					{content: $L("As") + ":", fit: true},
-					{name: "selectedName", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("File"), selectOnFocus: true, onchange: "updateSelectedName"}
-				]},
+				]},*/
+				{classes:"ares-row ares-file-choser-row", name:"fileNameRow", showing: false, components:[
+					{tag:"label", classes: "ares-fixed-label ares-file-chooser-label", content: "File name: "},
+					{name: "nameSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline file-chooser-input", showing: false, components: [
+						{name: "selectedName", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("File"), selectOnFocus: true, onchange: "updateSelectedName"}
+					]}
+				]}
+			]},
+			{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
 				{name: "cancel", kind: "onyx.Button", content: $L("Cancel"), ontap: "cancel"},
-				{name: "confirm", kind: "onyx.Button", content: $L("OK"), ontap: "confirm"}
+				{name: "confirm", kind: "onyx.Button", content: $L("OK"), classes:"right", ontap: "confirm"}
 			]}
 		]}
 	],
@@ -104,6 +114,7 @@ enyo.kind({
 			}
 		}
 		if (!this.folderChooser) {
+			this.$.fileNameRow.show();
 			this.$.nameSelector.show();
 			if (this.allowNewFile) {
 				this.$.selectedName.setDisabled(false);
@@ -146,7 +157,7 @@ enyo.kind({
 			this.selectedFile.parent = this.$.hermesFileTree.getParentOfSelected();
 			this.$.confirm.setDisabled(false);
 		}
-		this.$.selectedFolder.setValue(ares.basename(ares.dirname(inEvent.file.path)));
+		//this.$.selectedFolder.setValue(ares.basename(ares.dirname(inEvent.file.path)));
 		this.setSelectedName(inEvent.file.name);
 		return true; // Stop event propagation
 	},
@@ -162,7 +173,7 @@ enyo.kind({
 		} else {
 			this.$.confirm.setDisabled(true);
 		}
-		this.$.selectedFolder.setValue(inEvent.file.name);
+		//this.$.selectedFolder.setValue(inEvent.file.name);
 		this.updateConfirmButton();
 		return true; // Stop event propagation
 	},

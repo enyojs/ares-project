@@ -459,20 +459,10 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 					next(err);
 					return;
 				}
-				if (files.length >= 1) {
-					files.forEach(function(file) {
-						var sub = path.join(dstPath, file);
-						_copyNode(path.join(srcPath, file), path.join(dstPath, file), function(err) {
-							if (err) {
-								next(err);
-								return;
-							}
-							if (++count == files.length) {
-								next();
-							}
-						});
-					});
-				}
+				async.forEachSeries(files, function(file, next) {
+					var sub = path.join(dstPath, file);
+					_copyNode(path.join(srcPath, file), path.join(dstPath, file), next);
+				}, next);
 			});
 		});
 	}
@@ -515,7 +505,7 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		root: argv.root,
 		pathname: argv.pathname,
 		port: argv.port,
-		verbose: (argv.level === 'verbose') // FIXME: rather use npm.log() directly
+		level: argv.level
 	}, function(err, service){
 		if (err) process.exit(err);
 		// process.send() is only available if the

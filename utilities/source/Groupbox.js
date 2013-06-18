@@ -1,7 +1,6 @@
 enyo.kind({
 	name: "Ares.Groupbox",
 	kind: "onyx.Groupbox",
-	classes: "enyo-fill onyx-groupbox",
 
 	published: {
 		header: ""
@@ -14,8 +13,7 @@ enyo.kind({
 
 enyo.kind({
 	name: "Ares.GroupBoxItemKey",
-	classes: "ares-groupbox-item-key onyx-groupbox enyo-fill",
-	tag: "span",
+	classes: "ares-groupbox-item-key",
 
 	create: function() {
 		this.inherited(arguments);
@@ -24,8 +22,7 @@ enyo.kind({
 
 enyo.kind({
 	name: "Ares.GroupBoxItemValue",
-	classes: "ares-groupbox-item-value onyx-groupbox enyo-fill",
-	tag: "span",
+	classes: "ares-groupbox-item-value",
 
 	create: function() {
 		this.inherited(arguments);

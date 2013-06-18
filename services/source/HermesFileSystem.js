@@ -193,11 +193,35 @@ enyo.kind({
 	remove: function(inNodeId) {
 		return this._request("DELETE", inNodeId, null /*inParams*/);
 	},
-	rename: function(inNodeId, inNewName) {
-		return this._request("MOVE", inNodeId, {name: inNewName} /*inParams*/);
+	/**
+	 * Only one of folderId or name can be defined.  In case both are defined
+	 * name takes precedence.
+	 * @param {Object} inParams
+	 * @property inParams {String} folderId
+	 * @property inParams {String} name
+	 */
+	rename: function(inNodeId, inParams) {
+		if (typeof inParams === 'object') {
+			return this._request("MOVE", inNodeId, inParams);
+		} else {
+			// backward compatible method signature
+			return this._request("MOVE", inNodeId, {name: inParams}  /*inParams*/);
+		}
 	},
-	copy: function(inNodeId, inNewName) {
-		return this._request("COPY", inNodeId, {name: inNewName}  /*inParams*/);
+	/**
+	 * Only one of folderId or name can be defined.  In case both are defined
+	 * name takes precedence.
+	 * @param {Object} inParams
+	 * @property inParams {String} folderId
+	 * @property inParams {String} name
+	 */
+	copy: function(inNodeId, inParams) {
+		if (typeof inParams === 'object') {
+			return this._request("COPY", inNodeId, inParams);
+		} else {
+			// backward compatible method signature
+			return this._request("COPY", inNodeId, {name: inParams}  /*inParams*/);
+		}
 	},
 	exportAs: function(inNodeId, inDepth) {
 		return this._request("GET", inNodeId, {depth: inDepth, format: "base64"} /*inParams*/)

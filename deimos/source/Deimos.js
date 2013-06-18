@@ -19,7 +19,13 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction", style: "float:right;"}
 			]},
 			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
-				{classes:"ares_deimos_left", kind: "Palette", name: "palette", ondragstart: "paletteDragstart", ondragend: "paletteDragend"},
+			
+			
+			
+				{name: "left", classes:"ares_deimos_left", kind: "Palette", name:"palette"},
+				
+				
+				
 				{name: "middle", fit: true, kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
 						{kind: "onyx.Button", name: "reloadDesignerButton", classes: "deimos-designer-toolbar-spacing", content: "Reload", ontap: "reloadDesigner"},
@@ -27,11 +33,11 @@ enyo.kind({
 						{kind: "onyx.PickerDecorator", classes: "deimos-device-picker deimos-designer-toolbar-spacing", components: [
 							{style: "width:100%;"},
 							{kind: "onyx.Picker", name: "devicePicker", ontap: "deviceChosen", components: [
-								{content: "(600 x 800) Default",			value: { height:  800, width:  600 }},
-								{content: "(1920 x 1080) HDTV",				value: { height:  1080, width:  1920 }},
-								{content: "(320 x 480) iPhone\u2122",		value: { height:  480, width:  320 }},
-								{content: "(320 x 573) iPhone\u2122 5",		value: { height: 573, width:  320 }},
-								{content: "(1024 x 768) iPad\u2122",	value: { height: 768, width: 1024 }},
+								{content: "(600 x 800) Default",		value: { height: 800,  width: 600 }},
+								{content: "(1920 x 1080) HDTV",			value: { height: 1080, width: 1920 }},
+								{content: "(320 x 480) iPhone\u2122",	value: { height: 480,  width: 320 }},
+								{content: "(320 x 573) iPhone\u2122 5",	value: { height: 573,  width: 320 }},
+								{content: "(1024 x 768) iPad\u2122",	value: { height: 768,  width: 1024 }},
 								{content: "Custom"}
 							]}
 						]},
@@ -55,16 +61,22 @@ enyo.kind({
 							onMoveItem: "moveItem",
 							onCreateItem: "createItem",
 							onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
-							onReloadComplete: "reloadComplete"
-						}
+							onReloadComplete: "reloadComplete",
+							onResizeItem: "resizeItem",
+							onReturnPositionValue: "designerReturnPositionValue"
+						},
 					]}
 				]},
+				
+				
+				
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar deimos-toolbar-margined-buttons", components: [
 						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
 						{name:"undoButton", kind: "onyx.Button", content: "Undo", classes: "btn-danger",  ontap: "undoAction"},
 						{name:"redoButton", kind: "onyx.Button", content: "Redo", classes: "btn-danger",  ontap: "redoAction"}
 					]},
+					
 					{kind: "ComponentView", classes: "deimos_panel ares_deimos_componentView",
 						onSelect: "componentViewSelect",
 						onHighlightDropTarget: "highlightDesignerDropTarget",
@@ -73,7 +85,12 @@ enyo.kind({
 						onCreateItem: "createItem",
 						onHoldOver: "holdOver"
 					},
-					{kind: "Inspector", fit: true, classes: "deimos_panel", onModify: "inspectorModify"}
+					
+					{kind: "Inspector", fit: true, classes: "deimos_panel",
+						onModify: "inspectorModify",
+						onRequestPositionValue: "inspectorRequestPositionValue",
+						onPositionDataUpdated: "inspectorPositionDataUpdated"
+					}
 				]}
 			]}
 		]}
@@ -141,9 +158,11 @@ enyo.kind({
 	paletteDragstart: function(inSender, inEvent) {
 		inEvent = enyo.mixin(inEvent.config, {aresId: this.generateNewAresId()});
 		this.$.designer.enterCreateMode(inEvent);
+		this.$.componentView.setCreateMode(true);
 	},
 	paletteDragend: function(inSender, inEvent) {
 		this.$.designer.leaveCreateMode(inEvent.config);
+		this.$.componentView.setCreateMode(false);
 	},
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
@@ -212,15 +231,105 @@ enyo.kind({
 		return true;
 	},
 	inspectorModify: function(inSender, inEvent) {
+		if (inEvent.name === "layoutKind" && this.layoutKindUpdated(inEvent.value)) {
+			return true;
+		}
+		
 		this.$.designer.modifyProperty(inEvent.name, inEvent.value);
 		return true;
+	},
+	inspectorRequestPositionValue: function(inSender, inEvent) {
+		this.$.designer.requestPositionValue(inEvent.prop);
+	},
+	inspectorPositionDataUpdated: function(inSender, inEvent) {
+		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components),
+			prop,
+			val
+		;
+		
+		for (prop in inEvent.props) {
+			val = inEvent.props[prop];
+			this.addReplaceStyleProp(item, prop, inEvent.props[prop]);
+		}
+
+		this.rerenderKind(item.aresId);
+	},
+	layoutKindUpdated: function(inLayoutKind) {
+		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		
+		if (inLayoutKind !== "AbsolutePositioningLayout" && item.layoutKind !== "AbsolutePositioningLayout") {
+			return false;
+		}
+		
+		if (inLayoutKind === "AbsolutePositioningLayout") {
+			item.layoutKind = inLayoutKind;
+			this.updateStyleForAbsolutePositioningLayoutKind(item);
+		} else {
+			item.layoutKind && delete item.layoutKind;
+			this.updateStyleForNonAbsolutePositioningLayoutKind(item);
+		}
+		
+		this.rerenderKind(item.aresId);
+		return true;
+	},
+	//* Add relative positioning to top item, and absolute positioning to it's children
+	updateStyleForAbsolutePositioningLayoutKind: function(inComponent) {
+		this.addReplaceStyleProp(inComponent, "position", "relative");
+		
+		if (inComponent.components) {
+			for (var i = 0, comp; (comp = inComponent.components[i]); i++) {
+				this.addAbsolutePositioning(comp);
+			}
+		}
+	},
+	//* Set position: absolute; and layoutKind = "AbsolutePositioningLayout" on _inComponent_
+	addAbsolutePositioning: function(inComponent) {
+		this.addReplaceStyleProp(inComponent, "position", "absolute");
+		inComponent.layoutKind = "AbsolutePositioningLayout";
+		this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind = inComponent.layoutKind;
+	},
+	//* Add static positioning to top item and to it's children
+	updateStyleForNonAbsolutePositioningLayoutKind: function(inComponent) {
+		this.addReplaceStyleProp(inComponent, "position", "");
+		
+		if (inComponent.components) {
+			for (var i = 0, comp; (comp = inComponent.components[i]); i++) {
+				this.removeAbsolutePositioning(comp);
+			}
+		}
+	},
+	//* Set position: ""; and layoutKind = "" on _inComponent_
+	removeAbsolutePositioning: function(inComponent) {
+		this.addReplaceStyleProp(inComponent, "position", "");
+		this.addReplaceStyleProp(inComponent, "top", "");
+		this.addReplaceStyleProp(inComponent, "right", "");
+		this.addReplaceStyleProp(inComponent, "bottom", "");
+		this.addReplaceStyleProp(inComponent, "left", "");
+		inComponent.layoutKind && delete inComponent.layoutKind;
+		this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind && delete this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind;
+	},
+	//* Update _inComponent.style.inProp_ to be _inValue_
+	addReplaceStyleProp: function(inComponent, inProp, inValue) {
+		var currentStyle = inComponent.style || "",
+			styleProps = {}
+		;
+		
+		// Convert css string to hash
+		enyo.Control.cssTextToDomStyles(this.trimWhitespace(currentStyle), styleProps);
+		
+		// Add/replace inProp with inValue
+		styleProps[inProp] = inValue;
+		
+		// Convert back to a string
+		inComponent.style = enyo.Control.domStylesToCssText(styleProps);
+		this.$.inspector.userDefinedAttributes[inComponent.aresId].style = inComponent.style;
 	},
 	prepareDesignerUpdate: function() {
 		if (this.index !== null) {
 			// Prepare the data for the code editor
 			var event = {docHasChanged: this.getEdited(), contents: []};
 			for(var i = 0 ; i < this.kinds.length ; i++) {
-				event.contents[i] = this.kinds[i].updatedComponents;
+				event.contents[i] = enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components));
 			}
 			return event;
 		}
@@ -238,13 +347,13 @@ enyo.kind({
 	// When the designer finishes rendering, re-build the components view
 	designRendered: function(inSender, inEvent) {
 		var components = enyo.json.codify.from(inEvent.content);
-
+		
 		this.refreshComponentView(components);
 		this.setEdited(true);
 		
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
-		this.kinds[this.index].updatedComponents = enyo.json.codify.to(this.cleanUpComponents(components));
-
+		this.kinds[this.index].components = this.cleanUpComponents(components, true);
+		
 		this.designerUpdate();
 		
 		return true;
@@ -289,19 +398,22 @@ enyo.kind({
 			beforeId = inEvent.beforeId || null,
 			target = (inEvent.targetId)
 					?	this.getItemById(inEvent.targetId, this.kinds[this.index].components)
-					:	this.kinds[this.index];
+					:	this.kinds[this.index]
+		;
 		
-		if (target === movedItem) {
-			return true;
-		}
-		
-		// If moving item before itself, do nothing
-		if (beforeId !== null && beforeId === inEvent.itemId) {
+		// If moving item onto itself or before itself, do nothing
+		if ((target === movedItem) || (beforeId !== null && beforeId === inEvent.itemId)) {
 			return true;
 		}
 		
 		// Remove existing item
 		this.removeItemById(inEvent.itemId, this.kinds[this.index].components);
+		
+		// Apply any special layout rules
+		clone = this.applyLayoutKindRules(inEvent.layoutData, clone);
+		
+		// Copy clone style props to inspector
+		this.$.inspector.userDefinedAttributes[clone.aresId].style = clone.style;
 		
 		if (beforeId) {
 			if (!this.insertItemBefore(clone, target, beforeId)) {
@@ -312,7 +424,95 @@ enyo.kind({
 		}
 		
 		this.rerenderKind(inEvent.itemId);
+		
 		return true;
+	},
+	resizeItem: function(inSender, inEvent) {
+		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		
+		for (var prop in inEvent.sizeData) {
+			this.addReplaceStyleProp(item, prop, inEvent.sizeData[prop]);
+		}
+		
+		this.rerenderKind(item.aresId);
+		
+		return true;
+	},
+	//* Called when the iFrame has retrieved a requested absolute position value
+	designerReturnPositionValue: function(inSender, inEvent) {
+		this.$.inspector.setRequestedPositionValue(inEvent.prop, inEvent.value);
+		return true;
+		
+		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		this.addReplaceStyleProp(item, inEvent.prop, inEvent.value + "px");
+		this.rerenderKind(item.aresId);
+	},
+	applyLayoutKindRules: function(inLayoutData, inControl) {
+		var layoutKind = inLayoutData && inLayoutData.layoutKind;
+
+		switch (layoutKind) {
+			case "AbsolutePositioningLayout":
+				inControl.style = this.addAbsolutePositioningStyle(inLayoutData, inControl);
+				break;
+			default:
+				inControl.style = this.removeAbsolutePositioningStyle(inControl);
+				break;
+		}
+		
+		return inControl;
+	},
+	//* Add absolute positioning styling
+	addAbsolutePositioningStyle: function(inLayoutData, inControl) {
+		var currentStyle = inControl.style || "",
+			styleProps = {}
+		;
+		
+		// Convert css string to hash
+		enyo.Control.cssTextToDomStyles(this.trimWhitespace(currentStyle), styleProps);
+		
+		// Add absolute positioning styles (default to top and left)
+		styleProps.position = "absolute";
+		
+		// If only top property, or no top or bottom property, add top
+		if (styleProps.top || (!styleProps.top && !styleProps.bottom)) {
+			styleProps.top = inLayoutData.bounds.top + "px";
+		}
+		// If bottom add bottom
+		if (styleProps.bottom) {
+			styleProps.bottom = inLayoutData.bounds.bottom + "px";
+		}
+		
+		// If only left property, or no left or right property, add left
+		if (styleProps.left || (!styleProps.left && !styleProps.right)) {
+			styleProps.left = inLayoutData.bounds.left + "px";
+		}
+		// If right add right
+		if (styleProps.right) {
+			styleProps.right = inLayoutData.bounds.right + "px";
+		}
+		
+		// Convert back to a string and return
+		return enyo.Control.domStylesToCssText(styleProps);
+	},
+	removeAbsolutePositioningStyle: function(inControl) {
+		var currentStyle = inControl.style || "",
+			styleProps = {},
+			prop,
+			i
+		;
+		
+		// Convert css string to hash
+		enyo.Control.cssTextToDomStyles(this.trimWhitespace(currentStyle), styleProps);
+		
+		// Remove absolute positioning styles
+		styleProps.position = styleProps.top = styleProps.right = styleProps.bottom = styleProps.left = "";
+		
+		// Convert back to a string and return
+		return enyo.Control.domStylesToCssText(styleProps);
+	},
+	trimWhitespace: function(inStr) {
+		inStr = inStr || "";
+		return inStr.replace(/\s/g, "");
 	},
 	//* Holdover event from ComponentView - simulate drop in designer
 	holdOver: function(inSender, inEvent) {
@@ -384,18 +584,18 @@ enyo.kind({
 			}
 		}
 	},
-	cleanUpComponents: function(inComponents) {
+	cleanUpComponents: function(inComponents, inKeepAresIds) {
 		var component,
 			ret = [],
 			i;
 		
 		for (i=0; (component = inComponents[i]); i++) {
-			ret.push(this.cleanUpComponent(component));
+			ret.push(this.cleanUpComponent(component, inKeepAresIds));
 		}
 		
 		return ret;
 	},
-	cleanUpComponent: function(inComponent) {
+	cleanUpComponent: function(inComponent, inKeepAresIds) {
 		var aresId = inComponent.aresId,
 			childComponents = [],
 			cleanComponent = {},
@@ -415,7 +615,7 @@ enyo.kind({
 		
 		// Copy each user-defined property from _atts_ to the cleaned component
 		for (att in atts) {
-			if (att !== "aresId" && att !== "components" && att !== "__aresOptions") {
+			if ((inKeepAresIds && att === "aresId") || (att !== "aresId" && att !== "components" && att !== "__aresOptions")) {
 				cleanComponent[att] = atts[att];
 			}
 		}
@@ -425,7 +625,7 @@ enyo.kind({
 			
 			// Recurse through child components
 			for (var i=0; i<inComponent.components.length; i++) {
-				childComponents.push(this.cleanUpComponent(inComponent.components[i]));
+				childComponents.push(this.cleanUpComponent(inComponent.components[i], inKeepAresIds));
 			}
 			
 			if (childComponents.length > 0) {

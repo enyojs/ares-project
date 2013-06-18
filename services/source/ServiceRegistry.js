@@ -204,7 +204,7 @@ enyo.kind({
 			}
 			next();
 		} catch(err) {
-			this.error(err);
+			this.error("Unable to configure service '" + service.config.id + "':", err.stack);
 			next(err);
 		}
 	},
@@ -352,7 +352,7 @@ enyo.kind({
 					enyo.Signals.send("onPluginRegist", {pluginService: service.impl});
 					this.notifyServicesChange();
 				} catch(err) {
-					this.error("Unexpected error while creating '" + kindInformation.kind + "' for service " + serviceId , err);
+					this.error("Unexpected error while creating '" + kindInformation.kind + "' for service '" + serviceId + "': ", err.stack);
 					next(err);
 				}
 			}
