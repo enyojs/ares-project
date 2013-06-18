@@ -31,5 +31,6 @@ $*
 /node_modules/tunnel
 /node_modules/zipstream
 /node_modules/npmlog
+/node_modules/jshint
 test/root
 /project.json
