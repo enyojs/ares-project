@@ -466,9 +466,9 @@ FsBase.prototype._putWebForm = function(req, res, next) {
  */
 FsBase.prototype._putMultipart = function(req, res, next) {
 	var pathParam = req.param('path');
-	//this.log("FsBase.putMultipart(): req.files:", req.files);
-	//this.log("FsBase.putMultipart(): req.body:", req.body);
-	//this.log("FsBase.putMultipart(): pathParam:", pathParam);
+	this.log("FsBase.putMultipart(): req.files:", req.files);
+	this.log("FsBase.putMultipart(): req.body:", req.body);
+	this.log("FsBase.putMultipart(): pathParam:", pathParam);
 	if (!req.files.file) {
 		next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
 		return;
@@ -498,7 +498,7 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 		}
 	}
 
-	//this.log("FsBase.putMultipart(): files", files);
+	this.log("FsBase.putMultipart(): files", files);
 
 	var nodes = [];
 	async.forEachSeries(files, (function(file, cb) {

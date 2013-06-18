@@ -18,7 +18,8 @@ var fs = require("fs"),
     http = require("http"),
     client = require("phonegap-build-api"),
     BdBase = require("./lib/bdBase"),
-    HttpError = require("./lib/httpError");
+    HttpError = require("./lib/httpError"),
+    CombinedStream = require('combined-stream');
 
 var basename = path.basename(__filename, '.js'),
     log = npmlog;
@@ -39,7 +40,9 @@ function BdPhoneGap(config, next) {
 	config.minifyScript = config.minifyScript || path.join(config.enyoDir, 'tools', 'deploy.js');
 	try {
 		var stat = fs.statSync(config.minifyScript);
-		if (!stat.isFile()) throw "Not a file";
+		if (!stat.isFile()) {
+			throw "Not a file";
+		}
 	} catch(e) {
 		// Build a more usable exception
 		next(new Error("Not a suitable Enyo: it does not contain a usable 'tools/deploy.js'"));
@@ -55,6 +58,8 @@ BdPhoneGap.prototype.use = function() {
 	this.app.use(express.cookieParser());
 	this.app.use(this.makeExpressRoute('/op'), authorize.bind(this));
 	this.app.use(this.makeExpressRoute('/api'), authorize.bind(this));
+	
+
 	function authorize(req, res, next) {
 		log.verbose("authorize()", "req.url:", req.url);
 		log.verbose("authorize()", "req.query:", req.query);
@@ -74,8 +79,11 @@ BdPhoneGap.prototype.route = function() {
 	// '/token' & '/api' -- Wrapped public Phonegap API
 	this.app.post(this.makeExpressRoute('/token'), this.getToken.bind(this));
 	this.app.get(this.makeExpressRoute('/api/v1/me'), this.getUserData.bind(this));
+	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId'), this.getAppStatus.bind(this));
+	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId/:platform/:title/:version'),
+		     this.downloadApp.bind(this));
 };
-	
+
 BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 	var self = this;
 	log.info("errorHandler()", "err:", err);
@@ -157,6 +165,7 @@ BdPhoneGap.prototype.getUserData = function(req, res, next) {
 		if (err1) {
 			next(err1);
 		} else {
+			log.http("getUserData()", "GET /apps/me");
 			api.get('/me', function(err2, userData) {
 				if (err2) {
 					next(err2);
@@ -166,12 +175,174 @@ BdPhoneGap.prototype.getUserData = function(req, res, next) {
 				}
 			});
 		}
-	});;
+	});
+};
+BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
+	client.auth({
+		token: req.token,
+		proxy: this.config.proxyUrl
+	}, function(err1, api) {
+		if (err1) {
+			next(err1);
+		} else {
+			var appId = req.params.appId;
+			log.http("getAppStatus()", "GET /apps/" + appId);					
+			api.get('/apps/' + appId, function(err2, userData) {
+				if (err2) {
+					next(err2);
+				} else {
+					log.info("getAppStatus()", "appStatus:", userData);
+					res.status(200).send({user: userData}).end();
+			 	}
+			});	
+		}
+	});
 };
 
-BdBase.prototype.build = function(req, res, next) {
+/**
+ * When a download request is received from "Build.js",
+ * this function is called to do the following actions : 
+ * 	- Create the appropriate file name
+ * 	- Download the built project from Phonegap build using the 
+ * 	  API-Phonegap-Build
+ * 	- When the download is done, the file is piped to "Ares client"
+ * 	  using a multipart/form Post request
+ *   
+ * @param  {Object}   req  Contain the request attributes
+ * @param  {Object}   res  Contain the response attributes
+ * @param  {Function} next a CommonJs callback
+ * 
+ */
+BdPhoneGap.prototype.downloadApp = function(req, res, next){
+	
+	var appId = req.params.appId;
+	var platform = req.params.platform;
+	var requestURL = '/apps/' + appId + '/'+ platform;
+	var FORM_DATA_LINE_BREAK = '\r\n';
+
+ 	returnBody(req, res, function() {});
+
+	/*
+	 *the extensions for the downloaded file 
+	 *	apk for Android
+	 *	ipa for iOS
+	 * 	ipk for webOS
+	 *	jad for unsigned BlackBerry builds; 
+	 *	zip if you've uploaded your BlackBerry signing keys
+	 *	wgz for Symbian
+	 *	xap for Windows Phone
+	 * 
+	 */
+
+ 	function returnBody(req, res, next) {
+ 		// Getting the needed informations from the parsed URL
+ 		// to generate the name of the built application.
+ 		var title = req.params.title,
+		    platform = req.params.platform,
+		    appId = req.params.appId,
+		    version = req.params.version,
+		    extensions = {
+			    "android": "apk",
+			    "ios": "ipa",
+			    "webos": "ipk",
+			    "symbian": "wgz",
+			    "winphone": "xap",
+			    "blackberry": "jad"
+		    };
+		var fileName = title + "_" + version + "." + (extensions[platform] || "bin"), 
+ 		    tempFileName = temp.path({prefix: 'com.palm.ares.hermes.phonegap'});
+ 		
+		client.auth({
+			token: req.token			
+		}, function(err1, api) {
+			if (err1) {
+				next(err1);
+			} else {
+				var os = fs.createWriteStream(tempFileName);
+				os.on('close', createMultipartData);
+				api.get("/apps/" + appId + "/"+ platform).pipe(os);
+			}
+		});
+
+		function createMultipartData(){
+			// Build the multipart/formdata
+			var combinedStream = CombinedStream.create();
+			var boundary = generateBoundary();
+
+			// Adding part header
+			combinedStream.append(getPartHeader(fileName, boundary));
+			// Adding file data
+			combinedStream.append(function(nextDataChunk){
+				
+				fs.readFile(tempFileName, 'base64', function (err, packagedFile) {
+					fs.unlink(tempFileName);
+					if (err) {
+						next('Unable to read ' + tempFileName);
+						nextDataChunk('INVALID CONTENT');
+					} else {
+						log.verbose("downloadApp()#returnBody()#createMultipartData(): ", packagedFile.length);
+						nextDataChunk(packagedFile);						
+					}
+				});
+			});	
+
+			// Adding part footer
+			combinedStream.append(getPartFooter());
+
+			// Adding last footer
+			combinedStream.append(getLastPartFooter(boundary));
+
+			// Send the files back as a multipart/form-data
+			log.verbose("downloadApp#returnBody#createMultipartData()", "Start streaming down:" + fileName);
+			res.status(200);
+			res.header('Content-Type', getContentTypeHeader(boundary));
+			combinedStream.pipe(res);
+
+			// cleanup the temp dir when the response has been sent
+			combinedStream.on('end', function() {
+				next();
+			});
+		}
+
+		function generateBoundary() {
+			// This generates a 50 character boundary similar to those used by Firefox.
+			// They are optimized for boyer-moore parsing.
+			var boundary = '--------------------------';
+			for (var i = 0; i < 24; i++) {
+				boundary += Math.floor(Math.random() * 10).toString(16);
+			}
+
+			return boundary;
+		}
+
+		function getContentTypeHeader(boundary) {
+			return 'multipart/form-data; boundary=' + boundary;
+		}
+
+		function getPartHeader(filename, boundary) {
+			var header = '--' + boundary + FORM_DATA_LINE_BREAK;
+			header += 'Content-Disposition: form-data; name="file"';
+
+			header += '; filename="' + filename + '"' + FORM_DATA_LINE_BREAK;
+			header += 'Content-Type: application/octet-stream; x-encoding=base64';
+
+			header += FORM_DATA_LINE_BREAK + FORM_DATA_LINE_BREAK;
+			return header;
+		}
+
+		function getPartFooter() {
+			return FORM_DATA_LINE_BREAK;
+		}
+
+		function getLastPartFooter(boundary) {
+			return '--' + boundary + '--';
+		}
+	}
+};
+
+BdPhoneGap.prototype.build = function(req, res, next) {
 	var appData = {}, query = req.query;
-	log.info("build()", "title:", query.title, ", platforms:", query.platforms, ", appId:", query.appId);
+	log.info("build()", "title:", query.title,"platforms:", query.platforms, ", appId:", query.appId);
 	async.series([
 		this.prepare.bind(this, req, res),
 		this.store.bind(this, req, res),
@@ -220,7 +391,7 @@ BdBase.prototype.build = function(req, res, next) {
 		//WARNING: enabling this trace shows-up the signing keys passwords
 		log.silly("build#_parse(): appData:", appData);
 		next();
-	}
+	};
 
 	function _upload(next) {
 		log.info("build#_upload()");
@@ -328,10 +499,14 @@ if (path.basename(process.argv[1], '.js') === basename) {
 		level: log.level,
 		enyoDir: path.resolve(__dirname, '..', 'enyo')
 	}, function(err, service){
-		if(err) process.exit(err);
+		if(err) {
+			process.exit(err);
+		}
 		// process.send() is only available if the
 		// parent-process is also node
-		if (process.send) process.send(service);
+		if (process.send) {
+			process.send(service);
+		}
 	});
 
 } else {
