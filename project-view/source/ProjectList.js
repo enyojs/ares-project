@@ -18,7 +18,6 @@ enyo.kind({
 		onProjectRemoved: "",
 		onModifySettings: "",
 		onBuild: "",
-		onBuildStatus: "",
 		onInstall: "",
 		onRun: "",
 		onRunDebug: "",
@@ -79,10 +78,6 @@ enyo.kind({
 							{value: "doBuild", components: [
 								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_build.png"},
 								{content: "Build..."}
-							]},
-							{value: "doBuildStatus", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_build.png"},
-								{content: "BuildStatus..."}
 							]},
 							{classes: "onyx-menu-divider"},
 							{value: "doInstall", components: [
