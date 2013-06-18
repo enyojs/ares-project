@@ -21,8 +21,6 @@ var fs = require("fs"),
     HttpError = require("./lib/httpError"),
     CombinedStream = require('combined-stream');
 
-
-
 var basename = path.basename(__filename, '.js'),
     log = npmlog;
 log.heading = basename;
@@ -222,8 +220,6 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 
  	returnBody(req, res, function() {});
 
-
-
 	/*
 	 *the extensions for the downloaded file 
 	 *	apk for Android
@@ -237,34 +233,22 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 	 */
 
  	function returnBody(req, res, next) {
- 		//Getting the needed informations from the parsed URL
- 		//to generate the name of the built application.
- 		var title = req.params.title;
-		var platform = req.params.platform;
-		var appId = req.params.appId;
-		var version = req.params.version;
-		
-		//Array containing the mapping between the name of
-		// the targeted platform and the file's extension
-		// of the built application 
-		var extensions = {
-			"android": ".apk",
-			"ios": ".ipa",
-			"webos": ".ipk",
-			"symbian": ".wgz",
-			"winphone": ".xap",
-			"blackberry": ".jad"
-		}
-
-		fn = title +"_"+ version +extensions[platform]; 
-	
-		//This is a temporary code used to test the download function 
- 		//It will be replaced by the below commented code as soon as 
- 		//the "api.get()" works correctly.
- 		//IMPORTANT : change the file name path of the attribute 
- 		//			 "tempFileName" to another file stored on your computer
- 		//***** Begining of the temporrary code *****
- 		var tempFileName = temp.path({prefix: 'com.palm.ares.hermes.phonegap'});
+ 		// Getting the needed informations from the parsed URL
+ 		// to generate the name of the built application.
+ 		var title = req.params.title,
+		    platform = req.params.platform,
+		    appId = req.params.appId,
+		    version = req.params.version,
+		    extensions = {
+			"android": "apk",
+			"ios": "ipa",
+			"webos": "ipk",
+			"symbian": "wgz",
+			"winphone": "xap",
+			"blackberry": "jad"
+		};
+		var fileName = title + "_" + version + "." + (extensions[platform] || "bin"), 
+ 		    tempFileName = temp.path({prefix: 'com.palm.ares.hermes.phonegap'});
  		
 		client.auth({
 			token: req.token			
@@ -278,18 +262,17 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 			}
 		});
 
-
 		function createMultipartData(){
 			// Build the multipart/formdata
 			var combinedStream = CombinedStream.create();
 			var boundary = generateBoundary();
 
 			// Adding part header
-			combinedStream.append(getPartHeader(fn, boundary));
+			combinedStream.append(getPartHeader(fileName, boundary));
 			// Adding file data
 			combinedStream.append(function(nextDataChunk){
 				
-				fs.readFile(tempFileName/*"C:\\TrucMush_0.1.apk"*/, 'base64', function (err, packagedFile) {
+				fs.readFile(tempFileName, 'base64', function (err, packagedFile) {
 					fs.unlink(tempFileName);
 					if (err) {
 						next('Unable to read ' + tempFileName);
@@ -308,14 +291,13 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 			combinedStream.append(getLastPartFooter(boundary));
 
 			// Send the files back as a multipart/form-data
-			log.verbose("check01: res"+ getContentTypeHeader(boundary));
+			log.verbose("downloadApp#returnBody#createMultipartData()", "Start streaming down:" + fileName);
 			res.status(200);
 			res.header('Content-Type', getContentTypeHeader(boundary));
 			combinedStream.pipe(res);
 
 			// cleanup the temp dir when the response has been sent
 			combinedStream.on('end', function() {
-
 				next();
 			});
 		}
@@ -355,8 +337,6 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 		}
 	}
 };
-
-
 
 BdPhoneGap.prototype.build = function(req, res, next) {
 	var appData = {}, query = req.query;
@@ -410,7 +390,6 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		log.silly("build#_parse(): appData:", appData);
 		next();
 	};
-
 
 	function _upload(next) {
 		log.info("build#_upload()");
