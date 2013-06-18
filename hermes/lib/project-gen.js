@@ -160,9 +160,16 @@ var shell = require("shelljs"),
 	
 	function parseInsertTemplates(data, templatesUrl, next) {
 		try {
-			var newTemplates = JSON.parse(data);
+			var dataObj = JSON.parse(data);
+			var newTemplates;
 
 			var base = (templatesUrl.substr(0, 4) !== 'http') && path.dirname(templatesUrl);
+
+			if (dataObj.hasOwnProperty('templates')) {
+				newTemplates = dataObj.templates;
+			} else {
+				newTemplates = dataObj;
+			}
 
 			newTemplates.forEach(function(entry) {
 				entry.zipfiles = entry.zipfiles || [];
@@ -248,12 +255,6 @@ var shell = require("shelljs"),
 
 	function prefix(item, options, srcDir, dstDir, next) {
 		log.verbose("generate#prefix()", "item:", item);
-		if (!item.prefixToRemove && !item.prefixToAdd) {
-			log.verbose("generate#prefix()", "skipping prefix changes");
-			next();
-			return;
-		}
-
 		var src = path.join(srcDir, item.prefixToRemove);
 		var dst = path.join(dstDir, item.prefixToAdd);
 		log.verbose("generate#prefix()", "src:", src, "-> dst:", dst);
