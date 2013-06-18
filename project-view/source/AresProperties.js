@@ -16,7 +16,7 @@ enyo.kind({
 
 	components: [
 		{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail"},
-		{name: "toolbarId", classes: "ares-right-toolbar", kind: "onyx.Toolbar", components: [
+		{name: "toolbarId", classes: "ares-bordered-toolbar", kind: "onyx.Toolbar", components: [
 			{name: "ok", kind: "onyx.Button", content: "OK", ontap: "confirmTap"}
 		]},
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"},

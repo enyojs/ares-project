@@ -60,6 +60,17 @@ Real stuff - Code
 
 Ares 2 is part of the EnyoJS ecosystem.  Before contributing code to Ares or Enyo, you want to read the [Contributors Guide](http://enyojs.com/community/contribute/).  Source-code contributions to the core Ares code are expected to follow the [Enyo Style Guide](https://github.com/enyojs/enyo/wiki/Style-Guide).
 
+#### Jshint
+
+Ares 2 will be soon integrated with [Travis CI](https://travis-ci.org/) to automatically run [JSHint](http://www.jshint.com/) when pull-requests are submitted.
+
+Before submitting a pull request, please follow these steps
+
+	$ cd ares-project
+	$ node_modules/.bin/jshint .
+	
+NOTE: JSHint configuration files (.jshintrc, …) are automatically loaded by some editors when the appropriate plugins are installed. See [JSHint - Plugins for text editors and IDEs](http://www.jshint.com/install/)
+
 ### Testing
 
 For all contributions on Ares project and before commit, please execute the available Ares Test Suite. See [this page](test/README.md) for more details.
