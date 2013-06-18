@@ -940,9 +940,15 @@ enyo.kind({
 					}
 				});			
 
-				this.refreshFileTree(function() {
-					that.$.scroller.scrollIntoView(inTarget, true);
-				}, inTarget.file.id);
+				inTarget.getChildren()
+					.response(this, function(inSender, inNodes) {
+						this.refreshFileTree(function() {
+							that.$.scroller.scrollIntoView(inTarget.getNodeWithId(inValue.id), true);
+						}, inValue.id);
+					})
+					.error(this, function() {
+						this.log("error retrieving related node children");
+					});
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to move:", inNode.file.name, inError);
