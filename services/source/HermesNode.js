@@ -283,8 +283,8 @@ enyo.kind({
 	 *
 	 */
 	
-	getChildren: function (inNode) {
-		return this.service.listFiles(inNode.file && inNode.file.id)
+	getChildren: function () {
+		return this.service.listFiles(this.file && this.file.id)
 			.response(this, function(inSender, inFiles) {
 				var sortedFiles = inFiles.sort(this.fileNameSort) ;
 				this.updateNodeContent(sortedFiles);

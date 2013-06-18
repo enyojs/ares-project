@@ -193,7 +193,7 @@ enyo.kind({
 					newParentNode=this.targetNode;
 				this.moveNode(this.draggedNode, this.targetNode)
 					.response(this, function(inSender, inNodeFile) {
-						newParentNode.getChildren(newParentNode)
+						newParentNode.getChildren()
 							.response(this, function(inSender, inNodes) {
 								this.movedNode=newParentNode.getNodeWithId(inNodeFile.id);
 								this.originNode=oldParentNode;
