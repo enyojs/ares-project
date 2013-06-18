@@ -40,7 +40,9 @@ function BdPhoneGap(config, next) {
 	config.minifyScript = config.minifyScript || path.join(config.enyoDir, 'tools', 'deploy.js');
 	try {
 		var stat = fs.statSync(config.minifyScript);
-		if (!stat.isFile()) throw "Not a file";
+		if (!stat.isFile()) {
+			throw "Not a file";
+		}
 	} catch(e) {
 		// Build a more usable exception
 		next(new Error("Not a suitable Enyo: it does not contain a usable 'tools/deploy.js'"));
@@ -79,9 +81,9 @@ BdPhoneGap.prototype.route = function() {
 	this.app.get(this.makeExpressRoute('/api/v1/me'), this.getUserData.bind(this));
 	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId'), this.getAppStatus.bind(this));
 	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId/:platform/:title/:version'),
-				 this.downloadApp.bind(this));
+		     this.downloadApp.bind(this));
 };
-	
+
 BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 	var self = this;
 	log.info("errorHandler()", "err:", err);
@@ -240,13 +242,13 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 		    appId = req.params.appId,
 		    version = req.params.version,
 		    extensions = {
-			"android": "apk",
-			"ios": "ipa",
-			"webos": "ipk",
-			"symbian": "wgz",
-			"winphone": "xap",
-			"blackberry": "jad"
-		};
+			    "android": "apk",
+			    "ios": "ipa",
+			    "webos": "ipk",
+			    "symbian": "wgz",
+			    "winphone": "xap",
+			    "blackberry": "jad"
+		    };
 		var fileName = title + "_" + version + "." + (extensions[platform] || "bin"), 
  		    tempFileName = temp.path({prefix: 'com.palm.ares.hermes.phonegap'});
  		
@@ -497,10 +499,14 @@ if (path.basename(process.argv[1], '.js') === basename) {
 		level: log.level,
 		enyoDir: path.resolve(__dirname, '..', 'enyo')
 	}, function(err, service){
-		if(err) process.exit(err);
+		if(err) {
+			process.exit(err);
+		}
 		// process.send() is only available if the
 		// parent-process is also node
-		if (process.send) process.send(service);
+		if (process.send) {
+			process.send(service);
+		}
 	});
 
 } else {
