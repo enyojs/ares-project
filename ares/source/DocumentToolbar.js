@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "AresTab",
 	kind: "GroupItem",
-	classes: "onyx-radiobutton ares-tab",
+	classes: "onyx-radiobutton ares-tab"
 });
 
 enyo.kind({
@@ -43,7 +43,7 @@ enyo.kind({
 			kind: "AresTab",
 			fileId: id,
 			components: [
-	    		{content: name, classes: "ares-tab-label"},
+				{content: name, classes: "ares-tab-label"},
 				{name: "close-"+id, kind: "onyx.IconButton", classes: "ares-doc-close", src: "$lib/onyx/images/progress-button-cancel.png", fileId: id, ontap: "closeFile"}
 			],
 			ontap: "switchFile"
