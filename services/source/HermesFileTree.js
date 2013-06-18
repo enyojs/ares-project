@@ -49,9 +49,9 @@ enyo.kind({
 				{kind: "onyx.Tooltip", content: $L("Delete...")}
 			]},
 			{name: "revertMove", kind: "onyx.TooltipDecorator", components: [
-   				{name: "revertMoveButton", kind: "onyx.IconButton", src: "$harmonia/images/undo.png", ontap: "revertClick"},
-   				{kind: "onyx.Tooltip", content: $L("Revert move...")}
-     		]}
+				{name: "revertMoveButton", kind: "onyx.IconButton", src: "$harmonia/images/undo.png", ontap: "revertClick"},
+				{kind: "onyx.Tooltip", content: $L("Revert move...")}
+			]}
 		]},
 		
 		// Hermes tree, "serverNode" component will be added as HermesFileTree is created
@@ -256,7 +256,7 @@ enyo.kind({
 		if (this.debug) this.log("inNode=", inNode);
 		
 		var draggedFile = this.draggedNode.file,
-				inFile = inNode.file
+				inFile = inNode.file;
 		
 		if (draggedFile != inFile) {
 			if (inFile.isDir) {
@@ -543,8 +543,7 @@ enyo.kind({
 	 */
 	getFolderOfSelectedNode: function() {
 		var node = this.selectedNode;
-		return node && !node.file.isDir ? this.selectedNode.container
-		     : node;
+		return node && !node.file.isDir ? this.selectedNode.container : node;
 	},
 
 	/**
