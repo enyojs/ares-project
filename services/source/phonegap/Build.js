@@ -8,13 +8,16 @@ enyo.kind({
 	events: {
 		onLoginFailed: "",
 		onShowWaitPopup: ""
+	},
+	published: {
+		timeoutDuration: 3000
 	},	
 	components: [
 		{kind: "Phonegap.BuildStatusUI",
 		 name: "buildStatusPopup"
 		}
 	],
-	debug: false,
+	debug: true,
 	/**
 	 * @private
 	 */
@@ -237,6 +240,8 @@ enyo.kind({
 	 * details about the project built in Phongap platform.
 	 * 
 	 * @param  {Object}   project contain informations about the Ares project
+	 * @param  {Object}  inData  contains detailed informations about the built
+	 *                           application on Phonegap
 	 * @param  {Function} next    is a CommonJS callback
 	 * @private
 	 */
@@ -281,6 +286,8 @@ enyo.kind({
 	 * 
 	 * @param  {Object}   project contain a description about the current selected
 	 *                          project
+	 * @param  {Object}  appData  contains detailed informations about the built
+	 *                           application on Phonegap                          
 	 * @param  {Function} next    is a CommonJs callback
 	 * @private
 	 */
@@ -419,7 +426,7 @@ enyo.kind({
 			enyo.bind(this, this._getFiles, project),
 			enyo.bind(this, this._submitBuildRequest, project),
 			enyo.bind(this, this._prepareStore, project),
-			enyo.bind(this, this._store, project),
+			enyo.bind(this, this._store, project)
 		], next);
 	},
 
@@ -584,13 +591,15 @@ enyo.kind({
 	 * Prepare the folder where to store the built package
 	 * @param  {Object}   project contain a description about the current selected
 	 *                          project
-	 * @param  {Object}   inData  [description]
-	 * @param  {Function} next    [description]
+	 * @param  {Object}  inData  contains detailed informations about the built
+	 *                           application on Phonegap
+	 * @param  {Function} next    a CommonJS callback
 	 * @private
 	 */
 	_prepareStore: function(project, inData, next) {
 		var folderKey = "build." + this.getName() + ".target.folderId",
 		    folderPath = "target/" + this.getName();
+		 this.doShowWaitPopup({msg: $L("Storing Phonegap application package")});
 
 		var folderId = project.getObject(folderKey);
 		if (folderId) {
@@ -608,7 +617,7 @@ enyo.kind({
 	},
 
 	/**
-	 * Create a the built application file in the target directory of the project.
+	 * Store the built application file in the directory "<projectName>\target\Phonegap build".
 	 *
 	 * 
 	 * @param  {Object}   project contain a description about the current selected
@@ -616,7 +625,7 @@ enyo.kind({
 	 * @param  {String}   folderId id used in Hermes File system to identify the 
 	 *                             target folder where the downloaded applications
 	 *                             will be stored.
-	 * @param  {Object}   inData   contains detailed information about the build of
+	 * @param  {Object}   inData   contains detailed informations about the build of
 	 *                           the project.
 	 * @param  {Function} next     a CommonJs callback.
 	 * @private            
@@ -658,10 +667,6 @@ enyo.kind({
 	 * @private
 	 */
 	_store: function(project, folderId, appData, next) {
-	
-		enyo.Signals.send("onUpdateAppData", {appData: appData});
-
-
 		var config = ares.clone(project.getConfig().getData());
 		var applicationId = config.id;
 	
@@ -677,7 +682,7 @@ enyo.kind({
 
 		project.setObject(appKey, appData);
 			
-		this._getAllApplications(project, appData, folderId, next);
+		this._getAllPackagedApplications(project, appData, folderId, next);
 	},
 	
 	/**
@@ -690,7 +695,7 @@ enyo.kind({
 	 * @param  {Function} next     a CommonJS callback
 	 * @private
 	 */
-	_getAllApplications: function(project, appData, folderId, next){
+	_getAllPackagedApplications: function(project, appData, folderId, next){
 	
 		var platforms = [];
 
@@ -759,7 +764,7 @@ enyo.kind({
 				async.waterfall([
 	    			function (next) {
 	    				//Timeout before sending a new check status request
-	        			setTimeout(next, 3000);
+	        			setTimeout(next, builder.timeoutDuration);
 	    			},
 	    			function (next) {
 	    				if(appData.status[platform] === "pending"){
@@ -779,7 +784,7 @@ enyo.kind({
 	    		], next);	    			
 			}
 			/**
-			 * Launch the appropirate action when an exception occure or when 
+			 * Launch the appropirate action when an exception occurs or when 
 			 * the status is no longer in the pending state.
 			 * @param  {Object} err 
 			 * @private
