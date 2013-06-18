@@ -241,7 +241,7 @@ enyo.kind({
 		if (inTargetNode != this.draggedNode && inTargetNode.file.isDir && !inTargetNode.expanded) {
 			this.$.selection.select(inTargetNode.file.id, inTargetNode);
 			
-			inTargetNode.expanded = true;
+			inTargetNode.setExpanded(true);
 			// update icon for expanded state
 			inTargetNode.setIcon("$services/assets/images/folder-open.png");
 			
