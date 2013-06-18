@@ -1,0 +1,10 @@
+#!/bin/bash
+
+case "${1}" in
+    --about )
+        echo "Install npm modules."
+        ;;
+    * )
+		TMP=/home/domi/tmp PATH=$ENYOBIN:$PATH npm -d install
+        ;;
+esac
