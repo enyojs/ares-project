@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use IO::Pipe;
+
+if ($ARGV[0] eq '--about') {
+	print "prepend branch name to commit message\n";
+	exit 0;
+}
+
+my $pipe = IO::Pipe->new()->reader(qw(git branch));
+my ($enyo) = grep {chomp; s/^\* //; } $pipe->getlines ;
+$pipe->close ;
+
+my $msg_h = IO::File->new ($ARGV[0]) ;
+my @msg = $msg_h->getlines ;
+$msg[0] = $enyo.': '. $msg[0] ;
+$msg_h->close;
+
+my $pipe2 = IO::Pipe->new()->reader(qw/git var GIT_AUTHOR_IDENT/) ;
+my @sob = split / /, $pipe2->getline ;
+$pipe2->close;
+
+push @msg, "\n", "\n";# join(' ','Enyo-DCO-1.1-Signed-off-by:',@sob[0..2])."\n";
+#print @msg ;
+
+my $out = IO::File->new($ARGV[0],'w') ;
+$out->print(@msg) ;
+$out->close ;
