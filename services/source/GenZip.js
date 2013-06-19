@@ -33,15 +33,6 @@ enyo.kind({
 			this.url = this.config.origin + this.config.pathname;
 			if (this.debug) this.log("url:", this.url);
 		}
-
-		// Populate the repositories on nodejs
-		for(var repoId in inConfig.projectTemplateRepositories) {
-			var repository = inConfig.projectTemplateRepositories[repoId];
-			repository.id = repoId;
-			if (repository.url) {
-				this.createRepo(repository);		// TODO: handle the answer
-			}
-		}
 	},
 	/**
 	 * @return {Object} the configuration this service was configured by
@@ -49,24 +40,25 @@ enyo.kind({
 	getConfig: function() {
 		return this.config;
 	},
-	getTemplates: function() {
+	/** @public */
+	getSources: function(type) {
 		if (this.debug) this.log();
 
 		var req = new enyo.Ajax({
-			url: this.url + '/templates'
+			url: this.url + '/config/sources'
 		});
-		return req.go();
+		return req.go({type: type});
 	},
-	generate: function(templateId, substitutions) {
+	generate: function(options) {
 		if (this.debug) this.log();
 
-		var data = "templateId=" + encodeURIComponent(templateId);
-		data +=	("&substitutions=" + encodeURIComponent(JSON.stringify(substitutions)));
+		var data = "sourceIds=" + encodeURIComponent(JSON.stringify(options.sourceIds));
+		data +=	("&substitutions=" + encodeURIComponent(JSON.stringify(options.substitutions)));
 
 		var userreq = new enyo.Async();
 
 		var req = new enyo.Ajax({
-			url: this.url + '/generate',
+			url: this.url + '/op/generate',
 			method: 'POST',
 			handleAs: "text",
 			postBody: data,
@@ -82,16 +74,5 @@ enyo.kind({
 		});
 		req.go();
 		return userreq;
-	},
-	createRepo: function(repo) {
-		if (this.debug) this.log(repo);
-		var data = "url=" + encodeURIComponent(repo.url);
-
-		var req = new enyo.Ajax({
-			url: this.url + '/template-repos/' + repo.id,
-			method: 'POST',
-			postBody: data
-		});
-		return req.go();
 	}
 });
