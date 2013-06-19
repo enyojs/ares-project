@@ -9,245 +9,200 @@ enyo.kind({
 	centered: true,
 	floating: true,
 	autoDismiss: false,
-	debug: true,
-	style:"width: 500px; height: 280px;",
+	debug: false,
+	classes: "ares-BuildStatusUI",
+	published: {
+		pgUrl: "",
+	},
 	handlers: {
-		onDismissPopup: "hidePopup"
-	}, 
+		onDismissPopup: "_hidePopup"
+	},
 	components: [
-
-			{kind:"BuildStatusTopToolBar",
-			 name: "TopTB"
-			},	   			
-
-			{kind: "FittableRows",
-    		name:"AllStatus",
-    		components: [
-
-    			{kind: "StatusRow",
-    			 name: "AndroidStatus"    			 
-    			},	    		
-	    		
-    			{kind: "StatusRow",
-    			 name: "IosStatus"  		
-    			},
-
-		    	{kind: "StatusRow",
-    			 name: "BlackBerryStatus"    			
-    			},
-
-		    	{kind: "StatusRow",
-    			 name: "SymbianStatus"
-    			},
-
-		    	{kind: "StatusRow",
-    			 name: "WebosStatus"
-    			},
-
-		    	{kind: "StatusRow",
-    			 name: "WinphoneStatus"
-    			},
-		      ]
+		// Header displaying :
+		// * The application name
+		// * Phonegap version used for the build
+		// * The owner of the application
+		{
+			kind: "onyx.Toolbar",
+			components: [{
+					kind: "FittableRows",
+					name: "HeaderRows"
+				}
+			]
 		},
-	    {kind: "BuildStatusBotomToolBar",
-		 name: "BottomTB"
+		//this component contains the status information 
+		//for each target platform supported by Phonegap.
+		{
+			kind: "FittableRows",
+			name: "AllStatus",
+			style: "padding-left: 60px;"
+		},
+
+		//Footer containing the "Ok" button to dismiss the Pop-up
+		{
+			kind: "BuildStatusBotomToolBar",
+			name: "BottomTB"
 		}
 	],
 
 	/**
-	 * Show the status informations about the selected project
-	 * @param  {Object} inSender contain the status informations
-	 * @return {boolean} show the pop-up
+	 * Hide the Pop-up when the ok button is clicked.
+	 * @private
 	 */
-	
-	create: function(){
-		this.inherited(arguments);
-	
-		this.$.AndroidStatus.setLabelValue("Android");
-		this.$.IosStatus.setLabelValue("IOS");
-		this.$.BlackBerryStatus.setLabelValue("BlackBerry");
-		this.$.SymbianStatus.setLabelValue("Symbian");
-		this.$.WebosStatus.setLabelValue("WebOS");
-		this.$.WinphoneStatus.setLabelValue("Windows Phone 7");
+	_hidePopup: function () {
+		this.hide();
+		return true; //stop the bubbling
 	},
 
-	
-    hidePopup: function(){
-    	this.hide();
-    	return true; //stop the bubbling
-    },
+	/**
+	 * Setup the content of the pop-up and display it.
+	 *
+	 * @param  {Object} project   contain a description of the current selected
+	 *                          project
+	 * @param  {Object} inAppData contains detailed informations relative to the built
+	 *                           application on Phonegap
+	 * @public
+	 */
+	showPopup: function (project, inAppData) {
 
-    showPopup: function(project, inUserData){
-    	this.setUpHeader(inUserData);
-    	this.setUpStatus(inUserData);
-    	this.log("BuildStatusUI#showPopup()#inUserData", inUserData.id);
-    	this.$.AndroidStatus.setAppId(inUserData.id);
-    	this.show();
-    },
+		//Setting to pop-up content.
+		this.setUpHeader(inAppData);
+		this.setUpRows(inAppData);
 
-    setUpHeader: function(inData){
-    	this.$.TopTB.setTitle(inData.title);
-    	this.$.TopTB.setVersion(inData.phonegap_version);
-    	//this.$.TopTB.setOwner(inData.collaborators.active[0].person);
-    },
+		// Setting the target URL of the webview opened when 
+		// an instance of "DataRow" is clicked.
+		this.pgUrl = "https://build.phonegap.com/apps/" + inAppData.id + "/builds";
 
+		//Display the pop-up.
+		this.show();
+	},
 
-    setUpStatus: function(inData){
-    	this.$.AndroidStatus.setStatusValue(inData.status["android"]);
-		this.$.IosStatus.setStatusValue(inData.status["ios"]);
-		this.$.BlackBerryStatus.setStatusValue(inData.status["blackberry"]);
-		this.$.SymbianStatus.setStatusValue(inData.status["symbian"]);
-		this.$.WebosStatus.setStatusValue(inData.status["webos"]);
-		this.$.WinphoneStatus.setStatusValue(inData.status["winphone"]);
-
-    },
-
-
- 
-    getBuildStatusData: function(inData){
-		
-		if(this.debug){
-
-    		enyo.log("the user data are : ", inData );
-    		enyo.log("Phonegap version used for the build: ", 
-    		      'inData.phonegap_version');
-    		enyo.log("Owned by: ",
-    			  'inData.collaborators.active[0].person');
-    		enyo.log("The title is: ",'title');
-    		
-    		
-    		
-    		this.log("Android download: ", this.url + inData.download.android);
-    		this.log("IOS download: ",this.url + inData.download.ios);
-    		this.log("BlackBerry download: ", this.url + inData.download.blackberry);
-    		this.log("Symbian download: ", this.url + inData.download.symbian);
-    		this.log("WebOS download: ", this.url + inData.download.webos);
-    		this.log("Windows Phone 7 download: ", this.url + inData.download.winphone);
+	/**
+	 * Create the status rows.
+	 *
+	 * @param  {Object} inAppData contains detailed informations relative to the built
+	 *                           application on Phonegap
+	 * @private
+	 */
+	setUpRows: function (inAppData) {
+		//Creating the array containing the status's data.
+		var platforms = enyo.keys(inAppData && inAppData.status);
+		if (this.debug) {
+			this.log("Application Data: ", inAppData);
+			this.log("platforms list: ", platforms);
 		}
-	}   
-});
 
-
-enyo.kind({
-	name: "BuildStatusTopToolBar", 
-	kind: "onyx.Toolbar",
-	published: {
-		title: "",
-		version: "",
-		owner: ""
+		// Instanciate the status rows.
+		enyo.forEach(platforms, function (platform) {
+			this.$.AllStatus.createComponent({
+				kind: "DataRow",
+				name: platform,
+				label: platform,
+				value: inAppData && inAppData.status[platform] || "error"
+			});
+		}, this);
 	},
 
-	components: [
-		{content: "Application: "
-		},
+	/**
+	 * Create the header's rows of the Pop-up.
+	 *
+	 * @param  {Object} inAppData contains detailed informations relative to the built
+	 *                           application on Phonegap
+	 * @private
+	 */
+	setUpHeader: function (inAppData) {
+		//Creating the array containing the header's data.
+		var headerData = [
+			["Application", inAppData && inAppData.package],
+			["Phonegap version", inAppData && inAppData.phonegap_version],
+			["Owner", inAppData &&
+					inAppData.collaborators &&
+					inAppData.collaborators.active[0] &&
+					inAppData.collaborators.active[0].person
+			]
+		];
 
-		{name: "TitleLabel"
-		},
-		
-		
-
-		{style: "font-size: 70%;", 
-		 content:"Phonegap version : ",
-		 tag: "br"
-		},
-
-		{name: "PhonegapVersionLabel",
-		 style: "font-size: 70%;"
-		},
-		
-		
-	], 
-
-	create: function(){
-		this.inherited(arguments);
-	},
-
-	titleChanged: function(){
-		this.$.TitleLabel.setContent(this.title);
-	},
-
-	versionChanged: function(){
-		this.$.PhonegapVersionLabel.setContent(this.version);
+		// Instanciate the header's rows.
+		enyo.forEach(headerData, function (row) {
+			this.$.HeaderRows.createComponent({
+				kind: "DataRow",
+				label: row[0],
+				value: row[1]
+			});
+		}, this);
 	}
-	
 });
 
-
+/**
+ * A DataRow is a UI component of the BuildStatusUI containing two labels:
+ * - The first label is the title of the row
+ * - The second label is the content displayed for an appData sent
+ * 	 by Phonegap
+ */
 enyo.kind({
-	name: "StatusRow",
+	name: "DataRow",
 	kind: "FittableColumns",
-	style: "margin-top: 10px;",
+	classes: "ares-BuildStatusUI-row",
 	published: {
-		labelValue: "Platform",
-		statusValue: "Status",
-		appId: "",
-		pgUrl: ""
+		label: "",
+		value: ""
 	},
 	handlers: {
 		ontap: "manageApps"
 	},
-	debug: true,
-	components: [
-	 		{name: "StatusRow_platform",
-		  	 style: "width: 150px;"
-		    },
-     		{name: "StatusRow_status",
-    	     style: "width: 150px;"
-    	    },
-			{tag: "br"}
-	 ],
-	create: function(){
-	 	this.inherited(arguments);
-	 	
-	 	this.labelValueChanged();
-	 	this.statusValueChanged();
+	components: [{
+			name: "Label",
+			classes: "ares-BuildStatusUI-row-label"
+		}, {
+			name: "Value",
+			classes: "ares-BuildStatusUI-row-label"
+		}, {
+			tag: "br"
+		}
+	],
+	debug: false,
+
+	create: function () {
+		this.inherited(arguments);
+		this.labelChanged();
+		this.valueChanged();
 	},
 
-	labelValueChanged: function(){
-	 	this.$.StatusRow_platform.setContent(this.labelValue);
-	},
-	appIdChanged: function(){
-		if(this.debug){
-			this.log("BuildStatusUI#appIdChanged(): ", this.appId);
+	labelChanged: function () {
+		this.$.Label.setContent(this.label);
+		if (this.debug) {
+			this.log("Label is: ", this.label);
 		}
-		this.pgUrl = "https://build.phonegap.com/apps/" + 
-	 				  this.appId + "/builds";
 	},
-	manageApps: function(inSender, inValue) {
+
+	valueChanged: function () {
+		this.$.Value.setContent(this.value);
+		if (this.debug) {
+			this.log("Value is:", this.value);
+		}
+	},
+	manageApps: function (inSender, inValue) {
+		if (this.debug) this.log("sender:", inSender, "value:", inValue);
 		var accountPopup = window.open(this.pgUrl,
-					       "PhoneGap Build Account Management",
-					       "resizeable=1,width=1024, height=600", 'self');
+			"PhoneGap Build Account Management",
+			"resizeable=1,width=1024, height=600", 'self');
 	},
-	statusValueChanged: function(){
-	 	this.$.StatusRow_status.setContent(this.statusValue);
-	}		    	
 });
 
 enyo.kind({
-	name: "BuildStatusBotomToolBar", 
-	 classes: "ares-bordered-toolbar", 
-	 kind: "onyx.Toolbar",
-	 components: [
-		   {name: "ok", 
-		    kind: "onyx.Button", 
-		    content: "OK",
-		    handlers: { 
-		    	ontap: 'tapped'
-		     }, 
-		    tapped: function(){
-		 		this.bubble("onDismissPopup");
-		 	}
-	    }
-	 ]	 
+	name: "BuildStatusBotomToolBar",
+	classes: "ares-bordered-toolbar",
+	kind: "onyx.Toolbar",
+	components: [{
+			name: "ok",
+			kind: "onyx.Button",
+			content: "OK",
+			handlers: {
+				ontap: 'tapped'
+			},
+			tapped: function () {
+				this.bubble("onDismissPopup");
+			}
+		}
+	]
 });
-
-
-
-
-
-
-
-
-
-
-  

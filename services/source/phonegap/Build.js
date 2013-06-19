@@ -17,7 +17,7 @@ enyo.kind({
 		 name: "buildStatusPopup"
 		}
 	],
-	debug: true,
+	debug: false,
 	/**
 	 * @private
 	 */
@@ -240,12 +240,13 @@ enyo.kind({
 	 * details about the project built in Phongap platform.
 	 * 
 	 * @param  {Object}   project contain informations about the Ares project
-	 * @param  {Object}  inData  contains detailed informations about the built
-	 *                           application on Phonegap
+	 * @param  {Object}  inAppData  contains detailed informations of the submitted 
+	 *                              package to Phonegap build plateform
+	 *                           application in Phonegap
 	 * @param  {Function} next    is a CommonJS callback
 	 * @private
 	 */
-	_getBuildStatus: function(project, inData, next){
+	_getBuildStatus: function(project, inAppData, next){
 		var config = project.getConfig().getData();
 		var appId = config.providers.phonegap.appId;
 		var url = this.url + '/api/v1/apps/' + appId;
@@ -257,10 +258,10 @@ enyo.kind({
 
 		//in case of sucess send the obtained JSON object to the next function
 		//in the Async.waterfall.
-		req.response(this, function(inSender, inData) {
+		req.response(this, function(inSender, inAppData) {
 		
 		  // activate the pop up to view the results
-		  next(null, inData);
+		  next(null, inAppData);
 		});
 		req.error(this, function(inSender, inError) {
 			// invalidate token
@@ -281,12 +282,12 @@ enyo.kind({
 	},
 	
 	/**
-	 * Show the pop-up containing informations about the previous  build of the 
-	 * selected project from the project list view.
+	 * Show the pop-up containing the informations of the previous build of the 
+	 * current selected project from the project list view.
 	 * 
-	 * @param  {Object}   project contain a description about the current selected
+	 * @param  {Object}   project contain a description of the current selected
 	 *                          project
-	 * @param  {Object}  appData  contains detailed informations about the built
+	 * @param  {Object}  appData  contains detailed informations of the built
 	 *                           application on Phonegap                          
 	 * @param  {Function} next    is a CommonJs callback
 	 * @private
@@ -408,11 +409,16 @@ enyo.kind({
 	 *
 	 * The following actions will be performed:
 	 * - Get a phonegapbuild account token
-	 * - Get the file list of the project
+	 * - Get the configuration parameters of the project
 	 * - Download all the project files
 	 * - Build a multipart/form-data with all the project data
 	 * - Send it to nodejs which will submit the build request
 	 * - Save the appid
+	 * - wait for the response of nodejs wich containe the packaged
+	 * 	 applicaiton built by Phonegap build service.
+	 * - create the packaged application files in the target directory
+	 *   of the project from the multipart/form-data of the response
+	 *   
 	 * 
 	 * @param {Ares.Model.Project} project
 	 * @param {Function} next is a CommonJS callback
@@ -431,11 +437,11 @@ enyo.kind({
 	},
 
 	/**
-	 * Communicate with Phonegap build in order to get the curent status of the
-	 * built project for all targeted platforms. This status are showen in a 
-	 * Pop-up defined in the file BuildStatusUI.js
+	 * Communicate with Phonegap build platform in order to get the status of progress 
+	 * of the building project in each targeted platform. These status are showen in a 
+	 * Pop-up defined in the @see{BuildStatusUI}
 	 * 
-	 * @param  {Object}   project contain a description about the current selected
+	 * @param  {Object}   project contain a description of the current selected
 	 *                            project
 	 * @param  {Function} next    is a CommonJS Callback
 	 * @public
@@ -589,28 +595,28 @@ enyo.kind({
 
 	/**
 	 * Prepare the folder where to store the built package
-	 * @param  {Object}   project contain a description about the current selected
+	 * @param  {Object}   project contain a description of the current selected
 	 *                          project
-	 * @param  {Object}  inData  contains detailed informations about the built
-	 *                           application on Phonegap
+ 	 * @param  {Object}  inAppData  contains detailed informations of the submitted 
+	 *                              package to Phonegap build plateform
 	 * @param  {Function} next    a CommonJS callback
 	 * @private
 	 */
-	_prepareStore: function(project, inData, next) {
+	_prepareStore: function(project, inAppData, next) {
 		var folderKey = "build." + this.getName() + ".target.folderId",
 		    folderPath = "target/" + this.getName();
 		 this.doShowWaitPopup({msg: $L("Storing Phonegap application package")});
 
 		var folderId = project.getObject(folderKey);
 		if (folderId) {
-			next(null, folderId, inData);
+			next(null, folderId, inAppData);
 		} else {
 			var req = project.getService().createFolder(project.getFolderId(), folderPath);
 			req.response(this, function(inSender, inResponse) {
 				if (this.debug) this.log("response received ", inResponse);
 				folderId = inResponse.id;
 				project.setObject(folderKey, folderId);
-				next(null, folderId, inData);
+				next(null, folderId, inAppData);
 			});
 			req.error(this, this._handleServiceError.bind(this, "Unable to prepare package storage", next));
 		}
@@ -620,28 +626,28 @@ enyo.kind({
 	 * Store the built application file in the directory "<projectName>\target\Phonegap build".
 	 *
 	 * 
-	 * @param  {Object}   project contain a description about the current selected
+	 * @param  {Object}   project contain a description of the current selected
 	 *                            project
 	 * @param  {String}   folderId id used in Hermes File system to identify the 
 	 *                             target folder where the downloaded applications
 	 *                             will be stored.
-	 * @param  {Object}   inData   contains detailed informations about the build of
-	 *                           the project.
+	 * @param  {Object}  inAppData  contains detailed informations of the submitted 
+	 *                              package to Phonegap build plateform
 	 * @param  {Function} next     a CommonJs callback.
 	 * @private            
 	 */
-	_storePkg: function(project, folderId, inData, next) {
+	_storePkg: function(project, folderId, inAppData, next) {
 		if(this.debug){		
-			this.log("data content.ctype: ", inData.ctype);	
+			this.log("data content.ctype: ", inAppData.ctype);	
 		}	
 
 		var req = project.getService().createFiles(folderId, 
-			{content: inData.content, ctype: inData.ctype});
+			{content: inAppData.content, ctype: inAppData.ctype});
 
-		req.response(this, function(inSender, inData) {
-			if (this.debug) this.log("response received ", inData);
+		req.response(this, function(inSender, inAppData) {
+			if (this.debug) this.log("response received ", inAppData);
 			var config = project.getService().config;
-			var pkgUrl = config.origin + config.pathname + '/file' + inData[0].path; // TODO: YDM: shortcut to be refined
+			var pkgUrl = config.origin + config.pathname + '/file' + inAppData[0].path;
 			project.setObject("build.phonegap.target.pkgUrl", pkgUrl);
 			next();
 		});
@@ -649,8 +655,8 @@ enyo.kind({
 	},	
 
 	/**
-	 * After checking that the building of the project is finished in Phongap platform, this 
-	 * function send an ajax request to the Node.js in order to launch
+	 * After checking that the building of the project is finished in Phonegap 
+	 * platform, this function send an ajax request to Node.js in order to launch
 	 * the download of the packaged application. 
 	 * Node.js succeed in the downloading of this application, 
 	 * an Ajax response is sent back in order to save the
@@ -702,7 +708,7 @@ enyo.kind({
 		var builder = this;
 		
 
-		//Setting the targeted platforms for the build from the those
+		//Setting the targeted platforms for the build from those
 		//presented in the object appData.
 		enyo.forEach(enyo.keys(appData.status),
 			function(platform){
@@ -774,10 +780,10 @@ enyo.kind({
 	    				}
 	    				
 	    			},
-	    			function(inData, next) {
+	    			function(inAppData, next) {
 	    				//get the result from the previous status check request
-	    				if (inData !== null){
-	    					appData = inData.user;
+	    				if (inAppData !== null){
+	    					appData = inAppData.user;
 	    				}	    				
 	    				next();
 	    			}
@@ -839,11 +845,10 @@ enyo.kind({
 						_sendDownloadRequest.bind(builder)( 
 							urlSuffix, next);
 					},
-					//inData is a multipart/form containing the
-					//built application
-					function(inData, next){
+					//the built application is sent in a multipart/form-data.
+					function(inAppData, next){
 						builder._storePkg(project, folderId, 
-						inData, next);
+						inAppData, next);
 					}
 				], next);
 			}
@@ -877,16 +882,16 @@ enyo.kind({
 				});		
 
 				//Handling a successfull response
-				req.response(this, function(inSender, inData) {
+				req.response(this, function(inSender, inAppData) {
 					if (this.debug){
-						this.log("response: received " + inData.length + 
-							" bytes typeof: " + (typeof inData));
+						this.log("response: received " + inAppData.length + 
+							" bytes typeof: " + (typeof inAppData));
 					}
 					var ctype = req.xhrResponse.headers['content-type'];
 					if (this.debug){
 						this.log("response: received ctype: " + ctype);
 					}
-					next(null, {content: inData, ctype: ctype});			
+					next(null, {content: inAppData, ctype: ctype});			
 				});
 
 				//Handling a failure response
