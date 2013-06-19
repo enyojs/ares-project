@@ -55,7 +55,7 @@ enyo.kind({
 		]},
 		
 		// Hermes tree, "serverNode" component will be added as HermesFileTree is created
-		{name: "scroller", kind: "Scroller", fit: true},
+		{kind: "Scroller", fit: true},
 
 		// track selection of nodes. here, selection Key is file or folderId.
 		// Selection value is the node object. Is an Enyo kind
