@@ -52,8 +52,8 @@ var ares = {
 	 * @param {String} the path to extract the dirname from
 	 * @return the path dirname
 	 */
- 	dirname: function (path) {
-		return path.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');;
+	dirname: function (path) {
+		return path.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');
 	},
 
 	/** @private */
@@ -154,14 +154,13 @@ var ares = {
 		var testWindow = window.open("popupTest.htm", "popupTest", params);
 
 		if ( !testWindow || 
-		     testWindow.closed ||
-		     (typeof testWindow.closed=='undefined') ||
-		     (testWindow.outerHeight === 0) ||
-		     (testWindow.outerWidth === 0)) {
-			  // pop-ups ARE blocked
-			  return true;
-		  }
-		else {
+			testWindow.closed ||
+			(typeof testWindow.closed=='undefined') ||
+			(testWindow.outerHeight === 0) ||
+			(testWindow.outerWidth === 0)) {
+				// pop-ups ARE blocked
+				return true;
+		} else {
 			// pop-ups are NOT blocked
 			testWindow.close();
 			return false;

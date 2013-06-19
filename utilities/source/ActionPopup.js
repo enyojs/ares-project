@@ -7,14 +7,14 @@ enyo.kind({
         autoDismiss: false,
         classes:"ares-classic-popup",
         published: {
-        	name: "",
+            name: "",
             actionButton: "",
             message: ""
         },
-    	events: {
-    		onConfirmDeleteProject: "",
-    		onAbandonDocAction: "",
-    	},
+        events: {
+            onConfirmDeleteProject: "",
+            onAbandonDocAction: ""
+        },
         components: [
             {tag: "div", name: "title", classes:"title", content: " "},
             {kind: "enyo.Scroller",  classes:"ares-small-popup", fit: true, components: [
@@ -31,22 +31,22 @@ enyo.kind({
         create: function() {
                 this.inherited(arguments);
         },
-    	nameChanged: function(oldVal) {
-    		this.$.title.setContent(this.name);
-    	},
+        nameChanged: function(oldVal) {
+            this.$.title.setContent(this.name);
+        },
         messageChanged:function(oldVal) {
             this.$.message.setContent(this.message);
         },
-    	actionButtonChanged: function(oldVal) {
-    		this.$.actionButton.setContent(this.actionButton);
-    	},
-    	actionCancel: function(inSender, inEvent) {
-    	    this.hide();
-    	},
-    	actionConfirm: function(inSender, inEvent) {
-    	    this.hide();
-    	    this.doConfirmDeleteProject();
-    	    this.doAbandonDocAction();
-    	}
-    	
+        actionButtonChanged: function(oldVal) {
+            this.$.actionButton.setContent(this.actionButton);
+        },
+        actionCancel: function(inSender, inEvent) {
+            this.hide();
+        },
+        actionConfirm: function(inSender, inEvent) {
+            this.hide();
+            this.doConfirmDeleteProject();
+            this.doAbandonDocAction();
+        }
+
 });

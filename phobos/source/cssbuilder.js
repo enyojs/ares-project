@@ -522,12 +522,12 @@ enyo.kind({
 	},
 
 	textshadow: function(inSender, inEvent) {
-		this.$.toggle = "text-shadow",
+		this.$.toggle = "text-shadow";
 		this.$.textShadowPopup.show();
 	},
 	textshadowH: function(inSender, inEvent) {
-			this.$.textshadowH = inEvent.selected.content;
-			this.updateBox();
+		this.$.textshadowH = inEvent.selected.content;
+		this.updateBox();
 	},
 	textshadowV: function(inSender, inEvent) {
 		this.$.textshadowV = inEvent.selected.content;
@@ -545,7 +545,7 @@ enyo.kind({
 	},
 
 	boxshadow: function(inSender, inEvent) {
-		this.$.toggle = "box-shadow",
+		this.$.toggle = "box-shadow";
 		this.$.boxShadowPopup.show();
 	},
 	boxshadowH: function(inSender, inEvent) {
@@ -567,7 +567,7 @@ enyo.kind({
 		enyo.log(this.$.bgImage, this.$.imageInput.hasNode().value );
 	},
 	hrepeat: function(inSender) {
-		if (inSender.checked == true ){
+		if (inSender.checked === true ){
 			this.$.hrepeat = true;
 		}else{
 			this.$.hrepeat  = null;
@@ -575,7 +575,7 @@ enyo.kind({
 		this.updateBox();
 	},
 	vrepeat: function(inSender) {
-		if (inSender.checked == true ){
+		if (inSender.checked === true ){
 			this.$.vrepeat = true;
 		}else{
 			this.$.vrepeat  = null;
@@ -584,7 +584,7 @@ enyo.kind({
 	},
 	
 	norepeat: function(inSender) {
-		if (inSender.checked == true ){
+		if (inSender.checked === true ){
 			this.$.norepeat = true;
 		}else{
 			this.$.norepeat  = null;
@@ -611,7 +611,6 @@ enyo.kind({
 		this.$.vrepeat = null;
 		this.$.norepeat = null;
 		this.$.outPut = null;
-		outString = "";
 		this.updateBox();
 
 	}
