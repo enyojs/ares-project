@@ -170,8 +170,7 @@ body {
 
 .onyx-radiobutton {
 	font-size: 13px;
-	/*padding-top: 8px 4px;*/
-	/*margin-bottom: 15px;*/
+	margin-bottom: 15px;
 }
 
 .onyx-toolbar .onyx-button { height: 28px; }
