@@ -19,9 +19,6 @@
 [submodule "lib/g11n"]
 	path = lib/g11n
 	url = ../../enyojs/g11n.git
-[submodule "node_modules/unzip"]
-	path = node_modules/unzip
-	url = ../../enyojs/node-unzip.git
 [submodule "lib/foss/ace-builds"]
 	path = lib/foss/ace-builds
 	url = ../../ajaxorg/ace-builds.git

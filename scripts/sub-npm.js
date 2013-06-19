@@ -3,7 +3,6 @@ var path = require('path'),
 
 var submodules = [
 	'node_modules/ares-generator',
-	'node_modules/unzip',
 	'node_modules/semver'
 ];
 
