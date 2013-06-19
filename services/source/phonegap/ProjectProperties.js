@@ -10,6 +10,18 @@ enyo.kind({
 
 	],
 	statics: {
+		
+		general: [
+			["phonegapVersion" ,"Phonegap version" ,
+					["2.8.0", "2.7.0", "2.5.0", "2.3.0", "2.2.0", "2.1.0", 
+					 "2.0.0", "1.9.0", "1.8.1", "1.7.0", "1.6.1", "1.5.0", 
+					 "1.4.1", "1.3.0", "1.2.0", "1.1.0"]],
+			["orientation", "Orientation" ,["both", "landscape", "portrait"]],
+			["targetDevice" ,"Target device" ,["universal", "handset", "tablet"]],
+			["fullScreen" ,"Fullscreen mode" ,["true", "false"]],
+			 
+		],
+		//TODO: remove the row name.
 		//in this array: 
 		//the first element is the name of the row
 		//the second element is ne label value
@@ -32,8 +44,20 @@ enyo.kind({
 			["maxSDK", "Maximum SDK"],
 			["splashScreenDuration", "Duration of the splashScreen"],
 			["loadUrlTimeout", "Load URL timeout"]
-		]
+		], 
 
+		iosPickers: [
+			["webviewBounce", "Web view bounce", ["true", "false"]], 
+			["prerenderedIcon", "Prerendred icon", ["true", "false"]],
+			["statusBarStyle", "Status Bar style", ["black-opaque", "black-translucent", "default"]],
+			["detectDataTypes", "Detect Data type", ["true", "false"]],
+			["exitOnSuspend", "Exit on suspend", ["true", "false"]],
+			["showSplashScreenSpinner", "Show splash screen spinner", ["true", "false"]],
+			["autoHideSplashScreen", "Auto-hide splash screen", ["true", "false"]]
+
+
+
+		]
 
 
 	}
@@ -88,8 +112,11 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.setUpDrawers();
+		this.setUpGeneralDrawer();
 		this.setUpPermissionDrawer();
 		this.setUpAndroidDrawer();
+		this.setUpIOSDrawer();
+
 
 		this.log(Phonegap.Build.DEFAULT_PROJECT_CONFIG);
 	},
@@ -110,6 +137,20 @@ enyo.kind({
 		}, this);
 	},
 
+	setUpGeneralDrawer: function(){
+		var generalUiData = Phonegap.EditUiData.general; 
+
+		enyo.forEach(generalUiData, function(row){
+			this.$.targetsRows.$.general.$.targetDrw.createComponent({
+				kind: "PickerRow",
+				name: row[0],
+				label: row[1], 
+				value: row[2]
+			});		
+		}, this);
+
+	},
+
 	//TODO :change to a nested function when refactoring
 	setUpPermissionDrawer: function(){
 		var permissionsUiData = Phonegap.EditUiData.permissions;
@@ -125,16 +166,30 @@ enyo.kind({
 
 	setUpAndroidDrawer: function(){
 		var androidInput = Phonegap.EditUiData.android;
+		var androidConfig = phongap.configData.androidSpecific;
 		
-
 		enyo.forEach(androidInput, function(row){
 			this.$.targetsRows.$.android.$.targetDrw.createComponent({
 				kind: "inputRow",
 				name: row[0],
 				label: row[1], 
-				value: androidInput[row[0]]
+				value: androidConfig[row[0]]
 			});		
 		}, this);
+	},
+
+	setUpIOSDrawer: function(){
+		var ioslUiData = Phonegap.EditUiData.iosPickers; 
+
+		enyo.forEach(ioslUiData, function(row){
+			this.$.targetsRows.$.ios.$.targetDrw.createComponent({
+				kind: "PickerRow",
+				name: row[0],
+				label: row[1], 
+				value: row[2]
+			});		
+		}, this);
+
 	},
 
 	/** public */
@@ -516,7 +571,7 @@ enyo.kind({
 		value: ""
 	},
 	components: [
-		  	{name: "label", content: "Maximum SDK version", 
+		  	{name: "label",  
 		     style: "width: 13em; margin-left:3em;"},
 		    {kind: "onyx.InputDecorator", 
 		     components: [
@@ -535,8 +590,47 @@ enyo.kind({
 	},
 	valueChanged: function(){
 		var input = this.$.configurationInput;
-		this.log("this configurationInput: ", this.$.configurationInput);
-		this.$.configurationInput.setValue(this.value);	
+		input.setValue(this.value);	
+	}
+});
+
+enyo.kind({
+    name: "PickerRow",
+ 	kind: "FittableColumns", 
+  	style: "margin-top: 10px;", 
+  	debug: true,
+  	published: {
+		  	label: "",
+		  	name: "",
+		  	value: ""
+  	},    
+ 	components:  [
+		{name: "label", style: "width: 13em; margin-left:3em;"},
+		{kind: "onyx.PickerDecorator", 	 
+    	 components: [ 
+            {kind: "onyx.PickerButton"},
+            {kind: "onyx.Picker", name:"configurationPicker"}
+   			]                                               
+		}
+	], 
+
+	create: function(){
+		this.inherited(arguments);
+		this.labelChanged();
+		this.valueChanged();
+	},
+
+	labelChanged: function(){
+		this.$.label.setContent(this.label);
+	},
+
+	valueChanged: function(){
+		
+		enyo.forEach(this.value, function(aValue) {
+		this.$.configurationPicker.createComponent({content: aValue});			
+		}, this);
+
+		this.log("this configurationPicker: ", this.$.configurationPicker);
 	}
 });
 
