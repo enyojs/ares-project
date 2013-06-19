@@ -1,4 +1,4 @@
-/*global alert, Documentor, ProjectCtrl */
+/* global ProjectCtrl, analyzer */
 enyo.kind({
 	name: "Phobos",
 	classes: "enyo-unselectable",
@@ -81,7 +81,9 @@ enyo.kind({
 		}
 	},
 	fileMenuItemSelected: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		if (this.debug) {
+			this.log("sender:", inSender, ", event:", inEvent);
+		}
 		if (typeof this[inEvent.selected.value] === 'function') {
 			this[inEvent.selected.value]();
 		} else {
@@ -111,7 +113,9 @@ enyo.kind({
 		this.$.saveAsPopup.show();
 	},
 	saveAsFileChosen: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		if (this.debug) {
+			this.log("sender:", inSender, ", event:", inEvent);
+		}
 
 		if (!inEvent.file) {
 			// no file or folder chosen
@@ -215,7 +219,9 @@ enyo.kind({
 
 	adjustPanelsForMode: function(mode, rightpane) {
 
-		if (this.debug) this.log("mode:", mode);
+		if (this.debug) {
+			this.log("mode:", mode);
+		}
 		var showModes = {
 			javascript: {
 				imageViewer: false,
@@ -249,7 +255,9 @@ enyo.kind({
 		var showStuff, showSettings = showModes[mode]||showModes['text'];
 		for (var stuff in showSettings) {
 			showStuff = showSettings[stuff];
-			if (this.debug) this.log("show", stuff, ":", showStuff);
+			if (this.debug) {
+				this.log("show", stuff, ":", showStuff);
+			}
 			if (typeof this.$[stuff].setShowing === 'function') {
 				this.$[stuff].setShowing(showStuff) ;
 			} else {
@@ -293,7 +301,7 @@ enyo.kind({
 		this.$.autocomplete.setProjectData(null);
 	},
 	/**
-	 	Disable "Designer" button unless project & enyo index are both valid
+	 * Disable "Designer" button unless project & enyo index are both valid
 	*/
 	manageDesignerButton: function() {
 		var disabled = ! this.projectCtrl.fullAnalysisDone;
@@ -321,7 +329,9 @@ enyo.kind({
 	 * @protected
 	 */
 	projectIndexerChanged: function() {
-		this.debug && this.log("Project analysis ready");
+		if (this.debug) {
+			this.log("Project analysis ready");
+		}
 		this.manageDesignerButton();
 	},
 	dumpInfo: function(inObject) {
@@ -335,13 +345,13 @@ enyo.kind({
 		var h$ = "<h3>" + c.name + "</h3>";
 		//
 		var h = [];
-		for (var i=0, p; p=c.superkinds[i]; i++) {
+		for (var i=0, p; (p = c.superkinds[i]); i++) {
 			h.push(p);
 		}
 		h$ += "<h4>Extends</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
 		h = [];
-		for (i=0, p; p=c.components[i]; i++) {
+		for (i=0, p; (p = c.components[i]); i++) {
 			h.push(p.name);
 		}
 		if (h.length) {
@@ -349,13 +359,13 @@ enyo.kind({
 		}
 		//
 		h = [];
-		for (i=0, p; p=c.properties[i]; i++) {
+		for (i=0, p; (p = c.properties[i]); i++) {
 			h.push(p.name);
 		}
 		h$ += "<h4>Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
 		h = [];
-		for (i=0, p; p=c.allProperties[i]; i++) {
+		for (i=0, p; (p = c.allProperties[i]); i++) {
 			h.push(p.name);
 		}
 		h$ += "<h4>All Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
@@ -680,7 +690,9 @@ enyo.kind({
 	docChanged: function(inSender, inEvent) {
 		this.docData.setEdited(true);
 
-		if (this.debug) this.log(JSON.stringify(inEvent.data));
+		if (this.debug) {
+			this.log(JSON.stringify(inEvent.data));
+		}
 
 		if (this.analysis) {
 			// Call the autocomplete component
@@ -690,7 +702,9 @@ enyo.kind({
 	},
 	cursorChanged: function(inSender, inEvent) {
 		var position = this.$.ace.getCursorPositionInDocument();
-		if (this.debug) this.log(inSender.id + " " + inEvent.type + " " + JSON.stringify(position));
+		if (this.debug) {
+			this.log(inSender.id + " " + inEvent.type + " " + JSON.stringify(position));
+		}
 
 		// Check if we moved to another enyo kind and display it in the right pane
 		var tempo = this.analysis;
@@ -773,10 +787,10 @@ enyo.kind({
 		this.$.findpop.hide();
 	},
 	toggleww: function(){
-	    if(this.$.ace.wordWrap === "true" || this.$.ace.wordWrap === true){
+		if (this.$.ace.wordWrap === "true" || this.$.ace.wordWrap === true){
 			this.$.ace.wordWrap = false;
 			this.$.ace.wordWrapChanged();
-	    }else{
+		} else {
 			this.$.ace.wordWrap = true;
 			this.$.ace.wordWrapChanged();
 		}

@@ -52,7 +52,7 @@ enyo.kind({
 			]}
 		]},
 		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
-			{name: "close", kind: "onyx.Button", content: "Close", ontap: "doClose"},
+			{name: "close", kind: "onyx.Button", content: "Close", ontap: "doClose"}
 		]}
 	],
 	findChanged: function(inSender, inEvent) {

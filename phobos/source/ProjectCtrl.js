@@ -13,7 +13,9 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.projectUrl = this.projectData.getProjectUrl();
-		this.debug && this.log("New project: " + this.projectUrl);
+		if (this.debug) {
+			this.log("New project: " + this.projectUrl);
+		}
 		this.createPathResolver(this.projectUrl);
 		this.projectData.setProjectIndexer(this.$.projectAnalyzer.index);
 	},
@@ -39,9 +41,13 @@ enyo.kind({
 	 */
 	buildProjectDb: function() {
 		if (this.fullAnalysisDone) {
-			this.debug && this.log("Project DB already available - index: ", this.$.projectAnalyzer.index);
+			if (this.debug) {
+				this.log("Project DB already available - index: ", this.$.projectAnalyzer.index);
+			}
 		} else {
-			this.debug && this.log("Starting project analysis for " + this.projectUrl);
+			if (this.debug) {
+				this.log("Starting project analysis for " + this.projectUrl);
+			}
 			this.$.projectAnalyzer.analyze([this.projectUrl + "/enyo/source", this.projectUrl], this.pathResolver);
 		}
 	},
