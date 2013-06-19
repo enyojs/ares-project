@@ -37,7 +37,7 @@ body {
 
 .hermesFileTree-toolbar { height:64px; border-left: 0px; }
 
-.ares-bottom-bar {/*height:40px;*/ background-color:#0A0A0A; border-top: 1px solid #050505; padding:0px;}
+.ares-bottom-bar {background-color:#0A0A0A; border-top: 1px solid #050505; padding:0px;}
 
 .ares-docbar-tabs {
 	overflow:auto; 
@@ -45,10 +45,10 @@ body {
 	padding:0px 0px 0px 15px;
 }
 
-.ares-tab {
+.ares-docbar-tabs .ares-tab {
 	background-color: #0A0A0A;
 	float: left; 
-	margin: 0px; 
+	margin: 0;
 	padding:7px 0px; 
 	text-align:center; 
 	cursor:pointer; 
@@ -65,7 +65,7 @@ body {
 	color:#999999;
 }
 
-.ares-tab.active {
+.ares-docbar-tabs .ares-tab.active {
 	-o-box-shadow: inset 0px 0px 40px 0px #000000; 
     -moz-box-shadow: inset 0px 0px 40px 0px #000000;
     -ms-box-shadow: inset 0px 0px 40px 0px #000000;
@@ -73,6 +73,7 @@ body {
     box-shadow: inset 0px 0px 40px 0px #000000; 
     background: #333; 
     border:none;
+    color:#fff;
 }
 
 .ares-tab-label {
