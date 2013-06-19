@@ -7,23 +7,22 @@ body {
 	margin-top: 48px;
 }
 
-.ares-content-panel {
+.ares-panels>* {
+	width: 100%;
+	height: 100%;
 	padding: 10px;
 	box-sizing:border-box;
 }
 
-.ares-content-panel > div {
+.ares-panels>*>*{
+	width: 100%;
+	height: 100%;
 	position:relative;
 	border: 1px solid #555;
 	-moz-box-shadow: 0 0 20px rgba(0,0,0,0.6);
 	-webkit-box-shadow: 0 0 20px rgba(0,0,0,0.6);
 	box-shadow: 0 0 20px rgba(0,0,0,0.6);
 	border-radius: 5px;
-}
-
-.ares-full-display {
-	width: 100%;
-	height: 100%;
 }
 
 .ares-top-toolbar{ 
@@ -38,7 +37,7 @@ body {
 
 .hermesFileTree-toolbar { height:64px; border-left: 0px; }
 
-.ares-bottom-bar {height:40px; background-color:#0A0A0A; border-top: 1px solid #050505; padding:0px;}
+.ares-bottom-bar {/*height:40px;*/ background-color:#0A0A0A; border-top: 1px solid #050505; padding:0px;}
 
 .ares-docbar-tabs {
 	overflow:auto; 
@@ -95,6 +94,8 @@ body {
 
 /* Why z-index: 11? Because otherwise, on Opera, parts of the editor show through */
 .ares-files-slider {
+	width: 100%;
+	height: 100%;
 	z-index: 11;
 	-moz-box-shadow: 0 0 20px rgba(0,0,0,0.6);
 	-webkit-box-shadow: 0 0 20px rgba(0,0,0,0.6);
@@ -169,8 +170,8 @@ body {
 
 .onyx-radiobutton {
 	font-size: 13px;
-	padding-top: 8px 4px;
-	margin-bottom: 15px;
+	/*padding-top: 8px 4px;*/
+	/*margin-bottom: 15px;*/
 }
 
 .onyx-toolbar .onyx-button { height: 28px; }
