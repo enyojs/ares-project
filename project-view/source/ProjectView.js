@@ -116,6 +116,7 @@ enyo.kind({
 		}
 		return true; // stop bubble-up
 	},
+	
 	/**
 	 * Event handler: handle install application action (select provider & run action)
 	 * @param {enyo.Component} inSender

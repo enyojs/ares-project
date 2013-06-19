@@ -431,7 +431,7 @@ function proxyServices(req, res, next) {
 		port:   service.dest.port,
 		// path to forward to
 		path:   service.dest.pathname +
-			(req.params[0] ? '/' + req.params[0] : '') +
+			(req.params[0] ? '/' + encodeURI(req.params[0]) : '') +
 			'?' + querystring.stringify(query),
 		// request method
 		method: req.method,
@@ -575,7 +575,19 @@ app.configure(function(){
 		app.post('/res/tester', tester.setup);
 		app['delete']('/res/tester', tester.cleanup);
 	}
+	
+	/**
+	 * Global error handler (last plumbed middleware)
+	 * @private
+	 */
+	function errorHandler(err, req, res, next){
+		log.error(err.stack);
+		res.status(500).send(err.toString());
+	}
 
+	// express-3.x: middleware with arity === 4 is
+	// detected as the error handler
+	app.use(errorHandler.bind(this));
 });
 
 // Run non-regression test suite

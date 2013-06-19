@@ -26,27 +26,27 @@ enyo.kind({
 		{kind: "onyx.Toolbar", classes: "ares-top-toolbar  hermesFileTree-toolbar", components: [
 			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 				{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
-				{kind: "onyx.Tooltip", content: "New Folder..."}
+				{kind: "onyx.Tooltip", content: $L("New Folder...")}
 			]},
 			{name: "reloadAll", kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$harmonia/images/folder_reload.png", ontap: "reloadClick"},
-				{kind: "onyx.Tooltip", content: "reload ..."}
+				{kind: "onyx.Tooltip", content: $L("Reload...")}
 			]},
 			{name: "newFile", kind: "onyx.TooltipDecorator", components: [
 				{name: "newFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_new.png", ontap: "newFileClick"},
-				{kind: "onyx.Tooltip", content: "New File..."}
+				{kind: "onyx.Tooltip", content: $L("New File...")}
 			]},
 			{name: "renameFile", kind: "onyx.TooltipDecorator", components: [
 				{name: "renameFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_edit.png", ontap: "renameClick"},
-				{kind: "onyx.Tooltip", content: "Rename..."}
+				{kind: "onyx.Tooltip", content: $L("Rename...")}
 			]},
 			{name: "copyFile", kind: "onyx.TooltipDecorator", components: [
 				{name: "copyFileButton", kind: "onyx.IconButton", src: "$harmonia/images/copy.png", ontap: "copyClick"},
-				{kind: "onyx.Tooltip", content: "Copy..."}
+				{kind: "onyx.Tooltip", content: $L("Copy...")}
 			]},
 			{name: "deleteFile", kind: "onyx.TooltipDecorator", components: [
 				{name: "deleteFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_delete.png", ontap: "deleteClick"},
-				{kind: "onyx.Tooltip", content: "Delete..."}
+				{kind: "onyx.Tooltip", content: $L("Delete...")}
 			]}
 		]},
 		
@@ -62,11 +62,11 @@ enyo.kind({
 
 		// Hermes popups
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "Service returned an error"},
-		{name: "nameFilePopup", kind: "NamePopup", type: "file", fileName:"", placeHolder: "File Name", onCancel: "newFileCancel", onConfirm: "newFileConfirm"},
-		{name: "nameFolderPopup", kind: "NamePopup", type: "folder", fileName: "", placeHolder: "Folder Name", onCancel: "_newFolderCancel", onConfirm: "_newFolderConfirm"},
-		{name: "nameCopyPopup", kind: "NamePopup", title: "Name for copy of", fileName: "Copy of foo.js", onCancel: "copyFileCancel", onConfirm: "copyFileConfirm"},
+		{name: "nameFilePopup", kind: "NamePopup", type: "file", fileName:"", placeHolder: $L("File Name"), onCancel: "newFileCancel", onConfirm: "newFileConfirm"},
+		{name: "nameFolderPopup", kind: "NamePopup", type: "folder", fileName: "", placeHolder: $L("Folder Name"), onCancel: "_newFolderCancel", onConfirm: "_newFolderConfirm"},
+		{name: "nameCopyPopup", kind: "NamePopup", title: $L("Name for copy of"), fileName: $L("Copy of foo.js"), onCancel: "copyFileCancel", onConfirm: "copyFileConfirm"},
 		{name: "deletePopup", kind: "DeletePopup", onCancel: "deleteCancel", onConfirm: "deleteConfirm"},
-		{name: "renamePopup", kind: "RenamePopup", title: "New name for ", fileName: "foo.js", onCancel: "_renameCancel", onConfirm: "_renameConfirm"}
+		{name: "renamePopup", kind: "RenamePopup", title: $L("New name for "), fileName: "foo.js", onCancel: "_renameCancel", onConfirm: "_renameConfirm"}
 	],
 
 	// warning: this variable duplicates an information otherwise stored in this.$.selection
@@ -88,7 +88,7 @@ enyo.kind({
 		
 		this.enableDisableButtons();
 		this.createComponent(
-			{name: "serverNode", container: this.$.scroller, kind: "ares.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed, onExpand: "nodeExpand", onForceView: "adjustScroll" }
+			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed, onExpand: "nodeExpand", onForceView: "adjustScroll" }
 		);
 	},
 	
@@ -101,8 +101,11 @@ enyo.kind({
 	itemDragstart: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
-		// get the related ares.Node
+		// get the related hermes.Node
 		this.draggedNode = inEvent.originator;
+		if (this.draggedNode.kind !== "hermes.Node") {			
+			this.draggedNode = this.draggedNode.parent;
+		}
 		this.targetNode = this.draggedNode;
 		
 		if (this.draggedNode.content == "package.js") {
@@ -117,10 +120,14 @@ enyo.kind({
 	itemDragenter: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
-		// look for the related ares.Node
+		// look for the related hermes.Node
 		var tempNode = inEvent.originator;
-		if (tempNode.kind !== "ares.Node") {
+		if (tempNode.kind !== "hermes.Node") {
 			tempNode = tempNode.parent;
+		}
+
+		if (!tempNode.file.isDir) {
+			tempNode = tempNode.container;
 		}
 		
 		if (this.targetNode === tempNode) {
@@ -129,9 +136,7 @@ enyo.kind({
 		
 		if (this.targetNode !== null) {
 			if (this.targetNode.file.isDir && this.targetNode.expanded) {
-				this.targetNode.applyStyle("border-color", null);
-				this.targetNode.applyStyle("border-style", "none");
-				this.targetNode.applyStyle("border-width", "0px");
+				this.targetNode.removeClass("hermesFileTree-folder-highlight");
 				this.$.selection.deselect(this.targetNode.file.id, this.targetNode);
 			}
 		}
@@ -142,9 +147,7 @@ enyo.kind({
 		this.targetNode = tempNode;
 		
 		if (this.targetNode.file.isDir && this.targetNode.expanded) {
-			this.targetNode.applyStyle("border-color", "grey");
-			this.targetNode.applyStyle("border-style", "dotted");
-			this.targetNode.applyStyle("border-width", "1px");
+			this.targetNode.addClass("hermesFileTree-folder-highlight");
 		}
 		
 		this.setHoldoverTimeout(this.targetNode);
@@ -192,9 +195,7 @@ enyo.kind({
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		if (this.targetNode.file.isDir && this.targetNode.expanded) {
-			this.targetNode.applyStyle("border-color", null);
-			this.targetNode.applyStyle("border-style", "none");
-			this.targetNode.applyStyle("border-width", "0px");
+			this.targetNode.removeClass("hermesFileTree-folder-highlight");
 			this.$.selection.deselect(this.targetNode.file.id, this.targetNode);
 		}
 		
@@ -292,7 +293,7 @@ enyo.kind({
 		// (possibly remote & always asynchronous) file system
 		this.connectService(service, enyo.bind(this, (function(inError) {
 			if (inError) {
-				this.showErrorPopup("Internal Error (" + inError + ") from filesystem service");
+				this.showErrorPopup($L("Internal Error ({error}) from filesystem service").replace("{error}", inError.toString()));
 			} else {
 				if (this.selectedNode) {
 					this.deselect(null, {data: this.selectedNode});
@@ -318,7 +319,7 @@ enyo.kind({
 				});
 				req.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");
-					this.showErrorPopup("Internal Error (" + inError + ") from filesystem service");
+					this.showErrorPopup($L("Internal Error ({error}) from filesystem service").replace("{error}", inError.toString()));
 				});
 			}
 		})));
@@ -405,7 +406,7 @@ enyo.kind({
 		this.selectedNode=inEvent.data;
 		this.selectedFile=inEvent.data.file;
 		inEvent.data.file.service = this.$.service;
-		inEvent.data.$.caption.applyStyle("background-color", "lightblue");
+		inEvent.data.$.caption.addClass("hermesFileTree-select-highlight");
 		// this.doSelect({file: this.selectedFile});
 		this.enableDisableButtons();
 		// handled here (don't bubble)
@@ -415,7 +416,7 @@ enyo.kind({
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		if (inEvent.data && inEvent.data.$.caption) {
-			inEvent.data.$.caption.applyStyle("background-color", null);
+			inEvent.data.$.caption.removeClass("hermesFileTree-select-highlight");
 		}
 		//this.doDeselect({file: this.selectedFile});
 		this.selectedNode=null;
@@ -507,7 +508,7 @@ enyo.kind({
 
 	/**
 	 * @public
-	 * @returns selected folder {Ares.Node} or containing folder {Ares.Node}
+	 * @returns selected folder {hermes.Node} or containing folder {hermes.Node}
 	 */
 	getFolderOfSelectedNode: function() {
 		var node = this.selectedNode;
@@ -541,7 +542,7 @@ enyo.kind({
 			this.$.nameFilePopup.setPath(folder.path);
 			this.$.nameFilePopup.show();
 		} else {
-			this.showErrorPopup("Select a parent folder first");
+			this.showErrorPopup($L("Select a parent folder first"));
 		}
 	},
 	newFileCancel: function(inSender, inEvent) {
@@ -559,7 +560,7 @@ enyo.kind({
 			this.$.nameFolderPopup.setPath(folder.path);
 			this.$.nameFolderPopup.show();
 		} else {
-			this.showErrorPopup("Select a parent folder first");
+			this.showErrorPopup($L("Select a parent folder first"));
 		}
 	},
 	// User Interaction for Copy File/Folder op
@@ -572,7 +573,7 @@ enyo.kind({
 			this.$.nameCopyPopup.setFolderId(this.selectedFile.id);
 			this.$.nameCopyPopup.show();
 		} else {
-			this.showErrorPopup("Select a file or folder to copy first");
+			this.showErrorPopup($L("Select a file or folder to copy first"));
 		}
 	},
 	copyFileCancel: function(inSender, inEvent) {
@@ -588,7 +589,7 @@ enyo.kind({
 			this.$.renamePopup.setPath(this.selectedFile.path);
 			this.$.renamePopup.show();
 		} else {
-			this.showErrorPopup("Select a file or folder to rename first");
+			this.showErrorPopup($L("Select a file or folder to rename first"));
 		}
 	},
 	// User Interaction for Delete File/Folder op
@@ -601,7 +602,7 @@ enyo.kind({
 			this.$.deletePopup.setPath(this.selectedFile.path);
 			this.$.deletePopup.show();
 		} else {
-			this.showErrorPopup("Select a file or folder to delete first");
+			this.showErrorPopup($L("Select a file or folder to delete first"));
 		}
 	},
 	deleteCancel: function(inSender, inEvent) {
@@ -659,7 +660,7 @@ enyo.kind({
 		r.error(this, function(inSender, error) {
 			if (error === 404){
 				this.createFile(name, folderId);
-				this.showErrorPopup("No template found for '." + type + "' files.  Created an empty one.");
+				this.showErrorPopup($L("No template found for '.{extension}' files.  Created an empty one.").replace("{extension}", type));
 			}
 			else {
 				this.error("error while fetching " + templatePath + ': ' + error);
@@ -677,7 +678,7 @@ enyo.kind({
 		}) ;
 		return onDone ;
 	},
-
+	
 	createFile: function(name, folderId, content) {
 		if (this.debug) this.log("Creating new file "+name+" into folderId="+folderId);
 		this.$.service.createFile(folderId, name, content)
@@ -697,7 +698,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create file:", name, inError);
-				this.showErrorPopup("Creating file "+name+" failed:" + inError);
+				this.showErrorPopup($L("Creating file {name} failed: {error}").replace("{name}", name).replace("{error}", inError.toString()));
 			});
 	},
 	/** @private */
@@ -727,7 +728,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create folder:", name, inError);
-				this.showErrorPopup("Creating folder "+name+" failed:" + inError);
+				this.showErrorPopup($L("Creating folder {name} failed: {error}").replace("{name}", name).replace("{error}", inError.toString()));
 			});
 	},
 	/** @private */
@@ -762,7 +763,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to rename:", this.selectedFile, "into", newName, inError);
-				this.showErrorPopup("Renaming file '" + this.selectedFile.name + "' as '" + newName +"' failed");
+				this.showErrorPopup($L("Renaming file '{oldName}' as '{newName}").replace("{oldName}", this.selectedFile.name).replace("{newName}", newName));
 			});
 	},
 
@@ -787,7 +788,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to delete:", this.selectedFile, inError);
-				this.showErrorPopup("Deleting '" + this.selectedFile.name + "' failed");
+				this.showErrorPopup($L("Deleting '{name}' failed").replace("{oldName}", this.selectedFile.name));
 			});
 	},
 
@@ -813,17 +814,15 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to copy:", this.selectedFile, "as", newName, inError);
-				this.showErrorPopup("Creating file "+newName+" as copy of" + this.selectedFile.name +" failed:" + inError);
+				this.showErrorPopup($L("Creating file {copyName} as copy of {name} failed: {error}").replace("{copyName}", newName).replace("{name}", this.selectedFile.name).replace("{error}", inError.toString()));
 			});
 	},
 	
 	/**
 	 * moveNode
 	 * @public
-	 * @param {Object} inSender
-	 * @param {Object} inEvent
-	 * @property inEvent {ares.Node} oldNode
-	 * @property inEvent {ares.Node} newParent
+	 * @param {Object} inNode
+	 * @param {Object} inTarget
 	 * @return null
 	 *
 	 */
@@ -859,8 +858,8 @@ enyo.kind({
 					}, inTarget.file.id);
 			})
 			.error(this, function(inSender, inError) {
-				this.warn("Unable to move the node:", inNode.file.name, inError);
-				this.showErrorPopup("Moving node "+inNode.file.name+" failed:" + inError);
+				this.warn("Unable to move:", inNode.file.name, inError);
+				this.showErrorPopup($L("Moving  {nodeName} failed: {error}").replace("{nodeName}", inNode.file.name).replace("{error}", inError.toString()));
 			});
 	}
 });
