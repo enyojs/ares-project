@@ -41,10 +41,10 @@ Here are the main features you can start looking at today:
 * UI designer for drag and drop UI editing
 	* Component definitions are round-tripped from the Editor to the Designer, meaning that changes made in one will immediately appear in the other.
 * Integration with [PhoneGap online build](http://build.phonegap.com)
-* Project templates
+* Project sources
 	* Allow creation of new projects based on bootplate templates.
 	* Allow creation of new projects based on your own project templates.
-	* See [Project templates](#project-templates) for more information
+	* See [Project sources](#project-sources) for more information
 	
 ### Future plans
 
@@ -136,11 +136,11 @@ See [Hermes Security: Authentication](hermes/README.md#security).
 
 Ares's plugin architecture is made to allow extensions, both in its UI (browser client) & its server.
  
-### [Project templates](id:project-templates)
+### [Project sources](id:project-sources)
 
-The service "***genZip***" defined in "ide.json" of ares-project or "ide.json" of Ares plugins allows to intanciate new Ares project from project templates such as "**bootplate**" or any customer specific project templates.
+The service **genZip** defined in `ide.json` of ares-project or `ide-plugin.json` of Ares plugins allows to intanciate new Ares project from project templates such as "**bootplate**" or any customer specific project templates.
 
-The property "***projectTemplateRepositories***" of the service "**genZip**" lists the template definitions that are available at project creation time.
+The property `sources:` of the service **genZip** lists the template definitions that are available at project creation time.
 
 See the section "**Project template service**" in [hermes/README.md](hermes/README.md) for more information.
 
@@ -150,7 +150,7 @@ Ares plugins can bring additional functionality and configuration to Ares.
 An Ares plugin must follow these rules to be loaded as a plugin:
 
  * It must be installed in a directory under "_ares-project/node_modules_".  
- * It must have an "_ide.json_" in its main directory, which:
+ * It must have an `ide.json` in its main directory, which:
    * defines a new service entry
    * can define the client side code to load in the browser
    * can update some previously defined services (e.g.: modify/add project templates) 
