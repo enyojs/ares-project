@@ -12,7 +12,7 @@ enyo.kind({
 	debug: false,
 	classes: "ares-BuildStatusUI",
 	published: {
-		pgUrl: "",
+		pgUrl: ""
 	},
 	handlers: {
 		onDismissPopup: "_hidePopup"
@@ -66,15 +66,18 @@ enyo.kind({
 	showPopup: function (project, inAppData) {
 
 		//Setting to pop-up content.
-		this.setUpHeader(inAppData);
-		this.setUpRows(inAppData);
+		this._setUpHeader(inAppData);
+		this._setUpRows(inAppData);
+
+		//Display the pop-up.
+		this.show();
 
 		// Setting the target URL of the webview opened when 
 		// an instance of "DataRow" is clicked.
 		this.pgUrl = "https://build.phonegap.com/apps/" + inAppData.id + "/builds";
-
-		//Display the pop-up.
-		this.show();
+		if (this.debug) {
+			this.log("The url to Phonegap build web page: ", this.pgUrl);
+		}
 	},
 
 	/**
@@ -84,7 +87,7 @@ enyo.kind({
 	 *                           application on Phonegap
 	 * @private
 	 */
-	setUpRows: function (inAppData) {
+	_setUpRows: function (inAppData) {
 		//Creating the array containing the status's data.
 		var platforms = enyo.keys(inAppData && inAppData.status);
 		if (this.debug) {
@@ -98,7 +101,8 @@ enyo.kind({
 				kind: "DataRow",
 				name: platform,
 				label: platform,
-				value: inAppData && inAppData.status[platform] || "error"
+				value: inAppData && inAppData.status[platform] || "error",
+				url: this.pgUrl
 			});
 		}, this);
 	},
@@ -110,7 +114,10 @@ enyo.kind({
 	 *                           application on Phonegap
 	 * @private
 	 */
-	setUpHeader: function (inAppData) {
+	_setUpHeader: function (inAppData) {
+
+		var inUrl = this.pgUrl;
+
 		//Creating the array containing the header's data.
 		var headerData = [
 			["Application", inAppData && inAppData.package],
@@ -127,7 +134,8 @@ enyo.kind({
 			this.$.HeaderRows.createComponent({
 				kind: "DataRow",
 				label: row[0],
-				value: row[1]
+				value: row[1],
+				url: inUrl
 			});
 		}, this);
 	}
@@ -136,14 +144,14 @@ enyo.kind({
 /**
  * A DataRow is a UI component of the BuildStatusUI containing two labels:
  * - The first label is the title of the row
- * - The second label is the content displayed for an appData sent
- * 	 by Phonegap
+ * - The second label is the content displayed for an appData sent by Phonegap
  */
 enyo.kind({
 	name: "DataRow",
 	kind: "FittableColumns",
 	classes: "ares-BuildStatusUI-row",
 	published: {
+		url: "",
 		label: "",
 		value: ""
 	},
@@ -153,7 +161,9 @@ enyo.kind({
 	components: [{
 			name: "Label",
 			classes: "ares-BuildStatusUI-row-label"
-		}, {
+		},
+
+		{
 			name: "Value",
 			classes: "ares-BuildStatusUI-row-label"
 		}, {
@@ -181,12 +191,14 @@ enyo.kind({
 			this.log("Value is:", this.value);
 		}
 	},
+
 	manageApps: function (inSender, inValue) {
-		if (this.debug) this.log("sender:", inSender, "value:", inValue);
-		var accountPopup = window.open(this.pgUrl,
-			"PhoneGap Build Account Management",
+		if (this.debug) {
+			this.log("the url of the phonegap build web page: ", this.url);
+		}
+		window.open(this.url, "PhoneGap Build Account Management",
 			"resizeable=1,width=1024, height=600", 'self');
-	},
+	}
 });
 
 enyo.kind({
