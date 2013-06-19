@@ -21,7 +21,7 @@ enyo.kind({
 							{name: "detailsTxt", kind: "onyx.TextArea", disabled: true, fit:true, classes:"ares-error-text"}
 						]}
 				]}
-			]},
+			]}
 			]},
 			{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
 				{name: "okButton", kind: "onyx.Button", content: "Close", ontap: "hideErrorPopup"}
