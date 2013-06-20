@@ -15,7 +15,8 @@ enyo.kind({
 		onItemDragleave: "itemDragleave",
 		onItemDrop: "itemDrop",
 		onItemDragend: "itemDragend",
-		onNodeDblClick: "nodeDblClick"
+		onNodeDblClick: "nodeDblClick",
+		onAdjustScroll: "adjustScroll"
 	},
 	published: {
 		serverName: "",
@@ -67,11 +68,11 @@ enyo.kind({
 		// Hermes popups
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "Service returned an error"},
 		{name: "nameFilePopup", kind: "NamePopup", type: "file", fileName:"", placeHolder: $L("File Name"), onCancel: "newFileCancel", onConfirm: "newFileConfirm"},
-		{name: "nameFolderPopup", kind: "NamePopup", type: "folder", fileName: "", placeHolder: $L("Folder Name"), onCancel: "_newFolderCancel", onConfirm: "_newFolderConfirm"},
+		{name: "nameFolderPopup", kind: "NamePopup", type: "folder", fileName: "", placeHolder: $L("Folder Name"), onCancel: "newFolderCancel", onConfirm: "newFolderConfirm"},
 		{name: "nameCopyPopup", kind: "NamePopup", title: $L("Name for copy of"), fileName: $L("Copy of foo.js"), onCancel: "copyFileCancel", onConfirm: "copyFileConfirm"},
 		{name: "deletePopup", kind: "DeletePopup", onCancel: "deleteCancel", onConfirm: "deleteConfirm"},
-		{name: "renamePopup", kind: "RenamePopup", title: $L("New name for "), fileName: "foo.js", onCancel: "_renameCancel", onConfirm: "_renameConfirm"},
-		{name: "revertPopup", kind: "RevertPopup", title: $L("Revert node moving"), fileName: "foo.js", onCancel: "_revertCancel", onConfirm: "_revertConfirm"}
+		{name: "renamePopup", kind: "RenamePopup", title: $L("New name for "), fileName: "foo.js", onCancel: "renameCancel", onConfirm: "renameConfirm"},
+		{name: "revertPopup", kind: "RevertPopup", title: $L("Revert node moving"), fileName: "foo.js", onCancel: "revertCancel", onConfirm: "revertConfirm"}
 	],
 
 	// warning: this variable duplicates an information otherwise stored in this.$.selection
@@ -97,16 +98,19 @@ enyo.kind({
 		
 		this.enableDisableButtons();
 		this.createComponent(
-			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable", showing: false, content: "server", icon: "$services/assets/images/antenna.png", expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed, onExpand: "nodeExpand", onForceView: "adjustScroll" }
+			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable",
+				showing: false, content: "server", icon: "$services/assets/images/antenna.png",
+				expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed
+			}
 		);
 	},
-	
+	/** @private */
 	itemDown: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		return true;
 	},
-	
+	/** @private */
 	itemDragstart: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
@@ -126,6 +130,7 @@ enyo.kind({
 		
 		return true;
 	},
+	/** @private */
 	itemDragenter: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
@@ -163,6 +168,7 @@ enyo.kind({
 		
 		return true;
 	},
+	/** @private */
 	itemDragover: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
@@ -177,11 +183,13 @@ enyo.kind({
 		
 		return true;
 	},
+	/** @private */
 	itemDragleave: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
 		return true;
 	},
+	/** @private */
 	itemDrop: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
@@ -213,6 +221,7 @@ enyo.kind({
 
 		return true;
 	},
+	/** @private */
 	itemDragend: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		
@@ -227,13 +236,16 @@ enyo.kind({
 		
 		return true;
 	},
+	/** @private */
 	setHoldoverTimeout: function (inTarget) {
 		this.holdoverTimeout = setTimeout(enyo.bind(this, function() { this.holdOver(inTarget); }), this.holdoverTimeoutMS);
 	},
+	/** @private */
 	resetHoldoverTimeout: function() {
 		clearTimeout(this.holdoverTimeout);
 		this.holdoverTimeout = null;
 	},
+	/** @private */
 	holdOver: function (inTargetNode) {
 		if (this.debug) this.log("inTargetNode=", inTargetNode);
 		
@@ -253,6 +265,7 @@ enyo.kind({
 				});
 		}
 	},
+	/** @private */
 	isValidDropTarget: function(inNode) {
 		if (this.debug) this.log("inNode=", inNode);
 		
@@ -280,7 +293,7 @@ enyo.kind({
 	
 		return false;
 	},
-	
+	/** @public */
 	connectService: function(inService, next) {
 		if (this.debug) this.log("connect to service: ", inService);
 		this.projectUrlReady = false; // Reset the project information
@@ -299,9 +312,10 @@ enyo.kind({
 		return this ;
 	},
 	/**
+	 * @public
 	 * @param {Object} inFsService a FileSystemService implementation, as listed in ProviderList
 	 */
-	setConfig: function(inProjectData) {
+	connectProject: function(inProjectData) {
 		if (this.debug) this.log("config:", inProjectData);
 		this.projectData = inProjectData;
 
@@ -399,15 +413,16 @@ enyo.kind({
 		}
 		return this ;
 	},
-
+	/** @private */
 	adjustScroll: function (inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
 		var node = inEvent.originator;
 		this.$.scroller.scrollIntoView(node, true);
 		return true;
 	},
 
 	nodeTap: function(inSender, inEvent) {
-		if (this.debug) this.log('noteTap: ',inSender, "=>", inEvent);
+		if (this.debug) this.log(inSender, "=>", inEvent);
 		var node = inEvent.originator;
 		this.$.selection.select(node.file.id, node);
 		if (!node.file.isDir) {
@@ -418,7 +433,7 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
-
+	/** @private */
 	nodeDblClick: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		var node = inEvent.originator;
@@ -435,6 +450,7 @@ enyo.kind({
 	
 	select: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
+
 		this.selectedNode=inEvent.data;
 		this.selectedFile=inEvent.data.file;
 		inEvent.data.file.service = this.$.service;
@@ -562,24 +578,7 @@ enyo.kind({
 	getParentOfSelected: function() {
 		return this.selectedNode && this.selectedNode.container && this.selectedNode.container.file;
 	},
-
-	// User Interaction for New File op
-	newFileClick: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		var folder = this.getFolder();
-		if (folder && folder.isDir) {
-			this.$.nameFilePopup.setFileName("");
-			this.$.nameFilePopup.setFolderId(folder.id);
-			this.$.nameFilePopup.setPath(folder.path);
-			this.$.nameFilePopup.show();
-		} else {
-			this.showErrorPopup($L("Select a parent folder first"));
-		}
-	},
-	newFileCancel: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		if (this.debug) this.log("New File canceled.");
-	},
+	/** @private */
 	// User Interaction for New Folder op
 	newFolderClick: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
@@ -594,80 +593,60 @@ enyo.kind({
 			this.showErrorPopup($L("Select a parent folder first"));
 		}
 	},
-	// User Interaction for Copy File/Folder op
-	copyClick: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		if (this.selectedFile) {
-			this.$.nameCopyPopup.setType(this.selectedFile.type);
-			this.$.nameCopyPopup.setFileName(this.copyName(this.selectedFile.name));
-			this.$.nameCopyPopup.setPath(this.selectedFile.path);
-			this.$.nameCopyPopup.setFolderId(this.selectedFile.id);
-			this.$.nameCopyPopup.show();
-		} else {
-			this.showErrorPopup($L("Select a file or folder to copy first"));
-		}
+	/** @private */
+	newFolderCancel: function(inSender, inEvent) {
+		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
 	},
-	copyFileCancel: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-	},
-	// User Interaction for Rename File/Folder op
-	renameClick: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		if (this.selectedFile) {
-			this.$.renamePopup.setType(this.selectedFile.type);
-			this.$.renamePopup.setFileName(this.selectedFile.name);
-			this.$.renamePopup.setFolderId(this.selectedFile.id);
-			this.$.renamePopup.setPath(this.selectedFile.path);
-			this.$.renamePopup.show();
-		} else {
-			this.showErrorPopup($L("Select a file or folder to rename first"));
-		}
-	},
-	// User Interaction for Delete File/Folder op
-	deleteClick: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		if (this.selectedFile) {
-			this.$.deletePopup.setType(this.selectedFile.isDir ? $L("folder") : $L("file"));
-			this.$.deletePopup.setName(this.selectedFile.name);
-			this.$.deletePopup.setNodeId(this.selectedFile.id);
-			this.$.deletePopup.setPath(this.selectedFile.path);
-			this.$.deletePopup.show();
-		} else {
-			this.showErrorPopup($L("Select a file or folder to delete first"));
-		}
-	},
-	// User Interaction for Revert File/Folder moving op
-	revertClick: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-		if (this.revertMove) {
-			this.$.revertPopup.setType(this.movedNode.file.isDir ? $L("folder") : $L("file"));
-			this.$.revertPopup.setName(this.movedNode.file.name);
-			this.$.revertPopup.setPath(this.originNode.file.path);
-			this.$.revertPopup.show();
-		} else {
-			this.showErrorPopup($L("No more node moving to revert"));
-		}
-	},
-	deleteCancel: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
-	},
+	/** @private */
+	newFolderConfirm: function(inSender, inEvent) {
+		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
+		var folderId = inEvent.folderId;
+		var name = inSender.fileName.trim();
+		if (this.debug) this.log("Creating new folder "+name+" into folderId="+folderId);
+		this.$.service.createFolder(folderId, name)
+			.response(this, function(inSender, inFolder) {
+				if (this.debug) this.log("newFolderConfirm inFolder: ", inFolder);
+				var parentNode = this.getFolderOfSelectedNode(),
+				    pkgNode = parentNode.getNodeNamed('package.js');
+				this.doTreeChanged({
+					add: {
+						service: this.$.service,
+						parentNode: parentNode && parentNode.file,
+						pkgNode: pkgNode && pkgNode.file,
+						node: inFolder
+					}
+				});
 
-	showErrorPopup : function(msg) {
-		this.$.errorPopup.setErrorMsg(msg);
-		this.$.errorPopup.show();
+				/* cancel any move reverting */
+				this.resetRevert();
+
+				this.refreshFileTree(null, inFolder.id /*selectId*/);
+			})
+			.error(this, function(inSender, inError) {
+				this.warn("Unable to create folder:", name, inError);
+				this.showErrorPopup($L("Creating folder '{name}' failed: {error}").replace("{name}", name).replace("{error}", inError.toString()));
+			});
 	},
-	enableDisableButtons: function() {
-		if (this.selectedFile) {
-			this.$.deleteFileButton.setDisabled(this.selectedFile.isServer);
-			this.$.copyFileButton.setDisabled(this.selectedFile.isServer);
-			this.$.renameFileButton.setDisabled(this.selectedFile.isServer);
+	/** @private */
+	// User Interaction for New File op
+	newFileClick: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		var folder = this.getFolder();
+		if (folder && folder.isDir) {
+			this.$.nameFilePopup.setFileName("");
+			this.$.nameFilePopup.setFolderId(folder.id);
+			this.$.nameFilePopup.setPath(folder.path);
+			this.$.nameFilePopup.show();
 		} else {
-			this.$.copyFileButton.setDisabled(true);
-			this.$.deleteFileButton.setDisabled(true);
-			this.$.renameFileButton.setDisabled(true);
+			this.showErrorPopup($L("Select a parent folder first"));
 		}
 	},
-
+	/** @private */
+	newFileCancel: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		if (this.debug) this.log("New File canceled.");
+	},
+	/** @private */
 	newFileConfirm: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		var folderId = inEvent.folderId;
@@ -701,7 +680,7 @@ enyo.kind({
 			this.createFile(name, folderId, inResponse);
 
 			/* cancel any move reverting */
-			this._resetRevert();
+			this.resetRevert();
 		});
 		r.error(this, function(inSender, error) {
 			if (error === 404){
@@ -714,79 +693,74 @@ enyo.kind({
 		});
 		r.go();
 	},
-
-	delayedRefresh: function(msg, forceSelect) {
-		var onDone = new enyo.Async() ;
-		onDone.response(this, function(inSender, toSelectId) {
-			var select = forceSelect || toSelectId ;
-			if (this.debug) this.log("delayed refresh after " + msg + ' on ' + select) ;
-			this.refreshFileTree(null, select);
-		}) ;
-		return onDone ;
+	/** @private */
+	// User Interaction for Copy File/Folder op
+	copyClick: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		if (this.selectedFile) {
+			this.$.nameCopyPopup.setType(this.selectedFile.type);
+			this.$.nameCopyPopup.setFileName(this.copyName(this.selectedFile.name));
+			this.$.nameCopyPopup.setPath(this.selectedFile.path);
+			this.$.nameCopyPopup.setFolderId(this.selectedFile.id);
+			this.$.nameCopyPopup.show();
+		} else {
+			this.showErrorPopup($L("Select a file or folder to copy first"));
+		}
 	},
-	
-	createFile: function(name, folderId, content) {
-		if (this.debug) this.log("Creating new file "+name+" into folderId="+folderId);
-		this.$.service.createFile(folderId, name, content)
-			.response(this, function(inSender, inNodes) {
-				if (this.debug) this.log("inNodes: ",inNodes);
-				var parentNode = this.getFolderOfSelectedNode(),
+	/** @private */
+	copyFileCancel: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+	},
+	/** @private */
+	copyFileConfirm: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		var oldName = this.selectedFile.name;
+		var newName = inSender.fileName.trim();
+		if (this.debug) this.log("Creating new file " + newName + " as copy of" + this.selectedFile.name);
+		this.$.service.copy(this.selectedFile.id, newName)
+			.response(this, function(inSender, inFsNode) {
+				if (this.debug) this.log("inNode: "+inFsNode);
+				var parentNode = this.getParentNodeOfSelected(),
 				    pkgNode = parentNode.getNodeNamed('package.js');
 				this.doTreeChanged({
 					add: {
 						service: this.$.service,
 						parentNode: parentNode && parentNode.file,
 						pkgNode: pkgNode && pkgNode.file,
-						node: inNodes[0]
-					}
-				});
-				this.refreshFileTree(null, inNodes[0].id);
-			})
-			.error(this, function(inSender, inError) {
-				this.warn("Unable to create file:", name, inError);
-				this.showErrorPopup($L("Creating file '{name}' failed: {error}").replace("{name}", name).replace("{error}", inError.toString()));
-			});
-	},
-	/** @private */
-	_newFolderCancel: function(inSender, inEvent) {
-		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
-	},
-	/** @private */
-	_newFolderConfirm: function(inSender, inEvent) {
-		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
-		var folderId = inEvent.folderId;
-		var name = inSender.fileName.trim();
-		if (this.debug) this.log("Creating new folder "+name+" into folderId="+folderId);
-		this.$.service.createFolder(folderId, name)
-			.response(this, function(inSender, inFolder) {
-				if (this.debug) this.log("newFolderConfirm inFolder: ", inFolder);
-				var parentNode = this.getFolderOfSelectedNode(),
-				    pkgNode = parentNode.getNodeNamed('package.js');
-				this.doTreeChanged({
-					add: {
-						service: this.$.service,
-						parentNode: parentNode && parentNode.file,
-						pkgNode: pkgNode && pkgNode.file,
-						node: inFolder
+						node: inFsNode
 					}
 				});
 
 				/* cancel any move reverting */
-				this._resetRevert();
+				this.resetRevert();
 
-				this.refreshFileTree(null, inFolder.id /*selectId*/);
+				this.refreshFileTree(null, inFsNode.id /*selectId*/);
 			})
 			.error(this, function(inSender, inError) {
-				this.warn("Unable to create folder:", name, inError);
-				this.showErrorPopup($L("Creating folder '{name}' failed: {error}").replace("{name}", name).replace("{error}", inError.toString()));
+				this.warn("Unable to copy:", this.selectedFile, "as", newName, inError);
+				this.showErrorPopup($L("Creating file '{copyName}' as copy of '{name}' failed: {error}").replace("{copyName}", newName).replace("{name}", this.selectedFile.name).replace("{error}", inError.toString()));
 			});
 	},
 	/** @private */
-	_renameCancel: function(inSender, inEvent) {
+	// User Interaction for Rename File/Folder op
+	renameClick: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		if (this.selectedFile) {
+			this.$.renamePopup.setType(this.selectedFile.type);
+			this.$.renamePopup.setFileName(this.selectedFile.name);
+			this.$.renamePopup.setFolderId(this.selectedFile.id);
+			this.$.renamePopup.setPath(this.selectedFile.path);
+			this.$.renamePopup.show();
+		} else {
+			this.showErrorPopup($L("Select a file or folder to rename first"));
+		}
+	},
+	/** @private */
+	renameCancel: function(inSender, inEvent) {
 		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
 	},
 	/** @private */
-	_renameConfirm: function(inSender, inEvent) {
+	renameConfirm: function(inSender, inEvent) {
 		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
 		var newName = inSender.fileName.trim();
 		if (this.debug) this.log("Renaming '" + this.selectedFile + "' as '" + newName + "'");
@@ -811,7 +785,7 @@ enyo.kind({
 				});
 
 				/* cancel any move reverting */
-				this._resetRevert();
+				this.resetRevert();
 
 				this.refreshFileTree(null, inNode.id /*selectId*/);
 			})
@@ -821,31 +795,24 @@ enyo.kind({
 			});
 	},
 	/** @private */
-	_revertCancel: function(inSender, inEvent) {
-		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
+	// User Interaction for Delete File/Folder op
+	deleteClick: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		if (this.selectedFile) {
+			this.$.deletePopup.setType(this.selectedFile.isDir ? $L("folder") : $L("file"));
+			this.$.deletePopup.setName(this.selectedFile.name);
+			this.$.deletePopup.setNodeId(this.selectedFile.id);
+			this.$.deletePopup.setPath(this.selectedFile.path);
+			this.$.deletePopup.show();
+		} else {
+			this.showErrorPopup($L("Select a file or folder to delete first"));
+		}
 	},
 	/** @private */
-	_revertConfirm: function(inSender, inEvent) {
-		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
-		if (this.debug) this.log("Reverting '" + this.movedNode.file.name + "' into '" + this.originNode.file.path + "'");
-		this.moveNode(this.movedNode, this.originNode)
-			.response(this, function(inSender, inNodeFile) {
-				/* cancel any move reverting */
-				this._resetRevert();
-			})
-			.error(this, function(inSender, inError) {
-				this.warn("Unable to revert:", this.movedNode.file.name, "into", this.originNode.file.path, inError);
-				this.showErrorPopup($L("Reverting '{name}' to '{oldpath}' failed").replace("{name}", this.movedNode.file.name).replace("{oldpath}", this.originNode.file.path));
-			});
+	deleteCancel: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
 	},
 	/** @private */
-	_resetRevert: function() {
-		this.movedNode=null;
-		this.originNode=null;
-		this.revertMove=false;
-		this.hideRevertMoveButton();
-	},
-
 	deleteConfirm: function(inSender, inEvent) {
 		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
 		if (this.debug) this.log("selectedFile:", this.selectedFile);
@@ -865,7 +832,7 @@ enyo.kind({
 				});
 
 				/* cancel any move reverting */
-				this._resetRevert();
+				this.resetRevert();
 
 				this.refreshFileTree(null, inParentFolder.id /*selectId*/);
 			})
@@ -874,37 +841,95 @@ enyo.kind({
 				this.showErrorPopup($L("Deleting '{name}' failed").replace("{oldName}", this.selectedFile.name));
 			});
 	},
+	/** @private */
+	// User Interaction for Revert File/Folder moving op
+	revertClick: function(inSender, inEvent) {
+		if (this.debug) this.log(inSender, "=>", inEvent);
+		if (this.revertMove) {
+			this.$.revertPopup.setType(this.movedNode.file.isDir ? $L("folder") : $L("file"));
+			this.$.revertPopup.setName(this.movedNode.file.name);
+			this.$.revertPopup.setPath(this.originNode.file.path);
+			this.$.revertPopup.show();
+		} else {
+			this.showErrorPopup($L("No more node moving to revert"));
+		}
+	},
+	/** @private */
+	revertCancel: function(inSender, inEvent) {
+		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
+	},
+	/** @private */
+	revertConfirm: function(inSender, inEvent) {
+		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
+		if (this.debug) this.log("Reverting '" + this.movedNode.file.name + "' into '" + this.originNode.file.path + "'");
+		this.moveNode(this.movedNode, this.originNode)
+			.response(this, function(inSender, inNodeFile) {
+				/* cancel any move reverting */
+				this.resetRevert();
+			})
+			.error(this, function(inSender, inError) {
+				this.warn("Unable to revert:", this.movedNode.file.name, "into", this.originNode.file.path, inError);
+				this.showErrorPopup($L("Reverting '{name}' to '{oldpath}' failed").replace("{name}", this.movedNode.file.name).replace("{oldpath}", this.originNode.file.path));
+			});
+	},
 
-	copyFileConfirm: function(inSender, inEvent) {
-		if (this.debug) this.log(inEvent);
-		var oldName = this.selectedFile.name;
-		var newName = inSender.fileName.trim();
-		if (this.debug) this.log("Creating new file " + newName + " as copy of" + this.selectedFile.name);
-		this.$.service.copy(this.selectedFile.id, newName)
-			.response(this, function(inSender, inFsNode) {
-				if (this.debug) this.log("inNode: "+inFsNode);
-				var parentNode = this.getParentNodeOfSelected(),
+	showErrorPopup : function(msg) {
+		this.$.errorPopup.setErrorMsg(msg);
+		this.$.errorPopup.show();
+	},
+	enableDisableButtons: function() {
+		if (this.selectedFile) {
+			this.$.deleteFileButton.setDisabled(this.selectedFile.isServer);
+			this.$.copyFileButton.setDisabled(this.selectedFile.isServer);
+			this.$.renameFileButton.setDisabled(this.selectedFile.isServer);
+		} else {
+			this.$.copyFileButton.setDisabled(true);
+			this.$.deleteFileButton.setDisabled(true);
+			this.$.renameFileButton.setDisabled(true);
+		}
+	},
+
+	delayedRefresh: function(msg, forceSelect) {
+		var onDone = new enyo.Async() ;
+		onDone.response(this, function(inSender, toSelectId) {
+			var select = forceSelect || toSelectId ;
+			if (this.debug) this.log("delayed refresh after " + msg + ' on ' + select) ;
+			this.refreshFileTree(null, select);
+		}) ;
+		return onDone ;
+	},
+
+	createFile: function(name, folderId, content) {
+		if (this.debug) this.log("Creating new file "+name+" into folderId="+folderId);
+		this.$.service.createFile(folderId, name, content)
+			.response(this, function(inSender, inNodes) {
+				if (this.debug) this.log("inNodes: ",inNodes);
+				var parentNode = this.getFolderOfSelectedNode(),
 				    pkgNode = parentNode.getNodeNamed('package.js');
 				this.doTreeChanged({
 					add: {
 						service: this.$.service,
 						parentNode: parentNode && parentNode.file,
 						pkgNode: pkgNode && pkgNode.file,
-						node: inFsNode
+						node: inNodes[0]
 					}
 				});
-
-				/* cancel any move reverting */
-				this._resetRevert();
-
-				this.refreshFileTree(null, inFsNode.id /*selectId*/);
+				this.refreshFileTree(null, inNodes[0].id);
 			})
 			.error(this, function(inSender, inError) {
-				this.warn("Unable to copy:", this.selectedFile, "as", newName, inError);
-				this.showErrorPopup($L("Creating file '{copyName}' as copy of '{name}' failed: {error}").replace("{copyName}", newName).replace("{name}", this.selectedFile.name).replace("{error}", inError.toString()));
+				this.warn("Unable to create file:", name, inError);
+				this.showErrorPopup($L("Creating file '{name}' failed: {error}").replace("{name}", name).replace("{error}", inError.toString()));
 			});
 	},
 	
+	/** @private */
+	resetRevert: function() {
+		this.movedNode=null;
+		this.originNode=null;
+		this.revertMove=false;
+		this.hideRevertMoveButton();
+	},
+
 	/**
 	 * moveNode
 	 * @public
@@ -925,7 +950,7 @@ enyo.kind({
 						removePkgNode = removedParentNode.getNodeNamed('package.js'),
 						addParentNode = inTarget,
 						addPkgNode = addParentNode.getNodeNamed('package.js');
-						
+
 				if (!addParentNode.expanded) {
 					addParentNode.setExpanded(true);
 					// update icon for expanded state
@@ -961,6 +986,7 @@ enyo.kind({
 							that.$.scroller.scrollIntoView(inTarget.getNodeWithId(inValue.id), true);
 						}, inValue.id);*/
 						this.refreshFileTree(null, inValue.id);
+						//this.refreshFileTree(function() {inTarget.getNodeWithId(inValue.id).doAdjustScroll()}, inValue.id);
 					})
 					.error(this, function() {
 						this.log("error retrieving related node children");
@@ -968,7 +994,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to move:", inNode.file.name, inError);
-				this.showErrorPopup($L("Moving  {nodeName} failed: {error}").replace("{nodeName}", inNode.file.name).replace("{error}", inError.toString()));
+				this.showErrorPopup($L("Moving {nodeName} failed: {error}").replace("{nodeName}", inNode.file.name).replace("{error}", inError.toString()));
 			});
 	}
 });

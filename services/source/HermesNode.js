@@ -46,10 +46,12 @@ enyo.kind({
 	
 	debug: false,
 	
+	/** @private */
 	down: function(inSender, inEvent) {
 		this.doItemDown(inEvent);
 		return true;
 	},
+	/** @private */
 	dragstart: function(inSender, inEvent) {
 		if(!inEvent.dataTransfer) {
 			return true;
@@ -58,6 +60,7 @@ enyo.kind({
 		this.doItemDragstart(inEvent);
 		return true;
 	},
+	/** @private */
 	dragenter: function(inSender, inEvent) {
 		if (!inEvent.dataTransfer) {
 			return true;
@@ -66,6 +69,7 @@ enyo.kind({
 		this.doItemDragenter(inEvent);
 		return true;
 	},
+	/** @private */
 	dragover: function(inSender, inEvent) {
 		if (!inEvent.dataTransfer) {
 			return true;
@@ -74,6 +78,7 @@ enyo.kind({
 		this.doItemDragover(inEvent);
 		return true;
 	},
+	/** @private */
 	dragleave: function(inSender, inEvent) {
 		if (!inEvent.dataTransfer) {
 			return true;
@@ -82,6 +87,7 @@ enyo.kind({
 		this.doItemDragleave(inEvent);
 		return true;
 	},
+	/** @private */
 	drop: function(inSender, inEvent) {
 		if (!inEvent.dataTransfer) {
 			return true;
@@ -90,6 +96,7 @@ enyo.kind({
 		this.doItemDrop(inEvent);
 		return true;
 	},
+	/** @private */
 	dragend: function(inSender, inEvent) {
 		if (!inEvent.dataTransfer) {
 			return true;
@@ -150,7 +157,7 @@ enyo.kind({
 
 			res = i >= nfiles.length ? 1
 			    : i >= rfiles.length ? -1
-			    :                      this.fileNameSort(nfiles[i], rfiles[i]) ;
+			    : this.fileNameSort(nfiles[i], rfiles[i]) ;
 
 			// remember that these file lists are sorted
 			switch(res) {
@@ -336,11 +343,11 @@ enyo.kind({
 	// - tracker is an internal parameter used in inner refreshFileTree calls
 	refreshTree: function(tracker, belowTop, toSelectId) {
 		if (this.debug) this.log(this) ;
-		var target = this ;
+		//var target = this ; //dead code
 
 		if (this.debug) this.log('running refreshTree with ' +
-					 this.controls.length + ' controls with content ' + this.content +
-					 ' force select ' + toSelectId );
+			 this.controls.length + ' controls with content ' + this.content +
+			 ' force select ' + toSelectId );
 
 		tracker.inc() ; // for updadeNodes
 		this.updateNodes().
@@ -355,7 +362,7 @@ enyo.kind({
 					if ( c.file.id === toSelectId ) {
 						if (this.debug) this.log('force select of ' + c.file.id);
 						c.doNodeTap();
-						this.doAdjustScroll() ;
+
 						// force a "click" event when the item is selected
 						this.doFolderClick({file: c.file});
 					}
