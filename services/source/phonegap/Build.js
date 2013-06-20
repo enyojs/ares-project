@@ -99,15 +99,28 @@ enyo.kind({
 	 * Shared enyo.Ajax error handler
 	 * @private
 	 */
-	_handleServiceError: function(msg, next, inSender, inError) {
-		var response = inSender.xhrResponse, contentType, details;
+	_handleServiceError: function(message, next, inSender, inError) {
+		var response = inSender.xhrResponse, contentType, html, text;
 		if (response) {
 			contentType = response.headers['content-type'];
-			if (contentType && contentType.match('^text/plain')) {
-				details = response.body;
+			if (contentType) {
+				if (contentType.match('^text/plain')) {
+					text = response.body;
+				}
+				if (contentType.match('^text/html')) {
+					html = response.body;
+				}
 			}
 		}
-		next(new Error(msg + inError.toString()), details);
+		if (inError && inError.statusCode === 401) {
+			// invalidate token
+			this.config.auth.token = null;
+			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
+		}
+		var err = new Error(message + " (" + inError.toString() + ")");
+		err.html = html;
+		err.text = text;
+		next(err);
 	},
 
 	/**
@@ -187,19 +200,7 @@ enyo.kind({
 			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
 			next();
 		});
-		req.error(this, function(inSender, inError) {
-			// invalidate token
-			this.config.auth.token = null;
-			var response = inSender.xhrResponse, contentType, details;
-			if (response) {
-				contentType = response.headers['content-type'];
-				if (contentType && contentType.match('^text/plain')) {
-					details = response.body;
-				}
-			}
-			if (this.debug) this.error("Unable to get PhoneGap application token (" + details || inError + ")", "response:", response);
-			next(new Error("Unable to get PhoneGap application token (" + details || inError + ")"), details);
-		});
+		req.error(this, this._handleServiceError.bind(this, "Unable to obtain PhoneGap security token", next));
 		req.go();
 	},
 
@@ -218,20 +219,7 @@ enyo.kind({
 			this._storeUserData(inData.user);
 			next(null, inData);
 		});
-		req.error(this, function(inSender, inError) {
-			// invalidate token
-			this.config.auth.token = null;
-			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
-			// report the error
-			var response = inSender.xhrResponse, contentType, details;
-			if (response) {
-				contentType = response.headers['content-type'];
-				if (contentType && contentType.match('^text/plain')) {
-					details = response.body;
-				}
-			}
-			next(new Error("Unable to get PhoneGap user data (" + details || inError + ")"), details);
-		});
+		req.error(this, this._handleServiceError.bind(this, "Unable to get PhoneGap user data", next));
 		req.go();
 	},	
 
@@ -258,25 +246,10 @@ enyo.kind({
 		//in case of sucess send the obtained JSON object to the next function
 		//in the Async.waterfall.
 		req.response(this, function(inSender, inData) {
-		
-		  // activate the pop up to view the results
-		  next(null, inData);
+			// activate the pop up to view the results
+			next(null, inData);
 		});
-		req.error(this, function(inSender, inError) {
-			// invalidate token
-			this.config.auth.token = null;
-			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
-			
-			// report the error
-			var response = inSender.xhrResponse, contentType, details;
-			if (response) {
-				contentType = response.headers['content-type'];
-				if (contentType && contentType.match('^text/plain')) {
-					details = response.body;
-				}
-			}
-			next(new Error("Unable to get PhoneGap user data (" + details || inError + ")"), details);
-		});
+		req.error(this, this._handleServiceError.bind(this, "Unable to get application build status", next));
 		req.go(); 
 	},
 	
@@ -645,7 +618,7 @@ enyo.kind({
 			project.setObject("build.phonegap.target.pkgUrl", pkgUrl);
 			next();
 		});
-		req.error(this, this._handleServiceError.bind(this, "Unable to store pkg", next));
+		req.error(this, this._handleServiceError.bind(this, "Unable to store application package", next));
 	},	
 
 	/**
@@ -875,38 +848,13 @@ enyo.kind({
 					url: url,
 					handleAs: 'text'
 				});		
-
-				//Handling a successfull response
 				req.response(this, function(inSender, inData) {
-					if (this.debug){
-						this.log("response: received " + inData.length + 
-							" bytes typeof: " + (typeof inData));
-					}
+					if (this.debug) this.log("response: received " + inData.length + " bytes typeof: " + (typeof inData));
 					var ctype = req.xhrResponse.headers['content-type'];
-					if (this.debug){
-						this.log("response: received ctype: " + ctype);
-					}
+					if (this.debug) this.log("response: received ctype: " + ctype);
 					next(null, {content: inData, ctype: ctype});			
 				});
-
-				//Handling a failure response
-				req.error(this, function(inSender, inError) {
-					// invalidate token
-					this.config.auth.token = null;
-					ServiceRegistry.instance.setConfig(this.config.id, 
-						{auth: this.config.auth});
-					
-					// report the error
-					var response = inSender.xhrResponse, contentType, details;
-					if (response) {
-						contentType = response.headers['content-type'];
-						if (contentType && contentType.match('^text/plain')) {
-							details = response.body;
-						}
-					}			
-				});
-
-				//Execution of the Ajax request
+				req.error(this, this._handleServiceError.bind(this, "Unable to download application package", next));
 				req.go(); 
 			}	
 		}

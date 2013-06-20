@@ -100,7 +100,7 @@ BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 		    ("Missing authentication token" === msg)){
 			_respond(new HttpError(msg, 401));
 		} else {
-			_respond(new HttpError(msg, 400));
+			_respond(new HttpError(msg, 500));
 		}
 	} else {
 		_respond(new Error(err.toString()));
@@ -114,8 +114,13 @@ BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 			// invalidate token cookie
 			self.setCookie(res, 'token', null);
 		}
-		res.contentType('txt'); // direct usage of 'text/plain' does not work
-		res.send(err.toString());
+		if (err.contentType) {
+			res.contentType(err.contentType);
+			res.send(err.message);
+		} else {
+			res.contentType('txt'); // direct usage of 'text/plain' does not work
+			res.send(err.toString());
+		}
 	}
 };
 
