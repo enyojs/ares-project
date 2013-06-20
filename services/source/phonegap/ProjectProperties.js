@@ -6,12 +6,11 @@ enyo.kind({
 
 	},
 	components: [
-		{}
-
 	],
 	statics: {
+
 		
-		general: [
+		generalPickers: [
 			["phonegapVersion" ,"Phonegap version" ,
 					["2.8.0", "2.7.0", "2.5.0", "2.3.0", "2.2.0", "2.1.0", 
 					 "2.0.0", "1.9.0", "1.8.1", "1.7.0", "1.6.1", "1.5.0", 
@@ -21,25 +20,30 @@ enyo.kind({
 			["fullScreen" ,"Fullscreen mode" ,["true", "false"]],
 			 
 		],
-		//TODO: remove the row name.
+
+		generalInputs: [
+			["icon", "Icon"], 
+			["splashScreen", "Splash screen"]
+		], 
+		
 		//in this array: 
-		//the first element is the name of the row
+		//the first element is the name of the checkBox
 		//the second element is ne label value
-		permissions: [
-			["BatteryRow", "battery"],
-			["CameraRow", "camera"], 
-			["ContactRow", "contact"],
-			["FileRow", "file"],
-			["GeolocationRow", "geolocation"],
-			["MediaRow", "media"],
-			["NetworkRow", "network"],
-			["NotificationRow", "notification"],
-			["DeviceRow", "device"]
+		permissionsCkBox: [
+			["battery", "Battery"],
+			["camera", "Camera"], 
+			["contact", "Contact"],
+			["FileRow", "File"],
+			["geolocation", "Geolocation"],
+			["media", "Media"],
+			["network", "Network"],
+			["notification", "Notification"],
+			["device", "Device"]
 		],
 		//in this array: 
 		//the first sub-element is the name of the input
 		//the second sub-element is ne label value
-		android: [
+		androidInput: [
 			["minSDK", "Minimum SDK"],
 			["maxSDK", "Maximum SDK"],
 			["splashScreenDuration", "Duration of the splashScreen"],
@@ -54,12 +58,7 @@ enyo.kind({
 			["exitOnSuspend", "Exit on suspend", ["true", "false"]],
 			["showSplashScreenSpinner", "Show splash screen spinner", ["true", "false"]],
 			["autoHideSplashScreen", "Auto-hide splash screen", ["true", "false"]]
-
-
-
 		]
-
-
 	}
 });
 
@@ -84,24 +83,15 @@ enyo.kind({
 	components: [
 		{kind:"enyo.Scroller", fit:"true", classes:"ares-project-properties",components:[
 			{kind: "FittableRows", components: [
-				{classes:"ares-row ares-align-right", components :[
+				{classes:"ares-row ares-align-left", components :[
 					{tag:"label", classes: "ares-fixed-label ares-small-label", content: "PhoneGap App ID:"},
 					{kind: "onyx.InputDecorator", components: [
 						{kind: "Input", name: "pgConfId",
 							attributes: {title: "unique identifier, assigned by build.phonegap.com"}
 						}
-					]},
-					{tag:"label", classes: "ares-fixed-label ares-small-label", content: "Icon URL:"},
-					{kind: "onyx.InputDecorator", components: [
-						{kind: "Input", name: "pgIconUrl",
-							attributes: {title: "Relative location of the application icon. Defaults to Enyo icon."}
-						}
-					]}
-				]},
-				{content: "Targets:", classes:"ares-row ares-align-right", components: [
-					
-					{kind: "onyx.Button", content: "Refresh...", ontap: "refresh"},
-				]},
+					]}, 
+					{kind: "onyx.Button", style: "left: 200px;", content: "Refresh...", ontap: "refresh"}				
+				]},				
 				{name: "targetsRows", kind: "FittableRows", classes: 'ares_projectView_switches'}
 			]}
 		]}
@@ -138,9 +128,9 @@ enyo.kind({
 	},
 
 	setUpGeneralDrawer: function(){
-		var generalUiData = Phonegap.EditUiData.general; 
+		var generalUiDataPickers = Phonegap.EditUiData.generalPickers; 
 
-		enyo.forEach(generalUiData, function(row){
+		enyo.forEach(generalUiDataPickers, function(row){
 			this.$.targetsRows.$.general.$.targetDrw.createComponent({
 				kind: "PickerRow",
 				name: row[0],
@@ -149,11 +139,20 @@ enyo.kind({
 			});		
 		}, this);
 
+		var generalUiDataInputs =  Phonegap.EditUiData.generalInputs;
+		enyo.forEach(generalUiDataInputs, function(row){
+			this.$.targetsRows.$.general.$.targetDrw.createComponent({
+				kind: "inputRow",
+				name: row[0],
+				label: row[1]//, 
+				//value: row[2]
+			});		
+		}, this);
 	},
 
 	//TODO :change to a nested function when refactoring
 	setUpPermissionDrawer: function(){
-		var permissionsUiData = Phonegap.EditUiData.permissions;
+		var permissionsUiData = Phonegap.EditUiData.permissionsCkBox;
 		
 		enyo.forEach(permissionsUiData, function(row){
 			this.$.targetsRows.$.permissions.$.targetDrw.createComponent({
@@ -165,15 +164,15 @@ enyo.kind({
 	}, 
 
 	setUpAndroidDrawer: function(){
-		var androidInput = Phonegap.EditUiData.android;
-		var androidConfig = phongap.configData.androidSpecific;
+		var androidInput = Phonegap.EditUiData.androidInput;
+		//var androidConfig = Phonegap.configData.androidSpecific;
 		
 		enyo.forEach(androidInput, function(row){
 			this.$.targetsRows.$.android.$.targetDrw.createComponent({
 				kind: "inputRow",
 				name: row[0],
-				label: row[1], 
-				value: androidConfig[row[0]]
+				label: row[1]//, 
+				//value: androidConfig[row[0]]
 			});		
 		}, this);
 	},
@@ -189,7 +188,6 @@ enyo.kind({
 				value: row[2]
 			});		
 		}, this);
-
 	},
 
 	/** public */
@@ -199,7 +197,7 @@ enyo.kind({
 		this.config.enabled = true;
 
 		this.$.pgConfId.setValue(config.appId || '' );
-		this.$.pgIconUrl.setValue(config.icon.src || config.icon.src );
+		//this.$.pgIconUrl.setValue(config.icon.src || config.icon.src );
 
 		this.config.targets = this.config.targets || {};
 
@@ -514,11 +512,12 @@ enyo.kind({
 	debug: true,
 	published: {
 		label: "",
+		name: "",
 		activated: false
 	},
 	components: [		
 			{kind: "onyx.Checkbox",
-		     name: "checkBox" ,
+		     name: this.name ,
 		     onchange: "permissionChanged",
 		    style: "margin-left: 30px; margin-right: 50px;"
 		    }, 
