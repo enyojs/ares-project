@@ -73,8 +73,7 @@ BdPhoneGap.prototype.route = function() {
 	this.app.post(this.makeExpressRoute('/token'), this.getToken.bind(this));
 	this.app.get(this.makeExpressRoute('/api/v1/me'), this.getUserData.bind(this));
 	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId'), this.getAppStatus.bind(this));
-	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId/:platform/:title/:version'),
-		     this.downloadApp.bind(this));
+	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId/:platform/:title/:version'), this.downloadApp.bind(this));
 };
 
 BdPhoneGap.prototype.errorHandler = function(err, req, res, next){

@@ -547,8 +547,6 @@ enyo.kind({
 		req.go(query);
 	},
 
-	
-
 	/**
 	 * Prepare the folder where to store the built package
 	 * @param  {Object}   project contain a description about the current selected
@@ -601,7 +599,7 @@ enyo.kind({
 			{content: inData.content, ctype: inData.ctype});
 
 		req.response(this, function(inSender, inData) {
-			if (this.debug) this.log("response received ", inData);
+			if (this.debug) this.log("response:", inData);
 			var config = project.getService().config;
 			var pkgUrl = config.origin + config.pathname + '/file' + inData[0].path; // TODO: YDM: shortcut to be refined
 			project.setObject("build.phonegap.target.pkgUrl", pkgUrl);
@@ -629,21 +627,11 @@ enyo.kind({
 	 * @private
 	 */
 	_store: function(project, folderId, appData, next) {
-		var config = ares.clone(project.getConfig().getData());
-		var applicationId = config.id;
-	
-		
-		var appKey = "build." + this.getName() + ".app";
-		if(this.debug){
-		 this.log("Entering _store function"+
-			"project: ", project, 
-			" folderId: ", folderId,
-			",appData:  ", appData
-			 );
-		}
-
+		var config = ares.clone(project.getConfig().getData()),
+		    applicationId = config.id,
+		    appKey = "build." + this.getName() + ".app";
+		if(this.debug) this.log("Entering _store function project: ", project, "folderId:", folderId, "appData:", appData);
 		project.setObject(appKey, appData);
-			
 		this._getAllPackagedApplications(project, appData, folderId, next);
 	},
 	
@@ -701,46 +689,44 @@ enyo.kind({
 		 */
 		function _getApplicationForPlatform(platform, next){
 			async.whilst(
-		    	function() {
-		    		//Truthfull condition to send a new check status request
-		    		//to Phongap build. 
-		    			return appData.status[platform] === "pending";
-		    	},
-		    	_waitForApp,
-		    	//This function is run when the whilst condition in no longer
-		    	//satisfied
-		    	_downloadApp
-		   	);
+				function() {
+					// Synchronous condition to keep waiting.
+					return appData.status[platform] === "pending";
+				},
+				// ...condition satisfied
+				_waitForApp,
+				// ...condition no longer satisfied
+				_downloadApp
+			);
 
-		   	/**
+			/**
 			 * Nested function that check the build status of the application 
 			 * and update the appData each 3 sec
 			 * @param  {Function} next a CommonJS callback
 			 * @private
 			 */
 			function _waitForApp (next){
-
 				async.waterfall([
-	    			function (next) {
-	    				//Timeout before sending a new check status request
-	        			setTimeout(next, builder.timeoutDuration);
-	    			},
-	    			function (next) {
-	    				if(appData.status[platform] === "pending"){
-	    					builder._getBuildStatus(project, appData, next);
-	    				} else{
-	    					next(null, null);
-	    				}
-	    				
-	    			},
-	    			function(inData, next) {
-	    				//get the result from the previous status check request
-	    				if (inData !== null){
-	    					appData = inData.user;
-	    				}	    				
-	    				next();
-	    			}
-	    		], next);	    			
+					function (next) {
+						//Timeout before sending a new check status request
+						setTimeout(next, builder.timeoutDuration);
+					},
+					function (next) {
+						if(appData.status[platform] === "pending"){
+							builder._getBuildStatus(project, appData, next);
+						} else{
+							next(null, null);
+						}
+
+					},
+					function(inData, next) {
+						//get the result from the previous status check request
+						if (inData !== null){
+							appData = inData.user;
+						}
+						next();
+					}
+				], next);
 			}
 			/**
 			 * Launch the appropirate action when an exception occurs or when 
@@ -751,16 +737,13 @@ enyo.kind({
 			function _downloadApp(err){
 				if (err) {
 					next(err);
-	    		} else {
-	    			//if the status is complete then a download request
-	    			//is sent to Node.js server.
-	    			if (appData.status[platform] === "complete"){
-	    				_setApplicationToDownload(next);
-	    			}
-	    			else {
-	    				next();
-	    			}
-	    		}
+				} else {
+					if (appData.status[platform] === "complete"){
+						_setApplicationToDownload(next);
+					} else {
+						next();
+					}
+				}
 			}
 
 			/**
@@ -786,18 +769,11 @@ enyo.kind({
 						//make the download request.
 						appId = appData.id;
 						title = packageName;
-					    version = appData.version || "SNAPSHOT";
+						version = appData.version || "SNAPSHOT";
 						
-						var urlSuffix = appId +
-								  '/' + platform +
-								  '/' + title + 
-								  '/' + version;
-						if(builder.debug){
-							builder.log("Application "+ platform
-						     +" ready for download");
-						}
-						_sendDownloadRequest.bind(builder)( 
-							urlSuffix, next);
+						var urlSuffix = appId + '/' + platform + '/' + title + '/' + version;
+						if(builder.debug) builder.log("Application "+ platform + " ready for download");
+						_sendDownloadRequest.bind(builder)(urlSuffix, next);
 					},
 					//inData is a multipart/form containing the
 					//built application
@@ -822,15 +798,9 @@ enyo.kind({
 			 * @private
 			 */
 			function _sendDownloadRequest(urlSuffix, next){
-				
-				var config = project.getConfig().getData();
-
 				var url = this.url + '/api/v1/apps/' + urlSuffix;
-				if (this.debug){
-					this.log("download URL is : ", url);
-				}
+				if (this.debug) 	this.log("download URL is : ", url);
 				
-				//Definition of the Ajax request 
 				var req = new enyo.Ajax({
 					url: url,
 					handleAs: 'text'
@@ -846,8 +816,6 @@ enyo.kind({
 			}	
 		}
 	},
-
-	
 
 	/**
 	 * Generate PhoneGap's config.xml on the fly
