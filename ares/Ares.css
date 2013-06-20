@@ -37,7 +37,7 @@ body {
 
 .hermesFileTree-toolbar { height:64px; border-left: 0px; }
 
-.ares-bottom-bar { min-height: 40px; background-color:#0A0A0A; border-top: 1px solid #050505; padding:0px;}
+.ares-bottom-bar { height: 40px; background-color:#0A0A0A; border-top: 1px solid #050505; padding:0px;}
 
 .ares-docbar-tabs {
 	overflow:auto; 
@@ -58,7 +58,6 @@ body {
 	text-align:center; 
 	cursor:pointer; 
 	cursor:hand; 
-	color:#FFF; 
 	overflow:hidden; 
 	font-size:12px; 
 	font-weight:bold; 
