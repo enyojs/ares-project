@@ -1,3 +1,4 @@
+/*global enyo,ares,async,Ares,Phonegap,XMLWriter,ServiceRegistry*/
 /**
  * Kind to manage the life cycle of building a mobile application using 
  * the service Phonegap build.
@@ -72,8 +73,7 @@ enyo.kind({
 	 * @public
 	 */
 	getDefaultProjectConfig: function() {
-		var config = Phonegap.Build.DEFAULT_PROJECT_CONFIG;
-		return config;
+		return ares.clone(Phonegap.Build.DEFAULT_PROJECT_CONFIG);
 	},
 
 	/**
@@ -569,7 +569,7 @@ enyo.kind({
 		} else {
 			var req = project.getService().createFolder(project.getFolderId(), folderPath);
 			req.response(this, function(inSender, inResponse) {
-				if (this.debug) this.log("response received ", inResponse);
+				if (this.debug) this.log("response:", inResponse);
 				folderId = inResponse.id;
 				project.setObject(folderKey, folderId);
 				next(null, folderId, inData);
@@ -658,11 +658,8 @@ enyo.kind({
 	 * @private
 	 */
 	_getAllPackagedApplications: function(project, appData, folderId, next){
-	
 		var platforms = [];
-
 		var builder = this;
-		
 
 		//Setting the targeted platforms for the build from the those
 		//presented in the object appData.
@@ -672,20 +669,20 @@ enyo.kind({
 			}, this);
 
 		/* 
-		 * Parallel tasks are lauched to check the build status in each platform.
+		 * Parallel tasks are launched to check the build status in each platform.
 		 * A status can be : complete, pending or error.
-		 * 	- completed: a request is made to node.js to 
-		 *	 			download the application.
+		 *	- completed: a request is made to node.js to
+		 *				download the application.
 		 *	- pending: another request is sent to phonegap to check for an
 		 *	           updated status.
 		 *	- error: an error message is displayed.		
-		*/		
+		 */
 		async.forEach(platforms,
 		    function(platform, next) {
-		    	if(this.debug){
-		    		this.log("Send request for the platform: ", platform);
-		    	}
-		    	_getApplicationForPlatform(platform, next);
+			if(this.debug){
+				this.log("Send request for the platform: ", platform);
+			}
+			_getApplicationForPlatform(platform, next);
 	       },next);
 	
 		/**
@@ -780,8 +777,9 @@ enyo.kind({
 			 * @private
 			 */
 			 function _setApplicationToDownload(next){
-				var config = ares.clone(project.getConfig().getData());
-				var packageName = config.id;
+				var config = ares.clone(project.getConfig().getData()),
+				    packageName = config.id,
+				    appId, title, version;
 
 				async.waterfall([
 					function(next){
@@ -962,7 +960,6 @@ enyo.kind({
 	},
 
 	statics: {
-		platforms: ["android", "ios", "winphone", "blackberry", "symbian", "webos"],
 		DEFAULT_PROJECT_CONFIG: {
 			enabled: false,
 			icon: {

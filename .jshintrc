@@ -4,7 +4,7 @@
         "$L": true,
         "onyx": true
     },
-    "es3": true,
+    "es5": true,
     "evil": false,
     "regexdash": true,
     "browser": true,

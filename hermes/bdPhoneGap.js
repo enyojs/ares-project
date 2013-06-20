@@ -1,5 +1,7 @@
+/*jshint node: true, strict: false, globalstrict: false */
+
 /**
- * Hermes PhoneGap build service
+ * PhoneGap build service
  */
 
 // nodejs version checking is done in parent process ide.js
@@ -8,31 +10,22 @@ var fs = require("fs"),
     path = require("path"),
     express = require("express"),
     util  = require("util"),
-    npmlog = require('npmlog'),
-    querystring = require("querystring"),
+    log = require('npmlog'),
     temp = require("temp"),
     request = require('request'),
     async = require("async"),
-    mkdirp = require("mkdirp"),
-    rimraf = require("rimraf"),
     http = require("http"),
     client = require("phonegap-build-api"),
     BdBase = require("./lib/bdBase"),
-    HttpError = require("./lib/httpError"),
-    CombinedStream = require('combined-stream');
+    HttpError = require("./lib/httpError");
 
-var basename = path.basename(__filename, '.js'),
-    log = npmlog;
+var basename = path.basename(__filename, '.js');
+
 log.heading = basename;
 log.level = 'http';
 
 var PGB_URL = 'https://build.phonegap.com',
     PGB_TIMEOUT = 7000;
-
-process.on('uncaughtException', function (err) {
-	log.error('uncaughtException', err.stack);
-	process.exit(1);
-});
 
 function BdPhoneGap(config, next) {
 	config.pathname = config.pathname || '/phonegap';
@@ -56,9 +49,9 @@ util.inherits(BdPhoneGap, BdBase);
 BdPhoneGap.prototype.use = function() {
 	log.verbose('BdPhoneGap#use()', "configuring..."); 
 	this.app.use(express.cookieParser());
+
 	this.app.use(this.makeExpressRoute('/op'), authorize.bind(this));
 	this.app.use(this.makeExpressRoute('/api'), authorize.bind(this));
-	
 
 	function authorize(req, res, next) {
 		log.verbose("authorize()", "req.url:", req.url);
@@ -182,6 +175,7 @@ BdPhoneGap.prototype.getUserData = function(req, res, next) {
 		}
 	});
 };
+
 BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
 	client.auth({
 		token: req.token,
@@ -198,7 +192,7 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
 				} else {
 					log.info("getAppStatus()", "appStatus:", userData);
 					res.status(200).send({user: userData}).end();
-			 	}
+				}
 			});	
 		}
 	});
@@ -207,11 +201,11 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
 /**
  * When a download request is received from "Build.js",
  * this function is called to do the following actions : 
- * 	- Create the appropriate file name
- * 	- Download the built project from Phonegap build using the 
- * 	  API-Phonegap-Build
- * 	- When the download is done, the file is piped to "Ares client"
- * 	  using a multipart/form Post request
+ * - Create the appropriate file name
+ * - Download the built project from Phonegap build using the
+ *   API-Phonegap-Build
+ * - When the download is done, the file is piped to "Ares client"
+ *   using a multipart/form Post request
  *   
  * @param  {Object}   req  Contain the request attributes
  * @param  {Object}   res  Contain the response attributes
@@ -357,7 +351,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		_upload.bind(this),
 		this.returnBody.bind(this, req, res),
 		this.cleanup.bind(this, req, res)
-	], function (err, results) {
+	], function (err) {
 		if (err) {
 			// run express's next() : the errorHandler (which calls cleanup)
 			next(err);
@@ -369,7 +363,6 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 	});
 
 	function _parse(next) {
-		var errs = [];
 		// check mandatory parameters
 		if (!req.token) {
 			next(new HttpError("Missing account token", 401));
@@ -396,7 +389,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		//WARNING: enabling this trace shows-up the signing keys passwords
 		log.silly("build#_parse(): appData:", appData);
 		next();
-	};
+	}
 
 	function _upload(next) {
 		log.info("build#_upload()");
@@ -409,7 +402,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 			}),
 			_uploadApp.bind(this),
 			_success.bind(this)
-		], function(err, result) {
+		], function(err) {
 			if (err) {
 				_fail(err);
 			} else {

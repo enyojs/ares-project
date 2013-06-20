@@ -1,3 +1,5 @@
+/*jshint node: true, strict: false, globalstrict: false */
+
 var fs = require("fs"),
     path = require("path"),
     express = require("express"),
@@ -9,7 +11,6 @@ var fs = require("fs"),
     http = require("http"),
     async = require("async"),
     mkdirp = require("mkdirp"),
-    request = require('request'),
     rimraf = require("rimraf"),
     zipstream = require('zipstream'),
     CombinedStream = require('combined-stream'),
@@ -43,7 +44,9 @@ function BdBase(config, next) {
 	config.port = config.port || 0;
 	config.pathname = config.pathname || '/';
 	config.level = config.level || 'http';
-	if (config.performCleanup === undefined) config.performCleanup = true;
+	if (config.performCleanup === undefined) {
+		config.performCleanup = true;
+	}
 
 	this.config = config;
 	log.info('BdBase()', "config:", this.config);
@@ -109,8 +112,8 @@ function BdBase(config, next) {
 	/*
 	 * verbs
 	 */
-	this.app.post('/config', (function(req, res, next) {
-		this.configure(req.body && req.body.config, function(err) {
+	this.app.post('/config', (function(req, res /*, next*/) {
+		this.configure(req.body && req.body.config, function(/*err*/) {
 			res.status(200).end();
 		});
 	}).bind(this));
@@ -166,7 +169,7 @@ BdBase.prototype.configure = function(config, next) {
  * Additionnal middlewares: 'this.app.use(xxx)'
  * @protected
  */
-BdBase.prototype.use = function(config, next) {
+BdBase.prototype.use = function(/*config, next*/) {
 	log.verbose('BdBase#use()', "skipping..."); 
 };
 
@@ -174,7 +177,7 @@ BdBase.prototype.use = function(config, next) {
  * Additionnal routes/verbs: 'this.app.get()', 'this.app.port()'
  * @protected
  */
-BdBase.prototype.route = function(config, next) {
+BdBase.prototype.route = function(/*config, next*/) {
 	log.verbose('BdBase#route()', "skipping..."); 
 };
 
@@ -210,7 +213,7 @@ BdBase.prototype.errorHandler = function(err, req, res, next){
 /**
  * @protected
  */
-BdBase.prototype.answerOk = function(req, res, next) {
+BdBase.prototype.answerOk = function(req, res /*, next*/) {
 	log.verbose("answerOk()", '200 OK');
 	res.status(200).send();
 };
@@ -268,7 +271,7 @@ BdBase.prototype.store = function(req, res, next) {
 						try {
 							var fpath = file.path;
 							delete file.path;
-							fs.unlink(fpath, function(err) { /* Nothing to do */ });
+							fs.unlink(fpath, function(/*err*/) { /* Nothing to do */ });
 							
 							var filedata = new Buffer(data.toString('ascii'), 'base64');			// TODO: This works but I don't like it
 							fs.writeFile(path.join(req.appDir.source, file.name), filedata, function(err) {
@@ -365,7 +368,7 @@ BdBase.prototype.minify = function(req, res, next) {
 				log.warn("minify()", "unexpected child-process message msg=", msg);
 			}
 		});
-		child.on('exit', function(code, signal) {
+		child.on('exit', function(code /*, signal*/) {
 			if (code !== 0) {
 				next(new HttpError(child.errMsg || ("child-process failed: '"+ child.toString() + "'")));
 			} else {
@@ -415,7 +418,7 @@ BdBase.prototype.archive = function(req, res, next) {
 		this.zip.bind(this, req, res),
 		this.returnZip.bind(this, req, res),
 		this.cleanup.bind(this, req, res)
-	], function (err, results) {
+	], function (err /*, results*/) {
 		if (err) {
 			// run express's next() : the errorHandler (which calls cleanup)
 			next(err);
@@ -440,7 +443,7 @@ BdBase.prototype.zip = function(req, res, next) {
 	_walk.bind(this)(req.appDir.zipRoot, "" /*prefix*/, function() {
 		try {
 			req.zip.stream.finalize(function(written){
-				log.verbose("zip()", "finished ", req.zip.path);
+				log.verbose("zip()", "finished:", req.zip.path, "(" + written + " bytes)");
 				next();
 			});
 		} catch(e) {
@@ -624,7 +627,7 @@ BdBase.prototype.quit = function(cb) {
  * @protected
  */
 BdBase.prototype.onExit = function() {
-	rimraf(this.uploadDir, function(err) {
+	rimraf(this.uploadDir, function(/*err*/) {
 		// Nothing to do
 	});
 };
