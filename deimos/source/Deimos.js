@@ -334,6 +334,16 @@ enyo.kind({
 			return event;
 		}
 	},
+	prepareViewUpdate: function(data) {
+		if (this.index !== null) {
+			// Prepare the data for the code editor
+			var event = {docHasChanged: this.getEdited(), viewHasChanged: true, contents: []};
+			for(var i = 0 ; i < this.kinds.length ; i++) {
+				event.contents[i] = enyo.json.codify.to(data);
+			}
+			return event;
+		}
+	},
 	closeDesignerAction: function(inSender, inEvent) {
 		this.$.designer.cleanUp();
 		
@@ -363,7 +373,7 @@ enyo.kind({
 		var config = inEvent.config,
 			targetId = inEvent.targetId,
 			beforeId = inEvent.beforeId,
-			target = (targetId)
+			target = (!config.viewTemplate && targetId)
 					?	this.getItemById(targetId, this.kinds[this.index].components)
 					:	this.kinds[this.index];
 		
@@ -380,6 +390,9 @@ enyo.kind({
 		
 		if (beforeId) {
 			this.insertItemBefore(config, target, beforeId);
+		} else if(config.viewTemplate) {
+			this.insertView(config.components, target);
+			this.viewUpdate(config.data);
 		} else {
 			this.insertItem(config, target);
 		}
@@ -517,6 +530,11 @@ enyo.kind({
 	//* Holdover event from ComponentView - simulate drop in designer
 	holdOver: function(inSender, inEvent) {
 		this.$.designer.prerenderDrop(inEvent.targetId, inEvent.beforeId);
+	},
+	insertView: function(inItem, inTarget) {
+		inTarget.components = [];
+		for(var i = 0 ; i <inItem.length; i++)
+			inTarget.components.push(inItem[i]);
 	},
 	insertItem: function(inItem, inTarget) {
 		inTarget.components = inTarget.components || [];
@@ -675,6 +693,9 @@ enyo.kind({
 	},
 	designerUpdate: function() {
 		this.doDesignerUpdate(this.prepareDesignerUpdate());
+	},
+	viewUpdate: function(data) {
+		this.doDesignerUpdate(this.prepareViewUpdate(data));
 	},
 	//* Called by Ares when ProjectView has new project selected
 	projectSelected: function(inProject) {
