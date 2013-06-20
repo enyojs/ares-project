@@ -659,12 +659,12 @@ enyo.kind({
 		/* 
 		 * Parallel tasks are launched to check the build status in each platform.
 		 * A status can be : complete, pending or error.
-		 *	- completed: a request is made to node.js to
+		 *	- completed: a request is made to node.js to 
 		 *				download the application.
 		 *	- pending: another request is sent to phonegap to check for an
 		 *	           updated status.
 		 *	- error: an error message is displayed.		
-		 */
+		 */		
 		async.forEach(platforms,
 		    function(platform, next) {
 			if(this.debug){
@@ -690,7 +690,7 @@ enyo.kind({
 		function _getApplicationForPlatform(platform, next){
 			async.whilst(
 				function() {
-					// Synchronous condition to keep waiting.
+					// Synchronous condition to keep waiting. 
 					return appData.status[platform] === "pending";
 				},
 				// ...condition satisfied
@@ -717,16 +717,16 @@ enyo.kind({
 						} else{
 							next(null, null);
 						}
-
+						
 					},
 					function(inData, next) {
 						//get the result from the previous status check request
 						if (inData !== null){
 							appData = inData.user;
-						}
+						}					
 						next();
 					}
-				], next);
+				], next);				
 			}
 			/**
 			 * Launch the appropirate action when an exception occurs or when 
@@ -947,5 +947,3 @@ enyo.kind({
 		}
 	}
 });
-
-
