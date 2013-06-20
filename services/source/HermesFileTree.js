@@ -244,7 +244,8 @@ enyo.kind({
 			inTargetNode.setExpanded(true);
 			// update icon for expanded state
 			inTargetNode.setIcon("$services/assets/images/folder-open.png");
-			
+			inTargetNode.addClass("hermesFileTree-folder-highlight");
+						
 			// handle lazy-load when expanding
 			inTargetNode.updateNodes().
 				response(this, function() {
