@@ -44,6 +44,8 @@ enyo.kind({
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
 	create: function() {
+		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
+
 		this.inherited(arguments);
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
@@ -67,14 +69,14 @@ enyo.kind({
 	 * @private
 	 */
 	handleReloadServices: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		this.$.serviceRegistry.reloadServices();
 	},
 	/**
 	 * @private
 	 */
 	handleUpdateAuth: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		this.$.serviceRegistry.setConfig(inEvent.serviceId, {auth: inEvent.auth}, inEvent.next);
 	},
 	projectSelected: function() {
@@ -121,7 +123,7 @@ enyo.kind({
 			});
 	},
 	saveDocument: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		var self = this;
 		this._saveDocument(inEvent.content, {service: inEvent.file.service, fileId: inEvent.file.id}, function(err) {
 			if (err) {
@@ -147,7 +149,7 @@ enyo.kind({
 
 	},
 	saveAsDocument: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		var self = this,
 		    file = inEvent.file,
 		    name = inEvent.name,
@@ -205,14 +207,14 @@ enyo.kind({
 		}
 
 		function _footer(err, result) {
-			if (self.debug) enyo.log("err:", err, "result:", result);
+			if (self.debug) { enyo.log("err:", err, "result:", result); }
 			if (typeof inEvent.next === 'function') {
 				inEvent.next(err, result);
 			}
 		}
 	},
 	closeDocument: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		var self = this;
 		this._closeDocument(inEvent.id, function() {
 			self.showFiles();
@@ -387,7 +389,7 @@ enyo.kind({
 		this.$.waitPopup.hide();
 	},
 	showError: function(inSender, inEvent) {
-		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
+		this.trace("event:", inEvent, "from sender:", inSender);
 		this.hideWaitPopup();
 		this.showErrorPopup(inEvent);
 		return true; //Stop event propagation
@@ -403,7 +405,7 @@ enyo.kind({
 	 * @param {Object} inEvent as defined by calls to HermesFileTree#doTreeChanged
 	 */
 	_treeChanged: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		this.$.packageMunger.changeNodes(inEvent, (function(err) {
 			if (err) {
 				this.warn(err);
@@ -418,7 +420,7 @@ enyo.kind({
 	 * @param {Object} inEvent as defined by calls to Ares.PackageMunger#doChangingNode
 	 */
 	_nodeChanging: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		var docId = Ares.Workspace.files.computeId(inEvent.node);
 		this._closeDocument(docId);
 	},

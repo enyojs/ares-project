@@ -166,5 +166,27 @@ var ares = {
 			testWindow.close();
 			return false;
 		}
+	},
+	/**
+	 * Setup object.trace function to object.log
+	 * if object.debug is true.
+	 * Otherwise object.trace is set to a function
+	 * which logs nothing.
+	 * @param  {Object} the object to alter
+	 * @public
+	 */
+	setupTraceLogger: function(object) {
+		if ( ! object) {
+			enyo.error("Cannot setup trace logger of ", object);
+			return;
+		}
+		object.trace = (object.debug === true ? object.log : this.nolog);
+	},
+	/**
+	 * This function just discard all the arguments without logging anything
+	 * @private
+	 */
+	nolog: function() {
+		// Don't log anything
 	}
 };
