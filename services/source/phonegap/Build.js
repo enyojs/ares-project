@@ -875,12 +875,14 @@ enyo.kind({
 			xw.writeStartElement('platforms', 'gap');
 			for (var platformName in phonegap.targets) {
 				var platform = phonegap.targets[platformName];
-				xw.writeStartElement('platform', 'gap');
-				xw.writeAttributeString('name', platformName);
-				for (var propName in platform) {
-					xw.writeAttributeString(propName, platform[propName]);
+				if (platform !== false) {
+					xw.writeStartElement('platform', 'gap');
+					xw.writeAttributeString('name', platformName);
+					for (var propName in platform) {
+						xw.writeAttributeString(propName, platform[propName]);
+					}
+					xw.writeEndElement(); // gap:platform
 				}
-				xw.writeEndElement(); // gap:platform
 			}
 			xw.writeEndElement();	// gap:platforms
 		}
