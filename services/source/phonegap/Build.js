@@ -543,18 +543,7 @@ enyo.kind({
 			}
 			next(null, inData);
 		});
-		req.error(this, function(inSender, inError) {
-			var response = inSender.xhrResponse, contentType,
-			    message = "Unable to build application";
-			if (response) {
-				contentType = response.headers['content-type'];
-				if (contentType && contentType.match('^text/plain')) {
-					message = response.body;
-
-				}
-			}
-			next(new Error(message + " (" + details || inError + ")"));
-		});
+		req.error(this, this._handleServiceError.bind(this, "Unable to build application", next));
 		req.go(query);
 	},
 
