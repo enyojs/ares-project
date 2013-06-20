@@ -19,6 +19,7 @@
 	"engineStrict": true,
 	"os" : [ "darwin", "linux", "win32" ],
 	"dependencies": {
+		"ares-generator": "0.1.x",
 		"async": "0.1.x",
 		"combined-stream": "0.0.x",
 		"dropbox": "0.9.x",
@@ -35,10 +36,10 @@
 		"shelljs": "0.1.x",
 		"temp": "0.4.x",
 		"tunnel": "0.0.x",
-		"unzip": "0.1.3",
 		"zipstream": "0.2.x"
 	},
 	"bundledDependencies": [
+		"ares-generator",
 		"async",
 		"combined-stream",
 		"dropbox",
@@ -55,12 +56,12 @@
 		"shelljs",
 		"temp",
 		"tunnel",
-		"unzip",
 		"zipstream"
 	],
 	"devDependencies": {
 		"mocha": ">=1.4.2",
-		"should": ">=1.1.0"
+		"should": ">=1.1.0",
+		"jshint": ">=2.1.3"
 	},
 	"scripts" : {
 		"start": "node ide.js",

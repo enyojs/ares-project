@@ -10,5 +10,6 @@ enyo.depends(
 	"ProjectProperties.js",
 	"phonegap/ProjectProperties.js",
 	"phonegap/Build.js",
-	"GenZip.js"
+	"GenZip.js",
+	"phonegap/BuildStatusUI.js"
 );

@@ -56,9 +56,27 @@ Real stuff - Code
 1. Until recently, `ares-project/node_modules` contained 3rd-party modules directly archived into `ares-project` own Git repository.  So existing repository owners _may_ need to run `rm -rf ares-project/node_modules` to properly update their trees.
 2. Do **NOT** use Node.js 0.10.0: Ares does not work yet using this brand new version of Node.  [We are aware of the issue](https://enyojs.atlassian.net/browse/ENYO-2063).
 
+#### Some Git+NPM Automation Examples
+
+The [contrib directory](contrib/githooks) contains git hooks that you can install:
+
+* [npm-install](contrib/githooks/post-checkout/npm-install) to be copied as `.git/hooks/post-checkout`. This hook will run `npm -d install` after each `git checkout`. This hook requires bash shell.
+* [prepend-branch-name](contrib/githooks/prepare-commit-msg/prepend-branch-name) to be copied as `.git/hooks/prepare-commit-msg`. This hook will prepend the branch name (i.e. `ENYO-1234:`) in front of commit messages. This hook requires Perl.
+
 ### Coding
 
 Ares 2 is part of the EnyoJS ecosystem.  Before contributing code to Ares or Enyo, you want to read the [Contributors Guide](http://enyojs.com/community/contribute/).  Source-code contributions to the core Ares code are expected to follow the [Enyo Style Guide](https://github.com/enyojs/enyo/wiki/Style-Guide).
+
+#### Jshint
+
+Ares 2 will be soon integrated with [Travis CI](https://travis-ci.org/) to automatically run [JSHint](http://www.jshint.com/) when pull-requests are submitted.
+
+Before submitting a pull request, please follow these steps
+
+	$ cd ares-project
+	$ node_modules/.bin/jshint .
+	
+NOTE: JSHint configuration files (.jshintrc, …) are automatically loaded by some editors when the appropriate plugins are installed. See [JSHint - Plugins for text editors and IDEs](http://www.jshint.com/install/)
 
 ### Testing
 
