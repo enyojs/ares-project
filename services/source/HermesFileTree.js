@@ -926,6 +926,19 @@ enyo.kind({
 						addParentNode = inTarget,
 						addPkgNode = addParentNode.getNodeNamed('package.js');
 						
+				if (!addParentNode.expanded) {
+					addParentNode.setExpanded(true);
+					// update icon for expanded state
+					addParentNode.setIcon("$services/assets/images/folder-open.png");
+					addParentNode.addClass("hermesFileTree-folder-highlight");
+								
+					// handle lazy-load when expanding
+					addParentNode.updateNodes().
+						response(this, function() {
+							addParentNode.effectExpanded();
+						});
+				}
+
 				this.doTreeChanged({
 					remove: {
 						service: this.$.service,
