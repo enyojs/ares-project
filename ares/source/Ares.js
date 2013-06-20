@@ -392,8 +392,8 @@ enyo.kind({
 		this.showErrorPopup(inEvent);
 		return true; //Stop event propagation
 	},
-	showErrorPopup : function(msg, details) {
-		this.$.errorPopup.raise(msg, details);
+	showErrorPopup : function(inEvent) {
+		this.$.errorPopup.raise(inEvent);
 	},
 	/**
 	 * Event handler for user-initiated file or folder changes
