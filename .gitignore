@@ -11,6 +11,7 @@ $*
 /node_modules/.bin
 /node_modules/ares-webos-sdk
 /node_modules/async
+/node_modules/base64stream/
 /node_modules/combined-stream
 /node_modules/dropbox
 /node_modules/express
