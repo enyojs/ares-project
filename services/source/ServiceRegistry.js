@@ -204,7 +204,7 @@ enyo.kind({
 			}
 			next();
 		} catch(err) {
-			this.error(err);
+			this.error("Unable to configure service '" + service.config.id + "':", err.stack);
 			next(err);
 		}
 	},
@@ -261,7 +261,9 @@ enyo.kind({
 	 */
 	getServicesByType: function(type) {
 		return this.filter(function(service) {
-			return service.implementsType(type);
+			return service &&
+				typeof service.implementsType === 'function' &&
+				service.implementsType(type);
 		});
 	},
 	/**

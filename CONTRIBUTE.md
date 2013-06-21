@@ -56,9 +56,54 @@ Real stuff - Code
 1. Until recently, `ares-project/node_modules` contained 3rd-party modules directly archived into `ares-project` own Git repository.  So existing repository owners _may_ need to run `rm -rf ares-project/node_modules` to properly update their trees.
 2. Do **NOT** use Node.js 0.10.0: Ares does not work yet using this brand new version of Node.  [We are aware of the issue](https://enyojs.atlassian.net/browse/ENYO-2063).
 
+#### Some Git+NPM Automation Examples
+
+The [contrib directory](contrib/githooks) contains git hooks that you can install:
+
+* [npm-install](contrib/githooks/post-checkout/npm-install) to be copied as `.git/hooks/post-checkout`. This hook will run `npm -d install` after each `git checkout`. This hook requires bash shell.
+* [prepend-branch-name](contrib/githooks/prepare-commit-msg/prepend-branch-name) to be copied as `.git/hooks/prepare-commit-msg`. This hook will prepend the branch name (i.e. `ENYO-1234:`) in front of commit messages. This hook requires Perl.
+
 ### Coding
 
 Ares 2 is part of the EnyoJS ecosystem.  Before contributing code to Ares or Enyo, you want to read the [Contributors Guide](http://enyojs.com/community/contribute/).  Source-code contributions to the core Ares code are expected to follow the [Enyo Style Guide](https://github.com/enyojs/enyo/wiki/Style-Guide).
+
+#### Jshint
+
+Ares 2 will be soon integrated with [Travis CI](https://travis-ci.org/) to automatically run [JSHint](http://www.jshint.com/) when pull-requests are submitted.
+
+Before submitting a pull request, please follow these steps
+
+	$ cd ares-project
+	$ node_modules/.bin/jshint .
+	
+NOTE: JSHint configuration files (.jshintrc, …) are automatically loaded by some editors when the appropriate plugins are installed. See [JSHint - Plugins for text editors and IDEs](http://www.jshint.com/install/)
+
+#### Tracing
+
+Following the setup of jshint we had a lot of warning because of missing curly braces as most of the traces were in the form of:
+
+	if (this.debug) this.log(...);
+
+Instead of adding curly braces and going from one line to three lines for each trace, we decided to add a `this.trace()` function which references this.log() or a "NOP" function depending on `this.debug` boolean value.
+
+`To setup this.trace() function`, add the following in the create method of the kind.
+
+	create: function() {
+		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
+		this.inherited(arguments);
+		
+		this.trace("Just created a new", this.name, "object", this);
+	}
+	
+You can then directly call this.trace() in the same way this.log is used.
+
+WARNING: Removing the "`if (this.debug)`" test can add CPU overhead in particular when concataining strings or invoking functions in the "`this.trace()`" call.
+
+So, it's recommended to pass each string element as a parameter instead of concataining them with "+" operator.
+
+`this.debug` is still available and can be used if needed.
+
+NOTE: For production, we may suppress the "this.trace()" code when doing the minification process.
 
 ### Testing
 

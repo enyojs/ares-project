@@ -11,9 +11,9 @@ enyo.kind({
         classes:"ares-classic-popup",
         components: [
             {tag: "div", classes:"title", content: "Error"},
-			{kind: "enyo.Scroller", classes:"ares-small-popup", fit: true, components: [
+			{classes:"ares-error-popup", fit: true, components: [
 				{name: "msg"},
-				{classes:"ares-small-popup-details", components:[
+				{classes:"ares-error-details", components:[
 					{classes:"button", components:[
 						{tag:"label", classes:"label", name: "detailsBtn", content: "Details", ontap: "toggleDetails", showing: false},
 						{name:"detailsArrow", classes:"optionDownArrow", ontap: "toggleDetails", showing: false},
@@ -38,7 +38,7 @@ enyo.kind({
 			this.$.detailsBtn.show();
 			this.$.detailsArrow.show();
 			this.$.detailsDrw.show();
-			this.$.detailsDrw.setOpen(false);
+			this.$.detailsDrw.setOpen(true);
 			this.$.detailsTxt.setValue(this.details);
 		} else {
 			this.$.detailsBtn.hide();

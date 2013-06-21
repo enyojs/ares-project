@@ -343,7 +343,13 @@ FsLocal.prototype.putFile = function(req, file, next) {
 				cb1(new HttpError("cannot write file=" + JSON.stringify(file), 400));
 			}
 		},
-		function(cb1) {
+		(function(cb1){
+			this.log("FsLocal.putFile(): file length: ", 
+				file.buffer && file.buffer.length);
+
+			this.log("FsLocal.putFile(): file length: ", 
+				file.path);
+			
 			node = {
 				id: encodeFileId(urlPath),
 				path: urlPath,
@@ -351,7 +357,7 @@ FsLocal.prototype.putFile = function(req, file, next) {
 				isDir: false
 			};
 			cb1();
-		}
+		}).bind(this)
 	], (function(err) {
 		this.log("FsLocal.putFile(): node:", node);
 		next(err, node);
@@ -505,7 +511,7 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		root: argv.root,
 		pathname: argv.pathname,
 		port: argv.port,
-		verbose: (argv.level === 'verbose') // FIXME: rather use npm.log() directly
+		level: argv.level
 	}, function(err, service){
 		if (err) process.exit(err);
 		// process.send() is only available if the

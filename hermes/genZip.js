@@ -13,7 +13,7 @@ var fs = require("fs"),
     temp = require("temp"),
     http = require("http"),
     rimraf = require("rimraf"),
-    ptools = require("./lib/project-gen"),
+    ptools = require("ares-generator"),
     HttpError = require("./lib/httpError"),
     CombinedStream = require('combined-stream');
 
@@ -100,9 +100,7 @@ function GenZip(config, next) {
 	 * Verbs
 	 */
 
-	app.post(makeExpressRoute('/template-repos/:repoid'), addRepo.bind(this));
-	app.use(makeExpressRoute('/templates'), getList.bind(this));
-	app.use(makeExpressRoute('/generate'), generate.bind(this));
+	app.post(makeExpressRoute('/op/generate'), generate.bind(this));
 
 	app.post('/config', (function(req, res, next) {
 		log.verbose("req.body:", req.body);
@@ -112,6 +110,8 @@ function GenZip(config, next) {
 			res.status(200).end();
 		});
 	}).bind(this));
+
+	app.get(makeExpressRoute('/config/sources'), getSources.bind(this));
 
 	/*
 	 * Error handling, in last position, to be used by both
@@ -151,25 +151,14 @@ function GenZip(config, next) {
 	 * Methods
 	 */
 
-	function addRepo(req, res, next) {
-		log.info("addRepo()", "url:", req.body.url);
-		self.tools.registerRemoteTemplates(req.body.url, function(err) {
+	function getSources(req, res, next) {
+		log.info("getSources()");
+		self.tools.getSources(req.query.type, function(err, sources) {
 			if (err) {
 				next(err);
 			} else {
-				res.status(200).end();
-			}
-		});
-	}
-	
-	function getList(req, res, next) {
-		log.info("getList()");
-		self.tools.list(function(err, list) {
-			if (err) {
-				next(err);
-			} else {
-				log.info("getList()", "list:", list);
-				res.status(200).send(list).end();
+				log.info("getSources()", "sources:", sources);
+				res.status(200).send(sources).end();
 			}
 		});
 	}
@@ -178,7 +167,7 @@ function GenZip(config, next) {
 		log.info("generate()");
 
 		var destination = temp.mkdirSync({prefix: 'com.hp.ares.genZip'});
-		self.tools.generate(req.body.templateId, JSON.parse(req.body.substitutions), destination, {}, function(inError, inData) {
+		self.tools.generate(JSON.parse(req.body.sourceIds), JSON.parse(req.body.substitutions), destination, function(inError, inData) {
 			if (inError) {
 				next(inError);
 				return;

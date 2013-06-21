@@ -16,7 +16,7 @@ enyo.kind({
 
 	components: [
 		{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail"},
-		{name: "toolbarId", classes: "ares-bordered-toolbar", kind: "onyx.Toolbar", components: [
+		{name: "toolbarId", classes: "ares-right-toolbar", kind: "onyx.Toolbar", components: [
 			{name: "ok", kind: "onyx.Button", content: "OK", ontap: "confirmTap"}
 		]},
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"},
@@ -45,7 +45,7 @@ enyo.kind({
 		
 		var pluginService = {
 			id: inEvent.pluginService.id,
-			name: inEvent.pluginService.getName() || inEvent.pluginService.getId(),
+			name: inEvent.pluginService.getName() || inEvent.pluginService.id,
 			kind: inEvent.pluginService.getAresPropertiesKind()
 		};
 

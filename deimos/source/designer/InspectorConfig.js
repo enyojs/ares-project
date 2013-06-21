@@ -83,7 +83,16 @@ enyo.kind({
 		{classes: "inspector-field-caption", name: "title"},
 		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
 	],
-
+	
+	//* @public
+	
+	//* Facade for _enyo.Input.focus()_
+	focus: function() {
+		this.$.value.focus();
+	},
+	
+	//* @protected
+	
 	//* Stop extraneous activate event from being fired when box is initially checked
 	handleChange: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
@@ -161,35 +170,54 @@ enyo.kind({
 enyo.kind({
 	name: "Inspector.Config.Select",
 	kind: "Inspector.Config.IF",
+	handlers: {
+		onChange: "handleChange"
+	},
 	// events and published are defined by the base kind
 	// values: Must be defined in the configuration
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
-		{kind: "Select", classes: "inspector-field-editor", name: "value", onchange: "handleChange", components: [
-			// Will be filled at create() time
-		]}
+		{name: "decorator", kind: "onyx.PickerDecorator"}
 	],
-	create: function() {
-		this.values = [""].concat(this.values);		// Add a "empty value"
+	initComponents: function() {
+		this.initFinished = false;
 		this.inherited(arguments);
-	},
-	handleChange: function(inSender, inEvent) {
-		if (this.disabled) {
-			this.fieldValueChanged();	// Re-set the same previous value
-		} else {
-			this.fieldValue = this.$.value.getValue();
-			this.doChange({target: this});
+		
+		var components = [],
+			selected,
+			i;
+		
+		for (i = 0; i < this.values.length; i++) {
+			selected = (this.values[i] === this.fieldValue);
+			components.push({content: this.values[i], value: this.values[i], active: selected});
 		}
-		return true;
-	},
-	fieldValueChanged: function() {
-		enyo.forEach(this.values, function(value) {
-			this.$.value.createComponent({content: value, value: value});
-		}, this);
-		this.$.value.setSelected(Math.max(0, this.values.indexOf(this.fieldValue)));
+		
+		this.$.decorator.createComponents([
+			{name: "pickerButton"},
+			{kind: "onyx.Picker", classes: "inspector-field-editor", name: "value", components: components}
+		], {owner: this});
+
+		this.initFinished = true;
 	},
 	disabledChanged: function() {
-		// Nothing to do as this is not possible to disable a "Select"
+		this.$.pickerButton.setDisabled(this.getDisabled());
+	},
+	fieldValueChanged: function() {
+	},
+	handleChange: function(inSender, inEvent) {
+		if ( ! this.initFinished) {
+			return true;
+		}
+		
+		this.setFieldValue(this.$.value.getSelected().value);
+		
+		// Decorate event with _target_
+		inEvent.target = this;
+	},
+	updateSelected: function() {
+		var selectedIndex = Math.max(0, this.values.indexOf(this.fieldValue));
+		var selected = this.$.value.getClientControls()[selectedIndex];
+		this.$.value.setSelected(selected);
 	}
 });
 

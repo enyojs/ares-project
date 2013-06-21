@@ -10,7 +10,7 @@ enyo.kind(
 			height: '800px'
 		},
 
-		classes: "enyo-border-box ares-preview-device",
+		classes: "ares-preview-device",
 
 		//style: " overflow: hidden;",
 
@@ -23,7 +23,9 @@ enyo.kind(
 			this.urlChanged();
 		},
 		urlChanged: function() {
-			if(this.url) this.setAttribute('src', this.url);
+			if (this.url) {
+				this.setAttribute('src', this.url);
+			}
 		},
 		setGeometry: function(width, height) {
 			this.setAttribute( 'width',  width) ;

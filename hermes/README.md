@@ -148,8 +148,6 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Me
 	],
 	[...]
 
-**NOTE:** `fsLocal` is currently broken if you bind it to a folder whose name (or whose parents's names contain a space.  For example "New folder" breaks `fsLocal`.  We are aware of the issue.
-
 ### [Dropbox](id:dropbox-filesystem-service)
 
 Ares comes with an Hermes service using your Dropbox account as a storage service.    Enable this service in the `ide.json` before starting the IDE server:
@@ -169,9 +167,7 @@ Ares comes with an Hermes service using your Dropbox account as a storage servic
 			"type": "dropbox",
 			"appKey": "",
 			"appSecret": ""
-		},
-		"useJsonp":false,
-		"verbose": false
+		}
 	[…]
 
 You need to replace the appKey and appSecret entries with the proper values from your Dropbox application entry for Ares(see below).
@@ -212,38 +208,52 @@ See [Project template configuration](#project-template-config) and [Merging Ares
 
 ### [Project template configuration](id:project-template-config)
 
-The property `projectTemplateRepositories` of the service **genZip** lists the template definitions that are available at project creation time.  It is defined in the `ide.json` of ares-project.
+The property `sources:` of the service **genZip** lists the template definitions that are available at project creation time.  It is defined in the `ide.json` of ares-project.
 
+	"sources": [
 		{
-			"id":"genZip",
-			"projectTemplateRepositories": {
-				"bootplate": {
-					"description": "Standard Enyo template",
-					"url": "http://enyojs.com/archive/ares-project-templates.json"
+			"id": "bootplate-nightly",
+			"type": "template",
+			"description": "Enyo bootplate for webOS - Nightly",
+			"files": [
+				{
+					"url": "bootplate-latest.zip",
+						"alternateUrl": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
+						"prefixToRemove": "bootplate",
+						"excluded": [
+						"bootplate/api"
+						]
 				}
-			},
-			...
-		}
-
-The `url` property above can either be an http url or a an absolute filename such as:  
-
-	"url": "@INSTALLDIR@/templates/projects/ares-project-templates.json"
+			]
+		}, 
 
 Ares plugins can add or modify this list of templates, from their own `ide-plugin.json`.
 
-		{
-			"id": "genZip",
-			"projectTemplateRepositories": {
-				"bootplate": {
+	{
+		"id": "genZip",
+			"sources": [
+				{
+					"id": "bootplate"
 				},
-				"my-templates": {
-					"url": "http://xyz.com/my-templates.json",
-					"description": "My Templates"
-				}
-	        }
+				{
+					"id": "bootplate-nightly",
+					"type": "template",
+					"description": "Enyo bootplate for webOS - Nightly",
+					"files": [
+						{
+								"url": "bootplate-latest.zip",
+								"alternateUrl": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
+								"prefixToRemove": "bootplate",
+								"excluded": [
+										"bootplate/api"
+								]
+						}
+					]
+				}, 
+	        ]
 		}
 
-In the example above, `"bootplate": {}` will remove the entry defined in the main `ide.json` and `"my-templates": { "url" : "http://xyz.com/my-templates.json", …}` will add a new list of templates named 'my-templates'.
+In the example above, `{ "id": "bootplate" }` will remove the entry defined in the main `ide.json` and `{ "id": "bootplate-nightly" ... } will add a new template.
 
 ### [Project template definition](id:project-template-definition)
 

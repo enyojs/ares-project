@@ -9,7 +9,7 @@
 			"type": ["filesystem"],
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--pathname", "/files", "--port", "0", "--root", "@HOME@"
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@"
 			],
 			"useJsonp":false,
 			"verbose": false,
@@ -57,6 +57,7 @@
 			"useJsonp":false,
 			"verbose": false,
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
+			"timeout": 7000,
 			"auth": {
 				"type": "phonegap"
 			},
@@ -71,13 +72,53 @@
 				"@INSTALLDIR@/hermes/genZip.js", "--level", "http", "-P", "/genzip", "-p", "0"
 			],
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
-			"projectTemplateRepositories": {
-				"bootplate": {
-					"description": "Standard Enyo template",
-					"url": "@INSTALLDIR@/templates/projects/ares-project-templates.json"
+			"sources": [
+				{
+					"id": "bootplate-nightly",
+					"type": "template",
+					"files": [
+						{
+							"url": "bootplate-latest.zip",
+      							"alternateUrl": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
+      							"prefixToRemove": "bootplate",
+      							"excluded": [
+								"bootplate/api"
+      							]
+						}
+  					],
+  					"description": "Enyo bootplate for webOS - Nightly"
+				}, 
+				{
+					"id": "bootplate-2.2.0",
+					"type": "template",
+					"files": [
+						{
+							"url": "bootplate-2.2.0.zip",
+							"alternateUrl": "http://enyojs.com/archive/bootplate-2.2.0.zip",
+							"prefixToRemove": "bootplate",
+							"excluded": [
+								"bootplate/api"
+							]
+						}
+					],
+					"description": "Enyo bootplate 2.2.0"
+				},
+				{
+					"id": "bootplate-2.1.1",
+					"type": "template",
+					"files": [
+						{
+							"url": "bootplate-2.1.1.zip",
+							"alternateUrl": "http://enyojs.com/archive/bootplate-2.1.1.zip",
+							"prefixToRemove": "bootplate",
+							"excluded": [
+								"bootplate/api"
+							]
+						}
+					],
+					"description": "Enyo bootplate 2.1.1"
 				}
-			},
-			"useJsonp":false,
+			],
 			"respawn": false
 		}
 	]

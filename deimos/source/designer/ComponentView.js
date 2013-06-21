@@ -15,16 +15,13 @@ enyo.kind({
 		onItemDrop: "itemDrop",
 		onItemDragend: "itemDragend"
 	},
-	published: {
-		createMode: false
-	},
 	style: "position: relative;",
 	components: [
 		{kind: "Scroller", classes: "enyo-fit", components: [
 			{name: "client", style: "padding: 8px;"}
 		]}
 	],
-	
+
 	holdoverTimeout:   null,
 	holdoverTimeoutMS: 500,
 	
@@ -84,13 +81,15 @@ enyo.kind({
 			dropTarget,
 			dropTargetId,
 			beforeItem,
-			beforeId = null;
+			beforeId = null,
+			createMode = (inEvent.dataTransfer.items[0].type === "ares/createitem");
 
-		if ((this.createMode === true) && this.selection) {
+		// In create mode, allow to drop even on the selected component.
+		if ((createMode === true) && this.selection) {
 			this.unHighlightItem(this.selection);
 			this.selection = null;
 		}
-		
+
 		if (!this.isValidDropTarget(target)) {
 			this.resetDropDetails();
 			this.unhighlightDropTargets();
@@ -379,7 +378,12 @@ enyo.kind({
 			return true;
 		}
 		
+		// Set drag data
 		inEvent.dataTransfer.setData("ares/moveitem", enyo.json.codify.to(inEvent.originator.comp));
+		
+		// Hide the drag image ghost
+		inEvent.dataTransfer.setDragImage(this.createDragImage(), 0, 0);
+
 		return true;
 	},
 	dragover: function(inSender, inEvent) {
@@ -408,6 +412,10 @@ enyo.kind({
 		}
 		this.doItemDragend(inEvent);
 		return true;
+	},
+	createDragImage: function() {
+		this.dragImage = document.createElement();
+		return this.dragImage;
 	}
 })
 

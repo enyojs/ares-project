@@ -136,14 +136,24 @@ enyo.kind({
 		}
 	},
 
+	/**
+	 * @public
+	 */
 	getTemplates: function(inSender, inEvent, next) {
+		return this.getSources('template', next);
+	},
+
+	/**
+	 * @public
+	 */
+	getSources: function(type, next) {
 		var propW = this.$.propertiesWidget;
 		// Getting template list
 		var service = ServiceRegistry.instance.getServicesByType('generate')[0];
 		if (service) {
-			var templateReq = service.getTemplates();
-			templateReq.response(this, function(inSender, inData) {
-				propW.setTemplateList(inData);
+			var templateReq = service.getSources('template');
+			templateReq.response(this, function(inSender, inTemplates) {
+				propW.setTemplateList(inTemplates);
 				next();				// Should we return immediately without waiting the answer ?
 			});
 			templateReq.error(this, function(inSender, inError) {
@@ -244,7 +254,10 @@ enyo.kind({
 		}];
 
 		var genService = ServiceRegistry.instance.getServicesByType('generate')[0];
-		var req = genService.generate(template, substitutions);
+		var req = genService.generate({
+			sourceIds: [template],
+			substitutions: substitutions
+		});
 		req.response(this, this.populateProject);
 		req.error(this, function(inSender, inError) {
 			this.log("Unable to get the template files (" + inError + ")");
@@ -524,12 +537,22 @@ enyo.kind({
 		this.newConfigData = inEvent.data;
 
 		var destination = inEvent.data.name;
+		var known = Ares.Workspace.projects.get(destination);
+		if (known) {
+			var msg = "Unable to duplicate the project, the project '" +
+											destination + "' already exists";
+			this.doError({msg: msg});
+			return true ; // stop bubble			
+		}
 
 		var req = service.copy(folderId, destination);
 		req.response(this, this.saveProjectJson);
-		req.error(this, function(inSender, inData) {
+		req.error(this, function(inSender, status) {
 			var msg = "Unable to duplicate the project";
-			this.log(msg, inData);
+			if (status === 412 /*Precondition-Failed*/) {
+				msg = "Unable to duplicate the project, directory '" + destination + "' already exists";
+			}
+			this.log(msg, status);
 			this.doError({msg: msg});
 		});
 

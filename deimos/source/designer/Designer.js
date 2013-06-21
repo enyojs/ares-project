@@ -14,7 +14,9 @@ enyo.kind({
 		onMoveItem: "",
 		onSyncDropTargetHighlighting: "",
 		onReloadComplete: "",
-		onError: ""
+		onResizeItem: "",
+		onError: "",
+		onReturnPositionValue: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", classes: "ares-iframe-client"},
@@ -137,6 +139,12 @@ enyo.kind({
 			} else {
 				// TODO: We should store the error into a kind of rotating error log - ENYO-2462
 			}
+		// Existing component resized
+		} else if(msg.op === "resize") {
+			this.doResizeItem(msg.val);
+		// Returning requested position value
+		} else if(msg.op === "returnPositionValue") {
+			this.doReturnPositionValue(msg.val);
 		// Default case
 		} else {
 			enyo.warn("Deimos designer received unknown message op:", msg);
@@ -191,12 +199,8 @@ enyo.kind({
 	prerenderDrop: function(inTargetId, inBeforeId) {
 		this.sendMessage({op: "prerenderDrop", val: {targetId: inTargetId, beforeId: inBeforeId}});
 	},
-	//* Enter create mode (i.e. began dragging control in from Palette)
-	enterCreateMode: function(inConfig) {
-		this.sendMessage({op: "enterCreateMode", val: inConfig});
-	},
-	//* Leave create mode (i.e. finished dragging control in from Palette)
-	leaveCreateMode: function() {
-		this.sendMessage({op: "leaveCreateMode"});
+	//* Request auto-generated position value from iframe
+	requestPositionValue: function(inProp) {
+		this.sendMessage({op: "requestPositionValue", val: inProp});
 	}
 });
