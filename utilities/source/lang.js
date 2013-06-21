@@ -180,13 +180,10 @@ var ares = {
 			enyo.error("Cannot setup trace logger of ", object);
 			return;
 		}
-		object.trace = (object.debug === true ? object.log : this.nolog);
-	},
-	/**
-	 * This function just discard all the arguments without logging anything
-	 * @private
-	 */
-	nolog: function() {
-		// Don't log anything
+		object.trace = (object.debug === true ? object.log : _nolog);
+
+		function _nolog() {
+			// Don't log anything
+		}
 	}
 };
