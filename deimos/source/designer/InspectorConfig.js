@@ -180,6 +180,7 @@ enyo.kind({
 		{name: "decorator", kind: "onyx.PickerDecorator"}
 	],
 	initComponents: function() {
+		this.initFinished = false;
 		this.inherited(arguments);
 		
 		var components = [],
@@ -195,6 +196,8 @@ enyo.kind({
 			{name: "pickerButton"},
 			{kind: "onyx.Picker", classes: "inspector-field-editor", name: "value", components: components}
 		], {owner: this});
+
+		this.initFinished = true;
 	},
 	disabledChanged: function() {
 		this.$.pickerButton.setDisabled(this.getDisabled());
@@ -202,10 +205,7 @@ enyo.kind({
 	fieldValueChanged: function() {
 	},
 	handleChange: function(inSender, inEvent) {
-		this.initialChange = this.initialChange || false;
-
-		if (!this.initialChange) {
-			this.initialChange = true;
+		if ( ! this.initFinished) {
 			return true;
 		}
 		

@@ -19,7 +19,7 @@ enyo.kind({
 	setProject: function(project) {
 		if (this.debug) this.log("project:", project);
 		if (project !== null) {
-			this.$.hermesFileTree.setConfig(project).showFileOpButtons();
+			this.$.hermesFileTree.connectProject(project).showFileOpButtons();
 		} else {
 			this.$.hermesFileTree.hideFileOpButtons().clear();
 		}
