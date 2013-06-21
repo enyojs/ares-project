@@ -212,130 +212,80 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
  * 
  */
 BdPhoneGap.prototype.downloadApp = function(req, res, next){
+	var appId = req.param("appId"),
+	    platform = req.param("platform"),
+	    title = req.param("title"),
+	    version = req.param("version");
+	log.info("downloadApp()", "appId:", appId, "platform:", platform, "version:", version, "(" + title + ")");
+
+	var extensions = {
+		    "android": "apk",
+		    "ios": "ipa",
+		    "webos": "ipk",
+		    "symbian": "wgz",
+		    "winphone": "xap",
+		    "blackberry": "jad"
+	    };
+	var fileName = title + "_" + version + "." + (extensions[platform] || "bin"),
+	    url = "/apps/" + appId + "/" + platform;
+	log.info("downloadApp()", "packageName:", fileName, "<<< url:", url);
 	
-	var appId = req.params.appId;
-	var platform = req.params.platform;
-	var requestURL = '/apps/' + appId + '/'+ platform;
-	var FORM_DATA_LINE_BREAK = '\r\n';
-
- 	returnBody(req, res, function() {});
-
-	/*
-	 *the extensions for the downloaded file 
-	 *	apk for Android
-	 *	ipa for iOS
-	 * 	ipk for webOS
-	 *	jad for unsigned BlackBerry builds; 
-	 *	zip if you've uploaded your BlackBerry signing keys
-	 *	wgz for Symbian
-	 *	xap for Windows Phone
-	 * 
+	/* FIXME: broken streams on node-0.8.x
+	async.waterfall([
+		client.auth.bind(client, { token: req.token }),
+		(function _pipeFormData(api, next) {
+			log.http("downloadApp#_pipeFormData()", "GET", url);
+			var stream = api.get(url);
+			stream.pause();
+			this.returnFormData([{
+				filename: fileName,
+				stream: stream
+			}], res, next);
+		}).bind(this)
+	], function(err) {
+		if (err) {
+			next(err);
+			return;
+		}
+		log.verbose("downloadApp()", "completed");
+		// do not call next() here as the HTTP header was
+		// already sent back.
+	});
 	 */
 
- 	function returnBody(req, res, next) {
- 		// Getting the needed informations from the parsed URL
- 		// to generate the name of the built application.
- 		var title = req.params.title,
-		    platform = req.params.platform,
-		    appId = req.params.appId,
-		    version = req.params.version,
-		    extensions = {
-			    "android": "apk",
-			    "ios": "ipa",
-			    "webos": "ipk",
-			    "symbian": "wgz",
-			    "winphone": "xap",
-			    "blackberry": "jad"
-		    };
-		var fileName = title + "_" + version + "." + (extensions[platform] || "bin"), 
- 		    tempFileName = temp.path({prefix: 'com.palm.ares.hermes.phonegap'});
- 		
-		client.auth({
-			token: req.token			
-		}, function(err1, api) {
-			if (err1) {
-				next(err1);
-			} else {
-				var os = fs.createWriteStream(tempFileName);
-				os.on('close', createMultipartData);
-				api.get("/apps/" + appId + "/"+ platform).pipe(os);
-			}
-		});
-
-		function createMultipartData(){
-			// Build the multipart/formdata
-			var combinedStream = CombinedStream.create();
-			var boundary = generateBoundary();
-
-			// Adding part header
-			combinedStream.append(getPartHeader(fileName, boundary));
-			// Adding file data
-			combinedStream.append(function(nextDataChunk){
-				
-				fs.readFile(tempFileName, 'base64', function (err, packagedFile) {
-					fs.unlink(tempFileName);
-					if (err) {
-						next('Unable to read ' + tempFileName);
-						nextDataChunk('INVALID CONTENT');
-					} else {
-						log.verbose("downloadApp()#returnBody()#createMultipartData(): ", packagedFile.length);
-						nextDataChunk(packagedFile);						
-					}
-				});
-			});	
-
-			// Adding part footer
-			combinedStream.append(getPartFooter());
-
-			// Adding last footer
-			combinedStream.append(getLastPartFooter(boundary));
-
-			// Send the files back as a multipart/form-data
-			log.verbose("downloadApp#returnBody#createMultipartData()", "Start streaming down:" + fileName);
-			res.status(200);
-			res.header('Content-Type', getContentTypeHeader(boundary));
-			combinedStream.pipe(res);
-
-			// cleanup the temp dir when the response has been sent
-			combinedStream.on('end', function() {
-				next();
-			});
+	var tempFileName = temp.path({prefix: 'com.enyojs.ares.services.' + this.config.basename + "." + platform + "."});
+	async.waterfall([
+		client.auth.bind(client, { token: req.token }),
+		(function _fetchPackage(api, next) {
+			log.http("downloadApp#_fetchPackage()", "GET", url);
+			var os = fs.createWriteStream(tempFileName);
+			// FIXME: node-0.8 has no 'finish' event...
+			os.on('close', next);
+			api.get(url).pipe(os);
+		}).bind(this),
+		// FIXME: broken streams on node-0.8.x: we need to
+		// load packages in memory Buffer...
+		fs.readFile.bind(fs, tempFileName),
+		(function _returnFormData(buffer, next) {
+			fs.unlink(tempFileName);
+			log.http("downloadApp#_returnFormData()", "streaming down:", fileName);
+			this.returnFormData([{
+				filename: fileName,
+				buffer: buffer
+			}], res, next);
+		}).bind(this)
+	], function(err) {
+		if (err) {
+			next(err);
+			return;
 		}
-
-		function generateBoundary() {
-			// This generates a 50 character boundary similar to those used by Firefox.
-			// They are optimized for boyer-moore parsing.
-			var boundary = '--------------------------';
-			for (var i = 0; i < 24; i++) {
-				boundary += Math.floor(Math.random() * 10).toString(16);
-			}
-
-			return boundary;
-		}
-
-		function getContentTypeHeader(boundary) {
-			return 'multipart/form-data; boundary=' + boundary;
-		}
-
-		function getPartHeader(filename, boundary) {
-			var header = '--' + boundary + FORM_DATA_LINE_BREAK;
-			header += 'Content-Disposition: form-data; name="file"';
-
-			header += '; filename="' + filename + '"' + FORM_DATA_LINE_BREAK;
-			header += 'Content-Type: application/octet-stream; x-encoding=base64';
-
-			header += FORM_DATA_LINE_BREAK + FORM_DATA_LINE_BREAK;
-			return header;
-		}
-
-		function getPartFooter() {
-			return FORM_DATA_LINE_BREAK;
-		}
-
-		function getLastPartFooter(boundary) {
-			return '--' + boundary + '--';
-		}
-	}
+		// FIXME: this is never called, as neither
+		// CombinedStream nor express#res emit an 'end' when
+		// streaming is over...
+		log.verbose("downloadApp()", "completed");
+		// do not call next() here as the HTTP header was
+		// already sent back.
+	});
 };
 
 BdPhoneGap.prototype.build = function(req, res, next) {

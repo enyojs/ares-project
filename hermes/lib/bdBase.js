@@ -14,6 +14,7 @@ var fs = require("fs"),
     rimraf = require("rimraf"),
     zipstream = require('zipstream'),
     CombinedStream = require('combined-stream'),
+    base64stream = require('base64stream'),
     HttpError = require("./httpError");
 
 module.exports = BdBase;
@@ -105,7 +106,7 @@ function BdBase(config, next) {
 	// - 'application/json' => req.body
 	// - 'application/x-www-form-urlencoded' => req.body
 	// - 'multipart/form-data' => req.body.<field>[], req.body.file[]
-	this.uploadDir = temp.path({prefix: 'com.palm.ares.hermes.' + this.config.basename}) + '.d';
+	this.uploadDir = temp.path({prefix: 'com.enyojs.ares.services.' + this.config.basename}) + '.d';
 	fs.mkdirSync(this.uploadDir);
 	this.app.use(express.bodyParser({keepExtensions: true, uploadDir: this.uploadDir}));
 
@@ -391,7 +392,7 @@ BdBase.prototype.build = function(req, res, next) {
 		this.prepare.bind(this, req, res),
 		this.store.bind(this, req, res),
 		this.package.bind(this, req, res),
-		this.returnFormData.bind(this, req, res),
+		this.returnFormData.bind(this, [], res),
 		this.cleanup.bind(this, req, res)
 	], function (err, results) {
 		if (err) {
@@ -517,49 +518,62 @@ BdBase.prototype.returnBody = function(req, res, next) {
 };
 
 /**
+ * @param {Array} parts
+ * @item parts {Object} part
+ * @property part {String} [filename] name to put in the FormData 
+ * @property part {ReadableStream} [stream] input stream to use for the bits
+ * @property part {Buffer} [buffer] input buffer to use for the bits
  * @protected
  */
-BdBase.prototype.returnFormData = function(req, res, next) {
-	var filename = req.filename;
-	var stats = fs.statSync(filename);
-	log.verbose("returnFormData()", "size: " + stats.size + " bytes", filename);
+BdBase.prototype.returnFormData = function(parts, res, next) {
+	if (!Array.isArray(parts) || parts.length < 1) {
+		next(new Error("Invalid parameters: cannot return a multipart/form-data of nothing"));
+		return;
+	}
+	log.verbose("BdBase#returnFormData()", parts.length, "parts:");
 	
 	// Build the multipart/formdata
-	var combinedStream = CombinedStream.create();
-	var boundary = _generateBoundary();
-	
-	// Adding part header
-	combinedStream.append(_getPartHeader(path.basename(filename)));
-	// Adding file data
-	combinedStream.append(function(nextDataChunk) {
-		fs.readFile(filename, 'base64', function (err, data) {
-			if (err) {
-				next('Unable to read ' + filename);
+	var FORM_DATA_LINE_BREAK = '\r\n',
+	    combinedStream = CombinedStream.create(),
+	    boundary = _generateBoundary();
+
+	parts.forEach(function(part) {
+		// Adding part header
+		combinedStream.append(_getPartHeader(part.filename));
+		// Adding data
+		if (part.stream) {
+			var encodedStream = new base64stream.BufferedStreamToBase64();
+			part.stream.pipe(encodedStream);
+			combinedStream.append(encodedStream);
+			part.stream.resume();
+			log.verbose("BdBase#returnFormData()", "start streaming part:", part.filename);
+		} else if (part.buffer) {
+			combinedStream.append(function(nextDataChunk) {
+				nextDataChunk(part.buffer.toString('base64'));
+			});
+		} else {
+			combinedStream.append(function(nextDataChunk) {
 				nextDataChunk('INVALID CONTENT');
-			} else {
-				nextDataChunk(data);
-			}
-		});
+			});
+		}
 	});
 	
 	// Adding part footer
-	combinedStream.append(_getPartFooter());
+	combinedStream.append(function(nextDataChunk) {
+		nextDataChunk(_getPartFooter());
+	});
 	
 	// Adding last footer
-	combinedStream.append(_getLastPartFooter());
+	combinedStream.append(function(nextDataChunk) {
+		nextDataChunk(_getLastPartFooter());
+	});
 	
 	// Send the files back as a multipart/form-data
 	res.status(200);
 	res.header('Content-Type', _getContentTypeHeader());
 	combinedStream.pipe(res);
+	combinedStream.on('end', next); //FIXME: this event is never emitted
 	
-	// cleanup the temp dir when the response has been sent
-	combinedStream.on('end', function() {
-		next();
-	});
-
-	var FORM_DATA_LINE_BREAK = '\r\n';
-
 	function _generateBoundary() {
 		// This generates a 50 character boundary similar to those used by Firefox.
 		// They are optimized for boyer-moore parsing.

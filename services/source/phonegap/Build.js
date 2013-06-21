@@ -557,8 +557,8 @@ enyo.kind({
 	 * @private
 	 */
 	_prepareStore: function(project, inData, next) {
-		var folderKey = "build." + this.getName() + ".target.folderId",
-		    folderPath = "target/" + this.getName();
+		var folderKey = "build." + this.config.id + ".target.folderId",
+		    folderPath = "target/" + this.config.id;
 		 this.doShowWaitPopup({msg: $L("Storing Phonegap application package")});
 
 		var folderId = project.getObject(folderKey);
@@ -627,9 +627,7 @@ enyo.kind({
 	 * @private
 	 */
 	_store: function(project, folderId, appData, next) {
-		var config = ares.clone(project.getConfig().getData()),
-		    applicationId = config.id,
-		    appKey = "build." + this.getName() + ".app";
+		var appKey = "build." + this.config.id + ".app";
 		if(this.debug) this.log("Entering _store function project: ", project, "folderId:", folderId, "appData:", appData);
 		project.setObject(appKey, appData);
 		this._getAllPackagedApplications(project, appData, folderId, next);
@@ -799,7 +797,7 @@ enyo.kind({
 			 */
 			function _sendDownloadRequest(urlSuffix, next){
 				var url = this.url + '/api/v1/apps/' + urlSuffix;
-				if (this.debug) 	this.log("download URL is : ", url);
+				if (this.debug)	this.log("download URL is : ", url);
 				
 				var req = new enyo.Ajax({
 					url: url,

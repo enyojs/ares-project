@@ -327,6 +327,11 @@
       "from": "async@0.1.22",
       "resolved": "https://registry.npmjs.org/async/-/async-0.1.22.tgz"
     },
+    "base64stream": {
+      "version": "0.1.1",
+      "from": "base64stream@",
+      "resolved": "https://registry.npmjs.org/base64stream/-/base64stream-0.1.1.tgz"
+    },
     "combined-stream": {
       "version": "0.0.4",
       "from": "combined-stream@0.0.4",
