@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "AresTab",
 	kind: "GroupItem",
-	classes: "onyx-radiobutton ares-tab",
+	classes: "onyx-radiobutton ares-tab"
 });
 
 enyo.kind({
@@ -18,7 +18,7 @@ enyo.kind({
 	components: [
 		{name: "container", classes: "ares-docbar-container", kind: "FittableColumns", ontap: "doToggleOpen", components: [
 			{kind: "onyx.Grabber"},
-			{kind: "onyx.Drawer", classes: "ares-filedrawer", orient: "h", open: false, showing:false, components: [
+			{kind: "onyx.Drawer", orient: "h", open: false, showing:false, components: [
 				{kind: "FittableColumns", components: [
 					{kind: "onyx.Button", content: "Save", ontap: "saveFile"},
 					{kind: "onyx.Button", content: "New Kind", ontap: "newKind"},
@@ -43,7 +43,7 @@ enyo.kind({
 			kind: "AresTab",
 			fileId: id,
 			components: [
-	    		{content: name, classes: "ares-tab-label"},
+				{content: name, classes: "ares-tab-label"},
 				{name: "close-"+id, kind: "onyx.IconButton", classes: "ares-doc-close", src: "$lib/onyx/images/progress-button-cancel.png", fileId: id, ontap: "closeFile"}
 			],
 			ontap: "switchFile"
