@@ -76,6 +76,9 @@ BdPhoneGap.prototype.route = function() {
 	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId/:platform/:title/:version'), this.downloadApp.bind(this));
 };
 
+// jshint: it is not possible to reduce the number of parameters of
+// this function, otherwise is not recognized as the error-handler by
+// express...
 BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 	var self = this;
 	log.info("errorHandler()", "err:", err);
@@ -201,7 +204,7 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
  * When a download request is received from "Build.js",
  * this function is called to do the following actions : 
  * - Create the appropriate file name
- * - Download the built project from Phonegap build using the
+ * - Download the built project from Phonegap build using the 
  *   API-Phonegap-Build
  * - When the download is done, the file is piped to "Ares client"
  *   using a multipart/form Post request
