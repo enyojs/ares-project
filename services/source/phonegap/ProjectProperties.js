@@ -9,56 +9,116 @@ enyo.kind({
 	],
 	statics: {
 
-		
-		generalPickers: [
-			["phonegapVersion" ,"Phonegap version" ,
-					["2.8.0", "2.7.0", "2.5.0", "2.3.0", "2.2.0", "2.1.0", 
-					 "2.0.0", "1.9.0", "1.8.1", "1.7.0", "1.6.1", "1.5.0", 
-					 "1.4.1", "1.3.0", "1.2.0", "1.1.0"]],
-			["orientation", "Orientation" ,["both", "landscape", "portrait"]],
-			["targetDevice" ,"Target device" ,["universal", "handset", "tablet"]],
-			["fullScreen" ,"Fullscreen mode" ,["true", "false"]],
-			 
+		commonDrawersContent:[
+
+			{	id : "general",
+				name: "General" ,
+				inputs: [
+								["icon", "Icon"], 
+								["splashScreen", "Splash screen"]
+				], 
+				pickers: 	[	
+								["phonegapVersion" ,"Phonegap version" ,
+										["2.8.0", "2.7.0", "2.5.0", "2.3.0", "2.2.0", "2.1.0", 
+										 "2.0.0", "1.9.0", "1.8.1", "1.7.0", "1.6.1", "1.5.0", 
+										 "1.4.1", "1.3.0", "1.2.0", "1.1.0"]],
+								["orientation", "Orientation" ,["both", "landscape", "portrait"]],
+								["targetDevice" ,"Target device" ,["universal", "handset", "tablet"]],
+								["fullScreen" ,"Fullscreen mode" ,["true", "false"]]
+				 			], 
+				checkboxes: []
+			},
+			{
+				id : "permissions",
+				name: "Permissions",
+				inputs: [], 
+				pickers: [], 
+				checkboxes: [
+								["battery", "Battery"],
+								["camera", "Camera"], 
+								["contact", "Contact"],
+								["FileRow", "File"],
+								["geolocation", "Geolocation"],
+								["media", "Media"],
+								["network", "Network"],
+								["notification", "Notification"],
+								["device", "Device"]
+							]
+			}
 		],
 
-		generalInputs: [
-			["icon", "Icon"], 
-			["splashScreen", "Splash screen"]
-		], 
-		
-		//in this array: 
-		//the first element is the name of the checkBox
-		//the second element is ne label value
-		permissionsCkBox: [
-			["battery", "Battery"],
-			["camera", "Camera"], 
-			["contact", "Contact"],
-			["FileRow", "File"],
-			["geolocation", "Geolocation"],
-			["media", "Media"],
-			["network", "Network"],
-			["notification", "Notification"],
-			["device", "Device"]
-		],
-		//in this array: 
-		//the first sub-element is the name of the input
-		//the second sub-element is ne label value
-		androidInput: [
-			["minSDK", "Minimum SDK"],
-			["maxSDK", "Maximum SDK"],
-			["splashScreenDuration", "Duration of the splashScreen"],
-			["loadUrlTimeout", "Load URL timeout"]
-		], 
+		platformDrawersContent:[
+			{	id: "android", 
+				name: "Google Android",
+				inputs: [
+								["minSDK", "Minimum SDK"],
+								["maxSDK", "Maximum SDK"],
+								["splashScreenDuration", "Duration of the splashScreen"],
+								["loadUrlTimeout", "Load URL timeout"],
+								["icon", "Icon"], 
+								["splashScreen", "Splash screen"]
 
-		iosPickers: [
-			["webviewBounce", "Web view bounce", ["true", "false"]], 
-			["prerenderedIcon", "Prerendred icon", ["true", "false"]],
-			["statusBarStyle", "Status Bar style", ["black-opaque", "black-translucent", "default"]],
-			["detectDataTypes", "Detect Data type", ["true", "false"]],
-			["exitOnSuspend", "Exit on suspend", ["true", "false"]],
-			["showSplashScreenSpinner", "Show splash screen spinner", ["true", "false"]],
-			["autoHideSplashScreen", "Auto-hide splash screen", ["true", "false"]]
+				],
+				pickers: [
+								["installLocation" ,"Install Location" ,["internalOnly", "preferExternal", "auto"]]
+				],
+				checkboxes: []
+
+			},
+			{	id: "ios",
+				name: "Apple iOS",
+				inputs: [
+								["icon", "Icon"], 
+								["splashScreen", "Splash screen"]
+				],
+				pickers: [
+								["webviewBounce", "Web view bounce", ["true", "false"]], 
+								["prerenderedIcon", "Prerendred icon", ["true", "false"]],
+								["statusBarStyle", "Status Bar style", ["black-opaque", "black-translucent", "default"]],
+								["detectDataTypes", "Detect Data type", ["true", "false"]],
+								["exitOnSuspend", "Exit on suspend", ["true", "false"]],
+								["showSplashScreenSpinner", "Show splash screen spinner", ["true", "false"]],
+								["autoHideSplashScreen", "Auto-hide splash screen", ["true", "false"]]
+
+				],
+				checkboxes: []
+
+			},
+			{	id: "winphone",
+				name: "Microsoft Windows Phone 7",
+				inputs: [
+								["icon", "Icon"], 
+								["splashScreen", "Splash screen"]
+				],
+				pickers: [],
+				checkboxes: []
+
+			},
+			{	id: "blackberry",
+				name: "RIM Blackberry",
+				inputs: [
+								["icon", "Icon"], 
+								["splashScreen", "Splash screen"]
+				],
+				pickers: [
+								["disableCursor", "Disable Cursor" ,["none", "true", "false"]]
+				],
+				checkboxes: []
+
+			},
+			{	id: "webos",
+				name: "HP webOS 2",
+				inputs: [
+								["icon", "Icon"], 
+								["splashScreen", "Splash screen"]
+				],
+				pickers: [],
+				checkboxes: []
+
+			},
+
 		]
+				
 	}
 });
 
@@ -101,94 +161,132 @@ enyo.kind({
 	 */
 	create: function() {
 		this.inherited(arguments);
-		this.setUpDrawers();
-		this.setUpGeneralDrawer();
-		this.setUpPermissionDrawer();
-		this.setUpAndroidDrawer();
-		this.setUpIOSDrawer();
-
-
-		this.log(Phonegap.Build.DEFAULT_PROJECT_CONFIG);
+		this.createAllDrawers();		
 	},
 
-	//TODO : change to nested function
-	setUpDrawers: function(){
-		this.targets = Phonegap.ProjectProperties.platforms;
-		
-		enyo.forEach(this.targets, function(target) {
-			this.$.targetsRows.createComponent({
-				name: target.id,
+
+	createAllDrawers: function(){
+		self = this;
+		var commonDrawers = Phonegap.EditUiData.commonDrawersContent;
+		var platformDrawers = Phonegap.EditUiData.platformDrawersContent;
+		createDrawers(commonDrawers, platformDrawers);
+				
+		// setting up the drawers which contain the configuration
+		// parameters shared with all the platforms presented by
+		// Phonegap build.		
+		function createDrawers(inCommonDrawers, inPlatformDrawers){
+			createCommonDrawers(inCommonDrawers);
+			createPlatformDrawers(inPlatformDrawers);
+		}
+
+		function createCommonDrawers(inDrawers){
+			enyo.forEach(inDrawers, 
+				function(commonDrawer) {					
+					createCommonDrawer(commonDrawer);
+
+					// get the last created drawer.
+					var allDrawers = self.$.targetsRows.getComponents();
+					var lastDrawer = allDrawers[allDrawers.length - 1];
+					//this.log(lastDrawer, "+++++++");							
+					
+					// A loop to Setup the content of each drawer.
+					enyo.forEach(Phonegap.EditUiData.commonDrawersContent, 
+						function(drawerContent){
+							if (drawerContent.id === commonDrawer.id ){
+								setUpDrawer(lastDrawer, drawerContent);
+							}
+							
+						}, this
+					);
+				}, this
+			);
+		}
+
+		function createPlatformDrawers(inDrawers){
+				enyo.forEach(inDrawers, 
+				function(inDrawer) {					
+					createPlatformDrawer(inDrawer);
+
+					// get the last created drawer.
+					var allDrawers = self.$.targetsRows.getComponents();
+					var lastDrawer = allDrawers[allDrawers.length - 1];
+					//this.log(lastDrawer, "+++++++");							
+					
+					// A loop to Setup the content of each drawer.
+					enyo.forEach(Phonegap.EditUiData.platformDrawersContent, 
+						function(drawerContent){
+							if (drawerContent.id === inDrawer.id ){
+								setUpDrawer(lastDrawer, drawerContent);
+							}
+							
+						}, this
+					);
+				}, this);
+		}
+
+		function createCommonDrawer(inDrawer){
+			// Creation of the drawer.
+				self.$.targetsRows.createComponent({
+					kind: "Phonegap.ProjectProperties.Drawer",
+					classes:"ares-row",				
+					name: inDrawer.id,
+					drawerName: inDrawer.name								
+				});
+		}
+
+		function createPlatformDrawer(inDrawer){
+			self.$.targetsRows.createComponent({
+				name: inDrawer.id,
 				classes:"ares-row",
 				kind: "Phonegap.ProjectProperties.Target",
-				targetId: target.id,
-				targetName: target.name,
+				targetId: inDrawer.id,
+				targetName: inDrawer.name,
 				enabled: false
-			});			
-		}, this);
+			});				
+		}
+
+		/**
+		 * Setup the rows of a drawer, a row contain a label with 
+		 * a UI widget which can be an : onyx.Picker, onyx.Input or onyx.Checkbox.
+		 * The content of each UI widget is defined in the array 
+		 * {Phonegap.EditUiData.drawerContent}
+		 * 
+		 * @param {Object} dwr        The drawer to fill
+		 * @param {Array} dwrContent list of the rows that will be placed in the drawer
+		 */
+		function setUpDrawer(dwr, dwrContent){
+			// Creation of the pickers of the drawer if they existe.
+				enyo.forEach(dwrContent.pickers, function(row){
+					//this.log(allDrawers[allDrawers.length - 1], "+++++++");						
+					dwr.$.drawer.createComponent({
+						kind: "PickerRow",
+						name: row[0],
+						label: row[1], 
+						value: row[2]
+					});		
+				}, this);
+
+				// Creation of the inputs of the drawer if they existe.
+				enyo.forEach(dwrContent.inputs, function(row){
+					dwr.$.drawer.createComponent({
+						kind: "inputRow",
+						name: row[0],
+						label: row[1]//, 
+						//value: row[2]
+					});		
+				}, this);
+
+				// Creation of the checkboxes of the drawer if they existe.
+				enyo.forEach(dwrContent.checkboxes, function(row){
+					dwr.$.drawer.createComponent({
+						kind: "CheckBoxRow",
+						name: row[0],
+						label: row[1]
+					});		
+				}, this);			
+		}		
 	},
 
-	setUpGeneralDrawer: function(){
-		var generalUiDataPickers = Phonegap.EditUiData.generalPickers; 
-
-		enyo.forEach(generalUiDataPickers, function(row){
-			this.$.targetsRows.$.general.$.targetDrw.createComponent({
-				kind: "PickerRow",
-				name: row[0],
-				label: row[1], 
-				value: row[2]
-			});		
-		}, this);
-
-		var generalUiDataInputs =  Phonegap.EditUiData.generalInputs;
-		enyo.forEach(generalUiDataInputs, function(row){
-			this.$.targetsRows.$.general.$.targetDrw.createComponent({
-				kind: "inputRow",
-				name: row[0],
-				label: row[1]//, 
-				//value: row[2]
-			});		
-		}, this);
-	},
-
-	//TODO :change to a nested function when refactoring
-	setUpPermissionDrawer: function(){
-		var permissionsUiData = Phonegap.EditUiData.permissionsCkBox;
-		
-		enyo.forEach(permissionsUiData, function(row){
-			this.$.targetsRows.$.permissions.$.targetDrw.createComponent({
-				kind: "CheckBoxRow",
-				name: row[0],
-				label: row[1]
-			});		
-		}, this);
-	}, 
-
-	setUpAndroidDrawer: function(){
-		var androidInput = Phonegap.EditUiData.androidInput;
-		//var androidConfig = Phonegap.configData.androidSpecific;
-		
-		enyo.forEach(androidInput, function(row){
-			this.$.targetsRows.$.android.$.targetDrw.createComponent({
-				kind: "inputRow",
-				name: row[0],
-				label: row[1]//, 
-				//value: androidConfig[row[0]]
-			});		
-		}, this);
-	},
-
-	setUpIOSDrawer: function(){
-		var ioslUiData = Phonegap.EditUiData.iosPickers; 
-
-		enyo.forEach(ioslUiData, function(row){
-			this.$.targetsRows.$.ios.$.targetDrw.createComponent({
-				kind: "PickerRow",
-				name: row[0],
-				label: row[1], 
-				value: row[2]
-			});		
-		}, this);
-	},
 
 	/** public */
 	setProjectConfig: function(config) {
@@ -204,12 +302,12 @@ enyo.kind({
 		enyo.forEach(this.targets, function(target) {
 			this.$.targetsRows.$[target.id].setProjectConfig(this.config.targets[target.id]);
 		}, this);
-		this.refresh();
+		this.refresh();		
 	},
 	/** public */
 	getProjectConfig: function() {
 		this.config.appId   = this.$.pgConfId.getValue();
-		this.config.icon.src = this.$.pgIconUrl.getValue();
+		//this.config.icon.src = this.$.pgIconUrl.getValue();
 
 		enyo.forEach(this.targets, function(target) {
 			this.config.targets[target.id] = this.$.targetsRows.$[target.id].getProjectConfig();
@@ -242,21 +340,14 @@ enyo.kind({
 			this.warn("err:", err);
 		} else {
 			var provider = Phonegap.ProjectProperties.getProvider();
+			this.log("loadKeys#provider: ", provider);
 			enyo.forEach(this.targets, function(target) {
 				this.$.targetsRows.$[target.id].loadKeys(provider);
 			}, this);
 		}
 	},
-	statics: {
-		platforms: [
-			{id: 'general', name: "General"}, 
-			{id: 'permissions', name: "Permissions"},
-			{id: 'android',		name: "Google Android"},
-			{id: 'ios',		name: "Apple iOS"},
-			{id: 'winphone',	name: "Microsoft Windows Phone 7"},
-			{id: 'blackberry',	name: "RIM Blackberry"},
-			{id: 'webos',		name: "HP webOS 2"}
-		],
+	statics: {	
+		
 		getProvider: function() {
 			this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('phonegap');
 			return this.provider;
@@ -269,7 +360,7 @@ enyo.kind({
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.Target",
-	debug: false,
+	debug: true,
 	published: {
 		targetId: "",
 		targetName: "",
@@ -280,11 +371,8 @@ enyo.kind({
 	},
 	components: [
 			{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "updateDrawer"},
-			{tag:"label", name: "targetLbl", classes:"ares-label", content: ""},
-			{name: "DetailsButton", kind: "onyx.Button", content: "Details", 
-			 ontap: "unfold", style:"float:right;"},
-			{name: "targetDrw", classes:"ares-row ares-drawer", orient: "v", kind: "onyx.Drawer", open: false},
-
+			{tag:"label", name: "targetLbl", classes:"ares-label", ontap: "unfold"},
+			{name: "drawer", classes:"ares-row ares-drawer", orient: "v", kind: "onyx.Drawer", open: false}
 	],
 	/**
 	 * @private
@@ -297,13 +385,13 @@ enyo.kind({
 		if (this.debug) this.log("id:", this.targetId, "config:", config);
 		this.config = config;
 		this.setEnabled(!!this.config);
-		if (this.enabled && this.$.targetDrw.$.keySelector) {
-			 this.$.targetDrw.$.keySelector.setActiveKeyId(this.config.keyId);
+		if (this.enabled && this.$.drawer.$.keySelector) {
+			 this.$.drawer.$.keySelector.setActiveKeyId(this.config.keyId);
 		}
 	},
 	getProjectConfig: function() {
-		if (this.enabled && this.$.targetDrw.$.keySelector) {
-			this.config.keyId = this.$.targetDrw.$.keySelector.getActiveKeyId();
+		if (this.enabled && this.$.drawer.$.keySelector) {
+			this.config.keyId = this.$.drawer.$.keySelector.getActiveKeyId();
 		}
 		if (this.debug) this.log("id:", this.targetId, "config:", this.config);
 		return this.config;
@@ -312,7 +400,9 @@ enyo.kind({
 	 * @private
 	 */
 	targetNameChanged: function(old) {
-		//if (this.debug) this.log(old, "->", this.enabled);
+		if (this.debug){
+			//this.log(old, "->", this.enabled);
+		}
 		this.$.targetLbl.setContent(this.targetName);
 	},
 	/**
@@ -332,19 +422,21 @@ enyo.kind({
 	 * @protected
 	 */
 	loadKeys: function(provider) {
+		
 		if ((this.targetId === 'android' ||
 		     this.targetId === 'ios' ||
 		     this.targetId === 'blackberry')) {
 			if (this.debug) this.log("id:", this.targetId);
 
-			if (this.$.targetDrw.$.keySelector) {
-				this.$.targetDrw.$.keySelector.destroy();
+			if (this.$.drawer.$.keySelector) {
+				this.$.drawer.$.keySelector.destroy();
 			}
+			
 
 			var keys = provider.getKey(this.targetId);
 			if (this.debug) this.log("id:", this.targetId, "keys:", keys);
 			if (keys) {
-				this.$.targetDrw.createComponent({
+				this.$.drawer.createComponent({
 					name: "keySelector",
 					kind: "Phonegap.ProjectProperties.KeySelector",
 					targetId: this.targetId,
@@ -352,8 +444,8 @@ enyo.kind({
 					classes:"ares-row ares-drawer",
 					activeKeyId: (this.config && this.config.keyId)
 				});
-				this.$.targetDrw.$.keySelector.render();
-				this.$.targetDrw.$.keySelector.setProvider(provider);
+				this.$.drawer.$.keySelector.render();
+				this.$.drawer.$.keySelector.setProvider(provider);
 			}
 		}
 	},
@@ -361,13 +453,43 @@ enyo.kind({
 	 * @private
 	 */
 	updateDrawer: function() {
-		//this.$.targetDrw.setOpen(this.$.targetChkBx.checked);
+		//this.$.drawer.setOpen(this.$.targetChkBx.checked);
 		this.setEnabled(this.$.targetChkBx.checked);
 	},
 
 	 unfold: function (){
-	    this.$.targetDrw.setOpen(this.fold);
+	    this.$.drawer.setOpen(this.fold);
 	    this.fold = ! this.fold;
+    } 
+});
+
+enyo.kind({
+	name: "Phonegap.ProjectProperties.Drawer",
+	debug: true,
+	published: {
+		drawerName: "",
+		fold: true,		
+	},
+	components: [			
+			{name: "drawerLbl", style: "margin-left: 40px;", ontap: "unfold"},
+			{name: "drawer", classes:"ares-row ares-drawer", orient: "v", kind: "onyx.Drawer", open: false}
+
+	],
+	/**
+	 * @private
+	 */
+	create: function() {
+		this.inherited(arguments);
+		this.drawerNameChanged();
+	},
+	
+	unfold: function (){
+	    this.$.drawer.setOpen(this.fold);
+	    this.fold = ! this.fold;
+    }, 
+
+    drawerNameChanged: function(){
+    	this.$.drawerLbl.setContent(this.drawerName);
     } 
 });
 
@@ -509,7 +631,7 @@ enyo.kind({
 	name: "CheckBoxRow",
 	kind: "FittableColumns",
 	style: "margin-top: 10px; height: 32px;",
-	debug: true,
+	debug: false,
 	published: {
 		label: "",
 		name: "",
@@ -537,8 +659,7 @@ enyo.kind({
 		this.activated = !this.activated;
 		Phonegap.Build.DEFAULT_PROJECT_CONFIG.features[this.label] = this.activated;
 		if (this.debug){
-			//this.log("the permission ", this.label, "is set to ",
-			//Phonegap.Build.DEFAULT_PROJECT_CONFIG.features[this.label]);
+			
 		}
 
 	}
@@ -549,7 +670,7 @@ enyo.kind({
 	name: "inputRow",
 	 kind: "FittableColumns",
 	 style: "margin-top: 10px; height: 32px",       
-	debug: true,
+	debug: false,
 	published: {
 		/**
 		 * The label text used for the row.
@@ -597,7 +718,7 @@ enyo.kind({
     name: "PickerRow",
  	kind: "FittableColumns", 
   	style: "margin-top: 10px;", 
-  	debug: true,
+  	debug: false,
   	published: {
 		  	label: "",
 		  	name: "",
@@ -628,8 +749,9 @@ enyo.kind({
 		enyo.forEach(this.value, function(aValue) {
 		this.$.configurationPicker.createComponent({content: aValue});			
 		}, this);
-
-		this.log("this configurationPicker: ", this.$.configurationPicker);
+		if(this.debug){
+			this.log("this configurationPicker: ", this.$.configurationPicker);
+		}		
 	}
 });
 

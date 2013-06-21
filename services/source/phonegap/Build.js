@@ -17,7 +17,7 @@ enyo.kind({
 		 name: "buildStatusPopup"
 		}
 	],
-	debug: true,
+	debug: false,
 	/**
 	 * @private
 	 */
@@ -1025,13 +1025,13 @@ enyo.kind({
 	},
 
 	statics: {
-		platforms: ["android", "ios", "winphone", "blackberry", "symbian", "webos"],
 		DEFAULT_PROJECT_CONFIG: {
 			enabled: false,
 			icon: {
 				src: "icon.png",
 				role: "default"
 			},
+
 			preferences: {
 				"phonegap-version": "2.1.0"
 			},
