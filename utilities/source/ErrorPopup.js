@@ -1,16 +1,17 @@
 enyo.kind({
-        name: "Ares.ErrorPopup",
-        kind: "onyx.Popup",
-        modal: true,
-        centered: true,
-        floating: true,
-        published: {
+	name: "Ares.ErrorPopup",
+	kind: "onyx.Popup",
+	modal: true,
+	centered: true,
+	floating: true,
+	published: {
 		errorMsg: "unknown error",
-		details: ""
-        },
-        classes:"ares-classic-popup",
-        components: [
-            {tag: "div", classes:"title", content: "Error"},
+		detailsHtml: "",
+		detailsText: ""
+	},
+	classes:"ares-classic-popup",
+	components: [
+	    {tag: "div", classes:"title", content: "Error"},
 			{classes:"ares-error-popup", fit: true, components: [
 				{name: "msg"},
 				{classes:"ares-error-details", components:[
@@ -18,7 +19,8 @@ enyo.kind({
 						{tag:"label", classes:"label", name: "detailsBtn", content: "Details", ontap: "toggleDetails", showing: false},
 						{name:"detailsArrow", classes:"optionDownArrow", ontap: "toggleDetails", showing: false},
 						{name: "detailsDrw", kind: "onyx.Drawer", open: false, showing:false, classes:"ares-error-drawer", components: [
-							{name: "detailsTxt", kind: "onyx.TextArea", disabled: true, fit:true, classes:"ares-error-text"}
+							{name: "detailsText", kind: "onyx.TextArea", disabled: true, fit:true, classes:"ares-error-text"},
+							{name: "detailsHtml", allowHtml: true, fit:true}
 						]}
 					]}
 				]}
@@ -26,44 +28,69 @@ enyo.kind({
 			{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
 				{name: "okButton", kind: "onyx.Button", content: "Close", ontap: "hideErrorPopup"}
 			]}
-        ],
-        create: function() {
-                this.inherited(arguments);
-        },
-        errorMsgChanged: function (oldVal) {
+	],
+	create: function() {
+		this.inherited(arguments);
+	},
+	errorMsgChanged: function (oldVal) {
+		if (this.debug) this.log(oldVal, "->", this.errorMsg);
 		this.$.msg.setContent(this.errorMsg);
-        },
-	detailsChanged: function(oldVal) {
-		if (this.details) {
+	},
+	detailsTextChanged: function() {
+		this.updateDetailsDrw();
+	},
+	detailsHtmlChanged: function() {
+		this.updateDetailsDrw();
+	},
+	updateDetailsDrw: function() {
+		if (this.detailsText || this.detailsHtml) {
 			this.$.detailsBtn.show();
 			this.$.detailsArrow.show();
 			this.$.detailsDrw.show();
 			this.$.detailsDrw.setOpen(true);
-			this.$.detailsTxt.setValue(this.details);
+			if (this.detailsHtml) {
+				this.$.detailsHtml.setContent(this.detailsHtml);
+				this.$.detailsHtml.show();
+				this.$.detailsText.hide();
+			} else {
+				this.$.detailsText.setValue(this.detailsText);
+				this.$.detailsText.show();
+				this.$.detailsHtml.hide();
+			}
 		} else {
 			this.$.detailsBtn.hide();
 			this.$.detailsArrow.hide();
 			this.$.detailsDrw.hide();
-			this.$.detailsTxt.setValue("");
+			this.$.detailsText.setValue("");
+			this.$.detailsHtml.setContent("");
 		}
 	},
 	toggleDetails: function() {
 		this.$.detailsDrw.setOpen(!this.$.detailsDrw.open);
 	},
-        hideErrorPopup: function(inSender, inEvent) {
+	hideErrorPopup: function() {
 		this.setErrorMsg();
-		this.setDetails();
-                this.hide();
-        },
-        raise: function(msg, details) {
-		var evt;
-		if (typeof msg === 'object') {
-			evt = msg;
-			msg = evt.msg || (evt.err && evt.err.toString());
-			details = evt.details || (evt.err && evt.err.stack);
+		this.setDetailsText();
+		this.setDetailsHtml();
+		this.hide();
+	},
+	raise: function(evt) {
+		var msg, err, text, html;
+		if (typeof evt === 'object') {
+			if (evt instanceof Error) {
+				err = evt;
+				msg = err.toString();
+			} else {
+				err = evt.err;
+				msg = evt.msg || (err && err.toString());
+			}
 		}
+		text = err && (err.text || err.stack);
+		html = err && err.html;
+		text = !html && text;
 		this.setErrorMsg(msg);
-		this.setDetails(details);
+		this.setDetailsHtml(html);
+		this.setDetailsText(text);
 		this.show();
 	}
 });
