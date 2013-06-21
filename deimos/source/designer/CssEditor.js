@@ -1,18 +1,4 @@
 enyo.kind({
-	name: "PalettePicker",
-	components: [
-		{kind: "ColorPicker", onColorPick: "onPick", onColorSlide: "onPick"}
-	],
-	events: {
-		onChange: ""
-	},
-	onPick: function(inSender, color){
-		this.doChange({target:this.$.colorPicker});
-		return true;
-	}
-});
-
-enyo.kind({
 	name: "CategoryStyle",
 	components: [
 		{classes: "css-editor-category", components: [

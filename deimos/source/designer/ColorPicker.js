@@ -13,27 +13,24 @@ enyo.kind({
 	published: {
 		color: ''
 	},
+	tag: "div",
 	events: {
 		onSelect: ""
 	},
-	components: [
-		{classes: "onyx-groupbox", ontap: "colorTapped", components:[
-			{name: "colorBox", style: "height: 15px; border: 1px solid Black; margin: 5px;"}
-		]}
-	],
+	style: "height: 15px; border: 1px solid Black; margin: 5px;",
+	handlers: {
+		ontap: "colorTapped"
+	},
 	create: function() {
 		this.inherited(arguments);
 		this.colorChanged();
 	},
-	setColor: function(c){
-		this.color = c;
-		this.colorChanged();
-	},
 	colorChanged: function(){
-		this.$.colorBox.applyStyle("background-color", '#' + this.color);
+		this.applyStyle("background-color", '#' + this.color);
 	},
 	colorTapped: function(){
-		this.bubble("onSelect", {color: this.color});
+		this.bubble("onSelect", {color: '#' + this.color});
+		return true;
 	}
 });
 
@@ -166,7 +163,7 @@ enyo.kind({
 				{color: "FA5882"},
 				{color: "F7819F"},
 				{color: "F5A9BC"}
-			]},
+			]}
 		]}
 	]
 });
@@ -174,69 +171,14 @@ enyo.kind({
 enyo.kind({
 	name: "ColorPicker",
 	kind: "Control",
-	published: {
-		red: 'ff',
-		blue: 'ff',
-		green: 'ff',
-		color: ''
-	},
 	events: {
-		onColorPick: ""
-	},
-	handlers: {
-		onSelect: "colorTapped"
+		onColorSelected: ""
 	},
 	components: [
-		{kind: "DefaultColorsBoxes"},
-		{classes: "onyx-groupbox", components:[
-			{name: "colorBox", ontap: "mainColorPicked"}
-		]}
+		{kind: "DefaultColorsBoxes", onSelect: "colorTapped"}
 	],
-	create: function() {
-		this.inherited(arguments);
-		this.updateColor();
-	},
 	colorTapped: function(inEvent, data){
-		this.red = data.color.substr(0,2);
-		this.green = data.color.substr(2,2);
-		this.blue = data.color.substr(4,2);
-		this.updateColor();
-		this.doColorPick();
+		this.doColorSelected({color: data.color});
 		return true;
-	},
-	mainColorPicked: function(){
-		color = this.color;
-		this.doColorPick();
-	},
-	updateColor: function(){
-		var c = '#' + (this.red + this.green + this.blue).toUpperCase();
-		this.color = c;
-	},
-	redChanged: function(inSender, inEvent){
-		var x = Math.floor(inEvent.value*255/100);
-		var h = x.toString(16);
-		if (h.length==1){
-			h = '0' + h;
-		}
-		this.red = h;
-		this.updateColor();
-	},
-	greenChanged: function(inSender, inEvent){
-		var x = Math.floor(inEvent.value*255/100);
-		var h = x.toString(16);
-		if (h.length==1){
-			h = '0' + h;
-		}
-		this.green = h;
-		this.updateColor();
-	},
-	blueChanged: function(inSender, inEvent){
-		var x = Math.floor(inEvent.value*255/100);
-		var h = x.toString(16);
-		if (h.length==1){
-			h = '0' + h;
-		}
-		this.blue = h;
-		this.updateColor();
 	}
 });

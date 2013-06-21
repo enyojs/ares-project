@@ -270,7 +270,7 @@ enyo.kind({
 		return true;
 	},
 	colorChanged: function(inSender, inEvent) {
-		this.fieldValue = inEvent.originator.$.colorPicker.color;
+		this.fieldValue = inEvent.color;
 		this.doChange({target: this});
 		return true;
 	},
@@ -283,9 +283,9 @@ enyo.kind({
 				if (o !== "palette") {
 					inItem.$[o].destroy();					
 				}
-				var needed = (inConfigProperties.name === "background-color") || (inConfigProperties.name === "border-color")		
+				var needed = (inConfigProperties.name === "background-color") || (inConfigProperties.name === "border-color");
 				if (needed  && !oneP) {
-					inItem.createComponent({name: "palette", kind: "PalettePicker", onChange: "colorChanged"});
+					inItem.createComponent({name: "palette", kind: "ColorPicker", onColorSelected: "colorChanged"});
 					oneP = true;
 				}
 			}			
@@ -318,7 +318,7 @@ enyo.kind({
 									// TODO will be implemented in JIRA-2560
 									break;
 								case 'palette':
-									// nothing to do
+									// Nothing to do
 									break;
 								case 'slider':
                                     inItem.$[o].setValue(val);
