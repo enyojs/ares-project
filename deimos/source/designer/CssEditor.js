@@ -1,39 +1,4 @@
-enyo.kind({
-	name: "CategoryStyle",
-	components: [
-		{classes: "css-editor-category", components: [
-			{ontap:"toggleDrawer", classes: "css-editor-category-name", components: [
-				{name: "indicator", classes: "indicator turned"},
-				{name: "name", tag:"span"},
-			]},
-			{name:"drawer", kind: "onyx.Drawer", open:true, components: [
-				{name: "list", kind: "Repeater", onSetupItem: "setupItem", components: [
-					{name: "styleItem", kind: "Inspector.Config.MultiType"}
-				]}
-			]}
-		]}
-	],
-	cssConfig: null,
-	toggleDrawer: function() {
-		var open = this.$.drawer.getOpen();
-		this.$.drawer.setOpen(!open);
-		this.$.indicator.addRemoveClass("turned", !open);
-	},
-	setModel: function(inCategory) {
-		this.cssConfig = inCategory;
-		this.$.name.setContent(inCategory.cssStyleName);
-		this.$.list.setCount((inCategory.properties).length);
-		this.$.list.build();			
-	},
-	setupItem: function(inSender, inEvent) {
-		var prop = this.cssConfig.properties;
-		var item = inEvent.item.$.styleItem;
-		item.setFieldName(prop[inEvent.index].name);
-		item.setConfig(this.cssConfig.properties[inEvent.index], item);		
-		item.setValues(this.cssConfig.properties[inEvent.index], this.propUser, item);
-		return true;
-	}
-});
+/* global ares */
 
 enyo.kind({
 	name: "CssEditor",
@@ -42,118 +7,40 @@ enyo.kind({
 		onChange: ""
 	},
 	cssEditorConfig: [
-		{cssStyleName: "Background-Style", 
-		properties: [
-			{name: "background-color",
-			config: {"text": true, 
-				"palette": true, 
-				"aspect": false, 
-				"family": false, 
-				"slider": false,
-				"unit": false,
-				"colorUnit": true},
+		{category: "Background-Style", properties: [
+			{name: "background-color",	inputKind: "Inspector.Config.Color"}
+		]},
+		{category: "Border-Style",	properties: [
+			{name: "border-color", inputKind: "Inspector.Config.Color"},
+			{name: "border-style", inputKind: {kind: "Inspector.Config.Event",
+					values: ["dotted", "dashed", "double", "groove", "hidden", "ridge",  "solid", "inset", "outset"]
+				}
+			},
+			{name: "border-width", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
 			}
-		]
-		},
-		{cssStyleName: "Border-Style",
-		properties: [
-			{name: "border-color",
-			config: {"text": true, 
-				"palette": true, 
-				"aspect": false, 
-				"family": false, 
-				"slider": false,
-				"unit": false,
-				"colorUnit": true}
-			},
-			{name: "border-style",
-			config: {"text": true, 
-				"palette": false, 
-				"aspect": false, 
-				"family": false, 
-				"slider": false,
-				"unit": false,
-				"colorUnit": false}
-			},
-			{name: "border-width",
-			config: {"text": true, 
-				"palette": false, 
-				"aspect": false, 
-				"family": false, 
-				"slider": true,
-				"unit": true,
-				"colorUnit": false}
-			}
-		]
-		},
-		{cssStyleName: "Font-Style",
-		properties: [
-			{name: "font-size",
-			config: {"text": true, 
-				"palette": false, 
-				"aspect": false, 
-				"family": false, 
-				"slider": true,
-				"unit": true,
-				"colorUnit": false}
-			},
-			{name: "font-family",
-			config: {"text": true, 
-				"palette": false, 
-				"aspect": false, 
-				"family": false, 
-				"slider": false,
-				"unit": false,
-				"colorUnit": false}
-			},
-		]
-		},
-		{cssStyleName: "Paddings-Margins",
-		properties: [
-			{name: "padding",
-			config: {"text": true, 
-				"palette": false, 
-				"aspect": false, 
-				"family": false, 
-				"slider": true,
-				"unit": true,
-				"colorUnit": false}
-			},
-			{name: "margin",
-			config: {"text": true, 
-				"palette": false, 
-				"aspect": false, 
-				"family": false, 
-				"slider": true,
-				"unit": true,
-				"colorUnit": false}
-			}
-		]
-		},
-		{cssStyleName: "Text-Style",
-		properties: [
-			{
-				name: "text-indent",
-				config: {"text": true, 
-				"palette": false, 
-				"aspect": false, 
-				"family": false, 
-				"slider": true,
-				"unit": true,
-				"colorUnit": false}
-			}
-		]
-		}
+		]},
+		{category: "Font-Style", properties: [
+			{name: "font-size", inputKind: "Inspector.Config.Text"},
+			{name: "font-family", inputKind: "Inspector.Config.Text"},
+			{name: "padding", inputKind: "Inspector.Config.Text"},
+			{name: "margin", inputKind: "Inspector.Config.Text"},
+			{name: "text-indent", inputKind: "Inspector.Config.Text"}
+		]}
 	],
 	fieldName: null,
 	fieldValue: null,
 	
 	create: function() {
 		this.inherited(arguments);
-		var keys = Object.keys(this.cssEditorConfig);
-		enyo.forEach(keys, function(o) {
-			var category = this.createComponent({kind: "CategoryStyle", propUser: this.currentControlStyle, onChange: "change"});
-			category.setModel(this.cssEditorConfig[o]);
+
+		// Convert css string to hash
+		this.styleProps = {};
+		enyo.Control.cssTextToDomStyles(this.trimWhitespace(this.currentStyle), this.styleProps);
+
+		enyo.forEach(this.cssEditorConfig, function(category) {
+			this.createComponent({kind: "CssEditor.Category", propUser: this.styleProps, config: category, onChange: "change"});
 		}, this);
 	},	
 	change: function(inSender, inEvent) {
@@ -162,25 +49,19 @@ enyo.kind({
 		}
 		
 		var v = this.trimWhitespace(inEvent.target.fieldValue),
-			n = this.trimWhitespace(inEvent.target.fieldName),
-			styleProps = {},
-			updatedProp = {}
-		;
+			n = this.trimWhitespace(inEvent.target.fieldName);
 		
 		// If no fieldname, something is wrong
-		if (n == "") {
+		if (n === "") {
 			return true;
 		}
-		
-		// Convert css string to hash
-		enyo.Control.cssTextToDomStyles(this.trimWhitespace(this.currentControlStyle), styleProps);
 
 		// Add/replace new style
-		styleProps[n] = v;
+		this.styleProps[n] = v;
 		
 		// Set relevant properties
 		this.fieldName = "style";
-		this.fieldValue = enyo.Control.domStylesToCssText(styleProps);
+		this.fieldValue = enyo.Control.domStylesToCssText(this.styleProps);
 		
 		// Update change event target
 		inEvent.target = this;
@@ -188,5 +69,49 @@ enyo.kind({
 	trimWhitespace: function(inStr) {
 		inStr = inStr || "";
 		return inStr.replace(/\s/g, "");
+	}
+});
+
+enyo.kind({
+	name: "CssEditor.Category",
+	components: [
+		{classes: "css-editor-category", components: [
+			{ontap:"toggleDrawer", classes: "css-editor-category-name", components: [
+				{name: "indicator", classes: "indicator turned"},
+				{name: "name", tag:"span"}
+			]},
+			{name:"drawer", kind: "onyx.Drawer", open:true, components: [
+				{name: "list", kind: "Repeater", onSetupItem: "setupItem", components: [
+					{name: "item"}
+				]}
+			]}
+		]}
+	],
+	create: function() {
+		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
+		this.inherited(arguments);
+		this.$.name.setContent(this.config.category);
+		this.$.list.setCount((this.config.properties).length);
+		this.$.list.build();			
+	},
+	toggleDrawer: function() {
+		var open = this.$.drawer.getOpen();
+		this.$.drawer.setOpen(!open);
+		this.$.indicator.addRemoveClass("turned", !open);
+	},
+	setupItem: function(inSender, inEvent) {
+		var prop = this.config.properties[inEvent.index];
+		var item = inEvent.item.$.item;
+		var value = this.propUser[prop.name];
+		var kind = prop.inputKind;
+		if (kind && kind instanceof Object) {
+			kind = enyo.clone(kind);
+			kind = enyo.mixin(kind, {fieldName: prop.name, fieldValue: value});
+		} else {
+			kind = {kind: kind, fieldName: prop.name, fieldValue: value};
+		}
+		this.trace("CREATE", kind);
+		item.createComponent(kind, {owner: this});
+		return true;
 	}
 });

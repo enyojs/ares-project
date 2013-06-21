@@ -64,3 +64,12 @@ input.inspector-field-checkbox {
 .inspector-event-button:before {
 	content: url(../../../ares/assets/images/smallArrowDown.png);
 }
+
+.inspector-color-button {
+	height: 15px;
+	width: 15px;
+	border: 1px solid Black;
+	margin: 5px;
+	display: inline-block;
+	vertical-align: middle;
+}

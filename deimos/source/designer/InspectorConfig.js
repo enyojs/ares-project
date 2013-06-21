@@ -159,24 +159,18 @@ enyo.kind({
 	}
 });
 
-/**
- * This kind allows to select a value defined in the
- * "values" property of this kind.
- *
- * The values must be specified in the configuration file (base-design.js or design.js)
- * If "fieldValue" does not match an entry from "values" the first entry
- * of "values" is shown as selected.
- */
 enyo.kind({
-	name: "Inspector.Config.Select",
-	kind: "Inspector.Config.IF",
+	name: "Inspector.Internal.Select",
+	published: {
+		fieldValue: "",
+		disabled: false
+	},
 	handlers: {
 		onChange: "handleChange"
 	},
 	// events and published are defined by the base kind
 	// values: Must be defined in the configuration
 	components: [
-		{classes: "inspector-field-caption", name: "title"},
 		{name: "decorator", kind: "onyx.PickerDecorator"}
 	],
 	initComponents: function() {
@@ -203,6 +197,7 @@ enyo.kind({
 		this.$.pickerButton.setDisabled(this.getDisabled());
 	},
 	fieldValueChanged: function() {
+		// TODO: something to do ?
 	},
 	handleChange: function(inSender, inEvent) {
 		if ( ! this.initFinished) {
@@ -210,9 +205,6 @@ enyo.kind({
 		}
 		
 		this.setFieldValue(this.$.value.getSelected().value);
-		
-		// Decorate event with _target_
-		inEvent.target = this;
 	},
 	updateSelected: function() {
 		var selectedIndex = Math.max(0, this.values.indexOf(this.fieldValue));
@@ -222,9 +214,120 @@ enyo.kind({
 });
 
 /**
+ * This kind allows to select a value defined in the
+ * "values" property of this kind.
  *
+ * The values must be specified in the configuration file (base-design.js or design.js)
+ * If "fieldValue" does not match an entry from "values" the first entry
+ * of "values" is shown as selected.
  */
 enyo.kind({
+	name: "Inspector.Config.Select",
+	kind: "Inspector.Config.IF",
+	handlers: {
+		onChange: "handleChange"
+	},
+	// events and published are defined by the base kind
+	// values: Must be defined in the configuration
+	components: [
+		{classes: "inspector-field-caption", name: "title"}
+	],
+	create: function() {
+		this.inherited(arguments);
+		this.createComponent({name: "selector", kind: "Inspector.Internal.Select",
+							fieldValue: this.fieldValue, values: this.values}, {owner: this});
+		this.$.selector.setDisabled(this.getDisabled());
+	},
+	disabledChanged: function() {
+		var selector = this.$.selector;
+		if (selector) {
+			selector.setDisabled(this.getDisabled());
+		}
+	},
+	fieldValueChanged: function() {
+		var selector = this.$.selector;
+		if (selector) {
+			selector.setFieldValue(this.getFieldValue());
+		}
+	},
+	handleChange: function(inSender, inEvent) {
+		this.fieldValue = this.$.selector.getFieldValue();
+		// Decorate event with _target_
+		inEvent.target = this;
+	}
+});
+
+enyo.kind({
+	name: "Inspector.Config.Size",
+	kind: "Inspector.Config.IF",
+	// events and published are defined by the base kind
+	components: [
+		{classes: "inspector-field-caption", name: "title"},
+		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
+	],
+	
+	//* @public
+	
+	//* Facade for _enyo.Input.focus()_
+	focus: function() {
+		this.$.value.focus();
+	},
+	
+	//* @protected
+	
+	//* Stop extraneous activate event from being fired when box is initially checked
+	handleChange: function(inSender, inEvent) {
+		this.fieldValue = this.$.value.getValue();
+		this.doChange({target: this});
+		return true;
+	},
+	handleDblClick: function(inSender, inEvent) {
+		this.fieldValue = this.$.value.getValue();
+		this.doDblClick({target: this});
+		return true;
+	}
+});
+
+enyo.kind({
+	name: "Inspector.Config.Color",
+	kind: "Inspector.Config.IF",
+	// events and published are defined by the base kind
+	components: [
+		{classes: "inspector-field-caption", name: "title"},
+		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
+		{name: "color", classes: "inspector-color-button"}
+	],
+	
+	//* @public
+	
+	//* Facade for _enyo.Input.focus()_
+	focus: function() {
+		this.$.value.focus();
+	},
+	
+	//* @protected
+	
+	//* Stop extraneous activate event from being fired when box is initially checked
+	handleChange: function(inSender, inEvent) {
+		this.fieldValue = this.$.value.getValue();
+		this.doChange({target: this});
+		return true;
+	},
+	handleDblClick: function(inSender, inEvent) {
+		this.fieldValue = this.$.value.getValue();
+		this.doDblClick({target: this});
+		return true;
+	},
+	fieldValueChanged: function() {
+		this.$.value.setValue(this.fieldValue);
+		this.$.color.applyStyle("background-color", this.fieldValue);
+	}
+});
+
+/**
+ *
+ */
+enyo.kind({												// TODO: TBR
 	name: "Inspector.Config.MultiType",
 	kind: "Inspector.Config.IF",
 	// events and published are defined by the base kind
