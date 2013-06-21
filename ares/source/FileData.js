@@ -1,3 +1,4 @@
+/* global Ares, Backbone */
 
 // Create the Ares.Model object if it does not exist yet
 if ( ! Ares.Model) {
