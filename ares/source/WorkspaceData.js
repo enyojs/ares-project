@@ -1,3 +1,5 @@
+/* global _, Ares, Backbone, ares, guid */
+
 var AresStore = function(name, eraseAll) {
 	this.name = name;
 
@@ -31,7 +33,7 @@ _.extend(AresStore.prototype, {
 		try {
 			var projectString = JSON.stringify(this.data, enyo.bind(this, this.stringifyReplacer));
 			localStorage.setItem(this.name, projectString);
-			this.debug && enyo.log("Ares.Store#save(): ", projectString);
+			if (this.debug) { enyo.log("Ares.Store#save(): ", projectString); }
 		} catch(error) {
 			enyo.error("Ares.Store#save():", error);
 		}
@@ -39,7 +41,9 @@ _.extend(AresStore.prototype, {
     
 	// Add a model
 	create: function(model) {
-		if (!model.id) model.id = model.attributes.id = guid();
+		if (!model.id) {
+			model.id = model.attributes.id = guid();
+		}
 		this.data[model.id] = model;
 		this.save();
 		return model;
@@ -90,7 +94,7 @@ Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when
 	_getProp: function(name) {
 		var parts = name.split("."),
 		    v = {};
-		v.key = parts[0],
+		v.key = parts[0];
 		v.obj = this.get(v.key) || {};
 		parts.shift(1);
 		v.name = parts.join(".");
@@ -187,7 +191,7 @@ Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collec
 		}
 	},
 	renameProject: function(oldName, newName) {
-		var project, oldProject = this.get(oldName);
+		var oldProject = this.get(oldName);
 		if (oldProject === undefined) {
 			throw new Error("Project '" + oldName + "'Does not exist");
 		} else {
