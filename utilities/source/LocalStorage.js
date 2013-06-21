@@ -1,3 +1,5 @@
+/* global chrome */
+
 /**
  * Enyo wrapper around client key-value stores
  * 

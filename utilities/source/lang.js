@@ -52,8 +52,8 @@ var ares = {
 	 * @param {String} the path to extract the dirname from
 	 * @return the path dirname
 	 */
- 	dirname: function (path) {
-		return path.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');;
+	dirname: function (path) {
+		return path.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');
 	},
 
 	/** @private */
