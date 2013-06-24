@@ -8,11 +8,11 @@
 	line-height:16px;
 	cursor:hand;
 	cursor:pointer;
-	background: url(../ares/assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px 0px @onyx-button-background;
+	background: @ares-button-gradient @onyx-button-background;
 	background-size: auto;
 	min-width:75px;
 	position:relative;
-	box-shadow: inset 0px .5px 0px rgba(255, 255, 255, 0.2);
+	.ares-box-shadow(inset 0px .5px 0px rgba(255, 255, 255, 0.2));
 	font-weight: 100;
 }
 
@@ -22,11 +22,9 @@
 
 .onyx-picker {
 	padding:0px;
-	color:#8C8C8C;
-	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-	-moz-border-radius:4px;
-	-webkit-border-radius:4px;
-	border-radius:4px;
+	color: @ares-picker-text-color;
+	.ares-box-shadow(0px 0px 10px rgba(0, 0, 0, 0.5));
+	.ares-rounded-corners(@ares-button-radius);
 	overflow:hidden; 
 }
 
@@ -36,7 +34,7 @@
 
 .onyx-picker-decorator .onyx-button:before {
 	position: relative; 
-	content: url(../ares/assets/images/smallArrowDown.png);
+	content: @ares-small-arrow;
 	width:25px; 
 	vertical-align: middle;
 	display: inline-block;
@@ -46,7 +44,10 @@
 
 /*onyx toolbar*/
 
-.onyx-toolbar .onyx-button { height: 28px; }
+.onyx-toolbar .onyx-button {
+	height: 28px;
+	background: @ares-button-gradient @onyx-button-background;
+}
 
 /*onyx item*/
 
@@ -58,21 +59,19 @@
 /*onyx input*/
 
 .onyx-input-decorator {
-	background-color: #CCCCCC;
+	background-color: @ares-light-background;
 	overflow: visible;
 	position: relative;
 	padding: 5px 5px 3px 8px;
-	border: 1px solid #CCCCCC;
-	-moz-border-radius: @onyx-input-border-radius;
-	-webkit-border-radius: @onyx-input-border-radius;
-	box-shadow: 0 1px 0 #F2F2F2, 0 -1px 0 #CCCCCC;
+	border: 1px solid @ares-light-background;
+	.ares-box-shadow(~"0 1px 0 #F2F2F2, 0 -1px 0 #ccc");
 }
 
 
 .onyx-input-decorator > input {
-	height:20px;
-	color:#000000;
-	width:200px;
+	height: 20px;
+	width: 200px;
+	color: @ares-input-text-color;
 }
 
 /*onyx radiobutton*/
@@ -90,10 +89,17 @@
 	padding-top:40px;
 }
 
-/*==========================*/
-body {
-	background-color: #aaa;
+/*onyx group box*/
+
+.onyx-groupbox > * {
+	border-color: @ares-groupbox-border-color;
 }
+
+.onyx-groupbox > .onyx-input-decorator{
+	border-color: @ares-groupbox-border-color;
+}
+
+/*==========================*/
 
 .ares-panels {
 	margin-top: 48px;
@@ -111,10 +117,8 @@ body {
 	height: 100%;
 	position:relative;
 	border: 1px solid #555;
-	-moz-box-shadow: 0 0 20px rgba(0,0,0,0.6);
-	-webkit-box-shadow: 0 0 20px rgba(0,0,0,0.6);
-	box-shadow: 0 0 20px rgba(0,0,0,0.6);
-	border-radius: 5px;
+	.ares-box-shadow(0 0 20px rgba(0,0,0,0.6));
+	.ares-rounded-corners (@ares-pannel-radius);
 }
 
 .ares-top-toolbar{
@@ -123,13 +127,13 @@ body {
 	height:64px; 
 	line-height: 30px;
 	border-bottom: 1px solid #222; 
-	background:url(../ares/assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px -123px;
+	background: @ares-toolbar-gradient;
 	background-size: auto; /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
 }
 
 .hermesFileTree-toolbar { height:64px; border-left: 0px; }
 
-.ares-bottom-bar { height: 40px; background-color:#0A0A0A; border-top: 1px solid #050505; padding:0px;}
+.ares-bottom-bar { height: 40px; background-color:@ares-bottom-bar-background; border-top: 1px solid #050505; padding:0px;}
 
 .enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-docbar-tabs {
 	margin-top: 0px;
@@ -143,33 +147,30 @@ body {
 }
 
 .ares-docbar-tabs .ares-tab {
-	background-color: #0A0A0A;
-	float: left; 
-	margin: 0px; 
-	padding:7px 0px; 
-	text-align:center; 
-	cursor:pointer; 
-	cursor:hand;  
-	overflow:hidden; 
-	font-size:12px; 
-	font-weight:bold; 
-	text-shadow:0 -1px 0 #000000; 
+	background-color: @ares-background-file-docbar;
+	float: left;
+	margin: 0px;
+	padding:7px 0px;
+	text-align:center;
+	cursor:pointer;
+	cursor:hand;
+	overflow:hidden;
+	font-size:12px;
+	font-weight:bold;
+	text-shadow:0 -1px 0 #000;
 	min-width:100px;
-	box-shadow: none; 
+	.ares-box-shadow(none);
 	border:none;
 	height:24px;
-	color:#999999;
+	color: @ares-text-file-docbar;
+	.ares-rounded-corners(0);
 }
 
 .ares-docbar-tabs .ares-tab.active {
-	-o-box-shadow: inset 0px 0px 40px 0px #000000;
-	-moz-box-shadow: inset 0px 0px 40px 0px #000000;
-	-ms-box-shadow: inset 0px 0px 40px 0px #000000;
-	-webkit-box-shadow: inset 0px 0px 40px 0px #000000;
-	box-shadow: inset 0px 0px 40px 0px #000000; 
-	background: #333; 
+	.ares-box-shadow(inset 0px 0px 40px 0px #000);
+	background-color: @ares-background-active-file-docbar;
 	border:none;
-	color:#fff;
+	color: @ares-active-text-color;
 }
 
 .ares-tab-label {
@@ -194,9 +195,7 @@ body {
 	width: 100%;
 	height: 100%;
 	z-index: 11;
-	-moz-box-shadow: 0 0 20px rgba(0,0,0,0.6);
-	-webkit-box-shadow: 0 0 20px rgba(0,0,0,0.6);
-	box-shadow: 0 0 20px rgba(0,0,0,0.6);
+	.ares-box-shadow(0 0 20px rgba(0,0,0,0.6));
 }
 
 .ares-padleft {
@@ -242,7 +241,7 @@ body {
 .ares-drawer {
 	margin-top: 9px;
 	background-color: #eaeaea;
-	border-radius: 3px;
+	.ares-rounded-corners (@ares-drawer-radius);
 	padding:4px;
 	text-align: right;
 }
@@ -267,7 +266,7 @@ body {
 
 .ares-filechooser-header { padding: 0 0.5em; vertical-align: middle; }
 
-.ares-filechooser-footer { vertical-align: middle; background: #ffffff; }
+.ares-filechooser-footer { vertical-align: middle; background: @ares-background-filechooser; }
 
 .ares-create-sources {
 	height: 24%;
@@ -277,7 +276,7 @@ body {
 }
 
 .ares-left-pane-file-chooser {
-	background-color:#FFFFFF;
+	background-color: @ares-background-filechooser;
 }
 
 .ares-left-pane-file-chooser > .ares_harmonia_providerList {
@@ -290,37 +289,64 @@ body {
 .ares-file-chooser-label { min-width: 127px; }
 
 /*Project properties popup*/
+
 .ares-project-properties { height: 215px; width: 590px; padding: 5px 10px; margin-top: 15px; }
 
 .ares-radio-group{ padding-top: 7px; }
 
 .ares-radio-group>button {
 	line-height: 30px;
-	padding: 0px;
-	margin:0px;
+	padding: 0;
+	margin:0;
 	background-image: none;
-	color: #666666;
-	border: 1px solid #999999;
+	color: @ares-radiogroup-text-color;
+	border: 1px solid @ares-radiogroup-border-color;
 	width: 182px;
 }
 
 .ares-radio-group>button.active {
 	background-image: none;
-	background-color: #0088C2;
-	color: #FFFFFF;
-	border: 1px solid #0A3654;
-	box-shadow: inset 0px 0px 15px #0B4063;
+	background-color: @ares-radiogroup-active-background;
+	color: @ares-active-text-color;
+	border: 1px solid @ares-radiogroup-active-border;
+	.ares-box-shadow(inset 0px 0px 15px @ares-radiogroup-boxshadow-color);
 }
 
 .ares-bottom-check {
 	height: 8px;
 	width: 0;
 	position: relative;
-	border-bottom: 8px solid #EAEAEA;
+	border-bottom: 8px solid @ares-background;
 	border-left: 8px solid transparent;
 	border-right: 8px solid transparent;
 	bottom: -6px;
 	right: 43%;
+}
+
+/* Ares group box */
+
+.ares-datas>div:not([class="onyx-groupbox-header"]) {
+	cursor:pointer;
+	background-color: @ares-groupbox-backgound;
+}
+
+.ares-datas>div.hover { background-color: @ares-backgound-hover;}
+
+.ares-datas>.active {
+	background-color: @ares-background;
+	.ares-box-shadow (inset 0px 0px 30px rgba(0,0,0,0.3));
+}
+
+.ares-group-box>div {
+	padding-left: 3px;
+	line-height: 1.9;
+}
+
+.ares-group-box>.onyx-input-decorator { .ares-box-shadow(none); }
+
+.ares-groupbox-item-key, .ares-groupbox-item-value {
+	width: 50%;
+	display: inline-block;
 }
 
 p.break { padding: 1px 0; }
@@ -347,28 +373,37 @@ div.large-fixed { width: 80%; }
 
 .ares-large-content { height: 390px; }
 
-.ares-datas>div:not([class="onyx-groupbox-header"]) { cursor:pointer; background-color:rgb(230, 228, 228);}
-
-.ares-datas>div.hover { background-color:#eeeeee; }
-
-.ares-datas>.active {
-	background-color:#aaaaaa;
-	box-shadow: inset 0px 0px 30px rgba(0,0,0,0.3); }
-
-.ares-group-box>div {
-	padding-left: 3px;
-	line-height: 1.9;
+.title-gradient {
+	border-bottom:1px solid #FFFFFF;
+	background: @ares-title-gradient;
 }
 
-.ares-group-box>.onyx-input-decorator { box-shadow: none; }
+.hangar {
+	background: @ares-sprites-vertical repeat-y scroll 0 0;
+}
 
-.ares-groupbox-item-key, .ares-groupbox-item-value {
-	width: 50%;
+.lsmallDownArrow {
+	height: 25px;
+	width: 25px;
+	background: @ares-lsmall-dowm-arrow;
+	vertical-align: middle;
 	display: inline-block;
 }
 
-@import "assets/css/effects.less";
-@import "assets/css/sprites.less";
+.optionDownArrow {
+	position: absolute;
+	margin-top: 2px;
+	right: 1px;
+	top: 8px;
+	height: 1em;
+	width: 1.5em;
+	background: @option-down-arrow;
+	vertical-align: middle;
+	display: inline-block;
+	border: 1px solid gray;
+	padding-top: 4px;
+}
+
 @import "assets/css/aresPopup.less";
 @import "assets/css/cssbuilder.css";
 @import "../deimos/source/deimos.less";

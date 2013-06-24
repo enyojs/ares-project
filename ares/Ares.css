@@ -27,17 +27,31 @@
 /* ---------------------------------------*/
 /* Onyx variables overrides */
 /* ---------------------------------------*/
-/*fonts*/
+/*Fonts*/
 /*Colors*/
 /* Disabled Opacity */
-/* ---------------------------------------*/
 /* Border Radius */
-/* ---------------------------------------*/
 /* Backgrounds */
+/*#a7a7a7*/
 /* Images */
-/* ---------------------------------------*/
 /* Ares variables */
-/* ---------------------------------------*//* onyx-classes.less - combined CSS (less) files for all released Onyx controls
+/* ---------------------------------------*/
+/* Fonts */
+/* Images */
+/* Colors */
+/* #EAEAEA *//*# eeeeee */
+/*#ddd*/
+/*#999999*/
+/*#090909*/
+/*#333333*/
+/*#666*/
+/*#0a4461*/
+/*ex : #0B4063*/
+/* Ares popups */
+/* #999999 */
+/*Border radius*/
+/* Ares mixins */
+/* onyx-classes.less - combined CSS (less) files for all released Onyx controls
    into single onyx.less file to avoid IE bug that allows
    a maximum of 31 style sheets to be loaded before silently failing */
 .onyx {
@@ -96,8 +110,8 @@
   border-radius: 6px;
   /* for IE8 */
 
-  border: 1px solid #535456;
-  border: 1px solid rgba(11, 11, 12, 0.2);
+  border: 1px solid #535353;
+  border: 1px solid rgba(11, 11, 11, 0.2);
   /*
 		The border and the gradient interact in a strange way that
 		causes the bottom-border (top if the gradient is aligned top)
@@ -109,7 +123,7 @@
   /* border-bottom: 1px solid rgba(15, 15, 15, 0.5); */
 
   box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.2);
-  background: #a7a9ac url(../images/gradient.png) repeat-x bottom;
+  background: #a7a7a7 url(../images/gradient.png) repeat-x bottom;
   background-size: contain;
   /**/
 
@@ -1285,10 +1299,14 @@
   line-height: 16px;
   cursor: hand;
   cursor: pointer;
-  background: url(../ares/assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px 0px #a7a9ac;
+  background: url(assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px 0px #a7a7a7;
   background-size: auto;
   min-width: 75px;
   position: relative;
+  -o-box-shadow: inset 0px 0.5px 0px rgba(255, 255, 255, 0.2);
+  -ms-box-shadow: inset 0px 0.5px 0px rgba(255, 255, 255, 0.2);
+  -moz-box-shadow: inset 0px 0.5px 0px rgba(255, 255, 255, 0.2);
+  -webkit-box-shadow: inset 0px 0.5px 0px rgba(255, 255, 255, 0.2);
   box-shadow: inset 0px 0.5px 0px rgba(255, 255, 255, 0.2);
   font-weight: 100;
 }
@@ -1298,10 +1316,16 @@
 /*onyx picker*/
 .onyx-picker {
   padding: 0px;
-  color: #8C8C8C;
+  color: #8c8c8c;
+  -o-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  -ms-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  -webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-  -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
   border-radius: 4px;
   overflow: hidden;
 }
@@ -1310,7 +1334,7 @@
 }
 .onyx-picker-decorator .onyx-button:before {
   position: relative;
-  content: url(../ares/assets/images/smallArrowDown.png);
+  content: url(assets/images/smallArrowDown.png);
   width: 25px;
   vertical-align: middle;
   display: inline-block;
@@ -1320,6 +1344,7 @@
 /*onyx toolbar*/
 .onyx-toolbar .onyx-button {
   height: 28px;
+  background: url(assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px 0px #a7a7a7;
 }
 /*onyx item*/
 .onyx-item {
@@ -1328,19 +1353,21 @@
 }
 /*onyx input*/
 .onyx-input-decorator {
-  background-color: #CCCCCC;
+  background-color: #dddddd;
   overflow: visible;
   position: relative;
   padding: 5px 5px 3px 8px;
-  border: 1px solid #CCCCCC;
-  -moz-border-radius: 6px;
-  -webkit-border-radius: 6px;
-  box-shadow: 0 1px 0 #f2f2f2, 0 -1px 0 #cccccc;
+  border: 1px solid #dddddd;
+  -o-box-shadow: 0 1px 0 #F2F2F2, 0 -1px 0 #ccc;
+  -ms-box-shadow: 0 1px 0 #F2F2F2, 0 -1px 0 #ccc;
+  -moz-box-shadow: 0 1px 0 #F2F2F2, 0 -1px 0 #ccc;
+  -webkit-box-shadow: 0 1px 0 #F2F2F2, 0 -1px 0 #ccc;
+  box-shadow: 0 1px 0 #F2F2F2, 0 -1px 0 #ccc;
 }
 .onyx-input-decorator > input {
   height: 20px;
-  color: #000000;
   width: 200px;
+  color: #000000;
 }
 /*onyx radiobutton*/
 .onyx-radiobutton {
@@ -1353,10 +1380,14 @@
   transform: rotate(90deg);
   padding-top: 40px;
 }
-/*==========================*/
-body {
-  background-color: #aaa;
+/*onyx group box*/
+.onyx-groupbox > * {
+  border-color: #999999;
 }
+.onyx-groupbox > .onyx-input-decorator {
+  border-color: #999999;
+}
+/*==========================*/
 .ares-panels {
   margin-top: 48px;
 }
@@ -1371,9 +1402,15 @@ body {
   height: 100%;
   position: relative;
   border: 1px solid #555;
+  -o-box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+  -ms-box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
   -moz-box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
   -webkit-box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
   border-radius: 5px;
 }
 .ares-top-toolbar {
@@ -1382,7 +1419,7 @@ body {
   height: 64px;
   line-height: 30px;
   border-bottom: 1px solid #222;
-  background: url(../ares/assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px -123px;
+  background: url(assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px -123px;
   background-size: auto;
   /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
 
@@ -1393,7 +1430,7 @@ body {
 }
 .ares-bottom-bar {
   height: 40px;
-  background-color: #0A0A0A;
+  background-color: #090909;
   border-top: 1px solid #050505;
   padding: 0px;
 }
@@ -1407,7 +1444,7 @@ body {
   padding: 0px 0px 0px 15px;
 }
 .ares-docbar-tabs .ares-tab {
-  background-color: #0A0A0A;
+  background-color: #090909;
   float: left;
   margin: 0px;
   padding: 7px 0px;
@@ -1419,20 +1456,29 @@ body {
   font-weight: bold;
   text-shadow: 0 -1px 0 #000000;
   min-width: 100px;
+  -o-box-shadow: none;
+  -ms-box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
   box-shadow: none;
   border: none;
   height: 24px;
   color: #999999;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  -ms-border-radius: 0;
+  -o-border-radius: 0;
+  border-radius: 0;
 }
 .ares-docbar-tabs .ares-tab.active {
   -o-box-shadow: inset 0px 0px 40px 0px #000000;
-  -moz-box-shadow: inset 0px 0px 40px 0px #000000;
   -ms-box-shadow: inset 0px 0px 40px 0px #000000;
+  -moz-box-shadow: inset 0px 0px 40px 0px #000000;
   -webkit-box-shadow: inset 0px 0px 40px 0px #000000;
   box-shadow: inset 0px 0px 40px 0px #000000;
-  background: #333;
+  background-color: #333333;
   border: none;
-  color: #fff;
+  color: #ffffff;
 }
 .ares-tab-label {
   display: inline-block;
@@ -1453,6 +1499,8 @@ body {
   width: 100%;
   height: 100%;
   z-index: 11;
+  -o-box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+  -ms-box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
   -moz-box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
   -webkit-box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
@@ -1492,6 +1540,10 @@ body {
 .ares-drawer {
   margin-top: 9px;
   background-color: #eaeaea;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
   border-radius: 3px;
   padding: 4px;
   text-align: right;
@@ -1530,7 +1582,7 @@ body {
   text-transform: uppercase;
 }
 .ares-left-pane-file-chooser {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
 }
 .ares-left-pane-file-chooser > .ares_harmonia_providerList {
   height: 245px;
@@ -1554,8 +1606,8 @@ body {
 }
 .ares-radio-group > button {
   line-height: 30px;
-  padding: 0px;
-  margin: 0px;
+  padding: 0;
+  margin: 0;
   background-image: none;
   color: #666666;
   border: 1px solid #999999;
@@ -1563,20 +1615,56 @@ body {
 }
 .ares-radio-group > button.active {
   background-image: none;
-  background-color: #0088C2;
-  color: #FFFFFF;
-  border: 1px solid #0A3654;
-  box-shadow: inset 0px 0px 15px #0B4063;
+  background-color: #0088c2;
+  color: #ffffff;
+  border: 1px solid #0a4461;
+  -o-box-shadow: inset 0px 0px 15px #0a4461;
+  -ms-box-shadow: inset 0px 0px 15px #0a4461;
+  -moz-box-shadow: inset 0px 0px 15px #0a4461;
+  -webkit-box-shadow: inset 0px 0px 15px #0a4461;
+  box-shadow: inset 0px 0px 15px #0a4461;
 }
 .ares-bottom-check {
   height: 8px;
   width: 0;
   position: relative;
-  border-bottom: 8px solid #EAEAEA;
+  border-bottom: 8px solid #eaeaea;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   bottom: -6px;
   right: 43%;
+}
+/* Ares group box */
+.ares-datas > div:not([class="onyx-groupbox-header"]) {
+  cursor: pointer;
+  background-color: #eaeaea;
+}
+.ares-datas > div.hover {
+  background-color: #eeeeee;
+}
+.ares-datas > .active {
+  background-color: #eaeaea;
+  -o-box-shadow: inset 0px 0px 30px rgba(0, 0, 0, 0.3);
+  -ms-box-shadow: inset 0px 0px 30px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: inset 0px 0px 30px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: inset 0px 0px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0px 0px 30px rgba(0, 0, 0, 0.3);
+}
+.ares-group-box > div {
+  padding-left: 3px;
+  line-height: 1.9;
+}
+.ares-group-box > .onyx-input-decorator {
+  -o-box-shadow: none;
+  -ms-box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+.ares-groupbox-item-key,
+.ares-groupbox-item-value {
+  width: 50%;
+  display: inline-block;
 }
 p.break {
   padding: 1px 0;
@@ -1614,40 +1702,17 @@ div.large-fixed {
 .ares-large-content {
   height: 390px;
 }
-.ares-datas > div:not([class="onyx-groupbox-header"]) {
-  cursor: pointer;
-  background-color: #e6e4e4;
-}
-.ares-datas > div.hover {
-  background-color: #eeeeee;
-}
-.ares-datas > .active {
-  background-color: #aaaaaa;
-  box-shadow: inset 0px 0px 30px rgba(0, 0, 0, 0.3);
-}
-.ares-group-box > div {
-  padding-left: 3px;
-  line-height: 1.9;
-}
-.ares-group-box > .onyx-input-decorator {
-  box-shadow: none;
-}
-.ares-groupbox-item-key,
-.ares-groupbox-item-value {
-  width: 50%;
-  display: inline-block;
-}
 .title-gradient {
   border-bottom: 1px solid #FFFFFF;
   background: url(assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px -72px;
 }
 .hangar {
-  background: url("assets/images/hp_ep_sprite_vertical.png") repeat-y scroll 0 0;
+  background: url(assets/images/hp_ep_sprite_vertical.png) repeat-y scroll 0 0;
 }
 .lsmallDownArrow {
   height: 25px;
   width: 25px;
-  background: url(assets/images/images/hp_ep_sprite.png) -130px -60px no-repeat;
+  background: url(assets/images/hp_ep_sprite.png) -130px -60px no-repeat;
   vertical-align: middle;
   display: inline-block;
 }
@@ -1665,22 +1730,32 @@ div.large-fixed {
   padding-top: 4px;
 }
 .ares-classic-popup {
-  box-shadow: 0px 0px 10px #000000;
-  background-color: #FFFFFF;
-  -moz-border-radius: 6px;
-  -webkit-border-radius: 6px;
-  border-radius: 6px;
+  background-color: #ffffff;
   color: #000000;
-  padding: 0px;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  -ms-border-radius: 6px;
+  -o-border-radius: 6px;
+  border-radius: 6px;
+  -o-box-shadow: 0px 0px 10px #000000;
+  -ms-box-shadow: 0px 0px 10px #000000;
+  -moz-box-shadow: 0px 0px 10px #000000;
+  -webkit-box-shadow: 0px 0px 10px #000000;
+  box-shadow: 0px 0px 10px #000000;
+  padding: 0;
 }
 .ares-classic-popup > .title {
   height: 48px;
   line-height: 48px;
   font-size: 16px;
   padding-left: 20px;
-  background-color: #CCCCCC;
+  background-color: #dddddd;
   text-transform: uppercase;
   border-bottom: 2px solid #999999;
+  -webkit-border-radius: 6px 6px 0px 0px;
+  -moz-border-radius: 6px 6px 0px 0px;
+  -ms-border-radius: 6px 6px 0px 0px;
+  -o-border-radius: 6px 6px 0px 0px;
   border-radius: 6px 6px 0px 0px;
 }
 .ares-classic-popup > .title.left-align {
@@ -1689,16 +1764,17 @@ div.large-fixed {
 .bottom-toolbar {
   position: relative;
   background-image: none;
-  background-color: #CCCCCC;
+  background-color: #dddddd;
   padding: 7px;
-  border: 0px;
+  border: 0;
   border-top: 1px solid #999999;
-  -moz-border-radius: 0px 0px 6px 6px;
   -webkit-border-radius: 0px 0px 6px 6px;
+  -moz-border-radius: 0px 0px 6px 6px;
+  -ms-border-radius: 0px 0px 6px 6px;
+  -o-border-radius: 0px 0px 6px 6px;
   border-radius: 0px 0px 6px 6px;
 }
 .bottom-toolbar > .onyx-button {
-  background-color: transparent;
   border: 1px solid #999999;
   margin: 0;
 }
@@ -1707,7 +1783,7 @@ div.large-fixed {
   right: 7px;
 }
 .ares-small-popup {
-  width: 320px;
+  width: 325px;
   height: 150px;
   padding: 5px 10px;
 }
@@ -1715,17 +1791,9 @@ div.large-fixed {
   position: relative;
   width: 300px;
   word-wrap: break-word;
-}
-.ares-small-popup-details {
-  padding-top: 10px;
-  position: relative;
-}
-.ares-small-popup-details {
-  border: none;
-  color: #000000;
+  padding: 10px 0 0 10px;
   background: transparent;
   height: auto;
-  padding-left: 10px;
   text-align: left;
 }
 .ares-error-popup {
@@ -1745,7 +1813,6 @@ div.large-fixed {
 }
 .ares-error-details .label {
   border: none;
-  color: #000000;
   background: transparent;
   height: auto;
   padding-left: 10px;
