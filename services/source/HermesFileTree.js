@@ -417,7 +417,7 @@ enyo.kind({
 	adjustScroll: function (inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		var node = inEvent.originator;
-		this.$.scroller.scrollIntoView(node, true);
+		this.$.scroller.scrollToControl(node, true);
 		return true;
 	},
 
@@ -981,12 +981,7 @@ enyo.kind({
 
 				inTarget.getChildren()
 					.response(this, function(inSender, inNodes) {
-						// FIXME: ENYO-2575 (scrollIntoView has unexpected issue)
-						/*this.refreshFileTree(function() {
-							that.$.scroller.scrollIntoView(inTarget.getNodeWithId(inValue.id), true);
-						}, inValue.id);*/
-						this.refreshFileTree(null, inValue.id);
-						//this.refreshFileTree(function() {inTarget.getNodeWithId(inValue.id).doAdjustScroll()}, inValue.id);
+						this.refreshFileTree(function() {inTarget.getNodeWithId(inValue.id).doAdjustScroll()}, inValue.id);
 					})
 					.error(this, function() {
 						this.log("error retrieving related node children");
