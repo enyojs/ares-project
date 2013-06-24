@@ -98,7 +98,7 @@ enyo.kind({
 		
 		this.enableDisableButtons();
 		this.createComponent(
-			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable",
+			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable hermesFileTree-root",
 				showing: false, content: "server", icon: "$services/assets/images/antenna.png",
 				expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed
 			}
@@ -352,7 +352,7 @@ enyo.kind({
 					serverNode.file.isServer = true;
 
 					serverNode.setContent(nodeName);
-					this.refreshFileTree(function(){ that.select(null, { data: serverNode } ) ; });
+					this.refreshFileTree(function(){ that.$.selection.select(serverNode.file.id, serverNode ) ; });
 				});
 				req.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");
@@ -955,7 +955,6 @@ enyo.kind({
 					addParentNode.setExpanded(true);
 					// update icon for expanded state
 					addParentNode.setIcon("$services/assets/images/folder-open.png");
-					addParentNode.addClass("hermesFileTree-folder-highlight");
 								
 					// handle lazy-load when expanding
 					addParentNode.updateNodes().
