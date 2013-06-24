@@ -65,7 +65,8 @@
 	},
 	"scripts" : {
 		"start": "node ide.js",
-		"install" : "node ./scripts/sub-npm.js"
+		"install" : "node ./scripts/sub-npm.js",
+		"pretest" : "node ./node_modules/.bin/jshint ."
 	},
 	"files": [
 		"LICENSE-2.0.txt",
