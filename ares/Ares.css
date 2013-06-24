@@ -6,7 +6,7 @@
 /* minifier to fall back to using CSS files in place of the same-name       */
 /* LESS file.                                                               */
 
-@import "assets/css/cssbuilder.css";
+@import "../phobos/source/cssbuilder.css";
 /* Fonts */
 /* ---------------------------------------*/
 /* Text Colors */
@@ -35,6 +35,8 @@
 /* ---------------------------------------*/
 /* Backgrounds */
 /* Images */
+/* ---------------------------------------*/
+/* Gradient Overlays */
 /* ---------------------------------------*/
 /* Ares variables */
 /* ---------------------------------------*//* onyx-classes.less - combined CSS (less) files for all released Onyx controls
@@ -109,7 +111,7 @@
   /* border-bottom: 1px solid rgba(15, 15, 15, 0.5); */
 
   box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.2);
-  background: #a7a9ac url(../images/gradient.png) repeat-x bottom;
+  background: #a7a9ac url(../lib/onyx/images/gradient.png) repeat-x bottom;
   background-size: contain;
   /**/
 
@@ -130,13 +132,13 @@
 */
 .onyx-button.active,
 .onyx-button.pressed {
-  background-image: url(../images/gradient-invert.png);
+  background-image: url(../lib/onyx/images/gradient-invert.png);
   background-position: top;
   border-top: 1px solid rgba(15, 15, 15, 0.6);
   box-shadow: inset 0px 1px 0px rgba(0, 0, 0, 0.1);
 }
 .onyx-button:active:hover:not([disabled]) {
-  background-image: url(../images/gradient-invert.png);
+  background-image: url(../lib/onyx/images/gradient-invert.png);
   background-position: top;
   border-top: 1px solid rgba(15, 15, 15, 0.6);
   box-shadow: inset 0px 1px 0px rgba(0, 0, 0, 0.1);
@@ -186,7 +188,7 @@
   border-radius: 8px;
   padding: 6px;
   color: #ffffff;
-  background: #4c4c4c url(../images/gradient.png) repeat-x 0 bottom;
+  background: #4c4c4c url(../lib/onyx/images/gradient.png) repeat-x 0 bottom;
 }
 .onyx-popup-decorator {
   position: relative;
@@ -228,7 +230,7 @@
 
   background-color: #4c4c4c;
   border: none;
-  background: #4c4c4c url(../images/gradient.png) repeat-x 0 10px;
+  background: #4c4c4c url(../lib/onyx/images/gradient.png) repeat-x 0 10px;
 }
 .onyx-groupbox .onyx-input-decorator {
   display: block;
@@ -350,7 +352,7 @@
 }
 /* Submenu.css */
 .onyx-submenu {
-  background: rgba(0, 0, 0, 0.25) url(../images/gradient-invert.png) repeat-x 0 top;
+  background: rgba(0, 0, 0, 0.25) url(../lib/onyx/images/gradient-invert.png) repeat-x 0 top;
 }
 /* Picker.css */
 .onyx-picker-decorator .onyx-button {
@@ -466,7 +468,7 @@
   text-align: center;
   /**/
 
-  background: #e7e7e7 url(../images/gradient.png) repeat-x bottom;
+  background: #e7e7e7 url(../lib/onyx/images/gradient.png) repeat-x bottom;
   /* IE8 */
 
   border: 1px solid #333333;
@@ -488,7 +490,7 @@
 }
 .onyx-radiobutton.active {
   color: #ffffff;
-  background: #0091f2 url(../images/gradient-invert.png) repeat-x top;
+  background: #0091f2 url(../lib/onyx/images/gradient-invert.png) repeat-x top;
   border-top: 1px solid rgba(15, 15, 15, 0.6);
   box-shadow: inset 1px 2px 2px rgba(0, 0, 0, 0.2);
 }
@@ -644,7 +646,7 @@
 
   border-radius: 6px;
   box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.4);
-  background: #8bba3d url(../images/gradient-invert.png) repeat-x bottom;
+  background: #8bba3d url(../lib/onyx/images/gradient-invert.png) repeat-x bottom;
   background-size: auto 100%;
   /* label */
 
@@ -662,7 +664,7 @@
   height: 30px;
   margin: 1px;
   border-radius: 6px;
-  background: #f6f6f6 url(../images/gradient.png) repeat-x;
+  background: #f6f6f6 url(../lib/onyx/images/gradient.png) repeat-x;
   background-size: auto 100%;
 }
 .onyx-toggle-button .onyx-toggle-button-knob {
@@ -702,7 +704,7 @@
 
   padding: 9px 8px 10px 8px;
   border: 1px solid #3A3A3A;
-  background: #4c4c4c url(../images/gradient.png) repeat-x 0 bottom;
+  background: #4c4c4c url(../lib/onyx/images/gradient.png) repeat-x 0 bottom;
   background-size: contain;
   color: #ffffff;
   /**/
@@ -759,7 +761,7 @@
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(0, 0, 0, 0.2);
   color: #ffffff;
-  background: #216593 url(../images/gradient.png) repeat-x 0 bottom;
+  background: #216593 url(../lib/onyx/images/gradient.png) repeat-x 0 bottom;
   border-radius: 6px;
   white-space: nowrap;
 }
@@ -816,13 +818,13 @@
   height: 8px;
   border: 1px solid rgba(15, 15, 15, 0.2);
   border-radius: 6px;
-  background: #b8b8b8 url(../images/gradient-invert.png) repeat-x;
+  background: #b8b8b8 url(../lib/onyx/images/gradient-invert.png) repeat-x;
   background-size: auto 100%;
 }
 .onyx-progress-bar-bar {
   height: 100%;
   border-radius: 6px;
-  background: #58abef url(../images/gradient.png) repeat-x;
+  background: #58abef url(../lib/onyx/images/gradient.png) repeat-x;
   background-size: auto 100%;
 }
 .onyx-progress-bar-bar.striped {
