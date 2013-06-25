@@ -39,10 +39,10 @@
 /* Fonts */
 /* Images */
 /* Colors */
-/* #EAEAEA *//*# eeeeee */
+/* #EAEAEA */
+/*# eeeeee */
 /*#ddd*/
 /*#999999*/
-/*#090909*/
 /*#333333*/
 /*#666*/
 /*#0a4461*/
@@ -50,7 +50,11 @@
 /* Ares popups */
 /* #999999 */
 /*Border radius*/
-/* Ares mixins */
+/* Project list *//* #aaa */
+/*#ccc*/
+/* B7B7B7 */
+/*#666666*/
+/*dedede*//* Ares mixins */
 /* onyx-classes.less - combined CSS (less) files for all released Onyx controls
    into single onyx.less file to avoid IE bug that allows
    a maximum of 31 style sheets to be loaded before silently failing */
@@ -1419,10 +1423,19 @@
   height: 64px;
   line-height: 30px;
   border-bottom: 1px solid #222;
-  background: url(assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px -123px;
+  background: url(assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px -123px #090909;
   background-size: auto;
   /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
 
+}
+.ares-logo {
+  background-image: /*url(assets/images/hp.png)*/;
+  position: absolute;
+  padding: 3px;
+  height: 42px;
+  width: 42px;
+  right: 0;
+  margin: 0 10px 0 0;
 }
 .hermesFileTree-toolbar {
   height: 64px;
@@ -1704,7 +1717,7 @@ div.large-fixed {
 }
 .title-gradient {
   border-bottom: 1px solid #FFFFFF;
-  background: url(assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px -72px;
+  background: url(assets/images/hp_ep_sprite_horizontal.png) repeat-x 0px -72px #aaaaaa;
 }
 .hangar {
   background: url(assets/images/hp_ep_sprite_vertical.png) repeat-y scroll 0 0;
@@ -2033,7 +2046,7 @@ div.large-fixed {
   cursor: hand;
   cursor: pointer;
   height: 50px;
-  border-bottom: 1px solid #B7B7B7;
+  border-bottom: 1px solid #b7b7b7;
   font-size: 16px;
   font-weight: light;
   color: #666666;
@@ -2055,7 +2068,7 @@ div.large-fixed {
   box-shadow: inset 0px 0px 30px rgba(0, 0, 0, 0.3);
 }
 .ares-project-list-menu li.selected {
-  background-color: #cccccc;
+  background-color: #cdcdcd;
 }
 .ares-project-list-menu li.on.selected {
   background-color: inherit;
