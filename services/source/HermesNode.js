@@ -176,9 +176,9 @@ enyo.kind({
 				case 1: // file added
 				  if (this.debug) this.log(rfiles[i].name + " was added") ;
 					if (this.dragAllowed) {
-						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", dragAllowed: true, attributes: {draggable : true}} ) ;
+						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node", dragAllowed: true, attributes: {draggable : true}} ) ;
 					} else {
-						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node"} ) ;
+						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node"} ) ;
 					}
 					if (this.debug) this.log("updateNodeContent created ", newControl) ;
 					newControl.setService(this.service);
@@ -343,7 +343,6 @@ enyo.kind({
 	// - tracker is an internal parameter used in inner refreshFileTree calls
 	refreshTree: function(tracker, belowTop, toSelectId) {
 		if (this.debug) this.log(this) ;
-		//var target = this ; //dead code
 
 		if (this.debug) this.log('running refreshTree with ' +
 			 this.controls.length + ' controls with content ' + this.content +
