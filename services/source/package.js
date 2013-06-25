@@ -1,7 +1,5 @@
 enyo.depends(
 	"$lib/g11n",
-	"../assets/css/HermesNode.css",
-	"../assets/css/HermesFileTree.css",
 	"ServiceRegistry.js",
 	"FileSystemService.js",
 	"HermesNode.js",
