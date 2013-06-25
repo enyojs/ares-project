@@ -355,7 +355,69 @@ enyo.kind({
 			Ares.Workspace.projects.renameProject(oldName, inEvent.data.name);
 		}
 
+		this.updateAppinfo(inEvent);
+
 		return true ; // stop bubble
+	},
+
+	// step 3: update appinfo.json
+	updateAppinfo: function(inEvent) {
+		if (this.debug) { this.log("saving appinfo"); }
+		var service = this.targetProject.getService();
+		var req = service.propfind(this.targetProject.getFolderId(), 1);
+		req.response(this, function _appinfoLoaded(inSender, inResponse) {
+			//find appinfo.json
+			var appinfo = inResponse.children.filter(function(node){
+				return node.name === "appinfo.json";
+			});
+			if (appinfo.length === 1) {
+				if (this.debug) { this.log("There is an appinfo.json"); }
+				var fileid = appinfo[0].id;
+				var appinfoReq = service.getFile(fileid);
+				appinfoReq.response(this, function(inSender, fileStuff) {
+					var content;
+					try {
+						content = JSON.parse(fileStuff.content);
+					} catch(err) {
+						this.error( "Unable to parse appinfo.json >>" + fileStuff.content + "<<");
+						return;
+					}
+
+					// Save new data to appinfo.json
+					var newData = {
+							id: inEvent.data.id,
+							version: inEvent.data.version,
+							title: inEvent.data.title,
+					};
+					var modified = false;			
+					var keys = Object.keys(newData);
+					keys.forEach(function(key) {
+						if (content.hasOwnProperty(key)) {
+							content[key] = newData[key];
+							modified = true;
+						}
+					});
+					if (modified) {
+						req = service.putFile(fileid, JSON.stringify(content, null, 2));
+						req.response(this, function _appinfoSaved(inSender, inResponse) {
+							if (this.debug) { this.log("ProjectWizardModify.saveAppinfo:inResponse=", inResponse); }
+						});
+						req.error(this, function(inSender, inError) {
+							this.error("ProjectWizardModify.saveAppinfo:error=", inError);
+						});
+					}
+				});
+				appinfoReq.error(this, function(inSender, fileStuff) {
+					this.error("Unable to get appinfo.json");
+				});
+			} else {
+				// No appinfo.json found.
+				this.log("Unable to find appinfo.json");
+			}
+		});
+		req.error(this, function(inSender, inError){
+			this.error("propfind on folder id failed : "+inError);
+		});
 	}
 });
 
