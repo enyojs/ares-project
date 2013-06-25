@@ -4,7 +4,6 @@
         "$L": true,
         "onyx": true
     },
-    "es3": true,
     "evil": false,
     "regexdash": true,
     "browser": true,
@@ -16,6 +15,6 @@
     "curly": true,
     "newcap": true,
     "undef": true,
-    "smarttabs": true,
-    "unused": "vars"
+    "unused": "vars",
+    "smarttabs": true
 }

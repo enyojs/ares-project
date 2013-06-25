@@ -1,3 +1,5 @@
+/*jshint node: true, strict: false, globalstrict: false */
+
 var fs = require("fs"),
     path = require("path"),
     express = require("express"),
@@ -9,10 +11,10 @@ var fs = require("fs"),
     http = require("http"),
     async = require("async"),
     mkdirp = require("mkdirp"),
-    request = require('request'),
     rimraf = require("rimraf"),
     zipstream = require('zipstream'),
     CombinedStream = require('combined-stream'),
+    base64stream = require('base64stream'),
     HttpError = require("./httpError");
 
 module.exports = BdBase;
@@ -43,7 +45,9 @@ function BdBase(config, next) {
 	config.port = config.port || 0;
 	config.pathname = config.pathname || '/';
 	config.level = config.level || 'http';
-	if (config.performCleanup === undefined) config.performCleanup = true;
+	if (config.performCleanup === undefined) {
+		config.performCleanup = true;
+	}
 
 	this.config = config;
 	log.info('BdBase()', "config:", this.config);
@@ -102,15 +106,15 @@ function BdBase(config, next) {
 	// - 'application/json' => req.body
 	// - 'application/x-www-form-urlencoded' => req.body
 	// - 'multipart/form-data' => req.body.<field>[], req.body.file[]
-	this.uploadDir = temp.path({prefix: 'com.palm.ares.hermes.' + this.config.basename}) + '.d';
+	this.uploadDir = temp.path({prefix: 'com.enyojs.ares.services.' + this.config.basename}) + '.d';
 	fs.mkdirSync(this.uploadDir);
 	this.app.use(express.bodyParser({keepExtensions: true, uploadDir: this.uploadDir}));
 
 	/*
 	 * verbs
 	 */
-	this.app.post('/config', (function(req, res, next) {
-		this.configure(req.body && req.body.config, function(err) {
+	this.app.post('/config', (function(req, res /*, next*/) {
+		this.configure(req.body && req.body.config, function(/*err*/) {
 			res.status(200).end();
 		});
 	}).bind(this));
@@ -166,7 +170,7 @@ BdBase.prototype.configure = function(config, next) {
  * Additionnal middlewares: 'this.app.use(xxx)'
  * @protected
  */
-BdBase.prototype.use = function(config, next) {
+BdBase.prototype.use = function(/*config, next*/) {
 	log.verbose('BdBase#use()', "skipping..."); 
 };
 
@@ -174,7 +178,7 @@ BdBase.prototype.use = function(config, next) {
  * Additionnal routes/verbs: 'this.app.get()', 'this.app.port()'
  * @protected
  */
-BdBase.prototype.route = function(config, next) {
+BdBase.prototype.route = function(/*config, next*/) {
 	log.verbose('BdBase#route()', "skipping..."); 
 };
 
@@ -210,7 +214,7 @@ BdBase.prototype.errorHandler = function(err, req, res, next){
 /**
  * @protected
  */
-BdBase.prototype.answerOk = function(req, res, next) {
+BdBase.prototype.answerOk = function(req, res /*, next*/) {
 	log.verbose("answerOk()", '200 OK');
 	res.status(200).send();
 };
@@ -268,7 +272,7 @@ BdBase.prototype.store = function(req, res, next) {
 						try {
 							var fpath = file.path;
 							delete file.path;
-							fs.unlink(fpath, function(err) { /* Nothing to do */ });
+							fs.unlink(fpath, function(/*err*/) { /* Nothing to do */ });
 							
 							var filedata = new Buffer(data.toString('ascii'), 'base64');			// TODO: This works but I don't like it
 							fs.writeFile(path.join(req.appDir.source, file.name), filedata, function(err) {
@@ -365,7 +369,7 @@ BdBase.prototype.minify = function(req, res, next) {
 				log.warn("minify()", "unexpected child-process message msg=", msg);
 			}
 		});
-		child.on('exit', function(code, signal) {
+		child.on('exit', function(code /*, signal*/) {
 			if (code !== 0) {
 				next(new HttpError(child.errMsg || ("child-process failed: '"+ child.toString() + "'")));
 			} else {
@@ -388,7 +392,7 @@ BdBase.prototype.build = function(req, res, next) {
 		this.prepare.bind(this, req, res),
 		this.store.bind(this, req, res),
 		this.package.bind(this, req, res),
-		this.returnFormData.bind(this, req, res),
+		this.returnFormData.bind(this, [], res),
 		this.cleanup.bind(this, req, res)
 	], function (err, results) {
 		if (err) {
@@ -415,7 +419,7 @@ BdBase.prototype.archive = function(req, res, next) {
 		this.zip.bind(this, req, res),
 		this.returnZip.bind(this, req, res),
 		this.cleanup.bind(this, req, res)
-	], function (err, results) {
+	], function (err /*, results*/) {
 		if (err) {
 			// run express's next() : the errorHandler (which calls cleanup)
 			next(err);
@@ -440,7 +444,7 @@ BdBase.prototype.zip = function(req, res, next) {
 	_walk.bind(this)(req.appDir.zipRoot, "" /*prefix*/, function() {
 		try {
 			req.zip.stream.finalize(function(written){
-				log.verbose("zip()", "finished ", req.zip.path);
+				log.verbose("zip()", "finished:", req.zip.path, "(" + written + " bytes)");
 				next();
 			});
 		} catch(e) {
@@ -514,49 +518,62 @@ BdBase.prototype.returnBody = function(req, res, next) {
 };
 
 /**
+ * @param {Array} parts
+ * @item parts {Object} part
+ * @property part {String} [filename] name to put in the FormData 
+ * @property part {ReadableStream} [stream] input stream to use for the bits
+ * @property part {Buffer} [buffer] input buffer to use for the bits
  * @protected
  */
-BdBase.prototype.returnFormData = function(req, res, next) {
-	var filename = req.filename;
-	var stats = fs.statSync(filename);
-	log.verbose("returnFormData()", "size: " + stats.size + " bytes", filename);
+BdBase.prototype.returnFormData = function(parts, res, next) {
+	if (!Array.isArray(parts) || parts.length < 1) {
+		next(new Error("Invalid parameters: cannot return a multipart/form-data of nothing"));
+		return;
+	}
+	log.verbose("BdBase#returnFormData()", parts.length, "parts:");
 	
 	// Build the multipart/formdata
-	var combinedStream = CombinedStream.create();
-	var boundary = _generateBoundary();
-	
-	// Adding part header
-	combinedStream.append(_getPartHeader(path.basename(filename)));
-	// Adding file data
-	combinedStream.append(function(nextDataChunk) {
-		fs.readFile(filename, 'base64', function (err, data) {
-			if (err) {
-				next('Unable to read ' + filename);
+	var FORM_DATA_LINE_BREAK = '\r\n',
+	    combinedStream = CombinedStream.create(),
+	    boundary = _generateBoundary();
+
+	parts.forEach(function(part) {
+		// Adding part header
+		combinedStream.append(_getPartHeader(part.filename));
+		// Adding data
+		if (part.stream) {
+			var encodedStream = new base64stream.BufferedStreamToBase64();
+			part.stream.pipe(encodedStream);
+			combinedStream.append(encodedStream);
+			part.stream.resume();
+			log.verbose("BdBase#returnFormData()", "start streaming part:", part.filename);
+		} else if (part.buffer) {
+			combinedStream.append(function(nextDataChunk) {
+				nextDataChunk(part.buffer.toString('base64'));
+			});
+		} else {
+			combinedStream.append(function(nextDataChunk) {
 				nextDataChunk('INVALID CONTENT');
-			} else {
-				nextDataChunk(data);
-			}
-		});
+			});
+		}
 	});
 	
 	// Adding part footer
-	combinedStream.append(_getPartFooter());
+	combinedStream.append(function(nextDataChunk) {
+		nextDataChunk(_getPartFooter());
+	});
 	
 	// Adding last footer
-	combinedStream.append(_getLastPartFooter());
+	combinedStream.append(function(nextDataChunk) {
+		nextDataChunk(_getLastPartFooter());
+	});
 	
 	// Send the files back as a multipart/form-data
 	res.status(200);
 	res.header('Content-Type', _getContentTypeHeader());
 	combinedStream.pipe(res);
+	combinedStream.on('end', next); //FIXME: this event is never emitted
 	
-	// cleanup the temp dir when the response has been sent
-	combinedStream.on('end', function() {
-		next();
-	});
-
-	var FORM_DATA_LINE_BREAK = '\r\n';
-
 	function _generateBoundary() {
 		// This generates a 50 character boundary similar to those used by Firefox.
 		// They are optimized for boyer-moore parsing.
@@ -624,7 +641,7 @@ BdBase.prototype.quit = function(cb) {
  * @protected
  */
 BdBase.prototype.onExit = function() {
-	rimraf(this.uploadDir, function(err) {
+	rimraf(this.uploadDir, function(/*err*/) {
 		// Nothing to do
 	});
 };
