@@ -74,7 +74,7 @@ Ares 2 will be soon integrated with [Travis CI](https://travis-ci.org/) to autom
 Before submitting a pull request, please follow these steps
 
 	$ cd ares-project
-	$ node_modules/.bin/jshint .
+	$ npm test
 	
 NOTE: JSHint configuration files (.jshintrc, …) are automatically loaded by some editors when the appropriate plugins are installed. See [JSHint - Plugins for text editors and IDEs](http://www.jshint.com/install/)
 
