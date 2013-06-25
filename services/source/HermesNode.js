@@ -283,14 +283,14 @@ enyo.kind({
 	},
 
 	/**
-	 * reloadChildren
+	 * getChildren
 	 * @public
 	 * @param {hermes.Node} inNode
 	 * Update the inNode node content
 	 *
 	 */
 	
-	reloadChildren: function () {
+	getChildren: function () {
 		return this.service.listFiles(this.file && this.file.id)
 			.response(this, function(inSender, inFiles) {
 				var sortedFiles = inFiles.sort(this.fileNameSort) ;
