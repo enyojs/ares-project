@@ -1,5 +1,7 @@
+/*jshint node: true, strict: false, globalstrict: false */
+
 /**
- * Hermes PhoneGap build service
+ * PhoneGap build service
  */
 
 // nodejs version checking is done in parent process ide.js
@@ -8,31 +10,22 @@ var fs = require("fs"),
     path = require("path"),
     express = require("express"),
     util  = require("util"),
-    npmlog = require('npmlog'),
-    querystring = require("querystring"),
+    log = require('npmlog'),
     temp = require("temp"),
     request = require('request'),
     async = require("async"),
-    mkdirp = require("mkdirp"),
-    rimraf = require("rimraf"),
     http = require("http"),
     client = require("phonegap-build-api"),
     BdBase = require("./lib/bdBase"),
-    HttpError = require("./lib/httpError"),
-    CombinedStream = require('combined-stream');
+    HttpError = require("./lib/httpError");
 
-var basename = path.basename(__filename, '.js'),
-    log = npmlog;
+var basename = path.basename(__filename, '.js');
+
 log.heading = basename;
 log.level = 'http';
 
 var PGB_URL = 'https://build.phonegap.com',
     PGB_TIMEOUT = 7000;
-
-process.on('uncaughtException', function (err) {
-	log.error('uncaughtException', err.stack);
-	process.exit(1);
-});
 
 function BdPhoneGap(config, next) {
 	config.pathname = config.pathname || '/phonegap';
@@ -56,9 +49,9 @@ util.inherits(BdPhoneGap, BdBase);
 BdPhoneGap.prototype.use = function() {
 	log.verbose('BdPhoneGap#use()', "configuring..."); 
 	this.app.use(express.cookieParser());
+
 	this.app.use(this.makeExpressRoute('/op'), authorize.bind(this));
 	this.app.use(this.makeExpressRoute('/api'), authorize.bind(this));
-	
 
 	function authorize(req, res, next) {
 		log.verbose("authorize()", "req.url:", req.url);
@@ -80,10 +73,12 @@ BdPhoneGap.prototype.route = function() {
 	this.app.post(this.makeExpressRoute('/token'), this.getToken.bind(this));
 	this.app.get(this.makeExpressRoute('/api/v1/me'), this.getUserData.bind(this));
 	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId'), this.getAppStatus.bind(this));
-	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId/:platform/:title/:version'),
-		     this.downloadApp.bind(this));
+	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId/:platform/:title/:version'), this.downloadApp.bind(this));
 };
 
+// jshint: it is not possible to reduce the number of parameters of
+// this function, otherwise is not recognized as the error-handler by
+// express...
 BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 	var self = this;
 	log.info("errorHandler()", "err:", err);
@@ -100,7 +95,7 @@ BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 		    ("Missing authentication token" === msg)){
 			_respond(new HttpError(msg, 401));
 		} else {
-			_respond(new HttpError(msg, 400));
+			_respond(new HttpError(msg, 500));
 		}
 	} else {
 		_respond(new Error(err.toString()));
@@ -114,8 +109,13 @@ BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 			// invalidate token cookie
 			self.setCookie(res, 'token', null);
 		}
-		res.contentType('txt'); // direct usage of 'text/plain' does not work
-		res.send(err.toString());
+		if (err.contentType) {
+			res.contentType(err.contentType);
+			res.send(err.message);
+		} else {
+			res.contentType('txt'); // direct usage of 'text/plain' does not work
+			res.send(err.toString());
+		}
 	}
 };
 
@@ -177,6 +177,7 @@ BdPhoneGap.prototype.getUserData = function(req, res, next) {
 		}
 	});
 };
+
 BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
 	client.auth({
 		token: req.token,
@@ -193,7 +194,7 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
 				} else {
 					log.info("getAppStatus()", "appStatus:", userData);
 					res.status(200).send({user: userData}).end();
-			 	}
+				}
 			});	
 		}
 	});
@@ -202,11 +203,11 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
 /**
  * When a download request is received from "Build.js",
  * this function is called to do the following actions : 
- * 	- Create the appropriate file name
- * 	- Download the built project from Phonegap build using the 
- * 	  API-Phonegap-Build
- * 	- When the download is done, the file is piped to "Ares client"
- * 	  using a multipart/form Post request
+ * - Create the appropriate file name
+ * - Download the built project from Phonegap build using the 
+ *   API-Phonegap-Build
+ * - When the download is done, the file is piped to "Ares client"
+ *   using a multipart/form Post request
  *   
  * @param  {Object}   req  Contain the request attributes
  * @param  {Object}   res  Contain the response attributes
@@ -214,130 +215,80 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
  * 
  */
 BdPhoneGap.prototype.downloadApp = function(req, res, next){
+	var appId = req.param("appId"),
+	    platform = req.param("platform"),
+	    title = req.param("title"),
+	    version = req.param("version");
+	log.info("downloadApp()", "appId:", appId, "platform:", platform, "version:", version, "(" + title + ")");
+
+	var extensions = {
+		    "android": "apk",
+		    "ios": "ipa",
+		    "webos": "ipk",
+		    "symbian": "wgz",
+		    "winphone": "xap",
+		    "blackberry": "jad"
+	    };
+	var fileName = title + "_" + version + "." + (extensions[platform] || "bin"),
+	    url = "/apps/" + appId + "/" + platform;
+	log.info("downloadApp()", "packageName:", fileName, "<<< url:", url);
 	
-	var appId = req.params.appId;
-	var platform = req.params.platform;
-	var requestURL = '/apps/' + appId + '/'+ platform;
-	var FORM_DATA_LINE_BREAK = '\r\n';
-
- 	returnBody(req, res, function() {});
-
-	/*
-	 *the extensions for the downloaded file 
-	 *	apk for Android
-	 *	ipa for iOS
-	 * 	ipk for webOS
-	 *	jad for unsigned BlackBerry builds; 
-	 *	zip if you've uploaded your BlackBerry signing keys
-	 *	wgz for Symbian
-	 *	xap for Windows Phone
-	 * 
+	/* FIXME: broken streams on node-0.8.x
+	async.waterfall([
+		client.auth.bind(client, { token: req.token }),
+		(function _pipeFormData(api, next) {
+			log.http("downloadApp#_pipeFormData()", "GET", url);
+			var stream = api.get(url);
+			stream.pause();
+			this.returnFormData([{
+				filename: fileName,
+				stream: stream
+			}], res, next);
+		}).bind(this)
+	], function(err) {
+		if (err) {
+			next(err);
+			return;
+		}
+		log.verbose("downloadApp()", "completed");
+		// do not call next() here as the HTTP header was
+		// already sent back.
+	});
 	 */
 
- 	function returnBody(req, res, next) {
- 		// Getting the needed informations from the parsed URL
- 		// to generate the name of the built application.
- 		var title = req.params.title,
-		    platform = req.params.platform,
-		    appId = req.params.appId,
-		    version = req.params.version,
-		    extensions = {
-			    "android": "apk",
-			    "ios": "ipa",
-			    "webos": "ipk",
-			    "symbian": "wgz",
-			    "winphone": "xap",
-			    "blackberry": "jad"
-		    };
-		var fileName = title + "_" + version + "." + (extensions[platform] || "bin"), 
- 		    tempFileName = temp.path({prefix: 'com.palm.ares.hermes.phonegap'});
- 		
-		client.auth({
-			token: req.token			
-		}, function(err1, api) {
-			if (err1) {
-				next(err1);
-			} else {
-				var os = fs.createWriteStream(tempFileName);
-				os.on('close', createMultipartData);
-				api.get("/apps/" + appId + "/"+ platform).pipe(os);
-			}
-		});
-
-		function createMultipartData(){
-			// Build the multipart/formdata
-			var combinedStream = CombinedStream.create();
-			var boundary = generateBoundary();
-
-			// Adding part header
-			combinedStream.append(getPartHeader(fileName, boundary));
-			// Adding file data
-			combinedStream.append(function(nextDataChunk){
-				
-				fs.readFile(tempFileName, 'base64', function (err, packagedFile) {
-					fs.unlink(tempFileName);
-					if (err) {
-						next('Unable to read ' + tempFileName);
-						nextDataChunk('INVALID CONTENT');
-					} else {
-						log.verbose("downloadApp()#returnBody()#createMultipartData(): ", packagedFile.length);
-						nextDataChunk(packagedFile);						
-					}
-				});
-			});	
-
-			// Adding part footer
-			combinedStream.append(getPartFooter());
-
-			// Adding last footer
-			combinedStream.append(getLastPartFooter(boundary));
-
-			// Send the files back as a multipart/form-data
-			log.verbose("downloadApp#returnBody#createMultipartData()", "Start streaming down:" + fileName);
-			res.status(200);
-			res.header('Content-Type', getContentTypeHeader(boundary));
-			combinedStream.pipe(res);
-
-			// cleanup the temp dir when the response has been sent
-			combinedStream.on('end', function() {
-				next();
-			});
+	var tempFileName = temp.path({prefix: 'com.enyojs.ares.services.' + this.config.basename + "." + platform + "."});
+	async.waterfall([
+		client.auth.bind(client, { token: req.token }),
+		(function _fetchPackage(api, next) {
+			log.http("downloadApp#_fetchPackage()", "GET", url);
+			var os = fs.createWriteStream(tempFileName);
+			// FIXME: node-0.8 has no 'finish' event...
+			os.on('close', next);
+			api.get(url).pipe(os);
+		}).bind(this),
+		// FIXME: broken streams on node-0.8.x: we need to
+		// load packages in memory Buffer...
+		fs.readFile.bind(fs, tempFileName),
+		(function _returnFormData(buffer, next) {
+			fs.unlink(tempFileName);
+			log.http("downloadApp#_returnFormData()", "streaming down:", fileName);
+			this.returnFormData([{
+				filename: fileName,
+				buffer: buffer
+			}], res, next);
+		}).bind(this)
+	], function(err) {
+		if (err) {
+			next(err);
+			return;
 		}
-
-		function generateBoundary() {
-			// This generates a 50 character boundary similar to those used by Firefox.
-			// They are optimized for boyer-moore parsing.
-			var boundary = '--------------------------';
-			for (var i = 0; i < 24; i++) {
-				boundary += Math.floor(Math.random() * 10).toString(16);
-			}
-
-			return boundary;
-		}
-
-		function getContentTypeHeader(boundary) {
-			return 'multipart/form-data; boundary=' + boundary;
-		}
-
-		function getPartHeader(filename, boundary) {
-			var header = '--' + boundary + FORM_DATA_LINE_BREAK;
-			header += 'Content-Disposition: form-data; name="file"';
-
-			header += '; filename="' + filename + '"' + FORM_DATA_LINE_BREAK;
-			header += 'Content-Type: application/octet-stream; x-encoding=base64';
-
-			header += FORM_DATA_LINE_BREAK + FORM_DATA_LINE_BREAK;
-			return header;
-		}
-
-		function getPartFooter() {
-			return FORM_DATA_LINE_BREAK;
-		}
-
-		function getLastPartFooter(boundary) {
-			return '--' + boundary + '--';
-		}
-	}
+		// FIXME: this is never called, as neither
+		// CombinedStream nor express#res emit an 'end' when
+		// streaming is over...
+		log.verbose("downloadApp()", "completed");
+		// do not call next() here as the HTTP header was
+		// already sent back.
+	});
 };
 
 BdPhoneGap.prototype.build = function(req, res, next) {
@@ -352,7 +303,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		_upload.bind(this),
 		this.returnBody.bind(this, req, res),
 		this.cleanup.bind(this, req, res)
-	], function (err, results) {
+	], function (err) {
 		if (err) {
 			// run express's next() : the errorHandler (which calls cleanup)
 			next(err);
@@ -364,7 +315,6 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 	});
 
 	function _parse(next) {
-		var errs = [];
 		// check mandatory parameters
 		if (!req.token) {
 			next(new HttpError("Missing account token", 401));
@@ -391,7 +341,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		//WARNING: enabling this trace shows-up the signing keys passwords
 		log.silly("build#_parse(): appData:", appData);
 		next();
-	};
+	}
 
 	function _upload(next) {
 		log.info("build#_upload()");
@@ -404,7 +354,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 			}),
 			_uploadApp.bind(this),
 			_success.bind(this)
-		], function(err, result) {
+		], function(err) {
 			if (err) {
 				_fail(err);
 			} else {
