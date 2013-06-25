@@ -10,7 +10,7 @@ enyo.kind({
 	floating: true,
 	autoDismiss: false,
 	debug: false,
-	classes: "ares-BuildStatusUI",
+	classes: "ares-build-status",
 	published: {
 		pgUrl: ""
 	},
@@ -149,7 +149,7 @@ enyo.kind({
 enyo.kind({
 	name: "DataRow",
 	kind: "FittableColumns",
-	classes: "ares-BuildStatusUI-row",
+	classes: "ares-build-status-row",
 	published: {
 		url: "",
 		label: "",
@@ -160,12 +160,12 @@ enyo.kind({
 	},
 	components: [{
 			name: "Label",
-			classes: "ares-BuildStatusUI-row-label"
+			classes: "ares-build-status-row-label"
 		},
 
 		{
 			name: "Value",
-			classes: "ares-BuildStatusUI-row-label"
+			classes: "ares-build-status-row-label"
 		}, {
 			tag: "br"
 		}

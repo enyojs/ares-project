@@ -386,7 +386,9 @@ div.large-fixed { width: 80%; }
 	display: inline-block;
 }
 
-.ares-BuildStatusUI{ width: 500px; height: 320px; }
-.ares-BuildStatusUI-row{ margin-top: 10px }
-.ares-BuildStatusUI-row-label{ width: 150px; }
+.ares-build-status { width: 500px; height: 320px; }
+
+.ares-build-status-row { margin-top: 10px }
+
+.ares-build-status-row-label { width: 150px; }
 
