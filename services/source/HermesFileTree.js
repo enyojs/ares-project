@@ -201,7 +201,7 @@ enyo.kind({
 					newParentNode=this.targetNode;
 				this.moveNode(this.draggedNode, this.targetNode)
 					.response(this, function(inSender, inNodeFile) {
-						newParentNode.getChildren()
+						newParentNode.reloadChildren()
 							.response(this, function(inSender, inNodes) {
 								this.movedNode=newParentNode.getNodeWithId(inNodeFile.id);
 								this.originNode=oldParentNode;
@@ -978,7 +978,7 @@ enyo.kind({
 					}
 				});			
 
-				inTarget.getChildren()
+				inTarget.reloadChildren()
 					.response(this, function(inSender, inNodes) {
 						this.refreshFileTree(function() {inTarget.getNodeWithId(inValue.id).doAdjustScroll()}, inValue.id);
 					})
