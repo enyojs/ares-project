@@ -189,11 +189,11 @@ enyo.kind({
 		} else if (typeof provider[action] !== 'function') {
 			this.doError({msg: 'Service ' + provider.name + ' does not provide action: ' + action});
 		} else {
-			provider[action](project, function(inError, inDetails) {
+			provider[action](project, function(inError) {
 				self.doHideWaitPopup();
 				self.refreshFile(project.getFolderId());
 				if (inError) {
-					self.doError({msg: inError.toString(), err: inError, details: inDetails});
+					self.doError({msg: inError.toString(), err: inError});
 				}
 			});
 		}

@@ -74,9 +74,36 @@ Ares 2 will be soon integrated with [Travis CI](https://travis-ci.org/) to autom
 Before submitting a pull request, please follow these steps
 
 	$ cd ares-project
-	$ node_modules/.bin/jshint .
+	$ npm test
 	
 NOTE: JSHint configuration files (.jshintrc, …) are automatically loaded by some editors when the appropriate plugins are installed. See [JSHint - Plugins for text editors and IDEs](http://www.jshint.com/install/)
+
+#### Tracing
+
+Following the setup of jshint we had a lot of warning because of missing curly braces as most of the traces were in the form of:
+
+	if (this.debug) this.log(...);
+
+Instead of adding curly braces and going from one line to three lines for each trace, we decided to add a `this.trace()` function which references this.log() or a "NOP" function depending on `this.debug` boolean value.
+
+`To setup this.trace() function`, add the following in the create method of the kind.
+
+	create: function() {
+		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
+		this.inherited(arguments);
+		
+		this.trace("Just created a new", this.name, "object", this);
+	}
+	
+You can then directly call this.trace() in the same way this.log is used.
+
+WARNING: Removing the "`if (this.debug)`" test can add CPU overhead in particular when concataining strings or invoking functions in the "`this.trace()`" call.
+
+So, it's recommended to pass each string element as a parameter instead of concataining them with "+" operator.
+
+`this.debug` is still available and can be used if needed.
+
+NOTE: For production, we may suppress the "this.trace()" code when doing the minification process.
 
 ### Testing
 

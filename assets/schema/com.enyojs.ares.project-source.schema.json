@@ -1,13 +1,19 @@
 {
-	"description": "Project templates definition",
+	"description": "Project sources definition",
 	"type": "array",
-	"required": true,
 	"items": {
 		"type": "object",
 		"properties": {
+			"type" : {
+				"type": "string",
+				"description": "Source type, in ['template', 'lib', 'webos-service', ...] (extensible)",
+				"format": "regex",
+				"pattern": "([-_.a-zA-Z0-9]+)",
+				"required": true
+			},
 			"id": {
 				"type": "string",
-				"description": "Project template ID. ex: bootplate-2.1.1",
+				"description": "Unique source ID. ex: bootplate-2.1.1",
 				"format": "regex",
 				"pattern": "([-_.a-zA-Z0-9]+)",
 				"required": true
@@ -20,7 +26,7 @@
 				"required": true,
 				"default": "Enyo bootplate 2.1.1"
 			},
-			"zipfiles": {
+			"files": {
 				"description": "List of zip files part of a project templates definition",
 				"type": "array",
 				"required": true,
@@ -43,7 +49,14 @@
 						},
 						"prefixToRemove": {
 							"type": "string",
-							"description": "Directory prefix to remove from the extracted files. ex: bootplate",
+							"description": "Directory prefix to remove from the extracted files. ex: bootplate.  Only applicable to ZIP & other archive files.",
+							"format": "regex",
+							"pattern": "([a-zA-Z0-9]+)",
+							"required": false
+						},
+						"prefixToAdd": {
+							"type": "string",
+							"description": "Directory prefix to prepend to the extracted files (after removal due to 'prefixToRemove'). ex: 'services/simpleService'.  Only applicable to ZIP & other archive files.",
 							"format": "regex",
 							"pattern": "([a-zA-Z0-9]+)",
 							"required": false
@@ -53,10 +66,15 @@
 							"required": false,
 							"items": {
 								"type": "string",
-								"description": "Directory prefix to remove from the extracted files. ex: bootplate/api",
+								"description": "Directory prefix to remove from the extracted files. ex: bootplate/api.  Only applicable to ZIP & other archive files.",
 								"format": "regex",
-								"pattern": "([a-zA-Z0-9-/]+)",
+								"pattern": "([a-zA-Z0-9-/]+)"
 							}
+						},
+						"installAs": {
+							"type": "string",
+							"description": "Target filename to use for this file.  Only applicable to non-archive files.",
+							"required": false
 						}
 					}
 				}

@@ -136,14 +136,24 @@ enyo.kind({
 		}
 	},
 
+	/**
+	 * @public
+	 */
 	getTemplates: function(inSender, inEvent, next) {
+		return this.getSources('template', next);
+	},
+
+	/**
+	 * @public
+	 */
+	getSources: function(type, next) {
 		var propW = this.$.propertiesWidget;
 		// Getting template list
 		var service = ServiceRegistry.instance.getServicesByType('generate')[0];
 		if (service) {
-			var templateReq = service.getTemplates();
-			templateReq.response(this, function(inSender, inData) {
-				propW.setTemplateList(inData);
+			var templateReq = service.getSources('template');
+			templateReq.response(this, function(inSender, inTemplates) {
+				propW.setTemplateList(inTemplates);
 				next();				// Should we return immediately without waiting the answer ?
 			});
 			templateReq.error(this, function(inSender, inError) {
@@ -244,7 +254,10 @@ enyo.kind({
 		}];
 
 		var genService = ServiceRegistry.instance.getServicesByType('generate')[0];
-		var req = genService.generate(template, substitutions);
+		var req = genService.generate({
+			sourceIds: [template],
+			substitutions: substitutions
+		});
 		req.response(this, this.populateProject);
 		req.error(this, function(inSender, inError) {
 			this.log("Unable to get the template files (" + inError + ")");
