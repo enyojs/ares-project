@@ -93,7 +93,7 @@ FsLocal.prototype.mkcol = function(req, res, next) {
 		next(new HttpError("Attempt to navigate beyond the root folder: '" + newPath + "'", 403 /*Forbidden*/));
 		return;
 	}
-	newPath = '/' + newPath;
+	newPath = '/' + self.normalize(newPath);
 	newName = path.basename(newPath);
 	newId = this.encodeFileId(newPath);
 
@@ -102,7 +102,7 @@ FsLocal.prototype.mkcol = function(req, res, next) {
 			code: 201, // Created
 			body: {
 				id: newId,
-				path: self.normalize(newPath),
+				path: newPath,
 				name: newName,
 				isDir: true
 			}
