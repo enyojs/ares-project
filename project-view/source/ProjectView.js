@@ -28,6 +28,7 @@ enyo.kind({
 		onAddProjectInList: "addProjectInList",
 		onPreview: "previewAction",
 		onBuild: "buildAction",
+		onBuildStatus: "buildStatusAction",
 		onInstall: "installAction",
 		onRun: "runAction",
 		onRunDebug: "runDebugAction"
@@ -116,6 +117,21 @@ enyo.kind({
 		}
 		return true; // stop bubble-up
 	},
+		/**
+	 * Event handler: handle build get status action (get the Application datas)
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project 
+	 * @private
+	 */
+
+	 buildStatusAction: function(inSender, inEvent){
+	 	var project = inEvent && inEvent.project;
+		if (project) {
+			this.projectAction(project, 'build', 'buildStatus');
+		}
+		return true; // stop bubble-up
+	 },
 	
 	/**
 	 * Event handler: handle install application action (select provider & run action)

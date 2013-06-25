@@ -2128,3 +2128,10 @@ div.large-fixed {
   -khtml-user-drag: element;
   -webkit-user-drag: element;
 }
+
+.ares-build-status { width: 500px; height: 320px; }
+
+.ares-build-status-row { margin-top: 10px }
+
+.ares-build-status-row-label { width: 150px; }
+
