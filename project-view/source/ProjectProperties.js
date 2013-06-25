@@ -17,6 +17,9 @@ enyo.kind({
 		onSaveGeneratedXml: "",
 		onDone: ""
 	},
+	handlers: {
+		onAdditionalSource: "handleAdditionalSource"
+	},
 	classes:"ares-classic-popup",
 	components: [
 		{classes:"title left-align", content:"Project properties", components:[
@@ -116,6 +119,7 @@ enyo.kind({
 	templates: [],
 	TEMPLATE_NONE: "NONE",
 	selectedTemplate: undefined,
+	selectedAddSource: undefined,
 
 	services: {},
 
@@ -306,7 +310,11 @@ enyo.kind({
 		ppConf.top_file = this.$.ppTopFile.getValue();
 
 		// to be handled by a ProjectWizard
-		this.doModifiedConfig({data: this.config, template: this.selectedTemplate}) ;
+		var sourceIds = [];
+		if (this.selectedTemplate !==undefined && this.selectedAddSource !== undefined) {
+			sourceIds.push(this.selectedAddSource);
+		}
+		this.doModifiedConfig({data: this.config, template: this.selectedTemplate, addSources: sourceIds}) ;
 
 		this.doDone();
 
@@ -373,6 +381,9 @@ enyo.kind({
 		} else {
 			this.selectedTemplate = inEvent.content;
 		}
+	},
+	handleAdditionalSource: function(inSender, inEvent) {
+		this.selectedAddSource = inEvent.source;
 	}
 });
 
