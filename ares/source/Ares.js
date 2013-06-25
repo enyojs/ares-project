@@ -1,3 +1,5 @@
+/* global Ares, async, ares, alert */
+
 enyo.kind({
 	name: "Ares",
 	kind: "Control",
@@ -5,7 +7,7 @@ enyo.kind({
 	fit: true,
 	debug: false,
 	components: [
-		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels ares-full-display", components: [
+		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
 			{components: [
 				{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
 			]},
@@ -44,6 +46,8 @@ enyo.kind({
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
 	create: function() {
+		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
+
 		this.inherited(arguments);
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
@@ -67,14 +71,14 @@ enyo.kind({
 	 * @private
 	 */
 	handleReloadServices: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		this.$.serviceRegistry.reloadServices();
 	},
 	/**
 	 * @private
 	 */
 	handleUpdateAuth: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		this.$.serviceRegistry.setConfig(inEvent.serviceId, {auth: inEvent.auth}, inEvent.next);
 	},
 	projectSelected: function() {
@@ -99,18 +103,22 @@ enyo.kind({
 				self.hideWaitPopup();
 				if (inErr) {
 					self.warn("Open failed", inErr);
-					if (typeof next === 'function') next(inErr);
+					if (typeof next === 'function') {
+						next(inErr);
+					}
 				} else {
 					fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
 					self.switchToDocument(fileData);
-					if (typeof next === 'function') next();
+					if (typeof next === 'function') {
+						next();
+					}
 				}
 			});
 		}
 	},
 	/** @private */
 	_fetchDocument: function(projectData, file, next) {
-		if (this.debug) this.log("projectData:", projectData, ", file:", file);
+		this.trace("projectData:", projectData, ", file:", file);
 		var service = projectData.getService();
 		service.getFile(file.id)
 			.response(this, function(inEvent, inData) {
@@ -121,7 +129,7 @@ enyo.kind({
 			});
 	},
 	saveDocument: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		var self = this;
 		this._saveDocument(inEvent.content, {service: inEvent.file.service, fileId: inEvent.file.id}, function(err) {
 			if (err) {
@@ -147,11 +155,10 @@ enyo.kind({
 
 	},
 	saveAsDocument: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		var self = this,
 		    file = inEvent.file,
-		    name = inEvent.name,
-		    content = inEvent.content;
+		    name = inEvent.name;
 
 		if (!file) {
 			_footer(new Error("Internal error: missing file/folder description"));
@@ -205,14 +212,14 @@ enyo.kind({
 		}
 
 		function _footer(err, result) {
-			if (self.debug) enyo.log("err:", err, "result:", result);
+			if (self.debug) { enyo.log("err:", err, "result:", result); }
 			if (typeof inEvent.next === 'function') {
 				inEvent.next(err, result);
 			}
 		}
 	},
 	closeDocument: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		var self = this;
 		this._closeDocument(inEvent.id, function() {
 			self.showFiles();
@@ -226,7 +233,9 @@ enyo.kind({
 			this.$.bottomBar.removeTab(docId);
 			this.$.slideable.setDraggable(Ares.Workspace.files.length > 0);
 		}
-		if (typeof next === 'function') next();
+		if (typeof next === 'function') {
+			next();
+		}
 	},
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();
@@ -367,7 +376,6 @@ enyo.kind({
 			code = inDoc.getAceSession().getValue();
 
 		if(filename.slice(-4) === ".css") {
-			doc = inDoc;
 			this.syncCSSFile(filename, code);
 		} else if(filename.slice(-3) === ".js") {
 			this.syncJSFile(code);
@@ -387,13 +395,13 @@ enyo.kind({
 		this.$.waitPopup.hide();
 	},
 	showError: function(inSender, inEvent) {
-		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
+		this.trace("event:", inEvent, "from sender:", inSender);
 		this.hideWaitPopup();
 		this.showErrorPopup(inEvent);
 		return true; //Stop event propagation
 	},
-	showErrorPopup : function(msg, details) {
-		this.$.errorPopup.raise(msg, details);
+	showErrorPopup : function(inEvent) {
+		this.$.errorPopup.raise(inEvent);
 	},
 	/**
 	 * Event handler for user-initiated file or folder changes
@@ -403,7 +411,7 @@ enyo.kind({
 	 * @param {Object} inEvent as defined by calls to HermesFileTree#doTreeChanged
 	 */
 	_treeChanged: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		this.$.packageMunger.changeNodes(inEvent, (function(err) {
 			if (err) {
 				this.warn(err);
@@ -418,7 +426,7 @@ enyo.kind({
 	 * @param {Object} inEvent as defined by calls to Ares.PackageMunger#doChangingNode
 	 */
 	_nodeChanging: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		var docId = Ares.Workspace.files.computeId(inEvent.node);
 		this._closeDocument(docId);
 	},

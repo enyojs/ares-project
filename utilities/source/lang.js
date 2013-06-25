@@ -52,8 +52,8 @@ var ares = {
 	 * @param {String} the path to extract the dirname from
 	 * @return the path dirname
 	 */
- 	dirname: function (path) {
-		return path.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');;
+	dirname: function (path) {
+		return path.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');
 	},
 
 	/** @private */
@@ -165,6 +165,25 @@ var ares = {
 			// pop-ups are NOT blocked
 			testWindow.close();
 			return false;
+		}
+	},
+	/**
+	 * Setup object.trace function to object.log
+	 * if object.debug is true.
+	 * Otherwise object.trace is set to a function
+	 * which logs nothing.
+	 * @param  {Object} the object to alter
+	 * @public
+	 */
+	setupTraceLogger: function(object) {
+		if ( ! object) {
+			enyo.error("Cannot setup trace logger of ", object);
+			return;
+		}
+		object.trace = (object.debug === true ? object.log : _nolog);
+
+		function _nolog() {
+			// Don't log anything
 		}
 	}
 };
