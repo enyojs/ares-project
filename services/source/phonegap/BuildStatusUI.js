@@ -11,9 +11,6 @@ enyo.kind({
 	autoDismiss: false,
 	debug: false,
 	classes: "ares-build-status",
-	published: {
-		pgUrl: ""
-	},
 	handlers: {
 		onDismissPopup: "_hidePopup"
 	},
@@ -71,13 +68,6 @@ enyo.kind({
 
 		//Display the pop-up.
 		this.show();
-
-		// Setting the target URL of the webview opened when 
-		// an instance of "DataRow" is clicked.
-		this.pgUrl = "https://build.phonegap.com/apps/" + inAppData.id + "/builds";
-		if (this.debug) {
-			this.log("The url to Phonegap build web page: ", this.pgUrl);
-		}
 	},
 
 	/**
@@ -98,11 +88,11 @@ enyo.kind({
 		// Instanciate the status rows.
 		enyo.forEach(platforms, function (platform) {
 			this.$.AllStatus.createComponent({
-				kind: "DataRow",
+				kind: "Phonegap.BuildStatusUI.DataRow",
 				name: platform,
 				label: platform,
 				value: inAppData && inAppData.status[platform] || "error",
-				url: this.pgUrl
+				url: "https://build.phonegap.com/apps/" + inAppData.id + "/builds"
 			});
 		}, this);
 	},
@@ -115,8 +105,6 @@ enyo.kind({
 	 * @private
 	 */
 	_setUpHeader: function (inAppData) {
-
-		var inUrl = this.pgUrl;
 
 		//Creating the array containing the header's data.
 		var headerData = [
@@ -132,10 +120,10 @@ enyo.kind({
 		// Instanciate the header's rows.
 		enyo.forEach(headerData, function (row) {
 			this.$.HeaderRows.createComponent({
-				kind: "DataRow",
+				kind: "Phonegap.BuildStatusUI.DataRow",
 				label: row[0],
 				value: row[1],
-				url: inUrl
+				url: "https://build.phonegap.com/apps/" + inAppData.id + "/builds"
 			});
 		}, this);
 	}
@@ -147,11 +135,10 @@ enyo.kind({
  * - The second label is the content displayed for an appData sent by Phonegap
  */
 enyo.kind({
-	name: "DataRow",
+	name: "Phonegap.BuildStatusUI.DataRow",
 	kind: "FittableColumns",
 	classes: "ares-build-status-row",
 	published: {
-		url: "",
 		label: "",
 		value: ""
 	},
