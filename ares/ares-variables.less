@@ -67,9 +67,11 @@
 
 @ares-sprites-vertical : url(assets/images/hp_ep_sprite_vertical.png);
 
-@ares-button-gradient : @ares-sprites-gradient repeat-x 0px 0px;
+@ares-button-gradient : @ares-sprites-gradient repeat-x 0px 0px ;
 
-@ares-toolbar-gradient : @ares-sprites-gradient repeat-x 0px -123px;
+@ares-toolbar-background : #090909;
+
+@ares-toolbar-gradient : @ares-sprites-gradient repeat-x 0px -123px @ares-toolbar-background;
 
 @ares-title-gradient : @ares-sprites-gradient repeat-x 0px -72px;
 
@@ -101,7 +103,7 @@
 
 @ares-active-text-color : @ares-light-color;
 
-@ares-bottom-bar-background : #090909; /*#090909*/
+@ares-bottom-bar-background : @ares-toolbar-background;
 
 @ares-background-file-docbar : @ares-bottom-bar-background ;
 
