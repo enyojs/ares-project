@@ -147,6 +147,17 @@
 @ares-drawer-radius : @ares-border-radius - 1;
 
 @ares-popup-radius : @ares-border-radius + 2;/* Ares mixins */
+/* Project list */
+
+@ares-project-list-background-active : darken(@ares-background, 25%); /* #aaa */
+
+@ares-project-list-background-selected : lighten(@ares-project-list-background-active, 13.5%); /*#ccc*/
+
+@ares-project-list-border-color : darken(@ares-background, 20%); /* B7B7B7 */
+
+@ares-project-list-text-color : darken(@ares-background, 51.6%);/*#666666*/
+
+@ares-project-list-background-on : darken(@ares-background, 4.7%); /*dedede*/;
 
 .ares-rounded-corners (@radius: @ares-border-radius) {
 	-webkit-border-radius: @radius;
