@@ -114,9 +114,12 @@ enyo.kind({
 	name: "Inspector.Config.Event",
 	kind: "Inspector.Config.IF",
 	// events and published are defined by the base kind
+	
+	// TODO: YDM the style above in MenuDecorator should be replaced by a CSS class - Potential issue between less and css files
+	
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
-		{kind: "onyx.MenuDecorator", onSelect: "itemSelected", components: [
+		{kind: "onyx.MenuDecorator", style: "display: inline-block", onSelect: "itemSelected", components: [
 				{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
 				{kind: "enyo.Button", name: "button", classes:"inspector-event-button"},
 				{kind: "onyx.Menu", name: "menu", floating: true, components: [
@@ -265,7 +268,7 @@ enyo.kind({
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
 		{kind: "enyo.Input", classes: "inspector-size-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
-		{name: "unit", kind: "Inspector.Config.Select", classes: "css-editor-select-box", values: ["px","cm","em","ern","rem", "%"], onChange: "unitChanged"},
+		{name: "unit", kind: "Inspector.Internal.Select", classes: "css-editor-select-box", values: ["px","cm","em","ern","rem", "%"], onChange: "unitChanged"},
 		{name: "slider", kind: "onyx.Slider", value: 0, style:"width:90%", onChanging:"sliderChanged", onChange:"sliderChanged"}
 	],
 	
