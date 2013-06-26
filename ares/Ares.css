@@ -50,7 +50,8 @@
 /* Ares popups */
 /* #999999 */
 /*Border radius*/
-/* Project list *//* #aaa */
+/* Project list */
+/* #aaa */
 /*#ccc*/
 /* B7B7B7 */
 /*#666666*/
@@ -1427,15 +1428,6 @@
   background-size: auto;
   /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
 
-}
-.ares-logo {
-  background-image: /*url(assets/images/hp.png)*/;
-  position: absolute;
-  padding: 3px;
-  height: 42px;
-  width: 42px;
-  right: 0;
-  margin: 0 10px 0 0;
 }
 .hermesFileTree-toolbar {
   height: 64px;
