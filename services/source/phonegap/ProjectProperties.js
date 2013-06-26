@@ -14,7 +14,7 @@ enyo.kind({
 		 * It contains the folowing elements: 
 		 * id: the kind's name of the drawer
 		 * name: the value of the label associated to the drawer
-		 * inputs: each element of this array contain data to generate an instance of {inputRow}
+		 * inputs: each element of this array contain data to generate an instance of {InputRow}
 		 * pickers: each element of this array contain data to generate an instance of {PickerRow}
 		 * checkboxes: each element of this array contain data to generate an instance of {CheckBoxRow}
 		 * @type {Array}
@@ -62,7 +62,7 @@ enyo.kind({
 		 * It contains the folowing elements: 
 		 * id: the kind's name of the drawer
 		 * name: the value of the label associated to the drawer
-		 * inputs: each element of this array contain data to generate an instance of {inputRow}
+		 * inputs: each element of this array contain data to generate an instance of {InputRow}
 		 * pickers: each element of this array contain data to generate an instance of {PickerRow}
 		 * checkboxes: each element of this array contain data to generate an instance of {CheckBoxRow}
 		 * @type {Array}
@@ -170,7 +170,7 @@ enyo.kind({
 										{kind: "Input", name: "pgConfId", attributes: { title: "unique identifier, assigned by build.phonegap.com"}}
 									]
 								}, 
-								{kind: "onyx.Button", style: "left: 200px;", content: "Refresh...",	ontap: "refresh"}
+								{kind: "onyx.Button", classes: "ares-project-properties-refresh-button", content: "Refresh...",	ontap: "refresh"}
 							]
 						}, 
 						{name: "targetsRows", kind: "FittableRows",	classes: 'ares_projectView_switches'}
@@ -179,14 +179,20 @@ enyo.kind({
 			]
 		}
 	],
+	/**
+	 * @type {Array}
+	 */
 	commonDrawers: Phonegap.EditUiData.commonDrawersContent,
+
+	/**
+	 * @type {Array}
+	 */
 	platformDrawers: Phonegap.EditUiData.platformDrawersContent, 
 
 	/**
 	 * @private
 	 */
 	create: function () {
-		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.createAllDrawers();
 	},
@@ -196,15 +202,21 @@ enyo.kind({
 		
 		createDrawers(this.commonDrawers, this.platformDrawers);
 
-		// setting up the drawers which contain the configuration
-		// parameters shared with all the platforms presented by
-		// Phonegap build.		
+			
 
 		function createDrawers(inCommonDrawers, inPlatformDrawers) {
 			createCommonDrawers(inCommonDrawers);
 			createPlatformDrawers(inPlatformDrawers);
 		}
 
+	
+		/**
+		 * Create and initialise the content of all the common drawers which containe 
+		 * parameters shared with all the platforms presented by
+		 * Phonegap build.	
+		 * @param  {Arary} inDrawers defined in the array {Phonegap.EditUiData.commonDrawersContent}
+		 * @private
+		 */
 		function createCommonDrawers(inDrawers) {
 			enyo.forEach(inDrawers, function (commonDrawer) {
 				createCommonDrawer(commonDrawer);
@@ -222,6 +234,12 @@ enyo.kind({
 			}, this);
 		}
 
+		/**
+		 * Create and initialise the content of all the platforms drawers which containe 
+		 * parameters of a specific platform presented by Phonegap build.	
+		 * @param  {Arary} inDrawers defined in the array {Phonegap.EditUiData.platformDrawersContent}
+		 * @private
+		 */
 		function createPlatformDrawers(inDrawers) {
 			enyo.forEach(inDrawers, function (inDrawer) {
 				createPlatformDrawer(inDrawer);
@@ -235,11 +253,15 @@ enyo.kind({
 					if (drawerContent.id === inDrawer.id) {
 						setUpDrawer(lastDrawer, drawerContent);
 					}
-
 				}, this);
 			}, this);
 		}
 
+		/**
+		 * Create one common drawer
+		 * @param  {Array} inDrawer defined in the array {Phonegap.EditUiData.commonDrawersContent}
+		 * @private
+		 */
 		function createCommonDrawer(inDrawer) {
 			// Creation of the drawer.
 			self.$.targetsRows.createComponent({
@@ -250,6 +272,11 @@ enyo.kind({
 			});
 		}
 
+		/**
+		 * Create one platform drawer
+		 * @param  {Array} inDrawer defined in the array {Phonegap.EditUiData.platformDrawersContent}
+		 * @private
+		 */
 		function createPlatformDrawer(inDrawer) {
 			self.$.targetsRows.createComponent({
 				name: inDrawer.id,
@@ -269,6 +296,7 @@ enyo.kind({
 		 *
 		 * @param {Object} dwr        The drawer to fill
 		 * @param {Array} dwrContent list of the rows that will be placed in the drawer
+		 * @private
 		 */
 
 		function setUpDrawer(dwr, dwrContent) {
@@ -286,7 +314,7 @@ enyo.kind({
 			// Creation of the inputs of the drawer if they existe.
 			enyo.forEach(dwrContent.inputs, function (row) {
 				dwr.$.drawer.createComponent({
-					kind: "inputRow",
+					kind: "InputRow",
 					name: row[0],
 					label: row[1] //, 
 				});
@@ -332,8 +360,9 @@ enyo.kind({
 			this.config.targets[target.id] = this.$.targetsRows.$[target.id].getProjectConfig();
 		}, this);
 
-		this.trace("config:", this.config);
-
+		if (this.debug){
+			this.log("config:", this.config);
+		}
 		return this.config;
 	},
 	/**
@@ -387,7 +416,8 @@ enyo.kind({
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.Target",
-	debug: true,
+	debug: false,
+	classes: "ares-drawer",
 	published: {
 		targetId: "",
 		targetName: "",
@@ -502,17 +532,16 @@ enyo.kind({
 enyo.kind({
 	name: "Phonegap.ProjectProperties.Drawer",
 	debug: true,
+	classes: "ares-drawer",
 	published: {
 		drawerName: "",
-		fold: true,
+		fold: true
 	},
 	components: [{
-			name: "drawerLbl",
-			style: "margin-left: 40px;",
+			name: "drawerLbl",			
 			ontap: "unfold"
 		}, {
-			name: "drawer",
-			classes: "ares-row ares-drawer",
+			name: "drawer",			
 			orient: "v",
 			kind: "onyx.Drawer",
 			open: false
@@ -527,6 +556,10 @@ enyo.kind({
 		this.drawerNameChanged();
 	},
 
+	/**
+	 * Fold/Unfold the content of a drawer
+	 * @private
+	 */
 	unfold: function () {
 		this.$.drawer.setOpen(this.fold);
 		this.fold = !this.fold;
@@ -553,7 +586,7 @@ enyo.kind({
 				{
 					classes: "ares-row",
 					components: [
-						{tag: "label", style: "width: 13em; margin-left:3em;", content: "Signing Key"}, 
+						{tag: "label", classes: "ares-project-properties-drawer-row-label", content: "Signing Key"}, 
 						{name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey",
 							components: [
 								{kind: "onyx.PickerButton",	content: "Choose...", classes: "middle-width ares-margin-right"}, 
@@ -591,7 +624,9 @@ enyo.kind({
 	 * @private
 	 */
 	keysChanged: function (old) {
-		if (this.debug) this.log("id:", this.targetId, old, "->", this.keys);
+		if (this.debug){
+			this.log("id:", this.targetId, old, "->", this.keys);
+		}
 
 		// Sanity
 		this.keys = this.keys || [];
@@ -620,7 +655,9 @@ enyo.kind({
 	 */
 	activeKeyIdChanged: function (old) {
 		var key = this.getKey(this.activeKeyId);
-		if (this.debug) this.log("id:", this.targetId, old, "->", this.activeKeyId, "key:", key);
+		if (this.debug) {
+			this.log("id:", this.targetId, old, "->", this.activeKeyId, "key:", key);
+		}
 		if (key) {
 			// One of the configured keys
 			if (this.targetId === 'ios' || this.targetId === 'blackberry') {
@@ -680,17 +717,24 @@ enyo.kind({
 	 * @private
 	 */
 	savePassword: function (inSender, inValue) {
-		if (this.debug) this.log("sender:", inSender, "value:", inValue);
+		if (this.debug) {
+			this.log("sender:", inSender, "value:", inValue);
+		}
 		var key = this.getShowingKey();
-		if (this.debug) this.log("targetId:", this.targetId, "key:", key);
+		if (this.debug) {
+			this.log("targetId:", this.targetId, "key:", key);
+		}
 		this.provider.setKey(this.targetId, key);
 	}
 });
 
+/**
+ * This Kind define a row containing a checkbox widget and attached to a drawer in {Phonegap.ProjectProperties}
+ */
 enyo.kind({
 	name: "CheckBoxRow",
 	kind: "FittableColumns",
-	style: "margin-top: 10px; height: 32px;",
+	classes: "ares-project-properties-drawer-row",
 	debug: false,
 	published: {
 		label: "",
@@ -698,8 +742,8 @@ enyo.kind({
 		activated: false
 	},
 	components: [
-		{kind: "onyx.Checkbox", name: this.name, onchange: "permissionChanged",	style: "margin-left: 30px; margin-right: 50px;"},
-		{name: "labelValue", content: this.label}
+		{kind: "onyx.Checkbox", name: this.name, onchange: "permissionChanged",	classes: "ares-project-properties-drawer-row-check-box-label"},
+		{name: "labelValue", content: this.label, }
 
 	],
 	create: function () {
@@ -714,17 +758,16 @@ enyo.kind({
 	permissionChanged: function () {
 		this.activated = !this.activated;
 		Phonegap.Build.DEFAULT_PROJECT_CONFIG.features[this.label] = this.activated;
-		if (this.debug) {
-
-		}
-
 	}
 });
 
+/**
+ * This Kind define a row containing an Input widget and attached to a drawer in {Phonegap.ProjectProperties}
+ */
 enyo.kind({
-	name: "inputRow",
+	name: "InputRow",
 	kind: "FittableColumns",
-	style: "margin-top: 10px; height: 32px",
+	classes: "ares-project-properties-drawer-row",
 	debug: false,
 	published: {
 		/**
@@ -747,7 +790,7 @@ enyo.kind({
 	},
 	components: [{
 			name: "label",
-			style: "width: 13em; margin-left:3em;"
+			classes: "ares-project-properties-drawer-row-label"
 		}, {
 			kind: "onyx.InputDecorator",
 			components: [{
@@ -772,18 +815,35 @@ enyo.kind({
 	}
 });
 
+/**
+ * This Kind define a row containing a Picker widget and attached to a drawer in {Phonegap.ProjectProperties}
+ */
 enyo.kind({
 	name: "PickerRow",
 	kind: "FittableColumns",
-	style: "margin-top: 10px;",
+	classes: "ares-project-properties-drawer-row",
 	debug: false,
 	published: {
+		/**
+		 * The label text used for the row.
+		 * @type {String}
+		 */
 		label: "",
+
+		/**
+		 * The name of the Picker.
+		 * @type {String}
+		 */
 		name: "",
+
+		/**
+		 * The content of the Picker.
+		 * @type {String}
+		 */
 		value: ""
 	},
 	components: [
-		{name: "label",	style: "width: 13em; margin-left:3em;"},
+		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
 		{
 			kind: "onyx.PickerDecorator",
 			components: [
@@ -801,17 +861,13 @@ enyo.kind({
 
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
-	},
+	},	 
 
 	valueChanged: function () {
-
 		enyo.forEach(this.value, function (aValue) {
 			this.$.configurationPicker.createComponent({
 				content: aValue
 			});
 		}, this);
-		if (this.debug) {
-			this.log("this configurationPicker: ", this.$.configurationPicker);
-		}
 	}
 });
