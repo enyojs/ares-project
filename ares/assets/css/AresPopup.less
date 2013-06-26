@@ -1,22 +1,20 @@
 .ares-classic-popup {
-	box-shadow:0px 0px 10px #000000;
-	background-color:#FFFFFF;
-	-moz-border-radius:6px;
-	-webkit-border-radius:6px;
-	border-radius:6px;
-	color: #000000;
-	padding:0px;
+	background-color: @ares-popup-backgrond-color;
+	color: @ares-popup-text-color;
+	.ares-rounded-corners(@ares-popup-radius);
+	.ares-box-shadow(0px 0px 10px #000000);
+	padding:0;
 }
 
 .ares-classic-popup > .title {
-	height: 48px;
-	line-height: 48px;
-	font-size: 16px;
+	height: @ares-popup-title-height;
+	line-height: @ares-popup-title-height;
+	font-size: @ares-font-size-large;
 	padding-left: 20px;
-	background-color: #CCCCCC;
+	background-color: @ares-popup-bar-background-color;
 	text-transform: uppercase;
-	border-bottom: 2px solid #999999;
-	border-radius: 6px 6px 0px 0px;
+	border-bottom: 2px solid @ares-popup-bar-border-color;
+	.ares-rounded-corners(@ares-popup-radius @ares-popup-radius 0px 0px);
 }
 
 .ares-classic-popup >.title.left-align { padding-left: 6px; }
@@ -24,16 +22,17 @@
 .bottom-toolbar {
 	position: relative;
 	background-image: none;
-	background-color: #CCCCCC;
+	background-color: @ares-popup-bar-background-color;
 	padding: 7px;
-	border:0px;
-	border-top: 1px solid #999999;
-	-moz-border-radius:0px 0px 6px 6px;
-	-webkit-border-radius:0px 0px 6px 6px;
-	border-radius:0px 0px 6px 6px;
+	border:0;
+	border-top: 1px solid @ares-popup-bar-border-color;
+	.ares-rounded-corners(0px 0px @ares-popup-radius @ares-popup-radius);
 }
 
-.bottom-toolbar > .onyx-button { background-color: transparent; border: 1px solid #999999; margin:0; }
+.bottom-toolbar > .onyx-button {
+	border: 1px solid @ares-popup-bar-border-color;
+	margin:0;
+}
 
 .bottom-toolbar>.onyx-button.right { position: absolute; right: 7px; }
 
