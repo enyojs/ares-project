@@ -105,6 +105,35 @@ So, it's recommended to pass each string element as a parameter instead of conca
 
 NOTE: For production, we may suppress the "this.trace()" code when doing the minification process.
 
+### Ares style
+
+Ares 2 uses the dynamic stylesheet language LESS.
+
+Whenever you check in changes to .less files in Ares, you'll also need to rebuild and check in the top-level Ares.css file (ares/css/Ares.css).
+
+Replace Ares.css by Ares.less in ares/package.js.
+
+To rebuild Ares.css, run the lessc script from the command line.
+
+On Mac/Linux:
+
+		cd ares 
+		../enyo/tools/lessc.sh package.js
+
+On Windows:
+
+		cd ares 
+		../enyo/tools/lessc.bat package.js
+
+To compile .less files on the client side, we need to replace  enyo depends "Ares.css" by "Ares.less" in ares/package.js.
+
+The next step is to load Less library in index.html file.
+
+	<script src="enyo/tools/minifier/node_modules/less/dist/less-1.3.0e.min.js"></script>
+
+
+For more information you can see [this page](https://github.com/enyojs/enyo/wiki/UI-Theming). 
+
 ### Testing
 
 For all contributions on Ares project and before commit, please execute the available Ares Test Suite. See [this page](test/README.md) for more details.
