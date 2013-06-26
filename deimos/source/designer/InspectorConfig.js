@@ -197,19 +197,20 @@ enyo.kind({
 		this.$.pickerButton.setDisabled(this.getDisabled());
 	},
 	fieldValueChanged: function() {
-		// TODO: something to do ?
+		this.updateSelected();
 	},
 	handleChange: function(inSender, inEvent) {
 		if ( ! this.initFinished) {
 			return true;
 		}
-		
 		this.setFieldValue(this.$.value.getSelected().value);
 	},
 	updateSelected: function() {
 		var selectedIndex = Math.max(0, this.values.indexOf(this.fieldValue));
 		var selected = this.$.value.getClientControls()[selectedIndex];
+		this.initFinished = false;
 		this.$.value.setSelected(selected);
+		this.initFinished = true;
 	}
 });
 
@@ -263,7 +264,9 @@ enyo.kind({
 	// events and published are defined by the base kind
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
-		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
+		{kind: "enyo.Input", classes: "inspector-size-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
+		{name: "unit", kind: "Inspector.Config.Select", classes: "css-editor-select-box", values: ["px","cm","em","ern","rem", "%"], onChange: "unitChanged"},
+		{name: "slider", kind: "onyx.Slider", value: 0, style:"width:90%", onChanging:"sliderChanged", onChange:"sliderChanged"}
 	],
 	
 	//* @public
@@ -285,6 +288,24 @@ enyo.kind({
 		this.fieldValue = this.$.value.getValue();
 		this.doDblClick({target: this});
 		return true;
+	},
+	unitChanged: function(inSender, inEvent) {
+		this.setFieldValue(this.size + inEvent.content);
+		this.doChange({target: this});
+	},
+	sliderChanged: function(inSender, inEvent) {
+		this.fieldValue = Math.round(inSender.getValue()) + this.unit;
+		this.doChange({target: this});
+	},
+	fieldValueChanged: function() {
+		var result = this.fieldValue.match(/(\d*)([%]|\w*)/);
+		// this.log(">>" + this.fieldValue + "<< ", result);
+		this.unit = result[2] || "px";
+		this.$.unit.setFieldValue(this.unit);
+		this.size = result[1] || 0;
+		this.$.slider.setValue(this.size);
+        this.$.slider.setProgress(this.size);
+		this.$.value.setValue(this.fieldValue);
 	}
 });
 

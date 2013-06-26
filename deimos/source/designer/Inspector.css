@@ -9,6 +9,10 @@
 	width: 7rem;
 }
 
+.inspector-size-editor {
+	width: 5rem;
+}
+
 input.inspector-field-checkbox {
 	margin: 6px 0 10px 0;
 }
