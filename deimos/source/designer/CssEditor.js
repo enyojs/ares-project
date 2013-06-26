@@ -21,12 +21,25 @@ enyo.kind({
 				}
 			}
 		]},
+		{category: "Paddings-Margins",	properties: [
+			{name: "padding", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			},
+			{name: "margin", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			}
+		]},
+
 		{category: "Font-Style", properties: [
-			{name: "font-size", inputKind: "Inspector.Config.Text"},
-			{name: "font-family", inputKind: "Inspector.Config.Text"},
-			{name: "padding", inputKind: "Inspector.Config.Text"},
-			{name: "margin", inputKind: "Inspector.Config.Text"},
-			{name: "text-indent", inputKind: "Inspector.Config.Text"}
+			{name: "font-size", inputKind: "Inspector.Config.Size"},
+			{name: "font-family", inputKind: {kind: "Inspector.Config.Event",
+					values: ["arial", "arial black", "comic sans ms", "courier new", "georgia", 
+										"helvetica",  "times new roman", "trebuchet ms", "verdana" ]
+				}
+			},
+			{name: "text-indent", inputKind: "Inspector.Config.Size"}
 		]}
 	],
 	fieldName: null,
