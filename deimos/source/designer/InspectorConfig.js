@@ -290,8 +290,12 @@ enyo.kind({
 		return true;
 	},
 	unitChanged: function(inSender, inEvent) {
-		this.setFieldValue(this.size + inEvent.content);
-		this.doChange({target: this});
+		if (this.size === "") {
+			this.$.unit.setFieldValue(this.unit);	
+		} else {
+			this.setFieldValue(this.size + inEvent.content);
+			this.doChange({target: this});
+		}
 	},
 	sliderChanged: function(inSender, inEvent) {
 		this.fieldValue = Math.round(inSender.getValue()) + this.unit;
@@ -302,7 +306,7 @@ enyo.kind({
 		// this.log(">>" + this.fieldValue + "<< ", result);
 		this.unit = result[2] || "px";
 		this.$.unit.setFieldValue(this.unit);
-		this.size = result[1] || 0;
+		this.size = result[1] || "";
 		this.$.slider.setValue(this.size);
         this.$.slider.setProgress(this.size);
 		this.$.value.setValue(this.fieldValue);
