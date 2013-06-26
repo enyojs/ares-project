@@ -2,26 +2,31 @@
 
 /* Onyx variables overrides */
 /* ---------------------------------------*/
-/*fonts*/
-@onyx-font-family: Arial,'Helvetica Neue', 'Nimbus Sans L', sans-serif;
-@onyx-font-size-small: 13px;
-@onyx-font-size-medium: 13px;
-@onyx-font-size-large: 13px;
+/*Fonts*/
+
+@onyx-font-family : Arial,'Helvetica Neue', 'Nimbus Sans L', sans-serif;
+
+@onyx-font-size-small : 13px;
+
+@onyx-font-size-medium : 13px;
+
+@onyx-font-size-large : 13px;
 
 /*Colors*/
-@onyx-button-text-color: #ffffff; 
+
+@onyx-button-text-color : #ffffff;
 
 /* Disabled Opacity */
-/* ---------------------------------------*/
-@onyx-disabled-opacity: 0.25;
 
+@onyx-disabled-opacity : 0.25;
 
 /* Border Radius */
-/* ---------------------------------------*/
-@onyx-border-radius: 6px;
-@onyx-border-radius-tight: 6px;
 
-@onyx-button-border-radius: @onyx-border-radius-tight;
+@onyx-border-radius : 6px;
+
+@onyx-border-radius-tight : 6px;
+
+@onyx-button-border-radius : @onyx-border-radius-tight;
 
 /* Backgrounds */
 
@@ -34,25 +39,21 @@
 @onyx-groupbox-background : darken(@onyx-background, 62%);
 
 /* Images */
-/* ---------------------------------------*/
-@onyx-checkbox-image: url(../lib/onyx/images/checkbox.png);
 
-@onyx-grabber-image: url(../lib/onyx/images/grabbutton.png);
+@onyx-checkbox-image : url(../lib/onyx/images/checkbox.png);
 
-@onyx-more-toolbar-button-image: url(../lib/onyx/images/more.png);
+@onyx-grabber-image : url(../lib/onyx/images/grabbutton.png);
 
-@onyx-slider-knob-image: url(../lib/onyx/images/slider-handle.png);
+@onyx-more-toolbar-button-image : url(../lib/onyx/images/more.png);
 
-@onyx-spinner-dark-image: url(../lib/onyx/images/spinner-dark.gif);
-@onyx-spinner-light-image: url(../lib/onyx/images/spinner-light.gif);
+@onyx-slider-knob-image : url(../lib/onyx/images/slider-handle.png);
 
-/* Gradient Overlays */
-/* ---------------------------------------*/
-@onyx-gradient: url(../lib/onyx/images/gradient.png);
-@onyx-gradient-invert: url(../lib/onyx/images/gradient-invert.png);
+@onyx-spinner-dark-image : url(../lib/onyx/images/spinner-dark.gif);
+
+@onyx-spinner-light-image : url(../lib/onyx/images/spinner-light.gif);
 
 /* Ares variables */
-/* ---------------------------------------*//* ---------------------------------------*/
+/* ---------------------------------------*/
 
 /* Fonts */
 
@@ -146,7 +147,8 @@
 
 @ares-drawer-radius : @ares-border-radius - 1;
 
-@ares-popup-radius : @ares-border-radius + 2;/* Ares mixins */
+@ares-popup-radius : @ares-border-radius + 2;
+
 /* Project list */
 
 @ares-project-list-background-active : darken(@ares-background, 25%); /* #aaa */
@@ -158,6 +160,8 @@
 @ares-project-list-text-color : darken(@ares-background, 51.6%);/*#666666*/
 
 @ares-project-list-background-on : darken(@ares-background, 4.7%); /*dedede*/;
+
+/* Ares mixins */
 
 .ares-rounded-corners (@radius: @ares-border-radius) {
 	-webkit-border-radius: @radius;
