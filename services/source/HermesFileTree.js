@@ -98,7 +98,7 @@ enyo.kind({
 		
 		this.enableDisableButtons();
 		this.createComponent(
-			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable",
+			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable hermesFileTree-root",
 				showing: false, content: "server", icon: "$services/assets/images/antenna.png",
 				expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed
 			}
@@ -201,7 +201,7 @@ enyo.kind({
 					newParentNode=this.targetNode;
 				this.moveNode(this.draggedNode, this.targetNode)
 					.response(this, function(inSender, inNodeFile) {
-						newParentNode.getChildren()
+						newParentNode.reloadChildren()
 							.response(this, function(inSender, inNodes) {
 								this.movedNode=newParentNode.getNodeWithId(inNodeFile.id);
 								this.originNode=oldParentNode;
@@ -352,7 +352,7 @@ enyo.kind({
 					serverNode.file.isServer = true;
 
 					serverNode.setContent(nodeName);
-					this.refreshFileTree(function(){ that.select(null, { data: serverNode } ) ; });
+					this.refreshFileTree(function(){ that.$.selection.select(serverNode.file.id, serverNode ) ; });
 				});
 				req.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");
@@ -417,7 +417,7 @@ enyo.kind({
 	adjustScroll: function (inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		var node = inEvent.originator;
-		this.$.scroller.scrollIntoView(node, true);
+		this.$.scroller.scrollToControl(node, true);
 		return true;
 	},
 
@@ -605,9 +605,22 @@ enyo.kind({
 		if (this.debug) this.log("Creating new folder "+name+" into folderId="+folderId);
 		this.$.service.createFolder(folderId, name)
 			.response(this, function(inSender, inFolder) {
-				if (this.debug) this.log("newFolderConfirm inFolder: ", inFolder);
+				if (this.debug) this.log("inFolder: ", inFolder);
 				var parentNode = this.getFolderOfSelectedNode(),
 				    pkgNode = parentNode.getNodeNamed('package.js');
+				
+				if (!parentNode.expanded) {
+					parentNode.setExpanded(true);
+					// update icon for expanded state
+					parentNode.setIcon("$services/assets/images/folder-open.png");
+								
+					// handle lazy-load when expanding
+					parentNode.updateNodes().
+						response(this, function() {
+							parentNode.effectExpanded();
+						});
+				}
+
 				this.doTreeChanged({
 					add: {
 						service: this.$.service,
@@ -620,7 +633,13 @@ enyo.kind({
 				/* cancel any move reverting */
 				this.resetRevert();
 
-				this.refreshFileTree(null, inFolder.id /*selectId*/);
+				parentNode.reloadChildren()
+					.response(this, function(inSender, inNodes) {
+						this.refreshFileTree(function() {parentNode.getNodeWithId(inFolder.id).doAdjustScroll()}, inFolder.id /*selectId*/);
+					})
+					.error(this, function() {
+						this.log("error retrieving related node children");
+					});
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create folder:", name, inError);
@@ -734,7 +753,13 @@ enyo.kind({
 				/* cancel any move reverting */
 				this.resetRevert();
 
-				this.refreshFileTree(null, inFsNode.id /*selectId*/);
+				parentNode.reloadChildren()
+					.response(this, function(inSender, inNodes) {
+						this.refreshFileTree(function() {parentNode.getNodeWithId(inFsNode.id).doAdjustScroll()}, inFsNode.id /*selectId*/);
+					})
+					.error(this, function() {
+						this.log("error retrieving related node children");
+					});
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to copy:", this.selectedFile, "as", newName, inError);
@@ -787,7 +812,13 @@ enyo.kind({
 				/* cancel any move reverting */
 				this.resetRevert();
 
-				this.refreshFileTree(null, inNode.id /*selectId*/);
+				parentNode.reloadChildren()
+					.response(this, function(inSender, inNodes) {
+						this.refreshFileTree(function() {parentNode.getNodeWithId(inNode.id).doAdjustScroll()}, inNode.id /*selectId*/);
+					})
+					.error(this, function() {
+						this.log("error retrieving related node children");
+					});
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to rename:", this.selectedFile, "into", newName, inError);
@@ -814,11 +845,9 @@ enyo.kind({
 	},
 	/** @private */
 	deleteConfirm: function(inSender, inEvent) {
-		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
-		if (this.debug) this.log("selectedFile:", this.selectedFile);
+		if (this.debug) this.log(inSender, "=>", inEvent);
 		var parentNode = this.getParentNodeOfSelected(),
 		    pkgNode = parentNode.getNodeNamed('package.js');
-		if (this.debug) this.log("parentNode:", parentNode, "pkgNode:", pkgNode);
 		this.$.service.remove(this.selectedFile.id)
 			.response(this, function(inSender, inParentFolder) {
 				if (this.debug) this.log("inParentFolder: ", inParentFolder);
@@ -834,7 +863,7 @@ enyo.kind({
 				/* cancel any move reverting */
 				this.resetRevert();
 
-				this.refreshFileTree(null, inParentFolder.id /*selectId*/);
+				this.refreshFileTree(parentNode.doAdjustScroll(), parentNode.file.id /*selectId*/);
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to delete:", this.selectedFile, inError);
@@ -906,6 +935,19 @@ enyo.kind({
 				if (this.debug) this.log("inNodes: ",inNodes);
 				var parentNode = this.getFolderOfSelectedNode(),
 				    pkgNode = parentNode.getNodeNamed('package.js');
+
+				if (!parentNode.expanded) {
+					parentNode.setExpanded(true);
+					// update icon for expanded state
+					parentNode.setIcon("$services/assets/images/folder-open.png");
+								
+					// handle lazy-load when expanding
+					parentNode.updateNodes().
+						response(this, function() {
+							parentNode.effectExpanded();
+						});
+				}
+
 				this.doTreeChanged({
 					add: {
 						service: this.$.service,
@@ -914,7 +956,18 @@ enyo.kind({
 						node: inNodes[0]
 					}
 				});
-				this.refreshFileTree(null, inNodes[0].id);
+
+				/* cancel any move reverting */
+				this.resetRevert();
+
+				var node = inNodes[0];
+				parentNode.reloadChildren()
+					.response(this, function(inSender, inNodes) {
+						this.refreshFileTree(function() {parentNode.getNodeWithId(node.id).doAdjustScroll()}, node.id);
+					})
+					.error(this, function() {
+						this.log("error retrieving related node children");
+					});
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create file:", name, inError);
@@ -955,7 +1008,6 @@ enyo.kind({
 					addParentNode.setExpanded(true);
 					// update icon for expanded state
 					addParentNode.setIcon("$services/assets/images/folder-open.png");
-					addParentNode.addClass("hermesFileTree-folder-highlight");
 								
 					// handle lazy-load when expanding
 					addParentNode.updateNodes().
@@ -979,14 +1031,9 @@ enyo.kind({
 					}
 				});			
 
-				inTarget.getChildren()
+				inTarget.reloadChildren()
 					.response(this, function(inSender, inNodes) {
-						// FIXME: ENYO-2575 (scrollIntoView has unexpected issue)
-						/*this.refreshFileTree(function() {
-							that.$.scroller.scrollIntoView(inTarget.getNodeWithId(inValue.id), true);
-						}, inValue.id);*/
-						this.refreshFileTree(null, inValue.id);
-						//this.refreshFileTree(function() {inTarget.getNodeWithId(inValue.id).doAdjustScroll()}, inValue.id);
+						this.refreshFileTree(function() {inTarget.getNodeWithId(inValue.id).doAdjustScroll()}, inValue.id);
 					})
 					.error(this, function() {
 						this.log("error retrieving related node children");
