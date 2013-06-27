@@ -1,9 +1,9 @@
 enyo.depends(
 	"$lib/g11n",
 	"$lib/layout",
-	"$lib/onyx",
+	"$lib/onyx/source",
 	"$lib/foss",
 	"source/",
-	"../ares/Ares.css",
+	"../ares/Ares.less",
 	"../utilities/source"
 );
