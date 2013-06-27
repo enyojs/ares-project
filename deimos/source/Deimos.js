@@ -364,9 +364,16 @@ enyo.kind({
 		
 		// Give the new component (and any children) a fresh _aresId_
 		config.aresId = this.generateNewAresId();
+		var options = Model.getKindOptions(config.name);
 		if (config.components) {
 			this.addAresIds(config.components);
 		}
+		
+		// if component has a "isPluginAction" option, Ares send a signal to plugin.
+		if (options && options.isPluginAction){ 
+			enyo.Signals.send("onPaletteAction", {config: config, target:target});
+			return true;
+		} 
 		
 		if (beforeId) {
 			this.insertItemBefore(config, target, beforeId);
