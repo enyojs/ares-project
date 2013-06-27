@@ -657,6 +657,27 @@ enyo.kind({
 		this.insertMissingHandlers();
 		this.docData.setEdited(true);
 	},
+	updateView: function(inSender, inEvent) {
+		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
+			if (inEvent.contents[i]) {
+				// Insert the new version of components (replace components block, or insert at end)
+				var obj = this.analysis.objects[i];
+				var comps = inEvent.contents[i];
+				var start = obj.block.start;
+				var end = obj.block.end;
+				// Get the corresponding Ace range to replace the component definition
+				// NB: ace.replace() allow to use the undo/redo stack.
+				var range = this.$.ace.mapToLineColumnRange(start, end);
+				this.$.ace.replaceRange(range, comps);
+			}
+		}
+		/*
+		 * Insert the missing handlers
+		 * NB: reparseAction() is invoked by insertMissingHandlers()
+		 */
+		this.insertMissingHandlers();
+		this.docData.setEdited(true);
+	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
 			this.$.savePopup.setName("Document was modified!");
