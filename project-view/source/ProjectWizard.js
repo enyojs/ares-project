@@ -390,7 +390,17 @@ enyo.kind({
 		this.doProjectSelected({
 			project: this.targetProject
 		});
-	}
+		this.hideMe();
+	},
+
+	/**
+	 * Hide the whole widget. Typically called when ok or cancel is clicked
+	 */
+	hideMe: function() {
+		this.config = null ; // forget ProjectConfig object
+		this.hide() ;
+		return true;
+	},
 });
 
 
