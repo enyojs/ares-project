@@ -77,6 +77,8 @@
 
 @ares-small-arrow : url(assets/images/smallArrowDown.png);
 
+@ares-lsmall-arrow : url(assets/images/lsmallArrowDown.png);
+
 @ares-lsmall-dowm-arrow : @ares-sprites -130px -60px no-repeat;
 
 @option-down-arrow : @ares-sprites -134px -88px no-repeat;
@@ -98,6 +100,8 @@
 @ares-input-text-color : @ares-dark-color;
 
 @ares-picker-text-color : #8C8C8C;
+
+@ares-menu-background : @onyx-picker-background;
 
 @ares-background-filechooser : @ares-light-color;
 
@@ -124,6 +128,18 @@
 @ares-radiogroup-active-border : (darken(@ares-radiogroup-active-background, 19%) + #0a0000); /*#0a4461*/
 
 @ares-radiogroup-boxshadow-color : @ares-radiogroup-active-border; /*ex : #0B4063*/
+
+@ares-deimos-background : lighten(@ares-background, 4.5%); /* whiteSmoke */
+
+@ares-ace-background : @ares-deimos-background;
+
+@ares-ace-border : darken(@ares-ace-background, 35%);
+
+@ares-deimos-border-color : lighten(@ares-background, 1.4%);
+
+@ares-harmonia-border-color : @ares-darken-background;
+
+
 
 /* Ares popups */
 
@@ -178,3 +194,10 @@
 	-webkit-box-shadow: @shadows;
 	box-shadow: @shadows;
 }
+
+/*.ares-border(@width, @kind, @color, @alpha) {
+	@rgba: rgba(red(@color),green(@color),blue(@color),@alpha);
+	@argb: argb(@color);
+	border : @width @kind @argb;
+	//border : @width @kind @rgba;
+}*/
