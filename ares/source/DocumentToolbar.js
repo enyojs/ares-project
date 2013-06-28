@@ -16,17 +16,23 @@ enyo.kind({
 		onDesign: ""
 	},
 	components: [
-		{name: "container", classes: "ares-docbar-container", kind: "FittableColumns", ontap: "doToggleOpen", components: [
-			{kind: "onyx.Grabber"},
-			{kind: "onyx.Drawer", orient: "h", open: false, showing:false, components: [
-				{kind: "FittableColumns", components: [
-					{kind: "onyx.Button", content: "Save", ontap: "saveFile"},
-					{kind: "onyx.Button", content: "New Kind", ontap: "newKind"},
-					{name: "designButton", kind: "onyx.Button", content: "Designer", ontap: "designFile"}
-				]}
-			]},
-			{name: "tabs", classes: "ares-docbar-tabs", kind: "onyx.RadioGroup"}
-		]}
+		{
+			name: "container",
+			classes: "ares-docbar-container",
+			kind: "FittableColumns",
+			ontap: "doToggleOpen",
+			components: [
+				{kind: "onyx.Grabber"},
+				{kind: "onyx.Drawer", orient: "h", open: false, showing:false, components: [
+					{kind: "FittableColumns", components: [
+						{kind: "onyx.Button", content: "Save", ontap: "saveFile"},
+						{kind: "onyx.Button", content: "New Kind", ontap: "newKind"},
+						{name: "designButton", kind: "onyx.Button", content: "Designer", ontap: "designFile"}
+					]}
+				]},
+				{name: "tabs", classes: "ares-docbar-tabs", kind: "onyx.RadioGroup"}
+			]
+		}
 	],
 	tabs: {},
 	showControls: function() {
@@ -39,15 +45,25 @@ enyo.kind({
 		this.$.drawer.setOpen(false);
 	},
 	createFileTab: function(name, id) {
-		var c = this.$.tabs.createComponent({
-			kind: "AresTab",
-			fileId: id,
-			components: [
-				{content: name, classes: "ares-tab-label"},
-				{name: "close-"+id, kind: "onyx.IconButton", classes: "ares-doc-close", src: "$lib/onyx/images/progress-button-cancel.png", fileId: id, ontap: "closeFile"}
-			],
-			ontap: "switchFile"
-		}, {owner: this}).render();
+		var c = this.$.tabs.createComponent(
+			{
+				kind: "AresTab",
+				fileId: id,
+				components: [
+					{content: name, classes: "ares-tab-label"},
+					{
+						name: "close-"+id,
+						kind: "onyx.IconButton",
+						classes: "ares-doc-close",
+						src: "$lib/onyx/images/progress-button-cancel.png",
+						fileId: id,
+						ontap: "closeFile"
+					}
+				],
+				ontap: "switchFile"
+			},
+			{owner: this}
+		).render();
 		this.$.container.reflow();
 		this.tabs[id] = c;
 	},
