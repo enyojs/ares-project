@@ -206,6 +206,7 @@ enyo.kind({
 		//this.$.ok.setDisabled(true) ;
 		this.$.directoryEntry.show() ;
 		this.$.templatesEntry.show();
+		this.notifyProjectPropertyStatus({status: "create"});
 	},
 
 	/**
@@ -214,6 +215,7 @@ enyo.kind({
 	setupModif: function() {
 		this.$.directoryEntry.hide() ;
 		this.$.templatesEntry.hide();
+		this.notifyProjectPropertyStatus({status: "modify"});
 	},
 
 	/**
@@ -284,6 +286,10 @@ enyo.kind({
 		if (config) {
 			service.panel.setProjectConfig(config);
 		}
+	},
+
+	notifyProjectPropertyStatus: function(inEvent) {
+		this.waterfallDown("onChangeProjectStatus", inEvent);
 	},
 
 	confirmTap: function(inSender, inEvent) {
@@ -381,9 +387,27 @@ enyo.kind({
 		} else {
 			this.selectedTemplate = inEvent.content;
 		}
+
+		this.templateToggleService(inSender, inEvent);
+	},
+	templateToggleService: function(inSender, inEvent) {
+		var keys = Object.keys(this.services);
+		keys.forEach(function(serviceId) {
+			var svcChbox = serviceId + "CheckBox";
+			var service = this.services[serviceId];
+			if (inEvent.content.match(serviceId)) {
+				this.showService(serviceId);
+			} else {
+				service.checkBox.setChecked(false);
+				if (service.tab) {
+					service.tab.setShowing(false);
+				}
+			}
+		}.bind(this));
 	},
 	handleAdditionalSource: function(inSender, inEvent) {
 		this.selectedAddSource = inEvent.source;
+		return true;
 	}
 });
 

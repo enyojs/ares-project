@@ -305,6 +305,7 @@ enyo.kind({
 	},
 	notifyChangeSource: function(inSender, inEvent) {
 		this.waterfallDown("onAdditionalSource", inEvent, inSender);
+		return true;
 	}
 
 });
@@ -372,6 +373,7 @@ enyo.kind({
 	},
 	notifyChangeSource: function(inSender, inEvent) {
 		this.waterfallDown("onAdditionalSource", inEvent, inSender);
+		return true;
 	},
 	populateProject: function(inSender, inData) {
 		var selectedDir = this.targetProject.getConfig();
@@ -385,6 +387,7 @@ enyo.kind({
 			this.$.errorPopup.raise('Unable to create projet content from the template');
 			this.doHideWaitPopup();
 		});
+		return true;
 	},
 	projectRefresh: function(inSender, inData) {
 		this.doProjectSelected({
