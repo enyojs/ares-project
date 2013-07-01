@@ -105,6 +105,29 @@ So, it's recommended to pass each string element as a parameter instead of conca
 
 NOTE: For production, we may suppress the "this.trace()" code when doing the minification process.
 
+### Ares styling
+
+Ares 2 uses the dynamic stylesheet language LESS.
+
+For the moment, all css compilation is done on the client side and is loaded through index.html.
+
+We are waiting for ares minification to make possible using Ares.less on the client side in debug.html and compiled Ares.css file in index.html.
+
+### Adding css/less styling
+
+We have two main .less files :
+	
+	- ares-variables.less
+	- ares-rules.less
+
+In ares-variables.less, onyx variables are overridden and specific ares variables are added.
+
+In ares-rules.less onyx css classes and specific ares css classes use variables declared in ares-variables.less.
+
+To add new style to Ares, the file ares-rules.less should contain the new css classe. Check if one of variables can be used from ares-variables.less. Otherwise, add a new one.
+
+For more information see [this page](https://github.com/enyojs/enyo/wiki/UI-Theming).
+
 ### Testing
 
 For all contributions on Ares project and before commit, please execute the available Ares Test Suite. See [this page](test/README.md) for more details.
