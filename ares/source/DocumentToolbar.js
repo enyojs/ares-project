@@ -20,9 +20,8 @@ enyo.kind({
 			name: "container",
 			classes: "ares-docbar-container",
 			kind: "FittableColumns",
-			ontap: "doToggleOpen",
 			components: [
-				{kind: "onyx.Grabber"},
+				{kind: "onyx.Grabber", ontap: "doToggleOpen"},
 				{
 					name: "tabs",
 					kind: "onyx.TabBar",
