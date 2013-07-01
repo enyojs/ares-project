@@ -4,7 +4,7 @@ enyo.depends(
 	"$lib/onyx/source",
 	"$lib/foss",
 	"source/",
-	"Ares.css",
+	"Ares.less",
 	"$lib/extra/analyzer2",
 	"../utilities/source",
 	"../services/source",
