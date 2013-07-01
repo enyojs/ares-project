@@ -23,27 +23,11 @@ enyo.kind({
 			ontap: "doToggleOpen",
 			components: [
 				{kind: "onyx.Grabber"},
-				{kind: "onyx.Drawer", orient: "h", open: false, showing:false, components: [
-					{kind: "FittableColumns", components: [
-						{kind: "onyx.Button", content: "Save", ontap: "saveFile"},
-						{kind: "onyx.Button", content: "New Kind", ontap: "newKind"},
-						{name: "designButton", kind: "onyx.Button", content: "Designer", ontap: "designFile"}
-					]}
-				]},
 				{name: "tabs", classes: "ares-docbar-tabs", kind: "onyx.RadioGroup"}
 			]
 		}
 	],
 	tabs: {},
-	showControls: function() {
-		this.$.drawer.setOpen(true);
-		// lock designButton's width, so it doesn't move when the caption changes
-		var w = this.$.designButton.getBounds().width;
-		this.$.designButton.setBounds({width: w});
-	},
-	hideControls: function() {
-		this.$.drawer.setOpen(false);
-	},
 	createFileTab: function(name, id) {
 		var c = this.$.tabs.createComponent(
 			{
@@ -90,23 +74,11 @@ enyo.kind({
 		this.doDesign({id: id});
 		return true;
 	},
-	newKind: function(inSender, inEvent) {
-		var id = this.$.tabs.getActive().fileId;
-		this.doNewKind({id: id});
-		return true;
-	},
 	removeTab: function(id) {
 		if (this.tabs[id]) {
 			this.tabs[id].destroy();
 			this.tabs[id] = undefined;
 			this.$.container.reflow();
-		}
-	},
-	setDesignMode: function(toDesign) {
-		if (toDesign) {
-			this.$.designButton.setContent("Editor");
-		} else {
-			this.$.designButton.setContent("Designer");
 		}
 	}
 });

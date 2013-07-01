@@ -15,7 +15,7 @@ enyo.kind({
 				{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
 			]}
 		]},
-		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
+		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", components: [
 			{name: "projectView", kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "openDocument", onProjectSelected: "projectSelected"},
 			{name: "bottomBar", classes:"ares-bottom-bar", kind: "DocumentToolbar",
 				onToggleOpen: "toggleFiles",
@@ -321,13 +321,6 @@ enyo.kind({
 		this.$.bottomBar.activateFileWithId(d.getId());
 		this.hideFiles();
 	},
-	finishedSliding: function(inSender, inEvent) {
-		if (this.$.slideable.value < 0) {
-			this.$.bottomBar.showControls();
-		} else {
-			this.$.bottomBar.hideControls();
-		}
-	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceSave: function(inSender, inEvent) {
 		this.$.phobos.saveDocAction(inSender, inEvent);
@@ -343,7 +336,6 @@ enyo.kind({
 	},
 	adjustBarMode: function() {
 		var designMode = this.$.panels.getIndex() == this.deimosViewIndex;
-		this.$.bottomBar.setDesignMode(designMode);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {
