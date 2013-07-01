@@ -42,7 +42,7 @@ enyo.kind({
 		);
 	},
 	switchFile: function(inSender, inEvent) {
-		this.doSwitchFile({id: inEvent.data.userId});
+		this.doSwitchFile({id: inEvent.userId});
 		return true;
 	},
 	activateFileWithId: function(id) {
