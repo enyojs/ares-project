@@ -24,17 +24,17 @@ enyo.kind({
 				id: "general",
 				name: "General",				
 				inputs: [
-					["icon", "Icon"],
-					["splashScreen", "Splash screen"]
+					//["iconShared", "Icon"],
+					//["splashScreenShared", "Splash screen"]
 				],
 				pickers: [
-					["phonegapVersion", "Phonegap version", ["2.8.0", "2.7.0", "2.5.0", "2.3.0", "2.2.0", "2.1.0",
+					["phonegap-version", "Phonegap version", ["2.8.0", "2.7.0", "2.5.0", "2.3.0", "2.2.0", "2.1.0",
 								"2.0.0", "1.9.0", "1.8.1", "1.7.0", "1.6.1", "1.5.0",
 								"1.4.1", "1.3.0", "1.2.0", "1.1.0"
 						]],
 					["orientation", "Orientation", ["both", "landscape", "portrait"]],
-					["targetDevice", "Target device", ["universal", "handset", "tablet"]],
-					["fullScreen", "Fullscreen mode", ["true", "false"]]
+					["target-device", "Target device", ["universal", "handset", "tablet"]],
+					["fullscreen", "Fullscreen mode", ["true", "false"]]
 				],
 				checkboxes: []
 			}, 
@@ -47,7 +47,7 @@ enyo.kind({
 					["battery", "Battery"],
 					["camera", "Camera"],
 					["contact", "Contact"],
-					["FileRow", "File"],
+					["file", "File"],
 					["geolocation", "Geolocation"],
 					["media", "Media"],
 					["network", "Network"],
@@ -72,15 +72,15 @@ enyo.kind({
 				id: "android",
 				name: "Google Android",
 				inputs: [
-					["minSDK", "Minimum SDK"],
-					["maxSDK", "Maximum SDK"],
-					["splashScreenDuration", "Duration of the splashScreen"],
-					["loadUrlTimeout", "Load URL timeout"],
-					["icon", "Icon"],
-					["splashScreen", "Splash screen"]
+					["android-minSdkVersion", "Minimum SDK"],
+					["android-maxSdkVersion", "Maximum SDK"],
+					["splash-screen-duration", "Duration of the splashScreen"],
+					["load-url-timeout", "Load URL timeout"],
+				//	["iconAndroid", "Icon"],
+				//	["splashScreenAndroid", "Splash screen"]
 				],
 				pickers: [
-					["installLocation", "Install Location", ["internalOnly", "preferExternal", "auto"]]
+					["android-installLocation", "Install Location", ["internalOnly", "preferExternal", "auto"]]
 				],
 				checkboxes: []
 			}, 
@@ -88,17 +88,17 @@ enyo.kind({
 				id: "ios",
 				name: "Apple iOS",
 				inputs: [
-					["icon", "Icon"],
-					["splashScreen", "Splash screen"]
+				//	["iconIos", "Icon"],
+				//	["splashScreenIos", "Splash screen"]
 				],
 				pickers: [
-					["webviewBounce", "Web view bounce", ["true", "false"]],
-					["prerenderedIcon", "Prerendred icon", ["true", "false"]],
-					["statusBarStyle", "Status Bar style", ["black-opaque", "black-translucent", "default"]],
-					["detectDataTypes", "Detect Data type", ["true", "false"]],
-					["exitOnSuspend", "Exit on suspend", ["true", "false"]],
-					["showSplashScreenSpinner", "Show splash screen spinner", ["true", "false"]],
-					["autoHideSplashScreen", "Auto-hide splash screen", ["true", "false"]]
+					["webviewbounce", "Web view bounce", ["true", "false"]],
+					["prerendered-icon", "Prerendred icon", ["true", "false"]],
+					["ios-statusbarstyle", "Status Bar style", ["black-opaque", "black-translucent", "default"]],
+					["detect-data-types", "Detect Data type", ["true", "false"]],
+					["exit-on-suspend", "Exit on suspend", ["true", "false"]],
+					["show-splash-screen-spinner", "Show splash screen spinner", ["true", "false"]],
+					["auto-hide-splash-screen", "Auto-hide splash screen", ["true", "false"]]
 				],
 				checkboxes: []
 
@@ -107,8 +107,8 @@ enyo.kind({
 				id: "winphone",
 				name: "Microsoft Windows Phone 7",
 				inputs: [
-					["icon", "Icon"],
-					["splashScreen", "Splash screen"]
+				//	["iconWinphone", "Icon"],
+				//	["splashScreenWinphone", "Splash screen"]
 				],
 				pickers: [],
 				checkboxes: []
@@ -117,11 +117,11 @@ enyo.kind({
 				id: "blackberry",
 				name: "RIM Blackberry",
 				inputs: [
-					["icon", "Icon"],
-					["splashScreen", "Splash screen"]
+				//	["iconBlackberry", "Icon"],
+				//	["splashScreenBlackberry", "Splash screen"]
 				],
 				pickers: [
-					["disableCursor", "Disable Cursor", ["none", "true", "false"]]
+					["disable-cursor", "Disable Cursor", ["none", "true", "false"]]
 				],
 				checkboxes: []
 			}, 
@@ -129,8 +129,8 @@ enyo.kind({
 				id: "webos",
 				name: "HP webOS 2",
 				inputs: [
-					["icon", "Icon"],
-					["splashScreen", "Splash screen"]
+				//	["iconWebos", "Icon"],
+				//	["splashScreenWebos", "Splash screen"]
 				],
 				pickers: [],
 				checkboxes: []
@@ -741,23 +741,29 @@ enyo.kind({
 		name: "",
 		activated: false
 	},
+	handlers: {
+		onPopupClose : 'saveValue'
+	},
 	components: [
-		{kind: "onyx.Checkbox", name: this.name, onchange: "permissionChanged",	classes: "ares-project-properties-drawer-row-check-box-label"},
+		{kind: "onyx.Checkbox", name: "aCheckBox", classes: "ares-project-properties-drawer-row-check-box-label"},
 		{name: "labelValue", content: this.label, }
 
 	],
 	create: function () {
 		this.inherited(arguments);
+		//this.initiliseCheckBox();
 		this.labelChanged();
 	},
-
 	labelChanged: function () {
-		this.$.labelValue.setContent(this.label);
+		this.$.labelValue.setContent(this.name);
 	},
 
-	permissionChanged: function () {
-		this.activated = !this.activated;
-		Phonegap.Build.DEFAULT_PROJECT_CONFIG.features[this.label] = this.activated;
+	saveValue: function () {
+		//this.activated = !this.activated;
+		this.log("feature state: ", Phonegap.Build.DEFAULT_PROJECT_CONFIG.features[this.name]);
+		Phonegap.Build.DEFAULT_PROJECT_CONFIG.features[this.name] = this.$.aCheckBox.active;
+
+		return true;//stop the event waterfalling
 	}
 });
 
@@ -788,6 +794,9 @@ enyo.kind({
 		 */
 		value: ""
 	},
+	handlers: {
+		onPopupClose : 'saveValue'
+	},
 	components: [{
 			name: "label",
 			classes: "ares-project-properties-drawer-row-label"
@@ -801,17 +810,31 @@ enyo.kind({
 		}
 
 	],
+
 	create: function () {
 		this.inherited(arguments);
 		this.labelChanged();
 		this.valueChanged();
 	},
+
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
 	},
+
 	valueChanged: function () {
 		var input = this.$.configurationInput;
 		input.setValue(this.value);
+	},
+
+	saveValue: function(){
+		var content = this.$.configurationInput.value;
+		this.log("The value of the input : ", this.name, " is ", content);
+
+		Phonegap.Build.DEFAULT_PROJECT_CONFIG.preferences[this.name] = content;		
+	
+		
+	
+		return true;
 	}
 });
 
@@ -840,7 +863,12 @@ enyo.kind({
 		 * The content of the Picker.
 		 * @type {String}
 		 */
-		value: ""
+		value: "", 
+
+		selectedValue: "", 
+	},
+	handlers: {
+		onPopupClose : 'saveValue'
 	},
 	components: [
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
@@ -848,7 +876,7 @@ enyo.kind({
 			kind: "onyx.PickerDecorator",
 			components: [
 				{kind: "onyx.PickerButton"},
-				{kind: "onyx.Picker", name: "configurationPicker"}
+				{kind: "onyx.Picker", name: "configurationPicker", onSelect: "pickerValueUpdate"}
 			]
 		}
 	],
@@ -869,5 +897,15 @@ enyo.kind({
 				content: aValue
 			});
 		}, this);
+	}, 
+
+	pickerValueUpdate: function(inEvent, inValue){
+		this.selectedValue = inValue.content; 
+
+	},
+	saveValue: function(){
+		
+		Phonegap.Build.DEFAULT_PROJECT_CONFIG.preferences[this.name] = this.selectedValue;
+		return true;
 	}
 });

@@ -36,8 +36,7 @@ enyo.kind({
 	 * @see ServiceRegistry.js
 	 */	
 	setConfig: function(inConfig) {
-		var self = this;
-
+		
 		if (this.debug) this.log("config:", this.config, "+", inConfig);
 		this.config = ares.extend(this.config, inConfig);
 		if (this.debug) this.log("=> config:", this.config);
@@ -580,7 +579,7 @@ enyo.kind({
 
 				}
 			}
-			next(new Error(message + " (" + details || inError + ")"));
+			next(new Error(message + " (" + message || inError + ")"));
 		});
 		req.go(query);
 	},
@@ -923,6 +922,7 @@ enyo.kind({
 	 * FIXME: define a JSON schema
 	 */
 	_generateConfigXml: function(config) {
+		
 		var phonegap = config.providers.phonegap;
 		if (!phonegap) {
 			this.log("PhoneGap build disabled: will not generate the XML");
@@ -934,9 +934,7 @@ enyo.kind({
 		var str, xw = new XMLWriter('UTF-8');
 		xw.indentation = 4;
 		xw.writeStartDocument();
-		xw.writeComment('***                              WARNING                            ***');
-		xw.writeComment('***            This is an automatically generated document.         ***');
-		xw.writeComment('*** Do not edit it: your changes would be automatically overwritten ***');
+
 
 		xw.writeStartElement( 'widget' );
 
@@ -945,6 +943,10 @@ enyo.kind({
 
 		xw.writeAttributeString('id', config.id);
 		xw.writeAttributeString('version',config.version);
+
+		xw.writeComment('***                              WARNING                            ***');
+		xw.writeComment('***            This is an automatically generated document.         ***');
+		xw.writeComment('*** Do not edit it: your changes would be automatically overwritten ***');
 
 		// we use 'title' (one-line description) here because
 		// 'name' is made to be used by package names
@@ -1001,20 +1003,29 @@ enyo.kind({
 		// the URL's are correct... I am not sure whether it
 		// is possible to have them enforced by a JSON schema,
 		// unless we hard-code a discrete list of URL's...
-		enyo.forEach(phonegap.features, function(feature) {
-			xw.writeStartElement('feature');
-			xw.writeAttributeString('name', feature.name);
-			xw.writeEndElement(); // feature
+		// 
+		featureUrl = "http://api.phonegap.com/1.0/";
+		xw.writeComment("Features");
+		enyo.forEach(phonegap.features && enyo.keys(phonegap.features), function(feature) {
+							
+			if (phonegap.features[feature]){
+				xw.writeStartElement('feature');
+				xw.writeAttributeString('name', featureUrl + feature);
+				xw.writeEndElement(); // feature
+			}				
+	
 		}, this);
 
-		// ...same for preferences
-		for (var prefName in phonegap.preferences) {
+		xw.writeComment("Preferences");
+		enyo.forEach(phonegap.preferences && enyo.keys(phonegap.preferences), function(preference) {
+			
 			xw.writeStartElement('preference');
-			xw.writeAttributeString('name', prefName);
-			xw.writeAttributeString('value', phonegap.preferences[prefName]);
-			xw.writeEndElement(); // preference
-		}
-
+			xw.writeAttributeString('name', preference);
+			xw.writeAttributeString('value', phonegap.preferences[preference]);
+			xw.writeEndElement(); // preference			
+	
+		}, this);
+	
 		xw.writeEndElement();	// widget
 
 		//xw.writeEndDocument(); called by flush()
@@ -1031,9 +1042,43 @@ enyo.kind({
 				src: "icon.png",
 				role: "default"
 			},
-
+			features: {
+				"battery": false,
+       		   	"camera": false,
+       		   	"contact": false,
+		        "file": false,		        
+		        "geolocation": false,
+		        "media": false,
+		        "network": false,
+		        "notification": false,		                
+		        "device": false
+			},
 			preferences: {
-				"phonegap-version": "2.1.0"
+				//general prefrences
+				"phonegap-version": "2.1.0", 
+				"orientation": "landscape",
+				"target-device": "universal", 
+				"fullscreen": "true", 
+
+				//IOS preferences
+				"webviewbounce": "", 
+				"prerendered-icon": "",
+				"ios-statusbarstyle": "",
+				"detect-data-types": "",
+				"exit-on-suspend": "", 
+				"show-splash-screen-spinner": "",
+				"auto-hide-splash-screen": "", 
+
+				//Android preferences
+				"android-installLocation": "",
+				"android-minSdkVersion": "", 
+				"android-maxSdkVersion": "",
+				"splash-screen-duration": "",
+				"load-url-timeout": "",
+
+				//BlackBerry preferences
+				"disable-cursor": ""
+
 			},
 			plugins: {
 				"ChildBrowser": {

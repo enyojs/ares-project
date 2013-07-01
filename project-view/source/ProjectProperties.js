@@ -294,6 +294,12 @@ enyo.kind({
 		this.config.author.name = this.$.projectAuthor.getValue();
 		this.config.author.href = this.$.projectContact.getValue();
 
+		//Send an event to the kind {InputRow}, {PickerRow} & {CheckBoxRow}
+		//situated in "ProjectProperties.js" in order to save all the edited
+		//value of the view "Phonegap build" in the array {Build.DEFAULT_PROJECT_CONFIG}
+		//Defined in "Build.js"
+		this.waterfall("onPopupClose");
+
 		// Dump each provider service configuration panel into
 		// the project configuration.
 		enyo.forEach(enyo.keys(this.services), function(serviceId) {
