@@ -441,8 +441,6 @@ enyo.kind({
 	 */
 	_registerComponent: function(inSender, inEvent) {
 		this.componentsRegistry[inEvent.name] = inEvent.reference;
-		//this.componentsRegistry[inEvent.name] = this;
-		this.log(this.componentsRegistry);
 	},
 	statics: {
 		isBrowserSupported: function() {
