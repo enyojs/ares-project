@@ -8,10 +8,7 @@ enyo.kind({
 	events: {
 		onToggleOpen: "",
 		onSwitchFile: "",
-		onClose: "",
-		onSave: "",
-		onNewKind: "",
-		onDesign: ""
+		onClose: ""
 	},
 
 	components: [
@@ -23,7 +20,7 @@ enyo.kind({
 			onTabRemove: 'closeFile'
 		}
 	],
-	tabs: {},
+
 	createFileTab: function(name, id) {
 		var c = this.$.tabs.addTab(
 			{
@@ -42,16 +39,6 @@ enyo.kind({
 	closeFile: function(inSender, inEvent) {
 		var id = inSender.fileId;
 		this.doClose({id: id});
-		return true;
-	},
-	saveFile: function(inSender, inEvent) {
-		var id = this.$.tabs.getActive().fileId;
-		this.doSave({id: id});
-		return true;
-	},
-	designFile: function(inSender, inEvent) {
-		var id = this.$.tabs.getActive().fileId;
-		this.doDesign({id: id});
 		return true;
 	},
 	removeTab: function(id) {
