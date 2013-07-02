@@ -302,6 +302,7 @@ enyo.kind({
 		if (d) {
 			this.switchToDocument(d);
 		} else {
+			this.trace("File ID " + d + " not found in cache!");
 			alert("File ID not found in cache!");
 		}
 	},
