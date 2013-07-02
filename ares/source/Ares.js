@@ -222,7 +222,7 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var self = this;
 		this._closeDocument(inEvent.id, function() {
-			self.showFiles();
+			self.showProjectView();
 		});
 	},
 	/** @private */
@@ -273,17 +273,17 @@ enyo.kind({
 			return 'You may have some unsaved data';
 		}
 	},
-	hideFiles: function(inSender, inEvent) {
+	hideProjectView: function(inSender, inEvent) {
 		this.$.slideable.animateToMin();
 	},
-	showFiles: function(inSender, inEvent) {
+	showProjectView: function(inSender, inEvent) {
 		this.$.slideable.animateToMax();
 	},
 	toggleFiles: function(inSender, inEvent) {
 		if (this.$.slideable.value < 0 || Ares.Workspace.files.length === 0) {
-			this.showFiles();
+			this.showProjectView();
 		} else {
-			this.hideFiles();
+			this.hideProjectView();
 		}
 	},
 	resizeHandler: function(inSender, inEvent) {
@@ -319,7 +319,7 @@ enyo.kind({
 		}
 		this.adjustBarMode();
 		this.$.bottomBar.activateFileWithId(d.getId());
-		this.hideFiles();
+		this.hideProjectView();
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceSave: function(inSender, inEvent) {
