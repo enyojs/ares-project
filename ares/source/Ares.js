@@ -304,8 +304,10 @@ enyo.kind({
 		var d = Ares.Workspace.files.get(inEvent.id);
 		if (d) {
 			this.switchToDocument(d);
-		} else {
-			this.trace("File ID " + d + " not found in cache!");
+		} else if (this.debug) {
+			throw("File ID " + d + " not found in cache!");
+		}
+		else {
 			alert("File ID not found in cache!");
 		}
 	},
