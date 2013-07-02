@@ -269,7 +269,7 @@ enyo.kind({
 		{classes: "inspector-field-caption", name: "title"},
 		{kind: "enyo.Input", classes: "inspector-size-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
 		{name: "unit", kind: "Inspector.Internal.Select", classes: "css-editor-select-box", values: ["px","cm","em","ern","rem", "%"], onChange: "unitChanged"},
-		{name: "slider", kind: "onyx.Slider", value: 0, style:"width:90%", onChanging:"sliderChanged", onChange:"sliderChanged"}
+		{name: "slider", kind: "onyx.Slider", value: 0, style:"width:91%", onChanging:"sliderChanged", onChange:"sliderChanged"}
 	],
 	
 	//* @public

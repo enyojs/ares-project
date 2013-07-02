@@ -6,7 +6,7 @@
 }
 
 .inspector-field-editor {
-	width: 7rem;
+	width: 5rem;
 }
 
 .inspector-size-editor {
@@ -64,16 +64,16 @@ input.inspector-field-checkbox {
   padding: 2px;
 }
 
-.inspector-event-button { width: 22px; height: 22px; padding:3px;}
+.inspector-event-button { width: 74px; height: 21px; padding:2px;}
 .inspector-event-button:before {
 	content: url(../../../ares/assets/images/smallArrowDown.png);
 }
 
 .inspector-color-button {
-	height: 15px;
-	width: 15px;
+	height: 19px;
+	width: 69px;
 	border: 1px solid Black;
-	margin: 5px;
+	margin: 1px;
 	display: inline-block;
 	vertical-align: middle;
 }
