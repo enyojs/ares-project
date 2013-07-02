@@ -13,6 +13,7 @@ enyo.kind({
 		{
 			name: "tabs",
 			kind: "onyx.TabBar",
+			showing: false,
 			checkBeforeClosing: true,
 			onTabChanged: 'switchFile',
 			onTabRemoveRequested: 'requestCloseFile'
@@ -20,7 +21,9 @@ enyo.kind({
 	],
 
 	createFileTab: function(name, id) {
-		var c = this.$.tabs.addTab(
+		this.$.tabs.show();
+		this.$.tabs.render();
+		this.$.tabs.addTab(
 			{
 				caption: name,
 				userId: id // id like home-123f3c8a766751826...
@@ -43,5 +46,8 @@ enyo.kind({
 	},
 	removeTab: function(id) {
 		this.$.tabs.removeTab({ userId: id }) ;
+		if (this.$.tabs.isEmpty() ) {
+			this.$.tabs.hide();
+		}
 	}
 });
