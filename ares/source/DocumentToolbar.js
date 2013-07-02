@@ -1,6 +1,10 @@
 enyo.kind({
 	name: "DocumentToolbar",
 	kind: "onyx.Toolbar",
+
+	// TODO check if still needed
+	classes: "ares-docbar-container",
+
 	events: {
 		onToggleOpen: "",
 		onSwitchFile: "",
@@ -9,20 +13,14 @@ enyo.kind({
 		onNewKind: "",
 		onDesign: ""
 	},
+
 	components: [
+		{kind: "onyx.Grabber", ontap: "doToggleOpen"},
 		{
-			name: "container",
-			classes: "ares-docbar-container",
-			kind: "FittableColumns",
-			components: [
-				{kind: "onyx.Grabber", ontap: "doToggleOpen"},
-				{
-					name: "tabs",
-					kind: "onyx.TabBar",
-					onTabChanged: 'switchFile',
-					onTabRemove: 'closeFile'
-				}
-			]
+			name: "tabs",
+			kind: "onyx.TabBar",
+			onTabChanged: 'switchFile',
+			onTabRemove: 'closeFile'
 		}
 	],
 	tabs: {},
