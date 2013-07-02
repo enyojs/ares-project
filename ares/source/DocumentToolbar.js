@@ -51,7 +51,6 @@ enyo.kind({
 		var id = inSender.fileId;
 		this.doClose({id: id});
 		return true;
-		//inSender.parent.destroy();
 	},
 	saveFile: function(inSender, inEvent) {
 		var id = this.$.tabs.getActive().fileId;
@@ -64,10 +63,6 @@ enyo.kind({
 		return true;
 	},
 	removeTab: function(id) {
-		if (this.tabs[id]) {
-			this.tabs[id].destroy();
-			this.tabs[id] = undefined;
-			this.$.container.reflow();
-		}
+		this.$.tabs.removeTab({ userId: id }) ;
 	}
 });
