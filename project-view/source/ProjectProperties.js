@@ -17,6 +17,9 @@ enyo.kind({
 		onSaveGeneratedXml: "",
 		onDone: ""
 	},
+	handlers: {
+		onAdditionalSource: "handleAdditionalSource"
+	},
 	classes:"ares-classic-popup",
 	components: [
 		{classes:"title left-align", content:"Project properties", components:[
@@ -116,6 +119,7 @@ enyo.kind({
 	templates: [],
 	TEMPLATE_NONE: "NONE",
 	selectedTemplate: undefined,
+	selectedAddSource: undefined,
 
 	services: {},
 
@@ -202,6 +206,7 @@ enyo.kind({
 		//this.$.ok.setDisabled(true) ;
 		this.$.directoryEntry.show() ;
 		this.$.templatesEntry.show();
+		this.notifyProjectPropertyStatus({status: "create"});
 	},
 
 	/**
@@ -210,6 +215,7 @@ enyo.kind({
 	setupModif: function() {
 		this.$.directoryEntry.hide() ;
 		this.$.templatesEntry.hide();
+		this.notifyProjectPropertyStatus({status: "modify"});
 	},
 
 	/**
@@ -282,6 +288,10 @@ enyo.kind({
 		}
 	},
 
+	notifyProjectPropertyStatus: function(inEvent) {
+		this.waterfallDown("onChangeProjectStatus", inEvent);
+	},
+
 	confirmTap: function(inSender, inEvent) {
 		var tglist, ppConf ;
 		// retrieve modified values
@@ -306,7 +316,11 @@ enyo.kind({
 		ppConf.top_file = this.$.ppTopFile.getValue();
 
 		// to be handled by a ProjectWizard
-		this.doModifiedConfig({data: this.config, template: this.selectedTemplate}) ;
+		var sourceIds = [];
+		if (this.selectedTemplate !==undefined && this.selectedAddSource !== undefined) {
+			sourceIds.push(this.selectedAddSource);
+		}
+		this.doModifiedConfig({data: this.config, template: this.selectedTemplate, addSources: sourceIds}) ;
 
 		this.doDone();
 
@@ -373,6 +387,27 @@ enyo.kind({
 		} else {
 			this.selectedTemplate = inEvent.content;
 		}
+
+		this.templateToggleService(inSender, inEvent);
+	},
+	templateToggleService: function(inSender, inEvent) {
+		var keys = Object.keys(this.services);
+		keys.forEach(function(serviceId) {
+			var svcChbox = serviceId + "CheckBox";
+			var service = this.services[serviceId];
+			if (inEvent.content.match(serviceId)) {
+				this.showService(serviceId);
+			} else {
+				service.checkBox.setChecked(false);
+				if (service.tab) {
+					service.tab.setShowing(false);
+				}
+			}
+		}.bind(this));
+	},
+	handleAdditionalSource: function(inSender, inEvent) {
+		this.selectedAddSource = inEvent.source;
+		return true;
 	}
 });
 
