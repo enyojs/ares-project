@@ -1,10 +1,4 @@
 enyo.kind({
-	name: "AresTab",
-	kind: "GroupItem",
-	classes: "onyx-radiobutton ares-tab"
-});
-
-enyo.kind({
 	name: "DocumentToolbar",
 	kind: "onyx.Toolbar",
 	events: {
