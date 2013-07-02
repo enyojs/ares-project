@@ -2,9 +2,6 @@ enyo.kind({
 	name: "DocumentToolbar",
 	kind: "onyx.Toolbar",
 
-	// TODO check if still needed
-	classes: "ares-docbar-container",
-
 	events: {
 		onToggleOpen: "",
 		onSwitchFile: "",
