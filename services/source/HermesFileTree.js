@@ -931,43 +931,14 @@ enyo.kind({
 
 				parentNode.reloadChildren()
 					.response(this, function(inSender, inNodes) {
-						this.log("parentNode", parentNode);
 						this.refreshFileTree(function() {parentNode.doAdjustScroll()}, parentNode.file.id /*selectId*/);
 						if (parentNode === serverNode) {
-							this.log("serverNode", serverNode);
 							this.$.selection.select(serverNode.file.id, serverNode);
 						}
 					})
 					.error(this, function() {
 						this.log("error retrieving related node children");
 					});
-
-
-				/*if (parentNode.id != serverNode.id) {
-					parentNode.reloadChildren()
-						.response(this, function(inSender, inNodes) {
-							parentNode.container.reloadChildren()
-								.response(this, function(inSender, inNodes) {
-									this.refreshFileTree(function() {parentNode.container.getNodeWithId(inParentFolder.id).doAdjustScroll()}, inParentFolder.id /*selectId*//*);
-								})
-								.error(this, function() {
-									this.log("error retrieving related node children");
-								});
-						})
-						.error(this, function() {
-							this.log("error retrieving related node children");
-						});
-				} else {
-					serverNode.reloadChildren()
-						.response(this, function(inSender, inNodes) {
-							this.refreshFileTree(function(){serverNode.doAdjustScroll()}, serverNode.file.id /*selectId*//*);
-							this.$.selection.select(serverNode.file.id, serverNode);
-						})
-						.error(this, function() {
-							this.log("error retrieving related node children");
-						});
-					
-				}*/
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to delete:", this.selectedFile, inError);
