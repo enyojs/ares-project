@@ -222,7 +222,9 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var self = this;
 		this._closeDocument(inEvent.id, function() {
-			self.showProjectView();
+			if (! Ares.Workspace.files.length ) {
+				self.showProjectView();
+			}
 		});
 	},
 	/** @private */
