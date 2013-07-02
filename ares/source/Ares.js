@@ -94,10 +94,10 @@ enyo.kind({
 		var fileDataId = Ares.Workspace.files.computeId(file);
 		var fileData = Ares.Workspace.files.get(fileDataId);
 		if (fileData) {
+			// useful when double clicking on a file in HermesFileTree
 			this.switchToDocument(fileData);
 		} else {
 			this.showWaitPopup(this, {msg: $L("Opening...")});
-			this.$.bottomBar.createFileTab(file.name, fileDataId);
 			this.$.slideable.setDraggable(true);
 			this._fetchDocument(projectData, file, function(inErr, inContent) {
 				self.hideWaitPopup();
@@ -108,6 +108,7 @@ enyo.kind({
 					}
 				} else {
 					fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
+					self.$.bottomBar.createFileTab(file.name, fileDataId);
 					self.switchToDocument(fileData);
 					if (typeof next === 'function') {
 						next();
