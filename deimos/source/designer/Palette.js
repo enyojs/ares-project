@@ -76,9 +76,6 @@ enyo.kind({
 		projectData: "",
 		projectIndexer: ""
 	},
-	events: {
-		onPaletteItemDragStart: ""
-	},
 	debug: false,
 	components: [
 		{kind: "FittableRows", classes: "enyo-fit", components: [

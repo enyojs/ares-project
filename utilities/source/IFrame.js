@@ -23,7 +23,9 @@ enyo.kind(
 			this.urlChanged();
 		},
 		urlChanged: function() {
-			if(this.url) this.setAttribute('src', this.url);
+			if (this.url) {
+				this.setAttribute('src', this.url);
+			}
 		},
 		setGeometry: function(width, height) {
 			this.setAttribute( 'width',  width) ;
