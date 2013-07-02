@@ -8,7 +8,7 @@ enyo.kind({
 	events: {
 		onToggleOpen: "",
 		onSwitchFile: "",
-		onClose: ""
+		onCloseFileRequest: ""
 	},
 
 	components: [

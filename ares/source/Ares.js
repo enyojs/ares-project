@@ -23,7 +23,7 @@ enyo.kind({
 				onSave: "bounceSave",
 				onDesign: "bounceDesign",
 				onNewKind: "bounceNew",
-				onClose: "bounceClose"
+				onCloseFileRequest: "bounceCloseFileRequest"
 			}
 		]},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
@@ -345,9 +345,13 @@ enyo.kind({
 		this.$.phobos.newKindAction(inSender, inEvent);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
-	// Close is a special case, because it can be invoked on a document other than the currently-active one
-	bounceClose: function(inSender, inEvent) {
+
+	// Close is a special case, because it can be invoked on a
+	// document other than the currently-active one, so we must first
+	// switch the active document and then close it
+	bounceCloseFileRequest: function(inSender, inEvent) {
 		this.switchFile(inSender, inEvent);
+		// phobos fires a onCloseDocument event when file is closed by Ace
 		enyo.asyncMethod(this.$.phobos, "closeDocAction");
 	},
 	//* Update code running in designer
