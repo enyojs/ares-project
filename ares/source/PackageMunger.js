@@ -1,3 +1,5 @@
+/* global async, ares */
+
 /**
  * Manages the content of 'package.js' files
  * 
@@ -10,6 +12,10 @@ enyo.kind({
 	debug: false,
 	events: {
 		onChangingNode: ""
+	},
+	create: function() {
+		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
+		this.inherited(arguments);
 	},
 	/**
 	 * Handle a sequence of nodes addition and removal
@@ -39,9 +45,9 @@ enyo.kind({
 	 * @private
 	 */
 	_addNode: function(inParam, next) {
-		if (this.debug) this.log("inParam:", inParam);
+		this.trace("inParam:", inParam);
 		if (!this._isHandledInPackage(inParam)) {
-			if (this.debug) this.log('skipped:' + inParam.node.name + ' is not handled by package.js');
+			this.trace('skipped:', inParam.node.name, 'is not handled by package.js');
 			next();
 			return;
 		}
@@ -66,9 +72,9 @@ enyo.kind({
 	 * @private
 	 */
 	_removeNode: function(inParam, next) {
-		if (this.debug) this.log("inParam:", inParam);
+		this.trace("inParam:", inParam);
 		if (!this._isHandledInPackage(inParam)) {
-			if (this.debug) this.log('skipped:' + inParam.node.name + ' is not handled by package.js');
+			this.trace('skipped:', inParam.node.name, 'is not handled by package.js');
 			next();
 			return;
 		}
@@ -87,13 +93,13 @@ enyo.kind({
 	},
 	/** @private */
 	_packageCheckNode: function(service, parentNode, pkgNode, next) {
-		if (this.debug) this.log("parentNode:", parentNode, "pkgNode:", pkgNode);
+		this.trace("parentNode:", parentNode, "pkgNode:", pkgNode);
 		if (pkgNode) {
 			next(null, pkgNode);
 		} else if (parentNode.isDir) {
 			service.propfind(parentNode.id, 1 /*depth*/)
 				.response(this, function(inRequest, inData) {
-					if (this.debug) enyo.log("PackageMunger._packageCheckNode(): inRequest:", inRequest, "inData:", inData);
+					if (this.debug) { enyo.log("PackageMunger._packageCheckNode(): inRequest:", inRequest, "inData:", inData); }
 					var nodes = inData && inData.children;
 					pkgNode = nodes && enyo.filter(nodes, function(node) {
 						return node.name === 'package.js';
@@ -101,37 +107,37 @@ enyo.kind({
 					next(null, pkgNode);
 				})
 				.error(this, function(inRequest, inError) {
-					if (this.debug) enyo.log("PackageMunger._packageCheckNode(): inRequest:", inRequest, "inError:", inError);
+					if (this.debug) { enyo.log("PackageMunger._packageCheckNode(): inRequest:", inRequest, "inError:", inError); }
 					next(inError);
 				});
 		} else {
-			if (this.debug) this.log("no pkgNode & parentNode is not a folder: nothing to do");
+			this.trace("no pkgNode & parentNode is not a folder: nothing to do");
 			next(null, null);
 		}
 	},
 	/** @private */
 	_packageCreate: function(service, parentNode, pkgNode, next) {
-		if (this.debug) this.log("parentNode:", parentNode, "pkgNode:", pkgNode);
+		this.trace("parentNode:", parentNode, "pkgNode:", pkgNode);
 		if (pkgNode) {
 			next(null, pkgNode);
 		} else if (parentNode.isDir) {
 			service.createFile(parentNode.id, "package.js", "enyo.depends(\n);\n")
 				.response(this, function(inRequest, inFsNode) {
-					if (this.debug) enyo.log("PackageMunger._packageCreate(): package.js inFsNode[0]:", inFsNode[0]);
+					if (this.debug) { enyo.log("PackageMunger._packageCreate(): package.js inFsNode[0]:", inFsNode[0]); }
 					next(null, inFsNode[0]);
 				})
 				.error(this, function(inRequest, inError) {
-					if (this.debug) enyo.log("PackageMunger._packageCreate(): inRequest:", inRequest, "inError:", inError);
+					if (this.debug) { enyo.log("PackageMunger._packageCreate(): inRequest:", inRequest, "inError:", inError); }
 					next(inError);
 				});
 		} else {
-			if (this.debug) this.log("no pkgNode & parentNode is not a folder: nothing to do");
+			this.trace("no pkgNode & parentNode is not a folder: nothing to do");
 			next();
 		}
 	},
 	/** @private */
 	_packageRead: function(service, pkgNode, next) {
-		if (this.debug) this.log("pkgNode:", pkgNode);
+		this.trace("pkgNode:", pkgNode);
 		service.getFile(pkgNode.id)
 			.response(this, function(inSender, inContent) {
 				next(null, pkgNode, inContent.content);
@@ -139,15 +145,14 @@ enyo.kind({
 	},
 	/** @private */
 	_packageAppend: function(name, pkgNode, pkgContent, next) {
-		if (this.debug) this.log("name:", name, "pkgContent:", pkgContent);
-		if (this.debug) this.log(' called for file ' + name );
+		this.trace("name:", name, "pkgContent:", pkgContent);
 		var toMatch = name.replace(/\./, "\\."); // replace '.' with '\.'
 		var re = new RegExp("\\b" + toMatch + "\\b");
 		var newContent;
 		if (pkgContent.match(re)) {
-			if (this.debug) this.log('file ' + name + ' is already in package.js');
+			this.trace('file ' + name + ' is already in package.js');
 		} else {
-			if (this.debug) this.log('inserting ' + name + 'in package.js');
+			this.trace('inserting ' + name + 'in package.js');
 			newContent = pkgContent
 				.replace(/\)/,'\t"' + name + '"\n)') // insert new name
 				.replace(/("|')(\s*)"/,'$1,$2"');    // add potentially missing comma
@@ -161,9 +166,9 @@ enyo.kind({
 	},
 	/** @private */
 	_packageChop: function(name, pkgNode, pkgContent, next) {
-		if (this.debug) this.log("name:", name, "pkgContent:", pkgContent);
+		this.trace("name:", name, "pkgContent:", pkgContent);
 		var toMatch = name.replace(/\./, "\\."); // replace '.' with '\.'
-		if (this.debug) this.log('regexp toMatch:' , toMatch);
+		this.trace('regexp toMatch:', toMatch);
 		var re = new RegExp("(\"|')" + toMatch + "(\"|')");
 		var newContent;
 		if (pkgContent.match(re)) {
@@ -174,7 +179,7 @@ enyo.kind({
 				.replace(/,\s*\)/,"\n)")   // remove comma before ')'
 				.replace(/\(\s*\)/,"(\n)"); // remove blank line between ( )
 		} else  {
-			if (this.debug) this.log('cannot find ' + name + ' in package.js');
+			this.trace('cannot find ' + name + ' in package.js');
 		}
 		if (newContent === pkgContent) {
 			newContent = null;
@@ -185,15 +190,15 @@ enyo.kind({
 	},
 	/** @private */
 	_packageSave: function(service, pkgNode, pkgContent, next) {
-		if (this.debug) this.log("pkgNode:", pkgNode, "pkgContent:", pkgContent);
+		this.trace("pkgNode:", pkgNode, "pkgContent:", pkgContent);
 		if (pkgContent) {
 			service.putFile(pkgNode.id, pkgContent)
 				.response(this, function(inRequest, inFsNode) {
-					if (this.debug) enyo.log("PackageMunger._packageSave(): updated package.js in inFsNode:", inFsNode[0]);
+					if (this.debug) { enyo.log("PackageMunger._packageSave(): updated package.js in inFsNode:", inFsNode[0]); }
 					next(null, null);
 				})
 				.error(this, function (inRequest, inError) {
-					if (this.debug) enyo.log("PackageMunger._packageSave(): inRequest:", inRequest, "inError:", inError);
+					if (this.debug) { enyo.log("PackageMunger._packageSave(): inRequest:", inRequest, "inError:", inError); }
 					next(inError);
 				});
 		} else {
