@@ -16,8 +16,9 @@ enyo.kind({
 		{
 			name: "tabs",
 			kind: "onyx.TabBar",
+			checkBeforeClosing: true,
 			onTabChanged: 'switchFile',
-			onTabRemove: 'closeFile'
+			onTabRemoveRequested: 'requestCloseFile'
 		}
 	],
 
@@ -36,9 +37,11 @@ enyo.kind({
 	activateFileWithId: function(id) {
 		this.$.tabs.activate({ userId: id });
 	},
-	closeFile: function(inSender, inEvent) {
-		var id = inSender.fileId;
-		this.doClose({id: id});
+
+	requestCloseFile: function(inSender, inEvent) {
+		// inEvent.next callback is ditched. Ares will call removeTab
+		// when file is closed by Ace
+		this.doCloseFileRequest({id: inEvent.userId});
 		return true;
 	},
 	removeTab: function(id) {
