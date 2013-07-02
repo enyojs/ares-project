@@ -105,34 +105,28 @@ So, it's recommended to pass each string element as a parameter instead of conca
 
 NOTE: For production, we may suppress the "this.trace()" code when doing the minification process.
 
-### Ares style
+### Ares styling
 
 Ares 2 uses the dynamic stylesheet language LESS.
 
-Whenever you check in changes to .less files in Ares, you'll also need to rebuild and check in the top-level Ares.css file (ares/css/Ares.css).
+For the moment, all css compilation is done on the client side and is loaded through index.html.
 
-Replace Ares.css by Ares.less in ares/package.js.
+We are waiting for ares minification to make possible using Ares.less on the client side in debug.html and compiled Ares.css file in index.html.
 
-To rebuild Ares.css, run the lessc script from the command line.
+### Adding css/less styling
 
-On Mac/Linux:
+We have two main .less files :
+	
+	- ares-variables.less
+	- ares-rules.less
 
-		cd ares 
-		../enyo/tools/lessc.sh package.js
+In ares-variables.less, onyx variables are overridden and specific ares variables are added.
 
-On Windows:
+In ares-rules.less onyx css classes and specific ares css classes use variables declared in ares-variables.less.
 
-		cd ares 
-		../enyo/tools/lessc.bat package.js
+To add new style to Ares, the file ares-rules.less should contain the new css classe. Check if one of variables can be used from ares-variables.less. Otherwise, add a new one.
 
-To compile .less files on the client side, we need to replace  enyo depends "Ares.css" by "Ares.less" in ares/package.js.
-
-The next step is to load Less library in index.html file.
-
-	<script src="enyo/tools/minifier/node_modules/less/dist/less-1.3.0e.min.js"></script>
-
-
-For more information you can see [this page](https://github.com/enyojs/enyo/wiki/UI-Theming). 
+For more information see [this page](https://github.com/enyojs/enyo/wiki/UI-Theming).
 
 ### Testing
 

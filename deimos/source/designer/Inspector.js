@@ -371,7 +371,7 @@ enyo.kind({
 				if (inControl && inControl.style !== undefined) {
 					style = inControl.style;
 				}
-				this.$.content.createComponent({kind: "CssEditor", currentControlStyle: style});
+				this.$.content.createComponent({kind: "CssEditor", currentStyle: style});
 				this.$.filterLevel.hide();
 				break;
 			case 'L':
@@ -379,7 +379,7 @@ enyo.kind({
 				this.$.filterLevel.hide();
 				break;
 			default:
-				enyo.warn("Inspector has unknown filterType: ", filterType);
+				enyo.warn("Inspector has unknown filterType: ", this.filterType);
 				break;
 		}
 		
