@@ -5,10 +5,10 @@
     cursor: hand;
     cursor: pointer;
     height: 50px;
-    border-bottom: 1px solid #B7B7B7;
+    border-bottom: 1px solid @ares-project-list-border-color;
     font-size: 16px;
     font-weight: light;
-    color: #666666;
+    color: @ares-project-list-text-color;
     text-shadow: 0 1px 0 #FFFFFF;
     line-height: 50px;
     white-space: nowrap;
@@ -18,14 +18,14 @@
 
 .ares-project-list-menu li.on {
     box-shadow:inset 0px 0px 30px rgba(0,0,0,0.2);
-    background: #dedede;
+    background: @ares-project-list-background-on;
 }
 
-.ares-project-list-menu li.hover { background-color:#eeeeee; }
+.ares-project-list-menu li.hover { background-color:@ares-backgound-hover; }
 
-.ares-project-list-menu li.active { background-color:#aaaaaa; box-shadow: inset 0px 0px 30px rgba(0,0,0,0.3); }
+.ares-project-list-menu li.active { background-color:@ares-project-list-background-active; box-shadow: inset 0px 0px 30px rgba(0,0,0,0.3); }
 
-.ares-project-list-menu li.selected { background-color:#cccccc; }
+.ares-project-list-menu li.selected { background-color: @ares-project-list-background-selected; }
 
 .ares-project-list-menu li.on.selected { background-color:inherit; }
 
