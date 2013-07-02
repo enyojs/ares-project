@@ -103,13 +103,16 @@ enyo.kind({
 		onCloseDesigner: "",
 		onDesignerUpdate: "",
 		onUndo: "",
-		onRedo: ""
+		onRedo: "",
+		onRegisterMe: ""
 	},
 	kinds: [],
 	index: null,
 	create: function() {
 		this.inherited(arguments);
 		this.addHandlers();
+		var self = this;
+		this.doRegisterMe({name:"deimos", reference:self});
 	},
 	rendered: function() {
 		this.inherited(arguments);

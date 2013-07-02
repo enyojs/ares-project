@@ -35,10 +35,13 @@ enyo.kind({
 	events: {
 		onHideWaitPopup: "",
 		onShowWaitPopup: "",
-		onError: ""
+		onError: "",
+		onRegisterMe: ""
 	},
 	create: function() {
 		this.inherited(arguments);
+		var self = this;
+		this.doRegisterMe({name:"projectView", reference:self});
 	},
 	/**
 	 * Refresh the {ProjectView} (if relevant), following a change of the given file

@@ -13,7 +13,8 @@ enyo.kind({
 		onClose: "",
 		onSave: "",
 		onNewKind: "",
-		onDesign: ""
+		onDesign: "",
+		onRegisterMe: ""
 	},
 	components: [
 		{name: "container", classes: "ares-docbar-container", kind: "FittableColumns", ontap: "doToggleOpen", components: [
@@ -29,6 +30,11 @@ enyo.kind({
 		]}
 	],
 	tabs: {},
+	create: function() {
+		this.inherited(arguments);
+		var self = this;
+		this.doRegisterMe({name:"documentToolbar", reference:self});
+	},
 	showControls: function() {
 		this.$.drawer.setOpen(true);
 		// lock designButton's width, so it doesn't move when the caption changes
