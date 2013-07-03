@@ -31,25 +31,25 @@ enyo.kind({
 								"2.0.0", "1.9.0", "1.8.1", "1.7.0", "1.6.1", "1.5.0",
 								"1.4.1", "1.3.0", "1.2.0", "1.1.0"
 						],
-						type: "PickerRow"  
+						type: "Phonegap.ProjectProperties.PickerRow"  
 					},
-					{name: "orientation", label:"Orientation",content:["both", "landscape", "portrait"], type: "PickerRow"},
-					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], type: "PickerRow"},
-					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], type: "PickerRow"}
+					{name: "orientation", label:"Orientation",content:["both", "landscape", "portrait"], type: "Phonegap.ProjectProperties.PickerRow"},
+					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], type: "Phonegap.ProjectProperties.PickerRow"},
+					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], type: "Phonegap.ProjectProperties.PickerRow"}
 				] 				
 			}, 
 			{
 				id: "permissions",
 				name: "Permissions",
 				rows: [
-					{name: "battery", label: "Battery",	content: "", type: "CheckBoxRow"},
-					{name: "camera", label: "Camera", content: "", type: "CheckBoxRow"},
-					{name: "contact", label: "Contact",	content: "", type: "CheckBoxRow"},
-					{name: "file", label: "File", content: "", type: "CheckBoxRow"},
-					{name: "media",	label: "Media", content: "", type: "CheckBoxRow"},
-					{name: "network", label: "Network", content: "", type: "CheckBoxRow"},
-					{name: "notification", label: "Notification", content: "", type: "CheckBoxRow"},
-					{name: "device", label: "Device", content: "", type: "CheckBoxRow"}
+					{name: "battery", label: "Battery",	content: "", type: "Phonegap.ProjectProperties.CheckBoxRow"},
+					{name: "camera", label: "Camera", content: "", type: "Phonegap.ProjectProperties.CheckBoxRow"},
+					{name: "contact", label: "Contact",	content: "", type: "Phonegap.ProjectProperties.CheckBoxRow"},
+					{name: "file", label: "File", content: "", type: "Phonegap.ProjectProperties.CheckBoxRow"},
+					{name: "media",	label: "Media", content: "", type: "Phonegap.ProjectProperties.CheckBoxRow"},
+					{name: "network", label: "Network", content: "", type: "Phonegap.ProjectProperties.CheckBoxRow"},
+					{name: "notification", label: "Notification", content: "", type: "Phonegap.ProjectProperties.CheckBoxRow"},
+					{name: "device", label: "Device", content: "", type: "Phonegap.ProjectProperties.CheckBoxRow"}
 				]
 			}
 		],
@@ -69,28 +69,28 @@ enyo.kind({
 				id: "android",
 				name: "Google Android",
 				rows: [
-					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], type: "PickerRow"},
-					{name: "android-minSdkVersion", label: "Minimum SDK", content: "", type: "InputRow"},
-					{name: "android-maxSdkVersion", label: "Maximum SDK", content: "", type: "InputRow"},
-					{name: "splash-screen-duration", label: "Duration of the splashScreen", content: "", type: "InputRow"},
-					{name: "load-url-timeout", label: "Load URL timeout", content: "", type: "InputRow"},
-					{name: "iconAndroid", label: "Icon", content: "", type: "InputRow"},
-					{name: "splashScreenAndroid", label: "Splash screen", content: "", type: "InputRow"}
+					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], type: "Phonegap.ProjectProperties.PickerRow"},
+					{name: "android-minSdkVersion", label: "Minimum SDK", content: "", type: "Phonegap.ProjectProperties.InputRow"},
+					{name: "android-maxSdkVersion", label: "Maximum SDK", content: "", type: "Phonegap.ProjectProperties.InputRow"},
+					{name: "splash-screen-duration", label: "Duration of the splashScreen", content: "", type: "Phonegap.ProjectProperties.InputRow"},
+					{name: "load-url-timeout", label: "Load URL timeout", content: "", type: "Phonegap.ProjectProperties.InputRow"},
+					{name: "iconAndroid", label: "Icon", content: "", type: "Phonegap.ProjectProperties.InputRow"},
+					{name: "splashScreenAndroid", label: "Splash screen", content: "", type: "Phonegap.ProjectProperties.InputRow"}
 				]				
 			}, 
 			{
 				id: "ios",
 				name: "Apple iOS",
 				rows: [
-					{name: "webviewbounce", label: "Web view bounce", content:  ["true", "false"], type: "PickerRow"},
-					{name: "prerendered-icon", label: "Prerendred icon", content: ["true", "false"], type: "PickerRow"},
-					{name: "ios-statusbarstyle", label: "Status Bar style", content: ["black-opaque", "black-translucent", "default"], type: "PickerRow"},
-					{name: "detect-data-types", label: "Detect Data type", content: ["true", "false"], type: "PickerRow"},
-					{name: "exit-on-suspend", label: "Exit on suspend", content: ["true", "false"], type: "PickerRow"},
-					{name: "show-splash-screen-spinner", label: "Show splash screen spinner", content: ["true", "false"], type: "PickerRow"},
-					{name: "auto-hide-splash-screen", label: "Auto-hide splash screen", content: ["true", "false"], type: "PickerRow"},
-					{name: "iconIos", label: "Icon", content: "", type: "InputRow"},
-					{name: "splashScreenIos", label: "Splash screen", content: "", type: "InputRow"}
+					{name: "webviewbounce", label: "Web view bounce", content:  ["true", "false"], type: "Phonegap.ProjectProperties.PickerRow"},
+					{name: "prerendered-icon", label: "Prerendred icon", content: ["true", "false"], type: "Phonegap.ProjectProperties.PickerRow"},
+					{name: "ios-statusbarstyle", label: "Status Bar style", content: ["black-opaque", "black-translucent", "default"], type: "Phonegap.ProjectProperties.PickerRow"},
+					{name: "detect-data-types", label: "Detect Data type", content: ["true", "false"], type: "Phonegap.ProjectProperties.PickerRow"},
+					{name: "exit-on-suspend", label: "Exit on suspend", content: ["true", "false"], type: "Phonegap.ProjectProperties.PickerRow"},
+					{name: "show-splash-screen-spinner", label: "Show splash screen spinner", content: ["true", "false"], type: "Phonegap.ProjectProperties.PickerRow"},
+					{name: "auto-hide-splash-screen", label: "Auto-hide splash screen", content: ["true", "false"], type: "Phonegap.ProjectProperties.PickerRow"},
+					{name: "iconIos", label: "Icon", content: "", type: "Phonegap.ProjectProperties.InputRow"},
+					{name: "splashScreenIos", label: "Splash screen", content: "", type: "Phonegap.ProjectProperties.InputRow"}
 				]
 
 			}, 
@@ -98,25 +98,25 @@ enyo.kind({
 				id: "winphone",
 				name: "Microsoft Windows Phone 7",
 				rows: [
-					{name: "iconWinphone", label: "Icon", content: "", type: "InputRow"},
-					{name: "splashScreenWinphone", label: "Splash screen", content: "", type: "InputRow"}
+					{name: "iconWinphone", label: "Icon", content: "", type: "Phonegap.ProjectProperties.InputRow"},
+					{name: "splashScreenWinphone", label: "Splash screen", content: "", type: "Phonegap.ProjectProperties.InputRow"}
 				]				
 			}, 
 			{
 				id: "blackberry",
 				name: "RIM Blackberry",
 				rows: [
-					{name: "disable-cursor", label: "Disable Cursor", content:  ["none", "true", "false"], type: "PickerRow"},
-					{name: "iconBlackberry", label: "Icon", content: "", type: "InputRow"},
-					{name: "splashScreenBlackberry", label: "Splash screen", content: "", type: "InputRow"}
+					{name: "disable-cursor", label: "Disable Cursor", content:  ["none", "true", "false"], type: "Phonegap.ProjectProperties.PickerRow"},
+					{name: "iconBlackberry", label: "Icon", content: "", type: "Phonegap.ProjectProperties.InputRow"},
+					{name: "splashScreenBlackberry", label: "Splash screen", content: "", type: "Phonegap.ProjectProperties.InputRow"}
 				]
 			}, 
 			{
 				id: "webos",
 				name: "HP webOS 2",
 				rows: [
-					{name: "iconWebos", label: "Icon", content: "", type: "InputRow"},
-					{name: "splashScreenWebos", label: "Splash screen", content: "", type: "InputRow"}
+					{name: "iconWebos", label: "Icon", content: "", type: "Phonegap.ProjectProperties.InputRow"},
+					{name: "splashScreenWebos", label: "Splash screen", content: "", type: "Phonegap.ProjectProperties.InputRow"}
 				]
 			}
 		]
@@ -700,7 +700,7 @@ enyo.kind({
  * This Kind define a row containing a checkbox widget and attached to a drawer in {Phonegap.ProjectProperties}
  */
 enyo.kind({
-	name: "CheckBoxRow",
+	name: "Phonegap.ProjectProperties.CheckBoxRow",
 	kind: "FittableColumns",
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
@@ -739,7 +739,7 @@ enyo.kind({
  * This Kind define a row containing an Input widget and attached to a drawer in {Phonegap.ProjectProperties}
  */
 enyo.kind({
-	name: "InputRow",
+	name: "Phonegap.ProjectProperties.InputRow",
 	kind: "FittableColumns",
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
@@ -810,7 +810,7 @@ enyo.kind({
  * This Kind define a row containing a Picker widget and attached to a drawer in {Phonegap.ProjectProperties}
  */
 enyo.kind({
-	name: "PickerRow",
+	name: "Phonegap.ProjectProperties.PickerRow",
 	kind: "FittableColumns",
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
