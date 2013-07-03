@@ -22,37 +22,34 @@ enyo.kind({
 		commonDrawersContent: [
 			{
 				id: "general",
-				name: "General",				
-				inputs: [
-					//["iconShared", "Icon"],
-					//["splashScreenShared", "Splash screen"]
-				],
-				pickers: [
-					["phonegap-version", "Phonegap version", ["2.8.0", "2.7.0", "2.5.0", "2.3.0", "2.2.0", "2.1.0",
+				name: "General",
+				rows: [
+					{
+						name: "phonegap-version",
+						label:"Phonegap version",
+						content:["2.9.0", "2.8.0", "2.7.0", "2.5.0", "2.3.0", "2.2.0", "2.1.0",
 								"2.0.0", "1.9.0", "1.8.1", "1.7.0", "1.6.1", "1.5.0",
 								"1.4.1", "1.3.0", "1.2.0", "1.1.0"
-						]],
-					["orientation", "Orientation", ["both", "landscape", "portrait"]],
-					["target-device", "Target device", ["universal", "handset", "tablet"]],
-					["fullscreen", "Fullscreen mode", ["true", "false"]]
-				],
-				checkboxes: []
+						],
+						type: "PickerRow"  
+					},
+					{name: "orientation", label:"Orientation",content:["both", "landscape", "portrait"], type: "PickerRow"},
+					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], type: "PickerRow"},
+					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], type: "PickerRow"}
+				] 				
 			}, 
 			{
 				id: "permissions",
 				name: "Permissions",
-				inputs: [],
-				pickers: [],
-				checkboxes: [
-					["battery", "Battery"],
-					["camera", "Camera"],
-					["contact", "Contact"],
-					["file", "File"],
-					["geolocation", "Geolocation"],
-					["media", "Media"],
-					["network", "Network"],
-					["notification", "Notification"],
-					["device", "Device"]
+				rows: [
+					{name: "battery", label: "Battery",	content: "", type: "CheckBoxRow"},
+					{name: "camera", label: "Camera", content: "", type: "CheckBoxRow"},
+					{name: "contact", label: "Contact",	content: "", type: "CheckBoxRow"},
+					{name: "file", label: "File", content: "", type: "CheckBoxRow"},
+					{name: "media",	label: "Media", content: "", type: "CheckBoxRow"},
+					{name: "network", label: "Network", content: "", type: "CheckBoxRow"},
+					{name: "notification", label: "Notification", content: "", type: "CheckBoxRow"},
+					{name: "device", label: "Device", content: "", type: "CheckBoxRow"}
 				]
 			}
 		],
@@ -71,69 +68,56 @@ enyo.kind({
 			{
 				id: "android",
 				name: "Google Android",
-				inputs: [
-					["android-minSdkVersion", "Minimum SDK"],
-					["android-maxSdkVersion", "Maximum SDK"],
-					["splash-screen-duration", "Duration of the splashScreen"],
-					["load-url-timeout", "Load URL timeout"],
-				//	["iconAndroid", "Icon"],
-				//	["splashScreenAndroid", "Splash screen"]
-				],
-				pickers: [
-					["android-installLocation", "Install Location", ["internalOnly", "preferExternal", "auto"]]
-				],
-				checkboxes: []
+				rows: [
+					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], type: "PickerRow"},
+					{name: "android-minSdkVersion", label: "Minimum SDK", content: "", type: "InputRow"},
+					{name: "android-maxSdkVersion", label: "Maximum SDK", content: "", type: "InputRow"},
+					{name: "splash-screen-duration", label: "Duration of the splashScreen", content: "", type: "InputRow"},
+					{name: "load-url-timeout", label: "Load URL timeout", content: "", type: "InputRow"},
+					{name: "iconAndroid", label: "Icon", content: "", type: "InputRow"},
+					{name: "splashScreenAndroid", label: "Splash screen", content: "", type: "InputRow"}
+				]				
 			}, 
 			{
 				id: "ios",
 				name: "Apple iOS",
-				inputs: [
-				//	["iconIos", "Icon"],
-				//	["splashScreenIos", "Splash screen"]
-				],
-				pickers: [
-					["webviewbounce", "Web view bounce", ["true", "false"]],
-					["prerendered-icon", "Prerendred icon", ["true", "false"]],
-					["ios-statusbarstyle", "Status Bar style", ["black-opaque", "black-translucent", "default"]],
-					["detect-data-types", "Detect Data type", ["true", "false"]],
-					["exit-on-suspend", "Exit on suspend", ["true", "false"]],
-					["show-splash-screen-spinner", "Show splash screen spinner", ["true", "false"]],
-					["auto-hide-splash-screen", "Auto-hide splash screen", ["true", "false"]]
-				],
-				checkboxes: []
+				rows: [
+					{name: "webviewbounce", label: "Web view bounce", content:  ["true", "false"], type: "PickerRow"},
+					{name: "prerendered-icon", label: "Prerendred icon", content: ["true", "false"], type: "PickerRow"},
+					{name: "ios-statusbarstyle", label: "Status Bar style", content: ["black-opaque", "black-translucent", "default"], type: "PickerRow"},
+					{name: "detect-data-types", label: "Detect Data type", content: ["true", "false"], type: "PickerRow"},
+					{name: "exit-on-suspend", label: "Exit on suspend", content: ["true", "false"], type: "PickerRow"},
+					{name: "show-splash-screen-spinner", label: "Show splash screen spinner", content: ["true", "false"], type: "PickerRow"},
+					{name: "auto-hide-splash-screen", label: "Auto-hide splash screen", content: ["true", "false"], type: "PickerRow"},
+					{name: "iconIos", label: "Icon", content: "", type: "InputRow"},
+					{name: "splashScreenIos", label: "Splash screen", content: "", type: "InputRow"}
+				]
 
 			}, 
 			{
 				id: "winphone",
 				name: "Microsoft Windows Phone 7",
-				inputs: [
-				//	["iconWinphone", "Icon"],
-				//	["splashScreenWinphone", "Splash screen"]
-				],
-				pickers: [],
-				checkboxes: []
+				rows: [
+					{name: "iconWinphone", label: "Icon", content: "", type: "InputRow"},
+					{name: "splashScreenWinphone", label: "Splash screen", content: "", type: "InputRow"}
+				]				
 			}, 
 			{
 				id: "blackberry",
 				name: "RIM Blackberry",
-				inputs: [
-				//	["iconBlackberry", "Icon"],
-				//	["splashScreenBlackberry", "Splash screen"]
-				],
-				pickers: [
-					["disable-cursor", "Disable Cursor", ["none", "true", "false"]]
-				],
-				checkboxes: []
+				rows: [
+					{name: "disable-cursor", label: "Disable Cursor", content:  ["none", "true", "false"], type: "PickerRow"},
+					{name: "iconBlackberry", label: "Icon", content: "", type: "InputRow"},
+					{name: "splashScreenBlackberry", label: "Splash screen", content: "", type: "InputRow"}
+				]
 			}, 
 			{
 				id: "webos",
 				name: "HP webOS 2",
-				inputs: [
-				//	["iconWebos", "Icon"],
-				//	["splashScreenWebos", "Splash screen"]
-				],
-				pickers: [],
-				checkboxes: []
+				rows: [
+					{name: "iconWebos", label: "Icon", content: "", type: "InputRow"},
+					{name: "splashScreenWebos", label: "Splash screen", content: "", type: "InputRow"}
+				]
 			}
 		]
 	}
@@ -301,31 +285,13 @@ enyo.kind({
 
 		function setUpDrawer(dwr, dwrContent) {
 			// Creation of the pickers of the drawer if they existe.
-			enyo.forEach(dwrContent.pickers, function (row) {
+			enyo.forEach(dwrContent.rows, function (row) {
 				//this.log(allDrawers[allDrawers.length - 1], "+++++++");						
 				dwr.$.drawer.createComponent({
-					kind: "PickerRow",
-					name: row[0],
-					label: row[1],
-					value: row[2]
-				});
-			}, this);
-
-			// Creation of the inputs of the drawer if they existe.
-			enyo.forEach(dwrContent.inputs, function (row) {
-				dwr.$.drawer.createComponent({
-					kind: "InputRow",
-					name: row[0],
-					label: row[1] //, 
-				});
-			}, this);
-
-			// Creation of the checkboxes of the drawer if they existe.
-			enyo.forEach(dwrContent.checkboxes, function (row) {
-				dwr.$.drawer.createComponent({
-					kind: "CheckBoxRow",
-					name: row[0],
-					label: row[1]
+					kind: row.type,
+					name: row.name,
+					label: row.label,
+					value: row.content
 				});
 			}, this);
 		}
@@ -427,9 +393,14 @@ enyo.kind({
 		config: {}
 	},
 	components: [
-		{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "updateDrawer"}, 
-		{tag: "label", name: "targetLbl", classes: "ares-label", ontap: "unfold"}, 
-		{name: "drawer", classes: "ares-row ares-drawer", orient: "v", kind: "onyx.Drawer",	open: false}
+		 
+		{tag: "div", classes: "ares-project-properties-label-background", ontap: "unfold", 
+		components: [
+			{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "updateDrawer"},
+			{tag: "label", name: "targetLbl", classes: "ares-project-properties-platform_drawer_header"}
+		]},
+		 
+		{name: "drawer", orient: "v", kind: "onyx.Drawer",	open: false}
 	],
 	/**
 	 * @private
@@ -537,15 +508,12 @@ enyo.kind({
 		drawerName: "",
 		fold: true
 	},
-	components: [{
-			name: "drawerLbl",			
-			ontap: "unfold"
-		}, {
-			name: "drawer",			
-			orient: "v",
-			kind: "onyx.Drawer",
-			open: false
-		}
+	components: [
+			{tag: "div", classes: "ares-project-properties-label-background", ontap: "unfold",
+			components: [
+				{tag: "label", name: "drawerLbl", classes: "ares-project-properties-common_drawer_header"}
+			]},			 
+			{name: "drawer", orient: "v", kind: "onyx.Drawer", open: false}
 
 	],
 	/**

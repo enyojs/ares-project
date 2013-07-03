@@ -243,7 +243,8 @@
 	background-color: #eaeaea;
 	.ares-rounded-corners (@ares-drawer-radius);
 	padding:4px;
-	text-align: right;
+	text-align: left;
+	min-height: 60px;
 }
 
 .ares-drawer>div {
@@ -290,12 +291,12 @@
 
 /*Project properties popup*/
 
-.ares-project-properties { height: 215px; width: 590px; padding: 5px 10px; margin-top: 15px; }
+.ares-project-properties { height: 400px; width: 590px; padding: 5px 10px; margin-top: 15px; }
 
 .ares-radio-group{ padding-top: 7px; }
 
 .ares-radio-group>button {
-	line-height: 30px;
+	line-height: 32px;
 	padding: 0;
 	margin:0;
 	background-image: none;
@@ -321,6 +322,40 @@
 	border-right: 8px solid transparent;
 	bottom: -6px;
 	right: 43%;
+}
+
+/* Ares "Phonegap build" panel.*/
+.ares-group-box>.onyx-input-decorator { box-shadow: none; }
+
+.ares-project-properties-refresh-button { left: 200px; }
+
+.ares-project-properties-drawer-row { margin-top: 10px; height: 32px; }
+
+.ares-project-properties-drawer-row-label { width: 13em; margin-left: 3em; }
+
+.ares-project-properties-common_drawer_header { 
+	margin-left: 50px;
+	color: #000000;
+	font-weight:bold;
+	position: relative;
+	top : 7px;
+}
+
+.ares-project-properties-platform_drawer_header { 
+	margin-left: 10px; 
+	color: #000000;
+	font-weight:bold;
+
+}
+
+.ares-project-properties-drawer-row-check-box-label { margin-left: 30px; margin-right: 50px; }
+
+.ares-project-properties-label-background { 
+	background-color: #B9BBC7;
+	width: 560px; 
+	height: 32px; 
+	.ares-rounded-corners (@ares-drawer-radius); 
+	
 }
 
 /* Ares group box */
