@@ -416,11 +416,73 @@ enyo.kind({
 	/** @private */
 	adjustScroll: function (inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
+		
 		var node = inEvent.originator;
-		this.$.scroller.scrollToControl(node, true);
+		// FIXME: Due to unexpected UI behaviour ENYO-2575, scrollIntoView method is overridden...
+		//this.$.scroller.scrollIntoView(node, true);
+		this.scrollToHermesNode(node, true);
+
 		return true;
 	},
+	/** 
+	 * scrollToHermesNode: Scroll an Hermes node into scroller view
+	 * @private 
+	 * @param  {hermes.Node} inNode: Hermes node to scroll to
+	 * @param  {Boolean} inAlignWithTop: if true, node is aligned to its top, if false (default), to its bottom
+	*/
+	scrollToHermesNode: function (inNode, inAlignWithTop) {
+		if (this.debug) this.log("inNode", inNode, "inAlignWithTop", inEvent);
 
+		var scrollerBounds = this.$.scroller.getScrollBounds();
+		var scrollNode = inNode;
+		var scrollBounds = {height: 0, width: 0, top: 0, left: 0};
+
+		var first = true;
+		var height = 0;
+		
+		while (scrollNode && scrollNode.container && scrollNode.container.id != this.$.scroller.id) {	
+			// get the offset of the node related to the hermes.Node
+			var node = scrollNode.hasNode();
+			var nodeBounds = {height: node.offsetHeight, width: node.offsetWidth, top: node.offsetTop, left: node.offsetLeft};
+			
+			// get the height took by the whole sibling hermes nodes
+			var siblingNode = scrollNode.node;
+			var siblingBounds = {height: 0, width: 0, top: 0, left: 0};
+			
+			while (siblingNode) {
+				siblingBounds = {height: siblingNode.offsetHeight, width: siblingNode.offsetWidth, top: siblingNode.offsetTop, left: siblingNode.offsetLeft};
+				siblingNode = siblingNode.nextSibling;
+			}
+			
+			// get the height of the container
+			var scrollNodeContainer = scrollNode.container;
+			var containerNode = scrollNodeContainer.hasNode();
+			var containerBounds = {height: 0, width: 0, top: 0, left: 0};
+
+			if (scrollNodeContainer.id != this.$.scroller.id) {
+				containerBounds = {height: containerNode.offsetHeight, width: containerNode.offsetWidth, top: containerNode.offsetTop, left: containerNode.offsetLeft};
+			}
+			
+			// keep the height of the hermes.Node to scroll to
+			if (first) {
+				height = nodeBounds.height;
+				first = false;
+			}
+			
+			// keep the add up of the offsets between the Control to scroll to and the Scroller Control
+			scrollBounds.height = node.offsetHeight;
+			scrollBounds.width = node.offsetWidth;
+			scrollBounds.top += (containerBounds.height - siblingBounds.top - siblingBounds.height + nodeBounds.top);
+			scrollBounds.left += (- siblingBounds.left + nodeBounds.left);
+
+			// go to parent hermes.Node
+			scrollNode = scrollNode.container;
+		}
+
+		// By default, the hermes.Node is scrolled to align with the top of the scroll area.
+		this.$.scroller.setScrollTop(Math.min(scrollerBounds.maxTop, inAlignWithTop === false ? scrollerBounds.maxTop - (scrollerBounds.height - scrollBounds.top) + height : scrollBounds.top));
+		this.$.scroller.setScrollLeft(Math.min(scrollerBounds.maxLeft, inAlignWithTop === false ? scrollBounds.left - scrollerBounds.clientWidth + scrollBounds.width : scrollBounds.left));
+	},
 	nodeTap: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
 		var node = inEvent.originator;
@@ -846,6 +908,7 @@ enyo.kind({
 	/** @private */
 	deleteConfirm: function(inSender, inEvent) {
 		if (this.debug) this.log(inSender, "=>", inEvent);
+		var serverNode = this.$.serverNode;
 		var parentNode = this.getParentNodeOfSelected(),
 		    pkgNode = parentNode.getNodeNamed('package.js');
 		this.$.service.remove(this.selectedFile.id)
@@ -863,7 +926,19 @@ enyo.kind({
 				/* cancel any move reverting */
 				this.resetRevert();
 
-				this.refreshFileTree(parentNode.doAdjustScroll(), parentNode.file.id /*selectId*/);
+
+				serverNode.resized();
+
+				parentNode.reloadChildren()
+					.response(this, function(inSender, inNodes) {
+						this.refreshFileTree(function() {parentNode.doAdjustScroll()}, parentNode.file.id /*selectId*/);
+						if (parentNode === serverNode) {
+							this.$.selection.select(serverNode.file.id, serverNode);
+						}
+					})
+					.error(this, function() {
+						this.log("error retrieving related node children");
+					});
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to delete:", this.selectedFile, inError);
