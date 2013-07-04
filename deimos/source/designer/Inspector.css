@@ -70,9 +70,10 @@ input.inspector-field-checkbox {
 }
 
 .inspector-color-button {
-	height: 6px;
-	width: 69px;
-	border: 2px solid Black;
+	height: 17px;
+	min-width: 71px;
+	border: 1px solid Black;
+	border-radius: 6px;
 	margin: 1px;
 	display: inline-block;
 	vertical-align: middle;
