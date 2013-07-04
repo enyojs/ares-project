@@ -51,7 +51,7 @@ enyo.kind({
 			{tag: "div", name: "header", classes:"title", content: "Select a directory"},
 			{kind: "FittableColumns", classes: "onyx-light", fit: true, components: [
 				{kind:"FittableRows", classes:"ares-left-pane-file-chooser", components:[
-					{kind: "onyx.Toolbar", classes: "ares-top-toolbar  hermesFileTree-toolbar", components: [
+					{kind: "onyx.Toolbar", classes: "ares-top-toolbar", components: [
 						{content:"Sources", classes:"ares-create-sources"}
 					]},
 					{kind: "ProviderList", selector: ["type", "filesystem"], name: "providerList", classes:"ares-provider-list",/*style:"border: 3px solid yellow;", header: "Sources",*/ onSelectProvider: "handleSelectProvider"}

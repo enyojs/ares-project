@@ -27,7 +27,7 @@ enyo.kind({
 	debug: false,
 	components: [
 		{kind:"FittableRows", classes:"project-list", components:[
-			{kind: "onyx.MoreToolbar", classes: "onyx-menu-toolbar ares-top-toolbar", isContainer: true, name: "toolbar", components: [
+			{kind: "onyx.Toolbar", classes: "ares-top-toolbar", isContainer: true, name: "toolbar", components: [
 					{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
 						{tag:"button", content: "Ares"},
 						{kind: "onyx.Menu", classes:"sub-aresmenu", components: [
