@@ -323,7 +323,8 @@ enyo.kind({
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
 		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
-		{name: "color", classes: "inspector-color-button"}
+		{name: "color", classes: "inspector-color-button"},
+		{name: "palette", kind: "PalettePicker", onChange: "colorChanged"}
 	],
 	
 	//* @public
@@ -349,5 +350,10 @@ enyo.kind({
 	fieldValueChanged: function() {
 		this.$.value.setValue(this.fieldValue);
 		this.$.color.applyStyle("background-color", this.fieldValue);
-	}
+	},
+	colorChanged: function(inSender, inEvent) {
+		this.fieldValue = inEvent.originator.$.colorPicker.color;
+		this.doChange({target: this});
+		return true;
+	},
 });
