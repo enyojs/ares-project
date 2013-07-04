@@ -32,8 +32,7 @@ enyo.kind({
 	tabs: {},
 	create: function() {
 		this.inherited(arguments);
-		var self = this;
-		this.doRegisterMe({name:"documentToolbar", reference:self});
+		this.doRegisterMe({name:"documentToolbar", reference:this});
 	},
 	showControls: function() {
 		this.$.drawer.setOpen(true);
