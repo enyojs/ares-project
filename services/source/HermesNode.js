@@ -138,7 +138,7 @@ enyo.kind({
 	updateNodeContent: function(files) {
 		var i = 0, rfiles, tfiles, res, modified = 0, newControl, k = 0, nfiles;
 		
-		if (this.debug) this.log("updateNodeContent on", this) ;
+		if (this.debug) this.log( "updateNodeContent on", this ) ;
 
 		// Add dir property to files, which is a project-relative path
 		enyo.forEach(files, function(f) {
@@ -149,32 +149,32 @@ enyo.kind({
 				f.dir = (this.file.dir || "/");
 			}
 		}.bind(this));
-		rfiles = this.filesToNodes(files) ; // with prefix in name
+		rfiles = this.filesToNodes( files ) ; // with prefix in name
 
 		// detach visual subnodes
 		tfiles = this.getNodeFiles() ;		
-		for (j=0; j<tfiles.length; j++) {
+		for ( j = 0; j < tfiles.length; j++ ) {
 			this.removeControl(tfiles[j]);
 		}
 
-		nfiles=[];
+		nfiles = [];
 
 		// rearrange visual subnodes accordingly to file nodes order
 		while (k < tfiles.length || i < rfiles.length) {
 			res = k >= tfiles.length ? 1
 			    : i >= rfiles.length ? -1
-			    : this.fileNameSort(tfiles[k], rfiles[i]);
+			    : this.fileNameSort( tfiles[k], rfiles[i] );
 
 			switch(res) {
 				case -1:
-					if (this.debug) this.log(tfiles[k].name, "was removed") ;
+					if (this.debug) this.log( tfiles[k].name, "was removed" ) ;
 					tfiles[k].destroy() ;
 
 					k++;
 
 					break;
 				case 0:
-					if (this.debug) this.log(tfiles[k].name, "is kept") ;
+					if (this.debug) this.log( tfiles[k].name, "is kept" ) ;
 					this.addControl( tfiles[k] ) ;
 
 					k++;
@@ -182,14 +182,14 @@ enyo.kind({
 					
 					break;
 				case 1:
-					if (this.debug) this.log(rfiles[i].name, "was created") ;
+					if (this.debug) this.log( rfiles[i].name, "was created" ) ;
 					if (this.dragAllowed) {
 						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node", dragAllowed: true, attributes: {draggable : true}} ) ;
 					} else {
 						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node"} ) ;
 					}
 					newControl.setService(this.service);
-					if (this.debug) this.log(newControl, "has been created ") ;
+					if (this.debug) this.log( newControl, "has been created " ) ;
 
 					nfiles = this.getNodeFiles() ;
 					/*
