@@ -322,9 +322,8 @@ enyo.kind({
 	// events and published are defined by the base kind
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
-		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
-		{name: "color", classes: "inspector-color-button"},
-		{name: "palette", kind: "PalettePicker", onChange: "colorChanged"}
+		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", ontap: "paletteCreate", onchange: "handleChange", ondblclick: "handleDblClick"},
+		{name: "color", classes: "inspector-color-button"}
 	],
 	
 	//* @public
@@ -337,6 +336,10 @@ enyo.kind({
 	//* @protected
 	
 	//* Stop extraneous activate event from being fired when box is initially checked
+	paletteCreate: function(inSender, inEvent) {
+		this.createComponent({name: "palette", kind: "PalettePicker", onChange: "colorChanged"}).render();
+		return true;
+	},
 	handleChange: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
 		this.doChange({target: this});
