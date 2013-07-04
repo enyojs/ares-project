@@ -337,6 +337,9 @@ enyo.kind({
 	
 	//* Stop extraneous activate event from being fired when box is initially checked
 	paletteCreate: function(inSender, inEvent) {
+		if (this.$.palette) {
+			this.$.palette.destroyComponents();
+		}
 		this.createComponent({name: "palette", kind: "PalettePicker", onChange: "colorChanged"}).render();
 		return true;
 	},
@@ -346,6 +349,10 @@ enyo.kind({
 		return true;
 	},
 	handleDblClick: function(inSender, inEvent) {
+		if (this.$.palette) {
+			this.$.palette.destroyComponents();
+		}
+		this.createComponent({name: "palette", kind: "PalettePicker", onChange: "colorChanged"}).render();
 		this.fieldValue = this.$.value.getValue();
 		this.doDblClick({target: this});
 		return true;
