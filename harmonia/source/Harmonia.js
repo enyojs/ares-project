@@ -1,12 +1,16 @@
 enyo.kind({
 	name: "Harmonia",
 	kind: "FittableColumns",
+	events: {
+		onRegisterMe: ""
+	},
 	components: [
-		{kind: "HermesFileTree", fit: true, dragAllowed: true}
+		{kind: "HermesFileTree",  fit: true, dragAllowed: true}
 	],
 	debug: false,
 	create: function() {
 		this.inherited(arguments);
+		this.doRegisterMe({name:"harmonia", reference:this});
 	},
 	handleSelectProvider: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
