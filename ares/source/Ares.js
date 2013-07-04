@@ -55,7 +55,8 @@ enyo.kind({
 		this.inherited(arguments);
 
 		this.$.aresLayoutPanels.setIndex(0);
-		this.$.harmonia.addClass("ares-full-screen");
+		this.componentsRegistry.harmonia.addClass("ares-full-screen");
+
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
 
