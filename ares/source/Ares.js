@@ -50,15 +50,18 @@ enyo.kind({
 		onChangingNode: "_nodeChanging",
 		onRegisterMe : "_registerComponent"
 	},
+	projectListIndex: 0,
+	hermesFileTreeIndex: 1,
+	designerPanelsIndex: 2,
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 
-		this.$.aresLayoutPanels.setIndex(0);
+		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
 		this.componentsRegistry.harmonia.addClass("ares-full-screen");
-
+		this.componentsRegistry.harmonia.$.hermesFileTree.hideGrabber();
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
 
@@ -127,8 +130,9 @@ enyo.kind({
 		this.componentsRegistry.harmonia.removeClass("ares-full-screen");
 		this.componentsRegistry.harmonia.addClass("ares-small-screen");
 		this.$.aresLayoutPanels.reflow();
-		this.$.aresLayoutPanels.setIndex(1);
+		this.$.aresLayoutPanels.setIndex(this.hermesFileTreeIndex);
 		this.$.aresLayoutPanels.setDraggable(true);
+		this.componentsRegistry.harmonia.$.hermesFileTree.showGrabber();
 		this.$.designerPanels.show();
 	},
 	/** @private */
@@ -441,9 +445,10 @@ enyo.kind({
 	 * 
 	 * @private
 	 * @param {Object} inSender
-	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar]
+	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, hermesFileTree]
 	 */
 	_registerComponent: function(inSender, inEvent) {
+		//FIX ME : It should not be possible to save multi instance component
 		this.componentsRegistry[inEvent.name] = inEvent.reference;
 	},
 	statics: {

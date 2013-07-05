@@ -5,7 +5,8 @@ enyo.kind({
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
-		onTreeChanged: ""
+		onTreeChanged: "",
+		onRegisterMe: ""
 	},
 	handlers: {
 		onItemDown: "itemDown",
@@ -25,7 +26,7 @@ enyo.kind({
 	},
 	components: [
 		{kind: "onyx.Toolbar", classes: "ares-top-toolbar hermesFileTree-toolbar", components: [
-			{kind: "onyx.Grabber", name:"filePanelGrabber"},
+			{kind: "onyx.Grabber", name:"filePanelGrabber", showing: false},
 			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 				{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
 				{kind: "onyx.Tooltip", content: $L("New Folder...")}
@@ -96,7 +97,6 @@ enyo.kind({
 			
 	create: function() {
 		this.inherited(arguments);
-		
 		this.enableDisableButtons();
 		this.createComponent(
 			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable hermesFileTree-root",
@@ -104,6 +104,7 @@ enyo.kind({
 				expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed
 			}
 		);
+		this.doRegisterMe({name:"hermesFileTree", reference:this});
 	},
 	/** @private */
 	itemDown: function(inSender, inEvent) {
@@ -371,7 +372,6 @@ enyo.kind({
 		this.$.copyFile.hide();
 		this.$.deleteFile.hide();
 		this.$.revertMove.hide();
-		this.$.filePanelGrabber.hide();
 		return this ;
 	},
 	showNewFolderButton: function() {
@@ -385,7 +385,14 @@ enyo.kind({
 		this.$.renameFile.show();
 		this.$.copyFile.show();
 		this.$.deleteFile.show();
+		return this ;
+	},
+	showGrabber:function(){
 		this.$.filePanelGrabber.show();
+		return this ;
+	},
+	hideGrabber:function(){
+		this.$.filePanelGrabber.hide();
 		return this ;
 	},
 	showRevertMoveButton: function() {
