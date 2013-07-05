@@ -77,8 +77,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.helper = new analyzer.Analyzer.KindHelper();
-		var self = this;
-		this.doRegisterMe({name:"phobos", reference:self});
+		this.doRegisterMe({name:"phobos", reference:this});
 	},
 	getProjectController: function() {
 		this.projectCtrl = this.projectData.getProjectCtrl();

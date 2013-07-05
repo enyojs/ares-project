@@ -347,7 +347,7 @@ enyo.kind({
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {
-		this.$.phobos.newKindAction(inSender, inEvent);
+		this.componentsRegistry.phobos.newKindAction(inSender, inEvent);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	// Close is a special case, because it can be invoked on a document other than the currently-active one
