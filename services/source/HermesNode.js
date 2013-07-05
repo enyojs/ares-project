@@ -153,14 +153,14 @@ enyo.kind({
 
 		// detach visual subnodes
 		tfiles = this.getNodeFiles() ;		
-		for ( j = 0; j < tfiles.length; j++ ) {
-			this.removeControl(tfiles[j]);
+		for ( var j = 0; j < tfiles.length; j++ ) {
+			this.removeControl( tfiles[j] );
 		}
 
 		nfiles = [];
 
 		// rearrange visual subnodes accordingly to file nodes order
-		while (k < tfiles.length || i < rfiles.length) {
+		while ( k < tfiles.length || i < rfiles.length ) {
 			res = k >= tfiles.length ? 1
 			    : i >= rfiles.length ? -1
 			    : this.fileNameSort( tfiles[k], rfiles[i] );
