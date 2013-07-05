@@ -136,7 +136,7 @@ enyo.kind({
 		this.$.extra.setContent("");
 	},
 	updateNodeContent: function(files) {
-		var i = 0, rfiles, tfiles, res, modified = 0, newControl, k = 0, nfiles;
+		var i = 0, rfiles, tfiles, res, newControl, k = 0, nfiles;
 		
 		if (this.debug) this.log( "updateNodeContent on", this ) ;
 
