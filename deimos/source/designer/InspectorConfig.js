@@ -346,6 +346,7 @@ enyo.kind({
 		} else {
 			this.$.palette.destroy();
 		}
+		return true;
 	},
 	fieldValueChanged: function() {
 		this.$.value.setValue(this.fieldValue);
