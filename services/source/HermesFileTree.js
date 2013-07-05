@@ -201,7 +201,7 @@ enyo.kind({
 					newParentNode=this.targetNode;
 				this.moveNode(this.draggedNode, this.targetNode)
 					.response(this, function(inSender, inNodeFile) {
-						newParentNode.reloadChildren()
+						newParentNode.updateNodes()
 							.response(this, function(inSender, inNodes) {
 								this.movedNode=newParentNode.getNodeWithId(inNodeFile.id);
 								this.originNode=oldParentNode;
@@ -695,13 +695,7 @@ enyo.kind({
 				/* cancel any move reverting */
 				this.resetRevert();
 
-				parentNode.reloadChildren()
-					.response(this, function(inSender, inNodes) {
-						this.refreshFileTree(function() {parentNode.getNodeWithId(inFolder.id).doAdjustScroll()}, inFolder.id /*selectId*/);
-					})
-					.error(this, function() {
-						this.log("error retrieving related node children");
-					});
+				this.refreshFileTree( function()  {parentNode.getNodeWithId(inFolder.id).doAdjustScroll(); }, inFolder.id /*selectId*/ );
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create folder:", name, inError);
@@ -815,13 +809,7 @@ enyo.kind({
 				/* cancel any move reverting */
 				this.resetRevert();
 
-				parentNode.reloadChildren()
-					.response(this, function(inSender, inNodes) {
-						this.refreshFileTree(function() {parentNode.getNodeWithId(inFsNode.id).doAdjustScroll()}, inFsNode.id /*selectId*/);
-					})
-					.error(this, function() {
-						this.log("error retrieving related node children");
-					});
+				this.refreshFileTree( function() { parentNode.getNodeWithId(inFsNode.id).doAdjustScroll(); }, inFsNode.id /*selectId*/ );
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to copy:", this.selectedFile, "as", newName, inError);
@@ -874,13 +862,7 @@ enyo.kind({
 				/* cancel any move reverting */
 				this.resetRevert();
 
-				parentNode.reloadChildren()
-					.response(this, function(inSender, inNodes) {
-						this.refreshFileTree(function() {parentNode.getNodeWithId(inNode.id).doAdjustScroll()}, inNode.id /*selectId*/);
-					})
-					.error(this, function() {
-						this.log("error retrieving related node children");
-					});
+				this.refreshFileTree( function() { parentNode.getNodeWithId(inNode.id).doAdjustScroll(); }, inNode.id /*selectId*/ );
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to rename:", this.selectedFile, "into", newName, inError);
@@ -929,16 +911,10 @@ enyo.kind({
 
 				serverNode.resized();
 
-				parentNode.reloadChildren()
-					.response(this, function(inSender, inNodes) {
-						this.refreshFileTree(function() {parentNode.doAdjustScroll()}, parentNode.file.id /*selectId*/);
-						if (parentNode === serverNode) {
-							this.$.selection.select(serverNode.file.id, serverNode);
-						}
-					})
-					.error(this, function() {
-						this.log("error retrieving related node children");
-					});
+				this.refreshFileTree( function() { parentNode.doAdjustScroll(); }, parentNode.file.id /*selectId*/ );
+				if (parentNode === serverNode) {
+					this.$.selection.select(serverNode.file.id, serverNode);
+				}
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to delete:", this.selectedFile, inError);
@@ -1035,14 +1011,7 @@ enyo.kind({
 				/* cancel any move reverting */
 				this.resetRevert();
 
-				var node = inNodes[0];
-				parentNode.reloadChildren()
-					.response(this, function(inSender, inNodes) {
-						this.refreshFileTree(function() {parentNode.getNodeWithId(node.id).doAdjustScroll()}, node.id);
-					})
-					.error(this, function() {
-						this.log("error retrieving related node children");
-					});
+				this.refreshFileTree( function() { parentNode.getNodeWithId(inNodes[0].id).doAdjustScroll(); }, inNodes[0].id );
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create file:", name, inError);
@@ -1106,13 +1075,7 @@ enyo.kind({
 					}
 				});			
 
-				inTarget.reloadChildren()
-					.response(this, function(inSender, inNodes) {
-						this.refreshFileTree(function() {inTarget.getNodeWithId(inValue.id).doAdjustScroll()}, inValue.id);
-					})
-					.error(this, function() {
-						this.log("error retrieving related node children");
-					});
+				this.refreshFileTree( function() { inTarget.getNodeWithId(inValue.id).doAdjustScroll(); }, inValue.id );
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to move:", inNode.file.name, inError);
