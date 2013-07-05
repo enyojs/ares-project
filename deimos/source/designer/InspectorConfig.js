@@ -322,10 +322,9 @@ enyo.kind({
 	// events and published are defined by the base kind
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
-		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", ontap: "paletteCreate", onchange: "handleChange", ondblclick: "handleDblClick"},
+		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", onclick: "handleDblClick", ondblclick: "handleDblClick"},
 		{name: "color", classes: "inspector-color-button"}
 	],
-	
 	//* @public
 	
 	//* Facade for _enyo.Input.focus()_
@@ -336,26 +335,17 @@ enyo.kind({
 	//* @protected
 	
 	//* Stop extraneous activate event from being fired when box is initially checked
-	paletteCreate: function(inSender, inEvent) {
-		if (this.$.palette) {
-			this.$.palette.destroyComponents();
-		}
-		this.createComponent({name: "palette", kind: "PalettePicker", onChange: "colorChanged"}).render();
-		return true;
-	},
 	handleChange: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
 		this.doChange({target: this});
 		return true;
 	},
 	handleDblClick: function(inSender, inEvent) {
-		if (this.$.palette) {
-			this.$.palette.destroyComponents();
+		if (!this.$.palette) {
+			this.createComponent({name: "palette", kind: "PalettePicker", onChange: "colorChanged"}).render();							
+		} else {
+			this.$.palette.destroy();
 		}
-		this.createComponent({name: "palette", kind: "PalettePicker", onChange: "colorChanged"}).render();
-		this.fieldValue = this.$.value.getValue();
-		this.doDblClick({target: this});
-		return true;
 	},
 	fieldValueChanged: function() {
 		this.$.value.setValue(this.fieldValue);
@@ -364,6 +354,9 @@ enyo.kind({
 	colorChanged: function(inSender, inEvent) {
 		this.fieldValue = inEvent.originator.$.colorPicker.color;
 		this.doChange({target: this});
+		if (this.$.palette) {
+			this.$.palette.destroy();
+		}		
 		return true;
 	},
 });
