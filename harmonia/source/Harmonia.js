@@ -28,6 +28,14 @@ enyo.kind({
 			this.$.hermesFileTree.hideFileOpButtons().clear();
 		}
 	},
+	showGrabber:function(){
+		this.$.hermesFileTree.showGrabber();
+		return this ;
+	},
+	hideGrabber:function(){
+		this.$.hermesFileTree.hideGrabber();
+		return this ;
+	},
 	/**
 	 * Refresh the {HermesFileTree} (if relevant), following a change of the given file
 	 * @param {Object} changedFile
