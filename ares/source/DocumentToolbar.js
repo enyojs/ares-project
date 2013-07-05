@@ -1,6 +1,5 @@
 enyo.kind({
 	name: "DocumentToolbar",
-	kind: "onyx.Toolbar",
 
 	events: {
 		onToggleOpen: "",
