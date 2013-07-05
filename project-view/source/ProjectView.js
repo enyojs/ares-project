@@ -42,8 +42,7 @@ enyo.kind({
 	},
 	create: function() {
 		this.inherited(arguments);
-		var self = this;
-		this.doRegisterMe({name:"projectView", reference:self});
+		this.doRegisterMe({name:"projectView", reference:this});
 	},
 	/**
 	 * Refresh the {ProjectView} (if relevant), following a change of the given file

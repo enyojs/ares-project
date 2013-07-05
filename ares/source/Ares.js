@@ -354,7 +354,7 @@ enyo.kind({
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {
-		this.$.phobos.newKindAction(inSender, inEvent);
+		this.componentsRegistry.phobos.newKindAction(inSender, inEvent);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 
@@ -448,8 +448,11 @@ enyo.kind({
 	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, hermesFileTree]
 	 */
 	_registerComponent: function(inSender, inEvent) {
-		//FIX ME : It should not be possible to save multi instance component
-		this.componentsRegistry[inEvent.name] = inEvent.reference;
+		if(this.componentsRegistry[inEvent.name] === undefined){
+			this.componentsRegistry[inEvent.name] = inEvent.reference;
+		}else {
+			this.error("Component is already registred: ", inEvent.name);
+		}
 	},
 	statics: {
 		isBrowserSupported: function() {

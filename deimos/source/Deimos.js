@@ -111,8 +111,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.addHandlers();
-		var self = this;
-		this.doRegisterMe({name:"deimos", reference:self});
+		this.doRegisterMe({name:"deimos", reference:this});
 	},
 	rendered: function() {
 		this.inherited(arguments);

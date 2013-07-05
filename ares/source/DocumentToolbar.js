@@ -23,8 +23,7 @@ enyo.kind({
 
 	create: function() {
 		this.inherited(arguments);
-		var self = this;
-		this.doRegisterMe({name:"documentToolbar", reference:self});
+		this.doRegisterMe({name:"documentToolbar", reference:this});
 	},
 	createFileTab: function(name, id) {
 		this.$.tabs.show();

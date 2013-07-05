@@ -5,8 +5,7 @@ enyo.kind({
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
-		onTreeChanged: "",
-		onRegisterMe: ""
+		onTreeChanged: ""
 	},
 	handlers: {
 		onItemDown: "itemDown",
@@ -104,7 +103,6 @@ enyo.kind({
 				expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed
 			}
 		);
-		this.doRegisterMe({name:"hermesFileTree", reference:this});
 	},
 	/** @private */
 	itemDown: function(inSender, inEvent) {
