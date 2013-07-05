@@ -136,9 +136,9 @@ enyo.kind({
 		this.$.extra.setContent("");
 	},
 	updateNodeContent: function(files) {
-		var i = 0 , nfiles, rfiles, res, modified = 0, newControl ;
-
-		if (this.debug) this.log("updateNodeContent on",this) ;
+		var i = 0, rfiles, tfiles, res, newControl, k = 0, nfiles;
+		
+		if (this.debug) this.log( "updateNodeContent on", this ) ;
 
 		// Add dir property to files, which is a project-relative path
 		enyo.forEach(files, function(f) {
@@ -149,66 +149,68 @@ enyo.kind({
 				f.dir = (this.file.dir || "/");
 			}
 		}.bind(this));
-		rfiles = this.filesToNodes(files) ; // with prefix in name
-		nfiles = this.getNodeFiles() ;
+		rfiles = this.filesToNodes( files ) ; // with prefix in name
 
-		while ( i < nfiles.length || i < rfiles.length) {
-			if (this.debug) this.log("considering node " + (nfiles[i] ? nfiles[i].name : '<none>') + ' and file ' + (rfiles[i] ? rfiles[i].name : '<none>') );
+		// detach visual subnodes
+		tfiles = this.getNodeFiles() ;		
+		for ( var j = 0; j < tfiles.length; j++ ) {
+			this.removeControl( tfiles[j] );
+		}
 
-			res = i >= nfiles.length ? 1
+		nfiles = [];
+
+		// rearrange visual subnodes accordingly to file nodes order
+		while ( k < tfiles.length || i < rfiles.length ) {
+			res = k >= tfiles.length ? 1
 			    : i >= rfiles.length ? -1
-			    : this.fileNameSort(nfiles[i], rfiles[i]) ;
+			    : this.fileNameSort( tfiles[k], rfiles[i] );
 
-			// remember that these file lists are sorted
 			switch(res) {
-				case -1: // remote file removed
-					if (this.debug) this.log(nfiles[i].name + " was removed") ;
-					nfiles[i].destroy() ;
-				    modified = 1;
-					nfiles = this.getNodeFiles() ;
-					// node file list reduced by one, must not increment i
-					break ;
+				case -1:
+					if (this.debug) this.log( tfiles[k].name, "was removed" ) ;
+					tfiles[k].destroy() ;
 
-				case 0: // no change
-					i++ ;
-					break ;
+					k++;
 
-				case 1: // file added
-				  if (this.debug) this.log(rfiles[i].name + " was added") ;
+					break;
+				case 0:
+					if (this.debug) this.log( tfiles[k].name, "is kept" ) ;
+					this.addControl( tfiles[k] ) ;
+
+					k++;
+					i++;
+					
+					break;
+				case 1:
+					if (this.debug) this.log( rfiles[i].name, "was created" ) ;
 					if (this.dragAllowed) {
 						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node", dragAllowed: true, attributes: {draggable : true}} ) ;
 					} else {
 						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node"} ) ;
 					}
-					if (this.debug) this.log("updateNodeContent created ", newControl) ;
 					newControl.setService(this.service);
+					if (this.debug) this.log( newControl, "has been created " ) ;
+
 					nfiles = this.getNodeFiles() ;
-					// FIXME: ENYO-1337
-					//if (nfiles[i]) {
-					//	var justAdded = inNode.controls.pop() ;
-					//	inNode.controls.splice(i+4, 0, justAdded);
-					//}
-				    modified = 1;
-				/*
-				 FIXME: allow to manually change
-				 PhoneGap parameters from Ares.
-				 DEMANDS to relad Ares after each
-				 project.json manual change
+					/*
+					 FIXME: allow to manually change
+					 PhoneGap parameters from Ares.
+					 DEMANDS to relad Ares after each
+					 project.json manual change
 
-					if (nfiles[i].name === '$project.json') {
-						// project.json file is internal to Ares
-						nfiles[i].hide();
-					}
-				 */
-					i++ ;
-					break ;
+						if (nfiles[i].name === '$project.json') {
+							// project.json file is internal to Ares
+							nfiles[i].hide();
+						}
+					 */
+
+					i++;
+					
+					break;
 			}
-
 		}
 
-		if (modified) {
-			this.$.client.render();
-		}
+		this.$.client.render();
 	},
 	compareFiles: function(inFilesA, inFilesB) {
 		if (inFilesA.length != inFilesB.length) {
