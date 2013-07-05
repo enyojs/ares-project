@@ -5,11 +5,13 @@ enyo.kind({
 	events: {
 		onToggleOpen: "",
 		onSwitchFile: "",
-		onCloseFileRequest: ""
+		onCloseFileRequest: "",
+		onDesign: "",
+		onRegisterMe: ""
 	},
 
 	components: [
-		{kind: "onyx.Grabber", ontap: "doToggleOpen"},
+		{kind: "onyx.Grabber", ontap: "doToggleOpen", classes: "ares-grabber"},
 		{
 			name: "tabs",
 			kind: "onyx.TabBar",
@@ -20,6 +22,11 @@ enyo.kind({
 		}
 	],
 
+	create: function() {
+		this.inherited(arguments);
+		var self = this;
+		this.doRegisterMe({name:"documentToolbar", reference:self});
+	},
 	createFileTab: function(name, id) {
 		this.$.tabs.show();
 		this.$.tabs.render();

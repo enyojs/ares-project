@@ -56,12 +56,17 @@ enyo.kind({
 		onSaveAsDocument: "",
 		onDesignDocument: "",
 		onCloseDocument: "",
-		onUpdate: ""
+		onUpdate: "",
+		onRegisterMe: ""
 	},
 	handlers: {
+		ondragstart: "drop",
+		ondrag: "drop",
+		ondragfinish: "drop",
 		onCss: "newcssAction",
 		onReparseAsked: "reparseAction"
 	},
+	drop: function() { return true;},
 	published: {
 		projectData: null
 	},
@@ -72,6 +77,8 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.helper = new analyzer.Analyzer.KindHelper();
+		var self = this;
+		this.doRegisterMe({name:"phobos", reference:self});
 	},
 	getProjectController: function() {
 		this.projectCtrl = this.projectData.getProjectCtrl();
