@@ -10,7 +10,7 @@ enyo.kind({
 	},
 
 	components: [
-		{kind: "onyx.Grabber", ontap: "doToggleOpen", classes: "ares-grabber"},
+		{kind: "onyx.Grabber", ontap: "doToggleOpen"},
 		{
 			name: "tabs",
 			kind: "onyx.TabBar",
