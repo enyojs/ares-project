@@ -12,13 +12,15 @@ enyo.kind({
 			{name: "projectView", kind: "ProjectView", classes: "ares-panel-min-width ", onProjectSelected: "projectSelected"},
 			{kind: "Harmonia", name: "harmonia", classes: "ares-panel-min-width ", onFileDblClick: "openDocument"},
 			{name:"designerPanels", components:[	
-				{name: "bottomBar", classes:"ares-bottom-bar", kind: "DocumentToolbar",
+				{
+					name: "bottomBar",
+					kind: "DocumentToolbar",
 					onToggleOpen: "toggleFiles",
 					onSwitchFile: "switchFile",
 					onSave: "bounceSave",
 					onDesign: "bounceDesign",
 					onNewKind: "bounceNew",
-				onCloseFileRequest: "bounceCloseFileRequest"
+					onCloseFileRequest: "bounceCloseFileRequest"
 				},
 				{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
 					{components: [
