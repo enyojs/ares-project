@@ -24,7 +24,8 @@ enyo.kind({
 		dragAllowed: false
 	},
 	components: [
-		{kind: "onyx.Toolbar", classes: "ares-top-toolbar  hermesFileTree-toolbar", components: [
+		{kind: "onyx.Toolbar", classes: "ares-top-toolbar hermesFileTree-toolbar", components: [
+			{kind: "onyx.Grabber", name:"filePanelGrabber", showing: false},
 			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 				{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
 				{kind: "onyx.Tooltip", content: $L("New Folder...")}
@@ -95,7 +96,6 @@ enyo.kind({
 			
 	create: function() {
 		this.inherited(arguments);
-		
 		this.enableDisableButtons();
 		this.createComponent(
 			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable hermesFileTree-root",
@@ -383,6 +383,14 @@ enyo.kind({
 		this.$.renameFile.show();
 		this.$.copyFile.show();
 		this.$.deleteFile.show();
+		return this ;
+	},
+	showGrabber:function(){
+		this.$.filePanelGrabber.show();
+		return this ;
+	},
+	hideGrabber:function(){
+		this.$.filePanelGrabber.hide();
 		return this ;
 	},
 	showRevertMoveButton: function() {
