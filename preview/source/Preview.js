@@ -46,7 +46,6 @@ enyo.kind(
 							 attributes: {title: "display pixel ratio"} }
 						]
 					},
-					{tag:"p", classes:"break"},
 					{
 						kind: 'onyx.Groupbox',
 						classes : "ares-preview-groupbox",
@@ -75,7 +74,6 @@ enyo.kind(
 							}
 						]
 					},
-					{tag:"p", classes:"break"},
 					{
 						kind: 'onyx.Groupbox',
 						classes : "ares-preview-groupbox",
@@ -88,7 +86,6 @@ enyo.kind(
 							}
 						]
 					},
-					{tag:"p", classes:"break"},
 					{
 						kind: "onyx.Button",
 						ontap:"reload",
