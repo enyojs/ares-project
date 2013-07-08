@@ -132,13 +132,6 @@
 	width: 300px;
 }
 
-.panels-sample-collapsible > * {
-	/*min-width: 250px;*/
-}
-/*
-.toto{
-	width: 100% !important;
-}*/
 .ares-top-toolbar{
 	border-right: 0;
 	border-left: 0;
@@ -148,6 +141,8 @@
 	border-bottom: 1px solid #222; 
 	background: @ares-toolbar-gradient;
 	background-size: auto; /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
+	/*Fix for onyx.MoreToolbar used in projectList.js (use of onyx.Toolbar creates issues on menus in Safari)*/
+	z-index: auto;
 }
 .ares-top-toolbar.hermesFileTree-toolbar {
 	padding: 9px 3px 10px 3px;

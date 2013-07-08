@@ -61,7 +61,7 @@ enyo.kind({
 
 		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
 		this.componentsRegistry.harmonia.addClass("ares-full-screen");
-		this.componentsRegistry.harmonia.$.hermesFileTree.hideGrabber();
+		this.componentsRegistry.harmonia.hideGrabber();
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
 
@@ -132,7 +132,7 @@ enyo.kind({
 		this.$.aresLayoutPanels.reflow();
 		this.$.aresLayoutPanels.setIndex(this.hermesFileTreeIndex);
 		this.$.aresLayoutPanels.setDraggable(true);
-		this.componentsRegistry.harmonia.$.hermesFileTree.showGrabber();
+		this.componentsRegistry.harmonia.showGrabber();
 		this.$.designerPanels.show();
 	},
 	/** @private */
