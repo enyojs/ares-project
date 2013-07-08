@@ -82,6 +82,7 @@ enyo.kind({
 	selectedNode: null,
 	
 	debug: false,
+	packages: false,
 	
 	draggedNode: null,
 	targetNode: null,
@@ -360,6 +361,9 @@ enyo.kind({
 				});
 			}
 		})));
+
+		this.packages = true;
+
 		return this;
 	},
 	hideFileOpButtons: function() {
@@ -683,14 +687,16 @@ enyo.kind({
 						});
 				}
 
-				this.doTreeChanged({
-					add: {
-						service: this.$.service,
-						parentNode: parentNode && parentNode.file,
-						pkgNode: pkgNode && pkgNode.file,
-						node: inFolder
-					}
-				});
+				if (this.packages) {
+					this.doTreeChanged({
+						add: {
+							service: this.$.service,
+							parentNode: parentNode && parentNode.file,
+							pkgNode: pkgNode && pkgNode.file,
+							node: inFolder
+						}
+					});
+				} 
 
 				/* cancel any move reverting */
 				this.resetRevert();
