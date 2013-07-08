@@ -1,12 +1,16 @@
 enyo.kind({
 	name: "Harmonia",
 	kind: "FittableColumns",
+	events: {
+		onRegisterMe: ""
+	},
 	components: [
-		{kind: "HermesFileTree", fit: true, dragAllowed: true}
+		{kind: "HermesFileTree",  fit: true, dragAllowed: true}
 	],
 	debug: false,
 	create: function() {
 		this.inherited(arguments);
+		this.doRegisterMe({name:"harmonia", reference:this});
 	},
 	handleSelectProvider: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
@@ -23,6 +27,14 @@ enyo.kind({
 		} else {
 			this.$.hermesFileTree.hideFileOpButtons().clear();
 		}
+	},
+	showGrabber:function(){
+		this.$.hermesFileTree.showGrabber();
+		return this ;
+	},
+	hideGrabber:function(){
+		this.$.hermesFileTree.hideGrabber();
+		return this ;
 	},
 	/**
 	 * Refresh the {HermesFileTree} (if relevant), following a change of the given file

@@ -8,24 +8,27 @@ enyo.kind({
 	debug: false,
 	componentsRegistry: {},
 	components: [
-		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
-			{components: [
-				{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
-			]},
-			{components: [
-				{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
+		{name:"aresLayoutPanels", kind: "Panels", draggable: false, arrangerKind: "CollapsingArranger", fit: true, classes:"ares-main-panels", components:[
+			{name: "projectView", kind: "ProjectView", classes: "ares-panel-min-width ", onProjectSelected: "projectSelected"},
+			{kind: "Harmonia", name: "harmonia", classes: "ares-panel-min-width ", onFileDblClick: "openDocument"},
+			{name:"designerPanels", components:[	
+				{name: "bottomBar", classes:"ares-bottom-bar", kind: "DocumentToolbar",
+					onToggleOpen: "toggleFiles",
+					onSwitchFile: "switchFile",
+					onSave: "bounceSave",
+					onDesign: "bounceDesign",
+					onNewKind: "bounceNew",
+					onClose: "bounceClose"
+				},
+				{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
+					{components: [
+						{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
+					]},
+					{components: [
+						{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
+					]}
+				]}
 			]}
-		]},
-		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
-			{name: "projectView", kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "openDocument", onProjectSelected: "projectSelected"},
-			{name: "bottomBar", classes:"ares-bottom-bar", kind: "DocumentToolbar",
-				onToggleOpen: "toggleFiles",
-				onSwitchFile: "switchFile",
-				onSave: "bounceSave",
-				onDesign: "bounceDesign",
-				onNewKind: "bounceNew",
-				onClose: "bounceClose"
-			}
 		]},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
 			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
@@ -45,12 +48,18 @@ enyo.kind({
 		onChangingNode: "_nodeChanging",
 		onRegisterMe : "_registerComponent"
 	},
+	projectListIndex: 0,
+	hermesFileTreeIndex: 1,
+	designerPanelsIndex: 2,
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
-
 		this.inherited(arguments);
+
+		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
+		this.componentsRegistry.harmonia.addClass("ares-full-screen");
+		this.componentsRegistry.harmonia.hideGrabber();
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
 
@@ -61,14 +70,13 @@ enyo.kind({
 		} else {
 			Ares.Workspace.loadProjects();
 		}
-		this.calcSlideableLimit();
+
 		Ares.instance = this;
 	},
+
 	rendered: function() {
 		this.inherited(arguments);
-		this.calcSlideableLimit();
 	},
-	draggable: false,
 	/**
 	 * @private
 	 */
@@ -100,7 +108,6 @@ enyo.kind({
 		} else {
 			this.showWaitPopup(this, {msg: $L("Opening...")});
 			this.componentsRegistry.documentToolbar.createFileTab(file.name, fileDataId);
-			this.$.slideable.setDraggable(true);
 			this._fetchDocument(projectData, file, function(inErr, inContent) {
 				self.hideWaitPopup();
 				if (inErr) {
@@ -117,6 +124,13 @@ enyo.kind({
 				}
 			});
 		}
+		this.componentsRegistry.harmonia.removeClass("ares-full-screen");
+		this.componentsRegistry.harmonia.addClass("ares-small-screen");
+		this.$.aresLayoutPanels.reflow();
+		this.$.aresLayoutPanels.setIndex(this.hermesFileTreeIndex);
+		this.$.aresLayoutPanels.setDraggable(true);
+		this.componentsRegistry.harmonia.showGrabber();
+		this.$.designerPanels.show();
 	},
 	/** @private */
 	_fetchDocument: function(projectData, file, next) {
@@ -233,7 +247,6 @@ enyo.kind({
 			// remove file from cache
 			Ares.Workspace.files.removeEntry(docId);
 			this.componentsRegistry.documentToolbar.removeTab(docId);
-			this.$.slideable.setDraggable(Ares.Workspace.files.length > 0);
 		}
 		if (typeof next === 'function') {
 			next();
@@ -276,13 +289,13 @@ enyo.kind({
 		}
 	},
 	hideFiles: function(inSender, inEvent) {
-		this.$.slideable.animateToMin();
+		//this.$.slideable.animateToMin();
 	},
 	showFiles: function(inSender, inEvent) {
-		this.$.slideable.animateToMax();
+		//this.$.slideable.animateToMax();
 	},
 	toggleFiles: function(inSender, inEvent) {
-		if (this.$.slideable.value < 0 || Ares.Workspace.files.length === 0) {
+		if (/*this.$.slideable.value < 0 ||*/ Ares.Workspace.files.length === 0) {
 			this.showFiles();
 		} else {
 			this.hideFiles();
@@ -290,14 +303,6 @@ enyo.kind({
 	},
 	resizeHandler: function(inSender, inEvent) {
 		this.inherited(arguments);
-		this.calcSlideableLimit();
-		if (this.$.slideable.value < 0) {
-			this.$.slideable.setValue(this.$.slideable.min);
-		}
-	},
-	calcSlideableLimit: function() {
-		var min = this.getBounds().height-this.componentsRegistry.documentToolbar.getBounds().height;
-		this.$.slideable.setMin(-min);
 	},
 	switchFile: function(inSender, inEvent) {
 		var d = Ares.Workspace.files.get(inEvent.id);
@@ -322,13 +327,6 @@ enyo.kind({
 		this.adjustBarMode();
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
 		this.hideFiles();
-	},
-	finishedSliding: function(inSender, inEvent) {
-		if (this.$.slideable.value < 0) {
-			this.componentsRegistry.documentToolbar.showControls();
-		} else {
-			this.componentsRegistry.documentToolbar.hideControls();
-		}
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceSave: function(inSender, inEvent) {
@@ -437,10 +435,14 @@ enyo.kind({
 	 * 
 	 * @private
 	 * @param {Object} inSender
-	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar]
+	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, hermesFileTree]
 	 */
 	_registerComponent: function(inSender, inEvent) {
-		this.componentsRegistry[inEvent.name] = inEvent.reference;
+		if(this.componentsRegistry[inEvent.name] === undefined){
+			this.componentsRegistry[inEvent.name] = inEvent.reference;
+		}else {
+			this.error("Component is already registred: ", inEvent.name);
+		}
 	},
 	statics: {
 		isBrowserSupported: function() {
