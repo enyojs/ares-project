@@ -19,48 +19,45 @@ enyo.kind(
 	{
 		name: "Preview",
 		kind: "FittableColumns",
-		classes: "enyo-fit enyo-border-box",
-		style: "margin: 4px; background-color: #DDD",
-
+		classes: "enyo-fit enyo-border-box ares-preview-body",
 		components: [
 			{
-				style: "width: 150px; margin: 4px" ,
+				classes: "ares-preview-tools-panel",
 				components: [
 					{
 						kind: 'onyx.Groupbox',
-						style : "margin-top: 8px",
+						classes : "ares-preview-groupbox",
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Device"},
 							{
 								kind: "onyx.PickerDecorator",
 								onSelect: "resize",
-								style :"padding: 6px",
 								components:
 								[
-									{style: "width: 100%"}, // A content-less PickerButton
+									{}, // A content-less PickerButton
 									{
 										kind: "PreviewDevicePicker", name: "device"
 									}
 								]
 							},
-							{content: "width: 600 px",  name: "devWidth",  style: "padding: 8px"},
-							{content: "height: 800 px", name: "devHeight", style: "padding: 8px"},
-							{content: "DPR: 1",        name: "devDPR",    style: "padding: 8px",
+							{content: "width: 600 px",  name: "devWidth"},
+							{content: "height: 800 px", name: "devHeight"},
+							{content: "DPR: 1",        name: "devDPR",
 							 attributes: {title: "display pixel ratio"} }
 						]
 					},
-					{tag: "br"},
+					{tag:"p", classes:"break"},
 					{
 						kind: 'onyx.Groupbox',
+						classes : "ares-preview-groupbox",
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Screen"},
 							{
 								kind: "onyx.PickerDecorator",
 								onSelect: "resize",
-								style : "padding: 6px",
 								components:
 								[
-									{style: "width: 100%"}, // A content-less PickerButton
+									{}, // A content-less PickerButton
 									{
 										kind: "onyx.Picker", name: "orientation",
 										components: [
@@ -70,43 +67,41 @@ enyo.kind(
 									}
 								]
 							},
-							{content: "width: 600 px",  name: "screenWidth",  style: "padding: 8px",
+							{content: "width: 600 px",  name: "screenWidth",
 							 attributes: { title: "device width divided by DPR" }
 							},
-							{content: "height: 800 px", name: "screenHeight", style: "padding: 8px",
+							{content: "height: 800 px", name: "screenHeight",
 							 attributes: { title: "device height divided by DPR" }
 							}
 						]
 					},
-					{tag: "br"},
+					{tag:"p", classes:"break"},
 					{
 						kind: 'onyx.Groupbox',
+						classes : "ares-preview-groupbox",
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Zoom"},
 							{
-								// padding required so the gray box is connected to groupbox
-								style: "padding-top: 4px; padding-bottom: 4px",
 								components: [
 									{kind: "onyx.Slider", value: 100, onChange: 'zoom', onChanging: 'zoom' }
 								]
 							}
 						]
 					},
-					{tag: "br"},
+					{tag:"p", classes:"break"},
 					{
 						kind: "onyx.Button",
 						ontap:"reload",
-						style: "padding: 5px; width: 100%; margin-bottom: 5px",
+						classes: "ares-preview-buttons",
 						components: [
 							{tag: 'img', attributes: { src: "assets/images/preview_reload.png"} }
 						]
 					},
-					{tag: "br"},
 					{
 						kind:"onyx.Button",
 						content: "Detach test",
 						ontap:"detachIframe",
-						style: "padding: 5px; width: 100%",
+						classes: "ares-preview-buttons",
 						attributes: { title: "detach test device, then right click to enable Ripple emulator"}
 					}
 				]
