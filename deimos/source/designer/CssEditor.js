@@ -128,3 +128,17 @@ enyo.kind({
 		return true;
 	}
 });
+
+enyo.kind({
+	name: "PalettePicker",
+	components: [
+		{kind: "ColorPicker", onColorSelected: "onPick"}
+	],
+	events: {
+		onChange: ""
+	},
+	onPick: function(inSender, color){
+		this.doChange({target:this.$.colorPicker});
+		return true;
+	}
+});
