@@ -1,101 +1,60 @@
 enyo.kind({
-	name: "AresTab",
-	kind: "GroupItem",
-	classes: "onyx-radiobutton ares-tab"
-});
-
-enyo.kind({
 	name: "DocumentToolbar",
-	kind: "onyx.Toolbar",
+	kind:"FittableRows",
 	events: {
 		onToggleOpen: "",
 		onSwitchFile: "",
-		onClose: "",
-		onSave: "",
-		onNewKind: "",
+		onCloseFileRequest: "",
 		onDesign: "",
 		onRegisterMe: ""
 	},
-	components: [
-		{name: "container", classes: "ares-docbar-container", kind: "FittableColumns", ontap: "doToggleOpen", components: [
-			{kind: "onyx.Grabber", classes: "ares-grabber"},
-			{kind: "onyx.Drawer", orient: "h", open: false, showing:false, components: [
-				{kind: "FittableColumns", components: [
-					{kind: "onyx.Button", content: "Save", ontap: "saveFile"},
-					{kind: "onyx.Button", content: "New Kind", ontap: "newKind"},
-					{name: "designButton", kind: "onyx.Button", content: "Designer", ontap: "designFile"}
-				]}
-			]},
-			{name: "tabs", classes: "ares-docbar-tabs", kind: "onyx.RadioGroup"}
-		]}
+
+	components: [	
+		{kind: "onyx.Toolbar", classes: "ares-top-toolbar", components: [
+			{kind: "onyx.Grabber", ontap: "doToggleOpen"}
+		]},	
+		{
+			name: "tabs",
+			kind: "onyx.TabBar",
+			showing: false,
+			checkBeforeClosing: true,
+			onTabChanged: 'switchFile',
+			onTabRemoveRequested: 'requestCloseFile'
+		}
 	],
-	tabs: {},
+
 	create: function() {
 		this.inherited(arguments);
 		this.doRegisterMe({name:"documentToolbar", reference:this});
 	},
-	showControls: function() {
-		this.$.drawer.setOpen(true);
-		// lock designButton's width, so it doesn't move when the caption changes
-		var w = this.$.designButton.getBounds().width;
-		this.$.designButton.setBounds({width: w});
-	},
-	hideControls: function() {
-		this.$.drawer.setOpen(false);
-	},
 	createFileTab: function(name, id) {
-		var c = this.$.tabs.createComponent({
-			kind: "AresTab",
-			fileId: id,
-			components: [
-				{content: name, classes: "ares-tab-label"},
-				{name: "close-"+id, kind: "onyx.IconButton", classes: "ares-doc-close", src: "$lib/onyx/images/progress-button-cancel.png", fileId: id, ontap: "closeFile"}
-			],
-			ontap: "switchFile"
-		}, {owner: this}).render();
-		this.$.container.reflow();
-		this.tabs[id] = c;
+		this.$.tabs.show();
+		this.$.tabs.render();
+		this.$.tabs.addTab(
+			{
+				caption: name,
+				userId: id // id like home-123f3c8a766751826...
+			}
+		);
 	},
 	switchFile: function(inSender, inEvent) {
-		this.doSwitchFile({id: inSender.fileId});
+		this.doSwitchFile({id: inEvent.userId});
 		return true;
 	},
 	activateFileWithId: function(id) {
-		this.tabs[id].setActive(true);
+		this.$.tabs.activate({ userId: id });
 	},
-	closeFile: function(inSender, inEvent) {
-		var id = inSender.fileId;
-		this.doClose({id: id});
-		return true;
-		//inSender.parent.destroy();
-	},
-	saveFile: function(inSender, inEvent) {
-		var id = this.$.tabs.getActive().fileId;
-		this.doSave({id: id});
-		return true;
-	},
-	designFile: function(inSender, inEvent) {
-		var id = this.$.tabs.getActive().fileId;
-		this.doDesign({id: id});
-		return true;
-	},
-	newKind: function(inSender, inEvent) {
-		var id = this.$.tabs.getActive().fileId;
-		this.doNewKind({id: id});
+
+	requestCloseFile: function(inSender, inEvent) {
+		// inEvent.next callback is ditched. Ares will call removeTab
+		// when file is closed by Ace
+		this.doCloseFileRequest({id: inEvent.userId});
 		return true;
 	},
 	removeTab: function(id) {
-		if (this.tabs[id]) {
-			this.tabs[id].destroy();
-			this.tabs[id] = undefined;
-			this.$.container.reflow();
-		}
-	},
-	setDesignMode: function(toDesign) {
-		if (toDesign) {
-			this.$.designButton.setContent("Editor");
-		} else {
-			this.$.designButton.setContent("Designer");
+		this.$.tabs.removeTab({ userId: id }) ;
+		if (this.$.tabs.isEmpty() ) {
+			this.$.tabs.hide();
 		}
 	}
 });

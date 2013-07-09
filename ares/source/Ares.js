@@ -12,13 +12,15 @@ enyo.kind({
 			{name: "projectView", kind: "ProjectView", classes: "ares-panel-min-width ", onProjectSelected: "projectSelected"},
 			{kind: "Harmonia", name: "harmonia", classes: "ares-panel-min-width ", onFileDblClick: "openDocument"},
 			{name:"designerPanels", components:[	
-				{name: "bottomBar", classes:"ares-bottom-bar", kind: "DocumentToolbar",
+				{
+					name: "bottomBar",
+					kind: "DocumentToolbar",
 					onToggleOpen: "toggleFiles",
 					onSwitchFile: "switchFile",
 					onSave: "bounceSave",
 					onDesign: "bounceDesign",
 					onNewKind: "bounceNew",
-					onClose: "bounceClose"
+					onCloseFileRequest: "bounceCloseFileRequest"
 				},
 				{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
 					{components: [
@@ -104,10 +106,10 @@ enyo.kind({
 		var fileDataId = Ares.Workspace.files.computeId(file);
 		var fileData = Ares.Workspace.files.get(fileDataId);
 		if (fileData) {
+			// useful when double clicking on a file in HermesFileTree
 			this.switchToDocument(fileData);
 		} else {
 			this.showWaitPopup(this, {msg: $L("Opening...")});
-			this.componentsRegistry.documentToolbar.createFileTab(file.name, fileDataId);
 			this._fetchDocument(projectData, file, function(inErr, inContent) {
 				self.hideWaitPopup();
 				if (inErr) {
@@ -117,6 +119,7 @@ enyo.kind({
 					}
 				} else {
 					fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
+					self.componentsRegistry.documentToolbar.createFileTab(file.name, fileDataId);
 					self.switchToDocument(fileData);
 					if (typeof next === 'function') {
 						next();
@@ -238,7 +241,9 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var self = this;
 		this._closeDocument(inEvent.id, function() {
-			self.showFiles();
+			if (! Ares.Workspace.files.length ) {
+				self.showProjectView();
+			}
 		});
 	},
 	/** @private */
@@ -288,17 +293,17 @@ enyo.kind({
 			return 'You may have some unsaved data';
 		}
 	},
-	hideFiles: function(inSender, inEvent) {
+	hideProjectView: function(inSender, inEvent) {
 		//this.$.slideable.animateToMin();
 	},
-	showFiles: function(inSender, inEvent) {
+	showProjectView: function(inSender, inEvent) {
 		//this.$.slideable.animateToMax();
 	},
 	toggleFiles: function(inSender, inEvent) {
 		if (/*this.$.slideable.value < 0 ||*/ Ares.Workspace.files.length === 0) {
-			this.showFiles();
+			this.showProjectView();
 		} else {
-			this.hideFiles();
+			this.hideProjectView();
 		}
 	},
 	resizeHandler: function(inSender, inEvent) {
@@ -308,7 +313,10 @@ enyo.kind({
 		var d = Ares.Workspace.files.get(inEvent.id);
 		if (d) {
 			this.switchToDocument(d);
-		} else {
+		} else if (this.debug) {
+			throw("File ID " + d + " not found in cache!");
+		}
+		else {
 			alert("File ID not found in cache!");
 		}
 	},
@@ -326,7 +334,7 @@ enyo.kind({
 		}
 		this.adjustBarMode();
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
-		this.hideFiles();
+		this.hideProjectView();
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceSave: function(inSender, inEvent) {
@@ -343,15 +351,17 @@ enyo.kind({
 	},
 	adjustBarMode: function() {
 		var designMode = this.$.panels.getIndex() == this.deimosViewIndex;
-		this.componentsRegistry.documentToolbar.setDesignMode(designMode);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {
 		this.componentsRegistry.phobos.newKindAction(inSender, inEvent);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
-	// Close is a special case, because it can be invoked on a document other than the currently-active one
-	bounceClose: function(inSender, inEvent) {
+
+	// Close is a special case, because it can be invoked on a
+	// document other than the currently-active one, so we must first
+	// switch the active document and then close it
+	bounceCloseFileRequest: function(inSender, inEvent) {
 		this.switchFile(inSender, inEvent);
 		enyo.asyncMethod(this.componentsRegistry.phobos, "closeDocAction");
 	},
