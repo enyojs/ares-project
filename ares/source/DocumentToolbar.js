@@ -13,11 +13,12 @@ enyo.kind({
 		onClose: "",
 		onSave: "",
 		onNewKind: "",
-		onDesign: ""
+		onDesign: "",
+		onRegisterMe: ""
 	},
 	components: [
 		{name: "container", classes: "ares-docbar-container", kind: "FittableColumns", ontap: "doToggleOpen", components: [
-			{kind: "onyx.Grabber"},
+			{kind: "onyx.Grabber", classes: "ares-grabber"},
 			{kind: "onyx.Drawer", orient: "h", open: false, showing:false, components: [
 				{kind: "FittableColumns", components: [
 					{kind: "onyx.Button", content: "Save", ontap: "saveFile"},
@@ -29,6 +30,10 @@ enyo.kind({
 		]}
 	],
 	tabs: {},
+	create: function() {
+		this.inherited(arguments);
+		this.doRegisterMe({name:"documentToolbar", reference:this});
+	},
 	showControls: function() {
 		this.$.drawer.setOpen(true);
 		// lock designButton's width, so it doesn't move when the caption changes

@@ -6,25 +6,29 @@ enyo.kind({
 	classes: "onyx",
 	fit: true,
 	debug: false,
+	componentsRegistry: {},
 	components: [
-		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
-			{components: [
-				{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
-			]},
-			{components: [
-				{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
+		{name:"aresLayoutPanels", kind: "Panels", draggable: false, arrangerKind: "CollapsingArranger", fit: true, classes:"ares-main-panels", components:[
+			{name: "projectView", kind: "ProjectView", classes: "ares-panel-min-width ", onProjectSelected: "projectSelected"},
+			{kind: "Harmonia", name: "harmonia", classes: "ares-panel-min-width ", onFileDblClick: "openDocument"},
+			{name:"designerPanels", components:[	
+				{name: "bottomBar", classes:"ares-bottom-bar", kind: "DocumentToolbar",
+					onToggleOpen: "toggleFiles",
+					onSwitchFile: "switchFile",
+					onSave: "bounceSave",
+					onDesign: "bounceDesign",
+					onNewKind: "bounceNew",
+					onClose: "bounceClose"
+				},
+				{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
+					{components: [
+						{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
+					]},
+					{components: [
+						{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
+					]}
+				]}
 			]}
-		]},
-		{kind: "Slideable", layoutKind: "FittableRowsLayout", classes: "onyx ares-files-slider", axis: "v", value: 0, min: -500, max: 0, unit: "px", onAnimateFinish: "finishedSliding", components: [
-			{name: "projectView", kind: "ProjectView", fit: true, classes: "onyx", onFileDblClick: "openDocument", onProjectSelected: "projectSelected"},
-			{name: "bottomBar", classes:"ares-bottom-bar", kind: "DocumentToolbar",
-				onToggleOpen: "toggleFiles",
-				onSwitchFile: "switchFile",
-				onSave: "bounceSave",
-				onDesign: "bounceDesign",
-				onNewKind: "bounceNew",
-				onClose: "bounceClose"
-			}
 		]},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
 			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
@@ -41,14 +45,21 @@ enyo.kind({
 		onHideWaitPopup: "hideWaitPopup",
 		onError: "showError",
 		onTreeChanged: "_treeChanged",
-		onChangingNode: "_nodeChanging"
+		onChangingNode: "_nodeChanging",
+		onRegisterMe : "_registerComponent"
 	},
+	projectListIndex: 0,
+	hermesFileTreeIndex: 1,
+	designerPanelsIndex: 2,
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
-
 		this.inherited(arguments);
+
+		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
+		this.componentsRegistry.harmonia.addClass("ares-full-screen");
+		this.componentsRegistry.harmonia.hideGrabber();
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
 
@@ -59,14 +70,13 @@ enyo.kind({
 		} else {
 			Ares.Workspace.loadProjects();
 		}
-		this.calcSlideableLimit();
+
 		Ares.instance = this;
 	},
+
 	rendered: function() {
 		this.inherited(arguments);
-		this.calcSlideableLimit();
 	},
-	draggable: false,
 	/**
 	 * @private
 	 */
@@ -82,7 +92,7 @@ enyo.kind({
 		this.$.serviceRegistry.setConfig(inEvent.serviceId, {auth: inEvent.auth}, inEvent.next);
 	},
 	projectSelected: function() {
-		setTimeout(enyo.bind(this, function() { this.$.deimos.projectSelected(this.$.projectView.currentProject); }), 500);	// <-- TODO - using timeout here because project url is set asynchronously
+		setTimeout(enyo.bind(this, function() { this.componentsRegistry.deimos.projectSelected(this.componentsRegistry.projectView.currentProject); }), 500);	// <-- TODO - using timeout here because project url is set asynchronously
 		return true;
 	},
 	openDocument: function(inSender, inEvent) {
@@ -97,8 +107,7 @@ enyo.kind({
 			this.switchToDocument(fileData);
 		} else {
 			this.showWaitPopup(this, {msg: $L("Opening...")});
-			this.$.bottomBar.createFileTab(file.name, fileDataId);
-			this.$.slideable.setDraggable(true);
+			this.componentsRegistry.documentToolbar.createFileTab(file.name, fileDataId);
 			this._fetchDocument(projectData, file, function(inErr, inContent) {
 				self.hideWaitPopup();
 				if (inErr) {
@@ -115,6 +124,13 @@ enyo.kind({
 				}
 			});
 		}
+		this.componentsRegistry.harmonia.removeClass("ares-full-screen");
+		this.componentsRegistry.harmonia.addClass("ares-small-screen");
+		this.$.aresLayoutPanels.reflow();
+		this.$.aresLayoutPanels.setIndex(this.hermesFileTreeIndex);
+		this.$.aresLayoutPanels.setDraggable(true);
+		this.componentsRegistry.harmonia.showGrabber();
+		this.$.designerPanels.show();
 	},
 	/** @private */
 	_fetchDocument: function(projectData, file, next) {
@@ -133,10 +149,10 @@ enyo.kind({
 		var self = this;
 		this._saveDocument(inEvent.content, {service: inEvent.file.service, fileId: inEvent.file.id}, function(err) {
 			if (err) {
-				self.$.phobos.saveFailed(err);
+				self.componentsRegistry.phobos.saveFailed(err);
 			} else {
-				self.$.phobos.saveComplete();
-				self.$.deimos.saveComplete();
+				self.componentsRegistry.phobos.saveComplete();
+				self.componentsRegistry.deimos.saveComplete();
 			}
 		});
 	},
@@ -203,7 +219,7 @@ enyo.kind({
 		}
 
 		function _savedToOpen(inData, next) {
-			this.$.projectView.refreshFile(file);
+			this.componentsRegistry.projectView.refreshFile(file);
 			// FIXME: only HermesFileTree report built-in file#service
 			var hermesFile = inData[0];
 			hermesFile.service = file.service;
@@ -230,8 +246,7 @@ enyo.kind({
 		if (docId) {
 			// remove file from cache
 			Ares.Workspace.files.removeEntry(docId);
-			this.$.bottomBar.removeTab(docId);
-			this.$.slideable.setDraggable(Ares.Workspace.files.length > 0);
+			this.componentsRegistry.documentToolbar.removeTab(docId);
 		}
 		if (typeof next === 'function') {
 			next();
@@ -239,19 +254,19 @@ enyo.kind({
 	},
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();
-		this.$.deimos.load(inEvent);
+		this.componentsRegistry.deimos.load(inEvent);
 		this.$.panels.setIndex(this.deimosViewIndex);
 		this.adjustBarMode();
 		this.activeDocument.setCurrentIF('designer');
 	},
 	//* A code change happened in Phobos - push change to Deimos
 	phobosUpdate: function(inSender, inEvent) {
-		this.$.deimos.load(inEvent);
+		this.componentsRegistry.deimos.load(inEvent);
 	},
 	//* A design change happened in Deimos - push change to Phobos
 	designerUpdate: function(inSender, inEvent) {
 		if (inEvent && inEvent.docHasChanged) {
-			this.$.phobos.updateComponents(inSender, inEvent);
+			this.componentsRegistry.phobos.updateComponents(inSender, inEvent);
 		}
 	},
 	closeDesigner: function(inSender, inEvent) {
@@ -262,11 +277,11 @@ enyo.kind({
 	},
 	//* Undo event from Deimos
 	designerUndo: function(inSender, inEvent) {
-		this.$.phobos.undoAndUpdate();
+		this.componentsRegistry.phobos.undoAndUpdate();
 	},
 	//* Redo event from Deimos
 	designerRedo: function(inSender, inEvent) {
-		this.$.phobos.redoAndUpdate();
+		this.componentsRegistry.phobos.redoAndUpdate();
 	},
 	handleBeforeUnload: function() {
 		if (window.location.search.indexOf("debug") == -1) {
@@ -274,13 +289,13 @@ enyo.kind({
 		}
 	},
 	hideFiles: function(inSender, inEvent) {
-		this.$.slideable.animateToMin();
+		//this.$.slideable.animateToMin();
 	},
 	showFiles: function(inSender, inEvent) {
-		this.$.slideable.animateToMax();
+		//this.$.slideable.animateToMax();
 	},
 	toggleFiles: function(inSender, inEvent) {
-		if (this.$.slideable.value < 0 || Ares.Workspace.files.length === 0) {
+		if (/*this.$.slideable.value < 0 ||*/ Ares.Workspace.files.length === 0) {
 			this.showFiles();
 		} else {
 			this.hideFiles();
@@ -288,14 +303,6 @@ enyo.kind({
 	},
 	resizeHandler: function(inSender, inEvent) {
 		this.inherited(arguments);
-		this.calcSlideableLimit();
-		if (this.$.slideable.value < 0) {
-			this.$.slideable.setValue(this.$.slideable.min);
-		}
-	},
-	calcSlideableLimit: function() {
-		var min = this.getBounds().height-this.$.bottomBar.getBounds().height;
-		this.$.slideable.setMin(-min);
 	},
 	switchFile: function(inSender, inEvent) {
 		var d = Ares.Workspace.files.get(inEvent.id);
@@ -308,52 +315,45 @@ enyo.kind({
 	switchToDocument: function(d) {
 		// We no longer save the data as the ACE edit session will keep the data for us
 		if (!this.activeDocument || d !== this.activeDocument) {
-			this.$.phobos.openDoc(d);
+			this.componentsRegistry.phobos.openDoc(d);
 		}
 		var currentIF = d.getCurrentIF();
 		this.activeDocument = d;
 		if (currentIF === 'code') {
 			this.$.panels.setIndex(this.phobosViewIndex);
 		} else {
-			this.$.phobos.designerAction();
+			this.componentsRegistry.phobos.designerAction();
 		}
 		this.adjustBarMode();
-		this.$.bottomBar.activateFileWithId(d.getId());
+		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
 		this.hideFiles();
-	},
-	finishedSliding: function(inSender, inEvent) {
-		if (this.$.slideable.value < 0) {
-			this.$.bottomBar.showControls();
-		} else {
-			this.$.bottomBar.hideControls();
-		}
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceSave: function(inSender, inEvent) {
-		this.$.phobos.saveDocAction(inSender, inEvent);
+		this.componentsRegistry.phobos.saveDocAction(inSender, inEvent);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
 		var editorMode = this.$.panels.getIndex() == this.phobosViewIndex;
 		if (editorMode) {
-			this.$.phobos.designerAction(inSender, inEvent);
+			this.componentsRegistry.phobos.designerAction(inSender, inEvent);
 		} else {
-			this.$.deimos.closeDesignerAction();
+			this.componentsRegistry.deimos.closeDesignerAction();
 		}
 	},
 	adjustBarMode: function() {
 		var designMode = this.$.panels.getIndex() == this.deimosViewIndex;
-		this.$.bottomBar.setDesignMode(designMode);
+		this.componentsRegistry.documentToolbar.setDesignMode(designMode);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {
-		this.$.phobos.newKindAction(inSender, inEvent);
+		this.componentsRegistry.phobos.newKindAction(inSender, inEvent);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	// Close is a special case, because it can be invoked on a document other than the currently-active one
 	bounceClose: function(inSender, inEvent) {
 		this.switchFile(inSender, inEvent);
-		enyo.asyncMethod(this.$.phobos, "closeDocAction");
+		enyo.asyncMethod(this.componentsRegistry.phobos, "closeDocAction");
 	},
 	//* Update code running in designer
 	syncEditedFiles: function() {
@@ -382,10 +382,10 @@ enyo.kind({
 		}
 	},
 	syncCSSFile: function(inFilename, inCode) {
-		this.$.deimos.syncCSSFile(inFilename, inCode);
+		this.componentsRegistry.deimos.syncCSSFile(inFilename, inCode);
 	},
 	syncJSFile: function(inCode) {
-		this.$.deimos.syncJSFile(inCode);
+		this.componentsRegistry.deimos.syncJSFile(inCode);
 	},
 	showWaitPopup: function(inSender, inEvent) {
 		this.$.waitPopupMessage.setContent(inEvent.msg);
@@ -430,7 +430,20 @@ enyo.kind({
 		var docId = Ares.Workspace.files.computeId(inEvent.node);
 		this._closeDocument(docId);
 	},
-
+	/**
+	 * Event handler for ares components registry
+	 * 
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, hermesFileTree]
+	 */
+	_registerComponent: function(inSender, inEvent) {
+		if(this.componentsRegistry[inEvent.name] === undefined){
+			this.componentsRegistry[inEvent.name] = inEvent.reference;
+		}else {
+			this.error("Component is already registred: ", inEvent.name);
+		}
+	},
 	statics: {
 		isBrowserSupported: function() {
 			if (enyo.platform.ie && enyo.platform.ie <= 8) {

@@ -356,24 +356,31 @@ enyo.kind({
 
 	saveConfig: function(inSender, inValue)  {
 		switch (inSender.name) {
-			case "ConfigurationPicker" : {
+			case "ConfigurationPicker": {
 				//this.log("Configuration object : ", this.config);
 				this.log("Saving operation ... Originator: ", inSender.container.container.name , " Value: ", inValue.content);
 				this.config.preferences[inSender.container.container.name] = inValue.content;
 				this.log ("curent instance of config: ", this.config);
 			} break; 
 
-			case "ConfigurationCheckBox" : {
+			case "ConfigurationCheckBox": {
 				this.log("Saving operation ... Originator: ", inSender.container.name , " Value: ", inSender.getValue());
 				this.config.features[inSender.container.name] = inSender.getValue();
 			} break; 
 
-			case "ConfigurationInput" : {
+			case "ConfigurationInput": {
 				this.log("Saving operation ... Originator: ", inSender.container.container.name , " Value: ", inSender.value);
 				
 				this.config.preferences[inSender.container.container.name] = inSender.value;
 				this.log ("curent instance of config: ", this.config);
 			} break; 
+
+			case "imgPath": {
+				this.log("Saving operation ... Originator: ", inSender.container.container.name , " Value: ", inSender.value);
+				
+				//this.config.icon.android[inSender.container.container.name] = inSender.value;
+				this.log ("curent instance of config: ", this.config);
+			} break;
 			
 
 			default : {
@@ -813,7 +820,6 @@ enyo.kind({
 		this.inherited(arguments);
 		this.labelChanged();
 		this.valueChanged();
-		this.log(Phonegap.EditUiData.commonDrawersContent[0].rows[1].defaultValue);
 	},
 
 	labelChanged: function () {
@@ -889,7 +895,7 @@ enyo.kind({
 
 	valueChanged: function () {
 		enyo.forEach(this.value, function (aValue) {
-			this.log("this.defaultValue: ", this.defaultValue);
+			
 			if (aValue === this.defaultValue) {
 				this.$.ConfigurationPicker.createComponent({content: aValue, active: true});
 			} else {
@@ -934,7 +940,7 @@ enyo.kind({
 			kind: "onyx.InputDecorator",
 			classes: "ares-project-properties-input-medium", 
 			components: [
-				{kind: "onyx.Input", name: "imgPath"}
+				{kind: "onyx.Input", name: "imgPath", onchange: "updateConfigurationValue"}
 			]
 		}, 
 		{

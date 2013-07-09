@@ -18,7 +18,7 @@ enyo.kind({
 		 name: "buildStatusPopup"
 		}
 	],
-	debug: false,
+	debug: true,
 	/**
 	 * @private
 	 */
@@ -484,7 +484,8 @@ enyo.kind({
 		var query = {
 			//provided by the cookie
 			//token: this.config.auth.token,
-			title: config.title			
+			title: config.title,
+			debug: true				// Disable minification
 		};
 
 		// Already-created apps have an appId (to be reused)

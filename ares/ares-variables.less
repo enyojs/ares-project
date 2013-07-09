@@ -68,6 +68,8 @@
 
 @ares-small-arrow : url("@{ares-image-path}/smallArrowDown.png");
 
+@ares-lsmall-arrow : url("@{ares-image-path}/lsmallArrowDown.png");
+
 @ares-lsmall-dowm-arrow : @ares-sprites -130px -60px no-repeat;
 
 @option-down-arrow : @ares-sprites -134px -88px no-repeat;
@@ -89,6 +91,8 @@
 @ares-input-text-color : @ares-dark-color;
 
 @ares-picker-text-color : #8C8C8C;
+
+@ares-menu-background : @onyx-picker-background;
 
 @ares-background-filechooser : @ares-light-color;
 
@@ -115,6 +119,18 @@
 @ares-radiogroup-active-border : (darken(@ares-radiogroup-active-background, 19%) + #0a0000); /*#0a4461*/
 
 @ares-radiogroup-boxshadow-color : @ares-radiogroup-active-border; /*ex : #0B4063*/
+
+@ares-deimos-background : lighten(@ares-background, 4.5%); /* whiteSmoke */
+
+@ares-ace-background : @ares-deimos-background;
+
+@ares-ace-border : darken(@ares-ace-background, 35%);
+
+@ares-deimos-border-color : lighten(@ares-background, 1.4%);
+
+@ares-harmonia-border-color : @ares-darken-background;
+
+@ares-preview-background : @ares-light-background;
 
 /* Ares popups */
 
@@ -151,6 +167,10 @@
 @ares-project-list-text-color : darken(@ares-background, 51.6%);/*#666666*/
 
 @ares-project-list-background-on : darken(@ares-background, 4.7%); /*dedede*/;
+
+/* Project preview */
+
+@ares-preview-padding : 6px;
 
 /* Ares mixins */
 
