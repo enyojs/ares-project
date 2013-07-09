@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "DocumentToolbar",
-
+	kind:"FittableRows",
 	events: {
 		onToggleOpen: "",
 		onSwitchFile: "",
@@ -9,8 +9,10 @@ enyo.kind({
 		onRegisterMe: ""
 	},
 
-	components: [
-		{kind: "onyx.Grabber", ontap: "doToggleOpen"},
+	components: [	
+		{kind: "onyx.Toolbar", classes: "ares-top-toolbar", components: [
+			{kind: "onyx.Grabber", ontap: "doToggleOpen"}
+		]},	
 		{
 			name: "tabs",
 			kind: "onyx.TabBar",
