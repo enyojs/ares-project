@@ -93,13 +93,13 @@
 /*==========================*/
 
 .ares-panels {
-	margin-top: 48px;
+	margin-top: 85px;
 }
 
 .ares-panels>* {
 	width: 100%;
 	height: 100%;
-	padding: 10px;
+	padding: 30px 10px 10px 10px;
 	box-sizing:border-box;
 }
 
@@ -152,61 +152,8 @@
 	margin : 4px 1px 5px 1px;
 }
 
-.ares-bottom-bar { height: 40px; background-color:@ares-bottom-bar-background; border-top: 1px solid #050505; padding:0px;}
-
-.enyo-fittable-columns-layout.onyx-toolbar-inline > .ares-docbar-tabs {
-	margin-top: 0px;
-	margin-bottom: 0px;
-}
-
-.ares-docbar-tabs {
-	overflow:auto; 
-	margin:0px; 
-	padding:0px 0px 0px 15px;
-}
-
-.ares-docbar-tabs .ares-tab {
-	background-color: @ares-background-file-docbar;
-	float: left;
-	margin: 0px;
-	padding:7px 0px;
-	text-align:center;
-	cursor:pointer;
-	cursor:hand;
-	overflow:hidden;
-	font-size:12px;
-	font-weight:bold;
-	text-shadow:0 -1px 0 #000;
-	min-width:100px;
-	.ares-box-shadow(none);
-	border:none;
-	height:24px;
-	color: @ares-text-file-docbar;
-	.ares-rounded-corners(0);
-}
-
-.ares-docbar-tabs .ares-tab.active {
-	.ares-box-shadow(inset 0px 0px 40px 0px #000);
-	background-color: @ares-background-active-file-docbar;
-	border:none;
-	color: @ares-active-text-color;
-}
-
 .ares-tab-label {
 	display: inline-block;
-}
-
-.ares-tab > .ares-doc-close {
-	height: 22px;
-	width: 22px;
-	background-size: 100%;
-	margin-top:0;
-}
-
-.ares-docbar-container {
-	margin-top: 0px;
-	margin-bottom: 0px;
-	width: 100%;
 }
 
 /* Why z-index: 11? Because otherwise, on Opera, parts of the editor show through */
@@ -423,9 +370,6 @@ div.large-fixed { width: 80%; }
 	padding-top: 4px;
 }
 
-.ares-grabber {
-	padding-top:40px;
-}
 @import "assets/css/AresPopup.less";
 @import "../phobos/source/cssbuilder.css";
 @import "../deimos/source/Deimos.less";
