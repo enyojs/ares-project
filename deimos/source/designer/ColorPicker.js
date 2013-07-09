@@ -29,7 +29,7 @@ enyo.kind({
 		this.applyStyle("background-color", '#' + this.color);
 	},
 	colorTapped: function(){
-		this.bubble("onSelect", {color: '#' + this.color});
+		this.bubble("onSelect", {color: this.color});
 		return true;
 	}
 });
@@ -40,126 +40,108 @@ enyo.kind({
 		{kind: "FittableColumns", components: [
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "000000"},
 				{color: "222222"},
 				{color: "444444"},
 				{color: "666666"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "888888"},
 				{color: "AAAAAA"},
 				{color: "CCCCCC"},
 				{color: "FFFFFF"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "220000"},
 				{color: "440000"},
 				{color: "880000"},
 				{color: "BB0000"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "FF0000"},
 				{color: "FE2E2E"},
 				{color: "F78181"},
 				{color: "F6CECE"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "002200"},
 				{color: "004400"},
 				{color: "008800"},
 				{color: "00BB00"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "00FF00"},
 				{color: "2EFF2E"},
 				{color: "81FF81"},
 				{color: "CEF6CE"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "000022"},
 				{color: "000044"},
 				{color: "000088"},
 				{color: "0000BB"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "0000FF"},
 				{color: "2E2EFF"},
 				{color: "8181FF"},
 				{color: "CECEF6"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "220022"},
 				{color: "440044"},
 				{color: "880088"},
 				{color: "BB00BB"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "FF00FF"},
 				{color: "FF2EFF"},
 				{color: "FF81FF"},
 				{color: "F6CEF6"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "002222"},
 				{color: "004444"},
 				{color: "008888"},
 				{color: "00BBBB"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "00FFFF"},
 				{color: "2EFFFF"},
 				{color: "81FFFF"},
 				{color: "CEF6F6"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "222200"},
 				{color: "444400"},
 				{color: "888800"},
 				{color: "BBBB00"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "FFFF00"},
 				{color: "FFFF2E"},
 				{color: "FFFF81"},
 				{color: "F6F6CE"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "3B240B"},
 				{color: "61380B"},
 				{color: "B45F04"},
 				{color: "FF8000"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "FE9A2E"},
 				{color: "FAAC58"},
 				{color: "F7BE81"},
 				{color: "F5D0A9"}
 			]},
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "3B0B17"},
 				{color: "610B21"},
 				{color: "8A0829"},
 				{color: "DF013A"}
 			]},				
 			{kind: "FittableRows", style: "width: 5.5%;", defaultKind: "DefaultColorsBox", 
 			components: [
-				{color: "FF0040"},
 				{color: "FA5882"},
 				{color: "F7819F"},
 				{color: "F5A9BC"}
@@ -178,7 +160,8 @@ enyo.kind({
 		{kind: "DefaultColorsBoxes", onSelect: "colorTapped"}
 	],
 	colorTapped: function(inEvent, data){
-		this.doColorSelected({color: data.color});
+		this.color = '#' + (data.color.substr(0,2) + data.color.substr(2,2) + data.color.substr(4,2)).toUpperCase();
+		this.doColorSelected();
 		return true;
 	}
 });
