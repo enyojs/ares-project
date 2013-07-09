@@ -928,8 +928,24 @@ enyo.kind({
 			xw.writeEndElement(); // preference			
 	
 		}, this);
+
+		/*
+		xw.writeComment("Define app icon for each platform");
+		enyo.forEach(phonegap.icons, function(icon) {
+			
+			xw.writeStartElement('icon');
+			xw.writeAttributeString('src', preference);
+			xw.writeAttributeString('gap:platform', );
+			xw.writeAttributeString('gap:density', );
+
+			xw.writeEndElement(); // icon			
 	
+		}, this);
+*/
+
 		xw.writeEndElement();	// widget
+
+
 
 		//xw.writeEndDocument(); called by flush()
 		str = xw.flush();
@@ -946,43 +962,43 @@ enyo.kind({
 				role: "default"
 			},
 			features: {
-				"battery": false,
-       		   	"camera": false,
-       		   	"contact": false,
-		        "file": false,		        
-		        "geolocation": false,
-		        "media": false,
-		        "network": false,
-		        "notification": false,		                
-		        "device": false
+				battery: false,
+       		   	camera: false,
+       		   	contact: false,
+		        file: false,		        
+		        geolocation: false,
+		        media: false,
+		        network: false,
+		        notification: false,		                
+		        device: false
 			},
 			preferences: {
 				//general prefrences
-				"phonegap-version": "2.1.0", 
-				"orientation": "landscape",
-				"target-device": "universal", 
-				"fullscreen": "true", 
+				"phonegap-version": Phonegap.EditUiData.commonDrawersContent[0].rows[0].defaultValue, 
+				"orientation": Phonegap.EditUiData.commonDrawersContent[0].rows[1].defaultValue,
+				"target-device": Phonegap.EditUiData.commonDrawersContent[0].rows[2].defaultValue, 
+				"fullscreen": Phonegap.EditUiData.commonDrawersContent[0].rows[3].defaultValue, 
 
 				//IOS preferences
-				"webviewbounce": "", 
-				"prerendered-icon": "",
-				"ios-statusbarstyle": "",
-				"detect-data-types": "",
-				"exit-on-suspend": "", 
-				"show-splash-screen-spinner": "",
-				"auto-hide-splash-screen": "", 
+				"webviewbounce": Phonegap.EditUiData.platformDrawersContent[1].rows[0].defaultValue, 
+				"prerendered-icon": Phonegap.EditUiData.platformDrawersContent[1].rows[1].defaultValue, 
+				"ios-statusbarstyle": Phonegap.EditUiData.platformDrawersContent[1].rows[2].defaultValue, 
+				"detect-data-types": Phonegap.EditUiData.platformDrawersContent[1].rows[3].defaultValue, 
+				"exit-on-suspend": Phonegap.EditUiData.platformDrawersContent[1].rows[4].defaultValue, 
+				"show-splash-screen-spinner": Phonegap.EditUiData.platformDrawersContent[1].rows[5].defaultValue, 
+				"auto-hide-splash-screen": Phonegap.EditUiData.platformDrawersContent[1].rows[6].defaultValue, 
 
 				//Android preferences
-				"android-installLocation": "",
-				"android-minSdkVersion": "", 
-				"android-maxSdkVersion": "",
-				"splash-screen-duration": "",
-				"load-url-timeout": "",
+				"android-installLocation": Phonegap.EditUiData.platformDrawersContent[0].rows[0].defaultValue, 
+				"android-minSdkVersion": Phonegap.EditUiData.platformDrawersContent[1].rows[1].defaultValue, 
+				"android-maxSdkVersion": Phonegap.EditUiData.platformDrawersContent[1].rows[2].defaultValue, 
+				"splash-screen-duration": Phonegap.EditUiData.platformDrawersContent[1].rows[3].defaultValue, 
+				"load-url-timeout": Phonegap.EditUiData.platformDrawersContent[1].rows[4].defaultValue, 
 
 				//BlackBerry preferences
-				"disable-cursor": ""
-
+				"disable-cursor": Phonegap.EditUiData.platformDrawersContent[3].rows[0].defaultValue 
 			},
+
 			plugins: {
 				"ChildBrowser": {
 					version: "2.1.0"
