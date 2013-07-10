@@ -30,7 +30,7 @@ enyo.kind({
 			{kind: "onyx.MoreToolbar", classes: "ares-top-toolbar", isContainer: true, name: "toolbar", components: [
 					{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
 						{tag:"button", content: "Ares"},
-						{kind: "onyx.Menu", classes:"sub-aresmenu", components: [
+						{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", components: [
 							{value: "showAccountConfigurator", classes:"aresmenu-button", components: [
 								{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png"},
 								{content: "Accounts..."}
@@ -41,7 +41,7 @@ enyo.kind({
 					]},
 					{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
 						{content: "Edit"},
-						{kind: "onyx.Menu", classes:"sub-aresmenu", components: [
+						{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", components: [
 							{value: "doCreateProject",  classes:"aresmenu-button", components: [
 								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_new.png"},
 								{content: "Create..."}
@@ -65,7 +65,7 @@ enyo.kind({
 					]},
 					{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
 						{content: "Project", name: "projectMenu", disabled: true},
-						{kind: "onyx.Menu", classes:"sub-aresmenu", maxHeight: "100%", components: [
+						{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
 							{value: "doModifySettings",  classes:"aresmenu-button", components: [
 								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_edit.png"},
 								{content: "Edit..."}
