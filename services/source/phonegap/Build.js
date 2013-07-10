@@ -824,12 +824,56 @@ enyo.kind({
 	 * FIXME: define a JSON schema
 	 */
 	_generateConfigXml: function(config) {
+		self = this;
+		
 		
 		var phonegap = config.providers.phonegap;
 		if (!phonegap) {
 			this.log("PhoneGap build disabled: will not generate the XML");
 			return undefined;
 		}
+
+		var createIconXMLRow = function(inTarget) {
+			xw.writeStartElement( 'icon' );
+						// If the project does not define an icon, use Enyo's
+						// one
+						xw.writeAttributeString('src', phonegap.icons[inTarget].src || 'icon.png');
+						if(inTarget === "general"){
+							xw.writeAttributeString('role', phonegap.icons[inTarget].role || 'default');
+						} else {
+							xw.writeAttributeString('gap:platfom', inTarget);
+
+							if (inTarget === "android"){
+								xw.writeAttributeString('gap:density', phonegap.icons[inTarget].density || "mdpi");
+							} else if (inTarget === "ios") {
+									xw.writeAttributeString('width', phonegap.icons[inTarget].width || 60);
+									xw.writeAttributeString('height', phonegap.icons[inTarget].height || 60);
+								}
+						}
+							
+			xw.writeEndElement();
+		};
+
+		var createSplashScreenXMLRow = function(inTarget) {
+			xw.writeStartElement( 'gap:splash' );
+						// If the project does not define an icon, use Enyo's
+						// one
+						xw.writeAttributeString('src', phonegap.splashes[inTarget].src || 'icon.png');
+						if(inTarget === "general"){
+							xw.writeAttributeString('role', phonegap.splashes[inTarget].role || 'default');
+						} else {
+							xw.writeAttributeString('gap:platfom', inTarget);
+
+							if (inTarget === 'android'){
+								xw.writeAttributeString('gap:density', phonegap.splashes['android'].density || 'mdpi');
+							} else if (inTarget === 'ios') {
+									xw.writeAttributeString('width', phonegap.splashes['ios'].width || 90);
+									xw.writeAttributeString('height', phonegap.splashes['ios'].height || 150);
+								}
+						}
+							
+			xw.writeEndElement();
+		};
 
 		// See http://flesler.blogspot.fr/2008/03/xmlwriter-for-javascript.html
 
@@ -857,13 +901,6 @@ enyo.kind({
 		// we have no multi-line 'description' of the
 		// application, so use our one-line description
 		xw.writeElementString('description', config.title);
-
-		xw.writeStartElement( 'icon' );
-		// If the project does not define an icon, use Enyo's
-		// one
-		xw.writeAttributeString('src', phonegap.icon.src || 'icon.png');
-		xw.writeAttributeString('role', phonegap.icon.role || 'default');
-		xw.writeEndElement();	// icon
 
 		xw.writeStartElement( 'author' );
 		xw.writeAttributeString('href', config.author.href);
@@ -930,19 +967,20 @@ enyo.kind({
 	
 		}, this);
 
-		/*
+				
 		xw.writeComment("Define app icon for each platform");
-		enyo.forEach(phonegap.icons, function(icon) {
+		enyo.forEach(phonegap.icons && enyo.keys(phonegap.icons), function(target) {
+			createIconXMLRow.call(self, target);
 			
-			xw.writeStartElement('icon');
-			xw.writeAttributeString('src', preference);
-			xw.writeAttributeString('gap:platform', );
-			xw.writeAttributeString('gap:density', );
-
-			xw.writeEndElement(); // icon			
-	
 		}, this);
-*/
+
+		xw.writeComment("Define app splash screen for each platform");
+		enyo.forEach(phonegap.splashes && enyo.keys(phonegap.splashes), function(target) {
+			createSplashScreenXMLRow.call(self, target);			
+		}, this);
+
+
+
 
 		xw.writeEndElement();	// widget
 
@@ -975,31 +1013,48 @@ enyo.kind({
 			},
 			preferences: {
 				//general prefrences
-				"phonegap-version": Phonegap.EditUiData.commonDrawersContent[0].rows[0].defaultValue, 
-				"orientation": Phonegap.EditUiData.commonDrawersContent[0].rows[1].defaultValue,
-				"target-device": Phonegap.EditUiData.commonDrawersContent[0].rows[2].defaultValue, 
-				"fullscreen": Phonegap.EditUiData.commonDrawersContent[0].rows[3].defaultValue, 
+				"phonegap-version": Phonegap.UIConfiguration.commonDrawersContent[0].rows[0].defaultValue, 
+				"orientation": Phonegap.UIConfiguration.commonDrawersContent[0].rows[1].defaultValue,
+				"target-device": Phonegap.UIConfiguration.commonDrawersContent[0].rows[2].defaultValue, 
+				"fullscreen": Phonegap.UIConfiguration.commonDrawersContent[0].rows[3].defaultValue, 
 
 				//IOS preferences
-				"webviewbounce": Phonegap.EditUiData.platformDrawersContent[1].rows[0].defaultValue, 
-				"prerendered-icon": Phonegap.EditUiData.platformDrawersContent[1].rows[1].defaultValue, 
-				"ios-statusbarstyle": Phonegap.EditUiData.platformDrawersContent[1].rows[2].defaultValue, 
-				"detect-data-types": Phonegap.EditUiData.platformDrawersContent[1].rows[3].defaultValue, 
-				"exit-on-suspend": Phonegap.EditUiData.platformDrawersContent[1].rows[4].defaultValue, 
-				"show-splash-screen-spinner": Phonegap.EditUiData.platformDrawersContent[1].rows[5].defaultValue, 
-				"auto-hide-splash-screen": Phonegap.EditUiData.platformDrawersContent[1].rows[6].defaultValue, 
+				"webviewbounce": Phonegap.UIConfiguration.platformDrawersContent[1].rows[0].defaultValue, 
+				"prerendered-icon": Phonegap.UIConfiguration.platformDrawersContent[1].rows[1].defaultValue, 
+				"ios-statusbarstyle": Phonegap.UIConfiguration.platformDrawersContent[1].rows[2].defaultValue, 
+				"detect-data-types": Phonegap.UIConfiguration.platformDrawersContent[1].rows[3].defaultValue, 
+				"exit-on-suspend": Phonegap.UIConfiguration.platformDrawersContent[1].rows[4].defaultValue, 
+				"show-splash-screen-spinner": Phonegap.UIConfiguration.platformDrawersContent[1].rows[5].defaultValue, 
+				"auto-hide-splash-screen": Phonegap.UIConfiguration.platformDrawersContent[1].rows[6].defaultValue, 
 
 				//Android preferences
-				"android-installLocation": Phonegap.EditUiData.platformDrawersContent[0].rows[0].defaultValue, 
-				"android-minSdkVersion": Phonegap.EditUiData.platformDrawersContent[1].rows[1].defaultValue, 
-				"android-maxSdkVersion": Phonegap.EditUiData.platformDrawersContent[1].rows[2].defaultValue, 
-				"splash-screen-duration": Phonegap.EditUiData.platformDrawersContent[1].rows[3].defaultValue, 
-				"load-url-timeout": Phonegap.EditUiData.platformDrawersContent[1].rows[4].defaultValue, 
+				"android-installLocation": Phonegap.UIConfiguration.platformDrawersContent[0].rows[0].defaultValue, 
+				"android-minSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[1].rows[1].defaultValue, 
+				"android-maxSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[1].rows[2].defaultValue, 
+				"splash-screen-duration": Phonegap.UIConfiguration.platformDrawersContent[1].rows[3].defaultValue, 
+				"load-url-timeout": Phonegap.UIConfiguration.platformDrawersContent[1].rows[4].defaultValue, 
 
 				//BlackBerry preferences
-				"disable-cursor": Phonegap.EditUiData.platformDrawersContent[3].rows[0].defaultValue 
+				"disable-cursor": Phonegap.UIConfiguration.platformDrawersContent[3].rows[0].defaultValue 
 			},
 
+			icons: {
+				"general": {src: "", role: "default"},
+				"android": {src: "", density: "" },
+				"ios": {src: "", height: "", width: ""}, 
+				"winphone": {src: ""}, 
+				"blackberry": {src: ""},
+				"webos": {src: ""}  
+			},
+
+			splashes: {
+				general: {src: "", role: "default"},
+				android: {src: "", density: "" },
+				ios: {src: "", height: "", width: ""}, 
+				winphone: {src: ""}, 
+				blackberry: {src: ""},
+				webos: {src: ""} 
+			},
 			plugins: {
 				"ChildBrowser": {
 					version: "2.1.0"
