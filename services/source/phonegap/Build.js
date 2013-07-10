@@ -996,10 +996,6 @@ enyo.kind({
 	statics: {
 		DEFAULT_PROJECT_CONFIG: {
 			enabled: false,
-			icon: {
-				src: "icon.png",
-				role: "default"
-			},
 			features: {
 				battery: false,
        		   	camera: false,
