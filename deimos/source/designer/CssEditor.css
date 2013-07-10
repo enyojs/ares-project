@@ -63,3 +63,7 @@
 .css-editor-select-box > .inspector-field-editor {
 	width: 4rem;
 }
+
+.onyx-picker-decorator .onyx-button {
+padding: 2px 18px;
+}

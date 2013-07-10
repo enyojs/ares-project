@@ -229,7 +229,16 @@ enyo.kind({
 		if (template) {
 			this.instanciateTemplate(inEvent);
 		} else {
-			this.projectReady(null, inEvent);
+			var service = this.selectedDir.service;
+
+			service.createFile(folderId, "package.js", "enyo.depends(\n);\n")
+				.response(this, function(inRequest, inFsNode) {
+					if (this.debug) { enyo.log("package.js inFsNode[0]:", inFsNode[0]); }
+					this.projectReady(null, inEvent);
+				})
+				.error(this, function(inRequest, inError) {
+					if (this.debug) { enyo.log("inRequest:", inRequest, "inError:", inError); }
+				});
 		}
 
 		return true ; // stop bubble
