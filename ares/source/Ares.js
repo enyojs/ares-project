@@ -10,7 +10,7 @@ enyo.kind({
 	components: [
 		{name:"aresLayoutPanels", kind: "Panels", draggable: false, arrangerKind: "CollapsingArranger", fit: true, classes:"ares-main-panels", components:[
 			{name: "projectView", kind: "ProjectView", classes: "ares-panel-min-width ", onProjectSelected: "projectSelected"},
-			{kind: "Harmonia", name: "harmonia", classes: "ares-panel-min-width ", onFileDblClick: "openDocument"},
+			{kind: "Harmonia", name: "harmonia", classes: "ares-panel-min-width ", onFileDblClick: "openDocument", onFileChanged: "closeDocument", onFolderChanged: "closeSomeDocuments"},
 			{name:"designerPanels", components:[	
 				{
 					name: "bottomBar",
@@ -236,6 +236,32 @@ enyo.kind({
 				self.showProjectView();
 			}
 		});
+	},
+	/* @private */
+	closeSomeDocuments: function(inSender, inEvent) {
+		this.trace("sender:", inSender, ", event:", inEvent);
+		
+		var files = Ares.Workspace.files,
+			model,
+			i;
+		
+		this.log("files", files);
+
+		var self = this;
+		var show = function () {
+			if (! Ares.Workspace.files.length ) {
+				self.showProjectView();
+			}
+		};
+
+		for( i = 0; i < files.models.length; i++ ) {
+			model = files.models[i];
+
+			if ( model.id.indexOf( inEvent.id, 0 ) >= 0 ) {
+				this._closeDocument(model.id, show);
+				i--;
+			}
+		}
 	},
 	/** @private */
 	_closeDocument: function(docId, next) {

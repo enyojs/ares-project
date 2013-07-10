@@ -4,7 +4,7 @@
  * @class HermesFileTree
  */
 
-/* global ares */
+/* global Ares, ares */
 
 enyo.kind({
 	name: "HermesFileTree",
@@ -13,6 +13,8 @@ enyo.kind({
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
+		onFileChanged: "",
+		onFolderChanged: "",
 		onTreeChanged: ""
 	},
 	handlers: {
@@ -209,6 +211,7 @@ enyo.kind({
 			if (this.draggedNode.content != "package.js") {
 				var oldParentNode=this.draggedNode.container,
 					newParentNode=this.targetNode;
+
 				this.moveNode(this.draggedNode, this.targetNode)
 					.response(this, function(inSender, inNodeFile) {
 						newParentNode.updateNodes()
@@ -865,12 +868,21 @@ enyo.kind({
 	renameConfirm: function(inSender, inEvent) {
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		var newName = inSender.fileName.trim();
-		this.trace("Renaming '" + this.selectedFile + "' as '" + newName + "'");
+		this.trace("Renaming '", this.selectedFile, "' as '", newName, "'");
 		this.$.service.rename(this.selectedFile.id, newName)
 			.response(this, function(inSender, inNode) {
-				this.trace("inNode: "+inNode);
+				this.trace("inNode: ",inNode);
 				var parentNode = this.getParentNodeOfSelected(),
 				    pkgNode = parentNode.getNodeNamed('package.js');
+
+				if (!this.selectedFile.isServer && this.projectUrlReady) {
+					if (!this.selectedFile.isDir) {
+						this.doFileChanged({id: Ares.Workspace.files.computeId(this.selectedFile)});
+					} else {
+						this.doFolderChanged({id: Ares.Workspace.files.computeId(this.selectedFile)});
+					}
+				}
+
 				this.doTreeChanged({
 					remove: {
 						service: this.$.service,
@@ -935,7 +947,6 @@ enyo.kind({
 				/* cancel any move reverting */
 				this.resetRevert();
 
-
 				serverNode.resized();
 
 				this.refreshFileTree( function() { parentNode.doAdjustScroll(); }, parentNode.file.id /*selectId*/ );
@@ -968,7 +979,8 @@ enyo.kind({
 	/** @private */
 	revertConfirm: function(inSender, inEvent) {
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
-		this.trace("Reverting '" + this.movedNode.file.name + "' into '" + this.originNode.file.path + "'");
+		this.trace("Reverting '", this.movedNode.file.name, "' into '", this.originNode.file.path, "'");
+
 		this.moveNode(this.movedNode, this.originNode)
 			.response(this, function(inSender, inNodeFile) {
 				/* cancel any move reverting */
@@ -1007,7 +1019,7 @@ enyo.kind({
 	},
 
 	createFile: function(name, folderId, content) {
-		this.trace("Creating new file "+name+" into folderId="+folderId);
+		this.trace("Creating new file ",name," into folderId=",folderId);
 		this.$.service.createFile(folderId, name, content)
 			.response(this, function(inSender, inNodes) {
 				this.trace("inNodes: ",inNodes);
@@ -1072,6 +1084,14 @@ enyo.kind({
 						removePkgNode = removedParentNode.getNodeNamed('package.js'),
 						addParentNode = inTarget,
 						addPkgNode = addParentNode.getNodeNamed('package.js');
+
+				if (!inNode.file.isServer && this.projectUrlReady) {
+					if (!inNode.file.isDir) {
+						this.doFileChanged({id: Ares.Workspace.files.computeId(inNode.file)});
+					} else {
+						this.doFolderChanged({id: Ares.Workspace.files.computeId(inNode.file)});
+					}
+				}
 
 				if (!addParentNode.expanded) {
 					addParentNode.setExpanded(true);
