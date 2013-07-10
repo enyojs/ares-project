@@ -879,7 +879,7 @@ enyo.kind({
 					if (!this.selectedFile.isDir) {
 						this.doFileChanged({id: Ares.Workspace.files.computeId(this.selectedFile)});
 					} else {
-						this.doFolderChanged({id: Ares.Workspace.files.computeId(this.selectedFile)});
+						this.doFolderChanged({file: this.selectedFile, projectData: this.projectData});
 					}
 				}
 
@@ -1089,7 +1089,7 @@ enyo.kind({
 					if (!inNode.file.isDir) {
 						this.doFileChanged({id: Ares.Workspace.files.computeId(inNode.file)});
 					} else {
-						this.doFolderChanged({id: Ares.Workspace.files.computeId(inNode.file)});
+						this.doFolderChanged({file: inNode.file, projectData: this.projectData});
 					}
 				}
 

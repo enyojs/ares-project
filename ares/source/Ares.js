@@ -245,8 +245,6 @@ enyo.kind({
 			model,
 			i;
 		
-		this.log("files", files);
-
 		var self = this;
 		var show = function () {
 			if (! Ares.Workspace.files.length ) {
@@ -257,7 +255,10 @@ enyo.kind({
 		for( i = 0; i < files.models.length; i++ ) {
 			model = files.models[i];
 
-			if ( model.id.indexOf( inEvent.id, 0 ) >= 0 ) {
+			var path = model.getFile().path,
+				serviceId = model.getProjectData().getServiceId();
+
+			if ( serviceId == inEvent.projectData.getServiceId() && path.indexOf( inEvent.file.path, 0 ) >= 0 ) {
 				this._closeDocument(model.id, show);
 				i--;
 			}
