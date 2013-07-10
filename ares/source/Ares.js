@@ -15,7 +15,6 @@ enyo.kind({
 				{
 					name: "bottomBar",
 					kind: "DocumentToolbar",
-					onToggleOpen: "toggleFiles",
 					onSwitchFile: "switchFile",
 					onSave: "bounceSave",
 					onDesign: "bounceDesign",
@@ -58,13 +57,11 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
-
+		this.$.panels.setIndex(this.phobosViewIndex);
 		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
 		this.componentsRegistry.harmonia.addClass("ares-full-screen");
 		this.componentsRegistry.harmonia.hideGrabber();
-		this.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
-
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
 			Ares.Workspace.loadProjects("com.enyojs.ares.tests", true);
@@ -127,13 +124,7 @@ enyo.kind({
 				}
 			});
 		}
-		this.componentsRegistry.harmonia.removeClass("ares-full-screen");
-		this.componentsRegistry.harmonia.addClass("ares-small-screen");
-		this.$.aresLayoutPanels.reflow();
-		this.$.aresLayoutPanels.setIndex(this.hermesFileTreeIndex);
-		this.$.aresLayoutPanels.setDraggable(true);
-		this.componentsRegistry.harmonia.showGrabber();
-		this.$.designerPanels.show();
+		this.hideProjectView();
 	},
 	/** @private */
 	_fetchDocument: function(projectData, file, next) {
@@ -294,17 +285,20 @@ enyo.kind({
 		}
 	},
 	hideProjectView: function(inSender, inEvent) {
-		//this.$.slideable.animateToMin();
+		this.componentsRegistry.harmonia.removeClass("ares-full-screen");
+		this.componentsRegistry.harmonia.addClass("ares-small-screen");
+		this.$.aresLayoutPanels.reflow();
+		this.$.aresLayoutPanels.setIndex(this.hermesFileTreeIndex);
+		this.$.aresLayoutPanels.setDraggable(true);
+		this.componentsRegistry.harmonia.showGrabber();
 	},
 	showProjectView: function(inSender, inEvent) {
-		//this.$.slideable.animateToMax();
-	},
-	toggleFiles: function(inSender, inEvent) {
-		if (/*this.$.slideable.value < 0 ||*/ Ares.Workspace.files.length === 0) {
-			this.showProjectView();
-		} else {
-			this.hideProjectView();
-		}
+		this.componentsRegistry.harmonia.removeClass("ares-small-screen");
+		this.componentsRegistry.harmonia.addClass("ares-full-screen");
+		this.$.aresLayoutPanels.reflow();
+		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
+		this.$.aresLayoutPanels.setDraggable(false);
+		this.componentsRegistry.harmonia.hideGrabber();
 	},
 	resizeHandler: function(inSender, inEvent) {
 		this.inherited(arguments);
@@ -334,7 +328,6 @@ enyo.kind({
 		}
 		this.adjustBarMode();
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
-		this.hideProjectView();
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceSave: function(inSender, inEvent) {
