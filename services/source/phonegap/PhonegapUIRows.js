@@ -1,3 +1,6 @@
+/* global ares */
+
+
 /**
  * This Kind define a row containing a checkbox widget
  */
@@ -22,6 +25,7 @@ enyo.kind({
 		{name: "labelValue", content: this.label, }
 	],
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
 	},
@@ -30,7 +34,7 @@ enyo.kind({
 	},
 	updateConfigurationValue: function (inSender, inValue) {		
 		var saveProperty = (function(inConfig) {
-			this.log("Saving operation ... Originator: ", this.name , " Value: ",inSender.getValue());
+			this.trace("Saving operation ... Originator: ", this.name , " Value: ",inSender.getValue());
 			inConfig.features[this.name] = inSender.getValue();			
 		}).bind(this);		
 
@@ -75,6 +79,7 @@ enyo.kind({
 	],
 
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
 		this.valueChanged();
@@ -90,7 +95,7 @@ enyo.kind({
 
 	updateConfigurationValue: function (inSender, inValue) {
 		var saveProperty = (function(inConfig) {
-			this.log("Saving operation ... Originator: ", this.name , " Value: ",inSender.value);
+			this.trace("Saving operation ... Originator: ", this.name , " Value: ",inSender.value);
 			inConfig.preferences[this.name] = inSender.value;			
 		}).bind(this);		
 
@@ -126,6 +131,7 @@ enyo.kind({
 	],
 
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
 		this.valueChanged();
@@ -148,7 +154,7 @@ enyo.kind({
 
 	updateConfigurationValue: function (inSender, inValue) {
 		var saveProperty = (function(inConfig) {
-			this.log("Saving operation ... Originator: ", this.name , " Value: ", inValue.content);
+			this.trace("Saving operation ... Originator: ", this.name , " Value: ", inValue.content);
 			inConfig.preferences[this.name] = inValue.content;			
 		}).bind(this);		
 		
@@ -200,6 +206,7 @@ enyo.kind({
 	],
 
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
 		this.valueChanged();
@@ -216,12 +223,12 @@ enyo.kind({
 	updateConfigurationValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.icons["android"].src = inSender.value;			
 				}).bind(this);	
 		} else {
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.splashes["android"].src = inSender.value;			
 				}).bind(this);	
 		}
@@ -232,12 +239,12 @@ enyo.kind({
 	updateAndroidIconDensity: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inValue.content);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inValue.content);
 					inConfig.icons["android"].density = inValue.content;			
 				}).bind(this);	
 		} else {
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inValue.content);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inValue.content);
 					inConfig.splashes["android"].density = inValue.content;			
 				}).bind(this);	
 		}
@@ -303,6 +310,7 @@ enyo.kind({
 	],
 
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
 	},
@@ -319,12 +327,12 @@ enyo.kind({
 	updateConfigurationValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.icons["ios"].src = inSender.value;			
 				}).bind(this);	
 		} else {
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.splashes["ios"].src = inSender.value;			
 				}).bind(this);	
 		}
@@ -335,12 +343,12 @@ enyo.kind({
 	updateIosIconHeightValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.icons["ios"].height = inSender.value;			
 				}).bind(this);	
 		} else {
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.splashes["ios"].height = inSender.value;			
 				}).bind(this);	
 		}
@@ -351,12 +359,12 @@ enyo.kind({
 	updateIosIconWidhtValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.icons["ios"].width = inSender.value;			
 				}).bind(this);	
 		} else {
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.splashes["ios"].width = inSender.value;			
 				}).bind(this);	
 		}
@@ -402,6 +410,7 @@ enyo.kind({
 	],
 
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
 	},
@@ -417,12 +426,12 @@ enyo.kind({
 	updateConfigurationValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.icons["general"].src = inSender.value;			
 				}).bind(this);	
 		} else {
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.splashes["general"].src = inSender.value;			
 				}).bind(this);	
 		}
@@ -463,6 +472,7 @@ enyo.kind({
 	],
 
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
 	},
@@ -478,12 +488,12 @@ enyo.kind({
 	updateConfigurationValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.icons["winphone"].src = inSender.value;			
 				}).bind(this);	
 		} else {
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.splashes["winphone"].src = inSender.value;			
 				}).bind(this);	
 		}
@@ -527,6 +537,7 @@ enyo.kind({
 	],
 
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
 	},
@@ -542,12 +553,12 @@ enyo.kind({
 	updateConfigurationValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.icons["blackberry"].src = inSender.value;			
 				}).bind(this);	
 		} else {
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.splashes["blackberry"].src = inSender.value;			
 				}).bind(this);	
 		}
@@ -589,6 +600,7 @@ enyo.kind({
 	],
 
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
 	},
@@ -604,12 +616,12 @@ enyo.kind({
 	updateConfigurationValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.icons["webos"].src = inSender.value;			
 				}).bind(this);	
 		} else {
 			var saveProperty = (function(inConfig) {
-					this.log("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 					inConfig.splashes["webos"].src = inSender.value;			
 				}).bind(this);	
 		}

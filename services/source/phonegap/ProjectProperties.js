@@ -1,3 +1,5 @@
+/* global ares */
+
 /**
  * This kind hold the needed data to create the UI Projet -> Edit
  * @type {String}
@@ -114,6 +116,7 @@ enyo.kind({
  * UI: Phonegap pane in the ProjectProperties popup
  * @name Phonegap.ProjectProperties
  */
+
 enyo.kind({
 	name: "Phonegap.ProjectProperties",
 	kind: "Ares.ProjectProperties",
@@ -167,13 +170,13 @@ enyo.kind({
 	 * @private
 	 */
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.createAllDrawers();
 	},
 
 	createAllDrawers: function () {
 		self = this;
-
 		createDrawers(this.commonDrawers, this.platformDrawers);
 
 		function createDrawers(inCommonDrawers, inPlatformDrawers) {
@@ -274,7 +277,6 @@ enyo.kind({
 		function setUpDrawer(dwr, dwrContent) {
 			// Creation of the pickers of the drawer if they existe.
 			enyo.forEach(dwrContent.rows, function (row) {
-				//this.log(allDrawers[allDrawers.length - 1], "+++++++");						
 				dwr.$.drawer.createComponent({
 					kind: "Phonegap.ProjectProperties." + row.type,
 					name: row.name,
@@ -288,15 +290,10 @@ enyo.kind({
 
 	/** public */
 	setProjectConfig: function (config) {
-		this.config = config;
-		if (this.debug){
-			this.log("config:", this.config);
-		}
+		this.config = config;		
+		this.trace("config:", this.config);		
 		this.config.enabled = true;
-
 		this.$.pgConfId.setValue(config.appId || '');
-		//this.$.pgIconUrl.setValue(config.icon.src || config.icon.src );
-
 		this.config.targets = this.config.targets || {};		
 
 		enyo.forEach(this.platformDrawers, function (target) {
@@ -304,6 +301,7 @@ enyo.kind({
 		}, this);
 		this.refresh();
 	},
+
 	/** public */
 	getProjectConfig: function () {
 		this.config.appId = this.$.pgConfId.getValue();
@@ -312,49 +310,40 @@ enyo.kind({
 		enyo.forEach(this.platformDrawers, function (target) {
 			this.config.targets[target.id] = this.$.targetsRows.$[target.id].getProjectConfig();
 		}, this);
-
-		if (this.debug){
-			this.log("config:", this.config);
-		}
+		this.trace("config:", this.config);	
 		return this.config;
 	},
 	/**
 	 * @protected
 	 */
-	refresh: function (inSender, inValue) {
-		if (this.debug){
-			this.log("sender:", inSender, "value:", inValue);
-		}
+	refresh: function (inSender, inValue) {		
+		this.trace("sender:", inSender, "value:", inValue);		
 		var provider = Phonegap.ProjectProperties.getProvider();
 		provider.authorize(enyo.bind(this, this.loadKeys));
 	},
+
 	/**
 	 * @protected
 	 */
-	configure: function (inSender, inValue) {
-		if (this.debug){
-			this.log("sender:", inSender, "value:", inValue);
-		}
+	configure: function (inSender, inValue) {		
+		this.trace("sender:", inSender, "value:", inValue);		
 		this.doConfigure({
 			id: 'phonegap'
 		});
 	},
 
-
-
 	saveConfig: function(inSender, saveProperty)  {
-
 		saveProperty.call(this, this.config) ;
-
 		return true; //stop the bubbling
 	}, 
+	
 	/**
 	 * @protected
 	 */
 	loadKeys: function (err) {
-		if (this.debug){
-			this.log("err:", err);
-		}
+	
+		this.trace("err:", err);
+	
 		if (err) {
 			this.warn("err:", err);
 		} else {
@@ -402,13 +391,14 @@ enyo.kind({
 	 * @private
 	 */
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.targetNameChanged();
 	},
 	setProjectConfig: function (config) {
-		if (this.debug){
-			this.log("id:", this.targetId, "config:", config);
-		}
+		
+		this.trace("id:", this.targetId, "config:", config);
+		
 		this.config = config;
 		this.setEnabled( !! this.config);
 		if (this.enabled && this.$.drawer.$.keySelector) {
@@ -419,27 +409,27 @@ enyo.kind({
 		if (this.enabled && this.$.drawer.$.keySelector) {
 			this.config.keyId = this.$.drawer.$.keySelector.getActiveKeyId();
 		}
-		if (this.debug){
-			this.log("id:", this.targetId, "config:", this.config);
-		}
+		
+		this.trace("id:", this.targetId, "config:", this.config);
+		
 		return this.config;
 	},
 	/**
 	 * @private
 	 */
 	targetNameChanged: function (old) {
-		if (this.debug) {
-			this.log(old, "->", this.enabled);
-		}
+		
+		this.trace(old, "->", this.enabled);
+		
 		this.$.targetLbl.setContent(this.targetName);
 	},
 	/**
 	 * @private
 	 */
 	enabledChanged: function (old) {
-		if (this.debug){
-			this.log("id:", this.targetId, old, "->", this.enabled);
-		}
+		
+		this.trace("id:", this.targetId, old, "->", this.enabled);
+		
 		this.$.targetChkBx.setChecked(this.enabled);
 		this.updateDrawer();
 		if (this.enabled) {
@@ -456,18 +446,18 @@ enyo.kind({
 		if ((this.targetId === 'android' ||
 			this.targetId === 'ios' ||
 			this.targetId === 'blackberry')) {
-			if (this.debug){
-				this.log("id:", this.targetId);
-			}
+			
+			this.trace("id:", this.targetId);
+			
 
 			if (this.$.drawer.$.keySelector) {
 				this.$.drawer.$.keySelector.destroy();
 			}
 
 			var keys = provider.getKey(this.targetId);
-			if (this.debug){
-				this.log("id:", this.targetId, "keys:", keys);
-			}
+			
+			this.trace("id:", this.targetId, "keys:", keys);
+			
 			if (keys) {
 				this.$.drawer.createComponent({
 					name: "keySelector",
@@ -519,6 +509,7 @@ enyo.kind({
 	 * @private
 	 */
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.drawerNameChanged();
 	},
@@ -583,6 +574,7 @@ enyo.kind({
 		}
 	],
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.keysChanged();
 		this.activeKeyIdChanged();
@@ -591,10 +583,9 @@ enyo.kind({
 	 * @private
 	 */
 	keysChanged: function (old) {
-		if (this.debug){
-			this.log("id:", this.targetId, old, "->", this.keys);
-		}
-
+		
+		this.trace("id:", this.targetId, old, "->", this.keys);
+		
 		// Sanity
 		this.keys = this.keys || [];
 
@@ -622,9 +613,9 @@ enyo.kind({
 	 */
 	activeKeyIdChanged: function (old) {
 		var key = this.getKey(this.activeKeyId);
-		if (this.debug) {
-			this.log("id:", this.targetId, old, "->", this.activeKeyId, "key:", key);
-		}
+		
+		this.trace("id:", this.targetId, old, "->", this.activeKeyId, "key:", key);
+		
 		if (key) {
 			// One of the configured keys
 			if (this.targetId === 'ios' || this.targetId === 'blackberry') {
@@ -654,11 +645,11 @@ enyo.kind({
 	 * @private
 	 */
 	selectKey: function (inSender, inValue) {
-		this.log("sender:", inSender, "value:", inValue);
+		this.trace("sender:", inSender, "value:", inValue);
 		enyo.forEach(this.keys, function (key) {
 			if (key.title === inValue.content) {
 				this.setActiveKeyId(key.id);
-				this.log("selected key:", key);
+				this.trace("selected key:", key);
 			}
 		}, this);
 	},
@@ -684,13 +675,13 @@ enyo.kind({
 	 * @private
 	 */
 	savePassword: function (inSender, inValue) {
-		if (this.debug) {
-			this.log("sender:", inSender, "value:", inValue);
-		}
+		
+		this.trace("sender:", inSender, "value:", inValue);
+		
 		var key = this.getShowingKey();
-		if (this.debug) {
-			this.log("targetId:", this.targetId, "key:", key);
-		}
+		
+		this.trace("targetId:", this.targetId, "key:", key);
+		
 		this.provider.setKey(this.targetId, key);
 	}
 });
