@@ -21,7 +21,7 @@ enyo.kind({
 	},
 
 	components: [
-		{kind: "ProjectProperties", name: "propertiesWidget"},
+		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource"},
 		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true},
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"}
 	],
@@ -229,7 +229,16 @@ enyo.kind({
 		if (template) {
 			this.instanciateTemplate(inEvent);
 		} else {
-			this.projectReady(null, inEvent);
+			var service = this.selectedDir.service;
+
+			service.createFile(folderId, "package.js", "enyo.depends(\n);\n")
+				.response(this, function(inRequest, inFsNode) {
+					if (this.debug) { enyo.log("package.js inFsNode[0]:", inFsNode[0]); }
+					this.projectReady(null, inEvent);
+				})
+				.error(this, function(inRequest, inError) {
+					if (this.debug) { enyo.log("inRequest:", inRequest, "inError:", inError); }
+				});
 		}
 
 		return true ; // stop bubble
@@ -241,7 +250,9 @@ enyo.kind({
 	// step 4: populate the project with the selected template
 	instanciateTemplate: function (inEvent) {
 
+		var sources = [];
 		var template = inEvent.template;
+		var addSources = inEvent.addSources || [];
 		this.doShowWaitPopup({msg: this.$LS("Creating project from #{template}", {template: template})});
 
 		var substitutions = [{
@@ -254,8 +265,12 @@ enyo.kind({
 		}];
 
 		var genService = ServiceRegistry.instance.getServicesByType('generate')[0];
+		sources.push(template);
+		addSources.forEach(function(source) {
+			sources.push(source);
+		});
 		var req = genService.generate({
-			sourceIds: [template],
+			sourceIds: sources,
 			substitutions: substitutions
 		});
 		req.response(this, this.populateProject);
@@ -296,6 +311,10 @@ enyo.kind({
 		this.config = null ; // forget ProjectConfig object
 		this.hide() ;
 		return true;
+	},
+	notifyChangeSource: function(inSender, inEvent) {
+		this.waterfallDown("onAdditionalSource", inEvent, inSender);
+		return true;
 	}
 });
 
@@ -308,14 +327,18 @@ enyo.kind({
 	kind: "onyx.Popup",
 	modal: true, centered: true, floating: true, autoDismiss: false,
 
+	events: {
+		onProjectSelected: ""
+	},
 	handlers: {
 		onDone: "hide",
 		onModifiedConfig: "saveProjectConfig",
+		onModifiedSource: "populateProject",
 		onSelectPreviewTopFile: "selectTopFile"
 	},
 	classes:"ares-masked-content-popup",
 	components: [
-		{kind: "ProjectProperties", name: "propertiesWidget"},
+		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource"}
 		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Select top file..."), folderChooser: false, onFileChosen: "selectFileChosen"}
 	],
 
@@ -376,7 +399,40 @@ enyo.kind({
 		}
 
 		this.$.propertiesWidget.setTopFile(inEvent.file.name);
-	}
+	},
+	notifyChangeSource: function(inSender, inEvent) {
+		this.waterfallDown("onAdditionalSource", inEvent, inSender);
+		return true;
+	},
+	populateProject: function(inSender, inData) {
+		var selectedDir = this.targetProject.getConfig();
+		var folderId = selectedDir.folderId;
+		var service = selectedDir.service;
+
+		// Copy the template files into the new project
+		req = service.createFiles(folderId, {content: inData.content, ctype: inData.ctype});
+		req.response(this, this.projectRefresh);
+		req.error(this, function(inEvent, inData) {
+			this.$.errorPopup.raise('Unable to create projet content from the template');
+			this.doHideWaitPopup();
+		});
+		return true;
+	},
+	projectRefresh: function(inSender, inData) {
+		this.doProjectSelected({
+			project: this.targetProject
+		});
+		this.hideMe();
+	},
+
+	/**
+	 * Hide the whole widget. Typically called when ok or cancel is clicked
+	 */
+	hideMe: function() {
+		this.config = null ; // forget ProjectConfig object
+		this.hide() ;
+		return true;
+	},
 });
 
 

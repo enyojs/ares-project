@@ -5,6 +5,8 @@
  * @augments {enyo.Node}
  */
 
+/* global ares */
+
 enyo.kind({
 	name: "hermes.Node",
 	kind: "Node",
@@ -46,6 +48,10 @@ enyo.kind({
 	
 	debug: false,
 	
+	create: function() {
+		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
+		this.inherited(arguments);
+	},
 	/** @private */
 	down: function(inSender, inEvent) {
 		this.doItemDown(inEvent);
@@ -109,7 +115,7 @@ enyo.kind({
 	// Note: this function does not recurse
 	updateNodes: function() {
 		this.startLoading(this);
-		if (this.debug) this.log(this) ;
+		this.trace(this) ;
 		return this.service.listFiles(this.file && this.file.id)
 			.response(this, function(inSender, inFiles) {
 				var sortedFiles = inFiles.sort(this.fileNameSort) ;
@@ -117,7 +123,7 @@ enyo.kind({
 					this.show();
 				}
 
-				if (this.debug) this.log("updating node content of ", this.name, this," with ", sortedFiles ) ;
+				this.trace("updating node content of ", this.name, this," with ", sortedFiles ) ;
 				this.updateNodeContent(sortedFiles);
 				this.render() ;
 			})
@@ -136,79 +142,81 @@ enyo.kind({
 		this.$.extra.setContent("");
 	},
 	updateNodeContent: function(files) {
-		var i = 0 , nfiles, rfiles, res, modified = 0, newControl ;
-
-		if (this.debug) this.log("updateNodeContent on",this) ;
+		var i = 0, rfiles, tfiles, res, newControl, k = 0, nfiles;
+		
+		this.trace( "updateNodeContent on", this ) ;
 
 		// Add dir property to files, which is a project-relative path
 		enyo.forEach(files, function(f) {
-			if (this.debug) this.log("updateNodeContent loop on",f) ;
+			this.trace("updateNodeContent loop on",f) ;
 			if (f.isDir) {
 				f.dir = (this.file.dir || "/") + f.name + "/";
 			} else {
 				f.dir = (this.file.dir || "/");
 			}
 		}.bind(this));
-		rfiles = this.filesToNodes(files) ; // with prefix in name
-		nfiles = this.getNodeFiles() ;
+		rfiles = this.filesToNodes( files ) ; // with prefix in name
 
-		while ( i < nfiles.length || i < rfiles.length) {
-			if (this.debug) this.log("considering node " + (nfiles[i] ? nfiles[i].name : '<none>') + ' and file ' + (rfiles[i] ? rfiles[i].name : '<none>') );
+		// detach visual subnodes
+		tfiles = this.getNodeFiles() ;		
+		for ( var j = 0; j < tfiles.length; j++ ) {
+			this.removeControl( tfiles[j] );
+		}
 
-			res = i >= nfiles.length ? 1
+		nfiles = [];
+
+		// rearrange visual subnodes accordingly to file nodes order
+		while ( k < tfiles.length || i < rfiles.length ) {
+			res = k >= tfiles.length ? 1
 			    : i >= rfiles.length ? -1
-			    : this.fileNameSort(nfiles[i], rfiles[i]) ;
+			    : this.fileNameSort( tfiles[k], rfiles[i] );
 
-			// remember that these file lists are sorted
 			switch(res) {
-				case -1: // remote file removed
-					if (this.debug) this.log(nfiles[i].name + " was removed") ;
-					nfiles[i].destroy() ;
-				    modified = 1;
-					nfiles = this.getNodeFiles() ;
-					// node file list reduced by one, must not increment i
-					break ;
+				case -1:
+					this.trace( tfiles[k].name, "was removed" ) ;
+					tfiles[k].destroy() ;
 
-				case 0: // no change
-					i++ ;
-					break ;
+					k++;
 
-				case 1: // file added
-				  if (this.debug) this.log(rfiles[i].name + " was added") ;
+					break;
+				case 0:
+					this.trace( tfiles[k].name, "is kept" ) ;
+					this.addControl( tfiles[k] ) ;
+
+					k++;
+					i++;
+					
+					break;
+				case 1:
+					this.trace( rfiles[i].name, "was created" ) ;
 					if (this.dragAllowed) {
-						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", dragAllowed: true, attributes: {draggable : true}} ) ;
+						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node", dragAllowed: true, attributes: {draggable : true}} ) ;
 					} else {
-						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node"} ) ;
+						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node"} ) ;
 					}
-					if (this.debug) this.log("updateNodeContent created ", newControl) ;
 					newControl.setService(this.service);
+					this.trace( newControl, "has been created " ) ;
+
 					nfiles = this.getNodeFiles() ;
-					// FIXME: ENYO-1337
-					//if (nfiles[i]) {
-					//	var justAdded = inNode.controls.pop() ;
-					//	inNode.controls.splice(i+4, 0, justAdded);
-					//}
-				    modified = 1;
-				/*
-				 FIXME: allow to manually change
-				 PhoneGap parameters from Ares.
-				 DEMANDS to relad Ares after each
-				 project.json manual change
+					/*
+					 FIXME: allow to manually change
+					 PhoneGap parameters from Ares.
+					 DEMANDS to relad Ares after each
+					 project.json manual change
 
-					if (nfiles[i].name === '$project.json') {
-						// project.json file is internal to Ares
-						nfiles[i].hide();
-					}
-				 */
-					i++ ;
-					break ;
+						if (nfiles[i].name === '$project.json') {
+							// project.json file is internal to Ares
+							nfiles[i].hide();
+						}
+					 */
+
+					i++;
+					
+					break;
 			}
-
 		}
 
-		if (modified) {
-			this.$.client.render();
-		}
+		this.$.client.render();
 	},
 	compareFiles: function(inFilesA, inFilesB) {
 		if (inFilesA.length != inFilesB.length) {
@@ -282,29 +290,11 @@ enyo.kind({
 		return this.getControls().filter( idMatch )[0];
 	},
 
-	/**
-	 * getChildren
-	 * @public
-	 * @param {hermes.Node} inNode
-	 * Update the inNode node content
-	 *
-	 */
-	
-	getChildren: function () {
-		return this.service.listFiles(this.file && this.file.id)
-			.response(this, function(inSender, inFiles) {
-				var sortedFiles = inFiles.sort(this.fileNameSort) ;
-				this.updateNodeContent(sortedFiles);
-			})
-			.error(this, function() {
-				this.log("Child nodes not found");
-			});
-	},
-
 	filesToNodes: function(inFiles) {
-		var nodes = [];
+		var nodes = [], f;
 		inFiles.sort(this.fileNameSort); // TODO: Other sort orders
-		for (var i=0, f; f=inFiles[i]; i++) {
+		for (var i=0; i < inFiles.length; i++) {
+			f=inFiles[i];
 			nodes.push({
 				file: f,
 				name: '$' + f.name, // prefix avoids clobberring non-files components like icon
@@ -316,10 +306,10 @@ enyo.kind({
 		return nodes;
 	},
 	nodeExpand: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
+		this.trace(inSender, "=>", inEvent);
 		
 		var subnode = inEvent.originator;
-		if (this.debug) this.log("nodeExpand called while node Expanded is " + subnode.expanded) ;
+		this.trace("nodeExpand called while node Expanded is " + subnode.expanded) ;
 		// update icon for expanded state
 		if (subnode.file.isDir) {
 			subnode.setIcon("$services/assets/images/" + (subnode.expanded ? "folder-open.png" : "folder.png"));
@@ -342,10 +332,9 @@ enyo.kind({
 	//   Nothing is selected otherwise.
 	// - tracker is an internal parameter used in inner refreshFileTree calls
 	refreshTree: function(tracker, belowTop, toSelectId) {
-		if (this.debug) this.log(this) ;
-		//var target = this ; //dead code
+		this.trace(this) ;
 
-		if (this.debug) this.log('running refreshTree with ' +
+		this.trace('running refreshTree with ' +
 			 this.controls.length + ' controls with content ' + this.content +
 			 ' force select ' + toSelectId );
 
@@ -357,10 +346,10 @@ enyo.kind({
 
 				enyo.forEach(this.getNodeFiles(), function(f) {
 					var c = this.$[f.name] ; // c is a node
-					if (this.debug) this.log('running INNER function of refreshTree on ' + f.name +
+					this.trace('running INNER function of refreshTree on ' + f.name +
 								 ' id ' + c.file.id);
 					if ( c.file.id === toSelectId ) {
-						if (this.debug) this.log('force select of ' + c.file.id);
+						this.trace('force select of ' + c.file.id);
 						c.doNodeTap();
 
 						// force a "click" event when the item is selected
@@ -386,6 +375,6 @@ enyo.kind({
 		if( belowTop ) {
 			tracker.dec(); // run only for inner calls to refreshTree
 		}
-		this.debug && this.log("refreshTree done") ;
+		this.trace("refreshTree done") ;
 	}
 });

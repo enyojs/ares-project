@@ -35,3 +35,35 @@
 .turned {
 	background-position-y: -16px;
 }
+
+.css-editor-field-caption {
+	display: inline-block;
+	width: 80px;
+	text-align: right;
+	padding-right: 4px;
+}
+
+.css-editor-field-editor {
+	width: 4rem;
+}
+
+.css-editor-select {
+	display: inline-block; 
+	width:30px;
+}
+
+
+.css-editor-select-box {
+	display: inline-block;
+	width: 60px;
+	white-space:normal;
+	
+}
+
+.css-editor-select-box > .inspector-field-editor {
+	width: 4rem;
+}
+
+.onyx-picker-decorator .onyx-button {
+padding: 2px 18px;
+}

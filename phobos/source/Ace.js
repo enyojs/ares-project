@@ -288,9 +288,6 @@ enyo.kind({
 		}
 		return true;
 	},
-	resizeHandler: function() {
-		this.editor.resize();
-	},
 	scrollToY: function(inY) {
 		this.editor.renderer.scrollToY(inY);
 	},

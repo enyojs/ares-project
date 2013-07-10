@@ -6,7 +6,11 @@
 }
 
 .inspector-field-editor {
-	width: 7rem;
+	width: 5rem;
+}
+
+.inspector-size-editor {
+	width: 5rem;
 }
 
 input.inspector-field-checkbox {
@@ -14,7 +18,7 @@ input.inspector-field-checkbox {
 }
 
 .onyx-radiobutton.inspector-tabbutton {
-	font-size: 12px;
+	font-size: 10px;
 	padding: 5px; 
 	background-color: #CCC; 
 	text-transform: uppercase; 
@@ -60,7 +64,17 @@ input.inspector-field-checkbox {
   padding: 2px;
 }
 
-.inspector-event-button { width: 22px; height: 22px; padding:3px;}
+.inspector-event-button { width: 74px; height: 21px; padding:2px;}
 .inspector-event-button:before {
 	content: url(../../../ares/assets/images/smallArrowDown.png);
+}
+
+.inspector-color-button {
+	height: 17px;
+	min-width: 71px;
+	border: 1px solid Black;
+	border-radius: 6px;
+	margin: 1px;
+	display: inline-block;
+	vertical-align: middle;
 }

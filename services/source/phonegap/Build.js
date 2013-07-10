@@ -1,3 +1,4 @@
+/*global enyo,ares,async,Ares,Phonegap,XMLWriter,ServiceRegistry*/
 /**
  * Kind to manage the life cycle of building a mobile application using 
  * the service Phonegap build.
@@ -72,8 +73,7 @@ enyo.kind({
 	 * @public
 	 */
 	getDefaultProjectConfig: function() {
-		var config = Phonegap.Build.DEFAULT_PROJECT_CONFIG;
-		return config;
+		return ares.clone(Phonegap.Build.DEFAULT_PROJECT_CONFIG);
 	},
 
 	/**
@@ -99,15 +99,28 @@ enyo.kind({
 	 * Shared enyo.Ajax error handler
 	 * @private
 	 */
-	_handleServiceError: function(msg, next, inSender, inError) {
-		var response = inSender.xhrResponse, contentType, details;
+	_handleServiceError: function(message, next, inSender, inError) {
+		var response = inSender.xhrResponse, contentType, html, text;
 		if (response) {
 			contentType = response.headers['content-type'];
-			if (contentType && contentType.match('^text/plain')) {
-				details = response.body;
+			if (contentType) {
+				if (contentType.match('^text/plain')) {
+					text = response.body;
+				}
+				if (contentType.match('^text/html')) {
+					html = response.body;
+				}
 			}
 		}
-		next(new Error(msg + inError.toString()), details);
+		if (inError && inError.statusCode === 401) {
+			// invalidate token
+			this.config.auth.token = null;
+			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
+		}
+		var err = new Error(message + " (" + inError.toString() + ")");
+		err.html = html;
+		err.text = text;
+		next(err);
 	},
 
 	/**
@@ -187,19 +200,7 @@ enyo.kind({
 			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
 			next();
 		});
-		req.error(this, function(inSender, inError) {
-			// invalidate token
-			this.config.auth.token = null;
-			var response = inSender.xhrResponse, contentType, details;
-			if (response) {
-				contentType = response.headers['content-type'];
-				if (contentType && contentType.match('^text/plain')) {
-					details = response.body;
-				}
-			}
-			if (this.debug) this.error("Unable to get PhoneGap application token (" + details || inError + ")", "response:", response);
-			next(new Error("Unable to get PhoneGap application token (" + details || inError + ")"), details);
-		});
+		req.error(this, this._handleServiceError.bind(this, "Unable to obtain PhoneGap security token", next));
 		req.go();
 	},
 
@@ -218,20 +219,7 @@ enyo.kind({
 			this._storeUserData(inData.user);
 			next(null, inData);
 		});
-		req.error(this, function(inSender, inError) {
-			// invalidate token
-			this.config.auth.token = null;
-			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
-			// report the error
-			var response = inSender.xhrResponse, contentType, details;
-			if (response) {
-				contentType = response.headers['content-type'];
-				if (contentType && contentType.match('^text/plain')) {
-					details = response.body;
-				}
-			}
-			next(new Error("Unable to get PhoneGap user data (" + details || inError + ")"), details);
-		});
+		req.error(this, this._handleServiceError.bind(this, "Unable to get PhoneGap user data", next));
 		req.go();
 	},	
 
@@ -258,25 +246,10 @@ enyo.kind({
 		//in case of sucess send the obtained JSON object to the next function
 		//in the Async.waterfall.
 		req.response(this, function(inSender, inData) {
-		
-		  // activate the pop up to view the results
-		  next(null, inData);
+			// activate the pop up to view the results
+			next(null, inData);
 		});
-		req.error(this, function(inSender, inError) {
-			// invalidate token
-			this.config.auth.token = null;
-			ServiceRegistry.instance.setConfig(this.config.id, {auth: this.config.auth});
-			
-			// report the error
-			var response = inSender.xhrResponse, contentType, details;
-			if (response) {
-				contentType = response.headers['content-type'];
-				if (contentType && contentType.match('^text/plain')) {
-					details = response.body;
-				}
-			}
-			next(new Error("Unable to get PhoneGap user data (" + details || inError + ")"), details);
-		});
+		req.error(this, this._handleServiceError.bind(this, "Unable to get application build status", next));
 		req.go(); 
 	},
 	
@@ -512,7 +485,8 @@ enyo.kind({
 		var query = {
 			//provided by the cookie
 			//token: this.config.auth.token,
-			title: config.title			
+			title: config.title,
+			debug: true				// Disable minification
 		};
 
 		// Already-created apps have an appId (to be reused)
@@ -570,22 +544,9 @@ enyo.kind({
 			}
 			next(null, inData);
 		});
-		req.error(this, function(inSender, inError) {
-			var response = inSender.xhrResponse, contentType,
-			    message = "Unable to build application";
-			if (response) {
-				contentType = response.headers['content-type'];
-				if (contentType && contentType.match('^text/plain')) {
-					message = response.body;
-
-				}
-			}
-			next(new Error(message + " (" + details || inError + ")"));
-		});
+		req.error(this, this._handleServiceError.bind(this, "Unable to build application", next));
 		req.go(query);
 	},
-
-	
 
 	/**
 	 * Prepare the folder where to store the built package
@@ -597,8 +558,8 @@ enyo.kind({
 	 * @private
 	 */
 	_prepareStore: function(project, inData, next) {
-		var folderKey = "build." + this.getName() + ".target.folderId",
-		    folderPath = "target/" + this.getName();
+		var folderKey = "build." + this.config.id + ".target.folderId",
+		    folderPath = "target/" + this.config.id;
 		 this.doShowWaitPopup({msg: $L("Storing Phonegap application package")});
 
 		var folderId = project.getObject(folderKey);
@@ -607,7 +568,7 @@ enyo.kind({
 		} else {
 			var req = project.getService().createFolder(project.getFolderId(), folderPath);
 			req.response(this, function(inSender, inResponse) {
-				if (this.debug) this.log("response received ", inResponse);
+				if (this.debug) this.log("response:", inResponse);
 				folderId = inResponse.id;
 				project.setObject(folderKey, folderId);
 				next(null, folderId, inData);
@@ -639,13 +600,13 @@ enyo.kind({
 			{content: inData.content, ctype: inData.ctype});
 
 		req.response(this, function(inSender, inData) {
-			if (this.debug) this.log("response received ", inData);
+			if (this.debug) this.log("response:", inData);
 			var config = project.getService().config;
 			var pkgUrl = config.origin + config.pathname + '/file' + inData[0].path; // TODO: YDM: shortcut to be refined
 			project.setObject("build.phonegap.target.pkgUrl", pkgUrl);
 			next();
 		});
-		req.error(this, this._handleServiceError.bind(this, "Unable to store pkg", next));
+		req.error(this, this._handleServiceError.bind(this, "Unable to store application package", next));
 	},	
 
 	/**
@@ -667,21 +628,9 @@ enyo.kind({
 	 * @private
 	 */
 	_store: function(project, folderId, appData, next) {
-		var config = ares.clone(project.getConfig().getData());
-		var applicationId = config.id;
-	
-		
-		var appKey = "build." + this.getName() + ".app";
-		if(this.debug){
-		 this.log("Entering _store function"+
-			"project: ", project, 
-			" folderId: ", folderId,
-			",appData:  ", appData
-			 );
-		}
-
+		var appKey = "build." + this.config.id + ".app";
+		if(this.debug) this.log("Entering _store function project: ", project, "folderId:", folderId, "appData:", appData);
 		project.setObject(appKey, appData);
-			
 		this._getAllPackagedApplications(project, appData, folderId, next);
 	},
 	
@@ -696,11 +645,8 @@ enyo.kind({
 	 * @private
 	 */
 	_getAllPackagedApplications: function(project, appData, folderId, next){
-	
 		var platforms = [];
-
 		var builder = this;
-		
 
 		//Setting the targeted platforms for the build from the those
 		//presented in the object appData.
@@ -710,20 +656,20 @@ enyo.kind({
 			}, this);
 
 		/* 
-		 * Parallel tasks are lauched to check the build status in each platform.
+		 * Parallel tasks are launched to check the build status in each platform.
 		 * A status can be : complete, pending or error.
-		 * 	- completed: a request is made to node.js to 
-		 *	 			download the application.
+		 *	- completed: a request is made to node.js to 
+		 *				download the application.
 		 *	- pending: another request is sent to phonegap to check for an
 		 *	           updated status.
 		 *	- error: an error message is displayed.		
-		*/		
+		 */		
 		async.forEach(platforms,
 		    function(platform, next) {
-		    	if(this.debug){
-		    		this.log("Send request for the platform: ", platform);
-		    	}
-		    	_getApplicationForPlatform(platform, next);
+			if(this.debug){
+				this.log("Send request for the platform: ", platform);
+			}
+			_getApplicationForPlatform(platform, next);
 	       },next);
 	
 		/**
@@ -742,46 +688,44 @@ enyo.kind({
 		 */
 		function _getApplicationForPlatform(platform, next){
 			async.whilst(
-		    	function() {
-		    		//Truthfull condition to send a new check status request
-		    		//to Phongap build. 
-		    			return appData.status[platform] === "pending";
-		    	},
-		    	_waitForApp,
-		    	//This function is run when the whilst condition in no longer
-		    	//satisfied
-		    	_downloadApp
-		   	);
+				function() {
+					// Synchronous condition to keep waiting. 
+					return appData.status[platform] === "pending";
+				},
+				// ...condition satisfied
+				_waitForApp,
+				// ...condition no longer satisfied
+				_downloadApp
+			);
 
-		   	/**
+			/**
 			 * Nested function that check the build status of the application 
 			 * and update the appData each 3 sec
 			 * @param  {Function} next a CommonJS callback
 			 * @private
 			 */
 			function _waitForApp (next){
-
 				async.waterfall([
-	    			function (next) {
-	    				//Timeout before sending a new check status request
-	        			setTimeout(next, builder.timeoutDuration);
-	    			},
-	    			function (next) {
-	    				if(appData.status[platform] === "pending"){
-	    					builder._getBuildStatus(project, appData, next);
-	    				} else{
-	    					next(null, null);
-	    				}
-	    				
-	    			},
-	    			function(inData, next) {
-	    				//get the result from the previous status check request
-	    				if (inData !== null){
-	    					appData = inData.user;
-	    				}	    				
-	    				next();
-	    			}
-	    		], next);	    			
+					function (next) {
+						//Timeout before sending a new check status request
+						setTimeout(next, builder.timeoutDuration);
+					},
+					function (next) {
+						if(appData.status[platform] === "pending"){
+							builder._getBuildStatus(project, appData, next);
+						} else{
+							next(null, null);
+						}
+						
+					},
+					function(inData, next) {
+						//get the result from the previous status check request
+						if (inData !== null){
+							appData = inData.user;
+						}					
+						next();
+					}
+				], next);				
 			}
 			/**
 			 * Launch the appropirate action when an exception occurs or when 
@@ -792,16 +736,13 @@ enyo.kind({
 			function _downloadApp(err){
 				if (err) {
 					next(err);
-	    		} else {
-	    			//if the status is complete then a download request
-	    			//is sent to Node.js server.
-	    			if (appData.status[platform] === "complete"){
-	    				_setApplicationToDownload(next);
-	    			}
-	    			else {
-	    				next();
-	    			}
-	    		}
+				} else {
+					if (appData.status[platform] === "complete"){
+						_setApplicationToDownload(next);
+					} else {
+						next();
+					}
+				}
 			}
 
 			/**
@@ -818,26 +759,20 @@ enyo.kind({
 			 * @private
 			 */
 			 function _setApplicationToDownload(next){
-				var config = ares.clone(project.getConfig().getData());
-				var packageName = config.id;
+				var config = ares.clone(project.getConfig().getData()),
+				    packageName = config.id,
+				    appId, title, version;
 
 				async.waterfall([
 					function(next){
 						//make the download request.
 						appId = appData.id;
 						title = packageName;
-					    version = appData.version || "SNAPSHOT";
+						version = appData.version || "SNAPSHOT";
 						
-						var urlSuffix = appId +
-								  '/' + platform +
-								  '/' + title + 
-								  '/' + version;
-						if(builder.debug){
-							builder.log("Application "+ platform
-						     +" ready for download");
-						}
-						_sendDownloadRequest.bind(builder)( 
-							urlSuffix, next);
+						var urlSuffix = appId + '/' + platform + '/' + title + '/' + version;
+						if(builder.debug) builder.log("Application "+ platform + " ready for download");
+						_sendDownloadRequest.bind(builder)(urlSuffix, next);
 					},
 					//inData is a multipart/form containing the
 					//built application
@@ -862,57 +797,24 @@ enyo.kind({
 			 * @private
 			 */
 			function _sendDownloadRequest(urlSuffix, next){
-				
-				var config = project.getConfig().getData();
-
 				var url = this.url + '/api/v1/apps/' + urlSuffix;
-				if (this.debug){
-					this.log("download URL is : ", url);
-				}
+				if (this.debug)	this.log("download URL is : ", url);
 				
-				//Definition of the Ajax request 
 				var req = new enyo.Ajax({
 					url: url,
 					handleAs: 'text'
 				});		
-
-				//Handling a successfull response
 				req.response(this, function(inSender, inData) {
-					if (this.debug){
-						this.log("response: received " + inData.length + 
-							" bytes typeof: " + (typeof inData));
-					}
+					if (this.debug) this.log("response: received " + inData.length + " bytes typeof: " + (typeof inData));
 					var ctype = req.xhrResponse.headers['content-type'];
-					if (this.debug){
-						this.log("response: received ctype: " + ctype);
-					}
+					if (this.debug) this.log("response: received ctype: " + ctype);
 					next(null, {content: inData, ctype: ctype});			
 				});
-
-				//Handling a failure response
-				req.error(this, function(inSender, inError) {
-					// invalidate token
-					this.config.auth.token = null;
-					ServiceRegistry.instance.setConfig(this.config.id, 
-						{auth: this.config.auth});
-					
-					// report the error
-					var response = inSender.xhrResponse, contentType, details;
-					if (response) {
-						contentType = response.headers['content-type'];
-						if (contentType && contentType.match('^text/plain')) {
-							details = response.body;
-						}
-					}			
-				});
-
-				//Execution of the Ajax request
+				req.error(this, this._handleServiceError.bind(this, "Unable to download application package", next));
 				req.go(); 
 			}	
 		}
 	},
-
-	
 
 	/**
 	 * Generate PhoneGap's config.xml on the fly
@@ -972,12 +874,14 @@ enyo.kind({
 			xw.writeStartElement('platforms', 'gap');
 			for (var platformName in phonegap.targets) {
 				var platform = phonegap.targets[platformName];
-				xw.writeStartElement('platform', 'gap');
-				xw.writeAttributeString('name', platformName);
-				for (var propName in platform) {
-					xw.writeAttributeString(propName, platform[propName]);
+				if (platform !== false) {
+					xw.writeStartElement('platform', 'gap');
+					xw.writeAttributeString('name', platformName);
+					for (var propName in platform) {
+						xw.writeAttributeString(propName, platform[propName]);
+					}
+					xw.writeEndElement(); // gap:platform
 				}
-				xw.writeEndElement(); // gap:platform
 			}
 			xw.writeEndElement();	// gap:platforms
 		}
@@ -1025,7 +929,6 @@ enyo.kind({
 	},
 
 	statics: {
-		platforms: ["android", "ios", "winphone", "blackberry", "symbian", "webos"],
 		DEFAULT_PROJECT_CONFIG: {
 			enabled: false,
 			icon: {
@@ -1043,5 +946,3 @@ enyo.kind({
 		}
 	}
 });
-
-

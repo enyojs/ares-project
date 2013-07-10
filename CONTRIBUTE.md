@@ -74,7 +74,7 @@ Ares 2 will be soon integrated with [Travis CI](https://travis-ci.org/) to autom
 Before submitting a pull request, please follow these steps
 
 	$ cd ares-project
-	$ node_modules/.bin/jshint .
+	$ npm test
 	
 NOTE: JSHint configuration files (.jshintrc, …) are automatically loaded by some editors when the appropriate plugins are installed. See [JSHint - Plugins for text editors and IDEs](http://www.jshint.com/install/)
 
@@ -104,6 +104,29 @@ So, it's recommended to pass each string element as a parameter instead of conca
 `this.debug` is still available and can be used if needed.
 
 NOTE: For production, we may suppress the "this.trace()" code when doing the minification process.
+
+### Ares styling
+
+Ares 2 uses the dynamic stylesheet language LESS.
+
+For the moment, all css compilation is done on the client side and is loaded through index.html.
+
+We are waiting for ares minification to make possible using Ares.less on the client side in debug.html and compiled Ares.css file in index.html.
+
+### Adding css/less styling
+
+We have two main .less files :
+	
+	- ares-variables.less
+	- ares-rules.less
+
+In ares-variables.less, onyx variables are overridden and specific ares variables are added.
+
+In ares-rules.less onyx css classes and specific ares css classes use variables declared in ares-variables.less.
+
+To add new style to Ares, the file ares-rules.less should contain the new css classe. Check if one of variables can be used from ares-variables.less. Otherwise, add a new one.
+
+For more information see [this page](https://github.com/enyojs/enyo/wiki/UI-Theming).
 
 ### Testing
 
@@ -143,26 +166,57 @@ Release & Publish Ares
 
 _This section is for Ares commiters only_
 
-Before publishing a few steps and checkings are mandatory:
+**Before publishing** a few steps and checkings are mandatory:
 
-1. Commit your changes
-2. In package.json, update the `dependencies` and `bundledDependencies` if your changes introduce/change node module dependencies.
-3. Execute `npm-shrinkwrap` to update the file `npm-shrinkwrap.json`.
-4. Execute `npm pack`
-5. In a temporary directory, execute `npm install <path-to>/ares-ide-<version>.tgz` to verfy that the generated .tgz file if correct.
-6. Perform a few tests to verify that everything works.
-7. Commit your changes and start the publish process described above.
+1. Execute `npm pack` (preferably on a Linux machine)
+2. Destroy your `ares-ide` NPM cache (OSX/Linux: `$HOME/.npm/ares-ide`, Windows: `% APPDATA\npm-cache\ares-ide`)
+3. Test on several platforms, using the same `.tgz`file.
+	1. In a temporary directory, execute `npm install <path-to>/ares-ide-<version>.tgz` to verify that the generated .tgz file if correct.
+	2. Perform a few tests to verify that everything works.
+4. If you have last minutes changes, commit them directly on `master` & upload them.
 
-To publish:
+**Publishing:**
 
-1. Tag the version you intend to publish, with the exact same string as the `version: ` in `package.json` & upload this tag.
-1. Checkout a fresh copy _on a Linux (virtual) machine_ 
+1. Tag the version you intend to publish, with the exact same string as the `version: ` in `package.json` & upload this tag.  For example:
+
+	$ git tag 0.2.4
+	$ git push --tags origin
+
+2. Checkout a fresh copy _on a Linux (virtual) machine_ 
 	* Publishing from a Windows machine will break UNIX (Linux & OSX) installations [NPM Issue 2097](https://github.com/isaacs/npm/issues/2097)
 	* Packing from an OSX machine misses some files [NPM Issue 2619](https://github.com/isaacs/npm/issues/2619)
-1. If not already done run `npm adduser` to allow your self to publish from this machine
-1. Run `npm -d pack`
-1. Publish the generated tarball `npm -d publish <ares-ide-x.y.z.tgz>`
-	It is also possible to directly publish (skip the intermediate `pack`, but this one gives you a chance to verify the content of the publish archive without the need for a roundtrip with the NPM registry).
-1. Check [ares-ide on the NPM registry](https://npmjs.org/package/ares-ide).
+3. If not already done run `npm adduser` to allow your self to publish from this machine
+4. Run `npm -d pack`
+5. Publish the generated tarball `npm -d publish <ares-ide-x.y.z.tgz>`.
 
+		$ npm publish ares-ide
+	
+	_Note:_ It is also possible to directly publish (skip the intermediate `pack`, but this one gives you a chance to verify the content of the publish archive without the need for a roundtrip with the NPM registry).
+6. Check [ares-ide on the NPM registry](https://npmjs.org/package/ares-ide) after a few tens of minutes.
+7. Announce the release on [EnyoJS.com](http://enyojs.com) > Community > Forums > Categories : Ares > New discussion > _Ares x.y.z is out_
+8. In case things go wrong (like _published package not working_, it is possible to `npm unpublish` a specific version).  Do not forget to announce this operation on the EnyoJS.com forums.
 
+	$ npm unpublish ares-ide@0.2.4
+
+**After publishing:** ignite the work on the next version:
+
+1. Checkout the master branch
+
+	$ git branch -D master
+	$ git fetch --all
+	$ checkout -b master origin/master
+	$ git submodule update --init --recursive
+
+2. Increase the version number in `package.json`
+3. In package.json, update the `dependencies` and `bundledDependencies` if your changes introduce/change node module dependencies & checkpoint them in the shrinkwrap
+
+	$ npm -d update
+	$ npm -d install
+	$ npm-shrinkwrap
+
+4. Commit your changes (on `master`) & upload them:
+
+	$ git commit -m "start working on 0.2.5" package.json npm-shrinkwrap.json
+	$ git push origin master
+
+5. Announce it to team-mates 

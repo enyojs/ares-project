@@ -13,6 +13,7 @@
 	"RPCCommunicator.js",
 	"CssEditor.js",
 	"CssEditor.css",
+	"ColorPicker.js",
 	"LayoutEditor.js",
 	"LayoutEditor.css"
 );

@@ -18,10 +18,12 @@ enyo.kind({
 			onProjectRemoved: "projectRemoved",
 			onProjectSelected: "handleProjectSelected",
 			name: "projectList"},
-		{kind: "Harmonia", fit:true, name: "harmonia"},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate", classes:"ares-masked-content-popup"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan", classes:"ares-masked-content-popup"},
-		{kind: "ProjectWizardModify", canGenerate: false, name: "projectWizardModify"},
+		{kind: "ProjectWizardModify", canGenerate: false, 
+			onProjectSelected: "handleProjectSelected",
+			name: "projectWizardModify"
+		},
 		{kind: "ProjectWizardCopy", name: "projectWizardCopy", classes:"ares-masked-content-popup"}
 	],
 	handlers: {
@@ -35,17 +37,19 @@ enyo.kind({
 	events: {
 		onHideWaitPopup: "",
 		onShowWaitPopup: "",
-		onError: ""
+		onError: "",
+		onRegisterMe: ""
 	},
 	create: function() {
 		this.inherited(arguments);
+		this.doRegisterMe({name:"projectView", reference:this});
 	},
 	/**
 	 * Refresh the {ProjectView} (if relevant), following a change of the given file
 	 * @param {Object} changedFile
 	 */
 	refreshFile: function(changedFile) {
-		this.$.harmonia.refreshFile(changedFile);
+		this.owner.componentsRegistry.harmonia.refreshFile(changedFile);
 	},
 	scanProjectAction: function(inSender, inEvent) {
 		this.$.projectWizardScan.setHeaderText('Select a directory containing one or more project.json files');
@@ -82,7 +86,7 @@ enyo.kind({
 		var project = inEvent.project;
 		// Pass service definition & configuration to Harmonia
 		// & consequently to HermesFileTree
-		this.$.harmonia.setProject(project);
+		this.owner.componentsRegistry.harmonia.setProject(project);
 		// FIXME: temporary hack to create config.json on the
 		// fly if needed... would be better to create/load it
 		// when the workspace is loaded & when a new project
@@ -100,7 +104,7 @@ enyo.kind({
 		this.currentProject = project;
 	},
 	projectRemoved: function(inSender, inEvent) {
-		this.$.harmonia.setProject(null);
+		this.owner.componentsRegistry.harmonia.setProject(null);
 	},
 	/**
 	 * Event handler: handle build project action (select provider & run action)
@@ -173,11 +177,11 @@ enyo.kind({
 		} else if (typeof provider[action] !== 'function') {
 			this.doError({msg: 'Service ' + provider.name + ' does not provide action: ' + action});
 		} else {
-			provider[action](project, function(inError, inDetails) {
+			provider[action](project, function(inError) {
 				self.doHideWaitPopup();
 				self.refreshFile(project.getFolderId());
 				if (inError) {
-					self.doError({msg: inError.toString(), err: inError, details: inDetails});
+					self.doError({msg: inError.toString(), err: inError});
 				}
 			});
 		}
