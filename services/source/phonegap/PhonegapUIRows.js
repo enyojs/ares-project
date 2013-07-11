@@ -292,16 +292,17 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
+		var saveProperty;
 		if (this.name === "icon"){
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.icons["android"].src = inSender.value;			
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.icons["android"].src = inSender.value;			
 				}).bind(this);	
 		} else {
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.splashes["android"].src = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.splashes["android"].src = inSender.value;			
+			}).bind(this);	
 		}
 
 		this.bubble("onEditConfig", saveProperty);
@@ -320,25 +321,22 @@ enyo.kind({
 	 * @private
 	 */
 	updateAndroidIconDensity: function (inSender, inValue) {
+		var saveProperty;
 		if (this.name === "icon"){
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inValue.content);
-					inConfig.icons["android"].density = inValue.content;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inValue.content);
+				inConfig.icons["android"].density = inValue.content;			
+			}).bind(this);	
 		} else {
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inValue.content);
-					inConfig.splashes["android"].density = inValue.content;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inValue.content);
+				inConfig.splashes["android"].density = inValue.content;			
+			}).bind(this);	
 		}
 
 		this.bubble("onEditConfig", saveProperty);
 	}
 });
-
-
-
-
 
 /**
  * Defin a row to let the user add the path to an IOS icon or a splash screen image into the file "config.xml".
@@ -412,8 +410,7 @@ enyo.kind({
 	 * @ private
 	 */
 	valueChanged: function () {
-		var input = this.$.IosIconInput;
-		input.setValue(this.value);
+		this.$.IosIconInput.setValue(this.value);
 	},
 	/**
 	 * Event handler that is trigred when the value of the input change. It define 
@@ -428,16 +425,17 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
+		var saveProperty;
 		if (this.name === "icon"){
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.icons["ios"].src = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.icons["ios"].src = inSender.value;			
+			}).bind(this);	
 		} else {
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.splashes["ios"].src = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.splashes["ios"].src = inSender.value;			
+			}).bind(this);	
 		}
 
 		this.bubble("onEditConfig", saveProperty);
@@ -457,15 +455,15 @@ enyo.kind({
 	 */
 	updateIosIconHeightValue: function (inSender, inValue) {
 		if (this.name === "icon"){
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.icons["ios"].height = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.icons["ios"].height = inSender.value;			
+			}).bind(this);	
 		} else {
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.splashes["ios"].height = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.splashes["ios"].height = inSender.value;			
+			}).bind(this);	
 		}
 
 		this.bubble("onEditConfig", saveProperty);
@@ -485,15 +483,15 @@ enyo.kind({
 	 */
 	updateIosIconWidhtValue: function (inSender, inValue) {
 		if (this.name === "icon"){
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.icons["ios"].width = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.icons["ios"].width = inSender.value;			
+			}).bind(this);	
 		} else {
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.splashes["ios"].width = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.splashes["ios"].width = inSender.value;			
+			}).bind(this);	
 		}
 
 		this.bubble("onEditConfig", saveProperty);
@@ -573,16 +571,17 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
+		var saveProperty;
 		if (this.name === "icon"){
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.icons["general"].src = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.icons["general"].src = inSender.value;			
+			}).bind(this);	
 		} else {
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.splashes["general"].src = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.splashes["general"].src = inSender.value;			
+			}).bind(this);	
 		}
 
 		this.bubble("onEditConfig", saveProperty);
@@ -656,16 +655,17 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
+		var saveProperty;
 		if (this.name === "icon"){
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.icons["winphone"].src = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.icons["winphone"].src = inSender.value;			
+			}).bind(this);	
 		} else {
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.splashes["winphone"].src = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.splashes["winphone"].src = inSender.value;			
+			}).bind(this);	
 		}
 
 		this.bubble("onEditConfig", saveProperty);
@@ -738,16 +738,17 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
+		var saveProperty;
 		if (this.name === "icon"){
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.icons["blackberry"].src = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.icons["blackberry"].src = inSender.value;			
+			}).bind(this);	
 		} else {
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.splashes["blackberry"].src = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.splashes["blackberry"].src = inSender.value;			
+			}).bind(this);	
 		}
 
 		this.bubble("onEditConfig", saveProperty);
@@ -820,16 +821,17 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
+		var saveProperty;
 		if (this.name === "icon"){
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.icons["webos"].src = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.icons["webos"].src = inSender.value;			
+			}).bind(this);	
 		} else {
-			var saveProperty = (function(inConfig) {
-					this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-					inConfig.splashes["webos"].src = inSender.value;			
-				}).bind(this);	
+			saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+				inConfig.splashes["webos"].src = inSender.value;			
+			}).bind(this);	
 		}
 
 		this.bubble("onEditConfig", saveProperty);

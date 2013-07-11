@@ -36,15 +36,14 @@ enyo.kind({
 						content:["2.9.0", "2.8.0", "2.7.0", "2.5.0", "2.3.0", "2.2.0", "2.1.0",
 								"2.0.0", "1.9.0", "1.8.1", "1.7.0", "1.6.1", "1.5.0",
 								"1.4.1", "1.3.0", "1.2.0", "1.1.0"
-						], defaultValue: "2.9.0", 
-						type: "PickerRow"  
+						], defaultValue: "2.9.0", type: "PickerRow"  
 					},
 					{name: "orientation", label:"Orientation",content:["both", "landscape", "portrait"], defaultValue: "both", type: "PickerRow"},
 					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], defaultValue: "universal", type: "PickerRow"},
 					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},
 					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "icon.png", type: "GeneralImgRow"},
 					{name: "splashScreen", label: "SplashScreen", content: "", defaultValue: "", type: "GeneralImgRow"}
-				] 				
+				]		
 			}, 
 			{
 				id: "permissions",
@@ -92,7 +91,6 @@ enyo.kind({
 					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "IosImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "IosImgRow"}
 				]
-
 			}, 
 			{
 				id: "winphone",
