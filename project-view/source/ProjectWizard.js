@@ -394,12 +394,8 @@ enyo.kind({
 	selectTopFile: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 
-		this.log("targetProject", this.targetProject);
-
 		var config = this.targetProject.getConfig();
 		var top_file = config.data.preview.top_file;
-		this.log("preview", config.data.preview);
-		this.log("top_file", top_file);
 
 		this.$.selectFilePopup.setSelectedName(top_file);
 		this.$.selectFilePopup.show();
