@@ -48,11 +48,11 @@ enyo.kind({
 	},
 	components: [
 		{kind: "FittableRows", classes: "onyx-popup ares-filechooser ares-classic-popup", components: [
-			{tag: "div", name: "header", classes:"title", content: "Select a directory"},
+			{tag: "div", name: "header", classes:"title", content: $L("Select a directory")},
 			{kind: "FittableColumns", classes: "onyx-light", fit: true, components: [
 				{kind:"FittableRows", classes:"ares-left-pane-file-chooser", components:[
 					{kind: "onyx.Toolbar", classes: "ares-top-toolbar", components: [
-						{content:"Sources", classes:"ares-create-sources"}
+						{content: $L("Sources"), classes:"ares-create-sources"}
 					]},
 					{kind: "ProviderList", selector: ["type", "filesystem"], name: "providerList", classes:"ares-provider-list",/*style:"border: 3px solid yellow;", header: "Sources",*/ onSelectProvider: "handleSelectProvider"}
 				]},
@@ -65,7 +65,7 @@ enyo.kind({
 					{name: "selectedFolder", kind: "onyx.Input", classes: "only-light file-chooser-input", disabled: true, placeholder: $L("Folder")}
 				]},*/
 				{classes:"ares-row ares-file-choser-row", name:"fileNameRow", showing: false, components:[
-					{tag:"label", classes: "ares-fixed-label ares-file-chooser-label", content: "File name: "},
+					{tag:"label", classes: "ares-fixed-label ares-file-chooser-label", content: $L("File name: ")},
 					{name: "nameSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline file-chooser-input", showing: false, components: [
 						{name: "selectedName", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("File"), selectOnFocus: true, onchange: "updateSelectedName"}
 					]}
@@ -224,8 +224,12 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.trace("Error: ", inError);
-				this.$.hermesFileTree.showErrorPopup("Creating folder "+name+" failed:" + inError);
+				this.$.hermesFileTree.showErrorPopup(this.$LS("Creating folder '{folder}' failed: {error}", {folder: name, error: inError}));
 			});
+	},
+	$LS: function(msg, params) {
+		var tmp = new enyo.g11n.Template($L(msg));
+		return tmp.evaluate(params);
 	}
 });
 

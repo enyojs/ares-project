@@ -344,7 +344,7 @@ enyo.kind({
 		// (possibly remote & always asynchronous) file system
 		this.connectService(service, enyo.bind(this, (function(inError) {
 			if (inError) {
-				this.showErrorPopup($L("Internal Error ({error}) from filesystem service").replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
 			} else {
 				if (this.selectedNode) {
 					this.deselect(null, {data: this.selectedNode});
@@ -370,7 +370,7 @@ enyo.kind({
 				});
 				req.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");
-					this.showErrorPopup($L("Internal Error ({error}) from filesystem service").replace("{error}", inError.toString()));
+					this.showErrorPopup(this.$LS("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
 				});
 			}
 		})));
@@ -726,7 +726,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create folder:", name, inError);
-				this.showErrorPopup($L("Creating folder '{name}' failed: {error}").replace("{name}", name).replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Creating folder '{name}' failed: {error}", {name: name, error: inError.toString()}));
 			});
 	},
 	/** @private */
@@ -787,7 +787,7 @@ enyo.kind({
 		r.error(this, function(inSender, error) {
 			if (error === 404){
 				this.createFile(name, folderId);
-				this.showErrorPopup($L("No template found for '.{extension}' files.  Created an empty one.").replace("{extension}", type));
+				this.showErrorPopup(this.$LS("No template found for '.{extension}' files.  Created an empty one.", {extension: type}));
 			}
 			else {
 				this.error("error while fetching ", templatePath, ': ', error);
@@ -840,7 +840,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to copy:", this.selectedFile, "as", newName, inError);
-				this.showErrorPopup($L("Creating file '{copyName}' as copy of '{name}' failed: {error}").replace("{copyName}", newName).replace("{name}", this.selectedFile.name).replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Creating file '{copyName}' as copy of '{name}' failed: {error}", {copyName: newName, name: this.selectedFile.name, error: inError.toString()}));
 			});
 	},
 	/** @private */
@@ -893,7 +893,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to rename:", this.selectedFile, "into", newName, inError);
-				this.showErrorPopup($L("Renaming file '{oldName}' as '{newName}' failed").replace("{oldName}", this.selectedFile.name).replace("{newName}", newName));
+				this.showErrorPopup(this.$LS("Renaming file '{oldName}' as '{newName}' failed", {oldName: this.selectedFile.name, newName: newName}));
 			});
 	},
 	/** @private */
@@ -945,7 +945,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to delete:", this.selectedFile, inError);
-				this.showErrorPopup($L("Deleting '{name}' failed").replace("{oldName}", this.selectedFile.name));
+				this.showErrorPopup(this.$LS("Deleting '{name}' failed", {name: this.selectedFile.name}));
 			});
 	},
 	/** @private */
@@ -976,7 +976,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to revert:", this.movedNode.file.name, "into", this.originNode.file.path, inError);
-				this.showErrorPopup($L("Reverting '{name}' to '{oldpath}' failed").replace("{name}", this.movedNode.file.name).replace("{oldpath}", this.originNode.file.path));
+				this.showErrorPopup($L("Reverting '{name}' to '{oldpath}' failed", {name: this.movedNode.file.name, oldpath: this.originNode.file.path}));
 			});
 	},
 
@@ -1042,7 +1042,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create file:", name, inError);
-				this.showErrorPopup($L("Creating file '{name}' failed: {error}").replace("{name}", name).replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Creating file '{name}' failed: {error}", {name: name, error: inError.toString()}));
 			});
 	},
 	
@@ -1104,7 +1104,11 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to move:", inNode.file.name, inError);
-				this.showErrorPopup($L("Moving {nodeName} failed: {error}").replace("{nodeName}", inNode.file.name).replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Moving {nodeName} failed: {error}", {nodeName: inNode.file.name, error: inError.toString()}));
 			});
+	},
+	$LS: function(msg, params) {
+		var tmp = new enyo.g11n.Template($L(msg));
+		return tmp.evaluate(params);
 	}
 });
