@@ -94,7 +94,11 @@ Instead of adding curly braces and going from one line to three lines for each t
 		
 		this.trace("Just created a new", this.name, "object", this);
 	}
-	
+
+NB: if your file contains several kinds, each related "create" method must be modified if required (of course).
+
+Do not forget to add at the beginning of each file a reference to the global variable "ares": `/* global ares */`
+
 You can then directly call this.trace() in the same way this.log is used.
 
 WARNING: Removing the "`if (this.debug)`" test can add CPU overhead in particular when concataining strings or invoking functions in the "`this.trace()`" call.
