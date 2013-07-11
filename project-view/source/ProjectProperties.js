@@ -26,35 +26,39 @@ enyo.kind({
 	components: [
 		{classes:"title left-align", content:"Project properties", components:[
 			{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", classes:"ares-radio-group", components: [
-				{serviceId: "project", active: true, attributes: {title: 'project attributes...'}, components:[{classes:"large-fixed", content:"Project"},{tag:"span", classes:"ares-bottom-check"}]},
-				{serviceId: "preview", attributes: {title: 'project preview parameters...'}, components:[{classes:"large-fixed", content:"Preview"},{tag:"span", classes:"ares-bottom-check"}]}
-			]},
+				{serviceId: "project", active: true, attributes: { title: $L("project attributes...") }, components: [
+					{classes:"large-fixed", content: $L("Project")}, {tag:"span", classes:"ares-bottom-check"}
+				]},
+				{serviceId: "preview", attributes: { title: $L("project preview parameters...") }, components: [
+					{classes:"large-fixed", content: $L("Preview")}, {tag:"span", classes:"ares-bottom-check"}
+				]}
+			]}
 		]},
 		{name: "projectDrawer", kind: "onyx.Drawer", open:true, components: [		
 			{classes:"ares-project-properties",components:[
 				{kind:"FittableColumns", components: [
 					{kind:"FittableRows", components: [
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content: "Name: "},
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Name: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectName"}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content:"Version: "},
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Version: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectVersion", placeholder:"0.0.1"}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content:"Author name: "},
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Author name: ")},
 							{kind: "onyx.InputDecorator", components: [
-								{kind: "Input", name: "projectAuthor", attributes: {title: "Vendor / Committer Name"}, placeholder:"My Company"}
+								{kind: "Input", name: "projectAuthor", attributes: {title: $L("Vendor / Committer Name")}, placeholder: $L("My Company")}
 							]}
 
 						]},
 						{classes:"ares-row", name: "templatesEntry", showing: false, components: [
-							{tag:"label", classes:"ares-fixed-label ares-small-label", content:"Template:"},
+							{tag:"label", classes:"ares-fixed-label ares-small-label", content: $L("Template:")},
 							{kind: "onyx.PickerDecorator", fit: true, components: [
 								{name: "templateButton", classes:"very-large-width", kind: "onyx.PickerButton", fit: true},
 								{kind: "onyx.FlyweightPicker", name: "templatePicker", components: [
@@ -65,23 +69,23 @@ enyo.kind({
 					]},
 					{kind:"FittableRows", components: [
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content: "Title: "},
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Title: ")},
 							{kind: "onyx.InputDecorator", components: [
-								{kind: "Input", defaultFocus: true, name: "projectTitle", placeholder:"My Example App"}
+								{kind: "Input", defaultFocus: true, name: "projectTitle", placeholder: $L("My Example App")}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content:"Id: "},
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Id: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectId",
-								attributes: {title: "Application ID in reverse domain-name format: com.example.apps.myapp"}, placeholder:"com.example.apps.myapp"}
+								attributes: {title: $L("Application ID in reverse domain-name format: com.example.apps.myapp")}, placeholder:"com.example.apps.myapp"}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content:"Contact: "},
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Contact: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", name: "projectContact",
-									attributes: {title: "mail address or home page of the author"}, placeholder:"support@example.com"
+									attributes: {title: $L("mail address or home page of the author")}, placeholder: $L("support@example.com")
 								}
 							]}
 						]}
@@ -99,22 +103,22 @@ enyo.kind({
 			{classes:"ares-project-properties",components:[
 				{kind: 'FittableRows', components: [
 					{classes:"ares-row", components:[
-						{tag: "label" , classes:"ares-fixed-label", content: "Top application file: "},
+						{tag: "label" , classes:"ares-fixed-label", content: $L("Top application file: ")},
 						{kind: "onyx.InputDecorator", components: [
-							{kind: "Input", name: "ppTopFile", ontap: "doSelectPreviewTopFile",
-								attributes: {title: 'top file of your application. Typically index.html'}
+							{kind: "Input", name: "ppTopFile", classes: "enyo-unselectable", attributes: {title: $L("top file of your application. Typically index.html")}
 							}
-						]}
+						]},
+						{kind: "onyx.IconButton", src: "$project-view/assets/images/file-32x32.png", attributes: {title: $L("select file...")}, ontap: "doSelectPreviewTopFile"}
 					]}
 				]}
 			]}
 		]},
 		{name: "toolbarId", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
-			{kind: "onyx.Button", content: "Cancel", ontap: "doDone"},
-			{name: "ok", kind: "onyx.Button", content: "OK", classes:"right", ontap: "confirmTap"}
+			{kind: "onyx.Button", content: $L("Cancel"), ontap: "doDone"},
+			{name: "ok", kind: "onyx.Button", content: $L("OK"), classes:"right", ontap: "confirmTap"}
 		]},
 
-		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"},
+		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 	published: {

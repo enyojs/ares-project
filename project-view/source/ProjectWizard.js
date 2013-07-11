@@ -25,7 +25,7 @@ enyo.kind({
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource"},
 		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true},
-		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"}
+		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")}
 	],
 	debug: false,
 	projectName: "",
@@ -89,7 +89,7 @@ enyo.kind({
 
 		if (matchingNodes.length !== 0) {
 			this.hide();
-			var msg = 'Cannot create project: a project.json file already exists';
+			var msg = $L("Cannot create project: a project.json file already exists");
 			this.$.errorPopup.raise(msg);
 			next({handled: true, msg: msg});
 		} else {
@@ -116,8 +116,8 @@ enyo.kind({
 					info = JSON.parse(fileStuff.content);
 				} catch(err) {
 					this.hide();
-					this.log( "Unable to parse appinfo.json >>" + fileStuff.content + "<<");
-					var msg = 'Unable to parse appinfo.json: ' + err;
+					this.log( "Unable to parse appinfo.json >>", fileStuff.content, "<<");
+					var msg = this.$LS("Unable to parse appinfo.json: {error}", {error: err});
 					this.$.errorPopup.raise(msg);
 					next({handled: true, msg: msg});
 					return;
@@ -132,7 +132,7 @@ enyo.kind({
 			appinfoReq.error(this, function(inSender, fileStuff) {
 				// Strange: network error, ... ?
 				this.hide();
-				var msg = 'Unable to retrieve appinfo.json';
+				var msg = $L("Unable to retrieve appinfo.json");
 				this.$.errorPopup.raise(msg);
 				next({handled: true, msg: msg});
 			});
@@ -163,14 +163,14 @@ enyo.kind({
 				next();				// Should we return immediately without waiting the answer ?
 			});
 			templateReq.error(this, function(inSender, inError) {
-				this.log("Unable to get template list (" + inError + ")");
-				this.$.errorPopup.raise('Unable to get template list');
+				this.log("Unable to get template list (", inError, ")");
+				this.$.errorPopup.raise($L("Unable to get template list"));
 				propW.setTemplateList([]);
 				next();
 			});
 		} else {
 			this.log("Unable to get template list (No service defined)");
-			this.$.errorPopup.raise('Unable to get template list (No service defined)');
+			this.$.errorPopup.raise($L("Unable to get template list (No service defined)"));
 			propW.setTemplateList([]);
 			next();
 		}
@@ -281,8 +281,8 @@ enyo.kind({
 		});
 		req.response(this, this.populateProject);
 		req.error(this, function(inSender, inError) {
-			this.log("Unable to get the template files (" + inError + ")");
-			this.$.errorPopup.raise('Unable to instanciate projet content from the template');
+			this.log("Unable to get the template files (", inError, ")");
+			this.$.errorPopup.raise($L("Unable to instanciate projet content from the template"));
 			this.doHideWaitPopup();
 		});
 	},
