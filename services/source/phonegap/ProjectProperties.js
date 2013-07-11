@@ -1,4 +1,4 @@
-/* global ares */
+/* global ares, Phonegap, ServiceRegistry */
 
 /**
  * Hold the needed data to create the UI Projet -> Edit. Actually it's used in : 
@@ -187,7 +187,7 @@ enyo.kind({
 	},
 
 	createAllDrawers: function () {
-		self = this;
+		var self = this;
 		createDrawers(this.commonDrawers, this.platformDrawers);
 
 		function createDrawers(inCommonDrawers, inPlatformDrawers) {

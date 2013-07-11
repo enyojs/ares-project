@@ -454,6 +454,7 @@ enyo.kind({
 	 * @private
 	 */
 	updateIosIconHeightValue: function (inSender, inValue) {
+		var saveProperty;
 		if (this.name === "icon"){
 			saveProperty = (function(inConfig) {
 				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
@@ -482,6 +483,7 @@ enyo.kind({
 	 * @private
 	 */
 	updateIosIconWidhtValue: function (inSender, inValue) {
+		var saveProperty;
 		if (this.name === "icon"){
 			saveProperty = (function(inConfig) {
 				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);

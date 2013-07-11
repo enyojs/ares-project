@@ -264,7 +264,6 @@ enyo.kind({
 	 * @private
 	 */
 	_showBuildStatus: function(project, appData, next){
-	 		 	
 		this.$.buildStatusPopup.showPopup(project, appData.user);
 		next();
      },
@@ -443,7 +442,7 @@ enyo.kind({
 		var req = project.getService().createFile(project.getFolderId(), "config.xml", this._generateConfigXml(config));
 		req.response(this, function _savedConfigXml(inSender, inData) {
 			this.trace("Phonegap.Build#_updateConfigXml()", "updated config.xml:", inData);
-			var ctype = req.xhrResponse.headers['x-content-type'];
+			//var ctype = req.xhrResponse.headers['x-content-type'];
 			next();
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
@@ -457,7 +456,7 @@ enyo.kind({
 	 */
 	_getFiles: function(project, next) {
 		this.trace("...");
-		var req, fileList = [];
+		var req = [];
 		this.doShowWaitPopup({msg: $L("Fetching application source code")});
 		req = project.getService().exportAs(project.getFolderId(), -1 /*infinity*/);
 		req.response(this, function _gotFiles(inSender, inData) {
@@ -769,7 +768,9 @@ enyo.kind({
 						version = appData.version || "SNAPSHOT";
 						
 						var urlSuffix = appId + '/' + platform + '/' + title + '/' + version;
-						if(builder.debug) builder.log("Application "+ platform + " ready for download");
+						if(builder.debug){
+							builder.log("Application "+ platform + " ready for download");
+						}
 						_sendDownloadRequest.bind(builder)(urlSuffix, next);
 					},
 					//inData is a multipart/form containing the
@@ -823,7 +824,7 @@ enyo.kind({
 	 * FIXME: define a JSON schema
 	 */
 	_generateConfigXml: function(config) {
-		self = this;
+		var self = this;
 		
 		
 		var phonegap = config.providers.phonegap;
@@ -944,7 +945,7 @@ enyo.kind({
 		// is possible to have them enforced by a JSON schema,
 		// unless we hard-code a discrete list of URL's...
 		// 
-		featureUrl = "http://api.phonegap.com/1.0/";
+		var featureUrl = "http://api.phonegap.com/1.0/";
 		xw.writeComment("Features");
 		enyo.forEach(phonegap.features && enyo.keys(phonegap.features), function(feature) {
 							
@@ -997,8 +998,8 @@ enyo.kind({
 			enabled: false,
 			features: {
 				battery: false,
-       		   	camera: false,
-       		   	contact: false,
+				camera: false,
+				contact: false,
 		        file: false,		        
 		        geolocation: false,
 		        media: false,
