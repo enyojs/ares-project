@@ -615,7 +615,7 @@ enyo.kind({
 		}
 
 		if (toSelectId && toSelectId.match(/[^\da-f]/) ) {
-			this.warn("refreshFileTree: internal error, toSelectId " + toSelectId + " does not look like an Id");
+			this.warn("refreshFileTree: internal error, toSelectId ", toSelectId, " does not look like an Id");
 		}
 
 		var tracker = this.asyncTracker(
@@ -689,7 +689,7 @@ enyo.kind({
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		var folderId = inEvent.folderId;
 		var name = inSender.fileName.trim();
-		this.trace("Creating new folder "+name+" into folderId="+folderId);
+		this.trace("Creating new folder ", name," into folderId=", folderId);
 		this.$.service.createFolder(folderId, name)
 			.response(this, function(inSender, inFolder) {
 				this.trace("inFolder: ", inFolder);
@@ -790,7 +790,7 @@ enyo.kind({
 				this.showErrorPopup($L("No template found for '.{extension}' files.  Created an empty one.").replace("{extension}", type));
 			}
 			else {
-				this.error("error while fetching " + templatePath + ': ' + error);
+				this.error("error while fetching ", templatePath, ': ', error);
 			}
 		});
 		r.go();
@@ -865,7 +865,7 @@ enyo.kind({
 	renameConfirm: function(inSender, inEvent) {
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		var newName = inSender.fileName.trim();
-		this.trace("Renaming '" + this.selectedFile + "' as '" + newName + "'");
+		this.trace("Renaming '", this.selectedFile, "' as '", newName, "'");
 		this.$.service.rename(this.selectedFile.id, newName)
 			.response(this, function(inSender, inNode) {
 				this.trace("inNode: "+inNode);
@@ -968,7 +968,7 @@ enyo.kind({
 	/** @private */
 	revertConfirm: function(inSender, inEvent) {
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
-		this.trace("Reverting '" + this.movedNode.file.name + "' into '" + this.originNode.file.path + "'");
+		this.trace("Reverting '", this.movedNode.file.name, "' into '", this.originNode.file.path, "'");
 		this.moveNode(this.movedNode, this.originNode)
 			.response(this, function(inSender, inNodeFile) {
 				/* cancel any move reverting */
@@ -1000,7 +1000,7 @@ enyo.kind({
 		var onDone = new enyo.Async() ;
 		onDone.response(this, function(inSender, toSelectId) {
 			var select = forceSelect || toSelectId ;
-			this.trace("delayed refresh after " + msg + ' on ' + select) ;
+			this.trace("delayed refresh after ", msg, ' on ', select) ;
 			this.refreshFileTree(null, select);
 		}) ;
 		return onDone ;
