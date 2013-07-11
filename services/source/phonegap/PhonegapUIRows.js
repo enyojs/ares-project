@@ -29,9 +29,25 @@ enyo.kind({
 		this.inherited(arguments);
 		this.labelChanged();
 	},
+
+	/**
+	 * Set the content of the row's label when the row is created
+	 * @ private
+	 */
 	labelChanged: function () {
 		this.$.labelValue.setContent(this.name);
 	},
+
+	/**
+	 * Event handler that is trigred when the value of the checkbox change. It define 
+	 * a function and passe it as a parameter in the bubbling action to let the 
+	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
+	 * in the file "project.json"
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
 	updateConfigurationValue: function (inSender, inValue) {		
 		var saveProperty = (function(inConfig) {
 			this.trace("Saving operation ... Originator: ", this.name , " Value: ",inSender.getValue());
@@ -39,8 +55,6 @@ enyo.kind({
 		}).bind(this);		
 
 		this.bubble("onEditConfig", saveProperty);
-
-
 	}
 });
 
@@ -75,7 +89,6 @@ enyo.kind({
 				}
 			]
 		}
-
 	],
 
 	create: function () {
@@ -85,14 +98,31 @@ enyo.kind({
 		this.valueChanged();
 	},
 
+	/**
+	 * Set the content of the row's label when the row is created
+	 * @ private
+	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
 	},
 
+	/**
+	 * Set the content of the row's value when the row is created
+	 * @ private
+	 */
 	valueChanged: function () {
 		this.$.ConfigurationInput.setValue(this.value);
 	},
-
+	/**
+	 * Event handler that is trigred when the value of the input change. It define 
+	 * a function and passe it as a parameter in the bubbling action to let the 
+	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
+	 * in the file "project.json"
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
 	updateConfigurationValue: function (inSender, inValue) {
 		var saveProperty = (function(inConfig) {
 			this.trace("Saving operation ... Originator: ", this.name , " Value: ",inSender.value);
@@ -137,10 +167,18 @@ enyo.kind({
 		this.valueChanged();
 	},
 
+	/**
+	 * Set the content of the row's label when the row is created
+	 * @ private
+	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
 	},	 
 
+	/**
+	 * Set the content of the row's value when the row is created
+	 * @ private
+	 */
 	valueChanged: function () {
 		enyo.forEach(this.value, function (inValue) {			
 			if (inValue === this.defaultValue) {
@@ -152,6 +190,16 @@ enyo.kind({
 		}, this);
 	}, 
 
+	/**
+	 * Event handler that is trigred when the value of the picker change. It define 
+	 * a function and passe it as a parameter in the bubbling action to let the 
+	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
+	 * in the file "project.json"
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
 	updateConfigurationValue: function (inSender, inValue) {
 		var saveProperty = (function(inConfig) {
 			this.trace("Saving operation ... Originator: ", this.name , " Value: ", inValue.content);
@@ -162,6 +210,9 @@ enyo.kind({
 	}	
 });
 
+/**
+ * Defin a row to let the user add the path to an Android icon or a splash screen image into the file "config.xml".
+ */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.AndroidImgRow",
 	kind: "FittableColumns",
@@ -212,14 +263,34 @@ enyo.kind({
 		this.valueChanged();
 	},
 
+	/**
+	 * Set the content of the row's label when the row is created
+	 * @ private
+	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
 	},
 
+	/**
+	 * Set the content of the row's value when the row is created
+	 * @ private
+	 */
 	valueChanged: function () {
 		this.$.AndroidImgPath.setValue(this.value);
 	},
 
+	/**
+	 * Event handler that is trigred when the value of the input change. It define 
+	 * a function and passe it as a parameter in the bubbling action to let the 
+	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
+	 * in the file "project.json". This function is used on an Android Icon as well as for 
+	 * an Android splash screen.
+	 * 
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
 	updateConfigurationValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
@@ -236,6 +307,18 @@ enyo.kind({
 		this.bubble("onEditConfig", saveProperty);
 	}, 
 
+	/**
+	 * Event handler that is trigred when the value of the picker change. It define 
+	 * a function and passe it as a parameter in the bubbling action to let the 
+	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
+	 * in the file "project.json". This function is used on an Android Icon as well as for 
+	 * an Android splash screen.
+	 * 
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
 	updateAndroidIconDensity: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
@@ -257,7 +340,9 @@ enyo.kind({
 
 
 
-
+/**
+ * Defin a row to let the user add the path to an IOS icon or a splash screen image into the file "config.xml".
+ */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.IosImgRow",
 	kind: "FittableColumns",
@@ -281,7 +366,6 @@ enyo.kind({
 					kind: "onyx.Input",
 					name: "IosImgPath", 
 					onchange: "updateConfigurationValue"
-
 				}
 			]
 		},
@@ -315,15 +399,34 @@ enyo.kind({
 		this.labelChanged();
 	},
 
+	/**
+	 * Set the content of the row's label when the row is created
+	 * @ private
+	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
 	},
 
+	/**
+	 * Set the content of the row's value when the row is created
+	 * @ private
+	 */
 	valueChanged: function () {
 		var input = this.$.IosIconInput;
 		input.setValue(this.value);
 	},
-
+	/**
+	 * Event handler that is trigred when the value of the input change. It define 
+	 * a function and passe it as a parameter in the bubbling action to let the 
+	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
+	 * in the file "project.json". This function is used on an IOS Icon as well as for 
+	 * an IOS splash screen.
+	 * 
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
 	updateConfigurationValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
@@ -340,6 +443,18 @@ enyo.kind({
 		this.bubble("onEditConfig", saveProperty);
 	},
 
+	/**
+	 * Event handler that is trigred when the value of the input that hold the value of 
+	 * the IOS icon height change. It define a function and passe it as a parameter in the 
+	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
+	 * save the new value in the file "project.json". This function is used on an Android Icon as
+	 * well as for an Android splash screen.
+	 * 
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
 	updateIosIconHeightValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
@@ -356,6 +471,18 @@ enyo.kind({
 		this.bubble("onEditConfig", saveProperty);
 	}, 
 
+	/**
+	 * Event handler that is trigred when the value of the input that hold the value of 
+	 * the IOS icon width change. It define a function and passe it as a parameter in the 
+	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
+	 * save the new value in the file "project.json". This function is used on an Android Icon as
+	 * well as for an Android splash screen.
+	 * 
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
 	updateIosIconWidhtValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
@@ -378,7 +505,9 @@ enyo.kind({
 
 
 
-
+/**
+ * Defin a row to let the user add the path to a default icon or a splash screen image into the file "config.xml".
+ */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.GeneralImgRow",
 	kind: "FittableColumns",
@@ -415,14 +544,34 @@ enyo.kind({
 		this.labelChanged();
 	},
 
+	/**
+	 * Set the content of the row's label when the row is created
+	 * @ private
+	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
 	},
 
+	/**
+	 * Set the content of the row's value when the row is created
+	 * @ private
+	 */
 	valueChanged: function () {
 		this.$.GeneralImgPath.setValue(this.value);
 	},
 
+	/**
+	 * Event handler that is trigred when the value of the input that hold the value of 
+	 * the default icon change. It define a function and passe it as a parameter in the 
+	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
+	 * save the new value in the file "project.json". This function is used on an Android Icon as
+	 * well as for an Android splash screen.
+	 * 
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
 	updateConfigurationValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
@@ -440,6 +589,10 @@ enyo.kind({
 	}
 });
 
+
+/**
+ * Define a row to let the user add the path to a Winphone icon or a splash screen image into the file "config.xml".
+ */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.WinphoneImgRow",
 	kind: "FittableColumns",
@@ -467,8 +620,6 @@ enyo.kind({
 				}
 			]
 		},
-
-
 	],
 
 	create: function () {
@@ -477,14 +628,33 @@ enyo.kind({
 		this.labelChanged();
 	},
 
+	/**
+	 * Set the content of the row's label when the row is created
+	 * @ private
+	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
 	},
 
+	/**
+	 * Set the content of the row's value when the row is created
+	 * @ private
+	 */
 	valueChanged: function () {
 		this.$.GeneralImgPath.setValue(this.value);
 	},
-
+	/**
+	 * Event handler that is trigred when the value of the input that hold the value of 
+	 * the Winphone icon change. It define a function and passe it as a parameter in the 
+	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
+	 * save the new value in the file "project.json". This function is used on an Android Icon as
+	 * well as for an Android splash screen.
+	 * 
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
 	updateConfigurationValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
@@ -502,7 +672,9 @@ enyo.kind({
 	}
 });
 
-
+/**
+ * Defin a row to let the user add the path to a BlackBerry icon or a splash screen image into the file "config.xml".
+ */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.BlackBerryImgRow",
 	kind: "FittableColumns",
@@ -513,9 +685,6 @@ enyo.kind({
 		name: "",
 		value: "", 
 		defaultValue: ""
-	},
-	handlers: {
-			onConfigClone: "updateConfig"
 	},
 	components: [
 		{
@@ -541,15 +710,33 @@ enyo.kind({
 		this.inherited(arguments);
 		this.labelChanged();
 	},
-
+	/**
+	 * Set the content of the row's label when the row is created
+	 * @ private
+	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
 	},
-
+	/**
+	 * Set the content of the row's label when the row is created
+	 * @ private
+	 */
 	valueChanged: function () {
 		this.$.GeneralImgPath.setValue(this.value);
 	},
 
+	/**
+	 * Event handler that is trigred when the value of the input that hold the value of 
+	 * the BlackBerry icon change. It define a function and passe it as a parameter in the 
+	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
+	 * save the new value in the file "project.json". This function is used on an Android Icon as
+	 * well as for an Android splash screen.
+	 * 
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
 	updateConfigurationValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {
@@ -568,6 +755,9 @@ enyo.kind({
 	}
 });
 
+/**
+ * Defin a row to let the user add the path to a Webos icon or a splash screen image into the file "config.xml".
+ */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.WebOsImgRow",
 	kind: "FittableColumns",
@@ -578,9 +768,6 @@ enyo.kind({
 		name: "",
 		value: "", 
 		defaultValue: ""
-	},
-	handlers: {
-			onConfigClone: "updateConfig"
 	},
 	components: [
 		{
@@ -604,15 +791,34 @@ enyo.kind({
 		this.inherited(arguments);
 		this.labelChanged();
 	},
-
+	/**
+	 * Set the content of the row's label when the row is created
+	 * @ private
+	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
 	},
 
+	/**
+	 * Set the content of the row's label when the row is created
+	 * @ private
+	 */
 	valueChanged: function () {
 		this.$.GeneralImgPath.setValue(this.value);
 	},
 
+	/**
+	 * Event handler that is trigred when the value of the input that hold the value of 
+	 * the Webos icon change. It define a function and passe it as a parameter in the 
+	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
+	 * save the new value in the file "project.json". This function is used on an Android Icon as
+	 * well as for an Android splash screen.
+	 * 
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
 	updateConfigurationValue: function (inSender, inValue) {
 		if (this.name === "icon"){
 			var saveProperty = (function(inConfig) {

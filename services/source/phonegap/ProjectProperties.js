@@ -1,7 +1,20 @@
 /* global ares */
 
 /**
- * This kind hold the needed data to create the UI Projet -> Edit
+ * Hold the needed data to create the UI Projet -> Edit. Actually it's used in : 
+ * "ProjectProperties.js", "PhonegapUIRows.js" & "Build.js".
+ * In this kind, the data are defined in the statics attribute and are structured this way : 
+ * * Array of drawers : a drawer contain the following attributs  : 
+ * - id : define the name of the drawer's component that will be created
+ * - name: define the name of the drawer's label
+ * - rows: define the content of the drawer, a drawer contains an array of rows and each row contain the following attributs : 
+ * -- name: used to create the UI widget that hold the name of the row, this name is exactely the name of the xml tag of the file 
+ *          config.xml that will be generated (except for splashScreen row)
+ * -- label : the content of the label of the row
+ * -- content: the content of the row, the format of this content can change depending on the type of the UI widget used (picker, input, ...)
+ * -- defaultValue: the default value displayed in the widget
+ * -- type: contain the last part of the name of the kind that will be used to define a row, these kinds are defined in
+ * 			the "PhonegapUIRows.js"
  * @type {String}
  */
 enyo.kind({
@@ -331,12 +344,19 @@ enyo.kind({
 			id: 'phonegap'
 		});
 	},
-
+	/**
+	 * Event handler that detect the changes done in a drawer's row
+	 * @param  {Object} inSender     contain the description of the envent sender
+	 * @param  {function} saveProperty  this function is defined in each row's kind, it save the 
+	 *                                  new input of the row in the object "this.config".
+	 * 
+	 * @private
+	 */
 	saveConfig: function(inSender, saveProperty)  {
 		saveProperty.call(this, this.config) ;
 		return true; //stop the bubbling
 	}, 
-	
+
 	/**
 	 * @protected
 	 */
@@ -486,7 +506,7 @@ enyo.kind({
 	}
 });
 /**
- * Define the drawers "general" an "permissions"
+ * Define the drawers "general" and "permissions"
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.Drawer",
@@ -674,14 +694,10 @@ enyo.kind({
 	/**
 	 * @private
 	 */
-	savePassword: function (inSender, inValue) {
-		
-		this.trace("sender:", inSender, "value:", inValue);
-		
-		var key = this.getShowingKey();
-		
-		this.trace("targetId:", this.targetId, "key:", key);
-		
+	savePassword: function (inSender, inValue) {		
+		this.trace("sender:", inSender, "value:", inValue);		
+		var key = this.getShowingKey();		
+		this.trace("targetId:", this.targetId, "key:", key);		
 		this.provider.setKey(this.targetId, key);
 	}
 });
