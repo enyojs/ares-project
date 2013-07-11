@@ -60,7 +60,7 @@ enyo.kind({
 			]},
 			{name: "revertMove", kind: "onyx.TooltipDecorator", components: [
 				{name: "revertMoveButton", kind: "onyx.IconButton", src: "$harmonia/images/undo.png", ontap: "revertClick"},
-				{kind: "onyx.Tooltip", content: $L("Revert move...")}
+				{kind: "onyx.Tooltip", classes:"ares-tooltip-last", content: $L("Revert move...")}
 			]}
 		]},
 		
