@@ -1,3 +1,5 @@
+/*global Ares, ares, async, ProjectConfig, ServiceRegistry */
+
 enyo.kind({
 	name: "ProjectWizardCreate",
 	kind: "onyx.Popup",
@@ -28,13 +30,17 @@ enyo.kind({
 	debug: false,
 	projectName: "",
 
+	create: function() {
+		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
+		this.inherited(arguments);
+	},
 	/**
 	 * start project creation by showing direction selection widget
 	 */
 	start: function() {
 		var dirPopup = this.$.selectDirectoryPopup ;
 
-		if (this.debug) this.log("starting") ;
+		this.trace("starting") ;
 		this.show();
 
 		this.config = new ProjectConfig() ; // is a ProjectConfig object.
@@ -47,7 +53,7 @@ enyo.kind({
 	// Step 2: once the directory is selected by user, show the project properties popup
 	// Bail out if a project.json file already exists
 	prepareShowProjectPropPopup: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		if (!inEvent.file) {
 			this.hideMe();
 			return;
@@ -222,7 +228,7 @@ enyo.kind({
 		var folderId = this.selectedDir.id ;
 		var template = inEvent.template;
 
-		this.log("Creating new project " + name + " in folderId=" + folderId + " (template: " + template + ")");
+		this.log("Creating new project ", name, " in folderId=", folderId, " (template: ", template, ")");
 		this.config.setData(inEvent.data) ;
 		this.config.save() ;
 
@@ -233,11 +239,11 @@ enyo.kind({
 
 			service.createFile(folderId, "package.js", "enyo.depends(\n);\n")
 				.response(this, function(inRequest, inFsNode) {
-					if (this.debug) { enyo.log("package.js inFsNode[0]:", inFsNode[0]); }
+					this.trace("package.js inFsNode[0]:", inFsNode[0]);
 					this.projectReady(null, inEvent);
 				})
 				.error(this, function(inRequest, inError) {
-					if (this.debug) { enyo.log("inRequest:", inRequest, "inError:", inError); }
+					this.trace("inRequest:", inRequest, "inError:", inError);
 				});
 		}
 
@@ -287,10 +293,10 @@ enyo.kind({
 		var service = this.selectedDir.service;
 
 		// Copy the template files into the new project
-		req = service.createFiles(folderId, {content: inData.content, ctype: inData.ctype});
+		var req = service.createFiles(folderId, {content: inData.content, ctype: inData.ctype});
 		req.response(this, this.projectReady);
 		req.error(this, function(inEvent, inData) {
-			this.$.errorPopup.raise('Unable to create projet content from the template');
+			this.$.errorPopup.raise($L("Unable to create projet content from the template"));
 			this.doHideWaitPopup();
 		});
 	},
@@ -338,13 +344,17 @@ enyo.kind({
 	},
 	classes:"ares-masked-content-popup",
 	components: [
-		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource"}
+		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource"},
 		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Select top file..."), folderChooser: false, onFileChosen: "selectFileChosen"}
 	],
 
 	debug: false,
 	targetProject: null,
 
+	create: function() {
+		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
+		this.inherited(arguments);
+	},
 	/**
 	 * Step 1: start the modification by showing project properties widget
 	 */
@@ -360,7 +370,7 @@ enyo.kind({
 
 	// step 2:
 	saveProjectConfig: function(inSender, inEvent) {
-		if (this.debug) { this.log("saving project config"); }
+		this.trace("saving project config");
 
 		if (! this.targetProject) {
 			this.error("internal error: saveProjectConfig was called without a target project.") ;
@@ -382,16 +392,20 @@ enyo.kind({
 		return true ; // stop bubble
 	},
 	selectTopFile: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
+		this.trace(inSender, "=>", inEvent);
+
+		this.log("targetProject", this.targetProject);
 
 		var config = this.targetProject.getConfig();
 		var top_file = config.data.preview.top_file;
+		this.log("preview", config.data.preview);
+		this.log("top_file", top_file);
 
 		this.$.selectFilePopup.setSelectedName(top_file);
 		this.$.selectFilePopup.show();
 	},
 	selectFileChosen: function(inSender, inEvent) {
-		if (this.debug) this.log(inSender, "=>", inEvent);
+		this.trace(inSender, "=>", inEvent);
 
 		if (!inEvent.file) {
 			// no file or folder chosen
@@ -410,10 +424,10 @@ enyo.kind({
 		var service = selectedDir.service;
 
 		// Copy the template files into the new project
-		req = service.createFiles(folderId, {content: inData.content, ctype: inData.ctype});
+		var req = service.createFiles(folderId, {content: inData.content, ctype: inData.ctype});
 		req.response(this, this.projectRefresh);
 		req.error(this, function(inEvent, inData) {
-			this.$.errorPopup.raise('Unable to create projet content from the template');
+			this.$.errorPopup.raise($L("Unable to create projet content from the template"));
 			this.doHideWaitPopup();
 		});
 		return true;
@@ -432,7 +446,7 @@ enyo.kind({
 		this.config = null ; // forget ProjectConfig object
 		this.hide() ;
 		return true;
-	},
+	}
 });
 
 
@@ -456,21 +470,25 @@ enyo.kind({
 	},
 	debug: false,
 
+	create: function() {
+		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
+		this.inherited(arguments);
+	},
 	importProject: function(service, parentDir, child) {
-		this.debug && this.log('opening project.json from ' + parentDir.name ) ;
+		this.trace('opening project.json from ', parentDir.name ) ;
 
 		service.getFile( child.id ).
 			response(this, function(inSender, fileStuff) {
 				var projectData={};
-				this.debug && this.log( "file contents: '" + fileStuff.content + "'" ) ;
+				this.trace( "file contents: '", fileStuff.content, "'" ) ;
 
 				try {
 					projectData = JSON.parse(fileStuff.content)  ;
 				} catch(e) {
-					this.log("Error parsing project data: "+e.toString());
+					this.log("Error parsing project data: ", e.toString());
 				}
 
-				this.debug && this.log('Imported project ' + projectData.name + " from " + parentDir.id) ;
+				this.trace('Imported project ', projectData.name, " from ", parentDir.id) ;
 
 				this.doAddProjectInList({
 					name: projectData.name || parentDir.name,
@@ -506,7 +524,7 @@ enyo.kind({
 			var item = toScan.shift() ;
 			var parentDir = item[0] ;
 			var child = item[1];
-			this.debug && this.log('search iteration on ' + child.name + ' isDir ' + child.isDir ) ;
+			this.trace('search iteration on ', child.name, ' isDir ', child.isDir ) ;
 
 			service.listFiles(child.id)
 				.response(this, function(inSender, inFiles) {
@@ -518,7 +536,7 @@ enyo.kind({
 							this.importProject(service, child, v) ;
 						}
 						else if ( v.isDir ===  true ) {
-							this.debug && this.log('pushing ' + v.name + " from " + child.id) ;
+							this.trace('pushing ', v.name, " from ", child.id) ;
 							toPush.push([child,v]);
 						}
 						// else skip plain file
@@ -567,6 +585,10 @@ enyo.kind({
 	debug: false,
 	targetProject: null,
 
+	create: function() {
+		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
+		this.inherited(arguments);
+	},
 	/**
 	 * Step 1: start the modification by showing project properties widget
 	 */
@@ -585,7 +607,7 @@ enyo.kind({
 
 	// step 2:
 	copyProject: function(inSender, inEvent) {
-		if (this.debug) { this.log("Copying project", this.targetProject.getConfig().data.name); }
+		this.trace("Copying project", this.targetProject.getConfig().data.name);
 		this.doShowWaitPopup({msg: "Duplicating project"});
 
 		var service = this.targetProject.getService();
@@ -595,27 +617,27 @@ enyo.kind({
 		var destination = inEvent.data.name;
 		var known = Ares.Workspace.projects.get(destination);
 		if (known) {
-			var msg = "Unable to duplicate the project, the project '" +
-											destination + "' already exists";
-			this.doError({msg: msg});
+			this.doError({msg: this.$LS("Unable to duplicate the project, the project '{destination}' already exists", {destination: destination})});
 			return true ; // stop bubble			
 		}
 
 		var req = service.copy(folderId, destination);
 		req.response(this, this.saveProjectJson);
 		req.error(this, function(inSender, status) {
-			var msg = "Unable to duplicate the project";
+			var msg = $L("Unable to duplicate the project");
 			if (status === 412 /*Precondition-Failed*/) {
-				msg = "Unable to duplicate the project, directory '" + destination + "' already exists";
+				this.log("Unable to duplicate the project, directory '", destination, "' already exists", status);
+				msg = this.$LS("Unable to duplicate the project, directory '{destination}' already exists", {destination: destination});
+			} else {
+				this.log("Unable to duplicate the project", status);
 			}
-			this.log(msg, status);
 			this.doError({msg: msg});
 		});
 
 		return true ; // stop bubble
 	},
 	saveProjectJson: function(inSender, inData) {
-		if (this.debug) { this.log(inData); }
+		this.trace(inData);
 		var folderId = inData.id;
 		this.newFolderId = folderId;
 		var service = this.targetProject.getService();
@@ -627,26 +649,28 @@ enyo.kind({
 		});
 
 		if (! fileId) {
-			var msg = "Unable to duplicate the project, no 'project.json' found";
-			this.log(msg, inData);
-			this.doError({msg: msg});
+			this.log("Unable to duplicate the project, no 'project.json' found", inData);
+			this.doError({msg: $L("Unable to duplicate the project, no 'project.json' found")});
 			return;
 		}
 
 		var req = service.putFile(fileId, JSON.stringify(this.newConfigData, null, 2));
 		req.response(this, this.createProjectEntry);
 		req.error(this, function(inSender, inData) {
-			var msg = "Unable to duplicate the project, unable to update 'project.json'";
-			this.log(msg, inData);
-			this.doError({msg: msg});
+			this.log("Unable to duplicate the project, unable to update 'project.json'", inData);
+			this.doError({msg: $L("Unable to duplicate the project, unable to update 'project.json'")});
 		});
 	},
 	createProjectEntry: function(inSender, inData) {
-		if (this.debug) { this.log(inData); }
+		this.trace(inData);
 		var serviceId = this.targetProject.getServiceId();
 
 		// Create the project entry in the project list
 		Ares.Workspace.projects.createProject(this.newConfigData.name, this.newFolderId, serviceId);
 		this.doHideWaitPopup();
+	},
+	$LS: function(msg, params) {
+		var tmp = new enyo.g11n.Template($L(msg));
+		return tmp.evaluate(params);
 	}
 });

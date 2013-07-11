@@ -1,3 +1,5 @@
+/* global ares, ProjectConfig */
+
 /**
  * This kind provide a widget to tune project properties
  *
@@ -10,7 +12,7 @@
 enyo.kind({
 	name: "ProjectProperties",
 	debug: false,
-	classes: "enyo-unselectable",
+	classes: "enyo-unselectable ares-classic-popup",
 	fit: true,
 	events: {
 		onModifiedConfig: "",
@@ -21,7 +23,6 @@ enyo.kind({
 	handlers: {
 		onAdditionalSource: "handleAdditionalSource"
 	},
-	classes:"ares-classic-popup",
 	components: [
 		{classes:"title left-align", content:"Project properties", components:[
 			{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", classes:"ares-radio-group", components: [
@@ -127,12 +128,16 @@ enyo.kind({
 
 	services: {},
 
+	create: function() {
+		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
+		this.inherited(arguments);
+	},
 	/**
 	 * Receive the {onServicesChange} broadcast notification
 	 * @param {Object} inEvent.serviceRegistry
 	 */
 	handleServicesChange: function(inSender, inEvent) {
-		if (this.debug) this.log();
+		this.trace(inSender, "=>", inEvent);
 		this.services = enyo.clone(this.services) || {};
 		inEvent.serviceRegistry.forEach(enyo.bind(this, function(inService) {
 			var service = {
@@ -140,7 +145,7 @@ enyo.kind({
 				name: inService.getName() || inService.id,
 				kind: inService.getProjectPropertiesKind && inService.getProjectPropertiesKind()
 			};
-			if (this.debug) this.log("service:", service);
+			this.trace("service:", service);
 			if (service.kind) {
 				this.services[service.id] = service;
 			}
@@ -189,7 +194,7 @@ enyo.kind({
 			// to show the service or not
 			this.showService(serviceId);
 		}, this);
-		if (this.debug) this.log("services:", this.services);
+		this.trace("services:", this.services);
 	},
 	/**
 	 * Toggle a service panel
@@ -369,7 +374,7 @@ enyo.kind({
 
 	},
 	_onLibCheckedAction: function(inSender, inEvent) {
-		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
+		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		var selectedLibs = [];
 		enyo.forEach(this.libs, function(lib) {
 			if (lib.id === inEvent.lib.id) {
