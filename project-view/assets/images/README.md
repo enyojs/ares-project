@@ -4,5 +4,5 @@
   * license: "creative commons Public Domain Dedication"
 * icon file-32x32.png:
   * resized from `http://www.iconfinder.com/icondetails/27859/128/blank_document_file_paper_icon`
-  * provided by [iconfinder](http://http://www.iconfinder.com) project
+  * provided by [iconfinder](http://www.iconfinder.com) project
   * license: "Creative Commons Attribution-No Derivative Works 3.0 Unported"
