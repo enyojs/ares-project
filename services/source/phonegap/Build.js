@@ -835,43 +835,43 @@ enyo.kind({
 
 		var createIconXMLRow = function(inTarget) {
 			xw.writeStartElement( 'icon' );
-						// If the project does not define an icon, use Enyo's
-						// one
-						xw.writeAttributeString('src', phonegap.icons[inTarget].src || 'icon.png');
-						if(inTarget === "general"){
-							xw.writeAttributeString('role', phonegap.icons[inTarget].role || 'default');
-						} else {
-							xw.writeAttributeString('gap:platfom', inTarget);
+			// If the project does not define an icon, use Enyo's
+			// one
+			xw.writeAttributeString('src', phonegap.icons[inTarget].src || 'icon.png');
+			if(inTarget === "general"){
+				xw.writeAttributeString('role', phonegap.icons[inTarget].role || 'default');
+			} else {
+				xw.writeAttributeString('gap:platfom', inTarget);
 
-							if (inTarget === "android"){
-								xw.writeAttributeString('gap:density', phonegap.icons[inTarget].density || "mdpi");
-							} else if (inTarget === "ios") {
-									xw.writeAttributeString('width', phonegap.icons[inTarget].width || 60);
-									xw.writeAttributeString('height', phonegap.icons[inTarget].height || 60);
-								}
-						}
-							
+				if (inTarget === "android"){
+					xw.writeAttributeString('gap:density', phonegap.icons[inTarget].density || "mdpi");
+				} else if (inTarget === "ios") {
+					xw.writeAttributeString('width', phonegap.icons[inTarget].width || 60);
+					xw.writeAttributeString('height', phonegap.icons[inTarget].height || 60);
+				}
+			}
+
 			xw.writeEndElement();
 		};
 
 		var createSplashScreenXMLRow = function(inTarget) {
 			xw.writeStartElement( 'gap:splash' );
-						// If the project does not define an icon, use Enyo's
-						// one
-						xw.writeAttributeString('src', phonegap.splashes[inTarget].src || 'icon.png');
-						if(inTarget === "general"){
-							xw.writeAttributeString('role', phonegap.splashes[inTarget].role || 'default');
-						} else {
-							xw.writeAttributeString('gap:platfom', inTarget);
+			// If the project does not define an icon, use Enyo's
+			// one
+			xw.writeAttributeString('src', phonegap.splashes[inTarget].src || 'icon.png');
+			if(inTarget === "general"){
+				xw.writeAttributeString('role', phonegap.splashes[inTarget].role || 'default');
+			} else {
+				xw.writeAttributeString('gap:platfom', inTarget);
 
-							if (inTarget === 'android'){
-								xw.writeAttributeString('gap:density', phonegap.splashes['android'].density || 'mdpi');
-							} else if (inTarget === 'ios') {
-									xw.writeAttributeString('width', phonegap.splashes['ios'].width || 90);
-									xw.writeAttributeString('height', phonegap.splashes['ios'].height || 150);
-								}
-						}
-							
+				if (inTarget === 'android'){
+					xw.writeAttributeString('gap:density', phonegap.splashes['android'].density || 'mdpi');
+				} else if (inTarget === 'ios') {
+					xw.writeAttributeString('width', phonegap.splashes['ios'].width || 90);
+					xw.writeAttributeString('height', phonegap.splashes['ios'].height || 150);
+				}
+			}
+
 			xw.writeEndElement();
 		};
 
