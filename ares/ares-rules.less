@@ -291,7 +291,7 @@
 }
 
 /* Ares "Phonegap build" panel.*/
-.ares-group-box>.onyx-input-decorator { box-shadow: none;}
+
 
 .ares-project-properties-refresh-button { left: 200px; }
 
@@ -301,7 +301,7 @@
 
 .ares-project-properties-common_drawer_header { 
 	margin-left: 50px;
-	color: #000000;
+	color: @ares-drawer-label;
 	font-weight:bold;
 	position: relative;
 	top : 7px;
@@ -309,7 +309,7 @@
 
 .ares-project-properties-platform_drawer_header { 
 	margin-left: 10px; 
-	color: #000000;
+	color: @ares-drawer-label;
 	font-weight:bold;
 
 }
@@ -330,11 +330,16 @@
 .ares-project-properties-drawer-row-check-box-label { margin-left: 30px; margin-right: 50px; }
 
 .ares-project-properties-label-background { 
-	background-color: #B9BBC7;
-	width: 560px; 
+	background-color: @ares-drawer-label-background;
+	.ares-box-shadow (inset 0px 0px 30px rgba(0,0,0,0.3));
+	width: 605px; 
 	height: 32px; 
-	.ares-rounded-corners (@ares-drawer-radius); 
-	
+	margin-left: 5px;
+	.ares-rounded-corners (@ares-drawer-radius); 	
+}
+
+.ares-project-properties-label-background:hover {
+	background-color: @ares-drawer-label-background-hover;
 }
 
 /* Ares group box */
