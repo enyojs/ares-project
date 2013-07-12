@@ -935,6 +935,15 @@ enyo.kind({
 		this.$.service.remove(this.selectedFile.id)
 			.response(this, function(inSender, inParentFolder) {
 				this.trace("inParentFolder: ", inParentFolder);
+
+				if (!this.selectedFile.isServer && this.projectUrlReady) {
+					if (!this.selectedFile.isDir) {
+						this.doFileChanged({id: Ares.Workspace.files.computeId(this.selectedFile)});
+					} else {
+						this.doFolderChanged({file: this.selectedFile, projectData: this.projectData});
+					}
+				}
+				
 				this.doTreeChanged({
 					remove: {
 						service: this.$.service,
