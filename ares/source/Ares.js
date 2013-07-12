@@ -454,8 +454,13 @@ enyo.kind({
 	 */
 	_nodeChanging: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var docId = Ares.Workspace.files.computeId(inEvent.node);
-		this._closeDocument(docId);
+		var docId = Ares.Workspace.files.computeId(inEvent.node),
+			self=this;
+		this._closeDocument(docId, function() {
+			if (! Ares.Workspace.files.length ) {
+				self.showProjectView();
+			}
+		});
 	},
 	/**
 	 * Event handler for ares components registry
