@@ -245,13 +245,6 @@ enyo.kind({
 			model,
 			i;
 		
-		var self = this;
-		var show = function () {
-			if (! Ares.Workspace.files.length ) {
-				self.showProjectView();
-			}
-		};
-
 		for( i = 0; i < files.models.length; i++ ) {
 			model = files.models[i];
 
@@ -259,9 +252,13 @@ enyo.kind({
 				serviceId = model.getProjectData().getServiceId();
 
 			if ( serviceId == inEvent.projectData.getServiceId() && path.indexOf( inEvent.file.path, 0 ) >= 0 ) {
-				this._closeDocument(model.id, show);
+				this._closeDocument(model.id);
 				i--;
 			}
+		}
+
+		if (! Ares.Workspace.files.length ) {
+			this.showProjectView();
 		}
 	},
 	/** @private */
