@@ -10,7 +10,7 @@ enyo.kind({
 	components: [
 		{name:"aresLayoutPanels", kind: "Panels", draggable: false, arrangerKind: "CollapsingArranger", fit: true, classes:"ares-main-panels", components:[
 			{name: "projectView", kind: "ProjectView", classes: "ares-panel-min-width ", onProjectSelected: "projectSelected"},
-			{kind: "Harmonia", name: "harmonia", classes: "ares-panel-min-width ", onFileDblClick: "openDocument"},
+			{kind: "Harmonia", name: "harmonia", classes: "ares-panel-min-width ", onFileDblClick: "openDocument", onFileChanged: "closeDocument", onFolderChanged: "closeSomeDocuments"},
 			{name:"designerPanels", components:[	
 				{
 					name: "bottomBar",
@@ -237,6 +237,30 @@ enyo.kind({
 			}
 		});
 	},
+	/* @private */
+	closeSomeDocuments: function(inSender, inEvent) {
+		this.trace("sender:", inSender, ", event:", inEvent);
+		
+		var files = Ares.Workspace.files,
+			model,
+			i;
+		
+		for( i = 0; i < files.models.length; i++ ) {
+			model = files.models[i];
+
+			var path = model.getFile().path,
+				serviceId = model.getProjectData().getServiceId();
+
+			if ( serviceId == inEvent.projectData.getServiceId() && path.indexOf( inEvent.file.path, 0 ) >= 0 ) {
+				this._closeDocument(model.id);
+				i--;
+			}
+		}
+
+		if (! Ares.Workspace.files.length ) {
+			this.showProjectView();
+		}
+	},
 	/** @private */
 	_closeDocument: function(docId, next) {
 		if (docId) {
@@ -430,8 +454,13 @@ enyo.kind({
 	 */
 	_nodeChanging: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var docId = Ares.Workspace.files.computeId(inEvent.node);
-		this._closeDocument(docId);
+		var docId = Ares.Workspace.files.computeId(inEvent.node),
+			self=this;
+		this._closeDocument(docId, function() {
+			if (! Ares.Workspace.files.length ) {
+				self.showProjectView();
+			}
+		});
 	},
 	/**
 	 * Event handler for ares components registry
