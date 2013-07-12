@@ -211,7 +211,7 @@ enyo.kind({
 });
 
 /**
- * Defin a row to let the user add the path to an Android icon or a splash screen image into the file "config.xml".
+ * Define a row to let the user add the path to an Android icon or a splash screen image into the file "config.xml".
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.AndroidImgRow",
@@ -333,7 +333,7 @@ enyo.kind({
 });
 
 /**
- * Defin a row to let the user add the path to an IOS icon or a splash screen image into the file "config.xml".
+ * Define a row to let the user add the path to an IOS icon or a splash screen image into the file "config.xml".
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.IosImgRow",
@@ -500,7 +500,7 @@ enyo.kind({
 
 
 /**
- * Defin a row to let the user add the path to a default icon or a splash screen image into the file "config.xml".
+ * Define a row to let the user add the path to a default icon or a splash screen image into the file "config.xml".
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.GeneralImgRow",
@@ -669,7 +669,7 @@ enyo.kind({
 });
 
 /**
- * Defin a row to let the user add the path to a BlackBerry icon or a splash screen image into the file "config.xml".
+ * Define a row to let the user add the path to a BlackBerry icon or a splash screen image into the file "config.xml".
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.BlackBerryImgRow",
@@ -753,7 +753,7 @@ enyo.kind({
 });
 
 /**
- * Defin a row to let the user add the path to a Webos icon or a splash screen image into the file "config.xml".
+ * Define a row to let the user add the path to a Webos icon or a splash screen image into the file "config.xml".
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.WebOsImgRow",
