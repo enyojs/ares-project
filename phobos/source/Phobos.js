@@ -10,7 +10,7 @@ enyo.kind({
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", components: [
 				{kind: "onyx.MenuDecorator", onSelect: "fileMenuItemSelected", components: [
 					{content: "File"},
-					{kind: "onyx.Menu", components: [
+					{kind: "onyx.Menu", maxHeight: "100%", components: [
 						{name: "saveButton", value: "saveDocAction", components: [
 							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save.png"},
 							{content: $L("Save")}
@@ -23,7 +23,11 @@ enyo.kind({
 						{name: "closeButton", value: "closeDocAction", components: [
 							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
 							{content: $L("Close")}
-						]}
+						]},
+						{name: "closeAllButton", value: "closeAllDocAction", components: [
+							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
+							{content: $L("Close All")}
+						]}						
 					]}
 				]},
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: $L("New Kind"), ontap: "newKindAction"},
@@ -42,6 +46,7 @@ enyo.kind({
 			]}
 		]},
 		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
+		{name: "saveAllPopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonAllDocAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, onFileChosen: "saveAsFileChosen"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
@@ -56,6 +61,7 @@ enyo.kind({
 		onSaveAsDocument: "",
 		onDesignDocument: "",
 		onCloseDocument: "",
+		onCloseAllDocument: "",
 		onUpdate: "",
 		onRegisterMe: ""
 	},
@@ -676,12 +682,38 @@ enyo.kind({
 		}
 		return true; // Stop the propagation of the event
 	},
+	closeAllDocAction: function(inSender, inEvent) {
+		var fileEdited = false;
+		Ares.Workspace.files.each(function(file) {
+			fileEdited = fileEdited || file.getEdited();
+		});
+
+		if (fileEdited) {	
+			this.$.saveAllPopup.setName("Document(s) were modified!");
+			this.$.saveAllPopup.setMessage("Save it before closing?");
+			this.$.saveAllPopup.setActionButton("Don't Save");
+			this.$.saveAllPopup.show();
+		} else {
+			this.doCloseAllDocument();
+		}
+		return true; // Stop the propagation of the event
+	},
+	forceCloseDoc: function(inSender, inEvent) {
+		var docData = this.docData;
+		this.beforeClosingDocument();
+		this.doCloseDocument({id: docData.getId()});
+	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
 		var docData = this.docData;
 		this.beforeClosingDocument();
 		this.doCloseDocument({id: docData.getId()});
+	},
+	// called when "Don't Save" is selected in save all popup
+	abandonAllDocAction: function(inSender, inEvent) {
+		this.$.saveAllPopup.hide();
+		this.doCloseAllDocument();
 	},
 	docChanged: function(inSender, inEvent) {
 		this.docData.setEdited(true);

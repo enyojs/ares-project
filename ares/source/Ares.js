@@ -23,7 +23,7 @@ enyo.kind({
 				},
 				{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
 					{components: [
-						{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
+						{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onCloseAllDocument: "closeAllDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
 					]},
 					{components: [
 						{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
@@ -248,6 +248,26 @@ enyo.kind({
 			next();
 		}
 	},
+	closeAllDocument: function(inSender, inEvent) {
+		this.trace("sender:", inSender, ", event:", inEvent);
+		var self = this;
+		this._closeAllDocument(function() {
+			if (! Ares.Workspace.files.length ) {
+				self.showProjectView();
+			}
+		});
+	},
+	/** @private */
+	_closeAllDocument: function(next) {
+		var self = this;
+		Ares.Workspace.files.each(function(file) {
+			self.switchToDocument(file);
+			enyo.asyncMethod(self.componentsRegistry.phobos, "forceCloseDoc");	
+		});
+		if (typeof next === 'function') {
+			next();
+		}
+	},	
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();
 		this.componentsRegistry.deimos.load(inEvent);
