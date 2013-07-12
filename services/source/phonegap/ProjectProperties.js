@@ -186,11 +186,6 @@ enyo.kind({
 		this.createAllDrawers();	
 	},
 
-	getConfiguration: function(inSender, inValue){
-		this.log("récupération config", inValue);
-		return true;
-	},
-
 	createAllDrawers: function () {
 		var self = this;
 		createCommonDrawers(this.commonDrawers);
