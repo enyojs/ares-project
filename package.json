@@ -14,7 +14,7 @@
 	},
 	"engines": {
 		"node" : "0.8.x >=0.8.21",
-		"npm": "1.2.x"
+		"npm": ">=1.2.x"
 	},
 	"engineStrict": true,
 	"os" : [ "darwin", "linux", "win32" ],
