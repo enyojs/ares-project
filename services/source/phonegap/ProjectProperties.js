@@ -71,7 +71,7 @@ enyo.kind({
 					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], defaultValue: "internalOnly", type: "PickerRow"},
 					{name: "android-minSdkVersion", label: "Minimum SDK", content: "7", defaultValue: "7", type: "InputRow"},
 					{name: "android-maxSdkVersion", label: "Maximum SDK", content: "22", defaultValue: "22", type: "InputRow"},
-					{name: "splash-screen-duration", label: "Duration of the splashScreen", content: "3000", defaultValue: "3000", type: "InputRow"},
+					{name: "splash-screen-duration", label: "Splash screen duration", content: "3000", defaultValue: "3000", type: "InputRow"},
 					{name: "load-url-timeout", label: "Load URL timeout", content: "6000", defaultValue: "6000", type: "InputRow"},
 					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "AndroidImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "AndroidImgRow"}
