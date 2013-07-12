@@ -71,7 +71,7 @@ enyo.kind({
 					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], defaultValue: "internalOnly", type: "PickerRow"},
 					{name: "android-minSdkVersion", label: "Minimum SDK", content: "7", defaultValue: "7", type: "InputRow"},
 					{name: "android-maxSdkVersion", label: "Maximum SDK", content: "22", defaultValue: "22", type: "InputRow"},
-					{name: "splash-screen-duration", label: "Splash screen duration", content: "3000", defaultValue: "3000", type: "InputRow"},
+					{name: "splash-screen-duration", label: "Duration of the splashScreen", content: "3000", defaultValue: "3000", type: "InputRow"},
 					{name: "load-url-timeout", label: "Load URL timeout", content: "6000", defaultValue: "6000", type: "InputRow"},
 					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "AndroidImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "AndroidImgRow"}
@@ -183,17 +183,18 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		this.createAllDrawers();
+		this.createAllDrawers();	
+	},
+
+	getConfiguration: function(inSender, inValue){
+		this.log("récupération config", inValue);
+		return true;
 	},
 
 	createAllDrawers: function () {
 		var self = this;
-		createDrawers(this.commonDrawers, this.platformDrawers);
-
-		function createDrawers(inCommonDrawers, inPlatformDrawers) {
-			createCommonDrawers(inCommonDrawers);
-			createPlatformDrawers(inPlatformDrawers);
-		}
+		createCommonDrawers(this.commonDrawers);
+		createPlatformDrawers(this.platformDrawers);
 
 		/**
 		 * Create and initialise the content of all the common drawers which containe 
@@ -215,8 +216,8 @@ enyo.kind({
 					if (drawerContent.id === commonDrawer.id) {
 						setUpDrawer(lastDrawer, drawerContent);
 					}
-				}, this);
-			}, this);
+				}, self);
+			}, self);
 		}
 
 	
@@ -239,8 +240,8 @@ enyo.kind({
 					if (drawerContent.id === inDrawer.id) {
 						setUpDrawer(lastDrawer, drawerContent);
 					}
-				}, this);
-			}, this);
+				}, self);
+			}, self);
 		}
 
 		/**
@@ -293,7 +294,7 @@ enyo.kind({
 					name: row.name,
 					label: row.label,
 					value: row.content,	
-					defaultValue: row.defaultValue							
+					defaultValue: row.defaultValue
 				});
 			}, this);
 		}
@@ -305,7 +306,7 @@ enyo.kind({
 		this.trace("config:", this.config);		
 		this.config.enabled = true;
 		this.$.pgConfId.setValue(config.appId || '');
-		this.config.targets = this.config.targets || {};		
+		this.config.targets = this.config.targets || {};
 
 		enyo.forEach(this.platformDrawers, function (target) {
 			this.$.targetsRows.$[target.id].setProjectConfig(this.config.targets[target.id]);
