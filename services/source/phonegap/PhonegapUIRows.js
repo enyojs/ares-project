@@ -39,7 +39,7 @@ enyo.kind({
 	},
 
 	/**
-	 * Event handler that is trigred when the value of the checkbox change. It define 
+	 * Event handler that is triggered when the value of the checkbox change. It defines
 	 * a function and passe it as a parameter in the bubbling action to let the 
 	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
 	 * in the file "project.json"
@@ -114,7 +114,7 @@ enyo.kind({
 		this.$.ConfigurationInput.setValue(this.value);
 	},
 	/**
-	 * Event handler that is trigred when the value of the input change. It define 
+	 * Event handler that is triggered when the value of the input change. It defines
 	 * a function and passe it as a parameter in the bubbling action to let the 
 	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
 	 * in the file "project.json"
@@ -191,7 +191,7 @@ enyo.kind({
 	}, 
 
 	/**
-	 * Event handler that is trigred when the value of the picker change. It define 
+	 * Event handler that is triggered when the value of the picker change. It defines
 	 * a function and passe it as a parameter in the bubbling action to let the 
 	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
 	 * in the file "project.json"
@@ -280,7 +280,7 @@ enyo.kind({
 	},
 
 	/**
-	 * Event handler that is trigred when the value of the input change. It define 
+	 * Event handler that is triggered when the value of the input change. It defines
 	 * a function and passe it as a parameter in the bubbling action to let the 
 	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
 	 * in the file "project.json". This function is used on an Android Icon as well as for 
@@ -309,7 +309,7 @@ enyo.kind({
 	}, 
 
 	/**
-	 * Event handler that is trigred when the value of the picker change. It define 
+	 * Event handler that is triggered when the value of the picker change. It defines
 	 * a function and passe it as a parameter in the bubbling action to let the 
 	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
 	 * in the file "project.json". This function is used on an Android Icon as well as for 
@@ -413,7 +413,7 @@ enyo.kind({
 		this.$.IosIconInput.setValue(this.value);
 	},
 	/**
-	 * Event handler that is trigred when the value of the input change. It define 
+	 * Event handler that is triggered when the value of the input change. It defines
 	 * a function and passe it as a parameter in the bubbling action to let the 
 	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
 	 * in the file "project.json". This function is used on an IOS Icon as well as for 
@@ -442,8 +442,8 @@ enyo.kind({
 	},
 
 	/**
-	 * Event handler that is trigred when the value of the input that hold the value of 
-	 * the IOS icon height change. It define a function and passe it as a parameter in the 
+	 * Event handler that is triggered when the value of the input that hold the value of 
+	 * the IOS icon height change. It definesa function and passe it as a parameter in the 
 	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
 	 * save the new value in the file "project.json". This function is used on an Android Icon as
 	 * well as for an Android splash screen.
@@ -471,8 +471,8 @@ enyo.kind({
 	}, 
 
 	/**
-	 * Event handler that is trigred when the value of the input that hold the value of 
-	 * the IOS icon width change. It define a function and passe it as a parameter in the 
+	 * Event handler that is triggered when the value of the input that hold the value of 
+	 * the IOS icon width change. It definesa function and passe it as a parameter in the 
 	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
 	 * save the new value in the file "project.json". This function is used on an Android Icon as
 	 * well as for an Android splash screen.
@@ -561,8 +561,8 @@ enyo.kind({
 	},
 
 	/**
-	 * Event handler that is trigred when the value of the input that hold the value of 
-	 * the default icon change. It define a function and passe it as a parameter in the 
+	 * Event handler that is triggered when the value of the input that hold the value of 
+	 * the default icon change. It definesa function and passe it as a parameter in the 
 	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
 	 * save the new value in the file "project.json". This function is used on an Android Icon as
 	 * well as for an Android splash screen.
@@ -645,8 +645,8 @@ enyo.kind({
 		this.$.GeneralImgPath.setValue(this.value);
 	},
 	/**
-	 * Event handler that is trigred when the value of the input that hold the value of 
-	 * the Winphone icon change. It define a function and passe it as a parameter in the 
+	 * Event handler that is triggered when the value of the input that hold the value of 
+	 * the Winphone icon change. It definesa function and passe it as a parameter in the 
 	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
 	 * save the new value in the file "project.json". This function is used on an Android Icon as
 	 * well as for an Android splash screen.
@@ -728,8 +728,8 @@ enyo.kind({
 	},
 
 	/**
-	 * Event handler that is trigred when the value of the input that hold the value of 
-	 * the BlackBerry icon change. It define a function and passe it as a parameter in the 
+	 * Event handler that is triggered when the value of the input that hold the value of 
+	 * the BlackBerry icon change. It definesa function and passe it as a parameter in the 
 	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
 	 * save the new value in the file "project.json". This function is used on an Android Icon as
 	 * well as for an Android splash screen.
@@ -811,8 +811,8 @@ enyo.kind({
 	},
 
 	/**
-	 * Event handler that is trigred when the value of the input that hold the value of 
-	 * the Webos icon change. It define a function and passe it as a parameter in the 
+	 * Event handler that is triggered when the value of the input that hold the value of 
+	 * the Webos icon change. It definesa function and passe it as a parameter in the 
 	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
 	 * save the new value in the file "project.json". This function is used on an Android Icon as
 	 * well as for an Android splash screen.
