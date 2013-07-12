@@ -292,18 +292,12 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
-		var saveProperty;
-		if (this.name === "icon"){
-			saveProperty = (function(inConfig) {
-				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-				inConfig.icons["android"].src = inSender.value;			
-				}).bind(this);	
-		} else {
-			saveProperty = (function(inConfig) {
-				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-				inConfig.splashes["android"].src = inSender.value;			
-			}).bind(this);	
-		}
+		var target = this.name === "icon" ? 'icons' : 'splashes';
+		var saveProperty = (function(inConfig) {
+			this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
+			inConfig[target]["android"].src = inSender.value;
+		}).bind(this);
+		this.log('updated code');
 
 		this.bubble("onEditConfig", saveProperty);
 	}, 
