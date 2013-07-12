@@ -361,7 +361,7 @@ enyo.kind({
 				}
 			]
 		},
-		{content: "Lenght"},
+		{content: "Length"},
 		{
 			kind: "onyx.InputDecorator",
 			classes: "ares-project-properties-input-small",
@@ -372,7 +372,7 @@ enyo.kind({
 				}
 			]
 		},
-		{content: "width"},
+		{content: "Width"},
 		{
 			kind: "onyx.InputDecorator",
 			classes: "ares-project-properties-input-small",
