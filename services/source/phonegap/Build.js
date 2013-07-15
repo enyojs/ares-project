@@ -645,6 +645,7 @@ enyo.kind({
 	_getAllPackagedApplications: function(project, appData, folderId, next){
 		var platforms = [];
 		var builder = this;
+		var that = this ;
 
 		//Setting the targeted platforms for the build from the those
 		//presented in the object appData.
@@ -664,7 +665,7 @@ enyo.kind({
 		 */		
 		async.forEach(platforms,
 		    function(platform, next) {
-			this.trace("Send request for the platform: ", platform);
+			that.trace("Send request for the platform: ", platform);
 			
 			_getApplicationForPlatform(platform, next);
 	       },next);
