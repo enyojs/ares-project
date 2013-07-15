@@ -174,7 +174,7 @@ enyo.kind({
 	// events and published are defined by the base kind
 	// values: Must be defined in the configuration
 	components: [
-		{name: "decorator", kind: "onyx.PickerDecorator"}
+		{name: "decorator", kind: "onyx.PickerDecorator", classes: "css-editor-picker-decorator"}
 	],
 	initComponents: function() {
 		this.initFinished = false;
