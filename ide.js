@@ -214,10 +214,8 @@ function mergePluginConfig(service, newdata, configFile) {
 
 function appendPluginConfig(configFile) {
 	log.verbose('appendPluginConfig()', "Loading ARES plugin configuration from '"+configFile+"'...");
-	var pluginDir = path.dirname(configFile),
-	    pluginUrl = '../' + path.relative(myDir, pluginDir).replace('\\','/');
+	var pluginDir = path.dirname(configFile);
 	log.verbose('appendPluginConfig()', 'pluginDir:', pluginDir);
-	log.verbose('appendPluginConfig()', 'pluginUrl:', pluginUrl);
 
 	var pluginData,
 	    configContent = fs.readFileSync(configFile, 'utf8');
@@ -227,6 +225,18 @@ function appendPluginConfig(configFile) {
 		throw "Improper JSON in " + configFile + " : "+configContent;
 	}
 	
+	// The service in the plugin configuration file that is both
+	// active and has a defined 'type` property is the main
+	// plugin.
+	var pluginService = pluginData.services.filter(function(service) {
+		return service.active && service.type;
+	})[0];
+	var pluginUrl = '/res/plugins/' + pluginService.id;
+	log.verbose('appendPluginConfig()', 'pluginUrl:', pluginUrl);
+
+	pluginService.pluginDir = pluginDir;
+	pluginService.pluginUrl = pluginUrl;
+
 	pluginData.services.forEach(function(service) {
 		// Apply regexp to all properties
 		substVars(service, [
@@ -552,8 +562,8 @@ app.configure(function(){
 	app.use(cors);
 	app.use(express.favicon(myDir + '/ares/assets/images/ares_48x48.ico'));
 
-	app.use('/ide', express.static(enyojsRoot + '/'));
-	app.use('/test', express.static(enyojsRoot + '/test'));
+	app.use('/ide', express.static(enyojsRoot));
+	app.use('/test', express.static(path.join(enyojsRoot, '/test')));
 
 	app.use(express.logger('dev'));
 
@@ -571,6 +581,14 @@ app.configure(function(){
 	app.all('/res/services/:serviceId/*', proxyServices);
 	app.all('/res/services/:serviceId', proxyServices);
 
+	// access to static files provided by the plugins
+	ide.res.services.forEach(function(service) {
+		if (service.pluginUrl && service.pluginDir) {
+			log.verbose('app.configure()', service.pluginUrl + ' -> ' + service.pluginDir);
+			app.use(service.pluginUrl, express.static(service.pluginDir));
+		}
+	});
+
 	if (tester) {
 		app.post('/res/tester', tester.setup);
 		app['delete']('/res/tester', tester.cleanup);
@@ -581,13 +599,15 @@ app.configure(function(){
 	 * @private
 	 */
 	function errorHandler(err, req, res, next){
-		log.error(err.stack);
+		log.error('errorHandler()', err.stack);
 		res.status(500).send(err.toString());
 	}
 
 	// express-3.x: middleware with arity === 4 is
 	// detected as the error handler
 	app.use(errorHandler.bind(this));
+
+	log.verbose('app.configure()', "done");
 });
 
 // Run non-regression test suite

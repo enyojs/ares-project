@@ -77,29 +77,26 @@
   box-shadow: none;
 }
 
-.aresmenu > .sub-aresmenu {
+.sub-aresmenu {
     background-image: none;
     background-color: @ares-menu-background;
     .ares-box-shadow(0 5px 5px rgba(0, 0, 0, 0.5));
     overflow: hidden;
     padding: 0;
     position: absolute;
-    right: 0;
     text-align: left;
     .ares-rounded-corners(@ares-border-radius);
-    right: -95%;
+    min-width: 135px;
 }
 
 .onyx-menu-item.aresmenu-button {
     font-size:14px;
-    float: left;
     margin: 0;
     padding: 0 15px;
     cursor: pointer;
     cursor: hand;
     line-height: 36px;
     color: @ares-dark-color; 
-    width: 83%;
 }
 
 .aresmenu-button:hover{

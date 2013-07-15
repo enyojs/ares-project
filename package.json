@@ -1,6 +1,6 @@
 {
 	"name": "ares-ide",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"description": "A browser-based code editor and UI designer for Enyo 2 projects",
 	"keywords": ["ide", "enyo", "phonegap", "android", "ios", "windowsphone", "blackberry", "webos", "html5"],
 	"homepage": "https://github.com/enyojs/ares-project",
@@ -14,7 +14,7 @@
 	},
 	"engines": {
 		"node" : "0.8.x >=0.8.21",
-		"npm": "1.2.x"
+		"npm": ">=1.2.x"
 	},
 	"engineStrict": true,
 	"os" : [ "darwin", "linux", "win32" ],
