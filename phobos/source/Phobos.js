@@ -27,7 +27,7 @@ enyo.kind({
 						{name: "closeAllButton", value: "closeAllDocAction", components: [
 							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
 							{content: $L("Close All")}
-						]}						
+						]}
 					]}
 				]},
 				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: $L("New Kind"), ontap: "newKindAction"},
@@ -687,21 +687,16 @@ enyo.kind({
 		Ares.Workspace.files.each(function(file) {
 			fileEdited = fileEdited || file.getEdited();
 		});
-
-		if (fileEdited) {	
+		if (fileEdited === true) {
 			this.$.saveAllPopup.setName("Document(s) were modified!");
 			this.$.saveAllPopup.setMessage("Save it before closing?");
 			this.$.saveAllPopup.setActionButton("Don't Save");
 			this.$.saveAllPopup.show();
 		} else {
+			this.beforeClosingDocument();
 			this.doCloseAllDocument();
 		}
 		return true; // Stop the propagation of the event
-	},
-	forceCloseDoc: function(inSender, inEvent) {
-		var docData = this.docData;
-		this.beforeClosingDocument();
-		this.doCloseDocument({id: docData.getId()});
 	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
@@ -713,6 +708,7 @@ enyo.kind({
 	// called when "Don't Save" is selected in save all popup
 	abandonAllDocAction: function(inSender, inEvent) {
 		this.$.saveAllPopup.hide();
+		this.beforeClosingDocument();
 		this.doCloseAllDocument();
 	},
 	docChanged: function(inSender, inEvent) {

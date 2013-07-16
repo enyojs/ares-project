@@ -237,6 +237,14 @@ enyo.kind({
 			}
 		});
 	},
+	closeAllDocument: function(inSender, inEvent) {
+		this.trace("sender:", inSender, ", event:", inEvent);
+		var files = Ares.Workspace.files;
+		while(files.models.length) {
+			this._closeDocument(files.at(0).getId());
+		}
+		this.showProjectView();
+	},
 	/* @private */
 	closeSomeDocuments: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
@@ -268,26 +276,6 @@ enyo.kind({
 			Ares.Workspace.files.removeEntry(docId);
 			this.componentsRegistry.documentToolbar.removeTab(docId);
 		}
-		if (typeof next === 'function') {
-			next();
-		}
-	},
-	closeAllDocument: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-		var self = this;
-		this._closeAllDocument(function() {
-			if (! Ares.Workspace.files.length ) {
-				self.showProjectView();
-			}
-		});
-	},
-	/** @private */
-	_closeAllDocument: function(next) {
-		var self = this;
-		Ares.Workspace.files.each(function(file) {
-			self.switchToDocument(file);
-			enyo.asyncMethod(self.componentsRegistry.phobos, "forceCloseDoc");	
-		});
 		if (typeof next === 'function') {
 			next();
 		}
