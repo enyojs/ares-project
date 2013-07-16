@@ -30,8 +30,23 @@ enyo.kind({
 		onError: "showError",
 		onTreeChanged: "_treeChanged",
 		onChangingNode: "_nodeChanging",
+		onSaveDocument: "saveDocument", 
+		onSaveAsDocument: "saveAsDocument", 
+		onCloseDocument: "closeDocument", 
+		onDesignDocument: "designDocument", 
+		onUpdate: "phobosUpdate",
+		onCloseDesigner: "closeDesigner", 
+		onDesignerUpdate: "designerUpdate", 
+		onUndo: "designerUndo", 
+		onRedo: "designerRedo",
+		onSwitchFile: "switchFile",
+		onSave: "bounceSave",
+		onDesign: "bounceDesign",
+		onNewKind: "bounceNew",
+		onCloseFileRequest: "bounceCloseFileRequest",
 		onRegisterMe : "_registerComponent",
 		onMovePanel : "_movePanel"
+
 	},
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
@@ -517,7 +532,7 @@ enyo.kind({
 		]}
 	],
 	events: {
-		onMovePanel:"",
+		onMovePanel:""
 	},
 	handlers: {
 		onGrabberClick : "activePanel"
