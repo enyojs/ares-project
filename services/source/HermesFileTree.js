@@ -15,7 +15,8 @@ enyo.kind({
 		onFileDblClick: "",
 		onFileChanged: "",
 		onFolderChanged: "",
-		onTreeChanged: ""
+		onTreeChanged: "",
+		onGrabberClick: ""
 	},
 	handlers: {
 		onItemDown: "itemDown",
@@ -34,8 +35,11 @@ enyo.kind({
 		dragAllowed: false
 	},
 	components: [
-		{kind: "onyx.Toolbar", classes: "ares-top-toolbar hermesFileTree-toolbar", components: [
-			{kind: "onyx.Grabber", name:"filePanelGrabber", showing: false},
+			{kind: "onyx.Toolbar", classes: "ares-top-toolbar hermesFileTree-toolbar", components: [
+				{kind: "onyx.Grabber", classes: "ares-grabber" , name:"filePanelGrabber", showing: false, ontap: "doGrabberClick", components: [
+					{kind: "aresGrabber", name: "aresGrabberDirection"}
+				]
+			},
 			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 				{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
 				{kind: "onyx.Tooltip", content: $L("New Folder...")}
@@ -413,6 +417,10 @@ enyo.kind({
 		this.$.filePanelGrabber.hide();
 		return this ;
 	},
+	switchGrabberDirection: function(active){
+		this.$.aresGrabberDirection.switchGrabberDirection(active);
+	},
+
 	showRevertMoveButton: function() {
 		this.$.revertMove.show();
 		return this ;

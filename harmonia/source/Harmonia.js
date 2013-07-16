@@ -2,12 +2,19 @@ enyo.kind({
 	name: "Harmonia",
 	kind: "FittableColumns",
 	events: {
-		onRegisterMe: ""
+		onRegisterMe: "",
+		onMovePanel:"",
 	},
 	components: [
 		{kind: "HermesFileTree",  fit: true, dragAllowed: true}
 	],
+	handlers: {
+		onGrabberClick : "activePanel"
+	},
 	debug: false,
+	published: {
+		panelIndex: 1
+	},
 	create: function() {
 		this.inherited(arguments);
 		this.doRegisterMe({name:"harmonia", reference:this});
@@ -36,11 +43,17 @@ enyo.kind({
 		this.$.hermesFileTree.hideGrabber();
 		return this ;
 	},
+	switchGrabberDirection: function(active){
+		this.$.hermesFileTree.switchGrabberDirection(active);
+	},
 	/**
 	 * Refresh the {HermesFileTree} (if relevant), following a change of the given file
 	 * @param {Object} changedFile
 	 */
 	refreshFile: function(changedFile) {
 		this.$.hermesFileTree.refreshFile(changedFile);
+	},
+	activePanel : function(){
+		this.doMovePanel({panelIndex:this.panelIndex});
 	}
 });
