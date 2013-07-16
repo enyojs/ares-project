@@ -279,7 +279,7 @@ enyo.kind({
 		if (typeof next === 'function') {
 			next();
 		}
-	},	
+	},
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();
 		this.componentsRegistry.deimos.load(inEvent);
