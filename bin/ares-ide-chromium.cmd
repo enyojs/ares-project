@@ -1,1 +1,1 @@
-%~dp0\ares-ide.cmd -B %*
+"%~dp0\ares-ide.cmd" -B %*
