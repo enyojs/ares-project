@@ -141,10 +141,10 @@ enyo.kind({
 		if (this.debug) this.log("id:", service.config.id, "config:", service.config);
 		var self = this;
 		try {
-			if (service.config.pluginUrl) {
-				if (this.debug) this.log("Loading browser side code: " + service.config.pluginUrl);
-				enyo.load(service.config.pluginUrl, function loaded() {
-					if (self.debug) self.log("ServiceRegistry#instanciate(): Loaded browser side code: " + service.config.pluginUrl);
+			if (service.config.pluginClient) {
+				if (this.debug) this.log("Loading browser side code: " + service.config.pluginClient);
+				enyo.load(service.config.pluginClient, function loaded() {
+					if (self.debug) self.log("ServiceRegistry#instanciate(): Loaded browser side code: " + service.config.pluginClient);
 					next();	// configuration will be applied later on
 				});
 			} else if (service.config.provider === 'hermes' && service.implementsType("filesystem")) {
@@ -345,7 +345,7 @@ enyo.kind({
 		}, true);
 		if (services.length === 1) {
 			var service = services[0];
-			if (service.config.pluginUrl &&  (! service.impl)) {
+			if (service.config.pluginClient &&  (! service.impl)) {
 				try {
 					service.impl = ServiceRegistry.instance.createComponent(kindInformation);
 					this.configureService(service, next);
