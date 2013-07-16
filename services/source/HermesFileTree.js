@@ -1140,12 +1140,12 @@ enyo.kind({
 		var tmp = new enyo.g11n.Template($L(msg));
 		return tmp.evaluate(params);
 	},
-	checkNodePath: function (track, nodes, waypoints, next) {
+	followNodePath: function (track, nodes, waypoints, next) {
 		if (nodes.length > 0) {
 			track.updateNodes().response(this, function () {
 				track = track.getNodeNamed(nodes.shift());
 				waypoints.push(track);
-				this.checkNodePath(track, nodes, waypoints, next);
+				this.followNodePath(track, nodes, waypoints, next);
 			})
 			.error(this, function (inSender, inError) {
 				if (typeof next === 'function') {
@@ -1158,7 +1158,7 @@ enyo.kind({
 			}
 		}
 	},
-	followNodePath: function (nodePath) {
+	gotoNodePath: function (nodePath) {
 		var track = this.$.serverNode,
 			waypoints = [],
 			i,
@@ -1180,6 +1180,6 @@ enyo.kind({
 
 		nodes.shift();
 		waypoints.push(track);
-		this.checkNodePath(track, nodes, waypoints, next);
+		this.followNodePath(track, nodes, waypoints, next);
 	}
 });

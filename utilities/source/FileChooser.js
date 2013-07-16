@@ -246,10 +246,10 @@ enyo.kind({
 		this.$.sources.hide();
 		this.$.hermesFileTree.connectProject(this.project, next);
 	},
-	/** @ublic */
+	/** @public */
 	pointSelectedName: function(selectedName) {
 		this.setSelectedName(selectedName);
-		this.$.hermesFileTree.followNodePath(this.selectedName);
+		this.$.hermesFileTree.gotoNodePath(this.selectedName);
 	},
 	$LS: function(msg, params) {
 		var tmp = new enyo.g11n.Template($L(msg));
