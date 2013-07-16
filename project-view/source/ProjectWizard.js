@@ -329,7 +329,8 @@ enyo.kind({
 	modal: true, centered: true, floating: true, autoDismiss: false,
 
 	events: {
-		onProjectSelected: ""
+		onProjectSelected: "",
+		onUpdateAppInfo: ""
 	},
 	handlers: {
 		onDone: "hide",
@@ -377,6 +378,8 @@ enyo.kind({
 			var oldName = this.targetProject.getName();
 			Ares.Workspace.projects.renameProject(oldName, inEvent.data.name);
 		}
+
+		this.doUpdateAppInfo({project: this.targetProject});
 
 		return true ; // stop bubble
 	},

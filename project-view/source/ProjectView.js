@@ -28,6 +28,7 @@ enyo.kind({
 	],
 	handlers: {
 		onAddProjectInList: "addProjectInList",
+		onUpdateAppInfo: "updateAppInfo",
 		onPreview: "previewAction",
 		onBuild: "buildAction",
 		onInstall: "installAction",
@@ -160,6 +161,13 @@ enyo.kind({
 		var project = inEvent && inEvent.project;
 		if (project) {
 			this.projectAction(project, 'test', 'runDebug');
+		}
+		return true; // stop bubble-up
+	},
+	updateAppInfo: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (project) {
+			this.projectAction(project, 'test', 'updateAppInfo');
 		}
 		return true; // stop bubble-up
 	},
