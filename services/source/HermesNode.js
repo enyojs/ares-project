@@ -272,6 +272,7 @@ enyo.kind({
 		var nameMatch = function(e){
 			return (e.name === '$'+ name) ;
 		} ;
+		
 		return this.getControls().filter( nameMatch )[0];
 	},
 
@@ -369,7 +370,7 @@ enyo.kind({
 					errMsg += ": " + JSON.parse(inSender.xhrResponse.body).message;
 				} catch(e) {
 				}
-				this.log(errMsg);
+				this.warn(errMsg);
 			});
 
 		if( belowTop ) {

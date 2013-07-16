@@ -222,7 +222,7 @@ enyo.kind({
 								this.showRevertMoveButton();
 							})
 							.error(this, function() {
-								this.log("error retrieving related node children");
+								this.warn("error retrieving related node children");
 							});
 					});
 			} else {
@@ -332,7 +332,7 @@ enyo.kind({
 	 * @public
 	 * @param {Object} inFsService a FileSystemService implementation, as listed in ProviderList
 	 */
-	connectProject: function(inProjectData) {
+	connectProject: function(inProjectData, next) {
 		this.trace("config:", inProjectData);
 		this.projectData = inProjectData;
 
@@ -369,7 +369,7 @@ enyo.kind({
 					serverNode.file.isServer = true;
 
 					serverNode.setContent(nodeName);
-					this.refreshFileTree( function() { that.$.selection.select( serverNode.file.id, serverNode ) ; });
+					this.refreshFileTree( function() { if (next) {next();} else {that.$.selection.select( serverNode.file.id, serverNode );} });
 				});
 				req.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");
@@ -793,7 +793,7 @@ enyo.kind({
 				this.showErrorPopup(this.$LS("No template found for '.{extension}' files.  Created an empty one.", {extension: type}));
 			}
 			else {
-				this.error("error while fetching ", templatePath, ': ', error);
+				this.warn("error while fetching ", templatePath, ': ', error);
 			}
 		});
 		r.go();
@@ -1139,5 +1139,47 @@ enyo.kind({
 	$LS: function(msg, params) {
 		var tmp = new enyo.g11n.Template($L(msg));
 		return tmp.evaluate(params);
+	},
+	checkNodePath: function (track, nodes, waypoints, next) {
+		if (nodes.length > 0) {
+			track.updateNodes().response(this, function () {
+				track = track.getNodeNamed(nodes.shift());
+				waypoints.push(track);
+				this.checkNodePath(track, nodes, waypoints, next);
+			})
+			.error(this, function (inSender, inError) {
+				if (typeof next === 'function') {
+					next(inError);
+				}
+			});
+		} else {
+			if (typeof next === 'function') {
+				next();
+			}
+		}
+	},
+	followNodePath: function (nodePath) {
+		var track = this.$.serverNode,
+			waypoints = [],
+			i,
+			nodes = nodePath.split("/");
+
+		var next = function(inErr) {
+			if (inErr) {
+				this.warn("Path following failed", inErr);
+			} else {
+				for (i = 1; i < waypoints.length; i++) {
+					if (waypoints[i].file.isDir) {
+						waypoints[i-1].getNodeWithId(waypoints[i].file.id).setExpanded(true).doExpand();
+					}
+				}
+
+				this.refreshFileTree( function() { waypoints[i-1].doAdjustScroll(); }, waypoints[i-1].file.id );
+			}
+		}.bind(this);
+
+		nodes.shift();
+		waypoints.push(track);
+		this.checkNodePath(track, nodes, waypoints, next);
 	}
 });

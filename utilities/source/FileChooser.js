@@ -41,16 +41,17 @@ enyo.kind({
 		 * effects only when {Ares.FileChooser#folderChooser}
 		 * is true.
 		 */
-		selectedName: ""
-	},
-	headerTextChanged: function () {
-		this.$.header.setContent(this.headerText);
+		selectedName: "",
+		/**
+		 * project configuration information
+		 */
+		project: null
 	},
 	components: [
 		{kind: "FittableRows", classes: "onyx-popup ares-filechooser ares-classic-popup", components: [
 			{tag: "div", name: "header", classes:"title", content: $L("Select a directory")},
 			{kind: "FittableColumns", classes: "onyx-light", fit: true, components: [
-				{kind:"FittableRows", classes:"ares-left-pane-file-chooser", components:[
+				{kind:"FittableRows", name: "sources", classes:"ares-left-pane-file-chooser", components:[
 					{kind: "onyx.Toolbar", classes: "ares-top-toolbar", components: [
 						{content: $L("Sources"), classes:"ares-create-sources"}
 					]},
@@ -106,6 +107,7 @@ enyo.kind({
 		 */
 		onFileChosen: ""
 	},
+	/** @private */
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
@@ -126,11 +128,17 @@ enyo.kind({
 		this.$.header.setContent(this.headerText);
 		this.$.hermesFileTree.hideFileOpButtons();
 	},
-	selectedNameChanged:  function(oldSelectedName) {
+	/** @private */
+	headerTextChanged: function () {
+		this.$.header.setContent(this.headerText);
+	},
+	/** @private */
+	selectedNameChanged: function(oldSelectedName) {
 		this.trace("old:", oldSelectedName, " -> new:", this.selectedName);
 		this.$.selectedName.setValue(this.selectedName);
 		this.updateConfirmButton();
 	},
+	/** @private */
 	handleSelectProvider: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var hft = this.$.hermesFileTree ;
@@ -149,6 +157,7 @@ enyo.kind({
 	/** @private */
 	_selectFile: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
+
 		if (this.folderChooser) {
 			// TODO: should rather
 			// selectedFile.parentId... but this node
@@ -160,8 +169,12 @@ enyo.kind({
 			this.selectedFile.parent = this.$.hermesFileTree.getParentOfSelected();
 			this.$.confirm.setDisabled(false);
 		}
-		//this.$.selectedFolder.setValue(ares.basename(ares.dirname(inEvent.file.path)));
-		this.setSelectedName(inEvent.file.name);
+
+		// keep omly the relative path
+		var hft = this.$.hermesFileTree;
+		var relativePath=inEvent.file.path.slice(-(inEvent.file.path.length - hft.$.serverNode.file.path.length));
+		this.setSelectedName(relativePath);
+
 		return true; // Stop event propagation
 	},
 	/** @private */
@@ -223,9 +236,20 @@ enyo.kind({
 				this.$.hermesFileTree.refreshFileTree(null, inResponse);
 			})
 			.error(this, function(inSender, inError) {
-				this.trace("Error: ", inError);
-				this.$.hermesFileTree.showErrorPopup(this.$LS("Creating folder '{folder}' failed: {error}", {folder: name, error: inError}));
+				this.warn("Error: ", inError);
+				this.$.hermesFileTree.showErrorPopup(this.$LS("Creating folder '{folder}' failed: {error}", {folder: name, error: inError.toString()}));
 			});
+	},
+	/** @public */
+	connectProject: function (project, next) {
+		this.project = project;
+		this.$.sources.hide();
+		this.$.hermesFileTree.connectProject(this.project, next);
+	},
+	/** @ublic */
+	pointSelectedName: function(selectedName) {
+		this.setSelectedName(selectedName);
+		this.$.hermesFileTree.followNodePath(this.selectedName);
 	},
 	$LS: function(msg, params) {
 		var tmp = new enyo.g11n.Template($L(msg));
