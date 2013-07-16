@@ -1053,9 +1053,6 @@ enyo.kind({
 				webos: {src: ""} 
 			},
 			plugins: {
-				"ChildBrowser": {
-					version: "2.1.0"
-				}
 			}
 		}
 	}
