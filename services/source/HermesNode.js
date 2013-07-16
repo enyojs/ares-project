@@ -377,5 +377,23 @@ enyo.kind({
 			tracker.dec(); // run only for inner calls to refreshTree
 		}
 		this.trace("refreshTree done") ;
+	},
+	followNodePath: function (nodes, waypoints, next) {
+		if (nodes.length > 0) {
+			this.updateNodes().response(this, function () {
+				var track = this.getNodeNamed(nodes.shift());
+				waypoints.push(track);
+				track.followNodePath(nodes, waypoints, next);
+			})
+			.error(this, function (inSender, inError) {
+				if (typeof next === 'function') {
+					next(inError);
+				}
+			});
+		} else {
+			if (typeof next === 'function') {
+				next();
+			}
+		}
 	}
 });

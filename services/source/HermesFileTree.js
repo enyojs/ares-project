@@ -1140,24 +1140,6 @@ enyo.kind({
 		var tmp = new enyo.g11n.Template($L(msg));
 		return tmp.evaluate(params);
 	},
-	followNodePath: function (track, nodes, waypoints, next) {
-		if (nodes.length > 0) {
-			track.updateNodes().response(this, function () {
-				track = track.getNodeNamed(nodes.shift());
-				waypoints.push(track);
-				this.followNodePath(track, nodes, waypoints, next);
-			})
-			.error(this, function (inSender, inError) {
-				if (typeof next === 'function') {
-					next(inError);
-				}
-			});
-		} else {
-			if (typeof next === 'function') {
-				next();
-			}
-		}
-	},
 	gotoNodePath: function (nodePath) {
 		var track = this.$.serverNode,
 			waypoints = [],
@@ -1180,6 +1162,6 @@ enyo.kind({
 
 		nodes.shift();
 		waypoints.push(track);
-		this.followNodePath(track, nodes, waypoints, next);
+		track.followNodePath(nodes, waypoints, next);
 	}
 });
