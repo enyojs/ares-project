@@ -108,7 +108,7 @@ enyo.kind({
 		var matchingNodes = topNode.getNodeFiles(hft.selectedNode).filter( matchFileName ) ;
 
 		if (matchingNodes.length === 1) {
-			this.log("There is an appinfo.json", matchingNodes);
+			this.warn("There is an appinfo.json", matchingNodes);
 			var appinfoReq = this.selectedDir.service.getFile(matchingNodes[0].file.id);
 			appinfoReq.response(this, function(inSender, fileStuff) {
 				var info;
@@ -116,8 +116,8 @@ enyo.kind({
 					info = JSON.parse(fileStuff.content);
 				} catch(err) {
 					this.hide();
-					this.log( "Unable to parse appinfo.json >>", fileStuff.content, "<<");
-					var msg = this.$LS("Unable to parse appinfo.json: {error}", {error: err});
+					this.warn( "Unable to parse appinfo.json >>", fileStuff.content, "<<");
+					var msg = this.$LS("Unable to parse appinfo.json: {error}", {error: err.toString()});
 					this.$.errorPopup.raise(msg);
 					next({handled: true, msg: msg});
 					return;
@@ -163,13 +163,13 @@ enyo.kind({
 				next();				// Should we return immediately without waiting the answer ?
 			});
 			templateReq.error(this, function(inSender, inError) {
-				this.log("Unable to get template list (", inError, ")");
+				this.warn("Unable to get template list (", inError, ")");
 				this.$.errorPopup.raise($L("Unable to get template list"));
 				propW.setTemplateList([]);
 				next();
 			});
 		} else {
-			this.log("Unable to get template list (No service defined)");
+			this.warn("Unable to get template list (No service defined)");
 			this.$.errorPopup.raise($L("Unable to get template list (No service defined)"));
 			propW.setTemplateList([]);
 			next();
@@ -215,7 +215,7 @@ enyo.kind({
 			if (showError) {
 				this.$.selectDirectoryPopup.hide();
 				this.hideMe();
-				this.log("An error occured: ", err);
+				this.warn("An error occured: ", err);
 				this.$.errorPopup.raise(err.msg);
 			}
 		}
@@ -228,7 +228,7 @@ enyo.kind({
 		var folderId = this.selectedDir.id ;
 		var template = inEvent.template;
 
-		this.log("Creating new project ", name, " in folderId=", folderId, " (template: ", template, ")");
+		this.warn("Creating new project ", name, " in folderId=", folderId, " (template: ", template, ")");
 		this.config.setData(inEvent.data) ;
 		this.config.save() ;
 
@@ -243,7 +243,7 @@ enyo.kind({
 					this.projectReady(null, inEvent);
 				})
 				.error(this, function(inRequest, inError) {
-					this.trace("inRequest:", inRequest, "inError:", inError);
+					this.warn("inRequest:", inRequest, "inError:", inError);
 				});
 		}
 
@@ -281,7 +281,7 @@ enyo.kind({
 		});
 		req.response(this, this.populateProject);
 		req.error(this, function(inSender, inError) {
-			this.log("Unable to get the template files (", inError, ")");
+			this.warn("Unable to get the template files (", inError, ")");
 			this.$.errorPopup.raise($L("Unable to instanciate projet content from the template"));
 			this.doHideWaitPopup();
 		});
@@ -295,7 +295,7 @@ enyo.kind({
 		// Copy the template files into the new project
 		var req = service.createFiles(folderId, {content: inData.content, ctype: inData.ctype});
 		req.response(this, this.projectReady);
-		req.error(this, function(inEvent, inData) {
+		req.error(this, function(inEvent, inError) {
 			this.$.errorPopup.raise($L("Unable to create projet content from the template"));
 			this.doHideWaitPopup();
 		});
@@ -373,7 +373,7 @@ enyo.kind({
 		this.trace("saving project config");
 
 		if (! this.targetProject) {
-			this.error("internal error: saveProjectConfig was called without a target project.") ;
+			this.warn("internal error: saveProjectConfig was called without a target project.") ;
 			return true ; // stop bubble
 		}
 
@@ -394,11 +394,13 @@ enyo.kind({
 	selectTopFile: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 
-		var config = this.targetProject.getConfig();
-		var top_file = config.data.preview.top_file;
+		var top_file = this.$.propertiesWidget.getTopFile();
+		var self = this;
 
-		this.$.selectFilePopup.setSelectedName(top_file);
-		this.$.selectFilePopup.show();
+		this.$.selectFilePopup.connectProject(this.targetProject, function() {
+			self.$.selectFilePopup.pointSelectedName(top_file);
+			self.$.selectFilePopup.show();
+		});
 	},
 	selectFileChosen: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
@@ -408,7 +410,7 @@ enyo.kind({
 			return;
 		}
 
-		this.$.propertiesWidget.setTopFile(inEvent.file.name);
+		this.$.propertiesWidget.setTopFile(inEvent.name);
 	},
 	notifyChangeSource: function(inSender, inEvent) {
 		this.waterfallDown("onAdditionalSource", inEvent, inSender);
@@ -422,7 +424,7 @@ enyo.kind({
 		// Copy the template files into the new project
 		var req = service.createFiles(folderId, {content: inData.content, ctype: inData.ctype});
 		req.response(this, this.projectRefresh);
-		req.error(this, function(inEvent, inData) {
+		req.error(this, function(inEvent, inError) {
 			this.$.errorPopup.raise($L("Unable to create projet content from the template"));
 			this.doHideWaitPopup();
 		});
@@ -481,7 +483,7 @@ enyo.kind({
 				try {
 					projectData = JSON.parse(fileStuff.content)  ;
 				} catch(e) {
-					this.log("Error parsing project data: ", e.toString());
+					this.warn("Error parsing project data: ", e.toString());
 				}
 
 				this.trace('Imported project ', projectData.name, " from ", parentDir.id) ;
@@ -500,7 +502,6 @@ enyo.kind({
 			return;
 		}
 
-		var folderId = inEvent.file.id ;
 		var service = inEvent.file.service;
 
 		var hft = this.$.hermesFileTree ;
@@ -518,7 +519,6 @@ enyo.kind({
 
 		inIter = function() {
 			var item = toScan.shift() ;
-			var parentDir = item[0] ;
 			var child = item[1];
 			this.trace('search iteration on ', child.name, ' isDir ', child.isDir ) ;
 
@@ -536,7 +536,7 @@ enyo.kind({
 							toPush.push([child,v]);
 						}
 						// else skip plain file
-					},this) ;
+					}, this) ;
 
 					if (! foundProject ) {
 						// black magic required to push the entire array
@@ -622,10 +622,10 @@ enyo.kind({
 		req.error(this, function(inSender, status) {
 			var msg = $L("Unable to duplicate the project");
 			if (status === 412 /*Precondition-Failed*/) {
-				this.log("Unable to duplicate the project, directory '", destination, "' already exists", status);
+				this.warn("Unable to duplicate the project, directory '", destination, "' already exists", status);
 				msg = this.$LS("Unable to duplicate the project, directory '{destination}' already exists", {destination: destination});
 			} else {
-				this.log("Unable to duplicate the project", status);
+				this.warn("Unable to duplicate the project", status);
 			}
 			this.doError({msg: msg});
 		});
@@ -645,15 +645,15 @@ enyo.kind({
 		});
 
 		if (! fileId) {
-			this.log("Unable to duplicate the project, no 'project.json' found", inData);
+			this.warn("Unable to duplicate the project, no 'project.json' found", inData);
 			this.doError({msg: $L("Unable to duplicate the project, no 'project.json' found")});
 			return;
 		}
 
 		var req = service.putFile(fileId, JSON.stringify(this.newConfigData, null, 2));
 		req.response(this, this.createProjectEntry);
-		req.error(this, function(inSender, inData) {
-			this.log("Unable to duplicate the project, unable to update 'project.json'", inData);
+		req.error(this, function(inSender, inError) {
+			this.warn("Unable to duplicate the project, unable to update 'project.json'", inError);
 			this.doError({msg: $L("Unable to duplicate the project, unable to update 'project.json'")});
 		});
 	},

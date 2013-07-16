@@ -206,7 +206,7 @@ enyo.kind({
 	toggleService: function(inSender, inEvent) {
 		var serviceId = inEvent.originator.serviceId,
 		    checked = inEvent.originator.checked;
-		this.log("serviceId:", serviceId, 'checked:', checked);
+		this.warn("serviceId:", serviceId, 'checked:', checked);
 		var service = this.services[serviceId];
 		if (service.tab) {
 			service.tab.setShowing(checked);
@@ -270,7 +270,9 @@ enyo.kind({
 		}, this);
 
 		if (! conf.preview ) {conf.preview = {} ;}
-		this.$.ppTopFile.setValue(conf.preview.top_file);
+
+		this.topFile = conf.preview.top_file;
+		this.$.ppTopFile.setValue(this.topFile);
 
 		return this ;
 	},
@@ -287,7 +289,6 @@ enyo.kind({
 
 		return this ;
 	},
-
 
 	showService: function(serviceId) {
 		var service = this.services[serviceId];
@@ -306,7 +307,7 @@ enyo.kind({
 	},
 
 	confirmTap: function(inSender, inEvent) {
-		var tglist, ppConf ;
+		var ppConf ;
 		// retrieve modified values
 
 		this.config.id       = this.$.projectId     .getValue();
@@ -409,7 +410,6 @@ enyo.kind({
 	templateToggleService: function(inSender, inEvent) {
 		var keys = Object.keys(this.services);
 		keys.forEach(function(serviceId) {
-			var svcChbox = serviceId + "CheckBox";
 			var service = this.services[serviceId];
 			if (inEvent.content.match(serviceId)) {
 				this.showService(serviceId);
