@@ -56,7 +56,7 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
-		this.$.codeEditor.$.panels.setIndex(this.phobosViewIndex);
+		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
 		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
 		this.componentsRegistry.harmonia.addClass("ares-full-screen");
 		this.componentsRegistry.harmonia.hideGrabber();
@@ -275,7 +275,7 @@ enyo.kind({
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();
 		this.componentsRegistry.deimos.load(inEvent);
-		this.$.codeEditor.$.panels.setIndex(this.deimosViewIndex);
+		this.componentsRegistry.codeEditor.$.panels.setIndex(this.deimosViewIndex);
 		this.adjustBarMode();
 		this.activeDocument.setCurrentIF('designer');
 	},
@@ -291,7 +291,7 @@ enyo.kind({
 	},
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
-		this.$.codeEditor.$.panels.setIndex(this.phobosViewIndex);
+		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
 		this.adjustBarMode();
 		this.activeDocument.setCurrentIF('code');
 	},
@@ -368,7 +368,7 @@ enyo.kind({
 		var currentIF = d.getCurrentIF();
 		this.activeDocument = d;
 		if (currentIF === 'code') {
-			this.$.codeEditor.$.panels.setIndex(this.phobosViewIndex);
+			this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
 		} else {
 			this.componentsRegistry.phobos.designerAction();
 		}
@@ -381,7 +381,7 @@ enyo.kind({
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
-		var editorMode = this.$.codeEditor.$.panels.getIndex() == this.phobosViewIndex;
+		var editorMode = this.componentsRegistry.codeEditor.$.panels.getIndex() == this.phobosViewIndex;
 		if (editorMode) {
 			this.componentsRegistry.phobos.designerAction(inSender, inEvent);
 		} else {
@@ -489,7 +489,7 @@ enyo.kind({
 	 * 
 	 * @private
 	 * @param {Object} inSender
-	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, hermesFileTree]
+	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, codeEditor]
 	 */
 	_registerComponent: function(inSender, inEvent) {
 		if(this.componentsRegistry[inEvent.name] === undefined){
@@ -532,6 +532,7 @@ enyo.kind({
 		]}
 	],
 	events: {
+		onRegisterMe: "",
 		onMovePanel:""
 	},
 	handlers: {
@@ -539,6 +540,10 @@ enyo.kind({
 	},
 	published: {
 		panelIndex: 2
+	},
+	create: function() {
+		this.inherited(arguments);
+		this.doRegisterMe({name:"codeEditor", reference:this});
 	},
 	switchGrabberDirection: function(active){
 		this.$.bottomBar.switchGrabberDirection(active);
