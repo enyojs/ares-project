@@ -389,7 +389,7 @@ enyo.kind({
 		}
 	},
 	adjustBarMode: function() {
-		var designMode = this.$.codeEditor.$.panels.getIndex() == this.deimosViewIndex;
+		var designMode = this.componentsRegistry.codeEditor.$.panels.getIndex() == this.deimosViewIndex;
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {
