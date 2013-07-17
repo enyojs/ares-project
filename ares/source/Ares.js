@@ -522,7 +522,7 @@ enyo.kind({
 			onNewKind: "bounceNew",
 			onCloseFileRequest: "bounceCloseFileRequest"
 		},
-		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", components: [
+		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", onTransitionStart: "stopPanelEvent", onTransitionFinish: "stopPanelEvent", components: [
 			{components: [
 				{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
 			]},
@@ -550,5 +550,8 @@ enyo.kind({
 	},
 	activePanel : function(){
 		this.doMovePanel({panelIndex:this.panelIndex});
+	},
+	stopPanelEvent: function(){
+		return true;
 	}
 });
