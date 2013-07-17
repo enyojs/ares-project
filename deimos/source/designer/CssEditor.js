@@ -21,24 +21,44 @@ enyo.kind({
 				}
 			}
 		]},
-		{category: "Paddings-Margins",	properties: [
+		{category: "Paddings",	properties: [
 			{name: "padding", inputKind: {kind: "Inspector.Config.Size",
 					values: ["px","cm","em","ern","rem", "%"]
 				}
-			},
+			}
+		]},
+		{category: "Margins",	properties: [
 			{name: "margin", inputKind: {kind: "Inspector.Config.Size",
 					values: ["px","cm","em","ern","rem", "%"]
 				}
 			}
 		]},
-
 		{category: "Font-Style", properties: [
-			{name: "font-size", inputKind: "Inspector.Config.Size"},
+			{name: "font", inputKind:  {kind:"Inspector.Config.Text",  components: [
+					{content: "all attributs", style:"display: inline-block;"}
+				]}
+			},
 			{name: "font-family", inputKind: {kind: "Inspector.Config.Event",
 					values: ["arial", "arial black", "comic sans ms", "courier new", "georgia", 
 										"helvetica",  "times new roman", "trebuchet ms", "verdana" ]
 				}
 			},
+			{name: "font-style", inputKind: {kind: "Inspector.Config.Event",
+					values: ["normal", "italic", "oblique" ]
+				}
+			},
+			{name: "font-variant", inputKind: {kind: "Inspector.Config.Event",
+					values: ["normal", "small-caps"]
+				}
+			},
+			{name: "font-weight", inputKind: {kind: "Inspector.Config.Event",
+					values: ["normal", "bold", "bolder","lighter"]
+				}
+			},
+			{name: "font-size", inputKind: "Inspector.Config.Size"},
+			{name: "line-height", inputKind: "Inspector.Config.Size"}
+		]},			
+		{category: "Text-Style", properties: [
 			{name: "text-indent", inputKind: "Inspector.Config.Size"}
 		]}
 	],
