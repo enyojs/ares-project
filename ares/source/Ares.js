@@ -8,7 +8,7 @@ enyo.kind({
 	debug: false,
 	componentsRegistry: {},
 	components: [
-		{name:"aresLayoutPanels", kind: "Panels", draggable: false, arrangerKind: "CollapsingArranger", fit: true, classes:"ares-main-panels", onTransitionFinish:"changeGrabber", components:[
+		{name:"aresLayoutPanels", kind: "Panels", draggable: false, arrangerKind: "CollapsingArranger", fit: true, classes:"ares-main-panels", onTransitionFinish:"changeGrabberDirection", components:[
 			{name: "projectView", kind: "ProjectView", classes: "ares-panel-min-width ", onProjectSelected: "projectSelected"},
 			{kind: "Harmonia", name: "harmonia", classes: "ares-panel-min-width ", onFileDblClick: "openDocument", onFileChanged: "closeDocument", onFolderChanged: "closeSomeDocuments"},
 			{kind: "designerPanels", name: "codeEditor"}
@@ -123,7 +123,11 @@ enyo.kind({
 				}
 			});
 		}
-		this.hideProjectView();
+		//hide projectView only the first time
+		if (! Ares.Workspace.files.length ) {
+			this.hideProjectView();
+		}
+		
 	},
 
 	/** @private */
@@ -324,18 +328,12 @@ enyo.kind({
 		this.$.aresLayoutPanels.setDraggable(false);
 		this.componentsRegistry.harmonia.hideGrabber();
 	},
-	changeGrabber:function(inSender, inEvent){
+	changeGrabberDirection:function(inSender, inEvent){
 		if(this.$.aresLayoutPanels.getIndex()>0){
 			this.$.aresLayoutPanels.getActive().switchGrabberDirection(true);
 		}
 		if(inEvent.fromIndex>0){
-			var  panels = this.$.aresLayoutPanels.getPanels();
-			enyo.forEach(panels, function(panel) {
-				if(panel.getPanelIndex() === inEvent.fromIndex){
-					panel.switchGrabberDirection(false);
-					return true;
-				}
-			}, this);
+			this.$.aresLayoutPanels.getPanels()[inEvent.fromIndex].switchGrabberDirection(false);
 		}
 	},
 	/** @private */
