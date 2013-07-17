@@ -382,8 +382,14 @@ enyo.kind({
 		if (nodes.length > 0) {
 			this.updateNodes().response(this, function () {
 				var track = this.getNodeNamed(nodes.shift());
-				waypoints.push(track);
-				track.followNodePath(nodes, waypoints, next);
+				if (track) {
+					waypoints.push(track);
+					track.followNodePath(nodes, waypoints, next);
+				} else {
+					if (typeof next === 'function') {
+						next();
+					}
+				}
 			})
 			.error(this, function (inSender, inError) {
 				if (typeof next === 'function') {

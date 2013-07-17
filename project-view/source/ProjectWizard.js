@@ -364,7 +364,18 @@ enyo.kind({
 			this.targetProject = target ;
 			this.$.propertiesWidget.setupModif() ;
 			this.$.propertiesWidget.preFill(config.data);
-			this.show();
+
+			//check topFile link
+			this.$.selectFilePopup.connectProject(this.targetProject, (function() {
+				var checkedName = (function(status) {
+					this.$.propertiesWidget.setTopFileStatus(status);
+					this.$.selectFilePopup.reset();
+				}).bind(this);
+
+				this.$.selectFilePopup.checkSelectedName(config.data.preview.top_file, checkedName);
+
+				this.show();
+			}).bind(this));
 		}
 	},
 
@@ -394,13 +405,11 @@ enyo.kind({
 	selectTopFile: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 
-		var top_file = this.$.propertiesWidget.getTopFile();
-		var self = this;
-
-		this.$.selectFilePopup.connectProject(this.targetProject, function() {
-			self.$.selectFilePopup.pointSelectedName(top_file);
-			self.$.selectFilePopup.show();
-		});
+		this.$.selectFilePopup.reset();
+		this.$.selectFilePopup.connectProject(this.targetProject, (function() {
+			this.$.selectFilePopup.pointSelectedName(this.$.propertiesWidget.getTopFile(), this.$.propertiesWidget.getTopFileStatus());
+			this.$.selectFilePopup.show();
+		}).bind(this));
 	},
 	selectFileChosen: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
@@ -411,6 +420,7 @@ enyo.kind({
 		}
 
 		this.$.propertiesWidget.setTopFile(inEvent.name);
+		this.$.propertiesWidget.setTopFileStatus(true);
 	},
 	notifyChangeSource: function(inSender, inEvent) {
 		this.waterfallDown("onAdditionalSource", inEvent, inSender);

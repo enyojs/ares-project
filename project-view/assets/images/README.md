@@ -6,3 +6,7 @@
   * resized from `http://www.iconfinder.com/icondetails/27859/128/blank_document_file_paper_icon`
   * provided by [iconfinder](http://www.iconfinder.com) project
   * license: "Creative Commons Attribution-No Derivative Works 3.0 Unported"
+* icon file_broken-32x32.png:
+  * resized from `http://www.iconfinder.com/icondetails/3659/128/broken_file_icon`
+  * provided by [iconfinder](http://www.iconfinder.com) project
+  * license: "LGPL"

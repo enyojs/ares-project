@@ -108,7 +108,7 @@ enyo.kind({
 							{kind: "Input", name: "ppTopFile", classes: "enyo-unselectable", attributes: {title: $L("top file of your application. Typically index.html")}
 							}
 						]},
-						{kind: "onyx.IconButton", src: "$project-view/assets/images/file-32x32.png", attributes: {title: $L("select file...")}, ontap: "doSelectPreviewTopFile"}
+						{kind: "onyx.IconButton", name: "topFileChooser", src: "$project-view/assets/images/file-32x32.png", attributes: {title: $L("select file...")}, ontap: "doSelectPreviewTopFile"}
 					]}
 				]}
 			]}
@@ -122,7 +122,8 @@ enyo.kind({
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 	published: {
-		topFile: ""
+		topFile: "",
+		topFileStatus: ""
 	},
 
 	templates: [],
@@ -406,7 +407,15 @@ enyo.kind({
 	},
 	topFileChanged: function() {
 		this.$.ppTopFile.setValue(this.topFile);
-	},
+	},
+	topFileStatusChanged: function() {
+		this.log("status", this.topFileStatus);
+		if (this.topFileStatus) {
+			this.$.topFileChooser.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.topFileChooser.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
+	},
 	templateToggleService: function(inSender, inEvent) {
 		var keys = Object.keys(this.services);
 		keys.forEach(function(serviceId) {
