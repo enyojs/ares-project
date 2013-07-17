@@ -68,6 +68,7 @@ enyo.kind({
 		propW.preFill(ProjectConfig.PREFILLED_CONFIG_FOR_UI),
 		propW.$.projectDirectory.setContent(this.selectedDir.path);
 		propW.$.projectName.setValue(this.selectedDir.name);
+		propW.$.topFileChooser.setSrc("");
 
 		async.series([
 				this.checkProjectJson.bind(this, inSender, inEvent),
@@ -364,6 +365,7 @@ enyo.kind({
 			this.targetProject = target ;
 			this.$.propertiesWidget.setupModif() ;
 			this.$.propertiesWidget.preFill(config.data);
+			this.$.propertiesWidget.$.topFileChooser.setSrc("$project-view/assets/images/file-32x32.png");
 			this.show();
 		}
 	},
@@ -597,6 +599,7 @@ enyo.kind({
 			this.targetProject = target;
 			this.$.propertiesWidget.setupModif() ;
 			this.$.propertiesWidget.preFill(data);
+			this.$.propertiesWidget.$.topFileChooser.setSrc("");
 			this.show();
 		}
 	},
