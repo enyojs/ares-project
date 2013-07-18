@@ -141,7 +141,7 @@ enyo.kind({
 		PREFILLED_CONFIG_FOR_UI: {
 			providers: {},
 			preview: {
-				"top_file": 'debug.html'
+				"top_file": '/debug.html'
 			}
 		},
 
@@ -159,7 +159,7 @@ enyo.kind({
 			},
 			providers: {},
 			preview: {
-				"top_file": 'debug.html'
+				"top_file": '/debug.html'
 			}
 		}
 	}
