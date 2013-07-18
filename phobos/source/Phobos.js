@@ -41,7 +41,7 @@ enyo.kind({
 				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
-		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
+		{name: "savePopup", kind: "saveActionPopup", onAbandonDocAction: "abandonDocAction", onSave: "saveBeforeClose"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, onFileChosen: "saveAsFileChosen"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
@@ -138,6 +138,12 @@ enyo.kind({
 				}
 			}
 		});
+	},
+	saveBeforeClose: function(){
+		this.saveDocAction();
+		var id = this.docData.getId();
+		this.beforeClosingDocument();
+		this.doCloseDocument({id: id});
 	},
 	openDoc: function(inDocData) {
 
@@ -874,5 +880,24 @@ enyo.kind({
 	},
 	test: function(inEvent) {
 		this.doCss(inEvent);
+	}
+});
+
+enyo.kind({
+	name: "saveActionPopup",
+	kind: "Ares.ActionPopup",
+	events:{
+		onSave: ""
+	},
+	create: function() {
+ 		this.inherited(arguments);
+ 		this.$.buttons.createComponent(
+			{name:"saveButton", kind: "onyx.Button", content: "Save", ontap: "save"},
+			{owner: this}
+		);
+ 	},
+	save: function(inSender, inEvent) {
+		this.hide();
+		this.doSave();
 	}
 });
