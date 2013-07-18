@@ -534,12 +534,8 @@ enyo.kind({
 		onMovePanel:""
 	},
 	handlers: {
-		onGrabberClick : "activePanel",
-		ondragstart: "drop",
-		ondrag: "drop",
-		ondragfinish: "drop"
+		onGrabberClick : "activePanel"
 	},
-	drop: function() { return true;},
 	published: {
 		panelIndex: 2
 	},
