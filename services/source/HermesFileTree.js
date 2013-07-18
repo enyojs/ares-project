@@ -226,7 +226,7 @@ enyo.kind({
 								this.showRevertMoveButton();
 							})
 							.error(this, function() {
-								this.log("error retrieving related node children");
+								this.warn("error retrieving related node children");
 							});
 					});
 			} else {
@@ -336,7 +336,7 @@ enyo.kind({
 	 * @public
 	 * @param {Object} inFsService a FileSystemService implementation, as listed in ProviderList
 	 */
-	connectProject: function(inProjectData) {
+	connectProject: function(inProjectData, next) {
 		this.trace("config:", inProjectData);
 		this.projectData = inProjectData;
 
@@ -351,7 +351,7 @@ enyo.kind({
 		// (possibly remote & always asynchronous) file system
 		this.connectService(service, enyo.bind(this, (function(inError) {
 			if (inError) {
-				this.showErrorPopup($L("Internal Error ({error}) from filesystem service").replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
 			} else {
 				if (this.selectedNode) {
 					this.deselect(null, {data: this.selectedNode});
@@ -373,11 +373,11 @@ enyo.kind({
 					serverNode.file.isServer = true;
 
 					serverNode.setContent(nodeName);
-					this.refreshFileTree( function() { that.$.selection.select( serverNode.file.id, serverNode ) ; });
+					this.refreshFileTree( function() { if (next) {next();} else {that.$.selection.select( serverNode.file.id, serverNode );} });
 				});
 				req.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");
-					this.showErrorPopup($L("Internal Error ({error}) from filesystem service").replace("{error}", inError.toString()));
+					this.showErrorPopup(this.$LS("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
 				});
 			}
 		})));
@@ -626,7 +626,7 @@ enyo.kind({
 		}
 
 		if (toSelectId && toSelectId.match(/[^\da-f]/) ) {
-			this.warn("refreshFileTree: internal error, toSelectId " + toSelectId + " does not look like an Id");
+			this.warn("refreshFileTree: internal error, toSelectId ", toSelectId, " does not look like an Id");
 		}
 
 		var tracker = this.asyncTracker(
@@ -700,7 +700,7 @@ enyo.kind({
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		var folderId = inEvent.folderId;
 		var name = inSender.fileName.trim();
-		this.trace("Creating new folder "+name+" into folderId="+folderId);
+		this.trace("Creating new folder ", name," into folderId=", folderId);
 		this.$.service.createFolder(folderId, name)
 			.response(this, function(inSender, inFolder) {
 				this.trace("inFolder: ", inFolder);
@@ -737,7 +737,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create folder:", name, inError);
-				this.showErrorPopup($L("Creating folder '{name}' failed: {error}").replace("{name}", name).replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Creating folder '{name}' failed: {error}", {name: name, error: inError.toString()}));
 			});
 	},
 	/** @private */
@@ -798,10 +798,10 @@ enyo.kind({
 		r.error(this, function(inSender, error) {
 			if (error === 404){
 				this.createFile(name, folderId);
-				this.showErrorPopup($L("No template found for '.{extension}' files.  Created an empty one.").replace("{extension}", type));
+				this.showErrorPopup(this.$LS("No template found for '.{extension}' files.  Created an empty one.", {extension: type}));
 			}
 			else {
-				this.error("error while fetching " + templatePath + ': ' + error);
+				this.warn("error while fetching ", templatePath, ': ', error);
 			}
 		});
 		r.go();
@@ -851,7 +851,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to copy:", this.selectedFile, "as", newName, inError);
-				this.showErrorPopup($L("Creating file '{copyName}' as copy of '{name}' failed: {error}").replace("{copyName}", newName).replace("{name}", this.selectedFile.name).replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Creating file '{copyName}' as copy of '{name}' failed: {error}", {copyName: newName, name: this.selectedFile.name, error: inError.toString()}));
 			});
 	},
 	/** @private */
@@ -913,7 +913,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to rename:", this.selectedFile, "into", newName, inError);
-				this.showErrorPopup($L("Renaming file '{oldName}' as '{newName}' failed").replace("{oldName}", this.selectedFile.name).replace("{newName}", newName));
+				this.showErrorPopup(this.$LS("Renaming file '{oldName}' as '{newName}' failed", {oldName: this.selectedFile.name, newName: newName}));
 			});
 	},
 	/** @private */
@@ -973,7 +973,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to delete:", this.selectedFile, inError);
-				this.showErrorPopup($L("Deleting '{name}' failed").replace("{oldName}", this.selectedFile.name));
+				this.showErrorPopup(this.$LS("Deleting '{name}' failed", {name: this.selectedFile.name}));
 			});
 	},
 	/** @private */
@@ -1005,7 +1005,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to revert:", this.movedNode.file.name, "into", this.originNode.file.path, inError);
-				this.showErrorPopup($L("Reverting '{name}' to '{oldpath}' failed").replace("{name}", this.movedNode.file.name).replace("{oldpath}", this.originNode.file.path));
+				this.showErrorPopup($L("Reverting '{name}' to '{oldpath}' failed", {name: this.movedNode.file.name, oldpath: this.originNode.file.path}));
 			});
 	},
 
@@ -1029,7 +1029,7 @@ enyo.kind({
 		var onDone = new enyo.Async() ;
 		onDone.response(this, function(inSender, toSelectId) {
 			var select = forceSelect || toSelectId ;
-			this.trace("delayed refresh after " + msg + ' on ' + select) ;
+			this.trace("delayed refresh after ", msg, ' on ', select) ;
 			this.refreshFileTree(null, select);
 		}) ;
 		return onDone ;
@@ -1071,7 +1071,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create file:", name, inError);
-				this.showErrorPopup($L("Creating file '{name}' failed: {error}").replace("{name}", name).replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Creating file '{name}' failed: {error}", {name: name, error: inError.toString()}));
 			});
 	},
 	
@@ -1141,7 +1141,35 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to move:", inNode.file.name, inError);
-				this.showErrorPopup($L("Moving {nodeName} failed: {error}").replace("{nodeName}", inNode.file.name).replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Moving {nodeName} failed: {error}", {nodeName: inNode.file.name, error: inError.toString()}));
 			});
+	},
+	$LS: function(msg, params) {
+		var tmp = new enyo.g11n.Template($L(msg));
+		return tmp.evaluate(params);
+	},
+	gotoNodePath: function (nodePath) {
+		var track = this.$.serverNode,
+			waypoints = [],
+			i,
+			nodes = nodePath.split("/");
+
+		var next = function(inErr) {
+			if (inErr) {
+				this.warn("Path following failed", inErr);
+			} else {
+				for (i = 1; i < waypoints.length; i++) {
+					if (waypoints[i].file.isDir) {
+						waypoints[i-1].getNodeWithId(waypoints[i].file.id).setExpanded(true).doExpand();
+					}
+				}
+
+				this.refreshFileTree( function() { waypoints[i-1].doAdjustScroll(); }, waypoints[i-1].file.id );
+			}
+		}.bind(this);
+
+		nodes.shift();
+		waypoints.push(track);
+		track.followNodePath(nodes, waypoints, next);
 	}
 });
