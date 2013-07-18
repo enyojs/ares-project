@@ -1,3 +1,5 @@
+/* global ares, ProjectConfig, ServiceRegistry */
+
 /**
  * This kind holds the consistency between the project.json and the
  * in-memory representation of the project configuration.
@@ -23,6 +25,7 @@ enyo.kind({
 	fileId: null,
 	debug: false,
 	create: function() {
+		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 	},
 	/**
@@ -54,7 +57,9 @@ enyo.kind({
 		});
 		req.error(this, function(inSender, inError){
 			enyo.error("ProjectConfig.init:", inError);
-			if (next instanceof Function) next(inError);
+			if (next instanceof Function) {
+				next(inError);
+			}
 		});
 	},
 	/**
@@ -81,12 +86,16 @@ enyo.kind({
 			if (this.data !== data) {
 				this.save(next);
 			} else {
-				if (typeof next === 'function') next();
+				if (typeof next === 'function') {
+					next();
+				}
 			}
 		});
 		req.error(this, function(inSender, inError) {
 			this.error("ProjectConfig.load:", inError);
-			if (next instanceof Function) next(inError);
+			if (next instanceof Function) {
+				next(inError);
+			}
 		});
 	},
 	/**
@@ -104,11 +113,15 @@ enyo.kind({
 		req.response(this, function _projectSaved(inSender, inResponse) {
 			if (this.debug) enyo.log("ProjectConfig.save: inResponse=", inResponse);
 			this.fileId = inResponse.id;
-			if (next instanceof Function) next();
+			if (next instanceof Function) {
+				next();
+			}
 		});
 		req.error(this, function(inSender, inError) {
 			enyo.error("ProjectConfig.save: error=", inError);
-			if (next instanceof Function) next(inError);
+			if (next instanceof Function) {
+				next(inError);
+			}
 		});
 	},
 	statics: {
@@ -141,7 +154,7 @@ enyo.kind({
 		PREFILLED_CONFIG_FOR_UI: {
 			providers: {},
 			preview: {
-				"top_file": 'debug.html'
+				"top_file": '/debug.html'
 			}
 		},
 
@@ -159,7 +172,7 @@ enyo.kind({
 			},
 			providers: {},
 			preview: {
-				"top_file": 'debug.html'
+				"top_file": '/debug.html'
 			}
 		}
 	}
