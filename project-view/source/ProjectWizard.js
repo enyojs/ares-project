@@ -68,7 +68,7 @@ enyo.kind({
 		propW.preFill(ProjectConfig.PREFILLED_CONFIG_FOR_UI),
 		propW.$.projectDirectory.setContent(this.selectedDir.path);
 		propW.$.projectName.setValue(this.selectedDir.name);
-		propW.$.topFileChooser.setSrc("");
+		propW.activateFileChooser(false);
 
 		async.series([
 				this.checkProjectJson.bind(this, inSender, inEvent),
@@ -341,16 +341,17 @@ enyo.kind({
 		onDone: "hide",
 		onModifiedConfig: "saveProjectConfig",
 		onModifiedSource: "populateProject",
-		onSelectPreviewTopFile: "selectTopFile"
+		onSelectFile: "selectFile"
 	},
 	classes:"ares-masked-content-popup",
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource"},
-		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Select top file..."), folderChooser: false, onFileChosen: "selectFileChosen"}
+		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, onFileChosen: "selectFileChosen"}
 	],
 
 	debug: false,
 	targetProject: null,
+	chooser: null,
 
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
@@ -365,7 +366,7 @@ enyo.kind({
 			this.targetProject = target ;
 			this.$.propertiesWidget.setupModif() ;
 			this.$.propertiesWidget.preFill(config.data);
-
+			this.$.propertiesWidget.activateFileChooser(true);
 			//check topFile link
 			this.$.selectFilePopup.connectProject(this.targetProject, (function() {
 				var checkedName = (function(status) {
@@ -403,25 +404,35 @@ enyo.kind({
 
 		return true ; // stop bubble
 	},
-	selectTopFile: function(inSender, inEvent) {
-		this.trace(inSender, "=>", inEvent);
+	/** @private */
+	selectFile: function(inSender, inData) {
+		this.trace(inSender, "=>", inData);		
 
+		this.chooser = inData.input;
 		this.$.selectFilePopup.reset();
 		this.$.selectFilePopup.connectProject(this.targetProject, (function() {
-			this.$.selectFilePopup.pointSelectedName(this.$.propertiesWidget.getTopFile(), this.$.propertiesWidget.getTopFileStatus());
+			this.$.selectFilePopup.setHeaderText(inData.header);
+			this.$.selectFilePopup.pointSelectedName(inData.value);
 			this.$.selectFilePopup.show();
 		}).bind(this));
+
+		return true;
 	},
+	/** @private */
 	selectFileChosen: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 
+		var chooser = this.chooser;
+		this.chooser = null;
+
 		if (!inEvent.file) {
-			// no file or folder chosen
-			return;
+			// no file or folder chosen			
+			return true;
 		}
 
-		this.$.propertiesWidget.setTopFile(inEvent.name);
-		this.$.propertiesWidget.setTopFileStatus(true);
+		this.$.propertiesWidget.updateFileInput(chooser, inEvent.name);
+		//this.$.propertiesWidget.setTopFileStatus(true);
+		return true;
 	},
 	notifyChangeSource: function(inSender, inEvent) {
 		this.waterfallDown("onAdditionalSource", inEvent, inSender);
@@ -608,7 +619,7 @@ enyo.kind({
 			this.targetProject = target;
 			this.$.propertiesWidget.setupModif() ;
 			this.$.propertiesWidget.preFill(data);
-			this.$.propertiesWidget.$.topFileChooser.setSrc("");
+			this.$.propertiesWidget.activateFileChooser(false);
 			this.show();
 		}
 	},

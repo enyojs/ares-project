@@ -18,7 +18,7 @@ enyo.kind({
 		onModifiedConfig: "",
 		onSaveGeneratedXml: "",
 		onDone: "",
-		onSelectPreviewTopFile: ""
+		onSelectFile: ""
 	},
 	handlers: {
 		onAdditionalSource: "handleAdditionalSource"
@@ -108,7 +108,7 @@ enyo.kind({
 							{kind: "Input", name: "ppTopFile", classes: "enyo-unselectable", attributes: {title: $L("top file of your application. Typically index.html")}
 							}
 						]},
-						{kind: "onyx.IconButton", name:"topFileChooser", src: "", attributes: {title: $L("select file...")}, ontap: "doSelectPreviewTopFile"}
+						{kind: "onyx.IconButton", name:"topFileChooser", src: "$project-view/assets/images/file-32x32.png", attributes: {title: $L("select file...")}, ontap: "selectTopFile"}
 					]}
 				]}
 			]}
@@ -121,8 +121,8 @@ enyo.kind({
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
-	published: {
-		topFile: "",
+	published: {	
+		
 		topFileStatus: ""
 	},
 
@@ -272,8 +272,7 @@ enyo.kind({
 
 		if (! conf.preview ) {conf.preview = {} ;}
 
-		this.topFile = conf.preview.top_file;
-		this.$.ppTopFile.setValue(this.topFile);
+		this.$.ppTopFile.setValue(conf.preview.top_file);
 
 		return this ;
 	},
@@ -407,7 +406,7 @@ enyo.kind({
 	},
 	topFileChanged: function() {
 		this.$.ppTopFile.setValue(this.topFile);
-	},
+		},
 	topFileStatusChanged: function() {
 		this.log("status", this.topFileStatus);
 		if (this.topFileStatus) {
@@ -432,6 +431,27 @@ enyo.kind({
 	},
 	handleAdditionalSource: function(inSender, inEvent) {
 		this.selectedAddSource = inEvent.source;
+		return true;
+	},
+	/** @public */
+	activateFileChooser: function(status) {
+		this.activateTopFileChooser(status);
+	},
+	/** @private */
+	activateTopFileChooser: function(status) {
+		if (status) {
+			this.$.topFileChooser.show();
+		} else {
+			this.$.topFileChooser.hide();
+		}
+	},
+	/** @private */
+	selectTopFile: function () {
+		this.doSelectFile({input: "ppTopFile", value: this.$.ppTopFile.getValue(), header: $L("Select top file...")});
+	},
+	/** @public */
+	updateFileInput: function(input, value) {
+		this.$[input].setValue(value);
 		return true;
 	}
 });
