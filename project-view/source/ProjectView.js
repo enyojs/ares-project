@@ -9,6 +9,9 @@ enyo.kind({
 	kind: "FittableColumns",
 	classes: "enyo-unselectable /*shadow-panels*/",
 	debug: false,
+	published: {
+		panelIndex: 0
+	},
 	components: [
 		{kind: "ProjectList",
 			onModifySettings: "modifySettingsAction",
