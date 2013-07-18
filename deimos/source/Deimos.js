@@ -106,6 +106,12 @@ enyo.kind({
 		onRedo: "",
 		onRegisterMe: ""
 	},
+	handlers: {
+		ondragstart: "drop",
+		ondrag: "drop",
+		ondragfinish: "drop"
+	},
+	drop: function() { return true;},
 	kinds: [],
 	index: null,
 	create: function() {
