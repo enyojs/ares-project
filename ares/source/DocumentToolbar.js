@@ -6,12 +6,14 @@ enyo.kind({
 		onSwitchFile: "",
 		onCloseFileRequest: "",
 		onDesign: "",
-		onRegisterMe: ""
+		onRegisterMe: "",
+		onGrabberClick: ""
 	},
-
 	components: [	
 		{kind: "onyx.Toolbar", classes: "ares-top-toolbar", components: [
-			{kind: "onyx.Grabber"}
+			{kind: "onyx.Grabber", classes: "ares-grabber", ontap: "doGrabberClick", components:[
+				{kind: "aresGrabber", name: "aresGrabberDirection", classes:"lleftArrow"}
+			]}
 		]},	
 		{
 			name: "tabs",
@@ -56,5 +58,8 @@ enyo.kind({
 		if (this.$.tabs.isEmpty() ) {
 			this.$.tabs.hide();
 		}
+	},
+	switchGrabberDirection: function(active){
+		this.$.aresGrabberDirection.switchGrabberDirection(active);
 	}
 });

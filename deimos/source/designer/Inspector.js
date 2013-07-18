@@ -332,11 +332,10 @@ enyo.kind({
 	inspect: function(inControl) {
 		var ps, i, p;
 
+		this.$.content.destroyComponents();
 		if (!inControl) {
 			return;
 		}
-
-		this.$.content.destroyComponents();
 		this.selected = inControl;
 		
 		var kindName = inControl.name + " (" + inControl.kind + ")";
