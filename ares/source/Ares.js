@@ -520,14 +520,22 @@ enyo.kind({
 			onNewKind: "bounceNew",
 			onCloseFileRequest: "bounceCloseFileRequest"
 		},
-		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", onTransitionStart: "stopPanelEvent", onTransitionFinish: "stopPanelEvent", components: [
-			{components: [
-				{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
-			]},
-			{components: [
-				{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
-			]}
-		]}
+		{
+			kind: "Panels",
+			arrangerKind: "CarouselArranger",
+			draggable: false,
+			classes:"enyo-fit ares-panels",
+			onTransitionStart : "stopPanelEvent",
+			onTransitionFinish: "stopPanelEvent",
+			components: [
+				{components: [
+					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
+				]},
+				{components: [
+					{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
+				]}
+			]
+		}
 	],
 	events: {
 		onRegisterMe: "",
