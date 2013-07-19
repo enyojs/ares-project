@@ -188,7 +188,7 @@ enyo.kind({
 	itemDragover: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		
-		if (this.draggedNode.content != "package.js") {
+		if (this.draggedNode && this.draggedNode.content != "package.js") {
 			if (this.isValidDropTarget(this.targetNode)) {
 				inEvent.dataTransfer.dropEffect = "link";
 			} else {
