@@ -317,7 +317,6 @@ enyo.kind({
 	 * @private
 	 */
 	densityChanged: function () {
-		this.log("density value: ", this.density);
 		this.activatePickerItemByContent(this.density);
 	},
 
@@ -325,7 +324,6 @@ enyo.kind({
 	 * @private
 	 */
 	activatePickerItemByContent: function(inContent){
-		this.log("density picker content: ", this.$.AndroidDensity.controls);
 		for (var key in this.$.AndroidDensity.controls) {
 		    if(this.$.AndroidDensity.controls[key].kind === "onyx.MenuItem"){
 			this.$.AndroidDensity.controls[key].active = false;
@@ -356,7 +354,7 @@ enyo.kind({
 			this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
 			inConfig[target]["android"].src = inSender.value;
 		}).bind(this);
-		this.log('updated code');
+		this.trace('updated code');
 
 		this.bubble("onEditConfig", saveProperty);
 	}, 
@@ -463,7 +461,6 @@ enyo.kind({
 	 * @private
 	 */
 	heightChanged: function(){
-		this.log("heightLabel: ", this.$.IosImgHeight);
 		this.$.IosImgHeight.setValue(this.height);
 	},
 
