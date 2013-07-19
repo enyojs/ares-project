@@ -100,7 +100,7 @@ enyo.kind({
 			kind: "onyx.InputDecorator",
 			classes: "ares-project-properties-input-medium", 
 			components: [{
-					kind: "onyx.Input",
+					kind: "onyx.Input",	
 					name: "ConfigurationInput", 
 					onchange: "updateConfigurationValue"
 				}
@@ -272,6 +272,7 @@ enyo.kind({
 		}, 
 		{
 			kind: "onyx.PickerDecorator",
+			classes: "ares-project-properties-picker-small",
 			components: [
 				{kind: "onyx.PickerButton"},
 				{
@@ -409,7 +410,7 @@ enyo.kind({
 				}
 			]
 		},
-		{content: "Length"},
+		{content: "Length", classes: "ares-project-properties-drawer-row-attribut-label"},
 		{
 			kind: "onyx.InputDecorator",
 			classes: "ares-project-properties-input-small",
@@ -420,7 +421,7 @@ enyo.kind({
 				}
 			]
 		},
-		{content: "Width"},
+		{content: "Width", classes: "ares-project-properties-drawer-row-attribut-label"},
 		{
 			kind: "onyx.InputDecorator",
 			classes: "ares-project-properties-input-small",
