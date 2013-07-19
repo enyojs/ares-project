@@ -142,6 +142,8 @@ enyo.kind({
 		} else {
 			inEvent.dataTransfer.effectAllowed = "linkMove";
 		}
+		// Opera drag'n'drop does not work if setData is not called
+		// even if called with undef...
 		inEvent.dataTransfer.setData('text/html', this.innerHTML);
 		
 		return true;
