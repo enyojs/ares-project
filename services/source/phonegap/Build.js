@@ -837,17 +837,17 @@ enyo.kind({
 			xw.writeStartElement( 'icon' );
 			// If the project does not define an icon, use Enyo's
 			// one
-			xw.writeAttributeString('src', phonegap.icons[inTarget].src || 'icon.png');
+			xw.writeAttributeString('src', phonegap.icon[inTarget].src || 'icon.png');
 			if(inTarget === "general"){
-				xw.writeAttributeString('role', phonegap.icons[inTarget].role || 'default');
+				xw.writeAttributeString('role', phonegap.icon[inTarget].role || 'default');
 			} else {
 				xw.writeAttributeString('gap:platfom', inTarget);
 
 				if (inTarget === "android"){
-					xw.writeAttributeString('gap:density', phonegap.icons[inTarget].density || "mdpi");
+					xw.writeAttributeString('gap:density', phonegap.icon[inTarget].density || "mdpi");
 				} else if (inTarget === "ios") {
-					xw.writeAttributeString('width', phonegap.icons[inTarget].width || 60);
-					xw.writeAttributeString('height', phonegap.icons[inTarget].height || 60);
+					xw.writeAttributeString('width', phonegap.icon[inTarget].width || 60);
+					xw.writeAttributeString('height', phonegap.icon[inTarget].height || 60);
 				}
 			}
 
@@ -858,17 +858,17 @@ enyo.kind({
 			xw.writeStartElement( 'gap:splash' );
 			// If the project does not define an icon, use Enyo's
 			// one
-			xw.writeAttributeString('src', phonegap.splashes[inTarget].src || 'icon.png');
+			xw.writeAttributeString('src', phonegap.splashScreen[inTarget].src || 'icon.png');
 			if(inTarget === "general"){
-				xw.writeAttributeString('role', phonegap.splashes[inTarget].role || 'default');
+				xw.writeAttributeString('role', phonegap.splashScreen[inTarget].role || 'default');
 			} else {
 				xw.writeAttributeString('gap:platfom', inTarget);
 
 				if (inTarget === 'android'){
-					xw.writeAttributeString('gap:density', phonegap.splashes['android'].density || 'mdpi');
+					xw.writeAttributeString('gap:density', phonegap.splashScreen['android'].density || 'mdpi');
 				} else if (inTarget === 'ios') {
-					xw.writeAttributeString('width', phonegap.splashes['ios'].width || 90);
-					xw.writeAttributeString('height', phonegap.splashes['ios'].height || 150);
+					xw.writeAttributeString('width', phonegap.splashScreen['ios'].width || 90);
+					xw.writeAttributeString('height', phonegap.splashScreen['ios'].height || 150);
 				}
 			}
 
@@ -967,24 +967,18 @@ enyo.kind({
 	
 		}, this);
 
-				
 		xw.writeComment("Define app icon for each platform");
-		enyo.forEach(phonegap.icons && enyo.keys(phonegap.icons), function(target) {
+		enyo.forEach(phonegap.icon && enyo.keys(phonegap.icon), function(target) {
 			createIconXMLRow.call(self, target);
 			
 		}, this);
 
 		xw.writeComment("Define app splash screen for each platform");
-		enyo.forEach(phonegap.splashes && enyo.keys(phonegap.splashes), function(target) {
+		enyo.forEach(phonegap.splashScreen && enyo.keys(phonegap.splashScreen), function(target) {
 			createSplashScreenXMLRow.call(self, target);			
 		}, this);
 
-
-
-
 		xw.writeEndElement();	// widget
-
-
 
 		//xw.writeEndDocument(); called by flush()
 		str = xw.flush();
@@ -1034,16 +1028,16 @@ enyo.kind({
 				"disable-cursor": Phonegap.UIConfiguration.platformDrawersContent[3].rows[0].defaultValue 
 			},
 
-			icons: {
-				"general": {src: "", role: "default"},
-				"android": {src: "", density: "" },
-				"ios": {src: "", height: "", width: ""}, 
-				"winphone": {src: ""}, 
-				"blackberry": {src: ""},
-				"webos": {src: ""}  
+			icon: {
+				general: {src: "", role: "default"},
+				android: {src: "", density: "" },
+				ios: {src: "", height: "", width: ""}, 
+				winphone: {src: ""}, 
+				blackberry: {src: ""},
+				webos: {src: ""}  
 			},
 
-			splashes: {
+			splashScreen: {
 				general: {src: "", role: "default"},
 				android: {src: "", density: "" },
 				ios: {src: "", height: "", width: ""}, 
@@ -1052,9 +1046,6 @@ enyo.kind({
 				webos: {src: ""} 
 			},
 			plugins: {
-				"ChildBrowser": {
-					version: "2.1.0"
-				}
 			}
 		}
 	}
