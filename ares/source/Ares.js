@@ -8,12 +8,32 @@ enyo.kind({
 	debug: false,
 	componentsRegistry: {},
 	components: [
-		{name:"aresLayoutPanels", kind: "Panels", draggable: false, arrangerKind: "CollapsingArranger", fit: true, classes:"ares-main-panels", onTransitionFinish:"changeGrabberDirection", components:[
-			{name: "projectView", kind: "ProjectView", classes: "ares-panel-min-width ", onProjectSelected: "projectSelected"},
-			{kind: "Harmonia", name: "harmonia", classes: "ares-panel-min-width ", onFileDblClick: "openDocument", onFileChanged: "closeDocument", onFolderChanged: "closeSomeDocuments"},
-			{kind: "designerPanels", name: "codeEditor"}
-			
-		]},
+		{
+			name:"aresLayoutPanels",
+			kind: "Panels",
+			draggable: false,
+			arrangerKind: "CollapsingArranger",
+			fit: true,
+			classes:"ares-main-panels",
+			onTransitionFinish:"changeGrabberDirection",
+			components:[
+				{
+					name: "projectView",
+					kind: "ProjectView",
+					classes: "ares-panel-min-width ",
+					onProjectSelected: "projectSelected"
+				},
+				{
+					kind: "Harmonia",
+					name: "harmonia",
+					classes: "ares-panel-min-width ",
+					onFileDblClick: "openDocument",
+					onFileChanged: "closeDocument",
+					onFolderChanged: "closeSomeDocuments"
+				},
+				{kind: "designerPanels", name: "codeEditor"}
+			]
+		},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
 			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
