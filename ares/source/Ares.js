@@ -527,9 +527,9 @@ enyo.kind({
 			classes:"enyo-fit ares-panels",
 			onTransitionStart : "stopPanelEvent",
 			onTransitionFinish: "stopPanelEvent",
-			ondragstart		  : "stopPanelEvent",
-			ondrag			  : "stopPanelEvent",
-			ondragfinish	  : "stopPanelEvent",
+			ondragstart	      : "stopPanelEvent",
+			ondrag            : "stopPanelEvent",
+			ondragfinish      : "stopPanelEvent",
 			components: [
 				{components: [
 					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
