@@ -29,7 +29,10 @@ enyo.kind({
 					classes: "ares-panel-min-width ",
 					onFileDblClick: "openDocument",
 					onFileChanged: "closeDocument",
-					onFolderChanged: "closeSomeDocuments"
+					onFolderChanged: "closeSomeDocuments",
+					ondragstart	      : "stopEvent",
+					ondrag            : "stopEvent",
+					ondragfinish      : "stopEvent"
 				},
 				{kind: "designerPanels", name: "codeEditor"}
 			]
@@ -515,6 +518,9 @@ enyo.kind({
 		}else {
 			this.error("Component is already registred: ", inEvent.name);
 		}
+	},
+	stopEvent: function(){
+		return true;
 	},
 	statics: {
 		isBrowserSupported: function() {
