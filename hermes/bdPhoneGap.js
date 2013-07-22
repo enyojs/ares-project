@@ -258,7 +258,10 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 
 	var tempFileName = temp.path({prefix: 'com.enyojs.ares.services.' + this.config.basename + "." + platform + "."});
 	async.waterfall([
-		client.auth.bind(client, { token: req.token }),
+		client.auth.bind(client, {
+			token: req.token,
+			proxy: this.config.proxyUrl
+		}),
 		(function _fetchPackage(api, next) {
 			log.http("downloadApp#_fetchPackage()", "GET", url);
 			var os = fs.createWriteStream(tempFileName);

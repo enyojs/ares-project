@@ -8,12 +8,35 @@ enyo.kind({
 	debug: false,
 	componentsRegistry: {},
 	components: [
-		{name:"aresLayoutPanels", kind: "Panels", draggable: false, arrangerKind: "CollapsingArranger", classes:"ares-main-panels enyo-border-box", onTransitionFinish:"changeGrabberDirection", components:[
-			{name: "projectView", kind: "ProjectView", classes: "ares-panel-min-width", onProjectSelected: "projectSelected"},
-			{kind: "Harmonia", name: "harmonia", classes: "ares-panel-min-width enyo-fit", onFileDblClick: "openDocument", onFileChanged: "closeDocument", onFolderChanged: "closeSomeDocuments"},
-			{kind: "designerPanels", name: "codeEditor"}
-			
-		]},
+		{
+			name:"aresLayoutPanels",
+			kind: "Panels",
+			draggable: false,
+			arrangerKind: "CollapsingArranger",
+			fit: true,
+			classes:"ares-main-panels enyo-border-box",
+			onTransitionFinish:"changeGrabberDirection",
+			components:[
+				{
+					name: "projectView",
+					kind: "ProjectView",
+					classes: "ares-panel-min-width ",
+					onProjectSelected: "projectSelected"
+				},
+				{
+					kind: "Harmonia",
+					name: "harmonia",
+					classes: "ares-panel-min-width enyo-fit",
+					onFileDblClick: "openDocument",
+					onFileChanged: "closeDocument",
+					onFolderChanged: "closeSomeDocuments",
+					ondragstart	      : "stopEvent",
+					ondrag            : "stopEvent",
+					ondragfinish      : "stopEvent"
+				},
+				{kind: "designerPanels", name: "codeEditor"}
+			]
+		},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
 			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
@@ -33,6 +56,7 @@ enyo.kind({
 		onSaveDocument: "saveDocument", 
 		onSaveAsDocument: "saveAsDocument", 
 		onCloseDocument: "closeDocument", 
+		onCloseAllDocument: "closeAllDocument",
 		onDesignDocument: "designDocument", 
 		onUpdate: "phobosUpdate",
 		onCloseDesigner: "closeDesigner", 
@@ -239,6 +263,14 @@ enyo.kind({
 				self.showProjectView();
 			}
 		});
+	},
+	closeAllDocument: function(inSender, inEvent) {
+		this.trace("sender:", inSender, ", event:", inEvent);
+		var files = Ares.Workspace.files;
+		while(files.models.length) {
+			this._closeDocument(files.at(0).getId());
+		}
+		this.showProjectView();
 	},
 	/* @private */
 	closeSomeDocuments: function(inSender, inEvent) {
@@ -511,6 +543,9 @@ enyo.kind({
 			this.error("Component is already registred: ", inEvent.name);
 		}
 	},
+	stopEvent: function(){
+		return true;
+	},
 	statics: {
 		isBrowserSupported: function() {
 			if (enyo.platform.ie && enyo.platform.ie <= 8) {
@@ -535,14 +570,25 @@ enyo.kind({
 			onNewKind: "bounceNew",
 			onCloseFileRequest: "bounceCloseFileRequest"
 		},
-		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", onTransitionStart: "stopPanelEvent", onTransitionFinish: "stopPanelEvent", components: [
-			{components: [
-				{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
-			]},
-			{components: [
-				{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
-			]}
-		]}
+		{
+			kind: "Panels",
+			arrangerKind: "CarouselArranger",
+			draggable: false,
+			classes:"enyo-fit ares-panels",
+			onTransitionStart : "stopPanelEvent",
+			onTransitionFinish: "stopPanelEvent",
+			ondragstart	      : "stopPanelEvent",
+			ondrag            : "stopPanelEvent",
+			ondragfinish      : "stopPanelEvent",
+			components: [
+				{components: [
+					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onCloseAllDocument: "closeAllDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
+				]},
+				{components: [
+					{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
+				]}
+			]
+		}
 	],
 	events: {
 		onRegisterMe: "",
