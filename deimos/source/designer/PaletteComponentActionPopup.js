@@ -32,9 +32,9 @@ enyo.kind({
 	kind: "FittableRows",
 	noStretch:true,
 	components: [
-		{name: "addPanel", kind: "onyx.Button",  content: "Add new Panel", style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"},
-		{name: "replaceKind", kind: "onyx.Button", content: "Replace this Kind", centered: true, style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"},
-		{name: "addkind", kind: "onyx.Button", content: "Add new Kind", centered: true, style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"}
+		{name: "addtoKind", kind: "onyx.Button",  content: "Add to current kind", style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"},
+		{name: "replaceKind", kind: "onyx.Button", content: "Replace current kind", centered: true, style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"},
+		{name: "addNewKind", kind: "onyx.Button", content: "Add new kind to current file", centered: true, style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"}
 	],
 	events: {
 		onPaletteComponentAction : ""

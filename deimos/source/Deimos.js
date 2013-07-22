@@ -818,17 +818,21 @@ enyo.kind({
 	runPaletteComponentAction: function(inSender,inEvent){
 		var config = this.$.actionPopup.getConfigComponent(config);
 		var target = this.$.actionPopup.getTargetComponent(target);
+		var beforeId = inEvent.beforeId;
 
-		if(inEvent.getName() === "addPanel"){
-			this.insertItem(config, target);
+		if(inEvent.getName() === "addtoKind"){
+			if (beforeId) {
+				this.insertItemBefore(config, target, beforeId);
+			} else {
+				this.insertItem(config, target);
+			}	
 			this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
 			this.addAresKindOptions(this.kinds[this.index].components);
 			this.rerenderKind(config.aresId);
-
 		} else if (inEvent.getName() === "replaceKind"){
 			console.log("not implemented yet");
 
-		} else if (inEvent.getName() === "addkind"){
+		} else if (inEvent.getName() === "addNewKind"){
 			console.log("not implemented yet");
 		}
 		
