@@ -45,7 +45,7 @@ enyo.kind({
 				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
-		{name: "savePopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonDocAction"},
+		{name: "savePopup", kind: "saveActionPopup", onAbandonDocAction: "abandonDocAction", onSave: "saveBeforeClose"},
 		{name: "saveAllPopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonAllDocAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, onFileChosen: "saveAsFileChosen"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
@@ -144,6 +144,12 @@ enyo.kind({
 				}
 			}
 		});
+	},
+	saveBeforeClose: function(){
+		this.saveDocAction();
+		var id = this.docData.getId();
+		this.beforeClosingDocument();
+		this.doCloseDocument({id: id});
 	},
 	openDoc: function(inDocData) {
 
@@ -683,8 +689,9 @@ enyo.kind({
 		return true; // Stop the propagation of the event
 	},
 	closeAllDocAction: function(inSender, inEvent) {
-		var fileEdited = false;
-		Ares.Workspace.files.each(function(file) {
+		var fileEdited = false,
+		    files = Ares.Workspace.files;
+		files.each(function(file) {
 			fileEdited = fileEdited || file.getEdited();
 		});
 		if (fileEdited === true) {
@@ -697,7 +704,7 @@ enyo.kind({
 			this.doCloseAllDocument();
 		}
 		return true; // Stop the propagation of the event
-	},
+	},	
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
@@ -710,7 +717,7 @@ enyo.kind({
 		this.$.saveAllPopup.hide();
 		this.beforeClosingDocument();
 		this.doCloseAllDocument();
-	},
+	},	
 	docChanged: function(inSender, inEvent) {
 		this.docData.setEdited(true);
 
@@ -902,5 +909,24 @@ enyo.kind({
 	},
 	test: function(inEvent) {
 		this.doCss(inEvent);
+	}
+});
+
+enyo.kind({
+	name: "saveActionPopup",
+	kind: "Ares.ActionPopup",
+	events:{
+		onSave: ""
+	},
+	create: function() {
+ 		this.inherited(arguments);
+ 		this.$.buttons.createComponent(
+			{name:"saveButton", kind: "onyx.Button", content: "Save", ontap: "save"},
+			{owner: this}
+		);
+ 	},
+	save: function(inSender, inEvent) {
+		this.hide();
+		this.doSave();
 	}
 });
