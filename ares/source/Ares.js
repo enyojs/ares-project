@@ -8,35 +8,12 @@ enyo.kind({
 	debug: false,
 	componentsRegistry: {},
 	components: [
-		{
-			name:"aresLayoutPanels",
-			kind: "Panels",
-			draggable: false,
-			arrangerKind: "CollapsingArranger",
-			fit: true,
-			classes:"ares-main-panels",
-			onTransitionFinish:"changeGrabberDirection",
-			components:[
-				{
-					name: "projectView",
-					kind: "ProjectView",
-					classes: "ares-panel-min-width ",
-					onProjectSelected: "projectSelected"
-				},
-				{
-					kind: "Harmonia",
-					name: "harmonia",
-					classes: "ares-panel-min-width ",
-					onFileDblClick: "openDocument",
-					onFileChanged: "closeDocument",
-					onFolderChanged: "closeSomeDocuments",
-					ondragstart	      : "stopEvent",
-					ondrag            : "stopEvent",
-					ondragfinish      : "stopEvent"
-				},
-				{kind: "designerPanels", name: "codeEditor"}
-			]
-		},
+		{name:"aresLayoutPanels", kind: "Panels", draggable: false, arrangerKind: "CollapsingArranger", classes:"ares-main-panels enyo-border-box", onTransitionFinish:"changeGrabberDirection", components:[
+			{name: "projectView", kind: "ProjectView", classes: "ares-panel-min-width", onProjectSelected: "projectSelected"},
+			{kind: "Harmonia", name: "harmonia", classes: "ares-panel-min-width enyo-fit", onFileDblClick: "openDocument", onFileChanged: "closeDocument", onFolderChanged: "closeSomeDocuments"},
+			{kind: "designerPanels", name: "codeEditor"}
+			
+		]},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
 			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
@@ -56,7 +33,6 @@ enyo.kind({
 		onSaveDocument: "saveDocument", 
 		onSaveAsDocument: "saveAsDocument", 
 		onCloseDocument: "closeDocument", 
-		onCloseAllDocument: "closeAllDocument",
 		onDesignDocument: "designDocument", 
 		onUpdate: "phobosUpdate",
 		onCloseDesigner: "closeDesigner", 
@@ -77,13 +53,11 @@ enyo.kind({
 	designerPanelsIndex: 2,
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
+	projectListWidth: 300,
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
-		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
-		this.componentsRegistry.harmonia.addClass("ares-full-screen");
-		this.componentsRegistry.harmonia.hideGrabber();
 		this.adjustBarMode();
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
@@ -98,6 +72,7 @@ enyo.kind({
 
 	rendered: function() {
 		this.inherited(arguments);
+		this.showProjectView();
 	},
 	/**
 	 * @private
@@ -265,14 +240,6 @@ enyo.kind({
 			}
 		});
 	},
-	closeAllDocument: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-		var files = Ares.Workspace.files;
-		while(files.models.length) {
-			this._closeDocument(files.at(0).getId());
-		}
-		this.showProjectView();
-	},
 	/* @private */
 	closeSomeDocuments: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
@@ -344,19 +311,32 @@ enyo.kind({
 			return 'You may have some unsaved data';
 		}
 	},
+	/**
+	 * The width of the panel needs to be calculated en function of width of the previous panel
+	 * if the panel is not the last panel of arranger 
+	 * and we want that this panel take place of all remaining screen after display of all previous panels
+
+	 * @private
+	 * @param {Object} panel
+	 */
+	_calcPanelWidth:function(panel) {
+		var cn = this.$.aresLayoutPanels.hasNode();
+		this.aresContainerBounds = cn ? {width: cn.clientWidth, height: cn.clientHeight} : {};
+		panel.applyStyle("width", (this.aresContainerBounds.width - this.projectListWidth) + "px");
+	},
 	hideProjectView: function(inSender, inEvent) {
-		this.componentsRegistry.harmonia.removeClass("ares-full-screen");
+		this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex].applyStyle("width", null);
 		this.componentsRegistry.harmonia.addClass("ares-small-screen");
 		this.$.aresLayoutPanels.reflow();
-		this.$.aresLayoutPanels.setIndex(this.hermesFileTreeIndex);
+		this.$.aresLayoutPanels.setIndexDirect(this.hermesFileTreeIndex);
 		this.$.aresLayoutPanels.setDraggable(true);
 		this.componentsRegistry.harmonia.showGrabber();
 	},
 	showProjectView: function(inSender, inEvent) {
-		this.componentsRegistry.harmonia.removeClass("ares-small-screen");
-		this.componentsRegistry.harmonia.addClass("ares-full-screen");
-		this.$.aresLayoutPanels.reflow();
+		this.componentsRegistry.harmonia.removeClass("ares-small-screen");		
 		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
+		this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
+		this.$.aresLayoutPanels.reflow();
 		this.$.aresLayoutPanels.setDraggable(false);
 		this.componentsRegistry.harmonia.hideGrabber();
 	},
@@ -378,6 +358,9 @@ enyo.kind({
 	},
 	resizeHandler: function(inSender, inEvent) {
 		this.inherited(arguments);
+		if(this.$.aresLayoutPanels.getIndex() === this.projectListIndex){
+			this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
+		}
 	},
 	switchFile: function(inSender, inEvent) {
 		var d = Ares.Workspace.files.get(inEvent.id);
@@ -528,9 +511,6 @@ enyo.kind({
 			this.error("Component is already registred: ", inEvent.name);
 		}
 	},
-	stopEvent: function(){
-		return true;
-	},
 	statics: {
 		isBrowserSupported: function() {
 			if (enyo.platform.ie && enyo.platform.ie <= 8) {
@@ -555,25 +535,14 @@ enyo.kind({
 			onNewKind: "bounceNew",
 			onCloseFileRequest: "bounceCloseFileRequest"
 		},
-		{
-			kind: "Panels",
-			arrangerKind: "CarouselArranger",
-			draggable: false,
-			classes:"enyo-fit ares-panels",
-			onTransitionStart : "stopPanelEvent",
-			onTransitionFinish: "stopPanelEvent",
-			ondragstart	      : "stopPanelEvent",
-			ondrag            : "stopPanelEvent",
-			ondragfinish      : "stopPanelEvent",
-			components: [
-				{components: [
-					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onCloseAllDocument: "closeAllDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
-				]},
-				{components: [
-					{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
-				]}
-			]
-		}
+		{kind: "Panels", arrangerKind: "CarouselArranger", draggable: false, classes:"enyo-fit ares-panels", onTransitionStart: "stopPanelEvent", onTransitionFinish: "stopPanelEvent", components: [
+			{components: [
+				{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
+			]},
+			{components: [
+				{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
+			]}
+		]}
 	],
 	events: {
 		onRegisterMe: "",
