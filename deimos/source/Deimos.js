@@ -89,7 +89,8 @@ enyo.kind({
 					{kind: "Inspector", fit: true, classes: "deimos_panel",
 						onModify: "inspectorModify",
 						onRequestPositionValue: "inspectorRequestPositionValue",
-						onPositionDataUpdated: "inspectorPositionDataUpdated"
+						onPositionDataUpdated: "inspectorPositionDataUpdated",
+						onControlDynamicUI: "inspectorControlDynamicUI"
 					}
 				]}
 			]}
@@ -187,6 +188,11 @@ enyo.kind({
 		this.$.designer.setCurrentKind(this.kinds[this.index]);
 		this.$.designer.renderCurrentKind(inSelectId);
 	},
+	//* Show moonstone dynamic UI components
+	showDynamicUI: function(inSelectId, inEvent) {
+		this.$.designer.setCurrentKind(this.kinds[this.index]);
+		this.$.designer.refreshCurrentKind(inSelectId, inEvent);
+	},
 	refreshInspector: function() {
 		enyo.job("inspect", enyo.bind(this, function() {
 			this.$.inspector.inspect(this.$.designer.selection);
@@ -245,6 +251,10 @@ enyo.kind({
 		}
 
 		this.rerenderKind(item.aresId);
+	},
+	inspectorControlDynamicUI: function(inSender, inEvent) {
+		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		this.showDynamicUI(item.aresId, inEvent);
 	},
 	layoutKindUpdated: function(inLayoutKind) {
 		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);

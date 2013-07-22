@@ -3,7 +3,8 @@ enyo.kind({
 	kind: "FittableRows",
 	events: {
 		onModify: "",
-		onAction: ""
+		onAction: "",
+		onControlDynamicUI: ""
 	},
 	published: {
 		filterLevel: null,		// Value will be given by Inspector.FilterXXX "checked" item.
@@ -16,7 +17,8 @@ enyo.kind({
 		{kind: "Scroller", fit: true, components: [
 			{name: "content", kind: "FittableRows", onActivate: "inheritAttributeToggle"}
 		]},
-		{name: "filterLevel", kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"}
+		{name: "filterLevel", kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"},
+		{name: "controlDynamicUI", kind: "FittableRows", ontap: "updateControlDynamicUI"}
 	],
 	handlers: {
 		onChange: "change",
@@ -261,6 +263,23 @@ enyo.kind({
 			}
 		).render();
 	},
+	//*show the dynamic UI compoent controller below inspector
+	showDynamicUIControl: function(inKindName) {
+		this.$.controlDynamicUI.destroyComponents();
+
+		switch(inKindName) {
+			case "moon.Panels":
+				this.$.controlDynamicUI.createComponent({name: "panels.prev", kind: "onyx.Button", content: "Previous Panel"});
+				this.$.controlDynamicUI.createComponent({name: "panels.next", kind: "onyx.Button", content: "Next Panel"});
+				break;
+			default:
+				break;
+		}
+
+		this.$.controlDynamicUI.render();
+
+		return;
+	},
 	trimWhitespace: function(inStr) {
 		inStr = inStr || "";
 		return inStr.replace(/\s/g, "");
@@ -381,7 +400,9 @@ enyo.kind({
 				enyo.warn("Inspector has unknown filterType: ", this.filterType);
 				break;
 		}
-		
+
+		this.showDynamicUIControl(inControl.kind);
+
 		this.$.content.render();
 		// Resize to adjust content container height for filterLevel hide/show
 		this.resized();
@@ -531,6 +552,29 @@ enyo.kind({
 			this.setFilterLevel(inEvent.originator.value);
 			this.inspect(this.selected);
 		}
+		return true;
+	},
+	/**
+	 * Update dynamic UI component control UI by selecting a certain UI component on the designer.
+	 * @protected
+	 */
+	updateControlDynamicUI: function(inSender, inEvent) {
+		//Add code here to affect enable dynamic UI control on ARES designer
+		var splitString = inEvent.originator.name.split(".");
+		switch(splitString[0]) {
+			case "panels":
+				if(splitString[1] == "prev") {
+					this.doControlDynamicUI({inKindName: "panels", inKindProp: "prev"});
+				} else if(splitString[1] == "next") {
+					this.doControlDynamicUI({inKindName: "panels", inKindProp: "next"});
+				} else {
+					enyo.warn("Impossible input case, dynamic UI control on inspector");
+				}
+				break;
+			default:
+				break;
+		}
+
 		return true;
 	},
 	//* @protected
