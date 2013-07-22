@@ -56,6 +56,7 @@ enyo.kind({
 		onSaveDocument: "saveDocument", 
 		onSaveAsDocument: "saveAsDocument", 
 		onCloseDocument: "closeDocument", 
+		onCloseAllDocument: "closeAllDocument",
 		onDesignDocument: "designDocument", 
 		onUpdate: "phobosUpdate",
 		onCloseDesigner: "closeDesigner", 
@@ -263,6 +264,14 @@ enyo.kind({
 				self.showProjectView();
 			}
 		});
+	},
+	closeAllDocument: function(inSender, inEvent) {
+		this.trace("sender:", inSender, ", event:", inEvent);
+		var files = Ares.Workspace.files;
+		while(files.models.length) {
+			this._closeDocument(files.at(0).getId());
+		}
+		this.showProjectView();
 	},
 	/* @private */
 	closeSomeDocuments: function(inSender, inEvent) {
@@ -558,7 +567,7 @@ enyo.kind({
 			ondragfinish      : "stopPanelEvent",
 			components: [
 				{components: [
-					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
+					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onCloseAllDocument: "closeAllDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
 				]},
 				{components: [
 					{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
