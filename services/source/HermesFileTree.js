@@ -16,7 +16,8 @@ enyo.kind({
 		onFileChanged: "",
 		onFolderChanged: "",
 		onTreeChanged: "",
-		onGrabberClick: ""
+		onGrabberClick: "",
+		onPathChecked: ""
 	},
 	handlers: {
 		onItemDown: "itemDown",
@@ -1172,7 +1173,7 @@ enyo.kind({
 		waypoints.push(track);
 		track.followNodePath(nodes, waypoints, next);
 	},
-	checkNodePath: function (nodePath, checkedName) {
+	checkNodePath: function (nodePath) {
 		var track = this.$.serverNode,
 			waypoints = [],
 			nodes = nodePath.split("/"),
@@ -1181,12 +1182,13 @@ enyo.kind({
 		var next = (function(inErr) {
 			if (inErr) {
 				this.warn("Path following failed", inErr);
+				this.doPathChecked({status: false});
 				return false;
 			} else {
 				if (waypoints.length == l) {
-					checkedName(true);
+					this.doPathChecked({status: true});
 				} else {
-					checkedName(false);
+					this.doPathChecked({status: false});
 				}
 			}
 		}).bind(this);

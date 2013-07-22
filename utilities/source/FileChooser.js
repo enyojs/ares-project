@@ -259,8 +259,8 @@ enyo.kind({
 		this.$.hermesFileTree.gotoNodePath(selectedName);
 	},
 	/** @public */
-	checkSelectedName: function(selectedName, checkedName) {
-		return this.$.hermesFileTree.checkNodePath(selectedName, checkedName);
+	checkSelectedName: function(selectedName) {
+		this.$.hermesFileTree.checkNodePath(selectedName);
 	},
 	$LS: function(msg, params) {
 		var tmp = new enyo.g11n.Template($L(msg));
