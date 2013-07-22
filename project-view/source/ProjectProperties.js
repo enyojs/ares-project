@@ -129,7 +129,7 @@ enyo.kind({
 	TEMPLATE_NONE: "NONE",
 	selectedTemplate: undefined,
 	selectedAddSource: undefined,
-
+	targetProject: null,
 	services: {},
 
 	create: function() {
@@ -305,6 +305,10 @@ enyo.kind({
 		this.waterfallDown("onChangeProjectStatus", inEvent);
 	},
 
+	setTargetProject: function(project) {
+		this.targetProject = project;
+	},
+
 	confirmTap: function(inSender, inEvent) {
 		var ppConf ;
 		// retrieve modified values
@@ -323,6 +327,8 @@ enyo.kind({
 			var service = this.services[serviceId];
 			this.config.providers[service.id] = service.panel.getProjectConfig();
 			this.config.providers[service.id].enabled = service.checkBox.checked;
+			//Perform "save" action on service-specific plugin when closing the project properties popup
+			service.panel.saveProjectConfig(this.targetProject, this.config);
 		}, this);
 
 		ppConf = this.config.preview ;

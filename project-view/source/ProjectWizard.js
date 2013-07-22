@@ -335,8 +335,7 @@ enyo.kind({
 	modal: true, centered: true, floating: true, autoDismiss: false,
 
 	events: {
-		onProjectSelected: "",
-		onUpdateAppInfo: ""
+		onProjectSelected: ""
 	},
 	handlers: {
 		onDone: "hide",
@@ -365,9 +364,10 @@ enyo.kind({
 		if (target) {
 			var config = target.getConfig();
 			this.targetProject = target ;
-			this.$.propertiesWidget.setupModif() ;
+			this.$.propertiesWidget.setupModif();
 			this.$.propertiesWidget.preFill(config.data);
 			this.$.propertiesWidget.activateFileChooser(true);
+			this.$.propertiesWidget.setTargetProject(target);
 			this.show();
 		}
 	},
@@ -392,8 +392,6 @@ enyo.kind({
 			var oldName = this.targetProject.getName();
 			Ares.Workspace.projects.renameProject(oldName, inEvent.data.name);
 		}
-
-		this.doUpdateAppInfo({project: this.targetProject});
 
 		return true ; // stop bubble
 	},
