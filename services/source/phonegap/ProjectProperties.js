@@ -61,7 +61,6 @@ enyo.kind({
 			}
 		],
 
-
 		platformDrawersContent: [
 			{
 				id: "android",
@@ -120,13 +119,10 @@ enyo.kind({
 	}
 });
 
-
-
 /**
  * UI: Phonegap pane in the ProjectProperties popup
  * @name Phonegap.ProjectProperties
  */
-
 enyo.kind({
 	name: "Phonegap.ProjectProperties",
 	kind: "Ares.ProjectProperties",
@@ -194,7 +190,7 @@ enyo.kind({
 		 * Create and initialise the content of all the common drawers which containe 
 		 * parameters shared with all the platforms presented by
 		 * Phonegap build.	
-		 * @param  {Arary} inDrawers defined in the array {Phonegap.UIConfiguration.commonDrawersContent}
+		 * @param  {Array} inDrawers defined in the array {Phonegap.UIConfiguration.commonDrawersContent}
 		 * @private
 		 */
 		function createCommonDrawers(inDrawers) {
@@ -288,7 +284,7 @@ enyo.kind({
 					name: row.name,
 					label: row.label,
 					value: row.content,	
-					defaultValue: row.defaultValue
+					defaultValue: row.defaultValue					
 				});
 			}, this);
 		}
@@ -297,26 +293,66 @@ enyo.kind({
 	/** public */
 	setProjectConfig: function (config) {
 		this.config = config;		
-		this.trace("config:", this.config);		
 		this.config.enabled = true;
-		this.$.pgConfId.setValue(config.appId || '');
+				this.$.pgConfId.setValue(config.appId || '');
 		this.config.targets = this.config.targets || {};
+		
+		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {			
+			enyo.forEach(drawer.rows, function (row) {				
+				
+				var configParameterValue = (function(){
+					var value;
+					if(row.name ==='icon'){
+						value = config.icon[drawer.id].src;
+					} else { 
+						if (row.name ==='splashScreen'){
+							value = config.splashScreen[drawer.id].src;
+						} else {
+							 if(drawer.id === "permissions"){
+								value = config.features[row.name];
+							} else{
+								value = config.preferences[row.name];
+							}
+						}
+					}
+					return value;
+				}).bind(this);
 
-		enyo.forEach(this.platformDrawers, function (target) {
-			this.$.targetsRows.$[target.id].setProjectConfig(this.config.targets[target.id]);
+				this.$.targetsRows.$[drawer.id].setProjectConfig(this.config.targets[drawer.id]);				
+				this.$.targetsRows.$[drawer.id].$.drawer.$[row.name].setDefaultValue(configParameterValue.call(this));
+									
+			}, this);
 		}, this);
+		// function to update the attributs values of the icon and splash screen in ios drawer
+		var updateIosImgAttributs = (function(inImg){
+				this.$.targetsRows.$.ios.$.drawer.$[inImg].setHeight(config[inImg].ios.height);
+				this.$.targetsRows.$.ios.$.drawer.$[inImg].setWidth(config[inImg].ios.width);
+			}).bind(this);
+
+		// function to update the attribut value of the icon and splash screen in android drawer
+		var updateAndroidImgAttributs = (function(inImg){
+			this.$.targetsRows.$.android.$.drawer.$[inImg].setDensity(config[inImg].android.density);
+		}).bind(this);
+
+		var imgs = ['icon', 'splashScreen'];
+		
+		enyo.forEach(imgs, function(img){
+			updateIosImgAttributs.call(this, img);
+			updateAndroidImgAttributs.call(this, img);
+		}, this);
+
 		this.refresh();
 	},
 
 	/** public */
 	getProjectConfig: function () {
 		this.config.appId = this.$.pgConfId.getValue();
-		//this.config.icon.src = this.$.pgIconUrl.getValue();
-
+		
+		this.trace("Project config:", this.config);	
 		enyo.forEach(this.platformDrawers, function (target) {
 			this.config.targets[target.id] = this.$.targetsRows.$[target.id].getProjectConfig();
 		}, this);
-		this.trace("config:", this.config);	
+		
 		return this.config;
 	},
 	/**
@@ -410,39 +446,32 @@ enyo.kind({
 	},
 	setProjectConfig: function (config) {
 		
-		this.trace("id:", this.targetId, "config:", config);
-		
-		this.config = config;
+		this.trace("id:", this.targetId, "config:", config);		
+		this.config = config;		
 		this.setEnabled( !! this.config);
 		if (this.enabled && this.$.drawer.$.keySelector) {
 			this.$.drawer.$.keySelector.setActiveKeyId(this.config.keyId);
-		}
+		}		
 	},
 	getProjectConfig: function () {
 		if (this.enabled && this.$.drawer.$.keySelector) {
 			this.config.keyId = this.$.drawer.$.keySelector.getActiveKeyId();
-		}
-		
-		this.trace("id:", this.targetId, "config:", this.config);
-		
+		}		
+		this.trace("id:", this.targetId, "config:", this.config);	
 		return this.config;
 	},
 	/**
 	 * @private
 	 */
-	targetNameChanged: function (old) {
-		
-		this.trace(old, "->", this.enabled);
-		
+	targetNameChanged: function (old) {		
+		this.trace(old, "->", this.enabled);		
 		this.$.targetLbl.setContent(this.targetName);
 	},
 	/**
 	 * @private
 	 */
-	enabledChanged: function (old) {
-		
-		this.trace("id:", this.targetId, old, "->", this.enabled);
-		
+	enabledChanged: function (old) {		
+		this.trace("id:", this.targetId, old, "->", this.enabled);		
 		this.$.targetChkBx.setChecked(this.enabled);
 		this.updateDrawer();
 		if (this.enabled) {
@@ -467,8 +496,7 @@ enyo.kind({
 				this.$.drawer.$.keySelector.destroy();
 			}
 
-			var keys = provider.getKey(this.targetId);
-			
+			var keys = provider.getKey(this.targetId);			
 			this.trace("id:", this.targetId, "keys:", keys);
 			
 			if (keys) {
@@ -488,16 +516,16 @@ enyo.kind({
 	/**
 	 * @private
 	 */
-	updateDrawer: function () {
-		
+	updateDrawer: function () {		
 		this.setEnabled(this.$.targetChkBx.checked);
 	},
 
 	unfold: function () {
 		this.$.drawer.setOpen(this.fold);
-		this.fold = !this.fold;
+		this.fold = !this.fold;	
 	}
 });
+
 /**
  * Define the drawers "general" and "permissions"
  */
@@ -516,8 +544,8 @@ enyo.kind({
 				{tag: "label", name: "drawerLbl", classes: "ares-project-properties-common_drawer_header"}
 			]},			 
 			{name: "drawer", orient: "v", kind: "onyx.Drawer", open: false}
-
 	],
+
 	/**
 	 * @private
 	 */
@@ -527,8 +555,12 @@ enyo.kind({
 		this.drawerNameChanged();
 	},
 
+	setProjectConfig: function (config) {
+		this.config = config;			
+	},
+
 	/**
-	 * Fold/Unfold the content of a drawer
+	 * Fold/Unfold the content of a drawer.
 	 * @private
 	 */
 	unfold: function () {
@@ -536,6 +568,9 @@ enyo.kind({
 		this.fold = !this.fold;
 	},
 
+	/**
+	 * @private
+	 */
 	drawerNameChanged: function () {
 		this.$.drawerLbl.setContent(this.drawerName);
 	}
