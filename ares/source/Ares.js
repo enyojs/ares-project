@@ -123,6 +123,9 @@ enyo.kind({
 	_openDocument: function(projectData, file, next) {
 		var self = this;
 		var fileDataId = Ares.Workspace.files.computeId(file);
+		if (! fileDataId ) {
+			throw new Error ('Undefined fileId for file ' + file.name + ' service ' + file.service);
+		}
 		var fileData = Ares.Workspace.files.get(fileDataId);
 		if (fileData) {
 			// useful when double clicking on a file in HermesFileTree
