@@ -328,7 +328,7 @@ enyo.kind({
 			this.config.providers[service.id] = service.panel.getProjectConfig();
 			this.config.providers[service.id].enabled = service.checkBox.checked;
 			//Perform "save" action on service-specific plugin when closing the project properties popup
-			service.panel.saveProjectConfig(this.targetProject, this.config);
+			service.panel.saveProjectConfig(this.targetProject);
 		}, this);
 
 		ppConf = this.config.preview ;
