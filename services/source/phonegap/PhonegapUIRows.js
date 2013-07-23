@@ -151,6 +151,68 @@ enyo.kind({
 	}
 });
 
+enyo.kind({
+	name: "Phonegap.ProjectProperties.AccessRow",
+	kind: "Phonegap.ProjectProperties.Row",
+	classes: "ares-project-properties-drawer-row",
+	debug: false,
+	components: [
+		{name: "label", classes: "ares-project-properties-drawer-row-label"},
+		{
+			kind: "onyx.InputDecorator",
+			classes: "ares-project-properties-input-medium", 
+			components: [{
+					kind: "onyx.Input",	
+					name: "ConfigurationInput", 
+					onchange: "updateConfigurationValue"
+				}
+			]
+		}
+	],
+
+	/**
+	 * @private
+	 */
+	create: function () {
+		ares.setupTraceLogger(this);
+		this.inherited(arguments);
+		this.labelChanged();
+	},
+
+	/**
+	 * @private
+	 */
+	labelChanged: function () {
+		this.$.label.setContent(this.label);
+	},
+
+	/**
+	 * @private
+	 */
+	defaultValueChanged: function () {
+		this.$.ConfigurationInput.setValue(this.defaultValue);
+	},
+
+	/**
+	 * Event handler that is triggered when the value of the input change. It defines
+	 * a function and passe it as a parameter in the bubbling action to let the 
+	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
+	 * in the file "project.json"
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
+	updateConfigurationValue: function (inSender, inValue) {
+		var saveProperty = (function(inConfig) {
+			this.trace("Saving operation ... Originator: ", this.name , " Value: ",inSender.value);
+			inConfig.access.origin = inSender.value;			
+		}).bind(this);		
+
+		this.bubble("onEditConfig", saveProperty);
+	}
+});
+
 /**
  * This Kind define a row containing a Picker widget and attached to a drawer in {Phonegap.ProjectProperties}
  */
