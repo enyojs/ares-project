@@ -7,7 +7,7 @@ enyo.kind({
 		onMovePanel:"",
 	},
 	components: [
-		{kind: "HermesFileTree", dragAllowed: true}
+		{kind: "HermesFileTree", dragAllowed: true, classes:"enyo-fit"}
 	],
 	handlers: {
 		onGrabberClick : "activePanel"
