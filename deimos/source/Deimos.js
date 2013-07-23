@@ -607,7 +607,7 @@ enyo.kind({
 		
 		// Copy each user-defined property from _atts_ to the cleaned component
 		for (att in atts) {
-			if ((inKeepAresIds && att === "aresId") || (att !== "aresId" && att !== "components" && att !== "__aresOptions")) {
+			if ((inKeepAresIds && att === "aresId") || (att !== "aresId" && att !== "components" && att !== "__aresOptions")|| (att !== "aresId" && att !== "content")) {
 				cleanComponent[att] = atts[att];
 			}
 		}
