@@ -121,7 +121,7 @@ enyo.kind({
 	},
 	saveAsDocAction: function() {
 		var file = this.docData.getFile();
-		this.$.saveAsPopup.connectProject(this.projectData, (function() {
+		this.$.saveAsPopup.connectProject(this.docData.getProjectData(), (function() {
 			var path = file.path;
 			var relativePath = path.substring(path.indexOf(this.projectData.id) + this.projectData.id.length, path.length);
 			this.$.saveAsPopup.pointSelectedName(relativePath, true);
