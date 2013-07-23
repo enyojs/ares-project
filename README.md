@@ -116,7 +116,7 @@ You may also want to increase the log verbosity, in order to better understand w
 Known Bugs
 ----------
 
-See KNOWN-BUGS.md
+See this [list of known issues](KNOWN-BUGS.md)
 
 [Features](id:features)
 ----------
