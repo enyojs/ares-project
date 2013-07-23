@@ -260,7 +260,7 @@ enyo.kind({
 			item.layoutKind && delete item.layoutKind;
 			this.updateStyleForNonAbsolutePositioningLayoutKind(item);
 		}
-		
+		this.addAresKindOptions(this.kinds[this.index].components);
 		this.rerenderKind(item.aresId);
 		return true;
 	},
@@ -406,6 +406,7 @@ enyo.kind({
 		
 		// Copy clone style props to inspector
 		this.$.inspector.userDefinedAttributes[clone.aresId].style = clone.style;
+		this.addAresKindOptions(this.kinds[this.index].components);
 		
 		if (beforeId) {
 			if (!this.insertItemBefore(clone, target, beforeId)) {
