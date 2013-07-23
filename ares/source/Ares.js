@@ -75,6 +75,7 @@ enyo.kind({
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
 	projectListWidth: 300,
+	isProjectView: true,
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
@@ -354,6 +355,7 @@ enyo.kind({
 		panel.applyStyle("width", (this.aresContainerBounds.width - this.projectListWidth) + "px");
 	},
 	hideProjectView: function(inSender, inEvent) {
+		this.isProjectView = false;
 		this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex].applyStyle("width", null);
 		this.componentsRegistry.harmonia.addClass("ares-small-screen");
 		this.$.aresLayoutPanels.reflow();
@@ -361,6 +363,7 @@ enyo.kind({
 		this.componentsRegistry.harmonia.showGrabber();
 	},
 	showProjectView: function(inSender, inEvent) {
+		this.isProjectView = true;
 		this.componentsRegistry.harmonia.removeClass("ares-small-screen");		
 		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
 		this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
@@ -385,7 +388,7 @@ enyo.kind({
 	},
 	resizeHandler: function(inSender, inEvent) {
 		this.inherited(arguments);
-		if(this.$.aresLayoutPanels.getIndex() === this.projectListIndex){
+		if(this.$.aresLayoutPanels.getIndex() === this.projectListIndex && this.isProjectView){
 			this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
 		}
 	},
