@@ -224,7 +224,6 @@ enyo.kind({
 	 * @private
 	 */
 	defaultValueChanged: function(){
-		this.defaultValue = this.defaultValue;
 		this.activatePickerItemByContent(this.defaultValue);
 	},
 
