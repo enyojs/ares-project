@@ -40,6 +40,7 @@ enyo.kind({
 					{name: "orientation", label:"Orientation",content:["both", "landscape", "portrait"], defaultValue: "both", type: "PickerRow"},
 					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], defaultValue: "universal", type: "PickerRow"},
 					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},
+					{name: "access", label: "Access origin", content: "", defaultValue: "", type: "AccessRow"},
 					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "icon.png", type: "GeneralImgRow"},
 					{name: "splashScreen", label: "SplashScreen", content: "", defaultValue: "", type: "GeneralImgRow"}
 				]		
@@ -308,7 +309,7 @@ enyo.kind({
 						if (row.name ==='splashScreen'){
 							value = config.splashScreen[drawer.id].src;
 						} else {
-							 if(drawer.id === "permissions"){
+							 if(drawer.id === 'permissions'){
 								value = config.features[row.name];
 							} else{
 								value = config.preferences[row.name];
@@ -320,7 +321,7 @@ enyo.kind({
 
 				this.$.targetsRows.$[drawer.id].setProjectConfig(this.config.targets[drawer.id]);				
 				this.$.targetsRows.$[drawer.id].$.drawer.$[row.name].setDefaultValue(configParameterValue.call(this));
-									
+				this.$.targetsRows.$.general.$.drawer.$.access.setDefaultValue(config.access.origin);					
 			}, this);
 		}, this);
 		// function to update the attributs values of the icon and splash screen in ios drawer
