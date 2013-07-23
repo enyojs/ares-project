@@ -119,8 +119,12 @@ enyo.kind({
 	},
 	saveAsDocAction: function() {
 		var file = this.docData.getFile();
-		this.$.saveAsPopup.setSelectedName(file.name);
-		this.$.saveAsPopup.show();
+		this.$.saveAsPopup.connectProject(this.projectData, (function() {
+			var path = file.path;
+			var relativePath = path.substring(path.indexOf(this.projectData.id) + this.projectData.id.length, path.length);
+			this.$.saveAsPopup.pointSelectedName(relativePath, true);
+			this.$.saveAsPopup.show();
+		}).bind(this));
 	},
 	saveAsFileChosen: function(inSender, inEvent) {
 		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
