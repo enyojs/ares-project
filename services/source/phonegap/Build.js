@@ -1037,6 +1037,14 @@ enyo.kind({
 			createSplashScreenXMLRow.call(self, target);			
 		}, this);
 
+		xw.writeComment("Access external websites ressources");
+		
+		xw.writeStartElement('access');
+		xw.writeAttributeString('origin', phonegap.access.origin);		
+		xw.writeEndElement(); // access			
+		
+	
+
 		xw.writeEndElement();	// widget
 
 		//xw.writeEndDocument(); called by flush()
@@ -1105,6 +1113,9 @@ enyo.kind({
 				webos: {src: ""} 
 			},
 			plugins: {
+			}, 
+			access : {
+				"origin": "http://127.0.0.1"
 			}
 		}
 	}
