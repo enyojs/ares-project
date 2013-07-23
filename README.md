@@ -113,6 +113,11 @@ You may also want to increase the log verbosity, in order to better understand w
 
 	$ node ide.js --level=info
 
+Known Bugs
+----------
+
+See this [list of known issues](KNOWN-BUGS.md)
+
 [Features](id:features)
 ----------
 
