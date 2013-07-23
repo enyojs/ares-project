@@ -29,10 +29,7 @@ enyo.kind({
 					classes: "ares-panel-min-width enyo-fit",
 					onFileDblClick: "openDocument",
 					onFileChanged: "closeDocument",
-					onFolderChanged: "closeSomeDocuments",
-					ondragstart	      : "stopEvent",
-					ondrag            : "stopEvent",
-					ondragfinish      : "stopEvent"
+					onFolderChanged: "closeSomeDocuments"
 				},
 				{kind: "designerPanels", name: "codeEditor"}
 			]
@@ -361,7 +358,6 @@ enyo.kind({
 		this.componentsRegistry.harmonia.addClass("ares-small-screen");
 		this.$.aresLayoutPanels.reflow();
 		this.$.aresLayoutPanels.setIndexDirect(this.hermesFileTreeIndex);
-		this.$.aresLayoutPanels.setDraggable(true);
 		this.componentsRegistry.harmonia.showGrabber();
 	},
 	showProjectView: function(inSender, inEvent) {
@@ -369,7 +365,6 @@ enyo.kind({
 		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
 		this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
 		this.$.aresLayoutPanels.reflow();
-		this.$.aresLayoutPanels.setDraggable(false);
 		this.componentsRegistry.harmonia.hideGrabber();
 	},
 	changeGrabberDirection:function(inSender, inEvent){
