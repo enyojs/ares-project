@@ -539,7 +539,15 @@ enyo.kind({
 		// open anything before it is available.  Also do not
 		// try to open top-level root & folders.
 		if (!node.file.isDir && !node.file.isServer && this.projectUrlReady) {
-			this.doFileDblClick({file: node.file, projectData: this.projectData});
+			if (! node.file.service) {
+				// FIXME: root cause not found
+				this.warn("node.file found without service: adding service...");
+				node.file.service = inEvent.originator.service ;
+			}
+			this.doFileDblClick({
+				file: node.file,
+				projectData: this.projectData
+			});
 		}
 
 		// handled here (don't bubble)
