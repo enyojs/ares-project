@@ -241,15 +241,26 @@ enyo.kind({
 			});
 	},
 	/** @public */
+	reset: function () {
+		this.$.sources.show();
+	},
+	/** @public */
 	connectProject: function (project, next) {
 		this.project = project;
 		this.$.sources.hide();
 		this.$.hermesFileTree.connectProject(this.project, next);
 	},
 	/** @public */
-	pointSelectedName: function(selectedName) {
+	pointSelectedName: function(selectedName, valid) {
 		this.setSelectedName(selectedName);
-		this.$.hermesFileTree.gotoNodePath(this.selectedName);
+		if (!valid) {
+			selectedName = "/";
+		} 
+		this.$.hermesFileTree.gotoNodePath(selectedName);
+	},
+	/** @public */
+	checkSelectedName: function(selectedName) {
+		this.$.hermesFileTree.checkNodePath(selectedName);
 	},
 	$LS: function(msg, params) {
 		var tmp = new enyo.g11n.Template($L(msg));
