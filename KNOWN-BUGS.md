@@ -34,4 +34,10 @@ ChildBrowser plugin can be configured in the application's
 `project.json` file.  Edit your `project.json` to remove the
 `ChildBrowser` key and its associated value.
 
+### Build fails with application too large
+
+Non minified upload of source includes target directory containing
+already build packages. Remove the `target` directory from your
+application source directory.
+
 
