@@ -216,7 +216,7 @@ enyo.kind({
 	
 		enyo.forEach(userData.user.apps.all, 
 			function(appId){
-				if (projectAppId == appId.id) {							
+				if (projectAppId === appId.id.toString()) {							
 					appIdExist = true;				
 				}
 			}, this);
