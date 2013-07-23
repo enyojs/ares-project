@@ -140,6 +140,38 @@ enyo.kind({
 		};
 		this._getToken(next);
 	},
+	/**
+	 * Get the project instance that contain the data of "project.json" file of
+	 * a project. Also check if the the project is configured for Phonegap service.
+	 * @param  {Object} project contain informations about the Ares project.
+	 * @private
+	 */
+	getConfigInstance: function(project){
+		if (!project instanceof Ares.Model.Project) {
+					next(new Error("Invalid parameters"));
+					return;
+			}
+				
+		var config = project.getConfig().getData();		
+
+		if(!config || !config.providers || !config.providers.phonegap) {
+			next(new Error("Project not configured for Phonegap Build"));
+			return;
+		}
+
+		return config;
+	},
+
+	/**
+	 * Get the parameter AppId of the configuration object instance.
+	 * @param  {Object} project contain informations about the Ares project.
+	 * @return {String}         The AppId of the current project's application.
+	 * @private
+	 */
+	getConfigAppId: function(project){		
+		var config = this.getConfigInstance(project);
+		return config.providers.phonegap.appId;
+	},
 
 	/**
 	 * Authorize & then retrieve information about the currently registered user
@@ -153,21 +185,55 @@ enyo.kind({
 	authorize: function(next) {
 		var self = this;
 		this.trace();
-		this._getUserData(function(err, userData) {
+		this.getUserData(function(err, userData) {
 			if (err) {
 				self._getToken(function(err) {
 					if (err) {
 						self.doLoginFailed({id: self.config.id});
 						next(err);
 					} else {
-						self._getUserData(next);
+						self.getUserData(next);
 					}
 				});
-			} else {
-				next(null, userData);
+			} else {				
+				next(null, userData);				
 			}
 		});
 	},
+	
+	/**
+	 * Check if the AppId indicated in the file "project.json" exist 
+	 * in the Phonegap account before launching the submit build action.
+	 * @param  {Object}   project  project contain informations about the Ares project.
+	 * @param  {Object}   userData contains detailed informations about the owner of Phonegap Build account.
+	 * @param  {Function} next     is a CommonJS callback
+	 * @private
+	 */
+	checkAppId: function (project, userData, next) {	
+		
+		var projectAppId = this.getConfigAppId(project);
+		var appIdExist = false;
+	
+		enyo.forEach(userData.user.apps.all, 
+			function(appId){
+				if (projectAppId === appId.id.toString()) {							
+					appIdExist = true;				
+				}
+			}, this);
+		
+		if (appIdExist){
+			next(null, userData);
+		} else {
+			var config = this.getConfigInstance(project);
+			config.providers.phonegap.appId = "";
+			ServiceRegistry.instance.setConfig(config);
+			var errorMsg = 	"The AppId "+ projectAppId +" do not exist in the Phonegap Build account " +
+					userData.user.email + ". Please choose a correct AppId";
+			next(errorMsg);
+		}
+	},
+
+
 
 	/**
 	 * Get a developer token from user's credentials
@@ -208,7 +274,7 @@ enyo.kind({
 	 * @param {Function} next is a CommonJS callback
 	 * @private
 	 */
-	_getUserData: function(next) {
+	getUserData: function(next) {
 		this.trace();
 		var req = new enyo.Ajax({
 			url: this.url + '/api/v1/me'
@@ -251,6 +317,8 @@ enyo.kind({
 		req.error(this, this._handleServiceError.bind(this, "Unable to get application build status", next));
 		req.go(); 
 	},
+
+
 	
 	/**
 	 * Show the pop-up containing informations about the previous  build of the 
@@ -393,6 +461,7 @@ enyo.kind({
 		this.trace("Starting phonegap build: " + this.url + '/build');
 		async.waterfall([
 			enyo.bind(this, this.authorize),
+			enyo.bind(this, this.checkAppId, project),
 			enyo.bind(this, this._updateConfigXml, project),
 			enyo.bind(this, this._getFiles, project),
 			enyo.bind(this, this._submitBuildRequest, project),
@@ -425,19 +494,8 @@ enyo.kind({
 	 * @private
 	 */
 	_updateConfigXml: function(project, userData, next) {
-		if (!project instanceof Ares.Model.Project) {
-			next(new Error("Invalid parameters"));
-			return;
-		}
 		
-		var config = project.getConfig().getData();
-		this.trace("starting... project:", project);
-
-		if(!config || !config.providers || !config.providers.phonegap) {
-			next(new Error("Project not configured for Phonegap Build"));
-			return;
-		}
-		this.trace("PhoneGap App Id:", config.providers.phonegap.appId);
+		var config = this.getConfigInstance(project);
 
 		var req = project.getService().createFile(project.getFolderId(), "config.xml", this._generateConfigXml(config));
 		req.response(this, function _savedConfigXml(inSender, inData) {
