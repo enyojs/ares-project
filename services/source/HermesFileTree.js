@@ -18,7 +18,6 @@ enyo.kind({
 		onTreeChanged: "",
 		onGrabberClick: ""
 	},
-	classes:"enyo-fit",
 	handlers: {
 		onItemDown: "itemDown",
 		onItemDragstart: "itemDragstart",
