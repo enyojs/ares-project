@@ -470,6 +470,13 @@ enyo.kind({
 
 		this.checker = inData.input;
 		
+		// FIXME ENYO-2761: this is a workaround that shows the developer that the path is not
+		// valid because it doesn't begin with an "/".
+		if (inData.value.indexOf("/") !== 0) {
+			this.pathChecked(inSender, {status: false});
+			return true;
+		}
+
 		this.$.selectFilePopup.connectProject(this.targetProject, (function() {
 			this.$.selectFilePopup.checkSelectedName(inData.value);
 		}).bind(this));		
