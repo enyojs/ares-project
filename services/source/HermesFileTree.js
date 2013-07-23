@@ -16,7 +16,8 @@ enyo.kind({
 		onFileChanged: "",
 		onFolderChanged: "",
 		onTreeChanged: "",
-		onGrabberClick: ""
+		onGrabberClick: "",
+		onPathChecked: ""
 	},
 	handlers: {
 		onItemDown: "itemDown",
@@ -1152,7 +1153,7 @@ enyo.kind({
 			i,
 			nodes = nodePath.split("/");
 
-		var next = function(inErr) {
+		var next = (function(inErr) {
 			if (inErr) {
 				this.warn("Path following failed", inErr);
 			} else {
@@ -1164,7 +1165,31 @@ enyo.kind({
 
 				this.refreshFileTree( function() { waypoints[i-1].doAdjustScroll(); }, waypoints[i-1].file.id );
 			}
-		}.bind(this);
+		}).bind(this);
+
+		nodes.shift();
+		waypoints.push(track);
+		track.followNodePath(nodes, waypoints, next);
+	},
+	checkNodePath: function (nodePath) {
+		var track = this.$.serverNode,
+			waypoints = [],
+			nodes = nodePath.split("/"),
+			l = nodes.length;
+		
+		var next = (function(inErr) {
+			if (inErr) {
+				this.warn("Path following failed", inErr);
+				this.doPathChecked({status: false});
+				return false;
+			} else {
+				if (waypoints.length == l) {
+					this.doPathChecked({status: true});
+				} else {
+					this.doPathChecked({status: false});
+				}
+			}
+		}).bind(this);
 
 		nodes.shift();
 		waypoints.push(track);
