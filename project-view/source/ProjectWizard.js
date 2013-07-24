@@ -47,6 +47,7 @@ enyo.kind({
 
 		dirPopup.$.header.setContent("Select a directory containing the new project") ;
 		dirPopup.show();
+		this.hide();
 	},
 
 	// Step 2: once the directory is selected by user, show the project properties popup
@@ -198,7 +199,7 @@ enyo.kind({
 		var testCallBack = inEvent.testCallBack;
 		// once project.json is created, setup and show project properties widget
 		this.$.selectDirectoryPopup.hide();
-		this.$.propertiesWidget.show() ;
+		this.show() ;
 		if (testCallBack) {
 			testCallBack();
 		}

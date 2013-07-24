@@ -67,13 +67,9 @@ enyo.kind({
 		onRegisterMe: ""
 	},
 	handlers: {
-		ondragstart: "drop",
-		ondrag: "drop",
-		ondragfinish: "drop",
 		onCss: "newcssAction",
 		onReparseAsked: "reparseAction"
 	},
-	drop: function() { return true;},
 	published: {
 		projectData: null
 	},
