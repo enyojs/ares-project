@@ -48,6 +48,7 @@ enyo.kind({
 		dirPopup.$.header.setContent("Select a directory containing the new project") ;
 		dirPopup.$.hermesFileTree.showNewFolderButton();
 		dirPopup.show();
+		this.hide();
 	},
 
 	// Step 2: once the directory is selected by user, show the project properties popup
@@ -68,7 +69,7 @@ enyo.kind({
 		propW.preFill(ProjectConfig.PREFILLED_CONFIG_FOR_UI),
 		propW.$.projectDirectory.setContent(this.selectedDir.path);
 		propW.$.projectName.setValue(this.selectedDir.name);
-		propW.activateFileChooser(false);
+		propW.activateFileChoosers(false);
 
 		async.series([
 				this.checkProjectJson.bind(this, inSender, inEvent),
@@ -199,7 +200,7 @@ enyo.kind({
 		var testCallBack = inEvent.testCallBack;
 		// once project.json is created, setup and show project properties widget
 		this.$.selectDirectoryPopup.hide();
-		this.$.propertiesWidget.show() ;
+		this.show() ;
 		if (testCallBack) {
 			testCallBack();
 		}
@@ -341,17 +342,20 @@ enyo.kind({
 		onDone: "hide",
 		onModifiedConfig: "saveProjectConfig",
 		onModifiedSource: "populateProject",
-		onSelectFile: "selectFile"
+		onSelectFile: "selectFile",
+		onCheckPath: "checkPath",
+		onPathChecked: "pathChecked"
 	},
 	classes:"ares-masked-content-popup",
 	components: [
-		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource"},
+		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource", onFileChoosersChecked: "fileChoosersChecked"},
 		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, onFileChosen: "selectFileChosen"}
 	],
 
 	debug: false,
 	targetProject: null,
 	chooser: null,
+	checker: null,
 
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
@@ -366,9 +370,14 @@ enyo.kind({
 			this.targetProject = target ;
 			this.$.propertiesWidget.setupModif();
 			this.$.propertiesWidget.preFill(config.data);
-			this.$.propertiesWidget.activateFileChooser(true);
 			this.$.propertiesWidget.setTargetProject(target);
-			this.show();
+			this.$.propertiesWidget.activateFileChoosers(true);
+
+			var show = (function () {
+				this.show();
+			}).bind(this);
+
+			this.$.propertiesWidget.checkFileChoosers(show);
 		}
 	},
 
@@ -400,10 +409,10 @@ enyo.kind({
 		this.trace(inSender, "=>", inData);		
 
 		this.chooser = inData.input;
-		
+		this.$.selectFilePopup.reset();
 		this.$.selectFilePopup.connectProject(this.targetProject, (function() {
 			this.$.selectFilePopup.setHeaderText(inData.header);
-			this.$.selectFilePopup.pointSelectedName(inData.value);
+			this.$.selectFilePopup.pointSelectedName(inData.value, inData.status);
 			this.$.selectFilePopup.show();
 		}).bind(this));
 
@@ -422,7 +431,6 @@ enyo.kind({
 		}
 
 		this.$.propertiesWidget.updateFileInput(chooser, inEvent.name);
-
 		return true;
 	},
 	notifyChangeSource: function(inSender, inEvent) {
@@ -456,6 +464,38 @@ enyo.kind({
 	hideMe: function() {
 		this.config = null ; // forget ProjectConfig object
 		this.hide() ;
+		return true;
+	},
+	/** @private */
+	checkPath: function (inSender, inData) {
+		this.trace(inSender, "=>", inData);
+
+		this.checker = inData.input;
+		
+		// FIXME ENYO-2761: this is a workaround that shows the developer that the path is not
+		// valid because it doesn't begin with an "/".
+		if (inData.value.indexOf("/") !== 0) {
+			this.pathChecked(inSender, {status: false});
+			return true;
+		}
+
+		this.$.selectFilePopup.connectProject(this.targetProject, (function() {
+			this.$.selectFilePopup.checkSelectedName(inData.value);
+		}).bind(this));		
+	},
+	/** @private */
+	pathChecked: function (inSender, inData) {
+		this.trace(inSender, "=>", inData);
+
+		this.$.selectFilePopup.reset();
+		this.$.propertiesWidget.updatePathCheck(this.checker, inData.status);
+
+		this.checker = null;
+	},
+	/** @private */
+	fileChoosersChecked: function (inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		this.show();
 		return true;
 	}
 });
@@ -610,7 +650,7 @@ enyo.kind({
 			this.targetProject = target;
 			this.$.propertiesWidget.setupModif() ;
 			this.$.propertiesWidget.preFill(data);
-			this.$.propertiesWidget.activateFileChooser(false);
+			this.$.propertiesWidget.activateFileChoosers(false);
 			this.show();
 		}
 	},

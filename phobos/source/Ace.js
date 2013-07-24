@@ -43,6 +43,7 @@ enyo.kind({
 			this.updateSessionSettings(this.getSession());
 			this.readonlyChanged();
 			this.showPrintMarginChanged();
+			this.highlightActiveLineChanged();
 			this.persistentHScrollChanged();
 			this.gotoLine(0);
 			//this.removeMeasureNode();
