@@ -141,7 +141,7 @@ enyo.kind({
 		} else {
 			inEvent.dataTransfer.effectAllowed = "linkMove";
 		}
-		inEvent.dataTransfer.setData('text/html', this.innerHTML);
+		inEvent.dataTransfer.setData("hermes.Node", this.draggedNode.file.id);
 		
 		return true;
 	},
@@ -207,6 +207,9 @@ enyo.kind({
 	/** @private */
 	itemDrop: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
+
+		var draggedNodeId = inEvent.dataTransfer.getData("hermes.Node");
+		this.trace('node dropped', draggedNodeId);
 		
 		if (!this.isValidDropTarget(this.targetNode)) {
 			this.trace("target not valid");
@@ -233,7 +236,7 @@ enyo.kind({
 			}
 		}
 		
-		this.innerHTML = inEvent.dataTransfer.getData('text/html');
+		inEvent.dataTransfer.clearData();
 
 		return true;
 	},
