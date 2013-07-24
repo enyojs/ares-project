@@ -54,4 +54,9 @@ In order to solve these Issues the following solutions will be proposed  :
 
 For now, there is no workaround to bypass these issues.
 
+## Designer
 
+The actual Designer(Drag&Drop) feature works perfectly using Chrome Browser.
+Regarding the other browsers we still have issues that will be fixed for the next package release.
+
+For now, there is the workaround to bypass these issues.
