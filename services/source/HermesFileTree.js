@@ -16,7 +16,8 @@ enyo.kind({
 		onFileChanged: "",
 		onFolderChanged: "",
 		onTreeChanged: "",
-		onGrabberClick: ""
+		onGrabberClick: "",
+		onPathChecked: ""
 	},
 	handlers: {
 		onItemDown: "itemDown",
@@ -38,41 +39,39 @@ enyo.kind({
 			{kind: "onyx.Toolbar", classes: "ares-top-toolbar hermesFileTree-toolbar", components: [
 				{kind: "onyx.Grabber", classes: "ares-grabber" , name:"filePanelGrabber", showing: false, ontap: "doGrabberClick", components: [
 					{kind: "aresGrabber", name: "aresGrabberDirection"}
-				]
-			},
-			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
-				{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
-				{kind: "onyx.Tooltip", content: $L("New Folder...")}
-			]},
-			{name: "reloadAll", kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$harmonia/images/folder_reload.png", ontap: "reloadClick"},
-				{kind: "onyx.Tooltip", content: $L("Reload...")}
-			]},
-			{name: "newFile", kind: "onyx.TooltipDecorator", components: [
-				{name: "newFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_new.png", ontap: "newFileClick"},
-				{kind: "onyx.Tooltip", content: $L("New File...")}
-			]},
-			{name: "renameFile", kind: "onyx.TooltipDecorator", components: [
-				{name: "renameFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_edit.png", ontap: "renameClick"},
-				{kind: "onyx.Tooltip", content: $L("Rename...")}
-			]},
-			{name: "copyFile", kind: "onyx.TooltipDecorator", components: [
-				{name: "copyFileButton", kind: "onyx.IconButton", src: "$harmonia/images/copy.png", ontap: "copyClick"},
-				{kind: "onyx.Tooltip", content: $L("Copy...")}
-			]},
-			{name: "deleteFile", kind: "onyx.TooltipDecorator", components: [
-				{name: "deleteFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_delete.png", ontap: "deleteClick"},
-				{kind: "onyx.Tooltip", content: $L("Delete...")}
-			]},
-			{name: "revertMove", kind: "onyx.TooltipDecorator", components: [
-				{name: "revertMoveButton", kind: "onyx.IconButton", src: "$harmonia/images/undo.png", ontap: "revertClick"},
-				{kind: "onyx.Tooltip", classes:"ares-tooltip-last", content: $L("Revert move...")}
-			]}
+				]},
+				{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
+					{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
+					{kind: "onyx.Tooltip", content: $L("New Folder...")}
+				]},
+				{name: "reloadAll", kind: "onyx.TooltipDecorator", components: [
+					{kind: "onyx.IconButton", src: "$harmonia/images/folder_reload.png", ontap: "reloadClick"},
+					{kind: "onyx.Tooltip", content: $L("Reload...")}
+				]},
+				{name: "newFile", kind: "onyx.TooltipDecorator", components: [
+					{name: "newFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_new.png", ontap: "newFileClick"},
+					{kind: "onyx.Tooltip", content: $L("New File...")}
+				]},
+				{name: "renameFile", kind: "onyx.TooltipDecorator", components: [
+					{name: "renameFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_edit.png", ontap: "renameClick"},
+					{kind: "onyx.Tooltip", content: $L("Rename...")}
+				]},
+				{name: "copyFile", kind: "onyx.TooltipDecorator", components: [
+					{name: "copyFileButton", kind: "onyx.IconButton", src: "$harmonia/images/copy.png", ontap: "copyClick"},
+					{kind: "onyx.Tooltip", content: $L("Copy...")}
+				]},
+				{name: "deleteFile", kind: "onyx.TooltipDecorator", components: [
+					{name: "deleteFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_delete.png", ontap: "deleteClick"},
+					{kind: "onyx.Tooltip", content: $L("Delete...")}
+				]},
+				{name: "revertMove", kind: "onyx.TooltipDecorator", components: [
+					{name: "revertMoveButton", kind: "onyx.IconButton", src: "$harmonia/images/undo.png", ontap: "revertClick"},
+					{kind: "onyx.Tooltip", classes:"ares-tooltip-last", content: $L("Revert move...")}
+				]}
 		]},
 		
 		// Hermes tree, "serverNode" component will be added as HermesFileTree is created
-		{kind: "Scroller", fit: true},
-
+		{kind: "Scroller", fit:"true", classes:"enyo-document-fit" },
 		// track selection of nodes. here, selection Key is file or folderId.
 		// Selection value is the node object. Is an Enyo kind
 		{kind: "Selection", onSelect: "select", onDeselect: "deselect"},
@@ -454,7 +453,7 @@ enyo.kind({
 	/** @private */
 	adjustScroll: function (inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
-		
+
 		var node = inEvent.originator;
 		// FIXME: Due to unexpected UI behaviour ENYO-2575, scrollIntoView method is overridden...
 		//this.$.scroller.scrollIntoView(node, true);
@@ -541,7 +540,15 @@ enyo.kind({
 		// open anything before it is available.  Also do not
 		// try to open top-level root & folders.
 		if (!node.file.isDir && !node.file.isServer && this.projectUrlReady) {
-			this.doFileDblClick({file: node.file, projectData: this.projectData});
+			if (! node.file.service) {
+				// FIXME: root cause not found
+				this.warn("node.file found without service: adding service...");
+				node.file.service = inEvent.originator.service ;
+			}
+			this.doFileDblClick({
+				file: node.file,
+				projectData: this.projectData
+			});
 		}
 
 		// handled here (don't bubble)
@@ -1156,7 +1163,7 @@ enyo.kind({
 			i,
 			nodes = nodePath.split("/");
 
-		var next = function(inErr) {
+		var next = (function(inErr) {
 			if (inErr) {
 				this.warn("Path following failed", inErr);
 			} else {
@@ -1168,7 +1175,31 @@ enyo.kind({
 
 				this.refreshFileTree( function() { waypoints[i-1].doAdjustScroll(); }, waypoints[i-1].file.id );
 			}
-		}.bind(this);
+		}).bind(this);
+
+		nodes.shift();
+		waypoints.push(track);
+		track.followNodePath(nodes, waypoints, next);
+	},
+	checkNodePath: function (nodePath) {
+		var track = this.$.serverNode,
+			waypoints = [],
+			nodes = nodePath.split("/"),
+			l = nodes.length;
+		
+		var next = (function(inErr) {
+			if (inErr) {
+				this.warn("Path following failed", inErr);
+				this.doPathChecked({status: false});
+				return false;
+			} else {
+				if (waypoints.length == l) {
+					this.doPathChecked({status: true});
+				} else {
+					this.doPathChecked({status: false});
+				}
+			}
+		}).bind(this);
 
 		nodes.shift();
 		waypoints.push(track);

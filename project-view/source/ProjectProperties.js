@@ -18,7 +18,9 @@ enyo.kind({
 		onModifiedConfig: "",
 		onSaveGeneratedXml: "",
 		onDone: "",
-		onSelectFile: ""
+		onSelectFile: "",
+		onCheckPath: "",
+		onFileChoosersChecked: ""
 	},
 	handlers: {
 		onAdditionalSource: "handleAdditionalSource"
@@ -102,14 +104,12 @@ enyo.kind({
 		{name: "previewDrawer", kind: "onyx.Drawer", open: false, components: [
 			{classes:"ares-project-properties",components:[
 				{kind: 'FittableRows', components: [
-					{classes:"ares-row", components:[
-						{tag: "label" , classes:"ares-fixed-label", content: $L("Top application file: ")},
-						{kind: "onyx.InputDecorator", components: [
-							{kind: "Input", name: "ppTopFile", classes: "enyo-unselectable", attributes: {title: $L("top file of your application. Typically index.html")}
-							}
-						]},
-						{kind: "onyx.IconButton", name:"topFileChooser", src: "$project-view/assets/images/file-32x32.png", attributes: {title: $L("select file...")}, ontap: "selectTopFile"}
-					]}
+					{kind: "ProjectProperties.PathInputRow", 
+						name: "topFileRow", 
+						label: $L("Top application file: "), 
+						inputtip: $L("top file of your application. Typically index.html"), 
+						buttontip: $L("select file..."), 
+						onButtonTap: "selectTopFile"}					
 				]}
 			]}
 		]},
@@ -121,8 +121,8 @@ enyo.kind({
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
-	published: {
-		
+	published: {		
+		topFileStatus: ""
 	},
 
 	templates: [],
@@ -132,6 +132,8 @@ enyo.kind({
 
 	services: {},
 
+	fileChoosers: [],
+	
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
@@ -271,7 +273,7 @@ enyo.kind({
 
 		if (! conf.preview ) {conf.preview = {} ;}
 
-		this.$.ppTopFile.setValue(conf.preview.top_file);
+		this.$.topFileRow.setValue(conf.preview.top_file);
 
 		return this ;
 	},
@@ -326,7 +328,7 @@ enyo.kind({
 		}, this);
 
 		ppConf = this.config.preview ;
-		ppConf.top_file = this.$.ppTopFile.getValue();
+		ppConf.top_file = this.$.topFileRow.getValue();
 
 		// to be handled by a ProjectWizard
 		var sourceIds = [];
@@ -403,6 +405,13 @@ enyo.kind({
 
 		this.templateToggleService(inSender, inEvent);
 	},
+	topFileChanged: function() {
+		this.$.topFileRow.setValue(this.topFile);
+	},
+	topFileStatusChanged: function() {
+		this.log("status", this.topFileStatus);
+		this.$.topFileRow.setStatus(this.topFileStatus);
+	},
 	templateToggleService: function(inSender, inEvent) {
 		var keys = Object.keys(this.services);
 		keys.forEach(function(serviceId) {
@@ -422,31 +431,67 @@ enyo.kind({
 		return true;
 	},
 	/** @public */
-	activateFileChooser: function(status) {
-		this.activateTopFileChooser(status);
+	activateFileChoosers: function(status) {
+		this.$.topFileRow.setActivated(status);
+
+		// Activate PhoneGap path choosers in related rows
+		// ...
+	},
+	/** @public */
+	checkFileChoosers: function() {
+		// get fileChooser triggering objects name for ares project properties
+		// currently only one: Top File's PathInputRow in Preview tab
+		for (var o in this.$) {
+			if (this.$[o].kind === "ProjectProperties.PathInputRow") {
+				this.fileChoosers.push(this.$[o].name);
+			}
+		}
+
+		enyo.forEach(enyo.keys(this.services), function(serviceId) {
+			if (serviceId === "phonegap") {
+				// ENYO-2512:
+				// merge this.fileChoosers with array returned by phonegap.projectproperties 
+				// and containing all name of rows that have path to check 
+				// and that extend ProjectProperties.PathInputRow
+				this.fileChoosers.concat([] /* replace by returned array*/);
+			}
+
+			/* to the same for further services to be intregrated in Project Properties*/ 
+		}, this);
+
+		var name = this.fileChoosers.shift();
+		this.doCheckPath({input: name, value: this.$[name].getValue()});	
 	},
 	/** @private */
-	activateTopFileChooser: function(status) {
-		if (status) {
-			this.$.topFileChooser.show();
+	fileChooserChecked: function() {
+		if (this.fileChoosers.length) {
+			var name = this.fileChoosers.shift();
+			this.doCheckPath({input: name, value: this.$[name].getValue()});
 		} else {
-			this.$.topFileChooser.hide();
+			this.doFileChoosersChecked();
 		}
+
+		return true;
 	},
 	/** @private */
 	selectTopFile: function () {
-		this.doSelectFile({input: "ppTopFile", value: this.$.ppTopFile.getValue(), header: $L("Select top file...")});
+		this.doSelectFile({input: "topFileRow", value: this.$.topFileRow.getValue(), status: this.$.topFileRow.getStatus(), header: $L("Select top file...")});
 	},
 	/** @public */
 	updateFileInput: function(input, value) {
 		this.$[input].setValue(value);
+		return true;
+	},
+	updatePathCheck: function(input, status) {
+		this.$[input].setStatus(status);
+		this.fileChooserChecked();
 		return true;
 	}
 });
 
 enyo.kind({
 	name: "ProjectProperties.LibCheckBox",
-	classes:"ares-row",
+	classes: "ares-row",
 	published: {
 		lib: ""
 	},
@@ -466,3 +511,77 @@ enyo.kind({
 	}
 });
 
+enyo.kind({
+	name: "ProjectProperties.PathInputRow",
+	//kind: "",
+	classes: "ares-row",
+	published: {
+		label: "",
+		value: "",
+		inputtip: "",
+		activated: false,
+		status: false,
+		buttontip: ""
+	},
+	events: {
+		onChanged: "",
+		onButtonTap: "",
+		onPathChecked: ""
+	},
+	components: [
+		{tag: "label", name: "pathInputLabel", classes:"ares-fixed-label"},
+		{kind: "onyx.InputDecorator", components: [
+			{kind: "Input", name: "pathInputValue", classes: "enyo-unselectable"}
+		]},
+		{kind: "onyx.IconButton", name:"pathInputButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
+	],
+	create: function () {
+		this.inherited(arguments);
+
+		this.labelChanged();
+		this.valueChanged();
+		this.inputtipChanged();
+		this.activatedChanged();
+		this.statusChanged();
+		this.buttontipChanged();
+	},
+	/** @private */
+	labelChanged: function () {
+		this.$.pathInputLabel.setContent(this.label);
+	},
+	/** @private */
+	valueChanged: function () {
+		this.$.pathInputValue.setValue(this.value);
+		this.setStatus(true);
+	},
+	/** @private */
+	inputtipChanged: function () {
+		this.$.pathInputValue.setAttribute("title", this.inputtip);
+	},
+	/** @private */
+	activatedChanged: function () {
+		if (this.activated) {
+			this.$.pathInputButton.show();
+			this.statusChanged();
+		} else {
+			this.$.pathInputButton.hide();
+		}
+	},
+	/** @private */
+	statusChanged: function () {
+		if (this.status) {
+			this.$.pathInputButton.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.pathInputButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
+	},
+	/** @private */
+	buttontipChanged: function () {
+		this.$.pathInputButton.setAttribute("title", this.buttontip);
+	},
+	/** @private */
+	pathInputTap: function (inSender, inEvent) {
+		this.doButtonTap();
+		return true;
+	}
+});
