@@ -216,7 +216,11 @@ enyo.kind({
 	
 		enyo.forEach(userData.user.apps.all, 
 			function(appId){
-				if (projectAppId === appId.id.toString()) {							
+				// depending on the origin (project.json, Entry in
+				// projectConfig UI, XML from phonegap), AppId can be
+				// a string or an integer. So '==' is used instead of
+				// '==='
+				if (projectAppId == appId.id) {
 					appIdExist = true;				
 				}
 			}, this);
