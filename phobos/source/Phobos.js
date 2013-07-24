@@ -48,7 +48,7 @@ enyo.kind({
 		]},
 		{name: "savePopup", kind: "saveActionPopup", onAbandonDocAction: "abandonDocAction", onSave: "saveBeforeClose"},
 		{name: "saveAllPopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonAllDocAction"},
-		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, onFileChosen: "saveAsFileChosen"},
+		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, onFileChosen: "saveAsFileChosen"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
@@ -136,12 +136,14 @@ enyo.kind({
 			return;
 		}
 		var self = this;
+		var relativePath = inEvent.name.split("/");
+		var name = relativePath[relativePath.length-1];
 		this.showWaitPopup($L("Saving ..."));
 		this.doSaveAsDocument({
 			docId: this.docData.getId(),
-			projectData: this.projectData,
+			projectData: this.docData.getProjectData(),
 			file: inEvent.file,
-			name: inEvent.name,
+			name: name,
 			content: this.$.ace.getValue(),
 			next: function(err) {
 				self.hideWaitPopup();
@@ -150,6 +152,7 @@ enyo.kind({
 				}
 			}
 		});
+		return true; //Stop event propagation
 	},
 	saveBeforeClose: function(){
 		this.saveDocAction();
