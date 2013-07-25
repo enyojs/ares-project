@@ -213,7 +213,13 @@ enyo.kind({
 		
 		var projectAppId = this.getConfigAppId(project);
 		var appIdExist = false;
-	
+
+		// immediately go on if appId is blank
+		if (projectAppId.toString().length == 0) {
+			next(null, userData);
+			return;
+		}
+
 		enyo.forEach(userData.user.apps.all, 
 			function(appId){
 				// depending on the origin (project.json, Entry in
