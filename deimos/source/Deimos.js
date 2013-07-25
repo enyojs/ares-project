@@ -369,7 +369,7 @@ enyo.kind({
 		}
 		
 		// check component's options
-		var options = Model.getKindOptions(config.kind);
+		var options = Model.getKindOptions(config.name || config.kind);
 		
 		// Give the new component (and any children) a fresh _aresId_
 		config.aresId = this.generateNewAresId();
