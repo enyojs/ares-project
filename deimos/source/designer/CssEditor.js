@@ -90,7 +90,7 @@ enyo.kind({
 	components: [
 		{classes: "css-editor-category", components: [
 			{ontap:"toggleDrawer", classes: "css-editor-category-name", components: [
-				{name: "indicator", classes: "indicator turned"},
+				{name: "indicator", classes: "css-editor-turned css-editor-indicator "},
 				{name: "name", tag:"span"}
 			]},
 			{name:"drawer", kind: "onyx.Drawer", open:true, components: [
@@ -110,7 +110,7 @@ enyo.kind({
 	toggleDrawer: function() {
 		var open = this.$.drawer.getOpen();
 		this.$.drawer.setOpen(!open);
-		this.$.indicator.addRemoveClass("turned", !open);
+		this.$.indicator.addRemoveClass("css-editor-turned", !open);
 	},
 	setupItem: function(inSender, inEvent) {
 		var prop = this.config.properties[inEvent.index];
