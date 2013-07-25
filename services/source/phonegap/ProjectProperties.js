@@ -41,7 +41,7 @@ enyo.kind({
 					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], defaultValue: "universal", type: "PickerRow"},
 					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},					
 					{name: "access", label: "Access origin", content: "", defaultValue: "", type: "AccessRow"},
-					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "icon.png", type: "GeneralImgRow"},
+					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "/icon.png", type: "GeneralImgRow"},
 					{name: "splashScreen", label: "SplashScreen", content: "", defaultValue: "", type: "GeneralImgRow"}
 				]		
 			}, 
@@ -72,7 +72,7 @@ enyo.kind({
 					{name: "android-maxSdkVersion", label: "Maximum SDK", content: "22", defaultValue: "22", type: "InputRow"},
 					{name: "splash-screen-duration", label: "Splash screen Duration", content: "3000", defaultValue: "3000", type: "InputRow"},
 					{name: "load-url-timeout", label: "Load URL timeout", content: "6000", defaultValue: "6000", type: "InputRow"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "AndroidImgRow"},
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "AndroidImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "AndroidImgRow"}
 				]				
 			}, 
@@ -87,7 +87,7 @@ enyo.kind({
 					{name: "exit-on-suspend", label: "Exit on suspend", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},
 					{name: "show-splash-screen-spinner", label: "Show splash screen spinner", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},
 					{name: "auto-hide-splash-screen", label: "Auto-hide splash screen", content: ["true", "false"], defaultValue: "true", type: "PickerRow"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "IosImgRow"},
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "IosImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "IosImgRow"}
 				]
 			}, 
@@ -95,7 +95,7 @@ enyo.kind({
 				id: "winphone",
 				name: "Microsoft Windows Phone 7",
 				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "WinphoneImgRow"},
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "WinphoneImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "WinphoneImgRow"}
 				]				
 			}, 
@@ -104,7 +104,7 @@ enyo.kind({
 				name: "RIM Blackberry",
 				rows: [
 					{name: "disable-cursor", label: "Disable Cursor", content:  ["true", "false"], defaultValue: "false", type: "PickerRow"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "BlackBerryImgRow"},
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "BlackBerryImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "BlackBerryImgRow"}
 				]
 			}, 
@@ -112,7 +112,7 @@ enyo.kind({
 				id: "webos",
 				name: "HP webOS 2",
 				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "WebOsImgRow"},
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "WebOsImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "WebOsImgRow"}
 				]
 			}
@@ -305,8 +305,8 @@ enyo.kind({
 					kind: "Phonegap.ProjectProperties." + row.type,
 					name: row.name,
 					label: row.label,
-					value: row.content,	
-					defaultValue: row.defaultValue					
+					contentValue: row.content,	
+					value: row.defaultValue					
 				});
 			}, this);
 		}
@@ -353,9 +353,9 @@ enyo.kind({
 				}).bind(this);
 
 				this.$.targetsRows.$[drawer.id].setProjectConfig(this.config.targets[drawer.id]);				
-				this.$.targetsRows.$[drawer.id].$.drawer.$[row.name].setDefaultValue(configParameterValue.call(this));
-				this.$.targetsRows.$.general.$.drawer.$.access.setDefaultValue(config.access.origin);
-				this.$.AdvancedConfiguration.$.autoGenerateXML.setDefaultValue(config.autoGenerateXML);					
+				this.$.targetsRows.$[drawer.id].$.drawer.$[row.name].setValue(configParameterValue.call(this));
+				this.$.targetsRows.$.general.$.drawer.$.access.setValue(config.access.origin);
+				this.$.AdvancedConfiguration.$.autoGenerateXML.setValue(config.autoGenerateXML);					
 			}, this);
 		}, this);
 		// function to update the attributs values of the icon and splash screen in ios drawer

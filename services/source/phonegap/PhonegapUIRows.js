@@ -11,7 +11,7 @@ enyo.kind({
 	published: {
 		label: "",
 		name: "",
-		defaultValue: ""
+		value: ""
 	},
 	components: [				
 	],
@@ -61,8 +61,8 @@ enyo.kind({
 	/**
 	 * @private
 	 */
-	defaultValueChanged: function () {	
-		this.$.ConfigurationCheckBox.setChecked(this.defaultValue);		
+	valueChanged: function () {
+		this.$.ConfigurationCheckBox.setChecked(this.value);		
 	},
 
 	/**
@@ -141,13 +141,6 @@ enyo.kind({
 	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
-	},
-
-	/**
-	 * @private
-	 */
-	defaultValueChanged: function () {
-		this.$.ConfigurationInput.setValue(this.defaultValue);
 	},
 
 	/**
@@ -248,8 +241,8 @@ enyo.kind({
 	/**
 	 * @private
 	 */
-	defaultValueChanged: function () {	
-		this.$.ConfigurationCheckBox.setChecked(this.defaultValue);		
+	valueChanged: function () {
+		this.$.ConfigurationCheckBox.setChecked(this.value);		
 	},
 
 	/**
@@ -272,49 +265,6 @@ enyo.kind({
 			
 
 		this.bubble("onEditConfig", saveProperty);
-	},
-
-	/** @private */
-	valueChanged: function () {
-		this.$.ConfigurationInput.setValue(this.value);
-		this.setStatus(true);
-	},
-	/** @private */
-	inputtipChanged: function () {
-		this.$.ConfigurationInput.setAttribute("title", this.inputtip);
-	},
-	/** @private */
-	activatedChanged: function () {
-		if (this.activated) {
-			this.$.configurationButton.show();
-			this.statusChanged();
-		} else {
-			this.$.configurationButton.hide();
-		}
-	},
-	/** @private */
-	statusChanged: function () {
-		if (this.status) {
-			this.$.configurationButton.setSrc("$project-view/assets/images/file-32x32.png");
-		} else {
-			this.$.configurationButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
-		}
-	},
-	/** @private */
-	buttontipChanged: function () {
-		this.$.configurationButton.setAttribute("title", this.buttontip);
-	},
-	
-	/** @private */
-	pathInputTap: function (inSender, inEvent) {
-		var header = "";
-		if (this.name === 'icon') {
-			header = $L("Select an icon file");
-		} else if (this.name === 'icon') {
-			header = $L("Select a splashscreen file");
-		}
-		this.doInputButtonTap({header: header});
-		return true;
 	}
 });
 
@@ -356,11 +306,8 @@ enyo.kind({
 	/**
 	 * @private
 	 */
-	defaultValueChanged: function () {
-		enyo.forEach(this.value, function (inValue) {
-				var itemState = inValue === this.defaultValue ? true : false;
-				this.$.ConfigurationPicker.createComponent({content: inValue, active: itemState});			
-			}, this);
+	valueChanged: function () {
+		this.$.ConfigurationInput.setValue(this.value);
 	},
 
 	/**
@@ -392,7 +339,7 @@ enyo.kind({
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
 	published: {
-		value: ""
+		contentValue: ""
 	},
 	components: [
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
@@ -412,7 +359,7 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
-		this.valueChanged();
+		this.contentValueChanged();
 	},
 
 	/**
@@ -427,9 +374,9 @@ enyo.kind({
 	 * Set the content of the row's picker when the row is created.
 	 * @ private
 	 */
-	valueChanged: function () {
-		enyo.forEach(this.value, function (inValue) {
-			var itemState = inValue === this.defaultValue ? true : false;
+	contentValueChanged: function () {
+		enyo.forEach(this.contentValue, function (inValue) {
+			var itemState = inValue === this.value ? true : false;
 			this.$.ConfigurationPicker.createComponent({content: inValue, active: itemState});			
 		}, this);
 	}, 
@@ -455,8 +402,8 @@ enyo.kind({
 	/**
 	 * @private
 	 */
-	defaultValueChanged: function(){
-		this.activatePickerItemByContent(this.defaultValue);
+	valueChanged: function(){
+		this.activatePickerItemByContent(this.value);
 	},
 
 	/**
@@ -490,7 +437,6 @@ enyo.kind({
 	published: {				
 		density: "",
 
-		value: "",
 		inputtip: "",
 		activated: false,
 		status: false,
@@ -553,13 +499,6 @@ enyo.kind({
 	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
-	},
-
-	/**
-	 * @private
-	 */
-	defaultValueChanged: function () {
-		this.$.AndroidImgPath.setValue(this.defaultValue);
 	},
 
 	/**
@@ -690,7 +629,6 @@ enyo.kind({
 		height: "",
 		width: "",
 
-		value: "",
 		inputtip: "",
 		activated: false,
 		status: false,
@@ -757,13 +695,6 @@ enyo.kind({
 	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
-	},
-
-	/**
-	 * @private
-	 */
-	defaultValueChanged: function () {	
-		this.$.IosImgPath.setValue(this.defaultValue);
 	},
 
 	/**
@@ -903,7 +834,6 @@ enyo.kind({
 		onPathChecked: ""
 	},
 	published: {
-		value: "",
 		inputtip: "",
 		activated: false,
 		status: false,
@@ -948,13 +878,6 @@ enyo.kind({
 	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
-	},
-
-	/**
-	 * @private
-	 */
-	defaultValueChanged: function () {
-		this.$.GeneralImgPath.setValue(this.defaultValue);
 	},
 
 	/**
@@ -1037,7 +960,6 @@ enyo.kind({
 		onPathChecked: ""
 	},
 	published: {
-		value: "",
 		inputtip: "",
 		activated: false,
 		status: false,
@@ -1082,13 +1004,6 @@ enyo.kind({
 	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
-	},
-
-	/**
-	 * @private
-	 */
-	defaultValueChanged: function () {	
-		this.$.WinphoneImgPath.setValue(this.defaultValue);
 	},
 
 	/**
@@ -1170,7 +1085,6 @@ enyo.kind({
 		onPathChecked: ""
 	},
 	published: {
-		value: "",
 		inputtip: "",
 		activated: false,
 		status: false,
@@ -1216,13 +1130,6 @@ enyo.kind({
 		this.$.label.setContent(this.label);
 	},
 	
-	/**
-	 * @private
-	 */
-	defaultValueChanged: function () {	
-		this.$.BlackBerryImgPath.setValue(this.defaultValue);
-	},
-
 	/**
 	 * Event handler that is triggered when the value of the input that hold the value of 
 	 * the BlackBerry icon change. It definesa function and passe it as a parameter in the 
@@ -1303,7 +1210,6 @@ enyo.kind({
 		onPathChecked: ""
 	},
 	published: {
-		value: "",
 		inputtip: "",
 		activated: false,
 		status: false,
@@ -1348,13 +1254,6 @@ enyo.kind({
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
 	},	
-
-	/**
-	 * @private
-	 */
-	defaultValueChanged: function () {	
-		this.$.WebOsImgPath.setValue(this.defaultValue);
-	},
 
 	/**
 	 * Event handler that is triggered when the value of the input that hold the value of 
