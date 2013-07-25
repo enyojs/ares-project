@@ -11,7 +11,7 @@ enyo.kind({
 		onShowWaitPopup: ""
 	},
 	published: {
-		timeoutDuration: 3000
+		timeoutDuration: 3000	
 	},	
 	components: [
 		{kind: "Phonegap.BuildStatusUI",
@@ -505,15 +505,19 @@ enyo.kind({
 	 */
 	_updateConfigXml: function(project, userData, next) {
 		
-		var config = this.getConfigInstance(project);
+		if (this.getConfigInstance(project).providers.phonegap.autoGenerateXML){
+			var config = this.getConfigInstance(project);
 
-		var req = project.getService().createFile(project.getFolderId(), "config.xml", this._generateConfigXml(config));
-		req.response(this, function _savedConfigXml(inSender, inData) {
-			this.trace("Phonegap.Build#_updateConfigXml()", "updated config.xml:", inData);
-			//var ctype = req.xhrResponse.headers['x-content-type'];
+			var req = project.getService().createFile(project.getFolderId(), "config.xml", this._generateConfigXml(config));
+			req.response(this, function _savedConfigXml(inSender, inData) {
+				this.trace("Phonegap.Build#_updateConfigXml()", "updated config.xml:", inData);	
+				next();
+			});
+			req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
+		} else {
 			next();
-		});
-		req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
+		}
+
 	},
 
 	/**
@@ -1067,6 +1071,7 @@ enyo.kind({
 	statics: {
 		DEFAULT_PROJECT_CONFIG: {
 			enabled: false,
+			autoGenerateXML: true,
 			features: {
 				battery: false,
 				camera: false,
