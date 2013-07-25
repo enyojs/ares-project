@@ -307,17 +307,28 @@ enyo.kind({
 		this.waterfallDown("onChangeProjectStatus", inEvent);
 	},
 
-	confirmTap: function(inSender, inEvent) {
-		var ppConf ;
-		// retrieve modified values
-
-		this.config.id       = this.$.projectId     .getValue();
-		this.config.version  = this.$.projectVersion.getValue();
-		this.config.name     = this.$.projectName   .getValue();
-		this.config.title    = this.$.projectTitle  .getValue();
+	/** @private */
+	getProjectConfig: function() {
+		// Project settings
+		this.config.id = this.$.projectId     .getValue();
+		this.config.version = this.$.projectVersion.getValue();
+		this.config.name = this.$.projectName   .getValue();
+		this.config.title = this.$.projectTitle  .getValue();
 
 		this.config.author.name = this.$.projectAuthor.getValue();
 		this.config.author.href = this.$.projectContact.getValue();
+
+		// Preview settings
+		var ppConf = this.config.preview ;
+
+		ppConf.top_file = this.$.topFileRow.getValue();
+	},
+
+	confirmTap: function(inSender, inEvent) {
+		// retrieve modified values
+		
+		// retrieve general configuration settings
+		this.getProjectConfig();		
 
 		// Dump each provider service configuration panel into
 		// the project configuration.
@@ -325,10 +336,7 @@ enyo.kind({
 			var service = this.services[serviceId];
 			this.config.providers[service.id] = service.panel.getProjectConfig();
 			this.config.providers[service.id].enabled = service.checkBox.checked;
-		}, this);
-
-		ppConf = this.config.preview ;
-		ppConf.top_file = this.$.topFileRow.getValue();
+		}, this);		
 
 		// to be handled by a ProjectWizard
 		var sourceIds = [];
