@@ -14,7 +14,7 @@
  * -- content: the content of the row, the format of this content can change depending on the type of the UI widget used (picker, input, ...)
  * -- defaultValue: the default value displayed in the widget
  * -- type: contain the last part of the name of the kind that will be used to define a row, these kinds are defined in
- * 			the "PhonegapUIRows.js"
+ *          the "PhonegapUIRows.js"
  * @type {String}
  */
 enyo.kind({
@@ -404,6 +404,33 @@ enyo.kind({
 			}, this);
 		}
 	},
+	/** @public */
+	activateInputRows: function (status) {
+		var fileChoosers = this.findAllInputRows();
+		enyo.forEach(fileChoosers, function (fileChooser) {
+			fileChooser.setActivated(true);
+		});
+	},
+	/** @public */
+	findAllInputRows: function () {
+		var fileChoosers = [],
+			drawers = this.$.targetsRows;
+		
+		enyo.forEach(enyo.keys(drawers.$), function (drawer) {
+			var targets = drawers.$[drawer],
+				rows = targets.$.drawer;
+			enyo.forEach(enyo.keys(rows.$), function (row) {
+				if (rows.$[row].name === 'icon') {
+					fileChoosers.push(rows.$[row]);
+				} else if (rows.$[row].name === 'splashScreen') {
+					fileChoosers.push(rows.$[row]);
+				}
+			}, this);
+		}, this);
+
+		return fileChoosers;
+	},
+
 	statics: {
 		getProvider: function () {
 			this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('phonegap');

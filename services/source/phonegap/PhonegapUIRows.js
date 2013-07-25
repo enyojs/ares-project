@@ -1,4 +1,5 @@
 /* global ares */
+
 /**
  * Kind that define a generic row widget
  */
@@ -21,7 +22,7 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);			
-	},
+	}
 });
 
 enyo.kind({
@@ -29,7 +30,7 @@ enyo.kind({
 	kind: "Phonegap.ProjectProperties.Row",	
 	debug: false,
 	published: {		
-		activated: false,		
+		activated: false	
 	},
 	components: [
 		{	
@@ -94,6 +95,17 @@ enyo.kind({
 	kind: "Phonegap.ProjectProperties.Row",
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
+	events: {
+		onInputButtonTap: "",
+		onPathChecked: ""
+	},
+	published: {
+		value: "",
+		inputtip: "",
+		activated: false,
+		status: false,
+		buttontip: ""
+	},
 	components: [
 		{name: "label", classes: "ares-project-properties-drawer-row-label"},
 		{
@@ -105,9 +117,10 @@ enyo.kind({
 					onchange: "updateConfigurationValue"
 				}
 			]
-		}
+		},
+		{kind: "onyx.IconButton", name:"configurationButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
 	],
-
+	
 	/**
 	 * @private
 	 */
@@ -115,6 +128,12 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
+
+		this.valueChanged();
+		this.inputtipChanged();
+		this.activatedChanged();
+		this.statusChanged();
+		this.buttontipChanged();
 	},
 
 	/**
@@ -148,6 +167,49 @@ enyo.kind({
 		}).bind(this);		
 
 		this.bubble("onEditConfig", saveProperty);
+	},
+
+	/** @private */
+	valueChanged: function () {
+		this.$.ConfigurationInput.setValue(this.value);
+		this.setStatus(true);
+	},
+	/** @private */
+	inputtipChanged: function () {
+		this.$.ConfigurationInput.setAttribute("title", this.inputtip);
+	},
+	/** @private */
+	activatedChanged: function () {
+		if (this.activated) {
+			this.$.configurationButton.show();
+			this.statusChanged();
+		} else {
+			this.$.configurationButton.hide();
+		}
+	},
+	/** @private */
+	statusChanged: function () {
+		if (this.status) {
+			this.$.configurationButton.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.configurationButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
+	},
+	/** @private */
+	buttontipChanged: function () {
+		this.$.configurationButton.setAttribute("title", this.buttontip);
+	},
+	
+	/** @private */
+	pathInputTap: function (inSender, inEvent) {
+		var header = "";
+		if (this.name === 'icon') {
+			header = $L("Select an icon file");
+		} else if (this.name === 'icon') {
+			header = $L("Select a splashscreen file");
+		}
+		this.doInputButtonTap({header: header});
+		return true;
 	}
 });
 
@@ -318,7 +380,17 @@ enyo.kind({
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
 	published: {				
-		density: "",		
+		density: "",
+
+		value: "",
+		inputtip: "",
+		activated: false,
+		status: false,
+		buttontip: ""	
+	},
+	events: {
+		onInputButtonTap: "",
+		onPathChecked: ""
 	},
 	components: [{
 			name: "label",
@@ -331,6 +403,7 @@ enyo.kind({
 				{kind: "onyx.Input", name: "AndroidImgPath", onchange: "updateConfigurationValue"}
 			]
 		}, 
+		{kind: "onyx.IconButton", name:"AndroidImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"},
 		{
 			kind: "onyx.PickerDecorator",
 			classes: "ares-project-properties-picker-small",
@@ -357,7 +430,13 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		this.labelChanged();		
+		this.labelChanged();	
+
+		this.valueChanged();
+		this.inputtipChanged();
+		this.activatedChanged();
+		this.statusChanged();
+		this.buttontipChanged();	
 	},
 
 	/**
@@ -441,6 +520,49 @@ enyo.kind({
 			}).bind(this);			
 
 		this.bubble("onEditConfig", saveProperty);
+	},
+
+	/** @private */
+	valueChanged: function () {
+		this.$.AndroidImgPath.setValue(this.value);
+		this.setStatus(true);
+	},
+	/** @private */
+	inputtipChanged: function () {
+		this.$.AndroidImgPath.setAttribute("title", this.inputtip);
+	},
+	/** @private */
+	activatedChanged: function () {
+		if (this.activated) {
+			this.$.AndroidImgButton.show();
+			this.statusChanged();
+		} else {
+			this.$.AndroidImgButton.hide();
+		}
+	},
+	/** @private */
+	statusChanged: function () {
+		if (this.status) {
+			this.$.AndroidImgButton.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.AndroidImgButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
+	},
+	/** @private */
+	buttontipChanged: function () {
+		this.$.AndroidImgButton.setAttribute("title", this.buttontip);
+	},
+	
+	/** @private */
+	pathInputTap: function (inSender, inEvent) {
+		var header = "";
+		if (this.name === 'icon') {
+			header = $L("Select an icon file");
+		} else if (this.name === 'icon') {
+			header = $L("Select a splashscreen file");
+		}
+		this.doInputButtonTap({header: header});
+		return true;
 	}
 });
 
@@ -452,9 +574,19 @@ enyo.kind({
 	kind: "Phonegap.ProjectProperties.Row",
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
+	events: {
+		onInputButtonTap: "",
+		onPathChecked: ""
+	},
 	published: {		
 		height: "",
-		width: ""	
+		width: "",
+
+		value: "",
+		inputtip: "",
+		activated: false,
+		status: false,
+		buttontip: ""
 	},	
 	components: [
 		{
@@ -471,6 +603,7 @@ enyo.kind({
 				}
 			]
 		},
+		{kind: "onyx.IconButton", name:"IosImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"},
 		{content: "Length", classes: "ares-project-properties-drawer-row-attribut-label"},
 		{
 			kind: "onyx.InputDecorator",
@@ -502,6 +635,12 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
+
+		this.valueChanged();
+		this.inputtipChanged();
+		this.activatedChanged();
+		this.statusChanged();
+		this.buttontipChanged();
 	},
 
 	/**
@@ -597,6 +736,49 @@ enyo.kind({
 			}).bind(this);	
 		
 		this.bubble("onEditConfig", saveProperty);
+	},
+
+	/** @private */
+	valueChanged: function () {
+		this.$.IosImgPath.setValue(this.value);
+		this.setStatus(true);
+	},
+	/** @private */
+	inputtipChanged: function () {
+		this.$.IosImgPath.setAttribute("title", this.inputtip);
+	},
+	/** @private */
+	activatedChanged: function () {
+		if (this.activated) {
+			this.$.IosImgButton.show();
+			this.statusChanged();
+		} else {
+			this.$.IosImgButton.hide();
+		}
+	},
+	/** @private */
+	statusChanged: function () {
+		if (this.status) {
+			this.$.IosImgButton.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.IosImgButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
+	},
+	/** @private */
+	buttontipChanged: function () {
+		this.$.IosImgButton.setAttribute("title", this.buttontip);
+	},
+	
+	/** @private */
+	pathInputTap: function (inSender, inEvent) {
+		var header = "";
+		if (this.name === 'icon') {
+			header = $L("Select an icon file");
+		} else if (this.name === 'icon') {
+			header = $L("Select a splashscreen file");
+		}
+		this.doInputButtonTap({header: header});
+		return true;
 	}
 });
 
@@ -608,6 +790,17 @@ enyo.kind({
 	kind: "Phonegap.ProjectProperties.Row",
 	classes: "ares-project-properties-drawer-row",
 	debug: false,	
+	events: {
+		onInputButtonTap: "",
+		onPathChecked: ""
+	},
+	published: {
+		value: "",
+		inputtip: "",
+		activated: false,
+		status: false,
+		buttontip: ""
+	},
 	components: [
 		{
 			name: "label",
@@ -623,6 +816,7 @@ enyo.kind({
 				}
 			]
 		},
+		{kind: "onyx.IconButton", name:"GeneralImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
 	],
 
 	/**
@@ -632,6 +826,12 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
+
+		this.valueChanged();
+		this.inputtipChanged();
+		this.activatedChanged();
+		this.statusChanged();
+		this.buttontipChanged();
 	},
 
 	/**
@@ -669,6 +869,49 @@ enyo.kind({
 			}).bind(this);			
 
 		this.bubble("onEditConfig", saveProperty);
+	},
+
+	/** @private */
+	valueChanged: function () {
+		this.$.GeneralImgPath.setValue(this.value);
+		this.setStatus(true);
+	},
+	/** @private */
+	inputtipChanged: function () {
+		this.$.GeneralImgPath.setAttribute("title", this.inputtip);
+	},
+	/** @private */
+	activatedChanged: function () {
+		if (this.activated) {
+			this.$.GeneralImgButton.show();
+			this.statusChanged();
+		} else {
+			this.$.GeneralImgButton.hide();
+		}
+	},
+	/** @private */
+	statusChanged: function () {
+		if (this.status) {
+			this.$.GeneralImgButton.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.GeneralImgButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
+	},
+	/** @private */
+	buttontipChanged: function () {
+		this.$.GeneralImgButton.setAttribute("title", this.buttontip);
+	},
+	
+	/** @private */
+	pathInputTap: function (inSender, inEvent) {
+		var header = "";
+		if (this.name === 'icon') {
+			header = $L("Select an icon file");
+		} else if (this.name === 'icon') {
+			header = $L("Select a splashscreen file");
+		}
+		this.doInputButtonTap({header: header});
+		return true;
 	}
 });
 
@@ -681,6 +924,17 @@ enyo.kind({
 	kind: "Phonegap.ProjectProperties.Row",
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
+	events: {
+		onInputButtonTap: "",
+		onPathChecked: ""
+	},
+	published: {
+		value: "",
+		inputtip: "",
+		activated: false,
+		status: false,
+		buttontip: ""
+	},
 	components: [
 		{
 			name: "label",
@@ -696,6 +950,7 @@ enyo.kind({
 				}
 			]
 		},
+		{kind: "onyx.IconButton", name:"WinphoneImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
 	],
 
 	/**
@@ -705,6 +960,12 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
+
+		this.valueChanged();
+		this.inputtipChanged();
+		this.activatedChanged();
+		this.statusChanged();
+		this.buttontipChanged();
 	},
 
 	/**
@@ -742,6 +1003,49 @@ enyo.kind({
 			}).bind(this);
 
 		this.bubble("onEditConfig", saveProperty);
+	},
+
+	/** @private */
+	valueChanged: function () {
+		this.$.WinphoneImgPath.setValue(this.value);
+		this.setStatus(true);
+	},
+	/** @private */
+	inputtipChanged: function () {
+		this.$.WinphoneImgPath.setAttribute("title", this.inputtip);
+	},
+	/** @private */
+	activatedChanged: function () {
+		if (this.activated) {
+			this.$.WinphoneImgButton.show();
+			this.statusChanged();
+		} else {
+			this.$.WinphoneImgButton.hide();
+		}
+	},
+	/** @private */
+	statusChanged: function () {
+		if (this.status) {
+			this.$.WinphoneImgButton.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.WinphoneImgButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
+	},
+	/** @private */
+	buttontipChanged: function () {
+		this.$.WinphoneImgButton.setAttribute("title", this.buttontip);
+	},
+	
+	/** @private */
+	pathInputTap: function (inSender, inEvent) {
+		var header = "";
+		if (this.name === 'icon') {
+			header = $L("Select an icon file");
+		} else if (this.name === 'icon') {
+			header = $L("Select a splashscreen file");
+		}
+		this.doInputButtonTap({header: header});
+		return true;
 	}
 });
 
@@ -753,6 +1057,17 @@ enyo.kind({
 	kind: "Phonegap.ProjectProperties.Row",
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
+	events: {
+		onInputButtonTap: "",
+		onPathChecked: ""
+	},
+	published: {
+		value: "",
+		inputtip: "",
+		activated: false,
+		status: false,
+		buttontip: ""
+	},
 	components: [
 		{
 			name: "label",
@@ -768,6 +1083,7 @@ enyo.kind({
 				}
 			]
 		},
+		{kind: "onyx.IconButton", name:"BlackBerryImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
 	],
 
 	/**
@@ -777,6 +1093,12 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
+
+		this.valueChanged();
+		this.inputtipChanged();
+		this.activatedChanged();
+		this.statusChanged();
+		this.buttontipChanged();
 	},
 	/**
 	 * Set the content of the row's label when the row is created
@@ -814,6 +1136,49 @@ enyo.kind({
 
 		this.bubble("onEditConfig", saveProperty);
 			
+	},
+
+	/** @private */
+	valueChanged: function () {
+		this.$.BlackBerryImgPath.setValue(this.value);
+		this.setStatus(true);
+	},
+	/** @private */
+	inputtipChanged: function () {
+		this.$.BlackBerryImgPath.setAttribute("title", this.inputtip);
+	},
+	/** @private */
+	activatedChanged: function () {
+		if (this.activated) {
+			this.$.BlackBerryImgButton.show();
+			this.statusChanged();
+		} else {
+			this.$.BlackBerryImgButton.hide();
+		}
+	},
+	/** @private */
+	statusChanged: function () {
+		if (this.status) {
+			this.$.BlackBerryImgButton.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.BlackBerryImgButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
+	},
+	/** @private */
+	buttontipChanged: function () {
+		this.$.BlackBerryImgButton.setAttribute("title", this.buttontip);
+	},
+	
+	/** @private */
+	pathInputTap: function (inSender, inEvent) {
+		var header = "";
+		if (this.name === 'icon') {
+			header = $L("Select an icon file");
+		} else if (this.name === 'icon') {
+			header = $L("Select a splashscreen file");
+		}
+		this.doInputButtonTap({header: header});
+		return true;
 	}
 });
 
@@ -825,6 +1190,17 @@ enyo.kind({
 	kind: "Phonegap.ProjectProperties.Row",
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
+	events: {
+		onInputButtonTap: "",
+		onPathChecked: ""
+	},
+	published: {
+		value: "",
+		inputtip: "",
+		activated: false,
+		status: false,
+		buttontip: ""
+	},
 	components: [
 		{
 			name: "label",
@@ -840,6 +1216,7 @@ enyo.kind({
 				}
 			]
 		},
+		{kind: "onyx.IconButton", name:"WebOsImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
 	],
 
 	/**
@@ -849,6 +1226,12 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
+
+		this.valueChanged();
+		this.inputtipChanged();
+		this.activatedChanged();
+		this.statusChanged();
+		this.buttontipChanged();
 	},
 	/**
 	 * Set the content of the row's label when the row is created
@@ -884,5 +1267,48 @@ enyo.kind({
 				inConfig[target]["webos"].src = inSender.value;			
 			}).bind(this);			
 		this.bubble("onEditConfig", saveProperty);
+	},
+
+	/** @private */
+	valueChanged: function () {
+		this.$.WebOsImgPath.setValue(this.value);
+		this.setStatus(true);
+	},
+	/** @private */
+	inputtipChanged: function () {
+		this.$.WebOsImgPath.setAttribute("title", this.inputtip);
+	},
+	/** @private */
+	activatedChanged: function () {
+		if (this.activated) {
+			this.$.WebOsImgButton.show();
+			this.statusChanged();
+		} else {
+			this.$.WebOsImgButton.hide();
+		}
+	},
+	/** @private */
+	statusChanged: function () {
+		if (this.status) {
+			this.$.WebOsImgButton.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.WebOsImgButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
+	},
+	/** @private */
+	buttontipChanged: function () {
+		this.$.WebOsImgButton.setAttribute("title", this.buttontip);
+	},
+	
+	/** @private */
+	pathInputTap: function (inSender, inEvent) {
+		var header = "";
+		if (this.name === 'icon') {
+			header = $L("Select an icon file");
+		} else if (this.name === 'icon') {
+			header = $L("Select a splashscreen file");
+		}
+		this.doInputButtonTap({header: header});
+		return true;
 	}
 });
