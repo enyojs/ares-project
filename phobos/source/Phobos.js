@@ -248,7 +248,6 @@ enyo.kind({
 					this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
 				}
 			} else {
-				this.log(this);
 				if (typeof this.owner.$[stuff].setShowing === 'function') {
 					this.owner.$[stuff].setShowing(showStuff) ;
 				} else {
