@@ -21,25 +21,89 @@ enyo.kind({
 				}
 			}
 		]},
-		{category: "Paddings-Margins",	properties: [
-			{name: "padding", inputKind: {kind: "Inspector.Config.Size",
+		{category: "Paddings",	properties: [
+			{name: "padding", inputKind:  {kind:"Inspector.Config.Text",  components: [
+					{content: "shorthand form", style:"display: inline-block; font-size:11px;"}
+				]}
+			},
+			{name: "padding-top", inputKind: {kind: "Inspector.Config.Size",
 					values: ["px","cm","em","ern","rem", "%"]
 				}
 			},
-			{name: "margin", inputKind: {kind: "Inspector.Config.Size",
+			{name: "padding-bottom", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			},
+			{name: "padding-right", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			},
+			{name: "padding-left", inputKind: {kind: "Inspector.Config.Size",
 					values: ["px","cm","em","ern","rem", "%"]
 				}
 			}
 		]},
-
+		{category: "Margins",	properties: [
+			{name: "margin", inputKind:  {kind:"Inspector.Config.Text",  components: [
+					{content: "shorthand form", style:"display: inline-block; font-size:11px;"}
+				]}
+			},
+			{name: "margin-top", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			},
+			{name: "margin-bottom", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			},
+			{name: "margin-right", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			},
+			{name: "margin-left", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			}
+		]},
 		{category: "Font-Style", properties: [
-			{name: "font-size", inputKind: "Inspector.Config.Size"},
+			{name: "font", inputKind:  {kind:"Inspector.Config.Text",  components: [
+					{content: "shorthand form", style:"display: inline-block; font-size:11px;"}
+				]}
+			},
 			{name: "font-family", inputKind: {kind: "Inspector.Config.Event",
 					values: ["arial", "arial black", "comic sans ms", "courier new", "georgia", 
 										"helvetica",  "times new roman", "trebuchet ms", "verdana" ]
 				}
 			},
-			{name: "text-indent", inputKind: "Inspector.Config.Size"}
+			{name: "font-style", inputKind: {kind: "Inspector.Config.Event",
+					values: ["normal", "italic", "oblique" ]
+				}
+			},
+			{name: "font-variant", inputKind: {kind: "Inspector.Config.Event",
+					values: ["normal", "small-caps"]
+				}
+			},
+			{name: "font-weight", inputKind: {kind: "Inspector.Config.Event",
+					values: ["normal", "bold", "bolder","lighter"]
+				}
+			},
+			{name: "font-size", inputKind: "Inspector.Config.Size"},
+			{name: "line-height", inputKind: "Inspector.Config.Size"}
+		]},			
+		{category: "Text-Style", properties: [
+			{name: "text-align", inputKind: {kind: "Inspector.Config.Event",
+					values: ["center", "left", "right"]
+				}
+			},
+			{name: "text-decoration", inputKind: {kind: "Inspector.Config.Event",
+					values: ["overline", "line-through", "underline"]
+				}
+			},
+			{name: "text-indent", inputKind: "Inspector.Config.Size"},
+			{name: "text-justify", inputKind: {kind: "Inspector.Config.Event",
+					values: ["auto", "inter-word", "inter-ideograph", "inter-cluster", "distribute", "kashida", "trim", "none"]
+				}
+			}
 		]}
 	],
 	fieldName: null,
