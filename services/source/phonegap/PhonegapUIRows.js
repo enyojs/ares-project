@@ -168,6 +168,49 @@ enyo.kind({
 			}).bind(this);			
 
 		this.bubble("onEditConfig", saveProperty);
+	},
+
+	/** @private */
+	valueChanged: function () {
+		this.$.ConfigurationInput.setValue(this.value);
+		this.setStatus(true);
+	},
+	/** @private */
+	inputtipChanged: function () {
+		this.$.ConfigurationInput.setAttribute("title", this.inputtip);
+	},
+	/** @private */
+	activatedChanged: function () {
+		if (this.activated) {
+			this.$.configurationButton.show();
+			this.statusChanged();
+		} else {
+			this.$.configurationButton.hide();
+		}
+	},
+	/** @private */
+	statusChanged: function () {
+		if (this.status) {
+			this.$.configurationButton.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.configurationButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
+	},
+	/** @private */
+	buttontipChanged: function () {
+		this.$.configurationButton.setAttribute("title", this.buttontip);
+	},
+	
+	/** @private */
+	pathInputTap: function (inSender, inEvent) {
+		var header = "";
+		if (this.name === 'icon') {
+			header = $L("Select an icon file");
+		} else if (this.name === 'icon') {
+			header = $L("Select a splashscreen file");
+		}
+		this.doInputButtonTap({header: header});
+		return true;
 	}
 });
 
