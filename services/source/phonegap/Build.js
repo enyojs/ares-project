@@ -213,10 +213,20 @@ enyo.kind({
 		
 		var projectAppId = this.getConfigAppId(project);
 		var appIdExist = false;
-	
+
+		// immediately go on if appId is blank
+		if (projectAppId.toString().length == 0) {
+			next(null, userData);
+			return;
+		}
+
 		enyo.forEach(userData.user.apps.all, 
 			function(appId){
-				if (projectAppId === appId.id.toString()) {							
+				// depending on the origin (project.json, Entry in
+				// projectConfig UI, XML from phonegap), AppId can be
+				// a string or an integer. So '==' is used instead of
+				// '==='
+				if (projectAppId == appId.id) {
 					appIdExist = true;				
 				}
 			}, this);
@@ -227,7 +237,7 @@ enyo.kind({
 			var config = this.getConfigInstance(project);
 			config.providers.phonegap.appId = "";
 			ServiceRegistry.instance.setConfig(config);
-			var errorMsg = 	"The AppId "+ projectAppId +" do not exist in the Phonegap Build account " +
+			var errorMsg = 	"The AppId '"+ projectAppId +"' does not exist in the Phonegap Build account " +
 					userData.user.email + ". Please choose a correct AppId";
 			next(errorMsg);
 		}
@@ -1037,6 +1047,14 @@ enyo.kind({
 			createSplashScreenXMLRow.call(self, target);			
 		}, this);
 
+		xw.writeComment("Access external websites ressources");
+		
+		xw.writeStartElement('access');
+		xw.writeAttributeString('origin', phonegap.access.origin);		
+		xw.writeEndElement(); // access			
+		
+	
+
 		xw.writeEndElement();	// widget
 
 		//xw.writeEndDocument(); called by flush()
@@ -1105,6 +1123,9 @@ enyo.kind({
 				webos: {src: ""} 
 			},
 			plugins: {
+			}, 
+			access : {
+				"origin": "http://127.0.0.1"
 			}
 		}
 	}
