@@ -213,7 +213,13 @@ enyo.kind({
 		
 		var projectAppId = this.getConfigAppId(project);
 		var appIdExist = false;
-	
+
+		// immediately go on if appId is blank
+		if (projectAppId.toString().length == 0) {
+			next(null, userData);
+			return;
+		}
+
 		enyo.forEach(userData.user.apps.all, 
 			function(appId){
 				// depending on the origin (project.json, Entry in
@@ -231,7 +237,7 @@ enyo.kind({
 			var config = this.getConfigInstance(project);
 			config.providers.phonegap.appId = "";
 			ServiceRegistry.instance.setConfig(config);
-			var errorMsg = 	"The AppId "+ projectAppId +" do not exist in the Phonegap Build account " +
+			var errorMsg = 	"The AppId '"+ projectAppId +"' does not exist in the Phonegap Build account " +
 					userData.user.email + ". Please choose a correct AppId";
 			next(errorMsg);
 		}
