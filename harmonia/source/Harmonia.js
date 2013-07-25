@@ -2,12 +2,14 @@
 
 enyo.kind({
 	name: "Harmonia",
+	kind:"FittableColumns",
 	events: {
 		onRegisterMe: "",
 		onMovePanel:"",
 	},
 	components: [
-		{kind: "HermesFileTree", dragAllowed: true, classes:"enyo-fit"}
+		{kind: "HermesFileTree", dragAllowed: true, classes:"enyo-fit"},
+		{classes:"hangar"}
 	],
 	handlers: {
 		onGrabberClick : "activePanel"

@@ -3,38 +3,7 @@ enyo.kind({
 	name: "Phobos",
 	classes: "enyo-unselectable",
 	components: [
-		{kind: "DragAvatar", components: [
-			{tag: "img", src: "$deimos/images/icon.png"}
-		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
-			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", components: [
-				{kind: "onyx.MenuDecorator", onSelect: "fileMenuItemSelected", components: [
-					{content: "File"},
-					{kind: "onyx.Menu", maxHeight: "100%", components: [
-						{name: "saveButton", value: "saveDocAction", components: [
-							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save.png"},
-							{content: $L("Save")}
-						]},
-						{name: "saveAsButton", value: "saveAsDocAction", components: [
-							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save.png"},
-							{content: $L("Save as...")}
-						]},
-						{classes: "onyx-menu-divider"},
-						{name: "closeButton", value: "closeDocAction", components: [
-							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
-							{content: $L("Close")}
-						]},
-						{name: "closeAllButton", value: "closeAllDocAction", components: [
-							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
-							{content: $L("Close All")}
-						]}
-					]}
-				]},
-				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: $L("New Kind"), ontap: "newKindAction"},
-				{fit: true},
-				{name: "editorButton", kind: "onyx.Button", content: "Editor Settings", ontap: "editorSettings"},
-				{name: "designerButton", kind: "onyx.Button", content: $L("Designer"), ontap: "designerAction"}
-			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
@@ -224,7 +193,7 @@ enyo.kind({
 		this.projectCtrl.buildProjectDb();
 
 		this.docData.setEdited(edited);
-		this.$.toolbar.resized();
+		this.owner.$.toolbar.resized();
 	},
 
 	adjustPanelsForMode: function(mode, rightpane) {
@@ -264,10 +233,19 @@ enyo.kind({
 		for (var stuff in showSettings) {
 			showStuff = showSettings[stuff];
 			if (this.debug) this.log("show", stuff, ":", showStuff);
-			if (typeof this.$[stuff].setShowing === 'function') {
-				this.$[stuff].setShowing(showStuff) ;
+			if(this.$[stuff] !== undefined){
+				if (typeof this.$[stuff].setShowing === 'function') {
+					this.$[stuff].setShowing(showStuff) ;
+				} else {
+					this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
+				}
 			} else {
-				this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
+				this.log(this);
+				if (typeof this.owner.$[stuff].setShowing === 'function') {
+					this.owner.$[stuff].setShowing(showStuff) ;
+				} else {
+					this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
+				}
 			}
 		}
 
@@ -311,7 +289,7 @@ enyo.kind({
 	*/
 	manageDesignerButton: function() {
 		var disabled = ! this.projectCtrl.fullAnalysisDone;
-		this.$.designerButton.setDisabled(disabled);
+		this.owner.$.designerButton.setDisabled(disabled);
 	},
 	/**
 	 * Receive the project data reference which allows to access the analyzer
