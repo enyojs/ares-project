@@ -39,7 +39,7 @@ enyo.kind({
 					},
 					{name: "orientation", label:"Orientation",content:["both", "landscape", "portrait"], defaultValue: "both", type: "PickerRow"},
 					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], defaultValue: "universal", type: "PickerRow"},
-					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},
+					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},					
 					{name: "access", label: "Access origin", content: "", defaultValue: "", type: "AccessRow"},
 					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "icon.png", type: "GeneralImgRow"},
 					{name: "splashScreen", label: "SplashScreen", content: "", defaultValue: "", type: "GeneralImgRow"}
@@ -116,6 +116,9 @@ enyo.kind({
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "WebOsImgRow"}
 				]
 			}
+		], 
+		advancePanelContent: [						
+			{name: "autoGenerateXML", label: "Generate config.xml file when building", content: "", defaultValue: "true", type: "AutoGenerateXML"}				
 		]
 	}
 });
@@ -129,7 +132,8 @@ enyo.kind({
 	kind: "Ares.ProjectProperties",
 	debug: false,
 	published: {
-		config: {}	
+		config: {}, 
+		showAdvancedConfiguration: false
 	},
 	events: {
 		onConfigure: ""
@@ -154,10 +158,21 @@ enyo.kind({
 										{kind: "Input", name: "pgConfId", attributes: { title: "unique identifier, assigned by build.phonegap.com"}}
 									]
 								}, 
-								{kind: "onyx.Button", classes: "ares-project-properties-refresh-button", content: "Refresh...",	ontap: "refresh"}
+								{kind: "onyx.Button", name: "ConfigurationButton",classes: "ares-project-properties-advance-configuration-button", content: "Advanced configuration",	ontap: "displayAdvancedPanel"}
 							]
 						}, 
-						{name: "targetsRows", kind: "FittableRows",	classes: 'ares_projectView_switches'}
+						{name: "targetsRows", kind: "FittableRows", classes: "ares-project-properties-targetsRows-display"},
+						{
+							name: "AdvancedConfiguration", kind: "FittableRows", classes: "ares-project-properties-AdvancedPanel-hide", 
+							components: [
+								{
+									tag: "div", classes: "ares-project-properties-label-background", 
+								 	components: [
+								 		{content: "Advance configuration", classes: "ares-project-properties-advance-configuration"}
+								 	]
+								}
+							]
+						}
 					]
 				}
 			]
@@ -171,7 +186,12 @@ enyo.kind({
 	/**
 	 * @type {Array}
 	 */
-	platformDrawers: Phonegap.UIConfiguration.platformDrawersContent, 
+	platformDrawers: Phonegap.UIConfiguration.platformDrawersContent,
+
+	/**
+	 * @type {Array}
+	 */
+	advanceConfigurationPanel: Phonegap.UIConfiguration.advancePanelContent,
 
 	/**
 	 * @private
@@ -179,7 +199,8 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		this.createAllDrawers();	
+		this.createAllDrawers();
+		this.createAdvanceConfigurationPanel(); 	
 	},
 
 	createAllDrawers: function () {
@@ -291,6 +312,18 @@ enyo.kind({
 		}
 	},
 
+	createAdvanceConfigurationPanel: function (){
+		enyo.forEach(this.advanceConfigurationPanel, function(row){
+			this.$.AdvancedConfiguration.createComponent({
+					kind: "Phonegap.ProjectProperties." + row.type,
+					name: row.name,
+					label: row.label,
+					value: row.content,	
+					defaultValue: row.defaultValue					
+				});
+		}, this);
+	},
+
 	/** public */
 	setProjectConfig: function (config) {
 		this.config = config;		
@@ -321,7 +354,8 @@ enyo.kind({
 
 				this.$.targetsRows.$[drawer.id].setProjectConfig(this.config.targets[drawer.id]);				
 				this.$.targetsRows.$[drawer.id].$.drawer.$[row.name].setDefaultValue(configParameterValue.call(this));
-				this.$.targetsRows.$.general.$.drawer.$.access.setDefaultValue(config.access.origin);					
+				this.$.targetsRows.$.general.$.drawer.$.access.setDefaultValue(config.access.origin);
+				this.$.AdvancedConfiguration.$.autoGenerateXML.setDefaultValue(config.autoGenerateXML);					
 			}, this);
 		}, this);
 		// function to update the attributs values of the icon and splash screen in ios drawer
@@ -363,6 +397,19 @@ enyo.kind({
 		this.trace("sender:", inSender, "value:", inValue);		
 		var provider = Phonegap.ProjectProperties.getProvider();
 		provider.authorize(enyo.bind(this, this.loadKeys));
+	},
+
+	displayAdvancedPanel: function(){
+		this.showAdvancedConfiguration = !this.showAdvancedConfiguration;
+		if(this.showAdvancedConfiguration) {
+			this.$.ConfigurationButton.setContent("Back");
+			this.$.targetsRows.setClassAttribute("ares-project-properties-targetsRows-hide");
+			this.$.AdvancedConfiguration.setClassAttribute("ares-project-properties-AdvancedPanel-display");
+		} else {
+			this.$.ConfigurationButton.setContent("Advanced configuration");
+			this.$.targetsRows.setClassAttribute("ares-project-properties-targetsRows-display");
+			this.$.AdvancedConfiguration.setClassAttribute("ares-project-properties-AdvancedPanel-hide");
+		}				
 	},
 
 	/**

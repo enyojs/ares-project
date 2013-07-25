@@ -41,6 +41,7 @@ already build packages. Remove the `target` directory from your
 application source directory.
 
 ### Phonegap Build UI limitation
+*This issue is now fixed: to let the Ares user modify the file config.xml, a checkbox is added to the panel `Advanced configuration` accessible from the panel `Phonegap Build`. This checkbox enable/disable the auto-generation of the file `config.xml`*.
 
 The actual Phonegap Build UI that let the user define the content of the XML tags of the configuration file `config.xml` present the following limitations : 
 * The user don't have the ability to modify the content of the the file `config.xml`. Each time the build is launched, the content of this configuration file is rewritten by an auto-generated content.
@@ -52,7 +53,7 @@ In order to solve these Issues the following solutions will be proposed  :
 * Ares user will be grant the possibility to disable the auto-generation of the file `config.xml`
   when the build is launched, so the user will be able to have the full control of the content of this configuration file.
 
-For now, there is no workaround to bypass these issues.
+This issue is now fixed: to let the Ares user modifie the file config.xml, a checkbox is added in the panel `Advanced configuration` accessible from the panel `Phonegap Build`. This checkbox car enable/disable the auto-generation of the file `config.xml`.
 
 ## Designer
 
