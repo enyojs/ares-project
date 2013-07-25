@@ -27,10 +27,10 @@ Example:
 
 Before Ares 0.1.8, file resources like "preview top file", icons,
 splashscreens were specified using a relative path name (like
-"debug.html", "asset/my_icon.png). They now must be specified with an
-absoulte path name (i.e. with a leading '/'). These resource can be
-configured with the "Project -> Edit" menu or by directly editing
-"project.json" outside of Ares.
+`debug.html`, `asset/my_icon.png`). They now must be specified with an
+absoulte path name (i.e. with a leading `/`). These resources can be
+configured with the `Project` -> `Edit` menu or by directly editing
+`project.json` outside of Ares.
 (cf. https://enyojs.atlassian.net/browse/ENYO-2761 issue).
 
 ## PhoneGap
@@ -47,13 +47,13 @@ Non minified upload of source includes target directory containing
 already build packages. Remove the `target` directory from your
 application source directory.
 
-### Customizing Phonegap config.xml
+### Customizing Phonegap `config.xml`
 
-config.xml is generated from the data specified in the Phonegap tab of
+`config.xm`l is generated from the data specified in the Phonegap tab of
 Project Config Editor. If the proposed build options do not meet your
 need, you will have to:
-* disable config.xml generation (in the "Advanced" config setup of phonegap project config editor)
-* edit directly config.xml (with Ares or another editor).
+* disable `config.xml` generation (in the `Advanced` config setup of phonegap project config editor)
+* edit directly `config.xml` (with Ares or another editor).
 
 ### Icons and splashscreens and Phonegap
 
