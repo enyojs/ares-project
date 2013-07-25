@@ -9,7 +9,7 @@ enyo.kind({
 			{name:"editorControls", kind: "FittableColumns", fit:true, components:[
 				{kind: "onyx.MenuDecorator", onSelect: "fileMenuItemSelected", components: [
 					{content: "File"},
-					{kind: "onyx.Menu", maxHeight: "100%", components: [
+					{kind: "onyx.Menu", floating: true, maxHeight: "100%", components: [
 						{name: "saveButton", value: "saveDocAction", components: [
 							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save.png"},
 							{content: $L("Save")}
