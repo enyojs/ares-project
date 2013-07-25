@@ -49,7 +49,7 @@ application source directory.
 
 ### Customizing Phonegap `config.xml`
 
-`config.xm`l is generated from the data specified in the Phonegap tab of
+`config.xml` is generated from the data specified in the Phonegap tab of
 Project Config Editor. If the proposed build options do not meet your
 need, you will have to:
 * disable `config.xml` generation (in the `Advanced` config setup of phonegap project config editor)
