@@ -97,9 +97,6 @@ enyo.kind({
 	fileMenuItemSelected: function(inSender, inEvent) {
 		this.owner.componentsRegistry.phobos.fileMenuItemSelected(inSender, inEvent);
 	},
-	manageDesignerButton: function() {
-		this.$.designerButton.setDisabled(this.owner.componentsRegistry.phobos.manageDesignerButton());
-	},
 	editorSettings: function(){
 		this.owner.componentsRegistry.phobos.editorSettings();
 	},

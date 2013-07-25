@@ -289,8 +289,7 @@ enyo.kind({
 	*/
 	manageDesignerButton: function() {
 		var disabled = ! this.projectCtrl.fullAnalysisDone;
-		return disabled;
-		
+		this.owner.$.designerButton.setDisabled(disabled);
 	},
 	/**
 	 * Receive the project data reference which allows to access the analyzer
