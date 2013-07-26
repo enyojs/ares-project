@@ -21,11 +21,13 @@ enyo.kind({
 				}
 			}
 		]},
-		{category: "Paddings",	properties: [
+		{category: "Padding-ShortHand",	properties: [
 			{name: "padding", inputKind:  {kind:"Inspector.Config.Text",  components: [
 					{content: "shorthand form", style:"display: inline-block; font-size:11px;"}
 				]}
-			},
+			}
+		]},
+		{category: "Padding-LongHand",	properties: [
 			{name: "padding-top", inputKind: {kind: "Inspector.Config.Size",
 					values: ["px","cm","em","ern","rem", "%"]
 				}
@@ -43,11 +45,13 @@ enyo.kind({
 				}
 			}
 		]},
-		{category: "Margins",	properties: [
+		{category: "Margin-ShortHand",	properties: [
 			{name: "margin", inputKind:  {kind:"Inspector.Config.Text",  components: [
 					{content: "shorthand form", style:"display: inline-block; font-size:11px;"}
 				]}
-			},
+			}
+		]},
+		{category: "Margin-LongHand",	properties: [
 			{name: "margin-top", inputKind: {kind: "Inspector.Config.Size",
 					values: ["px","cm","em","ern","rem", "%"]
 				}
@@ -65,11 +69,13 @@ enyo.kind({
 				}
 			}
 		]},
-		{category: "Font-Style", properties: [
+		{category: "Font-ShortHand", properties: [
 			{name: "font", inputKind:  {kind:"Inspector.Config.Text",  components: [
 					{content: "shorthand form", style:"display: inline-block; font-size:11px;"}
 				]}
-			},
+			}
+		]},			
+		{category: "Font-Style", properties: [
 			{name: "font-family", inputKind: {kind: "Inspector.Config.Event",
 					values: ["arial", "arial black", "comic sans ms", "courier new", "georgia", 
 										"helvetica",  "times new roman", "trebuchet ms", "verdana" ]
