@@ -36,7 +36,7 @@ enyo.kind({
 								{content: "Accounts..."}
 							]},
 							{classes: "onyx-menu-divider aresmenu-button"},
-					{value: "showAresProperties",  classes:"aresmenu-button", content: "Properties..."}
+							{value: "showAresProperties",  classes:"aresmenu-button", content: "Properties..."}
 						]}
 					]},
 					{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
