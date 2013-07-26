@@ -1,40 +1,10 @@
-/*global alert, Documentor, ProjectCtrl */
+/* global analyzer, ares, Ares, ProjectCtrl */
+
 enyo.kind({
 	name: "Phobos",
 	classes: "enyo-unselectable",
 	components: [
-		{kind: "DragAvatar", components: [
-			{tag: "img", src: "$deimos/images/icon.png"}
-		]},
 		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
-			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", components: [
-				{kind: "onyx.MenuDecorator", onSelect: "fileMenuItemSelected", components: [
-					{content: "File"},
-					{kind: "onyx.Menu", maxHeight: "100%", components: [
-						{name: "saveButton", value: "saveDocAction", components: [
-							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save.png"},
-							{content: $L("Save")}
-						]},
-						{name: "saveAsButton", value: "saveAsDocAction", components: [
-							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save.png"},
-							{content: $L("Save as...")}
-						]},
-						{classes: "onyx-menu-divider"},
-						{name: "closeButton", value: "closeDocAction", components: [
-							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
-							{content: $L("Close")}
-						]},
-						{name: "closeAllButton", value: "closeAllDocAction", components: [
-							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
-							{content: $L("Close All")}
-						]}
-					]}
-				]},
-				{name: "newKindButton", kind: "onyx.Button", Showing: "false", content: $L("New Kind"), ontap: "newKindAction"},
-				{fit: true},
-				{name: "editorButton", kind: "onyx.Button", content: "Editor Settings", ontap: "editorSettings"},
-				{name: "designerButton", kind: "onyx.Button", content: $L("Designer"), ontap: "designerAction"}
-			]},
 			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
@@ -47,7 +17,7 @@ enyo.kind({
 		]},
 		{name: "savePopup", kind: "saveActionPopup", onAbandonDocAction: "abandonDocAction", onSave: "saveBeforeClose"},
 		{name: "saveAllPopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonAllDocAction"},
-		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, onFileChosen: "saveAsFileChosen"},
+		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, onFileChosen: "saveAsFileChosen"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
@@ -77,6 +47,7 @@ enyo.kind({
 	analysis: {},
 	helper: null,			// Analyzer.KindHelper
 	create: function() {
+		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.helper = new analyzer.Analyzer.KindHelper();
 		this.doRegisterMe({name:"phobos", reference:this});
@@ -89,7 +60,7 @@ enyo.kind({
 		}
 	},
 	fileMenuItemSelected: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		if (typeof this[inEvent.selected.value] === 'function') {
 			this[inEvent.selected.value]();
 		} else {
@@ -115,23 +86,29 @@ enyo.kind({
 	},
 	saveAsDocAction: function() {
 		var file = this.docData.getFile();
-		this.$.saveAsPopup.setSelectedName(file.name);
-		this.$.saveAsPopup.show();
+		this.$.saveAsPopup.connectProject(this.docData.getProjectData(), (function() {
+			var path = file.path;
+			var relativePath = path.substring(path.indexOf(this.projectData.id) + this.projectData.id.length, path.length);
+			this.$.saveAsPopup.pointSelectedName(relativePath, true);
+			this.$.saveAsPopup.show();
+		}).bind(this));
 	},
 	saveAsFileChosen: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 
 		if (!inEvent.file) {
 			// no file or folder chosen
 			return;
 		}
 		var self = this;
+		var relativePath = inEvent.name.split("/");
+		var name = relativePath[relativePath.length-1];
 		this.showWaitPopup($L("Saving ..."));
 		this.doSaveAsDocument({
 			docId: this.docData.getId(),
-			projectData: this.projectData,
+			projectData: this.docData.getProjectData(),
 			file: inEvent.file,
-			name: inEvent.name,
+			name: name,
 			content: this.$.ace.getValue(),
 			next: function(err) {
 				self.hideWaitPopup();
@@ -140,6 +117,7 @@ enyo.kind({
 				}
 			}
 		});
+		return true; //Stop event propagation
 	},
 	saveBeforeClose: function(){
 		this.saveDocAction();
@@ -224,12 +202,11 @@ enyo.kind({
 		this.projectCtrl.buildProjectDb();
 
 		this.docData.setEdited(edited);
-		this.$.toolbar.resized();
+		this.owner.$.toolbar.resized();
 	},
 
 	adjustPanelsForMode: function(mode, rightpane) {
-
-		if (this.debug) this.log("mode:", mode);
+		this.trace("mode:", mode);
 		var showModes = {
 			javascript: {
 				imageViewer: false,
@@ -263,11 +240,19 @@ enyo.kind({
 		var showStuff, showSettings = showModes[mode]||showModes['text'];
 		for (var stuff in showSettings) {
 			showStuff = showSettings[stuff];
-			if (this.debug) this.log("show", stuff, ":", showStuff);
-			if (typeof this.$[stuff].setShowing === 'function') {
-				this.$[stuff].setShowing(showStuff) ;
+			this.trace("show", stuff, ":", showStuff);
+			if(this.$[stuff] !== undefined){
+				if (typeof this.$[stuff].setShowing === 'function') {
+					this.$[stuff].setShowing(showStuff) ;
+				} else {
+					this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
+				}
 			} else {
-				this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
+				if (typeof this.owner.$[stuff].setShowing === 'function') {
+					this.owner.$[stuff].setShowing(showStuff) ;
+				} else {
+					this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
+				}
 			}
 		}
 
@@ -307,11 +292,11 @@ enyo.kind({
 		this.$.autocomplete.setProjectData(null);
 	},
 	/**
-	 	Disable "Designer" button unless project & enyo index are both valid
-	*/
+	 *	Disable "Designer" button unless project & enyo index are both valid
+	 */
 	manageDesignerButton: function() {
 		var disabled = ! this.projectCtrl.fullAnalysisDone;
-		this.$.designerButton.setDisabled(disabled);
+		this.owner.$.designerButton.setDisabled(disabled);
 	},
 	/**
 	 * Receive the project data reference which allows to access the analyzer
@@ -335,7 +320,7 @@ enyo.kind({
 	 * @protected
 	 */
 	projectIndexerChanged: function() {
-		this.debug && this.log("Project analysis ready");
+		this.trace("Project analysis ready");
 		this.manageDesignerButton();
 	},
 	dumpInfo: function(inObject) {
@@ -717,7 +702,7 @@ enyo.kind({
 	docChanged: function(inSender, inEvent) {
 		this.docData.setEdited(true);
 
-		if (this.debug) this.log(JSON.stringify(inEvent.data));
+		this.trace(JSON.stringify(inEvent.data));
 
 		if (this.analysis) {
 			// Call the autocomplete component
@@ -727,7 +712,7 @@ enyo.kind({
 	},
 	cursorChanged: function(inSender, inEvent) {
 		var position = this.$.ace.getCursorPositionInDocument();
-		if (this.debug) this.log(inSender.id + " " + inEvent.type + " " + JSON.stringify(position));
+		this.trace(inSender.id + " " + inEvent.type + " " + JSON.stringify(position));
 
 		// Check if we moved to another enyo kind and display it in the right pane
 		var tempo = this.analysis;
@@ -915,12 +900,12 @@ enyo.kind({
 		onSave: ""
 	},
 	create: function() {
- 		this.inherited(arguments);
- 		this.$.buttons.createComponent(
+		this.inherited(arguments);
+		this.$.buttons.createComponent(
 			{name:"saveButton", kind: "onyx.Button", content: "Save", ontap: "save"},
 			{owner: this}
 		);
- 	},
+	},
 	save: function(inSender, inEvent) {
 		this.hide();
 		this.doSave();

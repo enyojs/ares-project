@@ -31,7 +31,7 @@ enyo.kind({
 					onFileChanged: "closeDocument",
 					onFolderChanged: "closeSomeDocuments"
 				},
-				{kind: "designerPanels", name: "codeEditor"}
+				{kind: "Ares.DesignerPanels", name: "codeEditor"}
 			]
 		},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
@@ -412,8 +412,10 @@ enyo.kind({
 		this.activeDocument = d;
 		if (currentIF === 'code') {
 			this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
+			this.componentsRegistry.codeEditor.manageConrols(false);
 		} else {
 			this.componentsRegistry.phobos.designerAction();
+			this.componentsRegistry.codeEditor.manageConrols(true);
 		}
 		this.adjustBarMode();
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
@@ -553,62 +555,5 @@ enyo.kind({
 			}
 		},
 		instance: null
-	}
-});
-
-enyo.kind({
-	name:"designerPanels", 
-	components:[	
-		{
-			name: "bottomBar",
-			kind: "DocumentToolbar",
-			onSwitchFile: "switchFile",
-			onSave: "bounceSave",
-			onDesign: "bounceDesign",
-			onNewKind: "bounceNew",
-			onCloseFileRequest: "bounceCloseFileRequest"
-		},
-		{
-			kind: "Panels",
-			arrangerKind: "CarouselArranger",
-			draggable: false,
-			classes:"enyo-fit ares-panels",
-			onTransitionStart : "stopPanelEvent",
-			onTransitionFinish: "stopPanelEvent",
-			ondragstart	      : "stopPanelEvent",
-			ondrag            : "stopPanelEvent",
-			ondragfinish      : "stopPanelEvent",
-			components: [
-				{components: [
-					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onCloseAllDocument: "closeAllDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
-				]},
-				{components: [
-					{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
-				]}
-			]
-		}
-	],
-	events: {
-		onRegisterMe: "",
-		onMovePanel:""
-	},
-	handlers: {
-		onGrabberClick : "activePanel"
-	},
-	published: {
-		panelIndex: 2
-	},
-	create: function() {
-		this.inherited(arguments);
-		this.doRegisterMe({name:"codeEditor", reference:this});
-	},
-	switchGrabberDirection: function(active){
-		this.$.bottomBar.switchGrabberDirection(active);
-	},
-	activePanel : function(){
-		this.doMovePanel({panelIndex:this.panelIndex});
-	},
-	stopPanelEvent: function(){
-		return true;
 	}
 });

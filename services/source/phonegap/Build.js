@@ -11,7 +11,7 @@ enyo.kind({
 		onShowWaitPopup: ""
 	},
 	published: {
-		timeoutDuration: 3000
+		timeoutDuration: 3000	
 	},	
 	components: [
 		{kind: "Phonegap.BuildStatusUI",
@@ -213,7 +213,13 @@ enyo.kind({
 		
 		var projectAppId = this.getConfigAppId(project);
 		var appIdExist = false;
-	
+
+		// immediately go on if appId is blank
+		if (projectAppId.toString().length == 0) {
+			next(null, userData);
+			return;
+		}
+
 		enyo.forEach(userData.user.apps.all, 
 			function(appId){
 				// depending on the origin (project.json, Entry in
@@ -231,7 +237,7 @@ enyo.kind({
 			var config = this.getConfigInstance(project);
 			config.providers.phonegap.appId = "";
 			ServiceRegistry.instance.setConfig(config);
-			var errorMsg = 	"The AppId "+ projectAppId +" do not exist in the Phonegap Build account " +
+			var errorMsg = 	"The AppId '"+ projectAppId +"' does not exist in the Phonegap Build account " +
 					userData.user.email + ". Please choose a correct AppId";
 			next(errorMsg);
 		}
@@ -499,15 +505,19 @@ enyo.kind({
 	 */
 	_updateConfigXml: function(project, userData, next) {
 		
-		var config = this.getConfigInstance(project);
+		if (this.getConfigInstance(project).providers.phonegap.autoGenerateXML){
+			var config = this.getConfigInstance(project);
 
-		var req = project.getService().createFile(project.getFolderId(), "config.xml", this._generateConfigXml(config));
-		req.response(this, function _savedConfigXml(inSender, inData) {
-			this.trace("Phonegap.Build#_updateConfigXml()", "updated config.xml:", inData);
-			//var ctype = req.xhrResponse.headers['x-content-type'];
+			var req = project.getService().createFile(project.getFolderId(), "config.xml", this._generateConfigXml(config));
+			req.response(this, function _savedConfigXml(inSender, inData) {
+				this.trace("Phonegap.Build#_updateConfigXml()", "updated config.xml:", inData);	
+				next();
+			});
+			req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
+		} else {
 			next();
-		});
-		req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
+		}
+
 	},
 
 	/**
@@ -1061,6 +1071,7 @@ enyo.kind({
 	statics: {
 		DEFAULT_PROJECT_CONFIG: {
 			enabled: false,
+			autoGenerateXML: true,
 			features: {
 				battery: false,
 				camera: false,
