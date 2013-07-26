@@ -24,7 +24,7 @@ enyo.kind({
 
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource"},
-		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true},
+		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true, allowCreateFolder: true},
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")}
 	],
 	debug: false,
@@ -46,7 +46,6 @@ enyo.kind({
 		this.config = new ProjectConfig() ; // is a ProjectConfig object.
 
 		dirPopup.$.header.setContent("Select a directory containing the new project") ;
-		dirPopup.$.hermesFileTree.showNewFolderButton();
 		dirPopup.show();
 		this.hide();
 	},
