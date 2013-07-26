@@ -142,10 +142,72 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
+		
 		var saveProperty = (function(inConfig) {
 			this.trace("Saving operation ... Originator: ", this.name , " Value: ",inSender.value);
 			inConfig.preferences[this.name] = inSender.value;			
-		}).bind(this);		
+			}).bind(this);			
+
+		this.bubble("onEditConfig", saveProperty);
+	}
+});
+
+enyo.kind({
+	name: "Phonegap.ProjectProperties.AutoGenerateXML",
+	kind: "Phonegap.ProjectProperties.Row",
+	classes: "ares-project-properties-drawer-row",
+	debug: false,
+	components: [		
+		{	
+			kind: "onyx.Checkbox", 
+			name: "ConfigurationCheckBox", 
+			classes: "ares-project-properties-drawer-row-check-box-label",
+			onchange: "updateConfigurationValue"
+		},
+		{name: "label", content: this.label}	
+	],
+
+	/**
+	 * @private
+	 */
+	create: function () {
+		ares.setupTraceLogger(this);
+		this.inherited(arguments);	
+		this.labelChanged();	
+	},	
+
+	/**
+	 * @private
+	 */
+	labelChanged: function () {
+		this.$.label.setContent(this.label);
+	},
+
+	/**
+	 * @private
+	 */
+	defaultValueChanged: function () {	
+		this.$.ConfigurationCheckBox.setChecked(this.defaultValue);		
+	},
+
+	/**
+	 * Event handler that is triggered when the value of the input change. It defines
+	 * a function and passe it as a parameter in the bubbling action to let the 
+	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
+	 * in the file "project.json"
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
+	updateConfigurationValue: function (inSender, inValue) {
+	
+			var saveProperty = (function(inConfig) {
+				this.trace("Saving operation ... Originator: ", this.name , " Value: ",inSender.value);
+				inConfig.autoGenerateXML = inSender.getValue();			
+				}).bind(this);
+		
+			
 
 		this.bubble("onEditConfig", saveProperty);
 	}
@@ -190,7 +252,10 @@ enyo.kind({
 	 * @private
 	 */
 	defaultValueChanged: function () {
-		this.$.ConfigurationInput.setValue(this.defaultValue);
+		enyo.forEach(this.value, function (inValue) {
+				var itemState = inValue === this.defaultValue ? true : false;
+				this.$.ConfigurationPicker.createComponent({content: inValue, active: itemState});			
+			}, this);
 	},
 
 	/**

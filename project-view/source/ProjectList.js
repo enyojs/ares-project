@@ -106,7 +106,7 @@ enyo.kind({
 		{kind: "AccountsConfigurator"},
 		{kind: "AresProperties"}
 		]},
-		{classes:"hangar"},
+		{classes:"hangar"}
 	],
 	selected: null,
 	create: function() {

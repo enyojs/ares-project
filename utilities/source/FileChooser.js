@@ -28,14 +28,14 @@ enyo.kind({
 		 * When true the {Ares.FileChooser} has a "New Folder"
 		 * button
 		 */
-		allowCreateFolder: true,
+		allowCreateFolder: false,
 		/**
 		 * When true the {Ares.FileChooser} offers to define a
 		 * new (not yet exiting) file name.  This property is
 		 * applicable only if {Ares.FileChooser#folderChooser}
 		 * is false.
 		 */
-		allowNewFile: true,
+		allowNewFile: false,
 		/**
 		 * File name to use for the selection.  Has visible
 		 * effects only when {Ares.FileChooser#folderChooser}
@@ -127,10 +127,29 @@ enyo.kind({
 		}
 		this.$.header.setContent(this.headerText);
 		this.$.hermesFileTree.hideFileOpButtons();
+		this.allowCreateFolderChanged();
 	},
 	/** @private */
 	headerTextChanged: function () {
 		this.$.header.setContent(this.headerText);
+	},
+	/** @private */
+	folderChooserChanged: function () {
+		this.allowNewFileChanged();
+	},
+	/** @private */
+	allowCreateFolderChanged: function () {
+		if (this.allowCreateFolder) {
+			this.$.hermesFileTree.showNewFolderButton();
+		}
+	},
+	/** @private */
+	allowNewFileChanged: function () {
+		if (!this.folderChooser) {
+			if (this.allowNewFile) {
+				this.$.selectedName.setDisabled(false);
+			}
+		}
 	},
 	/** @private */
 	selectedNameChanged: function(oldSelectedName) {
@@ -180,6 +199,7 @@ enyo.kind({
 	/** @private */
 	_selectFolder: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
+		
 		// do neither modify this.selectedName nor
 		// this.$.selectedName.value
 		this.selectedFile = inEvent.file;
@@ -190,6 +210,13 @@ enyo.kind({
 			this.$.confirm.setDisabled(true);
 		}
 		//this.$.selectedFolder.setValue(inEvent.file.name);
+		
+		if (this.project) {
+			var path = inEvent.file.path;
+			var relativePath = path.substring(path.indexOf(this.project.id) + this.project.id.length, path.length);
+			this.$.selectedName.setValue(relativePath);
+		}
+		
 		this.updateConfirmButton();
 		return true; // Stop event propagation
 	},
@@ -197,6 +224,7 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.$.confirm.setDisabled(false);
 		this.setSelectedName(inSender.getValue());
+		return true; // Stop event propagation
 	},
 	updateConfirmButton: function() {
 		if (this.folderChooser) {
@@ -239,6 +267,7 @@ enyo.kind({
 				this.warn("Error: ", inError);
 				this.$.hermesFileTree.showErrorPopup(this.$LS("Creating folder '{folder}' failed: {error}", {folder: name, error: inError.toString()}));
 			});
+		return true; // Stop event propagation
 	},
 	/** @public */
 	reset: function () {
