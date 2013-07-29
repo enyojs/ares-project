@@ -161,7 +161,11 @@ enyo.kind({
 	},
 	trimWhitespace: function(inStr) {
 		inStr = inStr || "";
-		return inStr.replace(/\s/g, "");
+		// do not trimWhitespace in case of shorthand form
+		if (((inStr).split(" ")).length === 1) {
+			inStr.replace(/\s/g, "");
+		} 
+		return inStr;
 	}
 });
 
