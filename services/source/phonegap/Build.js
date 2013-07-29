@@ -556,7 +556,7 @@ enyo.kind({
 			//provided by the cookie
 			//token: this.config.auth.token,
 			title: config.title,
-			debug: true				// Disable minification
+			debug: false		// Enable minification
 		};
 
 		// Already-created apps have an appId (to be reused)
