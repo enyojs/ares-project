@@ -2,7 +2,7 @@ enyo.kind({
 	name:"Ares.DesignerPanels",
 	kind:"FittableRows", 
 	components:[
-		{kind: "onyx.Toolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels", layoutKind: "FittableColumnsLayout", noStretch: true, components: [
+		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels", layoutKind: "FittableColumnsLayout", noStretch: true, components: [
 			{kind: "onyx.Grabber", classes: "ares-grabber ares-icon", ontap: "activePanel", components:[
 				{kind: "aresGrabber", name: "aresGrabberDirection", classes:"lleftArrow"}
 			]},
