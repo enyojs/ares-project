@@ -115,7 +115,8 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium", 
 			components: [{
 					kind: "onyx.Input",	
-					name: "ConfigurationInput"
+					name: "ConfigurationInput", 
+					classes: "enyo-unselectable"
 				}
 			]
 		},
@@ -446,7 +447,11 @@ enyo.kind({
 			kind: "onyx.InputDecorator",
 			classes: "ares-project-properties-input-medium", 
 			components: [
-				{kind: "onyx.Input", name: "AndroidImgPath"}
+				{
+					kind: "onyx.Input", 
+					name: "AndroidImgPath", 
+					classes: "enyo-unselectable"
+				}
 			]
 		}, 
 		{kind: "onyx.IconButton", name:"AndroidImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"},
@@ -611,7 +616,8 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium", 
 			components: [{
 					kind: "onyx.Input",
-					name: "IosImgPath"
+					name: "IosImgPath", 
+					classes: "enyo-unselectable"
 				}
 			]
 		},
@@ -785,7 +791,8 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium", 
 			components: [{
 					kind: "onyx.Input",
-					name: "GeneralImgPath"
+					name: "GeneralImgPath", 
+					classes: "enyo-unselectable"
 				}
 			]
 		},
@@ -896,7 +903,8 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium", 
 			components: [{
 					kind: "onyx.Input",
-					name: "WinphoneImgPath"
+					name: "WinphoneImgPath", 
+					classes: "enyo-unselectable"
 				}
 			]
 		},
@@ -1006,7 +1014,8 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium", 
 			components: [{
 					kind: "onyx.Input",
-					name: "BlackBerryImgPath"
+					name: "BlackBerryImgPath", 
+					classes: "enyo-unselectable"
 				}
 			]
 		},
@@ -1115,7 +1124,8 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium", 
 			components: [{
 					kind: "onyx.Input",
-					name: "WebOsImgPath"
+					name: "WebOsImgPath", 
+					classes: "enyo-unselectable"
 				}
 			]
 		},
