@@ -21,7 +21,7 @@ enyo.kind({
 				}
 			}
 		]},
-		{category: "Padding-ShortHand",	properties: [
+		{category: "Padding",	properties: [
 			{name: "padding", inputKind:  {kind:"Inspector.Config.Text",  components: [
 					{content: "shorthand form", style:"display: inline-block; font-size:11px;"}
 				]}
@@ -45,7 +45,7 @@ enyo.kind({
 				}
 			}
 		]},
-		{category: "Margin-ShortHand",	properties: [
+		{category: "Margin",	properties: [
 			{name: "margin", inputKind:  {kind:"Inspector.Config.Text",  components: [
 					{content: "shorthand form", style:"display: inline-block; font-size:11px;"}
 				]}
@@ -69,7 +69,7 @@ enyo.kind({
 				}
 			}
 		]},
-		{category: "Font-ShortHand", properties: [
+		{category: "Font", properties: [
 			{name: "font", inputKind:  {kind:"Inspector.Config.Text",  components: [
 					{content: "shorthand form", style:"display: inline-block; font-size:11px;"}
 				]}
@@ -123,7 +123,7 @@ enyo.kind({
 		enyo.Control.cssTextToDomStyles(this.trimWhitespace(this.currentStyle), this.styleProps);
 
 		enyo.forEach(this.cssEditorConfig, function(category) {
-			this.createComponent({kind: "CssEditor.Category", propUser: this.styleProps, config: category, onChange: "change"});
+			this.createComponent({kind: "CssEditor.Category", propUser: this.styleProps, config: category, owner: this, onChange: "change"});
 		}, this);
 	},	
 	change: function(inSender, inEvent) {
@@ -148,6 +148,16 @@ enyo.kind({
 		
 		// Update change event target
 		inEvent.target = this;
+
+		// Update lastModifiedCategory
+		enyo.forEach(this.cssEditorConfig, function(category) {
+			var keys = Object.keys(category.properties);
+			enyo.forEach(keys, function(item) {
+				if (category.properties[item].name === n) {
+					this.inspectorObj.lastModifiedCategory = category.category;
+				}
+			}, this);	
+		}, this);	
 	},
 	trimWhitespace: function(inStr) {
 		inStr = inStr || "";
@@ -163,7 +173,7 @@ enyo.kind({
 				{name: "indicator", classes: "css-editor-turned css-editor-indicator "},
 				{name: "name", tag:"span"}
 			]},
-			{name:"drawer", kind: "onyx.Drawer", open:true, components: [
+			{name:"drawer", kind: "onyx.Drawer", open:false, components: [
 				{name: "list", kind: "Repeater", onSetupItem: "setupItem", components: [
 					{name: "item"}
 				]}
@@ -175,7 +185,17 @@ enyo.kind({
 		this.inherited(arguments);
 		this.$.name.setContent(this.config.category);
 		this.$.list.setCount((this.config.properties).length);
-		this.$.list.build();			
+		this.$.list.build();	
+		var open = this.$.drawer.getOpen();
+		if ((this.owner.inspectorObj.lastModifiedCategory === undefined) || 
+					(this.owner.inspectorObj.lastModifiedCategory === this.config.category)) {
+			this.owner.inspectorObj.lastModifiedCategory = this.config.category;
+			this.$.drawer.setOpen(!open);
+			this.$.indicator.addRemoveClass("css-editor-turned", !open);
+		} else {
+			this.$.drawer.setOpen(open);
+			this.$.indicator.addRemoveClass("css-editor-turned", open);			
+		}
 	},
 	toggleDrawer: function() {
 		var open = this.$.drawer.getOpen();
