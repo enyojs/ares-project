@@ -138,9 +138,6 @@ enyo.kind({
 	events: {
 		onConfigure: ""
 	},
-	handlers: {
-		onEditConfig: "saveConfig"
-	}, 
 	components: [{
 			kind: "enyo.Scroller",
 			fit: "true",
@@ -158,7 +155,7 @@ enyo.kind({
 										{kind: "Input", name: "pgConfId", attributes: { title: "unique identifier, assigned by build.phonegap.com"}}
 									]
 								}, 
-								{kind: "onyx.Button", name: "ConfigurationButton",classes: "ares-project-properties-advance-configuration-button", content: "Advanced configuration",	ontap: "displayAdvancedPanel"}
+								{kind: "onyx.Button", name: "ConfigurationButton",classes: "ares-project-properties-advance-configuration-button", content: "Advanced configuration", ontap: "displayAdvancedPanel"}
 							]
 						}, 
 						{name: "targetsRows", kind: "FittableRows", classes: "ares-project-properties-targetsRows-display"},
@@ -167,9 +164,9 @@ enyo.kind({
 							components: [
 								{
 									tag: "div", classes: "ares-project-properties-label-background", 
-								 	components: [
-								 		{content: "Advance configuration", classes: "ares-project-properties-advance-configuration"}
-								 	]
+									components: [
+										{content: "Advance configuration", classes: "ares-project-properties-advance-configuration"}
+									]
 								}
 							]
 						}
@@ -200,7 +197,7 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.createAllDrawers();
-		this.createAdvanceConfigurationPanel(); 	
+		this.createAdvanceConfigurationPanel();
 	},
 
 	createAllDrawers: function () {
@@ -324,71 +321,45 @@ enyo.kind({
 		}, this);
 	},
 
-	/** public */
+	/** @public */
 	setProjectConfig: function (config) {
-		this.config = config;		
-		this.config.enabled = true;
-				this.$.pgConfId.setValue(config.appId || '');
-		this.config.targets = this.config.targets || {};
-		
-		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {			
-			enyo.forEach(drawer.rows, function (row) {				
-				
-				var configParameterValue = (function(){
-					var value;
-					if(row.name ==='icon'){
-						value = config.icon[drawer.id].src;
-					} else { 
-						if (row.name ==='splashScreen'){
-							value = config.splashScreen[drawer.id].src;
-						} else {
-							 if(drawer.id === 'permissions'){
-								value = config.features[row.name];
-							} else{
-								value = config.preferences[row.name];
-							}
-						}
-					}
-					return value;
-				}).bind(this);
+		this.trace("Project config:", config);
 
-				this.$.targetsRows.$[drawer.id].setProjectConfig(this.config.targets[drawer.id]);				
-				this.$.targetsRows.$[drawer.id].$.drawer.$[row.name].setValue(configParameterValue.call(this));
-				this.$.targetsRows.$.general.$.drawer.$.access.setValue(config.access.origin);
-				this.$.AdvancedConfiguration.$.autoGenerateXML.setValue(config.autoGenerateXML);					
-			}, this);
-		}, this);
-		// function to update the attributs values of the icon and splash screen in ios drawer
-		var updateIosImgAttributs = (function(inImg){
-				this.$.targetsRows.$.ios.$.drawer.$[inImg].setHeight(config[inImg].ios.height);
-				this.$.targetsRows.$.ios.$.drawer.$[inImg].setWidth(config[inImg].ios.width);
-			}).bind(this);
+		config.enabled = true;
+		this.$.pgConfId.setValue(config.appId || '');
+		config.targets = config.targets || {};
 
-		// function to update the attribut value of the icon and splash screen in android drawer
-		var updateAndroidImgAttributs = (function(inImg){
-			this.$.targetsRows.$.android.$.drawer.$[inImg].setDensity(config[inImg].android.density);
-		}).bind(this);
+		this.$.AdvancedConfiguration.$.autoGenerateXML.setProjectConfig(config);
 
-		var imgs = ['icon', 'splashScreen'];
-		
-		enyo.forEach(imgs, function(img){
-			updateIosImgAttributs.call(this, img);
-			updateAndroidImgAttributs.call(this, img);
+		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {
+			this.$.targetsRows.$[drawer.id].setProjectConfig(config);
 		}, this);
 
 		this.refresh();
 	},
 
-	/** public */
-	getProjectConfig: function () {
-		this.config.appId = this.$.pgConfId.getValue();
+	/** @public */
+	getProjectConfig: function (config) {
+		config.access = {};
+		config.features = {};
+		config.preferences = {};
+		config.icon = {};
+		config.splashScreen = {};
+		config.targets = {};
+
+		config.appId = this.$.pgConfId.getValue();
+
+		this.$.AdvancedConfiguration.$.autoGenerateXML.getProjectConfig(config);
 		
-		this.trace("Project config:", this.config);	
-		enyo.forEach(this.platformDrawers, function (target) {
-			this.config.targets[target.id] = this.$.targetsRows.$[target.id].getProjectConfig();
+		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {
+			if (drawer.id !== "permissions") {
+				config.icon[drawer.id] = {};
+				config.splashScreen[drawer.id] = {};
+			}
+			this.$.targetsRows.$[drawer.id].getProjectConfig(config);
 		}, this);
-		
-		return this.config;
+
+		this.trace("Project config:", config);
 	},
 	/**
 	 * @protected
@@ -421,18 +392,6 @@ enyo.kind({
 			id: 'phonegap'
 		});
 	},
-	/**
-	 * Event handler that detect the changes done in a drawer's row
-	 * @param  {Object} inSender     contain the description of the envent sender
-	 * @param  {function} saveProperty  this function is defined in each row's kind, it save the 
-	 *                                  new input of the row in the object "this.config".
-	 * 
-	 * @private
-	 */
-	saveConfig: function(inSender, saveProperty)  {
-		saveProperty.call(this, this.config) ;
-		return true; //stop the bubbling
-	}, 
 
 	/**
 	 * @protected
@@ -498,8 +457,7 @@ enyo.kind({
 		targetName: "",
 		enabled: "",
 		fold: true,
-		keys: {},
-		config: {}
+		keys: {}
 	},
 	components: [
 		 
@@ -520,20 +478,40 @@ enyo.kind({
 		this.targetNameChanged();
 	},
 	setProjectConfig: function (config) {
+		this.trace("id:", this.targetId, "config:", config);
+
+		this.setEnabled( config && config.targets[this.targetId] );
 		
-		this.trace("id:", this.targetId, "config:", config);		
-		this.config = config;		
-		this.setEnabled( !! this.config);
-		if (this.enabled && this.$.drawer.$.keySelector) {
-			this.$.drawer.$.keySelector.setActiveKeyId(this.config.keyId);
-		}		
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else if (row === "keySelector") {
+				if (this.enabled) {
+					this.$.drawer.$.keySelector.setActiveKeyId( config.targets[this.targetId].keyId );
+				}
+			} else {
+				this.$.drawer.$[row].setProjectConfig(config);
+			}
+		}, this);
 	},
-	getProjectConfig: function () {
-		if (this.enabled && this.$.drawer.$.keySelector) {
-			this.config.keyId = this.$.drawer.$.keySelector.getActiveKeyId();
-		}		
-		this.trace("id:", this.targetId, "config:", this.config);	
-		return this.config;
+	getProjectConfig: function (config) {
+		if (this.enabled) {
+			config.targets[this.targetId] = {};
+		}
+
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else if (row === "keySelector") {
+				if (this.enabled && this.$.drawer.$.keySelector.getActiveKeyId()) {
+					config.targets[this.targetId].keyId = this.$.drawer.$.keySelector.getActiveKeyId();
+				}
+			} else {
+				this.$.drawer.$[row].getProjectConfig(config);
+			}
+		}, this);
+
+		this.trace("id:", this.targetId, "config:", config);
 	},
 	/**
 	 * @private
@@ -571,7 +549,7 @@ enyo.kind({
 				this.$.drawer.$.keySelector.destroy();
 			}
 
-			var keys = provider.getKey(this.targetId);			
+			var keys = provider.getKey(this.targetId);
 			this.trace("id:", this.targetId, "keys:", keys);
 			
 			if (keys) {
@@ -631,7 +609,23 @@ enyo.kind({
 	},
 
 	setProjectConfig: function (config) {
-		this.config = config;			
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else {
+				this.$.drawer.$[row].setProjectConfig(config);
+			}
+		}, this);
+	},
+
+	getProjectConfig: function (config) {
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else {
+				this.$.drawer.$[row].getProjectConfig(config);
+			}
+		}, this);
 	},
 
 	/**

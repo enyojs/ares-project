@@ -144,6 +144,7 @@ enyo.kind({
 	 */
 	handleServicesChange: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
+
 		this.services = enyo.clone(this.services) || {};
 		inEvent.serviceRegistry.forEach(enyo.bind(this, function(inService) {
 			var service = {
@@ -252,18 +253,17 @@ enyo.kind({
 	 */
 	preFill: function(inData) {
 		var conf = typeof inData === 'object' ? inData : JSON.parse(inData);
-		conf = ProjectConfig.checkConfig(conf);
-		this.config =  conf;
+		this.config = ProjectConfig.checkConfig(conf);
 
-		 // avoid storing 'undefined' in there
-		this.$.projectId.     setValue(conf.id      || '' );
-		this.$.projectVersion.setValue(conf.version || '' );
-		this.$.projectName.   setValue(conf.name    || '' );
-		this.$.projectTitle.  setValue(conf.title   || '' );
+		// avoid storing 'undefined' in there
+		this.$.projectId.setValue(this.config.id || '' );
+		this.$.projectVersion.setValue(this.config.version || '' );
+		this.$.projectName.setValue(this.config.name || '' );
+		this.$.projectTitle.setValue(this.config.title || '' );
 
-		if (! conf.author) { conf.author =  {} ;}
-		this.$.projectAuthor. setValue(conf.author.name || '') ;
-		this.$.projectContact.setValue(conf.author.href || '') ;
+		if (! this.config.author ) { this.config.author = {} ;}
+		this.$.projectAuthor.setValue(this.config.author.name || '') ;
+		this.$.projectContact.setValue(this.config.author.href || '') ;
 
 		// Load each provider service configuration into its
 		// respective ProjectProperties panel
@@ -271,9 +271,9 @@ enyo.kind({
 			this.showService(serviceId);
 		}, this);
 
-		if (! conf.preview ) {conf.preview = {} ;}
+		if (! this.config.preview ) {this.config.preview = {} ;}
 
-		this.$.topFileRow.setValue(conf.preview.top_file);
+		this.$.topFileRow.setValue(this.config.preview.top_file);
 
 		return this ;
 	},
@@ -308,35 +308,33 @@ enyo.kind({
 	},
 
 	/** @private */
-	getProjectConfig: function() {
-		// Project settings
-		this.config.id = this.$.projectId     .getValue();
-		this.config.version = this.$.projectVersion.getValue();
-		this.config.name = this.$.projectName   .getValue();
-		this.config.title = this.$.projectTitle  .getValue();
+	confirmTap: function(inSender, inEvent) {
+		// retrieve all configuration settings
+		this.config = {};
 
+		// Project settings
+		this.config.id = this.$.projectId.getValue();
+		this.config.version = this.$.projectVersion.getValue();
+		this.config.name = this.$.projectName.getValue();
+		this.config.title = this.$.projectTitle.getValue();
+
+		this.config.author = {};
 		this.config.author.name = this.$.projectAuthor.getValue();
 		this.config.author.href = this.$.projectContact.getValue();
 
 		// Preview settings
-		var ppConf = this.config.preview ;
-
-		ppConf.top_file = this.$.topFileRow.getValue();
-	},
-
-	confirmTap: function(inSender, inEvent) {
-		// retrieve modified values
-		
-		// retrieve general configuration settings
-		this.getProjectConfig();		
+		this.config.preview = {};
+		this.config.preview.top_file = this.$.topFileRow.getValue();
 
 		// Dump each provider service configuration panel into
 		// the project configuration.
+		this.config.providers = {};
 		enyo.forEach(enyo.keys(this.services), function(serviceId) {
 			var service = this.services[serviceId];
-			this.config.providers[service.id] = service.panel.getProjectConfig();
+			this.config.providers[service.id] = {};
 			this.config.providers[service.id].enabled = service.checkBox.checked;
-		}, this);		
+			service.panel.getProjectConfig(this.config.providers[service.id]);
+		}, this);
 
 		// to be handled by a ProjectWizard
 		var sourceIds = [];

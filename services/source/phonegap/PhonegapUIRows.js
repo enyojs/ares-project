@@ -66,22 +66,24 @@ enyo.kind({
 	},
 
 	/**
-	 * Event handler that is triggered when the value of the checkbox change. It defines
-	 * a function and passe it as a parameter in the bubbling action to let the 
-	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
-	 * in the file "project.json"
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
 	 * 
 	 * @private
 	 */
-	updateConfigurationValue: function (inSender, inValue) {		
-		var saveProperty = (function(inConfig) {
-			this.trace("Saving operation ... Originator: ", this.name , " Value: ",inSender.getValue());
-			inConfig.features[this.name] = inSender.getValue();			
-		}).bind(this);		
+	updateConfigurationValue: function (inSender, inValue) {
+		this.setValue(inSender.getValue());
 
-		this.bubble("onEditConfig", saveProperty);
+		return true;
+	},
+
+	/** @public */
+	setProjectConfig: function (config) {
+		this.setValue(config.features[this.name]);
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config.features[this.name] = this.getValue();
 	}
 });
 
@@ -113,8 +115,7 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium", 
 			components: [{
 					kind: "onyx.Input",	
-					name: "ConfigurationInput", 
-					onchange: "updateConfigurationValue"
+					name: "ConfigurationInput"
 				}
 			]
 		},
@@ -141,26 +142,6 @@ enyo.kind({
 	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
-	},
-
-	/**
-	 * Event handler that is triggered when the value of the input change. It defines
-	 * a function and passe it as a parameter in the bubbling action to let the 
-	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
-	 * in the file "project.json"
-	 * @param  {Object} inSender the event sender
-	 * @param  {Object} inValue  the event value
-	 * 
-	 * @private
-	 */
-	updateConfigurationValue: function (inSender, inValue) {
-		
-		var saveProperty = (function(inConfig) {
-			this.trace("Saving operation ... Originator: ", this.name , " Value: ",inSender.value);
-			inConfig.preferences[this.name] = inSender.value;			
-			}).bind(this);			
-
-		this.bubble("onEditConfig", saveProperty);
 	},
 
 	/** @private */
@@ -199,11 +180,19 @@ enyo.kind({
 		var header = "";
 		if (this.name === 'icon') {
 			header = $L("Select an icon file");
-		} else if (this.name === 'icon') {
+		} else if (this.name === 'splashScreen') {
 			header = $L("Select a splashscreen file");
 		}
 		this.doInputButtonTap({header: header});
 		return true;
+	},
+	/** @public */
+	setProjectConfig: function (config) {
+		this.setValue(config.preferences[this.name]);
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config.preferences[this.name] = this.getValue();
 	}
 });
 
@@ -246,25 +235,24 @@ enyo.kind({
 	},
 
 	/**
-	 * Event handler that is triggered when the value of the input change. It defines
-	 * a function and passe it as a parameter in the bubbling action to let the 
-	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
-	 * in the file "project.json"
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
 	 * 
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
-	
-			var saveProperty = (function(inConfig) {
-				this.trace("Saving operation ... Originator: ", this.name , " Value: ",inSender.value);
-				inConfig.autoGenerateXML = inSender.getValue();			
-				}).bind(this);
+		this.setValue(inSender.getValue());
 		
-			
+		return true;
+	},
 
-		this.bubble("onEditConfig", saveProperty);
+	/** @public */
+	setProjectConfig: function (config) {
+		this.setValue(config.autoGenerateXML);
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config.autoGenerateXML = this.getValue();
 	}
 });
 
@@ -277,7 +265,7 @@ enyo.kind({
 		{name: "label", classes: "ares-project-properties-drawer-row-label"},
 		{
 			kind: "onyx.InputDecorator",
-			classes: "ares-project-properties-input-medium", 
+			classes: "ares-project-properties-input-medium",
 			components: [{
 					kind: "onyx.Input",	
 					name: "ConfigurationInput", 
@@ -311,22 +299,24 @@ enyo.kind({
 	},
 
 	/**
-	 * Event handler that is triggered when the value of the input change. It defines
-	 * a function and passe it as a parameter in the bubbling action to let the 
-	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
-	 * in the file "project.json"
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
 	 * 
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
-		var saveProperty = (function(inConfig) {
-			this.trace("Saving operation ... Originator: ", this.name , " Value: ",inSender.value);
-			inConfig.access.origin = inSender.value;			
-		}).bind(this);		
+		this.setValue(inSender.getValue());
 
-		this.bubble("onEditConfig", saveProperty);
+		return true;
+	},
+
+	/** @public */
+	setProjectConfig: function (config) {
+		this.setValue(config.access.origin);
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config.access.origin = this.getValue();
 	}
 });
 
@@ -407,23 +397,25 @@ enyo.kind({
 	},
 
 	/**
-	 * Event handler that is triggered when the value of the picker change. It defines
-	 * a function and passe it as a parameter in the bubbling action to let the 
-	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
-	 * in the file "project.json"
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
 	 * 
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
-		var saveProperty = (function(inConfig) {
-			this.trace("Saving operation ... Originator: ", this.name , " Value: ", inValue.content);
-			inConfig.preferences[this.name] = inValue.content;			
-		}).bind(this);		
+		this.setValue(inValue.content);
 		
-		this.bubble("onEditConfig", saveProperty);
-	}	
+		return true;
+	},
+
+	/** @public */
+	setProjectConfig: function (config) {
+		this.setValue(config.preferences[this.name]);
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config.preferences[this.name] = this.getValue();
+	}
 });
 
 /**
@@ -454,7 +446,7 @@ enyo.kind({
 			kind: "onyx.InputDecorator",
 			classes: "ares-project-properties-input-medium", 
 			components: [
-				{kind: "onyx.Input", name: "AndroidImgPath", onchange: "updateConfigurationValue"}
+				{kind: "onyx.Input", name: "AndroidImgPath"}
 			]
 		}, 
 		{kind: "onyx.IconButton", name:"AndroidImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"},
@@ -522,51 +514,16 @@ enyo.kind({
 		  }
 	},
 
-	
-
 	/**
-	 * Event handler that is triggered when the value of the input change. It defines
-	 * a function and passe it as a parameter in the bubbling action to let the 
-	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
-	 * in the file "project.json". This function is used on an Android Icon as well as for 
-	 * an Android splash screen.
-	 * 
-	 * @param  {Object} inSender the event sender
-	 * @param  {Object} inValue  the event value
-	 * 
-	 * @private
-	 */
-	updateConfigurationValue: function (inSender, inValue) {
-		var target = this.name === "icon" ? 'icon' : 'splashScreen';
-		var saveProperty = (function(inConfig) {
-			this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-			inConfig[target]["android"].src = inSender.value;
-		}).bind(this);
-		this.trace('updated code');
-
-		this.bubble("onEditConfig", saveProperty);
-	}, 
-
-	/**
-	 * Event handler that is triggered when the value of the picker change. It defines
-	 * a function and passe it as a parameter in the bubbling action to let the 
-	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
-	 * in the file "project.json". This function is used on an Android Icon as well as for 
-	 * an Android splash screen.
-	 * 
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
 	 * 
 	 * @private
 	 */
 	updateAndroidIconDensity: function (inSender, inValue) {
-		var target = this.name === "icon" ? 'icon' : 'splashScreen';		
-		var	saveProperty = (function(inConfig) {
-				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inValue.content);
-				inConfig[target]["android"].density = inValue.content;			
-			}).bind(this);			
+		this.setDensity(inValue.content);
 
-		this.bubble("onEditConfig", saveProperty);
+		return true;
 	},
 
 	/** @private */
@@ -605,11 +562,21 @@ enyo.kind({
 		var header = "";
 		if (this.name === 'icon') {
 			header = $L("Select an icon file");
-		} else if (this.name === 'icon') {
+		} else if (this.name === 'splashScreen') {
 			header = $L("Select a splashscreen file");
 		}
 		this.doInputButtonTap({header: header});
 		return true;
+	},
+	/** @public */
+	setProjectConfig: function (config) {
+		this.setValue(config[this.name]["android"].src);
+		this.setDensity(config[this.name]["android"].density);
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config[this.name]["android"].src = this.getValue();
+		config[this.name]["android"].density = this.getDensity();
 	}
 });
 
@@ -644,8 +611,7 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium", 
 			components: [{
 					kind: "onyx.Input",
-					name: "IosImgPath", 
-					onchange: "updateConfigurationValue"
+					name: "IosImgPath"
 				}
 			]
 		},
@@ -710,71 +676,29 @@ enyo.kind({
 	widthChanged: function(){
 		this.$.IosImgWidth.setValue(this.width);
 	},
-	/**
-	 * Event handler that is triggered when the value of the input change. It defines
-	 * a function and passe it as a parameter in the bubbling action to let the 
-	 * function "saveConfig()" in the kind {Phonegap.ProjectProperties} save the new value 
-	 * in the file "project.json". This function is used on an IOS Icon as well as for 
-	 * an IOS splash screen.
-	 * 
-	 * @param  {Object} inSender the event sender
-	 * @param  {Object} inValue  the event value
-	 * 
-	 * @private
-	 */
-	updateConfigurationValue: function (inSender, inValue) {
-		var target = this.name === "icon" ? 'icon' : 'splashScreen';		
-		var saveProperty = (function(inConfig) {
-			this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-			inConfig[target]["ios"].src = inSender.value;			
-		}).bind(this);	
-		
-
-		this.bubble("onEditConfig", saveProperty);
-	},
 
 	/**
-	 * Event handler that is triggered when the value of the input that hold the value of 
-	 * the IOS icon height change. It defines a function and passe it as a parameter in the 
-	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
-	 * save the new value in the file "project.json". This function is used on an Android Icon as
-	 * well as for an Android splash screen.
-	 * 
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
 	 * 
 	 * @private
 	 */
 	updateIosIconHeightValue: function (inSender, inValue) {
-		var target = this.name === "icon" ? 'icon' : 'splashScreen';		
-		var	saveProperty = (function(inConfig) {
-				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-				inConfig[target]["ios"].height = inSender.value;			
-			}).bind(this);	
-		
-		this.bubble("onEditConfig", saveProperty);
-	}, 
+		this.setHeight(inValue.content);
+
+		return true;
+	},
 
 	/**
-	 * Event handler that is triggered when the value of the input that hold the value of 
-	 * the IOS icon width change. It defines a function and passe it as a parameter in the 
-	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
-	 * save the new value in the file "project.json". This function is used on an Android Icon as
-	 * well as for an Android splash screen.
-	 * 
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
 	 * 
 	 * @private
 	 */
 	updateIosIconWidhtValue: function (inSender, inValue) {
-		var target = this.name === "icon" ? 'icon' : 'splashScreen';		
-		var	saveProperty = (function(inConfig) {
-				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-				inConfig[target]["ios"].width = inSender.value;			
-			}).bind(this);	
-		
-		this.bubble("onEditConfig", saveProperty);
+		this.setWidth(inValue.content);
+
+		return true;
 	},
 
 	/** @private */
@@ -813,11 +737,23 @@ enyo.kind({
 		var header = "";
 		if (this.name === 'icon') {
 			header = $L("Select an icon file");
-		} else if (this.name === 'icon') {
+		} else if (this.name === 'splashScreen') {
 			header = $L("Select a splashscreen file");
 		}
 		this.doInputButtonTap({header: header});
 		return true;
+	},
+	/** @public */
+	setProjectConfig: function (config) {
+		this.setValue(config[this.name]["ios"].src);
+		this.setHeight(config[this.name]["ios"].height);
+		this.setWidth(config[this.name]["ios"].width);
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config[this.name]["ios"].src = this.getValue();
+		config[this.name]["ios"].height = this.getHeight();
+		config[this.name]["ios"].width = this.getWidth();
 	}
 });
 
@@ -849,8 +785,7 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium", 
 			components: [{
 					kind: "onyx.Input",
-					name: "GeneralImgPath", 
-					onchange: "updateConfigurationValue"
+					name: "GeneralImgPath"
 				}
 			]
 		},
@@ -878,28 +813,6 @@ enyo.kind({
 	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
-	},
-
-	/**
-	 * Event handler that is triggered when the value of the input that hold the value of 
-	 * the default icon change. It definesa function and passe it as a parameter in the 
-	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
-	 * save the new value in the file "project.json". This function is used on an Android Icon as
-	 * well as for an Android splash screen.
-	 * 
-	 * @param  {Object} inSender the event sender
-	 * @param  {Object} inValue  the event value
-	 * 
-	 * @private
-	 */
-	updateConfigurationValue: function (inSender, inValue) {
-		var target = this.name === "icon" ? 'icon' : 'splashScreen';		
-		var	saveProperty = (function(inConfig) {
-				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-				inConfig[target]["general"].src = inSender.value;			
-			}).bind(this);			
-
-		this.bubble("onEditConfig", saveProperty);
 	},
 
 	/** @private */
@@ -938,11 +851,19 @@ enyo.kind({
 		var header = "";
 		if (this.name === 'icon') {
 			header = $L("Select an icon file");
-		} else if (this.name === 'icon') {
+		} else if (this.name === 'splashScreen') {
 			header = $L("Select a splashscreen file");
 		}
 		this.doInputButtonTap({header: header});
 		return true;
+	},
+	/** @public */
+	setProjectConfig: function (config) {
+		this.setValue(config[this.name]["general"].src);
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config[this.name]["general"].src = this.getValue();
 	}
 });
 
@@ -975,8 +896,7 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium", 
 			components: [{
 					kind: "onyx.Input",
-					name: "WinphoneImgPath", 
-					onchange: "updateConfigurationValue"
+					name: "WinphoneImgPath"
 				}
 			]
 		},
@@ -1004,28 +924,6 @@ enyo.kind({
 	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
-	},
-
-	/**
-	 * Event handler that is triggered when the value of the input that hold the value of 
-	 * the Winphone icon change. It definesa function and passe it as a parameter in the 
-	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
-	 * save the new value in the file "project.json". This function is used on an Android Icon as
-	 * well as for an Android splash screen.
-	 * 
-	 * @param  {Object} inSender the event sender
-	 * @param  {Object} inValue  the event value
-	 * 
-	 * @private
-	 */
-	updateConfigurationValue: function (inSender, inValue) {
-		var target = this.name === "icon" ? 'icon' : 'splashScreen';			
-		var	saveProperty = (function(inConfig) {
-				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-				inConfig[target]["winphone"].src = inSender.value;			
-			}).bind(this);
-
-		this.bubble("onEditConfig", saveProperty);
 	},
 
 	/** @private */
@@ -1064,11 +962,19 @@ enyo.kind({
 		var header = "";
 		if (this.name === 'icon') {
 			header = $L("Select an icon file");
-		} else if (this.name === 'icon') {
+		} else if (this.name === 'splashScreen') {
 			header = $L("Select a splashscreen file");
 		}
 		this.doInputButtonTap({header: header});
 		return true;
+	},
+	/** @public */
+	setProjectConfig: function (config) {
+		this.setValue(config[this.name]["winphone"].src);
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config[this.name]["winphone"].src = this.getValue();
 	}
 });
 
@@ -1100,8 +1006,7 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium", 
 			components: [{
 					kind: "onyx.Input",
-					name: "BlackBerryImgPath", 
-					onchange: "updateConfigurationValue"
+					name: "BlackBerryImgPath"
 				}
 			]
 		},
@@ -1128,29 +1033,6 @@ enyo.kind({
 	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
-	},
-	
-	/**
-	 * Event handler that is triggered when the value of the input that hold the value of 
-	 * the BlackBerry icon change. It definesa function and passe it as a parameter in the 
-	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
-	 * save the new value in the file "project.json". This function is used on an Android Icon as
-	 * well as for an Android splash screen.
-	 * 
-	 * @param  {Object} inSender the event sender
-	 * @param  {Object} inValue  the event value
-	 * 
-	 * @private
-	 */
-	updateConfigurationValue: function (inSender, inValue) {
-		var target = this.name === "icon" ? 'icon' : 'splashScreen';		
-		var	saveProperty = (function(inConfig) {
-				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-				inConfig[target]["blackberry"].src = inSender.value;			
-			}).bind(this);		
-
-		this.bubble("onEditConfig", saveProperty);
-			
 	},
 
 	/** @private */
@@ -1189,11 +1071,19 @@ enyo.kind({
 		var header = "";
 		if (this.name === 'icon') {
 			header = $L("Select an icon file");
-		} else if (this.name === 'icon') {
+		} else if (this.name === 'splashScreen') {
 			header = $L("Select a splashscreen file");
 		}
 		this.doInputButtonTap({header: header});
 		return true;
+	},
+	/** @public */
+	setProjectConfig: function (config) {
+		this.setValue(config[this.name]["blackberry"].src);
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config[this.name]["blackberry"].src = this.getValue();
 	}
 });
 
@@ -1225,8 +1115,7 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium", 
 			components: [{
 					kind: "onyx.Input",
-					name: "WebOsImgPath", 
-					onchange: "updateConfigurationValue"
+					name: "WebOsImgPath"
 				}
 			]
 		},
@@ -1254,27 +1143,6 @@ enyo.kind({
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
 	},	
-
-	/**
-	 * Event handler that is triggered when the value of the input that hold the value of 
-	 * the Webos icon change. It definesa function and passe it as a parameter in the 
-	 * bubbling action to let the function "saveConfig()" in the kind {Phonegap.ProjectProperties} 
-	 * save the new value in the file "project.json". This function is used on an Android Icon as
-	 * well as for an Android splash screen.
-	 * 
-	 * @param  {Object} inSender the event sender
-	 * @param  {Object} inValue  the event value
-	 * 
-	 * @private
-	 */
-	updateConfigurationValue: function (inSender, inValue) {
-		var target = this.name === "icon" ? 'icon' : 'splashScreen';			
-		var	saveProperty = (function(inConfig) {
-				this.trace("Saving operation ... Originator: ", this.name , " Value: ", inSender.value);
-				inConfig[target]["webos"].src = inSender.value;			
-			}).bind(this);			
-		this.bubble("onEditConfig", saveProperty);
-	},
 
 	/** @private */
 	valueChanged: function () {
@@ -1312,10 +1180,18 @@ enyo.kind({
 		var header = "";
 		if (this.name === 'icon') {
 			header = $L("Select an icon file");
-		} else if (this.name === 'icon') {
+		} else if (this.name === 'splashScreen') {
 			header = $L("Select a splashscreen file");
 		}
 		this.doInputButtonTap({header: header});
 		return true;
+	},
+	/** @public */
+	setProjectConfig: function (config) {
+		this.setValue(config[this.name]["webos"].src);
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config[this.name]["webos"].src = this.getValue();
 	}
 });
