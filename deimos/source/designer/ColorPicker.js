@@ -17,7 +17,7 @@ enyo.kind({
 	events: {
 		onSelect: ""
 	},
-	style: "height: 15px; border: 1px solid Black; margin: 5px;",
+	style: "border-radius: 3px; height: 15px; border: 1px solid Black; margin: 5px;",
 	handlers: {
 		ontap: "colorTapped"
 	},
