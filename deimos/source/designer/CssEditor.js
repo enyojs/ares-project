@@ -21,25 +21,83 @@ enyo.kind({
 				}
 			}
 		]},
-		{category: "Paddings-Margins",	properties: [
-			{name: "padding", inputKind: {kind: "Inspector.Config.Size",
+		{category: "Padding",	properties: [
+			{name: "padding-top", inputKind: {kind: "Inspector.Config.Size",
 					values: ["px","cm","em","ern","rem", "%"]
 				}
 			},
-			{name: "margin", inputKind: {kind: "Inspector.Config.Size",
+			{name: "padding-bottom", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			},
+			{name: "padding-right", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			},
+			{name: "padding-left", inputKind: {kind: "Inspector.Config.Size",
 					values: ["px","cm","em","ern","rem", "%"]
 				}
 			}
 		]},
-
+		{category: "Padding-ShortHand",	properties: [
+			{name: "padding", inputKind:  {kind:"Inspector.Config.Text"}}
+		]},
+		{category: "Margin",	properties: [
+			{name: "margin-top", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			},
+			{name: "margin-bottom", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			},
+			{name: "margin-right", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			},
+			{name: "margin-left", inputKind: {kind: "Inspector.Config.Size",
+					values: ["px","cm","em","ern","rem", "%"]
+				}
+			}
+		]},
+		{category: "Margin-ShortHand",	properties: [
+			{name: "margin", inputKind:  {kind:"Inspector.Config.Text"}}
+		]},
 		{category: "Font-Style", properties: [
-			{name: "font-size", inputKind: "Inspector.Config.Size"},
 			{name: "font-family", inputKind: {kind: "Inspector.Config.Event",
 					values: ["arial", "arial black", "comic sans ms", "courier new", "georgia", 
 										"helvetica",  "times new roman", "trebuchet ms", "verdana" ]
 				}
 			},
-			{name: "text-indent", inputKind: "Inspector.Config.Size"}
+			{name: "font-style", inputKind: {kind: "Inspector.Config.Event",
+					values: ["normal", "italic", "oblique" ]
+				}
+			},
+			{name: "font-variant", inputKind: {kind: "Inspector.Config.Event",
+					values: ["normal", "small-caps"]
+				}
+			},
+			{name: "font-weight", inputKind: {kind: "Inspector.Config.Event",
+					values: ["normal", "bold", "bolder","lighter"]
+				}
+			},
+			{name: "font-size", inputKind: "Inspector.Config.Size"},
+			{name: "line-height", inputKind: "Inspector.Config.Size"}
+		]},			
+		{category: "Text-Style", properties: [
+			{name: "text-align", inputKind: {kind: "Inspector.Config.Event",
+					values: ["center", "left", "right"]
+				}
+			},
+			{name: "text-decoration", inputKind: {kind: "Inspector.Config.Event",
+					values: ["overline", "line-through", "underline"]
+				}
+			},
+			{name: "text-indent", inputKind: "Inspector.Config.Size"},
+			{name: "text-justify", inputKind: {kind: "Inspector.Config.Event",
+					values: ["auto", "inter-word", "inter-ideograph", "inter-cluster", "distribute", "kashida", "trim", "none"]
+				}
+			}
 		]}
 	],
 	fieldName: null,
@@ -53,7 +111,7 @@ enyo.kind({
 		enyo.Control.cssTextToDomStyles(this.trimWhitespace(this.currentStyle), this.styleProps);
 
 		enyo.forEach(this.cssEditorConfig, function(category) {
-			this.createComponent({kind: "CssEditor.Category", propUser: this.styleProps, config: category, onChange: "change"});
+			this.createComponent({kind: "CssEditor.Category", propUser: this.styleProps, config: category, owner: this, onChange: "change"});
 		}, this);
 	},	
 	change: function(inSender, inEvent) {
@@ -78,10 +136,24 @@ enyo.kind({
 		
 		// Update change event target
 		inEvent.target = this;
+
+		// Update lastModifiedCategory
+		enyo.forEach(this.cssEditorConfig, function(category) {
+			var keys = Object.keys(category.properties);
+			enyo.forEach(keys, function(item) {
+				if (category.properties[item].name === n) {
+					this.inspectorObj.lastModifiedCategory = category.category;
+				}
+			}, this);	
+		}, this);	
 	},
 	trimWhitespace: function(inStr) {
 		inStr = inStr || "";
-		return inStr.replace(/\s/g, "");
+		// do not trimWhitespace in case of shorthand form
+		if (((inStr).split(" ")).length === 1) {
+			inStr.replace(/\s/g, "");
+		} 
+		return inStr;
 	}
 });
 
@@ -90,10 +162,10 @@ enyo.kind({
 	components: [
 		{classes: "css-editor-category", components: [
 			{ontap:"toggleDrawer", classes: "css-editor-category-name", components: [
-				{name: "indicator", classes: "indicator turned"},
+				{name: "indicator", classes: "css-editor-turned css-editor-indicator "},
 				{name: "name", tag:"span"}
 			]},
-			{name:"drawer", kind: "onyx.Drawer", open:true, components: [
+			{name:"drawer", kind: "onyx.Drawer", open:false, components: [
 				{name: "list", kind: "Repeater", onSetupItem: "setupItem", components: [
 					{name: "item"}
 				]}
@@ -105,12 +177,22 @@ enyo.kind({
 		this.inherited(arguments);
 		this.$.name.setContent(this.config.category);
 		this.$.list.setCount((this.config.properties).length);
-		this.$.list.build();			
+		this.$.list.build();	
+		var open = this.$.drawer.getOpen();
+		if ((this.owner.inspectorObj.lastModifiedCategory === undefined) || 
+					(this.owner.inspectorObj.lastModifiedCategory === this.config.category)) {
+			this.owner.inspectorObj.lastModifiedCategory = this.config.category;
+			this.$.drawer.setOpen(!open);
+			this.$.indicator.addRemoveClass("css-editor-turned", !open);
+		} else {
+			this.$.drawer.setOpen(open);
+			this.$.indicator.addRemoveClass("css-editor-turned", open);			
+		}
 	},
 	toggleDrawer: function() {
 		var open = this.$.drawer.getOpen();
 		this.$.drawer.setOpen(!open);
-		this.$.indicator.addRemoveClass("turned", !open);
+		this.$.indicator.addRemoveClass("css-editor-turned", !open);
 	},
 	setupItem: function(inSender, inEvent) {
 		var prop = this.config.properties[inEvent.index];
