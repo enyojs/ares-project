@@ -69,12 +69,6 @@ enyo.kind({
 				}
 			}
 		]},
-		{category: "Font", properties: [
-			{name: "font", inputKind:  {kind:"Inspector.Config.Text",  components: [
-					{content: "shorthand form", style:"display: inline-block; font-size:11px;"}
-				]}
-			}
-		]},			
 		{category: "Font-Style", properties: [
 			{name: "font-family", inputKind: {kind: "Inspector.Config.Event",
 					values: ["arial", "arial black", "comic sans ms", "courier new", "georgia", 
