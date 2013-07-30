@@ -103,10 +103,10 @@ enyo.kind({
 	},
 	published: {
 		value: "",
-		inputtip: "",
+		inputTip: "",
 		activated: false,
 		status: false,
-		buttontip: ""
+		buttonTip: ""
 	},
 	components: [
 		{name: "label", classes: "ares-project-properties-drawer-row-label"},
@@ -132,10 +132,10 @@ enyo.kind({
 		this.labelChanged();
 
 		this.valueChanged();
-		this.inputtipChanged();
+		this.inputTipChanged();
 		this.activatedChanged();
 		this.statusChanged();
-		this.buttontipChanged();
+		this.buttonTipChanged();
 	},
 
 	/**
@@ -151,8 +151,8 @@ enyo.kind({
 		this.setStatus(true);
 	},
 	/** @private */
-	inputtipChanged: function () {
-		this.$.ConfigurationInput.setAttribute("title", this.inputtip);
+	inputTipChanged: function () {
+		this.$.ConfigurationInput.setAttribute("title", this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function () {
@@ -172,8 +172,8 @@ enyo.kind({
 		}
 	},
 	/** @private */
-	buttontipChanged: function () {
-		this.$.configurationButton.setAttribute("title", this.buttontip);
+	buttonTipChanged: function () {
+		this.$.configurationButton.setAttribute("title", this.buttonTip);
 	},
 	
 	/** @private */
@@ -430,10 +430,10 @@ enyo.kind({
 	published: {				
 		density: "",
 
-		inputtip: "",
+		inputTip: "",
 		activated: false,
 		status: false,
-		buttontip: ""	
+		buttonTip: ""	
 	},
 	events: {
 		onInputButtonTap: "",
@@ -484,10 +484,10 @@ enyo.kind({
 		this.labelChanged();	
 
 		this.valueChanged();
-		this.inputtipChanged();
+		this.inputTipChanged();
 		this.activatedChanged();
 		this.statusChanged();
-		this.buttontipChanged();	
+		this.buttonTipChanged();	
 	},
 
 	/**
@@ -537,8 +537,8 @@ enyo.kind({
 		this.setStatus(true);
 	},
 	/** @private */
-	inputtipChanged: function () {
-		this.$.AndroidImgPath.setAttribute("title", this.inputtip);
+	inputTipChanged: function () {
+		this.$.AndroidImgPath.setAttribute("title", this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function () {
@@ -558,8 +558,8 @@ enyo.kind({
 		}
 	},
 	/** @private */
-	buttontipChanged: function () {
-		this.$.AndroidImgButton.setAttribute("title", this.buttontip);
+	buttonTipChanged: function () {
+		this.$.AndroidImgButton.setAttribute("title", this.buttonTip);
 	},
 	
 	/** @private */
@@ -601,10 +601,10 @@ enyo.kind({
 		height: "",
 		width: "",
 
-		inputtip: "",
+		inputTip: "",
 		activated: false,
 		status: false,
-		buttontip: ""
+		buttonTip: ""
 	},	
 	components: [
 		{
@@ -655,10 +655,10 @@ enyo.kind({
 		this.labelChanged();
 
 		this.valueChanged();
-		this.inputtipChanged();
+		this.inputTipChanged();
 		this.activatedChanged();
 		this.statusChanged();
-		this.buttontipChanged();
+		this.buttonTipChanged();
 	},
 
 	/**
@@ -713,8 +713,8 @@ enyo.kind({
 		this.setStatus(true);
 	},
 	/** @private */
-	inputtipChanged: function () {
-		this.$.IosImgPath.setAttribute("title", this.inputtip);
+	inputTipChanged: function () {
+		this.$.IosImgPath.setAttribute("title", this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function () {
@@ -734,8 +734,8 @@ enyo.kind({
 		}
 	},
 	/** @private */
-	buttontipChanged: function () {
-		this.$.IosImgButton.setAttribute("title", this.buttontip);
+	buttonTipChanged: function () {
+		this.$.IosImgButton.setAttribute("title", this.buttonTip);
 	},
 	
 	/** @private */
@@ -776,10 +776,10 @@ enyo.kind({
 		onPathChecked: ""
 	},
 	published: {
-		inputtip: "",
+		inputTip: "",
 		activated: false,
 		status: false,
-		buttontip: ""
+		buttonTip: ""
 	},
 	components: [
 		{
@@ -808,10 +808,10 @@ enyo.kind({
 		this.labelChanged();
 
 		this.valueChanged();
-		this.inputtipChanged();
+		this.inputTipChanged();
 		this.activatedChanged();
 		this.statusChanged();
-		this.buttontipChanged();
+		this.buttonTipChanged();
 	},
 
 	/**
@@ -828,8 +828,8 @@ enyo.kind({
 		this.setStatus(true);
 	},
 	/** @private */
-	inputtipChanged: function () {
-		this.$.GeneralImgPath.setAttribute("title", this.inputtip);
+	inputTipChanged: function () {
+		this.$.GeneralImgPath.setAttribute("title", this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function () {
@@ -849,8 +849,8 @@ enyo.kind({
 		}
 	},
 	/** @private */
-	buttontipChanged: function () {
-		this.$.GeneralImgButton.setAttribute("title", this.buttontip);
+	buttonTipChanged: function () {
+		this.$.GeneralImgButton.setAttribute("title", this.buttonTip);
 	},
 	
 	/** @private */
@@ -888,10 +888,10 @@ enyo.kind({
 		onPathChecked: ""
 	},
 	published: {
-		inputtip: "",
+		inputTip: "",
 		activated: false,
 		status: false,
-		buttontip: ""
+		buttonTip: ""
 	},
 	components: [
 		{
@@ -920,10 +920,10 @@ enyo.kind({
 		this.labelChanged();
 
 		this.valueChanged();
-		this.inputtipChanged();
+		this.inputTipChanged();
 		this.activatedChanged();
 		this.statusChanged();
-		this.buttontipChanged();
+		this.buttonTipChanged();
 	},
 
 	/**
@@ -940,8 +940,8 @@ enyo.kind({
 		this.setStatus(true);
 	},
 	/** @private */
-	inputtipChanged: function () {
-		this.$.WinphoneImgPath.setAttribute("title", this.inputtip);
+	inputTipChanged: function () {
+		this.$.WinphoneImgPath.setAttribute("title", this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function () {
@@ -961,8 +961,8 @@ enyo.kind({
 		}
 	},
 	/** @private */
-	buttontipChanged: function () {
-		this.$.WinphoneImgButton.setAttribute("title", this.buttontip);
+	buttonTipChanged: function () {
+		this.$.WinphoneImgButton.setAttribute("title", this.buttonTip);
 	},
 	
 	/** @private */
@@ -999,10 +999,10 @@ enyo.kind({
 		onPathChecked: ""
 	},
 	published: {
-		inputtip: "",
+		inputTip: "",
 		activated: false,
 		status: false,
-		buttontip: ""
+		buttonTip: ""
 	},
 	components: [
 		{
@@ -1031,10 +1031,10 @@ enyo.kind({
 		this.labelChanged();
 
 		this.valueChanged();
-		this.inputtipChanged();
+		this.inputTipChanged();
 		this.activatedChanged();
 		this.statusChanged();
-		this.buttontipChanged();
+		this.buttonTipChanged();
 	},
 	/**
 	 * Set the content of the row's label when the row is created
@@ -1050,8 +1050,8 @@ enyo.kind({
 		this.setStatus(true);
 	},
 	/** @private */
-	inputtipChanged: function () {
-		this.$.BlackBerryImgPath.setAttribute("title", this.inputtip);
+	inputTipChanged: function () {
+		this.$.BlackBerryImgPath.setAttribute("title", this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function () {
@@ -1071,8 +1071,8 @@ enyo.kind({
 		}
 	},
 	/** @private */
-	buttontipChanged: function () {
-		this.$.BlackBerryImgButton.setAttribute("title", this.buttontip);
+	buttonTipChanged: function () {
+		this.$.BlackBerryImgButton.setAttribute("title", this.buttonTip);
 	},
 	
 	/** @private */
@@ -1109,10 +1109,10 @@ enyo.kind({
 		onPathChecked: ""
 	},
 	published: {
-		inputtip: "",
+		inputTip: "",
 		activated: false,
 		status: false,
-		buttontip: ""
+		buttonTip: ""
 	},
 	components: [
 		{
@@ -1141,10 +1141,10 @@ enyo.kind({
 		this.labelChanged();
 
 		this.valueChanged();
-		this.inputtipChanged();
+		this.inputTipChanged();
 		this.activatedChanged();
 		this.statusChanged();
-		this.buttontipChanged();
+		this.buttonTipChanged();
 	},
 	/**
 	 * Set the content of the row's label when the row is created
@@ -1160,8 +1160,8 @@ enyo.kind({
 		this.setStatus(true);
 	},
 	/** @private */
-	inputtipChanged: function () {
-		this.$.WebOsImgPath.setAttribute("title", this.inputtip);
+	inputTipChanged: function () {
+		this.$.WebOsImgPath.setAttribute("title", this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function () {
@@ -1181,8 +1181,8 @@ enyo.kind({
 		}
 	},
 	/** @private */
-	buttontipChanged: function () {
-		this.$.WebOsImgButton.setAttribute("title", this.buttontip);
+	buttonTipChanged: function () {
+		this.$.WebOsImgButton.setAttribute("title", this.buttonTip);
 	},
 	
 	/** @private */

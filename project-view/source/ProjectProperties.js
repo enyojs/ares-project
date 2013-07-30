@@ -108,8 +108,8 @@ enyo.kind({
 					{kind: "ProjectProperties.PathInputRow", 
 						name: "topFileRow", 
 						label: $L("Top application file: "), 
-						inputtip: $L("top file of your application. Typically index.html"), 
-						buttontip: $L("select file...")}					
+						inputTip: $L("top file of your application. Typically index.html"), 
+						buttonTip: $L("select file...")}					
 				]}
 			]}
 		]},
@@ -527,10 +527,10 @@ enyo.kind({
 	published: {
 		label: "",
 		value: "",
-		inputtip: "",
+		inputTip: "",
 		activated: false,
 		status: false,
-		buttontip: ""
+		buttonTip: ""
 	},
 	events: {
 		onInputButtonTap: "",
@@ -550,10 +550,10 @@ enyo.kind({
 
 		this.labelChanged();
 		this.valueChanged();
-		this.inputtipChanged();
+		this.inputTipChanged();
 		this.activatedChanged();
 		this.statusChanged();
-		this.buttontipChanged();
+		this.buttonTipChanged();
 	},
 	/** @private */
 	labelChanged: function () {
@@ -565,8 +565,8 @@ enyo.kind({
 		this.setStatus(true);
 	},
 	/** @private */
-	inputtipChanged: function () {
-		this.$.pathInputValue.setAttribute("title", this.inputtip);
+	inputTipChanged: function () {
+		this.$.pathInputValue.setAttribute("title", this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function () {
@@ -586,8 +586,8 @@ enyo.kind({
 		}
 	},
 	/** @private */
-	buttontipChanged: function () {
-		this.$.pathInputButton.setAttribute("title", this.buttontip);
+	buttonTipChanged: function () {
+		this.$.pathInputButton.setAttribute("title", this.buttonTip);
 	},
 	/** @private */
 	pathInputTap: function (inSender, inEvent) {
