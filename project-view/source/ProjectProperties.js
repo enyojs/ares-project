@@ -523,7 +523,6 @@ enyo.kind({
 
 enyo.kind({
 	name: "ProjectProperties.PathInputRow",
-	//kind: "",
 	classes: "ares-row",
 	published: {
 		label: "",
