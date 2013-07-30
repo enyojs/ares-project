@@ -53,7 +53,6 @@ enyo.kind({
 		onSaveDocument: "saveDocument", 
 		onSaveAsDocument: "saveAsDocument", 
 		onCloseDocument: "closeDocument", 
-		onCloseAllDocument: "closeAllDocument",
 		onDesignDocument: "designDocument", 
 		onUpdate: "phobosUpdate",
 		onCloseDesigner: "closeDesigner", 
@@ -261,14 +260,6 @@ enyo.kind({
 				self.showProjectView();
 			}
 		});
-	},
-	closeAllDocument: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-		var files = Ares.Workspace.files;
-		while(files.models.length) {
-			this._closeDocument(files.at(0).getId());
-		}
-		this.showProjectView();
 	},
 	/* @private */
 	closeSomeDocuments: function(inSender, inEvent) {
