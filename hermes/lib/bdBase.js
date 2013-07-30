@@ -303,7 +303,7 @@ BdBase.prototype.minify = function(req, res, next) {
 	var enyoDir = this.config.enyoDir,
 	    minifyScript = this.config.minifyScript;
 
-	if (req.query["debug"]) {
+	if (req.query["debug"] === "true") {
 		_noMinify();
 		return;
 	}
