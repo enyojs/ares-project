@@ -22,12 +22,6 @@ enyo.kind({
 			}
 		]},
 		{category: "Padding",	properties: [
-			{name: "padding", inputKind:  {kind:"Inspector.Config.Text",  components: [
-					{content: "shorthand form", style:"display: inline-block; font-size:11px;"}
-				]}
-			}
-		]},
-		{category: "Padding-LongHand",	properties: [
 			{name: "padding-top", inputKind: {kind: "Inspector.Config.Size",
 					values: ["px","cm","em","ern","rem", "%"]
 				}
@@ -45,13 +39,10 @@ enyo.kind({
 				}
 			}
 		]},
-		{category: "Margin",	properties: [
-			{name: "margin", inputKind:  {kind:"Inspector.Config.Text",  components: [
-					{content: "shorthand form", style:"display: inline-block; font-size:11px;"}
-				]}
-			}
+		{category: "Padding-ShortHand",	properties: [
+			{name: "padding", inputKind:  {kind:"Inspector.Config.Text"}}
 		]},
-		{category: "Margin-LongHand",	properties: [
+		{category: "Margin",	properties: [
 			{name: "margin-top", inputKind: {kind: "Inspector.Config.Size",
 					values: ["px","cm","em","ern","rem", "%"]
 				}
@@ -68,6 +59,9 @@ enyo.kind({
 					values: ["px","cm","em","ern","rem", "%"]
 				}
 			}
+		]},
+		{category: "Margin-ShortHand",	properties: [
+			{name: "margin", inputKind:  {kind:"Inspector.Config.Text"}}
 		]},
 		{category: "Font-Style", properties: [
 			{name: "font-family", inputKind: {kind: "Inspector.Config.Event",
