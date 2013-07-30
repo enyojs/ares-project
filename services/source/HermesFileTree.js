@@ -16,7 +16,6 @@ enyo.kind({
 		onFileChanged: "",
 		onFolderChanged: "",
 		onTreeChanged: "",
-		onGrabberClick: "",
 		onPathChecked: ""
 	},
 	handlers: {
@@ -35,11 +34,9 @@ enyo.kind({
 		// allows filetree to have draggable subnodes or not (not per default).
 		dragAllowed: false
 	},
+	fit:true,
 	components: [
-			{kind: "onyx.Toolbar", classes: "ares-top-toolbar hermesFileTree-toolbar", components: [
-				{kind: "onyx.Grabber", classes: "ares-grabber" , name:"filePanelGrabber", showing: false, ontap: "doGrabberClick", components: [
-					{kind: "aresGrabber", name: "aresGrabberDirection"}
-				]},
+			{kind: "onyx.Toolbar", classes:"ares-small-toolbar title-gradient", components: [
 				{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 					{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
 					{kind: "onyx.Tooltip", content: $L("New Folder...")}
@@ -411,18 +408,6 @@ enyo.kind({
 		this.$.deleteFile.show();
 		return this ;
 	},
-	showGrabber:function(){
-		this.$.filePanelGrabber.show();
-		return this ;
-	},
-	hideGrabber:function(){
-		this.$.filePanelGrabber.hide();
-		return this ;
-	},
-	switchGrabberDirection: function(active){
-		this.$.aresGrabberDirection.switchGrabberDirection(active);
-	},
-
 	showRevertMoveButton: function() {
 		this.$.revertMove.show();
 		return this ;

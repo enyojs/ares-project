@@ -139,13 +139,6 @@
 	/*Fix for onyx.MoreToolbar used in projectList.js (use of onyx.Toolbar creates issues on menus in Safari)*/
 	z-index: auto;
 }
-.ares-top-toolbar.hermesFileTree-toolbar {
-	padding: 9px 3px 10px 3px;
-}
-
-.ares-top-toolbar.hermesFileTree-toolbar>div {
-	margin : 0 1px;
-}
 
 .ares-tab-label {
 	display: inline-block;
@@ -459,6 +452,18 @@ div.large-fixed { width: 80%; }
 .title-gradient {
 	border-bottom:1px solid #FFFFFF;
 	background: @ares-title-gradient @ares-project-list-background-active;
+}
+
+.onyx-toolbar.ares-small-toolbar{
+	height:50px;
+	padding: 5px;
+	border-top:none;
+	border-left:none;
+	border-right:none;
+}
+
+.ares-small-toolbar>div {
+	margin : 0 2px;
 }
 
 .hangar {
