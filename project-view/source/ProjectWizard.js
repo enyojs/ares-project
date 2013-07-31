@@ -348,7 +348,7 @@ enyo.kind({
 	classes:"ares-masked-content-popup",
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource", onFileChoosersChecked: "fileChoosersChecked"},
-		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, onFileChosen: "selectFileChosen"}
+		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "selectFileChosen"}
 	],
 
 	debug: false,

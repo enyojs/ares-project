@@ -13,6 +13,7 @@ enyo.kind({
 		{
 			name: "tabs",
 			kind: "onyx.TabBar",
+			classes: "ares-small-toolbar title-gradient",
 			showing: false,
 			checkBeforeClosing: true,
 			onTabChanged: 'switchFile',

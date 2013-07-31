@@ -37,6 +37,10 @@ enyo.kind({
 		 */
 		allowNewFile: false,
 		/**
+		 * When true the {Ares.FileChooser} show the toolbar.
+		 */
+		allowToolbar: true,
+		/**
 		 * File name to use for the selection.  Has visible
 		 * effects only when {Ares.FileChooser#folderChooser}
 		 * is true.
@@ -52,10 +56,10 @@ enyo.kind({
 			{tag: "div", name: "header", classes:"title", content: $L("Select a directory")},
 			{kind: "FittableColumns", classes: "onyx-light", fit: true, components: [
 				{kind:"FittableRows", name: "sources", classes:"ares-left-pane-file-chooser", components:[
-					{kind: "onyx.Toolbar", classes: "ares-top-toolbar", components: [
+					{kind: "onyx.Toolbar", classes: "ares-small-toolbar title-gradient", components: [
 						{content: $L("Sources"), classes:"ares-create-sources"}
 					]},
-					{kind: "ProviderList", selector: ["type", "filesystem"], name: "providerList", classes:"ares-provider-list",/*style:"border: 3px solid yellow;", header: "Sources",*/ onSelectProvider: "handleSelectProvider"}
+					{kind: "ProviderList", selector: ["type", "filesystem"], fit:"true", name: "providerList", /*header: "Sources",*/ onSelectProvider: "handleSelectProvider"}
 				]},
 				{kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "_selectFile", onFolderClick: "_selectFolder", onNewFolderConfirm: "createFolder"}
 			]},
@@ -127,6 +131,7 @@ enyo.kind({
 		}
 		this.$.header.setContent(this.headerText);
 		this.$.hermesFileTree.hideFileOpButtons();
+		this.$.hermesFileTree.showToolbar(this.allowToolbar);
 		this.allowCreateFolderChanged();
 	},
 	/** @private */
