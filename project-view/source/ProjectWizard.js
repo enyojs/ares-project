@@ -404,8 +404,8 @@ enyo.kind({
 	},
 	/** @private */
 	selectFile: function(inSender, inData) {
-		this.trace(inSender, "=>", inData);		
-
+		this.trace(inSender, "=>", inData);
+		
 		this.chooser = inData.input;
 		this.$.selectFilePopup.reset();
 		this.$.selectFilePopup.connectProject(this.targetProject, (function() {
@@ -419,7 +419,7 @@ enyo.kind({
 	/** @private */
 	selectFileChosen: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
-
+		
 		var chooser = this.chooser;
 		this.chooser = null;
 
@@ -467,7 +467,7 @@ enyo.kind({
 	/** @private */
 	checkPath: function (inSender, inData) {
 		this.trace(inSender, "=>", inData);
-
+		
 		this.checker = inData.input;
 		
 		// FIXME ENYO-2761: this is a workaround that shows the developer that the path is not
@@ -484,11 +484,12 @@ enyo.kind({
 	/** @private */
 	pathChecked: function (inSender, inData) {
 		this.trace(inSender, "=>", inData);
+		
+		var checker = this.checker;
+		this.checker = null;
 
 		this.$.selectFilePopup.reset();
-		this.$.propertiesWidget.updatePathCheck(this.checker, inData.status);
-
-		this.checker = null;
+		this.$.propertiesWidget.updatePathCheck(checker, inData.status);
 	},
 	/** @private */
 	fileChoosersChecked: function (inSender, inEvent) {

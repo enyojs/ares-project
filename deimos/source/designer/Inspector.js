@@ -370,7 +370,7 @@ enyo.kind({
 				if (inControl && inControl.style !== undefined) {
 					style = inControl.style;
 				}
-				this.$.content.createComponent({kind: "CssEditor", currentStyle: style});
+				this.$.content.createComponent({kind: "CssEditor", currentStyle: style, inspectorObj: this});
 				this.$.filterLevel.hide();
 				break;
 			case 'L':
