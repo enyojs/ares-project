@@ -332,11 +332,10 @@ enyo.kind({
 	inspect: function(inControl) {
 		var ps, i, p;
 
+		this.$.content.destroyComponents();
 		if (!inControl) {
 			return;
 		}
-
-		this.$.content.destroyComponents();
 		this.selected = inControl;
 		
 		var kindName = inControl.name + " (" + inControl.kind + ")";
@@ -371,7 +370,7 @@ enyo.kind({
 				if (inControl && inControl.style !== undefined) {
 					style = inControl.style;
 				}
-				this.$.content.createComponent({kind: "CssEditor", currentStyle: style});
+				this.$.content.createComponent({kind: "CssEditor", currentStyle: style, inspectorObj: this});
 				this.$.filterLevel.hide();
 				break;
 			case 'L':

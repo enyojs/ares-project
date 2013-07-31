@@ -6,13 +6,10 @@ enyo.kind({
 		onSwitchFile: "",
 		onCloseFileRequest: "",
 		onDesign: "",
-		onRegisterMe: ""
+		onRegisterMe: "",
+		onGrabberClick: ""
 	},
-
 	components: [	
-		{kind: "onyx.Toolbar", classes: "ares-top-toolbar", components: [
-			{kind: "onyx.Grabber"}
-		]},	
 		{
 			name: "tabs",
 			kind: "onyx.TabBar",

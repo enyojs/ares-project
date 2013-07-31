@@ -16,6 +16,7 @@ enyo.kind({
 		onScanProject: "",
 		onDuplicateProject: "",
 		onProjectRemoved: "",
+		onCloseProjectDocuments:"",
 		onModifySettings: "",
 		onBuild: "",
 		onInstall: "",
@@ -106,7 +107,7 @@ enyo.kind({
 		{kind: "AccountsConfigurator"},
 		{kind: "AresProperties"}
 		]},
-		{classes:"hangar"},
+		{classes:"hangar"}
 	],
 	selected: null,
 	create: function() {
@@ -187,15 +188,18 @@ enyo.kind({
 			else {
 				this.removeSelectedProjectData() ;
 			}
+
 		}
 	},
 	removeSelectedProjectData: function() {
 		if (this.selected) {
 			// remove the project from list of project config
-			var name = Ares.Workspace.projects.at(this.selected.index).getName();
+			var project =  Ares.Workspace.projects.at(this.selected.index);
+			var name = project.getName();
 			Ares.Workspace.projects.removeProject(name);
 			this.selected = null;
 			this.doProjectRemoved();
+			this.doCloseProjectDocuments({"project":project}); //To reset the designer panel
 			this.$.projectMenu.setDisabled(true);
 		}
 	},

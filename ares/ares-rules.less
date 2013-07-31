@@ -124,10 +124,6 @@
 	min-width: 300px;
 }
 
-.ares-full-screen {
-	width: 100%;
-}
-
 .ares-small-screen {
 	width: 300px;
 }
@@ -135,7 +131,6 @@
 .ares-top-toolbar{
 	border-right: 0;
 	border-left: 0;
-	width: 100%;
 	height:64px; 
 	line-height: 30px;
 	border-bottom: 1px solid #222; 
@@ -149,7 +144,7 @@
 }
 
 .ares-top-toolbar.hermesFileTree-toolbar>div {
-	margin : 4px 1px 5px 1px;
+	margin : 0 1px;
 }
 
 .ares-tab-label {
@@ -209,7 +204,8 @@
 	background-color: #eaeaea;
 	.ares-rounded-corners (@ares-drawer-radius);
 	padding:4px;
-	text-align: right;
+	text-align: left;
+	min-height: 60px;
 }
 
 .ares-drawer>div {
@@ -256,12 +252,30 @@
 
 /*Project properties popup*/
 
-.ares-project-properties { height: 215px; width: 590px; padding: 5px 10px; margin-top: 15px; }
+.ares-project-properties { height: 400px; width: 660px; padding: 5px 10px; margin-top: 15px; }
+
+.ares-project-properties-targetsRows-display {
+	visibility: visible;
+}
+
+.ares-project-properties-targetsRows-hide {
+	visibility: hidden;
+	height: 0px;
+}
+.ares-project-properties-AdvancedPanel-display {
+	visibility: visible;
+}
+
+.ares-project-properties-AdvancedPanel-hide {
+	visibility: hidden;
+	height: 0px;
+}
+
 
 .ares-radio-group{ padding-top: 7px; }
 
 .ares-radio-group>button {
-	line-height: 30px;
+	line-height: 32px;
 	padding: 0;
 	margin:0;
 	background-image: none;
@@ -287,6 +301,72 @@
 	border-right: 8px solid transparent;
 	bottom: -6px;
 	right: 43%;
+}
+
+/* Ares "Phonegap build" panel.*/
+
+.ares-project-properties-drawer-row { margin-top: 10px; height: 32px; }
+
+.ares-project-properties-drawer-row-label { width: 13em; margin-left: 10px; margin-right: 10px;}
+
+.ares-project-properties-drawer-row-attribut-label {margin-left: 10px; margin-right: 10px;}
+
+.ares-project-properties-common_drawer_header { 
+	margin-left: 50px;
+	color: @ares-drawer-label;
+	font-weight:bold;
+	position: relative;
+	top : 7px;
+}
+
+.ares-project-properties-platform_drawer_header { 
+	margin-left: 10px; 
+	color: @ares-drawer-label;
+	font-weight:bold;
+}
+
+.ares-project-properties-advance-configuration { 
+	margin-left: 10px; 
+	position: relative;
+	top: 7px;
+	color: @ares-drawer-label;
+	font-weight:bold;
+}
+
+.ares-project-properties-advance-configuration-button {
+	width: 175px;
+	left: 100px;
+}
+
+.ares-project-properties-picker {
+	width: 130px;
+	margin-right: 30px;
+}
+.ares-project-properties-picker-small {
+	width: 50px;
+	margin-left: 10px;
+}
+.ares-project-properties-input-small > input {
+	width: 50px;	
+}
+.ares-project-properties-input-medium > input {
+	width: 110px;
+}
+
+
+.ares-project-properties-drawer-row-check-box-label { margin-left: 30px; margin-right: 50px; }
+
+.ares-project-properties-label-background { 
+	background-color: @ares-drawer-label-background;
+	.ares-box-shadow (inset 0px 0px 30px rgba(0,0,0,0.3));
+	width: 605px; 
+	height: 32px; 
+	margin-left: 5px;
+	.ares-rounded-corners (@ares-drawer-radius); 	
+}
+
+.ares-project-properties-label-background:hover {
+	background-color: @ares-drawer-label-background-hover;
 }
 
 /* Ares group box */
@@ -323,6 +403,35 @@
 	left: 71px;
 }
 
+.ares-grabber {
+	position: relative;
+	height: 28px;
+	width: 28px;
+	border: 1px solid @ares-toolbar-background ;
+	cursor: pointer;
+	cursor: hand;
+	.ares-rounded-corners (3px);
+    background: @ares-grabber-from-background;
+    background: -moz-linear-gradient(top, @ares-grabber-from-background 0%,@ares-grabber-to-background 100%); // FF3.6+ 
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, @ares-grabber-from-background), color-stop(100%, @ares-grabber-to-background)); //Chrome,Safari4+
+    background: -webkit-linear-gradient(top, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // Chrome10+,Safari5.1+ 
+    background: -o-linear-gradient(top, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // Opera 11.10+ 
+    background: -ms-linear-gradient(top, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // IE10+
+    background: linear-gradient(180deg, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // W3C*/
+}
+
+.ares-grabber .lleftArrow  {
+	position: absolute;
+	top: 2px;
+	left: -4px;
+}
+
+.ares-grabber .lrightArrow  {
+	position: absolute;
+	top: 2px;
+	left: -3px;
+}
+
 p.break { padding: 1px 0; }
 
 .file-chooser-input { width: 470px; }
@@ -339,7 +448,7 @@ input.ares-small-input { width: 75px;}
 
 .large-picker { width: 150px; }
 
-.middle-width { width: 140px; }
+.middle-width { width: 200px; }
 
 .very-large-width { width: 217px; }
 
@@ -356,10 +465,34 @@ div.large-fixed { width: 80%; }
 	background: @ares-sprites-vertical repeat-y scroll 0 0;
 }
 
+.enyo-fittable-columns-layout>.hangar{
+	width: 7px;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+}
+
 .lsmallDownArrow {
 	height: 25px;
 	width: 25px;
 	background: @ares-lsmall-dowm-arrow;
+	vertical-align: middle;
+	display: inline-block;
+}
+
+.lrightArrow {
+	height:25px;
+	width:25px;
+	background: @ares-lrightArrow;
+	vertical-align: middle;
+	display: inline-block;
+}
+
+.lleftArrow {
+	height:25px;
+	width:25px;
+	background: @ares-lleftArrow;
 	vertical-align: middle;
 	display: inline-block;
 }

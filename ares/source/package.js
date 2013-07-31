@@ -3,5 +3,6 @@ enyo.depends(
 	"DocumentToolbar.js",
 	"FileData.js",
 	"WorkspaceData.js",
-	"PackageMunger.js"
+	"PackageMunger.js",
+	"DesignerPanels.js"
 );
