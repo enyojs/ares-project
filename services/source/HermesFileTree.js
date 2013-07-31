@@ -36,7 +36,7 @@ enyo.kind({
 	},
 	fit:true,
 	components: [
-			{kind: "onyx.Toolbar", classes:"ares-small-toolbar title-gradient", components: [
+			{kind: "onyx.Toolbar", name: "hermesToolbar", classes:"ares-small-toolbar title-gradient", components: [
 				{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 					{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
 					{kind: "onyx.Tooltip", content: $L("New Folder...")}
@@ -406,6 +406,10 @@ enyo.kind({
 		this.$.renameFile.show();
 		this.$.copyFile.show();
 		this.$.deleteFile.show();
+		return this ;
+	},
+	showToolbar: function(show) {
+		this.$.hermesToolbar.setShowing(show);
 		return this ;
 	},
 	showRevertMoveButton: function() {

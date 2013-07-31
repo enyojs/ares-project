@@ -140,6 +140,20 @@
 	z-index: auto;
 }
 
+.ares-small-toolbar{
+	height:50px;
+	line-height: 1.8;
+	padding: 5px;
+	border-top:none;
+	border-left:none;
+	border-right:none;
+	background-size: auto; /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
+}
+
+.ares-small-toolbar>div {
+	margin : 0 2px;
+}
+
 .ares-tab-label {
 	display: inline-block;
 }
@@ -235,7 +249,6 @@
 }
 
 .ares-left-pane-file-chooser > .ares_harmonia_providerList {
-	height: 245px;
 	width: 100%;
 }
 
@@ -263,7 +276,6 @@
 	visibility: hidden;
 	height: 0px;
 }
-
 
 .ares-radio-group{ padding-top: 7px; }
 
@@ -345,7 +357,6 @@
 .ares-project-properties-input-medium > input {
 	width: 110px;
 }
-
 
 .ares-project-properties-drawer-row-check-box-label { margin-left: 30px; margin-right: 50px; }
 
@@ -452,18 +463,6 @@ div.large-fixed { width: 80%; }
 .title-gradient {
 	border-bottom:1px solid #FFFFFF;
 	background: @ares-title-gradient @ares-project-list-background-active;
-}
-
-.onyx-toolbar.ares-small-toolbar{
-	height:50px;
-	padding: 5px;
-	border-top:none;
-	border-left:none;
-	border-right:none;
-}
-
-.ares-small-toolbar>div {
-	margin : 0 2px;
 }
 
 .hangar {
