@@ -41,8 +41,8 @@ enyo.kind({
 					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], defaultValue: "universal", type: "PickerRow", jsonSection: "preferences"},
 					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},					
 					{name: "access", label: "Access origin", content: "", defaultValue: "", type: "InputRow", jsonSection: "preferences", jsonSection: "preferences"},
-					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "/icon.png", type: "GeneralImgRow"},
-					{name: "splashScreen", label: "SplashScreen", content: "", defaultValue: "", type: "GeneralImgRow"}
+					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "/icon.png", defaultWidth: "32", defaultHeight: "32", type: "ImgRow"},
+					{name: "splashScreen", label: "SplashScreen", content: "", defaultValue: "", defaultWidth: "100", defaultHeight: "100", type: "ImgRow"}
 				]		
 			}, 
 			{
@@ -87,16 +87,16 @@ enyo.kind({
 					{name: "exit-on-suspend", label: "Exit on suspend", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
 					{name: "show-splash-screen-spinner", label: "Show splash screen spinner", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
 					{name: "auto-hide-splash-screen", label: "Auto-hide splash screen", content: ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "IosImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "IosImgRow"}
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
 				]
 			}, 
 			{
 				id: "winphone",
 				name: "Microsoft Windows Phone 7",
 				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "WinphoneImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "WinphoneImgRow"}
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
 				]				
 			}, 
 			{
@@ -104,16 +104,16 @@ enyo.kind({
 				name: "RIM Blackberry",
 				rows: [
 					{name: "disable-cursor", label: "Disable Cursor", content:  ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "BlackBerryImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "BlackBerryImgRow"}
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
 				]
 			}, 
 			{
 				id: "webos",
 				name: "HP webOS 2",
 				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "WebOsImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "WebOsImgRow"}
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
 				]
 			}
 		], 
@@ -304,7 +304,11 @@ enyo.kind({
 					label: row.label,
 					contentValue: row.content,	
 					value: row.defaultValue,
-					jsonSection: row.jsonSection				
+					jsonSection: row.jsonSection,
+					platform: dwrContent.id,
+					width: row.defaultWidth,
+					height: row.defaultHeight
+
 				});
 			}, this);
 		}
