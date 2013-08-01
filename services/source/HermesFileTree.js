@@ -385,6 +385,14 @@ enyo.kind({
 
 		return this;
 	},
+	/** @public */
+	disconnect: function() {
+		this.trace("disconnect...");
+		this.$.selection.clear();
+		this.projectUrlReady = false; // Reset the project information
+		this.clear() ;
+		return this ;
+	},
 	hideFileOpButtons: function() {
 		this.$.newFolder.hide();
 		this.$.newFile.hide();
@@ -420,6 +428,7 @@ enyo.kind({
 		this.$.revertMove.hide();
 		return this ;
 	},
+	/** @private */
 	clear: function() {
 		var server = this.$.serverNode;
 		this.trace("clearing serverNode") ;
