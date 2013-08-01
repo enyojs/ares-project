@@ -64,7 +64,7 @@ enyo.kind({
 						{name: "selectedFoldersPath", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("/Folders/File_Name")}
 					]}
 				]},
-				{classes:"ares-row ares-file-choser-row", name:"fileNameRow", showing: false, components:[
+				{classes:"ares-row", name:"fileNameRow", showing: false, components:[
 					{tag:"label", name:"fileNameLabel", classes: "ares-fixed-label ares-file-chooser-label", content: $L("File name: ")},
 					{name: "fileNameSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline file-chooser-input", showing: false, components: [
 						{name: "selectedFileName", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("File_Name"), selectOnFocus: true, oninput: "updateSelectedName", onchange: "updateSelectedName"}
@@ -303,7 +303,9 @@ enyo.kind({
 		this.$.selectedFoldersPath.setValue("");
 		this.$.selectedFileName.setValue("");
 		this.selectedFile = null;
-		this.$.hermesFileTree.hideFileOpButtons();
+		this.folderChooserChanged();
+		this.allowToolbarChanged();
+		this.allowCreateFolderChanged();
 		
 		this.disconnectProject();
 	},
