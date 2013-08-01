@@ -524,6 +524,7 @@ enyo.kind({
 		onFileChosen: "searchProjects"
 	},
 	debug: false,
+	projects: 0,
 
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
@@ -550,6 +551,12 @@ enyo.kind({
 					folderId: parentDir.id,
 					service: this.selectedFile.service
 				});
+
+				this.projects--;
+
+				if (this.projects === 0) {
+					this.reset();
+				}
 			});
 	},
 
@@ -587,6 +594,7 @@ enyo.kind({
 					enyo.forEach(inFiles, function(v) {
 						if ( v.name === 'project.json' ) {
 							foundProject = true ;
+							this.projects++;
 							this.importProject(service, child, v) ;
 						}
 						else if ( v.isDir ===  true ) {
@@ -604,8 +612,6 @@ enyo.kind({
 					iter.apply(this) ;
 				}
 			) ;
-
-			this.reset();
 		} ;
 
 		iter = function() {
