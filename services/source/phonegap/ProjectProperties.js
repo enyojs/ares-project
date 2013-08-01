@@ -69,9 +69,9 @@ enyo.kind({
 				rows: [
 					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], defaultValue: "internalOnly", type: "PickerRow", jsonSection: "preferences"},
 					{name: "android-minSdkVersion", label: "Minimum SDK", content: "7", defaultValue: "7", type: "InputRow", jsonSection: "preferences"},
-					{name: "android-maxSdkVersion", label: "Maximum SDK", content: "22", defaultValue: "22", type: "InputRow", jsonSection: "preferences"},
-					{name: "splash-screen-duration", label: "Splash screen Duration", content: "3000", defaultValue: "3000", type: "InputRow", jsonSection: "preferences"},
-					{name: "load-url-timeout", label: "Load URL timeout", content: "6000", defaultValue: "6000", type: "InputRow", jsonSection: "preferences"},
+					{name: "android-maxSdkVersion", label: "Maximum SDK", content: "", defaultValue: "", type: "InputRow", jsonSection: "preferences"},
+					{name: "splash-screen-duration", label: "Splash screen Duration", content: "5000", defaultValue: "5000", type: "InputRow", jsonSection: "preferences"},
+					{name: "load-url-timeout", label: "Load URL timeout", content: "20000", defaultValue: "20000", type: "InputRow", jsonSection: "preferences"},
 					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "AndroidImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "AndroidImgRow"}
 				]				
