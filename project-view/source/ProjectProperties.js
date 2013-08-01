@@ -540,8 +540,7 @@ enyo.kind({
 		{tag: "label", name: "pathInputLabel", classes:"ares-fixed-label"},
 		{kind: "onyx.InputDecorator", components: [
 			{kind: "Input", name: "pathInputValue", classes: "enyo-unselectable"}
-		]},
-		{kind: "onyx.IconButton", name:"pathInputButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
+		]}		
 	],
 	debug: false,
 
@@ -551,44 +550,24 @@ enyo.kind({
 		this.labelChanged();
 		this.valueChanged();
 		this.inputTipChanged();
-		this.activatedChanged();
-		this.statusChanged();
-		this.buttonTipChanged();
 	},
+
 	/** @private */
 	labelChanged: function () {
 		this.$.pathInputLabel.setContent(this.label);
 	},
+
 	/** @private */
 	valueChanged: function () {
 		this.$.pathInputValue.setValue(this.value);
 		this.setStatus(true);
 	},
+	
 	/** @private */
 	inputTipChanged: function () {
 		this.$.pathInputValue.setAttribute("title", this.inputTip);
 	},
-	/** @private */
-	activatedChanged: function () {
-		if (this.activated) {
-			this.$.pathInputButton.show();
-			this.statusChanged();
-		} else {
-			this.$.pathInputButton.hide();
-		}
-	},
-	/** @private */
-	statusChanged: function () {
-		if (this.status) {
-			this.$.pathInputButton.setSrc("$project-view/assets/images/file-32x32.png");
-		} else {
-			this.$.pathInputButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
-		}
-	},
-	/** @private */
-	buttonTipChanged: function () {
-		this.$.pathInputButton.setAttribute("title", this.buttonTip);
-	},
+
 	/** @private */
 	pathInputTap: function (inSender, inEvent) {
 		this.doInputButtonTap({header: $L("Select top file...")});

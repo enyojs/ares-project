@@ -91,8 +91,6 @@ enyo.kind({
 
 /**
  * Define a row containing an Input widget.
- * This kind in meant to be used to define a configuration's parameter that goes to the block
- * {providers.preferences} of the file "project.json"
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.InputRow",
@@ -740,8 +738,4 @@ enyo.kind({
 		config[this.name][this.platform].width = this.getWidth();
 	}
 });
-
-
-
-
 
