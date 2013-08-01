@@ -119,8 +119,7 @@ enyo.kind({
 					classes: "enyo-unselectable"
 				}
 			]
-		},
-		{kind: "onyx.IconButton", name:"configurationButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
+		}	
 	],
 	
 	/**
@@ -133,9 +132,6 @@ enyo.kind({
 
 		this.valueChanged();
 		this.inputTipChanged();
-		this.activatedChanged();
-		this.statusChanged();
-		this.buttonTipChanged();
 	},
 
 	/**
@@ -154,39 +150,7 @@ enyo.kind({
 	inputTipChanged: function () {
 		this.$.ConfigurationInput.setAttribute("title", this.inputTip);
 	},
-	/** @private */
-	activatedChanged: function () {
-		if (this.activated) {
-			this.$.configurationButton.show();
-			this.statusChanged();
-		} else {
-			this.$.configurationButton.hide();
-		}
-	},
-	/** @private */
-	statusChanged: function () {
-		if (this.status) {
-			this.$.configurationButton.setSrc("$project-view/assets/images/file-32x32.png");
-		} else {
-			this.$.configurationButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
-		}
-	},
-	/** @private */
-	buttonTipChanged: function () {
-		this.$.configurationButton.setAttribute("title", this.buttonTip);
-	},
-	
-	/** @private */
-	pathInputTap: function (inSender, inEvent) {
-		var header = "";
-		if (this.name === 'icon') {
-			header = $L("Select an icon file");
-		} else if (this.name === 'splashScreen') {
-			header = $L("Select a splashscreen file");
-		}
-		this.doInputButtonTap({header: header});
-		return true;
-	},
+
 	/** @public */
 	setProjectConfig: function (config) {
 		this.setValue(config.preferences[this.name]);
