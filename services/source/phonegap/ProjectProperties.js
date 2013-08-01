@@ -13,8 +13,11 @@
  * -- label : the content of the label of the row
  * -- content: the content of the row, the format of this content can change depending on the type of the UI widget used (picker, input, ...)
  * -- defaultValue: the default value displayed in the widget
+ * -- defaultHeight: the default icon/splash screen height
+ * -- defaultWidth: the default icon/splash screen Width
  * -- type: contain the last part of the name of the kind that will be used to define a row, these kinds are defined in
  *          the "PhonegapUIRows.js"
+ * -- jsonSection: a subsection of "providers.phonegap" in the file "project.json"
  * @type {String}
  */
 enyo.kind({
