@@ -56,6 +56,8 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		if (!inEvent.file) {
 			this.hideMe();
+			this.$.selectDirectoryPopup.reset();
+
 			return;
 		}
 
@@ -199,6 +201,7 @@ enyo.kind({
 		var testCallBack = inEvent.testCallBack;
 		// once project.json is created, setup and show project properties widget
 		this.$.selectDirectoryPopup.hide();
+		this.$.selectDirectoryPopup.reset();
 		this.show() ;
 		if (testCallBack) {
 			testCallBack();
@@ -429,6 +432,7 @@ enyo.kind({
 		}
 
 		this.$.propertiesWidget.updateFileInput(chooser, inEvent.name);
+		this.$.selectFilePopup.reset();
 		return true;
 	},
 	notifyChangeSource: function(inSender, inEvent) {
@@ -510,6 +514,7 @@ enyo.kind({
 	centered: true,
 	floating: true,
 	autoDismiss: false,
+	folderChooser: true,
 
 	classes: "enyo-unselectable",
 	events: {
@@ -519,6 +524,7 @@ enyo.kind({
 		onFileChosen: "searchProjects"
 	},
 	debug: false,
+	projects: 0,
 
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
@@ -545,12 +551,19 @@ enyo.kind({
 					folderId: parentDir.id,
 					service: this.selectedFile.service
 				});
+
+				this.projects--;
+
+				if (this.projects === 0) {
+					this.reset();
+				}
 			});
 	},
 
 	searchProjects: function (inSender, inEvent) {
 		if (!inEvent.file) {
 			this.hide();
+			this.reset();
 			return;
 		}
 
@@ -581,6 +594,7 @@ enyo.kind({
 					enyo.forEach(inFiles, function(v) {
 						if ( v.name === 'project.json' ) {
 							foundProject = true ;
+							this.projects++;
 							this.importProject(service, child, v) ;
 						}
 						else if ( v.isDir ===  true ) {
