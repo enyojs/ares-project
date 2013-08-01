@@ -85,9 +85,6 @@ enyo.kind({
 		this.inherited(arguments);
 		this.doRegisterMe({name:"codeEditor", reference:this});
 	},
-	switchGrabberDirection: function(active){
-		this.$.bottomBar.switchGrabberDirection(active);
-	},
 	activePanel : function(){
 		this.doMovePanel({panelIndex:this.panelIndex});
 	},

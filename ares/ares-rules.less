@@ -139,12 +139,31 @@
 	/*Fix for onyx.MoreToolbar used in projectList.js (use of onyx.Toolbar creates issues on menus in Safari)*/
 	z-index: auto;
 }
-.ares-top-toolbar.hermesFileTree-toolbar {
-	padding: 9px 3px 10px 3px;
+
+.ares-small-toolbar{
+	height:50px;
+	line-height: 1.8;
+	padding: 5px;
+	border-top:none;
+	border-left:none;
+	border-right:none;
+	background-size: auto; /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
 }
 
-.ares-top-toolbar.hermesFileTree-toolbar>div {
-	margin : 0 1px;
+.onyx-tab-bar.ares-small-toolbar{
+	padding: 0;
+}
+
+.onyx-tab-bar.ares-small-toolbar>div{
+	margin: 0;
+}
+
+.ares-small-toolbar>div>div>div>.onyx-tab-rug{
+	padding:  0.7em;
+}
+
+.ares-small-toolbar>div {
+	margin : 0 2px;
 }
 
 .ares-tab-label {
@@ -242,7 +261,6 @@
 }
 
 .ares-left-pane-file-chooser > .ares_harmonia_providerList {
-	height: 245px;
 	width: 100%;
 }
 
@@ -252,7 +270,7 @@
 
 /*Project properties popup*/
 
-.ares-project-properties { height: 400px; width: 650px; padding: 5px 10px; margin-top: 15px; }
+.ares-project-properties { height: 400px; width: 660px; padding: 5px 10px; margin-top: 15px; }
 
 .ares-project-properties-targetsRows-display {
 	visibility: visible;
@@ -270,7 +288,6 @@
 	visibility: hidden;
 	height: 0px;
 }
-
 
 .ares-radio-group{ padding-top: 7px; }
 
@@ -352,7 +369,6 @@
 .ares-project-properties-input-medium > input {
 	width: 110px;
 }
-
 
 .ares-project-properties-drawer-row-check-box-label { margin-left: 30px; margin-right: 50px; }
 

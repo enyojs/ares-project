@@ -53,6 +53,7 @@ enyo.kind({
 		onSaveDocument: "saveDocument", 
 		onSaveAsDocument: "saveAsDocument", 
 		onCloseDocument: "closeDocument", 
+		onCloseProjectDocuments: "closeDocumentsForProject",
 		onDesignDocument: "designDocument", 
 		onUpdate: "phobosUpdate",
 		onCloseDesigner: "closeDesigner", 
@@ -79,7 +80,6 @@ enyo.kind({
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
-		this.adjustBarMode();
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
 			Ares.Workspace.loadProjects("com.enyojs.ares.tests", true);
@@ -300,7 +300,6 @@ enyo.kind({
 		this.syncEditedFiles();
 		this.componentsRegistry.deimos.load(inEvent);
 		this.componentsRegistry.codeEditor.$.panels.setIndex(this.deimosViewIndex);
-		this.adjustBarMode();
 		this.activeDocument.setCurrentIF('designer');
 	},
 	//* A code change happened in Phobos - push change to Deimos
@@ -316,7 +315,6 @@ enyo.kind({
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
 		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
-		this.adjustBarMode();
 		this.activeDocument.setCurrentIF('code');
 	},
 	//* Undo event from Deimos
@@ -408,7 +406,6 @@ enyo.kind({
 			this.componentsRegistry.phobos.designerAction();
 			this.componentsRegistry.codeEditor.manageConrols(true);
 		}
-		this.adjustBarMode();
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
 	},
 	// FIXME: This trampoline function probably needs some refactoring
@@ -423,9 +420,6 @@ enyo.kind({
 		} else {
 			this.componentsRegistry.deimos.closeDesignerAction();
 		}
-	},
-	adjustBarMode: function() {
-		var designMode = this.componentsRegistry.codeEditor.$.panels.getIndex() == this.deimosViewIndex;
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {
@@ -519,6 +513,31 @@ enyo.kind({
 				self.showProjectView();
 			}
 		});
+	},
+	/**
+	 * Event handler for to close opened documents of a project
+	 * 
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent => inEvent.project in Ares.Model.Project
+	 */
+	closeDocumentsForProject: function(inSender, inEvent){
+		var files = Ares.Workspace.files,
+			model,
+			i;
+		for( i = 0; i < files.models.length; i++ ) {
+			model = files.models[i];
+
+			var serviceId = model.getProjectData().getServiceId();
+			var folderId = model.getProjectData().getFolderId();
+			if ( serviceId === inEvent.project.getServiceId() && folderId === inEvent.project.getFolderId()) {
+				this._closeDocument(model.id);
+				i--;
+			}
+		}
+		if (! Ares.Workspace.files.length ) {
+			this.showProjectView();
+		}
 	},
 	/**
 	 * Event handler for ares components registry
