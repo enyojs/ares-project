@@ -262,7 +262,7 @@ enyo.kind({
 		 * @private
 		 */
 		function createCommonDrawer(inDrawer) {
-			// Creation of the drawer.
+			// Create the drawer.
 			self.$.targetsRows.createComponent({
 				kind: "Phonegap.ProjectProperties.Drawer",
 				classes: "ares-row",
@@ -282,7 +282,7 @@ enyo.kind({
 				classes: "ares-row",
 				kind: "Phonegap.ProjectProperties.Target",
 				targetId: inDrawer.id,
-				targetName: inDrawer.name,
+				drawerName: inDrawer.name,
 				enabled: false
 			});
 		}
@@ -301,6 +301,7 @@ enyo.kind({
 		function setUpDrawer(dwr, dwrContent) {
 			// Creation of the pickers of the drawer if they existe.
 			enyo.forEach(dwrContent.rows, function (row) {
+				enyo.log(row);
 				dwr.$.drawer.createComponent({
 					kind: "Phonegap.ProjectProperties." + row.type,
 					name: row.name,
@@ -316,7 +317,9 @@ enyo.kind({
 			}, this);
 		}
 	},
-
+	/**
+	 * @private
+	 */
 	createAdvanceConfigurationPanel: function (){
 		enyo.forEach(this.advanceConfigurationPanel, function(row){
 			this.$.AdvancedConfiguration.createComponent({
@@ -422,8 +425,8 @@ enyo.kind({
 	activateInputRows: function (status) {
 		var fileChoosers = this.findAllInputRows();
 		enyo.forEach(fileChoosers, function (fileChooser) {
-			fileChooser.setActivated(true);
-		});
+			fileChooser.setActivated(status);
+		}, this);
 	},
 	/** @public */
 	findAllInputRows: function () {
@@ -454,17 +457,83 @@ enyo.kind({
 });
 
 /**
+ * Define the drawers "general" and "permissions"
+ */
+enyo.kind({
+	name: "Phonegap.ProjectProperties.Drawer",
+	debug: true,
+	classes: "ares-drawer",
+	published: {
+		drawerName: "",
+		config: {},
+		fold: true
+	},
+	components: [
+			{tag: "div", classes: "ares-project-properties-label-background", ontap: "unfold",
+			components: [
+				{tag: "label", name: "drawerLbl", classes: "ares-project-properties-common_drawer_header"}
+			]},			 
+			{name: "drawer", orient: "v", kind: "onyx.Drawer", open: false}
+	],
+
+	/**
+	 * @private
+	 */
+	create: function () {
+		ares.setupTraceLogger(this);
+		this.inherited(arguments);
+		this.drawerNameChanged();
+	},
+		/**
+	 * @private
+	 */
+	drawerNameChanged: function () {
+		this.$.drawerLbl.setContent(this.drawerName);
+	},
+
+	setProjectConfig: function (config) {
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else {
+				this.$.drawer.$[row].setProjectConfig(config);
+			}
+		}, this);
+	},
+
+	getProjectConfig: function (config) {
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else {
+				this.$.drawer.$[row].getProjectConfig(config);
+			}
+		}, this);
+	},
+
+	/**
+	 * Fold/Unfold the content of a drawer.
+	 * @private
+	 */
+	unfold: function () {
+		this.$.drawer.setOpen(this.fold);
+		this.fold = !this.fold;
+	}
+
+
+});
+
+/**
  * This widget is aware of the differences between the Phoneap Build targets.
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.Target",
-	debug: false,
+	kind: "Phonegap.ProjectProperties.Drawer",
 	classes: "ares-drawer",
+	debug: false,
 	published: {
-		targetId: "",
-		targetName: "",
+		targetId: "",		
 		enabled: "",
-		fold: true,
 		keys: {}
 	},
 	components: [
@@ -483,7 +552,7 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		this.targetNameChanged();
+		this.drawerNameChanged();
 	},
 	setProjectConfig: function (config) {
 		this.trace("id:", this.targetId, "config:", config);
@@ -524,9 +593,9 @@ enyo.kind({
 	/**
 	 * @private
 	 */
-	targetNameChanged: function (old) {		
+	drawerNameChanged: function (old) {		
 		this.trace(old, "->", this.enabled);		
-		this.$.targetLbl.setContent(this.targetName);
+		this.$.targetLbl.setContent(this.drawerName);
 	},
 	/**
 	 * @private
@@ -580,77 +649,6 @@ enyo.kind({
 	updateDrawer: function () {		
 		this.setEnabled(this.$.targetChkBx.checked);
 	},
-
-	unfold: function () {
-		this.$.drawer.setOpen(this.fold);
-		this.fold = !this.fold;	
-	}
-});
-
-/**
- * Define the drawers "general" and "permissions"
- */
-enyo.kind({
-	name: "Phonegap.ProjectProperties.Drawer",
-	debug: true,
-	classes: "ares-drawer",
-	published: {
-		drawerName: "",
-		config: {},
-		fold: true
-	},
-	components: [
-			{tag: "div", classes: "ares-project-properties-label-background", ontap: "unfold",
-			components: [
-				{tag: "label", name: "drawerLbl", classes: "ares-project-properties-common_drawer_header"}
-			]},			 
-			{name: "drawer", orient: "v", kind: "onyx.Drawer", open: false}
-	],
-
-	/**
-	 * @private
-	 */
-	create: function () {
-		ares.setupTraceLogger(this);
-		this.inherited(arguments);
-		this.drawerNameChanged();
-	},
-
-	setProjectConfig: function (config) {
-		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
-			if (row === "client" || row === "animator") {
-				// nop;
-			} else {
-				this.$.drawer.$[row].setProjectConfig(config);
-			}
-		}, this);
-	},
-
-	getProjectConfig: function (config) {
-		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
-			if (row === "client" || row === "animator") {
-				// nop;
-			} else {
-				this.$.drawer.$[row].getProjectConfig(config);
-			}
-		}, this);
-	},
-
-	/**
-	 * Fold/Unfold the content of a drawer.
-	 * @private
-	 */
-	unfold: function () {
-		this.$.drawer.setOpen(this.fold);
-		this.fold = !this.fold;
-	},
-
-	/**
-	 * @private
-	 */
-	drawerNameChanged: function () {
-		this.$.drawerLbl.setContent(this.drawerName);
-	}
 });
 
 enyo.kind({

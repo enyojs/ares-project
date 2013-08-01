@@ -209,7 +209,7 @@ enyo.kind({
 	toggleService: function(inSender, inEvent) {
 		var serviceId = inEvent.originator.serviceId,
 		    checked = inEvent.originator.checked;
-		this.warn("serviceId:", serviceId, 'checked:', checked);
+		this.trace("serviceId:", serviceId, 'checked:', checked);
 		var service = this.services[serviceId];
 		if (service.tab) {
 			service.tab.setShowing(checked);
