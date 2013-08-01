@@ -11,7 +11,8 @@ enyo.kind({
 	published: {
 		label: "",
 		name: "",
-		value: ""
+		value: "", 
+		jsonSection: ""
 	},
 	components: [				
 	],
@@ -79,11 +80,11 @@ enyo.kind({
 
 	/** @public */
 	setProjectConfig: function (config) {
-		this.setValue(config.features[this.name]);
+		this.setValue(config[this.jsonSection][this.name]);
 	},
 	/** @public */
 	getProjectConfig: function (config) {
-		config.features[this.name] = this.getValue();
+		config[this.jsonSection][this.name] = this.getValue();
 	}
 });
 
@@ -103,10 +104,7 @@ enyo.kind({
 	},
 	published: {
 		value: "",
-		inputTip: "",
-		activated: false,
-		status: false,
-		buttonTip: ""
+		inputTip: ""		
 	},
 	components: [
 		{name: "label", classes: "ares-project-properties-drawer-row-label"},
@@ -115,8 +113,8 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium", 
 			components: [{
 					kind: "onyx.Input",	
-					name: "ConfigurationInput", 
-					classes: "enyo-unselectable"
+					name: "ConfigurationInput",
+					onchange: "updateConfigurationValue"
 				}
 			]
 		}	
@@ -143,21 +141,33 @@ enyo.kind({
 
 	/** @private */
 	valueChanged: function () {
-		this.$.ConfigurationInput.setValue(this.value);
-		this.setStatus(true);
+		this.$.ConfigurationInput.setValue(this.value);	
 	},
+
 	/** @private */
 	inputTipChanged: function () {
 		this.$.ConfigurationInput.setAttribute("title", this.inputTip);
 	},
 
+	/**
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * 
+	 * @private
+	 */
+	updateConfigurationValue: function (inSender, inValue) {
+		this.setValue(inSender.getValue());
+
+		return true;
+	},
+
 	/** @public */
 	setProjectConfig: function (config) {
-		this.setValue(config.preferences[this.name]);
+		this.setValue(config[this.jsonSection][this.name]);
 	},
 	/** @public */
 	getProjectConfig: function (config) {
-		config.preferences[this.name] = this.getValue();
+		config[this.jsonSection][this.name] = this.getValue();
 	}
 });
 
@@ -375,11 +385,11 @@ enyo.kind({
 
 	/** @public */
 	setProjectConfig: function (config) {
-		this.setValue(config.preferences[this.name]);
+		this.setValue(config[this.jsonSection][this.name]);
 	},
 	/** @public */
 	getProjectConfig: function (config) {
-		config.preferences[this.name] = this.getValue();
+		config[this.jsonSection][this.name] = this.getValue();
 	}
 });
 
