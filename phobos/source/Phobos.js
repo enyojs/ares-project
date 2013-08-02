@@ -659,7 +659,7 @@ enyo.kind({
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
 			this.$.savePopup.setName("Document was modified!");
-			this.$.savePopup.setMessage("Save it before closing?");
+			this.$.savePopup.setMessage("\""+ this.docData.getFile().path + "\" was modified.<br/><br/>Save it before closing?");
 			this.$.savePopup.setActionButton("Don't Save");
 			this.$.savePopup.show();
 		} else {
@@ -896,6 +896,7 @@ enyo.kind({
 	},
 	create: function() {
 		this.inherited(arguments);
+		this.$.message.allowHtml = true;
 		this.$.buttons.createComponent(
 			{name:"saveButton", kind: "onyx.Button", content: "Save", ontap: "save"},
 			{owner: this}
