@@ -16,7 +16,6 @@ enyo.kind({
 		onFileChanged: "",
 		onFolderChanged: "",
 		onTreeChanged: "",
-		onGrabberClick: "",
 		onPathChecked: ""
 	},
 	handlers: {
@@ -35,11 +34,9 @@ enyo.kind({
 		// allows filetree to have draggable subnodes or not (not per default).
 		dragAllowed: false
 	},
+	fit:true,
 	components: [
-			{kind: "onyx.Toolbar", classes: "ares-top-toolbar hermesFileTree-toolbar", components: [
-				{kind: "onyx.Grabber", classes: "ares-grabber" , name:"filePanelGrabber", showing: false, ontap: "doGrabberClick", components: [
-					{kind: "aresGrabber", name: "aresGrabberDirection"}
-				]},
+			{kind: "onyx.Toolbar", name: "hermesToolbar", classes:"ares-small-toolbar title-gradient", components: [
 				{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 					{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
 					{kind: "onyx.Tooltip", content: $L("New Folder...")}
@@ -141,7 +138,7 @@ enyo.kind({
 		} else {
 			inEvent.dataTransfer.effectAllowed = "linkMove";
 		}
-		inEvent.dataTransfer.setData('text/html', this.innerHTML);
+		inEvent.dataTransfer.setData("hermes.Node", this.draggedNode.file.id);
 		
 		return true;
 	},
@@ -207,6 +204,9 @@ enyo.kind({
 	/** @private */
 	itemDrop: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
+
+		var draggedNodeId = inEvent.dataTransfer.getData("hermes.Node");
+		this.trace('node dropped', draggedNodeId);
 		
 		if (!this.isValidDropTarget(this.targetNode)) {
 			this.trace("target not valid");
@@ -233,7 +233,7 @@ enyo.kind({
 			}
 		}
 		
-		this.innerHTML = inEvent.dataTransfer.getData('text/html');
+		inEvent.dataTransfer.clearData();
 
 		return true;
 	},
@@ -385,6 +385,14 @@ enyo.kind({
 
 		return this;
 	},
+	/** @public */
+	disconnect: function() {
+		this.trace("disconnect...");
+		this.$.selection.clear();
+		this.projectUrlReady = false; // Reset the project information
+		this.clear() ;
+		return this ;
+	},
 	hideFileOpButtons: function() {
 		this.$.newFolder.hide();
 		this.$.newFile.hide();
@@ -408,18 +416,10 @@ enyo.kind({
 		this.$.deleteFile.show();
 		return this ;
 	},
-	showGrabber:function(){
-		this.$.filePanelGrabber.show();
+	showToolbar: function(show) {
+		this.$.hermesToolbar.setShowing(show);
 		return this ;
 	},
-	hideGrabber:function(){
-		this.$.filePanelGrabber.hide();
-		return this ;
-	},
-	switchGrabberDirection: function(active){
-		this.$.aresGrabberDirection.switchGrabberDirection(active);
-	},
-
 	showRevertMoveButton: function() {
 		this.$.revertMove.show();
 		return this ;
@@ -428,6 +428,7 @@ enyo.kind({
 		this.$.revertMove.hide();
 		return this ;
 	},
+	/** @private */
 	clear: function() {
 		var server = this.$.serverNode;
 		this.trace("clearing serverNode") ;

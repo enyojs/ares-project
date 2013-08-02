@@ -10,14 +10,10 @@ enyo.kind({
 		onGrabberClick: ""
 	},
 	components: [	
-		{kind: "onyx.Toolbar", classes: "ares-top-toolbar", components: [
-			{kind: "onyx.Grabber", classes: "ares-grabber", ontap: "doGrabberClick", components:[
-				{kind: "aresGrabber", name: "aresGrabberDirection", classes:"lleftArrow"}
-			]}
-		]},	
 		{
 			name: "tabs",
 			kind: "onyx.TabBar",
+			classes: "ares-small-toolbar title-gradient",
 			showing: false,
 			checkBeforeClosing: true,
 			onTabChanged: 'switchFile',
@@ -58,8 +54,5 @@ enyo.kind({
 		if (this.$.tabs.isEmpty() ) {
 			this.$.tabs.hide();
 		}
-	},
-	switchGrabberDirection: function(active){
-		this.$.aresGrabberDirection.switchGrabberDirection(active);
 	}
 });

@@ -24,7 +24,7 @@ enyo.kind({
 
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource"},
-		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true},
+		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true, allowCreateFolder: true},
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")}
 	],
 	debug: false,
@@ -46,7 +46,6 @@ enyo.kind({
 		this.config = new ProjectConfig() ; // is a ProjectConfig object.
 
 		dirPopup.$.header.setContent("Select a directory containing the new project") ;
-		dirPopup.$.hermesFileTree.showNewFolderButton();
 		dirPopup.show();
 		this.hide();
 	},
@@ -57,6 +56,8 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		if (!inEvent.file) {
 			this.hideMe();
+			this.$.selectDirectoryPopup.reset();
+
 			return;
 		}
 
@@ -200,6 +201,7 @@ enyo.kind({
 		var testCallBack = inEvent.testCallBack;
 		// once project.json is created, setup and show project properties widget
 		this.$.selectDirectoryPopup.hide();
+		this.$.selectDirectoryPopup.reset();
 		this.show() ;
 		if (testCallBack) {
 			testCallBack();
@@ -349,7 +351,7 @@ enyo.kind({
 	classes:"ares-masked-content-popup",
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource", onFileChoosersChecked: "fileChoosersChecked"},
-		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, onFileChosen: "selectFileChosen"}
+		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "selectFileChosen"}
 	],
 
 	debug: false,
@@ -406,8 +408,8 @@ enyo.kind({
 	},
 	/** @private */
 	selectFile: function(inSender, inData) {
-		this.trace(inSender, "=>", inData);		
-
+		this.trace(inSender, "=>", inData);
+		
 		this.chooser = inData.input;
 		this.$.selectFilePopup.reset();
 		this.$.selectFilePopup.connectProject(this.targetProject, (function() {
@@ -421,7 +423,7 @@ enyo.kind({
 	/** @private */
 	selectFileChosen: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
-
+		
 		var chooser = this.chooser;
 		this.chooser = null;
 
@@ -431,6 +433,7 @@ enyo.kind({
 		}
 
 		this.$.propertiesWidget.updateFileInput(chooser, inEvent.name);
+		this.$.selectFilePopup.reset();
 		return true;
 	},
 	notifyChangeSource: function(inSender, inEvent) {
@@ -469,7 +472,7 @@ enyo.kind({
 	/** @private */
 	checkPath: function (inSender, inData) {
 		this.trace(inSender, "=>", inData);
-
+		
 		this.checker = inData.input;
 		
 		// FIXME ENYO-2761: this is a workaround that shows the developer that the path is not
@@ -486,11 +489,12 @@ enyo.kind({
 	/** @private */
 	pathChecked: function (inSender, inData) {
 		this.trace(inSender, "=>", inData);
+		
+		var checker = this.checker;
+		this.checker = null;
 
 		this.$.selectFilePopup.reset();
-		this.$.propertiesWidget.updatePathCheck(this.checker, inData.status);
-
-		this.checker = null;
+		this.$.propertiesWidget.updatePathCheck(checker, inData.status);
 	},
 	/** @private */
 	fileChoosersChecked: function (inSender, inEvent) {
@@ -511,6 +515,7 @@ enyo.kind({
 	centered: true,
 	floating: true,
 	autoDismiss: false,
+	folderChooser: true,
 
 	classes: "enyo-unselectable",
 	events: {
@@ -520,6 +525,7 @@ enyo.kind({
 		onFileChosen: "searchProjects"
 	},
 	debug: false,
+	projects: 0,
 
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
@@ -546,12 +552,19 @@ enyo.kind({
 					folderId: parentDir.id,
 					service: this.selectedFile.service
 				});
+
+				this.projects--;
+
+				if (this.projects === 0) {
+					this.reset();
+				}
 			});
 	},
 
 	searchProjects: function (inSender, inEvent) {
 		if (!inEvent.file) {
 			this.hide();
+			this.reset();
 			return;
 		}
 
@@ -582,6 +595,7 @@ enyo.kind({
 					enyo.forEach(inFiles, function(v) {
 						if ( v.name === 'project.json' ) {
 							foundProject = true ;
+							this.projects++;
 							this.importProject(service, child, v) ;
 						}
 						else if ( v.isDir ===  true ) {

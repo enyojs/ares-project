@@ -31,7 +31,7 @@ enyo.kind({
 					onFileChanged: "closeDocument",
 					onFolderChanged: "closeSomeDocuments"
 				},
-				{kind: "designerPanels", name: "codeEditor"}
+				{kind: "Ares.DesignerPanels", name: "codeEditor"}
 			]
 		},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
@@ -54,6 +54,7 @@ enyo.kind({
 		onSaveAsDocument: "saveAsDocument", 
 		onCloseDocument: "closeDocument", 
 		onCloseAllDocument: "closeAllDocument",
+		onCloseProjectDocuments: "closeDocumentsForProject",
 		onDesignDocument: "designDocument", 
 		onUpdate: "phobosUpdate",
 		onCloseDesigner: "closeDesigner", 
@@ -80,7 +81,6 @@ enyo.kind({
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
-		this.adjustBarMode();
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
 			Ares.Workspace.loadProjects("com.enyojs.ares.tests", true);
@@ -309,7 +309,6 @@ enyo.kind({
 		this.syncEditedFiles();
 		this.componentsRegistry.deimos.load(inEvent);
 		this.componentsRegistry.codeEditor.$.panels.setIndex(this.deimosViewIndex);
-		this.adjustBarMode();
 		this.activeDocument.setCurrentIF('designer');
 	},
 	//* A code change happened in Phobos - push change to Deimos
@@ -325,7 +324,6 @@ enyo.kind({
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
 		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
-		this.adjustBarMode();
 		this.activeDocument.setCurrentIF('code');
 	},
 	//* Undo event from Deimos
@@ -412,10 +410,11 @@ enyo.kind({
 		this.activeDocument = d;
 		if (currentIF === 'code') {
 			this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
+			this.componentsRegistry.codeEditor.manageConrols(false);
 		} else {
 			this.componentsRegistry.phobos.designerAction();
+			this.componentsRegistry.codeEditor.manageConrols(true);
 		}
-		this.adjustBarMode();
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
 	},
 	// FIXME: This trampoline function probably needs some refactoring
@@ -430,9 +429,6 @@ enyo.kind({
 		} else {
 			this.componentsRegistry.deimos.closeDesignerAction();
 		}
-	},
-	adjustBarMode: function() {
-		var designMode = this.componentsRegistry.codeEditor.$.panels.getIndex() == this.deimosViewIndex;
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {
@@ -528,6 +524,31 @@ enyo.kind({
 		});
 	},
 	/**
+	 * Event handler for to close opened documents of a project
+	 * 
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent => inEvent.project in Ares.Model.Project
+	 */
+	closeDocumentsForProject: function(inSender, inEvent){
+		var files = Ares.Workspace.files,
+			model,
+			i;
+		for( i = 0; i < files.models.length; i++ ) {
+			model = files.models[i];
+
+			var serviceId = model.getProjectData().getServiceId();
+			var folderId = model.getProjectData().getFolderId();
+			if ( serviceId === inEvent.project.getServiceId() && folderId === inEvent.project.getFolderId()) {
+				this._closeDocument(model.id);
+				i--;
+			}
+		}
+		if (! Ares.Workspace.files.length ) {
+			this.showProjectView();
+		}
+	},
+	/**
 	 * Event handler for ares components registry
 	 * 
 	 * @private
@@ -553,62 +574,5 @@ enyo.kind({
 			}
 		},
 		instance: null
-	}
-});
-
-enyo.kind({
-	name:"designerPanels", 
-	components:[	
-		{
-			name: "bottomBar",
-			kind: "DocumentToolbar",
-			onSwitchFile: "switchFile",
-			onSave: "bounceSave",
-			onDesign: "bounceDesign",
-			onNewKind: "bounceNew",
-			onCloseFileRequest: "bounceCloseFileRequest"
-		},
-		{
-			kind: "Panels",
-			arrangerKind: "CarouselArranger",
-			draggable: false,
-			classes:"enyo-fit ares-panels",
-			onTransitionStart : "stopPanelEvent",
-			onTransitionFinish: "stopPanelEvent",
-			ondragstart	      : "stopPanelEvent",
-			ondrag            : "stopPanelEvent",
-			ondragfinish      : "stopPanelEvent",
-			components: [
-				{components: [
-					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onCloseAllDocument: "closeAllDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
-				]},
-				{components: [
-					{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
-				]}
-			]
-		}
-	],
-	events: {
-		onRegisterMe: "",
-		onMovePanel:""
-	},
-	handlers: {
-		onGrabberClick : "activePanel"
-	},
-	published: {
-		panelIndex: 2
-	},
-	create: function() {
-		this.inherited(arguments);
-		this.doRegisterMe({name:"codeEditor", reference:this});
-	},
-	switchGrabberDirection: function(active){
-		this.$.bottomBar.switchGrabberDirection(active);
-	},
-	activePanel : function(){
-		this.doMovePanel({panelIndex:this.panelIndex});
-	},
-	stopPanelEvent: function(){
-		return true;
 	}
 });

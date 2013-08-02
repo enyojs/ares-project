@@ -24,7 +24,14 @@ Example:
 	},
 
 ## Project properties
-Old projects (created before ares-0.1.8) already in use (loaded in the local storage) or that will be imported, keep as resources definition (preview top file,icons, splashscreens) only the related name but now it should be the related relative path (from the root of the project they are dealing with). In "Project Properties" popup, old resources definition will appear as not valid. So they must be updated manually by selecting the resource through the file chooser launched from the file icon buttons in the "Project Properties" popup. (cf. https://enyojs.atlassian.net/browse/ENYO-2761 issue).
+
+Before Ares 0.1.8, file resources like "preview top file", icons,
+splashscreens were specified using a relative path name (like
+`debug.html`, `asset/my_icon.png`). They now must be specified with an
+absoulte path name (i.e. with a leading `/`). These resources can be
+configured with the `Project` -> `Edit` menu or by directly editing
+`project.json` outside of Ares.
+(cf. https://enyojs.atlassian.net/browse/ENYO-2761 issue).
 
 ## PhoneGap
 
@@ -40,4 +47,22 @@ Non minified upload of source includes target directory containing
 already build packages. Remove the `target` directory from your
 application source directory.
 
+### Customizing Phonegap `config.xml`
 
+`config.xml` is generated from the data specified in the Phonegap tab of
+Project Config Editor. If the proposed build options do not meet your
+need, you will have to:
+* disable `config.xml` generation (in the `Advanced` config setup of phonegap project config editor)
+* edit directly `config.xml` (with Ares or another editor).
+
+### Icons and splashscreens and Phonegap
+
+The number of instances of the XML tags `icon` & `gap:splash` is
+limited to 1 for each, or the Phonegap Build service let the user
+define for an application multiple icons or splash screens with
+different resolution.
+
+## Designer
+
+Designer Drag&Drop feature works fine with Chrome Browser but is
+broken with other browsers.

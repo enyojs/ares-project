@@ -10,14 +10,14 @@ enyo.kind({
 	debug: false,
 	published: {
 		/**
-		 * When true (the default), allow to pick only a
+		 * When true, allow to pick only a
 		 * folder (the "Ok" button is active when a folder is
-		 * selected).  Otherwise, allow only to pick a file
+		 * selected).  Otherwise (the default), allow only to pick a file
 		 * (the "Ok" button is active either when a file is
 		 * selected or when a folder is selected and the file
 		 * name input field is manually filled.).
 		 */
-		folderChooser: true,
+		folderChooser: false,
 		/**
 		 * Popup header.  Defaults to "Select a File" or
 		 * "Select a Folder" depending on the value of
@@ -28,53 +28,52 @@ enyo.kind({
 		 * When true the {Ares.FileChooser} has a "New Folder"
 		 * button
 		 */
-		allowCreateFolder: true,
+		allowCreateFolder: false,
 		/**
 		 * When true the {Ares.FileChooser} offers to define a
 		 * new (not yet exiting) file name.  This property is
 		 * applicable only if {Ares.FileChooser#folderChooser}
 		 * is false.
 		 */
-		allowNewFile: true,
+		allowNewFile: false,
 		/**
-		 * File name to use for the selection.  Has visible
-		 * effects only when {Ares.FileChooser#folderChooser}
-		 * is true.
+		 * When true the {Ares.FileChooser} show the toolbar.
 		 */
-		selectedName: "",
-		/**
-		 * project configuration information
-		 */
-		project: null
+		allowToolbar: true
 	},
+	/**
+	 * project configuration information
+	 */
+	project: null,
 	components: [
 		{kind: "FittableRows", classes: "onyx-popup ares-filechooser ares-classic-popup", components: [
 			{tag: "div", name: "header", classes:"title", content: $L("Select a directory")},
 			{kind: "FittableColumns", classes: "onyx-light", fit: true, components: [
 				{kind:"FittableRows", name: "sources", classes:"ares-left-pane-file-chooser", components:[
-					{kind: "onyx.Toolbar", classes: "ares-top-toolbar", components: [
+					{kind: "onyx.Toolbar", classes: "ares-small-toolbar title-gradient", components: [
 						{content: $L("Sources"), classes:"ares-create-sources"}
 					]},
-					{kind: "ProviderList", selector: ["type", "filesystem"], name: "providerList", classes:"ares-provider-list",/*style:"border: 3px solid yellow;", header: "Sources",*/ onSelectProvider: "handleSelectProvider"}
+					{kind: "ProviderList", selector: ["type", "filesystem"], fit:"true", name: "providerList", /*header: "Sources",*/ onSelectProvider: "handleSelectProvider"}
 				]},
 				{kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "_selectFile", onFolderClick: "_selectFolder", onNewFolderConfirm: "createFolder"}
 			]},
 			{kind: "FittableRows", classes: "onyx-light ares-filechooser-footer", isContainer: true, components: [
-				//TO DO : make possible to scroll on the selected folder in the file tree
-				/*{name: "folderSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline", components: [
-					{content: $L("Where") + ":", fit: true},
-					{name: "selectedFolder", kind: "onyx.Input", classes: "only-light file-chooser-input", disabled: true, placeholder: $L("Folder")}
-				]},*/
-				{classes:"ares-row ares-file-choser-row", name:"fileNameRow", showing: false, components:[
-					{tag:"label", classes: "ares-fixed-label ares-file-chooser-label", content: $L("File name: ")},
-					{name: "nameSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline file-chooser-input", showing: false, components: [
-						{name: "selectedName", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("File"), selectOnFocus: true, onchange: "updateSelectedName"}
+				{classes:"ares-row ares-file-choser-row", name:"foldersPathRow", showing: true, components:[
+					{tag:"label", name:"foldersPathLabel", classes: "ares-fixed-label ares-file-chooser-label"},
+					{name: "foldersPathSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline file-chooser-input", showing: true, components: [
+						{name: "selectedFoldersPath", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("/Folders/File_Name")}
+					]}
+				]},
+				{classes:"ares-row", name:"fileNameRow", showing: false, components:[
+					{tag:"label", name:"fileNameLabel", classes: "ares-fixed-label ares-file-chooser-label", content: $L("File name: ")},
+					{name: "fileNameSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline file-chooser-input", showing: false, components: [
+						{name: "selectedFileName", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("File_Name"), selectOnFocus: true, oninput: "updateSelectedName", onchange: "updateSelectedName"}
 					]}
 				]}
 			]},
 			{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
 				{name: "cancel", kind: "onyx.Button", content: $L("Cancel"), ontap: "cancel"},
-				{name: "confirm", kind: "onyx.Button", content: $L("OK"), classes:"right", ontap: "confirm"}
+				{name: "confirm", kind: "onyx.Button", content: $L("OK"), classes:"right", ontap: "confirm", disabled: true}
 			]}
 		]}
 	],
@@ -110,33 +109,63 @@ enyo.kind({
 	/** @private */
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
-		this.inherited(arguments);
+		this.inherited(arguments);	
+
+		this.folderChooserChanged();
+		this.allowToolbarChanged();
+		this.allowCreateFolderChanged();
+
 		if (!this.headerText) {
 			if (this.folderChooser) {
 				this.setHeaderText($L("Select a Folder"));
 			} else {
 				this.setHeaderText($L("Select a File"));
 			}
-		}
-		if (!this.folderChooser) {
-			this.$.fileNameRow.show();
-			this.$.nameSelector.show();
-			if (this.allowNewFile) {
-				this.$.selectedName.setDisabled(false);
-			}
-		}
-		this.$.header.setContent(this.headerText);
-		this.$.hermesFileTree.hideFileOpButtons();
+		} else {
+			this.headerTextChanged();
+		}	
 	},
+
 	/** @private */
 	headerTextChanged: function () {
 		this.$.header.setContent(this.headerText);
 	},
 	/** @private */
-	selectedNameChanged: function(oldSelectedName) {
-		this.trace("old:", oldSelectedName, " -> new:", this.selectedName);
-		this.$.selectedName.setValue(this.selectedName);
-		this.updateConfirmButton();
+	folderChooserChanged: function () {
+		if (this.folderChooser) {
+			this.$.foldersPathLabel.setContent($L("Folder path: "));
+		} else {
+			this.allowNewFileChanged();
+		}		
+	},
+	/** @private */
+	allowCreateFolderChanged: function () {
+		this.$.hermesFileTree.hideFileOpButtons();
+		
+		if (this.allowCreateFolder) {
+			this.$.hermesFileTree.showNewFolderButton();
+		}
+	},
+	/** @private */
+	allowNewFileChanged: function () {
+		if (!this.folderChooser) {
+			if (this.allowNewFile) {
+				this.$.foldersPathLabel.setContent($L("Folder path: "));
+				this.$.fileNameRow.show();
+				this.$.fileNameSelector.show();
+				this.$.selectedFileName.setDisabled(false);
+				return;
+			}
+		}
+
+		this.$.foldersPathLabel.setContent($L("File path: "));
+		this.$.fileNameRow.hide();
+		this.$.fileNameSelector.hide();
+		this.$.selectedFileName.setDisabled(true);
+	},
+	/** @private */
+	allowToolbarChanged: function () {
+		this.$.hermesFileTree.showToolbar(this.allowToolbar);
 	},
 	/** @private */
 	handleSelectProvider: function(inSender, inEvent) {
@@ -157,92 +186,128 @@ enyo.kind({
 	/** @private */
 	_selectFile: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
-
+		
 		if (this.folderChooser) {
 			// TODO: should rather
 			// selectedFile.parentId... but this node
 			// property does not exist in Ares filesystems
 			// (yet)
 			this.selectedFile = undefined;
+			this.$.confirm.setDisabled(true);
 		} else {
 			this.selectedFile = inEvent.file;
 			this.selectedFile.parent = this.$.hermesFileTree.getParentOfSelected();
-			this.$.confirm.setDisabled(false);
+			
+			this.$.confirm.setDisabled(this.selectedFile.isDir);	
+
+			var path = inEvent.file.path;
+			if (this.project) {
+				// keep only the relative path
+				var relativePath = path.substring(path.indexOf(this.project.id) + this.project.id.length, path.length);
+
+				if (this.allowNewFile) {
+					var folders = relativePath.slice(0, -inEvent.file.name.length - 1);
+					if (folders === "") {folders =  "/";}
+					this.$.selectedFoldersPath.setValue(folders);
+					this.$.selectedFileName.setValue(inEvent.file.name);
+				} else {
+
+					if (!this.folderChooser) { this.$.selectedFoldersPath.setValue(relativePath); }
+				}
+			} else {
+				this.$.selectedFoldersPath.setValue(path);
+			}
 		}
 
-		// keep omly the relative path
-		var hft = this.$.hermesFileTree;
-		var relativePath=inEvent.file.path.slice(-(inEvent.file.path.length - hft.$.serverNode.file.path.length));
-		this.setSelectedName(relativePath);
+		this.updateConfirmButton();
 
 		return true; // Stop event propagation
 	},
 	/** @private */
 	_selectFolder: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
-		// do neither modify this.selectedName nor
-		// this.$.selectedName.value
+		
 		this.selectedFile = inEvent.file;
 		this.selectedFile.parent = this.$.hermesFileTree.getParentOfSelected();
+		
 		if (this.folderChooser) {
 			this.$.confirm.setDisabled(false);
 		} else {
 			this.$.confirm.setDisabled(true);
 		}
-		//this.$.selectedFolder.setValue(inEvent.file.name);
+		
+		var path = inEvent.file.path;
+		if (this.project) {			
+			// keep only the relative path
+			var relativePath = path.substring(path.indexOf(this.project.id) + this.project.id.length, path.length);
+			if (relativePath === "") {relativePath = "/";}
+			if (inEvent.file.isDir) {this.$.selectedFoldersPath.setValue(relativePath); }
+		} else {
+			this.$.selectedFoldersPath.setValue(path);
+		}
+		
 		this.updateConfirmButton();
+
 		return true; // Stop event propagation
 	},
 	updateSelectedName: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
-		this.$.confirm.setDisabled(false);
-		this.setSelectedName(inSender.getValue());
+		this.updateConfirmButton();
+		return true; // Stop event propagation
 	},
 	updateConfirmButton: function() {
 		if (this.folderChooser) {
 			this.$.confirm.setDisabled(!(this.selectedFile && this.selectedFile.isDir));
 		} else {
-			this.$.confirm.setDisabled(!(this.selectedFile && this.selectedName));
+			if (!this.allowNewFile) {
+				this.$.confirm.setDisabled(!(this.selectedFile && !this.selectedFile.isDir));
+			} else {
+				this.$.confirm.setDisabled(!(this.selectedFile && this.$.selectedFoldersPath.getValue() !== "" && this.$.selectedFileName.getValue() !== ""));
+			}
 		}
 	},
 	/** @private */
 	confirm: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.hide() ;
-		this.trace("selectedFile:", this.selectedFile, "selectedName:", this.selectedName);
+		
+		var name = this.$.selectedFoldersPath.getValue();
+
+		if (this.allowNewFile) {
+			if (this.$.selectedFoldersPath !== "/") {
+				name = name + "/";
+			}
+			name = name + this.$.selectedFileName.getValue();
+		}
+		this.trace("New name:", name);
+
 		this.doFileChosen({
 			file: this.selectedFile,
-			name: (this.selectedName === this.selectedFile.name ? undefined : this.selectedName)
+			name: name
 		});
+
 		return true; // Stop event propagation
 	},
 	/** @private */
 	cancel: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);		
 		this.hide() ;
+
 		this.doFileChosen();
+		
 		return true; // Stop event propagation
-	},
-	//FIXME: This is *nearly* identical to the code in Harmonia. Maybe move this into HermesFileTree?
-	createFolder: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-		var folderId = inEvent.folderId;
-		var name = inEvent.fileName.trim();
-		var service = this.selectedFile.service;
-		this.trace("Creating new folder:", name, "into folderId:", folderId, "under service:", service);
-		service.createFolder(folderId, name)
-			.response(this, function(inSender, inResponse) {
-				this.trace("Response: ", inResponse);
-				this.$.hermesFileTree.refreshFileTree(null, inResponse);
-			})
-			.error(this, function(inSender, inError) {
-				this.warn("Error: ", inError);
-				this.$.hermesFileTree.showErrorPopup(this.$LS("Creating folder '{folder}' failed: {error}", {folder: name, error: inError.toString()}));
-			});
 	},
 	/** @public */
 	reset: function () {
-		this.$.sources.show();
+		this.$.confirm.setDisabled(true);
+		this.$.selectedFoldersPath.setValue("");
+		this.$.selectedFileName.setValue("");
+		this.selectedFile = null;
+		this.folderChooserChanged();
+		this.allowToolbarChanged();
+		this.allowCreateFolderChanged();
+		
+		this.disconnectProject();
 	},
 	/** @public */
 	connectProject: function (project, next) {
@@ -251,16 +316,22 @@ enyo.kind({
 		this.$.hermesFileTree.connectProject(this.project, next);
 	},
 	/** @public */
-	pointSelectedName: function(selectedName, valid) {
-		this.setSelectedName(selectedName);
-		if (!valid) {
-			selectedName = "/";
-		} 
-		this.$.hermesFileTree.gotoNodePath(selectedName);
+	disconnectProject: function () {
+		this.project = null;
+		this.$.sources.show();
+		this.$.providerList.reset();
+		this.$.hermesFileTree.disconnect();
 	},
 	/** @public */
-	checkSelectedName: function(selectedName) {
-		this.$.hermesFileTree.checkNodePath(selectedName);
+	pointSelectedName: function(selectedPath, valid) {
+		if (!valid) {
+			selectedPath = "/";
+		} 
+		this.$.hermesFileTree.gotoNodePath(selectedPath);
+	},
+	/** @public */
+	checkSelectedName: function(selectedPath) {
+		this.$.hermesFileTree.checkNodePath(selectedPath);
 	},
 	$LS: function(msg, params) {
 		var tmp = new enyo.g11n.Template($L(msg));

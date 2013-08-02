@@ -14,7 +14,7 @@
  * -- content: the content of the row, the format of this content can change depending on the type of the UI widget used (picker, input, ...)
  * -- defaultValue: the default value displayed in the widget
  * -- type: contain the last part of the name of the kind that will be used to define a row, these kinds are defined in
- * 			the "PhonegapUIRows.js"
+ *          the "PhonegapUIRows.js"
  * @type {String}
  */
 enyo.kind({
@@ -39,9 +39,9 @@ enyo.kind({
 					},
 					{name: "orientation", label:"Orientation",content:["both", "landscape", "portrait"], defaultValue: "both", type: "PickerRow"},
 					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], defaultValue: "universal", type: "PickerRow"},
-					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},
+					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},					
 					{name: "access", label: "Access origin", content: "", defaultValue: "", type: "AccessRow"},
-					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "icon.png", type: "GeneralImgRow"},
+					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "/icon.png", type: "GeneralImgRow"},
 					{name: "splashScreen", label: "SplashScreen", content: "", defaultValue: "", type: "GeneralImgRow"}
 				]		
 			}, 
@@ -72,7 +72,7 @@ enyo.kind({
 					{name: "android-maxSdkVersion", label: "Maximum SDK", content: "22", defaultValue: "22", type: "InputRow"},
 					{name: "splash-screen-duration", label: "Splash screen Duration", content: "3000", defaultValue: "3000", type: "InputRow"},
 					{name: "load-url-timeout", label: "Load URL timeout", content: "6000", defaultValue: "6000", type: "InputRow"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "AndroidImgRow"},
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "AndroidImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "AndroidImgRow"}
 				]				
 			}, 
@@ -87,7 +87,7 @@ enyo.kind({
 					{name: "exit-on-suspend", label: "Exit on suspend", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},
 					{name: "show-splash-screen-spinner", label: "Show splash screen spinner", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},
 					{name: "auto-hide-splash-screen", label: "Auto-hide splash screen", content: ["true", "false"], defaultValue: "true", type: "PickerRow"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "IosImgRow"},
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "IosImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "IosImgRow"}
 				]
 			}, 
@@ -95,7 +95,7 @@ enyo.kind({
 				id: "winphone",
 				name: "Microsoft Windows Phone 7",
 				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "WinphoneImgRow"},
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "WinphoneImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "WinphoneImgRow"}
 				]				
 			}, 
@@ -104,7 +104,7 @@ enyo.kind({
 				name: "RIM Blackberry",
 				rows: [
 					{name: "disable-cursor", label: "Disable Cursor", content:  ["true", "false"], defaultValue: "false", type: "PickerRow"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "BlackBerryImgRow"},
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "BlackBerryImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "BlackBerryImgRow"}
 				]
 			}, 
@@ -112,10 +112,13 @@ enyo.kind({
 				id: "webos",
 				name: "HP webOS 2",
 				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "WebOsImgRow"},
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "WebOsImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "WebOsImgRow"}
 				]
 			}
+		], 
+		advancePanelContent: [						
+			{name: "autoGenerateXML", label: "Generate config.xml file when building", content: "", defaultValue: "true", type: "AutoGenerateXML"}				
 		]
 	}
 });
@@ -129,14 +132,12 @@ enyo.kind({
 	kind: "Ares.ProjectProperties",
 	debug: false,
 	published: {
-		config: {}	
+		config: {}, 
+		showAdvancedConfiguration: false
 	},
 	events: {
 		onConfigure: ""
 	},
-	handlers: {
-		onEditConfig: "saveConfig"
-	}, 
 	components: [{
 			kind: "enyo.Scroller",
 			fit: "true",
@@ -154,10 +155,21 @@ enyo.kind({
 										{kind: "Input", name: "pgConfId", attributes: { title: "unique identifier, assigned by build.phonegap.com"}}
 									]
 								}, 
-								{kind: "onyx.Button", classes: "ares-project-properties-refresh-button", content: "Refresh...",	ontap: "refresh"}
+								{kind: "onyx.Button", name: "ConfigurationButton",classes: "ares-project-properties-advance-configuration-button", content: "Advanced configuration", ontap: "displayAdvancedPanel"}
 							]
 						}, 
-						{name: "targetsRows", kind: "FittableRows",	classes: 'ares_projectView_switches'}
+						{name: "targetsRows", kind: "FittableRows", classes: "ares-project-properties-targetsRows-display"},
+						{
+							name: "AdvancedConfiguration", kind: "FittableRows", classes: "ares-project-properties-AdvancedPanel-hide", 
+							components: [
+								{
+									tag: "div", classes: "ares-project-properties-label-background", 
+									components: [
+										{content: "Advance configuration", classes: "ares-project-properties-advance-configuration"}
+									]
+								}
+							]
+						}
 					]
 				}
 			]
@@ -171,7 +183,12 @@ enyo.kind({
 	/**
 	 * @type {Array}
 	 */
-	platformDrawers: Phonegap.UIConfiguration.platformDrawersContent, 
+	platformDrawers: Phonegap.UIConfiguration.platformDrawersContent,
+
+	/**
+	 * @type {Array}
+	 */
+	advanceConfigurationPanel: Phonegap.UIConfiguration.advancePanelContent,
 
 	/**
 	 * @private
@@ -179,7 +196,8 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		this.createAllDrawers();	
+		this.createAllDrawers();
+		this.createAdvanceConfigurationPanel();
 	},
 
 	createAllDrawers: function () {
@@ -284,77 +302,64 @@ enyo.kind({
 					kind: "Phonegap.ProjectProperties." + row.type,
 					name: row.name,
 					label: row.label,
-					value: row.content,	
-					defaultValue: row.defaultValue					
+					contentValue: row.content,	
+					value: row.defaultValue					
 				});
 			}, this);
 		}
 	},
 
-	/** public */
-	setProjectConfig: function (config) {
-		this.config = config;		
-		this.config.enabled = true;
-				this.$.pgConfId.setValue(config.appId || '');
-		this.config.targets = this.config.targets || {};
-		
-		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {			
-			enyo.forEach(drawer.rows, function (row) {				
-				
-				var configParameterValue = (function(){
-					var value;
-					if(row.name ==='icon'){
-						value = config.icon[drawer.id].src;
-					} else { 
-						if (row.name ==='splashScreen'){
-							value = config.splashScreen[drawer.id].src;
-						} else {
-							 if(drawer.id === 'permissions'){
-								value = config.features[row.name];
-							} else{
-								value = config.preferences[row.name];
-							}
-						}
-					}
-					return value;
-				}).bind(this);
-
-				this.$.targetsRows.$[drawer.id].setProjectConfig(this.config.targets[drawer.id]);				
-				this.$.targetsRows.$[drawer.id].$.drawer.$[row.name].setDefaultValue(configParameterValue.call(this));
-				this.$.targetsRows.$.general.$.drawer.$.access.setDefaultValue(config.access.origin);					
-			}, this);
+	createAdvanceConfigurationPanel: function (){
+		enyo.forEach(this.advanceConfigurationPanel, function(row){
+			this.$.AdvancedConfiguration.createComponent({
+					kind: "Phonegap.ProjectProperties." + row.type,
+					name: row.name,
+					label: row.label,
+					value: row.content,	
+					defaultValue: row.defaultValue					
+				});
 		}, this);
-		// function to update the attributs values of the icon and splash screen in ios drawer
-		var updateIosImgAttributs = (function(inImg){
-				this.$.targetsRows.$.ios.$.drawer.$[inImg].setHeight(config[inImg].ios.height);
-				this.$.targetsRows.$.ios.$.drawer.$[inImg].setWidth(config[inImg].ios.width);
-			}).bind(this);
+	},
 
-		// function to update the attribut value of the icon and splash screen in android drawer
-		var updateAndroidImgAttributs = (function(inImg){
-			this.$.targetsRows.$.android.$.drawer.$[inImg].setDensity(config[inImg].android.density);
-		}).bind(this);
+	/** @public */
+	setProjectConfig: function (config) {
+		this.trace("Project config:", config);
 
-		var imgs = ['icon', 'splashScreen'];
-		
-		enyo.forEach(imgs, function(img){
-			updateIosImgAttributs.call(this, img);
-			updateAndroidImgAttributs.call(this, img);
+		config.enabled = true;
+		this.$.pgConfId.setValue(config.appId || '');
+		config.targets = config.targets || {};
+
+		this.$.AdvancedConfiguration.$.autoGenerateXML.setProjectConfig(config);
+
+		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {
+			this.$.targetsRows.$[drawer.id].setProjectConfig(config);
 		}, this);
 
 		this.refresh();
 	},
 
-	/** public */
-	getProjectConfig: function () {
-		this.config.appId = this.$.pgConfId.getValue();
+	/** @public */
+	getProjectConfig: function (config) {
+		config.access = {};
+		config.features = {};
+		config.preferences = {};
+		config.icon = {};
+		config.splashScreen = {};
+		config.targets = {};
+
+		config.appId = this.$.pgConfId.getValue();
+
+		this.$.AdvancedConfiguration.$.autoGenerateXML.getProjectConfig(config);
 		
-		this.trace("Project config:", this.config);	
-		enyo.forEach(this.platformDrawers, function (target) {
-			this.config.targets[target.id] = this.$.targetsRows.$[target.id].getProjectConfig();
+		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {
+			if (drawer.id !== "permissions") {
+				config.icon[drawer.id] = {};
+				config.splashScreen[drawer.id] = {};
+			}
+			this.$.targetsRows.$[drawer.id].getProjectConfig(config);
 		}, this);
-		
-		return this.config;
+
+		this.trace("Project config:", config);
 	},
 	/**
 	 * @protected
@@ -363,6 +368,19 @@ enyo.kind({
 		this.trace("sender:", inSender, "value:", inValue);		
 		var provider = Phonegap.ProjectProperties.getProvider();
 		provider.authorize(enyo.bind(this, this.loadKeys));
+	},
+
+	displayAdvancedPanel: function(){
+		this.showAdvancedConfiguration = !this.showAdvancedConfiguration;
+		if(this.showAdvancedConfiguration) {
+			this.$.ConfigurationButton.setContent("Back");
+			this.$.targetsRows.setClassAttribute("ares-project-properties-targetsRows-hide");
+			this.$.AdvancedConfiguration.setClassAttribute("ares-project-properties-AdvancedPanel-display");
+		} else {
+			this.$.ConfigurationButton.setContent("Advanced configuration");
+			this.$.targetsRows.setClassAttribute("ares-project-properties-targetsRows-display");
+			this.$.AdvancedConfiguration.setClassAttribute("ares-project-properties-AdvancedPanel-hide");
+		}				
 	},
 
 	/**
@@ -374,18 +392,6 @@ enyo.kind({
 			id: 'phonegap'
 		});
 	},
-	/**
-	 * Event handler that detect the changes done in a drawer's row
-	 * @param  {Object} inSender     contain the description of the envent sender
-	 * @param  {function} saveProperty  this function is defined in each row's kind, it save the 
-	 *                                  new input of the row in the object "this.config".
-	 * 
-	 * @private
-	 */
-	saveConfig: function(inSender, saveProperty)  {
-		saveProperty.call(this, this.config) ;
-		return true; //stop the bubbling
-	}, 
 
 	/**
 	 * @protected
@@ -404,6 +410,33 @@ enyo.kind({
 			}, this);
 		}
 	},
+	/** @public */
+	activateInputRows: function (status) {
+		var fileChoosers = this.findAllInputRows();
+		enyo.forEach(fileChoosers, function (fileChooser) {
+			fileChooser.setActivated(true);
+		});
+	},
+	/** @public */
+	findAllInputRows: function () {
+		var fileChoosers = [],
+			drawers = this.$.targetsRows;
+		
+		enyo.forEach(enyo.keys(drawers.$), function (drawer) {
+			var targets = drawers.$[drawer],
+				rows = targets.$.drawer;
+			enyo.forEach(enyo.keys(rows.$), function (row) {
+				if (rows.$[row].name === 'icon') {
+					fileChoosers.push(rows.$[row]);
+				} else if (rows.$[row].name === 'splashScreen') {
+					fileChoosers.push(rows.$[row]);
+				}
+			}, this);
+		}, this);
+
+		return fileChoosers;
+	},
+
 	statics: {
 		getProvider: function () {
 			this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('phonegap');
@@ -424,8 +457,7 @@ enyo.kind({
 		targetName: "",
 		enabled: "",
 		fold: true,
-		keys: {},
-		config: {}
+		keys: {}
 	},
 	components: [
 		 
@@ -446,20 +478,40 @@ enyo.kind({
 		this.targetNameChanged();
 	},
 	setProjectConfig: function (config) {
+		this.trace("id:", this.targetId, "config:", config);
+
+		this.setEnabled( config && config.targets[this.targetId] );
 		
-		this.trace("id:", this.targetId, "config:", config);		
-		this.config = config;		
-		this.setEnabled( !! this.config);
-		if (this.enabled && this.$.drawer.$.keySelector) {
-			this.$.drawer.$.keySelector.setActiveKeyId(this.config.keyId);
-		}		
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else if (row === "keySelector") {
+				if (this.enabled) {
+					this.$.drawer.$.keySelector.setActiveKeyId( config.targets[this.targetId].keyId );
+				}
+			} else {
+				this.$.drawer.$[row].setProjectConfig(config);
+			}
+		}, this);
 	},
-	getProjectConfig: function () {
-		if (this.enabled && this.$.drawer.$.keySelector) {
-			this.config.keyId = this.$.drawer.$.keySelector.getActiveKeyId();
-		}		
-		this.trace("id:", this.targetId, "config:", this.config);	
-		return this.config;
+	getProjectConfig: function (config) {
+		if (this.enabled) {
+			config.targets[this.targetId] = {};
+		}
+
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else if (row === "keySelector") {
+				if (this.enabled && this.$.drawer.$.keySelector.getActiveKeyId()) {
+					config.targets[this.targetId].keyId = this.$.drawer.$.keySelector.getActiveKeyId();
+				}
+			} else {
+				this.$.drawer.$[row].getProjectConfig(config);
+			}
+		}, this);
+
+		this.trace("id:", this.targetId, "config:", config);
 	},
 	/**
 	 * @private
@@ -497,7 +549,7 @@ enyo.kind({
 				this.$.drawer.$.keySelector.destroy();
 			}
 
-			var keys = provider.getKey(this.targetId);			
+			var keys = provider.getKey(this.targetId);
 			this.trace("id:", this.targetId, "keys:", keys);
 			
 			if (keys) {
@@ -557,7 +609,23 @@ enyo.kind({
 	},
 
 	setProjectConfig: function (config) {
-		this.config = config;			
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else {
+				this.$.drawer.$[row].setProjectConfig(config);
+			}
+		}, this);
+	},
+
+	getProjectConfig: function (config) {
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else {
+				this.$.drawer.$[row].getProjectConfig(config);
+			}
+		}, this);
 	},
 
 	/**

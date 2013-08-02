@@ -2,16 +2,22 @@
 
 enyo.kind({
 	name: "Harmonia",
+	kind:"FittableColumns",
 	events: {
 		onRegisterMe: "",
-		onMovePanel:"",
+		onMovePanel: ""
 	},
 	components: [
-		{kind: "HermesFileTree", dragAllowed: true, classes:"enyo-fit"}
+		{kind:"FittableRows", classes:"enyo-fit", components:[
+			{kind: "onyx.Toolbar", classes: "ares-top-toolbar", components: [
+				{kind: "onyx.Grabber", classes: "ares-grabber" , name: "filePanelGrabber", showing: false, ontap: "activePanel", components: [
+					{kind: "aresGrabber", name: "aresGrabberDirection"}
+				]}
+			]},
+			{kind: "HermesFileTree", dragAllowed: true}
+		]},
+		{classes:"hangar"}
 	],
-	handlers: {
-		onGrabberClick : "activePanel"
-	},
 	debug: false,
 	published: {
 		panelIndex: 1
@@ -38,15 +44,13 @@ enyo.kind({
 		}
 	},
 	showGrabber:function(){
-		this.$.hermesFileTree.showGrabber();
-		return this ;
+		this.$.filePanelGrabber.show();
 	},
 	hideGrabber:function(){
-		this.$.hermesFileTree.hideGrabber();
-		return this ;
+		this.$.filePanelGrabber.hide();
 	},
 	switchGrabberDirection: function(active){
-		this.$.hermesFileTree.switchGrabberDirection(active);
+		this.$.aresGrabberDirection.switchGrabberDirection(active);
 	},
 	/**
 	 * Refresh the {HermesFileTree} (if relevant), following a change of the given file
