@@ -600,4 +600,3 @@ enyo.kind({
 		return true;
 	}
 });
->>>>>>> master
