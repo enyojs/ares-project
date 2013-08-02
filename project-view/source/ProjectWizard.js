@@ -370,8 +370,9 @@ enyo.kind({
 		if (target) {
 			var config = target.getConfig();
 			this.targetProject = target ;
-			this.$.propertiesWidget.setupModif() ;
+			this.$.propertiesWidget.setupModif();
 			this.$.propertiesWidget.preFill(config.data);
+			this.$.propertiesWidget.setTargetProject(target);
 			this.$.propertiesWidget.activateFileChoosers(true);
 
 			var show = (function () {
