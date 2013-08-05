@@ -137,7 +137,7 @@ var platformOpen = {
 };
 
 var bundledBrowser = {
-	win32: [ path.resolve ( myDir + "../../chromium/" + "chrome.exe" ) ],
+	win32: [ path.resolve ( myDir + "../../../chromium/" + "chrome.exe" ) ],
 	darwin:[ path.resolve ( myDir + "../../../../bin/chromium/" + "Chromium.app" ), "--args" ],
 	linux: [ path.resolve ( myDir + "../../../../bin/chromium/" + "chrome" ) ]
 };
