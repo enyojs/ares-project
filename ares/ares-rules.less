@@ -138,12 +138,30 @@
 	background-size: auto; /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
 }
 
-.ares-top-toolbar.hermesFileTree-toolbar {
-	padding: 9px 3px 10px 3px;
+.ares-small-toolbar{
+	height:50px;
+	line-height: 1.8;
+	padding: 5px;
+	border-top:none;
+	border-left:none;
+	border-right:none;
+	background-size: auto; /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
 }
 
-.ares-top-toolbar.hermesFileTree-toolbar>div {
-	margin : 0 1px;
+.onyx-tab-bar.ares-small-toolbar{
+	padding: 0;
+}
+
+.onyx-tab-bar.ares-small-toolbar>div{
+	margin: 0;
+}
+
+.ares-small-toolbar>div>div>div>.onyx-tab-rug{
+	padding:  0.7em;
+}
+
+.ares-small-toolbar>div {
+	margin : 0 2px;
 }
 
 .ares-top-toolbar.ares-designer-panels>div {
@@ -320,7 +338,6 @@
 }
 
 .ares-left-pane-file-chooser > .ares_harmonia_providerList {
-	height: 245px;
 	width: 100%;
 }
 
@@ -330,7 +347,24 @@
 
 /*Project properties popup*/
 
-.ares-project-properties { height: 400px; width: 630px; padding: 5px 10px; margin-top: 15px; }
+.ares-project-properties { height: 400px; width: 660px; padding: 5px 10px; margin-top: 15px; }
+
+.ares-project-properties-targetsRows-display {
+	visibility: visible;
+}
+
+.ares-project-properties-targetsRows-hide {
+	visibility: hidden;
+	height: 0px;
+}
+.ares-project-properties-AdvancedPanel-display {
+	visibility: visible;
+}
+
+.ares-project-properties-AdvancedPanel-hide {
+	visibility: hidden;
+	height: 0px;
+}
 
 .ares-radio-group{ padding-top: 7px; }
 
@@ -365,9 +399,6 @@
 
 /* Ares "Phonegap build" panel.*/
 
-
-.ares-project-properties-refresh-button { left: 200px; }
-
 .ares-project-properties-drawer-row { margin-top: 10px; height: 32px; }
 
 .ares-project-properties-drawer-row-label { width: 13em; margin-left: 10px; margin-right: 10px;}
@@ -386,8 +417,21 @@
 	margin-left: 10px; 
 	color: @ares-drawer-label;
 	font-weight:bold;
-
 }
+
+.ares-project-properties-advance-configuration { 
+	margin-left: 10px; 
+	position: relative;
+	top: 7px;
+	color: @ares-drawer-label;
+	font-weight:bold;
+}
+
+.ares-project-properties-advance-configuration-button {
+	width: 175px;
+	left: 100px;
+}
+
 .ares-project-properties-picker {
 	width: 130px;
 	margin-right: 30px;
@@ -402,7 +446,6 @@
 .ares-project-properties-input-medium > input {
 	width: 110px;
 }
-
 
 .ares-project-properties-drawer-row-check-box-label { margin-left: 30px; margin-right: 50px; }
 

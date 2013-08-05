@@ -22,7 +22,7 @@
 	display: inline-block;
 }
 
-.indicator {
+.css-editor-indicator {
 	height: 16px;
 	width: 16px;
 	padding-right: 5px;
@@ -32,7 +32,7 @@
 	display: inline-block;
 }
 
-.turned {
+.css-editor-turned {
 	background-position-y: -16px;
 }
 
