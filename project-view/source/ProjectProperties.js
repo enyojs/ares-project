@@ -129,7 +129,7 @@ enyo.kind({
 	TEMPLATE_NONE: "NONE",
 	selectedTemplate: undefined,
 	selectedAddSource: undefined,
-
+	targetProject: null,
 	services: {},
 
 	fileChoosers: [],
@@ -307,6 +307,10 @@ enyo.kind({
 		this.waterfallDown("onChangeProjectStatus", inEvent);
 	},
 
+	setTargetProject: function(project) {
+		this.targetProject = project;
+	},
+
 	/** @private */
 	confirmTap: function(inSender, inEvent) {
 		// retrieve all configuration settings
@@ -333,6 +337,7 @@ enyo.kind({
 			var service = this.services[serviceId];
 			this.config.providers[service.id] = {};
 			this.config.providers[service.id].enabled = service.checkBox.checked;
+			service.panel.saveProjectConfig(this.targetProject);
 			service.panel.getProjectConfig(this.config.providers[service.id]);
 		}, this);
 
