@@ -51,7 +51,7 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);	
 		this.labelChanged();	
-	},	
+	},
 
 	/**
 	 * @private
@@ -637,7 +637,7 @@ enyo.kind({
 
 	/**
 	 * Set the content of the row's label when the row is created
-	 * @ private
+	 * @private
 	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
