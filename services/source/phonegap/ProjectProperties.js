@@ -204,104 +204,57 @@ enyo.kind({
 	},
 
 	createAllDrawers: function () {
-		var self = this;
-		createCommonDrawers(this.commonDrawers);
-		createPlatformDrawers(this.platformDrawers);
-
+			
 		/**
-		 * Create and initialise the content of all the common drawers which containe 
-		 * parameters shared with all the platforms presented by
-		 * Phonegap build.	
-		 * @param  {Array} inDrawers defined in the array {Phonegap.UIConfiguration.commonDrawersContent}
+		 * Create a drawer in the UI "Phonegap Build" without initilizing its content.
+		 * 
+		 * @param  {Phonegap.ProjectProperties.Drawer} or {Phonegap.ProjectProperties.target}  inDrawer container for the 
+		 *                                                												rows.
 		 * @private
 		 */
-		function createCommonDrawers(inDrawers) {
-			enyo.forEach(inDrawers, function (commonDrawer) {
-				createCommonDrawer(commonDrawer);
-
-				// get the last created drawer.
-				var allDrawers = self.$.targetsRows.getComponents();
-				var lastDrawer = allDrawers[allDrawers.length - 1];
-
-				// A loop to Setup the content of each drawer.
-				enyo.forEach(Phonegap.UIConfiguration.commonDrawersContent, function (drawerContent) {
-					if (drawerContent.id === commonDrawer.id) {
-						setUpDrawer(lastDrawer, drawerContent);
-					}
-				}, self);
-			}, self);
-		}
-
-	
-		/**
-		 * Create and initialise the content of all the platforms drawers which containe 
-		 * parameters of a specific platform presented by Phonegap build.	
-		 * @param  {Arary} inDrawers defined in the array {Phonegap.UIConfiguration.platformDrawersContent}
-		 * @private
-		 */
-		function createPlatformDrawers(inDrawers) {
-			enyo.forEach(inDrawers, function (inDrawer) {
-				createPlatformDrawer(inDrawer);
-
-				// get the last created drawer.
-				var allDrawers = self.$.targetsRows.getComponents();
-				var lastDrawer = allDrawers[allDrawers.length - 1];
+		function createDrawer(inDrawer) {			
+			if (inDrawer && inDrawer.id === 'general' || inDrawer && inDrawer.id === 'permissions'){
+				// Create the drawer.
+				this.$.targetsRows.createComponent({
+					kind: "Phonegap.ProjectProperties.Drawer",
+					classes: "ares-row",
+					name: inDrawer.id,
+					drawerName: inDrawer.name				
+				});
+			} else {
+				this.$.targetsRows.createComponent({
+					name: inDrawer.id,
+					classes: "ares-row",
+					kind: "Phonegap.ProjectProperties.Target",
+					targetId: inDrawer.id,
+					drawerName: inDrawer.name,
+					enabled: false
+				});
+			}		
 		
-				// A loop to Setup the content of each drawer.
-				enyo.forEach(Phonegap.UIConfiguration.platformDrawersContent, function (drawerContent) {
-					if (drawerContent.id === inDrawer.id) {
-						setUpDrawer(lastDrawer, drawerContent);
-					}
-				}, self);
-			}, self);
+		}
+
+
+		/**
+		 * Create all the drawers in in the UI "Phonegap Build".
+		 * 
+		 * @param  {Array} inDrawers Array declared in {Phonegap.UIConfiguration}.
+		 * @private
+		 */
+		function createDrawers(inDrawers) {			
+			enyo.forEach(inDrawers, function (inDrawer) {				
+				createDrawer.call(this, inDrawer);								
+			}, this);
 		}
 
 		/**
-		 * Create one common drawer
-		 * @param  {Array} inDrawer defined in the array {Phonegap.UIConfiguration.commonDrawersContent}
-		 * @private
+		 * Initialise the content of a drawer.
+		 * @param {Phonegap.ProjectProperties.Drawer} or {Phonegap.ProjectProperties.target} dwr container for the rows.
+		 * @param {Array} dwrContent Array declared in {Phonegap.UIConfiguration}.
 		 */
-		function createCommonDrawer(inDrawer) {
-			// Create the drawer.
-			self.$.targetsRows.createComponent({
-				kind: "Phonegap.ProjectProperties.Drawer",
-				classes: "ares-row",
-				name: inDrawer.id,
-				drawerName: inDrawer.name				
-			});
-		}
-
-		/**
-		 * Create one platform drawer
-		 * @param  {Array} inDrawer defined in the array {Phonegap.UIConfiguration.platformDrawersContent}
-		 * @private
-		 */
-		function createPlatformDrawer(inDrawer) {
-			self.$.targetsRows.createComponent({
-				name: inDrawer.id,
-				classes: "ares-row",
-				kind: "Phonegap.ProjectProperties.Target",
-				targetId: inDrawer.id,
-				drawerName: inDrawer.name,
-				enabled: false
-			});
-		}
-
-		/**
-		 * Setup the rows of a drawer, a row contain a label with
-		 * a UI widget which can be an : onyx.Picker, onyx.Input or onyx.Checkbox.
-		 * The content of each UI widget is defined in the array
-		 * {Phonegap.UIConfiguration.drawerContent}
-		 *
-		 * @param {Object} dwr        The drawer to fill
-		 * @param {Array} dwrContent list of the rows that will be placed in the drawer
-		 * @private
-		 */
-
-		function setUpDrawer(dwr, dwrContent) {
-			// Creation of the pickers of the drawer if they existe.
+		function initialiseDrawer(dwr, dwrContent) {		
 			enyo.forEach(dwrContent.rows, function (row) {
-				enyo.log(row);
+				
 				dwr.$.drawer.createComponent({
 					kind: "Phonegap.ProjectProperties." + row.type,
 					name: row.name,
@@ -316,6 +269,36 @@ enyo.kind({
 				});
 			}, this);
 		}
+
+		/**
+		 * Initialise all the drawers in in the UI "Phonegap Build".
+		 * @param  {Array} inDrawers Array declared in {Phonegap.UIConfiguration}
+		 * @private
+		 */
+		function initialiseDrawers(inDrawers) {		
+			var i = 0;			
+			enyo.forEach(inDrawers, function (inDrawer) {
+				
+				// get all the created drawers.
+				var allDrawers = this.$.targetsRows.getComponents();
+				
+				// get the current drawer to fill
+				var actualDrawer = allDrawers[i];
+				
+				//increment to the next drawer
+				i ++;				
+
+				// A loop to Setup the content of each drawer.
+				enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawerContent) {
+					if (drawerContent.id === inDrawer.id) {
+						initialiseDrawer.call(this, actualDrawer, drawerContent);
+					}
+				}, this);
+			}, this);
+		}
+
+		createDrawers.call(this, this.commonDrawers.concat(this.platformDrawers));
+		initialiseDrawers.call(this, this.commonDrawers.concat(this.platformDrawers));
 	},
 	/**
 	 * @private
