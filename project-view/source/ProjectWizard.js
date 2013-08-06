@@ -731,7 +731,7 @@ enyo.kind({
 		// Create the project entry in the project list
 		var project = Ares.Workspace.projects.createProject(this.newConfigData.name, this.newFolderId, serviceId);
 		if(project){
- 			this.owner.$.projectList.selectInProjectList(project);
+			this.owner.$.projectList.selectInProjectList(project);
 		}
 		this.doHideWaitPopup();
 	},

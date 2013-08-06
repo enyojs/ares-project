@@ -1,3 +1,4 @@
+/* global Ares, ares, ServiceRegistry */
 /**
  * This kind provides:
  * - the project toolbars (with create .. delete)
@@ -112,6 +113,7 @@ enyo.kind({
 	],
 	selected: null,
 	create: function() {
+		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.$.projectList.setCount(Ares.Workspace.projects.length);
 		Ares.Workspace.projects.on("add remove reset", enyo.bind(this, this.projectCountChanged));
@@ -140,12 +142,12 @@ enyo.kind({
 	 * @private
 	 */
 	menuItemSelected: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		var fn = inEvent && inEvent.selected && inEvent.selected.value;
 		if (typeof this[fn] === 'function') {
 			this[fn]({project: this.selectedProject});
 		} else {
-			if (this.debug) this.log("*** BUG: '" + fn + "' is not a known function");
+			this.trace("*** BUG: '", fn,  "is not a known function");
 		}
 	},
 	addProject: function(name, folderId, service) {
@@ -155,7 +157,7 @@ enyo.kind({
 		}
 		var known = Ares.Workspace.projects.get(name);
 		if (known) {
-			this.debug && this.log("Skipped project " + name + " as it is already listed") ;
+			this.trace("Skipped project ", name, " as it is already listed") ;
 		} else {
 			var project = Ares.Workspace.projects.createProject(name, folderId, serviceId);
 			if(project){
@@ -179,8 +181,8 @@ enyo.kind({
 		if (this.selected) {
 			project = Ares.Workspace.projects.at(this.selected.index);
 			nukeFiles = this.$.removeProjectPopup.$.nukeFiles.getValue() ;
-			this.debug && this.log("removing project" +  project.getName() + ( nukeFiles ? " and its files" : "" )) ;
-			this.debug && this.log(project);
+			this.trace("removing project", project.getName(), ( nukeFiles ? " and its files" : "" )) ;
+			this.trace(project);
 			if (nukeFiles) {
 				var service = project.getService();
 				var folderId = project.getFolderId();
@@ -284,14 +286,14 @@ enyo.kind({
 		onShow: "shown"
 	},
 	create: function() {
- 		this.inherited(arguments);
- 		this.createComponent(
- 				{container:this.$.popupContent, classes:"ares-more-row", components:[
- 					{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "nukeChanged"},
- 					{kind: "Control", tag: "span", classes: "ares-padleft", content: "also delete files from disk"}
- 				]}
+		this.inherited(arguments);
+		this.createComponent(
+				{container:this.$.popupContent, classes:"ares-more-row", components:[
+					{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "nukeChanged"},
+					{kind: "Control", tag: "span", classes: "ares-padleft", content: "also delete files from disk"}
+				]}
 			);
- 	},
+	},
 	shown: function(inSender, inEvent) {
 		this.nukeChanged();
 	},
