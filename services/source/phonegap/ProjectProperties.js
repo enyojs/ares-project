@@ -19,16 +19,13 @@
  */
 enyo.kind({
 	name: "Phonegap.UIConfiguration",
-	published: {
-
-	},
 	components: [],
 	statics: {
 
 		commonDrawersContent: [
 			{
-				id: "general",
-				name: "General",
+				id: "sharedConfiguration",
+				name: "Shared configuration",
 				rows: [
 					{
 						name: "phonegap-version",
@@ -46,8 +43,8 @@ enyo.kind({
 				]		
 			}, 
 			{
-				id: "permissions",
-				name: "Permissions",
+				id: "applicationPermissions",
+				name: "Application permissions",
 				rows: [
 					{name: "battery", label: "Battery",	content: "",defaultValue: "",  type: "CheckBoxRow"},
 					{name: "camera", label: "Camera", content: "",defaultValue: "", type: "CheckBoxRow"},
@@ -352,7 +349,7 @@ enyo.kind({
 		this.$.AdvancedConfiguration.$.autoGenerateXML.getProjectConfig(config);
 		
 		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {
-			if (drawer.id !== "permissions") {
+			if (drawer.id !== "applicationPermissions") {
 				config.icon[drawer.id] = {};
 				config.splashScreen[drawer.id] = {};
 			}
@@ -580,7 +577,7 @@ enyo.kind({
 });
 
 /**
- * Define the drawers "general" and "permissions"
+ * Define the drawers "sharedConfiguration" and "applicationPermissions"
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.Drawer",
