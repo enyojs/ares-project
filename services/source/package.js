@@ -1,5 +1,4 @@
 enyo.depends(
-	"$lib/g11n",
 	"ServiceRegistry.js",
 	"FileSystemService.js",
 	"HermesNode.js",
