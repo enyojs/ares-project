@@ -1,6 +1,12 @@
 #!/bin/sh
 basedir=`dirname "$0"`
 
+SCRIPT="$basedir/./node_modules/ares-ide/ide.js"
+
+if [ ! -e "$SCRIPT" ]; then
+    SCRIPT="$basedir/../ide.js"
+fi
+
 case `uname` in
     *CYGWIN*) basedir=`cygpath -w "$basedir"`;;
 esac

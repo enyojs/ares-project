@@ -1,3 +1,5 @@
+/* global ares, ProjectConfig */
+
 /**
  * This kind provide a widget to tune project properties
  *
@@ -10,49 +12,56 @@
 enyo.kind({
 	name: "ProjectProperties",
 	debug: false,
-	classes: "enyo-unselectable",
+	classes: "enyo-unselectable ares-classic-popup",
 	fit: true,
 	events: {
 		onModifiedConfig: "",
 		onSaveGeneratedXml: "",
-		onDone: ""
+		onDone: "",
+		onSelectFile: "",
+		onCheckPath: "",
+		onFileChoosersChecked: ""
 	},
 	handlers: {
-		onAdditionalSource: "handleAdditionalSource"
+		onAdditionalSource: "handleAdditionalSource",
+		onInputButtonTap: "selectInputFile"
 	},
-	classes:"ares-classic-popup",
 	components: [
 		{classes:"title left-align", content:"Project properties", components:[
 			{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", classes:"ares-radio-group", components: [
-				{serviceId: "project", active: true, attributes: {title: 'project attributes...'}, components:[{classes:"large-fixed", content:"Project"},{tag:"span", classes:"ares-bottom-check"}]},
-				{serviceId: "preview", attributes: {title: 'project preview parameters...'}, components:[{classes:"large-fixed", content:"Preview"},{tag:"span", classes:"ares-bottom-check"}]}
-			]},
+				{serviceId: "project", active: true, attributes: { title: $L("project attributes...") }, components: [
+					{classes:"large-fixed", content: $L("Project")}, {tag:"span", classes:"ares-bottom-check"}
+				]},
+				{serviceId: "preview", attributes: { title: $L("project preview parameters...") }, components: [
+					{classes:"large-fixed", content: $L("Preview")}, {tag:"span", classes:"ares-bottom-check"}
+				]}
+			]}
 		]},
 		{name: "projectDrawer", kind: "onyx.Drawer", open:true, components: [		
 			{classes:"ares-project-properties",components:[
 				{kind:"FittableColumns", components: [
 					{kind:"FittableRows", components: [
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content: "Name: "},
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Name: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectName"}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content:"Version: "},
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Version: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectVersion", placeholder:"0.0.1"}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content:"Author name: "},
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Author name: ")},
 							{kind: "onyx.InputDecorator", components: [
-								{kind: "Input", name: "projectAuthor", attributes: {title: "Vendor / Committer Name"}, placeholder:"My Company"}
+								{kind: "Input", name: "projectAuthor", attributes: {title: $L("Vendor / Committer Name")}, placeholder: $L("My Company")}
 							]}
 
 						]},
 						{classes:"ares-row", name: "templatesEntry", showing: false, components: [
-							{tag:"label", classes:"ares-fixed-label ares-small-label", content:"Template:"},
+							{tag:"label", classes:"ares-fixed-label ares-small-label", content: $L("Template:")},
 							{kind: "onyx.PickerDecorator", fit: true, components: [
 								{name: "templateButton", classes:"very-large-width", kind: "onyx.PickerButton", fit: true},
 								{kind: "onyx.FlyweightPicker", name: "templatePicker", components: [
@@ -63,23 +72,23 @@ enyo.kind({
 					]},
 					{kind:"FittableRows", components: [
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content: "Title: "},
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Title: ")},
 							{kind: "onyx.InputDecorator", components: [
-								{kind: "Input", defaultFocus: true, name: "projectTitle", placeholder:"My Example App"}
+								{kind: "Input", defaultFocus: true, name: "projectTitle", placeholder: $L("My Example App")}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content:"Id: "},
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Id: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectId",
-								attributes: {title: "Application ID in reverse domain-name format: com.example.apps.myapp"}, placeholder:"com.example.apps.myapp"}
+								attributes: {title: $L("Application ID in reverse domain-name format: com.example.apps.myapp")}, placeholder:"com.example.apps.myapp"}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content:"Contact: "},
+							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Contact: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", name: "projectContact",
-									attributes: {title: "mail address or home page of the author"}, placeholder:"support@example.com"
+									attributes: {title: $L("mail address or home page of the author")}, placeholder: $L("support@example.com")
 								}
 							]}
 						]}
@@ -96,39 +105,46 @@ enyo.kind({
 		{name: "previewDrawer", kind: "onyx.Drawer", open: false, components: [
 			{classes:"ares-project-properties",components:[
 				{kind: 'FittableRows', components: [
-					{classes:"ares-row", components:[
-						{tag: "label" , classes:"ares-fixed-label", content: "Top application file: "},
-						{kind: "onyx.InputDecorator", components: [
-							{kind: "Input", name: "ppTopFile",
-								attributes: {title: 'top file of your application. Typically index.html'}
-							}
-						]}
-					]}
+					{kind: "ProjectProperties.PathInputRow", 
+						name: "topFileRow", 
+						label: $L("Top application file: "), 
+						inputTip: $L("top file of your application. Typically index.html"), 
+						buttonTip: $L("select file...")}					
 				]}
 			]}
 		]},
 		{name: "toolbarId", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
-			{kind: "onyx.Button", content: "Cancel", ontap: "doDone"},
-			{name: "ok", kind: "onyx.Button", content: "OK", classes:"right", ontap: "confirmTap"}
+			{kind: "onyx.Button", content: $L("Cancel"), ontap: "doDone"},
+			{name: "ok", kind: "onyx.Button", content: $L("OK"), classes:"right", ontap: "confirmTap"}
 		]},
 
-		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"},
+		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
+	published: {		
+		topFileStatus: ""
+	},
 
 	templates: [],
 	TEMPLATE_NONE: "NONE",
 	selectedTemplate: undefined,
 	selectedAddSource: undefined,
-
+	targetProject: null,
 	services: {},
 
+	fileChoosers: [],
+	
+	create: function() {
+		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
+		this.inherited(arguments);
+	},
 	/**
 	 * Receive the {onServicesChange} broadcast notification
 	 * @param {Object} inEvent.serviceRegistry
 	 */
 	handleServicesChange: function(inSender, inEvent) {
-		if (this.debug) this.log();
+		this.trace(inSender, "=>", inEvent);
+
 		this.services = enyo.clone(this.services) || {};
 		inEvent.serviceRegistry.forEach(enyo.bind(this, function(inService) {
 			var service = {
@@ -136,7 +152,7 @@ enyo.kind({
 				name: inService.getName() || inService.id,
 				kind: inService.getProjectPropertiesKind && inService.getProjectPropertiesKind()
 			};
-			if (this.debug) this.log("service:", service);
+			this.trace("service:", service);
 			if (service.kind) {
 				this.services[service.id] = service;
 			}
@@ -185,7 +201,7 @@ enyo.kind({
 			// to show the service or not
 			this.showService(serviceId);
 		}, this);
-		if (this.debug) this.log("services:", this.services);
+		this.trace("services:", this.services);
 	},
 	/**
 	 * Toggle a service panel
@@ -193,7 +209,7 @@ enyo.kind({
 	toggleService: function(inSender, inEvent) {
 		var serviceId = inEvent.originator.serviceId,
 		    checked = inEvent.originator.checked;
-		this.log("serviceId:", serviceId, 'checked:', checked);
+		this.warn("serviceId:", serviceId, 'checked:', checked);
 		var service = this.services[serviceId];
 		if (service.tab) {
 			service.tab.setShowing(checked);
@@ -237,18 +253,17 @@ enyo.kind({
 	 */
 	preFill: function(inData) {
 		var conf = typeof inData === 'object' ? inData : JSON.parse(inData);
-		conf = ProjectConfig.checkConfig(conf);
-		this.config =  conf;
+		this.config = ProjectConfig.checkConfig(conf);
 
-		 // avoid storing 'undefined' in there
-		this.$.projectId.     setValue(conf.id      || '' );
-		this.$.projectVersion.setValue(conf.version || '' );
-		this.$.projectName.   setValue(conf.name    || '' );
-		this.$.projectTitle.  setValue(conf.title   || '' );
+		// avoid storing 'undefined' in there
+		this.$.projectId.setValue(this.config.id || '' );
+		this.$.projectVersion.setValue(this.config.version || '' );
+		this.$.projectName.setValue(this.config.name || '' );
+		this.$.projectTitle.setValue(this.config.title || '' );
 
-		if (! conf.author) { conf.author =  {} ;}
-		this.$.projectAuthor. setValue(conf.author.name || '') ;
-		this.$.projectContact.setValue(conf.author.href || '') ;
+		if (! this.config.author ) { this.config.author = {} ;}
+		this.$.projectAuthor.setValue(this.config.author.name || '') ;
+		this.$.projectContact.setValue(this.config.author.href || '') ;
 
 		// Load each provider service configuration into its
 		// respective ProjectProperties panel
@@ -256,8 +271,9 @@ enyo.kind({
 			this.showService(serviceId);
 		}, this);
 
-		if (! conf.preview ) {conf.preview = {} ;}
-		this.$.ppTopFile.setValue(conf.preview.top_file);
+		if (! this.config.preview ) {this.config.preview = {} ;}
+
+		this.$.topFileRow.setValue(this.config.preview.top_file);
 
 		return this ;
 	},
@@ -275,7 +291,6 @@ enyo.kind({
 		return this ;
 	},
 
-
 	showService: function(serviceId) {
 		var service = this.services[serviceId];
 		var config = this.config && this.config.providers &&
@@ -292,28 +307,39 @@ enyo.kind({
 		this.waterfallDown("onChangeProjectStatus", inEvent);
 	},
 
+	setTargetProject: function(project) {
+		this.targetProject = project;
+	},
+
+	/** @private */
 	confirmTap: function(inSender, inEvent) {
-		var tglist, ppConf ;
-		// retrieve modified values
+		// retrieve all configuration settings
+		this.config = {};
 
-		this.config.id       = this.$.projectId     .getValue();
-		this.config.version  = this.$.projectVersion.getValue();
-		this.config.name     = this.$.projectName   .getValue();
-		this.config.title    = this.$.projectTitle  .getValue();
+		// Project settings
+		this.config.id = this.$.projectId.getValue();
+		this.config.version = this.$.projectVersion.getValue();
+		this.config.name = this.$.projectName.getValue();
+		this.config.title = this.$.projectTitle.getValue();
 
+		this.config.author = {};
 		this.config.author.name = this.$.projectAuthor.getValue();
 		this.config.author.href = this.$.projectContact.getValue();
 
+		// Preview settings
+		this.config.preview = {};
+		this.config.preview.top_file = this.$.topFileRow.getValue();
+
 		// Dump each provider service configuration panel into
 		// the project configuration.
+		this.config.providers = {};
 		enyo.forEach(enyo.keys(this.services), function(serviceId) {
 			var service = this.services[serviceId];
-			this.config.providers[service.id] = service.panel.getProjectConfig();
+			this.config.providers[service.id] = {};
 			this.config.providers[service.id].enabled = service.checkBox.checked;
+			service.panel.saveProjectConfig(this.targetProject);
+			service.panel.getProjectConfig(this.config.providers[service.id]);
 		}, this);
-
-		ppConf = this.config.preview ;
-		ppConf.top_file = this.$.ppTopFile.getValue();
 
 		// to be handled by a ProjectWizard
 		var sourceIds = [];
@@ -365,7 +391,7 @@ enyo.kind({
 
 	},
 	_onLibCheckedAction: function(inSender, inEvent) {
-		if (this.debug) this.log("inSender:", inSender, "inEvent:", inEvent);
+		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		var selectedLibs = [];
 		enyo.forEach(this.libs, function(lib) {
 			if (lib.id === inEvent.lib.id) {
@@ -390,10 +416,15 @@ enyo.kind({
 
 		this.templateToggleService(inSender, inEvent);
 	},
+	topFileChanged: function() {
+		this.$.topFileRow.setValue(this.topFile);
+	},
+	topFileStatusChanged: function() {
+		this.$.topFileRow.setStatus(this.topFileStatus);
+	},
 	templateToggleService: function(inSender, inEvent) {
 		var keys = Object.keys(this.services);
 		keys.forEach(function(serviceId) {
-			var svcChbox = serviceId + "CheckBox";
 			var service = this.services[serviceId];
 			if (inEvent.content.match(serviceId)) {
 				this.showService(serviceId);
@@ -408,12 +439,74 @@ enyo.kind({
 	handleAdditionalSource: function(inSender, inEvent) {
 		this.selectedAddSource = inEvent.source;
 		return true;
+	},
+	/** @public */
+	activateFileChoosers: function(status) {
+		this.$.topFileRow.setActivated(status);
+
+		// Activate PhoneGap (and other services) path chooser buttons in related rows
+		enyo.forEach(enyo.keys(this.services), function(serviceId) {
+			if (serviceId === "phonegap") {
+				this.services[serviceId].panel.activateInputRows(status);
+			}
+
+			/* to the same for further services to be intregrated in Project Properties*/ 
+		}, this);
+	},
+	/** @public */
+	checkFileChoosers: function() {
+		this.fileChoosers = [];
+
+		// get fileChooser triggering objects name for ares project properties
+		// currently only one: Top File's PathInputRow in Preview tab
+		for (var o in this.$) {
+			if (this.$[o].kind === "ProjectProperties.PathInputRow") {
+				this.fileChoosers.push(this.$[o]);
+			}
+		}
+		
+		// find PhoneGap (and other services) rows containing path chooser buttons
+		enyo.forEach(enyo.keys(this.services), function(serviceId) {
+			if (serviceId === "phonegap") {
+				this.fileChoosers = this.fileChoosers.concat(this.services[serviceId].panel.findAllInputRows());
+			}
+			
+			/* to the same for further services to be intregrated in Project Properties*/ 
+		}, this);
+		
+		var chooser = this.fileChoosers.shift();
+		this.doCheckPath({input: chooser, value: chooser.getValue()});	
+	},
+	/** @private */
+	fileChooserChecked: function() {
+		if (this.fileChoosers.length) {
+			var chooser = this.fileChoosers.shift();
+			this.doCheckPath({input: chooser, value: chooser.getValue()});
+		} else {
+			this.doFileChoosersChecked();
+		}
+
+		return true;
+	},
+	/** @private */
+	selectInputFile: function (inSender, inData) {
+		this.doSelectFile({input: inData.originator, value: inData.originator.getValue(), status: inData.originator.getStatus(), header: inData.header});
+	},
+	/** @public */
+	updateFileInput: function(input, value) {
+		input.setValue(value);
+		return true;
+	},
+	updatePathCheck: function(input, status) {
+		input.setStatus(status);
+		this.fileChooserChecked();
+		return true;
 	}
 });
 
 enyo.kind({
 	name: "ProjectProperties.LibCheckBox",
-	classes:"ares-row",
+	classes: "ares-row",
 	published: {
 		lib: ""
 	},
@@ -433,3 +526,77 @@ enyo.kind({
 	}
 });
 
+enyo.kind({
+	name: "ProjectProperties.PathInputRow",
+	classes: "ares-row",
+	published: {
+		label: "",
+		value: "",
+		inputTip: "",
+		activated: false,
+		status: false,
+		buttonTip: ""
+	},
+	events: {
+		onInputButtonTap: "",
+		onPathChecked: ""
+	},
+	components: [
+		{tag: "label", name: "pathInputLabel", classes:"ares-fixed-label"},
+		{kind: "onyx.InputDecorator", components: [
+			{kind: "Input", name: "pathInputValue", classes: "enyo-unselectable"}
+		]},
+		{kind: "onyx.IconButton", name:"pathInputButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
+	],
+	debug: false,
+
+	create: function () {
+		this.inherited(arguments);
+
+		this.labelChanged();
+		this.valueChanged();
+		this.inputTipChanged();
+		this.activatedChanged();
+		this.statusChanged();
+		this.buttonTipChanged();
+	},
+	/** @private */
+	labelChanged: function () {
+		this.$.pathInputLabel.setContent(this.label);
+	},
+	/** @private */
+	valueChanged: function () {
+		this.$.pathInputValue.setValue(this.value);
+		this.setStatus(true);
+	},
+	/** @private */
+	inputTipChanged: function () {
+		this.$.pathInputValue.setAttribute("title", this.inputTip);
+	},
+	/** @private */
+	activatedChanged: function () {
+		if (this.activated) {
+			this.$.pathInputButton.show();
+			this.statusChanged();
+		} else {
+			this.$.pathInputButton.hide();
+		}
+	},
+	/** @private */
+	statusChanged: function () {
+		if (this.status) {
+			this.$.pathInputButton.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.pathInputButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
+	},
+	/** @private */
+	buttonTipChanged: function () {
+		this.$.pathInputButton.setAttribute("title", this.buttonTip);
+	},
+	/** @private */
+	pathInputTap: function (inSender, inEvent) {
+		this.doInputButtonTap({header: $L("Select top file...")});
+		return true;
+	}
+});

@@ -5,27 +5,9 @@ enyo.kind({
 		edited: false
 	},
 	components: [
-		{kind: "DragAvatar", components: [
-			{tag: "img", src: "$deimos/images/icon.png", style: "width: 24px; height: 24px;"}
-		]},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
-			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", name: "toolbar", components: [
-				{name: "docLabel", content: "Deimos"},
-				{kind: "onyx.PickerDecorator", components: [
-					{name: "kindButton", kind: "onyx.PickerButton"},
-					{name: "kindPicker", kind: "onyx.Picker", onChange: "kindSelected", components: [
-					]}
-				]},
-				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction", style: "float:right;"}
-			]},
 			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
-			
-			
-			
 				{name: "left", classes:"ares_deimos_left", kind: "Palette", name:"palette"},
-				
-				
-				
 				{name: "middle", fit: true, kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
 						{kind: "onyx.Button", name: "reloadDesignerButton", classes: "deimos-designer-toolbar-spacing", content: "Reload", ontap: "reloadDesigner"},
@@ -66,10 +48,7 @@ enyo.kind({
 							onReturnPositionValue: "designerReturnPositionValue"
 						},
 					]}
-				]},
-				
-				
-				
+				]},				
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar deimos-toolbar-margined-buttons", components: [
 						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
@@ -137,7 +116,7 @@ enyo.kind({
 		
 		this.index = null;
 		this.kinds = what;
-		this.$.kindPicker.destroyClientControls();
+		this.owner.$.kindPicker.destroyClientControls();
 
 		// Pass the project information (analyzer output, ...) to the inspector and palette
 		this.$.inspector.setProjectData(data.projectData);
@@ -145,7 +124,7 @@ enyo.kind({
 
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
-			this.$.kindPicker.createComponent({
+			this.owner.$.kindPicker.createComponent({
 				content: k.name,
 				index: i,
 				active: (i==0)
@@ -153,8 +132,8 @@ enyo.kind({
 			maxLen = Math.max(k.name.length, maxLen);
 		}
 		
-		this.$.kindButton.applyStyle("width", (maxLen+2) + "em");
-		this.$.kindPicker.render();
+		this.owner.$.kindButton.applyStyle("width", (maxLen+2) + "em");
+		this.owner.$.kindPicker.render();
 		this.setEdited(false);
 	},
 	kindSelected: function(inSender, inEvent) {
@@ -178,8 +157,8 @@ enyo.kind({
 		}
 		
 		this.index = index;
-		this.$.kindButton.setContent(kind.name);
-		this.$.toolbar.reflow();
+		this.owner.$.kindButton.setContent(kind.name);
+		this.owner.$.toolbar.reflow();
 		
 		return true;
 	},
@@ -270,7 +249,7 @@ enyo.kind({
 			item.layoutKind && delete item.layoutKind;
 			this.updateStyleForNonAbsolutePositioningLayoutKind(item);
 		}
-		
+		this.addAresKindOptions(this.kinds[this.index].components);
 		this.rerenderKind(item.aresId);
 		return true;
 	},
@@ -416,6 +395,7 @@ enyo.kind({
 		
 		// Copy clone style props to inspector
 		this.$.inspector.userDefinedAttributes[clone.aresId].style = clone.style;
+		this.addAresKindOptions(this.kinds[this.index].components);
 		
 		if (beforeId) {
 			if (!this.insertItemBefore(clone, target, beforeId)) {
@@ -617,7 +597,7 @@ enyo.kind({
 		
 		// Copy each user-defined property from _atts_ to the cleaned component
 		for (att in atts) {
-			if ((inKeepAresIds && att === "aresId") || (att !== "aresId" && att !== "components" && att !== "__aresOptions")) {
+			if ((inKeepAresIds && att === "aresId") || (att !== "aresId" && att !== "components" && att !== "__aresOptions")|| (att !== "aresId" && att !== "content")) {
 				cleanComponent[att] = atts[att];
 			}
 		}
@@ -670,10 +650,11 @@ enyo.kind({
 		// Note: This doesn't look like it does anything, because we send updates to the document to Ares immediately, so a doc is 
 		// only "edited" for a few ms. I left this in here because I was tracking down some cases where the state stayed "edited"
 		if (this.edited) {
-			this.$.docLabel.setContent("Deimos *");
+			this.owner.$.docLabel.setContent("Deimos *");
 		} else {
-			this.$.docLabel.setContent("Deimos");
+			this.owner.$.docLabel.setContent("Deimos");
 		}
+		this.owner.$.toolbar.resized();
 	},
 	designerUpdate: function() {
 		this.doDesignerUpdate(this.prepareDesignerUpdate());

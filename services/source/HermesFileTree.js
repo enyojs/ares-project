@@ -16,7 +16,7 @@ enyo.kind({
 		onFileChanged: "",
 		onFolderChanged: "",
 		onTreeChanged: "",
-		onGrabberClick: ""
+		onPathChecked: ""
 	},
 	handlers: {
 		onItemDown: "itemDown",
@@ -34,45 +34,41 @@ enyo.kind({
 		// allows filetree to have draggable subnodes or not (not per default).
 		dragAllowed: false
 	},
+	fit:true,
 	components: [
-			{kind: "onyx.Toolbar", classes: "ares-top-toolbar hermesFileTree-toolbar", components: [
-				{kind: "onyx.Grabber", classes: "ares-grabber" , name:"filePanelGrabber", showing: false, ontap: "doGrabberClick", components: [
-					{kind: "aresGrabber", name: "aresGrabberDirection"}
-				]
-			},
-			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
-				{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
-				{kind: "onyx.Tooltip", content: $L("New Folder...")}
-			]},
-			{name: "reloadAll", kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$harmonia/images/folder_reload.png", ontap: "reloadClick"},
-				{kind: "onyx.Tooltip", content: $L("Reload...")}
-			]},
-			{name: "newFile", kind: "onyx.TooltipDecorator", components: [
-				{name: "newFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_new.png", ontap: "newFileClick"},
-				{kind: "onyx.Tooltip", content: $L("New File...")}
-			]},
-			{name: "renameFile", kind: "onyx.TooltipDecorator", components: [
-				{name: "renameFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_edit.png", ontap: "renameClick"},
-				{kind: "onyx.Tooltip", content: $L("Rename...")}
-			]},
-			{name: "copyFile", kind: "onyx.TooltipDecorator", components: [
-				{name: "copyFileButton", kind: "onyx.IconButton", src: "$harmonia/images/copy.png", ontap: "copyClick"},
-				{kind: "onyx.Tooltip", content: $L("Copy...")}
-			]},
-			{name: "deleteFile", kind: "onyx.TooltipDecorator", components: [
-				{name: "deleteFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_delete.png", ontap: "deleteClick"},
-				{kind: "onyx.Tooltip", content: $L("Delete...")}
-			]},
-			{name: "revertMove", kind: "onyx.TooltipDecorator", components: [
-				{name: "revertMoveButton", kind: "onyx.IconButton", src: "$harmonia/images/undo.png", ontap: "revertClick"},
-				{kind: "onyx.Tooltip", classes:"ares-tooltip-last", content: $L("Revert move...")}
-			]}
+			{kind: "onyx.Toolbar", name: "hermesToolbar", classes:"ares-small-toolbar title-gradient", components: [
+				{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
+					{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
+					{kind: "onyx.Tooltip", content: $L("New Folder...")}
+				]},
+				{name: "reloadAll", kind: "onyx.TooltipDecorator", components: [
+					{kind: "onyx.IconButton", src: "$harmonia/images/folder_reload.png", ontap: "reloadClick"},
+					{kind: "onyx.Tooltip", content: $L("Reload...")}
+				]},
+				{name: "newFile", kind: "onyx.TooltipDecorator", components: [
+					{name: "newFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_new.png", ontap: "newFileClick"},
+					{kind: "onyx.Tooltip", content: $L("New File...")}
+				]},
+				{name: "renameFile", kind: "onyx.TooltipDecorator", components: [
+					{name: "renameFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_edit.png", ontap: "renameClick"},
+					{kind: "onyx.Tooltip", content: $L("Rename...")}
+				]},
+				{name: "copyFile", kind: "onyx.TooltipDecorator", components: [
+					{name: "copyFileButton", kind: "onyx.IconButton", src: "$harmonia/images/copy.png", ontap: "copyClick"},
+					{kind: "onyx.Tooltip", content: $L("Copy...")}
+				]},
+				{name: "deleteFile", kind: "onyx.TooltipDecorator", components: [
+					{name: "deleteFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_delete.png", ontap: "deleteClick"},
+					{kind: "onyx.Tooltip", content: $L("Delete...")}
+				]},
+				{name: "revertMove", kind: "onyx.TooltipDecorator", components: [
+					{name: "revertMoveButton", kind: "onyx.IconButton", src: "$harmonia/images/undo.png", ontap: "revertClick"},
+					{kind: "onyx.Tooltip", classes:"ares-tooltip-last", content: $L("Revert move...")}
+				]}
 		]},
 		
 		// Hermes tree, "serverNode" component will be added as HermesFileTree is created
-		{kind: "Scroller", fit: true},
-
+		{kind: "Scroller", fit:"true", classes:"enyo-document-fit" },
 		// track selection of nodes. here, selection Key is file or folderId.
 		// Selection value is the node object. Is an Enyo kind
 		{kind: "Selection", onSelect: "select", onDeselect: "deselect"},
@@ -142,7 +138,7 @@ enyo.kind({
 		} else {
 			inEvent.dataTransfer.effectAllowed = "linkMove";
 		}
-		inEvent.dataTransfer.setData('text/html', this.innerHTML);
+		inEvent.dataTransfer.setData("hermes.Node", this.draggedNode.file.id);
 		
 		return true;
 	},
@@ -208,6 +204,9 @@ enyo.kind({
 	/** @private */
 	itemDrop: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
+
+		var draggedNodeId = inEvent.dataTransfer.getData("hermes.Node");
+		this.trace('node dropped', draggedNodeId);
 		
 		if (!this.isValidDropTarget(this.targetNode)) {
 			this.trace("target not valid");
@@ -226,7 +225,7 @@ enyo.kind({
 								this.showRevertMoveButton();
 							})
 							.error(this, function() {
-								this.log("error retrieving related node children");
+								this.warn("error retrieving related node children");
 							});
 					});
 			} else {
@@ -234,7 +233,7 @@ enyo.kind({
 			}
 		}
 		
-		this.innerHTML = inEvent.dataTransfer.getData('text/html');
+		inEvent.dataTransfer.clearData();
 
 		return true;
 	},
@@ -336,7 +335,7 @@ enyo.kind({
 	 * @public
 	 * @param {Object} inFsService a FileSystemService implementation, as listed in ProviderList
 	 */
-	connectProject: function(inProjectData) {
+	connectProject: function(inProjectData, next) {
 		this.trace("config:", inProjectData);
 		this.projectData = inProjectData;
 
@@ -351,7 +350,7 @@ enyo.kind({
 		// (possibly remote & always asynchronous) file system
 		this.connectService(service, enyo.bind(this, (function(inError) {
 			if (inError) {
-				this.showErrorPopup($L("Internal Error ({error}) from filesystem service").replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
 			} else {
 				if (this.selectedNode) {
 					this.deselect(null, {data: this.selectedNode});
@@ -373,11 +372,11 @@ enyo.kind({
 					serverNode.file.isServer = true;
 
 					serverNode.setContent(nodeName);
-					this.refreshFileTree( function() { that.$.selection.select( serverNode.file.id, serverNode ) ; });
+					this.refreshFileTree( function() { if (next) {next();} else {that.$.selection.select( serverNode.file.id, serverNode );} });
 				});
 				req.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");
-					this.showErrorPopup($L("Internal Error ({error}) from filesystem service").replace("{error}", inError.toString()));
+					this.showErrorPopup(this.$LS("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
 				});
 			}
 		})));
@@ -385,6 +384,14 @@ enyo.kind({
 		this.packages = true;
 
 		return this;
+	},
+	/** @public */
+	disconnect: function() {
+		this.trace("disconnect...");
+		this.$.selection.clear();
+		this.projectUrlReady = false; // Reset the project information
+		this.clear() ;
+		return this ;
 	},
 	hideFileOpButtons: function() {
 		this.$.newFolder.hide();
@@ -409,18 +416,10 @@ enyo.kind({
 		this.$.deleteFile.show();
 		return this ;
 	},
-	showGrabber:function(){
-		this.$.filePanelGrabber.show();
+	showToolbar: function(show) {
+		this.$.hermesToolbar.setShowing(show);
 		return this ;
 	},
-	hideGrabber:function(){
-		this.$.filePanelGrabber.hide();
-		return this ;
-	},
-	switchGrabberDirection: function(active){
-		this.$.aresGrabberDirection.switchGrabberDirection(active);
-	},
-
 	showRevertMoveButton: function() {
 		this.$.revertMove.show();
 		return this ;
@@ -429,6 +428,7 @@ enyo.kind({
 		this.$.revertMove.hide();
 		return this ;
 	},
+	/** @private */
 	clear: function() {
 		var server = this.$.serverNode;
 		this.trace("clearing serverNode") ;
@@ -452,7 +452,7 @@ enyo.kind({
 	/** @private */
 	adjustScroll: function (inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
-		
+
 		var node = inEvent.originator;
 		// FIXME: Due to unexpected UI behaviour ENYO-2575, scrollIntoView method is overridden...
 		//this.$.scroller.scrollIntoView(node, true);
@@ -539,7 +539,15 @@ enyo.kind({
 		// open anything before it is available.  Also do not
 		// try to open top-level root & folders.
 		if (!node.file.isDir && !node.file.isServer && this.projectUrlReady) {
-			this.doFileDblClick({file: node.file, projectData: this.projectData});
+			if (! node.file.service) {
+				// FIXME: root cause not found
+				this.warn("node.file found without service: adding service...");
+				node.file.service = inEvent.originator.service ;
+			}
+			this.doFileDblClick({
+				file: node.file,
+				projectData: this.projectData
+			});
 		}
 
 		// handled here (don't bubble)
@@ -626,7 +634,7 @@ enyo.kind({
 		}
 
 		if (toSelectId && toSelectId.match(/[^\da-f]/) ) {
-			this.warn("refreshFileTree: internal error, toSelectId " + toSelectId + " does not look like an Id");
+			this.warn("refreshFileTree: internal error, toSelectId ", toSelectId, " does not look like an Id");
 		}
 
 		var tracker = this.asyncTracker(
@@ -700,7 +708,7 @@ enyo.kind({
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		var folderId = inEvent.folderId;
 		var name = inSender.fileName.trim();
-		this.trace("Creating new folder "+name+" into folderId="+folderId);
+		this.trace("Creating new folder ", name," into folderId=", folderId);
 		this.$.service.createFolder(folderId, name)
 			.response(this, function(inSender, inFolder) {
 				this.trace("inFolder: ", inFolder);
@@ -737,7 +745,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create folder:", name, inError);
-				this.showErrorPopup($L("Creating folder '{name}' failed: {error}").replace("{name}", name).replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Creating folder '{name}' failed: {error}", {name: name, error: inError.toString()}));
 			});
 	},
 	/** @private */
@@ -798,10 +806,10 @@ enyo.kind({
 		r.error(this, function(inSender, error) {
 			if (error === 404){
 				this.createFile(name, folderId);
-				this.showErrorPopup($L("No template found for '.{extension}' files.  Created an empty one.").replace("{extension}", type));
+				this.showErrorPopup(this.$LS("No template found for '.{extension}' files.  Created an empty one.", {extension: type}));
 			}
 			else {
-				this.error("error while fetching " + templatePath + ': ' + error);
+				this.warn("error while fetching ", templatePath, ': ', error);
 			}
 		});
 		r.go();
@@ -851,7 +859,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to copy:", this.selectedFile, "as", newName, inError);
-				this.showErrorPopup($L("Creating file '{copyName}' as copy of '{name}' failed: {error}").replace("{copyName}", newName).replace("{name}", this.selectedFile.name).replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Creating file '{copyName}' as copy of '{name}' failed: {error}", {copyName: newName, name: this.selectedFile.name, error: inError.toString()}));
 			});
 	},
 	/** @private */
@@ -913,7 +921,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to rename:", this.selectedFile, "into", newName, inError);
-				this.showErrorPopup($L("Renaming file '{oldName}' as '{newName}' failed").replace("{oldName}", this.selectedFile.name).replace("{newName}", newName));
+				this.showErrorPopup(this.$LS("Renaming file '{oldName}' as '{newName}' failed", {oldName: this.selectedFile.name, newName: newName}));
 			});
 	},
 	/** @private */
@@ -973,7 +981,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to delete:", this.selectedFile, inError);
-				this.showErrorPopup($L("Deleting '{name}' failed").replace("{oldName}", this.selectedFile.name));
+				this.showErrorPopup(this.$LS("Deleting '{name}' failed", {name: this.selectedFile.name}));
 			});
 	},
 	/** @private */
@@ -1005,7 +1013,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to revert:", this.movedNode.file.name, "into", this.originNode.file.path, inError);
-				this.showErrorPopup($L("Reverting '{name}' to '{oldpath}' failed").replace("{name}", this.movedNode.file.name).replace("{oldpath}", this.originNode.file.path));
+				this.showErrorPopup($L("Reverting '{name}' to '{oldpath}' failed", {name: this.movedNode.file.name, oldpath: this.originNode.file.path}));
 			});
 	},
 
@@ -1029,7 +1037,7 @@ enyo.kind({
 		var onDone = new enyo.Async() ;
 		onDone.response(this, function(inSender, toSelectId) {
 			var select = forceSelect || toSelectId ;
-			this.trace("delayed refresh after " + msg + ' on ' + select) ;
+			this.trace("delayed refresh after ", msg, ' on ', select) ;
 			this.refreshFileTree(null, select);
 		}) ;
 		return onDone ;
@@ -1071,7 +1079,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create file:", name, inError);
-				this.showErrorPopup($L("Creating file '{name}' failed: {error}").replace("{name}", name).replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Creating file '{name}' failed: {error}", {name: name, error: inError.toString()}));
 			});
 	},
 	
@@ -1141,7 +1149,59 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to move:", inNode.file.name, inError);
-				this.showErrorPopup($L("Moving {nodeName} failed: {error}").replace("{nodeName}", inNode.file.name).replace("{error}", inError.toString()));
+				this.showErrorPopup(this.$LS("Moving {nodeName} failed: {error}", {nodeName: inNode.file.name, error: inError.toString()}));
 			});
+	},
+	$LS: function(msg, params) {
+		var tmp = new enyo.g11n.Template($L(msg));
+		return tmp.evaluate(params);
+	},
+	gotoNodePath: function (nodePath) {
+		var track = this.$.serverNode,
+			waypoints = [],
+			i,
+			nodes = nodePath.split("/");
+
+		var next = (function(inErr) {
+			if (inErr) {
+				this.warn("Path following failed", inErr);
+			} else {
+				for (i = 1; i < waypoints.length; i++) {
+					if (waypoints[i].file.isDir) {
+						waypoints[i-1].getNodeWithId(waypoints[i].file.id).setExpanded(true).doExpand();
+					}
+				}
+
+				this.refreshFileTree( function() { waypoints[i-1].doAdjustScroll(); }, waypoints[i-1].file.id );
+			}
+		}).bind(this);
+
+		nodes.shift();
+		waypoints.push(track);
+		track.followNodePath(nodes, waypoints, next);
+	},
+	checkNodePath: function (nodePath) {
+		var track = this.$.serverNode,
+			waypoints = [],
+			nodes = nodePath.split("/"),
+			l = nodes.length;
+		
+		var next = (function(inErr) {
+			if (inErr) {
+				this.warn("Path following failed", inErr);
+				this.doPathChecked({status: false});
+				return false;
+			} else {
+				if (waypoints.length == l) {
+					this.doPathChecked({status: true});
+				} else {
+					this.doPathChecked({status: false});
+				}
+			}
+		}).bind(this);
+
+		nodes.shift();
+		waypoints.push(track);
+		track.followNodePath(nodes, waypoints, next);
 	}
 });

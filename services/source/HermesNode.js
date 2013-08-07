@@ -68,7 +68,7 @@ enyo.kind({
 	},
 	/** @private */
 	dragenter: function(inSender, inEvent) {
-		if (!inEvent.dataTransfer) {
+		if (!inEvent.dataTransfer || inEvent.dataTransfer.types[0] != "hermes.node") {
 			return true;
 		}
 		
@@ -77,7 +77,7 @@ enyo.kind({
 	},
 	/** @private */
 	dragover: function(inSender, inEvent) {
-		if (!inEvent.dataTransfer) {
+		if (!inEvent.dataTransfer || inEvent.dataTransfer.types[0] != "hermes.node") {
 			return true;
 		}
 		
@@ -86,7 +86,7 @@ enyo.kind({
 	},
 	/** @private */
 	dragleave: function(inSender, inEvent) {
-		if (!inEvent.dataTransfer) {
+		if (!inEvent.dataTransfer || inEvent.dataTransfer.types[0] != "hermes.node") {
 			return true;
 		}
 		
@@ -95,7 +95,7 @@ enyo.kind({
 	},
 	/** @private */
 	drop: function(inSender, inEvent) {
-		if (!inEvent.dataTransfer) {
+		if (!inEvent.dataTransfer || inEvent.dataTransfer.types[0] != "hermes.node") {
 			return true;
 		}
 		
@@ -107,7 +107,7 @@ enyo.kind({
 		if (!inEvent.dataTransfer) {
 			return true;
 		}
-		
+
 		this.doItemDragend(inEvent);
 		return true;
 	},
@@ -272,6 +272,7 @@ enyo.kind({
 		var nameMatch = function(e){
 			return (e.name === '$'+ name) ;
 		} ;
+		
 		return this.getControls().filter( nameMatch )[0];
 	},
 
@@ -369,12 +370,36 @@ enyo.kind({
 					errMsg += ": " + JSON.parse(inSender.xhrResponse.body).message;
 				} catch(e) {
 				}
-				this.log(errMsg);
+				this.warn(errMsg);
 			});
 
 		if( belowTop ) {
 			tracker.dec(); // run only for inner calls to refreshTree
 		}
 		this.trace("refreshTree done") ;
+	},
+	followNodePath: function (nodes, waypoints, next) {
+		if (nodes.length > 0) {
+			this.updateNodes().response(this, function () {
+				var track = this.getNodeNamed(nodes.shift());
+				if (track) {
+					waypoints.push(track);
+					track.followNodePath(nodes, waypoints, next);
+				} else {
+					if (typeof next === 'function') {
+						next();
+					}
+				}
+			})
+			.error(this, function (inSender, inError) {
+				if (typeof next === 'function') {
+					next(inError);
+				}
+			});
+		} else {
+			if (typeof next === 'function') {
+				next();
+			}
+		}
 	}
 });
