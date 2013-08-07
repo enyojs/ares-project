@@ -1,3 +1,4 @@
+/* global ares, ServiceRegistry, ProjectConfig */
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -44,6 +45,7 @@ enyo.kind({
 		onRegisterMe: ""
 	},
 	create: function() {
+		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.doRegisterMe({name:"projectView", reference:this});
 	},
@@ -95,13 +97,15 @@ enyo.kind({
 		// when the workspace is loaded & when a new project
 		// is created that would save per-click HTTP traffic
 		// to the FileSystemService.
-		self = this;
+		var self = this;
 		var config = new ProjectConfig();
 		config.init({
 			service: project.getService(),
 			folderId: project.getFolderId()
 		}, function(err) {
-			if (err) self.doError({msg: err.toString(), err: err});
+			if (err) {
+				self.doError({msg: err.toString(), err: err});
+			}
 			project.setConfig(config);
 		});
 		this.currentProject = project;
@@ -208,8 +212,6 @@ enyo.kind({
 			var previewUrl = winLoc
 				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
 				+ 'url=' + encodeURIComponent(projectUrl);
-
-			if (this.debug) this.log("preview on URL " + previewUrl) ;
 
 			window.open(
 				previewUrl,

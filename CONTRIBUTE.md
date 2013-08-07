@@ -99,6 +99,8 @@ NB: if your file contains several kinds, each related "create" method must be mo
 
 Do not forget to add at the beginning of each file a reference to the global variable "ares": `/* global ares */`
 
+Do not forget to add to your kind `debug:true` if you want to print the trace.
+
 You can then directly call this.trace() in the same way this.log is used.
 
 WARNING: Removing the "`if (this.debug)`" test can add CPU overhead in particular when concataining strings or invoking functions in the "`this.trace()`" call.

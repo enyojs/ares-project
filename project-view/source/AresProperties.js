@@ -37,7 +37,6 @@ enyo.kind({
 	 * @param {Object} inEvent.pluginService
 	 */
 	handlePluginRegist: function(inSender, inEvent) {
-		if (this.debug) this.log();
 
 		if (typeof inEvent.pluginService.getAresPropertiesKind !== 'function') {
 			return true;
