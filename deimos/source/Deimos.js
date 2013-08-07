@@ -233,7 +233,22 @@ enyo.kind({
 	},
 	inspectorControlDynamicUI: function(inSender, inEvent) {
 		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
-		this.showDynamicUI(item.aresId, inEvent);
+		var parentItem = this.getParentOfId(this.$.designer.selection.aresId, this.kinds[this.index]);
+
+		switch(inEvent.inKindName) {
+			case "panel":
+				for (var i = 0; i < parentItem.components.length; i++) {
+					if(parentItem.components[i].aresId == item.aresId) {
+						inEvent.inPanelIndex = i;
+						break;
+					}
+				}
+				break;
+			default:
+				break;
+		}
+
+		this.showDynamicUI(parentItem.aresId, inEvent);
 	},
 	layoutKindUpdated: function(inLayoutKind) {
 		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);

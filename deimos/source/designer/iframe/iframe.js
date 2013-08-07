@@ -380,22 +380,31 @@ enyo.kind({
 			kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.components) : inKind.components;
 
 			if (inKind.refreshKindName) {
-				var refreshItem = this.getItemById(inKind.selectId, kindConstructor.prototype.kindComponents);
+				refreshItem = this.getItemById(inKind.selectId, kindConstructor.prototype.kindComponents);
+				switch (inKind.refreshKindName) {
+					case "panel":
+						if (inKind.refreshKindProp == "prev") {
+							if(--inKind.refreshKindPanelIndex <= 0) {
+								refreshItem.index = 0;
+							} else {
+								refreshItem.index = inKind.refreshKindPanelIndex;
+							}
+						} else if (inKind.refreshKindProp == "current") {
+							refreshItem.index = inKind.refreshKindPanelIndex;
+						} else if (inKind.refreshKindProp == "next") {
+							if(++inKind.refreshKindPanelIndex >= refreshItem.components.length) {
+								refreshItem.index = refreshItem.components.length - 1;
+							} else {
+								refreshItem.index = inKind.refreshKindPanelIndex;
+							}
+						} else {
+							enyo.warn("refresh kind property is wrong");
+						}
+						break;
+					default:
+						break;
+				}			
 			}
-			switch (inKind.refreshKindName) {
-				case "panels":
-					if (refreshItem.index === undefined) {
-						refreshItem.index = 0;
-					}
-					if ((inKind.refreshKindProp == "prev") && (refreshItem.index > 0)) {
-						refreshItem.index--;
-					} else if ((inKind.refreshKindProp == "next") && (refreshItem.index < refreshItem.components.length)) {
-						refreshItem.index++;
-					} else {
-						enyo.warn("refresh kind property is wrong");
-					}
-					break;
-			}			
 
 			// Clean up after previous kind
 			if (this.parentInstance) {
@@ -425,7 +434,17 @@ enyo.kind({
 			
 			// Select a control if so requested
 			if (inKind.selectId) {
-				this.selectItem({aresId: inKind.selectId});
+				if (inKind.refreshKindName) {
+					switch (inKind.refreshKindName) {
+						case "panel":
+							this.selectItem({aresId: refreshItem.components[refreshItem.index].aresId});
+							break;
+						default:
+							break;
+					}
+				} else {
+					this.selectItem({aresId: inKind.selectId});
+				}
 			}
 		} catch(error) {
 			errMsg = "Unable to render kind '" + inKind.name + "':" + error.message;

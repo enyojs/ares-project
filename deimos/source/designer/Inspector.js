@@ -268,9 +268,10 @@ enyo.kind({
 		this.$.controlDynamicUI.destroyComponents();
 
 		switch(inKindName) {
-			case "moon.Panels":
-				this.$.controlDynamicUI.createComponent({name: "panels.prev", kind: "onyx.Button", content: "Previous Panel"});
-				this.$.controlDynamicUI.createComponent({name: "panels.next", kind: "onyx.Button", content: "Next Panel"});
+			case "moon.Panel":
+				this.$.controlDynamicUI.createComponent({name: "panel.prev", kind: "onyx.Button", content: "Prev"});
+				this.$.controlDynamicUI.createComponent({name: "panel.current", kind: "onyx.Button", content: "Current"});
+				this.$.controlDynamicUI.createComponent({name: "panel.next", kind: "onyx.Button", content: "Next"});
 				break;
 			default:
 				break;
@@ -562,11 +563,13 @@ enyo.kind({
 		//Add code here to affect enable dynamic UI control on ARES designer
 		var splitString = inEvent.originator.name.split(".");
 		switch(splitString[0]) {
-			case "panels":
+			case "panel":
 				if(splitString[1] == "prev") {
-					this.doControlDynamicUI({inKindName: "panels", inKindProp: "prev"});
+					this.doControlDynamicUI({inKindName: "panel", inKindProp: "prev"});
+				} else if(splitString[1] == "current") {
+					this.doControlDynamicUI({inKindName: "panel", inKindProp: "current"});
 				} else if(splitString[1] == "next") {
-					this.doControlDynamicUI({inKindName: "panels", inKindProp: "next"});
+					this.doControlDynamicUI({inKindName: "panel", inKindProp: "next"});
 				} else {
 					enyo.warn("Impossible input case, dynamic UI control on inspector");
 				}

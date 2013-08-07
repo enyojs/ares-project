@@ -174,7 +174,8 @@ enyo.kind({
 											components: enyo.json.codify.to(currentKind.components),
 											selectId: inSelectId,
 											refreshKindName: inEvent.inKindName,
-											refreshKindProp: inEvent.inKindProp}});
+											refreshKindProp: inEvent.inKindProp,
+											refreshKindPanelIndex: inEvent.inPanelIndex}});
 	},
 	select: function(inControl) {
 		this.sendMessage({op: "select", val: inControl});
