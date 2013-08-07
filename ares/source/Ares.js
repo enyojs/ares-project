@@ -548,6 +548,14 @@ enyo.kind({
 		}
 		if (! Ares.Workspace.files.length ) {
 			this.showProjectView();
+		} else{
+			this.selectProjectForActiveDocument();
+		}
+	},
+	selectProjectForActiveDocument:function(){
+		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
+		if(project){
+			this.componentsRegistry.projectList.selectInProjectList(project);
 		}
 	},
 	/**
