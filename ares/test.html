@@ -19,6 +19,16 @@
 	</head>
 	<body class="enyo-unselectable">
 		<script type="text/javascript">
+			enyo.path.addPaths({
+				"assets"	: "$enyo/../assets",
+				// deprecated aliases
+				"utilities"	: "$enyo/../utilities",
+				"services"	: "$enyo/../services",
+				"phobos"	: "$enyo/../phobos",
+				"deimos"	: "$enyo/../deimos",
+				"harmonia"	: "$enyo/../harmonia",
+				"project-view"	: "$enyo/../project-view"
+			});
 			new Ares().write();
 		</script>
 	</body>
