@@ -33,7 +33,9 @@ enyo.kind({
 		this.inherited(arguments);
 	},
 	errorMsgChanged: function (oldVal) {
-		if (this.debug) this.log(oldVal, "->", this.errorMsg);
+		if (this.debug) {
+			this.log(oldVal, "->", this.errorMsg);
+		}
 		this.$.msg.setContent(this.errorMsg);
 	},
 	detailsTextChanged: function() {
