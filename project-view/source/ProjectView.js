@@ -21,7 +21,8 @@ enyo.kind({
 			onDuplicateProject: "duplicateProjectAction",
 			onProjectRemoved: "projectRemoved",
 			onProjectSelected: "handleProjectSelected",
-			name: "projectList"},
+			name: "projectList"
+		},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate", classes:"ares-masked-content-popup"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan", classes:"ares-masked-content-popup"},
 		{kind: "ProjectWizardModify", canGenerate: false, 

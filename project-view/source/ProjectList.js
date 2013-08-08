@@ -283,14 +283,14 @@ enyo.kind({
 		onShow: "shown"
 	},
 	create: function() {
- 		this.inherited(arguments);
- 		this.createComponent(
- 				{container:this.$.popupContent, classes:"ares-more-row", components:[
- 					{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "nukeChanged"},
- 					{kind: "Control", tag: "span", classes: "ares-padleft", content: "also delete files from disk"}
- 				]}
-			);
- 	},
+		this.inherited(arguments);
+		this.createComponent(
+			{container:this.$.popupContent, classes:"ares-more-row", components:[
+				{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "nukeChanged"},
+				{kind: "Control", tag: "span", classes: "ares-padleft", content: "also delete files from disk"}
+			]}
+		);
+	},
 	shown: function(inSender, inEvent) {
 		this.nukeChanged();
 	},
