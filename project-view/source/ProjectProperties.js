@@ -252,7 +252,7 @@ enyo.kind({
 	 *  can be a json string or an object.
 	 */
 	preFill: function(inData) {
-		var conf = typeof inData === 'object' ? inData : JSON.parse(inData);
+		var conf = typeof inData === 'object' ? inData : enyo.json.parse(inData);
 		this.config = ProjectConfig.checkConfig(conf);
 
 		// avoid storing 'undefined' in there

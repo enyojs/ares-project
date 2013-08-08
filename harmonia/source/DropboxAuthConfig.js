@@ -305,14 +305,14 @@ enyo.kind({
 		req.error(this, function(inSender, inError) {
 			var errMsg;
 			try {
-				errMsg = JSON.parse(inSender.xhrResponse.body).error; 
+				errMsg = enyo.json.parse(inSender.xhrResponse.body).error; 
 			} catch(e) {
 				errMsg = inError;
 			}
 			this.log("errMsg:", errMsg);
 			next(new Error(errMsg));
 		});
-		req.go({auth: JSON.stringify({
+		req.go({auth: enyo.json.stringify({
 			appKey: this.auth.appKey,
 			appSecret: this.auth.appSecret,
 			uid: this.auth.uid,
@@ -337,14 +337,14 @@ enyo.kind({
 		req.error(this, function(inSender, inError) {
 			var errMsg;
 			try {
-				errMsg = JSON.parse(inSender.xhrResponse.body).error; 
+				errMsg = enyo.json.parse(inSender.xhrResponse.body).error; 
 			} catch(e) {
 				errMsg = inError;
 			}
 			this.log("errMsg:", errMsg);
 			next(new Error(errMsg));
 		});
-		req.go({auth: JSON.stringify({
+		req.go({auth: enyo.json.stringify({
 			appKey: this.auth.appKey,
 			appSecret: this.auth.appSecret,
 			uid: this.auth.uid,
