@@ -586,12 +586,12 @@ enyo.kind({
 		}
 		if (typeof keys ==='object' && enyo.keys(keys).length > 0) {
 			this.trace("keys:", keys);
-			query.keys = JSON.stringify(keys);
+			query.keys = enyo.json.stringify(keys);
 		}
 
 		// Target platforms -- defined by the Web API, but not implemented yet
 		if (platforms.length > 0) {
-			query.platforms = JSON.stringify(platforms);
+			query.platforms = enyo.json.stringify(platforms);
 		} else {
 			next(new Error('No build platform selected'));
 			return;

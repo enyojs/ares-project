@@ -73,7 +73,7 @@ enyo.kind({
 			if (this.debug) this.log("ProjectConfig.load: file=", inResponse);
 			if (typeof inResponse.content === 'string') {
 				try {
-					data = JSON.parse(inResponse.content);
+					data = enyo.json.parse(inResponse.content);
 				} catch(e) {
 					enyo.error("ProjectConfig.load:", e);
 					inRequest.fail(e);
@@ -106,7 +106,7 @@ enyo.kind({
 		var req;
 		if (this.debug) this.log("data=", this.data);
 		if (this.fileId) {
-			req = this.service.putFile(this.fileId, JSON.stringify(this.data, null, 2));
+			req = this.service.putFile(this.fileId, enyo.json.stringify(this.data, null, 2));
 		} else {
 			req = this.service.createFile(this.folderId, "project.json", JSON.stringify(this.data, null, 2));
 		}

@@ -173,8 +173,8 @@ enyo.kind({
 			this.$.osMessage.content = "Programmable buttons Command-SHIFT  F1 to F12";
 		};
 
-		this.previewSettings = JSON.parse(JSON.stringify(this.settings));
-
+		// serialize
+		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
 	},
 
 	getValuesFromLocalStorage:function(){
@@ -183,7 +183,7 @@ enyo.kind({
 			if (self.debug) self.log("localStorage[" + self.SETTINGS_STORAGE_KEY + "] = ", str);
 			try {
 				if(str !== null && str !== undefined){
-					self.settings = JSON.parse(str);
+					self.settings = enyo.json.parse(str);
 				}		
 			} catch(e) {
 				Ares.LocalStorage.remove(self.SETTINGS_STORAGE_KEY);
@@ -214,7 +214,7 @@ enyo.kind({
 
 		this.$.rightPaneButton.setValue(this.settings.rightpane);
 		//deep copy: settings in previewSettings
-		this.previewSettings = JSON.parse(JSON.stringify(this.settings));
+		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
 	},
 
 	themeSelected: function(inSender, inEvent) {
@@ -287,7 +287,7 @@ enyo.kind({
 	},
 
 	saveSettings: function() {
-		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, JSON.stringify(this.previewSettings));
+		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, enyo.json.stringify(this.previewSettings));
 		//Local storage modified, reading new settings from local storage
 		this.getValuesFromLocalStorage();
 		this.initSettingsPopupFromLocalStorage();
