@@ -914,7 +914,7 @@ enyo.kind({
 			
 			xw.writeAttributeString('role', phonegap.icon[inTarget].role || 'default');
 			if(inTarget != 'general'){
-				xw.writeAttributeString('gap:platfom', inTarget);
+				xw.writeAttributeString('gap:platform', inTarget);
 			}
 
 			if (inTarget === 'android'){
@@ -933,10 +933,10 @@ enyo.kind({
 			// one
 			xw.writeAttributeString('src', phonegap.splashScreen[inTarget].src || 'icon.png');
 			if(inTarget != 'general'){
-				xw.writeAttributeString('gap:platfom', inTarget);
+				xw.writeAttributeString('gap:platform', inTarget);
 			}
 			if (inTarget === 'android'){
-					xw.writeAttributeString('gap:density', phonegap.splashScreen['android'].density || 'mdpi');
+					xw.writeAttributeString('gap:density', phonegap.splashScreen.android.density || 'mdpi');
 				} else {
 					xw.writeAttributeString('width', phonegap.splashScreen[inTarget].width || 60);
 					xw.writeAttributeString('height', phonegap.splashScreen[inTarget].height || 60);

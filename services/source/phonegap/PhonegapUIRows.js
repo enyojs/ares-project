@@ -278,16 +278,17 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
-		this.setValue(inSender.getValue() || "");
+		this.setValue(inSender.getValue());
 		return true;
 	},
 
 	/** @public */
-	setProjectConfig: function (config) {		
+	setProjectConfig: function (config) {	
 		this.setValue(config.access.origin);
+		this.valueChanged();
 	},
 	/** @public */
-	getProjectConfig: function (config) {
+	getProjectConfig: function (config) {		
 		config.access.origin = this.getValue();
 	}
 });
