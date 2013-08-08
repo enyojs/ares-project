@@ -334,13 +334,13 @@ enyo.kind({
 		var h$ = "<h3>" + c.name + "</h3>";
 		//
 		var h = [];
-		for (var i=0, p; p=c.superkinds[i]; i++) {
+		for (var i=0, p; (p=c.superkinds[i]); i++) {
 			h.push(p);
 		}
 		h$ += "<h4>Extends</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
 		h = [];
-		for (i=0, p; p=c.components[i]; i++) {
+		for (i=0, p; (p=c.components[i]); i++) {
 			h.push(p.name);
 		}
 		if (h.length) {
@@ -348,13 +348,13 @@ enyo.kind({
 		}
 		//
 		h = [];
-		for (i=0, p; p=c.properties[i]; i++) {
+		for (i=0, p; (p=c.properties[i]); i++) {
 			h.push(p.name);
 		}
 		h$ += "<h4>Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
 		h = [];
-		for (i=0, p; p=c.allProperties[i]; i++) {
+		for (i=0, p; (p=c.allProperties[i]); i++) {
 			h.push(p.name);
 		}
 		h$ += "<h4>All Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
@@ -512,7 +512,7 @@ enyo.kind({
 				var comps = [];
 				if (start && end) {
 					var js = c.substring(start, end);
-					comps = eval("(" + js + ")"); // Why eval? Because JSON.parse doesn't support unquoted keys...
+					comps = eval("(" + js + ")"); // TODO: ENYO-2074, replace eval. Why eval? Because JSON.parse doesn't support unquoted keys... 
 				}
 				var comp = {
 					name: name,
