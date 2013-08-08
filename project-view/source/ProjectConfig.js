@@ -70,7 +70,9 @@ enyo.kind({
 		var data,
 		    req = this.service.getFile(this.fileId);
 		req.response(this, function _projectReloaded(inRequest, inResponse) {
-			if (this.debug) this.log("ProjectConfig.load: file=", inResponse);
+			if (this.debug) {
+				this.log("ProjectConfig.load: file=", inResponse);
+			}
 			if (typeof inResponse.content === 'string') {
 				try {
 					data = JSON.parse(inResponse.content);
@@ -82,7 +84,9 @@ enyo.kind({
 				data = inResponse.content;
 			}
 			this.data = ProjectConfig.checkConfig(data);
-			if (this.debug) this.log("ProjectConfig.load config=", this.data);
+			if (this.debug) {
+				this.log("ProjectConfig.load config=", this.data);
+			}
 			if (this.data !== data) {
 				this.save(next);
 			} else {
@@ -104,14 +108,18 @@ enyo.kind({
 	 */
 	save: function(next) {
 		var req;
-		if (this.debug) this.log("data=", this.data);
+		if (this.debug) {
+			this.log("data=", this.data);
+		}
 		if (this.fileId) {
 			req = this.service.putFile(this.fileId, JSON.stringify(this.data, null, 2));
 		} else {
 			req = this.service.createFile(this.folderId, "project.json", JSON.stringify(this.data, null, 2));
 		}
 		req.response(this, function _projectSaved(inSender, inResponse) {
-			if (this.debug) enyo.log("ProjectConfig.save: inResponse=", inResponse);
+			if (this.debug) {
+				enyo.log("ProjectConfig.save: inResponse=", inResponse);
+			}
 			this.fileId = inResponse.id;
 			if (next instanceof Function) {
 				next();

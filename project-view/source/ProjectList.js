@@ -1,3 +1,4 @@
+/*global ServiceRegistry */
 /**
  * This kind provides:
  * - the project toolbars (with create .. delete)
@@ -138,12 +139,16 @@ enyo.kind({
 	 * @private
 	 */
 	menuItemSelected: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		if (this.debug) {
+			this.log("sender:", inSender, ", event:", inEvent);
+		}
 		var fn = inEvent && inEvent.selected && inEvent.selected.value;
 		if (typeof this[fn] === 'function') {
 			this[fn]({project: this.selectedProject});
 		} else {
-			if (this.debug) this.log("*** BUG: '" + fn + "' is not a known function");
+			if (this.debug) {
+				this.log("*** BUG: '" + fn + "' is not a known function");
+			}
 		}
 	},
 	addProject: function(name, folderId, service) {
@@ -153,7 +158,9 @@ enyo.kind({
 		}
 		var known = Ares.Workspace.projects.get(name);
 		if (known) {
-			this.debug && this.log("Skipped project " + name + " as it is already listed") ;
+			if(this.debug) {
+				this.log("Skipped project " + name + " as it is already listed") ;
+			}
 		} else {
 			Ares.Workspace.projects.createProject(name, folderId, serviceId);
 		}
@@ -174,8 +181,10 @@ enyo.kind({
 		if (this.selected) {
 			project = Ares.Workspace.projects.at(this.selected.index);
 			nukeFiles = this.$.removeProjectPopup.$.nukeFiles.getValue() ;
-			this.debug && this.log("removing project" +  project.getName() + ( nukeFiles ? " and its files" : "" )) ;
-			this.debug && this.log(project);
+			if (this.debug) {
+				this.log("removing project" +  project.getName() + ( nukeFiles ? " and its files" : "" )) ;
+				this.log(project);
+			}
 			if (nukeFiles) {
 				var service = project.getService();
 				var folderId = project.getFolderId();

@@ -1,3 +1,4 @@
+/*global ServiceRegistry, ProjectConfig */
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -95,13 +96,15 @@ enyo.kind({
 		// when the workspace is loaded & when a new project
 		// is created that would save per-click HTTP traffic
 		// to the FileSystemService.
-		self = this;
+		var self = this;
 		var config = new ProjectConfig();
 		config.init({
 			service: project.getService(),
 			folderId: project.getFolderId()
 		}, function(err) {
-			if (err) self.doError({msg: err.toString(), err: err});
+			if (err) {
+				self.doError({msg: err.toString(), err: err});
+			}
 			project.setConfig(config);
 		});
 		this.currentProject = project;
@@ -209,8 +212,10 @@ enyo.kind({
 				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
 				+ 'url=' + encodeURIComponent(projectUrl);
 
-			if (this.debug) this.log("preview on URL " + previewUrl) ;
-
+			if (this.debug) {
+				this.log("preview on URL " + previewUrl) ;
+			}
+			
 			window.open(
 				previewUrl,
 				'_blank', // ensure that a new window is created each time preview is tapped
