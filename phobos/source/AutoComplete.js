@@ -89,7 +89,7 @@ enyo.kind({
 					this.processChanges(inEvent);
 				}
 			} else {
-				this.debug && this.log("Auto-Completion needed ? - " + (inEvent && JSON.stringify(inEvent.data)));
+				this.debug && this.log("Auto-Completion needed ? - " + (inEvent && enyo.json.stringify(inEvent.data)));
 				
 				// Retrieve the kind name for the currently edited file
 				this.kindName = this.analysis.objects[this.analysis.currentObject].name;
@@ -401,7 +401,7 @@ enyo.kind({
 		selected = selected.substr(this.input.length);
 		var pos = enyo.clone(this.popupPosition);
 		pos.column += this.input.length;
-		this.debug && this.log("Inserting >>" + selected + "<< at " + JSON.stringify(pos));
+		this.debug && this.log("Inserting >>" + selected + "<< at " + enyo.json.stringify(pos));
 		this.ace.insertAt(pos, selected);
 		ace.focus();
 		return true; // Stop the propagation of the event
@@ -440,7 +440,7 @@ enyo.kind({
 				return;
 			}
 			var len = current.column - this.popupPosition.column;
-			this.debug && this.log("Auto-Completion update - current: " + JSON.stringify(current) + " len: " + len);
+			this.debug && this.log("Auto-Completion update - current:", enyo.json.stringify(current), "len:", len);
 			if (len < 0) {		// Hide if current cursor position is before the popup position
 				this.hideAutocompletePopup();
 				return;
