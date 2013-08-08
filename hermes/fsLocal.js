@@ -1,3 +1,4 @@
+/* global require, console, process, module, __dirname, __filename */
 /**
  * fsLocal.js -- Ares FileSystem (fs) provider, using local files.
  * 
@@ -16,6 +17,8 @@ var fs = require("fs"),
     FdUtil = require(__dirname + "/lib/SimpleFormData"),
     CombinedStream = require('combined-stream'),
     HttpError = require(__dirname + "/lib/httpError");
+
+var basename = path.basename(__filename, '.js');
 
 function FsLocal(inConfig, next) {
 	inConfig.name = inConfig.name || "fsLocal";
@@ -371,7 +374,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 	    folderIdParam = req.param('folderId'),
 	    overwriteParam = req.param('overwrite'),
 	    srcPath = path.join(this.root, pathParam);
-	var dstPath, dstRelPath, srcNode;
+	var dstPath, dstRelPath;
 	if (nameParam) {
 		// rename/copy file within the same collection (folder)
 		dstRelPath = path.join(path.dirname(pathParam),
@@ -454,7 +457,6 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 		util.pump(is, os, next); // XXX should return 201 (Created) on success
 	}
 	function _copyDir(srcPath, dstPath, next) {
-		var count = 0;
 		fs.readdir(srcPath, function(err, files) {
 			if (err) {
 				next(err);
@@ -466,7 +468,6 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 					return;
 				}
 				async.forEachSeries(files, function(file, next) {
-					var sub = path.join(dstPath, file);
 					_copyNode(path.join(srcPath, file), path.join(dstPath, file), next);
 				}, next);
 			});
@@ -476,7 +477,7 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 
 // module/main wrapper
 
-if (path.basename(process.argv[1]) === "fsLocal.js") {
+if (path.basename(process.argv[1], '.js') === basename) {
 	// We are main.js: create & run the object...
 	
 	var knownOpts = {
@@ -507,16 +508,20 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		process.exit(0);
 	}
 
-	var fsLocal = new FsLocal({
+	new FsLocal({
 		root: argv.root,
 		pathname: argv.pathname,
 		port: argv.port,
 		level: argv.level
 	}, function(err, service){
-		if (err) process.exit(err);
+		if (err) {
+			process.exit(err);
+		}
 		// process.send() is only available if the
 		// parent-process is also node
-		if (process.send) process.send(service);
+		if (process.send) {
+			process.send(service);
+		}
 	});
 
 } else {

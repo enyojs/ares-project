@@ -1,7 +1,6 @@
-var
-	config = require('./config.js'),
-	Dropbox = require('dropbox').DropboxClient
-	;
+/* global require, console, exports */
+var config = require('./config.js'),
+	Dropbox = require('dropbox').DropboxClient;
 
 exports.route = function(req, res) {
 	console.log('');
@@ -18,7 +17,7 @@ function connect(inUser, inPassword, next) {
 	new Dropbox(config.key, config.secret)
 		.getAccessToken(inUser, inPassword,
 			function(err, token, secret) {
-				next(err, {token: token, secret: secret})
+				next(err, {token: token, secret: secret});
 			}
 		);
-};
+}

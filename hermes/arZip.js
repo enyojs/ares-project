@@ -1,17 +1,17 @@
+/* global require, console, module, process */
 /**
  * Hermes ZIP archival service
  */
 
 // nodejs version checking is done in parent process ide.js
 
-var fs = require("fs");
-var path = require("path");
-var express = require("express");
-var util  = require("util");
-var querystring = require("querystring");
-var temp = require("temp");
-var zipstream = require('zipstream');
-var formidable = require('formidable');
+var fs = require("fs"),
+	path = require("path"),
+	express = require("express"),
+	util  = require("util"),
+	temp = require("temp"),
+	zipstream = require('zipstream'),
+	formidable = require('formidable');
 
 function ArZip(config, next) {
 	function HttpError(msg, statusCode) {
@@ -123,7 +123,9 @@ function ArZip(config, next) {
 
 			function _nextTask() {
 				var task = tasks.shift();
-				task && task();
+				if (task) {
+					task();
+				}
 			}
 
 			form.parse(req, function(err) {
@@ -135,10 +137,12 @@ function ArZip(config, next) {
 			function _clean(next) {
 				var file, count = files.length;
 				function _rmdir() {
-					(count === 0) && fs.rmdir(form.uploadDir, next);
+					if (count === 0) {
+						fs.rmdir(form.uploadDir, next);
+					}
 				}
 				_rmdir();
-				while ((file = files.shift())) {
+				function disconnect(file) {
 					fs.unlink(file.path, function(err) {
 						if (err) {
 							next(err);
@@ -148,7 +152,12 @@ function ArZip(config, next) {
 						_rmdir();
 					});
 				}
+				while ((file = files.shift())) {
+					disconnect(file);
+				}
 			}
+			
+			
 
 		} catch(e) {
 			console.error(e.stack);
@@ -181,7 +190,7 @@ function ArZip(config, next) {
 if (path.basename(process.argv[1]) === "arZip.js") {
 	// We are main.js: create & run the object...
 
-	var arZip = new ArZip({
+	new ArZip({
 		// pathname (M) can be '/', '/zip/' ...etc
 		pathname:	process.argv[2],
 		// port (o) local IP port of the express server (default: 9019, 0: dynamic)
