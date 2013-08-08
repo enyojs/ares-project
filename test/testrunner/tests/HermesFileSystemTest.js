@@ -227,7 +227,7 @@ enyo.kind({
 					if (self.debug) {
 						enyo.log("Got the inResponse for req3: "+JSON.stringify(inResponse));
 					}
-			    		var self2 = self;
+					var self2 = self;
 					if (inResponse.children[0].name === this.fileToCreate) {
 						var req3 = service.impl.remove(inResponse.children[0].id);
 						req3.response(self2, function(inSender, inResponse) {
@@ -279,7 +279,7 @@ enyo.kind({
 				var req2 = service.impl.remove(inResponse.children[3].id);
 				req2.response(self, function(inSender, inResponse) {
 					if (self.debug) {
-						enyo.log("Got the inResponse for req2: "+JSON.stringify(inResponse));
+						enyo.log("Got the inResponse for req2: "+JSON.stringify(inResponse));						
 					}
 					self.finish();
 				});

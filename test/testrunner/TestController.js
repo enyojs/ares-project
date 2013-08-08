@@ -43,7 +43,7 @@ enyo.kind({
 						if (count > 0) {
 							setTimeout(repeatPostMsg, 1000);
 						}
-				}
+					}
 				};
 				setTimeout(repeatPostMsg, 1000);
 			} else {
