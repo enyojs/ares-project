@@ -175,8 +175,8 @@ enyo.kind({
 		var catchKindListInPalette = [];
 		if (this.projectIndexer.design.hasOwnProperty("palette")) {
 			var keys = Object.keys(this.projectIndexer.design.palette);
- 			enyo.forEach(keys, function(o) {
- 				if (this.projectIndexer.design.palette[o]) {
+			enyo.forEach(keys, function(o) {
+				if (this.projectIndexer.design.palette[o]) {
 					var keys = Object.keys(this.projectIndexer.design.palette[o].items);
 					enyo.forEach(keys, function(item) {
 						catchKindListInPalette.push(this.projectIndexer.design.palette[o].items[item].kind);

@@ -807,10 +807,10 @@ enyo.kind({
 	},
 	//* Add appropriate vertical positioning to _inControl_ based on _inY_
 	addVerticalPositioning: function(inControl, inY) {
-		var container 		= this.getContainerItem(),
+		var container = this.getContainerItem(),
 			containerBounds = this.getRelativeBounds(container),
-			controlBounds 	= this.getRelativeBounds(inControl),
-			styleProps		= {}
+			controlBounds = this.getRelativeBounds(inControl),
+			styleProps = {}
 		;
 		
 		// Convert css string to hash
@@ -825,10 +825,10 @@ enyo.kind({
 	},
 	//* Add appropriate horizontal positioning to _inControl_ based on _inX_
 	addHorizontalPositioning: function(inControl, inX) {
-		var container 		= this.getContainerItem(),
+		var container = this.getContainerItem(),
 			containerBounds = this.getRelativeBounds(container),
-			controlBounds 	= this.getRelativeBounds(inControl),
-			styleProps		= {}
+			controlBounds = this.getRelativeBounds(inControl),
+			styleProps = {}
 		;
 		
 		// Convert css string to hash
@@ -1402,7 +1402,7 @@ enyo.kind({
 	},
 	removeDuplicateItems: function(inA, inB) {
 		return inA.concat(inB).filter(function(elem, pos, self) {
-		return self.indexOf(elem) !== pos;
+			return self.indexOf(elem) !== pos;
 		});
 	},
 	absolutePositioningMode: function(inControl) {
@@ -1448,15 +1448,15 @@ enyo.kind({
 		return bounds;
 	},
 	getAbsoluteBounds: function(inControl) {
-		var left 			= 0,
-			top 			= 0,
-			match			= null,
-			node 			= inControl.hasNode(),
-			width 			= node.offsetWidth,
-			height 			= node.offsetHeight,
-			transformProp 	= enyo.dom.getStyleTransformProp(),
-			xRegEx 		= /translateX\((-?\d+)px\)/i,
-			yRegEx 		= /translateY\((-?\d+)px\)/i;
+		var left = 0,
+			top = 0,
+			match = null,
+			node = inControl.hasNode(),
+			width = node.offsetWidth,
+			height = node.offsetHeight,
+			transformProp = enyo.dom.getStyleTransformProp(),
+			xRegEx = /translateX\((-?\d+)px\)/i,
+			yRegEx = /translateY\((-?\d+)px\)/i;
 
 		if (node.offsetParent) {
 			do {
@@ -1540,10 +1540,10 @@ enyo.kind({
 		enyo.Control.cssTextToDomStyles(this.trimWhitespace(inResizeComponent.style), styleProps);
 		
 		// Setup anchors hash
-		anchors.top = (styleProps.top != undefined && this.trimWhitespace(styleProps.top) != "");
-		anchors.right = (styleProps.right != undefined && this.trimWhitespace(styleProps.right) != "");
-		anchors.bottom = (styleProps.bottom != undefined && this.trimWhitespace(styleProps.bottom) != "");
-		anchors.left = (styleProps.left != undefined && this.trimWhitespace(styleProps.left) != "");
+		anchors.top = (styleProps.top !== undefined && this.trimWhitespace(styleProps.top) !== "");
+		anchors.right = (styleProps.right !== undefined && this.trimWhitespace(styleProps.right) !== "");
+		anchors.bottom = (styleProps.bottom !== undefined && this.trimWhitespace(styleProps.bottom) !== "");
+		anchors.left = (styleProps.left !== undefined && this.trimWhitespace(styleProps.left) !== "");
 		
 		// Select top/bottom side to be adjusted based on the corner the user is dragging
 		if (inHandle.sides.top) {

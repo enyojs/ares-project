@@ -248,17 +248,17 @@ enyo.kind({
 				properties[prop] = {
 					val: styleProps[prop],
 					disabled: false
-				}
+				};
 			}
 		}
 		
 		this.$.content.createComponent(
 			{
-				name: 		 "layoutEditor",
-				kind: 		 "Inspector.LayoutEditor",
+				name: "layoutEditor",
+				kind: "Inspector.LayoutEditor",
 				layoutKinds: this.getLayoutKinds(),
-				layoutKind:  this.getControlLayoutKind(inControl),
-				styleProps:  properties
+				layoutKind: this.getControlLayoutKind(inControl),
+				styleProps: properties
 			}
 		).render();
 	},
