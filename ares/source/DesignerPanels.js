@@ -76,7 +76,8 @@ enyo.kind({
 	],
 	events: {
 		onRegisterMe: "",
-		onMovePanel:""
+		onMovePanel:"",
+		onError:""
 	},
 	published: {
 		panelIndex: 2

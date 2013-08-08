@@ -84,7 +84,8 @@ enyo.kind({
 		onDesignerUpdate: "",
 		onUndo: "",
 		onRedo: "",
-		onRegisterMe: ""		
+		onRegisterMe: "",
+		onError:""
 	},
 	handlers:{
 		onPaletteComponentAction: "runPaletteComponentAction"
@@ -359,20 +360,9 @@ enyo.kind({
 		//if component has a "isViewTemplate" option, Designer show action popup
 		if(options && options.isViewTemplate){
 			this.showActionPopup(options, config, target);
-			return true;
-		}
-		
-		if (beforeId) {
-			this.insertItemBefore(config, target, beforeId);
 		} else {
-			this.insertItem(config, target);
-		}
-		
-		// Update user defined values
-		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
-		this.addAresKindOptions(this.kinds[this.index].components);
-		
-		this.rerenderKind(config.aresId);
+			this.rerenderCreatedItem(config, target, beforeId);	
+		}		
 		return true;
 	},
 	//* Move item with _inEvent.itemId_ into item with _inEvent.targetId_
@@ -802,22 +792,25 @@ enyo.kind({
 		var beforeId = inEvent.beforeId;
 
 		if(inEvent.getName() === "addtoKind"){
-			if (beforeId) {
-				this.insertItemBefore(config, target, beforeId);
-			} else {
-				this.insertItem(config, target);
-			}	
-			this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
-			this.addAresKindOptions(this.kinds[this.index].components);
-			this.rerenderKind(config.aresId);
+			this.rerenderCreatedItem(config, target, beforeId);			
 		} else if (inEvent.getName() === "replaceKind"){
-			console.log("not implemented yet");
-
+			//TODO: Add a feature for "Replace Button" against view template component on designer behavior - ENYO-2807
+			this.doError({msg:"not implemented yet"});
 		} else if (inEvent.getName() === "addNewKind"){
-			console.log("not implemented yet");
+			//TODO: Add a feature for "Add new Kind" against view template component on designer behavior - ENYO-2808
+			this.doError({msg:"not implemented yet"});
 		}
-		
 		this.$.actionPopup.hide();
+	},
+	rerenderCreatedItem: function(config, target, beforeId){
+		if (beforeId) {
+			this.insertItemBefore(config, target, beforeId);
+		} else {
+			this.insertItem(config, target);
+		}	
+		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
+		this.addAresKindOptions(this.kinds[this.index].components);
+		this.rerenderKind(config.aresId);
 	}
 });
 
