@@ -18,19 +18,29 @@ enyo.kind({
 		this.impl = null;
 	},
 	rootNodeChanged: function(old) {
-		if (this.debug) this.log("rootNode:", this.rootNode, "<-", old);
+		if (this.debug) {
+			this.log("rootNode:", this.rootNode, "<-", old);
+		}
 	},
 	connect: function(inFsService, next) {
 		this.impl = inFsService;
 		var req = this.impl.propfind(undefined, 0);
 		req.response(this, function(inRequest, inValue) {
-			if (this.debug) this.log("FileSystemService#connect(): connected");
+			if (this.debug) {
+				this.log("FileSystemService#connect(): connected");
+			}
 			this.setRootNode(inValue);
-			if (next) next();
+			if (next) {
+				next();
+			}
 		});
 		req.error(this, function(inRequest, inError) {
-			if (this.debug) this.error("FileSystemService#connect(): connection failed");
-			if (next) next(new Error(inError));
+			if (this.debug) {
+				this.error("FileSystemService#connect(): connection failed");
+			}
+			if (next) {
+				next(new Error(inError));
+			}
 		});
 	},
 	isOk: function() {

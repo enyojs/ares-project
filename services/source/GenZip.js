@@ -1,4 +1,4 @@
-/*global enyo,ares,async*/
+/*global enyo, ares */
 
 enyo.kind({
 	name: "GenZip",
@@ -12,7 +12,9 @@ enyo.kind({
 	 * @private
 	 */
 	create: function() {
-		if (this.debug) this.log();
+		if (this.debug) {
+			this.log();
+		}
 		this.inherited(arguments);
 		this.config = {};
 	},
@@ -26,13 +28,18 @@ enyo.kind({
 	 * @see ServiceRegistry.js
 	 */
 	setConfig: function(inConfig) {
-		if (this.debug) this.log("config:", this.config, "+", inConfig);
+		if (this.debug) {
+			this.log("config:", this.config, "+", inConfig);
+		}
 		this.config = ares.extend(this.config, inConfig);
-		if (this.debug) this.log("=> config:", this.config);
-
+		if (this.debug) {
+			this.log("=> config:", this.config);
+		}
 		if (this.config.origin && this.config.pathname) {
 			this.url = this.config.origin + this.config.pathname;
-			if (this.debug) this.log("url:", this.url);
+			if (this.debug) {
+				this.log("url:", this.url);
+			}
 		}
 	},
 
@@ -51,8 +58,9 @@ enyo.kind({
 	 * @public
 	 */
 	getSources: function(type) {
-		if (this.debug) this.log("type:", type);
-
+		if (this.debug) {
+			this.log("type:", type);
+		}
 		var req = new enyo.Ajax({
 			url: this.url + '/config/sources'
 		});
@@ -75,8 +83,9 @@ enyo.kind({
 			query.push(key + "=" + encodeURIComponent(JSON.stringify(options[key])));
 		}, this);
 		var data = query.join('&');
-		if (this.debug) this.log("data:", data);
-
+		if (this.debug) {
+			this.log("data:", data);
+		}
 		var userreq = new enyo.Async();
 
 		var req = new enyo.Ajax({

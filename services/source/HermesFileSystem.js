@@ -6,7 +6,9 @@ enyo.kind({
 		onLoginFailed: ""
 	},
 	create: function() {
-		if (this.debug) this.log();
+		if (this.debug) {
+			this.log();
+		}
 		this.inherited(arguments);
 		this.config = {};
 	},
@@ -14,11 +16,13 @@ enyo.kind({
 		return !!this.config.origin;
 	},
 	setConfig: function(inConfig) {
-		var self = this;
-
-		if (this.debug) this.log("config:", this.config, "+", inConfig);
+		if (this.debug) {
+			this.log("config:", this.config, "+", inConfig);
+		}
 		this.config = ares.extend(this.config, inConfig);
-		if (this.debug) this.log("=> config:", this.config);
+		if (this.debug) {
+			this.log("=> config:", this.config);
+		}
 	},
 	getConfig: function() {
 		return this.config;
@@ -35,14 +39,20 @@ enyo.kind({
 	},
 	//* @private
 	_request: function(inMethod, inNodeId, inParams) {
-		if (this.debug) this.log(inMethod, inNodeId, inParams);
+		if (this.debug) {
+			this.log(inMethod, inNodeId, inParams);
+		}
 		if (!this.config.origin) {
 			throw "Service URL not yet defined";
 		}
 		var url = this.config.origin + this.config.pathname + '/id/' + (inNodeId ? inNodeId : "" );
 		var method = this._requestDic[inMethod].verb;
-		if (this.debug) this.log(inMethod+"/"+method+": '"+url+"'");
-		if (this.debug) this.log("params=", inParams);
+		if (this.debug) {
+			this.log(inMethod+"/"+method+": '"+url+"'");
+		}
+		if (this.debug) {
+			this.log("params=", inParams);
+		}
 		var options = {
 			url: url,
 			method: method,
@@ -63,9 +73,13 @@ enyo.kind({
 			delete inParams.postBody;
 		}
 		req.response(function(inSender, inValue){
-			if (this.debug) this.log("inValue=", inValue);
+			if (this.debug) {
+				this.log("inValue=", inValue);
+			}
 			var node = this.xhrResponse.headers['x-ares-node'];
-			if (this.debug) this.log("x-ares-node:", node);
+			if (this.debug) {
+				this.log("x-ares-node:", node);
+			}
 			return inValue;
 		}).error(function(inSender, inResponse) {
 			this.error("status="+ inResponse);
@@ -83,9 +97,13 @@ enyo.kind({
 		}
 
 		function _authenticate() {
-			if (this.debug) this.log("authenticate(): count:", count);
+			if (this.debug) {
+				this.log("authenticate(): count:", count);
+			}
 			if (count--) {
-				if (this.debug) this.log("authenticate(): authorization:", inAuth.headers.authorization);
+				if (this.debug) {
+					this.log("authenticate(): authorization:", inAuth.headers.authorization);
+				}
 				// POST the Authorization
 				// header/token/credential in a web-form.
 				new enyo.Ajax({
@@ -105,7 +123,9 @@ enyo.kind({
 			// that the Authorization credentials are
 			// passed as a Cookie set during the
 			// _authenticate() step.
-			if (this.debug) this.log("authorize():");
+			if (this.debug) {
+				this.log("authorize():");
+			}
 			new enyo.Ajax({
 				url: this.config.origin + this.config.pathname + '/',
 				method: 'GET'
@@ -115,19 +135,25 @@ enyo.kind({
 			.go();
 		}
 		function _authSuccess(inXhr, inValue) {
-			if (this.debug) this.log("authSuccess(): inValue:", inValue);
+			if (this.debug) {
+				this.log("authSuccess(): inValue:", inValue);
+			}
 			next(null, inValue);
 		}
 		function _authFailure(inXhr, inError) {
-			if (this.debug) this.log("authFailure(): inError:", inError, ", body:", (inXhr.xhrResponse ? inXhr.xhrResponse.body : undefined));
-			self.doLoginFailed({id: this.config.id});
+			if (this.debug) {
+				this.log("authFailure(): inError:", inError, ", body:", (inXhr.xhrResponse ? inXhr.xhrResponse.body : undefined));
+			}
+			this.doLoginFailed({id: this.config.id});
 			next(new Error(inError));
 		}
 	},
 	propfind: function(inNodeId, inDepth) {
 		return this._request("PROPFIND", inNodeId, {depth: inDepth} /*inParams*/)
 			.response(function(inSender, inValue) {
-				if (this.debug) this.log(inValue);
+				if (this.debug) {
+					this.log(inValue);
+				}
 				return inValue;
 			});
 	},
@@ -146,7 +172,9 @@ enyo.kind({
 	putFile: function(inFileId, inContent) {
 		var formData = new enyo.FormData() ;
 		var file = new enyo.Blob([inContent || ''], {type: "application/octet-stream"});
-		if (this.debug) this.log("file:", file);
+		if (this.debug) {
+			this.log("file:", file);
+		}
 		// ['/path','.'] resolves to '/path', so using '.'
 		// keeps the file name encoded in inFileId
 		formData.append('file', file, '.' /*filename*/);
@@ -165,7 +193,9 @@ enyo.kind({
 	createFile: function(inFolderId, inName, inContent) {
 		var formData = new enyo.FormData() ;
 		var file = new enyo.Blob([inContent || ''], {type: "application/octet-stream"});
-		if (this.debug) this.log("file:", file, "filename:", inName);
+		if (this.debug) {
+			this.log("file:", file, "filename:", inName);
+		}
 		formData.append('file', file, inName /*filename*/);
 		if (enyo.platform.firefox) {
 			// FormData#append() lacks the third parameter
@@ -183,10 +213,11 @@ enyo.kind({
 		return this._request("PUT", inFolderId, {postBody: inData.content, contentType: inData.ctype} /*inParams*/);
 	},
 	createFolder: function(inFolderId, inName) {
-		var newFolder = inFolderId + "/" + inName;
 		return this._request("MKCOL", inFolderId, {name: inName} /*inParams*/)
 			.response(function(inSender, inResponse) {
-				if (this.debug) this.log(inResponse);
+				if (this.debug) {
+					this.log(inResponse);
+				}
 				return inResponse;
 			});
 	},
@@ -226,7 +257,9 @@ enyo.kind({
 	exportAs: function(inNodeId, inDepth) {
 		return this._request("GET", inNodeId, {depth: inDepth, format: "base64"} /*inParams*/)
 			.response(function(inSender, inValue) {
-				if (this.debug) this.log(inValue);
+				if (this.debug) {
+					this.log(inValue);
+				}
 				return inValue;
 			});
 	}

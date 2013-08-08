@@ -1,4 +1,4 @@
-/*global enyo,ares,async,Ares,Phonegap,XMLWriter,ServiceRegistry*/
+/*global enyo, ares, async, Ares, Phonegap, XMLWriter, ServiceRegistry, next */
 /**
  * Kind to manage the life cycle of building a mobile application using 
  * the service Phonegap build.
@@ -215,7 +215,7 @@ enyo.kind({
 		var appIdExist = false;
 
 		// immediately go on if appId is blank
-		if (projectAppId.toString().length == 0) {
+		if (projectAppId.toString().length === 0) {
 			next(null, userData);
 			return;
 		}
@@ -237,8 +237,7 @@ enyo.kind({
 			var config = this.getConfigInstance(project);
 			config.providers.phonegap.appId = "";
 			ServiceRegistry.instance.setConfig(config);
-			var errorMsg = 	"The AppId '"+ projectAppId +"' does not exist in the Phonegap Build account " +
-					userData.user.email + ". Please choose a correct AppId";
+			var errorMsg = "The AppId \'"+ projectAppId +"\' does not exist in the Phonegap Build account " + userData.user.email + ". Please choose a correct AppId";
 			next(errorMsg);
 		}
 	},

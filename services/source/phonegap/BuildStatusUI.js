@@ -214,9 +214,10 @@ enyo.kind({
 	 				  this.appId + "/builds";
 	},
 	manageApps: function(inSender, inValue) {
-		var accountPopup = window.open(this.pgUrl,
+		window.open(this.pgUrl,
 					       "PhoneGap Build Account Management",
-					       "resizeable=1,width=1024, height=600", 'self');
+			"resizeable=1,width=1024, height=600", 'self'
+		);
 	},
 	statusValueChanged: function(){
 	 	this.$.StatusRow_status.setContent(this.statusValue);

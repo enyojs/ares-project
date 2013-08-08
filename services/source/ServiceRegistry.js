@@ -1,3 +1,4 @@
+/* global ServiceRegistry, async, HermesFileSystem, Phonegap, GenZip */
 /**
  * Manages registered Hermes services
  * 
@@ -49,7 +50,9 @@ enyo.kind({
 	 * @private
 	 */
 	_reloadServices: function(next) {
-		if (this.debug) this.log("Refreshing the list of available services");
+		if (this.debug) {
+			this.log("Refreshing the list of available services");
+		}
 		var origin = window.location.origin || window.location.protocol + "//" + window.location.host; // Webkit/FF vs IE
 		var url = origin + '/res/services';
 		this.services = [];
@@ -69,9 +72,9 @@ enyo.kind({
 
 		/* Hermes Services (reload from the IDE server) */
 		if (origin.match('^http')) {
-			var req = new enyo.Ajax({url: url, handleAs: 'json'})
+			new enyo.Ajax({url: url, handleAs: 'json'})
 				.response(this, function(inSender, inValue) {
-					var configs, self = this;
+					var configs;
 					if (inValue) {
 						if (inValue.services && inValue.services[0]) {
 							// dis-regard inactive service providers
@@ -88,7 +91,9 @@ enyo.kind({
 					} else {
 						next(new Error("Empty response from Ares IDE Server"));
 					}
-					if (this.debug) this.log(this.services);
+					if (this.debug) {
+						this.log(this.services);
+					}
 				})
 				.error(this, function(err){
 					next(err);
@@ -112,9 +117,13 @@ enyo.kind({
 			tasks = enyo.map(this.services, function(service){
 			return function(cb) {
 				var key = [self.SERVICES_STORAGE_KEY, service.config.id].join('.');
-				if (self.debug) self.log("localStorage[" + key + "]...");
+				if (self.debug) {
+					self.log("localStorage[" + key + "]...");
+				}
 				Ares.LocalStorage.get(key, function(str) {
-					if (self.debug) self.log("localStorage[" + key + "] = ", str);
+					if (self.debug) {
+						self.log("localStorage[" + key + "] = ", str);
+					}
 					var obj;
 					try {
 						obj = JSON.parse(str);
@@ -138,13 +147,19 @@ enyo.kind({
 		async.series(tasks, next);
 	},
 	instanciate: function(service, next) {
-		if (this.debug) this.log("id:", service.config.id, "config:", service.config);
+		if (this.debug) {
+			this.log("id:", service.config.id, "config:", service.config);
+		}
 		var self = this;
 		try {
 			if (service.config.pluginClient) {
-				if (this.debug) this.log("Loading browser side code: " + service.config.pluginClient);
+				if (this.debug) {
+					this.log("Loading browser side code: " + service.config.pluginClient);
+				}
 				enyo.load(service.config.pluginClient, function loaded() {
-					if (self.debug) self.log("ServiceRegistry#instanciate(): Loaded browser side code: " + service.config.pluginClient);
+					if (self.debug) {
+						self.log("ServiceRegistry#instanciate(): Loaded browser side code: " + service.config.pluginClient);
+					}
 					next();	// configuration will be applied later on
 				});
 			} else if (service.config.provider === 'hermes' && service.implementsType("filesystem")) {
@@ -169,18 +184,26 @@ enyo.kind({
 		}
 	},
 	configureService: function(service, next) {
-		if (this.debug) this.log("id:", service.config.id, "config:", service.config);
+		if (this.debug) {
+			this.log("id:", service.config.id, "config:", service.config);
+		}
 		try {
 			if (service.impl) {
-				if (this.debug) this.log("id:", service.config.id, "created");
+				if (this.debug) {
+					this.log("id:", service.config.id, "created");
+				}
 				// If the service does not define an
 				// 'authorize()' entry point (which optionally
 				// returns user acccount information), stub it
 				// using a Common-JS pass-through.
 				if (service.impl && !service.impl.authorize) {
-					if (this.debug) this.log("Adding " + service.config.id + "#authorize() stub");
+					if (this.debug) {
+						this.log("Adding " + service.config.id + "#authorize() stub");
+					}
 					service.impl.authorize = enyo.bind(service.impl, function(next) {
-						if (this.debug) this.log('authorize(): stubbed');
+						if (this.debug) {
+							this.log('authorize(): stubbed');
+						}
 						next(null, {});
 					});
 				}
@@ -198,9 +221,13 @@ enyo.kind({
 					pluginError.msg = msg;
 					throw pluginError;
 				}
-				if (this.debug) this.log("id:", service.config.id, "configured");
+				if (this.debug) {
+					this.log("id:", service.config.id, "configured");
+				}
 			} else {
-				if (this.debug) this.log("Ignoring service: " + service.config.id);
+				if (this.debug) {
+					this.log("Ignoring service: " + service.config.id);
+				}
 			}
 			next();
 		} catch(err) {
@@ -225,9 +252,13 @@ enyo.kind({
 	 * @param {Function} inCallback a CommonJS callback
 	 */
 	setConfig: function (inServiceId, inConfig, inCallback) {
-		if (this.debug) this.log("serviceId:", inServiceId, "config:", inConfig);
+		if (this.debug) {
+			this.log("serviceId:", inServiceId, "config:", inConfig);
+		}
 		var service = this.resolveServiceId(inServiceId);
-		if (!service) return;	// should we rather fail here?
+		if (!service) {
+			return;	// should we rather fail here?
+		}
 		ares.extend(service.config, inConfig);
 		service.setConfig(service.config);
 
@@ -288,7 +319,9 @@ enyo.kind({
 					services.push(match);
 				}
 			}, this);
-			if (this.debug) this.log("withNoImpl:", withNoImpl, " => services:", services);
+			if (this.debug) {
+				this.log("withNoImpl:", withNoImpl, " => services:", services);
+			}
 			return services;
 		} catch(error) {
 			this.error("Unexpected error", error);
@@ -326,7 +359,9 @@ enyo.kind({
 	 * @private
 	 */
 	notifyServicesChange: function() {
-		if (this.debug) this.log("sending signal...");
+		if (this.debug) {
+			this.log("sending signal...");
+		}
 		enyo.Signals.send("onServicesChange", {serviceRegistry: this});
 	},
 	/**
@@ -336,9 +371,13 @@ enyo.kind({
 	 * @param {Function} next commonJS callback
 	 */
 	pluginReady: function(serviceId, kindInformation, next) {
-		if (this.debug) this.log("New plugin ready: " + serviceId);
+		if (this.debug) {
+			this.log("New plugin ready: " + serviceId);
+		}
 		next = next || function(err) {
-			if (err) enyo.error(err);
+			if (err) {
+				enyo.error(err);
+			}
 		};
 		var services = this.filter(function(service) {
 			return service.config.id === serviceId;
@@ -349,7 +388,9 @@ enyo.kind({
 				try {
 					service.impl = ServiceRegistry.instance.createComponent(kindInformation);
 					this.configureService(service, next);
-					if (this.debug) this.log("New plugin registered: " + serviceId);
+					if (this.debug) {
+						this.log("New plugin registered: " + serviceId);
+					}
 					// FIXME: refactor notifyServicesChange() to carry only one service (like plugins).
 					enyo.Signals.send("onPluginRegist", {pluginService: service.impl});
 					this.notifyServicesChange();
