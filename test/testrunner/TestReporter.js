@@ -57,8 +57,8 @@ enyo.kind({
 	formatStackTrace: function(inStack) {
 		var stack = inStack.split("\n");
 		var out = [''];
-		for (var i=0, s; s=stack[i]; i++) {
-			if (s.indexOf("    at Object.do") == 0 || s.indexOf("    at Object.dispatch") == 0 || s.indexOf("TestSuite.js") != -1) {
+		for (var i=0, s; (s=stack[i]); i++) {
+			if (s.indexOf("    at Object.do") === 0 || s.indexOf("    at Object.dispatch") === 0 || s.indexOf("TestSuite.js") != -1) {
 				continue;
 			}
 			out.push(s);
@@ -94,26 +94,35 @@ enyo.kind({
 	},
 	recMsgFromIde: function(event) {
 		// test bad origin
-		if (event.origin !== "http://127.0.0.1:9009")
+		if (event.origin !== "http://127.0.0.1:9009") {
 			return;
+		}
 		// source must be valid
 		if (event.source === null) {
 			return;
 		}
 		if (event.data === "ARES.TEST.START") {
-			if (this.debug) enyo.log("Received ARES.TEST.START ... Post ARES.TEST.READY ...");
+			if (this.debug) {
+				enyo.log("Received ARES.TEST.START ... Post ARES.TEST.READY ...");
+			}
 			event.source.postMessage("ARES.TEST.READY", event.origin);
 		} 
 		if(event.data.evt === "ARES.TEST.NAME") {
-			if (this.debug) enyo.log("Received ARES.TEST.NAME ...");
+			if (this.debug) {
+				enyo.log("Received ARES.TEST.NAME ...");
+			}
 			this.testNameDisplay(event.data);
 		}
 		if(event.data.evt === "ARES.TEST.RUNNING") {
-			if (this.debug) enyo.log("Received ARES.TEST.RUNNING ...");
+			if (this.debug) {
+				enyo.log("Received ARES.TEST.RUNNING ...");
+			}
 			this.testBegun(event.data);
 		}
 		if(event.data.evt === "ARES.TEST.RESULT") {
-			if (this.debug) enyo.log("Received ARES.TEST.RESULT ...");
+			if (this.debug) {
+				enyo.log("Received ARES.TEST.RESULT ...");
+			}
 			this.updateTestDisplay(event.data);
 		}
 	}

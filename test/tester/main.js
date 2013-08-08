@@ -1,5 +1,5 @@
+/* global require, console, process, module */
 var path = require('path'),
-    fs = require('fs'),
     os = require('os'),
 	shell = require('./../../enyo/tools/node_modules/shelljs');
 
