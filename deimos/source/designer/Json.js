@@ -22,7 +22,7 @@
 	},
 	array: function(inObj, inDent) {
 		var p = [], pp;
-		for (var i=0, v; v=inObj[i]; i++) {
+		for (var i=0, v; (v=inObj[i]); i++) {
 			pp = inDent + "\t" + this.value(v, inDent + "\t");
 			p.push(pp);
 		}
@@ -61,6 +61,6 @@
 		return this.value(inValue, "\t");
 	},
 	from: function(inJson) {
-		return eval('(' + inJson + ')');
+		return eval('(' + inJson + ')'); // TODO: ENYO-2074, replace eval.
 	}
 };

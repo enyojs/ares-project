@@ -188,11 +188,6 @@ enyo.kind({
 	},
 	//* On drag over, enable HTML5 drag-and-drop if there is a valid drop target
 	dragover: function(inEvent) {
-		var dropTarget,
-			mouseMoved,
-			dataType
-		;
-		
 		if (!inEvent.dataTransfer) {
 			return false;
 		}
@@ -423,7 +418,7 @@ enyo.kind({
 		enyo.forEach(kinds, function(kindDefinition) {
 			var name = kindDefinition.kind;
 			if ( ! enyo.constructorForKind(name)) {
-				errMsg = 'No constructor found for kind "' + name + "'";
+				var errMsg = 'No constructor found for kind "' + name + "'";
 				this.log(errMsg);
 				this.sendMessage({op: "error", val: {msg: errMsg}});
 			}
@@ -494,7 +489,9 @@ enyo.kind({
 		if (options && options.isRepeater && (inProperty === "onSetupItem" || inProperty === "count")) {
 			// DO NOT APPLY changes to the properties mentioned above
 			// TODO: could be managed later on thru config in .design files if more than one kind need special processings.
-			this.debug && this.log("Skipping modification of \"" + inProperty + "\"");
+			if (this.debug) {
+				this.log("Skipping modification of \"" + inProperty + "\"");
+			}
 		} else {
 			this.selection[inProperty] = inValue;
 		}
@@ -540,7 +537,9 @@ enyo.kind({
 					Force "count" to 1 and invalidate "onSetupItem" to
 					manage them correctly in the Designer
 				 */
-				this.debug && this.log("Manage repeater " + inComponent.kind, inComponent);
+				if (this.debug) {
+					this.log("Manage repeater " + inComponent.kind, inComponent);
+				}
 				inComponent.count = 1;
 				inComponent.onSetupItem = "aresUnImplemetedFunction";
 			}
@@ -720,7 +719,7 @@ enyo.kind({
 	},
 	//* Eval code passed in by designer
 	codeUpdate: function(inCode) {
-		eval(inCode);
+		eval(inCode); // TODO: ENYO-2074, replace eval.
 	},
 	//* Update CSS by replacing the link/style tag in the head with an updated style tag
 	cssUpdate: function(inData) {
@@ -793,9 +792,8 @@ enyo.kind({
 	},
 	// Move selection to new position
 	moveSelectionToAbsolutePosition: function(inX, inY) {
-		var container   = this.getContainerItem(),
-			containerId = container ? container.aresId : null,
-			clone       = this.cloneControl(this.selection, true) //this.createSelectionGhost(this.selection)
+		var container = this.getContainerItem(),
+			clone = this.cloneControl(this.selection, true) //this.createSelectionGhost(this.selection)
 		;
 		
 		this.hideSelectHighlight();
@@ -1149,9 +1147,7 @@ enyo.kind({
 	//* TODO - This createSelectionGhost is WIP
 	createSelectionGhost: function (inItem) {
 		var computedStyle = enyo.dom.getComputedStyle(inItem.hasNode()),
-			rect = inItem.hasNode().getBoundingClientRect(),
 			borderWidth = 1,
-			height,
 			style;
 		
 		if (!computedStyle) {
@@ -1159,7 +1155,7 @@ enyo.kind({
 			return null;
 		}
 		
-		this.log("h: ", parseInt(computedStyle.height), "w: ", parseInt(computedStyle.width), "p: ", parseInt(computedStyle.padding), "m: ", parseInt(computedStyle.margin));
+		this.log("h: ", parseInt(computedStyle.height, 10), "w: ", parseInt(computedStyle.width, 10), "p: ", parseInt(computedStyle.padding, 10), "m: ", parseInt(computedStyle.margin,10));
 		
 		style = "width: "   + computedStyle.width + "; " +
 				"height: "  + computedStyle.height + "; " +
@@ -1406,7 +1402,7 @@ enyo.kind({
 	},
 	removeDuplicateItems: function(inA, inB) {
 		return inA.concat(inB).filter(function(elem, pos, self) {
-	    	return self.indexOf(elem) !== pos;
+		return self.indexOf(elem) !== pos;
 		});
 	},
 	absolutePositioningMode: function(inControl) {
@@ -1482,7 +1478,7 @@ enyo.kind({
 						top += parseInt(match[1], 10);
 					}
 				}
-			} while (node = node.offsetParent);
+			} while ((node = node.offsetParent));
 		}
 		return {
 			top		: top,

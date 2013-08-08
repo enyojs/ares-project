@@ -1,3 +1,4 @@
+/* global Model */
 enyo.singleton({
 	name: "Model",
 	kind: "enyo.Component",

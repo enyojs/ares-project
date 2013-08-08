@@ -1,3 +1,4 @@
+/* global analyzer, Model, Inspector */
 enyo.kind({
 	name: "Inspector",
 	kind: "FittableRows",
@@ -37,16 +38,16 @@ enyo.kind({
 			this.checkDefAvail();
 			var published = [];
 
-			obj = this.definition.properties;
-			for (i=0; i<obj.length; i++) {
+			var obj = this.definition.properties;
+			for (var i=0; i<obj.length; i++) {
 				if (obj[i].token === "published") {
-					p = obj[i].value[0].properties;
+					var p = obj[i].value[0].properties;
 					for (var j=0; j < p.length; j++) {
 						if (p[j].value[0].type != "array") {
 							var val = "";
 							try {
 								// TODO - shouldn't have to eval() here. Strings come back with double double quotes ("""")
-								val = eval(p[j].value[0].token);
+								val = eval(p[j].value[0].token); // TODO: ENYO-2074, replace eval.
 							} catch(err) {
 								enyo.warn("Invalid value for property '" + p[j].name +"': " +  p[j].value[0].token);
 							}
@@ -59,7 +60,7 @@ enyo.kind({
 				}
 			}
 			return published;
-		}
+		};
 	},
 	//* @protected
 	allowed: function(inKindName, inType, inName) {
@@ -132,7 +133,7 @@ enyo.kind({
 		var props = propMap;
 		
 		props.events = [];
-		for (n in eventMap) {
+		for (var n in eventMap) {
 			props.events.push(n);
 		}
 		for (n=0; n < domEvents.length; n++) {
@@ -172,7 +173,7 @@ enyo.kind({
 			props.push(propKeys[n]);
 		}
 		props.events = [];
-		for (var n in eventMap) {
+		for (n in eventMap) {
 			props.events.push(n);
 		}
 		for (n=0; n < domEvents.length; n++) {
@@ -273,8 +274,7 @@ enyo.kind({
 	},
 	//* Get the layoutKind value for _inControl_
 	getControlLayoutKind: function(inControl) {
-		var layoutKinds = this.getLayoutKinds(),
-			inherited = !(
+		var inherited = !(
 				inControl.aresId &&
 				this.userDefinedAttributes &&
 				this.userDefinedAttributes[inControl.aresId] &&
@@ -308,10 +308,7 @@ enyo.kind({
 			styleProps = {},
 			originator = this.getAttributeVal(inEvent.target),
 			n = originator.fieldName,
-			v = originator.fieldValue,
-			match = false,
-			prop
-		;
+			v = originator.fieldValue;
 		
 		enyo.Control.cssTextToDomStyles(controlStyle, styleProps);
 		styleProps[n] = " "+v;
@@ -546,8 +543,7 @@ enyo.kind({
 	inheritAttributeToggle: function(inSender, inEvent) {
 		var originator = inEvent.originator,
 			row = originator.parent,
-			attribute = originator.prop,
-			attributeVal;
+			attribute = originator.prop;
 		
 		if (!row.$.attributeVal) {
 			return;

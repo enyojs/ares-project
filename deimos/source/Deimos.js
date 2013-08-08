@@ -1,3 +1,4 @@
+/* global Model */
 enyo.kind({
 	name: "Deimos",
 	classes: "enyo-unselectable onyx",
@@ -7,7 +8,7 @@ enyo.kind({
 	components: [
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
-				{name: "left", classes:"ares_deimos_left", kind: "Palette", name:"palette"},
+				{name: "palette", classes:"ares_deimos_left", kind: "Palette"},
 				{name: "middle", fit: true, kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
 						{kind: "onyx.Button", name: "reloadDesignerButton", classes: "deimos-designer-toolbar-spacing", content: "Reload", ontap: "reloadDesigner"},
@@ -126,7 +127,7 @@ enyo.kind({
 			this.owner.$.kindPicker.createComponent({
 				content: k.name,
 				index: i,
-				active: (i==0)
+				active: (i===0)
 			});
 			maxLen = Math.max(k.name.length, maxLen);
 		}
@@ -236,7 +237,9 @@ enyo.kind({
 			item.layoutKind = inLayoutKind;
 			this.updateStyleForAbsolutePositioningLayoutKind(item);
 		} else {
-			item.layoutKind && delete item.layoutKind;
+			if (item.layoutKind) {
+				delete item.layoutKind;
+			}
 			this.updateStyleForNonAbsolutePositioningLayoutKind(item);
 		}
 		this.addAresKindOptions(this.kinds[this.index].components);
@@ -276,8 +279,12 @@ enyo.kind({
 		this.addReplaceStyleProp(inComponent, "right", "");
 		this.addReplaceStyleProp(inComponent, "bottom", "");
 		this.addReplaceStyleProp(inComponent, "left", "");
-		inComponent.layoutKind && delete inComponent.layoutKind;
-		this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind && delete this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind;
+		if (inComponent.layoutKind) {
+			delete inComponent.layoutKind;
+		}
+		if (this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind) {
+			delete this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind;
+		}
 	},
 	//* Update _inComponent.style.inProp_ to be _inValue_
 	addReplaceStyleProp: function(inComponent, inProp, inValue) {
@@ -413,7 +420,7 @@ enyo.kind({
 	//* Called when the iFrame has retrieved a requested absolute position value
 	designerReturnPositionValue: function(inSender, inEvent) {
 		this.$.inspector.setRequestedPositionValue(inEvent.prop, inEvent.value);
-		return true;
+		return true; //TODO See if the code behind the return is useful 
 		
 		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
 		this.addReplaceStyleProp(item, inEvent.prop, inEvent.value + "px");
@@ -468,10 +475,7 @@ enyo.kind({
 	},
 	removeAbsolutePositioningStyle: function(inControl) {
 		var currentStyle = inControl.style || "",
-			styleProps = {},
-			prop,
-			i
-		;
+			styleProps = {};
 		
 		// Convert css string to hash
 		enyo.Control.cssTextToDomStyles(this.trimWhitespace(currentStyle), styleProps);
@@ -596,7 +600,7 @@ enyo.kind({
 		if (inComponent.components) {
 			
 			// Recurse through child components
-			for (var i=0; i<inComponent.components.length; i++) {
+			for (i=0; i<inComponent.components.length; i++) {
 				childComponents.push(this.cleanUpComponent(inComponent.components[i], inKeepAresIds));
 			}
 			

@@ -1,3 +1,4 @@
+/* global Model */
 enyo.kind({
 	name: "IFrameDesigner",
 	published: {
@@ -34,7 +35,9 @@ enyo.kind({
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
 	},
 	currentKindChanged: function() {
-		if (this.debug) this.log("reloadNeeded", this.reloadNeeded);
+		if (this.debug) {
+			this.log("reloadNeeded", this.reloadNeeded);
+		}
 		if (this.reloadNeeded) {
 			this.reloadNeeded = false;
 			this.reload();
