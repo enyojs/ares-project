@@ -911,17 +911,17 @@ enyo.kind({
 			// If the project does not define an icon, use Enyo's
 			// one
 			xw.writeAttributeString('src', phonegap.icon[inTarget].src || 'icon.png');
-			if(inTarget === "general"){
-				xw.writeAttributeString('role', phonegap.icon[inTarget].role || 'default');
-			} else {
-				xw.writeAttributeString('gap:platfom', inTarget);
+			
+			xw.writeAttributeString('role', phonegap.icon[inTarget].role || 'default');
+			if(inTarget != 'general'){
+				xw.writeAttributeString('gap:platform', inTarget);
+			}
 
-				if (inTarget === "android"){
-					xw.writeAttributeString('gap:density', phonegap.icon[inTarget].density || "mdpi");
-				} else if (inTarget === "ios") {
-					xw.writeAttributeString('width', phonegap.icon[inTarget].width || 60);
-					xw.writeAttributeString('height', phonegap.icon[inTarget].height || 60);
-				}
+			if (inTarget === 'android'){
+				xw.writeAttributeString('gap:density', phonegap.icon[inTarget].density || "mdpi");
+			} else {
+				xw.writeAttributeString('width', phonegap.icon[inTarget].width || 32);
+				xw.writeAttributeString('height', phonegap.icon[inTarget].height || 32);
 			}
 
 			xw.writeEndElement();
@@ -932,18 +932,15 @@ enyo.kind({
 			// If the project does not define an icon, use Enyo's
 			// one
 			xw.writeAttributeString('src', phonegap.splashScreen[inTarget].src || 'icon.png');
-			if(inTarget === "general"){
-				xw.writeAttributeString('role', phonegap.splashScreen[inTarget].role || 'default');
-			} else {
-				xw.writeAttributeString('gap:platfom', inTarget);
-
-				if (inTarget === 'android'){
-					xw.writeAttributeString('gap:density', phonegap.splashScreen['android'].density || 'mdpi');
-				} else if (inTarget === 'ios') {
-					xw.writeAttributeString('width', phonegap.splashScreen['ios'].width || 90);
-					xw.writeAttributeString('height', phonegap.splashScreen['ios'].height || 150);
-				}
+			if(inTarget != 'general'){
+				xw.writeAttributeString('gap:platform', inTarget);
 			}
+			if (inTarget === 'android'){
+					xw.writeAttributeString('gap:density', phonegap.splashScreen.android.density || 'mdpi');
+				} else {
+					xw.writeAttributeString('width', phonegap.splashScreen[inTarget].width || 60);
+					xw.writeAttributeString('height', phonegap.splashScreen[inTarget].height || 60);
+				}
 
 			xw.writeEndElement();
 		};
@@ -1088,7 +1085,7 @@ enyo.kind({
 				"phonegap-version": Phonegap.UIConfiguration.commonDrawersContent[0].rows[0].defaultValue, 
 				"orientation": Phonegap.UIConfiguration.commonDrawersContent[0].rows[1].defaultValue,
 				"target-device": Phonegap.UIConfiguration.commonDrawersContent[0].rows[2].defaultValue, 
-				"fullscreen": Phonegap.UIConfiguration.commonDrawersContent[0].rows[3].defaultValue, 
+				"fullscreen": Phonegap.UIConfiguration.commonDrawersContent[0].rows[3].defaultValue,
 
 				//IOS preferences
 				"webviewbounce": Phonegap.UIConfiguration.platformDrawersContent[1].rows[0].defaultValue, 
@@ -1101,10 +1098,10 @@ enyo.kind({
 
 				//Android preferences
 				"android-installLocation": Phonegap.UIConfiguration.platformDrawersContent[0].rows[0].defaultValue, 
-				"android-minSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[1].rows[1].defaultValue, 
-				"android-maxSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[1].rows[2].defaultValue, 
-				"splash-screen-duration": Phonegap.UIConfiguration.platformDrawersContent[1].rows[3].defaultValue, 
-				"load-url-timeout": Phonegap.UIConfiguration.platformDrawersContent[1].rows[4].defaultValue, 
+				"android-minSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[0].rows[1].defaultValue, 
+				"android-maxSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[0].rows[2].defaultValue, 
+				"splash-screen-duration": Phonegap.UIConfiguration.platformDrawersContent[0].rows[3].defaultValue, 
+				"load-url-timeout": Phonegap.UIConfiguration.platformDrawersContent[0].rows[4].defaultValue, 
 
 				//BlackBerry preferences
 				"disable-cursor": Phonegap.UIConfiguration.platformDrawersContent[3].rows[0].defaultValue 
@@ -1130,7 +1127,7 @@ enyo.kind({
 			plugins: {
 			}, 
 			access : {
-				"origin": "http://127.0.0.1"
+				"origin": Phonegap.UIConfiguration.commonDrawersContent[0].rows[4].defaultValue
 			}
 		}
 	}
