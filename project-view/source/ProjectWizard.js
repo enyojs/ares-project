@@ -88,7 +88,7 @@ enyo.kind({
 		};
 		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
 		var topNode = hft.$.serverNode ;
-		var matchingNodes = topNode.getNodeFiles(hft.selectedNode).filter(matchFileName) ;
+		var matchingNodes = hft.selectedNode.getNodeFiles().filter(matchFileName) ;
 
 		if (matchingNodes.length !== 0) {
 			this.hide();
