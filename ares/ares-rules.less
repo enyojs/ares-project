@@ -136,8 +136,6 @@
 	border-bottom: 1px solid #222; 
 	background: @ares-toolbar-gradient;
 	background-size: auto; /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
-	/*Fix for onyx.MoreToolbar used in projectList.js (use of onyx.Toolbar creates issues on menus in Safari)*/
-	z-index: auto;
 }
 
 .ares-small-toolbar{
@@ -164,6 +162,21 @@
 
 .ares-small-toolbar>div {
 	margin : 0 2px;
+}
+
+.ares-top-toolbar.ares-designer-panels>div {
+	margin : 0 1px;
+}
+
+.onyx-toolbar .onyx-button.ares-toolbar-picker{
+	border: 1px solid @ares-toolbar-background ;
+    background: @ares-grabber-from-background;
+    background: -moz-linear-gradient(top, @ares-grabber-from-background 0%,@ares-grabber-to-background 100%); // FF3.6+ 
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, @ares-grabber-from-background), color-stop(100%, @ares-grabber-to-background)); //Chrome,Safari4+
+    background: -webkit-linear-gradient(top, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // Chrome10+,Safari5.1+ 
+    background: -o-linear-gradient(top, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // Opera 11.10+ 
+    background: -ms-linear-gradient(top, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // IE10+
+    background: linear-gradient(180deg, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // W3C*/
 }
 
 .ares-tab-label {
@@ -240,6 +253,70 @@
 	display: block;
 	top: -9px;
 	left: 9px;
+}
+
+/* Ares menu */
+.aresmenu .onyx-button {
+    width: 82px;
+    cursor: pointer;
+    cursor: hand;
+    font-weight: normal;
+    text-shadow: 0 -1px 0 #000000;
+    border: none;
+    background: none;
+    text-align: left;
+    padding: 6px 0;
+    box-shadow: none;
+    .ares-rounded-corners(0);
+}
+
+.aresmenu .onyx-button.active,
+.aresmenu .onyx-button.pressed {
+    border: none;
+    background: transparent;
+    .ares-box-shadow(none);
+    .ares-rounded-corners(0);
+}
+
+.aresmenu button:after{
+    position: relative;
+    content: @ares-lsmall-arrow;
+    width:25px;
+    display: inline-block;
+    padding-left: 10px;
+}
+
+.aresmenu button:active:hover:not([disabled]) {
+  background-image: none;
+  border-top: none;
+  box-shadow: none;
+}
+
+.sub-aresmenu {
+    background-image: none;
+    background-color: @ares-menu-background;
+    .ares-box-shadow(0 5px 5px rgba(0, 0, 0, 0.5));
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    text-align: left;
+    .ares-rounded-corners(@ares-border-radius);
+    min-width: 135px;
+}
+
+.onyx-menu-item.aresmenu-button {
+    font-size:14px;
+    margin: 0;
+    padding: 0 10px;
+    cursor: pointer;
+    cursor: hand;
+    line-height: 36px;
+    color: @ares-dark-color; 
+}
+
+.aresmenu-button:hover{
+    background: none;
+    .ares-box-shadow(inset 0px 0px 20px 0px rgba(0,0,0, 0.5));
 }
 
 /*file chooser*/
@@ -472,6 +549,14 @@ div.large-fixed { width: 80%; }
 
 .ares-large-content { height: 390px; }
 
+.onyx-toolbar-inline>.ares-right-margin {
+	margin-right: 30px;
+}
+
+.onyx-toolbar-inline>.ares-left-margin {
+	margin-left: 15px;
+}
+
 .title-gradient {
 	border-bottom:1px solid #FFFFFF;
 	background: @ares-title-gradient @ares-project-list-background-active;
@@ -487,6 +572,7 @@ div.large-fixed { width: 80%; }
 	top: 0;
 	bottom: 0;
 	right: 0;
+	z-index: 10;
 }
 
 .lsmallDownArrow {
