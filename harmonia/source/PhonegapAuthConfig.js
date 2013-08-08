@@ -13,7 +13,9 @@ enyo.kind({
 	 * @protected
 	 */
 	display: function(data, next) {
-		if (this.debug) this.log(data);
+		if (this.debug) {
+			this.log(data);
+		}
 		var userData = {
 			userId: data.user.id,
 			username: data.user.username,

@@ -1,3 +1,4 @@
+/* global async, ServiceRegistry */
 enyo.kind({
 	name: "BasicAuthConfig",
 
@@ -43,7 +44,9 @@ enyo.kind({
 	 */
 	create: function() {
 		this.inherited(arguments);
-		if (this.debug) this.log("serviceId:", this.serviceId, ", serviceName:", this.serviceName, ", username:", this.username, ", password:", 'XXX' /*this.password*/);
+		if (this.debug) {
+			this.log("serviceId:", this.serviceId, ", serviceName:", this.serviceName, ", username:", this.username, ", password:", 'XXX' /*this.password*/);
+		}
 		this.service = ServiceRegistry.instance.resolveServiceId(this.serviceId);
 		this.$.serviceName.setContent(this.serviceName);
 		this.usernameChanged();
@@ -86,7 +89,9 @@ enyo.kind({
 	 * @private
 	 */
 	authenticate: function(next) {
-		if (this.debug) this.log();
+		if (this.debug) {
+			this.log();
+		}
 		this.service.authenticate({
 			username: this.$.username.getValue(),
 			password: this.$.password.getValue()
@@ -97,7 +102,9 @@ enyo.kind({
 	 * @protected
 	 */
 	display: function(data, next) {
-		if (this.debug) this.log(data);
+		if (this.debug) {
+			this.log(data);
+		}
 		next();
 	}
 });

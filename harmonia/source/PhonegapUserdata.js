@@ -60,19 +60,23 @@ enyo.kind({
 	 * @protected
 	 */
 	manageAccount: function(inSender, inValue) {
-		if (this.debug) this.log("sender:", inSender, "value:", inValue);
-		var accountPopup = window.open("https://build.phonegap.com/people/edit",
-					       "PhoneGap Build Account Management",
-					       "resizeable=1,width=1024, height=600");
+		if (this.debug) {
+			this.log("sender:", inSender, "value:", inValue);
+		}
+		window.open("https://build.phonegap.com/people/edit",
+		   "PhoneGap Build Account Management",
+		   "resizeable=1,width=1024, height=600");
 	},
 	/**
 	 * Open the Applications Management Page at build.phonegap.com
 	 * @protected
 	 */
 	manageApps: function(inSender, inValue) {
-		if (this.debug) this.log("sender:", inSender, "value:", inValue);
-		var accountPopup = window.open("https://build.phonegap.com/apps",
-					       "PhoneGap Build Account Management",
-					       "resizeable=1,width=1024, height=600");
+		if (this.debug) {
+			this.log("sender:", inSender, "value:", inValue);
+		}
+		window.open("https://build.phonegap.com/apps",
+		   "PhoneGap Build Account Management",
+		   "resizeable=1,width=1024, height=600");
 	}
 });

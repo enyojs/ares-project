@@ -1,3 +1,4 @@
+/* global async */
 /**
  * @see https://www.dropbox.com/developers/reference/api
  * @see https://www.dropbox.com/developers/blog/20
@@ -70,7 +71,9 @@ enyo.kind({
 
 	create: function() {
 		this.inherited(arguments);
-		if (this.debug) this.log("title:", this.title);
+		if (this.debug) {
+			this.log("title:", this.title);
+		}
 		this.$.serviceName.setContent(this.serviceName);
 		this.auth = this.auth || {};
 		this.auth.headers = this.auth.headers || {};
@@ -359,7 +362,9 @@ enyo.kind({
 		this.$.quota.setContent("...");
 		this.$.privateBytes.setContent("...");
 		this.$.sharedBytes.setContent("...");
-		if (next) next();
+		if (next) {
+			next();
+		}
 	},
 	displayAccountInfo: function(next) {
 		this.log("accountInfo:", this.accountInfo);
@@ -372,6 +377,8 @@ enyo.kind({
 		this.$.privateBytes.setContent(privateBytes);
 		var sharedBytes = Math.floor(this.accountInfo.sharedBytes / (1024*1024)) + " MB";
 		this.$.sharedBytes.setContent(sharedBytes);
-		if (next) next();
+		if (next) {
+			next();
+		}
 	}
 });

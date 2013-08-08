@@ -1,3 +1,4 @@
+/* global ServiceRegistry */
 enyo.kind({
 	name: "AccountsConfigurator",
 	kind: "onyx.Popup",
@@ -39,16 +40,22 @@ enyo.kind({
 	 */
 	create: function() {
 		this.inherited(arguments);
-		if (this.debug) this.log("");
+		if (this.debug) {
+			this.log("");
+		}
 	},
 	/**
 	 * @private
 	 */
 	handleSelectProvider: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		if (this.debug) {
+			this.log("sender:", inSender, ", event:", inEvent);
+		}
 		var service = inEvent.service;
 		if (service && service.config && service.config.auth) {
-			if (this.debug) this.log("selected service:", service.config.id);
+			if (this.debug) {
+				this.log("selected service:", service.config.id);
+			}
 			var serviceAuthName = service.config.id + "AuthConfig";
 			if (this.selectedAuthConfig) {
 				this.selectedAuthConfig.hide();
@@ -58,11 +65,15 @@ enyo.kind({
 			this.selectedAuthConfig = this.$.authPanel.$[serviceAuthName];
 			if (!this.selectedAuthConfig) {
 				if (service.config.auth.type === 'plugin') {
-					if (this.debug) this.log("creating 'custom' auth form");
+					if (this.debug) {
+						this.log("creating 'custom' auth form");
+					}
 					var provider, authFormKind;
 					provider = ServiceRegistry.instance.resolveServiceId(service.config.id);
 					authFormKind = provider.getAuthConfigKind();
-					if (this.debug) this.log("auth form using kind:", authFormKind);
+					if (this.debug) {
+						this.log("auth form using kind:", authFormKind);
+					}
 					this.$.authPanel.createComponent({
 						kind: authFormKind,
 						name: serviceAuthName,
@@ -72,7 +83,9 @@ enyo.kind({
 						password: service.config.auth.password
 					});
 				} else if (service.config.auth.type === 'basic') {
-					if (this.debug) this.log("creating 'basic' auth form");
+					if (this.debug) {
+						this.log("creating 'basic' auth form");
+					}
 					this.$.authPanel.createComponent({
 						kind: "BasicAuthConfig",
 						name: serviceAuthName,
@@ -82,7 +95,9 @@ enyo.kind({
 						password: service.config.auth.password
 					});
 				} else if (service.config.auth.type === 'phonegap') {
-					if (this.debug) this.log("creating 'phonegap' auth form");
+					if (this.debug) {
+						this.log("creating 'phonegap' auth form");
+					}
 					this.$.authPanel.createComponent({
 						kind: "PhonegapAuthConfig",
 						name: serviceAuthName,
@@ -92,7 +107,9 @@ enyo.kind({
 						password: service.config.auth.password
 					});
 				} else if (service.config.auth.type === 'dropbox') {
-					if (this.debug) this.log("creating 'dropbox' auth form");
+					if (this.debug) {
+						this.log("creating 'dropbox' auth form");
+					}
 					this.$.authPanel.createComponent({
 						kind: "DropboxAuthConfig",
 						name: serviceAuthName,
@@ -124,22 +141,30 @@ enyo.kind({
 	 * @public
 	 */
 	dismiss: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		if (this.debug) {
+			this.log("sender:", inSender, ", event:", inEvent);
+		}
 		this.hide();
 	},
 	showError: function(inSender, inEvent) {
-		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
+		if (this.debug) {
+			this.log("event:", inEvent, "from sender:", inSender);
+		}
 		this.$.errorPopup.raise(inEvent.msg, inEvent.details);
 		return true; //Stop event propagation
 	},
 	startWaiting: function(inSender, inEvent) {
-		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
+		if (this.debug) {
+			this.log("event:", inEvent, "from sender:", inSender);
+		}
 		this.$.waitPopupMsg.setContent(inEvent.msg);
 		this.$.waitPopup.show();
 		return true; //Stop event propagation
 	},
 	stopWaiting: function(inSender, inEvent) {
-		if (this.debug) this.log("event:", inEvent, "from sender:", inSender);
+		if (this.debug) {
+			this.log("event:", inEvent, "from sender:", inSender);
+		}
 		this.$.waitPopupMsg.setContent("");
 		this.$.waitPopup.hide();
 		return true; //Stop event propagation
