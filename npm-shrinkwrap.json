@@ -15,12 +15,11 @@
       }
     },
     "ares-generator": {
-      "version": "0.1.7",
+      "version": "0.2.2",
       "dependencies": {
         "async": {
-          "version": "0.1.22",
-          "from": "https://registry.npmjs.org/async/-/async-0.1.22.tgz",
-          "resolved": "https://registry.npmjs.org/async/-/async-0.1.22.tgz"
+          "version": "0.2.9",
+          "from": "async@0.2.9"
         },
         "mkdirp": {
           "version": "0.3.5",

@@ -94,7 +94,7 @@ enyo.kind({
 			this.log("Unable to get the template files (" + inError + ")");
 			userreq.fail(inError);
 		});
-		req.go();
+		req.go({ overwrite: true });
 		return userreq;
 	}
 });

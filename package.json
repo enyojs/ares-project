@@ -19,7 +19,6 @@
 	"engineStrict": true,
 	"os" : [ "darwin", "linux", "win32" ],
 	"dependencies": {
-		"ares-generator": "0.1.x",
 		"async": "0.1.x",
 		"base64stream": "0.1.x",
 		"combined-stream": "0.0.x",
@@ -39,6 +38,7 @@
 		"temp": "0.4.x",
 		"tunnel": "0.0.x",
 		"archiver": "~0.4.6",
+		"ares-generator": "0.2.2",
 	},
 	"bundledDependencies": [
 		"archiver",
