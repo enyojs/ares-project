@@ -1,7 +1,7 @@
 enyo.depends(
 	"$lib/g11n",
 	"$lib/layout",
-	"$lib/onyx",
+	"$lib/onyx/source",
 	"$lib/onyx/source/wip-package.js",
 	"$lib/extra/analyzer2",
 	"$lib/foss",
