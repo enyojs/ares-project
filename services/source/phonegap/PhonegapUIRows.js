@@ -193,8 +193,7 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);	
-		this.labelChanged();
-		this.displayConfigXmlPanel();	
+		this.labelChanged();			
 	},	
 
 	/**
@@ -218,25 +217,32 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
-		this.displayConfigXmlPanel();
-		this.setValue(inSender.getValue());		
+		this.setValue(inSender.getValue());	
+		this.displayConfigXmlPanel();			
 		return true;
 	},
 	displayConfigXmlPanel: function(){
-		if(this.getValue()) {			
-			this.pan && this.pan.setClassAttribute("ares-project-properties-targetsRows-hide");
-		} else {			
-			this.pan && this.pan.setClassAttribute("ares-project-properties-targetsRows-display");		
-		}	
+		
+		if (this.name === "autoGenerateXML"){
+			this.trace("auto-generate config.xml is enabled: ", this.getValue());
+			
+			if(this.getValue()) {			
+				this.pan && this.pan.setClassAttribute("ares-project-properties-targetsRows-display");
+			} else {			
+				this.pan && this.pan.setClassAttribute("ares-project-properties-targetsRows-hide");		
+			}			
+		}
+		
 	},
 
 	/** @public */
 	setProjectConfig: function (config) {
 		this.setValue(config[this.name]);
+		this.displayConfigXmlPanel();		
 	},
 	/** @public */
 	getProjectConfig: function (config) {
-		config[this.name] = this.getValue();
+		config[this.name] = this.getValue();		
 	}
 });
 

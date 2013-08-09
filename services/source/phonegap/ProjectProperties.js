@@ -22,7 +22,6 @@
  */
 enyo.kind({
 	name: "Phonegap.UIConfiguration",
-	components: [],
 	statics: {
 
 		commonDrawersContent: [
@@ -206,7 +205,7 @@ enyo.kind({
 		 * @private
 		 */
 		function createDrawer(inDrawer) {			
-			var container, drawerKind;
+			var container;
 			
 			if (inDrawer.id === 'buildOption'){
 				container = this.$.BuildOptionPanel;
@@ -247,7 +246,7 @@ enyo.kind({
 				if (inRowName === "autoGenerateXML") {					
 					return this.$.targetsRows;
 				}
-			}		
+			};		
 						
 			enyo.forEach(dwrContent.rows, function (row) {
 				var containerPanel = getPanel.call(this, row.name);
@@ -493,7 +492,6 @@ enyo.kind({
 	kind: "Phonegap.ProjectProperties.Drawer",
 	debug: false,
 	classes: "ares-drawer",
-	debug: false,
 	published: {
 		targetId: "",		
 		enabled: "",
