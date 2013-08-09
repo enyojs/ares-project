@@ -5,5 +5,5 @@ enyo.depends(
 	"$lib/foss",
 	"source/",
 	"../ares/Ares.less",
-	"../utilities/source"
+	"../utilities"
 );
