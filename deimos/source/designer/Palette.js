@@ -97,7 +97,7 @@ enyo.kind({
 	},
 	create: function () {
 		ares.setupTraceLogger(this);
-		this.inherited(arguments)
+		this.inherited(arguments);
 	},
 	setupItem: function(inSender, inEvent) {
 		var index = inEvent.index;

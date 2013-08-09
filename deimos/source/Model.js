@@ -101,7 +101,7 @@ enyo.singleton({
 				} else {
 					inData.level = Model.F_NORMAL;
 				}
-				this.trace("addInformation: Setting level ", inData.level, " for ", inType, " ", inName, ".", inSubName); }
+				this.trace("addInformation: Setting level ", inData.level, " for ", inType, " ", inName, ".", inSubName);
 			};
 			var addFilterLevel = enyo.bind(this, fn, inType, inName);
 

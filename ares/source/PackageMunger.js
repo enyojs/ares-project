@@ -123,7 +123,7 @@ enyo.kind({
 		} else if (parentNode.isDir) {
 			service.createFile(parentNode.id, "package.js", "enyo.depends(\n);\n")
 				.response(this, function(inRequest, inFsNode) {
-					this.trace(("PackageMunger._packageCreate(): package.js inFsNode[0]:", inFsNode[0]);
+					this.trace("PackageMunger._packageCreate(): package.js inFsNode[0]:", inFsNode[0]);
 					next(null, inFsNode[0]);
 				})
 				.error(this, function(inRequest, inError) {
