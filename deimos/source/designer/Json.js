@@ -1,4 +1,4 @@
-﻿enyo.json.codify = {
+enyo.json.codify = {
 	_block: function(p, inDent) {
 		p = p.join(",\n");
 		var j = (p ? "\n" + p + "\n" + inDent : "");
@@ -61,6 +61,9 @@
 		return this.value(inValue, "\t");
 	},
 	from: function(inJson) {
-		return eval('(' + inJson + ')'); // TODO: ENYO-2074, replace eval.
+		/* jshint evil: true */
+		var o = eval('(' + inJson + ')'); // TODO: ENYO-2074, replace eval.
+		/* jshint evil: false */
+		return o;
 	}
 };

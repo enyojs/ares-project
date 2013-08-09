@@ -717,7 +717,9 @@ enyo.kind({
 	},
 	//* Eval code passed in by designer
 	codeUpdate: function(inCode) {
+		/* jshint evil: true */
 		eval(inCode); // TODO: ENYO-2074, replace eval.
+		/* jshint evil: false */
 	},
 	//* Update CSS by replacing the link/style tag in the head with an updated style tag
 	cssUpdate: function(inData) {

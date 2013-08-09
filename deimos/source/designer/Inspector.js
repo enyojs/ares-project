@@ -48,7 +48,9 @@ enyo.kind({
 							var val = "";
 							try {
 								// TODO - shouldn't have to eval() here. Strings come back with double double quotes ("""")
+								/* jshint evil: true */
 								val = eval(p[j].value[0].token); // TODO: ENYO-2074, replace eval.
+								/* jshint evil: false */
 							} catch(err) {
 								enyo.warn("Invalid value for property '" + p[j].name +"': " +  p[j].value[0].token);
 							}

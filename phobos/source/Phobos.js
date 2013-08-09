@@ -512,7 +512,9 @@ enyo.kind({
 				var comps = [];
 				if (start && end) {
 					var js = c.substring(start, end);
+					/* jshint evil: true */
 					comps = eval("(" + js + ")"); // TODO: ENYO-2074, replace eval. Why eval? Because JSON.parse doesn't support unquoted keys... 
+					/* jshint evil: false */
 				}
 				var comp = {
 					name: name,
