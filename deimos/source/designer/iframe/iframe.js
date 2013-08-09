@@ -411,7 +411,7 @@ enyo.kind({
 		} catch(error) {
 			errMsg = "Unable to render kind '" + inKind.name + "':" + error.message;
 			this.error(errMsg, error.stack);
-			this.sendMessage({op: "error", val: {msg: errMsg, details: error.stack}});
+			this.sendMessage({op: "error", val: {msg: errMsg, err: {stack: error.stack}}});
 			this.sendMessage({op: "reloadNeeded"});
 		}
 	},
@@ -423,7 +423,7 @@ enyo.kind({
 		enyo.forEach(kinds, function(kindDefinition) {
 			var name = kindDefinition.kind;
 			if ( ! enyo.constructorForKind(name)) {
-				errMsg = 'No constructor found for kind "' + name + "'";
+				var errMsg = 'No constructor found for kind "' + name + "'";
 				this.log(errMsg);
 				this.sendMessage({op: "error", val: {msg: errMsg}});
 			}
