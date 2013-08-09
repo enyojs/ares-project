@@ -1069,6 +1069,7 @@ enyo.kind({
 		DEFAULT_PROJECT_CONFIG: {
 			enabled: false,
 			autoGenerateXML: true,
+			minification: true,
 			features: {
 				battery: false,
 				camera: false,
@@ -1081,20 +1082,11 @@ enyo.kind({
 		        device: false
 			},
 			preferences: {
-				//general prefrences
-				"phonegap-version": Phonegap.UIConfiguration.commonDrawersContent[0].rows[0].defaultValue, 
-				"orientation": Phonegap.UIConfiguration.commonDrawersContent[0].rows[1].defaultValue,
-				"target-device": Phonegap.UIConfiguration.commonDrawersContent[0].rows[2].defaultValue, 
-				"fullscreen": Phonegap.UIConfiguration.commonDrawersContent[0].rows[3].defaultValue,
-
-				//IOS preferences
-				"webviewbounce": Phonegap.UIConfiguration.platformDrawersContent[1].rows[0].defaultValue, 
-				"prerendered-icon": Phonegap.UIConfiguration.platformDrawersContent[1].rows[1].defaultValue, 
-				"ios-statusbarstyle": Phonegap.UIConfiguration.platformDrawersContent[1].rows[2].defaultValue, 
-				"detect-data-types": Phonegap.UIConfiguration.platformDrawersContent[1].rows[3].defaultValue, 
-				"exit-on-suspend": Phonegap.UIConfiguration.platformDrawersContent[1].rows[4].defaultValue, 
-				"show-splash-screen-spinner": Phonegap.UIConfiguration.platformDrawersContent[1].rows[5].defaultValue, 
-				"auto-hide-splash-screen": Phonegap.UIConfiguration.platformDrawersContent[1].rows[6].defaultValue, 
+				//shared prefrences
+				"phonegap-version": Phonegap.UIConfiguration.commonDrawersContent[1].rows[0].defaultValue, 
+				"orientation": Phonegap.UIConfiguration.commonDrawersContent[1].rows[1].defaultValue,
+				"target-device": Phonegap.UIConfiguration.commonDrawersContent[1].rows[2].defaultValue, 
+				"fullscreen": Phonegap.UIConfiguration.commonDrawersContent[1].rows[3].defaultValue,
 
 				//Android preferences
 				"android-installLocation": Phonegap.UIConfiguration.platformDrawersContent[0].rows[0].defaultValue, 
@@ -1103,12 +1095,21 @@ enyo.kind({
 				"splash-screen-duration": Phonegap.UIConfiguration.platformDrawersContent[0].rows[3].defaultValue, 
 				"load-url-timeout": Phonegap.UIConfiguration.platformDrawersContent[0].rows[4].defaultValue, 
 
+				//IOS preferences
+				"webviewbounce": Phonegap.UIConfiguration.platformDrawersContent[1].rows[0].defaultValue, 
+				"prerendered-icon": Phonegap.UIConfiguration.platformDrawersContent[1].rows[1].defaultValue, 
+				"ios-statusbarstyle": Phonegap.UIConfiguration.platformDrawersContent[1].rows[2].defaultValue, 
+				"detect-data-types": Phonegap.UIConfiguration.platformDrawersContent[1].rows[3].defaultValue, 
+				"exit-on-suspend": Phonegap.UIConfiguration.platformDrawersContent[1].rows[4].defaultValue, 
+				"show-splash-screen-spinner": Phonegap.UIConfiguration.platformDrawersContent[1].rows[5].defaultValue, 
+				"auto-hide-splash-screen": Phonegap.UIConfiguration.platformDrawersContent[1].rows[6].defaultValue,
+
 				//BlackBerry preferences
 				"disable-cursor": Phonegap.UIConfiguration.platformDrawersContent[3].rows[0].defaultValue 
 			},
 
 			icon: {
-				general: {src: "", role: "default"},
+				sharedConfiguration: {src: "", role: "default"},
 				android: {src: "", density: "" },
 				ios: {src: "", height: "", width: ""}, 
 				winphone: {src: ""}, 
@@ -1117,7 +1118,7 @@ enyo.kind({
 			},
 
 			splashScreen: {
-				general: {src: "", role: "default"},
+				sharedConfiguration: {src: "", role: "default"},
 				android: {src: "", density: "" },
 				ios: {src: "", height: "", width: ""}, 
 				winphone: {src: ""}, 
@@ -1127,7 +1128,7 @@ enyo.kind({
 			plugins: {
 			}, 
 			access : {
-				"origin": Phonegap.UIConfiguration.commonDrawersContent[0].rows[4].defaultValue
+				"origin": Phonegap.UIConfiguration.commonDrawersContent[1].rows[4].defaultValue
 			}
 		}
 	}

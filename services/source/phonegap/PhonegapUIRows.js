@@ -170,9 +170,12 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "Phonegap.ProjectProperties.AutoGenerateXML",
+	name: "Phonegap.ProjectProperties.BuildOption",
 	kind: "Phonegap.ProjectProperties.Row",
 	classes: "ares-project-properties-drawer-row",
+	published: {
+		pan: ""
+	},
 	debug: false,
 	components: [		
 		{	
@@ -190,7 +193,7 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);	
-		this.labelChanged();	
+		this.labelChanged();			
 	},	
 
 	/**
@@ -214,20 +217,36 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
-		this.setValue(inSender.getValue());
-		
+		this.setValue(inSender.getValue());	
+		this.displayConfigXmlPanel();			
 		return true;
+	},
+	displayConfigXmlPanel: function(){
+		
+		if (this.name === "autoGenerateXML"){
+			this.trace("auto-generate config.xml is enabled: ", this.getValue());
+			
+			if(this.getValue()) {			
+				this.pan && this.pan.setClassAttribute("ares-project-properties-targetsRows-display");
+			} else {			
+				this.pan && this.pan.setClassAttribute("ares-project-properties-targetsRows-hide");		
+			}			
+		}
+		
 	},
 
 	/** @public */
 	setProjectConfig: function (config) {
-		this.setValue(config.autoGenerateXML);
+		this.setValue(config[this.name]);
+		this.displayConfigXmlPanel();		
 	},
 	/** @public */
 	getProjectConfig: function (config) {
-		config.autoGenerateXML = this.getValue();
+		config[this.name] = this.getValue();		
 	}
 });
+
+
 
 enyo.kind({
 	name: "Phonegap.ProjectProperties.AccessRow",
