@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "EditorSettings",
-	kind: "onyx.Popup",
+	kind: "Ares.AresPopup",
 	classes:"ares-classic-popup",
 	events: {
 		onClose: "",
@@ -256,6 +256,7 @@ enyo.kind({
 		this.$.textArea.setValue(""); //needs to be set here to avoid disappearance of placeholder in FF21
 		this.disableKeys(false);
 		this.$.modalPopup.hide();
+		this.draggable = true;
 	},
 
 	restoreButton: function(inSender) {
@@ -283,7 +284,8 @@ enyo.kind({
 		}
 		this.$[this.key].addClass("active");
 		this.disableKeys(true);
-		this.$.modalPopup.show();	
+		this.$.modalPopup.show();
+		this.draggable = false;	
 	},
 
 	saveSettings: function() {
