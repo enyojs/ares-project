@@ -8,7 +8,7 @@ var AresStore = function(name, eraseAll) {
 		this.data = {};
 	} else {
 		var store = localStorage.getItem(this.name);
-		this.data = (store && JSON.parse(store)) || {};
+		this.data = (store && enyo.json.parse(store)) || {};
 	}
 
 	// Remove data in 'old' format (prior introduction of Ares.Workspace.projects)
@@ -31,7 +31,7 @@ _.extend(AresStore.prototype, {
 	// Save the current state of the **Store** to *localStorage*.
 	save: function() {
 		try {
-			var projectString = JSON.stringify(this.data, enyo.bind(this, this.stringifyReplacer));
+			var projectString = enyo.json.stringify(this.data, enyo.bind(this, this.stringifyReplacer));
 			localStorage.setItem(this.name, projectString);
 			if (this.debug) { enyo.log("Ares.Store#save(): ", projectString); }
 		} catch(error) {

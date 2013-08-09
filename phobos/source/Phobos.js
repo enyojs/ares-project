@@ -702,7 +702,7 @@ enyo.kind({
 	docChanged: function(inSender, inEvent) {
 		this.docData.setEdited(true);
 
-		this.trace(JSON.stringify(inEvent.data));
+		this.trace("data:", enyo.json.stringify(inEvent.data));
 
 		if (this.analysis) {
 			// Call the autocomplete component
@@ -712,7 +712,7 @@ enyo.kind({
 	},
 	cursorChanged: function(inSender, inEvent) {
 		var position = this.$.ace.getCursorPositionInDocument();
-		this.trace(inSender.id + " " + inEvent.type + " " + JSON.stringify(position));
+		this.trace("senderId:", inSender.id, "eventType:", inEvent.type, "position:", enyo.json.stringify(position));
 
 		// Check if we moved to another enyo kind and display it in the right pane
 		var tempo = this.analysis;

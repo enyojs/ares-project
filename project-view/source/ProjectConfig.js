@@ -25,7 +25,6 @@ enyo.kind({
 	fileId: null,
 	debug: false,
 	create: function() {
-		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 	},
 	/**
@@ -35,6 +34,7 @@ enyo.kind({
 	 * @param {Object} next is a CommonJS callback
 	 */
 	init: function(inLocation, next) {
+		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.data = null;
 		this.service = inLocation.service;
 		this.folderId = inLocation.folderId;
@@ -70,10 +70,10 @@ enyo.kind({
 		var data,
 		    req = this.service.getFile(this.fileId);
 		req.response(this, function _projectReloaded(inRequest, inResponse) {
-			if (this.debug) this.log("ProjectConfig.load: file=", inResponse);
+			this.trace("ProjectConfig.load: file=", inResponse);
 			if (typeof inResponse.content === 'string') {
 				try {
-					data = JSON.parse(inResponse.content);
+					data = enyo.json.parse(inResponse.content);
 				} catch(e) {
 					enyo.error("ProjectConfig.load:", e);
 					inRequest.fail(e);
@@ -82,7 +82,7 @@ enyo.kind({
 				data = inResponse.content;
 			}
 			this.data = ProjectConfig.checkConfig(data);
-			if (this.debug) this.log("ProjectConfig.load config=", this.data);
+			this.trace("ProjectConfig.load config=", this.data);
 			if (this.data !== data) {
 				this.save(next);
 			} else {
@@ -104,14 +104,14 @@ enyo.kind({
 	 */
 	save: function(next) {
 		var req;
-		if (this.debug) this.log("data=", this.data);
+		this.trace("data=", this.data);
 		if (this.fileId) {
-			req = this.service.putFile(this.fileId, JSON.stringify(this.data, null, 2));
+			req = this.service.putFile(this.fileId, enyo.json.stringify(this.data, null, 2));
 		} else {
 			req = this.service.createFile(this.folderId, "project.json", JSON.stringify(this.data, null, 2));
 		}
 		req.response(this, function _projectSaved(inSender, inResponse) {
-			if (this.debug) enyo.log("ProjectConfig.save: inResponse=", inResponse);
+			this.trace("ProjectConfig.save: inResponse=", inResponse);
 			this.fileId = inResponse.id;
 			if (next instanceof Function) {
 				next();

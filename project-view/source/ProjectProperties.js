@@ -209,7 +209,7 @@ enyo.kind({
 	toggleService: function(inSender, inEvent) {
 		var serviceId = inEvent.originator.serviceId,
 		    checked = inEvent.originator.checked;
-		this.warn("serviceId:", serviceId, 'checked:', checked);
+		this.trace("serviceId:", serviceId, 'checked:', checked);
 		var service = this.services[serviceId];
 		if (service.tab) {
 			service.tab.setShowing(checked);
@@ -252,7 +252,7 @@ enyo.kind({
 	 *  can be a json string or an object.
 	 */
 	preFill: function(inData) {
-		var conf = typeof inData === 'object' ? inData : JSON.parse(inData);
+		var conf = typeof inData === 'object' ? inData : enyo.json.parse(inData);
 		this.config = ProjectConfig.checkConfig(conf);
 
 		// avoid storing 'undefined' in there
@@ -261,7 +261,9 @@ enyo.kind({
 		this.$.projectName.setValue(this.config.name || '' );
 		this.$.projectTitle.setValue(this.config.title || '' );
 
-		if (! this.config.author ) { this.config.author = {} ;}
+		if (!this.config.author) {
+			this.config.author = {};
+		}
 		this.$.projectAuthor.setValue(this.config.author.name || '') ;
 		this.$.projectContact.setValue(this.config.author.href || '') ;
 
@@ -271,7 +273,9 @@ enyo.kind({
 			this.showService(serviceId);
 		}, this);
 
-		if (! this.config.preview ) {this.config.preview = {} ;}
+		if (!this.config.preview) {
+			this.config.preview = {};
+		}
 
 		this.$.topFileRow.setValue(this.config.preview.top_file);
 
@@ -544,7 +548,7 @@ enyo.kind({
 	components: [
 		{tag: "label", name: "pathInputLabel", classes:"ares-fixed-label"},
 		{kind: "onyx.InputDecorator", components: [
-			{kind: "Input", name: "pathInputValue", classes: "enyo-unselectable"}
+			{kind: "Input", name: "pathInputValue", disabled: true}
 		]},
 		{kind: "onyx.IconButton", name:"pathInputButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
 	],
