@@ -549,6 +549,9 @@ enyo.kind({
 	_submitBuildRequest: function(project, data, next) {
 		var config = ares.clone(project.getConfig().getData());
 		this.trace("config: ", config);
+
+		var minification = config.providers.phonegap.minification;
+
 		var keys = {};
 		var platforms = [];
 		// mandatory parameters
@@ -556,7 +559,7 @@ enyo.kind({
 			//provided by the cookie
 			//token: this.config.auth.token,
 			title: config.title,
-			debug: false		// Enable minification
+			debug: !minification
 		};
 
 		// Already-created apps have an appId (to be reused)
