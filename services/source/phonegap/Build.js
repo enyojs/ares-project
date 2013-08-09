@@ -467,7 +467,7 @@ enyo.kind({
 	 * @public
 	 */
 	build: function(project, next) {
-		this.trace("Starting phonegap build: " + this.url + '/build');
+		this.trace("Starting phonegap build: ", this.url, '/build');
 		async.waterfall([
 			enyo.bind(this, this.authorize),
 			enyo.bind(this, this.checkAppId, project),
@@ -490,7 +490,7 @@ enyo.kind({
 	 * @public
 	 */
 	buildStatus: function(project, next) {
-		this.trace("Getting build status:  " + this.url + '/build');
+		this.trace("Getting build status:  ", this.url, '/build');
 		async.waterfall([
 			enyo.bind(this, this.authorize),
 			enyo.bind(this, this._getBuildStatus, project),			
@@ -661,9 +661,7 @@ enyo.kind({
 	 * @private            
 	 */
 	_storePkg: function(project, folderId, inData, next) {
-		if(this.debug){		
-			this.trace("data content.ctype: ", inData.ctype);	
-		}	
+		this.trace("data content.ctype: ", inData.ctype);	
 
 		var req = project.getService().createFiles(folderId, 
 			{content: inData.content, ctype: inData.ctype});
@@ -876,9 +874,9 @@ enyo.kind({
 					handleAs: 'text'
 				});		
 				req.response(this, function(inSender, inData) {
-					this.trace("response: received " + inData.length + " bytes typeof: " + (typeof inData));
+					this.trace("response: received ", inData.length, " bytes typeof: ", (typeof inData));
 					var ctype = req.xhrResponse.headers['content-type'];
-					this.trace("response: received ctype: " + ctype);
+					this.trace("response: received ctype: ", ctype);
 					next(null, {content: inData, ctype: ctype});			
 				});
 				req.error(this, this._handleServiceError.bind(this, "Unable to download application package", next));

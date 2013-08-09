@@ -1,3 +1,4 @@
+/* global ares */
 enyo.kind({
 	name: "CategoryItem",
 	components: [
@@ -94,6 +95,10 @@ enyo.kind({
 	handlers: {
 		ondragstart: "dragstart"
 	},
+	create: function () {
+		ares.setupTraceLogger(this);
+		this.inherited(arguments)
+	},
 	setupItem: function(inSender, inEvent) {
 		var index = inEvent.index;
 		var item = inEvent.item;
@@ -116,13 +121,13 @@ enyo.kind({
 	 */
 	projectDataChanged: function(oldProjectData) {
 		if (this.projectData) {
-			if (this.debug)  { this.log("projectDataChanged: projectData: ", this.projectData); }
+			this.trace("projectDataChanged: projectData: ", this.projectData);
 			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
 			this.projectData.on('update:project-indexer', this.projectIndexerChanged, this);
 			this.setProjectIndexer(this.projectData.getProjectIndexer());
 		}
 		if (oldProjectData) {
-			if (this.debug)  { this.log("projectDataChanged: oldProjectData: ", oldProjectData); }
+			this.trace("projectDataChanged: oldProjectData: ", oldProjectData);
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
 			oldProjectData.off('update:project-indexer', this.projectIndexerChanged);
 		}
@@ -133,7 +138,7 @@ enyo.kind({
 	 * @protected
 	 */
 	projectIndexReady: function(model, value, options) {
-		if (this.debug)  { this.log("projectIndexReady: ", value); }
+		this.trace("projectIndexReady: ", value);
 		this.setProjectIndexer(value);
 	},
 	/**
@@ -143,7 +148,7 @@ enyo.kind({
 	 * @protected
 	 */
 	projectIndexerChanged: function() {
-		if (this.debug)  { this.log("projectIndexerChanged: rebuilt the palette "); }
+		this.trace("projectIndexerChanged: rebuilt the palette ");
 		var catchAllPalette = this.buildCatchAllPalette();
 		this.palette = catchAllPalette.concat(this.projectIndexer.design.palette || []);
 		this.palette.sort(function(a,b) {

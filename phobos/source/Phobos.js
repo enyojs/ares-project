@@ -712,7 +712,7 @@ enyo.kind({
 	},
 	cursorChanged: function(inSender, inEvent) {
 		var position = this.$.ace.getCursorPositionInDocument();
-		this.trace(inSender.id + " " + inEvent.type + " " + JSON.stringify(position));
+		this.trace(inSender.id, " ", inEvent.type, " ", JSON.stringify(position));
 
 		// Check if we moved to another enyo kind and display it in the right pane
 		var tempo = this.analysis;

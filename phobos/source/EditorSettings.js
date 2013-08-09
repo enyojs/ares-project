@@ -1,3 +1,4 @@
+/* global ares */
 enyo.kind({
 	name: "EditorSettings",
 	kind: "onyx.Popup",
@@ -149,6 +150,7 @@ enyo.kind({
 	 */
 	
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.getValuesFromLocalStorage();
 		this.$.highLightButton.value = this.settings.highlight;
@@ -180,9 +182,7 @@ enyo.kind({
 	getValuesFromLocalStorage:function(){
 		var self = this;
 		Ares.LocalStorage.get(this.SETTINGS_STORAGE_KEY, function(str) {
-			if (self.debug) {
-				self.log("localStorage[" + self.SETTINGS_STORAGE_KEY + "] = ", str);
-			}
+			self.trace("localStorage[", self.SETTINGS_STORAGE_KEY, "] = ", str);
 			try {
 				if(str !== null && str !== undefined){
 					self.settings = JSON.parse(str);

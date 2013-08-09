@@ -1,4 +1,4 @@
-/*global ServiceRegistry, ProjectConfig */
+/*global ServiceRegistry, ProjectConfig, ares */
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -46,6 +46,7 @@ enyo.kind({
 		onRegisterMe: ""
 	},
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.doRegisterMe({name:"projectView", reference:this});
 	},
@@ -213,9 +214,7 @@ enyo.kind({
 				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
 				+ 'url=' + encodeURIComponent(projectUrl);
 
-			if (this.debug) {
-				this.log("preview on URL " + previewUrl) ;
-			}
+			this.trace("preview on URL ", previewUrl) ;
 			
 			window.open(
 				previewUrl,

@@ -1,4 +1,4 @@
-/* global analyzer, Model, Inspector */
+/* global analyzer, Model, Inspector, ares */
 enyo.kind({
 	name: "Inspector",
 	kind: "FittableRows",
@@ -30,6 +30,7 @@ enyo.kind({
 	userDefinedAttributes: {},
 	//* @protected
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.helper = new analyzer.Analyzer.KindHelper();
 		
@@ -65,7 +66,7 @@ enyo.kind({
 	//* @protected
 	allowed: function(inKindName, inType, inName) {
 		var level = Model.getFilterLevel(inKindName, inType, inName);
-		if (this.debug) { this.log("Level: " + level + " for " + inKindName + "." + inName); }		
+		this.trace("Level: ", level, " for ", inKindName, ".", inName);	
 		return level >= this.filterLevel;
 	},
 	//* Return complete list of published properties for _inControl_
@@ -76,7 +77,7 @@ enyo.kind({
 
 		var definition = this.getKindDefinition(currentKind);
 		if (!definition) {
-			if (this.debug) { this.log("NO DEFINITION found for '" + currentKind + "' inControl: ", inControl); }
+			this.trace("NO DEFINITION found for '", currentKind, "' inControl: ", inControl);
 			// Revert to the property and event list extracted from the object
 			return this.buildPropListFromObject(inControl);
 		}
@@ -95,15 +96,13 @@ enyo.kind({
 			
 			// Get all published properties for this kind
 			var publishedProperties = this.helper.getPublishedWithValues();
-			if (this.debug) {
-				this.log("buildPropList: publishedProperties", publishedProperties);
-			}
+			this.trace("buildPropList: publishedProperties", publishedProperties);
 			
 			// Add an entry to _propMap[]_ for each property found in _publishedProperties_
 			for (var i = 0, p; (p = publishedProperties[i]); i++) {
 				if (((this.allowed(kindName, "properties", p.name)) || 
 					(this.userDefinedAttributes[inControl.aresId].hasOwnProperty(p.name)))) {
-					if (this.debug) { this.log("Adding property '" + p.name + "' from '" + currentKind + "'"); }
+					this.trace("Adding property '", p.name, "' from '", currentKind, "'");
 					propMap[p.name] = p.value;
 				}
 			}
@@ -115,7 +114,7 @@ enyo.kind({
 			for (i = 0, p; (p = events[i]); i++) {
 				if (((this.allowed(kindName, "events", p)) ||
 					(this.userDefinedAttributes[inControl.aresId].hasOwnProperty(p)))) {
-					if (this.debug) { this.log("Adding event '" + p + "' from '" + currentKind + "'"); }
+					this.trace("Adding event '", p, "' from '", currentKind, "'");
 					eventMap[p] = true;
 				}
 			}
@@ -142,7 +141,7 @@ enyo.kind({
 			}
 		}
 		
-		if (this.debug) { this.log("buildPropList: props", props); }
+		this.trace("buildPropList: props", props);
 		return props;
 	},
 	//* @protected
@@ -155,13 +154,13 @@ enyo.kind({
 		while (context) {
 			for (var p in context.published) {
 				if (this.allowed(kindName, "properties", p)) {
-					if (this.debug) { this.log("Adding property '" + p + "' from '" + context.kind + "'"); }
+					this.trace("Adding property '", p, "' from '", context.kind, "'");
 					propMap[p] = true;
 				}
 			}
 			for (var e in context.events) {
 				if (this.allowed(kindName, "events", e)) {
-					if (this.debug) { this.log("Adding event '" + e + "' from '" + context.kind + "'"); }
+					this.trace("Adding event '", e, "' from '", context.kind, "'");
 					eventMap[e] = true;
 				}
 			}
@@ -189,7 +188,7 @@ enyo.kind({
 			return;
 		}
 		
-		if (this.debug) { this.log("Adding entry for " + inType + " " + inName + " : " + inDefaultValue); }
+		this.trace("Adding entry for ", inType, " ", inName, " : ", inDefaultValue);
 		
 		var inherited = !(inControl.aresId && this.userDefinedAttributes && this.userDefinedAttributes[inControl.aresId] && typeof this.userDefinedAttributes[inControl.aresId][inName] !== "undefined"),
 			value = (inherited) ? inDefaultValue : this.userDefinedAttributes[inControl.aresId][inName],
@@ -397,7 +396,7 @@ enyo.kind({
 			v = num;
 		}
 
-		if (this.debug) { this.log("Set property: " + n + " --> ", v); }
+		this.trace("Set property: ", n, " --> ", v);
 
 		// Save each change to _this.userDefinedAttributes_
 		if(!this.userDefinedAttributes[this.selected.aresId]) {
@@ -428,7 +427,7 @@ enyo.kind({
 			var v = inEvent.target.fieldValue;
 			if (!v) {
 				v = this.selected.name + enyo.cap(n.slice(2));
-				if (this.debug) { this.log("SET handler: " + n + " --> " + v); }
+				this.trace("SET handler: ", n, " --> ", v);
 				inEvent.target.setFieldValue(v);
 				this.change(inSender, inEvent);
 			}
@@ -449,7 +448,7 @@ enyo.kind({
 		}
 
 		if (this.projectData) {
-			if (this.debug) { this.log("projectDataChanged: projectData", this.projectData); }
+			this.trace("projectDataChanged: projectData", this.projectData);
 			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
 			this.projectData.on('update:project-indexer', this.projectIndexUpdated, this);
 			this.setProjectIndexer(this.projectData.getProjectIndexer());
@@ -462,12 +461,12 @@ enyo.kind({
 	 * @protected
 	 */
 	projectIndexReady: function(model, value, options) {
-		if (this.debug) { this.log("projectIndexReady: ", value); }
+		this.trace("projectIndexReady: ", value);
 		this.setProjectIndexer(value);
 	},
 	//* @protected
 	projectIndexUpdated: function() {
-		if (this.debug) { this.log("projectIndexUpdated: for projectIndexer: ", this.projectIndexer); }
+		this.trace("projectIndexUpdated: for projectIndexer: ", this.projectIndexer);
 		Model.buildInformation(this.projectIndexer);
 	},
 	//* @public

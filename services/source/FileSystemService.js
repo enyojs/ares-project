@@ -14,21 +14,18 @@ enyo.kind({
 	 */
 	impl: null,
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.impl = null;
 	},
 	rootNodeChanged: function(old) {
-		if (this.debug) {
-			this.log("rootNode:", this.rootNode, "<-", old);
-		}
+		this.trace("rootNode:", this.rootNode, "<-", old);
 	},
 	connect: function(inFsService, next) {
 		this.impl = inFsService;
 		var req = this.impl.propfind(undefined, 0);
 		req.response(this, function(inRequest, inValue) {
-			if (this.debug) {
-				this.log("FileSystemService#connect(): connected");
-			}
+			this.trace("FileSystemService#connect(): connected");
 			this.setRootNode(inValue);
 			if (next) {
 				next();

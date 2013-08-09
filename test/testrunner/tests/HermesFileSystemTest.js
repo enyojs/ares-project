@@ -1,4 +1,4 @@
-/* global HermesFileSystemTest, ServiceRegistry */
+/* global HermesFileSystemTest, ServiceRegistry, ares */
 
 enyo.kind({
 	name: "HermesFileSystemTest",
@@ -13,8 +13,9 @@ enyo.kind({
 	home: null,
 
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		//enyo.log("create()");
+		this.trace("create()");
 		this.services = HermesFileSystemTest.services;
 		this.home = HermesFileSystemTest.home;
 	},
@@ -34,9 +35,7 @@ enyo.kind({
 		} else {
 			this.services = this.registry.services;
 			HermesFileSystemTest.services = this.services;
-			if (this.debug) {
-				this.log("HermesFileSystemTest.services: ", HermesFileSystemTest.services);
-			}
+			this.trace("HermesFileSystemTest.services: ", HermesFileSystemTest.services);
 			if(this.services.length > 0) {
 				this.finish();
 			} else {
@@ -50,14 +49,10 @@ enyo.kind({
 	testGetHomeFromServices: function() {
 		enyo.log("Begin called in testGetHomeFromServices.");
 		var h = this.services.filter(function(s) {
-			if (this.debug) {
-				enyo.log("service.conf.id: "+s.conf.id);
-			}
+			this.trace("service.conf.id: ", s.conf.id);
 			return s.config.id === "home";
 		});
-		if (this.debug) {
-			this.log("home service: ", h);
-		}
+		this.trace("home service: ", h);
 		this.home = h;
 		HermesFileSystemTest.home = this.home;
 		if(h.length > 0) {
@@ -72,17 +67,13 @@ enyo.kind({
 	testPropfindOrCreateFolder: function() {
 		enyo.log("Begin called in testPropfindOrCreateFolder.");
 		var service = this.home[0];
-		if (this.debug) {
-			enyo.log("Got the Service: ", service);
-		}
+		this.trace("Got the Service: ", service);
 		/**
 		* PROPFIND on the root id (test/root defined into ide-test.json)
 		*/
 		var req = service.impl.propfind("", 1);
 		req.response(this, function(inSender, inResponse) {
-			if (this.debug) {
-				enyo.log("Got the inResponse for req: ", inResponse);
-			}
+			this.trace("Got the inResponse for req: ", inResponse);
 			var self = this;
 			/**
 			* MKCOL - want to create test/root/TestRunner directory
@@ -90,9 +81,7 @@ enyo.kind({
 			*/
 				var req2 = service.impl.createFolder(inResponse.id, this.dirToCreate);
 				req2.response(function(inSender, inResponse) {
-					if (self.debug) {
-						enyo.log("Got the inResponse for req2: ", inResponse);
-					}
+					self.trace("Got the inResponse for req2: ", inResponse);
 					self.finish();
 				});
 				req2.error(this, function(inSender, inError) {
@@ -114,17 +103,13 @@ enyo.kind({
 	__testGetFile: function(inFilePath, inExpectedSize) {
 		this.log("Begin called in __testGetFile: " + inFilePath);
 		var service = this.home[0];
-		if (this.debug) {
-			this.log("Got the Service: ", service);
-		}
+		this.trace("Got the Service: ", service);
 		/**
 		* PROPFIND on the root id (test/root defined into ide-test.json)
 		*/
 		var req = service.impl.propfind("", -1);
 		req.response(this, function(inSender, inResponse) {
-			if (this.debug) {
-				enyo.log("Got the inResponse for req: ", inResponse);
-			}
+			this.trace("Got the inResponse for req: ", inResponse);
 
 			enyo.forEach(inResponse.children, function(item) {
 				if (item.isDir) {
@@ -132,13 +117,9 @@ enyo.kind({
 						if (( ! file.isDir) && file.path == inFilePath) {
 							var req2 = service.impl.getFile(file.id);
 							req2.response(this, function(inSender, inResponse) {
-								if (this.debug) {
-									enyo.log("Got the inResponse for req2: ", inResponse);
-								}
+								this.trace("Got the inResponse for req2: ", inResponse);
 								var fileSize = inResponse.content.length;
-								if (this.debug) {
-									enyo.log("file size: " + fileSize + " bytes");
-								}
+								this.trace("file size: ", fileSize, " bytes");
 								if (fileSize === inExpectedSize) {
 									this.finish();
 								} else {
@@ -162,17 +143,13 @@ enyo.kind({
 	testPropfindAndCreateFile: function() {
 		enyo.log("Begin called in testPropfindAndCreateFile.");
 		var service = this.home[0];
-		if (this.debug) {
-			enyo.log("Got the Service: ", service);
-		}
+		this.trace("Got the Service: ", service);
 		/**
 		* PROPFIND from the root id (test/root defined into ide-test.json)
 		*/
 		var req = service.impl.propfind("", 1);
 		req.response(this, function(inSender, inResponse) {
-			if (this.debug) {
-				enyo.log("Got the inResponse for req: ", inResponse);
-			}
+			this.trace("Got the inResponse for req: ", inResponse);
 			var self = this;
 			var content = {
 				title: "created by the test suite"
@@ -183,9 +160,7 @@ enyo.kind({
 			if (inResponse.children[3].id) {
 				var req2 = service.impl.createFile(inResponse.children[3].id, this.fileToCreate, JSON.stringify(content));
 				req2.response(self, function(inSender, inResponse) {
-					if (self.debug) {
-						enyo.log("Got the inResponse for req2: ", inResponse);
-					}
+					self.trace("Got the inResponse for req2: ", inResponse);
 					self.finish();
 				});
 				req2.error(this, function(inSender, inError) {
@@ -204,17 +179,13 @@ enyo.kind({
 	testDeleteFile: function() {
 		enyo.log("Begin called in testDeleteFile.");
 		var service = this.home[0];
-		if (this.debug) {
-			enyo.log("Got the Service: ", service);
-		}
+		this.trace("Got the Service: ", service);
 		/**
 		* PROPFIND from the root id (test/root defined into ide-test.json)
 		*/
 		var req = service.impl.propfind("", 1);
 		req.response(this, function(inSender, inResponse) {
-			if (this.debug) {
-				enyo.log("Got the inResponse for req: ", inResponse);
-			}
+			this.trace("Got the inResponse for req: ", inResponse);
 			/**
 			* DELETE - want to delete test/root/TestRunner/App.js file
 			*/
@@ -224,16 +195,12 @@ enyo.kind({
 			    var req2 = service.impl.propfind(inResponse.children[3].id, 1);
 			    var self = this;
 			    req2.response(self, function(inSender, inResponse) {
-					if (self.debug) {
-						enyo.log("Got the inResponse for req3: "+JSON.stringify(inResponse));
-					}
+					self.trace("Got the inResponse for req3: ", JSON.stringify(inResponse));
 					var self2 = self;
 					if (inResponse.children[0].name === this.fileToCreate) {
 						var req3 = service.impl.remove(inResponse.children[0].id);
 						req3.response(self2, function(inSender, inResponse) {
-							if (self2.debug) {
-								enyo.log("Got the inResponse for req3: "+JSON.stringify(inResponse));
-							}
+							self2.trace("Got the inResponse for req3: "+JSON.stringify(inResponse));
 							self2.finish();
 						});
 						req3.error(self2, function(inSender, inError) {
@@ -260,17 +227,13 @@ enyo.kind({
 		enyo.log("Begin called in testDeleteFolder.");
 		var service = this.home[0];
 		this.resetTimeout(10000);
-		if (this.debug) {
-			enyo.log("Got the Service: ", service);
-		}
+		this.trace("Got the Service: ", service);
 		/**
 		* PROPFIND on the root id (test/root defined into ide-test.json)
 		*/
 		var req = service.impl.propfind("", 1);
 		req.response(this, function(inSender, inResponse) {
-			if (this.debug) {
-				enyo.log("Got the inResponse for req: ", inResponse);
-			}
+			this.trace("Got the inResponse for req: ", inResponse);
 			var self = this;
 			/**
 			* DELETE - want to delete test/root/TestRunner directory
@@ -278,9 +241,7 @@ enyo.kind({
 			if ((inResponse.children[3].id) && (inResponse.children[3].name === this.dirToCreate)) {
 				var req2 = service.impl.remove(inResponse.children[3].id);
 				req2.response(self, function(inSender, inResponse) {
-					if (self.debug) {
-						enyo.log("Got the inResponse for req2: "+JSON.stringify(inResponse));						
-					}
+					self.trace("Got the inResponse for req2: ", JSON.stringify(inResponse));						
 					self.finish();
 				});
 				req2.error(self, function(inSender, inError) {
@@ -303,26 +264,20 @@ enyo.kind({
 	testSourceFolderRevival: function() {
 		enyo.log("Begin called in testSourceFolderRevival.");
 		var service = this.home[0];
-		if (this.debug) {
-			enyo.log("Got the Service: ", service);
-		}
+		this.trace("Got the Service: ", service);
 		/**
 		* PROPFIND on the root id (test/root defined into ide-test.json)
 		*/
 		var req = service.impl.propfind("", 1);
 		req.response(this, function(inSender, inResponse) {
-			if (this.debug) {
-				enyo.log("Got the inResponse for req: ", inResponse);
-			}
+			this.trace("Got the inResponse for req: ", inResponse);
 			var self = this;
 			/**
 			* MKCOL - want to create test/root/TestRunner directory
 			*/
 			var req2 = service.impl.createFolder(inResponse.id, this.dirToCreate);
 			req2.response(function(inSender, inResponse) {
-				if (self.debug) {
-					enyo.log("Got the inResponse for req2: ", inResponse);
-				}
+				self.trace("Got the inResponse for req2: ", inResponse);
 				self.finish();
 			});
 			req2.error(this, function(inSender, inError) {

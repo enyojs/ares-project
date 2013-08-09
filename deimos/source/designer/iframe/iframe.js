@@ -1,3 +1,4 @@
+/* global ares */
 enyo.kind({
 	name: "Ares.App",
 	classes: "enyo-fit",
@@ -41,6 +42,7 @@ enyo.kind({
 	debug: false,
 	
 	create: function() {
+		ares.setupTraceLogger(this);        // Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.addHandlers();
 		this.addDispatcherFeature();
@@ -489,9 +491,7 @@ enyo.kind({
 		if (options && options.isRepeater && (inProperty === "onSetupItem" || inProperty === "count")) {
 			// DO NOT APPLY changes to the properties mentioned above
 			// TODO: could be managed later on thru config in .design files if more than one kind need special processings.
-			if (this.debug) {
-				this.log("Skipping modification of \"" + inProperty + "\"");
-			}
+			this.trace("Skipping modification of \"", inProperty, "\"");
 		} else {
 			this.selection[inProperty] = inValue;
 		}
@@ -537,9 +537,7 @@ enyo.kind({
 					Force "count" to 1 and invalidate "onSetupItem" to
 					manage them correctly in the Designer
 				 */
-				if (this.debug) {
-					this.log("Manage repeater " + inComponent.kind, inComponent);
-				}
+				this.trace("Manage repeater ", inComponent.kind, inComponent);
 				inComponent.count = 1;
 				inComponent.onSetupItem = "aresUnImplemetedFunction";
 			}

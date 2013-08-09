@@ -837,10 +837,10 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		var oldName = this.selectedFile.name;
 		var newName = inSender.fileName.trim();
-		this.trace("Creating new file ", newName + " as copy of", oldName);
+		this.trace("Creating new file ", newName, " as copy of", oldName);
 		this.$.service.copy(this.selectedFile.id, newName)
 			.response(this, function(inSender, inFsNode) {
-				this.trace("inNode: "+inFsNode);
+				this.trace("inNode: ", inFsNode);
 				var parentNode = this.getParentNodeOfSelected(),
 				    pkgNode = parentNode.getNodeNamed('package.js');
 				this.doTreeChanged({

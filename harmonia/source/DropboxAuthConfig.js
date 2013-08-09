@@ -1,4 +1,4 @@
-/* global async */
+/* global async, ares */
 /**
  * @see https://www.dropbox.com/developers/reference/api
  * @see https://www.dropbox.com/developers/blog/20
@@ -70,10 +70,9 @@ enyo.kind({
 	],
 
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		if (this.debug) {
-			this.log("title:", this.title);
-		}
+		this.trace("title:", this.title);
 		this.$.serviceName.setContent(this.serviceName);
 		this.auth = this.auth || {};
 		this.auth.headers = this.auth.headers || {};

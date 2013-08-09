@@ -1,12 +1,12 @@
+/* global ares */
 enyo.kind({
 	name: "Ares.TestController",
 	kind: enyo.Component,
 	debug: false,
 	status: "None",
 	create: function() {
-		if (this.debug) {
-			enyo.log("I am Ares Test Controller ...");
-		}
+		ares.setupTraceLogger(this);
+		this.trace("I am Ares Test Controller ...");
 
 		// in charge of the setup&cleanup test environment
 		var req = new enyo.Ajax({
