@@ -361,7 +361,7 @@ enyo.kind({
 		if(options && options.isViewTemplate){
 			this.showActionPopup(options, config, target);
 		} else {
-			this.rerenderCreatedItem(config, target, beforeId);	
+			this.performCreateItem(config, target, beforeId);	
 		}		
 		return true;
 	},
@@ -785,14 +785,15 @@ enyo.kind({
 		this.$.actionPopup.setTargetComponent(target);
 		this.$.actionPopup.show();
 	},
-		
+	
+	// @protected		
 	runPaletteComponentAction: function(inSender,inEvent){
 		var config = this.$.actionPopup.getConfigComponent(config);
 		var target = this.$.actionPopup.getTargetComponent(target);
 		var beforeId = inEvent.beforeId;
 
 		if(inEvent.getName() === "addtoKind"){
-			this.rerenderCreatedItem(config, target, beforeId);			
+			this.performCreateItem(config, target, beforeId);			
 		} else if (inEvent.getName() === "replaceKind"){
 			//TODO: Add a feature for "Replace Button" against view template component on designer behavior - ENYO-2807
 			this.doError({msg:"not implemented yet"});
@@ -802,7 +803,9 @@ enyo.kind({
 		}
 		this.$.actionPopup.hide();
 	},
-	rerenderCreatedItem: function(config, target, beforeId){
+
+	// @protected
+	performCreateItem: function(config, target, beforeId){
 		if (beforeId) {
 			this.insertItemBefore(config, target, beforeId);
 		} else {

@@ -6,7 +6,7 @@ enyo.kind({
 		targetComponent:""
 	},
 	components:[
-		{name:"title", content: "Select The Actions"},
+		{name:"title", content: "Select one action"},
 		{name:"body", kind: "FittableRows", noStretch:true, components: [
 			{name: "vtAction", kind: "ViewTemplateAction", showing:false },
 			{name: "close", kind: "onyx.Button", content: "Cancel", centered: true, style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"}	
