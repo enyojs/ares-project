@@ -30,7 +30,7 @@ enyo.kind({
 	SETTINGS_STORAGE_KEY: "com.enyojs.editor.settings",
 	components: [
 		{classes:"title", content: "EDITOR GLOBAL SETTINGS"},
-		{classes:"ace-settings-popup", components: [
+		{classes:"ace-settings-popup", ondragstart:"drop", ondrag:"drop", ondragfinish:"drop", components: [
 			{kind:"FittableColumns", components: [
 				{kind:"FittableRows", components: [
 					{classes: "ares-row", components: [
@@ -294,5 +294,8 @@ enyo.kind({
 		this.getValuesFromLocalStorage();
 		this.initSettingsPopupFromLocalStorage();
 		this.doClose();
+	},
+	drop: function(inSender, inEvent){
+		return true;
 	}
 });
