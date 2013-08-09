@@ -117,7 +117,7 @@ enyo.kind({
 					if (self.debug) self.log("localStorage[" + key + "] = ", str);
 					var obj;
 					try {
-						obj = JSON.parse(str);
+						obj = enyo.json.parse(str);
 					} catch(e) {
 						obj = {};
 					}
@@ -232,7 +232,7 @@ enyo.kind({
 		service.setConfig(service.config);
 
 		var key = [this.SERVICES_STORAGE_KEY, service.config.id].join('.');
-		Ares.LocalStorage.set(key, JSON.stringify({auth: service.config.auth}), inCallback);
+		Ares.LocalStorage.set(key, enyo.json.stringify({auth: service.config.auth}), inCallback);
 	},
 	/**
 	 * @param {String} serviceId
@@ -315,7 +315,7 @@ enyo.kind({
 	_handleReloadError: function(err) {
 		this.$.errorPopup.setErrorMsg("Ares IDE Server returned an error");
 		this.$.errorPopup.show();
-		this.error("Error: "+JSON.stringify(err));
+		this.error(err);
 	},
 	/**
 	 * Notify every possible users of a change in the list of providers

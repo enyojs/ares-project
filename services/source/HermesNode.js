@@ -367,7 +367,7 @@ enyo.kind({
 			error(this, function(inSender, inError) {
 				var errMsg = "*** Error refreshing the file list (" + inError + ")";
 				try {
-					errMsg += ": " + JSON.parse(inSender.xhrResponse.body).message;
+					errMsg += ": " + enyo.json.parse(inSender.xhrResponse.body).message;
 				} catch(e) {
 				}
 				this.warn(errMsg);
