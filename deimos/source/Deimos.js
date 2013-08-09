@@ -421,10 +421,11 @@ enyo.kind({
 	designerReturnPositionValue: function(inSender, inEvent) {
 		this.$.inspector.setRequestedPositionValue(inEvent.prop, inEvent.value);
 		return true; //TODO See if the code behind the return is useful 
-		
+		/*
 		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
 		this.addReplaceStyleProp(item, inEvent.prop, inEvent.value + "px");
 		this.rerenderKind(item.aresId);
+		 */
 	},
 	applyLayoutKindRules: function(inLayoutData, inControl) {
 		var layoutKind = inLayoutData && inLayoutData.layoutKind;
