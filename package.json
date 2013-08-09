@@ -38,9 +38,10 @@
 		"shelljs": "0.1.x",
 		"temp": "0.4.x",
 		"tunnel": "0.0.x",
-		"zipstream": "0.2.x"
+		"archiver": "~0.4.6",
 	},
 	"bundledDependencies": [
+		"archiver",
 		"ares-generator",
 		"async",
 		"base64stream",
@@ -60,7 +61,6 @@
 		"shelljs",
 		"temp",
 		"tunnel",
-		"zipstream"
 	],
 	"devDependencies": {
 		"mocha": ">=1.4.2",
