@@ -49,6 +49,7 @@ enyo.kind({
 		}
 		
 		inEvent.config = this.config;
+		inEvent.options = this.options;
 	},
 	setModel: function(inModel) {
 		if (inModel) {
@@ -65,6 +66,7 @@ enyo.kind({
 				}
 			}
 			this.config = inModel.config;
+			this.options = inModel.options;
 		}
 	}
 });
@@ -105,7 +107,7 @@ enyo.kind({
 			return true;
 		}
 		
-		inEvent.dataTransfer.setData("ares/createitem", enyo.json.codify.to({config: inEvent.config}));
+		inEvent.dataTransfer.setData("ares/createitem", enyo.json.codify.to({config: inEvent.config, options: inEvent.options}));
 	},
 	/**
 	 * Receive the project data reference which allows to access the analyzer

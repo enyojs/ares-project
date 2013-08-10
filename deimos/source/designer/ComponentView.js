@@ -200,6 +200,7 @@ enyo.kind({
 			case "ares/createitem":
 				this.doCreateItem({
 					config:   inDropData.data.config,
+					options:  inDropData.data.options,
 					targetId: inTargetId,
 					beforeId: inBeforeId
 				});
