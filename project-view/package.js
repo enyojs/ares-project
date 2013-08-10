@@ -1,4 +1,3 @@
-﻿enyo.depends(
-	"$lib/g11n",
+enyo.depends(
 	"source"
 );

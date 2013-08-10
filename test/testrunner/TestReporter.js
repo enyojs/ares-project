@@ -44,13 +44,13 @@ enyo.kind({
 	},
 	testNameDisplay: function(inData) {
 		if (this.debug) {
-			enyo.log("TestReporter: testNameDisplay: "+JSON.stringify(inData));
+			enyo.log("TestReporter: testNameDisplay:", enyo.json.stringify(inData));
 		}
 		this.$.group.createComponent({classes: "enyo-testcase-title", content: inData.data}).render();
 	},
 	testBegun: function(inData) {
 		if (this.debug) {
-			enyo.log("TestReporter: testBegun: "+JSON.stringify(inData));
+			enyo.log("TestReporter: testBegun:", enyo.json.stringify(inData));
 		}
 		this.$.group.createComponent({name: inData.data.test, classes: "enyo-testcase-running", content: inData.data.test + ": running", allowHtml: true}).render();
 	},
@@ -67,9 +67,9 @@ enyo.kind({
 	},
 	updateTestDisplay: function(inData) {
 		if (this.debug) {
-			enyo.log("TestReporter: updataTestDisplay: "+JSON.stringify(inData));
+			enyo.log("TestReporter: updataTestDisplay:", enyo.json.stringify(inData));
 		}
-		var results = JSON.parse(inData.data.results);
+		var results = enyo.json.parse(inData.data.results);
 		var e = results.exception;
 		var info = this.$.group.$[results.name];
 		var content = "<b>" + results.name + "</b>: " + (results.passed ? "PASSED" : results.message);

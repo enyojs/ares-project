@@ -2,47 +2,59 @@ enyo.kind({
 	name:"Ares.DesignerPanels",
 	kind:"FittableRows", 
 	components:[
-		{kind: "onyx.Toolbar", name:"toolbar", classes: "ares-top-toolbar", layoutKind: "FittableColumnsLayout", noStretch: true, components: [
-			{kind: "onyx.Grabber", classes: "ares-grabber", ontap: "activePanel", components:[
+		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels", layoutKind: "FittableColumnsLayout", noStretch: true, components: [
+			{kind: "onyx.Grabber", classes: "ares-grabber ares-icon", ontap: "activePanel", components:[
 				{kind: "aresGrabber", name: "aresGrabberDirection", classes:"lleftArrow"}
 			]},
-			{name:"editorControls", kind: "FittableColumns", fit:true, components:[
-				{kind: "onyx.MenuDecorator", onSelect: "fileMenuItemSelected", components: [
-					{content: "File"},
-					{kind: "onyx.Menu", floating: true, maxHeight: "100%", components: [
-						{name: "saveButton", value: "saveDocAction", components: [
-							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save.png"},
+			{name:"editorControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline", components:[
+				{kind: "onyx.MenuDecorator", classes:"aresmenu ares-right-margin ares-left-margin", onSelect: "fileMenuItemSelected", components: [
+					{tag:"button", content: "File"},
+					{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
+						{name: "saveButton", value: "saveDocAction", classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 							{content: $L("Save")}
 						]},
-						{name: "saveAsButton", value: "saveAsDocAction", components: [
-							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save.png"},
+						{name: "saveAsButton", value: "saveAsDocAction", classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 							{content: $L("Save as...")}
 						]},
 						{classes: "onyx-menu-divider"},
-						{name: "closeButton", value: "closeDocAction", components: [
+						{name: "closeButton", value: "closeDocAction", classes:"aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
 							{content: $L("Close")}
 						]},
-						{name: "closeAllButton", value: "closeAllDocAction", components: [
+						{name: "closeAllButton", value: "closeAllDocAction", classes:"aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
 							{content: $L("Close All")}
 						]}
 					]}
 				]},
-				{name: "newKindButton", kind: "onyx.Button", showing: false, content: $L("New Kind"), ontap: "newKindAction"},
+				{name: "newKindDecorator", kind: "onyx.TooltipDecorator", components: [
+					{name: "newKindButton", kind: "onyx.IconButton", src: "assets/images/new_kind.png", ontap: "newKindAction"},
+					{kind: "onyx.Tooltip", content: $L("New Kind")}
+				]},
 				{fit: true},
-				{name: "editorButton", kind: "onyx.Button", content: "Editor Settings", ontap: "editorSettings"},
-				{name: "designerButton", kind: "onyx.Button", content: $L("Designer"), ontap: "designerAction"}
+				{name: "editorSettingDecorator", kind: "onyx.TooltipDecorator", components: [
+					{name: "editorButton", kind: "onyx.IconButton", src: "assets/images/editor_settings.png", ontap: "editorSettings"},
+					{kind: "onyx.Tooltip", content: "Editor Settings"}
+				]},
+				{name: "designerDecorator", kind: "onyx.TooltipDecorator", components: [
+					{name: "designerButton", kind: "onyx.IconButton", src: "assets/images/designer.png", ontap: "designerAction"},
+					{kind: "onyx.Tooltip", content: $L("Designer")}
+				]}
 			]},
-			{name:"deimosControls", kind: "FittableColumns", fit:true,  components:[
-				{name: "docLabel", content: "Deimos"},
-				{kind: "onyx.PickerDecorator", components: [
-					{name: "kindButton", kind: "onyx.PickerButton"},
+			{name:"deimosControls", kind: "FittableColumns", fit:true,  classes: "onyx-toolbar-inline", components:[
+				{name: "docLabel", content: "Deimos", classes: "ares-left-margin"},
+				{kind: "onyx.PickerDecorator", classes: "ares-right-margin", components: [
+					{name: "kindButton", classes:"ares-toolbar-picker", kind: "onyx.PickerButton"},
 					{name: "kindPicker", kind: "onyx.Picker", onChange: "kindSelected", components: [
 					]}
 				]},
 				{fit: true},
-				{kind: "onyx.Button", content: "Code Editor", ontap: "closeDesignerAction"}
+				{name: "codeEditorDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
+					{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closeDesignerAction"},
+					{kind: "onyx.Tooltip", content: "Code editor"}
+				]}
 			]}
 		]},
 		{

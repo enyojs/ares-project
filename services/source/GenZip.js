@@ -72,7 +72,7 @@ enyo.kind({
 	generate: function(options) {
 		var query = [];
 		enyo.forEach(enyo.keys(options), function(key) {
-			query.push(key + "=" + encodeURIComponent(JSON.stringify(options[key])));
+			query.push(key + "=" + encodeURIComponent(enyo.json.stringify(options[key])));
 		}, this);
 		var data = query.join('&');
 		if (this.debug) this.log("data:", data);

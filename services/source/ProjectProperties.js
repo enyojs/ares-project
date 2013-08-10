@@ -14,5 +14,9 @@ enyo.kind({
 	/** public */
 	getProjectConfig: function() {
 		return this.config;
+	},
+	/**public */
+	saveProjectConfig: function(project) {
+		return true;
 	}
 });

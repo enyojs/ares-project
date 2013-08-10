@@ -17,7 +17,7 @@ enyo.kind({
 		]},
 		{name: "savePopup", kind: "saveActionPopup", onAbandonDocAction: "abandonDocAction", onSave: "saveBeforeClose"},
 		{name: "saveAllPopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonAllDocAction"},
-		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, onFileChosen: "saveAsFileChosen"},
+		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
@@ -702,7 +702,7 @@ enyo.kind({
 	docChanged: function(inSender, inEvent) {
 		this.docData.setEdited(true);
 
-		this.trace(JSON.stringify(inEvent.data));
+		this.trace("data:", enyo.json.stringify(inEvent.data));
 
 		if (this.analysis) {
 			// Call the autocomplete component
@@ -712,7 +712,7 @@ enyo.kind({
 	},
 	cursorChanged: function(inSender, inEvent) {
 		var position = this.$.ace.getCursorPositionInDocument();
-		this.trace(inSender.id + " " + inEvent.type + " " + JSON.stringify(position));
+		this.trace("senderId:", inSender.id, "eventType:", inEvent.type, "position:", enyo.json.stringify(position));
 
 		// Check if we moved to another enyo kind and display it in the right pane
 		var tempo = this.analysis;

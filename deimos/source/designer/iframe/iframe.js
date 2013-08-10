@@ -90,7 +90,7 @@ enyo.kind({
 		enyo.dispatcher.features.push(
 			function(e) {
 				if (_this[e.type]) {
-					_this[e.type](e)
+					_this[e.type](e);
 				}
 				e.preventDispatch = true;
 				return true;
@@ -163,6 +163,13 @@ enyo.kind({
 		if (dragTarget && dragTarget.aresComponent) {
 			this._selectItem(dragTarget);
 		}
+
+		// Using encoded 1px x 1px transparent png
+		var imageData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyBpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBXaW5kb3dzIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjEwRDRFRUY1Rjk3NDExRTI5NTRFQ0U1RjAwMURENDczIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjEwRDRFRUY2Rjk3NDExRTI5NTRFQ0U1RjAwMURENDczIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTBENEVFRjNGOTc0MTFFMjk1NEVDRTVGMDAxREQ0NzMiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MTBENEVFRjRGOTc0MTFFMjk1NEVDRTVGMDAxREQ0NzMiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4/IH2ZAAAAEElEQVR42mL4//8/A0CAAQAI/AL+26JNFgAAAABJRU5ErkJggg==";
+		this.createDragImage(imageData);
+	},
+	up: function(e) {
+		this.clearDragImage();
 	},
 	//* On drag start, set the event _dataTransfer_ property to contain a serialized copy of _this.selection_
 	dragstart: function(e) {
@@ -175,7 +182,7 @@ enyo.kind({
 		e.dataTransfer.setData('ares/moveitem', this.$.serializer.serializeComponent(this.selection, true));
 
 		// Hide the drag image ghost
-		e.dataTransfer.setDragImage(this.createDragImage(), 0, 0);
+		e.dataTransfer.setDragImage(this.dragImage, 0, 0);
 
         return true;
 	},
@@ -275,7 +282,7 @@ enyo.kind({
 				dropTargetId = this.getContainerItem() ? this.getContainerItem() : this.getEventDropTarget(inEvent.dispatchTarget);
 				dropTargetId = (dropTargetId && dropTargetId.aresId) || null;
 				beforeId = this.getBeforeItem() ? this.getBeforeItem().aresId : null;
-				this.sendMessage({op: "createItem", val: {config: dropData.config, targetId: dropTargetId, beforeId: beforeId}});
+				this.sendMessage({op: "createItem", val: {config: dropData.config, options: dropData.options, targetId: dropTargetId, beforeId: beforeId}});
 				break;
 			
 			default:
@@ -294,8 +301,9 @@ enyo.kind({
 		this.unhighlightDropTargets();
 		this.clearDragImage();
 	},
-	createDragImage: function() {
-		this.dragImage = document.createElement();
+	createDragImage: function(inImage) {
+		this.dragImage = document.createElement("img");
+		this.dragImage.src = inImage;
 		return this.dragImage;
 	},
 	clearDragImage: function() {

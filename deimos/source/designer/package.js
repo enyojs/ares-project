@@ -1,4 +1,4 @@
-﻿enyo.depends(
+enyo.depends(
 	"Palette.js",
 	"Palette.css",
 	"Json.js",

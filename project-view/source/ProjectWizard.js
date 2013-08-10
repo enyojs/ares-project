@@ -56,6 +56,8 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		if (!inEvent.file) {
 			this.hideMe();
+			this.$.selectDirectoryPopup.reset();
+
 			return;
 		}
 
@@ -114,7 +116,7 @@ enyo.kind({
 			appinfoReq.response(this, function(inSender, fileStuff) {
 				var info;
 				try {
-					info = JSON.parse(fileStuff.content);
+					info = enyo.json.parse(fileStuff.content);
 				} catch(err) {
 					this.hide();
 					this.warn( "Unable to parse appinfo.json >>", fileStuff.content, "<<");
@@ -199,6 +201,7 @@ enyo.kind({
 		var testCallBack = inEvent.testCallBack;
 		// once project.json is created, setup and show project properties widget
 		this.$.selectDirectoryPopup.hide();
+		this.$.selectDirectoryPopup.reset();
 		this.show() ;
 		if (testCallBack) {
 			testCallBack();
@@ -348,7 +351,7 @@ enyo.kind({
 	classes:"ares-masked-content-popup",
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource", onFileChoosersChecked: "fileChoosersChecked"},
-		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, onFileChosen: "selectFileChosen"}
+		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "selectFileChosen"}
 	],
 
 	debug: false,
@@ -367,8 +370,9 @@ enyo.kind({
 		if (target) {
 			var config = target.getConfig();
 			this.targetProject = target ;
-			this.$.propertiesWidget.setupModif() ;
+			this.$.propertiesWidget.setupModif();
 			this.$.propertiesWidget.preFill(config.data);
+			this.$.propertiesWidget.setTargetProject(target);
 			this.$.propertiesWidget.activateFileChoosers(true);
 
 			var show = (function () {
@@ -429,6 +433,7 @@ enyo.kind({
 		}
 
 		this.$.propertiesWidget.updateFileInput(chooser, inEvent.name);
+		this.$.selectFilePopup.reset();
 		return true;
 	},
 	notifyChangeSource: function(inSender, inEvent) {
@@ -510,6 +515,7 @@ enyo.kind({
 	centered: true,
 	floating: true,
 	autoDismiss: false,
+	folderChooser: true,
 
 	classes: "enyo-unselectable",
 	events: {
@@ -519,6 +525,7 @@ enyo.kind({
 		onFileChosen: "searchProjects"
 	},
 	debug: false,
+	projects: 0,
 
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
@@ -533,7 +540,7 @@ enyo.kind({
 				this.trace( "file contents: '", fileStuff.content, "'" ) ;
 
 				try {
-					projectData = JSON.parse(fileStuff.content)  ;
+					projectData = enyo.json.parse(fileStuff.content)  ;
 				} catch(e) {
 					this.warn("Error parsing project data: ", e.toString());
 				}
@@ -545,12 +552,19 @@ enyo.kind({
 					folderId: parentDir.id,
 					service: this.selectedFile.service
 				});
+
+				this.projects--;
+
+				if (this.projects === 0) {
+					this.reset();
+				}
 			});
 	},
 
 	searchProjects: function (inSender, inEvent) {
 		if (!inEvent.file) {
 			this.hide();
+			this.reset();
 			return;
 		}
 
@@ -581,6 +595,7 @@ enyo.kind({
 					enyo.forEach(inFiles, function(v) {
 						if ( v.name === 'project.json' ) {
 							foundProject = true ;
+							this.projects++;
 							this.importProject(service, child, v) ;
 						}
 						else if ( v.isDir ===  true ) {
@@ -703,7 +718,7 @@ enyo.kind({
 			return;
 		}
 
-		var req = service.putFile(fileId, JSON.stringify(this.newConfigData, null, 2));
+		var req = service.putFile(fileId, enyo.json.stringify(this.newConfigData, null, 2));
 		req.response(this, this.createProjectEntry);
 		req.error(this, function(inSender, inError) {
 			this.warn("Unable to duplicate the project, unable to update 'project.json'", inError);
@@ -713,9 +728,11 @@ enyo.kind({
 	createProjectEntry: function(inSender, inData) {
 		this.trace(inData);
 		var serviceId = this.targetProject.getServiceId();
-
 		// Create the project entry in the project list
-		Ares.Workspace.projects.createProject(this.newConfigData.name, this.newFolderId, serviceId);
+		var project = Ares.Workspace.projects.createProject(this.newConfigData.name, this.newFolderId, serviceId);
+		if(project){
+			this.owner.$.projectList.selectInProjectList(project);
+		}
 		this.doHideWaitPopup();
 	},
 	$LS: function(msg, params) {
