@@ -337,6 +337,7 @@ enyo.kind({
 	//* Create item from palette (via drag-and-drop from Palette into Designer or Component View)
 	createItem: function(inSender, inEvent) {
 		var config = inEvent.config,
+			options = inEvent.options,
 			targetId = inEvent.targetId,
 			beforeId = inEvent.beforeId,
 			target = (targetId)
@@ -347,10 +348,7 @@ enyo.kind({
 			enyo.warn("Could not create new item - bad data: ", inEvent);
 			return true;
 		}
-		
-		// check component's options
-		var options = Model.getKindOptions(config.name || config.kind);
-		
+				
 		// Give the new component (and any children) a fresh _aresId_
 		config.aresId = this.generateNewAresId();
 		if (config.components) {
