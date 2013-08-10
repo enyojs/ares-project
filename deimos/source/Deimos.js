@@ -29,7 +29,7 @@ enyo.kind({
 						]},
 						{kind: "onyx.Button", name: "swapDesignerDimensionsButton", classes: "deimos-swap-dimensions-button", allowHtml: true, content: "&larr;<br/>&rarr;", ontap: "swapDesignerDimensions"},
 						{content: "Height:"},
-						{kind: "onyx.InputDecorator", classes: "deimos-designer-toolbar-spacing", components: [
+						{kind: "onyx.InputDecorator", components: [
 							{kind: "onyx.Input", name: "designerHeightInput", classes: "deimos-designer-input", placeholder: "Auto", onchange: "updateHeight"}
 						]},
 						{content: "Zoom:"},
