@@ -39,8 +39,12 @@ enyo.kind({
 					{kind: "onyx.Tooltip", content: "Editor Settings"}
 				]},
 				{name: "designerDecorator", kind: "onyx.TooltipDecorator", components: [
-					{name: "designerButton", kind: "onyx.IconButton", src: "assets/images/designer.png", ontap: "designerAction"},
+					{name: "designerButton", kind: "onyx.IconButton", Showing: "false", src: "assets/images/designer.png", ontap: "designerAction"},
 					{kind: "onyx.Tooltip", content: $L("Designer")}
+				]},
+				{name: "cssDecorator", kind: "onyx.TooltipDecorator", components: [
+					{name: "cssButton", kind: "onyx.IconButton", Showing: "false", src: "assets/images/designer.png", ontap: "doCss"},
+					{kind: "onyx.Tooltip", content: $L("Css Designer")}
 				]}
 			]},
 			{name:"deimosControls", kind: "FittableColumns", fit:true,  classes: "onyx-toolbar-inline", components:[
@@ -55,7 +59,15 @@ enyo.kind({
 					{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closeDesignerAction"},
 					{kind: "onyx.Tooltip", content: "Code editor"}
 				]}
-			]}
+			]},
+			{name:"cssControls", kind: "FittableColumns", fit:true,  classes: "onyx-toolbar-inline", components:[
+
+				{fit: true},
+				{name: "cssEditorDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
+					{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closecssDesigner"},
+					{kind: "onyx.Tooltip", content: "Code editor"}
+				]}
+			]},
 		]},
 		{
 			name: "bottomBar",
@@ -82,13 +94,17 @@ enyo.kind({
 				]},
 				{components: [
 					{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
+				]},
+				{components: [
+					{kind: "Hera"},
 				]}
 			]
 		}
 	],
 	events: {
 		onRegisterMe: "",
-		onMovePanel:""
+		onMovePanel:"",
+		onCloseCss: ""
 	},
 	published: {
 		panelIndex: 2
@@ -132,9 +148,26 @@ enyo.kind({
 	manageConrols: function(designer){
 		this.$.editorControls.setShowing(!designer);
 		this.$.deimosControls.setShowing(designer);
+		this.$.cssControls.setShowing(false);
 		this.$.toolbar.resized();
 	},
 	switchGrabberDirection: function(active){
 		this.$.aresGrabberDirection.switchGrabberDirection(active);
-	}	
+	},
+	doCss: function(){
+		this.owner.componentsRegistry.phobos.cssAction();
+		this.$.editorControls.setShowing(false);
+		this.$.deimosControls.setShowing(false);
+		this.$.cssControls.setShowing(true);
+		this.$.toolbar.resized();
+	},
+	closecssDesigner: function(){
+		//this.owner.componentsRegistry.deimos.closeDesignerAction();
+		this.owner.componentsRegistry.hera.csssave();
+		this.$.editorControls.setShowing(true);
+		this.$.deimosControls.setShowing(false);
+		this.$.cssControls.setShowing(false);
+		this.$.toolbar.resized();
+		this.doCloseCss();
+	}
 });

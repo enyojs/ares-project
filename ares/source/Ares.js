@@ -54,6 +54,10 @@ enyo.kind({
 		{kind: "Ares.PackageMunger", name: "packageMunger"}
 	],
 	handlers: {
+		onCssDocument: "cssDocument",
+		onCloseCss: "closecss", 
+		onNewcss: "newCss", 
+		onReplacecss: "replacecss",
 		onReloadServices: "handleReloadServices",
 		onUpdateAuth: "handleUpdateAuth",
 		onShowWaitPopup: "showWaitPopup",
@@ -86,6 +90,7 @@ enyo.kind({
 	designerPanelsIndex: 2,
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
+	heraViewIndex:2,
 	projectListWidth: 300,
 	isProjectView: true,
 	create: function() {
@@ -595,6 +600,22 @@ enyo.kind({
 			}
 		},
 		instance: null
+	},
+	cssDocument: function(inSender, inEvent){
+		this.componentsRegistry.hera.cssload(inEvent);
+		this.componentsRegistry.codeEditor.$.panels.setIndex(this.heraViewIndex);
+		this.activeDocument.setCurrentIF('hera');
+	},
+	closecss: function(inSender, inEvent){
+		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
+		this.activeDocument.setCurrentIF('code');
+	},
+	newCss: function(inSender, inEvent){
+		console.log( inSender, inEvent, this.componentsRegistry.hera.outPut );
+		this.componentsRegistry.phobos.newcss(this.componentsRegistry.hera.outPut);
+	},
+	replacecss: function(inSender, inEvent){
+		this.componentsRegistry.phobos.replacecss(this.componentsRegistry.hera.old, this.componentsRegistry.hera.out);
 	}
 });
 

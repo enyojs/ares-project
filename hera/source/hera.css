@@ -6,7 +6,7 @@
 .css_builder_RadioGroup {
 	font-size: 10px;
 	width: 125px;
-	height: 50px;
+	height: 40px;
 
 }
 .css_builder_picker {
@@ -45,4 +45,34 @@
 
 .css_builder_button {
 	font-size: 10px;
+}
+
+
+
+.list-sample {
+	background-color: gray;
+}
+.list-sample-list {
+	width: 50%;
+	min-width: 300px;
+	max-width: 600px;
+	margin: auto;
+	background-color: #eee;
+}
+.list-sample-item {
+	background-color: #F5F5F5; 
+	border-bottom: 1px solid #D0D0D0; 
+	padding: 5px;
+}
+.list-sample-index {
+	float: right;
+	font-size: 16px;
+	font-weight: normal;
+}
+.list-sample-selected {
+	background-color: #c4e3fe;
+}
+/* needed to make onyx-highlight more specific for highlighting to work */
+.onyx-highlight.list-sample-selected {
+	background-color: #dedfdf;
 }
