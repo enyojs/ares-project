@@ -1,3 +1,4 @@
+/* global async, ServiceRegistry, ares */
 enyo.kind({
 	name: "BasicAuthConfig",
 
@@ -42,8 +43,9 @@ enyo.kind({
 	 * @protected
 	 */
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		if (this.debug) this.log("serviceId:", this.serviceId, ", serviceName:", this.serviceName, ", username:", this.username, ", password:", 'XXX' /*this.password*/);
+		this.trace("serviceId:", this.serviceId, ", serviceName:", this.serviceName, ", username:", this.username, ", password:", 'XXX' /*this.password*/);
 		this.service = ServiceRegistry.instance.resolveServiceId(this.serviceId);
 		this.$.serviceName.setContent(this.serviceName);
 		this.usernameChanged();
@@ -86,7 +88,7 @@ enyo.kind({
 	 * @private
 	 */
 	authenticate: function(next) {
-		if (this.debug) this.log();
+		this.trace("");
 		this.service.authenticate({
 			username: this.$.username.getValue(),
 			password: this.$.password.getValue()
@@ -97,7 +99,7 @@ enyo.kind({
 	 * @protected
 	 */
 	display: function(data, next) {
-		if (this.debug) this.log(data);
+		this.trace(data);
 		next();
 	}
 });

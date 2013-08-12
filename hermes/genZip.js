@@ -1,3 +1,4 @@
+/* global require, console, process, module, __filename */
 /**
  * Project Generator based on ZIP-files
  */
@@ -14,7 +15,6 @@ var fs = require("fs"),
     http = require("http"),
     rimraf = require("rimraf"),
     ptools = require("ares-generator"),
-    HttpError = require("./lib/httpError"),
     CombinedStream = require('combined-stream');
 
 var basename = path.basename(__filename, '.js');
@@ -307,15 +307,19 @@ if (path.basename(process.argv[1], '.js') === basename) {
 
 	log.level = argv.level || 'http';
 
-	var obj = new GenZip({
+	new GenZip({
 		pathname: argv.pathname,
 		port: argv.port,
 		level: argv.level
 	}, function(err, service){
-		if(err) process.exit(err);
+		if(err) {
+			process.exit(err);
+		}
 		// process.send() is only available if the
 		// parent-process is also node
-		if (process.send) process.send(service);
+		if (process.send) {
+			process.send(service);
+		}
 	});
 } else {
 

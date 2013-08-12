@@ -1,14 +1,12 @@
-var
-	config = require('./config.js'),
+/* global require, console, exports */
+var config = require('./config.js'),
 	DropboxClient = require('dropbox').DropboxClient,
-	path = require('path')
-	;
+	path = require('path');
 
 exports.route = function(req, res) {
-	var
-		auth_token = req.param("token"),
+	var auth_token = req.param("token"),
 		auth_secret = req.param("secret"),
-		path = req.params[0]
+		path = req.params[0];
 	//
 	console.log('');
 	console.log('');
@@ -33,10 +31,10 @@ function list(inDropbox, inPath, next) {
 			return next(err);
 		}
 		//
-		for (i=0; n=data.contents[i]; i++) {
-			n.path = n.path.replace(/^\/+/, '')
+		for (i=0; (n=data.contents[i]); i++) {
+			n.path = n.path.replace(/^\/+/, '');
 			if ({".": 1, "..": 1}[n.path]) {
-				continue
+				continue;
 			}
 			entries.push({
 				id: n.path,
@@ -49,4 +47,4 @@ function list(inDropbox, inPath, next) {
 		console.log('Listed, ', inPath, ': ', entries);
 		next(null, {contents: entries});
 	});
-};
+}

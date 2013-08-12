@@ -67,7 +67,7 @@ enyo.kind({
 		propW.setTemplateList([]);		// Reset template list
 
 		// Pre-fill project properties widget
-		propW.preFill(ProjectConfig.PREFILLED_CONFIG_FOR_UI),
+		propW.preFill(ProjectConfig.PREFILLED_CONFIG_FOR_UI);
 		propW.$.projectDirectory.setContent(this.selectedDir.path);
 		propW.$.projectName.setValue(this.selectedDir.name);
 		propW.activateFileChoosers(false);

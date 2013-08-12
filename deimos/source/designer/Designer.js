@@ -1,3 +1,4 @@
+/* global Model, ares */
 enyo.kind({
 	name: "IFrameDesigner",
 	published: {
@@ -29,12 +30,16 @@ enyo.kind({
 	scale: 1,
 	reloading: false,
 	debug: false,
+	create: function() {
+		ares.setupTraceLogger(this);
+		this.inherited(arguments);
+	},
 	rendered: function() {
 		this.inherited(arguments);
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
 	},
 	currentKindChanged: function() {
-		if (this.debug) this.log("reloadNeeded", this.reloadNeeded);
+		this.trace("reloadNeeded", this.reloadNeeded);
 		if (this.reloadNeeded) {
 			this.reloadNeeded = false;
 			this.reload();
@@ -75,7 +80,7 @@ enyo.kind({
 		this.projectSource = inSource;
 		this.projectPath = serviceConfig.origin + serviceConfig.pathname + "/file";
 		var iframeUrl = this.baseSource + "?src=" + this.projectSource.getProjectUrl();
-		if (this.debug) { this.log("Setting iframe url: " + iframeUrl); }
+		this.trace("Setting iframe url: ", iframeUrl);
 		this.$.client.hasNode().src = iframeUrl;
 	},
 	reload: function() {
@@ -85,7 +90,7 @@ enyo.kind({
 	
 	//* Send message via communicator
 	sendMessage: function(inMessage) {
-		if (this.debug) { this.log("Op: " + inMessage.op, inMessage); }
+		this.trace("Op: ", inMessage.op, inMessage);
 		this.$.communicator.sendMessage(inMessage);
 	},
 	//* Respond to message from communicator
@@ -93,7 +98,7 @@ enyo.kind({
 		
 		var msg = inEvent.message;
 
-		if (this.debug) { this.log("Op: " + msg.op, msg); }
+		this.trace("Op: ", msg.op, msg);
 
 		if(!msg || !msg.op) {
 			enyo.warn("Deimos designer received invalid message data:", msg);

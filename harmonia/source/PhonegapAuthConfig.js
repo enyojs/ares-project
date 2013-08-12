@@ -1,3 +1,4 @@
+/* global ares */
 enyo.kind({
 	name: "PhonegapAuthConfig",
 	debug: true,
@@ -6,6 +7,7 @@ enyo.kind({
 	 * @protected
 	 */
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 	},
 	/**
@@ -13,7 +15,7 @@ enyo.kind({
 	 * @protected
 	 */
 	display: function(data, next) {
-		if (this.debug) this.log(data);
+		this.trace(data);
 		var userData = {
 			userId: data.user.id,
 			username: data.user.username,
