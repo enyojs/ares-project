@@ -1,4 +1,4 @@
-/*global enyo,ares,async,Ares,Phonegap,XMLWriter,ServiceRegistry*/
+/*global enyo, ares, async, Ares, Phonegap, XMLWriter, ServiceRegistry, next */
 /**
  * Kind to manage the life cycle of building a mobile application using 
  * the service Phonegap build.
@@ -215,7 +215,7 @@ enyo.kind({
 		var appIdExist = false;
 
 		// immediately go on if appId is blank
-		if (projectAppId.toString().length == 0) {
+		if (projectAppId.toString().length === 0) {
 			next(null, userData);
 			return;
 		}
@@ -237,8 +237,7 @@ enyo.kind({
 			var config = this.getConfigInstance(project);
 			config.providers.phonegap.appId = "";
 			ServiceRegistry.instance.setConfig(config);
-			var errorMsg = 	"The AppId '"+ projectAppId +"' does not exist in the Phonegap Build account " +
-					userData.user.email + ". Please choose a correct AppId";
+			var errorMsg = "The AppId \'"+ projectAppId +"\' does not exist in the Phonegap Build account " + userData.user.email + ". Please choose a correct AppId";
 			next(errorMsg);
 		}
 	},
@@ -468,7 +467,7 @@ enyo.kind({
 	 * @public
 	 */
 	build: function(project, next) {
-		this.trace("Starting phonegap build: " + this.url + '/build');
+		this.trace("Starting phonegap build: ", this.url, '/build');
 		async.waterfall([
 			enyo.bind(this, this.authorize),
 			enyo.bind(this, this.checkAppId, project),
@@ -491,7 +490,7 @@ enyo.kind({
 	 * @public
 	 */
 	buildStatus: function(project, next) {
-		this.trace("Getting build status:  " + this.url + '/build');
+		this.trace("Getting build status:  ", this.url, '/build');
 		async.waterfall([
 			enyo.bind(this, this.authorize),
 			enyo.bind(this, this._getBuildStatus, project),			
@@ -665,9 +664,7 @@ enyo.kind({
 	 * @private            
 	 */
 	_storePkg: function(project, folderId, inData, next) {
-		if(this.debug){		
-			this.trace("data content.ctype: ", inData.ctype);	
-		}	
+		this.trace("data content.ctype: ", inData.ctype);	
 
 		var req = project.getService().createFiles(folderId, 
 			{content: inData.content, ctype: inData.ctype});
@@ -880,9 +877,9 @@ enyo.kind({
 					handleAs: 'text'
 				});		
 				req.response(this, function(inSender, inData) {
-					this.trace("response: received " + inData.length + " bytes typeof: " + (typeof inData));
+					this.trace("response: received ", inData.length, " bytes typeof: ", (typeof inData));
 					var ctype = req.xhrResponse.headers['content-type'];
-					this.trace("response: received ctype: " + ctype);
+					this.trace("response: received ctype: ", ctype);
 					next(null, {content: inData, ctype: ctype});			
 				});
 				req.error(this, this._handleServiceError.bind(this, "Unable to download application package", next));

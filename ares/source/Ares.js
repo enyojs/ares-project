@@ -68,7 +68,6 @@ enyo.kind({
 		onSaveDocument: "saveDocument", 
 		onSaveAsDocument: "saveAsDocument", 
 		onCloseDocument: "closeDocument", 
-		onCloseAllDocument: "closeAllDocument",
 		onCloseProjectDocuments: "closeDocumentsForProject",
 		onDesignDocument: "designDocument", 
 		onUpdate: "phobosUpdate",
@@ -263,7 +262,7 @@ enyo.kind({
 		}
 
 		function _footer(err, result) {
-			if (self.debug) { enyo.log("err:", err, "result:", result); }
+			self.trace("err:", err, "result:", result);
 			if (typeof inEvent.next === 'function') {
 				inEvent.next(err, result);
 			}
@@ -277,14 +276,6 @@ enyo.kind({
 				self.showProjectView();
 			}
 		});
-	},
-	closeAllDocument: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-		var files = Ares.Workspace.files;
-		while(files.models.length) {
-			this._closeDocument(files.at(0).getId());
-		}
-		this.showProjectView();
 	},
 	/* @private */
 	closeSomeDocuments: function(inSender, inEvent) {

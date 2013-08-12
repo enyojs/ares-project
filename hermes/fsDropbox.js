@@ -1,3 +1,4 @@
+/* global require, console, process, module, __dirname, __filename */
 /**
  * fsDropbox.js -- Ares FileSystem (fs) provider, using Dropbox
  */
@@ -7,12 +8,11 @@
 var util  = require("util"),
     path = require("path"),
     fs = require("fs"),
-    http = require("http"),
-    https = require("https"),
     dropbox = require("dropbox"),
-    request = require("request"),
     FsBase = require(__dirname + "/lib/fsBase"),
     HttpError = require(__dirname + "/lib/httpError");
+
+var basename = path.basename(__filename, '.js');
 
 function FsDropbox(inConfig, next) {
 	inConfig.name = inConfig.name || "fsDropbox";
@@ -33,7 +33,9 @@ FsDropbox.prototype.configure = function(config, next) {
 	if (this.httpsAgent) {
 		dropbox.Xhr.Request.nodejsSet({httpsAgent: this.httpsAgent});
 	}
-	if (next) next();
+	if (next) {
+		next();
+	}
 };
 
 FsDropbox.prototype.errorResponse = function(err) {
@@ -74,7 +76,7 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 		req.dropbox = new dropbox.Client({
 			key: auth.appKey, secret: auth.appSecret, sandbox: true
 		});
-		req.dropbox.authDriver(new _authDriver(auth));
+		req.dropbox.authDriver(new AuthDriver(auth));
 		req.dropbox.authenticate((function(err, client) {
 			if (err) {
 				return next(err);
@@ -85,7 +87,7 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 	}
 
 	// see https://github.com/dropbox/dropbox-js/blob/master/doc/auth_drivers.md
-	function _authDriver(auth) {
+	function AuthDriver(auth) {
 		if (!auth || !auth.uid ||
 		    !auth.appKey || !auth.appSecret ||
 		    !auth.accessToken || !auth.accessTokenSecret) {
@@ -170,7 +172,7 @@ FsDropbox.prototype.copyOrMove = function(req, res, op, next) {
 	    dstFolderId = req.param('folderId'),
 	    overwriteParam = req.param('overwrite');
 	var dstRelPath;
-	this.log("FsDropbox.copyOrMove(): path:", srcRelPath, "name:", dstName, "folderId:", dstFolderId);
+	this.log("FsDropbox.copyOrMove(): path:", srcRelPath, "name:", dstName, "folderId:", dstFolderId, "overwriteParam:", overwriteParam);
 	if (dstName) {
 		// rename/copy file within the same collection (folder)
 		dstRelPath = path.join(path.dirname(srcRelPath),
@@ -226,7 +228,6 @@ FsDropbox.prototype.putFile = function(req, file, next) {
 		noOverwrite: false,
 		lastVersionTag: undefined
 	};
-	var buf = file.buffer;
 	if (file.path) {
 		this.log("FsDropbox.putFile(): uploading file:", file.path);
 		// Dropbox has no Node.js streaming interface, so we
@@ -338,7 +339,7 @@ function getNode(stat, depth) {
 
 // module/main wrapper
 
-if (path.basename(process.argv[1]) === "fsDropbox.js") {
+if (path.basename(process.argv[1], '.js') === basename) {
 	// We are main.js: create & run the object...
 	
 	var knownOpts = {
@@ -367,15 +368,19 @@ if (path.basename(process.argv[1]) === "fsDropbox.js") {
 		process.exit(0);
 	}
 
-	var fsDropbox = new FsDropbox({
+	new FsDropbox({
 		pathname: argv.pathname,
 		port: argv.port,
 		verbose: (argv.level === 'verbose') // FIXME: rather use npm.log() directly
 	}, function(err, service){
-		if (err) process.exit(err);
+		if (err) {
+			process.exit(err);
+		}
 		// process.send() is only available if the
 		// parent-process is also node
-		if (process.send) process.send(service);
+		if (process.send) {
+			process.send(service);
+		}
 	});
 
 } else {

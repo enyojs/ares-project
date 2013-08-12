@@ -1,3 +1,4 @@
+/* global ares */
 enyo.kind({
 	name: "Ares.ErrorPopup",
 	kind: "onyx.Popup",
@@ -30,10 +31,11 @@ enyo.kind({
 			]}
 	],
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 	},
 	errorMsgChanged: function (oldVal) {
-		if (this.debug) this.log(oldVal, "->", this.errorMsg);
+		this.trace(oldVal, "->", this.errorMsg);
 		this.$.msg.setContent(this.errorMsg);
 	},
 	detailsTextChanged: function() {
@@ -84,6 +86,8 @@ enyo.kind({
 				err = evt.err;
 				msg = evt.msg || (err && err.toString());
 			}
+		} else {
+			msg = evt.toString();
 		}
 		text = err && (err.text || err.stack);
 		html = err && err.html;

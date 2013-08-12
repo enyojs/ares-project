@@ -1,4 +1,5 @@
 #!/usr/bin/env ../../node_modules/mocha/bin/mocha
+/* global require, console, process, it, describe, __dirname */
 /**
  * ares.spec.js -- ARES server test suite
  */
