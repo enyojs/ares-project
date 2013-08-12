@@ -1,4 +1,3 @@
-/* global ares */
 enyo.kind({
 	name: "Ares.App",
 	classes: "enyo-fit",

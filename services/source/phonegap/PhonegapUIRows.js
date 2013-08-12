@@ -222,17 +222,19 @@ enyo.kind({
 		return true;
 	},
 	displayConfigXmlPanel: function(){
-		
+
 		if (this.name === "autoGenerateXML"){
 			this.trace("auto-generate config.xml is enabled: ", this.getValue());
-			
-			if(this.getValue()) {			
-				this.pan && this.pan.setClassAttribute("ares-project-properties-targetsRows-display");
-			} else {			
-				this.pan && this.pan.setClassAttribute("ares-project-properties-targetsRows-hide");		
-			}			
+
+			if (this.pan) {
+				if(this.getValue()) {
+					this.pan.setClassAttribute("ares-project-properties-targetsRows-display");
+				} else {
+					this.pan.setClassAttribute("ares-project-properties-targetsRows-hide");
+				}
+			}
 		}
-		
+
 	},
 
 	/** @public */
