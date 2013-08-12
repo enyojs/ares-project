@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "FindPopup",
-	kind: "Ares.AresPopup",
+	kind: "Ares.Popup",
 	classes:"ares-classic-popup",
 	events: {
 		onFindNext:"",

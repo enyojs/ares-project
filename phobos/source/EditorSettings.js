@@ -1,7 +1,7 @@
 /* global ares */
 enyo.kind({
 	name: "EditorSettings",
-	kind: "Ares.AresPopup",
+	kind: "Ares.Popup",
 	classes:"ares-classic-popup",
 	events: {
 		onClose: "",

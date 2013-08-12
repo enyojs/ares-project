@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "Ares.AresPopup",
+	name: "Ares.Popup",
 	kind: "onyx.Popup",
 	handlers: {
 		ondragstart: "_dragstartAction",
