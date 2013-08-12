@@ -12,7 +12,7 @@ var fs = require("fs"),
     async = require("async"),
     mkdirp = require("mkdirp"),
     rimraf = require("rimraf"),
-    zipstream = require('zipstream'),
+    archiver = require('archiver'),
     CombinedStream = require('combined-stream'),
     base64stream = require('base64stream'),
     HttpError = require("./httpError");
@@ -66,7 +66,8 @@ function BdBase(config, next) {
 	/*
 	 * Error Handling - Wrap exceptions in delayed handlers
 	 */
-	this.app.use(function(req, res, next) {
+	this.app.use(function _useDomain(req, res, next) {
+		log.silly("BdBase#_useDomain()");
 		var domain = createDomain();
 
 		domain.on('error', function(err) {
@@ -79,7 +80,8 @@ function BdBase(config, next) {
 	});
 
 	// CORS -- Cross-Origin Resources Sharing
-	this.app.use(function(req, res, next) {
+	this.app.use(function _useCors(req, res, next) {
+		log.silly("BdBase#_useCors()");
 		res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
 		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
 		res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control');
@@ -439,7 +441,7 @@ BdBase.prototype.zip = function(req, res, next) {
 	
 	req.zip = {};
 	req.zip.path = path.join(req.appDir.root, "app.zip");
-	req.zip.stream = zipstream.createZip({level: 1});
+	req.zip.stream = archiver.createZip({level: 1});
 	req.zip.stream.pipe(fs.createWriteStream(req.zip.path));
 	_walk.bind(this)(req.appDir.zipRoot, "" /*prefix*/, function() {
 		try {

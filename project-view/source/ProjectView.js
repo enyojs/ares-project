@@ -1,4 +1,4 @@
-/* global ares, ServiceRegistry, ProjectConfig */
+/*global ServiceRegistry, ProjectConfig, ares */
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -21,7 +21,8 @@ enyo.kind({
 			onDuplicateProject: "duplicateProjectAction",
 			onProjectRemoved: "projectRemoved",
 			onProjectSelected: "handleProjectSelected",
-			name: "projectList"},
+			name: "projectList"
+		},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate", classes:"ares-masked-content-popup"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan", classes:"ares-masked-content-popup"},
 		{kind: "ProjectWizardModify", canGenerate: false, 
@@ -45,7 +46,7 @@ enyo.kind({
 		onRegisterMe: ""
 	},
 	create: function() {
-		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.doRegisterMe({name:"projectView", reference:this});
 	},
@@ -213,6 +214,8 @@ enyo.kind({
 				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
 				+ 'url=' + encodeURIComponent(projectUrl);
 
+			this.trace("preview on URL ", previewUrl) ;
+			
 			window.open(
 				previewUrl,
 				'_blank', // ensure that a new window is created each time preview is tapped

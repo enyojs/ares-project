@@ -1,3 +1,4 @@
+/* global Model, ares */
 enyo.singleton({
 	name: "Model",
 	kind: "enyo.Component",
@@ -33,6 +34,7 @@ enyo.singleton({
 
 	levelMapping: null,			// Instanciated at create() time
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		//
 		this.levelMapping = {
@@ -47,7 +49,7 @@ enyo.singleton({
 	 * @public
 	 */
 	resetInformation: function() {
-		if (this.debug)  { this.log("resetInformation!"); }
+		this.trace("resetInformation!");
 		this.info = {};
 		this.addInformation("properties", "__default", this.defaults.properties);
 		this.addInformation("events", "__default", this.defaults.events);
@@ -59,11 +61,11 @@ enyo.singleton({
 	 * @public
 	 */
 	buildInformation: function(projectIndexer) {
-		if (this.debug)  { this.log("buildInformation: Indexer: ", projectIndexer); }
+		this.trace("buildInformation: Indexer: ", projectIndexer);
 		this.resetInformation();
 		enyo.forEach(projectIndexer.design.inspector, function(item) {
 			if (item.type === "kind") {
-				if (this.debug) { this.log("Processing: " + item.name, item); }
+				this.trace("Processing: ", item.name, item);
 				this.addInformation("properties", item.name, item.properties);
 				this.addInformation("events", item.name, item.events);
 			} else {
@@ -87,7 +89,7 @@ enyo.singleton({
 	},
 	addInformation: function(inType, inName, inInfo) {
 		if (inInfo) {
-			if (this.debug) { this.log("addInformation: Adding " + inType + " information for " + inName); }
+			this.trace("addInformation: Adding ", inType, " information for ", inName);
 
 			var fn = function(inType, inName, inSubName, inData) {
 				if (inData.filterLevel) {
@@ -99,7 +101,7 @@ enyo.singleton({
 				} else {
 					inData.level = Model.F_NORMAL;
 				}
-				if (this.debug) { this.log("addInformation: Setting level " + inData.level + " for " + inType + " " + inName + "." + inSubName); }
+				this.trace("addInformation: Setting level ", inData.level, " for ", inType, " ", inName, ".", inSubName);
 			};
 			var addFilterLevel = enyo.bind(this, fn, inType, inName);
 

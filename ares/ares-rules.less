@@ -136,6 +136,7 @@
 	border-bottom: 1px solid #222; 
 	background: @ares-toolbar-gradient;
 	background-size: auto; /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
+	z-index: auto;
 }
 
 .ares-small-toolbar{
@@ -162,6 +163,10 @@
 
 .ares-small-toolbar>div {
 	margin : 0 2px;
+}
+
+.ares-top-toolbar.ares-designer-panels{
+	z-index: 10;
 }
 
 .ares-top-toolbar.ares-designer-panels>div {
@@ -527,7 +532,7 @@
 
 p.break { padding: 1px 0; }
 
-.file-chooser-input { width: 470px; }
+.file-chooser-input>input { width: 470px; }
 
 .ares-align-right { text-align: right; }
 
@@ -572,7 +577,6 @@ div.large-fixed { width: 80%; }
 	top: 0;
 	bottom: 0;
 	right: 0;
-	z-index: 10;
 }
 
 .lsmallDownArrow {
@@ -613,7 +617,7 @@ div.large-fixed { width: 80%; }
 	padding-top: 4px;
 }
 
-@import "assets/css/AresPopup.less";
+@import "assets/css/Popup.less";
 @import "../phobos/source/cssbuilder.css";
 @import "../deimos/source/Deimos.less";
 @import "../harmonia/source/Harmonia.less";

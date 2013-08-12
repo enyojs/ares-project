@@ -1,4 +1,4 @@
-/* global Ares, ares, ServiceRegistry */
+/*global ServiceRegistry, ares */
 /**
  * This kind provides:
  * - the project toolbars (with create .. delete)
@@ -113,7 +113,7 @@ enyo.kind({
 	],
 	selected: null,
 	create: function() {
-		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.$.projectList.setCount(Ares.Workspace.projects.length);
 		Ares.Workspace.projects.on("add remove reset", enyo.bind(this, this.projectCountChanged));
@@ -147,7 +147,7 @@ enyo.kind({
 		if (typeof this[fn] === 'function') {
 			this[fn]({project: this.selectedProject});
 		} else {
-			this.trace("*** BUG: '", fn,  "is not a known function");
+			this.trace("*** BUG: '", fn, "' is not a known function");
 		}
 	},
 	addProject: function(name, folderId, service) {
@@ -292,7 +292,7 @@ enyo.kind({
 					{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "nukeChanged"},
 					{kind: "Control", tag: "span", classes: "ares-padleft", content: "also delete files from disk"}
 				]}
-			);
+		);
 	},
 	shown: function(inSender, inEvent) {
 		this.nukeChanged();
