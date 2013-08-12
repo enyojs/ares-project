@@ -539,16 +539,8 @@ ide.res.services.filter(function(service){
 
 var enyojsRoot = path.resolve(myDir,".");
 
-var app, server;
-if (express.version.match(/^2\./)) {
-	// express-2.x
-	app = express.createServer();
-	server = app;
-} else {
-	// express-3.x
-	app = express();
-	server = http.createServer(app);
-}
+var app = express(),
+    server = http.createServer(app);
 
 function cors(req, res, next) {
 	/*

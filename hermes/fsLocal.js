@@ -24,7 +24,7 @@ function FsLocal(inConfig, next) {
 	inConfig.name = inConfig.name || "fsLocal";
 
 	// parameters sanitization
-	this.root = path.resolve(this.root);
+	inConfig.root = path.resolve(inConfig.root);
 
 	// inherits FsBase (step 1/2)
 	FsBase.call(this, inConfig, next);
