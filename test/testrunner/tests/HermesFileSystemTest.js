@@ -158,7 +158,7 @@ enyo.kind({
 			* PUT Verb - want to create test/root/TestRunner/App.js file
 			*/
 			if (inResponse.children[3].id) {
-				var req2 = service.impl.createFile(inResponse.children[3].id, this.fileToCreate, JSON.stringify(content));
+				var req2 = service.impl.createFile(inResponse.children[3].id, this.fileToCreate, enyo.json.stringify(content));
 				req2.response(self, function(inSender, inResponse) {
 					self.trace("Got the inResponse for req2: ", inResponse);
 					self.finish();
@@ -195,12 +195,12 @@ enyo.kind({
 			    var req2 = service.impl.propfind(inResponse.children[3].id, 1);
 			    var self = this;
 			    req2.response(self, function(inSender, inResponse) {
-					self.trace("Got the inResponse for req3: ", JSON.stringify(inResponse));
+					self.trace("Got the inResponse for req3: ", enyo.json.stringify(inResponse));
 					var self2 = self;
 					if (inResponse.children[0].name === this.fileToCreate) {
 						var req3 = service.impl.remove(inResponse.children[0].id);
 						req3.response(self2, function(inSender, inResponse) {
-							self2.trace("Got the inResponse for req3: "+JSON.stringify(inResponse));
+							self2.trace("Got the inResponse for req3:", enyo.json.stringify(inResponse));
 							self2.finish();
 						});
 						req3.error(self2, function(inSender, inError) {
@@ -241,7 +241,7 @@ enyo.kind({
 			if ((inResponse.children[3].id) && (inResponse.children[3].name === this.dirToCreate)) {
 				var req2 = service.impl.remove(inResponse.children[3].id);
 				req2.response(self, function(inSender, inResponse) {
-					self.trace("Got the inResponse for req2: ", JSON.stringify(inResponse));						
+					self.trace("Got the inResponse for req2:", enyo.json.stringify(inResponse));						
 					self.finish();
 				});
 				req2.error(self, function(inSender, inError) {

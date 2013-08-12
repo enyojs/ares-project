@@ -25,7 +25,6 @@ enyo.kind({
 	fileId: null,
 	debug: false,
 	create: function() {
-		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 	},
 	/**
@@ -35,6 +34,7 @@ enyo.kind({
 	 * @param {Object} next is a CommonJS callback
 	 */
 	init: function(inLocation, next) {
+		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.data = null;
 		this.service = inLocation.service;
 		this.folderId = inLocation.folderId;
@@ -73,7 +73,7 @@ enyo.kind({
 			this.trace("ProjectConfig.load: file=", inResponse);
 			if (typeof inResponse.content === 'string') {
 				try {
-					data = JSON.parse(inResponse.content);
+					data = enyo.json.parse(inResponse.content);
 				} catch(e) {
 					enyo.error("ProjectConfig.load:", e);
 					inRequest.fail(e);
@@ -106,7 +106,7 @@ enyo.kind({
 		var req;
 		this.trace("data=", this.data);
 		if (this.fileId) {
-			req = this.service.putFile(this.fileId, JSON.stringify(this.data, null, 2));
+			req = this.service.putFile(this.fileId, enyo.json.stringify(this.data, null, 2));
 		} else {
 			req = this.service.createFile(this.folderId, "project.json", JSON.stringify(this.data, null, 2));
 		}

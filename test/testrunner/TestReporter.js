@@ -41,11 +41,11 @@ enyo.kind({
 		this.$.runTests.setDisabled(true);
 	},
 	testNameDisplay: function(inData) {
-		this.trace("TestReporter: testNameDisplay: ", JSON.stringify(inData));
+		this.trace("TestReporter: testNameDisplay: ", enyo.json.stringify(inData));
 		this.$.group.createComponent({classes: "enyo-testcase-title", content: inData.data}).render();
 	},
 	testBegun: function(inData) {
-		this.trace("TestReporter: testBegun: ", JSON.stringify(inData));
+		this.trace("TestReporter: testBegun: ", enyo.json.stringify(inData));
 		this.$.group.createComponent({name: inData.data.test, classes: "enyo-testcase-running", content: inData.data.test + ": running", allowHtml: true}).render();
 	},
 	formatStackTrace: function(inStack) {
@@ -60,8 +60,8 @@ enyo.kind({
 		return out.join("<br/>");
 	},
 	updateTestDisplay: function(inData) {
-		this.trace("TestReporter: updataTestDisplay: ", JSON.stringify(inData));
-		var results = JSON.parse(inData.data.results);
+		this.trace("TestReporter: updataTestDisplay: ", enyo.json.stringify(inData));
+		var results = enyo.json.parse(inData.data.results);
 		var e = results.exception;
 		var info = this.$.group.$[results.name];
 		var content = "<b>" + results.name + "</b>: " + (results.passed ? "PASSED" : results.message);
