@@ -42,7 +42,7 @@ enyo.kind({
 	debug: false,
 	
 	create: function() {
-		ares.setupTraceLogger(this);        // Setup this.trace() function according to this.debug value
+		this.trace = (this.debug === true ? this.log : function(){});
 		this.inherited(arguments);
 		this.addHandlers();
 		this.addDispatcherFeature();
