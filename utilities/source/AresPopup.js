@@ -2,12 +2,16 @@ enyo.kind({
 	name: "Ares.AresPopup",
 	kind: "onyx.Popup",
 	handlers: {
-		ondragstart: "dragstart",
-		ondrag: "drag"
+		ondragstart: "_dragstartAction",
+		ondrag: "_dragAction"
 	},
-	initialPosition: "",
-	isDraggable: false,
-	draggable: true,
+	/** @private */
+	_initialPosition: "",
+	/** @private */
+	_isDragging: false,
+	published: {
+		draggable: true
+	},
 	create: function(inSender, inEvent) {
 		this.inherited(arguments);
 	},
@@ -16,61 +20,64 @@ enyo.kind({
 		var cn = Ares.instance.hasNode();
 		this.containerBounds = cn ? {width: cn.clientWidth, height: cn.clientHeight} : {};
 	},
-	drag: function(inSender, inEvent) {
-		if(this.draggable){
-			if(this.isDraggable) {
-				var leftP = this.isOutOfXDrag(inSender, inEvent);
-				var topP = this.isOutOfYDrag(inSender, inEvent);
-				if(leftP !== null){
-					this.applyStyle("left", leftP+"px");
-				} else {
-					this.applyStyle("left", (this.initialPosition.left+inEvent.dx)+"px");
-				}
-				if(topP !== null){
-					this.applyStyle("top", topP+"px");
-				} else {
-					this.applyStyle("top", (this.initialPosition.top+inEvent.dy)+"px");
-				}
+	/** @private */
+	_dragAction: function(inSender, inEvent) {
+		if(this.draggable && this._isDragging) {
+			var leftP = this._isOutOfXDrag(inSender, inEvent);
+			var topP = this._isOutOfYDrag(inSender, inEvent);
+			if(leftP !== null){
+				this.applyStyle("left", leftP+"px");
+			} else {
+				this.applyStyle("left", (this._initialPosition.left+inEvent.dx)+"px");
+			}
+			if(topP !== null){
+				this.applyStyle("top", topP+"px");
+			} else {
+				this.applyStyle("top", (this._initialPosition.top+inEvent.dy)+"px");
 			}
 		}
 		return true;
 	},
-	dragstart: function(inSender, inEvent) {
+	/** @private */
+	_dragstartAction: function(inSender, inEvent) {
 		if(this.draggable){
-			this.initialPosition = this.getBounds();
-			this.isDraggable = this.isInDraggable(inSender, inEvent);
+			this._initialPosition = this.getBounds();
+			this._isDragging = this._isInDraggable(inSender, inEvent);
 		}
 		return true;
 	},
-	isInDraggable: function(inSender, inEvent) {
+	/** @private */
+	_isInDraggable: function(inSender, inEvent) {
 		var pX, pY, minX, minY, maxX, maxY;
 		pX = inEvent.clientX;
 		pY = inEvent.clientY;
-		minX = this.initialPosition.left;
-		minY = this.initialPosition.top;
-		maxX = minX + this.initialPosition.width;
-		maxY = minY + this.initialPosition.height;
+		minX = this._initialPosition.left;
+		minY = this._initialPosition.top;
+		maxX = minX + this._initialPosition.width;
+		maxY = minY + this._initialPosition.height;
 		return (pX >= minX && pX <= maxX && pY >= minY && pY <= maxY);
 	},
-	isOutOfXDrag:function(inSender, inEvent) {
+	/** @private */
+	_isOutOfXDrag:function(inSender, inEvent) {
 		var xPosition = null;
 		var e = inEvent;
-		var leftP = this.initialPosition.left + e.dx;
+		var leftP = this._initialPosition.left + e.dx;
 		if(leftP < 0){
 			xPosition = 0;
-		} else if(this.containerBounds.width < (leftP+this.initialPosition.width)){
-			xPosition = this.containerBounds.width - this.initialPosition.width;
+		} else if(this.containerBounds.width < (leftP+this._initialPosition.width)){
+			xPosition = this.containerBounds.width - this._initialPosition.width;
 		}
 		return xPosition;
 	},
-	isOutOfYDrag:function(inSender, inEvent) {
+	/** @private */
+	_isOutOfYDrag:function(inSender, inEvent) {
 		var yPosition = null;
 		var e = inEvent;
-		var topP = this.initialPosition.top + e.dy;
+		var topP = this._initialPosition.top + e.dy;
 		if(topP < 0){
 			yPosition = 0;
-		} else if(this.containerBounds.height < (topP+this.initialPosition.height)){
-			yPosition = this.containerBounds.height - this.initialPosition.height;
+		} else if(this.containerBounds.height < (topP+this._initialPosition.height)){
+			yPosition = this.containerBounds.height - this._initialPosition.height;
 		}
 		return yPosition;
 	}
