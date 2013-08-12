@@ -9,6 +9,7 @@
 .*.rej
 $*
 /node_modules/.bin
+/node_modules/archiver
 /node_modules/ares-webos-sdk
 /node_modules/async
 /node_modules/base64stream/
@@ -30,9 +31,9 @@ $*
 /node_modules/should
 /node_modules/temp
 /node_modules/tunnel
-/node_modules/zipstream
 /node_modules/npmlog
 /node_modules/jshint
 test/root
 /project.json
 node_modules/less
+node_modules/semver
