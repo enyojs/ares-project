@@ -3,6 +3,7 @@ enyo.kind({
 	kind: "onyx.Popup",
 	handlers: {
 		ondragstart: "_dragstartAction",
+		ondragend: "_dragendAction",
 		ondrag: "_dragAction"
 	},
 	/** @private */
@@ -43,6 +44,13 @@ enyo.kind({
 		if(this.draggable){
 			this._initialPosition = this.getBounds();
 			this._isDragging = this._isInDraggable(inSender, inEvent);
+		}
+		return true;
+	},
+	/** @private */
+	_dragendAction: function(inSender, inEvent) {
+		if(this.draggable){
+			this._isDragging = false;
 		}
 		return true;
 	},
