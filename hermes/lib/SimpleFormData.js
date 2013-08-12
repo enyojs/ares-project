@@ -1,3 +1,4 @@
+/* global module  */
 /**
  * Simple FormData storing base64 encoded file
  */

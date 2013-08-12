@@ -26,7 +26,7 @@ enyo.kind({
 		}
 		function confirmFileList(inSender, inResponse) {
 			this.log(inResponse);
-			if (inResponse.length != 0) {
+			if (inResponse.length !== 0) {
 				this.finish("bad listing");
 			}
 			this.$.provider.deleteFolder(this.service + "/" + "testFolder")

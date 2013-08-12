@@ -99,7 +99,7 @@ enyo.kind({
 		} else if (parentNode.isDir) {
 			service.propfind(parentNode.id, 1 /*depth*/)
 				.response(this, function(inRequest, inData) {
-					if (this.debug) { enyo.log("PackageMunger._packageCheckNode(): inRequest:", inRequest, "inData:", inData); }
+					this.trace("PackageMunger._packageCheckNode(): inRequest:", inRequest, "inData:", inData);
 					var nodes = inData && inData.children;
 					pkgNode = nodes && enyo.filter(nodes, function(node) {
 						return node.name === 'package.js';
@@ -107,7 +107,7 @@ enyo.kind({
 					next(null, pkgNode);
 				})
 				.error(this, function(inRequest, inError) {
-					if (this.debug) { enyo.log("PackageMunger._packageCheckNode(): inRequest:", inRequest, "inError:", inError); }
+					this.trace("PackageMunger._packageCheckNode(): inRequest:", inRequest, "inError:", inError);
 					next(inError);
 				});
 		} else {
@@ -123,11 +123,11 @@ enyo.kind({
 		} else if (parentNode.isDir) {
 			service.createFile(parentNode.id, "package.js", "enyo.depends(\n);\n")
 				.response(this, function(inRequest, inFsNode) {
-					if (this.debug) { enyo.log("PackageMunger._packageCreate(): package.js inFsNode[0]:", inFsNode[0]); }
+					this.trace("PackageMunger._packageCreate(): package.js inFsNode[0]:", inFsNode[0]);
 					next(null, inFsNode[0]);
 				})
 				.error(this, function(inRequest, inError) {
-					if (this.debug) { enyo.log("PackageMunger._packageCreate(): inRequest:", inRequest, "inError:", inError); }
+					this.trace("PackageMunger._packageCreate(): inRequest:", inRequest, "inError:", inError);
 					next(inError);
 				});
 		} else {
@@ -150,9 +150,9 @@ enyo.kind({
 		var re = new RegExp("\\b" + toMatch + "\\b");
 		var newContent;
 		if (pkgContent.match(re)) {
-			this.trace('file ' + name + ' is already in package.js');
+			this.trace('file ', name, ' is already in package.js');
 		} else {
-			this.trace('inserting ' + name + 'in package.js');
+			this.trace('inserting ', name, 'in package.js');
 			newContent = pkgContent
 				.replace(/\)/,'\t"' + name + '"\n)') // insert new name
 				.replace(/("|')(\s*)"/,'$1,$2"');    // add potentially missing comma
@@ -179,7 +179,7 @@ enyo.kind({
 				.replace(/,\s*\)/,"\n)")   // remove comma before ')'
 				.replace(/\(\s*\)/,"(\n)"); // remove blank line between ( )
 		} else  {
-			this.trace('cannot find ' + name + ' in package.js');
+			this.trace('cannot find ', name, ' in package.js');
 		}
 		if (newContent === pkgContent) {
 			newContent = null;
@@ -194,11 +194,11 @@ enyo.kind({
 		if (pkgContent) {
 			service.putFile(pkgNode.id, pkgContent)
 				.response(this, function(inRequest, inFsNode) {
-					if (this.debug) { enyo.log("PackageMunger._packageSave(): updated package.js in inFsNode:", inFsNode[0]); }
+					this.trace("PackageMunger._packageSave(): updated package.js in inFsNode:", inFsNode[0]);
 					next(null, null);
 				})
 				.error(this, function (inRequest, inError) {
-					if (this.debug) { enyo.log("PackageMunger._packageSave(): inRequest:", inRequest, "inError:", inError); }
+					this.trace("PackageMunger._packageSave(): inRequest:", inRequest, "inError:", inError);
 					next(inError);
 				});
 		} else {

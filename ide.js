@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+/* global require, __dirname, console, process */
 /**
  *  ARES IDE server
  */
@@ -121,7 +121,6 @@ process.on('SIGINT', onExit);
 // Load IDE configuration & start per-project file servers
 
 var ide = {};
-var service = {};
 var subProcesses = [];
 var platformVars = [
 	{regex: /@NODE@/, value: process.argv[0]},
@@ -372,9 +371,7 @@ function substVars(data, vars) {
 		var pType = getObjectType(data[key]);
 		if (pType === 'string') {
 			s = data[key];
-			vars.forEach(function(subst){
-				s = s.replace(subst.regex,subst.value);
-			});
+			s = substitute(s, vars);
 			data[key] = s;
 		} else if (pType === 'array') {
 			substVars(data[key], vars);
@@ -384,6 +381,13 @@ function substVars(data, vars) {
 		// else - Nothing to do (no substitution on non-string
 		// properties)
 	}
+}
+
+function substitute(s, vars) {
+	vars.forEach(function(subst){
+		s = s.replace(subst.regex,subst.value);
+	});
+	return s;
 }
 
 function startService(service) {
@@ -620,13 +624,14 @@ if (argv.runtest) {
 server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, function () {
 	var tcpAddr = server.address();
 	var url = "http://" + (argv.host || "127.0.0.1") + ":" + tcpAddr.port + "/ide/ares/" + page;
+	var info;
 	if (argv.browser) {
 		// Open default browser
-		var info = platformOpen[process.platform] ;
+		info = platformOpen[process.platform] ;
 		spawn(info[0], info.slice(1).concat([url]));
 	} else if (argv['bundled-browser']) {
 		// Open bundled browser
-		var info = platformOpen[process.platform].concat(bundledBrowser[process.platform]);
+		info = platformOpen[process.platform].concat(bundledBrowser[process.platform]);
 		spawn(info[0], info.slice(1).concat([url]));
 	} else {
 		log.http('main', "Ares now running at <" + url + ">");

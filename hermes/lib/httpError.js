@@ -1,3 +1,4 @@
+/* global require, module  */
 module.exports = HttpError;
 
 var util  = require("util");

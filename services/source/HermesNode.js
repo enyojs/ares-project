@@ -310,7 +310,7 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		
 		var subnode = inEvent.originator;
-		this.trace("nodeExpand called while node Expanded is " + subnode.expanded) ;
+		this.trace("nodeExpand called while node Expanded is ", subnode.expanded) ;
 		// update icon for expanded state
 		if (subnode.file.isDir) {
 			subnode.setIcon("$services/assets/images/" + (subnode.expanded ? "folder-open.png" : "folder.png"));
@@ -350,7 +350,7 @@ enyo.kind({
 					this.trace('running INNER function of refreshTree on ' + f.name +
 								 ' id ' + c.file.id);
 					if ( c.file.id === toSelectId ) {
-						this.trace('force select of ' + c.file.id);
+						this.trace('force select of ', c.file.id);
 						c.doNodeTap();
 
 						// force a "click" event when the item is selected

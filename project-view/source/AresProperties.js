@@ -1,3 +1,4 @@
+/* global ares */
 /**
  * This kind provide a widget to tune global properties
  */
@@ -29,6 +30,7 @@ enyo.kind({
 	 * @protected
 	 */
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 	},
 
@@ -37,6 +39,7 @@ enyo.kind({
 	 * @param {Object} inEvent.pluginService
 	 */
 	handlePluginRegist: function(inSender, inEvent) {
+		this.trace("");
 
 		if (typeof inEvent.pluginService.getAresPropertiesKind !== 'function') {
 			return true;
