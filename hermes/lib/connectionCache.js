@@ -1,3 +1,4 @@
+/* global console, module  */
 module.exports = {
 	timeToLive: 5000,
 	sweepInterval: 10000,
@@ -51,7 +52,7 @@ module.exports = {
 		var names = Object.keys(this.cache);
 		this.sweeper(!!names.length);
 		var now = Date.now();
-		for (var i=0, n; n=names[i]; i++) {
+		for (var i=0, n; (n=names[i]); i++) {
 			if (this.cache[n].expires < now) {
 				console.log("cache: disposing connection [" + n + "]");
 				this.dispose(this.cache[n].connection);

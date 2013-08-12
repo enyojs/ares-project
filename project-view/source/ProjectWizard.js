@@ -67,7 +67,7 @@ enyo.kind({
 		propW.setTemplateList([]);		// Reset template list
 
 		// Pre-fill project properties widget
-		propW.preFill(ProjectConfig.PREFILLED_CONFIG_FOR_UI),
+		propW.preFill(ProjectConfig.PREFILLED_CONFIG_FOR_UI);
 		propW.$.projectDirectory.setContent(this.selectedDir.path);
 		propW.$.projectName.setValue(this.selectedDir.name);
 		propW.activateFileChoosers(false);
@@ -88,7 +88,7 @@ enyo.kind({
 		};
 		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
 		var topNode = hft.$.serverNode ;
-		var matchingNodes = topNode.getNodeFiles(hft.selectedNode).filter(matchFileName) ;
+		var matchingNodes = hft.selectedNode.getNodeFiles().filter(matchFileName) ;
 
 		if (matchingNodes.length !== 0) {
 			this.hide();
@@ -108,7 +108,7 @@ enyo.kind({
 		};
 		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
 		var topNode = hft.$.serverNode ;
-		var matchingNodes = topNode.getNodeFiles(hft.selectedNode).filter( matchFileName ) ;
+		var matchingNodes = hft.selectedNode.getNodeFiles().filter(matchFileName) ;
 
 		if (matchingNodes.length === 1) {
 			this.warn("There is an appinfo.json", matchingNodes);

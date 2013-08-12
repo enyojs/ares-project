@@ -44,7 +44,7 @@ enyo.kind({
 	 * @param {Object} inEvent.serviceRegistry
 	 */
 	handleServicesChange: function(inSender, inEvent) {
-		//if (this.debug) this.log("sender:", inSender, "event:", inEvent);
+		this.trace("sender:", inSender, "event:", inEvent);
 		// filter-out on this.selector
 		if (this.selector.length === 0) {
 			this.error("Unexpected selector value: ", this.selector);
@@ -59,7 +59,7 @@ enyo.kind({
 			this.error("Unexpected selector value: ", this.selector);
 			this.services = [];
 		}
-		this.trace("selector=", this.selector + " ==> services: ", this.services);
+		this.trace("selector=", this.selector, " ==> services: ", this.services);
 
 		this.$.list.count = this.services.length;
 		this.$.list.render();

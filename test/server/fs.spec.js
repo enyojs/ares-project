@@ -1,11 +1,11 @@
 #!/usr/bin/env ../../node_modules/mocha/bin/mocha --bail
+/* global require, console, process, Buffer, it, describe */
 /**
  * fsXXX.js test suite
  */
 // @see http://visionmedia.github.com/mocha/
 
-var fs = require("fs"),
-    path = require("path"),
+var path = require("path"),
     http = require("http"),
     querystring = require("querystring"),
     npmlog = require('npmlog'),
@@ -107,7 +107,7 @@ function get(path, query, next) {
 }
 
 function post(path, query, content, contentType, next) {
-	var reqContent, reqBody, reqParts;
+	var reqBody, reqParts;
 	var reqOptions = {
 		hostname: "127.0.0.1",
 		port: argv.port,
@@ -122,22 +122,32 @@ function post(path, query, content, contentType, next) {
 	}
 
 	if (contentType) {
-		if (!contentType instanceof String) throw new Error("bad parameter: missing contentType");
+		if (!contentType instanceof String) {
+			throw new Error("bad parameter: missing contentType");
+		}
 		reqOptions.headers['content-type'] = contentType;
 
 		if (contentType.match(/^text\/plain/)) {
-			if (!content instanceof String) throw new Error("bad parameter: not a String");
+			if (!content instanceof String) {
+				throw new Error("bad parameter: not a String");
+			}
 			reqBody = content;
 		} else if (contentType.match(/^application\/xml/)) {
-			if (!content instanceof String) throw new Error("bad parameter: not a String");
+			if (!content instanceof String) {
+				throw new Error("bad parameter: not a String");
+			}
 			reqBody = content;	// XXX or convert an Object to XML
 		} else if (contentType.match(/^application\/json/)) {
-			if (!content instanceof Object) throw new Error("bad parameter: not an Object");
+			if (!content instanceof Object) {
+				throw new Error("bad parameter: not an Object");
+			}
 			reqBody = JSON.stringify(content);
 		} else if (contentType === 'application/x-www-form-urlencoded') {
 			query = query || {};
 			if (content) {
-				if (!Buffer.isBuffer(content)) throw new Error("bad parameter: not a Buffer");
+				if (!Buffer.isBuffer(content)) {
+					throw new Error("bad parameter: not a Buffer");
+				}
 				query.content = content.toString('base64');
 			}	
 			if (Object.keys(query).length > 0) {
@@ -146,7 +156,9 @@ function post(path, query, content, contentType, next) {
 		} else if (contentType.match(/multipart\/form-data/)) {
 			reqParts = content;
 		} else if (content && contentType instanceof String) {
-			if (contentType) reqOptions.headers['x-content-type'] = contentType; // original value
+			if (contentType) {
+				reqOptions.headers['x-content-type'] = contentType; // original value
+			}
 			reqOptions.headers['content-type'] = 'text/plain; charset=x-binary';
 			reqBody = content.toString('x-binary'); // do not decode/encode
 		}
@@ -452,7 +464,6 @@ describe("Testing " + config.name, function() {
 
 	var textContent = "This is a Text content!";
 	var textContent2 = "This is another Text content!";
-	var textContentType = "text/plain; charset=utf-8";
 	var textContentId = "";
 
 	it("t3.1. should create a file (using 'application/x-www-form-urlencoded')", function(done) {
@@ -699,7 +710,6 @@ describe("Testing " + config.name, function() {
 
 	it("t5.1. should fail to describe a non-existing file", function(done) {
 		get('/id/' + '112233', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
-			var emptyBuf, emptyStr;
 			should.exist(err);
 			should.exist(err.statusCode);
 			err.statusCode.should.equal(404);
@@ -710,7 +720,6 @@ describe("Testing " + config.name, function() {
 
 	it("t5.2. should fail to download a non-existing file", function(done) {
 		get('/id/' + '112233', null /*query*/, function(err, res) {
-			var contentBuf, contentStr;
 			should.exist(err);
 			should.exist(err.statusCode);
 			err.statusCode.should.equal(404);
@@ -850,7 +859,6 @@ describe("Testing " + config.name, function() {
 				contentStr.should.equal(contentStr);
 
 				get('/file' + rootPath + '/toto.1/titi/tata', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
-					var contentBuf, contentStr;
 					should.exist(err);
 					should.exist(err.statusCode);
 					err.statusCode.should.equal(404);
@@ -880,7 +888,6 @@ describe("Testing " + config.name, function() {
 				contentStr.should.equal(contentStr);
 
 				get('/file' + rootPath + '/toto/titi/tata.1', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
-					var contentBuf, contentStr;
 					should.exist(err);
 					should.exist(err.statusCode);
 					err.statusCode.should.equal(404);

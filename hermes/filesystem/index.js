@@ -1,10 +1,10 @@
+/* global require, console, process, __dirname */
 /**
  * filesystem/index.js -- Framework-based ARES FileSystemProvider, using local files.
  */
 
 var fs = require('fs'),
     HermesFilesystem = require(__dirname + '/hermesFilesystem').HermesFilesystem,
-    port = parseInt(process.argv[2], 10) || 0,
     secure = (process.argv[4] ? true : false), //FIXME: use node-optimist to parse options
     config = {
 	    port: parseInt(process.argv[2], 10) || 0,
@@ -25,5 +25,5 @@ if (config.debug) {
 	console.log("Configuration:");
 	console.dir(config);
 }
-var hermesFilesystem = new HermesFilesystem(config);
+new HermesFilesystem(config);
 
