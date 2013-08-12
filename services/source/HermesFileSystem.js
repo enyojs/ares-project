@@ -62,12 +62,12 @@ enyo.kind({
 		if (inParams && inParams.postBody) {
 			delete inParams.postBody;
 		}
-		req.response(function(inSender, inValue){
+		req.response(this, function(inSender, inValue){
 			this.trace("inValue=", inValue);
-			var node = this.xhrResponse.headers['x-ares-node'];
+			var node = req.xhrResponse.headers['x-ares-node'];
 			this.trace("x-ares-node:", node);
 			return inValue;
-		}).error(function(inSender, inResponse) {
+		}).error(this, function(inSender, inResponse) {
 			this.error("status="+ inResponse);
 			if (inResponse === 0 && this.notifyFailure) {
 				this.notifyFailure();
@@ -126,20 +126,20 @@ enyo.kind({
 	},
 	propfind: function(inNodeId, inDepth) {
 		return this._request("PROPFIND", inNodeId, {depth: inDepth} /*inParams*/)
-			.response(function(inSender, inValue) {
+			.response(this, function(inSender, inValue) {
 				this.trace(inValue);
 				return inValue;
 			});
 	},
 	listFiles: function(inFolderId, depth) {
 		return this.propfind(inFolderId, depth)
-			.response(function(inSender, inValue) {
+			.response(this, function(inSender, inValue) {
 				return inValue.children;
 			});
 	},
 	getFile: function(inFileId) {
 		return this._request("GET", inFileId, null /*inParams*/)
-			.response(function(inSender, inValue) {
+			.response(this, function(inSender, inValue) {
 				return { content: inValue };
 			});
 	},
@@ -184,7 +184,7 @@ enyo.kind({
 	},
 	createFolder: function(inFolderId, inName) {
 		return this._request("MKCOL", inFolderId, {name: inName} /*inParams*/)
-			.response(function(inSender, inResponse) {
+			.response(this, function(inSender, inResponse) {
 				this.trace(inResponse);
 				return inResponse;
 			});
@@ -224,7 +224,7 @@ enyo.kind({
 	},
 	exportAs: function(inNodeId, inDepth) {
 		return this._request("GET", inNodeId, {depth: inDepth, format: "base64"} /*inParams*/)
-			.response(function(inSender, inValue) {
+			.response(this, function(inSender, inValue) {
 				this.trace(inValue);
 				return inValue;
 			});
