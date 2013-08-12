@@ -30,29 +30,31 @@ enyo.kind({
 		//onCloseCss: "save"
 	},
 	components: [
-	//	{kind: "onyx.Toolbar", classes: "css_toolbar", content:"Tool bar", components: [
-			//	{kind: "onyx.Button", classes: "onyx-negative", content: "UnDo", ontap:"undo"},
-			//	{kind: "onyx.Button", content: "Code Editor", ontap:"save", style: "float:right;"}
-	//	]},	// tool bar
-		
 		{kind: "enyo.FittableColumns", style: "width: 33%; height: 100%;", components:[
 			
-			{name: "cssleft",	style: "width: 100%; height: 90%; ", classes:"ares_deimos_left", kind: "leftpannel"},
+			{name: "cssleft", style: "width: 100%; height: 90%; ", classes:"ares_deimos_left", kind: "leftpannel"},
 			
-			{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 90%; ", classes: "css_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
-				{name: "bg", allowHtml: true, style: "font-size: 10px;", content: ""},
-				{name: "dd", allowHtml: true, content:"  ",style: "height: 10px"}
-			]},	// output box
-		
-			{kind: "FittableRows", fit: true, style: "width: 100%; height: 90%;", components: [
-				{kind: "Panels",  style: "width: 100%; height: 50%;", classes: "enyo-unselectable", components: [
+			{name: "center", kind: "enyo.FittableRows", style: "width: 100%; height: 100%; ", components: [
+				{name:"sampleBox", kind: "enyo.Panels",	style: "width: 100%; height: 60%; ", fit: "true", classes: "css_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
+				
+			//	{ name: "Sample", kind: "onyx.Button", style: "float: center;",	content: "Sample Button"},
+					{name: "Sample", allowHtml: true, style: "height: 60%; font-size: 10px;", content: "Sample Box"},
+				]},					
+				
+				{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 40%; ", classes: "css_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
+					{name: "bg", allowHtml: true, style: "font-size: 13px;", content: ""},
+				]},	
+			]},// center
+			
+			{kind: "FittableRows", fit: true, style: "width: 100%; height: 100%;", components: [
+				{kind: "Panels",  style: "width: 100%; height: 60%;", classes: "enyo-unselectable", components: [
 					{name: "list", kind: "List", count: 100, multiSelect: false, classes: "enyo-fit list-sample-list", onSetupItem: "setupItem", components: [
 						{name: "item", classes: "list-sample-item enyo-border-box", ontap: "classGrabber", components: [
 							{name: "name2"}
 						]},				
 					]},
 				]},
-				{kind: "Panels", style: "width: 100%; height: 50%;", classes: "enyo-unselectable", components: [
+				{kind: "Panels", style: "width: 100%; height: 40%;", classes: "enyo-unselectable", components: [
 					{name: "valueinput", kind: "valueInput", onUpdate: "change"},
 					
 				]},
@@ -139,11 +141,7 @@ enyo.kind({
 		//	console.log(this.pro[a], ":", this.value[a],a);	
 			outPut = outPut + tab + this.pro[a] + ":" + this.value[a] + "<br>";
 			outString = outString + this.pro[a] + ":" + this.value[a] + "\n";
-			console.log(this.pro[a]+ ":" + this.value[a] );
-		//	this.$.bg.applyStyle(this.pro[a]+ ":" + this.value[a] );
-			//this.$.dd.applyStyle(outPut);
-			//this.$.outputBox.applyStyle(this.pro[a]+ ":" + this.value[a] );
-			this.$.outputBox.applyStyle(this.pro[a], this.value[a]);
+			this.$.Sample.applyStyle(this.pro[a], this.value[a]);
 			a++;
 		}		
 			this.$.bg.setContent(outPut + "}");											// write in to the preview box
@@ -165,6 +163,7 @@ enyo.kind({
 		}
 			
 		if (inEvent.input === "font"){
+			this.$.valueinput.showsblank();
 			this.$.property = "font-family";
 		//	this. = inEvent.name +  ";";
 		
@@ -389,6 +388,7 @@ enyo.kind({
 	*/
 	setupItem: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
+	//	console.log(inSender, inEvent);
 		var i = inEvent.index;
 		var n = this.declaration[i];
 		this.$.item.addRemoveClass("list-sample-selected", inSender.isSelected(i));
