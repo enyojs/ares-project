@@ -13,11 +13,14 @@ enyo.kind({
 	},
 
 	components: [
-		{kind: "Panels", arrangerKind: "CardArranger", classes: "enyo-fit",	components: [
+		{kind: "Panels", arrangerKind: "CardArranger",  style: "border: solid black thin;", classes: "enyo-fit",	components: [
 			{name: "blank", kind: "Control", showing: true, components: [
 		]},
 		
 			{name: "sliders", kind: "Control", showing: false, components: [
+			{style: "height: 5px"},
+			{style: "height: 15px;  text-align: center; ", content: "Color Sliders" },
+			{style: "height: 5px"},
 			{name: "redSlider", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged", style: "height:10px; background-color: red; enyo-unselectable;"},
 			{style: "height: 5px"},
 
@@ -28,6 +31,9 @@ enyo.kind({
 		]},	// sliders
 		
 			{name: "misc", kind: "Control", showing: false, components: [
+				{style: "height: 5px"},
+				{style: "height: 15px;  text-align: center; ", content: "Misc Input" },
+				{style: "height: 5px"},
 			{ fit: true, content:"Inputs"},
 				
 			{kind: "FittableColumns", fit: true, components: [
@@ -40,15 +46,21 @@ enyo.kind({
 		]},	// misc		
 			
 			{name: "xy", kind: "Control", showing: false, components: [
-			{ fit: true, content:"Inputs xy"},
+				{style: "height: 5px"},
+				{style: "height: 15px;  text-align: center; ", content: "X and Y Inputs" },
+				{style: "height: 5px"},
+				{ fit: true, content:"Inputs xy"},
 				{kind: "onyx.PickerDecorator", components: [		
 			]}
 		]}, // xy
 			
 			{name: "xyz", kind: "Control", showing: false, components: [
-			{tag: "br"},
-			{name: "namex", tag:"span", content:"X offset  "},
-			{kind: "onyx.InputDecorator", components: [
+				{style: "height: 5px"},
+				{style: "height: 15px;  text-align: center; ", content: "X Y Z & Color Inputs " },
+				{style: "height: 5px"},
+				{tag: "br"},
+				{name: "namex", tag:"span", content:"X offset  "},
+				{kind: "onyx.InputDecorator", components: [
 				{kind: "onyx.Input", placeholder: "Enter text here", onchange:"inputx"}
 			]},	
 			
@@ -78,15 +90,15 @@ enyo.kind({
 			]},
 		]},	//xyz
 			
-			{name: "picker", kind: "Control", showing: false, components: [
-			{kind: "FittableColumns", fit: true, components: [			
-				{ content:"Picker Inputs  "},
-				{kind: "onyx.PickerDecorator", components: [
-					{style: "min-width: 80px; font-size: 10px;"},
-					{name: "Input", kind: "onyx.Picker", onSelect: "input_picker"},
-					
-					
-				]},
+			{name: "picker", kind: "Control", style: "border: solid black;", showing: false, components: [
+				{style: "height: 5px"},
+				{style: "height: 15px;  text-align: center; ", content: "Picker Inputs" },
+				{style: "height: 5px", tag: "br"},
+				{kind: "FittableColumns", fit: true, components: [			
+					{kind: "onyx.PickerDecorator", components: [
+						{style: "min-width: 80px; font-size: 10px;"},
+						{name: "Input", kind: "onyx.Picker", onSelect: "input_picker"},
+					]},
 				
 				{kind: "onyx.PickerDecorator", style: "width: 40px;", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
@@ -195,6 +207,10 @@ enyo.kind({
 		this.color();
 	},
 	
+	showsblank: function(inSender,inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.$.panels.setIndex(this.blank);
+	},
 	showssliders: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.$.panels.setIndex(this.sliders);
@@ -273,30 +289,31 @@ enyo.kind({
 		var valueout = "";
 		if(this.x !== undefined){
 			valueout = " " + this.x;
-			this.x ="";
+			this.x = undefined;
 		}		
 		if(this.y !== undefined){
 			valueout = valueout + " " + this.y;	
-			this.y ="";
+			this.y = undefined;
 		}
 		if(this.z !== undefined){
 			valueout = valueout + " " +this.z;
-			this.z ="";
+			this.z = undefined;
 		}		
 		if(this.c !== undefined ){
 			valueout = valueout + " " + this.c + ";";
-			this.c ="";
+			this.c = undefined;
 		}		
 		if(this.misc !== undefined){
-			valueout = valueout + " " + this.misc;
-			this.misc ="";
+			valueout = valueout + "\t" + this.misc;
+			this.misc = undefined;
 		}
 		if(this.misc_picker !== undefined){
 			valueout = valueout + "\t" + this.misc_picker;
-			this.misc_picker = "";
+			this.misc_picker = undefined;
 		}
 	
 		this.valueout = valueout;
+		//console.log(this.valueout, valueout);
 		valueout = "";
 		this.doValueUpdate();
 		
