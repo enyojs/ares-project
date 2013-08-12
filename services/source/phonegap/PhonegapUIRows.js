@@ -11,37 +11,37 @@ enyo.kind({
 	published: {
 		label: "",
 		name: "",
-		value: "", 
+		value: "",
 		jsonSection: "",
 		platform: ""
 	},
-	components: [				
+	components: [
 	],
-	
+
 	/**
 	 * @private
 	 */
 	create: function () {
 		ares.setupTraceLogger(this);
-		this.inherited(arguments);			
+		this.inherited(arguments);
 	}
 });
 
 enyo.kind({
 	name: "Phonegap.ProjectProperties.CheckBoxRow",
-	kind: "Phonegap.ProjectProperties.Row",	
+	kind: "Phonegap.ProjectProperties.Row",
 	debug: false,
-	published: {		
-		activated: false	
+	published: {
+		activated: false
 	},
 	components: [
-		{	
-			kind: "onyx.Checkbox", 
-			name: "ConfigurationCheckBox", 
+		{
+			kind: "onyx.Checkbox",
+			name: "ConfigurationCheckBox",
 			classes: "ares-project-properties-drawer-row-check-box-label",
 			onchange: "updateConfigurationValue"
 		},
-		{name: "label", content: this.label}	
+		{name: "label", content: this.label}
 	],
 
 	/**
@@ -49,8 +49,8 @@ enyo.kind({
 	 */
 	create: function () {
 		ares.setupTraceLogger(this);
-		this.inherited(arguments);	
-		this.labelChanged();	
+		this.inherited(arguments);
+		this.labelChanged();
 	},
 
 	/**
@@ -64,13 +64,13 @@ enyo.kind({
 	 * @private
 	 */
 	valueChanged: function () {
-		this.$.ConfigurationCheckBox.setChecked(this.value);		
+		this.$.ConfigurationCheckBox.setChecked(this.value);
 	},
 
 	/**
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
-	 * 
+	 *
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
@@ -103,22 +103,22 @@ enyo.kind({
 	},
 	published: {
 		value: "",
-		inputTip: ""		
+		inputTip: ""
 	},
 	components: [
 		{name: "label", classes: "ares-project-properties-drawer-row-label"},
 		{
 			kind: "onyx.InputDecorator",
-			classes: "ares-project-properties-input-medium", 
+			classes: "ares-project-properties-input-medium",
 			components: [{
-					kind: "onyx.Input",	
+					kind: "onyx.Input",
 					name: "ConfigurationInput",
 					onchange: "updateConfigurationValue"
 				}
 			]
-		}	
+		}
 	],
-	
+
 	/**
 	 * @private
 	 */
@@ -140,7 +140,7 @@ enyo.kind({
 
 	/** @private */
 	valueChanged: function () {
-		this.$.ConfigurationInput.setValue(this.value);	
+		this.$.ConfigurationInput.setValue(this.value);
 	},
 
 	/** @private */
@@ -151,7 +151,7 @@ enyo.kind({
 	/**
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
-	 * 
+	 *
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
@@ -170,18 +170,21 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "Phonegap.ProjectProperties.AutoGenerateXML",
+	name: "Phonegap.ProjectProperties.BuildOption",
 	kind: "Phonegap.ProjectProperties.Row",
 	classes: "ares-project-properties-drawer-row",
+	published: {
+		pan: ""
+	},
 	debug: false,
-	components: [		
-		{	
-			kind: "onyx.Checkbox", 
-			name: "ConfigurationCheckBox", 
+	components: [
+		{
+			kind: "onyx.Checkbox",
+			name: "ConfigurationCheckBox",
 			classes: "ares-project-properties-drawer-row-check-box-label",
 			onchange: "updateConfigurationValue"
 		},
-		{name: "label", content: this.label}	
+		{name: "label", content: this.label}
 	],
 
 	/**
@@ -189,9 +192,9 @@ enyo.kind({
 	 */
 	create: function () {
 		ares.setupTraceLogger(this);
-		this.inherited(arguments);	
-		this.labelChanged();	
-	},	
+		this.inherited(arguments);
+		this.labelChanged();
+	},
 
 	/**
 	 * @private
@@ -204,30 +207,48 @@ enyo.kind({
 	 * @private
 	 */
 	valueChanged: function () {
-		this.$.ConfigurationCheckBox.setChecked(this.value);		
+		this.$.ConfigurationCheckBox.setChecked(this.value);
 	},
 
 	/**
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
-	 * 
+	 *
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
 		this.setValue(inSender.getValue());
-		
+		this.displayConfigXmlPanel();
 		return true;
+	},
+	displayConfigXmlPanel: function(){
+
+		if (this.name === "autoGenerateXML"){
+			this.trace("auto-generate config.xml is enabled: ", this.getValue());
+
+			if (this.pan) {
+				if(this.getValue()) {
+					this.pan.setClassAttribute("ares-project-properties-targetsRows-display");
+				} else {
+					this.pan.setClassAttribute("ares-project-properties-targetsRows-hide");
+				}
+			}
+		}
+
 	},
 
 	/** @public */
 	setProjectConfig: function (config) {
-		this.setValue(config.autoGenerateXML);
+		this.setValue(config[this.name]);
+		this.displayConfigXmlPanel();
 	},
 	/** @public */
 	getProjectConfig: function (config) {
-		config.autoGenerateXML = this.getValue();
+		config[this.name] = this.getValue();
 	}
 });
+
+
 
 enyo.kind({
 	name: "Phonegap.ProjectProperties.AccessRow",
@@ -240,8 +261,8 @@ enyo.kind({
 			kind: "onyx.InputDecorator",
 			classes: "ares-project-properties-input-medium",
 			components: [{
-					kind: "onyx.Input",	
-					name: "ConfigurationInput", 
+					kind: "onyx.Input",
+					name: "ConfigurationInput",
 					onchange: "updateConfigurationValue"
 				}
 			]
@@ -274,7 +295,7 @@ enyo.kind({
 	/**
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
-	 * 
+	 *
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
@@ -283,12 +304,12 @@ enyo.kind({
 	},
 
 	/** @public */
-	setProjectConfig: function (config) {	
+	setProjectConfig: function (config) {
 		this.setValue(config.access.origin);
 		this.valueChanged();
 	},
 	/** @public */
-	getProjectConfig: function (config) {		
+	getProjectConfig: function (config) {
 		config.access.origin = this.getValue();
 	}
 });
@@ -331,7 +352,7 @@ enyo.kind({
 	 */
 	labelChanged: function () {
 		this.$.label.setContent(this.label);
-	},	 
+	},
 
 	/**
 	 * Set the content of the row's picker when the row is created.
@@ -340,9 +361,9 @@ enyo.kind({
 	contentValueChanged: function () {
 		enyo.forEach(this.contentValue, function (inValue) {
 			var itemState = inValue === this.value ? true : false;
-			this.$.ConfigurationPicker.createComponent({content: inValue, active: itemState});			
+			this.$.ConfigurationPicker.createComponent({content: inValue, active: itemState});
 		}, this);
-	}, 
+	},
 
 	/**
 	 * This function change the displayed value of the picker to the parameter "inContent".
@@ -356,8 +377,8 @@ enyo.kind({
 		    if(this.$.ConfigurationPicker.$[key].kind === "onyx.MenuItem"){
 			this.$.ConfigurationPicker.$[key].active = false;
 				if(this.$.ConfigurationPicker.$[key].content === inContent){
-					this.$.ConfigurationPicker.setSelected(this.$.ConfigurationPicker.$[key]);					
-				}	
+					this.$.ConfigurationPicker.setSelected(this.$.ConfigurationPicker.$[key]);
+				}
 		    }
 		  }
 	},
@@ -372,12 +393,12 @@ enyo.kind({
 	/**
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
-	 * 
+	 *
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
 		this.setValue(inValue.content);
-		
+
 		return true;
 	},
 
@@ -399,13 +420,13 @@ enyo.kind({
 	kind: "Phonegap.ProjectProperties.Row",
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
-	published: {				
+	published: {
 		density: "",
 
 		inputTip: "",
 		activated: false,
 		status: false,
-		buttonTip: ""	
+		buttonTip: ""
 	},
 	events: {
 		onInputButtonTap: "",
@@ -414,18 +435,18 @@ enyo.kind({
 	components: [{
 			name: "label",
 			classes: "ares-project-properties-drawer-row-label"
-		}, 
+		},
 		{
 			kind: "onyx.InputDecorator",
-			classes: "ares-project-properties-input-medium", 
+			classes: "ares-project-properties-input-medium",
 			components: [
 				{
-					kind: "onyx.Input", 
-					name: "AndroidImgPath", 
+					kind: "onyx.Input",
+					name: "AndroidImgPath",
 					classes: "enyo-unselectable"
 				}
 			]
-		}, 
+		},
 		{kind: "onyx.IconButton", name:"AndroidImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"},
 		{
 			kind: "onyx.PickerDecorator",
@@ -433,12 +454,12 @@ enyo.kind({
 			components: [
 				{kind: "onyx.PickerButton"},
 				{
-					kind: "onyx.Picker", 
-					name: "AndroidDensity", 
+					kind: "onyx.Picker",
+					name: "AndroidDensity",
 					onSelect: "updateAndroidIconDensity",
 					components: [
 						{content: "ldpi"},
-						{content: "mdpi", active: true}, 
+						{content: "mdpi", active: true},
 						{content: "hdpi"},
 						{content: "xdpi"}
 					]
@@ -453,13 +474,13 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		this.labelChanged();	
+		this.labelChanged();
 
 		this.valueChanged();
 		this.inputTipChanged();
 		this.activatedChanged();
 		this.statusChanged();
-		this.buttonTipChanged();	
+		this.buttonTipChanged();
 	},
 
 	/**
@@ -485,8 +506,8 @@ enyo.kind({
 		    if(this.$.AndroidDensity.controls[key].kind === "onyx.MenuItem"){
 			this.$.AndroidDensity.controls[key].active = false;
 				if(this.$.AndroidDensity.controls[key].content === inContent){
-					this.$.AndroidDensity.setSelected(this.$.AndroidDensity.controls[key]);					
-				}	
+					this.$.AndroidDensity.setSelected(this.$.AndroidDensity.controls[key]);
+				}
 		    }
 		  }
 	},
@@ -494,7 +515,7 @@ enyo.kind({
 	/**
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
-	 * 
+	 *
 	 * @private
 	 */
 	updateAndroidIconDensity: function (inSender, inValue) {
@@ -533,7 +554,7 @@ enyo.kind({
 	buttonTipChanged: function () {
 		this.$.AndroidImgButton.setAttribute("title", this.buttonTip);
 	},
-	
+
 	/** @private */
 	pathInputTap: function (inSender, inEvent) {
 		var header = "";
@@ -569,7 +590,7 @@ enyo.kind({
 		onInputButtonTap: "",
 		onPathChecked: ""
 	},
-	published: {		
+	published: {
 		height: "",
 		width: "",
 
@@ -577,18 +598,18 @@ enyo.kind({
 		activated: false,
 		status: false,
 		buttonTip: ""
-	},	
+	},
 	components: [
 		{
 			name: "label",
 			classes: "ares-project-properties-drawer-row-label"
-		}, 
+		},
 		{
 			kind: "onyx.InputDecorator",
-			classes: "ares-project-properties-input-medium", 
+			classes: "ares-project-properties-input-medium",
 			components: [{
 					kind: "onyx.Input",
-					name: "ImgPath", 
+					name: "ImgPath",
 					classes: "enyo-unselectable"
 				}
 			]
@@ -600,7 +621,7 @@ enyo.kind({
 			classes: "ares-project-properties-input-small",
 			components: [{
 					kind: "onyx.Input",
-					name: "ImgHeight", 
+					name: "ImgHeight",
 					onchange: "updateIconHeightValue"
 				}
 			]
@@ -611,7 +632,7 @@ enyo.kind({
 			classes: "ares-project-properties-input-small",
 			components: [{
 					kind: "onyx.Input",
-					name: "ImgWidth",					
+					name: "ImgWidth",
 					onchange: "updateIconWidhtValue"
 				}
 			]
@@ -661,7 +682,7 @@ enyo.kind({
 	/**
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
-	 * 
+	 *
 	 * @private
 	 */
 	updateIconHeightValue: function (inSender, inValue) {
@@ -673,7 +694,7 @@ enyo.kind({
 	/**
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
-	 * 
+	 *
 	 * @private
 	 */
 	updateIconWidhtValue: function (inSender, inValue) {
@@ -712,7 +733,7 @@ enyo.kind({
 	buttonTipChanged: function () {
 		this.$.ImgButton.setAttribute("title", this.buttonTip);
 	},
-	
+
 	/** @private */
 	pathInputTap: function (inSender, inEvent) {
 		var header = "";
@@ -737,4 +758,3 @@ enyo.kind({
 		config[this.name][this.platform].width = this.getWidth();
 	}
 });
-

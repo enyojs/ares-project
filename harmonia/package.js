@@ -1,8 +1,3 @@
-﻿enyo.depends(
-	"$lib/onyx",
-	"$lib/layout",
-	"../lib/localStorage",
-	"../lib/tree",
-	"../lib/service",
+enyo.depends(
 	"source"
 );

@@ -1,3 +1,4 @@
+/* global require, __dirname, console, process, module */
 /*
 	Stick to a synchronous version although this is not recommended.
 	However this check is done only by the process ide.js at startup time.
@@ -46,16 +47,19 @@ var  semver = require('semver'),
 	 */
 	vtools.checkNodeVersion = function() {
 		var range = getAllowedNodeVersion();
+		logger.info("Allowed Node.js version range:", range);
 		var expectedRange = semver.validRange(range);
+		logger.info("Interpreted Node.js version range:", expectedRange);
+		logger.info("Actual Node.js version:", process.version);
 		if (expectedRange) {
 			if (semver.satisfies(process.version, expectedRange)) {
 				return;			// That's fine
 			} else {
-				logger.error("Ares ide.js only works on Node.js version: " + expectedRange);
+				logger.error("Ares ide.js only works on Node.js version:", expectedRange);
 				process.exit(1);
 			}
 		} else {
-			logger.error("Invalid Node.js version range: " + range);
+			logger.error("Invalid Node.js version range:", range);
 			process.exit(1);
 		}
 	};

@@ -71,13 +71,13 @@ enyo.kind({
 	//* Create a picker for the _layoutKind_ property
 	createLayoutKindPicker: function() {
 		this.$.layoutKindRow.createComponent({
-			name: 		"attributeVal-layoutKind",
-			kind: 		"Inspector.Config.Select",
-			classes: 	"layout-kind-select",
-			fieldName: 	"layoutKind",
+			name: "attributeVal-layoutKind",
+			kind: "Inspector.Config.Select",
+			classes: "layout-kind-select",
+			fieldName: "layoutKind",
 			fieldValue: this.getLayoutKind(),
-			values: 	this.getLayoutKinds(),
-			disabled: 	false
+			values: this.getLayoutKinds(),
+			disabled: false
 		});
 	},
 	//* Fill in any missing properties from _this.styleProps_ with _this.defaultStyleProps_
@@ -114,12 +114,12 @@ enyo.kind({
 			row = this.createComponent({classes: "ares-inspector-row"});
 			row.createComponent(
 				{
-					name: 		"attributeVal-" + prop,
-					kind: 		"Inspector.Config.Text",
-					fieldName: 	prop,
+					name: "attributeVal-" + prop,
+					kind: "Inspector.Config.Text",
+					fieldName: prop,
 					fieldValue: properties[prop].val,
-					disabled: 	properties[prop].disabled,
-					onChange: 	"positionPropertyChanged"
+					disabled: properties[prop].disabled,
+					onChange: "positionPropertyChanged"
 				},
 				{owner: this}
 			);

@@ -77,7 +77,7 @@ enyo.kind({
 	},
 	fileNameChanged: function() {
 		this.$.fileName.setValue(this.fileName);
-		this.$.confirmButton.setDisabled(this.fileName.length == 0)
+		this.$.confirmButton.setDisabled(this.fileName.length === 0);
 	},
 	placeHolderChanged: function(inSender, inEvent) {
 		this.$.fileName.setPlaceholder(this.placeHolder);
