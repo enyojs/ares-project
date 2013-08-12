@@ -39,4 +39,4 @@ enyo.kind({
 	events: {
 		onPaletteComponentAction : ""
 	}
-})
+});
