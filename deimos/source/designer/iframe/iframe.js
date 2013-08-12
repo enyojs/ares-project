@@ -278,7 +278,7 @@ enyo.kind({
 				dropTargetId = this.getContainerItem() ? this.getContainerItem() : this.getEventDropTarget(inEvent.dispatchTarget);
 				dropTargetId = (dropTargetId && dropTargetId.aresId) || null;
 				beforeId = this.getBeforeItem() ? this.getBeforeItem().aresId : null;
-				this.sendMessage({op: "createItem", val: {config: dropData.config, targetId: dropTargetId, beforeId: beforeId}});
+				this.sendMessage({op: "createItem", val: {config: dropData.config, options: dropData.options, targetId: dropTargetId, beforeId: beforeId}});
 				break;
 			
 			default:
