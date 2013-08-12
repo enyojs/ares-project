@@ -43,7 +43,7 @@ enyo.kind({
 		return true;
 	},
 	isInDraggable: function(inSender, inEvent) {
-		var px, pY, minX, minY, maxX, maxY;
+		var pX, pY, minX, minY, maxX, maxY;
 		pX = inEvent.clientX;
 		pY = inEvent.clientY;
 		minX = this.initialPosition.left;
@@ -56,7 +56,6 @@ enyo.kind({
 		var xPosition = null;
 		var e = inEvent;
 		var leftP = this.initialPosition.left + e.dx;
-		var topP = this.initialPosition.left + e.dy;
 		if(leftP < 0){
 			xPosition = 0;
 		} else if(this.containerBounds.width < (leftP+this.initialPosition.width)){
@@ -75,4 +74,5 @@ enyo.kind({
 		}
 		return yPosition;
 	}
-})
+});
+
