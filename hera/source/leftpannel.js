@@ -14,10 +14,10 @@ enyo.kind({
 				{name: "name", tag:"span", content:"Color"}
 			]},
 			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
-				{name: "Colorlist", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
+				{name: "Colorlist", kind: "Repeater", count: 0, onSetupItem: "setupItem", onSelect: "s", components: [
 					
 					{name:"item", classes: "list-sample-item enyo-border-box", components: [
-						{tag:"span", name: "declaration", ontap: "tap"}
+						{ name: "declaration", tag:"span", ontap: "tap"}
 					]}
 				]}
 			]}
@@ -41,20 +41,31 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var index = inEvent.index;
 		var item = inEvent.item;
+		console.log(item);
 		var dec = this.dec[index];
 		item.$.declaration.setContent(dec.name);
-		
+		item.$.declaration.applyStyle("background-color","dodgerblue");
 		/* stop propagation */
 		return true;
 	},	
 	
 	tap: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var index = inEvent.index;	
+		var index = inEvent.index;
+		var item = inEvent.item;
+		console.log(inSender, inEvent);
+		console.log(inEvent.originator);
+		this.inEvent.originator.applyStyle("background-color","red");
+		
+		
+		
+		
+		//this.inSender.controls.applyStyle("background-color","red");
 		this.doPickdeclaration(this.dec[index]);
 	},
-
-	
+	s: function(inSender, inEvent){
+	console.log( inSender, inEvent );
+	},
 	dec: [
 		{name: "background-color", input:"color"},		
 	]
@@ -98,6 +109,7 @@ enyo.kind({
 
 	setupItem: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
+		//console.log(inSender, inEvent );
 		var index = inEvent.index;
 		var item = inEvent.item;
 		var fonts = this.fonts[index];
@@ -109,7 +121,14 @@ enyo.kind({
 	
 	tap: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var index = inEvent.index;	
+		var item = inEvent.item;
+		var index = inEvent.index;
+		console.log(inSender, inEvent );
+	//	this.inSender.addClass("highlight");	
+	//	console.log(this, this.$);
+		// apply selection style if inSender (the list) indicates that this row is selected.
+	//	item.$.addRemoveClass("list-sample-selected", index);
+	
 		this.doPickdeclaration(this.fonts[index]);
 	},
 	
