@@ -87,7 +87,6 @@ enyo.kind({
 			return (node.content === 'project.json' ) ;
 		};
 		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
-		var topNode = hft.$.serverNode ;
 		var matchingNodes = hft.selectedNode.getNodeFiles().filter(matchFileName) ;
 
 		if (matchingNodes.length !== 0) {
@@ -107,7 +106,6 @@ enyo.kind({
 			return (node.content === 'appinfo.json' ) ;
 		};
 		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
-		var topNode = hft.$.serverNode ;
 		var matchingNodes = hft.selectedNode.getNodeFiles().filter(matchFileName) ;
 
 		if (matchingNodes.length === 1) {
