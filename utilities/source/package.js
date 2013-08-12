@@ -8,5 +8,6 @@ enyo.depends(
 	"LocalStorage.js",
 	"FileChooser.js",
 	"LinkController.js",
-	"PanelGrabber.js" 
+	"PanelGrabber.js",
+	"Popup.js" 
 );

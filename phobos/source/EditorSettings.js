@@ -1,7 +1,7 @@
 /* global ares */
 enyo.kind({
 	name: "EditorSettings",
-	kind: "onyx.Popup",
+	kind: "Ares.Popup",
 	classes:"ares-classic-popup",
 	events: {
 		onClose: "",
@@ -31,7 +31,7 @@ enyo.kind({
 	SETTINGS_STORAGE_KEY: "com.enyojs.editor.settings",
 	components: [
 		{classes:"title", content: "EDITOR GLOBAL SETTINGS"},
-		{classes:"ace-settings-popup", components: [
+		{classes:"ace-settings-popup", ondragstart:"drop", ondrag:"drop", ondragfinish:"drop", components: [
 			{kind:"FittableColumns", components: [
 				{kind:"FittableRows", components: [
 					{classes: "ares-row", components: [
@@ -258,6 +258,7 @@ enyo.kind({
 		this.$.textArea.setValue(""); //needs to be set here to avoid disappearance of placeholder in FF21
 		this.disableKeys(false);
 		this.$.modalPopup.hide();
+		this.draggable = true;
 	},
 
 	restoreButton: function(inSender) {
@@ -285,7 +286,8 @@ enyo.kind({
 		}
 		this.$[this.key].addClass("active");
 		this.disableKeys(true);
-		this.$.modalPopup.show();	
+		this.$.modalPopup.show();
+		this.draggable = false;	
 	},
 
 	saveSettings: function() {
@@ -294,5 +296,8 @@ enyo.kind({
 		this.getValuesFromLocalStorage();
 		this.initSettingsPopupFromLocalStorage();
 		this.doClose();
+	},
+	drop: function(inSender, inEvent){
+		return true;
 	}
 });
