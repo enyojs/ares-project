@@ -1,4 +1,4 @@
-/* global analyzer, ares, Ares, ProjectCtrl */
+/* global analyzer, ares, ProjectCtrl */
 
 enyo.kind({
 	name: "Phobos",
