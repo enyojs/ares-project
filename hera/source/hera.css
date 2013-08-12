@@ -35,19 +35,11 @@
 	height: 125px;
 	background-color: #FFFFFF;
 }
-.css_builder_outputbox2 {
-	font-size: 15px;
-	color: #000000;
-	width: 150px;
-	height: 25px;
-	background-color: #FFFFFF;
-}
+
 
 .css_builder_button {
 	font-size: 10px;
 }
-
-
 
 .list-sample {
 	background-color: gray;
@@ -75,4 +67,7 @@
 /* needed to make onyx-highlight more specific for highlighting to work */
 .onyx-highlight.list-sample-selected {
 	background-color: #dedfdf;
+}
+.test {
+	max-height: 200px;
 }
