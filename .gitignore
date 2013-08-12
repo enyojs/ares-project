@@ -36,3 +36,4 @@ $*
 test/root
 /project.json
 node_modules/less
+node_modules/semver
