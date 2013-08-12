@@ -1,5 +1,4 @@
 enyo.depends(
-	"$lib/g11n",
 	"FieldDecorator.js",
 	"DropboxAuthConfig.js",
 	"ProviderList.js",

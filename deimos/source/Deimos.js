@@ -5,6 +5,7 @@ enyo.kind({
 		edited: false
 	},
 	components: [
+		{name: "actionPopup", kind:"PaletteComponentActionPopup", centered: true, floating: true, autoDismiss: false, modal: true},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
 				{name: "left", classes:"ares_deimos_left", kind: "Palette", name:"palette"},
@@ -83,7 +84,11 @@ enyo.kind({
 		onDesignerUpdate: "",
 		onUndo: "",
 		onRedo: "",
-		onRegisterMe: ""
+		onRegisterMe: "",
+		onError:""
+	},
+	handlers:{
+		onPaletteComponentAction: "runPaletteComponentAction"
 	},
 	kinds: [],
 	index: null,
@@ -332,34 +337,30 @@ enyo.kind({
 	//* Create item from palette (via drag-and-drop from Palette into Designer or Component View)
 	createItem: function(inSender, inEvent) {
 		var config = inEvent.config,
+			options = inEvent.options,
 			targetId = inEvent.targetId,
 			beforeId = inEvent.beforeId,
 			target = (targetId)
 					?	this.getItemById(targetId, this.kinds[this.index].components)
 					:	this.kinds[this.index];
-		
+
 		if (!config) {
 			enyo.warn("Could not create new item - bad data: ", inEvent);
 			return true;
 		}
-		
+				
 		// Give the new component (and any children) a fresh _aresId_
 		config.aresId = this.generateNewAresId();
 		if (config.components) {
 			this.addAresIds(config.components);
 		}
-		
-		if (beforeId) {
-			this.insertItemBefore(config, target, beforeId);
+
+		//if component has a "isViewTemplate" option, Designer show action popup
+		if(options && options.isViewTemplate){
+			this.showActionPopup(options, config, target);
 		} else {
-			this.insertItem(config, target);
-		}
-		
-		// Update user defined values
-		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
-		this.addAresKindOptions(this.kinds[this.index].components);
-		
-		this.rerenderKind(config.aresId);
+			this.performCreateItem(config, target, beforeId);	
+		}		
 		return true;
 	},
 	//* Move item with _inEvent.itemId_ into item with _inEvent.targetId_
@@ -769,6 +770,48 @@ enyo.kind({
 		document.ondragover =  enyo.dispatch;
 		document.ondrop =      enyo.dispatch;
 		document.ondragend =   enyo.dispatch;
+	},
+
+	showActionPopup: function(options, config, target){
+		if(options.isViewTemplate){
+			this.$.actionPopup.setActionShowing("vtAction");
+		} else {
+			//FIXME: for other palette component actions
+			this.$.actionPopup.setActionShowing(null);
+		}
+		this.$.actionPopup.setConfigComponent(config);
+		this.$.actionPopup.setTargetComponent(target);
+		this.$.actionPopup.show();
+	},
+	
+	// @protected		
+	runPaletteComponentAction: function(inSender,inEvent){
+		var config = this.$.actionPopup.getConfigComponent(config);
+		var target = this.$.actionPopup.getTargetComponent(target);
+		var beforeId = inEvent.beforeId;
+
+		if(inEvent.getName() === "addtoKind"){
+			this.performCreateItem(config, target, beforeId);			
+		} else if (inEvent.getName() === "replaceKind"){
+			//TODO: Add a feature for "Replace Button" against view template component on designer behavior - ENYO-2807
+			this.doError({msg:"not implemented yet"});
+		} else if (inEvent.getName() === "addNewKind"){
+			//TODO: Add a feature for "Add new Kind" against view template component on designer behavior - ENYO-2808
+			this.doError({msg:"not implemented yet"});
+		}
+		this.$.actionPopup.hide();
+	},
+
+	// @protected
+	performCreateItem: function(config, target, beforeId){
+		if (beforeId) {
+			this.insertItemBefore(config, target, beforeId);
+		} else {
+			this.insertItem(config, target);
+		}	
+		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
+		this.addAresKindOptions(this.kinds[this.index].components);
+		this.rerenderKind(config.aresId);
 	}
 });
 

@@ -1,3 +1,5 @@
+/* global ares */
+
 enyo.kind({
 	name: "ProviderList",
 	kind: "FittableRows",
@@ -27,9 +29,10 @@ enyo.kind({
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 	create: function() {
+		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.services = [];
-		if (this.debug) this.log("selector=", this.selector);
+		this.trace("selector=", this.selector);
 		if (!this.header) {
 			this.$.header.hide();
 		} else {
@@ -56,7 +59,7 @@ enyo.kind({
 			this.error("Unexpected selector value: ", this.selector);
 			this.services = [];
 		}
-		if (this.debug) this.log("selector=", this.selector + " ==> services: ", this.services);
+		this.trace("selector=", this.selector + " ==> services: ", this.services);
 
 		this.$.list.count = this.services.length;
 		this.$.list.render();
@@ -64,7 +67,7 @@ enyo.kind({
 		this.doSelectProvider({service: this.services[this.selected]});
 	},
 	setupRow: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		var p = this.services[inEvent.index], config;
 		if (p) {
 			config = p.getConfig();
@@ -78,11 +81,16 @@ enyo.kind({
 		this.$.list.getSelection().select(this.selected);
 	},
 	rowSelected: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		this.selected = inEvent.key;
 		var p = this.services[this.selected];
 		if (p) {
 			this.doSelectProvider({service: p});
 		}
+	},
+	/** @ public */
+	reset: function () {
+		this.selector = null;
+		this.setSelected(-1);
 	}
 });

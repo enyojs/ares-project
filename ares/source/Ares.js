@@ -1,5 +1,16 @@
 /* global Ares, async, ares, alert */
 
+enyo.path.addPaths({
+	"assets"	: "$enyo/../assets",
+	// deprecated aliases
+	"utilities"	: "$enyo/../utilities",
+	"services"	: "$enyo/../services",
+	"phobos"	: "$enyo/../phobos",
+	"deimos"	: "$enyo/../deimos",
+	"harmonia"	: "$enyo/../harmonia",
+	"project-view"	: "$enyo/../project-view"
+});
+
 enyo.kind({
 	name: "Ares",
 	kind: "Control",
@@ -360,10 +371,12 @@ enyo.kind({
 		this.componentsRegistry.harmonia.hideGrabber();
 	},
 	changeGrabberDirection:function(inSender, inEvent){
-		if(this.$.aresLayoutPanels.getIndex()>0){
-			this.$.aresLayoutPanels.getActive().switchGrabberDirection(true);
+		if(inEvent.toIndex > 0 && inEvent.fromIndex < inEvent.toIndex){
+			for(var i = 1; i<=inEvent.toIndex; i++){
+				this.$.aresLayoutPanels.getPanels()[i].switchGrabberDirection(true);
+			}
 		}
-		if(inEvent.fromIndex>0){
+		if(inEvent.fromIndex>inEvent.toIndex){
 			this.$.aresLayoutPanels.getPanels()[inEvent.fromIndex].switchGrabberDirection(false);
 		}
 	},
@@ -537,6 +550,14 @@ enyo.kind({
 		}
 		if (! Ares.Workspace.files.length ) {
 			this.showProjectView();
+		} else{
+			this.selectProjectForActiveDocument();
+		}
+	},
+	selectProjectForActiveDocument:function(){
+		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
+		if(project){
+			this.componentsRegistry.projectList.selectInProjectList(project);
 		}
 	},
 	/**
@@ -567,3 +588,7 @@ enyo.kind({
 		instance: null
 	}
 });
+
+if ( ! Ares.isBrowserSupported()) {
+	alert($L("Ares is designed for the latest version of IE. We recommend that you upgrade your browser or use Chrome"));
+}
