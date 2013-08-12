@@ -1,4 +1,4 @@
-/* global analyzer, ares, Ares, ProjectCtrl */
+/* global analyzer, ares, ProjectCtrl */
 
 enyo.kind({
 	name: "Phobos",
@@ -15,8 +15,7 @@ enyo.kind({
 				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
-		{name: "savePopup", kind: "saveActionPopup", onAbandonDocAction: "abandonDocAction", onSave: "saveBeforeClose"},
-		{name: "saveAllPopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonAllDocAction"},
+		{name: "savePopup", kind: "saveActionPopup", onAbandonDocAction: "abandonDocAction", onSave: "saveBeforeClose", onCancel: "cancelClose"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
@@ -31,7 +30,6 @@ enyo.kind({
 		onSaveAsDocument: "",
 		onDesignDocument: "",
 		onCloseDocument: "",
-		onCloseAllDocument: "",
 		onUpdate: "",
 		onRegisterMe: ""
 	},
@@ -46,6 +44,7 @@ enyo.kind({
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
 	helper: null,			// Analyzer.KindHelper
+	closeAll: false,
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
@@ -124,6 +123,7 @@ enyo.kind({
 		var id = this.docData.getId();
 		this.beforeClosingDocument();
 		this.doCloseDocument({id: id});
+		this.closeNextDoc();
 	},
 	openDoc: function(inDocData) {
 
@@ -661,32 +661,31 @@ enyo.kind({
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
 			this.$.savePopup.setName("Document was modified!");
-			this.$.savePopup.setMessage("Save it before closing?");
+			this.$.savePopup.setMessage("\""+ this.docData.getFile().path + "\" was modified.<br/><br/>Save it before closing?");
 			this.$.savePopup.setActionButton("Don't Save");
 			this.$.savePopup.show();
 		} else {
 			var id = this.docData.getId();
 			this.beforeClosingDocument();
 			this.doCloseDocument({id: id});
+			this.closeNextDoc();
 		}
 		return true; // Stop the propagation of the event
 	},
 	closeAllDocAction: function(inSender, inEvent) {
-		var fileEdited = false,
-		    files = Ares.Workspace.files;
-		files.each(function(file) {
-			fileEdited = fileEdited || file.getEdited();
-		});
-		if (fileEdited === true) {
-			this.$.saveAllPopup.setName("Document(s) were modified!");
-			this.$.saveAllPopup.setMessage("Save it before closing?");
-			this.$.saveAllPopup.setActionButton("Don't Save");
-			this.$.saveAllPopup.show();
-		} else {
-			this.beforeClosingDocument();
-			this.doCloseAllDocument();
-		}
+		this.closeAll = true;
+		this.closeNextDoc();
 		return true; // Stop the propagation of the event
+	},
+	closeNextDoc: function() {
+		if(this.docData && this.closeAll) {
+			this.closeDocAction(this);
+		} else {
+			this.closeAll = false;
+		}
+	},
+	cancelClose: function(inSender, inEvent) {
+		this.closeAll = false;
 	},	
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
@@ -694,12 +693,7 @@ enyo.kind({
 		var docData = this.docData;
 		this.beforeClosingDocument();
 		this.doCloseDocument({id: docData.getId()});
-	},
-	// called when "Don't Save" is selected in save all popup
-	abandonAllDocAction: function(inSender, inEvent) {
-		this.$.saveAllPopup.hide();
-		this.beforeClosingDocument();
-		this.doCloseAllDocument();
+		this.closeNextDoc();
 	},	
 	docChanged: function(inSender, inEvent) {
 		this.docData.setEdited(true);
@@ -899,15 +893,21 @@ enyo.kind({
 	name: "saveActionPopup",
 	kind: "Ares.ActionPopup",
 	events:{
-		onSave: ""
+		onSave: "",
+		onCancel: ""
 	},
 	create: function() {
 		this.inherited(arguments);
+		this.$.message.allowHtml = true;
 		this.$.buttons.createComponent(
 			{name:"saveButton", kind: "onyx.Button", content: "Save", ontap: "save"},
 			{owner: this}
 		);
 	},
+	actionCancel: function(inSender, inEvent) {
+        this.inherited(arguments);
+        this.doCancel();
+    },
 	save: function(inSender, inEvent) {
 		this.hide();
 		this.doSave();

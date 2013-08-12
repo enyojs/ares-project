@@ -78,7 +78,7 @@ enyo.kind({
 			ondragfinish      : "stopPanelEvent",
 			components: [
 				{components: [
-					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onCloseAllDocument: "closeAllDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
+					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
 				]},
 				{components: [
 					{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
