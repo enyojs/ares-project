@@ -1,15 +1,12 @@
-var
-	config = require('./config.js'),
-	DropboxClient = require('dropbox').DropboxClient
-	;
+/* global require, console, exports */
+var config = require('./config.js'),
+	DropboxClient = require('dropbox').DropboxClient;
 
 exports.route = function(req, res) {
-	var
-		auth_token = req.param("token"),
+	var auth_token = req.param("token"),
 		auth_secret = req.param("secret"),
 		content = req.param("content"),
-		path = req.params[0]
-		;
+		path = req.params[0];
 	//
 	path = path.replace(/\s$/, '');
 	//

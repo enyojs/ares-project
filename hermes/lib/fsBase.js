@@ -1,3 +1,4 @@
+/* global require, console, module, Buffer, process  */
 /**
  * Base toolkit for Hermes FileSystem providers implemented using Node.js
  */
@@ -6,9 +7,7 @@ var fs = require("fs"),
     path = require("path"),
     express = require("express"),
     http = require("http"),
-    https = require("https"),
     tunnel = require("tunnel"),
-    util  = require("util"),
     createDomain = require('domain').create,
     temp = require("temp"),
     async = require("async"),
@@ -203,7 +202,9 @@ function FsBase(inConfig, next) {
 
 FsBase.prototype.configure = function(config, next) {
 	this.log("FsBase.configure(): config:", config);
-	if (next) next();
+	if (next) {
+		next();
+	}
 };
 
 // Middlewares -- one per session
@@ -243,13 +244,13 @@ FsBase.prototype.cors = function(req, res, next) {
  * @param {String} p the path to normalize
  */
 if (process.platform === 'win32') {
-FsBase.prototype.normalize = function(p) {
-	return path.normalize(p).replace(/\\/g,'/');
-}
+	FsBase.prototype.normalize = function(p) {
+		return path.normalize(p).replace(/\\/g,'/');
+	};
 } else {
-FsBase.prototype.normalize = function(p) {
-	return path.normalize(p);
-};
+	FsBase.prototype.normalize = function(p) {
+		return path.normalize(p);
+	};
 }
 
 /**

@@ -76,9 +76,9 @@ BdPhoneGap.prototype.route = function() {
 	this.app.get(this.makeExpressRoute('/api/v1/apps/:appId/:platform/:title/:version'), this.downloadApp.bind(this));
 };
 
-// jshint: it is not possible to reduce the number of parameters of
+// it is not possible to reduce the number of parameters of
 // this function, otherwise is not recognized as the error-handler by
-// express...
+// express... (jshint)
 BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 	var self = this;
 	log.info("errorHandler()", "err:", err);

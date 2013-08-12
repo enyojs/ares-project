@@ -15,5 +15,6 @@ enyo.depends(
 	"CssEditor.css",
 	"ColorPicker.js",
 	"LayoutEditor.js",
-	"LayoutEditor.css"
+	"LayoutEditor.css",
+	"PaletteComponentActionPopup.js"
 );
