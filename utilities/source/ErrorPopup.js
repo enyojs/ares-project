@@ -84,6 +84,8 @@ enyo.kind({
 				err = evt.err;
 				msg = evt.msg || (err && err.toString());
 			}
+		} else {
+			msg = evt.toString();
 		}
 		text = err && (err.text || err.stack);
 		html = err && err.html;
