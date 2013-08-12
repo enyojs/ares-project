@@ -69,6 +69,7 @@ enyo.kind({
 	saveDocAction: function() {
 		this.showWaitPopup($L("Saving ..."));
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
+		return true;
 	},
 	saveComplete: function() {
 		this.hideWaitPopup();
