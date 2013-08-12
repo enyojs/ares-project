@@ -78,8 +78,7 @@
 					"type": "template",
 					"files": [
 						{
-							"url": "bootplate-latest.zip",
-      							"alternateUrl": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
+							"url": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
       							"prefixToRemove": "bootplate",
       							"excluded": [
 								"bootplate/api"

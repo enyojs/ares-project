@@ -168,7 +168,7 @@ function GenZip(config, next) {
 
 		var destination = temp.mkdirSync({prefix: 'com.enyojs.ares.services.genZip'});
 		self.tools.generate(JSON.parse(req.body.sourceIds), JSON.parse(req.body.substitutions), destination, {
-			overwrite: req.param("overwrite")
+			overwrite: req.param("overwrite") === 'true'
 		}, function(inError, inData) {
 			if (inError) {
 				next(inError);
