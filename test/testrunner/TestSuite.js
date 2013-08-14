@@ -1,5 +1,4 @@
-/*global enyo, console
-*/
+/* global enyo */
 /*
 Test Package Wish list:
 -----------------------

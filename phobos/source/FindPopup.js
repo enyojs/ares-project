@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "FindPopup",
-	kind: "onyx.Popup",
+	kind: "Ares.Popup",
 	classes:"ares-classic-popup",
 	events: {
 		onFindNext:"",
@@ -19,7 +19,7 @@ enyo.kind({
 	},
 	components: [
 		{classes:"title", content: "FIND/REPLACE"},
-		{classes:"ace-find-popup", components: [
+		{classes:"ace-find-popup", ondragstart:"drop", ondrag:"drop", ondragfinish:"drop", components: [
 			{kind: "FittableRows", components: [
 				{classes: "ares-row", components: [
 					{tag:"label", classes: "ares-fixed-label ace-find-label", content: "Find:"},
@@ -65,5 +65,8 @@ enyo.kind({
 	},
 	shown: function(inSender, inEvent) {
 		this.$.find.focus();
+	},
+	drop: function(inSender, inEvent){
+		return true;
 	}
 });

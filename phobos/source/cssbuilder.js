@@ -292,120 +292,120 @@ enyo.kind({
 	},
 
 	updateBox: function(){
-	var tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
-	var outPut = this.className + " " + "{<br>" ;
-	var outString =  this.className + " " + "{\n" ;
-	var c = '#' + (this.red + this.green + this.blue).toUpperCase();
+		var tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
+		var outPut = this.className + " " + "{<br>" ;
+		var outString =  this.className + " " + "{\n" ;
+		var c = '#' + (this.red + this.green + this.blue).toUpperCase();
 
-	if(this.$.toggle == "background"){
-		this.$.outputBox.applyStyle("background-color", c);
-		this.backgroundColor = c;
-	}
-	if(this.$.toggle == "Font color"){
-		this.$.outputBox.applyStyle("color", c);
-		this.fontColor = c;
-	}
-
-	if(this.$.toggle == "text-shadow"){
-		this.$.textshadowcolor = '#' + (this.red + this.green + this.blue).toUpperCase();
-	}
-
-	if(this.$.toggle == "box-shadow"){
-		this.$.boxshadowcolor = '#' + (this.red + this.green + this.blue).toUpperCase();
-	}
-
-
-
-	if(this.$.textshadowcolor != null ){
-		outPut = outPut + tab + "text-shadow:" + " " + this.$.textshadowH + "px"  + " " + this.$.textshadowV + "px" +  " " + this.$.textshadowB + "px" + " " + this.$.textshadowcolor  +";<br>";
-		outString = outString + "	" + "text-shadow:" + " " + this.$.textshadowH + "px" + " " + this.$.textshadowV + "px" + " " + this.$.textshadowB + "px" + " "  + this.$.textshadowcolor  + ";\n";
-		this.$.textoutputBox.applyStyle("background-color", c);
-	}
-
-	if(this.$.boxshadowcolor != null ){
-		outPut = outPut + tab + "box-shadow:" + " " + this.$.boxshadowH + "px"  + " " + this.$.boxshadowV + "px" +  " " + this.$.boxshadowB + "px" + " " + this.$.boxshadowcolor  +";<br>";
-		outString = outString + "	" + "box-shadow:" + " " + this.$.boxshadowH + "px" + " " + this.$.boxshadowV + "px" + " " + this.$.boxshadowB + "px" + " "  + this.$.boxshadowcolor  + ";\n";
-		this.$.outputBox2.applyStyle("background-color", c);
-	}
-
-	if(this.backgroundColor != null){
-		outPut = outPut + tab + "background-color:" + " " + this.backgroundColor + ";" + "<br>";
-		outString = outString + "	" + "background-color:" + "	" + this.backgroundColor + ";\n";
-	}
-
-	if(this.fontColor != null){
-		outPut = outPut + tab + "color:" + " " + this.fontColor + ";"  + "<br>";
-		outString = outString + "	" + "color:" + " " + this.fontColor + ";\n";
-	}
-
-	if(this.fontFamily != null){
-		outPut = outPut +tab + "font-family:" + " " + this.fontFamily + ";" + "<br>";
-		outString = outString + "	" + "font-family:" + " " + this.fontFamily + ";\n";
-	}
-
-	if(this.$.fontSize != null){
-		outPut = outPut + tab + "font-size:" + " " + this.$.fontSize + "px;" + "<br>";
-		outString = outString + "	" + "font-size:" + " " + this.$.fontSize + "px;\n";
-	}
-
-	if(this.$.marginSize != null){
-		outPut = outPut  + tab + "margin:" + " " + this.$.marginSize + "px;" + "<br>";
-		outString = outString + "	" + "margin:" + " " + this.$.marginSize + "px;\n";
-	}
-
-	if(this.$.borderSize != null){
-		outPut = outPut + tab + "border:" + " " + this.$.borderSize + "px";
-		outString = outString + "	" + "border:" + " " + this.$.borderSize + "px";
-
-	if(this.toggle == "Border color"){
-			outPut = outPut + " " + "sold" + " " + c + ";<br>";
-			outString = outString + "	" + "sold" + " " + c + ";\n";
-		}else{
-		outPut = outPut + ";<br>";
-		outString = outString + ";\n";
+		if(this.$.toggle == "background"){
+			this.$.outputBox.applyStyle("background-color", c);
+			this.backgroundColor = c;
 		}
-	}
-	if(this.$.heightSize != null){
-		outPut = outPut  + tab + "height:" + " " + this.$.heightSize + "px;" + "<br>";
-		outString = outString + "	" + "height:" + " " + this.$.heightSize + "px;\n";
-	}
-	if(this.$.widthSize != null){
-		outPut = outPut  + tab + "width:" + " " + this.$.widthSize + "px;" + "<br>";
-		outString = outString + "	" + "width:" + " " + this.$.widthSize + "px;\n";
-	}
+		if(this.$.toggle == "Font color"){
+			this.$.outputBox.applyStyle("color", c);
+			this.fontColor = c;
+		}
 
-	if(this.$.paddingSize != null){
-		outPut = outPut  + tab + "padding:" + " " + this.$.paddingSize + "px;" + "<br>";
-		outString = outString + "	" + "padding:" + " " + this.$.paddingSize + "px;\n";
-	}
+		if(this.$.toggle == "text-shadow"){
+			this.$.textshadowcolor = '#' + (this.red + this.green + this.blue).toUpperCase();
+		}
 
-	if(this.$.radiusSize != null){
-		outPut = outPut  + tab + "border-radius:" + " " + this.$.radiusSize + "px;" + "<br>";
-		outString = outString + "	" + "border-radius:" + " " + this.$.radiusSize + "px;\n";
-	}
+		if(this.$.toggle == "box-shadow"){
+			this.$.boxshadowcolor = '#' + (this.red + this.green + this.blue).toUpperCase();
+		}
 
-	if(this.$.bgImage != null){
-		outPut = outPut  + tab + "background-image: url('" + this.$.bgImage +"');<br>";
-		outString = outString + "	" + "background-image: url('" + this.$.bgImage + "');\n";
-	}
-	if(this.$.hrepeat != null){
-		outPut = outPut  + tab + "background-image: repeat-x;<br>";
-		outString = outString + "	" + "background-image: repeat-x;\n";	
-	}
-	
-	if(this.$.vrepeat != null){
-		outPut = outPut  + tab + "background-image: repeat-y;<br>";
-		outString = outString + "	" + "background-image: repeat-y;\n";	
-	}
-	
-	if(this.$.norepeat != null){
-		outPut = outPut  + tab + "background-image: no-repeat;<br>";
-		outString = outString + "	" + "background-image: no-repeat;\n";	
-	}
 
-	this.$.bg.setContent(outPut + "<br>}");
-	outString = outString + "\n}";
-	this.outPut = outString;
+
+		if(this.$.textshadowcolor != null ){
+			outPut = outPut + tab + "text-shadow:" + " " + this.$.textshadowH + "px"  + " " + this.$.textshadowV + "px" +  " " + this.$.textshadowB + "px" + " " + this.$.textshadowcolor  +";<br>";
+			outString = outString + "	" + "text-shadow:" + " " + this.$.textshadowH + "px" + " " + this.$.textshadowV + "px" + " " + this.$.textshadowB + "px" + " "  + this.$.textshadowcolor  + ";\n";
+			this.$.textoutputBox.applyStyle("background-color", c);
+		}
+
+		if(this.$.boxshadowcolor != null ){
+			outPut = outPut + tab + "box-shadow:" + " " + this.$.boxshadowH + "px"  + " " + this.$.boxshadowV + "px" +  " " + this.$.boxshadowB + "px" + " " + this.$.boxshadowcolor  +";<br>";
+			outString = outString + "	" + "box-shadow:" + " " + this.$.boxshadowH + "px" + " " + this.$.boxshadowV + "px" + " " + this.$.boxshadowB + "px" + " "  + this.$.boxshadowcolor  + ";\n";
+			this.$.outputBox2.applyStyle("background-color", c);
+		}
+
+		if(this.backgroundColor != null){
+			outPut = outPut + tab + "background-color:" + " " + this.backgroundColor + ";" + "<br>";
+			outString = outString + "	" + "background-color:" + "	" + this.backgroundColor + ";\n";
+		}
+
+		if(this.fontColor != null){
+			outPut = outPut + tab + "color:" + " " + this.fontColor + ";"  + "<br>";
+			outString = outString + "	" + "color:" + " " + this.fontColor + ";\n";
+		}
+
+		if(this.fontFamily != null){
+			outPut = outPut +tab + "font-family:" + " " + this.fontFamily + ";" + "<br>";
+			outString = outString + "	" + "font-family:" + " " + this.fontFamily + ";\n";
+		}
+
+		if(this.$.fontSize != null){
+			outPut = outPut + tab + "font-size:" + " " + this.$.fontSize + "px;" + "<br>";
+			outString = outString + "	" + "font-size:" + " " + this.$.fontSize + "px;\n";
+		}
+
+		if(this.$.marginSize != null){
+			outPut = outPut  + tab + "margin:" + " " + this.$.marginSize + "px;" + "<br>";
+			outString = outString + "	" + "margin:" + " " + this.$.marginSize + "px;\n";
+		}
+
+		if(this.$.borderSize != null){
+			outPut = outPut + tab + "border:" + " " + this.$.borderSize + "px";
+			outString = outString + "	" + "border:" + " " + this.$.borderSize + "px";
+
+		if(this.toggle == "Border color"){
+				outPut = outPut + " " + "sold" + " " + c + ";<br>";
+				outString = outString + "	" + "sold" + " " + c + ";\n";
+			}else{
+			outPut = outPut + ";<br>";
+			outString = outString + ";\n";
+			}
+		}
+		if(this.$.heightSize != null){
+			outPut = outPut  + tab + "height:" + " " + this.$.heightSize + "px;" + "<br>";
+			outString = outString + "	" + "height:" + " " + this.$.heightSize + "px;\n";
+		}
+		if(this.$.widthSize != null){
+			outPut = outPut  + tab + "width:" + " " + this.$.widthSize + "px;" + "<br>";
+			outString = outString + "	" + "width:" + " " + this.$.widthSize + "px;\n";
+		}
+
+		if(this.$.paddingSize != null){
+			outPut = outPut  + tab + "padding:" + " " + this.$.paddingSize + "px;" + "<br>";
+			outString = outString + "	" + "padding:" + " " + this.$.paddingSize + "px;\n";
+		}
+
+		if(this.$.radiusSize != null){
+			outPut = outPut  + tab + "border-radius:" + " " + this.$.radiusSize + "px;" + "<br>";
+			outString = outString + "	" + "border-radius:" + " " + this.$.radiusSize + "px;\n";
+		}
+
+		if(this.$.bgImage != null){
+			outPut = outPut  + tab + "background-image: url('" + this.$.bgImage +"');<br>";
+			outString = outString + "	" + "background-image: url('" + this.$.bgImage + "');\n";
+		}
+		if(this.$.hrepeat != null){
+			outPut = outPut  + tab + "background-image: repeat-x;<br>";
+			outString = outString + "	" + "background-image: repeat-x;\n";	
+		}
+		
+		if(this.$.vrepeat != null){
+			outPut = outPut  + tab + "background-image: repeat-y;<br>";
+			outString = outString + "	" + "background-image: repeat-y;\n";	
+		}
+		
+		if(this.$.norepeat != null){
+			outPut = outPut  + tab + "background-image: no-repeat;<br>";
+			outString = outString + "	" + "background-image: no-repeat;\n";	
+		}
+
+		this.$.bg.setContent(outPut + "<br>}");
+		outString = outString + "\n}";
+		this.outPut = outString;
 	},
 
 	redChanged: function(inSender, inEvent){
@@ -522,7 +522,7 @@ enyo.kind({
 	},
 
 	textshadow: function(inSender, inEvent) {
-		this.$.toggle = "text-shadow",
+		this.$.toggle = "text-shadow";
 		this.$.textShadowPopup.show();
 	},
 	textshadowH: function(inSender, inEvent) {
@@ -545,7 +545,7 @@ enyo.kind({
 	},
 
 	boxshadow: function(inSender, inEvent) {
-		this.$.toggle = "box-shadow",
+		this.$.toggle = "box-shadow";
 		this.$.boxShadowPopup.show();
 	},
 	boxshadowH: function(inSender, inEvent) {
@@ -567,7 +567,7 @@ enyo.kind({
 		enyo.log(this.$.bgImage, this.$.imageInput.hasNode().value );
 	},
 	hrepeat: function(inSender) {
-		if (inSender.checked == true ){
+		if (inSender.checked === true ){
 			this.$.hrepeat = true;
 		}else{
 			this.$.hrepeat  = null;
@@ -575,7 +575,7 @@ enyo.kind({
 		this.updateBox();
 	},
 	vrepeat: function(inSender) {
-		if (inSender.checked == true ){
+		if (inSender.checked === true ){
 			this.$.vrepeat = true;
 		}else{
 			this.$.vrepeat  = null;
@@ -584,7 +584,7 @@ enyo.kind({
 	},
 	
 	norepeat: function(inSender) {
-		if (inSender.checked == true ){
+		if (inSender.checked === true ){
 			this.$.norepeat = true;
 		}else{
 			this.$.norepeat  = null;
@@ -611,7 +611,6 @@ enyo.kind({
 		this.$.vrepeat = null;
 		this.$.norepeat = null;
 		this.$.outPut = null;
-		outString = "";
 		this.updateBox();
 
 	}

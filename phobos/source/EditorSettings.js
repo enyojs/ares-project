@@ -1,6 +1,7 @@
+/* global ares */
 enyo.kind({
 	name: "EditorSettings",
-	kind: "onyx.Popup",
+	kind: "Ares.Popup",
 	classes:"ares-classic-popup",
 	events: {
 		onClose: "",
@@ -9,28 +10,28 @@ enyo.kind({
 		onSoftTabs: "",
 		onChangeSettings:""
 	},
-   	published: {
-	 	settings: {
-	 		theme:"clouds",
-	 		highlight:false,
-	 		fontsize:12,
-	 		wordwrap:false,
-	 		rightpane:false,
-	 		keys:{ }
-	 	},
-	 	previewSettings: {
-	 		theme:"clouds",
-	 		highlight:false,
-	 		fontsize:12,
-	 		wordwrap:false,
-	 		rightpane:false,
-	 		keys:{ }
-	 	}
+	published: {
+		settings: {
+			theme:"clouds",
+			highlight:false,
+			fontsize:12,
+			wordwrap:false,
+			rightpane:false,
+			keys:{ }
+		},
+		previewSettings: {
+			theme:"clouds",
+			highlight:false,
+			fontsize:12,
+			wordwrap:false,
+			rightpane:false,
+			keys:{ }
+		}
 	},
 	SETTINGS_STORAGE_KEY: "com.enyojs.editor.settings",
 	components: [
 		{classes:"title", content: "EDITOR GLOBAL SETTINGS"},
-		{classes:"ace-settings-popup", components: [
+		{classes:"ace-settings-popup", ondragstart:"drop", ondrag:"drop", ondragfinish:"drop", components: [
 			{kind:"FittableColumns", components: [
 				{kind:"FittableRows", components: [
 					{classes: "ares-row", components: [
@@ -149,6 +150,7 @@ enyo.kind({
 	 */
 	
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.getValuesFromLocalStorage();
 		this.$.highLightButton.value = this.settings.highlight;
@@ -171,7 +173,7 @@ enyo.kind({
 
 		if(/Macintosh/.test(navigator.userAgent)){
 			this.$.osMessage.content = "Programmable buttons Command-SHIFT  F1 to F12";
-		};
+		}
 
 		// serialize
 		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
@@ -180,7 +182,7 @@ enyo.kind({
 	getValuesFromLocalStorage:function(){
 		var self = this;
 		Ares.LocalStorage.get(this.SETTINGS_STORAGE_KEY, function(str) {
-			if (self.debug) self.log("localStorage[" + self.SETTINGS_STORAGE_KEY + "] = ", str);
+			self.trace("localStorage[", self.SETTINGS_STORAGE_KEY, "] = ", str);
 			try {
 				if(str !== null && str !== undefined){
 					self.settings = enyo.json.parse(str);
@@ -220,7 +222,7 @@ enyo.kind({
 	themeSelected: function(inSender, inEvent) {
 		this.previewSettings.theme = inEvent.originator.content;
 		this.doChangeSettings();
-    },
+	},
 
 	buttonToggle: function(inSender, inEvent) {
 		this.previewSettings.highlight = inEvent.value;
@@ -256,6 +258,7 @@ enyo.kind({
 		this.$.textArea.setValue(""); //needs to be set here to avoid disappearance of placeholder in FF21
 		this.disableKeys(false);
 		this.$.modalPopup.hide();
+		this.draggable = true;
 	},
 
 	restoreButton: function(inSender) {
@@ -283,7 +286,8 @@ enyo.kind({
 		}
 		this.$[this.key].addClass("active");
 		this.disableKeys(true);
-		this.$.modalPopup.show();	
+		this.$.modalPopup.show();
+		this.draggable = false;	
 	},
 
 	saveSettings: function() {
@@ -292,5 +296,8 @@ enyo.kind({
 		this.getValuesFromLocalStorage();
 		this.initSettingsPopupFromLocalStorage();
 		this.doClose();
+	},
+	drop: function(inSender, inEvent){
+		return true;
 	}
 });

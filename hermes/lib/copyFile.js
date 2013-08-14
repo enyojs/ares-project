@@ -1,3 +1,4 @@
+/* global require, module  */
 module.exports = copyFile;
 
 var fs = require('fs');

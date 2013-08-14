@@ -1,9 +1,9 @@
+/* global console, process, require */
 var path = require('path'),
     spawn = require('child_process').spawn;
 
 var submodules = [
-	'node_modules/ares-generator',
-	'node_modules/semver'
+	'node_modules/ares-generator'
 ];
 
 var mwd = process.cwd();
