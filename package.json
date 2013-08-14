@@ -20,7 +20,7 @@
 	"os" : [ "darwin", "linux", "win32" ],
 	"dependencies": {
 		"archiver": "~0.4.6",
-		"ares-generator": "0.2.2",
+		"ares-generator": "0.2.3",
 		"async": "~0.2.9",
 		"base64stream": "~0.1.1",
 		"combined-stream": "~0.0.4",
