@@ -144,7 +144,7 @@ enyo.kind({
 	kind: "Ares.ProjectProperties",
 	debug: false,
 	published: {
-		config: {},
+		config: {}
 	},
 	events: {
 		onConfigure: ""
@@ -159,7 +159,7 @@ enyo.kind({
 						{
 							classes: "ares-row ares-align-left",
 							components: [
-								{kind: "Phonegap.ProjectProperties.AppId", name: "AppIdSelector"}							
+								{kind: "Phonegap.ProjectProperties.AppId", name: "appIdSelector"}							
 							]
 						}, 
 						{name: "BuildOptionPanel", kind: "FittableRows"},
@@ -490,7 +490,7 @@ enyo.kind({
 			kind: "onyx.PickerDecorator",
 		
 			components: [
-				{kind: "onyx.PickerButton", name:"aaa", classes: "ares-project-properties-picker"},
+				{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
 				{kind: "onyx.Picker", name: "AppIdList",published: {appObject: undefined}, onSelect: "updateSelectedAppId"}
 			]
 		},
@@ -498,15 +498,11 @@ enyo.kind({
 		{name: "ApplicationTitle", content:""}
 	],
 
-	create: function(){
-		this.inherited(arguments);		
-	}, 
-
+	/**@private*/
 	userDataChanged: function(){
 		this.log("userData: ", this.userData.user.apps.all);		
 		this.clearPickerContent();
-		//this.$.aaa.render();
-
+		
 		if (this.userData.user.apps.all === null){
 			this.$.AppIdList.createComponent({content: "New Application", active: true});
 		} else {
@@ -523,6 +519,7 @@ enyo.kind({
 		}		
 	}, 
 
+	/**@private*/
 	updateSelectedAppId: function (inSender, inValue) {	
 		this.setSelectedTitle(inValue && inValue.selected.published.applicationObject&& inValue.selected.published.applicationObject.title || "");
 		if (inValue.content === "New Application") {
@@ -532,19 +529,19 @@ enyo.kind({
 		}				
 	},
 
+	/**@private*/
 	clearPickerContent: function(){
 		
 		for (var key in this.$.AppIdList.$) {
-			this.log(key);
-		
+					
 			if (this.$.AppIdList.$[key].kind === "onyx.MenuItem"){							
 				this.$.AppIdList.$[key].destroy();
 			}		
 		}
 		this.$.AppIdList.render();
-		this.log(this.$.AppIdList.$);		
 	},
 
+	/**@private*/
 	selectedTitleChanged: function(){
 		this.$.ApplicationTitle.setContent(this.selectedTitle);
 		this.$.ApplicationTitle.render();
@@ -583,6 +580,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.drawerNameChanged();
 	},
+	/**@public*/
 	setProjectConfig: function (config) {
 		this.trace("id:", this.targetId, "config:", config);
 
@@ -600,6 +598,7 @@ enyo.kind({
 			}
 		}, this);
 	},
+	/**@public*/
 	getProjectConfig: function (config) {
 		if (this.enabled) {
 			config.targets[this.targetId] = {};
