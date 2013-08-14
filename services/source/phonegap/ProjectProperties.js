@@ -27,7 +27,7 @@ enyo.kind({
 		commonDrawersContent: [
 			{
 				id: "buildOption",
-				name: "Build Option",
+				name: "Build Options",
 				type: "Drawer",
 				rows: [
 					{name: "autoGenerateXML", label: "Generate config.xml file when building", content: "", defaultValue: "true", type: "BuildOption"},
@@ -144,8 +144,7 @@ enyo.kind({
 	kind: "Ares.ProjectProperties",
 	debug: false,
 	published: {
-		config: {}, 
-		showAdvancedConfiguration: true
+		config: {},
 	},
 	events: {
 		onConfigure: ""
@@ -160,13 +159,7 @@ enyo.kind({
 						{
 							classes: "ares-row ares-align-left",
 							components: [
-								{tag: "label", classes: "ares-fixed-label ares-small-label", content: "PhoneGap App ID"}, 
-								{
-									kind: "onyx.InputDecorator",
-									components: [
-										{kind: "Input", name: "pgConfId", attributes: { title: "unique identifier, assigned by build.phonegap.com"}}
-									]
-								}, 
+								{kind: "Phonegap.ProjectProperties.AppId", name: "AppIdSelector"}							
 							]
 						}, 
 						{name: "BuildOptionPanel", kind: "FittableRows"},
@@ -241,7 +234,6 @@ enyo.kind({
 		 * @param {Array} dwrContent Array declared in {Phonegap.UIConfiguration}.
 		 */
 		function initialiseDrawer(dwr, dwrContent) {
-
 			var getPanel = function (inRowName){
 				if (inRowName === "autoGenerateXML") {					
 					return this.$.targetsRows;
@@ -303,7 +295,7 @@ enyo.kind({
 		this.trace("Project config:", config);
 
 		config.enabled = true;
-		this.$.pgConfId.setValue(config.appId || '');
+		this.$.AppIdSelector.setSelectedAppId(config.appId || '');		
 		config.targets = config.targets || {};
 
 
@@ -328,7 +320,7 @@ enyo.kind({
 		config.splashScreen = {};
 		config.targets = {};
 
-		config.appId = this.$.pgConfId.getValue();
+		config.appId = this.$.AppIdSelector.getSelectedAppId();
 		
 		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {
 			if (drawer.id !== "applicationPermissions" && drawer.id !== "buildOption") {
@@ -350,8 +342,8 @@ enyo.kind({
 	 */
 	refresh: function (inSender, inValue) {		
 		this.trace("sender:", inSender, "value:", inValue);		
-		var provider = Phonegap.ProjectProperties.getProvider();
-		provider.authorize(enyo.bind(this, this.loadKeys));
+		var provider = Phonegap.ProjectProperties.getProvider();		
+		provider.authorize(enyo.bind(this, this.getUserData));		
 	},
 
 	/**
@@ -367,16 +359,13 @@ enyo.kind({
 	/**
 	 * @protected
 	 */
-	loadKeys: function (err) {
-	
-		this.trace("err:", err);
-	
+	getUserData: function (err, userData) {
 		if (err) {
 			this.warn("err:", err);
-		} else {
-			var provider = Phonegap.ProjectProperties.getProvider();
-					
+		} else {			
+			var provider = Phonegap.ProjectProperties.getProvider();					
 			enyo.forEach(this.platformDrawers, function (target) {
+				this.$.AppIdSelector.setUserData(userData);
 				this.$.targetsRows.$[target.id].loadKeys(provider);
 			}, this);
 		}
@@ -481,6 +470,85 @@ enyo.kind({
 		this.fold = !this.fold;
 	}
 
+
+});
+
+
+enyo.kind({
+	name: "Phonegap.ProjectProperties.AppId",
+	kind: "FittableColumns",
+	debug: false,
+	published: {
+		userData: undefined,
+		selectedAppId: undefined,
+		selectedTitle: undefined
+	},
+
+	components: [
+		{content: "AppId",	classes: "ares-project-properties-appid-id"},
+		{
+			kind: "onyx.PickerDecorator",
+		
+			components: [
+				{kind: "onyx.PickerButton", name:"aaa", classes: "ares-project-properties-picker"},
+				{kind: "onyx.Picker", name: "AppIdList",published: {appObject: undefined}, onSelect: "updateSelectedAppId"}
+			]
+		},
+		{content: "Application name:",	classes: "ares-project-properties-appid-title"},
+		{name: "ApplicationTitle", content:""}
+	],
+
+	create: function(){
+		this.inherited(arguments);		
+	}, 
+
+	userDataChanged: function(){
+		this.log("userData: ", this.userData.user.apps.all);		
+		this.clearPickerContent();
+		//this.$.aaa.render();
+
+		if (this.userData.user.apps.all === null){
+			this.$.AppIdList.createComponent({content: "New Application", active: true});
+		} else {
+			this.$.AppIdList.createComponent({content: "New Application", active: false});
+			enyo.forEach(this.userData.user.apps.all, 
+				function (inApp) {
+					var itemState = inApp.id === this.selectedAppId ? true : false;
+					if (itemState) {
+						this.setSelectedTitle(inApp.title);
+					}
+					this.$.AppIdList.createComponent({content: inApp.id, published: {applicationObject: inApp} , active: itemState});			
+					this.$.AppIdList.render();								
+				}, this);
+		}		
+	}, 
+
+	updateSelectedAppId: function (inSender, inValue) {	
+		this.setSelectedTitle(inValue && inValue.selected.published.applicationObject&& inValue.selected.published.applicationObject.title || "");
+		if (inValue.content === "New Application") {
+			this.setSelectedAppId("");
+		} else {
+			this.setSelectedAppId(inValue.content);
+		}				
+	},
+
+	clearPickerContent: function(){
+		
+		for (var key in this.$.AppIdList.$) {
+			this.log(key);
+		
+			if (this.$.AppIdList.$[key].kind === "onyx.MenuItem"){							
+				this.$.AppIdList.$[key].destroy();
+			}		
+		}
+		this.$.AppIdList.render();
+		this.log(this.$.AppIdList.$);		
+	},
+
+	selectedTitleChanged: function(){
+		this.$.ApplicationTitle.setContent(this.selectedTitle);
+		this.$.ApplicationTitle.render();
+	}
 
 });
 
