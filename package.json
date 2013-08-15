@@ -1,6 +1,6 @@
 {
 	"name": "ares-ide",
-	"version": "0.2.2",
+	"version": "0.2.3",
 	"description": "A browser-based code editor and UI designer for Enyo 2 projects",
 	"keywords": ["ide", "enyo", "phonegap", "android", "ios", "windowsphone", "blackberry", "webos", "html5"],
 	"homepage": "https://github.com/enyojs/ares-project",
@@ -14,13 +14,13 @@
 	},
 	"engines": {
 		"node" : "~0.10.0",
-		"npm": "~1.2.11"
+		"npm": ">=1.2.11"
 	},
 	"engineStrict": true,
 	"os" : [ "darwin", "linux", "win32" ],
 	"dependencies": {
 		"archiver": "~0.4.6",
-		"ares-generator": "0.2.2",
+		"ares-generator": "0.2.3",
 		"async": "~0.2.9",
 		"base64stream": "~0.1.1",
 		"combined-stream": "~0.0.4",
