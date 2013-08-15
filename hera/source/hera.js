@@ -92,7 +92,6 @@ enyo.kind({
 	
 	csssave: function(inSender, inEvent){
 		this.log("sender:", inSender, ", event:", inEvent);
-		console.log( this.mode );
 		if(this.mode === "reset"){
 			return;
 		}
@@ -103,7 +102,6 @@ enyo.kind({
 		}
 		
 		if(this.mode === "editing"){
-			console.log("r");
 			this.doReplacecss();
 			this.reset();
 		}
@@ -138,7 +136,10 @@ enyo.kind({
 		var outString =  this.className + " " + "{\n" ;
 	
 		while(this.pro[a] !== undefined && this.pro[a] !== "null"){
-		//	console.log(this.pro[a], ":", this.value[a],a);	
+		//	console.log(this.pro[a], ":", this.value[a],a);
+			if(this.pro[a] === "font-family"){
+				this.pro[a] =  "\t" + this.pro[a];
+			}
 			outPut = outPut + tab + this.pro[a] + ":" + this.value[a] + "<br>";
 			outString = outString + this.pro[a] + ":" + this.value[a] + "\n";
 			this.$.Sample.applyStyle(this.pro[a], this.value[a]);
@@ -165,16 +166,15 @@ enyo.kind({
 		if (inEvent.input === "font"){
 			this.$.valueinput.showsblank();
 			this.$.property = "font-family";
-		//	this. = inEvent.name +  ";";
-		
+			
 			while(this.pro[a] !== undefined && this.pro[a] !== "null"){
-				if(this.pro[a].indexOf(this.$.property) === 0 ){
+				if(this.pro[a].indexOf(this.$.property) !== -1 ){
 					break;	
 				}
 				a++;
 			}
 			this.pro[a] = this.$.property;
-			this.value[a] = "	" + inEvent.name +  ";";
+			this.value[a] = " " + inEvent.name +  ";";
 			this.updateBox();		
 		
 		

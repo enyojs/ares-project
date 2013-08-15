@@ -35,7 +35,6 @@ enyo.kind({
 		onCssDocument: ""
 	},
 	handlers: {
-		//onCss: "newcssAction",
 		onNewcss: "newcss",
 		onReplacecss: "replacecss",
 		onReparseAsked: "reparseAction"
