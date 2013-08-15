@@ -6,18 +6,23 @@ enyo.kind({
 	name: "ColorItem",
 	events: {
 		onPickdeclaration: "",
+		onUncheck: "",
+	},
+	handlers: {
+		onUnTap: "unhighlight"
 	},
 	components: [
 		{classes: "palette-category", components: [
 			{ontap:"toggleDrawer", classes: "palette-category-name", components: [
 				{name: "indicator", classes: "indicator turned"},
-				{name: "name", tag:"span", content:"Color"}
+				{name: "drawName", tag:"span", content:"Color"}
 			]},
 			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
-				{name: "Colorlist", kind: "Repeater", count: 0, onSetupItem: "setupItem", onSelect: "s", components: [
-					
-					{name:"item", classes: "list-sample-item enyo-border-box", components: [
-						{ name: "declaration", tag:"span", ontap: "tap"}
+				{name: "Colorlist", kind: "Repeater", 
+				classes: "list-sample-list",
+				count: 0, onSetupItem: "setupItem", components: [					
+					{name:"item", classes: "list-sample-item enyo-border-box ", components: [
+						{name: "declaration", ontap: "tap"}
 					]}
 				]}
 			]}
@@ -30,7 +35,8 @@ enyo.kind({
 		this.$.Colorlist.setCount(this.dec.length);
 	},
 
-	toggleDrawer: function() {
+	toggleDrawer: function(inSender, inEvent) {
+		this.trace("sender:", inSender, ", event:", inEvent);
 		var open = this.$.drawer.getOpen();
 		this.$.drawer.setOpen(!open);
 		this.$.indicator.addRemoveClass("turned", !open);
@@ -41,31 +47,41 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var index = inEvent.index;
 		var item = inEvent.item;
-		console.log(item);
 		var dec = this.dec[index];
+		if (this.highlight === index){
+		
+			this.$.Colorlist.addRemoveClass("list-sample-selected", this.selected);
+			
+			item.$.declaration.addRemoveClass("list-sample-selected", this.selected);	// dose just the text	
+			
+		//	item.addRemoveClass("list-sample-selected", this.selected);
+			
+		}
 		item.$.declaration.setContent(dec.name);
-		item.$.declaration.applyStyle("background-color","dodgerblue");
+		
 		/* stop propagation */
 		return true;
 	},	
 	
 	tap: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var index = inEvent.index;
-		var item = inEvent.item;
-		console.log(inSender, inEvent);
-		console.log(inEvent.originator);
-		this.inEvent.originator.applyStyle("background-color","red");
+		var index = inEvent.index;	
+		this.doUncheck();
+		this.highlight = index;	
+		this.selected = true;
+		this.$.Colorlist.renderRow(index);
 		
-		
-		
-		
-		//this.inSender.controls.applyStyle("background-color","red");
 		this.doPickdeclaration(this.dec[index]);
 	},
-	s: function(inSender, inEvent){
-	console.log( inSender, inEvent );
+
+	unhighlight: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.selected = false;
+		for(var i = 0; i < this.dec.length; i++){
+			this.$.Colorlist.renderRow(i);
+		}
 	},
+	
 	dec: [
 		{name: "background-color", input:"color"},		
 	]
@@ -76,6 +92,7 @@ enyo.kind({
 	name: "FontsItem",
 	events: {
 		onPickdeclaration: "",
+		onUncheck: "",		
 	},
 	components: [
 		{classes: "palette-category", components: [
@@ -84,10 +101,9 @@ enyo.kind({
 				{name: "name", tag:"span", content:"Font"}
 			]},
 			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
-				{name: "Fontlist", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
-					
+				{name: "Fontlist", kind: "Repeater", classes: "list-sample-list", count: 0, onSetupItem: "setupItem", components: [					
 					{name:"item", classes: "list-sample-item enyo-border-box", components: [
-						{tag:"span", name: "font", style: "font-family: Serif;", ontap: "tap"}
+						{name: "font", ontap: "tap"}
 					]}
 					
 				]}
@@ -109,12 +125,14 @@ enyo.kind({
 
 	setupItem: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
-		//console.log(inSender, inEvent );
 		var index = inEvent.index;
 		var item = inEvent.item;
 		var fonts = this.fonts[index];
 		item.$.font.setContent(fonts.name);
 		item.$.font.setStyle("font-family:" + fonts.name + ";");
+		if (this.highlight === index){
+			item.$.font.addRemoveClass("list-sample-selected", this.selected);
+		}	
 		/* stop propagation */
 		return true;
 	},	
@@ -123,15 +141,20 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var item = inEvent.item;
 		var index = inEvent.index;
-		console.log(inSender, inEvent );
-	//	this.inSender.addClass("highlight");	
-	//	console.log(this, this.$);
-		// apply selection style if inSender (the list) indicates that this row is selected.
-	//	item.$.addRemoveClass("list-sample-selected", index);
-	
+		this.doUncheck();
+		this.highlight = index;	
+		this.selected = true;		
+		this.$.Fontlist.renderRow(index);	
 		this.doPickdeclaration(this.fonts[index]);
 	},
 	
+	unhighlight: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.selected = false;
+		for(var i = 0; i < this.fonts.length; i++){
+			this.$.Fontlist.renderRow(i);
+		}
+	},
 	fonts: [
 		{name: "color", input: "color"},
 		{name: "font-size", input: "picker"},
@@ -149,6 +172,10 @@ enyo.kind({
 	name: "BorderItem",
 	events: {
 		onPickdeclaration: "",
+		onUncheck: "",
+	},
+	handlers: {
+		onUnTap: "unhighlight"
 	},
 	components: [
 		{classes: "palette-category", components: [
@@ -157,10 +184,9 @@ enyo.kind({
 				{name: "name", tag:"span", content:"Border/Margin.."}
 			]},
 			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
-				{name: "borderlist", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
-					
+				{name: "borderlist", kind: "Repeater", classes: "list-sample-list", count: 0, onSetupItem: "setupItem", components: [					
 					{name:"item", classes: "list-sample-item enyo-border-box", components: [
-						{tag:"span", name: "border", ontap: "tap"}
+						{name: "border", ontap: "tap"}
 					]}
 					
 				]}
@@ -174,7 +200,7 @@ enyo.kind({
 		this.$.borderlist.setCount(this.borders.length);
 	},
 
-	toggleDrawer: function() {
+	toggleDrawer: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var open = this.$.drawer.getOpen();
 		this.$.drawer.setOpen(!open);
@@ -186,8 +212,10 @@ enyo.kind({
 		var index = inEvent.index;
 		var item = inEvent.item;
 		var border = this.borders[index];
-		item.$.border.setContent(border.name);
-		
+			if (this.highlight === index){
+			item.$.border.addRemoveClass("list-sample-selected", this.selected);
+		}
+		item.$.border.setContent(border.name);		
 		/* stop propagation */
 		return true;
 	},	
@@ -195,7 +223,19 @@ enyo.kind({
 	tap: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var index = inEvent.index;	
+		this.doUncheck();
+		this.highlight = index;	
+		this.selected = true;
+		this.$.borderlist.renderRow(index);		
 		this.doPickdeclaration(this.borders[index]);
+	},
+	
+	unhighlight: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.selected = false;
+		for(var i = 0; i < this.borders.length; i++){
+			this.$.borderlist.renderRow(i);
+		}
 	},
 	
 	borders: [
@@ -211,6 +251,7 @@ enyo.kind({
 	name: "ImageItem",
 	events: {
 		onPickdeclaration: "",
+		onUncheck: "",
 	},
 	components: [
 		{classes: "palette-category", components: [
@@ -219,10 +260,9 @@ enyo.kind({
 				{name: "name", tag:"span", content:"Image"}
 			]},
 			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
-				{name: "imagelist", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
-					
+				{name: "imagelist", kind: "Repeater", classes: "list-sample-list", count: 0, onSetupItem: "setupItem", components: [					
 					{name:"item", classes: "list-sample-item enyo-border-box", components: [
-						{tag:"span", name: "image", ontap: "tap"}
+						{name: "image", ontap: "tap"}
 					]}
 					
 				]}
@@ -236,7 +276,7 @@ enyo.kind({
 		this.$.imagelist.setCount(this.image.length);
 	},
 
-	toggleDrawer: function() {
+	toggleDrawer: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var open = this.$.drawer.getOpen();
 		this.$.drawer.setOpen(!open);
@@ -249,15 +289,29 @@ enyo.kind({
 		var item = inEvent.item;
 		var image = this.image[index];
 		item.$.image.setContent(image.name);
-		
+		if (this.highlight === index){
+			item.$.image.addRemoveClass("list-sample-selected", this.selected);
+		}
 		/* stop propagation */
 		return true;
 	},	
 
 	tap: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var index = inEvent.index;	
+		var index = inEvent.index;
+		this.doUncheck();
+		this.highlight = index;	
+		this.selected = true;
+		this.$.imagelist.renderRow(index);		
 		this.doPickdeclaration(this.image[index]);
+	},
+	
+	unhighlight: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.selected = false;
+		for(var i = 0; i < this.image.length; i++){
+			this.$.imagelist.renderRow(i);
+		}
 	},
 	
 	image: [
@@ -270,9 +324,14 @@ enyo.kind({
 	name: "leftpannel",
 	kind: "Control",
 	published: {
+		
 	},
 	events: {
 		onPickdeclaration: "",
+		onUntap: "",
+	},
+	handlers: {
+		onUncheck: "selected",
 	},
 	components: [
 		{kind: "FittableRows", classes: "enyo-fit", components: [
@@ -292,7 +351,13 @@ enyo.kind({
 		
 	},
 	
-
+	selected: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.$.colorItem.unhighlight();
+		this.$.fontsItem.unhighlight();
+		this.$.borderItem.unhighlight();
+		this.$.imageItem.unhighlight();
+	}
 });
 
 
