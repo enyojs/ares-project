@@ -304,11 +304,11 @@ enyo.kind({
 			this.c = undefined;
 		}		
 		if(this.misc !== undefined){
-			valueout = valueout + "\t" + this.misc;
+			valueout = valueout + " " + this.misc;
 			this.misc = undefined;
 		}
 		if(this.misc_picker !== undefined){
-			valueout = valueout + "\t" + this.misc_picker;
+			valueout = valueout + " " + this.misc_picker;
 			this.misc_picker = undefined;
 		}
 	
