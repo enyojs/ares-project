@@ -92,7 +92,7 @@ function GenZip(config, next) {
 	// - 'application/json' => req.body
 	// - 'application/x-www-form-urlencoded' => req.body
 	// - 'multipart/form-data' => req.body.<field>[], req.body.file[]
-	this.uploadDir = temp.path({prefix: 'com.palm.ares.hermes.genZip'}) + '.d';
+	this.uploadDir = temp.path({prefix: 'com.enyojs.ares.services.genZip'}) + '.d';
 	fs.mkdirSync(this.uploadDir);
 	app.use(express.bodyParser({keepExtensions: true, uploadDir: this.uploadDir}));
 
