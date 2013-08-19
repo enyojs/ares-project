@@ -54,6 +54,10 @@ enyo.kind({
 		{kind: "Ares.PackageMunger", name: "packageMunger"}
 	],
 	handlers: {
+		onCssDocument: "cssDocument",
+		onCloseCss: "closecss", 
+		onNewcss: "newCss", 
+		onReplacecss: "replacecss",
 		onReloadServices: "handleReloadServices",
 		onUpdateAuth: "handleUpdateAuth",
 		onShowWaitPopup: "showWaitPopup",
@@ -85,6 +89,7 @@ enyo.kind({
 	designerPanelsIndex: 2,
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
+	heraViewIndex:2,
 	projectListWidth: 300,
 	isProjectView: true,
 	create: function() {
@@ -586,6 +591,37 @@ enyo.kind({
 			}
 		},
 		instance: null
+	},
+	/*
+	* open hera
+	* @protected
+	*/
+	cssDocument: function(inSender, inEvent){
+		this.componentsRegistry.hera.cssload(inEvent);
+		this.componentsRegistry.codeEditor.$.panels.setIndex(this.heraViewIndex);
+		this.activeDocument.setCurrentIF('hera');
+	},
+	/*
+	* close hera
+	* @protected
+	*/
+	closecss: function(inSender, inEvent){
+		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
+		this.activeDocument.setCurrentIF('code');
+	},
+	/*
+	* write the new css to the end of the file
+	* @protected
+	*/
+	newCss: function(inSender, inEvent){
+		this.componentsRegistry.phobos.newcss(this.componentsRegistry.hera.out);
+	},
+	/*
+	* replace the old data in the css file with the new css rules
+	* @protected
+	*/
+	replacecss: function(inSender, inEvent){
+		this.componentsRegistry.phobos.replacecss(this.componentsRegistry.hera.old, this.componentsRegistry.hera.out);
 	}
 });
 
