@@ -18,10 +18,8 @@ enyo.kind({
 				{name: "drawName", tag:"span", content:"Color"}
 			]},
 			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
-				{name: "Colorlist", kind: "Repeater", 
-				classes: "list-sample-list",
-				count: 0, onSetupItem: "setupItem", components: [					
-					{name:"item", classes: "list-sample-item enyo-border-box ", components: [
+				{name: "Colorlist", kind: "Repeater", classes: "list-sample-list enyo-border-box", count: 0, onSetupItem: "setupItem", components: [					
+					{name:"item", classes: "list-sample-item ", components: [
 						{name: "declaration", ontap: "tap"}
 					]}
 				]}
@@ -34,7 +32,10 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.$.Colorlist.setCount(this.dec.length);
 	},
-
+	/**
+	* @private
+	* 
+	*/
 	toggleDrawer: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var open = this.$.drawer.getOpen();
@@ -83,7 +84,7 @@ enyo.kind({
 	},
 	
 	dec: [
-		{name: "background-color", input:"color"},		
+		{name: "background-color", input:"picker"},		
 	]
 	
 });
@@ -334,7 +335,7 @@ enyo.kind({
 		onUncheck: "selected",
 	},
 	components: [
-		{kind: "FittableRows", classes: "enyo-fit", components: [
+		{kind: "enyo.FittableRows", classes: "enyo-fit", components: [
 			{kind: "Scroller", fit: true, components: [
 				
 				{kind: "ColorItem"},
