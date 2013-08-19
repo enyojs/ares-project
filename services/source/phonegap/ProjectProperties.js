@@ -500,10 +500,9 @@ enyo.kind({
 
 	/**@private*/
 	userDataChanged: function(){
-		this.log("userData: ", this.userData.user.apps.all);		
-		this.clearPickerContent();
-		this.log(this.userData.user.apps.all.length);
 		
+		this.clearPickerContent();
+				
 		if (this.userData.user.apps.all.length === 0){
 			this.$.AppIdList.createComponent({content: "New Application", active: true});
 			this.setSelectedAppId('');
