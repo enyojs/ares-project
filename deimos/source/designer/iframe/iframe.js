@@ -152,6 +152,9 @@ enyo.kind({
 			case "requestPositionValue":
 				this.requestPositionValue(msg.val);
 				break;
+			case "serializerOptions":
+				this.$.serializer.setSerializerOptions(msg.val);
+				break;
 			default:
 				enyo.warn("Deimos iframe received unknown message op:", msg);
 				break;

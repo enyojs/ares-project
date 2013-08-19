@@ -209,6 +209,7 @@ enyo.kind({
 		this.$.inspector.setProjectIndexer(indexer);
 		this.$.palette.setProjectIndexer(indexer);
 		Model.buildInformation(indexer);
+		this.$.designer.sendSerializerOptions(Model.serializerOptions);
 	},
 	//* Rerender current kind
 	rerenderKind: function(inSelectId) {

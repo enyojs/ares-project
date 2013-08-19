@@ -207,5 +207,8 @@ enyo.kind({
 	//* Request auto-generated position value from iframe
 	requestPositionValue: function(inProp) {
 		this.sendMessage({op: "requestPositionValue", val: inProp});
+	},
+	sendSerializerOptions: function(serializerOptions) {
+		this.sendMessage({op: "serializerOptions", val: serializerOptions});	
 	}
 });
