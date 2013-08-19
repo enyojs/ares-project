@@ -887,7 +887,6 @@ enyo.kind({
 	},
 
 	replacecss: function(old_css, new_css){
-		console.log("phobos replace");
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.gotoLine(0,0);
 		this.$.ace.replace(old_css, new_css, options);

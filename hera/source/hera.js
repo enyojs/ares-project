@@ -27,7 +27,7 @@ enyo.kind({
 		onPickdeclaration: "radioActivated",
 		onValueUpdate: "change",
 		onUnitChange: "unitchange",
-		//onCloseCss: "save"
+		onCloseCss: "save"
 	},
 	components: [
 		{kind: "enyo.FittableColumns", style: "width: 33%; height: 100%;", components:[
@@ -35,13 +35,13 @@ enyo.kind({
 			{name: "cssleft", style: "width: 100%; height: 90%; ", classes:"ares_deimos_left", kind: "leftpannel"},
 			
 			{name: "center", kind: "enyo.FittableRows", style: "width: 100%; height: 100%; ", components: [
-				{name:"sampleBox", kind: "enyo.Panels",	style: "width: 100%; height: 60%; ", fit: "true", classes: "css_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
-				
-			//	{ name: "Sample", kind: "onyx.Button", style: "float: center;",	content: "Sample Button"},
-					{name: "Sample", allowHtml: true, style: "height: 60%; font-size: 10px;", content: "Sample Box"},
+				{name:"sampleBox", kind: "enyo.Panels",	style: "width: 100%; height: 60%; ", fit: "true", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
+					{name: "Sample", allowHtml: true, style: "height: 60%; font-size: 10px;", components: [
+						{name: "sampletext", content: "Sample Text"},
+					]}
 				]},					
 				
-				{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 40%; ", classes: "css_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
+				{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 40%; ", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
 					{name: "bg", allowHtml: true, style: "font-size: 13px;", content: ""},
 				]},	
 			]},// center
@@ -61,7 +61,7 @@ enyo.kind({
 			]},	// right
 		]}, 
 	
-		{kind: "onyx.Popup", modal: true, floating: true, centered: true, classes: "css_builder_popup", canGenerate: false, name: "newCssPopup", components: [
+		{kind: "onyx.Popup", modal: true, floating: true, centered: true, canGenerate: false, name: "newCssPopup", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", name: "toolbar4", components: [
 					{kind: "Control", content: "Enter you new class name", name: "newCssName"}
 				]},
@@ -84,19 +84,25 @@ enyo.kind({
 		this.unit = "px";
 	},	
 	
+	/*
+	* load the data this is were the fun start's
+	*/
 	cssload: function(data){
 		this.trace("data", data);
 		var d = data.originator.$.ace.value;
 		this.dePuzzle(d);
 	},
 	
+	/*
+	* save -- dose a find and replce in  phobos for the ace editor
+	* @protected
+	*/
 	csssave: function(inSender, inEvent){
 		this.log("sender:", inSender, ", event:", inEvent);
 		if(this.mode === "reset"){
 			return;
 		}
 		if(this.mode === "new"){
-			console.log(this);
 			this.doNewcss();
 			this.reset();
 		}
@@ -105,13 +111,14 @@ enyo.kind({
 			this.doReplacecss();
 			this.reset();
 		}
-	
-	//	this.doCloseCss(event);		
 		return true;
 	},
 	
+	/*
+	* this is were we come in (new values)  from valueinput.js 
+	* @protected
+	*/
 	change: function(inSender, inEvent){
-	//	console.log(inSender,inEvent);
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
 		this.newvalue = inEvent.originator.valueout;
@@ -127,6 +134,10 @@ enyo.kind({
 		this.updateBox();
 	},
 
+	/*
+	* this is were we push out to the output sample box and build the output to copy in to ace
+	* @protected
+	*/
 	updateBox: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
@@ -136,20 +147,23 @@ enyo.kind({
 		var outString =  this.className + " " + "{\n" ;
 	
 		while(this.pro[a] !== undefined && this.pro[a] !== "null"){
-		//	console.log(this.pro[a], ":", this.value[a],a);
 			if(this.pro[a] === "font-family"){
 				this.pro[a] =  "\t" + this.pro[a];
 			}
 			outPut = outPut + tab + this.pro[a] + ":" + this.value[a] + "<br>";
 			outString = outString + this.pro[a] + ":" + this.value[a] + "\n";
 			this.$.Sample.applyStyle(this.pro[a], this.value[a]);
+			this.$.sampletext.applyStyle(this.pro[a], this.value[a]);
 			a++;
 		}		
-			this.$.bg.setContent(outPut + "}");											// write in to the preview box
-			outString = outString + "}\n";
-			this.out = outString;			
+			this.$.bg.setContent(outPut + "}");		// write in to the preview box
+			this.out = outString + "}\n";
 	},
 
+	/*
+	* yhis is were we set wich input group to display in valueinput.js
+	* @protected
+	*/
 	radioActivated: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
@@ -199,22 +213,23 @@ enyo.kind({
 	
 	},
 
-	newDeclaration: function(inSender, inEvent){		// used to start a new CSS declarations
+	/*
+	* this is were we get the "new CSS declarations name "  from the popup
+	* @protected
+	*/
+	newDeclaration: function(inSender, inEvent){	
 		this.trace("sender:", inSender, ", event:", inEvent);
-		if(this.$.property !== undefined ){	// save the old frist
-		//	this.mode = "old"; 
-		//	this.save();
-			console.log(this.$.property," save old frist");
-		}
-		
 		this.className = this.$.input.hasNode().value;
 		this.$.newCssPopup.hide();
-		
 		this.mode ="new";
 		this.updateBox();
 		return;
 	},
 
+	/*
+	* handle the unit change if the programer change's it
+	* @protected
+	*/
 	unitchange: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.unit = inEvent.content;
@@ -222,24 +237,21 @@ enyo.kind({
 	},
 	
 	reset: function(){
-		this.trace();
-		this.className = null;
-	
+		this.$.valueinput.showsblank();
+		this.pro.length = 0;			
+		this.value.length = 0;	
+		this.old = null;
+		this.className = null;	
+		this.outPut = null;	
+			
 		this.$.bgImage = null;
-		this.$.hrepeat  = null;
-		this.$.vrepeat  = null;
-		this.$.norepeat  = null;
-		
-
 		this.x = null;
 		this.y = null;
 		this.z = null;	
-		this.outPut = null;
-		this.$.outPut = null;
-		outString = "";
 		
-		this.$.property = null;
-		this.old = null;
+		this.$.outPut = null;
+		outString = "";		
+		this.$.property = null;	
 		this.mode = "rest";
 		this.$.outputBox.applyStyle("color", "#FFFFFF");
 		this.$.outputBox.applyStyle("background-color", "#000000");
@@ -248,6 +260,10 @@ enyo.kind({
 
 	},
 
+	/*
+	* split up the incoming file to find the declarations for the list in uppper right
+	* @protected
+	*/
 	dePuzzle: function(inSender,inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var j = 0;
@@ -268,13 +284,15 @@ enyo.kind({
 	this.$.list.reset();
 	},
 
+	/*
+	* split up the incoming file and find the propert and it's value
+	* @protected
+	*/
 	classGrabber: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
 		var s = "";
 		var c = inEvent.index;
-		var notme = "notfound";
-		this.$.skiped = "";
 		this.reset();
 		n = (this.file.split("\n"));			// split the file up by lines
 
@@ -282,7 +300,6 @@ enyo.kind({
 			this.mode = "new";
 			this.$.newCssPopup.show();
 			this.updateBox();
-			//return;
 		}else{
 			this.mode = "editing";
 			for (var i=0; i < n.length; i++) {
@@ -298,15 +315,8 @@ enyo.kind({
 						this.pro[a] = s[0];
 						this.value[a] = s[1];						
 						a++;
-					
-					
-					//	console.log("notfound", notme);
-						if (notme == "notfound"){
-							this.$.skiped = this.$.skiped + n[j] + "\n";
-							notme = "notfound";
-						}
-					}
-					this.delcss(this.className);
+			}
+					this.oldcss(this.className);
 					this.updateBox();
 				}
 			}
@@ -316,7 +326,7 @@ enyo.kind({
 	/*
 	*  hang on to the old info so we know what too replace
 	*/	
-	delcss: function (inSender,inEvent){
+	oldcss: function (inSender,inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var n = "";
 		var j = 0;
@@ -338,53 +348,9 @@ enyo.kind({
 		
 		return;
 	},
-	
+
 	/*
-	undo: function(){
-		this.trace("sender:", inSender, ", event:", inEvent);
-			
-		this.className = this.bufferclassName;
-		this.background_color = this.bufferbackgroundColor;
-		this.$.fontColor  = this.$.bufferfontColor;
-		this.$.borderSize = this.$.bufferborderSize;
-		this.$.fontFamily = this.$.bufferfontFamily;
-		this.$.marginSize = this.$.buffermarginSize;
-		this.$.fontSize = this.$.bufferfontSize;
-
-		this.$.textshadow = this.$.buffertextshadow;
-		this.$.textshadowV = this.$.buffertextshadowV;
-		this.$.textshadowH = this.$.buffertextshadowH;
-		this.$.textshadowcolor = this.$.buffertextshadowcolor;
-
-		this.$.heightSize = this.$.bufferheightSize;
-		this.$.widthSize = this.$.bufferwidthSize;
-		this.$.radiusSize =	this.$.bufferradiusSize;
-		this.$.paddingSize = this.$.bufferpaddingSize;
-
-		this.$.boxshadowV = this.$.bufferboxshadowV;
-		this.$.boxshadowB = this.$.bufferboxshadowB;
-		this.$.boxshadowcolor = this.$.bufferboxshadowcolor;
-
-		this.$.bgImage = this.$.bufferbgImage;
-		this.$.hrepeat  = this.$.bufferhrepeat;
-		this.$.vrepeat  = this.$.buffervrepeat;
-		this.$.norepeat  = this.$.buffernorepeat;
-		
-		this.$.property = null;
-		this.property = null;
-		this.mode = null;
-		this.outPut = this.buffer;
-		this.$.bg.setContent(this.previewbuffer + "}");
-		if(this.mode === "grabed"){		// insert at cursor
-			//this.doInsertInplace();
-			this.mode = "editing";
-		}
-	},
-	*/
-	
-	
-	/*
-	* display the list for right CSS declarations
+	* build the list for right CSS declarations
 	*/
 	setupItem: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
@@ -397,7 +363,7 @@ enyo.kind({
 	},
 	
 	/*
-	* build the list for right CSS declarations
+	* add  the "New declarations" to the list
 	*/
 	addNewItem: function( inSender, inEvent ) {
 		this.trace("sender:", inSender, ", event:", inEvent);
@@ -406,6 +372,5 @@ enyo.kind({
         this.declaration[index] = "New";
         this.$.list.reset();
     },
-
 
 });
