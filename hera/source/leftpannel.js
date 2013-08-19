@@ -360,5 +360,3 @@ enyo.kind({
 		this.$.imageItem.unhighlight();
 	}
 });
-
-

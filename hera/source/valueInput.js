@@ -192,7 +192,7 @@ enyo.kind({
 		this.blue = h;
 		this.color();
 	},
-	
+			
 	blueSliding: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var x = Math.floor(inEvent.value*255/100);
@@ -270,8 +270,9 @@ enyo.kind({
 	
 	input_picker: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
+		console.log(this.Unit);
 		var unit = this.unit;
-		this.misc_picker = inEvent.content + unit;		
+		this.misc_picker = inEvent.content;		
 		this.total();
 	},
 	
@@ -284,30 +285,28 @@ enyo.kind({
 	
 	inputx: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		console.log( inSender, inEvent );
-		var type = this.unit;
-		this.x = inEvent.content + type;
+		this.x = inEvent.content;
 		this.total();
 	},
 	
 	inputy: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var type = this.unit;
-		this.y = inEvent.content + type;
+		this.y = inEvent.content ;
 		this.total();
 	},
 	
 	inputz: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var type = this.unit;
-		this.z = inEvent.content + type;
+		this.z = inEvent.content;
 		this.total();
 	},
 	
 	unit_type: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.unit = inEvent;
-		this.doUnitChange(inEvent);
+		console.log(this.unit);
+		this.total(inEvent);
+	//	this.doUnitChange(inEvent);
 	},
 	
 	color: function(inSender, inEvent){
@@ -316,31 +315,35 @@ enyo.kind({
 		this.total();
 	},
 	
-	total: function(){
-	//	console.log("total");
+	total: function(inSender, inEvent){
+		console.log("total", this.unit.content);
 		var valueout = "";
+		if (this.unit.content === undefined){
+			this.unit = "px";
+		}else{
+			this.unit = this.unit.content;
+		}
+		
 		if(this.x !== undefined){
-			valueout = valueout +" " + this.x;
+			valueout = valueout +" " + this.x  + this.unit;
 			
 		}		
 		if(this.y !== undefined){
-			valueout = valueout + " " + this.y;	
+			valueout = valueout + " " + this.y  + this.unit;	
 		
 		}
 		if(this.z !== undefined){
-			valueout = valueout + " " +this.z;
+			valueout = valueout + " " +this.z + this.unit;
 			
 		}		
 		if(this.c !== undefined ){
-			valueout = valueout + " " + this.c;
-		
+			valueout = valueout + " " + this.c;		
 		}		
 		if(this.misc !== undefined){
-			valueout = valueout + " " + this.misc;
-			
+			valueout = valueout + " " + this.misc;			
 		}
 		if(this.misc_picker !== undefined){
-			valueout = valueout + " " + this.misc_picker;
+			valueout = valueout + " " + this.misc_picker + this.unit;
 			
 		}
 		this.valueout = valueout + ";";

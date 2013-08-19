@@ -161,7 +161,7 @@ enyo.kind({
 	},
 
 	/*
-	* yhis is were we set wich input group to display in valueinput.js
+	* this is were we set wich input group to display in valueinput.js
 	* @protected
 	*/
 	radioActivated: function(inSender, inEvent) {
@@ -232,6 +232,7 @@ enyo.kind({
 	*/
 	unitchange: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
+		console.log(inEvent.content);
 		this.unit = inEvent.content;
 		//this.change();
 	},
