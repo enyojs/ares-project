@@ -54,26 +54,16 @@ enyo.kind({
 	// Bail out if a project.json file already exists
 	prepareShowProjectPropPopup: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
+
 		if (!inEvent.file) {
 			this.hideMe();
-			this.$.selectDirectoryPopup.reset();
 
 			return;
 		}
 
-		var propW = this.$.propertiesWidget;
-		this.selectedDir = inEvent.file;
-		propW.setupCreate();
-		propW.setTemplateList([]);		// Reset template list
-
-		// Pre-fill project properties widget
-		propW.preFill(ProjectConfig.PREFILLED_CONFIG_FOR_UI);
-		propW.$.projectDirectory.setContent(this.selectedDir.path);
-		propW.$.projectName.setValue(this.selectedDir.name);
-		propW.activateFileChoosers(false);
-
 		async.series([
 				this.checkProjectJson.bind(this, inSender, inEvent),
+				this.fillProjectPropPopup.bind(this, inSender, inEvent),
 				this.checkGetAppinfo.bind(this, inSender, inEvent),
 				this.getTemplates.bind(this, inSender, inEvent),
 				this.createProjectJson.bind(this, inSender, inEvent),
@@ -86,17 +76,42 @@ enyo.kind({
 		var matchFileName = function(node){
 			return (node.content === 'project.json' ) ;
 		};
+		
 		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
-		var matchingNodes = hft.selectedNode.getNodeFiles().filter(matchFileName) ;
+		hft.selectedNode.updateNodes()
+			.response(this, function() {
+				var matchingNodes = hft.selectedNode.getNodeFiles().filter(matchFileName) ;
 
-		if (matchingNodes.length !== 0) {
-			this.hide();
-			var msg = $L("Cannot create project: a project.json file already exists");
-			this.$.errorPopup.raise(msg);
-			next({handled: true, msg: msg});
-		} else {
-			next();
-		}
+				if (matchingNodes.length !== 0) {
+					this.hide();
+					var msg = $L("Cannot create project: a project.json file already exists");
+					this.$.errorPopup.raise(msg);
+					this.$.selectDirectoryPopup.reset();
+					next({handled: true, msg: msg});
+				} else {
+					next();
+				}
+			})
+			.error(this, function() {
+				var msg = $L("Cannot create project: subnodes not found");
+				next({handled: true, msg: msg});
+			})
+			;
+	},
+
+	fillProjectPropPopup: function(inSender, inEvent, next) {
+		var propW = this.$.propertiesWidget;
+		this.selectedDir = inEvent.file;
+		propW.setupCreate();
+		propW.setTemplateList([]);		// Reset template list
+
+		// Pre-fill project properties widget
+		propW.preFill(ProjectConfig.PREFILLED_CONFIG_FOR_UI);
+		propW.$.projectDirectory.setContent(this.selectedDir.path);
+		propW.$.projectName.setValue(this.selectedDir.name);
+		propW.activateFileChoosers(false);
+
+		next();
 	},
 
 	checkGetAppinfo: function(inSender, inEvent, next) {

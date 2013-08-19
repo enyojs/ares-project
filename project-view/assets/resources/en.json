@@ -2,6 +2,7 @@
 	"Application ID in reverse domain-name format: com.example.apps.myapp": "Application ID in reverse domain-name format: com.example.apps.myapp",
 	"Author name: ": "Author name: ",
 	"Cannot create project: a project.json file already exists": "Cannot create project: a project.json file already exists",
+	"Cannot create project: subnodes not found": "Cannot create project: subnodes not found",
 	"Contact: ": "Contact: ",
 	"Id: ": "Id: ",
 	"mail address or home page of the author": "mail address or home page of the author",
