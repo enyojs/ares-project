@@ -295,7 +295,7 @@ enyo.kind({
 		this.trace("Project config:", config);
 
 		config.enabled = true;
-		this.$.AppIdSelector.setSelectedAppId(config.appId || '');		
+		this.$.appIdSelector.setSelectedAppId(config.appId || '');		
 		config.targets = config.targets || {};
 
 
@@ -320,7 +320,7 @@ enyo.kind({
 		config.splashScreen = {};
 		config.targets = {};
 
-		config.appId = this.$.AppIdSelector.getSelectedAppId();
+		config.appId = this.$.appIdSelector.getSelectedAppId();
 		
 		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {
 			if (drawer.id !== "applicationPermissions" && drawer.id !== "buildOption") {
@@ -365,7 +365,7 @@ enyo.kind({
 		} else {			
 			var provider = Phonegap.ProjectProperties.getProvider();					
 			enyo.forEach(this.platformDrawers, function (target) {
-				this.$.AppIdSelector.setUserData(userData);
+				this.$.appIdSelector.setUserData(userData);
 				this.$.targetsRows.$[target.id].loadKeys(provider);
 			}, this);
 		}
@@ -502,9 +502,11 @@ enyo.kind({
 	userDataChanged: function(){
 		this.log("userData: ", this.userData.user.apps.all);		
 		this.clearPickerContent();
+		this.log(this.userData.user.apps.all.length);
 		
-		if (this.userData.user.apps.all === null){
+		if (this.userData.user.apps.all.length === 0){
 			this.$.AppIdList.createComponent({content: "New Application", active: true});
+			this.setSelectedAppId('');
 		} else {
 			this.$.AppIdList.createComponent({content: "New Application", active: false});
 			enyo.forEach(this.userData.user.apps.all, 
