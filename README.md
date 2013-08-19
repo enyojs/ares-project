@@ -62,7 +62,7 @@ The following features are in the works, and you should see them added as we mov
 
 ### Install
 
-1. Install Node.js 0.10.x & its associated NPM (Node Package Manager) from a binary distribution, for example at [nodejs.org](http://nodejs.org/download/)
+1. Install Node.js 0.8.21 (or later, including 0.10.x) & its associated NPM (Node Package Manager) from a binary distribution, for example at [nodejs.org](http://nodejs.org/download/)
 1. Install `ares-ide` using NPM:
 
 		$ npm -d install ares-ide
