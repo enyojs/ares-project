@@ -273,6 +273,14 @@ enyo.kind({
 		
 		var name = this.$.selectedFoldersPath.getValue();
 
+		var hft = this.$.hermesFileTree;
+		if (!hft.checkedPath(name)) {
+			this.hide() ;
+			this.doFileChosen();
+
+			return true;
+		}
+
 		if (this.allowNewFile) {
 			if (this.$.selectedFoldersPath !== "/") {
 				name = name + "/";

@@ -24,5 +24,6 @@
 	"Deleting '{name}' failed": "Deleting '{name}' failed",
 	"Creating file '{copyName}' as copy of '{name}' failed: {error}": "Creating file '{copyName}' as copy of '{name}' failed: {error}",
 	"Moving '{nodeName}' failed: {error}": "Moving '{nodeName}' failed: {error}",
-	"Reverting '{name}' to '{oldpath}' failed": "Reverting '{name}' to '{oldpath}' failed"
+	"Reverting '{name}' to '{oldpath}' failed": "Reverting '{name}' to '{oldpath}' failed",
+	"Path {path} contains illegal characters": "Path {path} contains illegal characters"
 }

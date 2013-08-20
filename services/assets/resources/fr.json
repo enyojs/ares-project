@@ -24,5 +24,6 @@
 	"Deleting '{name}' failed": "La suppression de '{name}' a échoué",
 	"Creating file '{copyName}' as copy of '{name}' failed: {error}": "La création du fichier '{copyName}' comme copie de '{name}' a échoué : {error}",
 	"Moving '{nodeName}' failed: {error}": "Le déplacement de '{nodeName}' a échoué : {error}",
-	"Reverting '{name}' to '{oldpath}' failed": "Faire revenir '{name}' à '{oldpath}' a échoué"
+	"Reverting '{name}' to '{oldpath}' failed": "Faire revenir '{name}' à '{oldpath}' a échoué",
+	"Path {path} contains illegal characters": "Le chemin {path} contiens des caractères inappropriés"
 }

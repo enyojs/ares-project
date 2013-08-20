@@ -708,6 +708,12 @@ enyo.kind({
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		var folderId = inEvent.folderId;
 		var name = inSender.fileName.trim();
+
+		if (!this.checkedPath(name)) {
+			return true;
+		}
+
+		this.log("Creating new folder ", name," into folderId=", folderId);
 		this.trace("Creating new folder ", name," into folderId=", folderId);
 		this.$.service.createFolder(folderId, name)
 			.response(this, function(inSender, inFolder) {
@@ -772,6 +778,11 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		var folderId = inEvent.folderId;
 		var name = inEvent.name.trim();
+
+		if (!this.checkedPath(name)) {
+			return true;
+		}
+
 		var nameStem = name.substring(0, name.lastIndexOf(".")); // aka basename
 		var type = name.substring(name.lastIndexOf(".")+1); // aka suffix
 		var templatePath;
@@ -837,6 +848,11 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		var oldName = this.selectedFile.name;
 		var newName = inSender.fileName.trim();
+
+		if (!this.checkedPath(newName)) {
+			return true;
+		}
+
 		this.trace("Creating new file ", newName, " as copy of", oldName);
 		this.$.service.copy(this.selectedFile.id, newName)
 			.response(this, function(inSender, inFsNode) {
@@ -866,6 +882,7 @@ enyo.kind({
 	// User Interaction for Rename File/Folder op
 	renameClick: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
+
 		if (this.selectedFile) {
 			this.$.renamePopup.setType(this.selectedFile.type);
 			this.$.renamePopup.setFileName(this.selectedFile.name);
@@ -884,6 +901,11 @@ enyo.kind({
 	renameConfirm: function(inSender, inEvent) {
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		var newName = inSender.fileName.trim();
+
+		if (!this.checkedPath(newName)) {
+			return true;
+		}
+
 		this.trace("Renaming '", this.selectedFile, "' as '", newName, "'");
 		this.$.service.rename(this.selectedFile.id, newName)
 			.response(this, function(inSender, inNode) {
@@ -1203,5 +1225,16 @@ enyo.kind({
 		nodes.shift();
 		waypoints.push(track);
 		track.followNodePath(nodes, waypoints, next);
+	},
+	/* @public */
+	checkedPath: function(path) {
+		var illegal = /[<>\/\\!?@#\$%^&\*,]+/i;
+
+		if (path.match(illegal)) {
+			this.showErrorPopup(this.$LS("Path {path} contains illegal characters", {path: path}));
+			return false;
+		}
+
+		return true;
 	}
 });
