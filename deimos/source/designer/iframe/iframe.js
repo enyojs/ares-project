@@ -354,7 +354,8 @@ enyo.kind({
 		var errMsg;
 		
 		try {
-			var kindConstructor = enyo.constructorForKind(inKind.name);
+			var kindConstructor = enyo.constructorForKind(inKind.name),
+				refreshItem = null;
 
 			if (!kindConstructor) {
 				errMsg = "No constructor exists for ";
@@ -373,6 +374,33 @@ enyo.kind({
 				has defined. If components came in as a string, convert to object first.
 			*/
 			kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.components) : inKind.components;
+
+			if (inKind.refreshKindName) {
+				refreshItem = this.getItemById(inKind.selectId, kindConstructor.prototype.kindComponents);
+				switch (inKind.refreshKindName) {
+					case "panel":
+						if (inKind.refreshKindProp == "prev") {
+							if(--inKind.refreshKindPanelIndex <= 0) {
+								refreshItem.index = 0;
+							} else {
+								refreshItem.index = inKind.refreshKindPanelIndex;
+							}
+						} else if (inKind.refreshKindProp == "current") {
+							refreshItem.index = inKind.refreshKindPanelIndex;
+						} else if (inKind.refreshKindProp == "next") {
+							if(++inKind.refreshKindPanelIndex >= refreshItem.components.length) {
+								refreshItem.index = refreshItem.components.length - 1;
+							} else {
+								refreshItem.index = inKind.refreshKindPanelIndex;
+							}
+						} else {
+							enyo.warn("refresh kind property is wrong");
+						}
+						break;
+					default:
+						break;
+				}			
+			}
 
 			// Clean up after previous kind
 			if (this.parentInstance) {
@@ -402,7 +430,17 @@ enyo.kind({
 			
 			// Select a control if so requested
 			if (inKind.selectId) {
-				this.selectItem({aresId: inKind.selectId});
+				if (inKind.refreshKindName) {
+					switch (inKind.refreshKindName) {
+						case "panel":
+							this.selectItem({aresId: refreshItem.components[refreshItem.index].aresId});
+							break;
+						default:
+							break;
+					}
+				} else {
+					this.selectItem({aresId: inKind.selectId});
+				}
 			}
 		} catch(error) {
 			errMsg = "Unable to render kind '" + inKind.name + "':" + error.message;
@@ -619,6 +657,23 @@ enyo.kind({
 		}
 	},
 	
+	getItemById: function(inId, inComponents) {
+		if (inComponents.length === 0) {
+			return;
+		}
+		
+		for (var i = 0, component, item; (component = inComponents[i]); i++) {
+			if (component.aresId === inId) {
+				item = inComponents[i];
+			} else if (component.components) {
+				item = this.getItemById(inId, component.components);
+			}
+			if(item) {
+				return item;
+			}
+		}
+	},
+
 	getEventDragTarget: function(inComponent) {
 		return (!inComponent) ? null : (!this.isDraggable(inComponent)) ? this.getEventDragTarget(inComponent.parent) : inComponent;
 	},

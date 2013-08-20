@@ -168,6 +168,20 @@ enyo.kind({
 		var currentKind = this.getCurrentKind();
 		this.sendMessage({op: "render", val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components), selectId: inSelectId}});
 	},
+	//* Render the current kind again for only dynamic UI component without changing source code
+	refreshCurrentKind: function(inSelectId, inEvent) {
+		if(!this.getIframeReady()) {
+			return;
+		}
+		
+		var currentKind = this.getCurrentKind();
+		this.sendMessage({op: "render", val: {name: currentKind.name,
+											components: enyo.json.codify.to(currentKind.components),
+											selectId: inSelectId,
+											refreshKindName: inEvent.inKindName,
+											refreshKindProp: inEvent.inKindProp,
+											refreshKindPanelIndex: inEvent.inPanelIndex}});
+	},
 	select: function(inControl) {
 		this.sendMessage({op: "select", val: inControl});
 	},
