@@ -1,6 +1,11 @@
 /* global Ares, Backbone */
 
-Ares.model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when possible
+// Create the Ares.Model object if it does not exist yet
+if ( ! Ares.Model) {
+	Ares.Model = {};
+}
+
+Ares.Model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when possible
 	getId: function() {
 		return this.get("id");
 	},
@@ -45,11 +50,11 @@ Ares.model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when po
 	}
 });
 
-Ares.model.Files = Backbone.Collection.extend({		// TODO: move to enyo.Collection when possible
-	model: Ares.model.File,
+Ares.Model.Files = Backbone.Collection.extend({		// TODO: move to enyo.Collection when possible
+	model: Ares.Model.File,
 	newEntry: function(file, data, projectData) {
 		var id = this.computeId(file);
-		var obj = new Ares.model.File({id: id, file: file, data: data, "project-data": projectData, edited: false, currentIF: "code"});
+		var obj = new Ares.Model.File({id: id, file: file, data: data, "project-data": projectData, edited: false, currentIF: "code"});
 		this.add(obj);
 		return obj;
 	},

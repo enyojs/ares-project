@@ -17,7 +17,6 @@ enyo.kind({
 	classes: "onyx",
 	fit: true,
 	debug: false,
-	noDefer: true,
 	componentsRegistry: {},
 	components: [
 		{
@@ -533,7 +532,7 @@ enyo.kind({
 	 * 
 	 * @private
 	 * @param {Object} inSender
-	 * @param {Object} inEvent => inEvent.project in Ares.model.Project
+	 * @param {Object} inEvent => inEvent.project in Ares.Model.Project
 	 */
 	closeDocumentsForProject: function(inSender, inEvent){
 		var files = Ares.Workspace.files,
@@ -586,8 +585,7 @@ enyo.kind({
 				return true;
 			}
 		},
-		instance: null,
-		model: {}
+		instance: null
 	}
 });
 

@@ -90,7 +90,7 @@ _.extend(AresStore.prototype, {
 	}
 });
 
-Ares.model.Project = Backbone.model.extend({				// TODO: Move to enyo.Model when possible
+Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when possible
 	_getProp: function(name) {
 		var parts = name.split("."),
 		    v = {};
@@ -157,8 +157,9 @@ Ares.model.Project = Backbone.model.extend({				// TODO: Move to enyo.Model when
 	}
 });
 
-Ares.model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collection when possible
-	model: Ares.model.Project,
+Ares.Model.PROJECTS_STORAGE_KEY = "com.enyojs.ares.projects";
+Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collection when possible
+	model: Ares.Model.Project,
 	comparator: function(a, b) {
 		var result;
 		if (a.id > b.id) {
@@ -210,14 +211,13 @@ Ares.model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collec
 enyo.singleton({
 	name: "Ares.Workspace",
 	kind: enyo.Component,
-	PROJECTS_STORAGE_KEY: "com.enyojs.ares.projects",
 	create: function() {
 		this.inherited(arguments);
-		this.projects = new Ares.model.Projects();
-		this.files = new Ares.model.Files();
+		this.projects = new Ares.Model.Projects();
+		this.files = new Ares.Model.Files();
 	},
 	loadProjects: function(storageKey, eraseAll) {
-		var key = storageKey || this.PROJECTS_STORAGE_KEY;
+		var key = storageKey || Ares.Model.PROJECTS_STORAGE_KEY;
 		this.projects.localStorage = new AresStore(key, eraseAll);
 		this.projects.fetch();
 	}
