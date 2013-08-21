@@ -78,25 +78,24 @@ enyo.kind({
 		};
 		
 		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
-		hft.selectedNode.updateNodes()
-			.response(this, function() {
-				var matchingNodes = hft.selectedNode.getNodeFiles().filter(matchFileName) ;
+		var nodeUpdated = hft.selectedNode.updateNodes();
+		nodeUpdated.response(this, function() {
+			var matchingNodes = hft.selectedNode.getNodeFiles().filter(matchFileName) ;
 
-				if (matchingNodes.length !== 0) {
-					this.hide();
-					var msg = $L("Cannot create project: a project.json file already exists");
-					this.$.errorPopup.raise(msg);
-					this.$.selectDirectoryPopup.reset();
-					next({handled: true, msg: msg});
-				} else {
-					next();
-				}
-			})
-			.error(this, function() {
-				var msg = $L("Cannot create project: subnodes not found");
+			if (matchingNodes.length !== 0) {
+				this.hide();
+				var msg = $L("Cannot create project: a project.json file already exists");
+				this.$.errorPopup.raise(msg);
+				this.$.selectDirectoryPopup.reset();
 				next({handled: true, msg: msg});
-			})
-			;
+			} else {
+				next();
+			}
+		});
+		nodeUpdated.error(this, function() {
+			var msg = $L("Cannot create project: subnodes not found");
+			next({handled: true, msg: msg});
+		});
 	},
 
 	fillProjectPropPopup: function(inSender, inEvent, next) {
