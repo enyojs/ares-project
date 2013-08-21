@@ -273,6 +273,14 @@ enyo.kind({
 		
 		var name = this.$.selectedFoldersPath.getValue();
 
+		var hft = this.$.hermesFileTree;
+		if (!hft.checkedPath(name)) {
+			this.hide() ;
+			this.doFileChosen();
+
+			return true;
+		}
+
 		if (this.allowNewFile) {
 			if (this.$.selectedFoldersPath !== "/") {
 				name = name + "/";
@@ -332,10 +340,6 @@ enyo.kind({
 	/** @public */
 	checkSelectedName: function(selectedPath) {
 		this.$.hermesFileTree.checkNodePath(selectedPath);
-	},
-	$LS: function(msg, params) {
-		var tmp = new enyo.g11n.Template($L(msg));
-		return tmp.evaluate(params);
 	}
 });
 
