@@ -118,7 +118,7 @@ enyo.kind({
 				} catch(err) {
 					this.hide();
 					this.warn( "Unable to parse appinfo.json >>", fileStuff.content, "<<");
-					var msg = this.$LS("Unable to parse appinfo.json: {error}", {error: err.toString()});
+					var msg = this.$LS("Unable to parse appinfo.json: #{error}", {error: err.toString()});
 					this.$.errorPopup.raise(msg);
 					next({handled: true, msg: msg});
 					return;
@@ -679,7 +679,7 @@ enyo.kind({
 		var destination = inEvent.data.name;
 		var known = Ares.Workspace.projects.get(destination);
 		if (known) {
-			this.doError({msg: this.$LS("Unable to duplicate the project, the project '{destination}' already exists", {destination: destination})});
+			this.doError({msg: this.$LS("Unable to duplicate the project, the project '#{destination}' already exists", {destination: destination})});
 			return true ; // stop bubble			
 		}
 
@@ -689,7 +689,7 @@ enyo.kind({
 			var msg = $L("Unable to duplicate the project");
 			if (status === 412 /*Precondition-Failed*/) {
 				this.warn("Unable to duplicate the project, directory '", destination, "' already exists", status);
-				msg = this.$LS("Unable to duplicate the project, directory '{destination}' already exists", {destination: destination});
+				msg = this.$LS("Unable to duplicate the project, directory '#{destination}' already exists", {destination: destination});
 			} else {
 				this.warn("Unable to duplicate the project", status);
 			}

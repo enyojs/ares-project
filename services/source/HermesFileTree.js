@@ -350,7 +350,7 @@ enyo.kind({
 		// (possibly remote & always asynchronous) file system
 		this.connectService(service, enyo.bind(this, (function(inError) {
 			if (inError) {
-				this.showErrorPopup(this.$LS("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
+				this.showErrorPopup(this.$LS("Internal Error (#{error}) from filesystem service", {error: inError.toString()}));
 			} else {
 				if (this.selectedNode) {
 					this.deselect(null, {data: this.selectedNode});
@@ -376,7 +376,7 @@ enyo.kind({
 				});
 				req.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");
-					this.showErrorPopup(this.$LS("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
+					this.showErrorPopup(this.$LS("Internal Error (#{error}) from filesystem service", {error: inError.toString()}));
 				});
 			}
 		})));
@@ -751,7 +751,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create folder:", name, inError);
-				this.showErrorPopup(this.$LS("Creating folder '{name}' failed: {error}", {name: name, error: inError.toString()}));
+				this.showErrorPopup(this.$LS("Creating folder '#{name}' failed: {#error}", {name: name, error: inError.toString()}));
 			});
 	},
 	/** @private */
@@ -817,7 +817,7 @@ enyo.kind({
 		r.error(this, function(inSender, error) {
 			if (error === 404){
 				this.createFile(name, folderId);
-				this.showErrorPopup(this.$LS("No template found for '.{extension}' files.  Created an empty one.", {extension: type}));
+				this.showErrorPopup(this.$LS("No template found for '.#{extension}' files.  Created an empty one.", {extension: type}));
 			}
 			else {
 				this.warn("error while fetching ", templatePath, ': ', error);
@@ -875,7 +875,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to copy:", this.selectedFile, "as", newName, inError);
-				this.showErrorPopup(this.$LS("Creating file '{copyName}' as copy of '{name}' failed: {error}", {copyName: newName, name: this.selectedFile.name, error: inError.toString()}));
+				this.showErrorPopup(this.$LS("Creating file '#{copyName}' as copy of '#{name}' failed: #{error}", {copyName: newName, name: this.selectedFile.name, error: inError.toString()}));
 			});
 	},
 	/** @private */
@@ -943,7 +943,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to rename:", this.selectedFile, "into", newName, inError);
-				this.showErrorPopup(this.$LS("Renaming file '{oldName}' as '{newName}' failed", {oldName: this.selectedFile.name, newName: newName}));
+				this.showErrorPopup(this.$LS("Renaming file '#{oldName}' as '#{newName}' failed", {oldName: this.selectedFile.name, newName: newName}));
 			});
 	},
 	/** @private */
@@ -1003,7 +1003,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to delete:", this.selectedFile, inError);
-				this.showErrorPopup(this.$LS("Deleting '{name}' failed", {name: this.selectedFile.name}));
+				this.showErrorPopup(this.$LS("Deleting '#{name}' failed", {name: this.selectedFile.name}));
 			});
 	},
 	/** @private */
@@ -1101,7 +1101,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to create file:", name, inError);
-				this.showErrorPopup(this.$LS("Creating file '{name}' failed: {error}", {name: name, error: inError.toString()}));
+				this.showErrorPopup(this.$LS("Creating file '#{name}' failed: #{error}", {name: name, error: inError.toString()}));
 			});
 	},
 	
@@ -1171,7 +1171,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to move:", inNode.file.name, inError);
-				this.showErrorPopup(this.$LS("Moving {nodeName} failed: {error}", {nodeName: inNode.file.name, error: inError.toString()}));
+				this.showErrorPopup(this.$LS("Moving #{nodeName} failed: #{error}", {nodeName: inNode.file.name, error: inError.toString()}));
 			});
 	},
 	$LS: function(msg, params) {
@@ -1231,7 +1231,7 @@ enyo.kind({
 		var illegal = /[<>\/\\!?@#\$%^&\*,]+/i;
 
 		if (path.match(illegal)) {
-			this.showErrorPopup(this.$LS("Path {path} contains illegal characters", {path: path}));
+			this.showErrorPopup(this.$LS("Path #{path} contains illegal characters", {path: path}));
 			return false;
 		}
 
