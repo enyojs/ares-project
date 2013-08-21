@@ -709,7 +709,6 @@ enyo.kind({
 			return true;
 		}
 
-		this.log("Creating new folder ", name," into folderId=", folderId);
 		this.trace("Creating new folder ", name," into folderId=", folderId);
 		this.$.service.createFolder(folderId, name)
 			.response(this, function(inSender, inFolder) {
