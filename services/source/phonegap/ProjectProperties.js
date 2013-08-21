@@ -148,7 +148,10 @@ enyo.kind({
 		showAdvancedConfiguration: true
 	},
 	events: {
-		onConfigure: ""
+		onLoginFailed: "",
+		onError: "",
+		onConfigure: "",
+		onRegisterMe: "",
 	},
 	components: [{
 			kind: "enyo.Scroller",
@@ -193,6 +196,7 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
+		this.doRegisterMe({name:"phonegapBuild", reference:this});
 		this.createAllDrawers();
 	},
 
@@ -348,7 +352,7 @@ enyo.kind({
 	/**
 	 * @protected
 	 */
-	refresh: function (inSender, inValue) {		
+	refresh: function (inSender, inValue) {
 		this.trace("sender:", inSender, "value:", inValue);		
 		var provider = Phonegap.ProjectProperties.getProvider();
 		provider.authorize(enyo.bind(this, this.loadKeys));
@@ -367,13 +371,13 @@ enyo.kind({
 	/**
 	 * @protected
 	 */
-	loadKeys: function (err) {
-	
+	loadKeys: function (err) {	
 		this.trace("err:", err);
 	
 		if (err) {
-			this.warn("err:", err);
-		} else {
+			//this.warn("err:", err);
+			this.doError({msg: err.toString(), err: err});
+		} else {						
 			var provider = Phonegap.ProjectProperties.getProvider();
 					
 			enyo.forEach(this.platformDrawers, function (target) {
