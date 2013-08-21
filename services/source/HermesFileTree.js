@@ -785,62 +785,61 @@ enyo.kind({
 		var location = window.location.toString();
 		var prefix = location.substring(0, location.lastIndexOf("/")+1);
 
-		var matchFileName = function(node){
-			return (node.content === name ) ;
-		};
-
-		this.log(this.selectedNode);
 		var folder = this.getFolderOfSelectedNode();
 		var nodeUpdate = folder.updateNodes();
 		nodeUpdate.response(this, function() {
-			var matchingNodes = this.selectedNode.getNodeFiles().filter(matchFileName) ;
+			var matchFileName = function(node){
+				return (node.content === name ) ;
+			};
+
+			var matchingNodes = folder.getNodeFiles().filter(matchFileName) ;
 
 			if (matchingNodes.length !== 0) {
 				this.showErrorPopup(this.$LS("File '#{name}' already exists", {name: name}));
 				return true;
 			}
+
+			if (name === "package.js") {
+				templatePath = prefix+"../templates/package.js";
+			} else {
+				templatePath = prefix+"../templates/template."+type;
+			}
+			var options = {
+				url: templatePath,
+				cacheBust: false,
+				handleAs: "text"
+			};
+			var replacements = {
+				"$NAME": nameStem,
+				"$YEAR": new Date().getFullYear()
+			};
+			// retrieve template from server
+			var r = new enyo.Ajax(options);
+			r.response(this, function(inSender, inResponse) {
+				this.trace("newFileConfirm response: ", inResponse);
+				for (var n in replacements) {
+					inResponse = inResponse.replace(n, replacements[n]);
+				}
+				this.createFile(name, folderId, inResponse);
+
+				/* cancel any move reverting */
+				this.resetRevert();
+			});
+			r.error(this, function(inSender, error) {
+				if (error === 404){
+					this.createFile(name, folderId);
+					this.showErrorPopup(this.$LS("No template found for '.#{extension}' files.  Created an empty one.", {extension: type}));
+				}
+				else {
+					this.warn("error while fetching ", templatePath, ': ', error);
+				}
+			});
+			r.go();
 		});
 		nodeUpdate.error(this, function() {
 			this.showErrorPopup($L("Cannot reach filesystem"));
 			return true;
 		});
-
-		if (name === "package.js") {
-			templatePath = prefix+"../templates/package.js";
-		} else {
-			templatePath = prefix+"../templates/template."+type;
-		}
-		var options = {
-			url: templatePath,
-			cacheBust: false,
-			handleAs: "text"
-		};
-		var replacements = {
-			"$NAME": nameStem,
-			"$YEAR": new Date().getFullYear()
-		};
-		// retrieve template from server
-		var r = new enyo.Ajax(options);
-		r.response(this, function(inSender, inResponse) {
-			this.trace("newFileConfirm response: ", inResponse);
-			for (var n in replacements) {
-				inResponse = inResponse.replace(n, replacements[n]);
-			}
-			this.createFile(name, folderId, inResponse);
-
-			/* cancel any move reverting */
-			this.resetRevert();
-		});
-		r.error(this, function(inSender, error) {
-			if (error === 404){
-				this.createFile(name, folderId);
-				this.showErrorPopup(this.$LS("No template found for '.#{extension}' files.  Created an empty one.", {extension: type}));
-			}
-			else {
-				this.warn("error while fetching ", templatePath, ': ', error);
-			}
-		});
-		r.go();
 	},
 	/** @private */
 	// User Interaction for Copy File/Folder op
