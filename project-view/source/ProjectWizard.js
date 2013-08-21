@@ -178,7 +178,6 @@ enyo.kind({
 
 	createProjectJson: function(data, next) {
 		//initialize project config
-		ares.setupTraceLogger(this.config);
 		this.config.data = null;
 		this.config.service = this.selectedDir.service;
 		this.config.folderId = this.selectedDir.id;
