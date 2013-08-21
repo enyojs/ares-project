@@ -249,6 +249,15 @@ enyo.kind({
 				} else {
 					this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
 				}
+			} else if (this.owner.$.editorFileMenu.$[stuff] !== undefined && this.owner.$.designerFileMenu.$[stuff] !== undefined) {
+				var editorFileMenu = this.owner.$.editorFileMenu.$[stuff];
+				var designerFileMenu = this.owner.$.designerFileMenu.$[stuff];
+				if (typeof editorFileMenu.setShowing === 'function' && typeof designerFileMenu.setShowing === 'function') {
+					editorFileMenu.setShowing(showStuff);
+					designerFileMenu.setShowing(showStuff);
+				} else {
+					this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
+				}
 			} else {
 				if (typeof this.owner.$[stuff].setShowing === 'function') {
 					this.owner.$[stuff].setShowing(showStuff) ;
