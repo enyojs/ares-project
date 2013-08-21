@@ -195,8 +195,9 @@ enyo.kind({
 			this.$.ace.editingMode = mode;
 		}
 		else {
-			var origin = this.projectData.getService().getConfig().origin;
-			this.$.imageViewer.setAttribute("src", origin + file.pathname);
+			var config = this.projectData.getService().getConfig();
+			var fileUrl = config.origin + config.pathname + "/file" + file.path;
+			this.$.imageViewer.setAttribute("src", fileUrl);
 		}
 		this.manageDesignerButton();
 		this.reparseAction(true);
