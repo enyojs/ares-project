@@ -118,7 +118,7 @@ enyo.kind({
 	 * Event handler: handle build project action (select provider & run action)
 	 * @param {enyo.Component} inSender
 	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project 
+	 * @property inEvent {Ares.model.Project} project 
 	 * @private
 	 */
 	buildAction: function(inSender, inEvent) {
@@ -133,7 +133,7 @@ enyo.kind({
 	 * Event handler: handle install application action (select provider & run action)
 	 * @param {enyo.Component} inSender
 	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project
+	 * @property inEvent {Ares.model.Project} project
 	 * @private
 	 */
 	installAction: function(inSender, inEvent) {
@@ -147,7 +147,7 @@ enyo.kind({
 	 * Event handler: handle run application action (select provider & run action)
 	 * @param {enyo.Component} inSender
 	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project
+	 * @property inEvent {Ares.model.Project} project
 	 * @private
 	 */
 	runAction: function(inSender, inEvent) {
@@ -161,7 +161,7 @@ enyo.kind({
 	 * Event handler: handle debug application action (select provider & run action)
 	 * @param {enyo.Component} inSender
 	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project
+	 * @property inEvent {Ares.model.Project} project
 	 * @private
 	 */
 	runDebugAction: function(inSender, inEvent) {
@@ -198,7 +198,7 @@ enyo.kind({
 	 * Event handler: Launch a preview widget of the selected project in a separate frame
 	 * @param {enyo.Component} inSender
 	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project 
+	 * @property inEvent {Ares.model.Project} project 
 	 * @private
 	 */
 	previewAction: function(inSender, inEvent) {

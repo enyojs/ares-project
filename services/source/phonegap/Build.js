@@ -147,7 +147,7 @@ enyo.kind({
 	 * @private
 	 */
 	getConfigInstance: function(project){
-		if (!project instanceof Ares.Model.Project) {
+		if (!project instanceof Ares.model.Project) {
 					next(new Error("Invalid parameters"));
 					return;
 			}
@@ -462,7 +462,7 @@ enyo.kind({
 	 * - Send it to nodejs which will submit the build request
 	 * - Save the appid
 	 * 
-	 * @param {Ares.Model.Project} project
+	 * @param {Ares.model.Project} project
 	 * @param {Function} next is a CommonJS callback
 	 * @public
 	 */
