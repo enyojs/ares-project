@@ -23,7 +23,9 @@ enyo.kind({
 		onFileChoosersChecked: ""
 	},
 	handlers: {
-		onAdditionalSource: "handleAdditionalSource",
+		onAddSource:"addNewSource",
+		onRemoveSource:"removeAddedSource",
+		onInitSource:"initAddedSource",
 		onInputButtonTap: "selectInputFile"
 	},
 	components: [
@@ -131,7 +133,7 @@ enyo.kind({
 	selectedAddSource: undefined,
 	targetProject: null,
 	services: {},
-
+	addedSource:[],
 	fileChoosers: [],
 	
 	create: function() {
@@ -208,12 +210,11 @@ enyo.kind({
 	 */
 	toggleService: function(inSender, inEvent) {
 		var serviceId = inEvent.originator.serviceId,
-		    checked = inEvent.originator.checked;
+		    checked = inEvent.originator.checked,
+		    config = this.config && this.config.providers && this.config.providers[serviceId];
 		this.trace("serviceId:", serviceId, 'checked:', checked);
-		var service = this.services[serviceId];
-		if (service.tab) {
-			service.tab.setShowing(checked);
-		}
+		this.config.providers[serviceId].enabled = checked;
+		this.showService(serviceId);
 	},
 	/**
 	 * Tune the widget for project creation
@@ -297,8 +298,7 @@ enyo.kind({
 
 	showService: function(serviceId) {
 		var service = this.services[serviceId];
-		var config = this.config && this.config.providers &&
-			    this.config.providers[serviceId];
+		var config = this.config && this.config.providers && this.config.providers[serviceId];
 		var enabled = config && config.enabled;
 		service.checkBox.setChecked(enabled);
 		service.tab.setShowing(enabled);
@@ -345,12 +345,7 @@ enyo.kind({
 			service.panel.getProjectConfig(this.config.providers[service.id]);
 		}, this);
 
-		// to be handled by a ProjectWizard
-		var sourceIds = [];
-		if (this.selectedTemplate !==undefined && this.selectedAddSource !== undefined) {
-			sourceIds.push(this.selectedAddSource);
-		}
-		this.doModifiedConfig({data: this.config, template: this.selectedTemplate, addSources: sourceIds}) ;
+		this.doModifiedConfig({data: this.config, template: this.selectedTemplate, addSources: this.addedSource}) ;
 
 		this.doDone();
 
@@ -417,8 +412,6 @@ enyo.kind({
 		} else {
 			this.selectedTemplate = inEvent.content;
 		}
-
-		this.templateToggleService(inSender, inEvent);
 	},
 	topFileChanged: function() {
 		this.$.topFileRow.setValue(this.topFile);
@@ -426,22 +419,21 @@ enyo.kind({
 	topFileStatusChanged: function() {
 		this.$.topFileRow.setStatus(this.topFileStatus);
 	},
-	templateToggleService: function(inSender, inEvent) {
-		var keys = Object.keys(this.services);
-		keys.forEach(function(serviceId) {
-			var service = this.services[serviceId];
-			if (inEvent.content.match(serviceId)) {
-				this.showService(serviceId);
-			} else {
-				service.checkBox.setChecked(false);
-				if (service.tab) {
-					service.tab.setShowing(false);
-				}
-			}
-		}.bind(this));
-	},
 	handleAdditionalSource: function(inSender, inEvent) {
 		this.selectedAddSource = inEvent.source;
+		return true;
+	},
+	addNewSource: function(inSender, inEvent) {
+		this.addedSource.push(inEvent.source);
+		return true;
+	},
+	removeAddedSource: function(inSender, inEvent) {
+		var index = this.addedSource.indexOf(inEvent.source);
+		this.addedSource = this.addedSource.slice(0,index).concat(this.addedSource.slice(index+1,this.addedSource.lenght));
+		return true;
+	},
+	initAddedSource: function(inSender, inEvent) {
+		this.addedSource = [];
 		return true;
 	},
 	/** @public */

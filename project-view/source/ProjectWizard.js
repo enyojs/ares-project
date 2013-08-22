@@ -13,7 +13,8 @@ enyo.kind({
 	events: {
 		onAddProjectInList: "",
 		onShowWaitPopup: "",
-		onHideWaitPopup: ""
+		onHideWaitPopup: "",
+		onProjectSelected: ""
 	},
 	handlers: {
 		onFileChosen: "prepareShowProjectPropPopup",
@@ -229,26 +230,29 @@ enyo.kind({
 		this.projectName = inEvent.data.name;
 		var folderId = this.selectedDir.id ;
 		var template = inEvent.template;
+		var addSources = inEvent.addSources.length !==0 ? true : false;
 
 		this.warn("Creating new project ", name, " in folderId=", folderId, " (template: ", template, ")");
 		this.config.setData(inEvent.data) ;
 		this.config.save() ;
 
-		if (template) {
+		if (template || addSources) {
 			this.instanciateTemplate(inEvent);
-		} else {
+		} 
+		if (!template) {
 			var service = this.selectedDir.service;
-
 			service.createFile(folderId, "package.js", "enyo.depends(\n);\n")
 				.response(this, function(inRequest, inFsNode) {
 					this.trace("package.js inFsNode[0]:", inFsNode[0]);
-					this.projectReady(null, inEvent);
+					if (!addSources)
+						this.projectReady(null, inEvent);
+					else
+						this.projectRefresh();
 				})
 				.error(this, function(inRequest, inError) {
 					this.warn("inRequest:", inRequest, "inError:", inError);
 				});
 		}
-
 		return true ; // stop bubble
 	},
 	$LS: function(msg, params) {
@@ -311,17 +315,19 @@ enyo.kind({
 			service: this.selectedDir.service
 		});
 	},
-
+	
+	projectRefresh: function(inSender, inData) {
+		this.doProjectSelected({
+			project: this.targetProject
+		});
+		this.hideMe();
+	},
 	/**
 	 * Hide the whole widget. Typically called when ok or cancel is clicked
 	 */
 	hideMe: function() {
 		this.config = null ; // forget ProjectConfig object
 		this.hide() ;
-		return true;
-	},
-	notifyChangeSource: function(inSender, inEvent) {
-		this.waterfallDown("onAdditionalSource", inEvent, inSender);
 		return true;
 	}
 });
@@ -432,10 +438,6 @@ enyo.kind({
 
 		this.$.propertiesWidget.updateFileInput(chooser, inEvent.name);
 		this.$.selectFilePopup.reset();
-		return true;
-	},
-	notifyChangeSource: function(inSender, inEvent) {
-		this.waterfallDown("onAdditionalSource", inEvent, inSender);
 		return true;
 	},
 	populateProject: function(inSender, inData) {
