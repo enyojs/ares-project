@@ -1,4 +1,5 @@
 {
+	"Cannot reach filesystem": "Système de fichier inaccessible",
 	"Copy...": "Copier...",
 	"Copy of foo.js": "Copie de foo.js",
 	"Creating file '{name}' failed: {error}": "La création du fichier '{name}' a échoué : {error}",
@@ -8,6 +9,7 @@
 	"Deleting '{name}' failed": "La suppression de '{name}' a échoué",
 	"file": "fichier",
 	"File Name": "Nom de fichier",
+	"File '#{name}' already exists": "Le fichier '#{name}' existe déjà"
 	"folder": "dossier",
 	"Folder Name": "Nom de répertoire",
 	"Internal Error ({error}) from filesystem service": "Erreur Interne ({error}) du service de système de fichiers",
