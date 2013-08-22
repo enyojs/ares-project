@@ -558,7 +558,7 @@ enyo.kind({
 		this.selectedNode=inEvent.data;
 		inEvent.data.file.service = this.$.service;
 		inEvent.data.$.caption.addClass("hermesFileTree-select-highlight");
-		// this.doSelect({file: this.selectedNode.file});
+		
 		this.enableDisableButtons();
 		// handled here (don't bubble)
 		return true;
@@ -569,7 +569,7 @@ enyo.kind({
 		if (inEvent.data && inEvent.data.$.caption) {
 			inEvent.data.$.caption.removeClass("hermesFileTree-select-highlight");
 		}
-		//this.doDeselect({file: this.selectedNode.file});
+		
 		this.selectedNode=null;
 		this.enableDisableButtons();
 		// handled here (don't bubble)
