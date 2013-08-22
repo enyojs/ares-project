@@ -1,8 +1,24 @@
 
-.css_builder_font {
+.hera_builder_font {
     font-size: 10px;
 }
 
+.left-input-box{
+	padding-right: 4px;
+	border-radius: 4px;
+	margin: auto;
+}
+
+.left-input-col{
+	text-align: center;
+	padding-right: 4px;
+	margin: 5px;
+}
+
+.left-input-dec{
+	padding-left: 9px;
+
+}
 .css_builder_RadioGroup {
 	font-size: 10px;
 	width: 125px;
@@ -45,7 +61,8 @@
 	background-color: #eee;
 }
 .list-sample-item {
-	font-size: 13px;
+	font-size: 16px;
+	border:1px solid gray;
 	background-color: #F5F5F5; 
 }
 .list-sample-index {

@@ -11,7 +11,6 @@ enyo.kind({
 		onUnitChange: "",
 		onRegisterMe: "",
 	},
-
 	components: [
 		{kind: "Panels", arrangerKind: "CardArranger",  style: "border: solid black thin;", classes: "enyo-fit",	components: [
 			{name: "blank", kind: "Control", showing: true, components: [
@@ -34,11 +33,9 @@ enyo.kind({
 				{style: "height: 5px"},
 				{style: "height: 15px;  text-align: center; ", content: "Misc Input" },
 				{style: "height: 5px"},
-			{ fit: true, content:"Inputs"},
-				
-			{kind: "FittableColumns", fit: true, components: [
-				
-				{kind: "onyx.InputDecorator", components: [
+							
+				{kind: "FittableColumns", fit: true, components: [
+					{kind: "onyx.InputDecorator", components: [
 					{kind: "onyx.Input", placeholder: "Enter text here", onchange:"input_misc"},
 				]},
 
@@ -54,43 +51,51 @@ enyo.kind({
 			]}
 		]}, // xy
 			
-			{name: "xyz", kind: "Control", showing: false, components: [
+			{name: "xyz", kind: "Control", showing: false, classes:"left-input-box", components: [
 				{style: "height: 5px"},
 				{style: "height: 15px;  text-align: center; ", content: "X Y Z & Color Inputs " },
 				{style: "height: 5px"},
 				{tag: "br"},
-				{name: "namex", tag:"span", content:"X offset  "},
-				{kind: "onyx.InputDecorator", components: [
-				{kind: "onyx.Input", placeholder: "Enter text here", onchange:"inputx"}
-			]},	
-			
+				
+					{kind: "FittableColumns", fit: true, classes:"left-input-col",  components: [
+					{style: "text-align: right;", content:"X Y & Z offset"},
+					{tag:"span"	, content:"  "},
+					{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [						
+						{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
+						{name: "Inputx", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputx"},
+					]},
+					{kind: "onyx.PickerDecorator", components: [						
+						{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
+						{name: "Inputy", kind: "onyx.Picker", onSelect: "inputy"},
+					]},
+					{kind: "onyx.PickerDecorator", components: [						
+						{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
+						{name: "Inputz", kind: "onyx.Picker", onSelect: "inputz"},
+					]},	
+					{kind: "onyx.PickerDecorator", style: " width: 40px;", components: [
+						{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
+						{kind: "onyx.Picker", onSelect: "unit_type", components: [
+							{content: "px", active: true},
+							{content: "cm"},
+							{content: "em"},
+							{content: "ern"},
+							{content: "rem"},
+							{content: "%"}
+						]}
+					]},
+				]},	
 			{tag: "br"},
-			{name: "namey", tag:"span", content:"Y offset  "},
-			//	{content: "	"},
-			{kind: "onyx.InputDecorator", components: [
-				{kind: "onyx.Input", placeholder: "Enter text here", onchange:"inputy"}
-			]},
-			
-				
-			{tag: "br"},
-				
-			{name: "namez", tag:"span", content:"Blur  "},
-			{kind: "onyx.InputDecorator", components: [
-				{kind: "onyx.Input", placeholder: "Enter text here", onchange:"inputz"}
-			]},
-		
-				
-			{name: "sliders0", kind: "Control", showing: true, components: [
-				{name: "redSlider0", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged", style: "height:10px; background-color: red; enyo-unselectable;"},
+			{tag: "br"},	
+			{kind: "Control", showing: true, components: [
+				{kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged", style: "height:10px; background-color: red; enyo-unselectable;"},
 				{style: "height: 5px"},
-				{name: "greenSlider0", kind: "onyx.Slider", onChanging: "greenSliding", onChange: "greenChanged", style: "height:10px;  background-color: green; enyo-unselectable" },
+				{kind: "onyx.Slider", onChanging: "greenSliding", onChange: "greenChanged", style: "height:10px;  background-color: green; enyo-unselectable" },
 				{style: "height: 5px"},
-
 				{ kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged", style: "height:10px;  background-color: blue; enyo-unselectable" },
 			]},
 		]},	//xyz
 			
-			{name: "picker", kind: "Control", style: "border: solid black;", showing: false, components: [
+			{name: "Picker", kind: "Control", showing: false, components: [
 				{style: "height: 5px"},
 				{style: "height: 15px;  text-align: center; ", content: "Picker Inputs" },
 				{style: "height: 5px", tag: "br"},
@@ -119,7 +124,7 @@ enyo.kind({
 	
 	blank: 0,
 	sliders: 1,
-	misc: 2,	
+	inputbox: 2,	
 	xy: 3,
 	xyz: 4,
 	picker: 5,	
@@ -135,9 +140,23 @@ enyo.kind({
 		this.blue = "00";
 		this.green = "00";
 		this.misc = "";
-		this.unit = "px;";
-		for (var j=5; j<2000; j+=5) {
-			this.$.Input.createComponent({content: j, active: !j});
+		this.unit = "px";
+		var step = 1;
+		for (var j = 0; j < 2000; j+= step) {
+			if(j <= 9){
+				this.$.Inputx.createComponent({content: j, active: !j});
+				this.$.Inputy.createComponent({content: j, active: !j});
+				this.$.Inputz.createComponent({content: j, active: !j});
+				this.$.Input.createComponent({content: j, active: !j});
+			}
+			if(j >= 10 && j <= 40){
+				step = 2;
+				this.$.Input.createComponent({content: j, active: !j});
+			}
+			if(j > 40){
+				step = 10;
+				this.$.Input.createComponent({content: j, active: !j});
+			}
 		}
 	},
 	
@@ -173,7 +192,7 @@ enyo.kind({
 		this.blue = h;
 		this.color();
 	},
-	
+			
 	blueSliding: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var x = Math.floor(inEvent.value*255/100);
@@ -209,38 +228,44 @@ enyo.kind({
 	
 	showsblank: function(inSender,inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
+		this.clear();
 		this.$.panels.setIndex(this.blank);
 	},
+	
 	showssliders: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
+		this.clear();
 		this.$.panels.setIndex(this.sliders);
 	},
 	
 	showmisc: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		this.$.panels.setIndex(1);
+		this.clear();
+		this.$.panels.setIndex(this.inputbox);
 	},
 	
 	showxy: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
+		this.clear();
 		this.$.panels.setIndex(this.xy);
 	},
 	
 	showxyz: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
+		this.clear();
 		this.$.panels.setIndex(this.xyz);
 	},
 	
 	showpicker: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
+		this.clear();
 		this.$.panels.setIndex(this.picker);
 	},
 	
 	input_picker: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var unit = this.unit;
-		console.log(inEvent.content, unit);
-		this.misc_picker = inEvent.content + unit;		
+		this.misc_picker = inEvent.content;		
 		this.total();
 	},
 	
@@ -253,29 +278,26 @@ enyo.kind({
 	
 	inputx: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var type = this.unit;
-		this.x = inSender.value + type;
+		this.x = inEvent.content;
 		this.total();
 	},
 	
 	inputy: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var type = this.unit;
-		this.y = inSender.value + type;
+		this.y = inEvent.content ;
 		this.total();
 	},
 	
 	inputz: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var type = this.unit;
-		this.z = inSender.value + type;
+		this.z = inEvent.content;
 		this.total();
 	},
 	
 	unit_type: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.unit = inEvent;
-		this.doUnitChange(inEvent);
+		this.total(inEvent);
 	},
 	
 	color: function(inSender, inEvent){
@@ -284,39 +306,52 @@ enyo.kind({
 		this.total();
 	},
 	
-	total: function(){
-	//	console.log("total");
+	total: function(inSender, inEvent){
 		var valueout = "";
+		if (this.unit.content === undefined){
+			this.unit = "px";
+		}else{
+			this.unit = this.unit.content;
+		}
+		
 		if(this.x !== undefined){
-			valueout = " " + this.x;
-			this.x = undefined;
+			valueout = valueout +" " + this.x  + this.unit;
+			
 		}		
 		if(this.y !== undefined){
-			valueout = valueout + " " + this.y;	
-			this.y = undefined;
+			valueout = valueout + " " + this.y  + this.unit;	
+		
 		}
 		if(this.z !== undefined){
-			valueout = valueout + " " +this.z;
-			this.z = undefined;
+			valueout = valueout + " " + this.z + this.unit;
+			
 		}		
 		if(this.c !== undefined ){
-			valueout = valueout + " " + this.c + ";";
-			this.c = undefined;
+			valueout = valueout + " " + this.c;		
 		}		
 		if(this.misc !== undefined){
-			valueout = valueout + " " + this.misc;
-			this.misc = undefined;
+			valueout = valueout + " " + this.misc;			
 		}
 		if(this.misc_picker !== undefined){
-			valueout = valueout + " " + this.misc_picker;
-			this.misc_picker = undefined;
+			valueout = valueout + " " + this.misc_picker + this.unit;
+			
 		}
-	
-		this.valueout = valueout;
-		//console.log(this.valueout, valueout);
+		this.valueout = valueout + ";";
 		valueout = "";
 		this.doValueUpdate();
 		
 		
+	},
+	
+	clear: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.c = undefined;
+		this.x = undefined;
+		this.y = undefined;
+		this.z = undefined;
+		this.misc = undefined;
+		this.misc_picker = undefined;
+		this.valueout = undefined;
 	}
+	
 });
