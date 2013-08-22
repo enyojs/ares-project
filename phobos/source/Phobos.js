@@ -197,8 +197,9 @@ enyo.kind({
 			this.$.ace.editingMode = mode;
 		}
 		else {
-			var origin = this.projectData.getService().getConfig().origin;
-			this.$.imageViewer.setAttribute("src", origin + file.pathname);
+			var config = this.projectData.getService().getConfig();
+			var fileUrl = config.origin + config.pathname + "/file" + file.path;
+			this.$.imageViewer.setAttribute("src", fileUrl);
 		}
 		this.manageDesignerButton();
 		this.reparseAction(true);
@@ -260,6 +261,15 @@ enyo.kind({
 			if(this.$[stuff] !== undefined){
 				if (typeof this.$[stuff].setShowing === 'function') {
 					this.$[stuff].setShowing(showStuff) ;
+				} else {
+					this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
+				}
+			} else if (this.owner.$.editorFileMenu.$[stuff] !== undefined && this.owner.$.designerFileMenu.$[stuff] !== undefined) {
+				var editorFileMenu = this.owner.$.editorFileMenu.$[stuff];
+				var designerFileMenu = this.owner.$.designerFileMenu.$[stuff];
+				if (typeof editorFileMenu.setShowing === 'function' && typeof designerFileMenu.setShowing === 'function') {
+					editorFileMenu.setShowing(showStuff);
+					designerFileMenu.setShowing(showStuff);
 				} else {
 					this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
 				}

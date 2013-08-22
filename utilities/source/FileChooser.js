@@ -273,6 +273,13 @@ enyo.kind({
 		
 		var name = this.$.selectedFoldersPath.getValue();
 
+		if (!this.checkedPath(name)) {
+			this.hide() ;
+			this.doFileChosen();
+
+			return true;
+		}
+
 		if (this.allowNewFile) {
 			if (this.$.selectedFoldersPath !== "/") {
 				name = name + "/";
@@ -333,9 +340,16 @@ enyo.kind({
 	checkSelectedName: function(selectedPath) {
 		this.$.hermesFileTree.checkNodePath(selectedPath);
 	},
-	$LS: function(msg, params) {
-		var tmp = new enyo.g11n.Template($L(msg));
-		return tmp.evaluate(params);
+	/* @private */
+	checkedPath: function(path) {
+		var illegal = /[<>\\!?@#\$%^&\*,]+/i;
+
+		if (path.match(illegal)) {
+			this.showErrorPopup(this.$LS("Path #{path} contains illegal characters", {path: path}));
+			return false;
+		}
+
+		return true;
 	}
 });
 
