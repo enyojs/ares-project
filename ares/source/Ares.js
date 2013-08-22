@@ -579,13 +579,13 @@ enyo.kind({
 	 * 
 	 * @private
 	 * @param {Object} inSender
-	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, codeEditor]
+	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, codeEditor, accountsConfigurator]
 	 */
 	_registerComponent: function(inSender, inEvent) {
 		if(this.componentsRegistry[inEvent.name] === undefined){
 			this.componentsRegistry[inEvent.name] = inEvent.reference;
 		}else {
-			//this.error("Component is already registred: ", inEvent.name);
+			this.error("Component is already registred: ", inEvent.name);
 		}
 	},
 	stopEvent: function(){
