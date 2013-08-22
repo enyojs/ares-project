@@ -425,7 +425,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 					}).bind(this));
 				}).bind(this));
 			} else {
-				if (srcPath !== dstPath && op === fs.rename) {
+				if (op === fs.rename) {
 					op(srcPath, dstPath, (function(err) {
 						//next(err, { code: 204 /*No-Content*/ });
 						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
