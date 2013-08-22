@@ -425,7 +425,19 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 					}).bind(this));
 				}).bind(this));
 			} else {
-				next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+				if (srcPath !== dstPath) {
+					op(srcPath, dstPath, (function(err) {
+						//next(err, { code: 204 /*No-Content*/ });
+						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
+							next(err, {
+								code: 200 /*Ok*/,
+								body: content
+							});
+						});
+					}).bind(this));
+				} else { 
+					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+				}
 			}
 		}
 	}).bind(this));
