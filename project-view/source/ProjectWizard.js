@@ -67,7 +67,6 @@ enyo.kind({
 				this.fillProjectPropPopup.bind(this, inSender, inEvent),
 				this.checkGetAppinfo.bind(this, inSender, inEvent),
 				this.getTemplates.bind(this, inSender, inEvent),
-				this.createProjectJson.bind(this, inSender, inEvent),
 				this.showProjectPropPopup.bind(this, inSender, inEvent)
 			], this.waitOk.bind(this));
 	},
@@ -192,22 +191,15 @@ enyo.kind({
 		}
 	},
 
-	createProjectJson: function(inSender, inEvent, next) {
-		this.config.init({
-			folderId:  this.selectedDir.id,
-			service: this.selectedDir.service
-		}, function(err) {
-			if (err) {
-				this.$.errorPopup.raise(err.toString());
-				var testCallBack = inEvent.testCallBack;
-				if (testCallBack) {
-					testCallBack();
-				}
-				next({handled: true, msg: err.toString()});
-			} else {
-				next();
-			}
-		}.bind(this));
+	createProjectJson: function(data, next) {
+		//initialize project config
+		this.config.data = null;
+		this.config.service = this.selectedDir.service;
+		this.config.folderId = this.selectedDir.id;
+		//save the project config;
+		this.config.setData(data) ;
+		//create and save the project.json
+		this.config.save() ;
 	},
 
 	showProjectPropPopup: function(inSender, inEvent, next) {
@@ -247,8 +239,8 @@ enyo.kind({
 		var addSources = inEvent.addSources.length !==0 ? true : false;
 
 		this.warn("Creating new project ", name, " in folderId=", folderId, " (template: ", template, ")");
-		this.config.setData(inEvent.data) ;
-		this.config.save() ;
+		//create project.json file
+		this.createProjectJson(inEvent.data);
 
 		if (template || addSources) {
 			this.instanciateTemplate(inEvent);
