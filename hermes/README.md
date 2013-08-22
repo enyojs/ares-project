@@ -8,7 +8,6 @@ Hermes offers several services not available in a Web Browser through one (or se
 
 ## [Security](id:security)
 
-
 ### Authentication
 
 Each service may need an individual authentication to access a back-end in the cloud.  For example, PhoneGap Build (PGB) uses a simple per-user token that is provided as a query parameter with every request to the build service.  Another example is more complex example is Dropbox, which requires both an application OAuth token pair (for Ares itself), plus a per-user account (the one users use to access their private data on Dropbox).  There are a variety of possible 
