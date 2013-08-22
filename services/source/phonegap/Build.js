@@ -119,6 +119,7 @@ enyo.kind({
 		var err = new Error(message + " (" + inError.toString() + ")");
 		err.html = html;
 		err.text = text;
+		err.status = response.status;		
 		next(err);
 	},
 
@@ -189,7 +190,6 @@ enyo.kind({
 			if (err) {
 				self._getToken(function(err) {
 					if (err) {
-						self.doLoginFailed({id: self.config.id});
 						next(err);
 					} else {
 						self.getUserData(next);
