@@ -1,4 +1,3 @@
-/* global ares */
 enyo.kind({
 	name: "Ares.SignInErrorPopup",
 	kind: "Ares.ErrorPopup", 

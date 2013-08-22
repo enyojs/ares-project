@@ -150,8 +150,7 @@ enyo.kind({
 	events: {
 		onLoginFailed: "",
 		onError: "",
-		onConfigure: "",
-		onRegisterMe: "",
+		onConfigure: ""
 	},
 	components: [{
 			kind: "enyo.Scroller",
@@ -196,7 +195,6 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		this.doRegisterMe({name:"phonegapBuild", reference:this});
 		this.createAllDrawers();
 	},
 
