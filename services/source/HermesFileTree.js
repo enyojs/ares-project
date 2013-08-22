@@ -1226,7 +1226,7 @@ enyo.kind({
 		waypoints.push(track);
 		track.followNodePath(nodes, waypoints, next);
 	},
-	/* @public */
+	/* @private */
 	checkedPath: function(path) {
 		var illegal = /[<>\/\\!?@#\$%^&\*,]+/i;
 
