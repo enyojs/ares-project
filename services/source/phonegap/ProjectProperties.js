@@ -144,10 +144,10 @@ enyo.kind({
 	kind: "Ares.ProjectProperties",
 	debug: false,
 	published: {
-		config: {}, 
-		showAdvancedConfiguration: true
+		config: {}
 	},
 	events: {
+		onError: "",
 		onConfigure: ""
 	},
 	components: [{
@@ -157,8 +157,11 @@ enyo.kind({
 			components: [{
 					kind: "FittableRows",
 					components: [
+						{content: "Sign-in is required", name: "signInErrorMsg", classes: "ares-project-properties-sign-in-error-msg"}, 
+						{content: "Looking for Phonegap account data ...", name: "waitingForSignIn", classes: "ares-project-properties-sign-in-error-msg"},
 						{
 							classes: "ares-row ares-align-left",
+							name: "appIdRow",
 							components: [
 								{tag: "label", classes: "ares-fixed-label ares-small-label", content: "PhoneGap App ID"}, 
 								{
@@ -348,9 +351,10 @@ enyo.kind({
 	/**
 	 * @protected
 	 */
-	refresh: function (inSender, inValue) {		
+	refresh: function (inSender, inValue) {
 		this.trace("sender:", inSender, "value:", inValue);		
 		var provider = Phonegap.ProjectProperties.getProvider();
+		this.showErrorMsg("waitingSignIn");
 		provider.authorize(enyo.bind(this, this.loadKeys));
 	},
 
@@ -363,17 +367,45 @@ enyo.kind({
 			id: 'phonegap'
 		});
 	},
+	/**
+	 * Display the content of the top row in the Phonegap Build panel according 
+	 * to the Phonegap authentification status.
+	 * 
+	 * @param  {String} authStatus can have as a value [userDataRecieved, signInError, waitingSignIn]
+	 * @private.
+	 */
+	showErrorMsg: function(authStatus) {
+		
+		if(authStatus === "userDataRecieved") {
+			this.$.appIdRow.show();
+			this.$.signInErrorMsg.hide();
+			this.$.waitingForSignIn.hide();
+		} else{
+			 if (authStatus === "signInError") {
+						this.$.signInErrorMsg.show();
+						this.$.appIdRow.hide();
+						this.$.waitingForSignIn.hide();
+			} else if (authStatus === "waitingSignIn"){
+				this.$.signInErrorMsg.hide();
+				this.$.appIdRow.hide();
+				this.$.waitingForSignIn.show();
+
+			} 
+		}		
+	},
 
 	/**
 	 * @protected
 	 */
-	loadKeys: function (err) {
-	
+	loadKeys: function (err) {	
 		this.trace("err:", err);
 	
 		if (err) {
-			this.warn("err:", err);
+			//this.warn("err:", err);
+			this.showErrorMsg("signInError");
+			this.doError({msg: err.toString(), err: err});
 		} else {
+			this.showErrorMsg("userDataRecieved");
 			var provider = Phonegap.ProjectProperties.getProvider();
 					
 			enyo.forEach(this.platformDrawers, function (target) {

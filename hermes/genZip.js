@@ -92,7 +92,7 @@ function GenZip(config, next) {
 	// - 'application/json' => req.body
 	// - 'application/x-www-form-urlencoded' => req.body
 	// - 'multipart/form-data' => req.body.<field>[], req.body.file[]
-	this.uploadDir = temp.path({prefix: 'com.palm.ares.hermes.genZip'}) + '.d';
+	this.uploadDir = temp.path({prefix: 'com.enyojs.ares.services.genZip'}) + '.d';
 	fs.mkdirSync(this.uploadDir);
 	app.use(express.bodyParser({keepExtensions: true, uploadDir: this.uploadDir}));
 
@@ -168,7 +168,7 @@ function GenZip(config, next) {
 
 		var destination = temp.mkdirSync({prefix: 'com.enyojs.ares.services.genZip'});
 		self.tools.generate(JSON.parse(req.body.sourceIds), JSON.parse(req.body.substitutions), destination, {
-			overwrite: req.param("overwrite")
+			overwrite: req.param("overwrite") === 'true'
 		}, function(inError, inData) {
 			if (inError) {
 				next(inError);
