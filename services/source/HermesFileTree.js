@@ -890,7 +890,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to copy:", this.selectedNode.file, "as", newName, inError);
-				this.showErrorPopup(this.$LS("Creating file '#{copyName}' as copy of '#{name}' failed: #{error}", {copyName: newName, name: this.selectedFile.name, error: inError.toString()}));
+				this.showErrorPopup(this.$LS("Creating file '#{copyName}' as copy of '#{name}' failed: #{error}", {copyName: newName, name: this.selectedNode.file.name, error: inError.toString()}));
 			});
 	},
 	/** @private */
@@ -920,8 +920,8 @@ enyo.kind({
 			return true;
 		}
 
-		this.trace("Renaming '", this.selectedFile, "' as '", newName, "'");
-		this.$.service.rename(this.selectedFile.id, newName)
+		this.trace("Renaming '", this.selectedNode.file, "' as '", newName, "'");
+		this.$.service.rename(this.selectedNode.file.id, newName)
 			.response(this, function(inSender, inNode) {
 				this.trace("inNode: ",inNode);
 				var parentNode = this.getParentNodeOfSelected(),
@@ -957,7 +957,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to rename:", this.selectedNode.file, "into", newName, inError);
-				this.showErrorPopup(this.$LS("Renaming file '#{oldName}' as '#{newName}' failed", {oldName: this.selectedFile.name, newName: newName}));
+				this.showErrorPopup(this.$LS("Renaming file '#{oldName}' as '#{newName}' failed", {oldName: this.selectedNode.file.name, newName: newName}));
 			});
 	},
 	/** @private */
@@ -1017,7 +1017,7 @@ enyo.kind({
 			})
 			.error(this, function(inSender, inError) {
 				this.warn("Unable to delete:", this.selectedNode.file, inError);
-				this.showErrorPopup(this.$LS("Deleting '#{name}' failed", {name: this.selectedFile.name}));
+				this.showErrorPopup(this.$LS("Deleting '#{name}' failed", {name: this.selectedNode.file.name}));
 			});
 	},
 	/** @private */
