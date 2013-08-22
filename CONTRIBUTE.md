@@ -69,7 +69,7 @@ Ares 2 is part of the EnyoJS ecosystem.  Before contributing code to Ares or Eny
 
 #### Jshint
 
-Ares 2 will be soon integrated with [Travis CI](https://travis-ci.org/) to automatically run [JSHint](http://www.jshint.com/) when pull-requests are submitted.
+Ares 2 is now integrated with [Travis CI](https://travis-ci.org/) to automatically run [JSHint](http://www.jshint.com/) when pull-requests are submitted.
 
 Before submitting a pull request, please follow these steps
 
