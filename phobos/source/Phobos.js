@@ -885,7 +885,10 @@ enyo.kind({
 	newcss: function(inSender, inEvent){
 		this.$.ace.insertAtEndOfFile(inSender);
 	},
-
+	/*
+	* replace the old css with edited css 
+	*
+	*/
 	replacecss: function(old_css, new_css){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.gotoLine(0,0);
