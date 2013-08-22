@@ -8,6 +8,7 @@ Hermes offers several services not available in a Web Browser through one (or se
 
 ## [Security](id:security)
 
+
 ### Authentication
 
 Each service may need an individual authentication to access a back-end in the cloud.  For example, PhoneGap Build (PGB) uses a simple per-user token that is provided as a query parameter with every request to the build service.  Another example is more complex example is Dropbox, which requires both an application OAuth token pair (for Ares itself), plus a per-user account (the one users use to access their private data on Dropbox).  There are a variety of possible 
@@ -19,6 +20,34 @@ The elements of the authentication token that are tight to the server (rather th
 The actual properties stored within each `"auth":{…}` are essentially service-specific.
 
 **NOTE:** The `localStorage` values are not encrypted.  This could be changed if proven to be useful.
+
+### Phonegap Account
+A user can be authentified in a Phonegap account in two possible ways :
+
+- Using and **Adobe ID**: the Adobe account (login+password)
+- Using a **Github ID** : the Github account (login+password)
+In order to run the Phonegap build service from Ares, the authentication must be done with the Adobe ID.
+So if the user has registered on the Phonegap account using Github account, these steps must be followed:
+ 
+1- Click on the upper right profile icon and select *Edit account*
+
+2- In the tab *Account details* click on *Connect an Adobe ID*
+
+3- If you have already an Adobe account, just use it to sign in otherwise, Click on the button *Create Adobe ID* to register for a new Adobe account.
+
+4- Now you can use the Adobe ID to connect to the Phonegap account in Ares.
+
+***Remarks***:
+ 
+- Due to a certain restriction on the edition of the Adobe account, a user can’t change the linked Adobe ID on his Phonegap account.
+
+- A user can unlink his Phonegap account from the Github account by following these steps: 
+
+1- The user must be authenticated in Github
+
+2- Open this page https://github.com/settings/applications 
+
+3- In the section *Authorized applications* click on *Revoke* button of the row *Phonegap:Build*.
 
 ## Filesystem services
 
