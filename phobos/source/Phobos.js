@@ -882,7 +882,7 @@ enyo.kind({
 	// Update the projectIndexer and notify watchers
 		this.reparseAction();
 		
-		data = {
+		var data = {
 				projectData: this.projectData,
 				fileIndexer: this.analysis
 			};

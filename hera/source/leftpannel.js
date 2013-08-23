@@ -140,7 +140,6 @@ enyo.kind({
 	
 	tap: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var item = inEvent.item;
 		var index = inEvent.index;
 		this.doUncheck();
 		this.highlight = index;	

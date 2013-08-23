@@ -141,7 +141,6 @@ enyo.kind({
 	updateBox: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
-		var s = "";
 		var tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
 		var outPut = this.className + " " + "{<br>" ;
 		var outString =  this.className + " " + "{\n" ;
@@ -225,7 +224,6 @@ enyo.kind({
 	*/
 	unitchange: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		console.log(inEvent.content);
 		this.unit = inEvent.content;
 		this.change();
 	},
@@ -261,6 +259,7 @@ enyo.kind({
 	dePuzzle: function(inSender,inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var j = 0;
+		var n =[];
 		this.file = inSender;
 		var line = inSender.split("\n");
 		for (var i=0; i < line.length; i++) {
@@ -269,7 +268,7 @@ enyo.kind({
 				this.declaration[j] = n[0];
 	
 				j++;
-				k = 0;
+			//	k = 0;
 				n = "";
 			}
 		}
@@ -287,6 +286,8 @@ enyo.kind({
 		var a = 0;
 		var s = "";
 		var c = inEvent.index;
+		var r = "";
+		var n = [];
 		this.reset();
 		n = (this.file.split("\n"));			// split the file up by lines
 
@@ -328,7 +329,7 @@ enyo.kind({
 		
 		n = (this.file.split("\n"));
 		for( j = 0;  j < n.length; j++){
-			if(n[j].indexOf(inSender) == 0 ){
+			if(n[j].indexOf(inSender) === 0 ){
 				old = old + n[j] + "\n";
 				for (var i = j + 1; i < n.length; i++) {
 					old = old + n[i] + "\n";

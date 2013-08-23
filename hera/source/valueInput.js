@@ -272,7 +272,6 @@ enyo.kind({
 	
 	input_picker: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var unit = this.unit;
 		this.misc_picker = inEvent.content;		
 		this.total();
 	},
@@ -390,7 +389,6 @@ enyo.kind({
 	inputx: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.x = inEvent.content;
-		console.log(this.x);
 		this.doTotalx(this.x);
 		
 	},
