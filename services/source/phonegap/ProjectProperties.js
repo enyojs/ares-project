@@ -27,7 +27,7 @@ enyo.kind({
 		commonDrawersContent: [
 			{
 				id: "buildOption",
-				name: "Build Option",
+				name: "Build Options",
 				type: "Drawer",
 				rows: [
 					{name: "autoGenerateXML", label: "Generate config.xml file when building", content: "", defaultValue: "true", type: "BuildOption"},
@@ -144,10 +144,10 @@ enyo.kind({
 	kind: "Ares.ProjectProperties",
 	debug: false,
 	published: {
-		config: {}, 
-		showAdvancedConfiguration: true
+		config: {}
 	},
 	events: {
+		onError: "",
 		onConfigure: ""
 	},
 	components: [{
@@ -157,16 +157,13 @@ enyo.kind({
 			components: [{
 					kind: "FittableRows",
 					components: [
+						{content: "Sign-in is required", name: "signInErrorMsg", classes: "ares-project-properties-sign-in-error-msg"}, 
+						{content: "Looking for Phonegap account data ...", name: "waitingForSignIn", classes: "ares-project-properties-sign-in-error-msg"},
 						{
 							classes: "ares-row ares-align-left",
+							name: "appIdRow",
 							components: [
-								{tag: "label", classes: "ares-fixed-label ares-small-label", content: "PhoneGap App ID"}, 
-								{
-									kind: "onyx.InputDecorator",
-									components: [
-										{kind: "Input", name: "pgConfId", attributes: { title: "unique identifier, assigned by build.phonegap.com"}}
-									]
-								}, 
+								{kind: "Phonegap.ProjectProperties.AppId", name: "appIdSelector"}							
 							]
 						}, 
 						{name: "BuildOptionPanel", kind: "FittableRows"},
@@ -241,7 +238,6 @@ enyo.kind({
 		 * @param {Array} dwrContent Array declared in {Phonegap.UIConfiguration}.
 		 */
 		function initialiseDrawer(dwr, dwrContent) {
-
 			var getPanel = function (inRowName){
 				if (inRowName === "autoGenerateXML") {					
 					return this.$.targetsRows;
@@ -303,7 +299,7 @@ enyo.kind({
 		this.trace("Project config:", config);
 
 		config.enabled = true;
-		this.$.pgConfId.setValue(config.appId || '');
+		this.$.appIdSelector.setSelectedAppId(config.appId || '');		
 		config.targets = config.targets || {};
 
 
@@ -328,7 +324,7 @@ enyo.kind({
 		config.splashScreen = {};
 		config.targets = {};
 
-		config.appId = this.$.pgConfId.getValue();
+		config.appId = this.$.appIdSelector.getSelectedAppId();
 		
 		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {
 			if (drawer.id !== "applicationPermissions" && drawer.id !== "buildOption") {
@@ -348,10 +344,11 @@ enyo.kind({
 	/**
 	 * @protected
 	 */
-	refresh: function (inSender, inValue) {		
+	refresh: function (inSender, inValue) {
 		this.trace("sender:", inSender, "value:", inValue);		
-		var provider = Phonegap.ProjectProperties.getProvider();
-		provider.authorize(enyo.bind(this, this.loadKeys));
+		var provider = Phonegap.ProjectProperties.getProvider();		
+		this.showErrorMsg("waitingSignIn");
+		provider.authorize(enyo.bind(this, this.getUserData));
 	},
 
 	/**
@@ -363,20 +360,46 @@ enyo.kind({
 			id: 'phonegap'
 		});
 	},
+	/**
+	 * Display the content of the top row in the Phonegap Build panel according 
+	 * to the Phonegap authentification status.
+	 * 
+	 * @param  {String} authStatus can have as a value [userDataRecieved, signInError, waitingSignIn]
+	 * @private.
+	 */
+	showErrorMsg: function(authStatus) {
+		
+		if(authStatus === "userDataRecieved") {
+			this.$.appIdRow.show();
+			this.$.signInErrorMsg.hide();
+			this.$.waitingForSignIn.hide();
+		} else{
+			 if (authStatus === "signInError") {
+						this.$.signInErrorMsg.show();
+						this.$.appIdRow.hide();
+						this.$.waitingForSignIn.hide();
+			} else if (authStatus === "waitingSignIn"){
+				this.$.signInErrorMsg.hide();
+				this.$.appIdRow.hide();
+				this.$.waitingForSignIn.show();
+
+			} 
+		}		
+	},
 
 	/**
 	 * @protected
 	 */
-	loadKeys: function (err) {
-	
-		this.trace("err:", err);
-	
+	getUserData: function (err, userData) {
 		if (err) {
-			this.warn("err:", err);
-		} else {
-			var provider = Phonegap.ProjectProperties.getProvider();
-					
+			//this.warn("err:", err);
+			this.showErrorMsg("signInError");
+			this.doError({msg: err.toString(), err: err});
+		} else {			
+			this.showErrorMsg("userDataRecieved");
+			var provider = Phonegap.ProjectProperties.getProvider();					
 			enyo.forEach(this.platformDrawers, function (target) {
+				this.$.appIdSelector.setUserData(userData);
 				this.$.targetsRows.$[target.id].loadKeys(provider);
 			}, this);
 		}
@@ -484,6 +507,83 @@ enyo.kind({
 
 });
 
+
+enyo.kind({
+	name: "Phonegap.ProjectProperties.AppId",
+	kind: "FittableColumns",
+	debug: false,
+	published: {
+		userData: undefined,
+		selectedAppId: undefined,
+		selectedTitle: undefined
+	},
+
+	components: [
+		{content: "AppId",	classes: "ares-project-properties-appid-id"},
+		{
+			kind: "onyx.PickerDecorator",
+		
+			components: [
+				{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
+				{kind: "onyx.Picker", name: "AppIdList",published: {appObject: undefined}, onSelect: "updateSelectedAppId"}
+			]
+		},
+		{content: "Application name:",	classes: "ares-project-properties-appid-title"},
+		{name: "ApplicationTitle", content:""}
+	],
+
+	/**@private*/
+	userDataChanged: function(){
+		
+		this.clearPickerContent();
+				
+		if (this.userData.user.apps.all.length === 0){
+			this.$.AppIdList.createComponent({content: "New Application", active: true});
+			this.setSelectedAppId('');
+		} else {
+			this.$.AppIdList.createComponent({content: "New Application", active: false});
+			enyo.forEach(this.userData.user.apps.all, 
+				function (inApp) {
+					var itemState = inApp.id === this.selectedAppId ? true : false;
+					if (itemState) {
+						this.setSelectedTitle(inApp.title);
+					}
+					this.$.AppIdList.createComponent({content: inApp.id, published: {applicationObject: inApp} , active: itemState});			
+					this.$.AppIdList.render();								
+				}, this);
+		}		
+	}, 
+
+	/**@private*/
+	updateSelectedAppId: function (inSender, inValue) {	
+		this.setSelectedTitle(inValue && inValue.selected.published.applicationObject&& inValue.selected.published.applicationObject.title || "");
+		if (inValue.content === "New Application") {
+			this.setSelectedAppId("");
+		} else {
+			this.setSelectedAppId(inValue.content);
+		}				
+	},
+
+	/**@private*/
+	clearPickerContent: function(){
+		
+		for (var key in this.$.AppIdList.$) {
+					
+			if (this.$.AppIdList.$[key].kind === "onyx.MenuItem"){							
+				this.$.AppIdList.$[key].destroy();
+			}		
+		}
+		this.$.AppIdList.render();
+	},
+
+	/**@private*/
+	selectedTitleChanged: function(){
+		this.$.ApplicationTitle.setContent(this.selectedTitle);
+		this.$.ApplicationTitle.render();
+	}
+
+});
+
 /**
  * This widget is aware of the differences between the Phoneap Build targets.
  */
@@ -515,6 +615,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.drawerNameChanged();
 	},
+	/**@public*/
 	setProjectConfig: function (config) {
 		this.trace("id:", this.targetId, "config:", config);
 
@@ -532,6 +633,7 @@ enyo.kind({
 			}
 		}, this);
 	},
+	/**@public*/
 	getProjectConfig: function (config) {
 		if (this.enabled) {
 			config.targets[this.targetId] = {};

@@ -24,9 +24,12 @@ enyo.kind({
 	folderId: null,
 	fileId: null,
 	debug: false,
-	create: function() {
+	
+	constructor: function(){
 		this.inherited(arguments);
+		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 	},
+
 	/**
 	 * Initializer: load data from project.json file
 	 * @param {Object} inLocation gives information to access project.json
@@ -34,7 +37,6 @@ enyo.kind({
 	 * @param {Object} next is a CommonJS callback
 	 */
 	init: function(inLocation, next) {
-		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.data = null;
 		this.service = inLocation.service;
 		this.folderId = inLocation.folderId;
