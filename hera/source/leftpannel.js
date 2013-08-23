@@ -244,6 +244,7 @@ enyo.kind({
 		{name: "padding", input:"picker"},
 		{name: "height", input:"picker"},
 		{name: "box-shadow", input:"xyz"},
+		{name: "border-radius", input:"xy"},
 	]
 	
 });
