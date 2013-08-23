@@ -17,6 +17,7 @@ enyo.kind({
 	classes: "onyx",
 	fit: true,
 	debug: false,
+	//noDefer: true, //FIXME: does not work with statics:{}
 	componentsRegistry: {},
 	components: [
 		{
