@@ -16,6 +16,7 @@ var fs = require("fs"),
     async = require("async"),
     http = require("http"),
     client = require("phonegap-build-api"),
+    copyFile = require('./lib/copyFile'),
     BdBase = require("./lib/bdBase"),
     HttpError = require("./lib/httpError");
 
@@ -302,6 +303,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		this.store.bind(this, req, res),
 		_parse.bind(this),
 		this.minify.bind(this, req, res),
+		_postMinify.bind(this, req),
 		this.zip.bind(this, req, res),
 		_upload.bind(this),
 		this.returnBody.bind(this, req, res),
@@ -344,6 +346,15 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		//WARNING: enabling this trace shows-up the signing keys passwords
 		log.silly("build#_parse(): appData:", appData);
 		next();
+	}
+
+	function _postMinify(req, next) {
+		log.info("build#_postMinify()");
+		if (req.appDir.zipRoot !== req.appDir.source) {
+			copyFile(path.join(req.appDir.source, "config.xml"), path.join(req.appDir.zipRoot, "config.xml"), next);
+		} else {
+			next();
+		}
 	}
 
 	function _upload(next) {
