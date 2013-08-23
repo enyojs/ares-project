@@ -211,7 +211,6 @@ enyo.kind({
 	toggleService: function(inSender, inEvent) {
 		var serviceId = inEvent.originator.serviceId,
 		    checked = inEvent.originator.checked,
-		    config = this.config && this.config.providers && this.config.providers[serviceId];
 		this.trace("serviceId:", serviceId, 'checked:', checked);
 		this.config.providers[serviceId].enabled = checked;
 		this.showService(serviceId);
