@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* global require, __dirname, console, process */
+/* jshint node:true */
 /**
  *  ARES IDE server
  */
