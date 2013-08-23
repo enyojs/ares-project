@@ -1,4 +1,4 @@
-/* global require, console, process, module, __dirname, __filename */
+/* jshint node:true */
 /**
  * fsLocal.js -- Ares FileSystem (fs) provider, using local files.
  * 
