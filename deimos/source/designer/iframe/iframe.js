@@ -152,6 +152,9 @@ enyo.kind({
 			case "requestPositionValue":
 				this.requestPositionValue(msg.val);
 				break;
+			case "serializerOptions":
+				this.$.serializer.setSerializerOptions(msg.val);
+				break;
 			default:
 				enyo.warn("Deimos iframe received unknown message op:", msg);
 				break;
@@ -407,7 +410,7 @@ enyo.kind({
 		} catch(error) {
 			errMsg = "Unable to render kind '" + inKind.name + "':" + error.message;
 			this.error(errMsg, error.stack);
-			this.sendMessage({op: "error", val: {msg: errMsg, details: error.stack}});
+			this.sendMessage({op: "error", val: {msg: errMsg, err: {stack: error.stack}}});
 			this.sendMessage({op: "reloadNeeded"});
 		}
 	},
@@ -1507,27 +1510,31 @@ enyo.kind({
 		this.renderSelectHighlight();
 	},
 	resizeWidth: function(inDelta) {
-		if (this.selectionDragAnchors.left) {
-			this.selection.applyStyle("left", (this.intialDragBounds.left + inDelta) + "px");
-		} else if (this.selectionDragAnchors.right) {
-			this.selection.applyStyle("right", (this.intialDragBounds.right - inDelta) + "px");
-		}
-		if (this.selectionDragAnchors.width) {
-			this.selection.applyStyle("width", (
-				(this.$resizeHandle.sides.left) ? this.intialDragBounds.width - inDelta : this.intialDragBounds.width + inDelta
-			) + "px");
+		if (this.selectionDragAnchors) {
+			if (this.selectionDragAnchors.left) {
+				this.selection.applyStyle("left", (this.intialDragBounds.left + inDelta) + "px");
+			} else if (this.selectionDragAnchors.right) {
+				this.selection.applyStyle("right", (this.intialDragBounds.right - inDelta) + "px");
+			}
+			if (this.selectionDragAnchors.width) {
+				this.selection.applyStyle("width", (
+					(this.$resizeHandle.sides.left) ? this.intialDragBounds.width - inDelta : this.intialDragBounds.width + inDelta
+				) + "px");
+			}
 		}
 	},
 	resizeHeight: function(inDelta) {
-		if (this.selectionDragAnchors.top) {
-			this.selection.applyStyle("top", (this.intialDragBounds.top + inDelta) + "px");
-		} else if (this.selectionDragAnchors.bottom) {
-			this.selection.applyStyle("bottom", (this.intialDragBounds.bottom - inDelta) + "px");
-		}
-		if (this.selectionDragAnchors.height) {
-			this.selection.applyStyle("height", (
-				(this.$resizeHandle.sides.top) ? this.intialDragBounds.height - inDelta : this.intialDragBounds.height + inDelta
-			) + "px");
+		if (this.selectionDragAnchors) {
+			if (this.selectionDragAnchors.top) {
+				this.selection.applyStyle("top", (this.intialDragBounds.top + inDelta) + "px");
+			} else if (this.selectionDragAnchors.bottom) {
+				this.selection.applyStyle("bottom", (this.intialDragBounds.bottom - inDelta) + "px");
+			}
+			if (this.selectionDragAnchors.height) {
+				this.selection.applyStyle("height", (
+					(this.$resizeHandle.sides.top) ? this.intialDragBounds.height - inDelta : this.intialDragBounds.height + inDelta
+				) + "px");
+			}
 		}
 	},
 	getDragAnchors: function(inResizeComponent, inHandle) {
