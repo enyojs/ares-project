@@ -11,6 +11,12 @@ enyo.kind({
 		onUnitChange: "",
 		onRegisterMe: "",
 	},
+	handlers: {
+		onTotalx: "inputx",
+		onTotaly: "inputy",
+		onTotalz: "inputz",
+	},
+	
 	components: [
 		{kind: "Panels", arrangerKind: "CardArranger",  style: "border: solid black thin;", classes: "enyo-fit",	components: [
 			{name: "blank", kind: "Control", showing: true, components: [
@@ -46,9 +52,21 @@ enyo.kind({
 				{style: "height: 5px"},
 				{style: "height: 15px;  text-align: center; ", content: "X and Y Inputs" },
 				{style: "height: 5px"},
-				{ fit: true, content:"Inputs xy"},
-				{kind: "onyx.PickerDecorator", components: [		
-			]}
+				{kind: "FittableColumns", fit: true, classes:"left-input-col",  components: [
+					{kind: "xinput"},
+					{kind: "yinput"},
+					{kind: "onyx.PickerDecorator", style: " width: 40px;", components: [
+						{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
+						{kind: "onyx.Picker", onSelect: "unit_type", components: [
+							{content: "px", active: true},
+							{content: "cm"},
+							{content: "em"},
+							{content: "ern"},
+							{content: "rem"},
+							{content: "%"}
+						]}
+					]},
+				]}
 		]}, // xy
 			
 			{name: "xyz", kind: "Control", showing: false, classes:"left-input-box", components: [
@@ -57,21 +75,11 @@ enyo.kind({
 				{style: "height: 5px"},
 				{tag: "br"},
 				
-					{kind: "FittableColumns", fit: true, classes:"left-input-col",  components: [
-					{style: "text-align: right;", content:"X Y & Z offset"},
+				{kind: "FittableColumns", fit: true, classes:"left-input-col",  components: [
 					{tag:"span"	, content:"  "},
-					{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [						
-						{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
-						{name: "Inputx", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputx"},
-					]},
-					{kind: "onyx.PickerDecorator", components: [						
-						{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
-						{name: "Inputy", kind: "onyx.Picker", onSelect: "inputy"},
-					]},
-					{kind: "onyx.PickerDecorator", components: [						
-						{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
-						{name: "Inputz", kind: "onyx.Picker", onSelect: "inputz"},
-					]},	
+					{kind: "xinput"},
+					{kind: "yinput"},
+					{kind: "zinput"},
 					{kind: "onyx.PickerDecorator", style: " width: 40px;", components: [
 						{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
 						{kind: "onyx.Picker", onSelect: "unit_type", components: [
@@ -104,6 +112,7 @@ enyo.kind({
 						{style: "min-width: 80px; font-size: 10px;"},
 						{name: "Input", kind: "onyx.Picker", onSelect: "input_picker"},
 					]},
+				//{kind: "xinput"},
 				
 				{kind: "onyx.PickerDecorator", style: "width: 40px;", components: [
 					{style: "min-width: 40px; font-size: 10px;"},
@@ -129,7 +138,6 @@ enyo.kind({
 	xyz: 4,
 	picker: 5,	
 	
-	debug: false,
 
 	create: function() {
 		this.inherited(arguments);
@@ -144,9 +152,9 @@ enyo.kind({
 		var step = 1;
 		for (var j = 0; j < 2000; j+= step) {
 			if(j <= 9){
-				this.$.Inputx.createComponent({content: j, active: !j});
-				this.$.Inputy.createComponent({content: j, active: !j});
-				this.$.Inputz.createComponent({content: j, active: !j});
+			//	this.$.Inputx.createComponent({content: j, active: !j});
+			//	this.$.Inputy.createComponent({content: j, active: !j});
+			//	this.$.Inputz.createComponent({content: j, active: !j});
 				this.$.Input.createComponent({content: j, active: !j});
 			}
 			if(j >= 10 && j <= 40){
@@ -278,19 +286,19 @@ enyo.kind({
 	
 	inputx: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		this.x = inEvent.content;
+		this.x = inEvent;
 		this.total();
 	},
 	
 	inputy: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		this.y = inEvent.content ;
+		this.y = inEvent;
 		this.total();
 	},
 	
 	inputz: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		this.z = inEvent.content;
+		this.z = inEvent;
 		this.total();
 	},
 	
@@ -355,3 +363,98 @@ enyo.kind({
 	}
 	
 });
+
+enyo.kind({
+	name: "xinput",
+	kind: "Control",
+	published: {
+	},
+	events: {
+		onTotalx: ""
+	},
+	components: [
+		{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [						
+			{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
+			{name: "Inputx", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputx"},
+		]},
+	],
+	create: function() {
+		this.inherited(arguments);
+		ares.setupTraceLogger(this);
+		// initialization code goes here
+		var step = 1;
+		for (var j = 0; j < 11; j+= step) {
+			this.$.Inputx.createComponent({content: j, active: !j});
+		}
+	},
+	inputx: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.x = inEvent.content;
+		console.log(this.x);
+		this.doTotalx(this.x);
+		
+	},
+});
+
+
+enyo.kind({
+	name: "yinput",
+	kind: "Control",
+	published: {
+	},
+	events: {
+		onTotaly: ""
+	},
+	components: [
+		{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [						
+			{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
+			{name: "Inputx", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputy"},
+		]},
+	],
+	create: function() {
+		this.inherited(arguments);
+		ares.setupTraceLogger(this);
+		// initialization code goes here
+		var step = 1;
+		for (var j = 0; j < 11; j+= step) {
+			this.$.Inputx.createComponent({content: j, active: !j});
+		}
+	},
+	inputy: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.y = inEvent.content;
+		this.doTotaly(this.y);
+	},
+});
+
+
+enyo.kind({
+	name: "zinput",
+	kind: "Control",
+	published: {
+	},
+	events: {
+		onTotalz: ""
+	},
+	components: [
+		{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [						
+			{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
+			{name: "Inputz", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputz"},
+		]},
+	],
+	create: function() {
+		this.inherited(arguments);
+		ares.setupTraceLogger(this);
+		// initialization code goes here
+		var step = 1;
+		for (var j = 0; j < 11; j+= step) {
+			this.$.Inputz.createComponent({content: j, active: !j});
+		}
+	},
+	inputz: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.z = inEvent.content;
+		this.doTotalz(this.z);
+	},
+});
+
