@@ -707,6 +707,13 @@ enyo.kind({
 		}
 		return true; // Stop the propagation of the event
 	},
+	editorUserSyntaxError:function(){
+		var userSyntaxError = [];
+		
+		userSyntaxError = this.$.autocomplete.ace.editor.session.$annotations.length;
+		
+	   return	userSyntaxError;
+	},
 	cursorChanged: function(inSender, inEvent) {
 		var position = this.$.ace.getCursorPositionInDocument();
 		this.trace(inSender.id, " ", inEvent.type, " ", enyo.json.stringify(position));
