@@ -242,7 +242,6 @@ enyo.kind({
 		this.z = null;	
 		
 		this.$.outPut = null;
-		outString = "";		
 		this.$.property = null;	
 		this.mode = "rest";
 		this.$.outputBox.applyStyle("color", "#FFFFFF");
