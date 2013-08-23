@@ -250,10 +250,12 @@ enyo.kind({
 			service.createFile(folderId, "package.js", "enyo.depends(\n);\n")
 				.response(this, function(inRequest, inFsNode) {
 					this.trace("package.js inFsNode[0]:", inFsNode[0]);
-					if (!addSources)
+					if (!addSources){
 						this.projectReady(null, inEvent);
-					else
+					}
+					else{
 						this.projectRefresh();
+					}
 				})
 				.error(this, function(inRequest, inError) {
 					this.warn("inRequest:", inRequest, "inError:", inError);
