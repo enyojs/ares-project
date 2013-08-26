@@ -202,6 +202,9 @@ enyo.kind({
 		if (inEvent.input === "picker"){
 			this.$.valueinput.showpicker();
 		}
+		if (inEvent.input === "lrc"){
+			this.$.valueinput.showlrc();
+		}
 		this.updateBox();
 	},
 

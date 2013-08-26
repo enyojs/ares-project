@@ -128,6 +128,8 @@ enyo.kind({
 			]}
 		]},	// picker
 			
+			{kind: "lrc"}
+			
 		]}
 	],
 	
@@ -137,7 +139,7 @@ enyo.kind({
 	xy: 3,
 	xyz: 4,
 	picker: 5,	
-	
+	lrc: 6,
 
 	create: function() {
 		this.inherited(arguments);
@@ -268,6 +270,12 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.clear();
 		this.$.panels.setIndex(this.picker);
+	},
+	
+	showlrc: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.clear();
+		this.$.panels.setIndex(this.lrc);		
 	},
 	
 	input_picker: function(inSender, inEvent){
@@ -456,3 +464,39 @@ enyo.kind({
 	},
 });
 
+enyo.kind({
+	name: "lrc",
+	kind: "Control",
+	published: {
+	},
+	events: {
+		onValueUpdate: "",
+	},
+	components: [
+		{kind: "onyx.PickerDecorator", components: [
+			{kind: "onyx.PickerButton", content: "Pick One...", style: "width: 200px"},
+			{kind: "onyx.Picker", onSelect: "itemSelected", components: [
+				{content: "left"},
+				{content: "right"},
+				{content: "justify"},
+				{content: "start"},
+				{content: "end"},
+				{content: "match-parent"},
+				{content: "start end"},
+				{content: "'.'"},
+				{content: "start '.'"},
+				{content: "'.' start"},
+				{content: "inherit"},
+			]}
+		]},
+	],
+	create: function() {
+		this.inherited(arguments);
+		ares.setupTraceLogger(this);
+		// initialization code goes here
+	},
+	itemSelected: function(inSender, inEvent){
+		this.valueout = "	" + inEvent.content + ";";
+		this.doValueUpdate();
+	}
+});
