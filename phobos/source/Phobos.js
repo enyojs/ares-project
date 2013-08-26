@@ -76,7 +76,7 @@ enyo.kind({
 		if (inDocData) {
 			inDocData.setEdited(false);		// TODO: The user may have switched to another file
 		}
-		if (this.docData !== inDocData) {
+		if (this.docData === inDocData) {
 			this.reparseAction();
 		}
 	},
