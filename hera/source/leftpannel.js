@@ -243,8 +243,10 @@ enyo.kind({
 		{name: "width", input:"picker"},
 		{name: "padding", input:"picker"},
 		{name: "height", input:"picker"},
+		{name: "border-color", input:"color"},
 		{name: "box-shadow", input:"xyz"},
 		{name: "border-radius", input:"xy"},
+		
 	]
 	
 });
