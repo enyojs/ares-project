@@ -16,7 +16,7 @@
 			"respawn": false
 		},
 		{
-			"active":true,
+			"active":false,
 			"id":"dropbox",
 			"icon":"$harmonia/images/providers/dropbox.com-32x32.png",
 			"name":"Dropbox",

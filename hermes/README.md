@@ -20,6 +20,29 @@ The actual properties stored within each `"auth":{…}` are essentially service-
 
 **NOTE:** The `localStorage` values are not encrypted.  This could be changed if proven to be useful.
 
+### Phonegap Build Account
+
+A user can be authentified in a Phonegap account in two possible ways :
+
+- Using and **Adobe ID**: the Adobe account (login+password)
+- Using a **Github ID** : the Github account (login+password)
+
+In order to run the Phonegap build service from Ares, the authentication must be done with the Adobe ID.  So if the user has registered on the Phonegap account using Github account, these steps must be followed:
+ 
+1. Click on the upper right profile icon and select *Edit account*
+1. In the tab *Account details* click on *Connect an Adobe ID*
+1. If you have already an Adobe account, just use it to sign in otherwise, Click on the button *Create Adobe ID* to register for a new Adobe account.
+1. Now you can use the Adobe ID to connect to the Phonegap account in Ares.
+
+**NOTE**:
+ 
+- Due to a certain restriction on the edition of the Adobe account, a user can’t change the linked Adobe ID on his Phonegap account.
+- A user can unlink his Phonegap account from the Github account by following these steps: 
+
+	1. The user must be authenticated in Github
+	1. Open this page https://github.com/settings/applications 
+	1. In the section *Authorized applications* click on *Revoke* button of the row *Phonegap:Build*.
+
 ## Filesystem services
 
 ### Protocol

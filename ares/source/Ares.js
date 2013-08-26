@@ -50,15 +50,21 @@ enyo.kind({
 			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
 		]},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
+		{name: "signInErrorPopup", kind: "Ares.SignInErrorPopup", msg: "unknown error", details: ""},
 		{kind: "ServiceRegistry"},
 		{kind: "Ares.PackageMunger", name: "packageMunger"}
 	],
 	handlers: {
+		onCssDocument: "cssDocument",
+		onCloseCss: "closecss", 
+		onNewcss: "newCss", 
+		onReplacecss: "replacecss",
 		onReloadServices: "handleReloadServices",
 		onUpdateAuth: "handleUpdateAuth",
 		onShowWaitPopup: "showWaitPopup",
 		onHideWaitPopup: "hideWaitPopup",
 		onError: "showError",
+		onSignInError: "showAccountConfiguration",
 		onTreeChanged: "_treeChanged",
 		onChangingNode: "_nodeChanging",
 		onSaveDocument: "saveDocument", 
@@ -85,6 +91,7 @@ enyo.kind({
 	designerPanelsIndex: 2,
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
+	heraViewIndex:2,
 	projectListWidth: 300,
 	isProjectView: true,
 	create: function() {
@@ -488,12 +495,24 @@ enyo.kind({
 	},
 	showError: function(inSender, inEvent) {
 		this.trace("event:", inEvent, "from sender:", inSender);
-		this.hideWaitPopup();
-		this.showErrorPopup(inEvent);
+		this.hideWaitPopup();		
+		if (inEvent && inEvent.err.status === 401){
+			this.showSignInErrorPopup(inEvent);
+		} else {
+			this.showErrorPopup(inEvent);
+		}
+		
 		return true; //Stop event propagation
 	},
 	showErrorPopup : function(inEvent) {
 		this.$.errorPopup.raise(inEvent);
+	},
+	showSignInErrorPopup : function(inEvent) {
+		this.$.signInErrorPopup.raise(inEvent);
+	},
+	showAccountConfiguration: function() {
+		this.componentsRegistry["accountsConfigurator"].show();		
+		this.$.signInErrorPopup.hide();		
 	},
 	/**
 	 * Event handler for user-initiated file or folder changes
@@ -565,13 +584,14 @@ enyo.kind({
 	 * 
 	 * @private
 	 * @param {Object} inSender
-	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, codeEditor]
+	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, codeEditor, accountsConfigurator, ...]
 	 */
 	_registerComponent: function(inSender, inEvent) {
-		if(this.componentsRegistry[inEvent.name] === undefined){
+		var ref = this.componentsRegistry[inEvent.name];
+		if (ref === undefined || ref === inEvent.reference){
 			this.componentsRegistry[inEvent.name] = inEvent.reference;
-		}else {
-			this.error("Component is already registred: ", inEvent.name);
+		} else {
+			throw new Error("Component is already registred: '" + inEvent.name + "'");
 		}
 	},
 	stopEvent: function(){
@@ -586,6 +606,37 @@ enyo.kind({
 			}
 		},
 		instance: null
+	},
+	/*
+	* open hera
+	* @protected
+	*/
+	cssDocument: function(inSender, inEvent){
+		this.componentsRegistry.hera.cssload(inEvent);
+		this.componentsRegistry.codeEditor.$.panels.setIndex(this.heraViewIndex);
+		this.activeDocument.setCurrentIF('hera');
+	},
+	/*
+	* close hera
+	* @protected
+	*/
+	closecss: function(inSender, inEvent){
+		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
+		this.activeDocument.setCurrentIF('code');
+	},
+	/*
+	* write the new css to the end of the file
+	* @protected
+	*/
+	newCss: function(inSender, inEvent){
+		this.componentsRegistry.phobos.newcss(this.componentsRegistry.hera.out);
+	},
+	/*
+	* replace the old data in the css file with the new css rules
+	* @protected
+	*/
+	replacecss: function(inSender, inEvent){
+		this.componentsRegistry.phobos.replacecss(this.componentsRegistry.hera.old, this.componentsRegistry.hera.out);
 	}
 });
 
