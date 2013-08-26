@@ -433,7 +433,6 @@ enyo.kind({
 	},
 });
 
-
 enyo.kind({
 	name: "zinput",
 	kind: "Control",
@@ -473,7 +472,9 @@ enyo.kind({
 		onValueUpdate: "",
 	},
 	components: [
-		{kind: "onyx.PickerDecorator", components: [
+		{style: "height: 15px;  text-align: center; ", content: "Left Right Center ..... " },
+		{style: "height: 15px"},
+		{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [
 			{kind: "onyx.PickerButton", content: "Pick One...", style: "width: 200px"},
 			{kind: "onyx.Picker", onSelect: "itemSelected", components: [
 				{content: "left"},
