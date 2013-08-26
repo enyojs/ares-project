@@ -75,7 +75,6 @@ enyo.kind({
 		onUndo: "designerUndo", 
 		onRedo: "designerRedo",
 		onSwitchFile: "switchFile",
-		onSave: "bounceSave",
 		onDesign: "bounceDesign",
 		onNewKind: "bounceNew",
 		onCloseFileRequest: "bounceCloseFileRequest",
@@ -183,7 +182,10 @@ enyo.kind({
 			if (err) {
 				self.componentsRegistry.phobos.saveFailed(err);
 			} else {
-				self.componentsRegistry.phobos.saveComplete();
+				var fileDataId = Ares.Workspace.files.computeId(inEvent.file);
+				var fileData = Ares.Workspace.files.get(fileDataId);
+				self.componentsRegistry.phobos.saveComplete(fileData);
+				// FIXME: ENYO-2976
 				self.componentsRegistry.deimos.saveComplete();
 			}
 		});
@@ -423,10 +425,6 @@ enyo.kind({
 			this.componentsRegistry.codeEditor.manageConrols(true);
 		}
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
-	},
-	// FIXME: This trampoline function probably needs some refactoring
-	bounceSave: function(inSender, inEvent) {
-		this.componentsRegistry.phobos.saveDocAction(inSender, inEvent);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
