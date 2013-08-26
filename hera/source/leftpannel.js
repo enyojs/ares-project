@@ -164,6 +164,7 @@ enyo.kind({
 		{name: "Helvetica ", input: "font"},
 		{name: "Monospace", input: "font"},
 		{name: "Lucida Sans Unicode", input:"font"},
+		{name: "text-align", input:"lrc"}
 	]
 	
 });
