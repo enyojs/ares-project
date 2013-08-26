@@ -39,12 +39,7 @@ enyo.kind({
 		]},
 		{
 			name: "bottomBar",
-			kind: "DocumentToolbar",
-			onSwitchFile: "switchFile",
-			onSave: "bounceSave",
-			onDesign: "bounceDesign",
-			onNewKind: "bounceNew",
-			onCloseFileRequest: "bounceCloseFileRequest"
+			kind: "DocumentToolbar"
 		},
 		{
 			kind: "Panels",
