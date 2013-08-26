@@ -142,7 +142,7 @@ enyo.kind({
 		});
 
 		//TODO: manage the error more properly.
-		req.error(function(){this.log("Request Error")});
+		req.error(function(){this.error("Request Error");});
 		
 		req.go();
 	},

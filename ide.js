@@ -145,7 +145,7 @@ var configPath, tester;
 var configStats;
 var serviceMap = {};
 var packagePath = path.resolve(myDir, "package.json");
-var packageContent = undefined;
+var packageContent;
 
 if (argv.runtest) {
 	tester = require('./test/tester/main.js');
@@ -180,9 +180,9 @@ function loadMainConfig(configFile) {
 }
 function loadPackageConfig(packageFile) {
 	checkFile(packageFile);
-	var packageContent = fs.readFileSync(packageFile, 'utf8');
+	var packageContentJSON = fs.readFileSync(packageFile, 'utf8');
 	try {	
-		packageContent = JSON.parse(packageContent);
+		var packageContent = JSON.parse(packageContentJSON);
 		var aresAboutData = {"version": packageContent.version, "bugReportURL": packageContent.bugs.url, 
 							 "license": packageContent.license, "projectHomePage": packageContent.homepage};
 
