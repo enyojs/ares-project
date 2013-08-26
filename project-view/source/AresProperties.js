@@ -101,27 +101,30 @@ enyo.kind({
 		{
 			kind:"FittableColumns", 
 			components: [
-				{content: "Version: "},
+				{content: "Ares v"},
 				{name: "versionValue"}
 			]
 		},
 		{
 			kind:"FittableColumns", 
-			components: [
-				{name: "brValue", kind: "enyo.Control", tag: "a", content: "Report a Bug", attributes: {"target": "_blank"}}
+			components: [				
+				{content: "If you encounter any bug please report it in the following link "},
+				{name: "brValue", kind: "enyo.Control", tag: "a", content: "Report a bug", attributes: {"target": "_blank"}}
 			]
 		},
 		{
 			kind:"FittableColumns", 
-			components: [
-				{name: "phpValue", kind: "enyo.Control", tag: "a", content: "Project Repository", attributes: {"target": "_blank"}}				
+			components: [				
+				{content: "We would welcome any contribution you can comme with "},
+				{name: "phpValue", kind: "enyo.Control", tag: "a", content: "Project Homepage", attributes: {"target": "_blank"}}				
 			]
 		},
 		{
 			kind:"FittableColumns", 
-			components: [
-				{content: "License: "},
-				{name: "license"}
+			components: [				
+				{content: "Copyright: "},
+				{name: "license"},
+				{ content: " all rights reserved"}
 			]
 		}
 	],
