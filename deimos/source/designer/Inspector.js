@@ -26,7 +26,7 @@ enyo.kind({
 	style: "padding: 8px; white-space: nowrap;",
 	debug: false,
 	helper: null,			// Analyzer.KindHelper
-	userDefinedAttributes: {},
+	userDefinedAttributes: [],
 	//* @protected
 	create: function() {
 		ares.setupTraceLogger(this);
@@ -84,7 +84,7 @@ enyo.kind({
 		}
 		
 		// If no attributes, bail
-		if (!this.userDefinedAttributes[inControl.aresId]) {
+		if (!this.userDefinedAttributes[this.index][inControl.aresId]) {
 			return;
 		}
 
@@ -102,7 +102,7 @@ enyo.kind({
 			// Add an entry to _propMap[]_ for each property found in _publishedProperties_
 			for (var i = 0, p; (p = publishedProperties[i]); i++) {
 				if (((this.allowed(kindName, "properties", p.name)) || 
-					(this.userDefinedAttributes[inControl.aresId].hasOwnProperty(p.name)))) {
+					(this.userDefinedAttributes[this.index][inControl.aresId].hasOwnProperty(p.name)))) {
 					this.trace("Adding property '", p.name, "' from '", currentKind, "'");
 					propMap[p.name] = p.value;
 				}
@@ -114,7 +114,7 @@ enyo.kind({
 			// Add an entry to _eventMap[]_ for each event found in _events_
 			for (i = 0, p; (p = events[i]); i++) {
 				if (((this.allowed(kindName, "events", p)) ||
-					(this.userDefinedAttributes[inControl.aresId].hasOwnProperty(p)))) {
+					(this.userDefinedAttributes[this.index][inControl.aresId].hasOwnProperty(p)))) {
 					this.trace("Adding event '", p, "' from '", currentKind, "'");
 					eventMap[p] = true;
 				}
@@ -191,8 +191,8 @@ enyo.kind({
 		
 		this.trace("Adding entry for ", inType, " ", inName, " : ", inDefaultValue);
 		
-		var inherited = !(inControl.aresId && this.userDefinedAttributes && this.userDefinedAttributes[inControl.aresId] && typeof this.userDefinedAttributes[inControl.aresId][inName] !== "undefined"),
-			value = (inherited) ? inDefaultValue : this.userDefinedAttributes[inControl.aresId][inName],
+		var inherited = !(inControl.aresId && this.userDefinedAttributes && this.userDefinedAttributes[this.index] && this.userDefinedAttributes[this.index][inControl.aresId] && typeof this.userDefinedAttributes[this.index][inControl.aresId][inName] !== "undefined"),
+			value = (inherited) ? inDefaultValue : this.userDefinedAttributes[this.index][inControl.aresId][inName],
 			classList = "ares-inspector-row",
 			attributeRow,
 			info,
@@ -268,8 +268,8 @@ enyo.kind({
 	},
 	//* Return the style string held in _this.userDefinedAttributes_ for _inControl_
 	getControlStyle: function(inControl) {
-		return (inControl.aresId && this.userDefinedAttributes && this.userDefinedAttributes[inControl.aresId])
-			?	this.userDefinedAttributes[inControl.aresId].style
+		return (inControl.aresId && this.userDefinedAttributes && this.userDefinedAttributes[this.index] && this.userDefinedAttributes[this.index][inControl.aresId])
+			?	this.userDefinedAttributes[this.index][inControl.aresId].style
 			:	null;
 	},
 	//* Get the layoutKind value for _inControl_
@@ -277,12 +277,13 @@ enyo.kind({
 		var inherited = !(
 				inControl.aresId &&
 				this.userDefinedAttributes &&
-				this.userDefinedAttributes[inControl.aresId] &&
-				typeof this.userDefinedAttributes[inControl.aresId]["layoutKind"] !== "undefined"
+				this.userDefinedAttributes[this.index] &&
+				this.userDefinedAttributes[this.index][inControl.aresId] &&
+				typeof this.userDefinedAttributes[this.index][inControl.aresId]["layoutKind"] !== "undefined"
 			)
 		;
 		
-		return (inherited) ? "" : this.userDefinedAttributes[inControl.aresId]["layoutKind"];
+		return (inherited) ? "" : this.userDefinedAttributes[this.index][inControl.aresId]["layoutKind"];
 	},
 	//* Return sorted list of all layout kind names from indexer
 	getLayoutKinds: function() {
@@ -303,7 +304,7 @@ enyo.kind({
 		return layoutKinds;
 	},
 	positionPropertyChanged: function(inSender, inEvent) {
-		var controlStyle = (this.selected.aresId && this.userDefinedAttributes && this.userDefinedAttributes[this.selected.aresId]) ? this.userDefinedAttributes[this.selected.aresId].style : null,
+		var controlStyle = (this.selected.aresId && this.userDefinedAttributes && this.userDefinedAttributes[this.index] && this.userDefinedAttributes[this.index][this.selected.aresId]) ? this.userDefinedAttributes[this.index][this.selected.aresId].style : null,
 			// Get this control's style as an array
 			styleProps = {},
 			originator = this.getAttributeVal(inEvent.target),
@@ -400,14 +401,14 @@ enyo.kind({
 		this.trace("Set property: ", n, " --> ", v);
 
 		// Save each change to _this.userDefinedAttributes_
-		if(!this.userDefinedAttributes[this.selected.aresId]) {
-			this.userDefinedAttributes[this.selected.aresId] = {};
+		if(!this.userDefinedAttributes[this.index][this.selected.aresId]) {
+			this.userDefinedAttributes[this.index][this.selected.aresId] = {};
 		}
 
 		if (v === "") {
-			delete this.userDefinedAttributes[this.selected.aresId][n];
+			delete this.userDefinedAttributes[this.index][this.selected.aresId][n];
 		} else {
-			this.userDefinedAttributes[this.selected.aresId][n] = v;			
+			this.userDefinedAttributes[this.index][this.selected.aresId][n] = v;			
 		}
 		
 		this.doModify({name: n, value: v, type: inEvent.target.fieldType});
@@ -435,13 +436,13 @@ enyo.kind({
 		}
 	},
 	//* @public
-	initUserDefinedAttributes: function(inComponents) {
-		this.userDefinedAttributes = {};
+	initUserDefinedAttributes: function(inComponents, inIndex) {
+		this.userDefinedAttributes[inIndex] = {};
 		
 		var components = this.flattenComponents(inComponents);
 		
 		for(var i = 0, component; (component = components[i]); i++) {
-			this.userDefinedAttributes[component.aresId] = component;
+			this.userDefinedAttributes[inIndex][component.aresId] = component;
 		}
 	},
 	//* @protected
@@ -514,19 +515,19 @@ enyo.kind({
 		}
 		
 		// Make sure this attribute exists in _this.userDefinedAttributes_
-		if (!this.userDefinedAttributes[this.selected.aresId]) {
-			this.userDefinedAttributes[this.selected.aresId] = {};
+		if (!this.userDefinedAttributes[this.index][this.selected.aresId]) {
+			this.userDefinedAttributes[this.index][this.selected.aresId] = {};
 		}
 		
 		if (originator.active === true) {
 			row.$.attributeVal.setDisabled(false);
 			
 			// Add this attribute to the rendered instance
-			this.userDefinedAttributes[this.selected.aresId][attribute] = row.$.attributeVal.getFieldValue();
+			this.userDefinedAttributes[this.index][this.selected.aresId][attribute] = row.$.attributeVal.getFieldValue();
 		} else {
 			row.$.attributeVal.setFieldValue(this.buildPropList(this.selected)[attribute]);
 			row.$.attributeVal.setDisabled(true);
-			delete this.userDefinedAttributes[this.selected.aresId][attribute];
+			delete this.userDefinedAttributes[this.index][this.selected.aresId][attribute];
 			
 			// Remove this attribute from the rendered instance in the iframe by setting it to _undefined_
 			this.doModify({name: attribute, value: undefined});
@@ -539,6 +540,10 @@ enyo.kind({
 
 		// Get the list of handler methods
 		this.kindFunctions = this.helper.getFunctions().sort();
+	},
+	setCurrentKindIndex: function(inIndex) {
+		this.userDefinedAttributes = [];
+		this.index = inIndex;
 	}
 });
 
