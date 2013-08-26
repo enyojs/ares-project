@@ -144,6 +144,8 @@ var bundledBrowser = {
 var configPath, tester;
 var configStats;
 var serviceMap = {};
+var packagePath = path.resolve(myDir, "package.json");
+var packageContent = undefined;
 
 if (argv.runtest) {
 	tester = require('./test/tester/main.js');
@@ -151,18 +153,20 @@ if (argv.runtest) {
 } else{
 	configPath = argv.config;
 }
+function checkFile(inFile) {
+	if (!fs.existsSync(inFile)) {
+		throw "Did not find: '"+inFile+"': ";
+	}
+
+	log.verbose('loadMainConfig()', "Loading ARES configuration from '"+inFile+"'...");
+	configStats = fs.lstatSync(inFile);
+	if (!configStats.isFile()) {
+		throw "Not a file: '"+inFile+"': ";
+	}
+}
 
 function loadMainConfig(configFile) {
-	if (!fs.existsSync(configFile)) {
-		throw "Did not find: '"+configFile+"': ";
-	}
-
-	log.verbose('loadMainConfig()', "Loading ARES configuration from '"+configFile+"'...");
-	configStats = fs.lstatSync(configFile);
-	if (!configStats.isFile()) {
-		throw "Not a file: '"+configFile+"': ";
-	}
-
+	checkFile(configFile);
 	var configContent = fs.readFileSync(configFile, 'utf8');
 	try {
 		ide.res = JSON.parse(configContent);
@@ -173,6 +177,19 @@ function loadMainConfig(configFile) {
 	if (!ide.res.services || !ide.res.services[0]) {
 		throw "Corrupted '"+configFile+"': no storage services defined";
 	}
+}
+function loadPackageConfig(packageFile) {
+	checkFile(packageFile);
+	var packageContent = fs.readFileSync(packageFile, 'utf8');
+	try {	
+		packageContent = JSON.parse(packageContent);
+		var aresAboutData = {"version": packageContent.version, "bugReportURL": packageContent.bugs.url, 
+							 "license": packageContent.license, "projectHomePage": packageContent.homepage};
+
+		return aresAboutData;
+	} catch(e) {
+		throw "Improper JSON: "+packageContent;
+	}	
 }
 
 function getObjectType(object) {
@@ -573,6 +590,10 @@ app.configure(function(){
 	app.get('/res/services', function(req, res, next) {
 		log.http('main', m("GET /res/services:", ide.res.services));
 		res.status(200).json({services: ide.res.services});
+	});
+	app.get('/res/aboutares', function(req, res, next) {
+		log.http('main', m("GET /res/aboutares:", ide.res.services));
+		res.status(200).json({aboutAres: loadPackageConfig(packagePath)});
 	});
 	app.all('/res/services/:serviceId/*', proxyServices);
 	app.all('/res/services/:serviceId', proxyServices);

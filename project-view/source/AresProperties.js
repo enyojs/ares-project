@@ -13,9 +13,10 @@ enyo.kind({
 		onModifiedConfig: "",
 		onSaveGeneratedXml: "",
 		onDone: ""
-	},
+	},	
 
 	components: [
+		{kind: "aboutAresPanel"},
 		{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail"},
 		{name: "toolbarId", classes: "ares-right-toolbar", kind: "onyx.Toolbar", components: [
 			{name: "ok", kind: "onyx.Button", content: "OK", ontap: "confirmTap"}
@@ -87,4 +88,69 @@ enyo.kind({
 		this.hide();
 	}
 	
+});
+
+enyo.kind({
+	name: "aboutAresPanel",
+	kind: "FittableRows",
+	published: {
+		config: {},
+		aboutAresData: undefined
+	},
+	components: [
+		{
+			kind:"FittableColumns", 
+			components: [
+				{content: "Version: "},
+				{name: "versionValue"}
+			]
+		},
+		{
+			kind:"FittableColumns", 
+			components: [
+				{name: "brValue", kind: "enyo.Control", tag: "a", content: "Report a Bug", attributes: {"target": "_blank"}}
+			]
+		},
+		{
+			kind:"FittableColumns", 
+			components: [
+				{name: "phpValue", kind: "enyo.Control", tag: "a", content: "Project Repository", attributes: {"target": "_blank"}}				
+			]
+		},
+		{
+			kind:"FittableColumns", 
+			components: [
+				{content: "License: "},
+				{name: "license"}
+			]
+		}
+	],
+
+	create: function(){
+		this.inherited(arguments);
+		this.getAboutAresData();		
+	},
+
+	getAboutAresData: function(){
+		var req = new enyo.Ajax({
+			url: 'http://127.0.0.1:9009/res/aboutares'
+		});
+
+		req.response(this, function(inSender, inData) {		
+			this.setAboutAresData(inData.aboutAres);
+			this.aboutAresDataChanged();
+		});
+
+		//TODO: manage the error more properly.
+		req.error(function(){this.log("Request Error")});
+		
+		req.go();
+	},
+
+	aboutAresDataChanged: function(){
+		this.$.versionValue.content = this.aboutAresData.version;
+		this.$.brValue.setAttribute("href", this.aboutAresData.bugReportURL);
+		this.$.phpValue.setAttribute("href", this.aboutAresData.projectHomePage);
+		this.$.license.content = this.aboutAresData.license;
+	}	
 });
