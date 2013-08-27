@@ -142,6 +142,7 @@ enyo.kind({
 			if (( ! msg.val.hasOwnProperty('popup')) || msg.val.popup === true) {
 				if (msg.val.reloadNeeded === true) {
 					msg.val.callback = this.goBacktoEditor.bind(this);
+					msg.val.action = "Switching back to code editor";
 				}
 				this.doError(msg.val);
 			} else {

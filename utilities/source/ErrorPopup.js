@@ -8,6 +8,7 @@ enyo.kind({
 	autoDismiss: false,
 	published: {
 		errorMsg: "unknown error",
+		actionMsg: undefined,
 		detailsHtml: "",
 		detailsText: "",
 		callback: null
@@ -17,6 +18,7 @@ enyo.kind({
 	    {tag: "div", classes:"title", content: "Error"},
 			{classes:"ares-error-popup", fit: true, components: [
 				{name: "msg"},
+				{name: "action", showing: false},
 				{classes:"ares-error-details", components:[
 					{classes:"button", components:[
 						{tag:"label", classes:"label", name: "detailsBtn", content: "Details", ontap: "toggleDetails", showing: false},
@@ -45,6 +47,14 @@ enyo.kind({
 	},
 	detailsHtmlChanged: function() {
 		this.updateDetailsDrw();
+	},
+	actionMsgChanged: function() {
+		if (this.actionMsg) {
+			this.$.action.setContent(this.actionMsg);			
+			this.$.action.setShowing(true);
+		} else {
+			this.$.action.setShowing(false);
+		}
 	},
 	updateDetailsDrw: function() {
 		if (this.detailsText || this.detailsHtml) {
@@ -109,6 +119,7 @@ enyo.kind({
 		this.setErrorMsg(msg);
 		this.setDetailsHtml(html);
 		this.setDetailsText(text);
+		this.setActionMsg(evt.action);
 		this.show();
 	}
 });
