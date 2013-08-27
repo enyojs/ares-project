@@ -945,6 +945,18 @@ function sendClosingBoundary(req, boundaryKey) {
 		});
 	});
 
+	it("t8.0. should find a designer overlay iframe.html at any place", function(done) {
+		get("t8.0", '/file' + rootPath + '/iframe.html', {overlay: "designer"}, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(200);
+			should.not.exist(res.json);
+			res.headers['content-type'].should.match(/^text\/html/);
+			done();
+		});
+	});
+
 	it("t100.0. should delete test root folder", function(done) {
 		post("t100.0", '/id/' + rootId, {_method: "DELETE"} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
 			should.not.exist(err);

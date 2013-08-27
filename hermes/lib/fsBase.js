@@ -163,20 +163,25 @@ function FsBase(inConfig, next) {
 		next();
 	}
 
-	var designerDir = (path.join(__dirname, "..", "..", "deimos", "source", "designer", "iframe"));
+	var overlays = {
+		// "$deimos/source/designer/iframe/*"
+		designer: path.join(__dirname, "..", "..", "deimos", "source", "designer", "iframe"),
+		// "node_modules/less/dist/*"
+		less: path.join(__dirname, "..", "..", "node_modules", "less", "dist")
+	};
 	function _parseOverlays(req, res, next) {
-		if (req.query.overlay === 'designer') {
-			this.log("_designer()", "checking for designer files...");
-			// overlay files in folder "$deimos/source/designer/iframe".
+		var overlayDir = overlays[req.query.overlay];
+		if (overlayDir) {
+			this.log("_designer()", "checking for overlay='" + req.query.overlay + "' files...");
 			// We cannot use express.static(), because it would serve
 			// designer files always from the same mount-point in
 			// the '/file' tree.
-			var filePath = path.join(designerDir, path.basename(req.params.path));
+			var filePath = path.join(overlayDir, path.basename(req.params.path));
 			fs.stat(filePath, (function(err, stats) {
 				if (err) {
 					next(err);
 				} else if (stats.isFile()) {
-					this.log("_designer()", "found designer file:", filePath);
+					this.log("_designer()", "found overlay file:", filePath);
 					res.status(200);
 					res.sendfile(filePath);
 				} else {
