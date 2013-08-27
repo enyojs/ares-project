@@ -146,22 +146,13 @@ enyo.kind({
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
 		var kind = this.kinds[index];
-		var len = this.kinds.length;
-
-		for (var i=0; i<len; i++) {
-			this.addAresIds(this.kinds[i].components);
-			this.addAresKindOptions(this.kinds[i].components);
-			this.$.inspector.initUserDefinedAttributes(this.kinds[i].components, i);
-		}
+		
+		this.addAresIds(this.kinds[index].components);
+		this.addAresKindOptions(this.kinds[index].components);
+		this.$.inspector.initUserDefinedAttributes(this.kinds[index].components);
+		
 		if (index !== this.index) {
-			
-			// If edited, save these changes in Ares TODO
-			if (this.index !== null && this.getEdited()) {
-				this.designerUpdate();
-			}
-			
 			this.$.inspector.inspect(null);
-			this.$.inspector.setCurrentKindIndex(index);
 			this.$.inspector.setCurrentKindName(kind.name);
 			this.$.designer.setCurrentKind(kind);
 		}
@@ -312,7 +303,7 @@ enyo.kind({
 	addAbsolutePositioning: function(inComponent) {
 		this.addReplaceStyleProp(inComponent, "position", "absolute");
 		inComponent.layoutKind = "AbsolutePositioningLayout";
-		this.$.inspector.userDefinedAttributes[this.index][inComponent.aresId].layoutKind = inComponent.layoutKind;
+		this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind = inComponent.layoutKind;
 	},
 	//* Add static positioning to top item and to it's children
 	updateStyleForNonAbsolutePositioningLayoutKind: function(inComponent) {
@@ -334,8 +325,8 @@ enyo.kind({
 		if (inComponent.layoutKind) {
 			delete inComponent.layoutKind;
 		}
-		if (this.$.inspector.userDefinedAttributes[this.index][inComponent.aresId].layoutKind) {
-			delete this.$.inspector.userDefinedAttributes[this.index][inComponent.aresId].layoutKind;
+		if (this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind) {
+			delete this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind;
 		}
 	},
 	//* Update _inComponent.style.inProp_ to be _inValue_
@@ -352,14 +343,14 @@ enyo.kind({
 		
 		// Convert back to a string
 		inComponent.style = enyo.Control.domStylesToCssText(styleProps);
-		this.$.inspector.userDefinedAttributes[this.index][inComponent.aresId].style = inComponent.style;
+		this.$.inspector.userDefinedAttributes[inComponent.aresId].style = inComponent.style;
 	},
 	prepareDesignerUpdate: function() {
 		if (this.index !== null) {
 			// Prepare the data for the code editor
 			var event = {docHasChanged: this.getEdited(), contents: []};
 			for(var i = 0 ; i < this.kinds.length ; i++) {
-				event.contents[i] = enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components, false, i));
+				event.contents[i] = (i === this.index) ? enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components)) : null;
 			}
 			return event;
 		}
@@ -382,7 +373,7 @@ enyo.kind({
 		this.setEdited(true);
 		
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
-		this.kinds[this.index].components = this.cleanUpComponents(components, true, this.index);
+		this.kinds[this.index].components = this.cleanUpComponents(components, true);
 		
 		this.designerUpdate();
 		
@@ -439,7 +430,7 @@ enyo.kind({
 		clone = this.applyLayoutKindRules(inEvent.layoutData, clone);
 		
 		// Copy clone style props to inspector
-		this.$.inspector.userDefinedAttributes[this.index][clone.aresId].style = clone.style;
+		this.$.inspector.userDefinedAttributes[clone.aresId].style = clone.style;
 		this.addAresKindOptions(this.kinds[this.index].components);
 		
 		if (beforeId) {
@@ -609,32 +600,30 @@ enyo.kind({
 			}
 		}
 	},
-	cleanUpComponents: function(inComponents, inKeepAresIds, inIndex) {
+	cleanUpComponents: function(inComponents, inKeepAresIds) {
 		var component,
 			ret = [],
 			i;
 		
 		for (i=0; (component = inComponents[i]); i++) {
-			ret.push(this.cleanUpComponent(component, inKeepAresIds, inIndex));
+			ret.push(this.cleanUpComponent(component, inKeepAresIds));
 		}
 		
 		return ret;
 	},
-	cleanUpComponent: function(inComponent, inKeepAresIds, inIndex) {
+	cleanUpComponent: function(inComponent, inKeepAresIds) {
 		var aresId = inComponent.aresId,
 			childComponents = [],
 			cleanComponent = {},
 			atts,
 			att,
 			i;
-
-		inIndex = inIndex || 0;
 		
 		if (!aresId) {
 			return cleanComponent;
 		}
 		
-		atts = this.$.inspector.userDefinedAttributes[inIndex][aresId];
+		atts = this.$.inspector.userDefinedAttributes[aresId];
 		
 		if (!atts) {
 			return cleanComponent;
@@ -652,7 +641,7 @@ enyo.kind({
 			
 			// Recurse through child components
 			for (i=0; i<inComponent.components.length; i++) {
-				childComponents.push(this.cleanUpComponent(inComponent.components[i], inKeepAresIds, inIndex));
+				childComponents.push(this.cleanUpComponent(inComponent.components[i], inKeepAresIds));
 			}
 			
 			if (childComponents.length > 0) {
@@ -677,6 +666,7 @@ enyo.kind({
 		}
 		
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		this.addAresKindOptions(this.kinds[this.index].components);
 		this.rerenderKind();
 	},
 	deleteComponentByAresId: function(inAresId, inComponents) {
@@ -863,7 +853,7 @@ enyo.kind({
 		} else {
 			this.insertItem(config, target);
 		}	
-		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components, this.index);
+		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
 		this.addAresKindOptions(this.kinds[this.index].components);
 		this.rerenderKind(config.aresId);
 	}
