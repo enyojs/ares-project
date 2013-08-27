@@ -1,4 +1,4 @@
-/* global require, console, module, process */
+/* jshint node:true */
 /**
  * Hermes ZIP archival service
  */

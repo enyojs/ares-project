@@ -2,8 +2,10 @@
 enyo.kind({
 	name: "Deimos",
 	classes: "enyo-unselectable onyx",
+	debug: false,
 	published: {
-		edited: false
+		edited: false,
+		projectData: null		// All the project data shared mainly between phobos and deimos
 	},
 	components: [
 		{name: "actionPopup", kind:"PaletteComponentActionPopup", centered: true, floating: true, autoDismiss: false, modal: true},
@@ -94,6 +96,7 @@ enyo.kind({
 	kinds: [],
 	index: null,
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.addHandlers();
 		this.doRegisterMe({name:"deimos", reference:this});
@@ -124,8 +127,7 @@ enyo.kind({
 		this.owner.$.kindPicker.destroyClientControls();
 
 		// Pass the project information (analyzer output, ...) to the inspector and palette
-		this.$.inspector.setProjectData(data.projectData);
-		this.$.palette.setProjectData(data.projectData);
+		this.setProjectData(data.projectData);
 
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
@@ -166,6 +168,48 @@ enyo.kind({
 		this.owner.$.toolbar.reflow();
 		
 		return true;
+	},
+	/**
+	 * Receive the project data reference which allows to access the analyzer
+	 * output for the project's files, enyo/onyx and all the other project
+	 * related information shared between phobos and deimos.
+	 * @param  oldProjectData
+	 * @protected
+	 */
+	projectDataChanged: function(oldProjectData) {
+		if (oldProjectData) {
+			oldProjectData.off('change:project-indexer', this.projectIndexReady);
+			oldProjectData.off('update:project-indexer', this.projectIndexUpdated);
+		}
+
+		Model.resetInformation();
+
+		if (this.projectData) {
+			this.trace("projectData", this.projectData);
+			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
+			this.projectData.on('update:project-indexer', this.projectIndexUpdated, this);
+			this.projectIndexer = this.projectData.getProjectIndexer();
+			this.projectIndexUpdated();
+		}
+	},
+	/**
+	 * The project analyzer output has changed
+	 * @param value   the new analyzer output
+	 * @protected
+	 */
+	projectIndexReady: function(model, indexer, options) {
+		this.trace("projectIndexReady: ", indexer);
+		this.projectIndexer = indexer;
+		this.projectIndexUpdated();
+	},
+	//* @protected
+	projectIndexUpdated: function() {
+		var indexer = this.projectIndexer;
+		this.trace("projectIndexUpdated: for projectIndexer: ", indexer);
+		this.$.inspector.setProjectIndexer(indexer);
+		this.$.palette.setProjectIndexer(indexer);
+		Model.buildInformation(indexer);
+		this.$.designer.sendSerializerOptions(Model.serializerOptions);
 	},
 	//* Rerender current kind
 	rerenderKind: function(inSelectId) {
@@ -321,7 +365,7 @@ enyo.kind({
 		this.$.designer.cleanUp();
 		
 		var event = this.prepareDesignerUpdate();
-		this.$.inspector.setProjectData(null);
+		this.setProjectData(null);
 		this.doCloseDesigner(event);
 		this.setEdited(false);
 		
@@ -628,6 +672,7 @@ enyo.kind({
 		}
 		
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		this.addAresKindOptions(this.kinds[this.index].components);
 		this.rerenderKind();
 	},
 	deleteComponentByAresId: function(inAresId, inComponents) {
