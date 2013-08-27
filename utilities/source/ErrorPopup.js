@@ -5,10 +5,12 @@ enyo.kind({
 	modal: true,
 	centered: true,
 	floating: true,
+	autoDismiss: false,
 	published: {
 		errorMsg: "unknown error",
 		detailsHtml: "",
-		detailsText: ""
+		detailsText: "",
+		callback: null
 	},
 	classes:"ares-classic-popup",
 	components: [
@@ -75,9 +77,21 @@ enyo.kind({
 		this.setDetailsText();
 		this.setDetailsHtml();
 		this.hide();
+		if (this.callback) {
+			var cb = this.callback;
+			this.callback = null;
+			cb();
+		}
 	},
 	raise: function(evt) {
 		var msg, err, text, html;
+
+		if (evt.callback) {
+			if (this.callback) {
+				this.error("Previous callback was not fired ! Bug ?");
+			}
+			this.callback = evt.callback;
+		}
 		if (typeof evt === 'object') {
 			if (evt instanceof Error) {
 				err = evt;

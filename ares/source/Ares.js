@@ -327,6 +327,7 @@ enyo.kind({
 		this.designerUpdate(inSender, inEvent);
 		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
 		this.activeDocument.setCurrentIF('code');
+		this.componentsRegistry.codeEditor.manageControls(false);
 	},
 	//* Undo event from Deimos
 	designerUndo: function(inSender, inEvent) {

@@ -17,7 +17,8 @@ enyo.kind({
 		onReloadComplete: "",
 		onResizeItem: "",
 		onError: "",
-		onReturnPositionValue: ""
+		onReturnPositionValue: "",
+		onCloseDesigner: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", classes: "ares-iframe-client"},
@@ -137,9 +138,11 @@ enyo.kind({
 			this.doMoveItem(msg.val);
 		} else if (msg.op === "reloadNeeded") {
 			this.reloadNeeded = true;
-		// Existing component dropped in iframe
 		} else if(msg.op === "error") {
 			if (( ! msg.val.hasOwnProperty('popup')) || msg.val.popup === true) {
+				if (msg.val.reloadNeeded === true) {
+					msg.val.callback = this.goBacktoEditor.bind(this);
+				}
 				this.doError(msg.val);
 			} else {
 				// TODO: We should store the error into a kind of rotating error log - ENYO-2462
@@ -154,6 +157,9 @@ enyo.kind({
 		} else {
 			enyo.warn("Deimos designer received unknown message op:", msg);
 		}
+	},
+	goBacktoEditor: function() {
+		this.doCloseDesigner();
 	},
 	//* Pass _isContainer_ info down to iframe
 	sendIframeContainerData: function() {
