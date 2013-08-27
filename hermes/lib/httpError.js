@@ -1,4 +1,4 @@
-/* global require, module  */
+/* jshint node:true */
 module.exports = HttpError;
 
 var util  = require("util");

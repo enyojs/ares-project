@@ -30,7 +30,7 @@ enyo.kind({
 					]}
 				]}
 			]},
-			{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+			{kind: "onyx.Toolbar", name: "bottomToolbar",  classes:"bottom-toolbar", components: [
 				{name: "okButton", kind: "onyx.Button", content: "Close", ontap: "hideErrorPopup"}
 			]}
 	],

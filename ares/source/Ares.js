@@ -17,6 +17,7 @@ enyo.kind({
 	classes: "onyx",
 	fit: true,
 	debug: false,
+	//noDefer: true, //FIXME: does not work with statics:{}
 	componentsRegistry: {},
 	components: [
 		{
@@ -50,6 +51,7 @@ enyo.kind({
 			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
 		]},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
+		{name: "signInErrorPopup", kind: "Ares.SignInErrorPopup", msg: "unknown error", details: ""},
 		{kind: "ServiceRegistry"},
 		{kind: "Ares.PackageMunger", name: "packageMunger"}
 	],
@@ -59,6 +61,7 @@ enyo.kind({
 		onShowWaitPopup: "showWaitPopup",
 		onHideWaitPopup: "hideWaitPopup",
 		onError: "showError",
+		onSignInError: "showAccountConfiguration",
 		onTreeChanged: "_treeChanged",
 		onChangingNode: "_nodeChanging",
 		onSaveDocument: "saveDocument", 
@@ -72,7 +75,6 @@ enyo.kind({
 		onUndo: "designerUndo", 
 		onRedo: "designerRedo",
 		onSwitchFile: "switchFile",
-		onSave: "bounceSave",
 		onDesign: "bounceDesign",
 		onNewKind: "bounceNew",
 		onCloseFileRequest: "bounceCloseFileRequest",
@@ -180,7 +182,10 @@ enyo.kind({
 			if (err) {
 				self.componentsRegistry.phobos.saveFailed(err);
 			} else {
-				self.componentsRegistry.phobos.saveComplete();
+				var fileDataId = Ares.Workspace.files.computeId(inEvent.file);
+				var fileData = Ares.Workspace.files.get(fileDataId);
+				self.componentsRegistry.phobos.saveComplete(fileData);
+				// FIXME: ENYO-2976
 				self.componentsRegistry.deimos.saveComplete();
 			}
 		});
@@ -423,10 +428,6 @@ enyo.kind({
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
 	},
 	// FIXME: This trampoline function probably needs some refactoring
-	bounceSave: function(inSender, inEvent) {
-		this.componentsRegistry.phobos.saveDocAction(inSender, inEvent);
-	},
-	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
 		var editorMode = this.componentsRegistry.codeEditor.$.panels.getIndex() == this.phobosViewIndex;
 		if (editorMode) {
@@ -489,12 +490,24 @@ enyo.kind({
 	},
 	showError: function(inSender, inEvent) {
 		this.trace("event:", inEvent, "from sender:", inSender);
-		this.hideWaitPopup();
-		this.showErrorPopup(inEvent);
+		this.hideWaitPopup();		
+		if (inEvent && inEvent.err.status === 401){
+			this.showSignInErrorPopup(inEvent);
+		} else {
+			this.showErrorPopup(inEvent);
+		}
+		
 		return true; //Stop event propagation
 	},
 	showErrorPopup : function(inEvent) {
 		this.$.errorPopup.raise(inEvent);
+	},
+	showSignInErrorPopup : function(inEvent) {
+		this.$.signInErrorPopup.raise(inEvent);
+	},
+	showAccountConfiguration: function() {
+		this.componentsRegistry["accountsConfigurator"].show();		
+		this.$.signInErrorPopup.hide();		
 	},
 	/**
 	 * Event handler for user-initiated file or folder changes
@@ -566,13 +579,14 @@ enyo.kind({
 	 * 
 	 * @private
 	 * @param {Object} inSender
-	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, codeEditor]
+	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, codeEditor, accountsConfigurator, ...]
 	 */
 	_registerComponent: function(inSender, inEvent) {
-		if(this.componentsRegistry[inEvent.name] === undefined){
+		var ref = this.componentsRegistry[inEvent.name];
+		if (ref === undefined || ref === inEvent.reference){
 			this.componentsRegistry[inEvent.name] = inEvent.reference;
-		}else {
-			this.error("Component is already registred: ", inEvent.name);
+		} else {
+			throw new Error("Component is already registred: '" + inEvent.name + "'");
 		}
 	},
 	stopEvent: function(){

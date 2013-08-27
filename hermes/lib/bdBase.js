@@ -229,7 +229,6 @@ BdBase.prototype.prepare = function(req, res, next) {
 	req.appDir = {
 		root: appTempDir,
 		source: path.join(appTempDir, 'source'),
-		build: path.join(appTempDir, 'build'),
 		minify: path.join(appTempDir, 'minify')
 	};
 	
@@ -237,7 +236,6 @@ BdBase.prototype.prepare = function(req, res, next) {
 	async.series([
 		function(done) { mkdirp(req.appDir.root, done); },
 		function(done) { fs.mkdir(req.appDir.source, done); },
-		function(done) { fs.mkdir(req.appDir.build, done); },
 		function(done) { fs.mkdir(req.appDir.minify, done); }
 	], next);
 };
@@ -302,8 +300,7 @@ BdBase.prototype.store = function(req, res, next) {
  */
 BdBase.prototype.minify = function(req, res, next) {
 	// 'this' context not available in nested functions?
-	var enyoDir = this.config.enyoDir,
-	    minifyScript = this.config.minifyScript;
+	var minifyScript = this.config.minifyScript;
 
 	if (req.query["debug"] === "true") {
 		_noMinify();
@@ -352,10 +349,7 @@ BdBase.prototype.minify = function(req, res, next) {
 		// child-processes
 		// <http://nodejs.org/api/child_process.html>.
 		var params = [ '--verbose',
-			       '--packagejs', path.join(req.appDir.source, 'package.js'),
 			       '--source', req.appDir.source,
-			       '--enyo', enyoDir,
-			       '--build', req.appDir.build,
 			       '--out', req.appDir.minify,
 			       '--less'];
 		log.info("_minify()", "Running: '", minifyScript, params.join(' '), "'");
@@ -438,12 +432,15 @@ BdBase.prototype.archive = function(req, res, next) {
  */
 BdBase.prototype.zip = function(req, res, next) {
 	log.info("zip()", "Zipping '" + req.appDir.zipRoot + "'");
-	
 	req.zip = {};
 	req.zip.path = path.join(req.appDir.root, "app.zip");
 	req.zip.stream = archiver.createZip({level: 1});
 	req.zip.stream.pipe(fs.createWriteStream(req.zip.path));
-	_walk.bind(this)(req.appDir.zipRoot, "" /*prefix*/, function() {
+	_walk.bind(this)(req.appDir.zipRoot, "" /*prefix*/, function(err) {
+		if (err) {
+			next(err);
+			return;
+		}
 		try {
 			req.zip.stream.finalize(function(written){
 				log.verbose("zip()", "finished:", req.zip.path, "(" + written + " bytes)");
