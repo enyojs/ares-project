@@ -492,7 +492,7 @@ enyo.kind({
 	showError: function(inSender, inEvent) {
 		this.trace("event:", inEvent, "from sender:", inSender);
 		this.hideWaitPopup();		
-		if (inEvent && inEvent.err.status === 401){
+		if (inEvent && inEvent.err && inEvent.err.status === 401) {
 			this.showSignInErrorPopup(inEvent);
 		} else {
 			this.showErrorPopup(inEvent);
