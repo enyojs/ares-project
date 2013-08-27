@@ -1,4 +1,4 @@
-/* global require, console, module, Buffer, process  */
+/* jshint node:true */
 /**
  * Base toolkit for Hermes FileSystem providers implemented using Node.js
  */
@@ -52,7 +52,7 @@ function FsBase(inConfig, next) {
 
 	this.app.configure((function() {
 		this.app.use(this.separator.bind(this));
-		if (this.level !== 'error') {
+		if (this.level !== 'error' && this.level !== 'warning') {
 			this.app.use(express.logger('dev'));
 		}
 
@@ -187,7 +187,7 @@ function FsBase(inConfig, next) {
 			next();
 		}
 	}
-
+	
 	this.log("ALL:", this.route3);
 	this.app.all(this.route3, [_parseFileUrl.bind(this), _parseOverlays.bind(this)], _handle.bind(this));
 
