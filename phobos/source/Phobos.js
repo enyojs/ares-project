@@ -284,7 +284,7 @@ enyo.kind({
 
 		var settings = modes[mode]||modes['text'];
 		this.$.right.setIndex(settings.rightIndex);
-		this.$.body.reflow();
+		this.resizeHandler();
 		return showSettings.ace ;
 	},
 	showWaitPopup: function(inMessage) {
@@ -869,6 +869,10 @@ enyo.kind({
 		if (data.kinds.length > 0) {
 			this.doUpdate(data);
 		} // else - The error has been displayed by extractKindsData()
+	},
+	resizeHandler: function() {
+		this.$.body.reflow();
+		this.$.ace.resize();
 	}
 });
 
