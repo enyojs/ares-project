@@ -13,10 +13,11 @@ var fs = require("fs"),
     util  = require("util"),
     mkdirp = require("mkdirp"),
     async = require("async"),
-    FsBase = require(__dirname + "/lib/fsBase"),
-    FdUtil = require(__dirname + "/lib/SimpleFormData"),
     CombinedStream = require('combined-stream'),
-    HttpError = require(__dirname + "/lib/httpError");
+    copyFile = require("./lib/copyFile"),
+    FsBase = require("./lib/fsBase"),
+    FdUtil = require("./lib/SimpleFormData"),
+    HttpError = require("./lib/httpError");
 
 var basename = path.basename(__filename, '.js');
 
@@ -446,15 +447,9 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 			if (stats.isDirectory()) {
 				_copyDir(srcPath, dstPath, next);
 			} else if (stats.isFile()){
-				_copyFile(srcPath, dstPath, next);
+				copyFile(srcPath, dstPath, next);
 			}
 		});
-	}
-	function _copyFile(srcPath, dstPath, next) {
-		var is, os;
-		is = fs.createReadStream(srcPath);
-		os = fs.createWriteStream(dstPath);
-		util.pump(is, os, next); // XXX should return 201 (Created) on success
 	}
 	function _copyDir(srcPath, dstPath, next) {
 		fs.readdir(srcPath, function(err, files) {
