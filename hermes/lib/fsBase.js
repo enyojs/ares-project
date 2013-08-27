@@ -137,20 +137,19 @@ function FsBase(inConfig, next) {
 	this.route2 = makeExpressRoute.bind(this)('/id/:id');
 
 	this.log("ALL:", this.route1);
-	this.app.all(this.route1, (function(req, res) {
+	this.app.all(this.route1, (function(req, res, next) {
 		req.params.id = this.encodeFileId('/');
-		receiveId.bind(this)(req, res, next);
+		req.params.path = '/';
+		_handle.bind(this)(req, res, next);
 	}).bind(this));
 
 	this.log("ALL:", this.route2);
-	this.app.all(this.route2, receiveId.bind(this));
+	this.app.all(this.route2, [_parseIdUrl.bind(this)], _handle.bind(this));
 
-	function receiveId(req, res, next) {
-		var method = req.method.toLowerCase();
+	function _parseIdUrl(req, res, next) {
 		req.params.id = req.params.id || this.encodeFileId('/');
 		req.params.path = this.decodeFileId(req.params.id);
-		this.log("FsBase.receiveId(): method:" + method + ", req.params:", req.params);
-		this[method](req, res, this.respond.bind(this, res));
+		next();
 	}
 
 	// URL-scheme: WebDAV-like navigation, used by the Enyo loader
@@ -158,14 +157,43 @@ function FsBase(inConfig, next) {
 	// project source code) & by the Ares project preview.
 	this.route3 = makeExpressRoute.bind(this)('/file/*');
 
-	this.log("ALL:", this.route3);
-	this.app.all(this.route3, receivePath.bind(this));
-
-	function receivePath(req, res, next) {
-		var method = req.method.toLowerCase();
+	function _parseFileUrl(req, res, next) {
 		req.params.path = req.params[0];
 		req.params.id = this.encodeFileId(req.params.path);
-		this.log("FsBase.receivePath(): method:" + method + ", req.params:", req.params);
+		next();
+	}
+
+	var designerDir = (path.join(__dirname, "..", "..", "deimos", "source", "designer", "iframe"));
+	function _parseOverlays(req, res, next) {
+		if (req.query.overlay === 'designer') {
+			this.log("_designer()", "checking for designer files...");
+			// overlay files in folder "$deimos/source/designer/iframe".
+			// We cannot use express.static(), because it would serve
+			// designer files always from the same mount-point in
+			// the '/file' tree.
+			var filePath = path.join(designerDir, path.basename(req.params.path));
+			fs.stat(filePath, (function(err, stats) {
+				if (err) {
+					next(err);
+				} else if (stats.isFile()) {
+					this.log("_designer()", "found designer file:", filePath);
+					res.status(200);
+					res.sendfile(filePath);
+				} else {
+					next();
+				}
+			}).bind(this));
+		} else {
+			next();
+		}
+	}
+
+	this.log("ALL:", this.route3);
+	this.app.all(this.route3, [_parseFileUrl.bind(this), _parseOverlays.bind(this)], _handle.bind(this));
+
+	function _handle(req, res, next) {
+		var method = req.method.toLowerCase();
+		this.log("FsBase. _handle(): method:", method, "req.params.id:", req.params.id, "req.params.path:", req.params.path);
 		this[method](req, res, this.respond.bind(this, res));
 	}
 

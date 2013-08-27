@@ -1,8 +1,7 @@
 enyo.depends(
 	"Palette.js",
 	"Palette.css",
-	"Json.js",
-	"Serializer.js",
+	"iframe/Json.js",
 	"Inspector.css",
 	"Inspector.js",
 	"ComponentView.js",
@@ -10,7 +9,7 @@ enyo.depends(
 	"InspectorConfig.js",
 	"Designer.js",
 	"designer.css",
-	"RPCCommunicator.js",
+	"iframe/RPCCommunicator.js",
 	"CssEditor.js",
 	"CssEditor.css",
 	"ColorPicker.js",
