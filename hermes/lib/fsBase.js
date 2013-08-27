@@ -56,28 +56,28 @@ function FsBase(inConfig, next) {
 			this.app.use(express.logger('dev'));
 		}
 
-	/*
-	 * Error Handling - Wrap exceptions in delayed handlers
-	 */
-	this.app.use(function(req, res, next) {
-		var domain = createDomain();
+		/*
+		 * Error Handling - Wrap exceptions in delayed handlers
+		 */
+		this.app.use(function(req, res, next) {
+			var domain = createDomain();
 
-		domain.on('error', function(err) {
-			next(err);
-			domain.dispose();
+			domain.on('error', function(err) {
+				next(err);
+				domain.dispose();
+			});
+
+			domain.enter();
+			next();
 		});
-
-		domain.enter();
-		next();
-	});
 
 		this.app.use(this.cors.bind(this));
 		this.app.use(express.cookieParser());
 		this.app.use(this.pathname, this.authorize.bind(this));
 		this.app.use(express.methodOverride());
-		
+
 		this.app.use(this.dump.bind(this));
-	
+
 		// Built-in express form parser: handles:
 		// - 'application/json' => req.body
 		// - 'application/x-www-form-urlencoded' => req.body
@@ -95,7 +95,7 @@ function FsBase(inConfig, next) {
 			console.error(err.stack);
 			this.respond(res, err);
 		}
-		
+
 		// express-3.x: middleware with arity === 4 is
 		// detected as the error handler
 		this.app.use(errorHandler.bind(this));
@@ -107,7 +107,7 @@ function FsBase(inConfig, next) {
 	this.httpsAgent = null;
 
 	// 2. Dynamic configuration
-	
+
 	this.app.post('/config', (function(req, res, next) {
 		this.log("req.body:", req.body);
 		var config = req.body && req.body.config;
@@ -121,16 +121,16 @@ function FsBase(inConfig, next) {
 			.replace(/\/+/g, "/") // compact "//" into "/"
 			.replace(/(\.\.)+/g, ""); // remove ".."
 	}
-	
+
 	// URL-scheme: '/' to get/set user credentials
 	this.route0 = makeExpressRoute.bind(this)('');
-	
+
 	this.log("GET/POST:", this.route0);
 	this.app.get(this.route0, this.getUserInfo.bind(this));
 	this.app.post(this.route0, this.setUserInfo.bind(this));
 
 	// 3. Handle HTTP verbs
-	
+
 	// URL-scheme: ID-based file/folder tree navigation, used by
 	// HermesClient.
 	this.route1 = makeExpressRoute.bind(this)('/id/');
@@ -283,10 +283,10 @@ if (process.platform === 'win32') {
 
 /**
  * Turns an {Error} object into a usable response {Object}
- * 
+ *
  * A response {Object} as #code and #body properties.  This method is
  * expecyted to be overriden by sub-classes of {FsBase}.
- * 
+ *
  * @param {Error} err the error object to convert.
  */
 FsBase.prototype.errorResponse = function(err) {
@@ -309,9 +309,9 @@ FsBase.prototype.errorResponse = function(err) {
  * @param {Object} res the express response {Object}
  * @param {Object} err the error if any.  Can be any kind of {Error}, such as an { HttpError}
  * @param {Object} response is a response {Object}
- * 
+ *
  * A response {Object} has:
- * 
+ *
  * - Two mandatory properties: #code (used as the HTTP statusCode) and
  * #body (inlined in the response body, of not falsy).
  * - One optional #headers property is an {Object} of HTTP headers to
@@ -352,10 +352,10 @@ FsBase.prototype.decodeFileId = function(fileId) {
 
 FsBase.prototype.parseProxy = function(config) {
 	var self = this;
-	
+
 	this.httpAgent = _makeAgent('http', config);
 	this.httpsAgent = _makeAgent('https', config);
-	
+
 	function _makeAgent(protocol, config) {
 		var proxyConfig = config.proxy && config.proxy[protocol];
 		if (!proxyConfig) {
@@ -418,10 +418,10 @@ FsBase.prototype.put = function(req, res, next) {
 
 /**
  * Store a file provided by a web-form
- * 
+ *
  * The web form is a 'application/x-www-form-urlencoded'
  * request, which contains the following fields:
- * 
+ *
  * - name (optional) is the name of the file to be created or
  *   updated.
  * - path (mandatory) is the relative path to the storage root
@@ -429,10 +429,10 @@ FsBase.prototype.put = function(req, res, next) {
  *   containing folder (if name is provided).
  * - content (mandatory) is the base64-encoded version of the
  *   file
- * 
- * @param {HTTPRequest} req 
+ *
+ * @param {HTTPRequest} req
  * @param {HTTPResponse} res
- * @param {Function} next(err, data) CommonJS callback 
+ * @param {Function} next(err, data) CommonJS callback
  */
 FsBase.prototype._putWebForm = function(req, res, next) {
 	// Mutually-agreed encoding of file name & location:
@@ -460,7 +460,7 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		this.log("FsBase.putWebForm(): empty file");
 		buf = new Buffer('');
 	}
-	
+
 	var urlPath = this.normalize(relPath);
 	this.log("FsBase.putWebForm(): storing file as", urlPath);
 	fileId = this.encodeFileId(urlPath);
@@ -483,15 +483,15 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 
 /**
  * Stores one or more files provided by a multipart form
- * 
+ *
  * The multipart form is a 'multipart/form-data'.  Each of its
  * parts follows this field convention, compatible with the
  * Express/Connect bodyParser, itself based on the Formidable
  * Node.js module.
- * 
- * @param {HTTPRequest} req 
+ *
+ * @param {HTTPRequest} req
  * @param {HTTPResponse} res
- * @param {Function} next(err, data) CommonJS callback 
+ * @param {Function} next(err, data) CommonJS callback
  */
 FsBase.prototype._putMultipart = function(req, res, next) {
 	var pathParam = req.param('path');
@@ -581,9 +581,9 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 
 /**
  * Write a file in the filesystem
- * 
+ *
  * Invokes the CommonJs callback with the created {ares.Filesystem.Node}.
- * 
+ *
  * @param {Object} req the express request context
  * @param {Object} file contains mandatory #name property, plus either
  * #buffer (a {Buffer}) or #path (a temporary absolute location).
@@ -592,4 +592,3 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 FsBase.prototype.putFile = function(req, file, next) {
 	next (new HttpError("ENOSYS", 500));
 };
-
