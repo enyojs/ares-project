@@ -672,6 +672,7 @@ enyo.kind({
 		}
 		
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		this.addAresKindOptions(this.kinds[this.index].components);
 		this.rerenderKind();
 	},
 	deleteComponentByAresId: function(inAresId, inComponents) {
