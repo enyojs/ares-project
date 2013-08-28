@@ -49,8 +49,9 @@ enyo.kind({
 	*/
 	testGetHomeFromServices: function() {
 		enyo.log("Begin called in testGetHomeFromServices.");
+		var self = this;
 		var h = this.services.filter(function(s) {
-			this.trace("service.conf.id: ", s.conf.id);
+			self.trace("service.config.id: ", s.config.id);
 			return s.config.id === "home";
 		});
 		this.trace("home service: ", h);

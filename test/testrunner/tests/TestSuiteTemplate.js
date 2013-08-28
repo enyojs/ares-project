@@ -17,7 +17,7 @@ enyo.kind({
 	* test without success example
 	*/
 	testWithOutSuccess: function() {
-		this.finish("test failure");
+		this.finish("test with excepted failure");
 	},
 
 });
