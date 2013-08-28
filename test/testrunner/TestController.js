@@ -1,4 +1,4 @@
-/* global ares */
+/* global ares, aresTestW */
 enyo.kind({
 	name: "Ares.TestController",
 	kind: enyo.Component,
@@ -22,7 +22,6 @@ enyo.kind({
 		// in charge of Ares TestRunner Test Suite
 		if (window.location.search.indexOf("norunner") == -1) {
 			this.inherited(arguments);
-			var aresTestW;
 			// postMessage API is not correctly supported by IE
 			if (!enyo.platform.ie) {
 				// listen for dispatched messages (received from Ares Test Reporter)
@@ -38,11 +37,11 @@ enyo.kind({
 				var repeatPostMsg = function() {
 					if (this.debug) {
 						enyo.log("Post ARES.TEST.START ...");
-						aresTestW.postMessage("ARES.TEST.START", "http://127.0.0.1:9009");
-						count--;
-						if (count > 0) {
-							setTimeout(repeatPostMsg, 1000);
-						}
+					}
+					aresTestW.postMessage("ARES.TEST.START", "http://127.0.0.1:9009");
+					count--;
+					if (count > 0) {
+						setTimeout(repeatPostMsg, 1000);
 					}
 				};
 				setTimeout(repeatPostMsg, 1000);
