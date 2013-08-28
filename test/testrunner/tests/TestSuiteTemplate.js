@@ -1,6 +1,7 @@
 enyo.kind({
 	name: "TestSuiteTemplate",
 	kind: "Ares.TestSuite",
+	noDefer: true,
 	debug: false,
 
 	create: function () {

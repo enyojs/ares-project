@@ -3,6 +3,7 @@
 enyo.kind({
 	name: "HermesFileSystemTest",
 	kind: "Ares.TestSuite",
+	noDefer: true,
 	debug: false,
 
 	dirToCreate: "TestRunner",
