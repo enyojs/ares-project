@@ -871,6 +871,7 @@ enyo.kind({
 		} // else - The error has been displayed by extractKindsData()
 	},
 	resizeHandler: function() {
+		this.inherited(arguments);
 		this.$.body.reflow();
 		this.$.ace.resize();
 	}
