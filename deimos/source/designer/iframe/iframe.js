@@ -375,7 +375,7 @@ enyo.kind({
 				Stomp on existing _kindComponents_ to ensure that we render exactly what the user
 				has defined. If components came in as a string, convert to object first.
 			*/
-			kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.components) : inKind.components;
+			kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.allKindComponents) : inKind.allKindComponents;
 
 			// Clean up after previous kind
 			if (this.parentInstance) {
@@ -398,6 +398,8 @@ enyo.kind({
 			if (this.parentInstance.fit) {
 				this.parentInstance.addClass("enyo-fit enyo-clip");
 			}
+			this.parentInstance.domStyles = {};
+			this.parentInstance.domStylesChanged();
 			this.parentInstance.render();
 			
 			// Notify Deimos that the kind rendered successfully
@@ -416,7 +418,9 @@ enyo.kind({
 	},
 	//* Rerender current selection
 	rerenderKind: function() {
-		this.renderKind({name: this.parentInstance.kind, components: this.getSerializedCopyOfComponent(this.parentInstance).components});
+		var copy = this.getSerializedCopyOfComponent(this.parentInstance).components;
+		copy[0].allKindComponents = copy;
+		this.renderKind(copy[0]);
 	},
 	checkXtorForAllKinds: function(kinds) {
 		enyo.forEach(kinds, function(kindDefinition) {

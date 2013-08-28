@@ -50,7 +50,7 @@ enyo.kind({
 							onReloadComplete: "reloadComplete",
 							onResizeItem: "resizeItem",
 							onReturnPositionValue: "designerReturnPositionValue"
-						},
+						}
 					]}
 				]},				
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
@@ -146,21 +146,16 @@ enyo.kind({
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
 		var kind = this.kinds[index];
+		var components = this.getSingleKind(index);
 		
-		this.addAresIds(this.kinds[index].components);
-		this.addAresKindOptions(this.kinds[index].components);
-		this.$.inspector.initUserDefinedAttributes(this.kinds[index].components);
-		
+		this.addAresIds(components);
+		this.addAresKindOptions(components);
+		this.$.inspector.initUserDefinedAttributes(components);
+
 		if (index !== this.index) {
-			
-			// If edited, save these changes in Ares TODO
-			if (this.index !== null && this.getEdited()) {
-				this.designerUpdate();
-			}
-			
 			this.$.inspector.inspect(null);
 			this.$.inspector.setCurrentKindName(kind.name);
-			this.$.designer.setCurrentKind(kind);
+			this.$.designer.setCurrentKind(components[0]);
 		}
 		
 		this.index = index;
@@ -203,6 +198,18 @@ enyo.kind({
 		this.projectIndexUpdated();
 	},
 	//* @protected
+	getSingleKind: function(inIndex) {
+		var kind = [],
+			len = this.kinds.length;
+
+		for (var i=0;  i<len; i++) {
+			if (i === inIndex) {
+				kind[0] = this.kinds[inIndex];
+				break;
+			}
+		}
+		return kind;
+	},
 	projectIndexUpdated: function() {
 		var indexer = this.projectIndexer;
 		this.trace("projectIndexUpdated: for projectIndexer: ", indexer);
@@ -213,7 +220,7 @@ enyo.kind({
 	},
 	//* Rerender current kind
 	rerenderKind: function(inSelectId) {
-		this.$.designer.setCurrentKind(this.kinds[this.index]);
+		this.$.designer.currentKind = this.getSingleKind(this.index)[0];
 		this.$.designer.renderCurrentKind(inSelectId);
 	},
 	refreshInspector: function() {
@@ -263,7 +270,7 @@ enyo.kind({
 		this.$.designer.requestPositionValue(inEvent.prop);
 	},
 	inspectorPositionDataUpdated: function(inSender, inEvent) {
-		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components),
+		var item = this.getItemById(this.$.designer.selection.aresId, this.getSingleKind(this.index)),
 			prop,
 			val
 		;
@@ -276,7 +283,8 @@ enyo.kind({
 		this.rerenderKind(item.aresId);
 	},
 	layoutKindUpdated: function(inLayoutKind) {
-		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		var kind = this.getSingleKind(this.index);
+		var item = this.getItemById(this.$.designer.selection.aresId, kind);
 		
 		if (inLayoutKind !== "AbsolutePositioningLayout" && item.layoutKind !== "AbsolutePositioningLayout") {
 			return false;
@@ -291,7 +299,7 @@ enyo.kind({
 			}
 			this.updateStyleForNonAbsolutePositioningLayoutKind(item);
 		}
-		this.addAresKindOptions(this.kinds[this.index].components);
+		this.addAresKindOptions(kind);
 		this.rerenderKind(item.aresId);
 		return true;
 	},
@@ -356,10 +364,19 @@ enyo.kind({
 			// Prepare the data for the code editor
 			var event = {docHasChanged: this.getEdited(), contents: []};
 			for(var i = 0 ; i < this.kinds.length ; i++) {
-				event.contents[i] = enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components));
+				event.contents[i] = (i === this.index) ? this.formatContent(enyo.json.codify.to(this.cleanUpComponents([this.kinds[i]]))) : null;
 			}
 			return event;
 		}
+	},
+	formatContent: function(inContent) {
+		// Strip opening [ bracket
+		inContent = inContent.replace(/\[\n\t\t\{/, "{\n\t");
+
+		// Strip closing }] brackets
+        inContent = inContent.replace(/\}\s([^}]+)$/, "");
+		
+		return inContent;
 	},
 	closeDesignerAction: function(inSender, inEvent) {
 		this.$.designer.cleanUp();
@@ -379,7 +396,7 @@ enyo.kind({
 		this.setEdited(true);
 		
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
-		this.kinds[this.index].components = this.cleanUpComponents(components, true);
+		this.kinds[this.index] = this.cleanUpComponents(components, true)[0];
 		
 		this.designerUpdate();
 		
@@ -392,7 +409,7 @@ enyo.kind({
 			targetId = inEvent.targetId,
 			beforeId = inEvent.beforeId,
 			target = (targetId)
-					?	this.getItemById(targetId, this.kinds[this.index].components)
+					?	this.getItemById(targetId, this.getSingleKind(this.index))
 					:	this.kinds[this.index];
 
 		if (!config) {
@@ -416,11 +433,12 @@ enyo.kind({
 	},
 	//* Move item with _inEvent.itemId_ into item with _inEvent.targetId_
 	moveItem: function (inSender, inEvent) {
-		var movedItem = this.getItemById(inEvent.itemId, this.kinds[this.index].components),
+		var kind = this.getSingleKind(this.index),
+			movedItem = this.getItemById(inEvent.itemId, kind),
 			clone = enyo.clone(movedItem),
 			beforeId = inEvent.beforeId || null,
 			target = (inEvent.targetId)
-					?	this.getItemById(inEvent.targetId, this.kinds[this.index].components)
+					?	this.getItemById(inEvent.targetId, kind)
 					:	this.kinds[this.index]
 		;
 		
@@ -437,9 +455,9 @@ enyo.kind({
 		
 		// Copy clone style props to inspector
 		this.$.inspector.userDefinedAttributes[clone.aresId].style = clone.style;
-		this.addAresKindOptions(this.kinds[this.index].components);
+		this.addAresKindOptions(kind);
 		
-		if (beforeId) {
+		if (beforeId && (beforeId !== target.aresId)) {
 			if (!this.insertItemBefore(clone, target, beforeId)) {
 				return true;
 			}
@@ -452,7 +470,7 @@ enyo.kind({
 		return true;
 	},
 	resizeItem: function(inSender, inEvent) {
-		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		var item = this.getItemById(this.$.designer.selection.aresId, this.getSingleKind(this.index));
 		
 		for (var prop in inEvent.sizeData) {
 			this.addReplaceStyleProp(item, prop, inEvent.sizeData[prop]);
@@ -670,9 +688,9 @@ enyo.kind({
 		if(!this.$.designer.selection) {
 			return;
 		}
-		
-		this.deleteComponentByAresId(this.$.designer.selection.aresId, this.kinds[this.index].components);
-		this.addAresKindOptions(this.kinds[this.index].components);
+		var kind = this.getSingleKind(this.index);
+		this.deleteComponentByAresId(this.$.designer.selection.aresId, kind);
+		this.addAresKindOptions(kind);
 		this.rerenderKind();
 	},
 	deleteComponentByAresId: function(inAresId, inComponents) {
@@ -854,13 +872,14 @@ enyo.kind({
 
 	// @protected
 	performCreateItem: function(config, target, beforeId){
-		if (beforeId) {
+		var kind = this.getSingleKind(this.index);
+		if (beforeId && (beforeId !== target.aresId)) {
 			this.insertItemBefore(config, target, beforeId);
 		} else {
 			this.insertItem(config, target);
-		}	
-		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
-		this.addAresKindOptions(this.kinds[this.index].components);
+		}
+		this.$.inspector.initUserDefinedAttributes(kind);
+		this.addAresKindOptions(kind);
 		this.rerenderKind(config.aresId);
 	}
 });

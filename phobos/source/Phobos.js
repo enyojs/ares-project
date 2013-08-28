@@ -648,7 +648,7 @@ enyo.kind({
 				// Insert the new version of components (replace components block, or insert at end)
 				var obj = this.analysis.objects[i];
 				var comps = inEvent.contents[i];
-				var start = obj.componentsBlockStart;
+				var start = obj.block.start;
 				var end = obj.componentsBlockEnd;
 				if (!(start && end)) {
 					// If this kind doesn't have a components block yet, insert a new one
