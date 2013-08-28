@@ -152,12 +152,6 @@ enyo.kind({
 		this.$.inspector.initUserDefinedAttributes(this.kinds[index].components);
 		
 		if (index !== this.index) {
-			
-			// If edited, save these changes in Ares TODO
-			if (this.index !== null && this.getEdited()) {
-				this.designerUpdate();
-			}
-			
 			this.$.inspector.inspect(null);
 			this.$.inspector.setCurrentKindName(kind.name);
 			this.$.designer.setCurrentKind(kind);
@@ -356,7 +350,7 @@ enyo.kind({
 			// Prepare the data for the code editor
 			var event = {docHasChanged: this.getEdited(), contents: []};
 			for(var i = 0 ; i < this.kinds.length ; i++) {
-				event.contents[i] = enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components));
+				event.contents[i] = (i === this.index) ? enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components)) : null;
 			}
 			return event;
 		}
@@ -672,6 +666,7 @@ enyo.kind({
 		}
 		
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		this.addAresKindOptions(this.kinds[this.index].components);
 		this.rerenderKind();
 	},
 	deleteComponentByAresId: function(inAresId, inComponents) {

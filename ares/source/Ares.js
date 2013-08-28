@@ -332,6 +332,7 @@ enyo.kind({
 		this.designerUpdate(inSender, inEvent);
 		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
 		this.activeDocument.setCurrentIF('code');
+		this.componentsRegistry.codeEditor.manageControls(false);
 	},
 	//* Undo event from Deimos
 	designerUndo: function(inSender, inEvent) {
@@ -419,10 +420,10 @@ enyo.kind({
 		this.activeDocument = d;
 		if (currentIF === 'code') {
 			this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
-			this.componentsRegistry.codeEditor.manageConrols(false);
+			this.componentsRegistry.codeEditor.manageControls(false);
 		} else {
 			this.componentsRegistry.phobos.designerAction();
-			this.componentsRegistry.codeEditor.manageConrols(true);
+			this.componentsRegistry.codeEditor.manageControls(true);
 		}
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
 	},

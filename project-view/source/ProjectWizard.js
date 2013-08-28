@@ -237,8 +237,6 @@ enyo.kind({
 		var template = inEvent.template;
 
 		this.warn("Creating new project ", name, " in folderId=", folderId, " (template: ", template, ")");
-		//create project.json file
-		this.createProjectJson(inEvent.data);
 
 		if (template) {
 			this.instanciateTemplate(inEvent);
@@ -249,6 +247,8 @@ enyo.kind({
 				.response(this, function(inRequest, inFsNode) {
 					this.trace("package.js inFsNode[0]:", inFsNode[0]);
 					this.projectReady(null, inEvent);
+
+					this.createProjectJson(inEvent.data);
 				})
 				.error(this, function(inRequest, inError) {
 					this.warn("inRequest:", inRequest, "inError:", inError);
@@ -257,6 +257,7 @@ enyo.kind({
 
 		return true ; // stop bubble
 	},
+	/** @private */
 	$LS: function(msg, params) {
 		var tmp = new enyo.g11n.Template($L(msg));
 		return tmp.evaluate(params);
@@ -287,7 +288,11 @@ enyo.kind({
 			sourceIds: sources,
 			substitutions: substitutions
 		});
-		req.response(this, this.populateProject);
+		req.response(this, function(inSender, inData) {
+			this.populateProject(inSender, inData);
+
+			this.createProjectJson(inEvent.data);
+		});
 		req.error(this, function(inSender, inError) {
 			this.warn("Unable to get the template files (", inError, ")");
 			this.$.errorPopup.raise($L("Unable to instanciate projet content from the template"));
