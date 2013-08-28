@@ -87,7 +87,7 @@ enyo.kind({
 					self.finish();
 				});
 				req2.error(this, function(inSender, inError) {
-					enyo.log(inError);
+					self.trace(inError);
 					self.finish("create "+this.dirToCreate+ " folder failed with error: " +inError);
 				});
 			});
