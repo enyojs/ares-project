@@ -117,9 +117,6 @@ enyo.kind({
 				this.setContainerData(msg.val);
 				break;
 			case "render":
-				// Add "$app" to enyo.path for image path (src attribute) resolution when the app is running into Ares Designer.
-				enyo.path.addPath("app", enyo.path.rewrite("$enyo/.."));
-
 				this.renderKind(msg.val);
 				break;
 			case "select":
@@ -410,8 +407,8 @@ enyo.kind({
 		} catch(error) {
 			errMsg = "Unable to render kind '" + inKind.name + "':" + error.message;
 			this.error(errMsg, error.stack);
-			this.sendMessage({op: "error", val: {msg: errMsg, err: {stack: error.stack}}});
 			this.sendMessage({op: "reloadNeeded"});
+			this.sendMessage({op: "error", val: {msg: errMsg, reloadNeeded: true, err: {stack: error.stack}}});
 		}
 	},
 	//* Rerender current selection
