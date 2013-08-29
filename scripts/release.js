@@ -177,8 +177,6 @@ function preDist() {
 }
 
 function postDist() {
-	var updateDeps = true;
-
 	// update `version` in package.json
 	log.info("post-dist", "before version:", version.raw);
 	if (opt.major) {
