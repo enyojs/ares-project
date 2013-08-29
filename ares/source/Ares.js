@@ -581,7 +581,7 @@ enyo.kind({
 		var files = Ares.Workspace.files,
 			model,
 			i;
-		var documents = new Array();
+		var documents = [];
 		for( i = 0; i < files.models.length; i++ ) {
 			model = files.models[i];
 			var serviceId = model.getProjectData().getServiceId();
