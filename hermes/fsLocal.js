@@ -404,7 +404,8 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 	}
 	dstPath = path.join(this.root, dstRelPath);
 
-	//ByJunil call _compareNode
+	//interim-code //comment-out
+	/*
 	async.waterfall([
 		_checkChagable.bind(this, srcPath, dstPath),
 		function(movable, next) {
@@ -415,7 +416,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 			console.log("[ByJunil-ERROR]:", err);
 		}
 	});
-	//ByJunil need to restructure the following code
+	*/
 	if (srcPath === dstPath) {
 		next(new HttpError("trying to move a resource onto itself", 400 /*Bad-Request*/));
 		return;
@@ -469,6 +470,8 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 			}
 		}
 	}).bind(this));
+
+	/* interim code - comment out 
 		// 1. dstPath does not exist ( O ) 
 		//    1.1 file name same => not Possible !! (Don't care)
 		//    1.2 file name diff => Can Move (TRUE)
@@ -509,6 +512,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 			next(null, movable);
 		});
 	}
+	*/
 };
 
 // XXX ENYO-1086: refactor tree walk-down
