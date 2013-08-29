@@ -403,6 +403,19 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 		return;
 	}
 	dstPath = path.join(this.root, dstRelPath);
+
+	//ByJunil call _compareNode
+	async.waterfall([
+		_checkChagable.bind(this, srcPath, dstPath),
+		function(movable, next) {
+			console.log("[ByJunil-MOVABLE]:", movable);
+		}
+	], function(err, results) {
+		if (err) {
+			console.log("[ByJunil-ERROR]:", err);
+		}
+	});
+	//ByJunil need to restructure the following code
 	if (srcPath === dstPath) {
 		next(new HttpError("trying to move a resource onto itself", 400 /*Bad-Request*/));
 		return;
@@ -456,6 +469,46 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 			}
 		}
 	}).bind(this));
+		// 1. dstPath does not exist ( O ) 
+		//    1.1 file name same => not Possible !! (Don't care)
+		//    1.2 file name diff => Can Move (TRUE)
+		// 2. dstPath exist, but file name diff
+		//    2.1 inode same => Can Move (TRUE)
+		//    2.2 inode diff => Not Allow to move (FALSE)
+		// 3. dstPath exist, and file name same => Not Allow to move (don't have to move) (FALSE)
+	function _checkChagable(srcPath, dstPath, next) {
+		var movable = false,
+			copyable = false;
+		var pathComp = (srcPath === dstPath);
+		async.series([
+			fs.stat.bind(this, srcPath),
+			fs.stat.bind(this, dstPath)
+		], function(err, results) {
+			if (err) {
+				if (err.code === 'ENOENT') {
+					movable = true;
+					next(null, movable);
+				} else {
+					next(err);
+				}
+				return;
+			}
+			// code flow comes here, it means dstPath already exist.
+			var srcStat = results[0],
+				dstStat = results[1];
+
+			if ( pathComp ) {
+				movable = false;
+			} else {
+				if (srcStat.ino === dstStat.ino) {
+					movable = true;
+				} else {
+					movable = false;
+				}
+			}
+			next(null, movable);
+		});
+	}
 };
 
 // XXX ENYO-1086: refactor tree walk-down
