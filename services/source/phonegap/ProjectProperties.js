@@ -772,10 +772,8 @@ enyo.kind({
 		if (err) {
 			this.warn("err:", err);
 		} else {
-			this.log(inBuildStatusData);		
+			this.trace(inBuildStatusData);		
 			this.setBuildStatusData(inBuildStatusData.user);
-			this.log(this.buildStatusData.status);		
-
 		}
 	}
 });
