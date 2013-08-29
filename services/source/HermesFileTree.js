@@ -137,8 +137,17 @@ enyo.kind({
 		} else {
 			inEvent.dataTransfer.effectAllowed = "linkMove";
 		}
-		inEvent.dataTransfer.setData("hermes.Node", this.draggedNode.file.id);
+
+		var data = {};
+		data.kind = this.draggedNode.kind;
+		data.file = this.draggedNode.file;
+		data.service={};
+		data.service.id = this.draggedNode.service.id;
+		data.service.config = this.draggedNode.service.config;
+		var dataText = JSON.stringify(data);
 		
+		inEvent.dataTransfer.setData("Text", dataText);
+
 		return true;
 	},
 	/** @private */
@@ -150,7 +159,13 @@ enyo.kind({
 		if (tempNode.kind !== "hermes.Node") {
 			tempNode = tempNode.parent;
 		}
-
+		
+		// FIXME: ENYO-2786 MSIE 10 workaround to avoid parent of Control object that is a Control object too and produce an error in the console
+		// BTW, objects dragged from elsewhere than HermesFileTree are discarded
+		if (tempNode.kind !== "hermes.Node") {
+			return true;
+		}
+		
 		if (!tempNode.file.isDir) {
 			tempNode = tempNode.container;
 		}
@@ -182,6 +197,11 @@ enyo.kind({
 	/** @private */
 	itemDragover: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
+
+		// discard any object that are not coming HermesFileTree
+		if (!this.draggedNode) {
+			return true;
+		}
 		
 		if (this.draggedNode.content != "package.js") {
 			if (this.isValidDropTarget(this.targetNode)) {
@@ -203,8 +223,18 @@ enyo.kind({
 	/** @private */
 	itemDrop: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
+		
+		var dataText = inEvent.dataTransfer.getData("Text");
+		if (dataText === "") {
+			return true;
+		}
 
-		var draggedNodeId = inEvent.dataTransfer.getData("hermes.Node");
+		var data = JSON.parse(dataText);
+		if (data.kind !== "hermes.Node") {
+			return true;
+		}
+		
+		var draggedNodeId = data.file.id;		
 		this.trace('node dropped', draggedNodeId);
 		
 		if (!this.isValidDropTarget(this.targetNode)) {
