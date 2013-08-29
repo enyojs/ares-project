@@ -157,8 +157,8 @@ enyo.kind({
 			components: [{
 					kind: "FittableRows",
 					components: [
-						{content: "Sign-in is required", name: "signInErrorMsg", classes: "ares-project-properties-sign-in-error-msg"}, 
-						{content: "Looking for Phonegap account data ...", name: "waitingForSignIn", classes: "ares-project-properties-sign-in-error-msg"},
+						{content: "Sign-in is required", name: "signInErrorMsg", classes: "ares-project-properties-sign-in-msg"}, 
+						{content: "Looking for Phonegap account data ...", name: "waitingForSignIn", classes: "ares-project-properties-sign-in-msg"},
 						{
 							classes: "ares-row ares-align-left",
 							name: "appIdRow",
@@ -510,7 +510,8 @@ enyo.kind({
 
 enyo.kind({
 	name: "Phonegap.ProjectProperties.AppId",
-	kind: "FittableColumns",
+	kind: "FittableRows",
+	classes: "ares-project-propertie-application-panel",
 	debug: false,
 	published: {
 		userData: undefined,
@@ -519,17 +520,30 @@ enyo.kind({
 	},
 
 	components: [
-		{content: "AppId",	classes: "ares-project-properties-appid-id"},
-		{
-			kind: "onyx.PickerDecorator",
+	{
+		kind:"FittableColumns",
+		classes: "ares-project-properties-appid-container",
+		components: [
+			{content: "Title",	classes: "ares-project-properties-appid-label-title"},
+			{name: "ApplicationTitle"}
+		]
+	},
+	{
+		kind:"FittableColumns",				
+		components: [
+			{content: "AppId",	classes: "ares-project-properties-appid-label-title"},
+			{
+				kind: "onyx.PickerDecorator",			
+				components: [
+					{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
+					{kind: "onyx.Picker", name: "AppIdList",published: {appObject: undefined}, onSelect: "updateSelectedAppId"}
+				]
+			},
+			{kind:"Phonegap.ProjectProperties.BuildStatus", name: "buildStatusDisplay"}
+			
+		]
+	}
 		
-			components: [
-				{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
-				{kind: "onyx.Picker", name: "AppIdList",published: {appObject: undefined}, onSelect: "updateSelectedAppId"}
-			]
-		},
-		{content: "Application name:",	classes: "ares-project-properties-appid-title"},
-		{name: "ApplicationTitle", content:""}
 	],
 
 	/**@private*/
@@ -557,11 +571,15 @@ enyo.kind({
 	/**@private*/
 	updateSelectedAppId: function (inSender, inValue) {	
 		this.setSelectedTitle(inValue && inValue.selected.published.applicationObject&& inValue.selected.published.applicationObject.title || "");
+		this.$.buildStatusDisplay.$.statusMessage.setContent("");
 		if (inValue.content === "New Application") {
 			this.setSelectedAppId("");
 		} else {
 			this.setSelectedAppId(inValue.content);
 		}				
+	},
+	selectedAppIdChanged: function() {
+		this.$.buildStatusDisplay.setAppId(this.selectedAppId);		
 	},
 
 	/**@private*/
@@ -582,6 +600,184 @@ enyo.kind({
 		this.$.ApplicationTitle.render();
 	}
 
+});
+
+enyo.kind({
+	name: "Phonegap.ProjectProperties.BuildStatus",
+	kind: "FittableRows",
+	published: {
+		appId: "",
+		buildStatusData: undefined,
+		phongapUrl: "https://build.phonegap.com/",
+		provider: undefined 
+	},
+	components: [
+		{
+			name: "buildStatusContainer", kind: "FittableRows", classes: "ares-project-properties-build-status-container",
+			components: [
+				{	
+						name: "labelContainer",
+						classes:"ares-project-properties-buildStatus-container",
+						kind: "FittableColumns",					
+						components:[						
+							{
+								name: "androidButton", kind: "onyx.IconButton", platform: "android", src: "$services/assets/images/platforms/android-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
+								ontap: "showStatusMessage",
+								components: [
+									{name: "androidMessage", classes:"ares-hide"}
+								]
+							},
+							{
+								name: "iosButton", kind: "onyx.IconButton", platform: "ios", src: "$services/assets/images/platforms/ios-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
+								ontap: "showStatusMessage",
+								components: [
+									{name: "iosMessage", classes:"ares-hide"}
+								]
+							},
+							{
+								name: "blackberryButton", kind: "onyx.IconButton", platform: "blackberry", src: "$services/assets/images/platforms/blackberry-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
+								ontap: "showStatusMessage",
+								components: [
+									{name: "blackberryMessage", classes:"ares-hide"}
+								]
+							},
+							{
+								name: "webosButton", kind: "onyx.IconButton", platform: "webos", src: "$services/assets/images/platforms/webos-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
+								ontap: "showStatusMessage",
+								components: [
+									{name: "webosMessage", classes:"ares-hide"}
+								]
+							},
+							{
+								name: "winphoneButton", kind: "onyx.IconButton", platform: "winphone", src: "$services/assets/images/platforms/winphone-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
+								ontap: "showStatusMessage",
+								components: [
+									{name: "winphoneMessage", classes:"ares-hide"}
+								]
+							}
+						]
+				},
+				{
+					name: "statusMessageContainer", kind: "onyx.Drawer", 
+					components: [
+						{name: "statusMessage", onclick: "hideStatusMessage"}
+					]
+				}
+			]
+		}
+	],
+	/**@private*/
+	create: function() {
+		this.inherited(arguments);
+		this.appIdChanged();
+		this.setProvider(Phonegap.ProjectProperties.getProvider());
+	},
+
+	/**@private*/
+	updateBuildStatusContainer: function(){
+		
+		if(this.appId === ""){
+			this.setBuildStatusData(null);			
+		} else {
+			this.provider.getAppData(this.appId, enyo.bind(this, this.getBuildStatusData));
+		} 
+
+		this.buildStatusDataChanged();
+		this.$.buildStatusContainer.render();
+	},
+	
+	/**
+	 * Charge the icon showing the build status of the application of a a given platform depending on 
+	 * its status. the status is checked from the "buildStatusData" object.
+	 * By clicking on the icon, the status message is displayed in the "statusMessageContainer".
+	 * 
+	 * @param  {onyx.IconButton} inIconButton Icon showing the status of the application build for a given
+	 *                                        platform.
+	 * @private
+	 */
+	buildStatusStyle: function(inIconButton) {
+
+		if (this.buildStatusData && this.buildStatusData.status[inIconButton.platform] === "complete") {
+			
+			//Build status: complete
+			inIconButton.setSrc("$services/assets/images/platforms/"+inIconButton.platform + "-logo-complete-32x32.png");
+			this.$[inIconButton.platform+"Message"].setContent("Download link: " + this.phongapUrl +this.buildStatusData.download[inIconButton.platform]);		
+		
+		} else {
+			if (this.buildStatusData && this.buildStatusData.status[inIconButton.platform] === "error" || 
+				this.buildStatusData && this.buildStatusData.status[inIconButton.platform] === null){
+				
+				//Build status: error
+				inIconButton.setSrc("$services/assets/images/platforms/" + inIconButton.platform + "-logo-error-32x32.png");
+				this.$[inIconButton.platform + "Message"].setContent("Error: " + this.buildStatusData.error[inIconButton.platform]);
+			
+			} else {
+				
+				inIconButton.setSrc("$services/assets/images/platforms/" + inIconButton.platform + "-logo-not-available-32x32.png");
+				if(this.buildStatusData === null) {
+					
+					//Build status: application not built
+					this.$[inIconButton.platform + "Message"].setContent("Build the application first");
+				
+				} else {
+					
+					//Build status: pending
+					this.$[inIconButton.platform + "Message"].setContent("Build in progress");
+				}		
+			}
+		}
+	},
+
+	/**
+	 * Change the icon of the application status for all platforms.
+	 * 
+	 * @private	 
+	 */
+	buildStatusDataChanged: function(){	
+		for(var key in this.$){
+			if(this.$[key].platform !== undefined) {
+				this.buildStatusStyle(this.$[key]);
+			}			
+		}
+	},
+
+	/**@private*/
+	showStatusMessage: function(inSender, inEvent){
+		this.$.statusMessage.setContent(this.$[inSender.platform+"Message"].getContent());
+	},
+
+	/**
+	 * Hide the status message.
+	 * 
+	 * @private
+	 */
+	hideStatusMessage: function(){
+		this.$.statusMessage.setContent("");
+	},
+
+	/**@private*/
+	appIdChanged: function(){
+		this.updateBuildStatusContainer();
+	},
+
+	/**
+	 * Callback function to initialize the "buildStatusData" object. 
+	 * 
+	 * @param  {Object} err               error object
+	 * @param  {Object} inBuildStatusData Object returned by Phonegap build, it contains several informations
+	 *                                    about the built application.
+	 * @private
+	 */
+	getBuildStatusData: function (err, inBuildStatusData) {
+		if (err) {
+			this.warn("err:", err);
+		} else {
+			this.log(inBuildStatusData);		
+			this.setBuildStatusData(inBuildStatusData.user);
+			this.log(this.buildStatusData.status);		
+
+		}
+	}
 });
 
 /**

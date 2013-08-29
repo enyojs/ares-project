@@ -96,6 +96,14 @@
 	margin-top: 85px;
 }
 
+.ares-hide {
+	visibility: hidden;
+}
+
+.ares-display {
+	visibility: visible;
+}
+
 .ares-panels>* {
 	width: 100%;
 	height: 100%;
@@ -352,26 +360,16 @@
 
 /*Project properties popup*/
 
-.ares-project-properties { height: 400px; width: 660px; padding: 5px 10px; margin-top: 15px; }
-.ares-project-properties-sign-in-error-msg {margin-left: 30px; font-weight: bold;}
-.ares-project-properties-targetsRows-display {
-	visibility: visible;
+.ares-project-properties {
+	height: 400px;
+	width: 660px;
+	padding: 5px 10px;
+	margin-top: 15px;
 }
 
-.ares-project-properties-targetsRows-hide {
-	visibility: hidden;
-	height: 0px;
+.ares-radio-group{
+	padding-top: 7px;
 }
-.ares-project-properties-AdvancedPanel-display {
-	visibility: visible;
-}
-
-.ares-project-properties-AdvancedPanel-hide {
-	visibility: hidden;
-	height: 0px;
-}
-
-.ares-radio-group{ padding-top: 7px; }
 
 .ares-radio-group>button {
 	line-height: 32px;
@@ -403,15 +401,36 @@
 }
 
 /* Ares "Phonegap build" panel.*/
-.ares-project-properties-appid-id { margin-left: 20px; margin-right: 20px}
 
-.ares-project-properties-appid-title { margin-left: 30px; margin-right: 10px;}
+.ares-project-properties-appid-label-title { 
+	width: 50px;
+	margin-left: 30px;
+	margin-right: 10px;
+}
 
-.ares-project-properties-drawer-row { margin-top: 10px; height: 32px; }
+.ares-project-properties-sign-in-msg {
+	margin-left: 80px;
+}
 
-.ares-project-properties-drawer-row-label { width: 13em; margin-left: 10px; margin-right: 10px;}
+.ares-project-properties-drawer-row {
+	height: 32px;
+	margin-top: 10px;	
+}
 
-.ares-project-properties-drawer-row-attribut-label {margin-left: 10px; margin-right: 10px;}
+.ares-project-properties-drawer-row-label {
+	width: 13em;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.ares-project-properties-drawer-row-attribut-label {
+	margin-left: 10px; 
+	margin-right: 10px;
+}
+
+.ares-project-propertie-application-panel {
+	height: 100px;
+}
 
 .ares-project-properties-common_drawer_header { 
 	margin-left: 50px;
@@ -455,7 +474,10 @@
 	width: 110px;
 }
 
-.ares-project-properties-drawer-row-check-box-label { margin-left: 30px; margin-right: 50px; }
+.ares-project-properties-drawer-row-check-box-label {
+	margin-left: 30px;
+	margin-right: 50px;
+}
 
 .ares-project-properties-label-background { 
 	background-color: @ares-drawer-label-background;
@@ -468,6 +490,24 @@
 
 .ares-project-properties-label-background:hover {
 	background-color: @ares-drawer-label-background-hover;
+}
+
+.ares-project-properties-build-status-container {
+	margin-left: 100px;
+}
+
+.ares-project-properties-build-status-icon {
+	width: 40px;
+	margin-left: 20px;
+}
+
+.ares-project-properties-buildStatus-container {
+	margin-bottom: 10px;
+	height: 32px;	
+}
+
+.ares-project-properties-appid-container {
+	margin-bottom: 20px;
 }
 
 /* Ares group box */
