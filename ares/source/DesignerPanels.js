@@ -35,6 +35,10 @@ enyo.kind({
 					{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closeDesignerAction"},
 					{kind: "onyx.Tooltip", content: "Code editor"}
 				]}
+			]},
+			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
+				{kind: "onyx.IconButton", src: "../project-view/assets/images/project_view_preview.png", ontap: "doSavePreviewAction"},
+				{kind: "onyx.Tooltip", content: "Preview"}
 			]}
 		]},
 		{
@@ -63,7 +67,8 @@ enyo.kind({
 	],
 	events: {
 		onRegisterMe: "",
-		onMovePanel:""
+		onMovePanel:"",
+		onSavePreviewAction:""
 	},
 	published: {
 		panelIndex: 2

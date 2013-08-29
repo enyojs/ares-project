@@ -15,7 +15,8 @@ enyo.kind({
 				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
-		{name: "savePopup", kind: "saveActionPopup", onAbandonDocAction: "abandonDocAction", onSave: "saveBeforeClose", onCancel: "cancelClose"},
+		{name: "savePopup", kind: "saveActionPopup", onAbandonDocAction: "abandonDocAction", onSave: "saveBeforeClose"},
+		{name: "savePopupPreview", kind: "saveActionPopup", onAbandonDocAction: "abandonSaveDocAction", onSave: "saveBeforePreview", onCancel: "cancelClose"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
@@ -31,7 +32,9 @@ enyo.kind({
 		onDesignDocument: "",
 		onCloseDocument: "",
 		onUpdate: "",
-		onRegisterMe: ""
+		onRegisterMe: "",
+		onDisplayPreview: "",
+		onSwitchFile: ""
 	},
 	handlers: {
 		onCss: "newcssAction",
@@ -40,6 +43,7 @@ enyo.kind({
 	published: {
 		projectData: null
 	},
+	documents:"",
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
@@ -701,7 +705,7 @@ enyo.kind({
 	},
 	cancelClose: function(inSender, inEvent) {
 		this.closeAll = false;
-	},	
+	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
@@ -710,6 +714,37 @@ enyo.kind({
 		this.doCloseDocument({id: docData.getId()});
 		this.closeNextDoc();
 	},	
+	saveDocumentsBeforePreview: function(documents){
+		this.documents = documents;
+		this.saveNextDocument();
+	},
+	saveNextDocument: function(){
+		if(this.documents.length >= 1){
+			var docData = this.documents[this.documents.length-1];
+			this.openDoc(docData);
+			this.doSwitchFile({id:docData.id});
+			this.saveDocForPreview();
+			this.documents.splice(this.documents.length-1, 1);
+		}else{
+			this.doDisplayPreview();
+		}
+		return true;
+	},
+	saveDocForPreview: function(){
+		this.$.savePopupPreview.setName("Document was modified!");
+		this.$.savePopupPreview.setMessage("\""+ this.docData.getFile().path + "\" was modified.<br/><br/>Save it before preview?");
+		this.$.savePopupPreview.setActionButton("Don't Save");
+		this.$.savePopupPreview.show();
+	},
+	saveBeforePreview: function(inSender, inEvent){
+		this.saveDocAction();
+		this.saveNextDocument();
+		return true;
+	},
+	abandonSaveDocAction: function(inSender, inEvent) {
+		this.$.savePopup.hide();
+		this.saveNextDocument();
+	},
 	docChanged: function(inSender, inEvent) {
 		this.docData.setEdited(true);
 
