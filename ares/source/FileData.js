@@ -1,9 +1,9 @@
 /* global Ares, Backbone */
 
-// Create the Ares.Model object if it does not exist yet
-if ( ! Ares.Model) {
-	Ares.Model = {};
-}
+enyo.singleton({
+	kind: "enyo.Component",
+	name: "Ares.Model"
+});
 
 Ares.Model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when possible
 	getId: function() {

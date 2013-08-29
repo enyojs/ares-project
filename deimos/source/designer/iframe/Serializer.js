@@ -13,6 +13,9 @@ enyo.kind({
 		var s = this._serializeComponent(inComponent, inIncludeAresId);
 		return enyo.json.codify.to(s, null, 4);
 	},
+	published: {
+		serializerOptions: null
+	},
 	//* protected
 	noserialize: {owner: 1, container: 1, parent: 1, id: 1, attributes: 1, selected: 1, active: 1, isContainer: 1},
 	_serialize: function(inContainer, inIncludeAresId) {
@@ -71,7 +74,7 @@ enyo.kind({
 		var ps = this.buildPropList(inComponent, "published");
 		var proto = inComponent.ctor.prototype;
 		for (var j=0, p; (p=ps[j]); j++) {
-			if (!this.noserialize[p] && proto[p] != inComponent[p] && inComponent[p] !== "") {
+			if (this.isSerializable(inComponent.kind, p) && proto[p] != inComponent[p] && inComponent[p] !== "") {
 				o[p] = inComponent[p];
 			}
 		}
@@ -92,7 +95,7 @@ enyo.kind({
 		var ps = this.buildPropList(inComponent, "events");
 		var proto = inComponent.ctor.prototype;
 		for (var j=0, p; (p=ps[j]); j++) {
-			if (!this.noserialize[p] && proto[p] != inComponent[p] && inComponent[p] !== "") {
+			if (this.isSerializable(inComponent.kind, p) && proto[p] != inComponent[p] && inComponent[p] !== "") {
 				inProps[p] = inComponent[p];
 			}
 		}
@@ -118,5 +121,26 @@ enyo.kind({
 			props.push(n);
 		}
 		return props;
+	},
+	// @protected
+	isSerializable: function(inKind, inProp) {
+		if (this.noserialize[inProp] === 1) {
+			return false;
+		} else {
+			var value = this.getSerializerOptions(inKind, inProp, "exclude");
+			if (value === undefined) {
+				return true;
+			} else {
+				return ! value;
+			}
+		}
+	},
+	// @protected
+	getSerializerOptions: function(inKind, inPropName, inOptName) {
+		try {
+			return this.serializerOptions[inKind][inOptName][inPropName];
+		} catch(error) {
+			return;			// Just return an undefined value
+		}
 	}
 });

@@ -71,17 +71,21 @@ enyo.kind({
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
 		return true;
 	},
-	saveComplete: function() {
+	saveComplete: function(inDocData) {
 		this.hideWaitPopup();
-		this.docData.setEdited(false);		// TODO: The user may have switched to another file
-		this.reparseAction();
+		if (inDocData) {
+			inDocData.setEdited(false);		// TODO: The user may have switched to another file
+		}
+		if (this.docData === inDocData) {
+			this.reparseAction();
+		}
 	},
 	saveNeeded: function() {
 		return this.docData.getEdited();
 	},
 	saveFailed: function(inMsg) {
 		this.hideWaitPopup();
-		this.log("Save failed: " + inMsg);
+		this.warn("Save failed: " + inMsg);
 		this.showErrorPopup("Unable to save the file");
 	},
 	saveAsDocAction: function() {
@@ -125,9 +129,9 @@ enyo.kind({
 		this.beforeClosingDocument();
 		this.doCloseDocument({id: id});
 		this.closeNextDoc();
+		return true;
 	},
 	openDoc: function(inDocData) {
-
 		// If we are changing documents, reparse any changes into the current projectIndexer
 		if (this.docData && this.docData.getEdited()) {
 			this.reparseAction(true);
@@ -249,6 +253,15 @@ enyo.kind({
 				} else {
 					this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
 				}
+			} else if (this.owner.$.editorFileMenu.$[stuff] !== undefined && this.owner.$.designerFileMenu.$[stuff] !== undefined) {
+				var editorFileMenu = this.owner.$.editorFileMenu.$[stuff];
+				var designerFileMenu = this.owner.$.designerFileMenu.$[stuff];
+				if (typeof editorFileMenu.setShowing === 'function' && typeof designerFileMenu.setShowing === 'function') {
+					editorFileMenu.setShowing(showStuff);
+					designerFileMenu.setShowing(showStuff);
+				} else {
+					this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
+				}
 			} else {
 				if (typeof this.owner.$[stuff].setShowing === 'function') {
 					this.owner.$[stuff].setShowing(showStuff) ;
@@ -271,7 +284,7 @@ enyo.kind({
 
 		var settings = modes[mode]||modes['text'];
 		this.$.right.setIndex(settings.rightIndex);
-		this.$.body.reflow();
+		this.resizeHandler();
 		return showSettings.ace ;
 	},
 	showWaitPopup: function(inMessage) {
@@ -856,6 +869,11 @@ enyo.kind({
 		if (data.kinds.length > 0) {
 			this.doUpdate(data);
 		} // else - The error has been displayed by extractKindsData()
+	},
+	resizeHandler: function() {
+		this.inherited(arguments);
+		this.$.body.reflow();
+		this.$.ace.resize();
 	}
 });
 

@@ -1,4 +1,4 @@
-/* global require, console, process, module, __dirname, __filename */
+/* jshint node:true */
 /**
  * fsLocal.js -- Ares FileSystem (fs) provider, using local files.
  * 
@@ -13,10 +13,11 @@ var fs = require("fs"),
     util  = require("util"),
     mkdirp = require("mkdirp"),
     async = require("async"),
-    FsBase = require(__dirname + "/lib/fsBase"),
-    FdUtil = require(__dirname + "/lib/SimpleFormData"),
     CombinedStream = require('combined-stream'),
-    HttpError = require(__dirname + "/lib/httpError");
+    copyFile = require("./lib/copyFile"),
+    FsBase = require("./lib/fsBase"),
+    FdUtil = require("./lib/SimpleFormData"),
+    HttpError = require("./lib/httpError");
 
 var basename = path.basename(__filename, '.js');
 
@@ -337,15 +338,29 @@ FsLocal.prototype.putFile = function(req, file, next) {
 		function(cb1) {
 			mkdirp(dir, cb1);
 		},
-		function(cb1) {
+		(function(cb1) {
 			if (file.path) {
-				fs.rename(file.path, absPath, cb1);
+				try {
+					fs.renameSync(file.path, absPath);
+					cb1();
+				} catch(err) {
+					this.log("FsLocal.putFile(): err:", err.toString());
+					if (err.code === 'EXDEV') {
+						this.log("FsLocal.putFile(): COPY+REMOVE file:", file.path, "-> absPath:", absPath);
+						async.series([
+							copyFile.bind(undefined, file.path, absPath),
+							fs.unlink.bind(fs, file.path)
+						], cb1);
+					} else {
+						throw err;
+					}
+				}
 			} else if (file.buffer) {
 				fs.writeFile(absPath, file.buffer, cb1);
 			} else {
 				cb1(new HttpError("cannot write file=" + JSON.stringify(file), 400));
 			}
-		},
+		}).bind(this),
 		(function(cb1){
 			this.log("FsLocal.putFile(): file length: ", 
 				file.buffer && file.buffer.length);
@@ -458,15 +473,9 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 			if (stats.isDirectory()) {
 				_copyDir(srcPath, dstPath, next);
 			} else if (stats.isFile()){
-				_copyFile(srcPath, dstPath, next);
+				copyFile(srcPath, dstPath, next);
 			}
 		});
-	}
-	function _copyFile(srcPath, dstPath, next) {
-		var is, os;
-		is = fs.createReadStream(srcPath);
-		os = fs.createWriteStream(dstPath);
-		util.pump(is, os, next); // XXX should return 201 (Created) on success
 	}
 	function _copyDir(srcPath, dstPath, next) {
 		fs.readdir(srcPath, function(err, files) {

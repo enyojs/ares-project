@@ -66,7 +66,6 @@ enyo.kind({
 				this.fillProjectPropPopup.bind(this, inSender, inEvent),
 				this.checkGetAppinfo.bind(this, inSender, inEvent),
 				this.getTemplates.bind(this, inSender, inEvent),
-				this.createProjectJson.bind(this, inSender, inEvent),
 				this.showProjectPropPopup.bind(this, inSender, inEvent)
 			], this.waitOk.bind(this));
 	},
@@ -191,22 +190,15 @@ enyo.kind({
 		}
 	},
 
-	createProjectJson: function(inSender, inEvent, next) {
-		this.config.init({
-			folderId:  this.selectedDir.id,
-			service: this.selectedDir.service
-		}, function(err) {
-			if (err) {
-				this.$.errorPopup.raise(err.toString());
-				var testCallBack = inEvent.testCallBack;
-				if (testCallBack) {
-					testCallBack();
-				}
-				next({handled: true, msg: err.toString()});
-			} else {
-				next();
-			}
-		}.bind(this));
+	createProjectJson: function(data, next) {
+		//initialize project config
+		this.config.data = null;
+		this.config.service = this.selectedDir.service;
+		this.config.folderId = this.selectedDir.id;
+		//save the project config;
+		this.config.setData(data) ;
+		//create and save the project.json
+		this.config.save() ;
 	},
 
 	showProjectPropPopup: function(inSender, inEvent, next) {
@@ -245,8 +237,6 @@ enyo.kind({
 		var template = inEvent.template;
 
 		this.warn("Creating new project ", name, " in folderId=", folderId, " (template: ", template, ")");
-		this.config.setData(inEvent.data) ;
-		this.config.save() ;
 
 		if (template) {
 			this.instanciateTemplate(inEvent);
@@ -257,6 +247,8 @@ enyo.kind({
 				.response(this, function(inRequest, inFsNode) {
 					this.trace("package.js inFsNode[0]:", inFsNode[0]);
 					this.projectReady(null, inEvent);
+
+					this.createProjectJson(inEvent.data);
 				})
 				.error(this, function(inRequest, inError) {
 					this.warn("inRequest:", inRequest, "inError:", inError);
@@ -265,6 +257,7 @@ enyo.kind({
 
 		return true ; // stop bubble
 	},
+	/** @private */
 	$LS: function(msg, params) {
 		var tmp = new enyo.g11n.Template($L(msg));
 		return tmp.evaluate(params);
@@ -295,7 +288,11 @@ enyo.kind({
 			sourceIds: sources,
 			substitutions: substitutions
 		});
-		req.response(this, this.populateProject);
+		req.response(this, function(inSender, inData) {
+			this.populateProject(inSender, inData);
+
+			this.createProjectJson(inEvent.data);
+		});
 		req.error(this, function(inSender, inError) {
 			this.warn("Unable to get the template files (", inError, ")");
 			this.$.errorPopup.raise($L("Unable to instanciate projet content from the template"));
