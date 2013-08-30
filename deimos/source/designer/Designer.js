@@ -17,13 +17,14 @@ enyo.kind({
 		onReloadComplete: "",
 		onResizeItem: "",
 		onError: "",
-		onReturnPositionValue: ""
+		onReturnPositionValue: "",
+		onCloseDesigner: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", classes: "ares-iframe-client"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"}
 	],
-	baseSource: "../deimos/source/designer/iframe.html",
+	baseSource: "iframe.html",
 	projectSource: null,
 	selection: null,
 	reloadNeeded: false,
@@ -79,7 +80,7 @@ enyo.kind({
 		this.setIframeReady(false);
 		this.projectSource = inSource;
 		this.projectPath = serviceConfig.origin + serviceConfig.pathname + "/file";
-		var iframeUrl = this.baseSource + "?src=" + this.projectSource.getProjectUrl();
+		var iframeUrl = this.projectSource.getProjectUrl() + "/" + this.baseSource + "?overlay=designer";
 		this.trace("Setting iframe url: ", iframeUrl);
 		this.$.client.hasNode().src = iframeUrl;
 	},
@@ -137,9 +138,12 @@ enyo.kind({
 			this.doMoveItem(msg.val);
 		} else if (msg.op === "reloadNeeded") {
 			this.reloadNeeded = true;
-		// Existing component dropped in iframe
 		} else if(msg.op === "error") {
 			if (( ! msg.val.hasOwnProperty('popup')) || msg.val.popup === true) {
+				if (msg.val.reloadNeeded === true) {
+					msg.val.callback = this.goBacktoEditor.bind(this);
+					msg.val.action = "Switching back to code editor";
+				}
 				this.doError(msg.val);
 			} else {
 				// TODO: We should store the error into a kind of rotating error log - ENYO-2462
@@ -154,6 +158,9 @@ enyo.kind({
 		} else {
 			enyo.warn("Deimos designer received unknown message op:", msg);
 		}
+	},
+	goBacktoEditor: function() {
+		this.doCloseDesigner();
 	},
 	//* Pass _isContainer_ info down to iframe
 	sendIframeContainerData: function() {
@@ -207,5 +214,8 @@ enyo.kind({
 	//* Request auto-generated position value from iframe
 	requestPositionValue: function(inProp) {
 		this.sendMessage({op: "requestPositionValue", val: inProp});
+	},
+	sendSerializerOptions: function(serializerOptions) {
+		this.sendMessage({op: "serializerOptions", val: serializerOptions});	
 	}
 });

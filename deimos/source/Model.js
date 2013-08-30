@@ -5,6 +5,7 @@ enyo.singleton({
 	debug: false,
 	info: {},
 	kindOptions: {},
+	serializerOptions: {},
 	defaults: {
 		properties: {
 			owner: {filterLevel: "hidden"},
@@ -26,6 +27,8 @@ enyo.singleton({
 	},
 	defaultKindOptions: {
 		"enyo.Repeater": {"isRepeater": true}
+	},
+	defaultSerializerOptions: {
 	},
 	F_HIDDEN: -1,
 	F_DANGEROUS: 1,
@@ -55,6 +58,7 @@ enyo.singleton({
 		this.addInformation("events", "__default", this.defaults.events);
 
 		this.kindOptions = enyo.clone(this.defaultKindOptions);
+		this.serializerOptions = enyo.clone(this.defaultSerializerOptions);
 	},
 	/**
 	 * Build all the information needed by the inspector
@@ -74,7 +78,9 @@ enyo.singleton({
 		}, this);
 
 		this.addKindOptions(projectIndexer.design.palette);
+		this.addSerializerOptions(projectIndexer.design.serializer);
 	},
+	// @protected
 	addKindOptions: function(palette) {
 		enyo.forEach(palette, function(category) {
 			enyo.forEach(category.items, function(item) {
@@ -84,9 +90,23 @@ enyo.singleton({
 			}, this);
 		}, this);
 	},
+	// @public
 	getKindOptions: function(name) {
 		return this.kindOptions[name] || this.kindOptions["enyo." + name];
 	},
+	// @protected
+	addSerializerOptions: function(data) {
+		// Prepare serializer options for the designer iframe
+		enyo.forEach(data, function(item) {
+			var kindName = item.name;
+			var info = this.serializerOptions[kindName];
+			if ( ! info) {
+				this.serializerOptions[kindName] = info = {};
+			}
+			info.exclude = item.exclude;
+		}, this);
+	},
+	// @protected
 	addInformation: function(inType, inName, inInfo) {
 		if (inInfo) {
 			this.trace("addInformation: Adding ", inType, " information for ", inName);

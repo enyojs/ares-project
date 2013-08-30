@@ -16,7 +16,7 @@ enyo.kind({
 				{fit:true},
 				{kind: "Control", content: "Click on "},
 				{kind: "onyx.InputDecorator", components: [
-					{name: "runTests", kind: "onyx.IconButton", src: "$test/images/play.png", ontap: "runTests"},
+					{name: "runTests", kind: "onyx.IconButton", src: "./images/play.png", ontap: "runTests"},
 				]}
 			]},
 

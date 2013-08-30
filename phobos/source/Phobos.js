@@ -16,6 +16,7 @@ enyo.kind({
 			]}
 		]},
 		{name: "savePopup", kind: "saveActionPopup", onAbandonDocAction: "abandonDocAction", onSave: "saveBeforeClose", onCancel: "cancelClose"},
+		{name: "savePopupPreview", kind: "saveActionPopup", onAbandonDocAction: "abandonDocActionOnPreview", onSave: "saveBeforePreviewAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
@@ -32,7 +33,12 @@ enyo.kind({
 		onCloseDocument: "",
 		onUpdate: "",
 		onRegisterMe: "",
-		onCssDocument: ""
+
+		onCssDocument: "",
+
+		onDisplayPreview: "",
+		onSwitchFile: ""
+
 	},
 	handlers: {
 		onNewcss: "newcss",
@@ -42,6 +48,7 @@ enyo.kind({
 	published: {
 		projectData: null
 	},
+	editedDocs:"",
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
@@ -73,17 +80,21 @@ enyo.kind({
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
 		return true;
 	},
-	saveComplete: function() {
+	saveComplete: function(inDocData) {
 		this.hideWaitPopup();
-		this.docData.setEdited(false);		// TODO: The user may have switched to another file
-		this.reparseAction();
+		if (inDocData) {
+			inDocData.setEdited(false);		// TODO: The user may have switched to another file
+		}
+		if (this.docData === inDocData) {
+			this.reparseAction();
+		}
 	},
 	saveNeeded: function() {
 		return this.docData.getEdited();
 	},
 	saveFailed: function(inMsg) {
 		this.hideWaitPopup();
-		this.log("Save failed: " + inMsg);
+		this.warn("Save failed: " + inMsg);
 		this.showErrorPopup("Unable to save the file");
 	},
 	saveAsDocAction: function() {
@@ -127,9 +138,9 @@ enyo.kind({
 		this.beforeClosingDocument();
 		this.doCloseDocument({id: id});
 		this.closeNextDoc();
+		return true;
 	},
 	openDoc: function(inDocData) {
-
 		// If we are changing documents, reparse any changes into the current projectIndexer
 		if (this.docData && this.docData.getEdited()) {
 			this.reparseAction(true);
@@ -295,7 +306,7 @@ enyo.kind({
 
 		var settings = modes[mode]||modes['text'];
 		this.$.right.setIndex(settings.rightIndex);
-		this.$.body.reflow();
+		this.resizeHandler();
 		return showSettings.ace ;
 	},
 	showWaitPopup: function(inMessage) {
@@ -686,10 +697,7 @@ enyo.kind({
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
-			this.$.savePopup.setName("Document was modified!");
-			this.$.savePopup.setMessage("\""+ this.docData.getFile().path + "\" was modified.<br/><br/>Save it before closing?");
-			this.$.savePopup.setActionButton("Don't Save");
-			this.$.savePopup.show();
+			this.showSavePopup('"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing? "');
 		} else {
 			var id = this.docData.getId();
 			this.beforeClosingDocument();
@@ -712,7 +720,7 @@ enyo.kind({
 	},
 	cancelClose: function(inSender, inEvent) {
 		this.closeAll = false;
-	},	
+	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
@@ -720,7 +728,54 @@ enyo.kind({
 		this.beforeClosingDocument();
 		this.doCloseDocument({id: docData.getId()});
 		this.closeNextDoc();
+	},
+	/**
+	* @protected
+	*/
+	showSavePopup: function(message){
+		this.$.savePopupPreview.setName("Document was modified!");
+		this.$.savePopupPreview.setMessage(message);
+		this.$.savePopupPreview.setActionButton("Don't Save");
+		this.$.savePopupPreview.show();
 	},	
+	/** 
+	* @protected
+	*/
+	saveDocumentsBeforePreview: function(editedDocs){
+		this.editedDocs = editedDocs;
+		this.saveNextDocument();
+	},
+	/**
+	* @protected
+	*/
+	saveNextDocument: function(){
+		if(this.editedDocs.length >= 1){
+			var docData = this.editedDocs.pop();
+			this.openDoc(docData);
+			this.doSwitchFile({id:docData.id});
+			this.showSavePopup('"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before preview? "');
+		}else{
+			this.doDisplayPreview();
+		}
+		return true;
+	},
+	/**
+	* Called when save button is selected in save popup shown before preview action
+	* @protected
+	*/
+	saveBeforePreviewAction: function(inSender, inEvent){
+		this.saveDocAction();
+		this.saveNextDocument();
+		return true;
+	},
+	/**
+	* Called when don't save button is selected in save popup shown before preview action
+	* @protected
+	*/
+	abandonDocActionOnPreview: function(inSender, inEvent) {
+		this.$.savePopup.hide();
+		this.saveNextDocument();
+	},
 	docChanged: function(inSender, inEvent) {
 		this.docData.setEdited(true);
 
@@ -814,11 +869,11 @@ enyo.kind({
 		this.$.findpop.hide();
 	},
 	toggleww: function(){
-	    if(this.$.ace.wordWrap === "true" || this.$.ace.wordWrap === true){
+		if(this.$.ace.wordWrap === "true" || this.$.ace.wordWrap === true){
 			this.$.ace.wordWrap = false;
 			this.$.ace.wordWrapChanged();
-	    }else{
-			this.$.ace.wordWrap = true;
+    }else{
+		this.$.ace.wordWrap = true;
 			this.$.ace.wordWrapChanged();
 		}
 	},
@@ -878,6 +933,7 @@ enyo.kind({
 			this.doUpdate(data);
 		} // else - The error has been displayed by extractKindsData()
 	},
+
 	cssAction: function(){
 	// Update the projectIndexer and notify watchers
 		this.reparseAction();
@@ -904,6 +960,12 @@ enyo.kind({
 		this.$.ace.gotoLine(0,0);
 		this.$.ace.replace(old_css, new_css, options);
 	},
+
+	resizeHandler: function() {
+		this.inherited(arguments);
+		this.$.body.reflow();
+		this.$.ace.resize();
+	}
 
 });
 

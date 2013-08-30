@@ -22,7 +22,6 @@ enyo.kind({
 		// in charge of Ares TestRunner Test Suite
 		if (window.location.search.indexOf("norunner") == -1) {
 			this.inherited(arguments);
-			var aresTestW;
 			// postMessage API is not correctly supported by IE
 			if (!enyo.platform.ie) {
 				// listen for dispatched messages (received from Ares Test Reporter)
@@ -30,7 +29,7 @@ enyo.kind({
 
 				// Create the new window browser named Ares Test Suite
 				var url = "../test/testrunner/index.html";
-				aresTestW = window.open(url, 'Ares-Test-Suite','scrollbars=auto, titlebar=yes, height=640,width=640', false);
+				window.aresTestW = window.open(url, 'Ares-Test-Suite','scrollbars=auto, titlebar=yes, height=640,width=640', false);
 
 				// Communication path between Ares Test and Ares Ide through postMessage window method
 				// Warning: postMessage sent several times to make sure it has been received by Ares Test browser
@@ -38,16 +37,16 @@ enyo.kind({
 				var repeatPostMsg = function() {
 					if (this.debug) {
 						enyo.log("Post ARES.TEST.START ...");
-						aresTestW.postMessage("ARES.TEST.START", "http://127.0.0.1:9009");
-						count--;
-						if (count > 0) {
-							setTimeout(repeatPostMsg, 1000);
-						}
+					}
+					window.aresTestW.postMessage("ARES.TEST.START", "http://127.0.0.1:9009");
+					count--;
+					if (count > 0) {
+						setTimeout(repeatPostMsg, 1000);
 					}
 				};
 				setTimeout(repeatPostMsg, 1000);
 			} else {
-				aresTestW = null;
+				window.aresTestW = null;
 				// Create TextCtrlRunner and TestProxyReporter components
 				// TestProxyReporter is created by TestCtrlRunner
 				if (this.$.runner) {

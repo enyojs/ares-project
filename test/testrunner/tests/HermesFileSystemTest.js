@@ -3,6 +3,7 @@
 enyo.kind({
 	name: "HermesFileSystemTest",
 	kind: "Ares.TestSuite",
+	noDefer: true,
 	debug: false,
 
 	dirToCreate: "TestRunner",
@@ -48,8 +49,9 @@ enyo.kind({
 	*/
 	testGetHomeFromServices: function() {
 		enyo.log("Begin called in testGetHomeFromServices.");
+		var self = this;
 		var h = this.services.filter(function(s) {
-			this.trace("service.conf.id: ", s.conf.id);
+			self.trace("service.config.id: ", s.config.id);
 			return s.config.id === "home";
 		});
 		this.trace("home service: ", h);
@@ -85,7 +87,7 @@ enyo.kind({
 					self.finish();
 				});
 				req2.error(this, function(inSender, inError) {
-					enyo.log(inError);
+					self.trace(inError);
 					self.finish("create "+this.dirToCreate+ " folder failed with error: " +inError);
 				});
 			});

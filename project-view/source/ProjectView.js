@@ -219,7 +219,7 @@ enyo.kind({
 			window.open(
 				previewUrl,
 				'_blank', // ensure that a new window is created each time preview is tapped
-				'scrollbars=0,menubar=1',
+				'scrollbars=0,menubar=1,resizable=1',
 				false
 			);
 		}
