@@ -716,7 +716,7 @@ enyo.kind({
 	*/
 	showSavePopup: function(message){
 		this.$.savePopupPreview.setName("Document was modified!");
-		this.$.savePopupPreview.setMessage(/*"\""+ this.docData.getFile().path + "\" was modified.<br/><br/>Save it before preview?"*/message);
+		this.$.savePopupPreview.setMessage(message);
 		this.$.savePopupPreview.setActionButton("Don't Save");
 		this.$.savePopupPreview.show();
 	},	
