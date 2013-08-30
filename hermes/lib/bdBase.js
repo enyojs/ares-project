@@ -296,6 +296,12 @@ BdBase.prototype.store = function(req, res, next) {
 };
 
 /**
+ * Bdbase#minify method takes 2 request query parameters:
+ * 
+ * - "debug" is one of ["true", "false"] (default: "false").  When true, the code is not minified.
+ * - "excludes" is an Array of relative path to be removed from the archive uploaded to PGB. "excludes"
+ *   is ignored when "debug" is "false".
+ * 
  * @protected
  */
 BdBase.prototype.minify = function(req, res, next) {
@@ -323,18 +329,34 @@ BdBase.prototype.minify = function(req, res, next) {
 	});
 
 	function _noMinify() {
-		log.info("_noMinify()", "Skipping minification");
+		log.info("minify#_noMinify()", "Skipping minification");
+
+		var excludes;
+		try {
+			excludes = JSON.parse(req.query["excludes"]);
+			excludes = Array.isArray(excludes) && excludes;
+		} catch(e) {}
+		excludes = excludes || ["target", "build"];
+
 		req.appDir.zipRoot = req.appDir.source;
 		var index = path.join(req.appDir.zipRoot, "index.html"),
 		    debug = path.join(req.appDir.zipRoot, "debug.html");
 		async.waterfall([
+			async.forEach.bind(this, excludes, function(exclude, next) {
+				var absExclude = path.join(req.appDir.zipRoot, exclude);
+				log.verbose("minify#_noMinify()", "rm -rf", absExclude);
+				rimraf(absExclude, next);
+			}),
 			fs.stat.bind(this, debug),
 			function(stat, next) {
+				log.verbose("minify#_noMinify()", "mv debug.html index.html");
 				fs.unlink(index, next);
 			},
 			fs.rename.bind(this, debug, index)
 		], function(err) {
-			log.verbose("expected err:", err);
+			if (err) {
+				log.verbose("ignoring err:", err.toString());
+			}
 			next();
 		});
 	}
@@ -352,7 +374,7 @@ BdBase.prototype.minify = function(req, res, next) {
 			       '--source', req.appDir.source,
 			       '--out', req.appDir.minify,
 			       '--less'];
-		log.info("_minify()", "Running: '", minifyScript, params.join(' '), "'");
+		log.info("minify#_minify()", "Running: '", minifyScript, params.join(' '), "'");
 		var child = child_process.fork(minifyScript, params, {
 			silent: false
 		});
