@@ -390,6 +390,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 	    overwriteParam = req.param('overwrite'),
 	    srcPath = path.join(this.root, pathParam);
 	var dstPath, dstRelPath;
+	var srcStat, dstStat;
 	if (nameParam) {
 		// rename/copy file within the same collection (folder)
 		dstRelPath = path.join(path.dirname(pathParam),
@@ -403,43 +404,49 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 		return;
 	}
 	dstPath = path.join(this.root, dstRelPath);
-
-	//interim-code //comment-out
-	/*
-	async.waterfall([
-		_checkChagable.bind(this, srcPath, dstPath),
-		function(movable, next) {
-			console.log("[ByJunil-MOVABLE]:", movable);
-		}
-	], function(err, results) {
-		if (err) {
-			console.log("[ByJunil-ERROR]:", err);
-		}
-	});
-	*/
 	if (srcPath === dstPath) {
 		next(new HttpError("trying to move a resource onto itself", 400 /*Bad-Request*/));
 		return;
 	}
-	fs.stat(dstPath, (function(err, stat) {
+	/* new code - ByJunil - interim */
+	async.waterfall([
+		fs.stat.bind(this, srcPath),
+			function(stat, next) {
+				srcStat = stat;
+	            fs.stat(dstPath, next);
+	        },
+	        function(stat, next) {
+	           	dstStat = stat;
+	            next();
+	        }
+	], function(err) {
 		// see RFC4918, section 9.9.4 (MOVE Status
 		// Codes) & section 9.8.5 (COPY Status Codes).
 		if (err) {
 			if (err.code === 'ENOENT') {
-				// Destination resource does not exist yet
-				op(srcPath, dstPath, (function(err) {
-					// return the new content of the destination path
-					this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
-						next(err, {
-							code: 201 /*Created*/,
-							body: content
+				if (err.path === srcPath) {
+					/* srcPath doesn't exist */
+					next(new HttpError("resouce does not exist", 400 /*Bad-Request*/));
+					return;
+				} else {
+					/* dstPath doesn't exist */
+					// Destination resource does not exist yet
+					op(srcPath, dstPath, (function(err) {
+						// return the new content of the destination path
+						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
+							next(err, {
+								code: 201 /*Created*/,
+								body: content
+							});
 						});
-					});
-				}).bind(this));
+					}).bind(this));
+				}
 			} else {
+				/* unknown error */
 				next(err);
 			}
-		} else if (stat) {
+		} else {
+			/* dstPath exist */
 			if (overwriteParam) {
 				// Destination resource already exists : destroy it first
 				this._rmrf(dstPath, (function(err) {
@@ -454,65 +461,72 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 					}).bind(this));
 				}).bind(this));
 			} else {
-				if (req.method.match(/MOVE/i)) {
-					op(srcPath, dstPath, (function(err) {
-						//next(err, { code: 204 /*No-Content*/ });
-						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
-							next(err, {
-								code: 200 /*Ok*/,
-								body: content
+				if (req.method.match(/MOVE/i) && (srcStat.ino === dstStat.ino)) {
+						op(srcPath, dstPath, (function(err) {
+							this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
+								next(err, {
+									code: 200 /*Ok*/,
+									body: content
+								});
 							});
-						});
-					}).bind(this));
+						}).bind(this));
 				} else { 
 					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
 				}
 			}
 		}
-	}).bind(this));
-
-	/* interim code - comment out 
-		// 1. dstPath does not exist ( O ) 
-		//    1.1 file name same => not Possible !! (Don't care)
-		//    1.2 file name diff => Can Move (TRUE)
-		// 2. dstPath exist, but file name diff
-		//    2.1 inode same => Can Move (TRUE)
-		//    2.2 inode diff => Not Allow to move (FALSE)
-		// 3. dstPath exist, and file name same => Not Allow to move (don't have to move) (FALSE)
-	function _checkChagable(srcPath, dstPath, next) {
-		var movable = false,
-			copyable = false;
-		var pathComp = (srcPath === dstPath);
-		async.series([
-			fs.stat.bind(this, srcPath),
-			fs.stat.bind(this, dstPath)
-		], function(err, results) {
-			if (err) {
-				if (err.code === 'ENOENT') {
-					movable = true;
-					next(null, movable);
-				} else {
-					next(err);
-				}
-				return;
-			}
-			// code flow comes here, it means dstPath already exist.
-			var srcStat = results[0],
-				dstStat = results[1];
-
-			if ( pathComp ) {
-				movable = false;
-			} else {
-				if (srcStat.ino === dstStat.ino) {
-					movable = true;
-				} else {
-					movable = false;
-				}
-			}
-			next(null, movable);
-		});
-	}
-	*/
+	});
+	
+	/* Prev Code - comment out */
+//	fs.stat(dstPath, (function(err, stat) {
+//		// see RFC4918, section 9.9.4 (MOVE Status
+//		// Codes) & section 9.8.5 (COPY Status Codes).
+//		if (err) {
+//			if (err.code === 'ENOENT') {
+//				// Destination resource does not exist yet
+//				op(srcPath, dstPath, (function(err) {
+//					// return the new content of the destination path
+//					this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
+//						next(err, {
+//							code: 201 /*Created*/,
+//							body: content
+//						});
+//					});
+//				}).bind(this));
+//			} else {
+//				next(err);
+//			}
+//		} else if (stat) {
+//			if (overwriteParam) {
+//				// Destination resource already exists : destroy it first
+//				this._rmrf(dstPath, (function(err) {
+//					op(srcPath, dstPath, (function(err) {
+//						//next(err, { code: 204 /*No-Content*/ });
+//						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
+//							next(err, {
+//								code: 200 /*Ok*/,
+//								body: content
+//							});
+//						});
+//					}).bind(this));
+//				}).bind(this));
+//			} else {
+//				if (req.method.match(/MOVE/i)) {
+//					op(srcPath, dstPath, (function(err) {
+//						//next(err, { code: 204 /*No-Content*/ });
+//						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
+//							next(err, {
+//								code: 200 /*Ok*/,
+//								body: content
+//							});
+//						});
+//					}).bind(this));
+//				} else { 
+//					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+//				}
+//			}
+//		}
+//	}).bind(this));
 };
 
 // XXX ENYO-1086: refactor tree walk-down
