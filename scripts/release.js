@@ -22,6 +22,7 @@ var knownOpts = {
         "minor":           Boolean,
         "patch":           Boolean,
         "pre":             Boolean,
+        "rel":             Boolean,
 	"dry-run":         Boolean,
         "level":           ['silly', 'verbose', 'info', 'http', 'warn', 'error']
 };
@@ -30,7 +31,8 @@ var shortHands = {
 	"M": "--major",
 	"m": "--minor",
 	"p": "--patch",
-	"R": "--pre",
+	"r": "--pre",
+	"R": "--rel",
 	"l": "--level",
 	"D": "--dry-run",
 	"v": ["--level", "verbose"],
@@ -38,17 +40,18 @@ var shortHands = {
 };
 var usageString = [
 	"",
-	"Manage semantic version: M.m.p-pre.R, AKA (M)ajor.(m)inor.(p)atch-pre.(R)elease",
+	"Manage semantic version: M.m.p-pre.r, AKA (M)ajor.(m)inor.(p)atch-pre.(r)elease",
 	"",
 	"USAGE:",
 	"\t" + process.argv[1] + " [OPTIONS] pre-dist",
-	"\t" + process.argv[1] + " [OPTIONS] [-M|-m|-p|-R] post-dist",
+	"\t" + process.argv[1] + " [OPTIONS] [-M|-m|-p|-R|-r] post-dist",
 	"\t" + process.argv[1] + " -h|--help",
 	"",
 	"\t-M|--major:   increment the major version",
 	"\t-m|--minor:   increment the minor version",
 	"\t-p|--patch:   increment the patch level",
-	"\t-p|--patch:   increment the pre-release number",
+	"\t-r|--pre:     increment the pre-release number",
+	"\t-R|--rel:     conclude the pre-release cycle (M.m.p-pre.r -> M.m.p)",
 	"",
 	"OPTIONS:",
 	"\t-D|--dry-run: do not perform any action on disk",
@@ -57,13 +60,18 @@ var usageString = [
 ];
 var exampleString = [
 	"EXAMPLES:",
-	"\tSequence to release, publish & prepare next minor version",
+	"\tSequence to tag, publish & prepare next minor version",
 	"",
 	"\t\t$ " + process.argv[1] + " pre-dist",
 	"\t\t$ npm publish\n", 
 	"\t\t$ " + process.argv[1] + " -m post-dist",
 	"",
-	"\tSequence to release, pick package & prepare next pre-release",
+	"\tSequence to tag, package & prepare next pre-release",
+	"",
+	"\t\t$ cp `" + process.argv[1] + " pre-dist` /some/target/directory",
+	"\t\t$ " + process.argv[1] + " -r post-dist",
+	"",
+	"\tSequence to tag, package & finalize current release (no more a pre-release)",
 	"",
 	"\t\t$ cp `" + process.argv[1] + " pre-dist` /some/target/directory",
 	"\t\t$ " + process.argv[1] + " -R post-dist",
@@ -119,6 +127,8 @@ log.verbose(processName, "command:", command);
 
 if (command === 'pre-dist') {
 	preDist();
+} else if (command === 'dist') {
+	dist();
 } else if (command === 'post-dist') {
 	postDist();
 } else if (command === 'test') {
@@ -144,17 +154,22 @@ function help() {
 	});
 }
 
-function run(prefix, args) {
+function run(prefix, args, always, silent) {
 	var cmd = args.join(" ");
-	log.info(prefix, cmd);
-	if (doIt) {
-		var p = shell.exec(cmd, { silent: false, async: false });
+	if (!silent) {
+		log.info(prefix, cmd);
+	} else {
+		log.verbose(prefix, cmd);
+	}
+	if (doIt || always) {
+		var p = shell.exec(cmd, { silent: silent, async: false });
 		log.verbose(prefix, "code:", p.code);
 		if (p.code !== 0) {
 			// only if you set `silent: true` above
 			//log.info(prefix, p.output);
 			throw new Error("Failed: '" + cmd + "'");
 		}
+		return p.output;
 	}
 }
 
@@ -176,7 +191,15 @@ function preDist() {
 	console.log(packageJson.name + "-" + version.version + ".tgz");
 }
 
+function dist() {
+	run("dist", [git, 'tag', version.version]);
+	console.log("you can now run:");
+	console.log("\t" + git + " push --tags origin");
+	console.log("\t" + npm + " publish");
+}
+
 function postDist() {
+	var pr;
 	// update `version` in package.json
 	log.info("post-dist", "before version:", version.raw);
 	if (opt.major) {
@@ -185,9 +208,13 @@ function postDist() {
 		version.inc('minor');
 	} else if (opt.patch) {
 		version.inc('patch');
+	} else if (opt.rel) {
+		// Remove "-pre.r"
+		version.prerelease = [];
+		version.format();
 	} else if (opt.pre) {
-		var pr = version.prerelease;
-		// hard-wire "-pre.R" as pre-release string format, with R starting at `1`
+		pr = version.prerelease;
+		// Force "-pre.r" as pre-release string format, with `r` starting at `1`
 		pr[0] = "pre";
 		pr[1] = version.prerelease[1] || 0;
 		pr.splice(2, pr.length);
@@ -213,4 +240,10 @@ function postDist() {
 
 	// Snapshot NPM dependencies
 	run("post-dist", [npm, "shrinkwrap"]);
+
+	var branch = run("post-dist", [git, "rev-parse", "--abbrev-ref", "HEAD"], true, true);
+	run("post-dist", [git, "commit", "-m", "\"start working on " + version.version + "\"", "package.json", "npm-shrinkwrap.json"]);
+
+	console.log("you can now run:");
+	console.log("\t" + git + " push origin " + branch);
 }
