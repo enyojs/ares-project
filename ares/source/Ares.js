@@ -580,19 +580,20 @@ enyo.kind({
 		var project = this.componentsRegistry.projectList.selectedProject;
 		var files = Ares.Workspace.files,
 			model,
+			serviceId,
+			folderId,
 			i;
-		var documents = [];
-		for( i = 0; i < files.models.length; i++ ) {
-			model = files.models[i];
-			var serviceId = model.getProjectData().getServiceId();
-			var folderId = model.getProjectData().getFolderId();
+		var editedDocs = [];
+		files.models.forEach(function(model) {
+			serviceId = model.getProjectData().getServiceId();
+			folderId = model.getProjectData().getFolderId();
 			if ( serviceId === project.getServiceId() && folderId === project.getFolderId()) {
 				if(model.getEdited()){
-					documents.push(model);
+					editedDocs.push(model);
 				}
 			}
-		}
-		this.componentsRegistry.phobos.saveDocumentsBeforePreview(documents);
+		})
+		this.componentsRegistry.phobos.saveDocumentsBeforePreview(editedDocs);
 	},
 	_displayPreview: function(inSender, inEvent){
 		var project = this.componentsRegistry.projectList.selectedProject;
