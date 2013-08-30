@@ -475,7 +475,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 				}
 			}
 		}
-	});
+	}.bind(this));
 	
 	/* Prev Code - comment out */
 //	fs.stat(dstPath, (function(err, stat) {
