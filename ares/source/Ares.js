@@ -584,7 +584,7 @@ enyo.kind({
 			folderId,
 			i;
 		var editedDocs = [];
-		files.models.forEach(function(model) {
+		enyo.forEach(files.models, function(model) {
 			serviceId = model.getProjectData().getServiceId();
 			folderId = model.getProjectData().getFolderId();
 			if ( serviceId === project.getServiceId() && folderId === project.getFolderId()) {
@@ -592,7 +592,7 @@ enyo.kind({
 					editedDocs.push(model);
 				}
 			}
-		})
+		}, this);
 		this.componentsRegistry.phobos.saveDocumentsBeforePreview(editedDocs);
 	},
 	_displayPreview: function(inSender, inEvent){
