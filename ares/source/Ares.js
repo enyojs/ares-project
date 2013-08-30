@@ -578,13 +578,11 @@ enyo.kind({
 	},
 	_saveBeforePreview: function(inSender, inEvent){
 		var project = this.componentsRegistry.projectList.selectedProject;
-		var files = Ares.Workspace.files,
-			serviceId,
-			folderId;
+		var files = Ares.Workspace.files;
 		var editedDocs = [];
 		enyo.forEach(files.models, function(model) {
-			serviceId = model.getProjectData().getServiceId();
-			folderId = model.getProjectData().getFolderId();
+			var serviceId = model.getProjectData().getServiceId();
+			var folderId = model.getProjectData().getFolderId();
 			if ( serviceId === project.getServiceId() && folderId === project.getFolderId()) {
 				if(model.getEdited()){
 					editedDocs.push(model);
