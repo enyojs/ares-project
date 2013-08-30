@@ -579,10 +579,8 @@ enyo.kind({
 	_saveBeforePreview: function(inSender, inEvent){
 		var project = this.componentsRegistry.projectList.selectedProject;
 		var files = Ares.Workspace.files,
-			model,
 			serviceId,
-			folderId,
-			i;
+			folderId;
 		var editedDocs = [];
 		enyo.forEach(files.models, function(model) {
 			serviceId = model.getProjectData().getServiceId();
