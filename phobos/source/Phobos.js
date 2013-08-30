@@ -71,17 +71,21 @@ enyo.kind({
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
 		return true;
 	},
-	saveComplete: function() {
+	saveComplete: function(inDocData) {
 		this.hideWaitPopup();
-		this.docData.setEdited(false);		// TODO: The user may have switched to another file
-		this.reparseAction();
+		if (inDocData) {
+			inDocData.setEdited(false);		// TODO: The user may have switched to another file
+		}
+		if (this.docData === inDocData) {
+			this.reparseAction();
+		}
 	},
 	saveNeeded: function() {
 		return this.docData.getEdited();
 	},
 	saveFailed: function(inMsg) {
 		this.hideWaitPopup();
-		this.log("Save failed: " + inMsg);
+		this.warn("Save failed: " + inMsg);
 		this.showErrorPopup("Unable to save the file");
 	},
 	saveAsDocAction: function() {
@@ -125,9 +129,9 @@ enyo.kind({
 		this.beforeClosingDocument();
 		this.doCloseDocument({id: id});
 		this.closeNextDoc();
+		return true;
 	},
 	openDoc: function(inDocData) {
-
 		// If we are changing documents, reparse any changes into the current projectIndexer
 		if (this.docData && this.docData.getEdited()) {
 			this.reparseAction(true);
@@ -280,7 +284,7 @@ enyo.kind({
 
 		var settings = modes[mode]||modes['text'];
 		this.$.right.setIndex(settings.rightIndex);
-		this.$.body.reflow();
+		this.resizeHandler();
 		return showSettings.ace ;
 	},
 	showWaitPopup: function(inMessage) {
@@ -865,6 +869,11 @@ enyo.kind({
 		if (data.kinds.length > 0) {
 			this.doUpdate(data);
 		} // else - The error has been displayed by extractKindsData()
+	},
+	resizeHandler: function() {
+		this.inherited(arguments);
+		this.$.body.reflow();
+		this.$.ace.resize();
 	}
 });
 

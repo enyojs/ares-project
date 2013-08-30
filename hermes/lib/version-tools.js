@@ -1,4 +1,4 @@
-/* global require, __dirname, console, process, module */
+/* jshint node:true */
 /*
 	Stick to a synchronous version although this is not recommended.
 	However this check is done only by the process ide.js at startup time.

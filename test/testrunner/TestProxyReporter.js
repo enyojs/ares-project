@@ -1,4 +1,4 @@
-/* global aresTestW, ares */
+/* global ares */
 enyo.kind({
 	name: "Ares.TestProxyReporter",
 	kind: enyo.Component,
@@ -14,9 +14,9 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		if (aresTestW !== null) {
+		if (window.aresTestW !== null) {
 			// Post ARES.TEST.NAME event to infor the Ares Test Reporter the name of the TestSuite
-			aresTestW.postMessage({evt:"ARES.TEST.NAME", data:this.name}, "http://127.0.0.1:9009");
+			window.aresTestW.postMessage({evt:"ARES.TEST.NAME", data:this.name}, "http://127.0.0.1:9009");
 			this.trace("Post ARES.TEST.NAME ...name: ", this.name);
 		}
 	},
@@ -30,7 +30,7 @@ enyo.kind({
 	testBegun: function(inSender, inEvent) {
 		this.trace("=>Ares Proxy Reporter *****", "Group: ", this.name, " *****test: ", inEvent.testName, " is running ...");
 
-		if (aresTestW !== null) {
+		if (window.aresTestW !== null) {
 			// Post ARES.TEST.RUNNING event with info related to the group and the name of the unit test
 			var obj = {
 				group: this.name,
@@ -38,7 +38,7 @@ enyo.kind({
 				state: "RUNNING"
 
 			};
-			aresTestW.postMessage({evt:"ARES.TEST.RUNNING", data:obj}, "http://127.0.0.1:9009");
+			window.aresTestW.postMessage({evt:"ARES.TEST.RUNNING", data:obj}, "http://127.0.0.1:9009");
 			this.trace("Post ARES.TEST.RUNNING ... ", JSON.stringify(obj));
 		}
 	},
@@ -79,13 +79,13 @@ enyo.kind({
 
 		enyo.log(content);
 
-		if (aresTestW !== null) {
+		if (window.aresTestW !== null) {
 			// Post ARES.TEST.RESULT event with associated results
 			var obj = {
 				group: this.name,
 				results: enyo.json.stringify(results)
 			};		
-			aresTestW.postMessage({evt:"ARES.TEST.RESULT", data:obj}, "http://127.0.0.1:9009");
+			window.aresTestW.postMessage({evt:"ARES.TEST.RESULT", data:obj}, "http://127.0.0.1:9009");
 			this.trace("Post ARES.TEST.RESULT ... ", JSON.stringify(obj));
 				enyo.log("Post ARES.TEST.RESULT ... ", enyo.json.stringify(obj));
 		}

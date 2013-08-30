@@ -39,12 +39,7 @@ enyo.kind({
 		]},
 		{
 			name: "bottomBar",
-			kind: "DocumentToolbar",
-			onSwitchFile: "switchFile",
-			onSave: "bounceSave",
-			onDesign: "bounceDesign",
-			onNewKind: "bounceNew",
-			onCloseFileRequest: "bounceCloseFileRequest"
+			kind: "DocumentToolbar"
 		},
 		{
 			kind: "Panels",
@@ -97,11 +92,11 @@ enyo.kind({
 	},
 	designerAction: function() {
 		this.owner.componentsRegistry.phobos.designerAction();
-		this.manageConrols(true);
+		this.manageControls(true);
 	},
 	closeDesignerAction: function(){
 		this.owner.componentsRegistry.deimos.closeDesignerAction();
-		this.manageConrols(false);
+		this.manageControls(false);
 	},
 	/**
 	 * Change controls on the panel top toolbar
@@ -109,7 +104,7 @@ enyo.kind({
 	 * @private
 	 * @param {boolean} designer, designer = true if designer's controls should be available
 	 */
-	manageConrols: function(designer){
+	manageControls: function(designer){
 		this.$.editorControls.setShowing(!designer);
 		this.$.deimosControls.setShowing(designer);
 		this.$.toolbar.resized();

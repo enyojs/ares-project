@@ -17,6 +17,7 @@ enyo.kind({
 	classes: "onyx",
 	fit: true,
 	debug: false,
+	//noDefer: true, //FIXME: does not work with statics:{}
 	componentsRegistry: {},
 	components: [
 		{
@@ -74,7 +75,6 @@ enyo.kind({
 		onUndo: "designerUndo", 
 		onRedo: "designerRedo",
 		onSwitchFile: "switchFile",
-		onSave: "bounceSave",
 		onDesign: "bounceDesign",
 		onNewKind: "bounceNew",
 		onCloseFileRequest: "bounceCloseFileRequest",
@@ -182,7 +182,10 @@ enyo.kind({
 			if (err) {
 				self.componentsRegistry.phobos.saveFailed(err);
 			} else {
-				self.componentsRegistry.phobos.saveComplete();
+				var fileDataId = Ares.Workspace.files.computeId(inEvent.file);
+				var fileData = Ares.Workspace.files.get(fileDataId);
+				self.componentsRegistry.phobos.saveComplete(fileData);
+				// FIXME: ENYO-2976
 				self.componentsRegistry.deimos.saveComplete();
 			}
 		});
@@ -329,6 +332,7 @@ enyo.kind({
 		this.designerUpdate(inSender, inEvent);
 		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
 		this.activeDocument.setCurrentIF('code');
+		this.componentsRegistry.codeEditor.manageControls(false);
 	},
 	//* Undo event from Deimos
 	designerUndo: function(inSender, inEvent) {
@@ -416,16 +420,12 @@ enyo.kind({
 		this.activeDocument = d;
 		if (currentIF === 'code') {
 			this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
-			this.componentsRegistry.codeEditor.manageConrols(false);
+			this.componentsRegistry.codeEditor.manageControls(false);
 		} else {
 			this.componentsRegistry.phobos.designerAction();
-			this.componentsRegistry.codeEditor.manageConrols(true);
+			this.componentsRegistry.codeEditor.manageControls(true);
 		}
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
-	},
-	// FIXME: This trampoline function probably needs some refactoring
-	bounceSave: function(inSender, inEvent) {
-		this.componentsRegistry.phobos.saveDocAction(inSender, inEvent);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
@@ -491,7 +491,7 @@ enyo.kind({
 	showError: function(inSender, inEvent) {
 		this.trace("event:", inEvent, "from sender:", inSender);
 		this.hideWaitPopup();		
-		if (inEvent && inEvent.err.status === 401){
+		if (inEvent && inEvent.err && inEvent.err.status === 401) {
 			this.showSignInErrorPopup(inEvent);
 		} else {
 			this.showErrorPopup(inEvent);
