@@ -142,7 +142,7 @@ enyo.kind({
 		this.$.extra.setContent("");
 	},
 	updateNodeContent: function(files) {
-		var i = 0, rfiles, tfiles, res, newControl, k = 0, nfiles;
+		var i = 0, rfiles, tfiles, res, newNode, k = 0, nfiles;
 		
 		this.trace( "updateNodeContent on", this ) ;
 
@@ -190,12 +190,12 @@ enyo.kind({
 				case 1:
 					this.trace( rfiles[i].name, "was created" ) ;
 					if (this.dragAllowed) {
-						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node", dragAllowed: true, attributes: {draggable : true}} ) ;
+						newNode = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node", dragAllowed: true, attributes: {draggable : true}} ) ;
 					} else {
-						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node"} ) ;
+						newNode = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node"} ) ;
 					}
-					newControl.setService(this.service);
-					this.trace( newControl, "has been created " ) ;
+					newNode.setService(this.service);
+					this.trace( newNode, "has been created " ) ;
 
 					nfiles = this.getNodeFiles() ;
 					/*
@@ -296,6 +296,7 @@ enyo.kind({
 		inFiles.sort(this.fileNameSort); // TODO: Other sort orders
 		for (var i=0; i < inFiles.length; i++) {
 			f=inFiles[i];
+			f.service = this.service;
 			nodes.push({
 				file: f,
 				name: '$' + f.name, // prefix avoids clobberring non-files components like icon

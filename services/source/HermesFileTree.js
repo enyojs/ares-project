@@ -567,11 +567,6 @@ enyo.kind({
 		// open anything before it is available.  Also do not
 		// try to open top-level root & folders.
 		if (!node.file.isDir && !node.file.isServer && this.projectUrlReady) {
-			if (! node.file.service) {
-				// FIXME: root cause not found
-				this.warn("node.file found without service: adding service...");
-				node.file.service = inEvent.originator.service ;
-			}
 			this.doFileDblClick({
 				file: node.file,
 				projectData: this.projectData
@@ -586,7 +581,6 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 
 		this.selectedNode=inEvent.data;
-		inEvent.data.file.service = this.$.service;
 		inEvent.data.$.caption.addClass("hermesFileTree-select-highlight");
 		
 		this.enableDisableButtons();
