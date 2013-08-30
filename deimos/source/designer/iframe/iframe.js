@@ -14,8 +14,8 @@ enyo.kind({
 	},
 	components: [
 		{name: "client", classes:"enyo-fit"},
-		{name: "cloneArea", style: "background:rgba(0,200,0,0.5); display:none; opacity: 0;", classes: "enyo-fit enyo-clip"},
-		{name: "flightArea", style: "display:none;", classes: "enyo-fit"},
+		{name: "cloneArea", style: "background:rgba(0,200,0,0.5); opacity: 0;", classes: "enyo-fit enyo-clip", showing: false},
+		{name: "flightArea", classes: "enyo-fit", showing: false},
 		{name: "serializer", kind: "Ares.Serializer"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"},
 		{name: "selectHighlight", classes: "iframe-highlight iframe-select-highlight", showing: false},
