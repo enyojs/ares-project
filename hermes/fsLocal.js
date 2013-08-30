@@ -408,7 +408,6 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 		next(new HttpError("trying to move a resource onto itself", 400 /*Bad-Request*/));
 		return;
 	}
-	/* new code - ByJunil - interim */
 	async.waterfall([
 		fs.stat.bind(this, srcPath),
 			function(stat, next) {
@@ -451,7 +450,6 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 				// Destination resource already exists : destroy it first
 				this._rmrf(dstPath, (function(err) {
 					op(srcPath, dstPath, (function(err) {
-						//next(err, { code: 204 /*No-Content*/ });
 						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
 							next(err, {
 								code: 200 /*Ok*/,
@@ -476,57 +474,6 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 			}
 		}
 	}.bind(this));
-	
-	/* Prev Code - comment out */
-//	fs.stat(dstPath, (function(err, stat) {
-//		// see RFC4918, section 9.9.4 (MOVE Status
-//		// Codes) & section 9.8.5 (COPY Status Codes).
-//		if (err) {
-//			if (err.code === 'ENOENT') {
-//				// Destination resource does not exist yet
-//				op(srcPath, dstPath, (function(err) {
-//					// return the new content of the destination path
-//					this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
-//						next(err, {
-//							code: 201 /*Created*/,
-//							body: content
-//						});
-//					});
-//				}).bind(this));
-//			} else {
-//				next(err);
-//			}
-//		} else if (stat) {
-//			if (overwriteParam) {
-//				// Destination resource already exists : destroy it first
-//				this._rmrf(dstPath, (function(err) {
-//					op(srcPath, dstPath, (function(err) {
-//						//next(err, { code: 204 /*No-Content*/ });
-//						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
-//							next(err, {
-//								code: 200 /*Ok*/,
-//								body: content
-//							});
-//						});
-//					}).bind(this));
-//				}).bind(this));
-//			} else {
-//				if (req.method.match(/MOVE/i)) {
-//					op(srcPath, dstPath, (function(err) {
-//						//next(err, { code: 204 /*No-Content*/ });
-//						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
-//							next(err, {
-//								code: 200 /*Ok*/,
-//								body: content
-//							});
-//						});
-//					}).bind(this));
-//				} else { 
-//					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
-//				}
-//			}
-//		}
-//	}).bind(this));
 };
 
 // XXX ENYO-1086: refactor tree walk-down
