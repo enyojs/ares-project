@@ -68,7 +68,7 @@ enyo.kind({
 	},
 	/** @private */
 	dragenter: function(inSender, inEvent) {
-		if (!inEvent.dataTransfer || inEvent.dataTransfer.types[0] != "hermes.node") {
+		if (!inEvent.dataTransfer) {
 			return true;
 		}
 		
@@ -77,7 +77,7 @@ enyo.kind({
 	},
 	/** @private */
 	dragover: function(inSender, inEvent) {
-		if (!inEvent.dataTransfer || inEvent.dataTransfer.types[0] != "hermes.node") {
+		if (!inEvent.dataTransfer) {
 			return true;
 		}
 		
@@ -86,7 +86,7 @@ enyo.kind({
 	},
 	/** @private */
 	dragleave: function(inSender, inEvent) {
-		if (!inEvent.dataTransfer || inEvent.dataTransfer.types[0] != "hermes.node") {
+		if (!inEvent.dataTransfer) {
 			return true;
 		}
 		
@@ -95,7 +95,7 @@ enyo.kind({
 	},
 	/** @private */
 	drop: function(inSender, inEvent) {
-		if (!inEvent.dataTransfer || inEvent.dataTransfer.types[0] != "hermes.node") {
+		if (!inEvent.dataTransfer) {
 			return true;
 		}
 		
