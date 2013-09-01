@@ -415,7 +415,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 	            fs.stat(dstPath, next);
 	        },
 	        function(stat, next) {
-	           	dstStat = stat;
+	            dstStat = stat;
 	            next();
 	        }
 	], function(err) {
