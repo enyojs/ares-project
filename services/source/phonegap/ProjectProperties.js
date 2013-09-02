@@ -608,7 +608,7 @@ enyo.kind({
 	published: {
 		appId: "",
 		buildStatusData: undefined,
-		phongapUrl: "https://build.phonegap.com/",
+		phongapUrl: "https://build.phonegap.com",
 		provider: undefined 
 	},
 	components: [
@@ -624,51 +624,50 @@ enyo.kind({
 								name: "androidButton", kind: "onyx.IconButton", platform: "android", src: "$services/assets/images/platforms/android-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
 								ontap: "showStatusMessage",
 								components: [
-									{name: "androidMessage", classes:"ares-hide"}
+									{name: "androidMessage", classes:"ares-hide", title: "", url: ""}
 								]
 							},
 							{
 								name: "iosButton", kind: "onyx.IconButton", platform: "ios", src: "$services/assets/images/platforms/ios-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
 								ontap: "showStatusMessage",
 								components: [
-									{name: "iosMessage", classes:"ares-hide"}
+									{name: "iosMessage", classes:"ares-hide", title: "", url: ""}
 								]
 							},
 							{
 								name: "blackberryButton", kind: "onyx.IconButton", platform: "blackberry", src: "$services/assets/images/platforms/blackberry-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
 								ontap: "showStatusMessage",
 								components: [
-									{name: "blackberryMessage", classes:"ares-hide"}
+									{name: "blackberryMessage", classes:"ares-hide", title: "", url: ""}
 								]
 							},
 							{
 								name: "webosButton", kind: "onyx.IconButton", platform: "webos", src: "$services/assets/images/platforms/webos-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
 								ontap: "showStatusMessage",
 								components: [
-									{name: "webosMessage", classes:"ares-hide"}
+									{name: "webosMessage", classes:"ares-hide", title: "", url: ""}
 								]
 							},
 							{
 								name: "winphoneButton", kind: "onyx.IconButton", platform: "winphone", src: "$services/assets/images/platforms/winphone-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
 								ontap: "showStatusMessage",
 								components: [
-									{name: "winphoneMessage", classes:"ares-hide"}
+									{name: "winphoneMessage", classes:"ares-hide", title: "", url: ""}
 								]
 							}
 						]
 				},
-				{
-					name: "statusMessageContainer", kind: "onyx.Drawer", 
-					components: [
-						{name: "statusMessage", onclick: "hideStatusMessage"}
-					]
-				}
+			
+				{name: "statusMessage", /*onclick: "hideStatusMessage",*/ classes: "project-properties-status-message"},
+				{name: "downloadLink", content: "ddl link", tag: "a"}
+					
 			]
 		}
 	],
 	/**@private*/
 	create: function() {
 		this.inherited(arguments);
+		this.$.downloadLink.hide();
 		this.appIdChanged();
 		this.setProvider(Phonegap.ProjectProperties.getProvider());
 	},
@@ -689,7 +688,7 @@ enyo.kind({
 	/**
 	 * Charge the icon showing the build status of the application of a a given platform depending on 
 	 * its status. the status is checked from the "buildStatusData" object.
-	 * By clicking on the icon, the status message is displayed in the "statusMessageContainer".
+	 * By clicking on the icon, the status message is displayed.
 	 * 
 	 * @param  {onyx.IconButton} inIconButton Icon showing the status of the application build for a given
 	 *                                        platform.
@@ -697,20 +696,32 @@ enyo.kind({
 	 */
 	buildStatusStyle: function(inIconButton) {
 
+		var extensions = {
+		    "android": "apk",
+		    "ios": "ipa",
+		    "webos": "ipk",
+		    "winphone": "xap",
+		    "blackberry": "jad"
+	    };
+
 		if (this.buildStatusData && this.buildStatusData.status[inIconButton.platform] === "complete") {
 			
 			//Build status: complete
 			inIconButton.setSrc("$services/assets/images/platforms/"+inIconButton.platform + "-logo-complete-32x32.png");
-			this.$[inIconButton.platform+"Message"].setContent("Download link: " + this.phongapUrl +this.buildStatusData.download[inIconButton.platform]);		
-		
-		} else {
+			this.$[inIconButton.platform+"Message"].setContent("Download link: ");
+				//save the title of the application + its extension
+			this.$[inIconButton.platform+"Message"].title = this.buildStatusData.title + "." + extensions[inIconButton.platform];
+				//save the URL to download the application
+			this.$[inIconButton.platform+"Message"].url = this.phongapUrl + this.buildStatusData.download[inIconButton.platform];	
+			} else {
 			if (this.buildStatusData && this.buildStatusData.status[inIconButton.platform] === "error" || 
 				this.buildStatusData && this.buildStatusData.status[inIconButton.platform] === null){
 				
 				//Build status: error
 				inIconButton.setSrc("$services/assets/images/platforms/" + inIconButton.platform + "-logo-error-32x32.png");
 				this.$[inIconButton.platform + "Message"].setContent("Error: " + this.buildStatusData.error[inIconButton.platform]);
-			
+				this.$[inIconButton.platform+"Message"].title = null;
+				this.$[inIconButton.platform+"Message"].url = null;
 			} else {
 				
 				inIconButton.setSrc("$services/assets/images/platforms/" + inIconButton.platform + "-logo-not-available-32x32.png");
@@ -718,7 +729,8 @@ enyo.kind({
 					
 					//Build status: application not built
 					this.$[inIconButton.platform + "Message"].setContent("Build the application first");
-				
+					this.$[inIconButton.platform+"Message"].title = null;
+					this.$[inIconButton.platform+"Message"].url = null;
 				} else {
 					
 					//Build status: pending
@@ -734,6 +746,7 @@ enyo.kind({
 	 * @private	 
 	 */
 	buildStatusDataChanged: function(){	
+		this.log(this.buildStatusData);
 		for(var key in this.$){
 			if(this.$[key].platform !== undefined) {
 				this.buildStatusStyle(this.$[key]);
@@ -744,6 +757,20 @@ enyo.kind({
 	/**@private*/
 	showStatusMessage: function(inSender, inEvent){
 		this.$.statusMessage.setContent(this.$[inSender.platform+"Message"].getContent());
+		this.log(this.$[inSender.platform+"Message"]);
+		if (this.$[inSender.platform+"Message"].url !== null && 
+			this.$[inSender.platform+"Message"].title !== null) {
+
+			this.log("in IF");
+			this.$.downloadLink.setAttribute("href", this.$[inSender.platform+"Message"].url);
+			this.$.downloadLink.setContent(this.$[inSender.platform+"Message"].title);
+			this.$.downloadLink.show();
+			this.$.downloadLink.render();
+			this.log(this.$.downloadLink);
+		} else {
+			this.$.downloadLink.hide();
+		}
+
 	},
 
 	/**
@@ -752,7 +779,7 @@ enyo.kind({
 	 * @private
 	 */
 	hideStatusMessage: function(){
-		this.$.statusMessage.setContent("");
+		//this.$.statusMessage.setContent("");
 	},
 
 	/**@private*/
