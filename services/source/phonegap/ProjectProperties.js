@@ -536,7 +536,7 @@ enyo.kind({
 				kind: "onyx.PickerDecorator",			
 				components: [
 					{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
-					{kind: "onyx.Picker", name: "AppIdList",published: {appObject: undefined}, onSelect: "updateSelectedAppId"}
+					{kind: "onyx.Picker", name: "AppIdList", onSelect: "updateSelectedAppId"}
 				]
 			},
 			{kind:"Phonegap.ProjectProperties.BuildStatus", name: "buildStatusDisplay"}
