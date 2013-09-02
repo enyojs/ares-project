@@ -141,11 +141,8 @@ enyo.kind({
 		var data = {};
 		data.kind = this.draggedNode.kind;
 		data.file = this.draggedNode.file;
-		data.service={};
-		data.service.id = this.draggedNode.service.id;
-		data.service.config = this.draggedNode.service.config;
-		var dataText = JSON.stringify(data);
-		
+
+		var dataText = enyo.json.stringify(data);		
 		inEvent.dataTransfer.setData("Text", dataText);
 
 		return true;
@@ -229,7 +226,7 @@ enyo.kind({
 			return true;
 		}
 
-		var data = JSON.parse(dataText);
+		var data = enyo.json.parse(dataText);
 		if (data.kind !== "hermes.Node") {
 			return true;
 		}
