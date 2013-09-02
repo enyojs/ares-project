@@ -25,6 +25,9 @@ enyo.kind({
 			{name: "waitPopupMsg", content: "Ongoing..."}
 		]}
 	],
+	events: {
+		onRegisterMe: ""
+	},
 
 	handlers: {
 		onError: "showError",
@@ -41,6 +44,7 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
+		this.doRegisterMe({name:"accountsConfigurator", reference:this});
 		this.trace("");
 	},
 	/**

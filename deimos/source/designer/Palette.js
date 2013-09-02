@@ -76,7 +76,6 @@ enyo.kind({
 	name: "Palette",
 	style: "position: relative",
 	published: {
-		projectData: "",
 		projectIndexer: ""
 	},
 	debug: false,
@@ -91,8 +90,7 @@ enyo.kind({
 				{kind: "onyx.Input", fit:true, placeholder: "filter"},
 				{kind: "onyx.Icon", src:"$deimos/images/search-input-search.png", style:"height:20px;"}
 			]}
-		]},
-		{name: "serializer", kind: "Ares.Serializer"}
+		]}
 	],
 	handlers: {
 		ondragstart: "dragstart"
@@ -113,35 +111,6 @@ enyo.kind({
 		}
 		
 		inEvent.dataTransfer.setData("ares/createitem", enyo.json.codify.to({config: inEvent.config, options: inEvent.options}));
-	},
-	/**
-	 * Receive the project data reference which allows to access the analyzer
-	 * output for the project's files, enyo/onyx and all the other project
-	 * related information shared between phobos and deimos.
-	 * @param  oldProjectData
-	 * @protected
-	 */
-	projectDataChanged: function(oldProjectData) {
-		if (this.projectData) {
-			this.trace("projectDataChanged: projectData: ", this.projectData);
-			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
-			this.projectData.on('update:project-indexer', this.projectIndexerChanged, this);
-			this.setProjectIndexer(this.projectData.getProjectIndexer());
-		}
-		if (oldProjectData) {
-			this.trace("projectDataChanged: oldProjectData: ", oldProjectData);
-			oldProjectData.off('change:project-indexer', this.projectIndexReady);
-			oldProjectData.off('update:project-indexer', this.projectIndexerChanged);
-		}
-	},
-	/**
-	 * The project analyzer output has changed
-	 * @param value   the new analyzer output
-	 * @protected
-	 */
-	projectIndexReady: function(model, value, options) {
-		this.trace("projectIndexReady: ", value);
-		this.setProjectIndexer(value);
 	},
 	/**
 	 * The current project analyzer output has changed
