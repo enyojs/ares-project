@@ -679,7 +679,7 @@ enyo.kind({
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
-			this.showSavePopup('"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing? "');
+			this.showSavePopup("savePopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing? "');
 		} else {
 			var id = this.docData.getId();
 			this.beforeClosingDocument();
@@ -714,11 +714,11 @@ enyo.kind({
 	/**
 	* @protected
 	*/
-	showSavePopup: function(message){
-		this.$.savePopupPreview.setName("Document was modified!");
-		this.$.savePopupPreview.setMessage(message);
-		this.$.savePopupPreview.setActionButton("Don't Save");
-		this.$.savePopupPreview.show();
+	showSavePopup: function(componentName, message){
+		this.$[componentName].setName("Document was modified!");
+		this.$[componentName].setMessage(message);
+		this.$[componentName].setActionButton("Don't Save");
+		this.$[componentName].show();
 	},	
 	/** 
 	* @protected
@@ -735,7 +735,7 @@ enyo.kind({
 			var docData = this.editedDocs.pop();
 			this.openDoc(docData);
 			this.doSwitchFile({id:docData.id});
-			this.showSavePopup('"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before preview? "');
+			this.showSavePopup("savePopupPreview",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before preview? "');
 		}else{
 			this.doDisplayPreview();
 		}
