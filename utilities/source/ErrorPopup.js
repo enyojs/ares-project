@@ -5,16 +5,20 @@ enyo.kind({
 	modal: true,
 	centered: true,
 	floating: true,
+	autoDismiss: false,
 	published: {
 		errorMsg: "unknown error",
+		actionMsg: undefined,
 		detailsHtml: "",
-		detailsText: ""
+		detailsText: "",
+		callback: null
 	},
 	classes:"ares-classic-popup",
 	components: [
 	    {tag: "div", classes:"title", content: "Error"},
 			{classes:"ares-error-popup", fit: true, components: [
 				{name: "msg"},
+				{name: "action", showing: false},
 				{classes:"ares-error-details", components:[
 					{classes:"button", components:[
 						{tag:"label", classes:"label", name: "detailsBtn", content: "Details", ontap: "toggleDetails", showing: false},
@@ -26,7 +30,7 @@ enyo.kind({
 					]}
 				]}
 			]},
-			{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+			{kind: "onyx.Toolbar", name: "bottomToolbar",  classes:"bottom-toolbar", components: [
 				{name: "okButton", kind: "onyx.Button", content: "Close", ontap: "hideErrorPopup"}
 			]}
 	],
@@ -43,6 +47,14 @@ enyo.kind({
 	},
 	detailsHtmlChanged: function() {
 		this.updateDetailsDrw();
+	},
+	actionMsgChanged: function() {
+		if (this.actionMsg) {
+			this.$.action.setContent(this.actionMsg);			
+			this.$.action.setShowing(true);
+		} else {
+			this.$.action.setShowing(false);
+		}
 	},
 	updateDetailsDrw: function() {
 		if (this.detailsText || this.detailsHtml) {
@@ -75,9 +87,21 @@ enyo.kind({
 		this.setDetailsText();
 		this.setDetailsHtml();
 		this.hide();
+		if (this.callback) {
+			var cb = this.callback;
+			this.callback = null;
+			cb();
+		}
 	},
 	raise: function(evt) {
 		var msg, err, text, html;
+
+		if (evt.callback) {
+			if (this.callback) {
+				this.error("Previous callback was not fired ! Bug ?");
+			}
+			this.callback = evt.callback;
+		}
 		if (typeof evt === 'object') {
 			if (evt instanceof Error) {
 				err = evt;
@@ -95,6 +119,7 @@ enyo.kind({
 		this.setErrorMsg(msg);
 		this.setDetailsHtml(html);
 		this.setDetailsText(text);
+		this.setActionMsg(evt.action);
 		this.show();
 	}
 });

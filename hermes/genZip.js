@@ -1,4 +1,5 @@
-/* global require, console, process, module, __filename */
+/* jshint node:true */
+
 /**
  * Project Generator based on ZIP-files
  */

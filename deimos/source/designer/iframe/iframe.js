@@ -14,8 +14,8 @@ enyo.kind({
 	},
 	components: [
 		{name: "client", classes:"enyo-fit"},
-		{name: "cloneArea", style: "background:rgba(0,200,0,0.5); display:none; opacity: 0;", classes: "enyo-fit enyo-clip"},
-		{name: "flightArea", style: "display:none;", classes: "enyo-fit"},
+		{name: "cloneArea", style: "background:rgba(0,200,0,0.5); opacity: 0;", classes: "enyo-fit enyo-clip", showing: false},
+		{name: "flightArea", classes: "enyo-fit", showing: false},
 		{name: "serializer", kind: "Ares.Serializer"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"},
 		{name: "selectHighlight", classes: "iframe-highlight iframe-select-highlight", showing: false},
@@ -117,9 +117,6 @@ enyo.kind({
 				this.setContainerData(msg.val);
 				break;
 			case "render":
-				// Add "$app" to enyo.path for image path (src attribute) resolution when the app is running into Ares Designer.
-				enyo.path.addPath("app", enyo.path.rewrite("$enyo/.."));
-
 				this.renderKind(msg.val);
 				break;
 			case "select":
@@ -151,6 +148,9 @@ enyo.kind({
 				break;
 			case "requestPositionValue":
 				this.requestPositionValue(msg.val);
+				break;
+			case "serializerOptions":
+				this.$.serializer.setSerializerOptions(msg.val);
 				break;
 			default:
 				enyo.warn("Deimos iframe received unknown message op:", msg);
@@ -407,8 +407,8 @@ enyo.kind({
 		} catch(error) {
 			errMsg = "Unable to render kind '" + inKind.name + "':" + error.message;
 			this.error(errMsg, error.stack);
-			this.sendMessage({op: "error", val: {msg: errMsg, details: error.stack}});
 			this.sendMessage({op: "reloadNeeded"});
+			this.sendMessage({op: "error", val: {msg: errMsg, reloadNeeded: true, err: {stack: error.stack}}});
 		}
 	},
 	//* Rerender current selection
@@ -1507,27 +1507,31 @@ enyo.kind({
 		this.renderSelectHighlight();
 	},
 	resizeWidth: function(inDelta) {
-		if (this.selectionDragAnchors.left) {
-			this.selection.applyStyle("left", (this.intialDragBounds.left + inDelta) + "px");
-		} else if (this.selectionDragAnchors.right) {
-			this.selection.applyStyle("right", (this.intialDragBounds.right - inDelta) + "px");
-		}
-		if (this.selectionDragAnchors.width) {
-			this.selection.applyStyle("width", (
-				(this.$resizeHandle.sides.left) ? this.intialDragBounds.width - inDelta : this.intialDragBounds.width + inDelta
-			) + "px");
+		if (this.selectionDragAnchors) {
+			if (this.selectionDragAnchors.left) {
+				this.selection.applyStyle("left", (this.intialDragBounds.left + inDelta) + "px");
+			} else if (this.selectionDragAnchors.right) {
+				this.selection.applyStyle("right", (this.intialDragBounds.right - inDelta) + "px");
+			}
+			if (this.selectionDragAnchors.width) {
+				this.selection.applyStyle("width", (
+					(this.$resizeHandle.sides.left) ? this.intialDragBounds.width - inDelta : this.intialDragBounds.width + inDelta
+				) + "px");
+			}
 		}
 	},
 	resizeHeight: function(inDelta) {
-		if (this.selectionDragAnchors.top) {
-			this.selection.applyStyle("top", (this.intialDragBounds.top + inDelta) + "px");
-		} else if (this.selectionDragAnchors.bottom) {
-			this.selection.applyStyle("bottom", (this.intialDragBounds.bottom - inDelta) + "px");
-		}
-		if (this.selectionDragAnchors.height) {
-			this.selection.applyStyle("height", (
-				(this.$resizeHandle.sides.top) ? this.intialDragBounds.height - inDelta : this.intialDragBounds.height + inDelta
-			) + "px");
+		if (this.selectionDragAnchors) {
+			if (this.selectionDragAnchors.top) {
+				this.selection.applyStyle("top", (this.intialDragBounds.top + inDelta) + "px");
+			} else if (this.selectionDragAnchors.bottom) {
+				this.selection.applyStyle("bottom", (this.intialDragBounds.bottom - inDelta) + "px");
+			}
+			if (this.selectionDragAnchors.height) {
+				this.selection.applyStyle("height", (
+					(this.$resizeHandle.sides.top) ? this.intialDragBounds.height - inDelta : this.intialDragBounds.height + inDelta
+				) + "px");
+			}
 		}
 	},
 	getDragAnchors: function(inResizeComponent, inHandle) {

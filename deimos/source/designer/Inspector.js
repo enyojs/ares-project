@@ -9,8 +9,7 @@ enyo.kind({
 	published: {
 		filterLevel: null,		// Value will be given by Inspector.FilterXXX "checked" item.
 		filterType: null,		// Value will be given by Inspector.FilterXXX "checked" item.
-		projectIndexer: null,	// Analyzer output for the current project
-		projectData: null		// All the project data shared mainly between phobos and deimos
+		projectIndexer: null	// Analyzer output for the current project
 	},
 	components: [
 		{kind: "Inspector.FilterType", onValueChanged: "updateFilterType"},
@@ -434,42 +433,6 @@ enyo.kind({
 				this.change(inSender, inEvent);
 			}
 		}
-	},
-	/**
-	 * Receive the project data reference which allows to access the analyzer
-	 * output for the project's files, enyo/onyx and all the other project
-	 * related information shared between phobos and deimos.
-	 * @param  oldProjectData
-	 * @protected
-	 */
-	projectDataChanged: function(oldProjectData) {
-		if (oldProjectData) {
-			oldProjectData.off('change:project-indexer', this.projectIndexReady);
-			oldProjectData.off('update:project-indexer', this.projectIndexUpdated);
-			Model.resetInformation();
-		}
-
-		if (this.projectData) {
-			this.trace("projectDataChanged: projectData", this.projectData);
-			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
-			this.projectData.on('update:project-indexer', this.projectIndexUpdated, this);
-			this.setProjectIndexer(this.projectData.getProjectIndexer());
-			Model.buildInformation(this.projectIndexer);
-		}
-	},
-	/**
-	 * The project analyzer output has changed
-	 * @param value   the new analyzer output
-	 * @protected
-	 */
-	projectIndexReady: function(model, value, options) {
-		this.trace("projectIndexReady: ", value);
-		this.setProjectIndexer(value);
-	},
-	//* @protected
-	projectIndexUpdated: function() {
-		this.trace("projectIndexUpdated: for projectIndexer: ", this.projectIndexer);
-		Model.buildInformation(this.projectIndexer);
 	},
 	//* @public
 	initUserDefinedAttributes: function(inComponents) {
