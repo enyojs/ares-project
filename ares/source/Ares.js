@@ -79,7 +79,9 @@ enyo.kind({
 		onNewKind: "bounceNew",
 		onCloseFileRequest: "bounceCloseFileRequest",
 		onRegisterMe : "_registerComponent",
-		onMovePanel : "_movePanel"
+		onMovePanel : "_movePanel",
+		onSavePreviewAction: "_saveBeforePreview",
+		onDisplayPreview : "_displayPreview"
 
 	},
 	projectListIndex: 0,
@@ -573,6 +575,25 @@ enyo.kind({
 		if(project){
 			this.componentsRegistry.projectList.selectInProjectList(project);
 		}
+	},
+	_saveBeforePreview: function(inSender, inEvent){
+		var project = this.componentsRegistry.projectList.selectedProject;
+		var files = Ares.Workspace.files;
+		var editedDocs = [];
+		enyo.forEach(files.models, function(model) {
+			var serviceId = model.getProjectData().getServiceId();
+			var folderId = model.getProjectData().getFolderId();
+			if ( serviceId === project.getServiceId() && folderId === project.getFolderId()) {
+				if(model.getEdited()){
+					editedDocs.push(model);
+				}
+			}
+		}, this);
+		this.componentsRegistry.phobos.saveDocumentsBeforePreview(editedDocs);
+	},
+	_displayPreview: function(inSender, inEvent){
+		var project = this.componentsRegistry.projectList.selectedProject;
+		this.componentsRegistry.projectView.previewAction(inSender,{project:project});
 	},
 	/**
 	 * Event handler for ares components registry
