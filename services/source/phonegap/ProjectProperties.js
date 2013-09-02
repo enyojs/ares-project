@@ -102,16 +102,7 @@ enyo.kind({
 					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
 				]
-			}, 
-			{
-				id: "winphone",
-				name: "Microsoft Windows Phone 7",
-				type: "Target",
-				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
-				]				
-			}, 
+			},  
 			{
 				id: "blackberry",
 				name: "RIM Blackberry",
@@ -130,7 +121,16 @@ enyo.kind({
 					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
 				]
-			}
+			},
+			{
+				id: "winphone",
+				name: "Microsoft Windows Phone 7",
+				type: "Target",
+				rows: [
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
+				]				
+			},
 		]
 	}
 });
