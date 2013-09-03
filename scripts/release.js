@@ -131,8 +131,6 @@ if (command === 'pre-dist') {
 	dist();
 } else if (command === 'post-dist') {
 	postDist();
-} else if (command === 'test') {
-	test();
 } else if (opt.help) {
 	help();
 	process.exit(0);
@@ -171,10 +169,6 @@ function run(prefix, args, always, silent) {
 		}
 		return p.output;
 	}
-}
-
-function test() {
-	run("test", ["cat", "/dev/null/toto"]);
 }
 
 function preDist() {
