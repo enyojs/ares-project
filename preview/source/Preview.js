@@ -28,6 +28,14 @@ enyo.kind(
 						kind: 'onyx.Groupbox',
 						classes : "ares-preview-groupbox",
 						components: [
+							{kind: "onyx.GroupboxHeader", content: "Project"},
+							{name:"projectName"}
+						]
+					},
+					{
+						kind: 'onyx.Groupbox',
+						classes : "ares-preview-groupbox",
+						components: [
 							{kind: "onyx.GroupboxHeader", content: "Device"},
 							{
 								kind: "onyx.PickerDecorator",
@@ -179,6 +187,7 @@ enyo.kind(
 			this.iframeUrl = param.url ;
 
 			this.$.scrolledIframe.setUrl   (param.url) ;
+			this.$.projectName.setContent(param.name);
 		},
 
 		reload: function() {
