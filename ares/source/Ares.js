@@ -19,9 +19,6 @@ enyo.kind({
 	debug: false,
 	//noDefer: true, //FIXME: does not work with statics:{}
 	componentsRegistry: {},
-	published:{
-		activeDocument:""
-	},
 	components: [
 		{
 			name:"aresLayoutPanels",
@@ -422,7 +419,9 @@ enyo.kind({
 			this.componentsRegistry.phobos.openDoc(d);
 		}
 		var currentIF = d.getCurrentIF();
-		this.setActiveDocument(d);
+		this.activeDocument = d;
+		this.componentsRegistry.codeEditor.addPreviewTooltip("Preview "+this.activeDocument.getProjectData().id);
+		
 		if (currentIF === 'code') {
 			this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
 			this.componentsRegistry.codeEditor.manageControls(false);
@@ -577,20 +576,6 @@ enyo.kind({
 		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
 		if(project){
 			this.componentsRegistry.projectList.selectInProjectList(project);
-		}
-	},
-	activeDocumentChanged: function(inOldValue) {
-		var changeProject = false;
-		var activeProjectName = this.activeDocument.getProjectData().id;
-		if(inOldValue){
-			if(inOldValue.getProjectData().id !== activeProjectName){
-				changeProject = true;
-			}
-		} else{
-				changeProject = true;
-		}
-		if(changeProject){
-			this.componentsRegistry.codeEditor.addPreviewTooltip("Preview "+activeProjectName);
 		}
 	},
 	_saveBeforePreview: function(inSender, inEvent){
