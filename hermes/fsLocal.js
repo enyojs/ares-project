@@ -410,13 +410,13 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 	}
 	async.waterfall([
 		fs.stat.bind(this, srcPath),
-			function(stat, next) {
-				srcStat = stat;
-	            fs.stat(dstPath, next);
+		function(stat, next) {
+			srcStat = stat;
+			fs.stat(dstPath, next);
 	        },
 	        function(stat, next) {
-	            dstStat = stat;
-	            next();
+			dstStat = stat;
+			next();
 	        }
 	], function(err) {
 		// see RFC4918, section 9.9.4 (MOVE Status
@@ -459,16 +459,17 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 					}).bind(this));
 				}).bind(this));
 			} else {
-				if (req.method.match(/MOVE/i) && (srcStat.ino === dstStat.ino) 
-									&& (srcStat.mtime.getTime() === dstStat.mtime.getTime())) {
-						op(srcPath, dstPath, (function(err) {
-							this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
-								next(err, {
-									code: 200 /*Ok*/,
-									body: content
-								});
+				if (req.method.match(/MOVE/i) &&
+				    (srcStat.ino === dstStat.ino) &&
+				    (srcStat.mtime.getTime() === dstStat.mtime.getTime())) {
+					op(srcPath, dstPath, (function(err) {
+						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
+							next(err, {
+								code: 200 /*Ok*/,
+								body: content
 							});
-						}).bind(this));
+						});
+					}).bind(this));
 				} else { 
 					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
 				}
