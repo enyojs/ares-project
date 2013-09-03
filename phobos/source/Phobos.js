@@ -709,9 +709,7 @@ enyo.kind({
 	},
 	editorUserSyntaxError:function(){
 		var userSyntaxError = [];
-		
 		userSyntaxError = this.$.autocomplete.ace.editor.session.$annotations.length;
-		
 	   return	userSyntaxError;
 	},
 	cursorChanged: function(inSender, inEvent) {

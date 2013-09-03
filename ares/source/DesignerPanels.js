@@ -85,7 +85,7 @@ enyo.kind({
 				]}
 			]
 		},
-		{kind: "User.ErrorPopup", name: "userErrorPopup", title: $L("User Syntax Error"),msg: $L("unknown error")}
+		{kind: "Ares.ErrorPopup", name: "userErrorPopup", title: $L("User Syntax Error"), msg: $L("unknown error")}
 	],
 	events: {
 		onRegisterMe: "",
