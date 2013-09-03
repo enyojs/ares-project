@@ -35,11 +35,14 @@ enyo.kind({
 						{tag:"button", content: "Ares"},
 						{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", components: [
 							{value: "showAccountConfigurator", classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png"},
-								{content: "Accounts..."}
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png", classes: "aresmenu-icon-button"},
+								{content: "Accounts...", classes: "aresmenu-button-label"}
 							]},
 							{classes: "onyx-menu-divider aresmenu-button"},
-							{value: "showAresProperties",  classes:"aresmenu-button", content: "Properties..."}
+							{value: "showAresProperties",  classes:"aresmenu-button", components: [
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/about-32x32.png", classes: "aresmenu-icon-button"},
+								{content: "Properties...", classes: "aresmenu-button-label"}
+							]}
 						]}
 					]},
 					{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
