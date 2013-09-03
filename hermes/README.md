@@ -47,12 +47,9 @@ In order to run the Phonegap build service from Ares, the authentication must be
 In the current realise, there is no UI to define externel plugins to be included in the built application. However there is two possibles workarounds to integrate externel plugins to the build : 
 #### By editing "project.json"
 In the project folder there is a JSON file that hold providers parameters, edit this file as mentioned in the following steps : 
+
 1. In the Ares UI, select the project in the **Project List**
-
-
 2. Using an external text editor, open the files *project.json* & *config.xml*
-
-
 3. In the *project.json* file edit the *plugin* block as shown in the below example : 
 ```json
 "plugins": {
@@ -77,7 +74,7 @@ In the project folder there is a JSON file that hold providers parameters, edit 
 }
 
 4. Proceed to the build
-5. Check the *config.xml* file, you should be able to see the ```gap:plugin``` tag, the above example should give the following result : 
+5. Check the *config.xml* file, you should be able to see the ```gap:plugin tag, the above example should give the following result : 
 ```xml
 	<gap:plugin name="com.phonegap.plugins.example">
 	    <param name="APIKey" value="12345678" />
