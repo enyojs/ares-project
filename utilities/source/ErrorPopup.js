@@ -109,6 +109,7 @@ enyo.kind({
 	    {tag: "div", name: "title", classes:"title", content: "User Error"},
 			{classes:"ares-error-popup", fit: true, components: [
 				{name: "msg"},
+				{name: "action", showing: false},
 				{classes:"ares-error-details", components:[
 					{classes:"button", components:[
 						{tag:"label", classes:"label", name: "detailsBtn", content: "Details", ontap: "toggleDetails", showing: false},
@@ -120,7 +121,7 @@ enyo.kind({
 					]}
 				]}
 			]},
-			{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+			{kind: "onyx.Toolbar", name: "bottomToolbar",  classes:"bottom-toolbar", components: [
 				{name: "okButton", kind: "onyx.Button", content: "Close", ontap: "hideErrorPopup"}
 			]}
 	]
