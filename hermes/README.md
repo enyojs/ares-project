@@ -74,8 +74,8 @@ In the project folder there is a JSON file that hold providers parameters, edit 
           "name": "com.phonegap.plugins.example",
           "version": "pluginVersion"
        }
-},
-```json
+}
+
 4. Proceed to the build
 5. Check the *config.xml* file, you should be able to see the ```gap:plugin``` tag, the above example should give the following result : 
 ```xml
@@ -83,7 +83,6 @@ In the project folder there is a JSON file that hold providers parameters, edit 
 	    <param name="APIKey" value="12345678" />
 	    <param name="APISecret" value="12345678" />
 	</gap:plugin>
-```xml
 
 
 the JSON block headers :
