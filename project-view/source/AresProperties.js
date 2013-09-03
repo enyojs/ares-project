@@ -71,7 +71,7 @@ enyo.kind({
 		inTabEntry.tab = this.$.thumbnail.createComponent({
 			name: inTabEntry.id + 'Tab',
 			content: inTabEntry.name,
-			pluginServiceId: inTabEntry.id,
+			componentId: inTabEntry.id,
 			showing: true,
 			active: true
 		});
@@ -102,8 +102,8 @@ enyo.kind({
 	switchDrawers: function(inSender, inEvent) {
 		if (inEvent.originator.active === true ) {
 			enyo.forEach(inEvent.originator.parent.children, function(tab) {
-				var activate = (tab.pluginServiceId === inEvent.originator.pluginServiceId);
-				this.$[tab.pluginServiceId+ 'Drawer'].setOpen(activate);
+				var activate = (tab.componentId === inEvent.originator.componentId);
+				this.$[tab.componentId + 'Drawer'].setOpen(activate);
 			}, this);
 		}
 	},
