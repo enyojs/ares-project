@@ -19,6 +19,9 @@ enyo.kind({
 	debug: false,
 	//noDefer: true, //FIXME: does not work with statics:{}
 	componentsRegistry: {},
+	published:{
+		activeDocument:""
+	},
 	components: [
 		{
 			name:"aresLayoutPanels",
@@ -419,7 +422,7 @@ enyo.kind({
 			this.componentsRegistry.phobos.openDoc(d);
 		}
 		var currentIF = d.getCurrentIF();
-		this.activeDocument = d;
+		this.setActiveDocument(d);
 		if (currentIF === 'code') {
 			this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
 			this.componentsRegistry.codeEditor.manageControls(false);
@@ -576,8 +579,22 @@ enyo.kind({
 			this.componentsRegistry.projectList.selectInProjectList(project);
 		}
 	},
+	activeDocumentChanged: function(inOldValue) {
+		var changeProject = false;
+		var activeProjectName = this.activeDocument.getProjectData().id;
+		if(inOldValue){
+			if(inOldValue.getProjectData().id !== activeProjectName){
+				changeProject = true;
+			}
+		} else{
+				changeProject = true;
+		}
+		if(changeProject){
+			this.componentsRegistry.codeEditor.addPreviewTooltip("Preview "+activeProjectName);
+		}
+	},
 	_saveBeforePreview: function(inSender, inEvent){
-		var project = this.componentsRegistry.projectList.selectedProject;
+		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
 		var files = Ares.Workspace.files;
 		var editedDocs = [];
 		enyo.forEach(files.models, function(model) {
@@ -592,7 +609,7 @@ enyo.kind({
 		this.componentsRegistry.phobos.saveDocumentsBeforePreview(editedDocs);
 	},
 	_displayPreview: function(inSender, inEvent){
-		var project = this.componentsRegistry.projectList.selectedProject;
+		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
 		this.componentsRegistry.projectView.previewAction(inSender,{project:project});
 	},
 	/**
