@@ -130,34 +130,34 @@ enyo.kind({
 	 */
 	createAresAboutContent: function() {
 		this.createComponent(
-			{
+			{	kind: "FittableRows",
 				components: [
 					{
 						kind:"FittableColumns", 
 						components: [
-							{content: "Ares version: "},
+							{content: "Ares version: ", classes: "ares-about-description"},
 							{name: "versionValue"}
 						]
 					},
 					{
 						kind:"FittableColumns", 
 						components: [				
-							{content: "If you encounter any bug please report it in the following link "},
+							{content: "If you encounter any bug please report it in the following link ", classes: "ares-about-description"},
 							{name: "brValue", kind: "enyo.Control", tag: "a", content: "Report a bug", attributes: {"target": "_blank"}}
 						]
 					},
 					{
 						kind:"FittableColumns", 
 						components: [				
-							{content: "We would welcome any contribution you can come with "},
+							{content: "We would welcome any contribution you can come with ", classes: "ares-about-description"},
 							{name: "homeValue", kind: "enyo.Control", tag: "a", content: "Project Homepage", attributes: {"target": "_blank"}}				
 						]
 					},
 					{
 						kind:"FittableColumns", 
 						components: [				
-							{content: "Copyright: "},
-							{name: "license"},
+							{content: "Copyright: ", classes: "ares-about-description"},
+							{name: "license", classes: "ares-about-description"},
 							{ content: " all rights reserved"}
 						]
 					}
