@@ -199,7 +199,7 @@ enyo.kind(
 			window.open(
 				this.iframeUrl ,
 				'_blank', // ensure that a new window is created each time preview is tapped
-				'scrollbars=1,menubar=1',
+				'scrollbars=1,menubar=1,resizable=1',
 				false
 			);
 			window.close();
