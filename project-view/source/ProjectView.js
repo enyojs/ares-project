@@ -212,7 +212,7 @@ enyo.kind({
 			var winLoc = window.location.toString().replace('ares','preview').replace('test', 'index') ;
 			var previewUrl = winLoc
 				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
-				+ 'url=' + encodeURIComponent(projectUrl);
+				+ 'url=' + encodeURIComponent(projectUrl)+'&name=' + project.id;
 
 			this.trace("preview on URL ", previewUrl) ;
 			
