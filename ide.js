@@ -142,7 +142,7 @@ var bundledBrowser = {
 };
 
 var configPath, tester;
-var configStats;
+var fileStats;
 var serviceMap = {};
 var packagePath = path.resolve(myDir, "package.json");
 var packageContent;
@@ -158,15 +158,15 @@ function checkFile(inFile) {
 		throw "Did not find: '"+inFile+"': ";
 	}
 
-	log.verbose('loadMainConfig()', "Loading ARES configuration from '"+inFile+"'...");
-	configStats = fs.lstatSync(inFile);
-	if (!configStats.isFile()) {
+	fileStats = fs.lstatSync(inFile);
+	if (!fileStats.isFile()) {
 		throw "Not a file: '"+inFile+"': ";
 	}
 }
 
 function loadMainConfig(configFile) {
 	checkFile(configFile);
+	log.verbose('loadMainConfig()', "Loading ARES configuration from '" + configFile + "'...");
 	var configContent = fs.readFileSync(configFile, 'utf8');
 	try {
 		ide.res = JSON.parse(configContent);
@@ -305,8 +305,8 @@ function loadPluginConfigFiles() {
 loadMainConfig(configPath);
 loadPluginConfigFiles();
 
-// configuration age/date is the UTC configuration file last modification date
-ide.res.timestamp = configStats.atime.getTime();
+// File age/date is the UTC configuration file last modification date
+ide.res.timestamp = fileStats.atime.getTime();
 log.verbose('main', ide.res);
 
 function handleMessage(service) {

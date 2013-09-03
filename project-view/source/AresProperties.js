@@ -16,12 +16,13 @@ enyo.kind({
 	},	
 
 	components: [
-		{kind: "aboutAresPanel"},
-		{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail"},
+		{kind: "onyx.Toolbar", classes: "ares-right-toolbar", components: [
+			{content: "About"}
+		]},
+		{name: "thumbnail", kind: "onyx.RadioGroup", onActivate: "switchDrawers"},
 		{name: "toolbarId", classes: "ares-right-toolbar", kind: "onyx.Toolbar", components: [
 			{name: "ok", kind: "onyx.Button", content: "OK", ontap: "confirmTap"}
 		]},
-		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: "unknown error"},
 		{kind: "Signals", onPluginRegist: "handlePluginRegist"}
 	],
 
@@ -33,6 +34,47 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
+		this.createAresAboutDrawer();
+	},
+
+	/**
+	 * @private
+	 */
+	createAresAboutDrawer: function() {
+		var aresAboutTabEntry = {
+			id: "aresAbout",
+			name: "Ares",
+			kind: "AboutAresPanel"
+		};
+		this.createAboutTab(aresAboutTabEntry);
+	}, 
+
+	/**
+	 * Create a tab to display basic informations about Ares or embeeded plugins
+	 * 
+	 * @param  {Object} inTabEntry object that define the name of the tab thumbnail & drawer
+	 *                             and the kind of the tab panel.
+	 * @private
+	 */
+	createAboutTab: function(inTabEntry) {
+		var drawer = this.createComponent({
+			name: inTabEntry.id + 'Drawer',
+			kind: "onyx.Drawer",
+			open: false
+		},{addBefore: this.$.toolbarId});
+
+		inTabEntry.panel = drawer.createComponent({
+			name: inTabEntry.id,
+			kind: inTabEntry.kind
+		});
+
+		inTabEntry.tab = this.$.thumbnail.createComponent({
+			name: inTabEntry.id + 'Tab',
+			content: inTabEntry.name,
+			pluginServiceId: inTabEntry.id,
+			showing: true,
+			active: true
+		});
 	},
 
 	/**
@@ -51,25 +93,7 @@ enyo.kind({
 			name: inEvent.pluginService.getName() || inEvent.pluginService.id,
 			kind: inEvent.pluginService.getAresPropertiesKind()
 		};
-
-		var drawer = this.createComponent({
-			name: pluginService.id + 'Drawer',
-			kind: "onyx.Drawer",
-			open: false
-		},{addBefore: this.$.toolbarId});
-
-		pluginService.panel = drawer.createComponent({
-			name: pluginService.id,
-			kind: pluginService.kind
-		});
-
-		pluginService.tab = this.$.thumbnail.createComponent({
-			name: pluginService.id + 'Tab',
-			content: pluginService.name,
-			pluginServiceId: pluginService.id,
-			showing: true,
-			active: true
-		});
+		this.createAboutTab(pluginService);		
 	},
 
 	// /**
@@ -91,69 +115,102 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "aboutAresPanel",
+	name: "AboutAresPanel",
 	kind: "FittableRows",
 	published: {
 		config: {},
 		aboutAresData: undefined
 	},
-	components: [
-		{
-			kind:"FittableColumns", 
-			components: [
-				{content: "Ares v"},
-				{name: "versionValue"}
-			]
-		},
-		{
-			kind:"FittableColumns", 
-			components: [				
-				{content: "If you encounter any bug please report it in the following link "},
-				{name: "brValue", kind: "enyo.Control", tag: "a", content: "Report a bug", attributes: {"target": "_blank"}}
-			]
-		},
-		{
-			kind:"FittableColumns", 
-			components: [				
-				{content: "We would welcome any contribution you can comme with "},
-				{name: "phpValue", kind: "enyo.Control", tag: "a", content: "Project Homepage", attributes: {"target": "_blank"}}				
-			]
-		},
-		{
-			kind:"FittableColumns", 
-			components: [				
-				{content: "Copyright: "},
-				{name: "license"},
-				{ content: " all rights reserved"}
-			]
-		}
-	],
+	events: {
+		onError: ""
+	},
+	
+	/**
+	 * @private
+	 */
+	createAresAboutContent: function() {
+		this.createComponent(
+			{
+				components: [
+					{
+						kind:"FittableColumns", 
+						components: [
+							{content: "Ares version: "},
+							{name: "versionValue"}
+						]
+					},
+					{
+						kind:"FittableColumns", 
+						components: [				
+							{content: "If you encounter any bug please report it in the following link "},
+							{name: "brValue", kind: "enyo.Control", tag: "a", content: "Report a bug", attributes: {"target": "_blank"}}
+						]
+					},
+					{
+						kind:"FittableColumns", 
+						components: [				
+							{content: "We would welcome any contribution you can come with "},
+							{name: "homeValue", kind: "enyo.Control", tag: "a", content: "Project Homepage", attributes: {"target": "_blank"}}				
+						]
+					},
+					{
+						kind:"FittableColumns", 
+						components: [				
+							{content: "Copyright: "},
+							{name: "license"},
+							{ content: " all rights reserved"}
+						]
+					}
+				]
+			}
+		);
 
-	create: function(){
-		this.inherited(arguments);
-		this.getAboutAresData();		
 	},
 
+	/**
+	 * private
+	 */
+	create: function(){
+		this.inherited(arguments);
+		this.getAboutAresData();
+
+	},
+
+	/**
+	 * Send an AJAX request to the  Backend in order to get the needed data for the Ares description.
+	 * @rprivate
+	 */
 	getAboutAresData: function(){
+		var origin = window.location.origin || window.location.protocol + "//" + window.location.host; // Webkit/FF vs IE
+
 		var req = new enyo.Ajax({
-			url: 'http://127.0.0.1:9009/res/aboutares'
+			url: origin + '/res/aboutares'
 		});
 
-		req.response(this, function(inSender, inData) {		
+		req.response(this, function(inSender, inData) {	
+
+			//The description is loaded only if the request to get the package informations succeeds
+			this.createAresAboutContent();
+
 			this.setAboutAresData(inData.aboutAres);
-			this.aboutAresDataChanged();
 		});
 
-		//TODO: manage the error more properly.
-		req.error(function(){this.error("Request Error");});
+		//Show the error in a Pop-up.
+		req.error(this, function(inSender, inError){
+			enyo.log("the error: " , inError.toString());
+			this.doError({msg: inError.toString(), err: inError});
+		});
 		
 		req.go();
 	},
-
+	
+	/**
+	 * @private
+	 */
 	aboutAresDataChanged: function(){
 		this.$.versionValue.content = this.aboutAresData.version;
 		this.$.brValue.setAttribute("href", this.aboutAresData.bugReportURL);
-		this.$.phpValue.setAttribute("href", this.aboutAresData.projectHomePage);
+		this.$.homeValue.setAttribute("href", this.aboutAresData.projectHomePage);
 		this.$.license.content = this.aboutAresData.license;
 	}	
 });
