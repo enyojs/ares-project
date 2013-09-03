@@ -539,8 +539,10 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 
 		if (file.name === '.' || !file.name) {
 			file.name = pathParam;
+			file.newFile = false;
 		} else {
 			file.name = [pathParam, file.name].join('/');
+			file.newFile = true;
 		}
 
 		var putCallback = function(err, node) {
