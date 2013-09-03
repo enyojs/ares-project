@@ -131,7 +131,7 @@ enyo.kind({
 	name: "User.ErrorPopup",
 	kind: "Ares.ErrorPopup",	
 		components: [
-		    {tag: "div", classes:"title", content: "User Error"},
+		    {tag: "div", name: "title", classes:"title", content: "User Error"},
 				{classes:"ares-error-popup", fit: true, components: [
 					{name: "msg"},
 					{name: "action", showing: false},
