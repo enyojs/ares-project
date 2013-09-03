@@ -38,7 +38,7 @@ enyo.kind({
 			]},
 			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
 				{kind: "onyx.IconButton", src: "../project-view/assets/images/project_view_preview.png", ontap: "doSavePreviewAction"},
-				{kind: "onyx.Tooltip", content: "Preview"}
+				{kind: "onyx.Tooltip", name:"previewTooltip", content: "Preview"}
 			]}
 		]},
 		{
@@ -116,6 +116,9 @@ enyo.kind({
 	},
 	switchGrabberDirection: function(active){
 		this.$.aresGrabberDirection.switchGrabberDirection(active);
+	},
+	addPreviewTooltip: function(message){
+		this.$.previewTooltip.setContent(message);
 	}	
 });
 
