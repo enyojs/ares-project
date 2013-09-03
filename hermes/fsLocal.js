@@ -336,6 +336,26 @@ FsLocal.prototype.putFile = function(req, file, next) {
 	
 	async.series([
 		function(cb1) {
+			if (file.newFile) {
+					fs.stat(absPath, (function(err, stat) {
+						if (err) {
+							if (err.code === 'ENOENT') {
+								/* normal */
+								cb1();
+							} else {
+								/* wrong */
+								cb1(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+							}
+						} else {
+							/* wrong */
+							cb1(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+						}
+					}).bind(this));
+			} else {
+				cb1();
+			}
+		},
+		function(cb1) {
 			mkdirp(dir, cb1);
 		},
 		(function(cb1) {
