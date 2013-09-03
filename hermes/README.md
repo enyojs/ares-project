@@ -51,7 +51,7 @@ In the project folder there is a JSON file that hold providers parameters, edit 
 1. In the Ares UI, select the project in the **Project List**
 2. Using an external text editor, open the files *project.json* & *config.xml*
 3. In the *project.json* file edit the *plugin* block as shown in the below example : 
-```json
+```json"
 "plugins": {
       "plugin_01": {
           "name": "com.phonegap.plugins.example",
@@ -71,16 +71,16 @@ In the project folder there is a JSON file that hold providers parameters, edit 
           "name": "com.phonegap.plugins.example",
           "version": "pluginVersion"
        }
-}
+}```
 
 4. Proceed to the build
-5. Check the *config.xml* file, you should be able to see the ```gap:plugin tag, the above example should give the following result : 
+5. Check the *config.xml* file, you should be able to see the ```gap:plugin``` tag, the above example should give the following result : 
 ```xml
 	<gap:plugin name="com.phonegap.plugins.example">
 	    <param name="APIKey" value="12345678" />
 	    <param name="APISecret" value="12345678" />
 	</gap:plugin>
-
+```
 
 the JSON block headers :
 ``` 
