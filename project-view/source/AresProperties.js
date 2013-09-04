@@ -124,13 +124,10 @@ enyo.kind({
 	events: {
 		onError: ""
 	},
-	
-	/**
-	 * @private
-	 */
-	createAresAboutContent: function() {
-		this.createComponent(
-			{	kind: "FittableRows",
+	components: [
+		{name: "errorMessage", content: "Error: Unable to load Ares About data from Ares IDE Server", showing: false},
+		{	kind: "FittableRows",
+			name: "aboutDescription",
 				components: [
 					{
 						kind:"FittableColumns", 
@@ -163,10 +160,8 @@ enyo.kind({
 					}
 				]
 			}
-		);
-
-	},
-
+	],
+	
 	/**
 	 * private
 	 */
@@ -188,17 +183,15 @@ enyo.kind({
 		});
 
 		req.response(this, function(inSender, inData) {	
-
-			//The description is loaded only if the request to get the package informations succeeds
-			this.createAresAboutContent();
-
 			this.setAboutAresData(inData.aboutAres);
 		});
 
 		//Show the error in a Pop-up.
 		req.error(this, function(inSender, inError){
-			enyo.log("the error: " , inError.toString());
-			this.doError({msg: inError.toString(), err: inError});
+			
+			this.doError({msg: "("+inError +") Unable to load Ares About data", err: inError});
+			this.$.errorMessage.show();
+			this.$.aboutDescription.hide();
 		});
 		
 		req.go();
