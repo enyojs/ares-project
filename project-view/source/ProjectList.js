@@ -40,7 +40,6 @@ enyo.kind({
 							]},
 							{classes: "onyx-menu-divider aresmenu-button"},
 							{value: "showAresProperties",  classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/about-32x32.png", classes: "aresmenu-icon-button"},
 								{content: "Properties...", classes: "aresmenu-button-label"}
 							]}
 						]}

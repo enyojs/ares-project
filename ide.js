@@ -142,10 +142,10 @@ var bundledBrowser = {
 };
 
 var configPath, tester;
-var fileStats;
+var configStats;
+var aresAboutData;
 var serviceMap = {};
-var packagePath = path.resolve(myDir, "package.json");
-var packageContent;
+
 
 if (argv.runtest) {
 	tester = require('./test/tester/main.js');
@@ -154,18 +154,20 @@ if (argv.runtest) {
 	configPath = argv.config;
 }
 function checkFile(inFile) {
+	var fileStats;
 	if (!fs.existsSync(inFile)) {
-		throw "Did not find: '"+inFile+"': ";
+		throw new Error("Did not find: '"+inFile+"': ");
 	}
 
 	fileStats = fs.lstatSync(inFile);
 	if (!fileStats.isFile()) {
-		throw "Not a file: '"+inFile+"': ";
+		throw new Error("Not a file: '"+inFile+"': ");
 	}
+	return fileStats;
 }
 
 function loadMainConfig(configFile) {
-	checkFile(configFile);
+	configStats = checkFile(configFile);
 	log.verbose('loadMainConfig()', "Loading ARES configuration from '" + configFile + "'...");
 	var configContent = fs.readFileSync(configFile, 'utf8');
 	try {
@@ -175,20 +177,22 @@ function loadMainConfig(configFile) {
 	}
 
 	if (!ide.res.services || !ide.res.services[0]) {
-		throw "Corrupted '"+configFile+"': no storage services defined";
+		throw new Error("Corrupted '"+configFile+"': no storage services defined");
 	}
 }
-function loadPackageConfig(packageFile) {
-	checkFile(packageFile);
-	var packageContentJSON = fs.readFileSync(packageFile, 'utf8');
+function loadPackageConfig() {
+	var packagePath = path.resolve(myDir, "package.json");
+	checkFile(packagePath);
+	var packageContentJSON = fs.readFileSync(packagePath, 'utf8');
 	try {	
 		var packageContent = JSON.parse(packageContentJSON);
-		var aresAboutData = {"version": packageContent.version, "bugReportURL": packageContent.bugs.url, 
-							 "license": packageContent.license, "projectHomePage": packageContent.homepage};
-
-		return aresAboutData;
+		aresAboutData = {
+			"version": packageContent.version, "bugReportURL": packageContent.bugs.url, 
+			"license": packageContent.license, "projectHomePage": packageContent.homepage
+		};
+		
 	} catch(e) {
-		throw "Improper JSON: "+packageContent;
+		throw new Error("Improper JSON: "+packageContent);
 	}	
 }
 
@@ -305,8 +309,10 @@ function loadPluginConfigFiles() {
 loadMainConfig(configPath);
 loadPluginConfigFiles();
 
+loadPackageConfig();
+
 // File age/date is the UTC configuration file last modification date
-ide.res.timestamp = fileStats.atime.getTime();
+ide.res.timestamp = configStats.atime.getTime();
 log.verbose('main', ide.res);
 
 function handleMessage(service) {
@@ -591,9 +597,8 @@ app.configure(function(){
 		log.http('main', m("GET /res/services:", ide.res.services));
 		res.status(200).json({services: ide.res.services});
 	});
-	app.get('/res/aboutares', function(req, res, next) {
-		log.http('main', m("GET /res/aboutares:", ide.res.services));
-		res.status(200).json({aboutAres: loadPackageConfig(packagePath)});
+	app.get('/res/aboutares', function(req, res, next) {		
+		res.status(200).json({aboutAres: aresAboutData});
 	});
 	app.all('/res/services/:serviceId/*', proxyServices);
 	app.all('/res/services/:serviceId', proxyServices);
