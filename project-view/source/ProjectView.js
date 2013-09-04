@@ -212,14 +212,14 @@ enyo.kind({
 			var winLoc = window.location.toString().replace('ares','preview').replace('test', 'index') ;
 			var previewUrl = winLoc
 				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
-				+ 'url=' + encodeURIComponent(projectUrl);
+				+ 'url=' + encodeURIComponent(projectUrl)+'&name=' + project.id;
 
 			this.trace("preview on URL ", previewUrl) ;
 			
 			window.open(
 				previewUrl,
 				'_blank', // ensure that a new window is created each time preview is tapped
-				'scrollbars=0,menubar=1',
+				'scrollbars=0,menubar=1,resizable=1',
 				false
 			);
 		}

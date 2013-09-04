@@ -341,6 +341,7 @@ function handleMessage(service) {
 			}).on('error', function(e) {
 				throw e;
 			});
+			log.verbose(service.id, "config:", service);
 			creq.write(JSON.stringify({config: service}, null, 2));
 			creq.end();
 		} else {
