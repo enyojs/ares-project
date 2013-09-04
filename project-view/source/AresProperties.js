@@ -5,7 +5,7 @@
 
 enyo.kind({
 	name: "AresProperties",
-	classes: "enyo-unselectable",
+	classes: "enyo-unselectable ares-classic-popup",
 	kind:"onyx.Popup",
 	fit: true,
 	modal: true, centered: true, floating: true, autoDismiss: false,
@@ -16,12 +16,11 @@ enyo.kind({
 	},	
 
 	components: [
-		{kind: "onyx.Toolbar", classes: "ares-right-toolbar", components: [
-			{content: "About"}
+		{classes:"title left-align", components:[
+			{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", classes:"ares-radio-group", components: []}
 		]},
-		{name: "thumbnail", kind: "onyx.RadioGroup", onActivate: "switchDrawers"},
-		{name: "toolbarId", classes: "ares-right-toolbar", kind: "onyx.Toolbar", components: [
-			{name: "ok", kind: "onyx.Button", content: "OK", ontap: "confirmTap"}
+		{kind: "onyx.Toolbar", name: "toolbarId", classes:"bottom-toolbar", components: [
+			{name: "ok", classes:"right", kind: "onyx.Button", content: "OK", ontap: "confirmTap"}
 		]},
 		{kind: "Signals", onPluginRegist: "handlePluginRegist"}
 	],
@@ -44,7 +43,8 @@ enyo.kind({
 		var aresAboutTabEntry = {
 			id: "aresAbout",
 			name: "Ares",
-			kind: "AboutAresPanel"
+			kind: "AboutAresPanel",
+			components:[{content:"Ares", classes:"large-fixed"},{tag:"span", classes:"ares-bottom-check"}]
 		};
 		this.createAboutTab(aresAboutTabEntry);
 	}, 
@@ -73,7 +73,8 @@ enyo.kind({
 			content: inTabEntry.name,
 			componentId: inTabEntry.id,
 			showing: true,
-			active: true
+			active: true,
+			components:inTabEntry.components
 		});
 	},
 
@@ -116,7 +117,9 @@ enyo.kind({
 
 enyo.kind({
 	name: "AboutAresPanel",
-	kind: "FittableRows",
+	kind: "enyo.Scroller",
+	fit: "true",
+	classes: "ares-about-drawer",
 	published: {
 		config: {},
 		aboutAresData: undefined
