@@ -86,7 +86,8 @@ enyo.kind({
 					{kind: "CategoryItem"}
 				]}
 			]},
-			{kind:"onyx.InputDecorator", style:"width:100%; margin-top:10px;", layoutKind:"FittableColumnsLayout", components: [
+			// FIXME ENYO-3021: component hidden until ENYO-1887 implementation
+			{kind:"onyx.InputDecorator", showing: false, style:"width:100%; margin-top:10px;", layoutKind:"FittableColumnsLayout", components: [
 				{kind: "onyx.Input", fit:true, placeholder: "filter"},
 				{kind: "onyx.Icon", src:"$deimos/images/search-input-search.png", style:"height:20px;"}
 			]}
