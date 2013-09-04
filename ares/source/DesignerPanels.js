@@ -35,6 +35,10 @@ enyo.kind({
 					{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closeDesignerAction"},
 					{kind: "onyx.Tooltip", content: "Code editor"}
 				]}
+			]},
+			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
+				{kind: "onyx.IconButton", src: "../project-view/assets/images/project_view_preview.png", ontap: "doSavePreviewAction"},
+				{kind: "onyx.Tooltip", name:"previewTooltip", content: "Preview"}
 			]}
 		]},
 		{
@@ -63,7 +67,8 @@ enyo.kind({
 	],
 	events: {
 		onRegisterMe: "",
-		onMovePanel:""
+		onMovePanel:"",
+		onSavePreviewAction:""
 	},
 	published: {
 		panelIndex: 2
@@ -111,6 +116,9 @@ enyo.kind({
 	},
 	switchGrabberDirection: function(active){
 		this.$.aresGrabberDirection.switchGrabberDirection(active);
+	},
+	addPreviewTooltip: function(message){
+		this.$.previewTooltip.setContent(message);
 	}	
 });
 
