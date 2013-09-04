@@ -872,7 +872,7 @@ enyo.kind({
 			this.$.nameCopyPopup.setFolderId(this.selectedNode.file.id);
 			this.$.nameCopyPopup.show();
 		} else {
-			this.showErrorPopup($L("Select a file or folder to copy first"));
+			this.showErrorPopup($L("First select a file or folder to copy"));
 		}
 	},
 	/** @private */
@@ -890,7 +890,10 @@ enyo.kind({
 		}
 
 		this.trace("Creating new file ", newName, " as copy of", oldName);
-		this.$.service.copy(this.selectedNode.file.id, newName)
+		this.$.service.copy(this.selectedNode.file.id, {
+			name: newName,
+			overwrite: false
+		})
 			.response(this, function(inSender, inFsNode) {
 				this.trace("inNode: ", inFsNode);
 				var parentNode = this.getParentNodeOfSelected(),
@@ -942,7 +945,10 @@ enyo.kind({
 		}
 
 		this.trace("Renaming '", this.selectedNode.file, "' as '", newName, "'");
-		this.$.service.rename(this.selectedNode.file.id, newName)
+		this.$.service.rename(this.selectedNode.file.id, {
+			name: newName,
+			overwrite: false
+		})
 			.response(this, function(inSender, inNode) {
 				this.trace("inNode: ",inNode);
 				var parentNode = this.getParentNodeOfSelected(),
@@ -1160,7 +1166,10 @@ enyo.kind({
 	moveNode: function(inNode, inTarget) {
 		this.trace("inNode", inNode, "inTarget", inTarget);
 		
-		return this.$.service.rename(inNode.file.id, {folderId: inTarget.file.id})
+		return this.$.service.rename(inNode.file.id, {
+			folderId: inTarget.file.id,
+			overwrite: false
+		})
 			.response(this, function(inSender, inValue) {
 				this.trace(inSender, "=>", inValue);
 				var removedParentNode = inNode.container,
