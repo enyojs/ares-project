@@ -18,6 +18,7 @@ enyo.kind({
 		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
 		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
+		{name: "overwritePopup", kind: "overwriteActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "saveAsConfirm", onCancelActionPopup: "saveAsCancel"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: $L("unknown error")},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
@@ -102,29 +103,55 @@ enyo.kind({
 		}).bind(this));
 	},
 	saveAsFileChosen: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-
+		this.trace(inSender, "=>", inEvent);
+		
 		if (!inEvent.file) {
 			// no file or folder chosen
 			return;
 		}
-		var self = this;
-		var relativePath = inEvent.name.split("/");
+		
+		var hft = this.$.saveAsPopup.$.hermesFileTree ;
+		var next = function(result) {
+			if (result) {
+				this.$.overwritePopup.setData(inEvent);
+				this.$.overwritePopup.show();
+			} else {
+				this.saveAsConfirm(inSender, {data: inEvent});
+			}
+		}.bind(this);
+
+		hft.checkNodeName(inEvent.name, next);		
+		
+		return true; //Stop event propagation
+	},
+	/** @private */
+	saveAsConfirm: function(inSender, inData){
+		this.trace(inSender, "=>", inData);
+		
+		var data = inData.data;
+		var relativePath = data.name.split("/");
 		var name = relativePath[relativePath.length-1];
+		
 		this.showWaitPopup($L("Saving ..."));
 		this.doSaveAsDocument({
 			docId: this.docData.getId(),
 			projectData: this.docData.getProjectData(),
-			file: inEvent.file,
+			file: data.file,
 			name: name,
 			content: this.$.ace.getValue(),
-			next: function(err) {
-				self.hideWaitPopup();
-				if (typeof inEvent.next === 'function') {
-					inEvent.next();
+			next: (function(err) {
+				this.hideWaitPopup();
+				if (typeof data.next === 'function') {
+					data.next();
 				}
-			}
+			}).bind(this)
 		});
+
+		return true; //Stop event propagation
+	},
+	saveAsCancel: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+
 		return true; //Stop event propagation
 	},
 	saveBeforeClose: function(){
@@ -977,4 +1004,31 @@ enyo.kind({
 		this.hide();
 		this.doSaveActionPopup();
 	}
+});
+
+enyo.kind({
+	name: "overwriteActionPopup",
+	kind: "Ares.ActionPopup",
+	data: null,
+	/** @private */
+	create: function() {
+		this.inherited(arguments);
+	},
+	/** @public */
+	setData: function(data) {
+		this.data = data;
+	},
+	/** @public */
+	getData: function() {
+		return this.data;
+	},
+	/* Ares.ActionPopup overloading */
+	/** @private */
+	actionConfirm: function(inSender, inEvent) {
+        this.hide();
+        this.log(this.data);
+        this.doConfirmActionPopup({data: this.data});
+        return true;
+    },
+    
 });
