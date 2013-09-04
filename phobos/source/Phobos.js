@@ -1026,7 +1026,6 @@ enyo.kind({
 	/** @private */
 	actionConfirm: function(inSender, inEvent) {
         this.hide();
-        this.log(this.data);
         this.doConfirmActionPopup({data: this.data});
         return true;
     },
