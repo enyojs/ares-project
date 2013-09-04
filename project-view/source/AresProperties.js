@@ -129,7 +129,8 @@ enyo.kind({
 	},
 	components: [
 		{name: "errorMessage", content: "Error: Unable to load Ares About data from Ares IDE Server", showing: false},
-		{	kind: "FittableRows",
+		{	
+			kind: "FittableRows",
 			name: "aboutDescription",
 				components: [
 					{
@@ -162,7 +163,7 @@ enyo.kind({
 						]
 					}
 				]
-			}
+		}
 	],
 	
 	/**
