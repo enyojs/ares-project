@@ -5,11 +5,10 @@
 
 enyo.kind({
 	name: "AresProperties",
-	classes: "enyo-unselectable",
+	classes: "enyo-unselectable ares-classic-popup",
 	kind:"onyx.Popup",
 	fit: true,
 	modal: true, centered: true, floating: true, autoDismiss: false,
-	classes:"ares-classic-popup",
 	events: {
 		onModifiedConfig: "",
 		onSaveGeneratedXml: "",
@@ -17,12 +16,12 @@ enyo.kind({
 	},	
 
 	components: [
-	 	{classes:"title left-align", components:[
-	 		{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", classes:"ares-radio-group", components: []}
-	 	]},
+		{classes:"title left-align", components:[
+			{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", classes:"ares-radio-group", components: []}
+		]},
 		{kind: "onyx.Toolbar", name: "toolbarId", classes:"bottom-toolbar", components: [
-            {name: "ok", classes:"right", kind: "onyx.Button", content: "OK", ontap: "confirmTap"}
-        ]},
+			{name: "ok", classes:"right", kind: "onyx.Button", content: "OK", ontap: "confirmTap"}
+		]},
 		{kind: "Signals", onPluginRegist: "handlePluginRegist"}
 	],
 
