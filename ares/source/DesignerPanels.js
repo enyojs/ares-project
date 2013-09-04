@@ -44,7 +44,7 @@ enyo.kind({
 		{
 			name: "bottomBar",
 			kind: "DocumentToolbar",
-			classes: "ares-bottom-bar",
+			classes: "ares-bottom-bar"
 		},
 		{
 			kind: "Panels",
