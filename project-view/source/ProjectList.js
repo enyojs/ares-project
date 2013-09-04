@@ -1,4 +1,4 @@
-/*global ServiceRegistry, ares */
+/* global ares, ServiceRegistry */
 /**
  * This kind provides:
  * - the project toolbars (with create .. delete)
@@ -105,7 +105,7 @@ enyo.kind({
 					{tag:"li",kind: "ProjectList.Project", name: "item"}
 				]}
 			]},
-			{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
+			{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmActionPopup: "confirmRemoveProject"},
 		{kind: "AccountsConfigurator"},
 		{kind: "AresProperties"}
 		]},
@@ -168,9 +168,9 @@ enyo.kind({
 	removeProjectAction: function(inSender, inEvent) {
 		var popup = this.$.removeProjectPopup;
 		if (this.selected) {
-			popup.setName("Remove project");
-			popup.setMessage("Remove project '" + this.selected.getProjectName() + "' from list?");
-			popup.$.nukeFiles.setValue(false) ;
+			popup.setTitle($L("Remove project"));
+			popup.setMessage(this.$LS("Remove project '#{projectName}' from list?", {projectName: this.selected.getProjectName()}));
+			popup.setNukeFiles(false) ;
 			popup.show();
 		}
 	},
@@ -180,7 +180,7 @@ enyo.kind({
 		var project, nukeFiles ;
 		if (this.selected) {
 			project = Ares.Workspace.projects.at(this.selected.index);
-			nukeFiles = this.$.removeProjectPopup.$.nukeFiles.getValue() ;
+			nukeFiles = this.$.removeProjectPopup.getNukeFiles() ;
 			this.trace("removing project", project.getName(), ( nukeFiles ? " and its files" : "" )) ;
 			this.trace(project);
 			if (nukeFiles) {
@@ -261,6 +261,10 @@ enyo.kind({
 			return undefined;	// Exclude
 		}
 		return value;	// Accept
+	},
+	$LS: function(msg, params) {
+		var tmp = new enyo.g11n.Template($L(msg));
+		return tmp.evaluate(params);
 	}
 });
 
@@ -282,26 +286,33 @@ enyo.kind({
 enyo.kind({
 	name: "ProjectDeletePopup",
 	kind: "Ares.ActionPopup",
-	handlers: {
-		onShow: "shown"
+	published: {
+		nukeFiles: false
 	},
+	/** @private */
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.createComponent(
 				{container:this.$.popupContent, classes:"ares-more-row", components:[
-					{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "nukeChanged"},
-					{kind: "Control", tag: "span", classes: "ares-padleft", content: "also delete files from disk"}
+					{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "changeNuke"},
+					{kind: "Control", tag: "span", classes: "ares-padleft", content: $L("also delete files from disk")}
 				]}
 		);
+		this.changeNuke();
 	},
-	shown: function(inSender, inEvent) {
-		this.nukeChanged();
+	/** @private */
+	nukeFilesChanged: function(inSender, inEvent) {
+		this.$.nukeFiles.checked = this.nukeFiles;
+		this.changeNuke();
 	},
-	nukeChanged: function(inSender, inEvent) {
+	/** @private */
+	changeNuke: function(inSender, inEvent) {
+		this.nukeFiles = this.$.nukeFiles.checked;
 		if (this.$.nukeFiles.checked) {
-			this.$.actionButton.setContent("Delete");
+			this.setActionButton($L("Delete"));
 		} else {
-			this.$.actionButton.setContent("Remove");
+			this.setActionButton($L("Remove"));
 		}
 	}
 });

@@ -15,11 +15,11 @@ enyo.kind({
 				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
-		{name: "savePopup", kind: "saveActionPopup", onAbandonDocAction: "abandonDocAction", onSave: "saveBeforeClose", onCancel: "cancelClose"},
-		{name: "savePopupPreview", kind: "saveActionPopup", onAbandonDocAction: "abandonDocActionOnPreview", onSave: "saveBeforePreviewAction"},
+		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
+		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: $L("unknown error")},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
 		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "enyo-unselectable", centered: true, modal: true, floating: true, autoDismiss: false,
 		onChangeSettings:"applySettings", onChangeRightPane: "changeRightPane", onClose: "closeEditorPop", onHide:"hideTest", onTabSizsChange: "tabSize"}
@@ -715,9 +715,9 @@ enyo.kind({
 	* @protected
 	*/
 	showSavePopup: function(componentName, message){
-		this.$[componentName].setName("Document was modified!");
+		this.$[componentName].setTitle($L("Document was modified!"));
 		this.$[componentName].setMessage(message);
-		this.$[componentName].setActionButton("Don't Save");
+		this.$[componentName].setActionButton($L("Don't Save"));
 		this.$[componentName].show();
 	},	
 	/** 
@@ -961,23 +961,20 @@ enyo.kind({
 	name: "saveActionPopup",
 	kind: "Ares.ActionPopup",
 	events:{
-		onSave: "",
-		onCancel: ""
+		onSaveActionPopup: ""
 	},
+	/** @private */
 	create: function() {
 		this.inherited(arguments);
 		this.$.message.allowHtml = true;
 		this.$.buttons.createComponent(
-			{name:"saveButton", kind: "onyx.Button", content: "Save", ontap: "save"},
+			{name:"saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "save"},
 			{owner: this}
 		);
 	},
-	actionCancel: function(inSender, inEvent) {
-        this.inherited(arguments);
-        this.doCancel();
-    },
+	/** @private */
 	save: function(inSender, inEvent) {
 		this.hide();
-		this.doSave();
+		this.doSaveActionPopup();
 	}
 });
