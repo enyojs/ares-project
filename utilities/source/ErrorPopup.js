@@ -15,7 +15,7 @@ enyo.kind({
 	},
 	classes:"ares-classic-popup",
 	components: [
-	    {tag: "div", classes:"title", content: "Error"},
+	    {tag: "div", name: "title", classes:"title", content: "Error"},
 			{classes:"ares-error-popup", fit: true, components: [
 				{name: "msg"},
 				{name: "action", showing: false},
@@ -109,6 +109,10 @@ enyo.kind({
 			} else {
 				err = evt.err;
 				msg = evt.msg || (err && err.toString());
+				
+				if(evt.title != undefined) {
+					this.$.title.setContent(evt.title);
+				}				
 			}
 		} else {
 			msg = evt.toString();
