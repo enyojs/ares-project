@@ -497,7 +497,8 @@ enyo.kind({
 				src: true,
 				style: true,
 				tag: true,
-				name: true
+				name: true,
+				allowHtml: true
 			},
 			c = this.$.ace.getValue(),
 			kinds = [];
@@ -506,7 +507,8 @@ enyo.kind({
 			var nbKinds = 0;
 			var errorMsg;
 			var i, o;
-			for (i=0; i < this.analysis.objects.length; i++) {
+			var oLen = this.analysis.objects.length;
+			for (i=0; i < oLen; i++) {
 				o = this.analysis.objects[i];
 				if (o.type !== "kind") {
 					errorMsg = $L("Ares does not support methods out of a kind. Please place '" + o.name + "' into a separate .js file");
@@ -522,7 +524,7 @@ enyo.kind({
 				return [];
 			}
 
-			for (i=0; i < this.analysis.objects.length; i++) {
+			for (i=0; i < oLen; i++) {
 				o = this.analysis.objects[i];
 				var start = o.componentsBlockStart;
 				var end = o.componentsBlockEnd;
@@ -543,15 +545,93 @@ enyo.kind({
 				for (var j=0; j < o.properties.length; j++) {
 					var prop = o.properties[j];
 					var pName = prop.name;
+					var value = this.verifyValueType(analyzer.Documentor.stripQuotes(prop.value[0].name));
 					if (isDesignProperty[pName]) {
-						var value = analyzer.Documentor.stripQuotes(prop.value[0].name);
 						comp[pName] = value;
+					}
+					if (value === "{") {
+						comp[pName] = this.getKindObjectData(prop.value[0].properties);
+					} else if (value === "[" && pName !== "components") {
+						comp[pName] = this.getKindArrayData(prop.value[0].properties);
 					}
 				}
 				kinds.push(comp);
 			}
 		}
 		return kinds;
+	},
+	/**
+	 * Converts string representation of boolean values
+	 * to boolean
+	 * TODO: Verify false-positives (ex: strings meant to be strings)
+	 * @param inProps: the value to match
+	 * @returns boolean value if match found: inValue if no matches
+	 * @protected
+	 */
+	verifyValueType: function(inValue) {
+		if (inValue === "true") {
+			inValue = true;
+		} else if (inValue === "false") {
+			inValue = false;
+		}
+		return inValue;
+	},
+	/**
+	 * Retrieves the kind's array data stored in the properties
+	 * passed as a parameter
+	 * @param inProps: the properties to explore
+	 * @returns the array in inProps
+	 * @protected
+	 */
+	getKindArrayData: function(inProps) {
+		var len = inProps.length,
+			val = [];
+
+		if (len) {
+			var name, propVal;
+			for (var k=0; k<len; k++) {
+				name = inProps[k].name;
+
+				if (name === "{") {
+					propVal = this.getKindObjectData(inProps[k].properties);
+				} else if (name === "[") {
+					propVal = this.getKindArrayData(inProps[k].properties);
+				} else {
+					propVal = analyzer.Documentor.stripQuotes(name);
+				}
+				val.push(this.verifyValueType(propVal));
+			}
+		}
+		return val;
+	},
+	/**
+	 * Retrieves the kind's object data stored in the properties
+	 * passed as a parameter
+	 * @param inProps: the properties to explore
+	 * @returns the object in inProps
+	 * @protected
+	 */
+	getKindObjectData: function(inProps) {
+		var len = inProps.length,
+			val = {};
+
+		if (len) {
+			var name, propName, propVal;
+			for (var k=0; k<len; k++) {
+				name = inProps[k].name;
+				propName = analyzer.Documentor.stripQuotes(inProps[k].value[0].name);
+
+				if (propName === "{") {
+					propVal = this.getKindObjectData(inProps[k].value[0].properties);
+				} else if (propName === "[") {
+					propVal = this.getKindArrayData(inProps[k].value[0].properties);
+				} else {
+					propVal = analyzer.Documentor.stripQuotes(inProps[k].value[0].name);
+				}
+				val[name] = this.verifyValueType(propVal);
+			}
+		}
+		return val;
 	},
 	/**
 	 * Lists the handler methods mentioned in the "handlers"
