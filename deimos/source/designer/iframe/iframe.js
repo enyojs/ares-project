@@ -372,7 +372,7 @@ enyo.kind({
 				Stomp on existing _kindComponents_ to ensure that we render exactly what the user
 				has defined. If components came in as a string, convert to object first.
 			*/
-			kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.allKindComponents) : inKind.allKindComponents;
+			kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.componentKinds) : inKind.componentKinds;
 
 			// Clean up after previous kind
 			if (this.parentInstance) {
@@ -416,7 +416,7 @@ enyo.kind({
 	//* Rerender current selection
 	rerenderKind: function() {
 		var copy = this.getSerializedCopyOfComponent(this.parentInstance).components;
-		copy[0].allKindComponents = copy;
+		copy[0].componentKinds = copy;
 		this.renderKind(copy[0]);
 	},
 	checkXtorForAllKinds: function(kinds) {

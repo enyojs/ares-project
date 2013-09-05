@@ -174,7 +174,7 @@ enyo.kind({
 		
 		var currentKind = this.getCurrentKind();
 		var components = [currentKind];
-		this.sendMessage({op: "render", val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components), allKindComponents: enyo.json.codify.to(components), selectId: inSelectId}});
+		this.sendMessage({op: "render", val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components), componentKinds: enyo.json.codify.to(components), selectId: inSelectId}});
 	},
 	select: function(inControl) {
 		this.sendMessage({op: "select", val: inControl});
