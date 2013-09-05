@@ -27,3 +27,14 @@ Example:
 
 Designer Drag&Drop feature works fine with Chrome Browser but is
 broken with other browsers.
+
+## Project Properties
+
+When creating a new project, _sometimes_ the project description
+(name, id, title... etc) are reverted to their default values before
+being saved to disk.  The work-around is to later edit those properties
+using Project > Edit.
+
+This problem also affects the user-set PhoneGap Build properties, such
+as permissions & signing-keys selection.
+
