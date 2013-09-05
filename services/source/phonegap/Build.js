@@ -1025,7 +1025,7 @@ enyo.kind({
 				}
 			}			
 			return noPermissions;
-		}		
+		};		
 
 		// If all the permissions are disabled, the tag generated is 
 		// <preference name="permissions" value="none" />
