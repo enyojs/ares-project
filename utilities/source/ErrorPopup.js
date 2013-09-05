@@ -110,7 +110,7 @@ enyo.kind({
 				err = evt.err;
 				msg = evt.msg || (err && err.toString());
 				
-				if(evt.title != undefined) {
+				if(evt.title !== undefined) {
 					this.$.title.setContent(evt.title);
 				}				
 			}
