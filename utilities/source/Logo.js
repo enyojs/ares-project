@@ -10,5 +10,9 @@ enyo.kind({
 	},
 	setSource: function(src){
 		this.setAttribute("src", src);
+	},
+	hideLogo: function(){
+		this.setSource(null);
+		this.hide();
 	}
 });

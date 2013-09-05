@@ -13,7 +13,9 @@ enyo.kind({
 				{kind: "onyx.Grabber", classes: "ares-grabber" , name: "filePanelGrabber", showing: false, ontap: "activePanel", components: [
 					{kind: "aresGrabber", name: "aresGrabberDirection"}
 				]},
-				{name:"logo", kind:"Ares.Logo"}
+				{classes:"ares-logo-container", name:"logoContainer", components:[
+					{name:"logo", kind:"Ares.Logo"}
+				]}
 			]},
 			{kind: "HermesFileTree", dragAllowed: true}
 		]},
@@ -64,9 +66,9 @@ enyo.kind({
 		this.doMovePanel({panelIndex:this.panelIndex});
 	},
 	showLogo:function(){
-		this.$.logo.show();
+		this.$.logoContainer.show();
 	},
 	hideLogo:function(){
-		this.$.logo.hide();
+		this.$.logoContainer.hide();
 	},
 });
