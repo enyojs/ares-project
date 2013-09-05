@@ -192,7 +192,7 @@ function loadPackageConfig() {
 		};
 		
 	} catch(e) {
-		throw new Error("Improper JSON: "+packageContent);
+		throw new Error("Improper JSON: " + packagePath);
 	}	
 }
 

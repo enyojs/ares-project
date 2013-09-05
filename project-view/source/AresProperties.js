@@ -46,7 +46,7 @@ enyo.kind({
 			kind: "AboutAresPanel",
 			components:[{content:"Ares", classes:"large-fixed"},{tag:"span", classes:"ares-bottom-check"}]
 		};
-		this.createAboutTab(aresAboutTabEntry);
+		this.createComponentTab(aresAboutTabEntry);
 	}, 
 
 	/**
@@ -56,7 +56,7 @@ enyo.kind({
 	 *                             and the kind of the tab panel.
 	 * @private
 	 */
-	createAboutTab: function(inTabEntry) {
+	createComponentTab: function(inTabEntry) {
 		var drawer = this.createComponent({
 			name: inTabEntry.id + 'Drawer',
 			kind: "onyx.Drawer",
@@ -94,7 +94,7 @@ enyo.kind({
 			name: inEvent.pluginService.getName() || inEvent.pluginService.id,
 			kind: inEvent.pluginService.getAresPropertiesKind()
 		};
-		this.createAboutTab(pluginService);		
+		this.createComponentTab(pluginService);		
 	},
 
 	// /**
