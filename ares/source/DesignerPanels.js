@@ -63,7 +63,8 @@ enyo.kind({
 					{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
 				]}
 			]
-		}
+		},
+		{kind: "Ares.ErrorPopup", name: "userErrorPopup", msg: $L("unknown error")}
 	],
 	events: {
 		onRegisterMe: "",
@@ -96,9 +97,19 @@ enyo.kind({
 		this.owner.componentsRegistry.deimos.kindSelected(inSender, inEvent);
 	},
 	designerAction: function() {
-		this.owner.componentsRegistry.phobos.designerAction();
-		this.manageControls(true);
+		if(this.owner.componentsRegistry.phobos.editorUserSyntaxError() !== 0)
+		{
+			this.userSyntaxErrorPop();
+		}	
+		else
+		{
+			this.owner.componentsRegistry.phobos.designerAction();
+			this.manageControls(true);
+		}
 	},
+	userSyntaxErrorPop: function(){
+		this.$.userErrorPopup.raise({msg: "The syntax error does not make designer work properly. Please fix the syntax error in first before you work designer.", title: "User Syntax Error"});
+	},	
 	closeDesignerAction: function(){
 		this.owner.componentsRegistry.deimos.closeDesignerAction();
 		this.manageControls(false);
