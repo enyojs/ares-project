@@ -1,6 +1,6 @@
 {
   "name": "ares-ide",
-  "version": "0.2.3-pre.2",
+  "version": "0.2.3",
   "dependencies": {
     "archiver": {
       "version": "0.4.6",
@@ -19,7 +19,8 @@
       "dependencies": {
         "async": {
           "version": "0.2.9",
-          "from": "async@0.2.9"
+          "from": "async@0.2.9",
+          "resolved": "https://registry.npmjs.org/async/-/async-0.2.9.tgz"
         },
         "mkdirp": {
           "version": "0.3.5",
@@ -151,8 +152,7 @@
         },
         "shelljs": {
           "version": "0.1.4",
-          "from": "shelljs@0.1.4",
-          "resolved": "https://registry.npmjs.org/shelljs/-/shelljs-0.1.4.tgz"
+          "from": "shelljs@0.1.4"
         },
         "temp": {
           "version": "0.5.1",
@@ -291,7 +291,7 @@
         },
         "xhr2": {
           "version": "0.0.7",
-          "from": "xhr2@0.0.7",
+          "from": "https://registry.npmjs.org/xhr2/-/xhr2-0.0.7.tgz",
           "resolved": "https://registry.npmjs.org/xhr2/-/xhr2-0.0.7.tgz"
         }
       }
@@ -336,7 +336,7 @@
           "dependencies": {
             "keypress": {
               "version": "0.1.0",
-              "from": "keypress@0.1.0",
+              "from": "https://registry.npmjs.org/keypress/-/keypress-0.1.0.tgz",
               "resolved": "https://registry.npmjs.org/keypress/-/keypress-0.1.0.tgz"
             }
           }
@@ -355,7 +355,7 @@
         },
         "fresh": {
           "version": "0.1.0",
-          "from": "fresh@0.1.0",
+          "from": "https://registry.npmjs.org/fresh/-/fresh-0.1.0.tgz",
           "resolved": "https://registry.npmjs.org/fresh/-/fresh-0.1.0.tgz"
         },
         "methods": {
@@ -373,7 +373,7 @@
         },
         "debug": {
           "version": "0.7.2",
-          "from": "debug@*",
+          "from": "https://registry.npmjs.org/debug/-/debug-0.7.2.tgz",
           "resolved": "https://registry.npmjs.org/debug/-/debug-0.7.2.tgz"
         }
       }
@@ -411,7 +411,7 @@
       "dependencies": {
         "abbrev": {
           "version": "1.0.4",
-          "from": "abbrev@1.0.4",
+          "from": "https://registry.npmjs.org/abbrev/-/abbrev-1.0.4.tgz",
           "resolved": "https://registry.npmjs.org/abbrev/-/abbrev-1.0.4.tgz"
         }
       }
@@ -468,6 +468,7 @@
     "request": {
       "version": "2.26.0",
       "from": "request@2.26.0",
+      "resolved": "https://registry.npmjs.org/request/-/request-2.26.0.tgz",
       "dependencies": {
         "qs": {
           "version": "0.6.5",
@@ -509,7 +510,7 @@
           "dependencies": {
             "hoek": {
               "version": "0.9.1",
-              "from": "hoek@0.9.1",
+              "from": "https://registry.npmjs.org/hoek/-/hoek-0.9.1.tgz",
               "resolved": "https://registry.npmjs.org/hoek/-/hoek-0.9.1.tgz"
             },
             "boom": {
