@@ -738,25 +738,24 @@ enyo.kind({
 						{kind: "onyx.Picker", name: "keys"}
 					]
 				},
-				{tag: "br"}, {tag: "br"},
+				
 
 				// android, ios & blackberry: key password
 				{	
-					kind: "onyx.InputDecorator",
+					kind: "onyx.InputDecorator", classes: "ares-project-properties-margin-right",
 					components: [						
 						{name: "keyPasswd",	kind: "onyx.Input",	classes: "ares-project-properties-password", type: "password", placeholder: "Password"}
 					]
 				},
-				{tag: "br"},
+			
 				// android-only: keystore password
 				{
-					kind: "onyx.InputDecorator", name: "keystorePasswdFrm", showing: false,
+					kind: "onyx.InputDecorator", name: "keystorePasswdFrm", showing: false, classes: "ares-project-properties-margin-right",
 					components: [
 						{name: "keystorePasswd", kind: "onyx.Input", classes: "ares-project-properties-password", type: "password", placeholder: "Keystore password"}
 					]
 				},
-				{tag: "br"},
-				{kind: "onyx.Button", content: "Save",	ontap: "savePassword"}
+				{ kind: "onyx.Button", content: "Save",	ontap: "savePassword", classes: "ares-project-properties-margin-right"}				
 			]
 		}
 	],
