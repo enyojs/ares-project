@@ -1014,14 +1014,6 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 	},
-	/** @public */
-	setData: function(data) {
-		this.data = data;
-	},
-	/** @public */
-	getData: function() {
-		return this.data;
-	},
 	/* Ares.ActionPopup overloading */
 	/** @private */
 	actionConfirm: function(inSender, inEvent) {
