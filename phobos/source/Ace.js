@@ -494,5 +494,10 @@ enyo.kind({
 	setFontSize: function(size){
 		var s = size;
 		this.editor.setFontSize(s);
+	},
+	resize: function(){
+		if (this.editor !== undefined) {
+			this.editor.resize();
+		}
 	}
 });

@@ -24,7 +24,7 @@ enyo.kind({
 		{name: "client", tag: "iframe", classes: "ares-iframe-client"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"}
 	],
-	baseSource: "../deimos/source/designer/iframe.html",
+	baseSource: "iframe.html",
 	projectSource: null,
 	selection: null,
 	reloadNeeded: false,
@@ -80,7 +80,7 @@ enyo.kind({
 		this.setIframeReady(false);
 		this.projectSource = inSource;
 		this.projectPath = serviceConfig.origin + serviceConfig.pathname + "/file";
-		var iframeUrl = this.baseSource + "?src=" + this.projectSource.getProjectUrl();
+		var iframeUrl = this.projectSource.getProjectUrl() + "/" + this.baseSource + "?overlay=designer";
 		this.trace("Setting iframe url: ", iframeUrl);
 		this.$.client.hasNode().src = iframeUrl;
 	},

@@ -88,7 +88,7 @@ enyo.kind({
 	/** @private */
 	_isHandledInPackage: function(inParam) {
 		return inParam.node.isDir ||
-			(inParam.node.name.match(/\.(js|css)$/) &&
+			(inParam.node.name.match(/\.(js|css)$/i) &&
 			 inParam.node.name !== "package.js");
 	},
 	/** @private */
