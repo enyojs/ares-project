@@ -165,6 +165,10 @@
 	margin : 0 2px;
 }
 
+.ares-bottom-bar {
+	z-index: 9 ; // behind top-toolbar so tooltip are not hidden on Safari
+}
+
 .ares-top-toolbar.ares-designer-panels{
 	z-index: 10;
 }
@@ -320,6 +324,13 @@
     cursor: hand;
     line-height: 36px;
     color: @ares-dark-color; 
+}
+.aresmenu-button-label {
+	margin-left: 5px;
+}
+
+.ares-about-description {
+	margin-right: 8px;
 }
 
 .aresmenu-button:hover{
