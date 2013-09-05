@@ -251,8 +251,12 @@ enyo.kind({
 			service.createFile(folderId, "package.js", "enyo.depends(\n);\n")
 				.response(this, function(inRequest, inFsNode) {
 					this.trace("package.js inFsNode[0]:", inFsNode[0]);
-					this.createProjectJson(inEvent.data);
-					this.projectReady(null, inEvent);
+
+					var callback = (function(){
+						this.projectReady(null, inEvent);
+					}).bind(this);
+
+					this.createProjectJson(inEvent.data, callback);
 				})
 				.error(this, function(inRequest, inError) {
 					this.warn("inRequest:", inRequest, "inError:", inError);
@@ -293,8 +297,11 @@ enyo.kind({
 			substitutions: substitutions
 		});
 		req.response(this, function(inSender, inData) {
-			this.createProjectJson(inEvent.data);
-			this.populateProject(inSender, inData);			
+			var callback = (function(){
+				this.populateProject(inSender, inData);	
+			}).bind(this);
+
+			this.createProjectJson(inEvent.data, callback);			
 		});
 		req.error(this, function(inSender, inError) {
 			this.warn("Unable to get the template files (", inError, ")");
