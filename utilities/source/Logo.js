@@ -1,14 +1,14 @@
 enyo.kind({
-    name: "Ares.Logo",
-    classes: "ares-logo",
-    tag:"img", 
-    src:"",
-    alt:"logo",
-    create:function(){
-    	this.inherited(arguments);
-    	this.setSource("../ares/assets/images/enyo-logo.png");
+	name: "Ares.Logo",
+	classes: "ares-logo",
+	tag:"img", 
+	src:"",
+	alt:"logo",
+	create:function(){
+		this.inherited(arguments);
+		this.setSource("../ares/assets/images/enyo-logo.png");
 	},
-    setSource: function(src){
+	setSource: function(src){
 		this.setAttribute("src", src);
-    }
+	}
 });
