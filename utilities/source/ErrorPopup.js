@@ -15,7 +15,7 @@ enyo.kind({
 	},
 	classes:"ares-classic-popup",
 	components: [
-	    {tag: "div", name: "title", classes:"title", content: "Ares Error"},
+	    {tag: "div", name: "title", classes:"title", content: "Error"},
 			{classes:"ares-error-popup", fit: true, components: [
 				{name: "msg"},
 				{name: "action", showing: false},
@@ -37,10 +37,7 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-	},
-      titleChanged: function() {
-            this.$.title.setContent(this.title);
-       },
+	},    
 	errorMsgChanged: function (oldVal) {
 		this.trace(oldVal, "->", this.errorMsg);
 		this.$.msg.setContent(this.errorMsg);
@@ -112,6 +109,10 @@ enyo.kind({
 			} else {
 				err = evt.err;
 				msg = evt.msg || (err && err.toString());
+				
+				if(evt.title != undefined) {
+					this.$.title.setContent(evt.title);
+				}				
 			}
 		} else {
 			msg = evt.toString();
@@ -125,29 +126,4 @@ enyo.kind({
 		this.setActionMsg(evt.action);
 		this.show();
 	}
-});
-
-enyo.kind({
-	name: "User.ErrorPopup",
-	kind: "Ares.ErrorPopup",	
-		components: [
-		    {tag: "div", name: "title", classes:"title", content: "User Error"},
-				{classes:"ares-error-popup", fit: true, components: [
-					{name: "msg"},
-					{name: "action", showing: false},
-					{classes:"ares-error-details", components:[
-						{classes:"button", components:[
-							{tag:"label", classes:"label", name: "detailsBtn", content: "Details", ontap: "toggleDetails", showing: false},
-							{name:"detailsArrow", classes:"optionDownArrow", ontap: "toggleDetails", showing: false},
-							{name: "detailsDrw", kind: "onyx.Drawer", open: false, showing:false, classes:"ares-error-drawer", components: [
-								{name: "detailsText", kind: "onyx.TextArea", disabled: true, fit:true, classes:"ares-error-text"},
-								{name: "detailsHtml", allowHtml: true, fit:true}
-							]}
-						]}
-					]}
-				]},
-				{kind: "onyx.Toolbar", name: "bottomToolbar",  classes:"bottom-toolbar", components: [
-					{name: "okButton", kind: "onyx.Button", content: "Close", ontap: "hideErrorPopup"}
-				]}
-		]
-});		
+});	

@@ -64,7 +64,7 @@ enyo.kind({
 				]}
 			]
 		},
-		{kind: "User.ErrorPopup", name: "userErrorPopup", title: $L("User Syntax Error"), msg: $L("unknown error")}
+		{kind: "Ares.ErrorPopup", name: "userErrorPopup", msg: $L("unknown error")}
 	],
 	events: {
 		onRegisterMe: "",
@@ -105,11 +105,10 @@ enyo.kind({
 		{
 		        this.owner.componentsRegistry.phobos.designerAction();
 		        this.manageControls(true);
-                 }
+             }
 	},
 	userSyntaxErrorPop: function(){
-		this.$.userErrorPopup.titleChanged();
-		this.$.userErrorPopup.raise($L("The syntax error does not make designer work properly. Please fix the syntax error in first before you work designer."));
+		this.$.userErrorPopup.raise({msg: "The syntax error does not make designer work properly. Please fix the syntax error in first before you work designer.", title: "User Syntax Error"});
 	},
 	closeDesignerAction: function(){
 		this.owner.componentsRegistry.deimos.closeDesignerAction();
