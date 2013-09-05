@@ -130,7 +130,7 @@ enyo.kind({
 	templates: [],
 	TEMPLATE_NONE: "NONE",
 	selectedTemplate: undefined,
-	selectedAddSource: undefined,
+	selectedAddedSource: undefined,
 	targetProject: null,
 	services: {},
 	addedSource:[],
@@ -344,7 +344,7 @@ enyo.kind({
 			service.panel.getProjectConfig(this.config.providers[service.id]);
 		}, this);
 
-		this.doModifiedConfig({data: this.config, template: this.selectedTemplate, addSources: this.addedSource}) ;
+		this.doModifiedConfig({data: this.config, template: this.selectedTemplate, addedSources: this.addedSource}) ;
 
 		this.doDone();
 
@@ -419,7 +419,7 @@ enyo.kind({
 		this.$.topFileRow.setStatus(this.topFileStatus);
 	},
 	handleAdditionalSource: function(inSender, inEvent) {
-		this.selectedAddSource = inEvent.source;
+		this.selectedAddedSource = inEvent.source;
 		return true;
 	},
 	addNewSource: function(inSender, inEvent) {

@@ -236,11 +236,11 @@ enyo.kind({
 		this.projectName = inEvent.data.name;
 		var folderId = this.selectedDir.id ;
 		var template = inEvent.template;
-		var addSources = inEvent.addSources.length !==0 ? true : false;
+		var addedSources = inEvent.addedSources.length !==0 ? true : false;
 
 		this.warn("Creating new project ", name, " in folderId=", folderId, " (template: ", template, ")");
 
-		if (template || addSources) {
+		if (template || addedSources) {
 			this.instanciateTemplate(inEvent);
 		} 
 		if (!template) {
@@ -248,7 +248,7 @@ enyo.kind({
 			service.createFile(folderId, "package.js", "enyo.depends(\n);\n")
 				.response(this, function(inRequest, inFsNode) {
 					this.trace("package.js inFsNode[0]:", inFsNode[0]);
-					if (!addSources){
+					if (!addedSources){
 						this.projectReady(null, inEvent);
 					}
 					else{
@@ -273,7 +273,7 @@ enyo.kind({
 
 		var sources = [];
 		var template = inEvent.template;
-		var addSources = inEvent.addSources || [];
+		var addedSources = inEvent.addedSources || [];
 		this.doShowWaitPopup({msg: this.$LS("Creating project from #{template}", {template: template})});
 
 		var substitutions = [{
@@ -287,7 +287,7 @@ enyo.kind({
 
 		var genService = ServiceRegistry.instance.getServicesByType('generate')[0];
 		sources.push(template);
-		addSources.forEach(function(source) {
+		addedSources.forEach(function(source) {
 			sources.push(source);
 		});
 		var req = genService.generate({
