@@ -7,7 +7,7 @@ enyo.kind({
 	floating: true,
 	autoDismiss: false,
 	published: {
-		errorMsg: "unknown error",
+		errorMsg: $L("unknown error"),
 		actionMsg: undefined,
 		detailsHtml: "",
 		detailsText: "",
@@ -21,7 +21,7 @@ enyo.kind({
 				{name: "action", showing: false},
 				{classes:"ares-error-details", components:[
 					{classes:"button", components:[
-						{tag:"label", classes:"label", name: "detailsBtn", content: "Details", ontap: "toggleDetails", showing: false},
+						{tag:"label", classes:"label", name: "detailsBtn", content: $L("Details"), ontap: "toggleDetails", showing: false},
 						{name:"detailsArrow", classes:"optionDownArrow", ontap: "toggleDetails", showing: false},
 						{name: "detailsDrw", kind: "onyx.Drawer", open: false, showing:false, classes:"ares-error-drawer", components: [
 							{name: "detailsText", kind: "onyx.TextArea", disabled: true, fit:true, classes:"ares-error-text"},

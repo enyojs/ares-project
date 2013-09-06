@@ -281,7 +281,7 @@ enyo.kind({
 		}
 
 		if (this.allowNewFile) {
-			if (this.$.selectedFoldersPath !== "/") {
+			if (this.$.selectedFoldersPath.getValue() !== "/") {
 				name = name + "/";
 			}
 			name = name + this.$.selectedFileName.getValue();
