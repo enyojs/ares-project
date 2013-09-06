@@ -103,9 +103,9 @@ enyo.kind({
 		}
 		else
 		{
-		        this.owner.componentsRegistry.phobos.designerAction();
-		        this.manageControls(true);
-             }
+			this.owner.componentsRegistry.phobos.designerAction();
+			this.manageControls(true);
+		}
 	},
 	userSyntaxErrorPop: function(){
 		this.$.userErrorPopup.raise({msg: "The syntax error does not make designer work properly. Please fix the syntax error in first before you work designer.", title: "User Syntax Error"});
