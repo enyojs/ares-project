@@ -758,3 +758,172 @@ enyo.kind({
 		config[this.name][this.platform].width = this.getWidth();
 	}
 });
+
+enyo.kind({
+	name: "Phonegap.ProjectProperties.KeySelector",
+	debug: false,
+	kind: "Phonegap.ProjectProperties.Row",
+	published: {
+		keys: undefined,
+		activeKeyId: undefined,
+		provider: undefined
+	},
+	components: [	
+		{name: "label",	classes: "ares-project-properties-drawer-row-label"}, 
+		{name: "noSigningKeys", content: "No signing keys for this platform"},
+		{
+			name: "signingKeysContainer",			
+			kind: "FittableRows",
+			components: [
+				{
+					name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey",
+					components: [
+						{kind: "onyx.PickerButton",	content: "Choose...", classes: "ares-project-properties-picker"}, 
+						{kind: "onyx.Picker", name: "keys"}
+					]
+				},
+				
+
+				// android, ios & blackberry: key password
+				{	
+					kind: "onyx.InputDecorator", classes: "ares-project-properties-margin-right",
+					components: [						
+						{name: "keyPasswd",	kind: "onyx.Input",	classes: "ares-project-properties-password", type: "password", placeholder: "Password"}
+					]
+				},
+			
+				// android-only: keystore password
+				{
+					kind: "onyx.InputDecorator", name: "keystorePasswdFrm", showing: false, classes: "ares-project-properties-margin-right",
+					components: [
+						{name: "keystorePasswd", kind: "onyx.Input", classes: "ares-project-properties-password", type: "password", placeholder: "Keystore password"}
+					]
+				},
+				{ kind: "onyx.Button", content: "Save",	ontap: "savePassword", classes: "ares-project-properties-margin-right"}				
+			]
+		}
+	],
+	create: function () {
+		ares.setupTraceLogger(this);
+		this.inherited(arguments);
+		this.labelChanged();
+		
+		this.activeKeyIdChanged();
+	},
+
+	/**
+	 * Set the content of the row's label when the row is created
+	 * @private
+	 */
+	labelChanged: function () {
+		this.$.label.setContent(this.label);
+	},
+
+	/** @public */
+	setProjectConfig: function (config) {
+		//this.log(config[this.jsonSection][this.platform].keyId);
+		this.setValue(config[this.jsonSection][this.platform].keyId);
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config[this.jsonSection][this.platform].keyId = this.getValue();
+	},
+
+	/**
+	 * @private
+	 */
+	keysChanged: function (old) {
+		this.log("keyChanged");
+		// Sanity
+		this.keys = this.keys || [];
+
+		if(this.keys.length !== 0){
+
+			this.$.signingKeysContainer.show();
+			this.$.noSigningKeys.hide();
+
+			// Fill
+			enyo.forEach(this.keys, function (key) {
+				this.$.keys.createComponent({
+					name: key.id,
+					content: key.title,
+					active: (key.id === this.activeKeyId)
+				});
+			}, this);
+
+		} else {
+			this.$.signingKeysContainer.hide();
+			this.$.noSigningKeys.show();
+		}
+	},
+	/**
+	 * @private
+	 */
+	activeKeyIdChanged: function (old) {
+		var key = this.getKey(this.activeKeyId);		
+		
+		if (key) {
+			// One of the configured keys
+			if (this.platform === 'ios' || this.platform === 'blackberry') {
+				// property named '.password' is defined by Phonegap
+				this.$.keyPasswd.setValue(key.password || "");
+			} else if (this.platform === 'android') {
+				// properties named '.key_pw'and 'keystore_pw' are defined by Phonegap
+				this.$.keyPasswd.setValue(key.key_pw || "");
+				this.$.keystorePasswd.setValue(key.keystore_pw || "");
+				this.$.keystorePasswdFrm.show();
+			}
+		}
+	},
+	/**
+	 * @protected
+	 */
+	getKey: function (keyId) {
+		if (keyId) {
+			return enyo.filter(this.keys, function (key) {
+				return key.id === keyId;
+			}, this)[0];
+		} else {
+			return undefined;
+		}
+	},
+	/**
+	 * @private
+	 */
+	selectKey: function (inSender, inValue) {
+		this.trace("sender:", inSender, "value:", inValue);
+		enyo.forEach(this.keys, function (key) {
+			if (key.title === inValue.content) {
+				this.setActiveKeyId(key.id);
+				this.trace("selected key:", key);
+			}
+		}, this);
+	},
+	/**
+	 * Return a signing key object from the displayed (showing === true) widgets
+	 * @private
+	 */
+	getShowingKey: function () {
+		var key = this.getKey(this.activeKeyId);
+		if (!key) {
+			return undefined;
+		} else if (this.platform === 'ios' || this.platform === 'blackberry') {
+			// property name '.password' is defined by Phonegap
+			key.password = this.$.keyPasswd.getValue();
+		} else if (this.platform === 'android') {
+			// properties names '.key_pw'and 'keystore_pw' are defined by Phonegap
+			key.key_pw = this.$.keyPasswd.getValue();
+			key.keystore_pw = this.$.keystorePasswd.getValue();
+		}
+		return key;
+	},
+	/**
+	 * @private
+	 */
+	savePassword: function (inSender, inValue) {		
+		this.trace("sender:", inSender, "value:", inValue);		
+		var key = this.getShowingKey();		
+		this.trace("platform:", this.platform, "key:", key);		
+		this.provider.setKey(this.platform, key);
+	}
+});

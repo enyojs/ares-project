@@ -84,7 +84,8 @@ enyo.kind({
 					{name: "splash-screen-duration", label: "Splash screen Duration", content: "5000", defaultValue: "5000", type: "InputRow", jsonSection: "preferences"},
 					{name: "load-url-timeout", label: "Load URL timeout", content: "20000", defaultValue: "20000", type: "InputRow", jsonSection: "preferences"},
 					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "AndroidImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "AndroidImgRow"}
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "AndroidImgRow"},
+					{name: "signingKey", label: "Signing Key", content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
 				]				
 			}, 
 			{
@@ -242,11 +243,15 @@ enyo.kind({
 				if (inRowName === "autoGenerateXML") {					
 					return this.$.targetsRows;
 				}
-			};		
+			};
+
+			var provider = Phonegap.ProjectProperties.getProvider();
+			var keys = provider.getKey(this.targetId);		
 						
 			enyo.forEach(dwrContent.rows, function (row) {
+		
 				var containerPanel = getPanel.call(this, row.name);
-
+			
 				dwr.$.drawer.createComponent({
 					kind: "Phonegap.ProjectProperties." + row.type,
 					name: row.name,
@@ -391,16 +396,22 @@ enyo.kind({
 	 * @protected
 	 */
 	getUserData: function (err, userData) {
+
 		if (err) {
 			//this.warn("err:", err);
 			this.showErrorMsg("signInError");
 			this.doError({msg: err.toString(), err: err});
 		} else {			
 			this.showErrorMsg("userDataRecieved");
-			var provider = Phonegap.ProjectProperties.getProvider();					
+			var provider = Phonegap.ProjectProperties.getProvider();
+									
 			enyo.forEach(this.platformDrawers, function (target) {
 				this.$.appIdSelector.setUserData(userData);
-				this.$.targetsRows.$[target.id].loadKeys(provider);
+				var keys = provider.getKey(target.id);
+				if(target.id === "android") {
+					this.$.targetsRows.$[target.id].$.drawer.$.signingKey.setKeys(keys);
+				}
+								
 			}, this);
 		}
 	},
@@ -620,18 +631,13 @@ enyo.kind({
 		this.trace("id:", this.targetId, "config:", config);
 
 		this.setEnabled( config && config.targets[this.targetId] );
-		
 		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
-			if (row === "client" || row === "animator") {
-				// nop;
-			} else if (row === "keySelector") {
-				if (this.enabled) {
-					this.$.drawer.$.keySelector.setActiveKeyId( config.targets[this.targetId].keyId );
-				}
-			} else {
+			if(this.$.drawer.$[row].platform){
 				this.$.drawer.$[row].setProjectConfig(config);
 			}
 		}, this);
+
+
 	},
 	/**@public*/
 	getProjectConfig: function (config) {
@@ -650,7 +656,6 @@ enyo.kind({
 				this.$.drawer.$[row].getProjectConfig(config);
 			}
 		}, this);
-
 		this.trace("id:", this.targetId, "config:", config);
 	},
 	/**
@@ -682,28 +687,14 @@ enyo.kind({
 			this.targetId === 'ios' ||
 			this.targetId === 'blackberry')) {
 			
-			this.trace("id:", this.targetId);
-			
+			this.trace("id:", this.targetId);			
 
 			if (this.$.drawer.$.keySelector) {
 				this.$.drawer.$.keySelector.destroy();
 			}
 
-			var keys = provider.getKey(this.targetId);
-			this.trace("id:", this.targetId, "keys:", keys);
-			
-			if (keys) {
-				this.$.drawer.createComponent({
-					name: "keySelector",
-					kind: "Phonegap.ProjectProperties.KeySelector",
-					targetId: this.targetId,
-					keys: keys,
-					classes: "ares-row ares-drawer",
-					activeKeyId: (this.config && this.config.keyId)
-				});
-				this.$.drawer.$.keySelector.render();
-				this.$.drawer.$.keySelector.setProvider(provider);
-			}
+			var keys = provider.getKey(this.targetId);			
+			this.trace("id:", this.targetId, "keys:", keys);		
 		}
 	},
 	/**
@@ -714,156 +705,4 @@ enyo.kind({
 	},
 });
 
-enyo.kind({
-	name: "Phonegap.ProjectProperties.KeySelector",
-	debug: false,
-	kind: "FittableColumns",
-	published: {
-		targetId: "",
-		keys: undefined,
-		activeKeyId: undefined,
-		provider: undefined
-	},
-	components: [	
-		{classes: "ares-project-properties-drawer-row-label", content: "Signing Key"}, 
-		{name: "noSigningKeys", content: "No signing keys for this platform"},
-		{
-			name: "signingKeysContainer",			
-			kind: "FittableRows",
-			components: [
-				{
-					name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey",
-					components: [
-						{kind: "onyx.PickerButton",	content: "Choose...", classes: "ares-project-properties-picker"}, 
-						{kind: "onyx.Picker", name: "keys"}
-					]
-				},
-				
 
-				// android, ios & blackberry: key password
-				{	
-					kind: "onyx.InputDecorator", classes: "ares-project-properties-margin-right",
-					components: [						
-						{name: "keyPasswd",	kind: "onyx.Input",	classes: "ares-project-properties-password", type: "password", placeholder: "Password"}
-					]
-				},
-			
-				// android-only: keystore password
-				{
-					kind: "onyx.InputDecorator", name: "keystorePasswdFrm", showing: false, classes: "ares-project-properties-margin-right",
-					components: [
-						{name: "keystorePasswd", kind: "onyx.Input", classes: "ares-project-properties-password", type: "password", placeholder: "Keystore password"}
-					]
-				},
-				{ kind: "onyx.Button", content: "Save",	ontap: "savePassword", classes: "ares-project-properties-margin-right"}				
-			]
-		}
-	],
-	create: function () {
-		ares.setupTraceLogger(this);
-		this.inherited(arguments);
-		this.keysChanged();
-		this.activeKeyIdChanged();
-	},
-	/**
-	 * @private
-	 */
-	keysChanged: function (old) {
-		
-		this.trace("id:", this.targetId, old, "->", this.keys);
-		
-		// Sanity
-		this.keys = this.keys || [];
-
-		if(this.keys.length !== 0){
-
-			this.$.signingKeysContainer.show();
-			this.$.noSigningKeys.hide();
-
-			// Fill
-			enyo.forEach(this.keys, function (key) {
-				this.$.keys.createComponent({
-					name: key.id,
-					content: key.title,
-					active: (key.id === this.activeKeyId)
-				});
-			}, this);
-
-		} else {
-			this.$.signingKeysContainer.hide();
-			this.$.noSigningKeys.show();
-		}
-	},
-	/**
-	 * @private
-	 */
-	activeKeyIdChanged: function (old) {
-		var key = this.getKey(this.activeKeyId);
-		
-		this.trace("id:", this.targetId, old, "->", this.activeKeyId, "key:", key);
-		
-		if (key) {
-			// One of the configured keys
-			if (this.targetId === 'ios' || this.targetId === 'blackberry') {
-				// property named '.password' is defined by Phonegap
-				this.$.keyPasswd.setValue(key.password || "");
-			} else if (this.targetId === 'android') {
-				// properties named '.key_pw'and 'keystore_pw' are defined by Phonegap
-				this.$.keyPasswd.setValue(key.key_pw || "");
-				this.$.keystorePasswd.setValue(key.keystore_pw || "");
-				this.$.keystorePasswdFrm.show();
-			}
-		}
-	},
-	/**
-	 * @protected
-	 */
-	getKey: function (keyId) {
-		if (keyId) {
-			return enyo.filter(this.keys, function (key) {
-				return key.id === keyId;
-			}, this)[0];
-		} else {
-			return undefined;
-		}
-	},
-	/**
-	 * @private
-	 */
-	selectKey: function (inSender, inValue) {
-		this.trace("sender:", inSender, "value:", inValue);
-		enyo.forEach(this.keys, function (key) {
-			if (key.title === inValue.content) {
-				this.setActiveKeyId(key.id);
-				this.trace("selected key:", key);
-			}
-		}, this);
-	},
-	/**
-	 * Return a signing key object from the displayed (showing === true) widgets
-	 * @private
-	 */
-	getShowingKey: function () {
-		var key = this.getKey(this.activeKeyId);
-		if (!key) {
-			return undefined;
-		} else if (this.targetId === 'ios' || this.targetId === 'blackberry') {
-			// property name '.password' is defined by Phonegap
-			key.password = this.$.keyPasswd.getValue();
-		} else if (this.targetId === 'android') {
-			// properties names '.key_pw'and 'keystore_pw' are defined by Phonegap
-			key.key_pw = this.$.keyPasswd.getValue();
-			key.keystore_pw = this.$.keystorePasswd.getValue();
-		}
-		return key;
-	},
-	/**
-	 * @private
-	 */
-	savePassword: function (inSender, inValue) {		
-		this.trace("sender:", inSender, "value:", inValue);		
-		var key = this.getShowingKey();		
-		this.trace("targetId:", this.targetId, "key:", key);		
-		this.provider.setKey(this.targetId, key);
-	}
-});
