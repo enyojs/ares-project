@@ -102,6 +102,7 @@ enyo.kind({
 	},
 	closeDesignerAction: function(){
 		this.owner.componentsRegistry.deimos.closeDesignerAction();
+		this.owner.componentsRegistry.phobos.focusEditor();
 		this.manageControls(false);
 	},
 	/**
