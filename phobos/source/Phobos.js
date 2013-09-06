@@ -113,7 +113,7 @@ enyo.kind({
 		var hft = this.$.saveAsPopup.$.hermesFileTree ;
 		var next = function(result) {
 			if (result) {
-				this.$.overwritePopup.setData(inEvent);
+				this.$.overwritePopup.set("data", inEvent);
 				this.$.overwritePopup.show();
 			} else {
 				this.saveAsConfirm(inSender, {data: inEvent});
