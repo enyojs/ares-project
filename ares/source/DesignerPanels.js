@@ -108,7 +108,7 @@ enyo.kind({
 		}
 	},
 	userSyntaxErrorPop: function(){
-		this.$.userErrorPopup.raise({msg: "The syntax error does not make designer work properly. Please fix the syntax error in first before you work designer.", title: "User Syntax Error"});
+		this.$.userErrorPopup.raise({msg: $L("Designer cannot work on a file with a syntax error. Please fix the error highlighted in code editor before launching the designer."), title: $L("Syntax Error")});
 	},
 	closeDesignerAction: function(){
 		this.owner.componentsRegistry.deimos.closeDesignerAction();
