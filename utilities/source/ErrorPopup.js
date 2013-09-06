@@ -15,7 +15,7 @@ enyo.kind({
 	},
 	classes:"ares-classic-popup",
 	components: [
-	    {tag: "div", classes:"title", content: "Error"},
+	    {tag: "div", name: "title", classes:"title", content: "Error"},
 			{classes:"ares-error-popup", fit: true, components: [
 				{name: "msg"},
 				{name: "action", showing: false},
@@ -37,7 +37,7 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-	},
+	},    
 	errorMsgChanged: function (oldVal) {
 		this.trace(oldVal, "->", this.errorMsg);
 		this.$.msg.setContent(this.errorMsg);
@@ -109,6 +109,10 @@ enyo.kind({
 			} else {
 				err = evt.err;
 				msg = evt.msg || (err && err.toString());
+				
+				if(evt.title !== undefined) {
+					this.$.title.setContent(evt.title);
+				}				
 			}
 		} else {
 			msg = evt.toString();
@@ -122,4 +126,4 @@ enyo.kind({
 		this.setActionMsg(evt.action);
 		this.show();
 	}
-});
+});	
