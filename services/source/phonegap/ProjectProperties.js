@@ -101,7 +101,8 @@ enyo.kind({
 					{name: "show-splash-screen-spinner", label: "Show splash screen spinner", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
 					{name: "auto-hide-splash-screen", label: "Auto-hide splash screen", content: ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
 					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"},
+					{name: "signingKey", label: "Signing Key", content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
 				]
 			},  
 			{
@@ -111,7 +112,8 @@ enyo.kind({
 				rows: [
 					{name: "disable-cursor", label: "Disable Cursor", content:  ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
 					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"},
+					{name: "signingKey", label: "Signing Key", content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
 				]
 			}, 
 			{
@@ -244,10 +246,7 @@ enyo.kind({
 					return this.$.targetsRows;
 				}
 			};
-
-			var provider = Phonegap.ProjectProperties.getProvider();
-			var keys = provider.getKey(this.targetId);		
-						
+									
 			enyo.forEach(dwrContent.rows, function (row) {
 		
 				var containerPanel = getPanel.call(this, row.name);
@@ -408,7 +407,7 @@ enyo.kind({
 			enyo.forEach(this.platformDrawers, function (target) {
 				this.$.appIdSelector.setUserData(userData);
 				var keys = provider.getKey(target.id);
-				if(target.id === "android") {
+				if(target.id === "android" || target.id === "ios"|| target.id === "blackberry") {
 					this.$.targetsRows.$[target.id].$.drawer.$.signingKey.setKeys(keys);
 				}
 								
@@ -646,13 +645,16 @@ enyo.kind({
 		}
 
 		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			
 			if (row === "client" || row === "animator") {
 				// nop;
-			} else if (row === "keySelector") {
-				if (this.enabled && this.$.drawer.$.keySelector.getActiveKeyId()) {
-					config.targets[this.targetId].keyId = this.$.drawer.$.keySelector.getActiveKeyId();
+			} else if (row === "signingKey") {				
+				if (this.enabled && this.$.drawer.$.signingKey.getActiveKeyId()) {
+					config.targets[this.targetId].keyId = this.$.drawer.$.signingKey.getActiveKeyId();
 				}
+				
 			} else {
+
 				this.$.drawer.$[row].getProjectConfig(config);
 			}
 		}, this);
@@ -676,25 +678,6 @@ enyo.kind({
 			this.config = this.config || {};
 		} else {
 			this.config = false;
-		}
-	},
-	/**
-	 * @protected
-	 */
-	loadKeys: function (provider) {
-
-		if ((this.targetId === 'android' ||
-			this.targetId === 'ios' ||
-			this.targetId === 'blackberry')) {
-			
-			this.trace("id:", this.targetId);			
-
-			if (this.$.drawer.$.keySelector) {
-				this.$.drawer.$.keySelector.destroy();
-			}
-
-			var keys = provider.getKey(this.targetId);			
-			this.trace("id:", this.targetId, "keys:", keys);		
 		}
 	},
 	/**

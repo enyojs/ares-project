@@ -1,4 +1,4 @@
-/* global ares */
+/* global ares, Phonegap */
 
 /**
  * Kind that define a generic row widget
@@ -769,10 +769,12 @@ enyo.kind({
 		provider: undefined
 	},
 	components: [	
-		{name: "label",	classes: "ares-project-properties-drawer-row-label"}, 
-		{name: "noSigningKeys", content: "No signing keys for this platform"},
+		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
+		{name: "loadingSingingKeys", content: "Loading signing keys ..."} ,
+		{name: "noSigningKeys", content: "No signing keys for this platform", showing: false},
 		{
-			name: "signingKeysContainer",			
+			name: "signingKeysContainer",
+			showing: false,			
 			kind: "FittableRows",
 			components: [
 				{
@@ -786,7 +788,7 @@ enyo.kind({
 
 				// android, ios & blackberry: key password
 				{	
-					kind: "onyx.InputDecorator", classes: "ares-project-properties-margin-right",
+					kind: "onyx.InputDecorator", classes: "ares-project-properties-margin-right", showing: false, name: "passwdFrm",
 					components: [						
 						{name: "keyPasswd",	kind: "onyx.Input",	classes: "ares-project-properties-password", type: "password", placeholder: "Password"}
 					]
@@ -799,7 +801,7 @@ enyo.kind({
 						{name: "keystorePasswd", kind: "onyx.Input", classes: "ares-project-properties-password", type: "password", placeholder: "Keystore password"}
 					]
 				},
-				{ kind: "onyx.Button", content: "Save",	ontap: "savePassword", classes: "ares-project-properties-margin-right"}				
+				{ kind: "onyx.Button", content: "Save",	ontap: "savePassword", showing: false, classes: "ares-project-properties-margin-right", name: "saveButton"}				
 			]
 		}
 	],
@@ -807,6 +809,7 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
+		this.setProvider(Phonegap.ProjectProperties.getProvider());
 		
 		this.activeKeyIdChanged();
 	},
@@ -821,8 +824,7 @@ enyo.kind({
 
 	/** @public */
 	setProjectConfig: function (config) {
-		//this.log(config[this.jsonSection][this.platform].keyId);
-		this.setValue(config[this.jsonSection][this.platform].keyId);
+		this.setValue(config[this.jsonSection][this.platform] && config[this.jsonSection][this.platform].keyId);
 	},
 	/** @public */
 	getProjectConfig: function (config) {
@@ -832,10 +834,26 @@ enyo.kind({
 	/**
 	 * @private
 	 */
-	keysChanged: function (old) {
-		this.log("keyChanged");
+	keysChanged: function () {		
 		// Sanity
 		this.keys = this.keys || [];
+
+		//Clear the content of the Signing keys picker.
+		this.clearPickerContent();		
+
+		var createPickerItem = function(item,state) {
+			
+			//check if the picker item wasn't already created.
+			if(this.$.keys.$[item.id] === undefined){
+				this.$.keys.createComponent({
+					name: item.id,
+					content: item.title,
+					active: state					
+				});	
+			}			
+		};
+
+		this.$.loadingSingingKeys.hide();		
 
 		if(this.keys.length !== 0){
 
@@ -844,11 +862,11 @@ enyo.kind({
 
 			// Fill
 			enyo.forEach(this.keys, function (key) {
-				this.$.keys.createComponent({
-					name: key.id,
-					content: key.title,
-					active: (key.id === this.activeKeyId)
-				});
+				if(key.id === this.getValue()) {
+					createPickerItem.call(this, key, true);
+				} else {
+					createPickerItem.call(this, key, false);
+				}				
 			}, this);
 
 		} else {
@@ -898,6 +916,21 @@ enyo.kind({
 				this.trace("selected key:", key);
 			}
 		}, this);
+		this.$.passwdFrm.show();		
+		this.$.saveButton.show();
+	},
+	/**
+	 * @private
+	 */
+	clearPickerContent: function(){
+		
+		for (var key in this.$.keyPicker.$) {
+					
+			if (this.$.keyPicker.$[key].kind === "onyx.MenuItem"){							
+				this.$.keyPicker.$[key].destroy();
+			}		
+		}
+		this.$.keyPicker.render();
 	},
 	/**
 	 * Return a signing key object from the displayed (showing === true) widgets
@@ -920,7 +953,7 @@ enyo.kind({
 	/**
 	 * @private
 	 */
-	savePassword: function (inSender, inValue) {		
+	savePassword: function (inSender, inValue) {
 		this.trace("sender:", inSender, "value:", inValue);		
 		var key = this.getShowingKey();		
 		this.trace("platform:", this.platform, "key:", key);		
