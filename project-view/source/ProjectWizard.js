@@ -191,7 +191,7 @@ enyo.kind({
 		}
 	},
 
-	createProjectJson: function(data) {
+	createProjectJson: function(data, callback) {
 		//initialize project config
 		this.config = new ProjectConfig() ; // is a ProjectConfig object.
 		this.config.service = this.selectedDir.service;
@@ -202,6 +202,7 @@ enyo.kind({
 		
 		var next = (function() {
 			this.config = null;
+			callback();
 		}).bind(this);
 
 		this.config.save(next) ;
