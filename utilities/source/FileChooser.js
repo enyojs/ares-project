@@ -53,7 +53,7 @@ enyo.kind({
 					{kind: "onyx.Toolbar", classes: "ares-small-toolbar title-gradient", components: [
 						{content: $L("Sources"), classes:"ares-create-sources"}
 					]},
-					{kind: "ProviderList", selector: ["type", "filesystem"], fit:"true", name: "providerList", /*header: "Sources",*/ onSelectProvider: "handleSelectProvider"}
+					{kind: "ProviderList", selector: ["type", "filesystem"], fit:"true", name: "providerList", onSelectProvider: "handleSelectProvider"}
 				]},
 				{kind: "HermesFileTree", fit: true, name: "hermesFileTree", onFileClick: "_selectFile", onFolderClick: "_selectFolder", onNewFolderConfirm: "createFolder"}
 			]},
@@ -309,6 +309,7 @@ enyo.kind({
 		this.$.confirm.setDisabled(true);
 		this.$.selectedFoldersPath.setValue("");
 		this.$.selectedFileName.setValue("");
+		this.$.hermesFileTree.disconnect();
 		this.selectedFile = null;
 		this.folderChooserChanged();
 		this.allowToolbarChanged();

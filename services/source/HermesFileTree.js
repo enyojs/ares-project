@@ -414,6 +414,7 @@ enyo.kind({
 	disconnect: function() {
 		this.trace("disconnect...");
 		this.$.selection.clear();
+		this.selectedNode = null;
 		this.projectUrlReady = false; // Reset the project information
 		this.clear() ;
 		return this ;
