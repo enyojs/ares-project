@@ -128,9 +128,14 @@ enyo.kind({
 			]}
 		]},	// picker
 			
-			{kind: "lrc"}
+			{kind: "lrc"},
 			
-		]}
+			{name: "filepicker", kind: "Control", showing: false, components: [
+				{style: "height: 5px"},
+				{style: "height: 15px;  text-align: center; ", content: "File Picker Input" },
+			]},
+		]},
+		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "fileChosen"}
 	],
 	
 	blank: 0,
@@ -140,7 +145,8 @@ enyo.kind({
 	xyz: 4,
 	picker: 5,	
 	lrc: 6,
-
+	filepicker: 7,
+	
 	create: function() {
 		this.inherited(arguments);
 		ares.setupTraceLogger(this);
@@ -276,6 +282,19 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.clear();
 		this.$.panels.setIndex(this.lrc);		
+	},
+	
+	fileinput: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.clear();
+		this.$.panels.setIndex(this.filepicker);
+		this.$.selectFilePopup.reset();
+		this.$.selectFilePopup.show();
+	},
+	
+	fileChosen: function(inSender, inEvent){
+		this.valueout = "url(" + inEvent.name + ");";
+		this.doValueUpdate();
 	},
 	
 	input_picker: function(inSender, inEvent){

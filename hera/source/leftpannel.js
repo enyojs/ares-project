@@ -319,7 +319,7 @@ enyo.kind({
 	},
 	
 	image: [
-		{name: "background-image", input:"misc"},
+		{name: "background-image", input:"filepicker"},
 	]
 	
 });
