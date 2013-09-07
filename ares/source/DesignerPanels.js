@@ -150,8 +150,9 @@ enyo.kind({
 		this.$.aresGrabberDirection.switchGrabberDirection(active);
 	},
 	
-	
-	
+	addPreviewTooltip: function(message){
+		this.$.previewTooltip.setContent(message);
+	},		
 	
 	doCss: function(){
 		this.owner.componentsRegistry.phobos.cssAction();
