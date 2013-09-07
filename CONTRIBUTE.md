@@ -145,7 +145,7 @@ Build an Ares package
 
 In order to produce Ares on a build server:
 
-1. Make sure Node and NPM are installed on the build server.  Version 0.8.x is known to work
+1. Make sure Node and NPM are installed on the build server.  Version >=0.8.21 is known to work
 1. In the build script, run:
 
 		$ npm pack
@@ -170,59 +170,48 @@ In order to produce Ares on a build server:
 Release & Publish Ares
 ----------------------
 
-_This section is for Ares commiters only_
+_This section is only for Ares commiters or developers of build scripts_
 
 **Before publishing** a few steps and checkings are mandatory:
 
-1. Execute `npm pack` (preferably on a Linux machine)
-2. Destroy your `ares-ide` NPM cache (OSX/Linux: `$HOME/.npm/ares-ide`, Windows: `% APPDATA\npm-cache\ares-ide`)
-3. Test on several platforms, using the same `.tgz`file.
+1. Preferably use a Linux machine or VM
+   * Publishing from a Windows machine will break UNIX (Linux & OSX) installations [NPM Issue 2097](https://github.com/isaacs/npm/issues/2097)
+   * Packing from an OSX machine misses some files [NPM Issue 2619](https://github.com/isaacs/npm/issues/2619)2. Run `./scripts/release.js --dry-run pre-dist` (Windows: `node scripts\release.js --dry-run pre-dist`).
+   1. See `./scripts/release.js --help` for usage details
+3. Run `./scripts/release.js pre-dist` (Windows: `node scripts\release.js pre-dist`) to generate an NPM package named `ares-ide-M.m.p-pre.R`
+4. Destroy this version from your `ares-ide` NPM cache (OSX/Linux: `$HOME/.npm/ares-ide/M.m.p-pre.R`, Windows: `% APPDATA\npm-cache\ares-ide\M.m.p-pre.R`)
+5. Test on several platforms, using the same `.tgz`file.
 	1. In a temporary directory, execute `npm install <path-to>/ares-ide-<version>.tgz` to verify that the generated .tgz file if correct.
-	2. Perform a few tests to verify that everything works.
+	2. Perform some tests to verify that everything works.
 4. If you have last minutes changes, commit them directly on `master` & upload them.
+   * If you did changes, re-run `./scripts/release.js pre-dist`
 
 **Publishing:**
 
-1. Tag the version you intend to publish, with the exact same string as the `version: ` in `package.json` & upload this tag.  For example:
+1. Tag the version you intend to publish, with the exact same string as the `version: ` in `package.json` & upload this tag.
+   * Using the helper script:
 
-	$ git tag 0.2.4
-	$ git push --tags origin
+			$ ./scripts/release.js --dry-run dist
 
-2. Checkout a fresh copy _on a Linux (virtual) machine_ 
-	* Publishing from a Windows machine will break UNIX (Linux & OSX) installations [NPM Issue 2097](https://github.com/isaacs/npm/issues/2097)
-	* Packing from an OSX machine misses some files [NPM Issue 2619](https://github.com/isaacs/npm/issues/2619)
-3. If not already done run `npm adduser` to allow your self to publish from this machine
-4. Run `npm -d pack`
-5. Publish the generated tarball `npm -d publish <ares-ide-x.y.z.tgz>`.
+   * Check the output & then run the real thing:
+   
+			$ ./scripts/release.js dist
 
-		$ npm publish ares-ide
-	
-	_Note:_ It is also possible to directly publish (skip the intermediate `pack`, but this one gives you a chance to verify the content of the publish archive without the need for a roundtrip with the NPM registry).
-6. Check [ares-ide on the NPM registry](https://npmjs.org/package/ares-ide) after a few tens of minutes.
-7. Announce the release on [EnyoJS.com](http://enyojs.com) > Community > Forums > Categories : Ares > New discussion > _Ares x.y.z is out_
-8. In case things go wrong (like _published package not working_, it is possible to `npm unpublish` a specific version).  Do not forget to announce this operation on the EnyoJS.com forums.
-
-	$ npm unpublish ares-ide@0.2.4
-
+2. If not already done run `npm adduser` to allow your self to publish from this machine
+3. Publish the generated tarball `npm -d publish <ares-ide-x.y.z.tgz>`.
+   1. Check [ares-ide on the NPM registry](https://npmjs.org/package/ares-ide) after a few (tens of) minutes.
+   2. Test `npm install ares-ide` on several platforms
+   3. In case things go wrong (like _published package not working_), it is possible to `npm unpublish <version>`.  For example `npm unpublish ares-ide@0.2.4`.
+4. Announce the release on [EnyoJS.com](http://enyojs.com) > Community > Forums > Categories : Ares > New discussion > _Ares x.y.z is out_
+   
 **After publishing:** ignite the work on the next version:
 
-1. Checkout the master branch
-
-	$ git branch -D master
-	$ git fetch --all
-	$ checkout -b master origin/master
-	$ git submodule update --init --recursive
-
-2. Increase the version number in `package.json`
-3. In package.json, update the `dependencies` and `bundledDependencies` if your changes introduce/change node module dependencies & checkpoint them in the shrinkwrap
-
-	$ npm -d update
-	$ npm -d install
-	$ npm-shrinkwrap
-
-4. Commit your changes (on `master`) & upload them:
-
-	$ git commit -m "start working on 0.2.5" package.json npm-shrinkwrap.json
-	$ git push origin master
-
-5. Announce it to team-mates 
+1. Upload the tag `git push --tags origin`
+2. Prepare for the next round of work.  Depending on the digit you want to increase, choose exactly one of
+   * `--major|-M` to perform `M.m.p` to `(M+1).m.p`
+   * `--minor|-m` to perform `M.m.p` to `M.(m+1).p`
+   * `--patch|-p` to perform `M.m.(p)` to `M.m.(p+1)`
+   * `--pre|-r` to perform `M.m.p-pre.r` to `M.m.p-pre.(r+1)`
+   * `--rel|-R` to perform `M.m.p-pre.r` to `M.m.p`
+3. Run `/scripts/release.js post-dist`
+4. Announce it to team-mates 

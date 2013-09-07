@@ -51,13 +51,14 @@ enyo.kind({
 
 			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
 				{kind: "onyx.IconButton", src: "../project-view/assets/images/project_view_preview.png", ontap: "doSavePreviewAction"},
-				{kind: "onyx.Tooltip", content: "Preview"}
+				{kind: "onyx.Tooltip", name:"previewTooltip", content: "Preview"}
 			]}
 
 		]},
 		{
 			name: "bottomBar",
-			kind: "DocumentToolbar"
+			kind: "DocumentToolbar",
+			classes: "ares-bottom-bar"
 		},
 		{
 			kind: "Panels",
@@ -80,7 +81,8 @@ enyo.kind({
 					{kind: "Hera"},
 				]}
 			]
-		}
+		},
+		{kind: "Ares.ErrorPopup", name: "userErrorPopup", msg: $L("unknown error")}
 	],
 	events: {
 		onRegisterMe: "",
@@ -114,11 +116,22 @@ enyo.kind({
 		this.owner.componentsRegistry.deimos.kindSelected(inSender, inEvent);
 	},
 	designerAction: function() {
-		this.owner.componentsRegistry.phobos.designerAction();
-		this.manageControls(true);
+		if(this.owner.componentsRegistry.phobos.editorUserSyntaxError() !== 0)
+		{
+			this.userSyntaxErrorPop();
+		}
+		else
+		{
+			this.owner.componentsRegistry.phobos.designerAction();
+			this.manageControls(true);
+		}
+	},
+	userSyntaxErrorPop: function(){
+		this.$.userErrorPopup.raise({msg: $L("Designer cannot work on a file with a syntax error. Please fix the error highlighted in code editor before launching the designer."), title: $L("Syntax Error")});
 	},
 	closeDesignerAction: function(){
 		this.owner.componentsRegistry.deimos.closeDesignerAction();
+		this.owner.componentsRegistry.phobos.focusEditor();
 		this.manageControls(false);
 	},
 	/**
@@ -136,6 +149,10 @@ enyo.kind({
 	switchGrabberDirection: function(active){
 		this.$.aresGrabberDirection.switchGrabberDirection(active);
 	},
+	
+	
+	
+	
 	doCss: function(){
 		this.owner.componentsRegistry.phobos.cssAction();
 		this.$.editorControls.setShowing(false);
