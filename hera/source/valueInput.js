@@ -160,9 +160,6 @@ enyo.kind({
 		var step = 1;
 		for (var j = 0; j < 2000; j+= step) {
 			if(j <= 9){
-			//	this.$.Inputx.createComponent({content: j, active: !j});
-			//	this.$.Inputy.createComponent({content: j, active: !j});
-			//	this.$.Inputz.createComponent({content: j, active: !j});
 				this.$.Input.createComponent({content: j, active: !j});
 			}
 			if(j >= 10 && j <= 40){
