@@ -84,7 +84,8 @@ enyo.kind({
 	},
 	
 	dec: [
-		{name: "background-color", input:"color"},		
+		{name: "background-color", input:"color"},
+		{name: "outline-color", input:"color"}
 	]
 	
 });
@@ -246,6 +247,10 @@ enyo.kind({
 		{name: "border-color", input:"color"},
 		{name: "box-shadow", input:"xyz"},
 		{name: "border-radius", input:"xy"},
+		{name: "border-top-color", input:"color"},
+		{name: "border-right-color", input:"color"},
+		{name: "border-left-color", input:"color"},
+		{name: "border-bottom-color", input:"color"}		
 		
 	]
 	
@@ -319,7 +324,10 @@ enyo.kind({
 	},
 	
 	image: [
-		{name: "background-image", input:"misc"},
+		{name: "background-image", input:"filepicker"},
+		{name: "background-position", input:"xy"},
+		{name: "background-clip", input:"bgc"},
+		{name: "background-repeat", input:"bgr"}
 	]
 	
 });
