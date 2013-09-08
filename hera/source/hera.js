@@ -215,6 +215,9 @@ enyo.kind({
 			this.$.valueinput.bgc();
 		}
 		
+		if (inEvent.input === "bgr"){
+			this.$.valueinput.bgr();
+		}
 		this.updateBox();
 	},
 
