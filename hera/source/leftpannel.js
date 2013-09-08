@@ -85,7 +85,7 @@ enyo.kind({
 	
 	dec: [
 		{name: "background-color", input:"color"},
-
+		{name: "outline-color", input:"color"}
 	]
 	
 });
