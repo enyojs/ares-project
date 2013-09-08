@@ -84,8 +84,8 @@ enyo.kind({
 	},
 	
 	dec: [
-		{name: "background-color", input:"color"},	
-		{name: "border-bottom-color", input:"color"}
+		{name: "background-color", input:"color"},
+
 	]
 	
 });
@@ -247,7 +247,10 @@ enyo.kind({
 		{name: "border-color", input:"color"},
 		{name: "box-shadow", input:"xyz"},
 		{name: "border-radius", input:"xy"},
-		
+		{name: "border-top-color", input:"color"},
+		{name: "border-right-color", input:"color"},
+		{name: "border-left-color", input:"color"},
+		{name: "border-bottom-color", input:"color"}		
 		
 	]
 	
