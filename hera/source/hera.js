@@ -208,9 +208,13 @@ enyo.kind({
 		}
 		
 		if (inEvent.input === "filepicker"){
-			console.log("filepicker0",inEvent.input);
 			this.$.valueinput.fileinput();
 		}
+			
+		if (inEvent.input === "bgc"){
+			this.$.valueinput.bgc();
+		}
+		
 		this.updateBox();
 	},
 

@@ -321,6 +321,7 @@ enyo.kind({
 	image: [
 		{name: "background-image", input:"filepicker"},
 		{name: "background-position", input:"xy"},
+		{name: "background-clip", input:"bgc"}
 	]
 	
 });

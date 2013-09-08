@@ -134,6 +134,8 @@ enyo.kind({
 				{style: "height: 5px"},
 				{style: "height: 15px;  text-align: center; ", content: "File Picker Input" },
 			]},
+			
+			{kind: "bc"},
 		]},
 		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "fileChosen"}
 	],
@@ -146,7 +148,7 @@ enyo.kind({
 	picker: 5,	
 	lrc: 6,
 	filepicker: 7,
-	
+	bc: 8,
 	create: function() {
 		this.inherited(arguments);
 		ares.setupTraceLogger(this);
@@ -383,6 +385,12 @@ enyo.kind({
 		this.misc = undefined;
 		this.misc_picker = undefined;
 		this.valueout = undefined;
+	},
+	
+	bgc: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.clear();
+		this.$.panels.setIndex(this.bc);	
 	}
 	
 });
@@ -504,6 +512,38 @@ enyo.kind({
 				{content: "start '.'"},
 				{content: "'.' start"},
 				{content: "inherit"},
+			]}
+		]},
+	],
+	create: function() {
+		this.inherited(arguments);
+		ares.setupTraceLogger(this);
+		// initialization code goes here
+	},
+	itemSelected: function(inSender, inEvent){
+		this.valueout = "	" + inEvent.content + ";";
+		this.doValueUpdate();
+	}
+});
+
+enyo.kind({
+	name: "bc",
+	kind: "Control",
+	published: {
+	},
+	events: {
+		onValueUpdate: "",
+	},
+	components: [
+		{style: "height: 15px;  text-align: center; ", content: "Left Right Center ..... " },
+		{style: "height: 15px"},
+		{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [
+			{kind: "onyx.PickerButton", content: "Pick One...", style: "width: 200px"},
+			{kind: "onyx.Picker", onSelect: "itemSelected", components: [
+				{content: "border-box"},
+				{content: "padding-box"},
+				{content: "content-box"},
+				{content: "inherit"}
 			]}
 		]},
 	],
