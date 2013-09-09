@@ -369,6 +369,7 @@ enyo.kind({
 		this.$.aresLayoutPanels.reflow();
 		this.$.aresLayoutPanels.setIndexDirect(this.hermesFileTreeIndex);
 		this.componentsRegistry.harmonia.showGrabber();
+		this.componentsRegistry.harmonia.hideLogo();
 	},
 	showProjectView: function(inSender, inEvent) {
 		this.isProjectView = true;
@@ -377,6 +378,7 @@ enyo.kind({
 		this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
 		this.$.aresLayoutPanels.reflow();
 		this.componentsRegistry.harmonia.hideGrabber();
+		this.componentsRegistry.harmonia.showLogo();
 	},
 	changeGrabberDirection:function(inSender, inEvent){
 		if(inEvent.toIndex > 0 && inEvent.fromIndex < inEvent.toIndex){
@@ -420,6 +422,8 @@ enyo.kind({
 		}
 		var currentIF = d.getCurrentIF();
 		this.activeDocument = d;
+		this.componentsRegistry.codeEditor.addPreviewTooltip("Preview "+this.activeDocument.getProjectData().id);
+		
 		if (currentIF === 'code') {
 			this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
 			this.componentsRegistry.codeEditor.manageControls(false);
@@ -577,7 +581,7 @@ enyo.kind({
 		}
 	},
 	_saveBeforePreview: function(inSender, inEvent){
-		var project = this.componentsRegistry.projectList.selectedProject;
+		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
 		var files = Ares.Workspace.files;
 		var editedDocs = [];
 		enyo.forEach(files.models, function(model) {
@@ -592,7 +596,7 @@ enyo.kind({
 		this.componentsRegistry.phobos.saveDocumentsBeforePreview(editedDocs);
 	},
 	_displayPreview: function(inSender, inEvent){
-		var project = this.componentsRegistry.projectList.selectedProject;
+		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
 		this.componentsRegistry.projectView.previewAction(inSender,{project:project});
 	},
 	/**

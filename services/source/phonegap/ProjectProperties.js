@@ -102,16 +102,7 @@ enyo.kind({
 					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
 				]
-			}, 
-			{
-				id: "winphone",
-				name: "Microsoft Windows Phone 7",
-				type: "Target",
-				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
-				]				
-			}, 
+			},  
 			{
 				id: "blackberry",
 				name: "RIM Blackberry",
@@ -130,7 +121,16 @@ enyo.kind({
 					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
 				]
-			}
+			},
+			{
+				id: "winphone",
+				name: "Microsoft Windows Phone 7",
+				type: "Target",
+				rows: [
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
+				]				
+			},
 		]
 	}
 });
@@ -937,45 +937,45 @@ enyo.kind({
 enyo.kind({
 	name: "Phonegap.ProjectProperties.KeySelector",
 	debug: false,
-	kind: "FittableRows",
+	kind: "FittableColumns",
 	published: {
 		targetId: "",
 		keys: undefined,
 		activeKeyId: undefined,
 		provider: undefined
 	},
-	components: [
+	components: [	
+		{classes: "ares-project-properties-drawer-row-label", content: "Signing Key"}, 
+		{name: "noSigningKeys", content: "No signing keys for this platform"},
 		{
+			name: "signingKeysContainer",			
+			kind: "FittableRows",
 			components: [
 				{
-					classes: "ares-row",
+					name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey",
 					components: [
-						{tag: "label", classes: "ares-project-properties-drawer-row-label", content: "Signing Key"}, 
-						{name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey",
-							components: [
-								{kind: "onyx.PickerButton",	content: "Choose...", classes: "middle-width ares-margin-right"}, 
-								{kind: "onyx.Picker", name: "keys"}
-							]
-						},
-						// android, ios & blackberry: key password
-						{
-							kind: "onyx.InputDecorator", classes: "ares-margin-right", 
-							components: [
-								{content: "Key"}, 
-								{name: "keyPasswd",	kind: "onyx.Input",	classes: "ares-small-input", type: "password",	placeholder: "Password"}
-							]
-						},
-						// android-only: keystore password
-						{
-							kind: "onyx.InputDecorator", name: "keystorePasswdFrm",	classes: "ares-margin-right", showing: false,
-							components: [
-								{content: "Keystore"}, 
-								{name: "keystorePasswd", kind: "onyx.Input", classes: "ares-small-input", type: "password",	placeholder: "Password"}
-							]
-						}, 
-						{kind: "onyx.Button", content: "Save",	ontap: "savePassword"}
+						{kind: "onyx.PickerButton",	content: "Choose...", classes: "ares-project-properties-picker"}, 
+						{kind: "onyx.Picker", name: "keys"}
 					]
-				}
+				},
+				
+
+				// android, ios & blackberry: key password
+				{	
+					kind: "onyx.InputDecorator", classes: "ares-project-properties-margin-right",
+					components: [						
+						{name: "keyPasswd",	kind: "onyx.Input",	classes: "ares-project-properties-password", type: "password", placeholder: "Password"}
+					]
+				},
+			
+				// android-only: keystore password
+				{
+					kind: "onyx.InputDecorator", name: "keystorePasswdFrm", showing: false, classes: "ares-project-properties-margin-right",
+					components: [
+						{name: "keystorePasswd", kind: "onyx.Input", classes: "ares-project-properties-password", type: "password", placeholder: "Keystore password"}
+					]
+				},
+				{ kind: "onyx.Button", content: "Save",	ontap: "savePassword", classes: "ares-project-properties-margin-right"}				
 			]
 		}
 	],
@@ -995,24 +995,24 @@ enyo.kind({
 		// Sanity
 		this.keys = this.keys || [];
 
-		// Make sure 'None' (id == -1) is always available
-		if (enyo.filter(this.keys, function (key) {
-			return key.id === undefined;
-		})[0] === undefined) {
-			this.keys.push({
-				id: undefined,
-				title: "None"
-			});
-		}
+		if(this.keys.length !== 0){
 
-		// Fill
-		enyo.forEach(this.keys, function (key) {
-			this.$.keys.createComponent({
-				name: key.id,
-				content: key.title,
-				active: (key.id === this.activeKeyId)
-			});
-		}, this);
+			this.$.signingKeysContainer.show();
+			this.$.noSigningKeys.hide();
+
+			// Fill
+			enyo.forEach(this.keys, function (key) {
+				this.$.keys.createComponent({
+					name: key.id,
+					content: key.title,
+					active: (key.id === this.activeKeyId)
+				});
+			}, this);
+
+		} else {
+			this.$.signingKeysContainer.hide();
+			this.$.noSigningKeys.show();
+		}
 	},
 	/**
 	 * @private

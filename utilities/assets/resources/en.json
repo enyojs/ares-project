@@ -1,5 +1,8 @@
 {
 	"Cancel": "Cancel",
+	"Close": "Close",
+	"Delete": "Delete",
+	"Detail": "Detail",
 	"File": "File",
 	"File name: ": "File name: ",
 	"OK": "OK",
@@ -7,5 +10,6 @@
 	"Select a directory": "Select a directory",
 	"Select a File": "Select a File",
 	"Select a Folder": "Select a Folder",
-	"Sources": "Sources"
+	"Sources": "Sources",
+	"unknown error": "unknown error"
 }
