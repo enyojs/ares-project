@@ -4,6 +4,7 @@ enyo.kind(
 		kind: "onyx.Picker",
 		components: [
 			{content: "default",           value: { height:  800, width:  600, ppi: 163, dpr: 1 }, active: true},
+			{content: "HDTV",              value: { height: 1080, width: 1920, ppi: 163, dpr: 1 , landscapeOnly : true}},
 			{content: "iPhone\u2122",      value: { height:  480, width:  320, ppi: 163, dpr: 1 }},
 			{content: "iPhone\u2122 4",    value: { height:  960, width:  640, ppi: 326, dpr: 2 }},
 			{content: "iPhone\u2122 5",    value: { height: 1136, width:  640, ppi: 326, dpr: 2 }},
@@ -141,19 +142,21 @@ enyo.kind(
 
 		resize: function() {
 			var device = this.$.device.selected ;
-			var orientation = this .$.orientation.selected ;
+			var orientation = this.$.orientation.selected ;
 
 			this.dlog("size for device " , device.content , " orientation " , orientation.content ) ;
 
 			var dw  = device.value.width ;
 			var dh  = device.value.height ;
-			var dpr = device.value.dpr ;
+			var dpr = device.value.dpr;
+			var landscapeOnly = device.value.landscapeOnly; 
+
 			this.$.devWidth .setContent("width: "  + dw + ' px') ;
 			this.$.devHeight.setContent("height: " + dh + ' px') ;
 			this.$.devDPR   .setContent("DPR: "    + dpr) ;
 
 			// there's no logical xor in javascript. Emulate one :-/
-			var wantWide = orientation.content === 'landscape' ;
+			var wantWide = orientation.content === 'landscape' || landscapeOnly;
 			var isWide   = dw > dh ;
 			var swap     = wantWide ^ isWide ; // bitwise xor works fine with boolean
 
