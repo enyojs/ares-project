@@ -87,15 +87,19 @@ enyo.kind({
 	},
 	/**
 	 * @return {enyo.Async} 
+	 * @param {Object} inOptions
+	 * @property inOptions {Boolean} overwrite [true]
 	 */
-	createFile: function(inFolderId, inName, inContent) {
-		return this.impl.createFile(inFolderId, inName, inContent);
+	createFile: function(inFolderId, inName, inContent, inOptions) {
+		return this.impl.createFile(inFolderId, inName, inContent, inOptions);
 	},
 	/**
 	 * @return {enyo.Async} 
+	 * @param {Object} inOptions
+	 * @property inOptions {Boolean} overwrite [true]
 	 */
-	createFiles: function(inFolderId, inData) {
-		return this.impl.createFiles(inFolderId, inData);
+	createFiles: function(inFolderId, inData, inOptions) {
+		return this.impl.createFiles(inFolderId, inData, inOptions);
 	},
 	/**
 	 * @return {enyo.Async} 
@@ -110,15 +114,29 @@ enyo.kind({
 		return this.impl.remove(inNodeId);
 	},
 	/**
-	 * @return {enyo.Async} 
+	 * @return {enyo.Async}
+	 * @param {Object} inParams
+	 * @property inParams {String} folderId
+	 * @property inParams {String} name
+	 * @property inParams {String} overwrite [true]
 	 */
-	rename: function(inNodeId, inNewName) {
-		return this.impl.rename(inNodeId, inNewName);
+	rename: function(inNodeId, inParams) {
+		if (typeof inParams !== 'object') {
+			throw new Error("Invalid parameter type:" + typeof inParams + " (value:" + inParams.toString() + ")");
+		}
+		return this.impl.rename(inNodeId, inParams);
 	},
 	/**
 	 * @return {enyo.Async} 
+	 * @param {Object} inParams
+	 * @property inParams {String} folderId
+	 * @property inParams {String} name
+	 * @property inParams {String} overwrite [true]
 	 */
-	copy: function(inNodeId, inNewName) {
-		return this.impl.copy(inNodeId, inNewName);
+	copy: function(inNodeId, inParams) {
+		if (typeof inParams !== 'object') {
+			throw new Error("Invalid parameter type:" + typeof inParams + " (value:" + inParams.toString() + ")");
+		}
+		return this.impl.copy(inNodeId, inParams);
 	}
 });

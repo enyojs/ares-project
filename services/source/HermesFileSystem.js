@@ -162,7 +162,7 @@ enyo.kind({
 		}
 		return this._request("PUT", inFileId, {postBody: formData} /*inParams*/);
 	},
-	createFile: function(inFolderId, inName, inContent) {
+	createFile: function(inFolderId, inName, inContent, options) {
 		var formData = new enyo.FormData() ;
 		var file = new enyo.Blob([inContent || ''], {type: "application/octet-stream"});
 		this.trace("file:", file, "filename:", inName);
@@ -177,10 +177,15 @@ enyo.kind({
 			// http://stackoverflow.com/questions/6664967/how-to-give-a-blob-uploaded-as-formdata-a-file-name
 			formData.append('filename', inName );
 		}
-		return this._request("PUT", inFolderId, {postBody: formData} /*inParams*/);
+		var params = ares.extend({ postBody: formData }, options);
+		return this._request("PUT", inFolderId, params);
 	},
-	createFiles: function(inFolderId, inData) {
-		return this._request("PUT", inFolderId, {postBody: inData.content, contentType: inData.ctype} /*inParams*/);
+	createFiles: function(inFolderId, inData, options) {
+		var params = ares.extend({
+			postBody: inData.content,
+			contentType: inData.ctype
+		}, options);
+		return this._request("PUT", inFolderId, params);
 	},
 	createFolder: function(inFolderId, inName) {
 		return this._request("MKCOL", inFolderId, {name: inName} /*inParams*/)
@@ -198,14 +203,10 @@ enyo.kind({
 	 * @param {Object} inParams
 	 * @property inParams {String} folderId
 	 * @property inParams {String} name
+	 * @property inParams {String} overwrite [true]
 	 */
 	rename: function(inNodeId, inParams) {
-		if (typeof inParams === 'object') {
-			return this._request("MOVE", inNodeId, inParams);
-		} else {
-			// backward compatible method signature
-			return this._request("MOVE", inNodeId, {name: inParams}  /*inParams*/);
-		}
+		return this._request("MOVE", inNodeId, inParams);
 	},
 	/**
 	 * Only one of folderId or name can be defined.  In case both are defined
@@ -215,12 +216,7 @@ enyo.kind({
 	 * @property inParams {String} name
 	 */
 	copy: function(inNodeId, inParams) {
-		if (typeof inParams === 'object') {
-			return this._request("COPY", inNodeId, inParams);
-		} else {
-			// backward compatible method signature
-			return this._request("COPY", inNodeId, {name: inParams}  /*inParams*/);
-		}
+		return this._request("COPY", inNodeId, inParams);
 	},
 	exportAs: function(inNodeId, inDepth) {
 		return this._request("GET", inNodeId, {depth: inDepth, format: "base64"} /*inParams*/)

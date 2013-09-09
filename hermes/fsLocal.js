@@ -330,14 +330,33 @@ FsLocal.prototype.putFile = function(req, file, next) {
             urlPath = this.normalize(file.name),
 	    dir = path.dirname(absPath),
 	    encodeFileId = this.encodeFileId,
+	    overwriteParam = req.param('overwrite') !== "false",
 	    node;
 	
 	this.log("FsLocal.putFile(): file:", file, "-> absPath:", absPath);
 	
 	async.series([
 		function(cb1) {
-			mkdirp(dir, cb1);
+			if (!overwriteParam) {
+				fs.stat(absPath, function(err, stat) {
+					if (err) {
+						if (err.code === 'ENOENT') {
+							/* normal */
+							cb1();
+						} else {
+							/* wrong */
+							cb1(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+						}
+					} else {
+						/* wrong */
+						cb1(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+					}
+				});
+			} else {
+				cb1();
+			}
 		},
+		mkdirp.bind(null, dir),
 		(function(cb1) {
 			if (file.path) {
 				try {
@@ -365,7 +384,7 @@ FsLocal.prototype.putFile = function(req, file, next) {
 			this.log("FsLocal.putFile(): file length: ", 
 				file.buffer && file.buffer.length);
 
-			this.log("FsLocal.putFile(): file length: ", 
+			this.log("FsLocal.putFile(): file path: ", 
 				file.path);
 			
 			node = {
@@ -387,7 +406,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 	var pathParam = req.param('path'),
 	    nameParam = req.param('name'),
 	    folderIdParam = req.param('folderId'),
-	    overwriteParam = req.param('overwrite'),
+	    overwriteParam = req.param('overwrite') !== "false",
 	    srcPath = path.join(this.root, pathParam);
 	var dstPath, dstRelPath;
 	var srcStat, dstStat;
