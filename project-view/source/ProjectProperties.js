@@ -344,6 +344,20 @@ enyo.kind({
 			service.panel.getProjectConfig(this.config.providers[service.id]);
 		}, this);
 
+		if(this.config.name === ""){
+			this.$.errorPopup.raise({msg:"Name field hasn't value. Please enter the name value.", title:"User Error"});
+			return;
+		}else if(this.config.title === ""){
+			this.$.errorPopup.raise({msg: "Title field hasn't value. Please enter the title value." , title:"User Error"});
+			return;
+		}else if(this.config.version === ""){
+			this.$.errorPopup.raise({msg: "Version field hasn't value. Please enter the version value.", title:"User Error"});
+			return;
+		}else if(this.config.id === ""){
+			this.$.errorPopup.raise( {msg: "Id field hasn't value. Please enter the Id value.", title: "User Error"});
+			return;
+		}
+		
 		this.doModifiedConfig({data: this.config, template: this.selectedTemplate, addedSources: this.addedSource}) ;
 
 		this.doDone();
