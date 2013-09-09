@@ -196,3 +196,15 @@ During the initialization process of Ares within the browser, the 'ServiceRegist
 After being loaded, the new code must invoke `ServiceRegistry.instance.pluginReady();` to notify Ares that the client side code is ready.  
 See the function 'pluginReady' in the file 'services/source/ServiceRegistry.js'.
 
+### Ares logo
+
+It is possible to customize the logo displayed on the top-right corner of Ares.
+
+For this, load your logo in ares (recommended size is 42x42px). Change the following line in ``utilities/source/Logo.js`` in the ``create`` function:
+
+			this.setSource("path-to-your-logo");
+
+To remove the logo's display from Ares, replace the call to ``this.setSource("path-to-your-logo")`` by:
+
+			this.hideLogo();
+

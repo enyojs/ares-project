@@ -176,6 +176,9 @@
 .ares-top-toolbar.ares-designer-panels>div {
 	margin : 0 1px;
 }
+.ares-designer-panels > .enyo-fittable-columns-layout.onyx-toolbar-inline > * {
+	vertical-align: inherit;
+}
 
 .onyx-toolbar .onyx-button.ares-toolbar-picker{
 	border: 1px solid @ares-toolbar-background ;
@@ -627,6 +630,19 @@ div.large-fixed { width: 80%; }
 	display: inline-block;
 	border: 1px solid gray;
 	padding-top: 4px;
+}
+.enyo-fittable-columns-layout.onyx-toolbar-inline>.ares-logo-container{
+	margin-left: 25px;
+}
+.ares-logo-container{
+	height: 42px;
+	width: 42px;
+}
+.ares-logo{
+	position: absolute;
+	height: 42px;
+	width: 42px;
+	right: 0;
 }
 
 @import "assets/css/Popup.less";

@@ -10,5 +10,6 @@ enyo.depends(
 	"FileChooser.js",
 	"LinkController.js",
 	"PanelGrabber.js",
-	"Popup.js" 
+	"Popup.js",
+	"Logo.js" 
 );
