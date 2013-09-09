@@ -44,53 +44,18 @@ In order to run the Phonegap build service from Ares, the authentication must be
 	3. In the section *Authorized applications* click on *Revoke* button of the row *Phonegap:Build*.
 
 ### Plugin integration
-In the current realise, there is no UI to define externel plugins to be included in the built application. However there is two possibles workarounds to integrate externel plugins to the build : 
-#### By editing "project.json"
-In the project folder there is a JSON file that hold providers parameters, edit this file as mentioned in the following steps : 
+In the current release, Ares don't have a UI to define external plugins to be included in the built application. However there is a workaround to integrate external plugins by editing the file *config.xml*  associated to the project : 
 
-1. In the Ares UI, select the project in the **Project List**
-2. Using an external text editor, open the files *project.json* & *config.xml*
-3. In the *project.json* file edit the *plugin* block as shown in the below example : 
-```json"
-"plugins": {
-      "plugin_01": {
-          "name": "com.phonegap.plugins.example",
-          "version": "pluginVersion",
-          "parameters": {
-            "parameter_01": {
-               "name": "APIKey",
-               "value": "12345678"
-              },
-            "parameter_02": {
-               "name": "APISecret",
-               "value": "12345678"
-               }
-            }          
-        },
-        "plugin_02": {
-          "name": "com.phonegap.plugins.example",
-          "version": "pluginVersion"
-       }
-}```
+In this case, the auto-generation of the *config.xml* must be disabled by unchecking the checkbox *Generate config.xml file when building*" in  **Project-> Edit -> Phonegap Build ->Build option**. 
 
-4. Proceed to the build
-5. Check the *config.xml* file, you should be able to see the ```gap:plugin``` tag, the above example should give the following result : 
+Here is an exemple of external plugin definition: 
+
 ```xml
 	<gap:plugin name="com.phonegap.plugins.example">
 	    <param name="APIKey" value="12345678" />
 	    <param name="APISecret" value="12345678" />
 	</gap:plugin>
 ```
-
-the JSON block headers :
-``` 
-plugin_01, plugin_02, parameter_01 & parameter_02
-```
-Follow the syntaxe ```< plugin_xx>``` , ```< parameter_xx >```.
-
-#### By editing "config.xml"
-In this case you have to disable the auto-generation of the *config.xml* by disabling the checkbox *Generate config.xml file when building*" in  **Project-> Edit -> Phonegap Build ->Build option**. 
-By disabling this feature, you will no longer depend on the UI to edit the *config.xml* file submitted in the build.
 
 ## Filesystem services
 
