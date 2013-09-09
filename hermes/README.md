@@ -30,9 +30,9 @@ A user can be authentified in a Phonegap account in two possible ways :
 In order to run the Phonegap build service from Ares, the authentication must be done with the Adobe ID.  So if the user has registered on the Phonegap account using Github account, these steps must be followed:
  
 1. Click on the upper right profile icon and select *Edit account*
-1. In the tab *Account details* click on *Connect an Adobe ID*
-1. If you have already an Adobe account, just use it to sign in otherwise, Click on the button *Create Adobe ID* to register for a new Adobe account.
-1. Now you can use the Adobe ID to connect to the Phonegap account in Ares.
+2. In the tab *Account details* click on *Connect an Adobe ID*
+3. If you have already an Adobe account, just use it to sign in otherwise, Click on the button *Create Adobe ID* to register for a new Adobe account.
+4. Now you can use the Adobe ID to connect to the Phonegap account in Ares.
 
 **NOTE**:
  
@@ -40,8 +40,57 @@ In order to run the Phonegap build service from Ares, the authentication must be
 - A user can unlink his Phonegap account from the Github account by following these steps: 
 
 	1. The user must be authenticated in Github
-	1. Open this page https://github.com/settings/applications 
-	1. In the section *Authorized applications* click on *Revoke* button of the row *Phonegap:Build*.
+	2. Open this page https://github.com/settings/applications 
+	3. In the section *Authorized applications* click on *Revoke* button of the row *Phonegap:Build*.
+
+### Plugin integration
+In the current realise, there is no UI to define externel plugins to be included in the built application. However there is two possibles workarounds to integrate externel plugins to the build : 
+#### By editing "project.json"
+In the project folder there is a JSON file that hold providers parameters, edit this file as mentioned in the following steps : 
+
+1. In the Ares UI, select the project in the **Project List**
+2. Using an external text editor, open the files *project.json* & *config.xml*
+3. In the *project.json* file edit the *plugin* block as shown in the below example : 
+```json"
+"plugins": {
+      "plugin_01": {
+          "name": "com.phonegap.plugins.example",
+          "version": "pluginVersion",
+          "parameters": {
+            "parameter_01": {
+               "name": "APIKey",
+               "value": "12345678"
+              },
+            "parameter_02": {
+               "name": "APISecret",
+               "value": "12345678"
+               }
+            }          
+        },
+        "plugin_02": {
+          "name": "com.phonegap.plugins.example",
+          "version": "pluginVersion"
+       }
+}```
+
+4. Proceed to the build
+5. Check the *config.xml* file, you should be able to see the ```gap:plugin``` tag, the above example should give the following result : 
+```xml
+	<gap:plugin name="com.phonegap.plugins.example">
+	    <param name="APIKey" value="12345678" />
+	    <param name="APISecret" value="12345678" />
+	</gap:plugin>
+```
+
+the JSON block headers :
+``` 
+plugin_01, plugin_02, parameter_01 & parameter_02
+```
+Follow the syntaxe ```< plugin_xx>``` , ```< parameter_xx >```.
+
+#### By editing "config.xml"
+In this case you have to disable the auto-generation of the *config.xml* by disabling the checkbox *Generate config.xml file when building*" in  **Project-> Edit -> Phonegap Build ->Build option**. 
+By disabling this feature, you will no longer depend on the UI to edit the *config.xml* file submitted in the build.
 
 ## Filesystem services
 
