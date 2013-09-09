@@ -12,6 +12,9 @@ enyo.kind({
 			{kind: "onyx.Toolbar", classes: "ares-top-toolbar", components: [
 				{kind: "onyx.Grabber", classes: "ares-grabber" , name: "filePanelGrabber", showing: false, ontap: "activePanel", components: [
 					{kind: "aresGrabber", name: "aresGrabberDirection"}
+				]},
+				{classes:"ares-logo-container", name:"logoContainer", components:[
+					{name:"logo", kind:"Ares.Logo"}
 				]}
 			]},
 			{kind: "HermesFileTree", dragAllowed: true}
@@ -61,5 +64,11 @@ enyo.kind({
 	},
 	activePanel : function(){
 		this.doMovePanel({panelIndex:this.panelIndex});
-	}
+	},
+	showLogo:function(){
+		this.$.logoContainer.show();
+	},
+	hideLogo:function(){
+		this.$.logoContainer.hide();
+	},
 });
