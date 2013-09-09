@@ -15,6 +15,7 @@ enyo.kind({
 	classes: "enyo-unselectable ares-classic-popup",
 	fit: true,
 	events: {
+		onError: "",
 		onModifiedConfig: "",
 		onSaveGeneratedXml: "",
 		onDone: "",
@@ -120,7 +121,6 @@ enyo.kind({
 			{name: "ok", kind: "onyx.Button", content: $L("OK"), classes:"right", ontap: "confirmTap"}
 		]},
 
-		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 	published: {		
@@ -345,16 +345,16 @@ enyo.kind({
 		}, this);
 
 		if(this.config.name === ""){
-			this.$.errorPopup.raise({msg:"Name field hasn't value. Please enter the name value.", title:"User Error"});
+			this.doError({msg:"Please enter a valid Name value.", title:"User Error"});
 			return;
 		}else if(this.config.title === ""){
-			this.$.errorPopup.raise({msg: "Title field hasn't value. Please enter the title value." , title:"User Error"});
+			this.doError({msg: "Please enter a valid Title value." , title:"User Error"});
 			return;
 		}else if(this.config.version === ""){
-			this.$.errorPopup.raise({msg: "Version field hasn't value. Please enter the version value.", title:"User Error"});
+			this.doError({msg: "Please enter a valid Version value.", title:"User Error"});
 			return;
 		}else if(this.config.id === ""){
-			this.$.errorPopup.raise( {msg: "Id field hasn't value. Please enter the Id value.", title: "User Error"});
+			this.doError( {msg: "Please enter a valid Id value.", title: "User Error"});
 			return;
 		}
 		
