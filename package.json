@@ -1,6 +1,7 @@
 {
 	"name": "ares-ide",
-	"version": "0.2.3-1",
+	"version": "0.2.4",
+	"license" : "Apache 2.0", 
 	"description": "A browser-based code editor and UI designer for Enyo 2 projects",
 	"keywords": ["ide", "enyo", "phonegap", "android", "ios", "windowsphone", "blackberry", "webos", "html5"],
 	"homepage": "https://github.com/enyojs/ares-project",
@@ -36,7 +37,6 @@
 		"request": "~2.26.0",
 		"rimraf": "~2.2.2",
 		"semver": "2.1.0",
-		"shelljs": "~0.1.4",
 		"temp": "~0.5.1",
 		"tunnel": "~0.0.2"
 	},
@@ -58,12 +58,12 @@
 		"request",
 		"rimraf",
 		"semver",
-		"shelljs",
 		"temp",
 		"tunnel"
 	],
 	"devDependencies": {
 		"mocha": "~1.4.2",
+		"shelljs": "~0.1.4",
 		"should": "~1.1.0",
 		"jshint": "~2.1.3"
 	},
