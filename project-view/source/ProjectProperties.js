@@ -15,6 +15,7 @@ enyo.kind({
 	classes: "enyo-unselectable ares-classic-popup",
 	fit: true,
 	events: {
+		onError: "",
 		onModifiedConfig: "",
 		onSaveGeneratedXml: "",
 		onDone: "",
@@ -120,7 +121,6 @@ enyo.kind({
 			{name: "ok", kind: "onyx.Button", content: $L("OK"), classes:"right", ontap: "confirmTap"}
 		]},
 
-		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 	published: {		
@@ -344,6 +344,20 @@ enyo.kind({
 			service.panel.getProjectConfig(this.config.providers[service.id]);
 		}, this);
 
+		if(this.config.name === ""){
+			this.doError({msg:"Please enter a valid Name value.", title:"User Error"});
+			return;
+		}else if(this.config.title === ""){
+			this.doError({msg: "Please enter a valid Title value." , title:"User Error"});
+			return;
+		}else if(this.config.version === ""){
+			this.doError({msg: "Please enter a valid Version value.", title:"User Error"});
+			return;
+		}else if(this.config.id === ""){
+			this.doError( {msg: "Please enter a valid Id value.", title: "User Error"});
+			return;
+		}
+		
 		this.doModifiedConfig({data: this.config, template: this.selectedTemplate, addedSources: this.addedSource}) ;
 
 		this.doDone();
