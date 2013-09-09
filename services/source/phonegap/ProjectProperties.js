@@ -603,6 +603,13 @@ enyo.kind({
 });
 
 enyo.kind({
+	name: "Phonegap.ProjectProperties.PlatformBuildStatus",
+	kind: "onyx.IconButton",
+	classes: "ares-project-properties-build-status-icon",
+	ontap: "showStatusMessage",	
+});
+
+enyo.kind({
 	name: "Phonegap.ProjectProperties.BuildStatus",
 	kind: "FittableRows",
 	published: {
@@ -616,58 +623,27 @@ enyo.kind({
 			name: "buildStatusContainer", kind: "FittableRows", classes: "ares-project-properties-build-status-container",
 			components: [
 				{	
-						name: "labelContainer",
-						classes:"ares-project-properties-buildStatus-container",
-						kind: "FittableColumns",					
-						components:[						
-							{
-								name: "androidButton", kind: "onyx.IconButton", platform: "android", src: "$services/assets/images/platforms/android-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
-								ontap: "showStatusMessage",
-								components: [
-									{name: "androidMessage", classes:"ares-hide", title: "", url: ""}
-								]
-							},
-							{
-								name: "iosButton", kind: "onyx.IconButton", platform: "ios", src: "$services/assets/images/platforms/ios-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
-								ontap: "showStatusMessage",
-								components: [
-									{name: "iosMessage", classes:"ares-hide", title: "", url: ""}
-								]
-							},
-							{
-								name: "blackberryButton", kind: "onyx.IconButton", platform: "blackberry", src: "$services/assets/images/platforms/blackberry-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
-								ontap: "showStatusMessage",
-								components: [
-									{name: "blackberryMessage", classes:"ares-hide", title: "", url: ""}
-								]
-							},
-							{
-								name: "webosButton", kind: "onyx.IconButton", platform: "webos", src: "$services/assets/images/platforms/webos-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
-								ontap: "showStatusMessage",
-								components: [
-									{name: "webosMessage", classes:"ares-hide", title: "", url: ""}
-								]
-							},
-							{
-								name: "winphoneButton", kind: "onyx.IconButton", platform: "winphone", src: "$services/assets/images/platforms/winphone-logo-not-available-32x32.png", classes: "ares-project-properties-build-status-icon",
-								ontap: "showStatusMessage",
-								components: [
-									{name: "winphoneMessage", classes:"ares-hide", title: "", url: ""}
-								]
-							}
-						]
+					name: "labelContainer",
+					classes:"ares-project-properties-buildStatus-container",
+					kind: "FittableColumns",					
+					components:[						
+						{ name: "androidButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "android" },
+						{ name: "iosButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "ios" },
+						{ name: "blackberryButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "blackberry" },
+						{ name: "webosButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform:"webos" },
+						{ name: "winphoneButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "winphone" }							
+					]
 				},
 			
-				{name: "statusMessage", /*onclick: "hideStatusMessage",*/ classes: "project-properties-status-message"},
-				{name: "downloadLink", content: "ddl link", tag: "a"}
+				{name: "statusMessage", onclick: "hideStatusMessage", classes: "project-properties-status-message"},
+				{name: "downloadLink", content: "ddl link", tag: "a", shown: false}
 					
 			]
 		}
 	],
 	/**@private*/
 	create: function() {
-		this.inherited(arguments);
-		this.$.downloadLink.hide();
+		this.inherited(arguments);		
 		this.appIdChanged();
 		this.setProvider(Phonegap.ProjectProperties.getProvider());
 	},
@@ -690,51 +666,35 @@ enyo.kind({
 	 * its status. the status is checked from the "buildStatusData" object.
 	 * By clicking on the icon, the status message is displayed.
 	 * 
-	 * @param  {onyx.IconButton} inIconButton Icon showing the status of the application build for a given
+	 * @param  {onyx.IconButton} platformIconButton Icon showing the status of the application build for a given
 	 *                                        platform.
 	 * @private
 	 */
-	buildStatusStyle: function(inIconButton) {
-
-		var extensions = {
-		    "android": "apk",
-		    "ios": "ipa",
-		    "webos": "ipk",
-		    "winphone": "xap",
-		    "blackberry": "jad"
-	    };
-
-		if (this.buildStatusData && this.buildStatusData.status[inIconButton.platform] === "complete") {
-			
+	buildStatusStyle: function(platformIconButton) {		
+	   
+		if (this.buildStatusData && this.buildStatusData.status[platformIconButton.platform] === "complete") {
 			//Build status: complete
-			inIconButton.setSrc("$services/assets/images/platforms/"+inIconButton.platform + "-logo-complete-32x32.png");
-			this.$[inIconButton.platform+"Message"].setContent("Download link: ");
-				//save the title of the application + its extension
-			this.$[inIconButton.platform+"Message"].title = this.buildStatusData.title + "." + extensions[inIconButton.platform];
-				//save the URL to download the application
-			this.$[inIconButton.platform+"Message"].url = this.phongapUrl + this.buildStatusData.download[inIconButton.platform];	
-			} else {
-			if (this.buildStatusData && this.buildStatusData.status[inIconButton.platform] === "error" || 
-				this.buildStatusData && this.buildStatusData.status[inIconButton.platform] === null){
+			platformIconButton.setSrc("$services/assets/images/platforms/" + platformIconButton.platform + "-logo-complete-32x32.png");
+			
+		} else {
+			if (this.buildStatusData && this.buildStatusData.status[platformIconButton.platform] === "error" || 
+			    this.buildStatusData && this.buildStatusData.status[platformIconButton.platform] === null){
 				
-				//Build status: error
-				inIconButton.setSrc("$services/assets/images/platforms/" + inIconButton.platform + "-logo-error-32x32.png");
-				this.$[inIconButton.platform + "Message"].setContent("Error: " + this.buildStatusData.error[inIconButton.platform]);
-				this.$[inIconButton.platform+"Message"].title = null;
-				this.$[inIconButton.platform+"Message"].url = null;
+				//Build status: error				
+				platformIconButton.setSrc("$services/assets/images/platforms/" + platformIconButton.platform + "-logo-error-32x32.png");
+
 			} else {
-				
-				inIconButton.setSrc("$services/assets/images/platforms/" + inIconButton.platform + "-logo-not-available-32x32.png");
+
 				if(this.buildStatusData === null) {
 					
 					//Build status: application not built
-					this.$[inIconButton.platform + "Message"].setContent("Build the application first");
-					this.$[inIconButton.platform+"Message"].title = null;
-					this.$[inIconButton.platform+"Message"].url = null;
+					platformIconButton.setSrc("$services/assets/images/platforms/" + platformIconButton.platform + "-logo-not-available-32x32.png");
+
 				} else {
 					
 					//Build status: pending
-					this.$[inIconButton.platform + "Message"].setContent("Build in progress");
+					platformIconButton.setSrc("$services/assets/images/platforms/" + platformIconButton.platform + "-logo-not-available-32x32.png");
+
 				}		
 			}
 		}
@@ -745,10 +705,11 @@ enyo.kind({
 	 * 
 	 * @private	 
 	 */
-	buildStatusDataChanged: function(){	
-		this.log(this.buildStatusData);
+	buildStatusDataChanged: function(){
+		this.$.downloadLink.hide();
 		for(var key in this.$){
-			if(this.$[key].platform !== undefined) {
+
+			if(this.$[key].platform !== undefined) {			
 				this.buildStatusStyle(this.$[key]);
 			}			
 		}
@@ -756,20 +717,50 @@ enyo.kind({
 
 	/**@private*/
 	showStatusMessage: function(inSender, inEvent){
-		this.$.statusMessage.setContent(this.$[inSender.platform+"Message"].getContent());
-		this.log(this.$[inSender.platform+"Message"]);
-		if (this.$[inSender.platform+"Message"].url !== null && 
-			this.$[inSender.platform+"Message"].title !== null) {
+		var extensions = {
+		    "android": "apk",
+		    "ios": "ipa",
+		    "webos": "ipk",
+		    "winphone": "xap",
+		    "blackberry": "jad"
+	    };
+	    if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "complete") {
+	    	this.$.statusMessage.setContent("Download link: ");
+	    	
+	    	if (this.buildStatusData.download[inSender.platform] !== undefined && 
+	    		this.buildStatusData.title !== undefined) {
+	    		
+	    		this.$.downloadLink.setAttribute("href", this.phongapUrl + this.buildStatusData.download[inSender.platform]);
+	    		this.$.downloadLink.setContent(this.buildStatusData.title + "." + extensions[inSender.platform]);
+	    		this.$.downloadLink.show();
+	    		this.$.downloadLink.render();
+	    	} else {
+	    		this.$.downloadLink.hide();
+	    	}
+	    }  else {
+			if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "error" || 
+			    this.buildStatusData && this.buildStatusData.status[inSender.platform] === null){
 
-			this.log("in IF");
-			this.$.downloadLink.setAttribute("href", this.$[inSender.platform+"Message"].url);
-			this.$.downloadLink.setContent(this.$[inSender.platform+"Message"].title);
-			this.$.downloadLink.show();
-			this.$.downloadLink.render();
-			this.log(this.$.downloadLink);
-		} else {
-			this.$.downloadLink.hide();
+				//Build status: error
+				this.$.downloadLink.hide();
+				this.$.statusMessage.setContent("Error: " + this.buildStatusData.error[inSender.platform]);				
+			} else {
+				
+				if(this.buildStatusData === null) {
+					
+					//Build status: application not built
+					this.$.downloadLink.hide();
+					this.$.statusMessage.setContent("Build the application first");					
+
+				} else {
+					
+					//Build status: pending
+					this.$.downloadLink.hide();
+					this.$.statusMessage.setContent("Build in progress");
+				}		
+			}
 		}
+		
 
 	},
 
@@ -779,7 +770,8 @@ enyo.kind({
 	 * @private
 	 */
 	hideStatusMessage: function(){
-		//this.$.statusMessage.setContent("");
+		this.$.downloadLink.hide();
+		this.$.statusMessage.setContent("");
 	},
 
 	/**@private*/
