@@ -731,7 +731,7 @@ enyo.kind({
 		}
 
 		this.trace("Creating new folder ", name," into folderId=", folderId);
-		this.$.service.createFolder(folderId, name)
+		this.$.service.createFolder(folderId, name, { overwrite: false })
 			.response(this, function(inSender, inFolder) {
 				this.trace("inFolder: ", inFolder);
 				var parentNode = this.getFolderOfSelectedNode(),
@@ -1109,7 +1109,7 @@ enyo.kind({
 	createFile: function(name, folderId, content) {
 		this.trace("Creating new file ",name," into folderId=",folderId);
 
-		this.$.service.createFile(folderId, name, content)
+		this.$.service.createFile(folderId, name, content, { overwrite: false })
 			.response(this, function(inSender, inNodes) {
 				this.trace("inNodes: ",inNodes);
 				var parentNode = this.getFolderOfSelectedNode(),

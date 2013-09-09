@@ -102,9 +102,13 @@ enyo.kind({
 		return this.impl.createFiles(inFolderId, inData, inOptions);
 	},
 	/**
+	 * @param {String} inFolderId parent folder Id
+	 * @param {String} inName folder name to create
+	 * @param {Object} inOptions options
+	 * @property inOptions {Boolean} overwrite [true]
 	 * @return {enyo.Async} 
 	 */
-	createFolder: function(inFolderId, inName) {
+	createFolder: function(inFolderId, inName, inOptions) {
 		return this.impl.createFolder(inFolderId, inName);
 	},
 	/**

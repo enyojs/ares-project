@@ -187,8 +187,16 @@ enyo.kind({
 		}, options);
 		return this._request("PUT", inFolderId, params);
 	},
-	createFolder: function(inFolderId, inName) {
-		return this._request("MKCOL", inFolderId, {name: inName} /*inParams*/)
+	/**
+	 * @param {String} inFolderId parent folder Id
+	 * @param {String} inName folder name to create
+	 * @param {Object} inOptions options
+	 * @property inOptions {Boolean} overwrite [true]
+	 * @return {enyo.Async} 
+	 */
+	createFolder: function(inFolderId, inName, inOptions) {
+		var params = ares.extend({name: inName}, inOptions);
+		return this._request("MKCOL", inFolderId,  params)
 			.response(this, function(inSender, inResponse) {
 				this.trace(inResponse);
 				return inResponse;

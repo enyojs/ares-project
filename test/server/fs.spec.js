@@ -317,8 +317,48 @@ function sendClosingBoundary(req, boundaryKey) {
 		});
 	});
 	
-	it("t2.1. should create a folder", function(done) {
-		post("t2.1", '/id/' + rootId, {_method: "MKCOL",name: "toto"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+	it("t2.1.0. should create a folder", function(done) {
+		post("t2.1.0", '/id/' + rootId, {_method: "MKCOL",name: "toto"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201);
+			should.exist(res.json);
+			should.exist(res.json.isDir);
+			res.json.isDir.should.equal(true);
+			should.exist(res.json.path);
+			res.json.path.should.equal(rootPath + "/toto");
+			done();
+		});
+	});
+
+	it("t2.1.1. should fail to re-create the same folder (overwrite=false)", function(done) {
+		post("t2.1.1", '/id/' + rootId, {_method: "MKCOL",name: "toto", overwrite: "false"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+			should.exist(err);
+			should.not.exist(res);
+			should.exist(err.statusCode);
+			err.statusCode.should.equal(412);
+			done();
+		});
+	});
+
+	it("t2.1.2. should re-create the same folder (overwrite=undefined)", function(done) {
+		post("t2.1.2", '/id/' + rootId, {_method: "MKCOL",name: "toto"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201);
+			should.exist(res.json);
+			should.exist(res.json.isDir);
+			res.json.isDir.should.equal(true);
+			should.exist(res.json.path);
+			res.json.path.should.equal(rootPath + "/toto");
+			done();
+		});
+	});
+
+	it("t2.1.3. should re-create the same folder (overwrite=true)", function(done) {
+		post("t2.1.3", '/id/' + rootId, {_method: "MKCOL",name: "toto", overwrite: "true"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);

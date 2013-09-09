@@ -96,7 +96,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		    "versionTag": "af34ef45",
 		}
 
-* `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded).  It returns a JSON-encoded single-level (depth=0) node descriptor of the new folder.
+* `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded).  When the `overwrite` parameter is explicitly set to `"false"` (as a string), `MKCOL` may fails with an HTTP status code `412/Resource Already Exists`. It returns a JSON-encoded single-level (depth=0) node descriptor of the new folder.
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
 
@@ -108,7 +108,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
     Other encoding may be added later on.
 
 	
-* `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.  When the `overwrite` parameter is explicitly set to `"false"` (as a string), `PUT` fails with an HTTP status code `412/Resource Already Exists`.
+* `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.  When the `overwrite` parameter is explicitly set to `"false"` (as a string), `PUT` may fails with an HTTP status code `412/Resource Already Exists`.
   * `application/x-www-form-urlencoded` contains a single base64-encoded file in the form field named `content`.  The file name and location are provided by `{id}` and optionally `name` query parameter.
   * `multipart/form-data` follows the standard format.  For each file `filename` is interpreted relativelly to the folder `{id}` provided in the URL.  **Note:** To accomodate an issue with old Firefox releases (eg. Firefox 10), fields labelled `filename` overwrite the `filename` in their corresponding `file` fields.  See `fsBase#_putMultipart()` for more details.
 

@@ -84,7 +84,8 @@ FsLocal.prototype.get = function(req, res, next) {
 FsLocal.prototype.mkcol = function(req, res, next) {
 	var newPath, newId, newName, self = this,
 	    pathParam = req.param('path'),
-	    nameParam = req.param('name');
+	    nameParam = req.param('name'),
+	    overwriteParam = req.param('overwrite') !== "false";
 	this.log("pathParam:", pathParam);
 	this.log("nameParam:", nameParam);
 	if (!nameParam) {
@@ -101,16 +102,24 @@ FsLocal.prototype.mkcol = function(req, res, next) {
 	newName = path.basename(newPath);
 	newId = this.encodeFileId(newPath);
 
-	mkdirp(path.join(this.root, newPath), function(err) {
-		next(err, {
-			code: 201, // Created
-			body: {
-				id: newId,
-				path: newPath,
-				name: newName,
-				isDir: true
-			}
-		});
+	var absPath = path.join(this.root, newPath);
+	async.series([
+		this._checkOverwrite.bind(this, absPath, overwriteParam),
+		mkdirp.bind(null, absPath)
+	], function(err) {
+		if (err) {
+			next(err);
+		} else {
+			next(null, {
+				code: 201, // Created
+				body: {
+					id: newId,
+					path: newPath,
+					name: newName,
+					isDir: true
+				}
+			});
+		}
 	});
 };
 
@@ -336,26 +345,7 @@ FsLocal.prototype.putFile = function(req, file, next) {
 	this.log("FsLocal.putFile(): file:", file, "-> absPath:", absPath);
 	
 	async.series([
-		function(cb1) {
-			if (!overwriteParam) {
-				fs.stat(absPath, function(err, stat) {
-					if (err) {
-						if (err.code === 'ENOENT') {
-							/* normal */
-							cb1();
-						} else {
-							/* wrong */
-							cb1(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
-						}
-					} else {
-						/* wrong */
-						cb1(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
-					}
-				});
-			} else {
-				cb1();
-			}
-		},
+		this._checkOverwrite.bind(this, absPath, overwriteParam),
 		mkdirp.bind(null, dir),
 		(function(cb1) {
 			if (file.path) {
@@ -399,6 +389,27 @@ FsLocal.prototype.putFile = function(req, file, next) {
 		this.log("FsLocal.putFile(): node:", node);
 		next(err, node);
 	}).bind(this));
+};
+
+FsLocal.prototype._checkOverwrite = function(absPath, overwrite, next) {
+	if (!overwrite) {
+		fs.stat(absPath, function(err, stat) {
+			if (err) {
+				if (err.code === 'ENOENT') {
+					/* normal */
+					next();
+				} else {
+					/* wrong */
+					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+				}
+			} else {
+				/* wrong */
+				next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+			}
+		});
+	} else {
+		next();
+	}
 };
 
 // XXX ENYO-1086: refactor tree walk-down
