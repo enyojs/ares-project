@@ -1262,6 +1262,30 @@ enyo.kind({
 		waypoints.push(track);
 		track.followNodePath(nodes, waypoints, next);
 	},
+	/** @public */
+	checkNodeName: function (nodeName, next) {
+		var track = this.$.serverNode,
+			waypoints = [],
+			nodes = nodeName.split("/"),
+			l = nodes.length;
+		
+		var callback = (function(inErr) {
+			if (inErr) {
+				this.warn("Node does not exist", inErr);
+				next(false);
+			} else {
+				if (waypoints.length == l) {
+					next(true);
+				} else {
+					next(false);
+				}
+			}
+		}).bind(this);
+
+		nodes.shift();
+		waypoints.push(track);
+		track.followNodePath(nodes, waypoints, callback);
+	},
 	/* @private */
 	checkedPath: function(path) {
 		var illegal = /[<>\/\\!?@#\$%^&\*,]+/i;

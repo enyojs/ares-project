@@ -143,7 +143,9 @@ var bundledBrowser = {
 
 var configPath, tester;
 var configStats;
+var aresAboutData;
 var serviceMap = {};
+
 
 if (argv.runtest) {
 	tester = require('./test/tester/main.js');
@@ -151,18 +153,22 @@ if (argv.runtest) {
 } else{
 	configPath = argv.config;
 }
+function checkFile(inFile) {
+	var fileStats;
+	if (!fs.existsSync(inFile)) {
+		throw new Error("Did not find: '"+inFile+"': ");
+	}
+
+	fileStats = fs.lstatSync(inFile);
+	if (!fileStats.isFile()) {
+		throw new Error("Not a file: '"+inFile+"': ");
+	}
+	return fileStats;
+}
 
 function loadMainConfig(configFile) {
-	if (!fs.existsSync(configFile)) {
-		throw "Did not find: '"+configFile+"': ";
-	}
-
-	log.verbose('loadMainConfig()', "Loading ARES configuration from '"+configFile+"'...");
-	configStats = fs.lstatSync(configFile);
-	if (!configStats.isFile()) {
-		throw "Not a file: '"+configFile+"': ";
-	}
-
+	configStats = checkFile(configFile);
+	log.verbose('loadMainConfig()', "Loading ARES configuration from '" + configFile + "'...");
 	var configContent = fs.readFileSync(configFile, 'utf8');
 	try {
 		ide.res = JSON.parse(configContent);
@@ -171,8 +177,23 @@ function loadMainConfig(configFile) {
 	}
 
 	if (!ide.res.services || !ide.res.services[0]) {
-		throw "Corrupted '"+configFile+"': no storage services defined";
+		throw new Error("Corrupted '"+configFile+"': no storage services defined");
 	}
+}
+function loadPackageConfig() {
+	var packagePath = path.resolve(myDir, "package.json");
+	checkFile(packagePath);
+	var packageContentJSON = fs.readFileSync(packagePath, 'utf8');
+	try {	
+		var packageContent = JSON.parse(packageContentJSON);
+		aresAboutData = {
+			"version": packageContent.version, "bugReportURL": packageContent.bugs.url, 
+			"license": packageContent.license, "projectHomePage": packageContent.homepage
+		};
+		
+	} catch(e) {
+		throw new Error("Improper JSON: " + packagePath);
+	}	
 }
 
 function getObjectType(object) {
@@ -288,7 +309,9 @@ function loadPluginConfigFiles() {
 loadMainConfig(configPath);
 loadPluginConfigFiles();
 
-// configuration age/date is the UTC configuration file last modification date
+loadPackageConfig();
+
+// File age/date is the UTC configuration file last modification date
 ide.res.timestamp = configStats.atime.getTime();
 log.verbose('main', ide.res);
 
@@ -574,6 +597,9 @@ app.configure(function(){
 	app.get('/res/services', function(req, res, next) {
 		log.http('main', m("GET /res/services:", ide.res.services));
 		res.status(200).json({services: ide.res.services});
+	});
+	app.get('/res/aboutares', function(req, res, next) {		
+		res.status(200).json({aboutAres: aresAboutData});
 	});
 	app.all('/res/services/:serviceId/*', proxyServices);
 	app.all('/res/services/:serviceId', proxyServices);
