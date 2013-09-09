@@ -191,21 +191,20 @@ enyo.kind({
 		}
 	},
 
-	createProjectJson: function(data, callback) {
-		//initialize project config
-		this.config = new ProjectConfig() ; // is a ProjectConfig object.
+	/**
+	 * @param {Object} data as found in {project.json}
+	 * @param {Function} next common-JS callback, when {project.json} is saved
+	 * @private
+	 */
+	createProjectJson: function(data, next) {
+		this.config = new ProjectConfig();
 		this.config.service = this.selectedDir.service;
 		this.config.folderId = this.selectedDir.id;
-		//save the project config;
 		this.config.setData(data) ;
-		//create and save the project.json
-		
-		var next = (function() {
-			this.config = null;
-			callback();
-		}).bind(this);
-
-		this.config.save(next) ;
+		this.config.save(function(err) {
+			this.config = null; // GC-deref
+			next(err);
+		});
 	},
 
 	showProjectPropPopup: function(inSender, inEvent, next) {
