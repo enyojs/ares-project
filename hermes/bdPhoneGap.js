@@ -124,13 +124,14 @@ BdPhoneGap.prototype.getToken = function(req, res, next) {
 	// XXX !!! leave this log commented-out to not log password !!!
 	//log.silly("getToken()", "req.body:", req.body);
 
+	var timeout = req.param('timeout') || this.config.timeout || PGB_TIMEOUT;
 	var auth, options;
 	auth = "Basic " + new Buffer(req.body.username + ':' +req.body.password).toString("base64");
 	options = {
 		url : PGB_URL + "/token",
 		headers : { "Authorization" : auth },
 		proxy: this.config.proxyUrl,
-		timeout: this.config.timeout || PGB_TIMEOUT
+		timeout: timeout
 	};
 	log.http("getToken()", "POST /token");
 	request.post(options, (function(err1, response, body) {
@@ -158,16 +159,18 @@ BdPhoneGap.prototype.getToken = function(req, res, next) {
 };
 
 BdPhoneGap.prototype.getUserData = function(req, res, next) {
+	var timeout = req.param('timeout') || this.config.timeout || PGB_TIMEOUT;
 	client.auth({
 		token: req.token,
-		proxy: this.config.proxyUrl,
-		timeout: this.config.timeout || PGB_TIMEOUT
+		proxy: this.config.proxyUrl
 	}, function(err1, api) {
 		if (err1) {
 			next(err1);
 		} else {
 			log.http("getUserData()", "GET /apps/me");
-			api.get('/me', function(err2, userData) {
+			api.get('/me', {
+				timeout: timeout
+			}, function(err2, userData) {
 				if (err2) {
 					next(err2);
 				} else {
@@ -180,6 +183,7 @@ BdPhoneGap.prototype.getUserData = function(req, res, next) {
 };
 
 BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
+	var timeout = req.param('timeout') || this.config.timeout || PGB_TIMEOUT;
 	client.auth({
 		token: req.token,
 		proxy: this.config.proxyUrl
@@ -189,7 +193,9 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
 		} else {
 			var appId = req.params.appId;
 			log.http("getAppStatus()", "GET /apps/" + appId);					
-			api.get('/apps/' + appId, function(err2, userData) {
+			api.get('/apps/' + appId, {
+				timeout: timeout
+			}, function(err2, userData) {
 				if (err2) {
 					next(err2);
 				} else {
@@ -216,6 +222,7 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
  * 
  */
 BdPhoneGap.prototype.downloadApp = function(req, res, next){
+	var timeout = req.param('timeout') || this.config.timeout || PGB_TIMEOUT;
 	var appId = req.param("appId"),
 	    platform = req.param("platform"),
 	    title = req.param("title"),
@@ -239,7 +246,7 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 		client.auth.bind(client, { token: req.token }),
 		(function _pipeFormData(api, next) {
 			log.http("downloadApp#_pipeFormData()", "GET", url);
-			var stream = api.get(url);
+			var stream = api.get(url, { timeout: timeout });
 			stream.pause();
 			this.returnFormData([{
 				filename: fileName,
@@ -268,8 +275,8 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 			var os = fs.createWriteStream(tempFileName);
 			// FIXME: node-0.8 has no 'finish' event...
 			os.on('close', next);
-			api.get(url).pipe(os);
-		}).bind(this),
+			api.get(url, { timeout: timeout*3 }).pipe(os);
+		},
 		// FIXME: broken streams on node-0.8.x: we need to
 		// load packages in memory Buffer...
 		fs.readFile.bind(fs, tempFileName),
@@ -298,6 +305,7 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 BdPhoneGap.prototype.build = function(req, res, next) {
 	var appData = {}, query = req.query;
 	log.info("build()", "title:", query.title,"platforms:", query.platforms, ", appId:", query.appId);
+	var timeout = req.param('timeout') || this.config.timeout || PGB_TIMEOUT;
 	async.series([
 		this.prepare.bind(this, req, res),
 		this.store.bind(this, req, res),
@@ -363,8 +371,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		async.waterfall([
 			client.auth.bind(this, {
 				token: req.token,
-				proxy: this.config.proxyUrl,
-				timeout: this.config.timeout || PGB_TIMEOUT
+				proxy: this.config.proxyUrl
 			}),
 			_uploadApp.bind(this),
 			_success.bind(this)
@@ -381,7 +388,8 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 				form: {
 					data: appData,
 					file: req.zip.path
-				}
+				},
+				timeout: timeout*3
 			};
 			if (appData.appId) {
 				log.http("build#_upload#_uploadApp()", "PUT /apps/" + appData.appId + " (title='" + appData.title + "')");
