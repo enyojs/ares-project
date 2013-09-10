@@ -298,9 +298,7 @@ enyo.kind({
 	setProjectConfig: function (config) {
 		this.trace("Project config:", config);
 
-		config.enabled = true;
-		this.log(this.config);
-		//this.$.appIdSelector.setProjectTitle(config.title);
+		config.enabled = true;	
 		this.$.appIdSelector.setSelectedAppId(config.appId || '');		
 		config.targets = config.targets || {};
 
@@ -505,8 +503,6 @@ enyo.kind({
 		this.$.drawer.setOpen(this.fold);
 		this.fold = !this.fold;
 	}
-
-
 });
 
 
@@ -516,7 +512,6 @@ enyo.kind({
 	classes: "ares-project-propertie-application-panel",
 	debug: false,
 	published: {
-		//projectTitle: undefined,
 		userData: undefined,
 		selectedAppId: undefined,
 		selectedTitle: undefined
