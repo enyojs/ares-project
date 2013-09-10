@@ -346,7 +346,7 @@ enyo.kind({
 	prepareDesignerUpdate: function() {
 		if (this.index !== null) {
 			// Prepare the data for the code editor
-			var event = {contents: []};
+			var event = {docHasChanged: true, contents: []};
 			for(var i = 0 ; i < this.kinds.length ; i++) {
 				event.contents[i] = (i === this.index) ? enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components)) : null;
 			}

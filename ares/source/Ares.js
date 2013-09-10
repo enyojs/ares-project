@@ -325,7 +325,7 @@ enyo.kind({
 	},
 	//* A design change happened in Deimos - push change to Phobos
 	designerUpdate: function(inSender, inEvent) {
-		if (inEvent) {
+		if (inEvent && inEvent.docHasChanged) {
 			this.componentsRegistry.phobos.updateComponents(inSender, inEvent);
 		}
 	},
