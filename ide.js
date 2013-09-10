@@ -494,6 +494,7 @@ function proxyServices(req, res, next) {
 		res.writeHead(cres.statusCode);
 		cres.pipe(res);
 	}).on('error', function(e) {
+		log.error('proxyServices()', "options:", options);
 		next(e);
 	});
 	req.pipe(creq);
