@@ -4,7 +4,6 @@ enyo.kind({
 	classes: "enyo-unselectable onyx",
 	debug: false,
 	published: {
-		edited: false,
 		projectData: null		// All the project data shared mainly between phobos and deimos
 	},
 	components: [
@@ -141,7 +140,6 @@ enyo.kind({
 		
 		this.owner.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.owner.$.kindPicker.render();
-		this.setEdited(false);
 	},
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
@@ -348,7 +346,7 @@ enyo.kind({
 	prepareDesignerUpdate: function() {
 		if (this.index !== null) {
 			// Prepare the data for the code editor
-			var event = {docHasChanged: this.getEdited(), contents: []};
+			var event = {contents: []};
 			for(var i = 0 ; i < this.kinds.length ; i++) {
 				event.contents[i] = (i === this.index) ? enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components)) : null;
 			}
@@ -361,7 +359,6 @@ enyo.kind({
 		var event = this.prepareDesignerUpdate();
 		this.setProjectData(null);
 		this.doCloseDesigner(event);
-		this.setEdited(false);
 		
 		return true;
 	},
@@ -370,7 +367,6 @@ enyo.kind({
 		var components = enyo.json.codify.from(inEvent.content);
 		
 		this.refreshComponentView(components);
-		this.setEdited(true);
 		
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
 		this.kinds[this.index].components = this.cleanUpComponents(components, true);
@@ -651,9 +647,9 @@ enyo.kind({
 		
 		return cleanComponent;
 	},
-	saveComplete: function() {
-		this.setEdited(false);
-	},
+	/*saveComplete: function() {
+		this.log("SAVE COMPLETE DEIMOS");
+	},*/
 	undoAction: function(inSender, inEvent) {
 		this.doUndo();
 	},
@@ -685,6 +681,14 @@ enyo.kind({
 		// Note: This doesn't look like it does anything, because we send updates to the document to Ares immediately, so a doc is 
 		// only "edited" for a few ms. I left this in here because I was tracking down some cases where the state stayed "edited"
 		if (this.edited) {
+			this.owner.$.docLabel.setContent("Deimos *");
+		} else {
+			this.owner.$.docLabel.setContent("Deimos");
+		}
+		this.owner.$.toolbar.resized();
+	},
+	fileEdited: function(edited) {
+		if (edited) {
 			this.owner.$.docLabel.setContent("Deimos *");
 		} else {
 			this.owner.$.docLabel.setContent("Deimos");

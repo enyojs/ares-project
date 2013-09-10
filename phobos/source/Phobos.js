@@ -34,7 +34,8 @@ enyo.kind({
 		onUpdate: "",
 		onRegisterMe: "",
 		onDisplayPreview: "",
-		onSwitchFile: ""
+		onSwitchFile: "",
+		onFileEdited: " "
 	},
 	handlers: {
 		onCss: "newcssAction",
@@ -79,6 +80,7 @@ enyo.kind({
 		this.hideWaitPopup();
 		if (inDocData) {
 			inDocData.setEdited(false);		// TODO: The user may have switched to another file
+			this.doFileEdited();
 		}
 		if (this.docData === inDocData) {
 			this.reparseAction();
@@ -188,7 +190,6 @@ enyo.kind({
 				this.$.ace.setSession(aceSession);
 			} else {
 				aceSession = this.$.ace.createSession(this.docData.getData(), mode);
-				this.docData.setData(null);			// We no longer need this data as it is now handled by the ACE edit session
 				this.$.ace.setSession(aceSession);
 				this.docData.setAceSession(aceSession);
 			}
@@ -675,7 +676,6 @@ enyo.kind({
 		 * NB: reparseAction() is invoked by insertMissingHandlers()
 		 */
 		this.insertMissingHandlers();
-		this.docData.setEdited(true);
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
@@ -759,7 +759,12 @@ enyo.kind({
 		this.saveNextDocument();
 	},
 	docChanged: function(inSender, inEvent) {
-		this.docData.setEdited(true);
+		if(!this.docData.getEdited()){
+			if(this.docData.getAceSession().getValue().localeCompare(this.docData.getData())!==0){
+				this.docData.setEdited(true);
+				this.doFileEdited();
+			}	
+		}
 
 		this.trace("data:", enyo.json.stringify(inEvent.data));
 

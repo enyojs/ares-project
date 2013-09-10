@@ -81,7 +81,8 @@ enyo.kind({
 		onRegisterMe : "_registerComponent",
 		onMovePanel : "_movePanel",
 		onSavePreviewAction: "_saveBeforePreview",
-		onDisplayPreview : "_displayPreview"
+		onDisplayPreview : "_displayPreview",
+		onFileEdited:"_fileEdited"
 
 	},
 	projectListIndex: 0,
@@ -187,8 +188,6 @@ enyo.kind({
 				var fileDataId = Ares.Workspace.files.computeId(inEvent.file);
 				var fileData = Ares.Workspace.files.get(fileDataId);
 				self.componentsRegistry.phobos.saveComplete(fileData);
-				// FIXME: ENYO-2976
-				self.componentsRegistry.deimos.saveComplete();
 			}
 		});
 	},
@@ -326,7 +325,7 @@ enyo.kind({
 	},
 	//* A design change happened in Deimos - push change to Phobos
 	designerUpdate: function(inSender, inEvent) {
-		if (inEvent && inEvent.docHasChanged) {
+		if (inEvent) {
 			this.componentsRegistry.phobos.updateComponents(inSender, inEvent);
 		}
 	},
@@ -429,6 +428,7 @@ enyo.kind({
 			this.componentsRegistry.phobos.designerAction();
 			this.componentsRegistry.codeEditor.manageControls(true);
 		}
+		this._fileEdited();
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
 	},
 	// FIXME: This trampoline function probably needs some refactoring
@@ -596,6 +596,9 @@ enyo.kind({
 	_displayPreview: function(inSender, inEvent){
 		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
 		this.componentsRegistry.projectView.previewAction(inSender,{project:project});
+	},
+	_fileEdited: function() {
+		this.componentsRegistry.deimos.fileEdited(this.activeDocument.getEdited());
 	},
 	/**
 	 * Event handler for ares components registry
