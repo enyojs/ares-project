@@ -21,4 +21,5 @@
   * made of `components_32_32.png` & pencil.png
 * new_kind.png
   * made of `splach_ic_editnow.png`
-
+* `project_view_preview.png`
+  * made from [http://openclipart.org/image/800px/svg_to_png/38917/Print_Preview.png](http://openclipart.org/image/800px/svg_to_png/38917/Print_Preview.png)
