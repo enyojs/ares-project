@@ -945,6 +945,31 @@ enyo.kind({
 			xw.writeEndElement();
 		};
 
+		/**
+		 * Create an XML row in the file config.xml, this row describe a depence to 
+		 * a hosted plugin, and may also contain sub-elements that contain a name and a value
+		 * of a parameter for the plugin.
+		 * 
+		 * @param  {Object} pluginList contains the plugins object defined in "project.json".
+		 * 
+		 */
+		var createPluginXMLRow = function (plugin) {
+			xw.writeStartElement('gap:plugin');
+				xw.writeAttributeString('name', plugin.name);
+				xw.writeAttributeString('version', plugin.version);
+				enyo.forEach(plugin.parameters && enyo.keys(plugin.parameters), function(parameter) {
+					xw.writeStartElement("param");
+						xw.writeAttributeString('name', plugin.parameters[parameter].name);
+						xw.writeAttributeString('value', plugin.parameters[parameter].value);
+					xw.writeEndElement();
+				}, this);	
+					
+
+				xw.writeEndElement();
+		};
+
+
+
 		// See http://flesler.blogspot.fr/2008/03/xmlwriter-for-javascript.html
 
 		var str, xw = new XMLWriter('UTF-8');
@@ -995,21 +1020,6 @@ enyo.kind({
 			xw.writeEndElement();	// gap:platforms
 		}
 
-		// plugins
-		if (typeof phonegap.plugins === 'object') {
-			for (var pluginName in phonegap.plugins) {
-				xw.writeStartElement('plugin', 'gap');
-				xw.writeAttributeString('name', pluginName);
-				var plugin = phonegap.plugins[pluginName];
-				if (typeof plugin === 'object') {
-					for (var attr in plugin) {
-						xw.writeAttributeString(attr, plugin[attr]);
-					}
-				}
-				xw.writeEndElement(); // gap:plugin
-			}
-		}
-
 		xw.writeComment("Features");
 
 		var featureUrl = "http://api.phonegap.com/1.0/";
@@ -1054,6 +1064,11 @@ enyo.kind({
 			xw.writeAttributeString('value', phonegap.preferences[preference]);
 			xw.writeEndElement(); // preference			
 	
+		}, this);
+
+		xw.writeComment("Plugins");		
+		enyo.forEach(phonegap.plugins && enyo.keys(phonegap.plugins), function(pluginName) {
+			createPluginXMLRow.call(self, phonegap.plugins[pluginName]);		
 		}, this);
 
 		xw.writeComment("Define app icon for each platform");
