@@ -169,7 +169,7 @@ enyo.kind({
 								{kind: "Phonegap.ProjectProperties.AppId", name: "appIdSelector"}							
 							]
 						}, 
-						{name: "BuildOptionPanel", kind: "FittableRows"},
+						{name: "BuildOptionPanel", kind: "FittableRows", style: "margin-top: 50px;"},
 						{name: "targetsRows", kind: "FittableRows", classes: "ares-project-properties-targetsRows-display"}
 						
 					]
@@ -685,10 +685,18 @@ enyo.kind({
 						{ name: "winphoneButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "winphone" }							
 					]
 				},
-			
-				{name: "statusMessage", onclick: "hideStatusMessage", classes: "project-properties-status-message"},
-				{name: "downloadLink", content: "ddl link", tag: "a", shown: false}
-					
+				{
+					name: "messageContainer",
+					kind: "onyx.Drawer",
+					classes: "ares-project-properties-status-message-container",
+					showing: false,
+					components: [
+						{name: "hideStatusContainer", kind: "onyx.IconButton", src: "$project-view/assets/images/close-button-16x16.png", classes: "ares-project-properties-hide-status-button", ontap:"hideMessageContainer"},
+						{name: "statusMessage"},
+						{name: "downloadLink", content: "ddl link", tag: "a", shown: false, classes: "ares-project-properties-dl-link"}
+					]
+				}
+									
 			]
 		}
 	],
@@ -719,7 +727,7 @@ enyo.kind({
 	 * @private	 
 	 */
 	buildStatusDataChanged: function(){
-
+		this.hideMessageContainer();
 		this.$.downloadLink.hide();
 		for(var key in this.$){
 			// Get only the Enyo control that have the "platform" attribute 
@@ -739,6 +747,10 @@ enyo.kind({
 			"winphone": "xap",
 			"blackberry": "jad"
 		};
+
+		this.$.messageContainer.show();
+
+
 		if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "complete") {
 			this.$.statusMessage.setContent("Download link: ");
 			
@@ -775,18 +787,13 @@ enyo.kind({
 				}		
 			}
 		}
-		
+	return true; //stop the propagation of the event
 
 	},
 
-	/**
-	 * Hide the status message.
-	 * 
-	 * @private
-	 */
-	hideStatusMessage: function(){
-		this.$.downloadLink.hide();
-		this.$.statusMessage.setContent("");
+	/**@private*/
+	hideMessageContainer: function() {
+		this.$.messageContainer.hide();
 	},
 
 	/**@private*/
