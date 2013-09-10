@@ -243,7 +243,10 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 	
 	/* FIXME: broken streams on node-0.8.x
 	async.waterfall([
-		client.auth.bind(client, { token: req.token }),
+		client.auth.bind(client, {
+			token: req.token,
+			proxy: this.config.proxyUrl
+		}),
 		(function _pipeFormData(api, next) {
 			log.http("BdPhoneGap#downloadApp#_pipeFormData()", "GET", url);
 			var stream = api.get(url, { timeout: timeout });
