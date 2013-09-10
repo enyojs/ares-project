@@ -46,6 +46,7 @@ enyo.kind({
 		projectData: null
 	},
 	editedDocs:"",
+	injected: false,
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
@@ -675,6 +676,7 @@ enyo.kind({
 	},
 	// called when designer has modified the components
 	updateComponents: function(inSender, inEvent) {
+		this.injected = true;
 		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
 			if (inEvent.contents[i]) {
 				// Insert the new version of components (replace components block, or insert at end)
@@ -698,11 +700,17 @@ enyo.kind({
 				this.$.ace.replaceRange(range, comps);
 			}
 		}
+		this.injected = false;
 		/*
 		 * Insert the missing handlers
 		 * NB: reparseAction() is invoked by insertMissingHandlers()
 		 */
 		this.insertMissingHandlers();
+		//file is edited if only we have a difference between stored file data and editor value
+		if(this.getEditorContent().localeCompare(this.docData.getData())!==0){
+			this.docData.setEdited(true);
+			this.doFileEdited();
+		}
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
@@ -786,11 +794,10 @@ enyo.kind({
 		this.saveNextDocument();
 	},
 	docChanged: function(inSender, inEvent) {
-		if(!this.docData.getEdited()){
-			if(this.docData.getAceSession().getValue().localeCompare(this.docData.getData())!==0){
-				this.docData.setEdited(true);
-				this.doFileEdited();
-			}	
+		//this.injected === false then modification coming from user
+		if(!this.injected && !this.docData.getEdited()){
+			this.docData.setEdited(true);
+			this.doFileEdited();
 		}
 
 		this.trace("data:", enyo.json.stringify(inEvent.data));
