@@ -71,12 +71,12 @@ function BdBase(config, next) {
 		var domain = createDomain();
 
 		domain.on('error', function(err) {
-			next(err);
+			setImmediate(next, err);
 			domain.dispose();
 		});
 
 		domain.enter();
-		next();
+		setImmediate(next);
 	});
 
 	// CORS -- Cross-Origin Resources Sharing
@@ -89,16 +89,16 @@ function BdBase(config, next) {
 			res.status(200).end();
 		}
 		else {
-			next();
+			setImmediate(next);
 		}
 	});
 
 	// Authentication
 	this.app.use(function(req, res, next) {
 		if (req.connection.remoteAddress !== "127.0.0.1") {
-			next(new Error("Access denied from IP address "+req.connection.remoteAddress));
+			setImmediate(next, new Error("Access denied from IP address "+req.connection.remoteAddress));
 		} else {
-			next();
+			setImmediate(next);
 		}
 	});
 
@@ -137,7 +137,7 @@ function BdBase(config, next) {
 	// is bound
 	this.server.listen(config.port, "127.0.0.1", null /*backlog*/, (function() {
 		var tcpAddr = this.server.address();
-		return next(null, {
+		setImmediate(next, null, {
 			protocol: 'http',
 			host: tcpAddr.address,
 			port: tcpAddr.port,
@@ -165,7 +165,7 @@ BdBase.prototype.configure = function(config, next) {
 	log.silly("configure()", "inc config:", config);
 	util._extend(this.config, config);
 	log.verbose("configure()", "new config:", this.config);
-	next();
+	setImmediate(next);
 };
 
 /**
@@ -245,12 +245,12 @@ BdBase.prototype.prepare = function(req, res, next) {
  */
 BdBase.prototype.store = function(req, res, next) {
 	if (!req.is('multipart/form-data')) {
-		next(new HttpError("Not a multipart request", 415 /*Unsupported Media Type*/));
+		setImmediate(next, new HttpError("Not a multipart request", 415 /*Unsupported Media Type*/));
 		return;
 	}
 	
 	if (!req.files.file) {
-		next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
+		setImmediate(next, new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
 		return;
 	}
 	
@@ -357,7 +357,7 @@ BdBase.prototype.minify = function(req, res, next) {
 			if (err) {
 				log.verbose("ignoring err:", err.toString());
 			}
-			next();
+			setImmediate(next);
 		});
 	}
 
@@ -389,10 +389,10 @@ BdBase.prototype.minify = function(req, res, next) {
 		});
 		child.on('exit', function(code /*, signal*/) {
 			if (code !== 0) {
-				next(new HttpError(child.errMsg || ("child-process failed: '"+ child.toString() + "'")));
+				setImmediate(next, new HttpError(child.errMsg || ("child-process failed: '"+ child.toString() + "'")));
 			} else {
 				log.info("minify(): completed");
-				next();
+				setImmediate(next);
 			}
 		});
 	}
@@ -403,7 +403,7 @@ BdBase.prototype.minify = function(req, res, next) {
  */
 BdBase.prototype.build = function(req, res, next) {
 	log.verbose("build()");
-	next(new HttpError("Not implemented", 500));
+	setImmediate(next, new HttpError("Not implemented", 500));
 	/*
 	// Example
 	async.series([
@@ -415,7 +415,7 @@ BdBase.prototype.build = function(req, res, next) {
 	], function (err, results) {
 		if (err) {
 			// run express's next() : the errorHandler (which calls cleanup)
-			next(err);
+			setImmediate(next, err);
 		}
 		// we do not invoke error-less next() here
 		// because that would try to return 200 with
@@ -440,7 +440,7 @@ BdBase.prototype.archive = function(req, res, next) {
 	], function (err /*, results*/) {
 		if (err) {
 			// run express's next() : the errorHandler (which calls cleanup)
-			next(err);
+			setImmediate(next, err);
 		}
 		// we do not invoke error-less next() here
 		// because that would try to return 200 with
@@ -460,16 +460,16 @@ BdBase.prototype.zip = function(req, res, next) {
 	req.zip.stream.pipe(fs.createWriteStream(req.zip.path));
 	_walk.bind(this)(req.appDir.zipRoot, "" /*prefix*/, function(err) {
 		if (err) {
-			next(err);
+			setImmediate(next, err);
 			return;
 		}
 		try {
 			req.zip.stream.finalize(function(written){
 				log.verbose("zip()", "finished:", req.zip.path, "(" + written + " bytes)");
-				next();
+				setImmediate(next);
 			});
 		} catch(e) {
-			next(e);
+			setImmediate(next, e);
 		}
 	});
 	
@@ -520,7 +520,7 @@ BdBase.prototype.zip = function(req, res, next) {
 BdBase.prototype.returnZip = function(req, res, next) {
 	res.status(200).sendfile(req.zip.path);
 	delete req.zip;
-	next();
+	setImmediate(next);
 };
 
 /**
@@ -535,7 +535,7 @@ BdBase.prototype.returnBody = function(req, res, next) {
 	res.status(200).send(res.body);
 	delete res.body;
 	delete res.contentType;
-	next();
+	setImmediate(next);
 };
 
 /**
@@ -548,7 +548,7 @@ BdBase.prototype.returnBody = function(req, res, next) {
  */
 BdBase.prototype.returnFormData = function(parts, res, next) {
 	if (!Array.isArray(parts) || parts.length < 1) {
-		next(new Error("Invalid parameters: cannot return a multipart/form-data of nothing"));
+		setImmediate(next, new Error("Invalid parameters: cannot return a multipart/form-data of nothing"));
 		return;
 	}
 	log.verbose("BdBase#returnFormData()", parts.length, "parts:");
@@ -640,11 +640,11 @@ BdBase.prototype.cleanup = function(req, res, next) {
 		rimraf(req.appDir.root, function(err) {
 			log.verbose("cleanup()", "removed " + dir);
 			delete req.appDir;
-			next(err);
+			setImmediate(next, err);
 		});
 	} else {
 		log.verbose("cleanup()", "skipping removal of " + dir);
-		next();
+		setImmediate(next);
 	}
 };
 

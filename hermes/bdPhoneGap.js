@@ -39,7 +39,7 @@ function BdPhoneGap(config, next) {
 		}
 	} catch(e) {
 		// Build a more usable exception
-		next(new Error("Not a suitable Enyo: it does not contain a usable 'tools/deploy.js'"));
+		setImmediate(next, new Error("Not a suitable Enyo: it does not contain a usable 'tools/deploy.js'"));
 	}
 
 	BdBase.call(this, config, next);
@@ -61,9 +61,9 @@ BdPhoneGap.prototype.use = function() {
 		var token = req.cookies.token || req.param('token');
 		if (token) {
 			req.token = token;
-			next();
+			setImmediate(next);
 		} else {
-			next(new HttpError('Missing authentication token', 401));
+			setImmediate(next, new HttpError('Missing authentication token', 401));
 		}
 	}
 };
@@ -141,19 +141,19 @@ BdPhoneGap.prototype.getToken = function(req, res, next) {
 			if (err1 || statusCode != 200) {
 				var msg = (err1 && err1.toString()) || http.STATUS_CODES[statusCode] || "Error";
 				log.warn("getToken()", msg);
-				next(new HttpError(msg, statusCode));
+				setImmediate(next, new HttpError(msg, statusCode));
 			} else {
 				log.verbose("getToken()", "response body:", body);
 				var data = JSON.parse(body);
 				if (data.error) {
-					next(new HttpError(data.error, 401));
+					setImmediate(next, new HttpError(data.error, 401));
 				} else {
 					this.setCookie(res, 'token', data.token);
 					res.status(200).send(data).end();
 				}
 			}
 		} catch(err0) {
-			next(err0);
+			setImmediate(next, err0);
 		}
 	}).bind(this));
 };
@@ -165,14 +165,14 @@ BdPhoneGap.prototype.getUserData = function(req, res, next) {
 		proxy: this.config.proxyUrl
 	}, function(err1, api) {
 		if (err1) {
-			next(err1);
+			setImmediate(next, err1);
 		} else {
 			log.http("getUserData()", "GET /apps/me");
 			api.get('/me', {
 				timeout: timeout
 			}, function(err2, userData) {
 				if (err2) {
-					next(err2);
+					setImmediate(next, err2);
 				} else {
 					log.info("getUserData()", "userData:", userData);
 					res.status(200).send({user: userData}).end();
@@ -189,7 +189,7 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
 		proxy: this.config.proxyUrl
 	}, function(err1, api) {
 		if (err1) {
-			next(err1);
+			setImmediate(next, err1);
 		} else {
 			var appId = req.params.appId;
 			log.http("getAppStatus()", "GET /apps/" + appId);					
@@ -197,7 +197,7 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
 				timeout: timeout
 			}, function(err2, userData) {
 				if (err2) {
-					next(err2);
+					setImmediate(next, err2);
 				} else {
 					log.info("getAppStatus()", "appStatus:", userData);
 					res.status(200).send({user: userData}).end();
@@ -255,7 +255,7 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 		}).bind(this)
 	], function(err) {
 		if (err) {
-			next(err);
+			setImmediate(next, err);
 			return;
 		}
 		log.verbose("downloadApp()", "completed");
@@ -270,7 +270,7 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 			token: req.token,
 			proxy: this.config.proxyUrl
 		}),
-		(function _fetchPackage(api, next) {
+		function _fetchPackage(api, next) {
 			log.http("downloadApp#_fetchPackage()", "GET", url);
 			var os = fs.createWriteStream(tempFileName);
 			// FIXME: node-0.8 has no 'finish' event...
@@ -290,7 +290,7 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 		}).bind(this)
 	], function(err) {
 		if (err) {
-			next(err);
+			setImmediate(next, err);
 			return;
 		}
 		// FIXME: this is never called, as neither
@@ -319,7 +319,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 	], function (err) {
 		if (err) {
 			// run express's next() : the errorHandler (which calls cleanup)
-			next(err);
+			setImmediate(next, err);
 		}
 		// we do not invoke error-less next() here
 		// because that would try to return 200 with
@@ -330,11 +330,11 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 	function _parse(next) {
 		// check mandatory parameters
 		if (!req.token) {
-			next(new HttpError("Missing account token", 401));
+			setImmediate(next, new HttpError("Missing account token", 401));
 			return;
 		}
 		if (!query.title) {
-			next(new HttpError("Missing application: title", 400));
+			setImmediate(next, new HttpError("Missing application: title", 400));
 			return;
 		}
 		// pass other query parameters as 1st-level
@@ -353,7 +353,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		}
 		//WARNING: enabling this trace shows-up the signing keys passwords
 		log.silly("build#_parse(): appData:", appData);
-		next();
+		setImmediate(next);
 	}
 
 	function _postMinify(req, next) {
@@ -361,13 +361,12 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		if (req.appDir.zipRoot !== req.appDir.source) {
 			copyFile(path.join(req.appDir.source, "config.xml"), path.join(req.appDir.zipRoot, "config.xml"), next);
 		} else {
-			next();
+			setImmediate(next);
 		}
 	}
 
 	function _upload(next) {
 		log.info("build#_upload()");
-
 		async.waterfall([
 			client.auth.bind(this, {
 				token: req.token,
@@ -379,7 +378,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 			if (err) {
 				_fail(err);
 			} else {
-				next();
+				setImmediate(next);
 			}
 		});
 
@@ -413,7 +412,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 					return;
 				}
 				res.body = data;
-				next();
+				setImmediate(next);
 			} catch(e) {
 				_fail(e);
 			}
@@ -427,7 +426,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 				msg = err.message;
 			}
 			log.warn("build#_upload#_fail()", "error:", msg);
-			next(new HttpError(msg, 400 /*Bad Request*/));
+			setImmediate(next, new HttpError(msg, 400 /*Bad Request*/));
 		}
 	}
 };
