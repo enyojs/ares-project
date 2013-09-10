@@ -954,6 +954,31 @@ enyo.kind({
 			xw.writeEndElement();
 		};
 
+		/**
+		 * Create an XML row in the file config.xml, this row describe a depence to 
+		 * a hosted plugin, and may also contain sub-elements that contain a name and a value
+		 * of a parameter for the plugin.
+		 * 
+		 * @param  {Object} pluginList contains the plugins object defined in "project.json".
+		 * 
+		 */
+		var createPluginXMLRow = function (plugin) {
+			xw.writeStartElement('gap:plugin');
+				xw.writeAttributeString('name', plugin.name);
+				xw.writeAttributeString('version', plugin.version);
+				enyo.forEach(plugin.parameters && enyo.keys(plugin.parameters), function(parameter) {
+					xw.writeStartElement("param");
+						xw.writeAttributeString('name', plugin.parameters[parameter].name);
+						xw.writeAttributeString('value', plugin.parameters[parameter].value);
+					xw.writeEndElement();
+				}, this);	
+					
+
+				xw.writeEndElement();
+		};
+
+
+
 		// See http://flesler.blogspot.fr/2008/03/xmlwriter-for-javascript.html
 
 		var str, xw = new XMLWriter('UTF-8');
@@ -1004,37 +1029,41 @@ enyo.kind({
 			xw.writeEndElement();	// gap:platforms
 		}
 
-		// plugins
-		if (typeof phonegap.plugins === 'object') {
-			for (var pluginName in phonegap.plugins) {
-				xw.writeStartElement('plugin', 'gap');
-				xw.writeAttributeString('name', pluginName);
-				var plugin = phonegap.plugins[pluginName];
-				if (typeof plugin === 'object') {
-					for (var attr in plugin) {
-						xw.writeAttributeString(attr, plugin[attr]);
-					}
-				}
-				xw.writeEndElement(); // gap:plugin
-			}
-		}
-
-		// UI should be helpful to define the features so that
-		// the URL's are correct... I am not sure whether it
-		// is possible to have them enforced by a JSON schema,
-		// unless we hard-code a discrete list of URL's...
-		// 
-		var featureUrl = "http://api.phonegap.com/1.0/";
 		xw.writeComment("Features");
-		enyo.forEach(phonegap.features && enyo.keys(phonegap.features), function(feature) {
-							
-			if (phonegap.features[feature]){
-				xw.writeStartElement('feature');
-				xw.writeAttributeString('name', featureUrl + feature);
-				xw.writeEndElement(); // feature
-			}				
-	
-		}, this);
+
+		var featureUrl = "http://api.phonegap.com/1.0/";
+		
+		// Check if all the permissions are disabled.
+		// If it's the case this function return true
+		var checkNoPermissions = function () {
+			var noPermissions = true;
+			
+			for (var key in phonegap.features){
+				if (phonegap.features[key]){
+					noPermissions = false;
+				}
+			}			
+			return noPermissions;
+		};		
+
+		// If all the permissions are disabled, the tag generated is 
+		// <preference name="permissions" value="none" />
+		// Else the tag <feature name= <featureUrl> >is generated
+		if(checkNoPermissions.call(this)) {
+			xw.writeStartElement('preference');
+				xw.writeAttributeString('name', 'permissions');
+				xw.writeAttributeString('value', 'none');
+				xw.writeEndElement();
+		} else {
+
+			enyo.forEach(phonegap.features && enyo.keys(phonegap.features), function(feature) {
+				if (phonegap.features[feature]){
+					xw.writeStartElement('feature');
+					xw.writeAttributeString('name', featureUrl + feature);
+					xw.writeEndElement();
+				}			
+			}, this);
+		}	
 
 		xw.writeComment("Preferences");
 		enyo.forEach(phonegap.preferences && enyo.keys(phonegap.preferences), function(preference) {
@@ -1044,6 +1073,11 @@ enyo.kind({
 			xw.writeAttributeString('value', phonegap.preferences[preference]);
 			xw.writeEndElement(); // preference			
 	
+		}, this);
+
+		xw.writeComment("Plugins");		
+		enyo.forEach(phonegap.plugins && enyo.keys(phonegap.plugins), function(pluginName) {
+			createPluginXMLRow.call(self, phonegap.plugins[pluginName]);		
 		}, this);
 
 		xw.writeComment("Define app icon for each platform");

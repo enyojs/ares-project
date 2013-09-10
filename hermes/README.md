@@ -2,11 +2,11 @@
 
 Hermes offers several services not available in a Web Browser through one (or several) Node.js processes:
 
-* [File-system services](#filesystem-services) (Local, [Dropbox](#dropbox-filesystem-service))
+* [Filesystem services](#filesystem-services) ([Local](#local-filesystem-service), [Dropbox](#dropbox-filesystem-service))
 * [Project templates services](#project-template-services)
 * [Build Services](#build-services) ([PhoneGap Build](#phonegap-build-service), …)
 
-## [Security](id:security)
+## Security
 
 ### Authentication
 
@@ -30,9 +30,9 @@ A user can be authentified in a Phonegap account in two possible ways :
 In order to run the Phonegap build service from Ares, the authentication must be done with the Adobe ID.  So if the user has registered on the Phonegap account using Github account, these steps must be followed:
  
 1. Click on the upper right profile icon and select *Edit account*
-1. In the tab *Account details* click on *Connect an Adobe ID*
-1. If you have already an Adobe account, just use it to sign in otherwise, Click on the button *Create Adobe ID* to register for a new Adobe account.
-1. Now you can use the Adobe ID to connect to the Phonegap account in Ares.
+2. In the tab *Account details* click on *Connect an Adobe ID*
+3. If you have already an Adobe account, just use it to sign in otherwise, Click on the button *Create Adobe ID* to register for a new Adobe account.
+4. Now you can use the Adobe ID to connect to the Phonegap account in Ares.
 
 **NOTE**:
  
@@ -40,8 +40,8 @@ In order to run the Phonegap build service from Ares, the authentication must be
 - A user can unlink his Phonegap account from the Github account by following these steps: 
 
 	1. The user must be authenticated in Github
-	1. Open this page https://github.com/settings/applications 
-	1. In the section *Authorized applications* click on *Revoke* button of the row *Phonegap:Build*.
+	2. Open this page https://github.com/settings/applications 
+	3. In the section *Authorized applications* click on *Revoke* button of the row *Phonegap:Build*.
 
 ## Filesystem services
 
@@ -156,7 +156,7 @@ To stop on the first failing case:
 
 For more detailled instructions, refer to the [Mocha home page](http://visionmedia.github.com/mocha/).
 
-### [Local](id:local-filesystem-service)
+### Local Filesystem Service
 
 The `fsLocal` service is simply serves your local machine's filesystem to the browser, which has otherwise no access outside the web sandbox (or exclusivelly via direct user interaction).
 
@@ -171,7 +171,7 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Me
 	],
 	[...]
 
-### [Dropbox](id:dropbox-filesystem-service)
+### Dropbox Filesystem Service
 
 Ares comes with an Hermes service using your Dropbox account as a storage service.    Enable this service in the `ide.json` before starting the IDE server:
 
@@ -219,7 +219,7 @@ Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to th
 			},
 			[…]
 
-## [Project template service](id:project-template-services)
+## Project template services
 
 The service **genZip** allows to intanciate new Ares project from project templates such as [Enyo Bootplate](https://github.com/enyojs/enyo/wiki/Bootplate) or any customer specific project templates.
 
@@ -228,9 +228,9 @@ These project templates can be defined in:
 * `ide.json` located in the `ares-project` installation directory
 * `ide-plugin.json` located in _each_ Ares plugin installation directory
 
-See [Project template configuration](#project-template-config) and [Merging Ares plugin configuration](../README.md#merging-configuration) for more information.
+See [Project template configuration](#project-template-configuration) and [Merging Ares plugin configuration](../README.md#merging-configuration) for more information.
 
-### [Project template configuration](id:project-template-config)
+### Project template configuration
 
 The property `sources:` of the service **genZip** lists the template definitions that are available at project creation time.  It is defined in the `ide.json` of ares-project.
 
@@ -281,7 +281,7 @@ Ares plugins can add or modify this list of templates, from their own `ide-plugi
 
 In the example above, `{ "id": "bootplate" }` will remove the entry defined in the main `ide.json` and `{ "id": "bootplate-nightly" ... } will add a new template.
 
-### [Project template definition](id:project-template-definition)
+### Project template definition
 
 A project template definition (defined by the property `url` in `projectTemplateRepositories`) must respect the json schema [com.enyojs.ares.project.templates.schema.json](../assets/schema/com.enyojs.ares.project.templates.schema.json).
 
@@ -360,7 +360,7 @@ The default `<pathname>` value is `/genzip`.  Its value can be changed using the
 		* It's up to the caller to extract and base64 decode the files to create a new project.  
 		In Ares, this is achieved by forwarding the FormData to Hermes filesystem service via a PUT method.
 
-## [Build services](id:build-services)
+## Build services
 
 ### Ares IDE - Javascript API
 
@@ -397,8 +397,7 @@ The following resources
 			* `text/plain` build has failed (see HTTP response code) or is asynchronous
 			* `multipart/form-data` generated application package is the first returned part of the multipart response
 			
-
-### [Archive build service](id:archive-build-service)
+### Archive build service
 
 This is the `arZip.js` service.  It takes 2 arguments:
 
@@ -429,7 +428,7 @@ The generated file is expected to look like to below:
 	 --------                   -------
 	     4068                   2 files
 
-### [PhoneGap build service](id:phonegap-build-service)
+### PhoneGap build service
 
 
 Ares includes the ability to package a mobile Enyo application using [PhoneGap Build](https://build.phonegap.com/).  You must have a properly setup account (with signing keys & distribution certificates) before being able to use Ares to build applications using PhoneGap Build.
@@ -452,6 +451,21 @@ The Ares PhoneGap build service does not need any configuration but the HTTP/HTT
 ```
 
 **NOTE:** Ares does not currently work behind a password-protected proxy.  Should you need this feature, please report it via JIRA or on our user's forum.
+
+#### PhoneGap Build Plugins
+
+Ares does not have yet a UI to define which external plugins are to be included in the built application. However there is a workaround to integrate external plugins by editing the file `config.xml`  associated with the project:  Select _Project_ > _Edit_ > _PhoneGap Build_ > _Build Options_ and uncheck the box _Generate config.xml file when building.
+
+Here is an exemple of external plugin definition: 
+
+```xml
+	<gap:plugin name="com.phonegap.plugins.example">
+	    <param name="APIKey" value="12345678" />
+	    <param name="APISecret" value="12345678" />
+	</gap:plugin>
+```
+
+**References:** Here are the online PhoneGap Build documentation on [How to use plugins from your application](https://build.phonegap.com/docs/plugins-using) and [the list of available PhoneGap Build plugins & their respective description](https://build.phonegap.com/plugins).
 
 #### Implementation
 
