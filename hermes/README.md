@@ -43,20 +43,6 @@ In order to run the Phonegap build service from Ares, the authentication must be
 	2. Open this page https://github.com/settings/applications 
 	3. In the section *Authorized applications* click on *Revoke* button of the row *Phonegap:Build*.
 
-### Plugin integration
-In the current release, Ares don't have a UI to define external plugins to be included in the built application. However there is a workaround to integrate external plugins by editing the file *config.xml*  associated to the project : 
-
-In this case, the auto-generation of the *config.xml* must be disabled by unchecking the checkbox *Generate config.xml file when building*" in  **Project-> Edit -> Phonegap Build ->Build option**. 
-
-Here is an exemple of external plugin definition: 
-
-```xml
-	<gap:plugin name="com.phonegap.plugins.example">
-	    <param name="APIKey" value="12345678" />
-	    <param name="APISecret" value="12345678" />
-	</gap:plugin>
-```
-
 ## Filesystem services
 
 ### Protocol
@@ -465,6 +451,21 @@ The Ares PhoneGap build service does not need any configuration but the HTTP/HTT
 ```
 
 **NOTE:** Ares does not currently work behind a password-protected proxy.  Should you need this feature, please report it via JIRA or on our user's forum.
+
+#### PhoneGap Build Plugins
+
+Ares does not have yet a UI to define which external plugins are to be included in the built application. However there is a workaround to integrate external plugins by editing the file `config.xml`  associated with the project:  Select _Project_ > _Edit_ > _PhoneGap Build_ > _Build Options_ and uncheck the box _Generate config.xml file when building.
+
+Here is an exemple of external plugin definition: 
+
+```xml
+	<gap:plugin name="com.phonegap.plugins.example">
+	    <param name="APIKey" value="12345678" />
+	    <param name="APISecret" value="12345678" />
+	</gap:plugin>
+```
+
+**References:** Here are the online PhoneGap Build documentation on [How to use plugins from your application](https://build.phonegap.com/docs/plugins-using) and [the list of available PhoneGap Build plugins & their respective description](https://build.phonegap.com/plugins).
 
 #### Implementation
 
