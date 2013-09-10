@@ -274,10 +274,14 @@ enyo.kind({
 		return this.editor.getSession().getUndoManager();
 	},
 	undo: function() {
-		this.getUndoManager().undo();
+		if (this.canUndo()) {
+			this.getUndoManager().undo();
+		}
 	},
 	redo: function() {
-		this.getUndoManager().redo();
+		if (this.canRedo()) {
+			this.getUndoManager().redo();
+		}
 	},
 	canUndo: function() {
 		return this.getUndoManager().hasUndo();
