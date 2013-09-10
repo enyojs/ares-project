@@ -206,6 +206,7 @@ Ares comes with an Hermes service using your Dropbox account as a storage servic
 			"appSecret": ""
 		}
 	[…]
+	}
 
 You need to replace the appKey and appSecret entries with the proper values from your Dropbox application entry for Ares(see below).
 
@@ -263,6 +264,8 @@ The property `sources:` of the service **genZip** lists the template definitions
 				}
 			]
 		}, 
+		[...]
+	}
 
 Ares plugins can add or modify this list of templates, from their own `ide-plugin.json`.
 
@@ -457,6 +460,8 @@ The Ares PhoneGap build service does not need any configuration but the HTTP/HTT
 			"verbose": false,
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
 			"auth": {
+				[...]
+			}
 ```
 
 **NOTE:** Ares does not currently work behind a password-protected proxy.  Should you need this feature, please report it via JIRA or on our user's forum.
