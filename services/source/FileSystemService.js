@@ -14,23 +14,30 @@ enyo.kind({
 	 */
 	impl: null,
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.impl = null;
 	},
 	rootNodeChanged: function(old) {
-		if (this.debug) this.log("rootNode:", this.rootNode, "<-", old);
+		this.trace("rootNode:", this.rootNode, "<-", old);
 	},
 	connect: function(inFsService, next) {
 		this.impl = inFsService;
 		var req = this.impl.propfind(undefined, 0);
 		req.response(this, function(inRequest, inValue) {
-			if (this.debug) this.log("FileSystemService#connect(): connected");
+			this.trace("FileSystemService#connect(): connected");
 			this.setRootNode(inValue);
-			if (next) next();
+			if (next) {
+				next();
+			}
 		});
 		req.error(this, function(inRequest, inError) {
-			if (this.debug) this.error("FileSystemService#connect(): connection failed");
-			if (next) next(new Error(inError));
+			if (this.debug) {
+				this.error("FileSystemService#connect(): connection failed");
+			}
+			if (next) {
+				next(new Error(inError));
+			}
 		});
 	},
 	isOk: function() {
@@ -80,21 +87,29 @@ enyo.kind({
 	},
 	/**
 	 * @return {enyo.Async} 
+	 * @param {Object} inOptions
+	 * @property inOptions {Boolean} overwrite [true]
 	 */
-	createFile: function(inFolderId, inName, inContent) {
-		return this.impl.createFile(inFolderId, inName, inContent);
+	createFile: function(inFolderId, inName, inContent, inOptions) {
+		return this.impl.createFile(inFolderId, inName, inContent, inOptions);
 	},
 	/**
 	 * @return {enyo.Async} 
+	 * @param {Object} inOptions
+	 * @property inOptions {Boolean} overwrite [true]
 	 */
-	createFiles: function(inFolderId, inData) {
-		return this.impl.createFiles(inFolderId, inData);
+	createFiles: function(inFolderId, inData, inOptions) {
+		return this.impl.createFiles(inFolderId, inData, inOptions);
 	},
 	/**
+	 * @param {String} inFolderId parent folder Id
+	 * @param {String} inName folder name to create
+	 * @param {Object} inOptions options
+	 * @property inOptions {Boolean} overwrite [true]
 	 * @return {enyo.Async} 
 	 */
-	createFolder: function(inFolderId, inName) {
-		return this.impl.createFolder(inFolderId, inName);
+	createFolder: function(inFolderId, inName, inOptions) {
+		return this.impl.createFolder(inFolderId, inName, inOptions);
 	},
 	/**
 	 * @return {enyo.Async} 
@@ -103,15 +118,29 @@ enyo.kind({
 		return this.impl.remove(inNodeId);
 	},
 	/**
-	 * @return {enyo.Async} 
+	 * @return {enyo.Async}
+	 * @param {Object} inParams
+	 * @property inParams {String} folderId
+	 * @property inParams {String} name
+	 * @property inParams {String} overwrite [true]
 	 */
-	rename: function(inNodeId, inNewName) {
-		return this.impl.rename(inNodeId, inNewName);
+	rename: function(inNodeId, inParams) {
+		if (typeof inParams !== 'object') {
+			throw new Error("Invalid parameter type:" + typeof inParams + " (value:" + inParams.toString() + ")");
+		}
+		return this.impl.rename(inNodeId, inParams);
 	},
 	/**
 	 * @return {enyo.Async} 
+	 * @param {Object} inParams
+	 * @property inParams {String} folderId
+	 * @property inParams {String} name
+	 * @property inParams {String} overwrite [true]
 	 */
-	copy: function(inNodeId, inNewName) {
-		return this.impl.copy(inNodeId, inNewName);
+	copy: function(inNodeId, inParams) {
+		if (typeof inParams !== 'object') {
+			throw new Error("Invalid parameter type:" + typeof inParams + " (value:" + inParams.toString() + ")");
+		}
+		return this.impl.copy(inNodeId, inParams);
 	}
 });

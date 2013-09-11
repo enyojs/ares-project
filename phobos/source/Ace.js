@@ -1,3 +1,4 @@
+/* global require, ace */
 enyo.kind({
 	name: "enyo.Ace",
 	kind: enyo.Control,
@@ -190,7 +191,8 @@ enyo.kind({
 		this.updateSessionSettings(this.getSession());
 	},
 	getValue: function() {
-		return this.value = this.getSession().getValue();
+		this.value = this.getSession().getValue();
+		return this.value;
 	},
 	valueChanged: function() {
 		var s = this.getSession();
@@ -492,5 +494,10 @@ enyo.kind({
 	setFontSize: function(size){
 		var s = size;
 		this.editor.setFontSize(s);
+	},
+	resize: function(){
+		if (this.editor !== undefined) {
+			this.editor.resize();
+		}
 	}
 });

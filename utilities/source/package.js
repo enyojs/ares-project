@@ -3,10 +3,13 @@ enyo.depends(
 	"Groupbox.js",
 	"ActionPopup.js",
 	"ErrorPopup.js",
+	"SignInErrorPopup.js",
 	"AsyncError.js",
 	"IFrame.js",
 	"LocalStorage.js",
 	"FileChooser.js",
 	"LinkController.js",
-	"PanelGrabber.js" 
+	"PanelGrabber.js",
+	"Popup.js",
+	"Logo.js" 
 );

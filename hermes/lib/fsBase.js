@@ -1,3 +1,4 @@
+/* jshint node:true */
 /**
  * Base toolkit for Hermes FileSystem providers implemented using Node.js
  */
@@ -6,9 +7,7 @@ var fs = require("fs"),
     path = require("path"),
     express = require("express"),
     http = require("http"),
-    https = require("https"),
     tunnel = require("tunnel"),
-    util  = require("util"),
     createDomain = require('domain').create,
     temp = require("temp"),
     async = require("async"),
@@ -53,32 +52,32 @@ function FsBase(inConfig, next) {
 
 	this.app.configure((function() {
 		this.app.use(this.separator.bind(this));
-		if (this.level !== 'error') {
+		if (this.level !== 'error' && this.level !== 'warning') {
 			this.app.use(express.logger('dev'));
 		}
 
-	/*
-	 * Error Handling - Wrap exceptions in delayed handlers
-	 */
-	this.app.use(function(req, res, next) {
-		var domain = createDomain();
+		/*
+		 * Error Handling - Wrap exceptions in delayed handlers
+		 */
+		this.app.use(function(req, res, next) {
+			var domain = createDomain();
 
-		domain.on('error', function(err) {
-			next(err);
-			domain.dispose();
+			domain.on('error', function(err) {
+				next(err);
+				domain.dispose();
+			});
+
+			domain.enter();
+			next();
 		});
-
-		domain.enter();
-		next();
-	});
 
 		this.app.use(this.cors.bind(this));
 		this.app.use(express.cookieParser());
 		this.app.use(this.pathname, this.authorize.bind(this));
 		this.app.use(express.methodOverride());
-		
+
 		this.app.use(this.dump.bind(this));
-	
+
 		// Built-in express form parser: handles:
 		// - 'application/json' => req.body
 		// - 'application/x-www-form-urlencoded' => req.body
@@ -96,7 +95,7 @@ function FsBase(inConfig, next) {
 			console.error(err.stack);
 			this.respond(res, err);
 		}
-		
+
 		// express-3.x: middleware with arity === 4 is
 		// detected as the error handler
 		this.app.use(errorHandler.bind(this));
@@ -108,7 +107,7 @@ function FsBase(inConfig, next) {
 	this.httpsAgent = null;
 
 	// 2. Dynamic configuration
-	
+
 	this.app.post('/config', (function(req, res, next) {
 		this.log("req.body:", req.body);
 		var config = req.body && req.body.config;
@@ -122,36 +121,35 @@ function FsBase(inConfig, next) {
 			.replace(/\/+/g, "/") // compact "//" into "/"
 			.replace(/(\.\.)+/g, ""); // remove ".."
 	}
-	
+
 	// URL-scheme: '/' to get/set user credentials
 	this.route0 = makeExpressRoute.bind(this)('');
-	
+
 	this.log("GET/POST:", this.route0);
 	this.app.get(this.route0, this.getUserInfo.bind(this));
 	this.app.post(this.route0, this.setUserInfo.bind(this));
 
 	// 3. Handle HTTP verbs
-	
+
 	// URL-scheme: ID-based file/folder tree navigation, used by
 	// HermesClient.
 	this.route1 = makeExpressRoute.bind(this)('/id/');
 	this.route2 = makeExpressRoute.bind(this)('/id/:id');
 
 	this.log("ALL:", this.route1);
-	this.app.all(this.route1, (function(req, res) {
+	this.app.all(this.route1, (function(req, res, next) {
 		req.params.id = this.encodeFileId('/');
-		receiveId.bind(this)(req, res, next);
+		req.params.path = '/';
+		_handle.bind(this)(req, res, next);
 	}).bind(this));
 
 	this.log("ALL:", this.route2);
-	this.app.all(this.route2, receiveId.bind(this));
+	this.app.all(this.route2, [_parseIdUrl.bind(this)], _handle.bind(this));
 
-	function receiveId(req, res, next) {
-		var method = req.method.toLowerCase();
+	function _parseIdUrl(req, res, next) {
 		req.params.id = req.params.id || this.encodeFileId('/');
 		req.params.path = this.decodeFileId(req.params.id);
-		this.log("FsBase.receiveId(): method:" + method + ", req.params:", req.params);
-		this[method](req, res, this.respond.bind(this, res));
+		next();
 	}
 
 	// URL-scheme: WebDAV-like navigation, used by the Enyo loader
@@ -159,14 +157,48 @@ function FsBase(inConfig, next) {
 	// project source code) & by the Ares project preview.
 	this.route3 = makeExpressRoute.bind(this)('/file/*');
 
-	this.log("ALL:", this.route3);
-	this.app.all(this.route3, receivePath.bind(this));
-
-	function receivePath(req, res, next) {
-		var method = req.method.toLowerCase();
+	function _parseFileUrl(req, res, next) {
 		req.params.path = req.params[0];
 		req.params.id = this.encodeFileId(req.params.path);
-		this.log("FsBase.receivePath(): method:" + method + ", req.params:", req.params);
+		next();
+	}
+
+	var overlays = {
+		// "$deimos/source/designer/iframe/*"
+		designer: path.join(__dirname, "..", "..", "deimos", "source", "designer", "iframe"),
+		// "node_modules/less/dist/*"
+		less: path.join(__dirname, "..", "..", "node_modules", "less", "dist")
+	};
+	function _parseOverlays(req, res, next) {
+		var overlayDir = overlays[req.query.overlay];
+		if (overlayDir) {
+			this.log("_designer()", "checking for overlay='" + req.query.overlay + "' files...");
+			// We cannot use express.static(), because it would serve
+			// designer files always from the same mount-point in
+			// the '/file' tree.
+			var filePath = path.join(overlayDir, path.basename(req.params.path));
+			fs.stat(filePath, (function(err, stats) {
+				if (err) {
+					next(err);
+				} else if (stats.isFile()) {
+					this.log("_designer()", "found overlay file:", filePath);
+					res.status(200);
+					res.sendfile(filePath);
+				} else {
+					next();
+				}
+			}).bind(this));
+		} else {
+			next();
+		}
+	}
+	
+	this.log("ALL:", this.route3);
+	this.app.all(this.route3, [_parseFileUrl.bind(this), _parseOverlays.bind(this)], _handle.bind(this));
+
+	function _handle(req, res, next) {
+		var method = req.method.toLowerCase();
+		this.log("FsBase. _handle(): method:", method, "req.params.id:", req.params.id, "req.params.path:", req.params.path);
 		this[method](req, res, this.respond.bind(this, res));
 	}
 
@@ -203,7 +235,9 @@ function FsBase(inConfig, next) {
 
 FsBase.prototype.configure = function(config, next) {
 	this.log("FsBase.configure(): config:", config);
-	if (next) next();
+	if (next) {
+		next();
+	}
 };
 
 // Middlewares -- one per session
@@ -243,21 +277,21 @@ FsBase.prototype.cors = function(req, res, next) {
  * @param {String} p the path to normalize
  */
 if (process.platform === 'win32') {
-FsBase.prototype.normalize = function(p) {
-	return path.normalize(p).replace(/\\/g,'/');
-}
+	FsBase.prototype.normalize = function(p) {
+		return path.normalize(p).replace(/\\/g,'/');
+	};
 } else {
-FsBase.prototype.normalize = function(p) {
-	return path.normalize(p);
-};
+	FsBase.prototype.normalize = function(p) {
+		return path.normalize(p);
+	};
 }
 
 /**
  * Turns an {Error} object into a usable response {Object}
- * 
+ *
  * A response {Object} as #code and #body properties.  This method is
  * expecyted to be overriden by sub-classes of {FsBase}.
- * 
+ *
  * @param {Error} err the error object to convert.
  */
 FsBase.prototype.errorResponse = function(err) {
@@ -280,9 +314,9 @@ FsBase.prototype.errorResponse = function(err) {
  * @param {Object} res the express response {Object}
  * @param {Object} err the error if any.  Can be any kind of {Error}, such as an { HttpError}
  * @param {Object} response is a response {Object}
- * 
+ *
  * A response {Object} has:
- * 
+ *
  * - Two mandatory properties: #code (used as the HTTP statusCode) and
  * #body (inlined in the response body, of not falsy).
  * - One optional #headers property is an {Object} of HTTP headers to
@@ -323,10 +357,10 @@ FsBase.prototype.decodeFileId = function(fileId) {
 
 FsBase.prototype.parseProxy = function(config) {
 	var self = this;
-	
+
 	this.httpAgent = _makeAgent('http', config);
 	this.httpsAgent = _makeAgent('https', config);
-	
+
 	function _makeAgent(protocol, config) {
 		var proxyConfig = config.proxy && config.proxy[protocol];
 		if (!proxyConfig) {
@@ -389,10 +423,10 @@ FsBase.prototype.put = function(req, res, next) {
 
 /**
  * Store a file provided by a web-form
- * 
+ *
  * The web form is a 'application/x-www-form-urlencoded'
  * request, which contains the following fields:
- * 
+ *
  * - name (optional) is the name of the file to be created or
  *   updated.
  * - path (mandatory) is the relative path to the storage root
@@ -400,10 +434,10 @@ FsBase.prototype.put = function(req, res, next) {
  *   containing folder (if name is provided).
  * - content (mandatory) is the base64-encoded version of the
  *   file
- * 
- * @param {HTTPRequest} req 
+ *
+ * @param {HTTPRequest} req
  * @param {HTTPResponse} res
- * @param {Function} next(err, data) CommonJS callback 
+ * @param {Function} next(err, data) CommonJS callback
  */
 FsBase.prototype._putWebForm = function(req, res, next) {
 	// Mutually-agreed encoding of file name & location:
@@ -431,7 +465,7 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		this.log("FsBase.putWebForm(): empty file");
 		buf = new Buffer('');
 	}
-	
+
 	var urlPath = this.normalize(relPath);
 	this.log("FsBase.putWebForm(): storing file as", urlPath);
 	fileId = this.encodeFileId(urlPath);
@@ -454,15 +488,15 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 
 /**
  * Stores one or more files provided by a multipart form
- * 
+ *
  * The multipart form is a 'multipart/form-data'.  Each of its
  * parts follows this field convention, compatible with the
  * Express/Connect bodyParser, itself based on the Formidable
  * Node.js module.
- * 
- * @param {HTTPRequest} req 
+ *
+ * @param {HTTPRequest} req
  * @param {HTTPResponse} res
- * @param {Function} next(err, data) CommonJS callback 
+ * @param {Function} next(err, data) CommonJS callback
  */
 FsBase.prototype._putMultipart = function(req, res, next) {
 	var pathParam = req.param('path');
@@ -552,9 +586,9 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 
 /**
  * Write a file in the filesystem
- * 
+ *
  * Invokes the CommonJs callback with the created {ares.Filesystem.Node}.
- * 
+ *
  * @param {Object} req the express request context
  * @param {Object} file contains mandatory #name property, plus either
  * #buffer (a {Buffer}) or #path (a temporary absolute location).
@@ -563,4 +597,3 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 FsBase.prototype.putFile = function(req, file, next) {
 	next (new HttpError("ENOSYS", 500));
 };
-

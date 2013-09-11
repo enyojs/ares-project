@@ -1,4 +1,4 @@
-/*global enyo,ares,async,Ares,Phonegap,XMLWriter,ServiceRegistry*/
+/*global enyo, ares, async, Ares, Phonegap, XMLWriter, ServiceRegistry, next */
 /**
  * Kind to manage the life cycle of building a mobile application using 
  * the service Phonegap build.
@@ -119,6 +119,7 @@ enyo.kind({
 		var err = new Error(message + " (" + inError.toString() + ")");
 		err.html = html;
 		err.text = text;
+		err.status = response.status;		
 		next(err);
 	},
 
@@ -189,7 +190,6 @@ enyo.kind({
 			if (err) {
 				self._getToken(function(err) {
 					if (err) {
-						self.doLoginFailed({id: self.config.id});
 						next(err);
 					} else {
 						self.getUserData(next);
@@ -215,7 +215,7 @@ enyo.kind({
 		var appIdExist = false;
 
 		// immediately go on if appId is blank
-		if (projectAppId.toString().length == 0) {
+		if (projectAppId.toString().length === 0) {
 			next(null, userData);
 			return;
 		}
@@ -237,8 +237,7 @@ enyo.kind({
 			var config = this.getConfigInstance(project);
 			config.providers.phonegap.appId = "";
 			ServiceRegistry.instance.setConfig(config);
-			var errorMsg = 	"The AppId '"+ projectAppId +"' does not exist in the Phonegap Build account " +
-					userData.user.email + ". Please choose a correct AppId";
+			var errorMsg = "The AppId \'"+ projectAppId +"\' does not exist in the Phonegap Build account " + userData.user.email + ". Please choose a correct AppId";
 			next(errorMsg);
 		}
 	},
@@ -468,7 +467,7 @@ enyo.kind({
 	 * @public
 	 */
 	build: function(project, next) {
-		this.trace("Starting phonegap build: " + this.url + '/build');
+		this.trace("Starting phonegap build: ", this.url, '/build');
 		async.waterfall([
 			enyo.bind(this, this.authorize),
 			enyo.bind(this, this.checkAppId, project),
@@ -491,7 +490,7 @@ enyo.kind({
 	 * @public
 	 */
 	buildStatus: function(project, next) {
-		this.trace("Getting build status:  " + this.url + '/build');
+		this.trace("Getting build status:  ", this.url, '/build');
 		async.waterfall([
 			enyo.bind(this, this.authorize),
 			enyo.bind(this, this._getBuildStatus, project),			
@@ -501,20 +500,29 @@ enyo.kind({
 
 	/**
 	 * Collect & check information about current project, update config.xml
+	 * @param {Object} project
+	 * @param {Object} userData is passed by checkAppId() in waterfall
+	 * @param {Function} next is a CommonJS callback
 	 * @private
 	 */
 	_updateConfigXml: function(project, userData, next) {
-		
-		if (this.getConfigInstance(project).providers.phonegap.autoGenerateXML){
-			var config = this.getConfigInstance(project);
-
-			var req = project.getService().createFile(project.getFolderId(), "config.xml", this._generateConfigXml(config));
-			req.response(this, function _savedConfigXml(inSender, inData) {
-				this.trace("Phonegap.Build#_updateConfigXml()", "updated config.xml:", inData);	
+		var config = this.getConfigInstance(project);
+		if (config.providers.phonegap.autoGenerateXML) {
+			var configXml = this._generateConfigXml(config);
+			if (!configXml) {
+				this.error("unable to generate config.xml from:", config);	
 				next();
-			});
-			req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
+			} else {
+				var req, fs = project.getService();
+				req = fs.createFile(project.getFolderId(), "config.xml", configXml, { overwrite: true });
+				req.response(this, function _savedConfigXml(inSender, inData) {
+					this.trace("Phonegap.Build#_updateConfigXml()", "wrote config.xml:", inData);	
+					next();
+				});
+				req.error(this, this._handleServiceError.bind(this, "Unable to write config.xml", next));
+			}
 		} else {
+			this.trace("skipping config.xml generation");	
 			next();
 		}
 
@@ -549,6 +557,9 @@ enyo.kind({
 	_submitBuildRequest: function(project, data, next) {
 		var config = ares.clone(project.getConfig().getData());
 		this.trace("config: ", config);
+
+		var minification = config.providers.phonegap.minification;
+
 		var keys = {};
 		var platforms = [];
 		// mandatory parameters
@@ -556,7 +567,7 @@ enyo.kind({
 			//provided by the cookie
 			//token: this.config.auth.token,
 			title: config.title,
-			debug: true				// Disable minification
+			debug: !minification
 		};
 
 		// Already-created apps have an appId (to be reused)
@@ -586,12 +597,12 @@ enyo.kind({
 		}
 		if (typeof keys ==='object' && enyo.keys(keys).length > 0) {
 			this.trace("keys:", keys);
-			query.keys = JSON.stringify(keys);
+			query.keys = enyo.json.stringify(keys);
 		}
 
 		// Target platforms -- defined by the Web API, but not implemented yet
 		if (platforms.length > 0) {
-			query.platforms = JSON.stringify(platforms);
+			query.platforms = enyo.json.stringify(platforms);
 		} else {
 			next(new Error('No build platform selected'));
 			return;
@@ -662,12 +673,10 @@ enyo.kind({
 	 * @private            
 	 */
 	_storePkg: function(project, folderId, inData, next) {
-		if(this.debug){		
-			this.trace("data content.ctype: ", inData.ctype);	
-		}	
+		this.trace("data content.ctype: ", inData.ctype);	
 
-		var req = project.getService().createFiles(folderId, 
-			{content: inData.content, ctype: inData.ctype});
+		var req, fs = project.getService();
+		req = fs.createFiles(folderId, {content: inData.content, ctype: inData.ctype}, { overwrite: true });
 
 		req.response(this, function(inSender, inData) {
 			this.trace("response:", inData);
@@ -877,9 +886,9 @@ enyo.kind({
 					handleAs: 'text'
 				});		
 				req.response(this, function(inSender, inData) {
-					this.trace("response: received " + inData.length + " bytes typeof: " + (typeof inData));
+					this.trace("response: received ", inData.length, " bytes typeof: ", (typeof inData));
 					var ctype = req.xhrResponse.headers['content-type'];
-					this.trace("response: received ctype: " + ctype);
+					this.trace("response: received ctype: ", ctype);
 					next(null, {content: inData, ctype: ctype});			
 				});
 				req.error(this, this._handleServiceError.bind(this, "Unable to download application package", next));
@@ -911,17 +920,17 @@ enyo.kind({
 			// If the project does not define an icon, use Enyo's
 			// one
 			xw.writeAttributeString('src', phonegap.icon[inTarget].src || 'icon.png');
-			if(inTarget === "general"){
-				xw.writeAttributeString('role', phonegap.icon[inTarget].role || 'default');
-			} else {
-				xw.writeAttributeString('gap:platfom', inTarget);
+			
+			xw.writeAttributeString('role', phonegap.icon[inTarget].role || 'default');
+			if(inTarget != 'general'){
+				xw.writeAttributeString('gap:platform', inTarget);
+			}
 
-				if (inTarget === "android"){
-					xw.writeAttributeString('gap:density', phonegap.icon[inTarget].density || "mdpi");
-				} else if (inTarget === "ios") {
-					xw.writeAttributeString('width', phonegap.icon[inTarget].width || 60);
-					xw.writeAttributeString('height', phonegap.icon[inTarget].height || 60);
-				}
+			if (inTarget === 'android'){
+				xw.writeAttributeString('gap:density', phonegap.icon[inTarget].density || "mdpi");
+			} else {
+				xw.writeAttributeString('width', phonegap.icon[inTarget].width || 32);
+				xw.writeAttributeString('height', phonegap.icon[inTarget].height || 32);
 			}
 
 			xw.writeEndElement();
@@ -932,21 +941,43 @@ enyo.kind({
 			// If the project does not define an icon, use Enyo's
 			// one
 			xw.writeAttributeString('src', phonegap.splashScreen[inTarget].src || 'icon.png');
-			if(inTarget === "general"){
-				xw.writeAttributeString('role', phonegap.splashScreen[inTarget].role || 'default');
-			} else {
-				xw.writeAttributeString('gap:platfom', inTarget);
-
-				if (inTarget === 'android'){
-					xw.writeAttributeString('gap:density', phonegap.splashScreen['android'].density || 'mdpi');
-				} else if (inTarget === 'ios') {
-					xw.writeAttributeString('width', phonegap.splashScreen['ios'].width || 90);
-					xw.writeAttributeString('height', phonegap.splashScreen['ios'].height || 150);
-				}
+			if(inTarget != 'general'){
+				xw.writeAttributeString('gap:platform', inTarget);
 			}
+			if (inTarget === 'android'){
+					xw.writeAttributeString('gap:density', phonegap.splashScreen.android.density || 'mdpi');
+				} else {
+					xw.writeAttributeString('width', phonegap.splashScreen[inTarget].width || 60);
+					xw.writeAttributeString('height', phonegap.splashScreen[inTarget].height || 60);
+				}
 
 			xw.writeEndElement();
 		};
+
+		/**
+		 * Create an XML row in the file config.xml, this row describe a depence to 
+		 * a hosted plugin, and may also contain sub-elements that contain a name and a value
+		 * of a parameter for the plugin.
+		 * 
+		 * @param  {Object} pluginList contains the plugins object defined in "project.json".
+		 * 
+		 */
+		var createPluginXMLRow = function (plugin) {
+			xw.writeStartElement('gap:plugin');
+				xw.writeAttributeString('name', plugin.name);
+				xw.writeAttributeString('version', plugin.version);
+				enyo.forEach(plugin.parameters && enyo.keys(plugin.parameters), function(parameter) {
+					xw.writeStartElement("param");
+						xw.writeAttributeString('name', plugin.parameters[parameter].name);
+						xw.writeAttributeString('value', plugin.parameters[parameter].value);
+					xw.writeEndElement();
+				}, this);	
+					
+
+				xw.writeEndElement();
+		};
+
+
 
 		// See http://flesler.blogspot.fr/2008/03/xmlwriter-for-javascript.html
 
@@ -998,37 +1029,41 @@ enyo.kind({
 			xw.writeEndElement();	// gap:platforms
 		}
 
-		// plugins
-		if (typeof phonegap.plugins === 'object') {
-			for (var pluginName in phonegap.plugins) {
-				xw.writeStartElement('plugin', 'gap');
-				xw.writeAttributeString('name', pluginName);
-				var plugin = phonegap.plugins[pluginName];
-				if (typeof plugin === 'object') {
-					for (var attr in plugin) {
-						xw.writeAttributeString(attr, plugin[attr]);
-					}
-				}
-				xw.writeEndElement(); // gap:plugin
-			}
-		}
-
-		// UI should be helpful to define the features so that
-		// the URL's are correct... I am not sure whether it
-		// is possible to have them enforced by a JSON schema,
-		// unless we hard-code a discrete list of URL's...
-		// 
-		var featureUrl = "http://api.phonegap.com/1.0/";
 		xw.writeComment("Features");
-		enyo.forEach(phonegap.features && enyo.keys(phonegap.features), function(feature) {
-							
-			if (phonegap.features[feature]){
-				xw.writeStartElement('feature');
-				xw.writeAttributeString('name', featureUrl + feature);
-				xw.writeEndElement(); // feature
-			}				
-	
-		}, this);
+
+		var featureUrl = "http://api.phonegap.com/1.0/";
+		
+		// Check if all the permissions are disabled.
+		// If it's the case this function return true
+		var checkNoPermissions = function () {
+			var noPermissions = true;
+			
+			for (var key in phonegap.features){
+				if (phonegap.features[key]){
+					noPermissions = false;
+				}
+			}			
+			return noPermissions;
+		};		
+
+		// If all the permissions are disabled, the tag generated is 
+		// <preference name="permissions" value="none" />
+		// Else the tag <feature name= <featureUrl> >is generated
+		if(checkNoPermissions.call(this)) {
+			xw.writeStartElement('preference');
+				xw.writeAttributeString('name', 'permissions');
+				xw.writeAttributeString('value', 'none');
+				xw.writeEndElement();
+		} else {
+
+			enyo.forEach(phonegap.features && enyo.keys(phonegap.features), function(feature) {
+				if (phonegap.features[feature]){
+					xw.writeStartElement('feature');
+					xw.writeAttributeString('name', featureUrl + feature);
+					xw.writeEndElement();
+				}			
+			}, this);
+		}	
 
 		xw.writeComment("Preferences");
 		enyo.forEach(phonegap.preferences && enyo.keys(phonegap.preferences), function(preference) {
@@ -1038,6 +1073,11 @@ enyo.kind({
 			xw.writeAttributeString('value', phonegap.preferences[preference]);
 			xw.writeEndElement(); // preference			
 	
+		}, this);
+
+		xw.writeComment("Plugins");		
+		enyo.forEach(phonegap.plugins && enyo.keys(phonegap.plugins), function(pluginName) {
+			createPluginXMLRow.call(self, phonegap.plugins[pluginName]);		
 		}, this);
 
 		xw.writeComment("Define app icon for each platform");
@@ -1072,6 +1112,7 @@ enyo.kind({
 		DEFAULT_PROJECT_CONFIG: {
 			enabled: false,
 			autoGenerateXML: true,
+			minification: true,
 			features: {
 				battery: false,
 				camera: false,
@@ -1084,11 +1125,18 @@ enyo.kind({
 		        device: false
 			},
 			preferences: {
-				//general prefrences
-				"phonegap-version": Phonegap.UIConfiguration.commonDrawersContent[0].rows[0].defaultValue, 
-				"orientation": Phonegap.UIConfiguration.commonDrawersContent[0].rows[1].defaultValue,
-				"target-device": Phonegap.UIConfiguration.commonDrawersContent[0].rows[2].defaultValue, 
-				"fullscreen": Phonegap.UIConfiguration.commonDrawersContent[0].rows[3].defaultValue, 
+				//shared prefrences
+				"phonegap-version": Phonegap.UIConfiguration.commonDrawersContent[1].rows[0].defaultValue, 
+				"orientation": Phonegap.UIConfiguration.commonDrawersContent[1].rows[1].defaultValue,
+				"target-device": Phonegap.UIConfiguration.commonDrawersContent[1].rows[2].defaultValue, 
+				"fullscreen": Phonegap.UIConfiguration.commonDrawersContent[1].rows[3].defaultValue,
+
+				//Android preferences
+				"android-installLocation": Phonegap.UIConfiguration.platformDrawersContent[0].rows[0].defaultValue, 
+				"android-minSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[0].rows[1].defaultValue, 
+				"android-maxSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[0].rows[2].defaultValue, 
+				"splash-screen-duration": Phonegap.UIConfiguration.platformDrawersContent[0].rows[3].defaultValue, 
+				"load-url-timeout": Phonegap.UIConfiguration.platformDrawersContent[0].rows[4].defaultValue, 
 
 				//IOS preferences
 				"webviewbounce": Phonegap.UIConfiguration.platformDrawersContent[1].rows[0].defaultValue, 
@@ -1097,21 +1145,14 @@ enyo.kind({
 				"detect-data-types": Phonegap.UIConfiguration.platformDrawersContent[1].rows[3].defaultValue, 
 				"exit-on-suspend": Phonegap.UIConfiguration.platformDrawersContent[1].rows[4].defaultValue, 
 				"show-splash-screen-spinner": Phonegap.UIConfiguration.platformDrawersContent[1].rows[5].defaultValue, 
-				"auto-hide-splash-screen": Phonegap.UIConfiguration.platformDrawersContent[1].rows[6].defaultValue, 
-
-				//Android preferences
-				"android-installLocation": Phonegap.UIConfiguration.platformDrawersContent[0].rows[0].defaultValue, 
-				"android-minSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[1].rows[1].defaultValue, 
-				"android-maxSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[1].rows[2].defaultValue, 
-				"splash-screen-duration": Phonegap.UIConfiguration.platformDrawersContent[1].rows[3].defaultValue, 
-				"load-url-timeout": Phonegap.UIConfiguration.platformDrawersContent[1].rows[4].defaultValue, 
+				"auto-hide-splash-screen": Phonegap.UIConfiguration.platformDrawersContent[1].rows[6].defaultValue,
 
 				//BlackBerry preferences
 				"disable-cursor": Phonegap.UIConfiguration.platformDrawersContent[3].rows[0].defaultValue 
 			},
 
 			icon: {
-				general: {src: "", role: "default"},
+				sharedConfiguration: {src: "", role: "default"},
 				android: {src: "", density: "" },
 				ios: {src: "", height: "", width: ""}, 
 				winphone: {src: ""}, 
@@ -1120,7 +1161,7 @@ enyo.kind({
 			},
 
 			splashScreen: {
-				general: {src: "", role: "default"},
+				sharedConfiguration: {src: "", role: "default"},
 				android: {src: "", density: "" },
 				ios: {src: "", height: "", width: ""}, 
 				winphone: {src: ""}, 
@@ -1130,7 +1171,7 @@ enyo.kind({
 			plugins: {
 			}, 
 			access : {
-				"origin": "http://127.0.0.1"
+				"origin": Phonegap.UIConfiguration.commonDrawersContent[1].rows[4].defaultValue
 			}
 		}
 	}

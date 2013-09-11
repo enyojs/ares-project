@@ -1,3 +1,4 @@
+/* global ares */
 enyo.kind({
 	name: "Ares.TestProxyReporter",
 	kind: enyo.Component,
@@ -11,13 +12,12 @@ enyo.kind({
 	timeout: 3000,
 	debug: true,
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		if (aresTestW !== null) {
+		if (window.aresTestW !== null) {
 			// Post ARES.TEST.NAME event to infor the Ares Test Reporter the name of the TestSuite
-			aresTestW.postMessage({evt:"ARES.TEST.NAME", data:this.name}, "http://127.0.0.1:9009");
-			if (this.debug) {
-				enyo.log("Post ARES.TEST.NAME ...name: "+this.name);
-			}
+			window.aresTestW.postMessage({evt:"ARES.TEST.NAME", data:this.name}, "http://127.0.0.1:9009");
+			this.trace("Post ARES.TEST.NAME ...name: ", this.name);
 		}
 	},
 	initComponents: function() {
@@ -28,11 +28,9 @@ enyo.kind({
 		this.$.testSuite.runAllTests();
 	},
 	testBegun: function(inSender, inEvent) {
-		if (this.debug) {
-			enyo.log("=>Ares Proxy Reporter *****" + "Group: " + this.name + " *****test: " +inEvent.testName + " is running ...");
-		}
+		this.trace("=>Ares Proxy Reporter *****", "Group: ", this.name, " *****test: ", inEvent.testName, " is running ...");
 
-		if (aresTestW !== null) {
+		if (window.aresTestW !== null) {
 			// Post ARES.TEST.RUNNING event with info related to the group and the name of the unit test
 			var obj = {
 				group: this.name,
@@ -40,18 +38,15 @@ enyo.kind({
 				state: "RUNNING"
 
 			};
-			aresTestW.postMessage({evt:"ARES.TEST.RUNNING", data:obj}, "http://127.0.0.1:9009");
-			if (this.debug) {
-				enyo.log("Post ARES.TEST.RUNNING ... "
-					+JSON.stringify(obj));
-			}
+			window.aresTestW.postMessage({evt:"ARES.TEST.RUNNING", data:obj}, "http://127.0.0.1:9009");
+			this.trace("Post ARES.TEST.RUNNING ... ", JSON.stringify(obj));
 		}
 	},
 	formatStackTrace: function(inStack) {
 		var stack = inStack.split("\n");
 		var out = [''];
-		for (var i=0, s; s=stack[i]; i++) {
-			if (s.indexOf("    at Object.do") == 0 || s.indexOf("    at Object.dispatch") == 0 || s.indexOf("TestSuite.js") != -1) {
+		for (var i=0, s; (s=stack[i]); i++) {
+			if (s.indexOf("    at Object.do") === 0 || s.indexOf("    at Object.dispatch") === 0 || s.indexOf("TestSuite.js") != -1) {
 				continue;
 			}
 			out.push(s);
@@ -84,17 +79,15 @@ enyo.kind({
 
 		enyo.log(content);
 
-		if (aresTestW !== null) {
+		if (window.aresTestW !== null) {
 			// Post ARES.TEST.RESULT event with associated results
 			var obj = {
 				group: this.name,
-				results: JSON.stringify(results),	
+				results: enyo.json.stringify(results)
 			};		
-			aresTestW.postMessage({evt:"ARES.TEST.RESULT", data:obj}, "http://127.0.0.1:9009");
-			if (this.debug) {
-				enyo.log("Post ARES.TEST.RESULT ... "
-					+JSON.stringify(obj));
-			}
+			window.aresTestW.postMessage({evt:"ARES.TEST.RESULT", data:obj}, "http://127.0.0.1:9009");
+			this.trace("Post ARES.TEST.RESULT ... ", JSON.stringify(obj));
+				enyo.log("Post ARES.TEST.RESULT ... ", enyo.json.stringify(obj));
 		}
 	}
 });

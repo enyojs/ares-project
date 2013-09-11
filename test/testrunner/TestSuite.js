@@ -1,5 +1,4 @@
-/*global enyo, console
-*/
+/* global enyo */
 /*
 Test Package Wish list:
 -----------------------
@@ -28,6 +27,7 @@ Jasmine style assert mechanism, so we can have fancy english text for failures
 enyo.kind({
 	name: "Ares.TestSuite",
 	kind: enyo.Component,
+	noDefer: true,
 	events: {
 		onBegin: "", // sent with test name as each test begins running.
 		onFinish: "", // sent with result as each test completes.
@@ -53,7 +53,7 @@ enyo.kind({
 	log: function(msg) {
 		this.logMessages = this.logMessages || [];
 		if (typeof msg !== "string") {
-			msg = JSON.stringify(msg);
+			msg = enyo.json.stringify(msg);
 		}
 		this.logMessages.push(msg);
 		enyo.log("*****Ares TestSuite***** ", msg);

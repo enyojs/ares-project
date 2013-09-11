@@ -13,51 +13,61 @@
  * -- label : the content of the label of the row
  * -- content: the content of the row, the format of this content can change depending on the type of the UI widget used (picker, input, ...)
  * -- defaultValue: the default value displayed in the widget
+ * -- defaultHeight: the default icon/splash screen height
+ * -- defaultWidth: the default icon/splash screen Width
  * -- type: contain the last part of the name of the kind that will be used to define a row, these kinds are defined in
- * 			the "PhonegapUIRows.js"
+ *          the "PhonegapUIRows.js"
+ * -- jsonSection: a subsection of "providers.phonegap" in the file "project.json"
  * @type {String}
  */
 enyo.kind({
 	name: "Phonegap.UIConfiguration",
-	published: {
-
-	},
-	components: [],
 	statics: {
 
 		commonDrawersContent: [
 			{
-				id: "general",
-				name: "General",
+				id: "buildOption",
+				name: "Build Options",
+				type: "Drawer",
+				rows: [
+					{name: "autoGenerateXML", label: "Generate config.xml file when building", content: "", defaultValue: "true", type: "BuildOption"},
+					{name: "minification", label:"Activate the build minification", content:"", defaultValue: "true", type: "BuildOption"}
+				]
+			},
+			{
+				id: "sharedConfiguration",
+				name: "Shared configuration",
+				type: "Drawer",
 				rows: [
 					{
 						name: "phonegap-version",
 						label:"Phonegap version",
 						content:["2.9.0", "2.7.0", "2.5.0", "2.3.0", "2.2.0", "2.1.0", "2.0.0"],
 						defaultValue: "2.9.0",
-						type: "PickerRow"
+						type: "PickerRow", jsonSection: "preferences"
 					},
-					{name: "orientation", label:"Orientation",content:["both", "landscape", "portrait"], defaultValue: "both", type: "PickerRow"},
-					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], defaultValue: "universal", type: "PickerRow"},
-					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},					
-					{name: "access", label: "Access origin", content: "", defaultValue: "", type: "AccessRow"},
-					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "icon.png", type: "GeneralImgRow"},
-					{name: "splashScreen", label: "SplashScreen", content: "", defaultValue: "", type: "GeneralImgRow"}
+					{name: "orientation", label:"Orientation",content:["both", "landscape", "portrait"], defaultValue: "both", type: "PickerRow", jsonSection: "preferences"},
+					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], defaultValue: "universal", type: "PickerRow", jsonSection: "preferences"},
+					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},					
+					{name: "access", label: "Access origin", content: "", defaultValue: "http://127.0.0.1", type: "AccessRow", jsonSection: "preferences"},
+					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "/icon.png", defaultWidth: "32", defaultHeight: "32", type: "ImgRow"},
+					{name: "splashScreen", label: "SplashScreen", content: "", defaultValue: "", defaultWidth: "60", defaultHeight: "60", type: "ImgRow"}
 				]		
 			}, 
 			{
-				id: "permissions",
-				name: "Permissions",
+				id: "applicationPermissions",
+				name: "Application permissions",
+				type: "Drawer",
 				rows: [
-					{name: "battery", label: "Battery",	content: "",defaultValue: "",  type: "CheckBoxRow"},
-					{name: "camera", label: "Camera", content: "",defaultValue: "", type: "CheckBoxRow"},
-					{name: "contact", label: "Contact",	content: "",defaultValue: "", type: "CheckBoxRow"},
-					{name: "file", label: "File", content: "",defaultValue: "", type: "CheckBoxRow"},
-					{name: "media",	label: "Media", content: "",defaultValue: "", type: "CheckBoxRow"},
-					{name: "geolocation", label: "Geolocation", content: "", defaultValue: "", type: "CheckBoxRow"},
-					{name: "network", label: "Network", content: "",defaultValue: "",  type: "CheckBoxRow"},
-					{name: "notification", label: "Notification", content: "", defaultValue: "", type: "CheckBoxRow"},
-					{name: "device", label: "Device", content: "", defaultValue: "",  type: "CheckBoxRow"}
+					{name: "battery", label: "Battery",	content: "",defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"},
+					{name: "camera", label: "Camera", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "contact", label: "Contact",	content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "file", label: "File", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "media",	label: "Media", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "geolocation", label: "Geolocation", content: "", defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "network", label: "Network", content: "",defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"},
+					{name: "notification", label: "Notification", content: "", defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "device", label: "Device", content: "", defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"}
 				]
 			}
 		],
@@ -66,59 +76,64 @@ enyo.kind({
 			{
 				id: "android",
 				name: "Google Android",
+				type: "Target",
 				rows: [
-					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], defaultValue: "internalOnly", type: "PickerRow"},
-					{name: "android-minSdkVersion", label: "Minimum SDK", content: "7", defaultValue: "7", type: "InputRow"},
-					{name: "android-maxSdkVersion", label: "Maximum SDK", content: "22", defaultValue: "22", type: "InputRow"},
-					{name: "splash-screen-duration", label: "Splash screen Duration", content: "3000", defaultValue: "3000", type: "InputRow"},
-					{name: "load-url-timeout", label: "Load URL timeout", content: "6000", defaultValue: "6000", type: "InputRow"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "AndroidImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "AndroidImgRow"}
+					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], defaultValue: "internalOnly", type: "PickerRow", jsonSection: "preferences"},
+					{name: "android-minSdkVersion", label: "Minimum SDK", content: "7", defaultValue: "7", type: "InputRow", jsonSection: "preferences"},
+					{name: "android-maxSdkVersion", label: "Maximum SDK", content: "", defaultValue: "", type: "InputRow", jsonSection: "preferences"},
+					{name: "splash-screen-duration", label: "Splash screen Duration", content: "5000", defaultValue: "5000", type: "InputRow", jsonSection: "preferences"},
+					{name: "load-url-timeout", label: "Load URL timeout", content: "20000", defaultValue: "20000", type: "InputRow", jsonSection: "preferences"},
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "AndroidImgRow"},
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "AndroidImgRow"},
+					{name: "signingKey", label: "Signing Key", content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
 				]				
 			}, 
 			{
 				id: "ios",
 				name: "Apple iOS",
+				type: "Target",
 				rows: [
-					{name: "webviewbounce", label: "Web view bounce", content:  ["true", "false"], defaultValue: "true", type: "PickerRow"},
-					{name: "prerendered-icon", label: "Prerendred icon", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},
-					{name: "ios-statusbarstyle", label: "Status Bar style", content: ["black-opaque", "black-translucent", "default"], defaultValue: "black-opaque",  type: "PickerRow"},
-					{name: "detect-data-types", label: "Detect Data type", content: ["true", "false"], defaultValue: "true", type: "PickerRow"},
-					{name: "exit-on-suspend", label: "Exit on suspend", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},
-					{name: "show-splash-screen-spinner", label: "Show splash screen spinner", content: ["true", "false"], defaultValue: "false", type: "PickerRow"},
-					{name: "auto-hide-splash-screen", label: "Auto-hide splash screen", content: ["true", "false"], defaultValue: "true", type: "PickerRow"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "IosImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "IosImgRow"}
+					{name: "webviewbounce", label: "Web view bounce", content:  ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
+					{name: "prerendered-icon", label: "Prerendred icon", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
+					{name: "ios-statusbarstyle", label: "Status Bar style", content: ["black-opaque", "black-translucent", "default"], defaultValue: "black-opaque",  type: "PickerRow", jsonSection: "preferences"},
+					{name: "detect-data-types", label: "Detect Data type", content: ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
+					{name: "exit-on-suspend", label: "Exit on suspend", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
+					{name: "show-splash-screen-spinner", label: "Show splash screen spinner", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
+					{name: "auto-hide-splash-screen", label: "Auto-hide splash screen", content: ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"},
+					{name: "signingKey", label: "Signing Key", content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
 				]
-			}, 
-			{
-				id: "winphone",
-				name: "Microsoft Windows Phone 7",
-				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "WinphoneImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "WinphoneImgRow"}
-				]				
-			}, 
+			},  
 			{
 				id: "blackberry",
 				name: "RIM Blackberry",
+				type: "Target",
 				rows: [
-					{name: "disable-cursor", label: "Disable Cursor", content:  ["true", "false"], defaultValue: "false", type: "PickerRow"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "BlackBerryImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "BlackBerryImgRow"}
+					{name: "disable-cursor", label: "Disable Cursor", content:  ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"},
+					{name: "signingKey", label: "Signing Key", content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
 				]
 			}, 
 			{
 				id: "webos",
 				name: "HP webOS 2",
+				type: "Target",
 				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "", type: "WebOsImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "WebOsImgRow"}
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
 				]
-			}
-		], 
-		advancePanelContent: [						
-			{name: "autoGenerateXML", label: "Generate config.xml file when building", content: "", defaultValue: "true", type: "AutoGenerateXML"}				
+			},
+			{
+				id: "winphone",
+				name: "Microsoft Windows Phone 7",
+				type: "Target",
+				rows: [
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow"},
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow"}
+				]				
+			},
 		]
 	}
 });
@@ -132,15 +147,12 @@ enyo.kind({
 	kind: "Ares.ProjectProperties",
 	debug: false,
 	published: {
-		config: {}, 
-		showAdvancedConfiguration: false
+		config: {}
 	},
 	events: {
+		onError: "",
 		onConfigure: ""
 	},
-	handlers: {
-		onEditConfig: "saveConfig"
-	}, 
 	components: [{
 			kind: "enyo.Scroller",
 			fit: "true",
@@ -148,31 +160,18 @@ enyo.kind({
 			components: [{
 					kind: "FittableRows",
 					components: [
+						{content: "Sign-in is required", name: "signInErrorMsg", classes: "ares-project-properties-sign-in-error-msg"}, 
+						{content: "Looking for Phonegap account data ...", name: "waitingForSignIn", classes: "ares-project-properties-sign-in-error-msg"},
 						{
 							classes: "ares-row ares-align-left",
+							name: "appIdRow",
 							components: [
-								{tag: "label", classes: "ares-fixed-label ares-small-label", content: "PhoneGap App ID"}, 
-								{
-									kind: "onyx.InputDecorator",
-									components: [
-										{kind: "Input", name: "pgConfId", attributes: { title: "unique identifier, assigned by build.phonegap.com"}}
-									]
-								}, 
-								{kind: "onyx.Button", name: "ConfigurationButton",classes: "ares-project-properties-advance-configuration-button", content: "Advanced configuration",	ontap: "displayAdvancedPanel"}
+								{kind: "Phonegap.ProjectProperties.AppId", name: "appIdSelector"}							
 							]
 						}, 
-						{name: "targetsRows", kind: "FittableRows", classes: "ares-project-properties-targetsRows-display"},
-						{
-							name: "AdvancedConfiguration", kind: "FittableRows", classes: "ares-project-properties-AdvancedPanel-hide", 
-							components: [
-								{
-									tag: "div", classes: "ares-project-properties-label-background", 
-								 	components: [
-								 		{content: "Advance configuration", classes: "ares-project-properties-advance-configuration"}
-								 	]
-								}
-							]
-						}
+						{name: "BuildOptionPanel", kind: "FittableRows"},
+						{name: "targetsRows", kind: "FittableRows", classes: "ares-project-properties-targetsRows-display"}
+						
 					]
 				}
 			]
@@ -189,227 +188,171 @@ enyo.kind({
 	platformDrawers: Phonegap.UIConfiguration.platformDrawersContent,
 
 	/**
-	 * @type {Array}
-	 */
-	advanceConfigurationPanel: Phonegap.UIConfiguration.advancePanelContent,
-
-	/**
 	 * @private
 	 */
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.createAllDrawers();
-		this.createAdvanceConfigurationPanel(); 	
 	},
 
 	createAllDrawers: function () {
-		var self = this;
-		createCommonDrawers(this.commonDrawers);
-		createPlatformDrawers(this.platformDrawers);
-
+			
 		/**
-		 * Create and initialise the content of all the common drawers which containe 
-		 * parameters shared with all the platforms presented by
-		 * Phonegap build.	
-		 * @param  {Array} inDrawers defined in the array {Phonegap.UIConfiguration.commonDrawersContent}
+		 * Create a drawer in the UI "Phonegap Build" without initilizing its content.
+		 * 
+		 * @param  {Phonegap.ProjectProperties.Drawer} or {Phonegap.ProjectProperties.target}  inDrawer container for the rows.
 		 * @private
 		 */
-		function createCommonDrawers(inDrawers) {
-			enyo.forEach(inDrawers, function (commonDrawer) {
-				createCommonDrawer(commonDrawer);
+		function createDrawer(inDrawer) {			
+			var container;
+			
+			if (inDrawer.id === 'buildOption'){
+				container = this.$.BuildOptionPanel;
+			} else {
+				container = this.$.targetsRows;			
+			}
 
-				// get the last created drawer.
-				var allDrawers = self.$.targetsRows.getComponents();
-				var lastDrawer = allDrawers[allDrawers.length - 1];
-
-				// A loop to Setup the content of each drawer.
-				enyo.forEach(Phonegap.UIConfiguration.commonDrawersContent, function (drawerContent) {
-					if (drawerContent.id === commonDrawer.id) {
-						setUpDrawer(lastDrawer, drawerContent);
-					}
-				}, self);
-			}, self);
-		}
-
-	
-		/**
-		 * Create and initialise the content of all the platforms drawers which containe 
-		 * parameters of a specific platform presented by Phonegap build.	
-		 * @param  {Arary} inDrawers defined in the array {Phonegap.UIConfiguration.platformDrawersContent}
-		 * @private
-		 */
-		function createPlatformDrawers(inDrawers) {
-			enyo.forEach(inDrawers, function (inDrawer) {
-				createPlatformDrawer(inDrawer);
-
-				// get the last created drawer.
-				var allDrawers = self.$.targetsRows.getComponents();
-				var lastDrawer = allDrawers[allDrawers.length - 1];
-		
-				// A loop to Setup the content of each drawer.
-				enyo.forEach(Phonegap.UIConfiguration.platformDrawersContent, function (drawerContent) {
-					if (drawerContent.id === inDrawer.id) {
-						setUpDrawer(lastDrawer, drawerContent);
-					}
-				}, self);
-			}, self);
-		}
-
-		/**
-		 * Create one common drawer
-		 * @param  {Array} inDrawer defined in the array {Phonegap.UIConfiguration.commonDrawersContent}
-		 * @private
-		 */
-		function createCommonDrawer(inDrawer) {
-			// Creation of the drawer.
-			self.$.targetsRows.createComponent({
-				kind: "Phonegap.ProjectProperties.Drawer",
-				classes: "ares-row",
-				name: inDrawer.id,
-				drawerName: inDrawer.name				
-			});
-		}
-
-		/**
-		 * Create one platform drawer
-		 * @param  {Array} inDrawer defined in the array {Phonegap.UIConfiguration.platformDrawersContent}
-		 * @private
-		 */
-		function createPlatformDrawer(inDrawer) {
-			self.$.targetsRows.createComponent({
+			container.createComponent({
 				name: inDrawer.id,
 				classes: "ares-row",
-				kind: "Phonegap.ProjectProperties.Target",
+				kind: "Phonegap.ProjectProperties." + inDrawer.type,
 				targetId: inDrawer.id,
-				targetName: inDrawer.name,
+				drawerName: inDrawer.name,
 				enabled: false
-			});
+			});	
+	}
+
+		/**
+		 * Create all the drawers in in the UI "Phonegap Build".
+		 * 
+		 * @param  {Array} inDrawers Array declared in {Phonegap.UIConfiguration}.
+		 * @private
+		 */
+		function createDrawers(inDrawers) {			
+			enyo.forEach(inDrawers, function (inDrawer) {				
+				createDrawer.call(this, inDrawer);								
+			}, this);
 		}
 
 		/**
-		 * Setup the rows of a drawer, a row contain a label with
-		 * a UI widget which can be an : onyx.Picker, onyx.Input or onyx.Checkbox.
-		 * The content of each UI widget is defined in the array
-		 * {Phonegap.UIConfiguration.drawerContent}
-		 *
-		 * @param {Object} dwr        The drawer to fill
-		 * @param {Array} dwrContent list of the rows that will be placed in the drawer
-		 * @private
+		 * Initialise the content of a drawer.
+		 * @param {Phonegap.ProjectProperties.Drawer} or {Phonegap.ProjectProperties.target} dwr container for the rows.
+		 * @param {Array} dwrContent Array declared in {Phonegap.UIConfiguration}.
 		 */
-
-		function setUpDrawer(dwr, dwrContent) {
-			// Creation of the pickers of the drawer if they existe.
+		function initialiseDrawer(dwr, dwrContent) {
+			var getPanel = function (inRowName){
+				if (inRowName === "autoGenerateXML") {					
+					return this.$.targetsRows;
+				}
+			};
+									
 			enyo.forEach(dwrContent.rows, function (row) {
+		
+				var containerPanel = getPanel.call(this, row.name);
+			
 				dwr.$.drawer.createComponent({
 					kind: "Phonegap.ProjectProperties." + row.type,
 					name: row.name,
 					label: row.label,
-					value: row.content,	
-					defaultValue: row.defaultValue					
+					contentValue: row.content,	
+					value: row.defaultValue,
+					jsonSection: row.jsonSection,
+					platform: dwrContent.id,
+					width: row.defaultWidth,
+					height: row.defaultHeight,
+					pan: containerPanel
 				});
 			}, this);
 		}
-	},
 
-	createAdvanceConfigurationPanel: function (){
-		enyo.forEach(this.advanceConfigurationPanel, function(row){
-			this.$.AdvancedConfiguration.createComponent({
-					kind: "Phonegap.ProjectProperties." + row.type,
-					name: row.name,
-					label: row.label,
-					value: row.content,	
-					defaultValue: row.defaultValue					
-				});
-		}, this);
-	},
-
-	/** public */
-	setProjectConfig: function (config) {
-		this.config = config;		
-		this.config.enabled = true;
-				this.$.pgConfId.setValue(config.appId || '');
-		this.config.targets = this.config.targets || {};
-		
-		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {			
-			enyo.forEach(drawer.rows, function (row) {				
+		/**
+		 * Initialise all the drawers in in the UI "Phonegap Build".
+		 * 
+		 * @param  {Array} inDrawers Array declared in {Phonegap.UIConfiguration}
+		 * @private
+		 */
+		function initialiseDrawers(inDrawers) {		
+			var i = 0;			
+			enyo.forEach(inDrawers, function (inDrawer) {
 				
-				var configParameterValue = (function(){
-					var value;
-					if(row.name ==='icon'){
-						value = config.icon[drawer.id].src;
-					} else { 
-						if (row.name ==='splashScreen'){
-							value = config.splashScreen[drawer.id].src;
-						} else {
-							 if(drawer.id === 'permissions'){
-								value = config.features[row.name];
-							} else{
-								value = config.preferences[row.name];
-							}
-						}
+				// get all the created drawers.
+				var allDrawers = this.$.BuildOptionPanel.getComponents().concat(this.$.targetsRows.getComponents());
+				
+				// get the current drawer to fill
+				var actualDrawer = allDrawers[i];
+				
+				//increment to the next drawer
+				i ++;				
+
+				// A loop to Setup the content of each drawer.
+				enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawerContent) {
+					if (drawerContent.id === inDrawer.id) {
+						initialiseDrawer.call(this, actualDrawer, drawerContent);
 					}
-					return value;
-				}).bind(this);
-
-				this.$.targetsRows.$[drawer.id].setProjectConfig(this.config.targets[drawer.id]);				
-				this.$.targetsRows.$[drawer.id].$.drawer.$[row.name].setDefaultValue(configParameterValue.call(this));
-				this.$.targetsRows.$.general.$.drawer.$.access.setDefaultValue(config.access.origin);
-				this.$.AdvancedConfiguration.$.autoGenerateXML.setDefaultValue(config.autoGenerateXML);					
+				}, this);
 			}, this);
-		}, this);
-		// function to update the attributs values of the icon and splash screen in ios drawer
-		var updateIosImgAttributs = (function(inImg){
-				this.$.targetsRows.$.ios.$.drawer.$[inImg].setHeight(config[inImg].ios.height);
-				this.$.targetsRows.$.ios.$.drawer.$[inImg].setWidth(config[inImg].ios.width);
-			}).bind(this);
+		}
 
-		// function to update the attribut value of the icon and splash screen in android drawer
-		var updateAndroidImgAttributs = (function(inImg){
-			this.$.targetsRows.$.android.$.drawer.$[inImg].setDensity(config[inImg].android.density);
-		}).bind(this);
+		createDrawers.call(this, this.commonDrawers.concat(this.platformDrawers));
+		initialiseDrawers.call(this, this.commonDrawers.concat(this.platformDrawers));
+	},
 
-		var imgs = ['icon', 'splashScreen'];
-		
-		enyo.forEach(imgs, function(img){
-			updateIosImgAttributs.call(this, img);
-			updateAndroidImgAttributs.call(this, img);
+	/** @public */
+	setProjectConfig: function (config) {
+		this.trace("Project config:", config);
+
+		config.enabled = true;
+		this.$.appIdSelector.setSelectedAppId(config.appId || '');		
+		config.targets = config.targets || {};
+
+
+		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {
+			if (drawer.id === 'buildOption') {
+				this.$.BuildOptionPanel.$[drawer.id].setProjectConfig(config);
+			} else {
+				this.$.targetsRows.$[drawer.id].setProjectConfig(config);
+			}
+			
 		}, this);
 
 		this.refresh();
 	},
 
-	/** public */
-	getProjectConfig: function () {
-		this.config.appId = this.$.pgConfId.getValue();
+	/** @public */
+	getProjectConfig: function (config) {
+		config.access = {};
+		config.features = {};
+		config.preferences = {};
+		config.icon = {};
+		config.splashScreen = {};
+		config.targets = {};
+
+		config.appId = this.$.appIdSelector.getSelectedAppId();
 		
-		this.trace("Project config:", this.config);	
-		enyo.forEach(this.platformDrawers, function (target) {
-			this.config.targets[target.id] = this.$.targetsRows.$[target.id].getProjectConfig();
+		enyo.forEach(this.commonDrawers.concat(this.platformDrawers), function (drawer) {
+			if (drawer.id !== "applicationPermissions" && drawer.id !== "buildOption") {
+				config.icon[drawer.id] = {};
+				config.splashScreen[drawer.id] = {};
+			}
+			if(drawer.id === 'buildOption'){
+				this.$.BuildOptionPanel.$[drawer.id].getProjectConfig(config);
+			} else {
+				this.$.targetsRows.$[drawer.id].getProjectConfig(config);
+			}
+			
 		}, this);
-		
-		return this.config;
+
+		this.trace("Project config:", config);
 	},
 	/**
 	 * @protected
 	 */
-	refresh: function (inSender, inValue) {		
+	refresh: function (inSender, inValue) {
 		this.trace("sender:", inSender, "value:", inValue);		
-		var provider = Phonegap.ProjectProperties.getProvider();
-		provider.authorize(enyo.bind(this, this.loadKeys));
-	},
-
-	displayAdvancedPanel: function(){
-		this.showAdvancedConfiguration = !this.showAdvancedConfiguration;
-		if(this.showAdvancedConfiguration) {
-			this.$.ConfigurationButton.setContent("Back");
-			this.$.targetsRows.setClassAttribute("ares-project-properties-targetsRows-hide");
-			this.$.AdvancedConfiguration.setClassAttribute("ares-project-properties-AdvancedPanel-display");
-		} else {
-			this.$.ConfigurationButton.setContent("Advanced configuration");
-			this.$.targetsRows.setClassAttribute("ares-project-properties-targetsRows-display");
-			this.$.AdvancedConfiguration.setClassAttribute("ares-project-properties-AdvancedPanel-hide");
-		}				
+		var provider = Phonegap.ProjectProperties.getProvider();		
+		this.showErrorMsg("waitingSignIn");
+		provider.authorize(enyo.bind(this, this.getUserData));
 	},
 
 	/**
@@ -422,35 +365,82 @@ enyo.kind({
 		});
 	},
 	/**
-	 * Event handler that detect the changes done in a drawer's row
-	 * @param  {Object} inSender     contain the description of the envent sender
-	 * @param  {function} saveProperty  this function is defined in each row's kind, it save the 
-	 *                                  new input of the row in the object "this.config".
+	 * Display the content of the top row in the Phonegap Build panel according 
+	 * to the Phonegap authentification status.
 	 * 
-	 * @private
+	 * @param  {String} authStatus can have as a value [userDataRecieved, signInError, waitingSignIn]
+	 * @private.
 	 */
-	saveConfig: function(inSender, saveProperty)  {
-		saveProperty.call(this, this.config) ;
-		return true; //stop the bubbling
-	}, 
+	showErrorMsg: function(authStatus) {
+		
+		if(authStatus === "userDataRecieved") {
+			this.$.appIdRow.show();
+			this.$.signInErrorMsg.hide();
+			this.$.waitingForSignIn.hide();
+		} else{
+			 if (authStatus === "signInError") {
+						this.$.signInErrorMsg.show();
+						this.$.appIdRow.hide();
+						this.$.waitingForSignIn.hide();
+			} else if (authStatus === "waitingSignIn"){
+				this.$.signInErrorMsg.hide();
+				this.$.appIdRow.hide();
+				this.$.waitingForSignIn.show();
+
+			} 
+		}		
+	},
 
 	/**
 	 * @protected
 	 */
-	loadKeys: function (err) {
-	
-		this.trace("err:", err);
-	
+	getUserData: function (err, userData) {
+
 		if (err) {
-			this.warn("err:", err);
-		} else {
+			//this.warn("err:", err);
+			this.showErrorMsg("signInError");
+			this.doError({msg: err.toString(), err: err});
+		} else {			
+			this.showErrorMsg("userDataRecieved");
 			var provider = Phonegap.ProjectProperties.getProvider();
-					
+									
 			enyo.forEach(this.platformDrawers, function (target) {
-				this.$.targetsRows.$[target.id].loadKeys(provider);
+				this.$.appIdSelector.setUserData(userData);
+				var keys = provider.getKey(target.id);
+				if(target.id === "android" || target.id === "ios"|| target.id === "blackberry") {
+					this.$.targetsRows.$[target.id].$.drawer.$.signingKey.setKeys(keys);
+				}
+								
 			}, this);
 		}
 	},
+	/** @public */
+	activateInputRows: function (status) {
+		var fileChoosers = this.findAllInputRows();
+		enyo.forEach(fileChoosers, function (fileChooser) {
+			fileChooser.setActivated(status);
+		}, this);
+	},
+	/** @public */
+	findAllInputRows: function () {
+		var fileChoosers = [],
+			drawers = this.$.targetsRows;
+		
+		enyo.forEach(enyo.keys(drawers.$), function (drawer) {
+			var targets = drawers.$[drawer],
+				rows = targets.$.drawer;
+			enyo.forEach(enyo.keys(rows.$), function (row) {
+				if (rows.$[row].name === 'icon') {
+					fileChoosers.push(rows.$[row]);
+				} else if (rows.$[row].name === 'splashScreen') {
+					fileChoosers.push(rows.$[row]);
+				}
+			}, this);
+		}, this);
+
+		return fileChoosers;
+	},
+
 	statics: {
 		getProvider: function () {
 			this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('phonegap');
@@ -460,122 +450,7 @@ enyo.kind({
 });
 
 /**
- * This widget is aware of the differences between the Phoneap Build targets.
- */
-enyo.kind({
-	name: "Phonegap.ProjectProperties.Target",
-	debug: false,
-	classes: "ares-drawer",
-	published: {
-		targetId: "",
-		targetName: "",
-		enabled: "",
-		fold: true,
-		keys: {},
-		config: {}
-	},
-	components: [
-		 
-		{tag: "div", classes: "ares-project-properties-label-background", ontap: "unfold", 
-		components: [
-			{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "updateDrawer"},
-			{tag: "label", name: "targetLbl", classes: "ares-project-properties-platform_drawer_header"}
-		]},
-		 
-		{name: "drawer", orient: "v", kind: "onyx.Drawer",	open: false}
-	],
-	/**
-	 * @private
-	 */
-	create: function () {
-		ares.setupTraceLogger(this);
-		this.inherited(arguments);
-		this.targetNameChanged();
-	},
-	setProjectConfig: function (config) {
-		
-		this.trace("id:", this.targetId, "config:", config);		
-		this.config = config;		
-		this.setEnabled( !! this.config);
-		if (this.enabled && this.$.drawer.$.keySelector) {
-			this.$.drawer.$.keySelector.setActiveKeyId(this.config.keyId);
-		}		
-	},
-	getProjectConfig: function () {
-		if (this.enabled && this.$.drawer.$.keySelector) {
-			this.config.keyId = this.$.drawer.$.keySelector.getActiveKeyId();
-		}		
-		this.trace("id:", this.targetId, "config:", this.config);	
-		return this.config;
-	},
-	/**
-	 * @private
-	 */
-	targetNameChanged: function (old) {		
-		this.trace(old, "->", this.enabled);		
-		this.$.targetLbl.setContent(this.targetName);
-	},
-	/**
-	 * @private
-	 */
-	enabledChanged: function (old) {		
-		this.trace("id:", this.targetId, old, "->", this.enabled);		
-		this.$.targetChkBx.setChecked(this.enabled);
-		this.updateDrawer();
-		if (this.enabled) {
-			this.config = this.config || {};
-		} else {
-			this.config = false;
-		}
-	},
-	/**
-	 * @protected
-	 */
-	loadKeys: function (provider) {
-
-		if ((this.targetId === 'android' ||
-			this.targetId === 'ios' ||
-			this.targetId === 'blackberry')) {
-			
-			this.trace("id:", this.targetId);
-			
-
-			if (this.$.drawer.$.keySelector) {
-				this.$.drawer.$.keySelector.destroy();
-			}
-
-			var keys = provider.getKey(this.targetId);			
-			this.trace("id:", this.targetId, "keys:", keys);
-			
-			if (keys) {
-				this.$.drawer.createComponent({
-					name: "keySelector",
-					kind: "Phonegap.ProjectProperties.KeySelector",
-					targetId: this.targetId,
-					keys: keys,
-					classes: "ares-row ares-drawer",
-					activeKeyId: (this.config && this.config.keyId)
-				});
-				this.$.drawer.$.keySelector.render();
-				this.$.drawer.$.keySelector.setProvider(provider);
-			}
-		}
-	},
-	/**
-	 * @private
-	 */
-	updateDrawer: function () {		
-		this.setEnabled(this.$.targetChkBx.checked);
-	},
-
-	unfold: function () {
-		this.$.drawer.setOpen(this.fold);
-		this.fold = !this.fold;	
-	}
-});
-
-/**
- * Define the drawers "general" and "permissions"
+ * Define the drawers "sharedConfiguration" and "applicationPermissions"
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.Drawer",
@@ -602,9 +477,32 @@ enyo.kind({
 		this.inherited(arguments);
 		this.drawerNameChanged();
 	},
+		/**
+	 * @private
+	 */
+	drawerNameChanged: function () {
+		this.$.drawerLbl.setContent(this.drawerName);
+	},
 
 	setProjectConfig: function (config) {
-		this.config = config;			
+		
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else {
+				this.$.drawer.$[row].setProjectConfig(config);
+			}
+		}, this);
+	},
+
+	getProjectConfig: function (config) {		
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {			
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else {				
+				this.$.drawer.$[row].getProjectConfig(config);
+			}
+		}, this);
 	},
 
 	/**
@@ -614,166 +512,180 @@ enyo.kind({
 	unfold: function () {
 		this.$.drawer.setOpen(this.fold);
 		this.fold = !this.fold;
+	}
+
+
+});
+
+
+enyo.kind({
+	name: "Phonegap.ProjectProperties.AppId",
+	kind: "FittableColumns",
+	debug: false,
+	published: {
+		userData: undefined,
+		selectedAppId: undefined,
+		selectedTitle: undefined
 	},
 
+	components: [
+		{content: "AppId",	classes: "ares-project-properties-appid-id"},
+		{
+			kind: "onyx.PickerDecorator",
+		
+			components: [
+				{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
+				{kind: "onyx.Picker", name: "AppIdList",published: {appObject: undefined}, onSelect: "updateSelectedAppId"}
+			]
+		},
+		{content: "Application name:",	classes: "ares-project-properties-appid-title"},
+		{name: "ApplicationTitle", content:""}
+	],
+
+	/**@private*/
+	userDataChanged: function(){
+		
+		this.clearPickerContent();
+				
+		if (this.userData.user.apps.all.length === 0){
+			this.$.AppIdList.createComponent({content: "New Application", active: true});
+			this.setSelectedAppId('');
+		} else {
+			this.$.AppIdList.createComponent({content: "New Application", active: false});
+			enyo.forEach(this.userData.user.apps.all, 
+				function (inApp) {
+					var itemState = inApp.id === this.selectedAppId ? true : false;
+					if (itemState) {
+						this.setSelectedTitle(inApp.title);
+					}
+					this.$.AppIdList.createComponent({content: inApp.id, published: {applicationObject: inApp} , active: itemState});			
+					this.$.AppIdList.render();								
+				}, this);
+		}		
+	}, 
+
+	/**@private*/
+	updateSelectedAppId: function (inSender, inValue) {	
+		this.setSelectedTitle(inValue && inValue.selected.published.applicationObject&& inValue.selected.published.applicationObject.title || "");
+		if (inValue.content === "New Application") {
+			this.setSelectedAppId("");
+		} else {
+			this.setSelectedAppId(inValue.content);
+		}				
+	},
+
+	/**@private*/
+	clearPickerContent: function(){
+		
+		for (var key in this.$.AppIdList.$) {
+					
+			if (this.$.AppIdList.$[key].kind === "onyx.MenuItem"){							
+				this.$.AppIdList.$[key].destroy();
+			}		
+		}
+		this.$.AppIdList.render();
+	},
+
+	/**@private*/
+	selectedTitleChanged: function(){
+		this.$.ApplicationTitle.setContent(this.selectedTitle);
+		this.$.ApplicationTitle.render();
+	}
+
+});
+
+/**
+ * This widget is aware of the differences between the Phoneap Build targets.
+ */
+enyo.kind({
+	name: "Phonegap.ProjectProperties.Target",
+	kind: "Phonegap.ProjectProperties.Drawer",
+	debug: false,
+	classes: "ares-drawer",
+	published: {
+		targetId: "",		
+		enabled: "",
+		keys: {}
+	},
+	components: [
+		 
+		{tag: "div", classes: "ares-project-properties-label-background", ontap: "unfold", 
+		components: [
+			{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "updateDrawer"},
+			{tag: "label", name: "targetLbl", classes: "ares-project-properties-platform_drawer_header"}
+		]},
+		 
+		{name: "drawer", orient: "v", kind: "onyx.Drawer",	open: false}
+	],
 	/**
 	 * @private
 	 */
-	drawerNameChanged: function () {
-		this.$.drawerLbl.setContent(this.drawerName);
-	}
-});
-
-enyo.kind({
-	name: "Phonegap.ProjectProperties.KeySelector",
-	debug: false,
-	kind: "FittableRows",
-	published: {
-		targetId: "",
-		keys: undefined,
-		activeKeyId: undefined,
-		provider: undefined
-	},
-	components: [
-		{
-			components: [
-				{
-					classes: "ares-row",
-					components: [
-						{tag: "label", classes: "ares-project-properties-drawer-row-label", content: "Signing Key"}, 
-						{name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey",
-							components: [
-								{kind: "onyx.PickerButton",	content: "Choose...", classes: "middle-width ares-margin-right"}, 
-								{kind: "onyx.Picker", name: "keys"}
-							]
-						},
-						// android, ios & blackberry: key password
-						{
-							kind: "onyx.InputDecorator", classes: "ares-margin-right", 
-							components: [
-								{content: "Key"}, 
-								{name: "keyPasswd",	kind: "onyx.Input",	classes: "ares-small-input", type: "password",	placeholder: "Password"}
-							]
-						},
-						// android-only: keystore password
-						{
-							kind: "onyx.InputDecorator", name: "keystorePasswdFrm",	classes: "ares-margin-right", showing: false,
-							components: [
-								{content: "Keystore"}, 
-								{name: "keystorePasswd", kind: "onyx.Input", classes: "ares-small-input", type: "password",	placeholder: "Password"}
-							]
-						}, 
-						{kind: "onyx.Button", content: "Save",	ontap: "savePassword"}
-					]
-				}
-			]
-		}
-	],
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		this.keysChanged();
-		this.activeKeyIdChanged();
+		this.drawerNameChanged();
 	},
-	/**
-	 * @private
-	 */
-	keysChanged: function (old) {
-		
-		this.trace("id:", this.targetId, old, "->", this.keys);
-		
-		// Sanity
-		this.keys = this.keys || [];
+	/**@public*/
+	setProjectConfig: function (config) {
+		this.trace("id:", this.targetId, "config:", config);
 
-		// Make sure 'None' (id == -1) is always available
-		if (enyo.filter(this.keys, function (key) {
-			return key.id === undefined;
-		})[0] === undefined) {
-			this.keys.push({
-				id: undefined,
-				title: "None"
-			});
-		}
-
-		// Fill
-		enyo.forEach(this.keys, function (key) {
-			this.$.keys.createComponent({
-				name: key.id,
-				content: key.title,
-				active: (key.id === this.activeKeyId)
-			});
-		}, this);
-	},
-	/**
-	 * @private
-	 */
-	activeKeyIdChanged: function (old) {
-		var key = this.getKey(this.activeKeyId);
-		
-		this.trace("id:", this.targetId, old, "->", this.activeKeyId, "key:", key);
-		
-		if (key) {
-			// One of the configured keys
-			if (this.targetId === 'ios' || this.targetId === 'blackberry') {
-				// property named '.password' is defined by Phonegap
-				this.$.keyPasswd.setValue(key.password || "");
-			} else if (this.targetId === 'android') {
-				// properties named '.key_pw'and 'keystore_pw' are defined by Phonegap
-				this.$.keyPasswd.setValue(key.key_pw || "");
-				this.$.keystorePasswd.setValue(key.keystore_pw || "");
-				this.$.keystorePasswdFrm.show();
+		this.setEnabled( config && config.targets[this.targetId] );
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			if(this.$.drawer.$[row].platform){
+				this.$.drawer.$[row].setProjectConfig(config);
 			}
+		}, this);
+
+
+	},
+	/**@public*/
+	getProjectConfig: function (config) {
+		if (this.enabled) {
+			config.targets[this.targetId] = {};
 		}
+
+		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
+			
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else if (row === "signingKey") {				
+				if (this.enabled && this.$.drawer.$.signingKey.getActiveKeyId()) {
+					config.targets[this.targetId].keyId = this.$.drawer.$.signingKey.getActiveKeyId();
+				}
+				
+			} else {
+
+				this.$.drawer.$[row].getProjectConfig(config);
+			}
+		}, this);
+		this.trace("id:", this.targetId, "config:", config);
 	},
 	/**
-	 * @protected
+	 * @private
 	 */
-	getKey: function (keyId) {
-		if (keyId) {
-			return enyo.filter(this.keys, function (key) {
-				return key.id === keyId;
-			}, this)[0];
+	drawerNameChanged: function (old) {		
+		this.trace(old, "->", this.enabled);		
+		this.$.targetLbl.setContent(this.drawerName);
+	},
+	/**
+	 * @private
+	 */
+	enabledChanged: function (old) {		
+		this.trace("id:", this.targetId, old, "->", this.enabled);		
+		this.$.targetChkBx.setChecked(this.enabled);
+		this.updateDrawer();
+		if (this.enabled) {
+			this.config = this.config || {};
 		} else {
-			return undefined;
+			this.config = false;
 		}
 	},
 	/**
 	 * @private
 	 */
-	selectKey: function (inSender, inValue) {
-		this.trace("sender:", inSender, "value:", inValue);
-		enyo.forEach(this.keys, function (key) {
-			if (key.title === inValue.content) {
-				this.setActiveKeyId(key.id);
-				this.trace("selected key:", key);
-			}
-		}, this);
+	updateDrawer: function () {		
+		this.setEnabled(this.$.targetChkBx.checked);
 	},
-	/**
-	 * Return a signing key object from the displayed (showing === true) widgets
-	 * @private
-	 */
-	getShowingKey: function () {
-		var key = this.getKey(this.activeKeyId);
-		if (!key) {
-			return undefined;
-		} else if (this.targetId === 'ios' || this.targetId === 'blackberry') {
-			// property name '.password' is defined by Phonegap
-			key.password = this.$.keyPasswd.getValue();
-		} else if (this.targetId === 'android') {
-			// properties names '.key_pw'and 'keystore_pw' are defined by Phonegap
-			key.key_pw = this.$.keyPasswd.getValue();
-			key.keystore_pw = this.$.keystorePasswd.getValue();
-		}
-		return key;
-	},
-	/**
-	 * @private
-	 */
-	savePassword: function (inSender, inValue) {		
-		this.trace("sender:", inSender, "value:", inValue);		
-		var key = this.getShowingKey();		
-		this.trace("targetId:", this.targetId, "key:", key);		
-		this.provider.setKey(this.targetId, key);
-	}
 });
+
+

@@ -1,11 +1,23 @@
 /* global Ares, async, ares, alert */
 
+enyo.path.addPaths({
+	"assets"	: "$enyo/../assets",
+	// deprecated aliases
+	"utilities"	: "$enyo/../utilities",
+	"services"	: "$enyo/../services",
+	"phobos"	: "$enyo/../phobos",
+	"deimos"	: "$enyo/../deimos",
+	"harmonia"	: "$enyo/../harmonia",
+	"project-view"	: "$enyo/../project-view"
+});
+
 enyo.kind({
 	name: "Ares",
 	kind: "Control",
 	classes: "onyx",
 	fit: true,
 	debug: false,
+	//noDefer: true, //FIXME: does not work with statics:{}
 	componentsRegistry: {},
 	components: [
 		{
@@ -39,6 +51,7 @@ enyo.kind({
 			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
 		]},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
+		{name: "signInErrorPopup", kind: "Ares.SignInErrorPopup", msg: "unknown error", details: ""},
 		{kind: "ServiceRegistry"},
 		{kind: "Ares.PackageMunger", name: "packageMunger"}
 	],
@@ -48,12 +61,13 @@ enyo.kind({
 		onShowWaitPopup: "showWaitPopup",
 		onHideWaitPopup: "hideWaitPopup",
 		onError: "showError",
+		onSignInError: "showAccountConfiguration",
 		onTreeChanged: "_treeChanged",
 		onChangingNode: "_nodeChanging",
 		onSaveDocument: "saveDocument", 
 		onSaveAsDocument: "saveAsDocument", 
 		onCloseDocument: "closeDocument", 
-		onCloseAllDocument: "closeAllDocument",
+		onCloseProjectDocuments: "closeDocumentsForProject",
 		onDesignDocument: "designDocument", 
 		onUpdate: "phobosUpdate",
 		onCloseDesigner: "closeDesigner", 
@@ -61,12 +75,13 @@ enyo.kind({
 		onUndo: "designerUndo", 
 		onRedo: "designerRedo",
 		onSwitchFile: "switchFile",
-		onSave: "bounceSave",
 		onDesign: "bounceDesign",
 		onNewKind: "bounceNew",
 		onCloseFileRequest: "bounceCloseFileRequest",
 		onRegisterMe : "_registerComponent",
-		onMovePanel : "_movePanel"
+		onMovePanel : "_movePanel",
+		onSavePreviewAction: "_saveBeforePreview",
+		onDisplayPreview : "_displayPreview"
 
 	},
 	projectListIndex: 0,
@@ -80,7 +95,6 @@ enyo.kind({
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
-		this.adjustBarMode();
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
 			Ares.Workspace.loadProjects("com.enyojs.ares.tests", true);
@@ -173,7 +187,10 @@ enyo.kind({
 			if (err) {
 				self.componentsRegistry.phobos.saveFailed(err);
 			} else {
-				self.componentsRegistry.phobos.saveComplete();
+				var fileDataId = Ares.Workspace.files.computeId(inEvent.file);
+				var fileData = Ares.Workspace.files.get(fileDataId);
+				self.componentsRegistry.phobos.saveComplete(fileData);
+				// FIXME: ENYO-2976
 				self.componentsRegistry.deimos.saveComplete();
 			}
 		});
@@ -250,7 +267,7 @@ enyo.kind({
 		}
 
 		function _footer(err, result) {
-			if (self.debug) { enyo.log("err:", err, "result:", result); }
+			self.trace("err:", err, "result:", result);
 			if (typeof inEvent.next === 'function') {
 				inEvent.next(err, result);
 			}
@@ -264,14 +281,6 @@ enyo.kind({
 				self.showProjectView();
 			}
 		});
-	},
-	closeAllDocument: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-		var files = Ares.Workspace.files;
-		while(files.models.length) {
-			this._closeDocument(files.at(0).getId());
-		}
-		this.showProjectView();
 	},
 	/* @private */
 	closeSomeDocuments: function(inSender, inEvent) {
@@ -312,7 +321,6 @@ enyo.kind({
 		this.syncEditedFiles();
 		this.componentsRegistry.deimos.load(inEvent);
 		this.componentsRegistry.codeEditor.$.panels.setIndex(this.deimosViewIndex);
-		this.adjustBarMode();
 		this.activeDocument.setCurrentIF('designer');
 	},
 	//* A code change happened in Phobos - push change to Deimos
@@ -328,8 +336,8 @@ enyo.kind({
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
 		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
-		this.adjustBarMode();
 		this.activeDocument.setCurrentIF('code');
+		this.componentsRegistry.codeEditor.manageControls(false);
 	},
 	//* Undo event from Deimos
 	designerUndo: function(inSender, inEvent) {
@@ -364,6 +372,7 @@ enyo.kind({
 		this.$.aresLayoutPanels.reflow();
 		this.$.aresLayoutPanels.setIndexDirect(this.hermesFileTreeIndex);
 		this.componentsRegistry.harmonia.showGrabber();
+		this.componentsRegistry.harmonia.hideLogo();
 	},
 	showProjectView: function(inSender, inEvent) {
 		this.isProjectView = true;
@@ -372,12 +381,15 @@ enyo.kind({
 		this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
 		this.$.aresLayoutPanels.reflow();
 		this.componentsRegistry.harmonia.hideGrabber();
+		this.componentsRegistry.harmonia.showLogo();
 	},
 	changeGrabberDirection:function(inSender, inEvent){
-		if(this.$.aresLayoutPanels.getIndex()>0){
-			this.$.aresLayoutPanels.getActive().switchGrabberDirection(true);
+		if(inEvent.toIndex > 0 && inEvent.fromIndex < inEvent.toIndex){
+			for(var i = 1; i<=inEvent.toIndex; i++){
+				this.$.aresLayoutPanels.getPanels()[i].switchGrabberDirection(true);
+			}
 		}
-		if(inEvent.fromIndex>0){
+		if(inEvent.fromIndex>inEvent.toIndex){
 			this.$.aresLayoutPanels.getPanels()[inEvent.fromIndex].switchGrabberDirection(false);
 		}
 	},
@@ -413,19 +425,16 @@ enyo.kind({
 		}
 		var currentIF = d.getCurrentIF();
 		this.activeDocument = d;
+		this.componentsRegistry.codeEditor.addPreviewTooltip("Preview "+this.activeDocument.getProjectData().id);
+		
 		if (currentIF === 'code') {
 			this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
-			this.componentsRegistry.codeEditor.manageConrols(false);
+			this.componentsRegistry.codeEditor.manageControls(false);
 		} else {
 			this.componentsRegistry.phobos.designerAction();
-			this.componentsRegistry.codeEditor.manageConrols(true);
+			this.componentsRegistry.codeEditor.manageControls(true);
 		}
-		this.adjustBarMode();
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
-	},
-	// FIXME: This trampoline function probably needs some refactoring
-	bounceSave: function(inSender, inEvent) {
-		this.componentsRegistry.phobos.saveDocAction(inSender, inEvent);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
@@ -435,9 +444,6 @@ enyo.kind({
 		} else {
 			this.componentsRegistry.deimos.closeDesignerAction();
 		}
-	},
-	adjustBarMode: function() {
-		var designMode = this.componentsRegistry.codeEditor.$.panels.getIndex() == this.deimosViewIndex;
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {
@@ -493,12 +499,24 @@ enyo.kind({
 	},
 	showError: function(inSender, inEvent) {
 		this.trace("event:", inEvent, "from sender:", inSender);
-		this.hideWaitPopup();
-		this.showErrorPopup(inEvent);
+		this.hideWaitPopup();		
+		if (inEvent && inEvent.err && inEvent.err.status === 401) {
+			this.showSignInErrorPopup(inEvent);
+		} else {
+			this.showErrorPopup(inEvent);
+		}
+		
 		return true; //Stop event propagation
 	},
 	showErrorPopup : function(inEvent) {
 		this.$.errorPopup.raise(inEvent);
+	},
+	showSignInErrorPopup : function(inEvent) {
+		this.$.signInErrorPopup.raise(inEvent);
+	},
+	showAccountConfiguration: function() {
+		this.componentsRegistry["accountsConfigurator"].show();		
+		this.$.signInErrorPopup.hide();		
 	},
 	/**
 	 * Event handler for user-initiated file or folder changes
@@ -533,17 +551,70 @@ enyo.kind({
 		});
 	},
 	/**
+	 * Event handler for to close opened documents of a project
+	 * 
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent => inEvent.project in Ares.Model.Project
+	 */
+	closeDocumentsForProject: function(inSender, inEvent){
+		var files = Ares.Workspace.files,
+			model,
+			i;
+		for( i = 0; i < files.models.length; i++ ) {
+			model = files.models[i];
+
+			var serviceId = model.getProjectData().getServiceId();
+			var folderId = model.getProjectData().getFolderId();
+			if ( serviceId === inEvent.project.getServiceId() && folderId === inEvent.project.getFolderId()) {
+				this._closeDocument(model.id);
+				i--;
+			}
+		}
+		if (! Ares.Workspace.files.length ) {
+			this.showProjectView();
+		} else{
+			this.selectProjectForActiveDocument();
+		}
+	},
+	selectProjectForActiveDocument:function(){
+		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
+		if(project){
+			this.componentsRegistry.projectList.selectInProjectList(project);
+		}
+	},
+	_saveBeforePreview: function(inSender, inEvent){
+		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
+		var files = Ares.Workspace.files;
+		var editedDocs = [];
+		enyo.forEach(files.models, function(model) {
+			var serviceId = model.getProjectData().getServiceId();
+			var folderId = model.getProjectData().getFolderId();
+			if ( serviceId === project.getServiceId() && folderId === project.getFolderId()) {
+				if(model.getEdited()){
+					editedDocs.push(model);
+				}
+			}
+		}, this);
+		this.componentsRegistry.phobos.saveDocumentsBeforePreview(editedDocs);
+	},
+	_displayPreview: function(inSender, inEvent){
+		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
+		this.componentsRegistry.projectView.previewAction(inSender,{project:project});
+	},
+	/**
 	 * Event handler for ares components registry
 	 * 
 	 * @private
 	 * @param {Object} inSender
-	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, codeEditor]
+	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, codeEditor, accountsConfigurator, ...]
 	 */
 	_registerComponent: function(inSender, inEvent) {
-		if(this.componentsRegistry[inEvent.name] === undefined){
+		var ref = this.componentsRegistry[inEvent.name];
+		if (ref === undefined || ref === inEvent.reference){
 			this.componentsRegistry[inEvent.name] = inEvent.reference;
-		}else {
-			this.error("Component is already registred: ", inEvent.name);
+		} else {
+			throw new Error("Component is already registred: '" + inEvent.name + "'");
 		}
 	},
 	stopEvent: function(){
@@ -560,3 +631,7 @@ enyo.kind({
 		instance: null
 	}
 });
+
+if ( ! Ares.isBrowserSupported()) {
+	alert($L("Ares is designed for the latest version of IE. We recommend that you upgrade your browser or use Chrome"));
+}

@@ -1,3 +1,4 @@
+/* global ares */
 enyo.kind({
 	name: "CategoryItem",
 	components: [
@@ -49,6 +50,7 @@ enyo.kind({
 		}
 		
 		inEvent.config = this.config;
+		inEvent.options = this.options;
 	},
 	setModel: function(inModel) {
 		if (inModel) {
@@ -65,6 +67,7 @@ enyo.kind({
 				}
 			}
 			this.config = inModel.config;
+			this.options = inModel.options;
 		}
 	}
 });
@@ -73,7 +76,6 @@ enyo.kind({
 	name: "Palette",
 	style: "position: relative",
 	published: {
-		projectData: "",
 		projectIndexer: ""
 	},
 	debug: false,
@@ -84,15 +86,19 @@ enyo.kind({
 					{kind: "CategoryItem"}
 				]}
 			]},
-			{kind:"onyx.InputDecorator", style:"width:100%; margin-top:10px;", layoutKind:"FittableColumnsLayout", components: [
+			// FIXME ENYO-3021: component hidden until ENYO-1887 implementation
+			{kind:"onyx.InputDecorator", showing: false, style:"width:100%; margin-top:10px;", layoutKind:"FittableColumnsLayout", components: [
 				{kind: "onyx.Input", fit:true, placeholder: "filter"},
 				{kind: "onyx.Icon", src:"$deimos/images/search-input-search.png", style:"height:20px;"}
 			]}
-		]},
-		{name: "serializer", kind: "Ares.Serializer"}
+		]}
 	],
 	handlers: {
 		ondragstart: "dragstart"
+	},
+	create: function () {
+		ares.setupTraceLogger(this);
+		this.inherited(arguments);
 	},
 	setupItem: function(inSender, inEvent) {
 		var index = inEvent.index;
@@ -105,36 +111,7 @@ enyo.kind({
 			return true;
 		}
 		
-		inEvent.dataTransfer.setData("ares/createitem", enyo.json.codify.to({config: inEvent.config}));
-	},
-	/**
-	 * Receive the project data reference which allows to access the analyzer
-	 * output for the project's files, enyo/onyx and all the other project
-	 * related information shared between phobos and deimos.
-	 * @param  oldProjectData
-	 * @protected
-	 */
-	projectDataChanged: function(oldProjectData) {
-		if (this.projectData) {
-			if (this.debug)  { this.log("projectDataChanged: projectData: ", this.projectData); }
-			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
-			this.projectData.on('update:project-indexer', this.projectIndexerChanged, this);
-			this.setProjectIndexer(this.projectData.getProjectIndexer());
-		}
-		if (oldProjectData) {
-			if (this.debug)  { this.log("projectDataChanged: oldProjectData: ", oldProjectData); }
-			oldProjectData.off('change:project-indexer', this.projectIndexReady);
-			oldProjectData.off('update:project-indexer', this.projectIndexerChanged);
-		}
-	},
-	/**
-	 * The project analyzer output has changed
-	 * @param value   the new analyzer output
-	 * @protected
-	 */
-	projectIndexReady: function(model, value, options) {
-		if (this.debug)  { this.log("projectIndexReady: ", value); }
-		this.setProjectIndexer(value);
+		inEvent.dataTransfer.setData("ares/createitem", enyo.json.codify.to({config: inEvent.config, options: inEvent.options}));
 	},
 	/**
 	 * The current project analyzer output has changed
@@ -143,7 +120,7 @@ enyo.kind({
 	 * @protected
 	 */
 	projectIndexerChanged: function() {
-		if (this.debug)  { this.log("projectIndexerChanged: rebuilt the palette "); }
+		this.trace("projectIndexerChanged: rebuilt the palette ");
 		var catchAllPalette = this.buildCatchAllPalette();
 		this.palette = catchAllPalette.concat(this.projectIndexer.design.palette || []);
 		this.palette.sort(function(a,b) {
@@ -175,8 +152,8 @@ enyo.kind({
 		var catchKindListInPalette = [];
 		if (this.projectIndexer.design.hasOwnProperty("palette")) {
 			var keys = Object.keys(this.projectIndexer.design.palette);
- 			enyo.forEach(keys, function(o) {
- 				if (this.projectIndexer.design.palette[o]) {
+			enyo.forEach(keys, function(o) {
+				if (this.projectIndexer.design.palette[o]) {
 					var keys = Object.keys(this.projectIndexer.design.palette[o].items);
 					enyo.forEach(keys, function(item) {
 						catchKindListInPalette.push(this.projectIndexer.design.palette[o].items[item].kind);
@@ -187,7 +164,7 @@ enyo.kind({
 		// Get list of all public Components from indexer without palette meta-data, sorted by name
 		var catchAllKinds = enyo.filter(this.projectIndexer.objects, function(o) {
 			return  (o.type == "kind") && (enyo.indexOf("enyo.Component", o.superkinds) >= 0) &&
-				(o.group == "public") && (!(catchKindListInPalette.indexOf(o.name) > -1));
+				(o.group == "public") && (catchKindListInPalette.indexOf(o.name) == -1);
 		}).sort(function(a,b) {
 			return a.name.localeCompare(b.name);
 		});

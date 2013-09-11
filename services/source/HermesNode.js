@@ -68,7 +68,7 @@ enyo.kind({
 	},
 	/** @private */
 	dragenter: function(inSender, inEvent) {
-		if (!inEvent.dataTransfer || inEvent.dataTransfer.types[0] != "hermes.node") {
+		if (!inEvent.dataTransfer) {
 			return true;
 		}
 		
@@ -77,7 +77,7 @@ enyo.kind({
 	},
 	/** @private */
 	dragover: function(inSender, inEvent) {
-		if (!inEvent.dataTransfer || inEvent.dataTransfer.types[0] != "hermes.node") {
+		if (!inEvent.dataTransfer) {
 			return true;
 		}
 		
@@ -86,7 +86,7 @@ enyo.kind({
 	},
 	/** @private */
 	dragleave: function(inSender, inEvent) {
-		if (!inEvent.dataTransfer || inEvent.dataTransfer.types[0] != "hermes.node") {
+		if (!inEvent.dataTransfer) {
 			return true;
 		}
 		
@@ -95,7 +95,7 @@ enyo.kind({
 	},
 	/** @private */
 	drop: function(inSender, inEvent) {
-		if (!inEvent.dataTransfer || inEvent.dataTransfer.types[0] != "hermes.node") {
+		if (!inEvent.dataTransfer) {
 			return true;
 		}
 		
@@ -142,7 +142,7 @@ enyo.kind({
 		this.$.extra.setContent("");
 	},
 	updateNodeContent: function(files) {
-		var i = 0, rfiles, tfiles, res, newControl, k = 0, nfiles;
+		var i = 0, rfiles, tfiles, res, newNode, k = 0, nfiles;
 		
 		this.trace( "updateNodeContent on", this ) ;
 
@@ -190,12 +190,12 @@ enyo.kind({
 				case 1:
 					this.trace( rfiles[i].name, "was created" ) ;
 					if (this.dragAllowed) {
-						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node", dragAllowed: true, attributes: {draggable : true}} ) ;
+						newNode = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node", dragAllowed: true, attributes: {draggable : true}} ) ;
 					} else {
-						newControl = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node"} ) ;
+						newNode = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node"} ) ;
 					}
-					newControl.setService(this.service);
-					this.trace( newControl, "has been created " ) ;
+					newNode.setService(this.service);
+					this.trace( newNode, "has been created " ) ;
 
 					nfiles = this.getNodeFiles() ;
 					/*
@@ -296,6 +296,7 @@ enyo.kind({
 		inFiles.sort(this.fileNameSort); // TODO: Other sort orders
 		for (var i=0; i < inFiles.length; i++) {
 			f=inFiles[i];
+			f.service = this.service;
 			nodes.push({
 				file: f,
 				name: '$' + f.name, // prefix avoids clobberring non-files components like icon
@@ -310,7 +311,7 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		
 		var subnode = inEvent.originator;
-		this.trace("nodeExpand called while node Expanded is " + subnode.expanded) ;
+		this.trace("nodeExpand called while node Expanded is ", subnode.expanded) ;
 		// update icon for expanded state
 		if (subnode.file.isDir) {
 			subnode.setIcon("$services/assets/images/" + (subnode.expanded ? "folder-open.png" : "folder.png"));
@@ -350,7 +351,7 @@ enyo.kind({
 					this.trace('running INNER function of refreshTree on ' + f.name +
 								 ' id ' + c.file.id);
 					if ( c.file.id === toSelectId ) {
-						this.trace('force select of ' + c.file.id);
+						this.trace('force select of ', c.file.id);
 						c.doNodeTap();
 
 						// force a "click" event when the item is selected
@@ -367,7 +368,7 @@ enyo.kind({
 			error(this, function(inSender, inError) {
 				var errMsg = "*** Error refreshing the file list (" + inError + ")";
 				try {
-					errMsg += ": " + JSON.parse(inSender.xhrResponse.body).message;
+					errMsg += ": " + enyo.json.parse(inSender.xhrResponse.body).message;
 				} catch(e) {
 				}
 				this.warn(errMsg);

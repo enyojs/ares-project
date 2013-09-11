@@ -62,10 +62,8 @@ The following features are in the works, and you should see them added as we mov
 
 ### Install
 
-1. Install Node.js & NPM 0.8.x (>= 0.8.21).  
-Recommended version is node 0.8.25 and can be downloaded from: [node 0.8.25](http://nodejs.org/dist/v0.8.25/).  
-	`NOTE`: Ares does not currently work with node 0.10.x.
-1. Run:
+1. Install Node.js 0.8.21 (or later, including 0.10.x) & its associated NPM (Node Package Manager) from a binary distribution, for example at [nodejs.org](http://nodejs.org/download/)
+1. Install `ares-ide` using NPM:
 
 		$ npm -d install ares-ide
 
@@ -74,10 +72,9 @@ Recommended version is node 0.8.25 and can be downloaded from: [node 0.8.25](htt
 1. Once installed, run it using `node_modules/.bin/ares-ide` (or `node_modules\.bin\ares-ide.cmd`) on Windows.
 1. Please report the issues you find in our JIRA at [https://enyojs.atlassian.net/](https://enyojs.atlassian.net/) against the component named `ares`.
 
-
 ### Run
 
-Start the IDE server: (e.g. using the Command Prompt, navigate to the ares directory and type 'node ide.js')… 
+Start the IDE server: (e.g. using the Command Prompt, navigate to the ares directory and type `node ide.js`)… 
 
 	C:\Users\johndoe\node_modules\.bin> ares-ide.cmd
 
@@ -198,4 +195,16 @@ The client code of an Ares plugin is defined by the property "`pluginUrl`" of a 
 During the initialization process of Ares within the browser, the 'ServiceRegistry' will perform an 'enyo.load' of the javascript file (Usually a 'package.js' file) specified by the property "`pluginUrl`".  
 After being loaded, the new code must invoke `ServiceRegistry.instance.pluginReady();` to notify Ares that the client side code is ready.  
 See the function 'pluginReady' in the file 'services/source/ServiceRegistry.js'.
+
+### Ares logo
+
+It is possible to customize the logo displayed on the top-right corner of Ares.
+
+For this, load your logo in ares (recommended size is 42x42px). Change the following line in ``utilities/source/Logo.js`` in the ``create`` function:
+
+			this.setSource("path-to-your-logo");
+
+To remove the logo's display from Ares, replace the call to ``this.setSource("path-to-your-logo")`` by:
+
+			this.hideLogo();
 

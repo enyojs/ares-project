@@ -1,3 +1,4 @@
+/* jshint node:true */
 module.exports = HttpError;
 
 var util  = require("util");

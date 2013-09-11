@@ -14,8 +14,8 @@ enyo.kind({
 	},
 	components: [
 		{name: "client", classes:"enyo-fit"},
-		{name: "cloneArea", style: "background:rgba(0,200,0,0.5); display:none; opacity: 0;", classes: "enyo-fit enyo-clip"},
-		{name: "flightArea", style: "display:none;", classes: "enyo-fit"},
+		{name: "cloneArea", style: "background:rgba(0,200,0,0.5); opacity: 0;", classes: "enyo-fit enyo-clip", showing: false},
+		{name: "flightArea", classes: "enyo-fit", showing: false},
 		{name: "serializer", kind: "Ares.Serializer"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"},
 		{name: "selectHighlight", classes: "iframe-highlight iframe-select-highlight", showing: false},
@@ -41,6 +41,7 @@ enyo.kind({
 	debug: false,
 	
 	create: function() {
+		this.trace = (this.debug === true ? this.log : function(){});
 		this.inherited(arguments);
 		this.addHandlers();
 		this.addDispatcherFeature();
@@ -90,7 +91,7 @@ enyo.kind({
 		enyo.dispatcher.features.push(
 			function(e) {
 				if (_this[e.type]) {
-					_this[e.type](e)
+					_this[e.type](e);
 				}
 				e.preventDispatch = true;
 				return true;
@@ -116,9 +117,6 @@ enyo.kind({
 				this.setContainerData(msg.val);
 				break;
 			case "render":
-				// Add "$app" to enyo.path for image path (src attribute) resolution when the app is running into Ares Designer.
-				enyo.path.addPath("app", enyo.path.rewrite("$enyo/.."));
-
 				this.renderKind(msg.val);
 				break;
 			case "select":
@@ -151,6 +149,9 @@ enyo.kind({
 			case "requestPositionValue":
 				this.requestPositionValue(msg.val);
 				break;
+			case "serializerOptions":
+				this.$.serializer.setSerializerOptions(msg.val);
+				break;
 			default:
 				enyo.warn("Deimos iframe received unknown message op:", msg);
 				break;
@@ -163,6 +164,13 @@ enyo.kind({
 		if (dragTarget && dragTarget.aresComponent) {
 			this._selectItem(dragTarget);
 		}
+
+		// Using encoded 1px x 1px transparent png
+		var imageData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyBpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBXaW5kb3dzIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjEwRDRFRUY1Rjk3NDExRTI5NTRFQ0U1RjAwMURENDczIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjEwRDRFRUY2Rjk3NDExRTI5NTRFQ0U1RjAwMURENDczIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTBENEVFRjNGOTc0MTFFMjk1NEVDRTVGMDAxREQ0NzMiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MTBENEVFRjRGOTc0MTFFMjk1NEVDRTVGMDAxREQ0NzMiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4/IH2ZAAAAEElEQVR42mL4//8/A0CAAQAI/AL+26JNFgAAAABJRU5ErkJggg==";
+		this.createDragImage(imageData);
+	},
+	up: function(e) {
+		this.clearDragImage();
 	},
 	//* On drag start, set the event _dataTransfer_ property to contain a serialized copy of _this.selection_
 	dragstart: function(e) {
@@ -175,17 +183,12 @@ enyo.kind({
 		e.dataTransfer.setData('ares/moveitem', this.$.serializer.serializeComponent(this.selection, true));
 
 		// Hide the drag image ghost
-		e.dataTransfer.setDragImage(this.createDragImage(), 0, 0);
+		e.dataTransfer.setDragImage(this.dragImage, 0, 0);
 
         return true;
 	},
 	//* On drag over, enable HTML5 drag-and-drop if there is a valid drop target
 	dragover: function(inEvent) {
-		var dropTarget,
-			mouseMoved,
-			dataType
-		;
-		
 		if (!inEvent.dataTransfer) {
 			return false;
 		}
@@ -275,7 +278,7 @@ enyo.kind({
 				dropTargetId = this.getContainerItem() ? this.getContainerItem() : this.getEventDropTarget(inEvent.dispatchTarget);
 				dropTargetId = (dropTargetId && dropTargetId.aresId) || null;
 				beforeId = this.getBeforeItem() ? this.getBeforeItem().aresId : null;
-				this.sendMessage({op: "createItem", val: {config: dropData.config, targetId: dropTargetId, beforeId: beforeId}});
+				this.sendMessage({op: "createItem", val: {config: dropData.config, options: dropData.options, targetId: dropTargetId, beforeId: beforeId}});
 				break;
 			
 			default:
@@ -294,8 +297,9 @@ enyo.kind({
 		this.unhighlightDropTargets();
 		this.clearDragImage();
 	},
-	createDragImage: function() {
-		this.dragImage = document.createElement();
+	createDragImage: function(inImage) {
+		this.dragImage = document.createElement("img");
+		this.dragImage.src = inImage;
 		return this.dragImage;
 	},
 	clearDragImage: function() {
@@ -401,10 +405,11 @@ enyo.kind({
 				this.selectItem({aresId: inKind.selectId});
 			}
 		} catch(error) {
-			errMsg = "Unable to render kind '" + inKind.name + "':" + error.message;
-			this.error(errMsg, error.stack);
-			this.sendMessage({op: "error", val: {msg: errMsg, details: error.stack}});
+			errMsg = "Unable to render kind '" + inKind.name + "':" + ( typeof error === 'object' ? error.message : error );
+			var errStack = typeof error === 'object' ? error.stack : '' ;
+			this.error(errMsg, errStack );
 			this.sendMessage({op: "reloadNeeded"});
+			this.sendMessage({op: "error", val: {msg: errMsg, reloadNeeded: true, err: {stack: errStack}}});
 		}
 	},
 	//* Rerender current selection
@@ -415,7 +420,7 @@ enyo.kind({
 		enyo.forEach(kinds, function(kindDefinition) {
 			var name = kindDefinition.kind;
 			if ( ! enyo.constructorForKind(name)) {
-				errMsg = 'No constructor found for kind "' + name + "'";
+				var errMsg = 'No constructor found for kind "' + name + "'";
 				this.log(errMsg);
 				this.sendMessage({op: "error", val: {msg: errMsg}});
 			}
@@ -486,7 +491,7 @@ enyo.kind({
 		if (options && options.isRepeater && (inProperty === "onSetupItem" || inProperty === "count")) {
 			// DO NOT APPLY changes to the properties mentioned above
 			// TODO: could be managed later on thru config in .design files if more than one kind need special processings.
-			this.debug && this.log("Skipping modification of \"" + inProperty + "\"");
+			this.trace("Skipping modification of \"", inProperty, "\"");
 		} else {
 			this.selection[inProperty] = inValue;
 		}
@@ -532,7 +537,7 @@ enyo.kind({
 					Force "count" to 1 and invalidate "onSetupItem" to
 					manage them correctly in the Designer
 				 */
-				this.debug && this.log("Manage repeater " + inComponent.kind, inComponent);
+				this.trace("Manage repeater ", inComponent.kind, inComponent);
 				inComponent.count = 1;
 				inComponent.onSetupItem = "aresUnImplemetedFunction";
 			}
@@ -712,7 +717,9 @@ enyo.kind({
 	},
 	//* Eval code passed in by designer
 	codeUpdate: function(inCode) {
-		eval(inCode);
+		/* jshint evil: true */
+		eval(inCode); // TODO: ENYO-2074, replace eval.
+		/* jshint evil: false */
 	},
 	//* Update CSS by replacing the link/style tag in the head with an updated style tag
 	cssUpdate: function(inData) {
@@ -785,9 +792,8 @@ enyo.kind({
 	},
 	// Move selection to new position
 	moveSelectionToAbsolutePosition: function(inX, inY) {
-		var container   = this.getContainerItem(),
-			containerId = container ? container.aresId : null,
-			clone       = this.cloneControl(this.selection, true) //this.createSelectionGhost(this.selection)
+		var container = this.getContainerItem(),
+			clone = this.cloneControl(this.selection, true) //this.createSelectionGhost(this.selection)
 		;
 		
 		this.hideSelectHighlight();
@@ -801,10 +807,10 @@ enyo.kind({
 	},
 	//* Add appropriate vertical positioning to _inControl_ based on _inY_
 	addVerticalPositioning: function(inControl, inY) {
-		var container 		= this.getContainerItem(),
+		var container = this.getContainerItem(),
 			containerBounds = this.getRelativeBounds(container),
-			controlBounds 	= this.getRelativeBounds(inControl),
-			styleProps		= {}
+			controlBounds = this.getRelativeBounds(inControl),
+			styleProps = {}
 		;
 		
 		// Convert css string to hash
@@ -819,10 +825,10 @@ enyo.kind({
 	},
 	//* Add appropriate horizontal positioning to _inControl_ based on _inX_
 	addHorizontalPositioning: function(inControl, inX) {
-		var container 		= this.getContainerItem(),
+		var container = this.getContainerItem(),
 			containerBounds = this.getRelativeBounds(container),
-			controlBounds 	= this.getRelativeBounds(inControl),
-			styleProps		= {}
+			controlBounds = this.getRelativeBounds(inControl),
+			styleProps = {}
 		;
 		
 		// Convert css string to hash
@@ -1141,9 +1147,7 @@ enyo.kind({
 	//* TODO - This createSelectionGhost is WIP
 	createSelectionGhost: function (inItem) {
 		var computedStyle = enyo.dom.getComputedStyle(inItem.hasNode()),
-			rect = inItem.hasNode().getBoundingClientRect(),
 			borderWidth = 1,
-			height,
 			style;
 		
 		if (!computedStyle) {
@@ -1151,7 +1155,7 @@ enyo.kind({
 			return null;
 		}
 		
-		this.log("h: ", parseInt(computedStyle.height), "w: ", parseInt(computedStyle.width), "p: ", parseInt(computedStyle.padding), "m: ", parseInt(computedStyle.margin));
+		this.log("h: ", parseInt(computedStyle.height, 10), "w: ", parseInt(computedStyle.width, 10), "p: ", parseInt(computedStyle.padding, 10), "m: ", parseInt(computedStyle.margin,10));
 		
 		style = "width: "   + computedStyle.width + "; " +
 				"height: "  + computedStyle.height + "; " +
@@ -1398,7 +1402,7 @@ enyo.kind({
 	},
 	removeDuplicateItems: function(inA, inB) {
 		return inA.concat(inB).filter(function(elem, pos, self) {
-	    	return self.indexOf(elem) !== pos;
+			return self.indexOf(elem) !== pos;
 		});
 	},
 	absolutePositioningMode: function(inControl) {
@@ -1444,15 +1448,15 @@ enyo.kind({
 		return bounds;
 	},
 	getAbsoluteBounds: function(inControl) {
-		var left 			= 0,
-			top 			= 0,
-			match			= null,
-			node 			= inControl.hasNode(),
-			width 			= node.offsetWidth,
-			height 			= node.offsetHeight,
-			transformProp 	= enyo.dom.getStyleTransformProp(),
-			xRegEx 		= /translateX\((-?\d+)px\)/i,
-			yRegEx 		= /translateY\((-?\d+)px\)/i;
+		var left = 0,
+			top = 0,
+			match = null,
+			node = inControl.hasNode(),
+			width = node.offsetWidth,
+			height = node.offsetHeight,
+			transformProp = enyo.dom.getStyleTransformProp(),
+			xRegEx = /translateX\((-?\d+)px\)/i,
+			yRegEx = /translateY\((-?\d+)px\)/i;
 
 		if (node.offsetParent) {
 			do {
@@ -1474,7 +1478,7 @@ enyo.kind({
 						top += parseInt(match[1], 10);
 					}
 				}
-			} while (node = node.offsetParent);
+			} while ((node = node.offsetParent));
 		}
 		return {
 			top		: top,
@@ -1504,27 +1508,31 @@ enyo.kind({
 		this.renderSelectHighlight();
 	},
 	resizeWidth: function(inDelta) {
-		if (this.selectionDragAnchors.left) {
-			this.selection.applyStyle("left", (this.intialDragBounds.left + inDelta) + "px");
-		} else if (this.selectionDragAnchors.right) {
-			this.selection.applyStyle("right", (this.intialDragBounds.right - inDelta) + "px");
-		}
-		if (this.selectionDragAnchors.width) {
-			this.selection.applyStyle("width", (
-				(this.$resizeHandle.sides.left) ? this.intialDragBounds.width - inDelta : this.intialDragBounds.width + inDelta
-			) + "px");
+		if (this.selectionDragAnchors) {
+			if (this.selectionDragAnchors.left) {
+				this.selection.applyStyle("left", (this.intialDragBounds.left + inDelta) + "px");
+			} else if (this.selectionDragAnchors.right) {
+				this.selection.applyStyle("right", (this.intialDragBounds.right - inDelta) + "px");
+			}
+			if (this.selectionDragAnchors.width) {
+				this.selection.applyStyle("width", (
+					(this.$resizeHandle.sides.left) ? this.intialDragBounds.width - inDelta : this.intialDragBounds.width + inDelta
+				) + "px");
+			}
 		}
 	},
 	resizeHeight: function(inDelta) {
-		if (this.selectionDragAnchors.top) {
-			this.selection.applyStyle("top", (this.intialDragBounds.top + inDelta) + "px");
-		} else if (this.selectionDragAnchors.bottom) {
-			this.selection.applyStyle("bottom", (this.intialDragBounds.bottom - inDelta) + "px");
-		}
-		if (this.selectionDragAnchors.height) {
-			this.selection.applyStyle("height", (
-				(this.$resizeHandle.sides.top) ? this.intialDragBounds.height - inDelta : this.intialDragBounds.height + inDelta
-			) + "px");
+		if (this.selectionDragAnchors) {
+			if (this.selectionDragAnchors.top) {
+				this.selection.applyStyle("top", (this.intialDragBounds.top + inDelta) + "px");
+			} else if (this.selectionDragAnchors.bottom) {
+				this.selection.applyStyle("bottom", (this.intialDragBounds.bottom - inDelta) + "px");
+			}
+			if (this.selectionDragAnchors.height) {
+				this.selection.applyStyle("height", (
+					(this.$resizeHandle.sides.top) ? this.intialDragBounds.height - inDelta : this.intialDragBounds.height + inDelta
+				) + "px");
+			}
 		}
 	},
 	getDragAnchors: function(inResizeComponent, inHandle) {
@@ -1536,10 +1544,10 @@ enyo.kind({
 		enyo.Control.cssTextToDomStyles(this.trimWhitespace(inResizeComponent.style), styleProps);
 		
 		// Setup anchors hash
-		anchors.top = (styleProps.top != undefined && this.trimWhitespace(styleProps.top) != "");
-		anchors.right = (styleProps.right != undefined && this.trimWhitespace(styleProps.right) != "");
-		anchors.bottom = (styleProps.bottom != undefined && this.trimWhitespace(styleProps.bottom) != "");
-		anchors.left = (styleProps.left != undefined && this.trimWhitespace(styleProps.left) != "");
+		anchors.top = (styleProps.top !== undefined && this.trimWhitespace(styleProps.top) !== "");
+		anchors.right = (styleProps.right !== undefined && this.trimWhitespace(styleProps.right) !== "");
+		anchors.bottom = (styleProps.bottom !== undefined && this.trimWhitespace(styleProps.bottom) !== "");
+		anchors.left = (styleProps.left !== undefined && this.trimWhitespace(styleProps.left) !== "");
 		
 		// Select top/bottom side to be adjusted based on the corner the user is dragging
 		if (inHandle.sides.top) {

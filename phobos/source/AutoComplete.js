@@ -1,3 +1,4 @@
+/* global Phobos, ares */
 enyo.kind({
 	name : "Phobos.AutoComplete",
 	kind : "onyx.Popup",
@@ -41,6 +42,7 @@ enyo.kind({
 	kindName: "",
 	popupShown: false,
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 	},
 	/**
@@ -89,12 +91,11 @@ enyo.kind({
 					this.processChanges(inEvent);
 				}
 			} else {
-				this.debug && this.log("Auto-Completion needed ? - " + (inEvent && JSON.stringify(inEvent.data)));
+				this.trace("Auto-Completion needed ? - ", (inEvent && enyo.json.stringify(inEvent.data)));
 				
 				// Retrieve the kind name for the currently edited file
 				this.kindName = this.analysis.objects[this.analysis.currentObject].name;
-				this.debug && this.log("Current Kind Name: "+this.kindName);
-				
+				this.trace("Current Kind Name: ", this.kindName);
 				if (inEvent) {
 					// Check if a '.' was inserted and see if we need to show-up the auto-complete popup
 					var data = inEvent.data;
@@ -149,7 +150,7 @@ enyo.kind({
 	 * @protected
 	 */
 	isCompletionAvailable: function(inEvent, pattern) {
-		this.debug && this.log("for " + pattern);
+		this.trace("for ", pattern);
 		var line, last, popupPosition, len;
 		if (inEvent) {	// Triggered by a '.' inserted by the user
 			popupPosition = inEvent.data.range.end;
@@ -161,12 +162,11 @@ enyo.kind({
 		line = this.ace.getLine(popupPosition.row);
 		len = pattern.length;
 		last = line.substr(popupPosition.column - len, len);
-		this.debug && this.log("last >>" + last + " <<");
-		
+		this.trace("last >>", last, " <<");
 		// Check if it's part of a pattern string
 		if (last === pattern) {
 			this.popupPosition = popupPosition;
-			this.debug && this.log("Completion available for " + pattern);
+			this.trace("Completion available for ", pattern);
 			return true;
 		}
 		return false;			// Nothing to auto-complete
@@ -189,17 +189,15 @@ enyo.kind({
 		line = this.ace.getLine(popupPosition.row);
 		
 		// Find the name of the components
-		for(var i = 0, o; o = this.analysis.objects[this.analysis.currentObject].components[i]; i++) {
+		for(var i = 0, o; (o = this.analysis.objects[this.analysis.currentObject].components[i]); i++) {
 			pattern = this.AUTOCOMP_THIS_DOLLAR + o.name + ".";
 			len = pattern.length;
 			last = line.substr(popupPosition.column - len, len);
-			this.debug && this.log("last >>" + last + "<<");
-
+			this.trace("last >>", last, "<<");
 			// Check if it's part of a pattern string
 			if (last === pattern) {
 				this.popupPosition = popupPosition;
-				this.debug && this.log("Completion available for " + pattern + " kind: " + o.kind);
-		
+				this.trace("Completion available for ", pattern, " kind: ", o.kind);
 				this.fillSuggestionsDoEvent(o.kind, suggestions);
 				this.fillSuggestionsGettersSetters(o.kind, suggestions);
 				this.fillSuggestionsProperties(o.kind, suggestions, pattern);
@@ -233,7 +231,7 @@ enyo.kind({
 
 		if (definition !== undefined) {
 			// this.do* - event trigger when within the current kind definition
-			this.debug && this.log("Adding doXXX for " + kindName);
+			this.trace("Adding doXXX for ", kindName);
 			obj = definition.properties;
 			for (i=0; i<obj.length; i++) {
 				if (obj[i].token === "events") {
@@ -262,7 +260,7 @@ enyo.kind({
 
 		if (definition !== undefined) {
 			// support setXXX and getXXX for published properties when within the current kind definition
-			this.debug && this.log("Adding getters/setters for " + kindName);
+			this.trace("Adding getters/setters for ", kindName);
 			obj = definition.properties;
 			for (i=0; i<obj.length; i++) {
 				if (obj[i].token === "published") {
@@ -293,13 +291,13 @@ enyo.kind({
 
 		if (definition !== undefined) {
 			// support functions, handlers published when within the current kind definition
-			this.debug && this.log("Adding properties for " + kindName);
+			this.trace("Adding properties for ", kindName);
 			obj = definition.allProperties;
 			for (i=0; i<obj.length; i++) {
 				if (obj[i].value[0].token === "function") {
 				    if(obj[i].value[0].group === "public" || pattern == this.AUTOCOMP_THIS){
-    				    name = obj[i].name;
-	    				suggestions.addItem({name: name, kind: kindName});
+						name = obj[i].name;
+						suggestions.addItem({name: name, kind: kindName});
 					}
 				}
 			}
@@ -315,7 +313,7 @@ enyo.kind({
 	 * @protected
 	 */
 	fillSuggestionsEnyo: function(suggestions) {
-		return suggestions.concat(this.suggestionsEnyo);
+		return suggestions.concatenate(this.suggestionsEnyo);
 	},
 	/**
 	 * Add suggestions for onyx functions and kinds
@@ -324,7 +322,7 @@ enyo.kind({
 	 * @protected
 	 */
 	fillSuggestionsOnyx: function(suggestions) {
-		return suggestions.concat(this.suggestionsOnyx);
+		return suggestions.concatenate(this.suggestionsOnyx);
 	},
 	/**
 	 * Finalyze the suggestion list based on user inputs and
@@ -338,7 +336,7 @@ enyo.kind({
 		select.nbEntries = select.controls.length;
 		if (select.nbEntries > 0) {
 			var size = Math.max(2, Math.min(select.nbEntries, 10));
-			if (this.debug) this.log("Nb entries: " + select.nbEntries + " Shown: " + size);
+			this.trace("Nb entries: ", select.nbEntries, " Shown: ", size);
 			select.setAttribute("size", size);
 			select.setSelected(0);
 			select.render();
@@ -366,7 +364,7 @@ enyo.kind({
 		// Fill-up the auto-completion list from this.suggestions with filtering based on this.input
 		select.destroyComponents();
 		var input = this.input;
-		if (this.debug) this.log("Preparing suggestions list, input: >>" + input + "<< + count " + this.suggestions.length);
+		this.trace("Preparing suggestions list, input: >>", input, "<< + count ", this.suggestions.length);
 		enyo.forEach(this.suggestions, function(item) {
 			var name = item.name;
 			if (input.length === 0) {
@@ -401,7 +399,7 @@ enyo.kind({
 		selected = selected.substr(this.input.length);
 		var pos = enyo.clone(this.popupPosition);
 		pos.column += this.input.length;
-		this.debug && this.log("Inserting >>" + selected + "<< at " + JSON.stringify(pos));
+		this.trace("Inserting >>", selected, "<< at ", enyo.json.stringify(pos));
 		this.ace.insertAt(pos, selected);
 		ace.focus();
 		return true; // Stop the propagation of the event
@@ -413,8 +411,7 @@ enyo.kind({
 	 * @protected
 	 */
 	processChanges: function(inEvent) {
-		this.debug && this.log("Auto-Completion update - ", inEvent.data, this.popupPosition);
-
+		this.trace("Auto-Completion update - ", inEvent.data, this.popupPosition);
 		var current, data = inEvent.data;
 		if (data.action === 'insertText') {
 			current = data.range.end;
@@ -435,19 +432,19 @@ enyo.kind({
 	 */
 	cursorChanged: function(current) {
 		if (this.popupShown) {
-			if (current.row !== this.popupPosition.row) { 	// Hide if the line has changed
+			if (current.row !== this.popupPosition.row) {// Hide if the line has changed
 				this.hideAutocompletePopup();
 				return;
 			}
 			var len = current.column - this.popupPosition.column;
-			this.debug && this.log("Auto-Completion update - current: " + JSON.stringify(current) + " len: " + len);
+			this.trace("Auto-Completion update - current: ", enyo.json.stringify(current), " len: ", len);
 			if (len < 0) {		// Hide if current cursor position is before the popup position
 				this.hideAutocompletePopup();
 				return;
 			}
 
 			// Get the line and the last characters entered
-			line = this.ace.getLine(current.row);
+			var line = this.ace.getLine(current.row);
 			this.input = line.substr(this.popupPosition.column, len);
 			this.showAutocompletePopup();
 		}
@@ -541,7 +538,7 @@ enyo.kind({
 	 * @protected
 	 */
 	projectIndexerChanged: function() {
-		this.debug && this.log("Project analysis ready");
+		this.trace("Project analysis ready");
 		var suggestions, regexp;
 
 		if (this.projectIndexer) {
@@ -570,7 +567,7 @@ enyo.kind({
 	analysisChanged: function() {
 		this.localKinds = {};	// Reset the list of kind for the currently edited file
 		if (this.analysis && this.analysis.objects) {
-			for(var i = 0, o; o = this.analysis.objects[i]; i++) {
+			for(var i = 0, o; (o = this.analysis.objects[i]); i++) {
 				if (this.localKinds[o.name]) {
 					this.log("Kind " + o.name + " is defined at least twice in the same file");	// TODO notify the user
 				}
@@ -641,9 +638,10 @@ enyo.kind({
 	kind : "enyo.Component",
 	debug: false,
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.objectId = Phobos.Suggestions.objectCounter++;
-		this.debug && this.log("objectId: " + this.objectId);
+		this.trace("objectId: ", this.objectId);
 		this.items = {};
 		this.nbItems = 0;
 	},
@@ -670,7 +668,7 @@ enyo.kind({
 		if (this.items[name] === undefined) {
 			this.items[name] = item;
 			this.nbItems++;
-			this.debug && this.log("objectId: " + this.objectId + " added: " + name + " count: " + this.nbItems);
+			this.trace("objectId: ", this.objectId, " added: ", name, " count: ", this.nbItems);
 		}
 	},
 	/**
@@ -678,7 +676,7 @@ enyo.kind({
 	 * @public
 	 */
 	reset: function() {
-		this.debug && this.log("objectId: " + this.objectId);
+		this.trace("objectId: ", this.objectId);
 		this.items = {};
 		this.nbItems = 0;
 	},
@@ -703,7 +701,7 @@ enyo.kind({
 	 * @public
 	 */
 	getCount: function() {
-		this.debug && this.log("objectId: " + this.objectId + " count: " + this.nbItems);
+		this.trace("objectId: ", this.objectId, " count: ", this.nbItems);
 		return this.nbItems;
 	},
 	/**
@@ -711,9 +709,9 @@ enyo.kind({
 	 * @param suggestions must be a current Phobos.Suggestions object
 	 * @public
 	 */
-	concat: function(suggestions) {
+	concatenate: function(suggestions) {
 		if (suggestions) {
-			this.debug && this.log("objectId: " + suggestions.objectId + " into " + this.objectId);
+			this.trace("objectId: ", suggestions.objectId, " into ", this.objectId);
 			for(var key in suggestions.items) {
 				this.addItem(suggestions.items[key]);
 			}

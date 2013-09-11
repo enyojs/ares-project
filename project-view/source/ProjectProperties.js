@@ -15,6 +15,7 @@ enyo.kind({
 	classes: "enyo-unselectable ares-classic-popup",
 	fit: true,
 	events: {
+		onError: "",
 		onModifiedConfig: "",
 		onSaveGeneratedXml: "",
 		onDone: "",
@@ -23,7 +24,10 @@ enyo.kind({
 		onFileChoosersChecked: ""
 	},
 	handlers: {
-		onAdditionalSource: "handleAdditionalSource"
+		onAddSource:"addNewSource",
+		onRemoveSource:"removeAddedSource",
+		onInitSource:"initAddedSource",
+		onInputButtonTap: "selectInputFile"
 	},
 	components: [
 		{classes:"title left-align", content:"Project properties", components:[
@@ -107,9 +111,8 @@ enyo.kind({
 					{kind: "ProjectProperties.PathInputRow", 
 						name: "topFileRow", 
 						label: $L("Top application file: "), 
-						inputtip: $L("top file of your application. Typically index.html"), 
-						buttontip: $L("select file..."), 
-						onButtonTap: "selectTopFile"}					
+						inputTip: $L("top file of your application. Typically index.html"), 
+						buttonTip: $L("select file...")}					
 				]}
 			]}
 		]},
@@ -118,7 +121,6 @@ enyo.kind({
 			{name: "ok", kind: "onyx.Button", content: $L("OK"), classes:"right", ontap: "confirmTap"}
 		]},
 
-		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")},
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 	published: {		
@@ -128,10 +130,10 @@ enyo.kind({
 	templates: [],
 	TEMPLATE_NONE: "NONE",
 	selectedTemplate: undefined,
-	selectedAddSource: undefined,
-
+	selectedAddedSource: undefined,
+	targetProject: null,
 	services: {},
-
+	addedSource:[],
 	fileChoosers: [],
 	
 	create: function() {
@@ -144,6 +146,7 @@ enyo.kind({
 	 */
 	handleServicesChange: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
+
 		this.services = enyo.clone(this.services) || {};
 		inEvent.serviceRegistry.forEach(enyo.bind(this, function(inService) {
 			var service = {
@@ -208,11 +211,9 @@ enyo.kind({
 	toggleService: function(inSender, inEvent) {
 		var serviceId = inEvent.originator.serviceId,
 		    checked = inEvent.originator.checked;
-		this.warn("serviceId:", serviceId, 'checked:', checked);
-		var service = this.services[serviceId];
-		if (service.tab) {
-			service.tab.setShowing(checked);
-		}
+		this.trace("serviceId:", serviceId, 'checked:', checked);
+		this.config.providers[serviceId].enabled = checked;
+		this.showService(serviceId);
 	},
 	/**
 	 * Tune the widget for project creation
@@ -251,19 +252,20 @@ enyo.kind({
 	 *  can be a json string or an object.
 	 */
 	preFill: function(inData) {
-		var conf = typeof inData === 'object' ? inData : JSON.parse(inData);
-		conf = ProjectConfig.checkConfig(conf);
-		this.config =  conf;
+		var conf = typeof inData === 'object' ? inData : enyo.json.parse(inData);
+		this.config = ProjectConfig.checkConfig(conf);
 
-		 // avoid storing 'undefined' in there
-		this.$.projectId.     setValue(conf.id      || '' );
-		this.$.projectVersion.setValue(conf.version || '' );
-		this.$.projectName.   setValue(conf.name    || '' );
-		this.$.projectTitle.  setValue(conf.title   || '' );
+		// avoid storing 'undefined' in there
+		this.$.projectId.setValue(this.config.id || '' );
+		this.$.projectVersion.setValue(this.config.version || '' );
+		this.$.projectName.setValue(this.config.name || '' );
+		this.$.projectTitle.setValue(this.config.title || '' );
 
-		if (! conf.author) { conf.author =  {} ;}
-		this.$.projectAuthor. setValue(conf.author.name || '') ;
-		this.$.projectContact.setValue(conf.author.href || '') ;
+		if (!this.config.author) {
+			this.config.author = {};
+		}
+		this.$.projectAuthor.setValue(this.config.author.name || '') ;
+		this.$.projectContact.setValue(this.config.author.href || '') ;
 
 		// Load each provider service configuration into its
 		// respective ProjectProperties panel
@@ -271,9 +273,11 @@ enyo.kind({
 			this.showService(serviceId);
 		}, this);
 
-		if (! conf.preview ) {conf.preview = {} ;}
+		if (!this.config.preview) {
+			this.config.preview = {};
+		}
 
-		this.$.topFileRow.setValue(conf.preview.top_file);
+		this.$.topFileRow.setValue(this.config.preview.top_file);
 
 		return this ;
 	},
@@ -293,8 +297,7 @@ enyo.kind({
 
 	showService: function(serviceId) {
 		var service = this.services[serviceId];
-		var config = this.config && this.config.providers &&
-			    this.config.providers[serviceId];
+		var config = this.config && this.config.providers && this.config.providers[serviceId];
 		var enabled = config && config.enabled;
 		service.checkBox.setChecked(enabled);
 		service.tab.setShowing(enabled);
@@ -307,35 +310,55 @@ enyo.kind({
 		this.waterfallDown("onChangeProjectStatus", inEvent);
 	},
 
+	setTargetProject: function(project) {
+		this.targetProject = project;
+	},
+
+	/** @private */
 	confirmTap: function(inSender, inEvent) {
-		var ppConf ;
-		// retrieve modified values
+		// retrieve all configuration settings
+		this.config = {};
 
-		this.config.id       = this.$.projectId     .getValue();
-		this.config.version  = this.$.projectVersion.getValue();
-		this.config.name     = this.$.projectName   .getValue();
-		this.config.title    = this.$.projectTitle  .getValue();
+		// Project settings
+		this.config.id = this.$.projectId.getValue();
+		this.config.version = this.$.projectVersion.getValue();
+		this.config.name = this.$.projectName.getValue();
+		this.config.title = this.$.projectTitle.getValue();
 
+		this.config.author = {};
 		this.config.author.name = this.$.projectAuthor.getValue();
 		this.config.author.href = this.$.projectContact.getValue();
 
+		// Preview settings
+		this.config.preview = {};
+		this.config.preview.top_file = this.$.topFileRow.getValue();
+
 		// Dump each provider service configuration panel into
 		// the project configuration.
+		this.config.providers = {};
 		enyo.forEach(enyo.keys(this.services), function(serviceId) {
 			var service = this.services[serviceId];
-			this.config.providers[service.id] = service.panel.getProjectConfig();
+			this.config.providers[service.id] = {};
 			this.config.providers[service.id].enabled = service.checkBox.checked;
+			service.panel.saveProjectConfig(this.targetProject);
+			service.panel.getProjectConfig(this.config.providers[service.id]);
 		}, this);
 
-		ppConf = this.config.preview ;
-		ppConf.top_file = this.$.topFileRow.getValue();
-
-		// to be handled by a ProjectWizard
-		var sourceIds = [];
-		if (this.selectedTemplate !==undefined && this.selectedAddSource !== undefined) {
-			sourceIds.push(this.selectedAddSource);
+		if(this.config.name === ""){
+			this.doError({msg:"Please enter a valid Name value.", title:"User Error"});
+			return;
+		}else if(this.config.title === ""){
+			this.doError({msg: "Please enter a valid Title value." , title:"User Error"});
+			return;
+		}else if(this.config.version === ""){
+			this.doError({msg: "Please enter a valid Version value.", title:"User Error"});
+			return;
+		}else if(this.config.id === ""){
+			this.doError( {msg: "Please enter a valid Id value.", title: "User Error"});
+			return;
 		}
-		this.doModifiedConfig({data: this.config, template: this.selectedTemplate, addSources: sourceIds}) ;
+		
+		this.doModifiedConfig({data: this.config, template: this.selectedTemplate, addedSources: this.addedSource}) ;
 
 		this.doDone();
 
@@ -402,71 +425,72 @@ enyo.kind({
 		} else {
 			this.selectedTemplate = inEvent.content;
 		}
-
-		this.templateToggleService(inSender, inEvent);
 	},
 	topFileChanged: function() {
 		this.$.topFileRow.setValue(this.topFile);
 	},
 	topFileStatusChanged: function() {
-		this.log("status", this.topFileStatus);
 		this.$.topFileRow.setStatus(this.topFileStatus);
 	},
-	templateToggleService: function(inSender, inEvent) {
-		var keys = Object.keys(this.services);
-		keys.forEach(function(serviceId) {
-			var service = this.services[serviceId];
-			if (inEvent.content.match(serviceId)) {
-				this.showService(serviceId);
-			} else {
-				service.checkBox.setChecked(false);
-				if (service.tab) {
-					service.tab.setShowing(false);
-				}
-			}
-		}.bind(this));
-	},
 	handleAdditionalSource: function(inSender, inEvent) {
-		this.selectedAddSource = inEvent.source;
+		this.selectedAddedSource = inEvent.source;
+		return true;
+	},
+	addNewSource: function(inSender, inEvent) {
+		this.addedSource.push(inEvent.source);
+		return true;
+	},
+	removeAddedSource: function(inSender, inEvent) {
+		var index = this.addedSource.indexOf(inEvent.source);
+		this.addedSource = this.addedSource.slice(0,index).concat(this.addedSource.slice(index+1,this.addedSource.lenght));
+		return true;
+	},
+	initAddedSource: function(inSender, inEvent) {
+		this.addedSource = [];
 		return true;
 	},
 	/** @public */
 	activateFileChoosers: function(status) {
 		this.$.topFileRow.setActivated(status);
 
-		// Activate PhoneGap path choosers in related rows
-		// ...
-	},
-	/** @public */
-	checkFileChoosers: function() {
-		// get fileChooser triggering objects name for ares project properties
-		// currently only one: Top File's PathInputRow in Preview tab
-		for (var o in this.$) {
-			if (this.$[o].kind === "ProjectProperties.PathInputRow") {
-				this.fileChoosers.push(this.$[o].name);
-			}
-		}
-
+		// Activate PhoneGap (and other services) path chooser buttons in related rows
 		enyo.forEach(enyo.keys(this.services), function(serviceId) {
 			if (serviceId === "phonegap") {
-				// ENYO-2512:
-				// merge this.fileChoosers with array returned by phonegap.projectproperties 
-				// and containing all name of rows that have path to check 
-				// and that extend ProjectProperties.PathInputRow
-				this.fileChoosers.concat([] /* replace by returned array*/);
+				this.services[serviceId].panel.activateInputRows(status);
 			}
 
 			/* to the same for further services to be intregrated in Project Properties*/ 
 		}, this);
+	},
+	/** @public */
+	checkFileChoosers: function() {
+		this.fileChoosers = [];
 
-		var name = this.fileChoosers.shift();
-		this.doCheckPath({input: name, value: this.$[name].getValue()});	
+		// get fileChooser triggering objects name for ares project properties
+		// currently only one: Top File's PathInputRow in Preview tab
+		for (var o in this.$) {
+			if (this.$[o].kind === "ProjectProperties.PathInputRow") {
+				this.fileChoosers.push(this.$[o]);
+			}
+		}
+		
+		// find PhoneGap (and other services) rows containing path chooser buttons
+		enyo.forEach(enyo.keys(this.services), function(serviceId) {
+			if (serviceId === "phonegap") {
+				this.fileChoosers = this.fileChoosers.concat(this.services[serviceId].panel.findAllInputRows());
+			}
+			
+			/* to the same for further services to be intregrated in Project Properties*/ 
+		}, this);
+		
+		var chooser = this.fileChoosers.shift();
+		this.doCheckPath({input: chooser, value: chooser.getValue()});	
 	},
 	/** @private */
 	fileChooserChecked: function() {
 		if (this.fileChoosers.length) {
-			var name = this.fileChoosers.shift();
-			this.doCheckPath({input: name, value: this.$[name].getValue()});
+			var chooser = this.fileChoosers.shift();
+			this.doCheckPath({input: chooser, value: chooser.getValue()});
 		} else {
 			this.doFileChoosersChecked();
 		}
@@ -474,16 +498,16 @@ enyo.kind({
 		return true;
 	},
 	/** @private */
-	selectTopFile: function () {
-		this.doSelectFile({input: "topFileRow", value: this.$.topFileRow.getValue(), status: this.$.topFileRow.getStatus(), header: $L("Select top file...")});
+	selectInputFile: function (inSender, inData) {
+		this.doSelectFile({input: inData.originator, value: inData.originator.getValue(), status: inData.originator.getStatus(), header: inData.header});
 	},
 	/** @public */
 	updateFileInput: function(input, value) {
-		this.$[input].setValue(value);
+		input.setValue(value);
 		return true;
 	},
 	updatePathCheck: function(input, status) {
-		this.$[input].setStatus(status);
+		input.setStatus(status);
 		this.fileChooserChecked();
 		return true;
 	}
@@ -513,37 +537,37 @@ enyo.kind({
 
 enyo.kind({
 	name: "ProjectProperties.PathInputRow",
-	//kind: "",
 	classes: "ares-row",
 	published: {
 		label: "",
 		value: "",
-		inputtip: "",
+		inputTip: "",
 		activated: false,
 		status: false,
-		buttontip: ""
+		buttonTip: ""
 	},
 	events: {
-		onChanged: "",
-		onButtonTap: "",
+		onInputButtonTap: "",
 		onPathChecked: ""
 	},
 	components: [
 		{tag: "label", name: "pathInputLabel", classes:"ares-fixed-label"},
 		{kind: "onyx.InputDecorator", components: [
-			{kind: "Input", name: "pathInputValue", classes: "enyo-unselectable"}
+			{kind: "Input", name: "pathInputValue", disabled: true}
 		]},
 		{kind: "onyx.IconButton", name:"pathInputButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
 	],
+	debug: false,
+
 	create: function () {
 		this.inherited(arguments);
 
 		this.labelChanged();
 		this.valueChanged();
-		this.inputtipChanged();
+		this.inputTipChanged();
 		this.activatedChanged();
 		this.statusChanged();
-		this.buttontipChanged();
+		this.buttonTipChanged();
 	},
 	/** @private */
 	labelChanged: function () {
@@ -555,8 +579,8 @@ enyo.kind({
 		this.setStatus(true);
 	},
 	/** @private */
-	inputtipChanged: function () {
-		this.$.pathInputValue.setAttribute("title", this.inputtip);
+	inputTipChanged: function () {
+		this.$.pathInputValue.setAttribute("title", this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function () {
@@ -576,12 +600,12 @@ enyo.kind({
 		}
 	},
 	/** @private */
-	buttontipChanged: function () {
-		this.$.pathInputButton.setAttribute("title", this.buttontip);
+	buttonTipChanged: function () {
+		this.$.pathInputButton.setAttribute("title", this.buttonTip);
 	},
 	/** @private */
 	pathInputTap: function (inSender, inEvent) {
-		this.doButtonTap();
+		this.doInputButtonTap({header: $L("Select top file...")});
 		return true;
 	}
 });

@@ -1,3 +1,4 @@
+/*global ServiceRegistry, ProjectConfig, ares */
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -20,7 +21,8 @@ enyo.kind({
 			onDuplicateProject: "duplicateProjectAction",
 			onProjectRemoved: "projectRemoved",
 			onProjectSelected: "handleProjectSelected",
-			name: "projectList"},
+			name: "projectList"
+		},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate", classes:"ares-masked-content-popup"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan", classes:"ares-masked-content-popup"},
 		{kind: "ProjectWizardModify", canGenerate: false, 
@@ -44,6 +46,7 @@ enyo.kind({
 		onRegisterMe: ""
 	},
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.doRegisterMe({name:"projectView", reference:this});
 	},
@@ -95,13 +98,15 @@ enyo.kind({
 		// when the workspace is loaded & when a new project
 		// is created that would save per-click HTTP traffic
 		// to the FileSystemService.
-		self = this;
+		var self = this;
 		var config = new ProjectConfig();
 		config.init({
 			service: project.getService(),
 			folderId: project.getFolderId()
 		}, function(err) {
-			if (err) self.doError({msg: err.toString(), err: err});
+			if (err) {
+				self.doError({msg: err.toString(), err: err});
+			}
 			project.setConfig(config);
 		});
 		this.currentProject = project;
@@ -207,14 +212,14 @@ enyo.kind({
 			var winLoc = window.location.toString().replace('ares','preview').replace('test', 'index') ;
 			var previewUrl = winLoc
 				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
-				+ 'url=' + encodeURIComponent(projectUrl);
+				+ 'url=' + encodeURIComponent(projectUrl)+'&name=' + project.id;
 
-			if (this.debug) this.log("preview on URL " + previewUrl) ;
-
+			this.trace("preview on URL ", previewUrl) ;
+			
 			window.open(
 				previewUrl,
 				'_blank', // ensure that a new window is created each time preview is tapped
-				'scrollbars=0,menubar=1',
+				'scrollbars=0,menubar=1,resizable=1',
 				false
 			);
 		}

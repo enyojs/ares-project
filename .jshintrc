@@ -2,7 +2,9 @@
     "globals": {
         "enyo": true,
         "$L": true,
-        "onyx": true
+        "onyx": true,
+        "ares": true,
+	"Ares": true
     },
     "evil": false,
     "regexdash": true,

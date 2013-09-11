@@ -1,3 +1,4 @@
+/* global ares */ 
 enyo.kind({
 	name: "HermesFileSystem",
 	kind: "enyo.Component",
@@ -6,7 +7,8 @@ enyo.kind({
 		onLoginFailed: ""
 	},
 	create: function() {
-		if (this.debug) this.log();
+		ares.setupTraceLogger(this);
+		this.trace("");
 		this.inherited(arguments);
 		this.config = {};
 	},
@@ -14,11 +16,9 @@ enyo.kind({
 		return !!this.config.origin;
 	},
 	setConfig: function(inConfig) {
-		var self = this;
-
-		if (this.debug) this.log("config:", this.config, "+", inConfig);
+		this.trace("config:", this.config, "+", inConfig);
 		this.config = ares.extend(this.config, inConfig);
-		if (this.debug) this.log("=> config:", this.config);
+		this.trace("=> config:", this.config);
 	},
 	getConfig: function() {
 		return this.config;
@@ -35,14 +35,14 @@ enyo.kind({
 	},
 	//* @private
 	_request: function(inMethod, inNodeId, inParams) {
-		if (this.debug) this.log(inMethod, inNodeId, inParams);
+		this.trace(inMethod, inNodeId, inParams);
 		if (!this.config.origin) {
 			throw "Service URL not yet defined";
 		}
 		var url = this.config.origin + this.config.pathname + '/id/' + (inNodeId ? inNodeId : "" );
 		var method = this._requestDic[inMethod].verb;
-		if (this.debug) this.log(inMethod+"/"+method+": '"+url+"'");
-		if (this.debug) this.log("params=", inParams);
+		this.trace(inMethod, "/", method, ": '", url, "'");
+		this.trace("params=", inParams);
 		var options = {
 			url: url,
 			method: method,
@@ -62,12 +62,12 @@ enyo.kind({
 		if (inParams && inParams.postBody) {
 			delete inParams.postBody;
 		}
-		req.response(function(inSender, inValue){
-			if (this.debug) this.log("inValue=", inValue);
-			var node = this.xhrResponse.headers['x-ares-node'];
-			if (this.debug) this.log("x-ares-node:", node);
+		req.response(this, function(inSender, inValue){
+			this.trace("inValue=", inValue);
+			var node = req.xhrResponse.headers['x-ares-node'];
+			this.trace("x-ares-node:", node);
 			return inValue;
-		}).error(function(inSender, inResponse) {
+		}).error(this, function(inSender, inResponse) {
 			this.error("status="+ inResponse);
 			if (inResponse === 0 && this.notifyFailure) {
 				this.notifyFailure();
@@ -83,9 +83,9 @@ enyo.kind({
 		}
 
 		function _authenticate() {
-			if (this.debug) this.log("authenticate(): count:", count);
+			this.trace("authenticate(): count:", count);
 			if (count--) {
-				if (this.debug) this.log("authenticate(): authorization:", inAuth.headers.authorization);
+				this.trace("authenticate(): authorization:", inAuth.headers.authorization);
 				// POST the Authorization
 				// header/token/credential in a web-form.
 				new enyo.Ajax({
@@ -105,7 +105,7 @@ enyo.kind({
 			// that the Authorization credentials are
 			// passed as a Cookie set during the
 			// _authenticate() step.
-			if (this.debug) this.log("authorize():");
+			this.trace("authorize():");
 			new enyo.Ajax({
 				url: this.config.origin + this.config.pathname + '/',
 				method: 'GET'
@@ -115,38 +115,38 @@ enyo.kind({
 			.go();
 		}
 		function _authSuccess(inXhr, inValue) {
-			if (this.debug) this.log("authSuccess(): inValue:", inValue);
+			this.trace("authSuccess(): inValue:", inValue);
 			next(null, inValue);
 		}
 		function _authFailure(inXhr, inError) {
-			if (this.debug) this.log("authFailure(): inError:", inError, ", body:", (inXhr.xhrResponse ? inXhr.xhrResponse.body : undefined));
-			self.doLoginFailed({id: this.config.id});
+			this.trace("authFailure(): inError:", inError, ", body:", (inXhr.xhrResponse ? inXhr.xhrResponse.body : undefined));
+			this.doLoginFailed({id: this.config.id});
 			next(new Error(inError));
 		}
 	},
 	propfind: function(inNodeId, inDepth) {
 		return this._request("PROPFIND", inNodeId, {depth: inDepth} /*inParams*/)
-			.response(function(inSender, inValue) {
-				if (this.debug) this.log(inValue);
+			.response(this, function(inSender, inValue) {
+				this.trace(inValue);
 				return inValue;
 			});
 	},
 	listFiles: function(inFolderId, depth) {
 		return this.propfind(inFolderId, depth)
-			.response(function(inSender, inValue) {
+			.response(this, function(inSender, inValue) {
 				return inValue.children;
 			});
 	},
 	getFile: function(inFileId) {
 		return this._request("GET", inFileId, null /*inParams*/)
-			.response(function(inSender, inValue) {
+			.response(this, function(inSender, inValue) {
 				return { content: inValue };
 			});
 	},
 	putFile: function(inFileId, inContent) {
 		var formData = new enyo.FormData() ;
 		var file = new enyo.Blob([inContent || ''], {type: "application/octet-stream"});
-		if (this.debug) this.log("file:", file);
+		this.trace("file:", file);
 		// ['/path','.'] resolves to '/path', so using '.'
 		// keeps the file name encoded in inFileId
 		formData.append('file', file, '.' /*filename*/);
@@ -162,10 +162,10 @@ enyo.kind({
 		}
 		return this._request("PUT", inFileId, {postBody: formData} /*inParams*/);
 	},
-	createFile: function(inFolderId, inName, inContent) {
+	createFile: function(inFolderId, inName, inContent, options) {
 		var formData = new enyo.FormData() ;
 		var file = new enyo.Blob([inContent || ''], {type: "application/octet-stream"});
-		if (this.debug) this.log("file:", file, "filename:", inName);
+		this.trace("file:", file, "filename:", inName);
 		formData.append('file', file, inName /*filename*/);
 		if (enyo.platform.firefox) {
 			// FormData#append() lacks the third parameter
@@ -177,16 +177,28 @@ enyo.kind({
 			// http://stackoverflow.com/questions/6664967/how-to-give-a-blob-uploaded-as-formdata-a-file-name
 			formData.append('filename', inName );
 		}
-		return this._request("PUT", inFolderId, {postBody: formData} /*inParams*/);
+		var params = ares.extend({ postBody: formData }, options);
+		return this._request("PUT", inFolderId, params);
 	},
-	createFiles: function(inFolderId, inData) {
-		return this._request("PUT", inFolderId, {postBody: inData.content, contentType: inData.ctype} /*inParams*/);
+	createFiles: function(inFolderId, inData, options) {
+		var params = ares.extend({
+			postBody: inData.content,
+			contentType: inData.ctype
+		}, options);
+		return this._request("PUT", inFolderId, params);
 	},
-	createFolder: function(inFolderId, inName) {
-		var newFolder = inFolderId + "/" + inName;
-		return this._request("MKCOL", inFolderId, {name: inName} /*inParams*/)
-			.response(function(inSender, inResponse) {
-				if (this.debug) this.log(inResponse);
+	/**
+	 * @param {String} inFolderId parent folder Id
+	 * @param {String} inName folder name to create
+	 * @param {Object} inOptions options
+	 * @property inOptions {Boolean} overwrite [true]
+	 * @return {enyo.Async} 
+	 */
+	createFolder: function(inFolderId, inName, inOptions) {
+		var params = ares.extend({name: inName}, inOptions);
+		return this._request("MKCOL", inFolderId,  params)
+			.response(this, function(inSender, inResponse) {
+				this.trace(inResponse);
 				return inResponse;
 			});
 	},
@@ -199,14 +211,10 @@ enyo.kind({
 	 * @param {Object} inParams
 	 * @property inParams {String} folderId
 	 * @property inParams {String} name
+	 * @property inParams {String} overwrite [true]
 	 */
 	rename: function(inNodeId, inParams) {
-		if (typeof inParams === 'object') {
-			return this._request("MOVE", inNodeId, inParams);
-		} else {
-			// backward compatible method signature
-			return this._request("MOVE", inNodeId, {name: inParams}  /*inParams*/);
-		}
+		return this._request("MOVE", inNodeId, inParams);
 	},
 	/**
 	 * Only one of folderId or name can be defined.  In case both are defined
@@ -216,17 +224,12 @@ enyo.kind({
 	 * @property inParams {String} name
 	 */
 	copy: function(inNodeId, inParams) {
-		if (typeof inParams === 'object') {
-			return this._request("COPY", inNodeId, inParams);
-		} else {
-			// backward compatible method signature
-			return this._request("COPY", inNodeId, {name: inParams}  /*inParams*/);
-		}
+		return this._request("COPY", inNodeId, inParams);
 	},
 	exportAs: function(inNodeId, inDepth) {
 		return this._request("GET", inNodeId, {depth: inDepth, format: "base64"} /*inParams*/)
-			.response(function(inSender, inValue) {
-				if (this.debug) this.log(inValue);
+			.response(this, function(inSender, inValue) {
+				this.trace(inValue);
 				return inValue;
 			});
 	}

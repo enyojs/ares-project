@@ -1,3 +1,4 @@
+/* global ares, ServiceRegistry */
 /**
  * This kind provides:
  * - the project toolbars (with create .. delete)
@@ -16,13 +17,15 @@ enyo.kind({
 		onScanProject: "",
 		onDuplicateProject: "",
 		onProjectRemoved: "",
+		onCloseProjectDocuments:"",
 		onModifySettings: "",
 		onBuild: "",
 		onInstall: "",
 		onRun: "",
 		onRunDebug: "",
 		onPreview: "",
-		onError: ""
+		onError: "",
+		onRegisterMe: ""
 	},
 	debug: false,
 	components: [
@@ -32,11 +35,13 @@ enyo.kind({
 						{tag:"button", content: "Ares"},
 						{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", components: [
 							{value: "showAccountConfigurator", classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png"},
-								{content: "Accounts..."}
+								{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png", classes: "aresmenu-icon-button"},
+								{content: "Accounts...", classes: "aresmenu-button-label"}
 							]},
 							{classes: "onyx-menu-divider aresmenu-button"},
-					{value: "showAresProperties",  classes:"aresmenu-button", content: "Properties..."}
+							{value: "showAresProperties",  classes:"aresmenu-button", components: [
+								{content: "Properties...", classes: "aresmenu-button-label"}
+							]}
 						]}
 					]},
 					{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
@@ -102,7 +107,7 @@ enyo.kind({
 					{tag:"li",kind: "ProjectList.Project", name: "item"}
 				]}
 			]},
-			{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmDeleteProject: "confirmRemoveProject"},
+			{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmActionPopup: "confirmRemoveProject"},
 		{kind: "AccountsConfigurator"},
 		{kind: "AresProperties"}
 		]},
@@ -110,9 +115,11 @@ enyo.kind({
 	],
 	selected: null,
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.$.projectList.setCount(Ares.Workspace.projects.length);
 		Ares.Workspace.projects.on("add remove reset", enyo.bind(this, this.projectCountChanged));
+		this.doRegisterMe({name:"projectList", reference:this});
 	},
 	aresMenuTapped: function() {
 		this.$.amenu.show();
@@ -137,12 +144,12 @@ enyo.kind({
 	 * @private
 	 */
 	menuItemSelected: function(inSender, inEvent) {
-		if (this.debug) this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		var fn = inEvent && inEvent.selected && inEvent.selected.value;
 		if (typeof this[fn] === 'function') {
 			this[fn]({project: this.selectedProject});
 		} else {
-			if (this.debug) this.log("*** BUG: '" + fn + "' is not a known function");
+			this.trace("*** BUG: '", fn, "' is not a known function");
 		}
 	},
 	addProject: function(name, folderId, service) {
@@ -152,17 +159,20 @@ enyo.kind({
 		}
 		var known = Ares.Workspace.projects.get(name);
 		if (known) {
-			this.debug && this.log("Skipped project " + name + " as it is already listed") ;
+			this.trace("Skipped project ", name, " as it is already listed") ;
 		} else {
-			Ares.Workspace.projects.createProject(name, folderId, serviceId);
+			var project = Ares.Workspace.projects.createProject(name, folderId, serviceId);
+			if(project){
+				this.selectInProjectList(project);
+			}
 		}
 	},
 	removeProjectAction: function(inSender, inEvent) {
 		var popup = this.$.removeProjectPopup;
 		if (this.selected) {
-			popup.setName("Remove project");
-			popup.setMessage("Remove project '" + this.selected.getProjectName() + "' from list?");
-			popup.$.nukeFiles.setValue(false) ;
+			popup.setTitle($L("Remove project"));
+			popup.setMessage(this.$LS("Remove project '#{projectName}' from list?", {projectName: this.selected.getProjectName()}));
+			popup.setNukeFiles(false) ;
 			popup.show();
 		}
 	},
@@ -172,9 +182,9 @@ enyo.kind({
 		var project, nukeFiles ;
 		if (this.selected) {
 			project = Ares.Workspace.projects.at(this.selected.index);
-			nukeFiles = this.$.removeProjectPopup.$.nukeFiles.getValue() ;
-			this.debug && this.log("removing project" +  project.getName() + ( nukeFiles ? " and its files" : "" )) ;
-			this.debug && this.log(project);
+			nukeFiles = this.$.removeProjectPopup.getNukeFiles() ;
+			this.trace("removing project", project.getName(), ( nukeFiles ? " and its files" : "" )) ;
+			this.trace(project);
 			if (nukeFiles) {
 				var service = project.getService();
 				var folderId = project.getFolderId();
@@ -187,15 +197,18 @@ enyo.kind({
 			else {
 				this.removeSelectedProjectData() ;
 			}
+
 		}
 	},
 	removeSelectedProjectData: function() {
 		if (this.selected) {
 			// remove the project from list of project config
-			var name = Ares.Workspace.projects.at(this.selected.index).getName();
+			var project =  Ares.Workspace.projects.at(this.selected.index);
+			var name = project.getName();
 			Ares.Workspace.projects.removeProject(name);
 			this.selected = null;
 			this.doProjectRemoved();
+			this.doCloseProjectDocuments({"project":project}); //To reset the designer panel
 			this.$.projectMenu.setDisabled(true);
 		}
 	},
@@ -208,19 +221,24 @@ enyo.kind({
 		item.setIndex(inEvent.index);
 	},
 	projectListTap: function(inSender, inEvent) {
-		var project, msg, service;
-		// Highlight the new project item
-		if (this.selected) {
-			this.selected.removeClass("on");
+		var project = Ares.Workspace.projects.at(inEvent.index);
+		if(project) {
+			this.selectInProjectList(project);
 		}
-		if (inEvent.originator.kind === 'ProjectList.Project') {
-			this.selected = inEvent.originator;
-		} else {
-			this.selected = inEvent.originator.owner;
-		}
-		this.selected.addClass("on");
-
-		project = Ares.Workspace.projects.at(inEvent.index);
+	},
+	selectInProjectList:function(project){
+		var itemList = this.$.projectList.getClientControls();
+		enyo.forEach(itemList, function(item) {
+			item.$.item.removeClass("on");
+			if(item.$.item.projectName === project.id){
+				this.selected = item.$.item;
+				item.$.item.addClass("on");
+				this.selectProject(project);
+			}
+		}, this);
+	},
+	selectProject: function(project){
+		var msg, service;
 		service = ServiceRegistry.instance.resolveServiceId(project.getServiceId());
 		if (service !== undefined) {
 			project.setService(service);
@@ -245,6 +263,10 @@ enyo.kind({
 			return undefined;	// Exclude
 		}
 		return value;	// Accept
+	},
+	$LS: function(msg, params) {
+		var tmp = new enyo.g11n.Template($L(msg));
+		return tmp.evaluate(params);
 	}
 });
 
@@ -266,26 +288,33 @@ enyo.kind({
 enyo.kind({
 	name: "ProjectDeletePopup",
 	kind: "Ares.ActionPopup",
-	handlers: {
-		onShow: "shown"
+	published: {
+		nukeFiles: false
 	},
+	/** @private */
 	create: function() {
- 		this.inherited(arguments);
- 		this.createComponent(
- 				{container:this.$.popupContent, classes:"ares-more-row", components:[
- 					{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "nukeChanged"},
- 					{kind: "Control", tag: "span", classes: "ares-padleft", content: "also delete files from disk"}
- 				]}
-			);
- 	},
-	shown: function(inSender, inEvent) {
-		this.nukeChanged();
+		ares.setupTraceLogger(this);
+		this.inherited(arguments);
+		this.createComponent(
+				{container:this.$.popupContent, classes:"ares-more-row", components:[
+					{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "changeNuke"},
+					{kind: "Control", tag: "span", classes: "ares-padleft", content: $L("also delete files from disk")}
+				]}
+		);
+		this.changeNuke();
 	},
-	nukeChanged: function(inSender, inEvent) {
+	/** @private */
+	nukeFilesChanged: function(inSender, inEvent) {
+		this.$.nukeFiles.checked = this.nukeFiles;
+		this.changeNuke();
+	},
+	/** @private */
+	changeNuke: function(inSender, inEvent) {
+		this.nukeFiles = this.$.nukeFiles.checked;
 		if (this.$.nukeFiles.checked) {
-			this.$.actionButton.setContent("Delete");
+			this.setActionButton($L("Delete"));
 		} else {
-			this.$.actionButton.setContent("Remove");
+			this.setActionButton($L("Remove"));
 		}
 	}
 });

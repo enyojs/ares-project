@@ -1,11 +1,15 @@
 {
 	"Cancel": "Cancel",
-	"Creating folder '{folder}' failed: {error}": "Creating folder '{folder}' failed: {error}",
+	"Close": "Close",
+	"Delete": "Delete",
+	"Detail": "Detail",
 	"File": "File",
 	"File name: ": "File name: ",
 	"OK": "OK",
+	"Path #{path} contains illegal characters": "Path #{path} contains illegal characters",
 	"Select a directory": "Select a directory",
 	"Select a File": "Select a File",
 	"Select a Folder": "Select a Folder",
-	"Sources": "Sources"
+	"Sources": "Sources",
+	"unknown error": "unknown error"
 }

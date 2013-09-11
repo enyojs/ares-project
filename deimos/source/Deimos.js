@@ -1,13 +1,17 @@
+/* global Model */
 enyo.kind({
 	name: "Deimos",
 	classes: "enyo-unselectable onyx",
+	debug: false,
 	published: {
-		edited: false
+		edited: false,
+		projectData: null		// All the project data shared mainly between phobos and deimos
 	},
 	components: [
+		{name: "actionPopup", kind:"PaletteComponentActionPopup", centered: true, floating: true, autoDismiss: false, modal: true},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
-				{name: "left", classes:"ares_deimos_left", kind: "Palette", name:"palette"},
+				{name: "palette", classes:"ares_deimos_left", kind: "Palette"},
 				{name: "middle", fit: true, kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
 						{kind: "onyx.Button", name: "reloadDesignerButton", classes: "deimos-designer-toolbar-spacing", content: "Reload", ontap: "reloadDesigner"},
@@ -29,7 +33,7 @@ enyo.kind({
 						]},
 						{kind: "onyx.Button", name: "swapDesignerDimensionsButton", classes: "deimos-swap-dimensions-button", allowHtml: true, content: "&larr;<br/>&rarr;", ontap: "swapDesignerDimensions"},
 						{content: "Height:"},
-						{kind: "onyx.InputDecorator", classes: "deimos-designer-toolbar-spacing", components: [
+						{kind: "onyx.InputDecorator", components: [
 							{kind: "onyx.Input", name: "designerHeightInput", classes: "deimos-designer-input", placeholder: "Auto", onchange: "updateHeight"}
 						]},
 						{content: "Zoom:"},
@@ -83,11 +87,16 @@ enyo.kind({
 		onDesignerUpdate: "",
 		onUndo: "",
 		onRedo: "",
-		onRegisterMe: ""
+		onRegisterMe: "",
+		onError:""
+	},
+	handlers:{
+		onPaletteComponentAction: "runPaletteComponentAction"
 	},
 	kinds: [],
 	index: null,
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.addHandlers();
 		this.doRegisterMe({name:"deimos", reference:this});
@@ -118,15 +127,14 @@ enyo.kind({
 		this.owner.$.kindPicker.destroyClientControls();
 
 		// Pass the project information (analyzer output, ...) to the inspector and palette
-		this.$.inspector.setProjectData(data.projectData);
-		this.$.palette.setProjectData(data.projectData);
+		this.setProjectData(data.projectData);
 
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
 			this.owner.$.kindPicker.createComponent({
 				content: k.name,
 				index: i,
-				active: (i==0)
+				active: (i===0)
 			});
 			maxLen = Math.max(k.name.length, maxLen);
 		}
@@ -144,12 +152,6 @@ enyo.kind({
 		this.$.inspector.initUserDefinedAttributes(this.kinds[index].components);
 		
 		if (index !== this.index) {
-			
-			// If edited, save these changes in Ares TODO
-			if (this.index !== null && this.getEdited()) {
-				this.designerUpdate();
-			}
-			
 			this.$.inspector.inspect(null);
 			this.$.inspector.setCurrentKindName(kind.name);
 			this.$.designer.setCurrentKind(kind);
@@ -160,6 +162,48 @@ enyo.kind({
 		this.owner.$.toolbar.reflow();
 		
 		return true;
+	},
+	/**
+	 * Receive the project data reference which allows to access the analyzer
+	 * output for the project's files, enyo/onyx and all the other project
+	 * related information shared between phobos and deimos.
+	 * @param  oldProjectData
+	 * @protected
+	 */
+	projectDataChanged: function(oldProjectData) {
+		if (oldProjectData) {
+			oldProjectData.off('change:project-indexer', this.projectIndexReady);
+			oldProjectData.off('update:project-indexer', this.projectIndexUpdated);
+		}
+
+		Model.resetInformation();
+
+		if (this.projectData) {
+			this.trace("projectData", this.projectData);
+			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
+			this.projectData.on('update:project-indexer', this.projectIndexUpdated, this);
+			this.projectIndexer = this.projectData.getProjectIndexer();
+			this.projectIndexUpdated();
+		}
+	},
+	/**
+	 * The project analyzer output has changed
+	 * @param value   the new analyzer output
+	 * @protected
+	 */
+	projectIndexReady: function(model, indexer, options) {
+		this.trace("projectIndexReady: ", indexer);
+		this.projectIndexer = indexer;
+		this.projectIndexUpdated();
+	},
+	//* @protected
+	projectIndexUpdated: function() {
+		var indexer = this.projectIndexer;
+		this.trace("projectIndexUpdated: for projectIndexer: ", indexer);
+		this.$.inspector.setProjectIndexer(indexer);
+		this.$.palette.setProjectIndexer(indexer);
+		Model.buildInformation(indexer);
+		this.$.designer.sendSerializerOptions(Model.serializerOptions);
 	},
 	//* Rerender current kind
 	rerenderKind: function(inSelectId) {
@@ -236,7 +280,9 @@ enyo.kind({
 			item.layoutKind = inLayoutKind;
 			this.updateStyleForAbsolutePositioningLayoutKind(item);
 		} else {
-			item.layoutKind && delete item.layoutKind;
+			if (item.layoutKind) {
+				delete item.layoutKind;
+			}
 			this.updateStyleForNonAbsolutePositioningLayoutKind(item);
 		}
 		this.addAresKindOptions(this.kinds[this.index].components);
@@ -276,8 +322,12 @@ enyo.kind({
 		this.addReplaceStyleProp(inComponent, "right", "");
 		this.addReplaceStyleProp(inComponent, "bottom", "");
 		this.addReplaceStyleProp(inComponent, "left", "");
-		inComponent.layoutKind && delete inComponent.layoutKind;
-		this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind && delete this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind;
+		if (inComponent.layoutKind) {
+			delete inComponent.layoutKind;
+		}
+		if (this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind) {
+			delete this.$.inspector.userDefinedAttributes[inComponent.aresId].layoutKind;
+		}
 	},
 	//* Update _inComponent.style.inProp_ to be _inValue_
 	addReplaceStyleProp: function(inComponent, inProp, inValue) {
@@ -300,7 +350,7 @@ enyo.kind({
 			// Prepare the data for the code editor
 			var event = {docHasChanged: this.getEdited(), contents: []};
 			for(var i = 0 ; i < this.kinds.length ; i++) {
-				event.contents[i] = enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components));
+				event.contents[i] = (i === this.index) ? enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components)) : null;
 			}
 			return event;
 		}
@@ -309,7 +359,7 @@ enyo.kind({
 		this.$.designer.cleanUp();
 		
 		var event = this.prepareDesignerUpdate();
-		this.$.inspector.setProjectData(null);
+		this.setProjectData(null);
 		this.doCloseDesigner(event);
 		this.setEdited(false);
 		
@@ -332,34 +382,30 @@ enyo.kind({
 	//* Create item from palette (via drag-and-drop from Palette into Designer or Component View)
 	createItem: function(inSender, inEvent) {
 		var config = inEvent.config,
+			options = inEvent.options,
 			targetId = inEvent.targetId,
 			beforeId = inEvent.beforeId,
 			target = (targetId)
 					?	this.getItemById(targetId, this.kinds[this.index].components)
 					:	this.kinds[this.index];
-		
+
 		if (!config) {
 			enyo.warn("Could not create new item - bad data: ", inEvent);
 			return true;
 		}
-		
+				
 		// Give the new component (and any children) a fresh _aresId_
 		config.aresId = this.generateNewAresId();
 		if (config.components) {
 			this.addAresIds(config.components);
 		}
-		
-		if (beforeId) {
-			this.insertItemBefore(config, target, beforeId);
+
+		//if component has a "isViewTemplate" option, Designer show action popup
+		if(options && options.isViewTemplate){
+			this.showActionPopup(options, config, target);
 		} else {
-			this.insertItem(config, target);
-		}
-		
-		// Update user defined values
-		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
-		this.addAresKindOptions(this.kinds[this.index].components);
-		
-		this.rerenderKind(config.aresId);
+			this.performCreateItem(config, target, beforeId);	
+		}		
 		return true;
 	},
 	//* Move item with _inEvent.itemId_ into item with _inEvent.targetId_
@@ -413,11 +459,12 @@ enyo.kind({
 	//* Called when the iFrame has retrieved a requested absolute position value
 	designerReturnPositionValue: function(inSender, inEvent) {
 		this.$.inspector.setRequestedPositionValue(inEvent.prop, inEvent.value);
-		return true;
-		
+		return true; //TODO See if the code behind the return is useful 
+		/*
 		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
 		this.addReplaceStyleProp(item, inEvent.prop, inEvent.value + "px");
 		this.rerenderKind(item.aresId);
+		 */
 	},
 	applyLayoutKindRules: function(inLayoutData, inControl) {
 		var layoutKind = inLayoutData && inLayoutData.layoutKind;
@@ -468,10 +515,7 @@ enyo.kind({
 	},
 	removeAbsolutePositioningStyle: function(inControl) {
 		var currentStyle = inControl.style || "",
-			styleProps = {},
-			prop,
-			i
-		;
+			styleProps = {};
 		
 		// Convert css string to hash
 		enyo.Control.cssTextToDomStyles(this.trimWhitespace(currentStyle), styleProps);
@@ -596,7 +640,7 @@ enyo.kind({
 		if (inComponent.components) {
 			
 			// Recurse through child components
-			for (var i=0; i<inComponent.components.length; i++) {
+			for (i=0; i<inComponent.components.length; i++) {
 				childComponents.push(this.cleanUpComponent(inComponent.components[i], inKeepAresIds));
 			}
 			
@@ -622,6 +666,7 @@ enyo.kind({
 		}
 		
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		this.addAresKindOptions(this.kinds[this.index].components);
 		this.rerenderKind();
 	},
 	deleteComponentByAresId: function(inAresId, inComponents) {
@@ -769,6 +814,48 @@ enyo.kind({
 		document.ondragover =  enyo.dispatch;
 		document.ondrop =      enyo.dispatch;
 		document.ondragend =   enyo.dispatch;
+	},
+
+	showActionPopup: function(options, config, target){
+		if(options.isViewTemplate){
+			this.$.actionPopup.setActionShowing("vtAction");
+		} else {
+			//FIXME: for other palette component actions
+			this.$.actionPopup.setActionShowing(null);
+		}
+		this.$.actionPopup.setConfigComponent(config);
+		this.$.actionPopup.setTargetComponent(target);
+		this.$.actionPopup.show();
+	},
+	
+	// @protected		
+	runPaletteComponentAction: function(inSender,inEvent){
+		var config = this.$.actionPopup.getConfigComponent(config);
+		var target = this.$.actionPopup.getTargetComponent(target);
+		var beforeId = inEvent.beforeId;
+
+		if(inEvent.getName() === "addtoKind"){
+			this.performCreateItem(config, target, beforeId);			
+		} else if (inEvent.getName() === "replaceKind"){
+			//TODO: Add a feature for "Replace Button" against view template component on designer behavior - ENYO-2807
+			this.doError({msg:"not implemented yet"});
+		} else if (inEvent.getName() === "addNewKind"){
+			//TODO: Add a feature for "Add new Kind" against view template component on designer behavior - ENYO-2808
+			this.doError({msg:"not implemented yet"});
+		}
+		this.$.actionPopup.hide();
+	},
+
+	// @protected
+	performCreateItem: function(config, target, beforeId){
+		if (beforeId) {
+			this.insertItemBefore(config, target, beforeId);
+		} else {
+			this.insertItem(config, target);
+		}	
+		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
+		this.addAresKindOptions(this.kinds[this.index].components);
+		this.rerenderKind(config.aresId);
 	}
 });
 

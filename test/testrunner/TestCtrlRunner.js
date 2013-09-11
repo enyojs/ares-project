@@ -16,7 +16,9 @@ enyo.kind({
 			aresRunner.runTests();
 		} else {
 			// Popup to inform results are available into console when executing tests on IE	
-			if (aresTestW === null) this.$.infoPopup.show();
+			if (window.aresTestW === null) {
+				this.$.infoPopup.show();
+			}
 			// No new test to run, we need to remove the temp test/root directory
 			var req = new enyo.Ajax({
 				url: '/res/tester',

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+/* jshint node:true */
 /**
  *  ARES IDE server
  */
@@ -121,7 +121,6 @@ process.on('SIGINT', onExit);
 // Load IDE configuration & start per-project file servers
 
 var ide = {};
-var service = {};
 var subProcesses = [];
 var platformVars = [
 	{regex: /@NODE@/, value: process.argv[0]},
@@ -137,14 +136,16 @@ var platformOpen = {
 };
 
 var bundledBrowser = {
-	win32: [ path.resolve ( myDir + "../../chromium/" + "chrome.exe" ) ],
+	win32: [ path.resolve ( myDir + "../../../chromium/" + "chrome.exe" ) ],
 	darwin:[ path.resolve ( myDir + "../../../../bin/chromium/" + "Chromium.app" ), "--args" ],
 	linux: [ path.resolve ( myDir + "../../../../bin/chromium/" + "chrome" ) ]
 };
 
 var configPath, tester;
 var configStats;
+var aresAboutData;
 var serviceMap = {};
+
 
 if (argv.runtest) {
 	tester = require('./test/tester/main.js');
@@ -152,18 +153,22 @@ if (argv.runtest) {
 } else{
 	configPath = argv.config;
 }
+function checkFile(inFile) {
+	var fileStats;
+	if (!fs.existsSync(inFile)) {
+		throw new Error("Did not find: '"+inFile+"': ");
+	}
+
+	fileStats = fs.lstatSync(inFile);
+	if (!fileStats.isFile()) {
+		throw new Error("Not a file: '"+inFile+"': ");
+	}
+	return fileStats;
+}
 
 function loadMainConfig(configFile) {
-	if (!fs.existsSync(configFile)) {
-		throw "Did not find: '"+configFile+"': ";
-	}
-
-	log.verbose('loadMainConfig()', "Loading ARES configuration from '"+configFile+"'...");
-	configStats = fs.lstatSync(configFile);
-	if (!configStats.isFile()) {
-		throw "Not a file: '"+configFile+"': ";
-	}
-
+	configStats = checkFile(configFile);
+	log.verbose('loadMainConfig()', "Loading ARES configuration from '" + configFile + "'...");
 	var configContent = fs.readFileSync(configFile, 'utf8');
 	try {
 		ide.res = JSON.parse(configContent);
@@ -172,8 +177,23 @@ function loadMainConfig(configFile) {
 	}
 
 	if (!ide.res.services || !ide.res.services[0]) {
-		throw "Corrupted '"+configFile+"': no storage services defined";
+		throw new Error("Corrupted '"+configFile+"': no storage services defined");
 	}
+}
+function loadPackageConfig() {
+	var packagePath = path.resolve(myDir, "package.json");
+	checkFile(packagePath);
+	var packageContentJSON = fs.readFileSync(packagePath, 'utf8');
+	try {	
+		var packageContent = JSON.parse(packageContentJSON);
+		aresAboutData = {
+			"version": packageContent.version, "bugReportURL": packageContent.bugs.url, 
+			"license": packageContent.license, "projectHomePage": packageContent.homepage
+		};
+		
+	} catch(e) {
+		throw new Error("Improper JSON: " + packagePath);
+	}	
 }
 
 function getObjectType(object) {
@@ -289,7 +309,9 @@ function loadPluginConfigFiles() {
 loadMainConfig(configPath);
 loadPluginConfigFiles();
 
-// configuration age/date is the UTC configuration file last modification date
+loadPackageConfig();
+
+// File age/date is the UTC configuration file last modification date
 ide.res.timestamp = configStats.atime.getTime();
 log.verbose('main', ide.res);
 
@@ -319,6 +341,7 @@ function handleMessage(service) {
 			}).on('error', function(e) {
 				throw e;
 			});
+			log.verbose(service.id, "config:", service);
 			creq.write(JSON.stringify({config: service}, null, 2));
 			creq.end();
 		} else {
@@ -372,9 +395,7 @@ function substVars(data, vars) {
 		var pType = getObjectType(data[key]);
 		if (pType === 'string') {
 			s = data[key];
-			vars.forEach(function(subst){
-				s = s.replace(subst.regex,subst.value);
-			});
+			s = substitute(s, vars);
 			data[key] = s;
 		} else if (pType === 'array') {
 			substVars(data[key], vars);
@@ -384,6 +405,13 @@ function substVars(data, vars) {
 		// else - Nothing to do (no substitution on non-string
 		// properties)
 	}
+}
+
+function substitute(s, vars) {
+	vars.forEach(function(subst){
+		s = s.replace(subst.regex,subst.value);
+	});
+	return s;
 }
 
 function startService(service) {
@@ -535,16 +563,8 @@ ide.res.services.filter(function(service){
 
 var enyojsRoot = path.resolve(myDir,".");
 
-var app, server;
-if (express.version.match(/^2\./)) {
-	// express-2.x
-	app = express.createServer();
-	server = app;
-} else {
-	// express-3.x
-	app = express();
-	server = http.createServer(app);
-}
+var app = express(),
+    server = http.createServer(app);
 
 function cors(req, res, next) {
 	/*
@@ -577,6 +597,9 @@ app.configure(function(){
 	app.get('/res/services', function(req, res, next) {
 		log.http('main', m("GET /res/services:", ide.res.services));
 		res.status(200).json({services: ide.res.services});
+	});
+	app.get('/res/aboutares', function(req, res, next) {		
+		res.status(200).json({aboutAres: aresAboutData});
 	});
 	app.all('/res/services/:serviceId/*', proxyServices);
 	app.all('/res/services/:serviceId', proxyServices);
@@ -620,13 +643,14 @@ if (argv.runtest) {
 server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, function () {
 	var tcpAddr = server.address();
 	var url = "http://" + (argv.host || "127.0.0.1") + ":" + tcpAddr.port + "/ide/ares/" + page;
+	var info;
 	if (argv.browser) {
 		// Open default browser
-		var info = platformOpen[process.platform] ;
+		info = platformOpen[process.platform] ;
 		spawn(info[0], info.slice(1).concat([url]));
 	} else if (argv['bundled-browser']) {
 		// Open bundled browser
-		var info = platformOpen[process.platform].concat(bundledBrowser[process.platform]);
+		info = platformOpen[process.platform].concat(bundledBrowser[process.platform]);
 		spawn(info[0], info.slice(1).concat([url]));
 	} else {
 		log.http('main', "Ares now running at <" + url + ">");

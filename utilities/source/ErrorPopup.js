@@ -1,22 +1,27 @@
+/* global ares */
 enyo.kind({
 	name: "Ares.ErrorPopup",
 	kind: "onyx.Popup",
 	modal: true,
 	centered: true,
 	floating: true,
+	autoDismiss: false,
 	published: {
-		errorMsg: "unknown error",
+		errorMsg: $L("unknown error"),
+		actionMsg: undefined,
 		detailsHtml: "",
-		detailsText: ""
+		detailsText: "",
+		callback: null
 	},
 	classes:"ares-classic-popup",
 	components: [
-	    {tag: "div", classes:"title", content: "Error"},
+	    {tag: "div", name: "title", classes:"title", content: "Error"},
 			{classes:"ares-error-popup", fit: true, components: [
 				{name: "msg"},
+				{name: "action", showing: false},
 				{classes:"ares-error-details", components:[
 					{classes:"button", components:[
-						{tag:"label", classes:"label", name: "detailsBtn", content: "Details", ontap: "toggleDetails", showing: false},
+						{tag:"label", classes:"label", name: "detailsBtn", content: $L("Details"), ontap: "toggleDetails", showing: false},
 						{name:"detailsArrow", classes:"optionDownArrow", ontap: "toggleDetails", showing: false},
 						{name: "detailsDrw", kind: "onyx.Drawer", open: false, showing:false, classes:"ares-error-drawer", components: [
 							{name: "detailsText", kind: "onyx.TextArea", disabled: true, fit:true, classes:"ares-error-text"},
@@ -25,15 +30,16 @@ enyo.kind({
 					]}
 				]}
 			]},
-			{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+			{kind: "onyx.Toolbar", name: "bottomToolbar",  classes:"bottom-toolbar", components: [
 				{name: "okButton", kind: "onyx.Button", content: "Close", ontap: "hideErrorPopup"}
 			]}
 	],
 	create: function() {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-	},
+	},    
 	errorMsgChanged: function (oldVal) {
-		if (this.debug) this.log(oldVal, "->", this.errorMsg);
+		this.trace(oldVal, "->", this.errorMsg);
 		this.$.msg.setContent(this.errorMsg);
 	},
 	detailsTextChanged: function() {
@@ -41,6 +47,14 @@ enyo.kind({
 	},
 	detailsHtmlChanged: function() {
 		this.updateDetailsDrw();
+	},
+	actionMsgChanged: function() {
+		if (this.actionMsg) {
+			this.$.action.setContent(this.actionMsg);			
+			this.$.action.setShowing(true);
+		} else {
+			this.$.action.setShowing(false);
+		}
 	},
 	updateDetailsDrw: function() {
 		if (this.detailsText || this.detailsHtml) {
@@ -73,9 +87,21 @@ enyo.kind({
 		this.setDetailsText();
 		this.setDetailsHtml();
 		this.hide();
+		if (this.callback) {
+			var cb = this.callback;
+			this.callback = null;
+			cb();
+		}
 	},
 	raise: function(evt) {
 		var msg, err, text, html;
+
+		if (evt.callback) {
+			if (this.callback) {
+				this.error("Previous callback was not fired ! Bug ?");
+			}
+			this.callback = evt.callback;
+		}
 		if (typeof evt === 'object') {
 			if (evt instanceof Error) {
 				err = evt;
@@ -83,7 +109,13 @@ enyo.kind({
 			} else {
 				err = evt.err;
 				msg = evt.msg || (err && err.toString());
+				
+				if(evt.title !== undefined) {
+					this.$.title.setContent(evt.title);
+				}				
 			}
+		} else {
+			msg = evt.toString();
 		}
 		text = err && (err.text || err.stack);
 		html = err && err.html;
@@ -91,6 +123,7 @@ enyo.kind({
 		this.setErrorMsg(msg);
 		this.setDetailsHtml(html);
 		this.setDetailsText(text);
+		this.setActionMsg(evt.action);
 		this.show();
 	}
-});
+});	

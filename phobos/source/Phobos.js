@@ -1,4 +1,4 @@
-/* global analyzer, ares, Ares, ProjectCtrl */
+/* global analyzer, ares, ProjectCtrl */
 
 enyo.kind({
 	name: "Phobos",
@@ -15,11 +15,12 @@ enyo.kind({
 				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
-		{name: "savePopup", kind: "saveActionPopup", onAbandonDocAction: "abandonDocAction", onSave: "saveBeforeClose"},
-		{name: "saveAllPopup", kind: "Ares.ActionPopup", onAbandonDocAction: "abandonAllDocAction"},
-		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, onFileChosen: "saveAsFileChosen"},
+		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
+		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction"},
+		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
+		{name: "overwritePopup", kind: "overwriteActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "saveAsConfirm", onCancelActionPopup: "saveAsCancel"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: $L("unknown error")},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
 		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "enyo-unselectable", centered: true, modal: true, floating: true, autoDismiss: false,
 		onChangeSettings:"applySettings", onChangeRightPane: "changeRightPane", onClose: "closeEditorPop", onHide:"hideTest", onTabSizsChange: "tabSize"}
@@ -31,9 +32,10 @@ enyo.kind({
 		onSaveAsDocument: "",
 		onDesignDocument: "",
 		onCloseDocument: "",
-		onCloseAllDocument: "",
 		onUpdate: "",
-		onRegisterMe: ""
+		onRegisterMe: "",
+		onDisplayPreview: "",
+		onSwitchFile: ""
 	},
 	handlers: {
 		onCss: "newcssAction",
@@ -42,10 +44,12 @@ enyo.kind({
 	published: {
 		projectData: null
 	},
+	editedDocs:"",
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
 	helper: null,			// Analyzer.KindHelper
+	closeAll: false,
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
@@ -70,18 +74,23 @@ enyo.kind({
 	saveDocAction: function() {
 		this.showWaitPopup($L("Saving ..."));
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
+		return true;
 	},
-	saveComplete: function() {
+	saveComplete: function(inDocData) {
 		this.hideWaitPopup();
-		this.docData.setEdited(false);		// TODO: The user may have switched to another file
-		this.reparseAction();
+		if (inDocData) {
+			inDocData.setEdited(false);		// TODO: The user may have switched to another file
+		}
+		if (this.docData === inDocData) {
+			this.reparseAction();
+		}
 	},
 	saveNeeded: function() {
 		return this.docData.getEdited();
 	},
 	saveFailed: function(inMsg) {
 		this.hideWaitPopup();
-		this.log("Save failed: " + inMsg);
+		this.warn("Save failed: " + inMsg);
 		this.showErrorPopup("Unable to save the file");
 	},
 	saveAsDocAction: function() {
@@ -94,29 +103,55 @@ enyo.kind({
 		}).bind(this));
 	},
 	saveAsFileChosen: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-
+		this.trace(inSender, "=>", inEvent);
+		
 		if (!inEvent.file) {
 			// no file or folder chosen
 			return;
 		}
-		var self = this;
-		var relativePath = inEvent.name.split("/");
+		
+		var hft = this.$.saveAsPopup.$.hermesFileTree ;
+		var next = function(result) {
+			if (result) {
+				this.$.overwritePopup.set("data", inEvent);
+				this.$.overwritePopup.show();
+			} else {
+				this.saveAsConfirm(inSender, {data: inEvent});
+			}
+		}.bind(this);
+
+		hft.checkNodeName(inEvent.name, next);		
+		
+		return true; //Stop event propagation
+	},
+	/** @private */
+	saveAsConfirm: function(inSender, inData){
+		this.trace(inSender, "=>", inData);
+		
+		var data = inData.data;
+		var relativePath = data.name.split("/");
 		var name = relativePath[relativePath.length-1];
+		
 		this.showWaitPopup($L("Saving ..."));
 		this.doSaveAsDocument({
 			docId: this.docData.getId(),
 			projectData: this.docData.getProjectData(),
-			file: inEvent.file,
+			file: data.file,
 			name: name,
 			content: this.$.ace.getValue(),
-			next: function(err) {
-				self.hideWaitPopup();
-				if (typeof inEvent.next === 'function') {
-					inEvent.next();
+			next: (function(err) {
+				this.hideWaitPopup();
+				if (typeof data.next === 'function') {
+					data.next();
 				}
-			}
+			}).bind(this)
 		});
+
+		return true; //Stop event propagation
+	},
+	saveAsCancel: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+
 		return true; //Stop event propagation
 	},
 	saveBeforeClose: function(){
@@ -124,9 +159,10 @@ enyo.kind({
 		var id = this.docData.getId();
 		this.beforeClosingDocument();
 		this.doCloseDocument({id: id});
+		this.closeNextDoc();
+		return true;
 	},
 	openDoc: function(inDocData) {
-
 		// If we are changing documents, reparse any changes into the current projectIndexer
 		if (this.docData && this.docData.getEdited()) {
 			this.reparseAction(true);
@@ -194,8 +230,9 @@ enyo.kind({
 			this.$.ace.editingMode = mode;
 		}
 		else {
-			var origin = this.projectData.getService().getConfig().origin;
-			this.$.imageViewer.setAttribute("src", origin + file.pathname);
+			var config = this.projectData.getService().getConfig();
+			var fileUrl = config.origin + config.pathname + "/file" + file.path;
+			this.$.imageViewer.setAttribute("src", fileUrl);
 		}
 		this.manageDesignerButton();
 		this.reparseAction(true);
@@ -247,6 +284,15 @@ enyo.kind({
 				} else {
 					this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
 				}
+			} else if (this.owner.$.editorFileMenu.$[stuff] !== undefined && this.owner.$.designerFileMenu.$[stuff] !== undefined) {
+				var editorFileMenu = this.owner.$.editorFileMenu.$[stuff];
+				var designerFileMenu = this.owner.$.designerFileMenu.$[stuff];
+				if (typeof editorFileMenu.setShowing === 'function' && typeof designerFileMenu.setShowing === 'function') {
+					editorFileMenu.setShowing(showStuff);
+					designerFileMenu.setShowing(showStuff);
+				} else {
+					this.warn("BUG: attempting to show/hide a non existing element: ", stuff);
+				}
 			} else {
 				if (typeof this.owner.$[stuff].setShowing === 'function') {
 					this.owner.$[stuff].setShowing(showStuff) ;
@@ -269,7 +315,7 @@ enyo.kind({
 
 		var settings = modes[mode]||modes['text'];
 		this.$.right.setIndex(settings.rightIndex);
-		this.$.body.reflow();
+		this.resizeHandler();
 		return showSettings.ace ;
 	},
 	showWaitPopup: function(inMessage) {
@@ -334,13 +380,13 @@ enyo.kind({
 		var h$ = "<h3>" + c.name + "</h3>";
 		//
 		var h = [];
-		for (var i=0, p; p=c.superkinds[i]; i++) {
+		for (var i=0, p; (p=c.superkinds[i]); i++) {
 			h.push(p);
 		}
 		h$ += "<h4>Extends</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
 		h = [];
-		for (i=0, p; p=c.components[i]; i++) {
+		for (i=0, p; (p=c.components[i]); i++) {
 			h.push(p.name);
 		}
 		if (h.length) {
@@ -348,13 +394,13 @@ enyo.kind({
 		}
 		//
 		h = [];
-		for (i=0, p; p=c.properties[i]; i++) {
+		for (i=0, p; (p=c.properties[i]); i++) {
 			h.push(p.name);
 		}
 		h$ += "<h4>Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
 		//
 		h = [];
-		for (i=0, p; p=c.allProperties[i]; i++) {
+		for (i=0, p; (p=c.allProperties[i]); i++) {
 			h.push(p.name);
 		}
 		h$ += "<h4>All Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
@@ -512,7 +558,9 @@ enyo.kind({
 				var comps = [];
 				if (start && end) {
 					var js = c.substring(start, end);
-					comps = eval("(" + js + ")"); // Why eval? Because JSON.parse doesn't support unquoted keys...
+					/* jshint evil: true */
+					comps = eval("(" + js + ")"); // TODO: ENYO-2074, replace eval. Why eval? Because JSON.parse doesn't support unquoted keys... 
+					/* jshint evil: false */
 				}
 				var comp = {
 					name: name,
@@ -658,51 +706,89 @@ enyo.kind({
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
-			this.$.savePopup.setName("Document was modified!");
-			this.$.savePopup.setMessage("Save it before closing?");
-			this.$.savePopup.setActionButton("Don't Save");
-			this.$.savePopup.show();
+			this.showSavePopup("savePopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing? "');
 		} else {
 			var id = this.docData.getId();
 			this.beforeClosingDocument();
 			this.doCloseDocument({id: id});
+			this.closeNextDoc();
 		}
 		return true; // Stop the propagation of the event
 	},
 	closeAllDocAction: function(inSender, inEvent) {
-		var fileEdited = false,
-		    files = Ares.Workspace.files;
-		files.each(function(file) {
-			fileEdited = fileEdited || file.getEdited();
-		});
-		if (fileEdited === true) {
-			this.$.saveAllPopup.setName("Document(s) were modified!");
-			this.$.saveAllPopup.setMessage("Save it before closing?");
-			this.$.saveAllPopup.setActionButton("Don't Save");
-			this.$.saveAllPopup.show();
-		} else {
-			this.beforeClosingDocument();
-			this.doCloseAllDocument();
-		}
+		this.closeAll = true;
+		this.closeNextDoc();
 		return true; // Stop the propagation of the event
-	},	
+	},
+	closeNextDoc: function() {
+		if(this.docData && this.closeAll) {
+			this.closeDocAction(this);
+		} else {
+			this.closeAll = false;
+		}
+	},
+	cancelClose: function(inSender, inEvent) {
+		this.closeAll = false;
+	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
 		var docData = this.docData;
 		this.beforeClosingDocument();
 		this.doCloseDocument({id: docData.getId()});
+		this.closeNextDoc();
 	},
-	// called when "Don't Save" is selected in save all popup
-	abandonAllDocAction: function(inSender, inEvent) {
-		this.$.saveAllPopup.hide();
-		this.beforeClosingDocument();
-		this.doCloseAllDocument();
+	/**
+	* @protected
+	*/
+	showSavePopup: function(componentName, message){
+		this.$[componentName].setTitle($L("Document was modified!"));
+		this.$[componentName].setMessage(message);
+		this.$[componentName].setActionButton($L("Don't Save"));
+		this.$[componentName].show();
 	},	
+	/** 
+	* @protected
+	*/
+	saveDocumentsBeforePreview: function(editedDocs){
+		this.editedDocs = editedDocs;
+		this.saveNextDocument();
+	},
+	/**
+	* @protected
+	*/
+	saveNextDocument: function(){
+		if(this.editedDocs.length >= 1){
+			var docData = this.editedDocs.pop();
+			this.openDoc(docData);
+			this.doSwitchFile({id:docData.id});
+			this.showSavePopup("savePopupPreview",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before preview? "');
+		}else{
+			this.doDisplayPreview();
+		}
+		return true;
+	},
+	/**
+	* Called when save button is selected in save popup shown before preview action
+	* @protected
+	*/
+	saveBeforePreviewAction: function(inSender, inEvent){
+		this.saveDocAction();
+		this.saveNextDocument();
+		return true;
+	},
+	/**
+	* Called when don't save button is selected in save popup shown before preview action
+	* @protected
+	*/
+	abandonDocActionOnPreview: function(inSender, inEvent) {
+		this.$.savePopup.hide();
+		this.saveNextDocument();
+	},
 	docChanged: function(inSender, inEvent) {
 		this.docData.setEdited(true);
 
-		this.trace(JSON.stringify(inEvent.data));
+		this.trace("data:", enyo.json.stringify(inEvent.data));
 
 		if (this.analysis) {
 			// Call the autocomplete component
@@ -710,9 +796,14 @@ enyo.kind({
 		}
 		return true; // Stop the propagation of the event
 	},
+	editorUserSyntaxError:function(){
+		var userSyntaxError = [];		
+		userSyntaxError = this.$.autocomplete.ace.editor.session.$annotations.length;
+		return userSyntaxError;
+	},
 	cursorChanged: function(inSender, inEvent) {
 		var position = this.$.ace.getCursorPositionInDocument();
-		this.trace(inSender.id + " " + inEvent.type + " " + JSON.stringify(position));
+		this.trace(inSender.id, " ", inEvent.type, " ", enyo.json.stringify(position));
 
 		// Check if we moved to another enyo kind and display it in the right pane
 		var tempo = this.analysis;
@@ -858,6 +949,11 @@ enyo.kind({
 		if (data.kinds.length > 0) {
 			this.doUpdate(data);
 		} // else - The error has been displayed by extractKindsData()
+	},
+	resizeHandler: function() {
+		this.inherited(arguments);
+		this.$.body.reflow();
+		this.$.ace.resize();
 	}
 });
 
@@ -897,17 +993,38 @@ enyo.kind({
 	name: "saveActionPopup",
 	kind: "Ares.ActionPopup",
 	events:{
-		onSave: ""
+		onSaveActionPopup: ""
 	},
+	/** @private */
 	create: function() {
 		this.inherited(arguments);
+		this.$.message.allowHtml = true;
 		this.$.buttons.createComponent(
-			{name:"saveButton", kind: "onyx.Button", content: "Save", ontap: "save"},
+			{name:"saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "save"},
 			{owner: this}
 		);
 	},
+	/** @private */
 	save: function(inSender, inEvent) {
 		this.hide();
-		this.doSave();
+		this.doSaveActionPopup();
 	}
+});
+
+enyo.kind({
+	name: "overwriteActionPopup",
+	kind: "Ares.ActionPopup",
+	data: null,
+	/** @private */
+	create: function() {
+		this.inherited(arguments);
+	},
+	/* Ares.ActionPopup overloading */
+	/** @private */
+	actionConfirm: function(inSender, inEvent) {
+        this.hide();
+        this.doConfirmActionPopup({data: this.data});
+        return true;
+    },
+    
 });

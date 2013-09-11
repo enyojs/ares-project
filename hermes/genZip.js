@@ -1,3 +1,5 @@
+/* jshint node:true */
+
 /**
  * Project Generator based on ZIP-files
  */
@@ -14,7 +16,6 @@ var fs = require("fs"),
     http = require("http"),
     rimraf = require("rimraf"),
     ptools = require("ares-generator"),
-    HttpError = require("./lib/httpError"),
     CombinedStream = require('combined-stream');
 
 var basename = path.basename(__filename, '.js');
@@ -92,7 +93,7 @@ function GenZip(config, next) {
 	// - 'application/json' => req.body
 	// - 'application/x-www-form-urlencoded' => req.body
 	// - 'multipart/form-data' => req.body.<field>[], req.body.file[]
-	this.uploadDir = temp.path({prefix: 'com.palm.ares.hermes.genZip'}) + '.d';
+	this.uploadDir = temp.path({prefix: 'com.enyojs.ares.services.genZip'}) + '.d';
 	fs.mkdirSync(this.uploadDir);
 	app.use(express.bodyParser({keepExtensions: true, uploadDir: this.uploadDir}));
 
@@ -168,7 +169,7 @@ function GenZip(config, next) {
 
 		var destination = temp.mkdirSync({prefix: 'com.enyojs.ares.services.genZip'});
 		self.tools.generate(JSON.parse(req.body.sourceIds), JSON.parse(req.body.substitutions), destination, {
-			overwrite: req.param("overwrite")
+			overwrite: req.param("overwrite") === 'true'
 		}, function(inError, inData) {
 			if (inError) {
 				next(inError);
@@ -307,15 +308,19 @@ if (path.basename(process.argv[1], '.js') === basename) {
 
 	log.level = argv.level || 'http';
 
-	var obj = new GenZip({
+	new GenZip({
 		pathname: argv.pathname,
 		port: argv.port,
 		level: argv.level
 	}, function(err, service){
-		if(err) process.exit(err);
+		if(err) {
+			process.exit(err);
+		}
 		// process.send() is only available if the
 		// parent-process is also node
-		if (process.send) process.send(service);
+		if (process.send) {
+			process.send(service);
+		}
 	});
 } else {
 

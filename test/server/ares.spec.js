@@ -1,14 +1,15 @@
-#!/usr/bin/env ../../node_modules/mocha/bin/mocha
+#!/usr/bin/env node_modules/mocha/bin/mocha
+/* jshint node:true */
+/* global describe */
 /**
  * ares.spec.js -- ARES server test suite
  */
 var path = require("path"),
     fs = require("fs"),
-    shell = require('shelljs'),
     npmlog = require('npmlog'),
     temp = require("temp"),
-    rimraf = require("rimraf"),
-    async = require("async");
+    mkdirp = require("mkdirp"),
+    rimraf = require("rimraf");
 
 var knownOpts = {
 	"config":	path,
@@ -53,7 +54,6 @@ log.level = argv.level || 'error';
 log.verbose("main", "running in verbose mode");
 log.verbose("main", "argv:", argv);
 
-var mocha = process.argv[1];
 var myPort = 9019;
 
 log.verbose("main", "loading " + argv.config);
@@ -66,82 +66,43 @@ var myTestDir = "_test";
  * test suite
  */
 
+function getHome() {
+	return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+}
+
 describe("Testing filesystems", function() {
+	var FsSpec = require("./fs.spec.js");
+
 	var dropbox = config.services.filter(function(service) {
 		return service.id === 'dropbox';
 	})[0];
 	if (dropbox && dropbox.auth && dropbox.auth.appKey) {
-		it("fsDropbox", function(done) {
-			var fsDropbox = path.resolve(__dirname, "..", "..", "hermes","fsDropbox.js");
-			var myTestDir = "_test";
+		describe("fsDropbox", function(done) {
 			var myDropboxApp = 'com.enyojs.ares';
 			// Assume a user's account grip in the local file-system.
-			var myTestDirPath = [getHome(), 'Dropbox', 'Apps', myDropboxApp, myTestDir].join('/');
-			async.series([
-				function(next) {
-					rimraf(myTestDirPath, next);
-				},
-				function(next) {
-					setTimeout(next, 1500);
-				},
-				function(next) {
-					run([mocha, "--bail",
-					     "--timeout", "5000", // This timeout may vary, depending on the network conditions
-					     "--reporter", "spec",
-					     path.resolve(__dirname, "fs.spec.js"),
-					     "--level", argv.level,
-					     "--filesystem", fsDropbox,
-					     "--pathname", "/",
-					     "--port", myPort,
-					     "--dir", myTestDir,
-					     "--auth", encodeURIComponent(JSON.stringify(dropbox.auth))]);
-					next();
-				},
-				function(next) {
-					rimraf(myTestDirPath, next);
-				}
-			], function(err) {
-				done();
+			var myTestDirPath = path.join(getHome(), 'Dropbox', 'Apps', myDropboxApp, myTestDir);
+			rimraf.sync(myTestDirPath);
+			mkdirp.sync(myTestDirPath);
+			new FsSpec({
+				filesystem: "./../../hermes/fsDropbox.js",
+				pathname: "/",
+				port: myPort,
+				dir: myTestDir,
+				level: argv.level,
+				auth: dropbox.auth
 			});
 		});
 	}
-	it("fsLocal", function(done) {
-		this.timeout(15000);
 
-		var fsLocal = path.resolve(__dirname, "..", "..", "hermes","fsLocal.js");
-		var myFsPath = temp.path({prefix: 'com.palm.ares.test.fs'});
-		
-		fs.mkdirSync(myFsPath);
-		
-		run([mocha, "--bail",
-		     "--reporter", "spec",
-		     path.resolve(__dirname, "fs.spec.js"),
-		     "--level", log.level,
-		     "--filesystem", fsLocal,
-		     "--pathname", "/",
-		     "--port", myPort,
-		     "--dir", myTestDir,
-		     "--root", myFsPath]);
-		
-		fs.rmdir(myFsPath, done);
+	describe("fsLocal", function() {
+		var myFsPath = temp.mkdirSync({prefix: 'com.palm.ares.test.fs'});
+		new FsSpec({
+			filesystem: "./../../hermes/fsLocal.js",
+			pathname: "/",
+			port: myPort,
+			dir: myTestDir,
+			level: argv.level,
+			root: myFsPath
+		});
 	});
 });
-
-/*
- * utilities
- */
-
-function run(args) {
-	// Use '" "' instead of ' ' to let things work on Windows
-	var command = args.shift() + ' "' + args.join('" "') + '"';
-	log.verbose("main", "Running: '", command, "' from '", process.cwd(), "'");
-
-	var report = shell.exec(command, { silent: false });
-	if (report.code !== 0) {
-		throw new Error("Fail: '" + command + "'\n" + report.output);
-	}
-}
-
-function getHome() {
-	return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
-}

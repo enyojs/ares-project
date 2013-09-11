@@ -1,9 +1,9 @@
-var	util = require('util')
-	, Stream = require('stream').Stream
-	, express = require('express')
- 	, _ = require('./_')
- 	, step = require('stepup')
- 	, debug = require('./debug');
+/* global require, console, process, module  */
+var	Stream = require('stream').Stream, 
+	express = require('express'), 
+	_ = require('./_'), 
+	step = require('stepup'), 
+	debug = require('./debug');
 
 function cors(req, res, next) {
 	// TODO: override this in individual services?
@@ -18,39 +18,37 @@ function cors(req, res, next) {
 	else {
 		next();
 	}
-};
+}
 
 function HermesClient(inConfig) {
 	var server, self;
-	var proto;
+	self = this;
 
-	self = this
-
-	this.config = _.mask(inConfig, this._configMask)
-	_.extend(this, _.mask(this.config, this._propertyMask))
+	this.config = _.mask(inConfig, this._configMask);
+	_.extend(this, _.mask(this.config, this._propertyMask));
 
 	if (this.config.certs) {
 		server = express.createServer(this.config.certs);
 	} else {
 		server = express.createServer();
 	}
-	this.server = server
+	this.server = server;
 	
 	// Not sure if this is overridable, but it should be
 	server.configure(function() {
 		if (self.debug) {
-			self.debug = debug(self.onError ? self.onError : HermesClient.prototype.onError)
-			server.use(self.debug)
+			self.debug = debug(self.onError ? self.onError : HermesClient.prototype.onError);
+			server.use(self.debug);
 		}
 		server.use(cors);
-		server.use(express.bodyParser())
-		server.use(express.cookieParser())
-		server.enable('strict routing')
+		server.use(express.bodyParser());
+		server.use(express.cookieParser());
+		server.enable('strict routing');
 		server.set('jsonp callback', true);
-	})
+	});
 
-	for (verb in this.routes) {
-		server.all(verb,  this.routes[verb].bind(this, verb))
+	for (var verb in this.routes) {
+		server.all(verb,  this.routes[verb].bind(this, verb));
 	}
 	server.listen(this.port, "127.0.0.1", null /*backlog*/, function() {
 		var msg = {
@@ -64,100 +62,100 @@ function HermesClient(inConfig) {
 }
 
 HermesClient.prototype = {
-	_configMask: ['port', 'debug', 'name', 'certs', 'root']
-, _propertyMask: ['port', 'debug', 'name']
-, port: 9000
-, debug: true
-, name: 'Hermes Service'
-, onError: function(req, res, err, next) {
-		console.log('============================ ERROR ============================')
+	_configMask: ['port', 'debug', 'name', 'certs', 'root'],
+	_propertyMask: ['port', 'debug', 'name'],
+	port: 9000,
+	debug: true,
+	name: 'Hermes Service',
+	onError: function(req, res, err, next) {
+		console.log('============================ ERROR ============================');
 		if (err instanceof Error) {
-			console.log(err.stack)
-			res.writeHead(500)
-			res.end(err.stack)
+			console.log(err.stack);
+			res.writeHead(500);
+			res.end(err.stack);
 		} else {
-			res.writeHead(403)
-			res.end(JSON.stringify({error: err}))
+			res.writeHead(403);
+			res.end(JSON.stringify({error: err}));
 		}
-	}
-, routes: {
+	}, 
+	routes: {
 		'/:verb/*': function(route, req, res) {
-			console.log("\n============================ " + this.name + " ============================")
-			console.log("= url:", req.url)
-			console.log("= verb:", req.params.verb)
-			console.log("= cookie:", req.cookies.provider)
-			console.log("==============")
-			this.verb(req.params.verb, req, res)
+			console.log("\n============================ " + this.name + " ============================");
+			console.log("= url:", req.url);
+			console.log("= verb:", req.params.verb);
+			console.log("= cookie:", req.cookies.provider);
+			console.log("==============");
+			this.verb(req.params.verb, req, res);
 		}
-	}
-, verb: function(inVerb, req, res) {
-		var self
+	}, 
+	verb: function(inVerb, req, res) {
+		var self;
 
-		self = this
+		self = this;
 
-		step(_.bind(this.onError, this, req, res)
-		, function() {
+		step(_.bind(this.onError, this, req, res), 
+			function() {
 				if (!self.hasVerb(inVerb)) {
-					self.onError(req, res, 'Verb not supported: '+inVerb)
-					return
+					self.onError(req, res, 'Verb not supported: '+inVerb);
+					return;
 				}
 
-				req.params.config = self.parseConfig(req.cookies.provider)
-				console.log('Config:\n', req.cookies, '\n', req.params.config)
+				req.params.config = self.parseConfig(req.cookies.provider);
+				console.log('Config:\n', req.cookies, '\n', req.params.config);
 
 				if (!req.params.config) {
 					return self.onError(req, res, 'Insufficient credentials provided.');
 				}
 
-				self.execute(inVerb, req, res, this)
+				self.execute(inVerb, req, res, this);
+			}, 
+			function(data) {
+				console.log("= verb [" + inVerb + "] complete");
+				self.send(res, data);
 			}
-		, function(data) {
-				console.log("= verb [" + inVerb + "] complete")
-				self.send(res, data)
-			}
-		)
-	}
-, execute: function(inVerb, req, res, next) {
-		this.verbs[inVerb].call(this, req, res, next)
-	}
-, send: function(res, inData) {
+		);
+	}, 
+	execute: function(inVerb, req, res, next) {
+		this.verbs[inVerb].call(this, req, res, next);
+	}, 
+	send: function(res, inData) {
 		if (inData instanceof Stream) {
-			console.log('Streaming response...')
-			inData.pipe(res)
+			console.log('Streaming response...');
+			inData.pipe(res);
 		} else {
 			res.send(inData);
 		}
-	}
-, hasVerb: function(inVerb) {
+	}, 
+	hasVerb: function(inVerb) {
 		if (!this.verbs[inVerb] || Object.prototype[inVerb]) {
-			console.log("unknown verb [" + inVerb + "]")
-			return false
+			console.log("unknown verb [" + inVerb + "]");
+			return false;
 		} else {
-			return true
+			return true;
 		}
-	}
-, parseConfig: function(inConfig) {
-		var config
+	}, 
+	parseConfig: function(inConfig) {
+		var config;
 
 		if (!inConfig) {
-			console.log("provider config was empty")
-			return {}
+			console.log("provider config was empty");
+			return {};
 		}
 
 		try {
-			config = JSON.parse(inConfig).params
+			config = JSON.parse(inConfig).params;
 		} catch(e) {
-			throw new Error("Invalid JSON in provider config")
+			throw new Error("Invalid JSON in provider config");
 		}
 
-		console.log("provider config:", config)
-		return config
+		console.log("provider config:", config);
+		return config;
 	}
-}
+};
 
 module.exports = {
 	HermesClient: HermesClient
-}
+};
 
 
 

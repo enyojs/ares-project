@@ -1,3 +1,4 @@
+/* jshint node:true */
 /**
  * fsLocal.js -- Ares FileSystem (fs) provider, using local files.
  * 
@@ -12,16 +13,19 @@ var fs = require("fs"),
     util  = require("util"),
     mkdirp = require("mkdirp"),
     async = require("async"),
-    FsBase = require(__dirname + "/lib/fsBase"),
-    FdUtil = require(__dirname + "/lib/SimpleFormData"),
     CombinedStream = require('combined-stream'),
-    HttpError = require(__dirname + "/lib/httpError");
+    copyFile = require("./lib/copyFile"),
+    FsBase = require("./lib/fsBase"),
+    FdUtil = require("./lib/SimpleFormData"),
+    HttpError = require("./lib/httpError");
+
+var basename = path.basename(__filename, '.js');
 
 function FsLocal(inConfig, next) {
 	inConfig.name = inConfig.name || "fsLocal";
 
 	// parameters sanitization
-	this.root = path.resolve(this.root);
+	inConfig.root = path.resolve(inConfig.root);
 
 	// inherits FsBase (step 1/2)
 	FsBase.call(this, inConfig, next);
@@ -80,7 +84,8 @@ FsLocal.prototype.get = function(req, res, next) {
 FsLocal.prototype.mkcol = function(req, res, next) {
 	var newPath, newId, newName, self = this,
 	    pathParam = req.param('path'),
-	    nameParam = req.param('name');
+	    nameParam = req.param('name'),
+	    overwriteParam = req.param('overwrite') !== "false";
 	this.log("pathParam:", pathParam);
 	this.log("nameParam:", nameParam);
 	if (!nameParam) {
@@ -97,16 +102,24 @@ FsLocal.prototype.mkcol = function(req, res, next) {
 	newName = path.basename(newPath);
 	newId = this.encodeFileId(newPath);
 
-	mkdirp(path.join(this.root, newPath), function(err) {
-		next(err, {
-			code: 201, // Created
-			body: {
-				id: newId,
-				path: newPath,
-				name: newName,
-				isDir: true
-			}
-		});
+	var absPath = path.join(this.root, newPath);
+	async.series([
+		this._checkOverwrite.bind(this, absPath, overwriteParam),
+		mkdirp.bind(null, absPath)
+	], function(err) {
+		if (err) {
+			next(err);
+		} else {
+			next(null, {
+				code: 201, // Created
+				body: {
+					id: newId,
+					path: newPath,
+					name: newName,
+					isDir: true
+				}
+			});
+		}
 	});
 };
 
@@ -326,28 +339,42 @@ FsLocal.prototype.putFile = function(req, file, next) {
             urlPath = this.normalize(file.name),
 	    dir = path.dirname(absPath),
 	    encodeFileId = this.encodeFileId,
+	    overwriteParam = req.param('overwrite') !== "false",
 	    node;
 	
 	this.log("FsLocal.putFile(): file:", file, "-> absPath:", absPath);
 	
 	async.series([
-		function(cb1) {
-			mkdirp(dir, cb1);
-		},
-		function(cb1) {
+		this._checkOverwrite.bind(this, absPath, overwriteParam),
+		mkdirp.bind(null, dir),
+		(function(cb1) {
 			if (file.path) {
-				fs.rename(file.path, absPath, cb1);
+				try {
+					fs.renameSync(file.path, absPath);
+					cb1();
+				} catch(err) {
+					this.log("FsLocal.putFile(): err:", err.toString());
+					if (err.code === 'EXDEV') {
+						this.log("FsLocal.putFile(): COPY+REMOVE file:", file.path, "-> absPath:", absPath);
+						async.series([
+							copyFile.bind(undefined, file.path, absPath),
+							fs.unlink.bind(fs, file.path)
+						], cb1);
+					} else {
+						throw err;
+					}
+				}
 			} else if (file.buffer) {
 				fs.writeFile(absPath, file.buffer, cb1);
 			} else {
 				cb1(new HttpError("cannot write file=" + JSON.stringify(file), 400));
 			}
-		},
+		}).bind(this),
 		(function(cb1){
 			this.log("FsLocal.putFile(): file length: ", 
 				file.buffer && file.buffer.length);
 
-			this.log("FsLocal.putFile(): file length: ", 
+			this.log("FsLocal.putFile(): file path: ", 
 				file.path);
 			
 			node = {
@@ -364,14 +391,36 @@ FsLocal.prototype.putFile = function(req, file, next) {
 	}).bind(this));
 };
 
+FsLocal.prototype._checkOverwrite = function(absPath, overwrite, next) {
+	if (!overwrite) {
+		fs.stat(absPath, function(err, stat) {
+			if (err) {
+				if (err.code === 'ENOENT') {
+					/* normal */
+					next();
+				} else {
+					/* wrong */
+					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+				}
+			} else {
+				/* wrong */
+				next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+			}
+		});
+	} else {
+		next();
+	}
+};
+
 // XXX ENYO-1086: refactor tree walk-down
 FsLocal.prototype._changeNode = function(req, res, op, next) {
 	var pathParam = req.param('path'),
 	    nameParam = req.param('name'),
 	    folderIdParam = req.param('folderId'),
-	    overwriteParam = req.param('overwrite'),
+	    overwriteParam = req.param('overwrite') !== "false",
 	    srcPath = path.join(this.root, pathParam);
-	var dstPath, dstRelPath, srcNode;
+	var dstPath, dstRelPath;
+	var srcStat, dstStat;
 	if (nameParam) {
 		// rename/copy file within the same collection (folder)
 		dstRelPath = path.join(path.dirname(pathParam),
@@ -389,30 +438,48 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 		next(new HttpError("trying to move a resource onto itself", 400 /*Bad-Request*/));
 		return;
 	}
-	fs.stat(dstPath, (function(err, stat) {
+	async.waterfall([
+		fs.stat.bind(this, srcPath),
+		function(stat, next) {
+			srcStat = stat;
+			fs.stat(dstPath, next);
+	        },
+	        function(stat, next) {
+			dstStat = stat;
+			next();
+	        }
+	], function(err) {
 		// see RFC4918, section 9.9.4 (MOVE Status
 		// Codes) & section 9.8.5 (COPY Status Codes).
 		if (err) {
 			if (err.code === 'ENOENT') {
-				// Destination resource does not exist yet
-				op(srcPath, dstPath, (function(err) {
-					// return the new content of the destination path
-					this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
-						next(err, {
-							code: 201 /*Created*/,
-							body: content
+				if (err.path === srcPath) {
+					/* srcPath doesn't exist */
+					next(new HttpError("resouce does not exist", 400 /*Bad-Request*/));
+					return;
+				} else {
+					/* dstPath doesn't exist */
+					// Destination resource does not exist yet
+					op(srcPath, dstPath, (function(err) {
+						// return the new content of the destination path
+						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
+							next(err, {
+								code: 201 /*Created*/,
+								body: content
+							});
 						});
-					});
-				}).bind(this));
+					}).bind(this));
+				}
 			} else {
+				/* unknown error */
 				next(err);
 			}
-		} else if (stat) {
+		} else {
+			/* dstPath exist */
 			if (overwriteParam) {
 				// Destination resource already exists : destroy it first
 				this._rmrf(dstPath, (function(err) {
 					op(srcPath, dstPath, (function(err) {
-						//next(err, { code: 204 /*No-Content*/ });
 						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
 							next(err, {
 								code: 200 /*Ok*/,
@@ -422,10 +489,23 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 					}).bind(this));
 				}).bind(this));
 			} else {
-				next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+				if (req.method.match(/MOVE/i) &&
+				    (srcStat.ino === dstStat.ino) &&
+				    (srcStat.mtime.getTime() === dstStat.mtime.getTime())) {
+					op(srcPath, dstPath, (function(err) {
+						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
+							next(err, {
+								code: 200 /*Ok*/,
+								body: content
+							});
+						});
+					}).bind(this));
+				} else { 
+					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+				}
 			}
 		}
-	}).bind(this));
+	}.bind(this));
 };
 
 // XXX ENYO-1086: refactor tree walk-down
@@ -443,18 +523,11 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 			if (stats.isDirectory()) {
 				_copyDir(srcPath, dstPath, next);
 			} else if (stats.isFile()){
-				_copyFile(srcPath, dstPath, next);
+				copyFile(srcPath, dstPath, next);
 			}
 		});
 	}
-	function _copyFile(srcPath, dstPath, next) {
-		var is, os;
-		is = fs.createReadStream(srcPath);
-		os = fs.createWriteStream(dstPath);
-		util.pump(is, os, next); // XXX should return 201 (Created) on success
-	}
 	function _copyDir(srcPath, dstPath, next) {
-		var count = 0;
 		fs.readdir(srcPath, function(err, files) {
 			if (err) {
 				next(err);
@@ -466,7 +539,6 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 					return;
 				}
 				async.forEachSeries(files, function(file, next) {
-					var sub = path.join(dstPath, file);
 					_copyNode(path.join(srcPath, file), path.join(dstPath, file), next);
 				}, next);
 			});
@@ -476,7 +548,7 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 
 // module/main wrapper
 
-if (path.basename(process.argv[1]) === "fsLocal.js") {
+if (path.basename(process.argv[1], '.js') === basename) {
 	// We are main.js: create & run the object...
 	
 	var knownOpts = {
@@ -507,16 +579,20 @@ if (path.basename(process.argv[1]) === "fsLocal.js") {
 		process.exit(0);
 	}
 
-	var fsLocal = new FsLocal({
+	new FsLocal({
 		root: argv.root,
 		pathname: argv.pathname,
 		port: argv.port,
 		level: argv.level
 	}, function(err, service){
-		if (err) process.exit(err);
+		if (err) {
+			process.exit(err);
+		}
 		// process.send() is only available if the
 		// parent-process is also node
-		if (process.send) process.send(service);
+		if (process.send) {
+			process.send(service);
+		}
 	});
 
 } else {

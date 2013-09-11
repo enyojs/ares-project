@@ -1,11 +1,11 @@
-#!/usr/bin/env ../../node_modules/mocha/bin/mocha --bail
+/* jshint node:true */
+/* global it */
 /**
  * fsXXX.js test suite
  */
 // @see http://visionmedia.github.com/mocha/
 
-var fs = require("fs"),
-    path = require("path"),
+var path = require("path"),
     http = require("http"),
     querystring = require("querystring"),
     npmlog = require('npmlog'),
@@ -13,75 +13,23 @@ var fs = require("fs"),
     util = require("util"),
     async = require("async");
 
-/*
- * parameters parsing
- */
+module.exports = FsSpec;
 
-var knownOpts = {
-	"filesystem":	path,
-	"auth":		String,
-	"pathname":	path,
-	"port":		Number,
-	"dir":		String,
-	"root":		path,
-	"help":		Boolean,
-	"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error']
-};
-var shortHands = {
-	"F": "--filesystem",
-	"A": "--auth",
-	"h": "--help",
-	"l": "--level",
-	"v": "--level verbose"
-};
-var helpString = [
-	"",
-	"Ares FileSystem (fs) tester.",
-	"Usage: '" + process.argv[0] + " " + process.argv[1] + " [OPTIONS] -F <FS_PATH>'",
-	"",
-	"Options:",
-	"  -F, --filesystem  path to the Hermes file-system to test. For example ../../hermes/fsLocal.js           ",
-	"  -A, --auth        auth parameter, passed as a single-quoted URL-encoded JSON-formatted Javascript Object",
-	"  -p, --port        IP port to bind the stest service onto                                                  [0]",
-	"  -h, --help        help message                                                                            [boolean]",
-	"  -v, --verbose     verbose execution mode                                                                  [boolean]",
-	"  -q, --quiet       really quiet                                                                            [boolean]",
-	""
-];
-var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
-argv.port = argv.port || 0;
-
-if (argv.help) {
-	helpString.forEach(function(s) { console.log(s); });
-	process.exit(0);
-}
-
-/**********************************************************************/
+function FsSpec(argv) {
 
 var log = npmlog;
-log.heading = 'fs.spec';
-log.level = argv.level || 'error';
 
-/**********************************************************************/
+log.info("fs.spec.js", "FsSpec()");
 
-var config = {};
+argv.port = argv.port || 0;
+argv.name = argv.name || path.basename(argv.filesystem);
 
-config.name = path.basename(argv.filesystem);
-config.prefix = '[fs.spec:' + config.name + ']';
+log.verbose("fs.spec.js", "argv:", argv);
 
-if (argv.auth) {
-	config.auth = JSON.parse(decodeURIComponent(argv.auth));
-}
+var Fs = require(argv.filesystem);
+var myFs;
 
-log.verbose('main', "running in verbose mode");
-log.verbose('main', "argv:", argv);
-log.verbose('main', "config:", config);
-
-/*
- * utilities
- */
-
-function get(path, query, next) {
+function get(prefix, path, query, next) {
 	var reqOptions = {
 		hostname: "127.0.0.1",
 		port: argv.port,
@@ -95,19 +43,19 @@ function get(path, query, next) {
 		delete query._method;
 	}
 
-	if (config.auth) {
-		query.auth = JSON.stringify(config.auth);
+	if (argv.auth) {
+		query.auth = JSON.stringify(argv.auth);
 	}
 
 	if (query && Object.keys(query).length > 0) {
 		reqOptions.path += '?' + querystring.stringify(query);
 	}
 
-	call(reqOptions, undefined /*reqBody*/, undefined /*reqParts*/, next);
+	call(prefix, reqOptions, undefined /*reqBody*/, undefined /*reqParts*/, next);
 }
 
-function post(path, query, content, contentType, next) {
-	var reqContent, reqBody, reqParts;
+function post(prefix, path, query, content, contentType, next) {
+	var reqBody, reqParts;
 	var reqOptions = {
 		hostname: "127.0.0.1",
 		port: argv.port,
@@ -122,22 +70,32 @@ function post(path, query, content, contentType, next) {
 	}
 
 	if (contentType) {
-		if (!contentType instanceof String) throw new Error("bad parameter: missing contentType");
+		if (!contentType instanceof String) {
+			throw new Error("bad parameter: missing contentType");
+		}
 		reqOptions.headers['content-type'] = contentType;
 
 		if (contentType.match(/^text\/plain/)) {
-			if (!content instanceof String) throw new Error("bad parameter: not a String");
+			if (!content instanceof String) {
+				throw new Error("bad parameter: not a String");
+			}
 			reqBody = content;
 		} else if (contentType.match(/^application\/xml/)) {
-			if (!content instanceof String) throw new Error("bad parameter: not a String");
+			if (!content instanceof String) {
+				throw new Error("bad parameter: not a String");
+			}
 			reqBody = content;	// XXX or convert an Object to XML
 		} else if (contentType.match(/^application\/json/)) {
-			if (!content instanceof Object) throw new Error("bad parameter: not an Object");
+			if (!content instanceof Object) {
+				throw new Error("bad parameter: not an Object");
+			}
 			reqBody = JSON.stringify(content);
 		} else if (contentType === 'application/x-www-form-urlencoded') {
 			query = query || {};
 			if (content) {
-				if (!Buffer.isBuffer(content)) throw new Error("bad parameter: not a Buffer");
+				if (!Buffer.isBuffer(content)) {
+					throw new Error("bad parameter: not a Buffer");
+				}
 				query.content = content.toString('base64');
 			}	
 			if (Object.keys(query).length > 0) {
@@ -146,26 +104,28 @@ function post(path, query, content, contentType, next) {
 		} else if (contentType.match(/multipart\/form-data/)) {
 			reqParts = content;
 		} else if (content && contentType instanceof String) {
-			if (contentType) reqOptions.headers['x-content-type'] = contentType; // original value
+			if (contentType) {
+				reqOptions.headers['x-content-type'] = contentType; // original value
+			}
 			reqOptions.headers['content-type'] = 'text/plain; charset=x-binary';
 			reqBody = content.toString('x-binary'); // do not decode/encode
 		}
 	}
 
-	if (config.auth) {
-		query.auth = JSON.stringify(config.auth);
+	if (argv.auth) {
+		query.auth = JSON.stringify(argv.auth);
 	}
 
 	if (query && Object.keys(query).length > 0) {
 		reqOptions.path += '?' + querystring.stringify(query);
 	}
 
-	call(reqOptions, reqBody, reqParts, next);
+	call(prefix, reqOptions, reqBody, reqParts, next);
 }
 
-function call(reqOptions, reqBody, reqParts, next) {
-	log.verbose('main', "reqOptions="+util.inspect(reqOptions));
-	log.verbose('main', "reqBody="+util.inspect(reqBody));
+function call(prefix, reqOptions, reqBody, reqParts, next) {
+	log.verbose(prefix, "reqOptions="+util.inspect(reqOptions));
+	log.verbose(prefix, "reqBody="+util.inspect(reqBody));
 	var req = http.request(reqOptions, function(res) {
 		var bufs = [];
 		res.on('data', function(chunk){
@@ -180,14 +140,14 @@ function call(reqOptions, reqBody, reqParts, next) {
 			if (mime) {
 				data.mime = mime;
 				data.buffer = Buffer.concat(bufs);
-				if (mime === 'application/json; charset=utf-8') {
+				if (mime.match('^application/json')) {
 					data.json = JSON.parse(data.buffer.toString());
 				}
-				if (mime === 'text/plain') {
+				if (mime.match('^text/plain')) {
 					data.text = data.buffer.toString();
 				}
 			}
-			log.verbose('main', "data="+util.inspect(data));
+			log.verbose(prefix, "response: "+util.inspect(data));
 			if (data.statusCode < 200 || data.statusCode >= 300) {
 				next(data);
 			} else {
@@ -245,19 +205,8 @@ function sendClosingBoundary(req, boundaryKey) {
 	req.end('--' + boundaryKey + '--');
 }
 
-var Fs = require(argv.filesystem);
-if (!Fs) {
-	throw new Error("Unable to load file-system: " + argv.filesystem);
-}
-var myFs;
-
-argv.verbose = (log.level === 'verbose' || log.level === 'silly');
-
-describe("Testing " + config.name, function() {
-	
 	it("t0. should start", function(done) {
-		myFs = new Fs(argv, function(err, service){
-			log.verbose('main', "service="+util.inspect(service));
+		myFs = new Fs(argv, function(err, service) {
 			should.not.exist(err);
 			should.exist(service);
 			should.exist(service.origin);
@@ -266,34 +215,34 @@ describe("Testing " + config.name, function() {
 		});
 	});
 
-	it("t0.1. fs root should have the same fileId with and without '/'", function(done) {
-		async.waterfall([
+	var fsRootId;
+
+	it("t0.1. fs root is the same as root folder", function(done) {
+		async.series([
 			function(next) {
-				get('/id/', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
+				get("t0.1/1", '/id/', {_method: "PROPFIND", depth: 0}, function(err, res) {
 					should.not.exist(err);
 					should.exist(res);
 					should.exist(res.statusCode);
-					res.statusCode.should.equal(200);
+					res.statusCode.should.equal(200, 'statusCode === 200');
 					should.exist(res.json);
-					should.exist(res.json.isDir);
-					res.json.isDir.should.equal(true);
-					should.not.exist(res.json.children);
 					should.exist(res.json.id);
-					next(null, res.json.id);
+					fsRootId = res.json.id;
+					next();
 				});
 			},
-			function(fsId, next) {
-				get('/id/' + fsId, {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
+			function(next) {
+				get("t0.1/2", '/id/' + fsRootId, {_method: "PROPFIND", depth: 0}, function(err, res) {
 					should.not.exist(err);
 					should.exist(res);
 					should.exist(res.statusCode);
-					res.statusCode.should.equal(200);
+					res.statusCode.should.equal(200, 'statusCode === 200');
 					should.exist(res.json);
 					should.exist(res.json.isDir);
-					res.json.isDir.should.equal(true);
+					res.json.isDir.should.equal(true, 'res.json.isDir === true');
 					should.not.exist(res.json.children);
 					should.exist(res.json.id);
-					res.json.id.should.equal(fsId);
+					res.json.id.should.equal(fsRootId);
 					next();
 				});
 			}
@@ -305,7 +254,7 @@ describe("Testing " + config.name, function() {
 	it("t0.2. should create test root folder", function(done) {
 		async.waterfall([
 			function(next) {
-				get('/id/', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
+				get("t0.2/1", '/id/' + fsRootId, {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
 					should.not.exist(err);
 					should.exist(res);
 					should.exist(res.statusCode);
@@ -319,7 +268,7 @@ describe("Testing " + config.name, function() {
 				});
 			},
 			function(fsId, next) {
-				post('/id/' + fsId, {_method: "MKCOL", name: rootName} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+				post("t0.2/2", '/id/' + fsId, {_method: "MKCOL", name: rootName} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 					should.not.exist(err);
 					should.exist(res);
 					should.exist(res.statusCode);
@@ -338,7 +287,7 @@ describe("Testing " + config.name, function() {
 	});
 	
 	it("t1.1. should have an empty root-level folder (depth=0)", function(done) {
-		get('/id/' + rootId, {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
+		get("t1.1", '/id/' + rootId, {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -352,7 +301,7 @@ describe("Testing " + config.name, function() {
 	});
 	
 	it("t1.2. should have an empty root-level folder (depth=1)", function(done) {
-		get('/id/' + rootId, {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
+		get("t1.2", '/id/' + rootId, {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -368,8 +317,8 @@ describe("Testing " + config.name, function() {
 		});
 	});
 	
-	it("t2.1. should create a folder", function(done) {
-		post('/id/' + rootId, {_method: "MKCOL",name: "toto"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+	it("t2.1.0. should create a folder", function(done) {
+		post("t2.1.0", '/id/' + rootId, {_method: "MKCOL",name: "toto"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -383,10 +332,50 @@ describe("Testing " + config.name, function() {
 		});
 	});
 
-	 var totoId;
+	it("t2.1.1. should fail to re-create the same folder (overwrite=false)", function(done) {
+		post("t2.1.1", '/id/' + rootId, {_method: "MKCOL",name: "toto", overwrite: "false"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+			should.exist(err);
+			should.not.exist(res);
+			should.exist(err.statusCode);
+			err.statusCode.should.equal(412);
+			done();
+		});
+	});
+
+	it("t2.1.2. should re-create the same folder (overwrite=undefined)", function(done) {
+		post("t2.1.2", '/id/' + rootId, {_method: "MKCOL",name: "toto"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201);
+			should.exist(res.json);
+			should.exist(res.json.isDir);
+			res.json.isDir.should.equal(true);
+			should.exist(res.json.path);
+			res.json.path.should.equal(rootPath + "/toto");
+			done();
+		});
+	});
+
+	it("t2.1.3. should re-create the same folder (overwrite=true)", function(done) {
+		post("t2.1.3", '/id/' + rootId, {_method: "MKCOL",name: "toto", overwrite: "true"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201);
+			should.exist(res.json);
+			should.exist(res.json.isDir);
+			res.json.isDir.should.equal(true);
+			should.exist(res.json.path);
+			res.json.path.should.equal(rootPath + "/toto");
+			done();
+		});
+	});
+
+	var totoId;
 
 	it("t2.2. should have a single sub-folder", function(done) {
-		get('/id/' + rootId, {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
+		get("t2.2", '/id/' + rootId, {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -407,7 +396,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t2.3. should have an empty folder (depth=1)", function(done) {
-		get('/id/' + totoId, {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
+		get("t2.3", '/id/' + totoId, {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -425,7 +414,7 @@ describe("Testing " + config.name, function() {
 	var titiId;
 
 	it("t2.5. should create a sub-folder", function(done) {
-		post('/id/' + totoId, {_method: "MKCOL",name: "titi"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+		post("t2.5", '/id/' + totoId, {_method: "MKCOL",name: "titi"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -441,7 +430,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t2.6. should fail to download a folder", function(done) {
-		get('/id/' + titiId, null /*query*/, function(err, res) {
+		get("t2.6", '/id/' + titiId, null /*query*/, function(err, res) {
 			should.exist(err);
 			should.exist(err.statusCode);
 			err.statusCode.should.equal(403); // Forbidden
@@ -452,11 +441,56 @@ describe("Testing " + config.name, function() {
 
 	var textContent = "This is a Text content!";
 	var textContent2 = "This is another Text content!";
-	var textContentType = "text/plain; charset=utf-8";
 	var textContentId = "";
 
 	it("t3.1. should create a file (using 'application/x-www-form-urlencoded')", function(done) {
-		post('/id/' + titiId, {_method: "PUT",name: "tutu"} /*query*/, new Buffer(textContent), 'application/x-www-form-urlencoded' /*contentType*/, function(err, res) {
+		post("t3.1", '/id/' + titiId, {_method: "PUT",name: "tutu"} /*query*/, new Buffer(textContent), 'application/x-www-form-urlencoded' /*contentType*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201);
+			should.exist(res.json);
+			should.exist(res.json[0]);
+			should.exist(res.json[0].isDir);
+			res.json[0].isDir.should.equal(false);
+			should.exist(res.json[0].path);
+			res.json[0].path.should.equal(rootPath + "/toto/titi/tutu");
+			should.exist(res.json[0].id);
+			textContentId = res.json[0].id;
+			done();
+		});
+	});
+
+	it("t3.1.1. should fail to overwrite an existing file (overwrite=false)", function(done) {
+		post("t3.1.1", '/id/' + titiId, {_method: "PUT",name: "tutu", overwrite: "false"} /*query*/, new Buffer(textContent), 'application/x-www-form-urlencoded' /*contentType*/, function(err, res) {
+			should.exist(err);
+			should.not.exist(res);
+			should.exist(err.statusCode);
+			err.statusCode.should.equal(412);
+			done();
+		});
+	});
+
+	it("t3.1.2. should succeed to overwrite an existing file (overwrite=undefined)", function(done) {
+		post("t3.1.1", '/id/' + titiId, {_method: "PUT",name: "tutu"} /*query*/, new Buffer(textContent), 'application/x-www-form-urlencoded' /*contentType*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201);
+			should.exist(res.json);
+			should.exist(res.json[0]);
+			should.exist(res.json[0].isDir);
+			res.json[0].isDir.should.equal(false);
+			should.exist(res.json[0].path);
+			res.json[0].path.should.equal(rootPath + "/toto/titi/tutu");
+			should.exist(res.json[0].id);
+			textContentId = res.json[0].id;
+			done();
+		});
+	});
+
+	it("t3.1.3. should succeed to overwrite an existing file (overwrite=true)", function(done) {
+		post("t3.1.1", '/id/' + titiId, {_method: "PUT",name: "tutu", overwrite: "true"} /*query*/, new Buffer(textContent), 'application/x-www-form-urlencoded' /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -474,7 +508,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t3.2. should see created file as a file", function(done) {
-		get('/id/' + textContentId, {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
+		get("t3.2", '/id/' + textContentId, {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -492,7 +526,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t3.3. should download the same file", function(done) {
-		get('/id/' + textContentId, null /*query*/, function(err, res) {
+		get("t3.3", '/id/' + textContentId, null /*query*/, function(err, res) {
 			var contentStr;
 			should.not.exist(err);
 			should.exist(res);
@@ -508,8 +542,8 @@ describe("Testing " + config.name, function() {
 	var emptyContent = "";		//empty file
 	var emptyContentId;
 
-	it("t3.3. should create an empty file (using 'application/x-www-form-urlencoded')", function(done) {
-		post('/id/' + titiId, {_method: "PUT",name: "empty"} /*query*/, emptyContent, 'application/x-www-form-urlencoded' /*contentType*/, function(err, res) {
+	it("t3.3.1. should create an empty file (using 'application/x-www-form-urlencoded')", function(done) {
+		post("t3.1.1", '/id/' + titiId, {_method: "PUT",name: "empty"} /*query*/, emptyContent, 'application/x-www-form-urlencoded' /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -527,7 +561,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t3.4. should download the same empty file", function(done) {
-		get('/id/' + emptyContentId, null /*query*/, function(err, res) {
+		get("t3.4", '/id/' + emptyContentId, null /*query*/, function(err, res) {
 			var emptyStr;
 			should.not.exist(err);
 			should.exist(res);
@@ -540,7 +574,7 @@ describe("Testing " + config.name, function() {
 		});
 	});
 
-	 var tataId;
+	var tataId;
 
 	it("t4.1. should create a file (using 'multipart/form-data')", function(done) {
 		var content = {
@@ -550,7 +584,7 @@ describe("Testing " + config.name, function() {
 		};
 		async.waterfall([
 			function(cb) {
-				post('/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
+				post("t4.1", '/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
 			},
 			function(res, cb) {
 				should.exist(res);
@@ -570,7 +604,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t4.2. should download the same file", function(done) {
-		get('/id/' + tataId, null /*query*/, function(err, res) {
+		get("t4.2", '/id/' + tataId, null /*query*/, function(err, res) {
 			var contentStr;
 			should.not.exist(err);
 			should.exist(res);
@@ -593,7 +627,7 @@ describe("Testing " + config.name, function() {
 		};
 		async.waterfall([
 			function(cb) {
-				post('/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
+				post("t4.3", '/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
 			},
 			function(res, cb) {
 				should.exist(res);
@@ -613,7 +647,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t4.4. should download the same file", function(done) {
-		get('/id/' + dir1file0Id, null /*query*/, function(err, res) {
+		get("t4.4", '/id/' + dir1file0Id, null /*query*/, function(err, res) {
 			var contentStr;
 			should.not.exist(err);
 			should.exist(res);
@@ -641,7 +675,7 @@ describe("Testing " + config.name, function() {
 		}];
 		async.waterfall([
 			function(cb) {
-				post('/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
+				post("t4.5", '/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
 			},
 			function(res, cb) {
 				should.exist(res);
@@ -670,7 +704,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t4.6. should download the same file (first one)", function(done) {
-		get('/id/' + dir2file0Id, null /*query*/, function(err, res) {
+		get("t4.6", '/id/' + dir2file0Id, null /*query*/, function(err, res) {
 			var contentStr;
 			should.not.exist(err);
 			should.exist(res);
@@ -684,7 +718,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t4.7. should download the same file (second one)", function(done) {
-		get('/id/' + dir2file1Id, null /*query*/, function(err, res) {
+		get("t4.7", '/id/' + dir2file1Id, null /*query*/, function(err, res) {
 			var contentStr;
 			should.not.exist(err);
 			should.exist(res);
@@ -698,8 +732,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t5.1. should fail to describe a non-existing file", function(done) {
-		get('/id/' + '112233', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
-			var emptyBuf, emptyStr;
+		get("t5.1", '/id/' + '112233', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
 			should.exist(err);
 			should.exist(err.statusCode);
 			err.statusCode.should.equal(404);
@@ -709,8 +742,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t5.2. should fail to download a non-existing file", function(done) {
-		get('/id/' + '112233', null /*query*/, function(err, res) {
-			var contentBuf, contentStr;
+		get("t5.2", '/id/' + '112233', null /*query*/, function(err, res) {
 			should.exist(err);
 			should.exist(err.statusCode);
 			err.statusCode.should.equal(404);
@@ -722,7 +754,7 @@ describe("Testing " + config.name, function() {
 	 var tata1Id;
 
 	it("t6.1. should copy file in the same folder, as a new file", function(done) {
-		post('/id/' + tataId, {_method: "COPY", name: "tata.1"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+		post("t6.1", '/id/' + tataId, {_method: "COPY", name: "tata.1"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -736,8 +768,8 @@ describe("Testing " + config.name, function() {
 		});
 	});
 
-	it("t6.2. should fail to copy file in the same folder, onto another one (no overwrite)", function(done) {
-		post('/id/' + tata1Id, {_method: "COPY", name: "tata"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+	it("t6.2. should fail to copy file in the same folder, onto another one (overwrite=false)", function(done) {
+		post("t6.2", '/id/' + tata1Id, {_method: "COPY", name: "tata", overwrite: "false"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.exist(err);
 			should.exist(err.statusCode);
 			err.statusCode.should.equal(412); // Precondition-Failed
@@ -747,7 +779,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t6.3. should fail to copy file as or to nothing", function(done) {
-		post('/id/' + tata1Id, {_method: "COPY"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+		post("t6.3", '/id/' + tata1Id, {_method: "COPY"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.exist(err);
 			should.exist(err.statusCode);
 			err.statusCode.should.equal(400); // Bad-Request
@@ -756,14 +788,14 @@ describe("Testing " + config.name, function() {
 		});
 	});
 
-	it("t6.4. should copy file in the same folder, onto another one (overwrite)", function(done) {
-		post('/id/' + tata1Id, {_method: "COPY", name: "tata", overwrite: true} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+	it("t6.4. should copy file in the same folder, onto another one (overwrite=undefined)", function(done) {
+		post("t6.4/1", '/id/' + tata1Id, {_method: "COPY", name: "tata"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
 			res.statusCode.should.equal(200); // Ok
 
-			get('/id/' + tataId, null /*query*/, function(err, res) {
+			get("t6.4/2", '/id/' + tataId, null /*query*/, function(err, res) {
 				var contentStr;
 				should.not.exist(err);
 				should.exist(res);
@@ -773,7 +805,7 @@ describe("Testing " + config.name, function() {
 				contentStr = res.buffer.toString();
 				contentStr.should.equal(contentStr);
 
-				get('/id/' + tata1Id, null /*query*/, function(err, res) {
+				get("t6.4/3", '/id/' + tata1Id, null /*query*/, function(err, res) {
 					var contentStr;
 					should.not.exist(err);
 					should.exist(res);
@@ -789,8 +821,8 @@ describe("Testing " + config.name, function() {
 		});
 	});
 
-	it("t6.5. should fail to copy file in the same folder as the same name (overwrite)", function(done) {
-		post('/id/' + tataId, {_method: "COPY",name: "tata", overwrite: true} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+	it("t6.5. should fail to copy file in the same folder as the same name (overwrite=true)", function(done) {
+		post("t6.5", '/id/' + tataId, {_method: "COPY",name: "tata", overwrite: true} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.exist(err);
 			should.exist(err.statusCode);
 			err.statusCode.should.equal(400);
@@ -799,12 +831,12 @@ describe("Testing " + config.name, function() {
 		});
 	});
 
-	 var toto1Id;
+	var toto1Id;
 
 	it("t6.6. should reccursively copy folder in the same folder, as a new folder", function(done) {
 		async.waterfall([
 			function(next) {
-				post('/id/' + totoId, {_method: "COPY", name: "toto.1"} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
+				post("t6.6/1", '/id/' + totoId, {_method: "COPY", name: "toto.1"} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
 					should.not.exist(err);
 					should.exist(res);
 					should.exist(res.statusCode);
@@ -817,7 +849,7 @@ describe("Testing " + config.name, function() {
 					next();
 				});
 			}, function(next) {
-				get('/file' + rootPath + '/toto.1/titi/tata', null /*query*/, function(err, res) {
+				get("t6.6/2", '/file' + rootPath + '/toto.1/titi/tata', null /*query*/, function(err, res) {
 					var contentStr;
 					should.not.exist(err);
 					should.exist(res);
@@ -833,13 +865,13 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t7.1. should rename folder in the same folder, as a new folder", function(done) {
-		post('/id/' + toto1Id, {_method: "MOVE", name: "toto.2"} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
+		post("t7.1/1", '/id/' + toto1Id, {_method: "MOVE", name: "toto.2"} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
 			res.statusCode.should.equal(201); // Created
 
-			get('/file' + rootPath + '/toto.2/titi/tata', null /*query*/, function(err, res) {
+			get("t7.1/2", '/file' + rootPath + '/toto.2/titi/tata', null /*query*/, function(err, res) {
 				var contentStr;
 				should.not.exist(err);
 				should.exist(res);
@@ -849,8 +881,7 @@ describe("Testing " + config.name, function() {
 				contentStr = res.buffer.toString();
 				contentStr.should.equal(contentStr);
 
-				get('/file' + rootPath + '/toto.1/titi/tata', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
-					var contentBuf, contentStr;
+				get("t7.1/3", '/file' + rootPath + '/toto.1/titi/tata', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
 					should.exist(err);
 					should.exist(err.statusCode);
 					err.statusCode.should.equal(404);
@@ -863,13 +894,13 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t7.2. should rename file in the same folder, as a new file", function(done) {
-		post('/id/' + tata1Id, {_method: "MOVE", name: "tata.2"} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
+		post("t7.2/1", '/id/' + tata1Id, {_method: "MOVE", name: "tata.2"} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
 			res.statusCode.should.equal(201); // Created
 
-			get('/file' + rootPath + '/toto/titi/tata.2', null /*query*/, function(err, res) {
+			get("t7.2/2", '/file' + rootPath + '/toto/titi/tata.2', null /*query*/, function(err, res) {
 				var contentStr;
 				should.not.exist(err);
 				should.exist(res);
@@ -879,8 +910,7 @@ describe("Testing " + config.name, function() {
 				contentStr = res.buffer.toString();
 				contentStr.should.equal(contentStr);
 
-				get('/file' + rootPath + '/toto/titi/tata.1', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
-					var contentBuf, contentStr;
+				get("t7.2/3", '/file' + rootPath + '/toto/titi/tata.1', {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
 					should.exist(err);
 					should.exist(err.statusCode);
 					err.statusCode.should.equal(404);
@@ -893,7 +923,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t7.3. should fail to move file into a non-existing folder", function(done) {
-		post('/id/' + tataId, {_method: "MOVE", folderId: '112233'} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
+		post("t7.3", '/id/' + tataId, {_method: "MOVE", folderId: '112233'} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
 			should.exist(err);
 			should.exist(err.statusCode);
 			err.statusCode.should.equal(404); // Not-Found
@@ -903,7 +933,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t7.4. should fail to move folder into a non-existing folder", function(done) {
-		post('/id/' + titiId, {_method: "MOVE", folderId: '112233'} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
+		post("t7.4", '/id/' + titiId, {_method: "MOVE", folderId: '112233'} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
 			should.exist(err);
 			should.exist(err.statusCode);
 			err.statusCode.should.equal(404); // Not-Found
@@ -915,7 +945,7 @@ describe("Testing " + config.name, function() {
 	 var toto3Id;
 
 	it("t7.5. should move file into another folder", function(done) {
-		post('/id/' + rootId, {_method: "MKCOL",name: "toto.3"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+		post("t7.5/1", '/id/' + rootId, {_method: "MKCOL",name: "toto.3"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -928,13 +958,13 @@ describe("Testing " + config.name, function() {
 			should.exist(res.json.id);
 			toto3Id = res.json.id;
 
-			post('/id/' + tataId, {_method: "MOVE", folderId: toto3Id} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
+			post("t7.5/2", '/id/' + tataId, {_method: "MOVE", folderId: toto3Id} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
 				should.not.exist(err);
 				should.exist(res);
 				should.exist(res.statusCode);
 				res.statusCode.should.equal(201); // Created
 
-				get('/file' + rootPath + '/toto.3/tata', null /*query*/, function(err, res) {
+				get("t7.5/3", '/file' + rootPath + '/toto.3/tata', null /*query*/, function(err, res) {
 					var contentStr;
 					should.not.exist(err);
 					should.exist(res);
@@ -951,7 +981,7 @@ describe("Testing " + config.name, function() {
 	});
 
 	it("t7.6. should move folder into another folder", function(done) {
-		post('/id/' + rootId, {_method: "MKCOL",name: "toto.4"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+		post("t7.6/1", '/id/' + rootId, {_method: "MKCOL",name: "toto.4"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -964,7 +994,7 @@ describe("Testing " + config.name, function() {
 			should.exist(res.json.id);
 			var toto4Id = res.json.id;
 
-			get('/file' + rootPath + '/toto.2/titi', {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
+			get("t7.6/2", '/file' + rootPath + '/toto.2/titi', {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
 				should.not.exist(err);
 				should.exist(res);
 				should.exist(res.statusCode);
@@ -977,13 +1007,13 @@ describe("Testing " + config.name, function() {
 				should.exist(res.json.children);
 				var nbChildren = res.json.children.length;
 
-				post('/id/' + toto2titiId, {_method: "MOVE", folderId: toto4Id} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
+				post("t7.6/3", '/id/' + toto2titiId, {_method: "MOVE", folderId: toto4Id} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
 					should.not.exist(err);
 					should.exist(res);
 					should.exist(res.statusCode);
 					res.statusCode.should.equal(201); // Created
 					
-					get('/file' + rootPath + '/toto.4/titi', {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
+					get("t7.6/4", '/file' + rootPath + '/toto.4/titi', {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
 						should.not.exist(err);
 						should.exist(res);
 						should.exist(res.statusCode);
@@ -1001,8 +1031,20 @@ describe("Testing " + config.name, function() {
 		});
 	});
 
+	it("t8.0. should find a designer overlay iframe.html at any place", function(done) {
+		get("t8.0", '/file' + rootPath + '/iframe.html', {overlay: "designer"}, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(200);
+			should.not.exist(res.json);
+			res.headers['content-type'].should.match(/^text\/html/);
+			done();
+		});
+	});
+
 	it("t100.0. should delete test root folder", function(done) {
-		post('/id/' + rootId, {_method: "DELETE"} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
+		post("t100.0", '/id/' + rootId, {_method: "DELETE"} /*query*/, null /*content*/, null /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -1014,4 +1056,4 @@ describe("Testing " + config.name, function() {
 	it("t100.1. should stop", function(done) {
 		myFs.quit(done);
 	});
-});
+}
