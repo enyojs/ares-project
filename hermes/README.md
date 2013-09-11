@@ -96,7 +96,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		    "versionTag": "af34ef45",
 		}
 
-* `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded).  It returns a JSON-encoded single-level (depth=0) node descriptor of the new folder.
+* `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded).  When the `overwrite` parameter is explicitly set to `"false"` (as a string), `MKCOL` may fails with an HTTP status code `412/Resource Already Exists`. It returns a JSON-encoded single-level (depth=0) node descriptor of the new folder.
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
 
@@ -108,7 +108,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
     Other encoding may be added later on.
 
 	
-* `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.
+* `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.  When the `overwrite` parameter is explicitly set to `"false"` (as a string), `PUT` may fails with an HTTP status code `412/Resource Already Exists`.
   * `application/x-www-form-urlencoded` contains a single base64-encoded file in the form field named `content`.  The file name and location are provided by `{id}` and optionally `name` query parameter.
   * `multipart/form-data` follows the standard format.  For each file `filename` is interpreted relativelly to the folder `{id}` provided in the URL.  **Note:** To accomodate an issue with old Firefox releases (eg. Firefox 10), fields labelled `filename` overwrite the `filename` in their corresponding `file` fields.  See `fsBase#_putMultipart()` for more details.
 
@@ -117,7 +117,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2Ftata?_method=DELETE"
 
-* `COPY` reccursively copies a resource as a new `name` or `folderId` provided in the query string (one of them is required, only one is taken into account, `name` takes precedence if both are provided in the query-string).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not.  The method returns the node descriptor (as `PROPFIND` would return) of the new resource.
+* `COPY` reccursively copies a resource as a new `name` or `folderId` provided in the query string (one of them is required, only one is taken into account, `name` takes precedence if both are provided in the query-string).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not (default value: `"true"`).  The method returns the node descriptor (as `PROPFIND` would return) of the new resource.
   * `201/Created` success, a new resource is created
   * `200/Ok` success, an existing resource was successfully overwritten (query parameter `overwrite` was set to `true`)
   * `412/Precondition-Failed` failure, not allowed to copy onto an exising resource
@@ -250,9 +250,9 @@ The property `sources:` of the service **genZip** lists the template definitions
 				}
 			]
 		}, 
-		[...]
-	}
-
+	    [...]
+	]
+	
 Ares plugins can add or modify this list of templates, from their own `ide-plugin.json`.
 
 	{
@@ -446,7 +446,7 @@ The Ares PhoneGap build service does not need any configuration but the HTTP/HTT
 			"verbose": false,
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
 			"auth": {
-				[...]
+			    [...]
 			}
 ```
 
