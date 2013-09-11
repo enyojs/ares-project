@@ -171,7 +171,7 @@ enyo.kind({
 	 */
 	create: function(){
 		this.inherited(arguments);
-		this.getAboutAresData();
+		this.reqAboutAresData();
 
 	},
 
@@ -179,7 +179,7 @@ enyo.kind({
 	 * Send an AJAX request to the  Backend in order to get the needed data for the Ares description.
 	 * @rprivate
 	 */
-	getAboutAresData: function(){
+	reqAboutAresData: function(){
 		var origin = window.location.origin || window.location.protocol + "//" + window.location.host; // Webkit/FF vs IE
 
 		var req = new enyo.Ajax({
