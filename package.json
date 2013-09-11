@@ -4,7 +4,7 @@
 	"license" : "Apache 2.0", 
 	"description": "A browser-based code editor and UI designer for Enyo 2 projects",
 	"keywords": ["ide", "enyo", "phonegap", "android", "ios", "windowsphone", "blackberry", "webos", "html5"],
-	"homepage": "https://github.com/enyojs/ares-project",
+	"homepage": "https://github.com/enyojs/ares-project/blob/master/README.md",
 	"bugs": {
 		"url": "https://enyojs.atlassian.net/browse/ENYO"
 	},

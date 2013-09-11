@@ -143,23 +143,22 @@ enyo.kind({
 					{
 						kind:"FittableColumns", 
 						components: [				
-							{content: "If you encounter any bug please report it in the following link ", classes: "ares-about-description"},
-							{name: "brValue", kind: "enyo.Control", tag: "a", content: "Report a bug", attributes: {"target": "_blank"}}
+							{content: "In case of issue, please consider ", classes: "ares-about-description"},
+							{name: "brValue", kind: "enyo.Control", tag: "a", content: "Reporting a bug", attributes: {"target": "_blank"}}
 						]
 					},
 					{
 						kind:"FittableColumns", 
 						components: [				
-							{content: "We would welcome any contribution you can come with ", classes: "ares-about-description"},
+							{content: "See ", classes: "ares-about-description"},
 							{name: "homeValue", kind: "enyo.Control", tag: "a", content: "Project Homepage", attributes: {"target": "_blank"}}				
 						]
 					},
 					{
 						kind:"FittableColumns", 
 						components: [				
-							{content: "Copyright: ", classes: "ares-about-description"},
-							{name: "license", classes: "ares-about-description"},
-							{ content: " all rights reserved"}
+							{content: "License: ", classes: "ares-about-description"},
+							{name: "license", classes: "ares-about-description"}
 						]
 					}
 				]
@@ -167,19 +166,19 @@ enyo.kind({
 	],
 	
 	/**
-	 * private
+	 * @protected
 	 */
 	create: function(){
 		this.inherited(arguments);
-		this.getAboutAresData();
+		this.reqAboutAresData();
 
 	},
 
 	/**
 	 * Send an AJAX request to the  Backend in order to get the needed data for the Ares description.
-	 * @rprivate
+	 * @private
 	 */
-	getAboutAresData: function(){
+	reqAboutAresData: function(){
 		var origin = window.location.origin || window.location.protocol + "//" + window.location.host; // Webkit/FF vs IE
 
 		var req = new enyo.Ajax({
@@ -193,7 +192,7 @@ enyo.kind({
 		//Show the error in a Pop-up.
 		req.error(this, function(inSender, inError){
 			
-			this.doError({msg: "("+inError +") Unable to load Ares About data", err: inError});
+			this.doError({msg: "Unable to load data about Ares", err: inError});
 			this.$.errorMessage.show();
 			this.$.aboutDescription.hide();
 		});
