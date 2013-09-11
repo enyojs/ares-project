@@ -160,8 +160,8 @@ enyo.kind({
 			components: [{
 					kind: "FittableRows",
 					components: [
-						{content: "Sign-in is required", name: "signInErrorMsg", classes: "ares-project-properties-sign-in-error-msg"}, 
-						{content: "Looking for Phonegap account data ...", name: "waitingForSignIn", classes: "ares-project-properties-sign-in-error-msg"},
+						{content: "Sign-in is required", name: "signInErrorMsg", classes: "ares-project-properties-sign-in-msg"}, 
+						{content: "Looking for Phonegap account data ...", name: "waitingForSignIn", classes: "ares-project-properties-sign-in-msg"},
 						{
 							classes: "ares-row ares-align-left",
 							name: "appIdRow",
@@ -169,7 +169,7 @@ enyo.kind({
 								{kind: "Phonegap.ProjectProperties.AppId", name: "appIdSelector"}							
 							]
 						}, 
-						{name: "BuildOptionPanel", kind: "FittableRows"},
+						{name: "BuildOptionPanel", kind: "FittableRows", style: "margin-top: 50px;"},
 						{name: "targetsRows", kind: "FittableRows", classes: "ares-project-properties-targetsRows-display"}
 						
 					]
@@ -302,7 +302,7 @@ enyo.kind({
 	setProjectConfig: function (config) {
 		this.trace("Project config:", config);
 
-		config.enabled = true;
+		config.enabled = true;	
 		this.$.appIdSelector.setSelectedAppId(config.appId || '');		
 		config.targets = config.targets || {};
 
@@ -513,14 +513,13 @@ enyo.kind({
 		this.$.drawer.setOpen(this.fold);
 		this.fold = !this.fold;
 	}
-
-
 });
 
 
 enyo.kind({
 	name: "Phonegap.ProjectProperties.AppId",
-	kind: "FittableColumns",
+	kind: "FittableRows",
+	classes: "ares-project-propertie-application-panel",
 	debug: false,
 	published: {
 		userData: undefined,
@@ -529,35 +528,51 @@ enyo.kind({
 	},
 
 	components: [
-		{content: "AppId",	classes: "ares-project-properties-appid-id"},
-		{
-			kind: "onyx.PickerDecorator",
+	{
+		kind:"FittableColumns",
+		classes: "ares-project-properties-appid-container",
+		components: [
+			{content: "Title",	classes: "ares-project-properties-appid-label-title"},
+			{name: "ApplicationTitle"}
+		]
+	},
+	{
+		kind:"FittableColumns",				
+		components: [
+			{content: "AppId",	classes: "ares-project-properties-appid-label-title"},
+			{
+				kind: "onyx.PickerDecorator",			
+				components: [
+					{kind: "onyx.PickerButton", classes: "ares-project-properties-picker", content:"Select AppId"},
+					{kind: "onyx.Picker", name: "AppIdList", onSelect: "updateSelectedAppId"}
+				]
+			},
+			{kind:"Phonegap.ProjectProperties.BuildStatus", name: "buildStatusDisplay"}
+			
+		]
+	}
 		
-			components: [
-				{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
-				{kind: "onyx.Picker", name: "AppIdList",published: {appObject: undefined}, onSelect: "updateSelectedAppId"}
-			]
-		},
-		{content: "Application name:",	classes: "ares-project-properties-appid-title"},
-		{name: "ApplicationTitle", content:""}
 	],
 
 	/**@private*/
 	userDataChanged: function(){
 		
-		this.clearPickerContent();
+		this.clearPickerContent();		
+		
+		//object containing default application's data to be associated with the picker's element "New Application"
+		var newApplicationObject = {title: "", role: "owner", link: null};
 				
 		if (this.userData.user.apps.all.length === 0){
-			this.$.AppIdList.createComponent({content: "New Application", active: true});
+			this.$.AppIdList.createComponent({content: "New Application", published: {applicationObject: newApplicationObject}, active: true});
 			this.setSelectedAppId('');
 		} else {
-			this.$.AppIdList.createComponent({content: "New Application", active: false});
+			this.$.AppIdList.createComponent({content: "New Application", published: {applicationObject: newApplicationObject}, active: false});
 			enyo.forEach(this.userData.user.apps.all, 
 				function (inApp) {
 					var itemState = inApp.id === this.selectedAppId ? true : false;
 					if (itemState) {
 						this.setSelectedTitle(inApp.title);
-					}
+					}					
 					this.$.AppIdList.createComponent({content: inApp.id, published: {applicationObject: inApp} , active: itemState});			
 					this.$.AppIdList.render();								
 				}, this);
@@ -565,13 +580,28 @@ enyo.kind({
 	}, 
 
 	/**@private*/
-	updateSelectedAppId: function (inSender, inValue) {	
-		this.setSelectedTitle(inValue && inValue.selected.published.applicationObject&& inValue.selected.published.applicationObject.title || "");
+	updateSelectedAppId: function (inSender, inValue) {		
+	
+		/**
+		 * selectedAppData is a sub-element from the object "userData" that contains the followin attributs : 
+		 * id : appId
+		 * link: url suffix for the Phonegap build application
+		 * role: user's privilege on the selected application
+		 * title: application's title.
+		 * @type {Array}
+		 */
+		var selectedAppData = inValue && inValue.selected.published.applicationObject;
+		
+		this.setSelectedTitle(selectedAppData.title || "");
+		this.$.buildStatusDisplay.$.statusMessage.setContent("");
 		if (inValue.content === "New Application") {
 			this.setSelectedAppId("");
 		} else {
 			this.setSelectedAppId(inValue.content);
 		}				
+	},
+	selectedAppIdChanged: function() {
+		this.$.buildStatusDisplay.setAppId(this.selectedAppId);		
 	},
 
 	/**@private*/
@@ -591,7 +621,201 @@ enyo.kind({
 		this.$.ApplicationTitle.setContent(this.selectedTitle);
 		this.$.ApplicationTitle.render();
 	}
+});
 
+enyo.kind({
+	name: "Phonegap.ProjectProperties.PlatformBuildStatus",
+	kind: "onyx.IconButton",
+	classes: "ares-project-properties-build-status-icon",
+	ontap: "showStatusMessage",	
+	published: {
+		platform: undefined,
+		buildStatusData: undefined,
+	},
+	buildStatusDataChanged: function() {
+		if (this.buildStatusData && this.buildStatusData.status[this.platform] === "complete") {
+			//Build status: complete
+			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-complete-32x32.png");
+			
+		} else {
+			if (this.buildStatusData && this.buildStatusData.status[this.platform] === "error" || 
+			    this.buildStatusData && this.buildStatusData.status[this.platform] === null){
+				
+				//Build status: error				
+				this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-error-32x32.png");
+
+			} else {
+				if(this.buildStatusData === null) {
+					
+					//Build status: application not built
+					this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
+
+				} else {					
+					//Build status: pending
+					this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
+
+				}		
+			}
+		}
+	}
+});
+
+enyo.kind({
+	name: "Phonegap.ProjectProperties.BuildStatus",
+	kind: "FittableRows",
+	published: {
+		appId: "",
+		buildStatusData: undefined,
+		phongapUrl: "https://build.phonegap.com",
+		provider: undefined 
+	},
+	components: [
+		{
+			name: "buildStatusContainer", kind: "FittableRows", classes: "ares-project-properties-build-status-container",
+			components: [
+				{	
+					name: "labelContainer",
+					classes:"ares-project-properties-buildStatus-container",
+					kind: "FittableColumns",					
+					components:[						
+						{ name: "androidButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "android" },
+						{ name: "iosButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "ios" },
+						{ name: "blackberryButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "blackberry" },
+						{ name: "webosButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform:"webos" },
+						{ name: "winphoneButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "winphone" }							
+					]
+				},
+				{
+					name: "messageContainer",
+					kind: "onyx.Drawer",
+					classes: "ares-project-properties-status-message-container",
+					showing: false,
+					components: [
+						{name: "hideStatusContainer", kind: "onyx.IconButton", src: "$project-view/assets/images/close-button-16x16.png", classes: "ares-project-properties-hide-status-button", ontap:"hideMessageContainer"},
+						{name: "statusMessage"},
+						{name: "downloadLink", content: "ddl link", tag: "a", shown: false, classes: "ares-project-properties-dl-link"}
+					]
+				}
+									
+			]
+		}
+	],
+	/**@private*/
+	create: function() {
+		this.inherited(arguments);		
+		this.appIdChanged();
+		this.setProvider(Phonegap.ProjectProperties.getProvider());
+	},
+
+	/**@private*/
+	updateBuildStatusContainer: function(){
+		
+		if(this.appId === ""){
+			this.setBuildStatusData(null);			
+		} else {
+			this.provider.getAppData(this.appId, enyo.bind(this, this.getBuildStatusData));
+		} 
+
+		this.buildStatusDataChanged();
+		this.$.buildStatusContainer.render();
+	},
+	
+	/**
+	 * Charge the icon showing the build status of the application of a a given platform depending on 
+	 * its status. the status is checked from the "buildStatusData" object.
+	 * By clicking on the icon, the status message is displayed.
+	 * @private	 
+	 */
+	buildStatusDataChanged: function(){
+		this.hideMessageContainer();
+		this.$.downloadLink.hide();
+		for(var key in this.$){
+			// Get only the Enyo control that have the "platform" attribute 
+			// => {Phonegap.ProjectProperties.PlatformBuildStatus} instance
+			if(this.$[key].platform !== undefined) {
+				this.$[key].setBuildStatusData(this.buildStatusData);
+			}			
+		}
+	},
+
+	/**@private*/
+	showStatusMessage: function(inSender, inEvent){
+		var extensions = {
+			"android": "apk",
+			"ios": "ipa",
+			"webos": "ipk",
+			"winphone": "xap",
+			"blackberry": "jad"
+		};
+
+		this.$.messageContainer.show();
+
+
+		if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "complete") {
+			this.$.statusMessage.setContent("Download link: ");
+			
+			if (this.buildStatusData.download[inSender.platform] !== undefined && 
+				this.buildStatusData.title !== undefined) {
+				
+				this.$.downloadLink.setAttribute("href", this.phongapUrl + this.buildStatusData.download[inSender.platform]);
+				this.$.downloadLink.setContent(this.buildStatusData.title + "." + extensions[inSender.platform]);
+				this.$.downloadLink.show();
+				this.$.downloadLink.render();
+			} else {
+				this.$.downloadLink.hide();
+			}
+		} else {
+			if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "error" || 
+				this.buildStatusData && this.buildStatusData.status[inSender.platform] === null){
+
+				//Build status: error
+				this.$.downloadLink.hide();
+				this.$.statusMessage.setContent("Error: " + this.buildStatusData.error[inSender.platform]);				
+			} else {
+				
+				if(this.buildStatusData === null) {
+					
+					//Build status: application not built
+					this.$.downloadLink.hide();
+					this.$.statusMessage.setContent("Build the application first");					
+
+				} else {
+					
+					//Build status: pending
+					this.$.downloadLink.hide();
+					this.$.statusMessage.setContent("Build in progress");
+				}		
+			}
+		}
+	return true; //stop the propagation of the event
+
+	},
+
+	/**@private*/
+	hideMessageContainer: function() {
+		this.$.messageContainer.hide();
+	},
+
+	/**@private*/
+	appIdChanged: function(){
+		this.updateBuildStatusContainer();
+	},
+
+	/**
+	 * Callback function to initialize the "buildStatusData" object. 
+	 * 
+	 * @param  {Object} err               error object
+	 * @param  {Object} inBuildStatusData Object returned by Phonegap build, it contains several informations
+	 *                                    about the built application.
+	 * @private
+	 */
+	getBuildStatusData: function (err, inBuildStatusData) {
+		if (err) {
+			this.warn("err:", err);
+		} else {
+			this.setBuildStatusData(inBuildStatusData.user);
+		}
+	}
 });
 
 /**

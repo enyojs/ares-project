@@ -228,9 +228,9 @@ enyo.kind({
 
 			if (this.pan) {
 				if(this.getValue()) {
-					this.pan.setClassAttribute("ares-project-properties-targetsRows-display");
+					this.pan.setClassAttribute("ares-display");
 				} else {
-					this.pan.setClassAttribute("ares-project-properties-targetsRows-hide");
+					this.pan.setClassAttribute("ares-hide");
 				}
 			}
 		}
