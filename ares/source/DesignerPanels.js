@@ -80,7 +80,7 @@ enyo.kind({
 	},
 	create: function() {
 		this.inherited(arguments);
-		this.doRegisterMe({name:"codeEditor", reference:this});
+		this.doRegisterMe({name:"designerPanels", reference:this});
 	},
 	activePanel : function(){
 		this.doMovePanel({panelIndex:this.panelIndex});
@@ -135,7 +135,15 @@ enyo.kind({
 	},
 	addPreviewTooltip: function(message){
 		this.$.previewTooltip.setContent(message);
-	}	
+	},
+	updateDeimosLabel: function(edited) {
+		if (edited) {
+			this.$.docLabel.setContent("Deimos *");
+		} else {
+			this.$.docLabel.setContent("Deimos");
+		}
+		this.$.toolbar.resized();
+	},	
 });
 
 /**
