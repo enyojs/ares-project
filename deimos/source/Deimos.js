@@ -674,16 +674,6 @@ enyo.kind({
 			}
 		}
 	},
-	editedChanged: function() {
-		// Note: This doesn't look like it does anything, because we send updates to the document to Ares immediately, so a doc is 
-		// only "edited" for a few ms. I left this in here because I was tracking down some cases where the state stayed "edited"
-		if (this.edited) {
-			this.owner.$.docLabel.setContent("Deimos *");
-		} else {
-			this.owner.$.docLabel.setContent("Deimos");
-		}
-		this.owner.$.toolbar.resized();
-	},
 	fileEdited: function(edited) {
 		if (edited) {
 			this.owner.$.docLabel.setContent("Deimos *");
