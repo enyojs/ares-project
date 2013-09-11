@@ -135,7 +135,15 @@ enyo.kind({
 	},
 	addPreviewTooltip: function(message){
 		this.$.previewTooltip.setContent(message);
-	}	
+	},
+	updateDeimosLabel: function(edited) {
+		if (edited) {
+			this.$.docLabel.setContent("Deimos *");
+		} else {
+			this.$.docLabel.setContent("Deimos");
+		}
+		this.$.toolbar.resized();
+	},	
 });
 
 /**

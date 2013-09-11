@@ -674,14 +674,6 @@ enyo.kind({
 			}
 		}
 	},
-	fileEdited: function(edited) {
-		if (edited) {
-			this.owner.$.docLabel.setContent("Deimos *");
-		} else {
-			this.owner.$.docLabel.setContent("Deimos");
-		}
-		this.owner.$.toolbar.resized();
-	},
 	designerUpdate: function() {
 		this.doDesignerUpdate(this.prepareDesignerUpdate());
 	},

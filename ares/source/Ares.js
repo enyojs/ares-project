@@ -604,7 +604,7 @@ enyo.kind({
 		this.componentsRegistry.projectView.previewAction(inSender,{project:project});
 	},
 	_fileEdited: function() {
-		this.componentsRegistry.deimos.fileEdited(this.activeDocument.getEdited());
+		this.componentsRegistry.codeEditor.updateDeimosLabel(this.activeDocument.getEdited());
 	},
 	/**
 	 * Event handler for ares components registry
