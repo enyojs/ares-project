@@ -39,11 +39,11 @@ function BdPhoneGap(config, next) {
 		}
 	} catch(e) {
 		// Build a more usable exception
-		next(new Error("Not a suitable Enyo: it does not contain a usable 'tools/deploy.js'"));
+		setImmediate(next, new Error("Not a suitable Enyo: it does not contain a usable 'tools/deploy.js'"));
 	}
 
 	BdBase.call(this, config, next);
-	log.verbose('BdPhoneGap', "config:",  this.config);
+	log.verbose('BdPhoneGap()', "config:",  this.config);
 }
 util.inherits(BdPhoneGap, BdBase);
 
@@ -55,15 +55,15 @@ BdPhoneGap.prototype.use = function() {
 	this.app.use(this.makeExpressRoute('/api'), authorize.bind(this));
 
 	function authorize(req, res, next) {
-		log.verbose("authorize()", "req.url:", req.url);
-		log.verbose("authorize()", "req.query:", req.query);
-		log.verbose("authorize()", "req.cookies:", req.cookies);
+		log.verbose("BdPhoneGap#authorize()", "req.url:", req.url);
+		log.verbose("BdPhoneGap#authorize()", "req.query:", req.query);
+		log.verbose("BdPhoneGap#authorize()", "req.cookies:", req.cookies);
 		var token = req.cookies.token || req.param('token');
 		if (token) {
 			req.token = token;
-			next();
+			setImmediate(next);
 		} else {
-			next(new HttpError('Missing authentication token', 401));
+			setImmediate(next, new HttpError('Missing authentication token', 401));
 		}
 	}
 };
@@ -82,7 +82,7 @@ BdPhoneGap.prototype.route = function() {
 // express... (jshint)
 BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 	var self = this;
-	log.info("errorHandler()", "err:", err);
+	log.info("BdPhoneGap#errorHandler()", "err:", err);
 	if (err instanceof HttpError) {
 		_respond(err);
 	} else if (err instanceof Error) {
@@ -103,7 +103,7 @@ BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 	}
 	
 	function _respond(err) {
-		log.warn("errorHandler#_respond():", err.stack);
+		log.warn("BdPhoneGap#errorHandler#_respond():", err.stack);
 		var statusCode = (err && err.statusCode) || 500;
 		res.status(statusCode);
 		if (statusCode === 401) {
@@ -122,56 +122,59 @@ BdPhoneGap.prototype.errorHandler = function(err, req, res, next){
 
 BdPhoneGap.prototype.getToken = function(req, res, next) {
 	// XXX !!! leave this log commented-out to not log password !!!
-	//log.silly("getToken()", "req.body:", req.body);
+	//log.silly("BdPhoneGap#getToken()", "req.body:", req.body);
 
+	var timeout = req.param('timeout') || this.config.timeout || PGB_TIMEOUT;
 	var auth, options;
 	auth = "Basic " + new Buffer(req.body.username + ':' +req.body.password).toString("base64");
 	options = {
 		url : PGB_URL + "/token",
 		headers : { "Authorization" : auth },
 		proxy: this.config.proxyUrl,
-		timeout: this.config.timeout || PGB_TIMEOUT
+		timeout: timeout
 	};
-	log.http("getToken()", "POST /token");
+	log.http("BdPhoneGap#getToken()", "POST /token");
 	request.post(options, (function(err1, response, body) {
 		try {
 			var statusCode = (response && response.statusCode) || 0;
-			log.verbose("getToken()", "statusCode:", statusCode);
+			log.verbose("BdPhoneGap#getToken()", "statusCode:", statusCode);
 			if (err1 || statusCode != 200) {
 				var msg = (err1 && err1.toString()) || http.STATUS_CODES[statusCode] || "Error";
-				log.warn("getToken()", msg);
-				next(new HttpError(msg, statusCode));
+				log.warn("BdPhoneGap#getToken()", msg);
+				setImmediate(next, new HttpError(msg, statusCode));
 			} else {
-				log.verbose("getToken()", "response body:", body);
+				log.verbose("BdPhoneGap#getToken()", "response body:", body);
 				var data = JSON.parse(body);
 				if (data.error) {
-					next(new HttpError(data.error, 401));
+					setImmediate(next, new HttpError(data.error, 401));
 				} else {
 					this.setCookie(res, 'token', data.token);
 					res.status(200).send(data).end();
 				}
 			}
 		} catch(err0) {
-			next(err0);
+			setImmediate(next, err0);
 		}
 	}).bind(this));
 };
 
 BdPhoneGap.prototype.getUserData = function(req, res, next) {
+	var timeout = req.param('timeout') || this.config.timeout || PGB_TIMEOUT;
 	client.auth({
 		token: req.token,
-		proxy: this.config.proxyUrl,
-		timeout: this.config.timeout || PGB_TIMEOUT
+		proxy: this.config.proxyUrl
 	}, function(err1, api) {
 		if (err1) {
-			next(err1);
+			setImmediate(next, err1);
 		} else {
-			log.http("getUserData()", "GET /apps/me");
-			api.get('/me', function(err2, userData) {
+			log.http("BdPhoneGap#getUserData()", "GET /apps/me");
+			api.get('/me', {
+				timeout: timeout
+			}, function(err2, userData) {
 				if (err2) {
-					next(err2);
+					setImmediate(next, err2);
 				} else {
-					log.info("getUserData()", "userData:", userData);
+					log.info("BdPhoneGap#getUserData()", "userData:", userData);
 					res.status(200).send({user: userData}).end();
 				}
 			});
@@ -180,20 +183,23 @@ BdPhoneGap.prototype.getUserData = function(req, res, next) {
 };
 
 BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
+	var timeout = req.param('timeout') || this.config.timeout || PGB_TIMEOUT;
 	client.auth({
 		token: req.token,
 		proxy: this.config.proxyUrl
 	}, function(err1, api) {
 		if (err1) {
-			next(err1);
+			setImmediate(next, err1);
 		} else {
 			var appId = req.params.appId;
-			log.http("getAppStatus()", "GET /apps/" + appId);					
-			api.get('/apps/' + appId, function(err2, userData) {
+			log.http("BdPhoneGap#getAppStatus()", "GET /apps/" + appId);					
+			api.get('/apps/' + appId, {
+				timeout: timeout
+			}, function(err2, userData) {
 				if (err2) {
-					next(err2);
+					setImmediate(next, err2);
 				} else {
-					log.info("getAppStatus()", "appStatus:", userData);
+					log.info("BdPhoneGap#getAppStatus()", "appStatus:", userData);
 					res.status(200).send({user: userData}).end();
 				}
 			});	
@@ -216,11 +222,12 @@ BdPhoneGap.prototype.getAppStatus = function(req, res, next) {
  * 
  */
 BdPhoneGap.prototype.downloadApp = function(req, res, next){
+	var timeout = req.param('timeout') || this.config.timeout || PGB_TIMEOUT;
 	var appId = req.param("appId"),
 	    platform = req.param("platform"),
 	    title = req.param("title"),
 	    version = req.param("version");
-	log.info("downloadApp()", "appId:", appId, "platform:", platform, "version:", version, "(" + title + ")");
+	log.info("BdPhoneGap#downloadApp()", "appId:", appId, "platform:", platform, "version:", version, "(" + title + ")");
 
 	var extensions = {
 		    "android": "apk",
@@ -232,14 +239,17 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 	    };
 	var fileName = title + "_" + version + "." + (extensions[platform] || "bin"),
 	    url = "/apps/" + appId + "/" + platform;
-	log.info("downloadApp()", "packageName:", fileName, "<<< url:", url);
+	log.info("BdPhoneGap#downloadApp()", "packageName:", fileName, "<<< url:", url);
 	
 	/* FIXME: broken streams on node-0.8.x
 	async.waterfall([
-		client.auth.bind(client, { token: req.token }),
+		client.auth.bind(client, {
+			token: req.token,
+			proxy: this.config.proxyUrl
+		}),
 		(function _pipeFormData(api, next) {
-			log.http("downloadApp#_pipeFormData()", "GET", url);
-			var stream = api.get(url);
+			log.http("BdPhoneGap#downloadApp#_pipeFormData()", "GET", url);
+			var stream = api.get(url, { timeout: timeout });
 			stream.pause();
 			this.returnFormData([{
 				filename: fileName,
@@ -248,10 +258,10 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 		}).bind(this)
 	], function(err) {
 		if (err) {
-			next(err);
+			setImmediate(next, err);
 			return;
 		}
-		log.verbose("downloadApp()", "completed");
+		log.verbose("BdPhoneGap#downloadApp()", "completed");
 		// do not call next() here as the HTTP header was
 		// already sent back.
 	});
@@ -263,19 +273,19 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 			token: req.token,
 			proxy: this.config.proxyUrl
 		}),
-		(function _fetchPackage(api, next) {
-			log.http("downloadApp#_fetchPackage()", "GET", url);
+		function _fetchPackage(api, next) {
+			log.http("BdPhoneGap#downloadApp#_fetchPackage()", "GET", url);
 			var os = fs.createWriteStream(tempFileName);
 			// FIXME: node-0.8 has no 'finish' event...
 			os.on('close', next);
-			api.get(url).pipe(os);
-		}).bind(this),
+			api.get(url, { timeout: timeout*3 }).pipe(os);
+		},
 		// FIXME: broken streams on node-0.8.x: we need to
 		// load packages in memory Buffer...
 		fs.readFile.bind(fs, tempFileName),
 		(function _returnFormData(buffer, next) {
 			fs.unlink(tempFileName);
-			log.http("downloadApp#_returnFormData()", "streaming down:", fileName);
+			log.http("BdPhoneGap#downloadApp#_returnFormData()", "streaming down:", fileName);
 			this.returnFormData([{
 				filename: fileName,
 				buffer: buffer
@@ -283,13 +293,13 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 		}).bind(this)
 	], function(err) {
 		if (err) {
-			next(err);
+			setImmediate(next, err);
 			return;
 		}
 		// FIXME: this is never called, as neither
 		// CombinedStream nor express#res emit an 'end' when
 		// streaming is over...
-		log.verbose("downloadApp()", "completed");
+		log.verbose("BdPhoneGap#downloadApp()", "completed");
 		// do not call next() here as the HTTP header was
 		// already sent back.
 	});
@@ -297,7 +307,8 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 
 BdPhoneGap.prototype.build = function(req, res, next) {
 	var appData = {}, query = req.query;
-	log.info("build()", "title:", query.title,"platforms:", query.platforms, ", appId:", query.appId);
+	log.info("BdPhoneGap#build()", "title:", query.title,"platforms:", query.platforms, ", appId:", query.appId);
+	var timeout = req.param('timeout') || this.config.timeout || PGB_TIMEOUT;
 	async.series([
 		this.prepare.bind(this, req, res),
 		this.store.bind(this, req, res),
@@ -311,7 +322,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 	], function (err) {
 		if (err) {
 			// run express's next() : the errorHandler (which calls cleanup)
-			next(err);
+			setImmediate(next, err);
 		}
 		// we do not invoke error-less next() here
 		// because that would try to return 200 with
@@ -322,11 +333,11 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 	function _parse(next) {
 		// check mandatory parameters
 		if (!req.token) {
-			next(new HttpError("Missing account token", 401));
+			setImmediate(next, new HttpError("Missing account token", 401));
 			return;
 		}
 		if (!query.title) {
-			next(new HttpError("Missing application: title", 400));
+			setImmediate(next, new HttpError("Missing application: title", 400));
 			return;
 		}
 		// pass other query parameters as 1st-level
@@ -341,30 +352,28 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 			}
 		}
 		if (typeof appData.keys !== 'object') {
-			log.info("build#_parse()", "un-signed build requested (did not find a valid signing key)");
+			log.info("BdPhoneGap#build#_parse()", "un-signed build requested (did not find a valid signing key)");
 		}
 		//WARNING: enabling this trace shows-up the signing keys passwords
-		log.silly("build#_parse(): appData:", appData);
-		next();
+		log.silly("BdPhoneGap#build#_parse(): appData:", appData);
+		setImmediate(next);
 	}
 
 	function _postMinify(req, next) {
-		log.info("build#_postMinify()");
+		log.info("BdPhoneGap#build#_postMinify()");
 		if (req.appDir.zipRoot !== req.appDir.source) {
 			copyFile(path.join(req.appDir.source, "config.xml"), path.join(req.appDir.zipRoot, "config.xml"), next);
 		} else {
-			next();
+			setImmediate(next);
 		}
 	}
 
 	function _upload(next) {
-		log.info("build#_upload()");
-
+		log.info("BdPhoneGap#build#_upload()");
 		async.waterfall([
 			client.auth.bind(this, {
 				token: req.token,
-				proxy: this.config.proxyUrl,
-				timeout: this.config.timeout || PGB_TIMEOUT
+				proxy: this.config.proxyUrl
 			}),
 			_uploadApp.bind(this),
 			_success.bind(this)
@@ -372,7 +381,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 			if (err) {
 				_fail(err);
 			} else {
-				next();
+				setImmediate(next);
 			}
 		});
 
@@ -381,14 +390,15 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 				form: {
 					data: appData,
 					file: req.zip.path
-				}
+				},
+				timeout: timeout*3
 			};
 			if (appData.appId) {
-				log.http("build#_upload#_uploadApp()", "PUT /apps/" + appData.appId + " (title='" + appData.title + "')");
+				log.http("BdPhoneGap#build#_upload#_uploadApp()", "PUT /apps/" + appData.appId + " (title='" + appData.title + "')");
 				api.put('/apps/' + appData.appId, options, next);
 
 			} else {
-				log.http("build#_upload#_uploadApp()", "POST /apps (title='" + appData.title + "')");
+				log.http("BdPhoneGap#build#_upload#_uploadApp()", "POST /apps (title='" + appData.title + "')");
 				options.form.data.create_method = 'file';
 				api.post('/apps', options, next);
 			}
@@ -396,7 +406,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 
 		function _success(data, next) {
 			try {
-				log.verbose("build#_upload#_success()", "data", data);
+				log.verbose("BdPhoneGap#build#_upload#_success()", "data", data);
 				if (typeof data === 'string') {
 					data = JSON.parse(data);
 				}
@@ -405,7 +415,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 					return;
 				}
 				res.body = data;
-				next();
+				setImmediate(next);
 			} catch(e) {
 				_fail(e);
 			}
@@ -418,8 +428,8 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 			} catch(e) {
 				msg = err.message;
 			}
-			log.warn("build#_upload#_fail()", "error:", msg);
-			next(new HttpError(msg, 400 /*Bad Request*/));
+			log.warn("BdPhoneGap#build#_upload#_fail()", "error:", msg);
+			setImmediate(next, new HttpError(msg, 400 /*Bad Request*/));
 		}
 	}
 };

@@ -858,8 +858,7 @@ enyo.kind({
 					//inData is a multipart/form containing the
 					//built application
 					function(inData, next){
-						builder._storePkg(project, folderId, 
-						inData, next);
+						builder._storePkg(project, folderId, inData, next);
 					}
 				], next);
 			}
