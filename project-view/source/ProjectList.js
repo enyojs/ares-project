@@ -41,6 +41,10 @@ enyo.kind({
 							{classes: "onyx-menu-divider aresmenu-button"},
 							{value: "showAresProperties",  classes:"aresmenu-button", components: [
 								{content: "Properties...", classes: "aresmenu-button-label"}
+							]},
+							{classes: "onyx-menu-divider aresmenu-button"},
+							{value: "showEnyoHelp",  classes:"aresmenu-button", components: [
+								{content: "Enyo API Viewer", classes: "aresmenu-button-label"}
 							]}
 						]}
 					]},
@@ -257,6 +261,11 @@ enyo.kind({
 	},
 	showAresProperties: function(){
 		this.$.aresProperties.show();
+	},
+	showEnyoHelp: function(){
+		window.open("http://enyojs.com/api/",
+			"Enyo API Viewer",
+			"resizeable=yes, dependent=yes, width=800, height=600");
 	},
 	stringifyReplacer: function(key, value) {
 		if (key === "originator") {
