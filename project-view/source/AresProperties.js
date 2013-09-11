@@ -166,7 +166,7 @@ enyo.kind({
 	],
 	
 	/**
-	 * private
+	 * @protected
 	 */
 	create: function(){
 		this.inherited(arguments);
@@ -176,7 +176,7 @@ enyo.kind({
 
 	/**
 	 * Send an AJAX request to the  Backend in order to get the needed data for the Ares description.
-	 * @rprivate
+	 * @private
 	 */
 	reqAboutAresData: function(){
 		var origin = window.location.origin || window.location.protocol + "//" + window.location.host; // Webkit/FF vs IE
@@ -192,7 +192,7 @@ enyo.kind({
 		//Show the error in a Pop-up.
 		req.error(this, function(inSender, inError){
 			
-			this.doError({msg: "("+inError +") Unable to load Ares About data", err: inError});
+			this.doError({msg: "Unable to load data about Ares", err: inError});
 			this.$.errorMessage.show();
 			this.$.aboutDescription.hide();
 		});
