@@ -647,9 +647,6 @@ enyo.kind({
 		
 		return cleanComponent;
 	},
-	/*saveComplete: function() {
-		this.log("SAVE COMPLETE DEIMOS");
-	},*/
 	undoAction: function(inSender, inEvent) {
 		this.doUndo();
 	},
