@@ -43,7 +43,7 @@ enyo.kind({
 					onFileChanged: "closeDocument",
 					onFolderChanged: "closeSomeDocuments"
 				},
-				{kind: "Ares.DesignerPanels", name: "codeEditor"}
+				{kind: "Ares.DesignerPanels", name: "designerPanels"}
 			]
 		},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
@@ -95,7 +95,7 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
-		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
+		this.componentsRegistry.designerPanels.$.panels.setIndex(this.phobosViewIndex);
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
 			Ares.Workspace.loadProjects("com.enyojs.ares.tests", true);
@@ -320,7 +320,7 @@ enyo.kind({
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();
 		this.componentsRegistry.deimos.load(inEvent);
-		this.componentsRegistry.codeEditor.$.panels.setIndex(this.deimosViewIndex);
+		this.componentsRegistry.designerPanels.$.panels.setIndex(this.deimosViewIndex);
 		this.activeDocument.setCurrentIF('designer');
 	},
 	//* A code change happened in Phobos - push change to Deimos
@@ -335,9 +335,9 @@ enyo.kind({
 	},
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
-		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
+		this.componentsRegistry.designerPanels.$.panels.setIndex(this.phobosViewIndex);
 		this.activeDocument.setCurrentIF('code');
-		this.componentsRegistry.codeEditor.manageControls(false);
+		this.componentsRegistry.designerPanels.manageControls(false);
 	},
 	//* Undo event from Deimos
 	designerUndo: function(inSender, inEvent) {
@@ -425,21 +425,21 @@ enyo.kind({
 		}
 		var currentIF = d.getCurrentIF();
 		this.activeDocument = d;
-		this.componentsRegistry.codeEditor.addPreviewTooltip("Preview "+this.activeDocument.getProjectData().id);
+		this.componentsRegistry.designerPanels.addPreviewTooltip("Preview "+this.activeDocument.getProjectData().id);
 		
 		if (currentIF === 'code') {
-			this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
-			this.componentsRegistry.codeEditor.manageControls(false);
+			this.componentsRegistry.designerPanels.$.panels.setIndex(this.phobosViewIndex);
+			this.componentsRegistry.designerPanels.manageControls(false);
 		} else {
 			this.componentsRegistry.phobos.designerAction();
-			this.componentsRegistry.codeEditor.manageControls(true);
+			this.componentsRegistry.designerPanels.manageControls(true);
 		}
 		this._fileEdited();
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
-		var editorMode = this.componentsRegistry.codeEditor.$.panels.getIndex() == this.phobosViewIndex;
+		var editorMode = this.componentsRegistry.designerPanels.$.panels.getIndex() == this.phobosViewIndex;
 		if (editorMode) {
 			this.componentsRegistry.phobos.designerAction(inSender, inEvent);
 		} else {
@@ -604,14 +604,14 @@ enyo.kind({
 		this.componentsRegistry.projectView.previewAction(inSender,{project:project});
 	},
 	_fileEdited: function() {
-		this.componentsRegistry.codeEditor.updateDeimosLabel(this.activeDocument.getEdited());
+		this.componentsRegistry.designerPanels.updateDeimosLabel(this.activeDocument.getEdited());
 	},
 	/**
 	 * Event handler for ares components registry
 	 * 
 	 * @private
 	 * @param {Object} inSender
-	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, codeEditor, accountsConfigurator, ...]
+	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, designerPanels, accountsConfigurator, ...]
 	 */
 	_registerComponent: function(inSender, inEvent) {
 		var ref = this.componentsRegistry[inEvent.name];

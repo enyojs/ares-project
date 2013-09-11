@@ -80,7 +80,7 @@ enyo.kind({
 	},
 	create: function() {
 		this.inherited(arguments);
-		this.doRegisterMe({name:"codeEditor", reference:this});
+		this.doRegisterMe({name:"designerPanels", reference:this});
 	},
 	activePanel : function(){
 		this.doMovePanel({panelIndex:this.panelIndex});
