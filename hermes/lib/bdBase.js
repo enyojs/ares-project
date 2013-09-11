@@ -71,12 +71,12 @@ function BdBase(config, next) {
 		var domain = createDomain();
 
 		domain.on('error', function(err) {
-			next(err);
+			setImmediate(next, err);
 			domain.dispose();
 		});
 
 		domain.enter();
-		next();
+		setImmediate(next);
 	});
 
 	// CORS -- Cross-Origin Resources Sharing
@@ -89,16 +89,16 @@ function BdBase(config, next) {
 			res.status(200).end();
 		}
 		else {
-			next();
+			setImmediate(next);
 		}
 	});
 
 	// Authentication
 	this.app.use(function(req, res, next) {
 		if (req.connection.remoteAddress !== "127.0.0.1") {
-			next(new Error("Access denied from IP address "+req.connection.remoteAddress));
+			setImmediate(next, new Error("Access denied from IP address "+req.connection.remoteAddress));
 		} else {
-			next();
+			setImmediate(next);
 		}
 	});
 
@@ -137,7 +137,7 @@ function BdBase(config, next) {
 	// is bound
 	this.server.listen(config.port, "127.0.0.1", null /*backlog*/, (function() {
 		var tcpAddr = this.server.address();
-		return next(null, {
+		setImmediate(next, null, {
 			protocol: 'http',
 			host: tcpAddr.address,
 			port: tcpAddr.port,
@@ -161,11 +161,11 @@ BdBase.prototype.makeExpressRoute = function(path) {
  * @protected
  */
 BdBase.prototype.configure = function(config, next) {
-	log.silly("configure()", "old config:", this.config);
-	log.silly("configure()", "inc config:", config);
+	log.silly("BdBase#configure()", "old config:", this.config);
+	log.silly("BdBase#configure()", "inc config:", config);
 	util._extend(this.config, config);
-	log.verbose("configure()", "new config:", this.config);
-	next();
+	log.verbose("BdBase#configure()", "new config:", this.config);
+	setImmediate(next);
 };
 
 /**
@@ -198,7 +198,7 @@ BdBase.prototype.setCookie = function(res, key, value) {
 		//maxAge: 1000*3600 // 1 hour
 	};
 	res.cookie(key, value, cookieOptions);
-	log.info('setCookie()', "Set-Cookie: " + key + ":", value || "");
+	log.info('BdBase#setCookie()', "Set-Cookie: " + key + ":", value || "");
 };
 
 /**
@@ -206,7 +206,7 @@ BdBase.prototype.setCookie = function(res, key, value) {
  * @protected
  */
 BdBase.prototype.errorHandler = function(err, req, res, next){
-	log.error("errorHandler()", err.stack);
+	log.error("BdBase#errorHandler()", err.stack);
 	res.status(err.statusCode || 500);
 	res.contentType('txt'); // direct usage of 'text/plain' does not work
 	res.send(err.toString());
@@ -217,7 +217,7 @@ BdBase.prototype.errorHandler = function(err, req, res, next){
  * @protected
  */
 BdBase.prototype.answerOk = function(req, res /*, next*/) {
-	log.verbose("answerOk()", '200 OK');
+	log.verbose("BdBase#answerOk()", '200 OK');
 	res.status(200).send();
 };
 
@@ -232,7 +232,7 @@ BdBase.prototype.prepare = function(req, res, next) {
 		minify: path.join(appTempDir, 'minify')
 	};
 	
-	log.verbose("prepare()", "setting-up " + req.appDir.root);
+	log.verbose("BdBase#prepare()", "setting-up " + req.appDir.root);
 	async.series([
 		function(done) { mkdirp(req.appDir.root, done); },
 		function(done) { fs.mkdir(req.appDir.source, done); },
@@ -245,27 +245,27 @@ BdBase.prototype.prepare = function(req, res, next) {
  */
 BdBase.prototype.store = function(req, res, next) {
 	if (!req.is('multipart/form-data')) {
-		next(new HttpError("Not a multipart request", 415 /*Unsupported Media Type*/));
+		setImmediate(next, new HttpError("Not a multipart request", 415 /*Unsupported Media Type*/));
 		return;
 	}
 	
 	if (!req.files.file) {
-		next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
+		setImmediate(next, new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
 		return;
 	}
 	
 	async.forEachSeries(req.files.file, function(file, cb) {
 		var dir = path.join(req.appDir.source, path.dirname(file.name));
-		log.silly("store()", "mkdir -p ", dir);
+		log.silly("BdBase#store()", "mkdir -p ", dir);
 		mkdirp(dir, function(err) {
-			log.silly("store()", "mv ", file.path, " ", file.name);
+			log.silly("BdBase#store()", "mv ", file.path, " ", file.name);
 			if (err) {
 				cb(err);
 			} else {
 				if (file.type.match(/x-encoding=base64/)) {
 					fs.readFile(file.path, function(err, data) {
 						if (err) {
-							log.info("store()", "transcoding: error" + file.path, err);
+							log.info("BdBase#store()", "transcoding: error" + file.path, err);
 							cb(err);
 							return;
 						}
@@ -276,17 +276,17 @@ BdBase.prototype.store = function(req, res, next) {
 							
 							var filedata = new Buffer(data.toString('ascii'), 'base64');			// TODO: This works but I don't like it
 							fs.writeFile(path.join(req.appDir.source, file.name), filedata, function(err) {
-								log.silly("store()", "from base64(): Stored: ", file.name);
+								log.silly("BdBase#store()", "from base64(): Stored: ", file.name);
 								cb(err);
 							});
 						} catch(transcodeError) {
-							log.warn("store()", "transcoding error: " + file.path, transcodeError);
+							log.warn("BdBase#store()", "transcoding error: " + file.path, transcodeError);
 							cb(transcodeError);
 						}
 					}.bind(this));
 				} else {
 					fs.rename(file.path, path.join(req.appDir.source, file.name), function(err) {
-						log.silly("store()", "Stored: ", file.name);
+						log.silly("BdBase#store()", "Stored: ", file.name);
 						cb(err);
 					});
 				}
@@ -321,7 +321,7 @@ BdBase.prototype.minify = function(req, res, next) {
 			// no clue on wether it is even an Enyo
 			// application, so we cannot `deploy` it
 			// easily.
-			log.info("minify()", "no '" + appManifest + "': not an Enyo Bootplate-based application");
+			log.info("BdBase#minify()", "no '" + appManifest + "': not an Enyo Bootplate-based application");
 			_noMinify();
 		} else {
 			_minify();
@@ -329,7 +329,7 @@ BdBase.prototype.minify = function(req, res, next) {
 	});
 
 	function _noMinify() {
-		log.info("minify#_noMinify()", "Skipping minification");
+		log.info("BdBase#minify#_noMinify()", "Skipping minification");
 
 		var excludes;
 		try {
@@ -344,20 +344,20 @@ BdBase.prototype.minify = function(req, res, next) {
 		async.waterfall([
 			async.forEach.bind(this, excludes, function(exclude, next) {
 				var absExclude = path.join(req.appDir.zipRoot, exclude);
-				log.verbose("minify#_noMinify()", "rm -rf", absExclude);
+				log.verbose("BdBase#minify#_noMinify()", "rm -rf", absExclude);
 				rimraf(absExclude, next);
 			}),
 			fs.stat.bind(this, debug),
 			function(stat, next) {
-				log.verbose("minify#_noMinify()", "mv debug.html index.html");
+				log.verbose("BdBase#minify#_noMinify()", "mv debug.html index.html");
 				fs.unlink(index, next);
 			},
 			fs.rename.bind(this, debug, index)
 		], function(err) {
 			if (err) {
-				log.verbose("ignoring err:", err.toString());
+				log.verbose("BdBase#ignoring err:", err.toString());
 			}
-			next();
+			setImmediate(next);
 		});
 	}
 
@@ -374,25 +374,25 @@ BdBase.prototype.minify = function(req, res, next) {
 			       '--source', req.appDir.source,
 			       '--out', req.appDir.minify,
 			       '--less'];
-		log.info("minify#_minify()", "Running: '", minifyScript, params.join(' '), "'");
+		log.info("BdBase#minify#_minify()", "Running: '", minifyScript, params.join(' '), "'");
 		var child = child_process.fork(minifyScript, params, {
 			silent: false
 		});
 		child.on('message', function(msg) {
-			log.verbose("minify()", msg);
+			log.verbose("BdBase#minify()", msg);
 			if (msg.error) {
-				log.error("minify()", "child-process error: ", msg.error);
+				log.error("BdBase#minify()", "child-process error: ", msg.error);
 				child.errMsg = msg.error;
 			} else {
-				log.warn("minify()", "unexpected child-process message msg=", msg);
+				log.warn("BdBase#minify()", "unexpected child-process message msg=", msg);
 			}
 		});
 		child.on('exit', function(code /*, signal*/) {
 			if (code !== 0) {
-				next(new HttpError(child.errMsg || ("child-process failed: '"+ child.toString() + "'")));
+				setImmediate(next, new HttpError(child.errMsg || ("child-process failed: '"+ child.toString() + "'")));
 			} else {
-				log.info("minify(): completed");
-				next();
+				log.info("BdBase#minify(): completed");
+				setImmediate(next);
 			}
 		});
 	}
@@ -402,8 +402,8 @@ BdBase.prototype.minify = function(req, res, next) {
  * @protected
  */
 BdBase.prototype.build = function(req, res, next) {
-	log.verbose("build()");
-	next(new HttpError("Not implemented", 500));
+	log.verbose("BdBase#build()");
+	setImmediate(next, new HttpError("Not implemented", 500));
 	/*
 	// Example
 	async.series([
@@ -415,7 +415,7 @@ BdBase.prototype.build = function(req, res, next) {
 	], function (err, results) {
 		if (err) {
 			// run express's next() : the errorHandler (which calls cleanup)
-			next(err);
+			setImmediate(next, err);
 		}
 		// we do not invoke error-less next() here
 		// because that would try to return 200 with
@@ -429,7 +429,7 @@ BdBase.prototype.build = function(req, res, next) {
  * @protected
  */
 BdBase.prototype.archive = function(req, res, next) {
-	log.verbose("archive()");
+	log.verbose("BdBase#archive()");
 	async.series([
 		this.prepare.bind(this, req, res),
 		this.store.bind(this, req, res),
@@ -440,7 +440,7 @@ BdBase.prototype.archive = function(req, res, next) {
 	], function (err /*, results*/) {
 		if (err) {
 			// run express's next() : the errorHandler (which calls cleanup)
-			next(err);
+			setImmediate(next, err);
 		}
 		// we do not invoke error-less next() here
 		// because that would try to return 200 with
@@ -453,23 +453,23 @@ BdBase.prototype.archive = function(req, res, next) {
  * @protected
  */
 BdBase.prototype.zip = function(req, res, next) {
-	log.info("zip()", "Zipping '" + req.appDir.zipRoot + "'");
+	log.info("BdBase#zip()", "Zipping '" + req.appDir.zipRoot + "'");
 	req.zip = {};
 	req.zip.path = path.join(req.appDir.root, "app.zip");
 	req.zip.stream = archiver.createZip({level: 1});
 	req.zip.stream.pipe(fs.createWriteStream(req.zip.path));
 	_walk.bind(this)(req.appDir.zipRoot, "" /*prefix*/, function(err) {
 		if (err) {
-			next(err);
+			setImmediate(next, err);
 			return;
 		}
 		try {
 			req.zip.stream.finalize(function(written){
-				log.verbose("zip()", "finished:", req.zip.path, "(" + written + " bytes)");
-				next();
+				log.verbose("BdBase#zip()", "finished:", req.zip.path, "(" + written + " bytes)");
+				setImmediate(next);
 			});
 		} catch(e) {
-			next(e);
+			setImmediate(next, e);
 		}
 	});
 	
@@ -477,18 +477,18 @@ BdBase.prototype.zip = function(req, res, next) {
 		// TODO that _thing_ probably needs a bit of
 		// refactoring by someone that feels easy with
 		// node-async _arcanes_.
-		log.silly("zip._walk()", "Parsing: ", relParent);
+		log.silly("BdBase#zip._walk()", "Parsing: ", relParent);
 		async.waterfall([
 			function(cb2) {
-				log.silly("zip._walk()", "readdir: ", absParent);
+				log.silly("BdBase#zip._walk()", "readdir: ", absParent);
 				fs.readdir(absParent, cb2);
 			},
 			function(nodes, cb2) {
-				log.silly("zip._walk()", "nodes.forEach");
+				log.silly("BdBase#zip._walk()", "nodes.forEach");
 				async.forEachSeries(nodes, function(name, cb3) {
 					var absPath = path.join(absParent, name),
 					    relPath = path.join(relParent, name);
-					log.silly("zip._walk()", "stat: ", absPath);
+					log.silly("BdBase#zip._walk()", "stat: ", absPath);
 					fs.stat(absPath, function(err, stat) {
 						if (err) {
 							cb3(err);
@@ -497,10 +497,10 @@ BdBase.prototype.zip = function(req, res, next) {
 						if (stat.isDirectory()) {
 							_walk(absPath, relPath, cb3);
 						} else {
-							log.silly("zip._walk()", "Adding: ", relPath);
+							log.silly("BdBase#zip._walk()", "Adding: ", relPath);
 							try {
 								req.zip.stream.addFile(fs.createReadStream(absPath), { name: relPath }, function(err) {
-									log.verbose("zip._walk()", "Added: ", relPath, "(err=", err, ")");
+									log.verbose("BdBase#zip._walk()", "Added: ", relPath, "(err=", err, ")");
 									cb3(err);
 								});
 							} catch(e) {
@@ -520,7 +520,7 @@ BdBase.prototype.zip = function(req, res, next) {
 BdBase.prototype.returnZip = function(req, res, next) {
 	res.status(200).sendfile(req.zip.path);
 	delete req.zip;
-	next();
+	setImmediate(next);
 };
 
 /**
@@ -535,7 +535,7 @@ BdBase.prototype.returnBody = function(req, res, next) {
 	res.status(200).send(res.body);
 	delete res.body;
 	delete res.contentType;
-	next();
+	setImmediate(next);
 };
 
 /**
@@ -548,7 +548,7 @@ BdBase.prototype.returnBody = function(req, res, next) {
  */
 BdBase.prototype.returnFormData = function(parts, res, next) {
 	if (!Array.isArray(parts) || parts.length < 1) {
-		next(new Error("Invalid parameters: cannot return a multipart/form-data of nothing"));
+		setImmediate(next, new Error("Invalid parameters: cannot return a multipart/form-data of nothing"));
 		return;
 	}
 	log.verbose("BdBase#returnFormData()", parts.length, "parts:");
@@ -636,15 +636,15 @@ BdBase.prototype.returnFormData = function(parts, res, next) {
 BdBase.prototype.cleanup = function(req, res, next) {
 	var dir = req.appDir && req.appDir.root;
 	if (this.config.performCleanup && dir) {
-		log.verbose("cleanup()", "rm -rf " + dir);
+		log.verbose("BdBase#cleanup()", "rm -rf " + dir);
 		rimraf(req.appDir.root, function(err) {
-			log.verbose("cleanup()", "removed " + dir);
+			log.verbose("BdBase#cleanup()", "removed " + dir);
 			delete req.appDir;
-			next(err);
+			setImmediate(next, err);
 		});
 	} else {
-		log.verbose("cleanup()", "skipping removal of " + dir);
-		next();
+		log.verbose("BdBase#cleanup()", "skipping removal of " + dir);
+		setImmediate(next);
 	}
 };
 
@@ -655,7 +655,7 @@ BdBase.prototype.cleanup = function(req, res, next) {
 BdBase.prototype.quit = function(cb) {
 	this.app.close();
 	rimraf(this.uploadDir, cb);
-	log.info('quit()',  "exiting");
+	log.info('BdBase#quit()',  "exiting");
 };
 
 /**
