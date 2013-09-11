@@ -30,6 +30,7 @@ enyo.kind({
 	],
 	debug: false,
 	projectName: "",
+	config: null,
 
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
@@ -44,8 +45,6 @@ enyo.kind({
 		this.trace("starting") ;
 		this.show();
 
-		this.config = new ProjectConfig() ; // is a ProjectConfig object.
-
 		dirPopup.$.header.setContent("Select a directory containing the new project") ;
 		dirPopup.show();
 		this.$.propertiesWidget.setDefaultTab();
@@ -58,6 +57,7 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 
 		if (!inEvent.file) {
+			this.config = null;
 			this.hideMe();
 
 			return;
@@ -192,15 +192,20 @@ enyo.kind({
 		}
 	},
 
+	/**
+	 * @param {Object} data as found in {project.json}
+	 * @param {Function} next common-JS callback, when {project.json} is saved
+	 * @private
+	 */
 	createProjectJson: function(data, next) {
-		//initialize project config
-		this.config.data = null;
+		this.config = new ProjectConfig();
 		this.config.service = this.selectedDir.service;
 		this.config.folderId = this.selectedDir.id;
-		//save the project config;
 		this.config.setData(data) ;
-		//create and save the project.json
-		this.config.save() ;
+		this.config.save(function(err) {
+			this.config = null; // GC-deref
+			next(err);
+		});
 	},
 
 	showProjectPropPopup: function(inSender, inEvent, next) {
@@ -223,7 +228,7 @@ enyo.kind({
 			}
 
 			if (showError) {
-				this.$.selectDirectoryPopup.hide();
+				this.config = null;
 				this.hideMe();
 				this.warn("An error occured: ", err);
 				this.$.errorPopup.raise(err.msg);
@@ -239,7 +244,7 @@ enyo.kind({
 		var template = inEvent.template;
 		var addedSources = inEvent.addedSources.length !==0 ? true : false;
 
-		this.warn("Creating new project ", name, " in folderId=", folderId, " (template: ", template, ")");
+		this.trace("Creating new project ", name, " in folderId=", folderId, " (template: ", template, ")");
 
 		if (template || addedSources) {
 			this.instanciateTemplate(inEvent);
@@ -249,14 +254,15 @@ enyo.kind({
 			service.createFile(folderId, "package.js", "enyo.depends(\n);\n")
 				.response(this, function(inRequest, inFsNode) {
 					this.trace("package.js inFsNode[0]:", inFsNode[0]);
-					if (!addedSources){
-						this.projectReady(null, inEvent);
-					}
-					else{
-						this.projectRefresh();
-					}
+					var callback = (function(){
+						if (!addedSources){
+							this.projectReady(null, inEvent);
+						} else {
+							this.projectRefresh();
+						}
+					}).bind(this);
 
-					this.createProjectJson(inEvent.data);
+					this.createProjectJson(inEvent.data, callback);
 				})
 				.error(this, function(inRequest, inError) {
 					this.warn("inRequest:", inRequest, "inError:", inError);
@@ -296,9 +302,11 @@ enyo.kind({
 			substitutions: substitutions
 		});
 		req.response(this, function(inSender, inData) {
-			this.populateProject(inSender, inData);
+			var callback = (function(){
+				this.populateProject(inSender, inData);	
+			}).bind(this);
 
-			this.createProjectJson(inEvent.data);
+			this.createProjectJson(inEvent.data, callback);			
 		});
 		req.error(this, function(inSender, inError) {
 			this.warn("Unable to get the template files (", inError, ")");
@@ -340,7 +348,8 @@ enyo.kind({
 	 * Hide the whole widget. Typically called when ok or cancel is clicked
 	 */
 	hideMe: function() {
-		this.config = null ; // forget ProjectConfig object
+		this.$.selectDirectoryPopup.hide();
+		this.$.selectDirectoryPopup.reset();
 		this.hide() ;
 		return true;
 	}

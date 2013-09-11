@@ -317,8 +317,48 @@ function sendClosingBoundary(req, boundaryKey) {
 		});
 	});
 	
-	it("t2.1. should create a folder", function(done) {
-		post("t2.1", '/id/' + rootId, {_method: "MKCOL",name: "toto"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+	it("t2.1.0. should create a folder", function(done) {
+		post("t2.1.0", '/id/' + rootId, {_method: "MKCOL",name: "toto"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201);
+			should.exist(res.json);
+			should.exist(res.json.isDir);
+			res.json.isDir.should.equal(true);
+			should.exist(res.json.path);
+			res.json.path.should.equal(rootPath + "/toto");
+			done();
+		});
+	});
+
+	it("t2.1.1. should fail to re-create the same folder (overwrite=false)", function(done) {
+		post("t2.1.1", '/id/' + rootId, {_method: "MKCOL",name: "toto", overwrite: "false"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+			should.exist(err);
+			should.not.exist(res);
+			should.exist(err.statusCode);
+			err.statusCode.should.equal(412);
+			done();
+		});
+	});
+
+	it("t2.1.2. should re-create the same folder (overwrite=undefined)", function(done) {
+		post("t2.1.2", '/id/' + rootId, {_method: "MKCOL",name: "toto"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201);
+			should.exist(res.json);
+			should.exist(res.json.isDir);
+			res.json.isDir.should.equal(true);
+			should.exist(res.json.path);
+			res.json.path.should.equal(rootPath + "/toto");
+			done();
+		});
+	});
+
+	it("t2.1.3. should re-create the same folder (overwrite=true)", function(done) {
+		post("t2.1.3", '/id/' + rootId, {_method: "MKCOL",name: "toto", overwrite: "true"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -421,6 +461,52 @@ function sendClosingBoundary(req, boundaryKey) {
 		});
 	});
 
+	it("t3.1.1. should fail to overwrite an existing file (overwrite=false)", function(done) {
+		post("t3.1.1", '/id/' + titiId, {_method: "PUT",name: "tutu", overwrite: "false"} /*query*/, new Buffer(textContent), 'application/x-www-form-urlencoded' /*contentType*/, function(err, res) {
+			should.exist(err);
+			should.not.exist(res);
+			should.exist(err.statusCode);
+			err.statusCode.should.equal(412);
+			done();
+		});
+	});
+
+	it("t3.1.2. should succeed to overwrite an existing file (overwrite=undefined)", function(done) {
+		post("t3.1.1", '/id/' + titiId, {_method: "PUT",name: "tutu"} /*query*/, new Buffer(textContent), 'application/x-www-form-urlencoded' /*contentType*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201);
+			should.exist(res.json);
+			should.exist(res.json[0]);
+			should.exist(res.json[0].isDir);
+			res.json[0].isDir.should.equal(false);
+			should.exist(res.json[0].path);
+			res.json[0].path.should.equal(rootPath + "/toto/titi/tutu");
+			should.exist(res.json[0].id);
+			textContentId = res.json[0].id;
+			done();
+		});
+	});
+
+	it("t3.1.3. should succeed to overwrite an existing file (overwrite=true)", function(done) {
+		post("t3.1.1", '/id/' + titiId, {_method: "PUT",name: "tutu", overwrite: "true"} /*query*/, new Buffer(textContent), 'application/x-www-form-urlencoded' /*contentType*/, function(err, res) {
+			should.not.exist(err);
+			should.exist(res);
+			should.exist(res.statusCode);
+			res.statusCode.should.equal(201);
+			should.exist(res.json);
+			should.exist(res.json[0]);
+			should.exist(res.json[0].isDir);
+			res.json[0].isDir.should.equal(false);
+			should.exist(res.json[0].path);
+			res.json[0].path.should.equal(rootPath + "/toto/titi/tutu");
+			should.exist(res.json[0].id);
+			textContentId = res.json[0].id;
+			done();
+		});
+	});
+
 	it("t3.2. should see created file as a file", function(done) {
 		get("t3.2", '/id/' + textContentId, {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
 			should.not.exist(err);
@@ -488,7 +574,7 @@ function sendClosingBoundary(req, boundaryKey) {
 		});
 	});
 
-	 var tataId;
+	var tataId;
 
 	it("t4.1. should create a file (using 'multipart/form-data')", function(done) {
 		var content = {
@@ -682,8 +768,8 @@ function sendClosingBoundary(req, boundaryKey) {
 		});
 	});
 
-	it("t6.2. should fail to copy file in the same folder, onto another one (no overwrite)", function(done) {
-		post("t6.2", '/id/' + tata1Id, {_method: "COPY", name: "tata"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+	it("t6.2. should fail to copy file in the same folder, onto another one (overwrite=false)", function(done) {
+		post("t6.2", '/id/' + tata1Id, {_method: "COPY", name: "tata", overwrite: "false"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.exist(err);
 			should.exist(err.statusCode);
 			err.statusCode.should.equal(412); // Precondition-Failed
@@ -702,8 +788,8 @@ function sendClosingBoundary(req, boundaryKey) {
 		});
 	});
 
-	it("t6.4. should copy file in the same folder, onto another one (overwrite)", function(done) {
-		post("t6.4/1", '/id/' + tata1Id, {_method: "COPY", name: "tata", overwrite: true} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
+	it("t6.4. should copy file in the same folder, onto another one (overwrite=undefined)", function(done) {
+		post("t6.4/1", '/id/' + tata1Id, {_method: "COPY", name: "tata"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.not.exist(err);
 			should.exist(res);
 			should.exist(res.statusCode);
@@ -735,7 +821,7 @@ function sendClosingBoundary(req, boundaryKey) {
 		});
 	});
 
-	it("t6.5. should fail to copy file in the same folder as the same name (overwrite)", function(done) {
+	it("t6.5. should fail to copy file in the same folder as the same name (overwrite=true)", function(done) {
 		post("t6.5", '/id/' + tataId, {_method: "COPY",name: "tata", overwrite: true} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.exist(err);
 			should.exist(err.statusCode);
@@ -745,7 +831,7 @@ function sendClosingBoundary(req, boundaryKey) {
 		});
 	});
 
-	 var toto1Id;
+	var toto1Id;
 
 	it("t6.6. should reccursively copy folder in the same folder, as a new folder", function(done) {
 		async.waterfall([

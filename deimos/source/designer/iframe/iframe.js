@@ -405,10 +405,11 @@ enyo.kind({
 				this.selectItem({aresId: inKind.selectId});
 			}
 		} catch(error) {
-			errMsg = "Unable to render kind '" + inKind.name + "':" + error.message;
-			this.error(errMsg, error.stack);
+			errMsg = "Unable to render kind '" + inKind.name + "':" + ( typeof error === 'object' ? error.message : error );
+			var errStack = typeof error === 'object' ? error.stack : '' ;
+			this.error(errMsg, errStack );
 			this.sendMessage({op: "reloadNeeded"});
-			this.sendMessage({op: "error", val: {msg: errMsg, reloadNeeded: true, err: {stack: error.stack}}});
+			this.sendMessage({op: "error", val: {msg: errMsg, reloadNeeded: true, err: {stack: errStack}}});
 		}
 	},
 	//* Rerender current selection
