@@ -10,7 +10,8 @@ enyo.kind(
 
 			{content: "iPad\u2122 Retina", value: { width: 2048, height: 1536, ppi: 264, dpr: 2 }},
 			{content: "iPad\u2122 2",      value: { width: 1024, height:  768, ppi: 132, dpr: 1 }},
-			{content: "iPad\u2122 mini",   value: { width: 1024, height:  768, ppi: 163, dpr: 1 }}
+			{content: "iPad\u2122 mini",   value: { width: 1024, height:  768, ppi: 163, dpr: 1 }},
+			{content: "HDTV",              value: { height: 1080, width: 1920, ppi: 163, dpr: 1 , landscapeOnly : true}}
 		]
 	}
 );
@@ -64,12 +65,12 @@ enyo.kind(
 								onSelect: "resize",
 								components:
 								[
-									{}, // A content-less PickerButton
+									{name:"screenPicker"}, // A content-less PickerButton
 									{
 										kind: "onyx.Picker", name: "orientation",
 										components: [
-											{content: "portrait", active: true },
-											{content: "landscape"              }
+											{name:"portrait", content: "portrait", active: true },
+											{name:"landscape", content: "landscape"              }
 										]
 									}
 								]
@@ -141,19 +142,21 @@ enyo.kind(
 
 		resize: function() {
 			var device = this.$.device.selected ;
-			var orientation = this .$.orientation.selected ;
+			var orientation = this.$.orientation.selected ;
 
 			this.dlog("size for device " , device.content , " orientation " , orientation.content ) ;
 
 			var dw  = device.value.width ;
 			var dh  = device.value.height ;
-			var dpr = device.value.dpr ;
+			var dpr = device.value.dpr;
+			var landscapeOnly = device.value.landscapeOnly; 
+
 			this.$.devWidth .setContent("width: "  + dw + ' px') ;
 			this.$.devHeight.setContent("height: " + dh + ' px') ;
 			this.$.devDPR   .setContent("DPR: "    + dpr) ;
 
 			// there's no logical xor in javascript. Emulate one :-/
-			var wantWide = orientation.content === 'landscape' ;
+			var wantWide = orientation.content === 'landscape' || landscapeOnly;
 			var isWide   = dw > dh ;
 			var swap     = wantWide ^ isWide ; // bitwise xor works fine with boolean
 
@@ -163,6 +166,12 @@ enyo.kind(
 			this.$.scrolledIframe.setGeometry( targetW , targetH) ;
 			this.$.screenWidth .setContent("width: "  + targetW + 'px') ;
 			this.$.screenHeight.setContent("height: " + targetH + 'px') ;
+			if(landscapeOnly){
+				this.$.landscape.setActive(true);
+				this.$.screenPicker.setDisabled(true);
+			} else {
+				this.$.screenPicker.setDisabled(false);
+			}
 			this.resized() ;
 		},
 

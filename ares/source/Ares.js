@@ -369,6 +369,7 @@ enyo.kind({
 		this.$.aresLayoutPanels.reflow();
 		this.$.aresLayoutPanels.setIndexDirect(this.hermesFileTreeIndex);
 		this.componentsRegistry.harmonia.showGrabber();
+		this.componentsRegistry.harmonia.hideLogo();
 	},
 	showProjectView: function(inSender, inEvent) {
 		this.isProjectView = true;
@@ -377,6 +378,7 @@ enyo.kind({
 		this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
 		this.$.aresLayoutPanels.reflow();
 		this.componentsRegistry.harmonia.hideGrabber();
+		this.componentsRegistry.harmonia.showLogo();
 	},
 	changeGrabberDirection:function(inSender, inEvent){
 		if(inEvent.toIndex > 0 && inEvent.fromIndex < inEvent.toIndex){
