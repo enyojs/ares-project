@@ -10,6 +10,7 @@ enyo.kind({
 	name: "HermesFileTree",
 	kind: "FittableRows",
 	events: {
+		onError: "",
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
@@ -732,7 +733,7 @@ enyo.kind({
 		}
 
 		this.trace("Creating new folder ", name," into folderId=", folderId);
-		this.$.service.createFolder(folderId, name, { overwrite: false })
+		var req = this.$.service.createFolder(folderId, name, { overwrite: false })
 			.response(this, function(inSender, inFolder) {
 				this.trace("inFolder: ", inFolder);
 				var parentNode = this.getFolderOfSelectedNode(),
@@ -765,12 +766,37 @@ enyo.kind({
 				this.resetRevert();
 
 				this.refreshFileTree( function()  {parentNode.getNodeWithId(inFolder.id).doAdjustScroll(); }, inFolder.id /*selectId*/ );
-			})
-			.error(this, function(inSender, inError) {
-				this.warn("Unable to create folder:", name, inError);
-				this.showErrorPopup(this.$LS("Creating folder '#{name}' failed: {#error}", {name: name, error: inError.toString()}));
 			});
+		req.error(this, this._handleXhrError.bind(this, "Unable to create folder '" + name + "'", null /*next*/));
 	},
+
+	/**
+	 * Shared enyo.Ajax error handler
+	 * @private
+	 */
+	_handleXhrError: function(message, next, inSender, inError) {
+		var response = inSender.xhrResponse, contentType, html, text;
+		if (response) {
+			contentType = response.headers['content-type'];
+			if (contentType) {
+				if (contentType.match('^text/plain')) {
+					text = response.body;
+				}
+				if (contentType.match('^text/html')) {
+					html = response.body;
+				}
+			}
+		}
+		var err = new Error(message + " (" + inError.toString() + ")");
+		err.html = html;
+		err.text = text;
+		err.status = response.status;
+		this.doError({ msg: message, err: err});
+		if (typeof next === 'function') {
+			next(err);
+		}
+	},
+
 	/** @private */
 	// User Interaction for New File op
 	newFileClick: function(inSender, inEvent) {
@@ -1110,7 +1136,7 @@ enyo.kind({
 	createFile: function(name, folderId, content) {
 		this.trace("Creating new file ",name," into folderId=",folderId);
 
-		this.$.service.createFile(folderId, name, content, { overwrite: false })
+		var req = this.$.service.createFile(folderId, name, content, { overwrite: false })
 			.response(this, function(inSender, inNodes) {
 				this.trace("inNodes: ",inNodes);
 				var parentNode = this.getFolderOfSelectedNode(),
@@ -1141,11 +1167,8 @@ enyo.kind({
 				this.resetRevert();
 
 				this.refreshFileTree( function() { parentNode.getNodeWithId(inNodes[0].id).doAdjustScroll(); }, inNodes[0].id );
-			})
-			.error(this, function(inSender, inError) {
-				this.warn("Unable to create file:", name, inError);
-				this.showErrorPopup(this.$LS("Creating file '#{name}' failed: #{error}", {name: name, error: inError.toString()}));
 			});
+		req.error(this, this._handleXhrError.bind(this, "Unable to create file '" + name + "'", null /*next*/));
 	},
 	
 	/** @private */
