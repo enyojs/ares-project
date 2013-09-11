@@ -109,7 +109,7 @@ enyo.kind({
 	 * @return {enyo.Async} 
 	 */
 	createFolder: function(inFolderId, inName, inOptions) {
-		return this.impl.createFolder(inFolderId, inName);
+		return this.impl.createFolder(inFolderId, inName, inOptions);
 	},
 	/**
 	 * @return {enyo.Async} 
