@@ -356,8 +356,11 @@ enyo.kind({
 			for(var i = 0 ; i < this.kinds.length ; i++) {
 				event.contents[i] = (i === this.index) ? enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components)) : null;
 			}
-			// structure return may contain [null] or [null, null]...
+			// the length of the returned event array is significant for the undo/redo operation.
+			// event.contents.length must match this.kinds.length even if it contains only null values
+			// so the returned structure return may be [null] or [null, content, null] or [ null, null, null]...
 			if (event.contents[this.index] === this.previousContents[this.index]) {
+				// except when undo/redo would not bring any change...
 				event.contents=[];
 			}
 			return event;
