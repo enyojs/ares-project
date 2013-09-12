@@ -32,10 +32,11 @@ enyo.kind({
 	components: [
 		{kind: "enyo.FittableColumns", style: "width: 33%; height: 100%;", components:[
 			
-			{name: "cssleft", style: "width: 100%; height: 90%; ", classes:"ares_deimos_left", kind: "leftpannel"},
+			{name: "cssleft", kind: "leftpannel", style: "width: 100%; height: 100%; ",	classes:"ares_deimos_left"},
 			
 			{name: "center", kind: "enyo.FittableRows", style: "width: 100%; height: 100%; ", components: [
-				{name:"sampleBox", kind: "enyo.Panels",	style: "width: 100%; height: 60%; ", fit: "true", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
+				
+				{name:"sampleBox", kind: "enyo.Panels",	style: "width: 100%; height: 60%; ", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
 					{name: "Sample", allowHtml: true, style: "height: 60%; font-size: 10px;", components: [
 						{name: "sampletext", content: "Sample Text"},
 					]}
@@ -46,24 +47,25 @@ enyo.kind({
 				]},	
 			]},// center
 			
-			{kind: "FittableRows", fit: true, style: "width: 100%; height: 100%;", components: [
+			{kind: "FittableRows", style: "width: 100%; height: 100%;", components: [
 				{kind: "Panels",  style: "width: 100%; height: 60%;", classes: "enyo-unselectable", components: [
-					{name: "list", kind: "List", count: 100, multiSelect: false, classes: "enyo-fit list-sample-list", onSetupItem: "setupItem", components: [
-						{name: "item", classes: "list-sample-item enyo-border-box", ontap: "classGrabber", components: [
-							{name: "name2"}
+					{name: "list", kind: "List", count: 100, multiSelect: false, classes: "list-sample-list", onSetupItem: "setupItem", components: [
+						{name: "item", style: "width: 100%;", classes: "list-sample-item enyo-border-box", ontap: "classGrabber", components: [
+							{name: "name2", style: "width: 100%;"}
 						]},				
 					]},
 				]},
-				{kind: "Panels", style: "width: 100%; height: 40%;", classes: "enyo-unselectable", components: [
+
+				{kind: "Panels", style: "width: 100%; height: 40%;", fit: true, classes: "enyo-unselectable", components: [
 					{name: "valueinput", kind: "valueInput", onUpdate: "change"},
 					
-				]},
+				]}
 			]},	// right
 		]}, 
 	
 		{kind: "onyx.Popup", modal: true, floating: true, centered: true, canGenerate: false, name: "newCssPopup", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", name: "toolbar4", components: [
-					{kind: "Control", content: "Enter you new class name", name: "newCssName"}
+					{name: "newCssName", kind: "Control", content: "Enter you new class name" }
 				]},
 			{kind: "onyx.Input", placeholder: "Enter your class name!..", name: "input"},
 			{kind: "onyx.Button", classes: "ok", content: "Ok", ontap:"newDeclaration"}
@@ -75,8 +77,8 @@ enyo.kind({
 	value: [],
 	
 	create: function() {
-		ares.setupTraceLogger(this);
-		this.inherited(arguments);
+			this.inherited(arguments);
+		ares.setupTraceLogger(this);	
 		this.doRegisterMe({name:"hera", reference:this});
 		this.$.outputBox.applyStyle("color", "#FFFFFF");
 		this.$.outputBox.applyStyle("background-color", "#000000");
