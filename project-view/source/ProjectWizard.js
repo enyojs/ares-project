@@ -707,7 +707,7 @@ enyo.kind({
 			return true ; // stop bubble			
 		}
 
-		var req = service.copy(folderId, destination);
+		var req = service.copy(folderId, {name: destination});
 		req.response(this, this.saveProjectJson);
 		req.error(this, function(inSender, status) {
 			var msg = $L("Unable to duplicate the project");
