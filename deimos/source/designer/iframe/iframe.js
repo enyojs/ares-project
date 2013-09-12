@@ -48,16 +48,21 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.inherited(arguments);
-		var expVer = [2,3,0,6] ;
+		var expVer = [2,3,0,6] ; // i.e. 2.3.0-pre.6
 		var myVerStr = (enyo.version && enyo.version.enyo) || '0.0.0-pre.0';
 		var myVer = myVerStr.split(/\D+/);
+		var errMsg ;
+
 		while (expVer.length) {
 			if (myVer.shift() < expVer.shift()) {
-				alert("Enyo used by your application is too old. Console log will show duplicated kind error "
-					  + "and Designer may not work as expected. You should use Enyo >= 2.3.0.pre.6" );
+				errMsg = "Enyo used by your application is too old. Console log will show duplicated kind error "
+					+ "and Designer may not work as expected. You should use Enyo >= 2.3.0.pre.6" ;
+				enyo.warn(errMsg);
+				this.sendMessage({op: "error", val: {msg: errMsg }});
 				break;
 			}
 		}
+
 		this.adjustFrameworkFeatures();
 		enyo.load("$enyo/../source/package.js", enyo.bind(this, function() {
 			this.sendMessage({op: "state", val: "initialized"});
