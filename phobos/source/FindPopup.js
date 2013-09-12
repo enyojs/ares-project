@@ -18,13 +18,13 @@ enyo.kind({
 		onShow: "shown"
 	},
 	components: [
-		{classes:"title", content: "FIND/REPLACE"},
-		{classes:"ace-find-popup", ondragstart:"drop", ondrag:"drop", ondragfinish:"drop", components: [
+		{classes: "title", content: "FIND/REPLACE"},
+		{classes: "ace-find-popup", ondragstart:"drop", ondrag:"drop", ondragfinish:"drop", components: [
 			{kind: "FittableRows", components: [
 				{classes: "ares-row", components: [
 					{tag:"label", classes: "ares-fixed-label ace-find-label", content: "Find:"},
 					{kind: "onyx.InputDecorator", components: [
-						{name: "find", kind: "onyx.Input", oninput:"findChanged"}
+						{name: "find", kind: "onyx.Input", oninput: "findChanged"}
 					]}
 				]},
 				{classes: "ares-row", components: [
@@ -34,28 +34,28 @@ enyo.kind({
 					]}
 				]},
 				{classes: "ares-row", components: [
-					{name:"message", classes:"ace-find-message", fit: true}
+					{name:"message", classes: "ace-find-message", fit: true}
 				]},
 				{classes: "ares-row", components: [
-					{kind: "FittableColumns", classes:"ace-find-left", fit: true, components: [
-						{name: "findnext", kind: "onyx.Button", classes:"ace-find-button", content: "Find", ontap: "doFindNext"},
-						{name: "findprevious", kind: "onyx.Button", classes:"ace-find-button", content: "Find Prev", ontap: "doFindPrevious"}
+					{kind: "FittableColumns", classes: "ace-find-left", fit: true, components: [
+						{name: "findnext", kind: "onyx.Button", classes: "ace-find-button", content: "Find", ontap: "doFindNext"},
+						{name: "findprevious", kind: "onyx.Button", classes: "ace-find-button", content: "Find Prev", ontap: "doFindPrevious"}
 					]}
 				]},
 				{classes: "ares-row", components: [
-					{kind: "FittableColumns", classes:"ace-find-left", fit: true, components: [
-						{name: "replaceFind", kind: "onyx.Button", classes:"ace-find-button", content: "Replace/Find", ontap: "doReplaceFind"},			
-						{name: "replaceOne", kind: "onyx.Button", classes:"ace-find-button", content: "Replace", ontap: "doReplace"}
+					{kind: "FittableColumns", classes: "ace-find-left", fit: true, components: [
+						{name: "replaceFind", kind: "onyx.Button", classes: "ace-find-button", content: "Replace/Find", ontap: "doReplaceFind"},			
+						{name: "replaceOne", kind: "onyx.Button", classes: "ace-find-button", content: "Replace", ontap: "doReplace"}
 					]}
 				]},
 				{classes: "ares-row", components: [
-					{kind: "FittableColumns", classes:"ace-find-left", fit: true, components: [
-						{name: "replaceAll", kind: "onyx.Button", classes:"ace-find-button", content: "Replace All", ontap: "doReplaceAll"}
+					{kind: "FittableColumns", classes: "ace-find-left", fit: true, components: [
+						{name: "replaceAll", kind: "onyx.Button", classes: "ace-find-button", content: "Replace All", ontap: "doReplaceAll"}
 					]}
 				]}
 			]}
 		]},
-		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+		{kind: "onyx.Toolbar", classes: "bottom-toolbar", components: [
 			{name: "close", kind: "onyx.Button", content: "Close", ontap: "doClose"},
 		]}
 	],
