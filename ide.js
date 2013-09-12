@@ -342,6 +342,7 @@ function handleMessage(service) {
 				throw e;
 			});
 			log.verbose(service.id, "config:", service);
+			creq.setTimeout(5*60*1000);
 			creq.write(JSON.stringify({config: service}, null, 2));
 			creq.end();
 		} else {
