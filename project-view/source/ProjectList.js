@@ -118,6 +118,7 @@ enyo.kind({
 		{classes:"hangar"}
 	],
 	selected: null,
+	enyoHelpTab: null,
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -263,9 +264,13 @@ enyo.kind({
 		this.$.aresProperties.show();
 	},
 	showEnyoHelp: function(){
-		window.open("http://enyojs.com/api/",
+		if (this.enyoHelpTab && !this.enyoHelpTab.closed) {
+			this.enyoHelpTab.focus();
+			return;
+		}
+		this.enyoHelpTab = window.open("http://enyojs.com/api/",
 			"Enyo API Viewer",
-			"resizeable=yes, dependent=yes, width=800, height=600").focus();
+			"resizeable=yes, dependent=yes, width=800, height=600");
 	},
 	stringifyReplacer: function(key, value) {
 		if (key === "originator") {
