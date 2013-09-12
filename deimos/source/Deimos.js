@@ -94,6 +94,7 @@ enyo.kind({
 	},
 	kinds: [],
 	index: null,
+	previousContents: [],
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -118,11 +119,15 @@ enyo.kind({
 	 * @public
 	 */
 	load: function(data) {
+		this.enableDesignerActionButtons(false);
+
 		var what = data.kinds;
 		var maxLen = 0;
 		
 		this.index = null;
 		this.kinds = what;
+		this.previousContents = [];
+		
 		this.owner.$.kindPicker.destroyClientControls();
 
 		// Pass the project information (analyzer output, ...) to the inspector and palette
@@ -130,6 +135,7 @@ enyo.kind({
 
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
+			this.previousContents.push(enyo.json.codify.to(k.components));
 			this.owner.$.kindPicker.createComponent({
 				content: k.name,
 				index: i,
@@ -346,9 +352,16 @@ enyo.kind({
 	prepareDesignerUpdate: function() {
 		if (this.index !== null) {
 			// Prepare the data for the code editor
-			var event = {docHasChanged: true, contents: []};
+			var event = {contents: []};
 			for(var i = 0 ; i < this.kinds.length ; i++) {
 				event.contents[i] = (i === this.index) ? enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components)) : null;
+			}
+			// the length of the returned event array is significant for the undo/redo operation.
+			// event.contents.length must match this.kinds.length even if it contains only null values
+			// so the returned structure return may be [null] or [null, content, null] or [ null, null, null]...
+			if (event.contents[this.index] === this.previousContents[this.index]) {
+				// except when undo/redo would not bring any change...
+				event.contents=[];
 			}
 			return event;
 		}
@@ -357,6 +370,7 @@ enyo.kind({
 		this.$.designer.cleanUp();
 		
 		var event = this.prepareDesignerUpdate();
+
 		this.setProjectData(null);
 		this.doCloseDesigner(event);
 		
@@ -372,7 +386,7 @@ enyo.kind({
 		this.kinds[this.index].components = this.cleanUpComponents(components, true);
 		
 		this.designerUpdate();
-		
+
 		return true;
 	},
 	//* Create item from palette (via drag-and-drop from Palette into Designer or Component View)
@@ -648,15 +662,19 @@ enyo.kind({
 		return cleanComponent;
 	},
 	undoAction: function(inSender, inEvent) {
+		this.enableDesignerActionButtons(false);
 		this.doUndo();
 	},
 	redoAction: function(inSender, inEvent) {
+		this.enableDesignerActionButtons(false);
 		this.doRedo();
 	},
 	deleteAction: function(inSender, inEvent) {
 		if(!this.$.designer.selection) {
 			return;
 		}
+		
+		this.enableDesignerActionButtons(false);
 		
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, this.kinds[this.index].components);
 		this.addAresKindOptions(this.kinds[this.index].components);
@@ -675,7 +693,10 @@ enyo.kind({
 		}
 	},
 	designerUpdate: function() {
-		this.doDesignerUpdate(this.prepareDesignerUpdate());
+		var event = this.prepareDesignerUpdate();
+
+		this.doDesignerUpdate(event);
+		this.enableDesignerActionButtons(true);
 	},
 	//* Called by Ares when ProjectView has new project selected
 	projectSelected: function(inProject) {
@@ -839,6 +860,11 @@ enyo.kind({
 		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
 		this.addAresKindOptions(this.kinds[this.index].components);
 		this.rerenderKind(config.aresId);
+	},
+	enableDesignerActionButtons: function(condition) {
+		this.$.deleteButton.setAttribute("disabled", !condition);
+		this.$.undoButton.setAttribute("disabled", !condition);
+		this.$.redoButton.setAttribute("disabled", !condition);
 	}
 });
 
