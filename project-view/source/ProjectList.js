@@ -41,6 +41,10 @@ enyo.kind({
 							{classes: "onyx-menu-divider aresmenu-button"},
 							{value: "showAresProperties",  classes:"aresmenu-button", components: [
 								{content: "Properties...", classes: "aresmenu-button-label"}
+							]},
+							{classes: "onyx-menu-divider aresmenu-button"},
+							{value: "showEnyoHelp",  classes:"aresmenu-button", components: [
+								{content: "Enyo API Viewer", classes: "aresmenu-button-label"}
 							]}
 						]}
 					]},
@@ -114,6 +118,7 @@ enyo.kind({
 		{classes:"hangar"}
 	],
 	selected: null,
+	enyoHelpTab: null,
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -257,6 +262,15 @@ enyo.kind({
 	},
 	showAresProperties: function(){
 		this.$.aresProperties.show();
+	},
+	showEnyoHelp: function(){
+		if (this.enyoHelpTab && !this.enyoHelpTab.closed) {
+			this.enyoHelpTab.focus();
+			return;
+		}
+		this.enyoHelpTab = window.open("http://enyojs.com/api/",
+			"Enyo API Viewer",
+			"resizable=1, dependent=yes, width=800, height=600");
 	},
 	stringifyReplacer: function(key, value) {
 		if (key === "originator") {
