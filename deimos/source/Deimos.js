@@ -353,11 +353,11 @@ enyo.kind({
 		if (this.index !== null) {
 			// Prepare the data for the code editor
 			var event = {contents: []};
-			if (event.contents[this.index] !== this.previousContents[this.index]) {
-				// structure returned may contains null like [ null, null, some_content, null ]
-				for(var i = 0 ; i < this.kinds.length ; i++) {
-					event.contents[i] = (i === this.index) ? enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components)) : null;
-				}
+			for(var i = 0 ; i < this.kinds.length ; i++) {
+				event.contents[i] = (i === this.index) ? enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components)) : null;
+			}
+			if (event.contents[this.index] === this.previousContents[this.index]) {
+				event.contents=[];
 			}
 			return event;
 		}
