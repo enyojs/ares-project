@@ -356,6 +356,7 @@ enyo.kind({
 			for(var i = 0 ; i < this.kinds.length ; i++) {
 				event.contents[i] = (i === this.index) ? enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components)) : null;
 			}
+			// structure return may contain [null] or [null, null]...
 			if (event.contents[this.index] === this.previousContents[this.index]) {
 				event.contents=[];
 			}
