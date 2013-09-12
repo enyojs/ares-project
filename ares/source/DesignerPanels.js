@@ -149,9 +149,11 @@ enyo.kind({
 	switchGrabberDirection: function(active){
 		this.$.aresGrabberDirection.switchGrabberDirection(active);
 	},
+	
 	addPreviewTooltip: function(message){
 		this.$.previewTooltip.setContent(message);
-	},
+	},		
+	
 	doCss: function(){
 		console.log("do css");
 		this.owner.componentsRegistry.phobos.cssAction();	
