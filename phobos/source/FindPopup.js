@@ -3,15 +3,15 @@ enyo.kind({
 	kind: "Ares.Popup",
 	classes:"ares-classic-popup",
 	events: {
-		onFindNext:"",
-		onFindPrevious:"",
-		onReplace:"",
-		onReplaceAll:"",
+		onFindNext: "",
+		onFindPrevious: "",
+		onReplace: "",
+		onReplaceAll: "",
 		onReplaceFind: "",
 		onClose: ""
 	},
 	published: {
-		findValue:"",
+		findValue: "",
 		replaceValue: ""
 	},
 	handlers: {
@@ -28,13 +28,13 @@ enyo.kind({
 					]}
 				]},
 				{classes: "ares-row", components: [
-					{tag:"label", classes: "ares-fixed-label ace-find-label",  content: "Replace:"},
+					{tag: "label", classes: "ares-fixed-label ace-find-label",  content: "Replace:"},
 					{kind: "onyx.InputDecorator", components: [
 						{name: "replace", kind: "onyx.Input", onchange: "replaceChanged"}
 					]}
 				]},
 				{classes: "ares-row", components: [
-					{name:"message", classes: "ace-find-message", fit: true}
+					{name: "message", classes: "ace-find-message", fit: true}
 				]},
 				{classes: "ares-row", components: [
 					{kind: "FittableColumns", classes: "ace-find-left", fit: true, components: [
