@@ -18,7 +18,7 @@ enyo.kind({
 					{kind: "onyx.Tooltip", content: "Editor Settings"}
 				]},
 				{name: "designerDecorator", kind: "onyx.TooltipDecorator", components: [
-					{name: "designerButton", kind: "onyx.IconButton", Showing: "false", src: "assets/images/designer.png", ontap: "designerAction"},
+					{name: "designerButton", kind: "onyx.IconButton", src: "assets/images/designer.png", ontap: "designerAction"},
 					{kind: "onyx.Tooltip", content: $L("Designer")}
 				]},
 				{name: "cssDecorator", kind: "onyx.TooltipDecorator", components: [
@@ -41,14 +41,12 @@ enyo.kind({
 				]}
 			]},
 			{name:"cssControls", kind: "FittableColumns", fit:true,  classes: "onyx-toolbar-inline", components:[
-
 				{fit: true},
 				{name: "cssEditorDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
 					{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closecssDesigner"},
 					{kind: "onyx.Tooltip", content: "Code editor"}
 				]}
-			]},
-
+			]},			
 			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
 				{kind: "onyx.IconButton", src: "../project-view/assets/images/project_view_preview.png", ontap: "doSavePreviewAction"},
 				{kind: "onyx.Tooltip", name:"previewTooltip", content: "Preview"}
@@ -56,7 +54,6 @@ enyo.kind({
 			{classes:"ares-logo-container", components:[
 				{name:"logo", kind:"Ares.Logo"}
 			]}
-
 		]},
 		{
 			name: "bottomBar",
@@ -78,7 +75,7 @@ enyo.kind({
 					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
 				]},
 				{components: [
-					{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
+					{kind: "Deimos", onCloseDesigner: "closeDesigner"}
 				]},
 				{components: [
 					{kind: "Hera"},
@@ -98,7 +95,7 @@ enyo.kind({
 	},
 	create: function() {
 		this.inherited(arguments);
-		this.doRegisterMe({name:"codeEditor", reference:this});
+		this.doRegisterMe({name:"designerPanels", reference:this});
 	},
 	activePanel : function(){
 		this.doMovePanel({panelIndex:this.panelIndex});
@@ -154,10 +151,10 @@ enyo.kind({
 	},
 	addPreviewTooltip: function(message){
 		this.$.previewTooltip.setContent(message);
-	},	
+	},
 	doCss: function(){
-		this.owner.componentsRegistry.phobos.cssAction();
-	
+		console.log("do css");
+		this.owner.componentsRegistry.phobos.cssAction();	
 		this.$.editorControls.setShowing(false);
 		this.$.deimosControls.setShowing(false);
 		this.$.cssControls.setShowing(true);
@@ -171,7 +168,15 @@ enyo.kind({
 		this.$.cssControls.setShowing(false);
 		this.$.toolbar.resized();
 		this.doCloseCss();
-	}
+	},
+	updateDeimosLabel: function(edited) {
+		if (edited) {
+			this.$.docLabel.setContent("Deimos *");
+		} else {
+			this.$.docLabel.setContent("Deimos");
+		}
+		this.$.toolbar.resized();
+	},	
 });
 
 /**

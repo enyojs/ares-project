@@ -38,8 +38,8 @@ enyo.kind({
 		onCssDocument: "",
 
 		onDisplayPreview: "",
-		onSwitchFile: ""
-
+		onSwitchFile: "",
+		onFileEdited: " "
 	},
 	handlers: {
 		onNewcss: "newcss",
@@ -50,6 +50,7 @@ enyo.kind({
 		projectData: null
 	},
 	editedDocs:"",
+	injected: false,
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
@@ -85,6 +86,7 @@ enyo.kind({
 		this.hideWaitPopup();
 		if (inDocData) {
 			inDocData.setEdited(false);		// TODO: The user may have switched to another file
+			this.doFileEdited();
 		}
 		if (this.docData === inDocData) {
 			this.reparseAction();
@@ -220,7 +222,6 @@ enyo.kind({
 				this.$.ace.setSession(aceSession);
 			} else {
 				aceSession = this.$.ace.createSession(this.docData.getData(), mode);
-				this.docData.setData(null);			// We no longer need this data as it is now handled by the ACE edit session
 				this.$.ace.setSession(aceSession);
 				this.docData.setAceSession(aceSession);
 			}
@@ -692,6 +693,7 @@ enyo.kind({
 	},
 	// called when designer has modified the components
 	updateComponents: function(inSender, inEvent) {
+		this.injected = true;
 		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
 			if (inEvent.contents[i]) {
 				// Insert the new version of components (replace components block, or insert at end)
@@ -715,12 +717,17 @@ enyo.kind({
 				this.$.ace.replaceRange(range, comps);
 			}
 		}
+		this.injected = false;
 		/*
 		 * Insert the missing handlers
 		 * NB: reparseAction() is invoked by insertMissingHandlers()
 		 */
 		this.insertMissingHandlers();
-		this.docData.setEdited(true);
+		//file is edited if only we have a difference between stored file data and editor value
+		if(this.getEditorContent().localeCompare(this.docData.getData())!==0){
+			this.docData.setEdited(true);
+			this.doFileEdited();
+		}
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
@@ -804,7 +811,11 @@ enyo.kind({
 		this.saveNextDocument();
 	},
 	docChanged: function(inSender, inEvent) {
-		this.docData.setEdited(true);
+		//this.injected === false then modification coming from user
+		if(!this.injected && !this.docData.getEdited()){
+			this.docData.setEdited(true);
+			this.doFileEdited();
+		}
 
 		this.trace(JSON.stringify(inEvent.data));
 
@@ -861,17 +872,24 @@ enyo.kind({
 	},
 	// Show Find popup
 	findpop: function(){
+		var selected = this.$.ace.getSelection();
+		if(selected){
+			this.$.findpop.setFindInput(selected);
+		} 
+		this.$.findpop.removeMessage();
 		this.$.findpop.show();
 		return true;
 	},
 	findNext: function(inSender, inEvent){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.find(this.$.findpop.findValue, options);
+		this.$.findpop.updateMessage(this.$.ace.getSelection());
 	},
 
 	findPrevious: function(){
 		var options = {backwards: true, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.find(this.$.findpop.findValue, options);
+		this.$.findpop.updateMessage(this.$.ace.getSelection());
 	},
 
 	replaceAll: function(){
@@ -880,11 +898,13 @@ enyo.kind({
 	replacefind: function(){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.replacefind(this.$.findpop.findValue , this.$.findpop.replaceValue, options);
+		this.$.findpop.updateMessage(this.$.ace.getSelection());
 	},
 
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
+	//It was not working because ACE(Ace.js) was doing "find" action before "replace".
 	replace: function(){
-		//this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
 
 	focusEditor: function(inSender, inEvent) {
