@@ -119,7 +119,7 @@ enyo.kind({
 	 * @public
 	 */
 	load: function(data) {
-		this.provideButtons(false);
+		this.enableDesignerActionButtons(false);
 
 		var what = data.kinds;
 		var maxLen = 0;
@@ -658,11 +658,11 @@ enyo.kind({
 		return cleanComponent;
 	},
 	undoAction: function(inSender, inEvent) {
-		this.provideButtons(false);
+		this.enableDesignerActionButtons(false);
 		this.doUndo();
 	},
 	redoAction: function(inSender, inEvent) {
-		this.provideButtons(false);
+		this.enableDesignerActionButtons(false);
 		this.doRedo();
 	},
 	deleteAction: function(inSender, inEvent) {
@@ -670,7 +670,7 @@ enyo.kind({
 			return;
 		}
 		
-		this.provideButtons(false);
+		this.enableDesignerActionButtons(false);
 		
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, this.kinds[this.index].components);
 		this.addAresKindOptions(this.kinds[this.index].components);
@@ -692,7 +692,7 @@ enyo.kind({
 		var event = this.prepareDesignerUpdate();
 
 		this.doDesignerUpdate(event);
-		this.provideButtons(true);
+		this.enableDesignerActionButtons(true);
 	},
 	//* Called by Ares when ProjectView has new project selected
 	projectSelected: function(inProject) {
@@ -857,7 +857,7 @@ enyo.kind({
 		this.addAresKindOptions(this.kinds[this.index].components);
 		this.rerenderKind(config.aresId);
 	},
-	provideButtons: function(condition) {
+	enableDesignerActionButtons: function(condition) {
 		this.$.deleteButton.setAttribute("disabled", !condition);
 		this.$.undoButton.setAttribute("disabled", !condition);
 		this.$.redoButton.setAttribute("disabled", !condition);
