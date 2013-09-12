@@ -270,7 +270,7 @@ enyo.kind({
 		}
 		this.enyoHelpTab = window.open("http://enyojs.com/api/",
 			"Enyo API Viewer",
-			"resizeable=yes, dependent=yes, width=800, height=600");
+			"resizable=1, dependent=yes, width=800, height=600");
 	},
 	stringifyReplacer: function(key, value) {
 		if (key === "originator") {
