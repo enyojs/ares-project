@@ -449,7 +449,7 @@ enyo.kind({
 	phonegapBuildClick: function(){
 		window.open("https://build.phonegap.com/docs",
 			"PhoneGap Build help",
-			"resizable=yes, dependent=yes, width=800, height=600");
+			"resizable=yes, dependent=yes, width=800, height=600").focus();
 	},
 	
 	statics: {
