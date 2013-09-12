@@ -161,7 +161,7 @@ enyo.kind({
 					kind: "FittableRows",
 					components: [
 						{name: "phonegapBuildHelp", kind: "onyx.TooltipDecorator", components: [
-							{name: "phonegapBuildButton", kind: "onyx.IconButton", src: "$services/assets/images/Phonegap_build_help.png", classes: "project-properties-phonegapbuild-help-button", ontap: "phonegapBuildClick"},
+							{name: "phonegapBuildButton", kind: "onyx.IconButton", src: "$services/assets/images/Phonegap_build_help.png", ontap: "phonegapBuildClick"},
 							{kind: "onyx.Tooltip", content: $L("PhoneGap Build Help")}
 						]}, 
 						{content: "Sign-in is required", name: "signInErrorMsg", classes: "ares-project-properties-sign-in-error-msg"}, 
@@ -190,6 +190,8 @@ enyo.kind({
 	 * @type {Array}
 	 */
 	platformDrawers: Phonegap.UIConfiguration.platformDrawersContent,
+
+	phonegapBuildHelpBrowser: null,
 
 	/**
 	 * @private
@@ -447,9 +449,13 @@ enyo.kind({
 
 	/** @private */
 	phonegapBuildClick: function(){
-		window.open("https://build.phonegap.com/docs",
+		if (this.phonegapBuildHelpBrowser && !this.phonegapBuildHelpBrowser.closed) {
+			this.phonegapBuildHelpBrowser.focus();
+			return;
+		}
+		this.phonegapBuildHelpBrowser = window.open("https://build.phonegap.com/docs",
 			"PhoneGap Build help",
-			"resizable=yes, dependent=yes, width=800, height=600").focus();
+			"resizable=yes, dependent=yes, width=800, height=600");
 	},
 	
 	statics: {
