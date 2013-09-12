@@ -77,7 +77,7 @@ enyo.kind({
 	value: [],
 	
 	create: function() {
-			this.inherited(arguments);
+		this.inherited(arguments);
 		ares.setupTraceLogger(this);	
 		this.doRegisterMe({name:"hera", reference:this});
 		this.$.outputBox.applyStyle("color", "#FFFFFF");
@@ -100,7 +100,7 @@ enyo.kind({
 	* @protected
 	*/
 	csssave: function(inSender, inEvent){
-		this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		if(this.mode === "reset"){
 			return;
 		}

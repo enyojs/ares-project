@@ -653,7 +653,7 @@ enyo.kind({
 	* @protected
 	*/
 	closecss: function(inSender, inEvent){
-		this.componentsRegistry.codeEditor.$.panels.setIndex(this.phobosViewIndex);
+		this.componentsRegistry.designerPanels.$.panels.setIndex(this.phobosViewIndex);
 		this.activeDocument.setCurrentIF('code');
 	},
 	/*

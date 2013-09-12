@@ -43,7 +43,6 @@ enyo.kind({
 	},
 	handlers: {
 		onNewcss: "newcss",
-		onReplacecss: "replacecss",
 		onReparseAsked: "reparseAction"
 	},
 	published: {
@@ -1010,6 +1009,7 @@ enyo.kind({
 	replacecss: function(old_css, new_css){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.gotoLine(0,0);
+		this.$.ace.find(old_css, options);
 		this.$.ace.replace(old_css, new_css, options);
 	},
 

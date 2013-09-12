@@ -153,9 +153,11 @@ enyo.kind({
 	addPreviewTooltip: function(message){
 		this.$.previewTooltip.setContent(message);
 	},		
-	
+	/**
+	 *  @private
+	 * show/goto the hera
+	 */
 	doCss: function(){
-		console.log("do css");
 		this.owner.componentsRegistry.phobos.cssAction();	
 		this.$.editorControls.setShowing(false);
 		this.$.deimosControls.setShowing(false);
@@ -163,7 +165,6 @@ enyo.kind({
 		this.$.toolbar.resized();
 	},
 	closecssDesigner: function(){
-		//this.owner.componentsRegistry.deimos.closeDesignerAction();
 		this.owner.componentsRegistry.hera.csssave();
 		this.$.editorControls.setShowing(true);
 		this.$.deimosControls.setShowing(false);
