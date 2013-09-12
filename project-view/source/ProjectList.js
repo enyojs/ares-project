@@ -265,7 +265,7 @@ enyo.kind({
 	showEnyoHelp: function(){
 		window.open("http://enyojs.com/api/",
 			"Enyo API Viewer",
-			"resizeable=yes, dependent=yes, width=800, height=600");
+			"resizeable=yes, dependent=yes, width=800, height=600").focus();
 	},
 	stringifyReplacer: function(key, value) {
 		if (key === "originator") {
