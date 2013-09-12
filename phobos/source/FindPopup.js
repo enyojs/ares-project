@@ -5,7 +5,7 @@ enyo.kind({
 	events: {
 		onFindNext:"",
 		onFindPrevious:"",
-		//onReplace:"",
+		onReplace:"",
 		onReplaceAll:"",
 		onReplaceFind: "",
 		onClose: ""
@@ -24,7 +24,7 @@ enyo.kind({
 				{classes: "ares-row", components: [
 					{tag:"label", classes: "ares-fixed-label ace-find-label", content: "Find:"},
 					{kind: "onyx.InputDecorator", components: [
-						{name: "find", kind: "onyx.Input", onchange: "findChanged"}
+						{name: "find", kind: "onyx.Input", oninput:"findChanged"}
 					]}
 				]},
 				{classes: "ares-row", components: [
@@ -33,7 +33,9 @@ enyo.kind({
 						{name: "replace", kind: "onyx.Input", onchange: "replaceChanged"}
 					]}
 				]},
-				{tag:"p", classes:"break"},
+				{classes: "ares-row", components: [
+					{name:"message", classes:"ace-find-message", fit: true}
+				]},
 				{classes: "ares-row", components: [
 					{kind: "FittableColumns", classes:"ace-find-left", fit: true, components: [
 						{name: "findnext", kind: "onyx.Button", classes:"ace-find-button", content: "Find", ontap: "doFindNext"},
@@ -42,11 +44,13 @@ enyo.kind({
 				]},
 				{classes: "ares-row", components: [
 					{kind: "FittableColumns", classes:"ace-find-left", fit: true, components: [
-						{name: "replaceFind", kind: "onyx.Button", classes:"ace-find-button", disabled: true, content: "Replace/Find", ontap: "doReplaceFind"},
-						//DO NOT REMOVE replaceOne button, it is not implemented for the moment, why?
-						//{name: "replaceOne", kind: "onyx.Button", classes:"ace-find-button", content: "Replace", ontap: "doReplace"},
-						//]},
-						{name: "replaceAll", kind: "onyx.Button", classes:"ace-find-button", disabled: true, content: "Replace All", ontap: "doReplaceAll"}
+						{name: "replaceFind", kind: "onyx.Button", classes:"ace-find-button", content: "Replace/Find", ontap: "doReplaceFind"},			
+						{name: "replaceOne", kind: "onyx.Button", classes:"ace-find-button", content: "Replace", ontap: "doReplace"}
+					]}
+				]},
+				{classes: "ares-row", components: [
+					{kind: "FittableColumns", classes:"ace-find-left", fit: true, components: [
+						{name: "replaceAll", kind: "onyx.Button", classes:"ace-find-button", content: "Replace All", ontap: "doReplaceAll"}
 					]}
 				]}
 			]}
@@ -55,13 +59,38 @@ enyo.kind({
 			{name: "close", kind: "onyx.Button", content: "Close", ontap: "doClose"},
 		]}
 	],
+	create: function(){
+		this.inherited(arguments);
+		this.findChanged();
+	},
 	findChanged: function(inSender, inEvent) {
 		this.findValue = this.$.find.getValue();
+		this.disableActionButtons(this.findValue === "");
 	},
 	replaceChanged: function(inSender, inEvent) {
 		this.replaceValue = this.$.replace.getValue();
-		this.$.replaceFind.setDisabled(false);
-		this.$.replaceAll.setDisabled(false);
+	},
+	setFindInput: function(value){
+		this.$.find.setValue(value);
+		this.findChanged();
+	},
+	disableActionButtons: function(value){
+		this.$.replaceOne.setDisabled(value);
+		this.$.replaceAll.setDisabled(value);
+		this.$.replaceFind.setDisabled(value);
+		this.$.findprevious.setDisabled(value);
+		this.$.findnext.setDisabled(value);
+	},
+	removeMessage: function(){
+		this.$.message.setContent("");
+	},
+	updateMessage: function(inResult){
+		if(!inResult){
+			this.$.message.setContent(this.findValue+" not found");
+		} else {
+			this.removeMessage();
+		}
+		
 	},
 	shown: function(inSender, inEvent) {
 		this.$.find.focus();

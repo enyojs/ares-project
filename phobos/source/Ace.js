@@ -259,7 +259,6 @@ enyo.kind({
 		this.editor.findPrevious();
 	},
 	replace: function(inFind, inReplace, inOptions) {
-		this.find(inFind, inOptions);
 		this.editor.replace(inReplace);
 	},
 	replacefind: function(inFind, inReplace, inOptions) {
