@@ -47,7 +47,6 @@ enyo.kind({
 
 		dirPopup.$.header.setContent("Select a directory containing the new project") ;
 		dirPopup.show();
-		this.$.propertiesWidget.setDefaultTab();
 		this.hide();
 	},
 
@@ -401,7 +400,6 @@ enyo.kind({
 			this.$.propertiesWidget.preFill(config.data);
 			this.$.propertiesWidget.setTargetProject(target);
 			this.$.propertiesWidget.activateFileChoosers(true);
-			this.$.propertiesWidget.setDefaultTab();
 
 			var show = (function () {
 				this.show();
