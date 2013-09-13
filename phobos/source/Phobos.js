@@ -858,17 +858,24 @@ enyo.kind({
 	},
 	// Show Find popup
 	findpop: function(){
+		var selected = this.$.ace.getSelection();
+		if(selected){
+			this.$.findpop.setFindInput(selected);
+		} 
+		this.$.findpop.removeMessage();
 		this.$.findpop.show();
 		return true;
 	},
 	findNext: function(inSender, inEvent){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.find(this.$.findpop.findValue, options);
+		this.$.findpop.updateMessage(this.$.ace.getSelection());
 	},
 
 	findPrevious: function(){
 		var options = {backwards: true, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.find(this.$.findpop.findValue, options);
+		this.$.findpop.updateMessage(this.$.ace.getSelection());
 	},
 
 	replaceAll: function(){
@@ -877,11 +884,13 @@ enyo.kind({
 	replacefind: function(){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.replacefind(this.$.findpop.findValue , this.$.findpop.replaceValue, options);
+		this.$.findpop.updateMessage(this.$.ace.getSelection());
 	},
 
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
+	//It was not working because ACE(Ace.js) was doing "find" action before "replace".
 	replace: function(){
-		//this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
 
 	focusEditor: function(inSender, inEvent) {
