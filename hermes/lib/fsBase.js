@@ -49,6 +49,7 @@ function FsBase(inConfig, next) {
 	// express-3.x
 	this.app = express();
 	this.server = http.createServer(this.app);
+	this.server.setTimeout(this.timeout || (2*60*1000));
 
 	this.app.configure((function() {
 		this.app.use(this.separator.bind(this));
