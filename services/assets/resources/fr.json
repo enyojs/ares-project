@@ -26,5 +26,6 @@
 	"Select a file or folder to copy first": "Sélectionner d'abord un fichier ou un répertoire à copier",
 	"Select a file or folder to delete first": "Sélectionner d'abord un fichier ou un répertoire à supprimer",
 	"Select a file or folder to rename first": "Sélectionner d'abord un fichier ou un répertoire à renommer",
+	"Select a file system first" : "Sélectionner d'abord un système de fichiers",
 	"Select a parent folder first": "Sélectionner d'abord un répertoire parent"
 }
