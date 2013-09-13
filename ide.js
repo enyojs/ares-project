@@ -54,7 +54,7 @@ var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ide.js'*
 argv.config = argv.config || path.join(myDir, "ide.json");
 argv.host = argv.host || "127.0.0.1";
 argv.port = argv.port || 9009;
-argv.timeout = argv.timeout || (4*60*1000);	//default: 4 minuates.
+argv.timeout = argv.timeout || (4*60*1000);	//default: 4 minutes.
 
 if (argv.help) {
 	console.log("\n" +
