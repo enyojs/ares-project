@@ -429,12 +429,14 @@ if (path.basename(process.argv[1], '.js') === basename) {
 
 	var knownOpts = {
 		"port":		Number,
+		"timeout":	Number,
 		"pathname":	String,
 		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 		"help":		Boolean
 	};
 	var shortHands = {
 		"p": "--port",
+		"t": "--timeout",
 		"P": "--pathname",
 		"l": "--level",
 		"v": "--level verbose",
@@ -442,9 +444,10 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	};
 	var helpString = [
 		"Usage: node " + basename,
-		"  -p, --port        port (o) local IP port of the express server (0: dynamic)         [default: '0']",
-		"  -P, --pathname    URL pathname prefix (before /minify and /build                    [default: '/phonegap']",
-		"  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error') [default: 'http']",
+		"  -p, --port        port (o) local IP port of the express server (0: dynamic)                       [default: '0']",
+		"  -t, --timeout     milliseconds of inactivity before a server socket is presumed to have timed out [default: '120000']",
+		"  -P, --pathname    URL pathname prefix (before /minify and /build                                  [default: '/phonegap']",
+		"  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')               [default: 'http']",
 		"  -h, --help        This message"
 	];
 	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
@@ -459,6 +462,7 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	new BdPhoneGap({
 		pathname: argv.pathname,
 		port: argv.port,
+		timeout: argv.timeout,
 		basename: basename,
 		level: log.level,
 		enyoDir: path.resolve(__dirname, '..', 'enyo')

@@ -43,6 +43,7 @@ module.exports = BdBase;
 function BdBase(config, next) {
 
 	config.port = config.port || 0;
+	config.timeout = config.timeout || (2*60*1000);
 	config.pathname = config.pathname || '/';
 	config.level = config.level || 'http';
 	if (config.performCleanup === undefined) {
@@ -55,6 +56,7 @@ function BdBase(config, next) {
 	// express 3.x: app is not a server
 	this.app = express();
 	this.server = http.createServer(this.app);
+	this.server.setTimeout(config.timeout);
 
 	/*
 	 * Middleware -- applied to every verbs
