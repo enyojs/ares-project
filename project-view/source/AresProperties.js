@@ -110,6 +110,7 @@ enyo.kind({
 	},
 
 	confirmTap: function(inSender, inEvent) {
+		this.waterfallDown("onOK", inEvent, inSender);
 		this.hide();
 	}
 	
