@@ -531,11 +531,31 @@ Start the file server:
 
 You must Frist install the box.net sync app for this to work
 
-Just a quick simple way to get to Box.net using the local file system pointed to the Sync folder on your PC/Srever 
+Just a quick simple way to get to Box.net using the local hermes file system pointed to the Sync folder on your PC/Srever 
 
-Change the ----   \\Documents\\My Box Files\\Default Sync Folder\\       to match the path to match your folder 
 
-"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files\\Default Sync Folder\\"
+make a secound copie of the 
+
+		{
+			"active":true,
+			"id":"home",
+			"icon":"$harmonia/images/providers/home-32x32.png",
+			"name":"Home Directory",
+			"type": ["filesystem"],
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@"
+			],
+			"useJsonp":false,
+			"verbose": false,
+			"respawn": false
+		},
+	
+change the id  	"id":"home",    to "id":"box",
+
+change the icon  "icon":"$harmonia/images/providers/home-32x32.png",  to point to a new icon 
+
+change the ----		"@HOME@"    to match the path to match your folder  (works on windows) ----->  " @HOME@\\Documents\\My Box Files\\Default Sync Folder\\ "
 
 
 References:
