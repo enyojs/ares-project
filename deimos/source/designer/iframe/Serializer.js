@@ -74,8 +74,11 @@ enyo.kind({
 		var ps = this.buildPropList(inComponent, "published");
 		var proto = inComponent.ctor.prototype;
 		for (var j=0, p; (p=ps[j]); j++) {
-			if (this.isSerializable(inComponent.kind, p) && proto[p] != inComponent[p] && inComponent[p] !== "") {
+			var serializable = this.isSerializable(inComponent.kind, p);
+			if (serializable && proto[p] != inComponent[p] && inComponent[p] !== "") {
 				o[p] = inComponent[p];
+			} else if (serializable && p === "style" && inComponent.hasOwnProperty("xxx-kindStyle")) {
+				o[p] = inComponent['kindStyle'];	// TODO To remove - Temporary workaround for ENYO-3122
 			}
 		}
 		if (inIncludeAresId) {
