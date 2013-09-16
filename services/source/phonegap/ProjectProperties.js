@@ -304,11 +304,16 @@ enyo.kind({
 		initialiseDrawers.call(this, this.commonDrawers.concat(this.platformDrawers));
 	},
 
-	/** @public */
+	/** 
+	 * Called when the "Project Properties" Pop-up is opened.
+	 * 
+	 * @param {JSON} config contains the parametres & values of the provider "phonegap"
+	 * @public
+	 *
+	 */
 	setProjectConfig: function (config) {
 		this.trace("Project config:", config);
-
-		config.enabled = true;
+		this.setConfig(config);
 		this.$.appIdSelector.setSelectedAppId(config.appId || '');		
 		config.targets = config.targets || {};
 
@@ -325,7 +330,13 @@ enyo.kind({
 		this.refresh();
 	},
 
-	/** @public */
+	/** 
+	 * Called when the "Project Properties" Pop-up is saved.
+	 * 
+	 * @param {JSON} config contains the parametres & values of the provider "phonegap"
+	 * @public
+	 *
+	 */
 	getProjectConfig: function (config) {
 		config.access = {};
 		config.features = {};
@@ -358,7 +369,11 @@ enyo.kind({
 		this.trace("sender:", inSender, "value:", inValue);		
 		var provider = Phonegap.ProjectProperties.getProvider();		
 		this.showErrorMsg("waitingSignIn");
-		provider.authorize(enyo.bind(this, this.getUserData));
+
+		//Send the request to get the user data only if the Phonegap build service is enabled.
+		if (this.config && this.config.enabled) {
+			provider.authorize(enyo.bind(this, this.getUserData));
+		}		
 	},
 
 	/**
@@ -401,7 +416,6 @@ enyo.kind({
 	 * @protected
 	 */
 	getUserData: function (err, userData) {
-
 		if (err) {
 			//this.warn("err:", err);
 			this.showErrorMsg("signInError");
@@ -409,7 +423,7 @@ enyo.kind({
 		} else {			
 			this.showErrorMsg("userDataRecieved");
 			var provider = Phonegap.ProjectProperties.getProvider();
-									
+			//			
 			enyo.forEach(this.platformDrawers, function (target) {
 				this.$.appIdSelector.setUserData(userData);
 				var keys = provider.getKey(target.id);
@@ -502,7 +516,7 @@ enyo.kind({
 	},
 
 	setProjectConfig: function (config) {
-		
+		this.setConfig(config);
 		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
 			if (row === "client" || row === "animator") {
 				// nop;
@@ -512,7 +526,7 @@ enyo.kind({
 		}, this);
 	},
 
-	getProjectConfig: function (config) {		
+	getProjectConfig: function (config) {			
 		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {			
 			if (row === "client" || row === "animator") {
 				// nop;
