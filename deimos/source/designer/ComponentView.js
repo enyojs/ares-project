@@ -15,6 +15,9 @@ enyo.kind({
 		onItemDrop: "itemDrop",
 		onItemDragend: "itemDragend"
 	},
+	published: {
+		dragType: null
+	},
 	style: "position: relative;",
 	components: [
 		{kind: "Scroller", classes: "enyo-fit", components: [
@@ -85,7 +88,7 @@ enyo.kind({
 			createMode;
 
 		if (inEvent.dataTransfer.items) {
-			createMode = (inEvent.dataTransfer.items[0].type === "ares/createitem");
+			createMode = (this.getDragType() === "ares/createitem");
 		}
 
 		// In create mode, allow to drop even on the selected component.
@@ -184,9 +187,10 @@ enyo.kind({
 		return true;
 	},
 	getDropData: function(inEvent) {
-		var type = inEvent.dataTransfer.types[0],
-			data = enyo.json.codify.from(inEvent.dataTransfer.getData(type));
-		return {type: type, data: data};
+		var data = enyo.json.codify.from(inEvent.dataTransfer.getData("text")),
+			item = data.item,
+			type = data.type;
+		return {type: type, data: item};
 	},
 	completeDrop: function(inDropData, inTargetId, inBeforeId) {
 		switch (inDropData.type) {
@@ -273,6 +277,7 @@ enyo.kind({
 	},
 	resetDropDetails: function() {
 		this.dropDetails = null;
+		this.setDragType(null);
 	},
 	resetHoldoverTimeout: function() {
 		clearTimeout(this.holdoverTimeout);
@@ -355,18 +360,20 @@ enyo.kind({
 		dropTarget: "true"
 	},
 	components: [
-		{name: "label", attributes: {draggable: "true"}, comp: null, components: [
+		{name: "label", components: [
 			{name: "componentName", tag: "b", style: "pointer-events: none; line-height: 20px;"},
 			{name: "componentKind", tag: "span", allowHtml: true, style: "pointer-events: none; line-height: 20px;"}
 		]},
-		{name: "client"}
+		{name: "client", style: "position: relative;"},
+		{name: "dragTarget", attributes: {draggable: "true"}, comp: null, style: "background-color: white; position: absolute; opacity: 0.1;"}
 	],
 	rendered: function() {
 		this.inherited(arguments);
 		this.compChanged();
+		this.$.dragTarget.setBounds(this.$.label.getBounds());
 	},
 	compChanged: function() {
-		this.$.label.comp = this.getComp();
+		this.$.dragTarget.comp = this.getComp();
 		this.$.componentName.setContent(this.getComp().name);
 		this.$.componentKind.setContent("&nbsp;(<i>"+this.getComp().kind+"</i>)");
 	},
@@ -387,11 +394,18 @@ enyo.kind({
 			return true;
 		}
 		
+		var dragData = {
+			type: "ares/moveitem",
+			item: inEvent.originator.comp
+		};
+
 		// Set drag data
-		inEvent.dataTransfer.setData("ares/moveitem", enyo.json.codify.to(inEvent.originator.comp));
+		inEvent.dataTransfer.setData("text", enyo.json.codify.to(dragData));
 		
-		// Hide the drag image ghost
-		inEvent.dataTransfer.setDragImage(this.dragImage, 0, 0);
+		// Hide the drag image ghost on platforms where it exists
+		if (inEvent.dataTransfer.setDragImage) {
+			inEvent.dataTransfer.setDragImage(this.dragImage, 0, 0);
+		}
 
 		return true;
 	},

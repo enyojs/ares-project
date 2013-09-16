@@ -10,7 +10,7 @@ enyo.kind({
 		{name: "actionPopup", kind:"PaletteComponentActionPopup", centered: true, floating: true, autoDismiss: false, modal: true},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
-				{name: "palette", classes:"ares_deimos_left", kind: "Palette"},
+				{name: "palette", classes:"ares_deimos_left", kind: "Palette", ondragstart: "paletteDragStart"},
 				{name: "middle", fit: true, kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
 						{kind: "onyx.Button", name: "reloadDesignerButton", classes: "deimos-designer-toolbar-spacing", content: "Reload", ontap: "reloadDesigner"},
@@ -388,6 +388,12 @@ enyo.kind({
 		this.designerUpdate();
 
 		return true;
+	},
+	//* Send dragData type to Designer and Component View during ondragstart within Palette
+	paletteDragStart: function(inSender, inEvent) {
+		var dragType = enyo.json.codify.from(inEvent.dataTransfer.getData("text")).type;
+		this.$.designer.sendDragType(dragType);
+		this.$.componentView.setDragType(dragType);
 	},
 	//* Create item from palette (via drag-and-drop from Palette into Designer or Component View)
 	createItem: function(inSender, inEvent) {
@@ -852,7 +858,7 @@ enyo.kind({
 
 	// @protected
 	performCreateItem: function(config, target, beforeId){
-		if (beforeId) {
+		if (beforeId && (target.aresId !== beforeId)) {
 			this.insertItemBefore(config, target, beforeId);
 		} else {
 			this.insertItem(config, target);

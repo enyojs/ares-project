@@ -217,5 +217,8 @@ enyo.kind({
 	},
 	sendSerializerOptions: function(serializerOptions) {
 		this.sendMessage({op: "serializerOptions", val: serializerOptions});	
+	},
+	sendDragType: function(type) {
+		this.sendMessage({op: "dragStart", val: type});
 	}
 });

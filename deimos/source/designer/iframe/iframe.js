@@ -10,7 +10,8 @@ enyo.kind({
 		containerItem: null,
 		beforeItem: null,
 		currentDropTarget: null,
-		createPaletteItem: null
+		createPaletteItem: null,
+		dragType: null
 	},
 	components: [
 		{name: "client", classes:"enyo-fit"},
@@ -18,7 +19,6 @@ enyo.kind({
 		{name: "flightArea", classes: "enyo-fit", showing: false},
 		{name: "serializer", kind: "Ares.Serializer"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"},
-		{name: "selectHighlight", classes: "iframe-highlight iframe-select-highlight", showing: false},
 		{name: "dropHighlight", classes: "iframe-highlight iframe-drop-highlight"},
 		
 		//* Resize handles
@@ -52,6 +52,21 @@ enyo.kind({
 		enyo.load("$enyo/../source/package.js", enyo.bind(this, function() {
 			this.sendMessage({op: "state", val: "initialized"});
 		}));
+	},
+	initComponents: function() {
+		this.createSelectHighlight();
+		this.inherited(arguments);
+	},
+	createSelectHighlight: function() {
+		var components = [{name: "selectHighlight", classes: "iframe-highlight iframe-select-highlight", showing: false}];
+		// IE can only support pointer-events:none; for svg elements
+		if (enyo.platform.ie) {
+			// Using svg for IE only as it causes performance issues in Chrome
+			components[0].tag = "svg";
+			// Unable to retrive offset values for svg elements in IE, thus we're forced to create additional dom for resizeHandle calculations
+			components.push({name: "selectHighlightCopy", classes: "iframe-highlight", style: "z-index:-1;", showing: false});
+		}
+		this.createComponents(components);
 	},
 	//* Any core features of the framework that need to be overridden/diesabled happens here
 	adjustFrameworkFeatures: function() {
@@ -152,6 +167,9 @@ enyo.kind({
 			case "serializerOptions":
 				this.$.serializer.setSerializerOptions(msg.val);
 				break;
+			case "dragStart":
+				this.setDragType(msg.val);
+				break;
 			default:
 				enyo.warn("Deimos iframe received unknown message op:", msg);
 				break;
@@ -179,12 +197,18 @@ enyo.kind({
 			return false;
 		}
 		
+		var dragData = {
+			type: "ares/moveitem",
+			item: enyo.json.codify.from(this.$.serializer.serializeComponent(this.selection, true))
+		};
+
 		// Set drag data
-		e.dataTransfer.setData('ares/moveitem', this.$.serializer.serializeComponent(this.selection, true));
+		e.dataTransfer.setData("text", enyo.json.codify.to(dragData));
 
-		// Hide the drag image ghost
-		e.dataTransfer.setDragImage(this.dragImage, 0, 0);
-
+		// Hide the drag image ghost on platforms where it exists
+		if (e.dataTransfer.setDragImage) {
+			e.dataTransfer.setDragImage(this.dragImage, 0, 0);
+		}
         return true;
 	},
 	//* On drag over, enable HTML5 drag-and-drop if there is a valid drop target
@@ -200,7 +224,7 @@ enyo.kind({
 		this.dragoverHighlighting(inEvent);
 		
 		// Don't do holdover if item is being dragged in from the palette
-		if (inEvent.dataTransfer.types[0] === "ares/createitem") {
+		if (this.getDragType() === "ares/createitem") {
 			return true;
 		}
 		
@@ -260,8 +284,9 @@ enyo.kind({
 			return true;
 		}
 		
-		var dataType = inEvent.dataTransfer.types[0],
-			dropData = enyo.json.codify.from(inEvent.dataTransfer.getData(dataType)),
+		var dropData = enyo.json.codify.from(inEvent.dataTransfer.getData("text")),
+			dropItem = dropData.item,
+			dataType = dropData.type,
 			dropTargetId,
 			dropTarget = this.getEventDropTarget(inEvent.dispatchTarget),
 			beforeId
@@ -271,14 +296,14 @@ enyo.kind({
 			case "ares/moveitem":
 				dropTargetId = (dropTarget) ? dropTarget.aresId : this.selection.parent.aresId;
 				beforeId = this.selection.addBefore ? this.selection.addBefore.aresId : null;
-				this.sendMessage({op: "moveItem", val: {itemId: dropData.aresId, targetId: dropTargetId, beforeId: beforeId, layoutData: this.getLayoutData(inEvent)}});
+				this.sendMessage({op: "moveItem", val: {itemId: dropItem.aresId, targetId: dropTargetId, beforeId: beforeId, layoutData: this.getLayoutData(inEvent)}});
 				break;
 			
 			case "ares/createitem":
-				dropTargetId = this.getContainerItem() ? this.getContainerItem() : this.getEventDropTarget(inEvent.dispatchTarget);
+				dropTargetId = this.getContainerItem() ? this.getContainerItem() : dropTarget;
 				dropTargetId = (dropTargetId && dropTargetId.aresId) || null;
 				beforeId = this.getBeforeItem() ? this.getBeforeItem().aresId : null;
-				this.sendMessage({op: "createItem", val: {config: dropData.config, options: dropData.options, targetId: dropTargetId, beforeId: beforeId}});
+				this.sendMessage({op: "createItem", val: {config: dropData.item.config, options: dropData.item.options, targetId: dropTargetId, beforeId: beforeId}});
 				break;
 			
 			default:
@@ -288,6 +313,7 @@ enyo.kind({
 		
 		this.setContainerItem(null);
 		this.setBeforeItem(null);
+		this.setDragType(null);
 		
 		return true;
 	},
@@ -328,7 +354,7 @@ enyo.kind({
 		var dropTarget = this.getEventDropTarget(inEvent.dispatchTarget);
 		
 		// Deselect the currently selected item if we're creating a new item, so all items are droppable
-		if (inEvent.dataTransfer.types[0] == "ares/createitem") {
+		if (this.getDragType() === "ares/createitem") {
 			this.selection = null;
 			this.hideSelectHighlight();
 		}
@@ -648,8 +674,14 @@ enyo.kind({
 	},
 	renderSelectHighlight: function() {
 		if(this.selection && this.selection.hasNode()) {
-			this.$.selectHighlight.setBounds(this.selection.hasNode().getBoundingClientRect());
+			var b = this.selection.hasNode().getBoundingClientRect();
+			this.$.selectHighlight.setBounds(b);
 			this.$.selectHighlight.show();
+
+			if (this.$.selectHighlightCopy) {
+				this.$.selectHighlightCopy.setBounds(b);
+				this.$.selectHighlightCopy.show();
+			}
 			
 			// Resize handle rendering
 			this.hideAllResizeHandles();
@@ -663,6 +695,9 @@ enyo.kind({
 	},
 	hideSelectHighlight: function() {
 		this.$.selectHighlight.hide();
+		if (this.$.selectHighlightCopy) {
+			this.$.selectHighlightCopy.hide();
+		}
 		this.hideAllResizeHandles();
 	},
 	syncDropTargetHighlighting: function() {
@@ -1606,32 +1641,32 @@ enyo.kind({
 		return anchors;
 	},
 	showAllResizeHandles: function() {
-		var bounds = this.getRelativeBounds(this.$.selectHighlight);
+		var bounds = this.getRelativeBounds(this.$.selectHighlightCopy || this.$.selectHighlight);
 		this.showTopLeftResizeHandle(bounds);
 		this.showTopRightResizeHandle(bounds);
 		this.showBottomRightResizeHandle(bounds);
 		this.showBottomLeftResizeHandle(bounds);
 	},
 	showTopLeftResizeHandle: function(inBounds) {
-		inBounds = inBounds || this.getRelativeBounds(this.$.selectHighlight);
+		inBounds = inBounds || this.getRelativeBounds(this.$.selectHighlightCopy || this.$.selectHighlight);
 		this.$.topLeftResizeHandle.applyStyle("top", inBounds.top + "px");
 		this.$.topLeftResizeHandle.applyStyle("left", inBounds.left + "px");
 		this.$.topLeftResizeHandle.show();
 	},
 	showTopRightResizeHandle: function(inBounds) {
-		inBounds = inBounds || this.getRelativeBounds(this.$.selectHighlight);
+		inBounds = inBounds || this.getRelativeBounds(this.$.selectHighlightCopy || this.$.selectHighlight);
 		this.$.topRightResizeHandle.applyStyle("top", inBounds.top + "px");
 		this.$.topRightResizeHandle.applyStyle("right", inBounds.right + "px");
 		this.$.topRightResizeHandle.show();
 	},
 	showBottomRightResizeHandle: function(inBounds) {
-		inBounds = inBounds || this.getRelativeBounds(this.$.selectHighlight);
+		inBounds = inBounds || this.getRelativeBounds(this.$.selectHighlightCopy || this.$.selectHighlight);
 		this.$.bottomRightResizeHandle.applyStyle("bottom", inBounds.bottom + "px");
 		this.$.bottomRightResizeHandle.applyStyle("right", inBounds.right + "px");
 		this.$.bottomRightResizeHandle.show();
 	},
 	showBottomLeftResizeHandle: function(inBounds) {
-		inBounds = inBounds || this.getRelativeBounds(this.$.selectHighlight);
+		inBounds = inBounds || this.getRelativeBounds(this.$.selectHighlightCopy || this.$.selectHighlight);
 		this.$.bottomLeftResizeHandle.applyStyle("bottom", inBounds.bottom + "px");
 		this.$.bottomLeftResizeHandle.applyStyle("left", inBounds.left + "px");
 		this.$.bottomLeftResizeHandle.show();
