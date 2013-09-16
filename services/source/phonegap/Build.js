@@ -13,11 +13,7 @@ enyo.kind({
 	published: {
 		timeoutDuration: 3000	
 	},	
-	components: [
-		{kind: "Phonegap.BuildStatusUI",
-		 name: "buildStatusPopup"
-		}
-	],
+	
 	debug: false,
 	/**
 	 * @private
