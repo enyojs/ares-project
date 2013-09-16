@@ -274,7 +274,6 @@ enyo.kind({
 		var name = this.$.selectedFoldersPath.getValue();
 
 		if (!this.checkedPath(name)) {
-			this.hide() ;
 			this.doFileChosen();
 
 			return true;
@@ -343,7 +342,7 @@ enyo.kind({
 	},
 	/* @private */
 	checkedPath: function(path) {
-		var illegal = /[<>\\!?\$%&\*,]+/i;
+		var illegal = /[<>\\!?$%&*,]+/i;
 
 		if (path.match(illegal)) {
 			this.showErrorPopup(this.$LS("Path #{path} contains illegal characters", {path: path}));
