@@ -554,6 +554,7 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	var knownOpts = {
 		"root":		path,
 		"port":		Number,
+		"timeout":	Number,
 		"pathname":	String,
 		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 		"help":		Boolean
@@ -561,6 +562,7 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	var shortHands = {
 		"r": "--root",
 		"p": "--port",
+		"t": "--timeout",
 		"P": "--pathname",
 		"l": "--level",
 		"v": "--level verbose",
@@ -569,12 +571,14 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	argv.pathname = argv.pathname || "/files";
 	argv.port = argv.port || 0;
+	argv.timeout = argv.timeout || (2*60*1000);
 	argv.level = argv.level || "http";
 	if (argv.help) {
 		console.log("Usage: node " + basename + "\n" +
-			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)         [default: '0']\n" +
-			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                    [default: '/files']\n" +
-			    "  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error') [default: 'http']\n" +
+			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)                       [default: '0']\n" +
+			    "  -t, --timeout     milliseconds of inactivity before a server socket is presumed to have timed out [default: '120000']\n" +
+			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                                  [default: '/files']\n" +
+			    "  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')               [default: 'http']\n" +
 			    "  -h, --help        This message\n");
 		process.exit(0);
 	}
@@ -583,6 +587,7 @@ if (path.basename(process.argv[1], '.js') === basename) {
 		root: argv.root,
 		pathname: argv.pathname,
 		port: argv.port,
+		timeout: argv.timeout,
 		level: argv.level
 	}, function(err, service){
 		if (err) {
