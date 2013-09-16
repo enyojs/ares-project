@@ -401,7 +401,6 @@ enyo.kind({
 			this.$.propertiesWidget.preFill(config.data);
 			this.$.propertiesWidget.setTargetProject(target);
 			this.$.propertiesWidget.activateFileChoosers(true);
-			this.$.propertiesWidget.setDefaultTab();
 
 			var show = (function () {
 				this.show();
@@ -524,6 +523,7 @@ enyo.kind({
 	fileChoosersChecked: function (inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		this.show();
+		this.$.propertiesWidget.setDefaultTab();
 		return true;
 	}
 });
