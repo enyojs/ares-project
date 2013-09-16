@@ -500,20 +500,29 @@ enyo.kind({
 
 	/**
 	 * Collect & check information about current project, update config.xml
+	 * @param {Object} project
+	 * @param {Object} userData is passed by checkAppId() in waterfall
+	 * @param {Function} next is a CommonJS callback
 	 * @private
 	 */
 	_updateConfigXml: function(project, userData, next) {
-		
-		if (this.getConfigInstance(project).providers.phonegap.autoGenerateXML){
-			var config = this.getConfigInstance(project);
-
-			var req = project.getService().createFile(project.getFolderId(), "config.xml", this._generateConfigXml(config));
-			req.response(this, function _savedConfigXml(inSender, inData) {
-				this.trace("Phonegap.Build#_updateConfigXml()", "updated config.xml:", inData);	
+		var config = this.getConfigInstance(project);
+		if (config.providers.phonegap.autoGenerateXML) {
+			var configXml = this._generateConfigXml(config);
+			if (!configXml) {
+				this.error("unable to generate config.xml from:", config);	
 				next();
-			});
-			req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
+			} else {
+				var req, fs = project.getService();
+				req = fs.createFile(project.getFolderId(), "config.xml", configXml, { overwrite: true });
+				req.response(this, function _savedConfigXml(inSender, inData) {
+					this.trace("Phonegap.Build#_updateConfigXml()", "wrote config.xml:", inData);	
+					next();
+				});
+				req.error(this, this._handleServiceError.bind(this, "Unable to write config.xml", next));
+			}
 		} else {
+			this.trace("skipping config.xml generation");	
 			next();
 		}
 
@@ -666,8 +675,8 @@ enyo.kind({
 	_storePkg: function(project, folderId, inData, next) {
 		this.trace("data content.ctype: ", inData.ctype);	
 
-		var req = project.getService().createFiles(folderId, 
-			{content: inData.content, ctype: inData.ctype});
+		var req, fs = project.getService();
+		req = fs.createFiles(folderId, {content: inData.content, ctype: inData.ctype}, { overwrite: true });
 
 		req.response(this, function(inSender, inData) {
 			this.trace("response:", inData);
@@ -849,8 +858,7 @@ enyo.kind({
 					//inData is a multipart/form containing the
 					//built application
 					function(inData, next){
-						builder._storePkg(project, folderId, 
-						inData, next);
+						builder._storePkg(project, folderId, inData, next);
 					}
 				], next);
 			}
@@ -945,6 +953,31 @@ enyo.kind({
 			xw.writeEndElement();
 		};
 
+		/**
+		 * Create an XML row in the file config.xml, this row describe a depence to 
+		 * a hosted plugin, and may also contain sub-elements that contain a name and a value
+		 * of a parameter for the plugin.
+		 * 
+		 * @param  {Object} pluginList contains the plugins object defined in "project.json".
+		 * 
+		 */
+		var createPluginXMLRow = function (plugin) {
+			xw.writeStartElement('gap:plugin');
+				xw.writeAttributeString('name', plugin.name);
+				xw.writeAttributeString('version', plugin.version);
+				enyo.forEach(plugin.parameters && enyo.keys(plugin.parameters), function(parameter) {
+					xw.writeStartElement("param");
+						xw.writeAttributeString('name', plugin.parameters[parameter].name);
+						xw.writeAttributeString('value', plugin.parameters[parameter].value);
+					xw.writeEndElement();
+				}, this);	
+					
+
+				xw.writeEndElement();
+		};
+
+
+
 		// See http://flesler.blogspot.fr/2008/03/xmlwriter-for-javascript.html
 
 		var str, xw = new XMLWriter('UTF-8');
@@ -995,21 +1028,6 @@ enyo.kind({
 			xw.writeEndElement();	// gap:platforms
 		}
 
-		// plugins
-		if (typeof phonegap.plugins === 'object') {
-			for (var pluginName in phonegap.plugins) {
-				xw.writeStartElement('plugin', 'gap');
-				xw.writeAttributeString('name', pluginName);
-				var plugin = phonegap.plugins[pluginName];
-				if (typeof plugin === 'object') {
-					for (var attr in plugin) {
-						xw.writeAttributeString(attr, plugin[attr]);
-					}
-				}
-				xw.writeEndElement(); // gap:plugin
-			}
-		}
-
 		xw.writeComment("Features");
 
 		var featureUrl = "http://api.phonegap.com/1.0/";
@@ -1054,6 +1072,11 @@ enyo.kind({
 			xw.writeAttributeString('value', phonegap.preferences[preference]);
 			xw.writeEndElement(); // preference			
 	
+		}, this);
+
+		xw.writeComment("Plugins");		
+		enyo.forEach(phonegap.plugins && enyo.keys(phonegap.plugins), function(pluginName) {
+			createPluginXMLRow.call(self, phonegap.plugins[pluginName]);		
 		}, this);
 
 		xw.writeComment("Define app icon for each platform");

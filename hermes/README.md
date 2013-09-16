@@ -2,11 +2,11 @@
 
 Hermes offers several services not available in a Web Browser through one (or several) Node.js processes:
 
-* [File-system services](#filesystem-services) (Local, [Dropbox](#dropbox-filesystem-service))
+* [Filesystem services](#filesystem-services) ([Local](#local-filesystem-service), [Dropbox](#dropbox-filesystem-service))
 * [Project templates services](#project-template-services)
 * [Build Services](#build-services) ([PhoneGap Build](#phonegap-build-service), …)
 
-## [Security](id:security)
+## Security
 
 ### Authentication
 
@@ -30,9 +30,9 @@ A user can be authentified in a Phonegap account in two possible ways :
 In order to run the Phonegap build service from Ares, the authentication must be done with the Adobe ID.  So if the user has registered on the Phonegap account using Github account, these steps must be followed:
  
 1. Click on the upper right profile icon and select *Edit account*
-1. In the tab *Account details* click on *Connect an Adobe ID*
-1. If you have already an Adobe account, just use it to sign in otherwise, Click on the button *Create Adobe ID* to register for a new Adobe account.
-1. Now you can use the Adobe ID to connect to the Phonegap account in Ares.
+2. In the tab *Account details* click on *Connect an Adobe ID*
+3. If you have already an Adobe account, just use it to sign in otherwise, Click on the button *Create Adobe ID* to register for a new Adobe account.
+4. Now you can use the Adobe ID to connect to the Phonegap account in Ares.
 
 **NOTE**:
  
@@ -40,8 +40,8 @@ In order to run the Phonegap build service from Ares, the authentication must be
 - A user can unlink his Phonegap account from the Github account by following these steps: 
 
 	1. The user must be authenticated in Github
-	1. Open this page https://github.com/settings/applications 
-	1. In the section *Authorized applications* click on *Revoke* button of the row *Phonegap:Build*.
+	2. Open this page https://github.com/settings/applications 
+	3. In the section *Authorized applications* click on *Revoke* button of the row *Phonegap:Build*.
 
 ## Filesystem services
 
@@ -96,7 +96,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		    "versionTag": "af34ef45",
 		}
 
-* `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded).  It returns a JSON-encoded single-level (depth=0) node descriptor of the new folder.
+* `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded).  When the `overwrite` parameter is explicitly set to `"false"` (as a string), `MKCOL` may fails with an HTTP status code `412/Resource Already Exists`. It returns a JSON-encoded single-level (depth=0) node descriptor of the new folder.
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
 
@@ -108,7 +108,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
     Other encoding may be added later on.
 
 	
-* `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.
+* `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.  When the `overwrite` parameter is explicitly set to `"false"` (as a string), `PUT` may fails with an HTTP status code `412/Resource Already Exists`.
   * `application/x-www-form-urlencoded` contains a single base64-encoded file in the form field named `content`.  The file name and location are provided by `{id}` and optionally `name` query parameter.
   * `multipart/form-data` follows the standard format.  For each file `filename` is interpreted relativelly to the folder `{id}` provided in the URL.  **Note:** To accomodate an issue with old Firefox releases (eg. Firefox 10), fields labelled `filename` overwrite the `filename` in their corresponding `file` fields.  See `fsBase#_putMultipart()` for more details.
 
@@ -117,7 +117,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2Ftata?_method=DELETE"
 
-* `COPY` reccursively copies a resource as a new `name` or `folderId` provided in the query string (one of them is required, only one is taken into account, `name` takes precedence if both are provided in the query-string).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not.  The method returns the node descriptor (as `PROPFIND` would return) of the new resource.
+* `COPY` reccursively copies a resource as a new `name` or `folderId` provided in the query string (one of them is required, only one is taken into account, `name` takes precedence if both are provided in the query-string).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not (default value: `"true"`).  The method returns the node descriptor (as `PROPFIND` would return) of the new resource.
   * `201/Created` success, a new resource is created
   * `200/Ok` success, an existing resource was successfully overwritten (query parameter `overwrite` was set to `true`)
   * `412/Precondition-Failed` failure, not allowed to copy onto an exising resource
@@ -156,7 +156,7 @@ To stop on the first failing case:
 
 For more detailled instructions, refer to the [Mocha home page](http://visionmedia.github.com/mocha/).
 
-### [Local](id:local-filesystem-service)
+### Local Filesystem Service
 
 The `fsLocal` service is simply serves your local machine's filesystem to the browser, which has otherwise no access outside the web sandbox (or exclusivelly via direct user interaction).
 
@@ -171,7 +171,7 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Me
 	],
 	[...]
 
-### [Dropbox](id:dropbox-filesystem-service)
+### Dropbox Filesystem Service
 
 Ares comes with an Hermes service using your Dropbox account as a storage service.    Enable this service in the `ide.json` before starting the IDE server:
 
@@ -192,6 +192,7 @@ Ares comes with an Hermes service using your Dropbox account as a storage servic
 			"appSecret": ""
 		}
 	[…]
+	}
 
 You need to replace the appKey and appSecret entries with the proper values from your Dropbox application entry for Ares(see below).
 
@@ -218,7 +219,7 @@ Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to th
 			},
 			[…]
 
-## [Project template service](id:project-template-services)
+## Project template services
 
 The service **genZip** allows to intanciate new Ares project from project templates such as [Enyo Bootplate](https://github.com/enyojs/enyo/wiki/Bootplate) or any customer specific project templates.
 
@@ -227,9 +228,9 @@ These project templates can be defined in:
 * `ide.json` located in the `ares-project` installation directory
 * `ide-plugin.json` located in _each_ Ares plugin installation directory
 
-See [Project template configuration](#project-template-config) and [Merging Ares plugin configuration](../README.md#merging-configuration) for more information.
+See [Project template configuration](#project-template-configuration) and [Merging Ares plugin configuration](../README.md#merging-configuration) for more information.
 
-### [Project template configuration](id:project-template-config)
+### Project template configuration
 
 The property `sources:` of the service **genZip** lists the template definitions that are available at project creation time.  It is defined in the `ide.json` of ares-project.
 
@@ -249,14 +250,17 @@ The property `sources:` of the service **genZip** lists the template definitions
 				}
 			]
 		}, 
-
+	    [...]
+	]
+	
 Ares plugins can add or modify this list of templates, from their own `ide-plugin.json`.
 
 	{
 		"id": "genZip",
 			"sources": [
 				{
-					"id": "bootplate"
+					"id": "bootplate",
+					"type": "null"
 				},
 				{
 					"id": "bootplate-nightly",
@@ -278,66 +282,6 @@ Ares plugins can add or modify this list of templates, from their own `ide-plugi
 
 In the example above, `{ "id": "bootplate" }` will remove the entry defined in the main `ide.json` and `{ "id": "bootplate-nightly" ... } will add a new template.
 
-### [Project template definition](id:project-template-definition)
-
-A project template definition (defined by the property `url` in `projectTemplateRepositories` must respect the json schema [com.enyojs.ares.project.templates.schema.json](../assets/schema/com.enyojs.ares.project.templates.schema.json).
-
-**NOTE:** Ares does not (yet) enforce JSON-schema compliance.  Plugin developers can check their own `ide-plugin.json` via [http://jsonschemalint.com/](http://jsonschemalint.com/).
-
-	[
-	  {
-	    "id": "my-bootplate-2.2.0",
-	    "zipfiles": [
-	      {
-	        "url": "bootplate-2.2.0.zip",
-	        "alternateUrl": "http://enyojs.com/archive/bootplate-2.2.0.zip",
-	        "prefixToRemove": "bootplate",
-	        "prefixToAdd": "2.2.0",
-	        "excluded": [
-	          "bootplate/api"
-	        ]
-	      },
-	   	  {
-	   	  	"url": ...
-	   	  }
-	    ],
-	    "files": [
-	      {
-	      	url: "lib/package.js.js",
-	      	installAs: "source/widgets/package.js"
-	      },
-	      {
-	      	url: "lib/MyWidget.js",
-	      	installAs: "source/widgets/MyWidget.js"
-	      }
-	    ],
-	    "description": "Enyo bootplate 2.2.0"
-	  },
-	  {
-	  	"id": ...
-	  }
-	]
-
-Each project definition defined by `id` can reference one or several zip files defined in the array `zipfiles`, plus one or several files. The zip files are extracted in the order they are specified:  files extracted from a ZIP-file possibly overwrite those that were extracted from earlier ZIP-files.
-
-Each `zipfiles` entry is an `Object` which:
-
-* _MUST_ define an `url` and optionally an `alternateUrl`. The `url` is tried first and can refer to either:
-
-	* a `Filename`: file stored locally on the filesystem (see below).
-	* an HTTP URL.  If the `url` references a file which does not exist the `alternateUrl` is used.
-
-* _MAY_ define a `prefixToRemove`. This prefix must correspond to one or several directory level that must be removed.
-* _MAY_ define a `prefixToAdd`. This prefix defines a folder (it can be a path of nested folders, like `another/path/to`) to be prepended to the root of the ZIP archive 
-* _MAY_ define in the array `excluded` a list of files or directories to be excluded when the zip file is extracted.
-
-Each `files` entry is an `Object` which:
-
-* _MUST_ define an `url:` property, which is currently a `Filename` value
-* _MUST_ define an `installAs:` property that defines where the file is to be installed relatively to the root of the application project within Ares.
-
-**NOTE:** `Filename` values are to be relative to the directory where the project templates definition file is stored (See property `url` in `projectTemplateRepositories` above).
-
 ### Protocol
 
 
@@ -357,7 +301,7 @@ The default `<pathname>` value is `/genzip`.  Its value can be changed using the
 		* It's up to the caller to extract and base64 decode the files to create a new project.  
 		In Ares, this is achieved by forwarding the FormData to Hermes filesystem service via a PUT method.
 
-## [Build services](id:build-services)
+## Build services
 
 ### Ares IDE - Javascript API
 
@@ -394,8 +338,7 @@ The following resources
 			* `text/plain` build has failed (see HTTP response code) or is asynchronous
 			* `multipart/form-data` generated application package is the first returned part of the multipart response
 			
-
-### [Archive build service](id:archive-build-service)
+### Archive build service
 
 This is the `arZip.js` service.  It takes 2 arguments:
 
@@ -426,7 +369,7 @@ The generated file is expected to look like to below:
 	 --------                   -------
 	     4068                   2 files
 
-### [PhoneGap build service](id:phonegap-build-service)
+### PhoneGap build service
 
 
 Ares includes the ability to package a mobile Enyo application using [PhoneGap Build](https://build.phonegap.com/).  You must have a properly setup account (with signing keys & distribution certificates) before being able to use Ares to build applications using PhoneGap Build.
@@ -444,9 +387,26 @@ The Ares PhoneGap build service does not need any configuration but the HTTP/HTT
 			"verbose": false,
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
 			"auth": {
+			    [...]
+			}
 ```
 
 **NOTE:** Ares does not currently work behind a password-protected proxy.  Should you need this feature, please report it via JIRA or on our user's forum.
+
+#### PhoneGap Build Plugins
+
+Ares does not have yet a UI to define which external plugins are to be included in the built application. However there is a workaround to integrate external plugins by editing the file `config.xml`  associated with the project:  Select _Project_ > _Edit_ > _PhoneGap Build_ > _Build Options_ and uncheck the box _Generate config.xml file when building.
+
+Here is an exemple of external plugin definition: 
+
+```xml
+	<gap:plugin name="com.phonegap.plugins.example">
+	    <param name="APIKey" value="12345678" />
+	    <param name="APISecret" value="12345678" />
+	</gap:plugin>
+```
+
+**References:** Here are the online PhoneGap Build documentation on [How to use plugins from your application](https://build.phonegap.com/docs/plugins-using) and [the list of available PhoneGap Build plugins & their respective description](https://build.phonegap.com/plugins).
 
 #### Implementation
 

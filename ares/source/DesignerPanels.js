@@ -39,6 +39,9 @@ enyo.kind({
 			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
 				{kind: "onyx.IconButton", src: "../project-view/assets/images/project_view_preview.png", ontap: "doSavePreviewAction"},
 				{kind: "onyx.Tooltip", name:"previewTooltip", content: "Preview"}
+			]},
+			{classes:"ares-logo-container", components:[
+				{name:"logo", kind:"Ares.Logo"}
 			]}
 		]},
 		{
@@ -61,7 +64,7 @@ enyo.kind({
 					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
 				]},
 				{components: [
-					{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
+					{kind: "Deimos", onCloseDesigner: "closeDesigner"}
 				]}
 			]
 		},
@@ -77,7 +80,7 @@ enyo.kind({
 	},
 	create: function() {
 		this.inherited(arguments);
-		this.doRegisterMe({name:"codeEditor", reference:this});
+		this.doRegisterMe({name:"designerPanels", reference:this});
 	},
 	activePanel : function(){
 		this.doMovePanel({panelIndex:this.panelIndex});
@@ -132,7 +135,15 @@ enyo.kind({
 	},
 	addPreviewTooltip: function(message){
 		this.$.previewTooltip.setContent(message);
-	}	
+	},
+	updateDeimosLabel: function(edited) {
+		if (edited) {
+			this.$.docLabel.setContent("Deimos *");
+		} else {
+			this.$.docLabel.setContent("Deimos");
+		}
+		this.$.toolbar.resized();
+	},	
 });
 
 /**
