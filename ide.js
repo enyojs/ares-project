@@ -237,12 +237,12 @@ function appendPluginConfig(configFile) {
 	var pluginDir = path.dirname(configFile);
 	log.verbose('appendPluginConfig()', 'pluginDir:', pluginDir);
 
-	var pluginData,
-	    configContent = fs.readFileSync(configFile, 'utf8');
+	var pluginData, configContent;
 	try {
+		configContent = fs.readFileSync(configFile, 'utf8');
 		pluginData = JSON.parse(configContent);
 	} catch(e) {
-		throw "Improper JSON in " + configFile + " : "+configContent;
+		throw new Error("Unable to load or JSON-parse '" + configFile + "' (" + e.toString() + ")");
 	}
 	
 	// The service in the plugin configuration file that is both
