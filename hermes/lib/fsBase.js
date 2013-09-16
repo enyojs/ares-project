@@ -5,6 +5,7 @@
 
 var fs = require("fs"),
     path = require("path"),
+    util = require("util"),
     express = require("express"),
     http = require("http"),
     tunnel = require("tunnel"),
@@ -50,56 +51,41 @@ function FsBase(inConfig, next) {
 	this.app = express();
 	this.server = http.createServer(this.app);
 
-	this.app.configure((function() {
-		this.app.use(this.separator.bind(this));
-		if (this.level !== 'error' && this.level !== 'warning') {
-			this.app.use(express.logger('dev'));
-		}
+	this.app.use(this.separator.bind(this));
+	if (this.level !== 'error' && this.level !== 'warning') {
+		this.app.use(express.logger('dev'));
+	}
 
-		/*
-		 * Error Handling - Wrap exceptions in delayed handlers
-		 */
-		this.app.use(function(req, res, next) {
-			var domain = createDomain();
+	/*
+	 * Error Handling - Wrap exceptions in delayed handlers
+	 */
+	this.app.use(function(req, res, next) {
+		var domain = createDomain();
 
-			domain.on('error', function(err) {
-				next(err);
-				domain.dispose();
-			});
-
-			domain.enter();
-			next();
+		domain.on('error', function(err) {
+			setImmediate(next, err);
+			domain.dispose();
 		});
 
-		this.app.use(this.cors.bind(this));
-		this.app.use(express.cookieParser());
-		this.app.use(this.pathname, this.authorize.bind(this));
-		this.app.use(express.methodOverride());
+		domain.enter();
+		setImmediate(next);
+	});
 
-		this.app.use(this.dump.bind(this));
+	this.app.use(this.cors.bind(this));
+	this.app.use(express.cookieParser());
+	this.app.use(this.pathname, this.authorize.bind(this));
+	this.app.use(express.methodOverride());
+	this.app.use(this.dump.bind(this));
 
-		// Built-in express form parser: handles:
-		// - 'application/json' => req.body
-		// - 'application/x-www-form-urlencoded' => req.body
-		// - 'multipart/form-data' => req.body.field[] & req.body.file[]
-		var uploadDir = temp.path({prefix: 'com.palm.ares.services.fs.' + this.name}) + '.d';
-		this.log("uploadDir:", uploadDir);
-		fs.mkdirSync(uploadDir);
-		this.app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
-
-		/**
-		 * Global error handler (last plumbed middleware)
-		 * @private
-		 */
-		function errorHandler(err, req, res, next){
-			console.error(err.stack);
-			this.respond(res, err);
-		}
-
-		// express-3.x: middleware with arity === 4 is
-		// detected as the error handler
-		this.app.use(errorHandler.bind(this));
-	}).bind(this));
+	// Built-in express form parser: handles:
+	// - 'application/json' => req.body
+	// - 'application/x-www-form-urlencoded' => req.body
+	// - 'multipart/form-data' => req.body.field[] & req.body.file[]
+	var uploadDir = temp.path({prefix: 'com.palm.ares.services.fs.' + this.name}) + '.d';
+	this.log("uploadDir:", uploadDir);
+	fs.mkdirSync(uploadDir);
+	this.app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
+	this.app.use(this.dump.bind(this));
 
 	// outbound http/https traffic
 
@@ -205,6 +191,20 @@ function FsBase(inConfig, next) {
 	}
 
 	//this.log("routes:", this.app.routes);
+
+	/**
+	 * Global error handler (last plumbed middleware)
+	 * @private
+	 */
+	function errorHandler(err, req, res, next){
+		console.error(err.stack);
+		this.respond(res, err);
+	}
+
+	// express-3.x: middleware with arity === 4 is detected as the
+	// error handler.  It also needs to be the last stuff hooked
+	// to the routing table.
+	this.app.use(errorHandler.bind(this));
 
 	// Send back the service location information (origin,
 	// protocol, host, port, pathname) to the creator, when port
