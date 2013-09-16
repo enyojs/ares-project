@@ -250,7 +250,11 @@ enyo.kind({
 		{name: "border-top-color", input:"color"},
 		{name: "border-right-color", input:"color"},
 		{name: "border-left-color", input:"color"},
-		{name: "border-bottom-color", input:"color"}		
+		{name: "border-bottom-color", input:"color"},
+		{name: "padding-top", input: "picker"},
+		{name: "padding-left", input: "picker"},
+		{name: "padding-right", input: "picker"},
+		{name: "padding-bottom", input: "picker"}		
 		
 	]
 	
