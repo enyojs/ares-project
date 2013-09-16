@@ -536,7 +536,8 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 		}
 	}
 
-	this.log("FsBase.putMultipart(): files", files);
+	this.log("FsBase.putMultipart(): files.length:", files.length);
+	this.log("FsBase.putMultipart(): files:", files.map(function(file) { return file.name; }) /*FIXME: too slow*/);
 
 	var nodes = [];
 	async.forEachSeries(files, (function(file, next) {
@@ -558,29 +559,8 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 			}
 			setImmediate(next);
 		};
+		this.putFile(req, file, putCallback.bind(this));
 
-		if (file.type.match(/x-encoding=base64/)) {
-			fs.readFile(file.path, function(err, data) {
-				if (err) {
-					console.log("transcoding: error" + file.path, err);
-					cb(err);
-					return;
-				}
-				try {
-					var fpath = file.path;
-					delete file.path;
-					fs.unlink(fpath, function(err) { /* Nothing to do */ });
-					file.buffer = new Buffer(data.toString('ascii'), 'base64');			// TODO: This works but I don't like it
-
-					this.putFile(req, file, putCallback.bind(this));
-				} catch(transcodeError) {
-					console.log("transcoding error: " + file.path, transcodeError);
-					cb(transcodeError);
-				}
-			}.bind(this));
-		} else {
-			this.putFile(req, file, putCallback.bind(this));
-		}
 	}).bind(this), (function(err){
 		this.log("FsBase.putMultipart(): nodes:", nodes);
 		setImmediate(next, err, {
