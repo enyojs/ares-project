@@ -55,7 +55,8 @@ enyo.kind({
 
 		while (expVer.length) {
 			if (myVer.shift() < expVer.shift()) {
-				errMsg = "Enyo used by your application is too old. Console log will show duplicated kind error "
+				errMsg = "Enyo used by your application is too old ("
+					+ myVerStr + "). Console log will show duplicated kind error "
 					+ "and Designer may not work as expected. You should use Enyo >= 2.3.0.pre.5" ;
 				enyo.warn(errMsg);
 				this.sendMessage({op: "error", val: {msg: errMsg }});
