@@ -23,7 +23,6 @@ var fs = require("fs"),
 var basename = path.basename(__filename, '.js');
 
 log.heading = basename;
-log.level = 'http';
 
 var PGB_URL = 'https://build.phonegap.com',
     PGB_TIMEOUT = 7000;
@@ -470,7 +469,6 @@ if (path.basename(process.argv[1], '.js') === basename) {
 		pathname: argv.pathname,
 		port: argv.port,
 		basename: basename,
-		level: log.level,
 		enyoDir: path.resolve(__dirname, '..', 'enyo')
 	}, function(err, service){
 		if(err) {

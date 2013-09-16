@@ -383,6 +383,7 @@ FsBase.prototype.parseProxy = function(config) {
 FsBase.prototype.dump = function(req, res, next) {
 	//this.log("FsBase.dump(): req.keys=", Object.keys(req));
 	this.log("FsBase.dump(): req.method=", req.method);
+	this.log("FsBase.dump(): req.headers=", req.headers);
 	this.log("FsBase.dump(): req.url=", req.url);
 	this.log("FsBase.dump(): req.query=", req.query);
 	this.log("FsBase.dump(): req.cookies=", req.cookies);
@@ -500,11 +501,11 @@ FsBase.prototype._putWebForm = function(req, res, next) {
  */
 FsBase.prototype._putMultipart = function(req, res, next) {
 	var pathParam = req.param('path');
-	this.log("FsBase.putMultipart(): req.files:", req.files);
-	this.log("FsBase.putMultipart(): req.body:", req.body);
-	this.log("FsBase.putMultipart(): pathParam:", pathParam);
+	this.log("FsBase#_putMultipart(): req.files.length:", req.files.length);
+	this.log("FsBase#_putMultipart(): req.body:", req.body);
+	this.log("FsBase#_putMultipart(): pathParam:", pathParam);
 	if (!req.files.file) {
-		next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
+		setImmediate(next, new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
 		return;
 	}
 	var files = [];
