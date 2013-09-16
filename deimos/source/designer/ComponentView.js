@@ -83,6 +83,7 @@ enyo.kind({
 			dropDetails,
 			dropTarget,
 			dropTargetId,
+			beforeTarget,
 			beforeItem,
 			beforeId = null,
 			createMode;
@@ -130,7 +131,8 @@ enyo.kind({
 			this.createDropPlaceholder(dropTarget, dropDetails.pos);
 			// TODO - owner should always have a getAresId() function - currently fails if owner is the app.
 			dropTargetId = dropTarget.owner.getAresId ? dropTarget.owner.getAresId() : null;
-			beforeItem = this.findControlBeforeTarget(dropTarget, dropDetails.pos).comp;
+			beforeTarget = this.findControlBeforeTarget(dropTarget, dropDetails.pos);
+			beforeItem = beforeTarget ? beforeTarget.comp : null;
 			beforeId = beforeItem ? beforeItem.aresId : null;
 		}
 		
