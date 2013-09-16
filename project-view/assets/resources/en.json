@@ -24,7 +24,7 @@
 	"support@example.com": "support@example.com",
 	"Template:": "Template:",
 	"Title: ": "Title: ",
-	"top file of your application. Typically index.html": "top file of your application. Typically index.html",
+	"top file of your application. Typically '/index.html', but per default '/debug.html' for debug mode.": "top file of your application. Typically '/index.html', but per default '/debug.html' for debug mode.",
 	"Top application file: ": "Top application file: ", 
 	"unknown error": "unknown error",
 	"Unable to create projet content from the template": "Unable to create projet content from the template",

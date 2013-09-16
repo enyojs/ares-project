@@ -111,8 +111,8 @@ enyo.kind({
 					{kind: "ProjectProperties.PathInputRow", 
 						name: "topFileRow", 
 						label: $L("Top application file: "), 
-						inputTip: $L("top file of your application. Typically index.html"), 
-						buttonTip: $L("select file...")}					
+						inputTip: $L("top file of your application. Typically '/index.html', but per default '/debug.html' for debug mode."), 
+						buttonTip: $L("select file...")}
 				]}
 			]}
 		]},
