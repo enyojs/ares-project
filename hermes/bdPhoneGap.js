@@ -47,7 +47,9 @@ function BdPhoneGap(config, next) {
 util.inherits(BdPhoneGap, BdBase);
 
 BdPhoneGap.prototype.use = function() {
-	log.verbose('BdPhoneGap#use()', "configuring..."); 
+	BdBase.prototype.use.call(this);
+
+	log.verbose('BdPhoneGap#use()'); 
 	this.app.use(express.cookieParser());
 
 	this.app.use(this.makeExpressRoute('/op'), authorize.bind(this));
@@ -68,7 +70,9 @@ BdPhoneGap.prototype.use = function() {
 };
 
 BdPhoneGap.prototype.route = function() {
-	log.verbose('BdPhoneGap#route()', "configuring..."); 
+	BdBase.prototype.route.call(this);
+
+	log.verbose('BdPhoneGap#route()'); 
 	// '/token' & '/api' -- Wrapped public Phonegap API
 	this.app.post(this.makeExpressRoute('/token'), this.getToken.bind(this));
 	this.app.get(this.makeExpressRoute('/api/v1/me'), this.getUserData.bind(this));
@@ -317,10 +321,10 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		this.zip.bind(this, req, res),
 		_upload.bind(this),
 		this.returnBody.bind(this, req, res),
-		this.cleanup.bind(this, req, res)
+		this.cleanSession.bind(this, req, res)
 	], function (err) {
 		if (err) {
-			// run express's next() : the errorHandler (which calls cleanup)
+			// run express's next() : the errorHandler (which calls cleanSession)
 			setImmediate(next, err);
 		}
 		// we do not invoke error-less next() here
