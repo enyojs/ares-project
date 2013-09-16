@@ -165,7 +165,8 @@ enyo.kind({
 		{name: "Helvetica ", input: "font"},
 		{name: "Monospace", input: "font"},
 		{name: "Lucida Sans Unicode", input:"font"},
-		{name: "text-align", input:"lrc"}
+		{name: "text-align", input:"lrc"},
+		{name: "text-indent", input:"picker"}
 	]
 	
 });
@@ -250,12 +251,11 @@ enyo.kind({
 		{name: "border-top-color", input:"color"},
 		{name: "border-right-color", input:"color"},
 		{name: "border-left-color", input:"color"},
-		{name: "border-bottom-color", input:"color"},
+		{name: "border-bottom-color", input:"color"},		
 		{name: "padding-top", input: "picker"},
 		{name: "padding-left", input: "picker"},
 		{name: "padding-right", input: "picker"},
-		{name: "padding-bottom", input: "picker"}		
-		
+		{name: "padding-bottom", input: "picker"}
 	]
 	
 });
