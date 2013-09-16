@@ -34,6 +34,7 @@ function GenZip(config, next) {
 	var app, server;
 	app = express();
 	server = http.createServer(app);
+	server.setTimeout(config.timeout || (2*60*1000));
 
 	/*
 	 * Middleware -- applied to every verbs
@@ -282,12 +283,14 @@ if (path.basename(process.argv[1], '.js') === basename) {
 
 	var knownOpts = {
 		"port":		Number,
+		"timeout":	Number,
 		"pathname":	String,
 		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 		"help":		Boolean
 	};
 	var shortHands = {
 		"p": "port",
+		"t": "timeout",
 		"P": "pathname",
 		"l": "--level",
 		"v": "--level verbose",
@@ -299,9 +302,10 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	argv.level = argv.level || "http";
 	if (argv.help) {
 		console.log("Usage: node " + basename + "\n" +
-			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)         [default: '0']\n" +
-			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                    [default: '/genZip']\n" +
-			    "  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error') [default: 'http']\n" +
+			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)                       [default: '0']\n" +
+			    "  -t, --timeout     milliseconds of inactivity before a server socket is presumed to have timed out [default: '120000']\n" +
+			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                                  [default: '/genZip']\n" +
+			    "  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')               [default: 'http']\n" +
 			    "  -h, --help        This message\n");
 		process.exit(0);
 	}
@@ -311,6 +315,7 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	new GenZip({
 		pathname: argv.pathname,
 		port: argv.port,
+		timeout: argv.timeout,
 		level: argv.level
 	}, function(err, service){
 		if(err) {
