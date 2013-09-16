@@ -41,7 +41,7 @@ function FsBase(inConfig, next) {
 	].forEach((function(method) {
 		if ((typeof(this[method]) !== 'function') ||
 		    (this[method].length !== 3)) {
-			next(new Error("BUG: method '" + method + "' is not a 3-parameters function"));
+			setImmediate(next, new Error("BUG: method '" + method + "' is not a 3-parameters function"));
 			return;
 		}
 	}).bind(this));
@@ -147,9 +147,10 @@ function FsBase(inConfig, next) {
 	this.app.all(this.route2, [_parseIdUrl.bind(this)], _handle.bind(this));
 
 	function _parseIdUrl(req, res, next) {
+		this.log("parsing file id:", req.params.id);
 		req.params.id = req.params.id || this.encodeFileId('/');
 		req.params.path = this.decodeFileId(req.params.id);
-		next();
+		setImmediate(next);
 	}
 
 	// URL-scheme: WebDAV-like navigation, used by the Enyo loader
@@ -158,9 +159,10 @@ function FsBase(inConfig, next) {
 	this.route3 = makeExpressRoute.bind(this)('/file/*');
 
 	function _parseFileUrl(req, res, next) {
+		this.log("parsing file path:", req.params[0]);
 		req.params.path = req.params[0];
 		req.params.id = this.encodeFileId(req.params.path);
-		next();
+		setImmediate(next);
 	}
 
 	var overlays = {
@@ -179,17 +181,17 @@ function FsBase(inConfig, next) {
 			var filePath = path.join(overlayDir, path.basename(req.params.path));
 			fs.stat(filePath, (function(err, stats) {
 				if (err) {
-					next(err);
+					setImmediate(next, err);
 				} else if (stats.isFile()) {
 					this.log("_designer()", "found overlay file:", filePath);
 					res.status(200);
 					res.sendfile(filePath);
 				} else {
-					next();
+					setImmediate(next);
 				}
 			}).bind(this));
 		} else {
-			next();
+			setImmediate(next);
 		}
 	}
 	
@@ -212,13 +214,14 @@ function FsBase(inConfig, next) {
 		this.host = tcpAddr.address;
 		this.port = tcpAddr.port;
 		this.origin = "http://" + this.host + ":"+ this.port;
-		return next(null, {
+		setImmediate(next, null, {
 			protocol: 'http',
 			host: this.host,
 			port: this.port,
 			origin: this.origin,
 			pathname: this.pathname
 		});
+		return;
 	}).bind(this));
 
 	/**
@@ -236,7 +239,7 @@ function FsBase(inConfig, next) {
 FsBase.prototype.configure = function(config, next) {
 	this.log("FsBase.configure(): config:", config);
 	if (next) {
-		next();
+		setImmediate(next);
 	}
 };
 
@@ -244,17 +247,17 @@ FsBase.prototype.configure = function(config, next) {
 
 FsBase.prototype.separator = function(req, res, next) {
 	this.log("---------------------------------------------------------");
-	next();
+	setImmediate(next);
 };
 
 // Authorize
 FsBase.prototype.authorize = function(req, res, next) {
 	this.log("FsBase.authorize(): checking that request comes from 127.0.0.1");
 	if (req.connection.remoteAddress !== "127.0.0.1") {
-		next(new HttpError("Access denied from IP address "+req.connection.remoteAddress, 401 /*Unauthorized*/));
+		setImmediate(next, new HttpError("Access denied from IP address "+req.connection.remoteAddress, 401 /*Unauthorized*/));
 	} else {
 		this.log("FsBase.authorize(): Ok");
-		next();
+		setImmediate(next);
 	}
 };
 
@@ -266,7 +269,7 @@ FsBase.prototype.cors = function(req, res, next) {
 	if ('OPTIONS' == req.method) {
 		res.status(200).end();
 	} else {
-		next();
+		setImmediate(next);
 	}
 };
 
@@ -388,12 +391,12 @@ FsBase.prototype.dump = function(req, res, next) {
 	this.log("FsBase.dump(): req.query=", req.query);
 	this.log("FsBase.dump(): req.cookies=", req.cookies);
 	this.log("FsBase.dump(): req.body=", req.body);
-	next();
+	setImmediate(next);
 };
 
 FsBase.prototype.getUserInfo = function(req, res, next) {
 	this.log("FsBase.getUserInfo():");
-	next(null, {
+	setImmediate(next, null, {
 		code: 200 /*Ok*/,
 		body: {}
 	});
@@ -401,7 +404,7 @@ FsBase.prototype.getUserInfo = function(req, res, next) {
 
 FsBase.prototype.setUserInfo = function(req, res, next) {
 	this.log("FsBase.setUserInfo():");
-	next(null, {
+	setImmediate(next, null, {
 		code: 200 /*Ok*/,
 		body: {}
 	});
@@ -418,7 +421,7 @@ FsBase.prototype.put = function(req, res, next) {
 		// can carry several files
 		return this._putMultipart(req, res, next);
 	} else {
-		next(new Error("Unhandled upload of content-type='" + req.headers['content-type'] + "'"));
+		setImmediate(next, new Error("Unhandled upload of content-type='" + req.headers['content-type'] + "'"));
 	}
 };
 
@@ -448,7 +451,7 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 	    nameParam = req.param('name');
 	this.log("FsBase.putWebForm(): pathParam:", pathParam, "nameParam:", nameParam);
 	if (!pathParam) {
-		next(new HttpError("Missing 'path' request parameter", 400 /*Bad Request*/));
+		setImmediate(next, new HttpError("Missing 'path' request parameter", 400 /*Bad Request*/));
 		return;
 	}
 	if (nameParam === '.'|| !nameParam) {
@@ -475,7 +478,7 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		buffer: buf
 	}, (function(err){
 		this.log("FsBase.putWebForm(): err:", err);
-		next(err, {
+		setImmediate(next, err, {
 			code: 201, // Created
 			body: [{
 				id: fileId,
@@ -536,7 +539,7 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 	this.log("FsBase.putMultipart(): files", files);
 
 	var nodes = [];
-	async.forEachSeries(files, (function(file, cb) {
+	async.forEachSeries(files, (function(file, next) {
 
 		if (file.name === '.' || !file.name) {
 			file.name = pathParam;
@@ -547,11 +550,13 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 		var putCallback = function(err, node) {
 			this.log("FsBase.putMultipart(): err:", err, "node:", node);
 			if (err) {
-				cb(err);
-			} else if (node) {
+				setImmediate(next, err);
+				return;
+			}
+			if (node) {
 				nodes.push(node);
 			}
-			cb();
+			setImmediate(next);
 		};
 
 		if (file.type.match(/x-encoding=base64/)) {
@@ -578,7 +583,7 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 		}
 	}).bind(this), (function(err){
 		this.log("FsBase.putMultipart(): nodes:", nodes);
-		next(err, {
+		setImmediate(next, err, {
 			code: 201, // Created
 			body: nodes
 		});
