@@ -141,6 +141,12 @@ enyo.kind({
 		this.inherited(arguments);
 	},
 	/**
+	 * Set the default tab
+	 */
+	setDefaultTab: function() {
+		this.$.thumbnail.children[0].setActive(true);
+	},
+	/**
 	 * Receive the {onServicesChange} broadcast notification
 	 * @param {Object} inEvent.serviceRegistry
 	 */
