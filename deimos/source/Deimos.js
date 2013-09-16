@@ -4,7 +4,6 @@ enyo.kind({
 	classes: "enyo-unselectable onyx",
 	debug: false,
 	published: {
-		edited: false,
 		projectData: null		// All the project data shared mainly between phobos and deimos
 	},
 	components: [
@@ -95,6 +94,7 @@ enyo.kind({
 	},
 	kinds: [],
 	index: null,
+	previousContents: [],
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -119,11 +119,15 @@ enyo.kind({
 	 * @public
 	 */
 	load: function(data) {
+		this.enableDesignerActionButtons(false);
+
 		var what = data.kinds;
 		var maxLen = 0;
 		
 		this.index = null;
 		this.kinds = what;
+		this.previousContents = [];
+		
 		this.owner.$.kindPicker.destroyClientControls();
 
 		// Pass the project information (analyzer output, ...) to the inspector and palette
@@ -131,6 +135,7 @@ enyo.kind({
 
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
+			this.previousContents.push(enyo.json.codify.to(k.components));
 			this.owner.$.kindPicker.createComponent({
 				content: k.name,
 				index: i,
@@ -141,7 +146,6 @@ enyo.kind({
 		
 		this.owner.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.owner.$.kindPicker.render();
-		this.setEdited(false);
 	},
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
@@ -362,9 +366,16 @@ enyo.kind({
 	prepareDesignerUpdate: function() {
 		if (this.index !== null) {
 			// Prepare the data for the code editor
-			var event = {docHasChanged: this.getEdited(), contents: []};
+			var event = {contents: []};
 			for(var i = 0 ; i < this.kinds.length ; i++) {
 				event.contents[i] = (i === this.index) ? this.formatContent(enyo.json.codify.to(this.cleanUpComponents([this.kinds[i]]))) : null;
+			}
+			// the length of the returned event array is significant for the undo/redo operation.
+			// event.contents.length must match this.kinds.length even if it contains only null values
+			// so the returned structure return may be [null] or [null, content, null] or [ null, null, null]...
+			if (event.contents[this.index] === this.previousContents[this.index]) {
+				// except when undo/redo would not bring any change...
+				event.contents=[];
 			}
 			return event;
 		}
@@ -382,9 +393,9 @@ enyo.kind({
 		this.$.designer.cleanUp();
 		
 		var event = this.prepareDesignerUpdate();
+
 		this.setProjectData(null);
 		this.doCloseDesigner(event);
-		this.setEdited(false);
 		
 		return true;
 	},
@@ -393,13 +404,12 @@ enyo.kind({
 		var components = enyo.json.codify.from(inEvent.content);
 		
 		this.refreshComponentView(components);
-		this.setEdited(true);
 		
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
 		this.kinds[this.index] = this.cleanUpComponents(components, true)[0];
 		
 		this.designerUpdate();
-		
+
 		return true;
 	},
 	//* Create item from palette (via drag-and-drop from Palette into Designer or Component View)
@@ -675,19 +685,21 @@ enyo.kind({
 		
 		return cleanComponent;
 	},
-	saveComplete: function() {
-		this.setEdited(false);
-	},
 	undoAction: function(inSender, inEvent) {
+		this.enableDesignerActionButtons(false);
 		this.doUndo();
 	},
 	redoAction: function(inSender, inEvent) {
+		this.enableDesignerActionButtons(false);
 		this.doRedo();
 	},
 	deleteAction: function(inSender, inEvent) {
 		if(!this.$.designer.selection) {
 			return;
 		}
+
+		this.enableDesignerActionButtons(false);
+
 		var kind = this.getSingleKind(this.index);
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, kind);
 		this.addAresKindOptions(kind);
@@ -705,18 +717,11 @@ enyo.kind({
 			}
 		}
 	},
-	editedChanged: function() {
-		// Note: This doesn't look like it does anything, because we send updates to the document to Ares immediately, so a doc is 
-		// only "edited" for a few ms. I left this in here because I was tracking down some cases where the state stayed "edited"
-		if (this.edited) {
-			this.owner.$.docLabel.setContent("Deimos *");
-		} else {
-			this.owner.$.docLabel.setContent("Deimos");
-		}
-		this.owner.$.toolbar.resized();
-	},
 	designerUpdate: function() {
-		this.doDesignerUpdate(this.prepareDesignerUpdate());
+		var event = this.prepareDesignerUpdate();
+
+		this.doDesignerUpdate(event);
+		this.enableDesignerActionButtons(true);
 	},
 	//* Called by Ares when ProjectView has new project selected
 	projectSelected: function(inProject) {
@@ -881,6 +886,11 @@ enyo.kind({
 		this.$.inspector.initUserDefinedAttributes(kind);
 		this.addAresKindOptions(kind);
 		this.rerenderKind(config.aresId);
+	},
+	enableDesignerActionButtons: function(condition) {
+		this.$.deleteButton.setAttribute("disabled", !condition);
+		this.$.undoButton.setAttribute("disabled", !condition);
+		this.$.redoButton.setAttribute("disabled", !condition);
 	}
 });
 

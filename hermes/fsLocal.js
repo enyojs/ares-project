@@ -84,7 +84,8 @@ FsLocal.prototype.get = function(req, res, next) {
 FsLocal.prototype.mkcol = function(req, res, next) {
 	var newPath, newId, newName, self = this,
 	    pathParam = req.param('path'),
-	    nameParam = req.param('name');
+	    nameParam = req.param('name'),
+	    overwriteParam = req.param('overwrite') !== "false";
 	this.log("pathParam:", pathParam);
 	this.log("nameParam:", nameParam);
 	if (!nameParam) {
@@ -101,16 +102,24 @@ FsLocal.prototype.mkcol = function(req, res, next) {
 	newName = path.basename(newPath);
 	newId = this.encodeFileId(newPath);
 
-	mkdirp(path.join(this.root, newPath), function(err) {
-		next(err, {
-			code: 201, // Created
-			body: {
-				id: newId,
-				path: newPath,
-				name: newName,
-				isDir: true
-			}
-		});
+	var absPath = path.join(this.root, newPath);
+	async.series([
+		this._checkOverwrite.bind(this, absPath, overwriteParam),
+		mkdirp.bind(null, absPath)
+	], function(err) {
+		if (err) {
+			next(err);
+		} else {
+			next(null, {
+				code: 201, // Created
+				body: {
+					id: newId,
+					path: newPath,
+					name: newName,
+					isDir: true
+				}
+			});
+		}
 	});
 };
 
@@ -330,14 +339,14 @@ FsLocal.prototype.putFile = function(req, file, next) {
             urlPath = this.normalize(file.name),
 	    dir = path.dirname(absPath),
 	    encodeFileId = this.encodeFileId,
+	    overwriteParam = req.param('overwrite') !== "false",
 	    node;
 	
 	this.log("FsLocal.putFile(): file:", file, "-> absPath:", absPath);
 	
 	async.series([
-		function(cb1) {
-			mkdirp(dir, cb1);
-		},
+		this._checkOverwrite.bind(this, absPath, overwriteParam),
+		mkdirp.bind(null, dir),
 		(function(cb1) {
 			if (file.path) {
 				try {
@@ -365,7 +374,7 @@ FsLocal.prototype.putFile = function(req, file, next) {
 			this.log("FsLocal.putFile(): file length: ", 
 				file.buffer && file.buffer.length);
 
-			this.log("FsLocal.putFile(): file length: ", 
+			this.log("FsLocal.putFile(): file path: ", 
 				file.path);
 			
 			node = {
@@ -382,12 +391,33 @@ FsLocal.prototype.putFile = function(req, file, next) {
 	}).bind(this));
 };
 
+FsLocal.prototype._checkOverwrite = function(absPath, overwrite, next) {
+	if (!overwrite) {
+		fs.stat(absPath, function(err, stat) {
+			if (err) {
+				if (err.code === 'ENOENT') {
+					/* normal */
+					next();
+				} else {
+					/* wrong */
+					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+				}
+			} else {
+				/* wrong */
+				next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+			}
+		});
+	} else {
+		next();
+	}
+};
+
 // XXX ENYO-1086: refactor tree walk-down
 FsLocal.prototype._changeNode = function(req, res, op, next) {
 	var pathParam = req.param('path'),
 	    nameParam = req.param('name'),
 	    folderIdParam = req.param('folderId'),
-	    overwriteParam = req.param('overwrite'),
+	    overwriteParam = req.param('overwrite') !== "false",
 	    srcPath = path.join(this.root, pathParam);
 	var dstPath, dstRelPath;
 	var srcStat, dstStat;
@@ -524,6 +554,7 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	var knownOpts = {
 		"root":		path,
 		"port":		Number,
+		"timeout":	Number,
 		"pathname":	String,
 		"level":	['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 		"help":		Boolean
@@ -531,6 +562,7 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	var shortHands = {
 		"r": "--root",
 		"p": "--port",
+		"t": "--timeout",
 		"P": "--pathname",
 		"l": "--level",
 		"v": "--level verbose",
@@ -539,12 +571,14 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
 	argv.pathname = argv.pathname || "/files";
 	argv.port = argv.port || 0;
+	argv.timeout = argv.timeout || (2*60*1000);
 	argv.level = argv.level || "http";
 	if (argv.help) {
 		console.log("Usage: node " + basename + "\n" +
-			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)         [default: '0']\n" +
-			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                    [default: '/files']\n" +
-			    "  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error') [default: 'http']\n" +
+			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)                       [default: '0']\n" +
+			    "  -t, --timeout     milliseconds of inactivity before a server socket is presumed to have timed out [default: '120000']\n" +
+			    "  -P, --pathname    URL pathname prefix (before /deploy and /build                                  [default: '/files']\n" +
+			    "  -l, --level       debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')               [default: 'http']\n" +
 			    "  -h, --help        This message\n");
 		process.exit(0);
 	}
@@ -553,6 +587,7 @@ if (path.basename(process.argv[1], '.js') === basename) {
 		root: argv.root,
 		pathname: argv.pathname,
 		port: argv.port,
+		timeout: argv.timeout,
 		level: argv.level
 	}, function(err, service){
 		if (err) {

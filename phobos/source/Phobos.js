@@ -15,11 +15,12 @@ enyo.kind({
 				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
-		{name: "savePopup", kind: "saveActionPopup", onAbandonDocAction: "abandonDocAction", onSave: "saveBeforeClose", onCancel: "cancelClose"},
-		{name: "savePopupPreview", kind: "saveActionPopup", onAbandonDocAction: "abandonDocActionOnPreview", onSave: "saveBeforePreviewAction"},
+		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
+		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
+		{name: "overwritePopup", kind: "overwriteActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "saveAsConfirm", onCancelActionPopup: "saveAsCancel"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error"},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: $L("unknown error")},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
 		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "enyo-unselectable", centered: true, modal: true, floating: true, autoDismiss: false,
 		onChangeSettings:"applySettings", onChangeRightPane: "changeRightPane", onClose: "closeEditorPop", onHide:"hideTest", onTabSizsChange: "tabSize"}
@@ -34,7 +35,8 @@ enyo.kind({
 		onUpdate: "",
 		onRegisterMe: "",
 		onDisplayPreview: "",
-		onSwitchFile: ""
+		onSwitchFile: "",
+		onFileEdited: " "
 	},
 	handlers: {
 		onCss: "newcssAction",
@@ -44,6 +46,7 @@ enyo.kind({
 		projectData: null
 	},
 	editedDocs:"",
+	injected: false,
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
@@ -79,6 +82,7 @@ enyo.kind({
 		this.hideWaitPopup();
 		if (inDocData) {
 			inDocData.setEdited(false);		// TODO: The user may have switched to another file
+			this.doFileEdited();
 		}
 		if (this.docData === inDocData) {
 			this.reparseAction();
@@ -102,29 +106,55 @@ enyo.kind({
 		}).bind(this));
 	},
 	saveAsFileChosen: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-
+		this.trace(inSender, "=>", inEvent);
+		
 		if (!inEvent.file) {
 			// no file or folder chosen
 			return;
 		}
-		var self = this;
-		var relativePath = inEvent.name.split("/");
+		
+		var hft = this.$.saveAsPopup.$.hermesFileTree ;
+		var next = function(result) {
+			if (result) {
+				this.$.overwritePopup.set("data", inEvent);
+				this.$.overwritePopup.show();
+			} else {
+				this.saveAsConfirm(inSender, {data: inEvent});
+			}
+		}.bind(this);
+
+		hft.checkNodeName(inEvent.name, next);		
+		
+		return true; //Stop event propagation
+	},
+	/** @private */
+	saveAsConfirm: function(inSender, inData){
+		this.trace(inSender, "=>", inData);
+		
+		var data = inData.data;
+		var relativePath = data.name.split("/");
 		var name = relativePath[relativePath.length-1];
+		
 		this.showWaitPopup($L("Saving ..."));
 		this.doSaveAsDocument({
 			docId: this.docData.getId(),
 			projectData: this.docData.getProjectData(),
-			file: inEvent.file,
+			file: data.file,
 			name: name,
 			content: this.$.ace.getValue(),
-			next: function(err) {
-				self.hideWaitPopup();
-				if (typeof inEvent.next === 'function') {
-					inEvent.next();
+			next: (function(err) {
+				this.hideWaitPopup();
+				if (typeof data.next === 'function') {
+					data.next();
 				}
-			}
+			}).bind(this)
 		});
+
+		return true; //Stop event propagation
+	},
+	saveAsCancel: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+
 		return true; //Stop event propagation
 	},
 	saveBeforeClose: function(){
@@ -188,7 +218,6 @@ enyo.kind({
 				this.$.ace.setSession(aceSession);
 			} else {
 				aceSession = this.$.ace.createSession(this.docData.getData(), mode);
-				this.docData.setData(null);			// We no longer need this data as it is now handled by the ACE edit session
 				this.$.ace.setSession(aceSession);
 				this.docData.setAceSession(aceSession);
 			}
@@ -727,6 +756,7 @@ enyo.kind({
 	},
 	// called when designer has modified the components
 	updateComponents: function(inSender, inEvent) {
+		this.injected = true;
 		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
 			if (inEvent.contents[i]) {
 				// Insert the new version of components (replace components block, or insert at end)
@@ -750,12 +780,17 @@ enyo.kind({
 				this.$.ace.replaceRange(range, comps);
 			}
 		}
+		this.injected = false;
 		/*
 		 * Insert the missing handlers
 		 * NB: reparseAction() is invoked by insertMissingHandlers()
 		 */
 		this.insertMissingHandlers();
-		this.docData.setEdited(true);
+		//file is edited if only we have a difference between stored file data and editor value
+		if(this.getEditorContent().localeCompare(this.docData.getData())!==0){
+			this.docData.setEdited(true);
+			this.doFileEdited();
+		}
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
@@ -795,9 +830,9 @@ enyo.kind({
 	* @protected
 	*/
 	showSavePopup: function(componentName, message){
-		this.$[componentName].setName("Document was modified!");
+		this.$[componentName].setTitle($L("Document was modified!"));
 		this.$[componentName].setMessage(message);
-		this.$[componentName].setActionButton("Don't Save");
+		this.$[componentName].setActionButton($L("Don't Save"));
 		this.$[componentName].show();
 	},	
 	/** 
@@ -839,7 +874,11 @@ enyo.kind({
 		this.saveNextDocument();
 	},
 	docChanged: function(inSender, inEvent) {
-		this.docData.setEdited(true);
+		//this.injected === false then modification coming from user
+		if(!this.injected && !this.docData.getEdited()){
+			this.docData.setEdited(true);
+			this.doFileEdited();
+		}
 
 		this.trace("data:", enyo.json.stringify(inEvent.data));
 
@@ -848,6 +887,11 @@ enyo.kind({
 			this.$.autocomplete.start(inEvent);
 		}
 		return true; // Stop the propagation of the event
+	},
+	editorUserSyntaxError:function(){
+		var userSyntaxError = [];		
+		userSyntaxError = this.$.autocomplete.ace.editor.session.$annotations.length;
+		return userSyntaxError;
 	},
 	cursorChanged: function(inSender, inEvent) {
 		var position = this.$.ace.getCursorPositionInDocument();
@@ -894,17 +938,24 @@ enyo.kind({
 	},
 	// Show Find popup
 	findpop: function(){
+		var selected = this.$.ace.getSelection();
+		if(selected){
+			this.$.findpop.setFindInput(selected);
+		} 
+		this.$.findpop.removeMessage();
 		this.$.findpop.show();
 		return true;
 	},
 	findNext: function(inSender, inEvent){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.find(this.$.findpop.findValue, options);
+		this.$.findpop.updateMessage(this.$.ace.getSelection());
 	},
 
 	findPrevious: function(){
 		var options = {backwards: true, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.find(this.$.findpop.findValue, options);
+		this.$.findpop.updateMessage(this.$.ace.getSelection());
 	},
 
 	replaceAll: function(){
@@ -913,11 +964,13 @@ enyo.kind({
 	replacefind: function(){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.replacefind(this.$.findpop.findValue , this.$.findpop.replaceValue, options);
+		this.$.findpop.updateMessage(this.$.ace.getSelection());
 	},
 
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
+	//It was not working because ACE(Ace.js) was doing "find" action before "replace".
 	replace: function(){
-		//this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
 	},
 
 	focusEditor: function(inSender, inEvent) {
@@ -1041,23 +1094,38 @@ enyo.kind({
 	name: "saveActionPopup",
 	kind: "Ares.ActionPopup",
 	events:{
-		onSave: "",
-		onCancel: ""
+		onSaveActionPopup: ""
 	},
+	/** @private */
 	create: function() {
 		this.inherited(arguments);
 		this.$.message.allowHtml = true;
 		this.$.buttons.createComponent(
-			{name:"saveButton", kind: "onyx.Button", content: "Save", ontap: "save"},
+			{name:"saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "save"},
 			{owner: this}
 		);
 	},
-	actionCancel: function(inSender, inEvent) {
-        this.inherited(arguments);
-        this.doCancel();
-    },
+	/** @private */
 	save: function(inSender, inEvent) {
 		this.hide();
-		this.doSave();
+		this.doSaveActionPopup();
 	}
+});
+
+enyo.kind({
+	name: "overwriteActionPopup",
+	kind: "Ares.ActionPopup",
+	data: null,
+	/** @private */
+	create: function() {
+		this.inherited(arguments);
+	},
+	/* Ares.ActionPopup overloading */
+	/** @private */
+	actionConfirm: function(inSender, inEvent) {
+        this.hide();
+        this.doConfirmActionPopup({data: this.data});
+        return true;
+    },
+    
 });

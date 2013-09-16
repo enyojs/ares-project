@@ -313,7 +313,7 @@ enyo.kind({
 	 * @protected
 	 */
 	fillSuggestionsEnyo: function(suggestions) {
-		return suggestions.concat(this.suggestionsEnyo);
+		return suggestions.concatenate(this.suggestionsEnyo);
 	},
 	/**
 	 * Add suggestions for onyx functions and kinds
@@ -322,7 +322,7 @@ enyo.kind({
 	 * @protected
 	 */
 	fillSuggestionsOnyx: function(suggestions) {
-		return suggestions.concat(this.suggestionsOnyx);
+		return suggestions.concatenate(this.suggestionsOnyx);
 	},
 	/**
 	 * Finalyze the suggestion list based on user inputs and
@@ -709,7 +709,7 @@ enyo.kind({
 	 * @param suggestions must be a current Phobos.Suggestions object
 	 * @public
 	 */
-	concat: function(suggestions) {
+	concatenate: function(suggestions) {
 		if (suggestions) {
 			this.trace("objectId: ", suggestions.objectId, " into ", this.objectId);
 			for(var key in suggestions.items) {
