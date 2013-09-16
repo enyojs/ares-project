@@ -28,13 +28,9 @@ Example:
 Designer Drag&Drop feature works fine with Chrome Browser but is
 broken with other browsers.
 
-## Project Properties
+## Style are lost on property changes in Designer with latest enyo version
 
-When creating a new project, _sometimes_ the project description
-(name, id, title... etc) are reverted to their default values before
-being saved to disk.  The work-around is to later edit those properties
-using Project > Edit.
+No work-around.
 
-This problem also affects the user-set PhoneGap Build properties, such
-as permissions & signing-keys selection.
+See JIRA https://enyojs.atlassian.net/browse/ENYO-2998
 
