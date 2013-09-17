@@ -774,7 +774,7 @@ enyo.kind({
 		{name: "noSigningKeys", content: "No signing keys for this platform", showing: false},
 		{
 			name: "signingKeysContainer",
-			showing: false,			
+			showing: false,	
 			kind: "FittableRows",
 			components: [
 				{
@@ -789,7 +789,7 @@ enyo.kind({
 				// android, ios & blackberry: key password
 				{	
 					kind: "onyx.InputDecorator", classes: "ares-project-properties-margin-right", showing: false, name: "passwdFrm",
-					components: [						
+					components: [
 						{name: "keyPasswd",	kind: "onyx.Input",	classes: "ares-project-properties-password", type: "password", placeholder: "Password"}
 					]
 				},
@@ -801,7 +801,7 @@ enyo.kind({
 						{name: "keystorePasswd", kind: "onyx.Input", classes: "ares-project-properties-password", type: "password", placeholder: "Keystore password"}
 					]
 				},
-				{ kind: "onyx.Button", content: "Save",	ontap: "savePassword", showing: false, classes: "ares-project-properties-margin-right", name: "saveButton"}				
+				{ kind: "onyx.Button", content: "Save",	ontap: "savePassword", showing: false, classes: "ares-project-properties-margin-right", name: "saveButton"}
 			]
 		}
 	],
@@ -836,12 +836,12 @@ enyo.kind({
 	/**
 	 * @private
 	 */
-	keysChanged: function () {		
+	keysChanged: function () {
 		// Sanity
 		this.keys = this.keys || [];
 
 		//Clear the content of the Signing keys picker.
-		this.clearPickerContent();		
+		this.clearPickerContent();
 
 		var createPickerItem = function(item,state) {
 			
@@ -850,12 +850,12 @@ enyo.kind({
 				this.$.keys.createComponent({
 					name: item.id,
 					content: item.title,
-					active: state					
-				});	
-			}			
+					active: state
+				});
+			}
 		};
 
-		this.$.loadingSingingKeys.hide();		
+		this.$.loadingSingingKeys.hide();
 
 		if(this.keys.length !== 0){
 
@@ -868,7 +868,7 @@ enyo.kind({
 					createPickerItem.call(this, key, true);
 				} else {
 					createPickerItem.call(this, key, false);
-				}				
+				}
 			}, this);
 
 		} else {
@@ -922,8 +922,6 @@ enyo.kind({
 				this.trace("selected key:", key);
 			}
 		}, this);
-		this.$.passwdFrm.show();		
-		this.$.saveButton.show();
 	},
 	/**
 	 * @private
@@ -932,9 +930,9 @@ enyo.kind({
 		
 		for (var key in this.$.keyPicker.$) {
 					
-			if (this.$.keyPicker.$[key].kind === "onyx.MenuItem"){							
+			if (this.$.keyPicker.$[key].kind === "onyx.MenuItem"){
 				this.$.keyPicker.$[key].destroy();
-			}		
+			}
 		}
 		this.$.keyPicker.render();
 	},
@@ -960,9 +958,9 @@ enyo.kind({
 	 * @private
 	 */
 	savePassword: function (inSender, inValue) {
-		this.trace("sender:", inSender, "value:", inValue);		
-		var key = this.getShowingKey();		
-		this.trace("platform:", this.platform, "key:", key);		
+		this.trace("sender:", inSender, "value:", inValue);
+		var key = this.getShowingKey();
+		this.trace("platform:", this.platform, "key:", key);
 		this.provider.setKey(this.platform, key);
 	}
 });
