@@ -531,10 +531,10 @@ Start the file server:
 
 You must Frist install the box.net sync app for this to work
 
-Just a quick simple way to get to Box.net using the local hermes file system pointed to the Sync folder on your PC/Srever 
+Just a quick simple way to get to Box.net using the local hermes file system pointed to the Sync folder on your PC/Server
 
 
-make a secound copie of the 
+make a second copie of the 
 
 		{
 			"active":true,

@@ -160,6 +160,20 @@
 			"useJsonp":false,
 			"verbose": false,
 			"respawn": false
+		},
+		{
+			"active":true,
+			"id":"true image",
+			"icon":"$harmonia/images/providers/dir.png",
+			"name":"True image Dir",
+			"type": ["filesystem"],
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Sync"
+			],
+			"useJsonp":false,
+			"verbose": false,
+			"respawn": false
 		}
 	]
 }
