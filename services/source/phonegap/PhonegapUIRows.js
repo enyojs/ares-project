@@ -824,7 +824,9 @@ enyo.kind({
 
 	/** @public */
 	setProjectConfig: function (config) {
-		this.setValue(config[this.jsonSection][this.platform] && config[this.jsonSection][this.platform].keyId);
+		var keyIdValue = config[this.jsonSection][this.platform] && config[this.jsonSection][this.platform].keyId;
+		this.setValue(keyIdValue);
+		this.setActiveKeyId(keyIdValue);
 	},
 	/** @public */
 	getProjectConfig: function (config) {
