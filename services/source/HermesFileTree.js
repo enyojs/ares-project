@@ -710,7 +710,6 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		var folder = this.getFolder();
 		this.trace("on folder ",folder);
-		this.log(this.$.serverNode);
 		if (this.$.serverNode && this.$.serverNode.file) {
 			if (folder && folder.isDir) {
 				this.$.nameFolderPopup.setFileName("");
