@@ -66,6 +66,7 @@ enyo.kind({
 	findChanged: function(inSender, inEvent) {
 		this.findValue = this.$.find.getValue();
 		this.disableActionButtons(this.findValue === "");
+		this.disableReplaceButtons(true);
 	},
 	replaceChanged: function(inSender, inEvent) {
 		this.replaceValue = this.$.replace.getValue();
@@ -75,22 +76,31 @@ enyo.kind({
 		this.findChanged();
 	},
 	disableActionButtons: function(value){
-		this.$.replaceOne.setDisabled(value);
 		this.$.replaceAll.setDisabled(value);
-		this.$.replaceFind.setDisabled(value);
 		this.$.findprevious.setDisabled(value);
 		this.$.findnext.setDisabled(value);
+		this.disableReplaceButtons(value);
+	},
+	disableReplaceButtons:function(value){
+		this.$.replaceOne.setDisabled(value);
+		this.$.replaceFind.setDisabled(value);
 	},
 	removeMessage: function(){
 		this.$.message.setContent("");
 	},
-	updateMessage: function(inResult){
-		if(!inResult){
+	updateMessage: function(inResult, occurences){
+		if(!inResult || occurences === 0){
 			this.$.message.setContent(this.findValue+" not found");
+		} else if(occurences > 0) {
+			this.$.message.setContent(occurences+" matches replaced");
 		} else {
 			this.removeMessage();
 		}
 		
+	},
+	updateAfterFind: function(value){
+		this.updateMessage(value);
+		this.disableReplaceButtons(value === "");
 	},
 	shown: function(inSender, inEvent) {
 		this.$.find.focus();
