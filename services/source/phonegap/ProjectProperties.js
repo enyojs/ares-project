@@ -423,7 +423,7 @@ enyo.kind({
 		} else {			
 			this.showErrorMsg("userDataRecieved");
 			var provider = Phonegap.ProjectProperties.getProvider();
-			//			
+
 			enyo.forEach(this.platformDrawers, function (target) {
 				this.$.appIdSelector.setUserData(userData);
 				var keys = provider.getKey(target.id);
@@ -526,7 +526,7 @@ enyo.kind({
 		}, this);
 	},
 
-	getProjectConfig: function (config) {			
+	getProjectConfig: function (config) {
 		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {			
 			if (row === "client" || row === "animator") {
 				// nop;
