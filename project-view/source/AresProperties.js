@@ -26,7 +26,7 @@ enyo.kind({
 	],
 
 	debug: false,
-	
+	pluginServicesList:[],
 	/**
 	 * @protected
 	 */
@@ -94,7 +94,8 @@ enyo.kind({
 			name: inEvent.pluginService.getName() || inEvent.pluginService.id,
 			kind: inEvent.pluginService.getAresPropertiesKind()
 		};
-		this.createComponentTab(pluginService);		
+		this.createComponentTab(pluginService);
+		this.pluginServicesList.push(pluginService);
 	},
 
 	// /**
@@ -110,9 +111,14 @@ enyo.kind({
 	},
 
 	confirmTap: function(inSender, inEvent) {
+		for(var index in this.pluginServicesList){
+			var pluginId = this.pluginServicesList[index].id;
+			if(typeof this.$[pluginId+'Drawer'].$[pluginId].okButtonAction === 'function'){
+				this.$[this.pluginServicesList[index].id+'Drawer'].$[pluginId].okButtonAction();
+			}
+		}
 		this.hide();
-	}
-	
+	}	
 });
 
 enyo.kind({
