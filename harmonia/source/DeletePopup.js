@@ -44,7 +44,7 @@ enyo.kind({
 	},
 	pathChanged: function() {
 		var fileName = this.$.name.getValue();
-   		var where = this.path.substring(0, this.path.lastIndexOf(fileName));
+		var where = this.path.substring(0, this.path.lastIndexOf(fileName));
 		this.$.path.setContent("in "+where);
 	},
 	deleteCancel: function(inSender, inEvent) {
