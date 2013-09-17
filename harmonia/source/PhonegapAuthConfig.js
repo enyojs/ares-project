@@ -31,6 +31,7 @@ enyo.kind({
 		}
 		this.$.userData.$.pgUserData.setUserData(userData);
 		this.$.userData.show();
+		enyo.Signals.send("onRefreshUserData");
 		next();
 	}
 });
