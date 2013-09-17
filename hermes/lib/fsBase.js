@@ -3,7 +3,7 @@
  * Base toolkit for Hermes FileSystem providers implemented using Node.js
  */
 
-var fs = require("fs"),
+var fs = require("graceful-fs"),
     path = require("path"),
     util = require("util"),
     express = require("express"),
@@ -197,7 +197,7 @@ function FsBase(inConfig, next) {
 	 * @private
 	 */
 	function errorHandler(err, req, res, next){
-		console.error(err.stack);
+		console.error("fsBase#errorHandler", err.stack);
 		this.respond(res, err);
 	}
 

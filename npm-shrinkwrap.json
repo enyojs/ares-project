@@ -18,7 +18,7 @@
       }
     },
     "ares-generator": {
-      "version": "0.2.3",
+      "version": "0.2.4",
       "dependencies": {
         "async": {
           "version": "0.2.9",
@@ -380,6 +380,10 @@
           "from": "mime@~1.2.11"
         }
       }
+    },
+    "graceful-fs": {
+      "version": "2.0.1",
+      "from": "graceful-fs@"
     },
     "less": {
       "version": "1.4.2",

@@ -1,6 +1,6 @@
 /*jshint node: true, strict: false, globalstrict: false */
 
-var fs = require("fs"),
+var fs = require("graceful-fs"),
     path = require("path"),
     express = require("express"),
     util  = require("util"),

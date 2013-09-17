@@ -8,7 +8,7 @@
 
 // nodejs version checking is done in parent process ide.js
 
-var fs = require("fs"),
+var fs = require("graceful-fs"),
     path = require("path"),
     util  = require("util"),
     mkdirp = require("mkdirp"),
