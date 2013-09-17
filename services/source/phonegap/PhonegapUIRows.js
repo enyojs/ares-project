@@ -880,18 +880,22 @@ enyo.kind({
 	 * @private
 	 */
 	activeKeyIdChanged: function (old) {
-		var key = this.getKey(this.activeKeyId);		
+		var key = this.getKey(this.activeKeyId);
 		
 		if (key) {
 			// One of the configured keys
 			if (this.platform === 'ios' || this.platform === 'blackberry') {
 				// property named '.password' is defined by Phonegap
 				this.$.keyPasswd.setValue(key.password || "");
+				this.$.passwdFrm.show();
+				this.$.saveButton.show();
 			} else if (this.platform === 'android') {
 				// properties named '.key_pw'and 'keystore_pw' are defined by Phonegap
 				this.$.keyPasswd.setValue(key.key_pw || "");
 				this.$.keystorePasswd.setValue(key.keystore_pw || "");
 				this.$.keystorePasswdFrm.show();
+				this.$.passwdFrm.show();
+				this.$.saveButton.show();
 			}
 		}
 	},
