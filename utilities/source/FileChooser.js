@@ -342,7 +342,7 @@ enyo.kind({
 	},
 	/* @private */
 	checkedPath: function(path) {
-		var illegal = /[<>\\!?$%&*,]+/i;
+		var illegal = /[<>\\!?$%&*,]/i;
 
 		if (path.match(illegal)) {
 			this.showErrorPopup(this.$LS("Path #{path} contains illegal characters", {path: path}));
@@ -350,6 +350,10 @@ enyo.kind({
 		}
 
 		return true;
+	},
+	$LS: function(msg, params) {
+		var tmp = new enyo.g11n.Template($L(msg));
+		return tmp.evaluate(params);
 	}
 });
 
