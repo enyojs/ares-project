@@ -75,7 +75,8 @@ enyo.kind({
 				{name: "cancel", kind: "onyx.Button", content: $L("Cancel"), ontap: "cancel"},
 				{name: "confirm", kind: "onyx.Button", content: $L("OK"), classes:"right", ontap: "confirm", disabled: true}
 			]}
-		]}
+		]},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: $L("Error message")}
 	],
 	events: {
 		/**
@@ -273,7 +274,6 @@ enyo.kind({
 		var name = this.$.selectedFoldersPath.getValue();
 
 		if (!this.checkedPath(name)) {
-			this.hide() ;
 			this.doFileChosen();
 
 			return true;
@@ -342,7 +342,7 @@ enyo.kind({
 	},
 	/* @private */
 	checkedPath: function(path) {
-		var illegal = /[<>\\!?@#\$%^&\*,]+/i;
+		var illegal = /[<>\\!?$%&*,]/i;
 
 		if (path.match(illegal)) {
 			this.showErrorPopup(this.$LS("Path #{path} contains illegal characters", {path: path}));
@@ -350,6 +350,14 @@ enyo.kind({
 		}
 
 		return true;
+	},
+	showErrorPopup : function(msg) {
+		this.$.errorPopup.setErrorMsg(msg);
+		this.$.errorPopup.show();
+	},
+	$LS: function(msg, params) {
+		var tmp = new enyo.g11n.Template($L(msg));
+		return tmp.evaluate(params);
 	}
 });
 
