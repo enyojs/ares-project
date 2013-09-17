@@ -1,7 +1,7 @@
 /* global ares */
 enyo.kind({
 	name: "PhonegapAuthConfig",
-	debug: true,
+	debug: false,
 	kind: "BasicAuthConfig",
 	/**
 	 * @protected
