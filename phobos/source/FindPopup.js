@@ -30,7 +30,7 @@ enyo.kind({
 				{classes: "ares-row", components: [
 					{tag: "label", classes: "ares-fixed-label ace-find-label",  content: "Replace:"},
 					{kind: "onyx.InputDecorator", components: [
-						{name: "replace", kind: "onyx.Input", onchange: "replaceChanged"}
+						{name: "replace", kind: "onyx.Input", oninput: "replaceChanged"}
 					]}
 				]},
 				{classes: "ares-row", components: [
