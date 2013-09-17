@@ -211,7 +211,6 @@ enyo.kind({
 					this.$.selectedFoldersPath.setValue(folders);
 					this.$.selectedFileName.setValue(inEvent.file.name);
 				} else {
-
 					if (!this.folderChooser) { this.$.selectedFoldersPath.setValue(relativePath); }
 				}
 			} else {

@@ -26,5 +26,6 @@
 	"Select a file or folder to copy first": "Select a file or folder to copy first",
 	"Select a file or folder to delete first": "Select a file or folder to delete first",
 	"Select a file or folder to rename first": "Select a file or folder to rename first",
+	"Select a file system first" : "Select a file system first",
 	"Select a parent folder first": "Select a parent folder first"
 }
