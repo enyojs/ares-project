@@ -642,7 +642,12 @@ enyo.kind({
 		this.inherited(arguments);
 		this.drawerNameChanged();
 	},
-	/**@public*/
+	/**
+	 *	Update this kind's attribut from the passed parameter.
+	 * 
+	 * @param {Object} config contains Phonegap build parmameters set in project.json
+	 * @public
+	 */
 	setProjectConfig: function (config) {
 		this.trace("id:", this.targetId, "config:", config);
 
@@ -655,7 +660,12 @@ enyo.kind({
 
 
 	},
-	/**@public*/
+	/**
+	 * Update the object config using the attributes values of {Phonegap.ProjectProperties.Target}
+	 * 
+	 * @param  {Object} config contains Phonegap build parmameters set in project.json
+	 * @public
+	 */
 	getProjectConfig: function (config) {
 		if (this.enabled) {
 			config.targets[this.targetId] = {};
