@@ -917,7 +917,7 @@ enyo.kind({
 			xw.writeAttributeString('src', phonegap.icon[inTarget].src || 'icon.png');
 			
 			xw.writeAttributeString('role', phonegap.icon[inTarget].role || 'default');
-			if(inTarget != 'general'){
+			if(inTarget != 'sharedConfiguration'){
 				xw.writeAttributeString('gap:platform', inTarget);
 			}
 
@@ -936,7 +936,7 @@ enyo.kind({
 			// If the project does not define an icon, use Enyo's
 			// one
 			xw.writeAttributeString('src', phonegap.splashScreen[inTarget].src || 'icon.png');
-			if(inTarget != 'general'){
+			if(inTarget != 'sharedConfiguration'){
 				xw.writeAttributeString('gap:platform', inTarget);
 			}
 			if (inTarget === 'android'){
