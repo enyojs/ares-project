@@ -674,6 +674,7 @@ enyo.kind({
 			return;
 		}
 		
+		this.$.inspector.inspect(null);
 		this.enableDesignerActionButtons(false);
 		
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, this.kinds[this.index].components);
