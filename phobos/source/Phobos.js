@@ -526,8 +526,7 @@ enyo.kind({
 				src: true,
 				style: true,
 				tag: true,
-				name: true,
-				allowHtml: true
+				name: true
 			},
 			c = this.$.ace.getValue(),
 			kinds = [];
@@ -557,8 +556,9 @@ enyo.kind({
 				o = this.analysis.objects[i];
 				var start = o.componentsBlockStart;
 				var end = o.componentsBlockEnd;
+				var kindBlock = enyo.json.codify.from(c.substring(o.block.start, o.block.end));
 				var name = o.name;
-				var kind = o.superkind;
+				var kind = kindBlock.kind || o.superkind;
 				var comps = [];
 				if (start && end) {
 					var js = c.substring(start, end);
@@ -575,13 +575,12 @@ enyo.kind({
 					var prop = o.properties[j];
 					var pName = prop.name;
 					var value = this.verifyValueType(analyzer.Documentor.stripQuotes(prop.value[0].name));
-					if (isDesignProperty[pName]) {
-						comp[pName] = value;
-					}
-					if (value === "{") {
-						comp[pName] = this.getKindObjectData(prop.value[0].properties);
-					} else if (value === "[" && pName !== "components") {
-						comp[pName] = this.getKindArrayData(prop.value[0].properties);
+					if (prop.start < start && pName !== "components") {
+						if (value === "{" || value === "[" || value === "function") {
+							comp[pName] = kindBlock[pName];
+						} else {
+							comp[pName] = value;
+						}
 					}
 				}
 				kinds.push(comp);
@@ -604,63 +603,6 @@ enyo.kind({
 			inValue = false;
 		}
 		return inValue;
-	},
-	/**
-	 * Retrieves the kind's array data stored in the properties
-	 * passed as a parameter
-	 * @param inProps: the properties to explore
-	 * @returns the array in inProps
-	 * @protected
-	 */
-	getKindArrayData: function(inProps) {
-		var len = inProps.length,
-			val = [];
-
-		if (len) {
-			var name, propVal;
-			for (var k=0; k<len; k++) {
-				name = inProps[k].name;
-
-				if (name === "{") {
-					propVal = this.getKindObjectData(inProps[k].properties);
-				} else if (name === "[") {
-					propVal = this.getKindArrayData(inProps[k].properties);
-				} else {
-					propVal = analyzer.Documentor.stripQuotes(name);
-				}
-				val.push(this.verifyValueType(propVal));
-			}
-		}
-		return val;
-	},
-	/**
-	 * Retrieves the kind's object data stored in the properties
-	 * passed as a parameter
-	 * @param inProps: the properties to explore
-	 * @returns the object in inProps
-	 * @protected
-	 */
-	getKindObjectData: function(inProps) {
-		var len = inProps.length,
-			val = {};
-
-		if (len) {
-			var name, propName, propVal;
-			for (var k=0; k<len; k++) {
-				name = inProps[k].name;
-				propName = analyzer.Documentor.stripQuotes(inProps[k].value[0].name);
-
-				if (propName === "{") {
-					propVal = this.getKindObjectData(inProps[k].value[0].properties);
-				} else if (propName === "[") {
-					propVal = this.getKindArrayData(inProps[k].value[0].properties);
-				} else {
-					propVal = analyzer.Documentor.stripQuotes(inProps[k].value[0].name);
-				}
-				val[name] = this.verifyValueType(propVal);
-			}
-		}
-		return val;
 	},
 	/**
 	 * Lists the handler methods mentioned in the "handlers"
