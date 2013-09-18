@@ -697,7 +697,8 @@ enyo.kind({
 		if(!this.$.designer.selection) {
 			return;
 		}
-
+		
+		this.$.inspector.inspect(null);
 		this.enableDesignerActionButtons(false);
 
 		var kind = this.getSingleKind(this.index);

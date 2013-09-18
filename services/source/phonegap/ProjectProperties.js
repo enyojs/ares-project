@@ -23,6 +23,10 @@
 enyo.kind({
 	name: "Phonegap.UIConfiguration",
 	statics: {
+		androidSdkVersionsToolTip: {"18": ["Android 4.3"], "17": ["Android 4.2, 4.2.2"], "16": ["Android 4.1, 4.1.1"], 
+		"15": ["Android 4.0.3, 4.0.4"], "14": ["Android 4.0, 4.0.1, 4.0.2"], "13": ["Android 3.2"], 
+		"12": ["Android 3.1.x"], "11": ["Android 3.0.x"], "10": ["Android 2.3.4, 2.3.3"], "9": ["Android 2.3.2, 2.3.1, 2.3"],
+		"8": ["Android 2.2.x"], "7": ["Android 2.1.x"]},
 
 		commonDrawersContent: [
 			{
@@ -79,8 +83,8 @@ enyo.kind({
 				type: "Target",
 				rows: [
 					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], defaultValue: "internalOnly", type: "PickerRow", jsonSection: "preferences"},
-					{name: "android-minSdkVersion", label: "Minimum SDK", content: "7", defaultValue: "7", type: "InputRow", jsonSection: "preferences"},
-					{name: "android-maxSdkVersion", label: "Maximum SDK", content: "", defaultValue: "", type: "InputRow", jsonSection: "preferences"},
+					{name: "android-minSdkVersion", label: "Minimum SDK", content: ["18", "17", "16", "15", "14", "13", "12", "11", "10", "9", "8", "7"], defaultValue: "7", type: "SDKVersionRow", jsonSection: "preferences"},
+					{name: "android-maxSdkVersion", label: "Maximum SDK", content: ["18", "17", "16", "15", "14", "13", "12", "11", "10", "9", "8", "7"], defaultValue: "", type: "SDKVersionRow", jsonSection: "preferences"},
 					{name: "splash-screen-duration", label: "Splash screen Duration", content: "5000", defaultValue: "5000", type: "InputRow", jsonSection: "preferences"},
 					{name: "load-url-timeout", label: "Load URL timeout", content: "20000", defaultValue: "20000", type: "InputRow", jsonSection: "preferences"},
 					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "AndroidImgRow"},
@@ -304,11 +308,16 @@ enyo.kind({
 		initialiseDrawers.call(this, this.commonDrawers.concat(this.platformDrawers));
 	},
 
-	/** @public */
+	/** 
+	 * Called when the "Project Properties" Pop-up is opened.
+	 * 
+	 * @param {JSON} config contains the parametres & values of the provider "phonegap"
+	 * @public
+	 *
+	 */
 	setProjectConfig: function (config) {
 		this.trace("Project config:", config);
-
-		config.enabled = true;
+		this.setConfig(config);
 		this.$.appIdSelector.setSelectedAppId(config.appId || '');		
 		config.targets = config.targets || {};
 
@@ -325,7 +334,13 @@ enyo.kind({
 		this.refresh();
 	},
 
-	/** @public */
+	/** 
+	 * Called when the "Project Properties" Pop-up is saved.
+	 * 
+	 * @param {JSON} config contains the parametres & values of the provider "phonegap"
+	 * @public
+	 *
+	 */
 	getProjectConfig: function (config) {
 		config.access = {};
 		config.features = {};
@@ -358,7 +373,11 @@ enyo.kind({
 		this.trace("sender:", inSender, "value:", inValue);		
 		var provider = Phonegap.ProjectProperties.getProvider();		
 		this.showErrorMsg("waitingSignIn");
-		provider.authorize(enyo.bind(this, this.getUserData));
+
+		//Send the request to get the user data only if the Phonegap build service is enabled.
+		if (this.config && this.config.enabled) {
+			provider.authorize(enyo.bind(this, this.getUserData));
+		}		
 	},
 
 	/**
@@ -401,7 +420,6 @@ enyo.kind({
 	 * @protected
 	 */
 	getUserData: function (err, userData) {
-
 		if (err) {
 			//this.warn("err:", err);
 			this.showErrorMsg("signInError");
@@ -409,7 +427,7 @@ enyo.kind({
 		} else {			
 			this.showErrorMsg("userDataRecieved");
 			var provider = Phonegap.ProjectProperties.getProvider();
-									
+
 			enyo.forEach(this.platformDrawers, function (target) {
 				this.$.appIdSelector.setUserData(userData);
 				var keys = provider.getKey(target.id);
@@ -502,7 +520,7 @@ enyo.kind({
 	},
 
 	setProjectConfig: function (config) {
-		
+		this.setConfig(config);
 		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {
 			if (row === "client" || row === "animator") {
 				// nop;
@@ -512,7 +530,7 @@ enyo.kind({
 		}, this);
 	},
 
-	getProjectConfig: function (config) {		
+	getProjectConfig: function (config) {
 		enyo.forEach(enyo.keys(this.$.drawer.$) , function (row) {			
 			if (row === "client" || row === "animator") {
 				// nop;
