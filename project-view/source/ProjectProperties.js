@@ -102,6 +102,15 @@ enyo.kind({
 					{content: "", name: "projectDirectory" }
 				]},
 				{tag:"p", classes:"break"},
+				{kind: "FittableColumns", components: [
+					{classes: "ares-row", components: [
+							{tag: "label", classes: "ares-fixed-label  ares-small-label", content: $L("Description:")},
+							{kind: "onyx.InputDecorator", classes: "ares-project-properties-textarea-wide", components: [
+								{kind: "onyx.TextArea", name: "projectDescription", fit: true, content: "", placeholder: $L("My project description...")}
+							]}
+						]}
+				]},
+				{tag:"p", classes:"break"},
 				{kind: "enyo.FittableColumns", classes:"ares-row", name: "servicesList"}
 			]}
 		]},
@@ -273,6 +282,8 @@ enyo.kind({
 		this.$.projectAuthor.setValue(this.config.author.name || '') ;
 		this.$.projectContact.setValue(this.config.author.href || '') ;
 
+		this.$.projectDescription.setValue(this.config.description || '') ;
+
 		// Load each provider service configuration into its
 		// respective ProjectProperties panel
 		enyo.forEach(enyo.keys(this.services), function(serviceId) {
@@ -334,6 +345,8 @@ enyo.kind({
 		this.config.author = {};
 		this.config.author.name = this.$.projectAuthor.getValue();
 		this.config.author.href = this.$.projectContact.getValue();
+
+		this.config.description = this.$.projectDescription.getValue();		
 
 		// Preview settings
 		this.config.preview = {};
