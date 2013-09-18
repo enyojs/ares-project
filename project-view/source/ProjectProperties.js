@@ -41,9 +41,9 @@ enyo.kind({
 			]}
 		]},
 		{name: "projectDrawer", kind: "onyx.Drawer", open: true, components: [		
-			{classes:"ares-project-properties",components:[
-				{kind:"FittableRows", components: [
-					{kind:"FittableColumns", classes: "ares-row", components: [
+			{classes: "ares-project-properties",components:[
+				{kind: "FittableRows", components: [
+					{kind: "FittableColumns", classes: "ares-row", components: [
 						{components: [
 							{tag: "label", name: "projectPathLabel", classes : "ares-label", content: ""},
 						]},
@@ -53,8 +53,8 @@ enyo.kind({
 					]}
 				]},
 				{tag: "p", classes:"break"},
-				{kind:"FittableColumns", components: [
-					{kind:"FittableRows", components: [
+				{kind: "FittableColumns", components: [
+					{kind: "FittableRows", components: [
 						{classes: "ares-row", components: [
 							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Name: ")},
 							{kind: "onyx.InputDecorator", components: [
@@ -83,9 +83,9 @@ enyo.kind({
 							]}
 						]}
 					]},
-					{kind:"FittableRows", components: [
+					{kind: "FittableRows", components: [
 						{classes: "ares-row", components: [
-							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Title: ")},
+							{tag: "label", classes: "ares-fixed-label ares-small-label", content: $L("Title: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectTitle", placeholder: $L("My Example App")}
 							]}
