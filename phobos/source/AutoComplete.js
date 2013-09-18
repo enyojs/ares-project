@@ -6,7 +6,7 @@ enyo.kind({
 	floating : true,
 	autoDismiss : false,
 	modal : false,
-	classes: "ares_phobos_autocomp",
+	classes: "ares_phobos_autocomp ares-masked-content-popup",
 	published: {
 		ace: null,
 		analysis: null,
@@ -344,12 +344,12 @@ enyo.kind({
 			// Compute the position of the popup
 			var ace = this.ace;
 			var pos = ace.textToScreenCoordinates(this.popupPosition.row, this.popupPosition.column);
-			pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
-
-			// Position the autocomplete popup
-			this.applyStyle("top", pos.pageY + "px");
-			this.applyStyle("left", pos.pageX + "px");
-			this.show();
+			this.applyStyle("padding-top", ace.getLineHeight() + "px");
+			var p = {
+			    left: pos.pageX,
+			    top: pos.pageY
+			};
+			this.showAtPosition(p);
 			this.popupShown = true;
 		} else {
 			this.hideAutocompletePopup();
