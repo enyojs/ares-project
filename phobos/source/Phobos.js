@@ -85,7 +85,7 @@ enyo.kind({
 			this.doFileEdited();
 		}
 		if (this.docData === inDocData) {
-			this.reparseAction();
+			this.reparseUsersCode();
 		}
 	},
 	saveNeeded: function() {
@@ -168,7 +168,7 @@ enyo.kind({
 	openDoc: function(inDocData) {
 		// If we are changing documents, reparse any changes into the current projectIndexer
 		if (this.docData && this.docData.getEdited()) {
-			this.reparseAction(true);
+			this.reparseUsersCode(true);
 		}
 
 		// Set up the new doucment
@@ -237,7 +237,7 @@ enyo.kind({
 			this.$.imageViewer.setAttribute("src", fileUrl);
 		}
 		this.manageDesignerButton();
-		this.reparseAction(true);
+		this.reparseUsersCode(true);
 		this.projectCtrl.buildProjectDb();
 
 		this.docData.setEdited(edited);
@@ -409,8 +409,13 @@ enyo.kind({
 		//
 		this.$.right.$.dump.setContent(h$);
 	},
+
+	// invoked by reparse button in right panel (the file index)
+	reparseAction: function(inSender, inEvent) {
+		this.reparseUsersCode(true);
+	},
 	//* Updates the projectIndexer (notifying watchers by default) and resets the local analysis file
-	reparseAction: function(inhibitUpdate) {
+	reparseUsersCode: function(inhibitUpdate) {
 		var mode = this.docData.getMode();
 		var module = {
 			name: this.docData.getFile().name,
@@ -499,7 +504,7 @@ enyo.kind({
 	//* Navigate from Phobos to Deimos. Pass Deimos all relevant info.
 	designerAction: function() {
 		// Update the projectIndexer and notify watchers
-		this.reparseAction();
+		this.reparseUsersCode();
 		
 		var kinds = this.extractKindsData(),
 			data = {
@@ -608,7 +613,7 @@ enyo.kind({
 	insertMissingHandlers: function() {
 		if (this.analysis) {
 			// Reparse to get the definition of possibly added onXXXX attributes
-			this.reparseAction(true);
+			this.reparseUsersCode(true);
 
 			/*
 			 * Insert missing handlers starting from the end of the
@@ -622,7 +627,7 @@ enyo.kind({
 				}
 			}
 			// Reparse to get the definition of the newly added methods
-			this.reparseAction(true);
+			this.reparseUsersCode(true);
 		} else {
 			// There is no parser data for the current file
 			enyo.log("Unable to insert missing handler methods");
@@ -703,7 +708,7 @@ enyo.kind({
 		this.injected = false;
 		/*
 		 * Insert the missing handlers
-		 * NB: reparseAction() is invoked by insertMissingHandlers()
+		 * NB: reparseUsersCode() is invoked by insertMissingHandlers()
 		 */
 		this.insertMissingHandlers();
 		//file is edited if only we have a difference between stored file data and editor value
@@ -964,7 +969,7 @@ enyo.kind({
 	//* Send up an updated copy of the code
 	bubbleCodeUpdate: function() {
 		// Update the projectIndexer and notify watchers
-		this.reparseAction(true);
+		this.reparseUsersCode(true);
 		
 		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
 		if (data.kinds.length > 0) {
