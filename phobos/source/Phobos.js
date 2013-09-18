@@ -515,20 +515,7 @@ enyo.kind({
 	},
 	//* Extract info about kinds from the current file needed by the designer
 	extractKindsData: function() {
-		var isDesignProperty = {
-				layoutKind: true,
-				attributes: true,
-				classes: true,
-				content: true,
-				controlClasses: true,
-				defaultKind: true,
-				fit: true,
-				src: true,
-				style: true,
-				tag: true,
-				name: true
-			},
-			c = this.$.ace.getValue(),
+		var c = this.$.ace.getValue(),
 			kinds = [];
 
 		if (this.analysis) {
