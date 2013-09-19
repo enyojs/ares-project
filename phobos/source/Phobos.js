@@ -80,17 +80,20 @@ enyo.kind({
 	},
 	saveComplete: function(inDocData) {
 		this.hideWaitPopup();
+		var codeLooksGood = false ;
 		if (inDocData) {
 			inDocData.setEdited(false);		// TODO: The user may have switched to another file
 			// update deimos label with edited status which is actually "not-edited" ...
 			this.doFileEdited();
 		}
 		if (this.docData === inDocData) {
-			this.reparseUsersCode();
+			codeLooksGood = this.reparseUsersCode();
 		}
 		else {
 			this.trace("skipping reparse user code");
 		}
+		this.trace("done. codeLooksGood: "+ codeLooksGood);
+		return codeLooksGood ;
 	},
 	saveNeeded: function() {
 		return this.docData.getEdited();
@@ -420,6 +423,7 @@ enyo.kind({
 	//* Updates the projectIndexer (notifying watchers by default) and resets the local analysis file
 	reparseUsersCode: function(inhibitUpdate) {
 		var mode = this.docData.getMode();
+		var codeLooksGood = false;
 		var module = {
 			name: this.docData.getFile().name,
 			code: this.$.ace.getValue(),
@@ -441,6 +445,8 @@ enyo.kind({
 
 					// Give the information to the autocomplete component
 					this.$.autocomplete.setAnalysis(this.analysis);
+
+					codeLooksGood = true;
 				} catch(error) {
 					enyo.log("An error occured during the code analysis: " + error);
 					this.dumpInfo(null);
@@ -463,6 +469,7 @@ enyo.kind({
 				this.$.autocomplete.setAnalysis(null);
 				break;
 		}
+		return codeLooksGood ;
 	},
 	/**
 	 * Add for each object the corresponding range of lines in the file

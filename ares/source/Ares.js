@@ -191,7 +191,8 @@ enyo.kind({
 				if(fileData){
 					fileData.setData(content);
 				}
-				self.componentsRegistry.phobos.saveComplete(fileData);
+				var codeParseOk = self.componentsRegistry.phobos.saveComplete(fileData);
+				self.componentsRegistry.designerPanels.enableDesignerButton(codeParseOk);
 			}
 		});
 	},
