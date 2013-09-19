@@ -82,6 +82,7 @@ enyo.kind({
 		this.hideWaitPopup();
 		if (inDocData) {
 			inDocData.setEdited(false);		// TODO: The user may have switched to another file
+			// update deimos label with edited status which is actually "not-edited" ...
 			this.doFileEdited();
 		}
 		if (this.docData === inDocData) {
