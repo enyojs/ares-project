@@ -178,6 +178,7 @@ enyo.kind({
 							]
 						}, 
 						{name: "BuildOptionPanel", kind: "FittableRows"},
+						{kind: "Signals", "plugin.phonegap.userDataRefreshed": "refresh"},
 						{name: "targetsRows", kind: "FittableRows", classes: "ares-project-properties-targetsRows-display"}
 						
 					]
