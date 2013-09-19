@@ -88,6 +88,9 @@ enyo.kind({
 		if (this.docData === inDocData) {
 			this.reparseUsersCode();
 		}
+		else {
+			this.trace("skipping reparse user code");
+		}
 	},
 	saveNeeded: function() {
 		return this.docData.getEdited();
