@@ -422,6 +422,7 @@ enyo.kind({
 			code: this.$.ace.getValue(),
 			path: this.projectCtrl.projectUrl + this.docData.getFile().dir + this.docData.getFile().name
 		};
+		this.trace("called with mode " + mode + " inhibitUpdate " + inhibitUpdate);
 		switch(mode) {
 			case "javascript":
 				try {
@@ -441,6 +442,7 @@ enyo.kind({
 					enyo.log("An error occured during the code analysis: " + error);
 					this.dumpInfo(null);
 					this.$.autocomplete.setAnalysis(null);
+					this.showErrorPopup("Failed code analysis with error (" + error + "). autocompletion and index are now disabled");
 				}
 				break;
 			case "json":
