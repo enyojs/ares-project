@@ -863,23 +863,25 @@ enyo.kind({
 			this.$.findpop.setFindInput(selected);
 		} 
 		this.$.findpop.removeMessage();
+		this.$.findpop.disableReplaceButtons(true);
 		this.$.findpop.show();
 		return true;
 	},
 	findNext: function(inSender, inEvent){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.find(this.$.findpop.findValue, options);
-		this.$.findpop.updateMessage(this.$.ace.getSelection());
+		this.$.findpop.updateAfterFind(this.$.ace.getSelection());
 	},
 
 	findPrevious: function(){
 		var options = {backwards: true, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.find(this.$.findpop.findValue, options);
-		this.$.findpop.updateMessage(this.$.ace.getSelection());
+		this.$.findpop.updateAfterFind(this.$.ace.getSelection());
 	},
 
 	replaceAll: function(){
-		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		var occurences = this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		this.$.findpop.updateMessage(this.$.ace.getSelection(), occurences);
 	},
 	replacefind: function(){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
@@ -890,7 +892,7 @@ enyo.kind({
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
 	//It was not working because ACE(Ace.js) was doing "find" action before "replace".
 	replace: function(){
-		this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		this.$.ace.replace(this.$.findpop.findValue, this.$.findpop.replaceValue);
 	},
 
 	focusEditor: function(inSender, inEvent) {
