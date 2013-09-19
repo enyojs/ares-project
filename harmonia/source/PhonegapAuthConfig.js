@@ -31,7 +31,7 @@ enyo.kind({
 		}
 		this.$.userData.$.pgUserData.setUserData(userData);
 		this.$.userData.show();
-		enyo.Signals.send("onRefreshUserData");
+		enyo.Signals.send("plugin.phonegap.userDataRefreshed");
 		next();
 	}
 });
