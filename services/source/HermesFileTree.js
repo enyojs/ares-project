@@ -1026,7 +1026,6 @@ enyo.kind({
 		if (this.selectedNode) {
 			this.$.deletePopup.setType(this.selectedNode.file.isDir ? $L("folder") : $L("file"));
 			this.$.deletePopup.setName(this.selectedNode.file.name);
-			this.$.deletePopup.setNodeId(this.selectedNode.file.id);
 			this.$.deletePopup.setPath(this.selectedNode.file.path);
 			this.$.deletePopup.show();
 		} else {
