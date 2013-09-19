@@ -340,11 +340,10 @@ enyo.kind({
 		this.$.autocomplete.setProjectData(null);
 	},
 	/**
-	 *	Disable "Designer" button unless project & enyo index are both valid
+	 *	Enable "Designer" button only if project & enyo index are both valid
 	 */
 	manageDesignerButton: function() {
-		var disabled = ! this.projectCtrl.fullAnalysisDone;
-		this.owner.$.designerButton.setDisabled(disabled);
+		this.owner.enableDesignerButton( this.projectCtrl.fullAnalysisDone );
 	},
 	/**
 	 * Receive the project data reference which allows to access the analyzer

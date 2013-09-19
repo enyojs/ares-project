@@ -111,6 +111,9 @@ enyo.kind({
 			this.manageControls(true);
 		}
 	},
+	enableDesignerButton: function(enable) {
+		this.$.designerButton.setDisabled(! enable) ;
+	},
 	userSyntaxErrorPop: function(){
 		this.$.userErrorPopup.raise({msg: $L("Designer cannot work on a file with a syntax error. Please fix the error highlighted in code editor before launching the designer."), title: $L("Syntax Error")});
 	},
