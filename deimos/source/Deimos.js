@@ -704,6 +704,7 @@ enyo.kind({
 		this.$.designer.updateSource(inProject);
 	},
 	reloadDesigner: function() {
+		this.enableDesignerActionButtons(false);
 		this.$.designer.reload();
 		this.$.inspector.inspect(null);
 	},
@@ -866,6 +867,6 @@ enyo.kind({
 		this.$.deleteButton.setAttribute("disabled", !condition);
 		this.$.undoButton.setAttribute("disabled", !condition);
 		this.$.redoButton.setAttribute("disabled", !condition);
+		this.$.reloadDesignerButton.setAttribute("disabled", !condition);
 	}
 });
-
