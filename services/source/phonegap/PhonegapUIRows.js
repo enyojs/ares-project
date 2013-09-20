@@ -323,7 +323,7 @@ enyo.kind({
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
 	published: {
-		contentValue: ""
+		contentValue: undefined
 	},
 	components: [
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
@@ -376,11 +376,11 @@ enyo.kind({
 		for (var key in this.$.ConfigurationPicker.$) {
 		    if(this.$.ConfigurationPicker.$[key].kind === "onyx.MenuItem"){
 			this.$.ConfigurationPicker.$[key].active = false;
-				if(this.$.ConfigurationPicker.$[key].content === inContent){
+				if(this.$.ConfigurationPicker.$[key].value === inContent){
 					this.$.ConfigurationPicker.setSelected(this.$.ConfigurationPicker.$[key]);
 				}
 		    }
-		  }
+		}
 	},
 
 	/**
@@ -416,31 +416,44 @@ enyo.kind({
 enyo.kind({
 	name: "Phonegap.ProjectProperties.SDKVersionRow",
 	kind: "Phonegap.ProjectProperties.PickerRow",
-
-	/** 
-	 * Show in a tool tip the Android versions associated to each SDK versions
-	 *  
+	
+	/**
 	 * @private
 	 */
-	updateToolTip: function() {
-		for (var key in this.$.ConfigurationPicker.$) {
-		    if(this.$.ConfigurationPicker.$[key].kind === "onyx.MenuItem"){
-			this.$.ConfigurationPicker.$[key].setAttribute("title", Phonegap.UIConfiguration.androidSdkVersionsToolTip[this.$.ConfigurationPicker.$[key].content]);
-		    }
-		  }
+	contentValueChanged: function() {
+		
+		for (var key in Phonegap.UIConfiguration.androidSdkVersionsToolTip) {
+			
+			var itemState = key === this.value ? true : false;
+
+			this.$.ConfigurationPicker.createComponent({
+				classes: "ares-project-properties-api-version-picker-element",
+				content: key + " / " + Phonegap.UIConfiguration.androidSdkVersionsToolTip[key], 
+				value: key,
+				active: itemState
+			});
+		};		
+	},
+
+	/**
+	 * @private
+	 */
+	updateConfigurationValue: function (inSender, inValue) {
+
+		this.setValue(inValue.selected.value);
+
+		return true;
 	},
 
 	/** @public */
 	setProjectConfig: function (config) {
-		this.updateToolTip();
 		this.setValue(config[this.jsonSection][this.name]);
 	},
 
 	/** @public */
 	getProjectConfig: function (config) {
 		config[this.jsonSection][this.name] = this.getValue();
-	}
-	
+	}	
 });
 
 /**

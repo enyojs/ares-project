@@ -83,8 +83,8 @@ enyo.kind({
 				type: "Target",
 				rows: [
 					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], defaultValue: "internalOnly", type: "PickerRow", jsonSection: "preferences"},
-					{name: "android-minSdkVersion", label: "Minimum SDK", content: ["18", "17", "16", "15", "14", "13", "12", "11", "10", "9", "8", "7"], defaultValue: "7", type: "SDKVersionRow", jsonSection: "preferences"},
-					{name: "android-maxSdkVersion", label: "Maximum SDK", content: ["18", "17", "16", "15", "14", "13", "12", "11", "10", "9", "8", "7"], defaultValue: "", type: "SDKVersionRow", jsonSection: "preferences"},
+					{name: "android-minSdkVersion", label: "Minimum API Level/Android Version ", content: [], defaultValue: "7", type: "SDKVersionRow", jsonSection: "preferences"},
+					{name: "android-maxSdkVersion", label: "Maximum API Level/Android Version ", content: [], defaultValue: "", type: "SDKVersionRow", jsonSection: "preferences"},
 					{name: "splash-screen-duration", label: "Splash screen Duration", content: "5000", defaultValue: "5000", type: "InputRow", jsonSection: "preferences"},
 					{name: "load-url-timeout", label: "Load URL timeout", content: "20000", defaultValue: "20000", type: "InputRow", jsonSection: "preferences"},
 					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "AndroidImgRow"},
