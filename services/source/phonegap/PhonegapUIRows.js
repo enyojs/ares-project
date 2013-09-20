@@ -431,7 +431,7 @@ enyo.kind({
 				value: key,
 				active: itemState
 			});
-		};		
+		}		
 	},
 
 	/**
