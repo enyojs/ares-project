@@ -228,13 +228,12 @@ enyo.kind({
 
 			if (this.pan) {
 				if(this.getValue()) {
-					this.pan.setClassAttribute("ares-project-properties-targetsRows-display");
+					this.pan.show();
 				} else {
-					this.pan.setClassAttribute("ares-project-properties-targetsRows-hide");
+					this.pan.hide();
 				}
 			}
 		}
-
 	},
 
 	/** @public */
