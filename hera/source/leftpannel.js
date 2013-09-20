@@ -166,9 +166,14 @@ enyo.kind({
 		{name: "Monospace", input: "font"},
 		{name: "Lucida Sans Unicode", input:"font"},
 		{name: "text-align", input:"lrc"},
-		{name: "text-indent", input:"picker"}
-	]
-	
+		{name: "text-indent", input:"picker"},
+		{name: "margin", input: "picker"},
+		{name: "margin-top", input: "picker"},
+		{name: "margin-right", input: "picker"},
+		{name: "margin-left", input: "picker"},
+		{name: "margin-bottom", input: "picker"}
+	] 
+	//  {name: " ", input: " "}
 });
 
 enyo.kind({
