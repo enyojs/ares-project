@@ -9,11 +9,11 @@ enyo.kind({
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
 	published: {
-		label: "",
-		name: "",
-		value: "",
-		jsonSection: "",
-		platform: ""
+		label: undefined,
+		name: undefined,
+		value: undefined,
+		jsonSection: undefined,
+		platform: undefined
 	},
 	components: [
 	],
