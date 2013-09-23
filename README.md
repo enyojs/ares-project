@@ -1,6 +1,8 @@
 Ares 2
 ======
 
+[![NPM](https://nodei.co/npm/ares-ide.png)](https://nodei.co/npm/ares-ide/)
+
 [Overview](id:overview)
 ----------
 
