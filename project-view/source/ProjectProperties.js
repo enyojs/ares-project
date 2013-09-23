@@ -24,47 +24,57 @@ enyo.kind({
 		onFileChoosersChecked: ""
 	},
 	handlers: {
-		onAddSource:"addNewSource",
-		onRemoveSource:"removeAddedSource",
-		onInitSource:"initAddedSource",
+		onAddSource: "addNewSource",
+		onRemoveSource: "removeAddedSource",
+		onInitSource: "initAddedSource",
 		onInputButtonTap: "selectInputFile"
 	},
 	components: [
 		{classes:"title left-align", content:"Project properties", components:[
 			{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", classes:"ares-radio-group", components: [
 				{serviceId: "project", active: true, attributes: { title: $L("project attributes...") }, components: [
-					{classes:"large-fixed", content: $L("Project")}, {tag:"span", classes:"ares-bottom-check"}
+					{classes: "large-fixed", content: $L("Project")}, {tag: "span", classes:"ares-bottom-check"}
 				]},
 				{serviceId: "preview", attributes: { title: $L("project preview parameters...") }, components: [
-					{classes:"large-fixed", content: $L("Preview")}, {tag:"span", classes:"ares-bottom-check"}
+					{classes: "large-fixed", content: $L("Preview")}, {tag:"span", classes:"ares-bottom-check"}
 				]}
 			]}
 		]},
-		{name: "projectDrawer", kind: "onyx.Drawer", open:true, components: [		
-			{classes:"ares-project-properties",components:[
-				{kind:"FittableColumns", components: [
-					{kind:"FittableRows", components: [
+		{name: "projectDrawer", kind: "onyx.Drawer", open: true, components: [		
+			{classes: "ares-project-properties",components:[
+				{kind: "FittableRows", components: [
+					{kind: "FittableColumns", classes: "ares-row", components: [
+						{components: [
+							{tag: "label", name: "projectPathLabel", classes : "ares-label", content: ""},
+						]},
+						{fit: true, components: [
+							{tag: "label", name: "projectPathValue", classes : "ares-label", content: ""},
+						]}
+					]}
+				]},
+				{tag: "p", classes:"break"},
+				{kind: "FittableColumns", components: [
+					{kind: "FittableRows", components: [
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Name: ")},
+							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Name: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectName"}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Version: ")},
+							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Version: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectVersion", placeholder:"0.0.1"}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Author name: ")},
+							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Author name: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", name: "projectAuthor", attributes: {title: $L("Vendor / Committer Name")}, placeholder: $L("My Company")}
 							]}
-
 						]},
 						{classes:"ares-row", name: "templatesEntry", showing: false, components: [
-							{tag:"label", classes:"ares-fixed-label ares-small-label", content: $L("Template:")},
+							{tag: "label", classes :"ares-fixed-label ares-small-label", content: $L("Template:")},
 							{kind: "onyx.PickerDecorator", fit: true, components: [
 								{name: "templateButton", classes:"very-large-width", kind: "onyx.PickerButton", fit: true},
 								{kind: "onyx.FlyweightPicker", name: "templatePicker", components: [
@@ -73,22 +83,22 @@ enyo.kind({
 							]}
 						]}
 					]},
-					{kind:"FittableRows", components: [
+					{kind: "FittableRows", components: [
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Title: ")},
+							{tag: "label", classes: "ares-fixed-label ares-small-label", content: $L("Title: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectTitle", placeholder: $L("My Example App")}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Id: ")},
+							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Id: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectId",
-								attributes: {title: $L("Application ID in reverse domain-name format: com.example.apps.myapp")}, placeholder:"com.example.apps.myapp"}
+								attributes: {title: $L("Application ID in reverse domain-name format: com.example.apps.myapp")}, placeholder: "com.example.apps.myapp"}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag:"label", classes : "ares-fixed-label ares-small-label", content: $L("Contact: ")},
+							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Contact: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", name: "projectContact",
 									attributes: {title: $L("mail address or home page of the author")}, placeholder: $L("support@example.com")
@@ -97,17 +107,22 @@ enyo.kind({
 						]}
 					]}
 				]},
-				{name:'directoryEntry', canGenerate:false, components: [
-					{content: "Directory: "},
-					{content: "", name: "projectDirectory" }
+				{tag: "p", classes: "break"},
+				{kind: "FittableColumns", components: [
+					{classes: "ares-row", components: [
+							{tag: "label", classes: "ares-fixed-label  ares-small-label", content: $L("Description:")},
+							{kind: "onyx.InputDecorator", classes: "ares-project-properties-textarea-wide", components: [
+								{kind: "onyx.TextArea", name: "projectDescription", fit: true, content: "", placeholder: $L("My project description...")}
+							]}
+						]}
 				]},
 				{tag:"p", classes:"break"},
-				{kind: "enyo.FittableColumns", classes:"ares-row", name: "servicesList"}
+				{kind: "enyo.FittableColumns", classes: "ares-row", name: "servicesList"}
 			]}
 		]},
 		{name: "previewDrawer", kind: "onyx.Drawer", open: false, components: [
-			{classes:"ares-project-properties",components:[
-				{kind: 'FittableRows', components: [
+			{classes: "ares-project-properties", components:[
+				{kind: "FittableRows", components: [
 					{kind: "ProjectProperties.PathInputRow", 
 						name: "topFileRow", 
 						label: $L("Top application file: "), 
@@ -116,9 +131,9 @@ enyo.kind({
 				]}
 			]}
 		]},
-		{name: "toolbarId", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+		{name: "toolbarId", kind: "onyx.Toolbar", classes: "bottom-toolbar", components: [
 			{kind: "onyx.Button", content: $L("Cancel"), ontap: "doDone"},
-			{name: "ok", kind: "onyx.Button", content: $L("OK"), classes:"right", ontap: "confirmTap"}
+			{name: "ok", kind: "onyx.Button", content: $L("OK"), classes: "right", ontap: "confirmTap"}
 		]},
 
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
@@ -226,7 +241,6 @@ enyo.kind({
 	 */
 	setupCreate: function() {
 		//this.$.ok.setDisabled(true) ;
-		this.$.directoryEntry.show() ;
 		this.$.templatesEntry.show();
 		this.notifyProjectPropertyStatus({status: "create"});
 	},
@@ -235,7 +249,6 @@ enyo.kind({
 	 * Tune the widget for project modification
 	 */
 	setupModif: function() {
-		this.$.directoryEntry.hide() ;
 		this.$.templatesEntry.hide();
 		this.notifyProjectPropertyStatus({status: "modify"});
 	},
@@ -272,6 +285,8 @@ enyo.kind({
 		}
 		this.$.projectAuthor.setValue(this.config.author.name || '') ;
 		this.$.projectContact.setValue(this.config.author.href || '') ;
+
+		this.$.projectDescription.setValue(this.config.description || '') ;
 
 		// Load each provider service configuration into its
 		// respective ProjectProperties panel
@@ -334,6 +349,8 @@ enyo.kind({
 		this.config.author = {};
 		this.config.author.name = this.$.projectAuthor.getValue();
 		this.config.author.href = this.$.projectContact.getValue();
+
+		this.config.description = this.$.projectDescription.getValue();		
 
 		// Preview settings
 		this.config.preview = {};

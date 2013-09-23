@@ -418,6 +418,7 @@ enyo.kind({
 		this.selectedNode = null;
 		this.projectUrlReady = false; // Reset the project information
 		this.clear() ;
+		this.$.serverNode.file = null;
 		return this ;
 	},
 	hideFileOpButtons: function() {
@@ -709,13 +710,17 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		var folder = this.getFolder();
 		this.trace("on folder ",folder);
-		if (folder && folder.isDir) {
-			this.$.nameFolderPopup.setFileName("");
-			this.$.nameFolderPopup.setFolderId(folder.id);
-			this.$.nameFolderPopup.setPath(folder.path);
-			this.$.nameFolderPopup.show();
+		if (this.$.serverNode && this.$.serverNode.file) {
+			if (folder && folder.isDir) {
+				this.$.nameFolderPopup.setFileName("");
+				this.$.nameFolderPopup.setFolderId(folder.id);
+				this.$.nameFolderPopup.setPath(folder.path);
+				this.$.nameFolderPopup.show();
+			} else {
+				this.showErrorPopup($L("Select a parent folder first"));
+			}
 		} else {
-			this.showErrorPopup($L("Select a parent folder first"));
+			this.showErrorPopup($L("Select a file system first"));
 		}
 	},
 	/** @private */
@@ -1021,7 +1026,6 @@ enyo.kind({
 		if (this.selectedNode) {
 			this.$.deletePopup.setType(this.selectedNode.file.isDir ? $L("folder") : $L("file"));
 			this.$.deletePopup.setName(this.selectedNode.file.name);
-			this.$.deletePopup.setNodeId(this.selectedNode.file.id);
 			this.$.deletePopup.setPath(this.selectedNode.file.path);
 			this.$.deletePopup.show();
 		} else {
@@ -1321,7 +1325,7 @@ enyo.kind({
 	},
 	/* @private */
 	checkedPath: function(path) {
-		var illegal = /[<>\/\\!?@#\$%^&\*,]+/i;
+		var illegal = /[<>\/\\!?$%&*,:;"|]/i;
 
 		if (path.match(illegal)) {
 			this.showErrorPopup(this.$LS("Path #{path} contains illegal characters", {path: path}));
