@@ -562,7 +562,7 @@ enyo.kind({
 					var prop = o.properties[j];
 					var pName = prop.name;
 					var value = this.verifyValueType(analyzer.Documentor.stripQuotes(prop.value[0].name));
-					if (prop.start < start && pName !== "components") {
+					if ((start === undefined || prop.start < start) && pName !== "components") {
 						if (value === "{" || value === "[" || value === "function") {
 							comp[pName] = kindBlock[pName];
 						} else {
@@ -690,23 +690,24 @@ enyo.kind({
 			if (inEvent.contents[i]) {
 				// Insert the new version of components (replace components block, or insert at end)
 				var obj = this.analysis.objects[i];
-				var comps = inEvent.contents[i];
-				var start = obj.block.start;
+				var content = inEvent.contents[i];
+				var start = obj.componentsBlockStart;
 				var end = obj.componentsBlockEnd;
+				var kindStart = obj.block.start;
 				if (!(start && end)) {
 					// If this kind doesn't have a components block yet, insert a new one
 					// at the end of the file
 					var last = obj.properties[obj.properties.length-1];
 					if (last) {
-						comps = (last.commaTerminated ? "" : ",") + "\n\t" + "components: " + comps;
-						start = obj.block.end - 2;
+						content = (last.commaTerminated ? "" : ",") + "\n\t" + "components: []";
+						kindStart = obj.block.end - 2;
 						end = obj.block.end - 2;
 					}
 				}
 				// Get the corresponding Ace range to replace the component definition
 				// NB: ace.replace() allow to use the undo/redo stack.
-				var range = this.$.ace.mapToLineColumnRange(start, end);
-				this.$.ace.replaceRange(range, comps);
+				var range = this.$.ace.mapToLineColumnRange(kindStart, end);
+				this.$.ace.replaceRange(range, content);
 			}
 		}
 		this.injected = false;
