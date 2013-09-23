@@ -72,56 +72,40 @@ GenZip.prototype.getSources = function(req, res, next) {
 GenZip.prototype.generate = function(req, res, next) {
 	log.info("GenZip#generate()");
 	
-	var destination = temp.mkdirSync({prefix: 'com.enyojs.ares.services.genZip'});
+	var destination = temp.mkdirSync({prefix: 'com.enyojs.ares.services.genZip.'});
 	this.tools.generate(JSON.parse(req.body.sourceIds), JSON.parse(req.body.substitutions), destination, {
 		overwrite: req.param("overwrite") === 'true'
-	}, (function(err, fileList) {
-		// XXX each item in filelist should
-		// XXX include only files & be
-		// XXX relative to the desination dir.
+	}, (function _out(err, fileList) {
+		log.silly("GenZip#generate#_out()", "fileList:", fileList);
 		if (err) {
-			log.error("GenZip#generate()", err);
+			log.error("GenZip#generate#_out()", err);
 			//log.silly("GenZip#generate()", "arguments:", arguments);
 			setImmediate(next, err);
 			return;
 		}
 
-		async.map(fileList, function(file, next) {
-			fs.stat(file, function(err, stat) {
-				if (err) {
-					// abort on error
-					setImmediate(next, err);
-				} else if (stat.isFile()) {
-					// keep file path
-					setImmediate(next, null, {
-						filename: file.substr(destination.length + 1),
-						path: file
-					});
-				} else {
-					// skip non-file
-					setImmediate(next);
-				}
+		var parts = fileList.map(function(file) {
+			return({
+				filename: file,
+				path: path.join(destination, file)
 			});
-		}, (function(err, results) {
-			// filter-out falsies left in place by async.map() above
-			var parts = results.filter(function(part) {
-				return !!part;
-			});
-			this.returnFormData(parts, res, (function _cleanup(err) {
-				// cleanup the temp dir when the response has been sent
-				if (this.config.performCleanup) {
-					log.verbose("GenZip#generate#_cleanup", "starting removal of " + destination);
-					rimraf(destination, function(err) {
-						log.verbose("cleanup", "removed " + destination);
-					});
-				} else {
-					log.verbose("GenZip#generate#_cleanup", "skipping removal of " + destination);
-				}
-				if (err) {
-					setImmediate(next, err);
-				}
-				// HTTP success was already sent in case no error happenned.
-			}).bind(this));
+		});
+		log.silly("GenZip#generate#_out()", "parts:", parts);
+
+		this.returnFormData(parts, res, (function _cleanup(err) {
+			// cleanup the temp dir when the response has been sent
+			if (this.config.performCleanup) {
+				log.verbose("GenZip#generate#_cleanup", "rm -rf", destination);
+				rimraf(destination, function(err) {
+					log.verbose("cleanup", "removed " + destination);
+				});
+			} else {
+				log.verbose("GenZip#generate#_cleanup", "skipping removal of", destination);
+			}
+			if (err) {
+				next(err);
+			}
+			// HTTP success was already sent in case no error happenned.
 		}).bind(this));
 	}).bind(this));
 };
