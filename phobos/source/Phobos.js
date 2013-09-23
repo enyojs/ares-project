@@ -59,9 +59,13 @@ enyo.kind({
 		this.doRegisterMe({name:"phobos", reference:this});
 	},
 	getProjectController: function() {
+		// create projectCtrl only when needed. In any case, there's only
+		// one Phobos and one projectCtrl in Ares
 		this.projectCtrl = this.projectData.getProjectCtrl();
 		if ( ! this.projectCtrl) {
 			this.projectCtrl = new ProjectCtrl({projectData: this.projectData});
+			// wire event propagation from there to Phobos
+			this.projectCtrl.setOwner(this);
 			this.projectData.setProjectCtrl(this.projectCtrl);
 		}
 	},
