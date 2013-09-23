@@ -106,7 +106,7 @@ function ServiceBase(config, next) {
 	// - 'multipart/form-data' => req.body.<field>[], req.body.file[]
 	this.uploadDir = temp.path({prefix: 'com.enyojs.ares.services.' + this.config.basename}) + '.d';
 	fs.mkdirSync(this.uploadDir);
-	this.app.use(express.bodyParser({keepExtensions: true, uploadDir: this.uploadDir}));
+	this.app.use(express.bodyParser({/*maxFields: 10000,*/ keepExtensions: true, uploadDir: this.uploadDir}));
 
 	/*
 	 * verbs

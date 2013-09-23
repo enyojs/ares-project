@@ -84,7 +84,7 @@ function FsBase(inConfig, next) {
 	var uploadDir = temp.path({prefix: 'com.palm.ares.services.fs.' + this.name}) + '.d';
 	this.log("uploadDir:", uploadDir);
 	fs.mkdirSync(uploadDir);
-	this.app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
+	this.app.use(express.bodyParser({maxFields: 10000, keepExtensions: true, uploadDir: uploadDir}));
 	this.app.use(this.dump.bind(this));
 
 	// outbound http/https traffic
