@@ -377,7 +377,7 @@ enyo.kind({
 
 		//Send the request to get the user data only if the Phonegap build service is enabled.
 		if (this.config && this.config.enabled) {
-			provider.authorize(enyo.bind(this, this.getUserData));
+			//provider.authorize(enyo.bind(this, this.getUserData));
 		}		
 	},
 
@@ -687,6 +687,7 @@ enyo.kind({
 			} else if (row === "signingKey") {				
 				if (this.enabled && this.$.drawer.$.signingKey.getActiveKeyId()) {
 					config.targets[this.targetId].keyId = this.$.drawer.$.signingKey.getActiveKeyId();
+					config.targets[this.targetId].keyTitle = this.$.drawer.$.signingKey.getActiveKeyTitle();
 				}
 				
 			} else {
