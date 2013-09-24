@@ -420,18 +420,20 @@ enyo.kind({
 	 * @private
 	 */
 	contentValueChanged: function() {
-		
-		for (var key in Phonegap.UIConfiguration.androidSdkVersionsToolTip) {
-			
-			var itemState = key === this.value ? true : false;
+		//sort the value of the Android API version to garanty the display in the correct order. 
+		Object.keys(Phonegap.UIConfiguration.androidSdkVersions)
+		.sort().forEach(
+			(function(key) {
+				var itemState = key === this.value ? true : false;
 
-			this.$.ConfigurationPicker.createComponent({
-				classes: "ares-project-properties-api-version-picker-element",
-				content: key + " / " + Phonegap.UIConfiguration.androidSdkVersionsToolTip[key], 
-				value: key,
-				active: itemState
-			});
-		}		
+				this.$.ConfigurationPicker.createComponent({
+					classes: "ares-project-properties-api-version-picker-element",
+					content: key + " / " + Phonegap.UIConfiguration.androidSdkVersions[key], 
+					value: key,
+					active: itemState
+				});
+			}).bind(this)		
+		);		
 	},
 
 	/**
