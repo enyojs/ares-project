@@ -111,10 +111,10 @@ GenZip.prototype.generate = function(req, res, next) {
 };
 
 GenZip.prototype.configure = function(config, next) {
-	log.silly("BdBase#configure()", "old config:", this.config);
-	log.silly("BdBase#configure()", "inc config:", config);
+	log.silly("GenZip#configure()", "old config:", this.config);
+	log.silly("GenZip#configure()", "inc config:", config);
 	util._extend(this.config, config);
-	log.verbose("BdBase#configure()", "new config:", this.config);
+	log.verbose("GenZip#configure()", "new config:", this.config);
 	this.tools = new ptools.Generator(this.config, next);
 };
 

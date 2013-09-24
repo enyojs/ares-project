@@ -504,7 +504,6 @@ FsBase.prototype._putWebForm = function(req, res, next) {
  */
 FsBase.prototype._putMultipart = function(req, res, next) {
 	var pathParam = req.param('path');
-	this.log("FsBase#_putMultipart(): req.files.length:", req.files.length);
 	this.log("FsBase#_putMultipart(): req.body:", req.body);
 	this.log("FsBase#_putMultipart(): pathParam:", pathParam);
 	if (!req.files.file) {
@@ -536,8 +535,8 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 		}
 	}
 
-	this.log("FsBase.putMultipart(): files.length:", files.length);
-	this.log("FsBase.putMultipart(): files:", files.map(function(file) { return file.name; }) /*FIXME: too slow*/);
+	this.log("FsBase#_putMultipart(): files.length:", files.length);
+	//this.log("FsBase.putMultipart(): files:", util.inspect(files, {depth: 1}));
 
 	var nodes = [];
 	async.forEachSeries(files, (function(file, next) {

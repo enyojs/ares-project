@@ -389,7 +389,7 @@ FsLocal.prototype.putFile = function(req, file, next) {
 			}
 		}).bind(this),
 		(function(next){
-			this.log("FsLocal.putFile(): wrote: file.name: ", file.name);
+			this.log("FsLocal.putFile(): wrote: file.name:", file.name);
 			node = {
 				id: encodeFileId(urlPath),
 				path: urlPath,
@@ -399,7 +399,6 @@ FsLocal.prototype.putFile = function(req, file, next) {
 			setImmediate(next);
 		}).bind(this)
 	], (function(err) {
-		this.log("FsLocal.putFile(): node:", node);
 		setImmediate(next, err, node);
 	}).bind(this));
 };
