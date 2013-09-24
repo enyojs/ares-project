@@ -580,7 +580,7 @@ function sendClosingBoundary(req, boundaryKey) {
 		var content = {
 			name: 'file',	// field name
 			filename: 'tata', // file path
-			input: new Buffer(textContent)
+			input: new Buffer(textContent).toString('base64')
 		};
 		async.waterfall([
 			function(cb) {
@@ -623,7 +623,7 @@ function sendClosingBoundary(req, boundaryKey) {
 		var content = {
 			name: 'file',	// field name
 			filename: 'dir.1/file.0', // file path
-			input: new Buffer(textContent)
+			input: new Buffer(textContent).toString('base64')
 		};
 		async.waterfall([
 			function(cb) {
@@ -667,11 +667,11 @@ function sendClosingBoundary(req, boundaryKey) {
 		var content = [{
 			name: 'file',	// field name
 			filename: 'dir.2/file.0', // file path
-			input: new Buffer(textContent)
+			input: new Buffer(textContent).toString('base64')
 		},{
 			name: 'file',	// field name
 			filename: 'dir.2/file.1', // file path
-			input: new Buffer(textContent2)
+			input: new Buffer(textContent2).toString('base64')
 		}];
 		async.waterfall([
 			function(cb) {

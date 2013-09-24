@@ -12,7 +12,7 @@ var fs = require("graceful-fs"),
     mkdirp = require("mkdirp"),
     rimraf = require("rimraf"),
     CombinedStream = require('combined-stream'),
-    base64stream = require('base64stream'),
+    base64 = require('base64-stream'),
     HttpError = require("./httpError");
 
 module.exports = ServiceBase;
@@ -153,8 +153,8 @@ ServiceBase.prototype.makeExpressRoute = function(path) {
 /**
  * @param {Object} config
  * @propery config {} basename
- * @propery config {String} pathname
- * @propery config {String} pathname
+ * @property config {int} maxDataSize used by https://npmjs.org/package/combined-stream
+ * @propery config {String} pathname 
  * @propery config {int} port
  * @protected
  */
@@ -323,11 +323,105 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 	}
 	log.verbose("ServiceBase#returnFormData()", parts.length, "parts");
 	log.silly("ServiceBase#returnFormData()", "parts", util.inspect(parts, {depth: 2}));
+	
+	try {
+		// Build the multipart/formdata
+		var FORM_DATA_LINE_BREAK = '\r\n',
+		    combinedStream = CombinedStream.create({ pauseStreams: true, maxDataSize: this.config.maxDataSize || 15*1024*1024 /*15 MB*/ }),
+		    boundary = _generateBoundary();
+		
+		parts.forEach(function(part) {
+			// Adding part header
+			combinedStream.append(_getPartHeader(part.filename));
 
+			// Adding data
+			log.verbose("ServiceBase#returnFormData()", "part:", part.filename);
+			if (part.path) {
+				log.silly("ServiceBase#returnFormData()", "Streaming part.path", part.path);
+				part.stream = fs.createReadStream(part.path);
+				part.path = undefined;
+			}
+
+			if (part.stream) {
+				combinedStream.append(part.stream.pipe(base64.encode()));
+				log.silly("ServiceBase#returnFormData()", "Sending Stream");
+			} else if (part.buffer) {
+				combinedStream.append(function(nextDataChunk) {
+					log.silly("ServiceBase#returnFormData()", "Sending Buffer");
+					nextDataChunk(part.buffer.toString('base64'));
+				});
+			} else {
+				log.warn("ServiceBase#returnFormData()", "Invalid part:", part);
+				combinedStream.append(function(nextDataChunk) {
+					nextDataChunk('INVALID CONTENT');
+				});
+			}
+		
+			// Adding part footer
+			combinedStream.append(function(nextDataChunk) {
+				log.silly("ServiceBase#returnFormData()", "End-of-Part:", part.filename);
+				nextDataChunk(_getPartFooter());
+			});
+		});
+		
+		// Adding last footer
+		combinedStream.append(function(nextDataChunk) {
+			nextDataChunk(_getLastPartFooter());
+		});
+	} catch(err) {
+		setImmediate(next, err);
+		return;
+	}
+
+	// Send the files back as a multipart/form-data
 	res.status(200);
+	res.header('Content-Type', _getContentTypeHeader());
+	res.header('X-Content-Type', _getContentTypeHeader());
+	combinedStream.on('end', function() {
 		log.silly("ServiceBase#returnFormData()", "Streaming completed");
 		next();
 	});
+	combinedStream.pipe(res);
+	
+	function _generateBoundary() {
+		// This generates a 50 character boundary similar to those used by Firefox.
+		// They are optimized for boyer-moore parsing.
+		var boundary = '--------------------------';
+		for (var i = 0; i < 24; i++) {
+			boundary += Math.floor(Math.random() * 10).toString(16);
+		}
+
+		return boundary;
+	}
+
+	function _getContentTypeHeader() {
+		return 'multipart/form-data; boundary=' + boundary;
+	}
+
+	function _getPartHeader(filename) {
+		var header = '--' + boundary + FORM_DATA_LINE_BREAK;
+		header += 'Content-Disposition: form-data; name="file"';
+
+		header += '; filename="' + filename + '"' + FORM_DATA_LINE_BREAK;
+
+		// 'Content-Transfer-Encoding' require 76-columns base64-encoded  data...
+		//header += 'Content-Type: application/octet-stream' + FORM_DATA_LINE_BREAK;
+		//header += 'Content-Transfer-Encoding: base64' + FORM_DATA_LINE_BREAK;
+
+		// ...so we use our own 'Content-Type'
+		header += 'Content-Type: application/octet-stream; x-encoding=base64' + FORM_DATA_LINE_BREAK;
+
+		header += FORM_DATA_LINE_BREAK;
+		return header;
+	}
+
+	function _getPartFooter() {
+		return FORM_DATA_LINE_BREAK;
+	}
+
+	function _getLastPartFooter() {
+		return '--' + boundary + '--';
+	}
 };
 
 /**

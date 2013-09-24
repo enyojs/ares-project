@@ -383,7 +383,6 @@ FsLocal.prototype.putFile = function(req, file, next) {
 					next();
 				}).bind(this));
 				file.stream.pipe(out);
-				file.stream.resume();
 			} else {
 				setImmediate(next, new HttpError("cannot write file=" + JSON.stringify(file), 400));
 			}

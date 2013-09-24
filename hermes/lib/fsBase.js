@@ -12,6 +12,7 @@ var fs = require("graceful-fs"),
     createDomain = require('domain').create,
     temp = require("temp"),
     async = require("async"),
+    base64 = require('base64-stream'),
     HttpError = require("./httpError");
 
 module.exports = FsBase;
@@ -84,7 +85,12 @@ function FsBase(inConfig, next) {
 	var uploadDir = temp.path({prefix: 'com.palm.ares.services.fs.' + this.name}) + '.d';
 	this.log("uploadDir:", uploadDir);
 	fs.mkdirSync(uploadDir);
-	this.app.use(express.bodyParser({maxFields: 10000, keepExtensions: true, uploadDir: uploadDir}));
+	this.app.use(express.bodyParser({
+		maxFieldsSize: 15 * 1024 * 1024, // 15 MBytes
+		maxFields: 10000,		 // 10,000 files
+		keepExtensions: true,
+		uploadDir: uploadDir
+	}));
 	this.app.use(this.dump.bind(this));
 
 	// outbound http/https traffic
@@ -506,34 +512,22 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 	var pathParam = req.param('path');
 	this.log("FsBase#_putMultipart(): req.body:", req.body);
 	this.log("FsBase#_putMultipart(): pathParam:", pathParam);
-	if (!req.files.file) {
+	//this.log("FsBase.putMultipart(): req.files:", util.inspect(req.files, {depth: 1}));
+
+	var names = req.files && Object.keys(req.files);
+	if (!names || names.length === 0) {
 		setImmediate(next, new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
 		return;
 	}
-	var files = [];
-	if (Array.isArray(req.files.file)) {
-		files.push.apply(files, req.files.file);
-	} else {
-		files.push(req.files.file);
-	}
-
-	// work-around firefox bug, that does not incorporate filename
-	// as third parameter of FormData#append().  We then expect a
-	// handful of filename=xxx keyvals, that will complement the
-	// file fields of the FormData.
-	var filenames = [];
-	if (req.body.filename) {
-		if (Array.isArray(req.body.filename)) {
-			filenames.push.apply(filenames, req.body.filename);
-		} else {
-			filenames.push(req.body.filename);
-		}
-		for (var i = 0; i < files.length; i++) {
-			if (filenames[i]) {
-				files[i].name = filenames[i];
-			}
-		}
-	}
+	var files = [], file;
+	names.forEach(function(name) {
+		var namedFiles = req.files[name];
+		namedFiles = Array.isArray(namedFiles) ? namedFiles : [ namedFiles ];
+		namedFiles.forEach(function(file) {
+			file.filename = file.filename || ((name === "file" || name === "blob") ? file.name : name);
+			files.push(file);
+		});
+	});
 
 	this.log("FsBase#_putMultipart(): files.length:", files.length);
 	//this.log("FsBase.putMultipart(): files:", util.inspect(files, {depth: 1}));
@@ -541,11 +535,14 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 	var nodes = [];
 	async.forEachSeries(files, (function(file, next) {
 
-		if (file.name === '.' || !file.name) {
+		if (file.filename === '.' || !file.filename) {
 			file.name = pathParam;
 		} else {
-			file.name = [pathParam, file.name].join('/');
+			file.name = [pathParam, file.filename].join('/');
 		}
+
+		file.stream = fs.createReadStream(file.path).pipe(base64.decode());
+		file.path = undefined;
 
 		var putCallback = function(err, node) {
 			this.log("FsBase.putMultipart(): err:", err, "node:", node);
