@@ -6,7 +6,7 @@ enyo.kind({
 	floating : true,
 	autoDismiss : false,
 	modal : false,
-	classes: "ares_phobos_autocomp",
+	classes: "ares_phobos_autocomp ares-masked-content-popup",
 	published: {
 		ace: null,
 		analysis: null,
@@ -313,7 +313,7 @@ enyo.kind({
 	 * @protected
 	 */
 	fillSuggestionsEnyo: function(suggestions) {
-		return suggestions.concat(this.suggestionsEnyo);
+		return suggestions.concatenate(this.suggestionsEnyo);
 	},
 	/**
 	 * Add suggestions for onyx functions and kinds
@@ -322,7 +322,7 @@ enyo.kind({
 	 * @protected
 	 */
 	fillSuggestionsOnyx: function(suggestions) {
-		return suggestions.concat(this.suggestionsOnyx);
+		return suggestions.concatenate(this.suggestionsOnyx);
 	},
 	/**
 	 * Finalyze the suggestion list based on user inputs and
@@ -344,12 +344,12 @@ enyo.kind({
 			// Compute the position of the popup
 			var ace = this.ace;
 			var pos = ace.textToScreenCoordinates(this.popupPosition.row, this.popupPosition.column);
-			pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
-
-			// Position the autocomplete popup
-			this.applyStyle("top", pos.pageY + "px");
-			this.applyStyle("left", pos.pageX + "px");
-			this.show();
+			this.applyStyle("padding-top", ace.getLineHeight() + "px");
+			var p = {
+			    left: pos.pageX,
+			    top: pos.pageY
+			};
+			this.showAtPosition(p);
 			this.popupShown = true;
 		} else {
 			this.hideAutocompletePopup();
@@ -709,7 +709,7 @@ enyo.kind({
 	 * @param suggestions must be a current Phobos.Suggestions object
 	 * @public
 	 */
-	concat: function(suggestions) {
+	concatenate: function(suggestions) {
 		if (suggestions) {
 			this.trace("objectId: ", suggestions.objectId, " into ", this.objectId);
 			for(var key in suggestions.items) {

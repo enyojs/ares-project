@@ -412,6 +412,37 @@ enyo.kind({
 	}
 });
 
+
+enyo.kind({
+	name: "Phonegap.ProjectProperties.SDKVersionRow",
+	kind: "Phonegap.ProjectProperties.PickerRow",
+
+	/** 
+	 * Show in a tool tip the Android versions associated to each SDK versions
+	 *  
+	 * @private
+	 */
+	updateToolTip: function() {
+		for (var key in this.$.ConfigurationPicker.$) {
+		    if(this.$.ConfigurationPicker.$[key].kind === "onyx.MenuItem"){
+			this.$.ConfigurationPicker.$[key].setAttribute("title", Phonegap.UIConfiguration.androidSdkVersionsToolTip[this.$.ConfigurationPicker.$[key].content]);
+		    }
+		  }
+	},
+
+	/** @public */
+	setProjectConfig: function (config) {
+		this.updateToolTip();
+		this.setValue(config[this.jsonSection][this.name]);
+	},
+
+	/** @public */
+	getProjectConfig: function (config) {
+		config[this.jsonSection][this.name] = this.getValue();
+	}
+	
+});
+
 /**
  * Define a row to let the user add the path to an Android icon or a splash screen image into the file "config.xml".
  */

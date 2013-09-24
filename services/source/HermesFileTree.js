@@ -10,6 +10,7 @@ enyo.kind({
 	name: "HermesFileTree",
 	kind: "FittableRows",
 	events: {
+		onError: "",
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
@@ -417,6 +418,7 @@ enyo.kind({
 		this.selectedNode = null;
 		this.projectUrlReady = false; // Reset the project information
 		this.clear() ;
+		this.$.serverNode.file = null;
 		return this ;
 	},
 	hideFileOpButtons: function() {
@@ -708,13 +710,17 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		var folder = this.getFolder();
 		this.trace("on folder ",folder);
-		if (folder && folder.isDir) {
-			this.$.nameFolderPopup.setFileName("");
-			this.$.nameFolderPopup.setFolderId(folder.id);
-			this.$.nameFolderPopup.setPath(folder.path);
-			this.$.nameFolderPopup.show();
+		if (this.$.serverNode && this.$.serverNode.file) {
+			if (folder && folder.isDir) {
+				this.$.nameFolderPopup.setFileName("");
+				this.$.nameFolderPopup.setFolderId(folder.id);
+				this.$.nameFolderPopup.setPath(folder.path);
+				this.$.nameFolderPopup.show();
+			} else {
+				this.showErrorPopup($L("Select a parent folder first"));
+			}
 		} else {
-			this.showErrorPopup($L("Select a parent folder first"));
+			this.showErrorPopup($L("Select a file system first"));
 		}
 	},
 	/** @private */
@@ -732,7 +738,7 @@ enyo.kind({
 		}
 
 		this.trace("Creating new folder ", name," into folderId=", folderId);
-		this.$.service.createFolder(folderId, name)
+		var req = this.$.service.createFolder(folderId, name, { overwrite: false })
 			.response(this, function(inSender, inFolder) {
 				this.trace("inFolder: ", inFolder);
 				var parentNode = this.getFolderOfSelectedNode(),
@@ -765,12 +771,37 @@ enyo.kind({
 				this.resetRevert();
 
 				this.refreshFileTree( function()  {parentNode.getNodeWithId(inFolder.id).doAdjustScroll(); }, inFolder.id /*selectId*/ );
-			})
-			.error(this, function(inSender, inError) {
-				this.warn("Unable to create folder:", name, inError);
-				this.showErrorPopup(this.$LS("Creating folder '#{name}' failed: {#error}", {name: name, error: inError.toString()}));
 			});
+		req.error(this, this._handleXhrError.bind(this, "Unable to create folder '" + name + "'", null /*next*/));
 	},
+
+	/**
+	 * Shared enyo.Ajax error handler
+	 * @private
+	 */
+	_handleXhrError: function(message, next, inSender, inError) {
+		var response = inSender.xhrResponse, contentType, html, text;
+		if (response) {
+			contentType = response.headers['content-type'];
+			if (contentType) {
+				if (contentType.match('^text/plain')) {
+					text = response.body;
+				}
+				if (contentType.match('^text/html')) {
+					html = response.body;
+				}
+			}
+		}
+		var err = new Error(message + " (" + inError.toString() + ")");
+		err.html = html;
+		err.text = text;
+		err.status = response.status;
+		this.doError({ msg: message, err: err});
+		if (typeof next === 'function') {
+			next(err);
+		}
+	},
+
 	/** @private */
 	// User Interaction for New File op
 	newFileClick: function(inSender, inEvent) {
@@ -873,7 +904,7 @@ enyo.kind({
 			this.$.nameCopyPopup.setFolderId(this.selectedNode.file.id);
 			this.$.nameCopyPopup.show();
 		} else {
-			this.showErrorPopup($L("Select a file or folder to copy first"));
+			this.showErrorPopup($L("First select a file or folder to copy"));
 		}
 	},
 	/** @private */
@@ -891,7 +922,10 @@ enyo.kind({
 		}
 
 		this.trace("Creating new file ", newName, " as copy of", oldName);
-		this.$.service.copy(this.selectedNode.file.id, newName)
+		this.$.service.copy(this.selectedNode.file.id, {
+			name: newName,
+			overwrite: false
+		})
 			.response(this, function(inSender, inFsNode) {
 				this.trace("inNode: ", inFsNode);
 				var parentNode = this.getParentNodeOfSelected(),
@@ -943,7 +977,10 @@ enyo.kind({
 		}
 
 		this.trace("Renaming '", this.selectedNode.file, "' as '", newName, "'");
-		this.$.service.rename(this.selectedNode.file.id, newName)
+		this.$.service.rename(this.selectedNode.file.id, {
+			name: newName,
+			overwrite: false
+		})
 			.response(this, function(inSender, inNode) {
 				this.trace("inNode: ",inNode);
 				var parentNode = this.getParentNodeOfSelected(),
@@ -989,7 +1026,6 @@ enyo.kind({
 		if (this.selectedNode) {
 			this.$.deletePopup.setType(this.selectedNode.file.isDir ? $L("folder") : $L("file"));
 			this.$.deletePopup.setName(this.selectedNode.file.name);
-			this.$.deletePopup.setNodeId(this.selectedNode.file.id);
 			this.$.deletePopup.setPath(this.selectedNode.file.path);
 			this.$.deletePopup.show();
 		} else {
@@ -1104,7 +1140,7 @@ enyo.kind({
 	createFile: function(name, folderId, content) {
 		this.trace("Creating new file ",name," into folderId=",folderId);
 
-		this.$.service.createFile(folderId, name, content)
+		var req = this.$.service.createFile(folderId, name, content, { overwrite: false })
 			.response(this, function(inSender, inNodes) {
 				this.trace("inNodes: ",inNodes);
 				var parentNode = this.getFolderOfSelectedNode(),
@@ -1135,11 +1171,8 @@ enyo.kind({
 				this.resetRevert();
 
 				this.refreshFileTree( function() { parentNode.getNodeWithId(inNodes[0].id).doAdjustScroll(); }, inNodes[0].id );
-			})
-			.error(this, function(inSender, inError) {
-				this.warn("Unable to create file:", name, inError);
-				this.showErrorPopup(this.$LS("Creating file '#{name}' failed: #{error}", {name: name, error: inError.toString()}));
 			});
+		req.error(this, this._handleXhrError.bind(this, "Unable to create file '" + name + "'", null /*next*/));
 	},
 	
 	/** @private */
@@ -1161,7 +1194,10 @@ enyo.kind({
 	moveNode: function(inNode, inTarget) {
 		this.trace("inNode", inNode, "inTarget", inTarget);
 		
-		return this.$.service.rename(inNode.file.id, {folderId: inTarget.file.id})
+		return this.$.service.rename(inNode.file.id, {
+			folderId: inTarget.file.id,
+			overwrite: false
+		})
 			.response(this, function(inSender, inValue) {
 				this.trace(inSender, "=>", inValue);
 				var removedParentNode = inNode.container,
@@ -1289,7 +1325,7 @@ enyo.kind({
 	},
 	/* @private */
 	checkedPath: function(path) {
-		var illegal = /[<>\/\\!?@#\$%^&\*,]+/i;
+		var illegal = /[<>\/\\!?$%&*,:;"|]/i;
 
 		if (path.match(illegal)) {
 			this.showErrorPopup(this.$LS("Path #{path} contains illegal characters", {path: path}));

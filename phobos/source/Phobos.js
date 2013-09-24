@@ -35,7 +35,8 @@ enyo.kind({
 		onUpdate: "",
 		onRegisterMe: "",
 		onDisplayPreview: "",
-		onSwitchFile: ""
+		onSwitchFile: "",
+		onFileEdited: " "
 	},
 	handlers: {
 		onCss: "newcssAction",
@@ -45,6 +46,7 @@ enyo.kind({
 		projectData: null
 	},
 	editedDocs:"",
+	injected: false,
 	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
@@ -80,6 +82,7 @@ enyo.kind({
 		this.hideWaitPopup();
 		if (inDocData) {
 			inDocData.setEdited(false);		// TODO: The user may have switched to another file
+			this.doFileEdited();
 		}
 		if (this.docData === inDocData) {
 			this.reparseAction();
@@ -215,7 +218,6 @@ enyo.kind({
 				this.$.ace.setSession(aceSession);
 			} else {
 				aceSession = this.$.ace.createSession(this.docData.getData(), mode);
-				this.docData.setData(null);			// We no longer need this data as it is now handled by the ACE edit session
 				this.$.ace.setSession(aceSession);
 				this.docData.setAceSession(aceSession);
 			}
@@ -513,27 +515,15 @@ enyo.kind({
 	},
 	//* Extract info about kinds from the current file needed by the designer
 	extractKindsData: function() {
-		var isDesignProperty = {
-				layoutKind: true,
-				attributes: true,
-				classes: true,
-				content: true,
-				controlClasses: true,
-				defaultKind: true,
-				fit: true,
-				src: true,
-				style: true,
-				tag: true,
-				name: true
-			},
-			c = this.$.ace.getValue(),
+		var c = this.$.ace.getValue(),
 			kinds = [];
 
 		if (this.analysis) {
 			var nbKinds = 0;
 			var errorMsg;
 			var i, o;
-			for (i=0; i < this.analysis.objects.length; i++) {
+			var oLen = this.analysis.objects.length;
+			for (i=0; i < oLen; i++) {
 				o = this.analysis.objects[i];
 				if (o.type !== "kind") {
 					errorMsg = $L("Ares does not support methods out of a kind. Please place '" + o.name + "' into a separate .js file");
@@ -549,12 +539,13 @@ enyo.kind({
 				return [];
 			}
 
-			for (i=0; i < this.analysis.objects.length; i++) {
+			for (i=0; i < oLen; i++) {
 				o = this.analysis.objects[i];
 				var start = o.componentsBlockStart;
 				var end = o.componentsBlockEnd;
+				var kindBlock = enyo.json.codify.from(c.substring(o.block.start, o.block.end));
 				var name = o.name;
-				var kind = o.superkind;
+				var kind = kindBlock.kind || o.superkind;
 				var comps = [];
 				if (start && end) {
 					var js = c.substring(start, end);
@@ -570,15 +561,35 @@ enyo.kind({
 				for (var j=0; j < o.properties.length; j++) {
 					var prop = o.properties[j];
 					var pName = prop.name;
-					if (isDesignProperty[pName]) {
-						var value = analyzer.Documentor.stripQuotes(prop.value[0].name);
-						comp[pName] = value;
+					var value = this.verifyValueType(analyzer.Documentor.stripQuotes(prop.value[0].name));
+					if (prop.start < start && pName !== "components") {
+						if (value === "{" || value === "[" || value === "function") {
+							comp[pName] = kindBlock[pName];
+						} else {
+							comp[pName] = value;
+						}
 					}
 				}
 				kinds.push(comp);
 			}
 		}
 		return kinds;
+	},
+	/**
+	 * Converts string representation of boolean values
+	 * to boolean
+	 * TODO: Verify false-positives (ex: strings meant to be strings)
+	 * @param inProps: the value to match
+	 * @returns boolean value if match found: inValue if no matches
+	 * @protected
+	 */
+	verifyValueType: function(inValue) {
+		if (inValue === "true") {
+			inValue = true;
+		} else if (inValue === "false") {
+			inValue = false;
+		}
+		return inValue;
 	},
 	/**
 	 * Lists the handler methods mentioned in the "handlers"
@@ -674,12 +685,13 @@ enyo.kind({
 	},
 	// called when designer has modified the components
 	updateComponents: function(inSender, inEvent) {
+		this.injected = true;
 		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
 			if (inEvent.contents[i]) {
 				// Insert the new version of components (replace components block, or insert at end)
 				var obj = this.analysis.objects[i];
 				var comps = inEvent.contents[i];
-				var start = obj.componentsBlockStart;
+				var start = obj.block.start;
 				var end = obj.componentsBlockEnd;
 				if (!(start && end)) {
 					// If this kind doesn't have a components block yet, insert a new one
@@ -697,12 +709,17 @@ enyo.kind({
 				this.$.ace.replaceRange(range, comps);
 			}
 		}
+		this.injected = false;
 		/*
 		 * Insert the missing handlers
 		 * NB: reparseAction() is invoked by insertMissingHandlers()
 		 */
 		this.insertMissingHandlers();
-		this.docData.setEdited(true);
+		//file is edited if only we have a difference between stored file data and editor value
+		if(this.getEditorContent().localeCompare(this.docData.getData())!==0){
+			this.docData.setEdited(true);
+			this.doFileEdited();
+		}
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
@@ -786,7 +803,11 @@ enyo.kind({
 		this.saveNextDocument();
 	},
 	docChanged: function(inSender, inEvent) {
-		this.docData.setEdited(true);
+		//this.injected === false then modification coming from user
+		if(!this.injected && !this.docData.getEdited()){
+			this.docData.setEdited(true);
+			this.doFileEdited();
+		}
 
 		this.trace("data:", enyo.json.stringify(inEvent.data));
 
@@ -846,30 +867,41 @@ enyo.kind({
 	},
 	// Show Find popup
 	findpop: function(){
+		var selected = this.$.ace.getSelection();
+		if(selected){
+			this.$.findpop.setFindInput(selected);
+		} 
+		this.$.findpop.removeMessage();
+		this.$.findpop.disableReplaceButtons(true);
 		this.$.findpop.show();
 		return true;
 	},
 	findNext: function(inSender, inEvent){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.find(this.$.findpop.findValue, options);
+		this.$.findpop.updateAfterFind(this.$.ace.getSelection());
 	},
 
 	findPrevious: function(){
 		var options = {backwards: true, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.find(this.$.findpop.findValue, options);
+		this.$.findpop.updateAfterFind(this.$.ace.getSelection());
 	},
 
 	replaceAll: function(){
-		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		var occurences = this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		this.$.findpop.updateMessage(this.$.ace.getSelection(), occurences);
 	},
 	replacefind: function(){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.replacefind(this.$.findpop.findValue , this.$.findpop.replaceValue, options);
+		this.$.findpop.updateMessage(this.$.ace.getSelection());
 	},
 
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
+	//It was not working because ACE(Ace.js) was doing "find" action before "replace".
 	replace: function(){
-		//this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		this.$.ace.replace(this.$.findpop.findValue, this.$.findpop.replaceValue);
 	},
 
 	focusEditor: function(inSender, inEvent) {

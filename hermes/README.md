@@ -96,7 +96,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 		    "versionTag": "af34ef45",
 		}
 
-* `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded).  It returns a JSON-encoded single-level (depth=0) node descriptor of the new folder.
+* `MKCOL` create a collection (a folder) into the given collection, as `name` passed as a query parameter (and therefore URL-encoded).  When the `overwrite` parameter is explicitly set to `"false"` (as a string), `MKCOL` may fails with an HTTP status code `412/Resource Already Exists`. It returns a JSON-encoded single-level (depth=0) node descriptor of the new folder.
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2F?_method=MKCOL&name=tata"
 
@@ -108,7 +108,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
     Other encoding may be added later on.
 
 	
-* `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.
+* `PUT` creates or overwrite one or more file resources, provided as `application/x-www-form-urlencoded` or `multipart/form-data`.  It returns a JSON-encoded array of single-level (depth=0) node descriptors for each uploaded files.  When the `overwrite` parameter is explicitly set to `"false"` (as a string), `PUT` may fails with an HTTP status code `412/Resource Already Exists`.
   * `application/x-www-form-urlencoded` contains a single base64-encoded file in the form field named `content`.  The file name and location are provided by `{id}` and optionally `name` query parameter.
   * `multipart/form-data` follows the standard format.  For each file `filename` is interpreted relativelly to the folder `{id}` provided in the URL.  **Note:** To accomodate an issue with old Firefox releases (eg. Firefox 10), fields labelled `filename` overwrite the `filename` in their corresponding `file` fields.  See `fsBase#_putMultipart()` for more details.
 
@@ -117,7 +117,7 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 		$ curl -d "" "http://127.0.0.1:9009/id/%2Ftata?_method=DELETE"
 
-* `COPY` reccursively copies a resource as a new `name` or `folderId` provided in the query string (one of them is required, only one is taken into account, `name` takes precedence if both are provided in the query-string).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not.  The method returns the node descriptor (as `PROPFIND` would return) of the new resource.
+* `COPY` reccursively copies a resource as a new `name` or `folderId` provided in the query string (one of them is required, only one is taken into account, `name` takes precedence if both are provided in the query-string).  The optionnal query parameter `overwrite` defines whether the `COPY` should try to overwrite an existing resource or not (default value: `"true"`).  The method returns the node descriptor (as `PROPFIND` would return) of the new resource.
   * `201/Created` success, a new resource is created
   * `200/Ok` success, an existing resource was successfully overwritten (query parameter `overwrite` was set to `true`)
   * `412/Precondition-Failed` failure, not allowed to copy onto an exising resource
@@ -250,16 +250,17 @@ The property `sources:` of the service **genZip** lists the template definitions
 				}
 			]
 		}, 
-		[...]
-	}
-
+	    [...]
+	]
+	
 Ares plugins can add or modify this list of templates, from their own `ide-plugin.json`.
 
 	{
 		"id": "genZip",
 			"sources": [
 				{
-					"id": "bootplate"
+					"id": "bootplate",
+					"type": "null"
 				},
 				{
 					"id": "bootplate-nightly",
@@ -280,66 +281,6 @@ Ares plugins can add or modify this list of templates, from their own `ide-plugi
 		}
 
 In the example above, `{ "id": "bootplate" }` will remove the entry defined in the main `ide.json` and `{ "id": "bootplate-nightly" ... } will add a new template.
-
-### Project template definition
-
-A project template definition (defined by the property `url` in `projectTemplateRepositories`) must respect the json schema [com.enyojs.ares.project.templates.schema.json](../assets/schema/com.enyojs.ares.project.templates.schema.json).
-
-**NOTE:** Ares does not (yet) enforce JSON-schema compliance.  Plugin developers can check their own `ide-plugin.json` via [http://jsonschemalint.com/](http://jsonschemalint.com/).
-
-	[
-	  {
-	    "id": "my-bootplate-2.2.0",
-	    "zipfiles": [
-	      {
-	        "url": "bootplate-2.2.0.zip",
-	        "alternateUrl": "http://enyojs.com/archive/bootplate-2.2.0.zip",
-	        "prefixToRemove": "bootplate",
-	        "prefixToAdd": "2.2.0",
-	        "excluded": [
-	          "bootplate/api"
-	        ]
-	      },
-	   	  {
-	   	  	"url": ...
-	   	  }
-	    ],
-	    "files": [
-	      {
-	      	url: "lib/package.js.js",
-	      	installAs: "source/widgets/package.js"
-	      },
-	      {
-	      	url: "lib/MyWidget.js",
-	      	installAs: "source/widgets/MyWidget.js"
-	      }
-	    ],
-	    "description": "Enyo bootplate 2.2.0"
-	  },
-	  {
-	  	"id": ...
-	  }
-	]
-
-Each project definition defined by `id` can reference one or several zip files defined in the array `zipfiles`, plus one or several files. The zip files are extracted in the order they are specified:  files extracted from a ZIP-file possibly overwrite those that were extracted from earlier ZIP-files.
-
-Each `zipfiles` entry is an `Object` which:
-
-* _MUST_ define an `url` and optionally an `alternateUrl`. The `url` is tried first and can refer to either:
-
-	* a `Filename`: file stored locally on the filesystem (see below).
-	* an HTTP URL.  If the `url` references a file which does not exist the `alternateUrl` is used.
-
-* _MAY_ define a `prefixToRemove`. This prefix must correspond to one or several directory level that must be removed.
-* _MAY_ define a `prefixToAdd`. This prefix defines a folder (it can be a path of nested folders, like `another/path/to`) to be prepended to the root of the ZIP archive 
-* _MAY_ define in the array `excluded` a list of files or directories to be excluded when the zip file is extracted.
-
-Each `files` entry is an `Object` which:
-
-* _MUST_ define an `url:` property, which is currently a `Filename` value
-* _MUST_ define an `installAs:` property that defines where the file is to be installed relatively to the root of the application project within Ares.
-
-**NOTE:** `Filename` values are to be relative to the directory where the project templates definition file is stored (See property `url` in `projectTemplateRepositories` above).
 
 ### Protocol
 
@@ -446,7 +387,7 @@ The Ares PhoneGap build service does not need any configuration but the HTTP/HTT
 			"verbose": false,
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
 			"auth": {
-				[...]
+			    [...]
 			}
 ```
 

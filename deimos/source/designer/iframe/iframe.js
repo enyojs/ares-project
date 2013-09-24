@@ -372,7 +372,7 @@ enyo.kind({
 				Stomp on existing _kindComponents_ to ensure that we render exactly what the user
 				has defined. If components came in as a string, convert to object first.
 			*/
-			kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.components) : inKind.components;
+			kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.componentKinds) : inKind.componentKinds;
 
 			// Clean up after previous kind
 			if (this.parentInstance) {
@@ -395,6 +395,8 @@ enyo.kind({
 			if (this.parentInstance.fit) {
 				this.parentInstance.addClass("enyo-fit enyo-clip");
 			}
+			this.parentInstance.domStyles = {};
+			this.parentInstance.domStylesChanged();
 			this.parentInstance.render();
 			
 			// Notify Deimos that the kind rendered successfully
@@ -405,15 +407,18 @@ enyo.kind({
 				this.selectItem({aresId: inKind.selectId});
 			}
 		} catch(error) {
-			errMsg = "Unable to render kind '" + inKind.name + "':" + error.message;
-			this.error(errMsg, error.stack);
+			errMsg = "Unable to render kind '" + inKind.name + "':" + ( typeof error === 'object' ? error.message : error );
+			var errStack = typeof error === 'object' ? error.stack : '' ;
+			this.error(errMsg, errStack );
 			this.sendMessage({op: "reloadNeeded"});
-			this.sendMessage({op: "error", val: {msg: errMsg, reloadNeeded: true, err: {stack: error.stack}}});
+			this.sendMessage({op: "error", val: {msg: errMsg, reloadNeeded: true, err: {stack: errStack}}});
 		}
 	},
 	//* Rerender current selection
 	rerenderKind: function() {
-		this.renderKind({name: this.parentInstance.kind, components: this.getSerializedCopyOfComponent(this.parentInstance).components});
+		var copy = this.getSerializedCopyOfComponent(this.parentInstance).components;
+		copy[0].componentKinds = copy;
+		this.renderKind(copy[0]);
 	},
 	checkXtorForAllKinds: function(kinds) {
 		enyo.forEach(kinds, function(kindDefinition) {

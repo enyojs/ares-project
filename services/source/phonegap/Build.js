@@ -13,6 +13,7 @@ enyo.kind({
 	published: {
 		timeoutDuration: 3000	
 	},
+	
 	debug: false,
 	/**
 	 * @private
@@ -469,20 +470,29 @@ enyo.kind({
 
 	/**
 	 * Collect & check information about current project, update config.xml
+	 * @param {Object} project
+	 * @param {Object} userData is passed by checkAppId() in waterfall
+	 * @param {Function} next is a CommonJS callback
 	 * @private
 	 */
 	_updateConfigXml: function(project, userData, next) {
-		
-		if (this.getConfigInstance(project).providers.phonegap.autoGenerateXML){
-			var config = this.getConfigInstance(project);
-
-			var req = project.getService().createFile(project.getFolderId(), "config.xml", this._generateConfigXml(config));
-			req.response(this, function _savedConfigXml(inSender, inData) {
-				this.trace("Phonegap.Build#_updateConfigXml()", "updated config.xml:", inData);	
+		var config = this.getConfigInstance(project);
+		if (config.providers.phonegap.autoGenerateXML) {
+			var configXml = this._generateConfigXml(config);
+			if (!configXml) {
+				this.error("unable to generate config.xml from:", config);	
 				next();
-			});
-			req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
+			} else {
+				var req, fs = project.getService();
+				req = fs.createFile(project.getFolderId(), "config.xml", configXml, { overwrite: true });
+				req.response(this, function _savedConfigXml(inSender, inData) {
+					this.trace("Phonegap.Build#_updateConfigXml()", "wrote config.xml:", inData);	
+					next();
+				});
+				req.error(this, this._handleServiceError.bind(this, "Unable to write config.xml", next));
+			}
 		} else {
+			this.trace("skipping config.xml generation");	
 			next();
 		}
 
@@ -635,8 +645,8 @@ enyo.kind({
 	_storePkg: function(project, folderId, inData, next) {
 		this.trace("data content.ctype: ", inData.ctype);	
 
-		var req = project.getService().createFiles(folderId, 
-			{content: inData.content, ctype: inData.ctype});
+		var req, fs = project.getService();
+		req = fs.createFiles(folderId, {content: inData.content, ctype: inData.ctype}, { overwrite: true });
 
 		req.response(this, function(inSender, inData) {
 			this.trace("response:", inData);
@@ -818,8 +828,7 @@ enyo.kind({
 					//inData is a multipart/form containing the
 					//built application
 					function(inData, next){
-						builder._storePkg(project, folderId, 
-						inData, next);
+						builder._storePkg(project, folderId, inData, next);
 					}
 				], next);
 			}
@@ -882,7 +891,7 @@ enyo.kind({
 			xw.writeAttributeString('src', phonegap.icon[inTarget].src || 'icon.png');
 			
 			xw.writeAttributeString('role', phonegap.icon[inTarget].role || 'default');
-			if(inTarget != 'general'){
+			if(inTarget != 'sharedConfiguration'){
 				xw.writeAttributeString('gap:platform', inTarget);
 			}
 
@@ -901,7 +910,7 @@ enyo.kind({
 			// If the project does not define an icon, use Enyo's
 			// one
 			xw.writeAttributeString('src', phonegap.splashScreen[inTarget].src || 'icon.png');
-			if(inTarget != 'general'){
+			if(inTarget != 'sharedConfiguration'){
 				xw.writeAttributeString('gap:platform', inTarget);
 			}
 			if (inTarget === 'android'){

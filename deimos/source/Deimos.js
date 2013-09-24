@@ -4,7 +4,6 @@ enyo.kind({
 	classes: "enyo-unselectable onyx",
 	debug: false,
 	published: {
-		edited: false,
 		projectData: null		// All the project data shared mainly between phobos and deimos
 	},
 	components: [
@@ -50,7 +49,7 @@ enyo.kind({
 							onReloadComplete: "reloadComplete",
 							onResizeItem: "resizeItem",
 							onReturnPositionValue: "designerReturnPositionValue"
-						},
+						}
 					]}
 				]},				
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
@@ -95,6 +94,7 @@ enyo.kind({
 	},
 	kinds: [],
 	index: null,
+	previousContents: [],
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -119,11 +119,15 @@ enyo.kind({
 	 * @public
 	 */
 	load: function(data) {
+		this.enableDesignerActionButtons(false);
+
 		var what = data.kinds;
 		var maxLen = 0;
 		
 		this.index = null;
 		this.kinds = what;
+		this.previousContents = [];
+		
 		this.owner.$.kindPicker.destroyClientControls();
 
 		// Pass the project information (analyzer output, ...) to the inspector and palette
@@ -131,6 +135,7 @@ enyo.kind({
 
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
+			this.previousContents.push(enyo.json.codify.to(k.components));
 			this.owner.$.kindPicker.createComponent({
 				content: k.name,
 				index: i,
@@ -141,20 +146,20 @@ enyo.kind({
 		
 		this.owner.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.owner.$.kindPicker.render();
-		this.setEdited(false);
 	},
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
 		var kind = this.kinds[index];
+		var components = this.getSingleKind(index);
 		
-		this.addAresIds(this.kinds[index].components);
-		this.addAresKindOptions(this.kinds[index].components);
-		this.$.inspector.initUserDefinedAttributes(this.kinds[index].components);
-		
+		this.addAresIds(components);
+		this.addAresKindOptions(components);
+		this.$.inspector.initUserDefinedAttributes(components);
+
 		if (index !== this.index) {
 			this.$.inspector.inspect(null);
 			this.$.inspector.setCurrentKindName(kind.name);
-			this.$.designer.setCurrentKind(kind);
+			this.$.designer.setCurrentKind(components[0]);
 		}
 		
 		this.index = index;
@@ -197,6 +202,18 @@ enyo.kind({
 		this.projectIndexUpdated();
 	},
 	//* @protected
+	getSingleKind: function(inIndex) {
+		var kind = [],
+			len = this.kinds.length;
+
+		for (var i=0;  i<len; i++) {
+			if (i === inIndex) {
+				kind[0] = this.kinds[inIndex];
+				break;
+			}
+		}
+		return kind;
+	},
 	projectIndexUpdated: function() {
 		var indexer = this.projectIndexer;
 		this.trace("projectIndexUpdated: for projectIndexer: ", indexer);
@@ -207,7 +224,7 @@ enyo.kind({
 	},
 	//* Rerender current kind
 	rerenderKind: function(inSelectId) {
-		this.$.designer.setCurrentKind(this.kinds[this.index]);
+		this.$.designer.currentKind = this.getSingleKind(this.index)[0];
 		this.$.designer.renderCurrentKind(inSelectId);
 	},
 	refreshInspector: function() {
@@ -257,7 +274,7 @@ enyo.kind({
 		this.$.designer.requestPositionValue(inEvent.prop);
 	},
 	inspectorPositionDataUpdated: function(inSender, inEvent) {
-		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components),
+		var item = this.getItemById(this.$.designer.selection.aresId, this.getSingleKind(this.index)),
 			prop,
 			val
 		;
@@ -270,7 +287,8 @@ enyo.kind({
 		this.rerenderKind(item.aresId);
 	},
 	layoutKindUpdated: function(inLayoutKind) {
-		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		var kind = this.getSingleKind(this.index);
+		var item = this.getItemById(this.$.designer.selection.aresId, kind);
 		
 		if (inLayoutKind !== "AbsolutePositioningLayout" && item.layoutKind !== "AbsolutePositioningLayout") {
 			return false;
@@ -285,7 +303,7 @@ enyo.kind({
 			}
 			this.updateStyleForNonAbsolutePositioningLayoutKind(item);
 		}
-		this.addAresKindOptions(this.kinds[this.index].components);
+		this.addAresKindOptions(kind);
 		this.rerenderKind(item.aresId);
 		return true;
 	},
@@ -348,20 +366,36 @@ enyo.kind({
 	prepareDesignerUpdate: function() {
 		if (this.index !== null) {
 			// Prepare the data for the code editor
-			var event = {docHasChanged: this.getEdited(), contents: []};
+			var event = {contents: []};
 			for(var i = 0 ; i < this.kinds.length ; i++) {
-				event.contents[i] = (i === this.index) ? enyo.json.codify.to(this.cleanUpComponents(this.kinds[i].components)) : null;
+				event.contents[i] = (i === this.index) ? this.formatContent(enyo.json.codify.to(this.cleanUpComponents([this.kinds[i]]))) : null;
+			}
+			// the length of the returned event array is significant for the undo/redo operation.
+			// event.contents.length must match this.kinds.length even if it contains only null values
+			// so the returned structure return may be [null] or [null, content, null] or [ null, null, null]...
+			if (event.contents[this.index] === this.previousContents[this.index]) {
+				// except when undo/redo would not bring any change...
+				event.contents=[];
 			}
 			return event;
 		}
+	},
+	formatContent: function(inContent) {
+		// Strip opening [ bracket
+		inContent = inContent.replace(/\[\n\t\t\{/, "{\n\t");
+
+		// Strip closing }] brackets
+        inContent = inContent.replace(/\}\s([^}]+)$/, "");
+		
+		return inContent;
 	},
 	closeDesignerAction: function(inSender, inEvent) {
 		this.$.designer.cleanUp();
 		
 		var event = this.prepareDesignerUpdate();
+
 		this.setProjectData(null);
 		this.doCloseDesigner(event);
-		this.setEdited(false);
 		
 		return true;
 	},
@@ -370,13 +404,12 @@ enyo.kind({
 		var components = enyo.json.codify.from(inEvent.content);
 		
 		this.refreshComponentView(components);
-		this.setEdited(true);
 		
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
-		this.kinds[this.index].components = this.cleanUpComponents(components, true);
+		this.kinds[this.index] = this.cleanUpComponents(components, true)[0];
 		
 		this.designerUpdate();
-		
+
 		return true;
 	},
 	//* Create item from palette (via drag-and-drop from Palette into Designer or Component View)
@@ -386,7 +419,7 @@ enyo.kind({
 			targetId = inEvent.targetId,
 			beforeId = inEvent.beforeId,
 			target = (targetId)
-					?	this.getItemById(targetId, this.kinds[this.index].components)
+					?	this.getItemById(targetId, this.getSingleKind(this.index))
 					:	this.kinds[this.index];
 
 		if (!config) {
@@ -410,11 +443,12 @@ enyo.kind({
 	},
 	//* Move item with _inEvent.itemId_ into item with _inEvent.targetId_
 	moveItem: function (inSender, inEvent) {
-		var movedItem = this.getItemById(inEvent.itemId, this.kinds[this.index].components),
+		var kind = this.getSingleKind(this.index),
+			movedItem = this.getItemById(inEvent.itemId, kind),
 			clone = enyo.clone(movedItem),
 			beforeId = inEvent.beforeId || null,
 			target = (inEvent.targetId)
-					?	this.getItemById(inEvent.targetId, this.kinds[this.index].components)
+					?	this.getItemById(inEvent.targetId, kind)
 					:	this.kinds[this.index]
 		;
 		
@@ -431,9 +465,9 @@ enyo.kind({
 		
 		// Copy clone style props to inspector
 		this.$.inspector.userDefinedAttributes[clone.aresId].style = clone.style;
-		this.addAresKindOptions(this.kinds[this.index].components);
+		this.addAresKindOptions(kind);
 		
-		if (beforeId) {
+		if (beforeId && (beforeId !== target.aresId)) {
 			if (!this.insertItemBefore(clone, target, beforeId)) {
 				return true;
 			}
@@ -446,7 +480,7 @@ enyo.kind({
 		return true;
 	},
 	resizeItem: function(inSender, inEvent) {
-		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		var item = this.getItemById(this.$.designer.selection.aresId, this.getSingleKind(this.index));
 		
 		for (var prop in inEvent.sizeData) {
 			this.addReplaceStyleProp(item, prop, inEvent.sizeData[prop]);
@@ -651,13 +685,12 @@ enyo.kind({
 		
 		return cleanComponent;
 	},
-	saveComplete: function() {
-		this.setEdited(false);
-	},
 	undoAction: function(inSender, inEvent) {
+		this.enableDesignerActionButtons(false);
 		this.doUndo();
 	},
 	redoAction: function(inSender, inEvent) {
+		this.enableDesignerActionButtons(false);
 		this.doRedo();
 	},
 	deleteAction: function(inSender, inEvent) {
@@ -665,8 +698,12 @@ enyo.kind({
 			return;
 		}
 		
-		this.deleteComponentByAresId(this.$.designer.selection.aresId, this.kinds[this.index].components);
-		this.addAresKindOptions(this.kinds[this.index].components);
+		this.$.inspector.inspect(null);
+		this.enableDesignerActionButtons(false);
+
+		var kind = this.getSingleKind(this.index);
+		this.deleteComponentByAresId(this.$.designer.selection.aresId, kind);
+		this.addAresKindOptions(kind);
 		this.rerenderKind();
 	},
 	deleteComponentByAresId: function(inAresId, inComponents) {
@@ -681,24 +718,18 @@ enyo.kind({
 			}
 		}
 	},
-	editedChanged: function() {
-		// Note: This doesn't look like it does anything, because we send updates to the document to Ares immediately, so a doc is 
-		// only "edited" for a few ms. I left this in here because I was tracking down some cases where the state stayed "edited"
-		if (this.edited) {
-			this.owner.$.docLabel.setContent("Deimos *");
-		} else {
-			this.owner.$.docLabel.setContent("Deimos");
-		}
-		this.owner.$.toolbar.resized();
-	},
 	designerUpdate: function() {
-		this.doDesignerUpdate(this.prepareDesignerUpdate());
+		var event = this.prepareDesignerUpdate();
+
+		this.doDesignerUpdate(event);
+		this.enableDesignerActionButtons(true);
 	},
 	//* Called by Ares when ProjectView has new project selected
 	projectSelected: function(inProject) {
 		this.$.designer.updateSource(inProject);
 	},
 	reloadDesigner: function() {
+		this.enableDesignerActionButtons(false);
 		this.$.designer.reload();
 		this.$.inspector.inspect(null);
 	},
@@ -848,14 +879,20 @@ enyo.kind({
 
 	// @protected
 	performCreateItem: function(config, target, beforeId){
-		if (beforeId) {
+		var kind = this.getSingleKind(this.index);
+		if (beforeId && (beforeId !== target.aresId)) {
 			this.insertItemBefore(config, target, beforeId);
 		} else {
 			this.insertItem(config, target);
-		}	
-		this.$.inspector.initUserDefinedAttributes(this.kinds[this.index].components);
-		this.addAresKindOptions(this.kinds[this.index].components);
+		}
+		this.$.inspector.initUserDefinedAttributes(kind);
+		this.addAresKindOptions(kind);
 		this.rerenderKind(config.aresId);
+	},
+	enableDesignerActionButtons: function(condition) {
+		this.$.deleteButton.setAttribute("disabled", !condition);
+		this.$.undoButton.setAttribute("disabled", !condition);
+		this.$.redoButton.setAttribute("disabled", !condition);
+		this.$.reloadDesignerButton.setAttribute("disabled", !condition);
 	}
 });
-
