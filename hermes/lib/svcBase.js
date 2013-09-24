@@ -11,6 +11,7 @@ var fs = require("graceful-fs"),
     async = require("async"),
     mkdirp = require("mkdirp"),
     rimraf = require("rimraf"),
+    FormData = require('form-data'),
     CombinedStream = require('combined-stream'),
     base64stream = require('base64stream'),
     HttpError = require("./httpError");
@@ -151,6 +152,11 @@ ServiceBase.prototype.makeExpressRoute = function(path) {
 };
 
 /**
+ * @param {Object} config
+ * @propery config {} basename
+ * @propery config {String} pathname
+ * @propery config {String} pathname
+ * @propery config {int} port
  * @protected
  */
 ServiceBase.prototype.configure = function(config, next) {
@@ -318,111 +324,30 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 	}
 	log.verbose("ServiceBase#returnFormData()", parts.length, "parts");
 	log.silly("ServiceBase#returnFormData()", "parts", util.inspect(parts, {depth: 2}));
-	
-	try {
-		// Build the multipart/formdata
-		var FORM_DATA_LINE_BREAK = '\r\n',
-		    combinedStream = CombinedStream.create(),
-		    boundary = _generateBoundary();
-		
-		parts.forEach(function(part) {
-			// Adding part header
-			combinedStream.append(_getPartHeader(part.filename));
-			// convert file path into stream (FIXME: prefer Buffers over streams)
-			if (false /*part.path*/) {
-				part.stream = fs.createReadStream(part.path);
-				part.stream.pause();
-				path.path = undefined;
-				log.silly("ServiceBase#returnFormData()", "Sending file as a Stream");
-			}
-			// Adding data
-			log.verbose("ServiceBase#returnFormData()", "part:", part.filename);
-			if (part.stream) {
-				var encodedStream = new base64stream.BufferedStreamToBase64();
-				part.stream.pipe(encodedStream);
-				combinedStream.append(encodedStream);
-				part.stream.resume();
-				log.silly("ServiceBase#returnFormData()", "Sending Stream");
-			} else if (part.path) {
-				combinedStream.append(function(nextDataChunk) {
-					fs.readFile(part.path, 'base64', function (err, data) {
-						if (err) {
-							log.warn("ServiceBase#returnFormData()", err);
-							nextDataChunk('INVALID CONTENT');
-							return;
-						}
-						log.silly("ServiceBase#returnFormData()", "Sending file as a Buffer");
-						nextDataChunk(data);
-					});
-				});
-			} else if (part.buffer) {
-				combinedStream.append(function(nextDataChunk) {
-					log.silly("ServiceBase#returnFormData()", "Sending Buffer");
-					nextDataChunk(part.buffer.toString('base64'));
-				});
-			} else {
-				log.warn("ServiceBase#returnFormData()", "Invalid part:", part);
-				combinedStream.append(function(nextDataChunk) {
-					nextDataChunk('INVALID CONTENT');
-				});
-			}
-		
-			// Adding part footer
-			combinedStream.append(function(nextDataChunk) {
-				nextDataChunk(_getPartFooter());
-			});
-		});
-		
-		// Adding last footer
-		combinedStream.append(function(nextDataChunk) {
-			nextDataChunk(_getLastPartFooter());
-		});
-	} catch(err) {
-		setImmediate(next, err);
-		return;
-	}
 
-	// Send the files back as a multipart/form-data
-	res.status(200);
-	res.header('Content-Type', _getContentTypeHeader());
-	res.header('X-Content-Type', _getContentTypeHeader());
-	combinedStream.pipe(res);
-	combinedStream.on('end', next); //FIXME: this event is never emitted
-	
-	function _generateBoundary() {
-		// This generates a 50 character boundary similar to those used by Firefox.
-		// They are optimized for boyer-moore parsing.
-		var boundary = '--------------------------';
-		for (var i = 0; i < 24; i++) {
-			boundary += Math.floor(Math.random() * 10).toString(16);
+	var form = new FormData();
+	parts.forEach(function(part) {
+		if (part.buffer) {
+			form.append(part.filename, part.buffer);
+		} else if (part.path) {
+			form.append(part.filename, fs.createReadStream(part.path));
+		} else if (part.stream) {
+			form.append(part.filename, part.stream);
 		}
-
-		return boundary;
-	}
-
-	function _getContentTypeHeader() {
-		return 'multipart/form-data; boundary=' + boundary;
-	}
-
-	function _getPartHeader(filename) {
-		var header = '--' + boundary + FORM_DATA_LINE_BREAK;
-		header += 'Content-Disposition: form-data; name="file"';
-
-		header += '; filename="' + filename + '"' + FORM_DATA_LINE_BREAK;
-		header += 'Content-Type: application/octet-stream' + FORM_DATA_LINE_BREAK;
-		header += 'Content-Transfer-Encoding: base64' + FORM_DATA_LINE_BREAK;
-
-		header += FORM_DATA_LINE_BREAK;
-		return header;
-	}
-
-	function _getPartFooter() {
-		return FORM_DATA_LINE_BREAK;
-	}
-
-	function _getLastPartFooter() {
-		return '--' + boundary + '--';
-	}
+	});
+	res.status(200);
+	var headers = form.getHeaders();
+	console.log("headers:", headers);
+	Object.keys(headers).forEach(function(header) {
+		res.header(header, headers[header]);
+	});
+	// XXX not sure why the browser cannot use 'content-type' directly...
+	res.header('x-content-type', headers['content-type']);
+	form.pipe(res);
+	form.on('end', function() {
+		log.silly("ServiceBase#returnFormData()", "Streaming completed");
+		next();
+	});
 };
 
 /**
