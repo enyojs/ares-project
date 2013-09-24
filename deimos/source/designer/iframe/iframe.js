@@ -954,7 +954,7 @@ enyo.kind({
 	},
 	prerenderMoveComplete: function(inInstances) {
 		// Hide layer with flying controls
-		this.$.flightArea.hide();
+		this.$.flightArea.applyStyle("display", "none");
 		// Show hidden controls in app
 		this.showMovedControls(inInstances);
 		// Point _this.parentInstance_ to current client controls
