@@ -7,37 +7,48 @@ enyo.kind({
 	floating: true,
 	autoDismiss: false,
 	published: {
+		title: $L("Error"),
 		errorMsg: $L("unknown error"),
 		actionMsg: undefined,
 		detailsHtml: "",
 		detailsText: "",
-		callback: null
+		callback: null,
+		okButton: $L("Close")
 	},
-	classes:"ares-classic-popup",
+	classes: "ares-classic-popup",
 	components: [
-	    {tag: "div", name: "title", classes:"title", content: "Error"},
+	    {tag: "div", name: "title", classes: "title"},
 			{classes:"ares-error-popup", fit: true, components: [
 				{name: "msg"},
 				{name: "action", showing: false},
-				{classes:"ares-error-details", components:[
-					{classes:"button", components:[
-						{tag:"label", classes:"label", name: "detailsBtn", content: $L("Details"), ontap: "toggleDetails", showing: false},
-						{name:"detailsArrow", classes:"optionDownArrow", ontap: "toggleDetails", showing: false},
-						{name: "detailsDrw", kind: "onyx.Drawer", open: false, showing:false, classes:"ares-error-drawer", components: [
-							{name: "detailsText", kind: "onyx.TextArea", disabled: true, fit:true, classes:"ares-error-text"},
-							{name: "detailsHtml", allowHtml: true, fit:true}
+				{classes: "ares-error-details", components: [
+					{classes: "button", components: [
+						{tag: "label", classes:" label", name: "detailsBtn", content: $L("Details"), ontap: "toggleDetails", showing: false},
+						{name: "detailsArrow", classes: "optionDownArrow", ontap: "toggleDetails", showing: false},
+						{name: "detailsDrw", kind: "onyx.Drawer", open: false, showing: false, classes: "ares-error-drawer", components: [
+							{name: "detailsText", kind: "onyx.TextArea", disabled: true, fit: true, classes: "ares-error-text"},
+							{name: "detailsHtml", allowHtml: true, fit: true}
 						]}
 					]}
 				]}
 			]},
-			{kind: "onyx.Toolbar", name: "bottomToolbar",  classes:"bottom-toolbar", components: [
-				{name: "okButton", kind: "onyx.Button", content: "Close", ontap: "hideErrorPopup"}
+			{kind: "onyx.Toolbar", name: "bottomToolbar",  classes: "bottom-toolbar", components: [
+				{name: "okButton", kind: "onyx.Button", ontap: "hideErrorPopup"}
 			]}
 	],
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
+		this.titleChanged();
+		this.errorMsgChanged();
+		this.detailsHtmlChanged();
+		this.detailsTextChanged();
+		this.okButtonChanged();
 	},    
+	titleChanged: function (oldVal) {
+		this.trace(oldVal, "->", this.title);
+		this.$.title.setContent(this.title);
+	},
 	errorMsgChanged: function (oldVal) {
 		this.trace(oldVal, "->", this.errorMsg);
 		this.$.msg.setContent(this.errorMsg);
@@ -79,13 +90,15 @@ enyo.kind({
 			this.$.detailsHtml.setContent("");
 		}
 	},
+	okButtonChanged: function(oldVal) {
+		this.trace(oldVal, "->", this.okButton);
+		this.$.okButton.setContent(this.okButton);
+	},
 	toggleDetails: function() {
 		this.$.detailsDrw.setOpen(!this.$.detailsDrw.open);
 	},
 	hideErrorPopup: function() {
-		this.setErrorMsg();
-		this.setDetailsText();
-		this.setDetailsHtml();
+		this.reset();
 		this.hide();
 		if (this.callback) {
 			var cb = this.callback;
@@ -98,7 +111,7 @@ enyo.kind({
 
 		if (evt.callback) {
 			if (this.callback) {
-				this.error("Previous callback was not fired ! Bug ?");
+				this.error("Previous callback was not fired ! Bug?");
 			}
 			this.callback = evt.callback;
 		}
@@ -125,5 +138,13 @@ enyo.kind({
 		this.setDetailsText(text);
 		this.setActionMsg(evt.action);
 		this.show();
+	},
+	reset: function() {
+		this.set("title", $L("error"));
+		this.set("errorMsg", $L("unknown error"));
+		this.set("actionMsg", undefined);
+		this.set("detailsHtml", "");
+		this.set("detailsTxt", "");
+		this.set("okButton", $L("Close"));
 	}
 });	
