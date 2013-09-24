@@ -375,6 +375,15 @@ FsLocal.prototype.putFile = function(req, file, next) {
 			} else if (file.buffer) {
 				this.log("FsLocal.putFile(): writing buffer");
 				fs.writeFile(absPath, file.buffer, next);
+			} else if (file.stream) {
+				this.log("FsLocal.putFile(): writing stream");
+				var out = fs.createWriteStream(absPath);
+				out.on('close', (function() {
+					this.log("FsLocal.putFile(): end-of-stream, file.name:", file.name);
+					next();
+				}).bind(this));
+				file.stream.pipe(out);
+				file.stream.resume();
 			} else {
 				setImmediate(next, new HttpError("cannot write file=" + JSON.stringify(file), 400));
 			}
