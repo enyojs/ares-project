@@ -11,7 +11,6 @@ var fs = require("graceful-fs"),
     async = require("async"),
     mkdirp = require("mkdirp"),
     rimraf = require("rimraf"),
-    FormData = require('form-data'),
     CombinedStream = require('combined-stream'),
     base64stream = require('base64stream'),
     HttpError = require("./httpError");
@@ -325,26 +324,7 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 	log.verbose("ServiceBase#returnFormData()", parts.length, "parts");
 	log.silly("ServiceBase#returnFormData()", "parts", util.inspect(parts, {depth: 2}));
 
-	var form = new FormData();
-	parts.forEach(function(part) {
-		if (part.buffer) {
-			form.append(part.filename, part.buffer);
-		} else if (part.path) {
-			form.append(part.filename, fs.createReadStream(part.path));
-		} else if (part.stream) {
-			form.append(part.filename, part.stream);
-		}
-	});
 	res.status(200);
-	var headers = form.getHeaders();
-	console.log("headers:", headers);
-	Object.keys(headers).forEach(function(header) {
-		res.header(header, headers[header]);
-	});
-	// XXX not sure why the browser cannot use 'content-type' directly...
-	res.header('x-content-type', headers['content-type']);
-	form.pipe(res);
-	form.on('end', function() {
 		log.silly("ServiceBase#returnFormData()", "Streaming completed");
 		next();
 	});

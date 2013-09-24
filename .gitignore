@@ -17,7 +17,6 @@ $*
 /node_modules/combined-stream
 /node_modules/dropbox
 /node_modules/express
-/node_modules/form-data
 /node_modules/graceful-fs
 /node_modules/hpacs-ares-plugin
 /node_modules/jshint
