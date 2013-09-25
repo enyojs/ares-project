@@ -71,43 +71,32 @@ GenZip.prototype.getSources = function(req, res, next) {
 
 GenZip.prototype.generate = function(req, res, next) {
 	log.info("GenZip#generate()");
+	var destination = undefined;
 	
-	var destination = temp.mkdirSync({prefix: 'com.enyojs.ares.services.genZip.'});
-	this.tools.generate(JSON.parse(req.body.sourceIds), JSON.parse(req.body.substitutions), destination, {
-		overwrite: req.param("overwrite") === 'true'
-	}, (function _out(err, fileList) {
-		log.silly("GenZip#generate#_out()", "fileList:", fileList);
-		if (err) {
-			log.error("GenZip#generate#_out()", err);
-			//log.silly("GenZip#generate()", "arguments:", arguments);
-			setImmediate(next, err);
-			return;
-		}
-
-		var parts = fileList.map(function(file) {
-			return({
-				filename: file,
-				path: path.join(destination, file)
-			});
-		});
-		log.silly("GenZip#generate#_out()", "parts:", parts);
-
-		this.returnFormData(parts, res, (function _cleanup(err) {
-			// cleanup the temp dir when the response has been sent
-			if (this.config.performCleanup) {
-				log.verbose("GenZip#generate#_cleanup", "rm -rf", destination);
-				rimraf(destination, function(err) {
-					log.verbose("cleanup", "removed " + destination);
+	async.waterfall([
+		this.tools.generate.bind(this, JSON.parse(req.body.sourceIds), JSON.parse(req.body.substitutions), undefined /*destination*/, {
+			overwrite: req.param("overwrite") === 'true'
+		}),
+		(function _out(fileMap, tmpDir, next) {
+			log.silly("GenZip#generate#_out()", "fileMap:", fileMap);
+			destination = tmpDir;
+			var parts = fileMap.map(function(file) {
+				return({
+					filename: file.name,
+					path: file.path
 				});
+			});
+			this.returnFormData(parts, res, next);
+		}).bind(this),
+		function _end(next) {
+			if (destination) {
+				log.verbose("GenZip#generate#_end()", "rm -rf", destination);
+				rimraf(destination, next);
 			} else {
-				log.verbose("GenZip#generate#_cleanup", "skipping removal of", destination);
+				setImmediate(next);
 			}
-			if (err) {
-				next(err);
-			}
-			// HTTP success was already sent in case no error happenned.
-		}).bind(this));
-	}).bind(this));
+		}
+	], next);
 };
 
 GenZip.prototype.configure = function(config, next) {

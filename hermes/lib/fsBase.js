@@ -532,7 +532,7 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 	this.log("FsBase#_putMultipart(): files.length:", files.length);
 	//this.log("FsBase.putMultipart(): files:", util.inspect(files, {depth: 1}));
 
-	var nodes = [];
+	var nodes = [], tmpPath;
 	async.forEachSeries(files, (function(file, next) {
 
 		if (file.filename === '.' || !file.filename) {
@@ -541,19 +541,18 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 			file.name = [pathParam, file.filename].join('/');
 		}
 
+		tmpPath = file.path;
 		file.stream = fs.createReadStream(file.path).pipe(base64.decode());
 		file.path = undefined;
 
 		var putCallback = function(err, node) {
 			this.log("FsBase.putMultipart(): err:", err, "node:", node);
-			if (err) {
-				setImmediate(next, err);
-				return;
-			}
 			if (node) {
 				nodes.push(node);
 			}
-			setImmediate(next);
+			fs.unlink(tmpPath, function() {
+				next();
+			});
 		};
 		this.putFile(req, file, putCallback.bind(this));
 

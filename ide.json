@@ -12,7 +12,6 @@
 				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@"
 			],
 			"useJsonp":false,
-			"verbose": false,
 			"respawn": false
 		},
 		{
@@ -42,8 +41,7 @@
 					"port":8080
 				}
 			},
-			"useJsonp":false,
-			"verbose": false
+			"useJsonp":false
 		},
 		{
 			"active":true,
@@ -57,7 +55,7 @@
 			"useJsonp":false,
 			"verbose": false,
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
-			"timeout": 7000,
+			"timeout": 10000,
 			"auth": {
 				"type": "phonegap"
 			},
@@ -70,8 +68,10 @@
 			"name":"ZIP-files Project Generator",
 			"type": ["generate"],
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/genZip.js", "--level", "http", "-P", "/genzip", "-p", "0"
+				"@INSTALLDIR@/hermes/genZip.js", "--level", "verbose", "-P", "/genzip", "-p", "0"
 			],
+			"timeout": 30000,
+			"level": "verbose",
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
 			"sources": [
 				{
@@ -82,11 +82,14 @@
 							"url": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
       							"prefixToRemove": "bootplate",
       							"excluded": [
-								"bootplate/api"
+								"bootplate/api/",
+								"bootplate/build/",
+								"bootplate/deploy/",
+								"bootplate/enyo/tools/"
       							]
 						}
   					],
-  					"description": "Enyo bootplate for webOS - Nightly"
+					"description": "Enyo bootplate - Nightly"
 				}, 
 				{
 					"id": "bootplate-2.2.0",
@@ -96,7 +99,10 @@
 							"url": "http://enyojs.com/archive/bootplate-2.2.0.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
-								"bootplate/api"
+								"bootplate/api/",
+								"bootplate/build/",
+								"bootplate/deploy/",
+								"bootplate/enyo/tools/"
 							]
 						}
 					],
@@ -110,7 +116,10 @@
 							"url": "http://enyojs.com/archive/bootplate-2.1.1.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
-								"bootplate/api"
+								"bootplate/api/",
+								"bootplate/build/",
+								"bootplate/deploy/",
+								"bootplate/enyo/tools/"
 							]
 						}
 					],
