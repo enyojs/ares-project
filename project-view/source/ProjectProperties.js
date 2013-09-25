@@ -252,7 +252,7 @@ enyo.kind({
 	 */
 	setupModif: function() {
 		//Set the selected Project Information to plugin service drawer
-		for(serviceId in this.services){
+		for(var serviceId in this.services){
 			var service = this.services[serviceId];
 			var serviceDrawer = this.$[service.id + 'Drawer'].$[service.id];
 			if(typeof serviceDrawer.setTargetProject === 'function'){
