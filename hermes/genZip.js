@@ -93,7 +93,14 @@ GenZip.prototype.generate = function(req, res, next) {
 				setImmediate(next);
 			}
 		}
-	], next);
+	], function(err) {
+		if (err) {
+			// report errors...
+			next(err);
+		}
+		// ...but not success, as the success header was
+		// already sent.
+	});
 };
 
 GenZip.prototype.configure = function(config, next) {
