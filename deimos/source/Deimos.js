@@ -135,7 +135,7 @@ enyo.kind({
 
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
-			this.previousContents.push(enyo.json.codify.to(k.components));
+			this.previousContents.push(this.formatContent(enyo.json.codify.to(k)));
 			this.owner.$.kindPicker.createComponent({
 				content: k.name,
 				index: i,
