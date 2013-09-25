@@ -208,7 +208,9 @@ enyo.kind({
 		this.insertAtCursor(inValue);
 	},
 	focus: function() {
-		this.editor.focus();
+		if (this.editor !== undefined){
+			this.editor.focus();
+		}
 	},
 	blur: function() {
 		this.editor.blur();

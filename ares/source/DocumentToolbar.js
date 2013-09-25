@@ -7,7 +7,8 @@ enyo.kind({
 		onCloseFileRequest: "",
 		onDesign: "",
 		onRegisterMe: "",
-		onGrabberClick: ""
+		onGrabberClick: "",
+		onAceFocus: ""
 	},
 	components: [	
 		{
@@ -17,7 +18,8 @@ enyo.kind({
 			showing: false,
 			checkBeforeClosing: true,
 			onTabChanged: 'switchFile',
-			onTabRemoveRequested: 'requestCloseFile'
+			onTabRemoveRequested: 'requestCloseFile',
+			onHide: "doAceFocus"
 		}
 	],
 

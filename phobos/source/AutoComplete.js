@@ -25,6 +25,9 @@ enyo.kind({
 			// options elements will be populated programmatically
 		]
 	} ],
+	events: {
+		onAceFocus: ""
+	},
 	handlers: {
 		onHide: "hideAutocompletePopup"
 	},
@@ -383,7 +386,7 @@ enyo.kind({
 	hideAutocompletePopup: function() {
 		this.popupShown = false;
 		this.hide();
-		this.ace.focus();
+		this.doAceFocus();
 		return true; // Stop the propagation of the event
 	},
 	/**
@@ -401,7 +404,7 @@ enyo.kind({
 		pos.column += this.input.length;
 		this.trace("Inserting >>", selected, "<< at ", enyo.json.stringify(pos));
 		this.ace.insertAt(pos, selected);
-		ace.focus();
+		this.doAceFocus();
 		return true; // Stop the propagation of the event
 	},
 	/**
