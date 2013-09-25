@@ -812,11 +812,13 @@ enyo.kind({
 	published: {
 		keys: undefined,
 		activeKeyId: undefined,
+		activeKeyTitle: undefined,
 		provider: undefined
 	},
 	components: [	
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
-		{name: "loadingSingingKeys", content: "Loading signing keys ..."} ,
+		{name: "activeSigningKey", classes: "ares-project-properties-show-sk"},
+		{name: "loadingSingingKeys"} ,
 		{name: "noSigningKeys", content: "No signing keys for this platform", showing: false},
 		{
 			name: "signingKeysContainer",
@@ -868,9 +870,17 @@ enyo.kind({
 		this.$.label.setContent(this.label);
 	},
 
+	activeKeyTitleChanged: function() {
+		this.$.activeSigningKey.setContent(this.getActiveKeyTitle() );
+		this.$.loadingSingingKeys.setContent(" Loading signing keys ...");
+	},
+
 	/** @public */
 	setProjectConfig: function (config) {
-		this.setValue(config[this.jsonSection][this.platform] && config[this.jsonSection][this.platform].keyId);
+		var myPlatform = config[this.jsonSection][this.platform];
+		this.setValue(myPlatform && myPlatform.keyId);
+		this.setActiveKeyTitle(myPlatform && myPlatform.keyTitle || "");
+
 	},
 	/** @public */
 	getProjectConfig: function (config) {
@@ -899,7 +909,8 @@ enyo.kind({
 			}			
 		};
 
-		this.$.loadingSingingKeys.hide();		
+		this.$.loadingSingingKeys.hide();
+		this.$.activeSigningKey.hide();
 
 		if(this.keys.length !== 0){
 
@@ -959,6 +970,7 @@ enyo.kind({
 		enyo.forEach(this.keys, function (key) {
 			if (key.title === inValue.content) {
 				this.setActiveKeyId(key.id);
+				this.setActiveKeyTitle(key.title);
 				this.trace("selected key:", key);
 			}
 		}, this);
