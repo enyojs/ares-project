@@ -45,7 +45,7 @@ enyo.kind({
 		this.trace("starting") ;
 		this.show();
 
-		dirPopup.$.header.setContent("Select a directory containing the new project") ;
+		dirPopup.$.header.setContent("Select a non top-level directory containing the new project");
 		dirPopup.show();
 		this.$.propertiesWidget.setDefaultTab();
 		this.hide();

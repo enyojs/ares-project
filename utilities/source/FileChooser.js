@@ -257,7 +257,7 @@ enyo.kind({
 	},
 	updateConfirmButton: function() {
 		if (this.folderChooser) {
-			this.$.confirm.setDisabled(!(this.selectedFile && this.selectedFile.isDir));
+			this.$.confirm.setDisabled(!(this.selectedFile && this.selectedFile.isDir && this.selectedFile.parent && !this.selectedFile.parent.isServer));
 		} else {
 			if (!this.allowNewFile) {
 				this.$.confirm.setDisabled(!(this.selectedFile && !this.selectedFile.isDir));
