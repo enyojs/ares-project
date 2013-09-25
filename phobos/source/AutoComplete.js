@@ -397,7 +397,6 @@ enyo.kind({
 	autocompleteChanged: function() {
 		// Insert the selected value
 		this.hide();
-		var ace = this.ace;
 		var selected = this.$.autocompleteSelect.getValue();
 		selected = selected.substr(this.input.length);
 		var pos = enyo.clone(this.popupPosition);
