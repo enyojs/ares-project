@@ -1,7 +1,7 @@
 /* global ares */
 enyo.kind({
 	name: "EditorSettings",
-	kind: "Ares.Popup",
+	kind: "onyx.Popup",
 	classes:"ares-classic-popup",
 	events: {
 		onClose: "",
@@ -30,8 +30,8 @@ enyo.kind({
 	},
 	SETTINGS_STORAGE_KEY: "com.enyojs.editor.settings",
 	components: [
-		{classes:"title", content: "EDITOR GLOBAL SETTINGS"},
-		{classes:"ace-settings-popup", ondragstart:"drop", ondrag:"drop", ondragfinish:"drop", components: [
+		{classes: "title draggable", kind: "Ares.PopupTitle", content: "EDITOR GLOBAL SETTINGS"},
+		{classes:"ace-settings-popup", components: [
 			{kind:"FittableColumns", components: [
 				{kind:"FittableRows", components: [
 					{classes: "ares-row", components: [
@@ -296,8 +296,5 @@ enyo.kind({
 		this.getValuesFromLocalStorage();
 		this.initSettingsPopupFromLocalStorage();
 		this.doClose();
-	},
-	drop: function(inSender, inEvent){
-		return true;
 	}
 });
