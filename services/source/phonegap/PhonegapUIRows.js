@@ -422,7 +422,8 @@ enyo.kind({
 	contentValueChanged: function() {
 		//sort the value of the Android API version to garanty the display in the correct order. 
 		Object.keys(Phonegap.UIConfiguration.androidSdkVersions)
-		.sort().forEach(
+		.sort(function(a, b) {return a - b;})
+		.forEach(
 			(function(key) {
 				var itemState = key === this.value ? true : false;
 
