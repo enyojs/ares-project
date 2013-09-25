@@ -323,12 +323,17 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 	}
 	log.verbose("ServiceBase#returnFormData()", parts.length, "parts");
 	log.silly("ServiceBase#returnFormData()", "parts", util.inspect(parts, {depth: 2}));
-	
+
+	var combinedStream;
 	try {
 		// Build the multipart/formdata
 		var FORM_DATA_LINE_BREAK = '\r\n',
-		    combinedStream = CombinedStream.create({ pauseStreams: true, maxDataSize: this.config.maxDataSize || 15*1024*1024 /*15 MB*/ }),
 		    boundary = _generateBoundary();
+
+		combinedStream = CombinedStream.create({
+			pauseStreams: true,
+			maxDataSize: this.config.maxDataSize || 15*1024*1024 /*15 MB*/
+		});
 		
 		parts.forEach(function(part) {
 			// Adding part header

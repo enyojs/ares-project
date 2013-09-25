@@ -5,7 +5,7 @@
 
 var fs = require("graceful-fs"),
     path = require("path"),
-    util = require("util"),
+    //util = require("util"),
     express = require("express"),
     http = require("http"),
     tunnel = require("tunnel"),
@@ -519,7 +519,7 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 		setImmediate(next, new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
 		return;
 	}
-	var files = [], file;
+	var files = [];
 	names.forEach(function(name) {
 		var namedFiles = req.files[name];
 		namedFiles = Array.isArray(namedFiles) ? namedFiles : [ namedFiles ];

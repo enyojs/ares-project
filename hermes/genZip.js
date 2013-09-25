@@ -10,14 +10,11 @@ var fs = require("fs"),
     path = require("path"),
     express = require("express"),
     util  = require("util"),
-    createDomain = require('domain').create,
     log = require('npmlog'),
     temp = require("temp"),
-    http = require("http"),
     async = require("async"),
     rimraf = require("rimraf"),
     ptools = require("ares-generator"),
-    CombinedStream = require('combined-stream'),
     ServiceBase = require("./lib/svcBase");
 
 var basename = path.basename(__filename, '.js');
@@ -45,7 +42,7 @@ GenZip.prototype.use = function() {
 	this.uploadDir = temp.path({prefix: 'com.enyojs.ares.services.genZip'}) + '.d';
 	fs.mkdirSync(this.uploadDir);
 	this.app.use(express.bodyParser({keepExtensions: true, uploadDir: this.uploadDir}));
-}
+};
 
 /**
  * Additionnal routes/verbs: 'this.app.get()', 'this.app.port()'
@@ -71,7 +68,7 @@ GenZip.prototype.getSources = function(req, res, next) {
 
 GenZip.prototype.generate = function(req, res, next) {
 	log.info("GenZip#generate()");
-	var destination = undefined;
+	var destination;
 	
 	async.waterfall([
 		this.tools.generate.bind(this, JSON.parse(req.body.sourceIds), JSON.parse(req.body.substitutions), undefined /*destination*/, {
