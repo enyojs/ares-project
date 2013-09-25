@@ -110,8 +110,16 @@ enyo.kind({
 		if(!inEvent.dataTransfer) {
 			return true;
 		}
+
+		var dragData = {
+			type: "ares/createitem",
+			item: {
+				config: inEvent.config,
+				options: inEvent.options
+			}
+		};
 		
-		inEvent.dataTransfer.setData("ares/createitem", enyo.json.codify.to({config: inEvent.config, options: inEvent.options}));
+		inEvent.dataTransfer.setData("text", enyo.json.codify.to(dragData));
 	},
 	/**
 	 * The current project analyzer output has changed
