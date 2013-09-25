@@ -53,7 +53,9 @@ enyo.kind({
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
 		{name: "signInErrorPopup", kind: "Ares.SignInErrorPopup", msg: "unknown error", details: ""},
 		{kind: "ServiceRegistry"},
-		{kind: "Ares.PackageMunger", name: "packageMunger"}
+		{kind: "Ares.PackageMunger", name: "packageMunger"},
+		// hack: cannot bubble up errors from runtime-machine-js in the middle of the analyser
+		{kind: "Signals", onAnalyserError: "showError"}
 	],
 	handlers: {
 		onReloadServices: "handleReloadServices",
