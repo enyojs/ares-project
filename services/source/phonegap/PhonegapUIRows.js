@@ -862,8 +862,9 @@ enyo.kind({
 
 	/** @public */
 	setProjectConfig: function (config) {
-		this.setValue(config[this.jsonSection][this.platform] && config[this.jsonSection][this.platform].keyId);
-		this.setActiveKeyTitle(config[this.jsonSection][this.platform] && config[this.jsonSection][this.platform].keyTitle || "");
+		var myPlatform = config[this.jsonSection][this.platform];
+		this.setValue(myPlatform && myPlatform.keyId);
+		this.setActiveKeyTitle(myPlatform && myPlatform.keyTitle || "");
 
 	},
 	/** @public */
