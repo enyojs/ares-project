@@ -117,7 +117,8 @@ enyo.kind({
 				this.setContainerData(msg.val);
 				break;
 			case "render":
-				this.renderKind(msg.val);
+				// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+				this.renderKind(msg.val, msg.filename);
 				break;
 			case "select":
 				this.selectItem(msg.val);
@@ -129,7 +130,8 @@ enyo.kind({
 				this.unhighlightDropTargets(msg.val);
 				break;
 			case "modify":
-				this.modifyProperty(msg.val);
+				// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+				this.modifyProperty(msg.val, msg.filename);
 				break;
 			case "codeUpdate":
 				this.codeUpdate(msg.val);
@@ -350,7 +352,7 @@ enyo.kind({
 		this.sendMessage({op: "state", val: "ready"});
 	},
 	//* Render the specified kind
-	renderKind: function(inKind) {
+	renderKind: function(inKind, inFileName) {
 		var errMsg;
 		
 		try {
@@ -400,7 +402,8 @@ enyo.kind({
 			this.parentInstance.render();
 			
 			// Notify Deimos that the kind rendered successfully
-			this.kindUpdated();
+			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+			this.kindUpdated(inFileName);
 			
 			// Select a control if so requested
 			if (inKind.selectId) {
@@ -415,10 +418,11 @@ enyo.kind({
 		}
 	},
 	//* Rerender current selection
-	rerenderKind: function() {
+	rerenderKind: function(inFileName) {
 		var copy = this.getSerializedCopyOfComponent(this.parentInstance).components;
 		copy[0].componentKinds = copy;
-		this.renderKind(copy[0]);
+		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+		this.renderKind(copy[0], inFileName);
 	},
 	checkXtorForAllKinds: function(kinds) {
 		enyo.forEach(kinds, function(kindDefinition) {
@@ -478,13 +482,13 @@ enyo.kind({
 		}
 	},
 	//* Update _this.selection_ property value based on change in Inspector
-	modifyProperty: function(inData) {
+	modifyProperty: function(inData, inFileName) {
 		if (typeof inData.value === "undefined") {
 			this.removeProperty(inData.property);
 		} else {
 			this.updateProperty(inData.property, inData.value);
 		}
-		this.rerenderKind();
+		this.rerenderKind(inFileName);
 		this.selectItem(this.selection);
 	},
 	removeProperty: function(inProperty) {
@@ -716,8 +720,9 @@ enyo.kind({
 		this.selectItem(this.selection);
 	},
 	//* Send update to Deimos with serialized copy of current kind component structure
-	kindUpdated: function() {
-		this.sendMessage({op: "rendered", val: this.$.serializer.serialize(this.parentInstance, true)});
+	kindUpdated: function(inFileName) {
+		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+		this.sendMessage({op: "rendered", val: this.$.serializer.serialize(this.parentInstance, true), filename: inFileName});
 	},
 	//* Eval code passed in by designer
 	codeUpdate: function(inCode) {
