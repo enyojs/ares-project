@@ -129,9 +129,10 @@ if (path.basename(process.argv[1], '.js') === basename) {
 		"h": "help"
 	};
 	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
+	log.level = argv.level || "http";
 	argv.pathname = argv.pathname || "/genZip";
 	argv.port = argv.port || 0;
-	argv.level = argv.level || "http";
+	argv.level = log.level;
 	if (argv.help) {
 		console.log("Usage: node " + basename + "\n" +
 			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)         [default: '0']\n" +
@@ -140,8 +141,6 @@ if (path.basename(process.argv[1], '.js') === basename) {
 			    "  -h, --help        This message\n");
 		process.exit(0);
 	}
-
-	log.level = argv.level;
 
 	new GenZip({
 		pathname: argv.pathname,
