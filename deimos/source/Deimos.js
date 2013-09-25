@@ -94,7 +94,7 @@ enyo.kind({
 	},
 	kinds: [],
 	index: null,
-	previousContents: [],
+	previousContent: "",
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -126,7 +126,6 @@ enyo.kind({
 		
 		this.index = null;
 		this.kinds = what;
-		this.previousContents = [];
 		
 		this.owner.$.kindPicker.destroyClientControls();
 
@@ -135,7 +134,6 @@ enyo.kind({
 
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
-			this.previousContents.push(this.formatContent(enyo.json.codify.to(k)));
 			this.owner.$.kindPicker.createComponent({
 				content: k.name,
 				index: i,
@@ -155,6 +153,7 @@ enyo.kind({
 		this.addAresIds(components);
 		this.addAresKindOptions(components);
 		this.$.inspector.initUserDefinedAttributes(components);
+		this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(components)));
 
 		if (index !== this.index) {
 			this.$.inspector.inspect(null);
@@ -373,10 +372,11 @@ enyo.kind({
 			// the length of the returned event array is significant for the undo/redo operation.
 			// event.contents.length must match this.kinds.length even if it contains only null values
 			// so the returned structure return may be [null] or [null, content, null] or [ null, null, null]...
-			if (event.contents[this.index] === this.previousContents[this.index]) {
+			if (event.contents[this.index] === this.previousContent) {
 				// except when undo/redo would not bring any change...
 				event.contents=[];
 			}
+			
 			return event;
 		}
 	},
