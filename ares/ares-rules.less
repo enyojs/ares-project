@@ -13,7 +13,6 @@
 	min-width:75px;
 	position:relative;
 	.ares-box-shadow(inset 0px .5px 0px rgba(255, 255, 255, 0.2));
-	font-weight: 100;
 }
 
 .onyx-button[disabled] { zoom:1; }
@@ -227,8 +226,8 @@
 }
 
 .ares-small-label {
-	min-width: 60px;
-	width: 60px;
+	min-width: 70px;
+	width: 70px;
 }
 
 .ares-row {
@@ -366,23 +365,16 @@
 
 /*Project properties popup*/
 
-.ares-project-properties { height: 400px; width: 800px; padding: 5px 10px; margin-top: 15px; }
-.ares-project-properties-sign-in-error-msg {margin-left: 30px; font-weight: bold;}
-.ares-project-properties-targetsRows-display {
-	visibility: visible;
+.ares-project-properties { 
+	height: 400px;
+	width: 930px;
+	padding: 5px 10px;
+	margin-top: 15px; 
 }
 
-.ares-project-properties-targetsRows-hide {
-	visibility: hidden;
-	height: 0px;
-}
-.ares-project-properties-AdvancedPanel-display {
-	visibility: visible;
-}
-
-.ares-project-properties-AdvancedPanel-hide {
-	visibility: hidden;
-	height: 0px;
+.ares-project-properties-sign-in-error-msg {
+	margin-left: 30px;
+	font-weight: bold;
 }
 
 .ares-radio-group{ padding-top: 7px; }
@@ -417,15 +409,31 @@
 }
 
 /* Ares "Phonegap build" panel.*/
-.ares-project-properties-appid-id { margin-left: 20px; margin-right: 20px}
+.ares-project-properties-appid-id { 
+	margin-left: 20px;
+	margin-right: 20px;
+}
 
-.ares-project-properties-appid-title { margin-left: 30px; margin-right: 10px;}
+.ares-project-properties-appid-title {
+	margin-left: 30px;
+	margin-right: 10px;
+}
 
-.ares-project-properties-drawer-row { margin-top: 10px; height: 32px; }
+.ares-project-properties-drawer-row {
+	margin-top: 10px;
+	height: 32px;
+}
 
-.ares-project-properties-drawer-row-label { width: 13em; margin-left: 10px; margin-right: 10px;}
+.ares-project-properties-drawer-row-label {
+	width: 20em!important;
+	margin-left: 10px;
+	margin-right: 10px;
+}
 
-.ares-project-properties-drawer-row-attribut-label {margin-left: 10px; margin-right: 10px;}
+.ares-project-properties-drawer-row-attribut-label {
+	margin-left: 10px;
+	margin-right: 10px;
+}
 
 .ares-project-properties-common_drawer_header { 
 	margin-left: 50px;
@@ -442,24 +450,40 @@
 }
 
 .ares-project-properties-picker {
-	width: 130px;
+	width: 15em;
 	margin-right: 30px;
 }
 .ares-project-properties-picker-small {
 	width: 50px;
 	margin-left: 10px;
 }
+
+.ares-project-properties-api-version-picker-element {
+	text-align: left !important;
+}
+
 .ares-project-properties-input-small > input {
 	width: 50px;	
 }
 .ares-project-properties-input-medium > input {
-	width: 110px;
+	width: 14em;
+}
+.ares-project-properties-textarea-wide > textarea {
+	width: 500px;
+	height: 85px;
 }
 .ares-project-properties-password {
-	width: 130px !important;
-	height: 22px !important;
+	width: 9em !important;
+	height: 2em !important;
 }
-
+.ares-project-properties-show-sk {
+	width: 15em;
+	background-color: #aaaaaa;
+	text-align: center;
+	padding-top: 0.5em;
+	margin-right: 3em;
+	.ares-rounded-corners (@ares-drawer-radius);
+}
 
 .ares-project-properties-drawer-row-check-box-label {
 	margin-left: 30px;
@@ -469,7 +493,7 @@
 .ares-project-properties-label-background { 
 	background-color: @ares-drawer-label-background;
 	.ares-box-shadow (inset 0px 0px 30px rgba(0,0,0,0.3));
-	width: 770px; 
+	width: 900px; 
 	height: 32px; 
 	margin-left: 5px;
 	.ares-rounded-corners (@ares-drawer-radius); 	
