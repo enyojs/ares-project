@@ -25,7 +25,6 @@ function GenZip(config, next) {
 		config.performCleanup = true;
 	}
 	ServiceBase.call(this, config, next);
-	server.setTimeout(config.timeout || (2*60*1000));
 }
 
 util.inherits(GenZip, ServiceBase);
@@ -148,8 +147,8 @@ if (path.basename(process.argv[1], '.js') === basename) {
 
 	new GenZip({
 		pathname: argv.pathname,
-		port: argv.port
-		timeout: argv.timeout,
+		port: argv.port,
+		timeout: argv.timeout
 	}, function(err, service){
 		if(err) {
 			process.exit(err);
