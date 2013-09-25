@@ -687,6 +687,7 @@ enyo.kind({
 			} else if (row === "signingKey") {				
 				if (this.enabled && this.$.drawer.$.signingKey.getActiveKeyId()) {
 					config.targets[this.targetId].keyId = this.$.drawer.$.signingKey.getActiveKeyId();
+					config.targets[this.targetId].keyTitle = this.$.drawer.$.signingKey.getActiveKeyTitle();
 				}
 				
 			} else {
