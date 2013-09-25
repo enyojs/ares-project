@@ -1,6 +1,5 @@
 enyo.kind({
-	name: "Ares.Popup",
-	kind: "onyx.Popup",
+	name: "Ares.PopupTitle",
 	handlers: {
 		ondragstart: "_dragstartAction",
 		ondragend: "_dragendAction",
@@ -27,14 +26,14 @@ enyo.kind({
 			var leftP = this._isOutOfXDrag(inSender, inEvent);
 			var topP = this._isOutOfYDrag(inSender, inEvent);
 			if(leftP !== null){
-				this.applyStyle("left", leftP+"px");
+				this.owner.applyStyle("left", leftP+"px");
 			} else {
-				this.applyStyle("left", (this._initialPosition.left+inEvent.dx)+"px");
+				this.owner.applyStyle("left", (this._initialPosition.left+inEvent.dx)+"px");
 			}
 			if(topP !== null){
-				this.applyStyle("top", topP+"px");
+				this.owner.applyStyle("top", topP+"px");
 			} else {
-				this.applyStyle("top", (this._initialPosition.top+inEvent.dy)+"px");
+				this.owner.applyStyle("top", (this._initialPosition.top+inEvent.dy)+"px");
 			}
 		}
 		return true;
@@ -42,7 +41,7 @@ enyo.kind({
 	/** @private */
 	_dragstartAction: function(inSender, inEvent) {
 		if(this.draggable){
-			this._initialPosition = this.getBounds();
+			this._initialPosition = this.owner.getBounds();
 			this._isDragging = this._isInDraggable(inSender, inEvent);
 		}
 		return true;
