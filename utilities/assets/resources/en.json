@@ -2,7 +2,8 @@
 	"Cancel": "Cancel",
 	"Close": "Close",
 	"Delete": "Delete",
-	"Detail": "Detail",
+	"Details": "Details",
+	"error": "error",
 	"File": "File",
 	"File name: ": "File name: ",
 	"OK": "OK",
@@ -11,5 +12,6 @@
 	"Select a File": "Select a File",
 	"Select a Folder": "Select a Folder",
 	"Sources": "Sources",
-	"unknown error": "unknown error"
+	"unknown error": "unknown error",
+	"warning": "warning"
 }

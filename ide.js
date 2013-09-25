@@ -28,6 +28,7 @@ var knownOpts = {
         "bundled-browser": Boolean,
         "port":            Number,
         "host":            String,
+        "timeout":         Number,
         "listen_all":      Boolean,
         "config":          path,
         "level":           ['silly', 'verbose', 'info', 'http', 'warn', 'error'],
@@ -41,6 +42,7 @@ var shortHands = {
 	"B": ["--bundled-browser"],
 	"p": ["--port"],
 	"H": ["--host"],
+	"t": ["--timeout"],
 	"a": ["--listen_all"],
 	"c": ["--config"],
 	"l": ["--level"],
@@ -52,6 +54,7 @@ var argv = nopt(knownOpts, shortHands, process.argv, 2 /*drop 'node' & 'ide.js'*
 argv.config = argv.config || path.join(myDir, "ide.json");
 argv.host = argv.host || "127.0.0.1";
 argv.port = argv.port || 9009;
+argv.timeout = argv.timeout || (4*60*1000);	//default: 4 minutes.
 
 if (argv.help) {
 	console.log("\n" +
@@ -66,6 +69,7 @@ if (argv.help) {
 		"  -B, --bundled-browser Open the included browser on the Ares URL                                             [boolean]\n" +
 		"  -p, --port        b   port (o) local IP port of the express server (default: 9009, 0: dynamic)              [default: '9009']\n" +
 		"  -H, --host        b   host to bind the express server onto                                                  [default: '127.0.0.1']\n" +
+		"  -t, --timeout     b   milliseconds of inactivity before a server socket is presumed to have timed out       [default: '240000']\n" +
 		"  -a, --listen_all  b   When set, listen to all adresses. By default, listen to the address specified with -H [boolean]\n" +
 		"  -c, --config      b   IDE configuration file                                                                [default: './ide.json']\n" +
 		"  -l, --level       b   IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')                 [default: 'http']\n" +
@@ -566,6 +570,7 @@ var enyojsRoot = path.resolve(myDir,".");
 
 var app = express(),
     server = http.createServer(app);
+    server.setTimeout(argv.timeout);
 
 function cors(req, res, next) {
 	/*

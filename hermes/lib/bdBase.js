@@ -38,6 +38,7 @@ module.exports = BdBase;
  * @public
  */
 function BdBase(config, next) {
+	config.timeout = config.timeout || (2*60*1000);
 	if (config.performCleanup === undefined) {
 		config.performCleanup = true;
 	}

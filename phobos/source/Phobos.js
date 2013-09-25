@@ -515,27 +515,15 @@ enyo.kind({
 	},
 	//* Extract info about kinds from the current file needed by the designer
 	extractKindsData: function() {
-		var isDesignProperty = {
-				layoutKind: true,
-				attributes: true,
-				classes: true,
-				content: true,
-				controlClasses: true,
-				defaultKind: true,
-				fit: true,
-				src: true,
-				style: true,
-				tag: true,
-				name: true
-			},
-			c = this.$.ace.getValue(),
+		var c = this.$.ace.getValue(),
 			kinds = [];
 
 		if (this.analysis) {
 			var nbKinds = 0;
 			var errorMsg;
 			var i, o;
-			for (i=0; i < this.analysis.objects.length; i++) {
+			var oLen = this.analysis.objects.length;
+			for (i=0; i < oLen; i++) {
 				o = this.analysis.objects[i];
 				if (o.type !== "kind") {
 					errorMsg = $L("Ares does not support methods out of a kind. Please place '" + o.name + "' into a separate .js file");
@@ -551,12 +539,13 @@ enyo.kind({
 				return [];
 			}
 
-			for (i=0; i < this.analysis.objects.length; i++) {
+			for (i=0; i < oLen; i++) {
 				o = this.analysis.objects[i];
 				var start = o.componentsBlockStart;
 				var end = o.componentsBlockEnd;
+				var kindBlock = enyo.json.codify.from(c.substring(o.block.start, o.block.end));
 				var name = o.name;
-				var kind = o.superkind;
+				var kind = kindBlock.kind || o.superkind;
 				var comps = [];
 				if (start && end) {
 					var js = c.substring(start, end);
@@ -572,15 +561,35 @@ enyo.kind({
 				for (var j=0; j < o.properties.length; j++) {
 					var prop = o.properties[j];
 					var pName = prop.name;
-					if (isDesignProperty[pName]) {
-						var value = analyzer.Documentor.stripQuotes(prop.value[0].name);
-						comp[pName] = value;
+					var value = this.verifyValueType(analyzer.Documentor.stripQuotes(prop.value[0].name));
+					if ((start === undefined || prop.start < start) && pName !== "components") {
+						if (value === "{" || value === "[" || value === "function") {
+							comp[pName] = kindBlock[pName];
+						} else {
+							comp[pName] = value;
+						}
 					}
 				}
 				kinds.push(comp);
 			}
 		}
 		return kinds;
+	},
+	/**
+	 * Converts string representation of boolean values
+	 * to boolean
+	 * TODO: Verify false-positives (ex: strings meant to be strings)
+	 * @param inProps: the value to match
+	 * @returns boolean value if match found: inValue if no matches
+	 * @protected
+	 */
+	verifyValueType: function(inValue) {
+		if (inValue === "true") {
+			inValue = true;
+		} else if (inValue === "false") {
+			inValue = false;
+		}
+		return inValue;
 	},
 	/**
 	 * Lists the handler methods mentioned in the "handlers"
@@ -681,23 +690,24 @@ enyo.kind({
 			if (inEvent.contents[i]) {
 				// Insert the new version of components (replace components block, or insert at end)
 				var obj = this.analysis.objects[i];
-				var comps = inEvent.contents[i];
+				var content = inEvent.contents[i];
 				var start = obj.componentsBlockStart;
 				var end = obj.componentsBlockEnd;
+				var kindStart = obj.block.start;
 				if (!(start && end)) {
 					// If this kind doesn't have a components block yet, insert a new one
 					// at the end of the file
 					var last = obj.properties[obj.properties.length-1];
 					if (last) {
-						comps = (last.commaTerminated ? "" : ",") + "\n\t" + "components: " + comps;
-						start = obj.block.end - 2;
+						content = (last.commaTerminated ? "" : ",") + "\n\t" + "components: []";
+						kindStart = obj.block.end - 2;
 						end = obj.block.end - 2;
 					}
 				}
 				// Get the corresponding Ace range to replace the component definition
 				// NB: ace.replace() allow to use the undo/redo stack.
-				var range = this.$.ace.mapToLineColumnRange(start, end);
-				this.$.ace.replaceRange(range, comps);
+				var range = this.$.ace.mapToLineColumnRange(kindStart, end);
+				this.$.ace.replaceRange(range, content);
 			}
 		}
 		this.injected = false;
@@ -858,30 +868,41 @@ enyo.kind({
 	},
 	// Show Find popup
 	findpop: function(){
+		var selected = this.$.ace.getSelection();
+		if(selected){
+			this.$.findpop.setFindInput(selected);
+		} 
+		this.$.findpop.removeMessage();
+		this.$.findpop.disableReplaceButtons(true);
 		this.$.findpop.show();
 		return true;
 	},
 	findNext: function(inSender, inEvent){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.find(this.$.findpop.findValue, options);
+		this.$.findpop.updateAfterFind(this.$.ace.getSelection());
 	},
 
 	findPrevious: function(){
 		var options = {backwards: true, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.find(this.$.findpop.findValue, options);
+		this.$.findpop.updateAfterFind(this.$.ace.getSelection());
 	},
 
 	replaceAll: function(){
-		this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		var occurences = this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		this.$.findpop.updateMessage(this.$.ace.getSelection(), occurences);
 	},
 	replacefind: function(){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
 		this.$.ace.replacefind(this.$.findpop.findValue , this.$.findpop.replaceValue, options);
+		this.$.findpop.updateMessage(this.$.ace.getSelection());
 	},
 
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
+	//It was not working because ACE(Ace.js) was doing "find" action before "replace".
 	replace: function(){
-		//this.$.ace.replace(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		this.$.ace.replace(this.$.findpop.findValue, this.$.findpop.replaceValue);
 	},
 
 	focusEditor: function(inSender, inEvent) {

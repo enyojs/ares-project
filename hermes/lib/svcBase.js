@@ -25,13 +25,14 @@ module.exports = ServiceBase;
  * @property config {String} pathname location after the service origin, defaults to '/'
  * @property config {String} basename child class name (for tracing)
  * @property config {Boolean} performCleanup clean temporary files & folders (default to true)
+ * @property service {Number} timeout HTTP timeout in ms (12000)
  * 
  * @param {Function} next
- * @param next {Error} err
- * @param next {Object} service
- * @property service {String} protocol is 'http' or 'https'
- * @property service {String} host IP address to 
- * @property service {String} port bound port (useful in case of dynamic allocation)
+ * @param {Error} next err
+ * @param {Object} next service
+ * @property service {String} protocol in ['http', 'https']
+ * @property service {String} host IP address the server is bound to (useful in case of dynamic allocation)
+ * @property service {String} port the server is bound to (useful in case of dynamic allocation)
  * @property service {String} origin consolidated string of protocol, host & port
  * @property service {String} pathname to locat the service behind the origin
  * 
@@ -39,6 +40,7 @@ module.exports = ServiceBase;
  */
 function ServiceBase(config, next) {
 
+	config.timeout = config.timeout || (2*60*1000);
 	config.port = config.port || 0;
 	config.pathname = config.pathname || '/';
 	if (config.performCleanup === undefined) {
@@ -51,6 +53,7 @@ function ServiceBase(config, next) {
 	// express 3.x: app is not a server
 	this.app = express();
 	this.server = http.createServer(this.app);
+	this.server.setTimeout(config.timeout);
 
 	/*
 	 * Middleware -- applied to every verbs

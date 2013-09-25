@@ -47,6 +47,7 @@ enyo.kind({
 
 		dirPopup.$.header.setContent("Select a directory containing the new project") ;
 		dirPopup.show();
+		this.$.propertiesWidget.setDefaultTab();
 		this.hide();
 	},
 
@@ -106,7 +107,8 @@ enyo.kind({
 
 		// Pre-fill project properties widget
 		propW.preFill(ProjectConfig.PREFILLED_CONFIG_FOR_UI);
-		propW.$.projectDirectory.setContent(this.selectedDir.path);
+		propW.$.projectPathLabel.setContent($L("Project path: "));
+		propW.$.projectPathValue.setContent(this.selectedDir.path);
 		propW.$.projectName.setValue(this.selectedDir.name);
 		propW.activateFileChoosers(false);
 
@@ -398,6 +400,14 @@ enyo.kind({
 			this.targetProject = target ;
 			this.$.propertiesWidget.setupModif();
 			this.$.propertiesWidget.preFill(config.data);
+
+			this.$.propertiesWidget.$.projectPathLabel.setContent($L("Project path: "));
+			this.$.propertiesWidget.$.projectPathValue.setContent("");
+			var req = config.service.propfind(config.folderId, 3);
+			req.response(this, function(inSender, inFile) {
+				this.$.propertiesWidget.$.projectPathValue.setContent(inFile.path);
+			});
+			
 			this.$.propertiesWidget.setTargetProject(target);
 			this.$.propertiesWidget.activateFileChoosers(true);
 
@@ -522,6 +532,7 @@ enyo.kind({
 	fileChoosersChecked: function (inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		this.show();
+		this.$.propertiesWidget.setDefaultTab();
 		return true;
 	}
 });
@@ -686,6 +697,16 @@ enyo.kind({
 			this.targetProject = target;
 			this.$.propertiesWidget.setupModif() ;
 			this.$.propertiesWidget.preFill(data);
+
+			this.$.propertiesWidget.$.projectPathLabel.setContent($L("Parent project path: "));
+			this.$.propertiesWidget.$.projectPathValue.setContent("");
+			var config = target.getConfig();
+			var req = config.service.propfind(config.folderId, 3);
+			req.response(this, function(inSender, inFile) {
+				var parentFolderPath = inFile.path.slice(0, -(inFile.name.length));
+				this.$.propertiesWidget.$.projectPathValue.setContent(parentFolderPath);
+			});
+
 			this.$.propertiesWidget.activateFileChoosers(false);
 			this.show();
 		}
@@ -707,7 +728,7 @@ enyo.kind({
 			return true ; // stop bubble			
 		}
 
-		var req = service.copy(folderId, destination);
+		var req = service.copy(folderId, {name: destination});
 		req.response(this, this.saveProjectJson);
 		req.error(this, function(inSender, status) {
 			var msg = $L("Unable to duplicate the project");

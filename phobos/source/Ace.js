@@ -259,7 +259,6 @@ enyo.kind({
 		this.editor.findPrevious();
 	},
 	replace: function(inFind, inReplace, inOptions) {
-		this.find(inFind, inOptions);
 		this.editor.replace(inReplace);
 	},
 	replacefind: function(inFind, inReplace, inOptions) {
@@ -268,16 +267,20 @@ enyo.kind({
 	},
 	replaceAll: function(inFind, inReplace, inOptions) {
 		this.find(inFind, inOptions);
-		this.editor.replaceAll(inReplace);
+		return this.editor.replaceAll(inReplace);
 	},
 	getUndoManager: function() {
 		return this.editor.getSession().getUndoManager();
 	},
 	undo: function() {
-		this.getUndoManager().undo();
+		if (this.canUndo()) {
+			this.getUndoManager().undo();
+		}
 	},
 	redo: function() {
-		this.getUndoManager().redo();
+		if (this.canRedo()) {
+			this.getUndoManager().redo();
+		}
 	},
 	canUndo: function() {
 		return this.getUndoManager().hasUndo();
