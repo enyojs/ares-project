@@ -724,7 +724,7 @@ enyo.kind({
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
-			this.showSavePopup("savePopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing? "');
+			this.showSavePopup("savePopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing?');
 		} else {
 			var id = this.docData.getId();
 			this.beforeClosingDocument();
@@ -780,7 +780,7 @@ enyo.kind({
 			var docData = this.editedDocs.pop();
 			this.openDoc(docData);
 			this.doSwitchFile({id:docData.id});
-			this.showSavePopup("savePopupPreview",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before preview? "');
+			this.showSavePopup("savePopupPreview",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before preview?');
 		}else{
 			this.doDisplayPreview();
 		}
