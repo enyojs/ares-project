@@ -68,7 +68,7 @@
 			"name":"ZIP-files Project Generator",
 			"type": ["generate"],
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/genZip.js", "--level", "verbose", "-P", "/genzip", "-p", "0"
+				"@INSTALLDIR@/hermes/genZip.js", "--level", "http", "-P", "/genzip", "-p", "0"
 			],
 			"timeout": 30000,
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
