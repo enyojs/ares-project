@@ -95,6 +95,7 @@ enyo.kind({
 	kinds: [],
 	index: null,
 	previousContent: "",
+	fileName: "",
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -126,6 +127,7 @@ enyo.kind({
 		
 		this.index = null;
 		this.kinds = what;
+		this.fileName = data.fileIndexer.name;
 		
 		this.owner.$.kindPicker.destroyClientControls();
 
@@ -158,6 +160,8 @@ enyo.kind({
 		if (index !== this.index) {
 			this.$.inspector.inspect(null);
 			this.$.inspector.setCurrentKindName(kind.name);
+			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+			this.$.designer.set("currentFileName", this.fileName);
 			this.$.designer.setCurrentKind(components[0]);
 		}
 		
@@ -223,6 +227,8 @@ enyo.kind({
 	},
 	//* Rerender current kind
 	rerenderKind: function(inSelectId) {
+		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+		this.$.designer.set("currentFileName", this.fileName);
 		this.$.designer.currentKind = this.getSingleKind(this.index)[0];
 		this.$.designer.renderCurrentKind(inSelectId);
 	},
@@ -408,7 +414,8 @@ enyo.kind({
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
 		this.kinds[this.index] = this.cleanUpComponents(components, true)[0];
 		
-		this.designerUpdate();
+		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+		this.designerUpdate(inEvent.filename);
 
 		return true;
 	},
@@ -718,10 +725,14 @@ enyo.kind({
 			}
 		}
 	},
-	designerUpdate: function() {
+	designerUpdate: function(inFilename) {
 		var event = this.prepareDesignerUpdate();
+		
+		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+		if (inFilename === this.fileName) {
+			this.doDesignerUpdate(event);
+		}
 
-		this.doDesignerUpdate(event);
 		this.enableDesignerActionButtons(true);
 	},
 	//* Called by Ares when ProjectView has new project selected
