@@ -114,10 +114,8 @@ function ServiceBase(config, next) {
 	/*
 	 * verbs
 	 */
-	this.app.post('/config', (function(req, res /*, next*/) {
-		this.configure(req.body && req.body.config, function(/*err*/) {
-			res.status(200).end();
-		});
+	this.app.post('/config', (function(req, res , next) {
+		this.configure(req.body && req.body.config, next);
 	}).bind(this));
 
 	this.route();
