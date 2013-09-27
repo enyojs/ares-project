@@ -9,11 +9,11 @@ enyo.kind({
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
 	published: {
-		label: "",
-		name: "",
-		value: "",
-		jsonSection: "",
-		platform: ""
+		label: undefined,
+		name: undefined,
+		value: undefined,
+		jsonSection: undefined,
+		platform: undefined
 	},
 	components: [
 	],
@@ -228,13 +228,12 @@ enyo.kind({
 
 			if (this.pan) {
 				if(this.getValue()) {
-					this.pan.setClassAttribute("ares-project-properties-targetsRows-display");
+					this.pan.show();
 				} else {
-					this.pan.setClassAttribute("ares-project-properties-targetsRows-hide");
+					this.pan.hide();
 				}
 			}
 		}
-
 	},
 
 	/** @public */
@@ -323,7 +322,7 @@ enyo.kind({
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
 	published: {
-		contentValue: ""
+		contentValue: undefined
 	},
 	components: [
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
@@ -376,11 +375,11 @@ enyo.kind({
 		for (var key in this.$.ConfigurationPicker.$) {
 		    if(this.$.ConfigurationPicker.$[key].kind === "onyx.MenuItem"){
 			this.$.ConfigurationPicker.$[key].active = false;
-				if(this.$.ConfigurationPicker.$[key].content === inContent){
+				if(this.$.ConfigurationPicker.$[key].value === inContent){
 					this.$.ConfigurationPicker.setSelected(this.$.ConfigurationPicker.$[key]);
 				}
 		    }
-		  }
+		}
 	},
 
 	/**
@@ -416,31 +415,47 @@ enyo.kind({
 enyo.kind({
 	name: "Phonegap.ProjectProperties.SDKVersionRow",
 	kind: "Phonegap.ProjectProperties.PickerRow",
-
-	/** 
-	 * Show in a tool tip the Android versions associated to each SDK versions
-	 *  
+	
+	/**
 	 * @private
 	 */
-	updateToolTip: function() {
-		for (var key in this.$.ConfigurationPicker.$) {
-		    if(this.$.ConfigurationPicker.$[key].kind === "onyx.MenuItem"){
-			this.$.ConfigurationPicker.$[key].setAttribute("title", Phonegap.UIConfiguration.androidSdkVersionsToolTip[this.$.ConfigurationPicker.$[key].content]);
-		    }
-		  }
+	contentValueChanged: function() {
+		//sort the value of the Android API version to garanty the display in the correct order. 
+		Object.keys(Phonegap.UIConfiguration.androidSdkVersions)
+		.sort(function(a, b) {return a - b;})
+		.forEach(
+			(function(key) {
+				var itemState = key === this.value ? true : false;
+
+				this.$.ConfigurationPicker.createComponent({
+					classes: "ares-project-properties-api-version-picker-element",
+					content: key + " / " + Phonegap.UIConfiguration.androidSdkVersions[key], 
+					value: key,
+					active: itemState
+				});
+			}).bind(this)		
+		);		
+	},
+
+	/**
+	 * @private
+	 */
+	updateConfigurationValue: function (inSender, inValue) {
+
+		this.setValue(inValue.selected.value);
+
+		return true;
 	},
 
 	/** @public */
 	setProjectConfig: function (config) {
-		this.updateToolTip();
 		this.setValue(config[this.jsonSection][this.name]);
 	},
 
 	/** @public */
 	getProjectConfig: function (config) {
 		config[this.jsonSection][this.name] = this.getValue();
-	}
-	
+	}	
 });
 
 /**
@@ -797,11 +812,13 @@ enyo.kind({
 	published: {
 		keys: undefined,
 		activeKeyId: undefined,
+		activeKeyTitle: undefined,
 		provider: undefined
 	},
 	components: [	
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
-		{name: "loadingSingingKeys", content: "Loading signing keys ..."} ,
+		{name: "activeSigningKey", classes: "ares-project-properties-show-sk"},
+		{name: "loadingSingingKeys"} ,
 		{name: "noSigningKeys", content: "No signing keys for this platform", showing: false},
 		{
 			name: "signingKeysContainer",
@@ -853,9 +870,17 @@ enyo.kind({
 		this.$.label.setContent(this.label);
 	},
 
+	activeKeyTitleChanged: function() {
+		this.$.activeSigningKey.setContent(this.getActiveKeyTitle() );
+		this.$.loadingSingingKeys.setContent(" Loading signing keys ...");
+	},
+
 	/** @public */
 	setProjectConfig: function (config) {
-		this.setValue(config[this.jsonSection][this.platform] && config[this.jsonSection][this.platform].keyId);
+		var myPlatform = config[this.jsonSection][this.platform];
+		this.setValue(myPlatform && myPlatform.keyId);
+		this.setActiveKeyTitle(myPlatform && myPlatform.keyTitle || "");
+
 	},
 	/** @public */
 	getProjectConfig: function (config) {
@@ -884,7 +909,8 @@ enyo.kind({
 			}			
 		};
 
-		this.$.loadingSingingKeys.hide();		
+		this.$.loadingSingingKeys.hide();
+		this.$.activeSigningKey.hide();
 
 		if(this.keys.length !== 0){
 
@@ -944,6 +970,7 @@ enyo.kind({
 		enyo.forEach(this.keys, function (key) {
 			if (key.title === inValue.content) {
 				this.setActiveKeyId(key.id);
+				this.setActiveKeyTitle(key.title);
 				this.trace("selected key:", key);
 			}
 		}, this);

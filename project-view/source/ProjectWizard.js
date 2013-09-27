@@ -397,7 +397,10 @@ enyo.kind({
 	start: function(target) {
 		if (target) {
 			var config = target.getConfig();
+			
 			this.targetProject = target ;
+			this.$.propertiesWidget.setTargetProject(target);
+
 			this.$.propertiesWidget.setupModif();
 			this.$.propertiesWidget.preFill(config.data);
 
@@ -408,7 +411,6 @@ enyo.kind({
 				this.$.propertiesWidget.$.projectPathValue.setContent(inFile.path);
 			});
 			
-			this.$.propertiesWidget.setTargetProject(target);
 			this.$.propertiesWidget.activateFileChoosers(true);
 
 			var show = (function () {
@@ -535,6 +537,7 @@ enyo.kind({
 		this.$.propertiesWidget.setDefaultTab();
 		return true;
 	}
+	
 });
 
 

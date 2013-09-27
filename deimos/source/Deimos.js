@@ -10,7 +10,7 @@ enyo.kind({
 		{name: "actionPopup", kind:"PaletteComponentActionPopup", centered: true, floating: true, autoDismiss: false, modal: true},
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
-				{name: "palette", classes:"ares_deimos_left", kind: "Palette"},
+				{name: "palette", classes:"ares_deimos_left", kind: "Palette", ondragstart: "paletteDragStart"},
 				{name: "middle", fit: true, kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
 						{kind: "onyx.Button", name: "reloadDesignerButton", classes: "deimos-designer-toolbar-spacing", content: "Reload", ontap: "reloadDesigner"},
@@ -94,7 +94,8 @@ enyo.kind({
 	},
 	kinds: [],
 	index: null,
-	previousContents: [],
+	previousContent: "",
+	fileName: "",
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -126,7 +127,7 @@ enyo.kind({
 		
 		this.index = null;
 		this.kinds = what;
-		this.previousContents = [];
+		this.fileName = data.fileIndexer.name;
 		
 		this.owner.$.kindPicker.destroyClientControls();
 
@@ -135,7 +136,6 @@ enyo.kind({
 
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
-			this.previousContents.push(enyo.json.codify.to(k.components));
 			this.owner.$.kindPicker.createComponent({
 				content: k.name,
 				index: i,
@@ -155,10 +155,13 @@ enyo.kind({
 		this.addAresIds(components);
 		this.addAresKindOptions(components);
 		this.$.inspector.initUserDefinedAttributes(components);
+		this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(components)));
 
 		if (index !== this.index) {
 			this.$.inspector.inspect(null);
 			this.$.inspector.setCurrentKindName(kind.name);
+			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+			this.$.designer.set("currentFileName", this.fileName);
 			this.$.designer.setCurrentKind(components[0]);
 		}
 		
@@ -224,6 +227,8 @@ enyo.kind({
 	},
 	//* Rerender current kind
 	rerenderKind: function(inSelectId) {
+		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+		this.$.designer.set("currentFileName", this.fileName);
 		this.$.designer.currentKind = this.getSingleKind(this.index)[0];
 		this.$.designer.renderCurrentKind(inSelectId);
 	},
@@ -373,10 +378,11 @@ enyo.kind({
 			// the length of the returned event array is significant for the undo/redo operation.
 			// event.contents.length must match this.kinds.length even if it contains only null values
 			// so the returned structure return may be [null] or [null, content, null] or [ null, null, null]...
-			if (event.contents[this.index] === this.previousContents[this.index]) {
+			if (event.contents[this.index] === this.previousContent) {
 				// except when undo/redo would not bring any change...
 				event.contents=[];
 			}
+			
 			return event;
 		}
 	},
@@ -408,9 +414,16 @@ enyo.kind({
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
 		this.kinds[this.index] = this.cleanUpComponents(components, true)[0];
 		
-		this.designerUpdate();
+		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+		this.designerUpdate(inEvent.filename);
 
 		return true;
+	},
+	//* Send dragData type to Designer and Component View during ondragstart within Palette
+	paletteDragStart: function(inSender, inEvent) {
+		var dragType = enyo.json.codify.from(inEvent.dataTransfer.getData("text")).type;
+		this.$.designer.sendDragType(dragType);
+		this.$.componentView.setDragType(dragType);
 	},
 	//* Create item from palette (via drag-and-drop from Palette into Designer or Component View)
 	createItem: function(inSender, inEvent) {
@@ -718,10 +731,14 @@ enyo.kind({
 			}
 		}
 	},
-	designerUpdate: function() {
+	designerUpdate: function(inFilename) {
 		var event = this.prepareDesignerUpdate();
+		
+		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+		if (inFilename === this.fileName) {
+			this.doDesignerUpdate(event);
+		}
 
-		this.doDesignerUpdate(event);
 		this.enableDesignerActionButtons(true);
 	},
 	//* Called by Ares when ProjectView has new project selected

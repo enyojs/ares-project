@@ -75,19 +75,19 @@
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
 			"sources": [
 				{
-					"id": "bootplate-nightly",
+					"id": "bootplate-2.3.0-pre.5",
 					"type": "template",
 					"files": [
 						{
-							"url": "http://nightly.enyojs.com/latest/bootplate-latest.zip",
-      							"prefixToRemove": "bootplate",
-      							"excluded": [
+							"url": "http://enyojs.com/archive/bootplate-2.3.0-pre.5.zip",
+							"prefixToRemove": "bootplate",
+							"excluded": [
 								"bootplate/api"
-      							]
+							]
 						}
-  					],
-  					"description": "Enyo bootplate for webOS - Nightly"
-				}, 
+					],
+					"description": "Enyo bootplate 2.3.0-pre.5 (Recommended)"
+				},
 				{
 					"id": "bootplate-2.2.0",
 					"type": "template",
