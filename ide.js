@@ -6,6 +6,7 @@
 
 var fs = require("fs"),
     path = require("path"),
+    createDomain = require('domain').create,
     express = require("express"),
     npmlog = require('npmlog'),
     nopt = require('nopt'),
@@ -584,6 +585,21 @@ function cors(req, res, next) {
 }
 
 app.configure(function(){
+
+	/*
+	 * Error Handling - Wrap exceptions in delayed handlers
+	 */
+	app.use(function _useDomain(req, res, next) {
+		var domain = createDomain();
+
+		domain.on('error', function(err) {
+			next(err);
+			domain.dispose();
+		});
+
+		domain.enter();
+		setImmediate(next);
+	});
 
 	app.use(cors);
 	app.use(express.favicon(myDir + '/ares/assets/images/ares_48x48.ico'));
