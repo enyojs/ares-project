@@ -5,7 +5,7 @@ enyo.kind({
 	modal: true,
 	centered: true,
 	floating: true,
-	autoDismiss: false,
+	autoDismiss: true,
 	published: {
 		title: $L("Error"),
 		errorMsg: $L("unknown error"),
@@ -121,7 +121,11 @@ enyo.kind({
 				this.error("Previous callback was not fired ! Bug?");
 			}
 			this.callback = evt.callback;
+			this.setAutoDismiss(false);
+		} else {
+			this.setAutoDismiss(true);
 		}
+
 		if (typeof evt === 'object') {
 			if (evt instanceof Error) {
 				err = evt;
