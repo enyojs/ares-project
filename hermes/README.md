@@ -175,7 +175,7 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Me
 
 Ares comes with an Hermes service using your Dropbox account as a storage service.    Enable this service in the `ide.json` before starting the IDE server:
 
-	[]
+	[...]
 	{
 		"active":true,
 		"id":"dropbox",
