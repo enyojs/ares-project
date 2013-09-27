@@ -40,7 +40,7 @@ enyo.kind({
 							]},
 							{classes: "onyx-menu-divider aresmenu-button"},
 							{value: "showAresProperties",  classes:"aresmenu-button", components: [
-								{content: "Properties...", classes: "aresmenu-button-label"}
+								{content: "About Ares...", classes: "aresmenu-button-label"}
 							]},
 							{classes: "onyx-menu-divider aresmenu-button"},
 							{value: "showEnyoHelp",  classes:"aresmenu-button", components: [
