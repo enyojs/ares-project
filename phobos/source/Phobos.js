@@ -458,7 +458,7 @@ enyo.kind({
 					enyo.log("An error occured during the code analysis: " + error);
 					this.dumpInfo(null);
 					this.$.autocomplete.setAnalysis(null);
-					this.showErrorPopup("Failed code analysis with error (" + error + "). autocompletion and index are now disabled");
+					this.showErrorPopup("Failed code analysis with error (" + error + "). autocompletion, index and designer are now disabled");
 				}
 				break;
 			case "json":
