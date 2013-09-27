@@ -458,7 +458,7 @@ function proxyServices(req, res, next) {
 		    return service.id === id;
 	    })[0];
 	if (!service) {
-		next(new HttpError('No such service: ' + id, 403));
+		setImmediate(next, new HttpError('No such service: ' + id, 403));
 		return;
 	}
 	for (var key in req.query) {
@@ -580,7 +580,7 @@ function cors(req, res, next) {
 	res.header('access-control-allow-origin', '*' /*FIXME: config.allowedDomains*/);
 	res.header('access-control-allow-methods', 'GET,POST');
 	res.header('access-control-allow-headers', 'Content-Type');
-	next();
+	setImmediate(next);
 }
 
 app.configure(function(){

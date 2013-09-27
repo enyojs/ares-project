@@ -247,13 +247,13 @@ ServiceBase.prototype.store = function(req, res, next) {
 		mkdirp(dir, function(err) {
 			log.silly("ServiceBase#store()", "mv ", file.path, " ", file.name);
 			if (err) {
-				setImmediate(next, err);
+				next(err);
 			} else {
 				if (file.type.match(/x-encoding=base64/)) {
 					fs.readFile(file.path, function(err, data) {
 						if (err) {
 							log.info("ServiceBase#store()", "transcoding: error" + file.path, err);
-							setImmediate(next, err);
+							next(err);
 							return;
 						}
 						try {
@@ -264,7 +264,7 @@ ServiceBase.prototype.store = function(req, res, next) {
 							var filedata = new Buffer(data.toString('ascii'), 'base64');			// TODO: This works but I don't like it
 							fs.writeFile(path.join(req.storeDir, file.name), filedata, function(err) {
 								log.silly("ServiceBase#store()", "from base64(): Stored: ", file.name);
-								setImmediate(next, err);
+								next(err);
 							});
 						} catch(transcodeError) {
 							log.warn("ServiceBase#store()", "transcoding error: " + file.path, transcodeError);
@@ -274,7 +274,7 @@ ServiceBase.prototype.store = function(req, res, next) {
 				} else {
 					fs.rename(file.path, path.join(req.storeDir, file.name), function(err) {
 						log.silly("ServiceBase#store()", "Stored: ", file.name);
-						setImmediate(next, err);
+						next(err);
 					});
 				}
 			}

@@ -165,7 +165,7 @@ BdBase.prototype.minify = function(req, res, next) {
 			if (err) {
 				log.verbose("BdBase#ignoring err:", err.toString());
 			}
-			setImmediate(next);
+			next();
 		});
 	}
 
@@ -197,10 +197,10 @@ BdBase.prototype.minify = function(req, res, next) {
 		});
 		child.on('exit', function(code /*, signal*/) {
 			if (code !== 0) {
-				setImmediate(next, new HttpError(child.errMsg || ("child-process failed: '"+ child.toString() + "'")));
+				next(new HttpError(child.errMsg || ("child-process failed: '"+ child.toString() + "'")));
 			} else {
 				log.info("BdBase#minify(): completed");
-				setImmediate(next);
+				next();
 			}
 		});
 	}
@@ -223,7 +223,7 @@ BdBase.prototype.build = function(req, res, next) {
 	], function (err, results) {
 		if (err) {
 			// run express's next() : the errorHandler (which calls cleanSession)
-			setImmediate(next, err);
+			next(err);
 		}
 		// we do not invoke error-less next() here
 		// because that would try to return 200 with
@@ -248,7 +248,7 @@ BdBase.prototype.archive = function(req, res, next) {
 	], function (err /*, results*/) {
 		if (err) {
 			// run express's next() : the errorHandler (which calls cleanSession)
-			setImmediate(next, err);
+			next(err);
 		}
 		// we do not invoke error-less next() here
 		// because that would try to return 200 with
@@ -299,7 +299,7 @@ BdBase.prototype.zip = function(req, res, next) {
 					log.silly("BdBase#zip._walk()", "stat: ", absPath);
 					fs.stat(absPath, function(err, stat) {
 						if (err) {
-							setImmediate(next, err);
+							next(err);
 							return;
 						}
 						if (stat.isDirectory()) {
@@ -341,7 +341,7 @@ BdBase.prototype.cleanSession = function(req, res, next) {
 		rimraf(req.appDir.root, function(err) {
 			log.verbose("BdBase#cleanSession()", "removed", dir);
 			delete req.appDir;
-			setImmediate(next, err);
+			next(err);
 		});
 	} else {
 		log.verbose("BdBase#cleanSession()", "skipping removal of", dir);
