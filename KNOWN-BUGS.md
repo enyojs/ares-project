@@ -25,12 +25,9 @@ Example:
 
 ## Designer
 
-Designer Drag&Drop feature works fine with Chrome Browser but is
-broken with other browsers.
+Designer Drag&Drop feature works fine with Chrome Browser but we
+still have issues with other browsers.
 
-## Style are lost on property changes in Designer with latest enyo version
+## Node.js
 
-No work-around.
-
-See JIRA https://enyojs.atlassian.net/browse/ENYO-2998.
-
+This release is still not working with Node.js 0.8.
