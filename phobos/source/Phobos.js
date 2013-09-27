@@ -16,14 +16,14 @@ enyo.kind({
 			]}
 		]},
 		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
-		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction"},
+		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onCancelActionPopup: "cancelAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
-		{name: "overwritePopup", kind: "overwriteActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "saveAsConfirm", onCancelActionPopup: "saveAsCancel"},
+		{name: "overwritePopup", kind: "overwriteActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "saveAsConfirm", onCancelActionPopup: "saveAsCancel", onHide:"doAceFocus"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: $L("unknown error")},
-		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide: "focusEditor", onClose: "findClose", onReplaceFind: "replacefind"},
+		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide:"doAceFocus", onClose: "findClose", onReplaceFind: "replacefind"},
 		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "enyo-unselectable", centered: true, modal: true, floating: true, autoDismiss: false,
-		onChangeSettings:"applySettings", onChangeRightPane: "changeRightPane", onClose: "closeEditorPop", onHide:"hideTest", onTabSizsChange: "tabSize"}
+		onChangeSettings:"applySettings", onChangeRightPane: "changeRightPane", onClose: "closeEditorPop", onTabSizsChange: "tabSize"}
 	],
 	events: {
 		onShowWaitPopup: "",
@@ -36,7 +36,8 @@ enyo.kind({
 		onRegisterMe: "",
 		onDisplayPreview: "",
 		onSwitchFile: "",
-		onFileEdited: " "
+		onFileEdited: " ",
+		onAceFocus: ""
 	},
 	handlers: {
 		onCss: "newcssAction",
@@ -76,6 +77,7 @@ enyo.kind({
 	saveDocAction: function() {
 		this.showWaitPopup($L("Saving ..."));
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
+		this.doAceFocus();
 		return true;
 	},
 	saveComplete: function(inDocData) {
@@ -109,6 +111,7 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		
 		if (!inEvent.file) {
+			this.doAceFocus();
 			// no file or folder chosen
 			return;
 		}
@@ -724,7 +727,7 @@ enyo.kind({
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
-			this.showSavePopup("savePopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing? "');
+			this.showSavePopup("savePopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing?');
 		} else {
 			var id = this.docData.getId();
 			this.beforeClosingDocument();
@@ -747,6 +750,10 @@ enyo.kind({
 	},
 	cancelClose: function(inSender, inEvent) {
 		this.closeAll = false;
+		this.cancelAction();
+	},
+	cancelAction: function(inSender, inEvent) {
+		this.doAceFocus();
 	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
@@ -780,8 +787,9 @@ enyo.kind({
 			var docData = this.editedDocs.pop();
 			this.openDoc(docData);
 			this.doSwitchFile({id:docData.id});
-			this.showSavePopup("savePopupPreview",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before preview? "');
+			this.showSavePopup("savePopupPreview",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before preview?');
 		}else{
+			this.doAceFocus();
 			this.doDisplayPreview();
 		}
 		return true;
@@ -801,6 +809,7 @@ enyo.kind({
 	*/
 	abandonDocActionOnPreview: function(inSender, inEvent) {
 		this.$.savePopup.hide();
+		this.doAceFocus();
 		this.saveNextDocument();
 	},
 	docChanged: function(inSender, inEvent) {
@@ -941,6 +950,7 @@ enyo.kind({
 		this.$.ace.applyAceSettings(this.$.editorSettingsPopup.getSettings());
 		this.adjustPanelsForMode(this.docData.getMode(), this.$.editorSettingsPopup.getSettings().rightpane);
 		this.$.editorSettingsPopup.hide();
+		this.doAceFocus();
 	},
 
 	//showing =
