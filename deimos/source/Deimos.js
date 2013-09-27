@@ -48,7 +48,8 @@ enyo.kind({
 							onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
 							onReloadComplete: "reloadComplete",
 							onResizeItem: "resizeItem",
-							onReturnPositionValue: "designerReturnPositionValue"
+							onReturnPositionValue: "designerReturnPositionValue",
+							onForceCloseDesigner: "closeDesignerAction"
 						}
 					]}
 				]},				
