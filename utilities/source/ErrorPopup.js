@@ -103,7 +103,14 @@ enyo.kind({
 		if (this.callback) {
 			var cb = this.callback;
 			this.callback = null;
-			cb();
+			try {
+				cb();
+			} catch(error) {
+				var errMsg = "An unexpected exception occured in callback:" + ( typeof error === 'object' ? error.message : error );
+				var errStack = typeof error === 'object' ? error.stack : '' ;
+				this.error(errMsg, errStack );
+				this.raise({msg: errMsg, err: {stack: errStack}});
+			}
 		}
 	},
 	raise: function(evt) {
