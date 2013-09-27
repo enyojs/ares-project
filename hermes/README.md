@@ -525,40 +525,116 @@ Start the file server:
 	$ node-inspector &
 	$ open -a Chromium http://localhost:8080/debug?port=5858
 
+### Box Sync
 
+In first, you have to install the Box Sync app.
 
-### Box.net sync directory
+Enable this service in the `ide.json` before starting the IDE server by changing "active" parameter:
 
-You must Frist install the box.net sync app for this to work
-
-Just a quick simple way to get to Box.net using the local hermes file system pointed to the Sync folder on your PC/Srever 
-
-
-make a secound copie of the 
-
+		[...]
 		{
 			"active":true,
-			"id":"home",
-			"icon":"$harmonia/images/providers/home-32x32.png",
-			"name":"Home Directory",
+			"id":"Box",
+			"icon":"$harmonia/images/providers/box.png",
+			"name":"Box Sync Directory",
 			"type": ["filesystem"],
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@"
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files"
 			],
 			"useJsonp":false,
 			"verbose": false,
 			"respawn": false
-		},
-	
-change the id  	"id":"home",    to "id":"box",
+		}
+		[...]
 
-change the icon  "icon":"$harmonia/images/providers/home-32x32.png",  to point to a new icon 
+Don't forget to check the path to your Box Documents in the following line:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files"
+			[...]
 
-change the ----		"@HOME@"    to match the path to match your folder  (works on windows) ----->  " @HOME@\\Documents\\My Box Files\\Default Sync Folder\\ "
+For example, on MacOS, this line can be:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/Box Documents"
+			[...]
 
+### Google Drive
 
-References:
+In first, you have to install the Google Drive app.
+
+Enable this service in the `ide.json` before starting the IDE server by changing "active" parameter:
+
+		[...]
+		{
+			"active":true,
+			"id":"Google Drive",
+			"icon":"$harmonia/images/providers/drive.png",
+			"name":"Google Sync Directory",
+			"type": ["filesystem"],
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Google Drive"
+			],
+			"useJsonp":false,
+			"verbose": false,
+			"respawn": false
+		}
+		[...]
+
+Don't forget to check the path to your Google Drive directory in the following line:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Google Drive"
+			[...]
+
+For example, on MacOS, this line can be:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/Google Drive"
+			[...]
+
+### SkyDrive
+
+In first, you have to install the SkyDrive app.
+
+Enable this service in the `ide.json` before starting the IDE server by changing "active" parameter:
+
+		[...]
+		{
+			"active":true,
+			"id":"Sky Drive",
+			"icon":"$harmonia/images/providers/sky.png",
+			"name":"Sky Sync Directory",
+			"type": ["filesystem"],
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\SkyDrive"
+			],
+			"useJsonp":false,
+			"verbose": false,
+			"respawn": false
+		}
+		[...]
+
+Don't forget to check the path to your Google Drive directory in the following line:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\SkyDrive"
+			[...]
+
+For example, on MacOS, this line  can be:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/SkyDrive"
+			[...]
 
 ## References
 
