@@ -127,7 +127,7 @@
 			"type": ["filesystem"],
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files\\Default Sync Folder\\"
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files"
 			],
 			"useJsonp":false,
 			"verbose": false,
