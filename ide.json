@@ -88,8 +88,8 @@
       							]
 						}
   					],
-					"description": "Enyo bootplate - 2.3.0-pre.5"
-				}, 
+					"description": "Enyo bootplate 2.3.0-pre.5 (Recommended)"
+				},
 				{
 					"id": "bootplate-2.2.0",
 					"type": "template",
