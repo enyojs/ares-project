@@ -341,8 +341,9 @@ function handleMessage(service) {
 					'content-type': 'application/json'
 				}
 			};
+			log.http(service.id, "POST /config");
 			var creq = http.request(options, function(cres) {
-				log.http(service.id, "POST /config response.status=" + cres.statusCode);
+				log.http(service.id, "POST /config", cres.statusCode);
 			}).on('error', function(e) {
 				throw e;
 			});
@@ -591,12 +592,12 @@ app.configure(function(){
 	 */
 	app.use(function _useDomain(req, res, next) {
 		var domain = createDomain();
-
+		
 		domain.on('error', function(err) {
 			next(err);
 			domain.dispose();
 		});
-
+		
 		domain.enter();
 		setImmediate(next);
 	});
@@ -638,7 +639,7 @@ app.configure(function(){
 		app.post('/res/tester', tester.setup);
 		app['delete']('/res/tester', tester.cleanup);
 	}
-	
+
 	/**
 	 * Global error handler (last plumbed middleware)
 	 * @private
@@ -647,11 +648,11 @@ app.configure(function(){
 		log.error('errorHandler()', err.stack);
 		res.status(500).send(err.toString());
 	}
-
+	
 	// express-3.x: middleware with arity === 4 is
 	// detected as the error handler
 	app.use(errorHandler.bind(this));
-
+	
 	log.verbose('app.configure()', "done");
 });
 
