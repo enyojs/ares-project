@@ -1,6 +1,6 @@
 {
   "name": "ares-ide",
-  "version": "0.2.4",
+  "version": "0.2.6-pre.1",
   "dependencies": {
     "archiver": {
       "version": "0.4.9",
@@ -19,6 +19,11 @@
     "ares-generator": {
       "version": "0.2.4",
       "dependencies": {
+        "adm-zip": {
+          "version": "0.4.3",
+          "from": "https://registry.npmjs.org/adm-zip/-/adm-zip-0.4.3.tgz",
+          "resolved": "https://registry.npmjs.org/adm-zip/-/adm-zip-0.4.3.tgz"
+        },
         "async": {
           "version": "0.2.9",
           "from": "async@0.2.9"
@@ -31,10 +36,6 @@
         "mkdirp": {
           "version": "0.3.5",
           "from": "mkdirp@0.3.5"
-        },
-        "node-zip": {
-          "version": "1.0.1",
-          "from": "node-zip@1.0.1"
         },
         "npmlog": {
           "version": "0.0.4",
@@ -292,7 +293,8 @@
     },
     "base64-stream": {
       "version": "0.1.2",
-      "from": "base64-stream@~0.1.2",
+      "from": "base64-stream@0.1.2",
+      "resolved": "https://registry.npmjs.org/base64-stream/-/base64-stream-0.1.2.tgz",
       "dependencies": {
         "readable-stream": {
           "version": "1.0.2",
@@ -326,7 +328,7 @@
     },
     "express": {
       "version": "3.4.0",
-      "from": "express@~3.4.0",
+      "from": "express@3.4.0",
       "dependencies": {
         "connect": {
           "version": "2.9.0",
@@ -367,7 +369,6 @@
         "commander": {
           "version": "1.2.0",
           "from": "commander@1.2.0",
-          "resolved": "https://registry.npmjs.org/commander/-/commander-1.2.0.tgz",
           "dependencies": {
             "keypress": {
               "version": "0.1.0",
