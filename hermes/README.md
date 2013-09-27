@@ -14,9 +14,9 @@ Each service may need an individual authentication to access a back-end in the c
 
 While authentications token are generally used by the Node.js-based Ares services (rather than by the Ares client application runnin in the Browser), the server server stores them locally:  they ares stored in the Browser sandbox (cookies, localStorage etc) and passed to the service when needed.
 
-The elements of the authentication token that are tight to the server (rather than to the end-user) are set on the server in the `"auth":{}` of `ide.json`, for each service.  This section is saved under `localStorage` key `com.hp.ares.services.<service name>.auth` in the Browser. The value associated with this key expands as the user feeds necessary credentails to each service.
+The elements of the authentication token that are tight to the server (rather than to the end-user) are set on the server in the `"auth":{...}` of `ide.json`, for each service.  This section is saved under `localStorage` key `com.hp.ares.services.<service name>.auth` in the Browser. The value associated with this key expands as the user feeds necessary credentails to each service.
 
-The actual properties stored within each `"auth":{}` are essentially service-specific.
+The actual properties stored within each `"auth":{...}` are essentially service-specific.
 
 **NOTE:** The `localStorage` values are not encrypted.  This could be changed if proven to be useful.
 
@@ -60,10 +60,10 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 		$ tree dir1/
 		dir1/
-		 file0
-		 file1
+		├── file0
+		└── file1
 
- corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.  The node descriptor Object format is defined by [this JSON schema](../assets/schema/com.enyojs.ares.fs.node.schema.json).  The `path` property is node location absolute to the Hermes file-system server root:  it uses URL notation: UNIX-type folder separator (`/`), not Windows-like (`\\`).
+... corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.  The node descriptor Object format is defined by [this JSON schema](../assets/schema/com.enyojs.ares.fs.node.schema.json).  The `path` property is node location absolute to the Hermes file-system server root:  it uses URL notation: UNIX-type folder separator (`/`), not Windows-like (`\\`).
 
 		$ curl "http://127.0.0.1:9009/id/%2F?_method=PROPFIND&depth=10"
 		{
@@ -191,7 +191,7 @@ Ares comes with an Hermes service using your Dropbox account as a storage servic
 			"appKey": "",
 			"appSecret": ""
 		}
-	[]
+	[...]
 	}
 
 You need to replace the appKey and appSecret entries with the proper values from your Dropbox application entry for Ares(see below).
@@ -204,7 +204,7 @@ In order to use Dropbox as storage service for Ares, you need to [create an Ares
 
 Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to the [GitHub:node-tunnel](https://github.com/koichik/node-tunnel) library.  `fsDropbox` proxy configuration embeds a `node-tunnel` configuration.  For example, fellow-HP-ers can use the below (transform `Xproxy` into `proxy` in the sample ide.json):
 
-			[]
+			[...]
 			"proxy":{
 				"http":{
 					"tunnel":"OverHttp",
@@ -217,7 +217,7 @@ Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to th
 					"port":8080
 				}
 			},
-			[]
+			[...]
 
 ## Project template services
 
