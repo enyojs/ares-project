@@ -162,7 +162,7 @@
 			"respawn": false
 		},
 		{
-			"active":true,
+			"active":false,
 			"id":"true image",
 			"icon":"$harmonia/images/providers/dir.png",
 			"name":"True image Dir",
