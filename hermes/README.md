@@ -14,9 +14,9 @@ Each service may need an individual authentication to access a back-end in the c
 
 While authentications token are generally used by the Node.js-based Ares services (rather than by the Ares client application runnin in the Browser), the server server stores them locally:  they ares stored in the Browser sandbox (cookies, localStorage etc) and passed to the service when needed.
 
-The elements of the authentication token that are tight to the server (rather than to the end-user) are set on the server in the `"auth":{}` of `ide.json`, for each service.  This section is saved under `localStorage` key `com.hp.ares.services.<service name>.auth` in the Browser. The value associated with this key expands as the user feeds necessary credentails to each service.
+The elements of the authentication token that are tight to the server (rather than to the end-user) are set on the server in the `"auth":{...}` of `ide.json`, for each service.  This section is saved under `localStorage` key `com.hp.ares.services.<service name>.auth` in the Browser. The value associated with this key expands as the user feeds necessary credentails to each service.
 
-The actual properties stored within each `"auth":{}` are essentially service-specific.
+The actual properties stored within each `"auth":{...}` are essentially service-specific.
 
 **NOTE:** The `localStorage` values are not encrypted.  This could be changed if proven to be useful.
 
@@ -60,10 +60,10 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 		$ tree dir1/
 		dir1/
-		 file0
-		 file1
+		├── file0
+		└── file1
 
- corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.  The node descriptor Object format is defined by [this JSON schema](../assets/schema/com.enyojs.ares.fs.node.schema.json).  The `path` property is node location absolute to the Hermes file-system server root:  it uses URL notation: UNIX-type folder separator (`/`), not Windows-like (`\\`).
+... corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.  The node descriptor Object format is defined by [this JSON schema](../assets/schema/com.enyojs.ares.fs.node.schema.json).  The `path` property is node location absolute to the Hermes file-system server root:  it uses URL notation: UNIX-type folder separator (`/`), not Windows-like (`\\`).
 
 		$ curl "http://127.0.0.1:9009/id/%2F?_method=PROPFIND&depth=10"
 		{
@@ -175,7 +175,7 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Me
 
 Ares comes with an Hermes service using your Dropbox account as a storage service.    Enable this service in the `ide.json` before starting the IDE server:
 
-	[]
+	[...]
 	{
 		"active":true,
 		"id":"dropbox",
@@ -191,7 +191,7 @@ Ares comes with an Hermes service using your Dropbox account as a storage servic
 			"appKey": "",
 			"appSecret": ""
 		}
-	[]
+	[...]
 	}
 
 You need to replace the appKey and appSecret entries with the proper values from your Dropbox application entry for Ares(see below).
@@ -204,7 +204,7 @@ In order to use Dropbox as storage service for Ares, you need to [create an Ares
 
 Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to the [GitHub:node-tunnel](https://github.com/koichik/node-tunnel) library.  `fsDropbox` proxy configuration embeds a `node-tunnel` configuration.  For example, fellow-HP-ers can use the below (transform `Xproxy` into `proxy` in the sample ide.json):
 
-			[]
+			[...]
 			"proxy":{
 				"http":{
 					"tunnel":"OverHttp",
@@ -217,7 +217,7 @@ Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to th
 					"port":8080
 				}
 			},
-			[]
+			[...]
 
 ## Project template services
 
@@ -525,40 +525,116 @@ Start the file server:
 	$ node-inspector &
 	$ open -a Chromium http://localhost:8080/debug?port=5858
 
+### Box Sync
 
+In first, you have to install the Box Sync app.
 
-### Box.net sync directory
+Enable this service in the `ide.json` before starting the IDE server by changing "active" parameter:
 
-You must Frist install the box.net sync app for this to work
-
-Just a quick simple way to get to Box.net using the local hermes file system pointed to the Sync folder on your PC/Server
-
-
-make a second copie of the 
-
+		[...]
 		{
 			"active":true,
-			"id":"home",
-			"icon":"$harmonia/images/providers/home-32x32.png",
-			"name":"Home Directory",
+			"id":"Box",
+			"icon":"$harmonia/images/providers/box.png",
+			"name":"Box Sync Directory",
 			"type": ["filesystem"],
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@"
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files"
 			],
 			"useJsonp":false,
 			"verbose": false,
 			"respawn": false
-		},
-	
-change the id  	"id":"home",    to "id":"box",
+		}
+		[...]
 
-change the icon  "icon":"$harmonia/images/providers/home-32x32.png",  to point to a new icon 
+Don't forget to check the path to your Box Documents in the following line:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files"
+			[...]
 
-change the ----		"@HOME@"    to match the path to match your folder  (works on windows) ----->  " @HOME@\\Documents\\My Box Files\\Default Sync Folder\\ "
+For example, on MacOS, this line can be:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/Box Documents"
+			[...]
 
+### Google Drive
 
-References:
+In first, you have to install the Google Drive app.
+
+Enable this service in the `ide.json` before starting the IDE server by changing "active" parameter:
+
+		[...]
+		{
+			"active":true,
+			"id":"Google Drive",
+			"icon":"$harmonia/images/providers/drive.png",
+			"name":"Google Sync Directory",
+			"type": ["filesystem"],
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Google Drive"
+			],
+			"useJsonp":false,
+			"verbose": false,
+			"respawn": false
+		}
+		[...]
+
+Don't forget to check the path to your Google Drive directory in the following line:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Google Drive"
+			[...]
+
+For example, on MacOS, this line can be:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/Google Drive"
+			[...]
+
+### SkyDrive
+
+In first, you have to install the SkyDrive app.
+
+Enable this service in the `ide.json` before starting the IDE server by changing "active" parameter:
+
+		[...]
+		{
+			"active":true,
+			"id":"Sky Drive",
+			"icon":"$harmonia/images/providers/sky.png",
+			"name":"Sky Sync Directory",
+			"type": ["filesystem"],
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\SkyDrive"
+			],
+			"useJsonp":false,
+			"verbose": false,
+			"respawn": false
+		}
+		[...]
+
+Don't forget to check the path to your Google Drive directory in the following line:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\SkyDrive"
+			[...]
+
+For example, on MacOS, this line  can be:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/SkyDrive"
+			[...]
 
 ## References
 
