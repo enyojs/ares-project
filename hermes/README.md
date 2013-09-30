@@ -60,8 +60,8 @@ Hermes file-system providers use verbs that closely mimic the semantics defined 
 
 		$ tree dir1/
 		dir1/
-		├── file0
-		└── file1
+		|-- file0
+		|-- file1
 
 ... corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.  The node descriptor Object format is defined by [this JSON schema](../assets/schema/com.enyojs.ares.fs.node.schema.json).  The `path` property is node location absolute to the Hermes file-system server root:  it uses URL notation: UNIX-type folder separator (`/`), not Windows-like (`\\`).
 
