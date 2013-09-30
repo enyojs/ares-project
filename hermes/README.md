@@ -4,7 +4,7 @@ Hermes offers several services not available in a Web Browser through one (or se
 
 * [Filesystem services](#filesystem-services) ([Local](#local-filesystem-service), [Dropbox](#dropbox-filesystem-service))
 * [Project templates services](#project-template-services)
-* [Build Services](#build-services) ([PhoneGap Build](#phonegap-build-service), )
+* [Build Services](#build-services) ([PhoneGap Build](#phonegap-build-service), ...)
 
 ## Security
 
@@ -36,7 +36,7 @@ In order to run the Phonegap build service from Ares, the authentication must be
 
 **NOTE**:
  
-- Due to a certain restriction on the edition of the Adobe account, a user cant change the linked Adobe ID on his Phonegap account.
+- Due to a certain restriction on the edition of the Adobe account, a user can't change the linked Adobe ID on his Phonegap account.
 - A user can unlink his Phonegap account from the Github account by following these steps: 
 
 	1. The user must be authenticated in Github
