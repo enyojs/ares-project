@@ -3,7 +3,7 @@ Ares 2
 
 [![NPM](https://nodei.co/npm/ares-ide.png)](https://nodei.co/npm/ares-ide/)
 
-Overview
+Overview[](id:overview)
 --------
 
 Ares 2 is an open-source ([Apache 2](LICENSE-2.0.txt)) browser-based code editor and UI designer for developing [Enyo 2](http://enyojs.com) applications.
@@ -17,7 +17,7 @@ Applications made using Ares 2 rely on the Enyo highly portable web technology: 
 * See [basic Ares security principles](#security)
 * Learn how to [extend Ares using plugins](#extend)
 
-Roadmap
+Roadmap[](id:roadmap)
 -------
 
 ### Current status
@@ -59,7 +59,7 @@ The following features are in the works, and you should see them added as we mov
 
 **Note:**  An up-to-date view of the ongoing activities is available from The [ARES JIRA](https://enyojs.atlassian.net/browse/ENYO/component/10302), itself available from the [EnyoJS JIRA](https://enyojs.atlassian.net/browse/ENYO).
 
-Usage
+Usage[](id:usage)
 -----
 
 ### Install
@@ -112,12 +112,12 @@ You may also want to increase the log verbosity, in order to better understand w
 
 	$ node ide.js --level=info
 
-Known Bugs
+Known Bugs[](id:known-bugs)
 ----------
 
 See this [list of known issues](KNOWN-BUGS.md)
 
-Features
+Features[](id:features)
 --------
 
 ### PhoneGap Build
@@ -128,14 +128,14 @@ See [Hermes README: PhoneGap build service](hermes/README.md#phonegap-build-serv
 
 See [Hermes README: Dropbox File-System service](hermes/README.md#dropbox-filesystem-service).
 
-Security
+Security[](id:security)
 --------
 
 Ares does not store any security token or credentials on the server.  Client-side security tokens & credentials are stored either using Cookies or using HTML5 `localStorage`.
 
 See [Hermes Security: Authentication](hermes/README.md#security).
 
-Extend
+Extend[](id:extend)
 ------
 
 Ares's plugin architecture is made to allow extensions, both in its UI (browser client) & its server.
@@ -178,7 +178,7 @@ At startup, the process "node ide.js":
 	* `@HOME@`: the user's `$HOME` folder on Mac OSX & Linux, `%USERPROFILE%` on Windows.
  * starts services defined in the resulting loaded configuration
 
-#### Merging configuration
+#### Merging configuration[](id:merging-configuration)
 
 Ares plugin configuration are merged as follow:
 
