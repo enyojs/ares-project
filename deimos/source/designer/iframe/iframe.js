@@ -39,6 +39,10 @@ enyo.kind({
 	moveControlSecs: 0.2,
 	edgeThresholdPx: 10,
 	debug: false,
+
+
+	// iframe will complain if user's application loads en enyo older than:
+	minEnyoVersion: "2.3.0-pre.9",
 	
 	create: function() {
 		this.trace = (this.debug === true ? this.log : function(){});
@@ -48,7 +52,7 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.inherited(arguments);
-		var expVer = [2,3,0,5] ; // i.e. 2.3.0-pre.5
+		var expVer = this.minEnyoVersion.split(/\D+/);
 		var myVerStr = (enyo.version && enyo.version.enyo) || '0.0.0-pre.0';
 		var myVer = myVerStr.split(/\D+/);
 		var errMsg ;
@@ -57,7 +61,8 @@ enyo.kind({
 			if (myVer.shift() < expVer.shift()) {
 				errMsg = "Enyo used by your application is too old ("
 					+ myVerStr + "). Console log will show duplicated kind error "
-					+ "and Designer may not work as expected. You should use Enyo >= 2.3.0.pre.5" ;
+					+ "and Designer may not work as expected. You should use Enyo >= "
+					+ this.minEnyoVersion;
 				enyo.warn(errMsg);
 				this.sendMessage({op: "error", val: {msg: errMsg }});
 				break;
