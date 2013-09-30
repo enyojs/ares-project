@@ -121,41 +121,13 @@
 		},
 		{
 			"active":false,
-			"id":"Box",
-			"icon":"$harmonia/images/providers/box.png",
-			"name":"Box Sync Directory",
+			"id":"Example",
+			"icon":"$harmonia/images/providers/box_white-32x32.png",
+			"name":"Example drive",
 			"type": ["filesystem"],
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files"
-			],
-			"useJsonp":false,
-			"verbose": false,
-			"respawn": false
-		},
-		{
-			"active":false,
-			"id":"Google Drive",
-			"icon":"$harmonia/images/providers/drive.png",
-			"name":"Google Sync Directory",
-			"type": ["filesystem"],
-			"provider": "hermes",
-			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Google Drive"
-			],
-			"useJsonp":false,
-			"verbose": false,
-			"respawn": false
-		},
-		{
-			"active":false,
-			"id":"Sky Drive",
-			"icon":"$harmonia/images/providers/sky.png",
-			"name":"Sky Sync Directory",
-			"type": ["filesystem"],
-			"provider": "hermes",
-			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\SkyDrive"
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Example dir"
 			],
 			"useJsonp":false,
 			"verbose": false,

@@ -12,7 +12,7 @@ Hermes offers several services not available in a Web Browser through one (or se
 
 Each service may need an individual authentication to access a back-end in the cloud.  For example, PhoneGap Build (PGB) uses a simple per-user token that is provided as a query parameter with every request to the build service.  Another example is more complex example is Dropbox, which requires both an application OAuth token pair (for Ares itself), plus a per-user account (the one users use to access their private data on Dropbox).  There are a variety of possible 
 
-While authentications token are generally used by the Node.js-based Ares services (rather than by the Ares client application runnin in the Browser), the server server stores them locally:  they ares stored in the Browser sandbox (cookies, localStorage etc) and passed to the service when needed.
+While authentications token are generally used by the Node.js-based Ares services (rather than by the Ares client application runnin in the Browser), the server server stores them locally:  they ares stored in the Browser sandbox (cookies, localStorage... etc) and passed to the service when needed.
 
 The elements of the authentication token that are tight to the server (rather than to the end-user) are set on the server in the `"auth":{...}` of `ide.json`, for each service.  This section is saved under `localStorage` key `com.hp.ares.services.<service name>.auth` in the Browser. The value associated with this key expands as the user feeds necessary credentails to each service.
 
@@ -527,22 +527,20 @@ Start the file server:
 	$ node-inspector &
 	$ open -a Chromium http://localhost:8080/debug?port=5858
 
-### Box Sync
+## Mapping more file-systems 
 
-In first, you have to install the Box Sync app.
-
-Enable this service in the `ide.json` before starting the IDE server by changing "active" parameter:
+To map another file-system, you have to enable it in ide.json before starting the IDE server by changing "active" parameter and also by changing the value associated with the --root parameter:
 
 		[...]
 		{
-			"active":true,
-			"id":"Box",
-			"icon":"$harmonia/images/providers/box.png",
-			"name":"Box Sync Directory",
+			"active":false,
+			"id":"Example",
+			"icon":"$harmonia/images/providers/box_white-32x32.png",
+			"name":"Example drive",
 			"type": ["filesystem"],
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files"
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Example dir"
 			],
 			"useJsonp":false,
 			"verbose": false,
@@ -550,34 +548,23 @@ Enable this service in the `ide.json` before starting the IDE server by changing
 		}
 		[...]
 
-The icon is not provided.
+Change name and id parameters.
 
-Don't forget to check the path to your Box Documents in the following line:
-			
-			[...]
-			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files"
-			[...]
+You can replace box_white-32x32.png by an appropriate app icon in the icon parameter.
 
-For example, on MacOS, this line can be:
-			
-			[...]
-			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/Box Documents"
-			[...]
 
-### Google Drive
+- Using Google Drive directory
 
-In first, you have to install the Google Drive app.
+First install Google Drive App. You can donwload it from [here](here "https://tools.google.com/dlpage/drive").
 
-Enable this service in the `ide.json` before starting the IDE server by changing "active" parameter:
+Make a copy of the example above and perform specific changes for the Google Drive directory.
 
 		[...]
 		{
 			"active":true,
 			"id":"Google Drive",
-			"icon":"$harmonia/images/providers/drive.png",
-			"name":"Google Sync Directory",
+			"icon":"$harmonia/images/providers/box_white-32x32.png",
+			"name":"Google Drive Directory",
 			"type": ["filesystem"],
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
@@ -589,9 +576,9 @@ Enable this service in the `ide.json` before starting the IDE server by changing
 		}
 		[...]
 
-The icon is not provided.
+The icon is not provided. You can check the terms of use of the Google Drive branding [here](https://developers.google.com/drive/branding) and add an appropriate icon.
 
-Don't forget to check the path to your Google Drive directory in the following line:
+Don't forget to check the --root parameter to your Google Drive directory in the following line:
 			
 			[...]
 			"command":"@NODE@", "params":[
@@ -605,22 +592,24 @@ For example, on MacOS, this line can be:
 				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/Google Drive"
 			[...]
 
-### SkyDrive
 
-In first, you have to install the SkyDrive app.
+- Using Box Sync directory
 
-Enable this service in the `ide.json` before starting the IDE server by changing "active" parameter:
+First install Box Sync App. You can donwload it from [here]("https://www.box.com/pricing/").
 
+Make a copie of example above and perform specific changes for the Box Sync directory.
+
+	
 		[...]
 		{
 			"active":true,
-			"id":"Sky Drive",
-			"icon":"$harmonia/images/providers/sky.png",
-			"name":"Sky Sync Directory",
+			"id":"Box",
+			"icon":"$harmonia/images/providers/box_white-32x32.png",
+			"name":"Box Sync Directory",
 			"type": ["filesystem"],
 			"provider": "hermes",
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\SkyDrive"
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files"
 			],
 			"useJsonp":false,
 			"verbose": false,
@@ -628,20 +617,21 @@ Enable this service in the `ide.json` before starting the IDE server by changing
 		}
 		[...]
 
+
 The icon is not provided.
 
-Don't forget to check the path to your Google Drive directory in the following line:
+Don't forget to check the --root parameter to your Box Sync directory in the following line:
 			
 			[...]
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\SkyDrive"
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files"
 			[...]
 
-For example, on MacOS, this line  can be:
+For example, on MacOS, this line can be:
 			
 			[...]
 			"command":"@NODE@", "params":[
-				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/SkyDrive"
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/Box Documents"
 			[...]
 
 ## References
