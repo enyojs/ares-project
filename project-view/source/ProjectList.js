@@ -41,6 +41,10 @@ enyo.kind({
 							{classes: "onyx-menu-divider aresmenu-button"},
 							{value: "showAresProperties",  classes:"aresmenu-button", components: [
 								{content: "Properties...", classes: "aresmenu-button-label"}
+							]},
+							{classes: "onyx-menu-divider aresmenu-button"},
+							{value: "showEnyoHelp",  classes:"aresmenu-button", components: [
+								{content: "Enyo API Viewer", classes: "aresmenu-button-label"}
 							]}
 						]}
 					]},
@@ -114,6 +118,7 @@ enyo.kind({
 		{classes:"hangar"}
 	],
 	selected: null,
+	enyoHelpTab: null,
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -172,7 +177,7 @@ enyo.kind({
 		if (this.selected) {
 			popup.setTitle($L("Remove project"));
 			popup.setMessage(this.$LS("Remove project '#{projectName}' from list?", {projectName: this.selected.getProjectName()}));
-			popup.setNukeFiles(false) ;
+			popup.set("nukeFiles", false) ;
 			popup.show();
 		}
 	},
@@ -182,7 +187,7 @@ enyo.kind({
 		var project, nukeFiles ;
 		if (this.selected) {
 			project = Ares.Workspace.projects.at(this.selected.index);
-			nukeFiles = this.$.removeProjectPopup.getNukeFiles() ;
+			nukeFiles = this.$.removeProjectPopup.get("nukeFiles");
 			this.trace("removing project", project.getName(), ( nukeFiles ? " and its files" : "" )) ;
 			this.trace(project);
 			if (nukeFiles) {
@@ -258,6 +263,15 @@ enyo.kind({
 	showAresProperties: function(){
 		this.$.aresProperties.show();
 	},
+	showEnyoHelp: function(){
+		if (this.enyoHelpTab && !this.enyoHelpTab.closed) {
+			this.enyoHelpTab.focus();
+			return;
+		}
+		this.enyoHelpTab = window.open("http://enyojs.com/api/",
+			"Enyo API Viewer",
+			"resizable=1, dependent=yes, width=800, height=600");
+	},
 	stringifyReplacer: function(key, value) {
 		if (key === "originator") {
 			return undefined;	// Exclude
@@ -288,24 +302,22 @@ enyo.kind({
 enyo.kind({
 	name: "ProjectDeletePopup",
 	kind: "Ares.ActionPopup",
-	published: {
-		nukeFiles: false
-	},
+	nukeFiles: false,
 	/** @private */
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.createComponent(
 				{container:this.$.popupContent, classes:"ares-more-row", components:[
-					{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onchange: "changeNuke"},
+					{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onActivate: "changeNuke"},
 					{kind: "Control", tag: "span", classes: "ares-padleft", content: $L("also delete files from disk")}
 				]}
 		);
 		this.changeNuke();
 	},
 	/** @private */
-	nukeFilesChanged: function(inSender, inEvent) {
-		this.$.nukeFiles.checked = this.nukeFiles;
+	nukeFilesChanged: function(inOldValue) {
+		this.$.nukeFiles.set("checked", this.nukeFiles);
 		this.changeNuke();
 	},
 	/** @private */

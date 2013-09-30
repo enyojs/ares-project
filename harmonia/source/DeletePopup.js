@@ -4,7 +4,6 @@ enyo.kind({
 	published: {
 		type: "",
 		name: "",
-		nodeId: "",
 		path: ""
 	},
 	events: {
@@ -14,34 +13,39 @@ enyo.kind({
 	modal: true,
 	centered: true,
 	floating: true,
+	classes:"ares-classic-popup",
 	components: [
-		{name: "title", tag: "h3", content: "Delete?"},
-		//{name: "path", tag: "p", content: "Path: "},
-		{tag: "br"},
-		{tag: "br"},
-		{kind: "FittableColumns", components: [
-			{name: "deleteCancelButton", kind: "onyx.Button", content: "Cancel", ontap: "deleteCancel"},
-			{fit: true},
-			{name: "deleteDeleteButton", kind: "onyx.Button", content: "Delete", ontap: "deleteConfirm"}
+		{tag: "div", name: "title", classes:"title", content: "Delete "},
+		{kind: "enyo.Scroller", classes:"ares-small-popup", fit: true, components: [
+			{tag:"p", classes:"break"},
+			{kind: "onyx.InputDecorator", components: [
+				{name: "name", kind: "onyx.Input", disabled: true}
+			]},
+			{classes:"ares-small-popup-details", components:[
+				{name: "path", tag: "p", content: "Path: "}
+			]}
+		]},
+		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+			{name:"deleteCancelButton", kind: "onyx.Button", content: "Cancel", ontap: "deleteCancel"},
+			{name:"deleteDeleteButton", classes:"right", kind: "onyx.Button", content: "Delete", ontap: "deleteConfirm"}
 		]}
 	],
 	create: function() {
 		this.inherited(arguments);
 		this.typeChanged();
 		this.nameChanged();
-		this.nodeIdChanged();
 		this.pathChanged();
 	},
 	typeChanged: function() {
-		this.$.title.setContent("Delete "+this.type+": "+this.name+"?");
+		this.$.title.setContent("Delete "+this.type);
 	},
 	nameChanged: function() {
-		this.$.title.setContent("Delete "+this.type+": "+this.name+"?");
-	},
-	nodeIdChanged: function() {
+		this.$.name.setValue(this.name);
 	},
 	pathChanged: function() {
-		//this.$.path.setContent("in "+this.path);
+		var fileName = this.$.name.getValue();
+		var where = this.path.substring(0, this.path.lastIndexOf(fileName));
+		this.$.path.setContent("in "+where);
 	},
 	deleteCancel: function(inSender, inEvent) {
 		this.hide();

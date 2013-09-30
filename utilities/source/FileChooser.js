@@ -39,7 +39,12 @@ enyo.kind({
 		/**
 		 * When true the {Ares.FileChooser} show the toolbar.
 		 */
-		allowToolbar: true
+		allowToolbar: true,
+		/**
+		 * When true the {Ares.FileChooser} allows the selection
+		 * of the top-level in the file tree.
+		 */
+		serverSelectable: true
 	},
 	/**
 	 * project configuration information
@@ -75,7 +80,8 @@ enyo.kind({
 				{name: "cancel", kind: "onyx.Button", content: $L("Cancel"), ontap: "cancel"},
 				{name: "confirm", kind: "onyx.Button", content: $L("OK"), classes:"right", ontap: "confirm", disabled: true}
 			]}
-		]}
+		]},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: $L("Error message")}
 	],
 	events: {
 		/**
@@ -211,7 +217,6 @@ enyo.kind({
 					this.$.selectedFoldersPath.setValue(folders);
 					this.$.selectedFileName.setValue(inEvent.file.name);
 				} else {
-
 					if (!this.folderChooser) { this.$.selectedFoldersPath.setValue(relativePath); }
 				}
 			} else {
@@ -257,7 +262,7 @@ enyo.kind({
 	},
 	updateConfirmButton: function() {
 		if (this.folderChooser) {
-			this.$.confirm.setDisabled(!(this.selectedFile && this.selectedFile.isDir));
+			this.$.confirm.setDisabled((this.selectedFile && this.selectedFile.isServer && !this.serverSelectable) || !(this.selectedFile && this.selectedFile.isDir));
 		} else {
 			if (!this.allowNewFile) {
 				this.$.confirm.setDisabled(!(this.selectedFile && !this.selectedFile.isDir));
@@ -274,7 +279,6 @@ enyo.kind({
 		var name = this.$.selectedFoldersPath.getValue();
 
 		if (!this.checkedPath(name)) {
-			this.hide() ;
 			this.doFileChosen();
 
 			return true;
@@ -343,7 +347,7 @@ enyo.kind({
 	},
 	/* @private */
 	checkedPath: function(path) {
-		var illegal = /[<>\\!?@#\$%^&\*,]+/i;
+		var illegal = /[<>\\!?$%&*,:;"|]/i;
 
 		if (path.match(illegal)) {
 			this.showErrorPopup(this.$LS("Path #{path} contains illegal characters", {path: path}));
@@ -351,6 +355,14 @@ enyo.kind({
 		}
 
 		return true;
+	},
+	showErrorPopup : function(msg) {
+		this.$.errorPopup.setErrorMsg(msg);
+		this.$.errorPopup.show();
+	},
+	$LS: function(msg, params) {
+		var tmp = new enyo.g11n.Template($L(msg));
+		return tmp.evaluate(params);
 	}
 });
 

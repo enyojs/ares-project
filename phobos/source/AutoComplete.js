@@ -6,7 +6,7 @@ enyo.kind({
 	floating : true,
 	autoDismiss : false,
 	modal : false,
-	classes: "ares_phobos_autocomp",
+	classes: "ares_phobos_autocomp ares-masked-content-popup",
 	published: {
 		ace: null,
 		analysis: null,
@@ -25,6 +25,9 @@ enyo.kind({
 			// options elements will be populated programmatically
 		]
 	} ],
+	events: {
+		onAceFocus: ""
+	},
 	handlers: {
 		onHide: "hideAutocompletePopup"
 	},
@@ -344,12 +347,12 @@ enyo.kind({
 			// Compute the position of the popup
 			var ace = this.ace;
 			var pos = ace.textToScreenCoordinates(this.popupPosition.row, this.popupPosition.column);
-			pos.pageY += ace.getLineHeight(); // Add the font height to be below the line
-
-			// Position the autocomplete popup
-			this.applyStyle("top", pos.pageY + "px");
-			this.applyStyle("left", pos.pageX + "px");
-			this.show();
+			this.applyStyle("padding-top", ace.getLineHeight() + "px");
+			var p = {
+			    left: pos.pageX,
+			    top: pos.pageY
+			};
+			this.showAtPosition(p);
 			this.popupShown = true;
 		} else {
 			this.hideAutocompletePopup();
@@ -383,7 +386,7 @@ enyo.kind({
 	hideAutocompletePopup: function() {
 		this.popupShown = false;
 		this.hide();
-		this.ace.focus();
+		this.doAceFocus();
 		return true; // Stop the propagation of the event
 	},
 	/**
@@ -394,14 +397,13 @@ enyo.kind({
 	autocompleteChanged: function() {
 		// Insert the selected value
 		this.hide();
-		var ace = this.ace;
 		var selected = this.$.autocompleteSelect.getValue();
 		selected = selected.substr(this.input.length);
 		var pos = enyo.clone(this.popupPosition);
 		pos.column += this.input.length;
 		this.trace("Inserting >>", selected, "<< at ", enyo.json.stringify(pos));
 		this.ace.insertAt(pos, selected);
-		ace.focus();
+		this.doAceFocus();
 		return true; // Stop the propagation of the event
 	},
 	/**

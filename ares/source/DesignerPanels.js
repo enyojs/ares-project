@@ -64,7 +64,7 @@ enyo.kind({
 					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
 				]},
 				{components: [
-					{kind: "Deimos", onCloseDesigner: "closeDesigner", onDesignerUpdate: "designerUpdate", onUndo: "designerUndo", onRedo: "designerRedo"}
+					{kind: "Deimos", onCloseDesigner: "closeDesigner"}
 				]}
 			]
 		},
@@ -76,11 +76,15 @@ enyo.kind({
 		onSavePreviewAction:""
 	},
 	published: {
-		panelIndex: 2
+		panelIndex: 2,
+		aceActive: true
+	},
+	handlers: {
+		onAceFocus: "aceFocus"
 	},
 	create: function() {
 		this.inherited(arguments);
-		this.doRegisterMe({name:"codeEditor", reference:this});
+		this.doRegisterMe({name:"designerPanels", reference:this});
 	},
 	activePanel : function(){
 		this.doMovePanel({panelIndex:this.panelIndex});
@@ -116,8 +120,7 @@ enyo.kind({
 	},
 	closeDesignerAction: function(){
 		this.owner.componentsRegistry.deimos.closeDesignerAction();
-		this.owner.componentsRegistry.phobos.focusEditor();
-		this.manageControls(false);
+		this.aceFocus();
 	},
 	/**
 	 * Change controls on the panel top toolbar
@@ -126,6 +129,7 @@ enyo.kind({
 	 * @param {boolean} designer, designer = true if designer's controls should be available
 	 */
 	manageControls: function(designer){
+		this.setAceActive(!designer);
 		this.$.editorControls.setShowing(!designer);
 		this.$.deimosControls.setShowing(designer);
 		this.$.toolbar.resized();
@@ -135,7 +139,20 @@ enyo.kind({
 	},
 	addPreviewTooltip: function(message){
 		this.$.previewTooltip.setContent(message);
-	}	
+	},
+	updateDeimosLabel: function(edited) {
+		if (edited) {
+			this.$.docLabel.setContent("Deimos *");
+		} else {
+			this.$.docLabel.setContent("Deimos");
+		}
+		this.$.toolbar.resized();
+	},
+	aceFocus: function(){
+		if(this.getAceActive()){
+			this.owner.componentsRegistry.phobos.focusEditor();	
+		}
+	}
 });
 
 /**
@@ -145,6 +162,9 @@ enyo.kind({
 	name: "Ares.FileMenu",
 	kind: "onyx.MenuDecorator",
 	classes:"aresmenu ares-right-margin ares-left-margin",
+	events: {
+		onAceFocus: ""
+	},
 	components: [
 		{tag:"button", content: "File"},
 		{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
