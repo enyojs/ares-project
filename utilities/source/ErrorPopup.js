@@ -5,7 +5,7 @@ enyo.kind({
 	modal: true,
 	centered: true,
 	floating: true,
-	autoDismiss: false,
+	autoDismiss: true,
 	published: {
 		title: $L("Error"),
 		errorMsg: $L("unknown error"),
@@ -103,7 +103,14 @@ enyo.kind({
 		if (this.callback) {
 			var cb = this.callback;
 			this.callback = null;
-			cb();
+			try {
+				cb();
+			} catch(error) {
+				var errMsg = "An unexpected exception occured in callback:" + ( typeof error === 'object' ? error.message : error );
+				var errStack = typeof error === 'object' ? error.stack : '' ;
+				this.error(errMsg, errStack );
+				this.raise({msg: errMsg, err: {stack: errStack}});
+			}
 		}
 	},
 	raise: function(evt) {
@@ -114,7 +121,11 @@ enyo.kind({
 				this.error("Previous callback was not fired ! Bug?");
 			}
 			this.callback = evt.callback;
+			this.setAutoDismiss(false);
+		} else {
+			this.setAutoDismiss(true);
 		}
+
 		if (typeof evt === 'object') {
 			if (evt instanceof Error) {
 				err = evt;
