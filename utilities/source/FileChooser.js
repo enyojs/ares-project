@@ -39,7 +39,12 @@ enyo.kind({
 		/**
 		 * When true the {Ares.FileChooser} show the toolbar.
 		 */
-		allowToolbar: true
+		allowToolbar: true,
+		/**
+		 * When true the {Ares.FileChooser} allows the selection
+		 * of the top-level in the file tree.
+		 */
+		serverSelectable: true
 	},
 	/**
 	 * project configuration information
@@ -257,7 +262,7 @@ enyo.kind({
 	},
 	updateConfirmButton: function() {
 		if (this.folderChooser) {
-			this.$.confirm.setDisabled(!(this.selectedFile && this.selectedFile.isDir));
+			this.$.confirm.setDisabled((this.selectedFile && this.selectedFile.isServer && !this.serverSelectable) || !(this.selectedFile && this.selectedFile.isDir));
 		} else {
 			if (!this.allowNewFile) {
 				this.$.confirm.setDisabled(!(this.selectedFile && !this.selectedFile.isDir));
