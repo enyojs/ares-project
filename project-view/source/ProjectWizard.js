@@ -25,7 +25,7 @@ enyo.kind({
 
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource"},
-		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true, allowCreateFolder: true},
+		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true, allowCreateFolder: true, serverSelectable: false},
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")}
 	],
 	debug: false,
@@ -45,7 +45,7 @@ enyo.kind({
 		this.trace("starting") ;
 		this.show();
 
-		dirPopup.$.header.setContent("Select a directory containing the new project") ;
+		dirPopup.$.header.setContent("Select a directory containing the new project");
 		dirPopup.show();
 		this.$.propertiesWidget.setDefaultTab();
 		this.hide();
