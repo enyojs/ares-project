@@ -196,6 +196,8 @@ Ares comes with an Hermes service using your Dropbox account as a storage servic
 
 You need to replace the appKey and appSecret entries with the proper values from your Dropbox application entry for Ares(see below).
 
+The icon is not provided.
+
 In order to use Dropbox as storage service for Ares, you need to [create an Ares application in Dropbox](https://www.dropbox.com/developers/apps) & grant Ares the authorization to access this Dropbox application (_Ares_ > _Accounts_ > _Dropbox_ > _Renew_ ).  Popup blockers must be disabled to allow the Dropbox OAuth popup window to appear.
 
 **NOTE:** While Chrome & Firefox will notify you of a blocked popup (hence allowing you to explicitly un-block it), Safari users will need to explicitly allow every popups (unless there is s smarter way  am not aware of) using _Safari_ > _Preferences_ > _Security_ > Un-check _Block pop-up windows_
@@ -548,6 +550,8 @@ Enable this service in the `ide.json` before starting the IDE server by changing
 		}
 		[...]
 
+The icon is not provided.
+
 Don't forget to check the path to your Box Documents in the following line:
 			
 			[...]
@@ -585,6 +589,8 @@ Enable this service in the `ide.json` before starting the IDE server by changing
 		}
 		[...]
 
+The icon is not provided.
+
 Don't forget to check the path to your Google Drive directory in the following line:
 			
 			[...]
@@ -621,6 +627,8 @@ Enable this service in the `ide.json` before starting the IDE server by changing
 			"respawn": false
 		}
 		[...]
+
+The icon is not provided.
 
 Don't forget to check the path to your Google Drive directory in the following line:
 			
