@@ -57,7 +57,7 @@ enyo.kind({
 	},
 	raiseError: function(inSender, inEvent) {
 		var cleaner = new RegExp('.*' + this.projectUrl) ;
-		var rmdots  = new RegExp('[^/]+/\.\./');
+		var rmdots  = new RegExp('[^/]+/\\.\\./');
 		var barUrl = inEvent.msg.replace(cleaner,'').replace(rmdots,'');
 		this.log("analyser cannot load ",barUrl);
 		this.doError({msg: "analyser cannot load " + barUrl });
