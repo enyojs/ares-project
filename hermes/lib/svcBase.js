@@ -246,7 +246,7 @@ ServiceBase.prototype.store = function(req, res, next) {
 			if (err) {
 				next(err);
 			} else {
-				if (file.type.match(/x-encoding=base64/)) {
+				if (typeof file.type === 'string' && file.type.match(/x-encoding=base64/)) {
 					fs.readFile(file.path, function(err, data) {
 						if (err) {
 							log.info("ServiceBase#store()", "transcoding: error" + file.path, err);
