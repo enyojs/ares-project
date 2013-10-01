@@ -6,7 +6,7 @@ Hermes offers several services not available in a Web Browser through one (or se
 * [Project templates services](#project-template-services)
 * [Build Services](#build-services) ([PhoneGap Build](#phonegap-build-service), ...)
 
-## Security
+## Security[](id:security)
 
 ### Authentication
 
@@ -43,7 +43,7 @@ In order to run the Phonegap build service from Ares, the authentication must be
 	2. Open this page https://github.com/settings/applications 
 	3. In the section *Authorized applications* click on *Revoke* button of the row *Phonegap:Build*.
 
-## Filesystem services
+## Filesystem services[](id:filesystem-services)
 
 ### Protocol
 
@@ -156,7 +156,7 @@ To stop on the first failing case:
 
 For more detailled instructions, refer to the [Mocha home page](http://visionmedia.github.com/mocha/).
 
-### Local Filesystem Service
+### Local Filesystem Service[](id:local-filesystem-service)
 
 The `fsLocal` service is simply serves your local machine's filesystem to the browser, which has otherwise no access outside the web sandbox (or exclusivelly via direct user interaction).
 
@@ -171,7 +171,8 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Me
 	],
 	[...]
 
-### Dropbox Filesystem Service
+### Dropbox Filesystem Service[](id:dropbox-filesystem-service)
+
 
 Ares comes with an Hermes service using your Dropbox account as a storage service.    Enable this service in the `ide.json` before starting the IDE server:
 
@@ -221,7 +222,7 @@ Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to th
 			},
 			[...]
 
-## Project template services
+## Project template services[](id:project-template-services)
 
 The service **genZip** allows to intanciate new Ares project from project templates such as [Enyo Bootplate](https://github.com/enyojs/enyo/wiki/Bootplate) or any customer specific project templates.
 
@@ -232,7 +233,7 @@ These project templates can be defined in:
 
 See [Project template configuration](#project-template-configuration) and [Merging Ares plugin configuration](../README.md#merging-configuration) for more information.
 
-### Project template configuration
+### Project template configuration[](id:project-template-configuration)
 
 The property `sources:` of the service **genZip** lists the template definitions that are available at project creation time.  It is defined in the `ide.json` of ares-project.
 
@@ -303,7 +304,7 @@ The default `<pathname>` value is `/genzip`.  Its value can be changed using the
 		* It's up to the caller to extract and base64 decode the files to create a new project.  
 		In Ares, this is achieved by forwarding the FormData to Hermes filesystem service via a PUT method.
 
-## Build services
+## Build services[](id:build-services)
 
 ### Ares IDE - Javascript API
 
@@ -340,7 +341,7 @@ The following resources
 			* `text/plain` build has failed (see HTTP response code) or is asynchronous
 			* `multipart/form-data` generated application package is the first returned part of the multipart response
 			
-### Archive build service
+### Archive build service[](id:archive-build-service)
 
 This is the `arZip.js` service.  It takes 2 arguments:
 
@@ -371,7 +372,7 @@ The generated file is expected to look like to below:
 	 --------                   -------
 	     4068                   2 files
 
-### PhoneGap build service
+### PhoneGap build service[](id:phonegap-build-service)
 
 
 Ares includes the ability to package a mobile Enyo application using [PhoneGap Build](https://build.phonegap.com/).  You must have a properly setup account (with signing keys & distribution certificates) before being able to use Ares to build applications using PhoneGap Build.

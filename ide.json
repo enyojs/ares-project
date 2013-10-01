@@ -12,7 +12,6 @@
 				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@", "--timeout", "120000"
 			],
 			"useJsonp":false,
-			"verbose": false,
 			"respawn": false
 		},
 		{
@@ -42,8 +41,7 @@
 					"port":8080
 				}
 			},
-			"useJsonp":false,
-			"verbose": false
+			"useJsonp":false
 		},
 		{
 			"active":true,
@@ -57,7 +55,7 @@
 			"useJsonp":false,
 			"verbose": false,
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
-			"timeout": 7000,
+			"timeout": 10000,
 			"auth": {
 				"type": "phonegap"
 			},
@@ -72,20 +70,25 @@
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/hermes/genZip.js", "--level", "http", "-P", "/genzip", "-p", "0", "-t", "120000"
 			],
+			"timeout": 30000,
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
 			"sources": [
 				{
 					"id": "bootplate-2.3.0-pre.5",
+					"isDefault": true,
 					"type": "template",
 					"files": [
 						{
 							"url": "http://enyojs.com/archive/bootplate-2.3.0-pre.5.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
-								"bootplate/api"
-							]
+								"bootplate/api/",
+								"bootplate/build/",
+								"bootplate/deploy/",
+								"bootplate/enyo/tools/"
+      							]
 						}
-					],
+  					],
 					"description": "Enyo bootplate 2.3.0-pre.5 (Recommended)"
 				},
 				{
@@ -96,7 +99,10 @@
 							"url": "http://enyojs.com/archive/bootplate-2.2.0.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
-								"bootplate/api"
+								"bootplate/api/",
+								"bootplate/build/",
+								"bootplate/deploy/",
+								"bootplate/enyo/tools/"
 							]
 						}
 					],
@@ -110,7 +116,10 @@
 							"url": "http://enyojs.com/archive/bootplate-2.1.1.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
-								"bootplate/api"
+								"bootplate/api/",
+								"bootplate/build/",
+								"bootplate/deploy/",
+								"bootplate/enyo/tools/"
 							]
 						}
 					],

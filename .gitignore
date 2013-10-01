@@ -13,11 +13,11 @@ $*
 /node_modules/archiver
 /node_modules/ares-webos-sdk
 /node_modules/async
-/node_modules/base64stream/
+/node_modules/base64-stream/
 /node_modules/combined-stream
 /node_modules/dropbox
 /node_modules/express
-/node_modules/form-data
+/node_modules/graceful-fs
 /node_modules/hpacs-ares-plugin
 /node_modules/jshint
 /node_modules/less

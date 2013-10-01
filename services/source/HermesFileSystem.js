@@ -145,38 +145,20 @@ enyo.kind({
 	},
 	putFile: function(inFileId, inContent) {
 		var formData = new enyo.FormData() ;
-		var file = new enyo.Blob([inContent || ''], {type: "application/octet-stream"});
+		var file = new enyo.Blob([btoa(inContent || '')], {type: "text/plain; charset=UTF-8"});
 		this.trace("file:", file);
-		// ['/path','.'] resolves to '/path', so using '.'
-		// keeps the file name encoded in inFileId
-		formData.append('file', file, '.' /*filename*/);
-		if (enyo.platform.firefox) {
-			// FormData#append() lacks the third parameter
-			// 'filename', so emulate it using a list of
-			// 'filename'fields of the same size os the
-			// number of files.  This only works if the
-			// other end of the tip is implemented on
-			// server-side.
-			// http://stackoverflow.com/questions/6664967/how-to-give-a-blob-uploaded-as-formdata-a-file-name
-			formData.append('filename', "." );
-		}
+		// - ['/path','.'] resolves to '/path', so using '.' keeps the file name encoded in inFileId
+		// - http://www.html5rocks.com/en/tutorials/file/xhr2/#toc-send-formdata
+		// - https://developer.mozilla.org/en-US/docs/Web/API/FormData
+		// - http://stackoverflow.com/questions/6664967/how-to-give-a-blob-uploaded-as-formdata-a-file-name
+		formData.append('.' /*name*/, file);
 		return this._request("PUT", inFileId, {postBody: formData} /*inParams*/);
 	},
 	createFile: function(inFolderId, inName, inContent, options) {
 		var formData = new enyo.FormData() ;
-		var file = new enyo.Blob([inContent || ''], {type: "application/octet-stream"});
-		this.trace("file:", file, "filename:", inName);
-		formData.append('file', file, inName /*filename*/);
-		if (enyo.platform.firefox) {
-			// FormData#append() lacks the third parameter
-			// 'filename', so emulate it using a list of
-			// 'filename'fields of the same size os the
-			// number of files.  This only works if the
-			// other end of the tip is implemented on
-			// server-side.
-			// http://stackoverflow.com/questions/6664967/how-to-give-a-blob-uploaded-as-formdata-a-file-name
-			formData.append('filename', inName );
-		}
+		var file = new enyo.Blob([btoa(inContent || '')], {type: "text/plain; charset=UTF-8"});
+		this.trace("file:", file, "name:", inName);
+		formData.append(inName /*name*/, file);
 		var params = ares.extend({ postBody: formData }, options);
 		return this._request("PUT", inFolderId, params);
 	},
