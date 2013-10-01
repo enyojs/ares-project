@@ -458,7 +458,7 @@ enyo.kind({
 			var errStack = typeof error === 'object' ? error.stack : '' ;
 			this.error(errMsg, errStack );
 			this.sendMessage({op: "reloadNeeded"});
-			this.sendMessage({op: "error", val: {msg: errMsg, backToCodeEditor: true, err: {stack: errStack}}});
+			this.sendMessage({op: "error", val: {msg: errMsg, requestReload: true, err: {stack: errStack}}});
 		}
 	},
 	//* Rerender current selection
