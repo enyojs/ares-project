@@ -156,17 +156,8 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 		return;
 	}
 
-	var exist = fs.existsSync(localPath);
-	if (!exist) {
-		return next(new Error(localPath + ' does not exist'));
-	}
-
 	fs.stat(localPath, (function(err, stat) {
 		if (err) {
-			if(err.code === 'ENOENT') {
-				//skip the files doesn't have permission to read
-				return next();
-			}
 			return next(err);
 		}
 
@@ -196,6 +187,10 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 				if (!files.length) {
 					return next(null, node);
 				}
+				//to skip the files does not exist
+				files = files.filter(function(name){
+					return fs.existsSync(localPath);
+				});
 				var count = files.length;
 				files.forEach(function(name) {
 					this._propfind(null, path.join(relPath, name), depth-1, function(err, subNode){
