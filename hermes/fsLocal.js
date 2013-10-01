@@ -187,6 +187,10 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 				if (!files.length) {
 					return next(null, node);
 				}
+				//to skip the files which user doesn't have permission to read
+				files = files.filter(function(name){
+					return fs.existsSync(path.join(localPath, name));
+				});
 				var count = files.length;
 				files.forEach(function(name) {
 					this._propfind(null, path.join(relPath, name), depth-1, function(err, subNode){
