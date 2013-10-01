@@ -618,7 +618,7 @@ Make a copie of example above and perform specific changes for the Box Sync dire
 		[...]
 
 
-The icon is not provided.
+The icon is not provided. You can add an appropriate icon from [here](https://www.google.com/?q=box.net+icon#q=box.net+icon).
 
 Don't forget to check the --root parameter to your Box Sync directory in the following line:
 			
