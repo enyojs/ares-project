@@ -75,6 +75,7 @@
 			"sources": [
 				{
 					"id": "bootplate-2.3.0-pre.5",
+					"isDefault": true,
 					"type": "template",
 					"files": [
 						{
