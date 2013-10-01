@@ -156,8 +156,17 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 		return;
 	}
 
+	var exist = fs.existsSync(localPath);
+	if (!exist) {
+		return next(new Error(localPath + ' does not exist'));
+	}
+
 	fs.stat(localPath, (function(err, stat) {
 		if (err) {
+			if(err.code === 'ENOENT') {
+				//skip the files doesn't have permission to read
+				return next();
+			}
 			return next(err);
 		}
 
