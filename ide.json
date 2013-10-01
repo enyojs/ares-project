@@ -118,6 +118,20 @@
 				}
 			],
 			"respawn": false
+		},
+		{
+			"active":false,
+			"id":"Example",
+			"icon":"$harmonia/images/providers/box_white-32x32.png",
+			"name":"Example drive",
+			"type": ["filesystem"],
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Example dir"
+			],
+			"useJsonp":false,
+			"verbose": false,
+			"respawn": false
 		}
 	]
 }
