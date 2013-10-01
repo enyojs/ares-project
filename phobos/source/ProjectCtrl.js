@@ -7,8 +7,13 @@ enyo.kind({
 		pathResolver: null,
 		fullAnalysisDone: false
 	},
+	events: {
+		onError: '',
+	},
 	components: [
-		{name: "projectAnalyzer", kind: "analyzer.Analyzer", onIndexReady: "projectIndexReady"}
+		{name: "projectAnalyzer", kind: "analyzer.Analyzer", onIndexReady: "projectIndexReady"},
+		// hack: cannot bubble up errors from runtime-machine-js in the middle of the analyser
+		{kind: "Signals", onAnalyserError: "raiseError"}
 	],
 	create: function() {
 		ares.setupTraceLogger(this);
@@ -49,6 +54,13 @@ enyo.kind({
 	forceFullAnalysis: function() {
 		this.trace("Re-starting project analysis for ", this.projectUrl);
 		this.$.projectAnalyzer.analyze([this.projectUrl + "/enyo/source", this.projectUrl], this.pathResolver);
+	},
+	raiseError: function(inSender, inEvent) {
+		var cleaner = new RegExp('.*' + this.projectUrl) ;
+		var rmdots  = new RegExp('[^/]+/\.\./');
+		var barUrl = inEvent.msg.replace(cleaner,'').replace(rmdots,'');
+		this.log("analyser cannot load ",barUrl);
+		this.doError({msg: "analyser cannot load " + barUrl });
 	},
 	/**
 	 * Notifies modules dependent on the indexer that it has updated
