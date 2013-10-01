@@ -62,7 +62,12 @@ enyo.kind({
 		this.$.projectWizardScan.show();
 		return true; //Stop event propagation
 	},
-	duplicateProjectAction: function(InSender, inEvent) {
+	duplicateProjectAction: function(InSender, inEvent) {	
+		if(InSender.selected == null){	
+			this.doError({msg: "Please project list select item."});
+			return false;
+		}
+		
 		this.$.projectWizardCopy.start(this.currentProject);
 		return true; //Stop event propagation
 	},
