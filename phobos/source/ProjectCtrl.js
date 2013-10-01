@@ -46,6 +46,10 @@ enyo.kind({
 			this.$.projectAnalyzer.analyze([this.projectUrl + "/enyo/source", this.projectUrl], this.pathResolver);
 		}
 	},
+	forceFullAnalysis: function() {
+		this.trace("Re-starting project analysis for ", this.projectUrl);
+		this.$.projectAnalyzer.analyze([this.projectUrl + "/enyo/source", this.projectUrl], this.pathResolver);
+	},
 	/**
 	 * Notifies modules dependent on the indexer that it has updated
 	 * @protected

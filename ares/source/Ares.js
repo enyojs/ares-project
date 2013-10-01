@@ -193,8 +193,7 @@ enyo.kind({
 				if(fileData){
 					fileData.setData(content);
 				}
-				var codeParseOk = self.componentsRegistry.phobos.saveComplete(fileData);
-				self.componentsRegistry.designerPanels.enableDesignerButton(codeParseOk);
+				self.componentsRegistry.phobos.saveComplete(fileData);
 			}
 		});
 	},
