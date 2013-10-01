@@ -56,7 +56,7 @@ In order to run the Phonegap build service from Ares, the authentication must be
 
 Hermes file-system providers use verbs that closely mimic the semantics defined by [WebDAV (RFC4918)](http://tools.ietf.org/html/rfc4918):  although Hermes reuses the same HTTP verbs (`GET`, `PUT`, `PROPFIND`, `MKCOL`, `DELETE` ...), it differs in terms of carried data.  Many (if not most) of the HTTP clients implement only the `GET` and `POST` HTTP verbs:  Hermes uses [X-HTTP-Method-Overrides](http://fandry.blogspot.fr/2012/03/x-http-header-method-override-and-rest.html) as WebDAV usually does.  As a potential security hole (enforced by Express), Ares does **not** support  the special `_method` query parameter .
 
-* `PROPFIND` lists properties of a resource.  It recurses into the collections according to the `depth` parameter, which may be 0, 1,  etc plus `infinity`.  For example, the following directory structure:
+* `PROPFIND` lists properties of a resource.  It recurses into the collections according to the `depth` parameter, which may be 0, 1, ... etc plus `infinity`.  For example, the following directory structure:
 
 		$ tree dir1/
 		dir1/
@@ -349,7 +349,7 @@ This is the `arZip.js` service.  It takes 2 arguments:
 
 It can be started standlone using the following command-line (or a similar one):
 
-in which case it can be tested using `curl` by a command-line like the following one:
+...in which case it can be tested using `curl` by a command-line like the following one:
 
 	$ curl \
 		-F "file=@config.xml;filename=config.xml" \
