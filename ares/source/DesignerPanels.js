@@ -93,6 +93,9 @@ enyo.kind({
 		return true;
 	},
 	fileMenuItemSelected: function(inSender, inEvent) {
+		if(this.$.panels.index == 1){
+			this.owner.componentsRegistry.deimos.closeDesignerAction();
+		}
 		this.owner.componentsRegistry.phobos.fileMenuItemSelected(inSender, inEvent);
 	},
 	editorSettings: function(){
