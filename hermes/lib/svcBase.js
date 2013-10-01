@@ -226,6 +226,10 @@ ServiceBase.prototype.answerOk = function(req, res /*, next*/) {
 
 /**
  * @protected
+ * @param {http.Request} req inbound HTTP request 
+ * @property req {path} storeDir where to store the file parts of the request
+ * @param {http.Response} res outbound HTTP response
+ * @param {Function} next commonJS callback
  */
 ServiceBase.prototype.store = function(req, res, next) {
 	if (!req.is('multipart/form-data')) {
@@ -281,15 +285,25 @@ ServiceBase.prototype.store = function(req, res, next) {
 
 /**
  * @protected
+ * @param {http.Request} req inbound HTTP request 
+ * @param {http.Response} res outbound HTTP response
+ * @property res {path} file file to be sent back as the body of the response (Content-Type is automatic)
+ * @param {Function} next commonJS callback
  */
 ServiceBase.prototype.returnFile = function(req, res, next) {
 	res.status(200).sendfile(res.file);
-	delete req.file;
+	delete res.file;
 	setImmediate(next);
 };
 
 /**
  * @protected
+ * @param {http.Request} req inbound HTTP request 
+ * @property req {Object} body set by {express.bodyParser}
+ * @property req {Object} files set by {express.bodyParser}
+ * @param {http.Response} res outbound HTTP response
+ * @property res {String} contentType force 'Content-Type' response header (otherwise set automatically by express)
+ * @param {Function} next commonJS callback
  */
 ServiceBase.prototype.returnBody = function(req, res, next) {
 	if (res.contentType) {
