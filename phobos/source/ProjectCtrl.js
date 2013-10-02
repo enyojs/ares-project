@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "ProjectCtrl",
 	kind: "enyo.Component",
-	debug: false,
+	debug: true,
 	published: {
 		projectData: null,
 		pathResolver: null,
@@ -11,12 +11,23 @@ enyo.kind({
 		onError: '',
 	},
 	components: [
-		{name: "projectAnalyzer", kind: "analyzer.Analyzer", onIndexReady: "projectIndexReady"},
-		// hack: cannot bubble up errors from runtime-machine-js in the middle of the analyser
-		{kind: "Signals", onAnalyserError: "raiseError"}
+		{
+			name: "projectAnalyzer",
+			kind: "analyzer.Analyzer",
+			onIndexReady: "projectIndexReady",
+			onError: "passError"
+		},
+		{
+			// hack: cannot bubble up errors from runtime-machine-js in the middle of the analyser
+			kind: "Signals",
+			onAnalyserError: "raiseLoadError"
+		}
 	],
+
+	// track what's going on with the analyses
 	ongoing: false, // false when analysis is done (sucessfull or not)
 	pending: false, // need to re-run analysis when true
+
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -64,29 +75,32 @@ enyo.kind({
 			this.pending = true;
 		}
 	},
-	raiseError: function(inSender, inEvent) {
+	cleanup: function(what) {
+		this.ongoing = false ;
+		if (this.pending) {
+			this.trace("Running pending project analysis after "+ what);
+			this.forceFullAnalysis();
+		}
+	},
+	passError: function(inSender, inEvent) {
+		this.cleanup('analyser error');
+		// let the error bubble so user is notified
+	},
+	raiseLoadError: function(inSender, inEvent) {
 		var cleaner = new RegExp('.*' + this.projectUrl) ;
 		var rmdots  = new RegExp('[^/]+/\\.\\./');
 		var barUrl = inEvent.msg.replace(cleaner,'').replace(rmdots,'');
 		this.log("analyser cannot load ",barUrl);
 		this.doError({msg: "analyser cannot load " + barUrl });
-		this.ongoing = false ;
-		if (this.pending) {
-			this.trace("Running pending project analysis after failure");
-			this.forceFullAnalysis();
-		}
+		this.cleanup('analyser load error');
 	},
 	/**
 	 * Notifies modules dependent on the indexer that it has updated
 	 * @protected
 	 */
 	projectIndexReady: function() {
-		this.ongoing = false ;
-		if (this.pending) {
-			this.trace("Running pending project analysis after success");
-			this.forceFullAnalysis();
-		}
-		else {
+		this.cleanup('successfull analysis');
+		if (! this.pending) {
 			// Update the model to wake up the listeners only when
 			// pending analysis is done to make sure that last
 			// modifications are taken into account (for better or for
