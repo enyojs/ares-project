@@ -113,11 +113,6 @@ enyo.kind({
 		} else {
 			this.warn("Unexpected event or missing function: event:", inEvent.selected.value);
 		}
-		//this.owner.componentsRegistry[openedPanel].fileMenuItemSelected(inSender, inEvent);
-		// if(this.$.panels.index == 1){
-		// 	this.owner.componentsRegistry.deimos.closeDesignerAction();
-		// }
-		// this.owner.componentsRegistry.phobos.fileMenuItemSelected(inSender, inEvent);
 	},
 	editorSettings: function(){
 		this.owner.componentsRegistry.phobos.editorSettings();
