@@ -81,7 +81,6 @@ enyo.kind({
 		onRegisterMe: "",
 		onMovePanel:"",
 		onSavePreviewAction:"",
-		onShowWaitPopup: "",
 		onSaveDocument: "",
 		onDesignerUpdate:"",
 		onCloseDocument: "",
