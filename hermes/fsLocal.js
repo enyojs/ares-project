@@ -8,7 +8,7 @@
 
 // nodejs version checking is done in parent process ide.js
 
-var fs = require("fs"),
+var fs = require("graceful-fs"),
     path = require("path"),
     util  = require("util"),
     mkdirp = require("mkdirp"),
@@ -65,7 +65,7 @@ FsLocal.prototype.propfind = function(req, res, next) {
 	var depthStr = req.param('depth');
 	var depth = depthStr ? (depthStr === 'infinity' ? -1 : parseInt(depthStr, 10)) : 1;
 	this._propfind(null, req.param('path'), depth, function(err, content){
-		next(err, {code: 200 /*Ok*/, body: content});
+		setImmediate(next, err, {code: 200 /*Ok*/, body: content});
 	});
 };
 
@@ -89,13 +89,13 @@ FsLocal.prototype.mkcol = function(req, res, next) {
 	this.log("pathParam:", pathParam);
 	this.log("nameParam:", nameParam);
 	if (!nameParam) {
-		next(new HttpError("missing 'name' query parameter", 400 /*Bad-Request*/));
+		setImmediate(next, new HttpError("missing 'name' query parameter", 400 /*Bad-Request*/));
 		return;
 	}
 	newPath = path.relative('.', path.join('.', pathParam, nameParam));
 	this.log("newPath:", newPath);
 	if (newPath[0] === '.') {
-		next(new HttpError("Attempt to navigate beyond the root folder: '" + newPath + "'", 403 /*Forbidden*/));
+		setImmediate(next, new HttpError("Attempt to navigate beyond the root folder: '" + newPath + "'", 403 /*Forbidden*/));
 		return;
 	}
 	newPath = '/' + self.normalize(newPath);
@@ -108,9 +108,9 @@ FsLocal.prototype.mkcol = function(req, res, next) {
 		mkdirp.bind(null, absPath)
 	], function(err) {
 		if (err) {
-			next(err);
+			setImmediate(next, err);
 		} else {
-			next(null, {
+			setImmediate(next, null, {
 				code: 201, // Created
 				body: {
 					id: newId,
@@ -127,12 +127,12 @@ FsLocal.prototype['delete'] = function(req, res, next) {
 	var pathParam = req.param('path'),
 	    localPath = path.join(this.root, pathParam);
 	if (localPath === this.root) {
-		next(new HttpError("Not allowed to remove service root", 403 /*Forbidden*/));
+		setImmediate(next, new HttpError("Not allowed to remove service root", 403 /*Forbidden*/));
 	} else {
 		this._rmrf(path.join(this.root, pathParam), (function(err) {
 			// return the new content of the parent folder
 			this._propfind(err, path.dirname(pathParam), 1 /*depth*/, function(err, content) {
-				next(err, {
+				setImmediate(next, err, {
 					code: 200 /*Ok*/,
 					body: content
 				});
@@ -143,7 +143,7 @@ FsLocal.prototype['delete'] = function(req, res, next) {
 
 FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 	if (err) {
-		next(err);
+		setImmediate(next, err);
 		return;
 	}
 
@@ -152,13 +152,14 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 	if (path.basename(relPath).charAt(0) ===".") {
 		// Skip hidden files & folders (using UNIX
 		// convention: XXX do it for Windows too)
-		next();
+		setImmediate(next);
 		return;
 	}
 
 	fs.stat(localPath, (function(err, stat) {
 		if (err) {
-			return next(err);
+			setImmediate(next, err);
+			return;
 		}
 
 		// minimum common set of properties
@@ -177,15 +178,18 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 		this.log("relPath=" + relPath + ", depth="+depth+", node="+util.inspect(node));
 
 		if (stat.isFile() || !depth) {
-			return next(null, node);
+			setImmediate(next, null, node);
+			return;
 		} else if (node.isDir) {
 			node.children = [];
 			fs.readdir(localPath, (function(err, files) {
 				if (err) {
-					return next(err); // XXX or skip this directory...
+					setImmediate(next, err); // XXX or skip this directory...
+					return;
 				}
 				if (!files.length) {
-					return next(null, node);
+					setImmediate(next, null, node);
+					return;
 				}
 				//to skip the files which user doesn't have permission to read
 				files = files.filter(function(name){
@@ -195,7 +199,8 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 				files.forEach(function(name) {
 					this._propfind(null, path.join(relPath, name), depth-1, function(err, subNode){
 						if (err) {
-							return next(err);
+							setImmediate(next, err);
+							return;
 						}
 						if (subNode) {
 							node.children.push(subNode);
@@ -204,14 +209,14 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 							// return to upper layer only if
 							// every nodes of this layer
 							// were successfully parsed
-							return next(null, node);
+							setImmediate(next, null, node);
 						}
 					});
 				}, this);
 			}).bind(this));
 		} else {
 			// skip special files
-			return next();
+			setImmediate(next);
 		}
 	}).bind(this));
 };
@@ -222,7 +227,7 @@ FsLocal.prototype._getFile = function(req, res, next) {
 	this.log("sending localPath=" + localPath);
 	fs.stat(localPath, (function(err, stat) {
 		if (err) {
-			next(err);
+			setImmediate(next, err);
 			return;
 		}
 		if (stat.isFile()) {
@@ -232,7 +237,7 @@ FsLocal.prototype._getFile = function(req, res, next) {
 				res.sendfile(localPath);
 				// return nothing: streaming response
 				// is already in progress.
-				next();
+				setImmediate(next);
 			});
 		} else {
 			if (stat.isDirectory() && req.param('format') === 'base64') {
@@ -265,7 +270,7 @@ FsLocal.prototype._getFile = function(req, res, next) {
 								combinedStream.append(function(nextDataChunk) {
 									fs.readFile(filepath, 'base64', function (err, data) {
 										if (err) {
-											next(new HttpError('Unable to read ' + filename, 500));
+											setImmediate(next, new HttpError('Unable to read ' + filename, 500));
 											nextDataChunk('INVALID CONTENT');
 											return;
 										}
@@ -295,7 +300,7 @@ FsLocal.prototype._getFile = function(req, res, next) {
 				});
 
 			} else {
-				next(new Error("not a file: '" + localPath + "'"));
+				setImmediate(next, new Error("not a file: '" + localPath + "'"));
 			}
 		}
 	}).bind(this));
@@ -306,7 +311,8 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 	// from <https://gist.github.com/1526919>
 	fs.stat(localPath, (function(err, stats) {
 		if (err) {
-			return next(err);
+			setImmediate(next, err);
+			return;
 		}
 
 		if (!stats.isDirectory()) {
@@ -316,7 +322,7 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 		var count = 0;
 		fs.readdir(localPath, (function(err, files) {
 			if (err) {
-				next(err);
+				setImmediate(next, err);
 			} else if (files.length < 1) {
 				fs.rmdir(localPath, next);
 			} else {
@@ -325,7 +331,8 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 					
 					this._rmrf(sub, function(err) {
 						if (err) {
-							return next(err);
+							setImmediate(next, err);
+							return;
 						}
 						
 						if (++count == files.length) {
@@ -346,16 +353,17 @@ FsLocal.prototype.putFile = function(req, file, next) {
 	    overwriteParam = req.param('overwrite') !== "false",
 	    node;
 	
-	this.log("FsLocal.putFile(): file:", file, "-> absPath:", absPath);
+	this.log("FsLocal.putFile(): file.name:", file.name, "-> absPath:", absPath);
 	
 	async.series([
 		this._checkOverwrite.bind(this, absPath, overwriteParam),
 		mkdirp.bind(null, dir),
-		(function(cb1) {
+		(function(next) {
 			if (file.path) {
+				this.log("FsLocal.putFile(): moving/copying file");
 				try {
 					fs.renameSync(file.path, absPath);
-					cb1();
+					setImmediate(next);
 				} catch(err) {
 					this.log("FsLocal.putFile(): err:", err.toString());
 					if (err.code === 'EXDEV') {
@@ -363,35 +371,38 @@ FsLocal.prototype.putFile = function(req, file, next) {
 						async.series([
 							copyFile.bind(undefined, file.path, absPath),
 							fs.unlink.bind(fs, file.path)
-						], cb1);
+						], next);
 					} else {
 						throw err;
 					}
 				}
 			} else if (file.buffer) {
-				fs.writeFile(absPath, file.buffer, cb1);
+				this.log("FsLocal.putFile(): writing buffer");
+				fs.writeFile(absPath, file.buffer, next);
+			} else if (file.stream) {
+				this.log("FsLocal.putFile(): writing stream");
+				var out = fs.createWriteStream(absPath);
+				out.on('close', (function() {
+					this.log("FsLocal.putFile(): end-of-stream, file.name:", file.name);
+					next();
+				}).bind(this));
+				file.stream.pipe(out);
 			} else {
-				cb1(new HttpError("cannot write file=" + JSON.stringify(file), 400));
+				setImmediate(next, new HttpError("cannot write file=" + JSON.stringify(file), 400));
 			}
 		}).bind(this),
-		(function(cb1){
-			this.log("FsLocal.putFile(): file length: ", 
-				file.buffer && file.buffer.length);
-
-			this.log("FsLocal.putFile(): file path: ", 
-				file.path);
-			
+		(function(next){
+			this.log("FsLocal.putFile(): wrote: file.name:", file.name);
 			node = {
 				id: encodeFileId(urlPath),
 				path: urlPath,
 				name: path.basename(urlPath),
 				isDir: false
 			};
-			cb1();
+			setImmediate(next);
 		}).bind(this)
 	], (function(err) {
-		this.log("FsLocal.putFile(): node:", node);
-		next(err, node);
+		setImmediate(next, err, node);
 	}).bind(this));
 };
 
@@ -401,18 +412,18 @@ FsLocal.prototype._checkOverwrite = function(absPath, overwrite, next) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					/* normal */
-					next();
+					setImmediate(next);
 				} else {
 					/* wrong */
-					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+					setImmediate(next, new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
 				}
 			} else {
 				/* wrong */
-				next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+				setImmediate(next, new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
 			}
 		});
 	} else {
-		next();
+		setImmediate(next);
 	}
 };
 
@@ -434,12 +445,12 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 		dstRelPath = path.join(this.decodeFileId(folderIdParam),
 				       path.basename(pathParam));
 	} else {
-		next(new HttpError("missing query parameter: 'name' or 'folderId'", 400 /*Bad-Request*/));
+		setImmediate(next, new HttpError("missing query parameter: 'name' or 'folderId'", 400 /*Bad-Request*/));
 		return;
 	}
 	dstPath = path.join(this.root, dstRelPath);
 	if (srcPath === dstPath) {
-		next(new HttpError("trying to move a resource onto itself", 400 /*Bad-Request*/));
+		setImmediate(next, new HttpError("trying to move a resource onto itself", 400 /*Bad-Request*/));
 		return;
 	}
 	async.waterfall([
@@ -450,7 +461,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 	        },
 	        function(stat, next) {
 			dstStat = stat;
-			next();
+			setImmediate(next);
 	        }
 	], function(err) {
 		// see RFC4918, section 9.9.4 (MOVE Status
@@ -459,7 +470,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 			if (err.code === 'ENOENT') {
 				if (err.path === srcPath) {
 					/* srcPath doesn't exist */
-					next(new HttpError("resouce does not exist", 400 /*Bad-Request*/));
+					setImmediate(next, new HttpError("resouce does not exist", 400 /*Bad-Request*/));
 					return;
 				} else {
 					/* dstPath doesn't exist */
@@ -467,7 +478,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 					op(srcPath, dstPath, (function(err) {
 						// return the new content of the destination path
 						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
-							next(err, {
+							setImmediate(next, err, {
 								code: 201 /*Created*/,
 								body: content
 							});
@@ -476,7 +487,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 				}
 			} else {
 				/* unknown error */
-				next(err);
+				setImmediate(next, err);
 			}
 		} else {
 			/* dstPath exist */
@@ -485,7 +496,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 				this._rmrf(dstPath, (function(err) {
 					op(srcPath, dstPath, (function(err) {
 						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
-							next(err, {
+							setImmediate(next, err, {
 								code: 200 /*Ok*/,
 								body: content
 							});
@@ -498,14 +509,14 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 				    (srcStat.mtime.getTime() === dstStat.mtime.getTime())) {
 					op(srcPath, dstPath, (function(err) {
 						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
-							next(err, {
+							setImmediate(next, err, {
 								code: 200 /*Ok*/,
 								body: content
 							});
 						});
 					}).bind(this));
 				} else { 
-					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+					setImmediate(next, new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
 				}
 			}
 		}
@@ -515,13 +526,14 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 // XXX ENYO-1086: refactor tree walk-down
 FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 	if (srcPath === dstPath) {
-		return next(new HttpError("Cannot copy on itself", 400 /*Bad Request*/));
+		setImmediate(next, new HttpError("Cannot copy on itself", 400 /*Bad Request*/));
+		return;
 	}
 	_copyNode(srcPath, dstPath, next);
 	function _copyNode(srcPath, dstPath, next) {
 		fs.stat(srcPath, function(err, stats) {
 			if (err) {
-				next(err);
+				setImmediate(next, err);
 				return;
 			}
 			if (stats.isDirectory()) {
@@ -534,12 +546,12 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 	function _copyDir(srcPath, dstPath, next) {
 		fs.readdir(srcPath, function(err, files) {
 			if (err) {
-				next(err);
+				setImmediate(next, err);
 				return;
 			}
 			fs.mkdir(dstPath, function(err) {
 				if (err) {
-					next(err);
+					setImmediate(next, err);
 					return;
 				}
 				async.forEachSeries(files, function(file, next) {
