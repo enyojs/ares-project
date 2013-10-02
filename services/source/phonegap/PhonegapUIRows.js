@@ -358,13 +358,19 @@ enyo.kind({
 	},
 	components: [
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
-		{
-			kind: "onyx.PickerDecorator",
+		{kind: "FittableRows", 
 			components: [
-				{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
-				{kind: "onyx.Picker", name: "ConfigurationPicker", onSelect: "updateConfigurationValue"}
+				{
+					kind: "onyx.PickerDecorator",
+					components: [
+						{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
+						{kind: "onyx.Picker", name: "ConfigurationPicker", onSelect: "updateConfigurationValue"}
+					]
+				},
+				{name: "errorMsg", content: "The value must be a number", showing: false, classes: "ares-project-properties-input-error-message"}
 			]
 		}
+		
 	],
 
 	/**
@@ -473,9 +479,38 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
+			//Initialize variables containing the values of "android-minSdkVersion" & "android-maxSdkVersion" attributs
+			var minValue = parseInt(this.container.$["android-minSdkVersion"].value);
+			var maxValue = parseInt(this.container.$["android-maxSdkVersion"].value);
+			
+			//Initialize variable containing the selected value
+			var selectedValue = parseInt(inValue.selected.value);
+			
+			if (this.name === "android-maxSdkVersion" && minValue > selectedValue ||
+				this.name === "android-minSdkVersion" && maxValue < selectedValue) {
+				
+				//Set the content of the error message
+				this.container.$["android-minSdkVersion"].$.errorMsg.setContent("Incorrect API level interval");
+				this.container.$["android-maxSdkVersion"].$.errorMsg.setContent("Incorrect API level interval");
+				
+				//Show the error message
+				this.container.$["android-minSdkVersion"].$.errorMsg.show();
+				this.container.$["android-maxSdkVersion"].$.errorMsg.show();
 
-		this.setValue(inValue.selected.value);
+				//Bubble an event to disable to Ok button of the Project properties pop-up
+				this.bubble("onDisableOkButton");
+			
+			} else {
+				//Hide the error message
+				this.container.$["android-minSdkVersion"].$.errorMsg.hide();
+				this.container.$["android-maxSdkVersion"].$.errorMsg.hide();
 
+				//Bubble an event to enable the Ok button of the project properties pop-up
+				this.bubble("onEnableOkButton");
+
+				this.setValue(inValue.selected.value);							
+			}
+			
 		return true;
 	},
 
