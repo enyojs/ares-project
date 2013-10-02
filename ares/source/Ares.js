@@ -130,6 +130,8 @@ enyo.kind({
 		return true;
 	},
 	openDocument: function(inSender, inEvent) {
+		//called when user opened documents by dblclicking file name
+		inEvent.projectData.currentIF = 'code';
 		this._openDocument(inEvent.projectData, inEvent.file, function(inErr) {});
 	},
 	/** @private */
@@ -138,6 +140,9 @@ enyo.kind({
 		var fileDataId = Ares.Workspace.files.computeId(file);
 		var fileData = Ares.Workspace.files.get(fileDataId);
 		if (fileData) {
+			if(projectData.currentIF){
+				fileData.setCurrentIF(projectData.currentIF);
+			}
 			// useful when double clicking on a file in HermesFileTree
 			this.switchToDocument(fileData);
 		} else {
@@ -151,6 +156,9 @@ enyo.kind({
 					}
 				} else {
 					fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
+					if(projectData.currentIF){
+						fileData.setCurrentIF(projectData.currentIF);
+					}
 					self.componentsRegistry.documentToolbar.createFileTab(file.name, fileDataId);
 					self.switchToDocument(fileData);
 					if (typeof next === 'function') {
@@ -457,7 +465,7 @@ enyo.kind({
 	// switch the active document and then close it
 	bounceCloseFileRequest: function(inSender, inEvent) {
 		this.switchFile(inSender, inEvent);
-		enyo.asyncMethod(this.componentsRegistry.phobos, "closeDocAction");
+		enyo.asyncMethod(this.componentsRegistry.designerPanels, "closeDocAction");
 	},
 	//* Update code running in designer
 	syncEditedFiles: function() {
@@ -597,7 +605,7 @@ enyo.kind({
 				}
 			}
 		}, this);
-		this.componentsRegistry.phobos.saveDocumentsBeforePreview(editedDocs);
+		this.componentsRegistry.designerPanels.saveDocumentsBeforePreview(editedDocs);
 	},
 	_displayPreview: function(inSender, inEvent){
 		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);

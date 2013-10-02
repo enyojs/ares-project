@@ -68,19 +68,33 @@ enyo.kind({
 				]}
 			]
 		},
-		{kind: "Ares.ErrorPopup", name: "userErrorPopup", msg: $L("unknown error")}
+		{kind: "Ares.ErrorPopup", name: "userErrorPopup", msg: $L("unknown error")},
+		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
+		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onCancelActionPopup: "cancelAction"},
+		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
+		{name: "overwritePopup", kind: "overwriteActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "saveAsConfirm", onCancelActionPopup: "saveAsCancel", onHide:"doAceFocus"}
 	],
 	events: {
+		onShowWaitPopup: "",
+		onHideWaitPopup: "",
+		onSaveAsDocument: "",
 		onRegisterMe: "",
 		onMovePanel:"",
-		onSavePreviewAction:""
+		onSavePreviewAction:"",
+		onShowWaitPopup: "",
+		onSaveDocument: "",
+		onDesignerUpdate:"",
+		onCloseDocument: "",
+		onSwitchFile: "",
+		onDisplayPreview:""
 	},
 	published: {
 		panelIndex: 2,
 		aceActive: true
 	},
 	handlers: {
-		onAceFocus: "aceFocus"
+		onAceFocus: "aceFocus",
+		onSave:"saveDocAction"
 	},
 	create: function() {
 		this.inherited(arguments);
@@ -93,10 +107,17 @@ enyo.kind({
 		return true;
 	},
 	fileMenuItemSelected: function(inSender, inEvent) {
-		if(this.$.panels.index == 1){
-			this.owner.componentsRegistry.deimos.closeDesignerAction();
+		var openedPanel = (this.$.panels.index == 1 ? "deimos" : "phobos");
+		if (typeof this[inEvent.selected.value] === 'function') {
+			this[inEvent.selected.value](openedPanel);
+		} else {
+			this.warn("Unexpected event or missing function: event:", inEvent.selected.value);
 		}
-		this.owner.componentsRegistry.phobos.fileMenuItemSelected(inSender, inEvent);
+		//this.owner.componentsRegistry[openedPanel].fileMenuItemSelected(inSender, inEvent);
+		// if(this.$.panels.index == 1){
+		// 	this.owner.componentsRegistry.deimos.closeDesignerAction();
+		// }
+		// this.owner.componentsRegistry.phobos.fileMenuItemSelected(inSender, inEvent);
 	},
 	editorSettings: function(){
 		this.owner.componentsRegistry.phobos.editorSettings();
@@ -155,6 +176,187 @@ enyo.kind({
 		if(this.getAceActive()){
 			this.owner.componentsRegistry.phobos.focusEditor();	
 		}
+	},
+	saveDocAction: function(openedPanel) {
+		this.doShowWaitPopup({msg:$L("Saving ...")});
+		if(openedPanel === "deimos"){
+			this.doDesignerUpdate(this.owner.componentsRegistry.deimos.prepareDesignerUpdate());
+		} else{
+			this.aceFocus();	
+		}		
+		this.doSaveDocument({content: this.owner.componentsRegistry.phobos.$.ace.getValue(), file: this.owner.componentsRegistry.phobos.docData.getFile()});
+		return true;
+	},
+	saveAsDocAction: function() {
+		var docData = this.owner.componentsRegistry.phobos.docData;
+		var file = docData.getFile();
+		var projectData = docData.getProjectData();
+		this.$.saveAsPopup.connectProject(projectData, (function() {
+			var path = file.path;
+			var relativePath = path.substring(path.indexOf(projectData.id) + projectData.id.length, path.length);
+			this.$.saveAsPopup.pointSelectedName(relativePath, true);
+			this.$.saveAsPopup.show();
+		}).bind(this));
+	},
+	closeDocAction: function(inSender, inEvent) {
+		if (this.owner.componentsRegistry.phobos.docData.getEdited() === true) {
+			this.showSavePopup("savePopup",'"' + this.owner.componentsRegistry.phobos.docData.getFile().path + '" was modified.<br/><br/>Save it before closing?');
+		} else {
+			var id = this.owner.componentsRegistry.phobos.docData.getId();
+			this.beforeClosingDocument();
+			this.doCloseDocument({id: id});
+			this.closeNextDoc();
+		}
+		return true; // Stop the propagation of the event
+	},
+	closeAllDocAction: function(inSender, inEvent) {
+		this.owner.componentsRegistry.phobos.closeAll = true;
+		this.closeNextDoc();
+		return true; // Stop the propagation of the event
+	},
+	saveAsFileChosen: function(inSender, inEvent) {
+		//this.trace(inSender, "=>", inEvent);
+		
+		if (!inEvent.file) {
+			this.aceFocus();
+			// no file or folder chosen
+			return;
+		}
+		
+		var hft = this.$.saveAsPopup.$.hermesFileTree ;
+		var next = function(result) {
+			if (result) {
+				this.$.overwritePopup.set("data", inEvent);
+				this.$.overwritePopup.show();
+			} else {
+				this.saveAsConfirm(inSender, {data: inEvent});
+			}
+		}.bind(this);
+
+		hft.checkNodeName(inEvent.name, next);		
+		
+		return true; //Stop event propagation
+	},
+	/** @private */
+	saveAsConfirm: function(inSender, inData){
+		//this.trace(inSender, "=>", inData);
+		
+		var data = inData.data;
+		var relativePath = data.name.split("/");
+		var name = relativePath[relativePath.length-1];
+		var docData = this.owner.componentsRegistry.phobos.docData;
+		var openedPanel = (this.$.panels.index == 1 ? 'deimos' : 'phobos');
+		var projectData = docData.getProjectData();
+
+		if(openedPanel === 'deimos'){
+			this.doDesignerUpdate(this.owner.componentsRegistry.deimos.prepareDesignerUpdate());
+			projectData.currentIF = 'designer';
+		}	
+
+		this.doShowWaitPopup($L("Saving ..."));
+		this.doSaveAsDocument({
+			docId: docData.getId(),
+			projectData: docData.getProjectData(),
+			file: data.file,
+			name: name,
+			content: this.owner.componentsRegistry.phobos.$.ace.getValue(),
+			next: (function(err) {
+				this.doHideWaitPopup();
+				if (typeof data.next === 'function') {
+					data.next();
+				}
+			}).bind(this)
+		});
+
+		return true; //Stop event propagation
+	},
+	saveAsCancel: function(inSender, inEvent) {
+		//this.trace(inSender, "=>", inEvent);
+
+		return true; //Stop event propagation
+	},
+	// called when "Don't Save" is selected in save popup
+	abandonDocAction: function(inSender, inEvent) {
+		this.$.savePopup.hide();
+		var docData = this.owner.componentsRegistry.phobos.docData;
+		this.beforeClosingDocument();
+		this.doCloseDocument({id: docData.getId()});
+		this.closeNextDoc();
+	},
+	/*
+	 * Perform a few actions before closing a document
+	 * @protected
+	 */
+	beforeClosingDocument: function() {
+		this.owner.componentsRegistry.phobos.$.ace.destroySession(this.owner.componentsRegistry.phobos.docData.getAceSession());
+		// NOTE: docData will be clear when removed from the Ares.Workspace.files collections
+		this.owner.componentsRegistry.phobos.resetAutoCompleteData();
+		this.owner.componentsRegistry.phobos.docData = null;
+		this.owner.componentsRegistry.phobos.setProjectData(null);
+	},
+	closeNextDoc: function() {
+		if(this.owner.componentsRegistry.phobos.docData && this.owner.componentsRegistry.phobos.closeAll) {
+			this.closeDocAction(this.owner.componentsRegistry.phobos);
+		} else {
+			this.owner.componentsRegistry.phobos.closeAll = false;
+		}
+	},
+	/**
+	* @protected
+	*/
+	showSavePopup: function(componentName, message){
+		this.$[componentName].setTitle($L("Document was modified!"));
+		this.$[componentName].setMessage(message);
+		this.$[componentName].setActionButton($L("Don't Save"));
+		this.$[componentName].show();
+	},
+	saveBeforeClose: function(){
+		this.saveDocAction();
+		var id = this.owner.componentsRegistry.phobos.docData.getId();
+		this.beforeClosingDocument();
+		this.doCloseDocument({id: id});
+		this.closeNextDoc();
+		return true;
+	},
+	/**
+	* @protected
+	*/
+	saveNextDocument: function(){
+		if(this.editedDocs.length >= 1){
+			var docData = this.editedDocs.pop();
+			this.owner.componentsRegistry.phobos.openDoc(docData);
+			this.doSwitchFile({id:docData.id});
+			this.showSavePopup("savePopupPreview",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before preview?');
+		}else{
+			this.aceFocus();
+			this.doDisplayPreview();
+		}
+		return true;
+	},
+	/** 
+	* @protected
+	*/
+	saveDocumentsBeforePreview: function(editedDocs){
+		this.editedDocs = editedDocs;
+		this.saveNextDocument();
+	},
+	/**
+	* Called when save button is selected in save popup shown before preview action
+	* @protected
+	*/
+	saveBeforePreviewAction: function(inSender, inEvent){
+		this.saveDocAction();
+		this.saveNextDocument();
+		return true;
+	},
+	/**
+	* Called when don't save button is selected in save popup shown before preview action
+	* @protected
+	*/
+	abandonDocActionOnPreview: function(inSender, inEvent) {
+		this.$.savePopup.hide();
+		this.aceFocus();
+		this.saveNextDocument();
 	}
 });
 
@@ -190,4 +392,44 @@ enyo.kind({
 			]}
 		]}
 	]
+});
+
+enyo.kind({
+	name: "saveActionPopup",
+	kind: "Ares.ActionPopup",
+	events:{
+		onSaveActionPopup: ""
+	},
+	/** @private */
+	create: function() {
+		this.inherited(arguments);
+		this.$.message.allowHtml = true;
+		this.$.buttons.createComponent(
+			{name:"saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "save"},
+			{owner: this}
+		);
+	},
+	/** @private */
+	save: function(inSender, inEvent) {
+		this.hide();
+		this.doSaveActionPopup();
+	}
+});
+
+enyo.kind({
+	name: "overwriteActionPopup",
+	kind: "Ares.ActionPopup",
+	data: null,
+	/** @private */
+	create: function() {
+		this.inherited(arguments);
+	},
+	/* Ares.ActionPopup overloading */
+	/** @private */
+	actionConfirm: function(inSender, inEvent) {
+        this.hide();
+        this.doConfirmActionPopup({data: this.data});
+        return true;
+    },
+    
 });
