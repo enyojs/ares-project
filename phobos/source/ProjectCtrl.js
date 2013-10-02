@@ -5,7 +5,7 @@ enyo.kind({
 	published: {
 		projectData: null,
 		pathResolver: null,
-		fullAnalysisDone: false
+		fullAnalysisDone: false // true when done *and* successfull
 	},
 	events: {
 		onError: '',
@@ -15,6 +15,8 @@ enyo.kind({
 		// hack: cannot bubble up errors from runtime-machine-js in the middle of the analyser
 		{kind: "Signals", onAnalyserError: "raiseError"}
 	],
+	ongoing: false, // false when analysis is done (sucessfull or not)
+	pending: false, // need to re-run analysis when true
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -47,13 +49,20 @@ enyo.kind({
 		if (this.fullAnalysisDone) {
 			this.trace("Project DB already available - index: ", this.$.projectAnalyzer.index);
 		} else {
-			this.trace("Starting project analysis for ", this.projectUrl);
-			this.$.projectAnalyzer.analyze([this.projectUrl + "/enyo/source", this.projectUrl], this.pathResolver);
+			this.forceFullAnalysis();
 		}
 	},
 	forceFullAnalysis: function() {
-		this.trace("Re-starting project analysis for ", this.projectUrl);
-		this.$.projectAnalyzer.analyze([this.projectUrl + "/enyo/source", this.projectUrl], this.pathResolver);
+		if (! this.ongoing) {
+			this.trace("Starting project analysis for ", this.projectUrl);
+			this.ongoing = true;
+			this.pending = false ;
+			this.$.projectAnalyzer.analyze([this.projectUrl + "/enyo/source", this.projectUrl], this.pathResolver);
+		}
+		else {
+			this.trace("Set pending project analysis for ", this.projectUrl);
+			this.pending = true;
+		}
 	},
 	raiseError: function(inSender, inEvent) {
 		var cleaner = new RegExp('.*' + this.projectUrl) ;
@@ -61,14 +70,29 @@ enyo.kind({
 		var barUrl = inEvent.msg.replace(cleaner,'').replace(rmdots,'');
 		this.log("analyser cannot load ",barUrl);
 		this.doError({msg: "analyser cannot load " + barUrl });
+		this.ongoing = false ;
+		if (this.pending) {
+			this.trace("Running pending project analysis after failure");
+			this.forceFullAnalysis();
+		}
 	},
 	/**
 	 * Notifies modules dependent on the indexer that it has updated
 	 * @protected
 	 */
 	projectIndexReady: function() {
-		// Update the model to wake up the listeners
-		this.fullAnalysisDone = true;
-		this.projectData.updateProjectIndexer();
+		this.ongoing = false ;
+		if (this.pending) {
+			this.trace("Running pending project analysis after success");
+			this.forceFullAnalysis();
+		}
+		else {
+			// Update the model to wake up the listeners only when
+			// pending analysis is done to make sure that last
+			// modifications are taken into account (for better or for
+			// worse)
+			this.fullAnalysisDone = true;
+			this.projectData.updateProjectIndexer();
+		}
 	}
 });
