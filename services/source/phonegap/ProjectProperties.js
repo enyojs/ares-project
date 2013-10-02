@@ -226,7 +226,7 @@ enyo.kind({
 
 			container.createComponent({
 				name: inDrawer.id,
-				classes: "ares-row",
+				classes: "ares-project-properties-drawer",
 				kind: "Phonegap.ProjectProperties." + inDrawer.type,
 				targetId: inDrawer.id,
 				drawerName: inDrawer.name,
