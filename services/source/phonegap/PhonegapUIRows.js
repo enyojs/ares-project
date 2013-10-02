@@ -788,7 +788,7 @@ enyo.kind({
 	 * @private
 	 */
 	heightChanged: function(){
-		if(!isNaN(this.$.ImgHeight.value)){
+		if(!isNaN(this.$.ImgHeight.value) && !isNaN(this.$.ImgWidth.value)){
 			this.$.errorMsg.hide();
 			this.$.ImgHeight.setValue(this.height || "");
 			this.bubble("onEnableOkButton");
@@ -804,7 +804,7 @@ enyo.kind({
 	 * @private
 	 */
 	widthChanged: function(){
-		if(!isNaN(this.$.ImgWidth.value)){
+		if(!isNaN(this.$.ImgHeight.value) && !isNaN(this.$.ImgWidth.value)){
 			this.$.errorMsg.hide();
 			this.$.ImgHeight.setValue(this.width || "");
 			this.bubble("onEnableOkButton");
