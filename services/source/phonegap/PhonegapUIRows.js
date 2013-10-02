@@ -108,13 +108,21 @@ enyo.kind({
 	components: [
 		{name: "label", classes: "ares-project-properties-drawer-row-label"},
 		{
-			kind: "onyx.InputDecorator",
-			classes: "ares-project-properties-input-medium",
-			components: [{
-					kind: "onyx.Input",
-					name: "ConfigurationInput",
-					onchange: "updateConfigurationValue"
-				}
+			kind: "FittableRows",
+			components: [
+				{
+					kind: "onyx.InputDecorator",
+					classes: "ares-project-properties-input-medium",
+					components: [
+						{
+							kind: "onyx.Input",
+							name: "ConfigurationInput",
+							onchange: "updateConfigurationValue"
+						}
+					]
+				}, 
+
+				{name: "errorMsg", content: "The value must be a number", showing: false, classes: "ares-project-properties-input-error-message"}
 			]
 		}
 	],
@@ -167,6 +175,30 @@ enyo.kind({
 	getProjectConfig: function (config) {
 		config[this.jsonSection][this.name] = this.getValue();
 	}
+});
+
+enyo.kind({
+	name: "Phonegap.ProjectProperties.NumberInputRow",
+	kind: "Phonegap.ProjectProperties.InputRow",
+	events: {
+		onDisableOkButton: ""
+	},
+
+	updateConfigurationValue: function (inSender, inValue) {
+		
+
+		if(!isNaN(inSender.getValue())) {
+			this.$.errorMsg.hide();
+			this.bubble("onEnableOkButton");
+			this.setValue(inSender.getValue());
+		} else {
+			this.$.errorMsg.show();
+			this.bubble("onDisableOkButton");
+		}
+		
+		return true;
+	},
+
 });
 
 enyo.kind({
