@@ -27,7 +27,9 @@ enyo.kind({
 		onAddSource: "addNewSource",
 		onRemoveSource: "removeAddedSource",
 		onInitSource: "initAddedSource",
-		onInputButtonTap: "selectInputFile"
+		onInputButtonTap: "selectInputFile",
+		onDisableOkButton: "disableOkButton",
+		onEnableOkButton: "enableOkButton"
 	},
 	components: [
 		{classes:"title left-align", content:"Project properties", components:[
@@ -398,6 +400,15 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
+	
+	disableOkButton: function(inSender, inEvent) {
+		this.$.ok.setDisabled(true);
+	},
+
+	enableOkButton: function(inSender, inEvent){
+		this.$.ok.setDisabled(false);
+	},
+
 	/** @public */
 	setTemplateList: function(templates) {
 		this.templates = [this.TEMPLATE_NONE];
