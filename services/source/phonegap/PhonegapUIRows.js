@@ -716,14 +716,20 @@ enyo.kind({
 			name: "label",
 			classes: "ares-project-properties-drawer-row-label"
 		},
-		{
-			kind: "onyx.InputDecorator",
-			classes: "ares-project-properties-input-medium",
-			components: [{
-					kind: "onyx.Input",
-					name: "ImgPath",
-					classes: "enyo-unselectable"
-				}
+			{
+			kind: "FittableRows",
+			components: [
+				{
+				kind: "onyx.InputDecorator",
+				classes: "ares-project-properties-input-medium",
+				components: [{
+						kind: "onyx.Input",
+						name: "ImgPath",
+						classes: "enyo-unselectable"
+					}
+				]
+			},
+				{name: "errorMsg", showing: false, classes: "ares-project-properties-input-error-message"}
 			]
 		},
 		{kind: "onyx.IconButton", name:"ImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"},
@@ -781,14 +787,30 @@ enyo.kind({
 	 * @private
 	 */
 	heightChanged: function(){
-		this.$.ImgHeight.setValue(this.height || "");
+		if(!isNaN(this.$.ImgHeight.value) && !isNaN(this.$.ImgWidth.value)){
+			this.$.errorMsg.hide();
+			this.$.ImgHeight.setValue(this.height || "");
+			this.bubble("onEnableOkButton");
+		} else{
+			this.$.errorMsg.setContent("Height and Width values must be numbers");
+			this.$.errorMsg.show();
+			this.bubble("onDisableOkButton");
+		}
 	},
 
 	/**
 	 * @private
 	 */
 	widthChanged: function(){
-		this.$.ImgWidth.setValue(this.width  || "");
+		if(!isNaN(this.$.ImgHeight.value) && !isNaN(this.$.ImgWidth.value)){
+			this.$.errorMsg.hide();
+			this.$.ImgHeight.setValue(this.width || "");
+			this.bubble("onEnableOkButton");
+		} else{
+			this.$.errorMsg.setContent("Height and Width values must be numbers");
+			this.$.errorMsg.show();
+			this.bubble("onDisableOkButton");
+		}
 	},
 
 	/**
