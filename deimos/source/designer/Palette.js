@@ -3,11 +3,11 @@ enyo.kind({
 	name: "CategoryItem",
 	components: [
 		{classes: "palette-category", components: [
-			{ontap:"toggleDrawer", classes: "palette-category-name", components: [
+			{ontap: "toggleDrawer", classes: "palette-category-name", components: [
 				{name: "indicator", classes: "indicator turned"},
-				{name: "name", tag:"span"}
+				{name: "name", tag: "span"}
 			]},
-			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
+			{kind: "onyx.Drawer", name: "drawer", open:true, components: [
 				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
 					{kind: "PaletteItem"}
 				]}
