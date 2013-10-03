@@ -19,7 +19,7 @@ enyo.kind({
 		onResizeItem: "",
 		onError: "",
 		onReturnPositionValue: "",
-		onCloseDesigner: ""
+		onForceCloseDesigner: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", classes: "ares-iframe-client"},
@@ -162,7 +162,7 @@ enyo.kind({
 		}
 	},
 	goBacktoEditor: function() {
-		this.doCloseDesigner();
+		this.doForceCloseDesigner();
 	},
 	//* Pass _isContainer_ info down to iframe
 	sendIframeContainerData: function() {
