@@ -86,10 +86,9 @@ enyo.kind({
 					{kind: "CategoryItem"}
 				]}
 			]},
-			// FIXME ENYO-3021: component hidden until ENYO-1887 implementation
-			{kind:"onyx.InputDecorator", showing: false, style:"width:100%; margin-top:10px;", layoutKind:"FittableColumnsLayout", components: [
-				{kind: "onyx.Input", fit:true, placeholder: "filter"},
-				{kind: "onyx.Icon", src:"$deimos/images/search-input-search.png", style:"height:20px;"}
+			{kind: "onyx.InputDecorator", style: "width:100%; margin-top:10px;", layoutKind: "FittableColumnsLayout", components: [
+				{kind: "onyx.Input", name: "filterPalette", fit:true, placeholder: "filter", oninput: "paletteFiltering"},
+				{kind: "onyx.Icon", name: "filterPaletteIcon", src: "$deimos/images/search-input-search.png", style: "height:20px;", ontap: "resetFilter"}
 			]}
 		]}
 	],
@@ -134,8 +133,9 @@ enyo.kind({
 		this.palette.sort(function(a,b) {
 			return (a.order || 0) - (b.order || 0);
 		});
-		this.$.list.count = this.palette.length;
-		this.$.list.build();
+		// count reset must be forced
+		this.$.list.set("count", 0);
+		this.$.list.set("count", this.palette.length);
 	},
 	/**
 	 * Builds "catch-all palette" entries.  The standard palette comes from the projectIndexer's
@@ -148,6 +148,8 @@ enyo.kind({
 	 * @protected
 	 */
 	buildCatchAllPalette: function() {
+		var filterRegexp =  new RegExp(this.$.filterPalette.getValue());
+
 		// Start custom palette with catch-all category for non-namespaced kinds
 		var catchAllCategories = {
 			"" : {
@@ -178,31 +180,33 @@ enyo.kind({
 		});
 		// Add components to catch-all categories per namespace
 		enyo.forEach(catchAllKinds, function(kind) {
-			// Create palette item for kind
-			var item = {
-				name: kind.name,
-				description: kind.comment,
-				inline: {kind: kind.name},
-				config: {kind: kind.name}
-			};
-			// Check for package namespace
-			var dot = kind.name.lastIndexOf(".");
-			if (dot > 0) {
-				var pkg = kind.name.substring(0, dot);
-				var cat = catchAllCategories[pkg];
-				if (!cat) {
-					// Generate a new custom palette for this package if it doesn't exist
-					cat = {
-						order: 1000,
-						name: pkg + " (other)",
-						items: []
-					};
-					catchAllCategories[pkg] = cat;
+			if (kind.name.search(filterRegexp) >= 0) {
+				// Create palette item for kind
+				var item = {
+					name: kind.name,
+					description: kind.comment,
+					inline: {kind: kind.name},
+					config: {kind: kind.name}
+				};
+				// Check for package namespace
+				var dot = kind.name.lastIndexOf(".");
+				if (dot > 0) {
+					var pkg = kind.name.substring(0, dot);
+					var cat = catchAllCategories[pkg];
+					if (!cat) {
+						// Generate a new custom palette for this package if it doesn't exist
+						cat = {
+							order: 1000,
+							name: pkg + " (other)",
+							items: []
+						};
+						catchAllCategories[pkg] = cat;
+					}
+					cat.items.push(item);
+				} else {
+					// No package, so add to catch-all category
+					catchAllCategories[""].items.push(item);
 				}
-				cat.items.push(item);
-			} else {
-				// No package, so add to catch-all category
-				catchAllCategories[""].items.push(item);
 			}
 		});
 		// Create the final custom palette array
@@ -213,5 +217,29 @@ enyo.kind({
 			}
 		}
 		return catchAllPalette;
+	},
+	/** @private */
+	paletteFiltering: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		
+		if (this.$.filterPalette.getValue() === "") {
+			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-search.png");
+		} else {
+			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-cancel.png");
+		}
+		this.projectIndexerChanged();
+
+		return true;
+	},
+	/** @private */
+	resetFilter: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		
+		if (this.$.filterPalette.getValue() !== "") {
+			this.$.filterPalette.setValue("");
+			this.paletteFiltering();
+		}
+
+		return true;
 	}
 });
