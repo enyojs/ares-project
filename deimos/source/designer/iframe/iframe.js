@@ -1504,7 +1504,7 @@ enyo.kind({
 		var left = 0,
 			top = 0,
 			match = null,
-			node = inControl.hasNode(),
+			node = inControl.hasNode() || inControl.scrollNode,
 			width = node.offsetWidth,
 			height = node.offsetHeight,
 			transformProp = enyo.dom.getStyleTransformProp(),
