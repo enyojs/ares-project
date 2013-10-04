@@ -790,11 +790,11 @@ enyo.kind({
 		if(!isNaN(this.$.ImgHeight.value) && !isNaN(this.$.ImgWidth.value)){
 			this.$.errorMsg.hide();
 			this.$.ImgHeight.setValue(this.height || "");
-			this.bubble("onEnableOkButton");
+			this.bubble("onEnableOkButton", this);
 		} else{
 			this.$.errorMsg.setContent("Height and Width values must be numbers");
 			this.$.errorMsg.show();
-			this.bubble("onDisableOkButton");
+			this.bubble("onDisableOkButton", this);
 		}
 	},
 
