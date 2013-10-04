@@ -116,6 +116,22 @@ the latest bootplate version. This way, your project will be created
 with a template of an application and the required enyo, layout and
 extra libraries.
 
+### Updating Enyo libraries in your application
+
+The simplest way is to update the libraries inside your project.
+
+For Enyo:
+
+* remove enyo directory
+* download latest release from [enyo release page](https://github.com/enyojs/enyo/releases)
+* unpack in your project and rename the directory to `enyo`
+
+For all libraries in `lib`:
+
+* remove each directory in `lib`
+* download the latest release for [layout](https://github.com/enyojs/layout/releases) and [extra](https://github.com/enyojs/extra/releases) libraries
+* unpack each library and rename the directories to `extra` and `layout`
+
 ### Reporting Issues
 
 Be sure to run Ares with `--log` (or `-L`) to capture the Ares server output in the file name `ide.log`.  Attach this log-file to you bug report on the [ARES JIRA](https://enyojs.atlassian.net/browse/ENYO/component/10302).
