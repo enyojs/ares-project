@@ -104,6 +104,18 @@ Get more information about the options using `-h` or `--help`:
 
 In case you want to access other parts of your machine's file-system, refer to the [local filesystem service configuration](hermes/README.md#local-filesystem-service)
 
+### Creating an application
+
+Once Ares is loaded in your browser, you can create a skeleton of an
+application with "Edit -> Create ... " menu.  Once you've selected a
+directory to create a project, you will see a popup to specify the
+name, title and other parameters of your project.
+
+To create a project skeleton, use the "Template" selector to choose
+the latest bootplate version. This way, your project will be created
+with a template of an application and the required enyo, layout and
+extra libraries.
+
 ### Reporting Issues
 
 Be sure to run Ares with `--log` (or `-L`) to capture the Ares server output in the file name `ide.log`.  Attach this log-file to you bug report on the [ARES JIRA](https://enyojs.atlassian.net/browse/ENYO/component/10302).
