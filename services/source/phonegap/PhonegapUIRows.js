@@ -735,7 +735,7 @@ enyo.kind({
 			]
 		},
 		{kind: "onyx.IconButton", name:"ImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"},
-		{content: "Length", classes: "ares-project-properties-drawer-row-attribut-label"},
+		{content: "Height", classes: "ares-project-properties-drawer-row-attribut-label"},
 		{
 			kind: "onyx.InputDecorator",
 			classes: "ares-project-properties-input-small",
