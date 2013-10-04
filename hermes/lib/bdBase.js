@@ -65,6 +65,11 @@ BdBase.prototype.use = function() {
 	}));
 };
 
+BdBase.prototype.cleanProcess = function(next) {
+	log.verbose('BdBase#cleanProcess()');
+	rimraf(this.uploadDir, next);
+};
+
 /**
  * Additionnal routes/verbs: 'this.app.get()', 'this.app.port()'
  * @protected

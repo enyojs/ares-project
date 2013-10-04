@@ -13,7 +13,8 @@ var fs = require("graceful-fs"),
     util  = require("util"),
     mkdirp = require("mkdirp"),
     async = require("async"),
-    CombinedStream = require('combined-stream'),
+    log = require('npmlog'),
+    CombinedStream = require('combined-stream'), // XXX
     copyFile = require("./lib/copyFile"),
     FsBase = require("./lib/fsBase"),
     FdUtil = require("./lib/SimpleFormData"),
@@ -21,14 +22,19 @@ var fs = require("graceful-fs"),
 
 var basename = path.basename(__filename, '.js');
 
-function FsLocal(inConfig, next) {
-	inConfig.name = inConfig.name || "fsLocal";
-
-	// parameters sanitization
-	inConfig.root = path.resolve(inConfig.root);
+/**
+ * Ares local file-system service
+ * @see {FsBase}
+ * @param {Object} config
+ * @property config {String} root local file-system folder that serves as root
+ * @public
+ */
+function FsLocal(config, next) {
+	// Use absolute local path
+	config.root = path.resolve(config.root);
 
 	// inherits FsBase (step 1/2)
-	FsBase.call(this, inConfig, next);
+	FsBase.call(this, config, next);
 }
 
 // inherits FsBase (step 2/2)
@@ -42,7 +48,7 @@ FsLocal.prototype._statusCodes = {
 };
 
 FsLocal.prototype.errorResponse = function(err) {
-	this.log("FsLocal.errorResponse(): err:", err);
+	log.warn("FsLocal#errorResponse()", "err:", err);
 	var response = {
 		code: 403,	// Forbidden
 		body: err.toString()
@@ -54,9 +60,9 @@ FsLocal.prototype.errorResponse = function(err) {
 			403; // Forbidden
 		response.body = err.toString();
 		delete err.statusCode;
-		this.log(err.stack);
+		log.warn("FsLocal#errorResponse()", err.stack);
 	}
-	this.log("FsLocal.errorResponse(): response:", response);
+	log.verbose("FsLocal#errorResponse()", "response:", response);
 	return response;
 };
 
@@ -86,14 +92,14 @@ FsLocal.prototype.mkcol = function(req, res, next) {
 	    pathParam = req.param('path'),
 	    nameParam = req.param('name'),
 	    overwriteParam = req.param('overwrite') !== "false";
-	this.log("pathParam:", pathParam);
-	this.log("nameParam:", nameParam);
+	log.verbose("FsLocal#mkcol()", "pathParam:", pathParam);
+	log.verbose("FsLocal#mkcol()", "nameParam:", nameParam);
 	if (!nameParam) {
 		setImmediate(next, new HttpError("missing 'name' query parameter", 400 /*Bad-Request*/));
 		return;
 	}
 	newPath = path.relative('.', path.join('.', pathParam, nameParam));
-	this.log("newPath:", newPath);
+	log.verbose("FsLocal#mkcol()", "newPath:", newPath);
 	if (newPath[0] === '.') {
 		setImmediate(next, new HttpError("Attempt to navigate beyond the root folder: '" + newPath + "'", 403 /*Forbidden*/));
 		return;
@@ -102,7 +108,7 @@ FsLocal.prototype.mkcol = function(req, res, next) {
 	newName = path.basename(newPath);
 	newId = this.encodeFileId(newPath);
 
-	var absPath = path.join(this.root, newPath);
+	var absPath = path.join(this.config.root, newPath);
 	async.series([
 		this._checkOverwrite.bind(this, absPath, overwriteParam),
 		mkdirp.bind(null, absPath)
@@ -125,11 +131,11 @@ FsLocal.prototype.mkcol = function(req, res, next) {
 
 FsLocal.prototype['delete'] = function(req, res, next) {
 	var pathParam = req.param('path'),
-	    localPath = path.join(this.root, pathParam);
-	if (localPath === this.root) {
+	    localPath = path.join(this.config.root, pathParam);
+	if (localPath === this.config.root) {
 		setImmediate(next, new HttpError("Not allowed to remove service root", 403 /*Forbidden*/));
 	} else {
-		this._rmrf(path.join(this.root, pathParam), (function(err) {
+		this._rmrf(path.join(this.config.root, pathParam), (function(err) {
 			// return the new content of the parent folder
 			this._propfind(err, path.dirname(pathParam), 1 /*depth*/, function(err, content) {
 				setImmediate(next, err, {
@@ -147,7 +153,7 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 		return;
 	}
 
-	var localPath = path.join(this.root, relPath),
+	var localPath = path.join(this.config.root, relPath),
             urlPath = this.normalize(relPath);
 	if (path.basename(relPath).charAt(0) ===".") {
 		// Skip hidden files & folders (using UNIX
@@ -172,10 +178,10 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 
 		// Give the top-level node the name (NOT the path) of the mount-point
 		if (node.name === '') {
-			node.name = path.basename(this.root);
+			node.name = path.basename(this.config.root);
 		}
 
-		this.log("relPath=" + relPath + ", depth="+depth+", node="+util.inspect(node));
+		log.verbose("FsLocal#_propfind()", "relPath=" + relPath + ", depth="+depth+", node="+util.inspect(node));
 
 		if (stat.isFile() || !depth) {
 			setImmediate(next, null, node);
@@ -223,8 +229,8 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 
 FsLocal.prototype._getFile = function(req, res, next) {
 	var relPath = req.param('path');
-	var localPath = path.join(this.root, relPath);
-	this.log("sending localPath=" + localPath);
+	var localPath = path.join(this.config.root, relPath);
+	log.verbose("FsLocal#_getFile()", "sending localPath=" + localPath);
 	fs.stat(localPath, (function(err, stat) {
 		if (err) {
 			setImmediate(next, err);
@@ -246,7 +252,7 @@ FsLocal.prototype._getFile = function(req, res, next) {
 
 				var depthStr = req.param('depth');
 				var depth = depthStr ? (depthStr === 'infinity' ? -1 : parseInt(depthStr, 10)) : 1;
-				this.log("Preparing dir in base64, depth: " + depth + " " + localPath);
+				log.verbose("FsLocal#_getFile()", "Preparing dir in base64, depth: " + depth + " " + localPath);
 				this._propfind(null, req.param('path'), depth, function(err, content){
 
 					// Build the multipart/formdata
@@ -346,28 +352,28 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 };
 
 FsLocal.prototype.putFile = function(req, file, next) {
-	var absPath = path.join(this.root, file.name),
+	var absPath = path.join(this.config.root, file.name),
             urlPath = this.normalize(file.name),
 	    dir = path.dirname(absPath),
 	    encodeFileId = this.encodeFileId,
 	    overwriteParam = req.param('overwrite') !== "false",
 	    node;
 	
-	this.log("FsLocal.putFile(): file.name:", file.name, "-> absPath:", absPath);
+	log.verbose("FsLocal#putFile()", "file.name:", file.name, "-> absPath:", absPath);
 	
 	async.series([
 		this._checkOverwrite.bind(this, absPath, overwriteParam),
 		mkdirp.bind(null, dir),
 		(function(next) {
 			if (file.path) {
-				this.log("FsLocal.putFile(): moving/copying file");
+				log.verbose("FsLocal#putFile()", "moving/copying file");
 				try {
 					fs.renameSync(file.path, absPath);
 					setImmediate(next);
 				} catch(err) {
-					this.log("FsLocal.putFile(): err:", err.toString());
+					log.verbose("FsLocal#putFile()", "err:", err.toString());
 					if (err.code === 'EXDEV') {
-						this.log("FsLocal.putFile(): COPY+REMOVE file:", file.path, "-> absPath:", absPath);
+						log.verbose("FsLocal#putFile()", "COPY+REMOVE file:", file.path, "-> absPath:", absPath);
 						async.series([
 							copyFile.bind(undefined, file.path, absPath),
 							fs.unlink.bind(fs, file.path)
@@ -377,13 +383,13 @@ FsLocal.prototype.putFile = function(req, file, next) {
 					}
 				}
 			} else if (file.buffer) {
-				this.log("FsLocal.putFile(): writing buffer");
+				log.silly("FsLocal#putFile()", "writing buffer");
 				fs.writeFile(absPath, file.buffer, next);
 			} else if (file.stream) {
-				this.log("FsLocal.putFile(): writing stream");
+				log.silly("FsLocal#putFile()", "writing stream");
 				var out = fs.createWriteStream(absPath);
 				out.on('close', (function() {
-					this.log("FsLocal.putFile(): end-of-stream, file.name:", file.name);
+					log.silly("FsLocal#putFile()", "end-of-stream, file.name:", file.name);
 					next();
 				}).bind(this));
 				file.stream.pipe(out);
@@ -392,7 +398,7 @@ FsLocal.prototype.putFile = function(req, file, next) {
 			}
 		}).bind(this),
 		(function(next){
-			this.log("FsLocal.putFile(): wrote: file.name:", file.name);
+			log.verbose("FsLocal#putFile()", "wrote: file.name:", file.name);
 			node = {
 				id: encodeFileId(urlPath),
 				path: urlPath,
@@ -433,7 +439,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 	    nameParam = req.param('name'),
 	    folderIdParam = req.param('folderId'),
 	    overwriteParam = req.param('overwrite') !== "false",
-	    srcPath = path.join(this.root, pathParam);
+	    srcPath = path.join(this.config.root, pathParam);
 	var dstPath, dstRelPath;
 	var srcStat, dstStat;
 	if (nameParam) {
@@ -448,7 +454,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 		setImmediate(next, new HttpError("missing query parameter: 'name' or 'folderId'", 400 /*Bad-Request*/));
 		return;
 	}
-	dstPath = path.join(this.root, dstRelPath);
+	dstPath = path.join(this.config.root, dstRelPath);
 	if (srcPath === dstPath) {
 		setImmediate(next, new HttpError("trying to move a resource onto itself", 400 /*Bad-Request*/));
 		return;
@@ -584,12 +590,12 @@ if (path.basename(process.argv[1], '.js') === basename) {
 		"v": "--level verbose",
 		"h": "--help"
 	};
-	var argv = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
-	argv.pathname = argv.pathname || "/files";
-	argv.port = argv.port || 0;
-	argv.timeout = argv.timeout || (2*60*1000);
-	argv.level = argv.level || "http";
-	if (argv.help) {
+	var opt = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
+	log.level = opt.level || "http";
+	opt.pathname = opt.pathname || "/files";
+	opt.port = opt.port || 0;
+	opt.timeout = opt.timeout || (2*60*1000);
+	if (opt.help) {
 		console.log("Usage: node " + basename + "\n" +
 			    "  -p, --port        port (o) local IP port of the express server (0: dynamic)                       [default: '0']\n" +
 			    "  -t, --timeout     milliseconds of inactivity before a server socket is presumed to have timed out [default: '120000']\n" +
@@ -600,11 +606,11 @@ if (path.basename(process.argv[1], '.js') === basename) {
 	}
 
 	new FsLocal({
-		root: argv.root,
-		pathname: argv.pathname,
-		port: argv.port,
-		timeout: argv.timeout,
-		level: argv.level
+		root: opt.root,
+		pathname: opt.pathname,
+		port: opt.port,
+		timeout: opt.timeout,
+		level: opt.level
 	}, function(err, service){
 		if (err) {
 			process.exit(err);

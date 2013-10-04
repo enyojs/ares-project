@@ -477,7 +477,8 @@ if (path.basename(process.argv[1], '.js') === basename) {
 		port: argv.port,
 		timeout: argv.timeout,
 		basename: basename,
-		enyoDir: path.resolve(__dirname, '..', 'enyo')
+		enyoDir: path.resolve(__dirname, '..', 'enyo'),
+		level: argv.level
 	}, function(err, service){
 		if(err) {
 			process.exit(err);

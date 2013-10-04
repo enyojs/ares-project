@@ -78,27 +78,10 @@ function ServiceBase(config, next) {
 	});
 
 	// CORS -- Cross-Origin Resources Sharing
-	this.app.use(function _useCors(req, res, next) {
-		log.silly("ServiceBase#_useCors()");
-		res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
-		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-		res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control');
-		if ('OPTIONS' == req.method) {
-			res.status(200).end();
-		}
-		else {
-			setImmediate(next);
-		}
-	});
+	this.app.use(this.setCors.bind(this));
 
 	// Authentication
-	this.app.use(function(req, res, next) {
-		if (req.connection.remoteAddress !== "127.0.0.1") {
-			setImmediate(next, new Error("Access denied from IP address "+req.connection.remoteAddress));
-		} else {
-			setImmediate(next);
-		}
-	});
+	this.app.use(this.allowLocalOnly.bind(this));
 
 	this.use();
 
@@ -178,6 +161,34 @@ ServiceBase.prototype.use = function(/*config, next*/) {
  */
 ServiceBase.prototype.route = function(/*config, next*/) {
 	log.verbose('ServiceBase#route()', "skipping..."); 
+};
+
+/**
+ * @protected
+ */
+ServiceBase.prototype.setCors = function(req, res, next) {
+	log.silly("ServiceBase#setCors()");
+	res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
+	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control, , X-HTTP-Method-Override');
+	if ('OPTIONS' == req.method) {
+		res.status(200).end();
+	}
+	else {
+		setImmediate(next);
+	}
+};
+
+/**
+ * @protected
+ */
+ServiceBase.prototype.allowLocalOnly = function(req, res, next) {
+	log.silly("ServiceBase#authorize()");
+	if (req.connection.remoteAddress !== "127.0.0.1") {
+		setImmediate(next, new Error("Access denied from IP address "+req.connection.remoteAddress));
+	} else {
+		setImmediate(next);
+	}
 };
 
 /**
@@ -446,16 +457,25 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
  * @protected
  */
 ServiceBase.prototype.quit = function(next) {
-	this.app.close();
-	rimraf(this.uploadDir, next);
-	log.info('ServiceBase#quit()',  "exiting");
+	log.info('ServiceBase#quit()');
+	this.server.close();
+	if (this.config.performCleanup) {
+		this.cleanProcess(next);
+	} else {
+		setImmediate(next);
+	}
+};
+
+/**
+ * @protected
+ */
+ServiceBase.prototype.cleanProcess = function() {
+	log.verbose('ServiceBase#cleanProcess()');
 };
 
 /**
  * @protected
  */
 ServiceBase.prototype.onExit = function() {
-	rimraf(this.uploadDir, function(/*err*/) {
-		// Nothing to do
-	});
+	log.verbose('ServiceBase#onExit()');
 };
