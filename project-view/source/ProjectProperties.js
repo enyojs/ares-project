@@ -436,7 +436,7 @@ enyo.kind({
 					return inOriginator && inOriginator.platform + "-splashScreen";
 				}
 				else {
-					return inOriginator.name
+					return inOriginator.name;
 				}
 			}
 	},
