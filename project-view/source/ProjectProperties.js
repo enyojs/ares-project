@@ -462,14 +462,14 @@ enyo.kind({
 		//Reeavluate all the array {this.validatePhonegapUiValues} in order to enable the 
 		//button OK if all the array's elements have the value true.
 		for(var key in this.validatePhonegapUiValues) {
-			this.log ("key: " + key + " value: " + this.validatePhonegapUiValues[key]);
+			//this.log ("key: " + key + " value: " + this.validatePhonegapUiValues[key]);
 			if (this.validatePhonegapUiValues[key] === false) {
 				
 				okDisabled = true;	
 			}
 		}
 
-		this.log("okDisabled : " + okDisabled);
+		//this.log("okDisabled : " + okDisabled);
 		this.$.ok.setDisabled(okDisabled);		
 	},
 

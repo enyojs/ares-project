@@ -13,7 +13,8 @@ enyo.kind({
 		name: undefined,
 		value: undefined,
 		jsonSection: undefined,
-		platform: undefined
+		platform: undefined,
+		description: undefined
 	},
 	components: [
 	],
@@ -117,7 +118,7 @@ enyo.kind({
 						{
 							kind: "onyx.Input",
 							name: "ConfigurationInput",
-							onchange: "updateConfigurationValue"
+							onchange: "updateConfigurationValue"							
 						}
 					]
 				}, 
@@ -134,7 +135,8 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
-
+		
+		this.$.ConfigurationInput.setAttribute("placeholder", this.description);
 		this.valueChanged();
 		this.inputTipChanged();
 	},
@@ -706,10 +708,10 @@ enyo.kind({
 		height: "",
 		width: "",
 
-		inputTip: "",
+		description: undefined,
 		activated: false,
 		status: false,
-		buttonTip: ""
+		buttonTip: "",
 	},
 	components: [
 		{
@@ -773,6 +775,8 @@ enyo.kind({
 
 		this.heightChanged();
 		this.widthChanged();
+		this.$.ImgWidth.setAttribute("placeholder", this.description);
+		this.$.ImgHeight.setAttribute("placeholder", this.description);
 	},
 
 	/**
