@@ -557,7 +557,7 @@ enyo.kind({
 				{
 					kind: "onyx.Input",
 					name: "AndroidImgPath",
-					classes: "enyo-unselectable"
+					disabled: true
 				}
 			]
 		},
@@ -727,7 +727,7 @@ enyo.kind({
 				components: [{
 						kind: "onyx.Input",
 						name: "ImgPath",
-						classes: "enyo-unselectable"
+						disabled: true
 					}
 				]
 			},
