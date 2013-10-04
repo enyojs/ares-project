@@ -98,7 +98,7 @@ Get more information about the options using `-h` or `--help`:
 	  -p, --port        port (o) local IP port of the express server (default: 9009, 0: dynamic)               [default: "9009"]
 	  -H, --host        host to bind the express server onto                                                   [default: "127.0.0.1"]
 	  -a, --listen_all  When set, listen to all adresses. By default, listen to the address specified with -H  [boolean]
-	  -c, --config      IDE configuration file                                                                 [default: "/Users/kowalskif/Desktop/GIT/enyojs/ares-project/ide.json"]
+	  -c, --config      IDE configuration file                                                                 [default: "./ide.json"]
 	  -l, --level       IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')                  [default: "http"]
 	  -L, --log         Log IDE debug to ./ide.log                                                             [boolean]
 
