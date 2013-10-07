@@ -248,58 +248,65 @@ ServiceBase.prototype.answerOk = function(req, res /*, next*/) {
  * @property req {path} storeDir where to store the file parts of the request
  * @param {http.Response} res outbound HTTP response
  * @param {Function} next commonJS callback
+ * @see {ServiceBase._storeMultiPart}
  */
 ServiceBase.prototype.store = function(req, res, next) {
-	if (!req.is('multipart/form-data')) {
+	log.verbose("ServiceBase#store()");
+
+	if (req.is('multipart/form-data')) {
+		this._storeMultipart(req, _storeOne, next);
+	} else {
 		setImmediate(next, new HttpError("Not a multipart request", 415 /*Unsupported Media Type*/));
 		return;
 	}
-	
-	if (!req.files.file) {
-		setImmediate(next, new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
-		return;
-	}
-	
-	async.forEachSeries(req.files.file, function(file, next) {
-		var dir = path.join(req.storeDir, path.dirname(file.name));
-		log.silly("ServiceBase#store()", "mkdir -p ", dir);
-		mkdirp(dir, function(err) {
-			log.silly("ServiceBase#store()", "mv ", file.path, " ", file.name);
-			if (err) {
+
+	function _storeOne(file, next) {
+		var absPath = path.join(req.storeDir, file.name);
+		mkdirp(path.dirname(absPath), function(err) {
+			var out = fs.createWriteStream(absPath);
+			out.on('error', function(err) {
+				log.warn("ServiceBase#store#_storeOne()", "err:", err);
 				next(err);
-			} else {
-				if (typeof file.type === 'string' && file.type.match(/x-encoding=base64/)) {
-					fs.readFile(file.path, function(err, data) {
-						if (err) {
-							log.info("ServiceBase#store()", "transcoding: error" + file.path, err);
-							next(err);
-							return;
-						}
-						try {
-							var fpath = file.path;
-							delete file.path;
-							fs.unlink(fpath, function(/*err*/) { /* Nothing to do */ });
-							
-							var filedata = new Buffer(data.toString('ascii'), 'base64');			// TODO: This works but I don't like it
-							fs.writeFile(path.join(req.storeDir, file.name), filedata, function(err) {
-								log.silly("ServiceBase#store()", "from base64(): Stored: ", file.name);
-								next(err);
-							});
-						} catch(transcodeError) {
-							log.warn("ServiceBase#store()", "transcoding error: " + file.path, transcodeError);
-							setImmediate(next, err);
-						}
-					}.bind(this));
-				} else {
-					fs.rename(file.path, path.join(req.storeDir, file.name), function(err) {
-						log.silly("ServiceBase#store()", "Stored: ", file.name);
-						next(err);
-					});
-				}
-			}
+			});
+			out.on('close', function() {
+				log.silly("ServiceBase#store#_storeOne()", "wrote:", absPath);
+				next();
+			});
+			file.stream.pipe(out);
 		});
-	}, next);
+	}
 };
+
+/**
+ * @see {FsBase._putMultipart}
+ */
+ServiceBase.prototype._storeMultipart = function(req, storeOne, next) {
+	log.verbose("ServiceBase#_storeMultipart()");
+
+	var self = this;
+
+	this.receiveFormData(req, _receiveFile, _receiveField, next);
+
+	function _receiveFile(fieldName, fieldValue, next, fileName, encoding) {
+		log.silly("ServiceBase#_storeMultipart#_receiveFile()", "fieldName:", fieldName, "fileName:", fileName, "encoding:", encoding);
+		if (fieldName === "file" || fieldName === "blob" || fieldName === ".") {
+			fieldName = undefined;
+		}
+		if (fileName === "file" || fileName === "blob" || fileName === ".") {
+			fileName = undefined;
+		}
+		var file = {
+			name: fieldName || fileName,
+			stream: encoding === 'base64' ? fieldValue.pipe(base64.decode()) : fieldValue
+		};
+		storeOne(file, next);
+	}
+
+	function _receiveField(fieldName, fieldValue) {
+		log.warn("ServiceBase#_storeMultipart#_receiveField()", "unexpected field:",fieldName , "fieldValue:", fieldValue );
+	}
+};
+
 
 /**
  * @protected
@@ -366,10 +373,10 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 		
 		parts.forEach(function(part) {
 			// Adding part header
-			combinedStream.append(_getPartHeader(part.filename));
+			combinedStream.append(_getPartHeader(part.name));
 
 			// Adding data
-			log.verbose("ServiceBase#returnFormData()", "part:", part.filename);
+			log.verbose("ServiceBase#returnFormData()", "part:", part.name);
 			if (part.path) {
 				log.silly("ServiceBase#returnFormData()", "Streaming part.path", part.path);
 				part.stream = fs.createReadStream(part.path);
@@ -393,7 +400,7 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 		
 			// Adding part footer
 			combinedStream.append(function(nextDataChunk) {
-				log.silly("ServiceBase#returnFormData()", "End-of-Part:", part.filename);
+				log.silly("ServiceBase#returnFormData()", "End-of-Part:", part.name);
 				nextDataChunk(_getPartFooter());
 			});
 		});

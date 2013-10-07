@@ -402,30 +402,21 @@ FsBase.prototype._putWebForm = function(req, res, next) {
  * @param {HTTPRequest} req
  * @param {HTTPResponse} res
  * @param {Function} next(err, data) CommonJS callback
+ * @see {ServiceBase._storeMultiPart}
  */
 FsBase.prototype._putMultipart = function(req, res, next) {
-	var self = this;
+	log.verbose("FsBase#_putMultipart()");
+
+	var self =this;
 	var nodes = [];
 	var pathParam = req.param('path');
-	log.verbose("FsBase#_putMultipart()", "pathParam:", pathParam);
 
-	this.receiveFormData(req, _receiveFile, _receiveField, _finish);
+	this._storeMultipart(req, _putOne, _finish);
 
-	function _receiveFile(fieldName, fieldValue, next, fileName, encoding) {
-		log.silly("FsBase#_putMultipart#_receiveFile()", "fieldName:", fieldName, "fileName:", fileName, "encoding:", encoding);
-		var name = (fieldName === "file" || fieldName === "blob") ? fileName : fieldName;
-		var stream = encoding === 'base64' ? fieldValue.pipe(base64.decode()) : fieldValue;
-		var file = {
-			stream: stream,
-			path: undefined
-		};
-		if (fileName === '.' || !fileName) {
-			file.name = pathParam;
-		} else {
-			file.name = [pathParam, fileName].join('/');
-		}
+	function _putOne(file, next) {
+		file.name = file.name ? [pathParam, file.name].join('/') : pathParam,
 		self.putFile(req, file, function _done(err, node) {
-			log.silly("FsBase#_putMultipart#_receiveFile#_done()", "err:", err, "node:", node);
+			log.silly("FsBase#_putMultipart#_putOne#_done()", "err:", err, "node:", node);
 			if (node) {
 				nodes.push(node);
 			}
@@ -433,13 +424,9 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 		});
 	}
 
-	function _receiveField(fieldName, fieldValue) {
-		log.warn("FsBase#_putMultipart#_receiveField()", "unexpected field:",fieldName , "fieldValue:", fieldValue );
-	}
-
 	function _finish(err) {
 		log.silly("FsBase#_putMultipart#_finish()", "nodes:", nodes);
-		setImmediate(next, err, {
+		next(err, {
 			code: 201, // Created
 			body: nodes
 		});
