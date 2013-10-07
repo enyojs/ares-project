@@ -190,15 +190,22 @@ function generateBoundary() {
 	return boundary;
 }
 
-function sendOnePart(req, name, filename, input, boundaryKey) {
+function sendOnePart(req, name, filename, input, boundaryKey, contentTransferEncoding) {
 	req.write('--' + boundaryKey + '\r\n' +
 		// use your file's mime type here, if known
 		'Content-Type: application/octet-stream\r\n' +
 		// "name" is the name of the form field
 		// "filename" is the name of the original file
-		'Content-Disposition: form-data; name="' + name + '"; filename="' + filename + '"\r\n' +
-		'Content-Transfer-Encoding: binary\r\n\r\n');
-	req.write(input);
+		'Content-Disposition: form-data; name="' + name + '"; filename="' + filename + '"\r\n');
+	contentTransferEncoding = false /*'base64'*/;
+	if (contentTransferEncoding) {
+		req.write('Content-Transfer-Encoding: ' + contentTransferEncoding + '\r\n');
+		req.write('\r\n');
+		req.write(input.toString(contentTransferEncoding));
+	} else {
+		req.write('\r\n');
+		req.write(input);
+	}
 	req.write('\r\n');
 }
 
@@ -589,13 +596,14 @@ function checkBuffer(buf, ref) {
 		var content = {
 			name: 'file',	// field name
 			filename: 'tata', // file path
-			input: new Buffer(textContent).toString('base64')
+			input: new Buffer(textContent)
 		};
 		async.waterfall([
 			function(cb) {
 				post("t4.1", '/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
 			},
 			function(res, cb) {
+				log.verbose("t4.1", "res:", res);
 				should.exist(res);
 				should.exist(res.statusCode);
 				res.statusCode.should.equal(201);
@@ -626,13 +634,13 @@ function checkBuffer(buf, ref) {
 		});
 	});
 
-	 var dir1file0Id;
+	var dir1file0Id;
 
 	it("t4.3. should create a file in a relative location (using 'multipart/form-data')", function(done) {
 		var content = {
 			name: 'file',	// field name
 			filename: 'dir.1/file.0', // file path
-			input: new Buffer(textContent).toString('base64')
+			input: new Buffer(textContent)
 		};
 		async.waterfall([
 			function(cb) {
@@ -676,17 +684,18 @@ function checkBuffer(buf, ref) {
 		var content = [{
 			name: 'file',	// field name
 			filename: 'dir.2/file.0', // file path
-			input: new Buffer(textContent).toString('base64')
+			input: new Buffer(textContent)
 		},{
 			name: 'file',	// field name
 			filename: 'dir.2/file.1', // file path
-			input: new Buffer(textContent2).toString('base64')
+			input: new Buffer(textContent2)
 		}];
 		async.waterfall([
 			function(cb) {
 				post("t4.5", '/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
 			},
 			function(res, cb) {
+				log.verbose("t4.5", "res:", res);
 				should.exist(res);
 				should.exist(res.statusCode);
 				res.statusCode.should.equal(201);
@@ -740,7 +749,7 @@ function checkBuffer(buf, ref) {
 		});
 	});
 
-	var iconId,
+	var iconId, 
 	    iconBuffer = fs.readFileSync(path.join(__dirname, '..', '..', 'ares', 'assets', 'images', 'ares_48x48.ico'));
 	it("t4.8. create & compare a binary file (using 'multipart/form-data')", function(done) {
 		var content = {

@@ -35,13 +35,6 @@ util.inherits(GenZip, ServiceBase);
  */
 GenZip.prototype.use = function() {
 	log.verbose('GenZip#use()'); 
-	// Built-in express form parser: handles:
-	// - 'application/json' => req.body
-	// - 'application/x-www-form-urlencoded' => req.body
-	// - 'multipart/form-data' => req.body.<field>[], req.body.file[]
-	this.uploadDir = temp.path({prefix: 'com.enyojs.ares.services.genZip'}) + '.d';
-	fs.mkdirSync(this.uploadDir);
-	this.app.use(express.bodyParser({keepExtensions: true, uploadDir: this.uploadDir}));
 };
 
 /**

@@ -302,6 +302,36 @@
         }
       }
     },
+    "busboy": {
+      "version": "0.0.4",
+      "from": "busboy@",
+      "dependencies": {
+        "dicer": {
+          "version": "0.1.3",
+          "from": "dicer@0.1.3",
+          "dependencies": {
+            "streamsearch": {
+              "version": "0.1.2",
+              "from": "streamsearch@0.1.2"
+            }
+          }
+        },
+        "readable-stream": {
+          "version": "1.1.7",
+          "from": "readable-stream@1.1.7",
+          "dependencies": {
+            "core-util-is": {
+              "version": "1.0.0",
+              "from": "core-util-is@~1.0.0"
+            },
+            "debuglog": {
+              "version": "0.0.2",
+              "from": "debuglog@0.0.2"
+            }
+          }
+        }
+      }
+    },
     "combined-stream": {
       "version": "0.0.4",
       "from": "combined-stream@~0.0.4",

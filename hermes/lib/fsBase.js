@@ -78,20 +78,6 @@ FsBase.prototype.use = function() {
 	this.app.use(this.config.pathname, this.authorize.bind(this));
 	this.app.use(express.methodOverride());
 	this.app.use(this.dump.bind(this));
-
-	// Built-in express form parser: handles:
-	// - 'application/json' => req.body
-	// - 'application/x-www-form-urlencoded' => req.body
-	// - 'multipart/form-data' => req.body.field[] & req.body.file[]
-	this.uploadDir = temp.path({prefix: 'com.palm.ares.services.fs.' + this.name}) + '.d';
-	log.verbose('FsBase#use()', "uploadDir:", this.uploadDir);
-	fs.mkdirSync(this.uploadDir);
-	this.app.use(express.bodyParser({
-		maxFieldsSize: 15 * 1024 * 1024, // 15 MBytes
-		maxFields: 10000,		 // 10,000 files
-		keepExtensions: true,
-		uploadDir: this.uploadDir
-	}));
 };
 
 FsBase.prototype.cleanProcess = function(next) {
@@ -362,18 +348,7 @@ FsBase.prototype.put = function(req, res, next) {
 };
 
 /**
- * Store a file provided by a web-form
- *
- * The web form is a 'application/x-www-form-urlencoded'
- * request, which contains the following fields:
- *
- * - name (optional) is the name of the file to be created or
- *   updated.
- * - path (mandatory) is the relative path to the storage root
- *   of the file to be uploaded (if name is absent) or to the
- *   containing folder (if name is provided).
- * - content (mandatory) is the base64-encoded version of the
- *   file
+ * Stores one file provided by a web form
  *
  * @param {HTTPRequest} req
  * @param {HTTPResponse} res
@@ -382,7 +357,7 @@ FsBase.prototype.put = function(req, res, next) {
 FsBase.prototype._putWebForm = function(req, res, next) {
 	// Mutually-agreed encoding of file name & location:
 	// 'path' and 'name'
-	var relPath, fileId,
+	var relPath, fileId, self = this,
 	    pathParam = req.param('path'),
 	    nameParam = req.param('name');
 	log.verbose("FsBase#putWebForm()", "pathParam:", pathParam, "nameParam:", nameParam);
@@ -396,8 +371,7 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		relPath = [pathParam, nameParam].join('/');
 	}
 
-	// Now get the bits: base64-encoded binary in the
-	// 'content' field
+	// get the bits: base64-encoded binary in the 'content' field
 	var buf;
 	if (req.body.content) {
 		buf = new Buffer(req.body.content, 'base64');
@@ -406,13 +380,13 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		buf = new Buffer('');
 	}
 
-	var urlPath = this.normalize(relPath);
+	var urlPath = self.normalize(relPath);
 	log.verbose("FsBase#putWebForm()", "storing file as", urlPath);
-	fileId = this.encodeFileId(urlPath);
-	this.putFile(req, {
+	fileId = self.encodeFileId(urlPath);
+	self.putFile(req, {
 		name: relPath,
 		buffer: buf
-	}, (function(err){
+	}, function(err){
 		log.verbose("FsBase#putWebForm()", "err:", err);
 		setImmediate(next, err, {
 			code: 201, // Created
@@ -423,7 +397,7 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 				isDir: false
 			}]
 		});
-	}).bind(this));
+	});
 };
 
 /**
@@ -439,59 +413,46 @@ FsBase.prototype._putWebForm = function(req, res, next) {
  * @param {Function} next(err, data) CommonJS callback
  */
 FsBase.prototype._putMultipart = function(req, res, next) {
+	var self = this;
+	var nodes = [];
 	var pathParam = req.param('path');
-	log.verbose("FsBase#_putMultipart()", "req.body:", req.body);
 	log.verbose("FsBase#_putMultipart()", "pathParam:", pathParam);
 
-	var names = req.files && Object.keys(req.files);
-	if (!names || names.length === 0) {
-		setImmediate(next, new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
-		return;
-	}
-	var files = [];
-	names.forEach(function(name) {
-		var namedFiles = req.files[name];
-		namedFiles = Array.isArray(namedFiles) ? namedFiles : [ namedFiles ];
-		namedFiles.forEach(function(file) {
-			file.filename = file.filename || ((name === "file" || name === "blob") ? file.name : name);
-			files.push(file);
-		});
-	});
+	this.receiveFormData(req, _receiveFile, _receiveField, _finish);
 
-	log.verbose("FsBase#_putMultipart()", "files.length:", files.length);
-	log.silly("FsBase#_putMultipart()", "files:", files);
-
-	var nodes = [], tmpPath;
-	async.forEachSeries(files, (function(file, next) {
-
-		if (file.filename === '.' || !file.filename) {
+	function _receiveFile(fieldName, fieldValue, next, fileName, encoding) {
+		log.silly("FsBase#_putMultipart#_receiveFile()", "fieldName:", fieldName, "fileName:", fileName, "encoding:", encoding);
+		var name = (fieldName === "file" || fieldName === "blob") ? fileName : fieldName;
+		var stream = encoding === 'base64' ? fieldValue.pipe(base64.decode()) : fieldValue;
+		var file = {
+			stream: stream,
+			path: undefined
+		};
+		if (fileName === '.' || !fileName) {
 			file.name = pathParam;
 		} else {
-			file.name = [pathParam, file.filename].join('/');
+			file.name = [pathParam, fileName].join('/');
 		}
-
-		tmpPath = file.path;
-		file.stream = fs.createReadStream(file.path).pipe(base64.decode());
-		file.path = undefined;
-
-		var putCallback = function(err, node) {
-			log.silly("FsBase#_putMultipart()", "err:", err, "node:", node);
+		self.putFile(req, file, function _done(err, node) {
+			log.silly("FsBase#_putMultipart#_receiveFile#_done()", "err:", err, "node:", node);
 			if (node) {
 				nodes.push(node);
 			}
-			fs.unlink(tmpPath, function() {
-				next();
-			});
-		};
-		this.putFile(req, file, putCallback.bind(this));
+			next();
+		});
+	}
 
-	}).bind(this), (function(err){
-		log.silly("FsBase#_putMultipart()", "nodes:", nodes);
+	function _receiveField(fieldName, fieldValue) {
+		log.warn("FsBase#_putMultipart#_receiveField()", "unexpected field:",fieldName , "fieldValue:", fieldValue );
+	}
+
+	function _finish(err) {
+		log.silly("FsBase#_putMultipart#_finish()", "nodes:", nodes);
 		setImmediate(next, err, {
 			code: 201, // Created
 			body: nodes
 		});
-	}).bind(this));
+	}
 };
 
 /**

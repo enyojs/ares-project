@@ -12,6 +12,8 @@ var fs = require("graceful-fs"),
     rimraf = require("rimraf"),
     CombinedStream = require('combined-stream'),
     base64 = require('base64-stream'),
+    Busboy = require('busboy'),
+    Readable = require('stream').Readable,
     HttpError = require("./httpError");
 
 module.exports = ServiceBase;
@@ -38,7 +40,6 @@ module.exports = ServiceBase;
  * @public
  */
 function ServiceBase(config, next) {
-
 	config.timeout = config.timeout || (2*60*1000);
 	config.port = config.port || 0;
 	config.pathname = config.pathname || '/';
@@ -85,6 +86,9 @@ function ServiceBase(config, next) {
 
 	// Authentication
 	this.app.use(this.allowLocalOnly.bind(this));
+
+	// Small content
+	this.app.use(this.bodyParser.bind(this));
 
 	this.use();
 
@@ -313,9 +317,8 @@ ServiceBase.prototype.returnFile = function(req, res, next) {
 /**
  * @protected
  * @param {http.Request} req inbound HTTP request 
- * @property req {Object} body set by {express.bodyParser}
- * @property req {Object} files set by {express.bodyParser}
  * @param {http.Response} res outbound HTTP response
+ * @property res {Object} body
  * @property res {String} contentType force 'Content-Type' response header (otherwise set automatically by express)
  * @param {Function} next commonJS callback
  */
@@ -435,12 +438,12 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 
 		header += '; filename="' + filename + '"' + FORM_DATA_LINE_BREAK;
 
-		// 'Content-Transfer-Encoding' require 76-columns base64-encoded  data...
-		//header += 'Content-Type: application/octet-stream' + FORM_DATA_LINE_BREAK;
-		//header += 'Content-Transfer-Encoding: base64' + FORM_DATA_LINE_BREAK;
-
-		// ...so we use our own 'Content-Type'
-		header += 'Content-Type: application/octet-stream; x-encoding=base64' + FORM_DATA_LINE_BREAK;
+		// 'Content-Transfer-Encoding: base64' require
+		// 76-columns data, to not break
+		// `connect.bodyParser()`... so we use our own
+		// `ServiceBase.bodyParser()`.
+		header += 'Content-Type: application/octet-stream' + FORM_DATA_LINE_BREAK;
+		header += 'Content-Transfer-Encoding: base64' + FORM_DATA_LINE_BREAK;
 
 		header += FORM_DATA_LINE_BREAK;
 		return header;
@@ -453,6 +456,121 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 	function _getLastPartFooter() {
 		return '--' + boundary + '--';
 	}
+};
+
+ServiceBase.prototype.bodyParser = function(req, res, next) {
+	if (req.is("application/json")) {
+		this.receiveJson(req, res, next);
+	} else if (req.is("application/x-www-form-urlencoded")) {
+		this.receiveWebForm(req, res, next);
+	} else {
+		setImmediate(next);
+	}
+};
+
+ServiceBase.prototype.receiveJson = function(req, res, next) {
+	var buf = '';
+	req.setEncoding('utf8');
+	req.on('data', function(chunk){
+		buf += chunk;
+	});
+	req.on('end', function(){
+		if (0 == buf.length) {
+			return next(new HttpError(400, "Invalid JSON, empty body"));
+		}
+		try {
+			req.body = JSON.parse(buf);
+		} catch (err){
+			return next(new HttpError(400, "Invalid JSON: " + err.toString()));
+		}
+		next();
+	});
+};
+
+/**
+ * Parse the multipart/form-data in the incoming request
+ * @param {http.Request} req
+ * @param {Function} receiveFile
+ * @param receiveFile {String} name might be "file" or the actual part file name
+ * @param receiveFile {stream.Readable} file
+ * @param receiveFile {Function} next commonJS callback, to be called when the file was read completelly
+ * @param receiveFile {String} [filename] the actual part file name, when present
+ * @param {Function} receiveField
+ * @param receiveField {String} fieldname
+ * @param receiveField {String} fieldvalue
+ * @param {Function} next commonJS callback
+ * @param next {Error} err falsy in case of success
+ * @param next {Integer} nfiles number of files received
+ * @param next {Integer} nfields number of fields set in {req.body}
+ */
+ServiceBase.prototype.receiveFormData = function(req, receiveFile, receiveField, next) {
+	log.verbose("ServiceBase#returnFormData()");
+	var infiles = 0, outfiles = 0, nfields = 0;
+	var parsed = false;
+	var busboy = new Busboy({headers: req.headers});
+	busboy.on('file', function(fieldName, fieldValue, fileName) {
+		infiles++;
+		log.silly("ServiceBase#returnFormData()", "fieldName:", fieldName, ", fileName:", fileName);
+		var file = new Readable().wrap(fieldValue);
+		receiveFile(fieldName, file, _receivedPart, fileName);
+	});
+	busboy.on('field', function(fieldname, val, valTruncated, keyTruncated) {
+		++nfields;
+		log.silly("ServiceBase#returnFormData()", "field", fieldname, "=", val);
+		receiveField(fieldname, val);
+	});
+	busboy.once('end', function() {
+		log.silly("ServiceBase#returnFormData()", "parsing complete, infiles:", infiles);
+		parsed = true;
+		if (infiles === 0) {
+			next();
+		}
+	});
+	log.silly("ServiceBase#returnFormData()", "parsing started");
+	req.on('error', function(err) {
+		log.warn("ServiceBase#returnFormData()", "req.err:", err);
+		next(err);
+	});
+	busboy.on('error', function(err) {
+		log.warn("ServiceBase#returnFormData()", "busboy.err:", err);
+		next(err);
+	});
+	req.pipe(busboy);
+
+	function _receivedPart(err) {
+		outfiles++;
+		log.silly("ServiceBase#returnFormData_receivedPart()", outfiles + "/" + infiles + " file parts processed");
+		if (parsed && infiles === outfiles) {
+			log.verbose("ServiceBase#receiveFormData#_receivedPart()", "received", outfiles, "parts");
+			setImmediate(next, null, outfiles, nfields);
+		}
+	}
+};
+
+/**
+ * Parse the application/x-www-form-urlencoded in the incoming request
+ * @param {http.Request} req
+ * @param {Function} receiveField
+ * @param receiveField {String} fieldname
+ * @param receiveField {String} fieldvalue
+ * @param {Function} next commonJS callback
+ */
+ServiceBase.prototype.receiveWebForm = function(req, res, next) {
+	var nfields = 0;
+	var parsed = false;
+	var busboy = new Busboy({headers: req.headers});
+	req.body = req.body || {};
+	busboy.on('field', function(fieldname, val, valTruncated, keyTruncated) {
+		++nfields;
+		log.silly("ServiceBase#receiveWebForm()", "field", fieldname, "=", val);
+		req.body[fieldname] = val;
+	});
+	busboy.once('end', function() {
+		log.verbose("ServiceBase#receiveWebForm()", "parsed " + nfields + " fields");
+		next();
+	});
+	log.verbose("ServiceBase#receiveWebForm()", "parsing started");
+	req.pipe(busboy);
 };
 
 /**
