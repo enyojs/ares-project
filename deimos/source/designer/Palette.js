@@ -148,7 +148,8 @@ enyo.kind({
 	 * @protected
 	 */
 	buildCatchAllPalette: function() {
-		var filterRegexp =  new RegExp(this.$.filterPalette.getValue());
+		var filterString =  this.$.filterPalette.getValue();
+		this.log("filterString", filterString);
 
 		// Start custom palette with catch-all category for non-namespaced kinds
 		var catchAllCategories = {
@@ -180,7 +181,7 @@ enyo.kind({
 		});
 		// Add components to catch-all categories per namespace
 		enyo.forEach(catchAllKinds, function(kind) {
-			if (kind.name.search(filterRegexp) >= 0) {
+			if (filterString === "" || kind.name.indexOf(filterString) >= 0) {
 				// Create palette item for kind
 				var item = {
 					name: kind.name,
