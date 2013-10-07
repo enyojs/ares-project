@@ -30,8 +30,8 @@ broken with other browsers.
 
 ## npm libraries issues
 
-After Ares has beenis updated with `git` and `git submodule update`, the
-node library must updated with `npm -d install`.
+Once Ares is updated with `git` and `git submodule update`, the
+node library must be updated with `npm -d install`.
 
 After several updates, you may encounter errors with the server like
 start failure or `project.json` corruption. In this case, `npm ls`
