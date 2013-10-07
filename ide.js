@@ -56,6 +56,10 @@ argv.config = argv.config || path.join(myDir, "ide.json");
 argv.host = argv.host || "127.0.0.1";
 argv.port = argv.port || 9009;
 argv.timeout = argv.timeout || (4*60*1000);	//default: 4 minutes.
+	
+if (process.env['ARES_BUNDLE_BROWSER'] && !argv['bundled-browser']) {
+	delete process.env['ARES_BUNDLE_BROWSER'];
+}
 
 if (argv.help) {
 	console.log("\n" +
