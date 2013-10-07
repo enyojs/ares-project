@@ -246,15 +246,15 @@ FsLocal.prototype._getFile = function(req, res, next) {
 				setImmediate(next);
 			});
 		} else if (stat.isDirectory() && req.param('format') === 'base64') {
-
+			
 			// Return the folder content as a FormData filled with base64 encoded file content
-
+			
 			var depthStr = req.param('depth');
 			var depth = depthStr ? (depthStr === 'infinity' ? -1 : parseInt(depthStr, 10)) : 1;
 			log.verbose("FsLocal#_getFile()", "Preparing dir in base64, depth: " + depth + " " + localPath);
 			this._propfind(null, req.param('path'), depth, function(err, content){
 				var parts = [];
-
+				
 				function addParts(entries) {
 					entries.forEach(function(entry) {
 						if (entry.isDir) {
@@ -269,11 +269,11 @@ FsLocal.prototype._getFile = function(req, res, next) {
 						}
 					});
 				};
-
+				
 				addParts(content.children);
 				this.returnFormData(parts, res, next);
 			});
-
+			
 		} else {
 			setImmediate(next, new Error("not a file: '" + localPath + "'"));
 		}
@@ -356,11 +356,22 @@ FsLocal.prototype.putFile = function(req, file, next) {
 			} else if (file.stream) {
 				log.silly("FsLocal#putFile()", "writing stream");
 				var out = fs.createWriteStream(absPath);
-				out.on('close', (function() {
-					log.silly("FsLocal#putFile()", "end-of-stream, file.name:", file.name);
+				out.on('close', function() {
+					log.silly("FsLocal#putFile()", "on-close, file.name:", file.name);
 					next();
-				}).bind(this));
-				file.stream.pipe(out);
+				});
+				out.on('error', function(err) {
+					log.silly("FsLocal#putFile()", "output file.name:", file.name, "on-err:", err);
+					next(err);
+				});
+				file.stream.on('error', function(err) {
+					log.warn("FsLocal#putFile()", "input file.name:", file.name, "on-err:", err);
+					next(err);
+				});
+				file.stream.on('end', function() {
+					log.silly("FsLocal#putFile()", "on-end: input");
+				});
+				file.stream.pipe(out, { end: true });
 			} else {
 				setImmediate(next, new HttpError("cannot write file=" + JSON.stringify(file), 400));
 			}
