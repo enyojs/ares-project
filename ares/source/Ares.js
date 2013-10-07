@@ -183,7 +183,6 @@ enyo.kind({
 	saveDocument: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var content = inEvent.content;
-		var self = this;
 		this._saveDocument(inEvent.content, {service: inEvent.file.service, fileId: inEvent.file.id}, function(err) {
 			if (err) {
 				ComponentsRegistry.getComponent("phobos").saveFailed(err);
