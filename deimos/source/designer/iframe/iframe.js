@@ -1490,12 +1490,14 @@ enyo.kind({
 		bounds.right = parentBounds.width - bounds.left - absoluteBounds.width;
 		bounds.bottom = parentBounds.height - bounds.top - absoluteBounds.height;
 
-		if(bounds.width + bounds.left >= node.offsetParent.clientWidth){
-			bounds.width = node.offsetParent.clientWidth - bounds.left;			
-		}
-		
-		if(bounds.height + bounds.top >= node.offsetParent.clientHeight){
-			bounds.height = node.offsetParent.clientHeight - bounds.top;
+		if(inControl.parent.scrollNode == undefined){	
+			if(bounds.width + bounds.left >= node.offsetParent.clientWidth){
+				bounds.width = node.offsetParent.clientWidth - bounds.left;			
+			}
+			
+			if(bounds.height + bounds.top >= node.offsetParent.clientHeight){
+				bounds.height = node.offsetParent.clientHeight - bounds.top;
+			}
 		}
 		
 		return bounds;
