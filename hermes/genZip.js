@@ -60,7 +60,7 @@ GenZip.prototype.getSources = function(req, res, next) {
 };
 
 GenZip.prototype.generate = function(req, res, next) {
-	log.info("GenZip#generate()");
+	log.info("GenZip#generate()", "req.body:", req.body);
 	var destination;
 	
 	async.waterfall([

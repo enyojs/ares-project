@@ -42,10 +42,6 @@ module.exports = FsBase;
  * @public
  */
 function FsBase(config, next) {
-	config.timeout = config.timeout || (2*60*1000);
-	if (config.performCleanup === undefined) {
-		config.performCleanup = true;
-	}
 	ServiceBase.call(this, config, next);
 
 	// sanity check
@@ -334,7 +330,7 @@ FsBase.prototype.setUserInfo = function(req, res, next) {
 };
 
 FsBase.prototype.put = function(req, res, next) {
-	log.verbose("FsBase#put()", "req.body", req.body);
+	log.verbose("FsBase#put()");
 
 	if (req.is('application/x-www-form-urlencoded')) {
 		// carry a single file at most
@@ -379,7 +375,7 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		log.verbose("FsBase#putWebForm()", "empty file");
 		buf = new Buffer('');
 	}
-
+		
 	var urlPath = self.normalize(relPath);
 	log.verbose("FsBase#putWebForm()", "storing file as", urlPath);
 	fileId = self.encodeFileId(urlPath);
@@ -402,11 +398,6 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 
 /**
  * Stores one or more files provided by a multipart form
- *
- * The multipart form is a 'multipart/form-data'.  Each of its
- * parts follows this field convention, compatible with the
- * Express/Connect bodyParser, itself based on the Formidable
- * Node.js module.
  *
  * @param {HTTPRequest} req
  * @param {HTTPResponse} res
