@@ -228,16 +228,17 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 };
 
 FsLocal.prototype._getFile = function(req, res, next) {
+	var self = this;
 	var relPath = req.param('path');
 	var localPath = path.join(this.config.root, relPath);
 	log.verbose("FsLocal#_getFile()", "sending localPath=" + localPath);
-	fs.stat(localPath, (function(err, stat) {
+	fs.stat(localPath, function(err, stat) {
 		if (err) {
 			setImmediate(next, err);
 			return;
 		}
 		if (stat.isFile()) {
-			this._propfind(err, relPath, 0 /*depth*/, function(err, node) {
+			self._propfind(err, relPath, 0 /*depth*/, function(err, node) {
 				res.setHeader('x-ares-node', JSON.stringify(node));
 				res.status(200);
 				res.sendfile(localPath);
@@ -252,7 +253,7 @@ FsLocal.prototype._getFile = function(req, res, next) {
 			var depthStr = req.param('depth');
 			var depth = depthStr ? (depthStr === 'infinity' ? -1 : parseInt(depthStr, 10)) : 1;
 			log.verbose("FsLocal#_getFile()", "Preparing dir in base64, depth: " + depth + " " + localPath);
-			this._propfind(null, req.param('path'), depth, function(err, content){
+			self._propfind(null, req.param('path'), depth, function(err, content){
 				var parts = [];
 				
 				function addParts(entries) {
@@ -271,13 +272,13 @@ FsLocal.prototype._getFile = function(req, res, next) {
 				};
 				
 				addParts(content.children);
-				this.returnFormData(parts, res, next);
+				self.returnFormData(parts, res, next);
 			});
 			
 		} else {
 			setImmediate(next, new Error("not a file: '" + localPath + "'"));
 		}
-	}).bind(this));
+	});
 };
 
 // XXX ENYO-1086: refactor tree walk-down
