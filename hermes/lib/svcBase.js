@@ -508,11 +508,11 @@ ServiceBase.prototype.receiveFormData = function(req, receiveFile, receiveField,
 	var infiles = 0, outfiles = 0, nfields = 0;
 	var parsed = false;
 	var busboy = new Busboy({headers: req.headers});
-	busboy.on('file', function(fieldName, fieldValue, fileName) {
+	busboy.on('file', function(fieldName, fieldValue, fileName, encoding) {
 		infiles++;
-		log.silly("ServiceBase#returnFormData()", "fieldName:", fieldName, ", fileName:", fileName);
+		log.silly("ServiceBase#returnFormData()", "fieldName:", fieldName, ", fileName:", fileName, "encoding:", encoding);
 		var file = new Readable().wrap(fieldValue);
-		receiveFile(fieldName, file, _receivedPart, fileName);
+		receiveFile(fieldName, file, _receivedPart, fileName, encoding);
 	});
 	busboy.on('field', function(fieldname, val, valTruncated, keyTruncated) {
 		++nfields;
