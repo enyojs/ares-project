@@ -245,69 +245,37 @@ FsLocal.prototype._getFile = function(req, res, next) {
 				// is already in progress.
 				setImmediate(next);
 			});
-		} else {
-			if (stat.isDirectory() && req.param('format') === 'base64') {
+		} else if (stat.isDirectory() && req.param('format') === 'base64') {
 
-				// Return the folder content as a FormData filled with base64 encoded file content
+			// Return the folder content as a FormData filled with base64 encoded file content
 
-				var depthStr = req.param('depth');
-				var depth = depthStr ? (depthStr === 'infinity' ? -1 : parseInt(depthStr, 10)) : 1;
-				log.verbose("FsLocal#_getFile()", "Preparing dir in base64, depth: " + depth + " " + localPath);
-				this._propfind(null, req.param('path'), depth, function(err, content){
+			var depthStr = req.param('depth');
+			var depth = depthStr ? (depthStr === 'infinity' ? -1 : parseInt(depthStr, 10)) : 1;
+			log.verbose("FsLocal#_getFile()", "Preparing dir in base64, depth: " + depth + " " + localPath);
+			this._propfind(null, req.param('path'), depth, function(err, content){
+				var parts = [];
 
-					// Build the multipart/formdata
-					var combinedStream = CombinedStream.create();
-					var boundary = FdUtil.generateBoundary();
-
-					var addFiles = function(entries) {
-						entries.forEach(function(entry) {
-							if (entry.isDir) {
-								addFiles(entry.children);
-							} else {
-								var filename = entry.path.substr(content.path.length + 1);
-								var filepath = path.join(localPath, entry.path.substr(content.path.length));
-								// console.log("adding file: ", filename);
-
-								// Adding part header
-								combinedStream.append(function(nextDataChunk) {
-									nextDataChunk(FdUtil.getPartHeader(filename, boundary));
-								});
-								// Adding file data
-								combinedStream.append(function(nextDataChunk) {
-									fs.readFile(filepath, 'base64', function (err, data) {
-										if (err) {
-											setImmediate(next, new HttpError('Unable to read ' + filename, 500));
-											nextDataChunk('INVALID CONTENT');
-											return;
-										}
-										nextDataChunk(data);
-									});
-								});
-								// Adding part footer
-								combinedStream.append(function(nextDataChunk) {
-									nextDataChunk(FdUtil.getPartFooter());
-								});
-							}
-						});
-					};
-
-					addFiles(content.children);
-
-					// Adding last footer
-					combinedStream.append(function(nextDataChunk) {
-						nextDataChunk(FdUtil.getLastPartFooter(boundary));
+				function addParts(entries) {
+					entries.forEach(function(entry) {
+						if (entry.isDir) {
+							addParts(entry.children);
+						} else {
+							var part = {
+								name: entry.path.substr(content.path.length + 1),
+								path: path.join(localPath, entry.path.substr(content.path.length))
+							};
+							log.silly("FsLocal#_getFile()", "adding part: ", part);
+							parts.push(part);
+						}
 					});
+				};
 
-					// Send the files back as a multipart/form-data
-					res.status(200);
-					res.header('Content-Type', FdUtil.getContentTypeHeader(boundary));
-					res.header('X-Content-Type', FdUtil.getContentTypeHeader(boundary));
-					combinedStream.pipe(res);
-				});
+				addParts(content.children);
+				this.returnFormData(parts, res, next);
+			});
 
-			} else {
-				setImmediate(next, new Error("not a file: '" + localPath + "'"));
-			}
+		} else {
+			setImmediate(next, new Error("not a file: '" + localPath + "'"));
 		}
 	}).bind(this));
 };
