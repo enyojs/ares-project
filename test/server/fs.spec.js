@@ -6,6 +6,7 @@
 // @see http://visionmedia.github.com/mocha/
 
 var path = require("path"),
+    fs = require("graceful-fs"),
     http = require("http"),
     querystring = require("querystring"),
     npmlog = require('npmlog'),
@@ -203,6 +204,14 @@ function sendOnePart(req, name, filename, input, boundaryKey) {
 
 function sendClosingBoundary(req, boundaryKey) {
 	req.end('--' + boundaryKey + '--');
+}
+
+function checkBuffer(buf, ref) {
+	for (var i = 0; i < ref.length; ++i) {
+		should.exist(buf[i]);
+		should.exist(ref[i]);
+		buf[i].should.equal(ref[i]);
+	}
 }
 
 	it("t0. should start", function(done) {
@@ -727,6 +736,51 @@ function sendClosingBoundary(req, boundaryKey) {
 			should.exist(res.buffer);
 			contentStr = res.buffer.toString();
 			contentStr.should.equal(textContent2);
+			done();
+		});
+	});
+
+	var iconId,
+	    iconBuffer = fs.readFileSync(path.join(__dirname, '..', '..', 'ares', 'assets', 'images', 'ares_48x48.ico'));
+	it("t4.8. create & compare a binary file (using 'multipart/form-data')", function(done) {
+		var content = {
+			name: 'file',	// field name
+			filename: 'ares.ico', // file path
+			input: iconBuffer
+		};
+		async.waterfall([
+			function(cb) {
+				post("t4.8", '/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
+			},
+			function(res, cb) {
+				log.verbose("t4.8", "POST res:", res);
+				should.exist(res);
+				should.exist(res.statusCode);
+				res.statusCode.should.equal(201);
+				should.exist(res.json);
+				should.exist(res.json[0]);
+				should.exist(res.json[0].isDir);
+				res.json[0].isDir.should.equal(false);
+				should.exist(res.json[0].path);
+				res.json[0].path.should.equal(rootPath + "/toto/titi/ares.ico");
+				should.exist(res.json[0].id);
+				iconId = res.json[0].id;
+				cb();
+			},
+			function(cb) {
+				get("t4.9", '/id/' + iconId, null /*query*/, cb);
+			},
+			function(res, cb) {
+				log.verbose("t4.8", "GET res:", res);
+				should.exist(res);
+				should.exist(res.statusCode);
+				res.statusCode.should.equal(200);
+				should.exist(res.buffer);
+				checkBuffer(res.buffer, iconBuffer);
+				cb();
+			}
+		], function(err) {
+			should.not.exist(err);
 			done();
 		});
 	});
