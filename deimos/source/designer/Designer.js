@@ -177,7 +177,7 @@ enyo.kind({
 		var currentKind = this.getCurrentKind();
 		var components = [currentKind];
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.sendMessage({op: "render", val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components), componentKinds: enyo.json.codify.to(components), selectId: inSelectId, filename: this.currentFileName}});
+		this.sendMessage({op: "render", filename: this.currentFileName, val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components), componentKinds: enyo.json.codify.to(components), selectId: inSelectId}});
 	},
 	select: function(inControl) {
 		this.sendMessage({op: "select", val: inControl});
@@ -191,7 +191,7 @@ enyo.kind({
 	//* Property was modified in Inspector, update iframe.
 	modifyProperty: function(inProperty, inValue) {
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.sendMessage({op: "modify", val: {property: inProperty, value: inValue, filename: this.currentFileName}});
+		this.sendMessage({op: "modify", filename: this.currentFileName, val: {property: inProperty, value: inValue}});
 	},
 	//* Send message to Deimos with components from iframe
 	kindRendered: function(content, filename) {
