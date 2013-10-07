@@ -140,12 +140,6 @@ var platformOpen = {
 	linux: [ "xdg-open" ]
 };
 
-var bundledBrowser = {
-	win32: [ path.resolve ( myDir + "../../../chromium/" + "chrome.exe" ) ],
-	darwin:[ path.resolve ( myDir + "../../../../bin/chromium/" + "Chromium.app" ), "--args" ],
-	linux: [ path.resolve ( myDir + "../../../../bin/chromium/" + "chrome" ) ]
-};
-
 var configPath, tester;
 var configStats;
 var aresAboutData;
@@ -673,7 +667,11 @@ server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, f
 		spawn(info[0], info.slice(1).concat([url]));
 	} else if (argv['bundled-browser']) {
 		// Open bundled browser
-		info = platformOpen[process.platform].concat(bundledBrowser[process.platform]);
+		var bundledBrowser = process.env['ARES_BUNDLE_BROWSER'];
+		info = platformOpen[process.platform];
+		if (bundledBrowser) {
+			info = info.concat([bundledBrowser, '--args']);
+		}
 		spawn(info[0], info.slice(1).concat([url]));
 	} else {
 		log.http('main', "Ares now running at <" + url + ">");
