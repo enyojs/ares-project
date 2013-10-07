@@ -7,9 +7,7 @@ var fs = require("graceful-fs"),
     createDomain = require('domain').create,
     log = require('npmlog'),
     http = require("http"),
-    async = require("async"),
     mkdirp = require("mkdirp"),
-    rimraf = require("rimraf"),
     CombinedStream = require('combined-stream'),
     base64 = require('base64-stream'),
     Busboy = require('busboy'),
@@ -283,8 +281,6 @@ ServiceBase.prototype.store = function(req, res, next) {
 ServiceBase.prototype._storeMultipart = function(req, storeOne, next) {
 	log.verbose("ServiceBase#_storeMultipart()");
 
-	var self = this;
-
 	this.receiveFormData(req, _receiveFile, _receiveField, next);
 
 	function _receiveFile(fieldName, fieldValue, next, fileName, encoding) {
@@ -358,7 +354,6 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 		return;
 	}
 	log.verbose("ServiceBase#returnFormData()", parts.length, "parts");
-	log.silly("ServiceBase#returnFormData()", "parts", util.inspect(parts, {depth: 2}));
 
 	var combinedStream;
 	try {
@@ -378,17 +373,14 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 			// Adding data
 			log.verbose("ServiceBase#returnFormData()", "part:", part.name);
 			if (part.path) {
-				log.silly("ServiceBase#returnFormData()", "Streaming part.path", part.path);
 				part.stream = fs.createReadStream(part.path);
 				part.path = undefined;
 			}
 
 			if (part.stream) {
 				combinedStream.append(part.stream.pipe(base64.encode()));
-				log.silly("ServiceBase#returnFormData()", "Sending Stream");
 			} else if (part.buffer) {
 				combinedStream.append(function(nextDataChunk) {
-					log.silly("ServiceBase#returnFormData()", "Sending Buffer");
 					nextDataChunk(part.buffer.toString('base64'));
 				});
 			} else {
@@ -482,7 +474,7 @@ ServiceBase.prototype.receiveJson = function(req, res, next) {
 		buf += chunk;
 	});
 	req.on('end', function(){
-		if (0 == buf.length) {
+		if (0 === buf.length) {
 			return next(new HttpError(400, "Invalid JSON, empty body"));
 		}
 		try {
@@ -564,7 +556,6 @@ ServiceBase.prototype.receiveFormData = function(req, receiveFile, receiveField,
  */
 ServiceBase.prototype.receiveWebForm = function(req, res, next) {
 	var nfields = 0;
-	var parsed = false;
 	var busboy = new Busboy({headers: req.headers});
 	req.body = req.body || {};
 	busboy.on('field', function(fieldname, val, valTruncated, keyTruncated) {

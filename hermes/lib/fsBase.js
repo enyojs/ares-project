@@ -7,14 +7,8 @@ var fs = require("graceful-fs"),
     path = require("path"),
     util = require("util"),
     express = require("express"),
-    http = require("http"),
     tunnel = require("tunnel"),
-    createDomain = require('domain').create,
-    temp = require("temp"),
     log = require('npmlog'),
-    rimraf = require("rimraf"),
-    async = require("async"),
-    base64 = require('base64-stream'),
     HttpError = require("./httpError"),
     ServiceBase = require("./svcBase");
 
@@ -278,8 +272,6 @@ FsBase.prototype.decodeFileId = function(fileId) {
 };
 
 FsBase.prototype.parseProxy = function(config) {
-	var self = this;
-
 	this.httpAgent = _makeAgent('http', config);
 	this.httpsAgent = _makeAgent('https', config);
 
@@ -384,7 +376,7 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		buffer: buf
 	}, function(err){
 		log.verbose("FsBase#putWebForm()", "err:", err);
-		setImmediate(next, err, {
+		next(err, {
 			code: 201, // Created
 			body: [{
 				id: fileId,
@@ -414,7 +406,7 @@ FsBase.prototype._putMultipart = function(req, res, next) {
 	this._storeMultipart(req, _putOne, _finish);
 
 	function _putOne(file, next) {
-		file.name = file.name ? [pathParam, file.name].join('/') : pathParam,
+		file.name = file.name ? [pathParam, file.name].join('/') : pathParam;
 		self.putFile(req, file, function _done(err, node) {
 			log.silly("FsBase#_putMultipart#_putOne#_done()", "err:", err, "node:", node);
 			if (node) {

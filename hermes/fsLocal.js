@@ -14,10 +14,8 @@ var fs = require("graceful-fs"),
     mkdirp = require("mkdirp"),
     async = require("async"),
     log = require('npmlog'),
-    CombinedStream = require('combined-stream'), // XXX
     copyFile = require("./lib/copyFile"),
     FsBase = require("./lib/fsBase"),
-    FdUtil = require("./lib/SimpleFormData"),
     HttpError = require("./lib/httpError");
 
 var basename = path.basename(__filename, '.js');
@@ -269,7 +267,7 @@ FsLocal.prototype._getFile = function(req, res, next) {
 							parts.push(part);
 						}
 					});
-				};
+				}
 				
 				addParts(content.children);
 				self.returnFormData(parts, res, next);

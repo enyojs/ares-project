@@ -2,7 +2,6 @@
 
 var fs = require("graceful-fs"),
     path = require("path"),
-    express = require("express"),
     util  = require("util"),
     child_process = require("child_process"),
     log = require('npmlog'),

@@ -6,12 +6,9 @@
 
 // nodejs version checking is done in parent process ide.js
 
-var fs = require("fs"),
-    path = require("path"),
-    express = require("express"),
+var path = require("path"),
     util  = require("util"),
     log = require('npmlog'),
-    temp = require("temp"),
     async = require("async"),
     rimraf = require("rimraf"),
     ptools = require("ares-generator"),
