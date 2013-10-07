@@ -61,6 +61,7 @@ BdBase.prototype.use = function() {
 	fs.mkdirSync(this.uploadDir);
 	this.app.use(express.bodyParser({
 		keepExtensions: true,
+		maxFields: 10000,
 		uploadDir: this.uploadDir
 	}));
 };
