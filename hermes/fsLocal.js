@@ -559,7 +559,7 @@ if (path.basename(process.argv[1], '.js') === basename) {
 		"h": "--help"
 	};
 	var opt = require('nopt')(knownOpts, shortHands, process.argv, 2 /*drop 'node' & basename*/);
-	log.level = opt.level || "http";
+	opt.level = opt.level || "http";
 	opt.pathname = opt.pathname || "/files";
 	opt.port = opt.port || 0;
 	opt.timeout = opt.timeout || (2*60*1000);
@@ -572,6 +572,8 @@ if (path.basename(process.argv[1], '.js') === basename) {
 			    "  -h, --help        This message\n");
 		process.exit(0);
 	}
+	console.log("opt:", opt);
+	log.level = opt.level;
 
 	new FsLocal({
 		root: opt.root,

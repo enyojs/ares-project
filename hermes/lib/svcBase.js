@@ -45,6 +45,9 @@ function ServiceBase(config, next) {
 	if (config.performCleanup === undefined) {
 		config.performCleanup = true;
 	}
+	if (config.level) {
+		log.level = config.level;
+	}
 
 	this.config = config;
 	log.info('ServiceBase()', "config:", this.config);
