@@ -332,7 +332,7 @@ FsLocal.prototype.putFile = function(req, file, next) {
 	async.series([
 		this._checkOverwrite.bind(this, absPath, overwriteParam),
 		mkdirp.bind(null, dir),
-		(function(next) {
+		function(next) {
 			if (file.path) {
 				log.verbose("FsLocal#putFile()", "moving/copying file");
 				try {
@@ -364,8 +364,8 @@ FsLocal.prototype.putFile = function(req, file, next) {
 			} else {
 				setImmediate(next, new HttpError("cannot write file=" + JSON.stringify(file), 400));
 			}
-		}).bind(this),
-		(function(next){
+		},
+		function(next){
 			log.verbose("FsLocal#putFile()", "wrote: file.name:", file.name);
 			node = {
 				id: encodeFileId(urlPath),
@@ -374,10 +374,10 @@ FsLocal.prototype.putFile = function(req, file, next) {
 				isDir: false
 			};
 			setImmediate(next);
-		}).bind(this)
-	], (function(err) {
-		setImmediate(next, err, node);
-	}).bind(this));
+		}
+	], function(err) {
+		next(err, node);
+	});
 };
 
 FsLocal.prototype._checkOverwrite = function(absPath, overwrite, next) {
