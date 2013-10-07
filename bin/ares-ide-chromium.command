@@ -10,7 +10,7 @@ SCRIPT=${BIN_DIR}/ares-ide.sh
 ARES_BUNDLE_BROWSER=${BIN_DIR}/chromium/Chromium.app
 
 if [ -e $ARES_BUNDLE_BROWSER ]; then
-	export BUNDLE_BROWSER
+	export ARES_BUNDLE_BROWSER
 fi
 
 # run script with -B + imported params
