@@ -139,14 +139,14 @@ enyo.kind({
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
 	],
 	published: {		
-		topFileStatus: ""
+		topFileStatus: "",
+		targetProject: "",
 	},
 
 	templates: [],
 	TEMPLATE_NONE: "NONE",
 	selectedTemplate: undefined,
 	selectedAddedSource: undefined,
-	targetProject: null,
 	services: {},
 	addedSource:[],
 	fileChoosers: [],
@@ -223,6 +223,8 @@ enyo.kind({
 			// Take the project configuration into account
 			// to show the service or not
 			this.showService(serviceId);
+
+
 		}, this);
 		this.trace("services:", this.services);
 	},
@@ -249,6 +251,14 @@ enyo.kind({
 	 * Tune the widget for project modification
 	 */
 	setupModif: function() {
+		//Set the selected Project Information to plugin service drawer
+		for(var serviceId in this.services){
+			var service = this.services[serviceId];
+			var serviceDrawer = this.$[service.id + 'Drawer'].$[service.id];
+			if(typeof serviceDrawer.setTargetProject === 'function'){
+				serviceDrawer.setTargetProject(this.targetProject);
+			}
+		}
 		this.$.templatesEntry.hide();
 		this.notifyProjectPropertyStatus({status: "modify"});
 	},
@@ -329,10 +339,6 @@ enyo.kind({
 
 	notifyProjectPropertyStatus: function(inEvent) {
 		this.waterfallDown("onChangeProjectStatus", inEvent);
-	},
-
-	setTargetProject: function(project) {
-		this.targetProject = project;
 	},
 
 	/** @private */

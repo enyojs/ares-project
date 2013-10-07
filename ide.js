@@ -6,6 +6,7 @@
 
 var fs = require("fs"),
     path = require("path"),
+    createDomain = require('domain').create,
     express = require("express"),
     npmlog = require('npmlog'),
     nopt = require('nopt'),
@@ -241,12 +242,12 @@ function appendPluginConfig(configFile) {
 	var pluginDir = path.dirname(configFile);
 	log.verbose('appendPluginConfig()', 'pluginDir:', pluginDir);
 
-	var pluginData,
-	    configContent = fs.readFileSync(configFile, 'utf8');
+	var pluginData, configContent;
 	try {
+		configContent = fs.readFileSync(configFile, 'utf8');
 		pluginData = JSON.parse(configContent);
 	} catch(e) {
-		throw "Improper JSON in " + configFile + " : "+configContent;
+		throw new Error("Unable to load or JSON-parse '" + configFile + "' (" + e.toString() + ")");
 	}
 	
 	// The service in the plugin configuration file that is both
@@ -340,8 +341,9 @@ function handleMessage(service) {
 					'content-type': 'application/json'
 				}
 			};
+			log.http(service.id, "POST /config");
 			var creq = http.request(options, function(cres) {
-				log.http(service.id, "POST /config response.status=" + cres.statusCode);
+				log.http(service.id, "POST /config", cres.statusCode);
 			}).on('error', function(e) {
 				throw e;
 			});
@@ -458,7 +460,7 @@ function proxyServices(req, res, next) {
 		    return service.id === id;
 	    })[0];
 	if (!service) {
-		next(new HttpError('No such service: ' + id, 403));
+		setImmediate(next, new HttpError('No such service: ' + id, 403));
 		return;
 	}
 	for (var key in req.query) {
@@ -580,10 +582,25 @@ function cors(req, res, next) {
 	res.header('access-control-allow-origin', '*' /*FIXME: config.allowedDomains*/);
 	res.header('access-control-allow-methods', 'GET,POST');
 	res.header('access-control-allow-headers', 'Content-Type');
-	next();
+	setImmediate(next);
 }
 
 app.configure(function(){
+
+	/*
+	 * Error Handling - Wrap exceptions in delayed handlers
+	 */
+	app.use(function _useDomain(req, res, next) {
+		var domain = createDomain();
+		
+		domain.on('error', function(err) {
+			next(err);
+			domain.dispose();
+		});
+		
+		domain.enter();
+		setImmediate(next);
+	});
 
 	app.use(cors);
 	app.use(express.favicon(myDir + '/ares/assets/images/ares_48x48.ico'));
@@ -622,7 +639,7 @@ app.configure(function(){
 		app.post('/res/tester', tester.setup);
 		app['delete']('/res/tester', tester.cleanup);
 	}
-	
+
 	/**
 	 * Global error handler (last plumbed middleware)
 	 * @private
@@ -631,11 +648,11 @@ app.configure(function(){
 		log.error('errorHandler()', err.stack);
 		res.status(500).send(err.toString());
 	}
-
+	
 	// express-3.x: middleware with arity === 4 is
 	// detected as the error handler
 	app.use(errorHandler.bind(this));
-
+	
 	log.verbose('app.configure()', "done");
 });
 

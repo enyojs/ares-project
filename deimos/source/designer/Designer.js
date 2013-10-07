@@ -5,7 +5,8 @@ enyo.kind({
 		iframeReady: false,
 		currentKind: null,
 		height: null,
-		width: null
+		width: null,
+		currentFileName: ""
 	},
 	events: {
 		onDesignRendered: "",
@@ -18,7 +19,7 @@ enyo.kind({
 		onResizeItem: "",
 		onError: "",
 		onReturnPositionValue: "",
-		onCloseDesigner: ""
+		onForceCloseDesigner: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", classes: "ares-iframe-client"},
@@ -118,7 +119,8 @@ enyo.kind({
 			}
 		// The current kind was successfully rendered in the iframe
 		} else if(msg.op === "rendered") {
-			this.kindRendered(msg.val);
+			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+			this.kindRendered(msg.val, msg.filename);
 		// Select event sent from here was completed successfully. Set _this.selection_.
 		} else if(msg.op === "selected") {
 			this.selection = enyo.json.codify.from(msg.val);
@@ -160,7 +162,7 @@ enyo.kind({
 		}
 	},
 	goBacktoEditor: function() {
-		this.doCloseDesigner();
+		this.doForceCloseDesigner();
 	},
 	//* Pass _isContainer_ info down to iframe
 	sendIframeContainerData: function() {
@@ -174,7 +176,8 @@ enyo.kind({
 		
 		var currentKind = this.getCurrentKind();
 		var components = [currentKind];
-		this.sendMessage({op: "render", val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components), componentKinds: enyo.json.codify.to(components), selectId: inSelectId}});
+		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+		this.sendMessage({op: "render", filename: this.currentFileName, val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components), componentKinds: enyo.json.codify.to(components), selectId: inSelectId}});
 	},
 	select: function(inControl) {
 		this.sendMessage({op: "select", val: inControl});
@@ -187,11 +190,13 @@ enyo.kind({
 	},
 	//* Property was modified in Inspector, update iframe.
 	modifyProperty: function(inProperty, inValue) {
-		this.sendMessage({op: "modify", val: {property: inProperty, value: inValue}});
+		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+		this.sendMessage({op: "modify", filename: this.currentFileName, val: {property: inProperty, value: inValue}});
 	},
 	//* Send message to Deimos with components from iframe
-	kindRendered: function(content) {
-		this.doDesignRendered({content: content});
+	kindRendered: function(content, filename) {
+		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+		this.doDesignRendered({content: content, filename: filename});
 	},
 	//* Clean up the iframe before closing designer
 	cleanUp: function() {
@@ -218,5 +223,8 @@ enyo.kind({
 	},
 	sendSerializerOptions: function(serializerOptions) {
 		this.sendMessage({op: "serializerOptions", val: serializerOptions});	
+	},
+	sendDragType: function(type) {
+		this.sendMessage({op: "dragStart", val: type});
 	}
 });

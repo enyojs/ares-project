@@ -25,7 +25,7 @@ enyo.kind({
 
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource"},
-		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true, allowCreateFolder: true},
+		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true, allowCreateFolder: true, serverSelectable: false},
 		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")}
 	],
 	debug: false,
@@ -45,7 +45,7 @@ enyo.kind({
 		this.trace("starting") ;
 		this.show();
 
-		dirPopup.$.header.setContent("Select a directory containing the new project") ;
+		dirPopup.$.header.setContent("Select a directory containing the new project");
 		dirPopup.show();
 		this.$.propertiesWidget.setDefaultTab();
 		this.hide();
@@ -397,7 +397,10 @@ enyo.kind({
 	start: function(target) {
 		if (target) {
 			var config = target.getConfig();
+			
 			this.targetProject = target ;
+			this.$.propertiesWidget.setTargetProject(target);
+
 			this.$.propertiesWidget.setupModif();
 			this.$.propertiesWidget.preFill(config.data);
 
@@ -408,7 +411,6 @@ enyo.kind({
 				this.$.propertiesWidget.$.projectPathValue.setContent(inFile.path);
 			});
 			
-			this.$.propertiesWidget.setTargetProject(target);
 			this.$.propertiesWidget.activateFileChoosers(true);
 
 			var show = (function () {
@@ -535,6 +537,7 @@ enyo.kind({
 		this.$.propertiesWidget.setDefaultTab();
 		return true;
 	}
+	
 });
 
 

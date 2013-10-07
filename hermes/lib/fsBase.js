@@ -3,14 +3,16 @@
  * Base toolkit for Hermes FileSystem providers implemented using Node.js
  */
 
-var fs = require("fs"),
+var fs = require("graceful-fs"),
     path = require("path"),
+    //util = require("util"),
     express = require("express"),
     http = require("http"),
     tunnel = require("tunnel"),
     createDomain = require('domain').create,
     temp = require("temp"),
     async = require("async"),
+    base64 = require('base64-stream'),
     HttpError = require("./httpError");
 
 module.exports = FsBase;
@@ -41,7 +43,7 @@ function FsBase(inConfig, next) {
 	].forEach((function(method) {
 		if ((typeof(this[method]) !== 'function') ||
 		    (this[method].length !== 3)) {
-			next(new Error("BUG: method '" + method + "' is not a 3-parameters function"));
+			setImmediate(next, new Error("BUG: method '" + method + "' is not a 3-parameters function"));
 			return;
 		}
 	}).bind(this));
@@ -51,56 +53,46 @@ function FsBase(inConfig, next) {
 	this.server = http.createServer(this.app);
 	this.server.setTimeout(this.timeout || (2*60*1000));
 
-	this.app.configure((function() {
-		this.app.use(this.separator.bind(this));
-		if (this.level !== 'error' && this.level !== 'warning') {
-			this.app.use(express.logger('dev'));
-		}
+	this.app.use(this.separator.bind(this));
+	if (this.level !== 'error' && this.level !== 'warning') {
+		this.app.use(express.logger('dev'));
+	}
 
-		/*
-		 * Error Handling - Wrap exceptions in delayed handlers
-		 */
-		this.app.use(function(req, res, next) {
-			var domain = createDomain();
+	/*
+	 * Error Handling - Wrap exceptions in delayed handlers
+	 */
+	this.app.use(function(req, res, next) {
+		var domain = createDomain();
 
-			domain.on('error', function(err) {
-				next(err);
-				domain.dispose();
-			});
-
-			domain.enter();
-			next();
+		domain.on('error', function(err) {
+			setImmediate(next, err);
+			domain.dispose();
 		});
 
-		this.app.use(this.cors.bind(this));
-		this.app.use(express.cookieParser());
-		this.app.use(this.pathname, this.authorize.bind(this));
-		this.app.use(express.methodOverride());
+		domain.enter();
+		setImmediate(next);
+	});
 
-		this.app.use(this.dump.bind(this));
+	this.app.use(this.cors.bind(this));
+	this.app.use(express.cookieParser());
+	this.app.use(this.pathname, this.authorize.bind(this));
+	this.app.use(express.methodOverride());
+	this.app.use(this.dump.bind(this));
 
-		// Built-in express form parser: handles:
-		// - 'application/json' => req.body
-		// - 'application/x-www-form-urlencoded' => req.body
-		// - 'multipart/form-data' => req.body.field[] & req.body.file[]
-		var uploadDir = temp.path({prefix: 'com.palm.ares.services.fs.' + this.name}) + '.d';
-		this.log("uploadDir:", uploadDir);
-		fs.mkdirSync(uploadDir);
-		this.app.use(express.bodyParser({keepExtensions: true, uploadDir: uploadDir}));
-
-		/**
-		 * Global error handler (last plumbed middleware)
-		 * @private
-		 */
-		function errorHandler(err, req, res, next){
-			console.error(err.stack);
-			this.respond(res, err);
-		}
-
-		// express-3.x: middleware with arity === 4 is
-		// detected as the error handler
-		this.app.use(errorHandler.bind(this));
-	}).bind(this));
+	// Built-in express form parser: handles:
+	// - 'application/json' => req.body
+	// - 'application/x-www-form-urlencoded' => req.body
+	// - 'multipart/form-data' => req.body.field[] & req.body.file[]
+	var uploadDir = temp.path({prefix: 'com.palm.ares.services.fs.' + this.name}) + '.d';
+	this.log("uploadDir:", uploadDir);
+	fs.mkdirSync(uploadDir);
+	this.app.use(express.bodyParser({
+		maxFieldsSize: 15 * 1024 * 1024, // 15 MBytes
+		maxFields: 10000,		 // 10,000 files
+		keepExtensions: true,
+		uploadDir: uploadDir
+	}));
+	this.app.use(this.dump.bind(this));
 
 	// outbound http/https traffic
 
@@ -148,9 +140,10 @@ function FsBase(inConfig, next) {
 	this.app.all(this.route2, [_parseIdUrl.bind(this)], _handle.bind(this));
 
 	function _parseIdUrl(req, res, next) {
+		this.log("parsing file id:", req.params.id);
 		req.params.id = req.params.id || this.encodeFileId('/');
 		req.params.path = this.decodeFileId(req.params.id);
-		next();
+		setImmediate(next);
 	}
 
 	// URL-scheme: WebDAV-like navigation, used by the Enyo loader
@@ -159,9 +152,10 @@ function FsBase(inConfig, next) {
 	this.route3 = makeExpressRoute.bind(this)('/file/*');
 
 	function _parseFileUrl(req, res, next) {
+		this.log("parsing file path:", req.params[0]);
 		req.params.path = req.params[0];
 		req.params.id = this.encodeFileId(req.params.path);
-		next();
+		setImmediate(next);
 	}
 
 	var overlays = {
@@ -180,17 +174,17 @@ function FsBase(inConfig, next) {
 			var filePath = path.join(overlayDir, path.basename(req.params.path));
 			fs.stat(filePath, (function(err, stats) {
 				if (err) {
-					next(err);
+					setImmediate(next, err);
 				} else if (stats.isFile()) {
 					this.log("_designer()", "found overlay file:", filePath);
 					res.status(200);
 					res.sendfile(filePath);
 				} else {
-					next();
+					setImmediate(next);
 				}
 			}).bind(this));
 		} else {
-			next();
+			setImmediate(next);
 		}
 	}
 	
@@ -205,6 +199,20 @@ function FsBase(inConfig, next) {
 
 	//this.log("routes:", this.app.routes);
 
+	/**
+	 * Global error handler (last plumbed middleware)
+	 * @private
+	 */
+	function errorHandler(err, req, res, next){
+		console.error("fsBase#errorHandler", err.stack);
+		this.respond(res, err);
+	}
+
+	// express-3.x: middleware with arity === 4 is detected as the
+	// error handler.  It also needs to be the last stuff hooked
+	// to the routing table.
+	this.app.use(errorHandler.bind(this));
+
 	// Send back the service location information (origin,
 	// protocol, host, port, pathname) to the creator, when port
 	// is bound
@@ -213,13 +221,14 @@ function FsBase(inConfig, next) {
 		this.host = tcpAddr.address;
 		this.port = tcpAddr.port;
 		this.origin = "http://" + this.host + ":"+ this.port;
-		return next(null, {
+		setImmediate(next, null, {
 			protocol: 'http',
 			host: this.host,
 			port: this.port,
 			origin: this.origin,
 			pathname: this.pathname
 		});
+		return;
 	}).bind(this));
 
 	/**
@@ -237,7 +246,7 @@ function FsBase(inConfig, next) {
 FsBase.prototype.configure = function(config, next) {
 	this.log("FsBase.configure(): config:", config);
 	if (next) {
-		next();
+		setImmediate(next);
 	}
 };
 
@@ -245,17 +254,17 @@ FsBase.prototype.configure = function(config, next) {
 
 FsBase.prototype.separator = function(req, res, next) {
 	this.log("---------------------------------------------------------");
-	next();
+	setImmediate(next);
 };
 
 // Authorize
 FsBase.prototype.authorize = function(req, res, next) {
 	this.log("FsBase.authorize(): checking that request comes from 127.0.0.1");
 	if (req.connection.remoteAddress !== "127.0.0.1") {
-		next(new HttpError("Access denied from IP address "+req.connection.remoteAddress, 401 /*Unauthorized*/));
+		setImmediate(next, new HttpError("Access denied from IP address "+req.connection.remoteAddress, 401 /*Unauthorized*/));
 	} else {
 		this.log("FsBase.authorize(): Ok");
-		next();
+		setImmediate(next);
 	}
 };
 
@@ -263,11 +272,11 @@ FsBase.prototype.authorize = function(req, res, next) {
 FsBase.prototype.cors = function(req, res, next) {
 	res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control');
+	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control, X-HTTP-Method-Override');
 	if ('OPTIONS' == req.method) {
 		res.status(200).end();
 	} else {
-		next();
+		setImmediate(next);
 	}
 };
 
@@ -384,16 +393,17 @@ FsBase.prototype.parseProxy = function(config) {
 FsBase.prototype.dump = function(req, res, next) {
 	//this.log("FsBase.dump(): req.keys=", Object.keys(req));
 	this.log("FsBase.dump(): req.method=", req.method);
+	this.log("FsBase.dump(): req.headers=", req.headers);
 	this.log("FsBase.dump(): req.url=", req.url);
 	this.log("FsBase.dump(): req.query=", req.query);
 	this.log("FsBase.dump(): req.cookies=", req.cookies);
 	this.log("FsBase.dump(): req.body=", req.body);
-	next();
+	setImmediate(next);
 };
 
 FsBase.prototype.getUserInfo = function(req, res, next) {
 	this.log("FsBase.getUserInfo():");
-	next(null, {
+	setImmediate(next, null, {
 		code: 200 /*Ok*/,
 		body: {}
 	});
@@ -401,7 +411,7 @@ FsBase.prototype.getUserInfo = function(req, res, next) {
 
 FsBase.prototype.setUserInfo = function(req, res, next) {
 	this.log("FsBase.setUserInfo():");
-	next(null, {
+	setImmediate(next, null, {
 		code: 200 /*Ok*/,
 		body: {}
 	});
@@ -418,7 +428,7 @@ FsBase.prototype.put = function(req, res, next) {
 		// can carry several files
 		return this._putMultipart(req, res, next);
 	} else {
-		next(new Error("Unhandled upload of content-type='" + req.headers['content-type'] + "'"));
+		setImmediate(next, new Error("Unhandled upload of content-type='" + req.headers['content-type'] + "'"));
 	}
 };
 
@@ -448,7 +458,7 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 	    nameParam = req.param('name');
 	this.log("FsBase.putWebForm(): pathParam:", pathParam, "nameParam:", nameParam);
 	if (!pathParam) {
-		next(new HttpError("Missing 'path' request parameter", 400 /*Bad Request*/));
+		setImmediate(next, new HttpError("Missing 'path' request parameter", 400 /*Bad Request*/));
 		return;
 	}
 	if (nameParam === '.'|| !nameParam) {
@@ -475,7 +485,7 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		buffer: buf
 	}, (function(err){
 		this.log("FsBase.putWebForm(): err:", err);
-		next(err, {
+		setImmediate(next, err, {
 			code: 201, // Created
 			body: [{
 				id: fileId,
@@ -501,84 +511,55 @@ FsBase.prototype._putWebForm = function(req, res, next) {
  */
 FsBase.prototype._putMultipart = function(req, res, next) {
 	var pathParam = req.param('path');
-	this.log("FsBase.putMultipart(): req.files:", req.files);
-	this.log("FsBase.putMultipart(): req.body:", req.body);
-	this.log("FsBase.putMultipart(): pathParam:", pathParam);
-	if (!req.files.file) {
-		next(new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
+	this.log("FsBase#_putMultipart(): req.body:", req.body);
+	this.log("FsBase#_putMultipart(): pathParam:", pathParam);
+	//this.log("FsBase.putMultipart(): req.files:", util.inspect(req.files, {depth: 1}));
+
+	var names = req.files && Object.keys(req.files);
+	if (!names || names.length === 0) {
+		setImmediate(next, new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
 		return;
 	}
 	var files = [];
-	if (Array.isArray(req.files.file)) {
-		files.push.apply(files, req.files.file);
-	} else {
-		files.push(req.files.file);
-	}
+	names.forEach(function(name) {
+		var namedFiles = req.files[name];
+		namedFiles = Array.isArray(namedFiles) ? namedFiles : [ namedFiles ];
+		namedFiles.forEach(function(file) {
+			file.filename = file.filename || ((name === "file" || name === "blob") ? file.name : name);
+			files.push(file);
+		});
+	});
 
-	// work-around firefox bug, that does not incorporate filename
-	// as third parameter of FormData#append().  We then expect a
-	// handful of filename=xxx keyvals, that will complement the
-	// file fields of the FormData.
-	var filenames = [];
-	if (req.body.filename) {
-		if (Array.isArray(req.body.filename)) {
-			filenames.push.apply(filenames, req.body.filename);
-		} else {
-			filenames.push(req.body.filename);
-		}
-		for (var i = 0; i < files.length; i++) {
-			if (filenames[i]) {
-				files[i].name = filenames[i];
-			}
-		}
-	}
+	this.log("FsBase#_putMultipart(): files.length:", files.length);
+	//this.log("FsBase.putMultipart(): files:", util.inspect(files, {depth: 1}));
 
-	this.log("FsBase.putMultipart(): files", files);
+	var nodes = [], tmpPath;
+	async.forEachSeries(files, (function(file, next) {
 
-	var nodes = [];
-	async.forEachSeries(files, (function(file, cb) {
-
-		if (file.name === '.' || !file.name) {
+		if (file.filename === '.' || !file.filename) {
 			file.name = pathParam;
 		} else {
-			file.name = [pathParam, file.name].join('/');
+			file.name = [pathParam, file.filename].join('/');
 		}
+
+		tmpPath = file.path;
+		file.stream = fs.createReadStream(file.path).pipe(base64.decode());
+		file.path = undefined;
 
 		var putCallback = function(err, node) {
 			this.log("FsBase.putMultipart(): err:", err, "node:", node);
-			if (err) {
-				cb(err);
-			} else if (node) {
+			if (node) {
 				nodes.push(node);
 			}
-			cb();
+			fs.unlink(tmpPath, function() {
+				next();
+			});
 		};
+		this.putFile(req, file, putCallback.bind(this));
 
-		if (file.type.match(/x-encoding=base64/)) {
-			fs.readFile(file.path, function(err, data) {
-				if (err) {
-					console.log("transcoding: error" + file.path, err);
-					cb(err);
-					return;
-				}
-				try {
-					var fpath = file.path;
-					delete file.path;
-					fs.unlink(fpath, function(err) { /* Nothing to do */ });
-					file.buffer = new Buffer(data.toString('ascii'), 'base64');			// TODO: This works but I don't like it
-
-					this.putFile(req, file, putCallback.bind(this));
-				} catch(transcodeError) {
-					console.log("transcoding error: " + file.path, transcodeError);
-					cb(transcodeError);
-				}
-			}.bind(this));
-		} else {
-			this.putFile(req, file, putCallback.bind(this));
-		}
 	}).bind(this), (function(err){
 		this.log("FsBase.putMultipart(): nodes:", nodes);
-		next(err, {
+		setImmediate(next, err, {
 			code: 201, // Created
 			body: nodes
 		});
