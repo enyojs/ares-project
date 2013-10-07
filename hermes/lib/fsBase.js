@@ -95,9 +95,8 @@ FsBase.prototype.use = function() {
 };
 
 FsBase.prototype.cleanProcess = function(next) {
-	log.verbose('FsBase#cleanProcess()', "uploadDir:", this.uploadDir);
-	log.silly('FsBase#cleanProcess()', "arguments:", arguments);
-	rimraf(this.uploadDir, next);
+	log.verbose('FsBase#cleanProcess()');
+	setImmediate(next);
 };
 
 /**

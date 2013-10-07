@@ -386,14 +386,14 @@ FsLocal.prototype._checkOverwrite = function(absPath, overwrite, next) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					/* normal */
-					setImmediate(next);
+					next();
 				} else {
 					/* wrong */
-					setImmediate(next, new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+					next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
 				}
 			} else {
 				/* wrong */
-				setImmediate(next, new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
+				next(new HttpError('Destination already exists', 412 /*Precondition-Failed*/));
 			}
 		});
 	} else {
