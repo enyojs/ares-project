@@ -137,27 +137,20 @@ enyo.singleton({
 		}
 	},
 	getInfo: function(inKind, inType, inName) {
-		try {
-			return this.info[inKind][inType][inName];
-		} catch(error) {
-			try {
-				return this.info["enyo." + inKind][inType][inName];
-			} catch(err2) {
-				return;		// Return undefined
-			}
-		}
+		// enyo kinds don't always have the enyo prefix
+		var inf = this.info[inKind] || this.info["enyo." + inKind] ;
+
+		var hasInfo = inf && inf[inType] && inf[inType].hasOwnProperty(inName);
+		return hasInfo ? inf[inType][inName] : undefined ;
 	},
 	getFilterLevel: function(inKind, inType, inName) {
-		var info;
-		try {
-			info = this.getInfo(inKind, inType, inName);
-			if (info && info.level) {
-				return info.level;
-			} else {
-				return this.getInfo("__default", inType, inName).level || Model.F_NORMAL;
-			}
-		} catch(error) {
-			info = this.getInfo("__default", inType, inName);
+		var info = this.getInfo(inKind, inType, inName);
+
+		if (info && info.level) {
+			return info.level;
+		}
+		else {
+			info = this.getInfo("__default", inType, inName) ;
 			return (info && info.level) || Model.F_NORMAL;
 		}
 	},

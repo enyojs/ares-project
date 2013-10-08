@@ -138,10 +138,10 @@ enyo.kind({
 	},
 	// @protected
 	getSerializerOptions: function(inKind, inOptName, inPropName) {
-		try {
-			return this.serializerOptions[inKind][inOptName][inPropName];
-		} catch(error) {
-			return;			// Just return an undefined value
-		}
+		var opt = this.serializerOptions[inKind] ;
+
+		var hasOpt = opt && opt[inOptName] && opt[inOptName].hasOwnProperty(inPropName) ;
+
+		return hasOpt ? opt[inOptName][inPropName] : undefined;
 	}
 });
