@@ -716,7 +716,6 @@ enyo.kind({
 		this.enableDesignerActionButtons(false);
 
 		var kind = this.getSingleKind(this.index);
-		//this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(kind)));
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, kind);
 		this.addAresKindOptions(kind);
 		this.rerenderKind();
