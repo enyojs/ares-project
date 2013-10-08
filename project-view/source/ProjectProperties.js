@@ -27,7 +27,9 @@ enyo.kind({
 		onAddSource: "addNewSource",
 		onRemoveSource: "removeAddedSource",
 		onInitSource: "initAddedSource",
-		onInputButtonTap: "selectInputFile"
+		onInputButtonTap: "selectInputFile",
+		onDisableOkButton: "disableOkButton",
+		onEnableOkButton: "enableOkButton"
 	},
 	components: [
 		{classes:"title left-align", content:"Project properties", components:[
@@ -141,6 +143,7 @@ enyo.kind({
 	published: {		
 		topFileStatus: "",
 		targetProject: "",
+		validatePhonegapUiValues: {}
 	},
 
 	templates: [],
@@ -154,6 +157,16 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
+		this.validatePhonegapUiValues = {
+			"sharedConfiguration-icon": true, "sharedConfiguration-splashScreen": true, 
+			"splash-screen-duration": true, "load-url-timeout": true,
+			"android-minSdkVersion": true, "android-maxSdkVersion": true,
+			"ios-icon": true, "ios-splashScreen": true,
+			"winphone-icon": true, "winphone-splashScreen": true,
+			"blackberry-icon": true, "blackberry-splashScreen": true,
+			"webos-icon": true, "webos-splashScreen": true
+
+		};
 	},
 	/**
 	 * Set the default tab
@@ -398,6 +411,63 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
+	
+	disableOkButton: function(inSender, inEvent) {
+
+		this.$.ok.setDisabled(true);
+		this.validatePhonegapUiValues[this.defineValidationArrayKey(inEvent.originator)] = false;
+	},
+
+
+	/**
+	 * @private
+	 * Function to define the name of the element of the array {this.validatePhonegapUiValues}
+	 * to be marked as correct.
+	 * 
+	 * @param  {Object} inOriginator to object that fired the event.
+	 * @return {String} corresponding name of the key of the array {this.validatePhonegapUiValues}
+	 */
+	defineValidationArrayKey: function(inOriginator) {
+		if (inOriginator.name === "icon") {
+				return inOriginator && inOriginator.platform + "-icon";
+			} else {
+				if (inOriginator.name === "splashScreen") {
+					return inOriginator && inOriginator.platform + "-splashScreen";
+				}
+				else {
+					return inOriginator.name;
+				}
+			}
+	},
+
+	/**
+	 * Enable the OK button of the project properties Pop-up if all the values are 
+	 * correct.
+	 * Called if the event onEnableOkButton is fired by a row in Phonegap build UI
+	 * This event is bubbled in the case where the value set in the UI Row is corrected.	 * 
+	 * 
+	 * @param  {Object} inSender container of the originator of the event
+	 * @param  {Object} inEvent  contain the new state of the event originator
+	 * @return {boolean}         stop the bubbling.
+	 */
+	enableOkButton: function(inSender, inEvent){		
+
+		// Set in the array {this.validatePhonegapUiValues} the originator UI row as valide
+		this.validatePhonegapUiValues[this.defineValidationArrayKey(inEvent.originator)] = true;
+	
+		var okDisabled = false;
+	
+		// Reevaluate all the array {this.validatePhonegapUiValues} in order to enable the 
+		// button OK if all the array's elements have the value true.
+		for(var key in this.validatePhonegapUiValues) {
+			if (this.validatePhonegapUiValues[key] === false) {
+				okDisabled = true;	
+			}
+		}
+
+		this.$.ok.setDisabled(okDisabled);		
+	},
+
 	/** @public */
 	setTemplateList: function(templates) {
 		this.templates = [this.TEMPLATE_NONE];
