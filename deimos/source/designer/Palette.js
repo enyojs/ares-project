@@ -128,8 +128,24 @@ enyo.kind({
 	 */
 	projectIndexerChanged: function() {
 		this.trace("projectIndexerChanged: rebuilt the palette ");
+		
 		var catchAllPalette = this.buildCatchAllPalette();
-		this.palette = catchAllPalette.concat(this.projectIndexer.design.palette || []);
+		var AllPalette = ares.clone(catchAllPalette.concat(this.projectIndexer.design.palette || []));
+		
+		var filterString = this.$.filterPalette.getValue().toLowerCase();
+		if (filterString !== "") {
+			var k;
+			enyo.forEach(AllPalette, function(category) {
+				for (k = 0; k < category.items.length; k++) {
+					if (category.items[k].name.toLowerCase().indexOf(filterString) == -1) {
+						category.items.splice(k, 1);
+						k--;
+					}
+				}
+			}, this);
+		}
+		
+		this.palette = AllPalette;
 		this.palette.sort(function(a,b) {
 			return (a.order || 0) - (b.order || 0);
 		});
@@ -148,9 +164,6 @@ enyo.kind({
 	 * @protected
 	 */
 	buildCatchAllPalette: function() {
-		var filterString =  this.$.filterPalette.getValue();
-		this.log("filterString", filterString);
-
 		// Start custom palette with catch-all category for non-namespaced kinds
 		var catchAllCategories = {
 			"" : {
@@ -181,33 +194,31 @@ enyo.kind({
 		});
 		// Add components to catch-all categories per namespace
 		enyo.forEach(catchAllKinds, function(kind) {
-			if (filterString === "" || kind.name.indexOf(filterString) >= 0) {
-				// Create palette item for kind
-				var item = {
-					name: kind.name,
-					description: kind.comment,
-					inline: {kind: kind.name},
-					config: {kind: kind.name}
-				};
-				// Check for package namespace
-				var dot = kind.name.lastIndexOf(".");
-				if (dot > 0) {
-					var pkg = kind.name.substring(0, dot);
-					var cat = catchAllCategories[pkg];
-					if (!cat) {
-						// Generate a new custom palette for this package if it doesn't exist
-						cat = {
-							order: 1000,
-							name: pkg + " (other)",
-							items: []
-						};
-						catchAllCategories[pkg] = cat;
-					}
-					cat.items.push(item);
-				} else {
-					// No package, so add to catch-all category
-					catchAllCategories[""].items.push(item);
+			// Create palette item for kind
+			var item = {
+				name: kind.name,
+				description: kind.comment,
+				inline: {kind: kind.name},
+				config: {kind: kind.name}
+			};
+			// Check for package namespace
+			var dot = kind.name.lastIndexOf(".");
+			if (dot > 0) {
+				var pkg = kind.name.substring(0, dot);
+				var cat = catchAllCategories[pkg];
+				if (!cat) {
+					// Generate a new custom palette for this package if it doesn't exist
+					cat = {
+						order: 1000,
+						name: pkg + " (other)",
+						items: []
+					};
+					catchAllCategories[pkg] = cat;
 				}
+				cat.items.push(item);
+			} else {
+				// No package, so add to catch-all category
+				catchAllCategories[""].items.push(item);
 			}
 		});
 		// Create the final custom palette array
@@ -217,6 +228,7 @@ enyo.kind({
 				catchAllPalette.push(catchAllCategories[p]);
 			}
 		}
+		
 		return catchAllPalette;
 	},
 	/** @private */
