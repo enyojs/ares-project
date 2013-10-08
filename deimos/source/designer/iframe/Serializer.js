@@ -14,6 +14,7 @@ enyo.kind({
 		return enyo.json.codify.to(s, null, 4);
 	},
 	published: {
+		// contains serialization data extracted (but not cloned) from .design files
 		serializerOptions: null
 	},
 	//* protected
