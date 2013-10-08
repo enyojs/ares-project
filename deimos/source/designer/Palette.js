@@ -130,12 +130,12 @@ enyo.kind({
 		this.trace("projectIndexerChanged: rebuilt the palette ");
 		
 		var catchAllPalette = this.buildCatchAllPalette();
-		var AllPalette = ares.clone(catchAllPalette.concat(this.projectIndexer.design.palette || []));
+		var allPalette = ares.clone(catchAllPalette.concat(this.projectIndexer.design.palette || []));
 		
 		var filterString = this.$.filterPalette.getValue().toLowerCase();
 		if (filterString !== "") {
 			var k;
-			enyo.forEach(AllPalette, function(category) {
+			enyo.forEach(allPalette, function(category) {
 				for (k = 0; k < category.items.length; k++) {
 					if (category.items[k].name.toLowerCase().indexOf(filterString) == -1) {
 						category.items.splice(k, 1);
@@ -145,7 +145,7 @@ enyo.kind({
 			}, this);
 		}
 		
-		this.palette = AllPalette;
+		this.palette = allPalette;
 		this.palette.sort(function(a,b) {
 			return (a.order || 0) - (b.order || 0);
 		});
