@@ -38,7 +38,7 @@ enyo.kind({
 	components: [
 		{
 			kind: "onyx.Checkbox",
-			name: "ConfigurationCheckBox",
+			name: "configurationCheckBox",
 			classes: "ares-project-properties-drawer-row-check-box-label",
 			onchange: "updateConfigurationValue"
 		},
@@ -65,7 +65,7 @@ enyo.kind({
 	 * @private
 	 */
 	valueChanged: function () {
-		this.$.ConfigurationCheckBox.setChecked(this.value);
+		this.$.configurationCheckBox.setChecked(this.value);
 	},
 
 	/**
@@ -117,7 +117,7 @@ enyo.kind({
 					components: [
 						{
 							kind: "onyx.Input",
-							name: "ConfigurationInput",
+							name: "configurationInput",
 							onchange: "updateConfigurationValue"							
 						}
 					]
@@ -136,7 +136,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.labelChanged();
 		
-		this.$.ConfigurationInput.setAttribute("placeholder", this.description);
+		this.$.configurationInput.setAttribute("placeholder", this.description);
 		this.valueChanged();
 		this.inputTipChanged();
 	},
@@ -150,12 +150,12 @@ enyo.kind({
 
 	/** @private */
 	valueChanged: function () {
-		this.$.ConfigurationInput.setValue(this.value);
+		this.$.configurationInput.setValue(this.value);
 	},
 
 	/** @private */
 	inputTipChanged: function () {
-		this.$.ConfigurationInput.setAttribute("title", this.inputTip);
+		this.$.configurationInput.setAttribute("title", this.inputTip);
 	},
 
 	/**
@@ -214,7 +214,7 @@ enyo.kind({
 	components: [
 		{
 			kind: "onyx.Checkbox",
-			name: "ConfigurationCheckBox",
+			name: "configurationCheckBox",
 			classes: "ares-project-properties-drawer-row-check-box-label",
 			onchange: "updateConfigurationValue"
 		},
@@ -241,7 +241,7 @@ enyo.kind({
 	 * @private
 	 */
 	valueChanged: function () {
-		this.$.ConfigurationCheckBox.setChecked(this.value);
+		this.$.configurationCheckBox.setChecked(this.value);
 	},
 
 	/**
@@ -295,7 +295,7 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium",
 			components: [{
 					kind: "onyx.Input",
-					name: "ConfigurationInput",
+					name: "configurationInput",
 					onchange: "updateConfigurationValue"
 				}
 			]
@@ -322,7 +322,7 @@ enyo.kind({
 	 * @private
 	 */
 	valueChanged: function () {
-		this.$.ConfigurationInput.setValue(this.value);
+		this.$.configurationInput.setValue(this.value);
 	},
 
 	/**
@@ -366,7 +366,7 @@ enyo.kind({
 					kind: "onyx.PickerDecorator",
 					components: [
 						{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
-						{kind: "onyx.Picker", name: "ConfigurationPicker", onSelect: "updateConfigurationValue"}
+						{kind: "onyx.Picker", name: "configurationPicker", onSelect: "updateConfigurationValue"}
 					]
 				},
 				{name: "errorMsg", content: "The value must be a number", showing: false, classes: "ares-project-properties-input-error-message"}
@@ -399,7 +399,7 @@ enyo.kind({
 	contentValueChanged: function () {
 		enyo.forEach(this.contentValue, function (inValue) {
 			var itemState = inValue === this.value ? true : false;
-			this.$.ConfigurationPicker.createComponent({content: inValue, active: itemState});
+			this.$.configurationPicker.createComponent({content: inValue, active: itemState});
 		}, this);
 	},
 
@@ -411,11 +411,11 @@ enyo.kind({
 	 * @private
 	 */
 	activatePickerItemByContent: function(inContent){
-		for (var key in this.$.ConfigurationPicker.$) {
-		    if(this.$.ConfigurationPicker.$[key].kind === "onyx.MenuItem"){
-			this.$.ConfigurationPicker.$[key].active = false;
-				if(this.$.ConfigurationPicker.$[key].value === inContent){
-					this.$.ConfigurationPicker.setSelected(this.$.ConfigurationPicker.$[key]);
+		for (var key in this.$.configurationPicker.$) {
+		    if(this.$.configurationPicker.$[key].kind === "onyx.MenuItem"){
+			this.$.configurationPicker.$[key].active = false;
+				if(this.$.configurationPicker.$[key].value === inContent){
+					this.$.configurationPicker.setSelected(this.$.configurationPicker.$[key]);
 				}
 		    }
 		}
@@ -466,7 +466,7 @@ enyo.kind({
 			(function(key) {
 				var itemState = key === this.value ? true : false;
 
-				this.$.ConfigurationPicker.createComponent({
+				this.$.configurationPicker.createComponent({
 					classes: "ares-project-properties-api-version-picker-element",
 					content: key + " / " + Phonegap.UIConfiguration.androidSdkVersions[key], 
 					value: key,
