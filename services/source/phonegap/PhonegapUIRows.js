@@ -13,7 +13,8 @@ enyo.kind({
 		name: undefined,
 		value: undefined,
 		jsonSection: undefined,
-		platform: undefined
+		platform: undefined,
+		description: undefined
 	},
 	components: [
 	],
@@ -37,7 +38,7 @@ enyo.kind({
 	components: [
 		{
 			kind: "onyx.Checkbox",
-			name: "ConfigurationCheckBox",
+			name: "configurationCheckBox",
 			classes: "ares-project-properties-drawer-row-check-box-label",
 			onchange: "updateConfigurationValue"
 		},
@@ -64,7 +65,7 @@ enyo.kind({
 	 * @private
 	 */
 	valueChanged: function () {
-		this.$.ConfigurationCheckBox.setChecked(this.value);
+		this.$.configurationCheckBox.setChecked(this.value);
 	},
 
 	/**
@@ -107,14 +108,22 @@ enyo.kind({
 	},
 	components: [
 		{name: "label", classes: "ares-project-properties-drawer-row-label"},
-		{
-			kind: "onyx.InputDecorator",
-			classes: "ares-project-properties-input-medium",
-			components: [{
-					kind: "onyx.Input",
-					name: "ConfigurationInput",
-					onchange: "updateConfigurationValue"
-				}
+			{
+			kind: "FittableRows",
+			components: [
+				{
+					kind: "onyx.InputDecorator",
+					classes: "ares-project-properties-input-medium",
+					components: [
+						{
+							kind: "onyx.Input",
+							name: "configurationInput",
+							onchange: "updateConfigurationValue"							
+						}
+					]
+				}, 
+
+				{name: "errorMsg", content: "The value must be a number", showing: false, classes: "ares-project-properties-input-error-message"}
 			]
 		}
 	],
@@ -126,7 +135,8 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.labelChanged();
-
+		
+		this.$.configurationInput.setAttribute("placeholder", this.description);
 		this.valueChanged();
 		this.inputTipChanged();
 	},
@@ -140,12 +150,12 @@ enyo.kind({
 
 	/** @private */
 	valueChanged: function () {
-		this.$.ConfigurationInput.setValue(this.value);
+		this.$.configurationInput.setValue(this.value);
 	},
 
 	/** @private */
 	inputTipChanged: function () {
-		this.$.ConfigurationInput.setAttribute("title", this.inputTip);
+		this.$.configurationInput.setAttribute("title", this.inputTip);
 	},
 
 	/**
@@ -170,6 +180,30 @@ enyo.kind({
 });
 
 enyo.kind({
+	name: "Phonegap.ProjectProperties.NumberInputRow",
+	kind: "Phonegap.ProjectProperties.InputRow",
+	events: {
+		onDisableOkButton: ""
+	},
+
+	updateConfigurationValue: function (inSender, inValue) {
+		
+
+		if(!isNaN(inSender.getValue())) {
+			this.$.errorMsg.hide();
+			this.bubble("onEnableOkButton");
+			this.setValue(inSender.getValue());
+		} else {
+			this.$.errorMsg.show();
+			this.bubble("onDisableOkButton");
+		}
+		
+		return true;
+	},
+
+});
+
+enyo.kind({
 	name: "Phonegap.ProjectProperties.BuildOption",
 	kind: "Phonegap.ProjectProperties.Row",
 	classes: "ares-project-properties-drawer-row",
@@ -180,7 +214,7 @@ enyo.kind({
 	components: [
 		{
 			kind: "onyx.Checkbox",
-			name: "ConfigurationCheckBox",
+			name: "configurationCheckBox",
 			classes: "ares-project-properties-drawer-row-check-box-label",
 			onchange: "updateConfigurationValue"
 		},
@@ -207,7 +241,7 @@ enyo.kind({
 	 * @private
 	 */
 	valueChanged: function () {
-		this.$.ConfigurationCheckBox.setChecked(this.value);
+		this.$.configurationCheckBox.setChecked(this.value);
 	},
 
 	/**
@@ -261,7 +295,7 @@ enyo.kind({
 			classes: "ares-project-properties-input-medium",
 			components: [{
 					kind: "onyx.Input",
-					name: "ConfigurationInput",
+					name: "configurationInput",
 					onchange: "updateConfigurationValue"
 				}
 			]
@@ -288,7 +322,7 @@ enyo.kind({
 	 * @private
 	 */
 	valueChanged: function () {
-		this.$.ConfigurationInput.setValue(this.value);
+		this.$.configurationInput.setValue(this.value);
 	},
 
 	/**
@@ -326,11 +360,16 @@ enyo.kind({
 	},
 	components: [
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
-		{
-			kind: "onyx.PickerDecorator",
+		{kind: "FittableRows", 
 			components: [
-				{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
-				{kind: "onyx.Picker", name: "ConfigurationPicker", onSelect: "updateConfigurationValue"}
+				{
+					kind: "onyx.PickerDecorator",
+					components: [
+						{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
+						{kind: "onyx.Picker", name: "configurationPicker", onSelect: "updateConfigurationValue"}
+					]
+				},
+				{name: "errorMsg", content: "The value must be a number", showing: false, classes: "ares-project-properties-input-error-message"}
 			]
 		}
 	],
@@ -360,7 +399,7 @@ enyo.kind({
 	contentValueChanged: function () {
 		enyo.forEach(this.contentValue, function (inValue) {
 			var itemState = inValue === this.value ? true : false;
-			this.$.ConfigurationPicker.createComponent({content: inValue, active: itemState});
+			this.$.configurationPicker.createComponent({content: inValue, active: itemState});
 		}, this);
 	},
 
@@ -372,11 +411,11 @@ enyo.kind({
 	 * @private
 	 */
 	activatePickerItemByContent: function(inContent){
-		for (var key in this.$.ConfigurationPicker.$) {
-		    if(this.$.ConfigurationPicker.$[key].kind === "onyx.MenuItem"){
-			this.$.ConfigurationPicker.$[key].active = false;
-				if(this.$.ConfigurationPicker.$[key].value === inContent){
-					this.$.ConfigurationPicker.setSelected(this.$.ConfigurationPicker.$[key]);
+		for (var key in this.$.configurationPicker.$) {
+		    if(this.$.configurationPicker.$[key].kind === "onyx.MenuItem"){
+			this.$.configurationPicker.$[key].active = false;
+				if(this.$.configurationPicker.$[key].value === inContent){
+					this.$.configurationPicker.setSelected(this.$.configurationPicker.$[key]);
 				}
 		    }
 		}
@@ -427,7 +466,7 @@ enyo.kind({
 			(function(key) {
 				var itemState = key === this.value ? true : false;
 
-				this.$.ConfigurationPicker.createComponent({
+				this.$.configurationPicker.createComponent({
 					classes: "ares-project-properties-api-version-picker-element",
 					content: key + " / " + Phonegap.UIConfiguration.androidSdkVersions[key], 
 					value: key,
@@ -441,9 +480,38 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
+			//Initialize variables containing the values of "android-minSdkVersion" & "android-maxSdkVersion" attributs
+			var minValue = parseInt(this.container.$["android-minSdkVersion"].value, 10);
+			var maxValue = parseInt(this.container.$["android-maxSdkVersion"].value, 10);
+			
+			//Initialize variable containing the selected value
+			var selectedValue = parseInt(inValue.selected.value, 10);
+			
+			if (this.name === "android-maxSdkVersion" && minValue > selectedValue ||
+				this.name === "android-minSdkVersion" && maxValue < selectedValue) {
+				
+				//Set the content of the error message
+				this.container.$["android-minSdkVersion"].$.errorMsg.setContent("Incorrect API level interval");
+				this.container.$["android-maxSdkVersion"].$.errorMsg.setContent("Incorrect API level interval");
+				
+				//Show the error message
+				this.container.$["android-minSdkVersion"].$.errorMsg.show();
+				this.container.$["android-maxSdkVersion"].$.errorMsg.show();
 
-		this.setValue(inValue.selected.value);
+				//Bubble an event to disable to Ok button of the Project properties pop-up
+				this.bubble("onDisableOkButton");
+			
+			} else {
+				//Hide the error message
+				this.container.$["android-minSdkVersion"].$.errorMsg.hide();
+				this.container.$["android-maxSdkVersion"].$.errorMsg.hide();
 
+				//Bubble an event to enable the Ok button of the project properties pop-up
+				this.bubble("onEnableOkButton");
+
+				this.setValue(inValue.selected.value);							
+			}
+			
 		return true;
 	},
 
@@ -489,7 +557,7 @@ enyo.kind({
 				{
 					kind: "onyx.Input",
 					name: "AndroidImgPath",
-					classes: "enyo-unselectable"
+					disabled: true
 				}
 			]
 		},
@@ -640,28 +708,34 @@ enyo.kind({
 		height: "",
 		width: "",
 
-		inputTip: "",
+		description: undefined,
 		activated: false,
 		status: false,
-		buttonTip: ""
+		buttonTip: "",
 	},
 	components: [
 		{
 			name: "label",
 			classes: "ares-project-properties-drawer-row-label"
 		},
-		{
-			kind: "onyx.InputDecorator",
-			classes: "ares-project-properties-input-medium",
-			components: [{
-					kind: "onyx.Input",
-					name: "ImgPath",
-					classes: "enyo-unselectable"
-				}
+			{
+			kind: "FittableRows",
+			components: [
+				{
+				kind: "onyx.InputDecorator",
+				classes: "ares-project-properties-input-medium",
+				components: [{
+						kind: "onyx.Input",
+						name: "ImgPath",
+						disabled: true
+					}
+				]
+			},
+				{name: "errorMsg", showing: false, classes: "ares-project-properties-input-error-message"}
 			]
 		},
 		{kind: "onyx.IconButton", name:"ImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"},
-		{content: "Length", classes: "ares-project-properties-drawer-row-attribut-label"},
+		{content: "Height", classes: "ares-project-properties-drawer-row-attribut-label"},
 		{
 			kind: "onyx.InputDecorator",
 			classes: "ares-project-properties-input-small",
@@ -701,6 +775,8 @@ enyo.kind({
 
 		this.heightChanged();
 		this.widthChanged();
+		this.$.ImgWidth.setAttribute("placeholder", this.description);
+		this.$.ImgHeight.setAttribute("placeholder", this.description);
 	},
 
 	/**
@@ -715,14 +791,30 @@ enyo.kind({
 	 * @private
 	 */
 	heightChanged: function(){
-		this.$.ImgHeight.setValue(this.height || "");
+		if(!isNaN(this.$.ImgHeight.value) && !isNaN(this.$.ImgWidth.value)){
+			this.$.errorMsg.hide();
+			this.$.ImgHeight.setValue(this.height || "");
+			this.bubble("onEnableOkButton", this);
+		} else{
+			this.$.errorMsg.setContent("Height and Width values must be numbers");
+			this.$.errorMsg.show();
+			this.bubble("onDisableOkButton", this);
+		}
 	},
 
 	/**
 	 * @private
 	 */
 	widthChanged: function(){
-		this.$.ImgWidth.setValue(this.width  || "");
+		if(!isNaN(this.$.ImgHeight.value) && !isNaN(this.$.ImgWidth.value)){
+			this.$.errorMsg.hide();
+			this.$.ImgHeight.setValue(this.width || "");
+			this.bubble("onEnableOkButton");
+		} else{
+			this.$.errorMsg.setContent("Height and Width values must be numbers");
+			this.$.errorMsg.show();
+			this.bubble("onDisableOkButton");
+		}
 	},
 
 	/**
