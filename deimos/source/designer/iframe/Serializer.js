@@ -128,7 +128,7 @@ enyo.kind({
 		if (this.noserialize[inProp] === 1) {
 			return false;
 		} else {
-			var value = this.getSerializerOptions(inKind, inProp, "exclude");
+			var value = this.getSerializerOptions(inKind, "exclude", inProp);
 			if (value === undefined) {
 				return true;
 			} else {
@@ -137,7 +137,7 @@ enyo.kind({
 		}
 	},
 	// @protected
-	getSerializerOptions: function(inKind, inPropName, inOptName) {
+	getSerializerOptions: function(inKind, inOptName, inPropName) {
 		try {
 			return this.serializerOptions[inKind][inOptName][inPropName];
 		} catch(error) {
