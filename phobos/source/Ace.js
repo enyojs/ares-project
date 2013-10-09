@@ -504,5 +504,9 @@ enyo.kind({
 		if (this.editor !== undefined) {
 			this.editor.resize();
 		}
+	},
+	/** @public */
+	requestSelectedText: function() {
+		return this.editor.session.getTextRange(this.editor.getSelectionRange());
 	}
 });
