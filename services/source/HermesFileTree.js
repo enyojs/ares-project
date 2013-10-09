@@ -25,18 +25,51 @@ enyo.kind({
 		onItemDragenter: "itemDragenter",
 		onItemDragover: "itemDragover",
 		onItemDragleave: "itemDragleave",
+		onItemUp: "itemUp",
 		onItemDrop: "itemDrop",
 		onItemDragend: "itemDragend",
 		onNodeDblClick: "nodeDblClick",
+		onNodeRightClick: "nodeRightClick",
 		onAdjustScroll: "adjustScroll"
 	},
 	published: {
 		serverName: "",
 		// allows filetree to have draggable subnodes or not (not per default).
-		dragAllowed: false
+		dragAllowed: false,
+		menuAllowed: false
 	},
 	fit:true,
 	components: [
+		// Hermes contextual menu
+		{kind: "onyx.MenuDecorator", name: "hermesMenu", classes: "hermesMenu", onSelect: "hermesMenuItemSelected", components: [
+			{kind: "onyx.Menu", name: "hermesMenuList", classes: "hermesMenu-list", maxHeight: "100%", components: [
+				{name: "newFolderItem", value: "newFolderClick", floating: true, classes: "hermesMenu-button", components: [
+					{kind: "onyx.IconButton", src: "$harmonia/images/folder_new_16.png"},
+					{content: $L("New Folder...")}
+				]},
+				{name: "newFileDivider", classes: "onyx-menu-divider hermesMenu-button"},
+				{name: "newFileItem", value: "newFileClick", classes: "hermesMenu-button", components: [
+					{kind: "onyx.IconButton", src: "$harmonia/images/document_new_16.png"},
+					{content: $L("New File...")}
+				]},
+				{name: "renameDivider", classes: "onyx-menu-divider hermesMenu-button"},
+				{name: "renameItem", value: "renameClick", classes: "hermesMenu-button", components: [
+					{kind: "onyx.IconButton", src: "$harmonia/images/document_edit_16.png"},
+					{content: $L("Rename...")}
+				]},
+				{name: "copyDivider", classes: "onyx-menu-divider hermesMenu-button"},
+				{name: "copyItem", value: "copyClick", classes: "hermesMenu-button", components: [
+					{kind: "onyx.IconButton", src: "$harmonia/images/copy_16.png"},
+					{content: $L("Copy...")}
+				]},
+				{name: "deleteDivider", classes: "onyx-menu-divider hermesMenu-button"},
+				{name: "deleteItem", value: "deleteClick", classes: "hermesMenu-button", components: [
+					{kind: "onyx.IconButton", src: "$harmonia/images/document_delete_16.png"},
+					{content: $L("Delete...")}
+				]}
+			]}
+		]},
+
 		{kind: "onyx.Toolbar", name: "hermesToolbar", classes:"ares-small-toolbar title-gradient", components: [
 			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 				{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
@@ -93,6 +126,8 @@ enyo.kind({
 	selectedNode: null,
 	
 	debug: false,
+	debugMenu: false, // used to deactivate Hermes right-click menu and allow the one browser one
+
 	packages: false,
 	
 	draggedNode: null,
@@ -112,7 +147,7 @@ enyo.kind({
 		this.createComponent(
 			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable hermesFileTree-root",
 				showing: false, content: "server", icon: "$services/assets/images/antenna.png",
-				expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed
+				expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed, menuAllowed: this.menuAllowed
 			}
 		);
 	},
@@ -214,6 +249,12 @@ enyo.kind({
 	},
 	/** @private */
 	itemDragleave: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	/** @private */
+	itemUp: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		
 		return true;
@@ -576,7 +617,74 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
-	
+	/** @private */
+	nodeRightClick: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+
+		if (!this.menuAllowed) {
+			return true;
+		}
+		
+		var node = inEvent.originator;
+
+		// activate contextual menu only on hermesNode caption
+		if (node.name !== "caption") {
+			return true;
+		}
+
+		// look for related hermesNode
+		if (node.kind !== "hermes.Node") {
+			node = node.parent;
+		}
+
+		if (node.kind !== "hermes.Node") {
+			return true;
+		}
+
+		node.doNodeTap();
+
+		// determine the shift between harmonia and ares
+		var LeftPanelTranslation = 0;
+		var regexp = /translateX\((.*)px\)/;
+		var t;
+		if (enyo.platform.firefox) {
+			t = this.owner.node.style["transform"];
+		} else {
+			t = this.owner.node.style["webkitTransform"];
+		}
+		var results = regexp.exec(t); 
+		if (results) {
+			LeftPanelTranslation = results[1];
+		}
+
+		this.$.hermesMenu.applyStyle("position", "absolute");
+		this.$.hermesMenu.applyStyle("z-index", "999");
+		this.$.hermesMenu.applyStyle("left", (inEvent.clientX - this.node.offsetLeft - LeftPanelTranslation) + "px");
+		this.$.hermesMenu.applyStyle("top", (inEvent.clientY - this.node.offsetTop) + "px");
+
+		this.$.hermesMenu.show();
+		this.$.hermesMenuList.show();
+		
+		// handled here (don't bubble)
+		return true;
+	},
+	/**
+	 * Generic event handler
+	 * @private
+	 */
+	hermesMenuItemSelected: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		
+		var fn = inEvent && inEvent.selected && inEvent.selected.value;
+		if (typeof this[fn] === 'function') {
+			this[fn]();
+		} else {
+			this.trace("*** BUG: '", fn, "' is not a known function");
+		}
+
+		// handled here (don't bubble)
+		return true;
+	},
 	select: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 
@@ -1227,10 +1335,31 @@ enyo.kind({
 			this.$.deleteFileButton.setDisabled(this.selectedNode.file.isServer);
 			this.$.copyFileButton.setDisabled(this.selectedNode.file.isServer);
 			this.$.renameFileButton.setDisabled(this.selectedNode.file.isServer);
+			if (this.selectedNode.file.isServer) {
+				this.$.deleteDivider.hide();
+				this.$.deleteItem.hide();
+				this.$.copyDivider.hide();
+				this.$.copyItem.hide();
+				this.$.renameDivider.hide();
+				this.$.renameItem.hide();
+			} else {
+				this.$.deleteDivider.show();
+				this.$.deleteItem.show();
+				this.$.copyDivider.show();
+				this.$.copyItem.show();
+				this.$.renameDivider.show();
+				this.$.renameItem.show();
+			}
 		} else {
 			this.$.copyFileButton.setDisabled(true);
 			this.$.deleteFileButton.setDisabled(true);
 			this.$.renameFileButton.setDisabled(true);
+			this.$.deleteDivider.hide();
+			this.$.deleteItem.hide();
+			this.$.copyDivider.hide();
+			this.$.copyItem.hide();
+			this.$.renameDivider.hide();
+			this.$.renameItem.hide();
 		}
 	},
 
