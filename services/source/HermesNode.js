@@ -16,11 +16,13 @@ enyo.kind({
 		onItemDragenter: "",
 		onItemDragover: "",
 		onItemDragleave: "",
+		onItemUp: "",
 		onItemDrop: "",
 		onItemDragend: "",
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
+		onNodeRightClick: "",
 		onAdjustScroll: ""
 	},
 	published: {
@@ -35,6 +37,7 @@ enyo.kind({
 		ondragenter: "dragenter",
 		ondragover: "dragover",
 		ondragleave: "dragleave",
+		onup: "up",
 		ondrop: "drop",
 		ondragend: "dragend"
 	},
@@ -47,14 +50,32 @@ enyo.kind({
 	onlyIconExpands: true,
 	
 	debug: false,
-	
+	debugContextMenu: false, // used to deactivate Hermes right-click menu and allow the browser one on the caption item of the node
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
+
+		enyo.dispatcher.listen(document, "contextmenu", enyo.bind(this, "contextMenu"));
+	},
+	contextMenu: function(inEvent) {
+		this.trace("inEvent", inEvent);
+		
+		if (inEvent.target.id.lastIndexOf("_caption") >= 0 && !this.debugMenu) {
+			inEvent.preventDefault();
+		}
+
+		return true;
 	},
 	/** @private */
 	down: function(inSender, inEvent) {
-		this.doItemDown(inEvent);
+		switch (inEvent.which) {
+			case 1:
+				this.doItemDown(inEvent);
+				break;
+			default:
+				break;
+		}
+		
 		return true;
 	},
 	/** @private */
@@ -91,6 +112,20 @@ enyo.kind({
 		}
 		
 		this.doItemDragleave(inEvent);
+		return true;
+	},
+	/** @private */
+	up: function (inSender, inEvent) {
+		switch (inEvent.which) {
+			case 1:
+				this.doItemUp(inEvent);
+				break;
+			case 3:
+				this.doNodeRightClick(inEvent);
+				break;
+			default:
+				break;
+		}
 		return true;
 	},
 	/** @private */
