@@ -52,17 +52,15 @@ enyo.kind({
 					{kind: "onyx.IconButton", src: "$harmonia/images/document_new_16.png"},
 					{content: $L("New File...")}
 				]},
-				{name: "renameDivider", classes: "onyx-menu-divider hermesMenu-button"},
+				{name: "nodeDivider", classes: "onyx-menu-divider hermesMenu-button"},
 				{name: "renameItem", value: "renameClick", classes: "hermesMenu-button", components: [
 					{kind: "onyx.IconButton", src: "$harmonia/images/document_edit_16.png"},
 					{content: $L("Rename...")}
 				]},
-				{name: "copyDivider", classes: "onyx-menu-divider hermesMenu-button"},
 				{name: "copyItem", value: "copyClick", classes: "hermesMenu-button", components: [
 					{kind: "onyx.IconButton", src: "$harmonia/images/copy_16.png"},
 					{content: $L("Copy...")}
 				]},
-				{name: "deleteDivider", classes: "onyx-menu-divider hermesMenu-button"},
 				{name: "deleteItem", value: "deleteClick", classes: "hermesMenu-button", components: [
 					{kind: "onyx.IconButton", src: "$harmonia/images/document_delete_16.png"},
 					{content: $L("Delete...")}
@@ -1336,29 +1334,23 @@ enyo.kind({
 			this.$.copyFileButton.setDisabled(this.selectedNode.file.isServer);
 			this.$.renameFileButton.setDisabled(this.selectedNode.file.isServer);
 			if (this.selectedNode.file.isServer) {
-				this.$.deleteDivider.hide();
+				this.$.nodeDivider.hide();
 				this.$.deleteItem.hide();
-				this.$.copyDivider.hide();
 				this.$.copyItem.hide();
-				this.$.renameDivider.hide();
 				this.$.renameItem.hide();
 			} else {
-				this.$.deleteDivider.show();
+				this.$.nodeDivider.show();
 				this.$.deleteItem.show();
-				this.$.copyDivider.show();
 				this.$.copyItem.show();
-				this.$.renameDivider.show();
 				this.$.renameItem.show();
 			}
 		} else {
 			this.$.copyFileButton.setDisabled(true);
 			this.$.deleteFileButton.setDisabled(true);
 			this.$.renameFileButton.setDisabled(true);
-			this.$.deleteDivider.hide();
+			this.$.nodeDivider.hide();
 			this.$.deleteItem.hide();
-			this.$.copyDivider.hide();
 			this.$.copyItem.hide();
-			this.$.renameDivider.hide();
 			this.$.renameItem.hide();
 		}
 	},
