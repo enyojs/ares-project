@@ -54,17 +54,6 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
-
-		enyo.dispatcher.listen(document, "contextmenu", enyo.bind(this, "contextMenu"));
-	},
-	contextMenu: function(inEvent) {
-		this.trace("inEvent", inEvent);
-		
-		if (inEvent.target.id.lastIndexOf("_caption") >= 0 && !this.debugMenu) {
-			inEvent.preventDefault();
-		}
-
-		return true;
 	},
 	/** @private */
 	down: function(inSender, inEvent) {

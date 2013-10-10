@@ -124,7 +124,7 @@ enyo.kind({
 	selectedNode: null,
 	
 	debug: false,
-	debugMenu: false, // used to deactivate Hermes right-click menu and allow the one browser one
+	debugContextMenu: false, //	used to deactivate Hermes right-click menu and allow the one browser one
 
 	packages: false,
 	
@@ -145,9 +145,39 @@ enyo.kind({
 		this.createComponent(
 			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable hermesFileTree-root",
 				showing: false, content: "server", icon: "$services/assets/images/antenna.png",
-				expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed, menuAllowed: this.menuAllowed
+				expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed
 			}
 		);
+
+		this.menuAllowedChanged();
+	},
+	menuAllowedChanged: function(oldValue) {
+		this.trace(oldValue, "=>", this.menuAllowed);
+		if (this.menuAllowed) {
+			enyo.dispatcher.listen(document, "contextmenu", enyo.bind(this, "contextMenu"));
+		} else {
+			enyo.dispatcher.stopListening(document, "contextmenu", enyo.bind(this, "contextMenu"));
+		}
+	},
+	contextMenu: function(inEvent) {
+		this.trace("inEvent", inEvent);
+		
+		var control = enyo.dispatcher.findDispatchTarget(inEvent.target);
+		
+		if (control.name !== "caption" || control.owner.kind !== "hermes.Node") {
+			return true;
+		}
+
+		while (control.kind !== "HermesFileTree") {
+			control = control.owner;
+		}
+		
+		if (control.get("menuAllowed") && !control.get("debugContextMenu")) {
+			inEvent.preventDefault();
+			return true;
+		}
+
+		return true;
 	},
 	/** @private */
 	itemDown: function(inSender, inEvent) {
