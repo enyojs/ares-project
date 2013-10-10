@@ -1,4 +1,4 @@
-/*global ServiceRegistry, ProjectConfig, ares */
+/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry */
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -55,7 +55,7 @@ enyo.kind({
 	 * @param {Object} changedFile
 	 */
 	refreshFile: function(changedFile) {
-		this.owner.componentsRegistry.harmonia.refreshFile(changedFile);
+		ComponentsRegistry.getComponent("harmonia").refreshFile(changedFile);
 	},
 	scanProjectAction: function(inSender, inEvent) {
 		this.$.projectWizardScan.setHeaderText('Select a directory containing one or more project.json files');
@@ -97,7 +97,7 @@ enyo.kind({
 		var project = inEvent.project;
 		// Pass service definition & configuration to Harmonia
 		// & consequently to HermesFileTree
-		this.owner.componentsRegistry.harmonia.setProject(project);
+		ComponentsRegistry.getComponent("harmonia").setProject(project);
 		// FIXME: temporary hack to create config.json on the
 		// fly if needed... would be better to create/load it
 		// when the workspace is loaded & when a new project
@@ -117,7 +117,7 @@ enyo.kind({
 		this.currentProject = project;
 	},
 	projectRemoved: function(inSender, inEvent) {
-		this.owner.componentsRegistry.harmonia.setProject(null);
+		ComponentsRegistry.getComponent("harmonia").setProject(null);
 	},
 	/**
 	 * Event handler: handle build project action (select provider & run action)

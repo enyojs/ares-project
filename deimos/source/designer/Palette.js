@@ -3,11 +3,11 @@ enyo.kind({
 	name: "CategoryItem",
 	components: [
 		{classes: "palette-category", components: [
-			{ontap:"toggleDrawer", classes: "palette-category-name", components: [
+			{ontap: "toggleDrawer", classes: "palette-category-name", components: [
 				{name: "indicator", classes: "indicator turned"},
-				{name: "name", tag:"span"}
+				{name: "name", tag: "span"}
 			]},
-			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
+			{kind: "onyx.Drawer", name: "drawer", open:true, components: [
 				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
 					{kind: "PaletteItem"}
 				]}
@@ -86,10 +86,9 @@ enyo.kind({
 					{kind: "CategoryItem"}
 				]}
 			]},
-			// FIXME ENYO-3021: component hidden until ENYO-1887 implementation
-			{kind:"onyx.InputDecorator", showing: false, style:"width:100%; margin-top:10px;", layoutKind:"FittableColumnsLayout", components: [
-				{kind: "onyx.Input", fit:true, placeholder: "filter"},
-				{kind: "onyx.Icon", src:"$deimos/images/search-input-search.png", style:"height:20px;"}
+			{kind: "onyx.InputDecorator", style: "width:100%; margin-top:10px;", layoutKind: "FittableColumnsLayout", components: [
+				{kind: "onyx.Input", name: "filterPalette", fit:true, placeholder: "filter", oninput: "paletteFiltering"},
+				{kind: "onyx.Icon", name: "filterPaletteIcon", src: "$deimos/images/search-input-search.png", style: "height:20px;", ontap: "resetFilter"}
 			]}
 		]}
 	],
@@ -129,13 +128,30 @@ enyo.kind({
 	 */
 	projectIndexerChanged: function() {
 		this.trace("projectIndexerChanged: rebuilt the palette ");
+		
 		var catchAllPalette = this.buildCatchAllPalette();
-		this.palette = catchAllPalette.concat(this.projectIndexer.design.palette || []);
+		var allPalette = ares.clone(catchAllPalette.concat(this.projectIndexer.design.palette || []));
+		
+		var filterString = this.$.filterPalette.getValue().toLowerCase();
+		if (filterString !== "") {
+			var k;
+			enyo.forEach(allPalette, function(category) {
+				for (k = 0; k < category.items.length; k++) {
+					if (category.items[k].name.toLowerCase().indexOf(filterString) == -1) {
+						category.items.splice(k, 1);
+						k--;
+					}
+				}
+			}, this);
+		}
+		
+		this.palette = allPalette;
 		this.palette.sort(function(a,b) {
 			return (a.order || 0) - (b.order || 0);
 		});
-		this.$.list.count = this.palette.length;
-		this.$.list.build();
+		// count reset must be forced
+		this.$.list.set("count", 0);
+		this.$.list.set("count", this.palette.length);
 	},
 	/**
 	 * Builds "catch-all palette" entries.  The standard palette comes from the projectIndexer's
@@ -212,6 +228,31 @@ enyo.kind({
 				catchAllPalette.push(catchAllCategories[p]);
 			}
 		}
+		
 		return catchAllPalette;
+	},
+	/** @private */
+	paletteFiltering: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		
+		if (this.$.filterPalette.getValue() === "") {
+			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-search.png");
+		} else {
+			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-cancel.png");
+		}
+		this.projectIndexerChanged();
+
+		return true;
+	},
+	/** @private */
+	resetFilter: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		
+		if (this.$.filterPalette.getValue() !== "") {
+			this.$.filterPalette.setValue("");
+			this.paletteFiltering();
+		}
+
+		return true;
 	}
 });
