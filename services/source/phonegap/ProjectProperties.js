@@ -151,7 +151,8 @@ enyo.kind({
 	kind: "Ares.ProjectProperties",
 	debug: false,
 	published: {
-		config: {}
+		config: {},
+		project: undefined
 	},
 	events: {
 		onError: "",
@@ -204,6 +205,7 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
+		this.$.appIdSelector.setProject(this.project);
 		this.createAllDrawers();
 	},
 
@@ -320,7 +322,8 @@ enyo.kind({
 	setProjectConfig: function (config) {
 		this.trace("Project config:", config);
 		this.setConfig(config);
-		this.$.appIdSelector.setSelectedAppId(config.appId || '');		
+		this.$.appIdSelector.setSelectedAppId(config.appId || '');
+		this.$.appIdSelector.setProject(this.project);
 		config.targets = config.targets || {};
 
 
@@ -561,7 +564,8 @@ enyo.kind({
 	published: {
 		userData: undefined,
 		selectedAppId: undefined,
-		selectedTitle: undefined
+		selectedTitle: undefined,
+		project: undefined
 	},
 
 	components: [
@@ -704,7 +708,15 @@ enyo.kind({
 		appId: "",
 		buildStatusData: undefined,
 		phongapUrl: "https://build.phonegap.com",
-		provider: undefined 
+		provider: undefined, 
+		selectedPlatform: undefined,
+		extensions: {
+			"android": "apk",
+			"ios": "ipa",
+			"webos": "ipk",
+			"winphone": "xap",
+			"blackberry": "jad"
+		}
 	},
 	components: [
 		{
@@ -730,7 +742,17 @@ enyo.kind({
 					components: [
 						{name: "hideStatusContainer", kind: "onyx.IconButton", src: "$project-view/assets/images/close-button-16x16.png", classes: "ares-project-properties-hide-status-button", ontap:"hideMessageContainer"},
 						{name: "statusMessage"},
-						{name: "downloadLink", content: "ddl link", tag: "a", shown: false, classes: "ares-project-properties-dl-link"}
+						{name: "downloadLink", content: "ddl link", tag: "a", shown: false, classes: "ares-project-properties-dl-link", ontap: "checkDownload"},
+						{
+							name: "downloadStatusContainer", kind: "FittableColumns", 
+							components: [
+								{name: "statusRow02", content: "Download confimation"},
+								{name: "launchDownload", kind: "onyx.Button", content: "Yes", showing: false},
+								{name: "cancelDownload", kind: "onyx.Button", content: "No", showing: false},
+							]
+						},
+						
+						{name: "statusRow03", content: "Download Progress", showing: false}
 					]
 				}
 									
@@ -777,25 +799,19 @@ enyo.kind({
 
 	/**@private*/
 	showStatusMessage: function(inSender, inEvent){
-		var extensions = {
-			"android": "apk",
-			"ios": "ipa",
-			"webos": "ipk",
-			"winphone": "xap",
-			"blackberry": "jad"
-		};
-
+		
 		this.$.messageContainer.show();
+		this.$.downloadStatusContainer.hide();
 
 
 		if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "complete") {
-			this.$.statusMessage.setContent("Download link: ");
-			
+			this.$.statusMessage.setContent("");
+			this.setSelectedPlatform(inSender.platform);
+
 			if (this.buildStatusData.download[inSender.platform] !== undefined && 
 				this.buildStatusData.title !== undefined) {
 				
-				this.$.downloadLink.setAttribute("href", this.phongapUrl + this.buildStatusData.download[inSender.platform]);
-				this.$.downloadLink.setContent(this.buildStatusData.title + "." + extensions[inSender.platform]);
+				this.$.downloadLink.setContent("Download application");
 				this.$.downloadLink.show();
 				this.$.downloadLink.render();
 			} else {
@@ -826,6 +842,99 @@ enyo.kind({
 		}
 	return true; //stop the propagation of the event
 
+	},
+
+	/**
+	 * 
+	 * @private
+	 */
+	checkDownload: function(inSender, inEvent) {
+
+		var provider = Phonegap.ProjectProperties.getProvider();
+		var childrenList, phonegapFolderContent;
+
+		// Reconstruct the name of the package in the same way as done in bdPhonegap.
+			var packageName = this.buildStatusData.package + "_" + this.buildStatusData.version + "." + (this.extensions[this.selectedPlatform] || "bin");
+		
+
+		// get the instance describing the project root node.
+		var projectConfig = this.owner.getProject();
+
+		/**
+		 * Return the list of the built applications in the file '$/target/phonegap'
+		 * @param  {Array} inArray contains instances of the sub-nodes of the selected project
+		 * @return {Array}         list of the files contained in the project folder '$/target/phonegap'
+		 * @private
+		 */
+		var getPhonegapFolderContent = function (inArray) {
+			var phonegapFolderContent = undefined; 
+			enyo.forEach(inArray, function(child){
+				if (child.isDir && child.name === "target") {
+					phonegapFolderContent = child.children[0].children;					
+				}
+			}, this);
+
+			return phonegapFolderContent;
+		};
+
+		/**
+		 * @param  {Array} inArray meta-data on the files existing in the folder "$/target/phonegap"
+		 * @return {boolean}         "true" if the package for the selected platfrom existe in "$/target/phonegap", false otherwise.
+		 * @private
+		 */
+		var verifyPackage = function(inArray) {
+
+			var packageAlreadyExist = false;
+			enyo.forEach(inArray, function (packageInstance) {
+				if (packageInstance.name === packageName) {
+					packageAlreadyExist = true;
+				}				
+			}, this);
+
+			return packageAlreadyExist;
+		};
+		
+		
+		// Test if a project is selected from the project list
+		if (projectConfig !== undefined) {
+			
+			var req = projectConfig.service.propfind(projectConfig.folderId, 3);			
+			req.response(this, function(inSender, inFile) {
+				childrenList = inFile.children;				
+				phonegapFolderContent = getPhonegapFolderContent.call(this, childrenList);
+
+				if(verifyPackage.call(this, phonegapFolderContent)) {
+				
+					this.$.downloadStatusContainer.show();
+					this.$.statusRow02.setContent("Override the package " + packageName);
+					
+					this.$.launchDownload.show();
+					this.$.cancelDownload.show();
+
+				} else {
+					
+					this.$.downloadStatusContainer.show();
+
+					this.$.statusRow02.setContent("Downloading the package" + packageName + "");
+					this.$.launchDownload.hide();
+					
+					this.$.cancelDownload.hide();
+					this.$.downloadLink.render();
+				}
+			});			
+		}		
+	},	
+
+	/**
+	 * Callback function to be sent to {Build.js}.
+	 * @private
+	 */
+	getPackage: function(err, inPackageState) {
+		if (err) {
+			this.warn("err:", err);
+		} else {
+			this.setBuildStatusData(inBuildStatusData.user);
+		}
 	},
 
 	/**@private*/

@@ -401,6 +401,9 @@ enyo.kind({
 			this.targetProject = target ;
 			this.$.propertiesWidget.setTargetProject(target);
 
+			// Pass the configuration of the selected project to the panel "Phonegap Build"
+			this.$.propertiesWidget.$.phonegapDrawer.$.phonegap.setProject(target.attributes);
+
 			this.$.propertiesWidget.setupModif();
 			this.$.propertiesWidget.preFill(config.data);
 
