@@ -850,7 +850,6 @@ enyo.kind({
 	 */
 	checkDownload: function(inSender, inEvent) {
 
-		var provider = Phonegap.ProjectProperties.getProvider();
 		var childrenList, phonegapFolderContent;
 
 		// Reconstruct the name of the package in the same way as done in bdPhonegap.
@@ -867,7 +866,7 @@ enyo.kind({
 		 * @private
 		 */
 		var getPhonegapFolderContent = function (inArray) {
-			var phonegapFolderContent = undefined; 
+			var phonegapFolderContent; 
 			enyo.forEach(inArray, function(child){
 				if (child.isDir && child.name === "target") {
 					phonegapFolderContent = child.children[0].children;					
@@ -924,18 +923,6 @@ enyo.kind({
 			});			
 		}		
 	},	
-
-	/**
-	 * Callback function to be sent to {Build.js}.
-	 * @private
-	 */
-	getPackage: function(err, inPackageState) {
-		if (err) {
-			this.warn("err:", err);
-		} else {
-			this.setBuildStatusData(inBuildStatusData.user);
-		}
-	},
 
 	/**@private*/
 	hideMessageContainer: function() {
