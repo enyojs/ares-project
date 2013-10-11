@@ -520,16 +520,16 @@ enyo.kind({
 		this.$.errorPopup.raise(inEvent);
 	},
 	showErrorTooltip: function(inSender, inEvent){
-		this.componentsRegistry.designerPanels.$.designerTooltipBroken.reset("Designer");
-		this.componentsRegistry.designerPanels.$.designerButtonBroken.setDisabled(false);
-		this.componentsRegistry.designerPanels.$.designerTooltipBroken.raise(inEvent);
+		ComponentsRegistry.getComponent("designerPanels").$.designerTooltipBroken.reset("Designer");
+		ComponentsRegistry.getComponent("designerPanels").$.designerButtonBroken.setDisabled(false);
+		ComponentsRegistry.getComponent("designerPanels").$.designerTooltipBroken.raise(inEvent);
 	},
 	resetErrorTooltip: function(inSender, inEvent){
-		this.componentsRegistry.designerPanels.$.designerTooltipBroken.reset("Designer");
-		this.componentsRegistry.designerPanels.$.designerButtonBroken.setDisabled(true);	
+		ComponentsRegistry.getComponent("designerPanels").$.designerTooltipBroken.reset("Designer");
+		ComponentsRegistry.getComponent("designerPanels").$.designerButtonBroken.setDisabled(true);	
 	},
 	showErrorFromDesignerBroken: function(){
-		this.showError("",this.componentsRegistry.designerPanels.$.designerTooltipBroken.error);
+		this.showError("",ComponentsRegistry.getComponent("designerPanels").$.designerTooltipBroken.error);
 	},
 	showSignInErrorPopup : function(inEvent) {
 		this.$.signInErrorPopup.raise(inEvent);
