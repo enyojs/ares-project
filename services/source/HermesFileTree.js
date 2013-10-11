@@ -29,7 +29,7 @@ enyo.kind({
 		onItemDrop: "itemDrop",
 		onItemDragend: "itemDragend",
 		onNodeDblClick: "nodeDblClick",
-		onNodeRightClick: "nodeRightClick",
+		//onNodeRightClick: "nodeRightClick",
 		onAdjustScroll: "adjustScroll"
 	},
 	published: {
@@ -162,7 +162,8 @@ enyo.kind({
 	contextMenu: function(inEvent) {
 		this.trace("inEvent", inEvent);
 		
-		var control = enyo.dispatcher.findDispatchTarget(inEvent.target);
+		var target = enyo.dispatcher.findDispatchTarget(inEvent.target),
+			control = target;
 		
 		if (control.name !== "caption" || control.owner.kind !== "hermes.Node") {
 			return true;
@@ -174,6 +175,7 @@ enyo.kind({
 		
 		if (control.get("menuAllowed") && !control.get("debugContextMenu")) {
 			inEvent.preventDefault();
+			this.nodeRightClick(target, inEvent);
 			return true;
 		}
 
@@ -648,12 +650,12 @@ enyo.kind({
 	/** @private */
 	nodeRightClick: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
-
+		
 		if (!this.menuAllowed) {
 			return true;
 		}
 		
-		var node = inEvent.originator;
+		var node = inSender;
 
 		// activate contextual menu only on hermesNode caption
 		if (node.name !== "caption") {

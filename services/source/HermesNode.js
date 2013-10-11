@@ -109,9 +109,6 @@ enyo.kind({
 			case 1:
 				this.doItemUp(inEvent);
 				break;
-			case 3:
-				this.doNodeRightClick(inEvent);
-				break;
 			default:
 				break;
 		}
