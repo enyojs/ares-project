@@ -19,7 +19,8 @@ enyo.kind({
 				]},
 				{name: "designerDecorator", kind: "onyx.TooltipDecorator", components: [
 					{name: "designerButton", kind: "onyx.IconButton", src: "assets/images/designer.png", ontap: "designerAction"},
-					{kind: "onyx.Tooltip", content: $L("Designer")}
+					{name: "designerButtonBroken", kind: "onyx.IconButton", src: "assets/images/designer_broken.png", ontap: "designerBroken"},
+					{name: "designerTooltipBroken", kind: "Ares.ErrorTooltip", content: $L("Designer")}
 				]}
 			]},
 			{name:"deimosControls", kind: "FittableColumns", fit:true,  classes: "onyx-toolbar-inline", components:[
@@ -73,7 +74,8 @@ enyo.kind({
 	events: {
 		onRegisterMe: "",
 		onMovePanel:"",
-		onSavePreviewAction:""
+		onSavePreviewAction:"",
+		onDesignerBroken: ""
 	},
 	published: {
 		panelIndex: 2,
@@ -115,8 +117,12 @@ enyo.kind({
 			this.manageControls(true);
 		}
 	},
+	designerBroken: function(){
+		this.doDesignerBroken();
+	},
 	enableDesignerButton: function(enable) {
-		this.$.designerButton.setDisabled(! enable) ;
+		this.$.designerButton.setShowing(enable);
+		this.$.designerButtonBroken.setShowing(! enable);
 	},
 	userSyntaxErrorPop: function(){
 		this.$.userErrorPopup.raise({msg: $L("Designer cannot work on a file with a syntax error. Please fix the error highlighted in code editor before launching the designer."), title: $L("Syntax Error")});

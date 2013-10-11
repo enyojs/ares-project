@@ -8,7 +8,11 @@ enyo.kind({
 		fullAnalysisDone: false // true when done *and* successfull
 	},
 	events: {
-		onError: '',
+		onErrorTooltip: '',
+		onErrorTooltipReset: ''
+	},
+	handlers:{
+		onError: 'raiseErrorTooltip',
 	},
 	components: [
 		{
@@ -64,6 +68,8 @@ enyo.kind({
 		}
 	},
 	forceFullAnalysis: function() {
+		//reset error tooltip
+		this.doErrorTooltipReset();
 		if (! this.ongoing) {
 			this.trace("Starting project analysis for ", this.projectUrl);
 			this.ongoing = true;
@@ -108,5 +114,9 @@ enyo.kind({
 			this.fullAnalysisDone = true;
 			this.projectData.updateProjectIndexer();
 		}
+	},
+	raiseErrorTooltip: function(inSender, inEvent){
+		this.doErrorTooltip(inEvent);
+		return true;
 	}
 });
