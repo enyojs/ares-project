@@ -674,8 +674,9 @@ server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, f
 		var bundledBrowser = process.env['ARES_BUNDLE_BROWSER'];
 		info = platformOpen[process.platform];
 		if (bundledBrowser) {
-			info = info.concat([bundledBrowser, '--args']);
-		}
+			info = info.splice(3,1); // delete 'start' command
+			info = (process.platform == 'win32') ? info.concat(bundledBrowser) : info.concat([bundledBrowser, '--args']);
+		} 
 		spawn(info[0], info.slice(1).concat([url]));
 	} else {
 		log.http('main', "Ares now running at <" + url + ">");
