@@ -1,4 +1,4 @@
-/* global ares, ServiceRegistry */
+/* global ares, ServiceRegistry, ComponentsRegistry */
 /**
  * This kind provides:
  * - the project toolbars (with create .. delete)
@@ -232,6 +232,7 @@ enyo.kind({
 		}
 	},
 	selectInProjectList:function(project){
+		this.trace("select ",project);
 		var itemList = this.$.projectList.getClientControls();
 		enyo.forEach(itemList, function(item) {
 			item.$.item.removeClass("on");
@@ -263,12 +264,23 @@ enyo.kind({
 	showAresProperties: function(){
 		this.$.aresProperties.show();
 	},
-	showEnyoHelp: function(){
+	showEnyoHelp: function() {
+		var search = ComponentsRegistry.getComponent("phobos").requestSelectedText();
+		
 		if (this.enyoHelpTab && !this.enyoHelpTab.closed) {
 			this.enyoHelpTab.focus();
+			if (search !== "") {
+				this.enyoHelpTab = window.open("http://enyojs.com/api/#" + search,
+				"Enyo API Viewer",
+				"resizable=1, dependent=yes, width=800, height=600");
+			}
 			return;
 		}
-		this.enyoHelpTab = window.open("http://enyojs.com/api/",
+		
+		if (search !== "") {
+			search = "#" + search;
+		}
+		this.enyoHelpTab = window.open("http://enyojs.com/api/" + search,
 			"Enyo API Viewer",
 			"resizable=1, dependent=yes, width=800, height=600");
 	},
