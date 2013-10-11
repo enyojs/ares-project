@@ -281,7 +281,7 @@ enyo.kind({
 				saveButton: true,
 				saveAsButton: true,
 				newKindButton: true,
-				designerButton: true,
+				designerDecorator: true,
 				right: rightpane
 			},
 			image: {
@@ -290,7 +290,7 @@ enyo.kind({
 				saveButton: false,
 				saveAsButton: false,
 				newKindButton: false,
-				designerButton: false,
+				designerDecorator: false,
 				right: false
 			},
 			text: {
@@ -299,7 +299,7 @@ enyo.kind({
 				saveButton: true,
 				saveAsButton: true,
 				newKindButton: false,
-				designerButton: false,
+				designerDecorator: false,
 				right: false
 			}
 		};
