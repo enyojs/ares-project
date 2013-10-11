@@ -1,4 +1,4 @@
-/* global Ares, async, ares, alert */
+/* global Ares, async, ares, alert, ComponentsRegistry */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets",
@@ -18,7 +18,6 @@ enyo.kind({
 	fit: true,
 	debug: false,
 	//noDefer: true, //FIXME: does not work with statics:{}
-	componentsRegistry: {},
 	components: [
 		{
 			name:"aresLayoutPanels",
@@ -95,7 +94,7 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
-		this.componentsRegistry.designerPanels.$.panels.setIndex(this.phobosViewIndex);
+		ComponentsRegistry.getComponent("designerPanels").$.panels.setIndex(this.phobosViewIndex);
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
 			Ares.Workspace.loadProjects("com.enyojs.ares.tests", true);
@@ -126,7 +125,10 @@ enyo.kind({
 		this.$.serviceRegistry.setConfig(inEvent.serviceId, {auth: inEvent.auth}, inEvent.next);
 	},
 	projectSelected: function() {
-		setTimeout(enyo.bind(this, function() { this.componentsRegistry.deimos.projectSelected(this.componentsRegistry.projectView.currentProject); }), 500);	// <-- TODO - using timeout here because project url is set asynchronously
+		setTimeout(enyo.bind(this, function() { 
+			var currentProject = ComponentsRegistry.getComponent("projectView").currentProject;
+			ComponentsRegistry.getComponent("deimos").projectSelected(currentProject);
+		}), 500);	// <-- TODO - using timeout here because project url is set asynchronously
 		return true;
 	},
 	openDocument: function(inSender, inEvent) {
@@ -152,7 +154,7 @@ enyo.kind({
 					}
 				} else {
 					fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
-					self.componentsRegistry.documentToolbar.createFileTab(file.name, projectData, fileDataId);
+					ComponentsRegistry.getComponent("documentToolbar").createFileTab(file.name, fileDataId, file.path, projectData);
 					self.switchToDocument(fileData);
 					if (typeof next === 'function') {
 						next();
@@ -182,17 +184,16 @@ enyo.kind({
 	saveDocument: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var content = inEvent.content;
-		var self = this;
 		this._saveDocument(inEvent.content, {service: inEvent.file.service, fileId: inEvent.file.id}, function(err) {
 			if (err) {
-				self.componentsRegistry.phobos.saveFailed(err);
+				ComponentsRegistry.getComponent("phobos").saveFailed(err);
 			} else {
 				var fileDataId = Ares.Workspace.files.computeId(inEvent.file);
 				var fileData = Ares.Workspace.files.get(fileDataId);
 				if(fileData){
 					fileData.setData(content);
 				}
-				self.componentsRegistry.phobos.saveComplete(fileData);
+				ComponentsRegistry.getComponent("phobos").saveComplete(fileData);
 			}
 		});
 	},
@@ -259,7 +260,7 @@ enyo.kind({
 		}
 
 		function _savedToOpen(inData, next) {
-			this.componentsRegistry.projectView.refreshFile(file);
+			ComponentsRegistry.getComponent("projectView").refreshFile(file);
 			// FIXME: only HermesFileTree report built-in file#service
 			var hermesFile = inData[0];
 			hermesFile.service = file.service;
@@ -312,7 +313,7 @@ enyo.kind({
 		if (docId) {
 			// remove file from cache
 			Ares.Workspace.files.removeEntry(docId);
-			this.componentsRegistry.documentToolbar.removeTab(docId);
+			ComponentsRegistry.getComponent("documentToolbar").removeTab(docId);
 		}
 		if (typeof next === 'function') {
 			next();
@@ -320,33 +321,33 @@ enyo.kind({
 	},
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();
-		this.componentsRegistry.deimos.load(inEvent);
-		this.componentsRegistry.designerPanels.$.panels.setIndex(this.deimosViewIndex);
+		ComponentsRegistry.getComponent("deimos").load(inEvent);
+		ComponentsRegistry.getComponent("designerPanels").$.panels.setIndex(this.deimosViewIndex);
 		this.activeDocument.setCurrentIF('designer');
 	},
 	//* A code change happened in Phobos - push change to Deimos
 	phobosUpdate: function(inSender, inEvent) {
-		this.componentsRegistry.deimos.load(inEvent);
+		ComponentsRegistry.getComponent("deimos").load(inEvent);
 	},
 	//* A design change happened in Deimos - push change to Phobos
 	designerUpdate: function(inSender, inEvent) {
 		if (inEvent) {
-			this.componentsRegistry.phobos.updateComponents(inSender, inEvent);
+			ComponentsRegistry.getComponent("phobos").updateComponents(inSender, inEvent);
 		}
 	},
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
-		this.componentsRegistry.designerPanels.$.panels.setIndex(this.phobosViewIndex);
+		ComponentsRegistry.getComponent("designerPanels").$.panels.setIndex(this.phobosViewIndex);
 		this.activeDocument.setCurrentIF('code');
-		this.componentsRegistry.designerPanels.manageControls(false);
+		ComponentsRegistry.getComponent("designerPanels").manageControls(false);
 	},
 	//* Undo event from Deimos
 	designerUndo: function(inSender, inEvent) {
-		this.componentsRegistry.phobos.undoAndUpdate();
+		ComponentsRegistry.getComponent("phobos").undoAndUpdate();
 	},
 	//* Redo event from Deimos
 	designerRedo: function(inSender, inEvent) {
-		this.componentsRegistry.phobos.redoAndUpdate();
+		ComponentsRegistry.getComponent("phobos").redoAndUpdate();
 	},
 	handleBeforeUnload: function() {
 		if (window.location.search.indexOf("debug") == -1) {
@@ -369,20 +370,22 @@ enyo.kind({
 	hideProjectView: function(inSender, inEvent) {
 		this.isProjectView = false;
 		this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex].applyStyle("width", null);
-		this.componentsRegistry.harmonia.addClass("ares-small-screen");
+		var harmonia = ComponentsRegistry.getComponent("harmonia");
+		harmonia.addClass("ares-small-screen");
 		this.$.aresLayoutPanels.reflow();
 		this.$.aresLayoutPanels.setIndexDirect(this.hermesFileTreeIndex);
-		this.componentsRegistry.harmonia.showGrabber();
-		this.componentsRegistry.harmonia.hideLogo();
+		harmonia.showGrabber();
+		harmonia.hideLogo();
 	},
 	showProjectView: function(inSender, inEvent) {
 		this.isProjectView = true;
-		this.componentsRegistry.harmonia.removeClass("ares-small-screen");		
+		var harmonia = ComponentsRegistry.getComponent("harmonia");
+		harmonia.removeClass("ares-small-screen");		
 		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
 		this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
 		this.$.aresLayoutPanels.reflow();
-		this.componentsRegistry.harmonia.hideGrabber();
-		this.componentsRegistry.harmonia.showLogo();
+		harmonia.hideGrabber();
+		harmonia.showLogo();
 	},
 	changeGrabberDirection:function(inSender, inEvent){
 		if(inEvent.toIndex > 0 && inEvent.fromIndex < inEvent.toIndex){
@@ -411,7 +414,7 @@ enyo.kind({
 	switchFile: function(inSender, inEvent) {
 		var d = Ares.Workspace.files.get(inEvent.id);
 		if (d) {
-			this.componentsRegistry.projectList.selectInProjectList(inEvent.project);
+			ComponentsRegistry.getComponent("projectList").selectInProjectList(inEvent.project);
 			this.switchToDocument(d);
 		} else if (this.debug) {
 			throw("File ID " + d + " not found in cache!");
@@ -423,34 +426,35 @@ enyo.kind({
 	switchToDocument: function(d) {
 		// We no longer save the data as the ACE edit session will keep the data for us
 		if (!this.activeDocument || d !== this.activeDocument) {
-			this.componentsRegistry.phobos.openDoc(d);
+			ComponentsRegistry.getComponent("phobos").openDoc(d);
 		}
 		var currentIF = d.getCurrentIF();
 		this.activeDocument = d;
-		this.componentsRegistry.designerPanels.addPreviewTooltip("Preview "+this.activeDocument.getProjectData().id);
+		var designerPanels = ComponentsRegistry.getComponent("designerPanels");
+		designerPanels.addPreviewTooltip("Preview "+this.activeDocument.getProjectData().id);
 		
 		if (currentIF === 'code') {
-			this.componentsRegistry.designerPanels.$.panels.setIndex(this.phobosViewIndex);
-			this.componentsRegistry.designerPanels.manageControls(false);
+			designerPanels.$.panels.setIndex(this.phobosViewIndex);
+			designerPanels.manageControls(false);
 		} else {
-			this.componentsRegistry.phobos.designerAction();
-			this.componentsRegistry.designerPanels.manageControls(true);
+			ComponentsRegistry.getComponent("phobos").designerAction();
+			designerPanels.manageControls(true);
 		}
 		this._fileEdited();
-		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
+		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(d.getId());
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
-		var editorMode = this.componentsRegistry.designerPanels.$.panels.getIndex() == this.phobosViewIndex;
+		var editorMode = ComponentsRegistry.getComponent("designerPanels").$.panels.getIndex() == this.phobosViewIndex;
 		if (editorMode) {
-			this.componentsRegistry.phobos.designerAction(inSender, inEvent);
+			ComponentsRegistry.getComponent("phobos").designerAction(inSender, inEvent);
 		} else {
-			this.componentsRegistry.deimos.closeDesignerAction();
+			ComponentsRegistry.getComponent("deimos").closeDesignerAction();
 		}
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {
-		this.componentsRegistry.phobos.newKindAction(inSender, inEvent);
+		this.$.componentsRegistry.phobos.newKindAction(inSender, inEvent);
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 
@@ -459,7 +463,7 @@ enyo.kind({
 	// switch the active document and then close it
 	bounceCloseFileRequest: function(inSender, inEvent) {
 		this.switchFile(inSender, inEvent);
-		enyo.asyncMethod(this.componentsRegistry.phobos, "closeDocAction");
+		enyo.asyncMethod(ComponentsRegistry.getComponent("phobos"), "closeDocAction");
 	},
 	//* Update code running in designer
 	syncEditedFiles: function() {
@@ -488,10 +492,10 @@ enyo.kind({
 		}
 	},
 	syncCSSFile: function(inFilename, inCode) {
-		this.componentsRegistry.deimos.syncCSSFile(inFilename, inCode);
+		ComponentsRegistry.getComponent("deimos").syncCSSFile(inFilename, inCode);
 	},
 	syncJSFile: function(inCode) {
-		this.componentsRegistry.deimos.syncJSFile(inCode);
+		ComponentsRegistry.getComponent("deimos").syncJSFile(inCode);
 	},
 	showWaitPopup: function(inSender, inEvent) {
 		this.$.waitPopupMessage.setContent(inEvent.msg);
@@ -518,7 +522,7 @@ enyo.kind({
 		this.$.signInErrorPopup.raise(inEvent);
 	},
 	showAccountConfiguration: function() {
-		this.componentsRegistry["accountsConfigurator"].show();		
+		ComponentsRegistry.getComponent("accountsConfigurator").show();		
 		this.$.signInErrorPopup.hide();		
 	},
 	/**
@@ -583,7 +587,7 @@ enyo.kind({
 	selectProjectForActiveDocument:function(){
 		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
 		if(project){
-			this.componentsRegistry.projectList.selectInProjectList(project);
+			ComponentsRegistry.getComponent("projectList").selectInProjectList(project);
 		}
 	},
 	_saveBeforePreview: function(inSender, inEvent){
@@ -599,14 +603,14 @@ enyo.kind({
 				}
 			}
 		}, this);
-		this.componentsRegistry.phobos.saveDocumentsBeforePreview(editedDocs);
+		ComponentsRegistry.getComponent("phobos").saveDocumentsBeforePreview(editedDocs);
 	},
 	_displayPreview: function(inSender, inEvent){
 		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
-		this.componentsRegistry.projectView.previewAction(inSender,{project:project});
+		ComponentsRegistry.getComponent("projectView").previewAction(inSender,{project:project});
 	},
 	_fileEdited: function() {
-		this.componentsRegistry.designerPanels.updateDeimosLabel(this.activeDocument.getEdited());
+		ComponentsRegistry.getComponent("designerPanels").updateDeimosLabel(this.activeDocument.getEdited());
 	},
 	/**
 	 * Event handler for ares components registry
@@ -616,12 +620,9 @@ enyo.kind({
 	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, designerPanels, accountsConfigurator, ...]
 	 */
 	_registerComponent: function(inSender, inEvent) {
-		var ref = this.componentsRegistry[inEvent.name];
-		if (ref === undefined || ref === inEvent.reference){
-			this.componentsRegistry[inEvent.name] = inEvent.reference;
-		} else {
-			throw new Error("Component is already registred: '" + inEvent.name + "'");
-		}
+		ComponentsRegistry.registerComponent(inEvent);
+
+		return true;
 	},
 	stopEvent: function(){
 		return true;
@@ -641,3 +642,30 @@ enyo.kind({
 if ( ! Ares.isBrowserSupported()) {
 	alert($L("Ares is designed for the latest version of IE. We recommend that you upgrade your browser or use Chrome"));
 }
+
+/**
+ * Manages registered components
+ * 
+ * @class ComponentRegistry
+ * @augments enyo.Object
+ */
+enyo.kind({
+	name: "ComponentsRegistry",
+	debug: false,
+	kind: "enyo.Object",
+	statics: {
+		components: {},
+		/** @public */
+		registerComponent: function(inEvent) {
+			var ref = ComponentsRegistry.components[inEvent.name];
+			if (ref === undefined || ref === inEvent.reference){
+				ComponentsRegistry.components[inEvent.name] = inEvent.reference;
+			} else {
+				throw new Error("Component is already registred: '" + inEvent.name + "'");
+			}
+		},
+		getComponent: function(name) {
+			return ComponentsRegistry.components[name];
+		}
+	}
+});
