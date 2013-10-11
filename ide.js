@@ -675,7 +675,7 @@ server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, f
 		info = platformOpen[process.platform];
 		if (bundledBrowser) {
 			if(process.platform == 'win32'){
-				info = info.splice(2,1); // delete 'start' command
+				info.splice(2,1); // delete 'start' command
 			}
 			info = info.concat([bundledBrowser, '--args']);
 			
