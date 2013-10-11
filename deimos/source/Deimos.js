@@ -889,7 +889,8 @@ enyo.kind({
 			this.performCreateItem(config, target, beforeId);			
 		} else if (inEvent.getName() === "replaceKind"){
 			//TODO: Add a feature for "Replace Button" against view template component on designer behavior - ENYO-2807
-			this.doError({msg:"not implemented yet"});
+			//this.doError({msg:"not implemented yet"});
+			this.performReplaceItem(config);
 		} else if (inEvent.getName() === "addNewKind"){
 			//TODO: Add a feature for "Add new Kind" against view template component on designer behavior - ENYO-2808
 			this.doError({msg:"not implemented yet"});
@@ -898,6 +899,15 @@ enyo.kind({
 	},
 
 	// @protected
+	performReplaceItem: function(config){
+		var kind = this.getSingleKind(this.index);
+
+		this.kinds[this.index].components = config.components;
+
+		this.$.inspector.initUserDefinedAttributes(kind);
+		this.addAresKindOptions(kind);
+		this.rerenderKind();
+	},
 	performCreateItem: function(config, target, beforeId){
 		var kind = this.getSingleKind(this.index);
 		if (beforeId && (beforeId !== target.aresId)) {
