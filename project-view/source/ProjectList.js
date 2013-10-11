@@ -232,6 +232,7 @@ enyo.kind({
 		}
 	},
 	selectInProjectList:function(project){
+		this.trace("select ",project);
 		var itemList = this.$.projectList.getClientControls();
 		enyo.forEach(itemList, function(item) {
 			item.$.item.removeClass("on");
