@@ -45,14 +45,7 @@ enyo.kind({
 		buildStatusData: undefined,
 		phongapUrl: "https://build.phonegap.com",
 		provider: undefined, 
-		selectedPlatform: undefined,
-		extensions: {
-			"android": "apk",
-			"ios": "ipa",
-			"webos": "ipk",
-			"winphone": "xap",
-			"blackberry": "jad"
-		}
+		selectedPlatform: undefined
 	},
 	components: [
 		{
@@ -189,7 +182,7 @@ enyo.kind({
 		var childrenList, phonegapFolderContent;
 
 		// Reconstruct the name of the package in the same way as done in bdPhonegap.
-			var packageName = this.buildStatusData.package + "_" + this.buildStatusData.version + "." + (this.extensions[this.selectedPlatform] || "bin");
+			var packageName = this.buildStatusData.package + "_" + this.buildStatusData.version + "." + (Phonegap.ProjectProperties.packageExtensions[this.selectedPlatform] || "bin");
 		
 
 		// get the instance describing the project root node.

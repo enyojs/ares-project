@@ -339,6 +339,13 @@ enyo.kind({
 	},
 	
 	statics: {
+		packageExtensions: {
+			"android": "apk",
+			"ios": "ipa",
+			"webos": "ipk",
+			"winphone": "xap",
+			"blackberry": "jad"
+		},
 		getProvider: function () {
 			this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('phonegap');
 			return this.provider;
