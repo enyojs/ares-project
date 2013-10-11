@@ -48,7 +48,8 @@ enyo.kind({
 							onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
 							onReloadComplete: "reloadComplete",
 							onResizeItem: "resizeItem",
-							onReturnPositionValue: "designerReturnPositionValue"
+							onReturnPositionValue: "designerReturnPositionValue",
+							onForceCloseDesigner: "closeDesignerAction"
 						}
 					]}
 				]},				
@@ -736,6 +737,8 @@ enyo.kind({
 		
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		if (inFilename === this.fileName) {
+			var kind = this.getSingleKind(this.index);
+			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(kind)));
 			this.doDesignerUpdate(event);
 		}
 

@@ -999,7 +999,7 @@ enyo.kind({
 
 		// we have no multi-line 'description' of the
 		// application, so use our one-line description
-		xw.writeElementString('description', config.title);
+		xw.writeElementString('description', config.description);
 
 		xw.writeStartElement( 'author' );
 		xw.writeAttributeString('href', config.author.href);

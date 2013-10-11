@@ -6,6 +6,7 @@
 
 var fs = require("fs"),
     path = require("path"),
+    createDomain = require('domain').create,
     express = require("express"),
     npmlog = require('npmlog'),
     nopt = require('nopt'),
@@ -55,6 +56,10 @@ argv.config = argv.config || path.join(myDir, "ide.json");
 argv.host = argv.host || "127.0.0.1";
 argv.port = argv.port || 9009;
 argv.timeout = argv.timeout || (4*60*1000);	//default: 4 minutes.
+	
+if (process.env['ARES_BUNDLE_BROWSER'] && !argv['bundled-browser']) {
+	delete process.env['ARES_BUNDLE_BROWSER'];
+}
 
 if (argv.help) {
 	console.log("\n" +
@@ -137,12 +142,6 @@ var platformOpen = {
 	win32: [ "cmd" , '/c', 'start' ],
 	darwin:[ "open" ],
 	linux: [ "xdg-open" ]
-};
-
-var bundledBrowser = {
-	win32: [ path.resolve ( myDir + "../../../chromium/" + "chrome.exe" ) ],
-	darwin:[ path.resolve ( myDir + "../../../../bin/chromium/" + "Chromium.app" ), "--args" ],
-	linux: [ path.resolve ( myDir + "../../../../bin/chromium/" + "chrome" ) ]
 };
 
 var configPath, tester;
@@ -241,12 +240,12 @@ function appendPluginConfig(configFile) {
 	var pluginDir = path.dirname(configFile);
 	log.verbose('appendPluginConfig()', 'pluginDir:', pluginDir);
 
-	var pluginData,
-	    configContent = fs.readFileSync(configFile, 'utf8');
+	var pluginData, configContent;
 	try {
+		configContent = fs.readFileSync(configFile, 'utf8');
 		pluginData = JSON.parse(configContent);
 	} catch(e) {
-		throw "Improper JSON in " + configFile + " : "+configContent;
+		throw new Error("Unable to load or JSON-parse '" + configFile + "' (" + e.toString() + ")");
 	}
 	
 	// The service in the plugin configuration file that is both
@@ -340,8 +339,9 @@ function handleMessage(service) {
 					'content-type': 'application/json'
 				}
 			};
+			log.http(service.id, "POST /config");
 			var creq = http.request(options, function(cres) {
-				log.http(service.id, "POST /config response.status=" + cres.statusCode);
+				log.http(service.id, "POST /config", cres.statusCode);
 			}).on('error', function(e) {
 				throw e;
 			});
@@ -458,7 +458,7 @@ function proxyServices(req, res, next) {
 		    return service.id === id;
 	    })[0];
 	if (!service) {
-		next(new HttpError('No such service: ' + id, 403));
+		setImmediate(next, new HttpError('No such service: ' + id, 403));
 		return;
 	}
 	for (var key in req.query) {
@@ -580,10 +580,25 @@ function cors(req, res, next) {
 	res.header('access-control-allow-origin', '*' /*FIXME: config.allowedDomains*/);
 	res.header('access-control-allow-methods', 'GET,POST');
 	res.header('access-control-allow-headers', 'Content-Type');
-	next();
+	setImmediate(next);
 }
 
 app.configure(function(){
+
+	/*
+	 * Error Handling - Wrap exceptions in delayed handlers
+	 */
+	app.use(function _useDomain(req, res, next) {
+		var domain = createDomain();
+		
+		domain.on('error', function(err) {
+			next(err);
+			domain.dispose();
+		});
+		
+		domain.enter();
+		setImmediate(next);
+	});
 
 	app.use(cors);
 	app.use(express.favicon(myDir + '/ares/assets/images/ares_48x48.ico'));
@@ -622,7 +637,7 @@ app.configure(function(){
 		app.post('/res/tester', tester.setup);
 		app['delete']('/res/tester', tester.cleanup);
 	}
-	
+
 	/**
 	 * Global error handler (last plumbed middleware)
 	 * @private
@@ -631,11 +646,11 @@ app.configure(function(){
 		log.error('errorHandler()', err.stack);
 		res.status(500).send(err.toString());
 	}
-
+	
 	// express-3.x: middleware with arity === 4 is
 	// detected as the error handler
 	app.use(errorHandler.bind(this));
-
+	
 	log.verbose('app.configure()', "done");
 });
 
@@ -656,7 +671,14 @@ server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, f
 		spawn(info[0], info.slice(1).concat([url]));
 	} else if (argv['bundled-browser']) {
 		// Open bundled browser
-		info = platformOpen[process.platform].concat(bundledBrowser[process.platform]);
+		var bundledBrowser = process.env['ARES_BUNDLE_BROWSER'];
+		info = platformOpen[process.platform];
+		if (bundledBrowser) {
+			if (process.platform === 'win32') {
+				info.splice(2, 1); // delete 'start' command
+			}
+			info = info.concat([bundledBrowser, '--args']);
+		} 
 		spawn(info[0], info.slice(1).concat([url]));
 	} else {
 		log.http('main', "Ares now running at <" + url + ">");

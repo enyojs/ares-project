@@ -4,19 +4,19 @@ Hermes offers several services not available in a Web Browser through one (or se
 
 * [Filesystem services](#filesystem-services) ([Local](#local-filesystem-service), [Dropbox](#dropbox-filesystem-service))
 * [Project templates services](#project-template-services)
-* [Build Services](#build-services) ([PhoneGap Build](#phonegap-build-service), …)
+* [Build Services](#build-services) ([PhoneGap Build](#phonegap-build-service), ...)
 
-## Security
+## Security[](id:security)
 
 ### Authentication
 
 Each service may need an individual authentication to access a back-end in the cloud.  For example, PhoneGap Build (PGB) uses a simple per-user token that is provided as a query parameter with every request to the build service.  Another example is more complex example is Dropbox, which requires both an application OAuth token pair (for Ares itself), plus a per-user account (the one users use to access their private data on Dropbox).  There are a variety of possible 
 
-While authentications token are generally used by the Node.js-based Ares services (rather than by the Ares client application runnin in the Browser), the server server stores them locally:  they ares stored in the Browser sandbox (cookies, localStorage… etc) and passed to the service when needed.
+While authentications token are generally used by the Node.js-based Ares services (rather than by the Ares client application runnin in the Browser), the server server stores them locally:  they ares stored in the Browser sandbox (cookies, localStorage... etc) and passed to the service when needed.
 
-The elements of the authentication token that are tight to the server (rather than to the end-user) are set on the server in the `"auth":{…}` of `ide.json`, for each service.  This section is saved under `localStorage` key `com.hp.ares.services.<service name>.auth` in the Browser. The value associated with this key expands as the user feeds necessary credentails to each service.
+The elements of the authentication token that are tight to the server (rather than to the end-user) are set on the server in the `"auth":{...}` of `ide.json`, for each service.  This section is saved under `localStorage` key `com.hp.ares.services.<service name>.auth` in the Browser. The value associated with this key expands as the user feeds necessary credentails to each service.
 
-The actual properties stored within each `"auth":{…}` are essentially service-specific.
+The actual properties stored within each `"auth":{...}` are essentially service-specific.
 
 **NOTE:** The `localStorage` values are not encrypted.  This could be changed if proven to be useful.
 
@@ -36,14 +36,14 @@ In order to run the Phonegap build service from Ares, the authentication must be
 
 **NOTE**:
  
-- Due to a certain restriction on the edition of the Adobe account, a user can’t change the linked Adobe ID on his Phonegap account.
+- Due to a certain restriction on the edition of the Adobe account, a user can't change the linked Adobe ID on his Phonegap account.
 - A user can unlink his Phonegap account from the Github account by following these steps: 
 
 	1. The user must be authenticated in Github
 	2. Open this page https://github.com/settings/applications 
 	3. In the section *Authorized applications* click on *Revoke* button of the row *Phonegap:Build*.
 
-## Filesystem services
+## Filesystem services[](id:filesystem-services)
 
 ### Protocol
 
@@ -56,14 +56,14 @@ In order to run the Phonegap build service from Ares, the authentication must be
 
 Hermes file-system providers use verbs that closely mimic the semantics defined by [WebDAV (RFC4918)](http://tools.ietf.org/html/rfc4918):  although Hermes reuses the same HTTP verbs (`GET`, `PUT`, `PROPFIND`, `MKCOL`, `DELETE` ...), it differs in terms of carried data.  Many (if not most) of the HTTP clients implement only the `GET` and `POST` HTTP verbs:  Hermes uses [X-HTTP-Method-Overrides](http://fandry.blogspot.fr/2012/03/x-http-header-method-override-and-rest.html) as WebDAV usually does.  As a potential security hole (enforced by Express), Ares does **not** support  the special `_method` query parameter .
 
-* `PROPFIND` lists properties of a resource.  It recurses into the collections according to the `depth` parameter, which may be 0, 1, … etc plus `infinity`.  For example, the following directory structure:
+* `PROPFIND` lists properties of a resource.  It recurses into the collections according to the `depth` parameter, which may be 0, 1, ... etc plus `infinity`.  For example, the following directory structure:
 
 		$ tree dir1/
 		dir1/
-		├── file0
-		└── file1
+		|-- file0
+		|-- file1
 
-… corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.  The node descriptor Object format is defined by [this JSON schema](../assets/schema/com.enyojs.ares.fs.node.schema.json).  The `path` property is node location absolute to the Hermes file-system server root:  it uses URL notation: UNIX-type folder separator (`/`), not Windows-like (`\\`).
+... corresponds to the following JSON object (multi-level node descriptor) returned by `PROPFIND`.  The node descriptor Object format is defined by [this JSON schema](../assets/schema/com.enyojs.ares.fs.node.schema.json).  The `path` property is node location absolute to the Hermes file-system server root:  it uses URL notation: UNIX-type folder separator (`/`), not Windows-like (`\\`).
 
 		$ curl "http://127.0.0.1:9009/id/%2F?_method=PROPFIND&depth=10"
 		{
@@ -156,7 +156,7 @@ To stop on the first failing case:
 
 For more detailled instructions, refer to the [Mocha home page](http://visionmedia.github.com/mocha/).
 
-### Local Filesystem Service
+### Local Filesystem Service[](id:local-filesystem-service)
 
 The `fsLocal` service is simply serves your local machine's filesystem to the browser, which has otherwise no access outside the web sandbox (or exclusivelly via direct user interaction).
 
@@ -171,11 +171,12 @@ For instance, you can change `@HOME@` to `@HOME@/Documents` or to `D:\\Users\\Me
 	],
 	[...]
 
-### Dropbox Filesystem Service
+### Dropbox Filesystem Service[](id:dropbox-filesystem-service)
+
 
 Ares comes with an Hermes service using your Dropbox account as a storage service.    Enable this service in the `ide.json` before starting the IDE server:
 
-	[…]
+	[...]
 	{
 		"active":true,
 		"id":"dropbox",
@@ -191,10 +192,12 @@ Ares comes with an Hermes service using your Dropbox account as a storage servic
 			"appKey": "",
 			"appSecret": ""
 		}
-	[…]
+	[...]
 	}
 
 You need to replace the appKey and appSecret entries with the proper values from your Dropbox application entry for Ares(see below).
+
+The icon is not provided.
 
 In order to use Dropbox as storage service for Ares, you need to [create an Ares application in Dropbox](https://www.dropbox.com/developers/apps) & grant Ares the authorization to access this Dropbox application (_Ares_ > _Accounts_ > _Dropbox_ > _Renew_ ).  Popup blockers must be disabled to allow the Dropbox OAuth popup window to appear.
 
@@ -204,7 +207,7 @@ In order to use Dropbox as storage service for Ares, you need to [create an Ares
 
 Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to the [GitHub:node-tunnel](https://github.com/koichik/node-tunnel) library.  `fsDropbox` proxy configuration embeds a `node-tunnel` configuration.  For example, fellow-HP-ers can use the below (transform `Xproxy` into `proxy` in the sample ide.json):
 
-			[…]
+			[...]
 			"proxy":{
 				"http":{
 					"tunnel":"OverHttp",
@@ -217,9 +220,9 @@ Ares Dropbox connector works behind an enterprise HTTP/HTTPS proxy, thanks to th
 					"port":8080
 				}
 			},
-			[…]
+			[...]
 
-## Project template services
+## Project template services[](id:project-template-services)
 
 The service **genZip** allows to intanciate new Ares project from project templates such as [Enyo Bootplate](https://github.com/enyojs/enyo/wiki/Bootplate) or any customer specific project templates.
 
@@ -230,7 +233,7 @@ These project templates can be defined in:
 
 See [Project template configuration](#project-template-configuration) and [Merging Ares plugin configuration](../README.md#merging-configuration) for more information.
 
-### Project template configuration
+### Project template configuration[](id:project-template-configuration)
 
 The property `sources:` of the service **genZip** lists the template definitions that are available at project creation time.  It is defined in the `ide.json` of ares-project.
 
@@ -301,7 +304,7 @@ The default `<pathname>` value is `/genzip`.  Its value can be changed using the
 		* It's up to the caller to extract and base64 decode the files to create a new project.  
 		In Ares, this is achieved by forwarding the FormData to Hermes filesystem service via a PUT method.
 
-## Build services
+## Build services[](id:build-services)
 
 ### Ares IDE - Javascript API
 
@@ -338,7 +341,7 @@ The following resources
 			* `text/plain` build has failed (see HTTP response code) or is asynchronous
 			* `multipart/form-data` generated application package is the first returned part of the multipart response
 			
-### Archive build service
+### Archive build service[](id:archive-build-service)
 
 This is the `arZip.js` service.  It takes 2 arguments:
 
@@ -347,7 +350,7 @@ This is the `arZip.js` service.  It takes 2 arguments:
 
 It can be started standlone using the following command-line (or a similar one):
 
-…in which case it can be tested using `curl` by a command-line like the following one:
+...in which case it can be tested using `curl` by a command-line like the following one:
 
 	$ curl \
 		-F "file=@config.xml;filename=config.xml" \
@@ -369,7 +372,7 @@ The generated file is expected to look like to below:
 	 --------                   -------
 	     4068                   2 files
 
-### PhoneGap build service
+### PhoneGap build service[](id:phonegap-build-service)
 
 
 Ares includes the ability to package a mobile Enyo application using [PhoneGap Build](https://build.phonegap.com/).  You must have a properly setup account (with signing keys & distribution certificates) before being able to use Ares to build applications using PhoneGap Build.
@@ -525,8 +528,112 @@ Start the file server:
 	$ node-inspector &
 	$ open -a Chromium http://localhost:8080/debug?port=5858
 
-References:
+## Mapping more file-systems 
 
+To map another file-system, you have to enable it in ide.json before starting the IDE server by changing "active" parameter and also by changing the value associated with the --root parameter:
+
+		[...]
+		{
+			"active":false,
+			"id":"Example",
+			"icon":"$harmonia/images/providers/box_white-32x32.png",
+			"name":"Example drive",
+			"type": ["filesystem"],
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Example dir"
+			],
+			"useJsonp":false,
+			"verbose": false,
+			"respawn": false
+		}
+		[...]
+
+Change name and id parameters.
+
+You can replace box_white-32x32.png by an appropriate app icon in the icon parameter.
+
+
+- Using Google Drive directory
+
+First install Google Drive App. You can donwload it from [here](here "https://tools.google.com/dlpage/drive").
+
+Make a copy of the example above and perform specific changes for the Google Drive directory.
+
+		[...]
+		{
+			"active":true,
+			"id":"Google Drive",
+			"icon":"$harmonia/images/providers/box_white-32x32.png",
+			"name":"Google Drive Directory",
+			"type": ["filesystem"],
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Google Drive"
+			],
+			"useJsonp":false,
+			"verbose": false,
+			"respawn": false
+		}
+		[...]
+
+The icon is not provided. You can check the terms of use of the Google Drive branding [here](https://developers.google.com/drive/branding) and add an appropriate icon.
+
+Don't forget to check the --root parameter to your Google Drive directory in the following line:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Google Drive"
+			[...]
+
+For example, on MacOS, this line can be:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/Google Drive"
+			[...]
+
+
+- Using Box Sync directory
+
+First install Box Sync App. You can donwload it from [here]("https://www.box.com/pricing/").
+
+Make a copie of example above and perform specific changes for the Box Sync directory.
+
+	
+		[...]
+		{
+			"active":true,
+			"id":"Box",
+			"icon":"$harmonia/images/providers/box_white-32x32.png",
+			"name":"Box Sync Directory",
+			"type": ["filesystem"],
+			"provider": "hermes",
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files"
+			],
+			"useJsonp":false,
+			"verbose": false,
+			"respawn": false
+		}
+		[...]
+
+
+The icon is not provided. You can add an appropriate icon from [here](https://www.google.com/?q=box.net+icon#q=box.net+icon).
+
+Don't forget to check the --root parameter to your Box Sync directory in the following line:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files"
+			[...]
+
+For example, on MacOS, this line can be:
+			
+			[...]
+			"command":"@NODE@", "params":[
+				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/Box Documents"
+			[...]
 
 ## References
 

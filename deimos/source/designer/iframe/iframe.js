@@ -1506,9 +1506,20 @@ enyo.kind({
 		var bounds = inControl.getBounds();
 		var absoluteBounds = this.getAbsoluteBounds(inControl);
 		var parentBounds = this.getAbsoluteBounds(inControl.parent);
+		var node = inControl.hasNode();
 		
 		bounds.right = parentBounds.width - bounds.left - absoluteBounds.width;
 		bounds.bottom = parentBounds.height - bounds.top - absoluteBounds.height;
+
+		if(typeof inControl.parent.scrollNode == "undefined"){	
+			if(bounds.width + bounds.left >= node.offsetParent.clientWidth){
+				bounds.width = node.offsetParent.clientWidth - bounds.left;			
+			}
+			
+			if(bounds.height + bounds.top >= node.offsetParent.clientHeight){
+				bounds.height = node.offsetParent.clientHeight - bounds.top;
+			}
+		}
 		
 		return bounds;
 	},
@@ -1516,7 +1527,7 @@ enyo.kind({
 		var left = 0,
 			top = 0,
 			match = null,
-			node = inControl.hasNode(),
+			node = inControl.hasNode() || inControl.scrollNode,
 			width = node.offsetWidth,
 			height = node.offsetHeight,
 			transformProp = enyo.dom.getStyleTransformProp(),
