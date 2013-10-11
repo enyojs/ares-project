@@ -675,11 +675,10 @@ server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, f
 		info = platformOpen[process.platform];
 		if (bundledBrowser) {
 			if(process.platform == 'win32'){
-				info = info.splice(3,1); // delete 'start' command
-				info = info.concat([bundledBrowser]);
-			} else {
-				info = info.concat([bundledBrowser, '--args']);
+				info = info.splice(2,1); // delete 'start' command
 			}
+			info = info.concat([bundledBrowser, '--args']);
+			
 		} 
 		spawn(info[0], info.slice(1).concat([url]));
 	} else {
