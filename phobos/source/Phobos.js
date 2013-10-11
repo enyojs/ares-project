@@ -970,6 +970,10 @@ enyo.kind({
 			this.$.ace.wordWrapChanged();
 		}
 	},
+	/** @public */
+	requestSelectedText: function() {
+		return this.$.ace.requestSelectedText();
+	},
 
 	/*  editor setting */
 

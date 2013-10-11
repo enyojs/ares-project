@@ -27,13 +27,14 @@ enyo.kind({
 		this.inherited(arguments);
 		this.doRegisterMe({name:"documentToolbar", reference:this});
 	},
-	createFileTab: function(name, id) {
+	createFileTab: function(name, id, path) {
 		this.$.tabs.show();
 		this.$.tabs.render();
 		this.$.tabs.addTab(
 			{
 				caption: name,
-				userId: id // id like home-123f3c8a766751826...
+				userId: id, // id like home-123f3c8a766751826...
+				tooltipMsg: path
 			}
 		);
 	},

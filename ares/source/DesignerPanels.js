@@ -1,3 +1,4 @@
+/* global ComponentsRegistry */
 enyo.kind({
 	name:"Ares.DesignerPanels",
 	kind:"FittableRows", 
@@ -62,7 +63,7 @@ enyo.kind({
 			ondragfinish      : "stopPanelEvent",
 			components: [
 				{components: [
-					{kind: "Phobos", onSaveDocument: "saveDocument", onSaveAsDocument: "saveAsDocument", onCloseDocument: "closeDocument", onDesignDocument: "designDocument", onUpdate: "phobosUpdate"}
+					{kind: "Phobos"}
 				]},
 				{components: [
 					{kind: "Deimos", onCloseDesigner: "closeDesigner"}
@@ -95,25 +96,25 @@ enyo.kind({
 		return true;
 	},
 	fileMenuItemSelected: function(inSender, inEvent) {
-		this.owner.componentsRegistry.phobos.fileMenuItemSelected(inSender, inEvent);
+		ComponentsRegistry.getComponent("phobos").fileMenuItemSelected(inSender, inEvent);
 	},
 	editorSettings: function(){
-		this.owner.componentsRegistry.phobos.editorSettings();
+		ComponentsRegistry.getComponent("phobos").editorSettings();
 	},
 	newKindAction: function() {
-		this.owner.componentsRegistry.phobos.newKindAction();
+		ComponentsRegistry.getComponent("phobos").newKindAction();
 	},
 	kindSelected: function(inSender, inEvent) {
-		this.owner.componentsRegistry.deimos.kindSelected(inSender, inEvent);
+		ComponentsRegistry.getComponent("deimos").kindSelected(inSender, inEvent);
 	},
 	designerAction: function() {
-		if(this.owner.componentsRegistry.phobos.editorUserSyntaxError() !== 0)
+		if(ComponentsRegistry.getComponent("phobos").editorUserSyntaxError() !== 0)
 		{
 			this.userSyntaxErrorPop();
 		}
 		else
 		{
-			this.owner.componentsRegistry.phobos.designerAction();
+			ComponentsRegistry.getComponent("phobos").designerAction();
 			this.manageControls(true);
 		}
 	},
@@ -128,7 +129,7 @@ enyo.kind({
 		this.$.userErrorPopup.raise({msg: $L("Designer cannot work on a file with a syntax error. Please fix the error highlighted in code editor before launching the designer."), title: $L("Syntax Error")});
 	},
 	closeDesignerAction: function(){
-		this.owner.componentsRegistry.deimos.closeDesignerAction();
+		ComponentsRegistry.getComponent("deimos").closeDesignerAction();
 		this.aceFocus();
 	},
 	/**
@@ -159,7 +160,7 @@ enyo.kind({
 	},
 	aceFocus: function(){
 		if(this.getAceActive()){
-			this.owner.componentsRegistry.phobos.focusEditor();	
+			ComponentsRegistry.getComponent("phobos").focusEditor();	
 		}
 	}
 });
