@@ -360,6 +360,7 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 		// Build the multipart/formdata
 		var FORM_DATA_LINE_BREAK = '\r\n',
 		    boundary = _generateBoundary();
+		var mode;
 
 		combinedStream = CombinedStream.create({
 			pauseStreams: true,
@@ -371,35 +372,37 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 			combinedStream.append(_getPartHeader(part.name));
 
 			// Adding data
-			log.verbose("ServiceBase#returnFormData()", "part:", part.name);
 			if (part.path) {
-				part.stream = fs.createReadStream(part.path);
-				part.path = undefined;
-			}
-
-			if (part.stream) {
+				mode = "path";
+				combinedStream.append(function(append) {
+					append(fs.createReadStream(part.path).pipe(base64.encode()));
+				});
+			} else if (part.stream) {
+				mode = "stream";
 				combinedStream.append(part.stream.pipe(base64.encode()));
 			} else if (part.buffer) {
-				combinedStream.append(function(nextDataChunk) {
-					nextDataChunk(part.buffer.toString('base64'));
+				mode = "buffer";
+				combinedStream.append(function(append) {
+					append(part.buffer.toString('base64'));
 				});
 			} else {
 				log.warn("ServiceBase#returnFormData()", "Invalid part:", part);
-				combinedStream.append(function(nextDataChunk) {
-					nextDataChunk('INVALID CONTENT');
+				combinedStream.append(function(append) {
+					append('INVALID CONTENT');
 				});
 			}
+			log.silly("ServiceBase#returnFormData()", "part:", part.filename, "(" + mode + ")");
 		
 			// Adding part footer
-			combinedStream.append(function(nextDataChunk) {
-				log.silly("ServiceBase#returnFormData()", "End-of-Part:", part.name);
-				nextDataChunk(_getPartFooter());
+			combinedStream.append(function(append) {
+				log.silly("ServiceBase#returnFormData()", "end-of-part:", part.filename);
+				append(_getPartFooter());
 			});
 		});
 		
 		// Adding last footer
-		combinedStream.append(function(nextDataChunk) {
-			nextDataChunk(_getLastPartFooter());
+		combinedStream.append(function(append) {
+			append(_getLastPartFooter());
 		});
 	} catch(err) {
 		setImmediate(next, err);
