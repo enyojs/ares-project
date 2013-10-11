@@ -43,7 +43,7 @@ enyo.kind({
 		// Hermes contextual menu
 		{kind: "onyx.MenuDecorator", name: "hermesMenu", classes: "hermesMenu", onSelect: "hermesMenuItemSelected", components: [
 			{kind: "onyx.Menu", name: "hermesMenuList", classes: "hermesMenu-list", maxHeight: "100%", components: [
-				{name: "newFolderItem", value: "newFolderClick", floating: true, classes: "hermesMenu-button", components: [
+				{name: "newFolderItem", value: "newFolderClick", classes: "hermesMenu-button", components: [
 					{kind: "onyx.IconButton", src: "$harmonia/images/folder_new_16.png"},
 					{content: $L("New Folder...")}
 				]},
@@ -685,13 +685,22 @@ enyo.kind({
 			LeftPanelTranslation = results[1];
 		}
 
-		this.$.hermesMenu.applyStyle("position", "absolute");
-		this.$.hermesMenu.applyStyle("z-index", "999");
-		this.$.hermesMenu.applyStyle("left", (inEvent.clientX - this.node.offsetLeft - LeftPanelTranslation) + "px");
-		this.$.hermesMenu.applyStyle("top", (inEvent.clientY - this.node.offsetTop) + "px");
+		// menu must be opened first to get its bounds
+		this.$.hermesMenu.requestShowMenu();
+		// calculate a specific back offset to add when menu reach bottom and right side of hermesFileTree, because of a z-index issue and wrong onyx widget position 
+		// calculation result when menu is shown at a mouse event place with or without a first offset...
+		var bounds = this.$.hermesMenuList.getBounds(),
+			backOffsetLeft = 0,
+			backOffsetTop = 0;
+		if (inEvent.clientX - this.node.offsetLeft - LeftPanelTranslation + bounds.width > this.node.clientWidth) {
+			backOffsetLeft = inEvent.clientX - this.node.offsetLeft - LeftPanelTranslation + bounds.width - this.node.clientWidth;
+		}
+		if (inEvent.clientY - this.node.offsetTop + bounds.height > this.node.clientHeight) {
+			backOffsetTop = bounds.height;
+		}
 
-		this.$.hermesMenu.show();
-		this.$.hermesMenuList.show();
+		this.$.hermesMenuList.showAtEvent(inEvent, {left: - this.node.offsetLeft - LeftPanelTranslation - backOffsetLeft, top: - this.node.offsetTop - backOffsetTop});
+		this.$.hermesMenuList.updatePosition();		
 		
 		// handled here (don't bubble)
 		return true;
