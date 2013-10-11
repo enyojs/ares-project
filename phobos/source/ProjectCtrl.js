@@ -97,7 +97,7 @@ enyo.kind({
 		var rmdots  = new RegExp('[^/]+/\\.\\./');
 		var barUrl = inEvent.msg.replace(cleaner,'').replace(rmdots,'');
 		this.log("analyser cannot load ",barUrl);
-		this.doError({msg: "analyser cannot load " + barUrl });
+		this.doErrorTooltip({msg: "analyser cannot load " + barUrl });
 		this.cleanup('analyser load error');
 	},
 	/**

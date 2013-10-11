@@ -21,7 +21,7 @@ enyo.kind({
 				this.errorTooltip = err.toString();
 			} else {
 				err = evt.err;
-				this.errorTooltip = err.msg || (err && err.toString());				
+				this.errorTooltip = evt.msg || (err && err.toString());				
 			}
 		} else {
 			this.errorTooltip = evt.toString();
