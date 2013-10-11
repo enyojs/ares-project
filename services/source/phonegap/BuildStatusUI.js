@@ -1,3 +1,5 @@
+/* global Phonegap */
+
 enyo.kind({
 	name: "Phonegap.ProjectProperties.PlatformBuildStatus",
 	kind: "onyx.IconButton",
