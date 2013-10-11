@@ -106,6 +106,15 @@ enyo.kind({
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"},
 					{name: "signingKey", label: "Signing Key", content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
 				]
+			},
+			{
+				id: "winphone",
+				name: "Microsoft Windows Phone 7",
+				type: "Target",
+				rows: [
+					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
+					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"}
+				]				
 			},  
 			{
 				id: "blackberry",
@@ -126,16 +135,8 @@ enyo.kind({
 					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
 					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"}
 				]
-			},
-			{
-				id: "winphone",
-				name: "Microsoft Windows Phone 7",
-				type: "Target",
-				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"}
-				]				
-			},
+			}
+			
 		]
 	}
 });
