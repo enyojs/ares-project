@@ -334,13 +334,13 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 		return;
 	}
 	log.verbose("ServiceBase#returnFormData()", parts.length, "parts");
-	log.silly("ServiceBase#returnFormData()", "parts", util.inspect(parts, {depth: 2}));
 
 	var combinedStream;
 	try {
 		// Build the multipart/formdata
 		var FORM_DATA_LINE_BREAK = '\r\n',
 		    boundary = _generateBoundary();
+		var mode;
 
 		combinedStream = CombinedStream.create({
 			pauseStreams: true,
@@ -352,38 +352,37 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 			combinedStream.append(_getPartHeader(part.filename));
 
 			// Adding data
-			log.verbose("ServiceBase#returnFormData()", "part:", part.filename);
 			if (part.path) {
-				log.silly("ServiceBase#returnFormData()", "Streaming part.path", part.path);
-				part.stream = fs.createReadStream(part.path);
-				part.path = undefined;
-			}
-
-			if (part.stream) {
+				mode = "path";
+				combinedStream.append(function(append) {
+					append(fs.createReadStream(part.path).pipe(base64.encode()));
+				});
+			} else if (part.stream) {
+				mode = "stream";
 				combinedStream.append(part.stream.pipe(base64.encode()));
-				log.silly("ServiceBase#returnFormData()", "Sending Stream");
 			} else if (part.buffer) {
-				combinedStream.append(function(nextDataChunk) {
-					log.silly("ServiceBase#returnFormData()", "Sending Buffer");
-					nextDataChunk(part.buffer.toString('base64'));
+				mode = "buffer";
+				combinedStream.append(function(append) {
+					append(part.buffer.toString('base64'));
 				});
 			} else {
 				log.warn("ServiceBase#returnFormData()", "Invalid part:", part);
-				combinedStream.append(function(nextDataChunk) {
-					nextDataChunk('INVALID CONTENT');
+				combinedStream.append(function(append) {
+					append('INVALID CONTENT');
 				});
 			}
+			log.silly("ServiceBase#returnFormData()", "part:", part.filename, "(" + mode + ")");
 		
 			// Adding part footer
-			combinedStream.append(function(nextDataChunk) {
-				log.silly("ServiceBase#returnFormData()", "End-of-Part:", part.filename);
-				nextDataChunk(_getPartFooter());
+			combinedStream.append(function(append) {
+				log.silly("ServiceBase#returnFormData()", "end-of-part:", part.filename);
+				append(_getPartFooter());
 			});
 		});
 		
 		// Adding last footer
-		combinedStream.append(function(nextDataChunk) {
-			nextDataChunk(_getLastPartFooter());
+		combinedStream.append(function(append) {
+			append(_getLastPartFooter());
 		});
 	} catch(err) {
 		setImmediate(next, err);
