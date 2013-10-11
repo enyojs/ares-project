@@ -3,6 +3,7 @@ enyo.depends(
 	"Groupbox.js",
 	"ActionPopup.js",
 	"ErrorPopup.js",
+	"ErrorTooltip.js",
 	"SignInErrorPopup.js",
 	"AsyncError.js",
 	"IFrame.js",
