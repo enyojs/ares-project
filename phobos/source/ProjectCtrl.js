@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "ProjectCtrl",
 	kind: "enyo.Component",
-	debug: true,
+	debug: false,
 	published: {
 		projectData: null,
 		pathResolver: null,
