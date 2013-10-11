@@ -12,7 +12,7 @@ enyo.kind({
 	},
 	published: {
 		timeoutDuration: 3000	
-	},	
+	},
 	
 	debug: false,
 	/**
@@ -294,8 +294,7 @@ enyo.kind({
 	},	
 
 	/**
-	 * This function send an Ajax request to Node.js in order to get all the
-	 * details about the project built in Phongap platform.
+	 * Get the AppData for the selected project.
 	 * 
 	 * @param  {Object}   project contain informations about the Ares project
 	 * @param  {Object}  inData  contains detailed informations about the built
@@ -303,10 +302,22 @@ enyo.kind({
 	 * @param  {Function} next    is a CommonJS callback
 	 * @private
 	 */
-	_getBuildStatus: function(project, inData, next){
+	getProjectAppData: function(project, inData, next){
 		var config = project.getConfig().getData();
 		var appId = config.providers.phonegap.appId;
-		var url = this.url + '/api/v1/apps/' + appId;
+		this.getAppData(appId, next);
+	},
+
+	
+	/**
+	 * Send an AJAX request to Phonegap Build in order to get the application data.
+	 * 
+	 * @param  {String}   inAppId Phonegap's application identifier
+	 * @param  {Function} next    CommonJS callback.
+	 * @private
+	 */
+	getAppData: function(inAppId, next){
+		var url = this.url + '/api/v1/apps/' + inAppId;
 		
 		//Creation of the Ajax request
 		var req = new enyo.Ajax({
@@ -322,24 +333,6 @@ enyo.kind({
 		req.error(this, this._handleServiceError.bind(this, "Unable to get application build status", next));
 		req.go(); 
 	},
-
-
-	
-	/**
-	 * Show the pop-up containing informations about the previous  build of the 
-	 * selected project from the project list view.
-	 * 
-	 * @param  {Object}   project contain a description about the current selected
-	 *                          project
-	 * @param  {Object}  appData  contains detailed informations about the built
-	 *                           application on Phonegap                          
-	 * @param  {Function} next    is a CommonJs callback
-	 * @private
-	 */
-	_showBuildStatus: function(project, appData, next){
-		this.$.buildStatusPopup.showPopup(project, appData.user);
-		next();
-     },
 	
 	/**
 	 * Store relevant user account data 
@@ -472,25 +465,6 @@ enyo.kind({
 			enyo.bind(this, this._submitBuildRequest, project),
 			enyo.bind(this, this._prepareStore, project),
 			enyo.bind(this, this._store, project)
-		], next);
-	},
-
-	/**
-	 * Communicate with Phonegap build in order to get the curent status of the
-	 * built project for all targeted platforms. This status are showen in a 
-	 * Pop-up defined in the file BuildStatusUI.js
-	 * 
-	 * @param  {Object}   project contain a description about the current selected
-	 *                            project
-	 * @param  {Function} next    is a CommonJS Callback
-	 * @public
-	 */
-	buildStatus: function(project, next) {
-		this.trace("Getting build status:  ", this.url, '/build');
-		async.waterfall([
-			enyo.bind(this, this.authorize),
-			enyo.bind(this, this._getBuildStatus, project),			
-			enyo.bind(this, this._showBuildStatus, project)
 		], next);
 	},
 
@@ -787,7 +761,7 @@ enyo.kind({
 					},
 					function (next) {
 						if(appData.status[platform] === "pending"){
-							builder._getBuildStatus(project, appData, next);
+							builder.getProjectAppData(project, appData, next);
 						} else{
 							next(null, null);
 						}
