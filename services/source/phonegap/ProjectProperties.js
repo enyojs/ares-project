@@ -1,3 +1,4 @@
+/* global ares, Phonegap, ServiceRegistry */
 /**
  * UI: Phonegap pane in the ProjectProperties popup
  * @name Phonegap.ProjectProperties
