@@ -60,6 +60,9 @@ enyo.kind({
 		onShowWaitPopup: "showWaitPopup",
 		onHideWaitPopup: "hideWaitPopup",
 		onError: "showError",
+		onErrorTooltip: "showDesignerErrorTooltip",
+		onErrorTooltipReset: "resetDesignerErrorTooltip",
+		onDesignerBroken: "showDesignerError",
 		onSignInError: "showAccountConfiguration",
 		onTreeChanged: "_treeChanged",
 		onChangingNode: "_nodeChanging",
@@ -515,6 +518,15 @@ enyo.kind({
 	},
 	showErrorPopup : function(inEvent) {
 		this.$.errorPopup.raise(inEvent);
+	},
+	showDesignerErrorTooltip: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("designerPanels").showErrorTooltip(inSender, inEvent);
+	},
+	resetDesignerErrorTooltip: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("designerPanels").resetErrorTooltip();
+	},
+	showDesignerError: function(){
+		this.showError("",ComponentsRegistry.getComponent("designerPanels").getErrorFromDesignerBroken());
 	},
 	showSignInErrorPopup : function(inEvent) {
 		this.$.signInErrorPopup.raise(inEvent);

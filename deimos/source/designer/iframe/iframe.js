@@ -45,13 +45,31 @@ enyo.kind({
 		this.inherited(arguments);
 		this.addHandlers();
 		this.addDispatcherFeature();
+		window.onerror = enyo.bind(this, this.raiseLoadError);
+	},
+	raiseLoadError: function(msg, url, linenumber) {
+		// I'm a goner
+		var file = url.replace(/.*\/services(?=\/)/,'');
+		var errMsg = "user app load FAILED with error '" + msg
+			+ "' in " + file + " line " + linenumber  ;
+		this.trace(errMsg);
+		this.sendMessage({op: "reloadNeeded"});
+		this.sendMessage({op: "error", val: {msg: errMsg}});
+		return true;
 	},
 	rendered: function() {
 		this.inherited(arguments);
+		this.trace("called for designer iframe. Loading user application");
 		this.adjustFrameworkFeatures();
+
+		// warning: user code error will trigger this.raiseLoadError
+		// through window.onerror handler
+		// another warning: enyo.load is asynchronous. try/catch is useless
 		enyo.load("$enyo/../source/package.js", enyo.bind(this, function() {
+			this.trace("user app load done within designer iframe");
 			this.sendMessage({op: "state", val: "initialized"});
 		}));
+
 	},
 	initComponents: function() {
 		this.createSelectHighlight();
@@ -440,7 +458,7 @@ enyo.kind({
 			var errStack = typeof error === 'object' ? error.stack : '' ;
 			this.error(errMsg, errStack );
 			this.sendMessage({op: "reloadNeeded"});
-			this.sendMessage({op: "error", val: {msg: errMsg, reloadNeeded: true, err: {stack: errStack}}});
+			this.sendMessage({op: "error", val: {msg: errMsg, requestReload: true, err: {stack: errStack}}});
 		}
 	},
 	//* Rerender current selection
