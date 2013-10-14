@@ -29,7 +29,6 @@ enyo.kind({
 		onItemDrop: "itemDrop",
 		onItemDragend: "itemDragend",
 		onNodeDblClick: "nodeDblClick",
-		//onNodeRightClick: "nodeRightClick",
 		onAdjustScroll: "adjustScroll"
 	},
 	published: {
@@ -124,7 +123,8 @@ enyo.kind({
 	selectedNode: null,
 	
 	debug: false,
-	debugContextMenu: false, //	used to deactivate Hermes right-click menu and allow the one browser one
+	// when set, deactivate Hermes right-click menu and allow the browser's menu
+	debugContextMenu: false,
 
 	packages: false,
 	

@@ -50,7 +50,11 @@ enyo.kind({
 	onlyIconExpands: true,
 	
 	debug: false,
-	debugContextMenu: false, // used to deactivate Hermes right-click menu and allow the browser one on the caption item of the node
+
+	// used to deactivate Hermes right-click menu and allow the
+	// browser one on the caption item of the node
+	debugContextMenu: false,
+
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
