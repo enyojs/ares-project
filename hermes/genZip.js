@@ -69,7 +69,7 @@ GenZip.prototype.generate = function(req, res, next) {
 			destination = tmpDir;
 			var parts = fileMap.map(function(file) {
 				return({
-					filename: file.name,
+					name: file.name,
 					path: file.path
 				});
 			});
