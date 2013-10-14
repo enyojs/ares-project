@@ -19,7 +19,7 @@ enyo.kind({
 		onProjectRemoved: "",
 		onCloseProjectDocuments:"",
 		onModifySettings: "",
-		onBuild: "",
+		onSaveAllBeforeBuild: "",
 		onInstall: "",
 		onRun: "",
 		onRunDebug: "",
@@ -84,7 +84,7 @@ enyo.kind({
 								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_preview.png"},
 								{content: "Preview"}
 							]},
-							{value: "doBuild",  classes:"aresmenu-button", components: [
+							{value: "doSaveAllBeforeBuild",  classes:"aresmenu-button", components: [
 								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_build.png"},
 								{content: "Build..."}
 							]},

@@ -18,6 +18,8 @@ enyo.kind({
 		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
 		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onCancelActionPopup: "cancelAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
+		{name: "saveAllPopup", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllAction", onCancelActionPopup: "cancelAction"},
+		{name: "BuildAfterSaveAllFailPopup", kind: "saveAllActionPopup", onConfirmActionPopup: "BuildAfterSaveFailAction", onCancelActionPopup: "cancelBuildAction"},
 		{name: "overwritePopup", kind: "overwriteActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "saveAsConfirm", onCancelActionPopup: "saveAsCancel", onHide:"doAceFocus"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: $L("unknown error")},
@@ -32,6 +34,7 @@ enyo.kind({
 		onSaveAsDocument: "",
 		onDesignDocument: "",
 		onCloseDocument: "",
+		onBuild: "",
 		onUpdate: "",
 		onRegisterMe: "",
 		onDisplayPreview: "",
@@ -53,6 +56,8 @@ enyo.kind({
 	analysis: {},
 	helper: null,			// Analyzer.KindHelper
 	closeAll: false,
+	saveAll: false,
+	saveAllBeforeBuildProject: null,
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
@@ -81,13 +86,18 @@ enyo.kind({
 		return true;
 	},
 	saveComplete: function(inDocData) {
+		if (this.saveAll === false) {
 		this.hideWaitPopup();
+		}
 		if (inDocData) {
 			inDocData.setEdited(false);		// TODO: The user may have switched to another file
 			this.doFileEdited();
 		}
-		if (this.docData === inDocData) {
+		if (this.docData === inDocData && this.saveAll == false) {
 			this.reparseAction();
+		}
+		if (this.saveAll === true) {
+			this.saveNextDocumentAsSaveAll();
 		}
 	},
 	saveNeeded: function() {
@@ -96,7 +106,15 @@ enyo.kind({
 	saveFailed: function(inMsg) {
 		this.hideWaitPopup();
 		this.warn("Save failed: " + inMsg);
-		this.showErrorPopup("Unable to save the file");
+		if (this.saveAll === true || this.saveAllBeforeBuildProject != null) {
+			this.editedDocs = null;
+			this.saveAll = false;
+			if (this.saveAllBeforeBuildProject != null) {
+				this.showSaveAllPopup("BuildAfterSaveAllFailPopup", "Unable to save the file.<br/><br/>Continue Build?'");
+			}
+		} else {
+			this.showErrorPopup("Unable to save the file");
+		}
 	},
 	saveAsDocAction: function() {
 		var file = this.docData.getFile();
@@ -107,6 +125,122 @@ enyo.kind({
 			this.$.saveAsPopup.show();
 		}).bind(this));
 	},
+	_getEditedDocs: function(){
+		var project = Ares.Workspace.projects.get(this.docData.getProjectData().id);
+		var files = Ares.Workspace.files;
+		var editedDocs = [];
+		enyo.forEach(files.models, function(model) {
+			var serviceId = model.getProjectData().getServiceId();
+			var folderId = model.getProjectData().getFolderId();
+			if ( serviceId === project.getServiceId() && folderId === project.getFolderId()) {
+				if(model.getEdited()){
+					editedDocs.push(model);
+				}
+			}
+		}, this);
+		this.editedDocs = editedDocs;
+	},
+
+	openDocAsSaveAll: function(inDocData) {
+		var file = inDocData.getFile();
+		var extension = file.name.split(".").pop();
+
+		var mode = {
+			json: "json",
+			design: "json",
+			js: "javascript",
+			html: "html",
+			css: "css",
+			coffee: "coffee",
+			dot: "dot",
+			patch: "diff",
+			diff: "diff",
+			jade: "jade",
+			less: "less",
+			md: "markdown",
+			markdown: "markdown",
+			svg: "svg",
+			xml: "xml",
+			jpeg: "image",
+			jpg: "image",
+			png: "image",
+			gif: "image"
+		}[extension] || "text";
+
+		var hasAce = this.adjustPanelsForMode(mode, this.$.editorSettingsPopup.getSettings().rightpane);
+		
+		if (hasAce) {
+			var aceSession = inDocData.getAceSession();
+			if (aceSession) {
+				this.$.ace.setSession(aceSession);
+			} else {
+				aceSession = this.$.ace.createSession(inDocData.getData(), mode);
+				this.$.ace.setSession(aceSession);
+				inDocData.setAceSession(aceSession);
+			}
+		}
+		else {
+			var config = this.projectData.getService().getConfig();
+			var fileUrl = config.origin + config.pathname + "/file" + file.path;
+			this.$.imageViewer.setAttribute("src", fileUrl);
+		}
+	},
+
+	saveNextDocumentAsSaveAll: function(){
+		if(this.editedDocs != null && this.editedDocs.length >= 1) {
+			var docData = this.editedDocs.pop();
+			this.openDocAsSaveAll(docData);
+			this.doSaveDocument({content: this.$.ace.getValue(), file: docData.getFile()});
+			return true;
+		}else{
+			this.hideWaitPopup();
+			this.saveAll = false;
+			this.editedDocs = null;
+			this.openDoc(this.docData);
+			this.doAceFocus();
+			if (this.saveAllBeforeBuildProject != null) {
+				this.doBuild({project: this.saveAllBeforeBuildProject});
+				this.saveAllBeforeBuildProject = null;
+			}
+			return false;
+		}
+	},
+	saveAllAction: function() { // hyunk
+		this.showWaitPopup($L("Saving ..."));
+		this.saveAll = true;
+		this.saveNextDocumentAsSaveAll();
+	},
+	BuildAfterSaveFailAction: function() { // hyunk
+		this.doBuild({project: this.saveAllBeforeBuildProject});
+		this.saveAllBeforeBuildProject = null;
+	},
+	saveAllDocuments: function(editedDocs){ // hyunk
+		this.editedDocs = editedDocs;
+		this.saveAllDocAction();
+	},
+	saveAllDocumentsBeforeBuild: function(project){ // hyunk
+		this.saveAllBeforeBuildProject = project;
+		this.saveAllDocAction();
+	},
+	saveAllDocAction: function() { // hyunk
+		this._getEditedDocs();
+		if(this.editedDocs.length >= 1) {
+			if (this.saveAllBeforeBuildProject != null) {
+				this.showSaveAllPopup("saveAllPopup", "Save All the files Before Build?'");
+			} else {
+				this.showSaveAllPopup("saveAllPopup", "Save All the files?'");
+			}
+		} else {
+//			this.showSaveAllPopup("saveAllPopup", "All files already saved");
+			console.log ("saveAllDocAction::No edited files exist");
+			if (this.saveAllBeforeBuildProject != null) {
+				// TODO hyunk :: start Build
+				this.doBuild({project: this.saveAllBeforeBuildProject});
+				this.saveAllBeforeBuildProject = null;
+			}
+		}
+	},
+	
 	saveAsFileChosen: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		
@@ -753,8 +887,18 @@ enyo.kind({
 		this.cancelAction();
 	},
 	cancelAction: function(inSender, inEvent) {
+		if (this.saveAllBeforeBuildProject != null) {
+			this.doBuild({project: this.saveAllBeforeBuildProject});
+			this.saveAllBeforeBuildProject = null;
+		}
 		this.doAceFocus();
 	},
+	cancelBuildAction: function(inSender, inEvent) {
+		if (this.saveAllBeforeBuildProject != null) {
+			this.saveAllBeforeBuildProject = null;
+		}
+		this.doAceFocus();
+	},	
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
@@ -772,6 +916,15 @@ enyo.kind({
 		this.$[componentName].setActionButton($L("Don't Save"));
 		this.$[componentName].show();
 	},	
+	/** 
+	* @protected
+	*/
+	showSaveAllPopup: function(componentName, message){
+		this.$[componentName].setTitle($L("Document was modified!"));
+		this.$[componentName].setMessage(message);
+		this.$[componentName].setActionButton($L("SaveAll"));
+		this.$[componentName].show();
+	},
 	/** 
 	* @protected
 	*/
@@ -1050,6 +1203,24 @@ enyo.kind({
 			{name:"saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "save"},
 			{owner: this}
 		);
+	},
+	/** @private */
+	save: function(inSender, inEvent) {
+		this.hide();
+		this.doSaveActionPopup();
+	}
+});
+
+enyo.kind({
+	name: "saveAllActionPopup",
+	kind: "Ares.ActionPopup",
+	events:{
+		onSaveActionPopup: ""
+	},
+	/** @private */
+	create: function() {
+		this.inherited(arguments);
+		this.$.message.allowHtml = true;
 	},
 	/** @private */
 	save: function(inSender, inEvent) {
