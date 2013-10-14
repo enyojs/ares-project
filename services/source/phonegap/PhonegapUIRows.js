@@ -1,3 +1,4 @@
+/* jshint indent: false */ // TODO: ENYO-3311
 /* global ares, Phonegap */
 
 /**

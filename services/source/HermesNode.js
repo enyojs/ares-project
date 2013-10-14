@@ -1,3 +1,4 @@
+/* jshint indent: false */ // TODO: ENYO-3311
 /**
  * Represents a directory or a file in {HermesFileTree}
  * 
