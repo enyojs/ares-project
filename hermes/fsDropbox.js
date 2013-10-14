@@ -74,7 +74,9 @@ FsDropbox.prototype.authorize = function(req, res, next) {
 			return next(e);
 		}
 		req.dropbox = new dropbox.Client({
-			key: auth.appKey, secret: auth.appSecret, sandbox: true
+			key: auth.appKey,
+			secret: auth.appSecret,
+			sandbox: true
 		});
 		req.dropbox.authDriver(new AuthDriver(auth));
 		req.dropbox.authenticate((function(err, client) {
