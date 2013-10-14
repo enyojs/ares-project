@@ -81,8 +81,9 @@ enyo.kind({
 		onMovePanel : "_movePanel",
 		onSavePreviewAction: "_saveBeforePreview",
 		onDisplayPreview : "_displayPreview",
-		onFileEdited:"_fileEdited"
-
+		onFileEdited:"_fileEdited",
+		onSaveAllDocument: "_saveAllDocument",
+		onBuild: "_startBuild",
 	},
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
@@ -610,6 +611,26 @@ enyo.kind({
 	_fileEdited: function() {
 		ComponentsRegistry.getComponent("designerPanels").updateDeimosLabel(this.activeDocument.getEdited());
 	},
+	_saveAllDocument: function(inSender, inEvent){
+		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
+		var files = Ares.Workspace.files;
+		var editedDocs = [];
+		enyo.forEach(files.models, function(model) {
+			var serviceId = model.getProjectData().getServiceId();
+			var folderId = model.getProjectData().getFolderId();
+			if ( serviceId === project.getServiceId() && folderId === project.getFolderId()) {
+				if(model.getEdited()){
+					editedDocs.push(model);
+				}
+			}
+		}, this);
+		ComponentsRegistry.getComponent("phobos").saveAllDocuments(editedDocs);
+	},
+	_startBuild: function(inSender, inEvent){
+		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
+		ComponentsRegistry.getComponent("projectView").buildAction(inSender,{project:project});
+	},
+	
 	/**
 	 * Event handler for ares components registry
 	 * 

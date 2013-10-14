@@ -177,6 +177,10 @@ enyo.kind({
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save as...")}
 			]},
+			{name: "saveAllButton", value: "saveAllDocAction", classes:"aresmenu-button", components: [
+				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
+				{content: $L("Save All")}
+			]},
 			{classes: "onyx-menu-divider"},
 			{name: "closeButton", value: "closeDocAction", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
