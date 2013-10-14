@@ -170,6 +170,9 @@ enyo.kind({
 		}
 
 		while (control.kind !== "HermesFileTree") {
+			if (control.owner === undefined) {
+				return true;
+			}
 			control = control.owner;
 		}
 		
