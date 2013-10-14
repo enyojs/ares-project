@@ -368,16 +368,29 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 		
 		parts.forEach(function(part) {
 			// Adding part header
-			combinedStream.append(_getPartHeader(part.name));
+			if (!part.name) {
+				throw new HttpError(503, "Invalid (missing name) part:"+ util.inspect(part, {level: 2}));
+			} else {
+				combinedStream.append(_getPartHeader(part.name));
+			}
 
 			// Adding data
 			if (part.path) {
 				mode = "path";
+				var stream = fs.createReadStream(part.path);
+				stream.on('error', function(err) {
+					log.warn("ServiceBase#returnFormData()", "part:", part.filename, "(" + mode + ")", "err:", err);
+					next(err);
+				});
 				combinedStream.append(function(append) {
-					append(fs.createReadStream(part.path).pipe(base64.encode()));
+					append(stream.pipe(base64.encode()));
 				});
 			} else if (part.stream) {
 				mode = "stream";
+				part.stream.on('error', function(err) {
+					log.warn("ServiceBase#returnFormData()", "part:", part.filename, "(" + mode + ")", "err:", err);
+					next(err);
+				});
 				combinedStream.append(part.stream.pipe(base64.encode()));
 			} else if (part.buffer) {
 				mode = "buffer";
@@ -386,9 +399,7 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 				});
 			} else {
 				log.warn("ServiceBase#returnFormData()", "Invalid part:", part);
-				combinedStream.append(function(append) {
-					append('INVALID CONTENT');
-				});
+				throw new HttpError(503, "Invalid part:"+ util.inspect(part, {level: 2}));
 			}
 			log.silly("ServiceBase#returnFormData()", "part:", part.filename, "(" + mode + ")");
 		
@@ -412,6 +423,7 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 	res.status(200);
 	res.header('Content-Type', _getContentTypeHeader());
 	res.header('X-Content-Type', _getContentTypeHeader());
+	combinedStream.on('error', next);
 	combinedStream.on('end', function() {
 		log.silly("ServiceBase#returnFormData()", "Streaming completed");
 		next();
@@ -568,6 +580,10 @@ ServiceBase.prototype.receiveWebForm = function(req, res, next) {
 	busboy.once('end', function() {
 		log.verbose("ServiceBase#receiveWebForm()", "parsed " + nfields + " fields");
 		next();
+	});
+	busboy.on('error', function(err) {
+		log.warn("ServiceBase#receiveWebForm()", "busboy.err:", err);
+		next(err);
 	});
 	log.verbose("ServiceBase#receiveWebForm()", "parsing started");
 	req.pipe(busboy);
