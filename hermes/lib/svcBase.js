@@ -363,7 +363,6 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 		var mode;
 
 		combinedStream = CombinedStream.create({
-			pauseStreams: true,
 			maxDataSize: this.config.maxDataSize || 15*1024*1024 /*15 MB*/
 		});
 		
