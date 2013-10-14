@@ -45,7 +45,8 @@ enyo.kind(
 								[
 									{}, // A content-less PickerButton
 									{
-										kind: "PreviewDevicePicker", name: "device"
+										kind: "PreviewDevicePicker",
+										name: "device"
 									}
 								]
 							},
@@ -67,7 +68,8 @@ enyo.kind(
 								[
 									{name:"screenPicker"}, // A content-less PickerButton
 									{
-										kind: "onyx.Picker", name: "orientation",
+										kind: "onyx.Picker",
+										name: "orientation",
 										components: [
 											{name:"portrait", content: "portrait", active: true },
 											{name:"landscape", content: "landscape"              }
