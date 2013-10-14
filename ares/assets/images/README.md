@@ -17,6 +17,8 @@
   * `splach_ic_editnow.png`
 * designer.png
   * made of splach_ic_editnow.png & bricks.png
+* designer_broken.png
+  * made of designer.png & [http://openclipart.org/image/800px/svg_to_png/168105/broken_icon.png](http://openclipart.org/image/800px/svg_to_png/168105/broken_icon.png)
 * editor_settings.png
   * made of `components_32_32.png` & pencil.png
 * new_kind.png
