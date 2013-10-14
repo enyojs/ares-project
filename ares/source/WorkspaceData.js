@@ -76,10 +76,18 @@ _.extend(AresStore.prototype, {
 		var resp;
 
 		switch (method) {
-			case "read":    resp = model.id ? this.find(model) : this.findAll(); break;
-			case "create":  resp = this.create(model);		break;
-			case "update":  resp = this.update(model);      break;
-			case "delete":  resp = this.destroy(model);     break;
+		case "read":
+			resp = model.id ? this.find(model) : this.findAll();
+			break;
+		case "create":
+			resp = this.create(model);
+			break;
+		case "update":
+			resp = this.update(model);
+			break;
+		case "delete":
+			resp = this.destroy(model);
+			break;
 		}
 
 		if (resp) {

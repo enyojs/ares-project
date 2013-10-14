@@ -18,5 +18,6 @@
     "newcap": true,
     "undef": true,
     "unused": "vars",
-    "smarttabs": true
+    "smarttabs": true,
+    "indent": 4
 }
