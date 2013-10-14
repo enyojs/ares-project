@@ -70,18 +70,8 @@ enyo.kind({
 					showing: false,
 					components: [
 						{name: "hideStatusContainer", kind: "onyx.IconButton", src: "$project-view/assets/images/close-button-16x16.png", classes: "ares-project-properties-hide-status-button", ontap:"hideMessageContainer"},
-						{name: "statusMessage"},
-						{name: "downloadLink", content: "ddl link", tag: "a", shown: false, classes: "ares-project-properties-dl-link", ontap: "checkDownload"},
-						{
-							name: "downloadStatusContainer", kind: "FittableColumns", 
-							components: [
-								{name: "statusRow02", content: "Download confimation"},
-								{name: "launchDownload", kind: "onyx.Button", content: "Yes", showing: false},
-								{name: "cancelDownload", kind: "onyx.Button", content: "No", showing: false},
-							]
-						},
-						
-						{name: "statusRow03", content: "Download Progress", showing: false}
+						{name: "downloadLink", content: "ddl link", tag: "a", shown: false, classes: "ares-project-properties-dl-link", ontap: "downloadPackage"},
+						{name: "statusMessage", classes: "ares-project-properties-status-message"}
 					]
 				}
 									
@@ -112,6 +102,7 @@ enyo.kind({
 	 * Charge the icon showing the build status of the application of a a given platform depending on 
 	 * its status. the status is checked from the "buildStatusData" object.
 	 * By clicking on the icon, the status message is displayed.
+	 * 
 	 * @private	 
 	 */
 	buildStatusDataChanged: function(){
@@ -130,8 +121,6 @@ enyo.kind({
 	showStatusMessage: function(inSender, inEvent){
 		
 		this.$.messageContainer.show();
-		this.$.downloadStatusContainer.hide();
-
 
 		if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "complete") {
 			this.$.statusMessage.setContent("");
@@ -174,83 +163,34 @@ enyo.kind({
 	},
 
 	/**
-	 * 
+	 * Listener to launch the download request form the Phonegap Build service manager.
+	 * @param  {Object} inSender 
+	 * @param  {Object} inEvent  
 	 * @private
 	 */
-	checkDownload: function(inSender, inEvent) {
+	downloadPackage: function(inSender, inEvent) {
 
-		var childrenList, phonegapFolderContent;
-
-		// Reconstruct the name of the package in the same way as done in bdPhonegap.
-			var packageName = this.buildStatusData.package + "_" + this.buildStatusData.version + "." + (Phonegap.ProjectProperties.packageExtensions[this.selectedPlatform] || "bin");
-		
-
-		// get the instance describing the project root node.
 		var projectConfig = this.owner.getProject();
+		this.provider.downloadPackage(projectConfig, this.selectedPlatform, this.buildStatusData, enyo.bind(this, this.getPackage));
+		this.$.statusMessage.setContent("Download on progress");
+		this.$.statusMessage.show();
+	},
+	/**
+	 * Callback used in the function "downloadPackage()"" in "Build.js"
+	 * Update the status message to show the current status of the download request.
+	 * 
+	 * @param  {Object} err       error object
+	 * @private
+	 */
+	getPackage: function(err) {
+		if(err) {
+			this.$.statusMessage.setContent("Download failed");
+			this.$.statusMessage.show();
 
-		/**
-		 * Return the list of the built applications in the file '$/target/phonegap'
-		 * @param  {Array} inArray contains instances of the sub-nodes of the selected project
-		 * @return {Array}         list of the files contained in the project folder '$/target/phonegap'
-		 * @private
-		 */
-		var getPhonegapFolderContent = function (inArray) {
-			var phonegapFolderContent; 
-			enyo.forEach(inArray, function(child){
-				if (child.isDir && child.name === "target") {
-					phonegapFolderContent = child.children[0].children;					
-				}
-			}, this);
-
-			return phonegapFolderContent;
-		};
-
-		/**
-		 * @param  {Array} inArray meta-data on the files existing in the folder "$/target/phonegap"
-		 * @return {boolean}         "true" if the package for the selected platfrom existe in "$/target/phonegap", false otherwise.
-		 * @private
-		 */
-		var verifyPackage = function(inArray) {
-
-			var packageAlreadyExist = false;
-			enyo.forEach(inArray, function (packageInstance) {
-				if (packageInstance.name === packageName) {
-					packageAlreadyExist = true;
-				}				
-			}, this);
-
-			return packageAlreadyExist;
-		};
-		
-		
-		// Test if a project is selected from the project list
-		if (projectConfig !== undefined) {
-			
-			var req = projectConfig.service.propfind(projectConfig.folderId, 3);			
-			req.response(this, function(inSender, inFile) {
-				childrenList = inFile.children;				
-				phonegapFolderContent = getPhonegapFolderContent.call(this, childrenList);
-
-				if(verifyPackage.call(this, phonegapFolderContent)) {
-				
-					this.$.downloadStatusContainer.show();
-					this.$.statusRow02.setContent("Override the package " + packageName);
-					
-					this.$.launchDownload.show();
-					this.$.cancelDownload.show();
-
-				} else {
-					
-					this.$.downloadStatusContainer.show();
-
-					this.$.statusRow02.setContent("Downloading the package" + packageName + "");
-					this.$.launchDownload.hide();
-					
-					this.$.cancelDownload.hide();
-					this.$.downloadLink.render();
-				}
-			});			
-		}		
+		} else {
+			this.$.statusMessage.setContent("Download complete");
+			this.$.statusMessage.show();
+		}
 	},	
 
 	/**@private*/

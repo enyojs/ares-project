@@ -402,7 +402,7 @@ enyo.kind({
 			this.$.propertiesWidget.setTargetProject(target);
 
 			// Pass the configuration of the selected project to the panel "Phonegap Build"
-			this.$.propertiesWidget.$.phonegapDrawer.$.phonegap.setProject(target.attributes);
+			this.$.propertiesWidget.$.phonegapDrawer.$.phonegap.setProject(target);
 
 			this.$.propertiesWidget.setupModif();
 			this.$.propertiesWidget.preFill(config.data);
