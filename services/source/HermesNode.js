@@ -61,12 +61,8 @@ enyo.kind({
 	},
 	/** @private */
 	down: function(inSender, inEvent) {
-		switch (inEvent.which) {
-			case 1:
-				this.doItemDown(inEvent);
-				break;
-			default:
-				break;
+		if (inEvent.which === 1) {
+			this.doItemDown(inEvent);
 		}
 		
 		return true;
@@ -109,13 +105,10 @@ enyo.kind({
 	},
 	/** @private */
 	up: function (inSender, inEvent) {
-		switch (inEvent.which) {
-			case 1:
-				this.doItemUp(inEvent);
-				break;
-			default:
-				break;
+		if (inEvent.which === 1) {
+			this.doItemUp(inEvent);
 		}
+		
 		return true;
 	},
 	/** @private */
