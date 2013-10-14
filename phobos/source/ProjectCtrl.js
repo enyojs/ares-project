@@ -81,7 +81,7 @@ enyo.kind({
 			this.pending = true;
 		}
 	},
-	cleanup: function(what) {
+	runPendingAnalysis: function(what) {
 		this.ongoing = false ;
 		if (this.pending) {
 			this.trace("Running pending project analysis after "+ what);
@@ -89,7 +89,7 @@ enyo.kind({
 		}
 	},
 	passError: function(inSender, inEvent) {
-		this.cleanup('analyser error');
+		this.runPendingAnalysis('analyser error');
 		// let the error bubble so user is notified
 	},
 	raiseLoadError: function(inSender, inEvent) {
@@ -98,14 +98,14 @@ enyo.kind({
 		var barUrl = inEvent.msg.replace(cleaner,'').replace(rmdots,'');
 		this.log("analyser cannot load ",barUrl);
 		this.doErrorTooltip({msg: "analyser cannot load " + barUrl });
-		this.cleanup('analyser load error');
+		this.runPendingAnalysis('analyser load error');
 	},
 	/**
 	 * Notifies modules dependent on the indexer that it has updated
 	 * @protected
 	 */
 	projectIndexReady: function() {
-		this.cleanup('successfull analysis');
+		this.runPendingAnalysis('successfull analysis');
 		if (! this.pending) {
 			// Update the model to wake up the listeners only when
 			// pending analysis is done to make sure that last
