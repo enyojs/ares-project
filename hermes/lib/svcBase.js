@@ -505,42 +505,42 @@ ServiceBase.prototype.receiveJson = function(req, res, next) {
  * @param next {Integer} nfields number of fields set in {req.body}
  */
 ServiceBase.prototype.receiveFormData = function(req, receiveFile, receiveField, next) {
-	log.verbose("ServiceBase#returnFormData()");
+	log.verbose("ServiceBase#receiveFormData()");
 	var infiles = 0, outfiles = 0, nfields = 0;
 	var parsed = false;
 	var busboy = new Busboy({headers: req.headers});
 	busboy.on('file', function(fieldName, fieldValue, fileName, encoding) {
 		infiles++;
-		log.silly("ServiceBase#returnFormData()", "fieldName:", fieldName, ", fileName:", fileName, "encoding:", encoding);
+		log.silly("ServiceBase#receiveFormData()", "fieldName:", fieldName, ", fileName:", fileName, "encoding:", encoding);
 		var file = new Readable().wrap(fieldValue);
 		receiveFile(fieldName, file, _receivedPart, fileName, encoding);
 	});
 	busboy.on('field', function(fieldname, val, valTruncated, keyTruncated) {
 		++nfields;
-		log.silly("ServiceBase#returnFormData()", "field", fieldname, "=", val);
+		log.silly("ServiceBase#receiveFormData()", "field", fieldname, "=", val);
 		receiveField(fieldname, val);
 	});
 	busboy.once('end', function() {
-		log.silly("ServiceBase#returnFormData()", "parsing complete, infiles:", infiles);
+		log.silly("ServiceBase#receiveFormData()", "parsing complete, infiles:", infiles);
 		parsed = true;
 		if (infiles === 0) {
 			next();
 		}
 	});
-	log.silly("ServiceBase#returnFormData()", "parsing started");
+	log.silly("ServiceBase#receiveFormData()", "parsing started");
 	req.on('error', function(err) {
-		log.warn("ServiceBase#returnFormData()", "req.err:", err);
+		log.warn("ServiceBase#receiveFormData()", "req.err:", err);
 		next(err);
 	});
 	busboy.on('error', function(err) {
-		log.warn("ServiceBase#returnFormData()", "busboy.err:", err);
+		log.warn("ServiceBase#receiveFormData()", "busboy.err:", err);
 		next(err);
 	});
 	req.pipe(busboy);
 
 	function _receivedPart(err) {
 		outfiles++;
-		log.silly("ServiceBase#returnFormData_receivedPart()", outfiles + "/" + infiles + " file parts processed");
+		log.silly("ServiceBase#receiveFormData_receivedPart()", outfiles + "/" + infiles + " file parts processed");
 		if (parsed && infiles === outfiles) {
 			log.verbose("ServiceBase#receiveFormData#_receivedPart()", "received", outfiles, "parts");
 			setImmediate(next, null, outfiles, nfields);
