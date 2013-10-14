@@ -93,7 +93,7 @@ enyo.kind({
 			inDocData.setEdited(false);		// TODO: The user may have switched to another file
 			this.doFileEdited();
 		}
-		if (this.docData === inDocData && this.saveAll == false) {
+		if (this.docData === inDocData && this.saveAll === false) {
 			this.reparseAction();
 		}
 		if (this.saveAll === true) {
@@ -205,24 +205,24 @@ enyo.kind({
 			return false;
 		}
 	},
-	saveAllAction: function() { // hyunk
+	saveAllAction: function() {
 		this.showWaitPopup($L("Saving ..."));
 		this.saveAll = true;
 		this.saveNextDocumentAsSaveAll();
 	},
-	BuildAfterSaveFailAction: function() { // hyunk
+	BuildAfterSaveFailAction: function() {
 		this.doBuild({project: this.saveAllBeforeBuildProject});
 		this.saveAllBeforeBuildProject = null;
 	},
-	saveAllDocuments: function(editedDocs){ // hyunk
+	saveAllDocuments: function(editedDocs){
 		this.editedDocs = editedDocs;
 		this.saveAllDocAction();
 	},
-	saveAllDocumentsBeforeBuild: function(project){ // hyunk
+	saveAllDocumentsBeforeBuild: function(project){
 		this.saveAllBeforeBuildProject = project;
 		this.saveAllDocAction();
 	},
-	saveAllDocAction: function() { // hyunk
+	saveAllDocAction: function() {
 		this._getEditedDocs();
 		if(this.editedDocs.length >= 1) {
 			if (this.saveAllBeforeBuildProject != null) {
@@ -231,10 +231,7 @@ enyo.kind({
 				this.showSaveAllPopup("saveAllPopup", "Save All the files?'");
 			}
 		} else {
-//			this.showSaveAllPopup("saveAllPopup", "All files already saved");
-			console.log ("saveAllDocAction::No edited files exist");
 			if (this.saveAllBeforeBuildProject != null) {
-				// TODO hyunk :: start Build
 				this.doBuild({project: this.saveAllBeforeBuildProject});
 				this.saveAllBeforeBuildProject = null;
 			}

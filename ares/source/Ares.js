@@ -630,13 +630,6 @@ enyo.kind({
 		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
 		ComponentsRegistry.getComponent("projectView").buildAction(inSender,{project:project});
 	},
-	_displayPreview: function(inSender, inEvent){
-		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
-		ComponentsRegistry.getComponent("projectView").previewAction(inSender,{project:project});
-	},
-	_fileEdited: function() {
-		ComponentsRegistry.getComponent("designerPanels").updateDeimosLabel(this.activeDocument.getEdited());
-	},
 	
 	/**
 	 * Event handler for ares components registry
