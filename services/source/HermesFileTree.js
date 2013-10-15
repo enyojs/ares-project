@@ -692,8 +692,12 @@ enyo.kind({
 
 		// menu must be opened first to get its bounds
 		this.$.hermesMenu.requestShowMenu();
-		// calculate a specific back offset to add when menu reach bottom and right side of hermesFileTree, because of a z-index issue and wrong onyx widget position 
-		// calculation result when menu is shown at a mouse event place with or without a first offset...
+		// calculate a specific offset to shift the menu when the menu
+		// reaches the bottom or the right side of hermesFileTree.
+		// Without this offset the popup menu can be shown *under* the
+		// editor.designer panel. This offset avoids but does not fix
+		// the z-index issue,
+
 		var bounds = this.$.hermesMenuList.getBounds(),
 			backOffsetLeft = 0,
 			backOffsetTop = 0;
