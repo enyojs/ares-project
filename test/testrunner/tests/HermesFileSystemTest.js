@@ -81,16 +81,16 @@ enyo.kind({
 			* MKCOL - want to create test/root/TestRunner directory
 			* if test/root/TestRunner exists first delete it
 			*/
-				var req2 = service.impl.createFolder(inResponse.id, this.dirToCreate);
-				req2.response(function(inSender, inResponse) {
-					self.trace("Got the inResponse for req2: ", inResponse);
-					self.finish();
-				});
-				req2.error(this, function(inSender, inError) {
-					self.trace(inError);
-					self.finish("create "+this.dirToCreate+ " folder failed with error: " +inError);
-				});
+			var req2 = service.impl.createFolder(inResponse.id, this.dirToCreate);
+			req2.response(function(inSender, inResponse) {
+				self.trace("Got the inResponse for req2: ", inResponse);
+				self.finish();
 			});
+			req2.error(this, function(inSender, inError) {
+				self.trace(inError);
+				self.finish("create "+this.dirToCreate+ " folder failed with error: " +inError);
+			});
+		});
 		req.error(this, function(inSender, inError) {
 			enyo.log(inError);
 			this.finish("propfind on root id failed: "+inError);
@@ -191,32 +191,32 @@ enyo.kind({
 			/**
 			* DELETE - want to delete test/root/TestRunner/App.js file
 			*/
-			    /**
-			    * new PROPFIND on test/root/TestRunner
-			    */
-			    var req2 = service.impl.propfind(inResponse.children[3].id, 1);
-			    var self = this;
-			    req2.response(self, function(inSender, inResponse) {
-					self.trace("Got the inResponse for req3: ", enyo.json.stringify(inResponse));
-					var self2 = self;
-					if (inResponse.children[0].name === this.fileToCreate) {
-						var req3 = service.impl.remove(inResponse.children[0].id);
-						req3.response(self2, function(inSender, inResponse) {
-							self2.trace("Got the inResponse for req3:", enyo.json.stringify(inResponse));
-							self2.finish();
-						});
-						req3.error(self2, function(inSender, inError) {
-							enyo.log(inError);
-							self2.finish("cannot delete " + this.fileToCreate + "because file not found.");
-						});
-					} else {
-						self2.finish("delete "+inResponse.children[0].name+ " file failed");
-					}
-				});
-				req2.error(this, function(inSender, inError) {
-					enyo.log(inError);
-					self.finish("delete File error: "+inError);
-				});
+			/**
+			 * * new PROPFIND on test/root/TestRunner
+			*/
+			var req2 = service.impl.propfind(inResponse.children[3].id, 1);
+			var self = this;
+			req2.response(self, function(inSender, inResponse) {
+				self.trace("Got the inResponse for req3: ", enyo.json.stringify(inResponse));
+				var self2 = self;
+				if (inResponse.children[0].name === this.fileToCreate) {
+					var req3 = service.impl.remove(inResponse.children[0].id);
+					req3.response(self2, function(inSender, inResponse) {
+						self2.trace("Got the inResponse for req3:", enyo.json.stringify(inResponse));
+						self2.finish();
+					});
+					req3.error(self2, function(inSender, inError) {
+						enyo.log(inError);
+						self2.finish("cannot delete " + this.fileToCreate + "because file not found.");
+					});
+				} else {
+					self2.finish("delete "+inResponse.children[0].name+ " file failed");
+				}
+			});
+			req2.error(this, function(inSender, inError) {
+				enyo.log(inError);
+				self.finish("delete File error: "+inError);
+			});
 
 		});
 		req.error(this, function(inSender, inError) {

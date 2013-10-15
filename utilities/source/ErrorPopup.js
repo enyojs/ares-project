@@ -1,3 +1,5 @@
+/* jshint indent: false */ // TODO: ENYO-3311
+
 /* global ares */
 enyo.kind({
 	name: "Ares.ErrorPopup",

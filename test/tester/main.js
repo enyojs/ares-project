@@ -21,7 +21,7 @@ var enyoDir = path.resolve(tDir, '../enyo'),
 
 (function() {
 
-        var tester = {
+    var tester = {
 			setup: function(req, res, next) {
 
 				// cleanup
@@ -62,8 +62,8 @@ var enyoDir = path.resolve(tDir, '../enyo'),
 			}
 		};
 
-        if (typeof module !== 'undefined' && module.exports) {
-                module.exports = tester;
-        }
+	if (typeof module !== 'undefined' && module.exports) {
+		module.exports = tester;
+	}
         
 }());

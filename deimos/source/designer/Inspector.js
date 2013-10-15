@@ -1,4 +1,6 @@
 /* global analyzer, Model, Inspector, ares */
+/* jshint indent: false */ // TODO: ENYO-3311
+
 enyo.kind({
 	name: "Inspector",
 	kind: "FittableRows",
