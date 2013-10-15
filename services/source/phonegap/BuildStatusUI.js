@@ -47,6 +47,9 @@ enyo.kind({
 		provider: undefined, 
 		selectedPlatform: undefined
 	},
+	handlers: {
+		onUpdateStatusMessage: "updateStatusMessage"
+	}, 
 	components: [
 		{
 			name: "buildStatusContainer", kind: "FittableRows", classes: "ares-project-properties-build-status-container",
@@ -63,6 +66,8 @@ enyo.kind({
 						{ name: "webosButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform:"webos" }													
 					]
 				},
+
+				{ name: "downloadStatus", kind: "Phonegap.ProjectProperties.DownloadStatus" },
 				{
 					name: "messageContainer",
 					kind: "onyx.Drawer",
@@ -70,7 +75,7 @@ enyo.kind({
 					showing: false,
 					components: [
 						{name: "hideStatusContainer", kind: "onyx.IconButton", src: "$project-view/assets/images/close-button-16x16.png", classes: "ares-project-properties-hide-status-button", ontap:"hideMessageContainer"},
-						{name: "downloadLink", content: "ddl link", tag: "a", shown: false, classes: "ares-project-properties-dl-link", ontap: "downloadPackage"},
+						{name: "downloadLink", content: "Download application", tag: "a", shown: false, classes: "ares-project-properties-dl-link", ontap: "downloadPackage"},
 						{name: "statusMessage", classes: "ares-project-properties-status-message"}
 					]
 				}
@@ -116,6 +121,18 @@ enyo.kind({
 			}			
 		}
 	},
+	/**
+	 * Update the content of the statusMessage row.
+	 * @protected
+	 */
+	updateStatusMessage: function() {
+
+		this.$.statusMessage.setContent(this.$.downloadStatus.getDownloadStatus(this.selectedPlatform));
+		this.$.statusMessage.show();
+
+		//stop the propagation of the bubble event
+		return true;
+	},
 
 	/**@private*/
 	showStatusMessage: function(inSender, inEvent){
@@ -129,9 +146,9 @@ enyo.kind({
 			if (this.buildStatusData.download[inSender.platform] !== undefined && 
 				this.buildStatusData.title !== undefined) {
 				
-				this.$.downloadLink.setContent("Download application");
+				this.updateStatusMessage();
 				this.$.downloadLink.show();
-				this.$.downloadLink.render();
+
 			} else {
 				this.$.downloadLink.hide();
 			}
@@ -172,8 +189,9 @@ enyo.kind({
 
 		var projectConfig = this.owner.getProject();
 		this.provider.downloadPackage(projectConfig, this.selectedPlatform, this.buildStatusData, enyo.bind(this, this.getPackage));
-		this.$.statusMessage.setContent("Download on progress");
-		this.$.statusMessage.show();
+
+		//set the download status to "Download on progress"
+		this.$.downloadStatus.setDownloadStatus(this.selectedPlatform, 2);		
 	},
 	/**
 	 * Callback used in the function "downloadPackage()"" in "Build.js"
@@ -184,12 +202,11 @@ enyo.kind({
 	 */
 	getPackage: function(err) {
 		if(err) {
-			this.$.statusMessage.setContent("Download failed");
-			this.$.statusMessage.show();
-
+			//set the download status to "Download failed"
+			this.$.downloadStatus.setDownloadStatus(this.selectedPlatform, 0);
 		} else {
-			this.$.statusMessage.setContent("Download complete");
-			this.$.statusMessage.show();
+			//set the download status to "Download complete"
+			this.$.downloadStatus.setDownloadStatus(this.selectedPlatform, 1);
 		}
 	},	
 
@@ -218,4 +235,51 @@ enyo.kind({
 			this.setBuildStatusData(inBuildStatusData.user);
 		}
 	}
+});
+
+/**
+ * Model kind to keep track on the download status for each
+ * mobile platform supported by Phonegap Build.
+ *
+ * Used only by the widget {Phonegap.ProjectProperties.BuildStatus}
+ */
+enyo.kind({
+	name: "Phonegap.ProjectProperties.DownloadStatus",
+	published: {
+		downloadStatus: {"android": "", "ios": "", "winphone": "", 
+						"blackberry": "", "webos": ""}	
+	},
+
+	/**
+	 * Set the download status for a platform defined in {this.downloadStatus}.
+	 * 
+	 * @param {String} inPlatform       platform defined in {this.downloadStatus}
+	 * @param {integer} inDownloadStatus code status: 0 => failed, 1 => complete, other => on progress
+	 * @public
+	 */
+	setDownloadStatus: function(inPlatform, inDownloadStatus) {
+		if(inDownloadStatus === 1){
+			this.downloadStatus[inPlatform] = "Download complete";			
+		} else {
+			if (inDownloadStatus === 0) {
+				this.downloadStatus[inPlatform] = "Download failed";
+			} else {
+				this.downloadStatus[inPlatform] = "Download on progress";
+			}
+		}
+
+		this.bubble("onUpdateStatusMessage");	
+	},
+
+	/**
+	 * Get the download status value by platform.
+	 * 
+	 * @param  {String} inPlatform [description]
+	 * @return {String} status message
+	 * @public
+	 */
+	getDownloadStatus: function(inPlatform) {
+		return this.downloadStatus[inPlatform];
+	}	
+
 });
