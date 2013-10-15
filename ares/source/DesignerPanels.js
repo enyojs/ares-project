@@ -20,7 +20,7 @@ enyo.kind({
 				]},
 				{name: "designerDecorator", kind: "onyx.TooltipDecorator", components: [
 					{name: "designerButton", kind: "onyx.IconButton", src: "assets/images/designer.png", ontap: "designerAction"},
-					{name: "designerButtonBroken", kind: "onyx.IconButton", src: "assets/images/designer_broken.png", ontap: "designerBroken"},
+					{name: "designerButtonBroken", kind: "onyx.IconButton", src: "assets/images/designer_broken.png", ontap: "doDesignerBroken"},
 					{name: "designerTooltipBroken", kind: "Ares.ErrorTooltip", content: $L("Designer")}
 				]}
 			]},
@@ -118,9 +118,6 @@ enyo.kind({
 			this.manageControls(true);
 		}
 	},
-	designerBroken: function(){
-		this.doDesignerBroken();
-	},
 	enableDesignerButton: function(enable) {
 		this.$.designerButton.setShowing(enable);
 		this.$.designerButtonBroken.setShowing(! enable);
@@ -162,7 +159,19 @@ enyo.kind({
 		if(this.getAceActive()){
 			ComponentsRegistry.getComponent("phobos").focusEditor();	
 		}
-	}
+	},
+	showErrorTooltip: function(inSender, inEvent){
+		this.$.designerTooltipBroken.reset("Designer");
+		this.$.designerButtonBroken.setDisabled(false);
+		this.$.designerTooltipBroken.raise(inEvent);
+	},
+	resetErrorTooltip: function(){
+		this.$.designerTooltipBroken.reset("Designer");
+		this.$.designerButtonBroken.setDisabled(true);	
+	},
+	getErrorFromDesignerBroken: function(){
+		return this.$.designerTooltipBroken.error;
+	},
 });
 
 /**

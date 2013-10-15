@@ -60,9 +60,9 @@ enyo.kind({
 		onShowWaitPopup: "showWaitPopup",
 		onHideWaitPopup: "hideWaitPopup",
 		onError: "showError",
-		onErrorTooltip: "showErrorTooltip",
-		onErrorTooltipReset: "resetErrorTooltip",
-		onDesignerBroken: "showErrorFromDesignerBroken",
+		onErrorTooltip: "showDesignerErrorTooltip",
+		onErrorTooltipReset: "resetDesignerErrorTooltip",
+		onDesignerBroken: "showDesignerError",
 		onSignInError: "showAccountConfiguration",
 		onTreeChanged: "_treeChanged",
 		onChangingNode: "_nodeChanging",
@@ -522,17 +522,14 @@ enyo.kind({
 	showErrorPopup : function(inEvent) {
 		this.$.errorPopup.raise(inEvent);
 	},
-	showErrorTooltip: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("designerPanels").$.designerTooltipBroken.reset("Designer");
-		ComponentsRegistry.getComponent("designerPanels").$.designerButtonBroken.setDisabled(false);
-		ComponentsRegistry.getComponent("designerPanels").$.designerTooltipBroken.raise(inEvent);
+	showDesignerErrorTooltip: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("designerPanels").showErrorTooltip(inSender, inEvent);
 	},
-	resetErrorTooltip: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("designerPanels").$.designerTooltipBroken.reset("Designer");
-		ComponentsRegistry.getComponent("designerPanels").$.designerButtonBroken.setDisabled(true);	
+	resetDesignerErrorTooltip: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("designerPanels").resetErrorTooltip();
 	},
-	showErrorFromDesignerBroken: function(){
-		this.showError("",ComponentsRegistry.getComponent("designerPanels").$.designerTooltipBroken.error);
+	showDesignerError: function(){
+		this.showError("",ComponentsRegistry.getComponent("designerPanels").getErrorFromDesignerBroken());
 	},
 	showSignInErrorPopup : function(inEvent) {
 		this.$.signInErrorPopup.raise(inEvent);
