@@ -1,3 +1,5 @@
+/* jshint indent: false */ // TODO: ENYO-3311
+
 /**
  * This "abstract" kind defines the interface needed for the
  * sub-kinds used by the Inspector to configure properties
