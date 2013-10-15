@@ -19,7 +19,7 @@ enyo.kind({
 	components: [
 	    {tag: "div", name: "title", classes: "title"},
 			{classes:"ares-error-popup", fit: true, components: [
-				{name: "msg"},
+				{name: "msg", allowHtml:true},
 				{name: "action", showing: false},
 				{classes: "ares-error-details", components: [
 					{classes: "button", components: [
