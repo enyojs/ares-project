@@ -16,11 +16,13 @@ enyo.kind({
 		onItemDragenter: "",
 		onItemDragover: "",
 		onItemDragleave: "",
+		onItemUp: "",
 		onItemDrop: "",
 		onItemDragend: "",
 		onFileClick: "",
 		onFolderClick: "",
 		onFileDblClick: "",
+		onNodeRightClick: "",
 		onAdjustScroll: ""
 	},
 	published: {
@@ -35,6 +37,7 @@ enyo.kind({
 		ondragenter: "dragenter",
 		ondragover: "dragover",
 		ondragleave: "dragleave",
+		onup: "up",
 		ondrop: "drop",
 		ondragend: "dragend"
 	},
@@ -47,14 +50,21 @@ enyo.kind({
 	onlyIconExpands: true,
 	
 	debug: false,
-	
+
+	// used to deactivate Hermes right-click menu and allow the
+	// browser one on the caption item of the node
+	debugContextMenu: false,
+
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 	},
 	/** @private */
 	down: function(inSender, inEvent) {
-		this.doItemDown(inEvent);
+		if (inEvent.which === 1) {
+			this.doItemDown(inEvent);
+		}
+		
 		return true;
 	},
 	/** @private */
@@ -91,6 +101,14 @@ enyo.kind({
 		}
 		
 		this.doItemDragleave(inEvent);
+		return true;
+	},
+	/** @private */
+	up: function (inSender, inEvent) {
+		if (inEvent.which === 1) {
+			this.doItemUp(inEvent);
+		}
+		
 		return true;
 	},
 	/** @private */

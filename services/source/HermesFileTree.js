@@ -25,6 +25,7 @@ enyo.kind({
 		onItemDragenter: "itemDragenter",
 		onItemDragover: "itemDragover",
 		onItemDragleave: "itemDragleave",
+		onItemUp: "itemUp",
 		onItemDrop: "itemDrop",
 		onItemDragend: "itemDragend",
 		onNodeDblClick: "nodeDblClick",
@@ -33,10 +34,39 @@ enyo.kind({
 	published: {
 		serverName: "",
 		// allows filetree to have draggable subnodes or not (not per default).
-		dragAllowed: false
+		dragAllowed: false,
+		menuAllowed: false
 	},
 	fit:true,
 	components: [
+		// Hermes contextual menu
+		{kind: "onyx.MenuDecorator", name: "hermesMenu", classes: "hermesMenu", onSelect: "hermesMenuItemSelected", components: [
+			{kind: "onyx.Menu", name: "hermesMenuList", classes: "hermesMenu-list", maxHeight: "100%", components: [
+				{name: "newFolderItem", value: "newFolderClick", classes: "hermesMenu-button", components: [
+					{kind: "onyx.IconButton", src: "$harmonia/images/folder_new_16.png"},
+					{content: $L("New Folder...")}
+				]},
+				{name: "newFileDivider", classes: "onyx-menu-divider hermesMenu-button"},
+				{name: "newFileItem", value: "newFileClick", classes: "hermesMenu-button", components: [
+					{kind: "onyx.IconButton", src: "$harmonia/images/document_new_16.png"},
+					{content: $L("New File...")}
+				]},
+				{name: "nodeDivider", classes: "onyx-menu-divider hermesMenu-button"},
+				{name: "renameItem", value: "renameClick", classes: "hermesMenu-button", components: [
+					{kind: "onyx.IconButton", src: "$harmonia/images/document_edit_16.png"},
+					{content: $L("Rename...")}
+				]},
+				{name: "copyItem", value: "copyClick", classes: "hermesMenu-button", components: [
+					{kind: "onyx.IconButton", src: "$harmonia/images/copy_16.png"},
+					{content: $L("Copy...")}
+				]},
+				{name: "deleteItem", value: "deleteClick", classes: "hermesMenu-button", components: [
+					{kind: "onyx.IconButton", src: "$harmonia/images/document_delete_16.png"},
+					{content: $L("Delete...")}
+				]}
+			]}
+		]},
+
 		{kind: "onyx.Toolbar", name: "hermesToolbar", classes:"ares-small-toolbar title-gradient", components: [
 			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 				{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
@@ -93,6 +123,9 @@ enyo.kind({
 	selectedNode: null,
 	
 	debug: false,
+	// when set, deactivate Hermes right-click menu and allow the browser's menu
+	debugContextMenu: false,
+
 	packages: false,
 	
 	draggedNode: null,
@@ -115,6 +148,41 @@ enyo.kind({
 				expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed
 			}
 		);
+
+		this.menuAllowedChanged();
+	},
+	menuAllowedChanged: function(oldValue) {
+		this.trace(oldValue, "=>", this.menuAllowed);
+		if (this.menuAllowed) {
+			enyo.dispatcher.listen(document, "contextmenu", enyo.bind(this, "contextMenu"));
+		} else {
+			enyo.dispatcher.stopListening(document, "contextmenu", enyo.bind(this, "contextMenu"));
+		}
+	},
+	contextMenu: function(inEvent) {
+		this.trace("inEvent", inEvent);
+		
+		var target = enyo.dispatcher.findDispatchTarget(inEvent.target),
+			control = target;
+		
+		if (control.name !== "caption" || control.owner.kind !== "hermes.Node") {
+			return true;
+		}
+
+		while (control.kind !== "HermesFileTree") {
+			if (control.owner === undefined) {
+				return true;
+			}
+			control = control.owner;
+		}
+		
+		if (control.get("menuAllowed") && !control.get("debugContextMenu")) {
+			inEvent.preventDefault();
+			this.nodeRightClick(target, inEvent);
+			return true;
+		}
+
+		return true;
 	},
 	/** @private */
 	itemDown: function(inSender, inEvent) {
@@ -214,6 +282,12 @@ enyo.kind({
 	},
 	/** @private */
 	itemDragleave: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		
+		return true;
+	},
+	/** @private */
+	itemUp: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		
 		return true;
@@ -576,7 +650,87 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
-	
+	/** @private */
+	nodeRightClick: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		
+		if (!this.menuAllowed) {
+			return true;
+		}
+		
+		var node = inSender;
+
+		// activate contextual menu only on hermesNode caption
+		if (node.name !== "caption") {
+			return true;
+		}
+
+		// look for related hermesNode
+		if (node.kind !== "hermes.Node") {
+			node = node.parent;
+		}
+
+		if (node.kind !== "hermes.Node") {
+			return true;
+		}
+
+		node.doNodeTap();
+
+		// determine the shift between harmonia and ares
+		var LeftPanelTranslation = 0;
+		var regexp = /translateX\((.*)px\)/;
+		var t;
+		if (enyo.platform.firefox) {
+			t = this.owner.node.style["transform"];
+		} else {
+			t = this.owner.node.style["webkitTransform"];
+		}
+		var results = regexp.exec(t); 
+		if (results) {
+			LeftPanelTranslation = results[1];
+		}
+
+		// menu must be opened first to get its bounds
+		this.$.hermesMenu.requestShowMenu();
+		// calculate a specific offset to shift the menu when the menu
+		// reaches the bottom or the right side of hermesFileTree.
+		// Without this offset the popup menu can be shown *under* the
+		// editor.designer panel. This offset avoids but does not fix
+		// the z-index issue,
+
+		var bounds = this.$.hermesMenuList.getBounds(),
+			backOffsetLeft = 0,
+			backOffsetTop = 0;
+		if (inEvent.clientX - this.node.offsetLeft - LeftPanelTranslation + bounds.width > this.node.clientWidth) {
+			backOffsetLeft = inEvent.clientX - this.node.offsetLeft - LeftPanelTranslation + bounds.width - this.node.clientWidth;
+		}
+		if (inEvent.clientY - this.node.offsetTop + bounds.height > this.node.clientHeight) {
+			backOffsetTop = bounds.height;
+		}
+
+		this.$.hermesMenuList.showAtEvent(inEvent, {left: - this.node.offsetLeft - LeftPanelTranslation - backOffsetLeft, top: - this.node.offsetTop - backOffsetTop});
+		this.$.hermesMenuList.updatePosition();		
+		
+		// handled here (don't bubble)
+		return true;
+	},
+	/**
+	 * Generic event handler
+	 * @private
+	 */
+	hermesMenuItemSelected: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		
+		var fn = inEvent && inEvent.selected && inEvent.selected.value;
+		if (typeof this[fn] === 'function') {
+			this[fn]();
+		} else {
+			this.trace("*** BUG: '", fn, "' is not a known function");
+		}
+
+		// handled here (don't bubble)
+		return true;
+	},
 	select: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 
@@ -1227,10 +1381,25 @@ enyo.kind({
 			this.$.deleteFileButton.setDisabled(this.selectedNode.file.isServer);
 			this.$.copyFileButton.setDisabled(this.selectedNode.file.isServer);
 			this.$.renameFileButton.setDisabled(this.selectedNode.file.isServer);
+			if (this.selectedNode.file.isServer) {
+				this.$.nodeDivider.hide();
+				this.$.deleteItem.hide();
+				this.$.copyItem.hide();
+				this.$.renameItem.hide();
+			} else {
+				this.$.nodeDivider.show();
+				this.$.deleteItem.show();
+				this.$.copyItem.show();
+				this.$.renameItem.show();
+			}
 		} else {
 			this.$.copyFileButton.setDisabled(true);
 			this.$.deleteFileButton.setDisabled(true);
 			this.$.renameFileButton.setDisabled(true);
+			this.$.nodeDivider.hide();
+			this.$.deleteItem.hide();
+			this.$.copyItem.hide();
+			this.$.renameItem.hide();
 		}
 	},
 

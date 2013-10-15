@@ -17,7 +17,7 @@ enyo.kind({
 					{name:"logo", kind:"Ares.Logo"}
 				]}
 			]},
-			{kind: "HermesFileTree", dragAllowed: true}
+			{kind: "HermesFileTree", dragAllowed: true, menuAllowed: true}
 		]},
 		{classes:"hangar"}
 	],
