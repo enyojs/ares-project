@@ -326,8 +326,6 @@ enyo.kind({
 		req.error(this, this._handleServiceError.bind(this, "Unable to get application build status", next));
 		req.go(); 
 	},
-
-
 	
 	/**
 	 * Show the pop-up containing informations about the previous  build of the 
@@ -343,7 +341,7 @@ enyo.kind({
 	_showBuildStatus: function(project, appData, next){
 		this.$.buildStatusPopup.showPopup(project, appData.user);
 		next();
-     },
+	},
 	
 	/**
 	 * Store relevant user account data 
@@ -556,7 +554,7 @@ enyo.kind({
 	 * 
 	 * @param {Object} project
 	 * @param {Function} buildStarted is a CommonJS callback
-	 * @param {FormData} formData
+	 * @param {FormData} data
 	 * @param {Function} next is a CommonJS callback
 	 * @private
 	 */
@@ -641,8 +639,6 @@ enyo.kind({
 	 * Prepare the folder where to store the built package
 	 * @param  {Object}   project contain a description about the current selected
 	 *                          project
-	 * @param  {Object}  inData  contains detailed informations about the built
-	 *                           application on Phonegap
 	 * @param  {Function} next    a CommonJS callback
 	 * @private
 	 */
@@ -697,9 +693,9 @@ enyo.kind({
 
 	/**
 	 * After checking that the building of the project is finished in Phongap platform, this 
-	 * function send an ajax request to the Node.js in order to launch
+	 * function send an ajax request to the Ares server in order to launch
 	 * the download of the packaged application. 
-	 * Node.js succeed in the downloading of this application, 
+	 * Ares server succeed in the downloading of this application, 
 	 * an Ajax response is sent back in order to save the
 	 * file (contained in a multipart data form)in the folder 
 	 * "Target/Phonegap build" of the curent built project.
@@ -707,8 +703,8 @@ enyo.kind({
 	 * @param  {Object}   project contain a description of the current selected
 	 *                          project
 	 * @param  {Object}   folderId unique identifier of the project in Ares
-	 * @param  {Object}   appData  multipart data form containing the application
-	 *                             to store
+	 * @param  {Object}   appData  contains detailed informations about the built
+	 *                           application on Phonegap
 	 * @param  {Function} next     a CommonJs callback
 	 
 	 * @private
