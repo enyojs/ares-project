@@ -469,10 +469,15 @@ enyo.kind({
 			enyo.bind(this, this.checkAppId, project),
 			enyo.bind(this, this._updateConfigXml, project),
 			enyo.bind(this, this._getFiles, project),
-			enyo.bind(this, this._submitBuildRequest, project),
+			enyo.bind(this, this._submitBuildRequest, project, next /*only called in case of success*/),
 			enyo.bind(this, this._prepareStore, project),
 			enyo.bind(this, this._store, project)
-		], next);
+		], function(err) {
+			if (err) {
+				enyo.warn("phonegap.Build#build()", "err:", err);
+				next(err);
+			}
+		});
 	},
 
 	/**
@@ -546,11 +551,12 @@ enyo.kind({
 	/**
 	 * 
 	 * @param {Object} project
+	 * @param {Function} buildStarted is a CommonJS callback
 	 * @param {FormData} formData
 	 * @param {Function} next is a CommonJS callback
 	 * @private
 	 */
-	_submitBuildRequest: function(project, data, next) {
+	_submitBuildRequest: function(project, buildStarted, data, next) {
 		var config = ares.clone(project.getConfig().getData());
 		this.trace("config: ", config);
 
@@ -619,6 +625,7 @@ enyo.kind({
 				configKind.setData(config);
 				configKind.save();
 			}
+			buildStarted();
 			next(null, inData);
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to build application", next));
@@ -813,7 +820,12 @@ enyo.kind({
 					next(err);
 				} else {
 					if (appData.status[platform] === "complete"){
-						_setApplicationToDownload(next);
+						_setApplicationToDownload(function(err) {
+							if (err) {
+								enyo.warn("phonegap.Build#getAllPackagedApplications._downloadApp()", "non-fatal err:", err);
+							}
+							next();
+						});
 					} else {
 						next();
 					}
