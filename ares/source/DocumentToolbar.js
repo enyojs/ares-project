@@ -52,7 +52,7 @@ enyo.kind({
 	requestCloseFile: function(inSender, inEvent) {
 		// inEvent.next callback is ditched. Ares will call removeTab
 		// when file is closed by Ace
-		this.doCloseFileRequest({id: inEvent.userId});
+		this.doCloseFileRequest({id: inEvent.userId, project: inEvent.data.project});
 		return true;
 	},
 	removeTab: function(id) {
