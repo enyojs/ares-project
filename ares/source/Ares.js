@@ -141,7 +141,11 @@ enyo.kind({
 	_openDocument: function(projectData, file, next) {
 		var self = this;
 		var fileDataId = Ares.Workspace.files.computeId(file);
+		if (! fileDataId ) {
+			throw new Error ('Undefined fileId for file ' + file.name + ' service ' + file.service);
+		}
 		var fileData = Ares.Workspace.files.get(fileDataId);
+		this.trace("open document with projectData ", projectData, " fileDataId ", fileDataId);
 		if (fileData) {
 			// useful when double clicking on a file in HermesFileTree
 			this.switchToDocument(fileData);
@@ -156,7 +160,7 @@ enyo.kind({
 					}
 				} else {
 					fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
-					ComponentsRegistry.getComponent("documentToolbar").createFileTab(file.name, fileDataId, file.path);
+					ComponentsRegistry.getComponent("documentToolbar").createFileTab(file.name, fileDataId, file.path, projectData);
 					self.switchToDocument(fileData);
 					if (typeof next === 'function') {
 						next();
@@ -416,6 +420,7 @@ enyo.kind({
 	switchFile: function(inSender, inEvent) {
 		var d = Ares.Workspace.files.get(inEvent.id);
 		if (d) {
+			ComponentsRegistry.getComponent("projectList").selectInProjectList(inEvent.project);
 			this.switchToDocument(d);
 		} else if (this.debug) {
 			throw("File ID " + d + " not found in cache!");
