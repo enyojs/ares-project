@@ -1,3 +1,5 @@
+/* jshint indent: false */ // TODO: ENYO-3311
+
 enyo.kind({
 	name: "Inspector.LayoutEditor",
 	kind: "enyo.Control",

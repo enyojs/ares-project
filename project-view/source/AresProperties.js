@@ -1,3 +1,4 @@
+/* jshint indent: false */ // TODO: ENYO-3311
 /* global ares */
 /**
  * This kind provide a widget to tune global properties

@@ -1,3 +1,4 @@
+/* jshint indent: false */ // TODO: ENYO-3311
 /* global ares, ServiceRegistry, ComponentsRegistry */
 /**
  * This kind provides:
@@ -232,6 +233,7 @@ enyo.kind({
 		}
 	},
 	selectInProjectList:function(project){
+		this.trace("select ",project);
 		var itemList = this.$.projectList.getClientControls();
 		enyo.forEach(itemList, function(item) {
 			item.$.item.removeClass("on");

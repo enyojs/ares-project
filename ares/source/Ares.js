@@ -60,6 +60,9 @@ enyo.kind({
 		onShowWaitPopup: "showWaitPopup",
 		onHideWaitPopup: "hideWaitPopup",
 		onError: "showError",
+		onErrorTooltip: "showDesignerErrorTooltip",
+		onErrorTooltipReset: "resetDesignerErrorTooltip",
+		onDesignerBroken: "showDesignerError",
 		onSignInError: "showAccountConfiguration",
 		onTreeChanged: "_treeChanged",
 		onFsEvent: "_fsEventAction",
@@ -140,7 +143,11 @@ enyo.kind({
 	_openDocument: function(projectData, file, next) {
 		var self = this;
 		var fileDataId = Ares.Workspace.files.computeId(file);
+		if (! fileDataId ) {
+			throw new Error ('Undefined fileId for file ' + file.name + ' service ' + file.service);
+		}
 		var fileData = Ares.Workspace.files.get(fileDataId);
+		this.trace("open document with projectData ", projectData, " fileDataId ", fileDataId);
 		if (fileData) {
 			// useful when double clicking on a file in HermesFileTree
 			this.switchToDocument(fileData);
@@ -155,7 +162,7 @@ enyo.kind({
 					}
 				} else {
 					fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
-					ComponentsRegistry.getComponent("documentToolbar").createFileTab(file.name, fileDataId, file.path);
+					ComponentsRegistry.getComponent("documentToolbar").createFileTab(file.name, fileDataId, file.path, projectData);
 					self.switchToDocument(fileData);
 					if (typeof next === 'function') {
 						next();
@@ -420,6 +427,7 @@ enyo.kind({
 	switchFile: function(inSender, inEvent) {
 		var d = Ares.Workspace.files.get(inEvent.id);
 		if (d) {
+			ComponentsRegistry.getComponent("projectList").selectInProjectList(inEvent.project);
 			this.switchToDocument(d);
 		} else if (this.debug) {
 			throw("File ID " + d + " not found in cache!");
@@ -522,6 +530,15 @@ enyo.kind({
 	},
 	showErrorPopup : function(inEvent) {
 		this.$.errorPopup.raise(inEvent);
+	},
+	showDesignerErrorTooltip: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("designerPanels").showErrorTooltip(inSender, inEvent);
+	},
+	resetDesignerErrorTooltip: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("designerPanels").resetErrorTooltip();
+	},
+	showDesignerError: function(){
+		this.showError("",ComponentsRegistry.getComponent("designerPanels").getErrorFromDesignerBroken());
 	},
 	showSignInErrorPopup : function(inEvent) {
 		this.$.signInErrorPopup.raise(inEvent);
