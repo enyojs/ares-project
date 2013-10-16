@@ -8,7 +8,8 @@ enyo.kind({
 	kind: "enyo.Component",
 	events: {
 		onLoginFailed: "",
-		onShowWaitPopup: ""
+		onShowWaitPopup: "",
+		onFsEvent: ""
 	},
 	published: {
 		timeoutDuration: 3000	
@@ -42,6 +43,9 @@ enyo.kind({
 			this.url = this.config.origin + this.config.pathname;
 			this.trace("url:", this.url);
 		}
+
+		this.folderKey = "build." + this.config.id + ".target.folderId";
+		this.appKey = "build." + this.config.id + ".app";
 	},
 
 	/**
@@ -468,10 +472,10 @@ enyo.kind({
 			enyo.bind(this, this.authorize),
 			enyo.bind(this, this.checkAppId, project),
 			enyo.bind(this, this._updateConfigXml, project),
+			enyo.bind(this, this._prepareStore, project),
 			enyo.bind(this, this._getFiles, project),
 			enyo.bind(this, this._submitBuildRequest, project, next /*only called in case of success*/),
-			enyo.bind(this, this._prepareStore, project),
-			enyo.bind(this, this._store, project)
+			enyo.bind(this, this._waitFetchStore, project)
 		], function(err) {
 			if (err) {
 				enyo.warn("phonegap.Build#build()", "err:", err);
@@ -641,23 +645,21 @@ enyo.kind({
 	 * @param  {Function} next    a CommonJS callback
 	 * @private
 	 */
-	_prepareStore: function(project, inData, next) {
-		var folderKey = "build." + this.config.id + ".target.folderId",
-		    folderPath = "target/" + this.config.id;
-		 this.doShowWaitPopup({msg: $L("Storing Phonegap application package")});
-
-		var folderId = project.getObject(folderKey);
+	_prepareStore: function(project, next) {
+		this.trace("PhoneGap.Build#_prepareStore()");
+		var folderId = project.getObject(this.folderKey);
 		if (folderId) {
-			next(null, folderId, inData);
+			next();
 		} else {
-			var req = project.getService().createFolder(project.getFolderId(), folderPath);
-			req.response(this, function(inSender, inResponse) {
-				this.trace("response:", inResponse);
+			var req = project.getService().createFolder(project.getFolderId(), "target/" + this.config.id);
+			req.response(this, function _folderCreated(inSender, inResponse) {
+				this.trace("PhoneGap.Build#_prepareStore()", "response:", inResponse);
 				folderId = inResponse.id;
-				project.setObject(folderKey, folderId);
-				next(null, folderId, inData);
+				project.setObject(this.folderKey, folderId);
+				this.doFsEvent({nodeId: folderId});
+				next();
 			});
-			req.error(this, this._handleServiceError.bind(this, "Unable to prepare package storage", next));
+			req.error(this, this._handleServiceError.bind(this, "Unable to prepare packages folder", next));
 		}
 	},
 
@@ -686,6 +688,7 @@ enyo.kind({
 			var config = project.getService().config;
 			var pkgUrl = config.origin + config.pathname + '/file' + inData[0].path; // TODO: YDM: shortcut to be refined
 			project.setObject("build.phonegap.target.pkgUrl", pkgUrl);
+			this.doFsEvent({nodeId: inData[0].id});
 			next();
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to store application package", next));
@@ -709,24 +712,11 @@ enyo.kind({
 	 
 	 * @private
 	 */
-	_store: function(project, folderId, appData, next) {
-		var appKey = "build." + this.config.id + ".app";
+	_waitFetchStore: function(project, appData, next) {
+		var folderId = project.getObject(this.folderKey);
 		this.trace("Entering _store function project: ", project, "folderId:", folderId, "appData:", appData);
-		project.setObject(appKey, appData);
-		this._getAllPackagedApplications(project, appData, folderId, next);
-	},
-	
-	/**
-	 * 
-	 * @param  {Object}   project  contain a description of the current selected
-	 *                             project
-	 * @param  {Object}   appData  meta-data on the build of the actuel
-	 *                             project
-	 * @param  {String}   folderId unique identifier of the project in Ares
-	 * @param  {Function} next     a CommonJS callback
-	 * @private
-	 */
-	_getAllPackagedApplications: function(project, appData, folderId, next){
+		project.setObject(this.appKey, appData);
+
 		var platforms = [];
 		var builder = this;
 		var that = this ;

@@ -62,6 +62,7 @@ enyo.kind({
 		onError: "showError",
 		onSignInError: "showAccountConfiguration",
 		onTreeChanged: "_treeChanged",
+		onFsEvent: "_fsEventAction",
 		onChangingNode: "_nodeChanging",
 		onSaveDocument: "saveDocument", 
 		onSaveAsDocument: "saveAsDocument", 
@@ -318,6 +319,11 @@ enyo.kind({
 		if (typeof next === 'function') {
 			next();
 		}
+	},
+	/** @private */
+	_fsEventAction: function(inSender, inEvent) {
+		var harmonia = ComponentsRegistry.getComponent("harmonia");
+		harmonia.refreshFile(inEvent.nodeId);
 	},
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();
