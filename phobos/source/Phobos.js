@@ -4,11 +4,11 @@ enyo.kind({
 	name: "Phobos",
 	classes: "enyo-unselectable",
 	components: [
-		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
-			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
+		{kind: "FittableRows", classes: "enyo-fit", components: [
+			{name: "body", fit: true, kind: "FittableColumns", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
-					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
+					{classes: "enyo-fit ares_phobos_panel border ", components: [
+						{kind: "Ace", classes: "enyo-fit ace-code-editor", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -1058,7 +1058,7 @@ enyo.kind({
 		{// right panel for HTML goes here
 		},
 		{kind: "enyo.Control", classes: "enyo-fit",	components: [ // right panel for CSS here
-			{kind: "cssBuilder", classes: "border panel enyo-fit",style: "margin: 8px;", onInsert: "test"}
+			{kind: "cssBuilder", classes: "enyo-fit ares_phobos_panel border", onInsert: "test"}
 		]}
 	],
 
