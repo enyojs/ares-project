@@ -7,6 +7,7 @@
 // @see http://visionmedia.github.com/mocha/
 
 var path = require("path"),
+    fs = require("graceful-fs"),
     http = require("http"),
     querystring = require("querystring"),
     npmlog = require('npmlog'),
@@ -190,20 +191,35 @@ function generateBoundary() {
 	return boundary;
 }
 
-function sendOnePart(req, name, filename, input, boundaryKey) {
+function sendOnePart(req, name, filename, input, boundaryKey, contentTransferEncoding) {
 	req.write('--' + boundaryKey + '\r\n' +
 		// use your file's mime type here, if known
 		'Content-Type: application/octet-stream\r\n' +
 		// "name" is the name of the form field
 		// "filename" is the name of the original file
-		'Content-Disposition: form-data; name="' + name + '"; filename="' + filename + '"\r\n' +
-		'Content-Transfer-Encoding: binary\r\n\r\n');
-	req.write(input);
+		'Content-Disposition: form-data; name="' + name + '"; filename="' + filename + '"\r\n');
+	contentTransferEncoding = false /*'base64'*/;
+	if (contentTransferEncoding) {
+		req.write('Content-Transfer-Encoding: ' + contentTransferEncoding + '\r\n');
+		req.write('\r\n');
+		req.write(input.toString(contentTransferEncoding));
+	} else {
+		req.write('\r\n');
+		req.write(input);
+	}
 	req.write('\r\n');
 }
 
 function sendClosingBoundary(req, boundaryKey) {
 	req.end('--' + boundaryKey + '--');
+}
+
+function checkBuffer(buf, ref) {
+	for (var i = 0; i < ref.length; ++i) {
+		should.exist(buf[i]);
+		should.exist(ref[i]);
+		buf[i].should.equal(ref[i]);
+	}
 }
 
 	it("t0. should start", function(done) {
@@ -581,13 +597,14 @@ function sendClosingBoundary(req, boundaryKey) {
 		var content = {
 			name: 'file',	// field name
 			filename: 'tata', // file path
-			input: new Buffer(textContent).toString('base64')
+			input: new Buffer(textContent)
 		};
 		async.waterfall([
 			function(cb) {
 				post("t4.1", '/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
 			},
 			function(res, cb) {
+				log.verbose("t4.1", "res:", res);
 				should.exist(res);
 				should.exist(res.statusCode);
 				res.statusCode.should.equal(201);
@@ -618,13 +635,13 @@ function sendClosingBoundary(req, boundaryKey) {
 		});
 	});
 
-	 var dir1file0Id;
+	var dir1file0Id;
 
 	it("t4.3. should create a file in a relative location (using 'multipart/form-data')", function(done) {
 		var content = {
 			name: 'file',	// field name
 			filename: 'dir.1/file.0', // file path
-			input: new Buffer(textContent).toString('base64')
+			input: new Buffer(textContent)
 		};
 		async.waterfall([
 			function(cb) {
@@ -668,17 +685,18 @@ function sendClosingBoundary(req, boundaryKey) {
 		var content = [{
 			name: 'file',	// field name
 			filename: 'dir.2/file.0', // file path
-			input: new Buffer(textContent).toString('base64')
+			input: new Buffer(textContent)
 		},{
 			name: 'file',	// field name
 			filename: 'dir.2/file.1', // file path
-			input: new Buffer(textContent2).toString('base64')
+			input: new Buffer(textContent2)
 		}];
 		async.waterfall([
 			function(cb) {
 				post("t4.5", '/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
 			},
 			function(res, cb) {
+				log.verbose("t4.5", "res:", res);
 				should.exist(res);
 				should.exist(res.statusCode);
 				res.statusCode.should.equal(201);
@@ -728,6 +746,51 @@ function sendClosingBoundary(req, boundaryKey) {
 			should.exist(res.buffer);
 			contentStr = res.buffer.toString();
 			contentStr.should.equal(textContent2);
+			done();
+		});
+	});
+
+	var iconId, 
+	    iconBuffer = fs.readFileSync(path.join(__dirname, '..', '..', 'ares', 'assets', 'images', 'ares_48x48.ico'));
+	it("t4.8. create & compare a binary file (using 'multipart/form-data')", function(done) {
+		var content = {
+			name: 'file',	// field name
+			filename: 'ares.ico', // file path
+			input: iconBuffer
+		};
+		async.waterfall([
+			function(cb) {
+				post("t4.8", '/id/' + titiId, {_method: "PUT"} /*query*/, content, 'multipart/form-data' /*contentType*/, cb);
+			},
+			function(res, cb) {
+				log.verbose("t4.8", "POST res:", res);
+				should.exist(res);
+				should.exist(res.statusCode);
+				res.statusCode.should.equal(201);
+				should.exist(res.json);
+				should.exist(res.json[0]);
+				should.exist(res.json[0].isDir);
+				res.json[0].isDir.should.equal(false);
+				should.exist(res.json[0].path);
+				res.json[0].path.should.equal(rootPath + "/toto/titi/ares.ico");
+				should.exist(res.json[0].id);
+				iconId = res.json[0].id;
+				cb();
+			},
+			function(cb) {
+				get("t4.9", '/id/' + iconId, null /*query*/, cb);
+			},
+			function(res, cb) {
+				log.verbose("t4.8", "GET res:", res);
+				should.exist(res);
+				should.exist(res.statusCode);
+				res.statusCode.should.equal(200);
+				should.exist(res.buffer);
+				checkBuffer(res.buffer, iconBuffer);
+				cb();
+			}
+		], function(err) {
+			should.not.exist(err);
 			done();
 		});
 	});
