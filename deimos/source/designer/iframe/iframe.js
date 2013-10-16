@@ -41,6 +41,10 @@ enyo.kind({
 	moveControlSecs: 0.2,
 	edgeThresholdPx: 10,
 	debug: false,
+
+
+	// iframe will complain if user's application loads en enyo older than:
+	minEnyoVersion: "2.3.0-pre.9",
 	
 	create: function() {
 		this.trace = (this.debug === true ? this.log : function(){});
@@ -61,7 +65,29 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.inherited(arguments);
-		this.trace("called for designer iframe. Loading user application");
+		var expVer = this.minEnyoVersion.split(/\D+/);
+		var myVerStr = (enyo.version && enyo.version.enyo) || '0.0.0-pre.0';
+		var myVer = myVerStr.split(/\D+/);
+		var errMsg ;
+
+		while (expVer.length) {
+			if (myVer.shift() < expVer.shift()) {
+				errMsg = "Enyo used by your application is too old ("
+					+ myVerStr + "). Console log may show duplicated kind error "
+					+ "and Designer may not work as expected. You should use Enyo >= "
+					+ this.minEnyoVersion+" Read <a href='https://github.com/enyojs/ares-project/blob/master/README.md' target='_blank'>README.md to update Enyo libraries</a>";
+				enyo.warn(errMsg);
+				/*
+				 * TODO this message should go in an error/warning history as described in ENYO-2462
+				 * Un-commenting the following "sendMessage" call will result in a annoying modal message
+				 * popping up too often. For the time being, we just issue a warning in the console.
+				 * 
+				 * this.sendMessage({op: "error", val: {msg: errMsg, title: "warning"}});
+				 */
+				break;
+			}
+		}
+
 		this.adjustFrameworkFeatures();
 
 		// warning: user code error will trigger this.raiseLoadError
