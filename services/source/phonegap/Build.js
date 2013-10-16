@@ -542,7 +542,7 @@ enyo.kind({
 	_getFiles: function(project, next) {
 		this.trace("...");
 		var req = [];
-		this.doShowWaitPopup({msg: $L("Fetching application source code")});
+		this.doShowWaitPopup({msg: $L("Building source archive")});
 		req = project.getService().exportAs(project.getFolderId(), -1 /*infinity*/);
 		req.response(this, function _gotFiles(inSender, inData) {
 			this.trace("Phonegap.Build#_getFiles()", "Got the files data");
@@ -563,6 +563,7 @@ enyo.kind({
 	_submitBuildRequest: function(project, buildStarted, data, next) {
 		var config = ares.clone(project.getConfig().getData());
 		this.trace("config: ", config);
+		this.doShowWaitPopup({msg: $L("Uploading source archive to PhoneGap Build")});
 
 		var minification = config.providers.phonegap.minification;
 
