@@ -379,7 +379,7 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 				mode = "path";
 				var stream = fs.createReadStream(part.path);
 				stream.on('error', function(err) {
-					log.warn("ServiceBase#returnFormData()", "part:", part.filename, "(" + mode + ")", "err:", err);
+					log.warn("ServiceBase#returnFormData()", "part:", part.name, "(" + mode + ")", "err:", err);
 					next(err);
 				});
 				combinedStream.append(function(append) {
@@ -388,7 +388,7 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 			} else if (part.stream) {
 				mode = "stream";
 				part.stream.on('error', function(err) {
-					log.warn("ServiceBase#returnFormData()", "part:", part.filename, "(" + mode + ")", "err:", err);
+					log.warn("ServiceBase#returnFormData()", "part:", part.name, "(" + mode + ")", "err:", err);
 					next(err);
 				});
 				combinedStream.append(part.stream.pipe(base64.encode()));
@@ -401,11 +401,11 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 				log.warn("ServiceBase#returnFormData()", "Invalid part:", part);
 				throw new HttpError(503, "Invalid part:"+ util.inspect(part, {level: 2}));
 			}
-			log.silly("ServiceBase#returnFormData()", "part:", part.filename, "(" + mode + ")");
+			log.silly("ServiceBase#returnFormData()", "part:", part.name, "(" + mode + ")");
 		
 			// Adding part footer
 			combinedStream.append(function(append) {
-				log.silly("ServiceBase#returnFormData()", "end-of-part:", part.filename);
+				log.silly("ServiceBase#returnFormData()", "end-of-part:", part.name);
 				append(_getPartFooter());
 			});
 		});
