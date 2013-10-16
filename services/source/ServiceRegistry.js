@@ -41,9 +41,9 @@ enyo.kind({
 		var self = this;
 		this._reloadServices(function(err) {
 			if (err) {
-					self._handleReloadError(err);
+				self._handleReloadError(err);
 			} else {
-					self.notifyServicesChange();
+				self.notifyServicesChange();
 			}
 		});
 	},

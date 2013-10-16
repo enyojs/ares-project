@@ -1,4 +1,6 @@
 /* global Model */
+/* jshint indent: false */ // TODO: ENYO-3311
+
 enyo.kind({
 	name: "Deimos",
 	classes: "enyo-unselectable onyx",

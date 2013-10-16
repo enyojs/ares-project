@@ -64,7 +64,7 @@ Usage[](id:usage)
 
 ### Install
 
-1. Install Node.js 0.8.21 (or later, including 0.10.x) & its associated NPM (Node Package Manager) from a binary distribution, for example at [nodejs.org](http://nodejs.org/download/)
+1. Install Node.js 0.10.19 (or later) & its associated NPM (Node Package Manager) from a binary distribution, for example at [nodejs.org](http://nodejs.org/download/)
 1. Install `ares-ide` using NPM:
 
 		$ npm -d install ares-ide
@@ -98,11 +98,39 @@ Get more information about the options using `-h` or `--help`:
 	  -p, --port        port (o) local IP port of the express server (default: 9009, 0: dynamic)               [default: "9009"]
 	  -H, --host        host to bind the express server onto                                                   [default: "127.0.0.1"]
 	  -a, --listen_all  When set, listen to all adresses. By default, listen to the address specified with -H  [boolean]
-	  -c, --config      IDE configuration file                                                                 [default: "/Users/kowalskif/Desktop/GIT/enyojs/ares-project/ide.json"]
+	  -c, --config      IDE configuration file                                                                 [default: "./ide.json"]
 	  -l, --level       IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')                  [default: "http"]
 	  -L, --log         Log IDE debug to ./ide.log                                                             [boolean]
 
 In case you want to access other parts of your machine's file-system, refer to the [local filesystem service configuration](hermes/README.md#local-filesystem-service)
+
+### Creating an application
+
+Once Ares is loaded in your browser, you can create a skeleton of an
+application with "Edit -> Create ... " menu.  Once you've selected a
+directory to create a project, you will see a popup to specify the
+name, title and other parameters of your project.
+
+To create a project skeleton, use the "Template" selector to choose
+the latest bootplate version. This way, your project will be created
+with a template of an application and the required enyo, layout and
+extra libraries.
+
+### Updating Enyo libraries in your application
+
+The simplest way is to update the libraries inside your project.
+
+For Enyo:
+
+* remove enyo directory
+* download latest release from [enyo release page](https://github.com/enyojs/enyo/releases)
+* unpack in your project and rename the directory to `enyo`
+
+For all libraries in `lib`:
+
+* remove each directory in `lib`
+* download the latest release for [layout](https://github.com/enyojs/layout/releases) and [extra](https://github.com/enyojs/extra/releases) libraries
+* unpack each library and rename the directories to `extra` and `layout`
 
 ### Reporting Issues
 

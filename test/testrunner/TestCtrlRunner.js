@@ -34,28 +34,28 @@ enyo.kind({
 });
 
 enyo.kind({
-		name: "InfoPopup",
-		kind: "onyx.Popup",
-		events: {
-			onCancel: ""
-		},
-		modal: true,
-		centered: true,
-		floating: true,
-		components: [
-			{tag: "h3", content: "The results of the Ares TestRunner are available in the console!!"},
-			{tag: "br"},
-			{kind: "FittableColumns", components: [
-				{name: "cancelButton", kind: "onyx.Button", content: "cancel", ontap: "deleteCancel"},
-				{fit: true},
-			]}
-		],
-		create: function() {
-			this.inherited(arguments);
-		},
-		deleteCancel: function(inSender, inEvent) {
-			this.hide();
-			this.doCancel();
-		}
+	name: "InfoPopup",
+	kind: "onyx.Popup",
+	events: {
+		onCancel: ""
+	},
+	modal: true,
+	centered: true,
+	floating: true,
+	components: [
+		{tag: "h3", content: "The results of the Ares TestRunner are available in the console!!"},
+		{tag: "br"},
+		{kind: "FittableColumns", components: [
+			{name: "cancelButton", kind: "onyx.Button", content: "cancel", ontap: "deleteCancel"},
+			{fit: true},
+		]}
+	],
+	create: function() {
+		this.inherited(arguments);
+	},
+	deleteCancel: function(inSender, inEvent) {
+		this.hide();
+		this.doCancel();
+	}
 });
 

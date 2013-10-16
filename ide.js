@@ -23,18 +23,18 @@ var myDir = typeof(__dirname) !== 'undefined' ?  __dirname : path.resolve('') ;
 /**********************************************************************/
 
 var knownOpts = {
-        "help":            Boolean,
-        "runtest":         Boolean,
-        "browser":         Boolean,
-        "bundled-browser": Boolean,
-        "port":            Number,
-        "host":            String,
-        "timeout":         Number,
-        "listen_all":      Boolean,
-        "config":          path,
-        "level":           ['silly', 'verbose', 'info', 'http', 'warn', 'error'],
-        "log":             Boolean,
-        "version":         Boolean
+	"help":            Boolean,
+	"runtest":         Boolean,
+	"browser":         Boolean,
+	"bundled-browser": Boolean,
+	"port":            Number,
+	"host":            String,
+	"timeout":         Number,
+	"listen_all":      Boolean,
+	"config":          path,
+	"level":           ['silly', 'verbose', 'info', 'http', 'warn', 'error'],
+	"log":             Boolean,
+	"version":         Boolean
 };
 var shortHands = {
 	"h": ["--help"],
@@ -109,7 +109,7 @@ function m() {
 		} else {
 			msg += arg;
 		}
-			msg += ' ';
+		msg += ' ';
 	}
 	return msg;
 }
@@ -190,8 +190,10 @@ function loadPackageConfig() {
 	try {	
 		var packageContent = JSON.parse(packageContentJSON);
 		aresAboutData = {
-			"version": packageContent.version, "bugReportURL": packageContent.bugs.url, 
-			"license": packageContent.license, "projectHomePage": packageContent.homepage
+			"version": packageContent.version,
+			"bugReportURL": packageContent.bugs.url, 
+			"license": packageContent.license,
+			"projectHomePage": packageContent.homepage
 		};
 		
 	} catch(e) {
@@ -570,7 +572,8 @@ var enyojsRoot = path.resolve(myDir,".");
 
 var app = express(),
     server = http.createServer(app);
-    server.setTimeout(argv.timeout);
+
+server.setTimeout(argv.timeout);
 
 function cors(req, res, next) {
 	/*
@@ -674,8 +677,11 @@ server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, f
 		var bundledBrowser = process.env['ARES_BUNDLE_BROWSER'];
 		info = platformOpen[process.platform];
 		if (bundledBrowser) {
+			if (process.platform === 'win32') {
+				info.splice(2, 1); // delete 'start' command
+			}
 			info = info.concat([bundledBrowser, '--args']);
-		}
+		} 
 		spawn(info[0], info.slice(1).concat([url]));
 	} else {
 		log.http('main', "Ares now running at <" + url + ">");

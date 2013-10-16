@@ -458,11 +458,11 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 		function(stat, next) {
 			srcStat = stat;
 			fs.stat(dstPath, next);
-	        },
-	        function(stat, next) {
+	    },
+	    function(stat, next) {
 			dstStat = stat;
 			setImmediate(next);
-	        }
+	    }
 	], function(err) {
 		// see RFC4918, section 9.9.4 (MOVE Status
 		// Codes) & section 9.8.5 (COPY Status Codes).

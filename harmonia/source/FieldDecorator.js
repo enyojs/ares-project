@@ -9,10 +9,7 @@ enyo.kind({
 		{name: "label", tag: "label", style: "xborder: 1px solid lightblue;", components: [
 			{name: "title", content: "Field", style: "font-size: 14px; font-style: italic; font-weight: bold; padding-bottom: 8px; padding-left: 0; color: #555;"},
 			{name: "subtitle", style: "font-size: 12px; font-style: italic; padding-bottom: 8px; padding-left: 0; color: #555;", showing: false},
-			//{kind: "ToolDecorator", classes: "onyx-input-decorator", components: [
-				{name: "client", tag: null}
-			//]}//,
-			//{name: "validation", style: "font-size: small; font-style: italic; padding: 8px; padding-left: 0; color: red;", allowHtml: true, content: "&nbsp;"}
+			{name: "client", tag: null}
 		]}
 	],
 	create: function() {

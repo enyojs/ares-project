@@ -17,14 +17,14 @@ var path = require('path'),
 var processName = path.basename(process.argv[1]).replace(/.js/, '');
 
 var knownOpts = {
-        "help":            Boolean,
-        "major":           Boolean,
-        "minor":           Boolean,
-        "patch":           Boolean,
-        "pre":             Boolean,
-        "rel":             Boolean,
+    "help":            Boolean,
+	"major":           Boolean,
+	"minor":           Boolean,
+	"patch":           Boolean,
+	"pre":             Boolean,
+	"rel":             Boolean,
 	"dry-run":         Boolean,
-        "level":           ['silly', 'verbose', 'info', 'http', 'warn', 'error']
+	"level":           ['silly', 'verbose', 'info', 'http', 'warn', 'error']
 };
 var shortHands = {
 	"h": "--help",
