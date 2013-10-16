@@ -69,6 +69,7 @@ FsLocal.prototype.propfind = function(req, res, next) {
 	var depthStr = req.param('depth');
 	var depth = depthStr ? (depthStr === 'infinity' ? -1 : parseInt(depthStr, 10)) : 1;
 	this._propfind(null, req.param('path'), depth, function(err, content){
+		log.verbose("FsLocal#propfind()", "content:", content);
 		next(err, {code: 200 /*Ok*/, body: content});
 	});
 };
@@ -179,7 +180,7 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 			node.name = path.basename(this.config.root);
 		}
 
-		log.verbose("FsLocal#_propfind()", "relPath=" + relPath + ", depth="+depth+", node="+util.inspect(node));
+		log.silly("FsLocal#_propfind()", "relPath=" + relPath + ", depth="+depth+", node="+util.inspect(node));
 
 		if (stat.isFile() || !depth) {
 			next(null, node);
