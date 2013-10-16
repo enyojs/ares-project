@@ -1,4 +1,4 @@
-/* global Ares, async, ares, alert, ComponentsRegistry */
+/* global Ares, ServiceRegistry, async, ares, alert, ComponentsRegistry */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets",

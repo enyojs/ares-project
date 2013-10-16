@@ -1,4 +1,3 @@
-/* jshint indent: false */ // TODO: ENYO-3311
 /*global enyo, ares, async, Ares, Phonegap, XMLWriter, ServiceRegistry, next */
 /**
  * Kind to manage the life cycle of building a mobile application using 
@@ -66,7 +65,7 @@ enyo.kind({
 	/**
 	 * Default configuration used when a new project is created.
 	 * The Project configuration is transformed into a config.xml
-	 * file at each build.  It is later expected to be modified by
+	 * file at each build.	It is later expected to be modified by
 	 * the UI kind returned by
 	 * {PhoneGap.Build#getProjectPropertiesKind}.
 	 * 
@@ -150,10 +149,10 @@ enyo.kind({
 	 */
 	getConfigInstance: function(project){
 		if (!project instanceof Ares.Model.Project) {
-					next(new Error("Invalid parameters"));
-					return;
-			}
-				
+			next(new Error("Invalid parameters"));
+			return;
+		}
+		
 		var config = project.getConfig().getData();		
 
 		if(!config || !config.providers || !config.providers.phonegap) {
@@ -167,7 +166,7 @@ enyo.kind({
 	/**
 	 * Get the parameter AppId of the configuration object instance.
 	 * @param  {Object} project contain informations about the Ares project.
-	 * @return {String}         The AppId of the current project's application.
+	 * @return {String}	    The AppId of the current project's application.
 	 * @private
 	 */
 	getConfigAppId: function(project){		
@@ -221,16 +220,15 @@ enyo.kind({
 			return;
 		}
 
-		enyo.forEach(userData.user.apps.all, 
-			function(appId){
-				// depending on the origin (project.json, Entry in
-				// projectConfig UI, XML from phonegap), AppId can be
-				// a string or an integer. So '==' is used instead of
-				// '==='
-				if (projectAppId == appId.id) {
-					appIdExist = true;				
-				}
-			}, this);
+		enyo.forEach(userData.user.apps.all, function(appId){
+			// depending on the origin (project.json, Entry in
+			// projectConfig UI, XML from phonegap), AppId can be
+			// a string or an integer. So '==' is used instead of
+			// '==='
+			if (projectAppId == appId.id) {
+				appIdExist = true;				
+			}
+		}, this);
 		
 		if (appIdExist){
 			next(null, userData);
@@ -304,7 +302,7 @@ enyo.kind({
 	 * 
 	 * @param  {Object}   project contain informations about the Ares project
 	 * @param  {Object}  inData  contains detailed informations about the built
-	 *                           application on Phonegap
+	 *			     application on Phonegap
 	 * @param  {Function} next    is a CommonJS callback
 	 * @private
 	 */
@@ -333,9 +331,9 @@ enyo.kind({
 	 * selected project from the project list view.
 	 * 
 	 * @param  {Object}   project contain a description about the current selected
-	 *                          project
+	 *			    project
 	 * @param  {Object}  appData  contains detailed informations about the built
-	 *                           application on Phonegap                          
+	 *			     application on Phonegap			      
 	 * @param  {Function} next    is a CommonJs callback
 	 * @private
 	 */
@@ -385,7 +383,7 @@ enyo.kind({
 	 * @param {String} id the signing key id, as defined by PhoneGap
 	 * 
 	 * @return If the key id is not provided, this method returns
-	 * an {Array} of keys available for the given platform.  If
+	 * an {Array} of keys available for the given platform.	 If
 	 * the given key id does not represent an existing key, this
 	 * method returns undefined.
 	 * 
@@ -489,7 +487,7 @@ enyo.kind({
 	 * Pop-up defined in the file BuildStatusUI.js
 	 * 
 	 * @param  {Object}   project contain a description about the current selected
-	 *                            project
+	 *			      project
 	 * @param  {Function} next    is a CommonJS Callback
 	 * @public
 	 */
@@ -639,7 +637,7 @@ enyo.kind({
 	/**
 	 * Prepare the folder where to store the built package
 	 * @param  {Object}   project contain a description about the current selected
-	 *                          project
+	 *			    project
 	 * @param  {Function} next    a CommonJS callback
 	 * @private
 	 */
@@ -666,14 +664,14 @@ enyo.kind({
 	 *
 	 * 
 	 * @param  {Object}   project contain a description about the current selected
-	 *                            project
+	 *			      project
 	 * @param  {String}   folderId id used in Hermes File system to identify the 
-	 *                             target folder where the downloaded applications
-	 *                             will be stored.
+	 *			       target folder where the downloaded applications
+	 *			       will be stored.
 	 * @param  {Object}   inData   contains detailed informations about the build of
-	 *                           the project.
+	 *			     the project.
 	 * @param  {Function} next     a CommonJs callback.
-	 * @private            
+	 * @private	       
 	 */
 	_storePkg: function(project, folderId, inData, next) {
 		this.trace("data content.ctype: ", inData.ctype);	
@@ -702,10 +700,10 @@ enyo.kind({
 	 * "Target/Phonegap build" of the curent built project.
 	 * 
 	 * @param  {Object}   project contain a description of the current selected
-	 *                          project
+	 *			    project
 	 * @param  {Object}   folderId unique identifier of the project in Ares
 	 * @param  {Object}   appData  contains detailed informations about the built
-	 *                           application on Phonegap
+	 *			     application on Phonegap
 	 * @param  {Function} next     a CommonJs callback
 	 
 	 * @private
@@ -721,37 +719,35 @@ enyo.kind({
 
 		//Setting the targeted platforms for the build from the those
 		//presented in the object appData.
-		enyo.forEach(enyo.keys(appData.status),
-			function(platform){
-				platforms.push(platform);
-			}, this);
-
+		enyo.forEach(enyo.keys(appData.status), function(platform){
+			platforms.push(platform);
+		}, this);
+		
 		/* 
 		 * Parallel tasks are launched to check the build status in each platform.
 		 * A status can be : complete, pending or error.
 		 *	- completed: a request is made to node.js to 
 		 *				download the application.
 		 *	- pending: another request is sent to phonegap to check for an
-		 *	           updated status.
+		 *		   updated status.
 		 *	- error: an error message is displayed.		
 		 */		
-		async.forEach(platforms,
-		    function(platform, next) {
+		async.forEach(platforms, function(platform, next) {
 			that.trace("Send request for the platform: ", platform);
 			
 			_getApplicationForPlatform(platform, next);
-	       },next);
-	
+		},next);
+		
 		/**
 		 * Check continuously the build status of the build in a targeted mobile
-		 * platform on Phongap  build service and launch the appropriate action 
+		 * platform on Phongap	build service and launch the appropriate action 
 		 * when the returned status of the build is
 		 * "complete" or "error". 
 		 * @param  {Object}   project  contain a description of the current 
-		 *                             selected project
+		 *			       selected project
 		 * @param  {String}   platform targeted platfrom for the build
 		 * @param  {Object}   appData  meta-data on the build of the actuel
-		 *                             project
+		 *			       project
 		 * @param  {Object}   folderId unique identifier of the project in Ares
 		 * @param  {Function} next     a CommonJS callback
 		 * @private
@@ -825,15 +821,15 @@ enyo.kind({
 			 * This URL contain the data to create the packaged file name.
 			 *  
 			 * @param  {Object}   project  contain a description of the current 
-			 *                             selected project
+			 *			       selected project
 			 * @param  {String}   folderId unique identifier of the project in Ares
 			 * @param  {String}   platform targeted platfrom for the build
 			 * @param  {Object}   appData  meta-data on the build of the actuel
-			 *                             project
+			 *			       project
 			 * @param  {Function} next     a CommonJS callback
 			 * @private
 			 */
-			 function _setApplicationToDownload(next){
+			function _setApplicationToDownload(next){
 				var config = ares.clone(project.getConfig().getData()),
 				    packageName = config.id,
 				    appId, title, version;
@@ -864,11 +860,11 @@ enyo.kind({
 			 * of an application in a specific mobile platform.
 			 * 
 			 * @param  {Object}   project contain a description about the 
-			 *                            current selected project
-			 * @param  {Object}   urlSuffix   is a url suffixe that contains:
-			 *                                the appId, the targeted build 
-			 *                                platform, the title of the 
-			 *                                application and its version.
+			 *			      current selected project
+			 * @param  {Object}   urlSuffix	  is a url suffixe that contains:
+			 *				  the appId, the targeted build 
+			 *				  platform, the title of the 
+			 *				  application and its version.
 			 * @param  {Function} next    is a CommunJS callback.
 			 * @private
 			 */
@@ -940,11 +936,11 @@ enyo.kind({
 				xw.writeAttributeString('gap:platform', inTarget);
 			}
 			if (inTarget === 'android'){
-					xw.writeAttributeString('gap:density', phonegap.splashScreen.android.density || 'mdpi');
-				} else {
-					xw.writeAttributeString('width', phonegap.splashScreen[inTarget].width || 60);
-					xw.writeAttributeString('height', phonegap.splashScreen[inTarget].height || 60);
-				}
+				xw.writeAttributeString('gap:density', phonegap.splashScreen.android.density || 'mdpi');
+			} else {
+				xw.writeAttributeString('width', phonegap.splashScreen[inTarget].width || 60);
+				xw.writeAttributeString('height', phonegap.splashScreen[inTarget].height || 60);
+			}
 
 			xw.writeEndElement();
 		};
@@ -959,17 +955,17 @@ enyo.kind({
 		 */
 		var createPluginXMLRow = function (plugin) {
 			xw.writeStartElement('gap:plugin');
-				xw.writeAttributeString('name', plugin.name);
-				xw.writeAttributeString('version', plugin.version);
-				enyo.forEach(plugin.parameters && enyo.keys(plugin.parameters), function(parameter) {
-					xw.writeStartElement("param");
-						xw.writeAttributeString('name', plugin.parameters[parameter].name);
-						xw.writeAttributeString('value', plugin.parameters[parameter].value);
-					xw.writeEndElement();
-				}, this);	
-					
-
+			xw.writeAttributeString('name', plugin.name);
+			xw.writeAttributeString('version', plugin.version);
+			enyo.forEach(plugin.parameters && enyo.keys(plugin.parameters), function(parameter) {
+				xw.writeStartElement("param");
+				xw.writeAttributeString('name', plugin.parameters[parameter].name);
+				xw.writeAttributeString('value', plugin.parameters[parameter].value);
 				xw.writeEndElement();
+			}, this);	
+			
+
+			xw.writeEndElement();
 		};
 
 
@@ -989,8 +985,8 @@ enyo.kind({
 		xw.writeAttributeString('id', config.id);
 		xw.writeAttributeString('version',config.version);
 
-		xw.writeComment('***                              WARNING                            ***');
-		xw.writeComment('***            This is an automatically generated document.         ***');
+		xw.writeComment('***				  WARNING			     ***');
+		xw.writeComment('***		This is an automatically generated document.	     ***');
 		xw.writeComment('*** Do not edit it: your changes would be automatically overwritten ***');
 
 		// we use 'title' (one-line description) here because
@@ -1046,9 +1042,9 @@ enyo.kind({
 		// Else the tag <feature name= <featureUrl> >is generated
 		if(checkNoPermissions.call(this)) {
 			xw.writeStartElement('preference');
-				xw.writeAttributeString('name', 'permissions');
-				xw.writeAttributeString('value', 'none');
-				xw.writeEndElement();
+			xw.writeAttributeString('name', 'permissions');
+			xw.writeAttributeString('value', 'none');
+			xw.writeEndElement();
 		} else {
 
 			enyo.forEach(phonegap.features && enyo.keys(phonegap.features), function(feature) {
@@ -1067,7 +1063,7 @@ enyo.kind({
 			xw.writeAttributeString('name', preference);
 			xw.writeAttributeString('value', phonegap.preferences[preference]);
 			xw.writeEndElement(); // preference			
-	
+			
 		}, this);
 
 		xw.writeComment("Plugins");		
@@ -1092,7 +1088,7 @@ enyo.kind({
 		xw.writeAttributeString('origin', phonegap.access.origin);		
 		xw.writeEndElement(); // access			
 		
-	
+		
 
 		xw.writeEndElement();	// widget
 
@@ -1112,12 +1108,12 @@ enyo.kind({
 				battery: false,
 				camera: false,
 				contact: false,
-		        file: false,		        
-		        geolocation: false,
-		        media: false,
-		        network: false,
-		        notification: false,		                
-		        device: false
+				file: false,			
+				geolocation: false,
+				media: false,
+				network: false,
+				notification: false,				
+				device: false
 			},
 			preferences: {
 				//shared prefrences
