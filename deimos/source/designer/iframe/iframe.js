@@ -71,11 +71,17 @@ enyo.kind({
 		while (expVer.length) {
 			if (myVer.shift() < expVer.shift()) {
 				errMsg = "Enyo used by your application is too old ("
-					+ myVerStr + "). Console log will show duplicated kind error "
+					+ myVerStr + "). Console log may show duplicated kind error "
 					+ "and Designer may not work as expected. You should use Enyo >= "
-					+ this.minEnyoVersion+" Read <a href='https://github.com/enyojs/ares-project/blob/master/README.md' target='_blank'>README.md to update Enyo librarie</a>";
+					+ this.minEnyoVersion+" Read <a href='https://github.com/enyojs/ares-project/blob/master/README.md' target='_blank'>README.md to update Enyo libraries</a>";
 				enyo.warn(errMsg);
-				this.sendMessage({op: "error", val: {msg: errMsg, title: "warning"}});
+				/*
+				 * TODO this message should go in an error/warning history as described in ENYO-2462
+				 * Un-commenting the following "sendMessage" call will result in a annoying modal message
+				 * popping up too often. For the time being, we just issue a warning in the console.
+				 * 
+				 * this.sendMessage({op: "error", val: {msg: errMsg, title: "warning"}});
+				 */
 				break;
 			}
 		}
