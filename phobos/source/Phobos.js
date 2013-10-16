@@ -446,7 +446,7 @@ enyo.kind({
 			item.setTitle(object);
 		}
 		item.setIndex(index);
-    	return true;
+		return true;
 	},
 	navigateInCodeEditor: function(inSender, inEvent) {
 		var itemToSelect = this.objectsToDump[inEvent.index];
