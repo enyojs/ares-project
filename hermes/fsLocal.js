@@ -69,7 +69,7 @@ FsLocal.prototype.propfind = function(req, res, next) {
 	var depthStr = req.param('depth');
 	var depth = depthStr ? (depthStr === 'infinity' ? -1 : parseInt(depthStr, 10)) : 1;
 	this._propfind(null, req.param('path'), depth, function(err, content){
-		setImmediate(next, err, {code: 200 /*Ok*/, body: content});
+		next(err, {code: 200 /*Ok*/, body: content});
 	});
 };
 
@@ -112,9 +112,9 @@ FsLocal.prototype.mkcol = function(req, res, next) {
 		mkdirp.bind(null, absPath)
 	], function(err) {
 		if (err) {
-			setImmediate(next, err);
+			next(err);
 		} else {
-			setImmediate(next, null, {
+			next(null, {
 				code: 201, // Created
 				body: {
 					id: newId,
@@ -136,7 +136,7 @@ FsLocal.prototype['delete'] = function(req, res, next) {
 		this._rmrf(path.join(this.config.root, pathParam), (function(err) {
 			// return the new content of the parent folder
 			this._propfind(err, path.dirname(pathParam), 1 /*depth*/, function(err, content) {
-				setImmediate(next, err, {
+				next(err, {
 					code: 200 /*Ok*/,
 					body: content
 				});
@@ -162,7 +162,7 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 
 	fs.stat(localPath, (function(err, stat) {
 		if (err) {
-			setImmediate(next, err);
+			next(err);
 			return;
 		}
 
@@ -182,17 +182,17 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 		log.verbose("FsLocal#_propfind()", "relPath=" + relPath + ", depth="+depth+", node="+util.inspect(node));
 
 		if (stat.isFile() || !depth) {
-			setImmediate(next, null, node);
+			next(null, node);
 			return;
 		} else if (node.isDir) {
 			node.children = [];
 			fs.readdir(localPath, (function(err, files) {
 				if (err) {
-					setImmediate(next, err); // XXX or skip this directory...
+					next(err); // XXX or skip this directory...
 					return;
 				}
 				if (!files.length) {
-					setImmediate(next, null, node);
+					next(null, node);
 					return;
 				}
 				//to skip the files which user doesn't have permission to read
@@ -203,7 +203,7 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 				files.forEach(function(name) {
 					this._propfind(null, path.join(relPath, name), depth-1, function(err, subNode){
 						if (err) {
-							setImmediate(next, err);
+							next(err);
 							return;
 						}
 						if (subNode) {
@@ -213,7 +213,7 @@ FsLocal.prototype._propfind = function(err, relPath, depth, next) {
 							// return to upper layer only if
 							// every nodes of this layer
 							// were successfully parsed
-							setImmediate(next, null, node);
+							next(null, node);
 						}
 					});
 				}, this);
@@ -274,7 +274,7 @@ FsLocal.prototype._getFile = function(req, res, next) {
 			});
 			
 		} else {
-			setImmediate(next, new Error("not a file: '" + localPath + "'"));
+			next(new Error("not a file: '" + localPath + "'"));
 		}
 	});
 };
@@ -284,7 +284,7 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 	// from <https://gist.github.com/1526919>
 	fs.stat(localPath, (function(err, stats) {
 		if (err) {
-			setImmediate(next, err);
+			next(err);
 			return;
 		}
 
@@ -295,7 +295,7 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 		var count = 0;
 		fs.readdir(localPath, (function(err, files) {
 			if (err) {
-				setImmediate(next, err);
+				next(err);
 			} else if (files.length < 1) {
 				fs.rmdir(localPath, next);
 			} else {
@@ -304,7 +304,7 @@ FsLocal.prototype._rmrf = function(localPath, next) {
 					
 					this._rmrf(sub, function(err) {
 						if (err) {
-							setImmediate(next, err);
+							next(err);
 							return;
 						}
 						
@@ -462,7 +462,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 					op(srcPath, dstPath, (function(err) {
 						// return the new content of the destination path
 						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
-							setImmediate(next, err, {
+							next(err, {
 								code: 201 /*Created*/,
 								body: content
 							});
@@ -480,7 +480,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 				this._rmrf(dstPath, (function(err) {
 					op(srcPath, dstPath, (function(err) {
 						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
-							setImmediate(next, err, {
+							next(err, {
 								code: 200 /*Ok*/,
 								body: content
 							});
@@ -493,7 +493,7 @@ FsLocal.prototype._changeNode = function(req, res, op, next) {
 				    (srcStat.mtime.getTime() === dstStat.mtime.getTime())) {
 					op(srcPath, dstPath, (function(err) {
 						this._propfind(err, dstRelPath, 1 /*depth*/, function(err, content) {
-							setImmediate(next, err, {
+							next(err, {
 								code: 200 /*Ok*/,
 								body: content
 							});
@@ -517,7 +517,7 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 	function _copyNode(srcPath, dstPath, next) {
 		fs.stat(srcPath, function(err, stats) {
 			if (err) {
-				setImmediate(next, err);
+				next(err);
 				return;
 			}
 			if (stats.isDirectory()) {
@@ -530,12 +530,12 @@ FsLocal.prototype._cpr = function(srcPath, dstPath, next) {
 	function _copyDir(srcPath, dstPath, next) {
 		fs.readdir(srcPath, function(err, files) {
 			if (err) {
-				setImmediate(next, err);
+				next(err);
 				return;
 			}
 			fs.mkdir(dstPath, function(err) {
 				if (err) {
-					setImmediate(next, err);
+					next(err);
 					return;
 				}
 				async.forEachSeries(files, function(file, next) {

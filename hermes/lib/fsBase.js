@@ -139,13 +139,13 @@ FsBase.prototype.route = function() {
 			var filePath = path.join(overlayDir, path.basename(req.params.path));
 			fs.stat(filePath, (function(err, stats) {
 				if (err) {
-					setImmediate(next, err);
+					next(err);
 				} else if (stats.isFile()) {
 					log.silly("FsBase#_parseOverlays()", "found overlay file:", filePath);
 					res.status(200);
 					res.sendfile(filePath);
 				} else {
-					setImmediate(next);
+					next();
 				}
 			}).bind(this));
 		} else {
