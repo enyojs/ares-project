@@ -1,4 +1,4 @@
-/* global Ares, async, ares, alert, ComponentsRegistry */
+/* global Ares, ServiceRegistry, async, ares, alert, ComponentsRegistry */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets",
@@ -65,6 +65,7 @@ enyo.kind({
 		onDesignerBroken: "showDesignerError",
 		onSignInError: "showAccountConfiguration",
 		onTreeChanged: "_treeChanged",
+		onFsEvent: "_fsEventAction",
 		onChangingNode: "_nodeChanging",
 		onSaveDocument: "saveDocument", 
 		onSaveAsDocument: "saveAsDocument", 
@@ -98,6 +99,7 @@ enyo.kind({
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		ComponentsRegistry.getComponent("designerPanels").$.panels.setIndex(this.phobosViewIndex);
+		ServiceRegistry.instance.setOwner(this); // plumb services events all the way up
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
 			Ares.Workspace.loadProjects("com.enyojs.ares.tests", true);
@@ -324,6 +326,11 @@ enyo.kind({
 		if (typeof next === 'function') {
 			next();
 		}
+	},
+	/** @private */
+	_fsEventAction: function(inSender, inEvent) {
+		var harmonia = ComponentsRegistry.getComponent("harmonia");
+		harmonia.refreshFile(inEvent.nodeId);
 	},
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();

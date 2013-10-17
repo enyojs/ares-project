@@ -255,7 +255,7 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 			var stream = api.get(url, { timeout: timeout });
 			stream.pause();
 			this.returnFormData([{
-				filename: fileName,
+				name: fileName,
 				stream: stream
 			}], res, next);
 		}).bind(this)
@@ -290,7 +290,7 @@ BdPhoneGap.prototype.downloadApp = function(req, res, next){
 			fs.unlink(tempFileName);
 			log.http("BdPhoneGap#downloadApp#_returnFormData()", "streaming down:", fileName);
 			this.returnFormData([{
-				filename: fileName,
+				name: fileName,
 				buffer: buffer
 			}], res, next);
 		}).bind(this)
@@ -477,7 +477,8 @@ if (path.basename(process.argv[1], '.js') === basename) {
 		port: argv.port,
 		timeout: argv.timeout,
 		basename: basename,
-		enyoDir: path.resolve(__dirname, '..', 'enyo')
+		enyoDir: path.resolve(__dirname, '..', 'enyo'),
+		level: argv.level
 	}, function(err, service){
 		if(err) {
 			process.exit(err);
