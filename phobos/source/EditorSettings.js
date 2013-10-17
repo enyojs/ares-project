@@ -17,7 +17,7 @@ enyo.kind({
 			highlight:false,
 			fontsize:12,
 			wordwrap:false,
-			rightpane:false,
+			rightpane:true,
 			keys:{ }
 		},
 		previewSettings: {
@@ -25,7 +25,7 @@ enyo.kind({
 			highlight:false,
 			fontsize:12,
 			wordwrap:false,
-			rightpane:false,
+			rightpane:true,
 			keys:{ }
 		}
 	},
