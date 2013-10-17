@@ -435,9 +435,9 @@ enyo.kind({
 		this.reparseUsersCode(true);
 	},
 	initNavigation: function(inSender, inEvent) {
-		var item = inEvent.item.$.item;
-		var index = inEvent.item.index;
-		var object = this.objectsToDump[index];
+		var item = inEvent.item.$.item,
+			index = inEvent.item.index,
+			object = this.objectsToDump[index];
 		if (object.isExtended){
 			item.setFixedItem(object.name);	
 		} else if (object.name){
