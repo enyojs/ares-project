@@ -1,3 +1,5 @@
+/* jshint indent: false */ // TODO: ENYO-3311
+
 enyo.kind({
 	name: "Ares.App",
 	classes: "enyo-fit",
@@ -39,19 +41,63 @@ enyo.kind({
 	moveControlSecs: 0.2,
 	edgeThresholdPx: 10,
 	debug: false,
+
+
+	// iframe will complain if user's application loads en enyo older than:
+	minEnyoVersion: "2.3.0-pre.9",
 	
 	create: function() {
 		this.trace = (this.debug === true ? this.log : function(){});
 		this.inherited(arguments);
 		this.addHandlers();
 		this.addDispatcherFeature();
+		window.onerror = enyo.bind(this, this.raiseLoadError);
+	},
+	raiseLoadError: function(msg, url, linenumber) {
+		// I'm a goner
+		var file = url.replace(/.*\/services(?=\/)/,'');
+		var errMsg = "user app load FAILED with error '" + msg
+			+ "' in " + file + " line " + linenumber  ;
+		this.trace(errMsg);
+		this.sendMessage({op: "reloadNeeded"});
+		this.sendMessage({op: "error", val: {msg: errMsg}});
+		return true;
 	},
 	rendered: function() {
 		this.inherited(arguments);
+		var expVer = this.minEnyoVersion.split(/\D+/);
+		var myVerStr = (enyo.version && enyo.version.enyo) || '0.0.0-pre.0';
+		var myVer = myVerStr.split(/\D+/);
+		var errMsg ;
+
+		while (expVer.length) {
+			if (myVer.shift() < expVer.shift()) {
+				errMsg = "Enyo used by your application is too old ("
+					+ myVerStr + "). Console log may show duplicated kind error "
+					+ "and Designer may not work as expected. You should use Enyo >= "
+					+ this.minEnyoVersion+" Read <a href='https://github.com/enyojs/ares-project/blob/master/README.md' target='_blank'>README.md to update Enyo libraries</a>";
+				enyo.warn(errMsg);
+				/*
+				 * TODO this message should go in an error/warning history as described in ENYO-2462
+				 * Un-commenting the following "sendMessage" call will result in a annoying modal message
+				 * popping up too often. For the time being, we just issue a warning in the console.
+				 * 
+				 * this.sendMessage({op: "error", val: {msg: errMsg, title: "warning"}});
+				 */
+				break;
+			}
+		}
+
 		this.adjustFrameworkFeatures();
+
+		// warning: user code error will trigger this.raiseLoadError
+		// through window.onerror handler
+		// another warning: enyo.load is asynchronous. try/catch is useless
 		enyo.load("$enyo/../source/package.js", enyo.bind(this, function() {
+			this.trace("user app load done within designer iframe");
 			this.sendMessage({op: "state", val: "initialized"});
 		}));
+
 	},
 	initComponents: function() {
 		this.createSelectHighlight();
@@ -440,7 +486,7 @@ enyo.kind({
 			var errStack = typeof error === 'object' ? error.stack : '' ;
 			this.error(errMsg, errStack );
 			this.sendMessage({op: "reloadNeeded"});
-			this.sendMessage({op: "error", val: {msg: errMsg, reloadNeeded: true, err: {stack: errStack}}});
+			this.sendMessage({op: "error", val: {msg: errMsg, requestReload: true, err: {stack: errStack}}});
 		}
 	},
 	//* Rerender current selection

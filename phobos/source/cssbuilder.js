@@ -1,3 +1,5 @@
+/* jshint indent: false */ // TODO: ENYO-3311
+
 enyo.kind({
 	published: {
 		red: '00',

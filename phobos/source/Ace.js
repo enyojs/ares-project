@@ -58,10 +58,10 @@ enyo.kind({
 	 * @public
 	 */
 	applyAceSettings: function(settings) {
-			this.setTheme(settings.theme);
-			this.setFontSize(settings.fontsize);
-			this.setHighlightActiveLine(settings.highlight);
-			this.setWordWrap(settings.wordwrap);
+		this.setTheme(settings.theme);
+		this.setFontSize(settings.fontsize);
+		this.setHighlightActiveLine(settings.highlight);
+		this.setWordWrap(settings.wordwrap);
 	},
 	/**
 	 * Register some specific commands for save, ...
@@ -508,5 +508,9 @@ enyo.kind({
 	/** @public */
 	requestSelectedText: function() {
 		return this.editor.session.getTextRange(this.editor.getSelectionRange());
+	},
+	navigateToPosition: function(start, end){
+		var pos = this.mapToLineColumns([start, end]);
+		this.editor.navigateTo(pos[0].row, pos[0].column);
 	}
 });

@@ -1,14 +1,15 @@
+/* jshint indent: false */ // TODO: ENYO-3311
 /* global analyzer, ares, ProjectCtrl */
 
 enyo.kind({
 	name: "Phobos",
 	classes: "enyo-unselectable",
 	components: [
-		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
-			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
+		{kind: "FittableRows", classes: "enyo-fit", components: [
+			{name: "body", fit: true, kind: "FittableColumns", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
-					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
+					{classes: "enyo-fit ares_phobos_panel border ", components: [
+						{kind: "Ace", classes: "enyo-fit ace-code-editor", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -41,10 +42,13 @@ enyo.kind({
 	},
 	handlers: {
 		onCss: "newcssAction",
-		onReparseAsked: "reparseAction"
+		onReparseAsked: "reparseAction",
+		onInitNavigation: "initNavigation",
+		onNavigateInCodeEditor: "navigateInCodeEditor"
 	},
 	published: {
-		projectData: null
+		projectData: null,
+		objectsToDump: []
 	},
 	editedDocs:"",
 	injected: false,
@@ -60,9 +64,13 @@ enyo.kind({
 		this.doRegisterMe({name:"phobos", reference:this});
 	},
 	getProjectController: function() {
+		// create projectCtrl only when needed. In any case, there's only
+		// one Phobos and one projectCtrl in Ares
 		this.projectCtrl = this.projectData.getProjectCtrl();
 		if ( ! this.projectCtrl) {
 			this.projectCtrl = new ProjectCtrl({projectData: this.projectData});
+			// wire event propagation from there to Phobos
+			this.projectCtrl.setOwner(this);
 			this.projectData.setProjectCtrl(this.projectCtrl);
 		}
 	},
@@ -82,13 +90,34 @@ enyo.kind({
 	},
 	saveComplete: function(inDocData) {
 		this.hideWaitPopup();
+		var codeLooksGood = false ;
+
 		if (inDocData) {
 			inDocData.setEdited(false);		// TODO: The user may have switched to another file
+			// update deimos label with edited status which is actually "not-edited" ...
 			this.doFileEdited();
 		}
+
 		if (this.docData === inDocData) {
-			this.reparseAction();
+			codeLooksGood = this.reparseUsersCode();
 		}
+		else {
+			this.trace("skipping reparse user code");
+		}
+
+		// successful analysis will enable designer button
+		this.owner.enableDesignerButton(false);
+
+		// Global analysis is always triggered even if local analysis
+		// reports an error.  This way, errors are reported from a
+		// single place wherever the error is.  The alternative is to
+		// report error during local analysis, which often lead to
+		// error reported twice (i.e on first file edit after a
+		// project load)
+		this.trace("triggering full analysis after file save");
+		this.projectCtrl.forceFullAnalysis();
+
+		this.trace("done. codeLooksGood: "+ codeLooksGood);
 	},
 	saveNeeded: function() {
 		return this.docData.getEdited();
@@ -171,7 +200,7 @@ enyo.kind({
 	openDoc: function(inDocData) {
 		// If we are changing documents, reparse any changes into the current projectIndexer
 		if (this.docData && this.docData.getEdited()) {
-			this.reparseAction(true);
+			this.reparseUsersCode(true);
 		}
 
 		// Set up the new doucment
@@ -240,7 +269,7 @@ enyo.kind({
 			this.$.imageViewer.setAttribute("src", fileUrl);
 		}
 		this.manageDesignerButton();
-		this.reparseAction(true);
+		this.reparseUsersCode(true);
 		this.projectCtrl.buildProjectDb();
 
 		this.docData.setEdited(edited);
@@ -256,7 +285,7 @@ enyo.kind({
 				saveButton: true,
 				saveAsButton: true,
 				newKindButton: true,
-				designerButton: true,
+				designerDecorator: true,
 				right: rightpane
 			},
 			image: {
@@ -265,7 +294,7 @@ enyo.kind({
 				saveButton: false,
 				saveAsButton: false,
 				newKindButton: false,
-				designerButton: false,
+				designerDecorator: false,
 				right: false
 			},
 			text: {
@@ -274,7 +303,7 @@ enyo.kind({
 				saveButton: true,
 				saveAsButton: true,
 				newKindButton: false,
-				designerButton: false,
+				designerDecorator: false,
 				right: false
 			}
 		};
@@ -343,11 +372,10 @@ enyo.kind({
 		this.$.autocomplete.setProjectData(null);
 	},
 	/**
-	 *	Disable "Designer" button unless project & enyo index are both valid
+	 *	Enable "Designer" button only if project & enyo index are both valid
 	 */
 	manageDesignerButton: function() {
-		var disabled = ! this.projectCtrl.fullAnalysisDone;
-		this.owner.$.designerButton.setDisabled(disabled);
+		this.owner.enableDesignerButton( this.projectCtrl.fullAnalysisDone );
 	},
 	/**
 	 * Receive the project data reference which allows to access the analyzer
@@ -375,51 +403,69 @@ enyo.kind({
 		this.manageDesignerButton();
 	},
 	dumpInfo: function(inObject) {
-		var c = inObject;
-		if (!c || !c.superkinds) {
-		//enyo.log(this.$.right.$.dump);
-			this.$.right.$.dump.setContent("(no info)");
+		var h = [];
+		this.$.right.setDumpCount(0);
+		if (!inObject || !inObject.superkinds) {
+			h.push("no content");
+			this.objectsToDump = h;
+			this.$.right.setDumpCount(this.objectsToDump.length);
 			return;
 		}
-		//
-		var h$ = "<h3>" + c.name + "</h3>";
-		//
-		var h = [];
+		var c = inObject;
+		h.push(c.name);
+		h.push("Extends");
 		for (var i=0, p; (p=c.superkinds[i]); i++) {
+			p = {name: c.superkinds[i], isExtended: true};
 			h.push(p);
 		}
-		h$ += "<h4>Extends</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
-		//
-		h = [];
-		for (i=0, p; (p=c.components[i]); i++) {
-			h.push(p.name);
+		if (c.components.length) {
+			h.push("Components");
+			for (i=0, p; (p=c.components[i]); i++) {
+				h.push(p); 
+			}
 		}
-		if (h.length) {
-			h$ += "<h4>Components</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
-		}
-		//
-		h = [];
+		h.push("Properties");
 		for (i=0, p; (p=c.properties[i]); i++) {
-			h.push(p.name);
+			h.push(p);
 		}
-		h$ += "<h4>Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
-		//
-		h = [];
-		for (i=0, p; (p=c.allProperties[i]); i++) {
-			h.push(p.name);
+		this.objectsToDump = h;
+		this.$.right.setDumpCount(this.objectsToDump.length);
+	},
+	// invoked by reparse button in right panel (the file index)
+	reparseAction: function(inSender, inEvent) {
+		this.reparseUsersCode(true);
+	},
+	initNavigation: function(inSender, inEvent) {
+		var item = inEvent.item.$.item,
+			index = inEvent.item.index,
+			object = this.objectsToDump[index];
+		if (object.isExtended){
+			item.setFixedItem(object.name);	
+		} else if (object.name){
+			item.setNavigateItem(object.name);
+		} else {
+			item.setTitle(object);
 		}
-		h$ += "<h4>All Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
-		//
-		this.$.right.$.dump.setContent(h$);
+		item.setIndex(index);
+		return true;
+	},
+	navigateInCodeEditor: function(inSender, inEvent) {
+		var itemToSelect = this.objectsToDump[inEvent.index];
+		if(itemToSelect.start && itemToSelect.end){
+			this.$.ace.navigateToPosition(itemToSelect.start, itemToSelect.end);
+			this.doAceFocus();
+		}
 	},
 	//* Updates the projectIndexer (notifying watchers by default) and resets the local analysis file
-	reparseAction: function(inhibitUpdate) {
+	reparseUsersCode: function(inhibitUpdate) {
 		var mode = this.docData.getMode();
+		var codeLooksGood = false;
 		var module = {
 			name: this.docData.getFile().name,
 			code: this.$.ace.getValue(),
 			path: this.projectCtrl.projectUrl + this.docData.getFile().dir + this.docData.getFile().name
 		};
+		this.trace("called with mode " + mode + " inhibitUpdate " + inhibitUpdate);
 		switch(mode) {
 			case "javascript":
 				try {
@@ -435,6 +481,8 @@ enyo.kind({
 
 					// Give the information to the autocomplete component
 					this.$.autocomplete.setAnalysis(this.analysis);
+
+					codeLooksGood = true;
 				} catch(error) {
 					enyo.log("An error occured during the code analysis: " + error);
 					this.dumpInfo(null);
@@ -456,6 +504,7 @@ enyo.kind({
 				this.$.autocomplete.setAnalysis(null);
 				break;
 		}
+		return codeLooksGood ;
 	},
 	/**
 	 * Add for each object the corresponding range of lines in the file
@@ -502,7 +551,7 @@ enyo.kind({
 	//* Navigate from Phobos to Deimos. Pass Deimos all relevant info.
 	designerAction: function() {
 		// Update the projectIndexer and notify watchers
-		this.reparseAction();
+		this.reparseUsersCode();
 		
 		var kinds = this.extractKindsData(),
 			data = {
@@ -620,7 +669,7 @@ enyo.kind({
 	insertMissingHandlers: function() {
 		if (this.analysis) {
 			// Reparse to get the definition of possibly added onXXXX attributes
-			this.reparseAction(true);
+			this.reparseUsersCode(true);
 
 			/*
 			 * Insert missing handlers starting from the end of the
@@ -634,7 +683,7 @@ enyo.kind({
 				}
 			}
 			// Reparse to get the definition of the newly added methods
-			this.reparseAction(true);
+			this.reparseUsersCode(true);
 		} else {
 			// There is no parser data for the current file
 			enyo.log("Unable to insert missing handler methods");
@@ -716,7 +765,7 @@ enyo.kind({
 		this.injected = false;
 		/*
 		 * Insert the missing handlers
-		 * NB: reparseAction() is invoked by insertMissingHandlers()
+		 * NB: reparseUsersCode() is invoked by insertMissingHandlers()
 		 */
 		this.insertMissingHandlers();
 		//file is edited if only we have a difference between stored file data and editor value
@@ -990,7 +1039,7 @@ enyo.kind({
 	//* Send up an updated copy of the code
 	bubbleCodeUpdate: function() {
 		// Update the projectIndexer and notify watchers
-		this.reparseAction(true);
+		this.reparseUsersCode(true);
 		
 		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
 		if (data.kinds.length > 0) {
@@ -1005,34 +1054,70 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "rightPanels",kind: "Panels", wrap: false, draggable:false,
+	name: "rightPanels", kind: "Panels", wrap: false, draggable:false,
 	events: {
 		onCss: "",
-		onReparseAsked: ""
+		onReparseAsked: "",
+		onInitNavigation: "",
+		onNavigateInCodeEditor: ""
 	},
 	components: [
 		{// right panel for JSON goes here
 		},
 		{kind: "enyo.Control", classes: "enyo-fit", components: [
-			{name: "right", classes: "border panel enyo-fit",style: "margin: 8px;", components: [
-				{kind: "enyo.Scroller", classes: "panel enyo-fit",components: [
-					{kind: "onyx.Button", content: "Reparse",  ontap: "doReparseAsked"},
-					{name: "dump", allowHtml: true}
+			{name: "right", classes: "enyo-fit ares_phobos_panel border", components: [
+				{kind: "onyx.Button", content: "Reparse",  ontap: "doReparseAsked"},
+				{kind: "enyo.Scroller", classes: "enyo-fit ace-helper-panel",components: [
+					{tag:"ul", kind: "enyo.Repeater", name: "dump", onSetupItem: "sendInitHelperReapeter", ontap: "sendNavigate", components: [
+						{tag:"li", classes:"ace-helper-list", kind:"RightPanel.Helper", name: "item"}
+					]}
 				]}
 			]}
 		]},
 		{// right panel for HTML goes here
 		},
 		{kind: "enyo.Control", classes: "enyo-fit",	components: [ // right panel for CSS here
-			{kind: "cssBuilder", classes: "border panel enyo-fit",style: "margin: 8px;", onInsert: "test"}
+			{kind: "cssBuilder", classes: "enyo-fit ares_phobos_panel border", onInsert: "test"}
 		]}
 	],
-
 	create: function() {
 		this.inherited(arguments);
 	},
 	test: function(inEvent) {
 		this.doCss(inEvent);
+	},
+	sendInitHelperReapeter: function(inSender, inEvent) {
+		this.doInitNavigation({item: inEvent.item});
+	},
+	sendNavigate: function(inSender, inEvent){
+		this.doNavigateInCodeEditor({index:inEvent.index});
+	},
+	setDumpCount: function(count){
+		this.$.dump.setCount(count);
+	}
+});
+
+enyo.kind({
+	name: "RightPanel.Helper",
+	published: {
+		title: "",
+		fixedItem: "",
+		navigateItem: "",
+		index: -1
+	},
+	components: [
+		{name: "title", classes: "ace-title"},
+		{name: "fixedItem", classes: "ace-fixed-item"},
+		{name: "navigateItem", kind: "control.Link", classes: "ace-navigate-item"}
+	],
+	titleChanged: function() {
+		this.$.title.setContent(this.title);
+	},
+	fixedItemChanged: function() {
+		this.$.fixedItem.setContent(this.fixedItem);
+	},
+	navigateItemChanged: function() {
+		this.$.navigateItem.setContent(this.navigateItem);
 	}
 });
 

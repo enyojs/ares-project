@@ -1,3 +1,5 @@
+/* jshint indent: false */ // TODO: ENYO-3311
+
 enyo.json.codify = {
 	_block: function(p, inDent) {
 		p = p.join(",\n");
