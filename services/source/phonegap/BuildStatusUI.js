@@ -1,5 +1,10 @@
-/* global Phonegap */
+/* jshint indent: false */ // TODO: ENYO-3311
 
+/* global ares */
+/**
+ * UI: Phonegap pane in the ProjectProperties popup
+ * @name Phonegap.BuildStatusUI
+ */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.PlatformBuildStatus",
 	kind: "onyx.IconButton",
@@ -65,18 +70,41 @@ enyo.kind({
 						{ name: "blackberryButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "blackberry" },
 						{ name: "webosButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform:"webos" }													
 					]
-				},
+				},				
 
 				{ name: "downloadStatus", kind: "Phonegap.ProjectProperties.DownloadStatus" },
 				{
 					name: "messageContainer",
-					kind: "onyx.Drawer",
 					classes: "ares-project-properties-status-message-container",
 					showing: false,
 					components: [
-						{name: "hideStatusContainer", kind: "onyx.IconButton", src: "$project-view/assets/images/close-button-16x16.png", classes: "ares-project-properties-hide-status-button", ontap:"hideMessageContainer"},
-						{name: "downloadLink", content: "Download application", tag: "a", shown: false, classes: "ares-project-properties-dl-link", ontap: "downloadPackage"},
-						{name: "statusMessage", classes: "ares-project-properties-status-message"}
+						{
+							name: "hideStatusContainer",
+							kind: "onyx.IconButton",
+							src: "$project-view/assets/images/close-button-16x16.png",
+							classes: "ares-project-properties-hide-status-button",
+							ontap:"hideMessageContainer"
+						},				
+						{
+							name: "statusMessage",
+							classes: "ares-project-properties-status-message"
+						}
+					]
+				},
+				{
+					kind: "FittableColumns",
+					style: "height: 32px; position: relative; top:-6em;",
+					components: [
+						{
+							name:"separatorForDownloadButton"
+						},
+						{
+							name: "downloadButton",
+							kind: "onyx.IconButton",
+							src: "$services/assets/images/download-icon.png",
+							shown: false,
+							ontap: "downloadPackage"
+						}
 					]
 				}
 									
@@ -112,7 +140,7 @@ enyo.kind({
 	 */
 	buildStatusDataChanged: function(){
 		this.hideMessageContainer();
-		this.$.downloadLink.hide();
+		this.$.downloadButton.hide();
 		for(var key in this.$){
 			// Get only the Enyo control that have the "platform" attribute 
 			// => {Phonegap.ProjectProperties.PlatformBuildStatus} instance
@@ -129,9 +157,23 @@ enyo.kind({
 
 		this.$.statusMessage.setContent(this.$.downloadStatus.getDownloadStatus(this.selectedPlatform));
 		this.$.statusMessage.show();
+		this.updateDownloadMessage(this.selectedPlatform);
+		
 
 		//stop the propagation of the bubble event
 		return true;
+	},
+
+	/**
+	 * 
+	 * @param  {String} inPlatform Mobile platform supported by Phonegap.
+	 * @private
+	 */
+	updateDownloadMessage: function(inPlatform) {
+		var classAttribute = "ares-project-properties-buildStatus-download-button-" + inPlatform;
+		this.$.separatorForDownloadButton.setClassAttribute(classAttribute);
+
+		this.$.downloadButton.show();
 	},
 
 	/**@private*/
@@ -147,30 +189,31 @@ enyo.kind({
 				this.buildStatusData.title !== undefined) {
 				
 				this.updateStatusMessage();
-				this.$.downloadLink.show();
+
+				this.updateDownloadMessage(inSender.platform);
 
 			} else {
-				this.$.downloadLink.hide();
+				this.$.downloadButton.hide();
 			}
 		} else {
 			if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "error" || 
 				this.buildStatusData && this.buildStatusData.status[inSender.platform] === null){
 
 				//Build status: error
-				this.$.downloadLink.hide();
+				this.$.downloadButton.hide();
 				this.$.statusMessage.setContent("Error: " + this.buildStatusData.error[inSender.platform]);				
 			} else {
 				
 				if(this.buildStatusData === null) {
 					
 					//Build status: application not built
-					this.$.downloadLink.hide();
+					this.$.downloadButton.hide();
 					this.$.statusMessage.setContent("Build the application first");					
 
 				} else {
 					
 					//Build status: pending
-					this.$.downloadLink.hide();
+					this.$.downloadButton.hide();
 					this.$.statusMessage.setContent("Build in progress");
 				}		
 			}
@@ -213,6 +256,7 @@ enyo.kind({
 	/**@private*/
 	hideMessageContainer: function() {
 		this.$.messageContainer.hide();
+		this.$.downloadButton.hide();
 	},
 
 	/**@private*/

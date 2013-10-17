@@ -1,3 +1,4 @@
+/* jshint indent: false */ // TODO: ENYO-3311
 /* global ares, Phonegap, ServiceRegistry */
 /**
  * UI: Phonegap pane in the ProjectProperties popup
@@ -25,9 +26,9 @@ enyo.kind({
 						{content: "Sign-in is required", name: "signInErrorMsg", classes: "ares-project-properties-sign-in-msg"}, 
 						{content: "Looking for Phonegap account data ...", name: "waitingForSignIn", classes: "ares-project-properties-sign-in-msg"},
 						{name: "phonegapBuildHelp", kind: "onyx.TooltipDecorator", components: [
-							{name: "phonegapBuildButton", kind: "onyx.IconButton", src: "$services/assets/images/Phonegap_build_help.png", ontap: "phonegapBuildClick"},
-							{kind: "onyx.Tooltip", content: $L("PhoneGap Build Help")}
-						]}, 
+							{name: "phonegapBuildButton", kind: "onyx.IconButton", src: "$services/assets/images/Phonegap_build_help.png", ontap: "phonegapBuildClick", classes: "ares-project-properties-help-button"},
+							
+						]},
 						{
 							classes: "ares-row ares-align-left",
 							name: "appIdRow",
@@ -35,7 +36,7 @@ enyo.kind({
 								{kind: "Phonegap.ProjectProperties.AppId", name: "appIdSelector"}							
 							]
 						}, 
-						{name: "BuildOptionPanel", kind: "FittableRows", style: "margin-top: 50px;"},
+						{name: "BuildOptionPanel", kind: "FittableRows", classes: "ares-project-properties-build-option-panel"},
 						{kind: "Signals", "plugin.phonegap.userDataRefreshed": "refresh"},
 						{name: "targetsRows", kind: "FittableRows", classes: "ares-project-properties-targetsRows-display"}
 						
@@ -434,28 +435,32 @@ enyo.kind({
 
 	components: [
 	{
-		kind:"FittableColumns",
-		classes: "ares-project-properties-appid-container",
-		components: [
-			{content: "Title",	classes: "ares-project-properties-appid-label-title"},
-			{name: "ApplicationTitle"}
-		]
-	},
-	{
 		kind:"FittableColumns",				
 		components: [
-			{content: "AppId",	classes: "ares-project-properties-appid-label-title"},
+			{content: "AppId",	classes: "ares-project-properties-appid-label"},
 			{
 				kind: "onyx.PickerDecorator",			
 				components: [
 					{kind: "onyx.PickerButton", classes: "ares-project-properties-picker", content:"Select AppId"},
 					{kind: "onyx.Picker", name: "AppIdList", onSelect: "updateSelectedAppId"}
 				]
-			},
-			{kind:"Phonegap.ProjectProperties.BuildStatus", name: "buildStatusDisplay"}
-			
+			}			
 		]
-	}
+	},
+
+	{
+		kind:"FittableColumns",
+		classes: "ares-project-properties-appid-container",
+		components: [
+			{content: "Title",	classes: "ares-project-properties-appid-label"},
+			{name: "ApplicationTitle"}
+		]
+	},
+
+	{kind:"Phonegap.ProjectProperties.BuildStatus", name: "buildStatusDisplay"},
+
+	
+
 		
 	],
 
