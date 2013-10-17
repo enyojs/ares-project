@@ -145,7 +145,7 @@ enyo.kind({
 	},
 	putFile: function(inFileId, inContent) {
 		var formData = new enyo.FormData() ;
-		var file = new enyo.Blob([btoa(inContent || '')], {type: "text/plain; charset=UTF-8"});
+		var file = new enyo.Blob([inContent || ''], {type: "text/plain; charset=UTF-8"});
 		this.trace("file:", file);
 		// - ['/path','.'] resolves to '/path', so using '.' keeps the file name encoded in inFileId
 		// - http://www.html5rocks.com/en/tutorials/file/xhr2/#toc-send-formdata
@@ -156,7 +156,7 @@ enyo.kind({
 	},
 	createFile: function(inFolderId, inName, inContent, options) {
 		var formData = new enyo.FormData() ;
-		var file = new enyo.Blob([btoa(inContent || '')], {type: "text/plain; charset=UTF-8"});
+		var file = new enyo.Blob([inContent || ''], {type: "text/plain; charset=UTF-8"});
 		this.trace("file:", file, "name:", inName);
 		formData.append(inName /*name*/, file);
 		var params = ares.extend({ postBody: formData }, options);

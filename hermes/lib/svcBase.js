@@ -7,11 +7,11 @@ var fs = require("graceful-fs"),
     createDomain = require('domain').create,
     log = require('npmlog'),
     http = require("http"),
-    async = require("async"),
     mkdirp = require("mkdirp"),
-    rimraf = require("rimraf"),
     CombinedStream = require('combined-stream'),
     base64 = require('base64-stream'),
+    Busboy = require('busboy'),
+    Readable = require('stream').Readable,
     HttpError = require("./httpError");
 
 module.exports = ServiceBase;
@@ -38,12 +38,14 @@ module.exports = ServiceBase;
  * @public
  */
 function ServiceBase(config, next) {
-
 	config.timeout = config.timeout || (2*60*1000);
 	config.port = config.port || 0;
 	config.pathname = config.pathname || '/';
 	if (config.performCleanup === undefined) {
 		config.performCleanup = true;
+	}
+	if (config.level) {
+		log.level = config.level;
 	}
 
 	this.config = config;
@@ -78,27 +80,13 @@ function ServiceBase(config, next) {
 	});
 
 	// CORS -- Cross-Origin Resources Sharing
-	this.app.use(function _useCors(req, res, next) {
-		log.silly("ServiceBase#_useCors()");
-		res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
-		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-		res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control, X-HTTP-Method-Override');
-		if ('OPTIONS' == req.method) {
-			res.status(200).end();
-		}
-		else {
-			setImmediate(next);
-		}
-	});
+	this.app.use(this.setCors.bind(this));
 
 	// Authentication
-	this.app.use(function(req, res, next) {
-		if (req.connection.remoteAddress !== "127.0.0.1") {
-			setImmediate(next, new Error("Access denied from IP address "+req.connection.remoteAddress));
-		} else {
-			setImmediate(next);
-		}
-	});
+	this.app.use(this.allowLocalOnly.bind(this));
+
+	// Small content
+	this.app.use(this.bodyParser.bind(this));
 
 	this.use();
 
@@ -183,6 +171,34 @@ ServiceBase.prototype.route = function(/*config, next*/) {
 /**
  * @protected
  */
+ServiceBase.prototype.setCors = function(req, res, next) {
+	log.silly("ServiceBase#setCors()");
+	res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
+	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control, , X-HTTP-Method-Override');
+	if ('OPTIONS' == req.method) {
+		res.status(200).end();
+	}
+	else {
+		setImmediate(next);
+	}
+};
+
+/**
+ * @protected
+ */
+ServiceBase.prototype.allowLocalOnly = function(req, res, next) {
+	log.silly("ServiceBase#authorize()");
+	if (req.connection.remoteAddress !== "127.0.0.1") {
+		setImmediate(next, new Error("Access denied from IP address "+req.connection.remoteAddress));
+	} else {
+		setImmediate(next);
+	}
+};
+
+/**
+ * @protected
+ */
 ServiceBase.prototype.setCookie = function(res, key, value) {
 	var exdate=new Date();
 	exdate.setDate(exdate.getDate() + 10 /*days*/);
@@ -230,58 +246,63 @@ ServiceBase.prototype.answerOk = function(req, res /*, next*/) {
  * @property req {path} storeDir where to store the file parts of the request
  * @param {http.Response} res outbound HTTP response
  * @param {Function} next commonJS callback
+ * @see {ServiceBase._storeMultiPart}
  */
 ServiceBase.prototype.store = function(req, res, next) {
-	if (!req.is('multipart/form-data')) {
+	log.verbose("ServiceBase#store()");
+
+	if (req.is('multipart/form-data')) {
+		this._storeMultipart(req, _storeOne, next);
+	} else {
 		setImmediate(next, new HttpError("Not a multipart request", 415 /*Unsupported Media Type*/));
 		return;
 	}
-	
-	if (!req.files.file) {
-		setImmediate(next, new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
-		return;
-	}
-	
-	async.forEachSeries(req.files.file, function(file, next) {
-		var dir = path.join(req.storeDir, path.dirname(file.name));
-		log.silly("ServiceBase#store()", "mkdir -p ", dir);
-		mkdirp(dir, function(err) {
-			log.silly("ServiceBase#store()", "mv ", file.path, " ", file.name);
-			if (err) {
+
+	function _storeOne(file, next) {
+		var absPath = path.join(req.storeDir, file.name);
+		mkdirp(path.dirname(absPath), function(err) {
+			var out = fs.createWriteStream(absPath);
+			out.on('error', function(err) {
+				log.warn("ServiceBase#store#_storeOne()", "err:", err);
 				next(err);
-			} else {
-				if (typeof file.type === 'string' && file.type.match(/x-encoding=base64/)) {
-					fs.readFile(file.path, function(err, data) {
-						if (err) {
-							log.info("ServiceBase#store()", "transcoding: error" + file.path, err);
-							next(err);
-							return;
-						}
-						try {
-							var fpath = file.path;
-							delete file.path;
-							fs.unlink(fpath, function(/*err*/) { /* Nothing to do */ });
-							
-							var filedata = new Buffer(data.toString('ascii'), 'base64');			// TODO: This works but I don't like it
-							fs.writeFile(path.join(req.storeDir, file.name), filedata, function(err) {
-								log.silly("ServiceBase#store()", "from base64(): Stored: ", file.name);
-								next(err);
-							});
-						} catch(transcodeError) {
-							log.warn("ServiceBase#store()", "transcoding error: " + file.path, transcodeError);
-							setImmediate(next, err);
-						}
-					}.bind(this));
-				} else {
-					fs.rename(file.path, path.join(req.storeDir, file.name), function(err) {
-						log.silly("ServiceBase#store()", "Stored: ", file.name);
-						next(err);
-					});
-				}
-			}
+			});
+			out.on('close', function() {
+				log.silly("ServiceBase#store#_storeOne()", "wrote:", absPath);
+				next();
+			});
+			file.stream.pipe(out);
 		});
-	}, next);
+	}
 };
+
+/**
+ * @see {FsBase._putMultipart}
+ */
+ServiceBase.prototype._storeMultipart = function(req, storeOne, next) {
+	log.verbose("ServiceBase#_storeMultipart()");
+
+	this.receiveFormData(req, _receiveFile, _receiveField, next);
+
+	function _receiveFile(fieldName, fieldValue, next, fileName, encoding) {
+		log.silly("ServiceBase#_storeMultipart#_receiveFile()", "fieldName:", fieldName, "fileName:", fileName, "encoding:", encoding);
+		if (fieldName === "file" || fieldName === "blob" || fieldName === ".") {
+			fieldName = undefined;
+		}
+		if (fileName === "file" || fileName === "blob" || fileName === ".") {
+			fileName = undefined;
+		}
+		var file = {
+			name: fieldName || fileName,
+			stream: encoding === 'base64' ? fieldValue.pipe(base64.decode()) : fieldValue
+		};
+		storeOne(file, next);
+	}
+
+	function _receiveField(fieldName, fieldValue) {
+		log.warn("ServiceBase#_storeMultipart#_receiveField()", "unexpected field:",fieldName , "fieldValue:", fieldValue );
+	}
+};
+
 
 /**
  * @protected
@@ -299,9 +320,8 @@ ServiceBase.prototype.returnFile = function(req, res, next) {
 /**
  * @protected
  * @param {http.Request} req inbound HTTP request 
- * @property req {Object} body set by {express.bodyParser}
- * @property req {Object} files set by {express.bodyParser}
  * @param {http.Response} res outbound HTTP response
+ * @property res {Object} body
  * @property res {String} contentType force 'Content-Type' response header (otherwise set automatically by express)
  * @param {Function} next commonJS callback
  */
@@ -343,22 +363,34 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 		var mode;
 
 		combinedStream = CombinedStream.create({
-			pauseStreams: true,
 			maxDataSize: this.config.maxDataSize || 15*1024*1024 /*15 MB*/
 		});
 		
 		parts.forEach(function(part) {
 			// Adding part header
-			combinedStream.append(_getPartHeader(part.filename));
+			if (!part.name) {
+				throw new HttpError(503, "Invalid (missing name) part:"+ util.inspect(part, {level: 2}));
+			} else {
+				combinedStream.append(_getPartHeader(part.name));
+			}
 
 			// Adding data
 			if (part.path) {
 				mode = "path";
+				var stream = fs.createReadStream(part.path);
+				stream.on('error', function(err) {
+					log.warn("ServiceBase#returnFormData()", "part:", part.name, "(" + mode + ")", "err:", err);
+					next(err);
+				});
 				combinedStream.append(function(append) {
-					append(fs.createReadStream(part.path).pipe(base64.encode()));
+					append(stream.pipe(base64.encode()));
 				});
 			} else if (part.stream) {
 				mode = "stream";
+				part.stream.on('error', function(err) {
+					log.warn("ServiceBase#returnFormData()", "part:", part.name, "(" + mode + ")", "err:", err);
+					next(err);
+				});
 				combinedStream.append(part.stream.pipe(base64.encode()));
 			} else if (part.buffer) {
 				mode = "buffer";
@@ -367,15 +399,13 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 				});
 			} else {
 				log.warn("ServiceBase#returnFormData()", "Invalid part:", part);
-				combinedStream.append(function(append) {
-					append('INVALID CONTENT');
-				});
+				throw new HttpError(503, "Invalid part:"+ util.inspect(part, {level: 2}));
 			}
-			log.silly("ServiceBase#returnFormData()", "part:", part.filename, "(" + mode + ")");
+			log.silly("ServiceBase#returnFormData()", "part:", part.name, "(" + mode + ")");
 		
 			// Adding part footer
 			combinedStream.append(function(append) {
-				log.silly("ServiceBase#returnFormData()", "end-of-part:", part.filename);
+				log.silly("ServiceBase#returnFormData()", "end-of-part:", part.name);
 				append(_getPartFooter());
 			});
 		});
@@ -393,6 +423,7 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 	res.status(200);
 	res.header('Content-Type', _getContentTypeHeader());
 	res.header('X-Content-Type', _getContentTypeHeader());
+	combinedStream.on('error', next);
 	combinedStream.on('end', function() {
 		log.silly("ServiceBase#returnFormData()", "Streaming completed");
 		next();
@@ -420,12 +451,12 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 
 		header += '; filename="' + filename + '"' + FORM_DATA_LINE_BREAK;
 
-		// 'Content-Transfer-Encoding' require 76-columns base64-encoded  data...
-		//header += 'Content-Type: application/octet-stream' + FORM_DATA_LINE_BREAK;
-		//header += 'Content-Transfer-Encoding: base64' + FORM_DATA_LINE_BREAK;
-
-		// ...so we use our own 'Content-Type'
-		header += 'Content-Type: application/octet-stream; x-encoding=base64' + FORM_DATA_LINE_BREAK;
+		// 'Content-Transfer-Encoding: base64' require
+		// 76-columns data, to not break
+		// `connect.bodyParser()`... so we use our own
+		// `ServiceBase.bodyParser()`.
+		header += 'Content-Type: application/octet-stream' + FORM_DATA_LINE_BREAK;
+		header += 'Content-Transfer-Encoding: base64' + FORM_DATA_LINE_BREAK;
 
 		header += FORM_DATA_LINE_BREAK;
 		return header;
@@ -440,21 +471,148 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 	}
 };
 
+ServiceBase.prototype.bodyParser = function(req, res, next) {
+	if (req.is("application/json")) {
+		this.receiveJson(req, res, next);
+	} else if (req.is("application/x-www-form-urlencoded")) {
+		this.receiveWebForm(req, res, next);
+	} else {
+		setImmediate(next);
+	}
+};
+
+ServiceBase.prototype.receiveJson = function(req, res, next) {
+	var buf = '';
+	req.setEncoding('utf8');
+	req.on('data', function(chunk){
+		buf += chunk;
+	});
+	req.on('end', function(){
+		if (0 === buf.length) {
+			return next(new HttpError(400, "Invalid JSON, empty body"));
+		}
+		try {
+			req.body = JSON.parse(buf);
+		} catch (err){
+			return next(new HttpError(400, "Invalid JSON: " + err.toString()));
+		}
+		next();
+	});
+};
+
+/**
+ * Parse the multipart/form-data in the incoming request
+ * @param {http.Request} req
+ * @param {Function} receiveFile
+ * @param receiveFile {String} name might be "file" or the actual part file name
+ * @param receiveFile {stream.Readable} file
+ * @param receiveFile {Function} next commonJS callback, to be called when the file was read completelly
+ * @param receiveFile {String} [filename] the actual part file name, when present
+ * @param {Function} receiveField
+ * @param receiveField {String} fieldname
+ * @param receiveField {String} fieldvalue
+ * @param {Function} next commonJS callback
+ * @param next {Error} err falsy in case of success
+ * @param next {Integer} nfiles number of files received
+ * @param next {Integer} nfields number of fields set in {req.body}
+ */
+ServiceBase.prototype.receiveFormData = function(req, receiveFile, receiveField, next) {
+	log.verbose("ServiceBase#receiveFormData()");
+	var infiles = 0, outfiles = 0, nfields = 0;
+	var parsed = false;
+	var busboy = new Busboy({headers: req.headers});
+	busboy.on('file', function(fieldName, fieldValue, fileName, encoding) {
+		infiles++;
+		log.silly("ServiceBase#receiveFormData()", "fieldName:", fieldName, ", fileName:", fileName, "encoding:", encoding);
+		var file = new Readable().wrap(fieldValue);
+		receiveFile(fieldName, file, _receivedPart, fileName, encoding);
+	});
+	busboy.on('field', function(fieldname, val, valTruncated, keyTruncated) {
+		++nfields;
+		log.silly("ServiceBase#receiveFormData()", "field", fieldname, "=", val);
+		receiveField(fieldname, val);
+	});
+	busboy.once('end', function() {
+		log.silly("ServiceBase#receiveFormData()", "parsing complete, infiles:", infiles);
+		parsed = true;
+		if (infiles === 0) {
+			next();
+		}
+	});
+	log.silly("ServiceBase#receiveFormData()", "parsing started");
+	req.on('error', function(err) {
+		log.warn("ServiceBase#receiveFormData()", "req.err:", err);
+		next(err);
+	});
+	busboy.on('error', function(err) {
+		log.warn("ServiceBase#receiveFormData()", "busboy.err:", err);
+		next(err);
+	});
+	req.pipe(busboy);
+
+	function _receivedPart(err) {
+		outfiles++;
+		log.silly("ServiceBase#receiveFormData_receivedPart()", outfiles + "/" + infiles + " file parts processed");
+		if (parsed && infiles === outfiles) {
+			log.verbose("ServiceBase#receiveFormData#_receivedPart()", "received", outfiles, "parts");
+			setImmediate(next, null, outfiles, nfields);
+		}
+	}
+};
+
+/**
+ * Parse the application/x-www-form-urlencoded in the incoming request
+ * @param {http.Request} req
+ * @param {Function} receiveField
+ * @param receiveField {String} fieldname
+ * @param receiveField {String} fieldvalue
+ * @param {Function} next commonJS callback
+ */
+ServiceBase.prototype.receiveWebForm = function(req, res, next) {
+	var nfields = 0;
+	var busboy = new Busboy({headers: req.headers});
+	req.body = req.body || {};
+	busboy.on('field', function(fieldname, val, valTruncated, keyTruncated) {
+		++nfields;
+		log.silly("ServiceBase#receiveWebForm()", "field", fieldname, "=", val);
+		req.body[fieldname] = val;
+	});
+	busboy.once('end', function() {
+		log.verbose("ServiceBase#receiveWebForm()", "parsed " + nfields + " fields");
+		next();
+	});
+	busboy.on('error', function(err) {
+		log.warn("ServiceBase#receiveWebForm()", "busboy.err:", err);
+		next(err);
+	});
+	log.verbose("ServiceBase#receiveWebForm()", "parsing started");
+	req.pipe(busboy);
+};
+
 /**
  * Terminates express server & clean-up the plate
  * @protected
  */
 ServiceBase.prototype.quit = function(next) {
-	this.app.close();
-	rimraf(this.uploadDir, next);
-	log.info('ServiceBase#quit()',  "exiting");
+	log.info('ServiceBase#quit()');
+	this.server.close();
+	if (this.config.performCleanup) {
+		this.cleanProcess(next);
+	} else {
+		setImmediate(next);
+	}
+};
+
+/**
+ * @protected
+ */
+ServiceBase.prototype.cleanProcess = function() {
+	log.verbose('ServiceBase#cleanProcess()');
 };
 
 /**
  * @protected
  */
 ServiceBase.prototype.onExit = function() {
-	rimraf(this.uploadDir, function(/*err*/) {
-		// Nothing to do
-	});
+	log.verbose('ServiceBase#onExit()');
 };

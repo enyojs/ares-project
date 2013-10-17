@@ -27,19 +27,22 @@ enyo.kind({
 		this.inherited(arguments);
 		this.doRegisterMe({name:"documentToolbar", reference:this});
 	},
-	createFileTab: function(name, id, path) {
+	createFileTab: function(name, id, path, project) {
 		this.$.tabs.show();
 		this.$.tabs.render();
 		this.$.tabs.addTab(
 			{
 				caption: name,
 				userId: id, // id like home-123f3c8a766751826...
-				tooltipMsg: path
+				tooltipMsg: path,
+				data: {
+					project: project // object with project name and whatnot
+				}
 			}
 		);
 	},
 	switchFile: function(inSender, inEvent) {
-		this.doSwitchFile({id: inEvent.userId});
+		this.doSwitchFile({id: inEvent.userId, project: inEvent.data.project});
 		return true;
 	},
 	activateFileWithId: function(id) {
@@ -49,7 +52,7 @@ enyo.kind({
 	requestCloseFile: function(inSender, inEvent) {
 		// inEvent.next callback is ditched. Ares will call removeTab
 		// when file is closed by Ace
-		this.doCloseFileRequest({id: inEvent.userId});
+		this.doCloseFileRequest({id: inEvent.userId, project: inEvent.data.project});
 		return true;
 	},
 	removeTab: function(id) {

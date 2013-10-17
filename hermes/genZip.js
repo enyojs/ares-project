@@ -6,12 +6,9 @@
 
 // nodejs version checking is done in parent process ide.js
 
-var fs = require("fs"),
-    path = require("path"),
-    express = require("express"),
+var path = require("path"),
     util  = require("util"),
     log = require('npmlog'),
-    temp = require("temp"),
     async = require("async"),
     rimraf = require("rimraf"),
     ptools = require("ares-generator"),
@@ -35,13 +32,6 @@ util.inherits(GenZip, ServiceBase);
  */
 GenZip.prototype.use = function() {
 	log.verbose('GenZip#use()'); 
-	// Built-in express form parser: handles:
-	// - 'application/json' => req.body
-	// - 'application/x-www-form-urlencoded' => req.body
-	// - 'multipart/form-data' => req.body.<field>[], req.body.file[]
-	this.uploadDir = temp.path({prefix: 'com.enyojs.ares.services.genZip'}) + '.d';
-	fs.mkdirSync(this.uploadDir);
-	this.app.use(express.bodyParser({keepExtensions: true, uploadDir: this.uploadDir}));
 };
 
 /**
@@ -67,7 +57,7 @@ GenZip.prototype.getSources = function(req, res, next) {
 };
 
 GenZip.prototype.generate = function(req, res, next) {
-	log.info("GenZip#generate()");
+	log.info("GenZip#generate()", "req.body:", req.body);
 	var destination;
 	
 	async.waterfall([
@@ -79,7 +69,7 @@ GenZip.prototype.generate = function(req, res, next) {
 			destination = tmpDir;
 			var parts = fileMap.map(function(file) {
 				return({
-					filename: file.name,
+					name: file.name,
 					path: file.path
 				});
 			});

@@ -269,7 +269,7 @@ enyo.kind({
 			return true;
 		}
 		
-		if (this.draggedNode.content != "package.js") {
+		if (this.draggedNode && this.draggedNode.content != "package.js") {
 			if (this.isValidDropTarget(this.targetNode)) {
 				inEvent.dataTransfer.dropEffect = "link";
 			} else {
