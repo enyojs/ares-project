@@ -5,11 +5,11 @@ enyo.kind({
 	name: "Phobos",
 	classes: "enyo-unselectable",
 	components: [
-		{kind: "FittableRows", classes: "enyo-fit", Xstyle: "padding: 10px;", components: [
-			{name: "body", fit: true, kind: "FittableColumns", Xstyle: "padding-bottom: 10px;", components: [
+		{kind: "FittableRows", classes: "enyo-fit", components: [
+			{name: "body", fit: true, kind: "FittableColumns", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
-					{classes: "border panel enyo-fit", style: "margin: 8px;", components: [
-						{kind: "Ace", classes: "enyo-fit", style: "margin: 4px;", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
+					{classes: "enyo-fit ares_phobos_panel border ", components: [
+						{kind: "Ace", classes: "enyo-fit ace-code-editor", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
@@ -42,10 +42,13 @@ enyo.kind({
 	},
 	handlers: {
 		onCss: "newcssAction",
-		onReparseAsked: "reparseAction"
+		onReparseAsked: "reparseAction",
+		onInitNavigation: "initNavigation",
+		onNavigateInCodeEditor: "navigateInCodeEditor"
 	},
 	published: {
-		projectData: null
+		projectData: null,
+		objectsToDump: []
 	},
 	editedDocs:"",
 	injected: false,
@@ -400,47 +403,58 @@ enyo.kind({
 		this.manageDesignerButton();
 	},
 	dumpInfo: function(inObject) {
-		var c = inObject;
-		if (!c || !c.superkinds) {
-		//enyo.log(this.$.right.$.dump);
-			this.$.right.$.dump.setContent("(no info)");
+		var h = [];
+		this.$.right.setDumpCount(0);
+		if (!inObject || !inObject.superkinds) {
+			h.push("no content");
+			this.objectsToDump = h;
+			this.$.right.setDumpCount(this.objectsToDump.length);
 			return;
 		}
-		//
-		var h$ = "<h3>" + c.name + "</h3>";
-		//
-		var h = [];
+		var c = inObject;
+		h.push(c.name);
+		h.push("Extends");
 		for (var i=0, p; (p=c.superkinds[i]); i++) {
+			p = {name: c.superkinds[i], isExtended: true};
 			h.push(p);
 		}
-		h$ += "<h4>Extends</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
-		//
-		h = [];
-		for (i=0, p; (p=c.components[i]); i++) {
-			h.push(p.name);
+		if (c.components.length) {
+			h.push("Components");
+			for (i=0, p; (p=c.components[i]); i++) {
+				h.push(p); 
+			}
 		}
-		if (h.length) {
-			h$ += "<h4>Components</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
-		}
-		//
-		h = [];
+		h.push("Properties");
 		for (i=0, p; (p=c.properties[i]); i++) {
-			h.push(p.name);
+			h.push(p);
 		}
-		h$ += "<h4>Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
-		//
-		h = [];
-		for (i=0, p; (p=c.allProperties[i]); i++) {
-			h.push(p.name);
-		}
-		h$ += "<h4>All Properties</h4>" + "<ul><li>" + h.join("</li><li>") + "</li></ul>";
-		//
-		this.$.right.$.dump.setContent(h$);
+		this.objectsToDump = h;
+		this.$.right.setDumpCount(this.objectsToDump.length);
 	},
-
 	// invoked by reparse button in right panel (the file index)
 	reparseAction: function(inSender, inEvent) {
 		this.reparseUsersCode(true);
+	},
+	initNavigation: function(inSender, inEvent) {
+		var item = inEvent.item.$.item,
+			index = inEvent.item.index,
+			object = this.objectsToDump[index];
+		if (object.isExtended){
+			item.setFixedItem(object.name);	
+		} else if (object.name){
+			item.setNavigateItem(object.name);
+		} else {
+			item.setTitle(object);
+		}
+		item.setIndex(index);
+		return true;
+	},
+	navigateInCodeEditor: function(inSender, inEvent) {
+		var itemToSelect = this.objectsToDump[inEvent.index];
+		if(itemToSelect.start && itemToSelect.end){
+			this.$.ace.navigateToPosition(itemToSelect.start, itemToSelect.end);
+			this.doAceFocus();
+		}
 	},
 	//* Updates the projectIndexer (notifying watchers by default) and resets the local analysis file
 	reparseUsersCode: function(inhibitUpdate) {
@@ -1040,34 +1054,70 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "rightPanels",kind: "Panels", wrap: false, draggable:false,
+	name: "rightPanels", kind: "Panels", wrap: false, draggable:false,
 	events: {
 		onCss: "",
-		onReparseAsked: ""
+		onReparseAsked: "",
+		onInitNavigation: "",
+		onNavigateInCodeEditor: ""
 	},
 	components: [
 		{// right panel for JSON goes here
 		},
 		{kind: "enyo.Control", classes: "enyo-fit", components: [
-			{name: "right", classes: "border panel enyo-fit",style: "margin: 8px;", components: [
-				{kind: "enyo.Scroller", classes: "panel enyo-fit",components: [
-					{kind: "onyx.Button", content: "Reparse",  ontap: "doReparseAsked"},
-					{name: "dump", allowHtml: true}
+			{name: "right", classes: "enyo-fit ares_phobos_panel border", components: [
+				{kind: "onyx.Button", content: "Reparse",  ontap: "doReparseAsked"},
+				{kind: "enyo.Scroller", classes: "enyo-fit ace-helper-panel",components: [
+					{tag:"ul", kind: "enyo.Repeater", name: "dump", onSetupItem: "sendInitHelperReapeter", ontap: "sendNavigate", components: [
+						{tag:"li", classes:"ace-helper-list", kind:"RightPanel.Helper", name: "item"}
+					]}
 				]}
 			]}
 		]},
 		{// right panel for HTML goes here
 		},
 		{kind: "enyo.Control", classes: "enyo-fit",	components: [ // right panel for CSS here
-			{kind: "cssBuilder", classes: "border panel enyo-fit",style: "margin: 8px;", onInsert: "test"}
+			{kind: "cssBuilder", classes: "enyo-fit ares_phobos_panel border", onInsert: "test"}
 		]}
 	],
-
 	create: function() {
 		this.inherited(arguments);
 	},
 	test: function(inEvent) {
 		this.doCss(inEvent);
+	},
+	sendInitHelperReapeter: function(inSender, inEvent) {
+		this.doInitNavigation({item: inEvent.item});
+	},
+	sendNavigate: function(inSender, inEvent){
+		this.doNavigateInCodeEditor({index:inEvent.index});
+	},
+	setDumpCount: function(count){
+		this.$.dump.setCount(count);
+	}
+});
+
+enyo.kind({
+	name: "RightPanel.Helper",
+	published: {
+		title: "",
+		fixedItem: "",
+		navigateItem: "",
+		index: -1
+	},
+	components: [
+		{name: "title", classes: "ace-title"},
+		{name: "fixedItem", classes: "ace-fixed-item"},
+		{name: "navigateItem", kind: "control.Link", classes: "ace-navigate-item"}
+	],
+	titleChanged: function() {
+		this.$.title.setContent(this.title);
+	},
+	fixedItemChanged: function() {
+		this.$.fixedItem.setContent(this.fixedItem);
+	},
+	navigateItemChanged: function() {
+		this.$.navigateItem.setContent(this.navigateItem);
 	}
 });
 

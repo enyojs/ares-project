@@ -15,6 +15,13 @@
 .ares_phobos_right {
 	width: 280px;
 }
+.ares_phobos_panel {
+	position: relative;
+	min-height: 20px;
+	padding: 19px;
+	box-sizing: border-box;
+	margin: 8px;
+}
 .ares_phobos_autocomp {
 	width: 140px;
 	padding: 0px;
@@ -85,4 +92,31 @@
 	word-wrap: break-word;
 	min-height: 2em;
 	margin-top: 3px
+}
+.ace-helper-panel{
+	margin-top: 60px;
+}
+.ace-helper-list{
+	list-style-type: none;
+	line-height: 2;
+}
+.ace-title{
+	font-weight: bold;	
+}
+.ace-fixed-item{
+	margin-left: 2em;
+	color: @ares-dark-color;
+}
+.ace-navigate-item{
+	cursor:hand;
+	cursor:pointer;
+	color: @ares-project-list-text-color;
+	text-shadow: 0 1px 0 #FFFFFF;
+	margin-left: 2em;
+}
+.ace-navigate-item.hover{
+	color: lighten(@ares-project-list-text-color, 25%);
+}
+.ace-code-editor{
+	margin-top: 4px;
 }
