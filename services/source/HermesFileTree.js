@@ -1420,7 +1420,7 @@ enyo.kind({
 		var fileCreation = this.$.service.createFile(folderId, name, content, { overwrite: false });
 		fileCreation.response(this, function(inSender, inNodes) {
 			this.trace("inNodes: ",inNodes);
-			var self = this;
+			var thisKind = this;
 			var parentNode = this.getFolderOfSelectedNode(),
 			    pkgNode = parentNode.getNodeNamed('package.js');
 
@@ -1450,16 +1450,16 @@ enyo.kind({
 
 			if (this.findNodeExtension(name) !== null) {
 				this.refreshFileTree( function() { 
-					var newNode = self.getFolderOfSelectedNode().getNodeWithId(inNodes[0].id);
+					var newNode = thisKind.getFolderOfSelectedNode().getNodeWithId(inNodes[0].id);
 					
 					// scroll adjustment
 					newNode.doAdjustScroll();
 
 					// opens the created file: after tree refresh done
-					if (!newNode.file.isServer && !newNode.file.isDir && self.projectUrlReady) {
-						self.doFileCreated({
+					if (!newNode.file.isServer && !newNode.file.isDir && thisKind.projectUrlReady) {
+						thisKind.doFileCreated({
 							file: newNode.file,
-							projectData: self.projectData
+							projectData: thisKind.projectData
 						});
 					}
 				}, inNodes[0].id );
