@@ -2,7 +2,6 @@
 
 var fs = require("graceful-fs"),
     path = require("path"),
-    express = require("express"),
     util  = require("util"),
     child_process = require("child_process"),
     log = require('npmlog'),
@@ -53,17 +52,11 @@ util.inherits(BdBase, ServiceBase);
  */
 BdBase.prototype.use = function() {
 	log.verbose('BdBase#use()'); 
-	// Built-in express form parser: handles:
-	// - 'application/json' => req.body
-	// - 'application/x-www-form-urlencoded' => req.body
-	// - 'multipart/form-data' => req.body.[fieldname][], req.files[filename][]
-	this.uploadDir = temp.path({prefix: 'com.enyojs.ares.services.' + this.config.basename}) + '.d';
-	fs.mkdirSync(this.uploadDir);
-	this.app.use(express.bodyParser({
-		keepExtensions: true,
-		maxFields: 10000,
-		uploadDir: this.uploadDir
-	}));
+};
+
+BdBase.prototype.cleanProcess = function(next) {
+	log.verbose('BdBase#cleanProcess()');
+	setImmediate(next);
 };
 
 /**

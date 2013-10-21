@@ -41,9 +41,9 @@ enyo.kind({
 		var self = this;
 		this._reloadServices(function(err) {
 			if (err) {
-					self._handleReloadError(err);
+				self._handleReloadError(err);
 			} else {
-					self.notifyServicesChange();
+				self.notifyServicesChange();
 			}
 		});
 	},
@@ -154,12 +154,15 @@ enyo.kind({
 				// a common front-end
 				service.impl = new HermesFileSystem();
 				service.impl.notifyFailure = enyo.bind(this, this.serviceFailure, service.config.type, service.config.id);
+				service.impl.setOwner(this);
 				this.configureService(service, next);
 			} else if (service.implementsType("build") && service.config.id === "phonegap") {
 				service.impl = new Phonegap.Build();
+				service.impl.setOwner(this);
 				this.configureService(service, next);
 			} else if (service.implementsType("generate") && service.config.id === "genZip") {
 				service.impl = new GenZip();
+				service.impl.setOwner(this);
 				this.configureService(service, next);
 			} else {
 				this.log("Ignoring service: " + service.config.id);
@@ -354,6 +357,7 @@ enyo.kind({
 			if (service.config.pluginClient &&  (! service.impl)) {
 				try {
 					service.impl = ServiceRegistry.instance.createComponent(kindInformation);
+					service.impl.setOwner(this);
 					this.configureService(service, next);
 					this.trace("New plugin registered: ", serviceId);
 					// FIXME: refactor notifyServicesChange() to carry only one service (like plugins).

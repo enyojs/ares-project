@@ -87,7 +87,7 @@ enyo.kind({
 			};		
 			window.aresTestW.postMessage({evt:"ARES.TEST.RESULT", data:obj}, "http://127.0.0.1:9009");
 			this.trace("Post ARES.TEST.RESULT ... ", JSON.stringify(obj));
-				enyo.log("Post ARES.TEST.RESULT ... ", enyo.json.stringify(obj));
+			enyo.log("Post ARES.TEST.RESULT ... ", enyo.json.stringify(obj));
 		}
 	}
 });

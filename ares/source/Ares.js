@@ -1,4 +1,4 @@
-/* global Ares, async, ares, alert, ComponentsRegistry */
+/* global Ares, ServiceRegistry, async, ares, alert, ComponentsRegistry */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets",
@@ -60,8 +60,12 @@ enyo.kind({
 		onShowWaitPopup: "showWaitPopup",
 		onHideWaitPopup: "hideWaitPopup",
 		onError: "showError",
+		onErrorTooltip: "showDesignerErrorTooltip",
+		onErrorTooltipReset: "resetDesignerErrorTooltip",
+		onDesignerBroken: "showDesignerError",
 		onSignInError: "showAccountConfiguration",
 		onTreeChanged: "_treeChanged",
+		onFsEvent: "_fsEventAction",
 		onChangingNode: "_nodeChanging",
 		onSaveDocument: "saveDocument", 
 		onSaveAsDocument: "saveAsDocument", 
@@ -95,6 +99,7 @@ enyo.kind({
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		ComponentsRegistry.getComponent("designerPanels").$.panels.setIndex(this.phobosViewIndex);
+		ServiceRegistry.instance.setOwner(this); // plumb services events all the way up
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
 			Ares.Workspace.loadProjects("com.enyojs.ares.tests", true);
@@ -138,6 +143,9 @@ enyo.kind({
 	_openDocument: function(projectData, file, next) {
 		var self = this;
 		var fileDataId = Ares.Workspace.files.computeId(file);
+		if (! fileDataId ) {
+			throw new Error ('Undefined fileId for file ' + file.name + ' service ' + file.service);
+		}
 		var fileData = Ares.Workspace.files.get(fileDataId);
 		this.trace("open document with projectData ", projectData, " fileDataId ", fileDataId);
 		if (fileData) {
@@ -319,6 +327,11 @@ enyo.kind({
 			next();
 		}
 	},
+	/** @private */
+	_fsEventAction: function(inSender, inEvent) {
+		var harmonia = ComponentsRegistry.getComponent("harmonia");
+		harmonia.refreshFile(inEvent.nodeId);
+	},
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();
 		ComponentsRegistry.getComponent("deimos").load(inEvent);
@@ -483,7 +496,8 @@ enyo.kind({
 	},
 	updateCode: function(inDoc) {
 		var filename = inDoc.getFile().path,
-			code = inDoc.getAceSession().getValue();
+			aceSession = inDoc.getAceSession(),
+			code = aceSession && aceSession.getValue();
 
 		if(filename.slice(-4) === ".css") {
 			this.syncCSSFile(filename, code);
@@ -517,6 +531,15 @@ enyo.kind({
 	},
 	showErrorPopup : function(inEvent) {
 		this.$.errorPopup.raise(inEvent);
+	},
+	showDesignerErrorTooltip: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("designerPanels").showErrorTooltip(inSender, inEvent);
+	},
+	resetDesignerErrorTooltip: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("designerPanels").resetErrorTooltip();
+	},
+	showDesignerError: function(){
+		this.showError("",ComponentsRegistry.getComponent("designerPanels").getErrorFromDesignerBroken());
 	},
 	showSignInErrorPopup : function(inEvent) {
 		this.$.signInErrorPopup.raise(inEvent);

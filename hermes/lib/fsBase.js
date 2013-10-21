@@ -5,36 +5,43 @@
 
 var fs = require("graceful-fs"),
     path = require("path"),
-    //util = require("util"),
+    util = require("util"),
     express = require("express"),
-    http = require("http"),
     tunnel = require("tunnel"),
-    createDomain = require('domain').create,
-    temp = require("temp"),
-    async = require("async"),
-    base64 = require('base64-stream'),
-    HttpError = require("./httpError");
+    log = require('npmlog'),
+    HttpError = require("./httpError"),
+    ServiceBase = require("./svcBase");
 
 module.exports = FsBase;
 
-function FsBase(inConfig, next) {
-
-	for (var p in inConfig) {
-		this[p] = inConfig[p];
-	}
-
-	if (this.level === 'verbose' || this.level === 'silly') {
-		this.log = function() {
-			console.log.bind(this, this.name).apply(this, arguments);
-		};
-	} else {
-		this.log = function(){};
-	}
+/**
+ * Base object for Ares file-system services
+ * 
+ * @param {Object} config
+ * @property config {String} port requested IP port (0 for dynamic allocation, the default)
+ * @property config {String} pathname location after the service origin, defaults to '/'
+ * @property config {String} basename child class name (for tracing)
+ * @property config {String} level tracing level (default to 'http')
+ * @property config {Boolean} performCleanup clean temporary files & folders (default to true)
+ * 
+ * @param {Function} next
+ * @param next {Error} err
+ * @param next {Object} service
+ * @property service {String} protocol is 'http' or 'https'
+ * @property service {String} host IP address to 
+ * @property service {String} port bound port (useful in case of dynamic allocation)
+ * @property service {String} origin consolidated string of protocol, host & port
+ * @property service {String} pathname to locat the service behind the origin
+ * 
+ * @public
+ */
+function FsBase(config, next) {
+	ServiceBase.call(this, config, next);
 
 	// sanity check
 	[
 		// middleware methods (always executed)
-		'cors', 'authorize', 'respond',
+		'setCors', 'allowLocalOnly', 'respond',
 		// admin methods
 		'getUserInfo', 'setUserInfo',
 		// filesystem verbs
@@ -47,78 +54,37 @@ function FsBase(inConfig, next) {
 			return;
 		}
 	}).bind(this));
+}
 
-	// express-3.x
-	this.app = express();
-	this.server = http.createServer(this.app);
-	this.server.setTimeout(this.timeout || (2*60*1000));
+util.inherits(FsBase, ServiceBase);
 
-	this.app.use(this.separator.bind(this));
-	if (this.level !== 'error' && this.level !== 'warning') {
-		this.app.use(express.logger('dev'));
-	}
-
-	/*
-	 * Error Handling - Wrap exceptions in delayed handlers
-	 */
-	this.app.use(function(req, res, next) {
-		var domain = createDomain();
-
-		domain.on('error', function(err) {
-			setImmediate(next, err);
-			domain.dispose();
-		});
-
-		domain.enter();
-		setImmediate(next);
-	});
-
-	this.app.use(this.cors.bind(this));
+/**
+ * Additionnal middlewares: 'this.app.use(xxx)'
+ * @protected
+ */
+FsBase.prototype.use = function() {
+	log.verbose('FsBase#use()'); 
 	this.app.use(express.cookieParser());
-	this.app.use(this.pathname, this.authorize.bind(this));
+	this.app.use(this.config.pathname, this.authorize.bind(this));
 	this.app.use(express.methodOverride());
 	this.app.use(this.dump.bind(this));
+};
 
-	// Built-in express form parser: handles:
-	// - 'application/json' => req.body
-	// - 'application/x-www-form-urlencoded' => req.body
-	// - 'multipart/form-data' => req.body.field[] & req.body.file[]
-	var uploadDir = temp.path({prefix: 'com.palm.ares.services.fs.' + this.name}) + '.d';
-	this.log("uploadDir:", uploadDir);
-	fs.mkdirSync(uploadDir);
-	this.app.use(express.bodyParser({
-		maxFieldsSize: 15 * 1024 * 1024, // 15 MBytes
-		maxFields: 10000,		 // 10,000 files
-		keepExtensions: true,
-		uploadDir: uploadDir
-	}));
-	this.app.use(this.dump.bind(this));
+FsBase.prototype.cleanProcess = function(next) {
+	log.verbose('FsBase#cleanProcess()');
+	setImmediate(next);
+};
 
-	// outbound http/https traffic
-
-	this.httpAgent = null;
-	this.httpsAgent = null;
-
-	// 2. Dynamic configuration
-
-	this.app.post('/config', (function(req, res, next) {
-		this.log("req.body:", req.body);
-		var config = req.body && req.body.config;
-		this.configure(config, function(err) {
-			res.status(200).end();
-		});
-	}).bind(this));
-
-	function makeExpressRoute(path) {
-		return (this.pathname + path)
-			.replace(/\/+/g, "/") // compact "//" into "/"
-			.replace(/(\.\.)+/g, ""); // remove ".."
-	}
-
+/**
+ * Additionnal routes/verbs: 'this.app.get()', 'this.app.port()'
+ * @protected
+ */
+FsBase.prototype.route = function() {
+	log.verbose('FsBase#route()'); 
 	// URL-scheme: '/' to get/set user credentials
-	this.route0 = makeExpressRoute.bind(this)('');
+	this.route0 = this.makeExpressRoute.bind(this)('');
 
-	this.log("GET/POST:", this.route0);
+	log.verbose("FsBase#route()", "GET/POST:", this.route0);
 	this.app.get(this.route0, this.getUserInfo.bind(this));
 	this.app.post(this.route0, this.setUserInfo.bind(this));
 
@@ -126,21 +92,21 @@ function FsBase(inConfig, next) {
 
 	// URL-scheme: ID-based file/folder tree navigation, used by
 	// HermesClient.
-	this.route1 = makeExpressRoute.bind(this)('/id/');
-	this.route2 = makeExpressRoute.bind(this)('/id/:id');
+	this.route1 = this.makeExpressRoute.bind(this)('/id/');
+	this.route2 = this.makeExpressRoute.bind(this)('/id/:id');
 
-	this.log("ALL:", this.route1);
+	log.verbose("FsBase#route()", "ALL:", this.route1);
 	this.app.all(this.route1, (function(req, res, next) {
 		req.params.id = this.encodeFileId('/');
 		req.params.path = '/';
 		_handle.bind(this)(req, res, next);
 	}).bind(this));
 
-	this.log("ALL:", this.route2);
+	log.verbose("FsBase#route()", "ALL:", this.route2);
 	this.app.all(this.route2, [_parseIdUrl.bind(this)], _handle.bind(this));
 
 	function _parseIdUrl(req, res, next) {
-		this.log("parsing file id:", req.params.id);
+		log.silly("FsBase#_parseIdUrl()", "parsing file id:", req.params.id);
 		req.params.id = req.params.id || this.encodeFileId('/');
 		req.params.path = this.decodeFileId(req.params.id);
 		setImmediate(next);
@@ -149,10 +115,9 @@ function FsBase(inConfig, next) {
 	// URL-scheme: WebDAV-like navigation, used by the Enyo loader
 	// (itself used by the Enyo Javacript parser to analyze the
 	// project source code) & by the Ares project preview.
-	this.route3 = makeExpressRoute.bind(this)('/file/*');
 
 	function _parseFileUrl(req, res, next) {
-		this.log("parsing file path:", req.params[0]);
+		log.silly("FsBase#_parseFileUrl()", "parsing file path:", req.params[0]);
 		req.params.path = req.params[0];
 		req.params.id = this.encodeFileId(req.params.path);
 		setImmediate(next);
@@ -167,20 +132,20 @@ function FsBase(inConfig, next) {
 	function _parseOverlays(req, res, next) {
 		var overlayDir = overlays[req.query.overlay];
 		if (overlayDir) {
-			this.log("_designer()", "checking for overlay='" + req.query.overlay + "' files...");
+			log.silly("FsBase#_parseOverlays()", "checking for overlay='" + req.query.overlay + "' files...");
 			// We cannot use express.static(), because it would serve
 			// designer files always from the same mount-point in
 			// the '/file' tree.
 			var filePath = path.join(overlayDir, path.basename(req.params.path));
 			fs.stat(filePath, (function(err, stats) {
 				if (err) {
-					setImmediate(next, err);
+					next(err);
 				} else if (stats.isFile()) {
-					this.log("_designer()", "found overlay file:", filePath);
+					log.silly("FsBase#_parseOverlays()", "found overlay file:", filePath);
 					res.status(200);
 					res.sendfile(filePath);
 				} else {
-					setImmediate(next);
+					next();
 				}
 			}).bind(this));
 		} else {
@@ -188,99 +153,40 @@ function FsBase(inConfig, next) {
 		}
 	}
 	
-	this.log("ALL:", this.route3);
+	this.route3 = this.makeExpressRoute.bind(this)('/file/*');
+	log.verbose("FsBase#route()", "ALL:", this.route3);
 	this.app.all(this.route3, [_parseFileUrl.bind(this), _parseOverlays.bind(this)], _handle.bind(this));
 
 	function _handle(req, res, next) {
 		var method = req.method.toLowerCase();
-		this.log("FsBase. _handle(): method:", method, "req.params.id:", req.params.id, "req.params.path:", req.params.path);
+		log.verbose("FsBase#_handle()", "method:", method, "req.params.id:", req.params.id, "req.params.path:", req.params.path);
 		this[method](req, res, this.respond.bind(this, res));
 	}
 
-	//this.log("routes:", this.app.routes);
+	log.verbose("FsBase#route()", "app.routes:", this.app.routes);
+};
 
-	/**
-	 * Global error handler (last plumbed middleware)
-	 * @private
-	 */
-	function errorHandler(err, req, res, next){
-		console.error("fsBase#errorHandler", err.stack);
-		this.respond(res, err);
-	}
-
-	// express-3.x: middleware with arity === 4 is detected as the
-	// error handler.  It also needs to be the last stuff hooked
-	// to the routing table.
-	this.app.use(errorHandler.bind(this));
-
-	// Send back the service location information (origin,
-	// protocol, host, port, pathname) to the creator, when port
-	// is bound
-	this.server.listen(this.port, "127.0.0.1", null /*backlog*/, (function() {
-		var tcpAddr = this.server.address();
-		this.host = tcpAddr.address;
-		this.port = tcpAddr.port;
-		this.origin = "http://" + this.host + ":"+ this.port;
-		setImmediate(next, null, {
-			protocol: 'http',
-			host: this.host,
-			port: this.port,
-			origin: this.origin,
-			pathname: this.pathname
-		});
-		return;
-	}).bind(this));
-
-	/**
-	 * Terminates express server
-	 */
-	this.quit = function(next) {
-		this.log("exiting");
-		this.server.close(next);
-	};
-
-}
-
-// Configure -- one per fs instance
-
-FsBase.prototype.configure = function(config, next) {
-	this.log("FsBase.configure(): config:", config);
-	if (next) {
-		setImmediate(next);
-	}
+/**
+ * Global error handler (arity === 4)
+ * @protected
+ */
+FsBase.prototype.errorHandler = function(err, req, res, next){
+	log.error("FsBase#errorHandler", err.stack);
+	this.respond(res, err);
 };
 
 // Middlewares -- one per session
 
-FsBase.prototype.separator = function(req, res, next) {
-	this.log("---------------------------------------------------------");
-	setImmediate(next);
-};
-
 // Authorize
 FsBase.prototype.authorize = function(req, res, next) {
-	this.log("FsBase.authorize(): checking that request comes from 127.0.0.1");
+	log.verbose("FsBase#authorize()", "checking that request comes from 127.0.0.1");
 	if (req.connection.remoteAddress !== "127.0.0.1") {
 		setImmediate(next, new HttpError("Access denied from IP address "+req.connection.remoteAddress, 401 /*Unauthorized*/));
 	} else {
-		this.log("FsBase.authorize(): Ok");
+		log.verbose("FsBase#authorize()", "Ok");
 		setImmediate(next);
 	}
 };
-
-// CORS -- Cross-Origin Resources Sharing
-FsBase.prototype.cors = function(req, res, next) {
-	res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
-	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control, X-HTTP-Method-Override');
-	if ('OPTIONS' == req.method) {
-		res.status(200).end();
-	} else {
-		setImmediate(next);
-	}
-};
-
-// Utilities
 
 /**
  * Normalize a path using only `/`, to make it usable in URL's
@@ -305,7 +211,7 @@ if (process.platform === 'win32') {
  * @param {Error} err the error object to convert.
  */
 FsBase.prototype.errorResponse = function(err) {
-	this.log("FsBase.errorResponse(): err:", err);
+	log.warn("FsBase#errorResponse()", "err:", err);
 	var response = {
 		code: 403,	// Forbidden
 		body: err.toString()
@@ -313,9 +219,9 @@ FsBase.prototype.errorResponse = function(err) {
 	if (err instanceof Error) {
 		response.code = err.statusCode || 403 /*Forbidden*/;
 		response.body = err.toString();
-		this.log(err.stack);
+		log.warn("FsBase#errorResponse()", err.stack);
 	}
-	this.log("FsBase.errorResponse(): response:", response);
+	log.info("FsBase#errorResponse()", "response:", response);
 	return response;
 };
 
@@ -333,7 +239,7 @@ FsBase.prototype.errorResponse = function(err) {
  * be carried into the response message
  */
 FsBase.prototype.respond = function(res, err, response) {
-	this.log("FsBase.respond(): response:", response);
+	log.verbose("FsBase#respond()", "response:", response);
 	if (err) {
 		response = this.errorResponse(err);
 	}
@@ -347,27 +253,25 @@ FsBase.prototype.respond = function(res, err, response) {
 	} else if (response) {
 		res.status(response.code).end();
 	} else {
-		this.log("FsBase.respond: response sent or being being sent");
+		log.silly("FsBase#respond()", "response already sent or being streamed");
 	}
 };
 
 FsBase.prototype.encodeFileId = function(filePath) {
-	//this.log("encodeFileId(): filePath:", filePath);
+	log.silly("FsBase#encodeFileId()", "filePath:", filePath);
 	var buf = new Buffer(filePath, 'utf-8');
 	var fileId = buf.toString('hex');
 	return fileId;
 };
 
 FsBase.prototype.decodeFileId = function(fileId) {
-	//this.log("decodeFileId(): fileId:", fileId);
+	log.silly("FsBase#encodeFileId()", "fileId:", fileId);
 	var buf = new Buffer(fileId, 'hex');
 	var filePath = buf.toString('utf-8');
 	return filePath;
 };
 
 FsBase.prototype.parseProxy = function(config) {
-	var self = this;
-
 	this.httpAgent = _makeAgent('http', config);
 	this.httpsAgent = _makeAgent('https', config);
 
@@ -380,9 +284,9 @@ FsBase.prototype.parseProxy = function(config) {
 		var agent;
 		if (proxyConfig && typeof tunnelConstructor == 'function') {
 			agent = tunnelConstructor({proxy: proxyConfig});
-			self.log("FsBase.parseProxy(): protocol:", protocol, "agent:", agent);
+			log.info("FsBase.parseProxy()", "protocol:", protocol, "agent:", agent);
 		} else {
-			console.warning("FsBase.parseProxy(): protocol:", protocol, "invalid proxy configuration:", config.proxy, "will use default agent");
+			log.warn("FsBase#parseProxy()", "protocol:", protocol, "invalid proxy configuration:", config.proxy, "will use default agent");
 		}
 		return agent;
 	}
@@ -391,18 +295,18 @@ FsBase.prototype.parseProxy = function(config) {
 // Actions
 
 FsBase.prototype.dump = function(req, res, next) {
-	//this.log("FsBase.dump(): req.keys=", Object.keys(req));
-	this.log("FsBase.dump(): req.method=", req.method);
-	this.log("FsBase.dump(): req.headers=", req.headers);
-	this.log("FsBase.dump(): req.url=", req.url);
-	this.log("FsBase.dump(): req.query=", req.query);
-	this.log("FsBase.dump(): req.cookies=", req.cookies);
-	this.log("FsBase.dump(): req.body=", req.body);
+	//log.silly("FsBase.dump()", "req.keys=", Object.keys(req));
+	log.silly("FsBase#dump()", "req.method=", req.method);
+	log.silly("FsBase#dump()", "req.headers=", req.headers);
+	log.silly("FsBase#dump()", "req.url=", req.url);
+	log.silly("FsBase#dump()", "req.query=", req.query);
+	log.silly("FsBase#dump()", "req.cookies=", req.cookies);
+	log.silly("FsBase#dump()", "req.body=", req.body);
 	setImmediate(next);
 };
 
 FsBase.prototype.getUserInfo = function(req, res, next) {
-	this.log("FsBase.getUserInfo():");
+	log.verbose("FsBase#getUserInfo():");
 	setImmediate(next, null, {
 		code: 200 /*Ok*/,
 		body: {}
@@ -410,7 +314,7 @@ FsBase.prototype.getUserInfo = function(req, res, next) {
 };
 
 FsBase.prototype.setUserInfo = function(req, res, next) {
-	this.log("FsBase.setUserInfo():");
+	log.verbose("FsBase#setUserInfo():");
 	setImmediate(next, null, {
 		code: 200 /*Ok*/,
 		body: {}
@@ -418,8 +322,7 @@ FsBase.prototype.setUserInfo = function(req, res, next) {
 };
 
 FsBase.prototype.put = function(req, res, next) {
-	this.log("FsBase.put(): req.headers", req.headers);
-	this.log("FsBase.put(): req.body", req.body);
+	log.verbose("FsBase#put()");
 
 	if (req.is('application/x-www-form-urlencoded')) {
 		// carry a single file at most
@@ -433,18 +336,7 @@ FsBase.prototype.put = function(req, res, next) {
 };
 
 /**
- * Store a file provided by a web-form
- *
- * The web form is a 'application/x-www-form-urlencoded'
- * request, which contains the following fields:
- *
- * - name (optional) is the name of the file to be created or
- *   updated.
- * - path (mandatory) is the relative path to the storage root
- *   of the file to be uploaded (if name is absent) or to the
- *   containing folder (if name is provided).
- * - content (mandatory) is the base64-encoded version of the
- *   file
+ * Stores one file provided by a web form
  *
  * @param {HTTPRequest} req
  * @param {HTTPResponse} res
@@ -453,10 +345,10 @@ FsBase.prototype.put = function(req, res, next) {
 FsBase.prototype._putWebForm = function(req, res, next) {
 	// Mutually-agreed encoding of file name & location:
 	// 'path' and 'name'
-	var relPath, fileId,
+	var relPath, fileId, self = this,
 	    pathParam = req.param('path'),
 	    nameParam = req.param('name');
-	this.log("FsBase.putWebForm(): pathParam:", pathParam, "nameParam:", nameParam);
+	log.verbose("FsBase#putWebForm()", "pathParam:", pathParam, "nameParam:", nameParam);
 	if (!pathParam) {
 		setImmediate(next, new HttpError("Missing 'path' request parameter", 400 /*Bad Request*/));
 		return;
@@ -467,25 +359,24 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 		relPath = [pathParam, nameParam].join('/');
 	}
 
-	// Now get the bits: base64-encoded binary in the
-	// 'content' field
+	// get the bits: base64-encoded binary in the 'content' field
 	var buf;
 	if (req.body.content) {
 		buf = new Buffer(req.body.content, 'base64');
 	} else {
-		this.log("FsBase.putWebForm(): empty file");
+		log.verbose("FsBase#putWebForm()", "empty file");
 		buf = new Buffer('');
 	}
-
-	var urlPath = this.normalize(relPath);
-	this.log("FsBase.putWebForm(): storing file as", urlPath);
-	fileId = this.encodeFileId(urlPath);
-	this.putFile(req, {
+		
+	var urlPath = self.normalize(relPath);
+	log.verbose("FsBase#putWebForm()", "storing file as", urlPath);
+	fileId = self.encodeFileId(urlPath);
+	self.putFile(req, {
 		name: relPath,
 		buffer: buf
-	}, (function(err){
-		this.log("FsBase.putWebForm(): err:", err);
-		setImmediate(next, err, {
+	}, function(err){
+		log.verbose("FsBase#putWebForm()", "err:", err);
+		next(err, {
 			code: 201, // Created
 			body: [{
 				id: fileId,
@@ -494,76 +385,44 @@ FsBase.prototype._putWebForm = function(req, res, next) {
 				isDir: false
 			}]
 		});
-	}).bind(this));
+	});
 };
 
 /**
  * Stores one or more files provided by a multipart form
  *
- * The multipart form is a 'multipart/form-data'.  Each of its
- * parts follows this field convention, compatible with the
- * Express/Connect bodyParser, itself based on the Formidable
- * Node.js module.
- *
  * @param {HTTPRequest} req
  * @param {HTTPResponse} res
  * @param {Function} next(err, data) CommonJS callback
+ * @see {ServiceBase._storeMultiPart}
  */
 FsBase.prototype._putMultipart = function(req, res, next) {
+	log.verbose("FsBase#_putMultipart()");
+
+	var self =this;
+	var nodes = [];
 	var pathParam = req.param('path');
-	this.log("FsBase#_putMultipart(): req.body:", req.body);
-	this.log("FsBase#_putMultipart(): pathParam:", pathParam);
-	//this.log("FsBase.putMultipart(): req.files:", util.inspect(req.files, {depth: 1}));
 
-	var names = req.files && Object.keys(req.files);
-	if (!names || names.length === 0) {
-		setImmediate(next, new HttpError("No file found in the multipart request", 400 /*Bad Request*/));
-		return;
-	}
-	var files = [];
-	names.forEach(function(name) {
-		var namedFiles = req.files[name];
-		namedFiles = Array.isArray(namedFiles) ? namedFiles : [ namedFiles ];
-		namedFiles.forEach(function(file) {
-			file.filename = file.filename || ((name === "file" || name === "blob") ? file.name : name);
-			files.push(file);
-		});
-	});
+	this._storeMultipart(req, _putOne, _finish);
 
-	this.log("FsBase#_putMultipart(): files.length:", files.length);
-	//this.log("FsBase.putMultipart(): files:", util.inspect(files, {depth: 1}));
-
-	var nodes = [], tmpPath;
-	async.forEachSeries(files, (function(file, next) {
-
-		if (file.filename === '.' || !file.filename) {
-			file.name = pathParam;
-		} else {
-			file.name = [pathParam, file.filename].join('/');
-		}
-
-		tmpPath = file.path;
-		file.stream = fs.createReadStream(file.path).pipe(base64.decode());
-		file.path = undefined;
-
-		var putCallback = function(err, node) {
-			this.log("FsBase.putMultipart(): err:", err, "node:", node);
+	function _putOne(file, next) {
+		file.name = file.name ? [pathParam, file.name].join('/') : pathParam;
+		self.putFile(req, file, function _done(err, node) {
+			log.silly("FsBase#_putMultipart#_putOne#_done()", "err:", err, "node:", node);
 			if (node) {
 				nodes.push(node);
 			}
-			fs.unlink(tmpPath, function() {
-				next();
-			});
-		};
-		this.putFile(req, file, putCallback.bind(this));
+			next();
+		});
+	}
 
-	}).bind(this), (function(err){
-		this.log("FsBase.putMultipart(): nodes:", nodes);
-		setImmediate(next, err, {
+	function _finish(err) {
+		log.silly("FsBase#_putMultipart#_finish()", "nodes:", nodes);
+		next(err, {
 			code: 201, // Created
 			body: nodes
 		});
-	}).bind(this));
+	}
 };
 
 /**

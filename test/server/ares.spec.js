@@ -5,7 +5,7 @@
  * ares.spec.js -- ARES server test suite
  */
 var path = require("path"),
-    fs = require("fs"),
+    fs = require("graceful-fs"),
     npmlog = require('npmlog'),
     temp = require("temp"),
     mkdirp = require("mkdirp"),

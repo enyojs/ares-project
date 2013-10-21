@@ -1,8 +1,11 @@
 ## Proxy settings
 
-Proxy can be configured in Ares ide.json file. Sample proxy configuration
-is provided in `ide.json` with the `Xproxy` and `XproxyUrl` parameters.
+Proxy can be configured in  Ares `ide.json` configuration file. Sample
+proxy configuration  is provided in  `ide.json` with the  `Xproxy` and
+`XproxyUrl` parameters.
+
 To setup your proxy:
+
 * remove the `X` from `XproxyUrl` and `Xproxy` name
 * configure your proxy in the value of these parameters.
 
@@ -26,29 +29,50 @@ Example:
 ## Designer
 
 Designer Drag&Drop feature works fine with Chrome Browser but is
-broken with other browsers.
+broken (at various levels) with other browsers.
 
 ## npm libraries issues
 
-Once Ares is updated with `git` and `git submodule update`, the
-node library must be updated with `npm -d install`.
+Once Ares is  updated with `git` and `git submodule  update`, the node
+library must be updated with `npm prune` and then `npm install`.
 
-After several updates, you may encounter errors with the server like
-start failure or `project.json` corruption. In this case, `npm ls`
-will return errors showing problems with the content of the
+After several updates,  you may encounter errors with  the server like
+start failure  or `project.json`  corruption. In  this case,  `npm ls`
+will  return  errors   showing  problems  with  the   content  of  the
 `node_modules` directory.
 
-These errors can be often be fixed by running `npm prune`.
-
-Otherwise, you will have to:
+These errors  can be often be  fixed by running `npm  prune`.  If not,
+you have to:
 
 * remove the whole `node_modules` directory
 * run `git submodule update --init --recursive`
 * run `npm -d install`.
 
-## Style are lost on property changes in Designer with latest enyo version
+## Node-0.8 process.nextTick() - Catching Zalgo
 
-No work-around.
+[ENYO-2999: Catch Zalgo in Ares Node.js code (cleanup async/sync callbacks)](https://enyojs.atlassian.net/browse/ENYO-2999)
 
-See JIRA https://enyojs.atlassian.net/browse/ENYO-2998.
+Ares now uses the process Node.js deferal API, but some libraries Ares
+depends   upon   are  not   (yet)   updated   to  use   Node.js   0.10
+`setImmediate()` in replacement of `process.nextTick()`.  Node.js 0.10
+complains  with the  following  harmless message  in  the Ares  server
+console.
+
+	ares WARN home (node) warning: Recursive process.nextTick detected. This will break in the next version of node. Please use setImmediate for recursive deferral.
+
+## PhoneGap Build
+
+[ENYO-3368: Ares automatic download of packages from PhoneGap Build often fails](https://enyojs.atlassian.net/browse/ENYO-3368)
+
+Symptom: The Ares server console contain the following error message & a PhoneGap Built package is not downloaded automatically to `target/phonegap`:
+
+	ares ERR! errorHandler() Error: socket hang up
+
+Workaround: directly download the built package from https://build.phonegap.com
+
+## Style are lost on property changes in Designer with Enyo < 2.3.0-pre.5
+
+[ENYO-2998: Style are lost on property changes in Designer with latest enyo version](https://enyojs.atlassian.net/browse/ENYO-2998)
+
+Workaround: update your applications Enyo (and libraries) to 2.3.0-pre.5 or later (_Latest Enyo_ in Ares now > 2.3.0-pre.8)
 

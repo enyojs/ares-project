@@ -86,10 +86,10 @@ enyo.kind({
 			// Add an entry into the project list
 			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
 		} catch(e) {
-				var msg = e.toString();
-				this.error(msg);
-				this.doError({msg: msg});
-				return false;
+			var msg = e.toString();
+			this.error(msg);
+			this.doError({msg: msg});
+			return false;
 		}
 		return true; //Stop event propagation
 	},

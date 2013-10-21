@@ -37,22 +37,22 @@ _.extend(true, HermesFiles.prototype, {
 				//HermesClient.prototype.onError(req, res, err, next); FIXME should work...
 			}, 
 			function() {
-					var connection;
+				var connection;
 
-					if (req.params.config) {
-						if (self.cache) {
+				if (req.params.config) {
+					if (self.cache) {
 							// locate a cached connection, if any
 							// connection = self.cache.extract(key)
-						} 
+					} 
 
-						if (connection) {
-							this(null, connection);
-						} else if (self.connect) {
-							self.connect(req.params.config, this);
-						} else {
-							this();
-						}
+					if (connection) {
+						this(null, connection);
+					} else if (self.connect) {
+						self.connect(req.params.config, this);
+					} else {
+						this();
 					}
+				}
 			}, 
 			function(connection) {
 				req.connection = connection;
