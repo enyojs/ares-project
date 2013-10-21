@@ -1,4 +1,4 @@
-/* global require, ace */
+/* global require, ace, ComponentsRegistry */
 enyo.kind({
 	name: "enyo.Ace",
 	kind: enyo.Control,
