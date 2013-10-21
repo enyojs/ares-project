@@ -237,7 +237,7 @@ enyo.kind({
 			error = docContent.err;
 
 			if (error) {
-				saveFailedDocs.push(err);
+				saveFailedDocs.push(error);
 				next();
 			}
 			async.series([
