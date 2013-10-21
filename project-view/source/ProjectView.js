@@ -34,7 +34,7 @@ enyo.kind({
 	handlers: {
 		onAddProjectInList: "addProjectInList",
 		onPreview: "previewAction",
-		onBuild: "buildAction",
+		onBuild: "saveAllBeforeBuildAction",
 		onInstall: "installAction",
 		onRun: "runAction",
 		onRunDebug: "runDebugAction"
@@ -131,6 +131,11 @@ enyo.kind({
 		if (project) {
 			this.projectAction(project, 'build', 'build');
 		}
+		return true; // stop bubble-up
+	},
+	saveAllBeforeBuildAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		ComponentsRegistry.getComponent("phobos").saveAllDocumentsBeforeBuild(project);
 		return true; // stop bubble-up
 	},
 	

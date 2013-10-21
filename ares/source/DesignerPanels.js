@@ -8,7 +8,7 @@ enyo.kind({
 				{kind: "aresGrabber", name: "aresGrabberDirection", classes:"lleftArrow"}
 			]},
 			{name:"editorControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline", components:[
-				{name: "editorFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
+				{name: "editorFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected", ontap: "fileMenuButtonSelected"},
 				{name: "newKindDecorator", kind: "onyx.TooltipDecorator", components: [
 					{name: "newKindButton", kind: "onyx.IconButton", src: "assets/images/new_kind.png", ontap: "newKindAction"},
 					{kind: "onyx.Tooltip", content: $L("New Kind")}
@@ -25,7 +25,7 @@ enyo.kind({
 				]}
 			]},
 			{name:"deimosControls", kind: "FittableColumns", fit:true,  classes: "onyx-toolbar-inline", components:[
-				{name: "designerFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
+				{name: "designerFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected", ontap: "fileMenuButtonSelected"},
 				{name: "docLabel", content: "Deimos", classes: "ares-left-margin"},
 				{kind: "onyx.PickerDecorator", classes: "ares-right-margin", components: [
 					{name: "kindButton", classes:"ares-toolbar-picker", kind: "onyx.PickerButton"},
@@ -94,6 +94,15 @@ enyo.kind({
 	},
 	stopPanelEvent: function(){
 		return true;
+	},
+	fileMenuButtonSelected: function(inSender, inEvent) {
+		var self = inSender;
+		var editedDocs = ComponentsRegistry.getComponent("phobos")._getEditedDocs(null);
+		if (editedDocs.length >= 1) {
+			self.$.saveAllButton.show();
+		} else {
+			self.$.saveAllButton.hide();
+		}		
 	},
 	fileMenuItemSelected: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("phobos").fileMenuItemSelected(inSender, inEvent);
@@ -194,6 +203,10 @@ enyo.kind({
 			{name: "saveAsButton", value: "saveAsDocAction", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save as...")}
+			]},
+			{name: "saveAllButton", value: "saveAllDocAction", classes:"aresmenu-button", components: [
+				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
+				{content: $L("Save All")}
 			]},
 			{classes: "onyx-menu-divider"},
 			{name: "closeButton", value: "closeDocAction", classes:"aresmenu-button", components: [
