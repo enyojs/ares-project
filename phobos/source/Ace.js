@@ -13,7 +13,8 @@ enyo.kind({
 		useSoftTabs: false,
 		persistentHScroll: false,
 		//** Modes:
-		editingMode: "javascript"
+		editingMode: "javascript",
+		translateX: ""
 	},
 	requiresDomMousedown: true,
 	events: {
@@ -121,6 +122,9 @@ enyo.kind({
 	addListeners: function() {
 		this.editor.renderer.on("gutterclick", enyo.bind(this, "gutterclick"));
 		this.editor.renderer.scrollBar.on("scroll", enyo.bind(this, "doScroll"));
+		//intercept event shoiwing the ace error tooltip
+		var gutterEl = this.editor.renderer.$gutter;
+		enyo.dispatcher.listen(gutterEl, "mousemove", enyo.bind(this, "guttermousemove"));
 	},
 	addSessionListeners: function() {
 		this.getSession().on("change", enyo.bind(this, "doChange"));
@@ -509,8 +513,32 @@ enyo.kind({
 	requestSelectedText: function() {
 		return this.editor.session.getTextRange(this.editor.getSelectionRange());
 	},
+
 	navigateToPosition: function(start, end){
 		var pos = this.mapToLineColumns([start, end]);
 		this.editor.navigateTo(pos[0].row, pos[0].column);
-	}
+	},
+	guttermousemove: function(inSender, inEvent) {
+		if(enyo.dom.canTransform() && enyo.platform.ie !== 10){
+			var deseignerPanelsTranslateX = ComponentsRegistry.getComponent("designerPanels").domTransforms.translateX;
+			var aceTooltip = document.getElementsByClassName("ace_gutter-tooltip");
+			if(aceTooltip[0]){
+				if(this.translateX !== deseignerPanelsTranslateX){
+					this.setTranslateX(deseignerPanelsTranslateX);
+					this.applyInverseTransform(aceTooltip[0]);
+				}
+			}
+		}
+	},
+	applyInverseTransform: function(htmlDiv){
+		//apply inverse transform to ace error tooltip
+		var transformProp = enyo.dom.getStyleTransformProp();
+		htmlDiv.className +=" ace_gutter-margin-tooltip";
+		if(this.translateX){
+			htmlDiv.style[transformProp] = "translateX(-"+this.translateX+")";	
+		}else{
+			htmlDiv.style[transformProp] = "none";
+		}
+	},
+	
 });
