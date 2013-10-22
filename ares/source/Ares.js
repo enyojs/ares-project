@@ -427,9 +427,14 @@ enyo.kind({
 	switchFile: function(inSender, inEvent) {
 		var d = Ares.Workspace.files.get(inEvent.id);
 		if (d) {
-			var project = Ares.Workspace.projects.get(d.getProjectData().id);
-			ComponentsRegistry.getComponent("projectList").selectInProjectList(project);
-			this.switchToDocument(d);
+			//select project if the file(d) comes from another project then the previous file
+			if (this.activeDocument.id && d !== this.activeDocument){
+				var project = Ares.Workspace.projects.get(d.getProjectData().id);
+				if(project){
+					ComponentsRegistry.getComponent("projectList").selectInProjectList(project);
+				}
+			}
+			this.switchToDocument(d);		
 		} else if (this.debug) {
 			throw("File ID " + d + " not found in cache!");
 		}
