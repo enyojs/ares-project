@@ -64,6 +64,9 @@ enyo.kind({
 		provider: undefined, 
 		selectedPlatform: undefined
 	},
+	events: {
+		onError: ""
+	},
 	handlers: {
 		onUpdateStatusMessage: "updateDownloadMessageContent"
 	}, 
@@ -351,7 +354,7 @@ enyo.kind({
 	 */
 	getBuildStatusData: function (err, inBuildStatusData) {
 		if (err) {
-			this.error("err:", err);
+			this.doError({msg: err.toString(), err: err});
 		} else {
 			this.setBuildStatusData(inBuildStatusData.user);
 		}
