@@ -496,7 +496,8 @@ enyo.kind({
 	},
 	updateCode: function(inDoc) {
 		var filename = inDoc.getFile().path,
-			code = inDoc.getAceSession().getValue();
+			aceSession = inDoc.getAceSession(),
+			code = aceSession && aceSession.getValue();
 
 		if(filename.slice(-4) === ".css") {
 			this.syncCSSFile(filename, code);
