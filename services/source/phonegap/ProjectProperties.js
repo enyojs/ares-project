@@ -440,7 +440,7 @@ enyo.kind({
 enyo.kind({
 	name: "Phonegap.ProjectProperties.AppId",
 	kind: "FittableRows",
-	classes: "ares-project-propertie-application-panel",
+	classes: "ares-project-properties-application-panel",
 	debug: false,
 	published: {
 		userData: undefined,
