@@ -145,8 +145,7 @@ enyo.kind({
 					]
 				}, 
 				{owner: this}
-			);
-			
+			);			
 		}
 	},
 
@@ -196,10 +195,10 @@ enyo.kind({
 	sendBuildStatusRequest: function() {
 		
 		if(this.appId === "" || this.appId === undefined){
-			this.setBuildStatusData(null);			
+			this.setBuildStatusData(null);
 		} else {
 			this.provider.getAppData(this.appId, enyo.bind(this, this.getBuildStatusData));
-		} 	
+		}
 	},
 
 	/**
