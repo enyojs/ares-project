@@ -784,12 +784,12 @@ enyo.kind({
 				next(err);
 			} else {
 				if (appData.status[platform] === "complete"){
-						_setApplicationToDownload(function(err) {
-							if (err) {
-								enyo.warn("phonegap.Build#getAllPackagedApplications._downloadApp()", "non-fatal err:", err);
-							}
-							next();
-						});
+					_setApplicationToDownload(function(err) {
+						if (err) {
+							enyo.warn("phonegap.Build#getAllPackagedApplications._downloadApp()", "non-fatal err:", err);
+						}
+						next();
+					});
 				} else {
 					next();
 				}
@@ -809,7 +809,7 @@ enyo.kind({
 		 * @param  {Function} next     a CommonJS callback
 		 * @private
 		 */
-			function _setApplicationToDownload(next){
+		function _setApplicationToDownload(next){
 			var config = ares.clone(project.getConfig().getData()),
 			    packageName = config.id,
 			    appId, title, version;
