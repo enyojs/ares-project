@@ -753,7 +753,6 @@ enyo.kind({
 				function (next) {
 					//Timeout before sending a new check status request
 					setTimeout(next, builder.timeoutDuration);
-					this.log("status pending");
 				},
 				function (next) {
 					if(appData.status[platform] === "pending"){
