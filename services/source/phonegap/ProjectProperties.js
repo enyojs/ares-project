@@ -16,6 +16,9 @@ enyo.kind({
 		onError: "",
 		onConfigure: ""
 	},
+	handlers: {
+		onRefresh: "_getUserData"
+	},
 	components: [{
 			kind: "enyo.Scroller",
 			fit: "true",
@@ -234,14 +237,22 @@ enyo.kind({
 	 */
 	refresh: function (inSender, inValue) {
 		this.trace("sender:", inSender, "value:", inValue);		
-		var provider = Phonegap.ProjectProperties.getProvider();		
+				
 		this.showErrorMsg("waitingSignIn");
+		this._getUserData();
+		this.$.appIdSelector.selectedAppIdChanged();
+		
+		return true;		
+	},
 
+	_getUserData: function() {
+		var provider = Phonegap.ProjectProperties.getProvider();
 		//Send the request to get the user data only if the Phonegap build service is enabled.
 		if (this.config && this.config.enabled) {
 			provider.authorize(enyo.bind(this, this.getUserData));
-		}		
-	},
+		}
+
+	}, 
 
 	/**
 	 * @protected
@@ -476,6 +487,9 @@ enyo.kind({
 			this.$.AppIdList.createComponent({content: "New Application", published: {applicationObject: newApplicationObject}, active: true});
 			this.setSelectedAppId('');
 		} else {
+			//Force the refresh of the build status icons 
+			this.selectedAppIdChanged();
+
 			this.$.AppIdList.createComponent({content: "New Application", published: {applicationObject: newApplicationObject}, active: false});
 			enyo.forEach(this.userData.user.apps.all, 
 				function (inApp) {

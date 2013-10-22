@@ -35,7 +35,7 @@ enyo.kind({
 				} else {					
 					//Build status: pending
 					this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
-
+					this.bubble("appIdChanged");
 				}		
 			}
 		}
@@ -146,16 +146,43 @@ enyo.kind({
 	 * @private	 
 	 */
 	buildStatusDataChanged: function(){
-		this.hideMessageContainer();
-		this.$.downloadButton.hide();
-		for(var key in this.$){
-			// Get only the Enyo control that have the "platform" attribute 
-			// => {Phonegap.ProjectProperties.PlatformBuildStatus} instance
-			if(this.$[key].platform !== undefined) {
-				this.$[key].setBuildStatusData(this.buildStatusData);
+		var pendingApplication = false;
+		
+		//Check if there is a pending build.
+		for(var key1 in this.buildStatusData && this.buildStatusData.status) {
+			if (this.buildStatusData.status[key1] === "pending") {
+				pendingApplication = true;
+			}
+		}
+
+		//If there is a pending build, another buildStatus Request is sent after 600 ms timeout.
+		if (pendingApplication) {
+			setTimeout(this.sendBuildStatusRequest(), 2000); 
+		}
+
+		// Get only the Enyo control that have the "platform" attribute 
+		// => {Phonegap.ProjectProperties.PlatformBuildStatus} instance
+		for(var key2 in this.$){		
+			if(this.$[key2].platform !== undefined) {
+				this.$[key2].setBuildStatusData(this.buildStatusData);				
 			}			
 		}
+
+		//Update to Status container if a platform is selected.
+		if(this.selectedPlatform !== undefined) {
+			this.showStatusMessage({platform: this.selectedPlatform});
+		}
+
 	},
+
+	/**
+	 * Use the phonegap service to request a {buildStatus} object from Phonegap build
+	 * @private
+	 */
+	sendBuildStatusRequest: function() {
+		this.provider.getAppData(this.appId, enyo.bind(this, this.getBuildStatusData));
+	},
+
 	/**
 	 * Update the content of the statusMessage row.
 	 * @protected
@@ -268,7 +295,13 @@ enyo.kind({
 
 	/**@private*/
 	appIdChanged: function(){
-		this.updateBuildStatusContainer();
+
+		if(this.appId === "" || this.appId === undefined){
+			this.setBuildStatusData(null);			
+		} else {
+			this.sendBuildStatusRequest();
+		} 
+		this.$.buildStatusContainer.render();
 	},
 
 	/**
