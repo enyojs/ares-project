@@ -353,10 +353,6 @@ enyo.kind({
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.DownloadStatus",
-	published: {
-		downloadStatus: {"android": "", "ios": "", "winphone": "", 
-						"blackberry": "", "webos": ""}	
-	},
 
 	/**
 	 * Set the download status for a platform defined in {this.downloadStatus}.
