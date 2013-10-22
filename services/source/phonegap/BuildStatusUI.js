@@ -231,40 +231,44 @@ enyo.kind({
 	},
 
 	/**@private*/
-	showStatusMessage: function(inSender, inEvent){
-		
+	showStatusMessage: function(inSender){
+
+		this.setSelectedPlatform(inSender.platform);
 		this.$.messageContainer.show();
 		this.addHightlightIconButton(this.$[inSender.platform+ "Decorator"]);
 
+		//Build status: complete
 		if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "complete") {
 
 				this.updateDownloadMessageContent();
 				this.updateDownloadMessageDisplay(inSender.platform);
+		
 		} else {
+			this.$.downloadButton.hide();
+
 			if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "error" || 
 				this.buildStatusData && this.buildStatusData.status[inSender.platform] === null){
 
 				//Build status: error
-				this.$.downloadButton.hide();
 				this.$.statusMessage.setContent("Error: " + this.buildStatusData.error[inSender.platform]);				
+			
 			} else {
 				
 				if(this.buildStatusData === null) {
 					
 					//Build status: application not built
-					this.$.downloadButton.hide();
 					this.$.statusMessage.setContent("Build the application first");					
 
 				} else {
 					
-					//Build status: pending
-					this.$.downloadButton.hide();
-					this.$.statusMessage.setContent("Build in progress");
+					//Build status: pending					
+					this.$.statusMessage.setContent("Build in progress");					
 				}		
 			}
 		}
-	return true; //stop the propagation of the event
 
+		//stop the propagation of the bubble event
+		return true; 
 	},
 
 	/**
