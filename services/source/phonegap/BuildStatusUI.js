@@ -53,23 +53,16 @@ enyo.kind({
 		selectedPlatform: undefined
 	},
 	handlers: {
-		onUpdateStatusMessage: "updateStatusMessage"
+		onUpdateStatusMessage: "updateDownloadMessageContent"
 	}, 
 	components: [
 		{
 			name: "buildStatusContainer", kind: "FittableRows", classes: "ares-project-properties-build-status-container",
 			components: [
 				{	
-					name: "labelContainer",
-					classes:"ares-project-properties-buildStatus-container",
+					name: "platformIconContainer",
+					classes:"ares-project-properties-platform-icon-container",
 					kind: "FittableColumns",					
-					components:[						
-						{ name: "androidButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "android" },
-						{ name: "iosButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "ios" },
-						{ name: "winphoneButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "winphone" },
-						{ name: "blackberryButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform: "blackberry" },
-						{ name: "webosButton", kind: "Phonegap.ProjectProperties.PlatformBuildStatus", platform:"webos" }													
-					]
 				},				
 
 				{ name: "downloadStatus", kind: "Phonegap.ProjectProperties.DownloadStatus" },
@@ -113,24 +106,38 @@ enyo.kind({
 	],
 	/**@private*/
 	create: function() {
-		this.inherited(arguments);		
+		this.inherited(arguments);
+		this.createIconButtons();
 		this.appIdChanged();
 		this.setProvider(Phonegap.ProjectProperties.getProvider());
 	},
 
-	/**@private*/
-	updateBuildStatusContainer: function(){
-		
-		if(this.appId === ""){
-			this.setBuildStatusData(null);			
-		} else {
-			this.provider.getAppData(this.appId, enyo.bind(this, this.getBuildStatusData));
-		} 
-
-		this.buildStatusDataChanged();
-		this.$.buildStatusContainer.render();
+	/**
+	 * Create the IconButtons displaying the build state of the application
+	 * for all platforms defined in the object {Phonegap.ProjectProperties.downloadStatus}
+	 * 
+	 * @private
+	 */
+	createIconButtons: function() {
+		for (var key in Phonegap.ProjectProperties.downloadStatus) {
+			this.$.platformIconContainer.createComponent(
+				{
+					name: key + "Decorator", 
+					classes: "ares-project-properties-build-status-icon",
+					components: [						
+						{
+							name: key + "Button", 
+							kind: "Phonegap.ProjectProperties.PlatformBuildStatus", 
+							platform: key
+						}
+					]
+				}, 
+				{owner: this}
+			);
+			
+		}
 	},
-	
+
 	/**
 	 * Charge the icon showing the build status of the application of a a given platform depending on 
 	 * its status. the status is checked from the "buildStatusData" object.
