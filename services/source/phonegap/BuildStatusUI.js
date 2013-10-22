@@ -95,7 +95,7 @@ enyo.kind({
 							name: "downloadButton",
 							kind: "onyx.IconButton",
 							src: "$services/assets/images/download-icon.png",
-							shown: false,
+							showing: false,
 							ontap: "downloadPackage"
 						}
 					]
