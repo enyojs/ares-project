@@ -181,7 +181,9 @@ enyo.kind({
 		//Update to Status container if a platform is selected.
 		if(this.selectedPlatform !== undefined) {
 			this.showStatusMessage({platform: this.selectedPlatform});
-		}
+		}		
+	
+		this.$.buildStatusContainer.render();
 
 	},
 
@@ -190,7 +192,12 @@ enyo.kind({
 	 * @private
 	 */
 	sendBuildStatusRequest: function() {
-		this.provider.getAppData(this.appId, enyo.bind(this, this.getBuildStatusData));
+		
+		if(this.appId === "" || this.appId === undefined){
+			this.setBuildStatusData(null);			
+		} else {
+			this.provider.getAppData(this.appId, enyo.bind(this, this.getBuildStatusData));
+		} 	
 	},
 
 	/**
@@ -330,13 +337,7 @@ enyo.kind({
 
 	/**@private*/
 	appIdChanged: function(){
-
-		if(this.appId === "" || this.appId === undefined){
-			this.setBuildStatusData(null);			
-		} else {
-			this.sendBuildStatusRequest();
-		} 
-		this.$.buildStatusContainer.render();
+		this.sendBuildStatusRequest();		
 	},
 
 	/**
