@@ -705,8 +705,7 @@ enyo.kind({
 	 
 	 * @private
 	 */
-	_waitFetchStore: function(project, appData, next) {
-		var folderId = project.getObject(this.folderKey);
+	_waitFetchStore: function(project, appData, folderId, platform, next) {
 		this.trace("Entering _store function project: ", project, "folderId:", folderId, 
 			"appData:", appData);
 		project.setObject(this.appKey, appData);
