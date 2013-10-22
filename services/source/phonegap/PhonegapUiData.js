@@ -46,7 +46,8 @@ enyo.kind({
 						label:"Phonegap version",
 						content:["2.9.0", "2.7.0", "2.5.0", "2.3.0", "2.2.0", "2.1.0", "2.0.0"],
 						defaultValue: "2.9.0",
-						type: "PickerRow", jsonSection: "preferences"
+						type: "PickerRow", 
+						jsonSection: "preferences"
 					},
 					{name: "orientation", label:"Orientation",content:["both", "landscape", "portrait"], defaultValue: "both", type: "PickerRow", jsonSection: "preferences"},
 					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], defaultValue: "universal", type: "PickerRow", jsonSection: "preferences"},
