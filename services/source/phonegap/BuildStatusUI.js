@@ -334,7 +334,7 @@ enyo.kind({
 	 */
 	getBuildStatusData: function (err, inBuildStatusData) {
 		if (err) {
-			this.warn("err:", err);
+			this.error("err:", err);
 		} else {
 			this.setBuildStatusData(inBuildStatusData.user);
 		}
