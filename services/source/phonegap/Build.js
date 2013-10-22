@@ -642,7 +642,7 @@ enyo.kind({
 		this.trace("PhoneGap.Build#_prepareStore()");
 		var folderId = project.getObject(this.folderKey);
 		if (folderId) {
-			next(null, folderId, inData, platform);
+			next(null, inData, folderId, platform);
 		} else {
 			var req = project.getService().createFolder(project.getFolderId(), "target/" + this.config.id);
 			req.response(this, function _folderCreated(inSender, inResponse) {
@@ -650,7 +650,7 @@ enyo.kind({
 				folderId = inResponse.id;
 				project.setObject(this.folderKey, folderId);
 				this.doFsEvent({nodeId: folderId});
-				next(null, folderId, inData, platform);
+				next(null, inData, folderId, platform);
 			});
 			req.error(this, this._handleServiceError.bind(this, "Unable to prepare packages folder", next));
 		}
