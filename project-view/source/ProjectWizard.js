@@ -414,18 +414,14 @@ enyo.kind({
 
 			this.$.propertiesWidget.$.projectPathLabel.setContent($L("Project path: "));
 			this.$.propertiesWidget.$.projectPathValue.setContent("");
+			
 			var req = config.service.propfind(config.folderId, 3);
 			req.response(this, function(inSender, inFile) {
 				this.$.propertiesWidget.$.projectPathValue.setContent(inFile.path);
 			});
 			
 			this.$.propertiesWidget.activateFileChoosers(true);
-
-			var show = (function () {
-				this.show();
-			}).bind(this);
-
-			this.$.propertiesWidget.checkFileChoosers(show);
+			this.$.propertiesWidget.checkFileChoosers();			
 		}
 	},
 
