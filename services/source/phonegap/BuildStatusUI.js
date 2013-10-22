@@ -237,19 +237,8 @@ enyo.kind({
 		this.addHightlightIconButton(this.$[inSender.platform+ "Decorator"]);
 
 		if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "complete") {
-			this.$.statusMessage.setContent("");
-			this.setSelectedPlatform(inSender.platform);
 
-			if (this.buildStatusData.download[inSender.platform] !== undefined && 
-				this.buildStatusData.title !== undefined) {
-				
-				this.updateStatusMessage();
-
-				this.updateDownloadMessage(inSender.platform);
-
-			} else {
-				this.$.downloadButton.hide();
-			}
+				this.updateDownloadMessageContent();
 				this.updateDownloadMessageDisplay(inSender.platform);
 		} else {
 			if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "error" || 
