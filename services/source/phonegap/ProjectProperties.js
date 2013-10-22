@@ -300,10 +300,11 @@ enyo.kind({
 			this.doError({msg: err.toString(), err: err});
 		} else {			
 			this.showErrorMsg("userDataRecieved");
+			this.$.appIdSelector.setUserData(userData);
+
 			var provider = Phonegap.ProjectProperties.getProvider();
 
 			enyo.forEach(this.platformDrawers, function (target) {
-				this.$.appIdSelector.setUserData(userData);
 				var keys = provider.getKey(target.id);
 				if(target.id === "android" || target.id === "ios"|| target.id === "blackberry") {
 					this.$.targetsRows.$[target.id].$.drawer.$.signingKey.setKeys(keys);
@@ -484,9 +485,10 @@ enyo.kind({
 		
 		this.clearPickerContent();		
 		
-		//object containing default application's data to be associated with the picker's element "New Application"
+		// Object containing default application's data to be associated with the picker's element "New Application"
 		var newApplicationObject = {title: "", role: "owner", link: null};
-				
+		
+		// Fill the AppId picker		
 		if (this.userData.user.apps.all.length === 0){
 			this.$.AppIdList.createComponent({content: "New Application", published: {applicationObject: newApplicationObject}, active: true});
 			this.setSelectedAppId('');
@@ -504,7 +506,10 @@ enyo.kind({
 					this.$.AppIdList.createComponent({content: inApp.id, published: {applicationObject: inApp} , active: itemState});			
 					this.$.AppIdList.render();								
 				}, this);
-		}		
+		}
+
+		// Update the build status object
+		this.$.buildStatusDisplay.sendBuildStatusRequest();		
 	}, 
 
 	/**@private*/
