@@ -13,7 +13,9 @@ enyo.kind({
 	published: {
 		platform: undefined,
 		buildStatusData: undefined,
+		userDataRequestTimeout: 2500
 	},
+
 	/**
 	 * Update the image for the platform IconButton depending on the status of the related platform
 	 * described in buildStatusData.
@@ -167,7 +169,7 @@ enyo.kind({
 
 		//If there is a pending build, another buildStatus Request is sent after 600 ms timeout.
 		if (pendingApplication) {
-			setTimeout(this.sendBuildStatusRequest(), 2000); 
+			setTimeout(this.sendBuildStatusRequest(), this.userDataRequestTimeout); 
 		}
 
 		// Get only the Enyo control that have the "platform" attribute 
