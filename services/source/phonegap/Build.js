@@ -1,4 +1,4 @@
-/*global enyo, ares, async, Ares, Phonegap, XMLWriter, ServiceRegistry, next */
+/*global enyo, ares, async, Ares, Phonegap, XMLWriter, ServiceRegistry, ComponentsRegistry, next */
 /**
  * Kind to manage the life cycle of building a mobile application using 
  * the service Phonegap build.

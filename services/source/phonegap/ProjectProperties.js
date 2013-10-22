@@ -521,13 +521,19 @@ enyo.kind({
 		var selectedAppData = inValue && inValue.selected.published.applicationObject;
 		
 		this.setSelectedTitle(selectedAppData.title || "");
+
+		//Reset the content of the build status message to an empty string.
 		this.$.buildStatusDisplay.$.statusMessage.setContent("");
+		
+		//Update the value of the selected AppId
 		if (inValue.content === "New Application") {
 			this.setSelectedAppId("");
 		} else {
 			this.setSelectedAppId(inValue.content);
 		}				
 	},
+
+	/**@private*/
 	selectedAppIdChanged: function() {
 		this.$.buildStatusDisplay.setAppId(this.selectedAppId);		
 	},

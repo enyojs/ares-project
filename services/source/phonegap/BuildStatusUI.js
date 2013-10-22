@@ -1,19 +1,25 @@
 /* jshint indent: false */ // TODO: ENYO-3311
 
-/* global ares */
+/* global Phonegap */
+
 /**
  * UI: Phonegap pane in the ProjectProperties popup
  * @name Phonegap.BuildStatusUI
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.PlatformBuildStatus",
-	kind: "onyx.IconButton",
-	classes: "ares-project-properties-build-status-icon",
+	kind: "onyx.IconButton",	
 	ontap: "showStatusMessage",	
 	published: {
 		platform: undefined,
 		buildStatusData: undefined,
 	},
+	/**
+	 * Update the image for the platform IconButton depending on the status of the related platform
+	 * described in buildStatusData.
+	 * 
+	 * @private
+	 */
 	buildStatusDataChanged: function() {
 		if (this.buildStatusData && this.buildStatusData.status[this.platform] === "complete") {
 			//Build status: complete
@@ -42,6 +48,10 @@ enyo.kind({
 	}
 });
 
+/**
+ * The widget "Build status", show the building state of the application
+ * for each platform.  
+ */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.BuildStatus",
 	kind: "FittableRows",
@@ -285,6 +295,7 @@ enyo.kind({
 		//set the download status to "Download on progress"
 		this.$.downloadStatus.setDownloadStatus(this.selectedPlatform, 2);		
 	},
+
 	/**
 	 * Callback used in the function "downloadPackage()"" in "Build.js"
 	 * Update the status message to show the current status of the download request.
