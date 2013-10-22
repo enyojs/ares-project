@@ -187,15 +187,35 @@ enyo.kind({
 	 * Update the content of the statusMessage row.
 	 * @protected
 	 */
-	updateStatusMessage: function() {
+	updateDownloadMessageContent: function() {
 
 		this.$.statusMessage.setContent(this.$.downloadStatus.getDownloadStatus(this.selectedPlatform));
 		this.$.statusMessage.show();
-		this.updateDownloadMessage(this.selectedPlatform);
-		
+		this.updateDownloadMessageDisplay(this.selectedPlatform);		
 
 		//stop the propagation of the bubble event
 		return true;
+	},
+
+	/**
+	 * Highlight the selected platform button by appling a css style on its decorator.
+	 * @param {enyo.component} inIconButtonDecorator decorator of the button
+	 * @private
+	 */
+	addHightlightIconButton: function(inIconButtonDecorator) {
+		this.removeHightlightIconButton();
+		inIconButtonDecorator.addClass("ares-project-properties-buildStatus-icon-highlight");
+
+	},
+
+	/**
+	 * Remove the highlignt effect from all platform buttons.
+	 * @private
+	 */
+	removeHightlightIconButton: function() {
+		for(var key in Phonegap.ProjectProperties.downloadStatus) {
+			this.$[key + "Decorator"].removeClass("ares-project-properties-buildStatus-icon-highlight");			
+		}
 	},
 
 	/**
@@ -203,7 +223,7 @@ enyo.kind({
 	 * @param  {String} inPlatform Mobile platform supported by Phonegap.
 	 * @private
 	 */
-	updateDownloadMessage: function(inPlatform) {
+	updateDownloadMessageDisplay: function(inPlatform) {
 		var classAttribute = "ares-project-properties-buildStatus-download-button-" + inPlatform;
 		this.$.separatorForDownloadButton.setClassAttribute(classAttribute);
 
@@ -214,6 +234,7 @@ enyo.kind({
 	showStatusMessage: function(inSender, inEvent){
 		
 		this.$.messageContainer.show();
+		this.addHightlightIconButton(this.$[inSender.platform+ "Decorator"]);
 
 		if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "complete") {
 			this.$.statusMessage.setContent("");
@@ -229,6 +250,7 @@ enyo.kind({
 			} else {
 				this.$.downloadButton.hide();
 			}
+				this.updateDownloadMessageDisplay(inSender.platform);
 		} else {
 			if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "error" || 
 				this.buildStatusData && this.buildStatusData.status[inSender.platform] === null){
@@ -289,9 +311,18 @@ enyo.kind({
 
 	/**@private*/
 	hideMessageContainer: function() {
+		//Unselect the focused platform
+		this.setSelectedPlatform(undefined);
+		this.removeHightlightIconButton();
+		
 		this.$.messageContainer.hide();
 		this.$.downloadButton.hide();
 	},
+
+	/**@private*/
+	hideMessageContent: function() {
+		this.$.downloadButton.hide();
+	}, 
 
 	/**@private*/
 	appIdChanged: function(){
