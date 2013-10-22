@@ -349,15 +349,19 @@ enyo.kind({
 			"PhoneGap Build help",
 			"resizable=yes, dependent=yes, width=800, height=600");
 	},
+
+	
 	
 	statics: {
-		packageExtensions: {
-			"android": "apk",
-			"ios": "ipa",
-			"webos": "ipk",
-			"winphone": "xap",
-			"blackberry": "jad"
+		
+		downloadStatus: {
+			"android": "Ready for download", 
+			"ios": "Ready for download", 
+			"winphone": "Ready for download", 
+			"blackberry": "Ready for download", 
+			"webos": "Ready for download"
 		},
+
 		getProvider: function () {
 			this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('phonegap');
 			return this.provider;

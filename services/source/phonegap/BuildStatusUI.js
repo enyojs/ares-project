@@ -343,12 +343,12 @@ enyo.kind({
 	 */
 	setDownloadStatus: function(inPlatform, inDownloadStatus) {
 		if(inDownloadStatus === 1){
-			this.downloadStatus[inPlatform] = "Download complete";			
+			Phonegap.ProjectProperties.downloadStatus[inPlatform] = "Download complete";			
 		} else {
 			if (inDownloadStatus === 0) {
-				this.downloadStatus[inPlatform] = "Download failed";
+				Phonegap.ProjectProperties.downloadStatus[inPlatform] = "Download failed";
 			} else {
-				this.downloadStatus[inPlatform] = "Download on progress";
+				Phonegap.ProjectProperties.downloadStatus[inPlatform] = "Download on progress";
 			}
 		}
 
@@ -363,7 +363,7 @@ enyo.kind({
 	 * @public
 	 */
 	getDownloadStatus: function(inPlatform) {
-		return this.downloadStatus[inPlatform];
+		return Phonegap.ProjectProperties.downloadStatus[inPlatform];
 	}	
 
 });
