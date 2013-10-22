@@ -427,7 +427,8 @@ enyo.kind({
 	switchFile: function(inSender, inEvent) {
 		var d = Ares.Workspace.files.get(inEvent.id);
 		if (d) {
-			ComponentsRegistry.getComponent("projectList").selectInProjectList(inEvent.project);
+			var project = Ares.Workspace.projects.get(d.getProjectData().id);
+			ComponentsRegistry.getComponent("projectList").selectInProjectList(project);
 			this.switchToDocument(d);
 		} else if (this.debug) {
 			throw("File ID " + d + " not found in cache!");
