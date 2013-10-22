@@ -618,6 +618,13 @@ enyo.kind({
 				configKind.save();
 			}
 			buildStarted();
+
+			//Display the Phonegap Build panel.
+			ComponentsRegistry.getComponent("projectView").$.projectWizardModify.start(project, 2);
+			
+			//Refresh the user Data
+			enyo.Signals.send("plugin.phonegap.userDataRefreshed");
+
 			next();
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to build application", next));
