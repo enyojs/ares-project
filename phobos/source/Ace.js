@@ -122,7 +122,7 @@ enyo.kind({
 	addListeners: function() {
 		this.editor.renderer.on("gutterclick", enyo.bind(this, "gutterclick"));
 		this.editor.renderer.scrollBar.on("scroll", enyo.bind(this, "doScroll"));
-		//intercept event shoiwing the ace error tooltip
+		//intercept event showing the ace error tooltip
 		var gutterEl = this.editor.renderer.$gutter;
 		enyo.dispatcher.listen(gutterEl, "mousemove", enyo.bind(this, "guttermousemove"));
 	},
@@ -520,11 +520,11 @@ enyo.kind({
 	},
 	guttermousemove: function(inSender, inEvent) {
 		if(enyo.dom.canTransform() && enyo.platform.ie !== 10){
-			var deseignerPanelsTranslateX = ComponentsRegistry.getComponent("designerPanels").domTransforms.translateX;
+			var designerPanelsTranslateX = ComponentsRegistry.getComponent("designerPanels").domTransforms.translateX;
 			var aceTooltip = document.getElementsByClassName("ace_gutter-tooltip");
 			if(aceTooltip[0]){
-				if(this.translateX !== deseignerPanelsTranslateX){
-					this.setTranslateX(deseignerPanelsTranslateX);
+				if(this.translateX !== designerPanelsTranslateX){
+					this.setTranslateX(designerPanelsTranslateX);
 					this.applyInverseTransform(aceTooltip[0]);
 				}
 			}
