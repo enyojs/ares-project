@@ -387,6 +387,7 @@ enyo.kind({
 	targetProject: null,
 	chooser: null,
 	checker: null,
+	displayedTab: undefined,
 
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
@@ -395,9 +396,12 @@ enyo.kind({
 	/**
 	 * Step 1: start the modification by showing project properties widget
 	 */
-	start: function(target) {
+	start: function(target, inDisplayedTab) {
 		if (target) {
 			var config = target.getConfig();
+
+			// Define the tab that will be shown when the Pop-up is displayed
+			this.displayedTab = inDisplayedTab;
 			
 			this.targetProject = target ;
 			this.$.propertiesWidget.setTargetProject(target);
@@ -538,7 +542,13 @@ enyo.kind({
 	fileChoosersChecked: function (inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		this.show();
-		this.$.propertiesWidget.setDefaultTab();
+
+		if (this.displayedTab !== undefined) {
+			this.$.propertiesWidget.setDisplayedTab(this.displayedTab);
+		} else {
+			this.$.propertiesWidget.setDefaultTab();
+		}
+		
 		return true;
 	}
 	
