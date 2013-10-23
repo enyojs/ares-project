@@ -903,7 +903,6 @@ enyo.kind({
 		var aresId = inComponent.aresId,
 			childComponents = [],
 			cleanComponent = {},
-			atts,
 			att,
 			i;
 		if (!aresId) {
