@@ -898,7 +898,7 @@ enyo.kind({
 		}
 		this.$.actionPopup.hide();
 	},
-
+	// @protected
 	cleanUpViewComponent: function(inComponent, inKeepAresIds) {
 		var aresId = inComponent.aresId,
 			childComponents = [],
@@ -909,31 +909,26 @@ enyo.kind({
 		if (!aresId) {
 			return cleanComponent;
 		}
-
 		for(att in inComponent){ 
 			if ((inKeepAresIds && att === "aresId") || (att !== "aresId" && att !== "components" && att !== "__aresOptions")) {
 				cleanComponent[att] = inComponent[att];
 			}
 	     };
-
 		if (inComponent.components) {
 			for (i=0; i<inComponent.components.length; i++) {
 				childComponents.push(this.cleanUpViewComponent(inComponent.components[i], inKeepAresIds));
 			}
-			
 			if (childComponents.length > 0) {
 				cleanComponent.components = childComponents;
 			}
 		}
-		
 		return cleanComponent;
 	},
-	
+	// @protected
 	performAddItem: function(config){
 		var config_data = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
 		ComponentsRegistry.getComponent("phobos").addViewKindAction(config_data);
 	},
-	
 	// @protected
 	performCreateItem: function(config, target, beforeId){
 		var kind = this.getSingleKind(this.index);
