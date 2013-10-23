@@ -1005,7 +1005,6 @@ enyo.kind({
 		// skip completelly the 'platforms' tags if we target
 		// all of them
 		if (phonegap.targets && (enyo.keys(phonegap.targets).length > 0)) {
-			xw.writeStartElement('platforms', 'gap');
 			for (var platformName in phonegap.targets) {
 				var platform = phonegap.targets[platformName];
 				if (platform !== false) {
@@ -1016,8 +1015,7 @@ enyo.kind({
 					}
 					xw.writeEndElement(); // gap:platform
 				}
-			}
-			xw.writeEndElement();	// gap:platforms
+			}	
 		}
 
 		xw.writeComment("Features");
