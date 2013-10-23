@@ -1002,8 +1002,7 @@ enyo.kind({
 		xw.writeString(config.author.name);
 		xw.writeEndElement();	// author
 
-		// skip completelly the 'platforms' tags if we target
-		// all of them
+		xw.writeComment("Platforms");
 		if (phonegap.targets && (enyo.keys(phonegap.targets).length > 0)) {
 			for (var platformName in phonegap.targets) {
 				var platform = phonegap.targets[platformName];
