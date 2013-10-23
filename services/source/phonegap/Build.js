@@ -12,7 +12,7 @@ enyo.kind({
 		onFsEvent: ""
 	},
 	published: {
-		timeoutDuration: 3000	
+		checkBuildResultInterval: 3000
 	},
 	
 	debug: false,
@@ -752,7 +752,7 @@ enyo.kind({
 			async.waterfall([
 				function (next) {
 					//Timeout before sending a new check status request
-					setTimeout(next, builder.timeoutDuration);
+					setTimeout(next, builder.checkBuildResultInterval);
 				},
 				function (next) {
 					if(appData.status[platform] === "pending"){
