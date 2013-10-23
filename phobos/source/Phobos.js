@@ -16,9 +16,10 @@ enyo.kind({
 				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
-		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onSaveAllActionPopup: "saveAllBeforeClose", onCancelActionPopup: "cancelClose"},
-		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onSaveAllActionPopup: "saveAllBeforePreviewAction",onCancelActionPopup: "cancelAction"},
-		{name: "initialSavePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "initialSaveBeforePreviewAction", onSaveAllActionPopup: "saveAllBeforePreviewAction",onCancelActionPopup: "cancelAction"},
+		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
+		{name: "saveWithSaveAllPopup", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onSaveAllActionPopup: "saveAllBeforeClose", onCancelActionPopup: "cancelClose"},
+		{name: "savePopupPreview", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onSaveAllActionPopup: "saveAllBeforePreviewAction",onCancelActionPopup: "cancelAction"},
+		{name: "initialSavePopupPreview", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "initialSaveBeforePreviewAction", onSaveAllActionPopup: "saveAllBeforePreviewAction",onCancelActionPopup: "cancelAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
 		{name: "saveAllPopup", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllAction", onCancelActionPopup: "cancelAction"},
 		{name: "saveAllPopupBuild", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllBeforeBuildAction", onCancelActionPopup: "cancelAction"},
@@ -894,7 +895,11 @@ enyo.kind({
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
-			this.showSavePopup("savePopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing?');
+			if (this.closeAll === true) {
+				this.showSavePopup("saveWithSaveAllPopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing?');
+			} else {
+				this.showSavePopup("savePopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing?');
+			}
 		} else {
 			var id = this.docData.getId();
 			this.beforeClosingDocument();
@@ -1280,6 +1285,28 @@ enyo.kind({
 
 enyo.kind({
 	name: "saveActionPopup",
+	kind: "Ares.ActionPopup",
+	events:{
+		onSaveActionPopup: ""
+	},
+	/** @private */
+	create: function() {
+		this.inherited(arguments);
+		this.$.message.allowHtml = true;
+		this.$.buttons.createComponent(
+			{name:"saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "save"},
+			{owner: this}
+		);
+	},
+	/** @private */
+	save: function(inSender, inEvent) {
+		this.hide();
+		this.doSaveActionPopup();
+	}
+});
+
+enyo.kind({
+	name: "saveActionWithSaveAllPopup",
 	kind: "onyx.Popup",
 	modal: true,
 	centered: true,
