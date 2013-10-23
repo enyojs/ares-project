@@ -211,6 +211,7 @@ enyo.kind({
 		data.kind = this.draggedNode.kind;
 		data.file = this.draggedNode.file;
 
+		data.file.service.owner = null;
 		var dataText = enyo.json.stringify(data);		
 		inEvent.dataTransfer.setData("Text", dataText);
 
