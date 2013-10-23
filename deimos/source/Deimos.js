@@ -1,5 +1,6 @@
 /* global Model */
 /* jshint indent: false */ // TODO: ENYO-3311
+/* global ComponentsRegistry */
 
 enyo.kind({
 	name: "Deimos",
@@ -885,7 +886,6 @@ enyo.kind({
 	runPaletteComponentAction: function(inSender,inEvent){
 		var config = this.$.actionPopup.getConfigComponent(config);
 		var target = this.$.actionPopup.getTargetComponent(target);
-		var beforeId = inEvent.beforeId;
 
 		if(inEvent.getName() === "addtoKind"){
 			this.performAddItem(config);
@@ -912,7 +912,7 @@ enyo.kind({
 			if ((inKeepAresIds && att === "aresId") || (att !== "aresId" && att !== "components" && att !== "__aresOptions")) {
 				cleanComponent[att] = inComponent[att];
 			}
-	     };
+	     }
 		if (inComponent.components) {
 			for (i=0; i<inComponent.components.length; i++) {
 				childComponents.push(this.cleanUpViewComponent(inComponent.components[i], inKeepAresIds));
