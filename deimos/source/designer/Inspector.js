@@ -4,7 +4,8 @@ enyo.kind({
 	kind: "FittableRows",
 	events: {
 		onModify: "",
-		onAction: ""
+		onAction: "",
+		onNotifyDynamicUI: ""
 	},
 	published: {
 		filterLevel: null,		// Value will be given by Inspector.FilterXXX "checked" item.
@@ -16,7 +17,8 @@ enyo.kind({
 		{kind: "Scroller", fit: true, components: [
 			{name: "content", kind: "FittableRows", onActivate: "inheritAttributeToggle"}
 		]},
-		{name: "filterLevel", kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"}
+		{name: "filterLevel", kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"},
+		{name: "dynamicProperty", ontap: "controlDynamicProperty"}
 	],
 	handlers: {
 		onChange: "change",
@@ -32,6 +34,28 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.helper = new analyzer.Analyzer.KindHelper();
+
+		//* TODO - should be moved to KindHelper.js.
+		this.helper.getDynamicProperty = function() {
+			this.checkDefAvail();
+
+			var obj = this.definition.properties;
+			for (var i=0; i<obj.length; i++) {
+				if (obj[i].token === "dynamicProperty") {
+					var val = "";
+					try {
+						// TODO - shouldn't have to eval() here. Strings come back with double double quotes ("""")
+						/* jshint evil: true */
+						val = eval(obj[i].value[0].name); // TODO: ENYO-2074, replace eval.
+						/* jshint evil: false */
+					} catch(err) {
+						enyo.warn("Invalid value for property '" + obj[i].token +"': " +  obj[i].value[0].name);
+					}
+					return val;
+				}
+			}
+			return null;
+		};
 		
 		//* TODO - should be moved to KindHelper.js.
 		this.helper.getPublishedWithValues = function() {
@@ -326,6 +350,58 @@ enyo.kind({
 	setRequestedPositionValue: function(inProp, inValue) {
 		this.waterfall("onSetRequestedPositionValue", {prop: inProp, value: inValue});
 	},
+	controlDynamicProperty: function(inSender, inEvent) {
+		var splitString = inEvent.originator.name.split(".");
+		if (splitString[0] != "dynamic") {
+			return;
+		}
+
+		switch (splitString[1]) {
+			case "panels":
+				if (splitString[2] === "prev") {
+					this.doNotifyDynamicUI({dynamicData: {dynamicProperty: "panels",
+											propertyValue: "prev",
+											maxIndex: inEvent.originator.maxIndex,
+											currentIndex: inEvent.originator.currentIndex}});
+				} else {
+					this.doNotifyDynamicUI({dynamicData: {dynamicProperty: "panels",
+											propertyValue: "next",
+											maxIndex: inEvent.originator.maxIndex,
+											currentIndex: inEvent.originator.currentIndex}});
+				}
+				break;
+
+			default:
+				break;
+		}
+	},
+	showDynamicProperty: function(inControl) {
+		var definition = this.getKindDefinition(inControl.kind);
+
+		this.helper.setDefinition(definition);
+
+		this.$.dynamicProperty.destroyComponents();
+
+		switch (this.helper.getDynamicProperty()) {
+			case "panels":
+				this.$.dynamicProperty.createComponent({name: "dynamic.panels.prev",
+														kind: onyx.Button,
+														content: "<< Move Prev",
+														maxIndex: inControl.components.length,
+														currentIndex: (inControl.index === undefined) ? 0 : inControl.index});
+				this.$.dynamicProperty.createComponent({name: "dynamic.panels.next",
+														kind: onyx.Button,
+														content: "Move Next >>",
+														maxIndex: inControl.components.length,
+														currentIndex: (inControl.index === undefined) ? 0 : inControl.index});
+				break;
+
+			default:
+				break;
+		}
+
+		this.$.dynamicProperty.render();
+	},
 	inspect: function(inControl) {
 		var ps, i, p;
 
@@ -378,6 +454,8 @@ enyo.kind({
 				enyo.warn("Inspector has unknown filterType: ", this.filterType);
 				break;
 		}
+
+		this.showDynamicProperty(inControl);
 		
 		this.$.content.render();
 		// Resize to adjust content container height for filterLevel hide/show
