@@ -518,8 +518,6 @@ enyo.kind({
 			self.addAresKindOptions(inProps.components, inOptions);
 
 			enyo.genuineEnyoKind(inProps);
-
-
 		};
 		enyo.mixin(enyo.kind, enyo.genuineEnyoKind);
 		
@@ -563,10 +561,14 @@ enyo.kind({
 				if (options) {
 					inComponent.__aresOptions = options;
 
-					var kindConstructor = enyo.constructorForKind(inComponent.kind);
-
-					kindConstructor.prototype.__create = kindConstructor.prototype.create;
-					kindConstructor.prototype.create = optionalCreate;
+					var kindConstructor= enyo.constructorForKind(inComponent.kind);
+					
+					if (kindConstructor.prototype.__create) {
+						this.trace(inComponent.kind, "already has __create");
+					} else {
+						kindConstructor.prototype.__create = kindConstructor.prototype.create;
+						kindConstructor.prototype.create = optionalCreate;
+					}								
 				}
 			}
 		}	
