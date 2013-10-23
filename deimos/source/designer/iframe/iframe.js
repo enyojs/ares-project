@@ -90,14 +90,8 @@ enyo.kind({
 
 		this.adjustFrameworkFeatures();
 
-		// warning: user code error will trigger this.raiseLoadError
-		// through window.onerror handler
-		// another warning: enyo.load is asynchronous. try/catch is useless
-		enyo.load("$enyo/../source/package.js", enyo.bind(this, function() {
-			this.trace("user app load done within designer iframe");
-			this.sendMessage({op: "state", val: "initialized"});
-		}));
-
+		this.trace("designer iframe load done");
+		this.sendMessage({op: "state", val: "loaded"});
 	},
 	initComponents: function() {
 		this.createSelectHighlight();
@@ -180,6 +174,9 @@ enyo.kind({
 			case "render":
 				// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 				this.renderKind(msg.val, msg.filename);
+				break;
+			case "initializeOptions":
+				this.initializeOptions(msg.options);
 				break;
 			case "select":
 				this.selectItem(msg.val);
@@ -505,6 +502,74 @@ enyo.kind({
 				this.sendMessage({op: "error", val: {msg: errMsg}});
 			}
 		}, this);
+	},
+	/**
+	 * @private
+	 *
+	 * Response to message sent from Deimos. Enhance the whole application code with aresOptions
+	 * and send back a state message.
+	*/
+	initializeOptions: function(inOptions) {
+		// genuine enyo.kind's master function extension
+		var self = this;
+		enyo.genuineEnyoKind = enyo.kind;
+		enyo.kind =  function(inProps) {
+			self.trace("inProps:", inProps);
+			self.addAresKindOptions(inProps.components, inOptions);
+
+			enyo.genuineEnyoKind(inProps);
+
+
+		};
+		enyo.mixin(enyo.kind, enyo.genuineEnyoKind);
+		
+		// warning: user code error will trigger this.raiseLoadError
+		// through window.onerror handler
+		// another warning: enyo.load is asynchronous. try/catch is useless
+		enyo.load("$enyo/../source/package.js", enyo.bind(this, function() {
+			this.trace("user app initialization done within designer iframe");
+			this.sendMessage({op: "state", val: "initialized"});
+		}));
+
+	},
+	addAresKindOptions: function(inComponents, inOptions) {
+		if (!inComponents) {
+			return;
+		}
+		
+		for(var i = 0; i < inComponents.length; i++) {
+			this.addOptionsToComponent(inComponents[i], inOptions);
+			if (inComponents[i].components) {
+				this.addAresKindOptions(inComponents[i].components, inOptions);
+			}
+		}
+	},
+	addOptionsToComponent: function(inComponent, inOptions) {
+		// FIXME: ENYO-3433 specific enyo.Repeater create method must be generic one accordingly to kinds that reauire options
+		function optionalCreate() {
+			if (this.__create) {
+				this.__create();
+			}
+
+			// for enyo.Repeater (only kind in defaultkindOptions set)
+			this.onSetupItem = "aresUnImplemetedFunction";
+			this.set("count", 1);
+		}
+
+		for(var o in inOptions) {
+			if (o === inComponent.kind) {
+				var options = inOptions[o];
+				
+				if (options) {
+					inComponent.__aresOptions = options;
+
+					var kindConstructor = enyo.constructorForKind(inComponent.kind);
+
+					kindConstructor.prototype.__create = kindConstructor.prototype.create;
+					kindConstructor.prototype.create = optionalCreate;
+				}
+			}
+		}	
 	},
 	//* When the designer is closed, clean up the last rendered kind
 	cleanUpKind: function() {
