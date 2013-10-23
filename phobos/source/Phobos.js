@@ -905,6 +905,15 @@ enyo.kind({
 	startAutoCompletion: function() {
 		this.$.autocomplete.start(null);
 	},
+
+	addViewKindAction: function(config) {
+		var newKind = 'enyo.kind('+config+'\n);';
+		this.$.ace.insertAtEndOfFile(newKind, '@cursor@');
+
+		this.designerAction();
+	},
+
+
 	newKindAction: function() {
 		// Insert a new empty enyo kind at the end of the file
 		var newKind = 'enyo.kind({\n	name : "@cursor@",\n	kind : "Control",\n	components : []\n});';
