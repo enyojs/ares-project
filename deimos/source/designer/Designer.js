@@ -169,7 +169,7 @@ enyo.kind({
 		this.sendMessage({op: "containerData", val: Model.getFlattenedContainerInfo()});
 	},
 	//* Tell iFrame to render the current kind
-	renderCurrentKind: function(inSelectId) {
+	renderCurrentKind: function(inSelectId, inEvent) {
 		if(!this.getIframeReady()) {
 			return;
 		}
@@ -177,7 +177,20 @@ enyo.kind({
 		var currentKind = this.getCurrentKind();
 		var components = [currentKind];
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.sendMessage({op: "render", filename: this.currentFileName, val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components), componentKinds: enyo.json.codify.to(components), selectId: inSelectId}});
+		if (inEvent === undefined) {
+			this.sendMessage({op: "render", filename: this.currentFileName,
+							val: {name: currentKind.name,
+								components: enyo.json.codify.to(currentKind.components),
+								componentKinds: enyo.json.codify.to(components),
+								selectId: inSelectId}});
+		} else {
+			this.sendMessage({op: "render", filename: this.currentFileName,
+							val: {name: currentKind.name,
+								components: enyo.json.codify.to(currentKind.components),
+								componentKinds: enyo.json.codify.to(components),
+								selectId: inSelectId,
+								dynamicData: inEvent.dynamicData}});
+		}
 	},
 	select: function(inControl) {
 		this.sendMessage({op: "select", val: inControl});

@@ -74,7 +74,8 @@ enyo.kind({
 					{kind: "Inspector", fit: true, classes: "deimos_panel",
 						onModify: "inspectorModify",
 						onRequestPositionValue: "inspectorRequestPositionValue",
-						onPositionDataUpdated: "inspectorPositionDataUpdated"
+						onPositionDataUpdated: "inspectorPositionDataUpdated",
+						onNotifyDynamicUI: "inspectorNotifyDynamicUI"
 					}
 				]}
 			]}
@@ -229,11 +230,11 @@ enyo.kind({
 		this.$.designer.sendSerializerOptions(Model.serializerOptions);
 	},
 	//* Rerender current kind
-	rerenderKind: function(inSelectId) {
+	rerenderKind: function(inSelectId, inEvent) {
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.$.designer.set("currentFileName", this.fileName);
 		this.$.designer.currentKind = this.getSingleKind(this.index)[0];
-		this.$.designer.renderCurrentKind(inSelectId);
+		this.$.designer.renderCurrentKind(inSelectId, inEvent);
 	},
 	refreshInspector: function() {
 		enyo.job("inspect", enyo.bind(this, function() {
@@ -280,6 +281,19 @@ enyo.kind({
 	},
 	inspectorRequestPositionValue: function(inSender, inEvent) {
 		this.$.designer.requestPositionValue(inEvent.prop);
+	},
+	inspectorNotifyDynamicUI: function(inSender, inEvent) {
+		var item = this.getItemById(this.$.designer.selection.aresId, this.getSingleKind(this.index)),
+			prop,
+			val
+		;
+		
+		for (prop in inEvent.props) {
+			val = inEvent.props[prop];
+			this.addReplaceStyleProp(item, prop, inEvent.props[prop]);
+		}
+
+		this.rerenderKind(item.aresId, inEvent);
 	},
 	inspectorPositionDataUpdated: function(inSender, inEvent) {
 		var item = this.getItemById(this.$.designer.selection.aresId, this.getSingleKind(this.index)),

@@ -448,6 +448,31 @@ enyo.kind({
 			*/
 			kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.componentKinds) : inKind.componentKinds;
 
+			if (inKind.dynamicData !== undefined) {
+				var dynamicKind = this.getItemById(inKind.selectId, kindConstructor.prototype.kindComponents);
+
+				switch (inKind.dynamicData.dynamicProperty) {
+					case "panels":
+						if (inKind.dynamicData.propertyValue === "prev") {
+							if(--inKind.dynamicData.currentIndex <= 0) {
+								dynamicKind.index = 0;
+							} else {
+								dynamicKind.index = inKind.dynamicData.currentIndex;
+							}
+						} else {
+							if(++inKind.dynamicData.currentIndex >= inKind.dynamicData.maxIndex) {
+								dynamicKind.index = inKind.dynamicData.maxIndex - 1;
+							} else {
+								dynamicKind.index = inKind.dynamicData.currentIndex;
+							}
+						}
+						break;
+						
+					default:
+						break;
+				}
+			}
+
 			// Clean up after previous kind
 			if (this.parentInstance) {
 				this.cleanUpPreviousKind(inKind.name);
@@ -699,7 +724,22 @@ enyo.kind({
 			}
 		}
 	},
-	
+	getItemById: function(inId, inComponents) {
+		if (inComponents.length === 0) {
+			return;
+		}
+		
+		for (var i = 0, component, item; (component = inComponents[i]); i++) {
+			if (component.aresId === inId) {
+				item = inComponents[i];
+			} else if (component.components) {
+				item = this.getItemById(inId, component.components);
+			}
+			if(item) {
+				return item;
+			}
+		}
+	},
 	getEventDragTarget: function(inComponent) {
 		return (!inComponent) ? null : (!this.isDraggable(inComponent)) ? this.getEventDragTarget(inComponent.parent) : inComponent;
 	},
