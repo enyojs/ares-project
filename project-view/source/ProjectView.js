@@ -41,6 +41,7 @@ enyo.kind({
 		onHideWaitPopup: "",
 		onShowWaitPopup: "",
 		onError: "",
+		onProjectSelected: "",
 		onRegisterMe: ""
 	},
 	create: function() {
@@ -111,8 +112,9 @@ enyo.kind({
 				self.doError({msg: err.toString(), err: err});
 			}
 			project.setConfig(config);
+			self.doProjectSelected();
 		});
-		this.currentProject = project;
+		self.currentProject = project;
 	},
 	projectRemoved: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("harmonia").setProject(null);
