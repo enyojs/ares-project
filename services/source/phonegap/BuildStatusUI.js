@@ -176,6 +176,7 @@ enyo.kind({
 		// => {Phonegap.ProjectProperties.PlatformBuildStatus} instance
 		for(var key2 in this.$){		
 			if(this.$[key2].platform !== undefined) {
+				// FIXME: pass only status data for the target button
 				this.$[key2].setBuildStatusData(this.buildStatusData);				
 			}			
 		}
