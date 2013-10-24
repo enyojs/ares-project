@@ -371,15 +371,9 @@ enyo.kind({
 	 * @public
 	 */
 	setDownloadStatus: function(inPlatform, inDownloadStatus) {
-		if(inDownloadStatus === 1){
-			Phonegap.ProjectProperties.downloadStatus[inPlatform] = "Download complete";			
-		} else {
-			if (inDownloadStatus === 0) {
-				Phonegap.ProjectProperties.downloadStatus[inPlatform] = "Download failed";
-			} else {
-				Phonegap.ProjectProperties.downloadStatus[inPlatform] = "Download on progress";
-			}
-		}
+
+		Phonegap.ProjectProperties.downloadStatus[inPlatform] = inDownloadStatus === 1 ? "Download complete": 
+		inDownloadStatus === 0 ? "Download failed" : "Download on progress";
 
 		this.bubble("onUpdateStatusMessage");	
 	},
