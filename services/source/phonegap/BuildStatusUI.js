@@ -251,40 +251,38 @@ enyo.kind({
 
 		this.setSelectedPlatform(inSender.platform);
 		this.$.messageContainer.show();
-		this.addHightlightIconButton(this.$[inSender.platform+ "Decorator"]);
+		this.addHightlightIconButton(this.$[inSender.platform + "Decorator"]);
 
-		//Build status: complete
-		if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "complete") {
+		var status = this.buildStatusData && this.buildStatusData.status[inSender.platform];
 
-				this.updateDownloadMessageContent();
-				this.updateDownloadMessageDisplay(inSender.platform);
-		
-		} else {
-			this.$.downloadButton.hide();
-
-			if (this.buildStatusData && this.buildStatusData.status[inSender.platform] === "error" || 
-				this.buildStatusData && this.buildStatusData.status[inSender.platform] === null){
-
-				//Build status: error
-				this.$.statusMessage.setContent("Error: " + this.buildStatusData.error[inSender.platform]);				
-			
-			} else {
-				
-				if(this.buildStatusData === null) {
-					
-					//Build status: application not built
-					this.$.statusMessage.setContent("Build the application first");					
-
-				} else {
-					
-					//Build status: pending					
-					this.$.statusMessage.setContent("Build in progress");					
-				}		
-			}
+		if (status === "complete") {
+			this.updateDownloadMessageContent();
+			this.updateDownloadMessageDisplay(inSender.platform);
+			return true;			 
 		}
 
-		//stop the propagation of the bubble event
-		return true; 
+		this.$.downloadButton.hide();
+
+		if (status === "skip"){			
+			this.$.statusMessage.setContent("Build skipped for this platform");
+			return true;
+		}
+		
+		if (status === "pending") {
+			this.$.statusMessage.setContent("Build in progress");
+			return true;			
+		}
+
+		if (status === "error") {
+			this.$.statusMessage.setContent("Error: " + this.buildStatusData.error[inSender.platform] );
+			return true;
+		}
+		
+		this.$.statusMessage.setContent("Application not built yet");
+
+		return true;
+
+			
 	},
 
 	/**
