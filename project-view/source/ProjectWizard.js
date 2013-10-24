@@ -387,7 +387,7 @@ enyo.kind({
 	targetProject: null,
 	chooser: null,
 	checker: null,
-	displayedTab: undefined,
+	displayedTab: null,
 
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
@@ -539,7 +539,7 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		this.show();
 
-		if (this.displayedTab !== undefined) {
+		if (this.displayedTab) {
 			this.$.propertiesWidget.setDisplayedTab(this.displayedTab);
 		} else {
 			this.$.propertiesWidget.setDefaultTab();
