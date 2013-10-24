@@ -772,7 +772,7 @@ enyo.kind({
 			], next);				
 		}
 		/**
-		 * Launch the appropirate action when an exception occurs or when 
+		 * Launch the appropriate action when an exception occurs or when 
 		 * the status is no longer in the pending state.
 		 * @param  {Object} err 
 		 * @private
