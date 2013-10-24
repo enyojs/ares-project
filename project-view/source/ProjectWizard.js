@@ -387,7 +387,7 @@ enyo.kind({
 	targetProject: null,
 	chooser: null,
 	checker: null,
-	displayedTab: undefined,
+	displayedTab: null,
 
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
