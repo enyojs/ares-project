@@ -11,8 +11,8 @@ enyo.kind({
 	kind: "onyx.IconButton",	
 	ontap: "showStatusMessage",	
 	published: {
-		platform: undefined,
-		buildStatusData: undefined,
+		platform: null,
+		status: null,
 		userDataRequestTimeout: 2500
 	},
 
@@ -22,33 +22,22 @@ enyo.kind({
 	 * 
 	 * @private
 	 */
-	buildStatusDataChanged: function() {
-		this.log(this.buildStatusData);
-		var status = this.buildStatusData && this.buildStatusData.status[this.platform];
+	statusChanged: function() {
 
-		if (status === null) {
-			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
+		if (this.status === "complete") {
+					
+			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-complete-32x32.png");
 			return ; 
 		}
 
-		if (status === "pending") {		
-			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
-			return;
-		}
-		
-		if (status === "complete") {
-			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-complete-32x32.png");
-			return;
-		}
-
-		if (status === "error"){
+		if (this.status === "error"){
+			this.show();
 			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-error-32x32.png");
 			return ;
 		}
-
 		
+		this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
 		
-		this.bubble("appIdChanged");
 	}
 });
 
@@ -178,11 +167,14 @@ enyo.kind({
 
 		// Get only the Enyo control that have the "platform" attribute 
 		// => {Phonegap.ProjectProperties.PlatformBuildStatus} instance
-		for(var key2 in this.$){		
-			if(this.$[key2].platform !== undefined) {
-				// FIXME: pass only status data for the target button
-				this.$[key2].setBuildStatusData(this.buildStatusData);				
-			}			
+		for(var key2 in this.$){
+
+			var platform = this.$[key2].platform;
+			var status = this.buildStatusData && this.buildStatusData.status[platform];
+			
+			if (platform !== undefined) {				
+				this.$[key2].setStatus(status);
+			}
 		}
 
 		//Update to Status container if a platform is selected.
