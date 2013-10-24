@@ -20,13 +20,11 @@ enyo.kind({
 			onScanProject: "scanProjectAction",
 			onDuplicateProject: "duplicateProjectAction",
 			onProjectRemoved: "projectRemoved",
-			onProjectSelected: "handleProjectSelected",
 			name: "projectList"
 		},
 		{kind: "ProjectWizardCreate", canGenerate: false, name: "projectWizardCreate", classes:"ares-masked-content-popup"},
 		{kind: "ProjectWizardScan", canGenerate: false, name: "projectWizardScan", classes:"ares-masked-content-popup"},
 		{kind: "ProjectWizardModify", canGenerate: false, 
-			onProjectSelected: "handleProjectSelected",
 			name: "projectWizardModify"
 		},
 		{kind: "ProjectWizardCopy", name: "projectWizardCopy", classes:"ares-masked-content-popup"}
@@ -93,11 +91,11 @@ enyo.kind({
 		}
 		return true; //Stop event propagation
 	},
-	handleProjectSelected: function(inSender, inEvent) {
-		var project = inEvent.project;
+	setupProjectConfig: function(project) {
 		// Pass service definition & configuration to Harmonia
 		// & consequently to HermesFileTree
 		ComponentsRegistry.getComponent("harmonia").setProject(project);
+
 		// FIXME: temporary hack to create config.json on the
 		// fly if needed... would be better to create/load it
 		// when the workspace is loaded & when a new project
