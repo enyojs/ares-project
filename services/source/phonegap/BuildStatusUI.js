@@ -23,27 +23,31 @@ enyo.kind({
 	 * @private
 	 */
 	buildStatusDataChanged: function() {
-		if (this.buildStatusData && this.buildStatusData.status[this.platform] === "complete") {
-			//Build status: application not built
+		this.log(this.buildStatusData);
+		var status = this.buildStatusData && this.buildStatusData.status[this.platform];
+
+		if (status === null) {
+			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
+			return ; 
+		}
+
+		if (status === "pending") {		
 			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
 			return;
 		}
-
-		var status = this.buildStatusData.status[this.platform] ;
+		
 		if (status === "complete") {
-			//Build status: complete
 			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-complete-32x32.png");
 			return;
 		}
 
-		if (status === "error" || status === null){
-			//Build status: error
+		if (status === "error"){
 			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-error-32x32.png");
 			return ;
 		}
 
-		//Build status: pending
-		this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
+		
+		
 		this.bubble("appIdChanged");
 	}
 });
