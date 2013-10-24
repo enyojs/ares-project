@@ -24,29 +24,27 @@ enyo.kind({
 	 */
 	buildStatusDataChanged: function() {
 		if (this.buildStatusData && this.buildStatusData.status[this.platform] === "complete") {
+			//Build status: application not built
+			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
+			return;
+		}
+
+		var status = this.buildStatusData.status[this.platform] ;
+		if (status === "complete") {
 			//Build status: complete
 			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-complete-32x32.png");
-			
-		} else {
-			if (this.buildStatusData && this.buildStatusData.status[this.platform] === "error" || 
-			    this.buildStatusData && this.buildStatusData.status[this.platform] === null){
-				
-				//Build status: error				
-				this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-error-32x32.png");
-
-			} else {
-				if(this.buildStatusData === null) {
-					
-					//Build status: application not built
-					this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
-
-				} else {					
-					//Build status: pending
-					this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
-					this.bubble("appIdChanged");
-				}		
-			}
+			return;
 		}
+
+		if (status === "error" || status === null){
+			//Build status: error
+			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-error-32x32.png");
+			return ;
+		}
+
+		//Build status: pending
+		this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
+		this.bubble("appIdChanged");
 	}
 });
 
