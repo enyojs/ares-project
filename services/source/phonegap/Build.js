@@ -305,7 +305,7 @@ enyo.kind({
 	 * @param  {Function} next    is a CommonJS callback
 	 * @private
 	 */
-	getProjectAppData: function(project, inData, next){
+	getProjectAppData: function(project, next){
 		var config = project.getConfig().getData();
 		var appId = config.providers.phonegap.appId;
 		this.getAppData(appId, next);
