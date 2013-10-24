@@ -87,6 +87,9 @@ enyo.kind({
 		onDisplayPreview : "_displayPreview",
 		onFileEdited:"_fileEdited",
 		onStartBuild: "_startBuild",
+		onStartInstall: "_startInstall",
+		onStartRun: "_startRun",
+		onStartRunDebug: "_startRunDebug",
 		onSaveAllDocuments: "saveAllDocuments"
 	},
 	projectListIndex: 0,
@@ -680,6 +683,18 @@ enyo.kind({
 	_startBuild: function(inSender, inEvent){
 		var project = inEvent && inEvent.project;
 		ComponentsRegistry.getComponent("projectView").buildAction(inSender,{project:project});
+	},
+	_startInstall: function(inSender, inEvent){
+		var project = inEvent && inEvent.project;
+		ComponentsRegistry.getComponent("projectView").installAction(inSender,{project:project});
+	},
+	_startRun: function(inSender, inEvent){
+		var project = inEvent && inEvent.project;
+		ComponentsRegistry.getComponent("projectView").runAction(inSender,{project:project});
+	},
+	_startRunDebug: function(inSender, inEvent){
+		var project = inEvent && inEvent.project;
+		ComponentsRegistry.getComponent("projectView").runDebugAction(inSender,{project:project});
 	},
 	
 	/**

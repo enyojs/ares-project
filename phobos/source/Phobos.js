@@ -19,10 +19,13 @@ enyo.kind({
 		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
 		{name: "saveWithSaveAllPopup", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onSaveAllActionPopup: "saveAllBeforeClose", onCancelActionPopup: "cancelClose"},
 		{name: "savePopupPreview", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onSaveAllActionPopup: "saveAllBeforePreviewAction",onCancelActionPopup: "cancelAction"},
-		{name: "initialSavePopupPreview", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "initialSaveBeforePreviewAction", onSaveAllActionPopup: "saveAllBeforePreviewAction",onCancelActionPopup: "cancelAction"},
+		{name: "initialSavePopupPreview", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "displayPreviewOnSaveAllComplete", onSaveActionPopup: "initialSaveBeforePreviewAction", onSaveAllActionPopup: "saveAllBeforePreviewAction",onCancelActionPopup: "cancelAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
 		{name: "saveAllPopup", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllAction", onCancelActionPopup: "cancelAction"},
 		{name: "saveAllPopupBuild", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllBeforeBuildAction", onCancelActionPopup: "cancelAction"},
+		{name: "saveAllPopupInstall", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllBeforeInstallAction", onCancelActionPopup: "cancelAction"},
+		{name: "saveAllPopupRun", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllBeforeRunAction", onCancelActionPopup: "cancelAction"},
+		{name: "saveAllPopupRunDebug", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllBeforeRunDebugAction", onCancelActionPopup: "cancelAction"},
 		{name: "overwritePopup", kind: "overwriteActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "saveAsConfirm", onCancelActionPopup: "saveAsCancel", onHide:"doAceFocus"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: $L("unknown error")},
@@ -38,6 +41,9 @@ enyo.kind({
 		onDesignDocument: "",
 		onCloseDocument: "",
 		onStartBuild: "",
+		onStartInstall: "",
+		onStartRun: "",
+		onStartRunDebug: "",
 		onUpdate: "",
 		onRegisterMe: "",
 		onDisplayPreview: "",
@@ -170,6 +176,15 @@ enyo.kind({
 			case "closeAll":
 				this.closeAllOnSaveAllComplete();
 				break;
+			case "install":
+				this.doStartInstall({project: inData});
+				break;
+			case "run":
+				this.doStartRun({project: inData});
+				break;
+			case "runDebug":
+				this.doStartRunDebug({project: inData});
+				break;
 			default:
 				break;
 		}
@@ -185,6 +200,15 @@ enyo.kind({
 				break;
 			case "closeAll":
 				this.showErrorPopup("Unable to save the file. Cannot close file...'");
+				break;
+			case "install":
+				this.showErrorPopup("Unable to save the file. Quit Installing...'");
+				break;
+			case "run":
+				this.showErrorPopup("Unable to save the file. Quit Running...'");
+				break;
+			case "runDebug":
+				this.showErrorPopup("Unable to save the file. Quit Running Debug...'");
 				break;
 			default:
 				this.showErrorPopup("Unable to save the file");
@@ -237,6 +261,57 @@ enyo.kind({
 			this.showSaveAllPopup("saveAllPopupBuild", "Save All the project files before Build?'");
 		} else {
 			this.doStartBuild({project: prj});
+		}
+	},
+	saveAllBeforeInstallAction: function() {
+		var saveAllData = {
+			type: "install",
+			docs: this.editedDocs
+		};
+
+		this.doSaveAllDocuments(saveAllData);
+	},
+	saveAllDocumentsBeforeInstall: function(prj) {
+		this.editedDocs = this._getEditedDocs(prj);
+
+		if(this.editedDocs.length >= 1) {
+			this.showSaveAllPopup("saveAllPopupInstall", "Save All the project files before Install?'");
+		} else {
+			this.doStartInstall({project: prj});
+		}
+	},
+	saveAllBeforeRunAction: function() {
+		var saveAllData = {
+			type: "run",
+			docs: this.editedDocs
+		};
+
+		this.doSaveAllDocuments(saveAllData);
+	},
+	saveAllDocumentsBeforeRun: function(prj) {
+		this.editedDocs = this._getEditedDocs(prj);
+
+		if(this.editedDocs.length >= 1) {
+			this.showSaveAllPopup("saveAllPopupRun", "Save All the project files before Run?'");
+		} else {
+			this.doStartRun({project: prj});
+		}
+	},
+	saveAllBeforeRunDebugAction: function() {
+		var saveAllData = {
+			type: "runDebug",
+			docs: this.editedDocs
+		};
+
+		this.doSaveAllDocuments(saveAllData);
+	},
+	saveAllDocumentsBeforeRunDebug: function(prj) {
+		this.editedDocs = this._getEditedDocs(prj);
+
+		if(this.editedDocs.length >= 1) {
+			this.showSaveAllPopup("saveAllPopupRunDebug", "Save All the project files before Run Debug?'");
+		} else {
+			this.doStartRunDebug({project: prj});
 		}
 	},
 	saveAsFileChosen: function(inSender, inEvent) {
@@ -997,7 +1072,8 @@ enyo.kind({
 		this.saveNextDocument();
 		return true;
 	},
-	displayPreviewOnSaveAllComplete: function() {
+	displayPreviewOnSaveAllComplete: function(inSender, inEvent) {
+		this.doAceFocus();
 		this.doDisplayPreview();
 	},
 	/**

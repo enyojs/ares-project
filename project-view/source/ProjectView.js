@@ -35,9 +35,9 @@ enyo.kind({
 		onAddProjectInList: "addProjectInList",
 		onPreview: "previewAction",
 		onBuild: "saveAllBeforeBuildAction",
-		onInstall: "installAction",
-		onRun: "runAction",
-		onRunDebug: "runDebugAction"
+		onInstall: "saveAllBeforeInstallAction",
+		onRun: "saveAllBeforeRunAction",
+		onRunDebug: "saveAllBeforeRunDebugAction"
 	},
 	events: {
 		onHideWaitPopup: "",
@@ -153,6 +153,11 @@ enyo.kind({
 		}
 		return true; // stop bubble-up
 	},
+	saveAllBeforeInstallAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		ComponentsRegistry.getComponent("phobos").saveAllDocumentsBeforeInstall(project);
+		return true; // stop bubble-up
+	},
 	/**
 	 * Event handler: handle run application action (select provider & run action)
 	 * @param {enyo.Component} inSender
@@ -167,6 +172,11 @@ enyo.kind({
 		}
 		return true; // stop bubble-up
 	},
+	saveAllBeforeRunAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		ComponentsRegistry.getComponent("phobos").saveAllDocumentsBeforeRun(project);
+		return true; // stop bubble-up
+	},
 	/**
 	 * Event handler: handle debug application action (select provider & run action)
 	 * @param {enyo.Component} inSender
@@ -179,6 +189,11 @@ enyo.kind({
 		if (project) {
 			this.projectAction(project, 'test', 'runDebug');
 		}
+		return true; // stop bubble-up
+	},
+	saveAllBeforeRunDebugAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		ComponentsRegistry.getComponent("phobos").saveAllDocumentsBeforeRunDebug(project);
 		return true; // stop bubble-up
 	},
 	/**
