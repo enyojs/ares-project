@@ -69,8 +69,7 @@ enyo.kind({
 					{kind: "Deimos", onCloseDesigner: "closeDesigner"}
 				]}
 			]
-		},
-		{kind: "Ares.ErrorPopup", name: "userErrorPopup", msg: $L("unknown error")}
+		}
 	],
 	events: {
 		onRegisterMe: "",
@@ -123,7 +122,7 @@ enyo.kind({
 		this.$.designerButtonBroken.setShowing(! enable);
 	},
 	userSyntaxErrorPop: function(){
-		this.$.userErrorPopup.raise({msg: $L("Designer cannot work on a file with a syntax error. Please fix the error highlighted in code editor before launching the designer."), title: $L("Syntax Error")});
+		this.doError({msg: $L("Designer cannot work on a file with a syntax error. Please fix the error highlighted in code editor before launching the designer."), title: $L("Syntax Error")});
 	},
 	closeDesignerAction: function(){
 		ComponentsRegistry.getComponent("deimos").closeDesignerAction();
