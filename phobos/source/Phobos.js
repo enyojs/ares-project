@@ -19,7 +19,7 @@ enyo.kind({
 		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
 		{name: "saveWithSaveAllPopup", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onSaveAllActionPopup: "saveAllBeforeClose", onCancelActionPopup: "cancelClose"},
 		{name: "savePopupPreview", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onSaveAllActionPopup: "saveAllBeforePreviewAction",onCancelActionPopup: "cancelAction"},
-		{name: "initialSavePopupPreview", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "displayPreviewOnSaveAllComplete", onSaveActionPopup: "initialSaveBeforePreviewAction", onSaveAllActionPopup: "saveAllBeforePreviewAction",onCancelActionPopup: "cancelAction"},
+		{name: "initialSavePopupPreview", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "previewActionOnSaveAllComplete", onSaveActionPopup: "initialSaveBeforePreviewAction", onSaveAllActionPopup: "saveAllBeforePreviewAction",onCancelActionPopup: "cancelAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
 		{name: "saveAllPopup", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllAction", onCancelActionPopup: "cancelAction"},
 		{name: "saveAllPopupBuild", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllBeforeBuildAction", onCancelActionPopup: "cancelAction"},
@@ -1072,7 +1072,7 @@ enyo.kind({
 		this.saveNextDocument();
 		return true;
 	},
-	displayPreviewOnSaveAllComplete: function(inSender, inEvent) {
+	previewActionOnSaveAllComplete: function(inSender, inEvent) {
 		this.doAceFocus();
 		this.doDisplayPreview();
 	},
