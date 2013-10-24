@@ -48,12 +48,12 @@ enyo.kind({
 enyo.kind({
 	name: "Phonegap.ProjectProperties.BuildStatus",
 	kind: "FittableRows",
+	buildStatusData: {},
 	published: {
-		appId: "",
-		buildStatusData: undefined,
+		appId: "",		
 		phongapUrl: "https://build.phonegap.com",
-		provider: undefined, 
-		selectedPlatform: undefined
+		provider: {}, 
+		selectedPlatform: null
 	},
 	events: {
 		onError: ""
@@ -150,7 +150,8 @@ enyo.kind({
 	 * 
 	 * @private	 
 	 */
-	buildStatusDataChanged: function(){
+	updateBuildStatusData: function(inBuildStatus){
+		this.buildStatusData = inBuildStatus;
 		var pendingApplication = false;
 		
 		//Check if there is a pending build.
@@ -178,7 +179,7 @@ enyo.kind({
 		}
 
 		//Update to Status container if a platform is selected.
-		if(this.selectedPlatform !== undefined) {
+		if(this.selectedPlatform !== null) {
 			this.showStatusMessage({platform: this.selectedPlatform});
 		}		
 	
@@ -193,7 +194,7 @@ enyo.kind({
 	sendBuildStatusRequest: function() {
 		
 		if(this.appId === "" || this.appId === undefined){
-			this.setBuildStatusData(null);
+			this.updateBuildStatusData(null);
 		} else {
 			this.provider.getAppData(this.appId, enyo.bind(this, this.getBuildStatusData));
 		}
@@ -349,7 +350,7 @@ enyo.kind({
 		if (err) {
 			this.doError({msg: err.toString(), err: err});
 		} else {
-			this.setBuildStatusData(inBuildStatusData.user);
+			this.updateBuildStatusData(inBuildStatusData.user);
 		}
 	}
 });
