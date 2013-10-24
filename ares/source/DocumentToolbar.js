@@ -42,7 +42,7 @@ enyo.kind({
 		);
 	},
 	switchFile: function(inSender, inEvent) {
-		this.doSwitchFile({id: inEvent.userId, project: inEvent.data.project});
+		this.doSwitchFile({id: inEvent.userId});
 		return true;
 	},
 	activateFileWithId: function(id) {
@@ -52,7 +52,7 @@ enyo.kind({
 	requestCloseFile: function(inSender, inEvent) {
 		// inEvent.next callback is ditched. Ares will call removeTab
 		// when file is closed by Ace
-		this.doCloseFileRequest({id: inEvent.userId, project: inEvent.data.project});
+		this.doCloseFileRequest({id: inEvent.userId});
 		return true;
 	},
 	removeTab: function(id) {

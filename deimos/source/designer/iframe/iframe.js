@@ -1263,13 +1263,17 @@ enyo.kind({
 	},
 	cloneControl: function(inSelection, inCloneChildren) {
 		var clone = {
-			kind:       inSelection.kind,
 			layoutKind: inSelection.layoutKind,
 			content:    inSelection.content,
 			aresId:     inSelection.aresId,
 			classes:    inSelection.classes,
 			style:      inSelection.style
 		};
+
+		// if inSelection.kind is undefined, let enyo apply the defaultKind
+		if (inSelection.kind) {
+			clone.kind = inSelection.kind;
+		}
 		
 		if (inCloneChildren) {
 			clone.components = this.cloneChildComponents(inSelection.components);
