@@ -181,10 +181,7 @@ enyo.kind({
 		//Update to Status container if a platform is selected.
 		if(this.selectedPlatform !== null) {
 			this.showStatusMessage({platform: this.selectedPlatform});
-		}		
-	
-		this.$.buildStatusContainer.render();
-
+		}
 	},
 
 	/**
