@@ -23,6 +23,9 @@ enyo.kind({
 		this.model = inModel;
 		this.$.name.setContent(this.model.name);
 		this.$.list.count = this.model.items.length;
+		if (this.$.list.count === 0 && this.$.drawer.getOpen()) {
+			this.toggleDrawer();
+		}
 		this.$.list.build();
 	},
 	setupItem: function(inSender, inEvent) {
