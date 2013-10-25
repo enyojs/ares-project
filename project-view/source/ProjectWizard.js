@@ -387,6 +387,7 @@ enyo.kind({
 	targetProject: null,
 	chooser: null,
 	checker: null,
+	displayedTab: null,
 
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
@@ -395,30 +396,32 @@ enyo.kind({
 	/**
 	 * Step 1: start the modification by showing project properties widget
 	 */
-	start: function(target) {
+	start: function(target, inDisplayedTab) {
 		if (target) {
 			var config = target.getConfig();
+
+			// Define the tab that will be shown when the Pop-up is displayed
+			this.displayedTab = inDisplayedTab;
 			
 			this.targetProject = target ;
 			this.$.propertiesWidget.setTargetProject(target);
+
+			// Pass the configuration of the selected project to the panel "Phonegap Build"
+			this.$.propertiesWidget.$.phonegapDrawer.$.phonegap.setProject(target);
 
 			this.$.propertiesWidget.setupModif();
 			this.$.propertiesWidget.preFill(config.data);
 
 			this.$.propertiesWidget.$.projectPathLabel.setContent($L("Project path: "));
 			this.$.propertiesWidget.$.projectPathValue.setContent("");
+			
 			var req = config.service.propfind(config.folderId, 3);
 			req.response(this, function(inSender, inFile) {
 				this.$.propertiesWidget.$.projectPathValue.setContent(inFile.path);
 			});
 			
 			this.$.propertiesWidget.activateFileChoosers(true);
-
-			var show = (function () {
-				this.show();
-			}).bind(this);
-
-			this.$.propertiesWidget.checkFileChoosers(show);
+			this.$.propertiesWidget.checkFileChoosers();			
 		}
 	},
 
@@ -535,7 +538,13 @@ enyo.kind({
 	fileChoosersChecked: function (inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		this.show();
-		this.$.propertiesWidget.setDefaultTab();
+
+		if (this.displayedTab) {
+			this.$.propertiesWidget.setDisplayedTab(this.displayedTab);
+		} else {
+			this.$.propertiesWidget.setDefaultTab();
+		}
+		
 		return true;
 	}
 	

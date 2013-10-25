@@ -1,148 +1,5 @@
 /* jshint indent: false */ // TODO: ENYO-3311
 /* global ares, Phonegap, ServiceRegistry */
-
-/**
- * Hold the needed data to create the UI Projet -> Edit. Actually it's used in : 
- * "ProjectProperties.js", "PhonegapUIRows.js" & "Build.js".
- * In this kind, the data are defined in the statics attribute and are structured this way : 
- * * Array of drawers : a drawer contain the following attributs  : 
- * - id : define the name of the drawer's component that will be created
- * - name: define the name of the drawer's label
- * - rows: define the content of the drawer, a drawer contains an array of rows and each row contain the following attributs : 
- * -- name: used to create the UI widget that hold the name of the row, this name is exactely the name of the xml tag of the file 
- *          config.xml that will be generated (except for splashScreen row)
- * -- label : the content of the label of the row
- * -- content: the content of the row, the format of this content can change depending on the type of the UI widget used (picker, input, ...)
- * -- defaultValue: the default value displayed in the widget
- * -- defaultHeight: the default icon/splash screen height
- * -- defaultWidth: the default icon/splash screen Width
- * -- type: contain the last part of the name of the kind that will be used to define a row, these kinds are defined in
- *          the "PhonegapUIRows.js"
- * -- jsonSection: a subsection of "providers.phonegap" in the file "project.json"
- * @type {String}
- */
-enyo.kind({
-	name: "Phonegap.UIConfiguration",
-	statics: {
-		androidSdkVersions: {"18": ["Android 4.3"], "17": ["Android 4.2, 4.2.2"], "16": ["Android 4.1, 4.1.1"], 
-		"15": ["Android 4.0.3, 4.0.4"], "14": ["Android 4.0, 4.0.1, 4.0.2"], "13": ["Android 3.2"], 
-		"12": ["Android 3.1.x"], "11": ["Android 3.0.x"], "10": ["Android 2.3.4, 2.3.3"], "9": ["Android 2.3.2, 2.3.1, 2.3"],
-		"8": ["Android 2.2.x"], "7": ["Android 2.1.x"]},
-
-		commonDrawersContent: [
-			{
-				id: "buildOption",
-				name: "Build Options",
-				type: "Drawer",
-				rows: [
-					{name: "autoGenerateXML", label: "Generate config.xml file when building", content: "", defaultValue: "true", type: "BuildOption"},
-					{name: "minification", label:"Activate the build minification", content:"", defaultValue: "true", type: "BuildOption"}
-				]
-			},
-			{
-				id: "sharedConfiguration",
-				name: "Shared configuration",
-				type: "Drawer",
-				rows: [
-					{
-						name: "phonegap-version",
-						label:"Phonegap version",
-						content:["2.9.0", "2.7.0", "2.5.0", "2.3.0", "2.2.0", "2.1.0", "2.0.0"],
-						defaultValue: "2.9.0",
-						type: "PickerRow", jsonSection: "preferences"
-					},
-					{name: "orientation", label:"Orientation",content:["both", "landscape", "portrait"], defaultValue: "both", type: "PickerRow", jsonSection: "preferences"},
-					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], defaultValue: "universal", type: "PickerRow", jsonSection: "preferences"},
-					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},					
-					{name: "access", label: "Access origin", content: "", defaultValue: "http://127.0.0.1", type: "AccessRow", jsonSection: "preferences"},
-					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "/icon.png", defaultWidth: "32", defaultHeight: "32", type: "ImgRow", description: "(px)"},
-					{name: "splashScreen", label: "SplashScreen", content: "", defaultValue: "", defaultWidth: "60", defaultHeight: "60", type: "ImgRow", description: "(px)"}
-				]		
-			}, 
-			{
-				id: "applicationPermissions",
-				name: "Application permissions",
-				type: "Drawer",
-				rows: [
-					{name: "battery", label: "Battery",	content: "",defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"},
-					{name: "camera", label: "Camera", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "contact", label: "Contact",	content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "file", label: "File", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "media",	label: "Media", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "geolocation", label: "Geolocation", content: "", defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "network", label: "Network", content: "",defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"},
-					{name: "notification", label: "Notification", content: "", defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "device", label: "Device", content: "", defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"}
-				]
-			}
-		],
-
-		platformDrawersContent: [
-			{
-				id: "android",
-				name: "Google Android",
-				type: "Target",
-				rows: [
-					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], defaultValue: "internalOnly", type: "PickerRow", jsonSection: "preferences"},
-					{name: "android-minSdkVersion", label: "Minimum API Level/Android Version ", content: [], defaultValue: "7", type: "SDKVersionRow", jsonSection: "preferences"},
-					{name: "android-maxSdkVersion", label: "Maximum API Level/Android Version ", content: [], defaultValue: "", type: "SDKVersionRow", jsonSection: "preferences"},
-					{name: "splash-screen-duration", label: "Splash screen Duration (ms)", content: "5000", defaultValue: "5000", type: "NumberInputRow", jsonSection: "preferences", description: "Time in milliseconds"},
-					{name: "load-url-timeout", label: "Load URL timeout (ms)", content: "20000", defaultValue: "20000", type: "NumberInputRow", jsonSection: "preferences", description: "Time in milliseconds"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "AndroidImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "AndroidImgRow"},
-					{name: "signingKey", label: "Signing Key", content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
-				]				
-			}, 
-			{
-				id: "ios",
-				name: "Apple iOS",
-				type: "Target",
-				rows: [
-					{name: "webviewbounce", label: "Web view bounce", content:  ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
-					{name: "prerendered-icon", label: "Prerendred icon", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
-					{name: "ios-statusbarstyle", label: "Status Bar style", content: ["black-opaque", "black-translucent", "default"], defaultValue: "black-opaque",  type: "PickerRow", jsonSection: "preferences"},
-					{name: "detect-data-types", label: "Detect Data type", content: ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
-					{name: "exit-on-suspend", label: "Exit on suspend", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
-					{name: "show-splash-screen-spinner", label: "Show splash screen spinner", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
-					{name: "auto-hide-splash-screen", label: "Auto-hide splash screen", content: ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"},
-					{name: "signingKey", label: "Signing Key", content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
-				]
-			},  
-			{
-				id: "blackberry",
-				name: "RIM Blackberry",
-				type: "Target",
-				rows: [
-					{name: "disable-cursor", label: "Disable Cursor", content:  ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"},
-					{name: "signingKey", label: "Signing Key", content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
-				]
-			}, 
-			{
-				id: "webos",
-				name: "HP webOS 2",
-				type: "Target",
-				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"}
-				]
-			},
-			{
-				id: "winphone",
-				name: "Microsoft Windows Phone 7",
-				type: "Target",
-				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"}
-				]				
-			},
-		]
-	}
-});
-
 /**
  * UI: Phonegap pane in the ProjectProperties popup
  * @name Phonegap.ProjectProperties
@@ -152,11 +9,15 @@ enyo.kind({
 	kind: "Ares.ProjectProperties",
 	debug: false,
 	published: {
-		config: {}
+		config: {},
+		project: undefined
 	},
 	events: {
 		onError: "",
 		onConfigure: ""
+	},
+	handlers: {
+		onRefresh: "_getUserData"
 	},
 	components: [{
 			kind: "enyo.Scroller",
@@ -165,12 +26,12 @@ enyo.kind({
 			components: [{
 					kind: "FittableRows",
 					components: [
+						{content: "Sign-in is required", name: "signInErrorMsg", classes: "ares-project-properties-sign-in-msg"}, 
+						{content: "Looking for Phonegap account data ...", name: "waitingForSignIn", classes: "ares-project-properties-sign-in-msg"},
 						{name: "phonegapBuildHelp", kind: "onyx.TooltipDecorator", components: [
-							{name: "phonegapBuildButton", kind: "onyx.IconButton", src: "$services/assets/images/Phonegap_build_help.png", ontap: "phonegapBuildClick"},
-							{kind: "onyx.Tooltip", content: $L("PhoneGap Build Help")}
-						]}, 
-						{content: "Sign-in is required", name: "signInErrorMsg", classes: "ares-project-properties-sign-in-error-msg"}, 
-						{content: "Looking for Phonegap account data ...", name: "waitingForSignIn", classes: "ares-project-properties-sign-in-error-msg"},
+							{name: "phonegapBuildButton", kind: "onyx.IconButton", src: "$services/assets/images/Phonegap_build_help.png", ontap: "phonegapBuildClick", classes: "ares-project-properties-help-button"},
+							
+						]},
 						{
 							classes: "ares-row ares-align-left",
 							name: "appIdRow",
@@ -178,7 +39,7 @@ enyo.kind({
 								{kind: "Phonegap.ProjectProperties.AppId", name: "appIdSelector"}							
 							]
 						}, 
-						{name: "BuildOptionPanel", kind: "FittableRows"},
+						{name: "BuildOptionPanel", kind: "FittableRows", classes: "ares-project-properties-build-option-panel"},
 						{kind: "Signals", "plugin.phonegap.userDataRefreshed": "refresh"},
 						{name: "targetsRows", kind: "FittableRows", classes: "ares-project-properties-targetsRows-display"}
 						
@@ -205,6 +66,7 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
+		this.$.appIdSelector.setProject(this.project);
 		this.createAllDrawers();
 	},
 
@@ -321,7 +183,8 @@ enyo.kind({
 	setProjectConfig: function (config) {
 		this.trace("Project config:", config);
 		this.setConfig(config);
-		this.$.appIdSelector.setSelectedAppId(config.appId || '');		
+		this.$.appIdSelector.setSelectedAppId(config.appId || '');
+		this.$.appIdSelector.setProject(this.project);
 		config.targets = config.targets || {};
 
 
@@ -374,14 +237,22 @@ enyo.kind({
 	 */
 	refresh: function (inSender, inValue) {
 		this.trace("sender:", inSender, "value:", inValue);		
-		var provider = Phonegap.ProjectProperties.getProvider();		
+				
 		this.showErrorMsg("waitingSignIn");
+		this._getUserData();
+		this.$.appIdSelector.selectedAppIdChanged();
+		
+		return true;		
+	},
 
+	_getUserData: function() {
+		var provider = Phonegap.ProjectProperties.getProvider();
 		//Send the request to get the user data only if the Phonegap build service is enabled.
 		if (this.config && this.config.enabled) {
 			provider.authorize(enyo.bind(this, this.getUserData));
-		}		
-	},
+		}
+
+	}, 
 
 	/**
 	 * @protected
@@ -429,10 +300,11 @@ enyo.kind({
 			this.doError({msg: err.toString(), err: err});
 		} else {			
 			this.showErrorMsg("userDataRecieved");
+			this.$.appIdSelector.setUserData(userData);
+
 			var provider = Phonegap.ProjectProperties.getProvider();
 
 			enyo.forEach(this.platformDrawers, function (target) {
-				this.$.appIdSelector.setUserData(userData);
 				var keys = provider.getKey(target.id);
 				if(target.id === "android" || target.id === "ios"|| target.id === "blackberry") {
 					this.$.targetsRows.$[target.id].$.drawer.$.signingKey.setKeys(keys);
@@ -478,8 +350,19 @@ enyo.kind({
 			"PhoneGap Build help",
 			"resizable=yes, dependent=yes, width=800, height=600");
 	},
+
+	
 	
 	statics: {
+		
+		downloadStatus: {
+			"android": "Ready for download", 
+			"ios": "Ready for download", 
+			"winphone": "Ready for download", 
+			"blackberry": "Ready for download", 
+			"webos": "Ready for download"
+		},
+
 		getProvider: function () {
 			this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('phonegap');
 			return this.provider;
@@ -551,65 +434,113 @@ enyo.kind({
 		this.$.drawer.setOpen(this.fold);
 		this.fold = !this.fold;
 	}
-
-
 });
 
 
 enyo.kind({
 	name: "Phonegap.ProjectProperties.AppId",
-	kind: "FittableColumns",
+	kind: "FittableRows",
+	classes: "ares-project-properties-application-panel",
 	debug: false,
 	published: {
 		userData: undefined,
 		selectedAppId: undefined,
-		selectedTitle: undefined
+		selectedTitle: undefined,
+		project: undefined
 	},
 
 	components: [
-		{content: "AppId",	classes: "ares-project-properties-appid-id"},
-		{
-			kind: "onyx.PickerDecorator",
+	{
+		kind:"FittableColumns",				
+		components: [
+			{content: "AppId",	classes: "ares-project-properties-appid-label"},
+			{
+				kind: "onyx.PickerDecorator",			
+				components: [
+					{kind: "onyx.PickerButton", classes: "ares-project-properties-picker", content:"Select AppId"},
+					{kind: "onyx.Picker", name: "AppIdList", onSelect: "updateSelectedAppId"}
+				]
+			}			
+		]
+	},
+
+	{
+		kind:"FittableColumns",
+		classes: "ares-project-properties-appid-container",
+		components: [
+			{content: "Title",	classes: "ares-project-properties-appid-label"},
+			{name: "ApplicationTitle"}
+		]
+	},
+
+	{kind:"Phonegap.ProjectProperties.BuildStatus", name: "buildStatusDisplay"},
+
+	
+
 		
-			components: [
-				{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
-				{kind: "onyx.Picker", name: "AppIdList",published: {appObject: undefined}, onSelect: "updateSelectedAppId"}
-			]
-		},
-		{content: "Application name:",	classes: "ares-project-properties-appid-title"},
-		{name: "ApplicationTitle", content:""}
 	],
 
 	/**@private*/
 	userDataChanged: function(){
 		
-		this.clearPickerContent();
-				
+		this.clearPickerContent();		
+		
+		// Object containing default application's data to be associated with the picker's element "New Application"
+		var newApplicationObject = {title: "", role: "owner", link: null};
+		
+		// Fill the AppId picker		
 		if (this.userData.user.apps.all.length === 0){
-			this.$.AppIdList.createComponent({content: "New Application", active: true});
+			this.$.AppIdList.createComponent({content: "New Application", published: {applicationObject: newApplicationObject}, active: true});
 			this.setSelectedAppId('');
 		} else {
-			this.$.AppIdList.createComponent({content: "New Application", active: false});
+			//Force the refresh of the build status icons 
+			this.selectedAppIdChanged();
+
+			this.$.AppIdList.createComponent({content: "New Application", published: {applicationObject: newApplicationObject}, active: false});
 			enyo.forEach(this.userData.user.apps.all, 
 				function (inApp) {
 					var itemState = inApp.id === this.selectedAppId ? true : false;
 					if (itemState) {
 						this.setSelectedTitle(inApp.title);
-					}
+					}					
 					this.$.AppIdList.createComponent({content: inApp.id, published: {applicationObject: inApp} , active: itemState});			
 					this.$.AppIdList.render();								
 				}, this);
-		}		
+		}
+
+		// Update the build status object
+		this.$.buildStatusDisplay.sendBuildStatusRequest();		
 	}, 
 
 	/**@private*/
-	updateSelectedAppId: function (inSender, inValue) {	
-		this.setSelectedTitle(inValue && inValue.selected.published.applicationObject&& inValue.selected.published.applicationObject.title || "");
+	updateSelectedAppId: function (inSender, inValue) {		
+	
+		/**
+		 * selectedAppData is a sub-element from the object "userData" that contains the followin attributs : 
+		 * id : appId
+		 * link: url suffix for the Phonegap build application
+		 * role: user's privilege on the selected application
+		 * title: application's title.
+		 * @type {Array}
+		 */
+		var selectedAppData = inValue && inValue.selected.published.applicationObject;
+		
+		this.setSelectedTitle(selectedAppData.title || "");
+
+		//Reset the content of the build status message to an empty string.
+		this.$.buildStatusDisplay.$.statusMessage.setContent("");
+		
+		//Update the value of the selected AppId
 		if (inValue.content === "New Application") {
 			this.setSelectedAppId("");
 		} else {
 			this.setSelectedAppId(inValue.content);
 		}				
+	},
+
+	/**@private*/
+	selectedAppIdChanged: function() {
+		this.$.buildStatusDisplay.setAppId(this.selectedAppId);		
 	},
 
 	/**@private*/
@@ -629,8 +560,8 @@ enyo.kind({
 		this.$.ApplicationTitle.setContent(this.selectedTitle);
 		this.$.ApplicationTitle.render();
 	}
-
 });
+
 
 /**
  * This widget is aware of the differences between the Phoneap Build targets.
