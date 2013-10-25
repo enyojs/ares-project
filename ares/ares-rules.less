@@ -377,7 +377,9 @@
 	font-weight: bold;
 }
 
-.ares-radio-group{ padding-top: 7px; }
+.ares-radio-group {
+	padding-top: 7px;
+}
 
 .ares-radio-group>button {
 	line-height: 32px;
@@ -433,17 +435,33 @@
 	margin-right: 10px;
 }
 
-.ares-project-properties-drawer-row-attribut-label {
+.ares-project-properties-drawer-row-attribute-label {
 	margin-left: 10px;
 	margin-right: 10px;
 }
 
+.ares-project-properties-application-panel {
+	height: 11em;
+}
+.ares-project-properties-help-button {
+	position: relative;
+	left: 67em;
+}
 .ares-project-properties-common_drawer_header { 
 	margin-left: 50px;
 	color: @ares-drawer-label;
 	font-weight:bold;
 	position: relative;
 	top : 7px;
+}
+.ares-project-properties-build-option-panel {
+	margin-top: 7em;
+}
+.ares-project-properties-appid-container {
+	margin-top: 1em;
+}
+.ares-project-properties-appid-label {
+	width: 4em;
 }
 
 .ares-project-properties-platform_drawer_header { 
@@ -515,10 +533,75 @@
 .ares-project-properties-label-background:hover {
 	background-color: @ares-drawer-label-background-hover;
 }
+
+.ares-project-properties-appid-container {
+	margin-bottom: 20px;
+}
+
+.ares-project-properties-status-message {
+	position: relative;
+	top: 2.5em;
+	left: 2.8em;
+}
+
+.ares-project-properties-status-message-container {
+	background-color: #ddd;
+	
+	.ares-rounded-corners (3px);
+	width: 35em;
+	height: 7em!important;
+}
+
+.ares-project-properties-hide-status-button {
+	position: relative;
+	left: 32.5em;
+	top: 0.2em;
+	height: 1.3em;
+	// otherwise button partly hides behind the fittable columns
+	// containing the download icon
+	z-index: 4;
+}
+
+.ares-project-properties-build-status-container {
+	margin-left: 3em;
+}
+
+.ares-project-properties-build-status-icon {
+	width: 34px;
+	height: 34px;
+
+	padding-right: 5px;
+	margin-left: 1em;
+}
+
+.ares-project-properties-platform-icon-container {
+	height: 32px;	
+}
+
+.ares-project-properties-buildStatus-icon-highlight {
+	background-color: #ddd;
+}
+
 .ares-project-properties-margin-right {
 	margin-right: 10px !important;
 }
 
+.ares-project-properties-buildStatus-download-button-android {
+	margin-left: 1em;
+}
+.ares-project-properties-buildStatus-download-button-ios {
+	margin-left: 4.7em;
+}
+.ares-project-properties-buildStatus-download-button-winphone {
+	margin-left: 8.5em;
+}
+.ares-project-properties-buildStatus-download-button-blackberry {
+	margin-left: 12em;
+}
+
+.ares-project-properties-buildStatus-download-button-webos {
+	margin-left: 15.6em;
+}
 /* Ares group box */
 
 .ares-datas>div:not([class="onyx-groupbox-header"]) {

@@ -172,9 +172,15 @@ enyo.kind({
 	/**
 	 * Set the default tab
 	 */
+	
 	setDefaultTab: function() {
 		this.$.thumbnail.children[0].setActive(true);
 	},
+
+	setDisplayedTab: function(inIndex) {
+		this.$.thumbnail.children[inIndex].setActive(true);
+	},
+	
 	/**
 	 * Receive the {onServicesChange} broadcast notification
 	 * @param {Object} inEvent.serviceRegistry
@@ -287,6 +293,13 @@ enyo.kind({
 				this.$[tab.serviceId + 'Drawer'].setOpen(activate);
 			}, this);
 		}
+	},
+
+	/**
+	 * Show the drawer of the corresponding service.
+	 */
+	showServiceDrawer: function(inServiceId) {
+		this.$.thumbnail.$[inServiceId + "Tab"].setActive(true);
 	},
 
 	/**
