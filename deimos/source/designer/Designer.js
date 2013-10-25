@@ -203,7 +203,7 @@ enyo.kind({
 	},
 	//* Initialize the iframe dependingly from aresOptions
 	loaded: function() {
-		// FIXME: ENYO-3433 : options are hard-coded with defaultKindOptions thjat are currently known. the whole/real set must be determined indeed.
+		// FIXME: ENYO-3433 : options are hard-coded with defaultKindOptions that are currently known. the whole/real set must be determined indeed.
 		this.sendMessage({op: "initializeOptions", options: Model.get("defaultKindOptions")});
 	},
 	//* Clean up the iframe before closing designer
