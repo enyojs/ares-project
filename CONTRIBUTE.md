@@ -241,7 +241,7 @@ It can be a simple kind as for "onyx.ProgressButton" or a complex kind definitio
 
 ### Section "inspector"
 
-It allows to define per kind and per event or property. _This section is required_
+It allows to define per kind and per event or property. _This section is optional_
 
 The filter level which could be one of:
 * "useful": the property/event will appear when the "FREQUENT" tab is selected in the inspector
