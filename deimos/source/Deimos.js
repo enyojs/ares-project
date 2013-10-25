@@ -478,9 +478,11 @@ enyo.kind({
 		
 		// Apply any special layout rules
 		clone = this.applyLayoutKindRules(inEvent.layoutData, clone);
-		
+
 		// Copy clone style props to inspector
-		this.$.inspector.userDefinedAttributes[clone.aresId].style = clone.style;
+		if(clone.style !== undefined){
+			this.$.inspector.userDefinedAttributes[clone.aresId].style = clone.style;
+		}
 		this.addAresKindOptions(kind);
 		
 		if (beforeId && (beforeId !== target.aresId)) {
@@ -524,7 +526,9 @@ enyo.kind({
 				inControl.style = this.addAbsolutePositioningStyle(inLayoutData, inControl);
 				break;
 			default:
-				inControl.style = this.removeAbsolutePositioningStyle(inControl);
+				if(inControl.style !== undefined){
+					inControl.style = this.removeAbsolutePositioningStyle(inControl);
+				}
 				break;
 		}
 		
