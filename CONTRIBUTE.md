@@ -268,4 +268,13 @@ _This section is optional_
 
 ### Section "ignore"
 
-_This section is optional_
+It defines which components to ignore. _This section is optional_
+
+Each item describes what, how, when rules to use to ignore a set of components in the palette:
+* "type" determines how to select components to ignore:
+** "list": list of components
+** "filter": regexp to apply
+* "target":
+** key: define on which key ("kind", "name",...) to apply the type of rule on
+** value: the value to use according to the type of rule
+* "description" give an explanation about the rule
