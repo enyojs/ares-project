@@ -239,6 +239,9 @@ It can be a simple kind as for "onyx.ProgressButton" or a complex kind definitio
 
 "inline" is not used for the time being.
 
+A _special_ category can be added to ignore some components in the palette by naming it `items-to-ignore` and adding a type `ignore` before giving the list of items to ignore.
+Each items to ignore must provide a string/regexp to match on related value of `kind` or `name` key.
+
 ### Section "inspector"
 
 It allows to define per kind and per event or property. _This section is optional_
@@ -265,16 +268,3 @@ If this property is not defined, we select an input kind based on the property t
 ### Section "serializer"
 
 _This section is optional_ 
-
-### Section "ignore"
-
-It defines which components to ignore. _This section is optional_
-
-Each item describes what, how, when rules to use to ignore a set of components in the palette:
-* "type" determines how to select components to ignore:
-	* "list": list of components
-	* "filter": regexp to apply
-* "target":
-	* key: define on which key ("kind", "name",...) to apply the type of rule on
-	* value: the value to use according to the type of rule
-* "description" give an explanation about the rule
