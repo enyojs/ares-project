@@ -12,8 +12,7 @@ enyo.kind({
 	ontap: "showStatusMessage",	
 	published: {
 		platform: null,
-		status: null,
-		userDataRequestTimeout: 2500
+		status: null
 	},
 
 	/**
@@ -163,7 +162,9 @@ enyo.kind({
 
 		//If there is a pending build, another buildStatus Request is sent after 600 ms timeout.
 		if (pendingApplication) {
-			setTimeout(this.sendBuildStatusRequest(), this.userDataRequestTimeout); 
+			enyo.job("updateBuildStatus", function() {
+				this.sendBuildStatusRequest(); 
+			}.bind(this), 3000);			
 		}
 
 		// Get only the Enyo control that have the "platform" attribute 
