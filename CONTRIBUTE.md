@@ -223,11 +223,11 @@ _This section is only for Enyo/lib commiters or developers of UI widgets librari
 
 This section describes how UI widgets defined in enyo or librairies must be referenced in order to be proposed inside the designer's palette of Ares.
 
-NB: .design files must be added into a "package.js" file in the "enyo.depends" call of your application/library.
+NB: ".design" files must be added into a "package.js" file in the "enyo.depends" call of your application/library.
 
 For the time being, we have 4 sections in these files:
 
-### "palette"**
+### Section "palette"
 
 It defines some categories of widget such as "onyx". _This section is required_
 
@@ -239,7 +239,7 @@ It can be a simple kind as for "onyx.ProgressButton" or a complex kind definitio
 
 "inline" is not used for the time being.
 
-### "inspector"** 
+### Section "inspector"
 
 It allows to define per kind and per event or property. _This section is required_
 
@@ -249,7 +249,7 @@ The filter level which could be one of:
 * "dangerous": the property/event will appear when the "ALL" tab is selected in the inspector as well as the properties/events of the previous level.
 * "hidden": the property/event will never appear in any tab of the inspector.
 
-NOTE: The "FREQUENT" tabs displays the events/properties which are either marked "useful" or which have been modified by the developer.
+NB: The "FREQUENT" tabs displays the events/properties which are either marked "useful" or which have been modified by the developer.
 
 The input kind which will be instantiated in the "inspector" part of the designer window.
 
@@ -262,10 +262,10 @@ Today, we support all kind which are defined in https://github.com/enyojs/ares-p
 
 If this property is not defined, we select an input kind based on the property type. For the time being this is limited to Inspector.Config.Boolean or Inspector.Config.Text.
 
-### "serializer"
+### Section "serializer"
 
-_This section is optional_
+_This section is optional_ 
 
-### "ignore"
+### Section "ignore"
 
 _This section is optional_
