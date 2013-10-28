@@ -17,6 +17,25 @@
 		<!-- package.js does not work with query parameters -->
 		<link href="./iframe.css?overlay=designer" rel="stylesheet"/>
 		<script src="./iframe.js?overlay=designer" type="text/javascript"></script>
+		<!-- Using Google Webfont Loader for Moonstone custome font loading -->
+		<script src="//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js"></script>
+		<script>
+   			WebFont.load({
+      		custom: {
+         		families: [ 'Miso', 
+         					'MuseoSans Light', 
+         					'MuseoSans 300', 
+         					'MuseoSans Medium', 
+         					'MuseoSans Medium Italic',
+         					'MuseoSans 700',
+         					'MuseoSans Bold',
+         					'MuseoSans Bold Italic',
+         					'LG Display',
+         					'Moonstone Icons'
+         		]
+      		}
+   		});
+</script>
 	</head>
 	<body class="enyo-unselectable">
 		<script>
