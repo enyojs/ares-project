@@ -13,7 +13,6 @@ enyo.kind({
 		onError: "",
 		onFileClick: "",
 		onFolderClick: "",
-		onFileCreated: "",
 		onFileDblClick: "",
 		onFileChanged: "",
 		onFolderChanged: "",
@@ -1457,7 +1456,7 @@ enyo.kind({
 
 					// opens the created file: after tree refresh done
 					if (!newNode.file.isServer && !newNode.file.isDir && thisKind.projectUrlReady) {
-						thisKind.doFileCreated({
+						thisKind.doFileDblClick({
 							file: newNode.file,
 							projectData: thisKind.projectData
 						});

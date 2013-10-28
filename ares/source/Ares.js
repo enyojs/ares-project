@@ -38,7 +38,6 @@ enyo.kind({
 					kind: "Harmonia",
 					name: "harmonia",
 					classes: "ares-panel-min-width enyo-fit",
-					onFileCreated: "openDocument",
 					onFileDblClick: "openDocument",
 					onFileChanged: "closeDocument",
 					onFolderChanged: "closeSomeDocuments"
