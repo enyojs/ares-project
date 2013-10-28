@@ -1448,7 +1448,20 @@ enyo.kind({
 			this.resetRevert();
 
 			if (this.findNodeExtension(name) !== null) {
-				this.refreshFileTree( function() { parentNode.getNodeWithId(inNodes[0].id).doAdjustScroll(); }, inNodes[0].id );
+				this.refreshFileTree( function() { 
+					var newNode = parentNode.getNodeWithId(inNodes[0].id);
+					
+					// scroll adjustment
+					newNode.doAdjustScroll();
+
+					// opens the created file: after tree refresh done
+					if (!newNode.file.isServer && !newNode.file.isDir && this.projectUrlReady) {
+						this.doFileDblClick({
+							file: newNode.file,
+							projectData: this.projectData
+						});
+					}
+				}.bind(this), inNodes[0].id );
 			}
 		});
 		fileCreation.error(this, this._handleXhrError.bind(this, "Unable to create file '" + name + "'", null /*next*/));
