@@ -123,6 +123,20 @@
 						}
 					],
 					"description": "Enyo bootplate 2.1.1"
+				},
+				{
+					"id": "WebOS-Ports",
+					"type": "template",
+					"files": [
+						{
+							"url": "https://github.com/webOS-ports/webos-ports-template/archive/master.zip",
+							"prefixToRemove": "webos-ports-template-master",
+							"excluded": [
+								"webos-ports-template-master/lib/onyx/sample/"
+							]
+						}
+					],
+					"description": "WebOS-ports-Template"
 				}
 			],
 			"respawn": false
