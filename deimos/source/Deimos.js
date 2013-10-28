@@ -702,6 +702,30 @@ enyo.kind({
 		
 		return cleanComponent;
 	},
+	cleanUpViewComponent: function(inComponent, inKeepAresIds) {
+		var aresId = inComponent.aresId,
+			childComponents = [],
+			cleanComponent = {},
+			att,
+			i;
+		if (!aresId) {
+			return cleanComponent;
+		}
+		for(att in inComponent){ 
+			if ((inKeepAresIds && att === "aresId") || (att !== "aresId" && att !== "components" && att !== "__aresOptions")) {
+				cleanComponent[att] = inComponent[att];
+			}
+	     }
+		if (inComponent.components) {
+			for (i=0; i<inComponent.components.length; i++) {
+				childComponents.push(this.cleanUpViewComponent(inComponent.components[i], inKeepAresIds));
+			}
+			if (childComponents.length > 0) {
+				cleanComponent.components = childComponents;
+			}
+		}
+		return cleanComponent;
+	},
 	undoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
 		this.doUndo();
@@ -886,48 +910,21 @@ enyo.kind({
 	runPaletteComponentAction: function(inSender,inEvent){
 		var config = this.$.actionPopup.getConfigComponent(config);
 		var target = this.$.actionPopup.getTargetComponent(target);
+		var beforeId = inEvent.beforeId; 
+		var config_data = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
 
 		if(inEvent.getName() === "addtoKind"){
-			this.performAddItem(config);
+			this.performCreateItem(config, target, beforeId);
 		} else if (inEvent.getName() === "replaceKind"){
 			//TODO: Add a feature for "Replace Button" against view template component on designer behavior - ENYO-2807
 			this.doError({msg:"not implemented yet"});
 		} else if (inEvent.getName() === "addNewKind"){
-			//TODO: Add a feature for "Add new Kind" against view template component on designer behavior - ENYO-2808
-			this.doError({msg:"not implemented yet"});
+			ComponentsRegistry.getComponent("phobos").addViewKindAction(config_data);
 		}
 		this.$.actionPopup.hide();
 	},
-	// @protected
-	cleanUpViewComponent: function(inComponent, inKeepAresIds) {
-		var aresId = inComponent.aresId,
-			childComponents = [],
-			cleanComponent = {},
-			att,
-			i;
-		if (!aresId) {
-			return cleanComponent;
-		}
-		for(att in inComponent){ 
-			if ((inKeepAresIds && att === "aresId") || (att !== "aresId" && att !== "components" && att !== "__aresOptions")) {
-				cleanComponent[att] = inComponent[att];
-			}
-	     }
-		if (inComponent.components) {
-			for (i=0; i<inComponent.components.length; i++) {
-				childComponents.push(this.cleanUpViewComponent(inComponent.components[i], inKeepAresIds));
-			}
-			if (childComponents.length > 0) {
-				cleanComponent.components = childComponents;
-			}
-		}
-		return cleanComponent;
-	},
-	// @protected
-	performAddItem: function(config){
-		var config_data = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
-		ComponentsRegistry.getComponent("phobos").addViewKindAction(config_data);
-	},
+
+
 	// @protected
 	performCreateItem: function(config, target, beforeId){
 		var kind = this.getSingleKind(this.index);
