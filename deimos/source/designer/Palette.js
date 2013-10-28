@@ -154,8 +154,9 @@ enyo.kind({
 		
 		this.palette = allPalette;
 		this.palette.sort(function(a,b) {
-			return (a.order || 0) - (b.order || 0);
+			return (a.name || "").localeCompare(b.name || "") + (a.order || 0) - (b.order || 0);
 		});
+				
 		// count reset must be forced
 		this.$.list.set("count", 0);
 		this.$.list.set("count", this.palette.length);
@@ -174,7 +175,7 @@ enyo.kind({
 		// Start custom palette with catch-all category for non-namespaced kinds
 		var catchAllCategories = {
 			"" : {
-				order: 1100,
+				order: 11000,
 				name: "Custom Kinds",
 				items: []
 			}
@@ -216,7 +217,7 @@ enyo.kind({
 				if (!cat) {
 					// Generate a new custom palette for this package if it doesn't exist
 					cat = {
-						order: 1000,
+						order: 10000,
 						name: pkg + " (other)",
 						items: []
 					};
