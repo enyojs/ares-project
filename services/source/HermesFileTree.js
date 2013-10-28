@@ -1419,7 +1419,6 @@ enyo.kind({
 		var fileCreation = this.$.service.createFile(folderId, name, content, { overwrite: false });
 		fileCreation.response(this, function(inSender, inNodes) {
 			this.trace("inNodes: ",inNodes);
-			var thisKind = this;
 			var parentNode = this.getFolderOfSelectedNode(),
 			    pkgNode = parentNode.getNodeNamed('package.js');
 
@@ -1449,19 +1448,19 @@ enyo.kind({
 
 			if (this.findNodeExtension(name) !== null) {
 				this.refreshFileTree( function() { 
-					var newNode = thisKind.getFolderOfSelectedNode().getNodeWithId(inNodes[0].id);
+					var newNode = parentNode.getNodeWithId(inNodes[0].id);
 					
 					// scroll adjustment
 					newNode.doAdjustScroll();
 
 					// opens the created file: after tree refresh done
-					if (!newNode.file.isServer && !newNode.file.isDir && thisKind.projectUrlReady) {
-						thisKind.doFileDblClick({
+					if (!newNode.file.isServer && !newNode.file.isDir && this.projectUrlReady) {
+						this.doFileDblClick({
 							file: newNode.file,
-							projectData: thisKind.projectData
+							projectData: this.projectData
 						});
 					}
-				}, inNodes[0].id );
+				}.bind(this), inNodes[0].id );
 			}
 		});
 		fileCreation.error(this, this._handleXhrError.bind(this, "Unable to create file '" + name + "'", null /*next*/));
