@@ -123,6 +123,7 @@ enyo.kind({
 	 * @public
 	 */
 	load: function(data) {
+		this.trace("called with",data);
 		this.enableDesignerActionButtons(false);
 
 		var what = data.kinds;
@@ -752,6 +753,7 @@ enyo.kind({
 	},
 	//* Called by Ares when ProjectView has new project selected
 	projectSelected: function(inProject) {
+		this.trace("called with ",inProject);
 		this.$.designer.updateSource(inProject);
 	},
 	reloadDesigner: function() {
