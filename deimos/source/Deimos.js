@@ -41,7 +41,7 @@ enyo.kind({
 						{kind: "onyx.Slider", classes: "deimos-zoom-slider", value: 100, onChange: 'zoomDesigner', onChanging: 'zoomDesigner' }
 					]},
 					{kind: "Scroller", classes: "deimos-designer-wrapper", fit: true, components: [
-						{kind: "IFrameDesigner", name: "designer",
+						{kind: "Designer", name: "designer",
 							onSelect: "designerSelect",
 							onSelected: "designerSelected",
 							onDesignRendered: "designRendered",

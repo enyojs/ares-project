@@ -1,6 +1,6 @@
 /* global ProjectKindsModel, ares */
 enyo.kind({
-	name: "IFrameDesigner",
+	name: "Designer",
 	published: {
 		iframeReady: false,
 		currentKind: null,

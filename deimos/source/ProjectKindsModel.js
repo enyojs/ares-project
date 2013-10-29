@@ -159,7 +159,7 @@ enyo.singleton({
 	},
 	getFlattenedContainerInfo: function() {		
 		// TODO: item containerData is set to null, revisit this,
-		// function called by the IFrameDesigner.sendIframeContainerData()
+		// function called by the Designer.sendIframeContainerData()
 		return null;
 	}
 });
