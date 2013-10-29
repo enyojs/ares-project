@@ -1,3 +1,4 @@
+/*global qrcode*/
 enyo.kind({
 	name: "Phonegap.ProjectProperties.QrCode",
 	published: {
@@ -30,7 +31,7 @@ enyo.kind({
 		
 		// append the Qr Code data to an SVG image.
 		svgTags  = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="200" height="200">/';
-		svgTags += '	<path d="'+ qr +'"/>'
+		svgTags += '	<path d="'+ qr +'"/>';
 		svgTags += '</svg>';
 				
 		return svgTags;
