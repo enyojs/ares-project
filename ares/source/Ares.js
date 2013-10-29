@@ -85,8 +85,12 @@ enyo.kind({
 		onMovePanel : "_movePanel",
 		onSavePreviewAction: "_saveBeforePreview",
 		onDisplayPreview : "_displayPreview",
-		onFileEdited:"_fileEdited"
-
+		onFileEdited:"_fileEdited",
+		onStartBuild: "_startBuild",
+		onStartInstall: "_startInstall",
+		onStartRun: "_startRun",
+		onStartRunDebug: "_startRunDebug",
+		onSaveAllDocuments: "saveAllDocuments"
 	},
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
@@ -201,7 +205,7 @@ enyo.kind({
 				if(fileData){
 					fileData.setData(content);
 				}
-				ComponentsRegistry.getComponent("phobos").saveComplete(fileData);
+				ComponentsRegistry.getComponent("phobos").saveComplete(fileData, false);
 			}
 		});
 	},
@@ -218,6 +222,48 @@ enyo.kind({
 			next(inErr);
 		});
 
+	},
+	saveAllDocuments: function(inSender, inEvent) {
+		var editedDocs = inEvent && inEvent.docs;
+		var saveFailedDocs = [];
+		var self = this;
+
+		ComponentsRegistry.getComponent("phobos").showWaitPopup($L("Saving ..."));
+
+		async.forEachSeries(editedDocs, function(inDoc, next) {
+			var docContent;
+			var content;
+			var error;
+
+			docContent = ComponentsRegistry.getComponent("phobos")._getDocContent(inDoc);
+			content = docContent.content;
+			error = docContent.err;
+
+			if (error) {
+				saveFailedDocs.push(error);
+				next();
+			}
+			async.series([
+				self._saveDocument.bind(self, content, {service: inDoc.getFile().service, fileId: inDoc.getFile().id})
+			], function(err, result) {
+				if (err) {
+					saveFailedDocs.push(err);
+				} else {
+					ComponentsRegistry.getComponent("phobos").saveComplete(inDoc, true);
+				}
+				next();		
+			});
+		}, function(err) {
+			ComponentsRegistry.getComponent("phobos").hideWaitPopup();
+
+			if (saveFailedDocs.length >= 1) {
+				ComponentsRegistry.getComponent("phobos").saveAllFailed(inEvent.type, err);
+			} else {
+				// SaveAll Completed..
+				var proj = ComponentsRegistry.getComponent("projectList").selectedProject;
+				ComponentsRegistry.getComponent("phobos").saveAllCompleted(inEvent.type, proj);
+			}
+		});
 	},
 	saveAsDocument: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
@@ -646,6 +692,23 @@ enyo.kind({
 	_fileEdited: function() {
 		ComponentsRegistry.getComponent("designerPanels").updateDeimosLabel(this.activeDocument.getEdited());
 	},
+	_startBuild: function(inSender, inEvent){
+		var project = inEvent && inEvent.project;
+		ComponentsRegistry.getComponent("projectView").buildAction(inSender,{project:project});
+	},
+	_startInstall: function(inSender, inEvent){
+		var project = inEvent && inEvent.project;
+		ComponentsRegistry.getComponent("projectView").installAction(inSender,{project:project});
+	},
+	_startRun: function(inSender, inEvent){
+		var project = inEvent && inEvent.project;
+		ComponentsRegistry.getComponent("projectView").runAction(inSender,{project:project});
+	},
+	_startRunDebug: function(inSender, inEvent){
+		var project = inEvent && inEvent.project;
+		ComponentsRegistry.getComponent("projectView").runDebugAction(inSender,{project:project});
+	},
+	
 	/**
 	 * Event handler for ares components registry
 	 * 

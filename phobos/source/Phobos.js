@@ -17,8 +17,15 @@ enyo.kind({
 			]}
 		]},
 		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
-		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onCancelActionPopup: "cancelAction"},
+		{name: "saveWithSaveAllPopup", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onSaveAllActionPopup: "saveAllBeforeClose", onCancelActionPopup: "cancelClose"},
+		{name: "savePopupPreview", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onSaveAllActionPopup: "saveAllBeforePreviewAction",onCancelActionPopup: "cancelAction"},
+		{name: "initialSavePopupPreview", kind: "saveActionWithSaveAllPopup", onConfirmActionPopup: "previewActionOnSaveAllComplete", onSaveActionPopup: "initialSaveBeforePreviewAction", onSaveAllActionPopup: "saveAllBeforePreviewAction",onCancelActionPopup: "cancelAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
+		{name: "saveAllPopup", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllAction", onCancelActionPopup: "cancelAction"},
+		{name: "saveAllPopupBuild", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllBeforeBuildAction", onCancelActionPopup: "cancelAction"},
+		{name: "saveAllPopupInstall", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllBeforeInstallAction", onCancelActionPopup: "cancelAction"},
+		{name: "saveAllPopupRun", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllBeforeRunAction", onCancelActionPopup: "cancelAction"},
+		{name: "saveAllPopupRunDebug", kind: "saveAllActionPopup", onConfirmActionPopup: "saveAllBeforeRunDebugAction", onCancelActionPopup: "cancelAction"},
 		{name: "overwritePopup", kind: "overwriteActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "saveAsConfirm", onCancelActionPopup: "saveAsCancel", onHide:"doAceFocus"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: $L("unknown error")},
@@ -33,12 +40,17 @@ enyo.kind({
 		onSaveAsDocument: "",
 		onDesignDocument: "",
 		onCloseDocument: "",
+		onStartBuild: "",
+		onStartInstall: "",
+		onStartRun: "",
+		onStartRunDebug: "",
 		onUpdate: "",
 		onRegisterMe: "",
 		onDisplayPreview: "",
 		onSwitchFile: "",
 		onFileEdited: " ",
-		onAceFocus: ""
+		onAceFocus: "",
+		onSaveAllDocuments: ""
 	},
 	handlers: {
 		onCss: "newcssAction",
@@ -88,8 +100,10 @@ enyo.kind({
 		this.doAceFocus();
 		return true;
 	},
-	saveComplete: function(inDocData) {
+	saveComplete: function(inDocData, saveAll) {
+		if (saveAll === false) {
 		this.hideWaitPopup();
+		}
 		var codeLooksGood = false ;
 
 		if (inDocData) {
@@ -135,6 +149,170 @@ enyo.kind({
 			this.$.saveAsPopup.pointSelectedName(relativePath, true);
 			this.$.saveAsPopup.show();
 		}).bind(this));
+	},
+	_getEditedDocs: function(project){
+		var files = Ares.Workspace.files;
+		var editedDocs = [];
+		enyo.forEach(files.models, function(model) {
+			var serviceId = model.getProjectData().getServiceId();
+			var folderId = model.getProjectData().getFolderId();
+			if ((project === null) || (serviceId === project.getServiceId() && folderId === project.getFolderId())) {
+				if(model.getEdited()){
+					editedDocs.push(model);
+				}
+			}
+		}, this);
+		return (editedDocs);
+	},
+	saveAllCompleted: function(type, inData) {
+		switch (type) {
+			case "build":
+				this.doStartBuild({project: inData});
+				break;
+			case "preview":
+				this.doAceFocus();
+				this.doDisplayPreview();
+				break;
+			case "closeAll":
+				this.closeAllOnSaveAllComplete();
+				break;
+			case "install":
+				this.doStartInstall({project: inData});
+				break;
+			case "run":
+				this.doStartRun({project: inData});
+				break;
+			case "runDebug":
+				this.doStartRunDebug({project: inData});
+				break;
+			default:
+				break;
+		}
+	},	
+	saveAllFailed: function(type, inMsg) {
+		this.warn("Save All failed: " + inMsg);
+		switch (type) {
+			case "build":
+				this.showErrorPopup("Unable to save the file. Quit Building...'");
+				break;
+			case "preview":
+				this.showErrorPopup("Unable to save the file. Quit Previewing...'");
+				break;
+			case "closeAll":
+				this.showErrorPopup("Unable to save the file. Cannot close file...'");
+				break;
+			case "install":
+				this.showErrorPopup("Unable to save the file. Quit Installing...'");
+				break;
+			case "run":
+				this.showErrorPopup("Unable to save the file. Quit Running...'");
+				break;
+			case "runDebug":
+				this.showErrorPopup("Unable to save the file. Quit Running Debug...'");
+				break;
+			default:
+				this.showErrorPopup("Unable to save the file");
+				break;
+		}
+	},
+	_getDocContent: function(inDocData) {
+		var aceSession = inDocData.getAceSession();
+
+		if (aceSession) {
+			return ({content: aceSession.getValue(), err: ""});
+		} else {
+			var errorMsg = {
+				path: "",
+				code: "ENOACESESSION"
+			};
+			this.trace("*** BUG: '", inDocData, "' has no aceSession");
+			return ({content: "", err: errorMsg});
+		}			
+	},
+	saveAllAction: function() {
+		var saveAllData = {
+			type: "saveall",
+			docs: ""
+		};
+
+		this.editedDocs = this._getEditedDocs(null);
+		saveAllData.docs = this.editedDocs;
+		this.doSaveAllDocuments(saveAllData);
+	},
+	saveAllDocAction: function() {
+		this.editedDocs = this._getEditedDocs(null);
+
+		if(this.editedDocs.length >= 1) {
+			this.showSaveAllPopup("saveAllPopup", "Save All the files?'");
+		}
+	},
+	saveAllBeforeBuildAction: function() {
+		var saveAllData = {
+			type: "build",
+			docs: this.editedDocs
+		};
+
+		this.doSaveAllDocuments(saveAllData);
+	},
+	saveAllDocumentsBeforeBuild: function(prj) {
+		this.editedDocs = this._getEditedDocs(prj);
+
+		if(this.editedDocs.length >= 1) {
+			this.showSaveAllPopup("saveAllPopupBuild", "Save All the project files before Build?'");
+		} else {
+			this.doStartBuild({project: prj});
+		}
+	},
+	saveAllBeforeInstallAction: function() {
+		var saveAllData = {
+			type: "install",
+			docs: this.editedDocs
+		};
+
+		this.doSaveAllDocuments(saveAllData);
+	},
+	saveAllDocumentsBeforeInstall: function(prj) {
+		this.editedDocs = this._getEditedDocs(prj);
+
+		if(this.editedDocs.length >= 1) {
+			this.showSaveAllPopup("saveAllPopupInstall", "Save All the project files before Install?'");
+		} else {
+			this.doStartInstall({project: prj});
+		}
+	},
+	saveAllBeforeRunAction: function() {
+		var saveAllData = {
+			type: "run",
+			docs: this.editedDocs
+		};
+
+		this.doSaveAllDocuments(saveAllData);
+	},
+	saveAllDocumentsBeforeRun: function(prj) {
+		this.editedDocs = this._getEditedDocs(prj);
+
+		if(this.editedDocs.length >= 1) {
+			this.showSaveAllPopup("saveAllPopupRun", "Save All the project files before Run?'");
+		} else {
+			this.doStartRun({project: prj});
+		}
+	},
+	saveAllBeforeRunDebugAction: function() {
+		var saveAllData = {
+			type: "runDebug",
+			docs: this.editedDocs
+		};
+
+		this.doSaveAllDocuments(saveAllData);
+	},
+	saveAllDocumentsBeforeRunDebug: function(prj) {
+		this.editedDocs = this._getEditedDocs(prj);
+
+		if(this.editedDocs.length >= 1) {
+			this.showSaveAllPopup("saveAllPopupRunDebug", "Save All the project files before Run Debug?'");
+		} else {
+			this.doStartRunDebug({project: prj});
+		}
 	},
 	saveAsFileChosen: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
@@ -195,6 +373,22 @@ enyo.kind({
 		this.beforeClosingDocument();
 		this.doCloseDocument({id: id});
 		this.closeNextDoc();
+		return true;
+	},
+	closeAllOnSaveAllComplete: function() {
+		this.closeAll = true;
+		this.closeDocAction(this);
+	},
+	saveAllBeforeClose: function(){
+		var saveAllData = {
+			type: "closeAll",
+			docs: ""
+		};
+
+		this.closeAll = false;
+		this.editedDocs = this._getEditedDocs(null);
+		saveAllData.docs = this.editedDocs;
+		this.doSaveAllDocuments(saveAllData);
 		return true;
 	},
 	openDoc: function(inDocData) {
@@ -776,7 +970,11 @@ enyo.kind({
 	},
 	closeDocAction: function(inSender, inEvent) {
 		if (this.docData.getEdited() === true) {
-			this.showSavePopup("savePopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing?');
+			if (this.closeAll === true) {
+				this.showSavePopup("saveWithSaveAllPopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing?');
+			} else {
+				this.showSavePopup("savePopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing?');
+			}
 		} else {
 			var id = this.docData.getId();
 			this.beforeClosingDocument();
@@ -804,6 +1002,10 @@ enyo.kind({
 	cancelAction: function(inSender, inEvent) {
 		this.doAceFocus();
 	},
+	cancelBuildAction: function(inSender, inEvent) {
+		this.doAceFocus();
+	},	
+
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
 		this.$.savePopup.hide();
@@ -824,9 +1026,23 @@ enyo.kind({
 	/** 
 	* @protected
 	*/
+	showSaveAllPopup: function(componentName, message){
+		this.$[componentName].setTitle($L("Documents were modified!"));
+		this.$[componentName].setMessage(message);
+		this.$[componentName].setActionButton($L("SaveAll"));
+		this.$[componentName].show();
+	},
+	/** 
+	* @protected
+	*/
 	saveDocumentsBeforePreview: function(editedDocs){
 		this.editedDocs = editedDocs;
-		this.saveNextDocument();
+		if(this.editedDocs.length >= 1) {
+			this.showSavePopup("initialSavePopupPreview", "Project files were modified.<br/><br/>Save project files before preview?");
+		} else {
+			this.doAceFocus();
+			this.doDisplayPreview();
+		}
 	},
 	/**
 	* @protected
@@ -835,7 +1051,7 @@ enyo.kind({
 		if(this.editedDocs.length >= 1){
 			var docData = this.editedDocs.pop();
 			this.openDoc(docData);
-			this.doSwitchFile({id:docData.id});
+			this.doSwitchFile({id:docData.id, project: Ares.Workspace.projects.get(this.docData.getProjectData().id)});
 			this.showSavePopup("savePopupPreview",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before preview?');
 		}else{
 			this.doAceFocus();
@@ -850,6 +1066,28 @@ enyo.kind({
 	saveBeforePreviewAction: function(inSender, inEvent){
 		this.saveDocAction();
 		this.saveNextDocument();
+		return true;
+	},
+	initialSaveBeforePreviewAction: function(inSender, inEvent){
+		this.saveNextDocument();
+		return true;
+	},
+	previewActionOnSaveAllComplete: function(inSender, inEvent) {
+		this.doAceFocus();
+		this.doDisplayPreview();
+	},
+	/**
+	* Called when saveAll button is selected in save popup shown before preview action
+	* @protected
+	*/
+	saveAllBeforePreviewAction: function(inSender, inEvent){
+		var saveAllData = {
+			type: "preview",
+			docs: ""
+		};
+		this.editedDocs = this._getEditedDocs(Ares.Workspace.projects.get(this.docData.getProjectData().id));
+		saveAllData.docs = this.editedDocs;
+		this.doSaveAllDocuments(saveAllData);
 		return true;
 	},
 	/**
@@ -1146,6 +1384,124 @@ enyo.kind({
 			{name:"saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "save"},
 			{owner: this}
 		);
+	},
+	/** @private */
+	save: function(inSender, inEvent) {
+		this.hide();
+		this.doSaveActionPopup();
+	}
+});
+
+enyo.kind({
+	name: "saveActionWithSaveAllPopup",
+	kind: "onyx.Popup",
+	modal: true,
+	centered: true,
+	floating: true,
+	autoDismiss: false,
+	classes:"ares-classic-popup",
+	published: {
+		title: "",
+		actionButton: "",
+		cancelButton: "",
+		saveButton: "",
+		saveAllButton: "",
+		message: ""
+	},
+	events: {
+		onConfirmActionPopup: "",
+		onCancelActionPopup: "",
+		onSaveActionPopup: "",
+		onSaveAllActionPopup: ""
+	},
+	components: [
+		{tag: "div", name: "title", classes:"title", content: ""},
+		{kind: "enyo.Scroller",  classes:"ares-small-popup", fit: true, components: [
+			{classes:"ares-small-popup-details", name:"popupContent", components:[
+			{name:"message"}
+			]}
+		]},
+		{kind: "onyx.Toolbar", classes:"bottom-toolbar", name: "buttons", components: [
+			{name:"cancelButton", kind: "onyx.Button", content: $L("Cancel"), ontap: "actionCancel"},
+			{name:"actionButton", kind: "onyx.Button", content: $L("Don't Save"), ontap: "actionConfirm"},
+			{name:"saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "save"},
+			{name:"saveAllButton", kind: "onyx.Button", content: $L("SaveAll"), ontap: "saveAll"}
+		]}
+	],
+	/** @private */
+    create: function() {
+		ares.setupTraceLogger(this);
+		this.inherited(arguments);
+		this.$.message.allowHtml = true;
+		this.titleChanged();
+		this.messageChanged();
+		this.actionButtonChanged();
+		this.cancelButtonChanged();
+	},
+	/** @private */
+	titleChanged: function(oldVal) {
+		this.$.title.setContent(this.title);
+	},
+	/** @private */
+	messageChanged:function(oldVal) {
+		this.$.message.setContent(this.message);
+	},
+	/** @private */
+	actionButtonChanged: function(oldVal) {
+		if (this.actionButton !== "") {
+			this.$.actionButton.setContent(this.actionButton);
+		}
+	},
+	/** @private */
+	cancelButtonChanged: function(oldVal) {
+		if (this.cancelButton !== "") {
+			this.$.cancelButton.setContent(this.cancelButton);
+		}
+	},
+	/** @private */
+	saveButtonChanged: function(oldVal) {
+		if (this.saveButton !== "") {
+			this.$.saveButton.setContent(this.saveButton);
+		}
+	},
+	/** @private */
+	saveAllButton: function(oldVal) {
+		if (this.saveAllButton !== "") {
+			this.$.saveAllButton.setContent(this.saveAllButton);
+		}
+	},
+	/** @private */
+	actionConfirm: function(inSender, inEvent) {
+		this.hide();
+		this.doConfirmActionPopup();
+		return true;
+	},
+	/** @private */
+	actionCancel: function(inSender, inEvent) {
+		this.hide();
+		this.doCancelActionPopup();
+		return true;
+	},
+	save: function(inSender, inEvent) {
+		this.hide();
+		this.doSaveActionPopup();
+	},
+	saveAll: function(inSender, inEvent) {
+		this.hide();
+		this.doSaveAllActionPopup();
+	},
+});
+
+enyo.kind({
+	name: "saveAllActionPopup",
+	kind: "Ares.ActionPopup",
+	events:{
+		onSaveActionPopup: ""
+	},
+	/** @private */
+	create: function() {
+		this.inherited(arguments);
+		this.$.message.allowHtml = true;
 	},
 	/** @private */
 	save: function(inSender, inEvent) {
