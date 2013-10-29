@@ -530,7 +530,7 @@ enyo.kind({
 			row.$.attributeVal.setDisabled(true);
 			delete this.userDefinedAttributes[this.selected.aresId][attribute];
 			
-			// Remove this attribute from the rendered instance in the iframe by setting it to _undefined_
+			// Remove this attribute from the rendered instance in the designerFrame by setting it to _undefined_
 			this.doModify({name: attribute, value: undefined});
 		}
 	},

@@ -99,7 +99,7 @@ enyo.singleton({
 	},
 	// @protected
 	addSerializerOptions: function(data) {
-		// Prepare serializer options for the designer iframe
+		// Prepare serializer options for the designerFrame
 		enyo.forEach(data, function(item) {
 			var kindName = item.name;
 			var info = this.serializerOptions[kindName];
@@ -159,7 +159,7 @@ enyo.singleton({
 	},
 	getFlattenedContainerInfo: function() {		
 		// TODO: item containerData is set to null, revisit this,
-		// function called by the Designer.sendIframeContainerData()
+		// function called by the Designer.sendDesignerFrameContainerData()
 		return null;
 	}
 });

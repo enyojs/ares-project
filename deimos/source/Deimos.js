@@ -248,7 +248,7 @@ enyo.kind({
 	refreshComponentView: function(inComponents) {
 		this.$.componentView.visualize(inComponents);
 	},
-	// New selected item triggered in iframe. Synchronize component view and refresh inspector.
+	// New selected item triggered in designerFrame. Synchronize component view and refresh inspector.
 	designerSelect: function(inSender, inEvent) {
 		var c = inSender.selection;
 		this.refreshInspector();
@@ -513,7 +513,7 @@ enyo.kind({
 		
 		return true;
 	},
-	//* Called when the iFrame has retrieved a requested absolute position value
+	//* Called when the designerFrame has retrieved a requested absolute position value
 	designerReturnPositionValue: function(inSender, inEvent) {
 		this.$.inspector.setRequestedPositionValue(inEvent.prop, inEvent.value);
 		return true; //TODO See if the code behind the return is useful 

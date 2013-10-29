@@ -2,7 +2,7 @@
 enyo.kind({
 	name: "Designer",
 	published: {
-		iframeReady: false,
+		designerFrameReady: false,
 		currentKind: null,
 		height: null,
 		width: null,
@@ -25,7 +25,7 @@ enyo.kind({
 		{name: "client", tag: "iframe", classes: "ares-designer-frame-client"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"}
 	],
-	baseSource: "iframe.html",
+	baseSource: "designerFrame.html",
 	projectSource: null,
 	selection: null,
 	reloadNeeded: false,
@@ -78,11 +78,11 @@ enyo.kind({
 	
 	updateSource: function(inSource) {
 		var serviceConfig = inSource.getService().config;
-		this.setIframeReady(false);
+		this.setDesignerFrameReady(false);
 		this.projectSource = inSource;
 		this.projectPath = serviceConfig.origin + serviceConfig.pathname + "/file";
 		var iframeUrl = this.projectSource.getProjectUrl() + "/" + this.baseSource + "?overlay=designer";
-		this.trace("Setting iframe url: ", iframeUrl);
+		this.trace("Setting designerFrame url: ", iframeUrl);
 		this.$.client.hasNode().src = iframeUrl;
 	},
 	reload: function() {
@@ -107,17 +107,17 @@ enyo.kind({
 			return;
 		}
 		
-		// Iframe is loaded and ready to do work.
+		// designerFrame is loaded and ready to do work.
 		if(msg.op === "state" && msg.val === "initialized") {
-			this.sendIframeContainerData();
-		// Iframe received container data
+			this.sendDesignerFrameContainerData();
+		// designerFrame received container data
 		} else if(msg.op === "state" && msg.val === "ready") {
-			this.setIframeReady(true);
+			this.setDesignerFrameReady(true);
 			if(this.reloading) {
 				this.doReloadComplete();
 				this.reloading = false;
 			}
-		// The current kind was successfully rendered in the iframe
+		// The current kind was successfully rendered in the designerFrame
 		} else if(msg.op === "rendered") {
 			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 			this.kindRendered(msg.val, msg.filename);
@@ -125,17 +125,17 @@ enyo.kind({
 		} else if(msg.op === "selected") {
 			this.selection = enyo.json.codify.from(msg.val);
 			this.doSelected({component: this.selection});
-		// New select event triggered in iframe. Set _this.selection_ and bubble.
+		// New select event triggered in designerFrame. Set _this.selection_ and bubble.
 		} else if(msg.op === "select") {
 			this.selection = enyo.json.codify.from(msg.val);
 			this.doSelect({component: this.selection});
-		// Highlight drop target to minic what's happening in iframe
+		// Highlight drop target to minic what's happening in designerFrame
 		} else if(msg.op === "syncDropTargetHighlighting") {
 			this.doSyncDropTargetHighlighting({component: enyo.json.codify.from(msg.val)});
-		// New component dropped in iframe
+		// New component dropped in designerFrame
 		} else if(msg.op === "createItem") {
 			this.doCreateItem(msg.val);
-		// Existing component dropped in iframe
+		// Existing component dropped in designerFrame
 		} else if(msg.op === "moveItem") {
 			this.doMoveItem(msg.val);
 		} else if (msg.op === "reloadNeeded") {
@@ -164,13 +164,13 @@ enyo.kind({
 	goBacktoEditor: function() {
 		this.doForceCloseDesigner();
 	},
-	//* Pass _isContainer_ info down to iframe
-	sendIframeContainerData: function() {
+	//* Pass _isContainer_ info down to designerFrame
+	sendDesignerFrameContainerData: function() {
 		this.sendMessage({op: "containerData", val: ProjectKindsModel.getFlattenedContainerInfo()});
 	},
-	//* Tell iFrame to render the current kind
+	//* Tell designerFrame to render the current kind
 	renderCurrentKind: function(inSelectId) {
-		if(!this.getIframeReady()) {
+		if(!this.getDesignerFrameReady()) {
 			return;
 		}
 		
@@ -188,36 +188,36 @@ enyo.kind({
 	unHighlightDropTargets: function() {
 		this.sendMessage({op: "unhighlight"});
 	},
-	//* Property was modified in Inspector, update iframe.
+	//* Property was modified in Inspector, update designerFrame.
 	modifyProperty: function(inProperty, inValue) {
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.sendMessage({op: "modify", filename: this.currentFileName, val: {property: inProperty, value: inValue}});
 	},
-	//* Send message to Deimos with components from iframe
+	//* Send message to Deimos with components from designerFrame
 	kindRendered: function(content, filename) {
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.doDesignRendered({content: content, filename: filename});
 	},
-	//* Clean up the iframe before closing designer
+	//* Clean up the designerFrame before closing designer
 	cleanUp: function() {
 		this.sendMessage({op: "cleanUp"});
 	},
-	//* Pass inCode down to the iFrame (to avoid needing to reload the iFrame)
+	//* Pass inCode down to the designerFrame (to avoid needing to reload the iFrame)
 	syncJSFile: function(inCode) {
 		this.sendMessage({op: "codeUpdate", val: inCode});
 	},
-	//* Sync the CSS in inCode with the iFrame (to avoid needing to reload the iFrame)
+	//* Sync the CSS in inCode with the designerFrame (to avoid needing to reload the iFrame)
 	syncCSSFile: function(inFilename, inCode) {
 		this.sendMessage({op: "cssUpdate", val: {filename: this.projectPath + inFilename, code: inCode}});
 	},
 	resizeClient: function() {
 		this.sendMessage({op: "resize"});
 	},
-	//* Prerender simulated drop in iFrame
+	//* Prerender simulated drop in designerFrame
 	prerenderDrop: function(inTargetId, inBeforeId) {
 		this.sendMessage({op: "prerenderDrop", val: {targetId: inTargetId, beforeId: inBeforeId}});
 	},
-	//* Request auto-generated position value from iframe
+	//* Request auto-generated position value from designerFrame
 	requestPositionValue: function(inProp) {
 		this.sendMessage({op: "requestPositionValue", val: inProp});
 	},

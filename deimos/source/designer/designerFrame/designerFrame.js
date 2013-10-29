@@ -5,7 +5,7 @@ enyo.kind({
 	classes: "enyo-fit",
 	id: "aresApp",
 	handlers: {
-		ondragleave: "iframeDragleave",
+		ondragleave: "designerFrameDragleave",
 		onWebkitTransitionEnd: "prerenderMoveComplete" // TODO
 	},
 	published: {
@@ -43,7 +43,7 @@ enyo.kind({
 	debug: false,
 
 
-	// iframe will complain if user's application loads en enyo older than:
+	// designerFrame will complain if user's application loads en enyo older than:
 	minEnyoVersion: "2.3.0-pre.9",
 	
 	create: function() {
@@ -94,7 +94,7 @@ enyo.kind({
 		// through window.onerror handler
 		// another warning: enyo.load is asynchronous. try/catch is useless
 		enyo.load("$enyo/../source/package.js", enyo.bind(this, function() {
-			this.trace("user app load done within designer iframe");
+			this.trace("user app load done within designer designerFrame");
 			this.sendMessage({op: "state", val: "initialized"});
 		}));
 
@@ -169,7 +169,7 @@ enyo.kind({
 		var msg = inEvent.message;
 
 		if (!msg || !msg.op) {
-			enyo.warn("Deimos iframe received invalid message data:", msg);
+			enyo.warn("Deimos designerFrame received invalid message data:", msg);
 			return;
 		}		
 			
@@ -219,7 +219,7 @@ enyo.kind({
 				this.setDragType(msg.val);
 				break;
 			default:
-				enyo.warn("Deimos iframe received unknown message op:", msg);
+				enyo.warn("Deimos designerFrame received unknown message op:", msg);
 				break;
 		}
 	},
@@ -956,7 +956,7 @@ enyo.kind({
 		this.setBeforeItem(beforeItem);
 		this.staticPrerenderDrop();
 	},
-	//* Handle drop that has been trigged from outside of the iframe
+	//* Handle drop that has been trigged from outside of the designerFrame
 	foreignPrerenderDrop: function(inData) {
 		var containerItem = this.getControlById(inData.targetId),
 			beforeItem    = inData.beforeId ? this.getControlById(inData.beforeId) : null

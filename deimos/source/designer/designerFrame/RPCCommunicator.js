@@ -22,11 +22,11 @@ enyo.kind({
 	published: {
 		/**
 			A reference to the window to which messages should be sent. This
-			can be obtained by using the _contentWindow_ property of an iframe,
+			can be obtained by using the _contentWindow_ property of an designerFrame,
 			by saving the return value of a _window.open_ call, or by referencing
 			an item in the _window.frames_ array.
 			
-			this.$.communicator.setRemote(this.$.myIframe.hasNode().contentWindow);
+			this.$.communicator.setRemote(this.$.myDesignerFrame.hasNode().contentWindow);
 		*/
 		remote: window.parent
 	},
