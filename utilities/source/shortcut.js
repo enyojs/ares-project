@@ -5,20 +5,18 @@
  * License : BSD
  */
 var shortcut = {
-	'all_shortcuts': {},//All the shortcuts are stored in this ArrayBuffer();
-	'add': function (shortcut_combination, callback, opt) {
-		//Provide a set of default options
+	'all_shortcuts': {},// All the shortcuts are stored in this array
+	add: function(shortcut_combination, callback, opt) {
+		// Provide a set of default options
 		var default_options = {
-			'type' : 'keydown',
-			'propagate' : false,
-			'disable_in_input' : false,
-			'target' : document,
-			'keycode' : false
-		};
-
-		if (!opt) {
-			opt = default_options;
-		} else {
+			'type':'keydown',
+			'propagate':false,
+			'disable_in_input':false,
+			'target':document,
+			'keycode':false
+		}
+		if(!opt) opt = default_options;
+		else {
 			for(var dfo in default_options) {
 				if(typeof opt[dfo] == 'undefined') opt[dfo] = default_options[dfo];
 			}
@@ -29,11 +27,11 @@ var shortcut = {
 		var ths = this;
 		shortcut_combination = shortcut_combination.toLowerCase();
 
-		//The function to be called at keypress
+		// The function to be called at keypress
 		var func = function(e) {
 			e = e || window.event;
 			
-			if(opt['disable_in_input']) { //Don't enable shortcut keys in Input, Textarea fields
+			if(opt['disable_in_input']) { // Don't enable shortcut keys in Input, Textarea fields
 				var element;
 				if(e.target) element=e.target;
 				else if(e.srcElement) element=e.srcElement;
@@ -42,19 +40,19 @@ var shortcut = {
 				if(element.tagName == 'INPUT' || element.tagName == 'TEXTAREA') return;
 			}
 	
-			//Find Which key is pressed
+			// Find Which key is pressed
 			if (e.keyCode) code = e.keyCode;
 			else if (e.which) code = e.which;
 			var character = String.fromCharCode(code).toLowerCase();
 			
-			if(code == 188) character=","; //If the user presses , when the type is onkeydown
-			if(code == 190) character="."; //If the user presses , when the type is onkeydown
+			if(code == 188) character=","; // If the user presses , when the type is onkeydown
+			if(code == 190) character="."; // If the user presses , when the type is onkeydown
 
 			var keys = shortcut_combination.split("+");
-			//Key Pressed - counts the number of valid keypresses - if it is same as the number of keys, the shortcut function is invoked
+			// Key Pressed - counts the number of valid keypresses - if it is same as the number of keys, the shortcut function is invoked
 			var kp = 0;
 			
-			//Work around for stupid Shift key bug created by using lowercase - as a result the shift+num combination was broken
+			// Work around for stupid Shift key bug created by using lowercase - as a result the shift+num combination was broken
 			var shift_nums = {
 				"`":"~",
 				"1":"!",
@@ -75,9 +73,8 @@ var shortcut = {
 				".":">",
 				"/":"?",
 				"\\":"|"
-			};
-
-			//Special Keys - and their codes
+			}
+			// Special Keys - and their codes
 			var special_keys = {
 				'esc':27,
 				'escape':27,
@@ -130,13 +127,13 @@ var shortcut = {
 				'f10':121,
 				'f11':122,
 				'f12':123
-			};
+			}
 	
 			var modifiers = { 
 				shift: { wanted:false, pressed:false},
 				ctrl : { wanted:false, pressed:false},
 				alt  : { wanted:false, pressed:false},
-				meta : { wanted:false, pressed:false}	//Meta is Mac specific
+				meta : { wanted:false, pressed:false}	// Meta is Mac specific
 			};
                         
 			if(e.ctrlKey)	modifiers.ctrl.pressed = true;
@@ -145,7 +142,7 @@ var shortcut = {
 			if(e.metaKey)   modifiers.meta.pressed = true;
                         
 			for(var i=0; k=keys[i],i<keys.length; i++) {
-				//Modifiers
+				// Modifiers
 				if(k == 'ctrl' || k == 'control') {
 					kp++;
 					modifiers.ctrl.wanted = true;
@@ -160,16 +157,16 @@ var shortcut = {
 				} else if(k == 'meta') {
 					kp++;
 					modifiers.meta.wanted = true;
-				} else if(k.length > 1) { //If it is a special key
+				} else if(k.length > 1) { // If it is a special key
 					if(special_keys[k] == code) kp++;
 					
 				} else if(opt['keycode']) {
 					if(opt['keycode'] == code) kp++;
 
-				} else { //The special keys did not match
+				} else { // The special keys did not match
 					if(character == k) kp++;
 					else {
-						if(shift_nums[character] && e.shiftKey) { //Stupid Shift key bug created by using lowercase
+						if(shift_nums[character] && e.shiftKey) { // Stupid Shift key bug created by using lowercase
 							character = shift_nums[character]; 
 							if(character == k) kp++;
 						}
@@ -184,12 +181,12 @@ var shortcut = {
 						modifiers.meta.pressed == modifiers.meta.wanted) {
 				callback(e);
 	
-				if(!opt['propagate']) { //Stop the event
-					//e.cancelBubble is supported by IE - this will kill the bubbling process.
+				if(!opt['propagate']) { // Stop the event
+					// e.cancelBubble is supported by IE - this will kill the bubbling process.
 					e.cancelBubble = true;
 					e.returnValue = false;
 	
-					//e.stopPropagation works in Firefox.
+					// e.stopPropagation works in Firefox.
 					if (e.stopPropagation) {
 						e.stopPropagation();
 						e.preventDefault();
@@ -203,17 +200,17 @@ var shortcut = {
 			'target':ele, 
 			'event': opt['type']
 		};
-		//Attach the function with the event
+		// Attach the function with the event
 		if(ele.addEventListener) ele.addEventListener(opt['type'], func, false);
 		else if(ele.attachEvent) ele.attachEvent('on'+opt['type'], func);
 		else ele['on'+opt['type']] = func;
 	},
 
-	//Remove the shortcut - just specify the shortcut and I will remove the binding
-	'remove':function(shortcut_combination) {
+	// Remove the shortcut - just specify the shortcut and I will remove the binding
+	remove: function(shortcut_combination) {
 		shortcut_combination = shortcut_combination.toLowerCase();
 		var binding = this.all_shortcuts[shortcut_combination];
-		delete(this.all_shortcuts[shortcut_combination]);
+		delete(this.all_shortcuts[shortcut_combination])
 		if(!binding) return;
 		var type = binding['event'];
 		var ele = binding['target'];
