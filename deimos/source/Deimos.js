@@ -913,6 +913,7 @@ enyo.kind({
 	// @protected		
 	runPaletteComponentAction: function(inSender,inEvent){
 		var config = this.$.actionPopup.getConfigComponent(config);
+		var config_data = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
 
 		if(inEvent.getName() === "addtoKind"){
 			var target = this.$.actionPopup.getTargetComponent(target);
@@ -920,11 +921,9 @@ enyo.kind({
 			this.performCreateItem(config, target, beforeId);
 		} else if (inEvent.getName() === "replaceKind"){
 			//Add a feature for "Replace Button" against view template component on designer behavior
-			var config_data = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
 			ComponentsRegistry.getComponent("phobos").ReplaceViewKindAction(this.index, config_data);
 		} else if (inEvent.getName() === "addNewKind"){
 			//Add a feature for "Add new Kind" against view template component on designer behavior
-			var config_data = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
 			ComponentsRegistry.getComponent("phobos").addViewKindAction(config_data);
 		}
 		this.$.actionPopup.hide();
