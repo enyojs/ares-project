@@ -1,4 +1,4 @@
-/*global qrcode, Phonegap*/
+/*global ares, qrcode, Phonegap*/
 enyo.kind({
 	name: "Phonegap.ProjectProperties.QrCode",
 	published: {
@@ -6,8 +6,9 @@ enyo.kind({
 		token: undefined
 	},
 	classes: "ares-project-properties-qrcode-image",
-
+	debug: false,
 	create: function () {
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.setToken(Phonegap.ProjectProperties.getProvider().config.auth.token);
 	},
@@ -26,7 +27,7 @@ enyo.kind({
 	displayQrCode: function() {
 		
 		if (this.appId !== undefined && this.token !== undefined) {
-			this.log("appid: ", this.appId, " token: ", this.token);
+			this.trace("appid: ", this.appId, " token: ", this.token);
 			this.hasNode().innerHTML = this.generateQrCode();
 		}
 		
