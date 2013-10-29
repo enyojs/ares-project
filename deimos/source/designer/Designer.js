@@ -107,7 +107,7 @@ enyo.kind({
 			return;
 		}
 		
-		// designerFrame is loaded and ready to do work.
+		// designerFrame is initialized and ready to do work.
 		if(msg.op === "state" && msg.val === "initialized") {
 			this.sendDesignerFrameContainerData();
 		// designerFrame received container data
@@ -117,7 +117,10 @@ enyo.kind({
 				this.doReloadComplete();
 				this.reloading = false;
 			}
-		// The current kind was successfully rendered in the designerFrame
+		// Loaded event sent from designerFrame and awaiting aresOptions.
+		} else if(msg.op === "state" && msg.val === "loaded") {
+			this.designerFrameLoaded();
+		// The current kind was successfully rendered in the iframe
 		} else if(msg.op === "rendered") {
 			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 			this.kindRendered(msg.val, msg.filename);
@@ -197,6 +200,13 @@ enyo.kind({
 	kindRendered: function(content, filename) {
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.doDesignRendered({content: content, filename: filename});
+	},
+	//* Initialize the designerFrame depending on aresOptions
+	designerFrameLoaded: function() {
+		// FIXME: ENYO-3433 : options are hard-coded with
+		// defaultKindOptions that are currently known. the whole/real
+		// set must be determined indeed.
+		this.sendMessage({op: "initializeOptions", options: ProjectKindsModel.get("defaultKindOptions")});
 	},
 	//* Clean up the designerFrame before closing designer
 	cleanUp: function() {
