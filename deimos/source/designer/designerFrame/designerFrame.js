@@ -1,7 +1,7 @@
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
-	name: "Ares.App",
+	name: "Ares.DesignerFrame",
 	classes: "enyo-fit",
 	id: "aresApp",
 	handlers: {
