@@ -1001,6 +1001,25 @@ enyo.kind({
 		this.$.ace.insertAtEndOfFile(newKind, '@cursor@');
 		this.designerAction();
 	},
+	/**
+	 * This function is called after replace current kind.
+	 * a switch to the designer is performed. 
+	 * @param config 
+	 * @public
+	 */
+	ReplaceViewKindAction: function(kind_index, config){
+
+		var obj = this.analysis.objects[kind_index];
+		var range = this.$.ace.mapToLineColumnRange(obj.block.start, obj.block.end);
+		this.$.ace.replaceRange(range, "");
+
+		var pos = obj.block.start;
+		range = this.$.ace.mapToLineColumnRange(pos, pos);
+		this.$.ace.replaceRange(range, config);
+
+		this.designerAction();
+	},
+	
 	/*  editor setting */
 
 	editorSettings: function() {
