@@ -1,4 +1,4 @@
-/*global qrcode*/
+/*global qrcode, Phonegap*/
 enyo.kind({
 	name: "Phonegap.ProjectProperties.QrCode",
 	published: {
