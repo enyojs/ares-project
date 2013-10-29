@@ -21,13 +21,13 @@ enyo.kind({
 		{name: "flightArea", classes: "enyo-fit", showing: false},
 		{name: "serializer", kind: "Ares.Serializer"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"},
-		{name: "dropHighlight", classes: "iframe-highlight iframe-drop-highlight"},
+		{name: "dropHighlight", classes: "designer-frame-highlight designer-frame-drop-highlight"},
 		
 		//* Resize handles
-		{name: "topLeftResizeHandle",     classes: "iframe-resize-handle", showing: false, sides: {top: true, left: true},     style: "top: 0px; left: 0px;"},
-		{name: "topRightResizeHandle",    classes: "iframe-resize-handle", showing: false, sides: {top: true, right: true},    style: "top: 0px; right: 0px;"},
-		{name: "bottomLeftResizeHandle",  classes: "iframe-resize-handle", showing: false, sides: {bottom: true, left: true},  style: "bottom: 0px; left: 0px;"},
-		{name: "bottomRightResizeHandle", classes: "iframe-resize-handle", showing: false, sides: {bottom: true, right: true}, style: "bottom: 0px; right: 0px;"}
+		{name: "topLeftResizeHandle",     classes: "designer-frame-resize-handle", showing: false, sides: {top: true, left: true},     style: "top: 0px; left: 0px;"},
+		{name: "topRightResizeHandle",    classes: "designer-frame-resize-handle", showing: false, sides: {top: true, right: true},    style: "top: 0px; right: 0px;"},
+		{name: "bottomLeftResizeHandle",  classes: "designer-frame-resize-handle", showing: false, sides: {bottom: true, left: true},  style: "bottom: 0px; left: 0px;"},
+		{name: "bottomRightResizeHandle", classes: "designer-frame-resize-handle", showing: false, sides: {bottom: true, right: true}, style: "bottom: 0px; right: 0px;"}
 	],
 	
 	selection: null,
@@ -104,13 +104,13 @@ enyo.kind({
 		this.inherited(arguments);
 	},
 	createSelectHighlight: function() {
-		var components = [{name: "selectHighlight", classes: "iframe-highlight iframe-select-highlight", showing: false}];
+		var components = [{name: "selectHighlight", classes: "designer-frame-highlight designer-frame-select-highlight", showing: false}];
 		// IE can only support pointer-events:none; for svg elements
 		if (enyo.platform.ie) {
 			// Using svg for IE only as it causes performance issues in Chrome
 			components[0].tag = "svg";
 			// Unable to retrive offset values for svg elements in IE, thus we're forced to create additional dom for resizeHandle calculations
-			components.push({name: "selectHighlightCopy", classes: "iframe-highlight", style: "z-index:-1;", showing: false});
+			components.push({name: "selectHighlightCopy", classes: "designer-frame-highlight", style: "z-index:-1;", showing: false});
 		}
 		this.createComponents(components);
 	},

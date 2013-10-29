@@ -22,7 +22,7 @@ enyo.kind({
 		onForceCloseDesigner: ""
 	},
 	components: [
-		{name: "client", tag: "iframe", classes: "ares-iframe-client"},
+		{name: "client", tag: "iframe", classes: "ares-designer-frame-client"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"}
 	],
 	baseSource: "iframe.html",
