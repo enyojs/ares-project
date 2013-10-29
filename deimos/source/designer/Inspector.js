@@ -1,4 +1,4 @@
-/* global analyzer, Model, Inspector, ares */
+/* global analyzer, ProjectKindsModel, Inspector, ares */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
@@ -68,7 +68,7 @@ enyo.kind({
 	},
 	//* @protected
 	allowed: function(inKindName, inType, inName) {
-		var level = Model.getFilterLevel(inKindName, inType, inName);
+		var level = ProjectKindsModel.getFilterLevel(inKindName, inType, inName);
 		this.trace("Level: ", level, " for ", inKindName, ".", inName);	
 		return level >= this.filterLevel;
 	},
@@ -209,7 +209,7 @@ enyo.kind({
 			kind = {kind: "Inspector.Config.Event", values: this.kindFunctions};
 		}
 		
-		info = Model.getInfo(inControl.kind, inType, inName);
+		info = ProjectKindsModel.getInfo(inControl.kind, inType, inName);
 		kind = (info && info.inputKind) || kind;
 		
 		// User defined kind: as an Object
@@ -551,9 +551,9 @@ enyo.kind({
 	},
 	components: [
 		{kind: "onyx.RadioGroup", fit: false, onActivate: "filterLevelActivated", style: "display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton thirds", components: [
-			{value: Model.F_USEFUL,    content: "Frequent"},
-			{value: Model.F_NORMAL,    content: "Normal", active: true},
-			{value: Model.F_DANGEROUS, content: "All"}
+			{value: ProjectKindsModel.F_USEFUL,    content: "Frequent"},
+			{value: ProjectKindsModel.F_NORMAL,    content: "Normal", active: true},
+			{value: ProjectKindsModel.F_DANGEROUS, content: "All"}
 		]}
 	],
 	filterLevelActivated: function(inSender, inEvent) {

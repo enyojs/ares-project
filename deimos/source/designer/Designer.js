@@ -1,4 +1,4 @@
-/* global Model, ares */
+/* global ProjectKindsModel, ares */
 enyo.kind({
 	name: "IFrameDesigner",
 	published: {
@@ -166,7 +166,7 @@ enyo.kind({
 	},
 	//* Pass _isContainer_ info down to iframe
 	sendIframeContainerData: function() {
-		this.sendMessage({op: "containerData", val: Model.getFlattenedContainerInfo()});
+		this.sendMessage({op: "containerData", val: ProjectKindsModel.getFlattenedContainerInfo()});
 	},
 	//* Tell iFrame to render the current kind
 	renderCurrentKind: function(inSelectId) {

@@ -1,9 +1,9 @@
-/* global Model, ares */
+/* global ProjectKindsModel, ares */
 // Store all information coming from all .design files of a project.
 // This is reset whenever a project change
 // This is used by Palette and inspector
 enyo.singleton({
-	name: "Model",
+	name: "ProjectKindsModel",
 	kind: "enyo.Component",
 	debug: false,
 	info: {},
@@ -51,7 +51,7 @@ enyo.singleton({
 		};
 	},
 	/**
-	 * Reset the Model Information to default
+	 * Reset the ProjectKindsModel Information to default
 	 * @public
 	 */
 	resetInformation: function() {
@@ -116,13 +116,13 @@ enyo.singleton({
 
 			var fn = function(inType, inName, inSubName, inData) {
 				if (inData.filterLevel) {
-					inData.level = Model.levelMapping[inData.filterLevel];
+					inData.level = ProjectKindsModel.levelMapping[inData.filterLevel];
 					if ( ! inData.level) {
-						inData.level = Model.F_NORMAL;
+						inData.level = ProjectKindsModel.F_NORMAL;
 						enyo.error("Invalid filter level for " + inType + " " + inName + "." + inSubName);
 					}
 				} else {
-					inData.level = Model.F_NORMAL;
+					inData.level = ProjectKindsModel.F_NORMAL;
 				}
 				this.trace("addInformation: Setting level ", inData.level, " for ", inType, " ", inName, ".", inSubName);
 			};
@@ -154,7 +154,7 @@ enyo.singleton({
 		}
 		else {
 			info = this.getInfo("__default", inType, inName) ;
-			return (info && info.level) || Model.F_NORMAL;
+			return (info && info.level) || ProjectKindsModel.F_NORMAL;
 		}
 	},
 	getFlattenedContainerInfo: function() {		

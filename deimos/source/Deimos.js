@@ -1,4 +1,4 @@
-/* global Model */
+/* global ProjectKindsModel */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
@@ -191,7 +191,7 @@ enyo.kind({
 			oldProjectData.off('update:project-indexer', this.projectIndexUpdated);
 		}
 
-		Model.resetInformation();
+		ProjectKindsModel.resetInformation();
 
 		if (this.projectData) {
 			this.trace("projectData", this.projectData);
@@ -230,8 +230,8 @@ enyo.kind({
 		this.trace("projectIndexUpdated: for projectIndexer: ", indexer);
 		this.$.inspector.setProjectIndexer(indexer);
 		this.$.palette.setProjectIndexer(indexer);
-		Model.buildInformation(indexer);
-		this.$.designer.sendSerializerOptions(Model.serializerOptions);
+		ProjectKindsModel.buildInformation(indexer);
+		this.$.designer.sendSerializerOptions(ProjectKindsModel.serializerOptions);
 	},
 	//* Rerender current kind
 	rerenderKind: function(inSelectId) {
@@ -795,7 +795,7 @@ enyo.kind({
 		}
 	},
 	addOptionsToComponent: function(inComponent) {
-		var options = Model.getKindOptions(inComponent.kind);
+		var options = ProjectKindsModel.getKindOptions(inComponent.kind);
 		if (options) {
 			inComponent.__aresOptions = options;
 		}
