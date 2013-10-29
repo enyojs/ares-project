@@ -119,7 +119,7 @@ enyo.kind({
 			}
 		// Loaded event sent from iframe and awaiting aresOptions.
 		} else if(msg.op === "state" && msg.val === "loaded") {
-			this.iframeLoaded();
+			this.designerFrameLoaded();
 		// The current kind was successfully rendered in the iframe
 		} else if(msg.op === "rendered") {
 			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
@@ -202,7 +202,7 @@ enyo.kind({
 		this.doDesignRendered({content: content, filename: filename});
 	},
 	//* Initialize the iframe dependingly from aresOptions
-	iframeLoaded: function() {
+	designerFrameLoaded: function() {
 		// FIXME: ENYO-3433 : options are hard-coded with defaultKindOptions that are currently known. the whole/real set must be determined indeed.
 		this.sendMessage({op: "initializeOptions", options: Model.get("defaultKindOptions")});
 	},
