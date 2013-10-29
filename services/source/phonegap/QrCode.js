@@ -3,10 +3,15 @@ enyo.kind({
 	name: "Phonegap.ProjectProperties.QrCode",
 	published: {
 		appId: null,
-		qr_key: null
+		token: null
 	},
 	classes: "ares-project-properties-qrcode-image",
 
+	create: function () {
+		this.inherited(arguments);
+		this.setToken(Phonegap.ProjectProperties.getProvider().config.auth.token);
+
+	},
 
 	/**@private*/
 	appIdChanged: function() {
