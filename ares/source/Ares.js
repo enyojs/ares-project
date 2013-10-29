@@ -109,11 +109,23 @@ enyo.kind({
 		}
 
 		Ares.instance = this;
+
+		// For Key-Binding
+		this.initializeKeyBinding();
 	},
 
 	rendered: function() {
 		this.inherited(arguments);
 		this.showProjectView();
+	},
+	/**
+	 * @private
+	 */ 
+	initializeKeyBinding: function() {
+		shortcut.add("Ctrl+X", function() {
+			// Close current document -> to Phobos
+			ComponentsRegistry.getComponent("phobos").closeDocAction();
+		}.bind(this));
 	},
 	/**
 	 * @private
