@@ -510,6 +510,8 @@ enyo.kind({
 					this.$.AppIdList.createComponent({content: inApp.id, published: {applicationObject: inApp} , active: itemState});			
 					this.$.AppIdList.render();								
 				}, this);
+
+			this.showQrCodeImg();
 		}
 
 		// Update the build status object
