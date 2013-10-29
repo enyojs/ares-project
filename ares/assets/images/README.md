@@ -25,3 +25,5 @@
   * made of `splach_ic_editnow.png`
 * `project_view_preview.png`
   * made from [http://openclipart.org/image/800px/svg_to_png/38917/Print_Preview.png](http://openclipart.org/image/800px/svg_to_png/38917/Print_Preview.png)
+* `folder_reload.png`
+  * made of folder_new.png and  [http://openclipart.org/image/15px/svg_to_png/33685/view-refresh.png](http://openclipart.org/image/15px/svg_to_png/33685/view-refresh.png)
