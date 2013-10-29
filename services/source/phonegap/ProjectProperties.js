@@ -550,10 +550,9 @@ enyo.kind({
 		this.showQrCodeImg();
 	},
 	
+	/**@private*/
 	showQrCodeImg: function() {
-			this.$.applicationQrCode.setAppId(this.selectedAppId);
-			//this.$.applicationQrCode.setQr_key("");
-			this.$.applicationQrCode.show();
+		this.$.applicationQrCode.setAppId(this.selectedAppId);
 	},
 
 	/**@private*/
