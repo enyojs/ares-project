@@ -450,34 +450,38 @@ enyo.kind({
 	},
 
 	components: [
-	{
-		kind:"FittableColumns",				
-		components: [
-			{content: "AppId",	classes: "ares-project-properties-appid-label"},
-			{
-				kind: "onyx.PickerDecorator",			
-				components: [
-					{kind: "onyx.PickerButton", classes: "ares-project-properties-picker", content:"Select AppId"},
-					{kind: "onyx.Picker", name: "AppIdList", onSelect: "updateSelectedAppId"}
-				]
-			}			
-		]
-	},
+		{
+			kind:"FittableColumns",				
+			components: [
+				{content: "AppId",	classes: "ares-project-properties-appid-label"},
+				{
+					kind: "onyx.PickerDecorator",			
+					components: [
+						{kind: "onyx.PickerButton", classes: "ares-project-properties-picker", content:"Select AppId"},
+						{kind: "onyx.Picker", name: "AppIdList", onSelect: "updateSelectedAppId"}
+					]
+				}			
+			]
+		},
 
-	{
-		kind:"FittableColumns",
-		classes: "ares-project-properties-appid-container",
-		components: [
-			{content: "Title",	classes: "ares-project-properties-appid-label"},
-			{name: "ApplicationTitle"}
-		]
-	},
-
-	{kind:"Phonegap.ProjectProperties.BuildStatus", name: "buildStatusDisplay"},
-
-	
-
-		
+		{
+			kind:"FittableColumns",
+			classes: "ares-project-properties-appid-container",
+			components: [
+				{content: "Title",	classes: "ares-project-properties-appid-label"},
+				{name: "ApplicationTitle"}
+			]
+		},
+		{
+			kind:"FittableColumns",
+			components: [
+				{kind:"Phonegap.ProjectProperties.BuildStatus", name: "buildStatusDisplay"},
+				{
+					name: "applicationQrCode",
+					kind: "Phonegap.ProjectProperties.QrCode"		
+				}
+			]
+		}
 	],
 
 	/**@private*/
@@ -541,6 +545,13 @@ enyo.kind({
 	/**@private*/
 	selectedAppIdChanged: function() {
 		this.$.buildStatusDisplay.setAppId(this.selectedAppId);		
+		this.showQrCodeImg();
+	},
+	
+	showQrCodeImg: function() {
+			this.$.applicationQrCode.setAppId(this.selectedAppId);
+			//this.$.applicationQrCode.setToken("byh9jfXSRmHvs2QGaVyX");
+			this.$.applicationQrCode.show();
 	},
 
 	/**@private*/
