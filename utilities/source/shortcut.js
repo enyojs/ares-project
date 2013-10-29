@@ -197,7 +197,7 @@ var shortcut = {
 					return false;
 				}
 			}
-		}
+		};
 		this.all_shortcuts[shortcut_combination] = {
 			'callback':func, 
 			'target':ele, 
@@ -223,4 +223,4 @@ var shortcut = {
 		else if(ele.removeEventListener) ele.removeEventListener(type, callback, false);
 		else ele['on'+type] = false;
 	}
-}
+};
