@@ -176,7 +176,7 @@ enyo.kind({
 				this.renderKind(msg.val, msg.filename);
 				break;
 			case "initializeOptions":
-				this.initializeOptions(msg.options);
+				this.initializeAllKindsAresOptions(msg.options);
 				break;
 			case "select":
 				this.selectItem(msg.val);
@@ -509,13 +509,12 @@ enyo.kind({
 	 * Response to message sent from Deimos. Enhance the whole application code with aresOptions
 	 * and send back a state message.
 	*/
-	initializeOptions: function(inOptions) {
+	initializeAllKindsAresOptions: function(inOptions) {
 		// genuine enyo.kind's master function extension
 		var self = this;
 		enyo.genuineEnyoKind = enyo.kind;
 		enyo.kind =  function(inProps) {
-			self.trace("inProps:", inProps);
-			self.addAresKindOptions(inProps.components, inOptions);
+			self.addKindAresOptions(inProps.components, inOptions);
 
 			enyo.genuineEnyoKind(inProps);
 		};
@@ -530,21 +529,21 @@ enyo.kind({
 		}));
 
 	},
-	addAresKindOptions: function(inComponents, inOptions) {
+	addKindAresOptions: function(inComponents, inOptions) {
 		if (!inComponents) {
 			return;
 		}
 		
 		for(var i = 0; i < inComponents.length; i++) {
-			this.addOptionsToComponent(inComponents[i], inOptions);
+			this.addAresOptionsToComponent(inComponents[i], inOptions);
 			if (inComponents[i].components) {
-				this.addAresKindOptions(inComponents[i].components, inOptions);
+				this.addKindAresOptions(inComponents[i].components, inOptions);
 			}
 		}
 	},
-	addOptionsToComponent: function(inComponent, inOptions) {
-		// FIXME: ENYO-3433 specific enyo.Repeater create method must be generic one accordingly to kinds that reauire options
-		function optionalCreate() {
+	addAresOptionsToComponent: function(inComponent, inOptions) {
+		// FIXME: ENYO-3433 specific enyo.Repeater create method must be generic one accordingly to kinds that require options
+		function aresOptionCreate() {
 			if (this.__create) {
 				this.__create();
 			}
@@ -567,7 +566,7 @@ enyo.kind({
 						this.trace(inComponent.kind, "already has __create");
 					} else {
 						kindConstructor.prototype.__create = kindConstructor.prototype.create;
-						kindConstructor.prototype.create = optionalCreate;
+						kindConstructor.prototype.create = aresOptionCreate;
 					}								
 				}
 			}
