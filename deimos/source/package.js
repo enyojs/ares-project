@@ -1,5 +1,5 @@
 enyo.depends(
-	"Model.js",
+	"ProjectKindsModel.js",
 	"designer",
 	"Deimos.js"
 );

@@ -17,7 +17,9 @@ enyo.kind({
 		onFileChanged: "",
 		onFolderChanged: "",
 		onTreeChanged: "",
-		onPathChecked: ""
+		onPathChecked: "",
+		onShowWaitPopup: "",
+		onHideWaitPopup: ""
 	},
 	handlers: {
 		onItemDown: "itemDown",
@@ -211,6 +213,7 @@ enyo.kind({
 		data.kind = this.draggedNode.kind;
 		data.file = this.draggedNode.file;
 
+		data.file.service.owner = null;
 		var dataText = enyo.json.stringify(data);		
 		inEvent.dataTransfer.setData("Text", dataText);
 
@@ -892,6 +895,10 @@ enyo.kind({
 		}
 
 		this.trace("Creating new folder ", name," into folderId=", folderId);
+		
+		var msgForCreatedItem = "Creating new folder "+name;
+		this.doShowWaitPopup({msg: msgForCreatedItem});
+
 		var folderCreation = this.$.service.createFolder(folderId, name, { overwrite: false });
 		folderCreation.response(this, function(inSender, inFolder) {
 			this.trace("inFolder: ", inFolder);
@@ -930,8 +937,12 @@ enyo.kind({
 				this.showWarningPopup(this.$LS("Folder named '#{name}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: name}));
 				this.refreshFileTree();
 			}
+			this.doHideWaitPopup();
 		});
-		folderCreation.error(this, this._handleXhrError.bind(this, "Unable to create folder '" + name + "'", null /*next*/));
+		folderCreation.error(this, function() {
+			this.doHideWaitPopup();
+			this._handleXhrError.bind(this, "Unable to create folder '" + name + "'", null /*next*/);
+		});
 	},
 
 	/**
@@ -990,6 +1001,9 @@ enyo.kind({
 			return true;
 		}
 
+		var msgForCreatedItem = "Creating " +name;
+		this.doShowWaitPopup({msg: msgForCreatedItem});
+		
 		var nameStem = name.substring(0, name.lastIndexOf(".")); // aka basename
 		var type = this.findNodeExtension(name);
 		var templatePath;
@@ -1006,6 +1020,7 @@ enyo.kind({
 			var matchingNodes = folder.getNodeFiles().filter(matchFileName) ;
 
 			if (matchingNodes.length !== 0) {
+				this.doHideWaitPopup();
 				this.showErrorPopup(this.$LS("File '#{name}' already exists", {name: name}));
 				return true;
 			}
@@ -1050,8 +1065,10 @@ enyo.kind({
 				}
 			});
 			r.go();
+			this.doHideWaitPopup();
 		});
 		nodeUpdating.error(this, function() {
+			this.doHideWaitPopup();
 			this.showErrorPopup($L("Cannot reach filesystem"));
 			return true;
 		});
@@ -1117,6 +1134,10 @@ enyo.kind({
 		}
 
 		this.trace("Creating new file ", newName, " as copy of", oldName);
+
+		var msgForCopiedItem = "Creating new file " + newName +" as copy of " + oldName;
+		this.doShowWaitPopup({msg: msgForCopiedItem});
+
 		var nodeCopying = this.$.service.copy(this.selectedNode.file.id, {
 			name: newName,
 			overwrite: false
@@ -1143,8 +1164,10 @@ enyo.kind({
 				this.showWarningPopup(this.$LS("Node named '#{newName}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: newName}));
 				this.refreshFileTree();
 			}
+			this.doHideWaitPopup();
 		});
 		nodeCopying.error(this, function(inSender, inError) {
+			this.doHideWaitPopup();
 			this.warn("Unable to copy:", this.selectedNode.file, "as", newName, inError);
 			this.showErrorPopup(this.$LS("Creating file '#{copyName}' as copy of '#{name}' failed: #{error}", {copyName: newName, name: this.selectedNode.file.name, error: inError.toString()}));
 		});
@@ -1221,6 +1244,10 @@ enyo.kind({
 		}
 
 		this.trace("Renaming '", this.selectedNode.file, "' as '", newName, "'");
+
+		var msgForRenamedItem = "Renaming " + this.selectedNode.file.name + " as " + newName;
+		this.doShowWaitPopup({msg: msgForRenamedItem});
+
 		var nodeRenaming = this.$.service.rename(this.selectedNode.file.id, {
 			name: newName,
 			overwrite: false
@@ -1270,8 +1297,10 @@ enyo.kind({
 
 			/* cancel any move reverting */
 			this.resetRevert();
+			this.doHideWaitPopup();
 		});
 		nodeRenaming.error(this, function(inSender, inError) {
+			this.doHideWaitPopup();
 			this.warn("Unable to rename:", this.selectedNode.file, "into", newName, inError);
 			this.showErrorPopup(this.$LS("Renaming file '#{oldName}' as '#{newName}' failed", {oldName: this.selectedNode.file.name, newName: newName}));
 		});
@@ -1299,7 +1328,10 @@ enyo.kind({
 		var serverNode = this.$.serverNode;
 		var parentNode = this.getParentNodeOfSelected(),
 		    pkgNode = parentNode.getNodeNamed('package.js');
+		var msgForDeletedItem = "Deleting " + (this.selectedNode.file.isDir ? "folder " : "file ") + this.selectedNode.file.name;
+		this.doShowWaitPopup({msg: msgForDeletedItem});
 		var nodeRemoving = this.$.service.remove(this.selectedNode.file.id);
+
 		nodeRemoving.response(this, function(inSender, inParentFolder) {
 			this.trace("inParentFolder: ", inParentFolder);
 
@@ -1329,10 +1361,12 @@ enyo.kind({
 			if (parentNode === serverNode) {
 				this.$.selection.select(serverNode.file.id, serverNode);
 			}
+			this.doHideWaitPopup();
 		});
 		nodeRemoving.error(this, function(inSender, inError) {
 			this.warn("Unable to delete:", this.selectedNode.file, inError);
 			this.showErrorPopup(this.$LS("Deleting '#{name}' failed", {name: this.selectedNode.file.name}));
+			this.doHideWaitPopup();
 		});
 	},
 	/** @private */
@@ -1356,13 +1390,19 @@ enyo.kind({
 	revertConfirm: function(inSender, inEvent) {
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		this.trace("Reverting '", this.movedNode.file.name, "' into '", this.originNode.file.path, "'");
+		
+		var msgForRevertedItem = "Reverting " + this.movedNode.file.name + " into " + this.originNode.file.path;
+		this.doShowWaitPopup({msg: msgForRevertedItem});
 
 		var nodeMoving = this.moveNode(this.movedNode, this.originNode);
 		nodeMoving.response(this, function(inSender, inNodeFile) {
+
 			/* cancel any move reverting */
 			this.resetRevert();
+			this.doHideWaitPopup();
 		});
 		nodeMoving.error(this, function(inSender, inError) {
+			this.doHideWaitPopup();
 			this.warn("Unable to revert:", this.movedNode.file.name, "into", this.originNode.file.path, inError);
 			this.showErrorPopup($L("Reverting '{name}' to '{oldpath}' failed", {name: this.movedNode.file.name, oldpath: this.originNode.file.path}));
 		});
@@ -1447,7 +1487,20 @@ enyo.kind({
 			this.resetRevert();
 
 			if (this.findNodeExtension(name) !== null) {
-				this.refreshFileTree( function() { parentNode.getNodeWithId(inNodes[0].id).doAdjustScroll(); }, inNodes[0].id );
+				this.refreshFileTree( function() { 
+					var newNode = parentNode.getNodeWithId(inNodes[0].id);
+					
+					// scroll adjustment
+					newNode.doAdjustScroll();
+
+					// opens the created file: after tree refresh done
+					if (!newNode.file.isServer && !newNode.file.isDir && this.projectUrlReady) {
+						this.doFileDblClick({
+							file: newNode.file,
+							projectData: this.projectData
+						});
+					}
+				}.bind(this), inNodes[0].id );
 			}
 		});
 		fileCreation.error(this, this._handleXhrError.bind(this, "Unable to create file '" + name + "'", null /*next*/));

@@ -215,3 +215,56 @@ _This section is only for Ares commiters or developers of build scripts_
    * `--rel|-R` to perform `M.m.p-pre.r` to `M.m.p`
 3. Run `/scripts/release.js post-dist`
 4. Announce it to team-mates 
+ 
+Palette/Inspector Design
+------------------------
+
+_This section is only for Enyo/lib commiters or developers of UI widgets libraries_
+
+This section describes how UI widgets defined in enyo or librairies must be referenced in order to be proposed inside the designer's palette of Ares.
+
+NB: ".design" files must be added into a "package.js" file in the "enyo.depends" call of your application/library.
+
+For the time being, we have 4 sections in these files:
+
+### Section "palette"
+
+It defines some categories of widget such as "onyx". _This section is required_
+
+Each "category" defines items which will appear in the Palette of the designer window.
+
+Per item, you need to specify the "name", "kind" and "description" and the most important is the property "config". "config" defines the actual "kind definition" which will be passed to createComponents() to instantiate the real object(s) when the drag and drop is done.
+
+It can be a simple kind as for "onyx.ProgressButton" or a complex kind definition such as for "onyx.RadioGroup" or "onyx.PickerDecorator".
+
+"inline" is not used for the time being.
+
+A _special_ category can be added to ignore some components in the palette by naming it `ignore` and giving the list of items to ignore.
+Each items to ignore must be declared simply with its `kind`, `name`, `description` and `config` values.
+
+### Section "inspector"
+
+It allows to define per kind and per event or property. _This section is optional_
+
+The filter level which could be one of:
+* "useful": the property/event will appear when the "FREQUENT" tab is selected in the inspector
+* "normal": the property/event will appear when the "NORMAL" tab is selected in the inspector as well as the properties/events of the previous level.
+* "dangerous": the property/event will appear when the "ALL" tab is selected in the inspector as well as the properties/events of the previous level.
+* "hidden": the property/event will never appear in any tab of the inspector.
+
+NB: The "FREQUENT" tabs displays the events/properties which are either marked "useful" or which have been modified by the developer.
+
+The input kind which will be instantiated in the "inspector" part of the designer window.
+
+Today, we support all kind which are defined in https://github.com/enyojs/ares-project/blob/master/deimos/source/designer/InspectorConfig.js, so:
+
+* Inspector.Config.Boolean
+* Inspector.Config.Text
+* Inspector.Config.Select which could be useful to you as you have enumerated values. See "onyx.Input" in "onyx.design" as an example.
+* Inspector.Config.Event which is used by default for all events to provide auto-completion with the functions existing in the edited kind
+
+If this property is not defined, we select an input kind based on the property type. For the time being this is limited to Inspector.Config.Boolean or Inspector.Config.Text.
+
+### Section "serializer"
+
+_This section is optional_ 

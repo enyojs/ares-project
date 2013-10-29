@@ -989,7 +989,18 @@ enyo.kind({
 	requestSelectedText: function() {
 		return this.$.ace.requestSelectedText();
 	},
-
+	
+	/**
+	 * This function is called after add new kind.
+	 * a switch to the designer is performed. 
+	 * @param config 
+	 * @public
+	 */
+	addViewKindAction: function(config) {
+		var newKind = 'enyo.kind('+config+'\n);';
+		this.$.ace.insertAtEndOfFile(newKind, '@cursor@');
+		this.designerAction();
+	},
 	/*  editor setting */
 
 	editorSettings: function() {
