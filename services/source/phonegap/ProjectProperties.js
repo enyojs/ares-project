@@ -240,8 +240,7 @@ enyo.kind({
 				
 		this.showErrorMsg("waitingSignIn");
 		this._getUserData();
-		this.$.appIdSelector.selectedAppIdChanged();
-		
+
 		return true;		
 	},
 
@@ -448,6 +447,10 @@ enyo.kind({
 		selectedTitle: undefined,
 		project: undefined
 	},
+	handlers: {
+		"onHideMessageContainer": "hideQrCodeImg",
+		"onShowMessageContainer": "showQrCodeImg"
+	},
 
 	components: [
 		{
@@ -475,10 +478,13 @@ enyo.kind({
 		{
 			kind:"FittableColumns",
 			components: [
-				{kind:"Phonegap.ProjectProperties.BuildStatus", name: "buildStatusDisplay"},
 				{
-					name: "applicationQrCode",
-					kind: "Phonegap.ProjectProperties.QrCode"		
+					kind:"Phonegap.ProjectProperties.BuildStatus",
+					name: "buildStatusDisplay"
+				},
+				{
+					kind: "Phonegap.ProjectProperties.QrCode",
+					name: "applicationQrCode"
 				}
 			]
 		}
@@ -510,8 +516,6 @@ enyo.kind({
 					this.$.AppIdList.createComponent({content: inApp.id, published: {applicationObject: inApp} , active: itemState});			
 					this.$.AppIdList.render();								
 				}, this);
-
-			this.showQrCodeImg();
 		}
 
 		// Update the build status object
@@ -547,12 +551,16 @@ enyo.kind({
 	/**@private*/
 	selectedAppIdChanged: function() {
 		this.$.buildStatusDisplay.setAppId(this.selectedAppId);		
-		this.showQrCodeImg();
 	},
 	
 	/**@private*/
 	showQrCodeImg: function() {
 		this.$.applicationQrCode.setAppId(this.selectedAppId);
+		this.$.applicationQrCode.show();
+	},
+
+	hideQrCodeImg: function() {
+		this.$.applicationQrCode.hide();
 	},
 
 	/**@private*/
