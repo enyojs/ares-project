@@ -548,9 +548,11 @@ enyo.kind({
 				this.__create();
 			}
 
-			// for enyo.Repeater (only kind in defaultkindOptions set)
-			this.onSetupItem = "aresUnImplemetedFunction";
-			this.set("count", 1);
+			// for enyo.Repeater (currently only kind in defaultkindOptions set)
+			if (this.__aresOptions.isRepeater === true) {
+				this.onSetupItem = "aresUnImplemetedFunction";
+				this.set("count", 1);
+			}
 		}
 
 		for(var o in inOptions) {
