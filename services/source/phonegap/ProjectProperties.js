@@ -552,7 +552,7 @@ enyo.kind({
 	
 	showQrCodeImg: function() {
 			this.$.applicationQrCode.setAppId(this.selectedAppId);
-			//this.$.applicationQrCode.setToken("byh9jfXSRmHvs2QGaVyX");
+			//this.$.applicationQrCode.setQr_key("");
 			this.$.applicationQrCode.show();
 	},
 
