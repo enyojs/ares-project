@@ -26,7 +26,9 @@ enyo.kind({
 		onRunDebug: "",
 		onPreview: "",
 		onError: "",
-		onRegisterMe: ""
+		onRegisterMe: "",
+		onShowWaitPopup: "",
+		onHideWaitPopup: ""
 	},
 	debug: false,
 	components: [
@@ -188,6 +190,10 @@ enyo.kind({
 		var project, nukeFiles ;
 		if (this.selected) {
 			project = Ares.Workspace.projects.at(this.selected.index);
+
+			var msgForDeletedProject = "Deleting project " + project.getName();  
+			this.doShowWaitPopup({msg: msgForDeletedProject});
+
 			nukeFiles = this.$.removeProjectPopup.get("nukeFiles");
 			this.trace("removing project", project.getName(), ( nukeFiles ? " and its files" : "" )) ;
 			this.trace(project);
@@ -203,7 +209,7 @@ enyo.kind({
 			else {
 				this.removeSelectedProjectData() ;
 			}
-
+			this.doHideWaitPopup();
 		}
 	},
 	removeSelectedProjectData: function() {

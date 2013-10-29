@@ -107,7 +107,7 @@ enyo.kind({
 			return;
 		}
 		
-		// Iframe is loaded and ready to do work.
+		// Iframe is initialyzed and ready to do work.
 		if(msg.op === "state" && msg.val === "initialized") {
 			this.sendIframeContainerData();
 		// Iframe received container data
@@ -117,6 +117,9 @@ enyo.kind({
 				this.doReloadComplete();
 				this.reloading = false;
 			}
+		// Loaded event sent from iframe and awaiting aresOptions.
+		} else if(msg.op === "state" && msg.val === "loaded") {
+			this.designerFrameLoaded();
 		// The current kind was successfully rendered in the iframe
 		} else if(msg.op === "rendered") {
 			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
@@ -197,6 +200,11 @@ enyo.kind({
 	kindRendered: function(content, filename) {
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.doDesignRendered({content: content, filename: filename});
+	},
+	//* Initialize the iframe dependingly from aresOptions
+	designerFrameLoaded: function() {
+		// FIXME: ENYO-3433 : options are hard-coded with defaultKindOptions that are currently known. the whole/real set must be determined indeed.
+		this.sendMessage({op: "initializeOptions", options: Model.get("defaultKindOptions")});
 	},
 	//* Clean up the iframe before closing designer
 	cleanUp: function() {
