@@ -1,4 +1,7 @@
 /* global Model, ares */
+// Store all information coming from all .design files of a project.
+// This is reset whenever a project change
+// This is used by Palette and inspector
 enyo.singleton({
 	name: "Model",
 	kind: "enyo.Component",

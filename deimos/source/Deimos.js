@@ -183,7 +183,10 @@ enyo.kind({
 	 * @protected
 	 */
 	projectDataChanged: function(oldProjectData) {
+		// *ProjectData are backbone obbject mixed with events. This is defined in ProjectCrtl...
+		// *ProjectData are kept in ProjectCtrl
 		if (oldProjectData) {
+			// unbind former project data from Deimos
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
 			oldProjectData.off('update:project-indexer', this.projectIndexUpdated);
 		}
@@ -192,6 +195,7 @@ enyo.kind({
 
 		if (this.projectData) {
 			this.trace("projectData", this.projectData);
+			// bind new project data in Deimos, any change in Project data triggers these callbacks
 			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
 			this.projectData.on('update:project-indexer', this.projectIndexUpdated, this);
 			this.projectIndexer = this.projectData.getProjectIndexer();
