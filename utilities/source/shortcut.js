@@ -4,19 +4,21 @@
  * By Binny V A
  * License : BSD
  */
-shortcut = {
-	'all_shortcuts':{},//All the shortcuts are stored in this array
-	'add': function(shortcut_combination,callback,opt) {
+var shortcut = {
+	'all_shortcuts': {},//All the shortcuts are stored in this ArrayBuffer();
+	'add': function (shortcut_combination, callback, opt) {
 		//Provide a set of default options
 		var default_options = {
-			'type':'keydown',
-			'propagate':false,
-			'disable_in_input':false,
-			'target':document,
-			'keycode':false
-		}
-		if(!opt) opt = default_options;
-		else {
+			'type' : 'keydown',
+			'propagate' : false,
+			'disable_in_input' : false,
+			'target' : document,
+			'keycode' : false
+		};
+
+		if (!opt) {
+			opt = default_options;
+		} else {
 			for(var dfo in default_options) {
 				if(typeof opt[dfo] == 'undefined') opt[dfo] = default_options[dfo];
 			}
@@ -73,7 +75,8 @@ shortcut = {
 				".":">",
 				"/":"?",
 				"\\":"|"
-			}
+			};
+
 			//Special Keys - and their codes
 			var special_keys = {
 				'esc':27,
@@ -127,7 +130,7 @@ shortcut = {
 				'f10':121,
 				'f11':122,
 				'f12':123
-			}
+			};
 	
 			var modifiers = { 
 				shift: { wanted:false, pressed:false},
@@ -210,7 +213,7 @@ shortcut = {
 	'remove':function(shortcut_combination) {
 		shortcut_combination = shortcut_combination.toLowerCase();
 		var binding = this.all_shortcuts[shortcut_combination];
-		delete(this.all_shortcuts[shortcut_combination])
+		delete(this.all_shortcuts[shortcut_combination]);
 		if(!binding) return;
 		var type = binding['event'];
 		var ele = binding['target'];
