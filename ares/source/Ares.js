@@ -42,7 +42,7 @@ enyo.kind({
 					onFileChanged: "closeDocument",
 					onFolderChanged: "closeSomeDocuments"
 				},
-				{kind: "Ares.DesignerPanels", name: "designerPanels"}
+				{kind: "Ares.DevelopmentPanel", name: "developmentPanel"}
 			]
 		},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
@@ -90,7 +90,7 @@ enyo.kind({
 	},
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
-	designerPanelsIndex: 2,
+	developmentPanelIndex: 2,
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
 	projectListWidth: 300,
@@ -98,7 +98,7 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
-		ComponentsRegistry.getComponent("designerPanels").$.panels.setIndex(this.phobosViewIndex);
+		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.phobosViewIndex);
 		ServiceRegistry.instance.setOwner(this); // plumb services events all the way up
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
@@ -130,8 +130,10 @@ enyo.kind({
 		this.$.serviceRegistry.setConfig(inEvent.serviceId, {auth: inEvent.auth}, inEvent.next);
 	},
 	projectSelected: function() {
+		this.trace("set timer for setting project in Deimos");
 		setTimeout(enyo.bind(this, function() { 
 			var currentProject = ComponentsRegistry.getComponent("projectView").currentProject;
+			this.trace("setting project in Deimos" + currentProject.id);
 			ComponentsRegistry.getComponent("deimos").projectSelected(currentProject);
 		}), 500);	// <-- TODO - using timeout here because project url is set asynchronously
 		return true;
@@ -335,7 +337,7 @@ enyo.kind({
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();
 		ComponentsRegistry.getComponent("deimos").load(inEvent);
-		ComponentsRegistry.getComponent("designerPanels").$.panels.setIndex(this.deimosViewIndex);
+		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.deimosViewIndex);
 		this.activeDocument.setCurrentIF('designer');
 	},
 	//* A code change happened in Phobos - push change to Deimos
@@ -350,9 +352,9 @@ enyo.kind({
 	},
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
-		ComponentsRegistry.getComponent("designerPanels").$.panels.setIndex(this.phobosViewIndex);
+		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.phobosViewIndex);
 		this.activeDocument.setCurrentIF('code');
-		ComponentsRegistry.getComponent("designerPanels").manageControls(false);
+		ComponentsRegistry.getComponent("developmentPanel").manageControls(false);
 	},
 	//* Undo event from Deimos
 	designerUndo: function(inSender, inEvent) {
@@ -454,22 +456,22 @@ enyo.kind({
 		}
 		var currentIF = d.getCurrentIF();
 		this.activeDocument = d;
-		var designerPanels = ComponentsRegistry.getComponent("designerPanels");
-		designerPanels.addPreviewTooltip("Preview "+this.activeDocument.getProjectData().id);
+		var developmentPanel = ComponentsRegistry.getComponent("developmentPanel");
+		developmentPanel.addPreviewTooltip("Preview "+this.activeDocument.getProjectData().id);
 		
 		if (currentIF === 'code') {
-			designerPanels.$.panels.setIndex(this.phobosViewIndex);
-			designerPanels.manageControls(false);
+			developmentPanel.$.panels.setIndex(this.phobosViewIndex);
+			developmentPanel.manageControls(false);
 		} else {
 			ComponentsRegistry.getComponent("phobos").designerAction();
-			designerPanels.manageControls(true);
+			developmentPanel.manageControls(true);
 		}
 		this._fileEdited();
 		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(d.getId());
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
-		var editorMode = ComponentsRegistry.getComponent("designerPanels").$.panels.getIndex() == this.phobosViewIndex;
+		var editorMode = ComponentsRegistry.getComponent("developmentPanel").$.panels.getIndex() == this.phobosViewIndex;
 		if (editorMode) {
 			ComponentsRegistry.getComponent("phobos").designerAction(inSender, inEvent);
 		} else {
@@ -544,13 +546,13 @@ enyo.kind({
 		this.$.errorPopup.raise(inEvent);
 	},
 	showDesignerErrorTooltip: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("designerPanels").showErrorTooltip(inSender, inEvent);
+		ComponentsRegistry.getComponent("developmentPanel").showErrorTooltip(inSender, inEvent);
 	},
 	resetDesignerErrorTooltip: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("designerPanels").resetErrorTooltip();
+		ComponentsRegistry.getComponent("developmentPanel").resetErrorTooltip();
 	},
 	showDesignerError: function(){
-		this.showError("",ComponentsRegistry.getComponent("designerPanels").getErrorFromDesignerBroken());
+		this.showError("",ComponentsRegistry.getComponent("developmentPanel").getErrorFromDesignerBroken());
 	},
 	showSignInErrorPopup : function(inEvent) {
 		this.$.signInErrorPopup.raise(inEvent);
@@ -644,14 +646,14 @@ enyo.kind({
 		ComponentsRegistry.getComponent("projectView").previewAction(inSender,{project:project});
 	},
 	_fileEdited: function() {
-		ComponentsRegistry.getComponent("designerPanels").updateDeimosLabel(this.activeDocument.getEdited());
+		ComponentsRegistry.getComponent("developmentPanel").updateDeimosLabel(this.activeDocument.getEdited());
 	},
 	/**
 	 * Event handler for ares components registry
 	 * 
 	 * @private
 	 * @param {Object} inSender
-	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, designerPanels, accountsConfigurator, ...]
+	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, developmentPanel, accountsConfigurator, ...]
 	 */
 	_registerComponent: function(inSender, inEvent) {
 		ComponentsRegistry.registerComponent(inEvent);

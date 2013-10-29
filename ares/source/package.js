@@ -4,5 +4,5 @@ enyo.depends(
 	"FileData.js",
 	"WorkspaceData.js",
 	"PackageMunger.js",
-	"DesignerPanels.js"
+	"DevelopmentPanel.js"
 );

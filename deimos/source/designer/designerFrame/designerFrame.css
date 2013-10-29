@@ -1,5 +1,5 @@
 
-.iframe-highlight {
+.designer-frame-highlight {
 	height: 0;
 	width: 0;
 	pointer-events: none;
@@ -7,17 +7,17 @@
 	position: absolute;
 	z-index: 9999;
 }
-.iframe-select-highlight {
+.designer-frame-select-highlight {
 	background-color: rgba(255,187,0,0.3);
 	border: 1px solid orange;
 }
 
-.iframe-drop-highlight {
+.designer-frame-drop-highlight {
 	border:1px solid blue;
 }
 
 /* Width/height handles */
-.iframe-resize-handle {
+.designer-frame-resize-handle {
 	position: absolute;
 	width: 10px;
 	height: 10px;

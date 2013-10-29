@@ -14,6 +14,7 @@ enyo.kind({
 		return enyo.json.codify.to(s, null, 4);
 	},
 	published: {
+		// contains serialization data extracted (but not cloned) from .design files
 		serializerOptions: null
 	},
 	//* protected
@@ -127,7 +128,7 @@ enyo.kind({
 		if (this.noserialize[inProp] === 1) {
 			return false;
 		} else {
-			var value = this.getSerializerOptions(inKind, inProp, "exclude");
+			var value = this.getSerializerOptions(inKind, "exclude", inProp);
 			if (value === undefined) {
 				return true;
 			} else {
@@ -136,11 +137,11 @@ enyo.kind({
 		}
 	},
 	// @protected
-	getSerializerOptions: function(inKind, inPropName, inOptName) {
-		try {
-			return this.serializerOptions[inKind][inOptName][inPropName];
-		} catch(error) {
-			return;			// Just return an undefined value
-		}
+	getSerializerOptions: function(inKind, inOptName, inPropName) {
+		var opt = this.serializerOptions[inKind] ;
+
+		var hasOpt = opt && opt[inOptName] && opt[inOptName].hasOwnProperty(inPropName) ;
+
+		return hasOpt ? opt[inOptName][inPropName] : undefined;
 	}
 });
