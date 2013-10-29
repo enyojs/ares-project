@@ -149,6 +149,7 @@ enyo.kind({
 		
 		this.owner.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.owner.$.kindPicker.render();
+		this.owner.resized();
 	},
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
