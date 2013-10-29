@@ -174,8 +174,9 @@ enyo.kind({
 			var platform = this.$[key2].platform;
 			var status = this.buildStatusData && this.buildStatusData.status[platform];
 			
-			if (platform !== undefined) {				
-				this.$[key2].setStatus(status);
+			if (platform !== undefined) {
+				this.log("status: ", status, " platform: ", platform)
+				this.$[key2].setStatus(status || "notAvailable");
 			}
 		}
 
