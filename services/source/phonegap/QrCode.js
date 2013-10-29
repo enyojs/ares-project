@@ -2,22 +2,34 @@
 enyo.kind({
 	name: "Phonegap.ProjectProperties.QrCode",
 	published: {
-		appId: null,
-		token: null
+		appId: undefined,
+		token: undefined
 	},
 	classes: "ares-project-properties-qrcode-image",
 
 	create: function () {
 		this.inherited(arguments);
 		this.setToken(Phonegap.ProjectProperties.getProvider().config.auth.token);
-
 	},
 
 	/**@private*/
 	appIdChanged: function() {
-		if(this.appId !== null || this.appId !== undefined) {
+		this.displayQrCode();	
+	},	
+
+	/**@private*/
+	tokenChanged: function() {	
+		this.displayQrCode();	
+	},
+
+	/**@private*/
+	displayQrCode: function() {
+		
+		if (this.appId !== undefined && this.token !== undefined) {
+			this.log("appid: ", this.appId, " token: ", this.token);
 			this.hasNode().innerHTML = this.generateQrCode();
-		}		
+		}
+		
 	},
 
 	/**@private*/
