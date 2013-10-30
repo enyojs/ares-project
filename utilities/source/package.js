@@ -13,5 +13,5 @@ enyo.depends(
 	"PanelGrabber.js",
 	"PopupTitle.js",
 	"Logo.js",
-	"shortcut.js"
+	"keyboard.js"
 );

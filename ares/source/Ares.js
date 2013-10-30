@@ -1,4 +1,4 @@
-/* global Ares, ServiceRegistry, async, ares, alert, ComponentsRegistry, shortcut */
+/* global Ares, ServiceRegistry, async, ares, alert, ComponentsRegistry, KeyboardJS */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets",
@@ -120,9 +120,19 @@ enyo.kind({
 	},
 	
 	initializeKeyBinding: function() {
-		shortcut.add("Ctrl+W", function() {
-			// Close the Editwindow
-			ComponentsRegistry.getComponent("phobos").closeDocAction();
+		KeyboardJS.on('ctrl + s', 
+			function(e) {
+				// Close the Editwindow
+				ComponentsRegistry.getComponent("phobos").closeDocAction();
+				// Prevent the Default Browser's action
+				if (e.preventDefault) {
+					e.preventDefault();
+				} else {
+					e.returnValue = false;
+				}
+			},
+			function(e) {
+				// 'Ctrl + S' Key-Up callback event issued: Do nothing
 		});
 	},
 
