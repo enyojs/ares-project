@@ -47,7 +47,13 @@ enyo.kind({
 		},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
 			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
-			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
+			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"},
+			{
+				name: "waitBuildPopupMessage", content: "Ongoing...", style: "padding-top: 10px;", 
+				components: [
+					{kind: "onyx.Button", content: "Cancel", ontap: "cancelBuild"}
+				]
+			}
 		]},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
 		{name: "signInErrorPopup", kind: "Ares.SignInErrorPopup", msg: "unknown error", details: ""},
