@@ -14,8 +14,7 @@ enyo.kind({
 	events: {
 		onAddProjectInList: "",
 		onShowWaitPopup: "",
-		onHideWaitPopup: "",
-		onProjectSelected: ""
+		onHideWaitPopup: ""
 	},
 	handlers: {
 		onFileChosen: "prepareShowProjectPropPopup",
@@ -341,9 +340,7 @@ enyo.kind({
 	},
 	
 	projectRefresh: function(inSender, inData) {
-		this.doProjectSelected({
-			project: this.targetProject
-		});
+		this.owner.setupProjectConfig(this.targetProject);
 		this.hideMe();
 	},
 	/**
@@ -366,9 +363,6 @@ enyo.kind({
 	kind: "onyx.Popup",
 	modal: true, centered: true, floating: true, autoDismiss: false,
 
-	events: {
-		onProjectSelected: ""
-	},
 	handlers: {
 		onDone: "hide",
 		onModifiedConfig: "saveProjectConfig",
@@ -493,9 +487,7 @@ enyo.kind({
 		return true;
 	},
 	projectRefresh: function(inSender, inData) {
-		this.doProjectSelected({
-			project: this.targetProject
-		});
+		this.owner.setupProjectConfig(this.targetProject);
 		this.hideMe();
 	},
 

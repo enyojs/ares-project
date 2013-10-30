@@ -14,7 +14,6 @@ enyo.kind({
 	classes: "enyo-unselectable ares-project-list",
 	events: {
 		onCreateProject: "",
-		onProjectSelected: "",
 		onScanProject: "",
 		onDuplicateProject: "",
 		onProjectRemoved: "",
@@ -257,7 +256,7 @@ enyo.kind({
 			project.setService(service);
 			this.$.projectMenu.setDisabled(false);
 			this.selectedProject = project;
-			this.doProjectSelected({project: project});
+			this.owner.setupProjectConfig( project );
 		} else {
 			// ...otherwise let
 			msg = "Service " + project.getServiceId() + " not found";

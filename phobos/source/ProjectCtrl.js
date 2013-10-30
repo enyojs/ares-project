@@ -62,7 +62,8 @@ enyo.kind({
 	 */
 	buildProjectDb: function() {
 		if (this.fullAnalysisDone) {
-			this.trace("Project DB already available - index: ", this.$.projectAnalyzer.index);
+			this.trace("Project DB already available for ", this.projectUrl, 
+					   " - index: ", this.$.projectAnalyzer.index);
 		} else {
 			this.forceFullAnalysis();
 		}
