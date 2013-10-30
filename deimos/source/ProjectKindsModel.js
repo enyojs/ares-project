@@ -1,6 +1,9 @@
-/* global Model, ares */
+/* global ProjectKindsModel, ares */
+// Store all information coming from all .design files of a project.
+// This is reset whenever a project change
+// This is used by Palette and inspector
 enyo.singleton({
-	name: "Model",
+	name: "ProjectKindsModel",
 	kind: "enyo.Component",
 	debug: false,
 	info: {},
@@ -48,7 +51,7 @@ enyo.singleton({
 		};
 	},
 	/**
-	 * Reset the Model Information to default
+	 * Reset the ProjectKindsModel Information to default
 	 * @public
 	 */
 	resetInformation: function() {
@@ -96,7 +99,7 @@ enyo.singleton({
 	},
 	// @protected
 	addSerializerOptions: function(data) {
-		// Prepare serializer options for the designer iframe
+		// Prepare serializer options for the designerFrame
 		enyo.forEach(data, function(item) {
 			var kindName = item.name;
 			var info = this.serializerOptions[kindName];
@@ -113,13 +116,13 @@ enyo.singleton({
 
 			var fn = function(inType, inName, inSubName, inData) {
 				if (inData.filterLevel) {
-					inData.level = Model.levelMapping[inData.filterLevel];
+					inData.level = ProjectKindsModel.levelMapping[inData.filterLevel];
 					if ( ! inData.level) {
-						inData.level = Model.F_NORMAL;
+						inData.level = ProjectKindsModel.F_NORMAL;
 						enyo.error("Invalid filter level for " + inType + " " + inName + "." + inSubName);
 					}
 				} else {
-					inData.level = Model.F_NORMAL;
+					inData.level = ProjectKindsModel.F_NORMAL;
 				}
 				this.trace("addInformation: Setting level ", inData.level, " for ", inType, " ", inName, ".", inSubName);
 			};
@@ -137,33 +140,26 @@ enyo.singleton({
 		}
 	},
 	getInfo: function(inKind, inType, inName) {
-		try {
-			return this.info[inKind][inType][inName];
-		} catch(error) {
-			try {
-				return this.info["enyo." + inKind][inType][inName];
-			} catch(err2) {
-				return;		// Return undefined
-			}
-		}
+		// enyo kinds don't always have the enyo prefix
+		var inf = this.info[inKind] || this.info["enyo." + inKind] ;
+
+		var hasInfo = inf && inf[inType] && inf[inType].hasOwnProperty(inName);
+		return hasInfo ? inf[inType][inName] : undefined ;
 	},
 	getFilterLevel: function(inKind, inType, inName) {
-		var info;
-		try {
-			info = this.getInfo(inKind, inType, inName);
-			if (info && info.level) {
-				return info.level;
-			} else {
-				return this.getInfo("__default", inType, inName).level || Model.F_NORMAL;
-			}
-		} catch(error) {
-			info = this.getInfo("__default", inType, inName);
-			return (info && info.level) || Model.F_NORMAL;
+		var info = this.getInfo(inKind, inType, inName);
+
+		if (info && info.level) {
+			return info.level;
+		}
+		else {
+			info = this.getInfo("__default", inType, inName) ;
+			return (info && info.level) || ProjectKindsModel.F_NORMAL;
 		}
 	},
 	getFlattenedContainerInfo: function() {		
 		// TODO: item containerData is set to null, revisit this,
-		// function called by the IFrameDesigner.sendIframeContainerData()
+		// function called by the Designer.sendDesignerFrameContainerData()
 		return null;
 	}
 });

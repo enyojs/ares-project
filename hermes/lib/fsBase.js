@@ -124,8 +124,8 @@ FsBase.prototype.route = function() {
 	}
 
 	var overlays = {
-		// "$deimos/source/designer/iframe/*"
-		designer: path.join(__dirname, "..", "..", "deimos", "source", "designer", "iframe"),
+		// "$deimos/source/designer/designerFrame/*"
+		designer: path.join(__dirname, "..", "..", "deimos", "source", "designer", "designerFrame"),
 		// "node_modules/less/dist/*"
 		less: path.join(__dirname, "..", "..", "node_modules", "less", "dist")
 	};

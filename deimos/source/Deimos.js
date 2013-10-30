@@ -1,4 +1,4 @@
-/* global Model */
+/* global ProjectKindsModel, ComponentsRegistry */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
@@ -41,7 +41,7 @@ enyo.kind({
 						{kind: "onyx.Slider", classes: "deimos-zoom-slider", value: 100, onChange: 'zoomDesigner', onChanging: 'zoomDesigner' }
 					]},
 					{kind: "Scroller", classes: "deimos-designer-wrapper", fit: true, components: [
-						{kind: "IFrameDesigner", name: "designer",
+						{kind: "Designer", name: "designer",
 							onSelect: "designerSelect",
 							onSelected: "designerSelected",
 							onDesignRendered: "designRendered",
@@ -123,6 +123,7 @@ enyo.kind({
 	 * @public
 	 */
 	load: function(data) {
+		this.trace("called with",data);
 		this.enableDesignerActionButtons(false);
 
 		var what = data.kinds;
@@ -149,6 +150,7 @@ enyo.kind({
 		
 		this.owner.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.owner.$.kindPicker.render();
+		this.owner.resized();
 	},
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
@@ -182,15 +184,19 @@ enyo.kind({
 	 * @protected
 	 */
 	projectDataChanged: function(oldProjectData) {
+		// *ProjectData are backbone obbject mixed with events. This is defined in ProjectCrtl...
+		// *ProjectData are kept in ProjectCtrl
 		if (oldProjectData) {
+			// unbind former project data from Deimos
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
 			oldProjectData.off('update:project-indexer', this.projectIndexUpdated);
 		}
 
-		Model.resetInformation();
+		ProjectKindsModel.resetInformation();
 
 		if (this.projectData) {
 			this.trace("projectData", this.projectData);
+			// bind new project data in Deimos, any change in Project data triggers these callbacks
 			this.projectData.on('change:project-indexer', this.projectIndexReady, this);
 			this.projectData.on('update:project-indexer', this.projectIndexUpdated, this);
 			this.projectIndexer = this.projectData.getProjectIndexer();
@@ -225,8 +231,8 @@ enyo.kind({
 		this.trace("projectIndexUpdated: for projectIndexer: ", indexer);
 		this.$.inspector.setProjectIndexer(indexer);
 		this.$.palette.setProjectIndexer(indexer);
-		Model.buildInformation(indexer);
-		this.$.designer.sendSerializerOptions(Model.serializerOptions);
+		ProjectKindsModel.buildInformation(indexer);
+		this.$.designer.sendSerializerOptions(ProjectKindsModel.serializerOptions);
 	},
 	//* Rerender current kind
 	rerenderKind: function(inSelectId) {
@@ -243,7 +249,7 @@ enyo.kind({
 	refreshComponentView: function(inComponents) {
 		this.$.componentView.visualize(inComponents);
 	},
-	// New selected item triggered in iframe. Synchronize component view and refresh inspector.
+	// New selected item triggered in designerFrame. Synchronize component view and refresh inspector.
 	designerSelect: function(inSender, inEvent) {
 		var c = inSender.selection;
 		this.refreshInspector();
@@ -508,7 +514,7 @@ enyo.kind({
 		
 		return true;
 	},
-	//* Called when the iFrame has retrieved a requested absolute position value
+	//* Called when the designerFrame has retrieved a requested absolute position value
 	designerReturnPositionValue: function(inSender, inEvent) {
 		this.$.inspector.setRequestedPositionValue(inEvent.prop, inEvent.value);
 		return true; //TODO See if the code behind the return is useful 
@@ -705,6 +711,30 @@ enyo.kind({
 		
 		return cleanComponent;
 	},
+	cleanUpViewComponent: function(inComponent, inKeepAresIds) {
+		var aresId = inComponent.aresId,
+			childComponents = [],
+			cleanComponent = {},
+			att,
+			i;
+		if (!aresId) {
+			return cleanComponent;
+		}
+		for(att in inComponent){ 
+			if ((inKeepAresIds && att === "aresId") || (att !== "aresId" && att !== "components" && att !== "__aresOptions")) {
+				cleanComponent[att] = inComponent[att];
+			}
+	     }
+		if (inComponent.components) {
+			for (i=0; i<inComponent.components.length; i++) {
+				childComponents.push(this.cleanUpViewComponent(inComponent.components[i], inKeepAresIds));
+			}
+			if (childComponents.length > 0) {
+				cleanComponent.components = childComponents;
+			}
+		}
+		return cleanComponent;
+	},
 	undoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
 		this.doUndo();
@@ -752,6 +782,7 @@ enyo.kind({
 	},
 	//* Called by Ares when ProjectView has new project selected
 	projectSelected: function(inProject) {
+		this.trace("called with ",inProject);
 		this.$.designer.updateSource(inProject);
 	},
 	reloadDesigner: function() {
@@ -789,7 +820,7 @@ enyo.kind({
 		}
 	},
 	addOptionsToComponent: function(inComponent) {
-		var options = Model.getKindOptions(inComponent.kind);
+		var options = ProjectKindsModel.getKindOptions(inComponent.kind);
 		if (options) {
 			inComponent.__aresOptions = options;
 		}
@@ -888,20 +919,22 @@ enyo.kind({
 	// @protected		
 	runPaletteComponentAction: function(inSender,inEvent){
 		var config = this.$.actionPopup.getConfigComponent(config);
-		var target = this.$.actionPopup.getTargetComponent(target);
-		var beforeId = inEvent.beforeId;
 
 		if(inEvent.getName() === "addtoKind"){
-			this.performCreateItem(config, target, beforeId);			
+			var target = this.$.actionPopup.getTargetComponent(target);
+			var beforeId = inEvent.beforeId; 
+			this.performCreateItem(config, target, beforeId);
 		} else if (inEvent.getName() === "replaceKind"){
 			//TODO: Add a feature for "Replace Button" against view template component on designer behavior - ENYO-2807
 			this.doError({msg:"not implemented yet"});
 		} else if (inEvent.getName() === "addNewKind"){
-			//TODO: Add a feature for "Add new Kind" against view template component on designer behavior - ENYO-2808
-			this.doError({msg:"not implemented yet"});
+			//Add a feature for "Add new Kind" against view template component on designer behavior
+			var config_data = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
+			ComponentsRegistry.getComponent("phobos").addViewKindAction(config_data);
 		}
 		this.$.actionPopup.hide();
 	},
+
 
 	// @protected
 	performCreateItem: function(config, target, beforeId){
