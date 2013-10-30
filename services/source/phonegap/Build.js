@@ -8,13 +8,15 @@ enyo.kind({
 	kind: "enyo.Component",
 	events: {
 		onLoginFailed: "",
-		onShowWaitPopup: "",
+		onShowWaitBuildPopup: "",
 		onFsEvent: ""
 	},
 	published: {
 		checkBuildResultInterval: 3000
 	},
-	
+	components: [
+		{kind: "Signals", "plugin.phonegap.buildCanceled": "abortAjaxRequest"},
+	],
 	debug: false,
 	/**
 	 * @private

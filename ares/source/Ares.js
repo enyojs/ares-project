@@ -65,6 +65,8 @@ enyo.kind({
 		onUpdateAuth: "handleUpdateAuth",
 		onShowWaitPopup: "showWaitPopup",
 		onHideWaitPopup: "hideWaitPopup",
+		onShowWaitBuildPopup: "showWaitBuildPopup",
+		onHideWaitBuildPopup: "hideWaitBuildPopup",
 		onError: "showError",
 		onErrorTooltip: "showDesignerErrorTooltip",
 		onErrorTooltipReset: "resetDesignerErrorTooltip",
@@ -534,8 +536,15 @@ enyo.kind({
 		this.$.waitPopupMessage.setContent(inEvent.msg);
 		this.$.waitPopup.show();
 	},
+	cancelBuild: function(inSender, inEvent) {
+		enyo.Signals.send("plugin.phonegap.buildCanceled");
+	},
+
 	hideWaitPopup: function() {
 		this.$.waitPopup.hide();
+	},
+	hideWaitBuildPopup: function() {
+		this.$.waitBuildPopupMessage.hide();
 	},
 	showError: function(inSender, inEvent) {
 		this.trace("event:", inEvent, "from sender:", inSender);
