@@ -18,7 +18,7 @@ enyo.kind({
 		onItemDragend: "itemDragend"
 	},
 	published: {
-		dragType: null,
+		dragType: null
 	},
 	style: "position: relative;",
 	components: [
