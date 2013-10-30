@@ -1,4 +1,4 @@
-/* global Ares, ServiceRegistry, async, ares, alert, ComponentsRegistry */
+/* global Ares, ServiceRegistry, async, ares, alert, ComponentsRegistry, shortcut */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets",
@@ -109,12 +109,23 @@ enyo.kind({
 		}
 
 		Ares.instance = this;
+
+		// For Key-Binding Sample
+		this.initializeKeyBinding();
 	},
 
 	rendered: function() {
 		this.inherited(arguments);
 		this.showProjectView();
 	},
+	
+	initializeKeyBinding: function() {
+		shortcut.add("Ctrl+W", function() {
+			// Close the Editwindow
+			ComponentsRegistry.getComponent("phobos").closeDocAction();
+		});
+	},
+
 	/**
 	 * @private
 	 */
