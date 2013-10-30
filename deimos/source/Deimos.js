@@ -6,8 +6,7 @@ enyo.kind({
 	classes: "enyo-unselectable onyx",
 	debug: false,
 	published: {
-		projectData: null,		// All the project data shared mainly between phobos and deimos
-		selectFromComponentView: false
+		projectData: null		// All the project data shared mainly between phobos and deimos
 	},
 	components: [
 		{name: "actionPopup", kind:"PaletteComponentActionPopup", centered: true, floating: true, autoDismiss: false, modal: true},
@@ -100,6 +99,8 @@ enyo.kind({
 	index: null,
 	previousContent: "",
 	fileName: "",
+	selectFromComponentView: false,
+	
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -256,7 +257,7 @@ enyo.kind({
 		this.refreshInspector();
 		var haveToScroll = !this.selectFromComponentView;
 		this.$.componentView.setSelected(c, haveToScroll);
-		this.setSelectFromComponentView(false);
+		this.selectFromComponentView = false;
 		return true;
 	},
 	// Select event triggered by component view was completed. Refresh inspector.
@@ -266,7 +267,7 @@ enyo.kind({
 	},
 	componentViewSelect: function(inSender, inEvent) {
 		this.$.designer.select(inEvent.component);
-		this.setSelectFromComponentView(true);
+		this.selectFromComponentView = true;
 		return true;
 	},
 	syncComponentViewDropTargetHighlighting: function(inSender, inEvent) {

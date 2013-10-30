@@ -19,7 +19,6 @@ enyo.kind({
 	},
 	published: {
 		dragType: null,
-		scroll: false
 	},
 	style: "position: relative;",
 	components: [
@@ -30,6 +29,7 @@ enyo.kind({
 
 	holdoverTimeout:   null,
 	holdoverTimeoutMS: 500,
+	scroll: false,
 	
 	//* Draw component view visualization of component tree
 	visualize: function(inComponents) {
@@ -60,11 +60,11 @@ enyo.kind({
 		if(this.scroll){
 			this.$.scroller.scrollIntoView(this.selection, true);
 		}
-		this.setScroll(false);
+		this.scroll = false;
 	},
 	//* Select control with _comp.aresId_ that matches _inComponent_
 	setSelected: function(inComponent, haveToScroll) {
-		this.setScroll(haveToScroll);
+		this.scroll = haveToScroll;
 		this._setSelected(inComponent.aresId, this.getClientControls());
 	},
 	_setSelected: function(inId, inComponents) {
