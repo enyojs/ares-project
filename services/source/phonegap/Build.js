@@ -17,6 +17,7 @@ enyo.kind({
 	components: [
 		{kind: "Signals", "plugin.phonegap.buildCanceled": "abortAjaxRequest"},
 	],
+	req: {},
 	debug: false,
 	/**
 	 * @private
@@ -509,6 +510,12 @@ enyo.kind({
 			} else {
 				var req, fs = project.getService();
 				req = fs.createFile(project.getFolderId(), "config.xml", configXml, { overwrite: true });
+
+				this.abortAjaxRequest= function() {
+						req.xhr.abort();
+						this.abortAjaxRequest= function() {};		
+				};
+				
 				req.response(this, function _savedConfigXml(inSender, inData) {
 					this.trace("Phonegap.Build#_updateConfigXml()", "wrote config.xml:", inData);	
 					next();
@@ -533,6 +540,12 @@ enyo.kind({
 		var req = [];
 		this.doShowWaitPopup({msg: $L("Building source archive")});
 		req = project.getService().exportAs(project.getFolderId(), -1 /*infinity*/);
+
+		this.abortAjaxRequest= function() {
+				req.xhr.abort();
+				this.abortAjaxRequest= function() {};		
+		};
+
 		req.response(this, function _gotFiles(inSender, inData) {
 			this.trace("Phonegap.Build#_getFiles()", "Got the files data");
 			var ctype = req.xhrResponse.headers['x-content-type'];
@@ -552,7 +565,7 @@ enyo.kind({
 	_submitBuildRequest: function(project, buildStarted, data, next) {
 		var config = ares.clone(project.getConfig().getData());
 		this.trace("config: ", config);
-		this.doShowWaitPopup({msg: $L("Uploading source archive to PhoneGap Build")});
+		this.doShowWaitBuildPopup({msg: $L("Uploading source archive to PhoneGap Build")});
 
 		var minification = config.providers.phonegap.minification;
 
@@ -611,6 +624,12 @@ enyo.kind({
 			postBody: data.content,
 			contentType: data.ctype
 		});
+
+		this.abortAjaxRequest= function() {
+				req.xhr.abort();
+				this.abortAjaxRequest= function() {};		
+		};
+
 		req.response(this, function(inSender, inData) {
 			this.trace("Phonegap.Build#_submitBuildRequest(): response:", inData);
 			if (inData) {
@@ -631,6 +650,9 @@ enyo.kind({
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to build application", next));
 		req.go(query);
+	},
+
+	abortAjaxRequest: function() {
 	},
 
 	/**

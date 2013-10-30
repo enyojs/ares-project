@@ -536,6 +536,11 @@ enyo.kind({
 		this.$.waitPopupMessage.setContent(inEvent.msg);
 		this.$.waitPopup.show();
 	},
+
+	showWaitBuildPopup: function(inSender, inEvent) {
+		this.$.waitBuildPopupMessage.setContent(inEvent.msg);
+		this.$.waitBuildPopupMessage.show();
+	},
 	cancelBuild: function(inSender, inEvent) {
 		enyo.Signals.send("plugin.phonegap.buildCanceled");
 	},
