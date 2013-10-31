@@ -652,6 +652,11 @@ enyo.kind({
 	},
 
 	abortAjaxRequest: function() {
+		// abortAjaxRequest will store a cancel build function
+		// generated when a build is on-going (See
+		// _submitBuildRequest). This function is a NOP so no failure
+		// happens even if a 'buildCanceled' signal is received out of
+		// a build
 	},
 
 	/**
