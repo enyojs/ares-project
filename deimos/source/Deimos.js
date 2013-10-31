@@ -99,6 +99,8 @@ enyo.kind({
 	index: null,
 	previousContent: "",
 	fileName: "",
+	selectFromComponentView: false,
+	
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -253,7 +255,9 @@ enyo.kind({
 	designerSelect: function(inSender, inEvent) {
 		var c = inSender.selection;
 		this.refreshInspector();
-		this.$.componentView.setSelected(c);
+		var haveToScroll = !this.selectFromComponentView;
+		this.$.componentView.setSelected(c, haveToScroll);
+		this.selectFromComponentView = false;
 		return true;
 	},
 	// Select event triggered by component view was completed. Refresh inspector.
@@ -263,6 +267,7 @@ enyo.kind({
 	},
 	componentViewSelect: function(inSender, inEvent) {
 		this.$.designer.select(inEvent.component);
+		this.selectFromComponentView = true;
 		return true;
 	},
 	syncComponentViewDropTargetHighlighting: function(inSender, inEvent) {
