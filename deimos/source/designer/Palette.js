@@ -14,7 +14,6 @@ enyo.kind({
 			]}
 		]}
 	],
-	debug: false,
 	toggleDrawer: function() {
 		var open = this.$.drawer.getOpen();
 		this.$.drawer.setOpen(!open);
@@ -28,7 +27,7 @@ enyo.kind({
 			this.toggleDrawer();
 		}
 		this.$.list.build();
-		if (!this.debug && this.$.name.content === "ignore") {
+		if (this.$.name.content === "ignore") {
 			this.hide();
 		}
 	},
