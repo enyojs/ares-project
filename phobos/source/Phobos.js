@@ -719,6 +719,7 @@ enyo.kind({
 				codeToInsert += ("\t" + item + ": function(inSender, inEvent) {\n\t\t// TO");
 				codeToInsert += ("DO - Auto-generated code\n\t}");
 			}
+			this.functionNavigate(item);
 		}
 
 		// insert the missing handler methods code in the editor
@@ -733,6 +734,17 @@ enyo.kind({
 		} else {
 			// There is no block information for that kind - Parser is probably not up-to-date
 			enyo.log("Unable to insert missing handler methods");
+		}
+	},
+	functionNavigate: function(item) {
+		for(var i = 0 ;  i <  this.objectsToDump.length ; i++) {
+			if(this.objectsToDump[i].name === item) {
+				var functionItem = this.objectsToDump[i];
+				if(functionItem.start && functionItem.end) {
+					this.$.ace.navigateToPosition(functionItem.start, functionItem.end);
+					this.doAceFocus();
+				}
+			}
 		}
 	},
 	// called when designer has modified the components

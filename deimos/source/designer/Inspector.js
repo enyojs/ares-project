@@ -1,4 +1,4 @@
-/* global analyzer, ProjectKindsModel, Inspector, ares */
+/* global analyzer, ProjectKindsModel, Inspector, ares, ComponentsRegistry */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
@@ -434,7 +434,12 @@ enyo.kind({
 				inEvent.target.setFieldValue(v);
 				this.change(inSender, inEvent);
 			}
+			this.dblclickJump(inSender, inEvent);		
 		}
+	},
+	dblclickJump: function(inSender, inEvent) {
+		this.change(inSender, inEvent);
+		ComponentsRegistry.getComponent("deimos").closeDesignerAction();
 	},
 	//* @public
 	initUserDefinedAttributes: function(inComponents) {
