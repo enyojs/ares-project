@@ -514,7 +514,7 @@ enyo.kind({
 				this.abortAjaxRequest= function() {
 						req.xhr.abort();
 						this.abortAjaxRequest= function() {};		
-				};
+					};
 				
 				req.response(this, function _savedConfigXml(inSender, inData) {
 					this.trace("Phonegap.Build#_updateConfigXml()", "wrote config.xml:", inData);	
@@ -628,7 +628,7 @@ enyo.kind({
 		this.abortAjaxRequest= function() {
 				req.xhr.abort();
 				this.abortAjaxRequest= function() {};		
-		};
+			};
 
 		req.response(this, function(inSender, inData) {
 			this.trace("Phonegap.Build#_submitBuildRequest(): response:", inData);

@@ -46,7 +46,13 @@ enyo.kind({
 			]
 		},
 		{
-			name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;",
+			name: "waitPopup",
+			kind: "onyx.Popup",
+			centered: true,
+			floating: true, 
+			autoDismiss: false,
+			modal: true,
+			style: "text-align: center; padding: 20px;",
 			components: [
 				{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 				{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}, 
@@ -523,7 +529,7 @@ enyo.kind({
 			this.syncJSFile(code);
 		}
 	},
-	
+
 	syncCSSFile: function(inFilename, inCode) {
 		ComponentsRegistry.getComponent("deimos").syncCSSFile(inFilename, inCode);
 	},
