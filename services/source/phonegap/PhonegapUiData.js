@@ -44,7 +44,7 @@ enyo.kind({
 					{
 						name: "phonegap-version",
 						label:"Phonegap version",
-						content:["2.9.0", "2.7.0", "2.5.0", "2.3.0", "2.2.0", "2.1.0", "2.0.0"],
+						content:["3.1.0", "3.0.0","2.9.0", "2.7.0", "2.5.0"],
 						defaultValue: "2.9.0",
 						type: "PickerRow", 
 						jsonSection: "preferences"
