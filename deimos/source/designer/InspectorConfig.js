@@ -127,8 +127,8 @@ enyo.kind({
 				{kind: "onyx.Menu", name: "menu", floating: true, components: [
 					// Will be filled at create() time
 				]}
-			]}
-			,{kind: "enyo.Button", name: "insertFunctionButton", content: "+" , ontap: "functionInsert"}
+			]},
+				{kind: "enyo.Button", name: "insertFunctionButton", content: "+" , ontap: "functionInsert"}
 	],
 	handlers: {
 		onActivate: "preventMenuActivation"
@@ -160,8 +160,8 @@ enyo.kind({
 	},
 	fieldSameValueFind: function() {
 		for(var key in this.values) {
-			if(this.values[key] === this.fieldValue) {	
-	   			return this.values[key];
+			if(this.values[key] === this.fieldValue) {
+				return this.values[key];
 			}
 		}
 	},
