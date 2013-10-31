@@ -539,8 +539,7 @@ enyo.kind({
 	},
 
 	showWaitPopup: function(inSender, inEvent) {
-		if(inEvent.service === 'build' && 
-			inEvent.msg !== 'Starting: ' + inEvent.service) {
+		if(inEvent.service === 'build' && ! inEvent.msg.match(/Starting/)) {
 			this.$.cancelWaitPopup.show();
 		}
 		this.$.waitPopupMessage.setContent(inEvent.msg);
