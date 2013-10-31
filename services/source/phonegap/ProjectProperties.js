@@ -500,10 +500,7 @@ enyo.kind({
 			enyo.forEach(this.userData.user.apps.all, 
 				function (inApp) {
 					var itemState = inApp.id === this.selectedAppId ? true : false;
-					if (itemState) {
-						this.setSelectedTitle(inApp.title);
-					}					
-					this.$.AppIdList.createComponent({content: inApp.id, published: {applicationObject: inApp} , active: itemState});			
+					this.$.AppIdList.createComponent({content: inApp.id+ " - " + inApp.title, value: inApp.id, published: {applicationObject: inApp} , active: itemState, classes: "ares-project-properties-picker-item-align-left"});			
 					this.$.AppIdList.render();								
 				}, this);
 		}
@@ -534,7 +531,7 @@ enyo.kind({
 		if (inValue.content === "New Application") {
 			this.setSelectedAppId("");
 		} else {
-			this.setSelectedAppId(inValue.content);
+			this.setSelectedAppId(inValue.selected.value);
 		}				
 	},
 
