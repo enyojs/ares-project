@@ -187,7 +187,8 @@ enyo.kind({
 				if (this.projectIndexer.design.palette[o]) {
 					var keys = Object.keys(this.projectIndexer.design.palette[o].items);
 					enyo.forEach(keys, function(item) {
-						catchKindListInPalette.push(this.projectIndexer.design.palette[o].items[item].kind);
+						var kindName = this.projectIndexer.design.palette[o].items[item].config.kind || "";
+						catchKindListInPalette.push(kindName);
 					}, this);
 				}
 			}, this);
@@ -205,7 +206,6 @@ enyo.kind({
 			var item = {
 				name: kind.name,
 				description: kind.comment,
-				inline: {kind: kind.name},
 				config: {kind: kind.name}
 			};
 			// Check for package namespace
