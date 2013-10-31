@@ -511,8 +511,8 @@ enyo.kind({
 				req = fs.createFile(project.getFolderId(), "config.xml", configXml, { overwrite: true });
 
 				this.abortAjaxRequest= function() {
-						req.xhr.abort();
 						this.abortAjaxRequest= function() {};		
+						req.xhr.abort();
 					};
 				
 				req.response(this, function _savedConfigXml(inSender, inData) {
@@ -541,9 +541,9 @@ enyo.kind({
 		req = project.getService().exportAs(project.getFolderId(), -1 /*infinity*/);
 
 		this.abortAjaxRequest= function() {
-			req.xhr.abort();
 			this.abortAjaxRequest= function() {};		
 			aborted = true ;
+			req.xhr.abort();
 		};
 
 		req.response(this, function _gotFiles(inSender, inData) {
@@ -633,8 +633,8 @@ enyo.kind({
 		});
 
 		this.abortAjaxRequest= function() {
-				req.xhr.abort();
 				this.abortAjaxRequest= function() {};		
+				req.xhr.abort();
 			};
 
 		req.response(this, function(inSender, inData) {
