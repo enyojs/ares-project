@@ -240,7 +240,7 @@ It can be a simple kind as for "onyx.ProgressButton" or a complex kind definitio
 "inline" is not used for the time being.
 
 A _special_ category can be added to ignore some components in the palette by naming it `ignore` and giving the list of items to ignore.
-Each items to ignore must be declared simply with its `kind`, `name`, `description` and `config` values.
+Each items to ignore must be declared simply with its `kind`, `name`. `description` and `config` are not needed.
 
 ### Section "inspector"
 
