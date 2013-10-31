@@ -29,6 +29,7 @@ enyo.kind({
 
 	holdoverTimeout:   null,
 	holdoverTimeoutMS: 500,
+	scroll: false,
 	
 	//* Draw component view visualization of component tree
 	visualize: function(inComponents) {
@@ -54,12 +55,16 @@ enyo.kind({
 		if(this.selection) {
 			this.unHighlightItem(this.selection);
 		}
-		
 		this.selection = inComponent;
 		this.highlightSelection();
+		if(this.scroll){
+			this.$.scroller.scrollIntoView(this.selection, true);
+		}
+		this.scroll = false;
 	},
 	//* Select control with _comp.aresId_ that matches _inComponent_
-	setSelected: function(inComponent) {
+	setSelected: function(inComponent, haveToScroll) {
+		this.scroll = haveToScroll;
 		this._setSelected(inComponent.aresId, this.getClientControls());
 	},
 	_setSelected: function(inId, inComponents) {
