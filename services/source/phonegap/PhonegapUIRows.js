@@ -482,12 +482,12 @@ enyo.kind({
 	 */
 	activatePickerItemByContent: function(inContent){
 		for (var key in this.$.configurationPicker.$) {
-		    if(this.$.configurationPicker.$[key].kind === "onyx.MenuItem"){
+			if(this.$.configurationPicker.$[key].kind === "onyx.MenuItem"){
 			this.$.configurationPicker.$[key].active = false;
 				if(this.$.configurationPicker.$[key].value === inContent){
 					this.$.configurationPicker.setSelected(this.$.configurationPicker.$[key]);
 				}
-		    }
+			}
 		}
 	},
 
