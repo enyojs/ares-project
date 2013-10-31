@@ -719,10 +719,9 @@ enyo.kind({
 				codeToInsert += ("\t" + item + ": function(inSender, inEvent) {\n\t\t// TO");
 				codeToInsert += ("DO - Auto-generated code\n\t}");
 			}
-		}			 		 	
+			this.functionNavigate(item);
+		}
 
-		this.functionNavigate(item);
-		
 		// insert the missing handler methods code in the editor
 		if (object.block) {
 			if (codeToInsert !== "") {
