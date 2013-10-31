@@ -542,8 +542,8 @@ enyo.kind({
 		req = project.getService().exportAs(project.getFolderId(), -1 /*infinity*/);
 
 		this.abortAjaxRequest= function() {
-				req.xhr.abort();
-				this.abortAjaxRequest= function() {};		
+			req.xhr.abort();
+			this.abortAjaxRequest= function() {};		
 		};
 
 		req.response(this, function _gotFiles(inSender, inData) {
