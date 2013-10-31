@@ -397,6 +397,7 @@ enyo.kind({
 		var harmonia = ComponentsRegistry.getComponent("harmonia");
 		harmonia.removeClass("ares-small-screen");		
 		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
+		this.$.aresLayoutPanels.getPanels()[this.developmentPanelIndex].switchGrabberDirection(false);
 		this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
 		this.$.aresLayoutPanels.reflow();
 		harmonia.hideGrabber();
