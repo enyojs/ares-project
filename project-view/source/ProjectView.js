@@ -181,7 +181,7 @@ enyo.kind({
 	 */
 	projectAction: function(project, serviceType, action) {
 		var self = this;
-		this.doShowWaitPopup({msg: "Starting: " + action});
+		this.doShowWaitPopup({msg: "Starting: " + action, service: serviceType});
 		// TODO: Must be reworked to allow the selection of builder/tester in the UI - ENYO-2049
 		var services = ServiceRegistry.instance.getServicesByType(serviceType);
 		var provider =	services[services.length - 1];

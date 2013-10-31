@@ -8,7 +8,7 @@ enyo.kind({
 	kind: "enyo.Component",
 	events: {
 		onLoginFailed: "",
-		onShowWaitBuildPopup: "",
+		onShowWaitPopup: "",
 		onFsEvent: ""
 	},
 	published: {
@@ -538,7 +538,7 @@ enyo.kind({
 	_getFiles: function(project, next) {
 		this.trace("...");
 		var req = [];
-		this.doShowWaitPopup({msg: $L("Building source archive")});
+		this.doShowWaitPopup({msg: $L("Building source archive"), service: "build"});
 		req = project.getService().exportAs(project.getFolderId(), -1 /*infinity*/);
 
 		this.abortAjaxRequest= function() {
@@ -565,7 +565,7 @@ enyo.kind({
 	_submitBuildRequest: function(project, buildStarted, data, next) {
 		var config = ares.clone(project.getConfig().getData());
 		this.trace("config: ", config);
-		this.doShowWaitBuildPopup({msg: $L("Uploading source archive to PhoneGap Build")});
+		this.doShowWaitPopup({msg: $L("Uploading source archive to PhoneGap Build"), service: "build"});
 
 		var minification = config.providers.phonegap.minification;
 
