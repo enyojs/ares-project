@@ -1,3 +1,4 @@
+/* global ComponentsRegistry */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 /**
