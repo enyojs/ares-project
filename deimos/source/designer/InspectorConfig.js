@@ -120,14 +120,15 @@ enyo.kind({
 	// TODO: YDM the style above in MenuDecorator should be replaced by a CSS class - Potential issue between less and css files
 	
 	components: [
-		{classes: "inspector-field-caption", name: "title"},
+		{classes: "inspector-field-caption", name: "title", style:"width:75px;"},
 		{kind: "onyx.MenuDecorator", style: "display: inline-block", onSelect: "itemSelected", components: [
-				{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
-				{kind: "enyo.Button", name: "button", classes:"inspector-event-button"},
+				{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onkeypress: "handleEnterKey", ondblclick: "handleDblClick"},
+				{kind: "enyo.Button", name: "button", classes:"inspector-event-button"},				
 				{kind: "onyx.Menu", name: "menu", floating: true, components: [
 					// Will be filled at create() time
 				]}
 			]}
+			,{kind: "enyo.Button", name: "insertFunctionButton", content: "+" , ontap: "functionInsert"}
 	],
 	handlers: {
 		onActivate: "preventMenuActivation"
@@ -142,25 +143,48 @@ enyo.kind({
 		return true;
 	},
 	//* Stop extraneous activate event from being fired when box is initially checked
-	handleChange: function(inSender, inEvent) {
+	handleEnterKey: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
-		this.doChange({target: this});
+		if(inEvent.keyCode === 13) {
+			this.doChange({target: this});
+			ComponentsRegistry.getComponent("deimos").closeDesignerAction();
+		}
 		return true;
 	},
 	handleDblClick: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
-		this.doDblClick({target: this});
+		if(!inEvent.srcElement.disabled) {
+			this.doDblClick({target: this});
+		}	
+		return true;
+	},
+	fieldSameValueFind: function() {
+		for(var key in this.values) {
+			if(this.values[key] === this.fieldValue) {	
+	   			return this.values[key];
+			}
+		}
+	},
+	functionInsert: function(inSender, inEvent) {		
+		this.fieldValue = this.$.value.getValue();
+		var listSameValue = this.fieldSameValueFind();
+		if(typeof listSameValue === "undefined") {
+			this.doChange({target: this});
+			ComponentsRegistry.getComponent("deimos").closeDesignerAction();
+		}
 		return true;
 	},
 	itemSelected: function(inSender, inEvent) {
 		this.fieldValue = inEvent.content;
 		this.$.value.setValue(inEvent.content);
 		this.doChange({target: this});
+		ComponentsRegistry.getComponent("deimos").closeDesignerAction();
 		return true;
 	},
 	disabledChanged: function() {
 		this.inherited(arguments);
 		this.$.button.setDisabled(this.getDisabled());
+		this.$.insertFunctionButton.setDisabled(this.getDisabled());
 	}
 });
 
