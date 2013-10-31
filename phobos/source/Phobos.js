@@ -1002,21 +1002,15 @@ enyo.kind({
 		this.designerAction();
 	},
 	/**
-	 * This function is called after replace current kind.
-	 * a switch to the designer is performed. 
-	 * @param config 
+	 * Insert a new kind (requested from the designer)
+	 * A switch to the designer is performed to fully reload the kinds in the designer.
+	 * @param kind_index, config 
 	 * @public
 	 */
-	ReplaceViewKindAction: function(kind_index, config){
-
+	replaceViewKindAction: function(kind_index, config){
 		var obj = this.analysis.objects[kind_index];
 		var range = this.$.ace.mapToLineColumnRange(obj.block.start, obj.block.end);
-		this.$.ace.replaceRange(range, "");
-
-		var pos = obj.block.start;
-		range = this.$.ace.mapToLineColumnRange(pos, pos);
 		this.$.ace.replaceRange(range, config);
-
 		this.designerAction();
 	},
 	
