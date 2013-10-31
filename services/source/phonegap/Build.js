@@ -17,7 +17,6 @@ enyo.kind({
 	components: [
 		{kind: "Signals", "plugin.phonegap.buildCanceled": "abortAjaxRequest"},
 	],
-	req: {},
 	debug: false,
 	/**
 	 * @private
