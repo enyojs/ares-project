@@ -23,7 +23,13 @@ enyo.kind({
 		this.model = inModel;
 		this.$.name.setContent(this.model.name);
 		this.$.list.count = this.model.items.length;
+		if (this.$.list.count === 0 && this.$.drawer.getOpen()) {
+			this.toggleDrawer();
+		}
 		this.$.list.build();
+		if (this.$.name.content === "ignore") {
+			this.hide();
+		}
 	},
 	setupItem: function(inSender, inEvent) {
 		inEvent.item.$.paletteItem.setModel(this.model.items[inEvent.index]); // <---- TODO - sibling reference, should be fixed up
@@ -147,8 +153,9 @@ enyo.kind({
 		
 		this.palette = allPalette;
 		this.palette.sort(function(a,b) {
-			return (a.order || 0) - (b.order || 0);
+			return (a.name || "").localeCompare(b.name || "") + (a.order || 0) - (b.order || 0);
 		});
+				
 		// count reset must be forced
 		this.$.list.set("count", 0);
 		this.$.list.set("count", this.palette.length);
@@ -167,7 +174,7 @@ enyo.kind({
 		// Start custom palette with catch-all category for non-namespaced kinds
 		var catchAllCategories = {
 			"" : {
-				order: 1100,
+				order: 11000,
 				name: "Custom Kinds",
 				items: []
 			}
@@ -180,7 +187,8 @@ enyo.kind({
 				if (this.projectIndexer.design.palette[o]) {
 					var keys = Object.keys(this.projectIndexer.design.palette[o].items);
 					enyo.forEach(keys, function(item) {
-						catchKindListInPalette.push(this.projectIndexer.design.palette[o].items[item].kind);
+						var kindName = this.projectIndexer.design.palette[o].items[item].config.kind || "";
+						catchKindListInPalette.push(kindName);
 					}, this);
 				}
 			}, this);
@@ -198,7 +206,6 @@ enyo.kind({
 			var item = {
 				name: kind.name,
 				description: kind.comment,
-				inline: {kind: kind.name},
 				config: {kind: kind.name}
 			};
 			// Check for package namespace
@@ -209,7 +216,7 @@ enyo.kind({
 				if (!cat) {
 					// Generate a new custom palette for this package if it doesn't exist
 					cat = {
-						order: 1000,
+						order: 10000,
 						name: pkg + " (other)",
 						items: []
 					};
