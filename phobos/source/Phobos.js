@@ -991,8 +991,8 @@ enyo.kind({
 	},
 	
 	/**
-	 * This function is called after add new kind.
-	 * a switch to the designer is performed. 
+	 * Add a new kind (requested from the designer)
+	 * A switch to the designer is performed to fully reload the kinds in the designer.
 	 * @param config 
 	 * @public
 	 */

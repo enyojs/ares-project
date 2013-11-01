@@ -920,10 +920,8 @@ enyo.kind({
 			var beforeId = inEvent.beforeId; 
 			this.performCreateItem(config, target, beforeId);
 		} else if (inEvent.getName() === "replaceKind"){
-			//Add a feature for "Replace Button" against view template component on designer behavior
 			ComponentsRegistry.getComponent("phobos").replaceViewKindAction(this.index, config_data);
 		} else if (inEvent.getName() === "addNewKind"){
-			//Add a feature for "Add new Kind" against view template component on designer behavior
 			ComponentsRegistry.getComponent("phobos").addViewKindAction(config_data);
 		}
 		this.$.actionPopup.hide();
