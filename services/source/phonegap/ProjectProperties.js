@@ -240,8 +240,7 @@ enyo.kind({
 				
 		this.showErrorMsg("waitingSignIn");
 		this._getUserData();
-		this.$.appIdSelector.selectedAppIdChanged();
-		
+
 		return true;		
 	},
 
@@ -447,12 +446,16 @@ enyo.kind({
 		selectedAppId: undefined,
 		project: undefined
 	},
+	handlers: {
+		"onHideMessageContainer": "hideQrCodeImg",
+		"onShowMessageContainer": "showQrCodeImg"
+	},
 
 	components: [
 		{
 			kind:"FittableColumns",				
 			components: [
-				{content: "AppId"},
+				{content: "Application"},
 				{
 					kind: "onyx.PickerDecorator",
 					components: [
@@ -462,7 +465,15 @@ enyo.kind({
 				}			
 			]
 		},
-		{kind:"Phonegap.ProjectProperties.BuildStatus", name: "buildStatusDisplay"}		
+		{
+			kind:"Phonegap.ProjectProperties.BuildStatus",
+			name: "buildStatusDisplay"
+		},
+		{
+			kind: "Phonegap.ProjectProperties.QrCode",
+			name: "applicationQrCode"
+		}
+
 	],
 
 	/**@private*/
@@ -511,6 +522,16 @@ enyo.kind({
 	/**@private*/
 	selectedAppIdChanged: function() {
 		this.$.buildStatusDisplay.setAppId(this.selectedAppId);		
+	},
+	
+	/**@private*/
+	showQrCodeImg: function() {
+		this.$.applicationQrCode.setAppId(this.selectedAppId);
+		this.$.applicationQrCode.show();
+	},
+
+	hideQrCodeImg: function() {
+		this.$.applicationQrCode.hide();
 	},
 
 	/**@private*/

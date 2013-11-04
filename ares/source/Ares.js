@@ -45,10 +45,21 @@ enyo.kind({
 				{kind: "Ares.DevelopmentPanel", name: "developmentPanel"}
 			]
 		},
-		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, style: "text-align: center; padding: 20px;", components: [
-			{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
-			{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}
-		]},
+		{
+			name: "waitPopup",
+			kind: "onyx.Popup",
+			centered: true,
+			floating: true, 
+			autoDismiss: false,
+			modal: true,
+			style: "text-align: center; padding: 20px;",
+			components: [
+				{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
+				{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}, 
+				{kind: "onyx.Button", name:"cancelWaitPopup", content: "Cancel", ontap: "cancelService", style: "margin-top: 10px;", showing: false}						
+			]
+		},
+		
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
 		{name: "signInErrorPopup", kind: "Ares.SignInErrorPopup", msg: "unknown error", details: ""},
 		{kind: "ServiceRegistry"},
@@ -397,6 +408,7 @@ enyo.kind({
 		var harmonia = ComponentsRegistry.getComponent("harmonia");
 		harmonia.removeClass("ares-small-screen");		
 		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
+		this.$.aresLayoutPanels.getPanels()[this.developmentPanelIndex].switchGrabberDirection(false);
 		this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
 		this.$.aresLayoutPanels.reflow();
 		harmonia.hideGrabber();
@@ -518,19 +530,35 @@ enyo.kind({
 			this.syncJSFile(code);
 		}
 	},
+
 	syncCSSFile: function(inFilename, inCode) {
 		ComponentsRegistry.getComponent("deimos").syncCSSFile(inFilename, inCode);
 	},
+
 	syncJSFile: function(inCode) {
 		ComponentsRegistry.getComponent("deimos").syncJSFile(inCode);
 	},
+
 	showWaitPopup: function(inSender, inEvent) {
+		if(inEvent.service === 'build' && ! inEvent.msg.match(/Starting/)) {
+			// Node server fails if cancel is done during "Starting build" phase
+			// See ENYO-3506
+			this.$.cancelWaitPopup.show();
+		}
 		this.$.waitPopupMessage.setContent(inEvent.msg);
 		this.$.waitPopup.show();
 	},
+
+	cancelService: function(inSender, inEvent) {
+		enyo.Signals.send("plugin.phonegap.buildCanceled");
+		this.$.cancelWaitPopup.hide();
+		this.hideWaitPopup();
+	},
+
 	hideWaitPopup: function() {
 		this.$.waitPopup.hide();
 	},
+
 	showError: function(inSender, inEvent) {
 		this.trace("event:", inEvent, "from sender:", inSender);
 		this.hideWaitPopup();		

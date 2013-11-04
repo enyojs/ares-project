@@ -14,7 +14,9 @@ enyo.kind({
 	published: {
 		checkBuildResultInterval: 3000
 	},
-	
+	components: [
+		{kind: "Signals", "plugin.phonegap.buildCanceled": "abortAjaxRequest"},
+	],
 	debug: false,
 	/**
 	 * @private
@@ -507,6 +509,12 @@ enyo.kind({
 			} else {
 				var req, fs = project.getService();
 				req = fs.createFile(project.getFolderId(), "config.xml", configXml, { overwrite: true });
+
+				this.abortAjaxRequest= function() {
+						this.abortAjaxRequest= function() {};		
+						req.xhr.abort();
+					};
+				
 				req.response(this, function _savedConfigXml(inSender, inData) {
 					this.trace("Phonegap.Build#_updateConfigXml()", "wrote config.xml:", inData);	
 					next();
@@ -528,13 +536,27 @@ enyo.kind({
 	 */
 	_getFiles: function(project, next) {
 		this.trace("...");
-		var req = [];
-		this.doShowWaitPopup({msg: $L("Building source archive")});
+		var req, aborted;
+		this.doShowWaitPopup({msg: $L("Building source archive"), service: "build"});
 		req = project.getService().exportAs(project.getFolderId(), -1 /*infinity*/);
+
+		this.abortAjaxRequest= function() {
+			this.abortAjaxRequest= function() {};		
+			aborted = true ;
+			req.xhr.abort();
+		};
+
 		req.response(this, function _gotFiles(inSender, inData) {
 			this.trace("Phonegap.Build#_getFiles()", "Got the files data");
 			var ctype = req.xhrResponse.headers['x-content-type'];
-			next(null, {content: inData, ctype: ctype});
+			if (aborted) {
+				// response is called on Mac even if xhr was aborted
+				this.trace("ugh, Ajax response was called after an abort");
+				next('canceled');
+			}
+			else {
+				next(null, {content: inData, ctype: ctype});
+			}
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
 	},
@@ -550,7 +572,7 @@ enyo.kind({
 	_submitBuildRequest: function(project, buildStarted, data, next) {
 		var config = ares.clone(project.getConfig().getData());
 		this.trace("config: ", config);
-		this.doShowWaitPopup({msg: $L("Uploading source archive to PhoneGap Build")});
+		this.doShowWaitPopup({msg: $L("Uploading source archive to PhoneGap Build"), service: "build"});
 
 		var minification = config.providers.phonegap.minification;
 
@@ -609,6 +631,12 @@ enyo.kind({
 			postBody: data.content,
 			contentType: data.ctype
 		});
+
+		this.abortAjaxRequest= function() {
+				this.abortAjaxRequest= function() {};		
+				req.xhr.abort();
+			};
+
 		req.response(this, function(inSender, inData) {
 			this.trace("Phonegap.Build#_submitBuildRequest(): response:", inData);
 			if (inData) {
@@ -629,6 +657,14 @@ enyo.kind({
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to build application", next));
 		req.go(query);
+	},
+
+	abortAjaxRequest: function() {
+		// abortAjaxRequest will store a cancel build function
+		// generated when a build is on-going (See
+		// _submitBuildRequest). This function is a NOP so no failure
+		// happens even if a 'buildCanceled' signal is received out of
+		// a build
 	},
 
 	/**

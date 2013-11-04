@@ -99,6 +99,8 @@ enyo.kind({
 	index: null,
 	previousContent: "",
 	fileName: "",
+	selectFromComponentView: false,
+	
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -253,7 +255,9 @@ enyo.kind({
 	designerSelect: function(inSender, inEvent) {
 		var c = inSender.selection;
 		this.refreshInspector();
-		this.$.componentView.setSelected(c);
+		var haveToScroll = !this.selectFromComponentView;
+		this.$.componentView.setSelected(c, haveToScroll);
+		this.selectFromComponentView = false;
 		return true;
 	},
 	// Select event triggered by component view was completed. Refresh inspector.
@@ -263,6 +267,7 @@ enyo.kind({
 	},
 	componentViewSelect: function(inSender, inEvent) {
 		this.$.designer.select(inEvent.component);
+		this.selectFromComponentView = true;
 		return true;
 	},
 	syncComponentViewDropTargetHighlighting: function(inSender, inEvent) {
@@ -919,17 +924,15 @@ enyo.kind({
 	// @protected		
 	runPaletteComponentAction: function(inSender,inEvent){
 		var config = this.$.actionPopup.getConfigComponent(config);
+		var config_data = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
 
 		if(inEvent.getName() === "addtoKind"){
 			var target = this.$.actionPopup.getTargetComponent(target);
 			var beforeId = inEvent.beforeId; 
 			this.performCreateItem(config, target, beforeId);
 		} else if (inEvent.getName() === "replaceKind"){
-			//TODO: Add a feature for "Replace Button" against view template component on designer behavior - ENYO-2807
-			this.doError({msg:"not implemented yet"});
+			ComponentsRegistry.getComponent("phobos").replaceViewKindAction(this.index, config_data);
 		} else if (inEvent.getName() === "addNewKind"){
-			//Add a feature for "Add new Kind" against view template component on designer behavior
-			var config_data = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
 			ComponentsRegistry.getComponent("phobos").addViewKindAction(config_data);
 		}
 		this.$.actionPopup.hide();

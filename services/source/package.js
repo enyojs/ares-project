@@ -11,5 +11,6 @@ enyo.depends(
 	"phonegap/BuildStatusUI.js",
 	"phonegap/PhonegapUIRows.js",
 	"phonegap/Build.js",
+	"phonegap/QrCode.js",
 	"GenZip.js"	
 );

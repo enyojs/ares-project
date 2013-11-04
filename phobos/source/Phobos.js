@@ -991,8 +991,8 @@ enyo.kind({
 	},
 	
 	/**
-	 * This function is called after add new kind.
-	 * a switch to the designer is performed. 
+	 * Add a new kind (requested from the designer)
+	 * A switch to the designer is performed to fully reload the kinds in the designer.
 	 * @param config 
 	 * @public
 	 */
@@ -1001,6 +1001,19 @@ enyo.kind({
 		this.$.ace.insertAtEndOfFile(newKind, '@cursor@');
 		this.designerAction();
 	},
+	/**
+	 * Insert a new kind (requested from the designer)
+	 * A switch to the designer is performed to fully reload the kinds in the designer.
+	 * @param kind_index, config 
+	 * @public
+	 */
+	replaceViewKindAction: function(kind_index, config){
+		var obj = this.analysis.objects[kind_index];
+		var range = this.$.ace.mapToLineColumnRange(obj.block.start, obj.block.end);
+		this.$.ace.replaceRange(range, config);
+		this.designerAction();
+	},
+	
 	/*  editor setting */
 
 	editorSettings: function() {

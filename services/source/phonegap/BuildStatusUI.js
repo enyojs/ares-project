@@ -243,6 +243,7 @@ enyo.kind({
 		this.$.separatorForDownloadButton.setClassAttribute(classAttribute);
 
 		this.$.downloadButton.show();
+		this.bubble("onShowMessageContainer");
 	},
 
 	/**@private*/
@@ -261,6 +262,7 @@ enyo.kind({
 		}
 
 		this.$.downloadButton.hide();
+		this.bubble("onHideMessageContainer");
 
 		if (status === "skip"){			
 			this.$.statusMessage.setContent("Build skipped for this platform");
@@ -324,6 +326,8 @@ enyo.kind({
 		
 		this.$.messageContainer.hide();
 		this.$.downloadButton.hide();
+
+		this.bubble("onHideMessageContainer");
 	},
 
 	/**@private*/
