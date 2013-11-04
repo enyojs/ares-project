@@ -346,9 +346,9 @@ enyo.kind({
 		harmonia.refreshFile(inEvent.nodeId);
 	},
 	designDocument: function(inSender, inEvent) {
-		// send all files being edited to the designer
+		// send all files being edited to the designer, this will send code to designerFrame
 		this.syncEditedFiles();
-		// then load the frame ????
+		// then load palette and inspector, and tune serialiser behavior sends option data to designerFrame
 		ComponentsRegistry.getComponent("deimos").load(inEvent);
 		// switch to Deimos editor
 		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.deimosViewIndex);

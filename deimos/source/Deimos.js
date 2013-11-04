@@ -124,6 +124,9 @@ enyo.kind({
 	 *   for all the .js files of the project and for enyo/onyx.
 	 * @public
 	 */
+	// load acts on pallete, inspector, kindPicker and (may be) sends
+	// to desingnerFrame serialisation options extracted from .design
+	// files. No ack message is expected from designerFrame
 	load: function(data) {
 		this.trace("called with",data);
 		this.enableDesignerActionButtons(false);
@@ -140,6 +143,7 @@ enyo.kind({
 		// Pass the project information (analyzer output, ...) to the inspector and palette
 		this.setProjectData(data.projectData);
 
+		// kindPicker let user select the top kind to be designed
 		for (var i = 0; i < what.length; i++) {
 			var k = what[i];
 			this.owner.$.kindPicker.createComponent({
@@ -234,6 +238,7 @@ enyo.kind({
 		this.$.inspector.setProjectIndexer(indexer);
 		this.$.palette.setProjectIndexer(indexer);
 		ProjectKindsModel.buildInformation(indexer);
+		// no return message is expected
 		this.$.designer.sendSerializerOptions(ProjectKindsModel.serializerOptions);
 	},
 	//* Rerender current kind

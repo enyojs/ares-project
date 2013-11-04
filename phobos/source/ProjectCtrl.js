@@ -1,3 +1,6 @@
+// One ProjectCtrl instance is created per project (when the first file of a project
+// is opened). This object manages the asynchronous analysis tasks
+
 enyo.kind({
 	name: "ProjectCtrl",
 	kind: "enyo.Component",
