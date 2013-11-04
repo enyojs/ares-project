@@ -346,9 +346,13 @@ enyo.kind({
 		harmonia.refreshFile(inEvent.nodeId);
 	},
 	designDocument: function(inSender, inEvent) {
+		// send all files being edited to the designer
 		this.syncEditedFiles();
+		// then load the frame ????
 		ComponentsRegistry.getComponent("deimos").load(inEvent);
+		// switch to Deimos editor
 		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.deimosViewIndex);
+		// update an internal variable
 		this.activeDocument.setCurrentIF('designer');
 	},
 	//* A code change happened in Phobos - push change to Deimos
