@@ -529,6 +529,8 @@ enyo.kind({
 			aceSession = inDoc.getAceSession(),
 			code = aceSession && aceSession.getValue();
 		// project is a backbone Ares.Model.Project defined in WorkspaceData.js
+		var projectName = inDoc.getProjectData().getName();
+		this.trace('code update on file', filename,' project ' + projectName);
 
 		if(filename.slice(-4) === ".css") {
 			this.syncCSSFile(filename, code);
