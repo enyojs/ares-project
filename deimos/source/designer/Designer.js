@@ -76,6 +76,7 @@ enyo.kind({
 		this.$.client.addStyles("top: " + y + "px; left: " + x + "px");
 	},
 	
+	// inSource in a backbone Ares.Model.Project defined in WorkspaceData.js
 	updateSource: function(inSource) {
 		var serviceConfig = inSource.getService().config;
 		this.setDesignerFrameReady(false);
@@ -213,13 +214,22 @@ enyo.kind({
 		this.sendMessage({op: "cleanUp"});
 	},
 	//* Pass inCode down to the designerFrame (to avoid needing to reload the iFrame)
-	syncJSFile: function(inCode) {
-		this.sendMessage({op: "codeUpdate", val: inCode});
+	syncFile: function(projectName, filename, inCode) {
+		// check if the file is indeed part of the current project
+		if (projectName === this.projectSource.getName() ){
+			if(filename.slice(-4) === ".css") {
+				//* Sync the CSS in inCode with the designerFrame (to avoid needing to reload the iFrame)
+				this.sendMessage({op: "cssUpdate", val: {filename: this.projectPath + filename, code: inCode}});
+			} else if(filename.slice(-3) === ".js") {
+				this.sendMessage({op: "codeUpdate", val: inCode});
+			}
+		}
+		else {
+			this.warn("syncFile aborted: project mismatch. Expected " + this.projectSource.getName()
+					  + ' got '+ projectName + ' with file ' + filename);
+		}
 	},
-	//* Sync the CSS in inCode with the designerFrame (to avoid needing to reload the iFrame)
-	syncCSSFile: function(inFilename, inCode) {
-		this.sendMessage({op: "cssUpdate", val: {filename: this.projectPath + inFilename, code: inCode}});
-	},
+
 	resizeClient: function() {
 		this.sendMessage({op: "resize"});
 	},

@@ -532,19 +532,7 @@ enyo.kind({
 		var projectName = inDoc.getProjectData().getName();
 		this.trace('code update on file', filename,' project ' + projectName);
 
-		if(filename.slice(-4) === ".css") {
-			this.syncCSSFile(filename, code);
-		} else if(filename.slice(-3) === ".js") {
-			this.syncJSFile(code);
-		}
-	},
-
-	syncCSSFile: function(inFilename, inCode) {
-		ComponentsRegistry.getComponent("deimos").syncCSSFile(inFilename, inCode);
-	},
-
-	syncJSFile: function(inCode) {
-		ComponentsRegistry.getComponent("deimos").syncJSFile(inCode);
+		ComponentsRegistry.getComponent("deimos").syncFile(projectName, filename, code);
 	},
 
 	showWaitPopup: function(inSender, inEvent) {

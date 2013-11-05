@@ -795,6 +795,7 @@ enyo.kind({
 		this.trace("called with ",inProject);
 		this.$.designer.updateSource(inProject);
 	},
+	// triggered by 'Reload' button
 	reloadDesigner: function() {
 		this.enableDesignerActionButtons(false);
 		this.$.designer.reload();
@@ -803,11 +804,8 @@ enyo.kind({
 	reloadComplete: function() {
 		this.rerenderKind();
 	},
-	syncJSFile: function(inCode) {
-		this.$.designer.syncJSFile(inCode);
-	},
-	syncCSSFile: function(inFilename, inCode) {
-		this.$.designer.syncCSSFile(inFilename, inCode);
+	syncFile: function(project, filename, code) {
+		this.$.designer.syncFile(project, filename, code);
 	},
 	addAresIds: function(inComponents) {
 		for(var i = 0; i < inComponents.length; i++) {
