@@ -446,17 +446,12 @@ enyo.kind({
 		var d = Ares.Workspace.files.get(inEvent.id);
 		if (d) {
 			//select project if the file(d) comes from another project then the previous file
-
-			// The following code introduced for ENYO-3142 uncovers a lot of issues
-			// this code will be re-introduced once these issues are fixed
-
-			// if (this.activeDocument.id && d !== this.activeDocument){
-			// 	var project = Ares.Workspace.projects.get(d.getProjectData().id);
-			// 	if(project){
-			// 		ComponentsRegistry.getComponent("projectList").selectInProjectList(project);
-			// 	}
-			// }
-
+			if (this.activeDocument.id && d !== this.activeDocument){
+				var project = Ares.Workspace.projects.get(d.getProjectData().id);
+				if(project){
+					ComponentsRegistry.getComponent("projectList").selectInProjectList(project);
+				}
+			}
 			this.switchToDocument(d);		
 		} else if (this.debug) {
 			throw("File ID " + d + " not found in cache!");
