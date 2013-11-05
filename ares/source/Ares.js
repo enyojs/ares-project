@@ -347,7 +347,7 @@ enyo.kind({
 	},
 	designDocument: function(inSender, inEvent) {
 		// send all files being edited to the designer, this will send code to designerFrame
-		this.syncEditedFiles();
+		this.syncEditedFiles(inEvent.projectData);
 		// then load palette and inspector, and tune serialiser behavior sends option data to designerFrame
 		ComponentsRegistry.getComponent("deimos").load(inEvent);
 		// switch to Deimos editor
@@ -507,22 +507,21 @@ enyo.kind({
 		this.switchFile(inSender, inEvent);
 		enyo.asyncMethod(ComponentsRegistry.getComponent("phobos"), "closeDocAction");
 	},
-	//* Update code running in designer
-	syncEditedFiles: function() {
-		var files = Ares.Workspace.files,
-			model,
-			i;
-		
-		for(i=0;i<files.models.length;i++) {
-			model = files.models[i];
-			
-			if(model.getFile().name === "package.js") {
-				continue;
-			}
 
-			this.updateCode(files.get(model.id));
+	//* Update code running in designer
+	syncEditedFiles: function(project) {
+		// project is a backbone Ares.Model.Project defined in WorkspaceData.js
+		var projectName = project.getName();
+		this.trace("update all edited files on project", projectName);
+		
+		function isProjectFile(model) {
+			return model.getFile().name !== "package.js"
+				&& model.getProjectData().getName() === projectName ;
 		}
+		// backbone collection
+		Ares.Workspace.files.filter(isProjectFile).forEach(this.updateCode,this);
 	},
+
 	updateCode: function(inDoc) {
 		// inDoc is a backbone Ares.Model.File defined in FileData.js
 		var filename = inDoc.getFile().path,
