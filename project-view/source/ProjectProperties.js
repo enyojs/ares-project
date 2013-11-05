@@ -397,8 +397,8 @@ enyo.kind({
 			this.config.providers[service.id] = {};
 			this.config.providers[service.id].enabled = service.checkBox.checked;
 
-			if ((service.checkBox.checked) && (service.panel.getWebosConfig !== undefined)) {
-				var webosConfigID = service.panel.getWebosConfig();
+			if ((service.checkBox.checked) && (service.panel.getDefaultConfig !== undefined)) {
+				var webosConfigID = service.panel.getDefaultConfig();
 				if (webosConfigID !== undefined) {
 					this.addNewSource(null, {source: webosConfigID});
 				}
