@@ -125,7 +125,7 @@ enyo.kind({
 	 * @public
 	 */
 	// load acts on pallete, inspector, kindPicker and (may be) sends
-	// to desingnerFrame serialisation options extracted from .design
+	// to designerFrame serialisation options extracted from .design
 	// files. No ack message is expected from designerFrame
 	load: function(data) {
 		this.trace("called with",data);

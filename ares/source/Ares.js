@@ -524,9 +524,11 @@ enyo.kind({
 		}
 	},
 	updateCode: function(inDoc) {
+		// inDoc is a backbone Ares.Model.File defined in FileData.js
 		var filename = inDoc.getFile().path,
 			aceSession = inDoc.getAceSession(),
 			code = aceSession && aceSession.getValue();
+		// project is a backbone Ares.Model.Project defined in WorkspaceData.js
 
 		if(filename.slice(-4) === ".css") {
 			this.syncCSSFile(filename, code);
