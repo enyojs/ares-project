@@ -233,14 +233,14 @@ It defines some categories of widget such as "onyx". _This section is required_
 
 Each "category" defines items which will appear in the Palette of the designer window.
 
-Per item, you need to specify the "name", "kind" and "description" and the most important is the property "config". "config" defines the actual "kind definition" which will be passed to createComponents() to instantiate the real object(s) when the drag and drop is done.
+Per item, you need to specify the "name", "description" and the most important is the property "config". "config" defines the actual "kind definition" which will be passed to createComponents() to instantiate the real object(s) when the drag and drop is done.
 
 It can be a simple kind as for "onyx.ProgressButton" or a complex kind definition such as for "onyx.RadioGroup" or "onyx.PickerDecorator".
 
 "inline" is not used for the time being.
 
 A _special_ category can be added to ignore some components in the palette by naming it `ignore` and giving the list of items to ignore.
-Each items to ignore must be declared simply with its `kind`, `name`, `description` and `config` values.
+Each items to ignore must be declared simply with its `kind`, `description` and basic `config` (kind definition at least).
 
 ### Section "inspector"
 

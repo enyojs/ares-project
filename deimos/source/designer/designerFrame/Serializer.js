@@ -15,7 +15,7 @@ enyo.kind({
 	},
 	published: {
 		// contains serialization data extracted (but not cloned) from .design files
-		serializerOptions: null
+		serializerOptions: {}
 	},
 	//* protected
 	noserialize: {owner: 1, container: 1, parent: 1, id: 1, attributes: 1, selected: 1, active: 1, isContainer: 1},
@@ -138,7 +138,7 @@ enyo.kind({
 	},
 	// @protected
 	getSerializerOptions: function(inKind, inOptName, inPropName) {
-		var opt = this.serializerOptions[inKind] ;
+		var opt = this.serializerOptions[inKind];
 
 		var hasOpt = opt && opt[inOptName] && opt[inOptName].hasOwnProperty(inPropName) ;
 
