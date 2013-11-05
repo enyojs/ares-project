@@ -413,18 +413,25 @@ enyo.kind({
 			this.$.propertiesWidget.checkFileChoosers();			
 		}
 	},
-
+	
+	/**
+	 * Function used to display the Edit Pop-up with the specification of the defaut tab to be displayed
+	 * @param  {Object} target         Object contains meta-data of the selected project.
+	 * @param  {in} inDisplayedTab index of the defaut displayed tab (0: Project, 1: Preview, 2: Phonegap Build)
+	 * @private
+	 */
 	showEditPopUp: function(target, inDisplayedTab) {
-		this.start(target);
+		if(target) {
+			this.start(target);
 
-		// Pass the configuration of the selected project to the panel "Phonegap Build"
-		if (this.$.propertiesWidget.$.phonegapDrawer) {
-			this.$.propertiesWidget.$.phonegapDrawer.$.phonegap.setProject(target);
+			// Pass the configuration of the selected project to the panel "Phonegap Build"
+			if (this.$.propertiesWidget.$.phonegapDrawer) {
+				this.$.propertiesWidget.$.phonegapDrawer.$.phonegap.setProject(target);
+			}
+
+			// Define the tab that will be shown when the Pop-up is displayed
+			this.displayedTab = inDisplayedTab;
 		}
-
-		// Define the tab that will be shown when the Pop-up is displayed
-		this.displayedTab = inDisplayedTab;
-
 	},
 
 	// step 2:
