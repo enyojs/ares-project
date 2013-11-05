@@ -6,7 +6,8 @@ enyo.kind({
 	classes: "enyo-unselectable onyx",
 	debug: false,
 	published: {
-		projectData: null		// All the project data shared mainly between phobos and deimos
+		projectData: null,		// All the project data shared mainly between phobos and deimos
+		defaultResolution: null
 	},
 	components: [
 		{name: "actionPopup", kind:"PaletteComponentActionPopup", centered: true, floating: true, autoDismiss: false, modal: true},
@@ -38,7 +39,7 @@ enyo.kind({
 							{kind: "onyx.Input", name: "designerHeightInput", classes: "deimos-designer-input", placeholder: "Auto", onchange: "updateHeight"}
 						]},
 						{content: "Zoom:"},
-						{kind: "onyx.Slider", classes: "deimos-zoom-slider", value: 100, onChange: 'zoomDesigner', onChanging: 'zoomDesigner' }
+						{kind: "onyx.Slider", name: "designerZoom", classes: "deimos-zoom-slider", value: 100, onChange: 'zoomDesigner', onChanging: 'zoomDesigner' }
 					]},
 					{kind: "Scroller", classes: "deimos-designer-wrapper", fit: true, components: [
 						{kind: "Designer", name: "designer",
@@ -106,14 +107,14 @@ enyo.kind({
 		this.inherited(arguments);
 		this.addHandlers();
 		this.doRegisterMe({name:"deimos", reference:this});
+		this.setDefaultResolution(this.$.devicePicker.getClientControls()[0]);
 	},
 	rendered: function() {
 		this.inherited(arguments);
-		this.initializeDesignerToolbar();
 	},
 	//* Initialize _devicePicker_ in the toolbar at render time
 	initializeDesignerToolbar: function() {
-		var initItem = this.$.devicePicker.getClientControls()[0];
+		var initItem = this.getDefaultResolution();
 		this.$.devicePicker.setSelected(initItem);
 		this.deviceChosen(null, {selected: initItem});
 	},
@@ -171,12 +172,45 @@ enyo.kind({
 			this.$.designer.set("currentFileName", this.fileName);
 			this.$.designer.setCurrentKind(components[0]);
 		}
+
+		this.setKindResolution(kind);
 		
 		this.index = index;
 		this.owner.$.kindButton.setContent(kind.name);
 		this.owner.$.toolbar.reflow();
 		
 		return true;
+	},
+	setKindResolution: function(kind){
+		var requestId = "com.enyojs.designer." + this.projectData.id + "." + kind.name;
+		this.currentkindResolution = null;
+		this.getValuesFromLocalStorage(requestId);
+		if(this.currentkindResolution){
+			var w = this.currentkindResolution.width,
+				h = this.currentkindResolution.height,
+				z = this.currentkindResolution.zoom;
+
+			this.$.designerHeightInput.setValue(h);
+			this.$.designerWidthInput.setValue(w);
+			this.$.designer.setWidth(w);
+			this.$.designer.setHeight(h);
+
+			this.findDeviceDimensionMatch();
+
+			this.$.designer.zoom(z);
+		} else{
+			this.initializeDesignerToolbar();
+		}
+	},
+	getValuesFromLocalStorage:function(id, returnValue){
+		var self = this;
+		Ares.LocalStorage.get(id, function(str) {
+			try {
+				self.currentkindResolution = enyo.json.parse(str);
+			} catch(e) {
+				Ares.LocalStorage.remove(self.SETTINGS_STORAGE_KEY);
+			}
+		});
 	},
 	/**
 	 * Receive the project data reference which allows to access the analyzer
@@ -850,15 +884,19 @@ enyo.kind({
 		this.$.designer.setWidth(selected.value.width);
 		this.$.designer.setHeight(selected.value.height);
 		
+		this.saveKindResolution();
+
 		return true;
 	},
 	updateHeight: function(inSender, inEvent) {
 		this.$.designer.setHeight(inSender.getValue());
 		this.findDeviceDimensionMatch();
+		this.saveKindResolution();
 	},
 	updateWidth: function(inSender, inEvent) {
 		this.$.designer.setWidth(inSender.getValue());
 		this.findDeviceDimensionMatch();
+		this.saveKindResolution();
 	},
 	findDeviceDimensionMatch: function() {
 		var items = this.$.devicePicker.getClientControls(),
@@ -894,9 +932,20 @@ enyo.kind({
 		// Force height/width value updates (change event isn't triggered)
 		this.$.designer.setWidth(this.$.designerWidthInput.getValue());
 		this.$.designer.setHeight(this.$.designerHeightInput.getValue());
+		this.saveKindResolution();
 	},
 	zoomDesigner: function(inSender, inEvent) {
 		this.$.designer.zoom(inSender.getValue());
+		this.saveKindResolution();
+	},
+	saveKindResolution: function(){
+		var kind = this.$.designer.getCurrentKind();
+		var requestId = "com.enyojs.designer." + this.projectData.id + "." + kind.name;
+		var kindResolution = {};
+		kindResolution.height = this.$.designerHeightInput.getValue();
+		kindResolution.width = this.$.designerWidthInput.getValue();
+		kindResolution.zoom = this.$.designerZoom.getValue();
+		Ares.LocalStorage.set(requestId, enyo.json.stringify(kindResolution));
 	},
 	//* Add dispatch for native drag events
 	addHandlers: function(inSender, inEvent) {
