@@ -444,7 +444,6 @@ enyo.kind({
 	published: {
 		userData: undefined,
 		selectedAppId: undefined,
-		selectedTitle: undefined,
 		project: undefined
 	},
 	handlers: {
@@ -456,38 +455,25 @@ enyo.kind({
 		{
 			kind:"FittableColumns",				
 			components: [
-				{content: "AppId",	classes: "ares-project-properties-appid-label"},
+				{content: "Application"},
 				{
-					kind: "onyx.PickerDecorator",			
+					kind: "onyx.PickerDecorator",
 					components: [
-						{kind: "onyx.PickerButton", classes: "ares-project-properties-picker", content:"Select AppId"},
+						{kind: "onyx.PickerButton", content:"Select AppId",	classes: "ares-project-properties-picker-AppId"},
 						{kind: "onyx.Picker", name: "AppIdList", onSelect: "updateSelectedAppId"}
 					]
 				}			
 			]
 		},
-
 		{
-			kind:"FittableColumns",
-			classes: "ares-project-properties-appid-container",
-			components: [
-				{content: "Title",	classes: "ares-project-properties-appid-label"},
-				{name: "ApplicationTitle"}
-			]
+			kind:"Phonegap.ProjectProperties.BuildStatus",
+			name: "buildStatusDisplay"
 		},
 		{
-			kind:"FittableColumns",
-			components: [
-				{
-					kind:"Phonegap.ProjectProperties.BuildStatus",
-					name: "buildStatusDisplay"
-				},
-				{
-					kind: "Phonegap.ProjectProperties.QrCode",
-					name: "applicationQrCode"
-				}
-			]
+			kind: "Phonegap.ProjectProperties.QrCode",
+			name: "applicationQrCode"
 		}
+
 	],
 
 	/**@private*/
@@ -510,10 +496,7 @@ enyo.kind({
 			enyo.forEach(this.userData.user.apps.all, 
 				function (inApp) {
 					var itemState = inApp.id === this.selectedAppId ? true : false;
-					if (itemState) {
-						this.setSelectedTitle(inApp.title);
-					}					
-					this.$.AppIdList.createComponent({content: inApp.id, published: {applicationObject: inApp} , active: itemState});			
+					this.$.AppIdList.createComponent({content: inApp.id+ " - " + inApp.title, value: inApp.id, published: {applicationObject: inApp} , active: itemState, classes: "ares-project-properties-picker-item-align-left"});			
 					this.$.AppIdList.render();								
 				}, this);
 		}
@@ -524,18 +507,6 @@ enyo.kind({
 
 	/**@private*/
 	updateSelectedAppId: function (inSender, inValue) {		
-	
-		/**
-		 * selectedAppData is a sub-element from the object "userData" that contains the followin attributs : 
-		 * id : appId
-		 * link: url suffix for the Phonegap build application
-		 * role: user's privilege on the selected application
-		 * title: application's title.
-		 * @type {Array}
-		 */
-		var selectedAppData = inValue && inValue.selected.published.applicationObject;
-		
-		this.setSelectedTitle(selectedAppData.title || "");
 
 		//Reset the content of the build status message to an empty string.
 		this.$.buildStatusDisplay.$.statusMessage.setContent("");
@@ -544,7 +515,7 @@ enyo.kind({
 		if (inValue.content === "New Application") {
 			this.setSelectedAppId("");
 		} else {
-			this.setSelectedAppId(inValue.content);
+			this.setSelectedAppId(inValue.selected.value);
 		}				
 	},
 
@@ -575,11 +546,7 @@ enyo.kind({
 		this.$.AppIdList.render();
 	},
 
-	/**@private*/
-	selectedTitleChanged: function(){
-		this.$.ApplicationTitle.setContent(this.selectedTitle);
-		this.$.ApplicationTitle.render();
-	}
+
 });
 
 
