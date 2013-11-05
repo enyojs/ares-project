@@ -390,18 +390,13 @@ enyo.kind({
 	/**
 	 * Step 1: start the modification by showing project properties widget
 	 */
-	start: function(target, inDisplayedTab) {
+	start: function(target) {
 		if (target) {
 			var config = target.getConfig();
-
-			// Define the tab that will be shown when the Pop-up is displayed
-			this.displayedTab = inDisplayedTab;
 			
 			this.targetProject = target ;
-			this.$.propertiesWidget.setTargetProject(target);
-
-			// Pass the configuration of the selected project to the panel "Phonegap Build"
-			this.$.propertiesWidget.$.phonegapDrawer.$.phonegap.setProject(target);
+			this.$.propertiesWidget.setTargetProject(target);		
+		
 
 			this.$.propertiesWidget.setupModif();
 			this.$.propertiesWidget.preFill(config.data);
@@ -417,6 +412,19 @@ enyo.kind({
 			this.$.propertiesWidget.activateFileChoosers(true);
 			this.$.propertiesWidget.checkFileChoosers();			
 		}
+	},
+
+	showEditPopUp: function(target, inDisplayedTab) {
+		this.start(target);
+
+		// Pass the configuration of the selected project to the panel "Phonegap Build"
+		if (this.$.propertiesWidget.$.phonegapDrawer) {
+			this.$.propertiesWidget.$.phonegapDrawer.$.phonegap.setProject(target);
+		}
+
+		// Define the tab that will be shown when the Pop-up is displayed
+		this.displayedTab = inDisplayedTab;
+
 	},
 
 	// step 2:
