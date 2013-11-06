@@ -31,8 +31,7 @@ enyo.kind({
 				{
 					name: "projectView",
 					kind: "ProjectView",
-					classes: "ares-panel-min-width ",
-					onProjectSelected: "projectSelected"
+					classes: "ares-panel-min-width "
 				},
 				{
 					kind: "Harmonia",
@@ -139,15 +138,6 @@ enyo.kind({
 	handleUpdateAuth: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.$.serviceRegistry.setConfig(inEvent.serviceId, {auth: inEvent.auth}, inEvent.next);
-	},
-	projectSelected: function() {
-		this.trace("set timer for setting project in Deimos");
-		setTimeout(enyo.bind(this, function() { 
-			var currentProject = ComponentsRegistry.getComponent("projectView").currentProject;
-			this.trace("setting project in Deimos" + currentProject.id);
-			ComponentsRegistry.getComponent("deimos").projectSelected(currentProject);
-		}), 500);	// <-- TODO - using timeout here because project url is set asynchronously
-		return true;
 	},
 	openDocument: function(inSender, inEvent) {
 		this._openDocument(inEvent.projectData, inEvent.file, function(inErr) {});

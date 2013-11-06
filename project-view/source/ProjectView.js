@@ -112,7 +112,8 @@ enyo.kind({
 				self.doError({msg: err.toString(), err: err});
 			}
 			project.setConfig(config);
-			self.doProjectSelected();
+			self.trace("ProjectView: setting project in Deimos for " + project.id);
+			ComponentsRegistry.getComponent("deimos").projectSelected(project);
 		});
 		self.currentProject = project;
 	},
