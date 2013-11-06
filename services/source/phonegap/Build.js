@@ -648,7 +648,7 @@ enyo.kind({
 			buildStarted();
 
 			// Display the Phonegap Build panel.
-			ComponentsRegistry.getComponent("projectView").$.projectWizardModify.start(project, 2);
+			ComponentsRegistry.getComponent("projectView").$.projectWizardModify.showEditPopUp(project, 2);
 			
 			// Signal recieved by the "kind Phonegap.ProjectProperties".
 			enyo.Signals.send("plugin.phonegap.userDataRefreshed");
