@@ -465,21 +465,21 @@ enyo.kind({
 		// We no longer save the data as the ACE edit session will keep the data for us
 		if (!this.activeDocument || d !== this.activeDocument) {
 			ComponentsRegistry.getComponent("phobos").openDoc(d);
-		}
-		var currentIF = d.getCurrentIF();
-		this.activeDocument = d;
-		var developmentPanel = ComponentsRegistry.getComponent("developmentPanel");
-		developmentPanel.addPreviewTooltip("Preview "+this.activeDocument.getProjectData().id);
+			var currentIF = d.getCurrentIF();
+			this.activeDocument = d;
+			var developmentPanel = ComponentsRegistry.getComponent("developmentPanel");
+			developmentPanel.addPreviewTooltip("Preview "+this.activeDocument.getProjectData().id);
 		
-		if (currentIF === 'code') {
-			developmentPanel.$.panels.setIndex(this.phobosViewIndex);
-			developmentPanel.manageControls(false);
-		} else {
-			ComponentsRegistry.getComponent("phobos").designerAction();
-			developmentPanel.manageControls(true);
+			if (currentIF === 'code') {
+				developmentPanel.$.panels.setIndex(this.phobosViewIndex);
+				developmentPanel.manageControls(false);
+			} else {
+				ComponentsRegistry.getComponent("phobos").designerAction();
+				developmentPanel.manageControls(true);
+			}
+			this._fileEdited();
+			ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(d.getId());
 		}
-		this._fileEdited();
-		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(d.getId());
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
