@@ -1,4 +1,4 @@
-/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry */
+/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async */
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -143,7 +143,7 @@ enyo.kind({
 			],
 			function (err) {
 				self.trace("ProjectView: setup project config done on " + project.getName() + " err is ",err );
-				next && next();
+				if (next) { next(); }
 			}
 		);
 	},

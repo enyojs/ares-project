@@ -44,7 +44,7 @@ enyo.kind({
 			this.$.hermesFileTree.connectProject(project, next).showFileOpButtons();
 		} else {
 			this.$.hermesFileTree.hideFileOpButtons().clear();
-			next && next() ;
+			if (next) { next(); }
 		}
 	},
 	showGrabber:function(){
