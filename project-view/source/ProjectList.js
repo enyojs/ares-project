@@ -237,7 +237,7 @@ enyo.kind({
 			this.selectInProjectList(project);
 		}
 	},
-	selectInProjectList:function(project){
+	selectInProjectList:function(project, next){
 		this.trace("select ",project);
 		var itemList = this.$.projectList.getClientControls();
 		enyo.forEach(itemList, function(item) {
@@ -245,18 +245,18 @@ enyo.kind({
 			if(item.$.item.projectName === project.id){
 				this.selected = item.$.item;
 				item.$.item.addClass("on");
-				this.selectProject(project);
+				this.selectProject(project,next);
 			}
 		}, this);
 	},
-	selectProject: function(project){
+	selectProject: function(project,next){
 		var msg, service;
 		service = ServiceRegistry.instance.resolveServiceId(project.getServiceId());
 		if (service !== undefined) {
 			project.setService(service);
 			this.$.projectMenu.setDisabled(false);
 			this.selectedProject = project;
-			this.owner.setupProjectConfig( project );
+			this.owner.setupProjectConfig( project, next );
 		} else {
 			// ...otherwise let
 			msg = "Service " + project.getServiceId() + " not found";

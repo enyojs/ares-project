@@ -38,12 +38,13 @@ enyo.kind({
 		this.$.hermesFileTree.hideFileOpButtons();
 		return true; //Stop event propagation
 	},
-	setProject: function(project) {
+	setProject: function(project, next) {
 		this.trace("project:", project);
 		if (project !== null) {
-			this.$.hermesFileTree.connectProject(project).showFileOpButtons();
+			this.$.hermesFileTree.connectProject(project, next).showFileOpButtons();
 		} else {
 			this.$.hermesFileTree.hideFileOpButtons().clear();
+			next && next() ;
 		}
 	},
 	showGrabber:function(){

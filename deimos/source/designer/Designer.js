@@ -76,8 +76,8 @@ enyo.kind({
 		this.$.client.addStyles("top: " + y + "px; left: " + x + "px");
 	},
 	
-	// inSource in a backbone Ares.Model.Project defined in WorkspaceData.js
-	updateSource: function(inSource) {
+	// inSource is a backbone Ares.Model.Project defined in WorkspaceData.js
+	updateSource: function(inSource,next) {
 		var serviceConfig = inSource.getService().config;
 		this.setDesignerFrameReady(false);
 		this.projectSource = inSource;
@@ -85,6 +85,8 @@ enyo.kind({
 		var iframeUrl = this.projectSource.getProjectUrl() + "/" + this.baseSource + "?overlay=designer";
 		this.trace("Setting designerFrame url: ", iframeUrl);
 		this.$.client.hasNode().src = iframeUrl;
+		// next callback is run once a "ready" message is received from designerFrame
+		this.updateSourceCallback = next;
 	},
 	reload: function() {
 		this.reloading = true;
@@ -117,6 +119,12 @@ enyo.kind({
 			if(this.reloading) {
 				this.doReloadComplete();
 				this.reloading = false;
+			}
+			// call back *once* the function passed to updateSource
+			if (this.updateSourceCallback) {
+				this.trace("calling updateSourceCallback");
+				this.updateSourceCallback();
+				this.updateSourceCallback = null;
 			}
 		// Loaded event sent from designerFrame and awaiting aresOptions.
 		} else if(msg.op === "state" && msg.val === "loaded") {

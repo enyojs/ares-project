@@ -432,33 +432,50 @@ enyo.kind({
 			this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
 		}
 	},
+
+	// switch file *and* project (if necessary)
 	switchFile: function(inSender, inEvent) {
-		var d = Ares.Workspace.files.get(inEvent.id);
-		if (d) {
+		var newDoc = Ares.Workspace.files.get(inEvent.id);
+		var oldDoc = this.activeDocument ; // may be undef when a project is closed
+
+		this.trace("switch " + (oldDoc ? "from " + oldDoc.getId() + " " : " ")
+				   + "to " + newDoc.getId() );
+
+		if (newDoc) {
 			//select project if the file(d) comes from another project then the previous file
-			if (this.activeDocument.id && d !== this.activeDocument){
-				var project = Ares.Workspace.projects.get(d.getProjectData().id);
-				if(project){
-					ComponentsRegistry.getComponent("projectList").selectInProjectList(project);
-				}
+			if (!oldDoc || oldDoc.getProjectData().getName() !== newDoc.getProjectData().getName()){
+				var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
+				this.trace("also switch project "
+						   + (oldDoc ? "from " + oldDoc.getProjectData().getName()  + " " : " ")
+						   + ' to ' + newDoc.getProjectData().getName());
+				// switchToDocument is passed as a callback
+				ComponentsRegistry.getComponent("projectList")
+					.selectInProjectList(project, this.switchToDocument.bind(this,newDoc));
 			}
-			this.switchToDocument(d);		
+			else {
+				this.switchToDocument(newDoc);
+			}
 		} else if (this.debug) {
-			throw("File ID " + d + " not found in cache!");
+			throw("File ID " + newDoc + " not found in cache!");
 		}
 		else {
 			alert("File ID not found in cache!");
 		}
 	},
-	switchToDocument: function(d) {
+
+	// switch Phobos or Deimos to new document
+	switchToDocument: function(newDoc) {
+		var oldDoc = this.activeDocument ;
+		this.trace("switch " + (oldDoc ? "from " + oldDoc.getId()  + " " : " ")
+				   + ' to ' + newDoc.getId());
 		// We no longer save the data as the ACE edit session will keep the data for us
-		if (!this.activeDocument || d !== this.activeDocument) {
-			ComponentsRegistry.getComponent("phobos").openDoc(d);
+		if (!oldDoc || newDoc !== oldDoc) {
+			ComponentsRegistry.getComponent("phobos").openDoc(newDoc);
 		}
-		var currentIF = d.getCurrentIF();
-		this.activeDocument = d;
+		var currentIF = newDoc.getCurrentIF();
+		this.activeDocument = newDoc;
 		var developmentPanel = ComponentsRegistry.getComponent("developmentPanel");
-		developmentPanel.addPreviewTooltip("Preview "+this.activeDocument.getProjectData().id);
+		developmentPanel.addPreviewTooltip("Preview " + newDoc.getProjectData().id);
 		
 		if (currentIF === 'code') {
 			developmentPanel.$.panels.setIndex(this.phobosViewIndex);
@@ -468,7 +485,7 @@ enyo.kind({
 			developmentPanel.manageControls(true);
 		}
 		this._fileEdited();
-		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(d.getId());
+		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(newDoc.getId());
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {
