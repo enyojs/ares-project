@@ -1,7 +1,12 @@
 .palette-category {
-	 border-radius: 4px; 
-	 border: 1px solid #D0D0D0; 
-	 margin-bottom: 1px;
+	border: 1px solid #D0D0D0; 
+	margin-bottom: 1px;
+}
+
+.palette-category-all {
+	border-radius: 4px;
+	border: 1px solid #D0D0D0; 
+	margin-bottom: 1px;
 }
 
 .palette-category-name {

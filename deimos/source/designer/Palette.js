@@ -88,8 +88,16 @@ enyo.kind({
 	components: [
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{kind: "Scroller", fit: true, components: [
-				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
-					{kind: "CategoryItem"}
+				{classes: "palette-category-all", components: [
+					{ontap: "toggleComponents", classes: "palette-category-name", components: [
+						{name: "indicator", classes: "indicator turned"},
+						{name: "name", tag: "span"}
+					]},
+					{kind: "onyx.Drawer", name: "drawer", open:true, components: [
+						{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
+							{kind: "CategoryItem"}
+						]}
+					]}
 				]}
 			]},
 			{kind: "onyx.InputDecorator", style: "width:100%; margin-top:10px;", layoutKind: "FittableColumnsLayout", components: [
@@ -109,6 +117,8 @@ enyo.kind({
 		var index = inEvent.index;
 		var item = inEvent.item;
 		item.$.categoryItem.setModel(this.palette[index]);
+		// Sets the title of all component toggle
+		this.$.name.setContent("UI Components");
 		return true;
 	},
 	dragstart: function(inSender, inEvent) {
@@ -125,6 +135,15 @@ enyo.kind({
 		};
 		
 		inEvent.dataTransfer.setData("text", enyo.json.codify.to(dragData));
+	},
+	/**
+	 * Toggles all UI components
+	 * @private 
+	 */
+	toggleComponents: function() {
+		var open = this.$.drawer.getOpen();
+		this.$.drawer.setOpen(!open);
+		this.$.indicator.addRemoveClass("turned", !open);
 	},
 	/**
 	 * The current project analyzer output has changed
