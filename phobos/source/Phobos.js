@@ -35,13 +35,14 @@ enyo.kind({
 		onCloseDocument: "",
 		onUpdate: "",
 		onRegisterMe: "",
+		onCssDocument: "",
 		onDisplayPreview: "",
 		onSwitchFile: "",
 		onFileEdited: " ",
 		onAceFocus: ""
 	},
 	handlers: {
-		onCss: "newcssAction",
+		onNewcss: "newcss",
 		onReparseAsked: "reparseAction",
 		onInitNavigation: "initNavigation",
 		onNavigateInCodeEditor: "navigateInCodeEditor"
@@ -286,6 +287,7 @@ enyo.kind({
 				saveAsButton: true,
 				newKindButton: true,
 				designerDecorator: true,
+				cssButton: false,
 				right: rightpane
 			},
 			image: {
@@ -295,6 +297,7 @@ enyo.kind({
 				saveAsButton: false,
 				newKindButton: false,
 				designerDecorator: false,
+				cssButton: false,
 				right: false
 			},
 			text: {
@@ -304,7 +307,28 @@ enyo.kind({
 				saveAsButton: true,
 				newKindButton: false,
 				designerDecorator: false,
+				cssButton: false,
 				right: false
+			},
+			css: {
+				imageViewer: false,
+				ace: true,
+				saveButton: true,
+				saveAsButton: true,
+				newKindButton: false,
+				designerDecorator: false,
+				cssButton: true,
+				right: false		
+			},
+			less: {
+				imageViewer: false,
+				ace: true,
+				saveButton: true,
+				saveAsButton: true,
+				newKindButton: false,
+				designerDecorator: false,
+				cssButton: true,
+				right: false		
 			}
 		};
 
@@ -910,9 +934,6 @@ enyo.kind({
 		var newKind = 'enyo.kind({\n	name : "@cursor@",\n	kind : "Control",\n	components : []\n});';
 		this.$.ace.insertAtEndOfFile(newKind, '@cursor@');
 	},
-	newcssAction: function(inSender, inEvent){
-		this.$.ace.insertAtEndOfFile(inEvent.outPut);
-	},
 	/*
 	 * Perform a few actions before closing a document
 	 * @protected
@@ -1070,11 +1091,39 @@ enyo.kind({
 			this.doUpdate(data);
 		} // else - The error has been displayed by extractKindsData()
 	},
+	cssAction: function(){
+	// Update the projectIndexer and notify watchers
+		this.reparseAction();
+		
+		var data = {
+				projectData: this.projectData,
+				fileIndexer: this.analysis
+			};
+		this.doCssDocument(data);
+	},
+	/*
+	* Add new css to end of current file
+	*
+	*/
+	newcss: function(inSender, inEvent){
+		this.$.ace.insertAtEndOfFile(inSender);
+	},
+	/*
+	* replace the old css with edited css 
+	*
+	*/
+	replacecss: function(old_css, new_css){
+		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
+		this.$.ace.gotoLine(0,0);
+		this.$.ace.find(old_css, options);
+		this.$.ace.replace(old_css, new_css, options);
+	},
 	resizeHandler: function() {
 		this.inherited(arguments);
 		this.$.body.reflow();
 		this.$.ace.resize();
-	}
+	},
+
 });
 
 enyo.kind({
@@ -1101,14 +1150,11 @@ enyo.kind({
 		{// right panel for HTML goes here
 		},
 		{kind: "enyo.Control", classes: "enyo-fit",	components: [ // right panel for CSS here
-			{kind: "cssBuilder", classes: "enyo-fit ares_phobos_panel border", onInsert: "test"}
+			
 		]}
 	],
 	create: function() {
 		this.inherited(arguments);
-	},
-	test: function(inEvent) {
-		this.doCss(inEvent);
 	},
 	sendInitHelperReapeter: function(inSender, inEvent) {
 		this.doInitNavigation({item: inEvent.item});
