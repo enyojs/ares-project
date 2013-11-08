@@ -26,19 +26,16 @@ enyo.kind({
 		this.inherited(arguments);
 		this.doRegisterMe({name:"documentToolbar", reference:this});
 	},
-	createFileTab: function(name, id, path, project) {
+	createFileTab: function(name, id, path) {
 		this.$.tabs.show();
 		this.$.tabs.render();
-		this.$.tabs.addTab(
-			{
-				caption: name,
-				userId: id, // id like home-123f3c8a766751826...
-				tooltipMsg: path,
-				data: {
-					project: project // object with project name and whatnot
-				}
-			}
-		);
+		this.$.tabs.addTab({
+			caption: name,
+			// id like home-123f3c8a766751826...
+			// id encodes project name and file path
+			userId: id,
+			tooltipMsg: path
+		});
 	},
 	switchFile: function(inSender, inEvent) {
 		this.doSwitchFile({id: inEvent.userId});

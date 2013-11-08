@@ -163,7 +163,7 @@ enyo.kind({
 					}
 				} else {
 					fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
-					ComponentsRegistry.getComponent("documentToolbar").createFileTab(file.name, fileDataId, file.path, projectData);
+					ComponentsRegistry.getComponent("documentToolbar").createFileTab(file.name, fileDataId, file.path);
 					self.switchToDocument(fileData);
 					if (typeof next === 'function') {
 						next();
