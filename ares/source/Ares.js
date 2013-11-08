@@ -88,7 +88,6 @@ enyo.kind({
 		onUndo: "designerUndo", 
 		onRedo: "designerRedo",
 		onSwitchFile: "switchFile",
-		onNewKind: "bounceNew",
 		onCloseFileRequest: "bounceCloseFileRequest",
 		onRegisterMe : "_registerComponent",
 		onMovePanel : "_movePanel",
@@ -485,10 +484,6 @@ enyo.kind({
 		}
 		this._fileEdited();
 		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(newDoc.getId());
-	},
-	// FIXME: This trampoline function probably needs some refactoring
-	bounceNew: function(inSender, inEvent) {
-		this.$.componentsRegistry.phobos.newKindAction(inSender, inEvent);
 	},
 
 	// FIXME: This trampoline function probably needs some refactoring
