@@ -2,8 +2,6 @@ enyo.depends(
 	"Phobos.js",
 	"AutoComplete.js",
 	"FindPopup.js",
-	"cssbuilder.css",
-	"cssbuilder.js",
 	"ProjectCtrl.js",
 	"EditorSettings.js",
 	"AceScroller.js",
