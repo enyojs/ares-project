@@ -128,6 +128,23 @@ enyo.kind({
 			return true;
 		}
 
+		// Size-related: BORDER-STYLE/PADDING/MARGIN/FONT-STYLE/TEXT-STYLE
+		if (n === "border-width" || 
+			n === "padding-top" || n === "padding-bottom" || n === "padding-right" || n === "padding-left" || 
+			n === "margin-top" || n === "margin-bottom" || n === "margin-right" || n === "margin-left" ||
+			n === "font-size" || n === "line-height" ||
+			n === "text-indent" ) {
+			var reg = new RegExp(/^\d+$/);
+			
+			/* Input value pattern matches with only number */
+			if (reg.test(v)) {
+				v = v + inEvent.target.unit;
+			}
+			else {
+				// Just use v: or other options can be considered
+			}
+		}
+
 		// Add/replace new style
 		this.styleProps[n] = v;
 		
