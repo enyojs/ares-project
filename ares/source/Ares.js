@@ -108,6 +108,7 @@ enyo.kind({
 	developmentPanelIndex: 2,
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
+	heraViewIndex: 2,
 	projectListWidth: 300,
 	isProjectView: true,
 	create: function() {
@@ -704,6 +705,15 @@ enyo.kind({
 			}
 		},
 		instance: null
+	},
+		/*
+	* open hera
+	* @protected
+	*/
+	cssDocument: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("hera").cssload(inEvent);
+		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.heraViewIndex);
+		this.activeDocument.setCurrentIF('hera');
 	},
 	/*
 	* close hera
