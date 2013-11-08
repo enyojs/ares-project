@@ -455,6 +455,7 @@ enyo.kind({
 		}
 
 		if (config.constraints) {
+			// Check container's constraints
 			if (config.constraints.containers) {
 				var droppable = false;
 				enyo.forEach (config.constraints.containers.targets, function(container) {
