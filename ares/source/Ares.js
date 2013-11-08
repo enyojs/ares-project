@@ -88,7 +88,6 @@ enyo.kind({
 		onUndo: "designerUndo", 
 		onRedo: "designerRedo",
 		onSwitchFile: "switchFile",
-		onDesign: "bounceDesign",
 		onNewKind: "bounceNew",
 		onCloseFileRequest: "bounceCloseFileRequest",
 		onRegisterMe : "_registerComponent",
@@ -488,20 +487,11 @@ enyo.kind({
 		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(newDoc.getId());
 	},
 	// FIXME: This trampoline function probably needs some refactoring
-	bounceDesign: function(inSender, inEvent) {
-		var editorMode = ComponentsRegistry.getComponent("developmentPanel").$.panels.getIndex() == this.phobosViewIndex;
-		if (editorMode) {
-			ComponentsRegistry.getComponent("phobos").designerAction(inSender, inEvent);
-		} else {
-			ComponentsRegistry.getComponent("deimos").closeDesignerAction();
-		}
-	},
-	// FIXME: This trampoline function probably needs some refactoring
 	bounceNew: function(inSender, inEvent) {
 		this.$.componentsRegistry.phobos.newKindAction(inSender, inEvent);
 	},
-	// FIXME: This trampoline function probably needs some refactoring
 
+	// FIXME: This trampoline function probably needs some refactoring
 	// Close is a special case, because it can be invoked on a
 	// document other than the currently-active one, so we must first
 	// switch the active document and then close it

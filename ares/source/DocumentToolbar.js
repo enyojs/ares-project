@@ -5,7 +5,6 @@ enyo.kind({
 		onToggleOpen: "",
 		onSwitchFile: "",
 		onCloseFileRequest: "",
-		onDesign: "",
 		onRegisterMe: "",
 		onGrabberClick: "",
 		onAceFocus: ""
