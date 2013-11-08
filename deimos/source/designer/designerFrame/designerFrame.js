@@ -1085,6 +1085,23 @@ enyo.kind({
 	legalDrop: function() {
 		var containerId = (this.getContainerItem()) ? this.getContainerItem().aresId : null,
 			beforeId    = (this.getBeforeItem())    ? this.getBeforeItem().aresId    : null;
+
+		if (this.selection && this.selection.constraints) {
+			// Check container's constraints
+			if (this.selection.constraints.containers) {
+				var droppable = false;
+				enyo.forEach (this.selection.constraints.containers, function(container) {
+					if (container.kind === this.getContainerItem().kind) {
+						droppable = true;
+					} 
+				}, this);
+
+				if (!droppable) {
+					enyo.warn("container's constraint", this.selection.constraints.containers.description);
+					return false;
+				}
+			}
+		}
 		
 		// If creating a new item, drop is legal
 		if (this.getCreatePaletteItem()) {
