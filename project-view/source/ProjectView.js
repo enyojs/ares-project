@@ -184,7 +184,26 @@ enyo.kind({
 		this.doShowWaitPopup({msg: "Starting: " + action, service: serviceType});
 		// TODO: Must be reworked to allow the selection of builder/tester in the UI - ENYO-2049
 		var services = ServiceRegistry.instance.getServicesByType(serviceType);
-		var provider =	services[services.length - 1];
+		
+		// Project action differ by providers.
+		var provider;
+		var providers = project.attributes.config.data.providers;
+		if (providers.webos.enabled) {
+			// WebOS build case
+			for (var idxW=0; idxW < services.length; idxW++) {
+				if (services[idxW].id === "webos") {
+					provider = services[idxW];
+				}
+			}
+		} else if (providers.phonegap.enabled) {
+			// PhoneGap build case
+			for (var idxP=0; idxP < services.length; idxP++) {
+				if (services[idxP].id === "phonegap") {
+					provider = services[idxP];
+				}	
+			}
+		}
+
 		if (!provider) {
 			this.doError({msg: 'No ' + serviceType + ' service available'});
 		} else if (typeof provider[action] !== 'function') {
