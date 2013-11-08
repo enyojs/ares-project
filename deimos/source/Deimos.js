@@ -453,6 +453,22 @@ enyo.kind({
 			enyo.warn("Could not create new item - bad data: ", inEvent);
 			return true;
 		}
+
+		if (config.constraints) {
+			if (config.constraints.containers) {
+				var droppable = false;
+				enyo.forEach (config.constraints.containers.targets, function(container) {
+					if (container.kind === target.kind) {
+						droppable = true;
+					} 
+				}, this);
+
+				if (!droppable) {
+					enyo.warn("container's constraint", config.constraints.containers.description);
+					return true;
+				}
+			}
+		}
 				
 		// Give the new component (and any children) a fresh _aresId_
 		config.aresId = this.generateNewAresId();
