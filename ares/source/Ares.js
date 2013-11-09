@@ -1,4 +1,4 @@
-/* global Ares, ServiceRegistry, async, ares, alert, ComponentsRegistry */
+/* global Ares, ServiceRegistry, async, ares, alert, ComponentsRegistry, KeyboardJS */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets",
@@ -120,12 +120,33 @@ enyo.kind({
 		}
 
 		Ares.instance = this;
+
+		// For Key-Binding Sample
+		this.initializeKeyBinding();
 	},
 
 	rendered: function() {
 		this.inherited(arguments);
 		this.showProjectView();
 	},
+	
+	initializeKeyBinding: function() {
+		KeyboardJS.on('ctrl + s', 
+			function(e) {
+				// Close the Editwindow
+				ComponentsRegistry.getComponent("phobos").closeDocAction();
+				// Prevent the Default Browser's action
+				if (e.preventDefault) {
+					e.preventDefault();
+				} else {
+					e.returnValue = false;
+				}
+			},
+			function(e) {
+				// 'Ctrl + S' Key-Up callback event issued: Do nothing
+		});
+	},
+
 	/**
 	 * @private
 	 */
