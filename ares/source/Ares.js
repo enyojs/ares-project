@@ -321,8 +321,8 @@ enyo.kind({
 	_closeDocument: function(docId, next) {
 		if (docId) {
 			// remove file from cache
-			Ares.Workspace.files.removeEntry(docId);
 			ComponentsRegistry.getComponent("documentToolbar").removeTab(docId);
+			Ares.Workspace.files.removeEntry(docId);
 		}
 		if (typeof next === 'function') {
 			next();
