@@ -29,7 +29,7 @@ enyo.kind({
 		onShowWaitPopup: "",
 		onHideWaitPopup: ""
 	},
-	debug: false,
+	debug: true,
 	components: [
 		{kind:"FittableRows", classes:"project-list", components:[
 			{kind: "onyx.MoreToolbar", classes: "ares-top-toolbar", isContainer: true, name: "toolbar", components: [
@@ -239,6 +239,14 @@ enyo.kind({
 	},
 	selectInProjectList:function(project, next){
 		this.trace("select ",project);
+		var oldProject = this.selectedProject ;
+
+		// do something only if project is actually changed
+		if (oldProject && oldProject.getName() === project.getName()) {
+			if (next) {next();}
+			return;
+		}
+
 		var itemList = this.$.projectList.getClientControls();
 		enyo.forEach(itemList, function(item) {
 			item.$.item.removeClass("on");
@@ -251,6 +259,7 @@ enyo.kind({
 	},
 	selectProject: function(project,next){
 		var msg, service;
+		this.trace("project ",project, " old ", this.selectedProject);
 		service = ServiceRegistry.instance.resolveServiceId(project.getServiceId());
 		if (service !== undefined) {
 			project.setService(service);
