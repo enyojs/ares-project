@@ -1,4 +1,4 @@
-/* global ComponentsRegistry */
+/* global ComponentsRegistry, alert */
 enyo.kind({
 	name:"Ares.DevelopmentPanel",
 	kind:"FittableRows", 
@@ -75,7 +75,8 @@ enyo.kind({
 		onRegisterMe: "",
 		onMovePanel:"",
 		onSavePreviewAction:"",
-		onDesignerBroken: ""
+		onDesignerBroken: "",
+		onFileEdited:"_fileEdited"
 	},
 	published: {
 		panelIndex: 2,
@@ -171,6 +172,91 @@ enyo.kind({
 	getErrorFromDesignerBroken: function(){
 		return this.$.designerTooltipBroken.error;
 	},
+	_fileEdited: function(){
+		ComponentsRegistry.getComponent("developmentController")._fileEdited();
+	}
+});
+
+enyo.kind({
+	name: "Ares.DevelopmentController",
+	kind: "enyo.Component",
+
+	events: {
+		onRegisterMe: "",
+		onNewActiveDocument: "", // to preserve legacy in Ares.js
+	},
+
+	debug: false,
+
+	create: function() {
+		this.inherited(arguments);
+
+		// Setup this.trace() function according to this.debug value
+		ares.setupTraceLogger(this);
+
+		this.doRegisterMe({name:"developmentController", reference:this});
+	},
+
+	activeDocument: null,
+
+	switchToDocument: function(newDoc) {
+		// safety net
+		if ( ! newDoc ) {
+			if  (this.debug) { throw("File ID " + newDoc + " not found in cache!");}
+			else             { alert("File ID not found in cache!");}
+			return;
+		}
+
+		var oldDoc = this.activeDocument ; // may be undef when a project is closed
+		var newName = newDoc.getProjectData().getName() ;
+		this.trace("switch " + (oldDoc ? "from " + oldDoc.getId() + " " : " ")
+				   + "to " + newDoc.getId() );
+
+		//select project if the file(d) comes from another project then the previous file
+		if (!oldDoc || oldDoc.getProjectData().getName() !== newName){
+			this.trace("also switch project "
+					   + (oldDoc ? "from " + oldDoc.getProjectData().getName()  + " " : " ")
+					   + ' to ' + newDoc.getProjectData().getName());
+			var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
+			// switch document is done in the callback
+			ComponentsRegistry.getComponent("projectList")
+				.selectInProjectList(project, this._switchDoc.bind(this,newDoc));
+		}
+		else {
+			this._switchDoc(newDoc);
+		}
+
+	},
+
+	// switch Phobos or Deimos to new document
+	_switchDoc: function(newDoc) {
+		var oldDoc = this.activeDocument ;
+		this.trace("switch " + (oldDoc ? "from " + oldDoc.getId()  + " " : " ")
+				   + ' to ' + newDoc.getId());
+		// We no longer save the data as the ACE edit session will keep the data for us
+		if (!oldDoc || newDoc !== oldDoc) {
+			ComponentsRegistry.getComponent("phobos").openDoc(newDoc);
+		}
+		var currentIF = newDoc.getCurrentIF();
+		this.activeDocument = newDoc;
+		var developmentPanel = ComponentsRegistry.getComponent("developmentPanel");
+		developmentPanel.addPreviewTooltip("Preview " + newDoc.getProjectData().id);
+
+		if (currentIF === 'code') {
+			developmentPanel.$.panels.setIndex(this.phobosViewIndex);
+			developmentPanel.manageControls(false);
+		} else {
+			ComponentsRegistry.getComponent("phobos").designerAction();
+			developmentPanel.manageControls(true);
+		}
+		this._fileEdited();
+		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(newDoc.getId());
+		this.doNewActiveDocument({ doc: this.activeDocument} );
+	},
+	_fileEdited: function() {
+		ComponentsRegistry.getComponent("developmentPanel").updateDeimosLabel(this.activeDocument.getEdited());
+	},
+
 });
 
 /**

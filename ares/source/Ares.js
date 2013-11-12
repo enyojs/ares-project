@@ -41,7 +41,8 @@ enyo.kind({
 					onFileChanged: "closeDocument",
 					onFolderChanged: "closeSomeDocuments"
 				},
-				{kind: "Ares.DevelopmentPanel", name: "developmentPanel"}
+				{kind: "Ares.DevelopmentPanel", name: "developmentPanel"},
+				{kind: "Ares.DevelopmentController", name: "developmentController"}
 			]
 		},
 		{
@@ -93,8 +94,7 @@ enyo.kind({
 		onMovePanel : "_movePanel",
 		onSavePreviewAction: "_saveBeforePreview",
 		onDisplayPreview : "_displayPreview",
-		onFileEdited:"_fileEdited"
-
+		onNewActiveDocument: "_setActiveDocument"
 	},
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
@@ -333,6 +333,13 @@ enyo.kind({
 		var harmonia = ComponentsRegistry.getComponent("harmonia");
 		harmonia.refreshFile(inEvent.nodeId);
 	},
+
+	_setActiveDocument: function(inSender, inEvent) {
+		// register current active Document, even though this should be handled only
+		// in Developmentcontroller
+		this.activeDocument = inEvent.doc ;
+	},
+
 	designDocument: function(inSender, inEvent) {
 		// send all files being edited to the designer, this will send code to designerFrame
 		this.syncEditedFiles(inEvent.projectData);
@@ -341,7 +348,7 @@ enyo.kind({
 		// switch to Deimos editor
 		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.deimosViewIndex);
 		// update an internal variable
-		this.activeDocument.setCurrentIF('designer');
+		ComponentsRegistry.getComponent("developmentController").activeDocument.setCurrentIF('designer');
 	},
 	//* A code change happened in Phobos - push change to Deimos
 	phobosUpdate: function(inSender, inEvent) {
@@ -356,7 +363,7 @@ enyo.kind({
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
 		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.phobosViewIndex);
-		this.activeDocument.setCurrentIF('code');
+		ComponentsRegistry.getComponent("developmentController").activeDocument.setCurrentIF('code');
 		ComponentsRegistry.getComponent("developmentPanel").manageControls(false);
 	},
 	//* Undo event from Deimos
@@ -434,56 +441,12 @@ enyo.kind({
 	// switch file *and* project (if necessary)
 	switchFile: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.id);
-		var oldDoc = this.activeDocument ; // may be undef when a project is closed
-
-		this.trace("switch " + (oldDoc ? "from " + oldDoc.getId() + " " : " ")
-				   + "to " + newDoc.getId() );
-
-		if (newDoc) {
-			//select project if the file(d) comes from another project then the previous file
-			if (!oldDoc || oldDoc.getProjectData().getName() !== newDoc.getProjectData().getName()){
-				var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
-				this.trace("also switch project "
-						   + (oldDoc ? "from " + oldDoc.getProjectData().getName()  + " " : " ")
-						   + ' to ' + newDoc.getProjectData().getName());
-				// switchToDocument is passed as a callback
-				ComponentsRegistry.getComponent("projectList")
-					.selectInProjectList(project, this.switchToDocument.bind(this,newDoc));
-			}
-			else {
-				this.switchToDocument(newDoc);
-			}
-		} else if (this.debug) {
-			throw("File ID " + newDoc + " not found in cache!");
-		}
-		else {
-			alert("File ID not found in cache!");
-		}
+		ComponentsRegistry.getComponent("developmentController").switchToDocument(newDoc);
 	},
 
 	// switch Phobos or Deimos to new document
 	switchToDocument: function(newDoc) {
-		var oldDoc = this.activeDocument ;
-		this.trace("switch " + (oldDoc ? "from " + oldDoc.getId()  + " " : " ")
-				   + ' to ' + newDoc.getId());
-		// We no longer save the data as the ACE edit session will keep the data for us
-		if (!oldDoc || newDoc !== oldDoc) {
-			ComponentsRegistry.getComponent("phobos").openDoc(newDoc);
-		}
-		var currentIF = newDoc.getCurrentIF();
-		this.activeDocument = newDoc;
-		var developmentPanel = ComponentsRegistry.getComponent("developmentPanel");
-		developmentPanel.addPreviewTooltip("Preview " + newDoc.getProjectData().id);
-		
-		if (currentIF === 'code') {
-			developmentPanel.$.panels.setIndex(this.phobosViewIndex);
-			developmentPanel.manageControls(false);
-		} else {
-			ComponentsRegistry.getComponent("phobos").designerAction();
-			developmentPanel.manageControls(true);
-		}
-		this._fileEdited();
-		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(newDoc.getId());
+		ComponentsRegistry.getComponent("developmentController").switchToDocument(newDoc);
 	},
 
 	// FIXME: This trampoline function probably needs some refactoring
@@ -654,9 +617,6 @@ enyo.kind({
 	_displayPreview: function(inSender, inEvent){
 		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
 		ComponentsRegistry.getComponent("projectView").previewAction(inSender,{project:project});
-	},
-	_fileEdited: function() {
-		ComponentsRegistry.getComponent("developmentPanel").updateDeimosLabel(this.activeDocument.getEdited());
 	},
 	/**
 	 * Event handler for ares components registry
