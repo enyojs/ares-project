@@ -551,11 +551,11 @@ enyo.kind({
 
 	cancelService: function(inSender, inEvent) {
 		enyo.Signals.send("plugin.phonegap.buildCanceled");
-		this.hideWaitPopup();
-		this.$.canceBuildButton.hide();
+		this.hideWaitPopup();		
 	},
 
 	hideWaitPopup: function() {
+		this.$.canceBuildButton.hide();
 		this.$.waitPopup.hide();
 	},
 
