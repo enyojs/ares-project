@@ -67,10 +67,10 @@ enyo.kind({
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", name: "toolbar4", components: [
 				{name: "newCssName", kind: "Control", content: "Enter you new class name" }
 			]},
-				{kind: "onyx.Input", placeholder: "Enter your class name!..", name: "input"},
-				{kind: "onyx.Button", classes: "ok", content: "Ok", ontap:"newDeclaration"}
-			]}
-		],
+			{kind: "onyx.Input", placeholder: "Enter your class name!..", name: "input"},
+			{kind: "onyx.Button", classes: "ok", content: "Ok", ontap:"newDeclaration"}
+		]}
+	],
 	
 	declaration: [],
 	pro: [],			
