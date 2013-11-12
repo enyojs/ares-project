@@ -218,9 +218,15 @@ enyo.kind({
 					   + (oldDoc ? "from " + oldDoc.getProjectData().getName()  + " " : " ")
 					   + ' to ' + newDoc.getProjectData().getName());
 			var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
+			var projectList = ComponentsRegistry.getComponent("projectList");
+			var deimos = ComponentsRegistry.getComponent("deimos");
+
 			// switch document is done in the callback
-			ComponentsRegistry.getComponent("projectList")
-				.selectInProjectList(project, this._switchDoc.bind(this,newDoc));
+			async.series([
+				projectList.selectInProjectList.bind(projectList,project),
+				deimos.projectSelected.bind(deimos,project),
+				this._switchDoc.bind(this,newDoc),
+			]);
 		}
 		else {
 			this._switchDoc(newDoc);

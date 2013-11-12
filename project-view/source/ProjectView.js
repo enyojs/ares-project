@@ -125,12 +125,10 @@ enyo.kind({
 							function (callback) {
 								self.trace("ProjectView: setup project set config on "+ project.getName() );
 								project.setConfig(config);
-								self.trace("ProjectView: setting project in Deimos for " + project.id);
-								ComponentsRegistry.getComponent("deimos").projectSelected(project,callback);
+								callback();
 							}
 						],
 						function (err) {
-							self.trace("ProjectView: Deimos setup done for " + project.getName() + " err is ",err );
 							if (err) {
 								self.doError({msg: err.toString(), err: err});
 							}
