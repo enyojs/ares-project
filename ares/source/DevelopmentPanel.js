@@ -1,4 +1,4 @@
-/* global ComponentsRegistry, alert */
+/* global ComponentsRegistry, alert, async */
 enyo.kind({
 	name:"Ares.DevelopmentPanel",
 	kind:"FittableRows", 
