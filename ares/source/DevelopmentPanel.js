@@ -231,13 +231,13 @@ enyo.kind({
 	// switch Phobos or Deimos to new document
 	_switchDoc: function(newDoc) {
 		var oldDoc = this.activeDocument ;
+		var currentIF = newDoc.getCurrentIF();
 		this.trace("switch " + (oldDoc ? "from " + oldDoc.getId()  + " " : " ")
-				   + ' to ' + newDoc.getId());
+				   + ' to ' + newDoc.getId() + " IF is " + currentIF );
 		// We no longer save the data as the ACE edit session will keep the data for us
 		if (!oldDoc || newDoc !== oldDoc) {
 			ComponentsRegistry.getComponent("phobos").openDoc(newDoc);
 		}
-		var currentIF = newDoc.getCurrentIF();
 		this.activeDocument = newDoc;
 		var developmentPanel = ComponentsRegistry.getComponent("developmentPanel");
 		developmentPanel.addPreviewTooltip("Preview " + newDoc.getProjectData().id);
