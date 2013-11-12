@@ -208,6 +208,12 @@ enyo.kind({
 		}
 
 		var oldDoc = this.activeDocument ; // may be undef when a project is closed
+
+		// don't open an already opened doc
+		if ( oldDoc && newDoc.getId() === oldDoc.getId()) {
+			return ;
+		}
+
 		var newName = newDoc.getProjectData().getName() ;
 		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : "")
 				   + "to " + newDoc.getName() );
