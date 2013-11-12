@@ -12,6 +12,9 @@ Ares.Model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when po
 	getFile: function() {
 		return this.get("file");
 	},
+	getName: function() {
+		return this.get("file").name;
+	},
 	getData: function() {
 		return this.get("data");
 	},

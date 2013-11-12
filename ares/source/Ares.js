@@ -148,7 +148,7 @@ enyo.kind({
 			throw new Error ('Undefined fileId for file ' + file.name + ' service ' + file.service);
 		}
 		var fileData = Ares.Workspace.files.get(fileDataId);
-		this.trace("open document with projectData ", projectData, " fileDataId ", fileDataId);
+		this.trace("open document with project ", projectData.getName(), " file ", file.name);
 		if (fileData) {
 			// useful when double clicking on a file in HermesFileTree
 			this.switchToDocument(fileData);
@@ -180,7 +180,7 @@ enyo.kind({
 
 	/** @private */
 	_fetchDocument: function(projectData, file, next) {
-		this.trace("projectData:", projectData, ", file:", file);
+		this.trace("projectData:", projectData.getName(), ", file:", file.name);
 		var service = projectData.getService();
 		service.getFile(file.id)
 			.response(this, function(inEvent, inData) {
@@ -337,6 +337,7 @@ enyo.kind({
 	_setActiveDocument: function(inSender, inEvent) {
 		// register current active Document, even though this should be handled only
 		// in Developmentcontroller
+		this.trace("called for " , inEvent.doc.getName());
 		this.activeDocument = inEvent.doc ;
 	},
 

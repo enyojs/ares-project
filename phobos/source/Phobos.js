@@ -465,7 +465,8 @@ enyo.kind({
 			code: this.$.ace.getValue(),
 			path: this.projectCtrl.projectUrl + this.docData.getFile().dir + this.docData.getFile().name
 		};
-		this.trace("called with mode " + mode + " inhibitUpdate " + inhibitUpdate);
+		this.trace("called with mode " + mode + " inhibitUpdate " + inhibitUpdate
+				   + " on " + module.name);
 		switch(mode) {
 			case "javascript":
 				try {
