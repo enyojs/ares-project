@@ -56,7 +56,7 @@ enyo.kind({
 			components: [
 				{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 				{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}, 
-				{kind: "onyx.Button", name:"cancelWaitPopup", content: "Cancel", ontap: "cancelService", style: "margin-top: 10px;", showing: false}						
+				{kind: "onyx.Button", name:"canceBuildButton", content: "Cancel", ontap: "cancelService", style: "margin-top: 10px;", showing: false}						
 			]
 		},
 		
@@ -543,7 +543,7 @@ enyo.kind({
 		if(inEvent.service === 'build' && ! inEvent.msg.match(/Starting/)) {
 			// Node server fails if cancel is done during "Starting build" phase
 			// See ENYO-3506
-			this.$.cancelWaitPopup.show();
+			this.$.canceBuildButton.show();
 		}
 		this.$.waitPopupMessage.setContent(inEvent.msg);
 		this.$.waitPopup.show();
@@ -551,8 +551,8 @@ enyo.kind({
 
 	cancelService: function(inSender, inEvent) {
 		enyo.Signals.send("plugin.phonegap.buildCanceled");
-		this.$.cancelWaitPopup.hide();
 		this.hideWaitPopup();
+		this.$.canceBuildButton.hide();
 	},
 
 	hideWaitPopup: function() {
