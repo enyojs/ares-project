@@ -65,12 +65,12 @@ enyo.kind({
 	
 		{kind: "onyx.Popup", modal: true, floating: true, centered: true, canGenerate: false, name: "newCssPopup", components: [
 			{kind: "onyx.Toolbar", layoutKind: "FittableColumnsLayout", name: "toolbar4", components: [
-					{name: "newCssName", kind: "Control", content: "Enter you new class name" }
-				]},
-			{kind: "onyx.Input", placeholder: "Enter your class name!..", name: "input"},
-			{kind: "onyx.Button", classes: "ok", content: "Ok", ontap:"newDeclaration"}
-		]}
-	],
+				{name: "newCssName", kind: "Control", content: "Enter you new class name" }
+			]},
+				{kind: "onyx.Input", placeholder: "Enter your class name!..", name: "input"},
+				{kind: "onyx.Button", classes: "ok", content: "Ok", ontap:"newDeclaration"}
+			]}
+		],
 	
 	declaration: [],
 	pro: [],			
@@ -157,8 +157,8 @@ enyo.kind({
 			this.$.sampletext.applyStyle(this.pro[a], this.value[a]);
 			a++;
 		}		
-			this.$.bg.setContent(outPut + "}");		// write in to the preview box
-			this.out = outString + "}\n";
+		this.$.bg.setContent(outPut + "}");		// write in to the preview box
+		this.out = outString + "}\n";
 	},
 
 	/*
@@ -289,9 +289,9 @@ enyo.kind({
 				n = "";
 			}
 		}
-	this.$.list.setCount(j);
-	this.addNewItem();
-	this.$.list.reset();
+		this.$.list.setCount(j);
+		this.addNewItem();
+		this.$.list.reset();
 	},
 
 	/*
@@ -327,7 +327,7 @@ enyo.kind({
 						this.pro[a] = s[0];
 						this.value[a] = s[1];						
 						a++;
-			}
+					}
 					this.oldcss(this.className);
 					this.updateBox();
 				}

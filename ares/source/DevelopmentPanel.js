@@ -24,7 +24,7 @@ enyo.kind({
 					{name: "designerTooltipBroken", kind: "Ares.ErrorTooltip", content: $L("Designer")}
 				]},
 				{name: "cssDecorator", kind: "onyx.TooltipDecorator", components: [
-				{name: "cssButton", kind: "onyx.IconButton", Showing: "false", src: "assets/images/designer.png", ontap: "doCss"},
+					{name: "cssButton", kind: "onyx.IconButton", Showing: "false", src: "assets/images/designer.png", ontap: "doCss"},
 					{kind: "onyx.Tooltip", content: $L("Css Designer")}
 				]}
 			]},

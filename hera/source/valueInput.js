@@ -19,21 +19,20 @@ enyo.kind({
 	
 	components: [
 		{kind: "Panels", arrangerKind: "CardArranger",  style: "border: solid black thin;", classes: "enyo-fit",	components: [
-			{name: "blank", kind: "Control", showing: true, components: [
-		]},
+			{name: "blank", kind: "Control", showing: true},
 		
 			{name: "sliders", kind: "Control", showing: false, components: [
-			{style: "height: 5px"},
-			{style: "height: 15px;  text-align: center; ", content: "Color Sliders" },
-			{style: "height: 5px"},
-			{name: "redSlider", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged", style: "height:10px; background-color: red; enyo-unselectable;"},
-			{style: "height: 5px"},
+				{style: "height: 5px"},
+				{style: "height: 15px;  text-align: center; ", content: "Color Sliders" },
+				{style: "height: 5px"},
+				{name: "redSlider", kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged", style: "height:10px; background-color: red; enyo-unselectable;"},
+				{style: "height: 5px"},
 
-			{name: "greenSlider", kind: "onyx.Slider", onChanging: "greenSliding", onChange: "greenChanged", style: "height:10px;  background-color: green; enyo-unselectable" },
-			{style: "height: 5px"},
+				{name: "greenSlider", kind: "onyx.Slider", onChanging: "greenSliding", onChange: "greenChanged", style: "height:10px;  background-color: green; enyo-unselectable" },
+				{style: "height: 5px"},
 
-			{name: "blueSlider", kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged", style: "height:10px;  background-color: blue; enyo-unselectable" },
-		]},	// sliders
+				{name: "blueSlider", kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged", style: "height:10px;  background-color: blue; enyo-unselectable" },
+			]},	// sliders
 		
 			{name: "misc", kind: "Control", showing: false, components: [
 				{style: "height: 5px"},
@@ -42,11 +41,10 @@ enyo.kind({
 							
 				{kind: "FittableColumns", fit: true, components: [
 					{kind: "onyx.InputDecorator", components: [
-					{kind: "onyx.Input", placeholder: "Enter text here", onchange:"input_misc"},
+						{kind: "onyx.Input", placeholder: "Enter text here", onchange:"input_misc"},
+					]},
 				]},
-
-			]},
-		]},	// misc		
+			]},	// misc		
 			
 			{name: "xy", kind: "Control", showing: false, components: [
 				{style: "height: 5px"},
@@ -67,7 +65,7 @@ enyo.kind({
 						]}
 					]},
 				]}
-		]}, // xy
+			]}, // xy
 			
 			{name: "xyz", kind: "Control", showing: false, classes:"left-input-box", components: [
 				{style: "height: 5px"},
@@ -92,16 +90,16 @@ enyo.kind({
 						]}
 					]},
 				]},	
-			{tag: "br"},
-			{tag: "br"},	
-			{kind: "Control", showing: true, components: [
-				{kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged", style: "height:10px; background-color: red; enyo-unselectable;"},
-				{style: "height: 5px"},
-				{kind: "onyx.Slider", onChanging: "greenSliding", onChange: "greenChanged", style: "height:10px;  background-color: green; enyo-unselectable" },
-				{style: "height: 5px"},
-				{ kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged", style: "height:10px;  background-color: blue; enyo-unselectable" },
-			]},
-		]},	//xyz
+				{tag: "br"},
+				{tag: "br"},	
+				{kind: "Control", showing: true, components: [
+					{kind: "onyx.Slider", onChanging: "redSliding", onChange: "redChanged", style: "height:10px; background-color: red; enyo-unselectable;"},
+					{style: "height: 5px"},
+					{kind: "onyx.Slider", onChanging: "greenSliding", onChange: "greenChanged", style: "height:10px;  background-color: green; enyo-unselectable" },
+					{style: "height: 5px"},
+					{ kind: "onyx.Slider", onChanging: "blueSliding", onChange: "blueChanged", style: "height:10px;  background-color: blue; enyo-unselectable" },
+				]},
+			]},	//xyz
 			
 			{name: "Picker", kind: "Control", showing: false, components: [
 				{style: "height: 5px"},
@@ -114,19 +112,19 @@ enyo.kind({
 					]},
 				//{kind: "xinput"},
 				
-				{kind: "onyx.PickerDecorator", style: "width: 40px;", components: [
-					{style: "min-width: 40px; font-size: 10px;"},
-					{name: "Unit", kind: "onyx.Picker", onSelect: "unit_type", components: [
-						{content: "px", active: true},
-						{content: "cm"},
-						{content: "em"},
-						{content: "ern"},
-						{content: "rem"},
-						{content: "%"}
-					]}
-				]},
-			]}
-		]},	// picker
+					{kind: "onyx.PickerDecorator", style: "width: 40px;", components: [
+						{style: "min-width: 40px; font-size: 10px;"},
+						{name: "Unit", kind: "onyx.Picker", onSelect: "unit_type", components: [
+							{content: "px", active: true},
+							{content: "cm"},
+							{content: "em"},
+							{content: "ern"},
+							{content: "rem"},
+							{content: "%"}
+						]}
+					]},
+				]}
+			]},	// picker
 			
 			{kind: "lrc"},
 			

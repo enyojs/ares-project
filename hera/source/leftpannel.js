@@ -214,7 +214,7 @@ enyo.kind({
 		var index = inEvent.index;
 		var item = inEvent.item;
 		var border = this.borders[index];
-			if (this.highlight === index){
+		if (this.highlight === index){
 			item.$.border.addRemoveClass("list-sample-selected", this.selected);
 		}
 		item.$.border.setContent(border.name);		
