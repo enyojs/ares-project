@@ -209,13 +209,13 @@ enyo.kind({
 
 		var oldDoc = this.activeDocument ; // may be undef when a project is closed
 		var newName = newDoc.getProjectData().getName() ;
-		this.trace("switch " + (oldDoc ? "from " + oldDoc.getId() + " " : " ")
-				   + "to " + newDoc.getId() );
+		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : "")
+				   + "to " + newDoc.getName() );
 
 		//select project if the file(d) comes from another project then the previous file
 		if (!oldDoc || oldDoc.getProjectData().getName() !== newName){
 			this.trace("also switch project "
-					   + (oldDoc ? "from " + oldDoc.getProjectData().getName()  + " " : " ")
+					   + (oldDoc ? "from " + oldDoc.getProjectData().getName()  + " " : "")
 					   + ' to ' + newDoc.getProjectData().getName());
 			var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
 			var projectList = ComponentsRegistry.getComponent("projectList");
@@ -238,8 +238,8 @@ enyo.kind({
 	_switchDoc: function(newDoc) {
 		var oldDoc = this.activeDocument ;
 		var currentIF = newDoc.getCurrentIF();
-		this.trace("switch " + (oldDoc ? "from " + oldDoc.getId()  + " " : " ")
-				   + ' to ' + newDoc.getId() + " IF is " + currentIF );
+		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName()  + " " : " ")
+				   + ' to ' + newDoc.getName() + " IF is " + currentIF );
 		// We no longer save the data as the ACE edit session will keep the data for us
 		if (!oldDoc || newDoc !== oldDoc) {
 			ComponentsRegistry.getComponent("phobos").openDoc(newDoc);
