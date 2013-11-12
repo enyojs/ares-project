@@ -148,7 +148,8 @@ enyo.kind({
 			throw new Error ('Undefined fileId for file ' + file.name + ' service ' + file.service);
 		}
 		var fileData = Ares.Workspace.files.get(fileDataId);
-		this.trace("open document with project ", projectData.getName(), " file ", file.name);
+		this.trace("open document with project ", projectData.getName(),
+				   " file ", file.name, " using cache ", fileData);
 		if (fileData) {
 			// useful when double clicking on a file in HermesFileTree
 			this.switchToDocument(fileData);
