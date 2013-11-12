@@ -155,28 +155,36 @@ enyo.kind({
 			this.switchToDocument(fileData);
 		} else {
 			this.showWaitPopup(this, {msg: $L("Opening...")});
-			this._fetchDocument(projectData, file, function(inErr, inContent) {
-				self.hideWaitPopup();
-				if (inErr) {
-					self.warn("Open failed", inErr);
-					if (typeof next === 'function') {
-						next(inErr);
+			async.waterfall(
+				[
+					this._fetchDocument.bind(this,projectData, file),
+					this._switchToNewTab.bind(this,projectData,file)
+				],
+				function (err) {
+					if (inErr) {
+						this.warn("Open failed", inErr);
 					}
-				} else {
-					fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
-					ComponentsRegistry.getComponent("documentToolbar").createFileTab(file.name, fileDataId, file.path);
-					self.switchToDocument(fileData);
 					if (typeof next === 'function') {
 						next();
 					}
 				}
-			});
+			);
 		}
 		//hide projectView only the first time
 		if (! Ares.Workspace.files.length ) {
 			this.hideProjectView();
 		}
 		
+	},
+
+	_switchToNewTab: function(projectData, file, inContent) {
+		this.trace("projectData:", projectData.getName(), ", file:", file.name);
+		this.hideWaitPopup();
+		var fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
+		this.trace(fileData.getId());
+		ComponentsRegistry.getComponent("documentToolbar")
+			.createFileTab(file.name, fileData.getId(), file.path);
+		this.switchToDocument(fileData);
 	},
 
 	/** @private */
