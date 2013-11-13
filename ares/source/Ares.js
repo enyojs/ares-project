@@ -549,8 +549,7 @@ enyo.kind({
 	 */
 	_nodeChanging: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
-		var docId = Ares.Workspace.files.computeId(inEvent.node),
-			self=this;
+		var docId = Ares.Workspace.files.computeId(inEvent.node);
 		this._closeDocument(docId);
 	},
 	/**
