@@ -90,7 +90,7 @@ enyo.kind({
 		this.inherited(arguments);
 		// Setup this.trace() function according to this.debug value
 		ares.setupTraceLogger(this);
-		this.doRegisterMe({name:"developmentPanel", reference:this});
+		this.doRegisterMe({name:"enyoEditor", reference:this});
 	},
 	activePanel : function(){
 		this.doMovePanel({panelIndex:this.panelIndex});
@@ -238,15 +238,15 @@ enyo.kind({
 			ComponentsRegistry.getComponent("phobos").openDoc(newDoc);
 		}
 		this.activeDocument = newDoc;
-		var developmentPanel = ComponentsRegistry.getComponent("developmentPanel");
-		developmentPanel.addPreviewTooltip("Preview " + newDoc.getProjectData().id);
+		var enyoEditor = ComponentsRegistry.getComponent("enyoEditor");
+		enyoEditor.addPreviewTooltip("Preview " + newDoc.getProjectData().id);
 
 		if (currentIF === 'code') {
-			developmentPanel.$.panels.setIndex(this.phobosViewIndex);
-			developmentPanel.manageControls(false);
+			enyoEditor.$.panels.setIndex(this.phobosViewIndex);
+			enyoEditor.manageControls(false);
 		} else {
 			ComponentsRegistry.getComponent("phobos").designerAction();
-			developmentPanel.manageControls(true);
+			enyoEditor.manageControls(true);
 		}
 		this._fileEdited();
 		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(newDoc.getId());

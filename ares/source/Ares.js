@@ -41,7 +41,7 @@ enyo.kind({
 					onFileChanged: "closeDocument",
 					onFolderChanged: "closeSomeDocuments"
 				},
-				{kind: "Ares.EnyoEditor", name: "developmentPanel"}
+				{kind: "Ares.EnyoEditor", name: "enyoEditor"}
 			]
 		},
 		{
@@ -97,7 +97,7 @@ enyo.kind({
 	},
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
-	developmentPanelIndex: 2,
+	enyoEditorIndex: 2,
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
 	projectListWidth: 300,
@@ -105,7 +105,7 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
-		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.phobosViewIndex);
+		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.phobosViewIndex);
 		ServiceRegistry.instance.setOwner(this); // plumb services events all the way up
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
@@ -354,9 +354,9 @@ enyo.kind({
 		// then load palette and inspector, and tune serialiser behavior sends option data to designerFrame
 		ComponentsRegistry.getComponent("deimos").load(inEvent);
 		// switch to Deimos editor
-		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.deimosViewIndex);
+		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.deimosViewIndex);
 		// update an internal variable
-		ComponentsRegistry.getComponent("developmentPanel").activeDocument.setCurrentIF('designer');
+		ComponentsRegistry.getComponent("enyoEditor").activeDocument.setCurrentIF('designer');
 	},
 	//* A code change happened in Phobos - push change to Deimos
 	phobosUpdate: function(inSender, inEvent) {
@@ -370,9 +370,9 @@ enyo.kind({
 	},
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
-		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.phobosViewIndex);
-		ComponentsRegistry.getComponent("developmentPanel").activeDocument.setCurrentIF('code');
-		ComponentsRegistry.getComponent("developmentPanel").manageControls(false);
+		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.phobosViewIndex);
+		ComponentsRegistry.getComponent("enyoEditor").activeDocument.setCurrentIF('code');
+		ComponentsRegistry.getComponent("enyoEditor").manageControls(false);
 	},
 	//* Undo event from Deimos
 	designerUndo: function(inSender, inEvent) {
@@ -415,7 +415,7 @@ enyo.kind({
 		var harmonia = ComponentsRegistry.getComponent("harmonia");
 		harmonia.removeClass("ares-small-screen");		
 		this.$.aresLayoutPanels.setIndex(this.projectListIndex);
-		this.$.aresLayoutPanels.getPanels()[this.developmentPanelIndex].switchGrabberDirection(false);
+		this.$.aresLayoutPanels.getPanels()[this.enyoEditorIndex].switchGrabberDirection(false);
 		this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
 		this.$.aresLayoutPanels.reflow();
 		harmonia.hideGrabber();
@@ -449,12 +449,12 @@ enyo.kind({
 	// switch file *and* project (if necessary)
 	switchFile: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.id);
-		ComponentsRegistry.getComponent("developmentPanel").switchToDocument(newDoc);
+		ComponentsRegistry.getComponent("enyoEditor").switchToDocument(newDoc);
 	},
 
 	// switch Phobos or Deimos to new document
 	switchToDocument: function(newDoc) {
-		ComponentsRegistry.getComponent("developmentPanel").switchToDocument(newDoc);
+		ComponentsRegistry.getComponent("enyoEditor").switchToDocument(newDoc);
 	},
 
 	// FIXME: This trampoline function probably needs some refactoring
@@ -527,13 +527,13 @@ enyo.kind({
 		this.$.errorPopup.raise(inEvent);
 	},
 	showDesignerErrorTooltip: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("developmentPanel").showErrorTooltip(inSender, inEvent);
+		ComponentsRegistry.getComponent("enyoEditor").showErrorTooltip(inSender, inEvent);
 	},
 	resetDesignerErrorTooltip: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("developmentPanel").resetErrorTooltip();
+		ComponentsRegistry.getComponent("enyoEditor").resetErrorTooltip();
 	},
 	showDesignerError: function(){
-		this.showError("",ComponentsRegistry.getComponent("developmentPanel").getErrorFromDesignerBroken());
+		this.showError("",ComponentsRegistry.getComponent("enyoEditor").getErrorFromDesignerBroken());
 	},
 	showSignInErrorPopup : function(inEvent) {
 		this.$.signInErrorPopup.raise(inEvent);
@@ -631,7 +631,7 @@ enyo.kind({
 	 * 
 	 * @private
 	 * @param {Object} inSender
-	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, developmentPanel, accountsConfigurator, ...]
+	 * @param {Object} inEvent => inEvent.name in [phobos, deimos, projectView, documentToolbar, harmonia, enyoEditor, accountsConfigurator, ...]
 	 */
 	_registerComponent: function(inSender, inEvent) {
 		ComponentsRegistry.registerComponent(inEvent);

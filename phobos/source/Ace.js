@@ -520,11 +520,11 @@ enyo.kind({
 	},
 	guttermousemove: function(inSender, inEvent) {
 		if(enyo.dom.canTransform() && enyo.platform.ie !== 10){
-			var developmentPanelTranslateX = ComponentsRegistry.getComponent("developmentPanel").domTransforms.translateX;
+			var enyoEditorTranslateX = ComponentsRegistry.getComponent("enyoEditor").domTransforms.translateX;
 			var aceTooltip = document.getElementsByClassName("ace_gutter-tooltip");
 			if(aceTooltip[0]){
-				if(this.translateX !== developmentPanelTranslateX){
-					this.setTranslateX(developmentPanelTranslateX);
+				if(this.translateX !== enyoEditorTranslateX){
+					this.setTranslateX(enyoEditorTranslateX);
 					this.applyInverseTransform(aceTooltip[0]);
 				}
 			}
