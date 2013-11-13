@@ -63,7 +63,7 @@ enyo.kind({
 			ondragfinish      : "stopPanelEvent",
 			components: [
 				{components: [
-					{kind: "Phobos"}
+					{kind: "Phobos", onCloseDocument: "handleCloseDocument"}
 				]},
 				{components: [
 					{kind: "Deimos", onCloseDesigner: "closeDesigner"}
@@ -73,6 +73,7 @@ enyo.kind({
 	],
 	events: {
 		onNewActiveDocument: "", // to preserve legacy in Ares.js
+		onAllDocumentsAreClosed: "",
 		onRegisterMe: "",
 		onMovePanel:"",
 		onSavePreviewAction:"",
@@ -182,6 +183,11 @@ enyo.kind({
 
 	activeDocument: null,
 
+	handleCloseDocument: function(inSender, inEvent) {
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.closeDocument(inEvent.id);
+	},
+
 	closeDocument: function(docId, next) {
 		if (docId && this.activeDocument.getId() === docId) {
 			this.trace("close document:",this.activeDocument.getName());
@@ -198,6 +204,11 @@ enyo.kind({
 		else {
 			this.warn("called without docId to close");
 		}
+
+		if (! Ares.Workspace.files.length ) {
+			this.doAllDocumentsAreClosed();
+		}
+
 		if (typeof next === 'function') {
 			next();
 		}

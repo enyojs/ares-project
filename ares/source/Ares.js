@@ -38,7 +38,7 @@ enyo.kind({
 					name: "harmonia",
 					classes: "ares-panel-min-width enyo-fit",
 					onFileDblClick: "openDocument",
-					onFileChanged: "closeDocument",
+					onFileChanged: "_closeDocument",
 					onFolderChanged: "closeSomeDocuments"
 				},
 				{kind: "Ares.EnyoEditor", name: "enyoEditor"}
@@ -79,7 +79,7 @@ enyo.kind({
 		onChangingNode: "_nodeChanging",
 		onSaveDocument: "saveDocument", 
 		onSaveAsDocument: "saveAsDocument", 
-		onCloseDocument: "closeDocument", 
+		onAllDocumentsAreClosed: "showProjectView",
 		onCloseProjectDocuments: "closeDocumentsForProject",
 		onDesignDocument: "designDocument", 
 		onUpdate: "phobosUpdate",
@@ -291,15 +291,6 @@ enyo.kind({
 			}
 		}
 	},
-	closeDocument: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-		var self = this;
-		this._closeDocument(inEvent.id, function() {
-			if (! Ares.Workspace.files.length ) {
-				self.showProjectView();
-			}
-		});
-	},
 	/* @private */
 	// close documents contained in a folder after a folder rename.
 	// One might say that these documents are canon folder...
@@ -320,10 +311,6 @@ enyo.kind({
 				this._closeDocument(model.id);
 				i--;
 			}
-		}
-
-		if (! Ares.Workspace.files.length ) {
-			this.showProjectView();
 		}
 	},
 	/** @private */
@@ -563,11 +550,7 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var docId = Ares.Workspace.files.computeId(inEvent.node),
 			self=this;
-		this._closeDocument(docId, function() {
-			if (! Ares.Workspace.files.length ) {
-				self.showProjectView();
-			}
-		});
+		this._closeDocument(docId);
 	},
 	/**
 	 * Event handler for to close opened documents of a project
