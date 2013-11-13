@@ -41,7 +41,7 @@ enyo.kind({
 					onFileChanged: "closeDocument",
 					onFolderChanged: "closeSomeDocuments"
 				},
-				{kind: "Ares.DevelopmentPanel", name: "developmentPanel"}
+				{kind: "Ares.EnyoEditor", name: "developmentPanel"}
 			]
 		},
 		{
@@ -343,7 +343,7 @@ enyo.kind({
 
 	_setActiveDocument: function(inSender, inEvent) {
 		// register current active Document, even though this should be handled only
-		// in DevelopmentPanel
+		// in EnyoEditor
 		this.trace("called for " , inEvent.doc.getName());
 		this.activeDocument = inEvent.doc ;
 	},

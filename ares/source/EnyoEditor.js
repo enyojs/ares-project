@@ -1,6 +1,6 @@
 /* global ComponentsRegistry, alert, async */
 enyo.kind({
-	name:"Ares.DevelopmentPanel",
+	name:"Ares.EnyoEditor",
 	kind:"FittableRows", 
 	components:[
 		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels", layoutKind: "FittableColumnsLayout", noStretch: true, components: [
