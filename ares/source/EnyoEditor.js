@@ -297,6 +297,8 @@ enyo.kind({
 	events: {
 		onAceFocus: ""
 	},
+	// value is the name of an event that will be sent to Phobos
+	// through onSelect event -> EnyoEditor.fileMenuItemSelected -> Phobos.fileMenuItemSelected
 	components: [
 		{tag:"button", content: "File"},
 		{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [

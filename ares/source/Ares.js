@@ -442,7 +442,8 @@ enyo.kind({
 	// FIXME: This trampoline function probably needs some refactoring
 	// Close is a special case, because it can be invoked on a
 	// document other than the currently-active one, so we must first
-	// switch the active document and then close it
+	// switch the active document and then try to close it. closeDocAction
+	// is the method directly called by File->Close menu entry
 	bounceCloseFileRequest: function(inSender, inEvent) {
 		this.switchFile(inSender, inEvent);
 		enyo.asyncMethod(ComponentsRegistry.getComponent("phobos"), "closeDocAction");
