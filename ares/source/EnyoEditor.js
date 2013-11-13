@@ -182,6 +182,27 @@ enyo.kind({
 
 	activeDocument: null,
 
+	closeDocument: function(docId, next) {
+		if (docId && this.activeDocument.getId() === docId) {
+			this.trace("close document:",this.activeDocument.getName());
+			// remove file from cache
+			ComponentsRegistry.getComponent("documentToolbar").removeTab(docId);
+			Ares.Workspace.files.removeEntry(docId);
+			this.activeDocument = null;
+		}
+		else if (docId) {
+			this.warn("closing a doc different from current one: ", docId);
+			ComponentsRegistry.getComponent("documentToolbar").removeTab(docId);
+			Ares.Workspace.files.removeEntry(docId);
+		}
+		else {
+			this.warn("called without docId to close");
+		}
+		if (typeof next === 'function') {
+			next();
+		}
+	},
+
 	switchToDocument: function(newDoc) {
 		// safety net
 		if ( ! newDoc ) {
