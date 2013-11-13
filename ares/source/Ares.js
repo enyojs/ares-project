@@ -41,8 +41,7 @@ enyo.kind({
 					onFileChanged: "closeDocument",
 					onFolderChanged: "closeSomeDocuments"
 				},
-				{kind: "Ares.DevelopmentPanel", name: "developmentPanel"},
-				{kind: "Ares.DevelopmentController", name: "developmentController"}
+				{kind: "Ares.DevelopmentPanel", name: "developmentPanel"}
 			]
 		},
 		{
@@ -344,7 +343,7 @@ enyo.kind({
 
 	_setActiveDocument: function(inSender, inEvent) {
 		// register current active Document, even though this should be handled only
-		// in Developmentcontroller
+		// in DevelopmentPanel
 		this.trace("called for " , inEvent.doc.getName());
 		this.activeDocument = inEvent.doc ;
 	},
@@ -357,7 +356,7 @@ enyo.kind({
 		// switch to Deimos editor
 		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.deimosViewIndex);
 		// update an internal variable
-		ComponentsRegistry.getComponent("developmentController").activeDocument.setCurrentIF('designer');
+		ComponentsRegistry.getComponent("developmentPanel").activeDocument.setCurrentIF('designer');
 	},
 	//* A code change happened in Phobos - push change to Deimos
 	phobosUpdate: function(inSender, inEvent) {
@@ -372,7 +371,7 @@ enyo.kind({
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
 		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.phobosViewIndex);
-		ComponentsRegistry.getComponent("developmentController").activeDocument.setCurrentIF('code');
+		ComponentsRegistry.getComponent("developmentPanel").activeDocument.setCurrentIF('code');
 		ComponentsRegistry.getComponent("developmentPanel").manageControls(false);
 	},
 	//* Undo event from Deimos
@@ -450,12 +449,12 @@ enyo.kind({
 	// switch file *and* project (if necessary)
 	switchFile: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.id);
-		ComponentsRegistry.getComponent("developmentController").switchToDocument(newDoc);
+		ComponentsRegistry.getComponent("developmentPanel").switchToDocument(newDoc);
 	},
 
 	// switch Phobos or Deimos to new document
 	switchToDocument: function(newDoc) {
-		ComponentsRegistry.getComponent("developmentController").switchToDocument(newDoc);
+		ComponentsRegistry.getComponent("developmentPanel").switchToDocument(newDoc);
 	},
 
 	// FIXME: This trampoline function probably needs some refactoring

@@ -72,6 +72,7 @@ enyo.kind({
 		}
 	],
 	events: {
+		onNewActiveDocument: "", // to preserve legacy in Ares.js
 		onRegisterMe: "",
 		onMovePanel:"",
 		onSavePreviewAction:"",
@@ -87,6 +88,8 @@ enyo.kind({
 	},
 	create: function() {
 		this.inherited(arguments);
+		// Setup this.trace() function according to this.debug value
+		ares.setupTraceLogger(this);
 		this.doRegisterMe({name:"developmentPanel", reference:this});
 	},
 	activePanel : function(){
@@ -172,30 +175,10 @@ enyo.kind({
 	getErrorFromDesignerBroken: function(){
 		return this.$.designerTooltipBroken.error;
 	},
-	_fileEdited: function(){
-		ComponentsRegistry.getComponent("developmentController")._fileEdited();
-	}
-});
-
-enyo.kind({
-	name: "Ares.DevelopmentController",
-	kind: "enyo.Component",
-
-	events: {
-		onRegisterMe: "",
-		onNewActiveDocument: "", // to preserve legacy in Ares.js
+	_fileEdited: function() {
+		this.updateDeimosLabel(this.activeDocument.getEdited());
 	},
 
-	debug: false,
-
-	create: function() {
-		this.inherited(arguments);
-
-		// Setup this.trace() function according to this.debug value
-		ares.setupTraceLogger(this);
-
-		this.doRegisterMe({name:"developmentController", reference:this});
-	},
 
 	activeDocument: null,
 
@@ -268,10 +251,7 @@ enyo.kind({
 		this._fileEdited();
 		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(newDoc.getId());
 		this.doNewActiveDocument({ doc: this.activeDocument} );
-	},
-	_fileEdited: function() {
-		ComponentsRegistry.getComponent("developmentPanel").updateDeimosLabel(this.activeDocument.getEdited());
-	},
+	}
 
 });
 
