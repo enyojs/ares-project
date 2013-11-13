@@ -301,6 +301,8 @@ enyo.kind({
 		});
 	},
 	/* @private */
+	// close documents contained in a folder after a folder rename.
+	// One might say that these documents are canon folder...
 	closeSomeDocuments: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		
