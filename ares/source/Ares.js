@@ -142,7 +142,6 @@ enyo.kind({
 	},
 	/** @private */
 	_openDocument: function(projectData, file, next) {
-		var self = this;
 		var fileDataId = Ares.Workspace.files.computeId(file);
 		if (! fileDataId ) {
 			throw new Error ('Undefined fileId for file ' + file.name + ' service ' + file.service);
@@ -160,14 +159,14 @@ enyo.kind({
 					this._fetchDocument.bind(this,projectData, file),
 					this._switchToNewTab.bind(this,projectData,file)
 				],
-				function (err) {
-					if (inErr) {
-						this.warn("Open failed", inErr);
+				(function (err) {
+					if (err) {
+						this.warn("Open failed", err);
 					}
 					if (typeof next === 'function') {
 						next();
 					}
-				}
+				}).bind(this)
 			);
 		}
 		//hide projectView only the first time
