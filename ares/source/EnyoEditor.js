@@ -261,10 +261,14 @@ enyo.kind({
 		var currentIF = newDoc.getCurrentIF();
 		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName()  + " " : " ")
 				   + ' to ' + newDoc.getName() + " IF is " + currentIF );
-		// We no longer save the data as the ACE edit session will keep the data for us
-		if (!oldDoc || newDoc !== oldDoc) {
-			ComponentsRegistry.getComponent("phobos").openDoc(newDoc);
+		if (oldDoc && newDoc === oldDoc) {
+			// no actual switch
+			return;
 		}
+
+		// We no longer save the data as the ACE edit session will keep the data for us
+		ComponentsRegistry.getComponent("phobos").openDoc(newDoc);
+
 		this.activeDocument = newDoc;
 		var enyoEditor = ComponentsRegistry.getComponent("enyoEditor");
 		enyoEditor.addPreviewTooltip("Preview " + newDoc.getProjectData().id);
