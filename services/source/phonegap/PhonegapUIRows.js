@@ -556,30 +556,24 @@ enyo.kind({
 			var minValue = parseInt(this.container.$["android-minSdkVersion"].value, 10);
 			var maxValue = parseInt(this.container.$["android-maxSdkVersion"].value, 10);
 			
+
 			//Initialize variable containing the selected value
 			var selectedValue = parseInt(inValue.selected.value, 10);
 			
 			if (this.name === "android-maxSdkVersion" && minValue > selectedValue ||
 				this.name === "android-minSdkVersion" && maxValue < selectedValue) {
 				
-				//Set the content of the error message
-				this.container.$["android-minSdkVersion"].$.errorMsg.setContent("Incorrect API level interval");
-				this.container.$["android-maxSdkVersion"].$.errorMsg.setContent("Incorrect API level interval");
-				
-				//Show the error message
-				this.container.$["android-minSdkVersion"].$.errorMsg.show();
-				this.container.$["android-maxSdkVersion"].$.errorMsg.show();
+				var minSdkDisplayed = this.container.$["android-minSdkVersion"].$.configurationPickerButton.content;
+				var maxSdkDisplayed = this.container.$["android-maxSdkVersion"].$.configurationPickerButton.content;
 
-				//Bubble an event to disable to Ok button of the Project properties pop-up
-				this.bubble("onDisableOkButton");
+				this.showErrorMessage(minSdkDisplayed, "android-minSdkVersion", "Incorrect API level interval");
+				this.showErrorMessage(maxSdkDisplayed, "android-maxSdkVersion", "Incorrect API level interval");
+
 			
 			} else {
 				//Hide the error message
-				this.container.$["android-minSdkVersion"].$.errorMsg.hide();
-				this.container.$["android-maxSdkVersion"].$.errorMsg.hide();
-
-				//Bubble an event to enable the Ok button of the project properties pop-up
-				this.bubble("onEnableOkButton");
+				this.hideErrorMessage("android-minSdkVersion");
+				this.hideErrorMessage("android-maxSdkVersion");
 
 				this.setValue(inValue.selected.value);							
 			}
