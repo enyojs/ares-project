@@ -1086,6 +1086,8 @@ enyo.kind({
 				this.trace("selected key:", key);
 			}
 		}, this);
+
+		this.activeKeyIdChanged();
 	},
 	/**
 	 * @private
