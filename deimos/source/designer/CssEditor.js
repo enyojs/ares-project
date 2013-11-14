@@ -82,7 +82,8 @@ enyo.kind({
 				}
 			},
 			{name: "font-size", inputKind: "Inspector.Config.Size"},
-			{name: "line-height", inputKind: "Inspector.Config.Size"}
+			{name: "line-height", inputKind: "Inspector.Config.Size"},
+			{name: "color",	inputKind: "Inspector.Config.Color"}
 		]},			
 		{category: "Text-Style", properties: [
 			{name: "text-align", inputKind: {kind: "Inspector.Config.Event",

@@ -72,7 +72,10 @@ enyo.kind({
 		var errMsg ;
 
 		while (expVer.length) {
-			if (myVer.shift() < expVer.shift()) {
+			// myVer and exptVer contain a string. Need to cast them
+			// to Number before trying a numeric comparison. Otherwise
+			// a lexicographic comparison is used.
+			if (Number(myVer.shift()) < Number(expVer.shift())) {
 				errMsg = "Enyo used by your application is too old ("
 					+ myVerStr + "). Console log may show duplicated kind error "
 					+ "and Designer may not work as expected. You should use Enyo >= "
