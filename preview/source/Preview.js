@@ -4,6 +4,9 @@ enyo.kind(
 		kind: "onyx.Picker",
 		components: [
 			{content: "default",           value: { height:  800, width:  600, ppi: 163, dpr: 1 }, active: true},
+			
+			{content: "HP Slate 7",      value: { height:  1024, width:  600, ppi: 170, dpr: 1 }},
+			
 			{content: "iPhone\u2122",      value: { height:  480, width:  320, ppi: 163, dpr: 1 }},
 			{content: "iPhone\u2122 4",    value: { height:  960, width:  640, ppi: 326, dpr: 2 }},
 			{content: "iPhone\u2122 5",    value: { height: 1136, width:  640, ppi: 326, dpr: 2 }},
