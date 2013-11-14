@@ -103,6 +103,7 @@ enyo.kind({
 	
 	create: function() {
 		ares.setupTraceLogger(this);
+		this.trace("Creating Deimos");
 		this.inherited(arguments);
 		this.addHandlers();
 		this.doRegisterMe({name:"deimos", reference:this});
@@ -113,6 +114,7 @@ enyo.kind({
 	},
 	//* Initialize _devicePicker_ in the toolbar at render time
 	initializeDesignerToolbar: function() {
+		this.trace("called");
 		var initItem = this.$.devicePicker.getClientControls()[0];
 		this.$.devicePicker.setSelected(initItem);
 		this.deviceChosen(null, {selected: initItem});
@@ -192,6 +194,7 @@ enyo.kind({
 	projectDataChanged: function(oldProjectData) {
 		// *ProjectData are backbone obbject mixed with events. This is defined in ProjectCrtl...
 		// *ProjectData are kept in ProjectCtrl
+		this.trace("called. New ",this.projectData," old ",oldProjectData);
 		if (oldProjectData) {
 			// unbind former project data from Deimos
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);

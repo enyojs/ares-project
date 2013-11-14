@@ -442,6 +442,7 @@ enyo.kind({
 	connectProject: function(inProjectData, next) {
 		this.trace("config:", inProjectData);
 		this.projectData = inProjectData;
+		this.log("HFT:connecting project " + inProjectData.getName());
 
 		var serverNode = this.$.serverNode;
 		var nodeName = inProjectData.getName();
@@ -456,6 +457,8 @@ enyo.kind({
 			if (inError) {
 				this.showErrorPopup(this.$LS("Internal Error (#{error}) from filesystem service", {error: inError.toString()}));
 			} else {
+				this.log("HFT: service is now connected for project" + inProjectData.getName()
+						 + '. Requesting project URL');
 				if (this.selectedNode) {
 					this.deselect(null, {data: this.selectedNode});
 				}
@@ -467,7 +470,10 @@ enyo.kind({
 				var rootFinding = this.$.service.propfind(folderId, 0);
 				rootFinding.response(this, function(inSender, inValue) {
 					var projectUrl = service.getConfig().origin + service.getConfig().pathname + "/file" + inValue.path;
+					this.log("HFT: service reply: project" + inProjectData.getName()
+							 + ' URL is ' + projectUrl + '. UPdating projectData');
 					this.projectData.setProjectUrl(projectUrl);
+					this.log("HFT: projet data update done");
 					this.projectUrlReady = true;
 
 					//
@@ -475,7 +481,10 @@ enyo.kind({
 					serverNode.file.isServer = true;
 
 					serverNode.setContent(nodeName);
-					this.refreshFileTree( function() { if (next) {next();} else {that.$.selection.select( serverNode.file.id, serverNode );} });
+					this.refreshFileTree( function() {
+						that.log("HFT: refreshFileTree done");
+						if (next) {next();} else {that.$.selection.select( serverNode.file.id, serverNode );}
+					});
 				});
 				rootFinding.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");

@@ -65,6 +65,7 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.inherited(arguments);
+		this.trace("called");
 		var expVer = this.minEnyoVersion.split(/\D+/);
 		var myVerStr = (enyo.version && enyo.version.enyo) || '0.0.0-pre.0';
 		var myVer = myVerStr.split(/\D+/);
@@ -155,12 +156,14 @@ enyo.kind({
 	},
 	//* Send message to Deimos via _this.$.communicator_
 	sendMessage: function(inMessage) {
+		this.trace(" msg ",inMessage);
 		this.$.communicator.sendMessage(inMessage);
 	},
 	//* Receive message from Deimos
 	receiveMessage: function(inSender, inEvent) {
 
 		var msg = inEvent.message;
+		this.trace(" msg ",msg);
 
 		if (!msg || !msg.op) {
 			enyo.warn("Deimos designerFrame received invalid message data:", msg);
@@ -512,6 +515,7 @@ enyo.kind({
 	initializeAllKindsAresOptions: function(inOptions) {
 		// genuine enyo.kind's master function extension
 		var self = this;
+		this.trace("starting user app initialization within designer iframe");
 		enyo.genuineEnyoKind = enyo.kind;
 		enyo.kind =  function(inProps) {
 			self.addKindAresOptions(inProps.components, inOptions);
