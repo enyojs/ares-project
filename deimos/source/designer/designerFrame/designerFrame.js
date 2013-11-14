@@ -1086,18 +1086,19 @@ enyo.kind({
 		var containerId = (this.getContainerItem()) ? this.getContainerItem().aresId : null,
 			beforeId    = (this.getBeforeItem())    ? this.getBeforeItem().aresId    : null;
 
+		// Check libs ".design" related constraints
 		if (this.selection && this.selection.constraints) {
-			// Check container's constraints
-			if (this.selection.constraints.containers) {
+			// Check "within" constraints
+			if (this.selection.constraints.within) {
 				var droppable = false;
-				enyo.forEach (this.selection.constraints.containers, function(container) {
+				enyo.forEach (this.selection.constraints.within, function(container) {
 					if (container.kind === this.getContainerItem().kind) {
 						droppable = true;
 					} 
 				}, this);
 
 				if (!droppable) {
-					enyo.warn("container's constraint", this.selection.constraints.containers.description);
+					enyo.warn("container's constraint", this.selection.constraints.within.description);
 					return false;
 				}
 			}

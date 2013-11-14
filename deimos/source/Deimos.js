@@ -454,18 +454,19 @@ enyo.kind({
 			return true;
 		}
 
+		// Check libs ".design" related constraints
 		if (config.constraints) {
-			// Check container's constraints
-			if (config.constraints.containers) {
+			// Check "within" constraints
+			if (config.constraints.within) {
 				var droppable = false;
-				enyo.forEach (config.constraints.containers.targets, function(container) {
+				enyo.forEach (config.constraints.within.targets, function(container) {
 					if (container.kind === target.kind) {
 						droppable = true;
 					} 
 				}, this);
 
 				if (!droppable) {
-					enyo.warn("container's constraint", config.constraints.containers.description);
+					enyo.warn("container's constraint", config.constraints.within.description);
 					return true;
 				}
 			}
