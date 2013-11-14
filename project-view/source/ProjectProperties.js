@@ -396,6 +396,14 @@ enyo.kind({
 			var service = this.services[serviceId];
 			this.config.providers[service.id] = {};
 			this.config.providers[service.id].enabled = service.checkBox.checked;
+
+			if ((service.checkBox.checked) && (service.panel.getDefaultConfig !== undefined)) {
+				var webosConfigID = service.panel.getDefaultConfig();
+				if (webosConfigID !== undefined) {
+					this.addNewSource(null, {source: webosConfigID});
+				}
+			}
+
 			service.panel.saveProjectConfig(this.targetProject);
 			service.panel.getProjectConfig(this.config.providers[service.id]);
 		}, this);
