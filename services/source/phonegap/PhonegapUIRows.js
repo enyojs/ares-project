@@ -441,6 +441,7 @@ enyo.kind({
 			this.showErrorMessage(inValue.content, this.name, "Incorrect saved value. Select a value from the picker above.");
 		} else {
 			this.hideErrorMessage(this.name);
+			this.contentValueChanged();
 			this.setValue(inValue.content);
 		}
 
