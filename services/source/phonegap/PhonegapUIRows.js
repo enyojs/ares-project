@@ -366,7 +366,7 @@ enyo.kind({
 				{
 					kind: "onyx.PickerDecorator",
 					components: [
-						{kind: "onyx.PickerButton", classes: "ares-project-properties-picker"},
+						{kind: "onyx.PickerButton", name: "configurationPickerButton", classes: "ares-project-properties-picker"},
 						{kind: "onyx.Picker", name: "configurationPicker", onSelect: "updateConfigurationValue"}
 					]
 				},
@@ -436,14 +436,72 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
-		this.setValue(inValue.content);
+		
+		if (this.checkActiveValue(inValue.content)) {
+			this.showErrorMessage(inValue.content, this.name, "Incorrect saved value. Select a value from the picker above.");
+		} else {
+			this.hideErrorMessage(this.name);
+			this.contentValueChanged();
+			this.setValue(inValue.content);
+		}
 
 		return true;
+	},
+	
+	/**
+	 * Show an error message under the picker & disable the 'OK' button of the Pop-up.
+	 * @param  {String} erroneousValue     The incorrect value spoted from the file 'project.json'
+	 * @param  {String} hightLightedPicker Name of the picker row.
+	 * @param  {String} errorMsg           Displayed error message
+	 * @private
+	 */
+	showErrorMessage: function(pickerButtonValue, hightLightedPicker, errorMsg) {
+		
+		this.container.$[hightLightedPicker].$.configurationPickerButton.setContent(pickerButtonValue);
+		
+		this.container.$[hightLightedPicker].$.errorMsg.setContent(errorMsg);
+		this.container.$[hightLightedPicker].$.errorMsg.show();
+		
+		this.bubble("onDisableOkButton");
+	},
+
+	/**
+	 * Check if the value recovered form the file "project.json" is contained or not in the picker values list.
+	 * @param  {String} inValue value to be checked.
+	 * @return {boolean}         true if the value is incorrect, false otherwise.
+	 * @private
+	 */
+	checkActiveValue: function(inValue){
+		var incorrectValue = true;
+
+		enyo.forEach(this.contentValue, function(validValue) {
+			if(inValue === validValue) {
+				incorrectValue = false;
+			}
+		}, this);
+
+		return incorrectValue;
+	},
+	
+	/**
+	 * Hide the error message and send a request to "ProjectWizard" to enable the "OK" button.
+	 * 
+	 * @param  {String} hightLightedPicker name of the row to exempted form the error message.
+	 * @private
+	 */
+	hideErrorMessage: function(hightLightedPicker){
+		this.container.$[hightLightedPicker].$.errorMsg.hide();
+		this.bubble("onEnableOkButton");
 	},
 
 	/** @public */
 	setProjectConfig: function (config) {
-		this.setValue(config[this.jsonSection][this.name]);
+		if (this.checkActiveValue(config[this.jsonSection][this.name])) {
+			this.showErrorMessage(config[this.jsonSection][this.name], this.name, "Incorrect saved value. Select a value from the picker above.");
+		} else {
+			this.hideErrorMessage(this.name);
+			this.setValue(config[this.jsonSection][this.name]);
+		}	
 	},
 	/** @public */
 	getProjectConfig: function (config) {
@@ -499,30 +557,24 @@ enyo.kind({
 			var minValue = parseInt(this.container.$["android-minSdkVersion"].value, 10);
 			var maxValue = parseInt(this.container.$["android-maxSdkVersion"].value, 10);
 			
+
 			//Initialize variable containing the selected value
 			var selectedValue = parseInt(inValue.selected.value, 10);
 			
 			if (this.name === "android-maxSdkVersion" && minValue > selectedValue ||
 				this.name === "android-minSdkVersion" && maxValue < selectedValue) {
 				
-				//Set the content of the error message
-				this.container.$["android-minSdkVersion"].$.errorMsg.setContent("Incorrect API level interval");
-				this.container.$["android-maxSdkVersion"].$.errorMsg.setContent("Incorrect API level interval");
-				
-				//Show the error message
-				this.container.$["android-minSdkVersion"].$.errorMsg.show();
-				this.container.$["android-maxSdkVersion"].$.errorMsg.show();
+				var minSdkDisplayed = this.container.$["android-minSdkVersion"].$.configurationPickerButton.content;
+				var maxSdkDisplayed = this.container.$["android-maxSdkVersion"].$.configurationPickerButton.content;
 
-				//Bubble an event to disable to Ok button of the Project properties pop-up
-				this.bubble("onDisableOkButton");
+				this.showErrorMessage(minSdkDisplayed, "android-minSdkVersion", "Incorrect API level interval");
+				this.showErrorMessage(maxSdkDisplayed, "android-maxSdkVersion", "Incorrect API level interval");
+
 			
 			} else {
 				//Hide the error message
-				this.container.$["android-minSdkVersion"].$.errorMsg.hide();
-				this.container.$["android-maxSdkVersion"].$.errorMsg.hide();
-
-				//Bubble an event to enable the Ok button of the project properties pop-up
-				this.bubble("onEnableOkButton");
+				this.hideErrorMessage("android-minSdkVersion");
+				this.hideErrorMessage("android-maxSdkVersion");
 
 				this.setValue(inValue.selected.value);							
 			}
@@ -1086,6 +1138,8 @@ enyo.kind({
 				this.trace("selected key:", key);
 			}
 		}, this);
+
+		this.activeKeyIdChanged();
 	},
 	/**
 	 * @private
