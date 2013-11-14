@@ -490,13 +490,12 @@ function proxyServices(req, res, next) {
 		for (var key in cres.headers) {
 			var val = cres.headers[key];
 			if (key.toLowerCase() === 'set-cookie') {
+				// re-write cookies
 				var cookies = parseSetCookie(val);
 				cookies.forEach(translateCookie.bind(this, service, res));
 			} else {
-				res.header(key, val);
 			}
 		}
-		// re-write cookies
 		res.writeHead(cres.statusCode);
 		cres.pipe(res);
 	}).on('error', function(e) {
@@ -575,14 +574,40 @@ var app = express(),
 
 server.setTimeout(argv.timeout);
 
-function cors(req, res, next) {
-	/*
-	 * - Lowercase HTTP headers, work-around an iPhone bug
-	 * - Overrriden by each individual service behind '/res/services/:service'
-	 */
-	res.header('access-control-allow-origin', '*' /*FIXME: config.allowedDomains*/);
-	res.header('access-control-allow-methods', 'GET,POST');
-	res.header('access-control-allow-headers', 'Content-Type');
+// over-write CORS headers using the configuration if
+// any, otherwise be paranoid.
+
+var corsHeaders;
+
+function setCorsHeaders(req, res, next) {
+	if (!corsHeaders) {
+		var cors = ide.res.cors || {},
+		    headers = Object.keys(ide.res.headers || {});
+		corsHeaders = {};
+		// Lowercase HTTP headers, work-around an iPhone bug
+		corsHeaders['access-control-allow-origin'] = ((Array.isArray(cors.origins) && cors.origins.length > 0 && cors.origins) || [origin]).join(',');
+		corsHeaders['access-control-allow-methods'] = ['GET', 'PUT', 'POST', 'DELETE'].concat(Array.isArray(cors.methods) && cors.methods).join(',');
+		corsHeaders['access-control-allow-headers'] = ['Content-Type','Authorization','Cache-Control','X-HTTP-Method-Override'].concat(Array.isArray(headers) && headers).join(',');
+		log.info("setCorsHeaders()", "CORS will use:", corsHeaders);
+	}
+	for (var h in corsHeaders) {
+		log.silly("setCorsHeaders()", h, ":", corsHeaders[h]);
+		res.header(h, corsHeaders[h]);
+	}
+	if ('OPTIONS' === req.method) {
+		res.status(200).end();
+	} else {
+		setImmediate(next);
+	}
+}
+
+function setUserHeaders(req, res, next) {
+	var headers = ide.res.headers || {};
+	for (var k in headers) {
+		var v = headers[k];
+		log.silly('setUserHeaders()', "adding:", k, ":", v);
+		res.header(k, v);
+	}
 	setImmediate(next);
 }
 
@@ -603,7 +628,9 @@ app.configure(function(){
 		setImmediate(next);
 	});
 
-	app.use(cors);
+	app.use(setCorsHeaders);
+	app.use(setUserHeaders);
+
 	app.use(express.favicon(myDir + '/ares/assets/images/ares_48x48.ico'));
 
 	app.use('/ide', express.static(enyojsRoot));
@@ -663,11 +690,13 @@ var page = "index.html";
 if (argv.runtest) {
 	page = "test.html";
 }
+var origin, url;
 
 server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, function () {
-	var tcpAddr = server.address();
-	var url = "http://" + (argv.host || "127.0.0.1") + ":" + tcpAddr.port + "/ide/ares/" + page;
-	var info;
+	var tcpAddr = server.address(),
+	    info;
+	origin = "http://" + (argv.host || "127.0.0.1") + ":" + tcpAddr.port;
+	url = origin + "/ide/ares/" + page;
 	if (argv.browser) {
 		// Open default browser
 		info = platformOpen[process.platform] ;
