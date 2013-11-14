@@ -78,7 +78,8 @@ enyo.kind({
 		onMovePanel:"",
 		onSavePreviewAction:"",
 		onDesignerBroken: "",
-		onFileEdited:"_fileEdited"
+		onFileEdited:"_fileEdited",
+		onError: ""
 	},
 	published: {
 		panelIndex: 2,
