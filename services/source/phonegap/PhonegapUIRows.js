@@ -454,9 +454,9 @@ enyo.kind({
 	 * @param  {String} errorMsg           Displayed error message
 	 * @private
 	 */
-	showErrorMessage: function(erroneousValue, hightLightedPicker, errorMsg) {
+	showErrorMessage: function(pickerButtonValue, hightLightedPicker, errorMsg) {
 		
-		this.container.$[hightLightedPicker].$.configurationPickerButton.setContent(erroneousValue);
+		this.container.$[hightLightedPicker].$.configurationPickerButton.setContent(pickerButtonValue);
 		
 		this.container.$[hightLightedPicker].$.errorMsg.setContent(errorMsg);
 		this.container.$[hightLightedPicker].$.errorMsg.show();
