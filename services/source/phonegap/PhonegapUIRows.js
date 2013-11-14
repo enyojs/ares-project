@@ -473,8 +473,8 @@ enyo.kind({
 	checkActiveValue: function(inValue){
 		var incorrectValue = true;
 
-		enyo.forEach(this.contentValue, function(valideValue) {
-			if(inValue === valideValue) {
+		enyo.forEach(this.contentValue, function(validValue) {
+			if(inValue === validValue) {
 				incorrectValue = false;
 			}
 		}, this);
