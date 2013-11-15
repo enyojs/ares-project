@@ -90,7 +90,8 @@ enyo.kind({
 		onMovePanel:"",
 		onCloseCss: "",
 		onSavePreviewAction:"",
-		onDesignerBroken: ""
+		onDesignerBroken: "",
+		onError: ""
 	},
 	published: {
 		panelIndex: 2,

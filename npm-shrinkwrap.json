@@ -212,7 +212,7 @@
               "from": "diff@1.0.2"
             },
             "debug": {
-              "version": "0.7.3",
+              "version": "0.7.4",
               "from": "debug@*"
             },
             "mkdirp": {
@@ -238,7 +238,7 @@
               "from": "cli@0.4.x",
               "dependencies": {
                 "glob": {
-                  "version": "3.2.6",
+                  "version": "3.2.7",
                   "from": "glob@>= 3.1.4",
                   "dependencies": {
                     "inherits": {
@@ -286,14 +286,13 @@
       }
     },
     "busboy": {
-      "version": "0.0.10",
-      "from": "busboy@0.0.10",
-      "resolved": "https://registry.npmjs.org/busboy/-/busboy-0.0.10.tgz",
+      "version": "0.0.12",
+      "from": "busboy@0.0.12",
+      "resolved": "https://registry.npmjs.org/busboy/-/busboy-0.0.12.tgz",
       "dependencies": {
         "dicer": {
           "version": "0.1.5",
           "from": "dicer@0.1.5",
-          "resolved": "https://registry.npmjs.org/dicer/-/dicer-0.1.5.tgz",
           "dependencies": {
             "streamsearch": {
               "version": "0.1.2",
@@ -303,7 +302,7 @@
         },
         "readable-stream": {
           "version": "1.1.9",
-          "from": "readable-stream@~1.1.9",
+          "from": "readable-stream@1.1.x",
           "dependencies": {
             "core-util-is": {
               "version": "1.0.0",
@@ -442,7 +441,7 @@
           "from": "cookie-signature@1.0.1"
         },
         "debug": {
-          "version": "0.7.3",
+          "version": "0.7.4",
           "from": "debug@*"
         }
       }

@@ -512,7 +512,7 @@ enyo.kind({
 
 				this.abortAjaxRequest= function() {
 						this.abortAjaxRequest= function() {};		
-						req.xhr.abort();
+						enyo.xhr.cancel(req.xhr);
 					};
 				
 				req.response(this, function _savedConfigXml(inSender, inData) {
@@ -543,7 +543,7 @@ enyo.kind({
 		this.abortAjaxRequest= function() {
 			this.abortAjaxRequest= function() {};		
 			aborted = true ;
-			req.xhr.abort();
+			enyo.xhr.cancel(req.xhr);
 		};
 
 		req.response(this, function _gotFiles(inSender, inData) {
@@ -552,7 +552,7 @@ enyo.kind({
 			if (aborted) {
 				// response is called on Mac even if xhr was aborted
 				this.trace("ugh, Ajax response was called after an abort");
-				next('canceled');
+				next('Build canceled by the user');
 			}
 			else {
 				next(null, {content: inData, ctype: ctype});
@@ -634,7 +634,7 @@ enyo.kind({
 
 		this.abortAjaxRequest= function() {
 				this.abortAjaxRequest= function() {};		
-				req.xhr.abort();
+				enyo.xhr.cancel(req.xhr);
 			};
 
 		req.response(this, function(inSender, inData) {
