@@ -74,14 +74,6 @@ enyo.kind({
 			this.projectData.setProjectCtrl(this.projectCtrl);
 		}
 	},
-	fileMenuItemSelected: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-		if (typeof this[inEvent.selected.value] === 'function') {
-			this[inEvent.selected.value]();
-		} else {
-			this.warn("Unexpected event or missing function: event:", inEvent.selected.value);
-		}
-	},
 	saveDocAction: function() {
 		this.showWaitPopup($L("Saving ..."));
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});

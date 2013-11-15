@@ -101,7 +101,10 @@ enyo.kind({
 		return true;
 	},
 	fileMenuItemSelected: function(inSender, inEvent) {
-		ComponentsRegistry.getComponent("phobos").fileMenuItemSelected(inSender, inEvent);
+		var target = inEvent.selected.value[0];
+		var method = inEvent.selected.value[1];
+		var object = target === 'self' ? this : ComponentsRegistry.getComponent(target);
+		object[method]();
 	},
 	editorSettings: function(){
 		ComponentsRegistry.getComponent("phobos").editorSettings();
@@ -303,20 +306,20 @@ enyo.kind({
 	components: [
 		{tag:"button", content: "File"},
 		{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
-			{name: "saveButton", value: "saveDocAction", classes:"aresmenu-button", components: [
+			{name: "saveButton", value: [ 'phobos', "saveDocAction" ], classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save")}
 			]},
-			{name: "saveAsButton", value: "saveAsDocAction", classes:"aresmenu-button", components: [
+			{name: "saveAsButton", value:  [ 'phobos', "saveAsDocAction"], classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save as...")}
 			]},
 			{classes: "onyx-menu-divider"},
-			{name: "closeButton", value: "closeDocAction", classes:"aresmenu-button", components: [
+			{name: "closeButton", value:  [ 'phobos', "closeDocAction"], classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
 				{content: $L("Close")}
 			]},
-			{name: "closeAllButton", value: "closeAllDocAction", classes:"aresmenu-button", components: [
+			{name: "closeAllButton", value: [ 'phobos', "closeAllDocAction"], classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
 				{content: $L("Close All")}
 			]}
