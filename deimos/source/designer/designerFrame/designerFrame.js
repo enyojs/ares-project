@@ -38,7 +38,7 @@ enyo.kind({
 	prevY: null,
 	dragoverTimeout: null,
 	holdoverTimeout: null,
-	moveControlSecs: 0.2,
+	moveControlSecs: 10, //0.2,
 	edgeThresholdPx: 10,
 	debug: false,
 
@@ -51,7 +51,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.addHandlers();
 		this.addDispatcherFeature();
-		window.onerror = enyo.bind(this, this.raiseLoadError);
+		//window.onerror = enyo.bind(this, this.raiseLoadError);
 	},
 	raiseLoadError: function(msg, url, linenumber) {
 		// I'm a goner
@@ -286,7 +286,7 @@ enyo.kind({
 			
 			// If mouse hasn't moved and timer isn't yet set, set it
 		} else if (!this.holdoverTimeout) {
-			this.holdoverTimeout = setTimeout(enyo.bind(this, function() { this.holdOver(inEvent); }), 200);
+			this.holdoverTimeout = setTimeout(enyo.bind(this, function() { this.holdOver(inEvent); }), this.moveControlSecs*1000 + 100);
 		}
 		
 		// Remember mouse location for next dragover event
@@ -1072,7 +1072,7 @@ enyo.kind({
 		this.animateMovedControls(movedControls);
 
 		// When animation completes, udpate parent instance to reflect changes. TODO - don't use setTimeout, do this on an event when the animation completes
-		setTimeout(enyo.bind(this, function() { this.prerenderMoveComplete(movedInstances); }), this.moveControlSecs*1000 + 100);
+		setTimeout(enyo.bind(this, function() { this.prerenderMoveComplete(movedInstances); }), this.moveControlSecs*1000);
 	},
 	prerenderMoveComplete: function(inInstances) {
 		// Hide layer with flying controls
@@ -1086,24 +1086,6 @@ enyo.kind({
 		var containerId = (this.getContainerItem()) ? this.getContainerItem().aresId : null,
 			beforeId    = (this.getBeforeItem())    ? this.getBeforeItem().aresId    : null;
 
-		// Check libs ".design" related constraints
-		if (this.selection && this.selection.constraints) {
-			// Check "within" constraints
-			if (this.selection.constraints.within) {
-				var droppable = false;
-				enyo.forEach (this.selection.constraints.within, function(container) {
-					if (container.kind === this.getContainerItem().kind) {
-						droppable = true;
-					} 
-				}, this);
-
-				if (!droppable) {
-					enyo.warn("container's constraint", this.selection.constraints.within.description);
-					return false;
-				}
-			}
-		}
-		
 		// If creating a new item, drop is legal
 		if (this.getCreatePaletteItem()) {
 			return true;

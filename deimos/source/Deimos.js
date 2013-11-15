@@ -454,19 +454,20 @@ enyo.kind({
 			return true;
 		}
 
+		this.log();
 		// Check libs ".design" related constraints
-		if (config.constraints) {
+		if (options) {
 			// Check "within" constraints
-			if (config.constraints.within) {
+			if (options.within) {
 				var droppable = false;
-				enyo.forEach (config.constraints.within.targets, function(container) {
+				enyo.forEach (options.within.targets, function(container) {
 					if (container.kind === target.kind) {
 						droppable = true;
 					} 
 				}, this);
 
 				if (!droppable) {
-					enyo.warn("container's constraint", config.constraints.within.description);
+					enyo.warn("container's constraint", options.within.description);
 					return true;
 				}
 			}
@@ -500,6 +501,25 @@ enyo.kind({
 		// If moving item onto itself or before itself, do nothing
 		if ((target === movedItem) || (beforeId !== null && beforeId === inEvent.itemId)) {
 			return true;
+		}
+
+		this.log();
+		// Check libs ".design" related constraints
+		if (kind.options) {
+			// Check "within" constraints
+			if (kind.options.within) {
+				var droppable = false;
+				enyo.forEach (kind.options.within.targets, function(container) {
+					if (container.kind === target.kind) {
+						droppable = true;
+					} 
+				}, this);
+
+				if (!droppable) {
+					enyo.warn("container's constraint", kind.options.within.description);
+					return true;
+				}
+			}
 		}
 		
 		// Remove existing item
