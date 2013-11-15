@@ -466,14 +466,18 @@ enyo.kind({
 			]
 		},
 		{
-			kind:"Phonegap.ProjectProperties.BuildStatus",
-			name: "buildStatusDisplay"
-		},
-		{
-			kind: "Phonegap.ProjectProperties.QrCode",
-			name: "applicationQrCode"
+			kind: "FittableColumns", 
+			components: [
+				{
+					kind:"Phonegap.ProjectProperties.BuildStatus",
+					name: "buildStatusDisplay"
+				},
+				{
+					kind: "Phonegap.ProjectProperties.QrCode",
+					name: "applicationQrCode"
+				}
+			]
 		}
-
 	],
 
 	/**@private*/

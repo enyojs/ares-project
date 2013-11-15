@@ -75,7 +75,8 @@ enyo.kind({
 		onRegisterMe: "",
 		onMovePanel:"",
 		onSavePreviewAction:"",
-		onDesignerBroken: ""
+		onDesignerBroken: "",
+		onError: ""
 	},
 	published: {
 		panelIndex: 2,

@@ -88,7 +88,7 @@ enyo.singleton({
 		enyo.forEach(palette, function(category) {
 			enyo.forEach(category.items, function(item) {
 				if (item.options) {
-					this.kindOptions[item.kind] = item.options;
+					this.kindOptions[item.config.kind || ""] = item.options;
 				}
 			}, this);
 		}, this);
