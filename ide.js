@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /* jshint node:true */
+/*global setImmediate*/
 /**
  *  ARES IDE server
  */
@@ -577,22 +578,26 @@ server.setTimeout(argv.timeout);
 // over-write CORS headers using the configuration if
 // any, otherwise be paranoid.
 
-var corsHeaders;
+var corsHeaders,
+    allowedMethods = ['GET', 'PUT', 'POST', 'DELETE'],
+    allowedHeaders = ['Content-Type','Authorization','Cache-Control','X-HTTP-Method-Override'];
 
 function setCorsHeaders(req, res, next) {
 	if (!corsHeaders) {
 		var cors = ide.res.cors || {},
+		    origins = (Array.isArray(cors.origins) && cors.origins.length > 0 && cors.origins),
+		    methods = Array.isArray(cors.methods) && cors.methods,
 		    headers = Object.keys(ide.res.headers || {});
 		corsHeaders = {};
-		// Lowercase HTTP headers, work-around an iPhone bug
-		corsHeaders['access-control-allow-origin'] = ((Array.isArray(cors.origins) && cors.origins.length > 0 && cors.origins) || [origin]).join(',');
-		corsHeaders['access-control-allow-methods'] = ['GET', 'PUT', 'POST', 'DELETE'].concat(Array.isArray(cors.methods) && cors.methods).join(',');
-		corsHeaders['access-control-allow-headers'] = ['Content-Type','Authorization','Cache-Control','X-HTTP-Method-Override'].concat(Array.isArray(headers) && headers).join(',');
+		corsHeaders['Access-Control-Allow-Origin'] = (origins || [origin]).join(',');
+		corsHeaders['Access-Control-Allow-Methods'] = allowedMethods.concat(methods).join(',');
+		corsHeaders['Access-Control-Allow-Headers'] = allowedHeaders.concat(headers).join(',');
 		log.info("setCorsHeaders()", "CORS will use:", corsHeaders);
 	}
 	for (var h in corsHeaders) {
 		log.silly("setCorsHeaders()", h, ":", corsHeaders[h]);
-		res.header(h, corsHeaders[h]);
+		// Lowercase HTTP headers, work-around an iPhone bug
+		res.header(h.toLowerCase(), corsHeaders[h]);
 	}
 	if ('OPTIONS' === req.method) {
 		res.status(200).end();
