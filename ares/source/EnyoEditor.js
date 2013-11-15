@@ -1,4 +1,4 @@
-/*global ComponentsRegistry, alert, async, enyo, $L */
+/*global ComponentsRegistry, ares, Ares, alert, async, enyo, $L */
 enyo.kind({
 	name:"Ares.EnyoEditor",
 	kind:"FittableRows", 
