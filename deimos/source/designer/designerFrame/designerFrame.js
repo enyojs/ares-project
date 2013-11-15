@@ -1085,7 +1085,7 @@ enyo.kind({
 	legalDrop: function() {
 		var containerId = (this.getContainerItem()) ? this.getContainerItem().aresId : null,
 			beforeId    = (this.getBeforeItem())    ? this.getBeforeItem().aresId    : null;
-		
+
 		// If creating a new item, drop is legal
 		if (this.getCreatePaletteItem()) {
 			return true;

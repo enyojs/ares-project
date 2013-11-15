@@ -453,6 +453,24 @@ enyo.kind({
 			enyo.warn("Could not create new item - bad data: ", inEvent);
 			return true;
 		}
+
+		// Check libs ".design" related constraints
+		if (options) {
+			// Check "within" constraints
+			if (options.within) {
+				var droppable = false;
+				enyo.forEach (options.within.targets, function(container) {
+					if (container.kind === target.kind) {
+						droppable = true;
+					} 
+				}, this);
+
+				if (!droppable) {
+					enyo.warn("container's constraint", options.within.description);
+					return true;
+				}
+			}
+		}
 				
 		// Give the new component (and any children) a fresh _aresId_
 		config.aresId = this.generateNewAresId();
@@ -482,6 +500,24 @@ enyo.kind({
 		// If moving item onto itself or before itself, do nothing
 		if ((target === movedItem) || (beforeId !== null && beforeId === inEvent.itemId)) {
 			return true;
+		}
+
+		// Check libs ".design" related constraints
+		if (kind.options) {
+			// Check "within" constraints
+			if (kind.options.within) {
+				var droppable = false;
+				enyo.forEach (kind.options.within.targets, function(container) {
+					if (container.kind === target.kind) {
+						droppable = true;
+					} 
+				}, this);
+
+				if (!droppable) {
+					enyo.warn("container's constraint", kind.options.within.description);
+					return true;
+				}
+			}
 		}
 		
 		// Remove existing item
