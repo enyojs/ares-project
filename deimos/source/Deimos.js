@@ -454,7 +454,6 @@ enyo.kind({
 			return true;
 		}
 
-		this.log();
 		// Check libs ".design" related constraints
 		if (options) {
 			// Check "within" constraints
@@ -503,7 +502,6 @@ enyo.kind({
 			return true;
 		}
 
-		this.log();
 		// Check libs ".design" related constraints
 		if (kind.options) {
 			// Check "within" constraints
