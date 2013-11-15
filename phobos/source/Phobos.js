@@ -1,5 +1,5 @@
 /* jshint indent: false */ // TODO: ENYO-3311
-/* global analyzer, ares, ProjectCtrl */
+/*global analyzer, ares, enyo, $L, ProjectCtrl */
 
 enyo.kind({
 	name: "Phobos",
