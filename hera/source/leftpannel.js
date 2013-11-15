@@ -84,7 +84,8 @@ enyo.kind({
 	},
 	
 	dec: [
-		{name: "background-color", input:"color"},		
+		{name: "background-color", input:"color"},
+		{name: "outline-color", input:"color"}
 	]
 	
 });
@@ -164,9 +165,15 @@ enyo.kind({
 		{name: "Helvetica ", input: "font"},
 		{name: "Monospace", input: "font"},
 		{name: "Lucida Sans Unicode", input:"font"},
-		{name: "text-align", input:"lrc"}
-	]
-	
+		{name: "text-align", input:"lrc"},
+		{name: "text-indent", input:"picker"},
+		{name: "margin", input: "picker"},
+		{name: "margin-top", input: "picker"},
+		{name: "margin-right", input: "picker"},
+		{name: "margin-left", input: "picker"},
+		{name: "margin-bottom", input: "picker"}
+	] 
+	//  {name: " ", input: " "}
 });
 
 enyo.kind({
@@ -246,7 +253,14 @@ enyo.kind({
 		{name: "border-color", input:"color"},
 		{name: "box-shadow", input:"xyz"},
 		{name: "border-radius", input:"xy"},
-		
+		{name: "border-top-color", input:"color"},
+		{name: "border-right-color", input:"color"},
+		{name: "border-left-color", input:"color"},
+		{name: "border-bottom-color", input:"color"},		
+		{name: "padding-top", input: "picker"},
+		{name: "padding-left", input: "picker"},
+		{name: "padding-right", input: "picker"},
+		{name: "padding-bottom", input: "picker"}
 	]
 	
 });
@@ -319,7 +333,10 @@ enyo.kind({
 	},
 	
 	image: [
-		{name: "background-image", input:"misc"},
+		{name: "background-image", input:"filepicker"},
+		{name: "background-position", input:"xy"},
+		{name: "background-clip", input:"bgc"},
+		{name: "background-repeat", input:"bgr"}
 	]
 	
 });
