@@ -20,7 +20,7 @@ By default, Ares backend only allows requests from Ares itself, using built-in H
 	"headers": {},
 ```
 
-It is possible to hard-wire a new set of allowed origins (for example when running behind a Secure Reverse Proxy) using the `cors.origins:` Array property.  It is also possible to allow more methods using the `cors.methods:` Array & also hard-wire some headers using the `headers:` Object property, as shown below.  The customized user-defined headers are automatically added to the list of headers allowed by CORS.
+It is possible to hard-wire a new set of allowed origins (for example when running behind a Secure Reverse Proxy) using the `cors.origins:` Array property.  It is  possible to allow more methods using the `cors.methods:` Array (in addition to the REST verbs `GET`, `PUT`, `POST` and `DELETE` which are already allowed).  It is also possible to hard-wire some HTTP headers using the `headers:` Object property, as shown below.  The customized user-defined headers are automatically added to the built-in list of headers allowed by CORS.
 
 ```
 	"cors": {
