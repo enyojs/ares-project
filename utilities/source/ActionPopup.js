@@ -1,4 +1,9 @@
-/* global ares */
+/*global ares enyo $L */
+
+// Action popup now accept call back that will be run when user click
+// on ok or cancel. Note that events are not fired when callback are
+// defined
+
 enyo.kind({
     name: "Ares.ActionPopup",
     kind: "onyx.Popup",
@@ -11,6 +16,8 @@ enyo.kind({
         title: "",
         actionButton: "",
         cancelButton: "",
+		actionCallback: null,
+		cancelCallback: null,
         message: ""
     },
     events: {
@@ -62,13 +69,23 @@ enyo.kind({
     /** @private */
     actionConfirm: function(inSender, inEvent) {
         this.hide();
-        this.doConfirmActionPopup();
+		if (this.actionCallback) {
+			this.actionCallback();
+		}
+		else {
+			this.doConfirmActionPopup();
+		}
         return true;
     },
     /** @private */
     actionCancel: function(inSender, inEvent) {
         this.hide();
-        this.doCancelActionPopup();
+       	if (this.cancelCallback) {
+			this.cancelCallback();
+		}
+		else {
+			this.doCancelActionPopup();
+		}
         return true;
     }
 });
