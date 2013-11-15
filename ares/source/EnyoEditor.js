@@ -46,6 +46,7 @@ enyo.kind({
 				{name:"logo", kind:"Ares.Logo"}
 			]}
 		]},
+		{ name: "savePopup", kind: "saveActionPopup"},
 		{
 			name: "bottomBar",
 			kind: "DocumentToolbar",
@@ -72,6 +73,8 @@ enyo.kind({
 		}
 	],
 	events: {
+		onShowWaitPopup: "",
+		onHideWaitPopup: "",
 		onNewActiveDocument: "", // to preserve legacy in Ares.js
 		onAllDocumentsAreClosed: "",
 		onRegisterMe: "",
@@ -88,6 +91,7 @@ enyo.kind({
 	handlers: {
 		onAceFocus: "aceFocus"
 	},
+	debug: false,
 	create: function() {
 		this.inherited(arguments);
 		// Setup this.trace() function according to this.debug value
@@ -103,7 +107,8 @@ enyo.kind({
 	fileMenuItemSelected: function(inSender, inEvent) {
 		var target = inEvent.selected.value[0];
 		var method = inEvent.selected.value[1];
-		var object = target === 'self' ? this : ComponentsRegistry.getComponent(target);
+		this.trace("will call " + target + ' ' + method);
+		var object = ComponentsRegistry.getComponent(target);
 		object[method]();
 	},
 	editorSettings: function(){
@@ -184,33 +189,49 @@ enyo.kind({
 		this.updateDeimosLabel(this.activeDocument.getEdited());
 	},
 
-
 	activeDocument: null,
+
+	showWaitPopup: function(inMessage) {
+		this.doShowWaitPopup({msg: inMessage});
+	},
+	hideWaitPopup: function() {
+		this.doHideWaitPopup();
+	},
+
+	// Save actions
 
 	handleCloseDocument: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.closeDocument(inEvent.id);
 	},
 
+	closeActiveDoc: function() {
+		var docId = this.activeDocument.getId();
+		this.trace("close document:",this.activeDocument.getName());
+		ComponentsRegistry.getComponent('phobos').closeSession();
+		this.activeDocument = null;
+		this.forgetDoc(docId);
+	},
+
+	forgetDoc: function(docId) {
+		// remove Doc from cache
+		ComponentsRegistry.getComponent("documentToolbar").removeTab(docId);
+		Ares.Workspace.files.removeEntry(docId);
+		if (! Ares.Workspace.files.length ) {
+			this.doAllDocumentsAreClosed();
+		}
+	},
+
 	closeDocument: function(docId, next) {
 		if (docId && this.activeDocument.getId() === docId) {
-			this.trace("close document:",this.activeDocument.getName());
-			// remove file from cache
-			ComponentsRegistry.getComponent("documentToolbar").removeTab(docId);
-			Ares.Workspace.files.removeEntry(docId);
-			this.activeDocument = null;
+			this.closeActiveDoc();
 		}
 		else if (docId) {
 			this.warn("closing a doc different from current one: ", docId);
-			ComponentsRegistry.getComponent("documentToolbar").removeTab(docId);
-			Ares.Workspace.files.removeEntry(docId);
+			this.forgetDoc(docId);
 		}
 		else {
 			this.warn("called without docId to close");
-		}
-
-		if (! Ares.Workspace.files.length ) {
-			this.doAllDocumentsAreClosed();
 		}
 
 		if (typeof next === 'function') {
@@ -294,6 +315,40 @@ enyo.kind({
 		this._fileEdited();
 		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(newDoc.getId());
 		this.doNewActiveDocument({ doc: this.activeDocument} );
+	},
+
+
+	// Close documents
+	requestCloseCurrentDoc: function(inSender, inEvent) {
+		this.requestCloseDoc(this.activeDocument);
+	},
+	requestCloseDoc: function(doc) {
+		var popup = this.$.savePopup ;
+		if (doc.getEdited() === true) {
+			this.trace("request close doc on ",doc.getName());
+			popup.setMessage('"' + doc.getFile().path
+					+ '" was modified.<br/><br/>Save it before closing?') ;
+			popup.setTitle($L("Document was modified!"));
+
+			popup.setActionButton($L("Don't Save"));
+			popup.setActionCallback(this.closeDocument.bind(this,doc));
+
+			popup.setSaveCallback(
+				(function() {
+					// FIXME 3082 save only current doc
+					// other doc need to clean the edit session
+					ComponentsRegistry.getComponent('phobos').saveDocAction();
+					this.closeActiveDoc();
+				}).bind(this)
+			);
+
+			popup.setCancelCallback(this.aceFocus.bind(this)) ;
+
+			popup.show();
+		} else {
+			this.closeActiveDoc();
+		}
+		return true; // Stop the propagation of the event
 	}
 
 });
@@ -322,7 +377,7 @@ enyo.kind({
 				{content: $L("Save as...")}
 			]},
 			{classes: "onyx-menu-divider"},
-			{name: "closeButton", value:  [ 'phobos', "closeDocAction"], classes:"aresmenu-button", components: [
+			{name: "closeButton", value:  [ 'enyoEditor', "requestCloseCurrentDoc"], classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
 				{content: $L("Close")}
 			]},
@@ -332,4 +387,28 @@ enyo.kind({
 			]}
 		]}
 	]
+});
+
+enyo.kind({
+	name: "saveActionPopup",
+	kind: "Ares.ActionPopup",
+
+	/** @private */
+	create: function() {
+		this.inherited(arguments);
+		this.$.message.allowHtml = true;
+		this.$.buttons.createComponent(
+			{name:"saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "save"},
+			{owner: this}
+		);
+	},
+	setSaveCallback: function(cb) {
+		this.saveCallback = cb;
+	},
+	/** @private */
+	save: function(inSender, inEvent) {
+		this.hide();
+		if (this.saveCallback) { this.saveCallback(); }
+		else {this.doSaveActionPopup();}
+	}
 });

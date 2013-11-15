@@ -768,6 +768,7 @@ enyo.kind({
 		}
 	},
 	closeDocAction: function(inSender, inEvent) {
+		this.warn("obsolete");
 		if (this.docData.getEdited() === true) {
 			this.showSavePopup("savePopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing?');
 		} else {
@@ -795,10 +796,12 @@ enyo.kind({
 		this.cancelAction();
 	},
 	cancelAction: function(inSender, inEvent) {
+		this.warn("obsolete");
 		this.doAceFocus();
 	},
 	// called when "Don't Save" is selected in save popup
 	abandonDocAction: function(inSender, inEvent) {
+		this.warn("obsolete");
 		this.$.savePopup.hide();
 		var docData = this.docData;
 		this.beforeClosingDocument();
@@ -809,6 +812,7 @@ enyo.kind({
 	* @protected
 	*/
 	showSavePopup: function(componentName, message){
+		this.warn("obsolete");
 		this.$[componentName].setTitle($L("Document was modified!"));
 		this.$[componentName].setMessage(message);
 		this.$[componentName].setActionButton($L("Don't Save"));
@@ -910,7 +914,15 @@ enyo.kind({
 	 * Perform a few actions before closing a document
 	 * @protected
 	 */
+	closeSession: function() {
+		// FIXME: remove this test once all close stuff is moved to EnyoEditor
+		if (this.docData) {
+			this.$.ace.destroySession(this.docData.getAceSession());
+			this.resetAutoCompleteData();
+		}
+	},
 	beforeClosingDocument: function() {
+		this.warn('obsolete');
 		this.$.ace.destroySession(this.docData.getAceSession());
 		// NOTE: docData will be clear when removed from the Ares.Workspace.files collections
 		this.resetAutoCompleteData();
@@ -1135,28 +1147,6 @@ enyo.kind({
 	},
 	navigateItemChanged: function() {
 		this.$.navigateItem.setContent(this.navigateItem);
-	}
-});
-
-enyo.kind({
-	name: "saveActionPopup",
-	kind: "Ares.ActionPopup",
-	events:{
-		onSaveActionPopup: ""
-	},
-	/** @private */
-	create: function() {
-		this.inherited(arguments);
-		this.$.message.allowHtml = true;
-		this.$.buttons.createComponent(
-			{name:"saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "save"},
-			{owner: this}
-		);
-	},
-	/** @private */
-	save: function(inSender, inEvent) {
-		this.hide();
-		this.doSaveActionPopup();
 	}
 });
 
