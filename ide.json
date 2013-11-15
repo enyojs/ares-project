@@ -1,5 +1,9 @@
 {
-	"domain": null,
+	"cors": {
+		"origins": [],
+		"methods": []
+	},
+	"headers": {},
 	"services": [
 		{
 			"active":true,
