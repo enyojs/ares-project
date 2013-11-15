@@ -218,7 +218,7 @@ enyo.kind({
 		}
 	},
 
-	switchToDocument: function(newDoc) {
+	switchToDocument: function(newDoc,next) {
 		// safety net
 		if ( ! newDoc ) {
 			if  (this.debug) { throw("File ID " + newDoc + " not found in cache!");}
@@ -230,6 +230,7 @@ enyo.kind({
 
 		// don't open an already opened doc
 		if ( oldDoc && newDoc.getId() === oldDoc.getId()) {
+			if (next) {next();}
 			return ;
 		}
 
@@ -247,14 +248,20 @@ enyo.kind({
 			var deimos = ComponentsRegistry.getComponent("deimos");
 
 			// switch document is done in the callback
-			async.series([
-				projectList.selectInProjectList.bind(projectList,project),
-				deimos.projectSelected.bind(deimos,project),
-				this._switchDoc.bind(this,newDoc),
-			]);
+			async.series(
+				[
+					projectList.selectInProjectList.bind(projectList,project),
+					deimos.projectSelected.bind(deimos,project),
+					this._switchDoc.bind(this,newDoc)
+				],
+				function() {
+					if (next) {next();}
+				}
+			);
 		}
 		else {
 			this._switchDoc(newDoc);
+			if (next) {next();}
 		}
 
 	},
