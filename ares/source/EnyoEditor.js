@@ -223,8 +223,7 @@ enyo.kind({
 			req = where.service.createFile(where.folderId, where.name, content);
 		}
 
-		// FIXME 3082 move popup to EnyoEditor
-		phobos.showWaitPopup($L("Saving ") + name + " ...");
+		this.showWaitPopup($L("Saving ") + name + " ...");
 		this.trace("Saving doc: " + name + " id " + where.fileId);
 
 		req.response(this, function(inEvent, inData) {

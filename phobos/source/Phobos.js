@@ -27,7 +27,6 @@ enyo.kind({
 		onChangeSettings:"applySettings", onChangeRightPane: "changeRightPane", onClose: "closeEditorPop", onTabSizsChange: "tabSize"}
 	],
 	events: {
-		onShowWaitPopup: "",
 		onHideWaitPopup: "",
 		onSaveDocument: "",
 		onSaveAsDocument: "",
@@ -344,9 +343,6 @@ enyo.kind({
 		this.$.right.setIndex(settings.rightIndex);
 		this.resizeHandler();
 		return showSettings.ace ;
-	},
-	showWaitPopup: function(inMessage) {
-		this.doShowWaitPopup({msg: inMessage});
 	},
 	hideWaitPopup: function() {
 		this.doHideWaitPopup();
