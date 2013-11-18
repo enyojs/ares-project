@@ -13,7 +13,8 @@ enyo.kind({
 	classes: "enyo-unselectable ares-project-list",
 	events: {
 		onCreateProject: "",
-		onScanProject: "",
+		onOpenProject: "",
+		onSearchProjects: "",
 		onDuplicateProject: "",
 		onProjectRemoved: "",
 		onCloseProjectDocuments:"",
@@ -50,20 +51,24 @@ enyo.kind({
 					]}
 				]},
 				{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
-					{content: "Edit"},
+					{content: "Projects"},
 					{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", components: [
 						{value: "doCreateProject",  classes:"aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_new.png"},
 							{content: "Create..."}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "doScanProject",  classes:"aresmenu-button", components: [
-							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_import.png"},
-							{content: "Import..."}
+						{value: "doOpenProject",  classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_open.png"},
+							{content: "Open..."}
+						]},
+						{value: "doSearchProjects",  classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_search.png"},
+							{content: "Search..."}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
 						{value: "doDuplicateProject",  classes:"aresmenu-button", components: [
-							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_import.png"},
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_duplicate.png"},
 							{content: "Duplicate..."}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
