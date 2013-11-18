@@ -1,4 +1,4 @@
-/* global require, ace, ComponentsRegistry */
+/*global require, ace, enyo, ComponentsRegistry */
 enyo.kind({
 	name: "enyo.Ace",
 	kind: enyo.Control,
@@ -21,7 +21,6 @@ enyo.kind({
 		onChange: "",
 		onScroll: "",
 		onCursorChange: "",
-		onSave: "",
 		onAutoCompletion: "",
 		onFind: "",
 		onWordwrap: "",
@@ -70,12 +69,13 @@ enyo.kind({
 	 */
 	addKeyBindings: function() {
 		var commands = this.editor.commands;
+		var enyoEd = ComponentsRegistry.getComponent("enyoEditor");
 		
 		// Add keybinding for save
 		commands.addCommand({
 			name: "save",
 			bindKey: {win: "Ctrl-S", mac: "Command-S"},
-			exec: enyo.bind(this, "saveDocAction")
+			exec: enyoEd.saveCurrentDoc.bind(enyoEd)
 		});
 
 		// Add keybinding for auto completion
@@ -134,9 +134,6 @@ enyo.kind({
 	},
 	handleScroll: function(/* Dont handle parameters as we dont need them yet */) {
 		this.doScroll();
-	},
-	saveDocAction: function() {
-		this.doSave();
 	},
 	gutterclick: function(inEventInfo) {
 		this.toggleBreakpoint(inEventInfo.row);

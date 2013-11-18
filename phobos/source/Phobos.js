@@ -9,7 +9,7 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "enyo-fit ares_phobos_panel border ", components: [
-						{kind: "Ace", classes: "enyo-fit ace-code-editor", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
+						{kind: "Ace", classes: "enyo-fit ace-code-editor", onChange: "docChanged", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
