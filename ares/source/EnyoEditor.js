@@ -227,13 +227,13 @@ enyo.kind({
 		this.trace("Saving doc: " + name + " id " + where.fileId);
 
 		req.response(this, function(inEvent, inData) {
-			var fileDataId = Ares.Workspace.files.computeId(inEvent.file);
-			var fileData = Ares.Workspace.files.get(fileDataId);
-			if(fileData){
-				fileData.setData(content);
+			var docDataId = Ares.Workspace.files.computeId(inEvent.file);
+			var docData = Ares.Workspace.files.get(docDataId);
+			if(docData){
+				docData.setData(content);
 			}
-			ComponentsRegistry.getComponent("phobos").saveComplete(fileData);
-			if (next) {next(null, fileData);}
+			this.saveComplete(docData);
+			if (next) {next(null, docData);}
 		}).error(this, function(inEvent, inErr) {
 			ComponentsRegistry.getComponent("phobos").saveFailed(inErr);
 			if (next) {next(inErr);}
