@@ -21,7 +21,6 @@ enyo.kind({
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
 		{name: "overwritePopup", kind: "overwriteActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "saveAsConfirm", onCancelActionPopup: "saveAsCancel", onHide:"doAceFocus"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: $L("unknown error")},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide:"doAceFocus", onClose: "findClose", onReplaceFind: "replacefind"},
 		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "enyo-unselectable", centered: true, modal: true, floating: true, autoDismiss: false,
 		onChangeSettings:"applySettings", onChangeRightPane: "changeRightPane", onClose: "closeEditorPop", onTabSizsChange: "tabSize"}
@@ -31,6 +30,7 @@ enyo.kind({
 		onSaveDocument: "",
 		onSaveAsDocument: "",
 		onDesignDocument: "",
+		onError: "",
 		onCloseDocument: "",
 		onUpdate: "",
 		onRegisterMe: "",
@@ -311,10 +311,6 @@ enyo.kind({
 	hideWaitPopup: function() {
 		this.doHideWaitPopup();
 	},
-	showErrorPopup : function(msg) {
-		this.$.errorPopup.setErrorMsg(msg);
-		this.$.errorPopup.show();
-	},
 	//
 	setAutoCompleteData: function() {
 		this.$.autocomplete.hide();
@@ -541,7 +537,7 @@ enyo.kind({
 				errorMsg = $L("No kinds found in this file");
 			}
 			if (errorMsg) {
-				this.showErrorPopup(errorMsg);
+				this.doError({msg: errorMsg});
 				return [];
 			}
 
