@@ -80,37 +80,6 @@ enyo.kind({
 		this.doAceFocus();
 		return true;
 	},
-	saveComplete: function(inDocData) {
-		this.hideWaitPopup();
-		var codeLooksGood = false ;
-
-		if (inDocData) {
-			inDocData.setEdited(false);		// TODO: The user may have switched to another file
-			// update deimos label with edited status which is actually "not-edited" ...
-			this.doFileEdited();
-		}
-
-		if (this.docData === inDocData) {
-			codeLooksGood = this.reparseUsersCode();
-		}
-		else {
-			this.trace("skipping reparse user code");
-		}
-
-		// successful analysis will enable designer button
-		this.owner.enableDesignerButton(false);
-
-		// Global analysis is always triggered even if local analysis
-		// reports an error.  This way, errors are reported from a
-		// single place wherever the error is.  The alternative is to
-		// report error during local analysis, which often lead to
-		// error reported twice (i.e on first file edit after a
-		// project load)
-		this.trace("triggering full analysis after file save");
-		this.projectCtrl.forceFullAnalysis();
-
-		this.trace("done. codeLooksGood: "+ codeLooksGood);
-	},
 	saveNeeded: function() {
 		return this.docData.getEdited();
 	},

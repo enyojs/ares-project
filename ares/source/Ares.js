@@ -210,7 +210,7 @@ enyo.kind({
 				if(fileData){
 					fileData.setData(content);
 				}
-				ComponentsRegistry.getComponent("phobos").saveComplete(fileData);
+				ComponentsRegistry.getComponent("enyoEditor").saveComplete(fileData);
 			}
 		});
 	},
