@@ -213,7 +213,6 @@ enyo.kind({
 
 	saveDoc: function(name,content,where,next){
 		var req;
-		var phobos = ComponentsRegistry.getComponent('phobos');
 
 		if (where.fileId) {
 			// plain save
