@@ -251,7 +251,8 @@ enyo.kind({
 			this._fileEdited();
 		}
 
-		if (this.docData === inDocData) {
+		if (this.activeDocument === inDocData) {
+			// current file was just saved
 			codeLooksGood = phobos.reparseUsersCode();
 		}
 		else {
