@@ -79,15 +79,10 @@ function ServiceBase(config, next) {
 		setImmediate(next);
 	});
 
-	// CORS -- Cross-Origin Resources Sharing
-	this.app.use(this.setCors.bind(this));
-
-	// Authentication
 	this.app.use(this.allowLocalOnly.bind(this));
-
-	// Small content
 	this.app.use(this.bodyParser.bind(this));
 
+	// Service-provides middle-wares
 	this.use();
 
 	/*
@@ -166,22 +161,6 @@ ServiceBase.prototype.use = function(/*config, next*/) {
  */
 ServiceBase.prototype.route = function(/*config, next*/) {
 	log.verbose('ServiceBase#route()', "skipping..."); 
-};
-
-/**
- * @protected
- */
-ServiceBase.prototype.setCors = function(req, res, next) {
-	log.silly("ServiceBase#setCors()");
-	res.header('Access-Control-Allow-Origin', "*"); // XXX be safer than '*'
-	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cache-Control, , X-HTTP-Method-Override');
-	if ('OPTIONS' == req.method) {
-		res.status(200).end();
-	}
-	else {
-		setImmediate(next);
-	}
 };
 
 /**

@@ -1,5 +1,9 @@
 {
-	"domain": null,
+	"cors": {
+		"origins": [],
+		"methods": []
+	},
+	"headers": {},
 	"services": [
 		{
 			"active":true,
@@ -73,12 +77,12 @@
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
 			"sources": [
 				{
-					"id": "bootplate-2.3.0-pre.9",
+					"id": "bootplate-2.3.0-pre.12",
 					"isDefault": true,
 					"type": "template",
 					"files": [
 						{
-							"url": "http://enyojs.com/archive/bootplate-2.3.0-pre.9.zip",
+							"url": "http://enyojs.com/archive/bootplate-2.3.0-pre.12.zip",
 							"prefixToRemove": "bootplate",
 							"excluded": [
 								"bootplate/api/",
@@ -88,7 +92,7 @@
       							]
 						}
   					],
-					"description": "Enyo bootplate 2.3.0-pre.9 (Recommended)"
+					"description": "Enyo bootplate 2.3.0-pre.12 (Recommended)"
 				},
 				{
 					"id": "bootplate-2.2.0",
