@@ -6,8 +6,13 @@ enyo.singleton({
 });
 
 Ares.Model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when possible
+	// returns service_name-project_name_as_hex_and_file_id_in_hex
 	getId: function() {
 		return this.get("id");
+	},
+	// return id encrypted in hexa
+	getFileId: function() {
+		return this.get("file").id;
 	},
 	getFile: function() {
 		return this.get("file");
