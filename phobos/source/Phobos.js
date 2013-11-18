@@ -75,7 +75,7 @@ enyo.kind({
 	},
 	saveDocAction: function() {
 		this.warn("obsolete");
-		this.showWaitPopup($L("Saving ..."));
+		this.owner.showWaitPopup($L("Saving ..."));
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
 		this.doAceFocus();
 		return true;
@@ -128,7 +128,7 @@ enyo.kind({
 		var relativePath = data.name.split("/");
 		var name = relativePath[relativePath.length-1];
 		
-		this.showWaitPopup($L("Saving ..."));
+		this.owner.showWaitPopup($L("Saving ..."));
 		this.doSaveAsDocument({
 			docId: this.docData.getId(),
 			projectData: this.docData.getProjectData(),
