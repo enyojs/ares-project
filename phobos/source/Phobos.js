@@ -75,6 +75,7 @@ enyo.kind({
 		}
 	},
 	saveDocAction: function() {
+		this.warn("obsolete");
 		this.showWaitPopup($L("Saving ..."));
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
 		this.doAceFocus();

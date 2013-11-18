@@ -198,6 +198,7 @@ enyo.kind({
 			});
 	},
 	saveDocument: function(inSender, inEvent) {
+		// copied in Ares.saveDoc. Remove once saveas is moved as well 3082
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var content = inEvent.content;
 		this._saveDocument(inEvent.content, {service: inEvent.file.service, fileId: inEvent.file.id}, function(err) {
@@ -214,6 +215,7 @@ enyo.kind({
 		});
 	},
 	_saveDocument: function(content, where, next) {
+		// copied in Ares.saveDoc. Remove once saveas is moved as well 3082
 		var req;
 		if (where.fileId) {
 			req = where.service.putFile(where.fileId, content);

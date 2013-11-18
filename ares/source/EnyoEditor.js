@@ -199,6 +199,49 @@ enyo.kind({
 	},
 
 	// Save actions
+	saveCurrentDoc: function() {
+		var phobos = ComponentsRegistry.getComponent('phobos');
+		this.saveDoc(
+			this.activeDocument.getName(),
+			phobos.getEditorContent(),
+			{
+				service: this.activeDocument.getProjectData().getService(),
+				fileId: this.activeDocument.getFileId()
+			}
+		);
+	},
+
+	saveDoc: function(name,content,where,next){
+		var req;
+		var phobos = ComponentsRegistry.getComponent('phobos');
+
+		if (where.fileId) {
+			// plain save
+			req = where.service.putFile(where.fileId, content);
+		} else {
+			// used with saveAs
+			req = where.service.createFile(where.folderId, where.name, content);
+		}
+
+		// FIXME 3082 move popup to EnyoEditor
+		phobos.showWaitPopup($L("Saving ") + name + " ...");
+		this.trace("Saving doc: " + name + " id " + where.fileId);
+
+		req.response(this, function(inEvent, inData) {
+			var fileDataId = Ares.Workspace.files.computeId(inEvent.file);
+			var fileData = Ares.Workspace.files.get(fileDataId);
+			if(fileData){
+				fileData.setData(content);
+			}
+			ComponentsRegistry.getComponent("phobos").saveComplete(fileData);
+			if (next) {next(null, fileData);}
+		}).error(this, function(inEvent, inErr) {
+			ComponentsRegistry.getComponent("phobos").saveFailed(inErr);
+			if (next) {next(inErr);}
+		});
+	},
+
+	// close actions
 
 	handleCloseDocument: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
@@ -368,7 +411,7 @@ enyo.kind({
 	components: [
 		{tag:"button", content: "File"},
 		{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
-			{name: "saveButton", value: [ 'phobos', "saveDocAction" ], classes:"aresmenu-button", components: [
+			{name: "saveButton", value: [ 'enyoEditor', "saveCurrentDoc" ], classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save")}
 			]},
