@@ -234,7 +234,7 @@ enyo.kind({
 			this.saveComplete(docData);
 			if (next) {next(null, docData);}
 		}).error(this, function(inEvent, inErr) {
-			ComponentsRegistry.getComponent("phobos").saveFailed(inErr);
+			this.saveFailed(inErr);
 			if (next) {next(inErr);}
 		});
 	},
@@ -272,6 +272,12 @@ enyo.kind({
 		phobos.projectCtrl.forceFullAnalysis();
 
 		this.trace("done. codeLooksGood: "+ codeLooksGood);
+	},
+
+	saveFailed: function(inMsg) {
+		this.hideWaitPopup();
+		this.warn("Save failed: " + inMsg);
+		this.doError({msg: "Unable to save the file: " + inMsg });
 	},
 
 	// close actions

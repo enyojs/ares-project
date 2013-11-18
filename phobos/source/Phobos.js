@@ -83,11 +83,6 @@ enyo.kind({
 	saveNeeded: function() {
 		return this.docData.getEdited();
 	},
-	saveFailed: function(inMsg) {
-		this.hideWaitPopup();
-		this.warn("Save failed: " + inMsg);
-		this.showErrorPopup("Unable to save the file");
-	},
 	saveAsDocAction: function() {
 		var file = this.docData.getFile();
 		this.$.saveAsPopup.connectProject(this.docData.getProjectData(), (function() {

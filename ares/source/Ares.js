@@ -203,7 +203,7 @@ enyo.kind({
 		var content = inEvent.content;
 		this._saveDocument(inEvent.content, {service: inEvent.file.service, fileId: inEvent.file.id}, function(err) {
 			if (err) {
-				ComponentsRegistry.getComponent("phobos").saveFailed(err);
+				ComponentsRegistry.getComponent("enyoEditor").saveFailed(err);
 			} else {
 				var fileDataId = Ares.Workspace.files.computeId(inEvent.file);
 				var fileData = Ares.Workspace.files.get(fileDataId);
