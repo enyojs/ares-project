@@ -320,7 +320,7 @@ enyo.kind({
 				name: '$' + f.name, // prefix avoids clobberring non-files components like icon
 				content: f.name,
 				expandable: f.isDir,
-				icon: "$services/assets/images/" + (f.isDir ? "folder.png" : "file.png")
+				icon: "$services/assets/images/" + (f.isDir ? "arrowRight.png" : "file.png")
 			});
 		}
 		return nodes;
@@ -332,7 +332,7 @@ enyo.kind({
 		this.trace("nodeExpand called while node Expanded is ", subnode.expanded) ;
 		// update icon for expanded state
 		if (subnode.file.isDir) {
-			subnode.setIcon("$services/assets/images/" + (subnode.expanded ? "folder-open.png" : "folder.png"));
+			subnode.setIcon("$services/assets/images/" + (subnode.expanded ? "arrowDown.png" : "arrowRight.png"));
 		}
 		// handle lazy-load when expanding
 		if (subnode.expanded) {
