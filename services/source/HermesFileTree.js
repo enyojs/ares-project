@@ -643,11 +643,21 @@ enyo.kind({
 		// projectUrl in this.projectData is set asynchronously. Do not try to
 		// open anything before it is available. Also do not
 		// try to open top-level root & folders.
-		if (!node.file.isDir && !node.file.isServer && this.projectUrlReady) {
-			this.doFileDblClick({
-				file: node.file,
-				projectData: this.projectData
-			});
+		if (this.projectUrlReady) {
+			if (!node.file.isDir && !node.file.isServer) {
+				this.doFileDblClick({
+					file: node.file,
+					projectData: this.projectData
+				});
+			} else {
+				if (node.file.isDir) {
+					if (node.get("expanded")) {
+						node.set("expanded", false);
+					} else {
+						node.set("expanded", true);
+					}
+				}
+			}
 		}
 
 		// handled here (don't bubble)
