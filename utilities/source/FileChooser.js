@@ -1,4 +1,4 @@
-/* global async, ares */
+/*global async, ares, enyo, $L */
 
 enyo.kind({
 	name: "Ares.FileChooser",
@@ -40,6 +40,12 @@ enyo.kind({
 		 * When true the {Ares.FileChooser} show the toolbar.
 		 */
 		allowToolbar: true,
+		/**
+		 * Invoke this callback instead of firing doFileChosen event
+		 * callback contain the same parameter as doFileChosen. Using
+		 * a callback is preferred over wiring another event.
+		 */
+		fileChosenCallback: null,
 		/**
 		 * When true the {Ares.FileChooser} allows the selection
 		 * of the top-level in the file tree.
@@ -272,6 +278,13 @@ enyo.kind({
 		}
 	},
 	/** @private */
+	runCallBack: function(param) {
+		if (this.fileChosenCallback) {
+			this.fileChosenCallback(param);
+		} else {
+			this.doFileChosen(param);
+		}
+	},
 	confirm: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.hide() ;
@@ -279,7 +292,7 @@ enyo.kind({
 		var name = this.$.selectedFoldersPath.getValue();
 
 		if (!this.checkedPath(name)) {
-			this.doFileChosen();
+			this.runCallBack();
 
 			return true;
 		}
@@ -292,7 +305,7 @@ enyo.kind({
 		}
 		this.trace("New name:", name);
 
-		this.doFileChosen({
+		this.runCallBack({
 			file: this.selectedFile,
 			name: name
 		});
@@ -304,7 +317,7 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);		
 		this.hide() ;
 
-		this.doFileChosen();
+		this.runCallBack();
 		
 		return true; // Stop event propagation
 	},
