@@ -329,15 +329,15 @@ enyo.kind({
 	requestOverwrite: function(param,willClobber) {
 		var owp = this.$.overwritePopup;
 		if (willClobber) {
-			owp.setActionCallback(this.saveAsConfirm.bind(this, param));
+			owp.setActionCallback(this.saveAs.bind(this, param));
 			owp.setCancelCallback(this.aceFocus.bind(this));
 			owp.show();
 		} else {
-			this.saveAsConfirm(param);
+			this.saveAs(param);
 		}
 	},
 
-	saveAsConfirm: function( param){
+	saveAs: function( param){
 		this.trace( param);
 
 		var relativePath = param.name.split("/");
