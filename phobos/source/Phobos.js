@@ -19,7 +19,7 @@ enyo.kind({
 		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
 		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onCancelActionPopup: "cancelAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true},
-		{name: "overwritePopup", kind: "overwriteActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "saveAsConfirm", onCancelActionPopup: "saveAsCancel", onHide:"doAceFocus"},
+		{name: "overwritePopup", kind: "Ares.ActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onCancelActionPopup: "saveAsCancel", onHide:"doAceFocus"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide:"doAceFocus", onClose: "findClose", onReplaceFind: "replacefind"},
 		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "enyo-unselectable", centered: true, modal: true, floating: true, autoDismiss: false,
@@ -107,7 +107,9 @@ enyo.kind({
 		var hft = this.$.saveAsPopup.$.hermesFileTree ;
 		var next = function(result) {
 			if (result) {
-				this.$.overwritePopup.set("data", param);
+				this.$.overwritePopup.setActionCallback(
+					this.saveAsConfirm.bind(this, null, {data: param})
+				);
 				this.$.overwritePopup.show();
 			} else {
 				this.saveAsConfirm(null, {data: param});
@@ -1108,22 +1110,4 @@ enyo.kind({
 	navigateItemChanged: function() {
 		this.$.navigateItem.setContent(this.navigateItem);
 	}
-});
-
-enyo.kind({
-	name: "overwriteActionPopup",
-	kind: "Ares.ActionPopup",
-	data: null,
-	/** @private */
-	create: function() {
-		this.inherited(arguments);
-	},
-	/* Ares.ActionPopup overloading */
-	/** @private */
-	actionConfirm: function(inSender, inEvent) {
-        this.hide();
-        this.doConfirmActionPopup({data: this.data});
-        return true;
-    },
-    
 });
