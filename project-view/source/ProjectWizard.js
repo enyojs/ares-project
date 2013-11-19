@@ -252,22 +252,37 @@ enyo.kind({
 		} 
 		if (!template) {
 			var service = this.selectedDir.service;
-			service.createFile(folderId, "package.js", "enyo.depends(\n);\n")
-				.response(this, function(inRequest, inFsNode) {
-					this.trace("package.js inFsNode[0]:", inFsNode[0]);
-					var callback = (function(){
-						if (!addedSources){
-							this.projectReady(null, inEvent);
-						} else {
-							this.projectRefresh();
-						}
-					}).bind(this);
+			var callback = (function(){
+				if (!addedSources){
+					this.projectReady(null, inEvent);
+				} else {
+					this.projectRefresh();
+				}
+			}).bind(this);
 
-					this.createProjectJson(inEvent.data, callback);
-				})
-				.error(this, function(inRequest, inError) {
-					this.warn("inRequest:", inRequest, "inError:", inError);
+			service.propfind(folderId, 1).response(this, function(inRequest, inDir) {
+				var packageFound = false;
+				enyo.forEach(inDir.children, function(c) {
+					if (c.name == "package.js") {
+						packageFound = true;
+						return;
+					}
 				});
+				if (!packageFound) {
+					service.createFile(folderId, "package.js", "enyo.depends(\n);\n")
+						.response(this, function(inRequest, inFsNode) {
+						this.trace("package.js inFsNode[0]:", inFsNode[0]);
+						this.createProjectJson(inEvent.data, callback);
+					})
+					.error(this, function(inRequest, inError) {
+						this.warn("inRequest:", inRequest, "inError:", inError);
+					});
+				} else {
+					this.createProjectJson(inEvent.data, callback);
+				}
+			}).error(this, function(inRequest, inError) {
+				this.warn("inRequest:", inRequest, "inError:", inError);
+			});
 		}
 		return true ; // stop bubble
 	},

@@ -4,7 +4,7 @@ enyo.kind({
 	id: "aresApp",
 	handlers: {
 		ondragleave: "iframeDragleave",
-		onWebkitTransitionEnd: "prerenderMoveComplete" // TODO
+		ontransitionend: "prerenderMoveComplete" // TODO
 	},
 	published: {
 		containerItem: null,
@@ -1126,6 +1126,7 @@ enyo.kind({
 		}
 		
 		// Render animated controls
+		//this.$.flightArea.render().show();
 		this.$.flightArea.render().applyStyle("display", "block");
 	},
 	animateAnimatedControls: function() {

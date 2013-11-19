@@ -244,6 +244,16 @@ enyo.kind({
 	},
 	selectProject: function(project){
 		var msg, service;
+		if (enyo.isString(project)) {
+			var p = Ares.Workspace.projects.get(project);
+			if (!project) {
+				this.doError({msg: "Project '" + project + "' not found."});
+				this.error(msg);
+				return;
+			} else {
+				project = p;
+			}
+		}
 		service = ServiceRegistry.instance.resolveServiceId(project.getServiceId());
 		if (service !== undefined) {
 			project.setService(service);

@@ -50,6 +50,9 @@ enyo.kind({
 		this.inherited(arguments);
 		this.doRegisterMe({name:"projectView", reference:this});
 	},
+	selectProject: function(projectId) {
+		this.$.projectList.selectProject(projectId);
+	},
 	/**
 	 * Refresh the {ProjectView} (if relevant), following a change of the given file
 	 * @param {Object} changedFile

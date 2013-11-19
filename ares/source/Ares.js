@@ -17,6 +17,7 @@ enyo.kind({
 	classes: "onyx",
 	fit: true,
 	debug: false,
+	useHashRouting: true,
 	//noDefer: true, //FIXME: does not work with statics:{}
 	componentsRegistry: {},
 	components: [
@@ -52,7 +53,7 @@ enyo.kind({
 		]},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
 		{name: "signInErrorPopup", kind: "Ares.SignInErrorPopup", msg: "unknown error", details: ""},
-		{kind: "ServiceRegistry"},
+		{kind: "ServiceRegistry", onServicesLoadingComplete: "servicesLoaded"},
 		{kind: "Ares.PackageMunger", name: "packageMunger"}
 	],
 	handlers: {
@@ -105,6 +106,108 @@ enyo.kind({
 		}
 
 		Ares.instance = this;
+
+		window.onhashchange = this.bindSafely("hashChanged");
+		this.hashChanged();
+	},
+	updateHash: function() {
+		if (!this.useHashRouting) {
+			return;
+		}
+		var project = this.componentsRegistry.projectView.currentProject;
+		if (project) {
+			var fileIds = [];
+			Ares.Workspace.files.forEach(function(f) {
+				fileIds.push(f.id);
+			});
+			var files = fileIds.join(",");
+			var active = (fileIds.length && ("/" + this.activeDocument.id)) || "";
+			var hash = project.id + "/" + files + active;
+			window.location.hash = hash;
+		} else {
+			window.location.hash = "";
+		}
+	},
+	hashChanged: function() {
+		if (!this.useHashRouting) {
+			return;
+		}
+		var parts = window.location.hash.slice(1).split("/");
+		var projectId = parts[0];
+		var files = parts[1] && parts[1].split(",");
+		var active = parts[2];
+		this.filesToOpen = this.filesToOpen || [];
+		var project = this.componentsRegistry.projectView.currentProject;
+		if (files && files.length && !this.filesToOpen.length) {
+			for (var f in files) {
+				if (!Ares.Workspace.files.get(files[f])) {
+					this.filesToOpen.push(files[f]);
+				}
+			}
+		}
+		if (projectId && (!project || (projectId != project.id)) && !this.projectToOpen) {
+			if (!this.$.serviceRegistry.getLoaded()) {
+				this.projectToOpen = projectId;
+			} else {
+				this.$.projectView.selectProject(this.project);
+			}
+		} else if (!this.filesSyncing) {
+			this.syncOpenFiles();
+		}
+		if (active && (!this.activeDocument || (active != this.activeDocument.id))) {
+			this.fileToActivate = active;
+			if (!this.filesToOpen.length && !this.fileLoading) {
+				this.syncActiveFile();
+			}
+		}
+	},
+	servicesLoaded: function() {
+		if (this.projectToOpen) {
+			this.$.projectView.selectProject(this.projectToOpen);
+		}
+	},
+	syncOpenFiles: function() {
+		if (!this.filesSyncing) {
+			if (this.filesToOpen.length) {
+				this.filesSyncing = true;
+				this.syncNextFile();
+			}
+		}
+	},
+	syncNextFile: function() {
+		if (this.filesToOpen.length) {
+			var idParts = this.filesToOpen.shift().split("-");
+			var serviceId = idParts[0];
+			var fileId = idParts[1];
+			var project = this.componentsRegistry.projectView.currentProject;
+			if (!project) {
+				this.filesToOpen = [];
+				return;  // What happened!?
+			}
+			var service = project.getService();
+			if (serviceId == service.id) {
+				service.propfind(fileId).response(enyo.bind(this, function(inSender, inFile) {
+					inFile.service = service;
+					this._openDocument(project, inFile, enyo.bind(this, function() {
+						this.syncNextFile();
+					}));
+				}));
+			} else {
+				this.syncNextFile();
+			}
+		} else {
+			this.filesSyncing = false;
+			this.syncActiveFile();
+		}
+	},
+	syncActiveFile: function() {
+		if (this.fileToActivate) {
+			var file = Ares.Workspace.files.get(this.fileToActivate);
+			if (file) {
+				this.switchToDocument(file);
+			}
+			this.fileToActivate = null;
+		}
 	},
 
 	rendered: function() {
@@ -126,11 +229,19 @@ enyo.kind({
 		this.$.serviceRegistry.setConfig(inEvent.serviceId, {auth: inEvent.auth}, inEvent.next);
 	},
 	projectSelected: function() {
-		setTimeout(enyo.bind(this, function() { this.componentsRegistry.deimos.projectSelected(this.componentsRegistry.projectView.currentProject); }), 500);	// <-- TODO - using timeout here because project url is set asynchronously
+		var project = this.componentsRegistry.projectView.currentProject;
+		this.updateHash();
+		setTimeout(enyo.bind(this, function() { this.componentsRegistry.deimos.projectSelected(project); }), 500);	// <-- TODO - using timeout here because project url is set asynchronously
+		this.projectToOpen = null;
+		this.syncOpenFiles();
 		return true;
 	},
 	openDocument: function(inSender, inEvent) {
-		this._openDocument(inEvent.projectData, inEvent.file, function(inErr) {});
+		this._openDocument(inEvent.projectData, inEvent.file, enyo.bind(this, function(inErr) {
+			if (!inErr) {
+				this.updateHash();
+			}
+		}));
 	},
 	/** @private */
 	_openDocument: function(projectData, file, next) {
@@ -316,6 +427,7 @@ enyo.kind({
 		if (typeof next === 'function') {
 			next();
 		}
+		this.updateHash();
 	},
 	designDocument: function(inSender, inEvent) {
 		this.syncEditedFiles();
@@ -436,6 +548,7 @@ enyo.kind({
 		}
 		this._fileEdited();
 		this.componentsRegistry.documentToolbar.activateFileWithId(d.getId());
+		this.updateHash();
 	},
 	// FIXME: This trampoline function probably needs some refactoring
 	bounceDesign: function(inSender, inEvent) {

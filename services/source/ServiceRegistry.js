@@ -10,13 +10,14 @@ enyo.kind({
 	debug: false,
 	kind: "enyo.Component",
 	events: {
-		onServicesChange: ""
+		onServicesLoadingComplete: ""
 	},
 	components: [
 		{name: "errorPopup", kind: "Ares.ErrorPopup"}
 	],
 	published: {
-		services: []
+		services: [],
+		loaded: false
 	},
 	create: function() {
 		ares.setupTraceLogger(this);
@@ -39,11 +40,14 @@ enyo.kind({
 	},
 	reloadServices: function() {
 		var self = this;
+		this.setLoaded(false);
 		this._reloadServices(function(err) {
 			if (err) {
-					self._handleReloadError(err);
+				self._handleReloadError(err);
 			} else {
-					self.notifyServicesChange();
+				self.notifyServicesChange();
+				self.setLoaded(true);
+				self.doServicesLoadingComplete();
 			}
 		});
 	},
