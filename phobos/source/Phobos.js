@@ -19,7 +19,7 @@ enyo.kind({
 		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
 		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onCancelActionPopup: "cancelAction"},
 		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true},
-		{name: "overwritePopup", kind: "Ares.ActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onCancelActionPopup: "saveAsCancel", onHide:"doAceFocus"},
+		{name: "overwritePopup", kind: "Ares.ActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite") },
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide:"doAceFocus", onClose: "findClose", onReplaceFind: "replacefind"},
 		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "enyo-unselectable", centered: true, modal: true, floating: true, autoDismiss: false,
@@ -89,9 +89,7 @@ enyo.kind({
 			var path = file.path;
 			var relativePath = path.substring(path.indexOf(this.projectData.id) + this.projectData.id.length, path.length);
 			this.$.saveAsPopup.pointSelectedName(relativePath, true);
-			this.$.saveAsPopup.setFileChosenCallback(
-				this.saveAsFileChosen.bind(this)
-			);
+			this.$.saveAsPopup.setFileChosenCallback(this.saveAsFileChosen.bind(this));
 			this.$.saveAsPopup.show();
 		}).bind(this));
 	},
@@ -108,11 +106,11 @@ enyo.kind({
 		}
 	},
 	requestOverwrite: function(param,willClobber) {
+		var owp = this.$.overwritePopup;
 		if (willClobber) {
-			this.$.overwritePopup.setActionCallback(
-				this.saveAsConfirm.bind(this, null, {data: param})
-			);
-			this.$.overwritePopup.show();
+			owp.setActionCallback(this.saveAsConfirm.bind(this, null, {data: param}));
+			owp.setCancelCallback(this.doAceFocus.bind(this));
+			owp.show();
 		} else {
 			this.saveAsConfirm(null, {data: param});
 		}
@@ -140,11 +138,6 @@ enyo.kind({
 				}
 			}).bind(this)
 		});
-
-		return true; //Stop event propagation
-	},
-	saveAsCancel: function(inSender, inEvent) {
-		this.trace(inSender, "=>", inEvent);
 
 		return true; //Stop event propagation
 	},
