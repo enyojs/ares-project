@@ -651,11 +651,7 @@ enyo.kind({
 				});
 			} else {
 				if (node.file.isDir) {
-					if (node.get("expanded")) {
-						node.set("expanded", false);
-					} else {
-						node.set("expanded", true);
-					}
+					node.set("expanded", !node.get("expanded"));
 				}
 			}
 		}
