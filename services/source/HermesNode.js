@@ -22,7 +22,6 @@ enyo.kind({
 		onItemDragend: "",
 		onFileClick: "",
 		onFolderClick: "",
-		onFileDblClick: "",
 		onNodeRightClick: "",
 		onAdjustScroll: ""
 	},
