@@ -104,22 +104,22 @@ enyo.kind({
 			return;
 		}
 		
-		var hft = this.$.saveAsPopup.$.hermesFileTree ;
-		var next = function(result) {
-			if (result) {
-				this.$.overwritePopup.setActionCallback(
-					this.saveAsConfirm.bind(this, null, {data: param})
-				);
-				this.$.overwritePopup.show();
-			} else {
-				this.saveAsConfirm(null, {data: param});
-			}
-		}.bind(this);
-
-		hft.checkNodeName(param.name, next);
+		this.$.saveAsPopup.$.hermesFileTree
+			.checkNodeName(param.name, this.requestOverwrite.bind(this,param));
 		
 		return true; //Stop event propagation
 	},
+	requestOverwrite: function(param,result) {
+		if (result) {
+			this.$.overwritePopup.setActionCallback(
+				this.saveAsConfirm.bind(this, null, {data: param})
+			);
+			this.$.overwritePopup.show();
+		} else {
+			this.saveAsConfirm(null, {data: param});
+		}
+	},
+
 	/** @private */
 	saveAsConfirm: function(inSender, inData){
 		this.trace(inSender, "=>", inData);
