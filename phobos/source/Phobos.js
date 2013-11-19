@@ -98,19 +98,17 @@ enyo.kind({
 	saveAsFileChosen: function(param) {
 		this.trace(param);
 		
-		if (!param.file) {
-			this.doAceFocus();
-			// no file or folder chosen
-			return;
+		if (param.file) {
+			this.$.saveAsPopup.$.hermesFileTree
+				.checkNodeName(param.name, this.requestOverwrite.bind(this,param));
 		}
-		
-		this.$.saveAsPopup.$.hermesFileTree
-			.checkNodeName(param.name, this.requestOverwrite.bind(this,param));
-		
-		return true; //Stop event propagation
+		else {
+			// no file or folder chosen
+			this.doAceFocus();
+		}
 	},
-	requestOverwrite: function(param,result) {
-		if (result) {
+	requestOverwrite: function(param,willClobber) {
+		if (willClobber) {
 			this.$.overwritePopup.setActionCallback(
 				this.saveAsConfirm.bind(this, null, {data: param})
 			);
