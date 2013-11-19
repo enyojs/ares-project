@@ -495,6 +495,7 @@ function proxyServices(req, res, next) {
 				var cookies = parseSetCookie(val);
 				cookies.forEach(translateCookie.bind(this, service, res));
 			} else {
+				res.header(key, val);
 			}
 		}
 		res.writeHead(cres.statusCode);
