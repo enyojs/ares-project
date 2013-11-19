@@ -18,7 +18,7 @@ enyo.kind({
 		]},
 		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
 		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onCancelActionPopup: "cancelAction"},
-		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
+		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true},
 		{name: "overwritePopup", kind: "overwriteActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "saveAsConfirm", onCancelActionPopup: "saveAsCancel", onHide:"doAceFocus"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide:"doAceFocus", onClose: "findClose", onReplaceFind: "replacefind"},
@@ -89,13 +89,16 @@ enyo.kind({
 			var path = file.path;
 			var relativePath = path.substring(path.indexOf(this.projectData.id) + this.projectData.id.length, path.length);
 			this.$.saveAsPopup.pointSelectedName(relativePath, true);
+			this.$.saveAsPopup.setFileChosenCallback(
+				this.saveAsFileChosen.bind(this)
+			);
 			this.$.saveAsPopup.show();
 		}).bind(this));
 	},
-	saveAsFileChosen: function(inSender, inEvent) {
-		this.trace(inSender, "=>", inEvent);
+	saveAsFileChosen: function(param) {
+		this.trace(param);
 		
-		if (!inEvent.file) {
+		if (!param.file) {
 			this.doAceFocus();
 			// no file or folder chosen
 			return;
@@ -104,14 +107,14 @@ enyo.kind({
 		var hft = this.$.saveAsPopup.$.hermesFileTree ;
 		var next = function(result) {
 			if (result) {
-				this.$.overwritePopup.set("data", inEvent);
+				this.$.overwritePopup.set("data", param);
 				this.$.overwritePopup.show();
 			} else {
-				this.saveAsConfirm(inSender, {data: inEvent});
+				this.saveAsConfirm(null, {data: param});
 			}
 		}.bind(this);
 
-		hft.checkNodeName(inEvent.name, next);		
+		hft.checkNodeName(param.name, next);
 		
 		return true; //Stop event propagation
 	},
