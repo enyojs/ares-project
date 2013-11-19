@@ -48,6 +48,24 @@ enyo.kind({
 		]},
 		{ name: "savePopup", kind: "saveActionPopup"},
 		{
+			name: "saveAsPopup",
+			kind: "Ares.FileChooser",
+			classes:"ares-masked-content-popup",
+			showing: false,
+			headerText: $L("Save as..."),
+			folderChooser: false,
+			allowCreateFolder: true,
+			allowNewFile: true,
+			allowToolbar: true
+		},
+		{
+			name: "overwritePopup",
+			kind: "Ares.ActionPopup",
+			title: $L("Overwrite"),
+			message: $L("Overwrite existing file?"),
+			actionButton: $L("Overwrite")
+		},
+		{
 			name: "bottomBar",
 			kind: "DocumentToolbar",
 			classes: "ares-bottom-bar"
@@ -77,6 +95,7 @@ enyo.kind({
 		onHideWaitPopup: "",
 		onNewActiveDocument: "", // to preserve legacy in Ares.js
 		onAllDocumentsAreClosed: "",
+		onSaveAsDocument: "", // FIXME 3082 remove
 		onRegisterMe: "",
 		onMovePanel:"",
 		onSavePreviewAction:"",
@@ -280,6 +299,69 @@ enyo.kind({
 		this.doError({msg: "Unable to save the file: " + inMsg });
 	},
 
+	requestSaveDocAs: function() {
+		var file = this.activeDocument.getFile();
+		var projectData = this.activeDocument.getProjectData();
+		var buildPopup = function() {
+			var path = file.path;
+			var relativePath = path.substring(
+				path.indexOf(projectData.id) + projectData.id.length,
+				path.length
+			);
+			this.$.saveAsPopup.pointSelectedName(relativePath, true);
+			this.$.saveAsPopup.setFileChosenCallback(this.saveAsFileChosen.bind(this));
+			this.$.saveAsPopup.show();
+		};
+		this.$.saveAsPopup.connectProject(projectData, buildPopup.bind(this));
+	},
+	saveAsFileChosen: function(param) {
+		this.trace(param);
+
+		if (param.file) {
+			this.$.saveAsPopup.$.hermesFileTree
+				.checkNodeName(param.name, this.requestOverwrite.bind(this,param));
+		}
+		else {
+			// no file or folder chosen
+			this.aceFocus();
+		}
+	},
+	requestOverwrite: function(param,willClobber) {
+		var owp = this.$.overwritePopup;
+		if (willClobber) {
+			owp.setActionCallback(this.saveAsConfirm.bind(this, param));
+			owp.setCancelCallback(this.aceFocus.bind(this));
+			owp.show();
+		} else {
+			this.saveAsConfirm(param);
+		}
+	},
+
+	saveAsConfirm: function( param){
+		this.trace( param);
+
+		var relativePath = param.name.split("/");
+		var name = relativePath[relativePath.length-1];
+
+		// FIXME 3082 remove bubble up to Ares
+		this.doSaveAsDocument({
+			docId: this.activeDocument.getId(),
+			projectData: this.activeDocument.getProjectData(),
+			file: param.file, // contain directory information
+			name: name,
+			content: ComponentsRegistry.getComponent('phobos').getEditorContent(),
+
+			next: (function(err) {
+				this.hideWaitPopup();
+				if (typeof param.next === 'function') {
+					param.next();
+				}
+			}).bind(this)
+		});
+
+		return true; //Stop event propagation
+	},
+
 	// close actions
 
 	handleCloseDocument: function(inSender, inEvent) {
@@ -454,7 +536,7 @@ enyo.kind({
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save")}
 			]},
-			{name: "saveAsButton", value:  [ 'phobos', "saveAsDocAction"], classes:"aresmenu-button", components: [
+			{name: "saveAsButton", value:  [ 'enyoEditor', "requestSaveDocAs"], classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save as...")}
 			]},
