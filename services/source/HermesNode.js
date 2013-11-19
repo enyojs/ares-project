@@ -46,9 +46,9 @@ enyo.kind({
 		dropTarget: "true"
 	},
 	
-	// expandable nodes may only be opened by tapping the icon; tapping the content label
+	// expandable nodes could be only opened by tapping the icon; tapping the content label
 	// will fire the nodeTap event, but will not expand the node.
-	onlyIconExpands: true,
+	onlyIconExpands: false,
 	
 	debug: false,
 
