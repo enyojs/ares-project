@@ -41,7 +41,7 @@ function FsBase(config, next) {
 	// sanity check
 	[
 		// middleware methods (always executed)
-		'setCors', 'allowLocalOnly', 'respond',
+		'allowLocalOnly', 'respond',
 		// admin methods
 		'getUserInfo', 'setUserInfo',
 		// filesystem verbs

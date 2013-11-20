@@ -8,6 +8,31 @@ Hermes offers several services not available in a Web Browser through one (or se
 
 ## Security[](id:security)
 
+### Same-Origin Policy - CORS
+
+By default, Ares backend only allows requests from Ares itself, using built-in HTTP methods & headers.  This is reflected in the default top-level `ide.json`:
+
+```
+	"cors": {
+		"origins": [],
+		"methods": []
+	},
+	"headers": {},
+```
+
+It is possible to hard-wire a new set of allowed origins (for example when running behind a Secure Reverse Proxy) using the `cors.origins:` Array property.  It is  possible to allow more methods using the `cors.methods:` Array (in addition to the REST verbs `GET`, `PUT`, `POST` and `DELETE` which are already allowed).  It is also possible to hard-wire some HTTP headers using the `headers:` Object property, as shown below.  The customized user-defined headers are automatically added to the built-in list of headers allowed by CORS.
+
+```
+	"cors": {
+		"origins": ["http://www.google.com"],
+		"methods": ["DOTHIS", "DOTHAT"]
+	},
+	"headers": {
+		"X-My-Header": "My Value",
+		"X-My-Other-Header": "My Other Value"
+	},
+```
+
 ### Authentication
 
 Each service may need an individual authentication to access a back-end in the cloud.  For example, PhoneGap Build (PGB) uses a simple per-user token that is provided as a query parameter with every request to the build service.  Another example is more complex example is Dropbox, which requires both an application OAuth token pair (for Ares itself), plus a per-user account (the one users use to access their private data on Dropbox).  There are a variety of possible 
@@ -584,6 +609,7 @@ Don't forget to check the --root parameter to your Google Drive directory in the
 			[...]
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Google Drive"
+			]
 			[...]
 
 For example, on MacOS, this line can be:
@@ -591,6 +617,7 @@ For example, on MacOS, this line can be:
 			[...]
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/Google Drive"
+			]
 			[...]
 
 
@@ -626,6 +653,7 @@ Don't forget to check the --root parameter to your Box Sync directory in the fol
 			[...]
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@\\Documents\\My Box Files"
+			]
 			[...]
 
 For example, on MacOS, this line can be:
@@ -633,6 +661,7 @@ For example, on MacOS, this line can be:
 			[...]
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/hermes/fsLocal.js", "--level", "http", "--pathname", "/files", "--port", "0", "--root", "@HOME@/Box Documents"
+			]
 			[...]
 
 ## References
