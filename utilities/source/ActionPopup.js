@@ -75,6 +75,7 @@ enyo.kind({
 		else {
 			this.doConfirmActionPopup();
 		}
+		this.clearCallbacks();
 		return true;
 	},
 	/** @private */
@@ -86,6 +87,12 @@ enyo.kind({
 		else {
 			this.doCancelActionPopup();
 		}
+		this.clearCallbacks();
 		return true;
+	},
+	/** @private */
+	clearCallbacks: function() {
+		this.actionCallback = null;
+		this.cancelCallback = null;
 	}
 });
