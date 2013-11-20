@@ -387,11 +387,11 @@ enyo.kind({
 	},
 
 	closeDocument: function(docId, next) {
-		if (docId && this.activeDocument.getId() === docId) {
+		if (docId && this.activeDocument && this.activeDocument.getId() === docId) {
 			this.closeActiveDoc();
 		}
 		else if (docId) {
-			this.warn("closing a doc different from current one: ", docId);
+			this.log("closing a doc different from current one: ", docId);
 			this.forgetDoc(docId);
 		}
 		else {
