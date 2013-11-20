@@ -78,6 +78,7 @@ enyo.kind({
 	
 	// inSource is a backbone Ares.Model.Project defined in WorkspaceData.js
 	updateSource: function(inSource,next) {
+		// FIXME 3082 assert the callback is null
 		var serviceConfig = inSource.getService().config;
 		this.setDesignerFrameReady(false);
 		this.projectSource = inSource;
@@ -153,6 +154,7 @@ enyo.kind({
 		} else if (msg.op === "reloadNeeded") {
 			this.reloadNeeded = true;
 		} else if(msg.op === "error") {
+			// FIXME 3082: handle "unable to render"
 			if (( ! msg.val.hasOwnProperty('popup')) || msg.val.popup === true) {
 				if (msg.val.requestReload === true) {
 					msg.val.callback = this.goBacktoEditor.bind(this);
