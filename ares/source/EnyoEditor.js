@@ -376,7 +376,6 @@ enyo.kind({
 			_prepareNewLocation.bind(this),
 			this.saveDoc.bind(this, name, content),
 			_refreshFileTree.bind(this),
-			// FIXME 3082 bring that from ares
 			aresInstance._openDocument.bind(aresInstance, projectData)
 		], myNext.bind(this) );
 

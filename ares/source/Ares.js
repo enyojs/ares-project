@@ -105,7 +105,6 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
-		// FIXME 3082 remove
 		this._registerComponent(null,{name: "ares", reference: this});
 		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.phobosViewIndex);
 		ServiceRegistry.instance.setOwner(this); // plumb services events all the way up
