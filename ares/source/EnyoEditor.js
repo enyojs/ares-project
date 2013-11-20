@@ -99,7 +99,7 @@ enyo.kind({
 		onSaveAsDocument: "", // FIXME 3082 remove
 		onRegisterMe: "",
 		onMovePanel:"",
-		onSavePreviewAction:"",
+		onSavePreviewAction:"", // FIXME 3082 remove
 		onDesignerBroken: "",
 		onFileEdited:"_fileEdited",
 		onError: ""
@@ -612,6 +612,10 @@ enyo.kind({
 enyo.kind({
 	name: "saveActionPopup",
 	kind: "Ares.ActionPopup",
+
+	events: {
+		onSaveActionPopup: ""
+	},
 
 	/** @private */
 	create: function() {
