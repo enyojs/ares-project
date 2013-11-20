@@ -148,9 +148,10 @@ enyo.kind({
 		var fileData = Ares.Workspace.files.get(fileDataId);
 		this.trace("open document with project ", projectData.getName(),
 				   " file ", file.name, " using cache ", fileData);
+
 		if (fileData) {
 			// useful when double clicking on a file in HermesFileTree
-			this.switchToDocument(fileData);
+			this.switchToDocument(this.fileData, next) ;
 		} else {
 			this.showWaitPopup(this, {msg: $L("Opening...")});
 			async.waterfall(
@@ -158,31 +159,25 @@ enyo.kind({
 					this._fetchDocument.bind(this,projectData, file),
 					this._switchToNewTab.bind(this,projectData,file)
 				],
-				(function (err) {
-					if (err) {
-						this.warn("Open failed", err);
-					}
-					if (typeof next === 'function') {
-						next();
-					}
-				}).bind(this)
+				next
 			);
 		}
-		//hide projectView only the first time
+
+		// hide projectView only the first time a file is opened in a project
+		// otherwise, let the user handle this
 		if (! Ares.Workspace.files.length ) {
 			this.hideProjectView();
 		}
-		
 	},
 
-	_switchToNewTab: function(projectData, file, inContent) {
+	_switchToNewTab: function(projectData, file, inContent,next) {
 		this.trace("projectData:", projectData.getName(), ", file:", file.name);
 		this.hideWaitPopup();
 		var fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
 		this.trace(fileData.getId());
 		ComponentsRegistry.getComponent("documentToolbar")
 			.createFileTab(file.name, fileData.getId(), file.path);
-		this.switchToDocument(fileData);
+		this.switchToDocument(fileData,next);
 	},
 
 	/** @private */
@@ -433,12 +428,13 @@ enyo.kind({
 	// switch file *and* project (if necessary)
 	switchFile: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.id);
+		this.trace(inEvent.id, newDoc);
 		ComponentsRegistry.getComponent("enyoEditor").switchToDocument(newDoc);
 	},
 
 	// switch Phobos or Deimos to new document
-	switchToDocument: function(newDoc) {
-		ComponentsRegistry.getComponent("enyoEditor").switchToDocument(newDoc);
+	switchToDocument: function(newDoc,next) {
+		ComponentsRegistry.getComponent("enyoEditor").switchToDocument(newDoc,next);
 	},
 
 	// FIXME: This trampoline function probably needs some refactoring
