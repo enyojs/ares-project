@@ -430,9 +430,13 @@ enyo.kind({
 		this.hideWaitPopup();		
 	},
 
-	hideWaitPopup: function() {
+	hideWaitPopup: function(inSender, inEvent) {
+		this._hideWaitPopup(function(){});
+	},
+	_hideWaitPopup: function(next) {
 		this.$.canceBuildButton.hide();
 		this.$.waitPopup.hide();
+		next();
 	},
 
 	showError: function(inSender, inEvent) {
