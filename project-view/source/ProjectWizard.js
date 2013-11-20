@@ -15,17 +15,24 @@ enyo.kind({
 		onHideWaitPopup: ""
 	},
 	handlers: {
-		onFileChosen: "prepareShowProjectPropPopup",
+		onFileChosen: "_folderSelectedAction",
 		onModifiedConfig: "createProject" ,
 		// can be canceled by either of the included components
 		onDone: "hideMe"
 	},
 
+	published: {
+		projectHermesNode: "",
+		projectFiles: ""
+	},
+
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource"},
-		{kind: "Ares.FileChooser", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true, allowCreateFolder: true, serverSelectable: false},
-		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")}
+		{kind: "Ares.FileChooser", header: "Select a directory containing the new project", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true, allowCreateFolder: true, serverSelectable: false},
+		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")},
+		{kind: "Ares.ActionPopup", name: "confirmOverwriteOrLoadPopup", title: $L("Non-empty folder"), message: $L("Use existing folder content or overwrite it?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "_confirmedOverwriteAction", action1Button: $L("Use"), onConfirmAction1Popup: "_confirmedUseAction", cancelButton: $L("Cancel")}
 	],
+
 	debug: false,
 	projectName: "",
 	config: null,
@@ -38,73 +45,136 @@ enyo.kind({
 	 * start project creation by showing direction selection widget
 	 */
 	start: function() {
-		var dirPopup = this.$.selectDirectoryPopup ;
+		this.projectHermesNode = null;
+		this.projectFiles = {};
 
-		this.trace("starting") ;
 		this.show();
-
-		dirPopup.$.header.setContent("Select a directory containing the new project");
-		dirPopup.show();
 		this.$.propertiesWidget.setDefaultTab();
 		this.hide();
+		this._selectFolder();
 	},
 
-	// Step 2: once the directory is selected by user, show the project properties popup
-	// Bail out if a project.json file already exists
-	prepareShowProjectPropPopup: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
+	_selectFolder: function() {
+		this.trace();
+		this.$.selectDirectoryPopup.show();
+	},
 
-		if (!inEvent.file) {
-			this.config = null;
-			this.hideMe();
+	_folderSelectedAction: function(inSender, inEvent) {
+		this.trace("inSender:", inSender, "inEvent:", inEvent);
+		this.projectHermesNode = this.$.selectDirectoryPopup.$.hermesFileTree.selectedNode;
+		if (this.projectHermesNode) {
+			var req = this.projectHermesNode.updateNodes();
+			req.response(this, function() {
+				var projectNodes = this.projectHermesNode.getNodeFiles();
+				enyo.forEach(projectNodes, function(node) {
+					this.projectFiles[node.content] = node.file;
+				}, this);
+				
+				if (enyo.keys(this.projectFiles).length > 0) {
+					this.$.confirmOverwriteOrLoadPopup.show();
+				} else {
+					this._createProject();
+				}
+			});
+			req.error(this, function(inSender, inError) {
+				this._waitOk(new Error(inError.toString()));
+			});
+		}
+		return true;
+	},
 
-			return;
+	_confirmedUseAction: function(inSender, inEvent) {
+		this.trace("inSender:", inSender, "inEvent:", inEvent);
+		this._loadProject();
+	},
+
+	_confirmedOverwriteAction: function(inSender, inEvent) {
+		this.trace("inSender:", inSender, "inEvent:", inEvent);
+		this._createProject();
+	},
+	
+	_loadProject: function() {
+		this.trace();
+		var conf = ares.clone(ProjectConfig.PREFILLED_CONFIG_FOR_UI);
+
+		async.waterfall([
+			_loadProjectJson.bind(this, conf),
+			_loadAppInfoJson.bind(this), // XXX move into webOS plugin
+			this._fillProjectPropPopup.bind(this, false /*isCreation*/),
+			this._showProjectPropPopup.bind(this)
+		], this._waitOk.bind(this));
+
+		function _loadProjectJson(conf, next) {
+			var file = this.projectFiles['project.json'];
+			if (!file) {
+				next(null, conf);
+			} else {
+				var req = this.projectHermesNode.service.getFile(file.id);
+				req.response(this, function(inSender, inResponse) {
+					try {
+						conf = ares.extend(conf, enyo.json.parse(inResponse.content));
+						next(null, conf);
+					} catch(err) {
+						//req.fail(new Error("Unable to parse 'project.json'"));
+						this.warn(new Error("Unable to parse 'project.json', skipping it..."));
+						next(null, conf);
+					}
+				});
+				req.error(this, function(inSender, inError) {
+					next(new Error(inError.toString));
+				});
+			}
+		}
+	
+		function _loadAppInfoJson(conf, next) {
+			var file = this.projectFiles['appinfo.json'];
+			if (!file) {
+				next(null, conf);
+			} else {
+				var req = this.projectHermesNode.service.getFile(file.id);
+				req.response(this, function(inSender, inResponse) {
+					try {
+						var appinfo = enyo.json.parse(inResponse.content);
+						conf.id = appinfo.id || conf.id;
+						conf.version = appinfo.version || conf.version;
+						conf.title = appinfo.title || conf.title;
+						next(null, conf);
+					} catch(err) {
+						//req.fail(new Error("Unable to parse 'appinfo.json'"));
+						this.warn(new Error("Unable to parse 'appinfo.json', skipping it..."));
+						next(null, conf);
+					}
+				});
+				req.error(this, function(inSender, inError) {
+					next(new Error(inError.toString));
+				});
+			}
+		}
+	},
+
+	_createProject: function() {
+		this.trace();
+		var conf = ares.clone(ProjectConfig.PREFILLED_CONFIG_FOR_UI);
+
+		async.waterfall([
+			this._fillProjectPropPopup.bind(this, true /*isCreation*/, conf),
+			this._getSources.bind(this, 'template'),
+			this._showProjectPropPopup.bind(this)
+		], this._waitOk.bind(this));
+	},
+
+	_fillProjectPropPopup: function(isCreation, conf, next) {
+		this.trace("conf:", conf);
+		var propW = this.$.propertiesWidget;
+		this.selectedDir = this.projectHermesNode.file;
+		if (isCreation) {
+			propW.setupCreate();
+		} else {
+			propW.setupModif();
 		}
 
-		async.series([
-			this.checkProjectJson.bind(this, inSender, inEvent),
-			this.fillProjectPropPopup.bind(this, inSender, inEvent),
-			this.checkGetAppinfo.bind(this, inSender, inEvent),
-			this.getTemplates.bind(this, inSender, inEvent),
-			this.showProjectPropPopup.bind(this, inSender, inEvent)
-		], this.waitOk.bind(this));
-	},
-
-	checkProjectJson: function(inSender, inEvent, next) {
-		// scan content for a project.json
-		var matchFileName = function(node){
-			return (node.content === 'project.json' ) ;
-		};
-		
-		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
-		var nodeUpdated = hft.selectedNode.updateNodes();
-		nodeUpdated.response(this, function() {
-			var matchingNodes = hft.selectedNode.getNodeFiles().filter(matchFileName) ;
-
-			if (matchingNodes.length !== 0) {
-				this.hide();
-				var msg = $L("Cannot create project: a project.json file already exists");
-				this.$.errorPopup.raise(msg);
-				this.$.selectDirectoryPopup.reset();
-				next({handled: true, msg: msg});
-			} else {
-				next();
-			}
-		});
-		nodeUpdated.error(this, function() {
-			var msg = $L("Cannot create project: subnodes not found");
-			next({handled: true, msg: msg});
-		});
-	},
-
-	fillProjectPropPopup: function(inSender, inEvent, next) {
-		var propW = this.$.propertiesWidget;
-		this.selectedDir = inEvent.file;
-		propW.setupCreate();
-		propW.setTemplateList([]);		// Reset template list
-
 		// Pre-fill project properties widget
-		propW.preFill(ProjectConfig.PREFILLED_CONFIG_FOR_UI);
+		propW.preFill(conf);
 		propW.$.projectPathLabel.setContent($L("Project path: "));
 		propW.$.projectPathValue.setContent(this.selectedDir.path);
 		propW.$.projectName.setValue(this.selectedDir.name);
@@ -113,82 +183,61 @@ enyo.kind({
 		next();
 	},
 
-	checkGetAppinfo: function(inSender, inEvent, next) {
-		var propW = this.$.propertiesWidget;
-		// scan content for an appinfo.json
-		var matchFileName = function(node){
-			return (node.content === 'appinfo.json' ) ;
-		};
-		var hft = this.$.selectDirectoryPopup.$.hermesFileTree ;
-		var matchingNodes = hft.selectedNode.getNodeFiles().filter(matchFileName) ;
-
-		if (matchingNodes.length === 1) {
-			this.warn("There is an appinfo.json", matchingNodes);
-			var appinfoReq = this.selectedDir.service.getFile(matchingNodes[0].file.id);
-			appinfoReq.response(this, function(inSender, fileStuff) {
-				var info;
-				try {
-					info = enyo.json.parse(fileStuff.content);
-				} catch(err) {
-					this.hide();
-					this.warn( "Unable to parse appinfo.json >>", fileStuff.content, "<<");
-					var msg = this.$LS("Unable to parse appinfo.json: #{error}", {error: err.toString()});
-					this.$.errorPopup.raise(msg);
-					next({handled: true, msg: msg});
-					return;
-				}
-				var conf = {};
-				conf.id = info.id;
-				conf.version = info.version;
-				conf.title = info.title;
-				propW.update(conf);
-				next();
-			});
-			appinfoReq.error(this, function(inSender, fileStuff) {
-				// Strange: network error, ... ?
-				this.hide();
-				var msg = $L("Unable to retrieve appinfo.json");
-				this.$.errorPopup.raise(msg);
-				next({handled: true, msg: msg});
-			});
-		} else {
-			// No appinfo.json found. Or more that one which should be a bug
-			next();		// Just continue
-		}
-	},
-
-	/**
-	 * @public
-	 */
-	getTemplates: function(inSender, inEvent, next) {
-		return this.getSources('template', next);
-	},
-
-	/**
-	 * @public
-	 */
-	getSources: function(type, next) {
+	_getSources: function(type, next) {
+		this.trace("type:", type);
 		var propW = this.$.propertiesWidget;
 		// Getting template list
 		var service = ServiceRegistry.instance.getServicesByType('generate')[0];
 		if (service) {
-			var templateReq = service.getSources('template');
-			templateReq.response(this, function(inSender, inTemplates) {
-				propW.setTemplateList(inTemplates);
-				next();				// Should we return immediately without waiting the answer ?
-			});
-			templateReq.error(this, function(inSender, inError) {
-				this.warn("Unable to get template list (", inError, ")");
-				this.$.errorPopup.raise($L("Unable to get template list"));
-				propW.setTemplateList([]);
+			var req = service.getSources(type);
+			req.response(this, function(inSender, inResponse) {
+				propW.setTemplateList(inResponse);
 				next();
 			});
+			req.error(this, function(inSender, inError) {
+				next(new Error("Unable to get list for type: " + type + " (" + inError.toString() + ")"));
+			});
 		} else {
-			this.warn("Unable to get template list (No service defined)");
-			this.$.errorPopup.raise($L("Unable to get template list (No service defined)"));
-			propW.setTemplateList([]);
-			next();
+			next(new Error("No application templating service ('generate')) defined"));
 		}
+	},
+
+	_showProjectPropPopup: function(next) {
+		this.$.selectDirectoryPopup.hide();
+		this.$.selectDirectoryPopup.reset();
+		this.show();
+		next();
+	},
+
+	_waitOk:function(err) {
+		this.trace("err:", err);
+		this.doHideWaitPopup();
+		if (err) {
+			this.hideMe();
+			this.warn("An error occured: ", err);
+			this.$.errorPopup.raise(err.toString());
+		}
+	},
+
+	// step 3: actually create project in ares data structure
+	createProject: function (inSender, inEvent) {
+		this.trace("inSender:", inSender, "inEvent:", inEvent);
+		var conf = inEvent.data;
+		this.projectName = conf.name;
+		var folderId = this.selectedDir.id ;
+		var template = inEvent.template;
+		var addedSources = inEvent.addedSources.length !==0 ? true : false;
+
+		this.trace("Creating new project ", this.projectName, " in folderId=", folderId, " (template: ", template, ")");
+
+		async.waterfall([
+			this.createProjectJson.bind(this, conf),
+			this.instanciateTemplate.bind(this, template, addedSources, conf),
+			this.populateProject.bind(this),
+			this.projectReady.bind(this)
+		], this._waitOk.bind(this));
+
+		return true ; // stop bubble
 	},
 
 	/**
@@ -197,103 +246,36 @@ enyo.kind({
 	 * @private
 	 */
 	createProjectJson: function(data, next) {
-		this.config = new ProjectConfig();
-		this.config.service = this.selectedDir.service;
-		this.config.folderId = this.selectedDir.id;
-		this.config.setData(data) ;
-		this.config.save(function(err) {
-			this.config = null; // GC-deref
-			next(err);
-		});
+		var config = new ProjectConfig();
+		config.service = this.selectedDir.service;
+		config.folderId = this.selectedDir.id;
+		config.setData(data) ;
+		config.save(next);
 	},
 
-	showProjectPropPopup: function(inSender, inEvent, next) {
-		var testCallBack = inEvent.testCallBack;
-		// once project.json is created, setup and show project properties widget
-		this.$.selectDirectoryPopup.hide();
-		this.$.selectDirectoryPopup.reset();
-		this.show() ;
-		if (testCallBack) {
-			testCallBack();
-		}
-		next();
-	},
-
-	waitOk:function(err, results) {
-		if (err) {
-			var showError = true;
-			if (err.handled && (err.handled === true)) {
-				showError = false;
-			}
-
-			if (showError) {
-				this.config = null;
-				this.hideMe();
-				this.warn("An error occured: ", err);
-				this.$.errorPopup.raise(err.msg);
-			}
-		}
-		// Else: nothing to do
-	},
-
-	// step 3: actually create project in ares data structure
-	createProject: function (inSender, inEvent, next) {
-		this.projectName = inEvent.data.name;
-		var folderId = this.selectedDir.id ;
-		var template = inEvent.template;
-		var addedSources = inEvent.addedSources.length !==0 ? true : false;
-
-		this.trace("Creating new project ", name, " in folderId=", folderId, " (template: ", template, ")");
-
-		if (template || addedSources) {
-			this.instanciateTemplate(inEvent);
-		} 
-		if (!template) {
-			var service = this.selectedDir.service;
-			service.createFile(folderId, "package.js", "enyo.depends(\n);\n")
-				.response(this, function(inRequest, inFsNode) {
-					this.trace("package.js inFsNode[0]:", inFsNode[0]);
-					var callback = (function(){
-						if (!addedSources){
-							this.projectReady(null, inEvent);
-						} else {
-							this.projectRefresh();
-						}
-					}).bind(this);
-
-					this.createProjectJson(inEvent.data, callback);
-				})
-				.error(this, function(inRequest, inError) {
-					this.warn("inRequest:", inRequest, "inError:", inError);
-				});
-		}
-		return true ; // stop bubble
-	},
-	/** @private */
-	$LS: function(msg, params) {
-		var tmp = new enyo.g11n.Template($L(msg));
-		return tmp.evaluate(params);
-	},
 	// step 4: populate the project with the selected template
-	instanciateTemplate: function (inEvent) {
-
+	instanciateTemplate: function (template, addedSources, conf, next) {
+		this.trace("template:", template, "addedSources:", addedSources, "conf:", conf);
+		if (!template) {
+			next(null, null);
+			return;
+		}
 		var sources = [];
-		var template = inEvent.template;
-		var addedSources = inEvent.addedSources || [];
-		this.doShowWaitPopup({msg: this.$LS("Creating project from #{template}", {template: template})});
+		this.doShowWaitPopup({msg: "Creating project from template '" + template + "'"});
 
+		// XXX webOS-specific substitution
 		var substitutions = [{
 			fileRegexp: "appinfo.json",
 			json: {
-				id: inEvent.data.id,
-				version: inEvent.data.version,
-				title: inEvent.data.title
+				id: conf.id,
+				version: conf.version,
+				title: conf.title
 			}
 		}];
 
 		var genService = ServiceRegistry.instance.getServicesByType('generate')[0];
 		sources.push(template);
-		addedSources.forEach(function(source) {
+		(addedSources || []).forEach(function(source) {
 			sources.push(source);
 		});
 		var req = genService.generate({
@@ -301,46 +283,48 @@ enyo.kind({
 			substitutions: substitutions
 		});
 		req.response(this, function(inSender, inData) {
-			var callback = (function(){
-				this.populateProject(inSender, inData);	
-			}).bind(this);
-
-			this.createProjectJson(inEvent.data, callback);			
+			this.trace("generate response:", inData);
+			next(null, inData);
 		});
 		req.error(this, function(inSender, inError) {
-			this.warn("Unable to get the template files (", inError, ")");
-			this.$.errorPopup.raise($L("Unable to instanciate projet content from the template"));
-			this.doHideWaitPopup();
+			var err = new Error("Unable to instanciate projet content from the template '" + template + "': " + inError.toString());
+			next(err);
 		});
 	},
 
 	// step 5: populate the project with the retrieved template files
-	populateProject: function(inSender, inData) {
+	populateProject: function(inData, next) {
+		this.trace("inData:", inData);
+		if (!inData) {
+			next();
+			return;
+		}
+
 		var folderId = this.selectedDir.id;
 		var service = this.selectedDir.service;
 
 		// Copy the template files into the new project
 		var req = service.createFiles(folderId, {content: inData.content, ctype: inData.ctype});
-		req.response(this, this.projectReady);
+		req.response(this, function(inSender, inData) {
+			next();
+		});
 		req.error(this, function(inEvent, inError) {
-			this.$.errorPopup.raise($L("Unable to create projet content from the template"));
-			this.doHideWaitPopup();
+			var err = new Error("Unable to create projet content from the template (" + inError.toString() + ")");
+			next(err);
 		});
 	},
 
 	// step 6: we're done
-	projectReady: function(inSender, inData) {
+	projectReady: function(next) {
+		this.trace();
 		this.doAddProjectInList({
 			name: this.projectName,
 			folderId: this.selectedDir.id,
 			service: this.selectedDir.service
 		});
+		next();
 	},
 	
-	projectRefresh: function(inSender, inData) {
-		this.owner.setupProjectConfig(this.targetProject);
-		this.hideMe();
-	},
 	/**
 	 * Hide the whole widget. Typically called when ok or cancel is clicked
 	 */
@@ -349,6 +333,12 @@ enyo.kind({
 		this.$.selectDirectoryPopup.reset();
 		this.hide() ;
 		return true;
+	},
+
+	/** @private */
+	$LS: function(msg, params) {
+		var tmp = new enyo.g11n.Template($L(msg));
+		return tmp.evaluate(params);
 	}
 });
 
@@ -489,6 +479,7 @@ enyo.kind({
 		return true;
 	},
 	populateProject: function(inSender, inData) {
+		this.trace("inData:", inData);
 		var selectedDir = this.targetProject.getConfig();
 		var folderId = selectedDir.folderId;
 		var service = selectedDir.service;
@@ -511,7 +502,6 @@ enyo.kind({
 	 * Hide the whole widget. Typically called when ok or cancel is clicked
 	 */
 	hideMe: function() {
-		this.config = null ; // forget ProjectConfig object
 		this.hide() ;
 		return true;
 	},
@@ -735,9 +725,11 @@ enyo.kind({
 		}
 
 		function _next(err) {
-			this.warn("Unable to open project:", err);
-			if (err && !this.recurse) {
-				this.doError({msg: "Unable to open project", err: err});
+			if (err) {
+				this.warn("Unable to open project:", err);
+				if (!this.recurse) {
+					this.doError({msg: "Unable to open project", err: err});
+				}
 			}
 		}
 	}

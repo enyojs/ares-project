@@ -55,7 +55,7 @@ enyo.kind({
 					{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", components: [
 						{value: "doCreateProject",  classes:"aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_new.png"},
-							{content: "Create..."}
+							{content: "New..."}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
 						{value: "doOpenProject",  classes:"aresmenu-button", components: [
