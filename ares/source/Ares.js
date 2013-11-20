@@ -1,4 +1,4 @@
-/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry */
+/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, $L */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets",
@@ -105,6 +105,8 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
+		// FIXME 3082 remove
+		this._registerComponent(null,{name: "ares", reference: this});
 		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.phobosViewIndex);
 		ServiceRegistry.instance.setOwner(this); // plumb services events all the way up
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
@@ -194,6 +196,7 @@ enyo.kind({
 	},
 	saveDocument: function(inSender, inEvent) {
 		// copied in Ares.saveDoc. Remove once saveas is moved as well 3082
+		this.warn("obsolete");
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var content = inEvent.content;
 		this._saveDocument(inEvent.content, {service: inEvent.file.service, fileId: inEvent.file.id}, function(err) {
@@ -211,6 +214,7 @@ enyo.kind({
 	},
 	_saveDocument: function(content, where, next) {
 		// copied in Ares.saveDoc. Remove once saveas is moved as well 3082
+		this.warn("obsolete");
 		var req;
 		if (where.fileId) {
 			req = where.service.putFile(where.fileId, content);
@@ -223,70 +227,6 @@ enyo.kind({
 			next(inErr);
 		});
 
-	},
-	saveAsDocument: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-		var self = this,
-		    file = inEvent.file,
-		    name = inEvent.name;
-
-		if (!file) {
-			_footer(new Error("Internal error: missing file/folder description"));
-			return;
-		}
-
-		async.waterfall([
-			this._closeDocument.bind(this, inEvent.docId),
-			_prepareNewLocation.bind(this),
-			this._saveDocument.bind(this, inEvent.content),
-			_savedToOpen.bind(this),
-			this._openDocument.bind(this, inEvent.projectData)
-		], _footer);
-
-		function _prepareNewLocation(next) {
-			var where, err;
-			if (file.isDir && name) {
-				// create given file in given dir
-				where = {
-					service: file.service,
-					folderId: file.id,
-					name: name
-				};
-			} else if (!file.isDir && !name) {
-				// overwrite the given file
-				where = {
-					service: file.service,
-					fileId: file.id
-				};
-			} else if (!file.isDir && name) {
-				// create a new file in the same folder as the
-				// given file
-				where = {
-					service: file.service,
-					folderId: file.parent.id,
-					name: name
-				};
-			} else {
-				err = new Error("Internal error: wrong file/folder description");
-			}
-			next(err, where);
-		}
-
-		function _savedToOpen(inData, next) {
-			ComponentsRegistry.getComponent("projectView").refreshFile(file);
-			// FIXME: only HermesFileTree report built-in file#service
-			var hermesFile = inData[0];
-			hermesFile.service = file.service;
-			hermesFile.name = ares.basename(hermesFile.path);
-			next(null, hermesFile);
-		}
-
-		function _footer(err, result) {
-			self.trace("err:", err, "result:", result);
-			if (typeof inEvent.next === 'function') {
-				inEvent.next(err, result);
-			}
-		}
 	},
 	/* @private */
 	// close documents contained in a folder after a folder rename.
@@ -312,6 +252,7 @@ enyo.kind({
 	},
 	/** @private */
 	_closeDocument: function(docId, next) {
+		this.warn("obsolete");
 		ComponentsRegistry.getComponent("enyoEditor").closeDocument(docId,next);
 	},
 	/** @private */
@@ -347,6 +288,7 @@ enyo.kind({
 			ComponentsRegistry.getComponent("phobos").updateComponents(inSender, inEvent);
 		}
 	},
+	// FIXME 3082 handle this in  by Enyoeditor
 	closeDesigner: function(inSender, inEvent) {
 		this.designerUpdate(inSender, inEvent);
 		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.phobosViewIndex);

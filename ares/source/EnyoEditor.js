@@ -347,29 +347,75 @@ enyo.kind({
 		}
 	},
 
-	saveAs: function( param){
+	saveAs: function(param){
 		this.trace( param);
 
 		var relativePath = param.name.split("/");
 		var name = relativePath[relativePath.length-1];
+		var docId= this.activeDocument.getId();
+		var projectData= this.activeDocument.getProjectData();
+		var file= param.file;
+		var content= ComponentsRegistry.getComponent('phobos').getEditorContent();
 
-		// FIXME 3082 remove bubble up to Ares
-		this.doSaveAsDocument({
-			docId: this.activeDocument.getId(),
-			projectData: this.activeDocument.getProjectData(),
-			file: param.file, // contain directory information
-			name: name,
-			content: ComponentsRegistry.getComponent('phobos').getEditorContent(),
+		var myNext = (function(err,result) {
+			this.trace("err:", err);
+			this.hideWaitPopup();
+			if (typeof param.next === 'function') {
+				param.next(err, result);
+			}
+		}).bind(this);
 
-			next: (function(err) {
-				this.hideWaitPopup();
-				if (typeof param.next === 'function') {
-					param.next();
-				}
-			}).bind(this)
-		});
+		if (!file) {
+			myNext(new Error("Internal error: missing file/folder description"));
+			return;
+		}
 
-		return true; //Stop event propagation
+		var aresInstance = ComponentsRegistry.getComponent('ares');
+		async.waterfall([
+			this.closeDocument.bind(this, docId),
+			_prepareNewLocation.bind(this),
+			this.saveDoc.bind(this, name, content),
+			_refreshFileTree.bind(this),
+			// FIXME 3082 bring that from ares
+			aresInstance._openDocument.bind(aresInstance, projectData)
+		], myNext.bind(this) );
+
+		function _prepareNewLocation(next) {
+			var where, err;
+			if (file.isDir && name) {
+				// create given file in given dir
+				where = {
+					service: file.service,
+					folderId: file.id,
+					name: name
+				};
+			} else if (!file.isDir && !name) {
+				// overwrite the given file
+				where = {
+					service: file.service,
+					fileId: file.id
+				};
+			} else if (!file.isDir && name) {
+				// create a new file in the same folder as the
+				// given file
+				where = {
+					service: file.service,
+					folderId: file.parent.id,
+					name: name
+				};
+			} else {
+				err = new Error("Internal error: wrong file/folder description");
+			}
+			next(err, where);
+		}
+
+		function _refreshFileTree( file, next) {
+			this.log(file);
+			// refreshFileTree is async, there's no need to wait before opening
+			// the document
+			ComponentsRegistry.getComponent("harmonia").refreshFileTree(file.id);
+			next(null, file);
+		}
 	},
 
 	// close actions
