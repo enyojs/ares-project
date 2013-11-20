@@ -283,7 +283,7 @@ enyo.kind({
 			substitutions: substitutions
 		});
 		req.response(this, function(inSender, inData) {
-			propW.setTemplateList([]);
+			this.propW.setTemplateList([]);
 			this.trace("generate response:", inData);
 			next(null, inData);
 		});
