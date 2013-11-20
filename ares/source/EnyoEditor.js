@@ -85,6 +85,7 @@ enyo.kind({
 					{kind: "Phobos", onCloseDocument: "handleCloseDocument"}
 				]},
 				{components: [
+					// FIXME 3082 this must not be handled by Ares.
 					{kind: "Deimos", onCloseDesigner: "closeDesigner"}
 				]}
 			]
@@ -235,14 +236,15 @@ enyo.kind({
 
 		if (where.fileId) {
 			// plain save
+			this.trace("Saving doc: " + name + " id " + where.fileId);
 			req = where.service.putFile(where.fileId, content);
 		} else {
 			// used with saveAs
+			this.trace("Saving doc: " + name + " in dir id " + where.folderId);
 			req = where.service.createFile(where.folderId, where.name, content);
 		}
 
 		this.showWaitPopup($L("Saving ") + name + " ...");
-		this.trace("Saving doc: " + name + " id " + where.fileId);
 
 		req.response(this, function(inEvent, inData) {
 			var docDataId = Ares.Workspace.files.computeId(inEvent.file);
