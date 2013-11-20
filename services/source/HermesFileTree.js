@@ -1,10 +1,10 @@
+/*global Ares, ares, enyo, $L */
+
 /**
  * Represents a file tree made with {hermes.Node}
  * 
  * @class HermesFileTree
  */
-
-/* global Ares, ares */
 
 enyo.kind({
 	name: "HermesFileTree",
@@ -836,7 +836,7 @@ enyo.kind({
 			}.bind(this)
 		) ;
 
-		this.trace("refreshFileTree called") ;
+		this.trace("refreshFileTree called. will select ",toSelectId) ;
 
 		this.$.serverNode.refreshTree(tracker,0, toSelectId) ;
 
