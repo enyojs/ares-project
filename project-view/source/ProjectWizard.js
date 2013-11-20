@@ -125,7 +125,7 @@ enyo.kind({
 				});
 			}
 		}
-	
+		
 		function _loadAppInfoJson(conf, next) {
 			var file = this.projectFiles['appinfo.json'];
 			if (!file) {
@@ -547,7 +547,6 @@ enyo.kind({
 	}
 	
 });
-
 
 /**
  * This kind will scan a directory. It will create a new project for each project.json found.
