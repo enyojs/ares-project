@@ -459,6 +459,14 @@ enyo.kind({
 		}
 	},
 
+	switchToNewTabAndDoc: function(projectData, file, inContent,next) {
+		this.trace("projectData:", projectData.getName(), ", file:", file.name);
+		var fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
+		ComponentsRegistry.getComponent("documentToolbar")
+			.createFileTab(file.name, fileData.getId(), file.path);
+		this.switchToDocument(fileData,next);
+	},
+
 	switchToDocument: function(newDoc,next) {
 		// safety net
 		if ( ! newDoc ) {
