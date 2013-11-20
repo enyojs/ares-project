@@ -134,9 +134,12 @@ enyo.kind({
 				]}
 			]}
 		]},
-		{name: "toolbarId", kind: "onyx.Toolbar", classes: "bottom-toolbar", components: [
-			{kind: "onyx.Button", content: $L("Cancel"), ontap: "doDone"},
-			{name: "ok", kind: "onyx.Button", content: $L("OK"), classes: "right", ontap: "confirmTap"}
+		{kind: "onyx.TooltipDecorator", components: [
+			{kind: "onyx.Tooltip", name: "errTooltip", content: "", showing: false, showDelay: 0},
+			{name: "toolbarId", kind: "onyx.Toolbar", classes: "bottom-toolbar", components: [
+				{kind: "onyx.Button", content: $L("Cancel"), ontap: "doDone"},
+				{kind: "onyx.Button", name: "ok", classes: "right", content: $L("OK"), ontap: "confirmTap"}
+			]}
 		]},
 
 		{kind: "Signals", onServicesChange: "handleServicesChange"}
@@ -179,7 +182,7 @@ enyo.kind({
 	setDisplayedTab: function(inIndex) {
 		this.$.thumbnail.children[inIndex].setActive(true);
 	},
-	
+
 	/**
 	 * Receive the {onServicesChange} broadcast notification
 	 * @param {Object} inEvent.serviceRegistry
@@ -426,8 +429,10 @@ enyo.kind({
 	},
 	
 	disableOkButton: function(inSender, inEvent) {
-
+		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		this.$.ok.setDisabled(true);
+		this.$.errTooltip.setContent(inEvent.reason || "Check project properties tabs for errors");
+		this.$.errTooltip.show();
 		this.validatePhonegapUiValues[this.defineValidationArrayKey(inEvent.originator)] = false;
 	},
 
@@ -464,6 +469,7 @@ enyo.kind({
 	 * @return {boolean}         stop the bubbling.
 	 */
 	enableOkButton: function(inSender, inEvent){		
+		this.trace("inSender:", inSender, "inEvent:", inEvent);
 
 		// Set in the array {this.validatePhonegapUiValues} the originator UI row as valide
 		this.validatePhonegapUiValues[this.defineValidationArrayKey(inEvent.originator)] = true;
@@ -478,6 +484,8 @@ enyo.kind({
 			}
 		}
 
+		this.$.errTooltip.setContent();
+		this.$.errTooltip.hide();
 		this.$.ok.setDisabled(okDisabled);		
 	},
 
