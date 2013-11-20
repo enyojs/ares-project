@@ -15,17 +15,30 @@ enyo.kind({
 		value: undefined,
 		jsonSection: undefined,
 		platform: undefined,
-		description: undefined
+		description: undefined,
+		err: null
 	},
-	components: [
-	],
-
+	events: {
+		onEnableOkButton: "",
+		onDisableOkButton: ""
+	},
 	/**
 	 * @private
 	 */
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
+		this.errChanged();
+	},
+
+	errChanged: function(prevErr) {
+		this.trace("err:", this.err && this.err.toString(), "<-", prevErr && prevErr.toString());
+		if (prevErr && !this.err) {
+			this.doEnableOkButton();
+		} else if (!prevErr && this.err) {
+			this.warn(this.err);
+			this.doDisableOkButton({reason: this.err.toString()});
+		}
 	}
 });
 
@@ -183,20 +196,19 @@ enyo.kind({
 enyo.kind({
 	name: "Phonegap.ProjectProperties.NumberInputRow",
 	kind: "Phonegap.ProjectProperties.InputRow",
-	events: {
-		onDisableOkButton: ""
-	},
 
 	updateConfigurationValue: function (inSender, inValue) {
 		
 
 		if(!isNaN(inSender.getValue())) {
 			this.$.errorMsg.hide();
-			this.bubble("onEnableOkButton");
 			this.setValue(inSender.getValue());
+			this.setErr(null);
 		} else {
+			var err = new Error(this.$.label.getContent().toString() + ": '" + this.getValue().toString() + "' is not a number");
+			this.$.errorMsg.setContent(err.toString());
 			this.$.errorMsg.show();
-			this.bubble("onDisableOkButton");
+			this.setErr(err);
 		}
 		
 		return true;
@@ -438,7 +450,7 @@ enyo.kind({
 	updateConfigurationValue: function (inSender, inValue) {
 		
 		if (this.checkActiveValue(inValue.content)) {
-			this.showErrorMessage(inValue.content, this.name, "Incorrect saved value. Select a value from the picker above.");
+			this.showErrorMessage(inValue.content, this.name, "Not an allowed value. Select another one using the picker.");
 		} else {
 			this.hideErrorMessage(this.name);
 			this.contentValueChanged();
@@ -456,13 +468,13 @@ enyo.kind({
 	 * @private
 	 */
 	showErrorMessage: function(pickerButtonValue, hightLightedPicker, errorMsg) {
-		
+		var err = new Error(this.$.label.getContent().toString() + ": '" + pickerButtonValue + "' is not an allowed value");
 		this.container.$[hightLightedPicker].$.configurationPickerButton.setContent(pickerButtonValue);
 		
 		this.container.$[hightLightedPicker].$.errorMsg.setContent(errorMsg);
 		this.container.$[hightLightedPicker].$.errorMsg.show();
 		
-		this.bubble("onDisableOkButton");
+		this.setErr(err);
 	},
 
 	/**
@@ -484,20 +496,20 @@ enyo.kind({
 	},
 	
 	/**
-	 * Hide the error message and send a request to "ProjectWizard" to enable the "OK" button.
+	 * Hide the error message 
 	 * 
 	 * @param  {String} hightLightedPicker name of the row to exempted form the error message.
 	 * @private
 	 */
 	hideErrorMessage: function(hightLightedPicker){
 		this.container.$[hightLightedPicker].$.errorMsg.hide();
-		this.bubble("onEnableOkButton");
+		this.setErr(null);
 	},
 
 	/** @public */
 	setProjectConfig: function (config) {
 		if (this.checkActiveValue(config[this.jsonSection][this.name])) {
-			this.showErrorMessage(config[this.jsonSection][this.name], this.name, "Incorrect saved value. Select a value from the picker above.");
+			this.showErrorMessage(config[this.jsonSection][this.name], this.name, "Not an allowed value. Select another one using the picker.");
 		} else {
 			this.hideErrorMessage(this.name);
 			this.setValue(config[this.jsonSection][this.name]);
@@ -861,11 +873,12 @@ enyo.kind({
 		if(!isNaN(this.$.ImgHeight.value) && !isNaN(this.$.ImgWidth.value)){
 			this.$.errorMsg.hide();
 			this.$.ImgHeight.setValue(this.height || "");
-			this.bubble("onEnableOkButton", this);
+			this.setErr(null);
 		} else{
-			this.$.errorMsg.setContent("Height and Width values must be numbers");
+			var err = new Error("Height and Width values must be numbers");
+			this.$.errorMsg.setContent(err.toString());
 			this.$.errorMsg.show();
-			this.bubble("onDisableOkButton", this);
+			this.setErr(err);
 		}
 	},
 
@@ -876,11 +889,12 @@ enyo.kind({
 		if(!isNaN(this.$.ImgHeight.value) && !isNaN(this.$.ImgWidth.value)){
 			this.$.errorMsg.hide();
 			this.$.ImgHeight.setValue(this.width || "");
-			this.bubble("onEnableOkButton");
+			this.setErr(null);
 		} else{
-			this.$.errorMsg.setContent("Height and Width values must be numbers");
+			var err = new Error("Height and Width values must be numbers");
+			this.$.errorMsg.setContent(err.toString());
 			this.$.errorMsg.show();
-			this.bubble("onDisableOkButton");
+			this.setErr(err);
 		}
 	},
 
