@@ -51,10 +51,10 @@ enyo.kind({
 	},
 	/**
 	 * Refresh the {ProjectView} (if relevant), following a change of the given file
-	 * @param {Object} changedFile
+	 * @param {Object} toSelectId. Asynchronous
 	 */
-	refreshFile: function(changedFile) {
-		ComponentsRegistry.getComponent("harmonia").refreshFile(changedFile);
+	refreshFileTree: function(toSelectId,next) {
+		ComponentsRegistry.getComponent("harmonia").refreshFileTree(toSelectId,next);
 	},
 	scanProjectAction: function(inSender, inEvent) {
 		this.$.projectWizardScan.setHeaderText('Select a directory containing one or more project.json files');
@@ -221,7 +221,7 @@ enyo.kind({
 		} else {
 			provider[action](project, function(inError) {
 				self.doHideWaitPopup();
-				self.refreshFile(project.getFolderId());
+				self.refreshFileTree(project.getFolderId());
 				if (inError) {
 					self.doError({msg: inError.toString(), err: inError});
 				}

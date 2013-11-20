@@ -1,4 +1,4 @@
-/* global ares */
+/*global ares, enyo */
 
 enyo.kind({
 	name: "Harmonia",
@@ -57,11 +57,13 @@ enyo.kind({
 		this.$.aresGrabberDirection.switchGrabberDirection(active);
 	},
 	/**
-	 * Refresh the {HermesFileTree} (if relevant), following a change of the given file
+	 * Refresh the {HermesFileTree}
 	 * @param {Object} changedFile
+	 * @param {Function} callback
 	 */
-	refreshFile: function(changedFile) {
-		this.$.hermesFileTree.refreshFile(changedFile);
+	refreshFileTree: function(toSelectId,next) {
+		// the inversion of parameter is not an error.
+		this.$.hermesFileTree.refreshFileTree(next, toSelectId);
 	},
 	activePanel : function(){
 		this.doMovePanel({panelIndex:this.panelIndex});

@@ -322,7 +322,7 @@ enyo.kind({
 	/** @private */
 	_fsEventAction: function(inSender, inEvent) {
 		var harmonia = ComponentsRegistry.getComponent("harmonia");
-		harmonia.refreshFile(inEvent.nodeId);
+		harmonia.refreshFileTree(inEvent.nodeId);
 	},
 
 	_setActiveDocument: function(inSender, inEvent) {
