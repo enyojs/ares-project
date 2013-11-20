@@ -246,15 +246,23 @@ enyo.kind({
 
 		this.showWaitPopup($L("Saving ") + name + " ...");
 
-		req.response(this, function(inEvent, inData) {
-			var docDataId = Ares.Workspace.files.computeId(inEvent.file);
+		req.response(this, function(inSender,inData) {
+			this.log('saveDoc response ',inData);
+			var savedFile = inData[0]; // only one file was saved
+			savedFile.service = where.service;
+			var docDataId = Ares.Workspace.files.computeId(savedFile);
+			if (! docDataId) {
+				this.error("cannot find docDataId from ", savedFile, ' where ', where);
+			}
 			var docData = Ares.Workspace.files.get(docDataId);
+			this.log('saveDoc response ok for ',name,savedFile, docDataId, " => ",docData);
 			if(docData){
 				docData.setData(content);
 			}
 			this.saveComplete(docData);
-			if (next) {next(null, docData);}
-		}).error(this, function(inEvent, inErr) {
+			if (next) {next(null, savedFile);}
+		}).error(this, function(inSender, inErr) {
+			this.log('saveDoc response failed with ' + inErr + ' for ',name,where);
 			this.saveFailed(inErr);
 			if (next) {next(inErr);}
 		});
