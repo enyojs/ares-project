@@ -392,7 +392,7 @@ enyo.kind({
 
 		var aresInstance = ComponentsRegistry.getComponent('ares');
 		async.waterfall([
-			this.closeDocument.bind(this, docId),
+			this.closeDoc.bind(this, docId),
 			_prepareNewLocation.bind(this),
 			this.saveFile.bind(this, name, content),
 			_refreshFileTree.bind(this),
@@ -441,7 +441,7 @@ enyo.kind({
 
 	handleCloseDocument: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
-		this.closeDocument(inEvent.id);
+		this.closeDoc(inEvent.id);
 	},
 
 	closeActiveDoc: function() {
@@ -461,7 +461,7 @@ enyo.kind({
 		}
 	},
 
-	closeDocument: function(docId, next) {
+	closeDoc: function(docId, next) {
 		if (docId && this.activeDocument && this.activeDocument.getId() === docId) {
 			this.closeActiveDoc();
 		}
@@ -587,7 +587,7 @@ enyo.kind({
 			popup.setTitle($L("Document was modified!"));
 
 			popup.setActionButton($L("Don't Save"));
-			popup.setActionCallback(this.closeDocument.bind(this,doc));
+			popup.setActionCallback(this.closeDoc.bind(this,doc));
 
 			popup.setSaveCallback(
 				(function() {

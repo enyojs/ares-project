@@ -244,7 +244,7 @@ enyo.kind({
 	/** @private */
 	_closeDocument: function(docId, next) {
 		this.warn("obsolete");
-		ComponentsRegistry.getComponent("enyoEditor").closeDocument(docId,next);
+		ComponentsRegistry.getComponent("enyoEditor").closeDoc(docId,next);
 	},
 	/** @private */
 	_fsEventAction: function(inSender, inEvent) {
