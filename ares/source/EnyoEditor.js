@@ -604,6 +604,27 @@ enyo.kind({
 		]);
 		return true; // Stop the propagation of the event
 	},
+
+	requestCloseCurrentProject: function(inSender, inEvent) {
+		this.trace("close project requested");
+		var serial = [] ;
+
+		// build the serie of functions to be fed to async.series
+		this.foreachProjectDocs(
+			function(doc) {
+				serial.push(
+					this.requestSave.bind(this,doc),
+					this.closeDoc.bind(this,doc)
+				);
+			}
+		);
+
+		// the real work is done here
+		async.series( serial ) ;
+
+		return true ;
+	},
+
 	//* query the user for save before performing next action
 	requestSave: function(doc, next) {
 		var popup = this.$.savePopup ;
@@ -665,6 +686,10 @@ enyo.kind({
 			{name: "closeButton", value:  [ 'enyoEditor', "requestCloseCurrentDoc"], classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
 				{content: $L("Close")}
+			]},
+			{name: "closeProjectButton", value:  [ 'enyoEditor', "requestCloseCurrentProject"], classes:"aresmenu-button", components: [
+				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
+				{content: $L("Close Project")}
 			]},
 			{name: "closeAllButton", value: [ 'phobos', "closeAllDocAction"], classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
