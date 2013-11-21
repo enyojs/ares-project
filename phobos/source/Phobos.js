@@ -16,7 +16,6 @@ enyo.kind({
 				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
-		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
 		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onCancelActionPopup: "cancelAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide:"doAceFocus", onClose: "findClose", onReplaceFind: "replacefind"},
@@ -79,17 +78,6 @@ enyo.kind({
 		return this.docData.getEdited();
 	},
 
-	/** @private */
-	saveBeforeClose: function(){
-		// FIXME 3082: remove
-		this.warn("obsolete");
-		this.saveDocAction();
-		var id = this.docData.getId();
-		this.beforeClosingDocument();
-		this.doCloseDocument({id: id});
-		this.closeNextDoc();
-		return true;
-	},
 	openDoc: function(inDocData) {
 		// If we are changing documents, reparse any changes into the current projectIndexer
 		if (this.docData && this.docData.getEdited()) {
@@ -685,22 +673,9 @@ enyo.kind({
 			this.closeAll = false;
 		}
 	},
-	cancelClose: function(inSender, inEvent) {
-		this.closeAll = false;
-		this.cancelAction();
-	},
 	cancelAction: function(inSender, inEvent) {
 		this.warn("obsolete");
 		this.doAceFocus();
-	},
-	// called when "Don't Save" is selected in save popup
-	abandonDocAction: function(inSender, inEvent) {
-		this.warn("obsolete");
-		this.$.savePopup.hide();
-		var docData = this.docData;
-		this.beforeClosingDocument();
-		this.doCloseDocument({id: docData.getId()});
-		this.closeNextDoc();
 	},
 	/**
 	* @protected
