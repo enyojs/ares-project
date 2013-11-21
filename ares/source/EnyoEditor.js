@@ -315,7 +315,7 @@ enyo.kind({
 		}).error(this, function(inSender, inErr) {
 			this.log('saveFile response failed with ' + inErr + ' for ',name,where);
 			this.hideWaitPopup();
-			this.doError({msg: "Unable to save the file: " + inMsg });
+			this.doError({msg: "Unable to save the file: " + inErr });
 			if (next) {next(inErr);}
 		});
 	},
@@ -391,7 +391,6 @@ enyo.kind({
 		var relativePath = param.name.split("/");
 		var name = relativePath[relativePath.length-1];
 		var doc = this.activeDocument;
-		var docId = doc.getId();
 		var projectData= this.activeDocument.getProjectData();
 		var file= param.file;
 		var content= ComponentsRegistry.getComponent('phobos').getEditorContent();
