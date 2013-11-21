@@ -220,18 +220,28 @@ enyo.kind({
 
 	// Save actions
 	saveCurrentDoc: function() {
-		var phobos = ComponentsRegistry.getComponent('phobos');
-		this.saveDoc(
-			this.activeDocument.getName(),
-			phobos.getEditorContent(),
+		this.saveDoc(this.activeDocument);
+	},
+
+	saveDoc: function(doc) {
+		var content;
+		if (doc === this.activeDocument) {
+			content = ComponentsRegistry.getComponent('phobos').getEditorContent();
+		} else {
+			content = doc.getEditedData();
+		}
+
+		this.saveFile(
+			doc.getName(),
+			content,
 			{
-				service: this.activeDocument.getProjectData().getService(),
-				fileId: this.activeDocument.getFileId()
+				service: doc.getProjectData().getService(),
+				fileId: doc.getFileId()
 			}
 		);
 	},
 
-	saveDoc: function(name,content,where,next){
+	saveFile: function(name,content,where,next){
 		var req;
 
 		if (where.fileId) {
@@ -247,7 +257,7 @@ enyo.kind({
 		this.showWaitPopup($L("Saving ") + name + " ...");
 
 		req.response(this, function(inSender,inData) {
-			this.log('saveDoc response ',inData);
+			this.log('saveFile response ',inData);
 			var savedFile = inData[0]; // only one file was saved
 			savedFile.service = where.service;
 			var docDataId = Ares.Workspace.files.computeId(savedFile);
@@ -255,14 +265,14 @@ enyo.kind({
 				this.error("cannot find docDataId from ", savedFile, ' where ', where);
 			}
 			var docData = Ares.Workspace.files.get(docDataId);
-			this.log('saveDoc response ok for ',name,savedFile, docDataId, " => ",docData);
+			this.log('saveFile response ok for ',name,savedFile, docDataId, " => ",docData);
 			if(docData){
 				docData.setData(content);
 			}
 			this.saveComplete(docData);
 			if (next) {next(null, savedFile);}
 		}).error(this, function(inSender, inErr) {
-			this.log('saveDoc response failed with ' + inErr + ' for ',name,where);
+			this.log('saveFile response failed with ' + inErr + ' for ',name,where);
 			this.saveFailed(inErr);
 			if (next) {next(inErr);}
 		});
@@ -374,7 +384,7 @@ enyo.kind({
 		async.waterfall([
 			this.closeDocument.bind(this, docId),
 			_prepareNewLocation.bind(this),
-			this.saveDoc.bind(this, name, content),
+			this.saveFile.bind(this, name, content),
 			_refreshFileTree.bind(this),
 			aresInstance._openDocument.bind(aresInstance, projectData)
 		], myNext.bind(this) );
