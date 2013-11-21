@@ -372,7 +372,8 @@ enyo.kind({
 
 		var relativePath = param.name.split("/");
 		var name = relativePath[relativePath.length-1];
-		var docId= this.activeDocument.getId();
+		var doc = this.activeDocument;
+		var docId = doc.getId();
 		var projectData= this.activeDocument.getProjectData();
 		var file= param.file;
 		var content= ComponentsRegistry.getComponent('phobos').getEditorContent();
@@ -392,7 +393,7 @@ enyo.kind({
 
 		var aresInstance = ComponentsRegistry.getComponent('ares');
 		async.waterfall([
-			this.closeDoc.bind(this, docId),
+			this.closeDoc.bind(this, doc),
 			_prepareNewLocation.bind(this),
 			this.saveFile.bind(this, name, content),
 			_refreshFileTree.bind(this),
@@ -445,15 +446,16 @@ enyo.kind({
 	},
 
 	closeActiveDoc: function() {
-		var docId = this.activeDocument.getId();
-		this.trace("close document:",this.activeDocument.getName());
+		var doc = this.activeDocument;
+		this.trace("close document:",doc.getName());
 		ComponentsRegistry.getComponent('phobos').closeSession();
 		this.activeDocument = null;
-		this.forgetDoc(docId);
+		this.forgetDoc(doc) ;
 	},
 
-	forgetDoc: function(docId) {
+	forgetDoc: function(doc) {
 		// remove Doc from cache
+		var docId = doc.getId();
 		ComponentsRegistry.getComponent("documentToolbar").removeTab(docId);
 		Ares.Workspace.files.removeEntry(docId);
 		if (! Ares.Workspace.files.length ) {
@@ -461,16 +463,20 @@ enyo.kind({
 		}
 	},
 
-	closeDoc: function(docId, next) {
+	//* close a document, param can be a docId or a doc
+	closeDoc: function(param, next) {
+		var doc = typeof param === 'object' ? param : Ares.Workspace.files.get(param) ;
+		var docId = doc.getId();
+
 		if (docId && this.activeDocument && this.activeDocument.getId() === docId) {
 			this.closeActiveDoc();
 		}
 		else if (docId) {
-			this.log("closing a doc different from current one: ", docId);
-			this.forgetDoc(docId);
+			this.log("closing a doc different from current one: ", doc.getName());
+			this.forgetDoc(doc);
 		}
 		else {
-			this.warn("called without docId to close");
+			this.warn("called without doc to close");
 		}
 
 		if (typeof next === 'function') {
