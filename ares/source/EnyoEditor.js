@@ -537,7 +537,13 @@ enyo.kind({
 			return;
 		}
 
-		// We no longer save the data as the ACE edit session will keep the data for us
+		// save current data, this is needed to save project files
+		// without switching ace and deimos
+		if (oldDoc) {
+			oldDoc.setEditedData(phobos.getEditorContent());
+		}
+
+		// open ace or deimos depending on edition mode...
 		phobos.openDoc(newDoc);
 
 		this.activeDocument = newDoc;
