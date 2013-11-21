@@ -77,7 +77,6 @@ enyo.kind({
 		onTreeChanged: "_treeChanged",
 		onFsEvent: "_fsEventAction",
 		onChangingNode: "_nodeChanging",
-		onSaveDocument: "saveDocument", 
 		onAllDocumentsAreClosed: "showProjectView",
 		onCloseProjectDocuments: "closeDocumentsForProject",
 		onDesignDocument: "designDocument", 
@@ -182,40 +181,6 @@ enyo.kind({
 			.error(this, function(inEvent, inErr) {
 				next(inErr);
 			});
-	},
-	saveDocument: function(inSender, inEvent) {
-		// copied in Ares.saveDoc. Remove once saveas is moved as well 3082
-		this.warn("obsolete");
-		this.trace("sender:", inSender, ", event:", inEvent);
-		var content = inEvent.content;
-		this._saveDocument(inEvent.content, {service: inEvent.file.service, fileId: inEvent.file.id}, function(err) {
-			if (err) {
-				ComponentsRegistry.getComponent("enyoEditor").saveFailed(err);
-			} else {
-				var fileDataId = Ares.Workspace.files.computeId(inEvent.file);
-				var fileData = Ares.Workspace.files.get(fileDataId);
-				if(fileData){
-					fileData.setData(content);
-				}
-				ComponentsRegistry.getComponent("enyoEditor").saveComplete(fileData);
-			}
-		});
-	},
-	_saveDocument: function(content, where, next) {
-		// copied in Ares.saveDoc. Remove once saveas is moved as well 3082
-		this.warn("obsolete");
-		var req;
-		if (where.fileId) {
-			req = where.service.putFile(where.fileId, content);
-		} else {
-			req = where.service.createFile(where.folderId, where.name, content);
-		}
-		req.response(this, function(inEvent, inData) {
-			next(null, inData);
-		}).error(this, function(inEvent, inErr) {
-			next(inErr);
-		});
-
 	},
 	/* @private */
 	// close documents contained in a folder after a folder rename.

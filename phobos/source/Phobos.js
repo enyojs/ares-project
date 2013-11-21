@@ -23,7 +23,6 @@ enyo.kind({
 	],
 	events: {
 		onHideWaitPopup: "",
-		onSaveDocument: "",
 		onDesignDocument: "",
 		onError: "",
 		onCloseDocument: "",
@@ -67,11 +66,6 @@ enyo.kind({
 			this.projectCtrl.setOwner(this);
 			this.projectData.setProjectCtrl(this.projectCtrl);
 		}
-	},
-	saveDocAction: function() {
-		this.warn("obsolete");
-		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
-		return true;
 	},
 	saveNeeded: function() {
 		return this.docData.getEdited();
