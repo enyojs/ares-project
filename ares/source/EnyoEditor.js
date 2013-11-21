@@ -218,7 +218,22 @@ enyo.kind({
 		this.doHideWaitPopup();
 	},
 
+	//* apply action on each doc of current project
+	foreachProjectDocs: function(action) {
+		var projectName = this.activeDocument.getProjectData().getName();
+		function isProjectDoc(model) {
+			return model.getFile().name !== "package.js"
+				&& model.getProjectData().getName() === projectName ;
+		}
+		// backbone collection
+		Ares.Workspace.files.filter(isProjectDoc).forEach(action,this);
+	},
+
 	// Save actions
+	saveProjectDocs: function() {
+		this.foreachProjectDocs(this.saveDoc.bind(this));
+	},
+
 	saveCurrentDoc: function() {
 		this.saveDoc(this.activeDocument);
 	},
@@ -620,6 +635,10 @@ enyo.kind({
 			{name: "saveAsButton", value:  [ 'enyoEditor', "requestSaveDocAs"], classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save as...")}
+			]},
+			{name: "saveProjectButton", value: [ 'enyoEditor', "saveProjectDocs" ], classes:"aresmenu-button", components: [
+				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
+				{content: $L("Save Project")}
 			]},
 			{classes: "onyx-menu-divider"},
 			{name: "closeButton", value:  [ 'enyoEditor', "requestCloseCurrentDoc"], classes:"aresmenu-button", components: [
