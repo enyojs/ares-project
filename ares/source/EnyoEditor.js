@@ -268,8 +268,13 @@ enyo.kind({
 			this.log('saveFile response ok for ',name,savedFile, docDataId, " => ",docData);
 			if(docData){
 				docData.setData(content);
+				// TODO: The user may have switched to another file
+				// update deimos label with edited status which is
+				// actually "not-edited" ...
+				docData.setEdited(false);
+				this._fileEdited();
 			}
-			this.saveComplete(docData);
+			this.analyseData(docData);
 			if (next) {next(null, savedFile);}
 		}).error(this, function(inSender, inErr) {
 			this.log('saveFile response failed with ' + inErr + ' for ',name,where);
@@ -278,17 +283,10 @@ enyo.kind({
 		});
 	},
 
-	saveComplete: function(inDocData) {
+	analyseData: function(inDocData) {
 		this.hideWaitPopup();
 		var codeLooksGood = false ;
 		var phobos = ComponentsRegistry.getComponent('phobos');
-
-		if (inDocData) {
-			// TODO: The user may have switched to another file
-			// update deimos label with edited status which is actually "not-edited" ...
-			inDocData.setEdited(false);
-			this._fileEdited();
-		}
 
 		if (this.activeDocument === inDocData) {
 			// current file was just saved
