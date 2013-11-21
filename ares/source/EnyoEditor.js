@@ -524,27 +524,30 @@ enyo.kind({
 
 	// switch Phobos or Deimos to new document
 	_switchDoc: function(newDoc) {
+		var phobos = ComponentsRegistry.getComponent('phobos');
+		var enyoEditor = ComponentsRegistry.getComponent("enyoEditor");
+
 		var oldDoc = this.activeDocument ;
 		var currentIF = newDoc.getCurrentIF();
 		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName()  + " " : " ")
 				   + ' to ' + newDoc.getName() + " IF is " + currentIF );
+
 		if (oldDoc && newDoc === oldDoc) {
 			// no actual switch
 			return;
 		}
 
 		// We no longer save the data as the ACE edit session will keep the data for us
-		ComponentsRegistry.getComponent("phobos").openDoc(newDoc);
+		phobos.openDoc(newDoc);
 
 		this.activeDocument = newDoc;
-		var enyoEditor = ComponentsRegistry.getComponent("enyoEditor");
 		enyoEditor.addPreviewTooltip("Preview " + newDoc.getProjectData().id);
 
 		if (currentIF === 'code') {
 			enyoEditor.$.panels.setIndex(this.phobosViewIndex);
 			enyoEditor.manageControls(false);
 		} else {
-			ComponentsRegistry.getComponent("phobos").designerAction();
+			phobos.designerAction();
 			enyoEditor.manageControls(true);
 		}
 		this._fileEdited();
