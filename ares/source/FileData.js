@@ -20,12 +20,26 @@ Ares.Model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when po
 	getName: function() {
 		return this.get("file").name;
 	},
+
+	// mirror the content on the remote file system
 	getData: function() {
 		return this.get("data");
 	},
+	// called when saving file
 	setData: function(data) {
 		this.set("data", data);
 	},
+
+	// mirror the content of the ace session
+	// updated when switching files, the content
+	// may no be up-to-date for current document
+	getEditedData: function() {
+		return this.get("edited-data");
+	},
+	setEditedData: function(data) {
+		this.set("edited-data", data);
+	},
+
 	getProjectData: function() {
 		return this.get("project-data");
 	},
