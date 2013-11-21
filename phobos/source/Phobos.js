@@ -16,7 +16,6 @@ enyo.kind({
 				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
-		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onCancelActionPopup: "cancelAction"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide:"doAceFocus", onClose: "findClose", onReplaceFind: "replacefind"},
 		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "enyo-unselectable", centered: true, modal: true, floating: true, autoDismiss: false,
@@ -673,10 +672,6 @@ enyo.kind({
 			this.closeAll = false;
 		}
 	},
-	cancelAction: function(inSender, inEvent) {
-		this.warn("obsolete");
-		this.doAceFocus();
-	},
 	/**
 	* @protected
 	*/
@@ -687,46 +682,6 @@ enyo.kind({
 		this.$[componentName].setActionButton($L("Don't Save"));
 		this.$[componentName].show();
 	},	
-	/** 
-	* @protected
-	*/
-	saveDocumentsBeforePreview: function(editedDocs){
-		this.editedDocs = editedDocs;
-		this.saveNextDocument();
-	},
-	/**
-	* @protected
-	*/
-	saveNextDocument: function(){
-		if(this.editedDocs.length >= 1){
-			var docData = this.editedDocs.pop();
-			this.openDoc(docData);
-			this.doSwitchFile({id:docData.id});
-			this.showSavePopup("savePopupPreview",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before preview?');
-		}else{
-			this.doAceFocus();
-			this.doDisplayPreview();
-		}
-		return true;
-	},
-	/**
-	* Called when save button is selected in save popup shown before preview action
-	* @protected
-	*/
-	saveBeforePreviewAction: function(inSender, inEvent){
-		this.saveDocAction();
-		this.saveNextDocument();
-		return true;
-	},
-	/**
-	* Called when don't save button is selected in save popup shown before preview action
-	* @protected
-	*/
-	abandonDocActionOnPreview: function(inSender, inEvent) {
-		this.$.savePopup.hide();
-		this.doAceFocus();
-		this.saveNextDocument();
-	},
 	docChanged: function(inSender, inEvent) {
 		//this.injected === false then modification coming from user
 		if(!this.injected && !this.docData.getEdited()){

@@ -91,7 +91,6 @@ enyo.kind({
 		onCloseFileRequest: "bounceCloseFileRequest",
 		onRegisterMe : "_registerComponent",
 		onMovePanel : "_movePanel",
-		onSavePreviewAction: "_saveBeforePreview",
 		onDisplayPreview : "_displayPreview",
 		onNewActiveDocument: "_setActiveDocument"
 	},
@@ -503,21 +502,6 @@ enyo.kind({
 				i--;
 			}
 		}
-	},
-	_saveBeforePreview: function(inSender, inEvent){
-		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
-		var files = Ares.Workspace.files;
-		var editedDocs = [];
-		enyo.forEach(files.models, function(model) {
-			var serviceId = model.getProjectData().getServiceId();
-			var folderId = model.getProjectData().getFolderId();
-			if ( serviceId === project.getServiceId() && folderId === project.getFolderId()) {
-				if(model.getEdited()){
-					editedDocs.push(model);
-				}
-			}
-		}, this);
-		ComponentsRegistry.getComponent("phobos").saveDocumentsBeforePreview(editedDocs);
 	},
 	_displayPreview: function(inSender, inEvent){
 		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);

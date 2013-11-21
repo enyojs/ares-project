@@ -39,7 +39,7 @@ enyo.kind({
 				]}
 			]},
 			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
-				{kind: "onyx.IconButton", src: "../project-view/assets/images/project_view_preview.png", ontap: "doSavePreviewAction"},
+				{kind: "onyx.IconButton", src: "../project-view/assets/images/project_view_preview.png", ontap: "requestPreview"},
 				{kind: "onyx.Tooltip", name:"previewTooltip", content: "Preview"}
 			]},
 			{classes:"ares-logo-container", components:[
@@ -92,6 +92,7 @@ enyo.kind({
 		}
 	],
 	events: {
+		onDisplayPreview: "",
 		onShowWaitPopup: "",
 		onHideWaitPopup: "",
 		onNewActiveDocument: "", // to preserve legacy in Ares.js
@@ -99,7 +100,6 @@ enyo.kind({
 		onSaveAsDocument: "", // FIXME 3082 remove
 		onRegisterMe: "",
 		onMovePanel:"",
-		onSavePreviewAction:"", // FIXME 3082 remove
 		onDesignerBroken: "",
 		onFileEdited:"_fileEdited",
 		onError: ""
@@ -228,6 +228,24 @@ enyo.kind({
 		}
 		// backbone collection
 		Ares.Workspace.files.filter(isProjectDoc).forEach(action,this);
+	},
+
+	requestPreview: function() {
+		// request save one by one and then launch preview
+		this.trace("preview requested");
+		var serialSaver = [] ;
+
+		// build the serie of functions to be fed to async.series
+		this.foreachProjectDocs(
+			function(doc) {
+				serialSaver.push(
+					this.requestSave.bind(this,doc)
+				);
+			}
+		);
+
+		// the real work is done here
+		async.series( serialSaver, this.doDisplayPreview.bind(this)) ;
 	},
 
 	// Save actions
