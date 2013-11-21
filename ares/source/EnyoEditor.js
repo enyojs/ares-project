@@ -582,23 +582,29 @@ enyo.kind({
 
 	// Close documents
 	requestCloseCurrentDoc: function(inSender, inEvent) {
-		this.requestCloseDoc(this.activeDocument);
+		async.waterfall([
+			this.requestSave.bind(this, this.activeDocument),
+			this.closeDoc.bind(this)
+		]);
+		return true; // Stop the propagation of the event
 	},
-	requestCloseDoc: function(doc) {
+	//* query the user for save before performing next action
+	requestSave: function(doc, next) {
 		var popup = this.$.savePopup ;
 		if (doc.getEdited() === true) {
-			this.trace("request close doc on ",doc.getName());
+			this.trace("request save doc on ",doc.getName());
 			popup.setMessage('"' + doc.getFile().path
 					+ '" was modified.<br/><br/>Save it before closing?') ;
 			popup.setTitle($L("Document was modified!"));
 
 			popup.setActionButton($L("Don't Save"));
-			popup.setActionCallback(this.closeDoc.bind(this,doc));
+
+			popup.setActionCallback(next.bind(this,doc));
 
 			popup.setSaveCallback(
 				(function() {
 					this.saveDoc(doc);
-					this.closeDoc(doc);
+					next(null,doc);
 				}).bind(this)
 			);
 
@@ -606,9 +612,8 @@ enyo.kind({
 
 			popup.show();
 		} else {
-			this.closeDoc(doc);
+			next(null,doc);
 		}
-		return true; // Stop the propagation of the event
 	}
 
 });
