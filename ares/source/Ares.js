@@ -153,7 +153,7 @@ enyo.kind({
 
 		if (fileData) {
 			// useful when double clicking on a file in HermesFileTree
-			editor.switchToDocument(this.fileData, next) ;
+			editor.switchToDocument(fileData, next) ;
 		} else {
 			this.showWaitPopup(this, {msg: $L("Opening...")});
 			async.waterfall(
