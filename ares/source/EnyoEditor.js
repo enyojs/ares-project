@@ -216,6 +216,7 @@ enyo.kind({
 	},
 	hideWaitPopup: function() {
 		this.doHideWaitPopup();
+		this.aceFocus();
 	},
 
 	//* apply action on each doc of current project
@@ -269,6 +270,7 @@ enyo.kind({
 			req = where.service.createFile(where.folderId, where.name, content);
 		}
 
+		// hide is done in the callbacks below
 		this.showWaitPopup($L("Saving ") + name + " ...");
 
 		req.response(this, function(inSender,inData) {
@@ -284,23 +286,23 @@ enyo.kind({
 			if(docData){
 				docData.setData(content);
 				docData.setEditedData(content);
-				// TODO: The user may have switched to another file
 				// update deimos label with edited status which is
 				// actually "not-edited" ...
 				docData.setEdited(false);
 				this._fileEdited();
 			}
+			this.hideWaitPopup();
 			this.analyseData(docData);
 			if (next) {next(null, savedFile);}
 		}).error(this, function(inSender, inErr) {
 			this.log('saveFile response failed with ' + inErr + ' for ',name,where);
-			this.saveFailed(inErr);
+			this.hideWaitPopup();
+			this.doError({msg: "Unable to save the file: " + inMsg });
 			if (next) {next(inErr);}
 		});
 	},
 
 	analyseData: function(inDocData) {
-		this.hideWaitPopup();
 		var codeLooksGood = false ;
 		var phobos = ComponentsRegistry.getComponent('phobos');
 
@@ -325,12 +327,6 @@ enyo.kind({
 		phobos.projectCtrl.forceFullAnalysis();
 
 		this.trace("done. codeLooksGood: "+ codeLooksGood);
-	},
-
-	saveFailed: function(inMsg) {
-		this.hideWaitPopup();
-		this.warn("Save failed: " + inMsg);
-		this.doError({msg: "Unable to save the file: " + inMsg });
 	},
 
 	requestSaveDocAs: function() {

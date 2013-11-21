@@ -72,9 +72,7 @@ enyo.kind({
 	},
 	saveDocAction: function() {
 		this.warn("obsolete");
-		this.owner.showWaitPopup($L("Saving ..."));
 		this.doSaveDocument({content: this.$.ace.getValue(), file: this.docData.getFile()});
-		this.doAceFocus();
 		return true;
 	},
 	saveNeeded: function() {
@@ -83,6 +81,8 @@ enyo.kind({
 
 	/** @private */
 	saveBeforeClose: function(){
+		// FIXME 3082: remove
+		this.warn("obsolete");
 		this.saveDocAction();
 		var id = this.docData.getId();
 		this.beforeClosingDocument();
