@@ -78,7 +78,6 @@ enyo.kind({
 		onFsEvent: "_fsEventAction",
 		onChangingNode: "_nodeChanging",
 		onSaveDocument: "saveDocument", 
-		onSaveAsDocument: "saveAsDocument", 
 		onAllDocumentsAreClosed: "showProjectView",
 		onCloseProjectDocuments: "closeDocumentsForProject",
 		onDesignDocument: "designDocument", 

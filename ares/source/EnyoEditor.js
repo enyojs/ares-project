@@ -97,7 +97,6 @@ enyo.kind({
 		onHideWaitPopup: "",
 		onNewActiveDocument: "", // to preserve legacy in Ares.js
 		onAllDocumentsAreClosed: "",
-		onSaveAsDocument: "", // FIXME 3082 remove
 		onRegisterMe: "",
 		onMovePanel:"",
 		onDesignerBroken: "",
