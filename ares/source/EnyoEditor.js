@@ -268,6 +268,7 @@ enyo.kind({
 			this.log('saveFile response ok for ',name,savedFile, docDataId, " => ",docData);
 			if(docData){
 				docData.setData(content);
+				docData.setEditedData(content);
 				// TODO: The user may have switched to another file
 				// update deimos label with edited status which is
 				// actually "not-edited" ...
