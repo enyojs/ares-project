@@ -597,10 +597,8 @@ enyo.kind({
 
 			popup.setSaveCallback(
 				(function() {
-					// FIXME 3082 save only current doc
-					// other doc need to clean the edit session
-					ComponentsRegistry.getComponent('phobos').saveDocAction();
-					this.closeActiveDoc();
+					this.saveDoc(doc);
+					this.closeDoc(doc);
 				}).bind(this)
 			);
 
@@ -608,7 +606,7 @@ enyo.kind({
 
 			popup.show();
 		} else {
-			this.closeActiveDoc();
+			this.closeDoc(doc);
 		}
 		return true; // Stop the propagation of the event
 	}
