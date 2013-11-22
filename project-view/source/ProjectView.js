@@ -228,6 +228,28 @@ enyo.kind({
 			});
 		}
 	},
+
+	launchPreview: function (project) {
+		var config = project.getConfig() ;
+		var topFile = config.data.preview.top_file ;
+		var projectUrl = project.getProjectUrl() + '/' + topFile ;
+
+		// the last replace method is needed for test environment only
+		var winLoc = window.location.toString().replace('ares','preview').replace('test', 'index') ;
+		var previewUrl = winLoc
+				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
+				+ 'url=' + encodeURIComponent(projectUrl)+'&name=' + project.id;
+
+		this.trace("preview on URL ", previewUrl) ;
+
+		window.open(
+			previewUrl,
+			'_blank', // ensure that a new window is created each time preview is tapped
+			'scrollbars=0,menubar=1,resizable=1',
+			false
+		);
+	},
+
 	/**
 	 * Event handler: Launch a preview widget of the selected project in a separate frame
 	 * @param {enyo.Component} inSender
@@ -238,24 +260,7 @@ enyo.kind({
 	previewAction: function(inSender, inEvent) {
 		var project = inEvent.project;
 		if ( project) {
-			var config = project.getConfig() ;
-			var topFile = config.data.preview.top_file ;
-			var projectUrl = project.getProjectUrl() + '/' + topFile ;
-
-			// the last replace method is needed for test environment only
-			var winLoc = window.location.toString().replace('ares','preview').replace('test', 'index') ;
-			var previewUrl = winLoc
-				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
-				+ 'url=' + encodeURIComponent(projectUrl)+'&name=' + project.id;
-
-			this.trace("preview on URL ", previewUrl) ;
-			
-			window.open(
-				previewUrl,
-				'_blank', // ensure that a new window is created each time preview is tapped
-				'scrollbars=0,menubar=1,resizable=1',
-				false
-			);
+			this.launchPreview(project);
 		}
 		return true; // stop the bubble
 	}
