@@ -621,22 +621,29 @@ enyo.kind({
 		return true; // Stop the propagation of the event
 	},
 
-	requestCloseProject: function () {
+	//* Close all files of a project. use current project if
+	// project is null. next is optional
+	requestCloseProject: function (project,next) {
 		this.trace("close project requested");
 		var serial = [] ;
 
 		// build the serie of functions to be fed to async.series
 		this.foreachProjectDocs(
-			function(doc) {
-				serial.push(
-					this.requestSave.bind(this,doc),
-					this.closeDoc.bind(this,doc)
-				);
-			}
+			this._chainSaveClose.bind(this,serial),
+			project
 		);
 
 		// the real work is done here
-		async.series( serial ) ;
+		async.series( serial, next ) ;
+	},
+
+	_chainSaveClose: function(serial,doc) {
+		this.trace("close project will close file " + doc.getName(), doc);
+		var close = this.closeDoc.bind(this,doc) ;
+		var save  = this.requestSave.bind(this,doc);
+		// save and close active doc the last to avoid switch
+		var method = this.activeDocument === doc ? 'push' : 'unshift' ;
+		serial[method](save, close);
 	},
 
 	requestCloseCurrentProject: function(inSender, inEvent) {
@@ -650,13 +657,7 @@ enyo.kind({
 
 		// build the serie of functions to be fed to async.series
 		Ares.Workspace.files.forEach(
-			function(doc) {
-				serial.push(
-					this.requestSave.bind(this,doc),
-					this.closeDoc.bind(this,doc)
-				);
-			},
-			this
+			this._chainSaveClose.bind(this,serial)
 		);
 
 		// the real work is done here
