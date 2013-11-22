@@ -1,5 +1,7 @@
+/*global Ares, ares, ServiceRegistry, ComponentsRegistry, enyo */
+
 /* jshint indent: false */ // TODO: ENYO-3311
-/* global ares, ServiceRegistry, ComponentsRegistry */
+
 /**
  * This kind provides:
  * - the project toolbars (with create .. delete)
@@ -183,32 +185,39 @@ enyo.kind({
 			popup.show();
 		}
 	},
+
+	removeProject: function (nukeFiles, project, next) {
+		// when nukeFiles is set, use file system service to remove
+		// project files (which behaves like a 'rm -rf') once done,
+		// call removeSelectedProjectData to mop up the remains.
+
+		var msgForDeletedProject = "Deleting project " + project.getName();
+		this.doShowWaitPopup({msg: msgForDeletedProject});
+
+		this.trace("removing project", project.getName(), ( nukeFiles ? " and its files" : "" )) ;
+
+		if (nukeFiles) {
+			var service = project.getService();
+			var folderId = project.getFolderId();
+			service.remove( folderId )
+				.response(this, function(){this.removeSelectedProjectData();})
+				.error(this, function(inError){
+					this.doError({msg: "Error removing files of project " + project.name + ": " + inError.toString(), err: inError});
+				}) ;
+		}
+		else {
+			this.removeSelectedProjectData() ;
+		}
+		this.doHideWaitPopup();
+	},
+
 	confirmRemoveProject: function(inSender, inEvent) {
-		// use file system service to remove project files (which behaves like a 'rm -rf')
-		// once done,  call removeSelectedProjectData to mop up the remains.
-		var project, nukeFiles ;
+		var project = Ares.Workspace.projects.at(this.selected.index);
+		var nukeFiles = this.$.removeProjectPopup.get("nukeFiles");
+		var editor = ComponentsRegistry.getComponent("enyoEditor");
+
 		if (this.selected) {
-			project = Ares.Workspace.projects.at(this.selected.index);
-
-			var msgForDeletedProject = "Deleting project " + project.getName();  
-			this.doShowWaitPopup({msg: msgForDeletedProject});
-
-			nukeFiles = this.$.removeProjectPopup.get("nukeFiles");
-			this.trace("removing project", project.getName(), ( nukeFiles ? " and its files" : "" )) ;
-			this.trace(project);
-			if (nukeFiles) {
-				var service = project.getService();
-				var folderId = project.getFolderId();
-				service.remove( folderId )
-					.response(this, function(){this.removeSelectedProjectData();})
-					.error(this, function(inError){
-						this.doError({msg: "Error removing files of project " + project.name + ": " + inError.toString(), err: inError});
-					}) ;
-			}
-			else {
-				this.removeSelectedProjectData() ;
-			}
-			this.doHideWaitPopup();
+			this.removeProject(nukeFiles, project);
 		}
 	},
 	removeSelectedProjectData: function() {
