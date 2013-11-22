@@ -17,7 +17,8 @@ enyo.kind({
 		{kind: "ProjectList",
 			onModifySettings: "modifySettingsAction",
 			onCreateProject: "createProjectAction",
-			onScanProject: "scanProjectAction",
+			onOpenProject: "openProjectAction",
+			onSearchProjects: "searchProjectsAction",
 			onDuplicateProject: "duplicateProjectAction",
 			onProjectRemoved: "projectRemoved",
 			name: "projectList"
@@ -56,8 +57,15 @@ enyo.kind({
 	refreshFile: function(changedFile) {
 		ComponentsRegistry.getComponent("harmonia").refreshFile(changedFile);
 	},
-	scanProjectAction: function(inSender, inEvent) {
-		this.$.projectWizardScan.setHeaderText('Select a directory containing one or more project.json files');
+	searchProjectsAction: function(inSender, inEvent) {
+		this.$.projectWizardScan.setHeaderText('Select a folder hierarchy');
+		this.$.projectWizardScan.setRecurse(true);
+		this.$.projectWizardScan.show();
+		return true; //Stop event propagation
+	},
+	openProjectAction: function(inSender, inEvent) {
+		this.$.projectWizardScan.setHeaderText('Select an existing Ares application folder (contains a project.json file)');
+		this.$.projectWizardScan.setRecurse(false);
 		this.$.projectWizardScan.show();
 		return true; //Stop event propagation
 	},
@@ -83,7 +91,7 @@ enyo.kind({
 		this.doHideWaitPopup();
 		try {
 			// Add an entry into the project list
-			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
+			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service, inEvent.dontSelect);
 		} catch(e) {
 			var msg = e.toString();
 			this.error(msg);

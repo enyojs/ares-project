@@ -1,10 +1,9 @@
-/* jshint indent: false */ // TODO: ENYO-3311
-/* global ares, ServiceRegistry, ComponentsRegistry */
+/*global enyo, ares, ServiceRegistry, ComponentsRegistry */
 /**
  * This kind provides:
  * - the project toolbars (with create .. delete)
  * - the project list
-/*
+ /*
  * The project list is a simple kind that only holds project names. It does not
  * hold project objects or kinds.
  */
@@ -14,7 +13,8 @@ enyo.kind({
 	classes: "enyo-unselectable ares-project-list",
 	events: {
 		onCreateProject: "",
-		onScanProject: "",
+		onOpenProject: "",
+		onSearchProjects: "",
 		onDuplicateProject: "",
 		onProjectRemoved: "",
 		onCloseProjectDocuments:"",
@@ -33,79 +33,83 @@ enyo.kind({
 	components: [
 		{kind:"FittableRows", classes:"project-list", components:[
 			{kind: "onyx.MoreToolbar", classes: "ares-top-toolbar", isContainer: true, name: "toolbar", components: [
-					{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
-						{tag:"button", content: "Ares"},
-						{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", components: [
-							{value: "showAccountConfigurator", classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png", classes: "aresmenu-icon-button"},
-								{content: "Accounts...", classes: "aresmenu-button-label"}
-							]},
-							{classes: "onyx-menu-divider aresmenu-button"},
-							{value: "showAresProperties",  classes:"aresmenu-button", components: [
-								{content: "Properties...", classes: "aresmenu-button-label"}
-							]},
-							{classes: "onyx-menu-divider aresmenu-button"},
-							{value: "showEnyoHelp",  classes:"aresmenu-button", components: [
-								{content: "Enyo API Viewer", classes: "aresmenu-button-label"}
-							]}
-						]}
-					]},
-					{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
-						{content: "Edit"},
-						{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", components: [
-							{value: "doCreateProject",  classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_new.png"},
-								{content: "Create..."}
-							]},
-							{classes: "onyx-menu-divider aresmenu-button"},
-							{value: "doScanProject",  classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_import.png"},
-								{content: "Import..."}
-							]},
-							{classes: "onyx-menu-divider aresmenu-button"},
-							{value: "doDuplicateProject",  classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_import.png"},
-								{content: "Duplicate..."}
-							]},
-							{classes: "onyx-menu-divider aresmenu-button"},
-							{value: "removeProjectAction",  classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_delete.png"},
-								{content: "Delete"}
-							]}
-						]}
-					]},
-					{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
-						{content: "Project", name: "projectMenu", disabled: true},
-						{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
-							{value: "doModifySettings",  classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_edit.png"},
-								{content: "Edit..."}
-							]},
-							{classes: "onyx-menu-divider aresmenu-button"},
-							{value: "doPreview",  classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_preview.png"},
-								{content: "Preview"}
-							]},
-							{value: "doBuild",  classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_build.png"},
-								{content: "Build..."}
-							]},
-							{classes: "onyx-menu-divider aresmenu-button"},
-							{value: "doInstall",  classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_install.png"},
-								{content: "Install..."}
-							]},
-							{classes: "onyx-menu-divider aresmenu-button"},
-							{value: "doRun",  classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_run.png"},
-								{content: "Run..."}
-							]},
-							{value: "doRunDebug",  classes:"aresmenu-button", components: [
-								{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_debug.png"},
-								{content: "Debug..." }
-							]}
+				{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
+					{tag:"button", content: "Ares"},
+					{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", components: [
+						{value: "showAccountConfigurator", classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png", classes: "aresmenu-icon-button"},
+							{content: "Accounts...", classes: "aresmenu-button-label"}
+						]},
+						{classes: "onyx-menu-divider aresmenu-button"},
+						{value: "showAresProperties",  classes:"aresmenu-button", components: [
+							{content: "Properties...", classes: "aresmenu-button-label"}
+						]},
+						{classes: "onyx-menu-divider aresmenu-button"},
+						{value: "showEnyoHelp",  classes:"aresmenu-button", components: [
+							{content: "Enyo API Viewer", classes: "aresmenu-button-label"}
 						]}
 					]}
+				]},
+				{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
+					{content: "Projects"},
+					{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", components: [
+						{value: "doCreateProject",  classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_new.png"},
+							{content: "New..."}
+						]},
+						{classes: "onyx-menu-divider aresmenu-button"},
+						{value: "doOpenProject",  classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_open.png"},
+							{content: "Open..."}
+						]},
+						{value: "doSearchProjects",  classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_search.png"},
+							{content: "Search..."}
+						]},
+						{classes: "onyx-menu-divider aresmenu-button"},
+						{value: "doDuplicateProject",  classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_duplicate.png"},
+							{content: "Duplicate..."}
+						]},
+						{classes: "onyx-menu-divider aresmenu-button"},
+						{value: "removeProjectAction",  classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_delete.png"},
+							{content: "Delete"}
+						]}
+					]}
+				]},
+				{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
+					{content: "Project", name: "projectMenu", disabled: true},
+					{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
+						{value: "doModifySettings",  classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_edit.png"},
+							{content: "Edit..."}
+						]},
+						{classes: "onyx-menu-divider aresmenu-button"},
+						{value: "doPreview",  classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_preview.png"},
+							{content: "Preview"}
+						]},
+						{value: "doBuild",  classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_build.png"},
+							{content: "Build..."}
+						]},
+						{classes: "onyx-menu-divider aresmenu-button"},
+						{value: "doInstall",  classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_install.png"},
+							{content: "Install..."}
+						]},
+						{classes: "onyx-menu-divider aresmenu-button"},
+						{value: "doRun",  classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_run.png"},
+							{content: "Run..."}
+						]},
+						{value: "doRunDebug",  classes:"aresmenu-button", components: [
+							{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_debug.png"},
+							{content: "Debug..." }
+						]}
+					]}
+				]}
 			]},
 			{content:"Project list", classes:"project-list-title title-gradient"},
 			{kind: "enyo.Scroller", fit: true,components: [
@@ -114,8 +118,8 @@ enyo.kind({
 				]}
 			]},
 			{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmActionPopup: "confirmRemoveProject"},
-		{kind: "AccountsConfigurator"},
-		{kind: "AresProperties"}
+			{kind: "AccountsConfigurator"},
+			{kind: "AresProperties"}
 		]},
 		{classes:"hangar"}
 	],
@@ -159,17 +163,17 @@ enyo.kind({
 			this.trace("*** BUG: '", fn, "' is not a known function");
 		}
 	},
-	addProject: function(name, folderId, service) {
+	addProject: function(name, folderId, service, dontSelect) {
 		var serviceId = service.getConfig().id || "";
 		if (serviceId === "") {
 			throw new Error("Cannot add a project in service=" + service);
 		}
 		var known = Ares.Workspace.projects.get(name);
 		if (known) {
-			this.trace("Skipped project ", name, " as it is already listed") ;
+			this.log("Skipped project ", name, " as it is already listed") ;
 		} else {
 			var project = Ares.Workspace.projects.createProject(name, folderId, serviceId);
-			if(project){
+			if(project && !dontSelect){
 				this.selectInProjectList(project);
 			}
 		}
@@ -277,8 +281,8 @@ enyo.kind({
 			this.enyoHelpTab.focus();
 			if (search !== "") {
 				this.enyoHelpTab = window.open("http://enyojs.com/api/#" + search,
-				"Enyo API Viewer",
-				"resizable=1, dependent=yes, width=800, height=600");
+							       "Enyo API Viewer",
+							       "resizable=1, dependent=yes, width=800, height=600");
 			}
 			return;
 		}
@@ -287,8 +291,8 @@ enyo.kind({
 			search = "#" + search;
 		}
 		this.enyoHelpTab = window.open("http://enyojs.com/api/" + search,
-			"Enyo API Viewer",
-			"resizable=1, dependent=yes, width=800, height=600");
+					       "Enyo API Viewer",
+					       "resizable=1, dependent=yes, width=800, height=600");
 	},
 	stringifyReplacer: function(key, value) {
 		if (key === "originator") {
@@ -326,10 +330,10 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.createComponent(
-				{container:this.$.popupContent, classes:"ares-more-row", components:[
-					{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onActivate: "changeNuke"},
-					{kind: "Control", tag: "span", classes: "ares-padleft", content: $L("also delete files from disk")}
-				]}
+			{container:this.$.popupContent, classes:"ares-more-row", components:[
+				{kind: "onyx.Checkbox", checked: false, name: "nukeFiles", onActivate: "changeNuke"},
+				{kind: "Control", tag: "span", classes: "ares-padleft", content: $L("also delete files from disk")}
+			]}
 		);
 		this.changeNuke();
 	},
