@@ -510,6 +510,7 @@ enyo.kind({
 		this.switchToDocument(fileData,next);
 	},
 
+	// switch file *and* project (if necessary)
 	switchToDocument: function(newDoc,next) {
 		// safety net
 		if ( ! newDoc ) {

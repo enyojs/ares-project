@@ -1,4 +1,4 @@
-/*global enyo */
+/*global enyo, Ares, ComponentsRegistry */
 
 enyo.kind({
 	name: "DocumentToolbar",
@@ -39,10 +39,14 @@ enyo.kind({
 			tooltipMsg: path
 		});
 	},
+
 	switchDoc: function(inSender, inEvent) {
-		this.doSwitchDoc({id: inEvent.userId});
+		var newDoc = Ares.Workspace.files.get(inEvent.id);
+		this.trace(inEvent.id, newDoc);
+		ComponentsRegistry.getComponent("enyoEditor").switchToDocument(newDoc);
 		return true;
 	},
+
 	activateDocWithId: function(id) {
 		this.$.tabs.activate({ userId: id });
 	},

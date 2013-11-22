@@ -85,7 +85,6 @@ enyo.kind({
 		onDesignerUpdate: "designerUpdate", 
 		onUndo: "designerUndo", 
 		onRedo: "designerRedo",
-		onSwitchDoc: "switchDoc",
 		onRegisterMe : "_registerComponent",
 		onMovePanel : "_movePanel"
 	},
@@ -308,13 +307,6 @@ enyo.kind({
 		if(this.$.aresLayoutPanels.getIndex() === this.projectListIndex && this.isProjectView){
 			this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
 		}
-	},
-
-	// switch file *and* project (if necessary)
-	switchDoc: function(inSender, inEvent) {
-		var newDoc = Ares.Workspace.files.get(inEvent.id);
-		this.trace(inEvent.id, newDoc);
-		ComponentsRegistry.getComponent("enyoEditor").switchToDocument(newDoc);
 	},
 
 	//* Update code running in designer
