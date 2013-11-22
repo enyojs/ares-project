@@ -89,7 +89,6 @@ enyo.kind({
 		onCloseFileRequest: "bounceCloseFileRequest",
 		onRegisterMe : "_registerComponent",
 		onMovePanel : "_movePanel",
-		onDisplayPreview : "_displayPreview",
 		onNewActiveDocument: "_setActiveDocument"
 	},
 	projectListIndex: 0,
@@ -466,10 +465,6 @@ enyo.kind({
 				i--;
 			}
 		}
-	},
-	_displayPreview: function(inSender, inEvent){
-		var project = Ares.Workspace.projects.get(this.activeDocument.getProjectData().id);
-		ComponentsRegistry.getComponent("projectView").previewAction(inSender,{project:project});
 	},
 	/**
 	 * Event handler for ares components registry

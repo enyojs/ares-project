@@ -92,7 +92,6 @@ enyo.kind({
 		}
 	],
 	events: {
-		onDisplayPreview: "",
 		onShowWaitPopup: "",
 		onHideWaitPopup: "",
 		onNewActiveDocument: "", // to preserve legacy in Ares.js
@@ -231,8 +230,10 @@ enyo.kind({
 
 	requestPreview: function() {
 		// request save one by one and then launch preview
-		this.trace("preview requested");
+		var previewer = ComponentsRegistry.getComponent("projectView");
+		var project = this.activeDocument.getProjectData();
 		var serialSaver = [] ;
+		this.trace("preview requested on project "+ project.getName());
 
 		// build the serie of functions to be fed to async.series
 		this.foreachProjectDocs(
@@ -244,7 +245,7 @@ enyo.kind({
 		);
 
 		// the real work is done here
-		async.series( serialSaver, this.doDisplayPreview.bind(this)) ;
+		async.series( serialSaver, previewer.launchPreview.bind(previewer,project)) ;
 	},
 
 	// Save actions
