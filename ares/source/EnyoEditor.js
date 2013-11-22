@@ -621,7 +621,7 @@ enyo.kind({
 		return true; // Stop the propagation of the event
 	},
 
-	requestCloseCurrentProject: function(inSender, inEvent) {
+	requestCloseProject: function () {
 		this.trace("close project requested");
 		var serial = [] ;
 
@@ -637,7 +637,10 @@ enyo.kind({
 
 		// the real work is done here
 		async.series( serial ) ;
+	},
 
+	requestCloseCurrentProject: function(inSender, inEvent) {
+		this.requestCloseProject();
 		return true ;
 	},
 
