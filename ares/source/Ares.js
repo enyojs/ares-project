@@ -327,14 +327,11 @@ enyo.kind({
 		ComponentsRegistry.getComponent("enyoEditor").switchToDocument(newDoc);
 	},
 
-	// FIXME: This trampoline function probably needs some refactoring
-	// Close is a special case, because it can be invoked on a
-	// document other than the currently-active one, so we must first
-	// switch the active document and then try to close it. closeDocAction
-	// is the method directly called by File->Close menu entry
+	// FIXME 3082: move to EnyoEditor
 	bounceCloseFileRequest: function(inSender, inEvent) {
-		this.switchFile(inSender, inEvent);
-		enyo.asyncMethod(ComponentsRegistry.getComponent("phobos"), "closeDocAction");
+		var doc = Ares.Workspace.files.get(inEvent.id);
+		var editor = ComponentsRegistry.getComponent("enyoEditor");
+		editor.switchToDocument(doc, editor.requestCloseCurrentDoc.bind(editor));
 	},
 
 	//* Update code running in designer
