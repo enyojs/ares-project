@@ -642,30 +642,6 @@ enyo.kind({
 			this.doFileEdited();
 		}
 	},
-	closeDocAction: function(inSender, inEvent) {
-		this.warn("obsolete");
-		if (this.docData.getEdited() === true) {
-			this.showSavePopup("savePopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing?');
-		} else {
-			var id = this.docData.getId();
-			this.beforeClosingDocument();
-			this.doCloseDocument({id: id});
-			this.closeNextDoc();
-		}
-		return true; // Stop the propagation of the event
-	},
-	closeAllDocAction: function(inSender, inEvent) {
-		this.closeAll = true;
-		this.closeNextDoc();
-		return true; // Stop the propagation of the event
-	},
-	closeNextDoc: function() {
-		if(this.docData && this.closeAll) {
-			this.closeDocAction(this);
-		} else {
-			this.closeAll = false;
-		}
-	},
 	/**
 	* @protected
 	*/
@@ -738,14 +714,6 @@ enyo.kind({
 			this.$.ace.destroySession(this.docData.getAceSession());
 			this.resetAutoCompleteData();
 		}
-	},
-	beforeClosingDocument: function() {
-		this.warn('obsolete');
-		this.$.ace.destroySession(this.docData.getAceSession());
-		// NOTE: docData will be clear when removed from the Ares.Workspace.files collections
-		this.resetAutoCompleteData();
-		this.docData = null;
-		this.setProjectData(null);
 	},
 	// Show Find popup
 	findpop: function(){
