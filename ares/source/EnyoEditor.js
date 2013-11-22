@@ -677,7 +677,7 @@ enyo.kind({
 
 			popup.setActionButton($L("Don't Save"));
 
-			popup.setActionCallback(next.bind(this,null,doc));
+			popup.setActionCallback( function() {next(null,doc);});
 
 			popup.setSaveCallback(
 				(function() {
