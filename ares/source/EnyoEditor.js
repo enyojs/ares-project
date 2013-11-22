@@ -94,7 +94,6 @@ enyo.kind({
 	events: {
 		onShowWaitPopup: "",
 		onHideWaitPopup: "",
-		onNewActiveDocument: "", // to preserve legacy in Ares.js
 		onAllDocumentsAreClosed: "",
 		onRegisterMe: "",
 		onMovePanel:"",
@@ -593,7 +592,6 @@ enyo.kind({
 		}
 		this._fileEdited();
 		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(newDoc.getId());
-		this.doNewActiveDocument({ doc: this.activeDocument} );
 	},
 
 

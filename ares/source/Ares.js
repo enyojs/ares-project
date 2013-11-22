@@ -88,8 +88,7 @@ enyo.kind({
 		onSwitchFile: "switchFile",
 		onCloseFileRequest: "bounceCloseFileRequest",
 		onRegisterMe : "_registerComponent",
-		onMovePanel : "_movePanel",
-		onNewActiveDocument: "_setActiveDocument"
+		onMovePanel : "_movePanel"
 	},
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
@@ -205,20 +204,12 @@ enyo.kind({
 	},
 	/** @private */
 	_closeDocument: function(docId, next) {
-		this.warn("obsolete");
 		ComponentsRegistry.getComponent("enyoEditor").closeDoc(docId,next);
 	},
 	/** @private */
 	_fsEventAction: function(inSender, inEvent) {
 		var harmonia = ComponentsRegistry.getComponent("harmonia");
 		harmonia.refreshFileTree(inEvent.nodeId);
-	},
-
-	_setActiveDocument: function(inSender, inEvent) {
-		// register current active Document, even though this should be handled only
-		// in EnyoEditor
-		this.trace("called for " , inEvent.doc.getName());
-		this.activeDocument = inEvent.doc ;
 	},
 
 	designDocument: function(inSender, inEvent) {
