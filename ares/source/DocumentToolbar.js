@@ -1,4 +1,4 @@
-/*global enyo, Ares, ComponentsRegistry */
+/*global enyo, Ares, ComponentsRegistry, ares */
 
 enyo.kind({
 	name: "DocumentToolbar",
@@ -26,6 +26,7 @@ enyo.kind({
 
 	create: function() {
 		this.inherited(arguments);
+		ares.setupTraceLogger(this);
 		this.doRegisterMe({name:"documentToolbar", reference:this});
 	},
 	createDocTab: function(name, id, path) {
