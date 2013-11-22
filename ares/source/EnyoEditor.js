@@ -68,6 +68,7 @@ enyo.kind({
 		{
 			name: "bottomBar",
 			kind: "DocumentToolbar",
+			onCloseFileRequest: "handleCloseDocument",
 			classes: "ares-bottom-bar"
 		},
 		{
@@ -458,7 +459,8 @@ enyo.kind({
 
 	handleCloseDocument: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
-		this.closeDoc(inEvent.id);
+		var doc = Ares.Workspace.files.get(inEvent.id);
+		this.requestCloseDoc(doc);
 	},
 
 	closeActiveDoc: function() {
@@ -596,6 +598,14 @@ enyo.kind({
 
 
 	// Close documents
+	requestCloseDoc: function(doc) {
+		async.waterfall([
+			this.requestSave.bind(this, doc),
+			this.closeDoc.bind(this)
+		]);
+		return true; // Stop the propagation of the event
+	},
+
 	requestCloseCurrentDoc: function(inSender, inEvent) {
 		async.waterfall([
 			this.requestSave.bind(this, this.activeDocument),

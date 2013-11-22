@@ -318,13 +318,6 @@ enyo.kind({
 		ComponentsRegistry.getComponent("enyoEditor").switchToDocument(newDoc);
 	},
 
-	// FIXME 3082: move to EnyoEditor
-	bounceCloseFileRequest: function(inSender, inEvent) {
-		var doc = Ares.Workspace.files.get(inEvent.id);
-		var editor = ComponentsRegistry.getComponent("enyoEditor");
-		editor.switchToDocument(doc, editor.requestCloseCurrentDoc.bind(editor));
-	},
-
 	//* Update code running in designer
 	syncEditedFiles: function(project) {
 		// project is a backbone Ares.Model.Project defined in WorkspaceData.js
