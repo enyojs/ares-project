@@ -217,9 +217,15 @@ enyo.kind({
 		this.aceFocus();
 	},
 
-	//* apply action on each doc of current project
-	foreachProjectDocs: function(action) {
-		var projectName = this.activeDocument.getProjectData().getName();
+	//* apply action on each doc of passed project (or project's doc)
+	// or current project (if param is falsy)
+	foreachProjectDocs: function(action,param) {
+		var project
+				= param instanceof Ares.Model.Project ? param
+				: param instanceof Ares.Model.File    ? param.getProjectData()
+				:                                       this.activeDocument.getProjectData();
+		var projectName = project.getName();
+
 		function isProjectDoc(model) {
 			return model.getFile().name !== "package.js"
 				&& model.getProjectData().getName() === projectName ;
