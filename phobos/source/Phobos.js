@@ -25,7 +25,6 @@ enyo.kind({
 		onHideWaitPopup: "",
 		onDesignDocument: "",
 		onError: "",
-		onCloseDocument: "",
 		onUpdate: "",
 		onRegisterMe: "",
 		onDisplayPreview: "",

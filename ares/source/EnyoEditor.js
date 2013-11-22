@@ -82,7 +82,7 @@ enyo.kind({
 			ondragfinish      : "stopPanelEvent",
 			components: [
 				{components: [
-					{kind: "Phobos", onCloseDocument: "handleCloseDocument"}
+					{kind: "Phobos"}
 				]},
 				{components: [
 					// FIXME 3082 this must not be handled by Ares.
