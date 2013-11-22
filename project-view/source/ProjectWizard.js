@@ -283,7 +283,8 @@ enyo.kind({
 			substitutions: substitutions
 		});
 		req.response(this, function(inSender, inData) {
-			this.propW.setTemplateList([]);
+			var propW = this.$.propertiesWidget;
+			propW.setTemplateList([]);
 			this.trace("generate response:", inData);
 			next(null, inData);
 		});
@@ -639,7 +640,8 @@ enyo.kind({
 				this.doAddProjectInList({
 					name: (projectData && projectData.name) || folderNode.name,
 					folderId: folderNode.id,
-					service: service
+					service: service,
+					dontSelect: true // do not open projects found by search
 				});
 				next();
 			} catch(e) {
@@ -672,13 +674,12 @@ enyo.kind({
 		var service = inEvent.file.service;
 		var topDir = this.$.hermesFileTree.selectedNode.file ;
 		var projects = [];
-		var next = (typeof inEvent.next === 'function' && inEvent.next) || _next;
 
 		async.series([
 			_walk.bind(this, topDir),
 			_add.bind(this),
 			_finish.bind(this)
-		], next);
+		], _next.bind(this));
 
 		function _walk(folderNode, next) {
 			this.trace('Searching in ', folderNode.path) ;
@@ -720,11 +721,12 @@ enyo.kind({
 		}
 
 		function _finish(next) {
-			this.doHideWaitPopup();
 			this.reset();
+			next();
 		}
 
 		function _next(err) {
+			this.doHideWaitPopup();
 			if (err) {
 				this.warn("Unable to open project:", err);
 				if (!this.recurse) {

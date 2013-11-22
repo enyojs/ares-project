@@ -91,7 +91,7 @@ enyo.kind({
 		this.doHideWaitPopup();
 		try {
 			// Add an entry into the project list
-			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service);
+			this.$.projectList.addProject(inEvent.name, inEvent.folderId, inEvent.service, inEvent.dontSelect);
 		} catch(e) {
 			var msg = e.toString();
 			this.error(msg);
