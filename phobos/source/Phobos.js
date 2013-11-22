@@ -705,11 +705,10 @@ enyo.kind({
 		this.$.ace.insertAtEndOfFile(inEvent.outPut);
 	},
 	/*
-	 * Perform a few actions before closing a document
+	 * cleanup data. Typically called when closing a document
 	 * @protected
 	 */
 	closeSession: function() {
-		// FIXME: remove this test once all close stuff is moved to EnyoEditor
 		if (this.docData) {
 			this.$.ace.destroySession(this.docData.getAceSession());
 			this.resetAutoCompleteData();
