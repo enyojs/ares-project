@@ -1,10 +1,12 @@
+/*global enyo */
+
 enyo.kind({
 	name: "DocumentToolbar",
 	kind:"FittableRows",
 	events: {
 		onToggleOpen: "",
-		onSwitchFile: "",
-		onCloseFileRequest: "",
+		onSwitchDoc: "",
+		onCloseDocRequest: "",
 		onRegisterMe: "",
 		onGrabberClick: "",
 		onAceFocus: ""
@@ -16,8 +18,8 @@ enyo.kind({
 			classes: "ares-small-toolbar title-gradient",
 			showing: false,
 			checkBeforeClosing: true,
-			onTabChanged: 'switchFile',
-			onTabRemoveRequested: 'requestCloseFile',
+			onTabChanged: 'switchDoc',
+			onTabRemoveRequested: 'requestCloseDoc',
 			onHide: "doAceFocus"
 		}
 	],
@@ -26,7 +28,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.doRegisterMe({name:"documentToolbar", reference:this});
 	},
-	createFileTab: function(name, id, path) {
+	createDocTab: function(name, id, path) {
 		this.$.tabs.show();
 		this.$.tabs.render();
 		this.$.tabs.addTab({
@@ -37,18 +39,18 @@ enyo.kind({
 			tooltipMsg: path
 		});
 	},
-	switchFile: function(inSender, inEvent) {
-		this.doSwitchFile({id: inEvent.userId});
+	switchDoc: function(inSender, inEvent) {
+		this.doSwitchDoc({id: inEvent.userId});
 		return true;
 	},
-	activateFileWithId: function(id) {
+	activateDocWithId: function(id) {
 		this.$.tabs.activate({ userId: id });
 	},
 
-	requestCloseFile: function(inSender, inEvent) {
+	requestCloseDoc: function(inSender, inEvent) {
 		// inEvent.next callback is ditched. Ares will call removeTab
 		// when file is closed by Ace
-		this.doCloseFileRequest({id: inEvent.userId});
+		this.doCloseDocRequest({id: inEvent.userId});
 		return true;
 	},
 	removeTab: function(id) {

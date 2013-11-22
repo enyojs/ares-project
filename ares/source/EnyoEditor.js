@@ -68,7 +68,7 @@ enyo.kind({
 		{
 			name: "bottomBar",
 			kind: "DocumentToolbar",
-			onCloseFileRequest: "handleCloseDocument",
+			onCloseDocRequest: "handleCloseDocument",
 			classes: "ares-bottom-bar"
 		},
 		{
@@ -506,7 +506,7 @@ enyo.kind({
 		this.trace("projectData:", projectData.getName(), ", file:", file.name);
 		var fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
 		ComponentsRegistry.getComponent("documentToolbar")
-			.createFileTab(file.name, fileData.getId(), file.path);
+			.createDocTab(file.name, fileData.getId(), file.path);
 		this.switchToDocument(fileData,next);
 	},
 
@@ -593,7 +593,7 @@ enyo.kind({
 			enyoEditor.manageControls(true);
 		}
 		this._fileEdited();
-		ComponentsRegistry.getComponent("documentToolbar").activateFileWithId(newDoc.getId());
+		this.$.bottomBar.activateDocWithId(newDoc.getId());
 	},
 
 

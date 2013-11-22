@@ -27,7 +27,6 @@ enyo.kind({
 		onError: "",
 		onUpdate: "",
 		onRegisterMe: "",
-		onSwitchFile: "",
 		onFileEdited: " ",
 		onAceFocus: ""
 	},

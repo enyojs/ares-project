@@ -85,8 +85,7 @@ enyo.kind({
 		onDesignerUpdate: "designerUpdate", 
 		onUndo: "designerUndo", 
 		onRedo: "designerRedo",
-		onSwitchFile: "switchFile",
-		onCloseFileRequest: "bounceCloseFileRequest",
+		onSwitchDoc: "switchDoc",
 		onRegisterMe : "_registerComponent",
 		onMovePanel : "_movePanel"
 	},
@@ -312,7 +311,7 @@ enyo.kind({
 	},
 
 	// switch file *and* project (if necessary)
-	switchFile: function(inSender, inEvent) {
+	switchDoc: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.id);
 		this.trace(inEvent.id, newDoc);
 		ComponentsRegistry.getComponent("enyoEditor").switchToDocument(newDoc);
