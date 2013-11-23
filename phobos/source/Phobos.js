@@ -714,9 +714,9 @@ enyo.kind({
 		var codeToInsert = "";
 		for(var item in declared) {
 			if (item !== "" && existing[item] === undefined) {
-				codeToInsert += (commaTerminated ? "" : ",\n");
+				codeToInsert += (commaTerminated ? "" : ",");
 				commaTerminated = false;
-				codeToInsert += ("\t" + item + ": function(inSender, inEvent) {\n\t\t// TO");
+				codeToInsert += ("\n\t" + item + ": function(inSender, inEvent) {\n\t\t// TO");
 				codeToInsert += ("DO - Auto-generated code\n\t}");
 			}
 		}
