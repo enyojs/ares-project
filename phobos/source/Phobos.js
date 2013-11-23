@@ -726,7 +726,7 @@ enyo.kind({
 			if (codeToInsert !== "") {
 				// Get the corresponding Ace range to replace/insert the missing code
 				// NB: ace.replace() allow to use the undo/redo stack.
-				var pos = object.block.end - 2;
+				var pos = object.block.end - 3;
 				var range = this.$.ace.mapToLineColumnRange(pos, pos);
 				this.$.ace.replaceRange(range, codeToInsert);
 			}
