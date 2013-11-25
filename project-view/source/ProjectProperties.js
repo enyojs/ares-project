@@ -148,7 +148,6 @@ enyo.kind({
 	},
 
 	templates: [],
-	TEMPLATE_NONE: "NONE",
 	selectedTemplate: undefined,
 	selectedAddedSource: undefined,
 	services: {},
@@ -414,7 +413,7 @@ enyo.kind({
 			return;
 		}
 		
-		this.doModifiedConfig({data: this.config, template: this.selectedTemplate, addedSources: this.addedSource}) ;
+		this.doModifiedConfig({data: this.config, template: this.selectedTemplate.id, addedSources: this.addedSource}) ;
 
 		this.doDone();
 
@@ -484,14 +483,10 @@ enyo.kind({
 
 	/** @public */
 	setTemplateList: function(templates) {
-		this.templates = [this.TEMPLATE_NONE];
-		enyo.forEach(templates, function(item) {
-			// TODO: also keep track of the template description
-			this.templates.push(item.id);
-		}, this);
+		this.templates = [].concat(templates);
 		this.$.templatePicker.setCount(this.templates.length);
 		this.$.templatePicker.setSelected(0);
-		this.selectedTemplate = undefined;
+		this.selectedTemplate = this.templates[0];
 	},
 	/** @public */
 	setLibsList: function(inLibs) {
@@ -529,15 +524,15 @@ enyo.kind({
 		this.setSelectedLibs(selectedLibs);
 	},
 	templateSetupItem: function(inSender, inEvent) {
-		this.$.template.setContent(this.templates[inEvent.index]);
+		this.trace("inSender:", inSender, "inEvent:", inEvent);
+		var template = this.templates[inEvent.index];
+		this.$.template.setContent(template.description);
+		this.$.template.setAttribute("x-template", template);
 		return true;
 	},
 	templateSelected: function(inSender, inEvent) {
-		if (inEvent.content === this.TEMPLATE_NONE) {
-			this.selectedTemplate = undefined;
-		} else {
-			this.selectedTemplate = inEvent.content;
-		}
+		this.trace("inSender:", inSender, "inEvent:", inEvent);
+		this.selectedTemplate = inEvent.selected.getAttribute("x-template");
 	},
 	topFileChanged: function() {
 		this.$.topFileRow.setValue(this.topFile);
