@@ -1,4 +1,4 @@
-/*global Ares, ares, ServiceRegistry, ComponentsRegistry, enyo */
+/*global Ares, ares, ServiceRegistry, ComponentsRegistry, enyo, async, $L */
 
 
 /**
@@ -195,24 +195,30 @@ enyo.kind({
 		// project files (which behaves like a 'rm -rf') once done,
 		// call removeSelectedProjectData to mop up the remains.
 
-		var msgForDeletedProject = "Deleting project " + project.getName();
-		this.doShowWaitPopup({msg: msgForDeletedProject});
-
-		this.trace("removing project", project.getName(), ( nukeFiles ? " and its files" : "" )) ;
+		this.trace("removing project", project.getName()) ;
 
 		if (nukeFiles) {
+			this.trace("removing project", project.getName() ,"files") ;
+			var msgForDeletedProject = "Deleting files of project " + project.getName();
+			this.doShowWaitPopup({msg: msgForDeletedProject});
+
 			var service = project.getService();
 			var folderId = project.getFolderId();
 			service.remove( folderId )
-				.response(this, function(){this.removeSelectedProjectData();})
+				.response(this, function(){
+					this.trace("removed project", project.getName() ,"files") ;
+					this.doHideWaitPopup();
+					this.removeProjectData(project, next);
+				})
 				.error(this, function(inError){
-					this.doError({msg: "Error removing files of project " + project.name + ": " + inError.toString(), err: inError});
+					this.trace("failed to remove project", project.getName() ,"files", inError) ;
+					this.doHideWaitPopup();
+					next(inError);
 				}) ;
 		}
 		else {
-			this.removeSelectedProjectData() ;
+			this.removeProjectData(project, next) ;
 		}
-		this.doHideWaitPopup();
 	},
 
 	confirmRemoveProject: function(inSender, inEvent) {
@@ -221,20 +227,34 @@ enyo.kind({
 		var editor = ComponentsRegistry.getComponent("enyoEditor");
 
 		if (this.selected) {
-			this.removeProject(nukeFiles, project);
+			async.series(
+				[
+					editor.requestCloseProject.bind(editor, project),
+					this.removeProject.bind(this, nukeFiles, project)
+				],
+				function(err){
+					if (err) {
+						this.doError({msg: "Error removing files of project " + project.name + ": " + err.toString(), err: err});
+					}
+				}
+			);
 		}
 	},
-	removeSelectedProjectData: function() {
-		if (this.selected) {
-			// remove the project from list of project config
-			var project =  Ares.Workspace.projects.at(this.selected.index);
-			var name = project.getName();
-			Ares.Workspace.projects.removeProject(name);
+	removeProjectData: function(project,next) {
+		var name = project.getName();
+
+		if (name === this.selected.projectName) {
+			this.trace("called on selected " + name);
 			this.selected = null;
 			this.doProjectRemoved();
-			this.doCloseProjectDocuments({"project":project}); //To reset the designer panel
 			this.$.projectMenu.setDisabled(true);
 		}
+		else {
+			this.trace("called on " + name);
+		}
+
+		// remove the project from list of project config
+		Ares.Workspace.projects.removeProject(name);
 	},
 	projectListSetupItem: function(inSender, inEvent) {
 		var project = Ares.Workspace.projects.at(inEvent.index);
