@@ -82,7 +82,6 @@ enyo.kind({
 		if (this.updateSourceCallback) {
 			throw new Error("updateSource called while previous "
 							+ "updateSourceCallback is still pending ");
-			return;
 		}
 		var serviceConfig = inSource.getService().config;
 		this.setDesignerFrameReady(false);
