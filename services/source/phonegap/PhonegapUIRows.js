@@ -198,21 +198,19 @@ enyo.kind({
 	kind: "Phonegap.ProjectProperties.InputRow",
 
 	updateConfigurationValue: function (inSender, inValue) {
-		
-
 		if(!isNaN(inSender.getValue())) {
 			this.$.errorMsg.hide();
 			this.setValue(inSender.getValue());
 			this.setErr(null);
 		} else {
-			var err = new Error(this.$.label.getContent().toString() + ": '" + this.getValue().toString() + "' is not a number");
+			var err = new Error(this.$.label.getContent().toString() + ": '" + inSender.getValue().toString() + "' is not a number");
 			this.$.errorMsg.setContent(err.toString());
 			this.$.errorMsg.show();
 			this.setErr(err);
 		}
 		
 		return true;
-	},
+	}
 
 });
 

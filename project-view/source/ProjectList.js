@@ -165,17 +165,17 @@ enyo.kind({
 			this.trace("*** BUG: '", fn, "' is not a known function");
 		}
 	},
-	addProject: function(name, folderId, service) {
+	addProject: function(name, folderId, service, dontSelect) {
 		var serviceId = service.getConfig().id || "";
 		if (serviceId === "") {
 			throw new Error("Cannot add a project in service=" + service);
 		}
 		var known = Ares.Workspace.projects.get(name);
 		if (known) {
-			this.trace("Skipped project ", name, " as it is already listed") ;
+			this.log("Skipped project ", name, " as it is already listed") ;
 		} else {
 			var project = Ares.Workspace.projects.createProject(name, folderId, serviceId);
-			if(project){
+			if(project && !dontSelect){
 				this.selectInProjectList(project);
 			}
 		}
