@@ -581,8 +581,10 @@ enyo.kind({
 	handlers: {
 		onFileChosen: "searchProjects"
 	},
+	published: {
+		recurse: true
+	},
 	debug: false,
-	projects: 0,
 
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
@@ -680,7 +682,7 @@ enyo.kind({
 		var service = inEvent.file.service;
 		var topDir = this.$.hermesFileTree.selectedNode.file ;
 		var projects = [];
-		var next = (typeof inEvent.next === 'function' && inEvent.next) || function() {};
+		var next = (typeof inEvent.next === 'function' && inEvent.next) || _next;
 
 		async.series([
 			_walk.bind(this, topDir),
@@ -705,6 +707,8 @@ enyo.kind({
 						file: fileNode
 					});
 					next();
+				} else if (!this.recurse) {
+					next();
 				} else {
 					// ... and recurse only if
 					// none if found in the
@@ -728,6 +732,13 @@ enyo.kind({
 		function _finish(next) {
 			this.doHideWaitPopup();
 			this.reset();
+		}
+
+		function _next(err) {
+			this.warn("Unable to open project:", err);
+			if (err && !this.recurse) {
+				this.doError({msg: "Unable to open project", err: err});
+			}
 		}
 	}
 });
