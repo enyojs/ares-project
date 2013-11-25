@@ -1,5 +1,4 @@
-/* jshint indent: false */ // TODO: ENYO-3311
-/*global Ares, ares, async, ProjectConfig, ServiceRegistry */
+/*global enyo, Ares, ares, async, ProjectConfig, ServiceRegistry */
 
 enyo.kind({
 	name: "ProjectWizardCreate",
@@ -8,7 +7,6 @@ enyo.kind({
 	centered: true,
 	floating: true,
 	autoDismiss: false,
-
 
 	classes: "enyo-unselectable",
 	events: {
@@ -64,12 +62,12 @@ enyo.kind({
 		}
 
 		async.series([
-				this.checkProjectJson.bind(this, inSender, inEvent),
-				this.fillProjectPropPopup.bind(this, inSender, inEvent),
-				this.checkGetAppinfo.bind(this, inSender, inEvent),
-				this.getTemplates.bind(this, inSender, inEvent),
-				this.showProjectPropPopup.bind(this, inSender, inEvent)
-			], this.waitOk.bind(this));
+			this.checkProjectJson.bind(this, inSender, inEvent),
+			this.fillProjectPropPopup.bind(this, inSender, inEvent),
+			this.checkGetAppinfo.bind(this, inSender, inEvent),
+			this.getTemplates.bind(this, inSender, inEvent),
+			this.showProjectPropPopup.bind(this, inSender, inEvent)
+		], this.waitOk.bind(this));
 	},
 
 	checkProjectJson: function(inSender, inEvent, next) {
@@ -361,7 +359,10 @@ enyo.kind({
 	name: "ProjectWizardModify",
 
 	kind: "onyx.Popup",
-	modal: true, centered: true, floating: true, autoDismiss: false,
+	modal: true,
+	centered: true,
+	floating: true,
+	autoDismiss: false,
 
 	handlers: {
 		onDone: "hide",
@@ -396,7 +397,7 @@ enyo.kind({
 			
 			this.targetProject = target ;
 			this.$.propertiesWidget.setTargetProject(target);		
-		
+			
 
 			this.$.propertiesWidget.setupModif();
 			this.$.propertiesWidget.preFill(config.data);
@@ -596,13 +597,13 @@ enyo.kind({
 
 	/**
 	 * Open an existing project
-	 *
+	 * 
 	 * Load the project from the given folder & requests Ares to
 	 * add it to the list of the known projects
-	 *
+	 * 
 	 * @param {FileSystemService} service is the file-system
 	 * @param {ares.Filesystem.Node} folderNode is the folder node
-	 * @param {ares.Filesystem.Node} [projectNode] is the <pre>project.json</pre> node
+	 * @param {ares.Filesystem.Node} [projectNode] is the <pre>project.json</pre> node 
 	 * @public
 	 */
 	openProject: function(service, folderNode, projectNode, next) {
@@ -735,7 +736,10 @@ enyo.kind({
 	name: "ProjectWizardCopy",
 
 	kind: "onyx.Popup",
-	modal: true, centered: true, floating: true, autoDismiss: false,
+	modal: true,
+	centered: true,
+	floating: true,
+	autoDismiss: false,
 
 	handlers: {
 		onDone: "hide",
