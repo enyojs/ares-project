@@ -17,6 +17,7 @@ enyo.kind({
 		actionButton: "",
 		action1Button: "",
 		cancelButton: "",
+		allowHtmlMsg: false,
 		message: ""
 	},
 	events: {
@@ -48,6 +49,7 @@ enyo.kind({
 		this.actionButtonChanged();
 		this.action1ButtonChanged();
 		this.cancelButtonChanged();
+		this.$.message.setAllowHtml(this.allowHtmlMsg);
 	},
 	/** @private */
 	titleChanged: function(oldVal) {
