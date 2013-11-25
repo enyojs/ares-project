@@ -794,7 +794,7 @@ enyo.kind({
 
 		this.enableDesignerActionButtons(true);
 	},
-	//* Called by Ares when ProjectView has new project selected
+	//* Called when ProjectView has new project selected
 	projectSelected: function(inProject,next) {
 		this.trace("called with ",inProject);
 		this.$.designer.updateSource(inProject,next);
