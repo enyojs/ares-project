@@ -1,4 +1,5 @@
-/* global ProjectKindsModel, ares */
+/*global ProjectKindsModel, ares, enyo */
+
 enyo.kind({
 	name: "Designer",
 	published: {
@@ -78,7 +79,11 @@ enyo.kind({
 	
 	// inSource is a backbone Ares.Model.Project defined in WorkspaceData.js
 	updateSource: function(inSource,next) {
-		// FIXME 3082 assert the callback is null
+		if (this.updateSourceCallback) {
+			throw new Error("updateSource called while previous "
+							+ "updateSourceCallback is still pending ");
+			return;
+		}
 		var serviceConfig = inSource.getService().config;
 		this.setDesignerFrameReady(false);
 		this.projectSource = inSource;
