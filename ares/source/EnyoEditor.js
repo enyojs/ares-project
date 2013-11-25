@@ -46,7 +46,7 @@ enyo.kind({
 				{name:"logo", kind:"Ares.Logo"}
 			]}
 		]},
-		{ name: "savePopup", kind: "saveActionPopup"},
+		{ name: "savePopup", kind: "Ares.ActionPopup", allowHtmlMsg: true},
 		{
 			name: "saveAsPopup",
 			kind: "Ares.FileChooser",
@@ -675,10 +675,10 @@ enyo.kind({
 			popup.setTitle($L("Document was modified!"));
 
 			popup.setActionButton($L("Don't Save"));
-
 			popup.setActionCallback( function() {next(null,doc);});
 
-			popup.setSaveCallback(
+			popup.setAction1Button($L("Save"));
+			popup.setAction1Callback(
 				(function() {
 					this.saveDoc(doc);
 					next(null,doc);
@@ -737,31 +737,4 @@ enyo.kind({
 			]}
 		]}
 	]
-});
-
-enyo.kind({
-	name: "saveActionPopup",
-	kind: "Ares.ActionPopup",
-
-	events: {
-		onSaveActionPopup: ""
-	},
-
-	/** @private */
-	create: function() {
-		this.inherited(arguments);
-		this.$.message.allowHtml = true;
-		this.$.buttons.createComponent(
-			{name:"saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "save"},
-			{owner: this}
-		);
-	},
-	setSaveCallback: function(cb) {
-		this.callbacks.save = cb;
-	},
-	/** @private */
-	save: function(inSender, inEvent) {
-		this.hide();
-		this.runCallbackOrBubbleUp('save', 'onSaveActionPopup');
-	}
 });
