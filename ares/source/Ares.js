@@ -51,7 +51,7 @@ enyo.kind({
 			floating: true, 
 			autoDismiss: false,
 			modal: true,
-			style: "text-align: center; padding: 20px;",
+			style: "text-align: center; padding: 20px; width: 200px;",
 			components: [
 				{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 				{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}, 

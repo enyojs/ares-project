@@ -572,7 +572,10 @@ enyo.kind({
 
 	classes: "enyo-unselectable",
 	events: {
-		onAddProjectInList: ""
+		onAddProjectInList: "",
+		onError: "",
+		onShowWaitPopup: "",
+		onHideWaitPopup: ""
 	},
 	handlers: {
 		onFileChosen: "searchProjects"
@@ -584,37 +587,89 @@ enyo.kind({
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 	},
+
+	/** @public */
 	importProject: function(service, parentDir, child) {
-		this.trace('opening project.json from ', parentDir.name ) ;
-
-		service.getFile( child.id ).
-			response(this, function(inSender, fileStuff) {
-				var projectData={};
-				this.trace( "file contents: '", fileStuff.content, "'" ) ;
-
-				try {
-					projectData = enyo.json.parse(fileStuff.content)  ;
-				} catch(e) {
-					this.warn("Error parsing project data: ", e.toString());
-				}
-
-				this.trace('Imported project ', projectData.name, " from ", parentDir.id) ;
-
-				this.doAddProjectInList({
-					name: projectData.name || parentDir.name,
-					folderId: parentDir.id,
-					service: this.selectedFile.service
-				});
-
-				this.projects--;
-
-				if (this.projects === 0) {
-					this.reset();
-				}
-			});
+		this.trace('importing project from folder ', parentDir.name ) ;
+		throw new Error("Not implemented - XXX ENYO-3543");
 	},
 
+	/**
+	 * Open an existing project
+	 *
+	 * Load the project from the given folder & requests Ares to
+	 * add it to the list of the known projects
+	 *
+	 * @param {FileSystemService} service is the file-system
+	 * @param {ares.Filesystem.Node} folderNode is the folder node
+	 * @param {ares.Filesystem.Node} [projectNode] is the <pre>project.json</pre> node
+	 * @public
+	 */
+	openProject: function(service, folderNode, projectNode, next) {
+		this.trace('opening project.json from ', folderNode.name ) ;
+		async.waterfall([
+			_list.bind(this),
+			_fetch.bind(this),
+			_load.bind(this)
+		], next);
+
+		function _list(next) {
+			if (projectNode && projectNode.id) {
+				next(null, projectNode);
+			} else {
+				var req = service.propfind(folderNode.id, 1 /*depth*/);
+				req.response(this, function(inSender, inResponse) {
+					this.trace(inResponse);
+					projectNode = inResponse.children.filter(function(child) {
+						return child.name === "project.json";
+					})[0];
+					next(null, projectNode);
+				});
+				req.error(_handleError);
+			}
+		}
+
+		function _fetch(projectNode, next) {
+			var req = service.getFile(projectNode.id);
+			req.error(_handleError);
+			req.response(function(inSender, fileStuff) {
+				next(null, fileStuff);
+			});
+		}
+
+		function _load(fileStuff, next) {
+			var projectData;
+			try {
+				this.trace( "file contents: '", fileStuff.content, "'" ) ;
+				projectData = enyo.json.parse(fileStuff.content)  ;
+				this.trace('Opened project ', projectData && projectData.name, " from ", folderNode.path) ;
+				this.doAddProjectInList({
+					name: (projectData && projectData.name) || folderNode.name,
+					folderId: folderNode.id,
+					service: service
+				});
+				next();
+			} catch(e) {
+				this.warn("Error parsing project data: ", e.toString());
+				next(e);
+			}
+		}
+
+		function _handleError(inSender, inError) {
+			this.warning(inError);
+			next(new Error(inError.toString()));
+		}
+	},
+
+	/**
+	 * Search for Ares projects in the currently selected folder
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 * @public
+	 */
 	searchProjects: function (inSender, inEvent) {
+		this.trace("inSender:", inSender, "inEvent:", inEvent);
+
 		if (!inEvent.file) {
 			this.hide();
 			this.reset();
@@ -622,60 +677,57 @@ enyo.kind({
 		}
 
 		var service = inEvent.file.service;
+		var topDir = this.$.hermesFileTree.selectedNode.file ;
+		var projects = [];
+		var next = (typeof inEvent.next === 'function' && inEvent.next) || function() {};
 
-		var hft = this.$.hermesFileTree ;
+		async.series([
+			_walk.bind(this, topDir),
+			_add.bind(this),
+			_finish.bind(this)
+		], next);
 
-		// we cannot use directly listFiles as this method sends a list of unrelated files
-		// we need to use the file tree to be able to relate a project.json with is parent dir.
-		var topDir = hft.selectedNode.file ;
-
-		// construct an (kind of) iterator that will scan all directory of the
-		// HFT and look for project.json
-		var toScan = [ [ null , topDir ] ]	; // list of parent_dir , child
-		// var this = this ;
-
-		var iter, inIter ;
-
-		inIter = function() {
-			var item = toScan.shift() ;
-			var child = item[1];
-			this.trace('search iteration on ', child.name, ' isDir ', child.isDir ) ;
-
-			service.listFiles(child.id)
-				.response(this, function(inSender, inFiles) {
-					var toPush = [] ;
-					var foundProject = false ;
-					enyo.forEach(inFiles, function(v) {
-						if ( v.name === 'project.json' ) {
-							foundProject = true ;
-							this.projects++;
-							this.importProject(service, child, v) ;
-						}
-						else if ( v.isDir ===  true ) {
-							this.trace('pushing ', v.name, " from ", child.id) ;
-							toPush.push([child,v]);
-						}
-						// else skip plain file
-					}, this) ;
-
-					if (! foundProject ) {
-						// black magic required to push the entire array
-						toScan.push.apply(toScan, toPush);
-					}
-
-					iter.apply(this) ;
+		function _walk(folderNode, next) {
+			this.trace('Searching in ', folderNode.path) ;
+			this.doShowWaitPopup({msg: "Scanning: " + folderNode.name + "..."});
+			var req = service.listFiles(folderNode.id);
+			req.response(this, function(inSender, inFiles) {
+				// First look for a `project.json`...
+				var fileNode = enyo.filter(inFiles, function(v) {
+					return v.name === 'project.json';
+				}, this)[0];
+				if (fileNode) {
+					this.trace('Found:', fileNode.path) ;
+					this.doShowWaitPopup({msg: "Found: " + folderNode.name + "..."});
+					projects.push({
+						folder: folderNode,
+						file: fileNode
+					});
+					next();
+				} else {
+					// ... and recurse only if
+					// none if found in the
+					// children.
+					var subDirs = enyo.filter(inFiles, function(file) {
+						return file.isDir;
+					});
+					async.forEachSeries(subDirs, _walk.bind(this), next);
 				}
-			) ;
-		} ;
+			});
+		}
 
-		iter = function() {
-			while (toScan.length > 0) {
-				inIter.apply(this) ;
-			}
-		} ;
+		function _add(next) {
+			this.trace('Adding found projects:', projects) ;
+			async.forEachSeries(projects, (function(project, next) {
+				this.doShowWaitPopup({msg: "Adding: " + project.folder.name + " ..."});
+				this.openProject(service, project.folder, project.file, next);
+			}).bind(this), next);
+		}
 
-		iter.apply(this) ; // do not forget to launch the whole stuff
-		this.hide();
+		function _finish(next) {
+			this.doHideWaitPopup();
+			this.reset();
+		}
 	}
 });
 
