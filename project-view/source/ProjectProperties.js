@@ -1,5 +1,4 @@
-/* jshint indent: false */ // TODO: ENYO-3311
-/* global ares, ProjectConfig */
+/*global enyo, ares, ProjectConfig */
 
 /**
  * This kind provide a widget to tune project properties
@@ -97,14 +96,14 @@ enyo.kind({
 							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Id: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectId",
-								attributes: {title: $L("Application ID in reverse domain-name format: com.example.apps.myapp")}, placeholder: "com.example.apps.myapp"}
+								 attributes: {title: $L("Application ID in reverse domain-name format: com.example.apps.myapp")}, placeholder: "com.example.apps.myapp"}
 							]}
 						]},
 						{classes: "ares-row", components: [
 							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Contact: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", name: "projectContact",
-									attributes: {title: $L("mail address or home page of the author")}, placeholder: $L("support@example.com")
+								 attributes: {title: $L("mail address or home page of the author")}, placeholder: $L("support@example.com")
 								}
 							]}
 						]}
@@ -113,11 +112,11 @@ enyo.kind({
 				{tag: "p", classes: "break"},
 				{kind: "FittableColumns", components: [
 					{classes: "ares-row", components: [
-							{tag: "label", classes: "ares-fixed-label  ares-small-label", content: $L("Description:")},
-							{kind: "onyx.InputDecorator", classes: "ares-project-properties-textarea-wide", components: [
-								{kind: "onyx.TextArea", name: "projectDescription", fit: true, content: "", placeholder: $L("My project description...")}
-							]}
+						{tag: "label", classes: "ares-fixed-label  ares-small-label", content: $L("Description:")},
+						{kind: "onyx.InputDecorator", classes: "ares-project-properties-textarea-wide", components: [
+							{kind: "onyx.TextArea", name: "projectDescription", fit: true, content: "", placeholder: $L("My project description...")}
 						]}
+					]}
 				]},
 				{tag:"p", classes:"break"},
 				{kind: "enyo.FittableColumns", classes: "ares-row", name: "servicesList"}
@@ -127,10 +126,10 @@ enyo.kind({
 			{classes: "ares-project-properties", components:[
 				{kind: "FittableRows", components: [
 					{kind: "ProjectProperties.PathInputRow", 
-						name: "topFileRow", 
-						label: $L("Top application file: "), 
-						inputTip: $L("top file of your application. Typically '/index.html', but per default '/debug.html' for debug mode."), 
-						buttonTip: $L("select file...")}
+					 name: "topFileRow", 
+					 label: $L("Top application file: "), 
+					 inputTip: $L("top file of your application. Typically '/index.html', but per default '/debug.html' for debug mode."), 
+					 buttonTip: $L("select file...")}
 				]}
 			]}
 		]},
@@ -161,20 +160,25 @@ enyo.kind({
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.validatePhonegapUiValues = {
-			"sharedConfiguration-icon": true, "sharedConfiguration-splashScreen": true, 
-			"splash-screen-duration": true, "load-url-timeout": true,
-			"android-minSdkVersion": true, "android-maxSdkVersion": true,
-			"ios-icon": true, "ios-splashScreen": true,
-			"winphone-icon": true, "winphone-splashScreen": true,
-			"blackberry-icon": true, "blackberry-splashScreen": true,
-			"webos-icon": true, "webos-splashScreen": true
-
+			"sharedConfiguration-icon": true,
+			"sharedConfiguration-splashScreen": true, 
+			"splash-screen-duration": true,
+			"load-url-timeout": true,
+			"android-minSdkVersion": true,
+			"android-maxSdkVersion": true,
+			"ios-icon": true,
+			"ios-splashScreen": true,
+			"winphone-icon": true,
+			"winphone-splashScreen": true,
+			"blackberry-icon": true,
+			"blackberry-splashScreen": true,
+			"webos-icon": true,
+			"webos-splashScreen": true
 		};
 	},
 	/**
 	 * Set the default tab
 	 */
-	
 	setDefaultTab: function() {
 		this.$.thumbnail.children[0].setActive(true);
 	},
@@ -245,8 +249,6 @@ enyo.kind({
 			// Take the project configuration into account
 			// to show the service or not
 			this.showService(serviceId);
-
-
 		}, this);
 		this.trace("services:", this.services);
 	},
@@ -416,7 +418,7 @@ enyo.kind({
 			return;
 		}
 		
-		this.doModifiedConfig({data: this.config, template: this.selectedTemplate.id, addedSources: this.addedSource}) ;
+		this.doModifiedConfig({data: this.config, template: this.selectedTemplate && this.selectedTemplate.id, addedSources: this.addedSource}) ;
 
 		this.doDone();
 
@@ -436,7 +438,6 @@ enyo.kind({
 		this.validatePhonegapUiValues[this.defineValidationArrayKey(inEvent.originator)] = false;
 	},
 
-
 	/**
 	 * @private
 	 * Function to define the name of the element of the array {this.validatePhonegapUiValues}
@@ -447,15 +448,15 @@ enyo.kind({
 	 */
 	defineValidationArrayKey: function(inOriginator) {
 		if (inOriginator.name === "icon") {
-				return inOriginator && inOriginator.platform + "-icon";
-			} else {
-				if (inOriginator.name === "splashScreen") {
-					return inOriginator && inOriginator.platform + "-splashScreen";
-				}
-				else {
-					return inOriginator.name;
-				}
+			return inOriginator && inOriginator.platform + "-icon";
+		} else {
+			if (inOriginator.name === "splashScreen") {
+				return inOriginator && inOriginator.platform + "-splashScreen";
 			}
+			else {
+				return inOriginator.name;
+			}
+		}
 	},
 
 	/**
@@ -473,9 +474,9 @@ enyo.kind({
 
 		// Set in the array {this.validatePhonegapUiValues} the originator UI row as valide
 		this.validatePhonegapUiValues[this.defineValidationArrayKey(inEvent.originator)] = true;
-	
+		
 		var okDisabled = false;
-	
+		
 		// Reevaluate all the array {this.validatePhonegapUiValues} in order to enable the 
 		// button OK if all the array's elements have the value true.
 		for(var key in this.validatePhonegapUiValues) {

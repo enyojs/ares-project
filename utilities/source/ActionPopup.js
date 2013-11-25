@@ -15,7 +15,7 @@ enyo.kind({
 	published: {
 		title: "",
 		actionButton: "",
-        action1Button: "",
+		action1Button: "",
 		cancelButton: "",
 		actionCallback: null,
 		cancelCallback: null,
@@ -23,7 +23,7 @@ enyo.kind({
 	},
 	events: {
 		onConfirmActionPopup: "",
-        onConfirmAction1Popup: "",
+		onConfirmAction1Popup: "",
 		onCancelActionPopup: ""
 	},
 	components: [
@@ -34,9 +34,9 @@ enyo.kind({
 			]}
 		]},
 		{kind: "onyx.Toolbar", classes:"bottom-toolbar", name: "buttons", components: [
-            {name:"actionButton", kind: "onyx.Button", content: "Action", ontap: "actionConfirm"},
-            {name:"action1Button", kind: "onyx.Button", content: "Action1", ontap: "action1Confirm", showing: false},
-            {name:"cancelButton", classes:"right", kind: "onyx.Button", content: $L("Cancel"), ontap: "actionCancel"}
+			{name:"actionButton", kind: "onyx.Button", content: "Action", ontap: "actionConfirm"},
+			{name:"action1Button", kind: "onyx.Button", content: "Action1", ontap: "action1Confirm", showing: false},
+			{name:"cancelButton", classes:"right", kind: "onyx.Button", content: $L("Cancel"), ontap: "actionCancel"}
 		]}
 	],
 	/** @private */
@@ -47,7 +47,7 @@ enyo.kind({
 		this.titleChanged();
 		this.messageChanged();
 		this.actionButtonChanged();
-	this.action1ButtonChanged();
+		this.action1ButtonChanged();
 		this.cancelButtonChanged();
 	},
 	/** @private */
@@ -65,15 +65,15 @@ enyo.kind({
 		}
 	},
 	/** @private */
-    action1ButtonChanged: function(oldVal) {
-	    if (this.action1Button !== "") {
-		    this.$.action1Button.setContent(this.action1Button);
-		    this.$.action1Button.show();
-	    } else {
-		    this.$.action1Button.hide();
-	    }
-    },
-    /** @private */
+	action1ButtonChanged: function(oldVal) {
+		if (this.action1Button !== "") {
+			this.$.action1Button.setContent(this.action1Button);
+			this.$.action1Button.show();
+		} else {
+			this.$.action1Button.hide();
+		}
+	},
+	/** @private */
 	cancelButtonChanged: function(oldVal) {
 		if (this.cancelButton !== "") {
 			this.$.cancelButton.setContent(this.cancelButton);
@@ -89,11 +89,12 @@ enyo.kind({
 			this.doConfirmActionPopup();
 		}
 		this.clearCallbacks();
+		return true;
 	},
-    /** @private */
-    action1Confirm: function(inSender, inEvent) {
-        this.hide();
-        this.doConfirmAction1Popup();
+	/** @private */
+	action1Confirm: function(inSender, inEvent) {
+		this.hide();
+		this.doConfirmAction1Popup();
 		return true;
 	},
 	/** @private */
