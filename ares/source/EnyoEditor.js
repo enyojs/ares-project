@@ -757,12 +757,11 @@ enyo.kind({
 		);
 	},
 	setSaveCallback: function(cb) {
-		this.saveCallback = cb;
+		this.callbacks.save = cb;
 	},
 	/** @private */
 	save: function(inSender, inEvent) {
 		this.hide();
-		if (this.saveCallback) { this.saveCallback(); }
-		else {this.doSaveActionPopup();}
+		this.runCallbackOrBubbleUp('save', 'onSaveActionPopup');
 	}
 });

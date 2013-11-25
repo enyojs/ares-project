@@ -17,8 +17,6 @@ enyo.kind({
 		actionButton: "",
 		action1Button: "",
 		cancelButton: "",
-		actionCallback: null,
-		cancelCallback: null,
 		message: ""
 	},
 	events: {
@@ -39,6 +37,7 @@ enyo.kind({
 			{name:"cancelButton", classes:"right", kind: "onyx.Button", content: $L("Cancel"), ontap: "actionCancel"}
 		]}
 	],
+	callbacks: {},
 	/** @private */
 	create: function() {
 		ares.setupTraceLogger(this);
@@ -82,36 +81,52 @@ enyo.kind({
 	/** @private */
 	actionConfirm: function(inSender, inEvent) {
 		this.hide();
-		if (this.actionCallback) {
-			this.actionCallback();
-		}
-		else {
-			this.doConfirmActionPopup();
-		}
-		this.clearCallbacks();
+		this.trace('actionConfirm tapped', inSender, inEvent);
+		this.runCallbackOrBubbleUp('action', 'onConfirmActionPopup');
 		return true;
 	},
 	/** @private */
 	action1Confirm: function(inSender, inEvent) {
 		this.hide();
-		this.doConfirmAction1Popup();
+		this.runCallbackOrBubbleUp('action1', 'onConfirmAction1Popup');
 		return true;
 	},
 	/** @private */
 	actionCancel: function(inSender, inEvent) {
 		this.hide();
-		if (this.cancelCallback) {
-			this.cancelCallback();
-		}
-		else {
-			this.doCancelActionPopup();
-		}
-		this.clearCallbacks();
+		this.log('');
+		this.runCallbackOrBubbleUp('cancel', 'onCancelActionPopup');
 		return true;
 	},
 	/** @private */
-	clearCallbacks: function() {
-		this.actionCallback = null;
-		this.cancelCallback = null;
+	runCallbackOrBubbleUp: function(cbName, fallbackEvent) {
+		var theCb = this.callbacks[cbName];
+
+		// to be re-entrant, all callbacks must be deleted before
+		// calling the the relevant callback (and not
+		// after). Otherwise, the code used in callback may reuse and
+		// set its own callback before the end fo runCallBack function
+		this.callbacks = {};
+
+		if (typeof theCb === 'function') {
+			this.trace("Running callback " + cbName);
+			theCb();
+		}
+		else {
+			this.trace("Bubbling fallback event " + fallbackEvent);
+			this.bubble(fallbackEvent);
+		}
+	},
+	setActionCallback: function(cb) {
+		this.callbacks.action = cb;
+	},
+	setAction1Callback: function(cb) {
+		this.callbacks.action1 = cb;
+	},
+	setCancelCallback: function(cb) {
+		this.callbacks.cancel = cb;
+	},
+	setCallbacks: function(allCbs) {
+		this.callbacks = allCbs;
 	}
 });
