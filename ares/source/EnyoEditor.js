@@ -227,8 +227,7 @@ enyo.kind({
 		var projectName = project.getName();
 
 		function isProjectDoc(model) {
-			return model.getFile().name !== "package.js"
-				&& model.getProjectData().getName() === projectName ;
+			return model.getProjectData().getName() === projectName ;
 		}
 		// backbone collection
 		Ares.Workspace.files.filter(isProjectDoc).forEach(action,this);
