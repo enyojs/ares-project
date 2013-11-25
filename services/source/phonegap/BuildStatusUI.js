@@ -52,10 +52,12 @@ enyo.kind({
 		appId: "",		
 		phongapUrl: "https://build.phonegap.com",
 		provider: {}, 
-		selectedPlatform: null
+		selectedPlatform: null,
+		project: {}
 	},
 	events: {
-		onError: ""
+		onError: "",
+		onRegisterMe: ""
 	},
 	handlers: {
 		onUpdateStatusMessage: "updateDownloadMessageContent"
@@ -115,7 +117,18 @@ enyo.kind({
 		this.createIconButtons();
 		this.appIdChanged();
 		this.setProvider(Phonegap.ProjectProperties.getProvider());
+
+		//Register only the instance of PGB status panel from the kind "ProjectWizardModify".
+		if(this.id.match(/projectWizardModify/)){
+			this.doRegisterMe({name:"PGBStatusModifyView", reference:this});
+		}
+
 	},
+
+	/**@private*/
+	projectChanged: function() {
+		this.trace("Selected project for Phonegap Build Status UI: ", this.project);	
+	}, 
 
 	/**
 	 * Create the IconButtons displaying the build state of the application
@@ -294,8 +307,7 @@ enyo.kind({
 	 */
 	downloadPackage: function(inSender, inEvent) {
 
-		var projectConfig = this.owner.getProject();
-		this.provider.downloadPackage(projectConfig, this.selectedPlatform, this.buildStatusData, enyo.bind(this, this.getPackage));
+		this.provider.downloadPackage(this.project, this.selectedPlatform, this.buildStatusData, enyo.bind(this, this.getPackage));
 
 		//set the download status to "Download on progress"
 		this.$.downloadStatus.setDownloadStatus(this.selectedPlatform, 2);		

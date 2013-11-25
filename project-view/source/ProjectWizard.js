@@ -424,11 +424,6 @@ enyo.kind({
 		if(target) {
 			this.start(target);
 
-			// Pass the configuration of the selected project to the panel "Phonegap Build"
-			if (this.$.propertiesWidget.$.phonegapDrawer) {
-				this.$.propertiesWidget.$.phonegapDrawer.$.phonegap.setProject(target);
-			}
-
 			// Define the tab that will be shown when the Pop-up is displayed
 			this.displayedTab = inDisplayedTab;
 		}
