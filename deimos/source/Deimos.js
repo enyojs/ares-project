@@ -129,9 +129,8 @@ enyo.kind({
 	// load acts on pallete, inspector, kindPicker and (may be) sends
 	// to designerFrame serialisation options extracted from .design
 	// files. No ack message is expected from designerFrame
-	// FIXME-3082: rename to loadDesignerUI ?
 	// FIXME 3082: add a callback to delay file load due to kind picker selection
-	load: function(data) {
+	loadDesignerUI: function(data) {
 		this.trace("called with",data);
 		this.enableDesignerActionButtons(false);
 
