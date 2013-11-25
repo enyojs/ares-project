@@ -1,6 +1,6 @@
 /* jshint indent: false */ // TODO: ENYO-3311
 
-/* global Phonegap */
+/* global ares, Phonegap */
 
 /**
  * UI: Phonegap pane in the ProjectProperties popup
@@ -113,12 +113,14 @@ enyo.kind({
 	],
 	/**@private*/
 	create: function() {
+
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.createIconButtons();
 		this.appIdChanged();
 		this.setProvider(Phonegap.ProjectProperties.getProvider());
 
-		//Register only the instance of PGB status panel from the kind "ProjectWizardModify".
+		//Register the instance of PGB status panel from the kind "ProjectWizardModify".
 		if(this.id.match(/projectWizardModify/)){
 			this.doRegisterMe({name:"PGBStatusModifyView", reference:this});
 		}
