@@ -218,7 +218,15 @@ enyo.kind({
 	//* Send message to Deimos with components from designerFrame
 	kindRendered: function(msg) {
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		ComponentsRegistry.getComponent("deimos").designRendered(msg);
+		var deimos = ComponentsRegistry.getComponent("deimos");
+		// need to check if the rendered was done for the current file
+		if (msg.filename === this.currentFileName) {
+			deimos.buildComponentView(msg);
+			deimos.updateCodeInEditor(msg.filename); // based on new Component view
+		}
+		else {
+			this.log("dropped rendered message for stale file ",msg.filename);
+		}
 	},
 	//* Initialize the designerFrame depending on aresOptions
 	designerFrameLoaded: function() {

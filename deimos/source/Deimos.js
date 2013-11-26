@@ -436,7 +436,7 @@ enyo.kind({
 	},
 
 	// When the designer finishes rendering, re-build the components view
-	designRendered: function(msg) {
+	buildComponentView: function(msg) {
 		var components = enyo.json.codify.from(msg.val);
 		
 		this.refreshComponentView(components);
@@ -444,12 +444,7 @@ enyo.kind({
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
 		this.kinds[this.index] = this.cleanUpComponents(components, true)[0];
 		
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.updateCodeInEditor(msg.filename);
-
 		this.enableDesignerActionButtons(true);
-
-		return true;
 	},
 	//* Send dragData type to Designer and Component View during ondragstart within Palette
 	paletteDragStart: function(inSender, inEvent) {
