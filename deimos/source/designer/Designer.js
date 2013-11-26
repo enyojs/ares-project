@@ -124,8 +124,7 @@ enyo.kind({
 			this.designerFrameLoaded();
 		// The current kind was successfully rendered in the iframe
 		} else if(msg.op === "rendered") {
-			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-			this.kindRendered(msg);
+			this.updateKind(msg);
 		// Select event sent from here was completed successfully. Set _this.selection_.
 		} else if(msg.op === "selected") {
 			this.selection = enyo.json.codify.from(msg.val);
@@ -216,9 +215,12 @@ enyo.kind({
 		this.sendMessage({op: "modify", filename: this.currentFileName, val: {property: inProperty, value: inValue}});
 	},
 	//* Send message to Deimos with components from designerFrame
-	kindRendered: function(msg) {
+	updateKind: function(msg) {
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		var deimos = ComponentsRegistry.getComponent("deimos");
+
+		// FIXME: 3082 need to run callback here when msg.triggeredByOp is 'render'
+
 		// need to check if the rendered was done for the current file
 		if (msg.filename === this.currentFileName) {
 			deimos.buildComponentView(msg);
