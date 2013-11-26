@@ -177,7 +177,7 @@ enyo.kind({
 			this.$.designer.set("currentFileName", this.fileName);
 
 			// FIXME: ENYO-3181 3082: synchronize rendering for the right rendered file
-			this.$.designer.renderKind(components[0]);
+			this.$.designer.renderKind(this.fileName, components[0]);
 
 		}
 		
@@ -250,8 +250,8 @@ enyo.kind({
 	//* Rerender current kind
 	rerenderKind: function(inSelectId) {
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.$.designer.set("currentFileName", this.fileName);
 		this.$.designer.renderKind(
+			this.fileName,
 			this.getSingleKind(this.index)[0],
 			inSelectId
 		);

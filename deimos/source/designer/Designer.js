@@ -5,8 +5,7 @@ enyo.kind({
 	published: {
 		designerFrameReady: false,
 		height: null,
-		width: null,
-		currentFileName: ""
+		width: null
 	},
 	events: {
 		onSelect: "",
@@ -177,7 +176,7 @@ enyo.kind({
 	},
 	//* Tell designerFrame to render the current kind
 	// FIXME 3082 need a callback
-	renderKind: function(theKind, inSelectId) {
+	renderKind: function(fileName, theKind, inSelectId) {
 		this.trace("reloadNeeded", this.reloadNeeded);
 		if (this.reloadNeeded) {
 			this.reloadNeeded = false;
@@ -188,11 +187,12 @@ enyo.kind({
 			return;
 		}
 		
+		this.currentFileName = fileName;
 		var components = [theKind];
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.sendMessage({
 			op: "render",
-			filename: this.currentFileName,
+			filename: fileName,
 			val: {
 				name: theKind.name,
 				components: enyo.json.codify.to(theKind.components),
