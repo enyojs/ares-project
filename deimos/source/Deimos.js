@@ -397,22 +397,24 @@ enyo.kind({
 		inComponent.style = enyo.Control.domStylesToCssText(styleProps);
 		this.$.inspector.userDefinedAttributes[inComponent.aresId].style = inComponent.style;
 	},
-	prepareDesignerUpdate: function() {
+	prepareUpdatedKindList: function() {
 		if (this.index !== null) {
-			// Prepare the data for the code editor
-			var event = {contents: []};
+			// create a list containing code for each kind managed by
+			// the designer, I.e. for each kind contained in the
+			// edited file. this list will be used by the code editor
+			var kindsAsCode = [];
+
 			for(var i = 0 ; i < this.kinds.length ; i++) {
-				event.contents[i] = (i === this.index) ? this.formatContent(enyo.json.codify.to(this.cleanUpComponents([this.kinds[i]]))) : null;
+				kindsAsCode[i] = (i === this.index) ? this.formatContent(enyo.json.codify.to(this.cleanUpComponents([this.kinds[i]]))) : null;
 			}
 			// the length of the returned event array is significant for the undo/redo operation.
 			// event.contents.length must match this.kinds.length even if it contains only null values
 			// so the returned structure return may be [null] or [null, content, null] or [ null, null, null]...
-			if (event.contents[this.index] === this.previousContent) {
+			if (kindsAsCode[this.index] === this.previousContent) {
 				// except when undo/redo would not bring any change...
-				event.contents=[];
+				kindsAsCode = [];
 			}
-			
-			return event;
+			return kindsAsCode;
 		}
 	},
 	formatContent: function(inContent) {
@@ -427,10 +429,10 @@ enyo.kind({
 	closeDesignerAction: function(inSender, inEvent) {
 		this.$.designer.cleanUp();
 		
-		var event = this.prepareDesignerUpdate();
+		var kindList = this.prepareUpdatedKindList();
 
 		this.setProjectData(null);
-		this.doCloseDesigner(event);
+		this.doCloseDesigner(kindList);
 		
 		return true;
 	},
@@ -789,13 +791,13 @@ enyo.kind({
 		}
 	},
 	designerUpdate: function(inFilename) {
-		var event = this.prepareDesignerUpdate();
+		var kindList = this.prepareUpdatedKindList();
 		
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		if (inFilename === this.fileName) {
 			var kind = this.getSingleKind(this.index);
 			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(kind)));
-			this.doDesignerUpdate(event);
+			this.doDesignerUpdate(kindList);
 		}
 
 		this.enableDesignerActionButtons(true);

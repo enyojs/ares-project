@@ -601,13 +601,13 @@ enyo.kind({
 		}
 	},
 	// called when designer has modified the components
-	updateComponents: function(inSender, inEvent) {
+	updateComponents: function(kinds) {
 		this.injected = true;
 		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
-			if (inEvent.contents[i]) {
+			if (kinds[i]) {
 				// Insert the new version of components (replace components block, or insert at end)
 				var obj = this.analysis.objects[i];
-				var content = inEvent.contents[i];
+				var content = kinds[i];
 				var start = obj.componentsBlockStart;
 				var end = obj.componentsBlockEnd;
 				var kindStart = obj.block.start;

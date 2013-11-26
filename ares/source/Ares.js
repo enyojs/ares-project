@@ -227,7 +227,7 @@ enyo.kind({
 	//* A design change happened in Deimos - push change to Phobos
 	designerUpdate: function(inSender, inEvent) {
 		if (inEvent) {
-			ComponentsRegistry.getComponent("phobos").updateComponents(inSender, inEvent);
+			ComponentsRegistry.getComponent("phobos").updateComponents(inEvent);
 		}
 	},
 	// FIXME 3082 handle this in  by Enyoeditor
