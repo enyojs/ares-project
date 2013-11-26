@@ -86,7 +86,6 @@ enyo.kind({
 	*/
 	events: {
 		onCloseDesigner: "",
-		onDesignerUpdate: "",
 		onUndo: "",
 		onRedo: "",
 		onRegisterMe: "",
@@ -797,7 +796,7 @@ enyo.kind({
 		if (inFilename === this.fileName) {
 			var kind = this.getSingleKind(this.index);
 			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(kind)));
-			this.doDesignerUpdate(kindList);
+			ComponentsRegistry.getComponent("phobos").updateComponents(kindList);
 		}
 
 		this.enableDesignerActionButtons(true);

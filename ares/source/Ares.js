@@ -82,7 +82,6 @@ enyo.kind({
 		onDesignDocument: "designDocument", 
 		onUpdate: "phobosUpdate",
 		onCloseDesigner: "closeDesigner", 
-		onDesignerUpdate: "designerUpdate", 
 		onUndo: "designerUndo", 
 		onRedo: "designerRedo",
 		onRegisterMe : "_registerComponent",
@@ -224,15 +223,9 @@ enyo.kind({
 	phobosUpdate: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("deimos").loadDesignerUI(inEvent);
 	},
-	//* A design change happened in Deimos - push change to Phobos
-	designerUpdate: function(inSender, inEvent) {
-		if (inEvent) {
-			ComponentsRegistry.getComponent("phobos").updateComponents(inEvent);
-		}
-	},
 	// FIXME 3082 handle this in  by Enyoeditor
 	closeDesigner: function(inSender, inEvent) {
-		this.designerUpdate(inSender, inEvent);
+		ComponentsRegistry.getComponent("phobos").updateComponents(inEvent);
 		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.phobosViewIndex);
 		ComponentsRegistry.getComponent("enyoEditor").activeDocument.setCurrentIF('code');
 		ComponentsRegistry.getComponent("enyoEditor").manageControls(false);
