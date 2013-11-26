@@ -794,13 +794,14 @@ enyo.kind({
 	updateCodeInEditor: function(inFilename) {
 		var kindList = this.prepareUpdatedKindList();
 		
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		if (inFilename === this.fileName) {
 			var kind = this.getSingleKind(this.index);
 			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(kind)));
 			ComponentsRegistry.getComponent("phobos").updateComponentsCode(kindList);
 		}
-
+		else {
+			this.log("skipped code update of stale file ",inFilename);
+		}
 	},
 	//* Called when ProjectView has new project selected
 	projectSelected: function(inProject,next) {
