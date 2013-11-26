@@ -127,8 +127,7 @@ enyo.kind({
 	// load acts on pallete, inspector, kindPicker and (may be) sends
 	// to designerFrame serialisation options extracted from .design
 	// files. No ack message is expected from designerFrame
-	// FIXME 3082: add a callback to delay file load due to kind picker selection
-	loadDesignerUI: function(data) {
+	loadDesignerUI: function(data, next) {
 		this.trace("called with",data);
 		this.enableDesignerActionButtons(false);
 
@@ -142,50 +141,43 @@ enyo.kind({
 		this.owner.$.kindPicker.destroyClientControls();
 
 		// Pass the project information (analyzer output, ...) to the inspector and palette
+		// FIXME: projectDataChanged is triggered only if the projectData reference is changed.
+		// The actual content is not checked by enyo.
 		this.setProjectData(data.projectData);
 
-		// kindPicker let user select the top kind to be designed
-		for (var i = 0; i < what.length; i++) {
-			var k = what[i];
-			this.owner.$.kindPicker.createComponent({
-				content: k.name,
-				index: i,
-				active: (i===0)
-			});
-			maxLen = Math.max(k.name.length, maxLen);
-		}
-		
-		this.owner.$.kindButton.applyStyle("width", (maxLen+2) + "em");
-		this.owner.$.kindPicker.render();
-		this.owner.resized();
+		this.owner.initKindPicker(what) ;
+
+		// preselect the first kind. This will lead to an action in
+		// DesignerFrame
+		async.series(
+			[
+				this.selectKind.bind(this,0)
+			],
+			next
+		);
 	},
-	kindSelected: function(inSender, inEvent) {
-		var index = inSender.getSelected().index;
+
+	selectKind: function(index,next) {
 		var kind = this.kinds[index];
 		var components = this.getSingleKind(index);
+		this.trace("selected kind ",kind);
 		
-		this.addAresIds(components);
-		this.addAresKindOptions(components);
-		this.$.inspector.initUserDefinedAttributes(components);
-		this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(components)));
-
 		if (index !== this.index) {
+			this.addAresIds(components);
+			this.addAresKindOptions(components);
+			this.$.inspector.initUserDefinedAttributes(components);
+			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(components)));
+
 			this.$.inspector.inspect(null);
 			this.$.inspector.setCurrentKindName(kind.name);
 
-			// no magic in there
-			this.$.designer.set("currentFileName", this.fileName);
+			this.$.designer.renderKind(this.fileName, components[0],null,next);
 
-			// FIXME: ENYO-3181 3082: synchronize rendering for the right rendered file
-			this.$.designer.renderKind(this.fileName, components[0]);
-
+			this.index = index;
 		}
-		
-		this.index = index;
-		this.owner.$.kindButton.setContent(kind.name);
-		this.owner.$.toolbar.reflow();
-		
-		return true;
+		else {
+			next(kind.name);
+		}
 	},
 	/**
 	 * Receive the project data reference which allows to access the analyzer
@@ -253,7 +245,8 @@ enyo.kind({
 		this.$.designer.renderKind(
 			this.fileName,
 			this.getSingleKind(this.index)[0],
-			inSelectId
+			inSelectId,
+			function () {}
 		);
 	},
 	refreshInspector: function() {

@@ -210,10 +210,16 @@ enyo.kind({
 	},
 
 	designDocument: function(inSender, inEvent) {
+		this.trace();
 		// send all files being edited to the designer, this will send code to designerFrame
 		this.syncEditedFiles(inEvent.projectData);
 		// then load palette and inspector, and tune serialiser behavior sends option data to designerFrame
-		ComponentsRegistry.getComponent("deimos").loadDesignerUI(inEvent);
+		ComponentsRegistry.getComponent("deimos").loadDesignerUI(
+			inEvent,
+			(function(err) {
+				this.trace("designDocument -> loadDesignerUI done, err is ",err);
+			}).bind(this)
+		);
 		// switch to Deimos editor
 		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.deimosViewIndex);
 		// update an internal variable
@@ -221,7 +227,13 @@ enyo.kind({
 	},
 	//* A code change happened in Phobos - push change to Deimos
 	phobosUpdate: function(inSender, inEvent) {
-		ComponentsRegistry.getComponent("deimos").loadDesignerUI(inEvent);
+		this.trace();
+		ComponentsRegistry.getComponent("deimos").loadDesignerUI(
+			inEvent,
+			(function(err) {
+				this.trace("phobosUpdate -> loadDesignerUI done, err is ",err);
+			}).bind(this)
+		);
 	},
 	// FIXME 3082 handle this in  by Enyoeditor
 	closeDesigner: function(inSender, inEvent) {

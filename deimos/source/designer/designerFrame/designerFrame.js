@@ -179,7 +179,7 @@ enyo.kind({
 			break;
 		case "render":
 			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-			this.renderKind(msg.val, msg.filename);
+			this.renderKind(msg.val, msg.filename, msg.op);
 			break;
 		case "initializeOptions":
 			this.initializeAllKindsAresOptions(msg.options);
@@ -427,7 +427,7 @@ enyo.kind({
 		this.sendMessage({op: "state", val: "ready"});
 	},
 	//* Render the specified kind
-	renderKind: function(inKind, inFileName) {
+	renderKind: function(inKind, inFileName, cmd) {
 		var errMsg;
 
 		try {
@@ -436,12 +436,12 @@ enyo.kind({
 			if (!kindConstructor) {
 				errMsg = "No constructor exists for ";
 				enyo.warn(errMsg, inKind.name);
-				this.sendMessage({op: "error", val: {msg: errMsg + inKind.name}});
+				this.sendMessage({op: "error", val: {triggeredbyOp: cmd, msg: errMsg + inKind.name}});
 				return;
 			} else if(!kindConstructor.prototype) {
 				errMsg = "No prototype exists for ";
 				enyo.warn(errMsg, inKind.name);
-				this.sendMessage({op: "error", val: {msg: errMsg + inKind.name}});
+				this.sendMessage({op: "error", val: {triggeredbyOp: cmd, msg: errMsg + inKind.name}});
 				return;
 			}
 
@@ -481,6 +481,7 @@ enyo.kind({
 			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 			this.sendMessage({
 				op: "rendered",
+				triggeredByOp: cmd, // 'render'
 				val: this.$.serializer.serialize(this.parentInstance, true),
 				filename: inFileName
 			});
@@ -494,7 +495,7 @@ enyo.kind({
 			var errStack = typeof error === 'object' ? error.stack : '' ;
 			this.error(errMsg, errStack );
 			this.sendMessage({op: "reloadNeeded"});
-			this.sendMessage({op: "error", val: {msg: errMsg, requestReload: true, err: {stack: errStack}}});
+			this.sendMessage({op: "error", val: {msg: errMsg, triggeredbyOp: cmd, requestReload: true, err: {stack: errStack}}});
 		}
 	},
 	//* Rerender current selection

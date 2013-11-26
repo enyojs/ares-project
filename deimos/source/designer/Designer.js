@@ -173,20 +173,29 @@ enyo.kind({
 	sendDesignerFrameContainerData: function() {
 		this.sendMessage({op: "containerData", val: ProjectKindsModel.getFlattenedContainerInfo()});
 	},
+
 	//* Tell designerFrame to render the current kind
-	// FIXME 3082 need a callback
-	renderKind: function(fileName, theKind, inSelectId) {
+	renderKind: function(fileName, theKind, inSelectId,next) {
 		this.trace("reloadNeeded", this.reloadNeeded);
 		if (this.reloadNeeded) {
 			this.reloadNeeded = false;
-			this.reload(); // FIXME async ?
+			// trigger a complete reload of designerFrame
+			this.reload();
+			return;
 		}
 
-		if(!this.getDesignerFrameReady()) { // FIXME 3082: poor man async check ???
+		if(!this.getDesignerFrameReady()) {
+			// frame is still being reloaded.
 			return;
 		}
 		
+		if (this.renderCallback) {
+			// a rendering is on-going
+			return;
+		}
 		this.currentFileName = fileName;
+		this.renderCallback = next ;
+
 		var components = [theKind];
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.sendMessage({
@@ -214,20 +223,27 @@ enyo.kind({
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.sendMessage({op: "modify", filename: this.currentFileName, val: {property: inProperty, value: inValue}});
 	},
-	//* Send message to Deimos with components from designerFrame
+	//* Send message to Deimos with new kind/components from designerFrame
 	updateKind: function(msg) {
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		var deimos = ComponentsRegistry.getComponent("deimos");
-
-		// FIXME: 3082 need to run callback here when msg.triggeredByOp is 'render'
 
 		// need to check if the rendered was done for the current file
 		if (msg.filename === this.currentFileName) {
 			deimos.buildComponentView(msg);
 			deimos.updateCodeInEditor(msg.filename); // based on new Component view
+
+			// updateKind may be called by other op than 'render'
+			if (this.renderCallback && msg.triggeredByOp === 'render') {
+				this.renderCallback() ;
+				this.renderCallback = null;
+			}
 		}
 		else {
 			this.log("dropped rendered message for stale file ",msg.filename);
+			if (this.renderCallback && msg.triggeredByOp === 'render') {
+				// other cleanup may be needed...
+				this.renderCallback = null;
+			}
 		}
 	},
 	//* Initialize the designerFrame depending on aresOptions

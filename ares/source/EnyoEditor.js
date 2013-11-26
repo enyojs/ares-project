@@ -135,9 +135,40 @@ enyo.kind({
 	newKindAction: function() {
 		ComponentsRegistry.getComponent("phobos").newKindAction();
 	},
+
+	// kind Picker stuff
 	kindSelected: function(inSender, inEvent) {
-		ComponentsRegistry.getComponent("deimos").kindSelected(inSender, inEvent);
+		var index = inSender.getSelected().index;
+		var deimos = ComponentsRegistry.getComponent("deimos");
+		async.series([
+			deimos.selectKind.bind(deimos,index),
+			(function(name,next) {
+				this.$.kindButton.setContent(name);
+				this.$.toolbar.reflow();
+				next();
+			}).bind(this)
+		]);
+		return true;
 	},
+
+	initKindPicker: function(kinds) {
+		// kindPicker let user select the top kind to be designed
+		var maxLen ;
+		for (var i = 0; i < kinds.length; i++) {
+			var k = kinds[i];
+			this.$.kindPicker.createComponent({
+				content: k.name,
+				index: i
+			});
+			maxLen = Math.max(k.name.length, maxLen);
+		}
+
+		this.$.kindButton.setContent(kinds[0].name);
+		this.$.kindButton.applyStyle("width", (maxLen+2) + "em");
+		this.$.kindPicker.render();
+		this.resized();
+	},
+
 	designerAction: function() {
 		if(ComponentsRegistry.getComponent("phobos").editorUserSyntaxError() !== 0)
 		{
