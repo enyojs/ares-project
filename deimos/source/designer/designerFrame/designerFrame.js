@@ -865,16 +865,7 @@ enyo.kind({
 	getSerializedCopyOfComponent: function(inComponent) {
 		return enyo.json.codify.from(this.$.serializer.serializeComponent(inComponent, true));
 	},
-	//* Rerender client, reselect _this.selection_, and notify Deimos
-	refreshClient: function(noMessage) {
-		this.$.client.render();
 
-		if(!noMessage) {
-			this.kindUpdated();
-		}
-
-		this.selectItem(this.selection);
-	},
 	//* Send update to Deimos with serialized copy of current kind component structure
 	kindUpdated: function(inFileName) {
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
