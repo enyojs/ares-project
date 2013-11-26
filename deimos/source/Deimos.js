@@ -445,7 +445,9 @@ enyo.kind({
 		this.kinds[this.index] = this.cleanUpComponents(components, true)[0];
 		
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.designerUpdate(msg.filename);
+		this.updateCodeInEditor(msg.filename);
+
+		this.enableDesignerActionButtons(true);
 
 		return true;
 	},
@@ -789,7 +791,7 @@ enyo.kind({
 			}
 		}
 	},
-	designerUpdate: function(inFilename) {
+	updateCodeInEditor: function(inFilename) {
 		var kindList = this.prepareUpdatedKindList();
 		
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
@@ -799,7 +801,6 @@ enyo.kind({
 			ComponentsRegistry.getComponent("phobos").updateComponentsCode(kindList);
 		}
 
-		this.enableDesignerActionButtons(true);
 	},
 	//* Called when ProjectView has new project selected
 	projectSelected: function(inProject,next) {
