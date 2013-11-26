@@ -796,7 +796,7 @@ enyo.kind({
 		if (inFilename === this.fileName) {
 			var kind = this.getSingleKind(this.index);
 			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(kind)));
-			ComponentsRegistry.getComponent("phobos").updateComponents(kindList);
+			ComponentsRegistry.getComponent("phobos").updateComponentsCode(kindList);
 		}
 
 		this.enableDesignerActionButtons(true);

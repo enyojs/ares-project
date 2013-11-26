@@ -225,7 +225,7 @@ enyo.kind({
 	},
 	// FIXME 3082 handle this in  by Enyoeditor
 	closeDesigner: function(inSender, inEvent) {
-		ComponentsRegistry.getComponent("phobos").updateComponents(inEvent);
+		ComponentsRegistry.getComponent("phobos").updateComponentsCode(inEvent);
 		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.phobosViewIndex);
 		ComponentsRegistry.getComponent("enyoEditor").activeDocument.setCurrentIF('code');
 		ComponentsRegistry.getComponent("enyoEditor").manageControls(false);

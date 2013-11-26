@@ -601,7 +601,7 @@ enyo.kind({
 		}
 	},
 	// called when designer has modified the components
-	updateComponents: function(kinds) {
+	updateComponentsCode: function(kinds) {
 		this.injected = true;
 		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
 			if (kinds[i]) {
