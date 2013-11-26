@@ -477,8 +477,13 @@ enyo.kind({
 			this.parentInstance.render();
 
 			// Notify Deimos that the kind rendered successfully
+			//* Send update to Deimos with serialized copy of current kind component structure
 			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-			this.kindUpdated(inFileName);
+			this.sendMessage({
+				op: "rendered",
+				val: this.$.serializer.serialize(this.parentInstance, true),
+				filename: inFileName
+			});
 
 			// Select a control if so requested
 			if (inKind.selectId) {
@@ -866,11 +871,6 @@ enyo.kind({
 		return enyo.json.codify.from(this.$.serializer.serializeComponent(inComponent, true));
 	},
 
-	//* Send update to Deimos with serialized copy of current kind component structure
-	kindUpdated: function(inFileName) {
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.sendMessage({op: "rendered", val: this.$.serializer.serialize(this.parentInstance, true), filename: inFileName});
-	},
 	//* Eval code passed in by designer
 	codeUpdate: function(inCode) {
 		/* jshint evil: true */
