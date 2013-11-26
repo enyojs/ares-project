@@ -1,4 +1,4 @@
-/* global ProjectKindsModel, ComponentsRegistry */
+/*global ProjectKindsModel, ComponentsRegistry, enyo, ares, async */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
@@ -174,9 +174,13 @@ enyo.kind({
 		if (index !== this.index) {
 			this.$.inspector.inspect(null);
 			this.$.inspector.setCurrentKindName(kind.name);
-			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+
+			// no magic in there
 			this.$.designer.set("currentFileName", this.fileName);
-			this.$.designer.setCurrentKind(components[0]);
+
+			// FIXME: ENYO-3181 3082: synchronize rendering for the right rendered file
+			this.$.designer.renderKind(components[0]);
+
 		}
 		
 		this.index = index;
@@ -249,8 +253,10 @@ enyo.kind({
 	rerenderKind: function(inSelectId) {
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.$.designer.set("currentFileName", this.fileName);
-		this.$.designer.currentKind = this.getSingleKind(this.index)[0];
-		this.$.designer.renderCurrentKind(inSelectId);
+		this.$.designer.renderKind(
+			this.getSingleKind(this.index)[0],
+			inSelectId
+		);
 	},
 	refreshInspector: function() {
 		enyo.job("inspect", enyo.bind(this, function() {

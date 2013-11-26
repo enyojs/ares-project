@@ -4,7 +4,6 @@ enyo.kind({
 	name: "Designer",
 	published: {
 		designerFrameReady: false,
-		currentKind: null,
 		height: null,
 		width: null,
 		currentFileName: ""
@@ -40,15 +39,6 @@ enyo.kind({
 	rendered: function() {
 		this.inherited(arguments);
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
-	},
-	currentKindChanged: function() {
-		this.trace("reloadNeeded", this.reloadNeeded);
-		if (this.reloadNeeded) {
-			this.reloadNeeded = false;
-			this.reload();
-		} else {
-			this.renderCurrentKind();
-		}
 	},
 	heightChanged: function() {
 		this.$.client.applyStyle("height", this.getHeight()+"px");
@@ -187,15 +177,30 @@ enyo.kind({
 		this.sendMessage({op: "containerData", val: ProjectKindsModel.getFlattenedContainerInfo()});
 	},
 	//* Tell designerFrame to render the current kind
-	renderCurrentKind: function(inSelectId) {
-		if(!this.getDesignerFrameReady()) {
+	// FIXME 3082 need a callback
+	renderKind: function(theKind, inSelectId) {
+		this.trace("reloadNeeded", this.reloadNeeded);
+		if (this.reloadNeeded) {
+			this.reloadNeeded = false;
+			this.reload(); // FIXME async ?
+		}
+
+		if(!this.getDesignerFrameReady()) { // FIXME 3082: poor man async check ???
 			return;
 		}
 		
-		var currentKind = this.getCurrentKind();
-		var components = [currentKind];
+		var components = [theKind];
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.sendMessage({op: "render", filename: this.currentFileName, val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components), componentKinds: enyo.json.codify.to(components), selectId: inSelectId}});
+		this.sendMessage({
+			op: "render",
+			filename: this.currentFileName,
+			val: {
+				name: theKind.name,
+				components: enyo.json.codify.to(theKind.components),
+				componentKinds: enyo.json.codify.to(components),
+				selectId: inSelectId
+			}
+		});
 	},
 	select: function(inControl) {
 		this.sendMessage({op: "select", val: inControl});
