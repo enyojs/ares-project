@@ -44,7 +44,6 @@ enyo.kind({
 						{kind: "Designer", name: "designer",
 							onSelect: "designerSelect",
 							onSelected: "designerSelected",
-							onDesignRendered: "designRendered",
 							onMoveItem: "moveItem",
 							onCreateItem: "createItem",
 							onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
@@ -435,9 +434,10 @@ enyo.kind({
 		
 		return true;
 	},
+
 	// When the designer finishes rendering, re-build the components view
-	designRendered: function(inSender, inEvent) {
-		var components = enyo.json.codify.from(inEvent.content);
+	designRendered: function(msg) {
+		var components = enyo.json.codify.from(msg.val);
 		
 		this.refreshComponentView(components);
 		
@@ -445,7 +445,7 @@ enyo.kind({
 		this.kinds[this.index] = this.cleanUpComponents(components, true)[0];
 		
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.designerUpdate(inEvent.filename);
+		this.designerUpdate(msg.filename);
 
 		return true;
 	},

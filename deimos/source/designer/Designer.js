@@ -1,4 +1,4 @@
-/*global ProjectKindsModel, ares, enyo */
+/*global ProjectKindsModel, ares, enyo, ComponentsRegistry */
 
 enyo.kind({
 	name: "Designer",
@@ -9,7 +9,6 @@ enyo.kind({
 		currentFileName: ""
 	},
 	events: {
-		onDesignRendered: "",
 		onSelect: "",
 		onSelected: "",
 		onCreateItem: "",
@@ -219,7 +218,7 @@ enyo.kind({
 	//* Send message to Deimos with components from designerFrame
 	kindRendered: function(msg) {
 		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.doDesignRendered({content: msg.val, filename: msg.filename});
+		ComponentsRegistry.getComponent("deimos").designRendered(msg);
 	},
 	//* Initialize the designerFrame depending on aresOptions
 	designerFrameLoaded: function() {
