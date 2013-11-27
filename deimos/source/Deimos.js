@@ -131,7 +131,6 @@ enyo.kind({
 		this.enableDesignerActionButtons(false);
 
 		var what = data.kinds;
-		var maxLen = 0;
 		
 		this.index = null;
 		this.kinds = what;
