@@ -34,7 +34,7 @@ enyo.kind({
 				]},
 				{fit: true},
 				{name: "codeEditorDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
-					{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closeDesignerAction"},
+					{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closeDesigner"},
 					{kind: "onyx.Tooltip", content: "Code editor"}
 				]}
 			]},
@@ -187,8 +187,7 @@ enyo.kind({
 		this.doError({msg: $L("Designer cannot work on a file with a syntax error. Please fix the error highlighted in code editor before launching the designer."), title: $L("Syntax Error")});
 	},
 
-	// FIXME 3082 should be plain closeDesigner
-	closeDesignerAction: function(){
+	closeDesigner: function(inSender, inEvent){
 		ComponentsRegistry.getComponent("deimos").closeDesigner();
 		return true;
 	},
