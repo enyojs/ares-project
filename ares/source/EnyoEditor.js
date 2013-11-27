@@ -193,8 +193,7 @@ enyo.kind({
 		return true;
 	},
 
-	//  FIXME 3082 rename this is not good
-	closeDesigner: function() {
+	switchToCodeMode: function() {
 		this.trace();
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.activeDocument.setCurrentIF('code');

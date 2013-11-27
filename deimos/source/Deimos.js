@@ -421,7 +421,7 @@ enyo.kind({
 		
 		this.updateCodeInEditor(this.fileName);
 		this.setProjectData(null);
-		this.owner.closeDesigner();
+		this.owner.switchToCodeMode();
 		
 		return true;
 	},
