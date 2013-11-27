@@ -194,10 +194,8 @@ enyo.kind({
 	},
 
 	//  FIXME 3082 rename this is not good
-	closeDesigner: function(kindList) {
+	closeDesigner: function() {
 		this.trace();
-		// FIXME 3082 call directly updateCodeInEditor from deimos
-		ComponentsRegistry.getComponent("phobos").updateComponentsCode(kindList);
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.activeDocument.setCurrentIF('code');
 		this.manageControls(false);

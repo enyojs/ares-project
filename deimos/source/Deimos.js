@@ -419,10 +419,9 @@ enyo.kind({
 	closeDesigner: function() {
 		this.$.designer.cleanUp();
 		
-		var kindList = this.prepareUpdatedKindList();
-
+		this.updateCodeInEditor(this.fileName);
 		this.setProjectData(null);
-		this.owner.closeDesigner(kindList);
+		this.owner.closeDesigner();
 		
 		return true;
 	},
