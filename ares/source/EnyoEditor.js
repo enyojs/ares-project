@@ -86,8 +86,7 @@ enyo.kind({
 					{kind: "Phobos"}
 				]},
 				{components: [
-					// FIXME 3082 this must not be handled by Ares.
-					{kind: "Deimos", onCloseDesigner: "closeDesigner"}
+					{kind: "Deimos"}
 				]}
 			]
 		}
@@ -187,10 +186,24 @@ enyo.kind({
 	userSyntaxErrorPop: function(){
 		this.doError({msg: $L("Designer cannot work on a file with a syntax error. Please fix the error highlighted in code editor before launching the designer."), title: $L("Syntax Error")});
 	},
+
+	// FIXME 3082 should be plain closeDesigner
 	closeDesignerAction: function(){
-		ComponentsRegistry.getComponent("deimos").closeDesignerAction();
+		ComponentsRegistry.getComponent("deimos").closeDesigner();
+		return true;
+	},
+
+	//  FIXME 3082 rename this is not good
+	closeDesigner: function(kindList) {
+		this.trace();
+		// FIXME 3082 call directly updateCodeInEditor from deimos
+		ComponentsRegistry.getComponent("phobos").updateComponentsCode(kindList);
+		this.$.panels.setIndex(this.phobosViewIndex);
+		this.activeDocument.setCurrentIF('code');
+		this.manageControls(false);
 		this.aceFocus();
 	},
+
 	/**
 	 * Change controls on the panel top toolbar
 	 * 

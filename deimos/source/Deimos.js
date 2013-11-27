@@ -49,8 +49,7 @@ enyo.kind({
 							onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
 							onReloadComplete: "reloadComplete",
 							onResizeItem: "resizeItem",
-							onReturnPositionValue: "designerReturnPositionValue",
-							onForceCloseDesigner: "closeDesignerAction"
+							onReturnPositionValue: "designerReturnPositionValue"
 						}
 					]}
 				]},				
@@ -417,13 +416,13 @@ enyo.kind({
 		
 		return inContent;
 	},
-	closeDesignerAction: function(inSender, inEvent) {
+	closeDesigner: function() {
 		this.$.designer.cleanUp();
 		
 		var kindList = this.prepareUpdatedKindList();
 
 		this.setProjectData(null);
-		this.doCloseDesigner(kindList);
+		this.owner.closeDesigner(kindList);
 		
 		return true;
 	},

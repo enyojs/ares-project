@@ -16,8 +16,7 @@ enyo.kind({
 		onReloadComplete: "",
 		onResizeItem: "",
 		onError: "",
-		onReturnPositionValue: "",
-		onForceCloseDesigner: ""
+		onReturnPositionValue: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", classes: "ares-designer-frame-client"},
@@ -95,6 +94,7 @@ enyo.kind({
 	receiveMessage: function(inSender, inEvent) {
 		
 		var msg = inEvent.message;
+		var deimos = this.owner;
 
 		this.trace("Op: ", msg.op, msg);
 
@@ -151,7 +151,7 @@ enyo.kind({
 					this.renderCallback = null;
 				}
 				if (msg.val.requestReload === true) {
-					msg.val.callback = this.goBacktoEditor.bind(this);
+					msg.val.callback = deimos.closeDesigner.bind(deimos);
 					msg.val.action = "Switching back to code editor";
 				}
 				this.doError(msg.val);
@@ -168,9 +168,6 @@ enyo.kind({
 		} else {
 			enyo.warn("Deimos designer received unknown message op:", msg);
 		}
-	},
-	goBacktoEditor: function() {
-		this.doForceCloseDesigner();
 	},
 	//* Pass _isContainer_ info down to designerFrame
 	sendDesignerFrameContainerData: function() {

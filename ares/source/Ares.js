@@ -81,7 +81,6 @@ enyo.kind({
 		onCloseProjectDocuments: "closeDocumentsForProject",
 		onDesignDocument: "designDocument", 
 		onUpdate: "phobosUpdate",
-		onCloseDesigner: "closeDesigner", 
 		onUndo: "designerUndo", 
 		onRedo: "designerRedo",
 		onRegisterMe : "_registerComponent",
@@ -234,13 +233,6 @@ enyo.kind({
 				this.trace("phobosUpdate -> loadDesignerUI done, err is ",err);
 			}).bind(this)
 		);
-	},
-	// FIXME 3082 handle this in  by Enyoeditor
-	closeDesigner: function(inSender, inEvent) {
-		ComponentsRegistry.getComponent("phobos").updateComponentsCode(inEvent);
-		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.phobosViewIndex);
-		ComponentsRegistry.getComponent("enyoEditor").activeDocument.setCurrentIF('code');
-		ComponentsRegistry.getComponent("enyoEditor").manageControls(false);
 	},
 	//* Undo event from Deimos
 	designerUndo: function(inSender, inEvent) {
