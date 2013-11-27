@@ -145,8 +145,11 @@ enyo.kind({
 		} else if (msg.op === "reloadNeeded") {
 			this.reloadNeeded = true;
 		} else if(msg.op === "error") {
-			// FIXME 3082: handle "unable to render"
 			if (( ! msg.val.hasOwnProperty('popup')) || msg.val.popup === true) {
+				if ( msg.val.triggeredByOp === 'render' && this.renderCallback ) {
+					this.log("dropping renderCallback after error ", msg.val.msg);
+					this.renderCallback = null;
+				}
 				if (msg.val.requestReload === true) {
 					msg.val.callback = this.goBacktoEditor.bind(this);
 					msg.val.action = "Switching back to code editor";
