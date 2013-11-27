@@ -436,12 +436,12 @@ enyo.kind({
 			if (!kindConstructor) {
 				errMsg = "No constructor exists for ";
 				enyo.warn(errMsg, inKind.name);
-				this.sendMessage({op: "error", val: {triggeredbyOp: cmd, msg: errMsg + inKind.name}});
+				this.sendMessage({op: "error", val: {triggeredByOp: cmd, msg: errMsg + inKind.name}});
 				return;
 			} else if(!kindConstructor.prototype) {
 				errMsg = "No prototype exists for ";
 				enyo.warn(errMsg, inKind.name);
-				this.sendMessage({op: "error", val: {triggeredbyOp: cmd, msg: errMsg + inKind.name}});
+				this.sendMessage({op: "error", val: {triggeredByOp: cmd, msg: errMsg + inKind.name}});
 				return;
 			}
 
@@ -495,7 +495,7 @@ enyo.kind({
 			var errStack = typeof error === 'object' ? error.stack : '' ;
 			this.error(errMsg, errStack );
 			this.sendMessage({op: "reloadNeeded"});
-			this.sendMessage({op: "error", val: {msg: errMsg, triggeredbyOp: cmd, requestReload: true, err: {stack: errStack}}});
+			this.sendMessage({op: "error", val: {msg: errMsg, triggeredByOp: cmd, requestReload: true, err: {stack: errStack}}});
 		}
 	},
 	//* Rerender current selection
