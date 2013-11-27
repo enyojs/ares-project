@@ -1,4 +1,4 @@
-/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async */
+/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo */
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -117,23 +117,22 @@ enyo.kind({
 
 		async.parallel(
 			[
-				function (callback) {
+				function (next) {
 					// Pass service definition & configuration to Harmonia
 					// & consequently to HermesFileTree
 					self.trace("ProjectView: setup project on harmonia "+ project.getName() );
-					ComponentsRegistry.getComponent("harmonia").setProject(project, callback);
+					ComponentsRegistry.getComponent("harmonia").setProject(project, next);
 				},
-				function (callback) {
-					// FIXME 3082: a shitload of errors happen below, before the call back
-					// load project configuration from remote project.json
+				function (next) {
 					self.trace("project config init for "+ project.getName() );
 					async.series(
 						[
+							// read default config from remote server
 							config.init.bind(config, initData) ,
-							function (callback) {
+							function (next) {
 								self.trace("ProjectView: setup project set config on "+ project.getName() );
 								project.setConfig(config);
-								callback();
+								next();
 							}
 						],
 						function (err) {
@@ -141,7 +140,7 @@ enyo.kind({
 								self.doError({msg: err.toString(), err: err});
 							}
 							else {
-								callback() ;
+								next() ;
 							}
 						}
 					);
