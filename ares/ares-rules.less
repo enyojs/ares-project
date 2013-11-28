@@ -244,26 +244,11 @@
 
 .ares-drawer {
 	margin-top: 9px;
-	background-color: #eaeaea;
 	.ares-rounded-corners (@ares-drawer-radius);
 	padding:4px;
 	text-align: left;
-	min-height: 60px;
-}
-
-.ares-drawer>div {
-	margin-right: 5px;
-}
-
-.ares-drawer:before{
-	position: absolute;
-	border-color: transparent transparent #eaeaea;
-	border-style: solid;
-	border-width: 0 7px 10px;
-	content: "";
-	display: block;
-	top: -9px;
-	left: 9px;
+	border: 1px solid @ares-darken-background;
+	background-color: lighten(@ares-background, 5%);
 }
 
 /* Ares menu */
@@ -424,17 +409,6 @@
 	margin-right: 10px;
 }
 
-.ares-project-properties-drawer-row {
-	margin-top: 35px!important;
-	margin-bottom: 3.2em!important;
-}
-
-.ares-project-properties-drawer-row-label {
-	width: 20em!important;
-	margin-left: 10px;
-	margin-right: 10px;
-}
-
 .ares-project-properties-drawer-row-attribute-label {
 	margin-left: 10px;
 	margin-right: 10px;
@@ -444,18 +418,17 @@
 	height: 11em;
 }
 .ares-project-properties-help-button {
-	position: relative;
-	left: 67em;
+	position: absolute;
+	display: inline;
+	right: 0px;
 }
 .ares-project-properties-common_drawer_header { 
 	margin-left: 50px;
 	color: @ares-drawer-label;
 	font-weight:bold;
-	position: relative;
-	top : 7px;
 }
 .ares-project-properties-build-option-panel {
-	margin-top: 7em;
+	margin-top: 40px;
 }
 .ares-project-properties-appid-container {
 	margin-top: 1em;
@@ -465,6 +438,7 @@
 	margin-left: 10px; 
 	color: @ares-drawer-label;
 	font-weight:bold;
+	vertical-align: middle;
 }
 
 .ares-project-properties-picker-AppId{
@@ -472,7 +446,7 @@
 	width: 24em!important;	
 	margin-right: 30px;
 	margin-left: 1em;
-	margin-bottom: 3em;
+	margin-bottom: 15px;
 }
 
 .onyx-menu-item.ares-project-properties-picker-item-align-left  {
@@ -482,7 +456,7 @@
 
 .ares-project-properties-picker {
 	width: 15em;
-	margin-right: 30px;
+	//margin-right: 30px;
 }
 .ares-project-properties-picker-small {
 	width: 50px;
@@ -501,13 +475,17 @@
 }
 
 .ares-project-properties-input-error-message {
-	padding-top: 0.2em;
-	padding-bottom: 0.1em;
 	padding-left: 0.5em;
 	padding-right: 0.5em;
-	width: 15em;
-	background-color: #FFD323;	
-
+	max-width: 56%;
+	background-color: #FFD323;
+	margin-left: 5px;
+	.ares-rounded-corners();	
+	word-wrap: break-word;
+	overflow: hidden;
+}
+.ares-project-properties-input-error-message.small{
+	max-width: 25%;
 }
 .ares-project-properties-textarea-wide > textarea {
 	width: 500px;
@@ -515,7 +493,6 @@
 }
 .ares-project-properties-password {
 	width: 9em !important;
-	height: 2em !important;
 }
 .ares-project-properties-show-sk {
 	width: 15em;
@@ -525,23 +502,17 @@
 	margin-right: 3em;
 	.ares-rounded-corners (@ares-drawer-radius);
 }
-
-.ares-project-properties-drawer-row-check-box-label {
-	margin-left: 30px;
-	margin-right: 50px;
-}
-
 .ares-project-properties-label-background { 
-	background-color: @ares-drawer-label-background;
+	background-color: @ares-background;
 	.ares-box-shadow (inset 0px 0px 30px rgba(0,0,0,0.3));
-	width: 900px; 
-	height: 32px; 
-	margin-left: 5px;
+	line-height: 1.5;
+	padding: 3px;
+	margin-bottom: 4px;
 	.ares-rounded-corners (@ares-drawer-radius); 	
 }
 
 .ares-project-properties-label-background:hover {
-	background-color: @ares-drawer-label-background-hover;
+	background-color: @ares-backgound-hover
 }
 
 .ares-project-properties-status-message {
@@ -552,7 +523,6 @@
 
 .ares-project-properties-status-message-container {
 	background-color: #ddd;
-	
 	.ares-rounded-corners (3px);
 	width: 35em;
 	height: 7em!important;
@@ -570,6 +540,7 @@
 
 .ares-project-properties-build-status-container {
 	margin-left: 3em;
+	height: 120px;
 }
 
 .ares-project-properties-build-status-icon {
@@ -585,7 +556,9 @@
 }
 
 .ares-project-properties-qrcode-image {
-	margin-left: 10em;
+	position: relative;
+	top: -16px;
+	left: 50px;
 }
 
 .ares-project-properties-buildStatus-icon-highlight {
@@ -593,7 +566,8 @@
 }
 
 .ares-project-properties-margin-right {
-	margin-right: 10px !important;
+	margin-right: 5px;
+	margin-left: 5px;
 }
 
 .ares-project-properties-buildStatus-download-button-android {
@@ -644,6 +618,14 @@
 
 .ares-tooltip-last:before {
 	left: 71px;
+}
+
+.ares-tooltip-last-phoneGap {
+	left: -100px;
+}
+
+.ares-tooltip-last-phoneGap:before {
+	left: 110px;
 }
 
 .ares-grabber {
