@@ -619,7 +619,14 @@ enyo.kind({
 		
 		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
 			if(c.aresId === inItem.aresId) {
-				// selection is surrounded by a timeout to insure selection to use the updated properties of the modified component to highlight after rendering
+				// this method is typically called right after a
+				// render.  The algorithm used in there will query the
+				// DOM to get the boundary and coordinates of the
+				// selected kind. This query must be issued only when
+				// the rendering phase is finished, lest bogus data
+				// are used to draw the highlight rectangle. The call
+				// to timeout ensures that _selectItem is called once
+				// the rendering phase is done.
 				setTimeout(this._selectItem.bind(this, c), 0);
 				return;
 			}
