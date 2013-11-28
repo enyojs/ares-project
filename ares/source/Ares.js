@@ -146,7 +146,6 @@ enyo.kind({
 			var currentProject = ComponentsRegistry.getComponent("projectView").currentProject;
 			this.trace("Current project: " + currentProject.id);
 			ComponentsRegistry.getComponent("deimos").projectSelected(currentProject);
-			ComponentsRegistry.getComponent("PGBStatusModifyView").setProject(currentProject);
 		}), 500);	// <-- TODO - using timeout here because project url is set asynchronously
 		return true;
 	},

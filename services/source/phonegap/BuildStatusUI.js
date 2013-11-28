@@ -119,17 +119,11 @@ enyo.kind({
 		this.createIconButtons();
 		this.appIdChanged();
 		this.setProvider(Phonegap.ProjectProperties.getProvider());
-
-		//Register the instance of PGB status panel from the kind "ProjectWizardModify".
-		if(this.id.match(/projectWizardModify/)){
-			this.doRegisterMe({name:"PGBStatusModifyView", reference:this});
-		}
-
 	},
 
 	/**@private*/
 	projectChanged: function() {
-		this.trace("Selected project for Phonegap Build Status UI: ", this.project);	
+		this.trace("Selected project for Phonegap Build Status UI: ", ComponentsRegistry.getComponent("projectView").currentProject);	
 	}, 
 
 	/**
@@ -308,8 +302,7 @@ enyo.kind({
 	 * @private
 	 */
 	downloadPackage: function(inSender, inEvent) {
-
-		this.provider.downloadPackage(this.project, this.selectedPlatform, this.buildStatusData, enyo.bind(this, this.getPackage));
+		this.provider.downloadPackage(this.provider.getCurrentProject(), this.selectedPlatform, this.buildStatusData, enyo.bind(this, this.getPackage));
 
 		//set the download status to "Download on progress"
 		this.$.downloadStatus.setDownloadStatus(this.selectedPlatform, 2);		
