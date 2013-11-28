@@ -710,23 +710,33 @@ enyo.kind({
 		// List the handler methods declared in the components and in handlers map
 		var declared = this.listHandlers(object, {});
 
-		// Prepare the code to insert
-		var codeToInsert = "";
-		for(var item in declared) {
-			if (item !== "" && existing[item] === undefined) {
-				codeToInsert += (commaTerminated ? "" : ",");
-				commaTerminated = false;
-				codeToInsert += ("\n\t" + item + ": function(inSender, inEvent) {\n\t\t// TO");
-				codeToInsert += ("DO - Auto-generated code\n\t}");
-			}
-		}
-
 		// insert the missing handler methods code in the editor
 		if (object.block) {
+			var pos = object.block.end - 2, 
+				lineTerm = "\n", 
+				position = this.$.ace.mapToLineColumns([pos]);
+			if (position[0].column === -1) {
+				// CRLF line termination detected, must go back one byte further
+				this.log("CRLF line termination document");
+				pos--;
+				lineTerm = "\r\n";
+			}
+
+			// Prepare the code to insert
+			var codeToInsert = "";
+			for(var item in declared) {
+				if (item !== "" && existing[item] === undefined) {
+					codeToInsert += (commaTerminated ? "" : ",");
+					commaTerminated = false;
+					// use correct line terminations
+					codeToInsert += ( lineTerm + "\t" + item + ": function(inSender, inEvent) {" + lineTerm + "\t\t// TO");
+					codeToInsert += ("DO - Auto-generated code" + lineTerm + "\t}");
+				}
+			}
+
 			if (codeToInsert !== "") {
 				// Get the corresponding Ace range to replace/insert the missing code
 				// NB: ace.replace() allow to use the undo/redo stack.
-				var pos = object.block.end - 3;
 				var range = this.$.ace.mapToLineColumnRange(pos, pos);
 				this.$.ace.replaceRange(range, codeToInsert);
 			}
