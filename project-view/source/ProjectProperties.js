@@ -432,14 +432,19 @@ enyo.kind({
 	disableOkButton: function(inSender, inEvent) {
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		this.$.ok.setDisabled(true);
-		this.$.errTooltipDecorator.createComponent({
+		var contentError = inEvent.reason || "Check project properties tabs for errors";
+		if(!this.$.errTooltip){
+			this.$.errTooltipDecorator.createComponent({
 			kind: "onyx.Tooltip", 
 			name: "errTooltip", 
-			content: inEvent.reason || "Check project properties tabs for errors", 
+			content: contentError, 
 			showing: true, 
 			showDelay: 0
-		}, {owner: this});
-		this.$.errTooltipDecorator.render();
+			}, {owner: this});
+			this.$.errTooltipDecorator.render();
+		}else{
+			this.$.errTooltip.setContent(contentError);
+		}
 		this.$.errTooltip.show();
 		this.validatePhonegapUiValues[this.defineValidationArrayKey(inEvent.originator)] = false;
 	},
@@ -475,7 +480,7 @@ enyo.kind({
 	 * @param  {Object} inEvent  contain the new state of the event originator
 	 * @return {boolean}         stop the bubbling.
 	 */
-	enableOkButton: function(inSender, inEvent){		
+	enableOkButton: function(inSender, inEvent){	
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 
 		// Set in the array {this.validatePhonegapUiValues} the originator UI row as valide
@@ -490,7 +495,9 @@ enyo.kind({
 				okDisabled = true;	
 			}
 		}
-		this.$.errTooltip.destroy();
+		if(this.$.errTooltip){
+			this.$.errTooltip.destroy();
+		}
 		this.$.ok.setDisabled(okDisabled);		
 	},
 
