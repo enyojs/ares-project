@@ -619,6 +619,7 @@ enyo.kind({
 		
 		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
 			if(c.aresId === inItem.aresId) {
+				// selection is surrounded by a timeout to insure selection to use the updated properties of the modified component to highlight after rendering
 				setTimeout(this._selectItem.bind(this, c), 0);
 				return;
 			}
