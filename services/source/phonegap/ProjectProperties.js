@@ -125,7 +125,7 @@ enyo.kind({
 				var containerPanel = getPanel.call(this, row.name);
 				var componentName = "drawer";
 				if(dwr.$.panel){
-					componentName = "panel"
+					componentName = "panel";
 				}
 				dwr.$[componentName].createComponent({
 					kind: "Phonegap.ProjectProperties." + row.type,

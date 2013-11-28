@@ -409,13 +409,13 @@ enyo.kind({
 	},
 	components: [
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
-			{
-				kind: "onyx.PickerDecorator",
-				components: [
-					{kind: "onyx.PickerButton", name: "configurationPickerButton", classes: "ares-project-properties-picker"},
-					{kind: "onyx.Picker", name: "configurationPicker", onSelect: "updateConfigurationValue"}
-				]
-			}
+		{
+			kind: "onyx.PickerDecorator",
+			components: [
+				{kind: "onyx.PickerButton", name: "configurationPickerButton", classes: "ares-project-properties-picker"},
+				{kind: "onyx.Picker", name: "configurationPicker", onSelect: "updateConfigurationValue"}
+			]
+		},
 		{name: "errorMsg", content: "The value must be a number", showing: false, classes: "ares-project-properties-input-error-message"}
 	],
 
