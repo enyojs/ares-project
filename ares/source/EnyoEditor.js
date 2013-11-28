@@ -576,6 +576,10 @@ enyo.kind({
 		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : "")
 				   + "to " + newDoc.getName() );
 
+		this.doShowWaitPopup({msg: "switching files"});
+
+		var serial = [];
+
 		//select project if the file(d) comes from another project then the previous file
 		if (!oldDoc || oldDoc.getProjectData().getName() !== newName){
 			this.trace("also switch project "
@@ -585,23 +589,18 @@ enyo.kind({
 			var projectList = ComponentsRegistry.getComponent("projectList");
 			var deimos = ComponentsRegistry.getComponent("deimos");
 
-			// switch document is done in the callback
-			async.series(
-				[
-					projectList.selectInProjectList.bind(projectList,project),
-					deimos.projectSelected.bind(deimos,project),
-					this._switchDoc.bind(this,newDoc)
-				],
-				function() {
-					if (next) {next();}
-				}
+			serial.push(
+				projectList.selectInProjectList.bind(projectList,project),
+				deimos.projectSelected.bind(deimos,project)
 			);
 		}
-		else {
-			this._switchDoc(newDoc);
-			if (next) {next();}
-		}
 
+		serial.push(
+			this._switchDoc.bind(this,newDoc),
+			this.doHideWaitPopup.bind(this)
+		);
+
+		async.series( serial, next );
 	},
 
 	// switch Phobos or Deimos to new document
