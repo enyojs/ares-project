@@ -66,7 +66,7 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		this.$.appIdSelector.setProject(this.project);
+		
 		this.createAllDrawers();
 	},
 
@@ -184,7 +184,6 @@ enyo.kind({
 		this.trace("Project config:", config);
 		this.setConfig(config);
 		this.$.appIdSelector.setSelectedAppId(config.appId || '');
-		this.$.appIdSelector.setProject(this.project);
 		config.targets = config.targets || {};
 
 

@@ -1,6 +1,6 @@
 /* jshint indent: false */ // TODO: ENYO-3311
 
-/* global Phonegap */
+/* global ares, Phonegap */
 
 /**
  * UI: Phonegap pane in the ProjectProperties popup
@@ -111,6 +111,8 @@ enyo.kind({
 	],
 	/**@private*/
 	create: function() {
+
+		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.createIconButtons();
 		this.appIdChanged();
@@ -293,9 +295,7 @@ enyo.kind({
 	 * @private
 	 */
 	downloadPackage: function(inSender, inEvent) {
-
-		var projectConfig = this.owner.getProject();
-		this.provider.downloadPackage(projectConfig, this.selectedPlatform, this.buildStatusData, enyo.bind(this, this.getPackage));
+		this.provider.downloadPackage(this.provider.getCurrentProject(), this.selectedPlatform, this.buildStatusData, enyo.bind(this, this.getPackage));
 
 		//set the download status to "Download on progress"
 		this.$.downloadStatus.setDownloadStatus(this.selectedPlatform, 2);		
