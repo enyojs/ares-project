@@ -8,12 +8,13 @@
 	z-index: 9999;
 }
 .designer-frame-select-highlight {
-	background-color: rgba(255,187,0,0.3);
-	border: 1px solid orange;
+	background-image: url("./highlight-orange.gif?overlay=designer");
+	opacity: 0.2;
 }
 
 .designer-frame-drop-highlight {
-	border:1px solid blue;
+	background-image: url("./highlight-blue.gif?overlay=designer");
+	opacity: 0.2;
 }
 
 /* Width/height handles */
