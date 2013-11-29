@@ -52,12 +52,10 @@ enyo.kind({
 		appId: "",		
 		phongapUrl: "https://build.phonegap.com",
 		provider: {}, 
-		selectedPlatform: null,
-		project: {}
+		selectedPlatform: null
 	},
 	events: {
-		onError: "",
-		onRegisterMe: ""
+		onError: ""
 	},
 	handlers: {
 		onUpdateStatusMessage: "updateDownloadMessageContent"
