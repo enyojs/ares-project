@@ -144,7 +144,7 @@ enyo.kind({
 		this.trace("set timer for setting project in Deimos");
 		setTimeout(enyo.bind(this, function() { 
 			var currentProject = ComponentsRegistry.getComponent("projectView").currentProject;
-			this.trace("setting project in Deimos: ", currentProject.id);
+			this.trace("setting project in Deimos" + currentProject.id);
 			ComponentsRegistry.getComponent("deimos").projectSelected(currentProject);
 		}), 500);	// <-- TODO - using timeout here because project url is set asynchronously
 		return true;
