@@ -149,6 +149,7 @@ var configPath, tester;
 var configStats;
 var aresAboutData;
 var serviceMap = {};
+var maxTimeout = 2*60*1000;
 
 
 if (argv.runtest) {
@@ -320,6 +321,31 @@ loadPackageConfig();
 // File age/date is the UTC configuration file last modification date
 ide.res.timestamp = configStats.atime.getTime();
 log.verbose('main', ide.res);
+
+
+ // Ares services timeout is defined as the maximum value of services timeout attributes.
+function setServicesTimeout() {
+
+	for (var key in ide.res.services) {
+
+		if (ide.res.services[key].timeout !== undefined) {
+
+			if (ide.res.services[key].timeout > maxTimeout) {			
+				maxTimeout = ide.res.services[key].timeout;
+			} else {
+				
+				log.verbose("Timeout redifined for ", ide.res.services[key].id, 
+							" from: ",ide.res.services[key].timeout ,"(ms)",
+							" to : ", maxTimeout ," (ms)");			
+				
+				ide.res.services[key].timeout = maxTimeout;
+
+			}		
+		}	
+	}	
+}
+
+setServicesTimeout();
 
 function handleMessage(service) {
 	return function(msg) {
