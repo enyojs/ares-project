@@ -450,9 +450,7 @@ enyo.kind({
 			var itemState = inValue === this.value ? true : false;
 			this.addElementPicker(inValue, inValue, itemState);			
 		}, this);
-	},
-
-	
+	},	
 
 	/**
 	 * This function change the displayed value of the picker to the parameter "inContent".
@@ -583,7 +581,6 @@ enyo.kind({
 enyo.kind({
 	name: "Phonegap.ProjectProperties.SDKMinVersionRow",
 	kind: "Phonegap.ProjectProperties.PickerRow",
-
 	
 	/**
 	 * @private
