@@ -18,6 +18,10 @@ enyo.kind({
 			classes: "ares-small-toolbar title-gradient",
 			showing: false,
 			checkBeforeClosing: true,
+			checkBeforeSwitching: true,
+			onTabSwitchRequest: 'switchDoc',
+			// backward compatibility: the following event handler can
+			// be removed once onyx pilot-13 is integrated in Ares
 			onTabChanged: 'switchDoc',
 			onTabRemoveRequested: 'requestCloseDoc',
 			onHide: "doAceFocus"
@@ -44,7 +48,7 @@ enyo.kind({
 	switchDoc: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.userId);
 		this.trace(inEvent.id, newDoc);
-		ComponentsRegistry.getComponent("enyoEditor").switchToDocument(newDoc);
+		ComponentsRegistry.getComponent("enyoEditor").switchToDocument(newDoc, inEvent.next);
 		return true;
 	},
 
