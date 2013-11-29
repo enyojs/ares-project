@@ -334,7 +334,7 @@ function setServicesTimeout() {
 				maxTimeout = ide.res.services[key].timeout;
 			} else {
 				
-				log.verbose("Timeout redifined for ", ide.res.services[key].id, 
+				log.verbose("Timeout redefined for ", ide.res.services[key].id,
 							" from: ",ide.res.services[key].timeout ,"(ms)",
 							" to : ", maxTimeout ," (ms)");			
 				
