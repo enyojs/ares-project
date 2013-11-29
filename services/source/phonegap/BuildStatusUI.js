@@ -119,11 +119,6 @@ enyo.kind({
 		this.setProvider(Phonegap.ProjectProperties.getProvider());
 	},
 
-	/**@private*/
-	projectChanged: function() {
-		this.trace("Selected project for Phonegap Build Status UI: ", ComponentsRegistry.getComponent("projectView").currentProject);	
-	}, 
-
 	/**
 	 * Create the IconButtons displaying the build state of the application
 	 * for all platforms defined in the object {Phonegap.ProjectProperties.downloadStatus}
