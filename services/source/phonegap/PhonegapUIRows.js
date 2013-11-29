@@ -431,6 +431,16 @@ enyo.kind({
 		this.$.label.setContent(this.label);
 	},
 
+	/**@private*/
+	addElementPicker: function(inContent, inValue, inActive) {
+		this.$.configurationPicker.createComponent({
+			classes: "ares-project-properties-api-version-picker-element",
+			content: inContent, 
+			value: inValue,
+			active: inActive
+		});	
+	},
+
 	/**
 	 * Set the content of the row's picker when the row is created.
 	 * @ private
@@ -438,9 +448,12 @@ enyo.kind({
 	contentValueChanged: function () {
 		enyo.forEach(this.contentValue, function (inValue) {
 			var itemState = inValue === this.value ? true : false;
-			this.$.configurationPicker.createComponent({content: inValue, active: itemState});
+			this.addElementPicker(inValue, inValue, itemState)
+			//this.$.configurationPicker.createComponent({content: inValue, active: itemState});
 		}, this);
 	},
+
+	
 
 	/**
 	 * This function change the displayed value of the picker to the parameter "inContent".
@@ -547,10 +560,31 @@ enyo.kind({
 	}
 });
 
+enyo.kind({
+	name: "Phonegap.ProjectProperties.SDKMaxVersionRow",
+	kind: "Phonegap.ProjectProperties.SDKMinVersionRow",
+	/**
+	 * @private
+	 */
+	contentValueChanged: function() {
+		//sort the value of the Android API version to garanty the display in the correct order. 
+		Object.keys(Phonegap.UIConfiguration.androidSdkVersions)
+		.sort(function(a, b) {return a - b;})
+		.forEach(
+			(function(key) {
+				var itemState = key === this.value ? true : false;
+				this.addElementPicker(key + " / " + Phonegap.UIConfiguration.androidSdkVersions[key], 
+					key, itemState);
+			}).bind(this)		
+		);
+		this.addElementPicker("None", "", false);
+	},
+});
 
 enyo.kind({
-	name: "Phonegap.ProjectProperties.SDKVersionRow",
+	name: "Phonegap.ProjectProperties.SDKMinVersionRow",
 	kind: "Phonegap.ProjectProperties.PickerRow",
+
 	
 	/**
 	 * @private
@@ -562,15 +596,10 @@ enyo.kind({
 		.forEach(
 			(function(key) {
 				var itemState = key === this.value ? true : false;
-
-				this.$.configurationPicker.createComponent({
-					classes: "ares-project-properties-api-version-picker-element",
-					content: key + " / " + Phonegap.UIConfiguration.androidSdkVersions[key], 
-					value: key,
-					active: itemState
-				});
+				this.addElementPicker(key + " / " + Phonegap.UIConfiguration.androidSdkVersions[key], 
+					key, itemState);
 			}).bind(this)		
-		);		
+		);
 	},
 	/**
 	 * @private
