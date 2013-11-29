@@ -82,8 +82,8 @@ enyo.kind({
 				type: "Target",
 				rows: [
 					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], defaultValue: "internalOnly", type: "PickerRow", jsonSection: "preferences"},
-					{name: "android-minSdkVersion", label: "Min. API Level/Android Version ", content: [], defaultValue: "7", type: "SDKVersionRow", jsonSection: "preferences"},
-					{name: "android-maxSdkVersion", label: "Max. API Level/Android Version ", content: [], defaultValue: "18", type: "SDKVersionRow", jsonSection: "preferences"},
+					{name: "android-minSdkVersion", label: "Min. API Level/Android Version ", content: [], defaultValue: "7", type: "SDKMinVersionRow", jsonSection: "preferences"},
+					{name: "android-maxSdkVersion", label: "Max. API Level/Android Version ", content: [], defaultValue: "18", type: "SDKMaxVersionRow", jsonSection: "preferences"},
 					{name: "android-windowSoftInputMode", label: "Window SoftInput Mode ", content: ["stateVisible", "adjustResize"], defaultValue: "stateVisible", type: "PickerRow", jsonSection: "preferences"},
 					{name: "splash-screen-duration", label: "Splash screen Duration (ms)", content: "5000", defaultValue: "5000", type: "NumberInputRow", jsonSection: "preferences", description: "Time in milliseconds"},
 					{name: "load-url-timeout", label: "Load URL timeout (ms)", content: "20000", defaultValue: "20000", type: "NumberInputRow", jsonSection: "preferences", description: "Time in milliseconds"},
