@@ -448,8 +448,7 @@ enyo.kind({
 	contentValueChanged: function () {
 		enyo.forEach(this.contentValue, function (inValue) {
 			var itemState = inValue === this.value ? true : false;
-			this.addElementPicker(inValue, inValue, itemState)
-			//this.$.configurationPicker.createComponent({content: inValue, active: itemState});
+			this.addElementPicker(inValue, inValue, itemState);			
 		}, this);
 	},
 
