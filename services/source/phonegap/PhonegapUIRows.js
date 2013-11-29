@@ -161,24 +161,18 @@ enyo.kind({
 	},
 	components: [
 		{name: "label", classes: "ares-project-properties-drawer-row-label"},
-			{
-			kind: "FittableRows",
+		{
+			kind: "onyx.InputDecorator",
+			classes: "ares-project-properties-input-medium",
 			components: [
 				{
-					kind: "onyx.InputDecorator",
-					classes: "ares-project-properties-input-medium",
-					components: [
-						{
-							kind: "onyx.Input",
-							name: "configurationInput",
-							onchange: "updateConfigurationValue"							
-						}
-					]
-				}, 
-
-				{name: "errorMsg", content: "The value must be a number", showing: false, classes: "ares-project-properties-input-error-message"}
+					kind: "onyx.Input",
+					name: "configurationInput",
+					onchange: "updateConfigurationValue"							
+				}
 			]
-		}
+		}, 
+		{name: "errorMsg", content: "The value must be a number", showing: false, classes: "ares-project-properties-input-error-message"}
 	],
 
 	/**
