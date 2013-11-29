@@ -14,8 +14,7 @@ enyo.kind({
 	},
 	events: {
 		onError: "",
-		onConfigure: "",
-		onRegisterMe: ""
+		onConfigure: ""
 	},
 	handlers: {
 		onRefresh: "_getUserData"
