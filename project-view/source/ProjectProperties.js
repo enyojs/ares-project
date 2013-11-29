@@ -435,12 +435,12 @@ enyo.kind({
 		var contentError = inEvent.reason || "Check project properties tabs for errors";
 		if(!this.$.errTooltip){
 			this.$.errTooltipDecorator.createComponent({
-			kind: "onyx.Tooltip", 
-			name: "errTooltip", 
-			content: contentError, 
-			showing: true, 
-			showDelay: 0
-			}, {owner: this});
+					kind: "onyx.Tooltip", 
+					name: "errTooltip", 
+					content: contentError, 
+					showing: true, 
+					showDelay: 0
+				}, {owner: this});
 			this.$.errTooltipDecorator.render();
 		}else{
 			this.$.errTooltip.setContent(contentError);
