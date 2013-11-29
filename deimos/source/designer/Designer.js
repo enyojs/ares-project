@@ -65,10 +65,13 @@ enyo.kind({
 	},
 	
 	// inSource is a backbone Ares.Model.Project defined in WorkspaceData.js
+	updateSourcePending: [],
 	updateSource: function(inSource,next) {
 		if (this.updateSourceCallback) {
-			throw new Error("updateSource called while previous "
+			this.log("updateSource called while previous "
 							+ "updateSourceCallback is still pending ");
+			this.updateSourcePending.push([inSource,next]);
+			return ;
 		}
 		var serviceConfig = inSource.getService().config;
 		this.setDesignerFrameReady(false);
@@ -95,6 +98,7 @@ enyo.kind({
 		
 		var msg = inEvent.message;
 		var deimos = this.owner;
+		var cbData;
 
 		this.trace("Op: ", msg.op, msg);
 
@@ -118,6 +122,12 @@ enyo.kind({
 				this.trace("calling updateSourceCallback");
 				this.updateSourceCallback();
 				this.updateSourceCallback = null;
+				// FIXME a real state machine is needd here
+				if (this.updateSourcePending.length) {
+					this.log("resuming delayed update source");
+					cbData = this.updateSourcePending.shift() ;
+					this.updateSource(cbData[0], cbData[1]);
+				}
 			}
 		// Loaded event sent from designerFrame and awaiting aresOptions.
 		} else if(msg.op === "state" && msg.val === "loaded") {
