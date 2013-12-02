@@ -716,8 +716,8 @@ enyo.kind({
 				lineTerm = "\n", 
 				position = this.$.ace.mapToLineColumns([pos]);
 			if (position[0].column === -1) {
-				// CRLF line termination detected, must go back one byte further
-				this.log("CRLF line termination document");
+				// CRLF line termination detected, must go back one byte more
+				this.trace("CRLF line termination document");
 				pos--;
 				lineTerm = "\r\n";
 			}
@@ -729,7 +729,7 @@ enyo.kind({
 					codeToInsert += (commaTerminated ? "" : ",");
 					commaTerminated = false;
 					// use correct line terminations
-					codeToInsert += ( lineTerm + "\t" + item + ": function(inSender, inEvent) {" + lineTerm + "\t\t// TO");
+					codeToInsert += (lineTerm + "\t" + item + ": function(inSender, inEvent) {" + lineTerm + "\t\t// TO");
 					codeToInsert += ("DO - Auto-generated code" + lineTerm + "\t}");
 				}
 			}
