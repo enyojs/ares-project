@@ -18,8 +18,8 @@ enyo.kind({
 			classes: "ares-small-toolbar title-gradient",
 			showing: false,
 			checkBeforeClosing: true,
-			checkBeforeSwitching: true,
-			onTabSwitchRequest: 'switchDoc',
+			checkBeforeChanging: true,
+			onTabChangeRequested: 'switchDoc',
 			// backward compatibility: the following event handler can
 			// be removed once onyx pilot-13 is integrated in Ares
 			onTabChanged: 'switchDoc',
