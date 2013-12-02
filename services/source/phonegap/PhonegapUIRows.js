@@ -399,7 +399,8 @@ enyo.kind({
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
 	published: {
-		contentValue: undefined
+		contentValue: undefined,
+		none: undefined
 	},
 	components: [
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
@@ -440,6 +441,19 @@ enyo.kind({
 			var itemState = inValue === this.value ? true : false;
 			this.$.configurationPicker.createComponent({content: inValue, active: itemState});
 		}, this);
+	
+		this.addNoneElement(this.none);
+		
+	},
+
+	/**
+	 * Add a none element to the picker's items.
+	 * @param {String} inNoneValue the value of the none picker's element.
+	 */
+	addNoneElement: function(inNoneValue) {
+		if (this.none !== undefined) {
+			this.$.configurationPicker.createComponent({content: "None", value: inNoneValue, active: false});
+		}
 	},
 
 	/**
@@ -571,6 +585,8 @@ enyo.kind({
 				});
 			}).bind(this)		
 		);		
+					
+		this.addNoneElement(this.none);
 	},
 	/**
 	 * @private
