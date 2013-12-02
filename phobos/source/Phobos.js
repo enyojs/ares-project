@@ -712,13 +712,13 @@ enyo.kind({
 
 		// insert the missing handler methods code in the editor
 		if (object.block) {
-			var pos = object.block.end - 2, 
+			var blockEnd = object.block.end - 2, 
 				lineTerm = "\n", 
-				position = this.$.ace.mapToLineColumns([pos]);
+				position = this.$.ace.mapToLineColumns([blockEnd]);
 			if (position[0].column === -1) {
 				// CRLF line termination detected, must go back one byte more
 				this.trace("CRLF line termination document");
-				pos--;
+				blockEnd--;
 				lineTerm = "\r\n";
 			}
 
@@ -737,7 +737,7 @@ enyo.kind({
 			if (codeToInsert !== "") {
 				// Get the corresponding Ace range to replace/insert the missing code
 				// NB: ace.replace() allow to use the undo/redo stack.
-				var range = this.$.ace.mapToLineColumnRange(pos, pos);
+				var range = this.$.ace.mapToLineColumnRange(blockEnd, blockEnd);
 				this.$.ace.replaceRange(range, codeToInsert);
 			}
 		} else {
