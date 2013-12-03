@@ -124,7 +124,7 @@ enyo.kind({
 			}
 			// call back *once* the function passed to updateSource
 			if (this.updateSourceCallback) {
-				this.trace("calling updateSourceCallback");
+				this.trace("update source done.");
 				this.updateSourceCallback();
 				this.updateSourceCallback = null;
 				// FIXME a real state machine is needd here
