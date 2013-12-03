@@ -310,14 +310,11 @@ enyo.kind({
 			content = doc.getEditedData();
 		}
 
-		this.saveFile(
-			doc.getName(),
-			content,
-			{
-				service: doc.getProjectData().getService(),
-				fileId: doc.getFileId()
-			}
-		);
+		var where = {
+			service: doc.getProjectData().getService(),
+			fileId: doc.getFileId()
+		};
+		this.saveFile(doc.getName(), content, where);
 	},
 
 	saveFile: function(name,content,where,next){
