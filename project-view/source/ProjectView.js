@@ -138,9 +138,8 @@ enyo.kind({
 						function (err) {
 							if (err) {
 								self.doError({msg: err.toString(), err: err});
-							}
-							else {
-								next() ;
+							} else {
+								next(err) ;
 							}
 						}
 					);
@@ -148,7 +147,9 @@ enyo.kind({
 			],
 			function (err) {
 				self.trace("ProjectView: setup project config done on " + project.getName() + " err is ",err );
-				if (next) { next(); }
+				if (next) {
+					next(err);
+				}
 			}
 		);
 	},
