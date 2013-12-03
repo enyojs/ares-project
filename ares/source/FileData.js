@@ -1,16 +1,25 @@
-/* global Ares, Backbone */
+/*global Ares, Backbone, enyo */
 
 enyo.singleton({
 	kind: "enyo.Component",
 	name: "Ares.Model"
 });
 
+/**
+ *
+ * @param {} Component
+ * @param {} Model
+ * @returns {String} service_name-project_name_as_hex_and_file_id_in_hex
+ */
 Ares.Model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when possible
-	// returns service_name-project_name_as_hex_and_file_id_in_hex
 	getId: function() {
 		return this.get("id");
 	},
-	// return id encrypted in hexa
+
+	/**
+	 *
+	 * @returns {String} id encrypted in hexa
+	 */
 	getFileId: function() {
 		return this.get("file").id;
 	},

@@ -306,9 +306,12 @@ enyo.kind({
 		}
 	},
 
-	//* Update code running in designer
+	/**
+	 * Update code running in designer
+	 * @param {Ares.Model.Project} project, backbone object defined
+	 * in WorkspaceData.js
+	 */
 	syncEditedFiles: function(project) {
-		// project is a backbone Ares.Model.Project defined in WorkspaceData.js
 		var projectName = project.getName();
 		this.trace("update all edited files on project", projectName);
 		
@@ -320,8 +323,11 @@ enyo.kind({
 		Ares.Workspace.files.filter(isProjectFile).forEach(this.updateCode,this);
 	},
 
+	/**
+	 *
+	 * @param {Ares.Model.File} inDoc is a backbone object defined in FileData.js
+	 */
 	updateCode: function(inDoc) {
-		// inDoc is a backbone Ares.Model.File defined in FileData.js
 		var filename = inDoc.getFile().path,
 			aceSession = inDoc.getAceSession(),
 			code = aceSession && aceSession.getValue();
