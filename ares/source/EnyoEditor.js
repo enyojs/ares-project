@@ -1,4 +1,4 @@
-/*global ComponentsRegistry, ares, Ares, alert, async, enyo, $L */
+/*global ComponentsRegistry, ares, Ares, async, enyo, $L */
 enyo.kind({
 	name:"Ares.EnyoEditor",
 	kind:"FittableRows", 
@@ -560,7 +560,7 @@ enyo.kind({
 		// safety net
 		if ( ! newDoc ) {
 			if  (this.debug) { throw("File ID " + newDoc + " not found in cache!");}
-			else             { alert("File ID not found in cache!");}
+			next("File ID not found in cache!");
 			return;
 		}
 
