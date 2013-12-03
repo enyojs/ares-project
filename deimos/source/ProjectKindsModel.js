@@ -151,8 +151,7 @@ enyo.singleton({
 
 		if (info && info.level) {
 			return info.level;
-		}
-		else {
+		} else {
 			info = this.getInfo("__default", inType, inName) ;
 			return (info && info.level) || ProjectKindsModel.F_NORMAL;
 		}

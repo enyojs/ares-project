@@ -113,8 +113,7 @@ enyo.kind({
 		if (typeof theCb === 'function') {
 			this.trace("Running callback " + cbName);
 			theCb();
-		}
-		else {
+		} else {
 			this.trace("Bubbling fallback event " + fallbackEvent);
 			this.bubble(fallbackEvent);
 		}

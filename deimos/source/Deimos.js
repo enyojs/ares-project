@@ -172,8 +172,7 @@ enyo.kind({
 			this.$.designer.renderKind(this.fileName, components[0],null,next);
 
 			this.index = index;
-		}
-		else {
+		} else {
 			next(kind.name);
 		}
 	},
@@ -783,8 +782,7 @@ enyo.kind({
 			var kind = this.getSingleKind(this.index);
 			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(kind)));
 			ComponentsRegistry.getComponent("phobos").updateComponentsCode(kindList);
-		}
-		else {
+		} else {
 			this.log("skipped code update of stale file ",inFilename);
 		}
 	},

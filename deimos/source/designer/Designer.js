@@ -252,8 +252,7 @@ enyo.kind({
 				this.renderCallback() ;
 				this.renderCallback = null;
 			}
-		}
-		else {
+		} else {
 			this.log("dropped rendered message for stale file ",msg.filename);
 			if (this.renderCallback && msg.triggeredByOp === 'render') {
 				// other cleanup may be needed...
@@ -288,8 +287,7 @@ enyo.kind({
 			} else if(filename.slice(-3) === ".js") {
 				this.sendMessage({op: "codeUpdate", val: inCode});
 			}
-		}
-		else {
+		} else {
 			this.warn("syncFile aborted: project mismatch. Expected " + this.projectSource.getName()
 					  + ' got '+ projectName + ' with file ' + filename);
 		}

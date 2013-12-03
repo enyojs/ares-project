@@ -138,8 +138,7 @@ enyo.kind({
 		this.$.amenu.show();
 		if(this.$.amenu.hasClass('on')) {
 			this.$.amenu.removeClass('on');
-		}
-		else {
+		} else {
 			this.$.amenu.addClass('on');
 		}
 	},
@@ -215,8 +214,7 @@ enyo.kind({
 					this.doHideWaitPopup();
 					next(inError);
 				}) ;
-		}
-		else {
+		} else {
 			this.removeProjectData(project, next) ;
 		}
 	},
@@ -248,8 +246,7 @@ enyo.kind({
 			this.selected = null;
 			this.doProjectRemoved();
 			this.$.projectMenu.setDisabled(true);
-		}
-		else {
+		} else {
 			this.trace("called on " + name);
 		}
 

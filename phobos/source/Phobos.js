@@ -133,8 +133,7 @@ enyo.kind({
 			this.$.ace.applyAceSettings(this.$.editorSettingsPopup.getSettings());
 
 			this.$.ace.editingMode = mode;
-		}
-		else {
+		} else {
 			var config = this.projectData.getService().getConfig();
 			var fileUrl = config.origin + config.pathname + "/file" + file.path;
 			this.$.imageViewer.setAttribute("src", fileUrl);

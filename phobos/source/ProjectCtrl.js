@@ -84,8 +84,7 @@ enyo.kind({
 			this.ongoing = true;
 			this.pending = false ;
 			this.$.projectAnalyzer.analyze([this.projectUrl + "/enyo/source", this.projectUrl], this.pathResolver);
-		}
-		else {
+		} else {
 			this.trace("Set pending project analysis for ", this.projectUrl);
 			this.pending = true;
 		}

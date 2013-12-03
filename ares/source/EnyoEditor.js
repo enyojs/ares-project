@@ -169,12 +169,9 @@ enyo.kind({
 	},
 
 	designerAction: function() {
-		if(ComponentsRegistry.getComponent("phobos").editorUserSyntaxError() !== 0)
-		{
+		if(ComponentsRegistry.getComponent("phobos").editorUserSyntaxError() !== 0) {
 			this.userSyntaxErrorPop();
-		}
-		else
-		{
+		} else {
 			ComponentsRegistry.getComponent("phobos").designerAction();
 			this.manageControls(true);
 		}
@@ -369,8 +366,7 @@ enyo.kind({
 		if (this.activeDocument === inDocData) {
 			// current file was just saved
 			codeLooksGood = phobos.reparseUsersCode();
-		}
-		else {
+		} else {
 			this.trace("skipping reparse user code");
 		}
 
@@ -410,8 +406,7 @@ enyo.kind({
 		if (param.file) {
 			this.$.saveAsPopup.$.hermesFileTree
 				.checkNodeName(param.name, this.requestOverwrite.bind(this,param));
-		}
-		else {
+		} else {
 			// no file or folder chosen
 			this.aceFocus();
 		}
@@ -530,12 +525,10 @@ enyo.kind({
 
 		if (docId && this.activeDocument && this.activeDocument.getId() === docId) {
 			this.closeActiveDoc();
-		}
-		else if (docId) {
+		} else if (docId) {
 			this.log("closing a doc different from current one: ", doc.getName());
 			this.forgetDoc(doc);
-		}
-		else {
+		} else {
 			this.warn("called without doc to close");
 		}
 

@@ -1074,8 +1074,7 @@ enyo.kind({
 					} else {
 						this.showWarningPopup(this.$LS("No template found for '.#{extension}' files. Created an empty one.", {extension: type}));
 					}
-				}
-				else {
+				} else {
 					this.warn("error while fetching ", templatePath, ': ', error);
 				}
 			});

@@ -452,8 +452,7 @@ enyo.kind({
 		} else {
 			if (inOriginator.name === "splashScreen") {
 				return inOriginator && inOriginator.platform + "-splashScreen";
-			}
-			else {
+			} else {
 				return inOriginator.name;
 			}
 		}
