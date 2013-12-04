@@ -149,7 +149,6 @@ var configPath, tester;
 var configStats;
 var aresAboutData;
 var serviceMap = {};
-var maxTimeout = 2*60*1000;
 
 
 if (argv.runtest) {
@@ -322,30 +321,6 @@ loadPackageConfig();
 ide.res.timestamp = configStats.atime.getTime();
 log.verbose('main', ide.res);
 
-
- // Ares services timeout is defined as the maximum value of services timeout attributes.
-function setServicesTimeout() {
-
-	for (var key in ide.res.services) {
-
-		if (ide.res.services[key].timeout !== undefined) {
-
-			if (ide.res.services[key].timeout > maxTimeout) {			
-				maxTimeout = ide.res.services[key].timeout;
-			} else {
-				
-				log.verbose("Timeout redefined for ", ide.res.services[key].id,
-							" from: ",ide.res.services[key].timeout ,"(ms)",
-							" to : ", maxTimeout ," (ms)");			
-				
-				ide.res.services[key].timeout = maxTimeout;
-
-			}		
-		}	
-	}	
-}
-
-setServicesTimeout();
 
 function handleMessage(service) {
 	return function(msg) {
@@ -600,7 +575,28 @@ var enyojsRoot = path.resolve(myDir,".");
 var app = express(),
     server = http.createServer(app);
 
-server.setTimeout(argv.timeout);
+/**
+ * Ares server timeout is defined as the maximum value of services timeout attributes.
+ * @param  {integer} inTimeout default value of the server timeout.
+ */
+function defineServerTimeout(inTimeout) {
+
+	var timeout = inTimeout;
+
+	for (var key in ide.res.services) {
+
+		if (ide.res.services[key].timeout !== undefined && 
+			ide.res.services[key].timeout > inTimeout) {
+			timeout = ide.res.services[key].timeout;
+		}
+	}
+	
+	log.verbose("Server timeout is set to : ", timeout ," (ms)");
+	server.setTimeout(timeout);
+}
+
+
+defineServerTimeout(argv.timeout);
 
 // over-write CORS headers using the configuration if
 // any, otherwise be paranoid.
