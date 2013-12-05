@@ -570,6 +570,8 @@ enyo.kind({
 	 * @private
 	 */
 	contentValueChanged: function() {
+		this.addNoneElement(this.none);
+
 		//sort the value of the Android API version to garanty the display in the correct order. 
 		Object.keys(Phonegap.UIConfiguration.androidSdkVersions)
 		.sort(function(a, b) {return a - b;})
@@ -585,8 +587,6 @@ enyo.kind({
 				});
 			}).bind(this)		
 		);		
-					
-		this.addNoneElement(this.none);
 	},
 	/**
 	 * @private
