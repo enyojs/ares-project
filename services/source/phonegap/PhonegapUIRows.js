@@ -437,12 +437,13 @@ enyo.kind({
 	 * @ private
 	 */
 	contentValueChanged: function () {
+		this.addNoneElement(this.none);
 		enyo.forEach(this.contentValue, function (inValue) {
 			var itemState = inValue === this.value ? true : false;
 			this.$.configurationPicker.createComponent({content: inValue, active: itemState});
 		}, this);
 	
-		this.addNoneElement(this.none);
+		
 		
 	},
 
