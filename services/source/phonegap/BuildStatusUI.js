@@ -365,6 +365,12 @@ enyo.kind({
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.DownloadStatus",
+	provider: {},
+
+	create: function() {
+		this.inherited(arguments);
+		this.set("provider", Phonegap.ProjectProperties.getProvider());
+	},
 
 	/**
 	 * Set the download status for a platform defined in {this.downloadStatus}.
@@ -374,10 +380,11 @@ enyo.kind({
 	 * @public
 	 */
 	setDownloadStatus: function(inPlatform, inDownloadStatus) {
-
-		Phonegap.ProjectProperties.downloadStatus[inPlatform] = inDownloadStatus === 1 ? "Download complete": 
+		
+		this.provider.getCurrentProject().getDownloadStatus()[inPlatform] = inDownloadStatus === 1 ? "Download complete": 
 		inDownloadStatus === 0 ? "Download failed" : "Download in progress";
 
+		this.log(this.provider.getCurrentProject().getDownloadStatus());
 		this.bubble("onUpdateStatusMessage");	
 	},
 
@@ -389,7 +396,7 @@ enyo.kind({
 	 * @public
 	 */
 	getDownloadStatus: function(inPlatform) {
-		return Phonegap.ProjectProperties.downloadStatus[inPlatform];
+		return this.provider.getCurrentProject().getDownloadStatus()[inPlatform];
 	}	
 
 });
