@@ -1,6 +1,6 @@
 /* global require, ace, ComponentsRegistry */
 enyo.kind({
-	name: "enyo.Ace",
+	name: "enyo.AceWrapper",
 	kind: enyo.Control,
 	published: {
 		value: "",
