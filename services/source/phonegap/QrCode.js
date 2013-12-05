@@ -47,7 +47,7 @@ enyo.kind({
 		qrPath = qr.createSVGPath(4);
 		
 		// append the Qr Code data to an SVG image.
-		svgTags  = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="200" height="200">/';
+		svgTags  = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="132" height="132">/';
 		svgTags += '	<path d="'+ qrPath +'"/>';
 		svgTags += '</svg>';
 				

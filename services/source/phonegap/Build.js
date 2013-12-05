@@ -57,6 +57,14 @@ enyo.kind({
 		return this.config;
 	},
 
+	/** 
+	 * Return an instance of the current selected project from the project list UI.
+	 * @public
+	 */
+	getCurrentProject: function() {
+		return ComponentsRegistry.getComponent("projectView").currentProject;
+	},
+
 	/**
 	 * @return the human-friendly name of this service
 	 */
