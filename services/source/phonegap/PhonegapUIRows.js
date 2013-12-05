@@ -399,9 +399,9 @@ enyo.kind({
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
 	published: {
-		contentValue: undefined,
-		none: undefined
+		contentValue: undefined		
 	},
+	none: undefined,
 	components: [
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
 		{
