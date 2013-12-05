@@ -132,6 +132,12 @@ Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when
 	setService: function(service) {
 		this.set("service", service);
 	},
+	getDownloadStatus: function() {
+		return this.get("downloadStatus");
+	},
+	setDownloadStatus: function(downloadStatus) {
+		this.set("downloadStatus", downloadStatus);
+	},
 	getConfig: function() {
 		return this.get("config");
 	},
