@@ -356,12 +356,12 @@ ServiceBase.prototype.returnFormData = function(parts, res, next) {
 			// Adding data
 			if (part.path) {
 				mode = "path";
-				var stream = fs.createReadStream(part.path);
-				stream.on('error', function(err) {
-					log.warn("ServiceBase#returnFormData()", "part:", part.name, "(" + mode + ")", "err:", err);
-					next(err);
-				});
 				combinedStream.append(function(append) {
+					var stream = fs.createReadStream(part.path);
+					stream.on('error', function(err) {
+						log.warn("ServiceBase#returnFormData()", "part:", part.name, "(" + mode + ")", "err:", err);
+						next(err);
+					});
 					append(stream.pipe(base64.encode()));
 				});
 			} else if (part.stream) {
