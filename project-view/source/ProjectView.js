@@ -84,6 +84,21 @@ enyo.kind({
 	},
 	modifySettingsAction: function(inSender, inEvent) {
 		this.$.projectWizardModify.start(this.currentProject);
+		/*
+		//Initialize the project attribute "downloadStatus"
+		if(this.currentProject.getDownloadStatus() === undefined) {
+			this.currentProject.setDownloadStatus(
+				{
+					"android": "Ready for download", 
+					"ios": "Ready for download", 
+					"winphone": "Ready for download", 
+					"blackberry": "Ready for download", 
+					"webos": "Ready for download"
+				}
+			);
+		}*/	
+
+		this.log(this.currentProject);
 		return true; //Stop event propagation
 	},
 
@@ -114,7 +129,7 @@ enyo.kind({
 		var config = new ProjectConfig();
 		config.init({
 			service: project.getService(),
-			folderId: project.getFolderId()
+			folderId: project.getFolderId()			
 		}, function(err) {
 			if (err) {
 				self.doError({msg: err.toString(), err: err});
@@ -122,6 +137,19 @@ enyo.kind({
 			project.setConfig(config);
 			self.doProjectSelected();
 		});
+		
+		//Initialize the attribute "downloadStatus" of the project
+		//this attribute is used only by Phonegap Build.
+		if (project.getDownloadStatus() === undefined) {
+			project.setDownloadStatus({
+				"android": "Ready for download", 
+				"ios": "Ready for download", 
+				"winphone": "Ready for download", 
+				"blackberry": "Ready for download", 
+				"webos": "Ready for download"
+			});
+		}
+	
 		self.currentProject = project;
 	},
 	projectRemoved: function(inSender, inEvent) {
