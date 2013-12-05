@@ -7,5 +7,5 @@ enyo.depends(
 	"ProjectCtrl.js",
 	"EditorSettings.js",
 	"AceScroller.js",
-	"Ace.js"
+	"AceWrapper.js"
 );

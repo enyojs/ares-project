@@ -1,6 +1,6 @@
 /* global require, ace, ComponentsRegistry */
 enyo.kind({
-	name: "enyo.Ace",
+	name: "enyo.AceWrapper",
 	kind: enyo.Control,
 	published: {
 		value: "",
@@ -499,7 +499,32 @@ enyo.kind({
 	replaceRange: function(range, text) {
 		this.getSession().replace(range, text);
 	},
-	
+	/**
+	 * Inserts at the specified position the new text passed
+	 * in the parameters
+	 * @param  position: the position to insert the new text
+	 * @param  text:  the new text
+	 * @public
+	 */
+	insertPosition: function(position, text) {
+		this.getSession().insert(position, text);
+	},
+	/**
+	 * Inserts at the specified position a new line
+	 * according to the line termination mode
+	 * @param  position: the position to insert the new line
+	 * @public
+	 */
+	insertNewLine: function(position) {
+		this.getSession().getDocument().insertNewLine(position);
+	},
+	/**
+	 * Get the line termination used according to the related mode
+	 * @public
+	 */
+	getNewLineCharacter: function() {
+		return this.getSession().getDocument().getNewLineCharacter();
+	},
 	setFontSize: function(size){
 		var s = size;
 		this.editor.setFontSize(s);
@@ -539,6 +564,5 @@ enyo.kind({
 		}else{
 			htmlDiv.style[transformProp] = "none";
 		}
-	},
-	
+	}
 });
