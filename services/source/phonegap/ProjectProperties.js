@@ -138,7 +138,8 @@ enyo.kind({
 					width: row.defaultWidth,
 					height: row.defaultHeight,
 					pan: containerPanel,
-					description: row.description
+					description: row.description,
+					none:row.none
 				});
 			}, this);
 		}

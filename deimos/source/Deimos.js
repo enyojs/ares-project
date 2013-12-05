@@ -21,6 +21,7 @@ enyo.kind({
 							{style: "width:100%;"},
 							{kind: "onyx.Picker", name: "devicePicker", ontap: "deviceChosen", components: [
 								{content: "(600 x 800) Default",		value: { height: 800,  width: 600 }},
+								{content: "(1024 x 600) HP Slate7",      value: { height:  1024, width:  600, ppi: 170, dpr: 1 }},
 								{content: "(1920 x 1080) HDTV",			value: { height: 1080, width: 1920 }},
 								{content: "(320 x 480) iPhone\u2122",	value: { height: 480,  width: 320 }},
 								{content: "(320 x 573) iPhone\u2122 5",	value: { height: 573,  width: 320 }},

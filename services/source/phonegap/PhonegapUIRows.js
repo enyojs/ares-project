@@ -399,8 +399,9 @@ enyo.kind({
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
 	published: {
-		contentValue: undefined
+		contentValue: undefined		
 	},
+	none: undefined,
 	components: [
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
 		{
@@ -436,10 +437,21 @@ enyo.kind({
 	 * @ private
 	 */
 	contentValueChanged: function () {
+		this.addNoneElement(this.none);
 		enyo.forEach(this.contentValue, function (inValue) {
 			var itemState = inValue === this.value ? true : false;
 			this.$.configurationPicker.createComponent({content: inValue, active: itemState});
-		}, this);
+		}, this);		
+	},
+
+	/**
+	 * Add a none element to the picker's items.
+	 * @param {String} inNoneValue the value of the none picker's element.
+	 */
+	addNoneElement: function(inNoneValue) {
+		if (this.none !== undefined) {
+			this.$.configurationPicker.createComponent({content: "None", value: inNoneValue, active: false});
+		}
 	},
 
 	/**
@@ -556,6 +568,8 @@ enyo.kind({
 	 * @private
 	 */
 	contentValueChanged: function() {
+		this.addNoneElement(this.none);
+
 		//sort the value of the Android API version to garanty the display in the correct order. 
 		Object.keys(Phonegap.UIConfiguration.androidSdkVersions)
 		.sort(function(a, b) {return a - b;})
