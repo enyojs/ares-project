@@ -11,7 +11,7 @@ enyo.kind({
 					{classes: "enyo-fit ares_phobos_panel border ", components: [
 						{
 							kind: "AceWrapper",
-							name:"ace",
+							name: "aceWrapper",
 							classes: "enyo-fit ace-code-editor",
 							onAutoCompletion: "startAutoCompletion",
 							onChange: "docChanged",
@@ -75,6 +75,7 @@ enyo.kind({
 			this.projectData.setProjectCtrl(this.projectCtrl);
 		}
 	},
+
 	saveNeeded: function() {
 		return this.docData.getEdited();
 	},
@@ -129,21 +130,21 @@ enyo.kind({
 		if (hasAce) {
 			var aceSession = this.docData.getAceSession();
 			if (aceSession) {
-				this.$.ace.setSession(aceSession);
+				this.$.aceWrapper.setSession(aceSession);
 			} else {
-				aceSession = this.$.ace.createSession(this.docData.getData(), mode);
-				this.$.ace.setSession(aceSession);
+				aceSession = this.$.aceWrapper.createSession(this.docData.getData(), mode);
+				this.$.aceWrapper.setSession(aceSession);
 				this.docData.setAceSession(aceSession);
 			}
 			
 			// Pass to the autocomplete compononent a reference to ace
-			this.$.autocomplete.setAce(this.$.ace);
+			this.$.autocomplete.setAceWrapper(this.$.aceWrapper);
 			this.focusEditor();
 
 			/* set editor to user pref */
-			this.$.ace.applyAceSettings(this.$.editorSettingsPopup.getSettings());
+			this.$.aceWrapper.applyAceSettings(this.$.editorSettingsPopup.getSettings());
 
-			this.$.ace.editingMode = mode;
+			this.$.aceWrapper.editingMode = mode;
 		} else {
 			var config = this.projectData.getService().getConfig();
 			var fileUrl = config.origin + config.pathname + "/file" + file.path;
@@ -162,7 +163,7 @@ enyo.kind({
 		var showModes = {
 			javascript: {
 				imageViewer: false,
-				ace: true,
+				aceWrapper: true,
 				saveButton: true,
 				saveAsButton: true,
 				newKindButton: true,
@@ -171,7 +172,7 @@ enyo.kind({
 			},
 			image: {
 				imageViewer: true,
-				ace: false,
+				aceWrapper: false,
 				saveButton: false,
 				saveAsButton: false,
 				newKindButton: false,
@@ -180,7 +181,7 @@ enyo.kind({
 			},
 			text: {
 				imageViewer: false,
-				ace: true,
+				aceWrapper: true,
 				saveButton: true,
 				saveAsButton: true,
 				newKindButton: false,
@@ -231,7 +232,7 @@ enyo.kind({
 		var settings = modes[mode]||modes['text'];
 		this.$.right.setIndex(settings.rightIndex);
 		this.resizeHandler();
-		return showSettings.ace ;
+		return showSettings.aceWrapper ;
 	},
 	hideWaitPopup: function() {
 		this.doHideWaitPopup();
@@ -326,7 +327,7 @@ enyo.kind({
 	navigateInCodeEditor: function(inSender, inEvent) {
 		var itemToSelect = this.objectsToDump[inEvent.index];
 		if(itemToSelect.start && itemToSelect.end){
-			this.$.ace.navigateToPosition(itemToSelect.start, itemToSelect.end);
+			this.$.aceWrapper.navigateToPosition(itemToSelect.start, itemToSelect.end);
 			this.doAceFocus();
 		}
 	},
@@ -336,7 +337,7 @@ enyo.kind({
 		var codeLooksGood = false;
 		var module = {
 			name: this.docData.getFile().name,
-			code: this.$.ace.getValue(),
+			code: this.$.aceWrapper.getValue(),
 			path: this.projectCtrl.projectUrl + this.docData.getFile().dir + this.docData.getFile().name
 		};
 		this.trace("called with mode " + mode + " inhibitUpdate " + inhibitUpdate
@@ -402,7 +403,7 @@ enyo.kind({
 			module.ranges.push(range);
 		}
 
-		var position = this.$.ace.getCursorPositionInDocument();
+		var position = this.$.aceWrapper.getCursorPositionInDocument();
 		module.currentObject = this.findCurrentEditedObject(position);
 		module.currentRange = module.ranges[module.currentObject];
 		module.currentLine = position.row;
@@ -442,7 +443,7 @@ enyo.kind({
 	},
 	//* Extract info about kinds from the current file needed by the designer
 	extractKindsData: function() {
-		var c = this.$.ace.getValue(),
+		var c = this.$.aceWrapper.getValue(),
 			kinds = [];
 
 		if (this.analysis) {
@@ -592,13 +593,13 @@ enyo.kind({
 
 		// insert the missing handler methods code in the editor
 		if (object.block) {
-			var lineTermination = this.$.ace.getNewLineCharacter(),
+			var lineTermination = this.$.aceWrapper.getNewLineCharacter(),
 				codeInsertionIndex = object.block.end - 1, // Index before kind block ending curly braket
 				codeInsertionPosition;
 
 			var commaInsertionPosition = null;
 			if (!commaTerminated) {
-				commaInsertionPosition = this.$.ace.mapToLineColumns([commaInsertionIndex]);
+				commaInsertionPosition = this.$.aceWrapper.mapToLineColumns([commaInsertionIndex]);
 				commaTerminated = true;
 			}
 
@@ -617,26 +618,26 @@ enyo.kind({
 			if (codeToInsert !== "") {
 				// add a comma after the last function/property if required
 				if (commaInsertionPosition) {
-					this.$.ace.insertPosition(commaInsertionPosition[0], ",");
+					this.$.aceWrapper.insertPosition(commaInsertionPosition[0], ",");
 					codeInsertionIndex++; // position shifted because of comma character addition
 				}
 				commaInsertionIndex++; // index after comma character added or already present
 				
 				// detect if block ending curly braket is contiguous to previous function or property ending: curly bracket w/wo comma, value w/wo comma
 				if (commaInsertionIndex === codeInsertionIndex) {
-					commaInsertionPosition = this.$.ace.mapToLineColumns([commaInsertionIndex]);
-					this.$.ace.insertNewLine(commaInsertionPosition[0]);
+					commaInsertionPosition = this.$.aceWrapper.mapToLineColumns([commaInsertionIndex]);
+					this.$.aceWrapper.insertNewLine(commaInsertionPosition[0]);
 					codeInsertionIndex += lineTermination.length; // shifted because of line termination addition, is sentitive to line termination mode
 				}
 				
 				// Add a new line before kind block ending curly braket
-				codeInsertionPosition = this.$.ace.mapToLineColumns([codeInsertionIndex]);
-				this.$.ace.insertNewLine(codeInsertionPosition[0]);
+				codeInsertionPosition = this.$.aceWrapper.mapToLineColumns([codeInsertionIndex]);
+				this.$.aceWrapper.insertNewLine(codeInsertionPosition[0]);
 				
 				// Get the corresponding Ace range to replace/insert the missing code
-				// NB: ace.replace() allow to use the undo/redo stack.
-				var codeInsertionRange = this.$.ace.mapToLineColumnRange(codeInsertionIndex, codeInsertionIndex);
-				this.$.ace.replaceRange(codeInsertionRange, codeToInsert);
+				// NB: aceWrapper.replace() allow to use the undo/redo stack.
+				var codeInsertionRange = this.$.aceWrapper.mapToLineColumnRange(codeInsertionIndex, codeInsertionIndex);
+				this.$.aceWrapper.replaceRange(codeInsertionRange, codeToInsert);
 			}
 		} else {
 			// There is no block information for that kind - Parser is probably not up-to-date
@@ -665,9 +666,9 @@ enyo.kind({
 					}
 				}
 				// Get the corresponding Ace range to replace the component definition
-				// NB: ace.replace() allow to use the undo/redo stack.
-				var range = this.$.ace.mapToLineColumnRange(kindStart, end);
-				this.$.ace.replaceRange(range, content);
+				// NB: aceWrapper.replace() allow to use the undo/redo stack.
+				var range = this.$.aceWrapper.mapToLineColumnRange(kindStart, end);
+				this.$.aceWrapper.replaceRange(range, content);
 			}
 		}
 		this.injected = false;
@@ -709,11 +710,11 @@ enyo.kind({
 	},
 	editorUserSyntaxError:function(){
 		var userSyntaxError = [];		
-		userSyntaxError = this.$.autocomplete.ace.editor.session.$annotations.length;
+		userSyntaxError = this.$.autocomplete.aceWrapper.editor.session.$annotations.length;
 		return userSyntaxError;
 	},
 	cursorChanged: function(inSender, inEvent) {
-		var position = this.$.ace.getCursorPositionInDocument();
+		var position = this.$.aceWrapper.getCursorPositionInDocument();
 		this.trace(inSender.id, " ", inEvent.type, " ", enyo.json.stringify(position));
 
 		// Check if we moved to another enyo kind and display it in the right pane
@@ -739,10 +740,10 @@ enyo.kind({
 	newKindAction: function() {
 		// Insert a new empty enyo kind at the end of the file
 		var newKind = 'enyo.kind({\n	name : "@cursor@",\n	kind : "Control",\n	components : []\n});';
-		this.$.ace.insertAtEndOfFile(newKind, '@cursor@');
+		this.$.aceWrapper.insertAtEndOfFile(newKind, '@cursor@');
 	},
 	newcssAction: function(inSender, inEvent){
-		this.$.ace.insertAtEndOfFile(inEvent.outPut);
+		this.$.aceWrapper.insertAtEndOfFile(inEvent.outPut);
 	},
 	/*
 	 * cleanup data. Typically called when closing a document
@@ -750,13 +751,13 @@ enyo.kind({
 	 */
 	closeSession: function() {
 		if (this.docData) {
-			this.$.ace.destroySession(this.docData.getAceSession());
+			this.$.aceWrapper.destroySession(this.docData.getAceSession());
 			this.resetAutoCompleteData();
 		}
 	},
 	// Show Find popup
 	findpop: function(){
-		var selected = this.$.ace.getSelection();
+		var selected = this.$.aceWrapper.getSelection();
 		if(selected){
 			this.$.findpop.setFindInput(selected);
 		} 
@@ -767,37 +768,37 @@ enyo.kind({
 	},
 	findNext: function(inSender, inEvent){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
-		this.$.ace.find(this.$.findpop.findValue, options);
-		this.$.findpop.updateAfterFind(this.$.ace.getSelection());
+		this.$.aceWrapper.find(this.$.findpop.findValue, options);
+		this.$.findpop.updateAfterFind(this.$.aceWrapper.getSelection());
 	},
 
 	findPrevious: function(){
 		var options = {backwards: true, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
-		this.$.ace.find(this.$.findpop.findValue, options);
-		this.$.findpop.updateAfterFind(this.$.ace.getSelection());
+		this.$.aceWrapper.find(this.$.findpop.findValue, options);
+		this.$.findpop.updateAfterFind(this.$.aceWrapper.getSelection());
 	},
 
 	replaceAll: function(){
-		var occurences = this.$.ace.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
-		this.$.findpop.updateMessage(this.$.ace.getSelection(), occurences);
+		var occurences = this.$.aceWrapper.replaceAll(this.$.findpop.findValue , this.$.findpop.replaceValue);
+		this.$.findpop.updateMessage(this.$.aceWrapper.getSelection(), occurences);
 	},
 	replacefind: function(){
 		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
-		this.$.ace.replacefind(this.$.findpop.findValue , this.$.findpop.replaceValue, options);
-		this.$.findpop.updateMessage(this.$.ace.getSelection());
+		this.$.aceWrapper.replacefind(this.$.findpop.findValue , this.$.findpop.replaceValue, options);
+		this.$.findpop.updateMessage(this.$.aceWrapper.getSelection());
 	},
 
 	//ACE replace doesn't replace the currently-selected match. It instead replaces the *next* match. Seems less-than-useful
 	//It was not working because ACE(Ace.js) was doing "find" action before "replace".
 	replace: function(){
-		this.$.ace.replace(this.$.findpop.findValue, this.$.findpop.replaceValue);
+		this.$.aceWrapper.replace(this.$.findpop.findValue, this.$.findpop.replaceValue);
 	},
 
 	focusEditor: function(inSender, inEvent) {
-		this.$.ace.focus();
+		this.$.aceWrapper.focus();
 	},
 	getEditorContent: function() {
-		return this.$.ace.getValue();
+		return this.$.aceWrapper.getValue();
 	},
 	handleScroll: function(inSender, inEvent) {
 		this.$.autocomplete.hide();
@@ -807,17 +808,17 @@ enyo.kind({
 		this.$.findpop.hide();
 	},
 	toggleww: function(){
-	    if(this.$.ace.wordWrap === "true" || this.$.ace.wordWrap === true){
-			this.$.ace.wordWrap = false;
-			this.$.ace.wordWrapChanged();
+	    if(this.$.aceWrapper.wordWrap === "true" || this.$.aceWrapper.wordWrap === true){
+			this.$.aceWrapper.wordWrap = false;
+			this.$.aceWrapper.wordWrapChanged();
 	    }else{
-			this.$.ace.wordWrap = true;
-			this.$.ace.wordWrapChanged();
+			this.$.aceWrapper.wordWrap = true;
+			this.$.aceWrapper.wordWrapChanged();
 		}
 	},
 	/** @public */
 	requestSelectedText: function() {
-		return this.$.ace.requestSelectedText();
+		return this.$.aceWrapper.requestSelectedText();
 	},
 	
 	/**
@@ -828,7 +829,7 @@ enyo.kind({
 	 */
 	addViewKindAction: function(config) {
 		var newKind = 'enyo.kind('+config+'\n);';
-		this.$.ace.insertAtEndOfFile(newKind, '@cursor@');
+		this.$.aceWrapper.insertAtEndOfFile(newKind, '@cursor@');
 		this.designerAction();
 	},
 	/**
@@ -839,8 +840,8 @@ enyo.kind({
 	 */
 	replaceViewKindAction: function(kind_index, config){
 		var obj = this.analysis.objects[kind_index];
-		var range = this.$.ace.mapToLineColumnRange(obj.block.start, obj.block.end);
-		this.$.ace.replaceRange(range, config);
+		var range = this.$.aceWrapper.mapToLineColumnRange(obj.block.start, obj.block.end);
+		this.$.aceWrapper.replaceRange(range, config);
 		this.designerAction();
 	},
 	
@@ -854,7 +855,7 @@ enyo.kind({
 
 		this.$.editorSettingsPopup.initSettingsPopupFromLocalStorage();
 		//apply changes only saved on Ace
-		this.$.ace.applyAceSettings(this.$.editorSettingsPopup.getSettings());
+		this.$.aceWrapper.applyAceSettings(this.$.editorSettingsPopup.getSettings());
 		this.adjustPanelsForMode(this.docData.getMode(), this.$.editorSettingsPopup.getSettings().rightpane);
 		this.$.editorSettingsPopup.hide();
 		this.doAceFocus();
@@ -867,27 +868,27 @@ enyo.kind({
 
 	applySettings:function(){
 		//apply Ace settings
-		this.$.ace.applyAceSettings(this.$.editorSettingsPopup.getPreviewSettings());
+		this.$.aceWrapper.applyAceSettings(this.$.editorSettingsPopup.getPreviewSettings());
 	},
 
 	tabSize: function() {
-		var ts = this.$.ace.editorSettingsPopup.Tsize;
-		this.$.ace.setTabSize(ts);
+		var ts = this.$.aceWrapper.editorSettingsPopup.Tsize;
+		this.$.aceWrapper.setTabSize(ts);
 	},
 	
 	fkeypressed: function(inSender, inEvent) {
 		var key = inEvent;
-		this.$.ace.insertAtCursor(this.$.editorSettingsPopup.settings.keys[ key ]);
+		this.$.aceWrapper.insertAtCursor(this.$.editorSettingsPopup.settings.keys[ key ]);
 	},
 	
 	//* Trigger an Ace undo and bubble updated code
 	undoAndUpdate: function() {
-		this.$.ace.undo();
+		this.$.aceWrapper.undo();
 		this.bubbleCodeUpdate();
 	},
 	//* Trigger an Ace undo and bubble updated code
 	redoAndUpdate: function() {
-		this.$.ace.redo();
+		this.$.aceWrapper.redo();
 		this.bubbleCodeUpdate();
 	},
 	//* Send up an updated copy of the code
@@ -903,7 +904,7 @@ enyo.kind({
 	resizeHandler: function() {
 		this.inherited(arguments);
 		this.$.body.reflow();
-		this.$.ace.resize();
+		this.$.aceWrapper.resize();
 	}
 });
 
