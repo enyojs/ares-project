@@ -591,7 +591,7 @@ function defineServerTimeout(inTimeout) {
 		}
 	}
 	
-	log.verbose("Server timeout is set to : ", timeout ," (ms)");
+	log.verbose("Timeout between main server and its children is set to : ", timeout ," (ms)");
 	server.setTimeout(timeout);
 }
 
