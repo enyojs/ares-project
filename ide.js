@@ -321,6 +321,7 @@ loadPackageConfig();
 ide.res.timestamp = configStats.atime.getTime();
 log.verbose('main', ide.res);
 
+
 function handleMessage(service) {
 	return function(msg) {
 		if (msg.protocol && msg.host && msg.port && msg.origin && msg.pathname) {
@@ -574,7 +575,28 @@ var enyojsRoot = path.resolve(myDir,".");
 var app = express(),
     server = http.createServer(app);
 
-server.setTimeout(argv.timeout);
+/**
+ * Ares server timeout is defined as the maximum value of services timeout attributes.
+ * @param  {integer} inTimeout default value of the server timeout.
+ */
+function defineServerTimeout(inTimeout) {
+
+	var timeout = inTimeout;
+
+	for (var key in ide.res.services) {
+
+		if (ide.res.services[key].timeout !== undefined && 
+			ide.res.services[key].timeout > inTimeout) {
+			timeout = ide.res.services[key].timeout;
+		}
+	}
+	
+	log.verbose("Timeout between main server and its children is set to : ", timeout ," (ms)");
+	server.setTimeout(timeout);
+}
+
+
+defineServerTimeout(argv.timeout);
 
 // over-write CORS headers using the configuration if
 // any, otherwise be paranoid.
