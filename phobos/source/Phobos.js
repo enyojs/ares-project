@@ -560,39 +560,72 @@ enyo.kind({
 	 * @protected
 	 */
 	insertMissingHandlersIntoKind: function(object) {
+		var commaTerminated = false,
+			commaInsertionIndex = 0;
+		
 		// List existing handlers
 		var existing = {};
-		var commaTerminated = false;
 		for(var j = 0 ; j < object.properties.length ; j++) {
 			var p = object.properties[j];
 			commaTerminated = p.commaTerminated;
 			if (p.value[0].name === 'function') {
 				existing[p.name] = "";
+				commaInsertionIndex = p.value[0].block.end; // Index of function block ending curly braket
+			} else {
+				commaInsertionIndex = p.value[0].end; // Index of property definition
 			}
 		}
 
 		// List the handler methods declared in the components and in handlers map
 		var declared = this.listHandlers(object, {});
 
-		// Prepare the code to insert
-		var codeToInsert = "";
-		for(var item in declared) {
-			if (item !== "" && existing[item] === undefined) {
-				codeToInsert += (commaTerminated ? "" : ",\n");
-				commaTerminated = false;
-				codeToInsert += ("\t" + item + ": function(inSender, inEvent) {\n\t\t// TO");
-				codeToInsert += ("DO - Auto-generated code\n\t}");
-			}
-		}
-
 		// insert the missing handler methods code in the editor
 		if (object.block) {
+			var lineTermination = this.$.ace.getNewLineCharacter(),
+				codeInsertionIndex = object.block.end - 1, // Index before kind block ending curly braket
+				codeInsertionPosition;
+
+			var commaInsertionPosition = null;
+			if (!commaTerminated) {
+				commaInsertionPosition = this.$.ace.mapToLineColumns([commaInsertionIndex]);
+				commaTerminated = true;
+			}
+
+			// Prepare the code to insert
+			var codeToInsert = "";
+			for(var item in declared) {
+				if (item !== "" && existing[item] === undefined) {
+					// use correct line terminations
+					codeToInsert += (commaTerminated ? "" : "," + lineTermination);
+					commaTerminated = false;
+					codeToInsert += ("\t" + item + ": function(inSender, inEvent) {" + lineTermination + "\t\t// TO");
+					codeToInsert += ("DO - Auto-generated code" + lineTermination + "\t}");
+				}
+			}
+
 			if (codeToInsert !== "") {
+				// add a comma after the last function/property if required
+				if (commaInsertionPosition) {
+					this.$.ace.insertPosition(commaInsertionPosition[0], ",");
+					codeInsertionIndex++; // position shifted because of comma character addition
+				}
+				commaInsertionIndex++; // index after comma character added or already present
+				
+				// detect if block ending curly braket is contiguous to previous function or property ending: curly bracket w/wo comma, value w/wo comma
+				if (commaInsertionIndex === codeInsertionIndex) {
+					commaInsertionPosition = this.$.ace.mapToLineColumns([commaInsertionIndex]);
+					this.$.ace.insertNewLine(commaInsertionPosition[0]);
+					codeInsertionIndex += lineTermination.length; // shifted because of line termination addition, is sentitive to line termination mode
+				}
+				
+				// Add a new line before kind block ending curly braket
+				codeInsertionPosition = this.$.ace.mapToLineColumns([codeInsertionIndex]);
+				this.$.ace.insertNewLine(codeInsertionPosition[0]);
+				
 				// Get the corresponding Ace range to replace/insert the missing code
 				// NB: ace.replace() allow to use the undo/redo stack.
-				var pos = object.block.end - 2;
-				var range = this.$.ace.mapToLineColumnRange(pos, pos);
-				this.$.ace.replaceRange(range, codeToInsert);
+				var codeInsertionRange = this.$.ace.mapToLineColumnRange(codeInsertionIndex, codeInsertionIndex);
+				this.$.ace.replaceRange(codeInsertionRange, codeToInsert);
 			}
 		} else {
 			// There is no block information for that kind - Parser is probably not up-to-date
