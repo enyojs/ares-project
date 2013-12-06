@@ -737,23 +737,23 @@ enyo.kind({
 		// send all files being edited to the designer, this will send code to designerFrame
 		this.syncEditedFiles(inEvent.projectData);
 		// then load palette and inspector, and tune serialiser behavior sends option data to designerFrame
-		ComponentsRegistry.getComponent("deimos").loadDesignerUI(
+		this.$.deimos.loadDesignerUI(
 			inEvent,
 			(function(err) {
 				this.trace("designDocument -> loadDesignerUI done, err is ",err);
 			}).bind(this)
 		);
 		// switch to Deimos editor
-		ComponentsRegistry.getComponent("enyoEditor").showDeimosPanel();
+		this.showDeimosPanel();
 		// update an internal variable
-		ComponentsRegistry.getComponent("enyoEditor").activeDocument.setCurrentIF('designer');
+		this.activeDocument.setCurrentIF('designer');
 	},
+
 	/**
 	 * Update code running in designer
 	 * @param {Ares.Model.Project} project, backbone object defined
 	 * in WorkspaceData.js
 	 */
-	// FIXME 3082 move elsewhere
 	syncEditedFiles: function(project) {
 		var projectName = project.getName();
 		this.trace("update all edited files on project", projectName);
@@ -770,7 +770,6 @@ enyo.kind({
 	 *
 	 * @param {Ares.Model.File} inDoc is a backbone object defined in FileData.js
 	 */
-	// FIXME 3082 move elsewhere
 	updateCode: function(inDoc) {
 		var filename = inDoc.getFile().path,
 			aceSession = inDoc.getAceSession(),
@@ -779,7 +778,7 @@ enyo.kind({
 		var projectName = inDoc.getProjectData().getName();
 		this.trace('code update on file', filename,' project ' + projectName);
 
-		ComponentsRegistry.getComponent("deimos").syncFile(projectName, filename, code);
+		this.$.deimos.syncFile(projectName, filename, code);
 	}
 
 });
