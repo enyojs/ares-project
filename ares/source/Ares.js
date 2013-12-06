@@ -81,10 +81,6 @@ enyo.kind({
 		onCloseProjectDocuments: "closeDocumentsForProject",
 	// FIXME 3082 move elsewhere
 		onUpdate: "phobosUpdate",
-	// FIXME 3082 move elsewhere
-		onUndo: "designerUndo", 
-	// FIXME 3082 move elsewhere
-		onRedo: "designerRedo",
 		onRegisterMe : "_registerComponent",
 		onMovePanel : "_movePanel"
 	},
@@ -221,16 +217,7 @@ enyo.kind({
 			}).bind(this)
 		);
 	},
-	//* Undo event from Deimos
-	// FIXME 3082 move elsewhere
-	designerUndo: function(inSender, inEvent) {
-		ComponentsRegistry.getComponent("phobos").undoAndUpdate();
-	},
-	//* Redo event from Deimos
-	// FIXME 3082 move elsewhere
-	designerRedo: function(inSender, inEvent) {
-		ComponentsRegistry.getComponent("phobos").redoAndUpdate();
-	},
+
 	handleBeforeUnload: function() {
 		if (window.location.search.indexOf("debug") == -1) {
 			return 'You may have some unsaved data';

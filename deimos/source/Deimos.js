@@ -85,8 +85,6 @@ enyo.kind({
 	*/
 	events: {
 		onCloseDesigner: "",
-		onUndo: "",
-		onRedo: "",
 		onRegisterMe: "",
 		onError:""
 	},
