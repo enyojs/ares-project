@@ -731,14 +731,13 @@ enyo.kind({
 		}
 	},
 
-		// FIXME 3082 move elsewhere
-	designDocument: function(inSender, inEvent) {
+	designDocument: function(inData) {
 		this.trace();
 		// send all files being edited to the designer, this will send code to designerFrame
-		this.syncEditedFiles(inEvent.projectData);
+		this.syncEditedFiles(inData.projectData);
 		// then load palette and inspector, and tune serialiser behavior sends option data to designerFrame
 		this.$.deimos.loadDesignerUI(
-			inEvent,
+			inData,
 			(function(err) {
 				this.trace("designDocument -> loadDesignerUI done, err is ",err);
 			}).bind(this)

@@ -34,7 +34,6 @@ enyo.kind({
 	],
 	events: {
 		onHideWaitPopup: "",
-		onDesignDocument: "",
 		onError: "",
 		onUpdate: "",
 		onRegisterMe: "",
@@ -438,7 +437,7 @@ enyo.kind({
 		
 		if (kinds.length > 0) {
 			// Request to design the current document, passing info about all kinds in the file
-			this.doDesignDocument(data);
+			this.owner.designDocument(data);
 		} // else - The error has been displayed by extractKindsData()
 	},
 	//* Extract info about kinds from the current file needed by the designer
