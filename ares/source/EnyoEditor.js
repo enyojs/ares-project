@@ -596,7 +596,6 @@ enyo.kind({
 	// switch Phobos or Deimos to new document
 	_switchDoc: function(newDoc) {
 		var phobos = ComponentsRegistry.getComponent('phobos');
-		var enyoEditor = ComponentsRegistry.getComponent("enyoEditor");
 
 		var oldDoc = this.activeDocument ;
 		var currentIF = newDoc.getCurrentIF();
@@ -618,14 +617,14 @@ enyo.kind({
 		phobos.openDoc(newDoc);
 
 		this.activeDocument = newDoc;
-		enyoEditor.addPreviewTooltip("Preview " + newDoc.getProjectData().id);
+		this.addPreviewTooltip("Preview " + newDoc.getProjectData().id);
 
 		if (currentIF === 'code') {
-			enyoEditor.$.panels.setIndex(this.phobosViewIndex);
-			enyoEditor.manageControls(false);
+			this.$.panels.setIndex(this.phobosViewIndex);
+			this.manageControls(false);
 		} else {
 			phobos.designerAction();
-			enyoEditor.manageControls(true);
+			this.manageControls(true);
 		}
 		this._fileEdited();
 		this.$.bottomBar.activateDocWithId(newDoc.getId());
