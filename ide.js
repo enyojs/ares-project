@@ -312,10 +312,25 @@ function loadPluginConfigFiles() {
 	log.info('loadPluginConfigFiles()', "loaded " + nPlugins + " plugins");
 }
 
+
+/**
+ * load proxy from environment in each service (only if proxy is
+ * missing from original config)
+ */
+function loadProxyFromEnv() {
+	ide.res.services.forEach(function(s){
+		if (! s.proxyUrl) {
+			s.proxyUrl = process.env.https_proxy || process.env.http_proxy;
+		}
+	});
+}
+
 loadMainConfig(configPath);
 loadPluginConfigFiles();
 
 loadPackageConfig();
+
+loadProxyFromEnv();
 
 // File age/date is the UTC configuration file last modification date
 ide.res.timestamp = configStats.atime.getTime();
