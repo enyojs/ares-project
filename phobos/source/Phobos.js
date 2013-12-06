@@ -35,7 +35,6 @@ enyo.kind({
 	events: {
 		onHideWaitPopup: "",
 		onError: "",
-		onUpdate: "",
 		onRegisterMe: "",
 		onFileEdited: " ",
 		onAceFocus: ""
@@ -883,15 +882,15 @@ enyo.kind({
 	//* Trigger an Ace undo and bubble updated code
 	undoAndUpdate: function(next) {
 		this.$.aceWrapper.undo();
-		this.bubbleCodeUpdate(next);
+		this.updateCodeInDesigner(next);
 	},
 	//* Trigger an Ace undo and bubble updated code
 	redoAndUpdate: function(next) {
 		this.$.aceWrapper.redo();
-		this.bubbleCodeUpdate(next);
+		this.updateCodeInDesigner(next);
 	},
 	//* Send up an updated copy of the code
-	bubbleCodeUpdate: function(next) {
+	updateCodeInDesigner: function(next) {
 		// Update the projectIndexer and notify watchers
 		this.reparseUsersCode(true);
 		

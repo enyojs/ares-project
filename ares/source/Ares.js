@@ -79,15 +79,12 @@ enyo.kind({
 		onChangingNode: "_nodeChanging",
 		onAllDocumentsAreClosed: "showProjectView",
 		onCloseProjectDocuments: "closeDocumentsForProject",
-	// FIXME 3082 move elsewhere
-		onUpdate: "phobosUpdate",
 		onRegisterMe : "_registerComponent",
 		onMovePanel : "_movePanel"
 	},
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
 	enyoEditorIndex: 2,
-
 
 	projectListWidth: 300,
 	isProjectView: true,
@@ -204,18 +201,6 @@ enyo.kind({
 	_fsEventAction: function(inSender, inEvent) {
 		var harmonia = ComponentsRegistry.getComponent("harmonia");
 		harmonia.refreshFileTree(inEvent.nodeId);
-	},
-
-	//* A code change happened in Phobos - push change to Deimos
-	// FIXME 3082 move elsewhere
-	phobosUpdate: function(inSender, inEvent) {
-		this.trace();
-		ComponentsRegistry.getComponent("deimos").loadDesignerUI(
-			inEvent,
-			(function(err) {
-				this.trace("phobosUpdate -> loadDesignerUI done, err is ",err);
-			}).bind(this)
-		);
 	},
 
 	handleBeforeUnload: function() {
