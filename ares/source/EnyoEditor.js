@@ -117,7 +117,14 @@ enyo.kind({
 		this.doRegisterMe({name:"enyoEditor", reference:this});
 	},
 	activePanel : function(){
+		// my index within the main Ares panels, not index phobos and deimos panels
 		this.doMovePanel({panelIndex:this.panelIndex});
+	},
+	showDeimosPanel: function () {
+		this.$.panels.setIndex(1) ;
+	},
+	showPhobosPanel: function () {
+		this.$.panels.setIndex(0) ;
 	},
 	stopPanelEvent: function(){
 		return true;

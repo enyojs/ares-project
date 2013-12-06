@@ -94,17 +94,13 @@ enyo.kind({
 	hermesFileTreeIndex: 1,
 	enyoEditorIndex: 2,
 
-	// FIXME 3082 move elsewhere
-	phobosViewIndex: 0,
-	deimosViewIndex: 1,
-
 	projectListWidth: 300,
 	isProjectView: true,
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this._registerComponent(null,{name: "ares", reference: this});
-		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.phobosViewIndex);
+		ComponentsRegistry.getComponent("enyoEditor").showPhobosPanel();
 		ServiceRegistry.instance.setOwner(this); // plumb services events all the way up
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
 		if (Ares.TestController) {
@@ -228,7 +224,7 @@ enyo.kind({
 			}).bind(this)
 		);
 		// switch to Deimos editor
-		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.deimosViewIndex);
+		ComponentsRegistry.getComponent("enyoEditor").showDeimosPanel();
 		// update an internal variable
 		ComponentsRegistry.getComponent("enyoEditor").activeDocument.setCurrentIF('designer');
 	},
