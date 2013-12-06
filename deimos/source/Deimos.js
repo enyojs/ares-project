@@ -745,11 +745,11 @@ enyo.kind({
 	},
 	undoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
-		this.doUndo();
+		this.owner.undo();
 	},
 	redoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
-		this.doRedo();
+		this.owner.redo();
 	},
 	deleteAction: function(inSender, inEvent) {
 		if(!this.$.designer.selection) {

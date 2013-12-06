@@ -778,6 +778,14 @@ enyo.kind({
 		this.trace('code update on file', filename,' project ' + projectName);
 
 		this.$.deimos.syncFile(projectName, filename, code);
+	},
+
+	undo: function() {
+		this.$.phobos.undoAndUpdate() ;
+	},
+
+	redo: function() {
+		this.$.phobos.redoAndUpdate() ;
 	}
 
 });
