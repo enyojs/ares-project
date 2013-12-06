@@ -11,6 +11,7 @@ enyo.kind({
 	classes: "enyo-unselectable",
 	debug: false,
 	published: {
+		// harcoded until ENYO-2755 is fixed
 		panelIndex: 0
 	},
 	components: [

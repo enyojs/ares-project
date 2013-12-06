@@ -23,6 +23,7 @@ enyo.kind({
 	],
 	debug: false,
 	published: {
+		// harcoded until ENYO-2755 is fixed
 		panelIndex: 1
 	},
 	create: function() {

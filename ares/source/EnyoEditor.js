@@ -102,6 +102,7 @@ enyo.kind({
 		onError: ""
 	},
 	published: {
+		// harcoded until ENYO-2755 is fixed
 		panelIndex: 2,
 		aceActive: true
 	},
