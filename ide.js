@@ -320,7 +320,7 @@ function loadPluginConfigFiles() {
 function loadProxyFromEnv() {
 	ide.res.services.forEach(function(s){
 		if (! s.proxyUrl) {
-			s.proxyUrl = process.env.https_proxy || process.env.http_proxy;
+			s.proxyUrl = ide.res.globalProxyUrl || process.env.https_proxy || process.env.http_proxy;
 		}
 	});
 }
