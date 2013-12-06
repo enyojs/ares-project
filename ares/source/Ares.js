@@ -80,8 +80,6 @@ enyo.kind({
 		onAllDocumentsAreClosed: "showProjectView",
 		onCloseProjectDocuments: "closeDocumentsForProject",
 	// FIXME 3082 move elsewhere
-		onDesignDocument: "designDocument", 
-	// FIXME 3082 move elsewhere
 		onUpdate: "phobosUpdate",
 	// FIXME 3082 move elsewhere
 		onUndo: "designerUndo", 
@@ -93,6 +91,7 @@ enyo.kind({
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
 	enyoEditorIndex: 2,
+
 
 	projectListWidth: 300,
 	isProjectView: true,
@@ -211,23 +210,6 @@ enyo.kind({
 		harmonia.refreshFileTree(inEvent.nodeId);
 	},
 
-	// FIXME 3082 move elsewhere
-	designDocument: function(inSender, inEvent) {
-		this.trace();
-		// send all files being edited to the designer, this will send code to designerFrame
-		this.syncEditedFiles(inEvent.projectData);
-		// then load palette and inspector, and tune serialiser behavior sends option data to designerFrame
-		ComponentsRegistry.getComponent("deimos").loadDesignerUI(
-			inEvent,
-			(function(err) {
-				this.trace("designDocument -> loadDesignerUI done, err is ",err);
-			}).bind(this)
-		);
-		// switch to Deimos editor
-		ComponentsRegistry.getComponent("enyoEditor").showDeimosPanel();
-		// update an internal variable
-		ComponentsRegistry.getComponent("enyoEditor").activeDocument.setCurrentIF('designer');
-	},
 	//* A code change happened in Phobos - push change to Deimos
 	// FIXME 3082 move elsewhere
 	phobosUpdate: function(inSender, inEvent) {
@@ -311,40 +293,6 @@ enyo.kind({
 		if(this.$.aresLayoutPanels.getIndex() === this.projectListIndex && this.isProjectView){
 			this._calcPanelWidth(this.$.aresLayoutPanels.getPanels()[this.hermesFileTreeIndex]);
 		}
-	},
-
-	/**
-	 * Update code running in designer
-	 * @param {Ares.Model.Project} project, backbone object defined
-	 * in WorkspaceData.js
-	 */
-	// FIXME 3082 move elsewhere
-	syncEditedFiles: function(project) {
-		var projectName = project.getName();
-		this.trace("update all edited files on project", projectName);
-		
-		function isProjectFile(model) {
-			return model.getFile().name !== "package.js"
-				&& model.getProjectData().getName() === projectName ;
-		}
-		// backbone collection
-		Ares.Workspace.files.filter(isProjectFile).forEach(this.updateCode,this);
-	},
-
-	/**
-	 *
-	 * @param {Ares.Model.File} inDoc is a backbone object defined in FileData.js
-	 */
-	// FIXME 3082 move elsewhere
-	updateCode: function(inDoc) {
-		var filename = inDoc.getFile().path,
-			aceSession = inDoc.getAceSession(),
-			code = aceSession && aceSession.getValue();
-		// project is a backbone Ares.Model.Project defined in WorkspaceData.js
-		var projectName = inDoc.getProjectData().getName();
-		this.trace('code update on file', filename,' project ' + projectName);
-
-		ComponentsRegistry.getComponent("deimos").syncFile(projectName, filename, code);
 	},
 
 	showWaitPopup: function(inSender, inEvent) {
