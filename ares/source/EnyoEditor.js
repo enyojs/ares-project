@@ -139,16 +139,16 @@ enyo.kind({
 		object[method]();
 	},
 	editorSettings: function(){
-		ComponentsRegistry.getComponent("phobos").editorSettings();
+		this.$.phobos.editorSettings();
 	},
 	newKindAction: function() {
-		ComponentsRegistry.getComponent("phobos").newKindAction();
+		this.$.phobos.newKindAction();
 	},
 
 	// kind Picker stuff
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
-		var deimos = ComponentsRegistry.getComponent("deimos");
+		var deimos = this.$.deimos;
 		async.series([
 			deimos.selectKind.bind(deimos,index),
 			(function(name,next) {
@@ -179,10 +179,10 @@ enyo.kind({
 	},
 
 	designerAction: function() {
-		if(ComponentsRegistry.getComponent("phobos").editorUserSyntaxError() !== 0) {
+		if(this.$.phobos.editorUserSyntaxError() !== 0) {
 			this.userSyntaxErrorPop();
 		} else {
-			ComponentsRegistry.getComponent("phobos").designerAction();
+			this.$.phobos.designerAction();
 			this.manageControls(true);
 		}
 	},
@@ -195,7 +195,7 @@ enyo.kind({
 	},
 
 	closeDesigner: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("deimos").closeDesigner();
+		this.$.deimos.closeDesigner();
 		return true;
 	},
 
@@ -235,7 +235,7 @@ enyo.kind({
 	},
 	aceFocus: function(){
 		if(this.getAceActive()){
-			ComponentsRegistry.getComponent("phobos").focusEditor();	
+			this.$.phobos.focusEditor();
 		}
 	},
 	showErrorTooltip: function(inSender, inEvent){
@@ -312,7 +312,7 @@ enyo.kind({
 	saveDoc: function(doc) {
 		var content;
 		if (doc === this.activeDocument) {
-			content = ComponentsRegistry.getComponent('phobos').getEditorContent();
+			content = this.$.phobos.getEditorContent();
 		} else {
 			content = doc.getEditedData();
 		}
@@ -371,7 +371,7 @@ enyo.kind({
 
 	analyseData: function(inDocData) {
 		var codeLooksGood = false ;
-		var phobos = ComponentsRegistry.getComponent('phobos');
+		var phobos = this.$.phobos;
 
 		if (this.activeDocument === inDocData) {
 			// current file was just saved
@@ -440,7 +440,7 @@ enyo.kind({
 		var doc = this.activeDocument;
 		var projectData= this.activeDocument.getProjectData();
 		var file= param.file;
-		var content= ComponentsRegistry.getComponent('phobos').getEditorContent();
+		var content= this.$.phobos.getEditorContent();
 
 		var myNext = (function(err,result) {
 			this.trace("err:", err);
@@ -513,7 +513,7 @@ enyo.kind({
 	closeActiveDoc: function() {
 		var doc = this.activeDocument;
 		this.trace("close document:",doc.getName());
-		ComponentsRegistry.getComponent('phobos').closeSession();
+		this.$.phobos.closeSession();
 		this.activeDocument = null;
 		this.forgetDoc(doc) ;
 	},
@@ -587,7 +587,7 @@ enyo.kind({
 					   + ' to ' + newDoc.getProjectData().getName());
 			var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
 			var projectList = ComponentsRegistry.getComponent("projectList");
-			var deimos = ComponentsRegistry.getComponent("deimos");
+			var deimos = this.$.deimos;
 
 			serial.push(
 				projectList.selectInProjectList.bind(projectList,project),
@@ -605,7 +605,7 @@ enyo.kind({
 
 	// switch Phobos or Deimos to new document
 	_switchDoc: function(newDoc) {
-		var phobos = ComponentsRegistry.getComponent('phobos');
+		var phobos = this.$.phobos;
 
 		var oldDoc = this.activeDocument ;
 		var currentIF = newDoc.getCurrentIF();
