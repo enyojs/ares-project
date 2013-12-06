@@ -786,6 +786,10 @@ enyo.kind({
 
 	redo: function() {
 		this.$.phobos.redoAndUpdate() ;
+	},
+
+	loadDesignerUI: function(inData, next) {
+		this.$.deimos.loadDesignerUI(inData, next);
 	}
 
 });

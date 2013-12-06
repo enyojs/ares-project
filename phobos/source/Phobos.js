@@ -881,23 +881,23 @@ enyo.kind({
 	},
 	
 	//* Trigger an Ace undo and bubble updated code
-	undoAndUpdate: function() {
+	undoAndUpdate: function(next) {
 		this.$.aceWrapper.undo();
-		this.bubbleCodeUpdate();
+		this.bubbleCodeUpdate(next);
 	},
 	//* Trigger an Ace undo and bubble updated code
-	redoAndUpdate: function() {
+	redoAndUpdate: function(next) {
 		this.$.aceWrapper.redo();
-		this.bubbleCodeUpdate();
+		this.bubbleCodeUpdate(next);
 	},
 	//* Send up an updated copy of the code
-	bubbleCodeUpdate: function() {
+	bubbleCodeUpdate: function(next) {
 		// Update the projectIndexer and notify watchers
 		this.reparseUsersCode(true);
 		
 		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
 		if (data.kinds.length > 0) {
-			this.doUpdate(data);
+			this.owner.loadDesignerUI(data,next);
 		} // else - The error has been displayed by extractKindsData()
 	},
 	resizeHandler: function() {
