@@ -79,9 +79,13 @@ enyo.kind({
 		onChangingNode: "_nodeChanging",
 		onAllDocumentsAreClosed: "showProjectView",
 		onCloseProjectDocuments: "closeDocumentsForProject",
+	// FIXME 3082 move elsewhere
 		onDesignDocument: "designDocument", 
+	// FIXME 3082 move elsewhere
 		onUpdate: "phobosUpdate",
+	// FIXME 3082 move elsewhere
 		onUndo: "designerUndo", 
+	// FIXME 3082 move elsewhere
 		onRedo: "designerRedo",
 		onRegisterMe : "_registerComponent",
 		onMovePanel : "_movePanel"
@@ -89,8 +93,11 @@ enyo.kind({
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
 	enyoEditorIndex: 2,
+
+	// FIXME 3082 move elsewhere
 	phobosViewIndex: 0,
 	deimosViewIndex: 1,
+
 	projectListWidth: 300,
 	isProjectView: true,
 	create: function() {
@@ -208,6 +215,7 @@ enyo.kind({
 		harmonia.refreshFileTree(inEvent.nodeId);
 	},
 
+	// FIXME 3082 move elsewhere
 	designDocument: function(inSender, inEvent) {
 		this.trace();
 		// send all files being edited to the designer, this will send code to designerFrame
@@ -225,6 +233,7 @@ enyo.kind({
 		ComponentsRegistry.getComponent("enyoEditor").activeDocument.setCurrentIF('designer');
 	},
 	//* A code change happened in Phobos - push change to Deimos
+	// FIXME 3082 move elsewhere
 	phobosUpdate: function(inSender, inEvent) {
 		this.trace();
 		ComponentsRegistry.getComponent("deimos").loadDesignerUI(
@@ -235,10 +244,12 @@ enyo.kind({
 		);
 	},
 	//* Undo event from Deimos
+	// FIXME 3082 move elsewhere
 	designerUndo: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("phobos").undoAndUpdate();
 	},
 	//* Redo event from Deimos
+	// FIXME 3082 move elsewhere
 	designerRedo: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("phobos").redoAndUpdate();
 	},
@@ -311,6 +322,7 @@ enyo.kind({
 	 * @param {Ares.Model.Project} project, backbone object defined
 	 * in WorkspaceData.js
 	 */
+	// FIXME 3082 move elsewhere
 	syncEditedFiles: function(project) {
 		var projectName = project.getName();
 		this.trace("update all edited files on project", projectName);
@@ -327,6 +339,7 @@ enyo.kind({
 	 *
 	 * @param {Ares.Model.File} inDoc is a backbone object defined in FileData.js
 	 */
+	// FIXME 3082 move elsewhere
 	updateCode: function(inDoc) {
 		var filename = inDoc.getFile().path,
 			aceSession = inDoc.getAceSession(),
