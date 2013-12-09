@@ -107,7 +107,6 @@ enyo.kind({
 		aceActive: true
 	},
 	handlers: {
-	// FIXME 3082 move elsewhere
 		onDesignDocument: "designDocument",
 		onAceFocus: "aceFocus"
 	},
