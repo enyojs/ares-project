@@ -310,7 +310,7 @@ enyo.kind({
 		this.$.aresProperties.show();
 	},
 	showEnyoHelp: function() {
-		var search = ComponentsRegistry.getComponent("phobos").requestSelectedText();
+		var search = ComponentsRegistry.getComponent("enyoEditor").requestSelectedText();
 		
 		if (this.enyoHelpTab && !this.enyoHelpTab.closed) {
 			this.enyoHelpTab.focus();
