@@ -132,11 +132,8 @@ enyo.kind({
 		return true;
 	},
 	fileMenuItemSelected: function(inSender, inEvent) {
-		var target = inEvent.selected.value[0];
-		var method = inEvent.selected.value[1];
-		this.trace("will call " + target + ' ' + method);
-		var object = ComponentsRegistry.getComponent(target);
-		object[method]();
+		var method = inEvent.selected.value;
+		this[method]();
 	},
 	editorSettings: function(){
 		this.$.phobos.editorSettings();
@@ -809,28 +806,28 @@ enyo.kind({
 	components: [
 		{tag:"button", content: "File"},
 		{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
-			{name: "saveButton", value: [ 'enyoEditor', "saveCurrentDoc" ], classes:"aresmenu-button", components: [
+			{name: "saveButton", value: "saveCurrentDoc", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save")}
 			]},
-			{name: "saveAsButton", value:  [ 'enyoEditor', "requestSaveDocAs"], classes:"aresmenu-button", components: [
+			{name: "saveAsButton", value: "requestSaveDocAs", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save as...")}
 			]},
-			{name: "saveProjectButton", value: [ 'enyoEditor', "saveProjectDocs" ], classes:"aresmenu-button", components: [
+			{name: "saveProjectButton", value: "saveProjectDocs", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save Project")}
 			]},
 			{classes: "onyx-menu-divider"},
-			{name: "closeButton", value:  [ 'enyoEditor', "requestCloseCurrentDoc"], classes:"aresmenu-button", components: [
+			{name: "closeButton", value: "requestCloseCurrentDoc", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
 				{content: $L("Close")}
 			]},
-			{name: "closeProjectButton", value:  [ 'enyoEditor', "requestCloseCurrentProject"], classes:"aresmenu-button", components: [
+			{name: "closeProjectButton", value: "requestCloseCurrentProject", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
 				{content: $L("Close Project")}
 			]},
-			{name: "closeAllButton", value: [ 'enyoEditor', "requestCloseAll"], classes:"aresmenu-button", components: [
+			{name: "closeAllButton", value: "requestCloseAll", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
 				{content: $L("Close All")}
 			]}
