@@ -70,7 +70,7 @@ Depending on your network environment, you may need to setup a proxy URL to acce
 This proxy URL can be set up with:
 
 1. `https_proxy` or `http_proxy` environment variable. I.e you can run node server with a command like `http_proxy=http://my-proxy.com:8080 node ide.js`
-1. edit the `globalProxyUrl` parameter at the beginning of [ide.json](ide.json) file
+1. edit the `globalProxyUrl` parameter at the beginning of [ide.json](ide.json) file to have something like `globalProxyUrl: "http://my-proxy.com:8080"'
 1. specific proxy per serrive. See "Advanced proxy setup" at the end of this document.
 
 By default, the service will get the proxy specified by
