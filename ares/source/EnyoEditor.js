@@ -561,11 +561,11 @@ enyo.kind({
 		var fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
 		ComponentsRegistry.getComponent("documentToolbar")
 			.createDocTab(file.name, fileData.getId(), file.path);
-		this.switchToDocument(fileData,next);
+		this.switchToDocument(fileData, $L("Opening...") ,next);
 	},
 
 	// switch file *and* project (if necessary)
-	switchToDocument: function(newDoc, next) {
+	switchToDocument: function(newDoc, popupMsg, next) {
 		// safety net
 		if ( ! newDoc ) {
 			if  (this.debug) { throw("File ID " + newDoc + " not found in cache!");}
@@ -585,7 +585,7 @@ enyo.kind({
 		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : "")
 				   + "to " + newDoc.getName() );
 
-		this.doShowWaitPopup({msg: "switching files"});
+		this.doShowWaitPopup({msg: popupMsg});
 
 		var serial = [];
 

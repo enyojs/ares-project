@@ -1,4 +1,4 @@
-/*global enyo, Ares, ComponentsRegistry, ares */
+/*global enyo, Ares, ComponentsRegistry, ares, $L */
 
 enyo.kind({
 	name: "DocumentToolbar",
@@ -48,7 +48,7 @@ enyo.kind({
 	switchDoc: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.userId);
 		this.trace(inEvent.id, newDoc);
-		ComponentsRegistry.getComponent("enyoEditor").switchToDocument(newDoc, inEvent.next);
+		this.owner.switchToDocument(newDoc, $L("Switching files..."), inEvent.next);
 		return true;
 	},
 
