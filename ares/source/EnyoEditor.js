@@ -143,6 +143,9 @@ enyo.kind({
 	requestSelectedText: function() {
 		return this.$.phobos.requestSelectedText();
 	},
+	updateComponentsCode: function(kindList) {
+		return this.$.phobos.updateComponentsCode(kindList);
+	},
 
 	// kind Picker stuff
 	kindSelected: function(inSender, inEvent) {

@@ -780,7 +780,7 @@ enyo.kind({
 		if (inFilename === this.fileName) {
 			var kind = this.getSingleKind(this.index);
 			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(kind)));
-			ComponentsRegistry.getComponent("phobos").updateComponentsCode(kindList);
+			this.owner.updateComponentsCode(kindList);
 		} else {
 			this.log("skipped code update of stale file ",inFilename);
 		}
