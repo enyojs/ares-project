@@ -375,7 +375,7 @@ enyo.kind({
 			
 			inTargetNode.setExpanded(true);
 			// update icon for expanded state
-			inTargetNode.setIcon("$services/assets/images/folder-open.png");
+			inTargetNode.setIcon("$services/assets/images/arrowDown.png");
 			inTargetNode.addClass("hermesFileTree-folder-highlight");
 						
 			// handle lazy-load when expanding
@@ -649,19 +649,14 @@ enyo.kind({
 	nodeDblClick: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		var node = inEvent.originator;
-		// projectUrl in this.projectData is set asynchronously. Do not try to
-		// open anything before it is available. Also do not
-		// try to open top-level root & folders.
-		if (this.projectUrlReady) {
-			if (!node.file.isDir && !node.file.isServer) {
-				this.doFileDblClick({
-					file: node.file,
-					projectData: this.projectData
-				});
-			} else {
-				if (node.file.isDir) {
-					node.set("expanded", !node.get("expanded"));
-				}
+		if (!node.file.isDir && !node.file.isServer) {
+			this.doFileDblClick({
+				file: node.file,
+				projectData: this.projectData
+			});
+		} else {
+			if (node.file.isDir) {
+				node.set("expanded", !node.get("expanded"));
 			}
 		}
 
@@ -923,7 +918,7 @@ enyo.kind({
 			if (!parentNode.expanded) {
 				parentNode.setExpanded(true);
 				// update icon for expanded state
-				parentNode.setIcon("$services/assets/images/folder-open.png");
+				parentNode.setIcon("$services/assets/images/arrowDown.png");
 							
 				// handle lazy-load when expanding
 				parentNode.updateNodes().
@@ -1479,7 +1474,7 @@ enyo.kind({
 			if (!parentNode.expanded) {
 				parentNode.setExpanded(true);
 				// update icon for expanded state
-				parentNode.setIcon("$services/assets/images/folder-open.png");
+				parentNode.setIcon("$services/assets/images/arrowDown.png");
 							
 				// handle lazy-load when expanding
 				parentNode.updateNodes().
@@ -1561,7 +1556,7 @@ enyo.kind({
 			if (!addParentNode.expanded) {
 				addParentNode.setExpanded(true);
 				// update icon for expanded state
-				addParentNode.setIcon("$services/assets/images/folder-open.png");
+				addParentNode.setIcon("$services/assets/images/arrowDown.png");
 							
 				// handle lazy-load when expanding
 				addParentNode.updateNodes().
