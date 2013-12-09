@@ -565,7 +565,7 @@ enyo.kind({
 	},
 
 	// switch file *and* project (if necessary)
-	switchToDocument: function(newDoc,next) {
+	switchToDocument: function(newDoc, next) {
 		// safety net
 		if ( ! newDoc ) {
 			if  (this.debug) { throw("File ID " + newDoc + " not found in cache!");}
@@ -577,7 +577,7 @@ enyo.kind({
 
 		// don't open an already opened doc
 		if ( oldDoc && newDoc.getId() === oldDoc.getId()) {
-			if (next) {next();}
+			next();
 			return ;
 		}
 
@@ -604,16 +604,18 @@ enyo.kind({
 			);
 		}
 
+		var that = this ;
 		serial.push(
 			this._switchDoc.bind(this,newDoc),
-			this.doHideWaitPopup.bind(this)
+			function(_next) { that.doHideWaitPopup(); _next();}
 		);
 
-		async.series( serial, next );
+		// no need to handle error, call outer next without params
+		async.series( serial, function(){ next();} );
 	},
 
 	// switch Phobos or Deimos to new document
-	_switchDoc: function(newDoc) {
+	_switchDoc: function(newDoc,next) {
 		var phobos = this.$.phobos;
 
 		var oldDoc = this.activeDocument ;
@@ -623,6 +625,7 @@ enyo.kind({
 
 		if (oldDoc && newDoc === oldDoc) {
 			// no actual switch
+			next();
 			return;
 		}
 
@@ -647,6 +650,7 @@ enyo.kind({
 		}
 		this._fileEdited();
 		this.$.bottomBar.activateDocWithId(newDoc.getId());
+		next() ;
 	},
 
 

@@ -134,6 +134,12 @@ enyo.kind({
 			throw new Error ('Undefined fileId for file ' + file.name + ' service ' + file.service);
 		}
 		var fileData = Ares.Workspace.files.get(fileDataId);
+
+		// hide projectView only the first time a file is opened in a project
+		// otherwise, let the user handle this
+		var toHideOrNotToHide = Ares.Workspace.files.length ? function() { next();}
+			: function(next) { this.hideProjectView(); next();} ;
+
 		this.trace("open document with project ", projectData.getName(),
 				   " file ", file.name, " using cache ", fileData);
 
@@ -146,16 +152,11 @@ enyo.kind({
 				[
 					this._fetchDocument.bind(this,projectData, file),
 					editor.switchToNewTabAndDoc.bind(editor,projectData,file),
+					toHideOrNotToHide.bind(this),
 					this._hideWaitPopup.bind(this)
 				],
 				next
 			);
-		}
-
-		// hide projectView only the first time a file is opened in a project
-		// otherwise, let the user handle this
-		if (! Ares.Workspace.files.length ) {
-			this.hideProjectView();
 		}
 	},
 
