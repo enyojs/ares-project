@@ -929,9 +929,9 @@ enyo.kind({
 			var beforeId = inEvent.beforeId; 
 			this.performCreateItem(config, target, beforeId);
 		} else if (inEvent.getName() === "replaceKind"){
-			ComponentsRegistry.getComponent("phobos").replaceViewKindAction(this.index, config_data);
+			this.owner.replaceKind(this.index, config_data);
 		} else if (inEvent.getName() === "addNewKind"){
-			ComponentsRegistry.getComponent("phobos").addViewKindAction(config_data);
+			this.owner.addNewKind(config_data);
 		}
 		this.$.actionPopup.hide();
 	},

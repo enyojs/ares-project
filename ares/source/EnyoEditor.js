@@ -146,6 +146,13 @@ enyo.kind({
 	updateComponentsCode: function(kindList) {
 		return this.$.phobos.updateComponentsCode(kindList);
 	},
+	replaceKind: function(kindIndex, config) {
+		return this.$.phobos.replaceKind(kindIndex, config);
+	},
+	addNewKind: function(config) {
+		return this.$.phobos.addNewKind(config);
+	},
+
 
 	// kind Picker stuff
 	kindSelected: function(inSender, inEvent) {

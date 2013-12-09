@@ -825,7 +825,7 @@ enyo.kind({
 	 * @param config 
 	 * @public
 	 */
-	addViewKindAction: function(config) {
+	addNewKind: function(config) {
 		var newKind = 'enyo.kind('+config+'\n);';
 		this.$.aceWrapper.insertAtEndOfFile(newKind, '@cursor@');
 		this.designerAction();
@@ -836,7 +836,7 @@ enyo.kind({
 	 * @param kind_index, config 
 	 * @public
 	 */
-	replaceViewKindAction: function(kind_index, config){
+	replaceKind: function(kind_index, config){
 		var obj = this.analysis.objects[kind_index];
 		var range = this.$.aceWrapper.mapToLineColumnRange(obj.block.start, obj.block.end);
 		this.$.aceWrapper.replaceRange(range, config);
