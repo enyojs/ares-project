@@ -102,7 +102,6 @@ enyo.kind({
 		this.trace("Creating Deimos");
 		this.inherited(arguments);
 		this.addHandlers();
-		this.doRegisterMe({name:"deimos", reference:this});
 	},
 	rendered: function() {
 		this.inherited(arguments);

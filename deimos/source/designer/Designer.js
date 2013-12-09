@@ -240,7 +240,7 @@ enyo.kind({
 	},
 	//* Send message to Deimos with new kind/components from designerFrame
 	updateKind: function(msg) {
-		var deimos = ComponentsRegistry.getComponent("deimos");
+		var deimos = this.owner;
 
 		// need to check if the rendered was done for the current file
 		if (msg.filename === this.currentFileName) {
