@@ -24,9 +24,9 @@ enyo.kind({
 		{name: "dropHighlight", classes: "designer-frame-highlight designer-frame-drop-highlight"},
 
 		//* Resize handles
-		{name: "topLeftResizeHandle",     classes: "designer-frame-resize-handle", showing: false, sides: {top: true, left: true},     style: "top: 0px; left: 0px;"},
-		{name: "topRightResizeHandle",    classes: "designer-frame-resize-handle", showing: false, sides: {top: true, right: true},    style: "top: 0px; right: 0px;"},
-		{name: "bottomLeftResizeHandle",  classes: "designer-frame-resize-handle", showing: false, sides: {bottom: true, left: true},  style: "bottom: 0px; left: 0px;"},
+		{name: "topLeftResizeHandle", classes: "designer-frame-resize-handle", showing: false, sides: {top: true, left: true}, style: "top: 0px; left: 0px;"},
+		{name: "topRightResizeHandle", classes: "designer-frame-resize-handle", showing: false, sides: {top: true, right: true}, style: "top: 0px; right: 0px;"},
+		{name: "bottomLeftResizeHandle", classes: "designer-frame-resize-handle", showing: false, sides: {bottom: true, left: true}, style: "bottom: 0px; left: 0px;"},
 		{name: "bottomRightResizeHandle", classes: "designer-frame-resize-handle", showing: false, sides: {bottom: true, right: true}, style: "bottom: 0px; right: 0px;"}
 	],
 
@@ -903,7 +903,7 @@ enyo.kind({
 		;
 
 		// Look through link tags for a linked stylesheet with a filename matching _filename_
-		for(i=0;(el = links[i]);i++) {
+		for(i = 0; (el = links[i]); i++) {
 			if(el.getAttribute("rel") === "stylesheet" && el.getAttribute("type") === "text/css" && el.getAttribute("href") === filename) {
 				this.updateStyle(filename, code, el);
 				return;

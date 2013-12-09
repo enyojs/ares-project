@@ -125,7 +125,7 @@ enyo.kind({
 	// to designerFrame serialisation options extracted from .design
 	// files. No ack message is expected from designerFrame
 	loadDesignerUI: function(data, next) {
-		this.trace("called with",data);
+		this.trace("called with", data);
 		this.enableDesignerActionButtons(false);
 
 		var what = data.kinds;
@@ -147,16 +147,16 @@ enyo.kind({
 		// DesignerFrame
 		async.series(
 			[
-				this.selectKind.bind(this,0)
+				this.selectKind.bind(this, 0)
 			],
 			next
 		);
 	},
 
-	selectKind: function(index,next) {
+	selectKind: function(index, next) {
 		var kind = this.kinds[index];
 		var components = this.getSingleKind(index);
-		this.trace("selected kind ",kind);
+		this.trace("selected kind ", kind);
 		
 		if (index !== this.index) {
 			this.addAresIds(components);
@@ -167,7 +167,7 @@ enyo.kind({
 			this.$.inspector.inspect(null);
 			this.$.inspector.setCurrentKindName(kind.name);
 
-			this.$.designer.renderKind(this.fileName, components[0],null,next);
+			this.$.designer.renderKind(this.fileName, components[0], null, next);
 
 			this.index = index;
 		} else {
@@ -184,7 +184,7 @@ enyo.kind({
 	projectDataChanged: function(oldProjectData) {
 		// *ProjectData are backbone obbject mixed with events. This is defined in ProjectCrtl...
 		// *ProjectData are kept in ProjectCtrl
-		this.trace("called. New ",this.projectData," old ",oldProjectData);
+		this.trace("called. New ", this.projectData, " old ", oldProjectData);
 		if (oldProjectData) {
 			// unbind former project data from Deimos
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
@@ -781,13 +781,13 @@ enyo.kind({
 			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(kind)));
 			this.owner.updateComponentsCode(kindList);
 		} else {
-			this.log("skipped code update of stale file ",inFilename);
+			this.log("skipped code update of stale file ", inFilename);
 		}
 	},
 	//* Called when ProjectView has new project selected
-	projectSelected: function(inProject,next) {
-		this.trace("called with ",inProject);
-		this.$.designer.updateSource(inProject,next);
+	projectSelected: function(inProject, next) {
+		this.trace("called with ", inProject);
+		this.$.designer.updateSource(inProject, next);
 	},
 	// triggered by 'Reload' button
 	reloadDesigner: function() {

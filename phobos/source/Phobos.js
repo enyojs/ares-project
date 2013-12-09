@@ -187,7 +187,7 @@ enyo.kind({
 			}
 		};
 
-		var showStuff, showSettings = showModes[mode]||showModes['text'];
+		var showStuff, showSettings = showModes[mode] || showModes['text'];
 		for (var stuff in showSettings) {
 			showStuff = showSettings[stuff];
 			this.trace("show", stuff, ":", showStuff);
