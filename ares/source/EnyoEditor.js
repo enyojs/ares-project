@@ -24,7 +24,7 @@ enyo.kind({
 					{name: "designerTooltipBroken", kind: "Ares.ErrorTooltip", content: $L("Designer")}
 				]}
 			]},
-			{name:"deimosControls", kind: "FittableColumns", fit:true,  classes: "onyx-toolbar-inline", components:[
+			{name:"deimosControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline", components:[
 				{name: "designerFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
 				{name: "docLabel", content: "Deimos", classes: "ares-left-margin"},
 				{kind: "onyx.PickerDecorator", classes: "ares-right-margin", components: [
@@ -159,7 +159,7 @@ enyo.kind({
 		var index = inSender.getSelected().index;
 		var deimos = this.$.deimos;
 		async.series([
-			deimos.selectKind.bind(deimos,index),
+			deimos.selectKind.bind(deimos, index),
 			(function(name,next) {
 				this.$.kindButton.setContent(name);
 				this.$.toolbar.reflow();
@@ -275,7 +275,7 @@ enyo.kind({
 
 	//* apply action on each doc of passed project (or project's doc)
 	// or current project (if param is falsy)
-	foreachProjectDocs: function(action,param) {
+	foreachProjectDocs: function(action, param) {
 		var project
 				= param instanceof Ares.Model.Project ? param
 				: param instanceof Ares.Model.File    ? param.getProjectData()
@@ -286,7 +286,7 @@ enyo.kind({
 			return model.getProjectData().getName() === projectName ;
 		}
 		// backbone collection
-		Ares.Workspace.files.filter(isProjectDoc).forEach(action,this);
+		Ares.Workspace.files.filter(isProjectDoc).forEach(action, this);
 	},
 
 	requestPreview: function() {
@@ -294,19 +294,19 @@ enyo.kind({
 		var previewer = ComponentsRegistry.getComponent("projectView");
 		var project = this.activeDocument.getProjectData();
 		var serialSaver = [] ;
-		this.trace("preview requested on project "+ project.getName());
+		this.trace("preview requested on project " + project.getName());
 
 		// build the serie of functions to be fed to async.series
 		this.foreachProjectDocs(
 			function(doc) {
 				serialSaver.push(
-					this.requestSave.bind(this,doc)
+					this.requestSave.bind(this, doc)
 				);
 			}
 		);
 
 		// the real work is done here
-		async.series( serialSaver, previewer.launchPreview.bind(previewer,project)) ;
+		async.series( serialSaver, previewer.launchPreview.bind(previewer, project)) ;
 	},
 
 	// Save actions
@@ -333,7 +333,7 @@ enyo.kind({
 		this.saveFile(doc.getName(), content, where);
 	},
 
-	saveFile: function(name,content,where,next){
+	saveFile: function(name, content, where, next){
 		var req;
 
 		if (where.fileId) {
@@ -349,8 +349,8 @@ enyo.kind({
 		// hide is done in the callbacks below
 		this.showWaitPopup($L("Saving ") + name + " ...");
 
-		req.response(this, function(inSender,inData) {
-			this.log('saveFile response ',inData);
+		req.response(this, function(inSender, inData) {
+			this.log('saveFile response ', inData);
 			var savedFile = inData[0]; // only one file was saved
 			savedFile.service = where.service;
 			var docDataId = Ares.Workspace.files.computeId(savedFile);
@@ -358,7 +358,7 @@ enyo.kind({
 				this.error("cannot find docDataId from ", savedFile, ' where ', where);
 			}
 			var docData = Ares.Workspace.files.get(docDataId);
-			this.log('saveFile response ok for ',name,savedFile, docDataId, " => ",docData);
+			this.log('saveFile response ok for ', name, savedFile, docDataId, " => ", docData);
 			if(docData){
 				docData.setData(content);
 				docData.setEditedData(content);
@@ -371,7 +371,7 @@ enyo.kind({
 			this.analyseData(docData);
 			if (next) {next(null, savedFile);}
 		}).error(this, function(inSender, inErr) {
-			this.log('saveFile response failed with ' + inErr + ' for ',name,where);
+			this.log('saveFile response failed with ' + inErr + ' for ', name, where);
 			this.hideWaitPopup();
 			this.doError({msg: "Unable to save the file: " + inErr });
 			if (next) {next(inErr);}
@@ -424,7 +424,7 @@ enyo.kind({
 
 		if (param.file) {
 			this.$.saveAsPopup.$.hermesFileTree
-				.checkNodeName(param.name, this.requestOverwrite.bind(this,param));
+				.checkNodeName(param.name, this.requestOverwrite.bind(this, param));
 		} else {
 			// no file or folder chosen
 			this.aceFocus();
@@ -502,7 +502,7 @@ enyo.kind({
 			next(err, where);
 		}
 
-		function _refreshFileTree( file, next) {
+		function _refreshFileTree(file, next) {
 			this.log(file);
 			// refreshFileTree is async, there's no need to wait before opening
 			// the document
@@ -521,7 +521,7 @@ enyo.kind({
 
 	closeActiveDoc: function() {
 		var doc = this.activeDocument;
-		this.trace("close document:",doc.getName());
+		this.trace("close document:", doc.getName());
 		this.$.phobos.closeSession();
 		this.activeDocument = null;
 		this.forgetDoc(doc) ;
@@ -561,11 +561,11 @@ enyo.kind({
 		var fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
 		ComponentsRegistry.getComponent("documentToolbar")
 			.createDocTab(file.name, fileData.getId(), file.path);
-		this.switchToDocument(fileData,next);
+		this.switchToDocument(fileData, next);
 	},
 
 	// switch file *and* project (if necessary)
-	switchToDocument: function(newDoc,next) {
+	switchToDocument: function(newDoc, next) {
 		// safety net
 		if ( ! newDoc ) {
 			if  (this.debug) { throw("File ID " + newDoc + " not found in cache!");}
@@ -599,13 +599,13 @@ enyo.kind({
 			var deimos = this.$.deimos;
 
 			serial.push(
-				projectList.selectInProjectList.bind(projectList,project),
-				deimos.projectSelected.bind(deimos,project)
+				projectList.selectInProjectList.bind(projectList, project),
+				deimos.projectSelected.bind(deimos, project)
 			);
 		}
 
 		serial.push(
-			this._switchDoc.bind(this,newDoc),
+			this._switchDoc.bind(this, newDoc),
 			this.doHideWaitPopup.bind(this)
 		);
 
@@ -618,7 +618,7 @@ enyo.kind({
 
 		var oldDoc = this.activeDocument ;
 		var currentIF = newDoc.getCurrentIF();
-		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName()  + " " : " ")
+		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : " ")
 				   + ' to ' + newDoc.getName() + " IF is " + currentIF );
 
 		if (oldDoc && newDoc === oldDoc) {
@@ -669,13 +669,13 @@ enyo.kind({
 
 	//* Close all files of a project. use current project if
 	// project is null. next is optional
-	requestCloseProject: function (project,next) {
+	requestCloseProject: function (project, next) {
 		this.trace("close project requested");
 		var serial = [] ;
 
 		// build the serie of functions to be fed to async.series
 		this.foreachProjectDocs(
-			this._chainSaveClose.bind(this,serial),
+			this._chainSaveClose.bind(this, serial),
 			project
 		);
 
@@ -703,7 +703,7 @@ enyo.kind({
 
 		// build the serie of functions to be fed to async.series
 		Ares.Workspace.files.forEach(
-			this._chainSaveClose.bind(this,serial)
+			this._chainSaveClose.bind(this, serial)
 		);
 
 		// the real work is done here
@@ -716,19 +716,19 @@ enyo.kind({
 	requestSave: function(doc, next) {
 		var popup = this.$.savePopup ;
 		if (doc.getEdited() === true) {
-			this.trace("request save doc on ",doc.getName());
+			this.trace("request save doc on ", doc.getName());
 			popup.setMessage('"' + doc.getFile().path
 					+ '" was modified.<br/><br/>Save it before closing?') ;
 			popup.setTitle($L("Document was modified!"));
 
 			popup.setActionButton($L("Don't Save"));
-			popup.setActionCallback( function() {next(null,doc);});
+			popup.setActionCallback( function() {next(null, doc);});
 
 			popup.setAction1Button($L("Save"));
 			popup.setAction1Callback(
 				(function() {
 					this.saveDoc(doc);
-					next(null,doc);
+					next(null, doc);
 				}).bind(this)
 			);
 
@@ -771,7 +771,7 @@ enyo.kind({
 				&& model.getProjectData().getName() === projectName ;
 		}
 		// backbone collection
-		Ares.Workspace.files.filter(isProjectFile).forEach(this.updateCode,this);
+		Ares.Workspace.files.filter(isProjectFile).forEach(this.updateCode, this);
 	},
 
 	/**
