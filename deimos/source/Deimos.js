@@ -1,4 +1,4 @@
-/*global ProjectKindsModel, ComponentsRegistry, enyo, ares, async */
+/*global ProjectKindsModel, enyo, ares, async */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({

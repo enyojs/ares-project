@@ -1,4 +1,4 @@
-/*global ProjectKindsModel, ares, enyo, ComponentsRegistry */
+/*global ProjectKindsModel, ares, enyo */
 
 enyo.kind({
 	name: "Designer",
