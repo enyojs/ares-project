@@ -115,6 +115,7 @@ enyo.kind({
 	handlers: {
 		onErrorTooltip: "showErrorTooltip",
 		onErrorTooltipReset: "resetErrorTooltip",
+		onAceGotFocus: "switchProjectToCurrentDoc",
 		onChildRequest: "handleCall",
 		onAceFocus: "aceFocus"
 	},
@@ -615,6 +616,13 @@ enyo.kind({
 		ComponentsRegistry.getComponent("documentToolbar")
 			.createDocTab(file.name, fileData.getId(), file.path);
 		this.switchToDocument(fileData, $L("Opening..."), next);
+	},
+
+	switchProjectToCurrentDoc: function(inSender, inEvent) {
+		if (this.activeDocument) {
+			ComponentsRegistry.getComponent("projectList")
+				.selectInProjectList( this.activeDocument.getProjectData() );
+		}
 	},
 
 	/**
