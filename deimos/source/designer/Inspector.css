@@ -27,6 +27,9 @@ input.inspector-field-checkbox {
 	color:black;
 }
 
+.onyx-radiobutton.inspector-tabbutton.filter{
+	margin-bottom: 5px;
+}
 .halves {
 	width: 50%;
 }
@@ -77,4 +80,10 @@ input.inspector-field-checkbox {
 	margin: 1px;
 	display: inline-block;
 	vertical-align: middle;
+}
+.properties-filter{
+	width: 100%;
+}
+.enyo-fittable-columns-layout.enyo-stretch > .filter-icon{
+	height:20px;
 }
