@@ -108,6 +108,7 @@ enyo.kind({
 	},
 	handlers: {
 		onDesignDocument: "designDocument",
+		onAceGotFocus: "switchProjectToCurrentDoc",
 		onAceFocus: "aceFocus"
 	},
 	debug: false,
@@ -562,6 +563,13 @@ enyo.kind({
 		ComponentsRegistry.getComponent("documentToolbar")
 			.createDocTab(file.name, fileData.getId(), file.path);
 		this.switchToDocument(fileData, $L("Opening..."), next);
+	},
+
+	switchProjectToCurrentDoc: function(inSender, inEvent) {
+		if (this.activeDocument) {
+			ComponentsRegistry.getComponent("projectList")
+				.selectInProjectList( this.activeDocument.getProjectData() );
+		}
 	},
 
 	// switch file *and* project (if necessary)
