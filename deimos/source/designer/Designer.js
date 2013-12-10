@@ -114,9 +114,11 @@ enyo.kind({
 		
 		// designerFrame is initialized and ready to do work.
 		if(msg.op === "state" && msg.val === "initialized") {
+			// reply op: "containerData"
 			this.sendDesignerFrameContainerData();
 		// designerFrame received container data
 		} else if(msg.op === "state" && msg.val === "ready") {
+			// no reply
 			this.setDesignerFrameReady(true);
 			if(this.reloading) {
 				this.doReloadComplete();
@@ -136,30 +138,39 @@ enyo.kind({
 			}
 		// Loaded event sent from designerFrame and awaiting aresOptions.
 		} else if(msg.op === "state" && msg.val === "loaded") {
+			// reply op: "initializeOptions"
 			this.designerFrameLoaded();
 		// The current kind was successfully rendered in the iframe
 		} else if(msg.op === "rendered") {
+			// no reply
 			this.updateKind(msg);
 		// Select event sent from here was completed successfully. Set _this.selection_.
 		} else if(msg.op === "selected") {
+			// no reply
 			this.selection = enyo.json.codify.from(msg.val);
 			this.doSelected({component: this.selection});
 		// New select event triggered in designerFrame. Set _this.selection_ and bubble.
 		} else if(msg.op === "select") {
+			// no reply
 			this.selection = enyo.json.codify.from(msg.val);
 			this.doSelect({component: this.selection});
 		// Highlight drop target to minic what's happening in designerFrame
 		} else if(msg.op === "syncDropTargetHighlighting") {
+			// no reply
 			this.doSyncDropTargetHighlighting({component: enyo.json.codify.from(msg.val)});
 		// New component dropped in designerFrame
 		} else if(msg.op === "createItem") {
+			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doCreateItem(msg.val);
 		// Existing component dropped in designerFrame
 		} else if(msg.op === "moveItem") {
+			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doMoveItem(msg.val);
 		} else if (msg.op === "reloadNeeded") {
+			// no reply
 			this.reloadNeeded = true;
 		} else if(msg.op === "error") {
+			// no reply
 			if (( ! msg.val.hasOwnProperty('popup')) || msg.val.popup === true) {
 				if ( msg.val.triggeredByOp === 'render' && this.renderCallback ) {
 					this.log("dropping renderCallback after error ", msg.val.msg);
@@ -175,9 +186,11 @@ enyo.kind({
 			}
 		// Existing component resized
 		} else if(msg.op === "resize") {
+			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doResizeItem(msg.val);
 		// Returning requested position value
 		} else if(msg.op === "returnPositionValue") {
+			// no reply
 			this.doReturnPositionValue(msg.val);
 		// Default case
 		} else {
