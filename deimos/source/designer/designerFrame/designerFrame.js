@@ -175,50 +175,66 @@ enyo.kind({
 
 		switch (msg.op) {
 		case "containerData":
+			// reply with msg op state val ready
 			this.setContainerData(msg.val);
 			break;
 		case "render":
-			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+			// async (call selectItem) reply with msg:
+			// op rendered
+			// op: error
+			// op: error with reload Needed in case of big problem
 			this.renderKind(msg.val, msg.filename, msg.op);
 			break;
 		case "initializeOptions":
+			// reply with msg op state val initialized
 			this.initializeAllKindsAresOptions(msg.options);
 			break;
 		case "select":
+			// async, reply with op select val: bunch of code
 			this.selectItem(msg.val);
 			break;
 		case "highlight":
+			// no reply
 			this.highlightDropTarget(this.getControlById(msg.val.aresId));
 			break;
 		case "unhighlight":
+			// no reply
 			this.unhighlightDropTargets(msg.val);
 			break;
 		case "modify":
-			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
+			// async, calls selectItem reply with op select val: bunch of code
 			this.modifyProperty(msg.val, msg.filename);
 			break;
 		case "codeUpdate":
+			// no reply, eval done on msg.val
 			this.codeUpdate(msg.val);
 			break;
 		case "cssUpdate":
+			// no reply
 			this.cssUpdate(msg.val);
 			break;
 		case "cleanUp":
+			// no reply
 			this.cleanUpKind();
 			break;
 		case "resize":
+			// no reply
 			this.resized();
 			break;
 		case "prerenderDrop":
+			// no reply even though async code is involved to render animation
 			this.foreignPrerenderDrop(msg.val);
 			break;
 		case "requestPositionValue":
+			// immediately replies op: "returnPositionValue"
 			this.requestPositionValue(msg.val);
 			break;
 		case "serializerOptions":
+			// no reply
 			this.$.serializer.setSerializerOptions(msg.val);
 			break;
 		case "dragStart":
+			// no reply
 			this.setDragType(msg.val);
 			break;
 		default:
@@ -428,6 +444,7 @@ enyo.kind({
 	},
 	//* Render the specified kind
 	renderKind: function(inKind, inFileName, cmd) {
+		// on msg "render"
 		var errMsg;
 
 		try {
@@ -522,6 +539,7 @@ enyo.kind({
 	 * and send back a state message.
 	 */
 	initializeAllKindsAresOptions: function(inOptions) {
+		// on msg "initializeOptions"
 		// genuine enyo.kind's master function extension
 		var self = this;
 		this.trace("starting user app initialization within designer iframe");
