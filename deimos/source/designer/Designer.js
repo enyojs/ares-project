@@ -19,7 +19,7 @@ enyo.kind({
 		onReturnPositionValue: ""
 	},
 	components: [
-		{name: "client", tag: "iframe", classes: "ares-designer-frame-client"},
+		{name: "designerFrame", tag: "iframe", classes: "ares-designer-frame-client"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"}
 	],
 	baseSource: "designerFrame.html",
@@ -35,25 +35,25 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.inherited(arguments);
-		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
+		this.$.communicator.setRemote(this.$.designerFrame.hasNode().contentWindow);
 	},
 	heightChanged: function() {
-		this.$.client.applyStyle("height", this.getHeight()+"px");
-		this.resizeClient();
-		this.repositionClient();
+		this.$.designerFrame.applyStyle("height", this.getHeight()+"px");
+		this.resizeDesignerFrame();
+		this.repositionDesignerFrame();
 	},
 	widthChanged: function() {
-		this.$.client.applyStyle("width", this.getWidth()+"px");
-		this.resizeClient();
-		this.repositionClient();
+		this.$.designerFrame.applyStyle("width", this.getWidth()+"px");
+		this.resizeDesignerFrame();
+		this.repositionDesignerFrame();
 	},
 	zoom: function(inScale) {
 		this.scale = (inScale >= 0) ? Math.max(inScale / 100, 0.2) : 1;
-		enyo.dom.transformValue(this.$.client, "scale", this.scale);
-		this.$.client.resized();
-		this.repositionClient();
+		enyo.dom.transformValue(this.$.designerFrame, "scale", this.scale);
+		this.$.designerFrame.resized();
+		this.repositionDesignerFrame();
 	},
-	repositionClient: function() {
+	repositionDesignerFrame: function() {
 		var height = this.getHeight(),
 			width = this.getWidth(),
 			scaledHeight = height * this.scale,
@@ -61,7 +61,7 @@ enyo.kind({
 			y = -1*(height - scaledHeight)/2,
 			x = -1*(width  - scaledWidth)/2;
 		
-		this.$.client.addStyles("top: " + y + "px; left: " + x + "px");
+		this.$.designerFrame.addStyles("top: " + y + "px; left: " + x + "px");
 	},
 	
 	updateSourcePending: [],
@@ -84,7 +84,7 @@ enyo.kind({
 		this.projectPath = serviceConfig.origin + serviceConfig.pathname + "/file";
 		var iframeUrl = this.projectSource.getProjectUrl() + "/" + this.baseSource + "?overlay=designer";
 		this.trace("Setting designerFrame url: ", iframeUrl);
-		this.$.client.hasNode().src = iframeUrl;
+		this.$.designerFrame.hasNode().src = iframeUrl;
 		// next callback is run once a "ready" message is received from designerFrame
 		this.updateSourceCallback = next;
 	},
@@ -293,7 +293,7 @@ enyo.kind({
 		}
 	},
 
-	resizeClient: function() {
+	resizeDesignerFrame: function() {
 		this.sendMessage({op: "resize"});
 	},
 	//* Prerender simulated drop in designerFrame
