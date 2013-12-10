@@ -106,7 +106,7 @@ enyo.kind({
 			//console.log(key);
 			commands.addCommand({
 				name: key,
-				bindKey: { win: "Ctrl-SHIFT-"+key, mac: "Command-SHIFT-"+key },
+				bindKey: {win: "Ctrl-SHIFT-"+key},
 				exec: enyo.bind(this, 'doFkey' , [key])
 			});
 		}	
