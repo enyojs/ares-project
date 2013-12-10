@@ -1,4 +1,4 @@
-/*global enyo, Ares, ComponentsRegistry, ares, $L */
+/*global enyo, Ares, ares, $L */
 
 enyo.kind({
 	name: "DocumentToolbar",
