@@ -574,6 +574,7 @@ enyo.kind({
 		}
 
 		var oldDoc = this.activeDocument ; // may be undef when a project is closed
+		var safeNext = next; // function parameter is not a closure
 
 		// don't open an already opened doc
 		if ( oldDoc && newDoc.getId() === oldDoc.getId()) {
@@ -611,7 +612,7 @@ enyo.kind({
 		);
 
 		// no need to handle error, call outer next without params
-		async.series( serial, function(){ next();} );
+		async.series( serial, function(){ safeNext();} );
 	},
 
 	// switch Phobos or Deimos to new document
