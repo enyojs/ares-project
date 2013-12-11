@@ -43,20 +43,58 @@ enyo.kind({
 });
 
 enyo.kind({
+	name: "Phonegap.ProjectProperties.Panel",
+	debug: false,
+	published: {
+		label: undefined,
+		name: undefined,
+		value: undefined,
+		jsonSection: undefined,
+		platform: undefined,
+		description: undefined,
+		err: null
+	},
+	events: {
+		onEnableOkButton: "",
+		onDisableOkButton: ""
+	},
+	/**
+	 * @private
+	 */
+	create: function () {
+		ares.setupTraceLogger(this);
+		this.inherited(arguments);
+		this.errChanged();
+	},
+
+	errChanged: function(prevErr) {
+		this.trace("err:", this.err && this.err.toString(), "<-", prevErr && prevErr.toString());
+		if (prevErr && !this.err) {
+			this.doEnableOkButton();
+		} else if (!prevErr && this.err) {
+			this.warn(this.err);
+			this.doDisableOkButton({reason: this.err.toString()});
+		}
+	}
+});
+
+enyo.kind({
 	name: "Phonegap.ProjectProperties.CheckBoxRow",
-	kind: "Phonegap.ProjectProperties.Row",
+	kind: "Phonegap.ProjectProperties.Panel",
 	debug: false,
 	published: {
 		activated: false
 	},
 	components: [
-		{
-			kind: "onyx.Checkbox",
-			name: "configurationCheckBox",
-			classes: "ares-project-properties-drawer-row-check-box-label",
-			onchange: "updateConfigurationValue"
-		},
-		{name: "label", content: this.label}
+		{components: [
+			{
+				kind: "onyx.Checkbox",
+				name: "configurationCheckBox",
+				classes: "ares-project-properties-drawer-row-check-box-label",
+				onchange: "updateConfigurationValue"
+			},
+			{name: "label", tag: "label", classes: "ares-project-properties-label", content: this.label}
+		]}
 	],
 
 	/**
@@ -104,6 +142,7 @@ enyo.kind({
 	}
 });
 
+
 /**
  * Define a row containing an Input widget.
  */
@@ -122,24 +161,18 @@ enyo.kind({
 	},
 	components: [
 		{name: "label", classes: "ares-project-properties-drawer-row-label"},
-			{
-			kind: "FittableRows",
+		{
+			kind: "onyx.InputDecorator",
+			classes: "ares-project-properties-input-medium",
 			components: [
 				{
-					kind: "onyx.InputDecorator",
-					classes: "ares-project-properties-input-medium",
-					components: [
-						{
-							kind: "onyx.Input",
-							name: "configurationInput",
-							onchange: "updateConfigurationValue"							
-						}
-					]
-				}, 
-
-				{name: "errorMsg", content: "The value must be a number", showing: false, classes: "ares-project-properties-input-error-message"}
+					kind: "onyx.Input",
+					name: "configurationInput",
+					onchange: "updateConfigurationValue"							
+				}
 			]
-		}
+		}, 
+		{name: "errorMsg", content: "The value must be a number", showing: false, classes: "ares-project-properties-input-error-message"}
 	],
 
 	/**
@@ -216,7 +249,7 @@ enyo.kind({
 
 enyo.kind({
 	name: "Phonegap.ProjectProperties.BuildOption",
-	kind: "Phonegap.ProjectProperties.Row",
+	kind: "Phonegap.ProjectProperties.Panel",
 	classes: "ares-project-properties-drawer-row",
 	published: {
 		pan: ""
@@ -229,7 +262,7 @@ enyo.kind({
 			classes: "ares-project-properties-drawer-row-check-box-label",
 			onchange: "updateConfigurationValue"
 		},
-		{name: "label", content: this.label}
+		{tag: "label", name: "label", classes: "ares-project-properties-label", content: this.label}
 	],
 
 	/**
@@ -270,7 +303,6 @@ enyo.kind({
 
 		if (this.name === "autoGenerateXML"){
 			this.trace("auto-generate config.xml is enabled: ", this.getValue());
-
 			if (this.pan) {
 				if(this.getValue()) {
 					this.pan.show();
@@ -367,22 +399,19 @@ enyo.kind({
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
 	published: {
-		contentValue: undefined
+		contentValue: undefined		
 	},
+	none: undefined,
 	components: [
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
-		{kind: "FittableRows", 
+		{
+			kind: "onyx.PickerDecorator",
 			components: [
-				{
-					kind: "onyx.PickerDecorator",
-					components: [
-						{kind: "onyx.PickerButton", name: "configurationPickerButton", classes: "ares-project-properties-picker"},
-						{kind: "onyx.Picker", name: "configurationPicker", onSelect: "updateConfigurationValue"}
-					]
-				},
-				{name: "errorMsg", content: "The value must be a number", showing: false, classes: "ares-project-properties-input-error-message"}
+				{kind: "onyx.PickerButton", name: "configurationPickerButton", classes: "ares-project-properties-picker"},
+				{kind: "onyx.Picker", name: "configurationPicker", onSelect: "updateConfigurationValue"}
 			]
-		}
+		},
+		{name: "errorMsg", content: "The value must be a number", showing: false, classes: "ares-project-properties-input-error-message"}
 	],
 
 	/**
@@ -408,10 +437,21 @@ enyo.kind({
 	 * @ private
 	 */
 	contentValueChanged: function () {
+		this.addNoneElement(this.none);
 		enyo.forEach(this.contentValue, function (inValue) {
 			var itemState = inValue === this.value ? true : false;
 			this.$.configurationPicker.createComponent({content: inValue, active: itemState});
-		}, this);
+		}, this);		
+	},
+
+	/**
+	 * Add a none element to the picker's items.
+	 * @param {String} inNoneValue the value of the none picker's element.
+	 */
+	addNoneElement: function(inNoneValue) {
+		if (this.none !== undefined) {
+			this.$.configurationPicker.createComponent({content: "None", value: inNoneValue, active: false});
+		}
 	},
 
 	/**
@@ -528,6 +568,8 @@ enyo.kind({
 	 * @private
 	 */
 	contentValueChanged: function() {
+		this.addNoneElement(this.none);
+
 		//sort the value of the Android API version to garanty the display in the correct order. 
 		Object.keys(Phonegap.UIConfiguration.androidSdkVersions)
 		.sort(function(a, b) {return a - b;})
@@ -791,26 +833,10 @@ enyo.kind({
 		buttonTip: "",
 	},
 	components: [
-		{
-			name: "label",
-			classes: "ares-project-properties-drawer-row-label"
-		},
-			{
-			kind: "FittableRows",
-			components: [
-				{
-				kind: "onyx.InputDecorator",
-				classes: "ares-project-properties-input-medium",
-				components: [{
-						kind: "onyx.Input",
-						name: "ImgPath",
-						disabled: true
-					}
-				]
-			},
-				{name: "errorMsg", showing: false, classes: "ares-project-properties-input-error-message"}
-			]
-		},
+		{ name: "label", classes: "ares-project-properties-drawer-row-label"},
+		{ kind: "onyx.InputDecorator", classes: "ares-project-properties-input-medium", components: [
+			{ kind: "onyx.Input", name: "ImgPath", disabled: true }
+		]},
 		{kind: "onyx.IconButton", name:"ImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"},
 		{content: "Height", classes: "ares-project-properties-drawer-row-attribute-label"},
 		{
@@ -833,7 +859,8 @@ enyo.kind({
 					onchange: "updateIconWidhtValue"
 				}
 			]
-		}
+		},
+		{name: "errorMsg", showing: false, classes: "ares-project-properties-input-error-message small"},
 	],
 
 	/**

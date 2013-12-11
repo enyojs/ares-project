@@ -3,6 +3,7 @@
 		"origins": [],
 		"methods": []
 	},
+	"globalProxyUrl": null,
 	"headers": {},
 	"services": [
 		{

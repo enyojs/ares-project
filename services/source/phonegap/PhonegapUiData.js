@@ -37,6 +37,22 @@ enyo.kind({
 				]
 			},
 			{
+				id: "applicationPermissions",
+				name: "Application permissions",
+				type: "PanelInDrawer",
+				rows: [
+					{name: "battery", label: "Battery",	content: "",defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"},
+					{name: "camera", label: "Camera", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "contact", label: "Contact",	content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "file", label: "File", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "media",	label: "Media", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "geolocation", label: "Geolocation", content: "", defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "network", label: "Network", content: "",defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"},
+					{name: "notification", label: "Notification", content: "", defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "device", label: "Device", content: "", defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"}		
+				]
+			},
+			{
 				id: "sharedConfiguration",
 				name: "Shared configuration",
 				type: "Drawer",
@@ -56,22 +72,6 @@ enyo.kind({
 					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "/icon.png", defaultWidth: "32", defaultHeight: "32", type: "ImgRow", description: "(px)"},
 					{name: "splashScreen", label: "SplashScreen", content: "", defaultValue: "", defaultWidth: "60", defaultHeight: "60", type: "ImgRow", description: "(px)"}
 				]		
-			}, 
-			{
-				id: "applicationPermissions",
-				name: "Application permissions",
-				type: "Drawer",
-				rows: [
-					{name: "battery", label: "Battery",	content: "",defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"},
-					{name: "camera", label: "Camera", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "contact", label: "Contact",	content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "file", label: "File", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "media",	label: "Media", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "geolocation", label: "Geolocation", content: "", defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "network", label: "Network", content: "",defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"},
-					{name: "notification", label: "Notification", content: "", defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "device", label: "Device", content: "", defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"}
-				]
 			}
 		],
 
@@ -82,8 +82,8 @@ enyo.kind({
 				type: "Target",
 				rows: [
 					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], defaultValue: "internalOnly", type: "PickerRow", jsonSection: "preferences"},
-					{name: "android-minSdkVersion", label: "Minimum API Level/Android Version ", content: [], defaultValue: "7", type: "SDKVersionRow", jsonSection: "preferences"},
-					{name: "android-maxSdkVersion", label: "Maximum API Level/Android Version ", content: [], defaultValue: "18", type: "SDKVersionRow", jsonSection: "preferences"},
+					{name: "android-minSdkVersion", label: "Min. API Level/Android Version ", content: [], defaultValue: "7", type: "SDKVersionRow", jsonSection: "preferences"},
+					{name: "android-maxSdkVersion", label: "Max. API Level/Android Version ", content: [], defaultValue: "18", type: "SDKVersionRow", jsonSection: "preferences", none: ""},
 					{name: "android-windowSoftInputMode", label: "Window SoftInput Mode ", content: ["stateVisible", "adjustResize"], defaultValue: "stateVisible", type: "PickerRow", jsonSection: "preferences"},
 					{name: "splash-screen-duration", label: "Splash screen Duration (ms)", content: "5000", defaultValue: "5000", type: "NumberInputRow", jsonSection: "preferences", description: "Time in milliseconds"},
 					{name: "load-url-timeout", label: "Load URL timeout (ms)", content: "20000", defaultValue: "20000", type: "NumberInputRow", jsonSection: "preferences", description: "Time in milliseconds"},

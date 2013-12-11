@@ -23,23 +23,24 @@ enyo.kind({
 			kind: "enyo.Scroller",
 			fit: "true",
 			classes: "ares-project-properties",
-			components: [{
-					kind: "FittableRows",
+			components: [
+				{kind: "FittableRows",
 					components: [
 						{content: "Sign-in is required", name: "signInErrorMsg", classes: "ares-project-properties-sign-in-msg"}, 
 						{content: "Looking for Phonegap account data ...", name: "waitingForSignIn", classes: "ares-project-properties-sign-in-msg"},
-						{name: "phonegapBuildHelp", kind: "onyx.TooltipDecorator", components: [
-							{name: "phonegapBuildButton", kind: "onyx.IconButton", src: "$services/assets/images/Phonegap_build_help.png", ontap: "phonegapBuildClick", classes: "ares-project-properties-help-button"},
-							
-						]},
-						{
-							classes: "ares-row ares-align-left",
-							name: "appIdRow",
-							components: [
+						{kind: "FittableColumns", components:[	
+							{classes: "ares-row ares-align-left",  name: "appIdRow", fit: true, style: "width: 95%", components: [
 								{kind: "Phonegap.ProjectProperties.AppId", name: "appIdSelector"}							
-							]
-						}, 
-						{name: "BuildOptionPanel", kind: "FittableRows", classes: "ares-project-properties-build-option-panel"},
+							]},
+							{style: "width: 5%", components:[
+								{name: "phonegapBuildHelp",  kind: "onyx.TooltipDecorator", components: [
+									{name: "phonegapBuildButton", kind: "onyx.IconButton", src: "$services/assets/images/Phonegap_build_help.png", ontap: "phonegapBuildClick"/*, classes: "ares-project-properties-help-button"*/},
+									{kind: "onyx.Tooltip", content: "PhoneGap Build Help", classes:"ares-tooltip-last-phoneGap"}		
+								]}
+							]}
+
+						]},
+						{name: "BuildOptionPanel", classes: "ares-project-properties-build-option-panel"},
 						{kind: "Signals", "plugin.phonegap.userDataRefreshed": "refresh"},
 						{name: "targetsRows", kind: "FittableRows", classes: "ares-project-properties-targetsRows-display"}
 						
@@ -66,7 +67,7 @@ enyo.kind({
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		this.$.appIdSelector.setProject(this.project);
+		
 		this.createAllDrawers();
 	},
 
@@ -80,16 +81,14 @@ enyo.kind({
 		 */
 		function createDrawer(inDrawer) {			
 			var container;
-			
 			if (inDrawer.id === 'buildOption'){
 				container = this.$.BuildOptionPanel;
 			} else {
-				container = this.$.targetsRows;			
+				container = this.$.targetsRows;		
 			}
-
 			container.createComponent({
 				name: inDrawer.id,
-				classes: "ares-row",
+				classes: (inDrawer.id === 'applicationPermissions') ? "":"ares-row",
 				kind: "Phonegap.ProjectProperties." + inDrawer.type,
 				targetId: inDrawer.id,
 				drawerName: inDrawer.name,
@@ -124,8 +123,11 @@ enyo.kind({
 			enyo.forEach(dwrContent.rows, function (row) {
 		
 				var containerPanel = getPanel.call(this, row.name);
-			
-				dwr.$.drawer.createComponent({
+				var componentName = "drawer";
+				if(dwr.$.panel){
+					componentName = "panel";
+				}
+				dwr.$[componentName].createComponent({
 					kind: "Phonegap.ProjectProperties." + row.type,
 					name: row.name,
 					label: row.label,
@@ -136,7 +138,8 @@ enyo.kind({
 					width: row.defaultWidth,
 					height: row.defaultHeight,
 					pan: containerPanel,
-					description: row.description
+					description: row.description,
+					none:row.none
 				});
 			}, this);
 		}
@@ -150,10 +153,9 @@ enyo.kind({
 		function initialiseDrawers(inDrawers) {		
 			var i = 0;			
 			enyo.forEach(inDrawers, function (inDrawer) {
-				
 				// get all the created drawers.
-				var allDrawers = this.$.BuildOptionPanel.getComponents().concat(this.$.targetsRows.getComponents());
-				
+				var allDrawers = this.$.BuildOptionPanel.getComponents();
+				allDrawers = allDrawers.concat(this.$.targetsRows.getComponents());
 				// get the current drawer to fill
 				var actualDrawer = allDrawers[i];
 				
@@ -184,7 +186,6 @@ enyo.kind({
 		this.trace("Project config:", config);
 		this.setConfig(config);
 		this.$.appIdSelector.setSelectedAppId(config.appId || '');
-		this.$.appIdSelector.setProject(this.project);
 		config.targets = config.targets || {};
 
 
@@ -386,7 +387,7 @@ enyo.kind({
 			components: [
 				{tag: "label", name: "drawerLbl", classes: "ares-project-properties-common_drawer_header"}
 			]},			 
-			{name: "drawer", orient: "v", kind: "onyx.Drawer", open: false}
+			{name: "drawer", orient: "v", kind: "onyx.Drawer", open: true}
 	],
 
 	/**
@@ -430,8 +431,8 @@ enyo.kind({
 	 * @private
 	 */
 	unfold: function () {
-		this.$.drawer.setOpen(this.fold);
-		this.fold = !this.fold;
+		var isOpen = this.$.drawer.open;
+		this.$.drawer.setOpen(!isOpen);
 	}
 });
 
@@ -575,7 +576,7 @@ enyo.kind({
 			{tag: "label", name: "targetLbl", classes: "ares-project-properties-platform_drawer_header"}
 		]},
 		 
-		{name: "drawer", orient: "v", kind: "onyx.Drawer",	open: false}
+		{name: "drawer", orient: "v", kind: "onyx.Drawer",	open: true}
 	],
 	/**
 	 * @private
@@ -659,4 +660,110 @@ enyo.kind({
 	},
 });
 
+//Drawer content is changed for application permission, the purpose is to display checkboxes and labels in row
+enyo.kind({
+	name: "PhoneGapGridArranger",
+	kind: "GridArranger",
+	colHeight: "30",
+	colWidth: "150"
+});
+enyo.kind({
+	name: "Phonegap.ProjectProperties.PanelInDrawer",
+	kind: "Phonegap.ProjectProperties.Drawer",
+	debug: false,
+	classes: "ares-drawer",
+	published: {
+		targetId: "",		
+		enabled: "",
+		keys: {}
+	},
+	components: [
+		 
+		{tag: "div", classes: "ares-project-properties-label-background", ontap: "unfold", 
+		components: [
+			{tag: "label", name: "targetLbl", classes: "ares-project-properties-common_drawer_header"}
+		]},
+		 
+		{name: "drawer", orient: "v", kind: "onyx.Drawer",	open: true, components: [
+			{kind: "FittableRows", name: "row", components: [
+				{name: "panel", kind: "Panels", arrangerKind: "PhoneGapGridArranger", fit: true, realtimeFit: true, draggable: false, classes: "panels-phonegap-grid"}
+			]}
+		]}
+	],
+	/**
+	 * @private
+	 */
+	create: function () {
+		ares.setupTraceLogger(this);
+		this.inherited(arguments);
+		this.drawerNameChanged();
+	},
+	rendered: function() {
+		this.inherited(arguments);
+	},
+	/**
+	 *	Update this kind's attribut from the passed parameter.
+	 * 
+	 * @param {Object} config contains Phonegap build parmameters set in project.json
+	 * @public
+	 */
+	setProjectConfig: function (config) {
+		this.trace("id:", this.targetId, "config:", config);
 
+		this.setEnabled( config && config.targets[this.targetId] );
+		var count = 0;
+		enyo.forEach(enyo.keys(this.$.panel.$) , function (row) {
+			if(this.$.panel.$[row].platform){
+				this.$.panel.$[row].setProjectConfig(config);
+				count ++;
+			}
+		}, this);
+		this.$.row.applyStyle("height", (count/4)*2+"em");
+
+	},
+	/**
+	 * Update the object config using the attributes values of {Phonegap.ProjectProperties.PanelInDrawer}
+	 * 
+	 * @param  {Object} config contains Phonegap build parmameters set in project.json
+	 * @public
+	 */
+	getProjectConfig: function (config) {
+		if (this.enabled) {
+			config.targets[this.targetId] = {};
+		}
+
+		enyo.forEach(enyo.keys(this.$.panel.$) , function (row) {
+			
+			if (row === "client" || row === "animator") {
+				// nop;
+			} else if (row === "signingKey") {				
+				if (this.enabled && this.$.panel.$.signingKey.getActiveKeyId()) {
+					config.targets[this.targetId].keyTitle = this.$.panel.$.signingKey.getActiveKeyTitle();
+				}
+				
+			} else {
+
+				this.$.panel.$[row].getProjectConfig(config);
+			}
+		}, this);
+		this.trace("id:", this.targetId, "config:", config);
+	},
+	/**
+	 * @private
+	 */
+	drawerNameChanged: function (old) {		
+		this.trace(old, "->", this.enabled);		
+		this.$.targetLbl.setContent(this.drawerName);
+	},
+	/**
+	 * @private
+	 */
+	enabledChanged: function (old) {		
+		this.trace("id:", this.targetId, old, "->", this.enabled);		
+		if (this.enabled) {
+			this.config = this.config || {};
+		} else {
+			this.config = false;
+		}
+	}
+});

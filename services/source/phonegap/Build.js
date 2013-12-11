@@ -57,6 +57,14 @@ enyo.kind({
 		return this.config;
 	},
 
+	/** 
+	 * Return an instance of the current selected project from the project list UI.
+	 * @public
+	 */
+	getCurrentProject: function() {
+		return ComponentsRegistry.getComponent("projectView").currentProject;
+	},
+
 	/**
 	 * @return the human-friendly name of this service
 	 */
@@ -1128,10 +1136,10 @@ enyo.kind({
 			},
 			preferences: {
 				//shared prefrences
-				"phonegap-version": Phonegap.UIConfiguration.commonDrawersContent[1].rows[0].defaultValue, 
-				"orientation": Phonegap.UIConfiguration.commonDrawersContent[1].rows[1].defaultValue,
-				"target-device": Phonegap.UIConfiguration.commonDrawersContent[1].rows[2].defaultValue, 
-				"fullscreen": Phonegap.UIConfiguration.commonDrawersContent[1].rows[3].defaultValue,
+				"phonegap-version": Phonegap.UIConfiguration.commonDrawersContent[2].rows[0].defaultValue, 
+				"orientation": Phonegap.UIConfiguration.commonDrawersContent[2].rows[1].defaultValue,
+				"target-device": Phonegap.UIConfiguration.commonDrawersContent[2].rows[2].defaultValue, 
+				"fullscreen": Phonegap.UIConfiguration.commonDrawersContent[2].rows[3].defaultValue,
 
 				//Android preferences
 				"android-installLocation": Phonegap.UIConfiguration.platformDrawersContent[0].rows[0].defaultValue, 
