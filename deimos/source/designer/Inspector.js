@@ -6,7 +6,8 @@ enyo.kind({
 	kind: "FittableRows",
 	events: {
 		onModify: "",
-		onAction: ""
+		onAction: "",
+		onCheckPath: ""
 	},
 	published: {
 		filterLevel: null,		// Value will be given by Inspector.FilterXXX "checked" item.
@@ -22,12 +23,15 @@ enyo.kind({
 		{name: "partialFilter", kind: "onyx.InputDecorator", classes: "properties-filter", layoutKind: "FittableColumnsLayout", showing: false, components: [
 			{kind: "onyx.Input", name: "filterProperties", fit: true, placeholder: "filter", oninput: "propertiesFiltering"},
 			{kind: "onyx.Icon", classes: "filter-icon", name: "filterPropertiesIcon", src: "$deimos/images/search-input-search.png", ontap: "resetFilter"}
-		]}
+		]},
+		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "selectFileChosen"}
 	],
 	handlers: {
 		onChange: "change",
 		onDblClick: "dblclick",
-		onPositionPropertyChanged: "positionPropertyChanged"
+		onPositionPropertyChanged: "positionPropertyChanged",
+		onInputButtonTap: "selectInputFile",
+		onSelectFile: "selectFile"
 	},
 	classes: "inspector-panel",
 	debug: false,
@@ -217,26 +221,37 @@ enyo.kind({
 		kind = (info && info.inputKind) || kind;
 		
 		// User defined kind: as an Object
-		if (kind && kind instanceof Object) {
-			kind = enyo.clone(kind);
-			kind = enyo.mixin(kind, {name: attributeFieldName, fieldName: inName, fieldValue: value, fieldType: inType, disabled: inherited});
-			attributeRow.createComponent(kind);
-		} else {
-			attributeKind = (kind)
-				?	kind
-				:	(value === true || value === false || value === "true" || value === "false")
-					?	"Inspector.Config.Boolean"
-					:	"Inspector.Config.Text";
-			
-			var values = info ? info.values : null;
-			var comp = {name: attributeFieldName, kind: attributeKind, fieldName: inName, fieldValue: value, extra: inType, disabled: inherited};
-			
-			if (values) {
-				comp.values = values;
+		if(inName !== 'src' && inName !== 'icon'){
+			if (kind && kind instanceof Object) {
+				kind = enyo.clone(kind);
+				kind = enyo.mixin(kind, {name: attributeFieldName, fieldName: inName, fieldValue: value, fieldType: inType, disabled: inherited});
+				this.log(" SRC ??? ", inName);
+				this.log(" KIND ", inName);
+				attributeRow.createComponent(kind);
+			} else {
+				attributeKind = (kind)
+					?	kind
+					:	(value === true || value === false || value === "true" || value === "false")
+						?	"Inspector.Config.Boolean"
+						:	"Inspector.Config.Text";
+				this.log(" SRC 2 ??? ", inName, "attributKing ", attributeKind);
+				var values = info ? info.values : null;
+				var comp = {name: attributeFieldName, kind: attributeKind, fieldName: inName, fieldValue: value, extra: inType, disabled: inherited};
+				
+				if (values) {
+					comp.values = values;
+				}
+				this.log(" COMP ", comp);
+				attributeRow.createComponent(comp);
 			}
-			
+		} else{
+			var comp = {name: attributeFieldName, kind: "Inspector.PathInputRow", fieldName: inName, fieldValue: value, extra: inType, label: inName, buttonTip: "select file..."}
 			attributeRow.createComponent(comp);
 		}
+		
+		//if the inName === src or icon
+		//add file chooser
+
 	},
 	//* Set up properties and create the LayoutEditor
 	makeLayoutEditor: function(inControl) {
@@ -593,6 +608,19 @@ enyo.kind({
 			this.propertiesFiltering();
 		}
 		return true;
+	},
+	selectFile: function(inSender, inData) {
+/*		this.trace(inSender, "=>", inData);
+		
+		this.chooser = inData.input;
+		this.$.selectFilePopup.reset();
+		this.$.selectFilePopup.connectProject(this.targetProject, (function() {
+			this.$.selectFilePopup.setHeaderText(inData.header);
+			this.$.selectFilePopup.pointSelectedName(inData.value, inData.status);
+			this.$.selectFilePopup.show();
+		}).bind(this));*/
+
+		return true;
 	}
 });
 
@@ -615,6 +643,9 @@ enyo.kind({
 		}
 		
 		return true;
+	},
+	selectInputFile: function (inSender, inData) {
+		this.doSelectFile({input: inData.originator, value: inData.originator.getValue(), status: inData.originator.getStatus(), header: inData.header});
 	}
 });
 
@@ -660,5 +691,80 @@ enyo.kind({
 		if(!this.allowActivate) {
 			return true;
 		}
+	}
+});
+
+enyo.kind({
+	name: "Inspector.PathInputRow",
+	//classes: "ares-row",
+	published: {
+		label: "",
+		value: "",
+		inputTip: "",
+		activated: true,
+		status: false,
+		buttonTip: ""
+	},
+	events: {
+		onInputButtonTap: "",
+		onPathChecked: ""
+	},
+	components: [
+		{tag: "label", name: "pathInputLabel"},
+		{kind: "onyx.InputDecorator", components: [
+			{kind: "Input", name: "pathInputValue"}
+		]},
+		{kind: "onyx.IconButton", name:"pathInputButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
+	],
+	debug: false,
+
+	create: function () {
+		this.inherited(arguments);
+
+		this.labelChanged();
+		this.valueChanged();
+		this.inputTipChanged();
+		this.activatedChanged();
+		this.statusChanged();
+		this.buttonTipChanged();
+	},
+	/** @private */
+	labelChanged: function () {
+		this.$.pathInputLabel.setContent(this.label);
+	},
+	/** @private */
+	valueChanged: function () {
+		this.$.pathInputValue.setValue(this.value);
+		this.setStatus(true);
+	},
+	/** @private */
+	inputTipChanged: function () {
+		this.$.pathInputValue.setAttribute("title", this.inputTip);
+	},
+	/** @private */
+	activatedChanged: function () {
+		if (this.activated) {
+			this.$.pathInputButton.show();
+			this.statusChanged();
+		} else {
+			this.$.pathInputButton.hide();
+		}
+	},
+	/** @private */
+	statusChanged: function () {
+		if (this.status) {
+			this.$.pathInputButton.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.pathInputButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
+	},
+	/** @private */
+	buttonTipChanged: function () {
+		this.$.pathInputButton.setAttribute("title", this.buttonTip);
+	},
+	/** @private */
+	pathInputTap: function (inSender, inEvent) {
+		this.doInputButtonTap({header: $L("Select file...")});
+		return true;
 	}
 });
