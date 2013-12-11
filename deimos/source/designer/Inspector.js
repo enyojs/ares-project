@@ -18,14 +18,18 @@ enyo.kind({
 		{kind: "Scroller", fit: true, components: [
 			{name: "content", kind: "FittableRows", onActivate: "inheritAttributeToggle"}
 		]},
-		{name: "filterLevel", kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"}
+		{name: "filterLevel", kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"},
+		{name: "partialFilter", kind: "onyx.InputDecorator", classes: "properties-filter", layoutKind: "FittableColumnsLayout", showing: false, components: [
+			{kind: "onyx.Input", name: "filterProperties", fit: true, placeholder: "filter", oninput: "propertiesFiltering"},
+			{kind: "onyx.Icon", classes: "filter-icon", name: "filterPropertiesIcon", src: "$deimos/images/search-input-search.png", ontap: "resetFilter"}
+		]}
 	],
 	handlers: {
 		onChange: "change",
 		onDblClick: "dblclick",
 		onPositionPropertyChanged: "positionPropertyChanged"
 	},
-	style: "padding: 8px; white-space: nowrap;",
+	classes: "inspector-panel",
 	debug: false,
 	helper: null,			// Analyzer.KindHelper
 	userDefinedAttributes: {},
@@ -353,6 +357,8 @@ enyo.kind({
 					this.makeEditor(inControl, p, ps[p], "properties");
 				}
 				this.$.filterLevel.show();
+				this.$.partialFilter.show();
+				this.propertiesFiltering();
 				break;
 			case 'E':
 				ps = ps.events;
@@ -363,6 +369,7 @@ enyo.kind({
 					this.makeEditor(inControl, p, "", "events");
 				}
 				this.$.filterLevel.show();
+				this.$.partialFilter.hide();
 				break;
 			case 'S':
 				var style = "";
@@ -371,10 +378,12 @@ enyo.kind({
 				}
 				this.$.content.createComponent({kind: "CssEditor", currentStyle: style, inspectorObj: this});
 				this.$.filterLevel.hide();
+				this.$.partialFilter.hide();
 				break;
 			case 'L':
 				this.makeLayoutEditor(inControl);
 				this.$.filterLevel.hide();
+				this.$.partialFilter.hide();
 				break;
 			default:
 				enyo.warn("Inspector has unknown filterType: ", this.filterType);
@@ -541,6 +550,49 @@ enyo.kind({
 
 		// Get the list of handler methods
 		this.kindFunctions = this.helper.getFunctions().sort();
+	},
+	//* @private
+	propertiesFiltering: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+
+		if (this.$.filterProperties.getValue() === "") {
+			this.$.filterPropertiesIcon.set("src", "$deimos/images/search-input-search.png");
+		} else {
+			this.$.filterPropertiesIcon.set("src", "$deimos/images/search-input-cancel.png");
+		}
+		this.filterProperties();
+
+		return true;
+	},
+	//* @private
+	filterProperties: function() {
+		var allProperties = this.$.content.getControls();
+		var filterString = this.$.filterProperties.getValue().toLowerCase();
+		enyo.forEach(allProperties, function(row) {
+			row.show();
+			if (filterString !== "") {
+				var controls = row.getControls();
+				if(controls.length){
+					enyo.forEach(controls, function(control) {
+						var fieldName = control.fieldName;
+						if(fieldName){
+							if(fieldName.toLowerCase().indexOf(filterString) === -1){
+								row.hide();
+							}
+						}
+					}, this);
+				}
+			}
+		}, this);
+	},
+	//* @private
+	resetFilter: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		if (this.$.filterProperties.getValue() !== "") {
+			this.$.filterProperties.setValue("");
+			this.propertiesFiltering();
+		}
+		return true;
 	}
 });
 
@@ -550,7 +602,7 @@ enyo.kind({
 		onValueChanged: ""
 	},
 	components: [
-		{kind: "onyx.RadioGroup", fit: false, onActivate: "filterLevelActivated", style: "display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton thirds", components: [
+		{kind: "onyx.RadioGroup", fit: false, onActivate: "filterLevelActivated", controlClasses: "onyx-tabbutton inspector-tabbutton filter thirds", components: [
 			{value: ProjectKindsModel.F_USEFUL,    content: "Frequent"},
 			{value: ProjectKindsModel.F_NORMAL,    content: "Normal", active: true},
 			{value: ProjectKindsModel.F_DANGEROUS, content: "All"}
