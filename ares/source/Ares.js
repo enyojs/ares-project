@@ -38,7 +38,7 @@ enyo.kind({
 					name: "harmonia",
 					classes: "ares-panel-min-width enyo-fit",
 					onFileDblClick: "openDocument",
-					onFileChanged: "_closeDocument",
+					onFileChanged: "closeDocument",
 					onFolderChanged: "closeSomeDocuments"
 				},
 				{kind: "Ares.EnyoEditor", name: "enyoEditor"}
@@ -195,7 +195,12 @@ enyo.kind({
 		}
 	},
 	/** @private */
+	closeDocument: function(inSender,inEvent) {
+		this._closeDocument(inEvent.id);
+	},
+
 	_closeDocument: function(docId, next) {
+		var cb = next || function (){};
 		ComponentsRegistry.getComponent("enyoEditor").closeDoc(docId,next);
 	},
 	/** @private */
