@@ -706,7 +706,7 @@ enyo.kind({
 		},
 		instance: null
 	},
-		/*
+	/*
 	* open hera
 	* @protected
 	*/

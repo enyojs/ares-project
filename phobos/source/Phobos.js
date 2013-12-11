@@ -282,7 +282,7 @@ enyo.kind({
 		var showModes = {
 			javascript: {
 				imageViewer: false,
-				ace: true,
+				aceWrapper: true,
 				saveButton: true,
 				saveAsButton: true,
 				newKindButton: true,
@@ -292,7 +292,7 @@ enyo.kind({
 			},
 			image: {
 				imageViewer: true,
-				ace: false,
+				aceWrapper: false,
 				saveButton: false,
 				saveAsButton: false,
 				newKindButton: false,
@@ -302,7 +302,7 @@ enyo.kind({
 			},
 			text: {
 				imageViewer: false,
-				ace: true,
+				aceWrapper: true,
 				saveButton: true,
 				saveAsButton: true,
 				newKindButton: false,
@@ -312,7 +312,7 @@ enyo.kind({
 			},
 			css: {
 				imageViewer: false,
-				ace: true,
+				aceWrapper: true,
 				saveButton: true,
 				saveAsButton: true,
 				newKindButton: false,
@@ -322,7 +322,7 @@ enyo.kind({
 			},
 			less: {
 				imageViewer: false,
-				ace: true,
+				aceWrapper: true,
 				saveButton: true,
 				saveAsButton: true,
 				newKindButton: false,
