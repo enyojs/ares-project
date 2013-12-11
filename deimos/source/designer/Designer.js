@@ -166,14 +166,14 @@ enyo.kind({
 		} else if(msg.op === "moveItem") {
 			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doMoveItem(msg.val);
-		} else if (msg.op === "reloadNeeded") {
-			// no reply
-			this.reloadNeeded = true;
 		} else if(msg.op === "error") {
 			// no reply
 			if ( msg.val.triggeredByOp === 'render' && this.renderCallback ) {
 				this.log("dropping renderCallback after error ", msg.val.msg);
 				this.renderCallback = null;
+			}
+			if (msg.val.reloadNeeded === true) {
+				this.reloadNeeded = true;
 			}
 			if (msg.val.requestReload === true) {
 				msg.val.callback = deimos.closeDesigner.bind(deimos);

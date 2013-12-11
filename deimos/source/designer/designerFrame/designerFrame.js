@@ -59,8 +59,7 @@ enyo.kind({
 		var errMsg = "user app load FAILED with error '" + msg
 				+ "' in " + file + " line " + linenumber  ;
 		this.trace(errMsg);
-		this.sendMessage({op: "reloadNeeded"});
-		this.sendMessage({op: "error", val: {msg: errMsg}});
+		this.sendMessage({op: "error", val: {msg: errMsg, reloadNeeded: true}});
 		return true;
 	},
 	rendered: function() {
@@ -511,8 +510,7 @@ enyo.kind({
 			errMsg = "Unable to render kind '" + inKind.name + "':" + ( typeof error === 'object' ? error.message : error );
 			var errStack = typeof error === 'object' ? error.stack : '' ;
 			this.error(errMsg, errStack );
-			this.sendMessage({op: "reloadNeeded"});
-			this.sendMessage({op: "error", val: {msg: errMsg, triggeredByOp: cmd, requestReload: true, err: {stack: errStack}}});
+			this.sendMessage({op: "error", val: {msg: errMsg, triggeredByOp: cmd, requestReload: true, reloadNeeded: true, err: {stack: errStack}}});
 		}
 	},
 	//* Rerender current selection
