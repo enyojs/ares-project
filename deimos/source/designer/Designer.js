@@ -171,19 +171,16 @@ enyo.kind({
 			this.reloadNeeded = true;
 		} else if(msg.op === "error") {
 			// no reply
-			if (( ! msg.val.hasOwnProperty('popup')) || msg.val.popup === true) {
-				if ( msg.val.triggeredByOp === 'render' && this.renderCallback ) {
-					this.log("dropping renderCallback after error ", msg.val.msg);
-					this.renderCallback = null;
-				}
-				if (msg.val.requestReload === true) {
-					msg.val.callback = deimos.closeDesigner.bind(deimos);
-					msg.val.action = "Switching back to code editor";
-				}
-				this.doError(msg.val);
-			} else {
-				// TODO: We should store the error into a kind of rotating error log - ENYO-2462
+			if ( msg.val.triggeredByOp === 'render' && this.renderCallback ) {
+				this.log("dropping renderCallback after error ", msg.val.msg);
+				this.renderCallback = null;
 			}
+			if (msg.val.requestReload === true) {
+				msg.val.callback = deimos.closeDesigner.bind(deimos);
+				msg.val.action = "Switching back to code editor";
+			}
+			this.doError(msg.val);
+			// TODO: We should store the error into a kind of rotating error log - ENYO-2462
 		// Existing component resized
 		} else if(msg.op === "resize") {
 			// reply op:render (or do a complete reload) after a detour through deimos
