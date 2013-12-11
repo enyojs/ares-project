@@ -59,11 +59,12 @@ enyo.kind({
 	},
 	/**
 	 * Refresh the {HermesFileTree}
-	 * @param {Object} changedFile
-	 * @param {Function} callback
+	 * @param {Object} toSelectId - changed file id
+	 * @param {Function} [callback] - optional callback
 	 */
 	refreshFileTree: function(toSelectId,next) {
 		// the inversion of parameter is not an error.
+		// next parameter is optional (can be null or undef)
 		this.$.hermesFileTree.refreshFileTree(next, toSelectId);
 	},
 	activePanel : function(){
