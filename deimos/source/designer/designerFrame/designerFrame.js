@@ -861,6 +861,7 @@ enyo.kind({
 	},
 	syncDropTargetHighlighting: function() {
 		var dropTarget = this.currentDropTarget ? this.$.serializer.serializeComponent(this.currentDropTarget, true) : null;
+		// to move the inspector spotlight during drag
 		this.sendMessage({op: "syncDropTargetHighlighting", val: dropTarget});
 	},
 	//* Set _inItem_ to _this.selected_ and notify Deimos

@@ -154,8 +154,10 @@ enyo.kind({
 			// no reply
 			this.selection = enyo.json.codify.from(msg.val);
 			this.doSelect({component: this.selection});
-		// Highlight drop target to minic what's happening in designerFrame
+
 		} else if(msg.op === "syncDropTargetHighlighting") {
+			// Highlight drop target in inspector to mimic what's
+			// happening in designerFrame
 			// no reply
 			this.doSyncDropTargetHighlighting({component: enyo.json.codify.from(msg.val)});
 		// New component dropped in designerFrame
@@ -201,21 +203,25 @@ enyo.kind({
 
 	//* Tell designerFrame to render the current kind
 	renderKind: function(fileName, theKind, inSelectId,next) {
-		this.trace("reloadNeeded", this.reloadNeeded);
 		if (this.reloadNeeded) {
 			this.reloadNeeded = false;
 			// trigger a complete reload of designerFrame
+			// FIXME 3181: the reason why render was called is then lost
+			// should recall renderKind once reload is done
 			this.reload();
+			this.log("warning: called in state reloadNeeded");
 			return;
 		}
 
 		if(!this.getDesignerFrameReady()) {
 			// frame is still being reloaded.
+			this.log("warning: called in state != ready");
 			return;
 		}
 		
 		if (this.renderCallback) {
 			// a rendering is on-going
+			this.log("warning: called in state rendering");
 			return;
 		}
 		this.currentFileName = fileName;

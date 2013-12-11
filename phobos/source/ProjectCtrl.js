@@ -6,6 +6,9 @@
  @classdesc 
 */
 
+// FIXME 3181: check how the mutated enyo loaded fares when 2
+// projects analysis are involved this object block concurent analysis
+// in the same project but not accross several project
 enyo.kind({
 	name: "ProjectCtrl",
 	kind: "enyo.Component",
