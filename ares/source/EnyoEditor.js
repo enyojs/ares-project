@@ -265,6 +265,10 @@ enyo.kind({
 
 	activeDocument: null,
 
+	activeProject: function() {
+		return this.activeDocument.getProjectData();
+	},
+
 	showWaitPopup: function(inMessage) {
 		this.doShowWaitPopup({msg: inMessage});
 	},
@@ -279,7 +283,7 @@ enyo.kind({
 		var project
 				= param instanceof Ares.Model.Project ? param
 				: param instanceof Ares.Model.File    ? param.getProjectData()
-				:                                       this.activeDocument.getProjectData();
+				:                                       this.activeProject();
 		var projectName = project.getName();
 
 		function isProjectDoc(model) {
@@ -292,7 +296,7 @@ enyo.kind({
 	requestPreview: function() {
 		// request save one by one and then launch preview
 		var previewer = ComponentsRegistry.getComponent("projectView");
-		var project = this.activeDocument.getProjectData();
+		var project = this.activeProject();
 		var serialSaver = [] ;
 		this.trace("preview requested on project " + project.getName());
 
@@ -406,7 +410,7 @@ enyo.kind({
 
 	requestSaveDocAs: function() {
 		var file = this.activeDocument.getFile();
-		var projectData = this.activeDocument.getProjectData();
+		var projectData = this.activeProject();
 		var buildPopup = function() {
 			var path = file.path;
 			var relativePath = path.substring(
@@ -447,7 +451,7 @@ enyo.kind({
 		var relativePath = param.name.split("/");
 		var name = relativePath[relativePath.length-1];
 		var doc = this.activeDocument;
-		var projectData= this.activeDocument.getProjectData();
+		var projectData= this.activeProject();
 		var file= param.file;
 		var content= this.$.phobos.getEditorContent();
 
