@@ -48,7 +48,9 @@ enyo.kind({
 	switchDoc: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.userId);
 		this.trace(inEvent.id, newDoc);
-		this.owner.switchToDocument(newDoc, $L("Switching files..."), inEvent.next);
+		// older TabBar don't provide callback
+		var next = inEvent.next || function() {} ;
+		this.owner.switchToDocument(newDoc, $L("Switching files..."), next);
 		return true;
 	},
 
