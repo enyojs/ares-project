@@ -28,7 +28,7 @@ input.inspector-field-checkbox {
 }
 
 .onyx-radiobutton.inspector-tabbutton.filter{
-	margin-bottom: 5px;
+	margin-bottom: 0px;
 }
 .halves {
 	width: 50%;
@@ -41,6 +41,11 @@ input.inspector-field-checkbox {
 }
 .fourths {
 	width: 25%;
+}
+
+.inspector-panel{
+	padding-top: 8px; 
+	white-space: nowrap;
 }
 
 .ares-inspector-row {
@@ -83,6 +88,7 @@ input.inspector-field-checkbox {
 }
 .properties-filter{
 	width: 100%;
+	margin-top: 5px;
 }
 .enyo-fittable-columns-layout.enyo-stretch > .filter-icon{
 	height:20px;

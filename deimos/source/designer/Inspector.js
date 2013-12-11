@@ -29,7 +29,7 @@ enyo.kind({
 		onDblClick: "dblclick",
 		onPositionPropertyChanged: "positionPropertyChanged"
 	},
-	style: "padding: 8px; white-space: nowrap;",
+	classes: "inspector-panel",
 	debug: false,
 	helper: null,			// Analyzer.KindHelper
 	userDefinedAttributes: {},
