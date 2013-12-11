@@ -199,9 +199,10 @@ enyo.kind({
 		this._closeDocument(inEvent.id);
 	},
 
+	// next is optional
 	_closeDocument: function(docId, next) {
 		var cb = next || function (){};
-		ComponentsRegistry.getComponent("enyoEditor").closeDoc(docId,next);
+		ComponentsRegistry.getComponent("enyoEditor").closeDoc(docId,cb);
 	},
 	/** @private */
 	_fsEventAction: function(inSender, inEvent) {
