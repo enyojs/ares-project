@@ -112,7 +112,7 @@ enyo.kind({
 		this.trace("called");
 		var initItem = this.$.devicePicker.getClientControls()[0];
 		this.$.devicePicker.setSelected(initItem);
-		this.deviceChosen(null, {selected: initItem});
+		this.deviceChosen();
 	},
 	/**
 	 * Loads the first kind passed thru the data parameter
@@ -836,7 +836,7 @@ enyo.kind({
 		var selected = this.$.devicePicker.getSelected();
 		
 		if(!selected.value) {
-			return;
+			return true; // stop bubble
 		}
 		
 		// Update fields with predefined values
