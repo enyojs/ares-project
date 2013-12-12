@@ -285,7 +285,14 @@ enyo.kind({
 	
 	//* Stop extraneous activate event from being fired when box is initially checked
 	handleChange: function(inSender, inEvent) {
-		this.fieldValue = this.$.value.getValue();
+		var result = this.$.value.getValue().match(/(\d*)([%]|\w*)/);
+		var unit = result[2] || this.unit;
+		var size = result[1] || "";
+		if(size){
+			this.fieldValue = size + unit;
+		} else{
+			this.fieldValue = "";
+		}
 		this.doChange({target: this});
 		return true;
 	},
@@ -314,6 +321,9 @@ enyo.kind({
 		this.size = result[1] || "";
 		this.$.slider.setValue(this.size);
         this.$.slider.setProgress(this.size);
+		if(this.size){
+			this.setFieldValue(this.size + this.unit);
+		}
 		this.$.value.setValue(this.fieldValue);
 	}
 });
