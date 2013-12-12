@@ -38,7 +38,7 @@ enyo.kind({
 					name: "harmonia",
 					classes: "ares-panel-min-width enyo-fit",
 					onFileDblClick: "openDocument",
-					onFileChanged: "_closeDocument",
+					onFileChanged: "closeDocument",
 					onFolderChanged: "closeSomeDocuments"
 				},
 				{kind: "Ares.EnyoEditor", name: "enyoEditor"}
@@ -147,10 +147,12 @@ enyo.kind({
 			// useful when double clicking on a file in HermesFileTree
 			editor.switchToDocument(fileData, next) ;
 		} else {
+			this.showWaitPopup(this, {msg: $L("Fetching file...")});
 			async.waterfall(
 				[
 					this._fetchDocument.bind(this,projectData, file),
 					editor.switchToNewTabAndDoc.bind(editor,projectData,file),
+					this._hideWaitPopup.bind(this),
 					toHideOrNotToHide.bind(this)
 				],
 				next
@@ -193,8 +195,14 @@ enyo.kind({
 		}
 	},
 	/** @private */
+	closeDocument: function(inSender,inEvent) {
+		this._closeDocument(inEvent.id);
+	},
+
+	// next is optional
 	_closeDocument: function(docId, next) {
-		ComponentsRegistry.getComponent("enyoEditor").closeDoc(docId,next);
+		var cb = next || function (){};
+		ComponentsRegistry.getComponent("enyoEditor").closeDoc(docId,cb);
 	},
 	/** @private */
 	_fsEventAction: function(inSender, inEvent) {

@@ -20,9 +20,6 @@ enyo.kind({
 			checkBeforeClosing: true,
 			checkBeforeChanging: true,
 			onTabChangeRequested: 'switchDoc',
-			// backward compatibility: the following event handler can
-			// be removed once onyx pilot-13 is integrated in Ares
-			onTabChanged: 'switchDoc',
 			onTabRemoveRequested: 'requestCloseDoc',
 			onHide: "doAceFocus"
 		}
