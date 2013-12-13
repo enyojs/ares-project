@@ -263,11 +263,13 @@ enyo.kind({
 		this.updateDeimosLabel(this.activeDocument.getEdited());
 	},
 
+	// document currently shown by Ace
 	activeDocument: null,
 
-	activeProject: function() {
-		return this.activeDocument.getProjectData();
-	},
+	// project currently loaded in designer. When all document are
+	// closed, the project is still active until project is switched.
+	// activeProject is never set to null
+	activeProject: null,
 
 	showWaitPopup: function(inMessage) {
 		this.doShowWaitPopup({msg: inMessage});
@@ -283,7 +285,7 @@ enyo.kind({
 		var project
 				= param instanceof Ares.Model.Project ? param
 				: param instanceof Ares.Model.File    ? param.getProjectData()
-				:                                       this.activeProject();
+				:                                       this.activeProject;
 		var projectName = project.getName();
 
 		function isProjectDoc(model) {
@@ -296,7 +298,7 @@ enyo.kind({
 	requestPreview: function() {
 		// request save one by one and then launch preview
 		var previewer = ComponentsRegistry.getComponent("projectView");
-		var project = this.activeProject();
+		var project = this.activeProject;
 		var serialSaver = [] ;
 		this.trace("preview requested on project " + project.getName());
 
@@ -410,7 +412,7 @@ enyo.kind({
 
 	requestSaveDocAs: function() {
 		var file = this.activeDocument.getFile();
-		var projectData = this.activeProject();
+		var projectData = this.activeProject;
 		var buildPopup = function() {
 			var path = file.path;
 			var relativePath = path.substring(
@@ -451,7 +453,7 @@ enyo.kind({
 		var relativePath = param.name.split("/");
 		var name = relativePath[relativePath.length-1];
 		var doc = this.activeDocument;
-		var projectData= this.activeProject();
+		var projectData = this.activeProject;
 		var file= param.file;
 		var content= this.$.phobos.getEditorContent();
 
@@ -578,6 +580,7 @@ enyo.kind({
 		}
 
 		var oldDoc = this.activeDocument ; // may be undef when a project is closed
+		var oldProject = this.activeProject; // may be undef before opening the first file
 		var safeNext = next; // function parameter is not a closure
 
 		// don't open an already opened doc
@@ -595,9 +598,9 @@ enyo.kind({
 		var serial = [];
 
 		//select project if the file(d) comes from another project then the previous file
-		if (!oldDoc || oldDoc.getProjectData().getName() !== newName){
+		if (!oldProject || oldProject.getName() !== newName){
 			this.trace("also switch project "
-					   + (oldDoc ? "from " + oldDoc.getProjectData().getName()  + " " : "")
+					   + (oldProject ? "from " + oldProject.getName()  + " " : "")
 					   + ' to ' + newDoc.getProjectData().getName());
 			var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
 			var projectList = ComponentsRegistry.getComponent("projectList");
@@ -644,7 +647,9 @@ enyo.kind({
 		phobos.openDoc(newDoc);
 
 		this.activeDocument = newDoc;
-		this.addPreviewTooltip("Preview " + newDoc.getProjectData().id);
+		this.activeProject = newDoc.getProjectData() ;
+
+		this.addPreviewTooltip("Preview " +  this.activeProject.id);
 
 		if (currentIF === 'code') {
 			this.$.panels.setIndex(this.phobosViewIndex);
