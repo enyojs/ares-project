@@ -285,14 +285,19 @@ enyo.kind({
 	
 	//* Stop extraneous activate event from being fired when box is initially checked
 	handleChange: function(inSender, inEvent) {
-		var result = this.$.value.getValue().match(/(\d*)([%]|\w*)/);
-		var unit = result[2] || this.unit;
-		var size = result[1] || "";
+		var result = this.parseFieldValue(this.$.value.getValue());
+		var unit = this.unit;
+		var size = "";
+		if(result){
+			unit = result[2] || this.unit;
+			size = result[1] || "";
+		} 
 		if(size){
 			this.fieldValue = size + unit;
 		} else{
 			this.fieldValue = "";
 		}
+		this.log(unit, size);
 		this.doChange({target: this});
 		return true;
 	},
@@ -314,17 +319,19 @@ enyo.kind({
 		this.doChange({target: this});
 	},
 	fieldValueChanged: function() {
-		var result = this.fieldValue.match(/(\d*)([%]|\w*)/);
-		// this.log(">>" + this.fieldValue + "<< ", result);
-		this.unit = result[2] || "px";
+		var result = this.parseFieldValue(this.fieldValue);
+		this.unit = (result) ? result[2] : "px";
+		this.size = (result) ? result[1] : "";
 		this.$.unit.setFieldValue(this.unit);
-		this.size = result[1] || "";
 		this.$.slider.setValue(this.size);
         this.$.slider.setProgress(this.size);
 		if(this.size){
 			this.setFieldValue(this.size + this.unit);
 		}
 		this.$.value.setValue(this.fieldValue);
+	},
+	parseFieldValue: function(fieldValue){
+		return fieldValue.match(/^(\d+)([%a-zA-Z]*)$/);
 	}
 });
 
