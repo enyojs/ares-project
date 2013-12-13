@@ -1378,7 +1378,7 @@ enyo.kind({
 			positions = [];
 		
 		for(var i=0;i<controls.length;i++) {
-			if (controls[i].aresId) {
+			if (controls[i].aresId && controls[i].hasNode()) {
 				positions.push({comp: controls[i], rect: controls[i].hasNode().getBoundingClientRect()});
 			}
 		}
@@ -1389,7 +1389,7 @@ enyo.kind({
 		return (inRectA.top === inRectB.top && inRectA.left === inRectB.left && inRectA.bottom === inRectB.bottom && inRectA.right === inRectB.right && inRectA.height === inRectB.height && inRectA.width === inRectB.width);
 	},
 	checkDragOverBoundary: function(inContainer, x, y) {
-		if (!inContainer) {
+		if (!inContainer && !inContainer.hasNode()) {
 			return 0;
 		}
 		
