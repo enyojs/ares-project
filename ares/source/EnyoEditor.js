@@ -600,8 +600,6 @@ enyo.kind({
 		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : "")
 				   + "to " + newDoc.getName() );
 
-		this.doShowWaitPopup({msg: popupMsg});
-
 		var serial = [];
 
 		//select project if the file(d) comes from another project then the previous file
@@ -613,6 +611,8 @@ enyo.kind({
 			var projectList = ComponentsRegistry.getComponent("projectList");
 			var deimos = this.$.deimos;
 
+			this.doShowWaitPopup({msg: $L("Switching project...")});
+
 			serial.push(
 				projectList.selectInProjectList.bind(projectList, project),
 				deimos.projectSelected.bind(deimos, project)
@@ -621,6 +621,7 @@ enyo.kind({
 
 		var that = this ;
 		serial.push(
+			function(_next) { that.doShowWaitPopup({msg: popupMsg}); _next();},
 			this._switchDoc.bind(this, newDoc),
 			function(_next) { that.doHideWaitPopup(); _next();}
 		);
