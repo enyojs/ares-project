@@ -144,8 +144,9 @@ enyo.kind({
 				   " file ", file.name, " using cache ", fileData);
 
 		if (fileData) {
-			// useful when double clicking on a file in HermesFileTree
-			editor.switchToDocument(fileData, next) ;
+			// switch triggered by double-clicking an already opened
+			// file in HermesFileTree
+			editor.switchToDocument(fileData, $L("Switching files..."), next) ;
 		} else {
 			this.showWaitPopup(this, {msg: $L("Fetching file...")});
 			async.waterfall(
