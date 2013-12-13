@@ -311,8 +311,15 @@ enyo.kind({
 			}
 		);
 
-		// the real work is done here
-		async.series( serialSaver, previewer.launchPreview.bind(previewer, project)) ;
+		// the real work is done below
+		async.series(
+			serialSaver,
+			function(err) {
+				if (! err) {
+					previewer.launchPreview(project);
+				}
+			}
+		);
 	},
 
 	// Save actions
@@ -643,7 +650,7 @@ enyo.kind({
 			oldDoc.setEditedData(phobos.getEditorContent());
 		}
 
-		// open ace or deimos depending on edition mode...
+		// open ace session (or image viewer)
 		phobos.openDoc(newDoc);
 
 		this.activeDocument = newDoc;
@@ -746,7 +753,12 @@ enyo.kind({
 				}).bind(this)
 			);
 
-			popup.setCancelCallback(this.aceFocus.bind(this)) ;
+			popup.setCancelCallback(
+				(function() {
+					this.aceFocus();
+					next('canceled');
+				}).bind(this)
+			) ;
 
 			popup.show();
 		} else {
