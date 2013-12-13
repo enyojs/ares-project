@@ -629,6 +629,14 @@ enyo.kind({
 		async.series( serial, function(){ safeNext();} );
 	},
 
+	// FIXME ENYO-3624: this function must trigger a reload of the designer
+	// to take into account code modification discarded bu user
+	reloadDoc: function(doc,next) {
+		var reloadedDoc = this.activeDocument ;
+		this.activeDocument = null;// reset to trigger reload
+		this._switchDoc(reloadedDoc, next || function(){/* nop */} );
+	},
+
 	// switch Phobos or Deimos to new document
 	_switchDoc: function(newDoc,next) {
 		var phobos = this.$.phobos;
@@ -755,6 +763,7 @@ enyo.kind({
 
 			popup.setCancelCallback(
 				(function() {
+					this.reloadDoc(doc);
 					this.aceFocus();
 					next('canceled');
 				}).bind(this)
