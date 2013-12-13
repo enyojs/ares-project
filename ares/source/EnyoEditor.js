@@ -354,7 +354,7 @@ enyo.kind({
 		this.showWaitPopup($L("Saving ") + name + " ...");
 
 		req.response(this, function(inSender, inData) {
-			this.log('saveFile response ', inData);
+			this.trace('saveFile response ', inData);
 			var savedFile = inData[0]; // only one file was saved
 			savedFile.service = where.service;
 			var docDataId = Ares.Workspace.files.computeId(savedFile);
@@ -362,7 +362,7 @@ enyo.kind({
 				this.error("cannot find docDataId from ", savedFile, ' where ', where);
 			}
 			var docData = Ares.Workspace.files.get(docDataId);
-			this.log('saveFile response ok for ', name, savedFile, docDataId, " => ", docData);
+			this.trace('saveFile response ok for ', name, savedFile, docDataId, " => ", docData);
 			if(docData){
 				docData.setData(content);
 				docData.setEditedData(content);
@@ -375,7 +375,7 @@ enyo.kind({
 			this.analyseData(docData);
 			if (next) {next(null, savedFile);}
 		}).error(this, function(inSender, inErr) {
-			this.log('saveFile response failed with ' + inErr + ' for ', name, where);
+			this.trace('saveFile response failed with ' + inErr + ' for ', name, where);
 			this.hideWaitPopup();
 			this.doError({msg: "Unable to save the file: " + inErr });
 			if (next) {next(inErr);}
@@ -507,7 +507,7 @@ enyo.kind({
 		}
 
 		function _refreshFileTree(file, next) {
-			this.log(file);
+			this.trace(file);
 			// refreshFileTree is async, there's no need to wait before opening
 			// the document
 			ComponentsRegistry.getComponent("harmonia").refreshFileTree(file.id);
@@ -549,7 +549,7 @@ enyo.kind({
 		if (docId && this.activeDocument && this.activeDocument.getId() === docId) {
 			this.closeActiveDoc();
 		} else if (docId) {
-			this.log("closing a doc different from current one: ", doc.getName());
+			this.trace("closing a doc different from current one: ", doc.getName());
 			this.forgetDoc(doc);
 		} else {
 			this.warn("called without doc to close");
