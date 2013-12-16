@@ -1,4 +1,4 @@
-/*global ComponentsRegistry, ares, Ares, async, enyo, $L */
+/*global ComponentsRegistry, ares, Ares, async, enyo, $L, setTimeout */
 enyo.kind({
 	name:"Ares.EnyoEditor",
 	kind:"FittableRows", 
@@ -577,12 +577,18 @@ enyo.kind({
 		this.switchToDocument(fileData, $L("Opening..."), next);
 	},
 
-	// switch file *and* project (if necessary)
+	/**
+	 * Switch file *and* project (if necessary)
+	 * @param {Object} newDoc
+	 * @param {String} popupMsg: message to display in popup message
+	 * @param {Code} next
+	 * @throws {String} throw an error when File ID is not found in cache
+	 */
 	switchToDocument: function(newDoc, popupMsg, next) {
 		// safety net
 		if ( ! newDoc ) {
 			if  (this.debug) { throw("File ID " + newDoc + " not found in cache!");}
-			next("File ID not found in cache!");
+			setTimeout( function() { next("File ID not found in cache!"); }, 0);
 			return;
 		}
 
@@ -592,7 +598,7 @@ enyo.kind({
 
 		// don't open an already opened doc
 		if ( oldDoc && newDoc.getId() === oldDoc.getId()) {
-			next();
+			setTimeout( function() { next(); }, 0);
 			return ;
 		}
 
