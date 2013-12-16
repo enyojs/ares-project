@@ -156,7 +156,12 @@ enyo.kind({
 	},
 
 
-	// kind Picker stuff
+	/**
+	 * event handler for kind Picker
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 * @returns {true}
+	 */
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
 		var deimos = this.$.deimos;
@@ -171,8 +176,12 @@ enyo.kind({
 		return true;
 	},
 
+	/**
+	 * kindPicker let user select the top kind to be designed. By
+	 * default, the first one is selected
+	 * @param {array} kinds
+	 */
 	initKindPicker: function(kinds) {
-		// kindPicker let user select the top kind to be designed
 		var maxLen ;
 		for (var i = 0; i < kinds.length; i++) {
 			var k = kinds[i];
@@ -281,8 +290,12 @@ enyo.kind({
 		this.aceFocus();
 	},
 
-	//* apply action on each doc of passed project (or project's doc)
-	// or current project (if param is falsy)
+	/**
+	 * apply action on each doc of passed project (or project's doc)
+	 * or current project (if param is falsy)
+	 * @param {Function} action: function called on each project doc
+	 * @param {Object} param: project (defaults to activeProject)
+	 */
 	foreachProjectDocs: function(action, param) {
 		var project
 				= param instanceof Ares.Model.Project ? param
@@ -297,8 +310,11 @@ enyo.kind({
 		Ares.Workspace.files.filter(isProjectDoc).forEach(action, this);
 	},
 
+	/**
+	 * request to save project files one by one and then launch
+	 * preview
+	 */
 	requestPreview: function() {
-		// request save one by one and then launch preview
 		var previewer = ComponentsRegistry.getComponent("projectView");
 		var project = this.activeProject;
 		var serialSaver = [] ;
@@ -325,6 +341,7 @@ enyo.kind({
 	},
 
 	// Save actions
+
 	saveProjectDocs: function() {
 		this.foreachProjectDocs(this.saveDoc.bind(this));
 	},
@@ -552,7 +569,11 @@ enyo.kind({
 		}
 	},
 
-	//* close a document, param can be a docId or a doc
+	/**
+	 * close a document
+	 * @param {(String|Object)} param: docId or doc
+	 * @param {[Function]} next
+	 */
 	closeDoc: function(param, next) {
 		var doc = typeof param === 'object' ? param : Ares.Workspace.files.get(param) ;
 		var docId = doc.getId();
@@ -648,7 +669,11 @@ enyo.kind({
 		this._switchDoc(reloadedDoc, next || function(){/* nop */} );
 	},
 
-	// switch Phobos or Deimos to new document
+	/**
+	 * switch Phobos or Deimos to new document
+	 * @param {Object} newDoc
+	 * @param {Function} next
+	 */
 	_switchDoc: function(newDoc,next) {
 		var phobos = this.$.phobos;
 
@@ -690,7 +715,11 @@ enyo.kind({
 	},
 
 
-	// Close documents
+	/**
+	 * Request to save doc and close if user agrees
+	 * @param {Object} doc
+	 * @returns {true}
+	 */
 	requestCloseDoc: function(doc) {
 		async.waterfall([
 			this.requestSave.bind(this, doc),
@@ -707,8 +736,11 @@ enyo.kind({
 		return true; // Stop the propagation of the event
 	},
 
-	//* Close all files of a project. use current project if
-	// project is null. next is optional
+	/**
+	 * Close all files of a project
+	 * @param {[Object]} project, defaults to current project
+	 * @param {[Function]} next
+	 */
 	requestCloseProject: function (project, next) {
 		this.trace("close project requested");
 		var serial = [] ;
@@ -752,7 +784,11 @@ enyo.kind({
 		return true ;
 	},
 
-	//* query the user for save before performing next action
+	/**
+	 * query the user for save before performing next action
+	 * @param {Object} doc to save
+	 * @param {Function} next
+	 */
 	requestSave: function(doc, next) {
 		var popup = this.$.savePopup ;
 		if (doc.getEdited() === true) {
@@ -805,8 +841,7 @@ enyo.kind({
 
 	/**
 	 * Update code running in designer
-	 * @param {Ares.Model.Project} project, backbone object defined
-	 * in WorkspaceData.js
+	 * @param {Ares.Model.Project} project, backbone object defined in WorkspaceData.js
 	 */
 	syncEditedFiles: function(project) {
 		var projectName = project.getName();

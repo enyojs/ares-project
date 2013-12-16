@@ -173,8 +173,12 @@ enyo.kind({
 				next(inErr);
 			});
 	},
-	/* @private */
-	// close documents contained in a folder after a folder rename.
+
+	/**
+	 * close documents contained in a folder after a folder rename.
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 */
 	// One might say that these documents are canon folder...
 	closeSomeDocuments: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
@@ -200,9 +204,9 @@ enyo.kind({
 		this._closeDocument(inEvent.id);
 	},
 
-	// next is optional
+
 	_closeDocument: function(docId, next) {
-		var cb = next || function (){};
+		var cb = next || function (){}; // next is optional
 		ComponentsRegistry.getComponent("enyoEditor").closeDoc(docId,cb);
 	},
 	/** @private */
