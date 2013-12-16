@@ -23,7 +23,7 @@ enyo.kind({
 			{kind: "onyx.Input", name: "filterProperties", fit: true, placeholder: "filter", oninput: "propertiesFiltering"},
 			{kind: "onyx.Icon", classes: "filter-icon", name: "filterPropertiesIcon", src: "$deimos/images/search-input-search.png", ontap: "resetFilter"}
 		]},
-		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "selectFileChosen", onCheckPath: "handlePathChecked"}
+		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "selectFileChosen"}
 	],
 	handlers: {
 		onChange: "change",
