@@ -622,16 +622,18 @@ enyo.kind({
 		var that = this ;
 		serial.push(
 			function(_next) { that.doShowWaitPopup({msg: popupMsg}); _next();},
-			this._switchDoc.bind(this, newDoc),
-			function(_next) { that.doHideWaitPopup(); _next();}
+			this._switchDoc.bind(this, newDoc)
 		);
 
 		// no need to handle error, call outer next without params
-		async.series( serial, function(){ safeNext();} );
+		async.series( serial, function(err){
+			that.doHideWaitPopup();
+			safeNext();
+		});
 	},
 
 	// FIXME ENYO-3624: this function must trigger a reload of the designer
-	// to take into account code modification discarded bu user
+	// to take into account code modification discarded by user
 	reloadDoc: function(doc,next) {
 		var reloadedDoc = this.activeDocument ;
 		this.activeDocument = null;// reset to trigger reload
