@@ -153,10 +153,12 @@ enyo.kind({
 				[
 					this._fetchDocument.bind(this,projectData, file),
 					editor.switchToNewTabAndDoc.bind(editor,projectData,file),
-					this._hideWaitPopup.bind(this),
 					toHideOrNotToHide.bind(this)
 				],
-				next
+				(function(err) {
+					this.hideWaitPopup();
+					next(err);
+				}).bind(this)
 			);
 		}
 	},
