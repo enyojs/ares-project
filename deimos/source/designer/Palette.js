@@ -34,6 +34,16 @@ enyo.kind({
 	setupItem: function(inSender, inEvent) {
 		inEvent.item.$.paletteItem.setModel(this.model.items[inEvent.index]); // <---- TODO - sibling reference, should be fixed up
 		return true;
+	},
+	openDrawer: function() {
+		if (!this.$.drawer.getOpen()) {
+			this.toggleDrawer();
+		}
+	},
+	closeDrawer: function() {
+		if (this.$.drawer.getOpen()) {
+			this.toggleDrawer();
+		}
 	}
 });
 
@@ -87,6 +97,10 @@ enyo.kind({
 	debug: false,
 	components: [
 		{kind: "FittableRows", classes: "enyo-fit", components: [
+			{kind: "onyx.MoreToolbar", classes: "deimos-toolbar deimos-toolbar-margined-buttons", components: [
+				{kind: "onyx.Button", name: "expandAllCategoriesButton", content: $L("Expand all"), ontap: "expandAllCategories"},
+				{kind: "onyx.Button", name: "collapseAllCategoriesButton", content: $L("Collapse all"), ontap: "collapseAllCategories"}
+			]},
 			{kind: "Scroller", fit: true, components: [
 				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
 					{kind: "CategoryItem"}
@@ -258,6 +272,26 @@ enyo.kind({
 		if (this.$.filterPalette.getValue() !== "") {
 			this.$.filterPalette.setValue("");
 			this.paletteFiltering();
+		}
+
+		return true;
+	},
+	/** @private */
+	expandAllCategories: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+
+		for (var i = 0; i < this.$.list.count; i ++) {
+			this.$.list.getControls()[i].$.categoryItem.openDrawer();
+		}
+		
+		return true;
+	},
+	/** @private */
+	collapseAllCategories: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		
+		for (var i = 0; i < this.$.list.count; i ++) {
+			this.$.list.getControls()[i].$.categoryItem.closeDrawer();
 		}
 
 		return true;
