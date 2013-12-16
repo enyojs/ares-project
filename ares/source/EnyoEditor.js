@@ -631,7 +631,8 @@ enyo.kind({
 
 		var serial = [];
 
-		//select project if the file(d) comes from another project then the previous file
+		// select project if the document comes from a different
+		// project compared to the project of the previous document
 		if (!oldProject || oldProject.getName() !== newName){
 			this.trace("also switch project "
 					   + (oldProject ? "from " + oldProject.getName()  + " " : "")
