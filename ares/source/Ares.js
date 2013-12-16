@@ -165,7 +165,7 @@ enyo.kind({
 
 	/** @private */
 	_fetchDocument: function(projectData, file, next) {
-		this.trace("projectData:", projectData.getName(), ", file:", file.name);
+		this.trace("project name:", projectData.getName(), ", file name:", file.name);
 		var service = projectData.getService();
 		service.getFile(file.id)
 			.response(this, function(inEvent, inData) {
