@@ -70,8 +70,6 @@ enyo.kind({
 		onShowWaitPopup: "showWaitPopup",
 		onHideWaitPopup: "hideWaitPopup",
 		onError: "showError",
-		onErrorTooltip: "showDesignerErrorTooltip",
-		onErrorTooltipReset: "resetDesignerErrorTooltip",
 		onDesignerBroken: "showDesignerError",
 		onSignInError: "showAccountConfiguration",
 		onTreeChanged: "_treeChanged",
@@ -314,12 +312,6 @@ enyo.kind({
 	},
 	showErrorPopup : function(inEvent) {
 		this.$.errorPopup.raise(inEvent);
-	},
-	showDesignerErrorTooltip: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("enyoEditor").showErrorTooltip(inSender, inEvent);
-	},
-	resetDesignerErrorTooltip: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("enyoEditor").resetErrorTooltip();
 	},
 	showDesignerError: function(){
 		this.showError("",ComponentsRegistry.getComponent("enyoEditor").getErrorFromDesignerBroken());

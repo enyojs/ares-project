@@ -107,6 +107,8 @@ enyo.kind({
 		aceActive: true
 	},
 	handlers: {
+		onErrorTooltip: "showErrorTooltip",
+		onErrorTooltipReset: "resetErrorTooltip",
 		onDesignDocument: "designDocument",
 		onAceFocus: "aceFocus"
 	},
