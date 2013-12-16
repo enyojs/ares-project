@@ -1,4 +1,4 @@
-/* global analyzer, ProjectKindsModel, Inspector, ares */
+/* global analyzer, ProjectKindsModel, Inspector, ares, ComponentsRegistry */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
