@@ -68,7 +68,7 @@ enyo.kind({
 		{
 			name: "docToolBar",
 			kind: "DocumentToolbar",
-			onCloseDocRequest: "handleCloseDocument",
+			onTabRemoveRequested: "handleCloseDocument",
 			onTabChangeRequested: 'handleSwitchDoc',
 			// FIXME ENYO-3627
 			// backward compatibility: the following event handler can
@@ -550,12 +550,6 @@ enyo.kind({
 
 	// close actions
 
-	handleCloseDocument: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-		var doc = Ares.Workspace.files.get(inEvent.id);
-		this.requestCloseDoc(doc);
-	},
-
 	closeActiveDoc: function() {
 		var doc = this.activeDocument;
 		this.trace("close document:", doc.getName());
@@ -567,7 +561,6 @@ enyo.kind({
 	forgetDoc: function(doc) {
 		// remove Doc from cache
 		var docId = doc.getId();
-		ComponentsRegistry.getComponent("documentToolbar").removeTab(docId);
 		Ares.Workspace.files.removeEntry(docId);
 		if (! Ares.Workspace.files.length ) {
 			this.doAllDocumentsAreClosed();
@@ -738,15 +731,28 @@ enyo.kind({
 
 
 	/**
+	 * handle request close doc events
 	 * Request to save doc and close if user agrees
-	 * @param {Object} doc
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
 	 * @returns {true}
 	 */
-	requestCloseDoc: function(doc) {
-		async.waterfall([
-			this.requestSave.bind(this, doc),
-			this.closeDoc.bind(this)
-		]);
+	handleCloseDocument: function(inSender, inEvent) {
+		// inEvent.next callback is ditched. Ares will call removeTab
+		// when file is closed by Ace
+		var doc = Ares.Workspace.files.get(inEvent.userId);
+
+		async.waterfall(
+			[
+				this.requestSave.bind(this, doc),
+				this.closeDoc.bind(this)
+			],
+			function(err) {
+				if (! err) {
+					inEvent.next();
+				}
+			}
+		);
 		return true; // Stop the propagation of the event
 	},
 

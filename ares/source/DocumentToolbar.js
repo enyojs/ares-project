@@ -19,7 +19,6 @@ enyo.kind({
 			showing: false,
 			checkBeforeClosing: true,
 			checkBeforeChanging: true,
-			onTabRemoveRequested: 'requestCloseDoc',
 			onHide: "doAceFocus"
 		}
 	],
@@ -45,12 +44,6 @@ enyo.kind({
 		this.$.tabs.activate({ userId: id });
 	},
 
-	requestCloseDoc: function(inSender, inEvent) {
-		// inEvent.next callback is ditched. Ares will call removeTab
-		// when file is closed by Ace
-		this.doCloseDocRequest({id: inEvent.userId});
-		return true;
-	},
 	removeTab: function(id) {
 		this.$.tabs.removeTab({ userId: id }) ;
 		if (this.$.tabs.isEmpty() ) {
