@@ -219,7 +219,7 @@ enyo.kind({
 		info = ProjectKindsModel.getInfo(inControl.kind, inType, inName);
 		kind = (info && info.inputKind) || kind;
 		
-		if(inName === 'src' || inName === 'icon'){
+		if(inName === 'src'){
 			kind = {kind: "Inspector.Config.PathInputRow", label : inName};
 		}
 		if (kind && kind instanceof Object) {
@@ -627,6 +627,10 @@ enyo.kind({
 	},
 	checkPath: function (pathComponent, value) {
 		this.checker = pathComponent;
+		if (value.match(/^\http/)){
+			this.pathChecked(true);
+			return true;
+		}
 		if (! value.match(/^\.\//)){
 			this.pathChecked(false);
 			return true;
