@@ -66,7 +66,7 @@ enyo.kind({
 			actionButton: $L("Overwrite")
 		},
 		{
-			name: "bottomBar",
+			name: "docToolBar",
 			kind: "DocumentToolbar",
 			onCloseDocRequest: "handleCloseDocument",
 			classes: "ares-bottom-bar"
@@ -711,7 +711,7 @@ enyo.kind({
 			this.manageControls(true);
 		}
 		this._fileEdited();
-		this.$.bottomBar.activateDocWithId(newDoc.getId());
+		this.$.docToolBar.activateDocWithId(newDoc.getId());
 		next() ;
 	},
 
