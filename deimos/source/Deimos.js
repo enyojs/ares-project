@@ -134,11 +134,7 @@ enyo.kind({
 		this.kinds = what;
 		this.fileName = data.fileIndexer.name;
 		
-		this.owner.$.kindPicker.destroyClientControls();
-
 		// Pass the project information (analyzer output, ...) to the inspector and palette
-		// FIXME: projectDataChanged is triggered only if the projectData reference is changed.
-		// The actual content is not checked by enyo.
 		this.setProjectData(data.projectData);
 
 		this.owner.initKindPicker(what) ;

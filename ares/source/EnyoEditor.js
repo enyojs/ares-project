@@ -188,6 +188,9 @@ enyo.kind({
 	 */
 	initKindPicker: function(kinds) {
 		var maxLen ;
+
+		this.$.kindPicker.destroyClientControls();
+
 		for (var i = 0; i < kinds.length; i++) {
 			var k = kinds[i];
 			this.$.kindPicker.createComponent({
