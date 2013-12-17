@@ -620,24 +620,25 @@ enyo.kind({
 			// no file or folder chosen			
 			return true;
 		}
-		chooser.setFieldValue("."+inEvent.name);
+		var value = inEvent.name.substr(1);
+		chooser.setFieldValue(value);
 		chooser.handleChange();
 		this.$.selectFilePopup.reset();
 		return true;
 	},
 	checkPath: function (pathComponent, value) {
 		this.checker = pathComponent;
-		if (value.match(/^\http/)){
+		if (value.match(/^https?:\/\//)){
 			this.pathChecked(true);
 			return true;
 		}
-		if (! value.match(/^\.\//)){
+		if (value.match(/^[\.\/]/)){
 			this.pathChecked(false);
 			return true;
 		}
 		var project = ComponentsRegistry.getComponent("phobos").getProjectData();
 		this.$.selectFilePopup.connectProject(project, (function() {
-			this.$.selectFilePopup.checkSelectedName(value);
+			this.$.selectFilePopup.checkSelectedName("/"+value);
 		}).bind(this));		
 	},
 	handlePathChecked: function(inSender, inData){
