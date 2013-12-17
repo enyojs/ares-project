@@ -711,6 +711,7 @@ enyo.kind({
 
 		// open ace session (or image viewer)
 		phobos.openDoc(newDoc);
+		this.$.toolbar.resized();
 
 		this.activeDocument = newDoc;
 		this.activeProject = newDoc.getProjectData() ;

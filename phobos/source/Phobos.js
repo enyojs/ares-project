@@ -152,7 +152,6 @@ enyo.kind({
 		this.projectCtrl.buildProjectDb();
 
 		this.docData.setEdited(edited);
-		this.owner.$.toolbar.resized();
 	},
 
 	adjustPanelsForMode: function(mode, rightpane) {
