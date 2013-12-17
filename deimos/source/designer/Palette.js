@@ -280,6 +280,8 @@ enyo.kind({
 	expandAllCategories: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 
+		this.resetFilter();
+
 		for (var i = 0; i < this.$.list.count; i ++) {
 			this.$.list.getControls()[i].$.categoryItem.openDrawer();
 		}
@@ -290,6 +292,8 @@ enyo.kind({
 	collapseAllCategories: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		
+		this.resetFilter();
+
 		for (var i = 0; i < this.$.list.count; i ++) {
 			this.$.list.getControls()[i].$.categoryItem.closeDrawer();
 		}
