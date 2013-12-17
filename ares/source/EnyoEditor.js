@@ -114,7 +114,7 @@ enyo.kind({
 	handlers: {
 		onErrorTooltip: "showErrorTooltip",
 		onErrorTooltipReset: "resetErrorTooltip",
-		onDesignDocument: "designDocument",
+		onChildRequest: "handleCall",
 		onAceFocus: "aceFocus"
 	},
 	debug: false,
@@ -124,6 +124,21 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.doRegisterMe({name:"enyoEditor", reference:this});
 	},
+
+	/**
+	 * handle a Call from children.
+	 * @param {Object} inSender
+	 * @param {Object} inEvent: inEvent.task: array [ method_name_to_call, arg1, arg2 , ...]
+	 * @returns {true}
+	 */
+	handleCall: function(inSender, inEvent){
+		var data = inEvent.task;
+		var task = typeof data === 'object' ? data : [ data ];
+		var method = task.shift();
+		this[method].apply(this, task);
+		return true;
+	},
+
 	activePanel : function(){
 		// my index within the main Ares panels, not index phobos and deimos panels
 		this.doMovePanel({panelIndex:this.panelIndex});

@@ -85,6 +85,7 @@ enyo.kind({
 	*/
 	events: {
 		onCloseDesigner: "",
+		onChildRequest: "",
 		onRegisterMe: "",
 		onError:""
 	},
@@ -137,7 +138,7 @@ enyo.kind({
 		// Pass the project information (analyzer output, ...) to the inspector and palette
 		this.setProjectData(data.projectData);
 
-		this.owner.initKindPicker(what) ;
+		this.doChildRequest({task: [ "initKindPicker", what ]}) ;
 
 		// preselect the first kind. This will lead to an action in
 		// DesignerFrame
@@ -413,7 +414,7 @@ enyo.kind({
 		
 		this.updateCodeInEditor(this.fileName);
 		this.setProjectData(null);
-		this.owner.switchToCodeMode();
+		this.doChildRequest({task: "switchToCodeMode" });
 		
 		return true;
 	},
@@ -738,15 +739,17 @@ enyo.kind({
 	},
 	undoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
-		this.owner.undo();
+		this.doChildRequest({task: "undo" });
+		return true;
 	},
 	redoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
-		this.owner.redo();
+		this.doChildRequest({task: "redo" });
+		return true;
 	},
 	deleteAction: function(inSender, inEvent) {
 		if(!this.$.designer.selection) {
-			return;
+			return true;
 		}
 		
 		this.$.inspector.inspect(null);
@@ -756,6 +759,7 @@ enyo.kind({
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, kind);
 		this.addAresKindOptions(kind);
 		this.rerenderKind();
+		return true;
 	},
 	deleteComponentByAresId: function(inAresId, inComponents) {
 		for (var i = 0; i < inComponents.length; i++) {
@@ -775,7 +779,7 @@ enyo.kind({
 		if (inFilename === this.fileName) {
 			var kind = this.getSingleKind(this.index);
 			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(kind)));
-			this.owner.updateComponentsCode(kindList);
+			this.doChildRequest({ task: [ "updateComponentsCode", kindList ] });
 		} else {
 			this.log("skipped code update of stale file ", inFilename);
 		}
@@ -924,11 +928,16 @@ enyo.kind({
 			var beforeId = inEvent.beforeId; 
 			this.performCreateItem(config, target, beforeId);
 		} else if (inEvent.getName() === "replaceKind"){
-			this.owner.replaceKind(this.index, config_data);
+			this.doChildRequest({task: [ "replaceKind", this.index, config_data ]});
 		} else if (inEvent.getName() === "addNewKind"){
-			this.owner.addNewKind(config_data);
+			this.doChildRequest({ task: [ "addNewKind", config_data] });
+		}
+		else {
+			this.log("unexpected event: " + inEvent.getName() );
 		}
 		this.$.actionPopup.hide();
+
+		return true;
 	},
 
 

@@ -37,6 +37,7 @@ enyo.kind({
 		onError: "",
 		onRegisterMe: "",
 		onFileEdited: " ",
+		onChildRequest: "",
 		onAceFocus: ""
 	},
 	handlers: {
@@ -190,6 +191,7 @@ enyo.kind({
 		for (var stuff in showSettings) {
 			showStuff = showSettings[stuff];
 			this.trace("show", stuff, ":", showStuff);
+			// FIXME need to clean up this code ENYO-3633
 			if(this.$[stuff] !== undefined){
 				if (typeof this.$[stuff].setShowing === 'function') {
 					this.$[stuff].setShowing(showStuff) ;
@@ -246,7 +248,7 @@ enyo.kind({
 	 *	Enable "Designer" button only if project & enyo index are both valid
 	 */
 	manageDesignerButton: function() {
-		this.owner.enableDesignerButton( this.projectCtrl.fullAnalysisDone );
+		this.doChildRequest({ task: [ "enableDesignerButton", this.projectCtrl.fullAnalysisDone ]} );
 	},
 	/**
 	 * Receive the project data reference which allows to access the analyzer
@@ -420,7 +422,10 @@ enyo.kind({
 		}
 		return -1;
 	},
-	//* Navigate from Phobos to Deimos. Pass Deimos all relevant info.
+
+	/**
+	 * Navigate from Phobos to Deimos. Pass Deimos all relevant info.
+	 */
 	designerAction: function() {
 		// Update the projectIndexer and notify watchers
 		this.reparseUsersCode();
@@ -434,7 +439,7 @@ enyo.kind({
 		
 		if (kinds.length > 0) {
 			// Request to design the current document, passing info about all kinds in the file
-			this.owner.designDocument(data);
+			this.doChildRequest({ task: [ 'designDocument',  data ]});
 		} // else - The error has been displayed by extractKindsData()
 	},
 	//* Extract info about kinds from the current file needed by the designer
@@ -894,7 +899,7 @@ enyo.kind({
 		
 		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
 		if (data.kinds.length > 0) {
-			this.owner.loadDesignerUI(data,next);
+			this.doChildRequest({task: [ "loadDesignerUI", data, next ]});
 		} // else - The error has been displayed by extractKindsData()
 	},
 	resizeHandler: function() {
