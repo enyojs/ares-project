@@ -620,14 +620,14 @@ enyo.kind({
 			// no file or folder chosen			
 			return true;
 		}
-		chooser.setFieldValue(inEvent.name);
+		chooser.setFieldValue("."+inEvent.name);
 		chooser.handleChange();
 		this.$.selectFilePopup.reset();
 		return true;
 	},
 	checkPath: function (pathComponent, value) {
 		this.checker = pathComponent;
-		if (value.indexOf("/") !== 0) {
+		if (! value.match(/^\.\//)){
 			this.pathChecked(false);
 			return true;
 		}

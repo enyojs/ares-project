@@ -372,7 +372,7 @@ enyo.kind({
 		inputTip: "",
 		activated: true,
 		status: false,
-		buttonTip: ""
+		buttonTip: "Select file..."
 	},
 	events: {
 		onInputButtonTap: "",
@@ -387,6 +387,7 @@ enyo.kind({
 
 	create: function () {
 		this.inherited(arguments);
+		this.buttonTipChanged();
 		this.statusChanged();
 	},
 	handleChange: function () {
