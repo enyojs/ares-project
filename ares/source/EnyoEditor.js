@@ -658,17 +658,15 @@ enyo.kind({
 		}
 
 		var newName = newDoc.getProjectData().getName() ;
-		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : "")
-				   + "to " + newDoc.getName() );
+		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : "") + "to " + newDoc.getName() );
 
 		var serial = [];
 
 		// select project if the document comes from a different
 		// project compared to the project of the previous document
 		if (!oldProject || oldProject.getName() !== newName){
-			this.trace("also switch project "
-					   + (oldProject ? "from " + oldProject.getName()  + " " : "")
-					   + ' to ' + newDoc.getProjectData().getName());
+			var pname =  oldProject ? "from " + oldProject.getName()  + " " : "" ;
+			this.trace("also switch project " + pname + ' to ' + newDoc.getProjectData().getName());
 			var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
 			var projectList = ComponentsRegistry.getComponent("projectList");
 			var deimos = this.$.deimos;
@@ -712,8 +710,8 @@ enyo.kind({
 
 		var oldDoc = this.activeDocument ;
 		var currentIF = newDoc.getCurrentIF();
-		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : " ")
-				   + ' to ' + newDoc.getName() + " IF is " + currentIF );
+		var oldName = oldDoc ? "from " + oldDoc.getName() + " " : " " ;
+		this.trace("switch " + oldName + ' to ' + newDoc.getName() + " IF is " + currentIF );
 
 		if (oldDoc && newDoc === oldDoc) {
 			// no actual switch
@@ -840,8 +838,7 @@ enyo.kind({
 		var popup = this.$.savePopup ;
 		if (doc.getEdited() === true) {
 			this.trace("request save doc on ", doc.getName());
-			popup.setMessage('"' + doc.getFile().path
-					+ '" was modified.<br/><br/>Save it before closing?') ;
+			popup.setMessage('"' + doc.getFile().path + '" was modified.<br/><br/>Save it before closing?') ;
 			popup.setTitle($L("Document was modified!"));
 
 			popup.setActionButton($L("Don't Save"));

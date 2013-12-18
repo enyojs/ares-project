@@ -56,8 +56,7 @@ enyo.kind({
 	raiseLoadError: function(msg, url, linenumber) {
 		// I'm a goner
 		var file = url.replace(/.*\/services(?=\/)/,'');
-		var errMsg = "user app load FAILED with error '" + msg
-				+ "' in " + file + " line " + linenumber  ;
+		var errMsg = "user app load FAILED with error '" + msg + "' in " + file + " line " + linenumber  ;
 		this.trace(errMsg);
 		this.sendMessage({op: "reloadNeeded"});
 		this.sendMessage({op: "error", val: {msg: errMsg}});

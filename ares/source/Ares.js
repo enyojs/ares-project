@@ -138,8 +138,7 @@ enyo.kind({
 		var mayHideProjectView = Ares.Workspace.files.length ? function() { next();}
 			: function(next) { this.hideProjectView(); next();} ;
 
-		this.trace("open document with project ", projectData.getName(),
-				   " file ", file.name, " using cache ", fileData);
+		this.trace("open document with project ", projectData.getName(), " file ", file.name, " using cache ", fileData);
 
 		if (fileData) {
 			// switch triggered by double-clicking an already opened
