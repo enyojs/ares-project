@@ -933,16 +933,16 @@ enyo.kind({
 	// @protected		
 	runPaletteComponentAction: function(inSender,inEvent){
 		var config = this.$.actionPopup.getConfigComponent(config);
-		var config_data = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
+		var configData = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
 
 		if(inEvent.getName() === "addtoKind"){
 			var target = this.$.actionPopup.getTargetComponent(target);
 			var beforeId = inEvent.beforeId; 
 			this.performCreateItem(config, target, beforeId);
 		} else if (inEvent.getName() === "replaceKind"){
-			this.doChildRequest({task: [ "replaceKind", this.index, config_data ]});
+			this.doChildRequest({task: [ "replaceKind", this.index, configData ]});
 		} else if (inEvent.getName() === "addNewKind"){
-			this.doChildRequest({ task: [ "addNewKind", config_data] });
+			this.doChildRequest({ task: [ "addNewKind", configData ] });
 		}
 		else {
 			this.log("unexpected event: " + inEvent.getName() );
