@@ -1,4 +1,4 @@
-/*global ProjectKindsModel, enyo, ares, async, setTimeout */
+/*global ProjectKindsModel, enyo, ares, setTimeout */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
@@ -142,14 +142,14 @@ enyo.kind({
 
 		this.doChildRequest({task: [ "initKindPicker", what ]}) ;
 
+		// selectKind is designed to be used in a waterfall, it calls
+		// next with `next(err,kindName)`. This extra parameter needs
+		// to be removed:
+		var bareNext = function(err) { next(err);} ;
+
 		// preselect the first kind. This will lead to an action in
-		// DesignerFrame
-		async.series(
-			[
-				this.selectKind.bind(this, 0)
-			],
-			next
-		);
+		// DesignerFrame.
+		this.selectKind(0, bareNext) ;
 	},
 
 	selectKind: function(index, next) {
