@@ -287,10 +287,10 @@ enyo.kind({
 	syncFile: function(projectName, filename, inCode) {
 		// check if the file is indeed part of the current project
 		if (projectName === this.projectSource.getName() ){
-			if(filename.slice(-4) === ".css") {
+			if( /\.css$/i.test(filename) ) {
 				// Sync the CSS in inCode with the designerFrame (to avoid needing to reload the iFrame)
 				this.sendMessage({op: "cssUpdate", val: {filename: this.projectPath + filename, code: inCode}});
-			} else if(filename.slice(-3) === ".js") {
+			} else if( /\.js$/i.test(filename) ) {
 				this.sendMessage({op: "codeUpdate", val: inCode});
 			}
 		} else {
