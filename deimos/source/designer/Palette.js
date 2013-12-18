@@ -28,8 +28,7 @@ enyo.kind({
 		this.$.name.setContent(this.model.name);
 		this.$.list.count = this.model.items.length;
 		if (this.$.list.count === 0 && this.$.drawer.getOpen()) {
-			this.$.drawer.setOpen(true);
-			this.$.indicator.addRemoveClass("turned", true);
+			this.openDrawer();
 		}
 		this.$.list.build();
 		if (this.$.name.content === "ignore") {
@@ -323,7 +322,6 @@ enyo.kind({
 
 		var j = 0;
 		for (var i = 0; i < this.$.list.count; i ++) {
-			this.log(i, this.$.list.getControls()[i]);
 			if (this.$.list.getControls()[i].$.categoryItem.drawerStatus()) {
 				j++;
 			} else {
