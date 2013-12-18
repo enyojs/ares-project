@@ -96,7 +96,6 @@ enyo.kind({
 	/** @private */
 	actionCancel: function(inSender, inEvent) {
 		this.hide();
-		this.log('');
 		this.runCallbackOrBubbleUp('cancel', 'onCancelActionPopup');
 		return true;
 	},
