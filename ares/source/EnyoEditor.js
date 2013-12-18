@@ -863,7 +863,7 @@ enyo.kind({
 
 			popup.show();
 		} else {
-			setTimeout( next.bind(null,doc), 0);
+			setTimeout( next.bind(null,null, doc), 0);
 		}
 	},
 
