@@ -139,9 +139,8 @@ enyo.kind({
 						function (err) {
 							if (err) {
 								self.doError({msg: err.toString(), err: err});
-							} else {
-								next(err) ;
 							}
+							next(err) ;
 						}
 					);
 				}
