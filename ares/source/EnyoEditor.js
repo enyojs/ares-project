@@ -717,7 +717,7 @@ enyo.kind({
 
 		if (oldDoc && newDoc === oldDoc) {
 			// no actual switch
-			next();
+			setTimeout(next,0);
 			return;
 		}
 
@@ -745,7 +745,7 @@ enyo.kind({
 		}
 		this._fileEdited();
 		this.$.docToolBar.activateDocWithId(newDoc.getId());
-		next() ;
+		setTimeout(next,0) ;
 	},
 
 
@@ -865,7 +865,7 @@ enyo.kind({
 
 			popup.show();
 		} else {
-			next(null,doc);
+			setTimeout( next.bind(null,doc), 0);
 		}
 	},
 

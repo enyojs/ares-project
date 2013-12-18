@@ -1,4 +1,4 @@
-/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, $L */
+/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, $L, setTimeout */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets",
@@ -300,7 +300,7 @@ enyo.kind({
 	_hideWaitPopup: function(next) {
 		this.$.canceBuildButton.hide();
 		this.$.waitPopup.hide();
-		next();
+		setTimeout(next,0);
 	},
 
 	showError: function(inSender, inEvent) {

@@ -1,4 +1,4 @@
-/*global ProjectKindsModel, enyo, ares, async */
+/*global ProjectKindsModel, enyo, ares, async, setTimeout */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
@@ -171,7 +171,7 @@ enyo.kind({
 
 			this.index = index;
 		} else {
-			nextWithName(null);
+			setTimeout(nextWithName, 0);
 		}
 	},
 	/**
