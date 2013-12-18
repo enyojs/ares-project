@@ -115,16 +115,18 @@ enyo.kind({
 		this.$.devicePicker.setSelected(initItem);
 		this.deviceChosen(null, {selected: initItem});
 	},
+
 	/**
-	 * Loads the first kind passed thru the data parameter
-	 * @param data contains kinds declaration (enyo.kind format)
-	 *   and project information such as the analyzer output
-	 *   for all the .js files of the project and for enyo/onyx.
-	 * @public
+	 * Loads the first kind passed thru the data parameter.
+	 * This function acts on pallete, inspector, kindPicker and (may be) sends
+	 * to designerFrame serialisation options extracted from .design
+	 * files. No ack message is expected from designerFrame
+	 *
+	 * @param {Object} data: contains kinds declaration (enyo.kind format)
+	 * and project information such as the analyzer output
+	 * for all the .js files of the project and for enyo/onyx.
+	 * @param {Function} next
 	 */
-	// load acts on pallete, inspector, kindPicker and (may be) sends
-	// to designerFrame serialisation options extracted from .design
-	// files. No ack message is expected from designerFrame
 	loadDesignerUI: function(data, next) {
 		this.trace("called with", data);
 		this.enableDesignerActionButtons(false);
