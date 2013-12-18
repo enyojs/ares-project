@@ -84,7 +84,6 @@ enyo.kind({
 		rendering to avoid error with setting values of width/height fields)
 	*/
 	events: {
-		onCloseDesigner: "",
 		onChildRequest: "",
 		onRegisterMe: "",
 		onError:""
