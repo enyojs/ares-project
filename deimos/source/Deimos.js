@@ -38,8 +38,11 @@ enyo.kind({
 						{kind: "onyx.InputDecorator", components: [
 							{kind: "onyx.Input", name: "designerHeightInput", classes: "deimos-designer-input", placeholder: "Auto", onchange: "updateHeight"}
 						]},
-						{content: "Zoom:"},
-						{kind: "onyx.Slider", classes: "deimos-zoom-slider", value: 100, onChange: 'zoomDesigner', onChanging: 'zoomDesigner' }
+						{content: "Zoom"},
+						{kind: "onyx.PickerDecorator", components: [
+							{},
+							{name: "zoomPicker", kind: "onyx.Picker", onSelect: "zoomDesigner", components: []}
+						]}
 					]},
 					{kind: "Scroller", classes: "deimos-designer-wrapper", fit: true, components: [
 						{kind: "Designer", name: "designer",
@@ -101,7 +104,7 @@ enyo.kind({
 	previousContent: "",
 	fileName: "",
 	selectFromComponentView: false,
-	
+	zoomValues: [25, 50, 100, 125, 150, 200, 400],
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -117,6 +120,11 @@ enyo.kind({
 		var initItem = this.$.devicePicker.getClientControls()[0];
 		this.$.devicePicker.setSelected(initItem);
 		this.deviceChosen(null, {selected: initItem});
+		var i, z, initZoom = 100;
+		for (i = 0; (z = this.zoomValues[i]); i++) {
+			this.$.zoomPicker.createComponent({content: z+"%", value: z, active: z === initZoom});
+		}
+		this.zoomDesigner(null, {selected: this.$.zoomPicker.getSelected()});
 	},
 	/**
 	 * Loads the first kind passed thru the data parameter
@@ -897,7 +905,7 @@ enyo.kind({
 		this.$.designer.setHeight(this.$.designerHeightInput.getValue());
 	},
 	zoomDesigner: function(inSender, inEvent) {
-		this.$.designer.zoom(inSender.getValue());
+		this.$.designer.zoom(inEvent.selected.value);
 	},
 	//* Add dispatch for native drag events
 	addHandlers: function(inSender, inEvent) {
