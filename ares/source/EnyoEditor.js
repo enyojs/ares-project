@@ -54,6 +54,7 @@ enyo.kind({
 			showing: false,
 			headerText: $L("Save as..."),
 			folderChooser: false,
+			onFileChosen: "saveAsFileChosen",
 			allowCreateFolder: true,
 			allowNewFile: true,
 			allowToolbar: true
@@ -469,17 +470,17 @@ enyo.kind({
 				path.length
 			);
 			this.$.saveAsPopup.pointSelectedName(relativePath, true);
-			this.$.saveAsPopup.setFileChosenCallback(this.saveAsFileChosen.bind(this));
+			// saveAsPopup may invoke saveAsFileChosen
 			this.$.saveAsPopup.show();
 		};
 		this.$.saveAsPopup.connectProject(projectData, buildPopup.bind(this));
 	},
-	saveAsFileChosen: function(param) {
-		this.trace(param);
+	saveAsFileChosen: function(inSender, inEvent) {
+		this.trace(inEvent);
 
-		if (param.file) {
+		if (inEvent.file) {
 			this.$.saveAsPopup.$.hermesFileTree
-				.checkNodeName(param.name, this.requestOverwrite.bind(this, param));
+				.checkNodeName(inEvent.name, this.requestOverwrite.bind(this, inEvent));
 		} else {
 			// no file or folder chosen
 			this.aceFocus();
