@@ -69,12 +69,10 @@ enyo.kind({
 	 *
 	 * @param {Ares.Model.Project} inSource is a backbone object defined in WorkspaceData.js
 	 * @param {Function} next
-	 * @returns {}
 	 */
 	updateSource: function(inSource, next) {
 		if (this.updateSourceCallback) {
-			this.log("updateSource called while previous "
-							+ "updateSourceCallback is still pending ");
+			this.log("updateSource called while previous updateSourceCallback is still pending ");
 			this.updateSourcePending.push([inSource, next]);
 			return ;
 		}
