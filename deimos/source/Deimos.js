@@ -788,12 +788,20 @@ enyo.kind({
 			this.log("skipped code update of stale file ", inFilename);
 		}
 	},
-	//* Called when ProjectView has new project selected
+
+	/**
+	 * Called when ProjectView has new project selected
+	 * @param {Object} inProject
+	 * @param {Function} next
+	 */
 	projectSelected: function(inProject, next) {
 		this.trace("called with ", inProject);
 		this.$.designer.updateSource(inProject, next);
 	},
-	// triggered by 'Reload' button
+
+	/**
+	 * triggered by 'Reload' button
+	 */
 	reloadDesigner: function() {
 		this.enableDesignerActionButtons(false);
 		this.$.designer.reload();
