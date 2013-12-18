@@ -1,4 +1,4 @@
-/* global analyzer, ProjectKindsModel, Inspector, ares */
+/* global analyzer, ProjectKindsModel, Inspector, ares, ComponentsRegistry */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
@@ -22,12 +22,15 @@ enyo.kind({
 		{name: "partialFilter", kind: "onyx.InputDecorator", classes: "properties-filter", layoutKind: "FittableColumnsLayout", showing: false, components: [
 			{kind: "onyx.Input", name: "filterProperties", fit: true, placeholder: "filter", oninput: "propertiesFiltering"},
 			{kind: "onyx.Icon", classes: "filter-icon", name: "filterPropertiesIcon", src: "$deimos/images/search-input-search.png", ontap: "resetFilter"}
-		]}
+		]},
+		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "selectFileChosen"}
 	],
 	handlers: {
 		onChange: "change",
 		onDblClick: "dblclick",
-		onPositionPropertyChanged: "positionPropertyChanged"
+		onPositionPropertyChanged: "positionPropertyChanged",
+		onInputButtonTap: "selectFile",
+		onPathChecked: "handlePathChecked"
 	},
 	classes: "inspector-panel",
 	debug: false,
@@ -212,29 +215,32 @@ enyo.kind({
 		if (inType === 'events') {
 			kind = {kind: "Inspector.Config.Event", values: this.kindFunctions};
 		}
-		
+
 		info = ProjectKindsModel.getInfo(inControl.kind, inType, inName);
 		kind = (info && info.inputKind) || kind;
 		
-		// User defined kind: as an Object
+		if(inName === 'src'){
+			kind = {kind: "Inspector.Config.PathInputRow", label : inName};
+		}
 		if (kind && kind instanceof Object) {
 			kind = enyo.clone(kind);
 			kind = enyo.mixin(kind, {name: attributeFieldName, fieldName: inName, fieldValue: value, fieldType: inType, disabled: inherited});
 			attributeRow.createComponent(kind);
+			if (kind.kind === "Inspector.Config.PathInputRow" && kind.fieldValue) {
+				this.checkPath(attributeRow.$[attributeFieldName], kind.fieldValue);	
+			}
 		} else {
 			attributeKind = (kind)
 				?	kind
 				:	(value === true || value === false || value === "true" || value === "false")
 					?	"Inspector.Config.Boolean"
 					:	"Inspector.Config.Text";
-			
 			var values = info ? info.values : null;
 			var comp = {name: attributeFieldName, kind: attributeKind, fieldName: inName, fieldValue: value, extra: inType, disabled: inherited};
 			
 			if (values) {
 				comp.values = values;
 			}
-			
 			attributeRow.createComponent(comp);
 		}
 	},
@@ -593,6 +599,62 @@ enyo.kind({
 			this.propertiesFiltering();
 		}
 		return true;
+	},
+	selectFile: function(inSender, inData) {
+		this.trace(inSender, "=>", inData);
+		var project = ComponentsRegistry.getComponent("phobos").getProjectData();
+		this.chooser = inData.originator;
+		this.$.selectFilePopup.reset();
+		this.$.selectFilePopup.connectProject(project, (function() {
+			this.$.selectFilePopup.setHeaderText(inData.header);
+			this.$.selectFilePopup.pointSelectedName(inData.originator.getValue(), inData.originator.getStatus());
+			this.$.selectFilePopup.show();
+		}).bind(this));
+		return true;
+	},
+		/** @private */
+	selectFileChosen: function(inSender, inEvent) {
+		var chooser = this.chooser;
+		this.chooser = null;
+		if (!inEvent.file) {
+			// no file or folder chosen			
+			return true;
+		}
+		var value = inEvent.name.substr(1);
+		chooser.setFieldValue(value);
+		chooser.handleChange();
+		this.$.selectFilePopup.reset();
+		return true;
+	},
+	checkPath: function (pathComponent, value) {
+		this.checker = pathComponent;
+		if (value.match(/^https?:\/\//)){
+			this.pathChecked(true);
+			return true;
+		}
+		if (value.match(/^[\.\/]/)){
+			this.pathChecked(false);
+			return true;
+		}
+		var project = ComponentsRegistry.getComponent("phobos").getProjectData();
+		this.$.selectFilePopup.connectProject(project, (function() {
+			this.$.selectFilePopup.checkSelectedName("/"+value);
+		}).bind(this));		
+	},
+	handlePathChecked: function(inSender, inData){
+		this.pathChecked(inData.status);
+	},
+	/** @private */
+	pathChecked: function (status) {
+		var checker = this.checker;
+		this.checker = null;
+		this.$.selectFilePopup.reset();
+		this.updatePathCheck(checker, status);
+	},
+	updatePathCheck: function(pathComponent, status) {
+		pathComponent.setStatus(status);
+		pathComponent.disableFileChooser(false);
+		return true;
 	}
 });
 
@@ -662,3 +724,4 @@ enyo.kind({
 		}
 	}
 });
+
