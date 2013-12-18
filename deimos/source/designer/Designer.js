@@ -212,7 +212,6 @@ enyo.kind({
 		this.renderCallback = next ;
 
 		var components = [theKind];
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.sendMessage({
 			op: "render",
 			filename: fileName,
@@ -235,7 +234,6 @@ enyo.kind({
 	},
 	//* Property was modified in Inspector, update designerFrame.
 	modifyProperty: function(inProperty, inValue) {
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.sendMessage({op: "modify", filename: this.currentFileName, val: {property: inProperty, value: inValue}});
 	},
 	//* Send message to Deimos with new kind/components from designerFrame

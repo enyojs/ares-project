@@ -238,7 +238,6 @@ enyo.kind({
 	},
 	//* Rerender current kind
 	rerenderKind: function(inSelectId) {
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.$.designer.renderKind(
 			this.fileName,
 			this.getSingleKind(this.index)[0],
