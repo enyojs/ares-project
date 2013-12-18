@@ -101,6 +101,12 @@ enyo.kind({
 		}
 		return true; //Stop event propagation
 	},
+
+	/**
+	 *
+	 * @param {Object} project
+	 * @param {Function} next
+	 */
 	setupProjectConfig: function(project, next) {
 		// FIXME: temporary hack to create config.json on the
 		// fly if needed... would be better to create/load it
@@ -147,6 +153,7 @@ enyo.kind({
 			],
 			function (err) {
 				self.trace("ProjectView: setup project config done on " + project.getName() + " err is ",err );
+				// ENYO-3629
 				if (next) {
 					next(err);
 				}
