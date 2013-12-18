@@ -185,7 +185,7 @@ enyo.kind({
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
 		var deimos = this.$.deimos;
-		async.series([
+		async.waterfall([
 			deimos.selectKind.bind(deimos, index),
 			(function(name,next) {
 				this.$.kindButton.setContent(name);

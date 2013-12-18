@@ -155,6 +155,9 @@ enyo.kind({
 		var components = this.getSingleKind(index);
 		this.trace("selected kind ", kind);
 		
+		// prepare next used by async.waterfall
+		var nextWithName = function(err) { next(err, kind.name); };
+
 		if (index !== this.index) {
 			this.addAresIds(components);
 			this.addAresKindOptions(components);
@@ -164,11 +167,11 @@ enyo.kind({
 			this.$.inspector.inspect(null);
 			this.$.inspector.setCurrentKindName(kind.name);
 
-			this.$.designer.renderKind(this.fileName, components[0], null, next);
+			this.$.designer.renderKind(this.fileName, components[0], null, nextWithName);
 
 			this.index = index;
 		} else {
-			next(kind.name);
+			nextWithName(null);
 		}
 	},
 	/**
