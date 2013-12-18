@@ -106,8 +106,8 @@ enyo.kind({
 	components: [
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{kind: "onyx.MoreToolbar", classes: "deimos-toolbar deimos-toolbar-margined-buttons", components: [
-				{kind: "onyx.Button", name: "expandAllCategoriesButton", content: $L("Expand all"), ontap: "expandAllCategories"},
-				{kind: "onyx.Button", name: "collapseAllCategoriesButton", content: $L("Collapse all"), ontap: "collapseAllCategories"}
+				{kind: "onyx.Button", name: "expandAllCategoriesButton", content: "Expand all", ontap: "expandAllCategories"},
+				{kind: "onyx.Button", name: "collapseAllCategoriesButton", content: "Collapse all", ontap: "collapseAllCategories"}
 			]},
 			{kind: "Scroller", fit: true, components: [
 				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
