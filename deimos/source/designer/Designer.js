@@ -88,7 +88,7 @@ enyo.kind({
 	},
 	reload: function() {
 		this.reloading = true;
-		this.updateSource(this.projectSource);
+		this.updateSource(this.projectSource, function(){} );
 	},
 	
 	//* Send message via communicator
