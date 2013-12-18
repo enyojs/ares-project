@@ -212,6 +212,7 @@ enyo.kind({
 		
 		if (this.renderCallback) {
 			// a rendering is on-going
+			this.log("dropped rendering: another one is on-going");
 			setTimeout(next('on-going rendering'), 0);
 			return;
 		}
