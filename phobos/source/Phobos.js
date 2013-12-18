@@ -338,7 +338,7 @@ enyo.kind({
 			code: this.$.aceWrapper.getValue(),
 			path: this.projectCtrl.projectUrl + this.docData.getFile().dir + this.docData.getFile().name
 		};
-		this.trace("called with mode " + mode + " inhibitUpdate " + inhibitUpdate + " on " + module.name);
+		this.trace("called with mode " , mode , " inhibitUpdate " , inhibitUpdate , " on " + module.name);
 		switch(mode) {
 			case "javascript":
 				try {
@@ -357,7 +357,7 @@ enyo.kind({
 
 					codeLooksGood = true;
 				} catch(error) {
-					enyo.log("An error occured during the code analysis: " + error);
+					enyo.log("An error occured during the code analysis: " , error);
 					this.dumpInfo(null);
 					this.$.autocomplete.setAnalysis(null);
 				}
@@ -532,7 +532,7 @@ enyo.kind({
 			this.helper.setDefinition(object);
 			return this.helper.listHandlers(declared);
 		} catch(error) {
-			enyo.log("Unexpected error: " + error);		// TODO TBC
+			enyo.log("Unexpected error: " , error);		// TODO TBC
 		}
 	},
 	/**
