@@ -744,6 +744,7 @@ enyo.kind({
 		if (this.docData) {
 			this.$.aceWrapper.destroySession(this.docData.getAceSession());
 			this.resetAutoCompleteData();
+			this.docData = null;
 		}
 	},
 	// Show Find popup
