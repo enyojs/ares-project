@@ -1,4 +1,4 @@
-/*global ProjectKindsModel, ares, enyo */
+/*global ProjectKindsModel, ares, enyo, setTimeout */
 
 enyo.kind({
 	name: "Designer",
@@ -187,23 +187,32 @@ enyo.kind({
 		this.sendMessage({op: "containerData", val: ProjectKindsModel.getFlattenedContainerInfo()});
 	},
 
-	//* Tell designerFrame to render the current kind
+	/**
+	 * Tell designerFrame to render a kind
+	 * @param {String} fileName
+	 * @param {Object} theKind to render
+	 * @param {String} inSelectId
+	 * @param {Function} next
+	 */
 	renderKind: function(fileName, theKind, inSelectId,next) {
 		this.trace("reloadNeeded", this.reloadNeeded);
 		if (this.reloadNeeded) {
 			this.reloadNeeded = false;
 			// trigger a complete reload of designerFrame
 			this.reload();
+			setTimeout(next('reload started'), 0);
 			return;
 		}
 
 		if(!this.getDesignerFrameReady()) {
 			// frame is still being reloaded.
+			setTimeout(next('on-going reload'), 0);
 			return;
 		}
 		
 		if (this.renderCallback) {
 			// a rendering is on-going
+			setTimeout(next('on-going rendering'), 0);
 			return;
 		}
 		this.currentFileName = fileName;
