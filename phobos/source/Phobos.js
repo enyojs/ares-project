@@ -683,16 +683,7 @@ enyo.kind({
 			this.doFileEdited();
 		}
 	},
-	/**
-	* @protected
-	*/
-	showSavePopup: function(componentName, message){
-		this.warn("obsolete");
-		this.$[componentName].setTitle($L("Document was modified!"));
-		this.$[componentName].setMessage(message);
-		this.$[componentName].setActionButton($L("Don't Save"));
-		this.$[componentName].show();
-	},	
+
 	docChanged: function(inSender, inEvent) {
 		//this.injected === false then modification coming from user
 		if(!this.injected && !this.docData.getEdited()){
