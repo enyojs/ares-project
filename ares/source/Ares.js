@@ -135,7 +135,7 @@ enyo.kind({
 
 		// hide projectView only the first time a file is opened in a project
 		// otherwise, let the user handle this
-		var toHideOrNotToHide = Ares.Workspace.files.length ? function() { next();}
+		var mayHideProjectView = Ares.Workspace.files.length ? function() { next();}
 			: function(next) { this.hideProjectView(); next();} ;
 
 		this.trace("open document with project ", projectData.getName(),
@@ -151,7 +151,7 @@ enyo.kind({
 				[
 					this._fetchDocument.bind(this,projectData, file),
 					editor.switchToNewTabAndDoc.bind(editor,projectData,file),
-					toHideOrNotToHide.bind(this)
+					mayHideProjectView.bind(this)
 				],
 				(function(err) {
 					this.hideWaitPopup();
