@@ -644,7 +644,7 @@ enyo.kind({
 		// safety net
 		if ( ! newDoc ) {
 			if  (this.debug) { throw("File ID " + newDoc + " not found in cache!");}
-			setTimeout( function() { next("File ID not found in cache!"); }, 0);
+			setTimeout( function() { next(new Error("File ID not found in cache!")); }, 0);
 			return;
 		}
 
@@ -857,7 +857,7 @@ enyo.kind({
 				(function() {
 					this.reloadDoc(doc);
 					this.aceFocus();
-					next('canceled');
+					next(new Error('canceled'));
 				}).bind(this)
 			) ;
 

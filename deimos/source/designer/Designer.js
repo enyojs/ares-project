@@ -200,20 +200,20 @@ enyo.kind({
 			this.reloadNeeded = false;
 			// trigger a complete reload of designerFrame
 			this.reload();
-			setTimeout(next('reload started'), 0);
+			setTimeout(next(new Error('reload started')), 0);
 			return;
 		}
 
 		if(!this.getDesignerFrameReady()) {
 			// frame is still being reloaded.
-			setTimeout(next('on-going reload'), 0);
+			setTimeout(next(new Error('on-going reload')), 0);
 			return;
 		}
 		
 		if (this.renderCallback) {
 			// a rendering is on-going
 			this.log("dropped rendering: another one is on-going");
-			setTimeout(next('on-going rendering'), 0);
+			setTimeout(next(new Error('on-going rendering')), 0);
 			return;
 		}
 		this.currentFileName = fileName;
