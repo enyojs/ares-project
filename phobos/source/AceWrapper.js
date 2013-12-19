@@ -26,7 +26,8 @@ enyo.kind({
 		onWordwrap: "",
 		onFkey: "",
 		onAceGotFocus: "",
-		
+		onChildRequest: "",
+
 		/// FIXME just add these for now
 		onSetBreakpoint: "",
 		onClearBreakpoint: ""
@@ -70,13 +71,12 @@ enyo.kind({
 	 */
 	addKeyBindings: function() {
 		var commands = this.editor.commands;
-		var enyoEd = ComponentsRegistry.getComponent("enyoEditor");
 		
 		// Add keybinding for save
 		commands.addCommand({
 			name: "save",
 			bindKey: {win: "Ctrl-S", mac: "Command-S"},
-			exec: enyoEd.saveCurrentDoc.bind(enyoEd)
+			exec: this.doChildRequest.bind(this,{task: "saveCurrentDoc"})
 		});
 
 		// Add keybinding for auto completion

@@ -1,4 +1,4 @@
-/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, $L */
+/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, $L, setTimeout */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets",
@@ -38,7 +38,7 @@ enyo.kind({
 					name: "harmonia",
 					classes: "ares-panel-min-width enyo-fit",
 					onFileDblClick: "openDocument",
-					onFileChanged: "_closeDocument",
+					onFileChanged: "closeDocument",
 					onFolderChanged: "closeSomeDocuments"
 				},
 				{kind: "Ares.EnyoEditor", name: "enyoEditor"}
@@ -70,8 +70,6 @@ enyo.kind({
 		onShowWaitPopup: "showWaitPopup",
 		onHideWaitPopup: "hideWaitPopup",
 		onError: "showError",
-		onErrorTooltip: "showDesignerErrorTooltip",
-		onErrorTooltipReset: "resetDesignerErrorTooltip",
 		onDesignerBroken: "showDesignerError",
 		onSignInError: "showAccountConfiguration",
 		onTreeChanged: "_treeChanged",
@@ -137,30 +135,34 @@ enyo.kind({
 
 		// hide projectView only the first time a file is opened in a project
 		// otherwise, let the user handle this
-		var toHideOrNotToHide = Ares.Workspace.files.length ? function() { next();}
+		var mayHideProjectView = Ares.Workspace.files.length ? function() { next();}
 			: function(next) { this.hideProjectView(); next();} ;
 
-		this.trace("open document with project ", projectData.getName(),
-				   " file ", file.name, " using cache ", fileData);
+		this.trace("open document with project ", projectData.getName(), " file ", file.name, " using cache ", fileData);
 
 		if (fileData) {
-			// useful when double clicking on a file in HermesFileTree
-			editor.switchToDocument(fileData, next) ;
+			// switch triggered by double-clicking an already opened
+			// file in HermesFileTree
+			editor.switchToDocument(fileData, $L("Switching files..."), next) ;
 		} else {
+			this.showWaitPopup(this, {msg: $L("Fetching file...")});
 			async.waterfall(
 				[
 					this._fetchDocument.bind(this,projectData, file),
 					editor.switchToNewTabAndDoc.bind(editor,projectData,file),
-					toHideOrNotToHide.bind(this)
+					mayHideProjectView.bind(this)
 				],
-				next
+				(function(err) {
+					this.hideWaitPopup();
+					next(err);
+				}).bind(this)
 			);
 		}
 	},
 
 	/** @private */
 	_fetchDocument: function(projectData, file, next) {
-		this.trace("projectData:", projectData.getName(), ", file:", file.name);
+		this.trace("project name:", projectData.getName(), ", file name:", file.name);
 		var service = projectData.getService();
 		service.getFile(file.id)
 			.response(this, function(inEvent, inData) {
@@ -170,8 +172,12 @@ enyo.kind({
 				next(inErr);
 			});
 	},
-	/* @private */
-	// close documents contained in a folder after a folder rename.
+
+	/**
+	 * close documents contained in a folder after a folder rename.
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 */
 	// One might say that these documents are canon folder...
 	closeSomeDocuments: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
@@ -193,8 +199,14 @@ enyo.kind({
 		}
 	},
 	/** @private */
+	closeDocument: function(inSender,inEvent) {
+		this._closeDocument(inEvent.id);
+	},
+
+
 	_closeDocument: function(docId, next) {
-		ComponentsRegistry.getComponent("enyoEditor").closeDoc(docId,next);
+		var cb = next || function (){}; // next is optional
+		ComponentsRegistry.getComponent("enyoEditor").closeDoc(docId,cb);
 	},
 	/** @private */
 	_fsEventAction: function(inSender, inEvent) {
@@ -282,12 +294,12 @@ enyo.kind({
 	},
 
 	hideWaitPopup: function(inSender, inEvent) {
-		this._hideWaitPopup(function(){});
+		this._hideWaitPopup(function(){/* nothing to do */});
 	},
 	_hideWaitPopup: function(next) {
 		this.$.canceBuildButton.hide();
 		this.$.waitPopup.hide();
-		next();
+		setTimeout(next,0);
 	},
 
 	showError: function(inSender, inEvent) {
@@ -303,12 +315,6 @@ enyo.kind({
 	},
 	showErrorPopup : function(inEvent) {
 		this.$.errorPopup.raise(inEvent);
-	},
-	showDesignerErrorTooltip: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("enyoEditor").showErrorTooltip(inSender, inEvent);
-	},
-	resetDesignerErrorTooltip: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("enyoEditor").resetErrorTooltip();
 	},
 	showDesignerError: function(){
 		this.showError("",ComponentsRegistry.getComponent("enyoEditor").getErrorFromDesignerBroken());

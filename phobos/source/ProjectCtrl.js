@@ -92,7 +92,7 @@ enyo.kind({
 	runPendingAnalysis: function(what) {
 		this.ongoing = false ;
 		if (this.pending) {
-			this.trace("Running pending project analysis after "+ what);
+			this.trace("Running pending project analysis after ", what);
 			this.forceFullAnalysis();
 		}
 	},

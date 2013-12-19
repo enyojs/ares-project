@@ -1,4 +1,4 @@
-/*global enyo, Ares, ares, $L */
+/*global enyo, ares */
 
 enyo.kind({
 	name: "DocumentToolbar",
@@ -19,11 +19,6 @@ enyo.kind({
 			showing: false,
 			checkBeforeClosing: true,
 			checkBeforeChanging: true,
-			onTabChangeRequested: 'switchDoc',
-			// backward compatibility: the following event handler can
-			// be removed once onyx pilot-13 is integrated in Ares
-			onTabChanged: 'switchDoc',
-			onTabRemoveRequested: 'requestCloseDoc',
 			onHide: "doAceFocus"
 		}
 	],
@@ -45,23 +40,10 @@ enyo.kind({
 		});
 	},
 
-	switchDoc: function(inSender, inEvent) {
-		var newDoc = Ares.Workspace.files.get(inEvent.userId);
-		this.trace(inEvent.id, newDoc);
-		this.owner.switchToDocument(newDoc, $L("Switching files..."), inEvent.next);
-		return true;
-	},
-
 	activateDocWithId: function(id) {
 		this.$.tabs.activate({ userId: id });
 	},
 
-	requestCloseDoc: function(inSender, inEvent) {
-		// inEvent.next callback is ditched. Ares will call removeTab
-		// when file is closed by Ace
-		this.doCloseDocRequest({id: inEvent.userId});
-		return true;
-	},
 	removeTab: function(id) {
 		this.$.tabs.removeTab({ userId: id }) ;
 		if (this.$.tabs.isEmpty() ) {

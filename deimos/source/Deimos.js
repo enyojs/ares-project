@@ -1,4 +1,4 @@
-/*global ProjectKindsModel, enyo, ares, async */
+/*global ProjectKindsModel, enyo, ares, setTimeout */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
@@ -84,7 +84,7 @@ enyo.kind({
 		rendering to avoid error with setting values of width/height fields)
 	*/
 	events: {
-		onCloseDesigner: "",
+		onChildRequest: "",
 		onRegisterMe: "",
 		onError:""
 	},
@@ -114,16 +114,18 @@ enyo.kind({
 		this.$.devicePicker.setSelected(initItem);
 		this.deviceChosen(null, {selected: initItem});
 	},
+
 	/**
-	 * Loads the first kind passed thru the data parameter
-	 * @param data contains kinds declaration (enyo.kind format)
-	 *   and project information such as the analyzer output
-	 *   for all the .js files of the project and for enyo/onyx.
-	 * @public
+	 * Loads the first kind passed thru the data parameter.
+	 * This function acts on pallete, inspector, kindPicker and (may be) sends
+	 * to designerFrame serialisation options extracted from .design
+	 * files. No ack message is expected from designerFrame
+	 *
+	 * @param {Object} data: contains kinds declaration (enyo.kind format)
+	 * and project information such as the analyzer output
+	 * for all the .js files of the project and for enyo/onyx.
+	 * @param {Function} next
 	 */
-	// load acts on pallete, inspector, kindPicker and (may be) sends
-	// to designerFrame serialisation options extracted from .design
-	// files. No ack message is expected from designerFrame
 	loadDesignerUI: function(data, next) {
 		this.trace("called with", data);
 		this.enableDesignerActionButtons(false);
@@ -134,23 +136,19 @@ enyo.kind({
 		this.kinds = what;
 		this.fileName = data.fileIndexer.name;
 		
-		this.owner.$.kindPicker.destroyClientControls();
-
 		// Pass the project information (analyzer output, ...) to the inspector and palette
-		// FIXME: projectDataChanged is triggered only if the projectData reference is changed.
-		// The actual content is not checked by enyo.
 		this.setProjectData(data.projectData);
 
-		this.owner.initKindPicker(what) ;
+		this.doChildRequest({task: [ "initKindPicker", what ]}) ;
+
+		// selectKind is designed to be used in a waterfall, it calls
+		// next with `next(err,kindName)`. This extra parameter needs
+		// to be removed:
+		var bareNext = function(err) { next(err);} ;
 
 		// preselect the first kind. This will lead to an action in
-		// DesignerFrame
-		async.series(
-			[
-				this.selectKind.bind(this, 0)
-			],
-			next
-		);
+		// DesignerFrame.
+		this.selectKind(0, bareNext) ;
 	},
 
 	selectKind: function(index, next) {
@@ -158,6 +156,9 @@ enyo.kind({
 		var components = this.getSingleKind(index);
 		this.trace("selected kind ", kind);
 		
+		// prepare next used by async.waterfall
+		var nextWithName = function(err) { next(err, kind.name); };
+
 		if (index !== this.index) {
 			this.addAresIds(components);
 			this.addAresKindOptions(components);
@@ -167,11 +168,11 @@ enyo.kind({
 			this.$.inspector.inspect(null);
 			this.$.inspector.setCurrentKindName(kind.name);
 
-			this.$.designer.renderKind(this.fileName, components[0], null, next);
+			this.$.designer.renderKind(this.fileName, components[0], null, nextWithName);
 
 			this.index = index;
 		} else {
-			next(kind.name);
+			setTimeout(nextWithName, 0);
 		}
 	},
 	/**
@@ -236,7 +237,6 @@ enyo.kind({
 	},
 	//* Rerender current kind
 	rerenderKind: function(inSelectId) {
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.$.designer.renderKind(
 			this.fileName,
 			this.getSingleKind(this.index)[0],
@@ -417,7 +417,7 @@ enyo.kind({
 		
 		this.updateCodeInEditor(this.fileName);
 		this.setProjectData(null);
-		this.owner.switchToCodeMode();
+		this.doChildRequest({task: "switchToCodeMode" });
 		
 		return true;
 	},
@@ -742,15 +742,17 @@ enyo.kind({
 	},
 	undoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
-		this.owner.undo();
+		this.doChildRequest({task: "undo" });
+		return true;
 	},
 	redoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
-		this.owner.redo();
+		this.doChildRequest({task: "redo" });
+		return true;
 	},
 	deleteAction: function(inSender, inEvent) {
 		if(!this.$.designer.selection) {
-			return;
+			return true;
 		}
 		
 		this.$.inspector.inspect(null);
@@ -760,6 +762,7 @@ enyo.kind({
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, kind);
 		this.addAresKindOptions(kind);
 		this.rerenderKind();
+		return true;
 	},
 	deleteComponentByAresId: function(inAresId, inComponents) {
 		for (var i = 0; i < inComponents.length; i++) {
@@ -779,17 +782,25 @@ enyo.kind({
 		if (inFilename === this.fileName) {
 			var kind = this.getSingleKind(this.index);
 			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(kind)));
-			this.owner.updateComponentsCode(kindList);
+			this.doChildRequest({ task: [ "updateComponentsCode", kindList ] });
 		} else {
 			this.log("skipped code update of stale file ", inFilename);
 		}
 	},
-	//* Called when ProjectView has new project selected
+
+	/**
+	 * Called when ProjectView has new project selected
+	 * @param {Object} inProject
+	 * @param {Function} next
+	 */
 	projectSelected: function(inProject, next) {
 		this.trace("called with ", inProject);
 		this.$.designer.updateSource(inProject, next);
 	},
-	// triggered by 'Reload' button
+
+	/**
+	 * triggered by 'Reload' button
+	 */
 	reloadDesigner: function() {
 		this.enableDesignerActionButtons(false);
 		this.$.designer.reload();
@@ -921,18 +932,23 @@ enyo.kind({
 	// @protected		
 	runPaletteComponentAction: function(inSender,inEvent){
 		var config = this.$.actionPopup.getConfigComponent(config);
-		var config_data = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
+		var configData = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
 
 		if(inEvent.getName() === "addtoKind"){
 			var target = this.$.actionPopup.getTargetComponent(target);
 			var beforeId = inEvent.beforeId; 
 			this.performCreateItem(config, target, beforeId);
 		} else if (inEvent.getName() === "replaceKind"){
-			this.owner.replaceKind(this.index, config_data);
+			this.doChildRequest({task: [ "replaceKind", this.index, configData ]});
 		} else if (inEvent.getName() === "addNewKind"){
-			this.owner.addNewKind(config_data);
+			this.doChildRequest({ task: [ "addNewKind", configData ] });
+		}
+		else {
+			this.log("unexpected event: " + inEvent.getName() );
 		}
 		this.$.actionPopup.hide();
+
+		return true;
 	},
 
 

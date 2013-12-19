@@ -37,6 +37,7 @@ enyo.kind({
 		onError: "",
 		onRegisterMe: "",
 		onFileEdited: " ",
+		onChildRequest: "",
 		onAceFocus: ""
 	},
 	handlers: {
@@ -152,7 +153,6 @@ enyo.kind({
 		this.projectCtrl.buildProjectDb();
 
 		this.docData.setEdited(edited);
-		this.owner.$.toolbar.resized();
 	},
 
 	adjustPanelsForMode: function(mode, rightpane) {
@@ -191,6 +191,7 @@ enyo.kind({
 		for (var stuff in showSettings) {
 			showStuff = showSettings[stuff];
 			this.trace("show", stuff, ":", showStuff);
+			// FIXME need to clean up this code ENYO-3633
 			if(this.$[stuff] !== undefined){
 				if (typeof this.$[stuff].setShowing === 'function') {
 					this.$[stuff].setShowing(showStuff) ;
@@ -247,7 +248,7 @@ enyo.kind({
 	 *	Enable "Designer" button only if project & enyo index are both valid
 	 */
 	manageDesignerButton: function() {
-		this.owner.enableDesignerButton( this.projectCtrl.fullAnalysisDone );
+		this.doChildRequest({ task: [ "enableDesignerButton", this.projectCtrl.fullAnalysisDone ]} );
 	},
 	/**
 	 * Receive the project data reference which allows to access the analyzer
@@ -337,8 +338,7 @@ enyo.kind({
 			code: this.$.aceWrapper.getValue(),
 			path: this.projectCtrl.projectUrl + this.docData.getFile().dir + this.docData.getFile().name
 		};
-		this.trace("called with mode " + mode + " inhibitUpdate " + inhibitUpdate
-				   + " on " + module.name);
+		this.trace("called with mode " , mode , " inhibitUpdate " , inhibitUpdate , " on " + module.name);
 		switch(mode) {
 			case "javascript":
 				try {
@@ -357,7 +357,7 @@ enyo.kind({
 
 					codeLooksGood = true;
 				} catch(error) {
-					enyo.log("An error occured during the code analysis: " + error);
+					enyo.log("An error occured during the code analysis: " , error);
 					this.dumpInfo(null);
 					this.$.autocomplete.setAnalysis(null);
 				}
@@ -421,7 +421,10 @@ enyo.kind({
 		}
 		return -1;
 	},
-	//* Navigate from Phobos to Deimos. Pass Deimos all relevant info.
+
+	/**
+	 * Navigate from Phobos to Deimos. Pass Deimos all relevant info.
+	 */
 	designerAction: function() {
 		// Update the projectIndexer and notify watchers
 		this.reparseUsersCode();
@@ -435,7 +438,7 @@ enyo.kind({
 		
 		if (kinds.length > 0) {
 			// Request to design the current document, passing info about all kinds in the file
-			this.owner.designDocument(data);
+			this.doChildRequest({ task: [ 'designDocument',  data ]});
 		} // else - The error has been displayed by extractKindsData()
 	},
 	//* Extract info about kinds from the current file needed by the designer
@@ -529,7 +532,7 @@ enyo.kind({
 			this.helper.setDefinition(object);
 			return this.helper.listHandlers(declared);
 		} catch(error) {
-			enyo.log("Unexpected error: " + error);		// TODO TBC
+			enyo.log("Unexpected error: " , error);		// TODO TBC
 		}
 	},
 	/**
@@ -680,16 +683,7 @@ enyo.kind({
 			this.doFileEdited();
 		}
 	},
-	/**
-	* @protected
-	*/
-	showSavePopup: function(componentName, message){
-		this.warn("obsolete");
-		this.$[componentName].setTitle($L("Document was modified!"));
-		this.$[componentName].setMessage(message);
-		this.$[componentName].setActionButton($L("Don't Save"));
-		this.$[componentName].show();
-	},	
+
 	docChanged: function(inSender, inEvent) {
 		//this.injected === false then modification coming from user
 		if(!this.injected && !this.docData.getEdited()){
@@ -750,6 +744,7 @@ enyo.kind({
 		if (this.docData) {
 			this.$.aceWrapper.destroySession(this.docData.getAceSession());
 			this.resetAutoCompleteData();
+			this.docData = null;
 		}
 	},
 	// Show Find popup
@@ -895,7 +890,7 @@ enyo.kind({
 		
 		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
 		if (data.kinds.length > 0) {
-			this.owner.loadDesignerUI(data,next);
+			this.doChildRequest({task: [ "loadDesignerUI", data, next ]});
 		} // else - The error has been displayed by extractKindsData()
 	},
 	resizeHandler: function() {

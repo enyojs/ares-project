@@ -457,8 +457,7 @@ enyo.kind({
 			if (inError) {
 				this.showErrorPopup(this.$LS("Internal Error (#{error}) from filesystem service", {error: inError.toString()}));
 			} else {
-				this.trace("HFT: service is now connected for project" + inProjectData.getName()
-						 + '. Requesting project URL');
+				this.trace("HFT: service is now connected for project" + inProjectData.getName() + '. Requesting project URL');
 				if (this.selectedNode) {
 					this.deselect(null, {data: this.selectedNode});
 				}
@@ -470,8 +469,7 @@ enyo.kind({
 				var rootFinding = this.$.service.propfind(folderId, 0);
 				rootFinding.response(this, function(inSender, inValue) {
 					var projectUrl = service.getConfig().origin + service.getConfig().pathname + "/file" + inValue.path;
-					this.trace("HFT: service reply: project" + inProjectData.getName()
-							 + ' URL is ' + projectUrl + '. UPdating projectData');
+					this.trace("HFT: service reply: project" + inProjectData.getName() + ' URL is ' + projectUrl + '. UPdating projectData');
 					this.projectData.setProjectUrl(projectUrl);
 					this.trace("HFT: projet data update done");
 					this.projectUrlReady = true;

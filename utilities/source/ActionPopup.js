@@ -96,7 +96,6 @@ enyo.kind({
 	/** @private */
 	actionCancel: function(inSender, inEvent) {
 		this.hide();
-		this.log('');
 		this.runCallbackOrBubbleUp('cancel', 'onCancelActionPopup');
 		return true;
 	},
@@ -114,7 +113,7 @@ enyo.kind({
 			this.trace("Running callback " + cbName);
 			theCb();
 		} else {
-			this.trace("Bubbling fallback event " + fallbackEvent);
+			this.trace("Bubbling fallback event " , fallbackEvent);
 			this.bubble(fallbackEvent);
 		}
 	},

@@ -56,8 +56,7 @@ enyo.kind({
 	raiseLoadError: function(msg, url, linenumber) {
 		// I'm a goner
 		var file = url.replace(/.*\/services(?=\/)/,'');
-		var errMsg = "user app load FAILED with error '" + msg
-				+ "' in " + file + " line " + linenumber  ;
+		var errMsg = "user app load FAILED with error '" + msg + "' in " + file + " line " + linenumber  ;
 		this.trace(errMsg);
 		this.sendMessage({op: "reloadNeeded"});
 		this.sendMessage({op: "error", val: {msg: errMsg}});
@@ -178,7 +177,6 @@ enyo.kind({
 			this.setContainerData(msg.val);
 			break;
 		case "render":
-			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 			this.renderKind(msg.val, msg.filename, msg.op);
 			break;
 		case "initializeOptions":
@@ -194,7 +192,6 @@ enyo.kind({
 			this.unhighlightDropTargets(msg.val);
 			break;
 		case "modify":
-			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 			this.modifyProperty(msg.val, msg.filename);
 			break;
 		case "codeUpdate":
@@ -478,7 +475,6 @@ enyo.kind({
 
 			// Notify Deimos that the kind rendered successfully
 			//* Send update to Deimos with serialized copy of current kind component structure
-			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 			this.sendMessage({
 				op: "rendered",
 				triggeredByOp: cmd, // 'render'
@@ -502,7 +498,6 @@ enyo.kind({
 	rerenderKind: function(inFileName) {
 		var copy = this.getSerializedCopyOfComponent(this.parentInstance).components;
 		copy[0].componentKinds = copy;
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.renderKind(copy[0], inFileName);
 	},
 	checkXtorForAllKinds: function(kinds) {

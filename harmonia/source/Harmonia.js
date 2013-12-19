@@ -1,4 +1,4 @@
-/*global ares, enyo */
+/*global ares, enyo, setTimeout */
 
 enyo.kind({
 	name: "Harmonia",
@@ -45,7 +45,7 @@ enyo.kind({
 			this.$.hermesFileTree.connectProject(project, next).showFileOpButtons();
 		} else {
 			this.$.hermesFileTree.hideFileOpButtons().clear();
-			if (next) { next(); }
+			if (next) { setTimeout(next,0); }
 		}
 	},
 	showGrabber:function(){
@@ -59,11 +59,13 @@ enyo.kind({
 	},
 	/**
 	 * Refresh the {HermesFileTree}
-	 * @param {Object} changedFile
-	 * @param {Function} callback
+	 * @param {Object} toSelectId - changed file id
+	 * @param {Function} [callback] - optional callback
 	 */
 	refreshFileTree: function(toSelectId,next) {
 		// the inversion of parameter is not an error.
+		// next parameter is optional (can be null or undef)
+		// ENYO-3641
 		this.$.hermesFileTree.refreshFileTree(next, toSelectId);
 	},
 	activePanel : function(){

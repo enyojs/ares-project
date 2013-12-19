@@ -1,4 +1,4 @@
-/*global ComponentsRegistry, ares, Ares, async, enyo, $L */
+/*global ComponentsRegistry, ares, Ares, async, enyo, $L, setTimeout */
 enyo.kind({
 	name:"Ares.EnyoEditor",
 	kind:"FittableRows", 
@@ -54,6 +54,7 @@ enyo.kind({
 			showing: false,
 			headerText: $L("Save as..."),
 			folderChooser: false,
+			onFileChosen: "saveAsFileChosen",
 			allowCreateFolder: true,
 			allowNewFile: true,
 			allowToolbar: true
@@ -66,9 +67,14 @@ enyo.kind({
 			actionButton: $L("Overwrite")
 		},
 		{
-			name: "bottomBar",
+			name: "docToolBar",
 			kind: "DocumentToolbar",
-			onCloseDocRequest: "handleCloseDocument",
+			onTabRemoveRequested: "handleCloseDocument",
+			onTabChangeRequested: 'handleSwitchDoc',
+			// FIXME ENYO-3627
+			// backward compatibility: the following event handler can
+			// be removed once onyx pilot-13 is integrated in Ares
+			onTabChanged: 'handleSwitchDoc',
 			classes: "ares-bottom-bar"
 		},
 		{
@@ -107,8 +113,10 @@ enyo.kind({
 		aceActive: true
 	},
 	handlers: {
-		onDesignDocument: "designDocument",
+		onErrorTooltip: "showErrorTooltip",
 		onAceGotFocus: "switchProjectToCurrentDoc",
+		onErrorTooltipReset: "resetErrorTooltip",
+		onChildRequest: "handleCall",
 		onAceFocus: "aceFocus"
 	},
 	debug: false,
@@ -118,6 +126,21 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.doRegisterMe({name:"enyoEditor", reference:this});
 	},
+
+	/**
+	 * handle a Call from children.
+	 * @param {Object} inSender
+	 * @param {Object} inEvent: inEvent.task: array [ method_name_to_call, arg1, arg2 , ...]
+	 * @returns {true}
+	 */
+	handleCall: function(inSender, inEvent){
+		var data = inEvent.task;
+		var task = typeof data === 'object' ? data : [ data ];
+		var method = task.shift();
+		this[method].apply(this, task);
+		return true;
+	},
+
 	activePanel : function(){
 		// my index within the main Ares panels, not index phobos and deimos panels
 		this.doMovePanel({panelIndex:this.panelIndex});
@@ -155,11 +178,16 @@ enyo.kind({
 	},
 
 
-	// kind Picker stuff
+	/**
+	 * event handler for kind Picker
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 * @returns {true}
+	 */
 	kindSelected: function(inSender, inEvent) {
 		var index = inSender.getSelected().index;
 		var deimos = this.$.deimos;
-		async.series([
+		async.waterfall([
 			deimos.selectKind.bind(deimos, index),
 			(function(name,next) {
 				this.$.kindButton.setContent(name);
@@ -170,9 +198,16 @@ enyo.kind({
 		return true;
 	},
 
+	/**
+	 * kindPicker let user select the top kind to be designed. By
+	 * default, the first one is selected
+	 * @param {array} kinds
+	 */
 	initKindPicker: function(kinds) {
-		// kindPicker let user select the top kind to be designed
 		var maxLen ;
+
+		this.$.kindPicker.destroyClientControls();
+
 		for (var i = 0; i < kinds.length; i++) {
 			var k = kinds[i];
 			this.$.kindPicker.createComponent({
@@ -264,7 +299,13 @@ enyo.kind({
 		this.updateDeimosLabel(this.activeDocument.getEdited());
 	},
 
+	// document currently shown by Ace
 	activeDocument: null,
+
+	// project currently loaded in designer. When all document are
+	// closed, the project is still active until project is switched.
+	// activeProject is never set to null
+	activeProject: null,
 
 	showWaitPopup: function(inMessage) {
 		this.doShowWaitPopup({msg: inMessage});
@@ -274,13 +315,17 @@ enyo.kind({
 		this.aceFocus();
 	},
 
-	//* apply action on each doc of passed project (or project's doc)
-	// or current project (if param is falsy)
+	/**
+	 * apply action on each doc of passed project (or project's doc)
+	 * or current project (if param is falsy)
+	 * @param {Function} action: function called on each project doc
+	 * @param {Object} param: project (defaults to activeProject)
+	 */
 	foreachProjectDocs: function(action, param) {
 		var project
 				= param instanceof Ares.Model.Project ? param
 				: param instanceof Ares.Model.File    ? param.getProjectData()
-				:                                       this.activeDocument.getProjectData();
+				:                                       this.activeProject;
 		var projectName = project.getName();
 
 		function isProjectDoc(model) {
@@ -290,10 +335,13 @@ enyo.kind({
 		Ares.Workspace.files.filter(isProjectDoc).forEach(action, this);
 	},
 
+	/**
+	 * request to save project files one by one and then launch
+	 * preview
+	 */
 	requestPreview: function() {
-		// request save one by one and then launch preview
 		var previewer = ComponentsRegistry.getComponent("projectView");
-		var project = this.activeDocument.getProjectData();
+		var project = this.activeProject;
 		var serialSaver = [] ;
 		this.trace("preview requested on project " + project.getName());
 
@@ -306,11 +354,19 @@ enyo.kind({
 			}
 		);
 
-		// the real work is done here
-		async.series( serialSaver, previewer.launchPreview.bind(previewer, project)) ;
+		// the real work is done below
+		async.series(
+			serialSaver,
+			function(err) {
+				if (! err) {
+					previewer.launchPreview(project);
+				}
+			}
+		);
 	},
 
 	// Save actions
+
 	saveProjectDocs: function() {
 		this.foreachProjectDocs(this.saveDoc.bind(this));
 	},
@@ -351,7 +407,7 @@ enyo.kind({
 		this.showWaitPopup($L("Saving ") + name + " ...");
 
 		req.response(this, function(inSender, inData) {
-			this.log('saveFile response ', inData);
+			this.trace('saveFile response ', inData);
 			var savedFile = inData[0]; // only one file was saved
 			savedFile.service = where.service;
 			var docDataId = Ares.Workspace.files.computeId(savedFile);
@@ -359,7 +415,7 @@ enyo.kind({
 				this.error("cannot find docDataId from ", savedFile, ' where ', where);
 			}
 			var docData = Ares.Workspace.files.get(docDataId);
-			this.log('saveFile response ok for ', name, savedFile, docDataId, " => ", docData);
+			this.trace('saveFile response ok for ', name, savedFile, docDataId, " => ", docData);
 			if(docData){
 				docData.setData(content);
 				docData.setEditedData(content);
@@ -372,7 +428,7 @@ enyo.kind({
 			this.analyseData(docData);
 			if (next) {next(null, savedFile);}
 		}).error(this, function(inSender, inErr) {
-			this.log('saveFile response failed with ' + inErr + ' for ', name, where);
+			this.trace('saveFile response failed with ' , inErr , ' for ', name, where);
 			this.hideWaitPopup();
 			this.doError({msg: "Unable to save the file: " + inErr });
 			if (next) {next(inErr);}
@@ -402,12 +458,12 @@ enyo.kind({
 		this.trace("triggering full analysis after file save");
 		phobos.projectCtrl.forceFullAnalysis();
 
-		this.trace("done. codeLooksGood: "+ codeLooksGood);
+		this.trace("done. codeLooksGood: ", codeLooksGood);
 	},
 
 	requestSaveDocAs: function() {
 		var file = this.activeDocument.getFile();
-		var projectData = this.activeDocument.getProjectData();
+		var projectData = this.activeProject;
 		var buildPopup = function() {
 			var path = file.path;
 			var relativePath = path.substring(
@@ -415,17 +471,17 @@ enyo.kind({
 				path.length
 			);
 			this.$.saveAsPopup.pointSelectedName(relativePath, true);
-			this.$.saveAsPopup.setFileChosenCallback(this.saveAsFileChosen.bind(this));
+			// saveAsPopup may invoke saveAsFileChosen
 			this.$.saveAsPopup.show();
 		};
 		this.$.saveAsPopup.connectProject(projectData, buildPopup.bind(this));
 	},
-	saveAsFileChosen: function(param) {
-		this.trace(param);
+	saveAsFileChosen: function(inSender, inEvent) {
+		this.trace(inEvent);
 
-		if (param.file) {
+		if (inEvent.file) {
 			this.$.saveAsPopup.$.hermesFileTree
-				.checkNodeName(param.name, this.requestOverwrite.bind(this, param));
+				.checkNodeName(inEvent.name, this.requestOverwrite.bind(this, inEvent));
 		} else {
 			// no file or folder chosen
 			this.aceFocus();
@@ -448,7 +504,7 @@ enyo.kind({
 		var relativePath = param.name.split("/");
 		var name = relativePath[relativePath.length-1];
 		var doc = this.activeDocument;
-		var projectData= this.activeDocument.getProjectData();
+		var projectData = this.activeProject;
 		var file= param.file;
 		var content= this.$.phobos.getEditorContent();
 
@@ -504,7 +560,7 @@ enyo.kind({
 		}
 
 		function _refreshFileTree(file, next) {
-			this.log(file);
+			this.trace(file);
 			// refreshFileTree is async, there's no need to wait before opening
 			// the document
 			ComponentsRegistry.getComponent("harmonia").refreshFileTree(file.id);
@@ -513,12 +569,6 @@ enyo.kind({
 	},
 
 	// close actions
-
-	handleCloseDocument: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-		var doc = Ares.Workspace.files.get(inEvent.id);
-		this.requestCloseDoc(doc);
-	},
 
 	closeActiveDoc: function() {
 		var doc = this.activeDocument;
@@ -531,14 +581,17 @@ enyo.kind({
 	forgetDoc: function(doc) {
 		// remove Doc from cache
 		var docId = doc.getId();
-		ComponentsRegistry.getComponent("documentToolbar").removeTab(docId);
 		Ares.Workspace.files.removeEntry(docId);
 		if (! Ares.Workspace.files.length ) {
 			this.doAllDocumentsAreClosed();
 		}
 	},
 
-	//* close a document, param can be a docId or a doc
+	/**
+	 * close a document
+	 * @param {(String|Object)} param: docId or doc
+	 * @param {[Function]} next
+	 */
 	closeDoc: function(param, next) {
 		var doc = typeof param === 'object' ? param : Ares.Workspace.files.get(param) ;
 		var docId = doc.getId();
@@ -546,7 +599,7 @@ enyo.kind({
 		if (docId && this.activeDocument && this.activeDocument.getId() === docId) {
 			this.closeActiveDoc();
 		} else if (docId) {
-			this.log("closing a doc different from current one: ", doc.getName());
+			this.trace("closing a doc different from current one: ", doc.getName());
 			this.forgetDoc(doc);
 		} else {
 			this.warn("called without doc to close");
@@ -572,39 +625,62 @@ enyo.kind({
 		}
 	},
 
-	// switch file *and* project (if necessary)
+	/**
+	 * Handle switch doc event
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 * @returns {true}
+	 */
+	handleSwitchDoc: function(inSender, inEvent) {
+		var newDoc = Ares.Workspace.files.get(inEvent.userId);
+		this.trace(inEvent.id, newDoc);
+		// FIXME ENYO-3627
+		// older TabBar doesn't provide callback
+		var next = inEvent.next || function() {} ;
+		this.switchToDocument(newDoc, $L("Switching files..."), next);
+		return true;
+	},
+
+	/**
+	 * Switch file *and* project (if necessary)
+	 * @param {Object} newDoc
+	 * @param {String} popupMsg: message to display in popup message
+	 * @param {Code} next
+	 * @throws {String} throw an error when File ID is not found in cache
+	 */
 	switchToDocument: function(newDoc, popupMsg, next) {
 		// safety net
 		if ( ! newDoc ) {
 			if  (this.debug) { throw("File ID " + newDoc + " not found in cache!");}
-			next("File ID not found in cache!");
+			setTimeout( function() { next(new Error("File ID not found in cache!")); }, 0);
 			return;
 		}
 
 		var oldDoc = this.activeDocument ; // may be undef when a project is closed
+		var oldProject = this.activeProject; // may be undef before opening the first file
+		var safeNext = next; // function parameter is not a closure
 
 		// don't open an already opened doc
 		if ( oldDoc && newDoc.getId() === oldDoc.getId()) {
-			next();
+			setTimeout( function() { next(); }, 0);
 			return ;
 		}
 
 		var newName = newDoc.getProjectData().getName() ;
-		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : "")
-				   + "to " + newDoc.getName() );
-
-		this.doShowWaitPopup({msg: popupMsg});
+		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : "") + "to " + newDoc.getName() );
 
 		var serial = [];
 
-		//select project if the file(d) comes from another project then the previous file
-		if (!oldDoc || oldDoc.getProjectData().getName() !== newName){
-			this.trace("also switch project "
-					   + (oldDoc ? "from " + oldDoc.getProjectData().getName()  + " " : "")
-					   + ' to ' + newDoc.getProjectData().getName());
+		// select project if the document comes from a different
+		// project compared to the project of the previous document
+		if (!oldProject || oldProject.getName() !== newName){
+			var pname =  oldProject ? "from " + oldProject.getName()  + " " : "" ;
+			this.trace("also switch project " + pname + ' to ' + newDoc.getProjectData().getName());
 			var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
 			var projectList = ComponentsRegistry.getComponent("projectList");
 			var deimos = this.$.deimos;
+
+			this.doShowWaitPopup({msg: $L("Switching project...")});
 
 			serial.push(
 				projectList.selectInProjectList.bind(projectList, project),
@@ -614,26 +690,41 @@ enyo.kind({
 
 		var that = this ;
 		serial.push(
-			this._switchDoc.bind(this, newDoc),
-			function(_next) { that.doHideWaitPopup(); _next();}
+			function(_next) { that.doShowWaitPopup({msg: popupMsg}); _next();},
+			this._switchDoc.bind(this, newDoc)
 		);
 
 		// no need to handle error, call outer next without params
-		async.series( serial, function(){ next();} );
+		async.series( serial, function(err){
+			that.doHideWaitPopup();
+			safeNext();
+		});
 	},
 
-	// switch Phobos or Deimos to new document
+	// FIXME ENYO-3624: this function must trigger a reload of the designer
+	// to take into account code modification discarded by user
+	reloadDoc: function(doc,next) {
+		var reloadedDoc = this.activeDocument ;
+		this.activeDocument = null;// reset to trigger reload
+		this._switchDoc(reloadedDoc, next || function(){/* nop */} );
+	},
+
+	/**
+	 * switch Phobos or Deimos to new document
+	 * @param {Object} newDoc
+	 * @param {Function} next
+	 */
 	_switchDoc: function(newDoc,next) {
 		var phobos = this.$.phobos;
 
 		var oldDoc = this.activeDocument ;
 		var currentIF = newDoc.getCurrentIF();
-		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : " ")
-				   + ' to ' + newDoc.getName() + " IF is " + currentIF );
+		var oldName = oldDoc ? "from " + oldDoc.getName() + " " : " " ;
+		this.trace("switch " + oldName + ' to ' + newDoc.getName() + " IF is " , currentIF );
 
 		if (oldDoc && newDoc === oldDoc) {
 			// no actual switch
-			next();
+			setTimeout(next,0);
 			return;
 		}
 
@@ -643,11 +734,14 @@ enyo.kind({
 			oldDoc.setEditedData(phobos.getEditorContent());
 		}
 
-		// open ace or deimos depending on edition mode...
+		// open ace session (or image viewer)
 		phobos.openDoc(newDoc);
+		this.$.toolbar.resized();
 
 		this.activeDocument = newDoc;
-		this.addPreviewTooltip("Preview " + newDoc.getProjectData().id);
+		this.activeProject = newDoc.getProjectData() ;
+
+		this.addPreviewTooltip("Preview " +  this.activeProject.id);
 
 		if (currentIF === 'code') {
 			this.$.panels.setIndex(this.phobosViewIndex);
@@ -657,17 +751,34 @@ enyo.kind({
 			this.manageControls(true);
 		}
 		this._fileEdited();
-		this.$.bottomBar.activateDocWithId(newDoc.getId());
-		next() ;
+		this.$.docToolBar.activateDocWithId(newDoc.getId());
+		setTimeout(next,0) ;
 	},
 
 
-	// Close documents
-	requestCloseDoc: function(doc) {
-		async.waterfall([
-			this.requestSave.bind(this, doc),
-			this.closeDoc.bind(this)
-		]);
+	/**
+	 * handle request close doc events
+	 * Request to save doc and close if user agrees
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 * @returns {true}
+	 */
+	handleCloseDocument: function(inSender, inEvent) {
+		// inEvent.next callback is ditched. Ares will call removeTab
+		// when file is closed by Ace
+		var doc = Ares.Workspace.files.get(inEvent.userId);
+
+		async.waterfall(
+			[
+				this.requestSave.bind(this, doc),
+				this.closeDoc.bind(this)
+			],
+			function(err) {
+				if (! err) {
+					inEvent.next();
+				}
+			}
+		);
 		return true; // Stop the propagation of the event
 	},
 
@@ -679,8 +790,11 @@ enyo.kind({
 		return true; // Stop the propagation of the event
 	},
 
-	//* Close all files of a project. use current project if
-	// project is null. next is optional
+	/**
+	 * Close all files of a project
+	 * @param {[Object]} project, defaults to current project
+	 * @param {[Function]} next
+	 */
 	requestCloseProject: function (project, next) {
 		this.trace("close project requested");
 		var serial = [] ;
@@ -724,13 +838,16 @@ enyo.kind({
 		return true ;
 	},
 
-	//* query the user for save before performing next action
+	/**
+	 * query the user for save before performing next action
+	 * @param {Object} doc to save
+	 * @param {Function} next
+	 */
 	requestSave: function(doc, next) {
 		var popup = this.$.savePopup ;
 		if (doc.getEdited() === true) {
 			this.trace("request save doc on ", doc.getName());
-			popup.setMessage('"' + doc.getFile().path
-					+ '" was modified.<br/><br/>Save it before closing?') ;
+			popup.setMessage('"' + doc.getFile().path + '" was modified.<br/><br/>Save it before closing?') ;
 			popup.setTitle($L("Document was modified!"));
 
 			popup.setActionButton($L("Don't Save"));
@@ -744,11 +861,17 @@ enyo.kind({
 				}).bind(this)
 			);
 
-			popup.setCancelCallback(this.aceFocus.bind(this)) ;
+			popup.setCancelCallback(
+				(function() {
+					this.reloadDoc(doc);
+					this.aceFocus();
+					next(new Error('canceled'));
+				}).bind(this)
+			) ;
 
 			popup.show();
 		} else {
-			next(null,doc);
+			setTimeout( next.bind(null,null, doc), 0);
 		}
 	},
 
@@ -771,8 +894,7 @@ enyo.kind({
 
 	/**
 	 * Update code running in designer
-	 * @param {Ares.Model.Project} project, backbone object defined
-	 * in WorkspaceData.js
+	 * @param {Ares.Model.Project} project, backbone object defined in WorkspaceData.js
 	 */
 	syncEditedFiles: function(project) {
 		var projectName = project.getName();
@@ -796,7 +918,7 @@ enyo.kind({
 			code = aceSession && aceSession.getValue();
 		// project is a backbone Ares.Model.Project defined in WorkspaceData.js
 		var projectName = inDoc.getProjectData().getName();
-		this.trace('code update on file', filename,' project ' + projectName);
+		this.trace('code update on file', filename,' project ' , projectName);
 
 		this.$.deimos.syncFile(projectName, filename, code);
 	},
