@@ -65,7 +65,7 @@ _.extend(true, HermesFilesystem.prototype, {
 					next(null, {content: data.toString()});
 				});
 			} else {
-				next("Not a file");
+				next(new Error("Not a file"));
 			}
 		});
 	}, 

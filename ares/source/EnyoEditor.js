@@ -427,7 +427,7 @@ enyo.kind({
 			this.analyseData(docData);
 			if (next) {next(null, savedFile);}
 		}).error(this, function(inSender, inErr) {
-			this.trace('saveFile response failed with ' + inErr + ' for ', name, where);
+			this.trace('saveFile response failed with ' , inErr , ' for ', name, where);
 			this.hideWaitPopup();
 			this.doError({msg: "Unable to save the file: " + inErr });
 			if (next) {next(inErr);}
@@ -457,7 +457,7 @@ enyo.kind({
 		this.trace("triggering full analysis after file save");
 		phobos.projectCtrl.forceFullAnalysis();
 
-		this.trace("done. codeLooksGood: "+ codeLooksGood);
+		this.trace("done. codeLooksGood: ", codeLooksGood);
 	},
 
 	requestSaveDocAs: function() {
@@ -644,7 +644,7 @@ enyo.kind({
 		// safety net
 		if ( ! newDoc ) {
 			if  (this.debug) { throw("File ID " + newDoc + " not found in cache!");}
-			setTimeout( function() { next("File ID not found in cache!"); }, 0);
+			setTimeout( function() { next(new Error("File ID not found in cache!")); }, 0);
 			return;
 		}
 
@@ -712,7 +712,7 @@ enyo.kind({
 		var oldDoc = this.activeDocument ;
 		var currentIF = newDoc.getCurrentIF();
 		var oldName = oldDoc ? "from " + oldDoc.getName() + " " : " " ;
-		this.trace("switch " + oldName + ' to ' + newDoc.getName() + " IF is " + currentIF );
+		this.trace("switch " + oldName + ' to ' + newDoc.getName() + " IF is " , currentIF );
 
 		if (oldDoc && newDoc === oldDoc) {
 			// no actual switch
@@ -857,7 +857,7 @@ enyo.kind({
 				(function() {
 					this.reloadDoc(doc);
 					this.aceFocus();
-					next('canceled');
+					next(new Error('canceled'));
 				}).bind(this)
 			) ;
 
@@ -910,7 +910,7 @@ enyo.kind({
 			code = aceSession && aceSession.getValue();
 		// project is a backbone Ares.Model.Project defined in WorkspaceData.js
 		var projectName = inDoc.getProjectData().getName();
-		this.trace('code update on file', filename,' project ' + projectName);
+		this.trace('code update on file', filename,' project ' , projectName);
 
 		this.$.deimos.syncFile(projectName, filename, code);
 	},
