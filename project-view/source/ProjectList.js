@@ -1,9 +1,11 @@
-/*global enyo, ares, ServiceRegistry, ComponentsRegistry */
+/*global Ares, ares, ServiceRegistry, ComponentsRegistry, enyo, async, $L */
+
+
 /**
  * This kind provides:
  * - the project toolbars (with create .. delete)
  * - the project list
- /*
+ *
  * The project list is a simple kind that only holds project names. It does not
  * hold project objects or kinds.
  */
@@ -136,8 +138,7 @@ enyo.kind({
 		this.$.amenu.show();
 		if(this.$.amenu.hasClass('on')) {
 			this.$.amenu.removeClass('on');
-		}
-		else {
+		} else {
 			this.$.amenu.addClass('on');
 		}
 	},
@@ -187,45 +188,70 @@ enyo.kind({
 			popup.show();
 		}
 	},
-	confirmRemoveProject: function(inSender, inEvent) {
-		// use file system service to remove project files (which behaves like a 'rm -rf')
-		// once done,  call removeSelectedProjectData to mop up the remains.
-		var project, nukeFiles ;
-		if (this.selected) {
-			project = Ares.Workspace.projects.at(this.selected.index);
 
-			var msgForDeletedProject = "Deleting project " + project.getName();  
+	removeProject: function (nukeFiles, project, next) {
+		// when nukeFiles is set, use file system service to remove
+		// project files (which behaves like a 'rm -rf') once done,
+		// call removeSelectedProjectData to mop up the remains.
+
+		this.trace("removing project", project.getName()) ;
+
+		if (nukeFiles) {
+			this.trace("removing project", project.getName() ,"files") ;
+			var msgForDeletedProject = "Deleting files of project " + project.getName();
 			this.doShowWaitPopup({msg: msgForDeletedProject});
 
-			nukeFiles = this.$.removeProjectPopup.get("nukeFiles");
-			this.trace("removing project", project.getName(), ( nukeFiles ? " and its files" : "" )) ;
-			this.trace(project);
-			if (nukeFiles) {
-				var service = project.getService();
-				var folderId = project.getFolderId();
-				service.remove( folderId )
-					.response(this, function(){this.removeSelectedProjectData();})
-					.error(this, function(inError){
-						this.doError({msg: "Error removing files of project " + project.name + ": " + inError.toString(), err: inError});
-					}) ;
-			}
-			else {
-				this.removeSelectedProjectData() ;
-			}
-			this.doHideWaitPopup();
+			var service = project.getService();
+			var folderId = project.getFolderId();
+			service.remove( folderId )
+				.response(this, function(){
+					this.trace("removed project", project.getName() ,"files") ;
+					this.doHideWaitPopup();
+					this.removeProjectData(project, next);
+				})
+				.error(this, function(inError){
+					this.trace("failed to remove project", project.getName() ,"files", inError) ;
+					this.doHideWaitPopup();
+					next(inError);
+				}) ;
+		} else {
+			this.removeProjectData(project, next) ;
 		}
 	},
-	removeSelectedProjectData: function() {
+
+	confirmRemoveProject: function(inSender, inEvent) {
+		var project = Ares.Workspace.projects.at(this.selected.index);
+		var nukeFiles = this.$.removeProjectPopup.get("nukeFiles");
+		var editor = ComponentsRegistry.getComponent("enyoEditor");
+
 		if (this.selected) {
-			// remove the project from list of project config
-			var project =  Ares.Workspace.projects.at(this.selected.index);
-			var name = project.getName();
-			Ares.Workspace.projects.removeProject(name);
+			async.series(
+				[
+					editor.requestCloseProject.bind(editor, project),
+					this.removeProject.bind(this, nukeFiles, project)
+				],
+				function(err){
+					if (err) {
+						this.doError({msg: "Error removing files of project " + project.name + ": " + err.toString(), err: err});
+					}
+				}
+			);
+		}
+	},
+	removeProjectData: function(project,next) {
+		var name = project.getName();
+
+		if (name === this.selected.projectName) {
+			this.trace("called on selected " + name);
 			this.selected = null;
 			this.doProjectRemoved();
-			this.doCloseProjectDocuments({"project":project}); //To reset the designer panel
 			this.$.projectMenu.setDisabled(true);
+		} else {
+			this.trace("called on " + name);
 		}
+
+		// remove the project from list of project config
+		Ares.Workspace.projects.removeProject(name);
 	},
 	projectListSetupItem: function(inSender, inEvent) {
 		var project = Ares.Workspace.projects.at(inEvent.index);
@@ -241,26 +267,35 @@ enyo.kind({
 			this.selectInProjectList(project);
 		}
 	},
-	selectInProjectList:function(project){
+	selectInProjectList:function(project, next){
 		this.trace("select ",project);
+		var oldProject = this.selectedProject ;
+
+		// do something only if project is actually changed
+		if (oldProject && oldProject.getName() === project.getName()) {
+			if (next) {next();}
+			return;
+		}
+
 		var itemList = this.$.projectList.getClientControls();
 		enyo.forEach(itemList, function(item) {
 			item.$.item.removeClass("on");
 			if(item.$.item.projectName === project.id){
 				this.selected = item.$.item;
 				item.$.item.addClass("on");
-				this.selectProject(project);
+				this.selectProject(project,next);
 			}
 		}, this);
 	},
-	selectProject: function(project){
+	selectProject: function(project,next){
 		var msg, service;
+		this.trace("project ",project, " old ", this.selectedProject);
 		service = ServiceRegistry.instance.resolveServiceId(project.getServiceId());
 		if (service !== undefined) {
 			project.setService(service);
 			this.$.projectMenu.setDisabled(false);
 			this.selectedProject = project;
-			this.owner.setupProjectConfig( project );
+			this.owner.setupProjectConfig( project, next );
 		} else {
 			// ...otherwise let
 			msg = "Service " + project.getServiceId() + " not found";
@@ -275,7 +310,7 @@ enyo.kind({
 		this.$.aresProperties.show();
 	},
 	showEnyoHelp: function() {
-		var search = ComponentsRegistry.getComponent("phobos").requestSelectedText();
+		var search = ComponentsRegistry.getComponent("enyoEditor").requestSelectedText();
 		
 		if (this.enyoHelpTab && !this.enyoHelpTab.closed) {
 			this.enyoHelpTab.focus();

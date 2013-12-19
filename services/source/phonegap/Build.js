@@ -560,9 +560,8 @@ enyo.kind({
 			if (aborted) {
 				// response is called on Mac even if xhr was aborted
 				this.trace("ugh, Ajax response was called after an abort");
-				next('Build canceled by the user');
-			}
-			else {
+				next(new Error('Build canceled by the user'));
+			} else {
 				next(null, {content: inData, ctype: ctype});
 			}
 		});

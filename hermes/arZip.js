@@ -35,8 +35,7 @@ function ArZip(config, next) {
 		res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-HTTP-Method-Override');
 		if ('OPTIONS' == req.method) {
 			res.status(200).end();
-		}
-		else {
+		} else {
 			next();
 		}
 	});

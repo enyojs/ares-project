@@ -1,4 +1,9 @@
-/*global ares, enyo */
+/*global ares, enyo, $L */
+
+// Action popup now accept call back that will be run when user click
+// on ok or cancel. Note that events are not fired when callback are
+// defined
+
 enyo.kind({
 	name: "Ares.ActionPopup",
 	kind: "onyx.Popup",
@@ -12,6 +17,7 @@ enyo.kind({
 		actionButton: "",
 		action1Button: "",
 		cancelButton: "",
+		allowHtmlMsg: false,
 		message: ""
 	},
 	events: {
@@ -32,6 +38,7 @@ enyo.kind({
 			{name:"cancelButton", classes:"right", kind: "onyx.Button", content: $L("Cancel"), ontap: "actionCancel"}
 		]}
 	],
+	callbacks: {},
 	/** @private */
 	create: function() {
 		ares.setupTraceLogger(this);
@@ -42,6 +49,7 @@ enyo.kind({
 		this.actionButtonChanged();
 		this.action1ButtonChanged();
 		this.cancelButtonChanged();
+		this.$.message.setAllowHtml(this.allowHtmlMsg);
 	},
 	/** @private */
 	titleChanged: function(oldVal) {
@@ -75,19 +83,50 @@ enyo.kind({
 	/** @private */
 	actionConfirm: function(inSender, inEvent) {
 		this.hide();
-		this.doConfirmActionPopup();
+		this.trace('actionConfirm tapped', inSender, inEvent);
+		this.runCallbackOrBubbleUp('action', 'onConfirmActionPopup');
 		return true;
 	},
 	/** @private */
 	action1Confirm: function(inSender, inEvent) {
 		this.hide();
-		this.doConfirmAction1Popup();
+		this.runCallbackOrBubbleUp('action1', 'onConfirmAction1Popup');
 		return true;
 	},
 	/** @private */
 	actionCancel: function(inSender, inEvent) {
 		this.hide();
-		this.doCancelActionPopup();
+		this.runCallbackOrBubbleUp('cancel', 'onCancelActionPopup');
 		return true;
+	},
+	/** @private */
+	runCallbackOrBubbleUp: function(cbName, fallbackEvent) {
+		var theCb = this.callbacks[cbName];
+
+		// to be re-entrant, all callbacks must be deleted before
+		// calling the the relevant callback (and not
+		// after). Otherwise, the code used in callback may reuse and
+		// set its own callback before the end fo runCallBack function
+		this.callbacks = {};
+
+		if (typeof theCb === 'function') {
+			this.trace("Running callback " + cbName);
+			theCb();
+		} else {
+			this.trace("Bubbling fallback event " , fallbackEvent);
+			this.bubble(fallbackEvent);
+		}
+	},
+	setActionCallback: function(cb) {
+		this.callbacks.action = cb;
+	},
+	setAction1Callback: function(cb) {
+		this.callbacks.action1 = cb;
+	},
+	setCancelCallback: function(cb) {
+		this.callbacks.cancel = cb;
+	},
+	setCallbacks: function(allCbs) {
+		this.callbacks = allCbs;
 	}
 });
