@@ -16,6 +16,8 @@ enyo.kind({
 				{name: "middle", classes: "ares-deimos-middle", fit: true, kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
 						{kind: "onyx.Button", name: "reloadDesignerButton", classes: "deimos-designer-toolbar-spacing", content: "Reload", ontap: "reloadDesigner"},
+						{content: "Fit"},
+						{kind: "onyx.Checkbox", onchange: "autoZoomDesigner"}, //checkbox is here as a workaround for ENYO-3648
 						{content: "Size:"},
 						{kind: "onyx.PickerDecorator", classes: "deimos-device-picker deimos-designer-toolbar-spacing", components: [
 							{style: "width:100%;"},
@@ -40,7 +42,7 @@ enyo.kind({
 						]},
 						{content: "Zoom"},
 						{kind: "onyx.PickerDecorator", components: [
-							{},
+							{name: "zoomPickerButton"},
 							{name: "zoomPicker", kind: "onyx.Picker", onSelect: "zoomDesigner", components: []}
 						]}
 					]},
@@ -97,7 +99,8 @@ enyo.kind({
 		onError:""
 	},
 	handlers:{
-		onPaletteComponentAction: "runPaletteComponentAction"
+		onPaletteComponentAction: "runPaletteComponentAction",
+		onScaleChange: "displayZoomValue"
 	},
 	kinds: [],
 	index: null,
@@ -105,6 +108,7 @@ enyo.kind({
 	fileName: "",
 	selectFromComponentView: false,
 	zoomValues: [25, 50, 100, 125, 150, 200, 400],
+	initZoomIndex: 2,
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -120,9 +124,9 @@ enyo.kind({
 		var initItem = this.$.devicePicker.getClientControls()[0];
 		this.$.devicePicker.setSelected(initItem);
 		this.deviceChosen(null, {selected: initItem});
-		var i, z, initZoom = 100;
+		var i, z;
 		for (i = 0; (z = this.zoomValues[i]); i++) {
-			this.$.zoomPicker.createComponent({content: z+"%", value: z, active: z === initZoom});
+			this.$.zoomPicker.createComponent({content: z+"%", value: z, active: z === this.zoomValues[this.initZoomIndex]});
 		}
 		this.zoomDesigner(null, {selected: this.$.zoomPicker.getSelected()});
 	},
@@ -906,6 +910,22 @@ enyo.kind({
 	},
 	zoomDesigner: function(inSender, inEvent) {
 		this.$.designer.zoom(inEvent.selected.value);
+	},
+	autoZoomDesigner: function(inSender, inEvent) {
+		var active = inSender.getValue();
+		this.$.zoomPickerButton.setDisabled(active);
+		this.$.designer.setAutoZoom(active);
+		if(active){
+			var scale = this.$.designer.zoomFromWidth();
+			this.$.zoomPickerButton.setContent(scale+"%");	
+		} else{
+			this.$.zoomPickerButton.setContent(this.zoomValues[this.initZoomIndex]+"%");	
+			this.$.zoomPicker.setSelected(this.$.zoomPicker.getClientControls()[this.initZoomIndex]);
+			this.zoomDesigner(null, {selected: this.$.zoomPicker.getSelected()});
+		}
+	},
+	displayZoomValue: function(inSender, inEvent){
+		this.$.zoomPickerButton.setContent(inEvent.scale+"%");
 	},
 	//* Add dispatch for native drag events
 	addHandlers: function(inSender, inEvent) {
