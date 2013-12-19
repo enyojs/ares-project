@@ -1,10 +1,10 @@
+/*global Ares, ares, enyo, $L */
+
 /**
  * Represents a file tree made with {hermes.Node}
  * 
  * @class HermesFileTree
  */
-
-/* global Ares, ares */
 
 enyo.kind({
 	name: "HermesFileTree",
@@ -442,6 +442,7 @@ enyo.kind({
 	connectProject: function(inProjectData, next) {
 		this.trace("config:", inProjectData);
 		this.projectData = inProjectData;
+		this.trace("HFT:connecting project " + inProjectData.getName());
 
 		var serverNode = this.$.serverNode;
 		var nodeName = inProjectData.getName();
@@ -456,6 +457,7 @@ enyo.kind({
 			if (inError) {
 				this.showErrorPopup(this.$LS("Internal Error (#{error}) from filesystem service", {error: inError.toString()}));
 			} else {
+				this.trace("HFT: service is now connected for project" + inProjectData.getName() + '. Requesting project URL');
 				if (this.selectedNode) {
 					this.deselect(null, {data: this.selectedNode});
 				}
@@ -467,7 +469,9 @@ enyo.kind({
 				var rootFinding = this.$.service.propfind(folderId, 0);
 				rootFinding.response(this, function(inSender, inValue) {
 					var projectUrl = service.getConfig().origin + service.getConfig().pathname + "/file" + inValue.path;
+					this.trace("HFT: service reply: project" + inProjectData.getName() + ' URL is ' + projectUrl + '. UPdating projectData');
 					this.projectData.setProjectUrl(projectUrl);
+					this.trace("HFT: projet data update done");
 					this.projectUrlReady = true;
 
 					//
@@ -475,7 +479,10 @@ enyo.kind({
 					serverNode.file.isServer = true;
 
 					serverNode.setContent(nodeName);
-					this.refreshFileTree( function() { if (next) {next();} else {that.$.selection.select( serverNode.file.id, serverNode );} });
+					this.refreshFileTree( function() {
+						that.trace("HFT: refreshFileTree done");
+						if (next) {next();} else {that.$.selection.select( serverNode.file.id, serverNode );}
+					});
 				});
 				rootFinding.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");
@@ -822,7 +829,7 @@ enyo.kind({
 			}.bind(this)
 		) ;
 
-		this.trace("refreshFileTree called") ;
+		this.trace("refreshFileTree called. will select ",toSelectId) ;
 
 		this.$.serverNode.refreshTree(tracker,0, toSelectId) ;
 
@@ -1060,8 +1067,7 @@ enyo.kind({
 					} else {
 						this.showWarningPopup(this.$LS("No template found for '.#{extension}' files. Created an empty one.", {extension: type}));
 					}
-				}
-				else {
+				} else {
 					this.warn("error while fetching ", templatePath, ': ', error);
 				}
 			});

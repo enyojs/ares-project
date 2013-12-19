@@ -1,3 +1,11 @@
+/*global enyo, ares */
+
+/**
+ One ProjectCtrl instance is created per project (when the first file of a project
+ is opened). This object manages the asynchronous analysis tasks.
+ @classdesc 
+*/
+
 enyo.kind({
 	name: "ProjectCtrl",
 	kind: "enyo.Component",
@@ -76,8 +84,7 @@ enyo.kind({
 			this.ongoing = true;
 			this.pending = false ;
 			this.$.projectAnalyzer.analyze([this.projectUrl + "/enyo/source", this.projectUrl], this.pathResolver);
-		}
-		else {
+		} else {
 			this.trace("Set pending project analysis for ", this.projectUrl);
 			this.pending = true;
 		}
@@ -85,7 +92,7 @@ enyo.kind({
 	runPendingAnalysis: function(what) {
 		this.ongoing = false ;
 		if (this.pending) {
-			this.trace("Running pending project analysis after "+ what);
+			this.trace("Running pending project analysis after ", what);
 			this.forceFullAnalysis();
 		}
 	},
