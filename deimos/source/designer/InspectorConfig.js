@@ -285,7 +285,19 @@ enyo.kind({
 	
 	//* Stop extraneous activate event from being fired when box is initially checked
 	handleChange: function(inSender, inEvent) {
-		this.fieldValue = this.$.value.getValue();
+		var result = this.parseFieldValue(this.$.value.getValue());
+		var unit = this.unit;
+		var size = "";
+		if(result){
+			unit = result[2] || this.unit;
+			size = result[1] || "";
+		} 
+		if(size){
+			this.fieldValue = size + unit;
+		} else{
+			this.fieldValue = "";
+		}
+		this.log(unit, size);
 		this.doChange({target: this});
 		return true;
 	},
@@ -307,14 +319,19 @@ enyo.kind({
 		this.doChange({target: this});
 	},
 	fieldValueChanged: function() {
-		var result = this.fieldValue.match(/(\d*)([%]|\w*)/);
-		// this.log(">>" + this.fieldValue + "<< ", result);
-		this.unit = result[2] || "px";
+		var result = this.parseFieldValue(this.fieldValue);
+		this.unit = (result) ? result[2] : "px";
+		this.size = (result) ? result[1] : "";
 		this.$.unit.setFieldValue(this.unit);
-		this.size = result[1] || "";
 		this.$.slider.setValue(this.size);
         this.$.slider.setProgress(this.size);
+		if(this.size){
+			this.setFieldValue(this.size + this.unit);
+		}
 		this.$.value.setValue(this.fieldValue);
+	},
+	parseFieldValue: function(fieldValue){
+		return fieldValue.match(/^(\d+)([%a-zA-Z]*)$/);
 	}
 });
 
@@ -362,4 +379,76 @@ enyo.kind({
 		}		
 		return true;
 	},
+});
+
+enyo.kind({
+	name: "Inspector.Config.PathInputRow",
+	kind: "Inspector.Config.IF",
+	published: {
+		value: "",
+		inputTip: "",
+		activated: true,
+		status: false,
+		buttonTip: "Select file..."
+	},
+	events: {
+		onInputButtonTap: "",
+		onPathChecked: ""
+	},
+	components: [
+		{tag: "label", classes: "inspector-field-caption", name: "title"},
+		{kind: "Input", classes: "enyo-input inspector-field-editor", name: "value", onchange: "handleChange"},
+		{kind: "onyx.IconButton", name:"pathInputButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
+	],
+	debug: false,
+
+	create: function () {
+		this.inherited(arguments);
+		this.buttonTipChanged();
+		this.statusChanged();
+	},
+	handleChange: function () {
+		this.disableFileChooser(true);
+		this.fieldValue = this.$.value.getValue();
+		this.doChange({target: this});
+		return true;
+	},
+	/** @private */
+	inputTipChanged: function () {
+		this.$.pathInputValue.setAttribute("title", this.inputTip);
+	},
+	disabledChanged: function() {
+		var disabled = this.getDisabled();
+		this.$.value.setDisabled(disabled);
+		if(!disabled){
+			this.$.pathInputButton.show();
+			this.statusChanged();
+		} else {
+			this.$.pathInputButton.hide();
+		}
+	},
+	disableFileChooser: function(disabled){
+		this.$.pathInputButton.setDisabled(disabled);
+	},
+	/** @private */
+	statusChanged: function () {
+		if (this.status) {
+			this.$.pathInputButton.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.pathInputButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
+	},
+	/** @private */
+	buttonTipChanged: function () {
+		this.$.pathInputButton.setAttribute("title", this.buttonTip);
+	},
+	/** @private */
+	pathInputTap: function (inSender, inEvent) {
+		this.doInputButtonTap({header: $L("Select file...")});
+		return true;
+	},
+	fieldValueChanged: function() {
+		this.setStatus(true);
+		this.$.value.setValue(this.fieldValue);
+	}
 });

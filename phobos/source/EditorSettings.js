@@ -107,7 +107,7 @@ enyo.kind({
 				]}
 			]},
 			{tag:"p", classes:"break"},
-			{kind:"FittableRows", components: [
+			{kind:"FittableRows", name: "functionKeys", components: [
 				{kind: "Control", name:"osMessage", classes:"ares-row", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
 				{kind: "onyx.MenuDecorator", name:"program_buttons", classes:"ares-row", components: [
 					{ kind: "FittableColumns", classes:"ace-keys", components:[
@@ -173,7 +173,7 @@ enyo.kind({
 		}, this);
 
 		if(/Macintosh/.test(navigator.userAgent)){
-			this.$.osMessage.content = "Programmable buttons Command-SHIFT  F1 to F12";
+			this.$.functionKeys.hide();
 		}
 
 		// serialize
