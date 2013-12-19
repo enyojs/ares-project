@@ -76,7 +76,6 @@ enyo.kind({
 		onFsEvent: "_fsEventAction",
 		onChangingNode: "_nodeChanging",
 		onAllDocumentsAreClosed: "showProjectView",
-		onCloseProjectDocuments: "closeDocumentsForProject",
 		onRegisterMe : "_registerComponent",
 		onMovePanel : "_movePanel"
 	},
@@ -353,28 +352,7 @@ enyo.kind({
 		var docId = Ares.Workspace.files.computeId(inEvent.node);
 		this._closeDocument(docId);
 	},
-	/**
-	 * Event handler for to close opened documents of a project
-	 * 
-	 * @private
-	 * @param {Object} inSender
-	 * @param {Object} inEvent => inEvent.project in Ares.Model.Project
-	 */
-	closeDocumentsForProject: function(inSender, inEvent){
-		var files = Ares.Workspace.files,
-			model,
-			i;
-		for( i = 0; i < files.models.length; i++ ) {
-			model = files.models[i];
 
-			var serviceId = model.getProjectData().getServiceId();
-			var folderId = model.getProjectData().getFolderId();
-			if ( serviceId === inEvent.project.getServiceId() && folderId === inEvent.project.getFolderId()) {
-				this._closeDocument(model.id);
-				i--;
-			}
-		}
-	},
 	/**
 	 * Event handler for ares components registry
 	 * 
