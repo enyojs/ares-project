@@ -65,16 +65,21 @@ enyo.kind({
 	rendered: function() {
 		this.inherited(arguments);
 		this.trace("called");
-		var expVer = this.minEnyoVersion.split(/\D+/);
+		var splitRegExp = /[\.\-]+/ ;
+		// version can be like 1.2.3-pre.4 or 1.2.3-rc.1
+		// rc sorts after pre
+		var expVer = this.minEnyoVersion.split(splitRegExp);
 		var myVerStr = (enyo.version && enyo.version.enyo) || '0.0.0-pre.0';
-		var myVer = myVerStr.split(/\D+/);
-		var errMsg ;
+		var myVer = myVerStr.split(splitRegExp);
+		var errMsg, mysv, expsv ;
 
 		while (expVer.length) {
+			mysv  =  myVer.shift();
+			expsv = expVer.shift();
 			// myVer and exptVer contain a string. Need to cast them
 			// to Number before trying a numeric comparison. Otherwise
 			// a lexicographic comparison is used.
-			if (Number(myVer.shift()) < Number(expVer.shift())) {
+			if (/\d/.test(mysv) ? Number(mysv) < Number(expsv) : mysv < expsv) {
 				errMsg = "Enyo used by your application is too old ("
 					+ myVerStr + "). Console log may show duplicated kind error "
 					+ "and Designer may not work as expected. You should use Enyo >= "
