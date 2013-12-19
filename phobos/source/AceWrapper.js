@@ -25,6 +25,7 @@ enyo.kind({
 		onFind: "",
 		onWordwrap: "",
 		onFkey: "",
+		onAceGotFocus: "",
 		onChildRequest: "",
 
 		/// FIXME just add these for now
@@ -125,6 +126,7 @@ enyo.kind({
 		//intercept event showing the ace error tooltip
 		var gutterEl = this.editor.renderer.$gutter;
 		enyo.dispatcher.listen(gutterEl, "mousemove", enyo.bind(this, "guttermousemove"));
+		this.editor.on("focus",this.bubble.bind(this,"onAceGotFocus"));
 	},
 	addSessionListeners: function() {
 		this.getSession().on("change", enyo.bind(this, "doChange"));
