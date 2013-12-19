@@ -121,10 +121,11 @@ enyo.kind({
 		this.$.serviceRegistry.setConfig(inEvent.serviceId, {auth: inEvent.auth}, inEvent.next);
 	},
 	openDocument: function(inSender, inEvent) {
-		this._openDocument(inEvent.projectData, inEvent.file, function(inErr) {});
+		this._openDocument(inEvent.projectData, inEvent.file, ares.noNext );
 	},
 	/** @private */
 	_openDocument: function(projectData, file, next) {
+		ares.assertCb(next);
 		var fileDataId = Ares.Workspace.files.computeId(file);
 		var editor = ComponentsRegistry.getComponent("enyoEditor");
 		if (! fileDataId ) {
