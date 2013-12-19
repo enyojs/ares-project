@@ -386,10 +386,11 @@ enyo.kind({
 			service: doc.getProjectData().getService(),
 			fileId: doc.getFileId()
 		};
-		this.saveFile(doc.getName(), content, where);
+		this.saveFile(doc.getName(), content, where, ares.noNext);
 	},
 
 	saveFile: function(name, content, where, next){
+		ares.assertCb(next);
 		var req;
 
 		if (where.fileId) {
@@ -425,12 +426,12 @@ enyo.kind({
 			}
 			this.hideWaitPopup();
 			this.analyseData(docData);
-			if (next) {next(null, savedFile);}
+			next(null, savedFile);
 		}).error(this, function(inSender, inErr) {
 			this.trace('saveFile response failed with ' , inErr , ' for ', name, where);
 			this.hideWaitPopup();
 			this.doError({msg: "Unable to save the file: " + inErr });
-			if (next) {next(inErr);}
+			next(inErr);
 		});
 	},
 
