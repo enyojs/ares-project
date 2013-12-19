@@ -1,4 +1,4 @@
-/* jshint indent: false */ // TODO: ENYO-3311
+/*global enyo */
 
 /**
  * ares namespace
@@ -59,50 +59,50 @@ var ares = {
 	},
 
 	/** @private */
-        _getProp: function(parts, create, context) {
-                var obj = context || window;
-                for(var i=0, p; obj && (p=parts[i]); i++){
-                        obj = (p in obj ? obj[p] : (create ? obj[p]={} : undefined));
-                }
-                return obj;
-        },
+    _getProp: function(parts, create, context) {
+        var obj = context || window;
+        for(var i=0, p; obj && (p=parts[i]); i++){
+            obj = (p in obj ? obj[p] : (create ? obj[p]={} : undefined));
+        }
+        return obj;
+    },
 
 	/**
-                Sets object _name_ to _value_. _name_ may use dot notation, and
-                intermediate objects are created as necessary.
+     Sets object _name_ to _value_. _name_ may use dot notation, and
+     intermediate objects are created as necessary.
 
-                        // set foo.bar.baz to 3; if foo or foo.bar do not exist, they are created
-                        enyo.setObject("foo.bar.baz", 3);
+     // set foo.bar.baz to 3; if foo or foo.bar do not exist, they are created
+     enyo.setObject("foo.bar.baz", 3);
 
-                Optionally, _name_ may be relative to object _context_.
+     Optionally, _name_ may be relative to object _context_.
 
-                        // create foo.zot and set foo.zot.zap to null
-                        enyo.setObject("zot.zap", null, foo);
-        */
-        setObject: function(name, value, context) {
-                var parts=name.split("."), p=parts.pop(), obj=ares._getProp(parts, true, context);
-                return obj && p ? (obj[p]=value) : undefined;
-        },
+     // create foo.zot and set foo.zot.zap to null
+     enyo.setObject("zot.zap", null, foo);
+     */
+    setObject: function(name, value, context) {
+        var parts=name.split("."), p=parts.pop(), obj=ares._getProp(parts, true, context);
+        return obj && p ? (obj[p]=value) : undefined;
+    },
 
-        /**
-                Gets object _name_. _name_ may use dot notation. Intermediate objects
-                are created if the _create_ argument is truthy.
+    /**
+     Gets object _name_. _name_ may use dot notation. Intermediate objects
+     are created if the _create_ argument is truthy.
 
-                        // get the value of foo.bar, or undefined if foo doesn't exist
-                        var value = enyo.getObject("foo.bar");
+     // get the value of foo.bar, or undefined if foo doesn't exist
+     var value = enyo.getObject("foo.bar");
 
-                        // get the value of foo.bar; if foo.bar doesn't exist,
-                        // it's assigned an empty object, which is then returned
-                        var value = enyo.getObject("foo.bar", true);
+     // get the value of foo.bar; if foo.bar doesn't exist,
+     // it's assigned an empty object, which is then returned
+     var value = enyo.getObject("foo.bar", true);
 
-                Optionally, _name_ may be relative to object _context_.
+     Optionally, _name_ may be relative to object _context_.
 
-                        // get the value of foo.zot.zap, or undefined if foo.zot doesn't exist
-                        var value = enyo.getObject("zot.zap", false, foo);
-        */
-        getObject: function(name, create, context) {
-                return ares._getProp(name.split("."), create, context);
-        },
+     // get the value of foo.zot.zap, or undefined if foo.zot doesn't exist
+     var value = enyo.getObject("zot.zap", false, foo);
+     */
+    getObject: function(name, create, context) {
+        return ares._getProp(name.split("."), create, context);
+    },
 
 	/**
 	 * Decode an 'application/x-www-urlencoded' string into an {Object}
@@ -160,9 +160,9 @@ var ares = {
 		     (typeof testWindow.closed=='undefined') ||
 		     (testWindow.outerHeight === 0) ||
 		     (testWindow.outerWidth === 0)) {
-			  // pop-ups ARE blocked
-			  return true;
-		  } else {
+			// pop-ups ARE blocked
+			return true;
+		} else {
 			// pop-ups are NOT blocked
 			testWindow.close();
 			return false;
