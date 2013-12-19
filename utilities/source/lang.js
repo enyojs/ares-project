@@ -162,8 +162,7 @@ var ares = {
 		     (testWindow.outerWidth === 0)) {
 			  // pop-ups ARE blocked
 			  return true;
-		  }
-		else {
+		  } else {
 			// pop-ups are NOT blocked
 			testWindow.close();
 			return false;

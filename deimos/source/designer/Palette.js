@@ -14,17 +14,21 @@ enyo.kind({
 			]}
 		]}
 	],
+	events: {
+		onToggledDrawer: ""
+	},
 	toggleDrawer: function() {
 		var open = this.$.drawer.getOpen();
 		this.$.drawer.setOpen(!open);
 		this.$.indicator.addRemoveClass("turned", !open);
+		this.doToggledDrawer();
 	},
 	setModel: function(inModel) {
 		this.model = inModel;
 		this.$.name.setContent(this.model.name);
 		this.$.list.count = this.model.items.length;
 		if (this.$.list.count === 0 && this.$.drawer.getOpen()) {
-			this.toggleDrawer();
+			this.openDrawer();
 		}
 		this.$.list.build();
 		if (this.$.name.content === "ignore") {
@@ -34,6 +38,20 @@ enyo.kind({
 	setupItem: function(inSender, inEvent) {
 		inEvent.item.$.paletteItem.setModel(this.model.items[inEvent.index]); // <---- TODO - sibling reference, should be fixed up
 		return true;
+	},
+	/** @public */
+	openDrawer: function() {
+		this.$.drawer.setOpen(true);
+		this.$.indicator.addRemoveClass("turned", true);
+	},
+	/** @public */
+	closeDrawer: function() {
+		this.$.drawer.setOpen(false);
+		this.$.indicator.addRemoveClass("turned", false);
+	},
+	/** @public */
+	drawerStatus: function() {
+		return this.$.drawer.getOpen();
 	}
 });
 
@@ -87,6 +105,10 @@ enyo.kind({
 	debug: false,
 	components: [
 		{kind: "FittableRows", classes: "enyo-fit", components: [
+			{kind: "onyx.MoreToolbar", classes: "deimos-toolbar deimos-toolbar-margined-buttons", components: [
+				{kind: "onyx.Button", name: "expandAllCategoriesButton", content: "Expand all", ontap: "expandAllCategories"},
+				{kind: "onyx.Button", name: "collapseAllCategoriesButton", content: "Collapse all", ontap: "collapseAllCategories"}
+			]},
 			{kind: "Scroller", fit: true, components: [
 				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
 					{kind: "CategoryItem"}
@@ -99,11 +121,13 @@ enyo.kind({
 		]}
 	],
 	handlers: {
-		ondragstart: "dragstart"
+		ondragstart: "dragstart",
+		onToggledDrawer: "toggledDrawer"
 	},
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
+		this.$.expandAllCategoriesButton.setDisabled(true);
 	},
 	setupItem: function(inSender, inEvent) {
 		var index = inEvent.index;
@@ -244,6 +268,8 @@ enyo.kind({
 		
 		if (this.$.filterPalette.getValue() === "") {
 			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-search.png");
+			this.$.expandAllCategoriesButton.setDisabled(true);
+			this.$.collapseAllCategoriesButton.setDisabled(false);
 		} else {
 			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-cancel.png");
 		}
@@ -261,5 +287,55 @@ enyo.kind({
 		}
 
 		return true;
+	},
+	/** @private */
+	expandAllCategories: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+
+		this.resetFilter();
+		this.$.expandAllCategoriesButton.setDisabled(true);
+		this.$.collapseAllCategoriesButton.setDisabled(false);
+
+		for (var i = 0; i < this.$.list.count; i ++) {
+			this.$.list.getControls()[i].$.categoryItem.openDrawer();
+		}
+		
+		return true;
+	},
+	/** @private */
+	collapseAllCategories: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		
+		this.resetFilter();
+		this.$.collapseAllCategoriesButton.setDisabled(true);
+		this.$.expandAllCategoriesButton.setDisabled(false);
+		
+		for (var i = 0; i < this.$.list.count; i ++) {
+			this.$.list.getControls()[i].$.categoryItem.closeDrawer();
+		}
+
+		return true;
+	},
+	/** @private */
+	toggledDrawer: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+
+		var j = 0;
+		for (var i = 0; i < this.$.list.count; i ++) {
+			if (this.$.list.getControls()[i].$.categoryItem.drawerStatus()) {
+				j++;
+			} else {
+				j--;
+			}
+		}
+
+		if (j === this.$.list.count) {
+			this.$.expandAllCategoriesButton.setDisabled(true);
+		} else if (j === -(this.$.list.count)) {
+			this.$.collapseAllCategoriesButton.setDisabled(true);
+		} else {
+			this.$.expandAllCategoriesButton.setDisabled(false);
+			this.$.collapseAllCategoriesButton.setDisabled(false);
+		}
 	}
 });

@@ -1,5 +1,5 @@
 /* jshint indent: false */ // TODO: ENYO-3311
-/* global analyzer, ares, ProjectCtrl */
+/*global analyzer, ares, enyo, $L, ProjectCtrl */
 
 enyo.kind({
 	name: "Phobos",
@@ -9,36 +9,36 @@ enyo.kind({
 			{name: "body", fit: true, kind: "FittableColumns", components: [
 				{name: "middle", fit: true, classes: "panel", components: [
 					{classes: "enyo-fit ares_phobos_panel border ", components: [
-						{kind: "AceWrapper", name:"aceWrapper", classes: "enyo-fit ace-code-editor", onChange: "docChanged", onSave: "saveDocAction", onCursorChange: "cursorChanged", onAutoCompletion: "startAutoCompletion", onFind: "findpop", onScroll: "handleScroll", onWordwrap: "toggleww", onFkey: "fkeypressed"},
+						{
+							kind: "AceWrapper",
+							name: "aceWrapper",
+							classes: "enyo-fit ace-code-editor",
+							onAutoCompletion: "startAutoCompletion",
+							onChange: "docChanged",
+							onCursorChange: "cursorChanged",
+							onFind: "findpop",
+							onFkey: "fkeypressed",
+							onScroll: "handleScroll",
+							onWordwrap: "toggleww"
+						},
 						{name: "imageViewer", kind: "enyo.Image"}
 					]}
 				]},
 				{name: "right", kind: "rightPanels", showing: false, classes: "ares_phobos_right", arrangerKind: "CardArranger"}
 			]}
 		]},
-		{name: "savePopup", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocAction", onSaveActionPopup: "saveBeforeClose", onCancelActionPopup: "cancelClose"},
-		{name: "savePopupPreview", kind: "saveActionPopup", onConfirmActionPopup: "abandonDocActionOnPreview", onSaveActionPopup: "saveBeforePreviewAction", onCancelActionPopup: "cancelAction"},
-		{name: "saveAsPopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, headerText: $L("Save as..."), folderChooser: false, allowCreateFolder: true, allowNewFile: true, allowToolbar: true, onFileChosen: "saveAsFileChosen"},
-		{name: "overwritePopup", kind: "overwriteActionPopup", title: $L("Overwrite"), message: $L("Overwrite existing file?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "saveAsConfirm", onCancelActionPopup: "saveAsCancel", onHide:"doAceFocus"},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: $L("unknown error")},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide:"doAceFocus", onClose: "findClose", onReplaceFind: "replacefind"},
 		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "enyo-unselectable", centered: true, modal: true, floating: true, autoDismiss: false,
 		onChangeSettings:"applySettings", onChangeRightPane: "changeRightPane", onClose: "closeEditorPop", onTabSizsChange: "tabSize"}
 	],
 	events: {
-		onShowWaitPopup: "",
 		onHideWaitPopup: "",
-		onSaveDocument: "",
-		onSaveAsDocument: "",
-		onDesignDocument: "",
-		onCloseDocument: "",
-		onUpdate: "",
+		onError: "",
 		onRegisterMe: "",
 		onCssDocument: "",
-		onDisplayPreview: "",
-		onSwitchFile: "",
 		onFileEdited: " ",
+		onChildRequest: "",
 		onAceFocus: ""
 	},
 	handlers: {
@@ -62,7 +62,6 @@ enyo.kind({
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.helper = new analyzer.Analyzer.KindHelper();
-		this.doRegisterMe({name:"phobos", reference:this});
 	},
 	getProjectController: function() {
 		// create projectCtrl only when needed. In any case, there's only
@@ -75,129 +74,11 @@ enyo.kind({
 			this.projectData.setProjectCtrl(this.projectCtrl);
 		}
 	},
-	fileMenuItemSelected: function(inSender, inEvent) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-		if (typeof this[inEvent.selected.value] === 'function') {
-			this[inEvent.selected.value]();
-		} else {
-			this.warn("Unexpected event or missing function: event:", inEvent.selected.value);
-		}
-	},
-	saveDocAction: function() {
-		this.showWaitPopup($L("Saving ..."));
-		this.doSaveDocument({content: this.$.aceWrapper.getValue(), file: this.docData.getFile()});
-		this.doAceFocus();
-		return true;
-	},
-	saveComplete: function(inDocData) {
-		this.hideWaitPopup();
-		var codeLooksGood = false ;
 
-		if (inDocData) {
-			inDocData.setEdited(false);		// TODO: The user may have switched to another file
-			// update deimos label with edited status which is actually "not-edited" ...
-			this.doFileEdited();
-		}
-
-		if (this.docData === inDocData) {
-			codeLooksGood = this.reparseUsersCode();
-		}
-		else {
-			this.trace("skipping reparse user code");
-		}
-
-		// successful analysis will enable designer button
-		this.owner.enableDesignerButton(false);
-
-		// Global analysis is always triggered even if local analysis
-		// reports an error.  This way, errors are reported from a
-		// single place wherever the error is.  The alternative is to
-		// report error during local analysis, which often lead to
-		// error reported twice (i.e on first file edit after a
-		// project load)
-		this.trace("triggering full analysis after file save");
-		this.projectCtrl.forceFullAnalysis();
-
-		this.trace("done. codeLooksGood: "+ codeLooksGood);
-	},
 	saveNeeded: function() {
 		return this.docData.getEdited();
 	},
-	saveFailed: function(inMsg) {
-		this.hideWaitPopup();
-		this.warn("Save failed: " + inMsg);
-		this.showErrorPopup("Unable to save the file");
-	},
-	saveAsDocAction: function() {
-		var file = this.docData.getFile();
-		this.$.saveAsPopup.connectProject(this.docData.getProjectData(), (function() {
-			var path = file.path;
-			var relativePath = path.substring(path.indexOf(this.projectData.id) + this.projectData.id.length, path.length);
-			this.$.saveAsPopup.pointSelectedName(relativePath, true);
-			this.$.saveAsPopup.show();
-		}).bind(this));
-	},
-	saveAsFileChosen: function(inSender, inEvent) {
-		this.trace(inSender, "=>", inEvent);
-		
-		if (!inEvent.file) {
-			this.doAceFocus();
-			// no file or folder chosen
-			return;
-		}
-		
-		var hft = this.$.saveAsPopup.$.hermesFileTree ;
-		var next = function(result) {
-			if (result) {
-				this.$.overwritePopup.set("data", inEvent);
-				this.$.overwritePopup.show();
-			} else {
-				this.saveAsConfirm(inSender, {data: inEvent});
-			}
-		}.bind(this);
 
-		hft.checkNodeName(inEvent.name, next);		
-		
-		return true; //Stop event propagation
-	},
-	/** @private */
-	saveAsConfirm: function(inSender, inData){
-		this.trace(inSender, "=>", inData);
-		
-		var data = inData.data;
-		var relativePath = data.name.split("/");
-		var name = relativePath[relativePath.length-1];
-		
-		this.showWaitPopup($L("Saving ..."));
-		this.doSaveAsDocument({
-			docId: this.docData.getId(),
-			projectData: this.docData.getProjectData(),
-			file: data.file,
-			name: name,
-			content: this.$.aceWrapper.getValue(),
-			next: (function(err) {
-				this.hideWaitPopup();
-				if (typeof data.next === 'function') {
-					data.next();
-				}
-			}).bind(this)
-		});
-
-		return true; //Stop event propagation
-	},
-	saveAsCancel: function(inSender, inEvent) {
-		this.trace(inSender, "=>", inEvent);
-
-		return true; //Stop event propagation
-	},
-	saveBeforeClose: function(){
-		this.saveDocAction();
-		var id = this.docData.getId();
-		this.beforeClosingDocument();
-		this.doCloseDocument({id: id});
-		this.closeNextDoc();
-		return true;
-	},
 	openDoc: function(inDocData) {
 		// If we are changing documents, reparse any changes into the current projectIndexer
 		if (this.docData && this.docData.getEdited()) {
@@ -263,8 +144,7 @@ enyo.kind({
 			this.$.aceWrapper.applyAceSettings(this.$.editorSettingsPopup.getSettings());
 
 			this.$.aceWrapper.editingMode = mode;
-		}
-		else {
+		} else {
 			var config = this.projectData.getService().getConfig();
 			var fileUrl = config.origin + config.pathname + "/file" + file.path;
 			this.$.imageViewer.setAttribute("src", fileUrl);
@@ -274,7 +154,6 @@ enyo.kind({
 		this.projectCtrl.buildProjectDb();
 
 		this.docData.setEdited(edited);
-		this.owner.$.toolbar.resized();
 	},
 
 	adjustPanelsForMode: function(mode, rightpane) {
@@ -332,10 +211,11 @@ enyo.kind({
 			}
 		};
 
-		var showStuff, showSettings = showModes[mode]||showModes['text'];
+		var showStuff, showSettings = showModes[mode] || showModes['text'];
 		for (var stuff in showSettings) {
 			showStuff = showSettings[stuff];
 			this.trace("show", stuff, ":", showStuff);
+			// FIXME need to clean up this code ENYO-3633
 			if(this.$[stuff] !== undefined){
 				if (typeof this.$[stuff].setShowing === 'function') {
 					this.$[stuff].setShowing(showStuff) ;
@@ -376,15 +256,8 @@ enyo.kind({
 		this.resizeHandler();
 		return showSettings.aceWrapper ;
 	},
-	showWaitPopup: function(inMessage) {
-		this.doShowWaitPopup({msg: inMessage});
-	},
 	hideWaitPopup: function() {
 		this.doHideWaitPopup();
-	},
-	showErrorPopup : function(msg) {
-		this.$.errorPopup.setErrorMsg(msg);
-		this.$.errorPopup.show();
 	},
 	//
 	setAutoCompleteData: function() {
@@ -399,7 +272,7 @@ enyo.kind({
 	 *	Enable "Designer" button only if project & enyo index are both valid
 	 */
 	manageDesignerButton: function() {
-		this.owner.enableDesignerButton( this.projectCtrl.fullAnalysisDone );
+		this.doChildRequest({ task: [ "enableDesignerButton", this.projectCtrl.fullAnalysisDone ]} );
 	},
 	/**
 	 * Receive the project data reference which allows to access the analyzer
@@ -489,7 +362,7 @@ enyo.kind({
 			code: this.$.aceWrapper.getValue(),
 			path: this.projectCtrl.projectUrl + this.docData.getFile().dir + this.docData.getFile().name
 		};
-		this.trace("called with mode " + mode + " inhibitUpdate " + inhibitUpdate);
+		this.trace("called with mode " , mode , " inhibitUpdate " , inhibitUpdate , " on " + module.name);
 		switch(mode) {
 			case "javascript":
 				try {
@@ -508,7 +381,7 @@ enyo.kind({
 
 					codeLooksGood = true;
 				} catch(error) {
-					enyo.log("An error occured during the code analysis: " + error);
+					enyo.log("An error occured during the code analysis: " , error);
 					this.dumpInfo(null);
 					this.$.autocomplete.setAnalysis(null);
 				}
@@ -572,7 +445,10 @@ enyo.kind({
 		}
 		return -1;
 	},
-	//* Navigate from Phobos to Deimos. Pass Deimos all relevant info.
+
+	/**
+	 * Navigate from Phobos to Deimos. Pass Deimos all relevant info.
+	 */
 	designerAction: function() {
 		// Update the projectIndexer and notify watchers
 		this.reparseUsersCode();
@@ -586,7 +462,7 @@ enyo.kind({
 		
 		if (kinds.length > 0) {
 			// Request to design the current document, passing info about all kinds in the file
-			this.doDesignDocument(data);
+			this.doChildRequest({ task: [ 'designDocument',  data ]});
 		} // else - The error has been displayed by extractKindsData()
 	},
 	//* Extract info about kinds from the current file needed by the designer
@@ -611,7 +487,7 @@ enyo.kind({
 				errorMsg = $L("No kinds found in this file");
 			}
 			if (errorMsg) {
-				this.showErrorPopup(errorMsg);
+				this.doError({msg: errorMsg});
 				return [];
 			}
 
@@ -680,7 +556,7 @@ enyo.kind({
 			this.helper.setDefinition(object);
 			return this.helper.listHandlers(declared);
 		} catch(error) {
-			enyo.log("Unexpected error: " + error);		// TODO TBC
+			enyo.log("Unexpected error: " , error);		// TODO TBC
 		}
 	},
 	/**
@@ -793,13 +669,13 @@ enyo.kind({
 		}
 	},
 	// called when designer has modified the components
-	updateComponents: function(inSender, inEvent) {
+	updateComponentsCode: function(kinds) {
 		this.injected = true;
 		for( var i = this.analysis.objects.length -1 ; i >= 0 ; i-- ) {
-			if (inEvent.contents[i]) {
+			if (kinds[i]) {
 				// Insert the new version of components (replace components block, or insert at end)
 				var obj = this.analysis.objects[i];
-				var content = inEvent.contents[i];
+				var content = kinds[i];
 				var start = obj.componentsBlockStart;
 				var end = obj.componentsBlockEnd;
 				var kindStart = obj.block.start;
@@ -831,93 +707,7 @@ enyo.kind({
 			this.doFileEdited();
 		}
 	},
-	closeDocAction: function(inSender, inEvent) {
-		if (this.docData.getEdited() === true) {
-			this.showSavePopup("savePopup",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before closing?');
-		} else {
-			var id = this.docData.getId();
-			this.beforeClosingDocument();
-			this.doCloseDocument({id: id});
-			this.closeNextDoc();
-		}
-		return true; // Stop the propagation of the event
-	},
-	closeAllDocAction: function(inSender, inEvent) {
-		this.closeAll = true;
-		this.closeNextDoc();
-		return true; // Stop the propagation of the event
-	},
-	closeNextDoc: function() {
-		if(this.docData && this.closeAll) {
-			this.closeDocAction(this);
-		} else {
-			this.closeAll = false;
-		}
-	},
-	cancelClose: function(inSender, inEvent) {
-		this.closeAll = false;
-		this.cancelAction();
-	},
-	cancelAction: function(inSender, inEvent) {
-		this.doAceFocus();
-	},
-	// called when "Don't Save" is selected in save popup
-	abandonDocAction: function(inSender, inEvent) {
-		this.$.savePopup.hide();
-		var docData = this.docData;
-		this.beforeClosingDocument();
-		this.doCloseDocument({id: docData.getId()});
-		this.closeNextDoc();
-	},
-	/**
-	* @protected
-	*/
-	showSavePopup: function(componentName, message){
-		this.$[componentName].setTitle($L("Document was modified!"));
-		this.$[componentName].setMessage(message);
-		this.$[componentName].setActionButton($L("Don't Save"));
-		this.$[componentName].show();
-	},	
-	/** 
-	* @protected
-	*/
-	saveDocumentsBeforePreview: function(editedDocs){
-		this.editedDocs = editedDocs;
-		this.saveNextDocument();
-	},
-	/**
-	* @protected
-	*/
-	saveNextDocument: function(){
-		if(this.editedDocs.length >= 1){
-			var docData = this.editedDocs.pop();
-			this.openDoc(docData);
-			this.doSwitchFile({id:docData.id});
-			this.showSavePopup("savePopupPreview",'"' + this.docData.getFile().path + '" was modified.<br/><br/>Save it before preview?');
-		}else{
-			this.doAceFocus();
-			this.doDisplayPreview();
-		}
-		return true;
-	},
-	/**
-	* Called when save button is selected in save popup shown before preview action
-	* @protected
-	*/
-	saveBeforePreviewAction: function(inSender, inEvent){
-		this.saveDocAction();
-		this.saveNextDocument();
-		return true;
-	},
-	/**
-	* Called when don't save button is selected in save popup shown before preview action
-	* @protected
-	*/
-	abandonDocActionOnPreview: function(inSender, inEvent) {
-		this.$.savePopup.hide();
-		this.doAceFocus();
-		this.saveNextDocument();
-	},
+
 	docChanged: function(inSender, inEvent) {
 		//this.injected === false then modification coming from user
 		if(!this.injected && !this.docData.getEdited()){
@@ -971,15 +761,15 @@ enyo.kind({
 		this.$.aceWrapper.insertAtEndOfFile(inEvent.outPut);
 		},
 	/*
-	 * Perform a few actions before closing a document
+	 * cleanup data. Typically called when closing a document
 	 * @protected
 	 */
-	beforeClosingDocument: function() {
-		this.$.aceWrapper.destroySession(this.docData.getAceSession());
-		// NOTE: docData will be clear when removed from the Ares.Workspace.files collections
-		this.resetAutoCompleteData();
-		this.docData = null;
-		this.setProjectData(null);
+	closeSession: function() {
+		if (this.docData) {
+			this.$.aceWrapper.destroySession(this.docData.getAceSession());
+			this.resetAutoCompleteData();
+			this.docData = null;
+		}
 	},
 	// Show Find popup
 	findpop: function(){
@@ -1053,7 +843,7 @@ enyo.kind({
 	 * @param config 
 	 * @public
 	 */
-	addViewKindAction: function(config) {
+	addNewKind: function(config) {
 		var newKind = 'enyo.kind('+config+'\n);';
 		this.$.aceWrapper.insertAtEndOfFile(newKind, '@cursor@');
 		this.designerAction();
@@ -1064,7 +854,7 @@ enyo.kind({
 	 * @param kind_index, config 
 	 * @public
 	 */
-	replaceViewKindAction: function(kind_index, config){
+	replaceKind: function(kind_index, config){
 		var obj = this.analysis.objects[kind_index];
 		var range = this.$.aceWrapper.mapToLineColumnRange(obj.block.start, obj.block.end);
 		this.$.aceWrapper.replaceRange(range, config);
@@ -1108,23 +898,23 @@ enyo.kind({
 	},
 	
 	//* Trigger an Ace undo and bubble updated code
-	undoAndUpdate: function() {
+	undoAndUpdate: function(next) {
 		this.$.aceWrapper.undo();
-		this.bubbleCodeUpdate();
+		this.updateCodeInDesigner(next);
 	},
 	//* Trigger an Ace undo and bubble updated code
-	redoAndUpdate: function() {
+	redoAndUpdate: function(next) {
 		this.$.aceWrapper.redo();
-		this.bubbleCodeUpdate();
+		this.updateCodeInDesigner(next);
 	},
 	//* Send up an updated copy of the code
-	bubbleCodeUpdate: function() {
+	updateCodeInDesigner: function(next) {
 		// Update the projectIndexer and notify watchers
 		this.reparseUsersCode(true);
 		
 		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
 		if (data.kinds.length > 0) {
-			this.doUpdate(data);
+			this.doChildRequest({task: [ "loadDesignerUI", data, next ]});
 		} // else - The error has been displayed by extractKindsData()
 	},
 	cssAction: function(){
@@ -1225,44 +1015,4 @@ enyo.kind({
 	navigateItemChanged: function() {
 		this.$.navigateItem.setContent(this.navigateItem);
 	}
-});
-
-enyo.kind({
-	name: "saveActionPopup",
-	kind: "Ares.ActionPopup",
-	events:{
-		onSaveActionPopup: ""
-	},
-	/** @private */
-	create: function() {
-		this.inherited(arguments);
-		this.$.message.allowHtml = true;
-		this.$.buttons.createComponent(
-			{name:"saveButton", kind: "onyx.Button", content: $L("Save"), ontap: "save"},
-			{owner: this}
-		);
-	},
-	/** @private */
-	save: function(inSender, inEvent) {
-		this.hide();
-		this.doSaveActionPopup();
-	}
-});
-
-enyo.kind({
-	name: "overwriteActionPopup",
-	kind: "Ares.ActionPopup",
-	data: null,
-	/** @private */
-	create: function() {
-		this.inherited(arguments);
-	},
-	/* Ares.ActionPopup overloading */
-	/** @private */
-	actionConfirm: function(inSender, inEvent) {
-        this.hide();
-        this.doConfirmActionPopup({data: this.data});
-        return true;
-    },
-    
 });

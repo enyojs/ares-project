@@ -1,15 +1,13 @@
-/* global ProjectKindsModel, ares */
+/*global ProjectKindsModel, ares, enyo, setTimeout */
+
 enyo.kind({
 	name: "Designer",
 	published: {
 		designerFrameReady: false,
-		currentKind: null,
 		height: null,
-		width: null,
-		currentFileName: ""
+		width: null
 	},
 	events: {
-		onDesignRendered: "",
 		onSelect: "",
 		onSelected: "",
 		onCreateItem: "",
@@ -18,8 +16,7 @@ enyo.kind({
 		onReloadComplete: "",
 		onResizeItem: "",
 		onError: "",
-		onReturnPositionValue: "",
-		onForceCloseDesigner: ""
+		onReturnPositionValue: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", classes: "ares-designer-frame-client"},
@@ -39,15 +36,6 @@ enyo.kind({
 	rendered: function() {
 		this.inherited(arguments);
 		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
-	},
-	currentKindChanged: function() {
-		this.trace("reloadNeeded", this.reloadNeeded);
-		if (this.reloadNeeded) {
-			this.reloadNeeded = false;
-			this.reload();
-		} else {
-			this.renderCurrentKind();
-		}
 	},
 	heightChanged: function() {
 		this.$.client.applyStyle("height", this.getHeight()+"px");
@@ -76,7 +64,18 @@ enyo.kind({
 		this.$.client.addStyles("top: " + y + "px; left: " + x + "px");
 	},
 	
-	updateSource: function(inSource) {
+	updateSourcePending: [],
+	/**
+	 *
+	 * @param {Ares.Model.Project} inSource is a backbone object defined in WorkspaceData.js
+	 * @param {Function} next
+	 */
+	updateSource: function(inSource, next) {
+		if (this.updateSourceCallback) {
+			this.log("updateSource called while previous updateSourceCallback is still pending ");
+			this.updateSourcePending.push([inSource, next]);
+			return ;
+		}
 		var serviceConfig = inSource.getService().config;
 		this.setDesignerFrameReady(false);
 		this.projectSource = inSource;
@@ -84,10 +83,12 @@ enyo.kind({
 		var iframeUrl = this.projectSource.getProjectUrl() + "/" + this.baseSource + "?overlay=designer";
 		this.trace("Setting designerFrame url: ", iframeUrl);
 		this.$.client.hasNode().src = iframeUrl;
+		// next callback is run once a "ready" message is received from designerFrame
+		this.updateSourceCallback = next;
 	},
 	reload: function() {
 		this.reloading = true;
-		this.updateSource(this.projectSource);
+		this.updateSource(this.projectSource, function(){} );
 	},
 	
 	//* Send message via communicator
@@ -99,6 +100,8 @@ enyo.kind({
 	receiveMessage: function(inSender, inEvent) {
 		
 		var msg = inEvent.message;
+		var deimos = this.owner;
+		var cbData;
 
 		this.trace("Op: ", msg.op, msg);
 
@@ -117,13 +120,24 @@ enyo.kind({
 				this.doReloadComplete();
 				this.reloading = false;
 			}
+			// call back *once* the function passed to updateSource
+			if (this.updateSourceCallback) {
+				this.trace("update source done.");
+				this.updateSourceCallback();
+				this.updateSourceCallback = null;
+				// FIXME a real state machine is needd here
+				if (this.updateSourcePending.length) {
+					this.log("resuming delayed update source");
+					cbData = this.updateSourcePending.shift() ;
+					this.updateSource(cbData[0], cbData[1]);
+				}
+			}
 		// Loaded event sent from designerFrame and awaiting aresOptions.
 		} else if(msg.op === "state" && msg.val === "loaded") {
 			this.designerFrameLoaded();
 		// The current kind was successfully rendered in the iframe
 		} else if(msg.op === "rendered") {
-			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-			this.kindRendered(msg.val, msg.filename);
+			this.updateKind(msg);
 		// Select event sent from here was completed successfully. Set _this.selection_.
 		} else if(msg.op === "selected") {
 			this.selection = enyo.json.codify.from(msg.val);
@@ -145,8 +159,12 @@ enyo.kind({
 			this.reloadNeeded = true;
 		} else if(msg.op === "error") {
 			if (( ! msg.val.hasOwnProperty('popup')) || msg.val.popup === true) {
+				if ( msg.val.triggeredByOp === 'render' && this.renderCallback ) {
+					this.log("dropping renderCallback after error ", msg.val.msg);
+					this.renderCallback = null;
+				}
 				if (msg.val.requestReload === true) {
-					msg.val.callback = this.goBacktoEditor.bind(this);
+					msg.val.callback = deimos.closeDesigner.bind(deimos);
 					msg.val.action = "Switching back to code editor";
 				}
 				this.doError(msg.val);
@@ -164,23 +182,54 @@ enyo.kind({
 			enyo.warn("Deimos designer received unknown message op:", msg);
 		}
 	},
-	goBacktoEditor: function() {
-		this.doForceCloseDesigner();
-	},
 	//* Pass _isContainer_ info down to designerFrame
 	sendDesignerFrameContainerData: function() {
 		this.sendMessage({op: "containerData", val: ProjectKindsModel.getFlattenedContainerInfo()});
 	},
-	//* Tell designerFrame to render the current kind
-	renderCurrentKind: function(inSelectId) {
+
+	/**
+	 * Tell designerFrame to render a kind
+	 * @param {String} fileName
+	 * @param {Object} theKind to render
+	 * @param {String} inSelectId
+	 * @param {Function} next
+	 */
+	renderKind: function(fileName, theKind, inSelectId,next) {
+		this.trace("reloadNeeded", this.reloadNeeded);
+		if (this.reloadNeeded) {
+			this.reloadNeeded = false;
+			// trigger a complete reload of designerFrame
+			this.reload();
+			setTimeout(next(new Error('reload started')), 0);
+			return;
+		}
+
 		if(!this.getDesignerFrameReady()) {
+			// frame is still being reloaded.
+			setTimeout(next(new Error('on-going reload')), 0);
 			return;
 		}
 		
-		var currentKind = this.getCurrentKind();
-		var components = [currentKind];
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.sendMessage({op: "render", filename: this.currentFileName, val: {name: currentKind.name, components: enyo.json.codify.to(currentKind.components), componentKinds: enyo.json.codify.to(components), selectId: inSelectId}});
+		if (this.renderCallback) {
+			// a rendering is on-going
+			this.log("dropped rendering: another one is on-going");
+			setTimeout(next(new Error('on-going rendering')), 0);
+			return;
+		}
+		this.currentFileName = fileName;
+		this.renderCallback = next ;
+
+		var components = [theKind];
+		this.sendMessage({
+			op: "render",
+			filename: fileName,
+			val: {
+				name: theKind.name,
+				components: enyo.json.codify.to(theKind.components),
+				componentKinds: enyo.json.codify.to(components),
+				selectId: inSelectId
+			}
+		});
 	},
 	select: function(inControl) {
 		this.sendMessage({op: "select", val: inControl});
@@ -193,13 +242,29 @@ enyo.kind({
 	},
 	//* Property was modified in Inspector, update designerFrame.
 	modifyProperty: function(inProperty, inValue) {
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.sendMessage({op: "modify", filename: this.currentFileName, val: {property: inProperty, value: inValue}});
 	},
-	//* Send message to Deimos with components from designerFrame
-	kindRendered: function(content, filename) {
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.doDesignRendered({content: content, filename: filename});
+	//* Send message to Deimos with new kind/components from designerFrame
+	updateKind: function(msg) {
+		var deimos = this.owner;
+
+		// need to check if the rendered was done for the current file
+		if (msg.filename === this.currentFileName) {
+			deimos.buildComponentView(msg);
+			deimos.updateCodeInEditor(msg.filename); // based on new Component view
+
+			// updateKind may be called by other op than 'render'
+			if (this.renderCallback && msg.triggeredByOp === 'render') {
+				this.renderCallback() ;
+				this.renderCallback = null;
+			}
+		} else {
+			this.log("dropped rendered message for stale file ",msg.filename);
+			if (this.renderCallback && msg.triggeredByOp === 'render') {
+				// other cleanup may be needed...
+				this.renderCallback = null;
+			}
+		}
 	},
 	//* Initialize the designerFrame depending on aresOptions
 	designerFrameLoaded: function() {
@@ -212,14 +277,28 @@ enyo.kind({
 	cleanUp: function() {
 		this.sendMessage({op: "cleanUp"});
 	},
-	//* Pass inCode down to the designerFrame (to avoid needing to reload the iFrame)
-	syncJSFile: function(inCode) {
-		this.sendMessage({op: "codeUpdate", val: inCode});
+
+	/**
+	 * Pass inCode down to the designerFrame (to avoid needing to reload the iFrame)
+	 * @param {String} projectName
+	 * @param {String} filename
+	 * @param {String} inCode
+	 */
+	syncFile: function(projectName, filename, inCode) {
+		// check if the file is indeed part of the current project
+		if (projectName === this.projectSource.getName() ){
+			if( /\.css$/i.test(filename) ) {
+				// Sync the CSS in inCode with the designerFrame (to avoid needing to reload the iFrame)
+				this.sendMessage({op: "cssUpdate", val: {filename: this.projectPath + filename, code: inCode}});
+			} else if( /\.js$/i.test(filename) ) {
+				this.sendMessage({op: "codeUpdate", val: inCode});
+			}
+		} else {
+			this.warn("syncFile aborted: project mismatch. Expected " + this.projectSource.getName()
+					  + ' got '+ projectName + ' with file ' + filename);
+		}
 	},
-	//* Sync the CSS in inCode with the designerFrame (to avoid needing to reload the iFrame)
-	syncCSSFile: function(inFilename, inCode) {
-		this.sendMessage({op: "cssUpdate", val: {filename: this.projectPath + inFilename, code: inCode}});
-	},
+
 	resizeClient: function() {
 		this.sendMessage({op: "resize"});
 	},
