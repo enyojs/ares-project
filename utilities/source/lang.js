@@ -58,6 +58,24 @@ var ares = {
 		return path.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');
 	},
 
+	/**
+	 * Throw an error if cb is not a function
+	 * @param {Function} cb
+	 * @throws Will throw an error if cb is not a function
+	 */
+	assertCb: function (cb) {
+		if (typeof cb !== 'function') {
+			throw new Error("Assert callback failed: found '" + cb + "' instead of a function");
+		}
+	},
+
+	/**
+	 * noNext does nothing. To be used to pass an empty callback
+	 */
+	noNext: function() {
+		/* does nothing */
+	},
+
 	/** @private */
     _getProp: function(parts, create, context) {
         var obj = context || window;
