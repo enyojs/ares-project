@@ -511,9 +511,6 @@ enyo.kind({
 		var myNext = (function(err,result) {
 			this.trace("err:", err);
 			this.hideWaitPopup();
-			if (typeof param.next === 'function') {
-				param.next(err, result);
-			}
 		}).bind(this);
 
 		if (!file) {
