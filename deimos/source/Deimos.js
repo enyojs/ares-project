@@ -1,4 +1,4 @@
-/* global ProjectKindsModel, ComponentsRegistry */
+/*global ProjectKindsModel, enyo, ares, setTimeout */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
@@ -50,14 +50,12 @@ enyo.kind({
 						{kind: "Designer", name: "designer",
 							onSelect: "designerSelect",
 							onSelected: "designerSelected",
-							onDesignRendered: "designRendered",
 							onMoveItem: "moveItem",
 							onCreateItem: "createItem",
 							onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
 							onReloadComplete: "reloadComplete",
 							onResizeItem: "resizeItem",
-							onReturnPositionValue: "designerReturnPositionValue",
-							onForceCloseDesigner: "closeDesignerAction"
+							onReturnPositionValue: "designerReturnPositionValue"
 						}
 					]}
 				]},				
@@ -91,10 +89,7 @@ enyo.kind({
 		rendering to avoid error with setting values of width/height fields)
 	*/
 	events: {
-		onCloseDesigner: "",
-		onDesignerUpdate: "",
-		onUndo: "",
-		onRedo: "",
+		onChildRequest: "",
 		onRegisterMe: "",
 		onError:""
 	},
@@ -111,9 +106,9 @@ enyo.kind({
 	initZoomIndex: 2,
 	create: function() {
 		ares.setupTraceLogger(this);
+		this.trace("Creating Deimos");
 		this.inherited(arguments);
 		this.addHandlers();
-		this.doRegisterMe({name:"deimos", reference:this});
 	},
 	rendered: function() {
 		this.inherited(arguments);
@@ -121,6 +116,7 @@ enyo.kind({
 	},
 	//* Initialize _devicePicker_ in the toolbar at render time
 	initializeDesignerToolbar: function() {
+		this.trace("called");
 		var initItem = this.$.devicePicker.getClientControls()[0];
 		this.$.devicePicker.setSelected(initItem);
 		this.deviceChosen(null, {selected: initItem});
@@ -130,66 +126,66 @@ enyo.kind({
 		}
 		this.zoomDesigner(null, {selected: this.$.zoomPicker.getSelected()});
 	},
+
 	/**
-	 * Loads the first kind passed thru the data parameter
-	 * @param data contains kinds declaration (enyo.kind format)
-	 *   and project information such as the analyzer output
-	 *   for all the .js files of the project and for enyo/onyx.
-	 * @public
+	 * Loads the first kind passed thru the data parameter.
+	 * This function acts on pallete, inspector, kindPicker and (may be) sends
+	 * to designerFrame serialisation options extracted from .design
+	 * files. No ack message is expected from designerFrame
+	 *
+	 * @param {Object} data: contains kinds declaration (enyo.kind format)
+	 * and project information such as the analyzer output
+	 * for all the .js files of the project and for enyo/onyx.
+	 * @param {Function} next
 	 */
-	load: function(data) {
-		this.trace("called with",data);
+	loadDesignerUI: function(data, next) {
+		this.trace("called with", data);
 		this.enableDesignerActionButtons(false);
 
 		var what = data.kinds;
-		var maxLen = 0;
 		
 		this.index = null;
 		this.kinds = what;
 		this.fileName = data.fileIndexer.name;
 		
-		this.owner.$.kindPicker.destroyClientControls();
-
 		// Pass the project information (analyzer output, ...) to the inspector and palette
 		this.setProjectData(data.projectData);
 
-		for (var i = 0; i < what.length; i++) {
-			var k = what[i];
-			this.owner.$.kindPicker.createComponent({
-				content: k.name,
-				index: i,
-				active: (i===0)
-			});
-			maxLen = Math.max(k.name.length, maxLen);
-		}
-		
-		this.owner.$.kindButton.applyStyle("width", (maxLen+2) + "em");
-		this.owner.$.kindPicker.render();
-		this.owner.resized();
+		this.doChildRequest({task: [ "initKindPicker", what ]}) ;
+
+		// selectKind is designed to be used in a waterfall, it calls
+		// next with `next(err,kindName)`. This extra parameter needs
+		// to be removed:
+		var bareNext = function(err) { next(err);} ;
+
+		// preselect the first kind. This will lead to an action in
+		// DesignerFrame.
+		this.selectKind(0, bareNext) ;
 	},
-	kindSelected: function(inSender, inEvent) {
-		var index = inSender.getSelected().index;
+
+	selectKind: function(index, next) {
 		var kind = this.kinds[index];
 		var components = this.getSingleKind(index);
+		this.trace("selected kind ", kind);
 		
-		this.addAresIds(components);
-		this.addAresKindOptions(components);
-		this.$.inspector.initUserDefinedAttributes(components);
-		this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(components)));
+		// prepare next used by async.waterfall
+		var nextWithName = function(err) { next(err, kind.name); };
 
 		if (index !== this.index) {
+			this.addAresIds(components);
+			this.addAresKindOptions(components);
+			this.$.inspector.initUserDefinedAttributes(components);
+			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(components)));
+
 			this.$.inspector.inspect(null);
 			this.$.inspector.setCurrentKindName(kind.name);
-			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-			this.$.designer.set("currentFileName", this.fileName);
-			this.$.designer.setCurrentKind(components[0]);
+
+			this.$.designer.renderKind(this.fileName, components[0], null, nextWithName);
+
+			this.index = index;
+		} else {
+			setTimeout(nextWithName, 0);
 		}
-		
-		this.index = index;
-		this.owner.$.kindButton.setContent(kind.name);
-		this.owner.$.toolbar.reflow();
-		
-		return true;
 	},
 	/**
 	 * Receive the project data reference which allows to access the analyzer
@@ -201,6 +197,7 @@ enyo.kind({
 	projectDataChanged: function(oldProjectData) {
 		// *ProjectData are backbone obbject mixed with events. This is defined in ProjectCrtl...
 		// *ProjectData are kept in ProjectCtrl
+		this.trace("called. New ", this.projectData, " old ", oldProjectData);
 		if (oldProjectData) {
 			// unbind former project data from Deimos
 			oldProjectData.off('change:project-indexer', this.projectIndexReady);
@@ -247,14 +244,17 @@ enyo.kind({
 		this.$.inspector.setProjectIndexer(indexer);
 		this.$.palette.setProjectIndexer(indexer);
 		ProjectKindsModel.buildInformation(indexer);
+		// no return message is expected
 		this.$.designer.sendSerializerOptions(ProjectKindsModel.serializerOptions);
 	},
 	//* Rerender current kind
 	rerenderKind: function(inSelectId) {
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.$.designer.set("currentFileName", this.fileName);
-		this.$.designer.currentKind = this.getSingleKind(this.index)[0];
-		this.$.designer.renderCurrentKind(inSelectId);
+		this.$.designer.renderKind(
+			this.fileName,
+			this.getSingleKind(this.index)[0],
+			inSelectId,
+			function () {}
+		);
 	},
 	refreshInspector: function() {
 		enyo.job("inspect", enyo.bind(this, function() {
@@ -395,22 +395,24 @@ enyo.kind({
 		inComponent.style = enyo.Control.domStylesToCssText(styleProps);
 		this.$.inspector.userDefinedAttributes[inComponent.aresId].style = inComponent.style;
 	},
-	prepareDesignerUpdate: function() {
+	prepareUpdatedKindList: function() {
 		if (this.index !== null) {
-			// Prepare the data for the code editor
-			var event = {contents: []};
+			// create a list containing code for each kind managed by
+			// the designer, I.e. for each kind contained in the
+			// edited file. this list will be used by the code editor
+			var kindsAsCode = [];
+
 			for(var i = 0 ; i < this.kinds.length ; i++) {
-				event.contents[i] = (i === this.index) ? this.formatContent(enyo.json.codify.to(this.cleanUpComponents([this.kinds[i]]))) : null;
+				kindsAsCode[i] = (i === this.index) ? this.formatContent(enyo.json.codify.to(this.cleanUpComponents([this.kinds[i]]))) : null;
 			}
 			// the length of the returned event array is significant for the undo/redo operation.
 			// event.contents.length must match this.kinds.length even if it contains only null values
 			// so the returned structure return may be [null] or [null, content, null] or [ null, null, null]...
-			if (event.contents[this.index] === this.previousContent) {
+			if (kindsAsCode[this.index] === this.previousContent) {
 				// except when undo/redo would not bring any change...
-				event.contents=[];
+				kindsAsCode = [];
 			}
-			
-			return event;
+			return kindsAsCode;
 		}
 	},
 	formatContent: function(inContent) {
@@ -422,29 +424,26 @@ enyo.kind({
 		
 		return inContent;
 	},
-	closeDesignerAction: function(inSender, inEvent) {
+	closeDesigner: function() {
 		this.$.designer.cleanUp();
 		
-		var event = this.prepareDesignerUpdate();
-
+		this.updateCodeInEditor(this.fileName);
 		this.setProjectData(null);
-		this.doCloseDesigner(event);
+		this.doChildRequest({task: "switchToCodeMode" });
 		
 		return true;
 	},
+
 	// When the designer finishes rendering, re-build the components view
-	designRendered: function(inSender, inEvent) {
-		var components = enyo.json.codify.from(inEvent.content);
+	buildComponentView: function(msg) {
+		var components = enyo.json.codify.from(msg.val);
 		
 		this.refreshComponentView(components);
 		
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
 		this.kinds[this.index] = this.cleanUpComponents(components, true)[0];
 		
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.designerUpdate(inEvent.filename);
-
-		return true;
+		this.enableDesignerActionButtons(true);
 	},
 	//* Send dragData type to Designer and Component View during ondragstart within Palette
 	paletteDragStart: function(inSender, inEvent) {
@@ -755,15 +754,17 @@ enyo.kind({
 	},
 	undoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
-		this.doUndo();
+		this.doChildRequest({task: "undo" });
+		return true;
 	},
 	redoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
-		this.doRedo();
+		this.doChildRequest({task: "redo" });
+		return true;
 	},
 	deleteAction: function(inSender, inEvent) {
 		if(!this.$.designer.selection) {
-			return;
+			return true;
 		}
 		
 		this.$.inspector.inspect(null);
@@ -773,6 +774,7 @@ enyo.kind({
 		this.deleteComponentByAresId(this.$.designer.selection.aresId, kind);
 		this.addAresKindOptions(kind);
 		this.rerenderKind();
+		return true;
 	},
 	deleteComponentByAresId: function(inAresId, inComponents) {
 		for (var i = 0; i < inComponents.length; i++) {
@@ -786,23 +788,31 @@ enyo.kind({
 			}
 		}
 	},
-	designerUpdate: function(inFilename) {
-		var event = this.prepareDesignerUpdate();
+	updateCodeInEditor: function(inFilename) {
+		var kindList = this.prepareUpdatedKindList();
 		
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		if (inFilename === this.fileName) {
 			var kind = this.getSingleKind(this.index);
 			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(kind)));
-			this.doDesignerUpdate(event);
+			this.doChildRequest({ task: [ "updateComponentsCode", kindList ] });
+		} else {
+			this.log("skipped code update of stale file ", inFilename);
 		}
+	},
 
-		this.enableDesignerActionButtons(true);
+	/**
+	 * Called when ProjectView has new project selected
+	 * @param {Object} inProject
+	 * @param {Function} next
+	 */
+	projectSelected: function(inProject, next) {
+		this.trace("called with ", inProject);
+		this.$.designer.updateSource(inProject, next);
 	},
-	//* Called by Ares when ProjectView has new project selected
-	projectSelected: function(inProject) {
-		this.trace("called with ",inProject);
-		this.$.designer.updateSource(inProject);
-	},
+
+	/**
+	 * triggered by 'Reload' button
+	 */
 	reloadDesigner: function() {
 		this.enableDesignerActionButtons(false);
 		this.$.designer.reload();
@@ -811,11 +821,8 @@ enyo.kind({
 	reloadComplete: function() {
 		this.rerenderKind();
 	},
-	syncJSFile: function(inCode) {
-		this.$.designer.syncJSFile(inCode);
-	},
-	syncCSSFile: function(inFilename, inCode) {
-		this.$.designer.syncCSSFile(inFilename, inCode);
+	syncFile: function(project, filename, code) {
+		this.$.designer.syncFile(project, filename, code);
 	},
 	addAresIds: function(inComponents) {
 		for(var i = 0; i < inComponents.length; i++) {
@@ -953,18 +960,23 @@ enyo.kind({
 	// @protected		
 	runPaletteComponentAction: function(inSender,inEvent){
 		var config = this.$.actionPopup.getConfigComponent(config);
-		var config_data = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
+		var configData = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
 
 		if(inEvent.getName() === "addtoKind"){
 			var target = this.$.actionPopup.getTargetComponent(target);
 			var beforeId = inEvent.beforeId; 
 			this.performCreateItem(config, target, beforeId);
 		} else if (inEvent.getName() === "replaceKind"){
-			ComponentsRegistry.getComponent("phobos").replaceViewKindAction(this.index, config_data);
+			this.doChildRequest({task: [ "replaceKind", this.index, configData ]});
 		} else if (inEvent.getName() === "addNewKind"){
-			ComponentsRegistry.getComponent("phobos").addViewKindAction(config_data);
+			this.doChildRequest({ task: [ "addNewKind", configData ] });
+		}
+		else {
+			this.log("unexpected event: " + inEvent.getName() );
 		}
 		this.$.actionPopup.hide();
+
+		return true;
 	},
 
 

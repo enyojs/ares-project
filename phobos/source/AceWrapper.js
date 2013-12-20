@@ -1,4 +1,4 @@
-/* global require, ace, ComponentsRegistry */
+/*global require, ace, enyo, ComponentsRegistry */
 enyo.kind({
 	name: "enyo.AceWrapper",
 	kind: enyo.Control,
@@ -21,12 +21,12 @@ enyo.kind({
 		onChange: "",
 		onScroll: "",
 		onCursorChange: "",
-		onSave: "",
 		onAutoCompletion: "",
 		onFind: "",
 		onWordwrap: "",
 		onFkey: "",
-		
+		onChildRequest: "",
+
 		/// FIXME just add these for now
 		onSetBreakpoint: "",
 		onClearBreakpoint: ""
@@ -75,7 +75,7 @@ enyo.kind({
 		commands.addCommand({
 			name: "save",
 			bindKey: {win: "Ctrl-S", mac: "Command-S"},
-			exec: enyo.bind(this, "saveDocAction")
+			exec: this.doChildRequest.bind(this,{task: "saveCurrentDoc"})
 		});
 
 		// Add keybinding for auto completion
@@ -134,9 +134,6 @@ enyo.kind({
 	},
 	handleScroll: function(/* Dont handle parameters as we dont need them yet */) {
 		this.doScroll();
-	},
-	saveDocAction: function() {
-		this.doSave();
 	},
 	gutterclick: function(inEventInfo) {
 		this.toggleBreakpoint(inEventInfo.row);
@@ -545,11 +542,11 @@ enyo.kind({
 	},
 	guttermousemove: function(inSender, inEvent) {
 		if(enyo.dom.canTransform() && enyo.platform.ie !== 10){
-			var developmentPanelTranslateX = ComponentsRegistry.getComponent("developmentPanel").domTransforms.translateX;
+			var enyoEditorTranslateX = ComponentsRegistry.getComponent("enyoEditor").domTransforms.translateX;
 			var aceTooltip = document.getElementsByClassName("ace_gutter-tooltip");
 			if(aceTooltip[0]){
-				if(this.translateX !== developmentPanelTranslateX){
-					this.setTranslateX(developmentPanelTranslateX);
+				if(this.translateX !== enyoEditorTranslateX){
+					this.setTranslateX(enyoEditorTranslateX);
 					this.applyInverseTransform(aceTooltip[0]);
 				}
 			}

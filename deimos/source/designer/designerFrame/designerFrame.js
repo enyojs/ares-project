@@ -1,4 +1,4 @@
-/* jshint indent: false */ // TODO: ENYO-3311
+/*global enyo, setTimeout, clearTimeout */
 
 enyo.kind({
 	name: "Ares.DesignerFrame",
@@ -22,14 +22,14 @@ enyo.kind({
 		{name: "serializer", kind: "Ares.Serializer"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"},
 		{name: "dropHighlight", classes: "designer-frame-highlight designer-frame-drop-highlight"},
-		
+
 		//* Resize handles
-		{name: "topLeftResizeHandle",     classes: "designer-frame-resize-handle", showing: false, sides: {top: true, left: true},     style: "top: 0px; left: 0px;"},
-		{name: "topRightResizeHandle",    classes: "designer-frame-resize-handle", showing: false, sides: {top: true, right: true},    style: "top: 0px; right: 0px;"},
-		{name: "bottomLeftResizeHandle",  classes: "designer-frame-resize-handle", showing: false, sides: {bottom: true, left: true},  style: "bottom: 0px; left: 0px;"},
+		{name: "topLeftResizeHandle", classes: "designer-frame-resize-handle", showing: false, sides: {top: true, left: true}, style: "top: 0px; left: 0px;"},
+		{name: "topRightResizeHandle", classes: "designer-frame-resize-handle", showing: false, sides: {top: true, right: true}, style: "top: 0px; right: 0px;"},
+		{name: "bottomLeftResizeHandle", classes: "designer-frame-resize-handle", showing: false, sides: {bottom: true, left: true}, style: "bottom: 0px; left: 0px;"},
 		{name: "bottomRightResizeHandle", classes: "designer-frame-resize-handle", showing: false, sides: {bottom: true, right: true}, style: "bottom: 0px; right: 0px;"}
 	],
-	
+
 	selection: null,
 	parentInstance: null,
 	containerData: null,
@@ -45,7 +45,7 @@ enyo.kind({
 
 	// designerFrame will complain if user's application loads en enyo older than:
 	minEnyoVersion: "2.3.0-pre.9",
-	
+
 	create: function() {
 		this.trace = (this.debug === true ? this.log : function(){});
 		this.inherited(arguments);
@@ -56,8 +56,7 @@ enyo.kind({
 	raiseLoadError: function(msg, url, linenumber) {
 		// I'm a goner
 		var file = url.replace(/.*\/services(?=\/)/,'');
-		var errMsg = "user app load FAILED with error '" + msg
-			+ "' in " + file + " line " + linenumber  ;
+		var errMsg = "user app load FAILED with error '" + msg + "' in " + file + " line " + linenumber  ;
 		this.trace(errMsg);
 		this.sendMessage({op: "reloadNeeded"});
 		this.sendMessage({op: "error", val: {msg: errMsg}});
@@ -65,6 +64,7 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.inherited(arguments);
+		this.trace("called");
 		var expVer = this.minEnyoVersion.split(/\D+/);
 		var myVerStr = (enyo.version && enyo.version.enyo) || '0.0.0-pre.0';
 		var myVer = myVerStr.split(/\D+/);
@@ -84,7 +84,7 @@ enyo.kind({
 				 * TODO this message should go in an error/warning history as described in ENYO-2462
 				 * Un-commenting the following "sendMessage" call will result in a annoying modal message
 				 * popping up too often. For the time being, we just issue a warning in the console.
-				 * 
+				 *
 				 * this.sendMessage({op: "error", val: {msg: errMsg, title: "warning"}});
 				 */
 				break;
@@ -140,12 +140,12 @@ enyo.kind({
 		document.ondragend =   enyo.dispatch;
 	},
 	/**
-		Add feature to dispatcher to catch drag-and-drop-related events, and
-		to stop any/all DOM events from being handled by the app.
-	*/
+	 Add feature to dispatcher to catch drag-and-drop-related events, and
+	 to stop any/all DOM events from being handled by the app.
+	 */
 	addDispatcherFeature: function() {
 		var _this = this;
-		
+
 		enyo.dispatcher.features.push(
 			function(e) {
 				if (_this[e.type]) {
@@ -158,75 +158,75 @@ enyo.kind({
 	},
 	//* Send message to Deimos via _this.$.communicator_
 	sendMessage: function(inMessage) {
+		this.trace(" msg ",inMessage);
 		this.$.communicator.sendMessage(inMessage);
 	},
 	//* Receive message from Deimos
 	receiveMessage: function(inSender, inEvent) {
 
 		var msg = inEvent.message;
+		this.trace(" msg ",msg);
 
 		if (!msg || !msg.op) {
 			enyo.warn("Deimos designerFrame received invalid message data:", msg);
 			return;
-		}		
-			
+		}
+
 		switch (msg.op) {
-			case "containerData":
-				this.setContainerData(msg.val);
-				break;
-			case "render":
-				// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-				this.renderKind(msg.val, msg.filename);
-				break;
-			case "initializeOptions":
-				this.initializeAllKindsAresOptions(msg.options);
-				break;
-			case "select":
-				this.selectItem(msg.val);
-				break;
-			case "highlight":
-				this.highlightDropTarget(this.getControlById(msg.val.aresId));
-				break;
-			case "unhighlight":
-				this.unhighlightDropTargets(msg.val);
-				break;
-			case "modify":
-				// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-				this.modifyProperty(msg.val, msg.filename);
-				break;
-			case "codeUpdate":
-				this.codeUpdate(msg.val);
-				break;
-			case "cssUpdate":
-				this.cssUpdate(msg.val);
-				break;
-			case "cleanUp":
-				this.cleanUpKind();
-				break;
-			case "resize":
-				this.resized();
-				break;
-			case "prerenderDrop":
-				this.foreignPrerenderDrop(msg.val);
-				break;
-			case "requestPositionValue":
-				this.requestPositionValue(msg.val);
-				break;
-			case "serializerOptions":
-				this.$.serializer.setSerializerOptions(msg.val);
-				break;
-			case "dragStart":
-				this.setDragType(msg.val);
-				break;
-			default:
-				enyo.warn("Deimos designerFrame received unknown message op:", msg);
-				break;
+		case "containerData":
+			this.setContainerData(msg.val);
+			break;
+		case "render":
+			this.renderKind(msg.val, msg.filename, msg.op);
+			break;
+		case "initializeOptions":
+			this.initializeAllKindsAresOptions(msg.options);
+			break;
+		case "select":
+			this.selectItem(msg.val);
+			break;
+		case "highlight":
+			this.highlightDropTarget(this.getControlById(msg.val.aresId));
+			break;
+		case "unhighlight":
+			this.unhighlightDropTargets(msg.val);
+			break;
+		case "modify":
+			this.modifyProperty(msg.val, msg.filename);
+			break;
+		case "codeUpdate":
+			this.codeUpdate(msg.val);
+			break;
+		case "cssUpdate":
+			this.cssUpdate(msg.val);
+			break;
+		case "cleanUp":
+			this.cleanUpKind();
+			break;
+		case "resize":
+			this.resized();
+			break;
+		case "prerenderDrop":
+			this.foreignPrerenderDrop(msg.val);
+			break;
+		case "requestPositionValue":
+			this.requestPositionValue(msg.val);
+			break;
+		case "serializerOptions":
+			this.$.serializer.setSerializerOptions(msg.val);
+			break;
+		case "dragStart":
+			this.setDragType(msg.val);
+			break;
+		default:
+			enyo.warn("Deimos designerFrame received unknown message op:", msg);
+			break;
 		}
 	},
 	//* On down, set _this.selection_
 	down: function(e) {
 		var dragTarget = this.getEventDragTarget(e.dispatchTarget);
-		
+
 		if (dragTarget && dragTarget.aresComponent) {
 			this._selectItem(dragTarget);
 		}
@@ -244,7 +244,7 @@ enyo.kind({
 			this.resizing = this.getActiveResizingHandle(e);
 			return false;
 		}
-		
+
 		var dragData = {
 			type: "ares/moveitem",
 			item: enyo.json.codify.from(this.$.serializer.serializeComponent(this.selection, true))
@@ -264,34 +264,34 @@ enyo.kind({
 		if (!inEvent.dataTransfer) {
 			return false;
 		}
-		
+
 		// Enable HTML5 drag-and-drop
 		inEvent.preventDefault();
-		
+
 		// Update dragover highlighting
 		this.dragoverHighlighting(inEvent);
-		
+
 		// Don't do holdover if item is being dragged in from the palette
 		if (this.getDragType() === "ares/createitem") {
 			return true;
 		}
-		
+
 		// If dragging in an absolute positioning container, go straight to _holdOver()_
 		if (this.absolutePositioningMode(this.getCurrentDropTarget())) {
 			this.holdOver(inEvent);
-			
+
 			// If mouse actually moved, begin timer for holdover
 		} else if (this.mouseMoved(inEvent)) {
 			this.resetHoldoverTimeout();
-			
+
 			// If mouse hasn't moved and timer isn't yet set, set it
 		} else if (!this.holdoverTimeout) {
 			this.holdoverTimeout = setTimeout(enyo.bind(this, function() { this.holdOver(inEvent); }), 200);
 		}
-		
+
 		// Remember mouse location for next dragover event
 		this.saveMouseLocation(inEvent);
-		
+
 		return true;
 	},
 	drag: function(inEvent) {
@@ -306,23 +306,23 @@ enyo.kind({
 	//* On drag leave, unhighlight previous drop target
 	dragleave: function(inEvent) {
 		var dropTarget;
-		
+
 		if (!inEvent.dataTransfer) {
 			return false;
 		}
-		
+
 		dropTarget = this.getEventDropTarget(inEvent.dispatchTarget);
 
 		if (!this.isValidDropTarget(dropTarget)) {
 			return false;
 		}
-		
+
 		this.setCurrentDropTarget(null);
 		this.syncDropTargetHighlighting();
-		
+
 		return true;
 	},
-	
+
 	//* On drop, either move _this.selection_ or create a new component
 	drop: function(inEvent) {
 		if (!inEvent.dataTransfer) {
@@ -331,7 +331,7 @@ enyo.kind({
 			}
 			return true;
 		}
-		
+
 		var dropData = enyo.json.codify.from(inEvent.dataTransfer.getData("text")),
 			dropItem = dropData.item,
 			dataType = dropData.type,
@@ -339,30 +339,30 @@ enyo.kind({
 			dropTarget = this.getEventDropTarget(inEvent.dispatchTarget),
 			beforeId
 		;
-		
+
 		switch (dataType) {
-			case "ares/moveitem":
-				dropTargetId = (dropTarget) ? dropTarget.aresId : this.selection.parent.aresId;
-				beforeId = this.selection.addBefore ? this.selection.addBefore.aresId : null;
-				this.sendMessage({op: "moveItem", val: {itemId: dropItem.aresId, targetId: dropTargetId, beforeId: beforeId, layoutData: this.getLayoutData(inEvent)}});
-				break;
-			
-			case "ares/createitem":
-				dropTargetId = this.getContainerItem() ? this.getContainerItem() : dropTarget;
-				dropTargetId = (dropTargetId && dropTargetId.aresId) || null;
-				beforeId = this.getBeforeItem() ? this.getBeforeItem().aresId : null;
-				this.sendMessage({op: "createItem", val: {config: dropData.item.config, options: dropData.item.options, targetId: dropTargetId, beforeId: beforeId}});
-				break;
-			
-			default:
-				enyo.warn("Component view received unknown drop: ", dataType, dropData);
-				break;
+		case "ares/moveitem":
+			dropTargetId = (dropTarget) ? dropTarget.aresId : this.selection.parent.aresId;
+			beforeId = this.selection.addBefore ? this.selection.addBefore.aresId : null;
+			this.sendMessage({op: "moveItem", val: {itemId: dropItem.aresId, targetId: dropTargetId, beforeId: beforeId, layoutData: this.getLayoutData(inEvent)}});
+			break;
+
+		case "ares/createitem":
+			dropTargetId = this.getContainerItem() ? this.getContainerItem() : dropTarget;
+			dropTargetId = (dropTargetId && dropTargetId.aresId) || null;
+			beforeId = this.getBeforeItem() ? this.getBeforeItem().aresId : null;
+			this.sendMessage({op: "createItem", val: {config: dropData.item.config, options: dropData.item.options, targetId: dropTargetId, beforeId: beforeId}});
+			break;
+
+		default:
+			enyo.warn("Component view received unknown drop: ", dataType, dropData);
+			break;
 		}
-		
+
 		this.setContainerItem(null);
 		this.setBeforeItem(null);
 		this.setDragType(null);
-		
+
 		return true;
 	},
 	dragend: function() {
@@ -382,7 +382,7 @@ enyo.kind({
 	resetHoldoverTimeout: function() {
 		clearTimeout(this.holdoverTimeout);
 		this.holdoverTimeout = null;
-		
+
 		if (this.selection && this.selection.addBefore) {
 			this.resetAddBefore();
 		}
@@ -400,19 +400,19 @@ enyo.kind({
 	},
 	dragoverHighlighting: function(inEvent) {
 		var dropTarget = this.getEventDropTarget(inEvent.dispatchTarget);
-		
+
 		// Deselect the currently selected item if we're creating a new item, so all items are droppable
 		if (this.getDragType() === "ares/createitem") {
 			this.selection = null;
 			this.hideSelectHighlight();
 		}
-		
+
 		// If not a valid drop target, reset _this.currentDropTarget_
 		if (!this.isValidDropTarget(dropTarget)) {
 			this.setCurrentDropTarget(null);
 			return false;
 		}
-		
+
 		// If drop target has changed, update drop target highlighting
 		if (!(this.currentDropTarget && this.currentDropTarget === dropTarget)) {
 			this.setCurrentDropTarget(dropTarget);
@@ -424,28 +424,28 @@ enyo.kind({
 		this.sendMessage({op: "state", val: "ready"});
 	},
 	//* Render the specified kind
-	renderKind: function(inKind, inFileName) {
+	renderKind: function(inKind, inFileName, cmd) {
 		var errMsg;
-		
+
 		try {
 			var kindConstructor = enyo.constructorForKind(inKind.name);
 
 			if (!kindConstructor) {
 				errMsg = "No constructor exists for ";
 				enyo.warn(errMsg, inKind.name);
-				this.sendMessage({op: "error", val: {msg: errMsg + inKind.name}});
+				this.sendMessage({op: "error", val: {triggeredByOp: cmd, msg: errMsg + inKind.name}});
 				return;
 			} else if(!kindConstructor.prototype) {
 				errMsg = "No prototype exists for ";
 				enyo.warn(errMsg, inKind.name);
-				this.sendMessage({op: "error", val: {msg: errMsg + inKind.name}});
+				this.sendMessage({op: "error", val: {triggeredByOp: cmd, msg: errMsg + inKind.name}});
 				return;
 			}
 
 			/*
-				Stomp on existing _kindComponents_ to ensure that we render exactly what the user
-				has defined. If components came in as a string, convert to object first.
-			*/
+			 Stomp on existing _kindComponents_ to ensure that we render exactly what the user
+			 has defined. If components came in as a string, convert to object first.
+			 */
 			kindConstructor.prototype.kindComponents = (typeof inKind.components === "string") ? enyo.json.codify.from(inKind.componentKinds) : inKind.componentKinds;
 
 			// Clean up after previous kind
@@ -472,11 +472,16 @@ enyo.kind({
 			this.parentInstance.domStyles = {};
 			this.parentInstance.domStylesChanged();
 			this.parentInstance.render();
-			
+
 			// Notify Deimos that the kind rendered successfully
-			// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-			this.kindUpdated(inFileName);
-			
+			//* Send update to Deimos with serialized copy of current kind component structure
+			this.sendMessage({
+				op: "rendered",
+				triggeredByOp: cmd, // 'render'
+				val: this.$.serializer.serialize(this.parentInstance, true),
+				filename: inFileName
+			});
+
 			// Select a control if so requested
 			if (inKind.selectId) {
 				this.selectItem({aresId: inKind.selectId});
@@ -486,14 +491,13 @@ enyo.kind({
 			var errStack = typeof error === 'object' ? error.stack : '' ;
 			this.error(errMsg, errStack );
 			this.sendMessage({op: "reloadNeeded"});
-			this.sendMessage({op: "error", val: {msg: errMsg, requestReload: true, err: {stack: errStack}}});
+			this.sendMessage({op: "error", val: {msg: errMsg, triggeredByOp: cmd, requestReload: true, err: {stack: errStack}}});
 		}
 	},
 	//* Rerender current selection
 	rerenderKind: function(inFileName) {
 		var copy = this.getSerializedCopyOfComponent(this.parentInstance).components;
 		copy[0].componentKinds = copy;
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
 		this.renderKind(copy[0], inFileName);
 	},
 	checkXtorForAllKinds: function(kinds) {
@@ -511,10 +515,11 @@ enyo.kind({
 	 *
 	 * Response to message sent from Deimos. Enhance the whole application code with aresOptions
 	 * and send back a state message.
-	*/
+	 */
 	initializeAllKindsAresOptions: function(inOptions) {
 		// genuine enyo.kind's master function extension
 		var self = this;
+		this.trace("starting user app initialization within designer iframe");
 		enyo.genuineEnyoKind = enyo.kind;
 		enyo.kind =  function(inProps) {
 			self.addKindAresOptions(inProps.components, inOptions);
@@ -522,7 +527,7 @@ enyo.kind({
 			enyo.genuineEnyoKind(inProps);
 		};
 		enyo.mixin(enyo.kind, enyo.genuineEnyoKind);
-		
+
 		// warning: user code error will trigger this.raiseLoadError
 		// through window.onerror handler
 		// another warning: enyo.load is asynchronous. try/catch is useless
@@ -536,7 +541,7 @@ enyo.kind({
 		if (!inComponents) {
 			return;
 		}
-		
+
 		for(var i = 0; i < inComponents.length; i++) {
 			this.addAresOptionsToComponent(inComponents[i], inOptions);
 			if (inComponents[i].components) {
@@ -561,21 +566,21 @@ enyo.kind({
 		for(var o in inOptions) {
 			if (o === inComponent.kind) {
 				var options = inOptions[o];
-				
+
 				if (options) {
 					inComponent.__aresOptions = options;
 
 					var kindConstructor= enyo.constructorForKind(inComponent.kind);
-					
+
 					if (kindConstructor.prototype.__create) {
 						this.trace(inComponent.kind, "already has __create");
 					} else {
 						kindConstructor.prototype.__create = kindConstructor.prototype.create;
 						kindConstructor.prototype.create = aresOptionCreate;
-					}								
+					}
 				}
 			}
-		}	
+		}
 	},
 	//* When the designer is closed, clean up the last rendered kind
 	cleanUpKind: function() {
@@ -585,7 +590,7 @@ enyo.kind({
 			this.parentInstance = null;
 			this.selection = null;
 		}
-		
+
 	},
 	//* Clean up previously rendered kind
 	cleanUpPreviousKind: function(inKindName) {
@@ -593,13 +598,13 @@ enyo.kind({
 		if(this.parentInstance.kind !== inKindName) {
 			enyo.constructorForKind(this.parentInstance.kind).prototype.kindComponents = enyo.json.codify.from(this.$.serializer.serialize(this.parentInstance, true));
 		}
-		
+
 		// Reset flags on previously rendered kind's _kindComponents_ array
 		this.unflagAresComponents();
-		
+
 		// Clear previously rendered kind
 		this.$.client.destroyClientControls();
-		
+
 		// Remove selection and drop highlighting
 		this.hideSelectHighlight();
 		this.unhighlightDropTargets();
@@ -609,14 +614,14 @@ enyo.kind({
 		this.highlightSelection();
 	},
 	/**
-		Response to message sent from Deimos. Highlight the specified conrol
-		and send a message with a serialized copy of the control.
-	*/
+	 Response to message sent from Deimos. Highlight the specified conrol
+	 and send a message with a serialized copy of the control.
+	 */
 	selectItem: function(inItem) {
 		if(!inItem) {
 			return;
 		}
-		
+
 		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
 			if(c.aresId === inItem.aresId) {
 				// this method is typically called right after a
@@ -655,17 +660,17 @@ enyo.kind({
 			this.selection[inProperty] = inValue;
 		}
 	},
-	
+
 	//* Get each kind component individually
 	flattenKindComponents: function(inComponents) {
 		var ret = [],
 			cs,
 			c;
-		
+
 		if(!inComponents) {
 			return ret;
 		}
-		
+
 		for (var i=0;(c = inComponents[i]);i++) {
 			ret.push(c);
 			if(c.components) {
@@ -675,7 +680,7 @@ enyo.kind({
 				}
 			}
 		}
-		
+
 		return ret;
 	},
 	manageComponentsOptions: function(inComponents) {
@@ -692,9 +697,9 @@ enyo.kind({
 			var options = inComponent.__aresOptions;
 			if (options.isRepeater === true) {
 				/*
-					We are handling a Repeater or a List.
-					Force "count" to 1 and invalidate "onSetupItem" to
-					manage them correctly in the Designer
+				 We are handling a Repeater or a List.
+				 Force "count" to 1 and invalidate "onSetupItem" to
+				 manage them correctly in the Designer
 				 */
 				this.trace("Manage repeater ", inComponent.kind, inComponent);
 				inComponent.count = 1;
@@ -707,7 +712,7 @@ enyo.kind({
 		var ret = [],
 			cs,
 			c;
-		
+
 		for (var i=0;(c = inComponents[i]);i++) {
 			ret.push(c);
 			if(c.children) {
@@ -717,10 +722,10 @@ enyo.kind({
 				}
 			}
 		}
-		
+
 		return ret;
 	},
-	
+
 	//* Set up drag and drop attributes for component in _inComponents_
 	makeComponentsDragAndDrop: function(inComponents) {
 		for(var i=0, component;(component = inComponents[i]);i++) {
@@ -744,9 +749,9 @@ enyo.kind({
 		}
 	},
 	/**
-		Add the attribute _dropTarget="true"_ to _inComponent_ if it wasn't explicitly set
-		to false in the design.js file (works as an opt out).
-	*/
+	 Add the attribute _dropTarget="true"_ to _inComponent_ if it wasn't explicitly set
+	 to false in the design.js file (works as an opt out).
+	 */
 	makeComponentADropTarget: function(inComponent) {
 		if(inComponent.attributes) {
 			// TODO: Revisit this, once indexer's propertyMetaData is integrated
@@ -766,7 +771,7 @@ enyo.kind({
 			delete component.aresComponent;
 		}
 	},
-	
+
 	isValidDropTarget: function(inControl) {
 		return (inControl && inControl !== this.selection && !inControl.isDescendantOf(this.selection));
 	},
@@ -778,7 +783,7 @@ enyo.kind({
 			}
 		}
 	},
-	
+
 	getEventDragTarget: function(inComponent) {
 		return (!inComponent) ? null : (!this.isDraggable(inComponent)) ? this.getEventDragTarget(inComponent.parent) : inComponent;
 	},
@@ -791,7 +796,7 @@ enyo.kind({
 	isDropTarget: function(inComponent) {
 		return (inComponent.attributes && inComponent.attributes.dropTarget);
 	},
-	
+
 	//* Highlight _inComponent_ with drop target styling, and unhighlight everything else
 	highlightDropTarget: function(inComponent) {
 		this.$.dropHighlight.setShowing(true);
@@ -815,10 +820,10 @@ enyo.kind({
 				this.$.selectHighlightCopy.setBounds(b);
 				this.$.selectHighlightCopy.show();
 			}
-			
+
 			// Resize handle rendering
 			this.hideAllResizeHandles();
-			
+
 			if (this.absolutePositioningMode(this.selection.parent)) {
 				this.showAllResizeHandles();
 			} else {
@@ -847,16 +852,16 @@ enyo.kind({
 		this.sendMessage({op: "select",	 val: this.$.serializer.serializeComponent(this.selection, true)});
 	},
 	/**
-		Find any children in _inControl_ that match kind components of the parent instance,
-		and make them drag/droppable (if appropriate)
-	*/
+	 Find any children in _inControl_ that match kind components of the parent instance,
+	 and make them drag/droppable (if appropriate)
+	 */
 	setupControlDragAndDrop: function(inControl) {
 		var childComponents = this.flattenChildren(inControl.children),
 			i,
 			j;
-		
+
 		this.makeComponentDragAndDrop(inControl);
-		
+
 		for(i=0;i<childComponents.length;i++) {
 			for(j=0;j<this.aresComponents.length;j++) {
 				if(childComponents[i].aresId === this.aresComponents[j].aresId) {
@@ -869,21 +874,7 @@ enyo.kind({
 	getSerializedCopyOfComponent: function(inComponent) {
 		return enyo.json.codify.from(this.$.serializer.serializeComponent(inComponent, true));
 	},
-	//* Rerender client, reselect _this.selection_, and notify Deimos
-	refreshClient: function(noMessage) {
-		this.$.client.render();
-		
-		if(!noMessage) {
-			this.kindUpdated();
-		}
-		
-		this.selectItem(this.selection);
-	},
-	//* Send update to Deimos with serialized copy of current kind component structure
-	kindUpdated: function(inFileName) {
-		// FIXME: ENYO-3181: synchronize rendering for the right rendered file
-		this.sendMessage({op: "rendered", val: this.$.serializer.serialize(this.parentInstance, true), filename: inFileName});
-	},
+
 	//* Eval code passed in by designer
 	codeUpdate: function(inCode) {
 		/* jshint evil: true */
@@ -896,7 +887,7 @@ enyo.kind({
 			enyo.warn("Invalid data sent for CSS update:", inData);
 			return;
 		}
-		
+
 		var filename = inData.filename,
 			code = inData.code,
 			head = document.getElementsByTagName("head")[0],
@@ -905,15 +896,15 @@ enyo.kind({
 			el,
 			i
 		;
-		
+
 		// Look through link tags for a linked stylesheet with a filename matching _filename_
-		for(i=0;(el = links[i]);i++) {
+		for(i = 0; (el = links[i]); i++) {
 			if(el.getAttribute("rel") === "stylesheet" && el.getAttribute("type") === "text/css" && el.getAttribute("href") === filename) {
 				this.updateStyle(filename, code, el);
 				return;
 			}
 		}
-		
+
 		// Look through style tags for a tag with a data-href property matching _filename_
 		for(i=0;(el = styles[i]);i++) {
 			if(el.getAttribute("data-href") === filename) {
@@ -926,21 +917,21 @@ enyo.kind({
 	updateStyle: function(inFilename, inNewCode, inElementToReplace) {
 		var head = document.getElementsByTagName("head")[0],
 			newTag = document.createElement("style");
-		
+
 		newTag.setAttribute("type", "text/css");
 		newTag.setAttribute("data-href", inFilename);
 		newTag.innerHTML = inNewCode;
-		
+
 		head.insertBefore(newTag, inElementToReplace);
 		head.removeChild(inElementToReplace);
 	},
 	holdOver: function(inEvent) {
 		var container = this.getCurrentDropTarget();
-		
+
 		if (!container) {
 			return;
 		}
-		
+
 		if (this.absolutePositioningMode(container)) {
 			this.absolutePositioningHoldover(inEvent, container);
 		} else {
@@ -956,7 +947,7 @@ enyo.kind({
 		var x = this.getAbsoluteXPosition(inEvent),
 			y = this.getAbsoluteYPosition(inEvent)
 		;
-		
+
 		this.moveSelectionToAbsolutePosition(x, y);
 	},
 	// Move selection to new position
@@ -964,9 +955,9 @@ enyo.kind({
 		var container = this.getContainerItem(),
 			clone = this.cloneControl(this.selection, true) //this.createSelectionGhost(this.selection)
 		;
-		
+
 		this.hideSelectHighlight();
-		
+
 		this.selection.destroy();
 		this.selection = container.createComponent(clone).render();
 		this.selection.applyStyle("position", "absolute");
@@ -981,10 +972,10 @@ enyo.kind({
 			controlBounds = this.getRelativeBounds(inControl),
 			styleProps = {}
 		;
-		
+
 		// Convert css string to hash
 		enyo.Control.cssTextToDomStyles(this.trimWhitespace(inControl.style), styleProps);
-		
+
 		if (styleProps.top || (!styleProps.top && !styleProps.bottom)) {
 			inControl.applyStyle("top", inY + "px");
 		}
@@ -999,10 +990,10 @@ enyo.kind({
 			controlBounds = this.getRelativeBounds(inControl),
 			styleProps = {}
 		;
-		
+
 		// Convert css string to hash
 		enyo.Control.cssTextToDomStyles(this.trimWhitespace(inControl.style), styleProps);
-		
+
 		if (styleProps.left || (!styleProps.left && !styleProps.right)) {
 			inControl.applyStyle("left", inX + "px");
 		}
@@ -1019,7 +1010,7 @@ enyo.kind({
 			y = inEvent.clientY,
 			onEdge = this.checkDragOverBoundary(inContainer, x, y),
 			beforeItem;
-		
+
 		if (onEdge < 0) {
 			beforeItem = inContainer;
 			inContainer = inContainer.parent;
@@ -1030,7 +1021,7 @@ enyo.kind({
 			beforeItem = (inContainer.children.length > 0) ? this.findBeforeItem(inContainer, x, y) : null;
 			inContainer = inContainer;
 		}
-		
+
 		this.setContainerItem(inContainer);
 		this.setBeforeItem(beforeItem);
 		this.staticPrerenderDrop();
@@ -1040,10 +1031,10 @@ enyo.kind({
 		var containerItem = this.getControlById(inData.targetId),
 			beforeItem    = inData.beforeId ? this.getControlById(inData.beforeId) : null
 		;
-		
+
 		this.setContainerItem(containerItem);
 		this.setBeforeItem(beforeItem);
-		
+
 		// Do static prerender drop if not an AbsolutePositioningLayout container
 		if (!this.absolutePositioningMode(containerItem)) {
 			this.staticPrerenderDrop();
@@ -1051,31 +1042,31 @@ enyo.kind({
 	},
 	staticPrerenderDrop: function() {
 		var movedControls, movedInstances;
-		
+
 		// If not a legal drop, do nothing
 		if (!this.legalDrop()) {
 			return;
 		}
-		
+
 		// Create copy of app in post-move state
 		this.renderUpdatedAppClone();
-		
+
 		// Figure which controls need to move to get to the new state
 		movedControls = this.getMovedControls();
-		
+
 		// Hide app copy
 		this.hideUpdatedAppClone();
-		
+
 		// Move (hidden) selected control to new position
 		this.moveSelection();
-		
+
 		// Hide any controls that need to be moved
 		movedInstances = this.hideMovedControls(movedControls);
-		
+
 		// Turn off selection/drop area highlighting
 		this.hideSelectHighlight();
 		this.unhighlightDropTargets();
-		
+
 		// Create copies of controls that need to move, and animate them to the new posiitions
 		this.animateMovedControls(movedControls);
 
@@ -1093,16 +1084,16 @@ enyo.kind({
 	legalDrop: function() {
 		var containerId = (this.getContainerItem()) ? this.getContainerItem().aresId : null,
 			beforeId    = (this.getBeforeItem())    ? this.getBeforeItem().aresId    : null;
-		
+
 		// If creating a new item, drop is legal
 		if (this.getCreatePaletteItem()) {
 			return true;
 		}
-		
+
 		if ((!this.getContainerItem() || !this.selection) || this.selection.aresId === containerId || this.selection.aresId === beforeId) {
 			return false;
 		}
-		
+
 		return true;
 	},
 	//* Return all controls that will be affected by this move
@@ -1114,7 +1105,7 @@ enyo.kind({
 			updatedItem,
 			i,
 			j;
-		
+
 		for (i = 0; (originalItem = originalPositions[i]); i++) {
 			for (j = 0; (updatedItem = updatedPositions[j]); j++) {
 				if (originalItem.comp.aresId === updatedItem.comp.aresId && !this.rectsAreEqual(originalItem.rect, updatedItem.rect)) {
@@ -1128,18 +1119,18 @@ enyo.kind({
 				}
 			}
 		}
-		
+
 		return movedControls;
 	},
 	cloneCSS: function(inCSS) {
 		for(var i = 0, cssText = ""; i < inCSS.length; i++) {
 			if (
-					inCSS[i] === "position" ||
+				inCSS[i] === "position" ||
 					inCSS[i] === "top" ||
 					inCSS[i] === "left" ||
 					inCSS[i] === "-webkit-transition-duration" ||
 					inCSS[i] === "-webkit-transition-property"
-				) {
+			) {
 				continue;
 			}
 			cssText += inCSS[i] + ": " + inCSS.getPropertyValue(inCSS[i]) + "; ";
@@ -1149,7 +1140,7 @@ enyo.kind({
 	hideMovedControls: function(inControls) {
 		var originalControls = this.flattenChildren(this.$.client.children),
 			hiddenControls = [];
-			
+
 		for (var i = 0; i < originalControls.length; i++) {
 			if (!originalControls[i].aresId) {
 				continue;
@@ -1161,7 +1152,7 @@ enyo.kind({
 				}
 			}
 		}
-		
+
 		return hiddenControls;
 	},
 	// Move selection to new position
@@ -1171,17 +1162,17 @@ enyo.kind({
 			beforeId    = (this.getBeforeItem()) ? this.getBeforeItem().aresId : null,
 			before      = (beforeId) ? this.getControlById(beforeId) : null,
 			clone       = this.cloneControl(this.selection, true); //this.createSelectionGhost(this.selection);
-		
+
 		// If the selection should be moved before another item, use the _addBefore_ property
 		if (before) {
 			clone = enyo.mixin(clone, {beforeId: beforeId, addBefore: before});
 		}
-		
+
 		// If the selection has absolute positioning applied, remove it
 		if (clone.style) {
 			clone.style = this.removeAbsolutePositioningStyle(clone);
 		}
-		
+
 		this.selection.destroy();
 		this.selection = container.createComponent(clone).render();
 	},
@@ -1191,7 +1182,7 @@ enyo.kind({
 			updatedProps = [],
 			prop,
 			i;
-		
+
 		for (i = 0; i < styleProps.length; i++) {
 			prop = styleProps[i].split(":");
 			if (prop[0].match(/position/) || prop[0].match(/top/) || prop[0].match(/left/)) {
@@ -1199,11 +1190,11 @@ enyo.kind({
 			}
 			updatedProps.push(styleProps[i]);
 		}
-		
+
 		for (i = 0, currentStyle = ""; i < updatedProps.length; i++) {
 			currentStyle += updatedProps[i];
 		}
-		
+
 		return currentStyle;
 	},
 	//* Draw controls that will do aniumating at starting points and then kick off animation
@@ -1214,7 +1205,7 @@ enyo.kind({
 	renderAnimatedControls: function(inControls) {
 		// Clean up existing animated controls
 		this.$.flightArea.destroyClientControls();
-		
+
 		// Create a copy of each control that is being moved
 		for (var i = 0, control; i < inControls.length; i++) {
 			if (inControls[i].comp.aresId === this.selection.aresId) {
@@ -1238,18 +1229,18 @@ enyo.kind({
 					}
 				);
 			}
-			
+
 			// Set the starting top/left values and props to enable animation
 			control.addStyles(
 				inControls[i].origStyle +
-				"position: absolute; " +
-				"top: "  + inControls[i].origRect.top  + "px; " +
-				"left: " + inControls[i].origRect.left + "px; " +
-				"-webkit-transition-duration: " + this.moveControlSecs + "s; " +
-				"-webkit-transition-property: all; "
+					"position: absolute; " +
+					"top: "  + inControls[i].origRect.top  + "px; " +
+					"left: " + inControls[i].origRect.left + "px; " +
+					"-webkit-transition-duration: " + this.moveControlSecs + "s; " +
+					"-webkit-transition-property: all; "
 			);
 		}
-		
+
 		// Render animated controls
 		this.$.flightArea.render().applyStyle("display", "block");
 	},
@@ -1259,9 +1250,9 @@ enyo.kind({
 			for(var i=0;i<controls.length;i++) {
 				controls[i].addStyles(
 					controls[i].newStyle +
-					"position: absolute; " +
-					"top: "  + controls[i].moveTo.top  + "px; " +
-					"left: " + controls[i].moveTo.left + "px; "
+						"position: absolute; " +
+						"top: "  + controls[i].moveTo.top  + "px; " +
+						"left: " + controls[i].moveTo.left + "px; "
 				);
 				controls[i].render();
 			}
@@ -1278,12 +1269,12 @@ enyo.kind({
 		this.$.cloneArea.destroyClientControls();
 		this.$.cloneArea.applyStyle("display", "block");
 		var appClone = this.$.cloneArea.createComponent(this.cloneControl(this.parentInstance));
-		
+
 		// Mimic top-level app fitting (as if this was rendered with renderInto or write)
 		if (this.parentInstance.fit) {
 			appClone.addClass("enyo-fit enyo-clip");
 		}
-		
+
 		var containerId = (this.getContainerItem()) ? this.getContainerItem().aresId : null,
 			container   = this.getControlById(containerId, this.$.cloneArea),
 			beforeId    = (this.getBeforeItem()) ? this.getBeforeItem().aresId : null,
@@ -1291,18 +1282,18 @@ enyo.kind({
 			selection   = this.getControlById(this.selection.aresId, this.$.cloneArea),
 			clone       = this.cloneControl(this.selection, true)
 		;
-		
+
 		if (before) {
 			clone = enyo.mixin(clone, {beforeId: beforeId, addBefore: before});
 		}
-		
+
 		// If the selection has absolute positioning applied, remove it
 		if (clone.style) {
 			clone.style = this.removeAbsolutePositioningStyle(clone);
 		}
 
 		container.createComponent(clone);
-		
+
 		if (selection) {
 			selection.destroy();
 		}
@@ -1318,22 +1309,22 @@ enyo.kind({
 		var computedStyle = enyo.dom.getComputedStyle(inItem.hasNode()),
 			borderWidth = 1,
 			style;
-		
+
 		if (!computedStyle) {
 			enyo.warn("Attempted to clone item with no node: ", inItem);
 			return null;
 		}
-		
+
 		this.log("h: ", parseInt(computedStyle.height, 10), "w: ", parseInt(computedStyle.width, 10), "p: ", parseInt(computedStyle.padding, 10), "m: ", parseInt(computedStyle.margin,10));
-		
+
 		style = "width: "   + computedStyle.width + "; " +
-				"height: "  + computedStyle.height + "; " +
-				//"margin: "  + computedStyle.margin + "; " +
-				//"padding: " + computedStyle.padding + "; " +
-				"border: "  + borderWidth + "px dotted black; " +
-				"display: " + computedStyle.display + "; " +
-				"background: rgba(255,255,255,0.8); ";
-		
+			"height: "  + computedStyle.height + "; " +
+			//"margin: "  + computedStyle.margin + "; " +
+			//"padding: " + computedStyle.padding + "; " +
+			"border: "  + borderWidth + "px dotted black; " +
+			"display: " + computedStyle.display + "; " +
+			"background: rgba(255,255,255,0.8); ";
+
 		return {
 			kind:   "enyo.Control",
 			aresId: inItem.aresId,
@@ -1353,36 +1344,36 @@ enyo.kind({
 		if (inSelection.kind) {
 			clone.kind = inSelection.kind;
 		}
-		
+
 		if (inCloneChildren) {
 			clone.components = this.cloneChildComponents(inSelection.components);
 		}
-		
+
 		return clone;
 	},
 	cloneChildComponents: function(inComponents) {
 		var childComponents = [];
-		
+
 		if (!inComponents || inComponents.length === 0) {
 			return childComponents;
 		}
-		
+
 		for (var i = 0, comp; (comp = inComponents[i]); i++) {
 			childComponents.push(this.cloneControl(comp, true));
 		}
-		
+
 		return childComponents;
 	},
 	getControlPositions: function(inComponents) {
 		var controls = this.flattenChildren(inComponents),
 			positions = [];
-		
+
 		for(var i=0;i<controls.length;i++) {
 			if (controls[i].aresId) {
 				positions.push({comp: controls[i], rect: controls[i].hasNode().getBoundingClientRect()});
 			}
 		}
-		
+
 		return positions;
 	},
 	rectsAreEqual: function(inRectA, inRectB) {
@@ -1392,7 +1383,7 @@ enyo.kind({
 		if (!inContainer) {
 			return 0;
 		}
-		
+
 		var bounds = inContainer.hasNode().getBoundingClientRect();
 		if (x - bounds.left <= this.edgeThresholdPx) {
 			return -1;
@@ -1410,13 +1401,13 @@ enyo.kind({
 		if (!inContainer) {
 			return null;
 		}
-		
+
 		var childData = [],
 			aboveItems,
 			belowItems,
 			rightItems,
 			sameRowItems;
-		
+
 		// Build up array of nodes
 		for (var i = 0; i < inContainer.children.length; i++) {
 			if (inContainer.children[i].hasNode()) {
@@ -1426,40 +1417,40 @@ enyo.kind({
 				));
 			}
 		}
-		
+
 		aboveItems = this.findAboveItems(childData, inY);
 		// If no above items, place as the first item in this container
 		if (aboveItems.length === 0) {
 			return childData[0];
 		}
-		
+
 		belowItems = this.findBelowItems(childData, inY);
 		// If no below items, place as the last item in this container
 		if (belowItems.length === 0) {
 			return null;
 		}
-		
+
 		// Items on the same row are both above and below the dragged item
 		sameRowItems = this.removeDuplicateItems(aboveItems, belowItems);
-		
+
 		// If we have items on the same row as the dragged item, find the first item to the left
 		if (sameRowItems.length > 0) {
 			// If on the same row but no left items, place as the first item on this row
 			if (this.findLeftItems(sameRowItems, inX).length === 0) {
 				return this.filterArrayForMinValue(sameRowItems, "left");
-			// If there are left items, the leftmost right item becomes the before item
+				// If there are left items, the leftmost right item becomes the before item
 			} else {
 				rightItems = this.findRightItems(sameRowItems, inX);
 				// If there are no items to the right, insert before topmost and leftmost below item
 				if(rightItems.length === 0) {
 					return this.filterArrayForMinValue(this.findLeftmostItems(belowItems), "top", inY);
-				// If there are items to the right, return the leftmost one
+					// If there are items to the right, return the leftmost one
 				} else {
 					return this.filterArrayForMinValue(rightItems, "left");
 				}
 			}
 		}
-		
+
 		// If there are no items on the same row as this one, insert before topmost and leftmost below item
 		return this.filterArrayForMinValue(this.findLeftmostItems(belowItems), "top");
 	},
@@ -1468,12 +1459,12 @@ enyo.kind({
 		if (!inContainer) {
 			return null;
 		}
-		
+
 		var childData = [],
 			aboveItems,
 			belowItems,
 			sameRowItems;
-		
+
 		for (var i = 0; i < inContainer.children.length; i++) {
 			if (inContainer.children[i].hasNode()) {
 				childData.push(enyo.mixin(
@@ -1482,7 +1473,7 @@ enyo.kind({
 				));
 			}
 		}
-		
+
 		// Filter out _inItem_ from _aboveItems_
 		aboveItems = this.findAboveItems(childData, inY).filter(function(elem, pos, self) {
 			return elem.aresId !== inItem.aresId;
@@ -1491,28 +1482,28 @@ enyo.kind({
 		belowItems = this.findBelowItems(childData, inY).filter(function(elem, pos, self) {
 			return elem.aresId !== inItem.aresId;
 		});
-		
+
 		// If no below items, place as the last item in this container
 		if (belowItems.length === 0) {
 			return null;
 		}
-		
+
 		// Items on the same row are both above and below the dragged item
 		sameRowItems = this.removeDuplicateItems(aboveItems, belowItems);
-		
+
 		/**
-			If we have items on the same row as the dragged item, find the first item
-			to the right of _inItem_
-		*/
+		 If we have items on the same row as the dragged item, find the first item
+		 to the right of _inItem_
+		 */
 		if (sameRowItems.length > 0) {
 			return this.filterArrayForMinValue(this.findRightItems(sameRowItems, inX), "left");
 		}
-		
+
 		// If no above items, place as the first item in this container
 		if (aboveItems.length === 0) {
 			return childData[0];
 		}
-		
+
 		// If there are no items on the same row as this one, insert before topmost and leftmost below item
 		return this.filterArrayForMinValue(this.findLeftmostItems(belowItems), "top");
 	},
@@ -1583,17 +1574,17 @@ enyo.kind({
 	},
 	getLayoutData: function(inEvent) {
 		var layoutKind = this.selection.parent ? this.selection.parent.layoutKind : null;
-		
+
 		switch (layoutKind) {
-			case "AbsolutePositioningLayout":
-				var bounds = this.getRelativeBounds(this.selection);
-				
-				return {
-					layoutKind: layoutKind,
-					bounds: bounds
-				};
-			default:
-				return null;
+		case "AbsolutePositioningLayout":
+			var bounds = this.getRelativeBounds(this.selection);
+
+			return {
+				layoutKind: layoutKind,
+				bounds: bounds
+			};
+		default:
+			return null;
 		}
 	},
 	getAbsoluteXPosition: function(inEvent) {
@@ -1610,25 +1601,25 @@ enyo.kind({
 		if (!inControl) {
 			return {top: 0, right: 0, bottom: 0, left: 0, width: 0, height: 0};
 		}
-		
+
 		var bounds = inControl.getBounds();
 		var absoluteBounds = this.getAbsoluteBounds(inControl);
 		var parentBounds = this.getAbsoluteBounds(inControl.parent);
 		var node = inControl.hasNode();
-		
+
 		bounds.right = parentBounds.width - bounds.left - absoluteBounds.width;
 		bounds.bottom = parentBounds.height - bounds.top - absoluteBounds.height;
 
-		if(typeof inControl.parent.scrollNode == "undefined"){	
+		if(typeof inControl.parent.scrollNode == "undefined"){
 			if(bounds.width + bounds.left >= node.offsetParent.clientWidth){
-				bounds.width = node.offsetParent.clientWidth - bounds.left;			
+				bounds.width = node.offsetParent.clientWidth - bounds.left;
 			}
-			
+
 			if(bounds.height + bounds.top >= node.offsetParent.clientHeight){
 				bounds.height = node.offsetParent.clientHeight - bounds.top;
 			}
 		}
-		
+
 		return bounds;
 	},
 	getAbsoluteBounds: function(inControl) {
@@ -1644,13 +1635,13 @@ enyo.kind({
 
 		if (node.offsetParent) {
 			do {
-				// Fix for FF (GF-2036), offsetParent is working differently between FF and chrome 
-				if (enyo.platform.firefox) {					
+				// Fix for FF (GF-2036), offsetParent is working differently between FF and chrome
+				if (enyo.platform.firefox) {
 					left += node.offsetLeft;
 					top  += node.offsetTop;
 				} else {
 					left += node.offsetLeft - (node.offsetParent ? node.offsetParent.scrollLeft : 0);
-					top  += node.offsetTop  - (node.offsetParent ? node.offsetParent.scrollTop  : 0);	
+					top  += node.offsetTop  - (node.offsetParent ? node.offsetParent.scrollTop  : 0);
 				}
 				if (transformProp) {
 					match = node.style[transformProp].match(xRegEx);
@@ -1673,9 +1664,9 @@ enyo.kind({
 			width	: width
 		};
 	},
-	
+
 	//****** RESIZING CODE ******//
-	
+
 	getActiveResizingHandle: function(inEvent) {
 		if (inEvent.dispatchTarget.sides) {
 			this.$resizeHandle = inEvent.dispatchTarget;
@@ -1683,7 +1674,7 @@ enyo.kind({
 			this.selectionDragAnchors = this.getDragAnchors(this.selection, this.$resizeHandle);
 			return true;
 		}
-		
+
 		return false;
 	},
 	resize: function(inEvent) {
@@ -1723,16 +1714,16 @@ enyo.kind({
 		var styleProps = {},
 			anchors = {}
 		;
-		
+
 		// Convert css string to hash
 		enyo.Control.cssTextToDomStyles(this.trimWhitespace(inResizeComponent.style), styleProps);
-		
+
 		// Setup anchors hash
 		anchors.top = (styleProps.top !== undefined && this.trimWhitespace(styleProps.top) !== "");
 		anchors.right = (styleProps.right !== undefined && this.trimWhitespace(styleProps.right) !== "");
 		anchors.bottom = (styleProps.bottom !== undefined && this.trimWhitespace(styleProps.bottom) !== "");
 		anchors.left = (styleProps.left !== undefined && this.trimWhitespace(styleProps.left) !== "");
-		
+
 		// Select top/bottom side to be adjusted based on the corner the user is dragging
 		if (inHandle.sides.top) {
 			if (anchors.top) {
@@ -1759,7 +1750,7 @@ enyo.kind({
 				anchors.top = false;
 			}
 		}
-		
+
 		// Select left/right side to be adjusted based on the corner the user is dragging
 		if (inHandle.sides.left) {
 			if (anchors.left) {
@@ -1786,7 +1777,7 @@ enyo.kind({
 				anchors.left = false;
 			}
 		}
-		
+
 		return anchors;
 	},
 	showAllResizeHandles: function() {
@@ -1832,7 +1823,7 @@ enyo.kind({
 	getResizeCompleteData: function() {
 		var bounds = this.getRelativeBounds(this.selection);
 		var sizeData = {};
-				
+
 		if (this.selectionDragAnchors.top) {
 			sizeData.top = bounds.top + "px";
 		}
