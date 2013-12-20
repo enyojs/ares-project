@@ -94,9 +94,8 @@ enyo.kind(
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Zoom"},
 							{classes: "zoom-slider", components: [
-									{kind: "onyx.RangeSlider", rangeMin: 0, rangeMax: 400, rangeStart: 0, rangeEnd: 200, interval: 25, onChange: 'zoom', onChanging: 'zoom'}
-								]
-							}
+								{kind: "onyx.RangeSlider", rangeMin: 0, rangeMax: 400, rangeStart: 0, rangeEnd: 200, interval: 25, onChange: 'zoom', onChanging: 'zoom'}
+							]}
 						]
 					},
 					{
