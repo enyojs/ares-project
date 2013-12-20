@@ -507,8 +507,8 @@ enyo.kind({
 	 */
 	showErrorMessage: function(pickerButtonValue, hightLightedPicker, errorMsg) {
 		var err = new Error(this.$.label.getContent().toString() + ": '" + pickerButtonValue + "' is not an allowed value");
-		this.container.$[hightLightedPicker].$.configurationPickerButton.setContent(pickerButtonValue);
 		
+		this.container.$[hightLightedPicker].$.configurationPickerButton.setContent(pickerButtonValue);
 		this.container.$[hightLightedPicker].$.errorMsg.setContent(errorMsg);
 		this.container.$[hightLightedPicker].$.errorMsg.show();
 		
@@ -605,32 +605,50 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
-			//Initialize variables containing the values of "android-minSdkVersion" & "android-maxSdkVersion" attributs
-			var minValue = parseInt(this.container.$["android-minSdkVersion"].value, 10);
-			var maxValue = parseInt(this.container.$["android-maxSdkVersion"].value, 10);
-			
+		//Initialize variables containing the values of "android-minSdkVersion" & "android-maxSdkVersion" attributs
+		var minValue = parseInt(this.container.$["android-minSdkVersion"].value, 10);
+		var maxValue = parseInt(this.container.$["android-maxSdkVersion"].value, 10);
+		var tgtValue = parseInt(this.container.$["android-targetSdkVersion"].value, 10);
+		
+		//Initialize variable containing the selected value
+		var selectedValue = parseInt(inValue.selected.value, 10);
+		switch (this.name) {
+			case "android-maxSdkVersion":
+				maxValue = selectedValue;
+				break;
+			case "android-minSdkVersion":
+				minValue = selectedValue;
+				break;
+			case "android-targetSdkVersion":
+				tgtValue = selectedValue;
+				break;
+		}
 
-			//Initialize variable containing the selected value
-			var selectedValue = parseInt(inValue.selected.value, 10);
-			
-			if (this.name === "android-maxSdkVersion" && minValue > selectedValue ||
-				this.name === "android-minSdkVersion" && maxValue < selectedValue) {
-				
-				var minSdkDisplayed = this.container.$["android-minSdkVersion"].$.configurationPickerButton.content;
-				var maxSdkDisplayed = this.container.$["android-maxSdkVersion"].$.configurationPickerButton.content;
+		/*
+			The SDK values are correct, either:
+			1- if there is target SDK expressed, and min <= target <= max
+			2- if there is no target SDK, and min <= max
+		*/
+		if (((minValue <= tgtValue) && (tgtValue <= maxValue) && (!isNaN(tgtValue))) ||
+			((minValue <= maxValue) && (isNaN(tgtValue)))
+			) {
+			//Hide the error message
+			this.container.$["android-minSdkVersion"].hideErrorMessage("android-minSdkVersion");
+			this.container.$["android-maxSdkVersion"].hideErrorMessage("android-maxSdkVersion");
+			this.container.$["android-targetSdkVersion"].hideErrorMessage("android-targetSdkVersion");
+		} else {
+			/*
+				Otherwise, something is wrong with the API versions selected.
+			*/
+			var minSdkDisplayed = this.container.$["android-minSdkVersion"].$.configurationPickerButton.content;
+			var maxSdkDisplayed = this.container.$["android-maxSdkVersion"].$.configurationPickerButton.content;
+			var tgtSdkDisplayed = this.container.$["android-targetSdkVersion"].$.configurationPickerButton.content;
 
-				this.showErrorMessage(minSdkDisplayed, "android-minSdkVersion", "Incorrect API level interval");
-				this.showErrorMessage(maxSdkDisplayed, "android-maxSdkVersion", "Incorrect API level interval");
-
-			
-			} else {
-				//Hide the error message
-				this.hideErrorMessage("android-minSdkVersion");
-				this.hideErrorMessage("android-maxSdkVersion");
-
-				this.setValue(inValue.selected.value);							
-			}
-			
+			this.container.$["android-minSdkVersion"].showErrorMessage(minSdkDisplayed, "android-minSdkVersion", "Inconsistent API level values");
+			this.container.$["android-maxSdkVersion"].showErrorMessage(maxSdkDisplayed, "android-maxSdkVersion", "Inconsistent API level values");
+			this.container.$["android-targetSdkVersion"].showErrorMessage(tgtSdkDisplayed, "android-targetSdkVersion", "Inconsistent API level values");
+		}	
+		this.setValue(inValue.selected.value);
 		return true;
 	},
 
