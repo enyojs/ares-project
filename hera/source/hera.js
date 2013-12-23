@@ -1,7 +1,7 @@
 // Copyright 2013, $ORGANIZATION
 // All rights reserved.
 
-/* global ares */
+/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, $L, setTimeout */
 
 enyo.kind({
 	name: "Hera",
@@ -91,7 +91,7 @@ enyo.kind({
 	*/
 	cssload: function(data){
 		this.trace("data", data);
-		var d = data.originator.$.ace.value;
+		var d = data.originator.$.aceWrapper.value;
 		this.dePuzzle(d);
 	},
 	

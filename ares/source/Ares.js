@@ -87,7 +87,6 @@ enyo.kind({
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
 	enyoEditorIndex: 2,
-
 	heraViewIndex: 2,
 	projectListWidth: 300,
 	isProjectView: true,
@@ -411,16 +410,14 @@ enyo.kind({
 	*/
 	cssDocument: function(inSender, inEvent){
 		ComponentsRegistry.getComponent("hera").cssload(inEvent);
-		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.heraViewIndex);
-		this.activeDocument.setCurrentIF('hera');
+		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.heraViewIndex);
 	},
 	/*
 	* close hera
 	* @protected
 	*/
 	closecss: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("developmentPanel").$.panels.setIndex(this.phobosViewIndex);
-		this.activeDocument.setCurrentIF('code');
+		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.phobosViewIndex);
 	},
 	/*
 	* write the new css to the end of the file
