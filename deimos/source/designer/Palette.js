@@ -1,6 +1,11 @@
 /* global ares */
 enyo.kind({
 	name: "CategoryItem",
+	/** @public */
+	published: {
+		//* When true, Drawer is shown as disabled and does not and not respond to tap
+		disabled: false
+	},
 	components: [
 		{classes: "palette-category", components: [
 			{ontap: "toggleDrawer", classes: "palette-category-name", components: [
@@ -18,15 +23,19 @@ enyo.kind({
 		onToggledDrawer: ""
 	},
 	toggleDrawer: function() {
-		var open = this.$.drawer.getOpen();
-		this.$.drawer.setOpen(!open);
-		this.$.indicator.addRemoveClass("turned", !open);
-		this.doToggledDrawer();
+		if (!this.getDisabled()) {
+			var open = this.$.drawer.getOpen();
+			this.$.drawer.setOpen(!open);
+			this.$.indicator.addRemoveClass("turned", !open);
+			this.doToggledDrawer();
+		}
 	},
 	setModel: function(inModel) {
 		this.model = inModel;
 		this.$.name.setContent(this.model.name);
 		this.$.list.count = this.model.items.length;
+		//* Set disabled if items list is empty
+		this.setDisabled(!this.model.items.length);
 		if (this.$.list.count === 0 && this.$.drawer.getOpen()) {
 			this.openDrawer();
 		}
@@ -41,8 +50,10 @@ enyo.kind({
 	},
 	/** @public */
 	openDrawer: function() {
-		this.$.drawer.setOpen(true);
-		this.$.indicator.addRemoveClass("turned", true);
+		if (!this.getDisabled()) {
+			this.$.drawer.setOpen(true);
+			this.$.indicator.addRemoveClass("turned", true);
+		}
 	},
 	/** @public */
 	closeDrawer: function() {
@@ -52,6 +63,13 @@ enyo.kind({
 	/** @public */
 	drawerStatus: function() {
 		return this.$.drawer.getOpen();
+	},
+	/** @private */
+	disabledChanged: function(oldValue) {
+		if (this.$.drawer.getOpen()) {
+			this.closeDrawer();
+		}
+		this.applyStyle("opacity", this.disabled ? 0.5 : 1);
 	}
 });
 
@@ -65,19 +83,24 @@ enyo.kind({
 		]}
 	],
 	handlers: {
-		ondragstart: "decorateDragEvent"
+		ondragstart: "decorateDragEvent",
+		onmousedown: "selectItem"
 	},
 	//* On dragstart, add _this.config_ data to drag event
 	decorateDragEvent: function(inSender, inEvent) {
-		if(!inEvent.dataTransfer) {
+		if (!inEvent.dataTransfer) {
 			return true;
 		}
-		
 		inEvent.config = this.config;
 		inEvent.options = this.options;
 	},
+	selectItem: function(inSender, inEvent) {
+		//* Bubble after mousedown event
+		this.bubbleUp("onSelectedItem", {item: this});
+	},
 	setModel: function(inModel) {
 		if (inModel) {
+			/* jshint ignore:start */
 			for (var n in inModel) {
 				var c = this.$[n];
 				if (c) {
@@ -90,6 +113,7 @@ enyo.kind({
 					}
 				}
 			}
+			/* jshint ignore:end */
 			this.config = inModel.config;
 			this.options = inModel.options;
 		}
@@ -100,7 +124,13 @@ enyo.kind({
 	name: "Palette",
 	style: "position: relative",
 	published: {
-		projectIndexer: ""
+		projectIndexer: "",
+		//* True - if need highlighted
+		highlighted: true,
+		//* Active Item - which will be highlighted
+		selectedComponent: null,
+		//* If true - filtering state is active
+		filteringState: false
 	},
 	debug: false,
 	components: [
@@ -122,12 +152,22 @@ enyo.kind({
 	],
 	handlers: {
 		ondragstart: "dragstart",
-		onToggledDrawer: "toggledDrawer"
+		onToggledDrawer: "toggledDrawer",
+		onSelectedItem: "selectedItem"
 	},
 	create: function () {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.$.expandAllCategoriesButton.setDisabled(true);
+		this.$.collapseAllCategoriesButton.setDisabled(true);
+	},
+	rendered: function() {
+		//* Сure the browsers cache
+		window.setTimeout(enyo.bind(this, function() {
+			// hack for enyo.Input (FF and some browsers) 
+			this.$.filterPalette.setValue(' ');
+			this.$.filterPalette.setValue('');
+		}), 0);
 	},
 	setupItem: function(inSender, inEvent) {
 		var index = inEvent.index;
@@ -174,15 +214,41 @@ enyo.kind({
 				}
 			}, this);
 		}
-		
-		this.palette = allPalette;
+
+		this.palette = allPalette; 
 		this.palette.sort(function(a,b) {
 			return (a.name || "").localeCompare(b.name || "") + (a.order || 0) - (b.order || 0);
 		});
-				
+
 		// count reset must be forced
 		this.$.list.set("count", 0);
 		this.$.list.set("count", this.palette.length);
+		// List will be scroll to top or first not empty drawer
+		this.scrollListTo(this.setFilteringState() ? 'first' : 'top');
+		this.expandControlButtonsChange();
+	},
+	/**
+	 * Provide correct scroll to first visible drawer
+	 * @protected
+	 */
+	scrollListTo: function(position) {
+		this.$.scroller.render();
+		if (position === 'top') {
+			this.$.scroller.setScrollTop(0);
+		} else if (position === 'first') {
+			var drawers = this.$.list.getControls(), foundFirst = null;
+			for (var i = 0, cnt = drawers.length; i < cnt; ++i) {
+				if (!drawers[i].$.categoryItem.getDisabled() && (drawers[i].$.categoryItem.$.name.content !== "ignore")) {
+					foundFirst = drawers[i].$.categoryItem;
+					break;
+				}
+			}
+			if (foundFirst) {
+				this.$.scroller.scrollToNode(foundFirst.hasNode());
+			} else {
+				this.$.scroller.setScrollTop(0);
+			}
+		}
 	},
 	/**
 	 * Builds "catch-all palette" entries.  The standard palette comes from the projectIndexer's
@@ -259,83 +325,130 @@ enyo.kind({
 				catchAllPalette.push(catchAllCategories[p]);
 			}
 		}
-		
 		return catchAllPalette;
 	},
 	/** @private */
 	paletteFiltering: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
-		
+
 		if (this.$.filterPalette.getValue() === "") {
 			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-search.png");
-			this.$.expandAllCategoriesButton.setDisabled(true);
-			this.$.collapseAllCategoriesButton.setDisabled(false);
+			this.setFilteringState(false);
 		} else {
 			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-cancel.png");
+			this.setFilteringState(true);
 		}
 		this.projectIndexerChanged();
-
 		return true;
 	},
 	/** @private */
 	resetFilter: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
-		
+
 		if (this.$.filterPalette.getValue() !== "") {
 			this.$.filterPalette.setValue("");
 			this.paletteFiltering();
 		}
-
 		return true;
 	},
 	/** @private */
 	expandAllCategories: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 
-		this.resetFilter();
-		this.$.expandAllCategoriesButton.setDisabled(true);
-		this.$.collapseAllCategoriesButton.setDisabled(false);
-
 		for (var i = 0; i < this.$.list.count; i ++) {
-			this.$.list.getControls()[i].$.categoryItem.openDrawer();
+			if (!this.$.list.getControls()[i].$.categoryItem.getDisabled()) {
+				this.$.list.getControls()[i].$.categoryItem.openDrawer();
+			}
 		}
-		
+		this.expandControlButtonsChange();
+		this.scrollListTo('top');
 		return true;
 	},
 	/** @private */
 	collapseAllCategories: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
-		
-		this.resetFilter();
-		this.$.collapseAllCategoriesButton.setDisabled(true);
-		this.$.expandAllCategoriesButton.setDisabled(false);
-		
-		for (var i = 0; i < this.$.list.count; i ++) {
-			this.$.list.getControls()[i].$.categoryItem.closeDrawer();
-		}
 
+		this.setSelectedComponent(null); // Clear highlighted item
+		for (var i = 0; i < this.$.list.count; i ++) {
+			if (!this.$.list.getControls()[i].$.categoryItem.getDisabled()) {
+				this.$.list.getControls()[i].$.categoryItem.closeDrawer();
+			}
+		}
+		this.expandControlButtonsChange();
+		this.scrollListTo('top');
 		return true;
 	},
 	/** @private */
 	toggledDrawer: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 
-		var j = 0;
-		for (var i = 0; i < this.$.list.count; i ++) {
-			if (this.$.list.getControls()[i].$.categoryItem.drawerStatus()) {
-				j++;
-			} else {
-				j--;
-			}
-		}
+		var selectedItem = this.getSelectedComponent(),
+			list = inEvent.originator.$.list.getComponents();
 
-		if (j === this.$.list.count) {
+		//* Clear highlighted item if it exists 
+		enyo.forEach(list, enyo.bind(this, function(item) {
+			if (item.$.paletteItem === selectedItem) {
+				this.setSelectedComponent(null);
+				return false;
+			}
+		}));
+		this.expandControlButtonsChange();
+	},
+	
+	/**
+	 * Enable/Disable exp.control buttons
+	 * @protected
+	 */
+	expandControlButtonsChange: function () {
+		var drawers = this.$.list.getControls(),
+			openedDrawers = 0,
+			closedDrawers = 0;
+		// sum opened and closed drawers
+		enyo.forEach(drawers, function(drawer) {
+			if (!drawer.$.categoryItem.getDisabled() && (drawer.$.categoryItem.$.name.content !== "ignore")) {
+				if (drawer.$.categoryItem.drawerStatus() === true) {
+					openedDrawers++;
+				} else {
+					closedDrawers++;
+				}
+			}
+		});
+		// Enable/Disable exp.control buttons in accordance with 
+		// opened and closed drawers
+		if (openedDrawers === 0 && closedDrawers === 0) {
 			this.$.expandAllCategoriesButton.setDisabled(true);
-		} else if (j === -(this.$.list.count)) {
 			this.$.collapseAllCategoriesButton.setDisabled(true);
-		} else {
+		} else if (openedDrawers > 0 && closedDrawers > 0) {
 			this.$.expandAllCategoriesButton.setDisabled(false);
 			this.$.collapseAllCategoriesButton.setDisabled(false);
+		} else if (openedDrawers > 0 && closedDrawers === 0) {
+			this.$.expandAllCategoriesButton.setDisabled(true);
+			this.$.collapseAllCategoriesButton.setDisabled(false);
+		} else {
+			this.$.expandAllCategoriesButton.setDisabled(false);
+			this.$.collapseAllCategoriesButton.setDisabled(true);
+		}
+	},
+
+	selectedItem: function(inSender, inEvent) {
+		this.setSelectedComponent(inEvent.item);
+		return true;
+	},
+
+	selectedComponentChanged: function(prevSelectedComponent) {
+		if (this.highlighted) { // if needs highlighted
+			if (prevSelectedComponent && prevSelectedComponent.$.control) {
+				prevSelectedComponent.$.control.addRemoveClass("selected", false);
+			}
+			if (this.selectedComponent) {
+				this.selectedComponent.$.control.addRemoveClass("selected", true);
+			}
+		}
+	},
+
+	filteringStateChanged: function() {
+		if (this.filteringState) {
+			this.expandControlButtonsChange();
 		}
 	}
 });
