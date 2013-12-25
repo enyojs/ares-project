@@ -32,23 +32,23 @@ enyo.kind({
 	components: [
 		{kind: "enyo.FittableColumns", style: "width: 33%; height: 100%;", components:[
 			
-			{name: "cssleft", kind: "leftpannel", style: "width: 100%; height: 100%; ",	classes:"ares_deimos_left"},
+			{name: "cssleft", kind: "leftpannel", style: "width: 100%; height: 100%; ",	classes:"ares_deimos_left"},	// left
 			
 			{name: "center", kind: "enyo.FittableRows", style: "width: 100%; height: 100%; ", components: [
 				
-				{name:"sampleBox", kind: "enyo.Panels",	style: "width: 100%; height: 60%; ", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
+				{name:"sampleBox", kind: "enyo.FittableColumns",	style: "width: 100%; height: 60%; ", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
 					{name: "Sample", allowHtml: true, style: "height: 60%; font-size: 10px;", components: [
 						{name: "sampletext", content: "Sample Text"},
 					]}
 				]},					
 				
-				{name:"outputBox", kind: "enyo.Panels",	style: "width: 100%; height: 40%; ", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
+				{name:"outputBox", kind: "enyo.FittableColumns",	style: "width: 100%; height: 40%; ", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
 					{name: "bg", allowHtml: true, style: "font-size: 13px;", content: ""},
 				]},	
 			]},// center
 			
 			{kind: "FittableRows", style: "width: 100%; height: 100%;", components: [
-				{kind: "Panels",  style: "width: 100%; height: 60%;", classes: "enyo-unselectable", components: [
+				{kind: "enyo.FittableColumns",  style: "width: 100%; height: 60%;", classes: "enyo-unselectable", components: [
 					{name: "list", kind: "List", count: 100, multiSelect: false, classes: "list-sample-list", onSetupItem: "setupItem", components: [
 						{name: "item", style: "width: 100%;", classes: "list-sample-item enyo-border-box", ontap: "classGrabber", components: [
 							{name: "name2", style: "width: 100%;"}
@@ -56,7 +56,7 @@ enyo.kind({
 					]},
 				]},
 
-				{kind: "Panels", style: "width: 100%; height: 40%;", fit: true, classes: "enyo-unselectable", components: [
+				{kind: "enyo.FittableColumns", style: "width: 100%; height: 40%;", fit: true, classes: "enyo-unselectable", components: [
 					{name: "valueinput", kind: "valueInput", onUpdate: "change"},
 					
 				]}
