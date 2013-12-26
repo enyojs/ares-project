@@ -1,7 +1,7 @@
 // Copyright 2013, $ORGANIZATION
 // All rights reserved.
 
-/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, $L, setTimeout */
+/*global  enyo, ares, */
 
 enyo.kind({
 	name: "Hera",
