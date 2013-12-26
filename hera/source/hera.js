@@ -1,7 +1,7 @@
 // Copyright 2013, $ORGANIZATION
 // All rights reserved.
 
-/*global  enyo, ares, */
+/*global enyo, ares */
 
 enyo.kind({
 	name: "Hera",
