@@ -26,6 +26,7 @@ enyo.kind({
 			fontsize:12,
 			wordwrap:false,
 			rightpane:true,
+			autotrace:false,
 			keys:{ }
 		}
 	},
@@ -103,6 +104,10 @@ enyo.kind({
 								{content: 36}
 							]}
 						]}
+					]},
+					{classes: "ares-row", components: [
+						{name: "atrace",tag:"label",  classes: "ares-fixed-label ace-label", content: "Auto add trace line's"},
+						{name: "atracebuttton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "aTrace"}
 					]}
 				]}
 			]},
@@ -297,5 +302,10 @@ enyo.kind({
 		this.getValuesFromLocalStorage();
 		this.initSettingsPopupFromLocalStorage();
 		this.doClose();
+	},
+	
+	aTrace: function(inSender, inEvent){
+		this.previewSettings.autotrace = inEvent.value;
+		//this.doChangeSettings();
 	}
 });
