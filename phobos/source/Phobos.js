@@ -612,7 +612,7 @@ enyo.kind({
 					commaTerminated = false;
 					codeToInsert += ("\t" + item + ": function(inSender, inEvent) {" + lineTermination);
 					if(this.$.editorSettingsPopup.settings.autotrace === true){
-						codeToInsert += ('\t\tthis.trace("sender:", inSender, ", event:", inEvent);' + lineTermination);
+						codeToInsert += ('\t\t' + this.$.editorSettingsPopup.settings.autotraceLine + lineTermination);
 					}
 					codeToInsert += ("\t\t// TO DO - Auto-generated code" + lineTermination + "\t}");
 				}
