@@ -610,8 +610,11 @@ enyo.kind({
 					// use correct line terminations
 					codeToInsert += (commaTerminated ? "" : "," + lineTermination);
 					commaTerminated = false;
-					codeToInsert += ("\t" + item + ": function(inSender, inEvent) {" + lineTermination + "\t\t// TO");
-					codeToInsert += ("DO - Auto-generated code" + lineTermination + "\t}");
+					codeToInsert += ("\t" + item + ": function(inSender, inEvent) {" + lineTermination);
+					if(this.$.editorSettingsPopup.settings.autotrace === true){
+						codeToInsert += ('\t\tthis.trace("sender:", inSender, ", event:", inEvent);' + lineTermination);
+					}
+					codeToInsert += ("\t\t// TO DO - Auto-generated code" + lineTermination + "\t}");
 				}
 			}
 
