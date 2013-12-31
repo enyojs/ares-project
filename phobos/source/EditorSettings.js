@@ -18,6 +18,7 @@ enyo.kind({
 			fontsize:12,
 			wordwrap:false,
 			rightpane:true,
+			autotrace:false,
 			keys:{ }
 		},
 		previewSettings: {
