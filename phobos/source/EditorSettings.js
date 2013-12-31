@@ -1,4 +1,4 @@
-/* jshint indent: false */ // TODO: ENYO-3311
+/* jshint indent:false */ // TODO: ENYO-3311
 /* global ares */
 enyo.kind({
 	name: "EditorSettings",
@@ -19,6 +19,7 @@ enyo.kind({
 			wordwrap:false,
 			rightpane:true,
 			autotrace:false,
+			autotraceLine: 'this.trace("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
 		},
 		previewSettings: {
@@ -28,6 +29,7 @@ enyo.kind({
 			wordwrap:false,
 			rightpane:true,
 			autotrace:false,
+			autotraceLine: 'this.trace("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
 		}
 	},
@@ -107,10 +109,15 @@ enyo.kind({
 						]}
 					]},
 					{classes: "ares-row", components: [
-						{name: "atrace",tag:"label",  classes: "ares-fixed-label ace-label", content: "Auto add trace line's"},
+						{name: "atrace",tag:"label",  classes: "ares-fixed-label ace-label", content: "Deimos add trace line's automatically"},
 						{name: "atracebuttton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "aTrace"}
 					]}
 				]}
+			]},
+				{tag:"p", classes:"break"},
+			{ tag:"label", classes: "ares-fixed-label ace-label", content: "Auto Trace line too add"},
+			{kind: "onyx.InputDecorator", style: "width: 300px;  height: 25px;", components: [
+				{name: "autotraceInput", kind: "onyx.Input", style: "width: 100%;  height: 100%;", placeholder: "Enter some text...", onchange: "newAutoTraceLine"}
 			]},
 			{tag:"p", classes:"break"},
 			{kind:"FittableRows", name: "functionKeys", components: [
@@ -163,7 +170,8 @@ enyo.kind({
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
 		this.$.rightPaneButton.value = this.settings.rightpane;
-
+		this.$.atracebuttton.setValue(this.settings.autotrace);
+		this.$.autotraceInput.setValue(this.settings.autotraceLine);
 		var themesControls = this.$.themes.getClientControls();
 		enyo.forEach(themesControls, function(control) {
 			if (control.content == this.settings.theme) {
@@ -222,8 +230,12 @@ enyo.kind({
 		}, this);
 
 		this.$.rightPaneButton.setValue(this.settings.rightpane);
+		this.$.atracebuttton.setValue(this.settings.autotrace);
+		this.$.autotraceInput.setContent(this.settings.autotraceLine);		
 		//deep copy: settings in previewSettings
 		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
+		
+	
 	},
 
 	themeSelected: function(inSender, inEvent) {
@@ -307,6 +319,13 @@ enyo.kind({
 	
 	aTrace: function(inSender, inEvent){
 		this.previewSettings.autotrace = inEvent.value;
-		//this.doChangeSettings();
+	},
+	newAutoTraceLine: function(inSender, inEvent) {
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.previewSettings.autotraceLine = inSender.value;
+	},
+	On: function(inSender, inEvent) {
+		this.trace("sender:", inSender, ", event:", inEvent);
+		// TO DO - Auto-generated code
 	}
 });
