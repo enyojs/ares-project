@@ -18,10 +18,12 @@ enyo.kind({
 		onToggledDrawer: ""
 	},
 	toggleDrawer: function() {
-		var open = this.$.drawer.getOpen();
-		this.$.drawer.setOpen(!open);
-		this.$.indicator.addRemoveClass("turned", !open);
-		this.doToggledDrawer();
+		if (this.$.list.count !== 0) {
+			var open = this.$.drawer.getOpen();
+			this.$.drawer.setOpen(!open);
+			this.$.indicator.addRemoveClass("turned", !open);
+			this.doToggledDrawer();
+		}
 	},
 	setModel: function(inModel) {
 		this.model = inModel;
