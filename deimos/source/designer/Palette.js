@@ -28,7 +28,7 @@ enyo.kind({
 		this.$.name.setContent(this.model.name);
 		this.$.list.count = this.model.items.length;
 		if (this.$.list.count === 0 && this.$.drawer.getOpen()) {
-			this.openDrawer();
+			this.closeDrawer();
 		}
 		this.$.list.build();
 		if (this.$.name.content === "ignore") {
