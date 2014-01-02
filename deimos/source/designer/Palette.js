@@ -94,6 +94,7 @@ enyo.kind({
 					}
 				}
 			}
+			this.attributes.title = inModel.description;
 			this.config = inModel.config;
 			this.options = inModel.options;
 		}
