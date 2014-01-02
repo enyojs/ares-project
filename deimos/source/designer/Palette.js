@@ -17,13 +17,15 @@ enyo.kind({
 	events: {
 		onToggledDrawer: ""
 	},
-	toggleDrawer: function() {
+	toggleDrawer: function(inSender, inEvent) {
 		if (this.$.list.count !== 0) {
 			var open = this.$.drawer.getOpen();
 			this.$.drawer.setOpen(!open);
 			this.$.indicator.addRemoveClass("turned", !open);
 			this.doToggledDrawer();
 		}
+
+		return true;
 	},
 	setModel: function(inModel) {
 		this.model = inModel;
