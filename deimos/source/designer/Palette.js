@@ -269,10 +269,11 @@ enyo.kind({
 		if (this.$.filterPalette.getValue() === "") {
 			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-search.png");
 			this.$.expandAllCategoriesButton.setDisabled(true);
-			this.$.collapseAllCategoriesButton.setDisabled(false);
 		} else {
 			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-cancel.png");
+			this.$.expandAllCategoriesButton.setDisabled(false);
 		}
+		this.$.collapseAllCategoriesButton.setDisabled(false);
 		this.projectIndexerChanged();
 
 		return true;
