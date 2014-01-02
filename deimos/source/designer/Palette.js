@@ -7,7 +7,7 @@ enyo.kind({
 				{name: "indicator", classes: "indicator turned"},
 				{name: "name", tag: "span"}
 			]},
-			{kind: "onyx.Drawer", name: "drawer", open:true, components: [
+			{kind: "onyx.Drawer", name: "drawer", open: true, components: [
 				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
 					{kind: "PaletteItem"}
 				]}
@@ -69,7 +69,7 @@ enyo.kind({
 	},
 	//* On dragstart, add _this.config_ data to drag event
 	decorateDragEvent: function(inSender, inEvent) {
-		if(!inEvent.dataTransfer) {
+		if (!inEvent.dataTransfer) {
 			return true;
 		}
 		
@@ -136,7 +136,7 @@ enyo.kind({
 		return true;
 	},
 	dragstart: function(inSender, inEvent) {
-		if(!inEvent.dataTransfer) {
+		if (!inEvent.dataTransfer) {
 			return true;
 		}
 
@@ -153,7 +153,7 @@ enyo.kind({
 	/**
 	 * The current project analyzer output has changed
 	 * Re-build the palette
-	 * @param value   the new analyzer output
+	 * @param value the new analyzer output
 	 * @protected
 	 */
 	projectIndexerChanged: function() {
