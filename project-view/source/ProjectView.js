@@ -115,11 +115,7 @@ enyo.kind({
 		}
 		return true; //Stop event propagation
 	},
-	setupProjectConfig: function(project) {
-		// Pass service definition & configuration to Harmonia
-		// & consequently to HermesFileTree
-		ComponentsRegistry.getComponent("harmonia").setProject(project);
-
+	setupProjectConfig: function(project, next) {
 		// FIXME: temporary hack to create config.json on the
 		// fly if needed... would be better to create/load it
 		// when the workspace is loaded & when a new project
@@ -127,21 +123,63 @@ enyo.kind({
 		// to the FileSystemService.
 		var self = this;
 		var config = new ProjectConfig();
-		config.init({
+		this.trace("setup project config init on "+ project.getName() );
+		self.currentProject = project;
+		var initData = {
 			service: project.getService(),
 			folderId: project.getFolderId()			
-		}, function(err) {
-			if (err) {
-				self.doError({msg: err.toString(), err: err});
+		};
+
+		async.parallel(
+			[
+				function (next) {
+					// Pass service definition & configuration to Harmonia
+					// & consequently to HermesFileTree
+					self.trace("ProjectView: setup project on harmonia "+ project.getName() );
+					ComponentsRegistry.getComponent("harmonia").setProject(project, next);
+				},
+				function (next) {
+					self.trace("project config init for "+ project.getName() );
+					async.series(
+						[
+							// read default config from remote server
+							config.init.bind(config, initData) ,
+							function (next) {
+								self.trace("ProjectView: setup project set config on "+ project.getName() );
+								project.setConfig(config);
+								
+								self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled)
+								next();
+							}
+						],
+						function (err) {
+							if (err) {
+								self.doError({msg: err.toString(), err: err});
+							} else {
+								next(err) ;
+							}
+						}
+					);
+				}
+			],
+			function (err) {
+				self.trace("ProjectView: setup project config done on " + project.getName() + " err is ",err );
+				if (next) {
+					next(err);
+				}
 			}
-			project.setConfig(config);
-			self.doProjectSelected();
-		});
-		
-		//Initialize the attribute "downloadStatus" of the project
-		//this attribute is used only by Phonegap Build.
-		if (project.getDownloadStatus() === undefined) {
-			project.setDownloadStatus({
+		);		
+	},
+
+	/**
+	 * Initialize the attribute "downloadStatus" of the project
+	 *
+	 * this attribute is used only by Phonegap Build.
+	 * @private
+	 */
+	initializeDownloadStatus: function(inProject, inPhonegapEnabled) {
+		if (inProject.getDownloadStatus() === undefined && inPhonegapEnabled) {
+			inProject.setDownloadStatus({
 				"android": "Ready for download", 
 				"ios": "Ready for download", 
 				"winphone": "Ready for download", 
@@ -149,9 +187,7 @@ enyo.kind({
 				"webos": "Ready for download"
 			});
 		}
-	
-		self.currentProject = project;
-	},
+	}, 
 	projectRemoved: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("harmonia").setProject(null);
 	},
