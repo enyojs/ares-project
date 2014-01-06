@@ -268,6 +268,8 @@ enyo.kind({
 					};
 					catchAllCategories[pkg] = cat;
 				}
+				// avoid HTML description coming from the API viewer
+				item.description = "";
 				cat.items.push(item);
 			} else {
 				// No package, so add to catch-all category
