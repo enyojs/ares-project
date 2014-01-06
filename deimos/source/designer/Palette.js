@@ -172,12 +172,29 @@ enyo.kind({
 			var k;
 			enyo.forEach(allPalette, function(category) {
 				for (k = 0; k < category.items.length; k++) {
-					if (category.items[k].name.toLowerCase().indexOf(filterString) == -1) {
+					if (category.items[k].name.toLowerCase().indexOf(filterString) === -1) {
 						category.items.splice(k, 1);
 						k--;
 					}
 				}
 			}, this);
+		}
+
+		var i = 0;
+		enyo.forEach(allPalette, function(category) {
+			if (category.items.length === 0) {
+				i--;
+			} else {
+				i++;
+			}
+		}, this);
+
+		if (i === this.$.list.count) {
+			this.$.expandAllCategoriesButton.setDisabled(true);
+			this.$.collapseAllCategoriesButton.setDisabled(false);
+		} else if (i === -(this.$.list.count)) {
+			this.$.expandAllCategoriesButton.setDisabled(true);
+			this.$.collapseAllCategoriesButton.setDisabled(true);
 		}
 		
 		this.palette = allPalette;
@@ -272,12 +289,11 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		
 		if (this.$.filterPalette.getValue() === "") {
-			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-search.png");
-			this.$.expandAllCategoriesButton.setDisabled(true);
+			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-search.png");		
 		} else {
 			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-cancel.png");
-			this.$.expandAllCategoriesButton.setDisabled(false);
 		}
+		this.$.expandAllCategoriesButton.setDisabled(true);
 		this.$.collapseAllCategoriesButton.setDisabled(false);
 		this.projectIndexerChanged();
 
@@ -298,21 +314,16 @@ enyo.kind({
 	expandAllCategories: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 
-		this.resetFilter();
+		this.paletteFiltering(inSender, inEvent);
 		this.$.expandAllCategoriesButton.setDisabled(true);
 		this.$.collapseAllCategoriesButton.setDisabled(false);
 
-		for (var i = 0; i < this.$.list.count; i ++) {
-			this.$.list.getControls()[i].$.categoryItem.openDrawer();
-		}
-		
 		return true;
 	},
 	/** @private */
 	collapseAllCategories: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		
-		this.resetFilter();
 		this.$.collapseAllCategoriesButton.setDisabled(true);
 		this.$.expandAllCategoriesButton.setDisabled(false);
 		
@@ -326,18 +337,22 @@ enyo.kind({
 	toggledDrawer: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 
-		var j = 0;
+		var openedCategories = 0,
+			closedCategories = 0;
+
 		for (var i = 0; i < this.$.list.count; i ++) {
 			if (this.$.list.getControls()[i].$.categoryItem.drawerStatus()) {
-				j++;
+				openedCategories++;
 			} else {
-				j--;
+				closedCategories--;
 			}
 		}
 
-		if (j === this.$.list.count) {
+		if (openedCategories === this.$.list.count) {
 			this.$.expandAllCategoriesButton.setDisabled(true);
-		} else if (j === -(this.$.list.count)) {
+			this.$.collapseAllCategoriesButton.setDisabled(false);
+		} else if (closedCategories === -(this.$.list.count)) {
+			this.$.expandAllCategoriesButton.setDisabled(false);
 			this.$.collapseAllCategoriesButton.setDisabled(true);
 		} else {
 			this.$.expandAllCategoriesButton.setDisabled(false);
