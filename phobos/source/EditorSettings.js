@@ -19,6 +19,7 @@ enyo.kind({
 			wordwrap:false,
 			rightpane:true,
 			autotrace:false,
+			autotraceLine: 'this.trace("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
 		},
 		previewSettings: {
@@ -28,6 +29,7 @@ enyo.kind({
 			wordwrap:false,
 			rightpane:true,
 			autotrace:false,
+			autotraceLine: 'this.trace("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
 		}
 	},
@@ -107,12 +109,22 @@ enyo.kind({
 						]}
 					]},
 					{classes: "ares-row", components: [
-						{name: "atrace",tag:"label",  classes: "ares-fixed-label ace-label", content: "Auto add trace line's"},
+						{name: "atrace", tag:"label",  classes: "ares-fixed-label ace-label", content: "Auto add trace line's"},
 						{name: "atracebuttton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "aTrace"}
 					]}
 				]}
 			]},
 			{tag:"p", classes:"break"},
+		
+			{kind:"FittableRows", components: [
+				{ content: "Trace line's that get auot add in deimos"},
+				{kind: "onyx.InputDecorator", classes: "ace-input-textarea", name: "inputDecorator", components: [
+					{kind: "onyx.Input", style: "width: 100%;", placeholder: "Enter text here", name: "autotextline", onchange: "atraceline"}
+				]}
+			]},
+		
+			{tag:"p", classes:"break"},
+			
 			{kind:"FittableRows", name: "functionKeys", components: [
 				{kind: "Control", name:"osMessage", classes:"ares-row", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
 				{kind: "onyx.MenuDecorator", name:"program_buttons", classes:"ares-row", components: [
@@ -163,7 +175,8 @@ enyo.kind({
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
 		this.$.rightPaneButton.value = this.settings.rightpane;
-
+		this.$.atracebuttton.value = this.settings.autotrace;
+		this.$.autotextline.setValue(this.settings.autotraceLine);
 		var themesControls = this.$.themes.getClientControls();
 		enyo.forEach(themesControls, function(control) {
 			if (control.content == this.settings.theme) {
@@ -308,5 +321,11 @@ enyo.kind({
 	aTrace: function(inSender, inEvent){
 		this.previewSettings.autotrace = inEvent.value;
 		//this.doChangeSettings();
+	},
+	
+	atraceline: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		console.log(inSender, inEvent);
+		this.previewSettings.autotraceLine = inSender.value;
 	}
 });
