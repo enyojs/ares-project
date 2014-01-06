@@ -1,6 +1,6 @@
-/* global require, ace, ComponentsRegistry */
+/*global require, ace, enyo, ComponentsRegistry */
 enyo.kind({
-	name: "enyo.Ace",
+	name: "enyo.AceWrapper",
 	kind: enyo.Control,
 	published: {
 		value: "",
@@ -21,12 +21,12 @@ enyo.kind({
 		onChange: "",
 		onScroll: "",
 		onCursorChange: "",
-		onSave: "",
 		onAutoCompletion: "",
 		onFind: "",
 		onWordwrap: "",
 		onFkey: "",
-		
+		onChildRequest: "",
+
 		/// FIXME just add these for now
 		onSetBreakpoint: "",
 		onClearBreakpoint: ""
@@ -75,7 +75,7 @@ enyo.kind({
 		commands.addCommand({
 			name: "save",
 			bindKey: {win: "Ctrl-S", mac: "Command-S"},
-			exec: enyo.bind(this, "saveDocAction")
+			exec: this.doChildRequest.bind(this,{task: "saveCurrentDoc"})
 		});
 
 		// Add keybinding for auto completion
@@ -106,7 +106,7 @@ enyo.kind({
 			//console.log(key);
 			commands.addCommand({
 				name: key,
-				bindKey: { win: "Ctrl-SHIFT-"+key, mac: "command-SHIFT-"+key },
+				bindKey: {win: "Ctrl-SHIFT-"+key},
 				exec: enyo.bind(this, 'doFkey' , [key])
 			});
 		}	
@@ -134,9 +134,6 @@ enyo.kind({
 	},
 	handleScroll: function(/* Dont handle parameters as we dont need them yet */) {
 		this.doScroll();
-	},
-	saveDocAction: function() {
-		this.doSave();
 	},
 	gutterclick: function(inEventInfo) {
 		this.toggleBreakpoint(inEventInfo.row);
@@ -499,7 +496,32 @@ enyo.kind({
 	replaceRange: function(range, text) {
 		this.getSession().replace(range, text);
 	},
-	
+	/**
+	 * Inserts at the specified position the new text passed
+	 * in the parameters
+	 * @param  position: the position to insert the new text
+	 * @param  text:  the new text
+	 * @public
+	 */
+	insertPosition: function(position, text) {
+		this.getSession().insert(position, text);
+	},
+	/**
+	 * Inserts at the specified position a new line
+	 * according to the line termination mode
+	 * @param  position: the position to insert the new line
+	 * @public
+	 */
+	insertNewLine: function(position) {
+		this.getSession().getDocument().insertNewLine(position);
+	},
+	/**
+	 * Get the line termination used according to the related mode
+	 * @public
+	 */
+	getNewLineCharacter: function() {
+		return this.getSession().getDocument().getNewLineCharacter();
+	},
 	setFontSize: function(size){
 		var s = size;
 		this.editor.setFontSize(s);
@@ -520,11 +542,11 @@ enyo.kind({
 	},
 	guttermousemove: function(inSender, inEvent) {
 		if(enyo.dom.canTransform() && enyo.platform.ie !== 10){
-			var developmentPanelTranslateX = ComponentsRegistry.getComponent("developmentPanel").domTransforms.translateX;
+			var enyoEditorTranslateX = ComponentsRegistry.getComponent("enyoEditor").domTransforms.translateX;
 			var aceTooltip = document.getElementsByClassName("ace_gutter-tooltip");
 			if(aceTooltip[0]){
-				if(this.translateX !== developmentPanelTranslateX){
-					this.setTranslateX(developmentPanelTranslateX);
+				if(this.translateX !== enyoEditorTranslateX){
+					this.setTranslateX(enyoEditorTranslateX);
 					this.applyInverseTransform(aceTooltip[0]);
 				}
 			}
@@ -539,6 +561,5 @@ enyo.kind({
 		}else{
 			htmlDiv.style[transformProp] = "none";
 		}
-	},
-	
+	}
 });

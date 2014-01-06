@@ -1,4 +1,4 @@
-/* global Ares, Backbone */
+/*global Ares, Backbone, enyo */
 
 enyo.singleton({
 	kind: "enyo.Component",
@@ -6,18 +6,60 @@ enyo.singleton({
 });
 
 Ares.Model.File = Backbone.Model.extend({				// TODO: Move to enyo.Model when possible
+	/**
+	 *
+	 * @returns {String} service_name-project_name_as_hex_and_file_id_in_hex
+	 */
 	getId: function() {
 		return this.get("id");
+	},
+
+	/**
+	 *
+	 * @returns {String} id encrypted in hexa
+	 */
+	getFileId: function() {
+		return this.get("file").id;
 	},
 	getFile: function() {
 		return this.get("file");
 	},
+	getName: function() {
+		return this.get("file").name;
+	},
+
+	/**
+	 * Returns data. Within Ares, this data is supposed to reflect the
+	 * content as stored on the file system. Ensuring this is the
+	 * caller responsability.
+	 * @returns {String}
+	 */
 	getData: function() {
 		return this.get("data");
 	},
+
+	/**
+	 * save data. Within Ares, this function is called when saving
+	 * file on the remote file system.
+	 * @param {String} data
+	 */
 	setData: function(data) {
 		this.set("data", data);
 	},
+
+	/**
+	 * Purpose within Ares: mirror the content of the ace session
+	 * updated when switching files, the content may no be up-to-date
+	 * for current document
+	 * @returns {String}
+	 */
+	getEditedData: function() {
+		return this.get("edited-data");
+	},
+	setEditedData: function(data) {
+		this.set("edited-data", data);
+	},
+
 	getProjectData: function() {
 		return this.get("project-data");
 	},

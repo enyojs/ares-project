@@ -1,4 +1,4 @@
-/* global analyzer, ProjectKindsModel, Inspector, ares */
+/* global analyzer, ProjectKindsModel, Inspector, ares, ComponentsRegistry */
 /* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
@@ -18,14 +18,21 @@ enyo.kind({
 		{kind: "Scroller", fit: true, components: [
 			{name: "content", kind: "FittableRows", onActivate: "inheritAttributeToggle"}
 		]},
-		{name: "filterLevel", kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"}
+		{name: "filterLevel", kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"},
+		{name: "partialFilter", kind: "onyx.InputDecorator", classes: "properties-filter", layoutKind: "FittableColumnsLayout", showing: false, components: [
+			{kind: "onyx.Input", name: "filterProperties", fit: true, placeholder: "filter", oninput: "propertiesFiltering"},
+			{kind: "onyx.Icon", classes: "filter-icon", name: "filterPropertiesIcon", src: "$deimos/images/search-input-search.png", ontap: "resetFilter"}
+		]},
+		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "selectFileChosen"}
 	],
 	handlers: {
 		onChange: "change",
 		onDblClick: "dblclick",
-		onPositionPropertyChanged: "positionPropertyChanged"
+		onPositionPropertyChanged: "positionPropertyChanged",
+		onInputButtonTap: "selectFile",
+		onPathChecked: "handlePathChecked"
 	},
-	style: "padding: 8px; white-space: nowrap;",
+	classes: "inspector-panel",
 	debug: false,
 	helper: null,			// Analyzer.KindHelper
 	userDefinedAttributes: {},
@@ -208,29 +215,32 @@ enyo.kind({
 		if (inType === 'events') {
 			kind = {kind: "Inspector.Config.Event", values: this.kindFunctions};
 		}
-		
+
 		info = ProjectKindsModel.getInfo(inControl.kind, inType, inName);
 		kind = (info && info.inputKind) || kind;
 		
-		// User defined kind: as an Object
+		if(inName === 'src'){
+			kind = {kind: "Inspector.Config.PathInputRow", label : inName};
+		}
 		if (kind && kind instanceof Object) {
 			kind = enyo.clone(kind);
 			kind = enyo.mixin(kind, {name: attributeFieldName, fieldName: inName, fieldValue: value, fieldType: inType, disabled: inherited});
 			attributeRow.createComponent(kind);
+			if (kind.kind === "Inspector.Config.PathInputRow" && kind.fieldValue) {
+				this.checkPath(attributeRow.$[attributeFieldName], kind.fieldValue);	
+			}
 		} else {
 			attributeKind = (kind)
 				?	kind
 				:	(value === true || value === false || value === "true" || value === "false")
 					?	"Inspector.Config.Boolean"
 					:	"Inspector.Config.Text";
-			
 			var values = info ? info.values : null;
 			var comp = {name: attributeFieldName, kind: attributeKind, fieldName: inName, fieldValue: value, extra: inType, disabled: inherited};
 			
 			if (values) {
 				comp.values = values;
 			}
-			
 			attributeRow.createComponent(comp);
 		}
 	},
@@ -353,6 +363,8 @@ enyo.kind({
 					this.makeEditor(inControl, p, ps[p], "properties");
 				}
 				this.$.filterLevel.show();
+				this.$.partialFilter.show();
+				this.propertiesFiltering();
 				break;
 			case 'E':
 				ps = ps.events;
@@ -363,6 +375,7 @@ enyo.kind({
 					this.makeEditor(inControl, p, "", "events");
 				}
 				this.$.filterLevel.show();
+				this.$.partialFilter.hide();
 				break;
 			case 'S':
 				var style = "";
@@ -371,10 +384,12 @@ enyo.kind({
 				}
 				this.$.content.createComponent({kind: "CssEditor", currentStyle: style, inspectorObj: this});
 				this.$.filterLevel.hide();
+				this.$.partialFilter.hide();
 				break;
 			case 'L':
 				this.makeLayoutEditor(inControl);
 				this.$.filterLevel.hide();
+				this.$.partialFilter.hide();
 				break;
 			default:
 				enyo.warn("Inspector has unknown filterType: ", this.filterType);
@@ -541,6 +556,105 @@ enyo.kind({
 
 		// Get the list of handler methods
 		this.kindFunctions = this.helper.getFunctions().sort();
+	},
+	//* @private
+	propertiesFiltering: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+
+		if (this.$.filterProperties.getValue() === "") {
+			this.$.filterPropertiesIcon.set("src", "$deimos/images/search-input-search.png");
+		} else {
+			this.$.filterPropertiesIcon.set("src", "$deimos/images/search-input-cancel.png");
+		}
+		this.filterProperties();
+
+		return true;
+	},
+	//* @private
+	filterProperties: function() {
+		var allProperties = this.$.content.getControls();
+		var filterString = this.$.filterProperties.getValue().toLowerCase();
+		enyo.forEach(allProperties, function(row) {
+			row.show();
+			if (filterString !== "") {
+				var controls = row.getControls();
+				if(controls.length){
+					enyo.forEach(controls, function(control) {
+						var fieldName = control.fieldName;
+						if(fieldName){
+							if(fieldName.toLowerCase().indexOf(filterString) === -1){
+								row.hide();
+							}
+						}
+					}, this);
+				}
+			}
+		}, this);
+	},
+	//* @private
+	resetFilter: function(inSender, inEvent) {
+		this.trace(inSender, "=>", inEvent);
+		if (this.$.filterProperties.getValue() !== "") {
+			this.$.filterProperties.setValue("");
+			this.propertiesFiltering();
+		}
+		return true;
+	},
+	selectFile: function(inSender, inData) {
+		this.trace(inSender, "=>", inData);
+		var project = ComponentsRegistry.getComponent("phobos").getProjectData();
+		this.chooser = inData.originator;
+		this.$.selectFilePopup.reset();
+		this.$.selectFilePopup.connectProject(project, (function() {
+			this.$.selectFilePopup.setHeaderText(inData.header);
+			this.$.selectFilePopup.pointSelectedName(inData.originator.getValue(), inData.originator.getStatus());
+			this.$.selectFilePopup.show();
+		}).bind(this));
+		return true;
+	},
+		/** @private */
+	selectFileChosen: function(inSender, inEvent) {
+		var chooser = this.chooser;
+		this.chooser = null;
+		if (!inEvent.file) {
+			// no file or folder chosen			
+			return true;
+		}
+		var value = inEvent.name.substr(1);
+		chooser.setFieldValue(value);
+		chooser.handleChange();
+		this.$.selectFilePopup.reset();
+		return true;
+	},
+	checkPath: function (pathComponent, value) {
+		this.checker = pathComponent;
+		if (value.match(/^https?:\/\//)){
+			this.pathChecked(true);
+			return true;
+		}
+		if (value.match(/^[\.\/]/)){
+			this.pathChecked(false);
+			return true;
+		}
+		var project = ComponentsRegistry.getComponent("phobos").getProjectData();
+		this.$.selectFilePopup.connectProject(project, (function() {
+			this.$.selectFilePopup.checkSelectedName("/"+value);
+		}).bind(this));		
+	},
+	handlePathChecked: function(inSender, inData){
+		this.pathChecked(inData.status);
+	},
+	/** @private */
+	pathChecked: function (status) {
+		var checker = this.checker;
+		this.checker = null;
+		this.$.selectFilePopup.reset();
+		this.updatePathCheck(checker, status);
+	},
+	updatePathCheck: function(pathComponent, status) {
+		pathComponent.setStatus(status);
+		pathComponent.disableFileChooser(false);
+		return true;
 	}
 });
 
@@ -550,7 +664,7 @@ enyo.kind({
 		onValueChanged: ""
 	},
 	components: [
-		{kind: "onyx.RadioGroup", fit: false, onActivate: "filterLevelActivated", style: "display:block;", controlClasses: "onyx-tabbutton inspector-tabbutton thirds", components: [
+		{kind: "onyx.RadioGroup", fit: false, onActivate: "filterLevelActivated", controlClasses: "onyx-tabbutton inspector-tabbutton filter thirds", components: [
 			{value: ProjectKindsModel.F_USEFUL,    content: "Frequent"},
 			{value: ProjectKindsModel.F_NORMAL,    content: "Normal", active: true},
 			{value: ProjectKindsModel.F_DANGEROUS, content: "All"}
@@ -610,3 +724,4 @@ enyo.kind({
 		}
 	}
 });
+

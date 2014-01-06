@@ -1,4 +1,4 @@
-/* global ares */
+/*global ares, enyo, setTimeout */
 
 enyo.kind({
 	name: "Harmonia",
@@ -23,6 +23,7 @@ enyo.kind({
 	],
 	debug: false,
 	published: {
+		// harcoded until ENYO-2755 is fixed
 		panelIndex: 1
 	},
 	create: function() {
@@ -38,12 +39,13 @@ enyo.kind({
 		this.$.hermesFileTree.hideFileOpButtons();
 		return true; //Stop event propagation
 	},
-	setProject: function(project) {
+	setProject: function(project, next) {
 		this.trace("project:", project);
 		if (project !== null) {
-			this.$.hermesFileTree.connectProject(project).showFileOpButtons();
+			this.$.hermesFileTree.connectProject(project, next).showFileOpButtons();
 		} else {
 			this.$.hermesFileTree.hideFileOpButtons().clear();
+			if (next) { setTimeout(next,0); }
 		}
 	},
 	showGrabber:function(){
@@ -56,11 +58,15 @@ enyo.kind({
 		this.$.aresGrabberDirection.switchGrabberDirection(active);
 	},
 	/**
-	 * Refresh the {HermesFileTree} (if relevant), following a change of the given file
-	 * @param {Object} changedFile
+	 * Refresh the {HermesFileTree}
+	 * @param {Object} toSelectId - changed file id
+	 * @param {Function} [callback] - optional callback
 	 */
-	refreshFile: function(changedFile) {
-		this.$.hermesFileTree.refreshFile(changedFile);
+	refreshFileTree: function(toSelectId,next) {
+		// the inversion of parameter is not an error.
+		// next parameter is optional (can be null or undef)
+		// ENYO-3641
+		this.$.hermesFileTree.refreshFileTree(next, toSelectId);
 	},
 	activePanel : function(){
 		this.doMovePanel({panelIndex:this.panelIndex});

@@ -1,4 +1,4 @@
-/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry */
+/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo */
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -11,6 +11,7 @@ enyo.kind({
 	classes: "enyo-unselectable",
 	debug: false,
 	published: {
+		// harcoded until ENYO-2755 is fixed
 		panelIndex: 0
 	},
 	components: [
@@ -52,10 +53,10 @@ enyo.kind({
 	},
 	/**
 	 * Refresh the {ProjectView} (if relevant), following a change of the given file
-	 * @param {Object} changedFile
+	 * @param {Object} toSelectId. Asynchronous
 	 */
-	refreshFile: function(changedFile) {
-		ComponentsRegistry.getComponent("harmonia").refreshFile(changedFile);
+	refreshFileTree: function(toSelectId,next) {
+		ComponentsRegistry.getComponent("harmonia").refreshFileTree(toSelectId,next);
 	},
 	searchProjectsAction: function(inSender, inEvent) {
 		this.$.projectWizardScan.setHeaderText('Select a folder hierarchy');
@@ -115,6 +116,11 @@ enyo.kind({
 		}
 		return true; //Stop event propagation
 	},
+	/**
+	 *
+	 * @param {Object} project
+	 * @param {Function} next
+	 */
 	setupProjectConfig: function(project, next) {
 		// FIXME: temporary hack to create config.json on the
 		// fly if needed... would be better to create/load it
@@ -158,19 +164,20 @@ enyo.kind({
 							} else {
 								next(err) ;
 							}
+							next(err) ;
 						}
 					);
 				}
 			],
 			function (err) {
 				self.trace("ProjectView: setup project config done on " + project.getName() + " err is ",err );
+				// ENYO-3629
 				if (next) {
 					next(err);
 				}
 			}
-		);		
+		);
 	},
-
 	/**
 	 * Initialize the attribute "downloadStatus" of the project
 	 *
@@ -264,13 +271,35 @@ enyo.kind({
 		} else {
 			provider[action](project, function(inError) {
 				self.doHideWaitPopup();
-				self.refreshFile(project.getFolderId());
+				self.refreshFileTree(project.getFolderId());
 				if (inError) {
 					self.doError({msg: inError.toString(), err: inError});
 				}
 			});
 		}
 	},
+
+	launchPreview: function (project) {
+		var config = project.getConfig() ;
+		var topFile = config.data.preview.top_file ;
+		var projectUrl = project.getProjectUrl() + '/' + topFile ;
+
+		// the last replace method is needed for test environment only
+		var winLoc = window.location.toString().replace('ares','preview').replace('test', 'index') ;
+		var previewUrl = winLoc
+				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
+				+ 'url=' + encodeURIComponent(projectUrl)+'&name=' + project.id;
+
+		this.trace("preview on URL ", previewUrl) ;
+
+		window.open(
+			previewUrl,
+			'_blank', // ensure that a new window is created each time preview is tapped
+			'scrollbars=0,menubar=1,resizable=1',
+			false
+		);
+	},
+
 	/**
 	 * Event handler: Launch a preview widget of the selected project in a separate frame
 	 * @param {enyo.Component} inSender
@@ -281,24 +310,7 @@ enyo.kind({
 	previewAction: function(inSender, inEvent) {
 		var project = inEvent.project;
 		if ( project) {
-			var config = project.getConfig() ;
-			var topFile = config.data.preview.top_file ;
-			var projectUrl = project.getProjectUrl() + '/' + topFile ;
-
-			// the last replace method is needed for test environment only
-			var winLoc = window.location.toString().replace('ares','preview').replace('test', 'index') ;
-			var previewUrl = winLoc
-				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
-				+ 'url=' + encodeURIComponent(projectUrl)+'&name=' + project.id;
-
-			this.trace("preview on URL ", previewUrl) ;
-			
-			window.open(
-				previewUrl,
-				'_blank', // ensure that a new window is created each time preview is tapped
-				'scrollbars=0,menubar=1,resizable=1',
-				false
-			);
+			this.launchPreview(project);
 		}
 		return true; // stop the bubble
 	}

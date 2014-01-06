@@ -8,7 +8,7 @@ enyo.kind({
 	modal : false,
 	classes: "ares_phobos_autocomp ares-masked-content-popup",
 	published: {
-		ace: null,
+		aceWrapper: null,
 		analysis: null,
 		projectData: null,
 		projectIndexer: null
@@ -49,31 +49,31 @@ enyo.kind({
 		this.inherited(arguments);
 	},
 	/**
-	 * The ace instance has been changed.
+	 * The aceWrapper instance has been changed.
 	 * We register the commands needed for auto-completion
 	 * @protected
 	 */
-	aceChanged: function() {
-		var ace = this.ace;
-		ace.addCommand({
+	aceWrapperChanged: function() {
+		var aceWrapper = this.aceWrapper;
+		aceWrapper.addCommand({
 			name: "Up",
 			bindKey: {win: "Up", mac: "Up"},
 			exec: enyo.bind(this, "cursorUp")
 		});
 
-		ace.addCommand({
+		aceWrapper.addCommand({
 			name: "Down",
 			bindKey: {win: "Down", mac: "Down"},
 			exec: enyo.bind(this, "cursorDown")
 		});
 
-		ace.addCommand({
+		aceWrapper.addCommand({
 			name: "Return",
 			bindKey: {win: "Return", mac: "Return"},
 			exec: enyo.bind(this, "keyReturn")
 		});
 
-		ace.addCommand({
+		aceWrapper.addCommand({
 			name: "Escape",
 			bindKey: {win: "ESC", mac: "ESC"},
 			exec: enyo.bind(this, "keyEscape")
@@ -158,11 +158,11 @@ enyo.kind({
 		if (inEvent) {	// Triggered by a '.' inserted by the user
 			popupPosition = inEvent.data.range.end;
 		} else {	// Triggered by a Ctrl-Space coming from the user
-			popupPosition = this.ace.getCursorPositionInDocument();
+			popupPosition = this.aceWrapper.getCursorPositionInDocument();
 		}
 
 		// Get the line and the last character entered
-		line = this.ace.getLine(popupPosition.row);
+		line = this.aceWrapper.getLine(popupPosition.row);
 		len = pattern.length;
 		last = line.substr(popupPosition.column - len, len);
 		this.trace("last >>", last, " <<");
@@ -185,11 +185,11 @@ enyo.kind({
 		if (inEvent) {	// Triggered by a '.' inserted by the user
 			popupPosition = inEvent.data.range.end;
 		} else {	// Triggered by a Ctrl-Space coming from the user
-			popupPosition = this.ace.getCursorPositionInDocument();
+			popupPosition = this.aceWrapper.getCursorPositionInDocument();
 		}
 
 		// Get the line and the last character entered
-		line = this.ace.getLine(popupPosition.row);
+		line = this.aceWrapper.getLine(popupPosition.row);
 		
 		// Find the name of the components
 		for(var i = 0, o; (o = this.analysis.objects[this.analysis.currentObject].components[i]); i++) {
@@ -345,9 +345,9 @@ enyo.kind({
 			select.render();
 
 			// Compute the position of the popup
-			var ace = this.ace;
-			var pos = ace.textToScreenCoordinates(this.popupPosition.row, this.popupPosition.column);
-			this.applyStyle("padding-top", ace.getLineHeight() + "px");
+			var aceWrapper = this.aceWrapper;
+			var pos = aceWrapper.textToScreenCoordinates(this.popupPosition.row, this.popupPosition.column);
+			this.applyStyle("padding-top", aceWrapper.getLineHeight() + "px");
 			var p = {
 			    left: pos.pageX,
 			    top: pos.pageY
@@ -402,7 +402,7 @@ enyo.kind({
 		var pos = enyo.clone(this.popupPosition);
 		pos.column += this.input.length;
 		this.trace("Inserting >>", selected, "<< at ", enyo.json.stringify(pos));
-		this.ace.insertAt(pos, selected);
+		this.aceWrapper.insertAt(pos, selected);
 		this.doAceFocus();
 		return true; // Stop the propagation of the event
 	},
@@ -446,7 +446,7 @@ enyo.kind({
 			}
 
 			// Get the line and the last characters entered
-			var line = this.ace.getLine(current.row);
+			var line = this.aceWrapper.getLine(current.row);
 			this.input = line.substr(this.popupPosition.column, len);
 			this.showAutocompletePopup();
 		}
@@ -465,7 +465,7 @@ enyo.kind({
 			if (selected < 0) { selected = select.nbEntries - 1;}
 			select.setSelected(selected);
 		} else {
-			this.ace.navigateUp(1);
+			this.aceWrapper.navigateUp(1);
 		}
 	},
 	/**
@@ -481,7 +481,7 @@ enyo.kind({
 			var selected = (select.getSelected() + 1) % select.nbEntries;
 			select.setSelected(selected);
 		} else {
-			this.ace.navigateDown(1);
+			this.aceWrapper.navigateDown(1);
 		}
 	},
 	/**
@@ -504,7 +504,7 @@ enyo.kind({
 			this.autocompleteChanged();
 			this.hideAutocompletePopup();
 		} else {
-			this.ace.insertAtCursor("\n");
+			this.aceWrapper.insertAtCursor("\n");
 		}
 	},
 	/**

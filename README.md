@@ -62,6 +62,21 @@ The following features are in the works, and you should see them added as we mov
 Usage[](id:usage)
 -----
 
+### Configuration
+
+Depending on your network environment, you may need to setup a proxy URL to access Internet through a
+[proxy server](http://en.wikipedia.org/wiki/Proxy_server).
+
+This proxy URL can be set up with:
+
+1. `https_proxy` or `http_proxy` environment variable. I.e you can run node server with a command like `http_proxy=http://my-proxy.com:8080 node ide.js`
+1. edit the `globalProxyUrl` parameter at the beginning of [ide.json](ide.json) file to have something like `globalProxyUrl: "http://my-proxy.com:8080"'
+1. specific proxy per serrive. See "Advanced proxy setup" at the end of this document.
+
+By default, the service will get the proxy specified by
+`globalProxyUrl` parameter or by `https_proxy` environment variable or
+by `http_proxy` environment variable.
+
 ### Install
 
 1. Install Node.js 0.10.19 (or later) & its associated NPM (Node Package Manager) from a binary distribution, for example at [nodejs.org](http://nodejs.org/download/)
@@ -237,4 +252,21 @@ For this, load your logo in ares (recommended size is 42x42px). Change the follo
 To remove the logo's display from Ares, replace the call to ``this.setSource("path-to-your-logo")`` by:
 
 			this.hideLogo();
+
+## Advanced Proxy settings
+
+Proxy can be configured per service in  Ares `ide.json` configuration file. Sample
+advanced proxy configuration  is provided in  `ide.json` with the  `Xproxy` and
+`XproxyUrl` parameters.
+
+To setup a proxy specific to a service:
+
+* locate the service you want in `ide.json`
+* remove the `X` from `XproxyUrl` and `Xproxy` name
+* configure your proxy in the value of these parameters.
+
+Example:
+
+	"proxyUrl": "http://myproxy.some.where.org:8080",
+
 

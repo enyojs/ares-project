@@ -97,17 +97,19 @@ Instead of adding curly braces and going from one line to three lines for each t
 
 NB: if your file contains several kinds, each related "create" method must be modified if required (of course).
 
-Do not forget to add at the beginning of each file a reference to the global variable "ares": `/* global ares */`
+Do not forget to add at the beginning of each file a reference to the global variable "ares": `/*global ares */`
 
 Do not forget to add to your kind `debug:true` if you want to print the trace.
 
 You can then directly call this.trace() in the same way this.log is used.
 
-WARNING: Removing the "`if (this.debug)`" test can add CPU overhead in particular when concataining strings or invoking functions in the "`this.trace()`" call.
+WARNING: Calling `this.trace` can add CPU overhead. Overhead is high when:
+* concataining objects and  strings (objects are stringified even if `this.debug` is false)
+* invoking functions in the "`this.trace()`", e.g. `this.trace(this.getStuff())`;
 
 So, it's recommended to pass each string element as a parameter instead of concataining them with "+" operator.
 
-`this.debug` is still available and can be used if needed.
+`this.debug` is still available and can be used when the parameters of `this.trace` calls are complex.
 
 NOTE: For production, we may suppress the "this.trace()" code when doing the minification process.
 
