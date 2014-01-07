@@ -76,9 +76,14 @@ enyo.kind({
 		while (expVer.length) {
 			mysv  =  myVer.shift();
 			expsv = expVer.shift();
+
 			// myVer and exptVer contain a string. Need to cast them
 			// to Number before trying a numeric comparison. Otherwise
 			// a lexicographic comparison is used.
+			if (/\d/.test(mysv) ? Number(mysv) > Number(expsv) : mysv > expsv) {
+				// found a greater version, no need to compare lower fields
+				break;
+			}
 			if (/\d/.test(mysv) ? Number(mysv) < Number(expsv) : mysv < expsv) {
 				errMsg = "Enyo used by your application is too old ("
 					+ myVerStr + "). Console log may show duplicated kind error "
