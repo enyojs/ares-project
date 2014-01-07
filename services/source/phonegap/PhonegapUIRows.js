@@ -625,13 +625,22 @@ enyo.kind({
 		}
 
 		/*
-			The SDK values are correct, either:
-			1- if there is target SDK expressed, and min <= target <= max
-			2- if there is no target SDK, and min <= max
+			The SDK values are correct, if and only if:
+			case1: There _is_ a specified target SDK expressed, and
+				case 11: min <= target <= max
+				OR case 12: min <= target & max == none
+			OR case2: There is no target SDK expressedn, and 
+				case 21: min <= max
+				OR case 22: OR max == none
 		*/
-		if (((minValue <= tgtValue) && (tgtValue <= maxValue) && (!isNaN(tgtValue))) ||
-			((minValue <= maxValue) && (isNaN(tgtValue)))
-			) {
+
+		var c11, c12, c21, c22;
+		c11 = (!isNaN(tgtValue)) && (minValue <= tgtValue) && (tgtValue <= maxValue);
+		c12 = (!isNaN(tgtValue)) && (isNaN(maxValue)) && (minValue <= tgtValue);
+		c21 = isNaN(tgtValue) && (minValue <= maxValue);
+		c22 = isNaN(tgtValue) && isNaN(maxValue);
+
+		if (c11 || c12 || c21 || c22) {
 			//Hide the error message
 			this.container.$["android-minSdkVersion"].hideErrorMessage("android-minSdkVersion");
 			this.container.$["android-maxSdkVersion"].hideErrorMessage("android-maxSdkVersion");
