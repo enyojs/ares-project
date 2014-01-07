@@ -928,41 +928,73 @@ enyo.kind({
 		}
 
 		var createIconXMLRow = function(inTarget) {
-			xw.writeStartElement( 'icon' );
-			// If the project does not define an icon, use Enyo's
-			// one
-			xw.writeAttributeString('src', phonegap.icon[inTarget].src || 'icon.png');
-			
-			xw.writeAttributeString('role', phonegap.icon[inTarget].role || 'default');
-			if(inTarget != 'sharedConfiguration'){
-				xw.writeAttributeString('gap:platform', inTarget);
-			}
-
-			if (inTarget === 'android'){
-				xw.writeAttributeString('gap:density', phonegap.icon[inTarget].density || "mdpi");
+			if (inTarget == 'sharedConfiguration') {
+				// we should always declare at least the 'platform neutral' icon 
+				xw.writeStartElement( 'icon' );	
+				// If the project does not define an icon, use Enyo's one
+				xw.writeAttributeString('src', phonegap.icon[inTarget].src || 'icon.png');
+				if (phonegap.icon[inTarget].width) {
+					xw.writeAttributeString('width', phonegap.icon[inTarget].width);	
+				}
+				if (phonegap.icon[inTarget].height) {
+					xw.writeAttributeString('height', phonegap.icon[inTarget].height);
+				}
 			} else {
-				xw.writeAttributeString('width', phonegap.icon[inTarget].width || 32);
-				xw.writeAttributeString('height', phonegap.icon[inTarget].height || 32);
+				// platform specific icon should only be declared if they exists...
+				// (i.e. if they differ from std icon)
+				if (phonegap.icon[inTarget].src && phonegap.icon[inTarget].src.length > 0) {
+					xw.writeStartElement( 'icon' );
+					xw.writeAttributeString('src', phonegap.icon[inTarget].src);
+					xw.writeAttributeString('gap:platform', inTarget);
+					if (inTarget === 'android'){
+						if (phonegap.icon[inTarget].density) {
+							xw.writeAttributeString('gap:density', phonegap.icon[inTarget].density);
+						}
+					} else {
+						if (phonegap.icon[inTarget].width) {
+							xw.writeAttributeString('width', phonegap.icon[inTarget].width);	
+						}
+						if (phonegap.icon[inTarget].height) {
+							xw.writeAttributeString('height', phonegap.icon[inTarget].height);
+						}
+					}
+				}
 			}
-
 			xw.writeEndElement();
 		};
 
 		var createSplashScreenXMLRow = function(inTarget) {
-			xw.writeStartElement( 'gap:splash' );
-			// If the project does not define an icon, use Enyo's
-			// one
-			xw.writeAttributeString('src', phonegap.splashScreen[inTarget].src || 'icon.png');
-			if(inTarget != 'sharedConfiguration'){
-				xw.writeAttributeString('gap:platform', inTarget);
-			}
-			if (inTarget === 'android'){
-				xw.writeAttributeString('gap:density', phonegap.splashScreen.android.density || 'mdpi');
+			if (inTarget == 'sharedConfiguration') {
+				// we should always declare at least the 'platform neutral' splash 
+				// If the project does not define a splash , use Enyo icon
+				xw.writeStartElement('gap:splash');
+				xw.writeAttributeString('src', phonegap.splashScreen[inTarget].src || 'icon.png');
+				if (phonegap.splashScreen[inTarget].width) {
+					xw.writeAttributeString('width', phonegap.splashScreen[inTarget].width);
+				}
+				if (phonegap.splashScreen[inTarget].height) {
+					xw.writeAttributeString('height', phonegap.splashScreen[inTarget].height);
+				}
 			} else {
-				xw.writeAttributeString('width', phonegap.splashScreen[inTarget].width || 60);
-				xw.writeAttributeString('height', phonegap.splashScreen[inTarget].height || 60);
+				if (phonegap.splashScreen[inTarget].src && phonegap.splashScreen[inTarget].src.length > 0) {
+					// for other platform, we only declare splash if there is a specific setting
+					xw.writeStartElement('gap:splash');
+					xw.writeAttributeString('src', phonegap.splashScreen[inTarget].src);
+					xw.writeAttributeString('gap:platform', inTarget);
+					if (inTarget === 'android'){
+						if (phonegap.splashScreen.android.density) {
+							xw.writeAttributeString('gap:density', phonegap.splashScreen.android.density);
+						}
+					} else {
+						if (phonegap.splashScreen[inTarget].width) {
+							xw.writeAttributeString('width', phonegap.splashScreen[inTarget].width);
+						}
+						if (phonegap.splashScreen[inTarget].height) {
+							xw.writeAttributeString('height', phonegap.splashScreen[inTarget].height);
+						}
+					}
+				}
 			}
-
 			xw.writeEndElement();
 		};
 
@@ -1093,7 +1125,6 @@ enyo.kind({
 		xw.writeComment("Define app icon for each platform");
 		enyo.forEach(phonegap.icon && enyo.keys(phonegap.icon), function(target) {
 			createIconXMLRow.call(self, target);
-			
 		}, this);
 
 		xw.writeComment("Define app splash screen for each platform");
