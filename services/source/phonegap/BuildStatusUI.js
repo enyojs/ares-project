@@ -384,7 +384,6 @@ enyo.kind({
 		this.provider.getCurrentProject().getDownloadStatus()[inPlatform] = inDownloadStatus === 1 ? "Download complete": 
 		inDownloadStatus === 0 ? "Download failed" : "Download in progress";
 
-		this.log(this.provider.getCurrentProject().getDownloadStatus());
 		this.bubble("onUpdateStatusMessage");	
 	},
 

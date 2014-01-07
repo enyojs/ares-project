@@ -86,7 +86,6 @@ enyo.kind({
 	modifySettingsAction: function(inSender, inEvent) {
 		this.$.projectWizardModify.start(this.currentProject);
 		
-		this.log(this.currentProject);
 		return true; //Stop event propagation
 	},
 
