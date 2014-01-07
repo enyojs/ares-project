@@ -133,7 +133,7 @@ enyo.kind({
 		self.currentProject = project;
 		var initData = {
 			service: project.getService(),
-			folderId: project.getFolderId()			
+			folderId: project.getFolderId()
 		};
 
 		async.parallel(
