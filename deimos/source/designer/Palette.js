@@ -7,7 +7,7 @@ enyo.kind({
 				{name: "indicator", classes: "indicator turned"},
 				{name: "name", tag: "span"}
 			]},
-			{kind: "onyx.Drawer", name: "drawer", open:true, components: [
+			{kind: "onyx.Drawer", name: "drawer", open: true, components: [
 				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
 					{kind: "PaletteItem"}
 				]}
@@ -17,18 +17,22 @@ enyo.kind({
 	events: {
 		onToggledDrawer: ""
 	},
-	toggleDrawer: function() {
-		var open = this.$.drawer.getOpen();
-		this.$.drawer.setOpen(!open);
-		this.$.indicator.addRemoveClass("turned", !open);
-		this.doToggledDrawer();
+	toggleDrawer: function(inSender, inEvent) {
+		if (this.$.list.count !== 0) {
+			var open = this.$.drawer.getOpen();
+			this.$.drawer.setOpen(!open);
+			this.$.indicator.addRemoveClass("turned", !open);
+			this.doToggledDrawer();
+		}
+
+		return true;
 	},
 	setModel: function(inModel) {
 		this.model = inModel;
 		this.$.name.setContent(this.model.name);
 		this.$.list.count = this.model.items.length;
 		if (this.$.list.count === 0 && this.$.drawer.getOpen()) {
-			this.openDrawer();
+			this.closeDrawer();
 		}
 		this.$.list.build();
 		if (this.$.name.content === "ignore") {
@@ -69,7 +73,7 @@ enyo.kind({
 	},
 	//* On dragstart, add _this.config_ data to drag event
 	decorateDragEvent: function(inSender, inEvent) {
-		if(!inEvent.dataTransfer) {
+		if (!inEvent.dataTransfer) {
 			return true;
 		}
 		
@@ -90,6 +94,7 @@ enyo.kind({
 					}
 				}
 			}
+			this.attributes.title = inModel.description;
 			this.config = inModel.config;
 			this.options = inModel.options;
 		}
@@ -136,7 +141,7 @@ enyo.kind({
 		return true;
 	},
 	dragstart: function(inSender, inEvent) {
-		if(!inEvent.dataTransfer) {
+		if (!inEvent.dataTransfer) {
 			return true;
 		}
 
@@ -153,7 +158,7 @@ enyo.kind({
 	/**
 	 * The current project analyzer output has changed
 	 * Re-build the palette
-	 * @param value   the new analyzer output
+	 * @param value the new analyzer output
 	 * @protected
 	 */
 	projectIndexerChanged: function() {
@@ -167,12 +172,29 @@ enyo.kind({
 			var k;
 			enyo.forEach(allPalette, function(category) {
 				for (k = 0; k < category.items.length; k++) {
-					if (category.items[k].name.toLowerCase().indexOf(filterString) == -1) {
+					if (category.items[k].name.toLowerCase().indexOf(filterString) === -1) {
 						category.items.splice(k, 1);
 						k--;
 					}
 				}
 			}, this);
+		}
+
+		var i = 0;
+		enyo.forEach(allPalette, function(category) {
+			if (category.items.length === 0) {
+				i--;
+			} else {
+				i++;
+			}
+		}, this);
+
+		if (i === this.$.list.count) {
+			this.$.expandAllCategoriesButton.setDisabled(true);
+			this.$.collapseAllCategoriesButton.setDisabled(false);
+		} else if (i === -(this.$.list.count)) {
+			this.$.expandAllCategoriesButton.setDisabled(true);
+			this.$.collapseAllCategoriesButton.setDisabled(true);
 		}
 		
 		this.palette = allPalette;
@@ -246,6 +268,8 @@ enyo.kind({
 					};
 					catchAllCategories[pkg] = cat;
 				}
+				// avoid HTML description coming from the API viewer
+				item.description = "";
 				cat.items.push(item);
 			} else {
 				// No package, so add to catch-all category
@@ -267,12 +291,12 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		
 		if (this.$.filterPalette.getValue() === "") {
-			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-search.png");
-			this.$.expandAllCategoriesButton.setDisabled(true);
-			this.$.collapseAllCategoriesButton.setDisabled(false);
+			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-search.png");		
 		} else {
 			this.$.filterPaletteIcon.set("src", "$deimos/images/search-input-cancel.png");
 		}
+		this.$.expandAllCategoriesButton.setDisabled(true);
+		this.$.collapseAllCategoriesButton.setDisabled(false);
 		this.projectIndexerChanged();
 
 		return true;
@@ -292,21 +316,16 @@ enyo.kind({
 	expandAllCategories: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 
-		this.resetFilter();
+		this.paletteFiltering(inSender, inEvent);
 		this.$.expandAllCategoriesButton.setDisabled(true);
 		this.$.collapseAllCategoriesButton.setDisabled(false);
 
-		for (var i = 0; i < this.$.list.count; i ++) {
-			this.$.list.getControls()[i].$.categoryItem.openDrawer();
-		}
-		
 		return true;
 	},
 	/** @private */
 	collapseAllCategories: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		
-		this.resetFilter();
 		this.$.collapseAllCategoriesButton.setDisabled(true);
 		this.$.expandAllCategoriesButton.setDisabled(false);
 		
@@ -320,18 +339,22 @@ enyo.kind({
 	toggledDrawer: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 
-		var j = 0;
+		var openedCategories = 0,
+			closedCategories = 0;
+
 		for (var i = 0; i < this.$.list.count; i ++) {
 			if (this.$.list.getControls()[i].$.categoryItem.drawerStatus()) {
-				j++;
+				openedCategories++;
 			} else {
-				j--;
+				closedCategories--;
 			}
 		}
 
-		if (j === this.$.list.count) {
+		if (openedCategories === this.$.list.count) {
 			this.$.expandAllCategoriesButton.setDisabled(true);
-		} else if (j === -(this.$.list.count)) {
+			this.$.collapseAllCategoriesButton.setDisabled(false);
+		} else if (closedCategories === -(this.$.list.count)) {
+			this.$.expandAllCategoriesButton.setDisabled(false);
 			this.$.collapseAllCategoriesButton.setDisabled(true);
 		} else {
 			this.$.expandAllCategoriesButton.setDisabled(false);
