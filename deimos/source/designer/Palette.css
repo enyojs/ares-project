@@ -28,10 +28,10 @@
 	padding-right: 5px;
 	background-image: url('../../images/triangle.png');
 	background-repeat: no-repeat;
-	background-position-y: 0px;
+	background-position: 0px 0px;
 	display: inline-block;
 }
 
 .turned {
-	background-position-y: -16px;
+	background-position: 0px -16px;
 }
