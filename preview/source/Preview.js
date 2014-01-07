@@ -93,11 +93,9 @@ enyo.kind(
 						classes : "ares-preview-groupbox",
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Zoom"},
-							{
-								components: [
-									{kind: "onyx.Slider", value: 100, onChange: 'zoom', onChanging: 'zoom' }
-								]
-							}
+							{classes: "zoom-slider", components: [
+								{kind: "onyx.RangeSlider", rangeMin: 0, rangeMax: 400, rangeStart: 0, rangeEnd: 200, interval: 25, onChange: 'zoom', onChanging: 'zoom'}
+							]}
 						]
 					},
 					{
@@ -134,8 +132,7 @@ enyo.kind(
 		},
 
 		zoom: function(inSender, inEvent) {
-
-			this.scale = 0.3 + 0.7 * inSender.getValue() / 100 ;
+			this.scale = 0.3 + 0.7 * inEvent.value / 100 ;
 			this.applyScale() ;
 		},
 		applyScale: function() {
