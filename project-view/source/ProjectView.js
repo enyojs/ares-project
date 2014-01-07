@@ -154,7 +154,7 @@ enyo.kind({
 								self.trace("ProjectView: setup project set config on "+ project.getName() );
 								project.setConfig(config);
 								
-								self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled)
+								self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled);
 								next();
 							}
 						],
