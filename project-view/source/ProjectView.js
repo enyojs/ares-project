@@ -85,20 +85,7 @@ enyo.kind({
 	},
 	modifySettingsAction: function(inSender, inEvent) {
 		this.$.projectWizardModify.start(this.currentProject);
-		/*
-		//Initialize the project attribute "downloadStatus"
-		if(this.currentProject.getDownloadStatus() === undefined) {
-			this.currentProject.setDownloadStatus(
-				{
-					"android": "Ready for download", 
-					"ios": "Ready for download", 
-					"winphone": "Ready for download", 
-					"blackberry": "Ready for download", 
-					"webos": "Ready for download"
-				}
-			);
-		}*/	
-
+		
 		this.log(this.currentProject);
 		return true; //Stop event propagation
 	},
