@@ -1108,10 +1108,10 @@ enyo.kind({
 
 		xw.writeComment("Preferences");
 		enyo.forEach(phonegap.preferences && enyo.keys(phonegap.preferences), function(preference) {
-				xw.writeStartElement('preference');
-				xw.writeAttributeString('name', preference);
-				xw.writeAttributeString('value', phonegap.preferences[preference]);
-				xw.writeEndElement(); // preference			
+			xw.writeStartElement('preference');
+			xw.writeAttributeString('name', preference);
+			xw.writeAttributeString('value', phonegap.preferences[preference]);
+			xw.writeEndElement(); // preference			
 		}, this);
 
 		xw.writeComment("Plugins");		
