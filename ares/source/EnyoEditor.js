@@ -620,9 +620,9 @@ enyo.kind({
 	},
 
 	switchProjectToCurrentDoc: function(inSender, inEvent) {
+		var pl = ComponentsRegistry.getComponent("projectList") ;
 		if (this.activeDocument) {
-			ComponentsRegistry.getComponent("projectList")
-				.selectInProjectList( this.activeDocument.getProjectData() );
+			pl.selectInProjectList( this.activeDocument.getProjectData() );
 		}
 	},
 
