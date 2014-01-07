@@ -5,7 +5,9 @@ enyo.kind({
 	published: {
 		designerFrameReady: false,
 		height: null,
-		width: null
+		width: null,
+		currentFileName: "",
+		autoZoom: false,
 	},
 	events: {
 		onSelect: "",
@@ -16,7 +18,9 @@ enyo.kind({
 		onReloadComplete: "",
 		onResizeItem: "",
 		onError: "",
-		onReturnPositionValue: ""
+		onReturnPositionValue: "",
+		onForceCloseDesigner: "",
+		onScaleChange: ""
 	},
 	components: [
 		{name: "client", tag: "iframe", classes: "ares-designer-frame-client"},
@@ -46,12 +50,28 @@ enyo.kind({
 		this.$.client.applyStyle("width", this.getWidth()+"px");
 		this.resizeClient();
 		this.repositionClient();
+		this.applyZoom();
 	},
 	zoom: function(inScale) {
 		this.scale = (inScale >= 0) ? Math.max(inScale / 100, 0.2) : 1;
 		enyo.dom.transformValue(this.$.client, "scale", this.scale);
 		this.$.client.resized();
 		this.repositionClient();
+	},
+	zoomFromWidth: function(){
+		var scale = (this.width > 0) ? Math.round((this.getBounds().width * 100)/this.width) : 100;
+		this.zoom(scale);
+		return scale;
+	},
+	applyZoom: function(){
+		if(this.autoZoom){
+			var scale = this.zoomFromWidth();
+			this.doScaleChange({scale : scale});
+		}
+	},
+	resizeHandler: function(inSender, inEvent){
+		this.applyZoom();
+		return true;
 	},
 	repositionClient: function() {
 		var height = this.getHeight(),
