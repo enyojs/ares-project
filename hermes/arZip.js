@@ -120,12 +120,12 @@ function ArZip(config, next) {
 				_nextTask();
 			});
 
-			function _nextTask() {
+			var _nextTask = function() {
 				var task = tasks.shift();
 				if (task) {
 					task();
 				}
-			}
+			};
 
 			form.parse(req, function(err) {
 				if (err) {
@@ -133,7 +133,7 @@ function ArZip(config, next) {
 				}
 			});
 
-			function _clean(next) {
+			var _clean = function(next) {
 				var file, count = files.length;
 				function _rmdir() {
 					if (count === 0) {
@@ -154,10 +154,7 @@ function ArZip(config, next) {
 				while ((file = files.shift())) {
 					disconnect(file);
 				}
-			}
-			
-			
-
+			};
 		} catch(e) {
 			console.error(e.stack);
 			next(new HttpError(e.msg));
