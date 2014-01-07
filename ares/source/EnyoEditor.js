@@ -594,7 +594,8 @@ enyo.kind({
 	 */
 	closeDoc: function(param, next) {
 		var doc = typeof param === 'object' ? param : Ares.Workspace.files.get(param) ;
-		var docId = doc.getId();
+
+		var docId = doc ? doc.getId() : undefined;
 
 		if (docId && this.activeDocument && this.activeDocument.getId() === docId) {
 			this.closeActiveDoc();
@@ -602,7 +603,7 @@ enyo.kind({
 			this.trace("closing a doc different from current one: ", doc.getName());
 			this.forgetDoc(doc);
 		} else {
-			this.warn("called without doc to close");
+			this.trace("called without doc to close");
 		}
 
 		if (typeof next === 'function') {
