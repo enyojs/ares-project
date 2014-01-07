@@ -1108,13 +1108,10 @@ enyo.kind({
 
 		xw.writeComment("Preferences");
 		enyo.forEach(phonegap.preferences && enyo.keys(phonegap.preferences), function(preference) {
-			if ((phonegap.preferences[preference].length > 0) && 
-				(phonegap.preferences[preference] != "None" || preference != "android-targetSdkVersion")){
 				xw.writeStartElement('preference');
 				xw.writeAttributeString('name', preference);
 				xw.writeAttributeString('value', phonegap.preferences[preference]);
 				xw.writeEndElement(); // preference			
-			}
 		}, this);
 
 		xw.writeComment("Plugins");		
