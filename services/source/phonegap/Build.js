@@ -1108,12 +1108,10 @@ enyo.kind({
 
 		xw.writeComment("Preferences");
 		enyo.forEach(phonegap.preferences && enyo.keys(phonegap.preferences), function(preference) {
-			
 			xw.writeStartElement('preference');
 			xw.writeAttributeString('name', preference);
 			xw.writeAttributeString('value', phonegap.preferences[preference]);
 			xw.writeEndElement(); // preference			
-			
 		}, this);
 
 		xw.writeComment("Plugins");		
@@ -1174,10 +1172,11 @@ enyo.kind({
 				//Android preferences
 				"android-installLocation": Phonegap.UIConfiguration.platformDrawersContent[0].rows[0].defaultValue, 
 				"android-minSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[0].rows[1].defaultValue, 
-				"android-maxSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[0].rows[2].defaultValue,
-				"android-windowSoftInputMode": Phonegap.UIConfiguration.platformDrawersContent[0].rows[3].defaultValue, 
-				"splash-screen-duration": Phonegap.UIConfiguration.platformDrawersContent[0].rows[4].defaultValue, 
-				"load-url-timeout": Phonegap.UIConfiguration.platformDrawersContent[0].rows[5].defaultValue,
+				"android-targetSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[0].rows[2].defaultValue,
+				"android-maxSdkVersion": Phonegap.UIConfiguration.platformDrawersContent[0].rows[3].defaultValue,
+				"android-windowSoftInputMode": Phonegap.UIConfiguration.platformDrawersContent[0].rows[4].defaultValue, 
+				"splash-screen-duration": Phonegap.UIConfiguration.platformDrawersContent[0].rows[5].defaultValue, 
+				"load-url-timeout": Phonegap.UIConfiguration.platformDrawersContent[0].rows[6].defaultValue,
 
 
 				//IOS preferences

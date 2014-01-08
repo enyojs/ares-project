@@ -21,7 +21,7 @@
 enyo.kind({
 	name: "Phonegap.UIConfiguration",
 	statics: {
-		androidSdkVersions: {"18": ["Android 4.3"], "17": ["Android 4.2, 4.2.2"], "16": ["Android 4.1, 4.1.1"], 
+		androidSdkVersions: {"19": ["Android 4.4"], "18": ["Android 4.3"], "17": ["Android 4.2, 4.2.2"], "16": ["Android 4.1, 4.1.1"], 
 		"15": ["Android 4.0.3, 4.0.4"], "14": ["Android 4.0, 4.0.1, 4.0.2"], "13": ["Android 3.2"], 
 		"12": ["Android 3.1.x"], "11": ["Android 3.0.x"], "10": ["Android 2.3.4, 2.3.3"], "9": ["Android 2.3.2, 2.3.1, 2.3"],
 		"8": ["Android 2.2.x"], "7": ["Android 2.1.x"]},
@@ -83,7 +83,8 @@ enyo.kind({
 				rows: [
 					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], defaultValue: "internalOnly", type: "PickerRow", jsonSection: "preferences"},
 					{name: "android-minSdkVersion", label: "Min. API Level/Android Version ", content: [], defaultValue: "7", type: "SDKVersionRow", jsonSection: "preferences"},
-					{name: "android-maxSdkVersion", label: "Max. API Level/Android Version ", content: [], defaultValue: "18", type: "SDKVersionRow", jsonSection: "preferences", none: ""},
+					{name: "android-targetSdkVersion", label: "Target API Level/Android Version ", content: [], defaultValue: "None", type: "SDKVersionRow", jsonSection: "preferences", none: ""},
+					{name: "android-maxSdkVersion", label: "Max. API Level/Android Version ", content: [], defaultValue: "None", type: "SDKVersionRow", jsonSection: "preferences", none: ""},
 					{name: "android-windowSoftInputMode", label: "Window SoftInput Mode ", content: ["stateVisible", "adjustResize"], defaultValue: "stateVisible", type: "PickerRow", jsonSection: "preferences"},
 					{name: "splash-screen-duration", label: "Splash screen Duration (ms)", content: "5000", defaultValue: "5000", type: "NumberInputRow", jsonSection: "preferences", description: "Time in milliseconds"},
 					{name: "load-url-timeout", label: "Load URL timeout (ms)", content: "20000", defaultValue: "20000", type: "NumberInputRow", jsonSection: "preferences", description: "Time in milliseconds"},
