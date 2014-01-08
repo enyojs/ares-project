@@ -22,6 +22,10 @@ enyo.kind({
 					{name: "designerButton", kind: "onyx.IconButton", src: "assets/images/designer.png", ontap: "designerAction"},
 					{name: "designerButtonBroken", kind: "onyx.IconButton", src: "assets/images/designer_broken.png", ontap: "doDesignerBroken"},
 					{name: "designerTooltipBroken", kind: "Ares.ErrorTooltip", content: $L("Designer")}
+				]},
+				{name: "cssDecorator", kind: "onyx.TooltipDecorator", components: [
+					{name: "cssButton", kind: "onyx.IconButton", Showing: "false", src: "assets/images/designer.png", ontap: "doCss"},
+					{kind: "onyx.Tooltip", content: $L("Css Designer")}
 				]}
 			]},
 			{name:"deimosControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline", components:[
@@ -35,6 +39,13 @@ enyo.kind({
 				{fit: true},
 				{name: "codeEditorDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
 					{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closeDesigner"},
+					{kind: "onyx.Tooltip", content: "Code editor"}
+				]}
+			]},
+			{name:"cssControls", kind: "FittableColumns", fit:true,  classes: "onyx-toolbar-inline", components:[
+				{fit: true},
+				{name: "cssEditorDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
+					{kind: "onyx.IconButton", Showing: "false", src: "assets/images/code_editor.png", ontap: "closecssDesigner"},
 					{kind: "onyx.Tooltip", content: "Code editor"}
 				]}
 			]},
@@ -93,6 +104,9 @@ enyo.kind({
 				]},
 				{components: [
 					{kind: "Deimos"}
+				]},
+				{components: [
+					{kind: "Hera"},
 				]}
 			]
 		}
@@ -101,6 +115,7 @@ enyo.kind({
 		onShowWaitPopup: "",
 		onHideWaitPopup: "",
 		onAllDocumentsAreClosed: "",
+		onCloseCss: "",
 		onRegisterMe: "",
 		onMovePanel:"",
 		onDesignerBroken: "",
@@ -261,6 +276,7 @@ enyo.kind({
 		this.setAceActive(!designer);
 		this.$.editorControls.setShowing(!designer);
 		this.$.deimosControls.setShowing(designer);
+		this.$.cssControls.setShowing(false);
 		this.$.toolbar.resized();
 	},
 	switchGrabberDirection: function(active){
@@ -926,7 +942,27 @@ enyo.kind({
 
 	loadDesignerUI: function(inData, next) {
 		this.$.deimos.loadDesignerUI(inData, next);
-	}
+	},
+	
+	/**
+	 *  @private
+	 * show/goto the hera
+	 */
+	doCss: function (){
+		ComponentsRegistry.getComponent("phobos").cssAction();
+		this.$.editorControls.setShowing(false);
+		this.$.deimosControls.setShowing(false);
+		this.$.cssControls.setShowing(true);
+		this.$.toolbar.resized();
+	},
+	closecssDesigner: function(){
+		ComponentsRegistry.getComponent("hera").csssave();
+		this.$.editorControls.setShowing(true);
+		this.$.deimosControls.setShowing(false);
+		this.$.cssControls.setShowing(false);
+		this.$.toolbar.resized();
+		this.doCloseCss();
+	},
 
 });
 
