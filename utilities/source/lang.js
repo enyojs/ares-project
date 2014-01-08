@@ -1,4 +1,4 @@
-/* jshint indent: false */ // TODO: ENYO-3311
+/*global enyo */
 
 /**
  * ares namespace
@@ -58,51 +58,69 @@ var ares = {
 		return path.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');
 	},
 
-	/** @private */
-        _getProp: function(parts, create, context) {
-                var obj = context || window;
-                for(var i=0, p; obj && (p=parts[i]); i++){
-                        obj = (p in obj ? obj[p] : (create ? obj[p]={} : undefined));
-                }
-                return obj;
-        },
+	/**
+	 * Throw an error if cb is not a function
+	 * @param {Function} cb
+	 * @throws Will throw an error if cb is not a function
+	 */
+	assertCb: function (cb) {
+		if (typeof cb !== 'function') {
+			throw new Error("Assert callback failed: found '" + cb + "' instead of a function");
+		}
+	},
 
 	/**
-                Sets object _name_ to _value_. _name_ may use dot notation, and
-                intermediate objects are created as necessary.
+	 * noNext does nothing. To be used to pass an empty callback
+	 */
+	noNext: function() {
+		/* does nothing */
+	},
 
-                        // set foo.bar.baz to 3; if foo or foo.bar do not exist, they are created
-                        enyo.setObject("foo.bar.baz", 3);
+	/** @private */
+    _getProp: function(parts, create, context) {
+        var obj = context || window;
+        for(var i=0, p; obj && (p=parts[i]); i++){
+            obj = (p in obj ? obj[p] : (create ? obj[p]={} : undefined));
+        }
+        return obj;
+    },
 
-                Optionally, _name_ may be relative to object _context_.
+	/**
+     Sets object _name_ to _value_. _name_ may use dot notation, and
+     intermediate objects are created as necessary.
 
-                        // create foo.zot and set foo.zot.zap to null
-                        enyo.setObject("zot.zap", null, foo);
-        */
-        setObject: function(name, value, context) {
-                var parts=name.split("."), p=parts.pop(), obj=ares._getProp(parts, true, context);
-                return obj && p ? (obj[p]=value) : undefined;
-        },
+     // set foo.bar.baz to 3; if foo or foo.bar do not exist, they are created
+     enyo.setObject("foo.bar.baz", 3);
 
-        /**
-                Gets object _name_. _name_ may use dot notation. Intermediate objects
-                are created if the _create_ argument is truthy.
+     Optionally, _name_ may be relative to object _context_.
 
-                        // get the value of foo.bar, or undefined if foo doesn't exist
-                        var value = enyo.getObject("foo.bar");
+     // create foo.zot and set foo.zot.zap to null
+     enyo.setObject("zot.zap", null, foo);
+     */
+    setObject: function(name, value, context) {
+        var parts=name.split("."), p=parts.pop(), obj=ares._getProp(parts, true, context);
+        return obj && p ? (obj[p]=value) : undefined;
+    },
 
-                        // get the value of foo.bar; if foo.bar doesn't exist,
-                        // it's assigned an empty object, which is then returned
-                        var value = enyo.getObject("foo.bar", true);
+    /**
+     Gets object _name_. _name_ may use dot notation. Intermediate objects
+     are created if the _create_ argument is truthy.
 
-                Optionally, _name_ may be relative to object _context_.
+     // get the value of foo.bar, or undefined if foo doesn't exist
+     var value = enyo.getObject("foo.bar");
 
-                        // get the value of foo.zot.zap, or undefined if foo.zot doesn't exist
-                        var value = enyo.getObject("zot.zap", false, foo);
-        */
-        getObject: function(name, create, context) {
-                return ares._getProp(name.split("."), create, context);
-        },
+     // get the value of foo.bar; if foo.bar doesn't exist,
+     // it's assigned an empty object, which is then returned
+     var value = enyo.getObject("foo.bar", true);
+
+     Optionally, _name_ may be relative to object _context_.
+
+     // get the value of foo.zot.zap, or undefined if foo.zot doesn't exist
+     var value = enyo.getObject("zot.zap", false, foo);
+     */
+    getObject: function(name, create, context) {
+        return ares._getProp(name.split("."), create, context);
+    },
 
 	/**
 	 * Decode an 'application/x-www-urlencoded' string into an {Object}
@@ -160,9 +178,9 @@ var ares = {
 		     (typeof testWindow.closed=='undefined') ||
 		     (testWindow.outerHeight === 0) ||
 		     (testWindow.outerWidth === 0)) {
-			  // pop-ups ARE blocked
-			  return true;
-		  } else {
+			// pop-ups ARE blocked
+			return true;
+		} else {
 			// pop-ups are NOT blocked
 			testWindow.close();
 			return false;
