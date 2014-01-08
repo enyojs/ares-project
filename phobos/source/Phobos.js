@@ -875,11 +875,13 @@ enyo.kind({
 	
 	//* Trigger an Ace undo and bubble updated code
 	undoAndUpdate: function(next) {
+		ares.assertCb(next);
 		this.$.aceWrapper.undo();
 		this.updateCodeInDesigner(next);
 	},
 	//* Trigger an Ace undo and bubble updated code
 	redoAndUpdate: function(next) {
+		ares.assertCb(next);
 		this.$.aceWrapper.redo();
 		this.updateCodeInDesigner(next);
 	},
