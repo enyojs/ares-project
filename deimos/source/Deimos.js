@@ -140,6 +140,7 @@ enyo.kind({
 	 */
 	loadDesignerUI: function(data, next) {
 		this.trace("called with", data);
+		ares.assertCb(next);
 		this.enableDesignerActionButtons(false);
 
 		var what = data.kinds;
@@ -754,12 +755,12 @@ enyo.kind({
 	},
 	undoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
-		this.doChildRequest({task: "undo" });
+		this.doChildRequest({task: [ "undo", ares.noNext ] });
 		return true;
 	},
 	redoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
-		this.doChildRequest({task: "redo" });
+		this.doChildRequest({task: [ "redo", ares.noNext ] });
 		return true;
 	},
 	deleteAction: function(inSender, inEvent) {
