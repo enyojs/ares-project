@@ -629,7 +629,7 @@ enyo.kind({
 			case1: There _is_ a specified target SDK expressed, and
 				case 11: min <= target <= max
 				OR case 12: min <= target & max == none
-			OR case2: There is no target SDK expressedn, and 
+			OR case2: There is no target SDK expressed, and 
 				case 21: min <= max
 				OR case 22: OR max == none
 		*/
