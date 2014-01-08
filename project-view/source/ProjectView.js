@@ -85,6 +85,7 @@ enyo.kind({
 	},
 	modifySettingsAction: function(inSender, inEvent) {
 		this.$.projectWizardModify.start(this.currentProject);
+		
 		return true; //Stop event propagation
 	},
 
@@ -101,7 +102,6 @@ enyo.kind({
 		}
 		return true; //Stop event propagation
 	},
-
 	/**
 	 *
 	 * @param {Object} project
@@ -139,12 +139,16 @@ enyo.kind({
 							function (next) {
 								self.trace("ProjectView: setup project set config on "+ project.getName() );
 								project.setConfig(config);
+								
+								self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled);
 								next();
 							}
 						],
 						function (err) {
 							if (err) {
 								self.doError({msg: err.toString(), err: err});
+							} else {
+								next(err) ;
 							}
 							next(err) ;
 						}
@@ -160,6 +164,23 @@ enyo.kind({
 			}
 		);
 	},
+	/**
+	 * Initialize the attribute "downloadStatus" of the project
+	 *
+	 * this attribute is used only by Phonegap Build.
+	 * @private
+	 */
+	initializeDownloadStatus: function(inProject, inPhonegapEnabled) {
+		if (inProject.getDownloadStatus() === undefined && inPhonegapEnabled) {
+			inProject.setDownloadStatus({
+				"android": "Ready for download", 
+				"ios": "Ready for download", 
+				"winphone": "Ready for download", 
+				"blackberry": "Ready for download", 
+				"webos": "Ready for download"
+			});
+		}
+	}, 
 	projectRemoved: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("harmonia").setProject(null);
 	},
