@@ -132,6 +132,11 @@ Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when
 	setService: function(service) {
 		this.set("service", service);
 	},
+	/*
+		FIXME ENYO-3687
+		PGB will become a plugin - therefore should not store its data directly at project level
+		e.g. getPluginData(plugname).getDownloadStatus()
+	*/
 	getDownloadStatus: function() {
 		return this.get("downloadStatus");
 	},
