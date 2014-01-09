@@ -621,9 +621,10 @@ enyo.kind({
 
 	switchProjectToCurrentDoc: function(inSender, inEvent) {
 		var pl = ComponentsRegistry.getComponent("projectList") ;
-		if (this.activeDocument) {
+		if (! this.switching && this.activeDocument) {
 			pl.selectInProjectList( this.activeDocument.getProjectData() );
 		}
+		return true;
 	},
 
 	/**
@@ -671,6 +672,8 @@ enyo.kind({
 		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : "") + "to " + newDoc.getName() );
 
 		var serial = [];
+		// used to block onFocus event coming from text editor
+		this.switching = true ;
 
 		// select project if the document comes from a different
 		// project compared to the project of the previous document
@@ -698,6 +701,7 @@ enyo.kind({
 		// no need to handle error, call outer next without params
 		async.series( serial, function(err){
 			that.doHideWaitPopup();
+			that.switching = false ;
 			safeNext();
 		});
 	},
