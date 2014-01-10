@@ -1,14 +1,10 @@
-/* jshint indent: false */ // TODO: ENYO-3311
-/* global ares */
 enyo.kind({
-	name: "EditorSettings",
-	kind: "onyx.Popup",
-	classes:"ares-classic-popup",
+	name: "editorSettings",
 	events: {
-		onClose: "",
+		onCloseSettings: "",
+		onApplySettings: "",
 		onChangeRightPane: "",
 		onTabSizeChange: "",
-		onSoftTabs: "",
 		onChangeSettings:""
 	},
 	published: {
@@ -27,11 +23,11 @@ enyo.kind({
 			wordwrap:false,
 			rightpane:true,
 			keys:{ }
-		}
+		},
+		mainToolbar: true
 	},
 	SETTINGS_STORAGE_KEY: "com.enyojs.editor.settings",
 	components: [
-		{classes: "title draggable", kind: "Ares.PopupTitle", content: "EDITOR GLOBAL SETTINGS"},
 		{classes:"ace-settings-popup", components: [
 			{kind:"FittableColumns", components: [
 				{kind:"FittableRows", components: [
@@ -141,8 +137,8 @@ enyo.kind({
 				]}
 			]}
 		]},
-		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
-			{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "doClose"},
+		{name: "settingsToolbar", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+			{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "cancelSettings"},
 			{name: "change", kind: "onyx.Button", classes:"right", content: "Save", ontap: "saveSettings"}
 		]}
 	],
@@ -153,6 +149,7 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
+		this.mainToolbarChanged();
 		this.getValuesFromLocalStorage();
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
@@ -180,6 +177,12 @@ enyo.kind({
 		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
 	},
 
+	mainToolbarChanged: function(){
+		if(!this.mainToolbar){
+			this.$.settingsToolbar.addClass("white");
+		}
+	},
+
 	getValuesFromLocalStorage:function(){
 		var self = this;
 		Ares.LocalStorage.get(this.SETTINGS_STORAGE_KEY, function(str) {
@@ -194,7 +197,12 @@ enyo.kind({
 		});
 	},
 
-	initSettingsPopupFromLocalStorage:function(){
+	getSettingFromLS: function(){
+		this.getValuesFromLocalStorage();
+		return this.settings;
+	},
+
+	initUI:function(){
 		//set UI items with values from localStorage
 		//change value of toggle button programmaticaly fire event onChange
 		//onyx toggle button API says that it not working when the value is changed programmatically
@@ -292,10 +300,23 @@ enyo.kind({
 	},
 
 	saveSettings: function() {
-		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, enyo.json.stringify(this.previewSettings));
+		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, enyo.json.stringify(this.previewSettings)); //push to ls
 		//Local storage modified, reading new settings from local storage
-		this.getValuesFromLocalStorage();
-		this.initSettingsPopupFromLocalStorage();
-		this.doClose();
+		this.getValuesFromLocalStorage(); 
+		this.initUI();
+		this.doCloseSettings();
+	},
+
+	resetSettings: function(){
+		this.getValuesFromLocalStorage(); 
+		this.initUI();
+		this.doApplySettings();
+		//this.doCloseSettings();
+	},
+	
+	cancelSettings: function(){
+		this.initUI();
+		this.doApplySettings();
+		this.doCloseSettings();
 	}
 });
