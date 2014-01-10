@@ -922,12 +922,14 @@ enyo.kind({
 		this.$.deimos.syncFile(projectName, filename, code);
 	},
 
-	undo: function() {
-		this.$.phobos.undoAndUpdate() ;
+	undo: function(next) {
+		ares.assertCb(next);
+		this.$.phobos.undoAndUpdate(next) ;
 	},
 
-	redo: function() {
-		this.$.phobos.redoAndUpdate() ;
+	redo: function(next) {
+		ares.assertCb(next);
+		this.$.phobos.redoAndUpdate(next) ;
 	},
 
 	loadDesignerUI: function(inData, next) {
