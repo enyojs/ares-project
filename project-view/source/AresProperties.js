@@ -9,7 +9,10 @@ enyo.kind({
 	classes: "enyo-unselectable ares-classic-popup",
 	kind:"onyx.Popup",
 	fit: true,
-	modal: true, centered: true, floating: true, autoDismiss: false,
+	modal: true, 
+	centered: true,
+	floating: true,
+	autoDismiss: false,
 	events: {
 		onModifiedConfig: "",
 		onSaveGeneratedXml: "",
@@ -21,7 +24,7 @@ enyo.kind({
 			{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", classes:"ares-radio-group", components: []}
 		]},
 		{kind: "onyx.Toolbar", name: "toolbarId", classes:"bottom-toolbar", components: [
-			{name: "ok", classes:"right", kind: "onyx.Button", content: "OK", ontap: "confirmTap"}
+			{name: "ok", classes:"right", kind: "onyx.Button", content: "Close", ontap: "confirmTap"}
 		]},
 		{kind: "Signals", onPluginRegist: "handlePluginRegist"}
 	],
@@ -66,7 +69,8 @@ enyo.kind({
 
 		inTabEntry.panel = drawer.createComponent({
 			name: inTabEntry.id,
-			kind: inTabEntry.kind
+			kind: inTabEntry.kind,
+			mainToolbar: false //TO DO MAKE USE OF KIND PARAMS GENERIC
 		});
 
 		inTabEntry.tab = this.$.thumbnail.createComponent({
@@ -216,4 +220,99 @@ enyo.kind({
 		this.$.homeValue.setAttribute("href", this.aboutAresData.projectHomePage);
 		this.$.license.content = this.aboutAresData.license;
 	}	
+});
+
+enyo.kind({
+	name: "AboutAres",
+	kind: "onyx.Popup",
+	modal: true,
+	centered: true,
+	floating: true,
+	autoDismiss: false,
+	classes:"ares-classic-popup",
+	published: {
+		config: {},
+		aboutAresData: undefined
+	},
+	events: {
+		onError: ""
+	},
+	components: [
+		{tag: "div", name: "title", classes:"title", content: "About"},
+		{kind: "enyo.Scroller",  classes: "ares-small-popup", /*fit: true,*/ components: [
+			{classes:"ares-small-popup-details", name:"popupContent", components:[
+				{kind: "FittableRows", name: "aboutDescription", components: [
+					{kind:"FittableColumns", components: [
+						{content: "Ares version: ", classes: "ares-about-description"},
+						{name: "versionValue"}
+					]},
+					{kind:"FittableColumns", components: [				
+						{content: "In case of issue, please consider ", classes: "ares-about-description"},
+						{name: "brValue", kind: "enyo.Control", tag: "a", content: "Reporting a bug", attributes: {"target": "_blank"}}
+					]},
+					{kind:"FittableColumns", components: [				
+						{content: "See ", classes: "ares-about-description"},
+						{name: "homeValue", kind: "enyo.Control", tag: "a", content: "Project Homepage", attributes: {"target": "_blank"}}				
+					]},
+					{kind:"FittableColumns", components: [				
+						{content: "License: ", classes: "ares-about-description"},
+						{name: "license", classes: "ares-about-description"}
+					]}
+				]}
+			]}
+		]},
+		{kind: "onyx.Toolbar", classes:"bottom-toolbar", name: "buttons", components: [
+			{name:"cancelButton", classes:"right", kind: "onyx.Button", content: "Close", ontap: "actionClose"}
+		]},
+		{name: "errorMessage", content: "Error: Unable to load Ares About data from Ares IDE Server", showing: false},
+	],
+	
+	/**
+	 * @protected
+	 */
+	create: function(){
+		this.inherited(arguments);
+		this.reqAboutAresData();
+
+	},
+
+	/**
+	 * Send an AJAX request to the  Backend in order to get the needed data for the Ares description.
+	 * @private
+	 */
+	reqAboutAresData: function(){
+		var origin = window.location.origin || window.location.protocol + "//" + window.location.host; // Webkit/FF vs IE
+
+		var req = new enyo.Ajax({
+			url: origin + '/res/aboutares'
+		});
+
+		req.response(this, function(inSender, inData) {	
+			this.setAboutAresData(inData.aboutAres);
+		});
+
+		//Show the error in a Pop-up.
+		req.error(this, function(inSender, inError){
+			
+			this.doError({msg: "Unable to load data about Ares", err: inError});
+			this.$.errorMessage.show();
+			this.$.aboutDescription.hide();
+		});
+		
+		req.go();
+	},
+	
+	/**
+	 * @private
+	 */
+	aboutAresDataChanged: function(){
+		this.$.versionValue.content = this.aboutAresData.version;
+		this.$.brValue.setAttribute("href", this.aboutAresData.bugReportURL);
+		this.$.homeValue.setAttribute("href", this.aboutAresData.projectHomePage);
+		this.$.license.content = this.aboutAresData.license;
+	},
+	actionClose: function(inSender, inEvent) {
+		this.hide();
+		return true;
+	},	
 });
