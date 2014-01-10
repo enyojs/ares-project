@@ -26,14 +26,14 @@ enyo.kind({
 			var leftP = this._isOutOfXDrag(inSender, inEvent);
 			var topP = this._isOutOfYDrag(inSender, inEvent);
 			if(leftP !== null){
-				this.owner.applyStyle("left", leftP+"px");
+				this.container.applyStyle("left", leftP+"px");
 			} else {
-				this.owner.applyStyle("left", (this._initialPosition.left+inEvent.dx)+"px");
+				this.container.applyStyle("left", (this._initialPosition.left+inEvent.dx)+"px");
 			}
 			if(topP !== null){
-				this.owner.applyStyle("top", topP+"px");
+				this.container.applyStyle("top", topP+"px");
 			} else {
-				this.owner.applyStyle("top", (this._initialPosition.top+inEvent.dy)+"px");
+				this.container.applyStyle("top", (this._initialPosition.top+inEvent.dy)+"px");
 			}
 		}
 		return true;
@@ -41,7 +41,7 @@ enyo.kind({
 	/** @private */
 	_dragstartAction: function(inSender, inEvent) {
 		if(this.draggable){
-			this._initialPosition = this.owner.getBounds();
+			this._initialPosition = this.container.getBounds();
 			this._isDragging = this._isInDraggable(inSender, inEvent);
 		}
 		return true;
