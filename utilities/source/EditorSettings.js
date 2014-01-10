@@ -197,6 +197,11 @@ enyo.kind({
 		});
 	},
 
+	initSettings:function(){
+		this.getValuesFromLocalStorage();
+		this.initUI();
+	},
+	
 	getSettingFromLS: function(){
 		this.getValuesFromLocalStorage();
 		return this.settings;
@@ -313,7 +318,7 @@ enyo.kind({
 		this.doApplySettings();
 		//this.doCloseSettings();
 	},
-	
+
 	cancelSettings: function(){
 		this.initUI();
 		this.doApplySettings();
