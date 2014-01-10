@@ -19,7 +19,7 @@ enyo.kind({
 			showing: false,
 			checkBeforeClosing: true,
 			checkBeforeChanging: true,
-			onHide: "doAceFocus"
+			onActivate: "doAceFocus"
 		}
 	],
 
