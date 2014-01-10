@@ -160,6 +160,12 @@ enyo.kind({
 	editorSettings: function(){
 		this.$.phobos.editorSettings();
 	},
+	applySettings: function(settings){
+		this.$.phobos.applySettings(settings);
+	},
+	changeRightPane: function(editorSettings){
+		this.$.phobos.changeRightPane(editorSettings);
+	},
 	newKindAction: function() {
 		this.$.phobos.newKindAction();
 	},

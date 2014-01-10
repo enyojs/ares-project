@@ -78,7 +78,11 @@ enyo.kind({
 		onAllDocumentsAreClosed: "showProjectView",
 		onCloseProjectDocuments: "closeDocumentsForProject",
 		onRegisterMe : "_registerComponent",
-		onMovePanel : "_movePanel"
+		onMovePanel : "_movePanel",
+		//handlers for editor settings
+		onChangeSettings:"applyPreviewSettings", 
+		onChangeRightPane: "changeRightPane", 
+		onApplySettings: "applySettings"
 	},
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
@@ -375,6 +379,24 @@ enyo.kind({
 			}
 		}
 	},
+	/**
+	* applySettings, applyPreviewSettings, changeRightPane
+	* Event handlers for ace's settings
+	* applyPreviewSettings - called when a setting is changing
+	* applySettings -  called when settings from localStorage have to be applied (cancel/open)
+	*/
+	applySettings: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("enyoEditor").applySettings(inEvent.originator.getSettingFromLS());
+	},
+
+	applyPreviewSettings: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("enyoEditor").applySettings(inEvent.originator.getPreviewSettings());
+	},
+
+	changeRightPane: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("enyoEditor").changeRightPane(inEvent.originator.getPreviewSettings());
+	},
+
 	/**
 	 * Event handler for ares components registry
 	 * 
