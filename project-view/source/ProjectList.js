@@ -1,4 +1,4 @@
-/*global Ares, ares, ServiceRegistry, ComponentsRegistry, enyo, async, $L */
+/*global Ares, ares, ServiceRegistry, ComponentsRegistry, enyo, async, $L, setTimeout */
 
 
 /**
@@ -277,25 +277,72 @@ enyo.kind({
 			}
 		}, this);
 	},
+
+	/**
+	 * Select a project
+	 * @param {Object} project
+	 * @param {Function} next
+	 */
 	selectProject: function(project,next){
 		var msg, service;
-		this.trace("project ",project, " old ", this.selectedProject);
+		var bailout = 0;
+		var err ;
+		var oldp = this.selectedProject;
+		var oldn = oldp ? oldp.getName() : '';
+		var newn = project.getName();
+		var that = this;
+		this.trace("select project " + newn + (oldp ? " old " + oldn : '') );
+
+		var selectNext = function(err) {
+			var pending = that.pendingSelect ;
+			that.trace("end of selection of project " + newn);
+			that.pendingSelect = null;
+			that.ongoingSelect = null;
+
+			if (err) {
+				setTimeout(function() {next(err);},0);
+			} else if (pending) {
+				that.trace("selecting pending project " + pending.getName() );
+				that.selectProject(pending, next);
+			} else {
+				setTimeout(next,0);
+			}
+		};
+
+		if (this.ongoingSelect) {
+			this.trace("on-going select project " + oldn + " storing request for " + newn );
+			this.pendingSelect = project; // may clobber previous pending select
+			bailout = 1;
+		}
+
+		if (newn === oldn) {
+			this.trace("drop redundant select project " + oldn );
+			bailout = 1;
+		}
+
 		service = ServiceRegistry.instance.resolveServiceId(project.getServiceId());
-		if (service !== undefined) {
-			project.setService(service);
-			this.$.projectMenu.setDisabled(false);
-			this.selectedProject = project;
-			this.owner.setupProjectConfig( project, next );
-		} else {
-			// ...otherwise let
+
+		if (service === undefined) {
 			msg = "Service " + project.getServiceId() + " not found";
 			this.doError({msg: msg});
-			this.error(msg);
+			err = new Error(msg);
+			bailout = 1;
+		}
+
+		if (bailout) {
+			setTimeout(function(){ selectNext(err); },0);
+			return;
 		}
 
 
 		this._selectInProjectList(project);
 
+		this.ongoingSelect = project;
+
+		project.setService(service);
+		this.$.projectMenu.setDisabled(false);
+		this.selectedProject = project;
+		this.owner.setupProjectConfig( project, selectNext );
 	},
 	showAccountConfigurator: function() {
 		this.$.accountsConfigurator.show();
