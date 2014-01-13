@@ -622,7 +622,7 @@ enyo.kind({
 	switchProjectToCurrentDoc: function(inSender, inEvent) {
 		var pl = ComponentsRegistry.getComponent("projectList") ;
 		if (! this.switching && this.activeDocument) {
-			pl.selectInProjectList( this.activeDocument.getProjectData(), ares.noNext );
+			pl.selectProject( this.activeDocument.getProjectData(), ares.noNext );
 		}
 		return true;
 	},
@@ -687,7 +687,7 @@ enyo.kind({
 			this.doShowWaitPopup({msg: $L("Switching project...")});
 
 			serial.push(
-				projectList.selectInProjectList.bind(projectList, project),
+				projectList.selectProject.bind(projectList, project),
 				deimos.projectSelected.bind(deimos, project)
 			);
 		}

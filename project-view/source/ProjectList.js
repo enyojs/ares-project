@@ -175,7 +175,7 @@ enyo.kind({
 		} else {
 			var project = Ares.Workspace.projects.createProject(name, folderId, serviceId);
 			if(project && !dontSelect){
-				this.selectInProjectList(project);
+				this.selectProject(project, ares.noNext);
 			}
 		}
 	},
@@ -264,27 +264,16 @@ enyo.kind({
 	projectListTap: function(inSender, inEvent) {
 		var project = Ares.Workspace.projects.at(inEvent.index);
 		if(project) {
-			this.selectInProjectList(project, ares.noNext);
+			this.selectProject(project, ares.noNext);
 		}
 	},
-	selectInProjectList:function(project, next){
-		ares.assertCb(next);
-		this.trace("select ",project.getName());
-		var oldProject = this.selectedProject ;
-
-		// do something only if project is actually changed
-		if (oldProject && oldProject.getName() === project.getName()) {
-			next();
-			return;
-		}
-
+	_selectInProjectList:function(project){
 		var itemList = this.$.projectList.getClientControls();
 		enyo.forEach(itemList, function(item) {
 			item.$.item.removeClass("on");
 			if(item.$.item.projectName === project.id){
 				this.selected = item.$.item;
 				item.$.item.addClass("on");
-				this.selectProject(project,next);
 			}
 		}, this);
 	},
@@ -303,6 +292,10 @@ enyo.kind({
 			this.doError({msg: msg});
 			this.error(msg);
 		}
+
+
+		this._selectInProjectList(project);
+
 	},
 	showAccountConfigurator: function() {
 		this.$.accountsConfigurator.show();
