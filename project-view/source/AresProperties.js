@@ -86,7 +86,7 @@ enyo.kind({
 			for(var key in optionalParams){
 				panelParams[key] =  optionalParams[key];
 			}
-		};
+		}
 
 		inTabEntry.panel = drawer.createComponent(panelParams);
 
