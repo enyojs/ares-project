@@ -42,7 +42,7 @@ enyo.kind({
 			onChangeRightPane: "changeRightPane",
 			components: [
 				{name:"title", classes: "title draggable", kind: "Ares.PopupTitle", content: "EDITOR GLOBAL SETTINGS"},
-				{kind: "editorSettings" }
+				{kind: "editorSettings", classes:"ace-settings-popup" }
 			],	  
 		}
 	],

@@ -1,5 +1,6 @@
 enyo.kind({
 	name: "editorSettings",
+	kind: "FittableRows",
 	events: {
 		onCloseSettings: "",
 		onApplySettings: "",
@@ -28,7 +29,7 @@ enyo.kind({
 	},
 	SETTINGS_STORAGE_KEY: "com.enyojs.editor.settings",
 	components: [
-		{classes:"ace-settings-popup", components: [
+		{classes: "ace-settings-paddings", fit: true, components: [
 			{kind:"FittableColumns", components: [
 				{kind:"FittableRows", components: [
 					{classes: "ares-row", components: [
