@@ -276,6 +276,13 @@ enyo.kind({
 			method: 'POST',
 			postBody: data
 		});
+
+		// Get ready for cancellation - (re)set abortAjaxRequest to stop "req" in case of cancellation
+		this.abortAjaxRequest= function() {
+			this.abortAjaxRequest= function() {};		
+			enyo.xhr.cancel(req.xhr);
+		};
+
 		req.response(this, function(inSender, inData) {
 			this.config.auth.token = inData.token;
 			this.trace("Got phonegap token:", this.config.auth.token);
@@ -302,6 +309,13 @@ enyo.kind({
 			this._storeUserData(inData.user);
 			next(null, inData);
 		});
+
+		// Get ready for possible cancellation - (re)set abortAjaxRequest to stop "req" in case of cancellation
+		this.abortAjaxRequest= function() {
+			this.abortAjaxRequest= function() {};		
+			enyo.xhr.cancel(req.xhr);
+		};
+
 		req.error(this, this._handleServiceError.bind(this, "Unable to get PhoneGap user data", next));
 		req.go();
 	},	
