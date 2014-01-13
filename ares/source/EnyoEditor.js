@@ -695,7 +695,8 @@ enyo.kind({
 		var that = this ;
 		serial.push(
 			function(_next) { that.doShowWaitPopup({msg: popupMsg}); _next();},
-			this._switchDoc.bind(this, newDoc)
+			this._switchDoc.bind(this, newDoc),
+			function(_next) { that.aceFocus(); _next();}
 		);
 
 		// no need to handle error, call outer next without params
