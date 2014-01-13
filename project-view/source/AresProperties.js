@@ -37,20 +37,27 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
-		this.createAresAboutDrawer();
+		this.createEditorSettingsDrawer();
 	},
-
+	initDrawers: function(){
+		enyo.forEach(this.$.editorSettingsDrawer.getControls(), function(tab) {
+			if(tab.kind === "editorSettings"){
+				tab.resetSettings();
+			}
+		}, this);
+	},
 	/**
 	 * @private
 	 */
-	createAresAboutDrawer: function() {
-		var aresAboutTabEntry = {
-			id: "aresAbout",
-			name: "Ares",
-			kind: "AboutAresPanel",
-			components:[{content:"Ares", classes:"large-fixed"},{tag:"span", classes:"ares-bottom-check"}]
+	createEditorSettingsDrawer: function() {
+		var aresPropertiesTabEntry = {
+			id: "editorSettings",
+			name: "EditorSettings",
+			kind: "editorSettings",
+			components:[{content:"Editor settings", classes:"large-fixed"},{tag:"span", classes:"ares-bottom-check"}]
 		};
-		this.createComponentTab(aresAboutTabEntry);
+		this.createComponentTab(aresPropertiesTabEntry, {mainToolbar: false});
+
 	}, 
 
 	/**
@@ -60,18 +67,28 @@ enyo.kind({
 	 *                             and the kind of the tab panel.
 	 * @private
 	 */
-	createComponentTab: function(inTabEntry) {
+	createComponentTab: function(inTabEntry, optionalParams) {
 		var drawer = this.createComponent({
 			name: inTabEntry.id + 'Drawer',
 			kind: "onyx.Drawer",
+			animated : false,
 			open: false
 		},{addBefore: this.$.toolbarId});
 
-		inTabEntry.panel = drawer.createComponent({
+		var panelParams = {
 			name: inTabEntry.id,
 			kind: inTabEntry.kind,
-			mainToolbar: false //TO DO MAKE USE OF KIND PARAMS GENERIC
-		});
+			classes: "ares-properties-drawer"
+		};
+
+		//add kind's params
+		if (optionalParams) {
+			for(var key in optionalParams){
+				panelParams[key] =  optionalParams[key];
+			}
+		};
+
+		inTabEntry.panel = drawer.createComponent(panelParams);
 
 		inTabEntry.tab = this.$.thumbnail.createComponent({
 			name: inTabEntry.id + 'Tab',
@@ -107,6 +124,7 @@ enyo.kind({
 	//  * close one drawer and open the other depending on which radio button was tapped
 	//  */
 	switchDrawers: function(inSender, inEvent) {
+		this.initDrawers();
 		if (inEvent.originator.active === true ) {
 			enyo.forEach(inEvent.originator.parent.children, function(tab) {
 				var activate = (tab.componentId === inEvent.originator.componentId);
@@ -116,6 +134,8 @@ enyo.kind({
 	},
 
 	confirmTap: function(inSender, inEvent) {
+		//reset of the all non saved settings
+		this.initDrawers();
 		for(var index in this.pluginServicesList){
 			var pluginId = this.pluginServicesList[index].id;
 			if(typeof this.$[pluginId+'Drawer'].$[pluginId].okButtonAction === 'function'){
@@ -123,102 +143,6 @@ enyo.kind({
 			}
 		}
 		this.hide();
-	}	
-});
-
-enyo.kind({
-	name: "AboutAresPanel",
-	kind: "enyo.Scroller",
-	fit: "true",
-	classes: "ares-about-drawer",
-	published: {
-		config: {},
-		aboutAresData: undefined
-	},
-	events: {
-		onError: ""
-	},
-	components: [
-		{name: "errorMessage", content: "Error: Unable to load Ares About data from Ares IDE Server", showing: false},
-		{	
-			kind: "FittableRows",
-			name: "aboutDescription",
-				components: [
-					{
-						kind:"FittableColumns", 
-						components: [
-							{content: "Ares version: ", classes: "ares-about-description"},
-							{name: "versionValue"}
-						]
-					},
-					{
-						kind:"FittableColumns", 
-						components: [				
-							{content: "In case of issue, please consider ", classes: "ares-about-description"},
-							{name: "brValue", kind: "enyo.Control", tag: "a", content: "Reporting a bug", attributes: {"target": "_blank"}}
-						]
-					},
-					{
-						kind:"FittableColumns", 
-						components: [				
-							{content: "See ", classes: "ares-about-description"},
-							{name: "homeValue", kind: "enyo.Control", tag: "a", content: "Project Homepage", attributes: {"target": "_blank"}}				
-						]
-					},
-					{
-						kind:"FittableColumns", 
-						components: [				
-							{content: "License: ", classes: "ares-about-description"},
-							{name: "license", classes: "ares-about-description"}
-						]
-					}
-				]
-		}
-	],
-	
-	/**
-	 * @protected
-	 */
-	create: function(){
-		this.inherited(arguments);
-		this.reqAboutAresData();
-
-	},
-
-	/**
-	 * Send an AJAX request to the  Backend in order to get the needed data for the Ares description.
-	 * @private
-	 */
-	reqAboutAresData: function(){
-		var origin = window.location.origin || window.location.protocol + "//" + window.location.host; // Webkit/FF vs IE
-
-		var req = new enyo.Ajax({
-			url: origin + '/res/aboutares'
-		});
-
-		req.response(this, function(inSender, inData) {	
-			this.setAboutAresData(inData.aboutAres);
-		});
-
-		//Show the error in a Pop-up.
-		req.error(this, function(inSender, inError){
-			
-			this.doError({msg: "Unable to load data about Ares", err: inError});
-			this.$.errorMessage.show();
-			this.$.aboutDescription.hide();
-		});
-		
-		req.go();
-	},
-	
-	/**
-	 * @private
-	 */
-	aboutAresDataChanged: function(){
-		this.$.versionValue.content = this.aboutAresData.version;
-		this.$.brValue.setAttribute("href", this.aboutAresData.bugReportURL);
-		this.$.homeValue.setAttribute("href", this.aboutAresData.projectHomePage);
-		this.$.license.content = this.aboutAresData.license;
 	}	
 });
 
@@ -239,7 +163,7 @@ enyo.kind({
 	},
 	components: [
 		{tag: "div", name: "title", classes:"title", content: "About"},
-		{kind: "enyo.Scroller",  classes: "ares-small-popup", /*fit: true,*/ components: [
+		{kind: "enyo.Scroller",  classes: "ares-small-popup", components: [
 			{classes:"ares-small-popup-details", name:"popupContent", components:[
 				{kind: "FittableRows", name: "aboutDescription", components: [
 					{kind:"FittableColumns", components: [
