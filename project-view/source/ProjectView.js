@@ -108,6 +108,7 @@ enyo.kind({
 	 * @param {Function} next
 	 */
 	setupProjectConfig: function(project, next) {
+		ares.assertCb(next);
 		// FIXME: temporary hack to create config.json on the
 		// fly if needed... would be better to create/load it
 		// when the workspace is loaded & when a new project

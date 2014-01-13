@@ -264,16 +264,17 @@ enyo.kind({
 	projectListTap: function(inSender, inEvent) {
 		var project = Ares.Workspace.projects.at(inEvent.index);
 		if(project) {
-			this.selectInProjectList(project);
+			this.selectInProjectList(project, ares.noNext);
 		}
 	},
 	selectInProjectList:function(project, next){
-		this.trace("select ",project);
+		ares.assertCb(next);
+		this.trace("select ",project.getName());
 		var oldProject = this.selectedProject ;
 
 		// do something only if project is actually changed
 		if (oldProject && oldProject.getName() === project.getName()) {
-			if (next) {next();}
+			next();
 			return;
 		}
 
