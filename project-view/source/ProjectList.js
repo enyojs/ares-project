@@ -339,8 +339,11 @@ enyo.kind({
 
 		project.setService(service);
 		this.$.projectMenu.setDisabled(false);
-		this.selectedProject = project;
+
+		// setupProjectConfig checks for redundant setup wrt this.selectedProject
 		this.owner.setupProjectConfig( project, selectNext );
+		// so this attribute must be set after calling setupProjectConfig
+		this.selectedProject = project;
 	},
 
 	getSelectedProject: function() {
