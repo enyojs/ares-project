@@ -593,6 +593,7 @@ enyo.kind({
 	 * @param {[Function]} next
 	 */
 	closeDoc: function(param, next) {
+		ares.assertCb(next);
 		var doc = typeof param === 'object' ? param : Ares.Workspace.files.get(param) ;
 
 		var docId = doc ? doc.getId() : undefined;
@@ -606,9 +607,7 @@ enyo.kind({
 			this.trace("called without doc to close");
 		}
 
-		if (typeof next === 'function') {
-			next();
-		}
+		next();
 	},
 
 	switchToNewTabAndDoc: function(projectData, file, inContent,next) {
