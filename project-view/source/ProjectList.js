@@ -344,6 +344,11 @@ enyo.kind({
 		this.selectedProject = project;
 		this.owner.setupProjectConfig( project, selectNext );
 	},
+
+	getSelectedProject: function() {
+		return this.selectedProject;
+	},
+
 	showAccountConfigurator: function() {
 		this.$.accountsConfigurator.show();
 	},
