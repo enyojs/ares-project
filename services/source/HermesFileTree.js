@@ -1267,6 +1267,11 @@ enyo.kind({
 			if (!this.selectedNode.file.isServer && this.projectUrlReady) {
 				if (!this.selectedNode.file.isDir) {
 					this.doFileRemoved({id: Ares.Workspace.files.computeId(this.selectedNode.file)});
+					inNode.service = this.$.service ;
+					this.doFileOpenRequest({
+						file: inNode, // need to add service
+						projectData: this.projectData
+					});
 				} else {
 					this.doFolderChanged({file: this.selectedNode.file, projectData: this.projectData});
 				}
