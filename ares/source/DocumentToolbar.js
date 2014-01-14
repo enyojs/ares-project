@@ -8,8 +8,7 @@ enyo.kind({
 		onSwitchDoc: "",
 		onCloseDocRequest: "",
 		onRegisterMe: "",
-		onGrabberClick: "",
-		onAceFocus: ""
+		onGrabberClick: ""
 	},
 	components: [	
 		{
@@ -18,8 +17,7 @@ enyo.kind({
 			classes: "ares-small-toolbar title-gradient",
 			showing: false,
 			checkBeforeClosing: true,
-			checkBeforeChanging: true,
-			onHide: "doAceFocus"
+			checkBeforeChanging: true
 		}
 	],
 
