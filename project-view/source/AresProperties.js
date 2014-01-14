@@ -117,6 +117,7 @@ enyo.kind({
 		};
 		this.createComponentTab(pluginService);
 		this.pluginServicesList.push(pluginService);
+		return true;
 	},
 
 	// /**
