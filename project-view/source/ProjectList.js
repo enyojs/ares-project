@@ -43,6 +43,10 @@ enyo.kind({
 							{content: "Accounts...", classes: "aresmenu-button-label"}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
+						{value: "showAresAbout",  classes:"aresmenu-button", components: [
+							{content: "About...", classes: "aresmenu-button-label"}
+						]},
+						{classes: "onyx-menu-divider aresmenu-button"},
 						{value: "showAresProperties",  classes:"aresmenu-button", components: [
 							{content: "Properties...", classes: "aresmenu-button-label"}
 						]},
@@ -121,7 +125,8 @@ enyo.kind({
 			]},
 			{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmActionPopup: "confirmRemoveProject"},
 			{kind: "AccountsConfigurator"},
-			{kind: "AresProperties"}
+			{kind: "AresProperties"},
+			{name: "about", kind: "AboutAres"}
 		]},
 		{classes:"hangar"}
 	],
@@ -347,8 +352,12 @@ enyo.kind({
 	showAccountConfigurator: function() {
 		this.$.accountsConfigurator.show();
 	},
+	showAresAbout: function(){
+		this.$.about.show();
+	},
 	showAresProperties: function(){
 		this.$.aresProperties.show();
+		this.$.aresProperties.initDrawers();
 	},
 	showEnyoHelp: function() {
 		var search = ComponentsRegistry.getComponent("enyoEditor").requestSelectedText();
