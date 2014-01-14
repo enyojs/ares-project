@@ -187,7 +187,7 @@ enyo.kind({
 		{kind: "onyx.Toolbar", classes:"bottom-toolbar", name: "buttons", components: [
 			{name:"cancelButton", classes:"right", kind: "onyx.Button", content: "Close", ontap: "actionClose"}
 		]},
-		{name: "errorMessage", content: "Error: Unable to load Ares About data from Ares IDE Server", showing: false},
+		{name: "errorMessage", content: "Error: Unable to load Ares About data from Ares IDE Server", showing: false}
 	],
 	
 	/**
@@ -237,5 +237,5 @@ enyo.kind({
 	actionClose: function(inSender, inEvent) {
 		this.hide();
 		return true;
-	},	
+	}
 });
