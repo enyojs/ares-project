@@ -133,7 +133,7 @@ enyo.kind({
 	},
 
 	confirmTap: function(inSender, inEvent) {
-		//reset of the all non saved settings
+		//reset of all unsaved settings
 		this.initDrawers();
 		for(var index in this.pluginServicesList){
 			var pluginId = this.pluginServicesList[index].id;
