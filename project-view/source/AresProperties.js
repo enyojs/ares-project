@@ -1,4 +1,4 @@
-/* global ares */
+/*global ares, enyo */
 /**
  * This kind provide a widget to tune global properties
  */
