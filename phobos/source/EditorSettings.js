@@ -320,12 +320,10 @@ enyo.kind({
 	
 	aTrace: function(inSender, inEvent){
 		this.previewSettings.autotrace = inEvent.value;
-		//this.doChangeSettings();
 	},
 	
 	atraceline: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		console.log(inSender, inEvent);
 		this.previewSettings.autotraceLine = inSender.value;
 	}
 });
