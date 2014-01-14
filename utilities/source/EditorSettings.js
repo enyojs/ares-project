@@ -129,7 +129,7 @@ enyo.kind({
 			components: [
 				{kind: "Control", classes: "ace-input-popup", name: "altInputbox", components: [
 					{kind: "onyx.InputDecorator", classes: "ace-input-textarea", name: "inputDecorator", components: [
-						{kind: "onyx.TextArea", classes: "f_keyInput", placeholder: "Enter text here", name: "textArea"}
+						{kind: "onyx.TextArea", placeholder: "Enter text here", name: "textArea"}
 					]}
 				]},
 				{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
