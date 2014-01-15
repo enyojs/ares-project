@@ -313,10 +313,6 @@ enyo.kind({
 	// activeProject is never set to null
 	activeProject: null,
 
-	getActiveProject: function() {
-		return this.activeProject;
-	},
-
 	showWaitPopup: function(inMessage) {
 		this.doShowWaitPopup({msg: inMessage});
 	},

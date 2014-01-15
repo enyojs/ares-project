@@ -601,7 +601,7 @@ enyo.kind({
 	},
 	selectFile: function(inSender, inData) {
 		this.trace(inSender, "=>", inData);
-		var project = ComponentsRegistry.getComponent("enyoEditor").getActiveProject();
+		var project = ComponentsRegistry.getComponent("enyoEditor").activeProject;
 		this.chooser = inData.originator;
 		this.$.selectFilePopup.reset();
 		this.$.selectFilePopup.connectProject(project, (function() {
@@ -635,7 +635,7 @@ enyo.kind({
 			this.pathChecked(false);
 			return true;
 		}
-		var project = ComponentsRegistry.getComponent("enyoEditor").getActiveProject();
+		var project = ComponentsRegistry.getComponent("enyoEditor").activeProject;
 		this.$.selectFilePopup.connectProject(project, (function() {
 			this.$.selectFilePopup.checkSelectedName("/"+value);
 		}).bind(this));		
