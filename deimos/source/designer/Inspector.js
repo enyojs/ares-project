@@ -1,5 +1,4 @@
 /* global analyzer, ProjectKindsModel, Inspector, ares, ComponentsRegistry */
-/* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
 	name: "Inspector",
@@ -111,7 +110,7 @@ enyo.kind({
 			// Add an entry to _propMap[]_ for each property found in _publishedProperties_
 			for (var i = 0, p; (p = publishedProperties[i]); i++) {
 				if (((this.allowed(kindName, "properties", p.name)) || 
-					(this.userDefinedAttributes[inControl.aresId].hasOwnProperty(p.name)))) {
+					 (this.userDefinedAttributes[inControl.aresId].hasOwnProperty(p.name)))) {
 					this.trace("Adding property '", p.name, "' from '", currentKind, "'");
 					propMap[p.name] = p.value;
 				}
@@ -123,7 +122,7 @@ enyo.kind({
 			// Add an entry to _eventMap[]_ for each event found in _events_
 			for (i = 0, p; (p = events[i]); i++) {
 				if (((this.allowed(kindName, "events", p)) ||
-					(this.userDefinedAttributes[inControl.aresId].hasOwnProperty(p)))) {
+					 (this.userDefinedAttributes[inControl.aresId].hasOwnProperty(p)))) {
 					this.trace("Adding event '", p, "' from '", currentKind, "'");
 					eventMap[p] = true;
 				}
@@ -233,8 +232,8 @@ enyo.kind({
 			attributeKind = (kind)
 				?	kind
 				:	(value === true || value === false || value === "true" || value === "false")
-					?	"Inspector.Config.Boolean"
-					:	"Inspector.Config.Text";
+				?	"Inspector.Config.Boolean"
+				:	"Inspector.Config.Text";
 			var values = info ? info.values : null;
 			var comp = {name: attributeFieldName, kind: attributeKind, fieldName: inName, fieldValue: value, extra: inType, disabled: inherited};
 			
@@ -287,11 +286,11 @@ enyo.kind({
 	//* Get the layoutKind value for _inControl_
 	getControlLayoutKind: function(inControl) {
 		var inherited = !(
-				inControl.aresId &&
+			inControl.aresId &&
 				this.userDefinedAttributes &&
 				this.userDefinedAttributes[inControl.aresId] &&
 				typeof this.userDefinedAttributes[inControl.aresId]["layoutKind"] !== "undefined"
-			)
+		)
 		;
 		
 		return (inherited) ? "" : this.userDefinedAttributes[inControl.aresId]["layoutKind"];
@@ -357,43 +356,43 @@ enyo.kind({
 		}
 
 		switch(this.filterType) {
-			case 'P':
-				this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Properties"});
-				for (p in ps) {
-					this.makeEditor(inControl, p, ps[p], "properties");
-				}
-				this.$.filterLevel.show();
-				this.$.partialFilter.show();
-				this.propertiesFiltering();
-				break;
-			case 'E':
-				ps = ps.events;
-				if (ps.length) {
-					this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
-				}
-				for (i=0, p; (p=ps[i]); i++) {
-					this.makeEditor(inControl, p, "", "events");
-				}
-				this.$.filterLevel.show();
-				this.$.partialFilter.hide();
-				break;
-			case 'S':
-				var style = "";
-				if (inControl && inControl.style !== undefined) {
-					style = inControl.style;
-				}
-				this.$.content.createComponent({kind: "CssEditor", currentStyle: style, inspectorObj: this});
-				this.$.filterLevel.hide();
-				this.$.partialFilter.hide();
-				break;
-			case 'L':
-				this.makeLayoutEditor(inControl);
-				this.$.filterLevel.hide();
-				this.$.partialFilter.hide();
-				break;
-			default:
-				enyo.warn("Inspector has unknown filterType: ", this.filterType);
-				break;
+		case 'P':
+			this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Properties"});
+			for (p in ps) {
+				this.makeEditor(inControl, p, ps[p], "properties");
+			}
+			this.$.filterLevel.show();
+			this.$.partialFilter.show();
+			this.propertiesFiltering();
+			break;
+		case 'E':
+			ps = ps.events;
+			if (ps.length) {
+				this.$.content.createComponent({classes: "onyx-groupbox-header", content: "Events"});
+			}
+			for (i=0, p; (p=ps[i]); i++) {
+				this.makeEditor(inControl, p, "", "events");
+			}
+			this.$.filterLevel.show();
+			this.$.partialFilter.hide();
+			break;
+		case 'S':
+			var style = "";
+			if (inControl && inControl.style !== undefined) {
+				style = inControl.style;
+			}
+			this.$.content.createComponent({kind: "CssEditor", currentStyle: style, inspectorObj: this});
+			this.$.filterLevel.hide();
+			this.$.partialFilter.hide();
+			break;
+		case 'L':
+			this.makeLayoutEditor(inControl);
+			this.$.filterLevel.hide();
+			this.$.partialFilter.hide();
+			break;
+		default:
+			enyo.warn("Inspector has unknown filterType: ", this.filterType);
+			break;
 		}
 		
 		this.$.content.render();
@@ -612,7 +611,7 @@ enyo.kind({
 		}).bind(this));
 		return true;
 	},
-		/** @private */
+	/** @private */
 	selectFileChosen: function(inSender, inEvent) {
 		var chooser = this.chooser;
 		this.chooser = null;
