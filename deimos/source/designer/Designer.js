@@ -106,6 +106,23 @@ enyo.kind({
 		// next callback is run once a "ready" message is received from designerFrame
 		this.updateSourceCallback = next;
 	},
+
+	_runUpdateSourceCb: function(txt) {
+		var cbData;
+		// call back *once* the function passed to updateSource
+		if (this.updateSourceCallback) {
+			this.trace("update source " + txt);
+			this.updateSourceCallback();
+			this.updateSourceCallback = null;
+			// FIXME a real state machine is needed here
+			if (this.updateSourcePending.length) {
+				this.log("resuming delayed update source");
+				cbData = this.updateSourcePending.shift() ;
+				this.updateSource(cbData[0], cbData[1]);
+			}
+		}
+	},
+
 	reload: function() {
 		this.reloading = true;
 		this.updateSource(this.projectSource, function(){} );
@@ -121,7 +138,6 @@ enyo.kind({
 		
 		var msg = inEvent.message;
 		var deimos = this.owner;
-		var cbData;
 
 		this.trace("Op: ", msg.op, msg);
 
@@ -140,18 +156,7 @@ enyo.kind({
 				this.doReloadComplete();
 				this.reloading = false;
 			}
-			// call back *once* the function passed to updateSource
-			if (this.updateSourceCallback) {
-				this.trace("update source done.");
-				this.updateSourceCallback();
-				this.updateSourceCallback = null;
-				// FIXME a real state machine is needd here
-				if (this.updateSourcePending.length) {
-					this.log("resuming delayed update source");
-					cbData = this.updateSourcePending.shift() ;
-					this.updateSource(cbData[0], cbData[1]);
-				}
-			}
+			this._runUpdateSourceCb('done') ;
 		// Loaded event sent from designerFrame and awaiting aresOptions.
 		} else if(msg.op === "state" && msg.val === "loaded") {
 			this.designerFrameLoaded();
