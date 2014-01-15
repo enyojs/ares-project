@@ -12,5 +12,6 @@ enyo.depends(
 	"LinkController.js",
 	"PanelGrabber.js",
 	"PopupTitle.js",
-	"Logo.js" 
+	"Logo.js",
+	"EditorSettings.js" 
 );
