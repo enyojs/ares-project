@@ -1,4 +1,4 @@
-/*global analyzer, ares, enyo, $L, ProjectCtrl */
+/*global analyzer, ares, enyo, $L, ProjectCtrl, setTimeout */
 
 enyo.kind({
 	name: "Phobos",
@@ -894,12 +894,16 @@ enyo.kind({
 	//* Send up an updated copy of the code
 	updateCodeInDesigner: function(next) {
 		// Update the projectIndexer and notify watchers
+		ares.assertCb(next);
 		this.reparseUsersCode(true);
 		
 		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
 		if (data.kinds.length > 0) {
 			this.doChildRequest({task: [ "loadDesignerUI", data, next ]});
 		} // else - The error has been displayed by extractKindsData()
+		else {
+			setTimeout(next,0);
+		}
 	},
 	resizeHandler: function() {
 		this.inherited(arguments);

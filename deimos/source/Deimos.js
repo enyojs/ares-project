@@ -164,6 +164,7 @@ enyo.kind({
 	},
 
 	selectKind: function(index, next) {
+		ares.assertCb(next);
 		var kind = this.kinds[index];
 		var components = this.getSingleKind(index);
 		this.trace("selected kind ", kind);

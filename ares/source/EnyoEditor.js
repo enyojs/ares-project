@@ -616,6 +616,7 @@ enyo.kind({
 	},
 
 	switchToNewTabAndDoc: function(projectData, file, inContent,next) {
+		ares.assertCb(next);
 		this.trace("projectData:", projectData.getName(), ", file:", file.name);
 		var fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
 		ComponentsRegistry.getComponent("documentToolbar")
@@ -715,9 +716,10 @@ enyo.kind({
 	// FIXME ENYO-3624: this function must trigger a reload of the designer
 	// to take into account code modification discarded by user
 	reloadDoc: function(doc,next) {
+		ares.assertCb(next);
 		var reloadedDoc = this.activeDocument ;
 		this.activeDocument = null;// reset to trigger reload
-		this._switchDoc(reloadedDoc, next || function(){/* nop */} );
+		this._switchDoc(reloadedDoc, next);
 	},
 
 	/**
@@ -726,6 +728,7 @@ enyo.kind({
 	 * @param {Function} next
 	 */
 	_switchDoc: function(newDoc,next) {
+		ares.assertCb(next);
 		var phobos = this.$.phobos;
 
 		var oldDoc = this.activeDocument ;
@@ -849,6 +852,7 @@ enyo.kind({
 	 * @param {Function} next
 	 */
 	requestSave: function(doc, next) {
+		ares.assertCb(next);
 		var popup = this.$.savePopup ;
 		if (doc.getEdited() === true) {
 			this.trace("request save doc on ", doc.getName());
@@ -868,7 +872,7 @@ enyo.kind({
 
 			popup.setCancelCallback(
 				(function() {
-					this.reloadDoc(doc);
+					this.reloadDoc(doc, ares.noNext);
 					this.aceFocus();
 					next(new Error('canceled'));
 				}).bind(this)
