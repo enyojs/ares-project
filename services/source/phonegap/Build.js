@@ -575,25 +575,22 @@ enyo.kind({
 	 */
 	_getFiles: function(project, next) {
 		this.trace("...");
-		var req, aborted;
+		var req, aborted = false;
 		this.doShowWaitPopup({msg: $L("Building source archive"), service: "build"});
 		req = project.getService().exportAs(project.getFolderId(), -1 /*infinity*/);
 
 		this.abortAjaxRequest= function() {
 			this.abortAjaxRequest= function() {};		
 			aborted = true ;
-			enyo.xhr.cancel(req.xhr);
 		};
 
 		req.response(this, function _gotFiles(inSender, inData) {
 			this.trace("Phonegap.Build#_getFiles()", "Got the files data");
 			var ctype = req.xhrResponse.headers['x-content-type'];
-			if (aborted) {
-				// response is called on Mac even if xhr was aborted
-				this.trace("ugh, Ajax response was called after an abort");
-				next(new Error('Build canceled by the user'));
-			} else {
+			if (!aborted) {
 				next(null, {content: inData, ctype: ctype});
+			} else {
+				next (Phonegap.Build.abortBuild);
 			}
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
