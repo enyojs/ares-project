@@ -125,12 +125,27 @@ enyo.kind(
 		debug: false ,
 		iframeUrl: null,
 
+		// retrieve URL from window and setup iframe url
+		create: function() {
+			ares.setupTraceLogger(this);
+			this.inherited(arguments);
+			var param = this.getQueryParams(window.location.search) ;
+			this.iframeUrl = param.url ;
+
+			this.trace("preview url:", param.url);
+
+			this.$.scrolledIframe.setUrl(param.url) ;
+			this.$.projectName.setContent(param.name);
+
+			//display project name in the window title
+			document.title = this.$.projectName.getContent()+" - Ares project preview";
 		},
 
 		zoom: function(inSender, inEvent) {
 			this.scale = 0.3 + 0.7 * inEvent.value / 100 ;
 			this.applyScale() ;
 		},
+
 		applyScale: function() {
 			enyo.dom.transformValue(
 				this.$.scrolledIframe.$.iframe, "scale", this.scale
