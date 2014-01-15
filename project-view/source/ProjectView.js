@@ -108,6 +108,15 @@ enyo.kind({
 	 * @param {Function} next
 	 */
 	setupProjectConfig: function(project, next) {
+		ares.assertCb(next);
+
+		var pname = project.getName();
+		if ( this.currentProject && pname === this.currentProject.getName()) {
+			this.trace("skip setup of already selected project" + pname);
+			next();
+			return;
+		}
+
 		// FIXME: temporary hack to create config.json on the
 		// fly if needed... would be better to create/load it
 		// when the workspace is loaded & when a new project
@@ -122,45 +131,31 @@ enyo.kind({
 			folderId: project.getFolderId()
 		};
 
-		async.parallel(
+		async.series(
 			[
+				// read default config from remote server
+				config.init.bind(config, initData) ,
+				function (next) {
+					self.trace("ProjectView: setup project set config on "+ project.getName() );
+					project.setConfig(config);
+					
+					self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled);
+					next();
+				},
 				function (next) {
 					// Pass service definition & configuration to Harmonia
 					// & consequently to HermesFileTree
 					self.trace("ProjectView: setup project on harmonia "+ project.getName() );
 					ComponentsRegistry.getComponent("harmonia").setProject(project, next);
-				},
-				function (next) {
-					self.trace("project config init for "+ project.getName() );
-					async.series(
-						[
-							// read default config from remote server
-							config.init.bind(config, initData) ,
-							function (next) {
-								self.trace("ProjectView: setup project set config on "+ project.getName() );
-								project.setConfig(config);
-								
-								self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled);
-								next();
-							}
-						],
-						function (err) {
-							if (err) {
-								self.doError({msg: err.toString(), err: err});
-							} else {
-								next(err) ;
-							}
-							next(err) ;
-						}
-					);
 				}
+
 			],
 			function (err) {
 				self.trace("ProjectView: setup project config done on " + project.getName() + " err is ",err );
-				// ENYO-3629
-				if (next) {
-					next(err);
-				}
+				if (err) {
+					self.doError({msg: err.toString(), err: err});
+				} 
+				next(err);
 			}
 		);
 	},

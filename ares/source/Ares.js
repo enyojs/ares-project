@@ -78,7 +78,11 @@ enyo.kind({
 		onAllDocumentsAreClosed: "showProjectView",
 		onCloseProjectDocuments: "closeDocumentsForProject",
 		onRegisterMe : "_registerComponent",
-		onMovePanel : "_movePanel"
+		onMovePanel : "_movePanel",
+		//handlers for editorSettings kind (utilities/EditorSettings.js)
+		onChangeSettings:"applyPreviewSettings", 
+		onChangeRightPane: "changeRightPane", 
+		onApplySettings: "applySettings"
 	},
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
@@ -373,6 +377,40 @@ enyo.kind({
 			}
 		}
 	},
+	
+	/**
+	 * Event handler for ace's settings called when settings from localStorage have to be applied (cancel/open)
+	 * 
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 */
+	applySettings: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("enyoEditor").applySettings(inEvent.originator.getSettingFromLS());
+	},
+
+	/**
+	 * Event handler for ace's settings called when a setting is changing (change theme, font size on ui for example)
+	 * 
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 */
+	applyPreviewSettings: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("enyoEditor").applySettings(inEvent.originator.getPreviewSettings());
+	},
+
+	/**
+	 * Event handler for ace's settings called when a right panel is changed
+	 * 
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 */
+	changeRightPane: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("enyoEditor").changeRightPane(inEvent.originator.getPreviewSettings());
+	},
+
 	/**
 	 * Event handler for ares components registry
 	 * 

@@ -115,6 +115,7 @@ enyo.kind({
 	handlers: {
 		onErrorTooltip: "showErrorTooltip",
 		onErrorTooltipReset: "resetErrorTooltip",
+		onAceGotFocus: "switchProjectToCurrentDoc",
 		onChildRequest: "handleCall",
 		onAceFocus: "aceFocus"
 	},
@@ -159,6 +160,12 @@ enyo.kind({
 	},
 	editorSettings: function(){
 		this.$.phobos.editorSettings();
+	},
+	applySettings: function(settings){
+		this.$.phobos.applySettings(settings);
+	},
+	changeRightPane: function(editorSettings){
+		this.$.phobos.changeRightPane(editorSettings);
 	},
 	newKindAction: function() {
 		this.$.phobos.newKindAction();
@@ -618,6 +625,14 @@ enyo.kind({
 		this.switchToDocument(fileData, $L("Opening..."), next);
 	},
 
+	switchProjectToCurrentDoc: function(inSender, inEvent) {
+		var pl = ComponentsRegistry.getComponent("projectList") ;
+		if (! this.switching && this.activeDocument) {
+			pl.selectProject( this.activeDocument.getProjectData(), ares.noNext );
+		}
+		return true;
+	},
+
 	/**
 	 * Handle switch doc event
 	 * @param {Object} inSender
@@ -663,6 +678,8 @@ enyo.kind({
 		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : "") + "to " + newDoc.getName() );
 
 		var serial = [];
+		// used to block onFocus event coming from text editor
+		this.switching = true ;
 
 		// select project if the document comes from a different
 		// project compared to the project of the previous document
@@ -676,7 +693,7 @@ enyo.kind({
 			this.doShowWaitPopup({msg: $L("Switching project...")});
 
 			serial.push(
-				projectList.selectInProjectList.bind(projectList, project),
+				projectList.selectProject.bind(projectList, project),
 				deimos.projectSelected.bind(deimos, project)
 			);
 		}
@@ -684,12 +701,14 @@ enyo.kind({
 		var that = this ;
 		serial.push(
 			function(_next) { that.doShowWaitPopup({msg: popupMsg}); _next();},
-			this._switchDoc.bind(this, newDoc)
+			this._switchDoc.bind(this, newDoc),
+			function(_next) { that.aceFocus(); _next();}
 		);
 
 		// no need to handle error, call outer next without params
 		async.series( serial, function(err){
 			that.doHideWaitPopup();
+			that.switching = false ;
 			safeNext();
 		});
 	},
