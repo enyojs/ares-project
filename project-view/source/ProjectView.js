@@ -140,7 +140,7 @@ enyo.kind({
 					project.setConfig(config);
 					
 					self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled);
-								self.initializeValidePgbConf(project, config.data.providers.phonegap.enabled);
+					self.initializeValidePgbConf(project, config.data.providers.phonegap.enabled);
 					next();
 				},
 				function (next) {
@@ -182,31 +182,55 @@ enyo.kind({
 		if (inProject.getValidePgbConf() === undefined && inPhonegapEnabled) {
 			inProject.setValidePgbConf({
 				"sharedConfiguration": {
-					"valideDrawer": true, "phonegap-version": true, "orientation": true,
-					"target-device": true, "fullscreen": true, "icon": true, "splashScreen": true
+					"valideDrawer": true,
+					"phonegap-version": true,
+					"orientation": true,
+					"target-device": true,
+					"fullscreen": true,
+					"icon": true,
+					"splashScreen": true
 				},
 				"android": {
-					"valideDrawer": true, "android-installLocation": true, "android-minSdkVersion": true, 
-					"android-targetSdkVersion": true, "android-maxSdkVersion": true, "android-windowSoftInputMode": true, 
-					"splash-screen-duration": true, "load-url-timeout": true, "icon": true, "splashScreen": true
+					"valideDrawer": true,
+					"android-installLocation": true,
+					"android-minSdkVersion": true, 
+					"android-targetSdkVersion": true,
+					"android-maxSdkVersion": true,
+					"android-windowSoftInputMode": true,
+					"splash-screen-duration": true,
+					"load-url-timeout": true,
+					"icon": true,
+					"splashScreen": true
 				},
 				"ios": {
-					"valideDrawer": true, "webviewbounce": true, "prerendered-icon": true, "ios-statusbarstyle": true, 
-					"detect-data-types": true, "exit-on-suspend": true, "show-splash-screen-spinner": true,
-					"auto-hide-splash-screen": true, "icon": true, "splashScreen": true
+					"valideDrawer": true,
+					"webviewbounce": true,
+					"prerendered-icon": true,
+					"ios-statusbarstyle": true, 
+					"detect-data-types": true,
+					"exit-on-suspend": true,
+					"show-splash-screen-spinner": true,
+					"auto-hide-splash-screen": true,
+					"icon": true,
+					"splashScreen": true
 				},
 				"winphone": {
-					"valideDrawer": true, "icon": true, "splashScreen": true
+					"valideDrawer": true,
+					"icon": true,
+					"splashScreen": true
 				},
 				
 				"blackberry": {
-					"valideDrawer": true, "disable-cursor": true, "icon": true, "splashScreen": true
+					"valideDrawer": true,
+					"disable-cursor": true,
+					"icon": true,
+					"splashScreen": true
 				},
 				"webos": {
-					"valideDrawer": true, "icon": true, "splashScreen": true
-				}
-
-				
+					"valideDrawer": true,
+					"icon": true,
+					"splashScreen": true
+				}				
 			});
 		}
 	},

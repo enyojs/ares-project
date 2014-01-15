@@ -1,4 +1,4 @@
-/*global enyo, ares, ProjectConfig */
+/*global enyo, ares, ProjectConfig, Phonegap */
 
 /**
  * This kind provide a widget to tune project properties
@@ -458,8 +458,8 @@ enyo.kind({
 
 		// Check the validation state of all controled PGB attributes by platform (it includes also the shared configuration attributes)
 		// to update the validation state of the drawer
-		for(var key in provider.getCurrentProject().attributes.validePgbConf[this.platform]){
-			if(!provider.getCurrentProject().attributes.validePgbConf[this.platform][key]){
+		for(var option in provider.getCurrentProject().attributes.validePgbConf[this.platform]){
+			if(!provider.getCurrentProject().attributes.validePgbConf[this.platform][option]){
 				valideDrawer = false;
 			}					
 		}
@@ -469,8 +469,8 @@ enyo.kind({
 		
 		// Check the validation state of all the controled PGB drawer
 		// to enable/disable the Ok button
-		for(var key in provider.getCurrentProject().attributes.validePgbConf) {
-			if (!provider.getCurrentProject().attributes.validePgbConf[key]["valideDrawer"]) {
+		for(var drawer in provider.getCurrentProject().attributes.validePgbConf) {
+			if (!provider.getCurrentProject().attributes.validePgbConf[drawer]["valideDrawer"]) {
 				okDisabled = true;	
 			}
 		}
