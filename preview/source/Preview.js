@@ -122,13 +122,9 @@ enyo.kind(
 			}
 		],
 
-		debug: true ,
+		debug: false ,
 		iframeUrl: null,
 
-		dlog: function() {
-			if (this.debug) {
-				this.log.apply(this, arguments) ;
-			}
 		},
 
 		zoom: function(inSender, inEvent) {
@@ -146,7 +142,7 @@ enyo.kind(
 			var device = this.$.device.selected ;
 			var orientation = this.$.orientation.selected ;
 
-			this.dlog("size for device " , device.content , " orientation " , orientation.content ) ;
+			this.trace("size for device " , device.content , " orientation " , orientation.content ) ;
 
 			var dw  = device.value.width ;
 			var dh  = device.value.height ;
@@ -187,18 +183,6 @@ enyo.kind(
 			}
 
 			return params;
-		},
-
-		// retrieve URL from window and setup iframe url
-		create: function() {
-			this.inherited(arguments);
-
-			var param = this.getQueryParams(window.location.search) ;
-			this.log("preview url " + param.url) ;
-			this.iframeUrl = param.url ;
-
-			this.$.scrolledIframe.setUrl   (param.url) ;
-			this.$.projectName.setContent(param.name);
 		},
 
 		reload: function() {
