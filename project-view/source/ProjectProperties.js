@@ -430,6 +430,10 @@ enyo.kind({
 			this.$.errTooltip.setContent(contentError);
 		}
 		this.$.errTooltip.show();
+		var provider = Phonegap.ProjectProperties.getProvider();
+	
+		provider.getCurrentProject().attributes.validePgbConf[inEvent.originator.platform][inEvent.originator.name] = false;
+		provider.getCurrentProject().attributes.validePgbConf[inEvent.originator.platform]["valideDrawer"] = false;
 	},
 
 
@@ -445,11 +449,28 @@ enyo.kind({
 	 */
 	enableOkButton: function(inSender, inEvent){	
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
+		var okDisabled = false;
+		var valideDrawer = true;
+		var provider = Phonegap.ProjectProperties.getProvider();
 
 		// Set in the array {this.validatePhonegapUiValues} the originator UI row as valide
+		provider.getCurrentProject().attributes.validePgbConf[inEvent.originator.platform][inEvent.originator.name] = true;
+
+		// Check the validation state of all controled PGB attributes by platform (it includes also the shared configuration attributes)
+		// to update the validation state of the drawer
+		for(var key in provider.getCurrentProject().attributes.validePgbConf[this.platform]){
+			if(!provider.getCurrentProject().attributes.validePgbConf[this.platform][key]){
+				valideDrawer = false;
+			}					
+		}
+		if (valideDrawer) {
+			provider.getCurrentProject().attributes.validePgbConf[inEvent.originator.platform]["valideDrawer"] = true;
+		}	
 		
-		var okDisabled = false;
-		
+		// Check the validation state of all the controled PGB drawer
+		// to enable/disable the Ok button
+		for(var key in provider.getCurrentProject().attributes.validePgbConf) {
+			if (!provider.getCurrentProject().attributes.validePgbConf[key]["valideDrawer"]) {
 				okDisabled = true;	
 			}
 		}
