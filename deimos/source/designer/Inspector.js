@@ -1,4 +1,4 @@
-/* global analyzer, ProjectKindsModel, Inspector, ares, ComponentsRegistry */
+/*global analyzer, ProjectKindsModel, Inspector, ares, ComponentsRegistry, enyo */
 
 enyo.kind({
 	name: "Inspector",
