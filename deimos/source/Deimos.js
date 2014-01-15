@@ -16,6 +16,8 @@ enyo.kind({
 				{name: "middle", classes: "ares-deimos-middle", fit: true, kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
 						{kind: "onyx.Button", name: "reloadDesignerButton", classes: "deimos-designer-toolbar-spacing", content: "Reload", ontap: "reloadDesigner"},
+						{content: "Fit"},
+						{kind: "onyx.Checkbox", onchange: "autoZoomDesigner"}, //checkbox is here as a workaround for ENYO-3648
 						{content: "Size:"},
 						{kind: "onyx.PickerDecorator", classes: "deimos-device-picker deimos-designer-toolbar-spacing", components: [
 							{style: "width:100%;"},
@@ -38,8 +40,11 @@ enyo.kind({
 						{kind: "onyx.InputDecorator", components: [
 							{kind: "onyx.Input", name: "designerHeightInput", classes: "deimos-designer-input", placeholder: "Auto", onchange: "updateHeight"}
 						]},
-						{content: "Zoom:"},
-						{kind: "onyx.Slider", classes: "deimos-zoom-slider", value: 100, onChange: 'zoomDesigner', onChanging: 'zoomDesigner' }
+						{content: "Zoom"},
+						{kind: "onyx.PickerDecorator", components: [
+							{name: "zoomPickerButton"},
+							{name: "zoomPicker", kind: "onyx.Picker", onSelect: "zoomDesigner", components: []}
+						]}
 					]},
 					{kind: "Scroller", classes: "deimos-designer-wrapper", fit: true, components: [
 						{kind: "Designer", name: "designer",
@@ -89,14 +94,16 @@ enyo.kind({
 		onError:""
 	},
 	handlers:{
-		onPaletteComponentAction: "runPaletteComponentAction"
+		onPaletteComponentAction: "runPaletteComponentAction",
+		onScaleChange: "displayZoomValue"
 	},
 	kinds: [],
 	index: null,
 	previousContent: "",
 	fileName: "",
 	selectFromComponentView: false,
-	
+	zoomValues: [25, 50, 100, 125, 150, 200, 400],
+	initZoomIndex: 2,
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.trace("Creating Deimos");
@@ -113,6 +120,11 @@ enyo.kind({
 		var initItem = this.$.devicePicker.getClientControls()[0];
 		this.$.devicePicker.setSelected(initItem);
 		this.deviceChosen(null, {selected: initItem});
+		var i, z;
+		for (i = 0; (z = this.zoomValues[i]); i++) {
+			this.$.zoomPicker.createComponent({content: z+"%", value: z, active: z === this.zoomValues[this.initZoomIndex]});
+		}
+		this.zoomDesigner(null, {selected: this.$.zoomPicker.getSelected()});
 	},
 
 	/**
@@ -128,6 +140,7 @@ enyo.kind({
 	 */
 	loadDesignerUI: function(data, next) {
 		this.trace("called with", data);
+		ares.assertCb(next);
 		this.enableDesignerActionButtons(false);
 
 		var what = data.kinds;
@@ -742,12 +755,12 @@ enyo.kind({
 	},
 	undoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
-		this.doChildRequest({task: "undo" });
+		this.doChildRequest({task: [ "undo", ares.noNext ] });
 		return true;
 	},
 	redoAction: function(inSender, inEvent) {
 		this.enableDesignerActionButtons(false);
-		this.doChildRequest({task: "redo" });
+		this.doChildRequest({task: [ "redo", ares.noNext ] });
 		return true;
 	},
 	deleteAction: function(inSender, inEvent) {
@@ -904,7 +917,23 @@ enyo.kind({
 		this.$.designer.setHeight(this.$.designerHeightInput.getValue());
 	},
 	zoomDesigner: function(inSender, inEvent) {
-		this.$.designer.zoom(inSender.getValue());
+		this.$.designer.zoom(inEvent.selected.value);
+	},
+	autoZoomDesigner: function(inSender, inEvent) {
+		var active = inSender.getValue();
+		this.$.zoomPickerButton.setDisabled(active);
+		this.$.designer.setAutoZoom(active);
+		if(active){
+			var scale = this.$.designer.zoomFromWidth();
+			this.$.zoomPickerButton.setContent(scale+"%");	
+		} else{
+			this.$.zoomPickerButton.setContent(this.zoomValues[this.initZoomIndex]+"%");	
+			this.$.zoomPicker.setSelected(this.$.zoomPicker.getClientControls()[this.initZoomIndex]);
+			this.zoomDesigner(null, {selected: this.$.zoomPicker.getSelected()});
+		}
+	},
+	displayZoomValue: function(inSender, inEvent){
+		this.$.zoomPickerButton.setContent(inEvent.scale+"%");
 	},
 	//* Add dispatch for native drag events
 	addHandlers: function(inSender, inEvent) {

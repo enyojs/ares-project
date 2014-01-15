@@ -1,6 +1,6 @@
 {
 	"name": "ares-ide",
-	"version": "0.2.9-pre.2",
+	"version": "0.2.10-pre.1",
 	"license" : "Apache 2.0", 
 	"description": "A browser-based code editor and UI designer for Enyo 2 projects",
 	"keywords": ["ide", "enyo", "phonegap", "android", "ios", "windowsphone", "blackberry", "webos", "html5"],
@@ -21,7 +21,7 @@
 	"os" : [ "darwin", "linux", "win32" ],
 	"dependencies": {
 		"archiver": "~0.4.6",
-		"ares-generator": "~0.2.3",
+		"ares-generator": "~0.3.4",
 		"async": "~0.2.9",
 		"base64-stream": "~0.1.2",
 		"busboy": "~0.0.5",

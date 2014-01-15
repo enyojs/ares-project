@@ -6,8 +6,8 @@
 	padding:0;
 }
 
-.ares-classic-popup > .title {
-	height: @ares-popup-title-height;
+.ares-classic-popup .title {
+	min-height: @ares-popup-title-height;
 	line-height: @ares-popup-title-height;
 	font-size: @ares-font-size-large;
 	padding-left: 20px;
@@ -17,12 +17,19 @@
 	.ares-rounded-corners(@ares-popup-radius @ares-popup-radius 0px 0px);
 }
 
-.ares-classic-popup > .title.draggable {
+//use a span inside the title div if your pop-up's title is on more then one line
+.title >span{
+	line-height: unit((@ares-popup-title-height/@ares-font-size-large)/2) ;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.ares-classic-popup .title.draggable {
 	cursor: pointer;
 	cursor: hand;
 }
 
-.ares-classic-popup >.title.left-align { padding-left: 6px; }
+.ares-classic-popup .title.left-align { padding-left: 6px; }
 
 .bottom-toolbar {
 	position: relative;
@@ -34,7 +41,10 @@
 	.ares-rounded-corners(0px 0px @ares-popup-radius @ares-popup-radius);
 	min-height: 28px;
 }
-
+.bottom-toolbar.white{
+	background-color: white;
+	
+}
 .bottom-toolbar > .onyx-button {
 	border: 1px solid @ares-popup-bar-border-color;
 	margin: 0 1px;

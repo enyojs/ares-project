@@ -365,6 +365,12 @@ enyo.kind({
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.DownloadStatus",
+	provider: {},
+
+	create: function() {
+		this.inherited(arguments);
+		this.set("provider", Phonegap.ProjectProperties.getProvider());
+	},
 
 	/**
 	 * Set the download status for a platform defined in {this.downloadStatus}.
@@ -374,8 +380,13 @@ enyo.kind({
 	 * @public
 	 */
 	setDownloadStatus: function(inPlatform, inDownloadStatus) {
-
-		Phonegap.ProjectProperties.downloadStatus[inPlatform] = inDownloadStatus === 1 ? "Download complete": 
+		/*
+			FIXME: ENYO-3687
+			This need further work to make sure that what we store in backbone is atomic data (not references/arrays)
+			However we'll need to revise the backbone store for Phonegap build as we transform it into a plugin
+		*/
+		
+		this.provider.getCurrentProject().getDownloadStatus()[inPlatform] = inDownloadStatus === 1 ? "Download complete": 
 		inDownloadStatus === 0 ? "Download failed" : "Download in progress";
 
 		this.bubble("onUpdateStatusMessage");	
@@ -389,7 +400,7 @@ enyo.kind({
 	 * @public
 	 */
 	getDownloadStatus: function(inPlatform) {
-		return Phonegap.ProjectProperties.downloadStatus[inPlatform];
+		return this.provider.getCurrentProject().getDownloadStatus()[inPlatform];
 	}	
 
 });

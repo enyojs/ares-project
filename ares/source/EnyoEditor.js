@@ -115,6 +115,7 @@ enyo.kind({
 	handlers: {
 		onErrorTooltip: "showErrorTooltip",
 		onErrorTooltipReset: "resetErrorTooltip",
+		onAceGotFocus: "switchProjectToCurrentDoc",
 		onChildRequest: "handleCall",
 		onAceFocus: "aceFocus"
 	},
@@ -159,6 +160,12 @@ enyo.kind({
 	},
 	editorSettings: function(){
 		this.$.phobos.editorSettings();
+	},
+	applySettings: function(settings){
+		this.$.phobos.applySettings(settings);
+	},
+	changeRightPane: function(editorSettings){
+		this.$.phobos.changeRightPane(editorSettings);
 	},
 	newKindAction: function() {
 		this.$.phobos.newKindAction();
@@ -579,6 +586,7 @@ enyo.kind({
 		// remove Doc from cache
 		var docId = doc.getId();
 		Ares.Workspace.files.removeEntry(docId);
+		this.$.docToolBar.removeTab(docId);
 		if (! Ares.Workspace.files.length ) {
 			this.doAllDocumentsAreClosed();
 		}
@@ -590,8 +598,10 @@ enyo.kind({
 	 * @param {[Function]} next
 	 */
 	closeDoc: function(param, next) {
+		ares.assertCb(next);
 		var doc = typeof param === 'object' ? param : Ares.Workspace.files.get(param) ;
-		var docId = doc.getId();
+
+		var docId = doc ? doc.getId() : undefined;
 
 		if (docId && this.activeDocument && this.activeDocument.getId() === docId) {
 			this.closeActiveDoc();
@@ -599,12 +609,10 @@ enyo.kind({
 			this.trace("closing a doc different from current one: ", doc.getName());
 			this.forgetDoc(doc);
 		} else {
-			this.warn("called without doc to close");
+			this.trace("called without doc to close");
 		}
 
-		if (typeof next === 'function') {
-			next();
-		}
+		next();
 	},
 
 	switchToNewTabAndDoc: function(projectData, file, inContent,next) {
@@ -613,6 +621,14 @@ enyo.kind({
 		ComponentsRegistry.getComponent("documentToolbar")
 			.createDocTab(file.name, fileData.getId(), file.path);
 		this.switchToDocument(fileData, $L("Opening..."), next);
+	},
+
+	switchProjectToCurrentDoc: function(inSender, inEvent) {
+		var pl = ComponentsRegistry.getComponent("projectList") ;
+		if (! this.switching && this.activeDocument) {
+			pl.selectProject( this.activeDocument.getProjectData(), ares.noNext );
+		}
+		return true;
 	},
 
 	/**
@@ -660,6 +676,8 @@ enyo.kind({
 		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : "") + "to " + newDoc.getName() );
 
 		var serial = [];
+		// used to block onFocus event coming from text editor
+		this.switching = true ;
 
 		// select project if the document comes from a different
 		// project compared to the project of the previous document
@@ -673,7 +691,7 @@ enyo.kind({
 			this.doShowWaitPopup({msg: $L("Switching project...")});
 
 			serial.push(
-				projectList.selectInProjectList.bind(projectList, project),
+				projectList.selectProject.bind(projectList, project),
 				deimos.projectSelected.bind(deimos, project)
 			);
 		}
@@ -681,12 +699,14 @@ enyo.kind({
 		var that = this ;
 		serial.push(
 			function(_next) { that.doShowWaitPopup({msg: popupMsg}); _next();},
-			this._switchDoc.bind(this, newDoc)
+			this._switchDoc.bind(this, newDoc),
+			function(_next) { that.aceFocus(); _next();}
 		);
 
 		// no need to handle error, call outer next without params
 		async.series( serial, function(err){
 			that.doHideWaitPopup();
+			that.switching = false ;
 			safeNext();
 		});
 	},
@@ -755,20 +775,14 @@ enyo.kind({
 	 */
 	handleCloseDocument: function(inSender, inEvent) {
 		// inEvent.next callback is ditched. Ares will call removeTab
-		// when file is closed by Ace
+		// when file is closed no matter where the tab removal request
+		// comes from.
 		var doc = Ares.Workspace.files.get(inEvent.userId);
 
-		async.waterfall(
-			[
-				this.requestSave.bind(this, doc),
-				this.closeDoc.bind(this)
-			],
-			function(err) {
-				if (! err) {
-					inEvent.next();
-				}
-			}
-		);
+		async.waterfall([
+			this.requestSave.bind(this, doc),
+			this.closeDoc.bind(this)
+		]);
 		return true; // Stop the propagation of the event
 	},
 
@@ -913,12 +927,14 @@ enyo.kind({
 		this.$.deimos.syncFile(projectName, filename, code);
 	},
 
-	undo: function() {
-		this.$.phobos.undoAndUpdate() ;
+	undo: function(next) {
+		ares.assertCb(next);
+		this.$.phobos.undoAndUpdate(next) ;
 	},
 
-	redo: function() {
-		this.$.phobos.redoAndUpdate() ;
+	redo: function(next) {
+		ares.assertCb(next);
+		this.$.phobos.redoAndUpdate(next) ;
 	},
 
 	loadDesignerUI: function(inData, next) {
