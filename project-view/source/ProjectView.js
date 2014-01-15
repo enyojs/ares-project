@@ -140,7 +140,7 @@ enyo.kind({
 					project.setConfig(config);
 					
 					self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled);
-					self.initializeValidePgbConf(project, config.data.providers.phonegap.enabled);
+					self.initializeValidPgbConf(project, config.data.providers.phonegap.enabled);
 					next();
 				},
 				function (next) {
@@ -178,11 +178,11 @@ enyo.kind({
 		}
 	},
 
-	initializeValidePgbConf: function(inProject, inPhonegapEnabled) {
-		if (inProject.getValidePgbConf() === undefined && inPhonegapEnabled) {
-			inProject.setValidePgbConf({
+	initializeValidPgbConf: function(inProject, inPhonegapEnabled) {
+		if (inProject.getValidPgbConf() === undefined && inPhonegapEnabled) {
+			inProject.setValidPgbConf({
 				"sharedConfiguration": {
-					"valideDrawer": true,
+					"validDrawer": true,
 					"phonegap-version": true,
 					"orientation": true,
 					"target-device": true,
@@ -191,7 +191,7 @@ enyo.kind({
 					"splashScreen": true
 				},
 				"android": {
-					"valideDrawer": true,
+					"validDrawer": true,
 					"android-installLocation": true,
 					"android-minSdkVersion": true, 
 					"android-targetSdkVersion": true,
@@ -203,7 +203,7 @@ enyo.kind({
 					"splashScreen": true
 				},
 				"ios": {
-					"valideDrawer": true,
+					"validDrawer": true,
 					"webviewbounce": true,
 					"prerendered-icon": true,
 					"ios-statusbarstyle": true, 
@@ -215,19 +215,19 @@ enyo.kind({
 					"splashScreen": true
 				},
 				"winphone": {
-					"valideDrawer": true,
+					"validDrawer": true,
 					"icon": true,
 					"splashScreen": true
 				},
 				
 				"blackberry": {
-					"valideDrawer": true,
+					"validDrawer": true,
 					"disable-cursor": true,
 					"icon": true,
 					"splashScreen": true
 				},
 				"webos": {
-					"valideDrawer": true,
+					"validDrawer": true,
 					"icon": true,
 					"splashScreen": true
 				}				

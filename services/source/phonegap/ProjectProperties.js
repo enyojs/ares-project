@@ -450,7 +450,7 @@ enyo.kind({
 	}, 
 
 	/**
-	 * Apply the css style associated to a valide state on a drawer header.
+	 * Apply the css style associated to a valid state on a drawer header.
 	 * @private
 	 */
 	disableDrawerHighLight: function() {
