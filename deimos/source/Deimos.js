@@ -1,5 +1,4 @@
 /*global ProjectKindsModel, enyo, ares, setTimeout */
-/* jshint indent: false */ // TODO: ENYO-3311
 
 enyo.kind({
 	name: "Deimos",
@@ -48,46 +47,46 @@ enyo.kind({
 					]},
 					{kind: "Scroller", classes: "deimos-designer-wrapper", fit: true, components: [
 						{kind: "Designer", name: "designer",
-							onSelect: "designerSelect",
-							onSelected: "designerSelected",
-							onMoveItem: "moveItem",
-							onCreateItem: "createItem",
-							onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
-							onReloadComplete: "reloadComplete",
-							onResizeItem: "resizeItem",
-							onReturnPositionValue: "designerReturnPositionValue"
+						 onSelect: "designerSelect",
+						 onSelected: "designerSelected",
+						 onMoveItem: "moveItem",
+						 onCreateItem: "createItem",
+						 onSyncDropTargetHighlighting: "syncComponentViewDropTargetHighlighting",
+						 onReloadComplete: "reloadComplete",
+						 onResizeItem: "resizeItem",
+						 onReturnPositionValue: "designerReturnPositionValue"
 						}
 					]}
-				]},				
+				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar deimos-toolbar-margined-buttons", components: [
 						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
 						{name:"undoButton", kind: "onyx.Button", content: "Undo", classes: "btn-danger",  ontap: "undoAction"},
 						{name:"redoButton", kind: "onyx.Button", content: "Redo", classes: "btn-danger",  ontap: "redoAction"}
 					]},
-					
+
 					{kind: "ComponentView", classes: "deimos_panel ares_deimos_componentView",
-						onSelect: "componentViewSelect",
-						onHighlightDropTarget: "highlightDesignerDropTarget",
-						onUnHighlightDropTargets: "unhighlightDesignerDropTargets",
-						onMoveItem: "moveItem",
-						onCreateItem: "createItem",
-						onHoldOver: "holdOver"
+					 onSelect: "componentViewSelect",
+					 onHighlightDropTarget: "highlightDesignerDropTarget",
+					 onUnHighlightDropTargets: "unhighlightDesignerDropTargets",
+					 onMoveItem: "moveItem",
+					 onCreateItem: "createItem",
+					 onHoldOver: "holdOver"
 					},
-					
+
 					{kind: "Inspector", fit: true, classes: "deimos_panel",
-						onModify: "inspectorModify",
-						onRequestPositionValue: "inspectorRequestPositionValue",
-						onPositionDataUpdated: "inspectorPositionDataUpdated"
+					 onModify: "inspectorModify",
+					 onRequestPositionValue: "inspectorRequestPositionValue",
+					 onPositionDataUpdated: "inspectorPositionDataUpdated"
 					}
 				]}
 			]}
 		]}
 	],
 	/**
-		Select the first item in _this.$.picker_ to iniitalize (do this after
-		rendering to avoid error with setting values of width/height fields)
-	*/
+	 Select the first item in _this.$.picker_ to iniitalize (do this after
+	 rendering to avoid error with setting values of width/height fields)
+	 */
 	events: {
 		onChildRequest: "",
 		onRegisterMe: "",
@@ -144,11 +143,11 @@ enyo.kind({
 		this.enableDesignerActionButtons(false);
 
 		var what = data.kinds;
-		
+
 		this.index = null;
 		this.kinds = what;
 		this.fileName = data.fileIndexer.name;
-		
+
 		// Pass the project information (analyzer output, ...) to the inspector and palette
 		this.setProjectData(data.projectData);
 
@@ -168,7 +167,7 @@ enyo.kind({
 		var kind = this.kinds[index];
 		var components = this.getSingleKind(index);
 		this.trace("selected kind ", kind);
-		
+
 		// prepare next used by async.waterfall
 		var nextWithName = function(err) { next(err, kind.name); };
 
@@ -299,7 +298,7 @@ enyo.kind({
 		if (inEvent.name === "layoutKind" && this.layoutKindUpdated(inEvent.value)) {
 			return true;
 		}
-		
+
 		this.$.designer.modifyProperty(inEvent.name, inEvent.value);
 		return true;
 	},
@@ -311,7 +310,7 @@ enyo.kind({
 			prop,
 			val
 		;
-		
+
 		for (prop in inEvent.props) {
 			val = inEvent.props[prop];
 			this.addReplaceStyleProp(item, prop, inEvent.props[prop]);
@@ -322,11 +321,11 @@ enyo.kind({
 	layoutKindUpdated: function(inLayoutKind) {
 		var kind = this.getSingleKind(this.index);
 		var item = this.getItemById(this.$.designer.selection.aresId, kind);
-		
+
 		if (inLayoutKind !== "AbsolutePositioningLayout" && item.layoutKind !== "AbsolutePositioningLayout") {
 			return false;
 		}
-		
+
 		if (inLayoutKind === "AbsolutePositioningLayout") {
 			item.layoutKind = inLayoutKind;
 			this.updateStyleForAbsolutePositioningLayoutKind(item);
@@ -343,7 +342,7 @@ enyo.kind({
 	//* Add relative positioning to top item, and absolute positioning to it's children
 	updateStyleForAbsolutePositioningLayoutKind: function(inComponent) {
 		this.addReplaceStyleProp(inComponent, "position", "relative");
-		
+
 		if (inComponent.components) {
 			for (var i = 0, comp; (comp = inComponent.components[i]); i++) {
 				this.addAbsolutePositioning(comp);
@@ -359,7 +358,7 @@ enyo.kind({
 	//* Add static positioning to top item and to it's children
 	updateStyleForNonAbsolutePositioningLayoutKind: function(inComponent) {
 		this.addReplaceStyleProp(inComponent, "position", "");
-		
+
 		if (inComponent.components) {
 			for (var i = 0, comp; (comp = inComponent.components[i]); i++) {
 				this.removeAbsolutePositioning(comp);
@@ -385,13 +384,13 @@ enyo.kind({
 		var currentStyle = inComponent.style || "",
 			styleProps = {}
 		;
-		
+
 		// Convert css string to hash
 		enyo.Control.cssTextToDomStyles(this.trimWhitespace(currentStyle), styleProps);
-		
+
 		// Add/replace inProp with inValue
 		styleProps[inProp] = inValue;
-		
+
 		// Convert back to a string
 		inComponent.style = enyo.Control.domStylesToCssText(styleProps);
 		this.$.inspector.userDefinedAttributes[inComponent.aresId].style = inComponent.style;
@@ -422,28 +421,28 @@ enyo.kind({
 
 		// Strip closing }] brackets
         inContent = inContent.replace(/\}\s([^}]+)$/, "");
-		
+
 		return inContent;
 	},
 	closeDesigner: function() {
 		this.$.designer.cleanUp();
-		
+
 		this.updateCodeInEditor(this.fileName);
 		this.setProjectData(null);
 		this.doChildRequest({task: "switchToCodeMode" });
-		
+
 		return true;
 	},
 
 	// When the designer finishes rendering, re-build the components view
 	buildComponentView: function(msg) {
 		var components = enyo.json.codify.from(msg.val);
-		
+
 		this.refreshComponentView(components);
-		
+
 		// Recreate this kind's components block based on components in Designer and user-defined properties in Inspector.
 		this.kinds[this.index] = this.cleanUpComponents(components, true)[0];
-		
+
 		this.enableDesignerActionButtons(true);
 	},
 	//* Send dragData type to Designer and Component View during ondragstart within Palette
@@ -459,14 +458,14 @@ enyo.kind({
 			targetId = inEvent.targetId,
 			beforeId = inEvent.beforeId,
 			target = (targetId)
-					?	this.getItemById(targetId, this.getSingleKind(this.index))
-					:	this.kinds[this.index];
+				?	this.getItemById(targetId, this.getSingleKind(this.index))
+				:	this.kinds[this.index];
 
 		if (!config) {
 			enyo.warn("Could not create new item - bad data: ", inEvent);
 			return true;
 		}
-				
+
 		// Give the new component (and any children) a fresh _aresId_
 		config.aresId = this.generateNewAresId();
 		if (config.components) {
@@ -477,8 +476,8 @@ enyo.kind({
 		if(options && options.isViewTemplate){
 			this.showActionPopup(options, config, target);
 		} else {
-			this.performCreateItem(config, target, beforeId);	
-		}		
+			this.performCreateItem(config, target, beforeId);
+		}
 		return true;
 	},
 	//* Move item with _inEvent.itemId_ into item with _inEvent.targetId_
@@ -488,18 +487,18 @@ enyo.kind({
 			clone = enyo.clone(movedItem),
 			beforeId = inEvent.beforeId || null,
 			target = (inEvent.targetId)
-					?	this.getItemById(inEvent.targetId, kind)
-					:	this.kinds[this.index]
+				?	this.getItemById(inEvent.targetId, kind)
+				:	this.kinds[this.index]
 		;
-		
+
 		// If moving item onto itself or before itself, do nothing
 		if ((target === movedItem) || (beforeId !== null && beforeId === inEvent.itemId)) {
 			return true;
 		}
-		
+
 		// Remove existing item
 		this.removeItemById(inEvent.itemId, this.kinds[this.index].components);
-		
+
 		// Apply any special layout rules
 		clone = this.applyLayoutKindRules(inEvent.layoutData, clone);
 
@@ -508,7 +507,7 @@ enyo.kind({
 			this.$.inspector.userDefinedAttributes[clone.aresId].style = clone.style;
 		}
 		this.addAresKindOptions(kind);
-		
+
 		if (beforeId && (beforeId !== target.aresId)) {
 			if (!this.insertItemBefore(clone, target, beforeId)) {
 				return true;
@@ -516,46 +515,46 @@ enyo.kind({
 		} else {
 			this.insertItem(clone, target);
 		}
-		
+
 		this.rerenderKind(inEvent.itemId);
-		
+
 		return true;
 	},
 	resizeItem: function(inSender, inEvent) {
 		var item = this.getItemById(this.$.designer.selection.aresId, this.getSingleKind(this.index));
-		
+
 		for (var prop in inEvent.sizeData) {
 			this.addReplaceStyleProp(item, prop, inEvent.sizeData[prop]);
 		}
-		
+
 		this.rerenderKind(item.aresId);
-		
+
 		return true;
 	},
 	//* Called when the designerFrame has retrieved a requested absolute position value
 	designerReturnPositionValue: function(inSender, inEvent) {
 		this.$.inspector.setRequestedPositionValue(inEvent.prop, inEvent.value);
-		return true; //TODO See if the code behind the return is useful 
+		return true; //TODO See if the code behind the return is useful
 		/*
-		var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
-		this.addReplaceStyleProp(item, inEvent.prop, inEvent.value + "px");
-		this.rerenderKind(item.aresId);
+		 var item = this.getItemById(this.$.designer.selection.aresId, this.kinds[this.index].components);
+		 this.addReplaceStyleProp(item, inEvent.prop, inEvent.value + "px");
+		 this.rerenderKind(item.aresId);
 		 */
 	},
 	applyLayoutKindRules: function(inLayoutData, inControl) {
 		var layoutKind = inLayoutData && inLayoutData.layoutKind;
 
 		switch (layoutKind) {
-			case "AbsolutePositioningLayout":
-				inControl.style = this.addAbsolutePositioningStyle(inLayoutData, inControl);
-				break;
-			default:
-				if(inControl.style !== undefined){
-					inControl.style = this.removeAbsolutePositioningStyle(inControl);
-				}
-				break;
+		case "AbsolutePositioningLayout":
+			inControl.style = this.addAbsolutePositioningStyle(inLayoutData, inControl);
+			break;
+		default:
+			if(inControl.style !== undefined){
+				inControl.style = this.removeAbsolutePositioningStyle(inControl);
+			}
+			break;
 		}
-		
+
 		return inControl;
 	},
 	//* Add absolute positioning styling
@@ -563,13 +562,13 @@ enyo.kind({
 		var currentStyle = inControl.style || "",
 			styleProps = {}
 		;
-		
+
 		// Convert css string to hash
 		enyo.Control.cssTextToDomStyles(this.trimWhitespace(currentStyle), styleProps);
-		
+
 		// Add absolute positioning styles (default to top and left)
 		styleProps.position = "absolute";
-		
+
 		// If only top property, or no top or bottom property, add top
 		if (styleProps.top || (!styleProps.top && !styleProps.bottom)) {
 			styleProps.top = inLayoutData.bounds.top + "px";
@@ -578,7 +577,7 @@ enyo.kind({
 		if (styleProps.bottom) {
 			styleProps.bottom = inLayoutData.bounds.bottom + "px";
 		}
-		
+
 		// If only left property, or no left or right property, add left
 		if (styleProps.left || (!styleProps.left && !styleProps.right)) {
 			styleProps.left = inLayoutData.bounds.left + "px";
@@ -587,20 +586,20 @@ enyo.kind({
 		if (styleProps.right) {
 			styleProps.right = inLayoutData.bounds.right + "px";
 		}
-		
+
 		// Convert back to a string and return
 		return enyo.Control.domStylesToCssText(styleProps);
 	},
 	removeAbsolutePositioningStyle: function(inControl) {
 		var currentStyle = inControl.style || "",
 			styleProps = {};
-		
+
 		// Convert css string to hash
 		enyo.Control.cssTextToDomStyles(this.trimWhitespace(currentStyle), styleProps);
-		
+
 		// Remove absolute positioning styles
 		styleProps.position = styleProps.top = styleProps.right = styleProps.bottom = styleProps.left = "";
-		
+
 		// Convert back to a string and return
 		return enyo.Control.domStylesToCssText(styleProps);
 	},
@@ -620,21 +619,21 @@ enyo.kind({
 		var beforeIndex = -1,
 			component,
 			i;
-		
+
 		inTarget.components = inTarget.components || [];
-		
+
 		for (i = 0; (component = inTarget.components[i]); i++) {
 			if(component.aresId === inBeforeId) {
 				beforeIndex = i;
 				break;
 			}
 		}
-		
+
 		if (beforeIndex === -1) {
 			enyo.warn("Couldn't find id: "+inBeforeId+" in ", inTarget);
 			return false;
 		}
-		
+
 		inTarget.components.splice(beforeIndex, 0, inItem);
 		return true;
 	},
@@ -642,7 +641,7 @@ enyo.kind({
 		if (inComponents.length === 0) {
 			return;
 		}
-		
+
 		for (var i = 0, component, item; (component = inComponents[i]); i++) {
 			if (component.aresId === inId) {
 				item = inComponents[i];
@@ -682,11 +681,11 @@ enyo.kind({
 		var component,
 			ret = [],
 			i;
-		
+
 		for (i=0; (component = inComponents[i]); i++) {
 			ret.push(this.cleanUpComponent(component, inKeepAresIds));
 		}
-		
+
 		return ret;
 	},
 	cleanUpComponent: function(inComponent, inKeepAresIds) {
@@ -696,37 +695,37 @@ enyo.kind({
 			atts,
 			att,
 			i;
-		
+
 		if (!aresId) {
 			return cleanComponent;
 		}
-		
+
 		atts = this.$.inspector.userDefinedAttributes[aresId];
-		
+
 		if (!atts) {
 			return cleanComponent;
 		}
-		
+
 		// Copy each user-defined property from _atts_ to the cleaned component
 		for (att in atts) {
 			if ((inKeepAresIds && att === "aresId") || (att !== "aresId" && att !== "components" && att !== "__aresOptions")) {
 				cleanComponent[att] = atts[att];
 			}
 		}
-		
+
 		// If this component has any child components, add them to components[] block
 		if (inComponent.components) {
-			
+
 			// Recurse through child components
 			for (i=0; i<inComponent.components.length; i++) {
 				childComponents.push(this.cleanUpComponent(inComponent.components[i], inKeepAresIds));
 			}
-			
+
 			if (childComponents.length > 0) {
 				cleanComponent.components = childComponents;
 			}
 		}
-		
+
 		return cleanComponent;
 	},
 	cleanUpViewComponent: function(inComponent, inKeepAresIds) {
@@ -738,11 +737,11 @@ enyo.kind({
 		if (!aresId) {
 			return cleanComponent;
 		}
-		for(att in inComponent){ 
+		for(att in inComponent){
 			if ((inKeepAresIds && att === "aresId") || (att !== "aresId" && att !== "components" && att !== "__aresOptions")) {
 				cleanComponent[att] = inComponent[att];
 			}
-	     }
+	    }
 		if (inComponent.components) {
 			for (i=0; i<inComponent.components.length; i++) {
 				childComponents.push(this.cleanUpViewComponent(inComponent.components[i], inKeepAresIds));
@@ -767,7 +766,7 @@ enyo.kind({
 		if(!this.$.designer.selection) {
 			return true;
 		}
-		
+
 		this.$.inspector.inspect(null);
 		this.enableDesignerActionButtons(false);
 
@@ -783,7 +782,7 @@ enyo.kind({
 				inComponents.splice(i, 1);
 				return;
 			}
-			
+
 			if (inComponents[i].components) {
 				this.deleteComponentByAresId(inAresId, inComponents[i].components);
 			}
@@ -791,7 +790,7 @@ enyo.kind({
 	},
 	updateCodeInEditor: function(inFilename) {
 		var kindList = this.prepareUpdatedKindList();
-		
+
 		if (inFilename === this.fileName) {
 			var kind = this.getSingleKind(this.index);
 			this.previousContent = this.formatContent(enyo.json.codify.to(this.cleanUpComponents(kind)));
@@ -827,11 +826,11 @@ enyo.kind({
 	},
 	addAresIds: function(inComponents) {
 		for(var i = 0; i < inComponents.length; i++) {
-			
+
 			if (!inComponents[i].aresId) {
 				inComponents[i].aresId = this.generateNewAresId();
 			}
-			
+
 			if (inComponents[i].components) {
 				this.addAresIds(inComponents[i].components);
 			}
@@ -858,19 +857,19 @@ enyo.kind({
 	//* When a device is chosen in the designer toolbar, set the appropriate heights/widths
 	deviceChosen: function() {
 		var selected = this.$.devicePicker.getSelected();
-		
+
 		if(!selected.value) {
 			return;
 		}
-		
+
 		// Update fields with predefined values
 		this.$.designerWidthInput.setValue(selected.value.width);
 		this.$.designerHeightInput.setValue(selected.value.height);
-		
+
 		// Force height/width value updates (change event isn't triggered)
 		this.$.designer.setWidth(selected.value.width);
 		this.$.designer.setHeight(selected.value.height);
-		
+
 		return true;
 	},
 	updateHeight: function(inSender, inEvent) {
@@ -887,20 +886,20 @@ enyo.kind({
 			h = this.$.designerHeightInput.getValue(),
 			w = this.$.designerWidthInput.getValue(),
 			i;
-		
+
 		for(i=0, item; (item = items[i]); i++) {
 			if(item.value && ((h == item.value.height && w == item.value.width) || (h == item.value.width && w == item.value.height))) {
 				this.$.devicePicker.setSelected(item);
 				return;
 			}
 		}
-		
+
 		// If no match, set selected item to custom
 		for(i=0, item; (item = items[i]); i++) {
 			if(item.value) {
 				continue;
 			}
-			
+
 			this.$.devicePicker.setSelected(item);
 		}
 	},
@@ -908,10 +907,10 @@ enyo.kind({
 	swapDesignerDimensions: function(inSender, inEvent) {
 		var h = this.$.designerHeightInput.getValue(),
 			w = this.$.designerWidthInput.getValue();
-		
+
 		this.$.designerHeightInput.setValue(w);
 		this.$.designerWidthInput.setValue(h);
-		
+
 		// Force height/width value updates (change event isn't triggered)
 		this.$.designer.setWidth(this.$.designerWidthInput.getValue());
 		this.$.designer.setHeight(this.$.designerHeightInput.getValue());
@@ -925,9 +924,9 @@ enyo.kind({
 		this.$.designer.setAutoZoom(active);
 		if(active){
 			var scale = this.$.designer.zoomFromWidth();
-			this.$.zoomPickerButton.setContent(scale+"%");	
+			this.$.zoomPickerButton.setContent(scale+"%");
 		} else{
-			this.$.zoomPickerButton.setContent(this.zoomValues[this.initZoomIndex]+"%");	
+			this.$.zoomPickerButton.setContent(this.zoomValues[this.initZoomIndex]+"%");
 			this.$.zoomPicker.setSelected(this.$.zoomPicker.getClientControls()[this.initZoomIndex]);
 			this.zoomDesigner(null, {selected: this.$.zoomPicker.getSelected()});
 		}
@@ -957,15 +956,15 @@ enyo.kind({
 		this.$.actionPopup.setTargetComponent(target);
 		this.$.actionPopup.show();
 	},
-	
-	// @protected		
+
+	// @protected
 	runPaletteComponentAction: function(inSender,inEvent){
 		var config = this.$.actionPopup.getConfigComponent(config);
 		var configData = this.formatContent(enyo.json.codify.to(this.cleanUpViewComponent(config)));
 
 		if(inEvent.getName() === "addtoKind"){
 			var target = this.$.actionPopup.getTargetComponent(target);
-			var beforeId = inEvent.beforeId; 
+			var beforeId = inEvent.beforeId;
 			this.performCreateItem(config, target, beforeId);
 		} else if (inEvent.getName() === "replaceKind"){
 			this.doChildRequest({task: [ "replaceKind", this.index, configData ]});
