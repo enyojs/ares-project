@@ -537,17 +537,26 @@ enyo.kind({
 				this.error("unable to generate config.xml from:", config);	
 				next();
 			} else {
-				var req, fs = project.getService();
+				var req, aborted, fs;
+				fs = project.getService();
+				aborted = false;
 				req = fs.createFile(project.getFolderId(), "config.xml", configXml, { overwrite: true });
 
 				this.abortAjaxRequest= function() {
-						this.abortAjaxRequest= function() {};		
-						enyo.xhr.cancel(req.xhr);
-					};
+					this.abortAjaxRequest= function() {};		
+					// in case of cancellation, we should let the update complete to prevent 
+					// file corruption but still error out to prevent a successful 
+					// continuation of the process
+					aborted = true;
+				};
 				
 				req.response(this, function _savedConfigXml(inSender, inData) {
-					this.trace("Phonegap.Build#_updateConfigXml()", "wrote config.xml:", inData);	
-					next();
+					this.trace("Phonegap.Build#_updateConfigXml()", "wrote config.xml:", inData);
+					if (!aborted) {
+						next();
+					} else {
+						next (Phonegap.Build.abortBuild);
+					}
 				});
 				req.error(this, this._handleServiceError.bind(this, "Unable to write config.xml", next));
 			}
