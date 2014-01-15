@@ -196,6 +196,9 @@ enyo.kind({
 	authorize: function(next) {
 		var self = this;
 		this.trace();
+		
+		// in case of user cancellation, getUserData may need to call next(error)
+		// to interrupt the build process. same for getToken.
 		this.getUserData(function(err, userData) {
 			if (err) {
 				self._getToken(function(err) {
@@ -204,11 +207,11 @@ enyo.kind({
 					} else {
 						self.getUserData(next);
 					}
-				});
+				}, next);
 			} else {				
 				next(null, userData);				
 			}
-		});
+		}, next);
 	},
 	
 	/**
@@ -258,7 +261,7 @@ enyo.kind({
 	 * @param {Function} next is a CommonJS callback
 	 * @private
 	 */
-	_getToken: function(next) {
+	_getToken: function(next, abort) {
 		this.trace();
 		if(this.config.auth && this.config.auth.token) {
 			this.trace("skipping token obtention");
@@ -281,6 +284,7 @@ enyo.kind({
 		this.abortAjaxRequest= function() {
 			this.abortAjaxRequest= function() {};		
 			enyo.xhr.cancel(req.xhr);
+			abort (Phonegap.Build.abortBuild);
 		};
 
 		req.response(this, function(inSender, inData) {
@@ -299,23 +303,25 @@ enyo.kind({
 	 * @param {Function} next is a CommonJS callback
 	 * @private
 	 */
-	getUserData: function(next) {
+	getUserData: function(next, abort) {
 		this.trace();
 		var req = new enyo.Ajax({
 			url: this.url + '/api/v1/me'
-		});
-		req.response(this, function(inSender, inData) {
-			this.trace("inData: ", inData);
-			this._storeUserData(inData.user);
-			next(null, inData);
 		});
 
 		// Get ready for possible cancellation - (re)set abortAjaxRequest to stop "req" in case of cancellation
 		this.abortAjaxRequest= function() {
 			this.abortAjaxRequest= function() {};		
 			enyo.xhr.cancel(req.xhr);
+			abort (Phonegap.Build.abortBuild);
 		};
 
+		req.response(this, function(inSender, inData) {
+			this.trace("inData: ", inData);
+			this._storeUserData(inData.user);
+			next(null, inData);
+		});
+		
 		req.error(this, this._handleServiceError.bind(this, "Unable to get PhoneGap user data", next));
 		req.go();
 	},	
