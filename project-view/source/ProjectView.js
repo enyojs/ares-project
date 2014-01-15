@@ -76,7 +76,7 @@ enyo.kind({
 			return false;
 		}
 		
-		this.$.projectWizardCopy.start(this.currentProject);
+		this.$.projectWizardCopy.start( this.currentProject() );
 		return true; //Stop event propagation
 	},
 	createProjectAction: function(inSender, inEvent) {
@@ -84,7 +84,7 @@ enyo.kind({
 		return true; //Stop event propagation
 	},
 	modifySettingsAction: function(inSender, inEvent) {
-		this.$.projectWizardModify.start(this.currentProject);
+		this.$.projectWizardModify.start( this.currentProject() );
 		
 		return true; //Stop event propagation
 	},
@@ -102,6 +102,9 @@ enyo.kind({
 		}
 		return true; //Stop event propagation
 	},
+	currentProject: function() {
+		return this.$.projectList.getSelectedProject() ;
+	},
 	/**
 	 *
 	 * @param {Object} project
@@ -111,7 +114,7 @@ enyo.kind({
 		ares.assertCb(next);
 
 		var pname = project.getName();
-		if ( this.currentProject && pname === this.currentProject.getName()) {
+		if ( this.currentProject() && pname === this.currentProject().getName() ) {
 			this.trace("skip setup of already selected project" + pname);
 			next();
 			return;
@@ -125,7 +128,6 @@ enyo.kind({
 		var self = this;
 		var config = new ProjectConfig();
 		this.trace("setup project config init on "+ project.getName() );
-		self.currentProject = project;
 		var initData = {
 			service: project.getService(),
 			folderId: project.getFolderId()
