@@ -655,6 +655,7 @@ enyo.kind({
 	 * @throws {String} throw an error when File ID is not found in cache
 	 */
 	switchToDocument: function(newDoc, popupMsg, next) {
+		ares.assertCb(next);
 		// safety net
 		if ( ! newDoc ) {
 			if  (this.debug) { throw("File ID " + newDoc + " not found in cache!");}
