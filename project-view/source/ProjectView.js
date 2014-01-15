@@ -141,6 +141,7 @@ enyo.kind({
 								project.setConfig(config);
 								
 								self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled);
+								self.initializeValidePgbConf(project, config.data.providers.phonegap.enabled);
 								next();
 							}
 						],
@@ -180,7 +181,41 @@ enyo.kind({
 				"webos": "Ready for download"
 			});
 		}
-	}, 
+	},
+
+	initializeValidePgbConf: function(inProject, inPhonegapEnabled) {
+		if (inProject.getValidePgbConf() === undefined && inPhonegapEnabled) {
+			inProject.setValidePgbConf({
+				"sharedConfiguration": {
+					"valideDrawer": true, "phonegap-version": true, "orientation": true,
+					"target-device": true, "fullscreen": true, "icon": true, "splashScreen": true
+				},
+				"android": {
+					"valideDrawer": true, "android-installLocation": true, "android-minSdkVersion": true, 
+					"android-targetSdkVersion": true, "android-maxSdkVersion": true, "android-windowSoftInputMode": true, 
+					"splash-screen-duration": true, "load-url-timeout": true, "icon": true, "splashScreen": true
+				},
+				"ios": {
+					"valideDrawer": true, "webviewbounce": true, "prerendered-icon": true, "ios-statusbarstyle": true, 
+					"detect-data-types": true, "exit-on-suspend": true, "show-splash-screen-spinner": true,
+					"auto-hide-splash-screen": true, "icon": true, "splashScreen": true
+				},
+				"winphone": {
+					"valideDrawer": true, "icon": true, "splashScreen": true
+				},
+				
+				"blackberry": {
+					"valideDrawer": true, "disable-cursor": true, "icon": true, "splashScreen": true
+				},
+				"webos": {
+					"valideDrawer": true, "icon": true, "splashScreen": true
+				}
+
+				
+			});
+		}
+	},
+
 	projectRemoved: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("harmonia").setProject(null);
 	},
