@@ -6,7 +6,7 @@
 	padding:0;
 }
 
-.ares-classic-popup > .title {
+.ares-classic-popup .title {
 	min-height: @ares-popup-title-height;
 	line-height: @ares-popup-title-height;
 	font-size: @ares-font-size-large;
@@ -24,12 +24,12 @@
 	vertical-align: middle;
 }
 
-.ares-classic-popup > .title.draggable {
+.ares-classic-popup .title.draggable {
 	cursor: pointer;
 	cursor: hand;
 }
 
-.ares-classic-popup >.title.left-align { padding-left: 6px; }
+.ares-classic-popup .title.left-align { padding-left: 6px; }
 
 .bottom-toolbar {
 	position: relative;
@@ -41,7 +41,10 @@
 	.ares-rounded-corners(0px 0px @ares-popup-radius @ares-popup-radius);
 	min-height: 28px;
 }
-
+.bottom-toolbar.white{
+	background-color: white;
+	
+}
 .bottom-toolbar > .onyx-button {
 	border: 1px solid @ares-popup-bar-border-color;
 	margin: 0 1px;
