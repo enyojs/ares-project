@@ -103,8 +103,21 @@ enyo.kind({
 		var iframeUrl = this.projectSource.getProjectUrl() + "/" + this.baseSource + "?overlay=designer";
 		this.trace("Setting designerFrame url: ", iframeUrl);
 		this.$.client.hasNode().src = iframeUrl;
+
+		var mopUp = function() {
+			var msg = "designerFrame load failed. Please check console log for errors";
+			this.doError(msg);
+			// do not propagate error as code editor needs to load file
+			this._runUpdateSourceCb('failed');
+		};
+
+		var timer = setTimeout(mopUp.bind(this), 3000);
 		// next callback is run once a "ready" message is received from designerFrame
-		this.updateSourceCallback = next;
+		this.updateSourceCallback = function () {
+			window.clearTimeout(timer);
+			next();
+		};
+
 	},
 
 	_runUpdateSourceCb: function(txt) {
