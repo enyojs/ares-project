@@ -668,9 +668,10 @@ enyo.kind({
 		});
 
 		this.abortAjaxRequest= function() {
-				this.abortAjaxRequest= function() {};		
-				enyo.xhr.cancel(req.xhr);
-			};
+			this.abortAjaxRequest= function() {};	
+			enyo.xhr.cancel(req.xhr);
+			next(Phonegap.Build.abortBuild);
+		};
 
 		req.response(this, function(inSender, inData) {
 			this.trace("Phonegap.Build#_submitBuildRequest(): response:", inData);
