@@ -493,7 +493,9 @@ enyo.kind({
 		], function(err) {
 			if (err) {
 				enyo.warn("phonegap.Build#build()", "err:", err);
-				next(err);
+				if (err !== Phonegap.Build.abortBuild) {
+					next(err);
+				}
 			}
 		});
 	},
@@ -1228,6 +1230,7 @@ enyo.kind({
 			access : {
 				"origin": Phonegap.UIConfiguration.commonDrawersContent[1].rows[4].defaultValue
 			}
-		}
+		},
+		abortBuild: new Error ("Build canceled by user")
 	}
 });
