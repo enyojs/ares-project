@@ -116,9 +116,9 @@ enyo.kind({
 			]},
 			{tag:"p", classes:"break"},
 		
-			{kind:"FittableRows", components: [
+			{name: "autotraceinput", kind:"FittableRows", showing: false, components: [
 				{ content: "Trace line's that get auot add in deimos"},
-				{kind: "onyx.InputDecorator", classes: "ace-input-textarea", name: "inputDecorator", components: [
+				{kind: "onyx.InputDecorator", classes: "ace-input-textarea", name: "autoTraceDecorator", components: [
 					{kind: "onyx.Input", style: "width: 100%;", placeholder: "Enter text here", name: "autotextline", onchange: "atraceline"}
 				]}
 			]},
@@ -178,6 +178,10 @@ enyo.kind({
 		this.$.atracebuttton.value = this.settings.autotrace;
 		this.$.autotextline.setValue(this.settings.autotraceLine);
 		var themesControls = this.$.themes.getClientControls();
+		
+		if(this.settings.autotraceLine === true){
+			this.$.autotraceinput.setshowing(true);
+		}
 		enyo.forEach(themesControls, function(control) {
 			if (control.content == this.settings.theme) {
 				this.$.themes.setSelected(control);
