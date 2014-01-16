@@ -498,8 +498,8 @@ enyo.kind({
 			enyo.bind(this, this._submitBuildRequest, project, next /*only called in case of success*/)
 		], function(err) {
 			if (err) {
-				enyo.warn("phonegap.Build#build()", "err:", err);
 				if (err !== Phonegap.Build.abortBuild) {
+					enyo.warn("phonegap.Build#build()", "err:", err);
 					next(err);
 				}
 			}
