@@ -308,11 +308,6 @@ enyo.kind({
 	// document currently shown by Ace
 	activeDocument: null,
 
-	// project currently loaded in designer. When all document are
-	// closed, the project is still active until project is switched.
-	// activeProject is never set to null
-	activeProject: null,
-
 	showWaitPopup: function(inMessage) {
 		this.doShowWaitPopup({msg: inMessage});
 	},
@@ -331,7 +326,7 @@ enyo.kind({
 		var project
 				= param instanceof Ares.Model.Project ? param
 				: param instanceof Ares.Model.File    ? param.getProjectData()
-				:                                       this.activeProject;
+				:                                       Ares.Workspace.projects.getActiveProject();
 		var projectName = project.getName();
 
 		function isProjectDoc(model) {
@@ -347,7 +342,7 @@ enyo.kind({
 	 */
 	requestPreview: function() {
 		var previewer = ComponentsRegistry.getComponent("projectView");
-		var project = this.activeProject;
+		var project = Ares.Workspace.projects.getActiveProject();
 		var serialSaver = [] ;
 		this.trace("preview requested on project " + project.getName());
 
@@ -469,7 +464,7 @@ enyo.kind({
 
 	requestSaveDocAs: function() {
 		var file = this.activeDocument.getFile();
-		var projectData = this.activeProject;
+		var projectData = Ares.Workspace.projects.getActiveProject();
 		var buildPopup = function() {
 			var path = file.path;
 			var relativePath = path.substring(
@@ -510,7 +505,7 @@ enyo.kind({
 		var relativePath = param.name.split("/");
 		var name = relativePath[relativePath.length-1];
 		var doc = this.activeDocument;
-		var projectData = this.activeProject;
+		var projectData = Ares.Workspace.projects.getActiveProject();
 		var file= param.file;
 		var content= this.$.phobos.getEditorContent();
 
@@ -665,7 +660,7 @@ enyo.kind({
 		}
 
 		var oldDoc = this.activeDocument ; // may be undef when a project is closed
-		var oldProject = this.activeProject; // may be undef before opening the first file
+		var oldProject = Ares.Workspace.projects.getActiveProject(); // may be undef before opening the first file
 		var safeNext = next; // function parameter is not a closure
 
 		// don't open an already opened doc
@@ -727,6 +722,7 @@ enyo.kind({
 	 * @param {Function} next
 	 */
 	_switchDoc: function(newDoc,next) {
+		var newProject;
 		var phobos = this.$.phobos;
 
 		var oldDoc = this.activeDocument ;
@@ -751,9 +747,10 @@ enyo.kind({
 		this.$.toolbar.resized();
 
 		this.activeDocument = newDoc;
-		this.activeProject = newDoc.getProjectData() ;
+		newProject = newDoc.getProjectData() ;
+		Ares.Workspace.projects.setActiveProject( newProject.getName() );
 
-		this.addPreviewTooltip("Preview " +  this.activeProject.id);
+		this.addPreviewTooltip("Preview " +  newProject.id);
 
 		if (currentIF === 'code') {
 			this.$.panels.setIndex(this.phobosViewIndex);
