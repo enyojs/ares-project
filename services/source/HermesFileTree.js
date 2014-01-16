@@ -13,8 +13,8 @@ enyo.kind({
 		onError: "",
 		onFileClick: "",
 		onFolderClick: "",
-		onFileDblClick: "",
-		onFileChanged: "",
+		onFileOpenRequest: "",
+		onFileRemoved: "",
 		onFolderChanged: "",
 		onTreeChanged: "",
 		onPathChecked: "",
@@ -648,7 +648,7 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		var node = inEvent.originator;
 		if (!node.file.isDir && !node.file.isServer) {
-			this.doFileDblClick({
+			this.doFileOpenRequest({
 				file: node.file,
 				projectData: this.projectData
 			});
@@ -1266,7 +1266,12 @@ enyo.kind({
 
 			if (!this.selectedNode.file.isServer && this.projectUrlReady) {
 				if (!this.selectedNode.file.isDir) {
-					this.doFileChanged({id: Ares.Workspace.files.computeId(this.selectedNode.file)});
+					this.doFileRemoved({id: Ares.Workspace.files.computeId(this.selectedNode.file)});
+					inNode.service = this.$.service ;
+					this.doFileOpenRequest({
+						file: inNode, // need to add service
+						projectData: this.projectData
+					});
 				} else {
 					this.doFolderChanged({file: this.selectedNode.file, projectData: this.projectData});
 				}
@@ -1344,7 +1349,7 @@ enyo.kind({
 
 			if (!this.selectedNode.file.isServer && this.projectUrlReady) {
 				if (!this.selectedNode.file.isDir) {
-					this.doFileChanged({id: Ares.Workspace.files.computeId(this.selectedNode.file)});
+					this.doFileRemoved({id: Ares.Workspace.files.computeId(this.selectedNode.file)});
 				} else {
 					this.doFolderChanged({file: this.selectedNode.file, projectData: this.projectData});
 				}
@@ -1502,7 +1507,7 @@ enyo.kind({
 
 					// opens the created file: after tree refresh done
 					if (!newNode.file.isServer && !newNode.file.isDir && this.projectUrlReady) {
-						this.doFileDblClick({
+						this.doFileOpenRequest({
 							file: newNode.file,
 							projectData: this.projectData
 						});
@@ -1545,7 +1550,7 @@ enyo.kind({
 
 			if (!inNode.file.isServer && this.projectUrlReady) {
 				if (!inNode.file.isDir) {
-					this.doFileChanged({id: Ares.Workspace.files.computeId(inNode.file)});
+					this.doFileRemoved({id: Ares.Workspace.files.computeId(inNode.file)});
 				} else {
 					this.doFolderChanged({file: inNode.file, projectData: this.projectData});
 				}
