@@ -7,7 +7,7 @@
 }
 
 .ares-classic-popup .title {
-	height: @ares-popup-title-height;
+	min-height: @ares-popup-title-height;
 	line-height: @ares-popup-title-height;
 	font-size: @ares-font-size-large;
 	padding-left: 20px;
@@ -15,6 +15,13 @@
 	text-transform: uppercase;
 	border-bottom: 2px solid @ares-popup-bar-border-color;
 	.ares-rounded-corners(@ares-popup-radius @ares-popup-radius 0px 0px);
+}
+
+//use a span inside the title div if your pop-up's title is on more then one line
+.title >span{
+	line-height: unit((@ares-popup-title-height/@ares-font-size-large)/2) ;
+	display: inline-block;
+	vertical-align: middle;
 }
 
 .ares-classic-popup .title.draggable {

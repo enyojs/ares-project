@@ -588,6 +588,7 @@ enyo.kind({
 		// remove Doc from cache
 		var docId = doc.getId();
 		Ares.Workspace.files.removeEntry(docId);
+		this.$.docToolBar.removeTab(docId);
 		if (! Ares.Workspace.files.length ) {
 			this.doAllDocumentsAreClosed();
 		}
@@ -599,6 +600,7 @@ enyo.kind({
 	 * @param {[Function]} next
 	 */
 	closeDoc: function(param, next) {
+		ares.assertCb(next);
 		var doc = typeof param === 'object' ? param : Ares.Workspace.files.get(param) ;
 
 		var docId = doc ? doc.getId() : undefined;
@@ -612,9 +614,7 @@ enyo.kind({
 			this.trace("called without doc to close");
 		}
 
-		if (typeof next === 'function') {
-			next();
-		}
+		next();
 	},
 
 	switchToNewTabAndDoc: function(projectData, file, inContent,next) {
@@ -777,20 +777,14 @@ enyo.kind({
 	 */
 	handleCloseDocument: function(inSender, inEvent) {
 		// inEvent.next callback is ditched. Ares will call removeTab
-		// when file is closed by Ace
+		// when file is closed no matter where the tab removal request
+		// comes from.
 		var doc = Ares.Workspace.files.get(inEvent.userId);
 
-		async.waterfall(
-			[
-				this.requestSave.bind(this, doc),
-				this.closeDoc.bind(this)
-			],
-			function(err) {
-				if (! err) {
-					inEvent.next();
-				}
-			}
-		);
+		async.waterfall([
+			this.requestSave.bind(this, doc),
+			this.closeDoc.bind(this)
+		]);
 		return true; // Stop the propagation of the event
 	},
 

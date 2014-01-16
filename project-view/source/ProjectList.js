@@ -130,7 +130,6 @@ enyo.kind({
 		]},
 		{classes:"hangar"}
 	],
-	selected: null,
 	enyoHelpTab: null,
 	create: function() {
 		ares.setupTraceLogger(this);
@@ -186,9 +185,9 @@ enyo.kind({
 	},
 	removeProjectAction: function(inSender, inEvent) {
 		var popup = this.$.removeProjectPopup;
-		if (this.selected) {
+		if (this.selectedProject) {
 			popup.setTitle($L("Remove project"));
-			popup.setMessage(this.$LS("Remove project '#{projectName}' from list?", {projectName: this.selected.getProjectName()}));
+			popup.setMessage(this.$LS("Remove project '#{projectName}' from list?", {projectName: this.selectedProject.getName()}));
 			popup.set("nukeFiles", false) ;
 			popup.show();
 		}
@@ -225,11 +224,11 @@ enyo.kind({
 	},
 
 	confirmRemoveProject: function(inSender, inEvent) {
-		var project = Ares.Workspace.projects.at(this.selected.index);
+		var project = this.selectedProject ;
 		var nukeFiles = this.$.removeProjectPopup.get("nukeFiles");
 		var editor = ComponentsRegistry.getComponent("enyoEditor");
 
-		if (this.selected) {
+		if (project) {
 			async.series(
 				[
 					editor.requestCloseProject.bind(editor, project),
@@ -246,9 +245,9 @@ enyo.kind({
 	removeProjectData: function(project,next) {
 		var name = project.getName();
 
-		if (name === this.selected.projectName) {
+		if (name === this.selectedProject.getName()) {
 			this.trace("called on selected " + name);
-			this.selected = null;
+			this.selectedProject = null;
 			this.doProjectRemoved();
 			this.$.projectMenu.setDisabled(true);
 		} else {
@@ -277,7 +276,6 @@ enyo.kind({
 		enyo.forEach(itemList, function(item) {
 			item.$.item.removeClass("on");
 			if(item.$.item.projectName === project.id){
-				this.selected = item.$.item;
 				item.$.item.addClass("on");
 			}
 		}, this);
@@ -346,9 +344,17 @@ enyo.kind({
 
 		project.setService(service);
 		this.$.projectMenu.setDisabled(false);
-		this.selectedProject = project;
+
+		// setupProjectConfig checks for redundant setup wrt this.selectedProject
 		this.owner.setupProjectConfig( project, selectNext );
+		// so this attribute must be set after calling setupProjectConfig
+		this.selectedProject = project;
 	},
+
+	getSelectedProject: function() {
+		return this.selectedProject;
+	},
+
 	showAccountConfigurator: function() {
 		this.$.accountsConfigurator.show();
 	},
