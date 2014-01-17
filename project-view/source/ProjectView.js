@@ -179,7 +179,7 @@ enyo.kind({
 		}
 	}, 
 	projectRemoved: function(inSender, inEvent) {
-		ComponentsRegistry.getComponent("harmonia").setProject(null);
+		ComponentsRegistry.getComponent("harmonia").setProject(null, ares.noNext);
 	},
 	/**
 	 * Event handler: handle build project action (select provider & run action)
