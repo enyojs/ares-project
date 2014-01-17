@@ -253,6 +253,8 @@ enyo.kind({
 		this.$.highLightButton.setValue(settings.highlight);
 		this.$.wordWrapButton.setValue(settings.wordwrap);
 
+		this.$.autoTraceInputLine.setValue( settings.autoTraceLine );
+		this.$.autoTraceButton.setValue( settings.autoTrace );
 		this.$.autoTraceInputBox.setShowing( settings.autoTrace );
 
 		var themesControls = this.$.themes.getClientControls();
