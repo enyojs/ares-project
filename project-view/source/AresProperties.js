@@ -76,8 +76,7 @@ enyo.kind({
 
 		var panelParams = {
 			name: inTabEntry.id,
-			kind: inTabEntry.kind,
-			classes: "ares-properties-drawer"
+			kind: inTabEntry.kind
 		};
 
 		//add kind's params
@@ -97,6 +96,8 @@ enyo.kind({
 			active: true,
 			components:inTabEntry.components
 		});
+
+		drawer.applyStyle("overflow", "visible");
 	},
 
 	/**

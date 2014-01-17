@@ -1,4 +1,4 @@
-/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, $L, setTimeout */
+/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, $L */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets",
@@ -76,7 +76,6 @@ enyo.kind({
 		onFsEvent: "_fsEventAction",
 		onChangingNode: "_nodeChanging",
 		onAllDocumentsAreClosed: "showProjectView",
-		onCloseProjectDocuments: "closeDocumentsForProject",
 		onRegisterMe : "_registerComponent",
 		onMovePanel : "_movePanel",
 		//handlers for editorSettings kind (utilities/EditorSettings.js)
@@ -126,10 +125,11 @@ enyo.kind({
 		this.$.serviceRegistry.setConfig(inEvent.serviceId, {auth: inEvent.auth}, inEvent.next);
 	},
 	openDocument: function(inSender, inEvent) {
-		this._openDocument(inEvent.projectData, inEvent.file, function(inErr) {});
+		this._openDocument(inEvent.projectData, inEvent.file, ares.noNext );
 	},
 	/** @private */
 	_openDocument: function(projectData, file, next) {
+		ares.assertCb(next);
 		var fileDataId = Ares.Workspace.files.computeId(file);
 		var editor = ComponentsRegistry.getComponent("enyoEditor");
 		if (! fileDataId ) {
@@ -207,10 +207,8 @@ enyo.kind({
 		this._closeDocument(inEvent.id);
 	},
 
-
-	_closeDocument: function(docId, next) {
-		var cb = next || function (){}; // next is optional
-		ComponentsRegistry.getComponent("enyoEditor").closeDoc(docId,cb);
+	_closeDocument: function(docId) {
+		ComponentsRegistry.getComponent("enyoEditor").closeDoc(docId, ares.noNext);
 	},
 	/** @private */
 	_fsEventAction: function(inSender, inEvent) {
@@ -283,9 +281,7 @@ enyo.kind({
 	},
 
 	showWaitPopup: function(inSender, inEvent) {
-		if(inEvent.service === 'build' && ! inEvent.msg.match(/Starting/)) {
-			// Node server fails if cancel is done during "Starting build" phase
-			// See ENYO-3506
+		if(inEvent.service === 'build' ) {
 			this.$.canceBuildButton.show();
 		}
 		this.$.waitPopupMessage.setContent(inEvent.msg);
@@ -298,12 +294,8 @@ enyo.kind({
 	},
 
 	hideWaitPopup: function(inSender, inEvent) {
-		this._hideWaitPopup(function(){/* nothing to do */});
-	},
-	_hideWaitPopup: function(next) {
 		this.$.canceBuildButton.hide();
 		this.$.waitPopup.hide();
-		setTimeout(next,0);
 	},
 
 	showError: function(inSender, inEvent) {
@@ -357,28 +349,7 @@ enyo.kind({
 		var docId = Ares.Workspace.files.computeId(inEvent.node);
 		this._closeDocument(docId);
 	},
-	/**
-	 * Event handler for to close opened documents of a project
-	 * 
-	 * @private
-	 * @param {Object} inSender
-	 * @param {Object} inEvent => inEvent.project in Ares.Model.Project
-	 */
-	closeDocumentsForProject: function(inSender, inEvent){
-		var files = Ares.Workspace.files,
-			model,
-			i;
-		for( i = 0; i < files.models.length; i++ ) {
-			model = files.models[i];
 
-			var serviceId = model.getProjectData().getServiceId();
-			var folderId = model.getProjectData().getFolderId();
-			if ( serviceId === inEvent.project.getServiceId() && folderId === inEvent.project.getFolderId()) {
-				this._closeDocument(model.id);
-				i--;
-			}
-		}
-	},
 	
 	/**
 	 * Event handler for ace's settings called when settings from localStorage have to be applied (cancel/open)
