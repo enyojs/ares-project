@@ -9,15 +9,9 @@ enyo.kind({
 		onChangeSettings:""
 	},
 	published: {
-		settings: {
-			theme:"clouds",
-			highlight:false,
-			fontsize:12,
-			wordwrap:false,
-			rightpane:true,
-			keys:{ }
-		},
-		previewSettings: {
+		settings: null,
+		previewSettings: null,
+		defaultsSettings: {
 			theme:"clouds",
 			highlight:false,
 			fontsize:12,
@@ -140,6 +134,7 @@ enyo.kind({
 		]},
 		{name: "settingsToolbar", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
 			{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "cancelSettings"},
+			{name: "restoreDefault", kind: "onyx.Button",  content: "Restore defaults", ontap: "restoreDefaults"},
 			{name: "change", kind: "onyx.Button", classes:"right", content: "Save", ontap: "saveSettings"}
 		]}
 	],
@@ -152,6 +147,9 @@ enyo.kind({
 		this.inherited(arguments);
 		this.mainToolbarChanged();
 		this.getValuesFromLocalStorage();
+		if(!this.settings){
+			this.settings = enyo.json.parse(enyo.json.stringify(this.defaultsSettings));
+		}
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
 		this.$.rightPaneButton.value = this.settings.rightpane;
@@ -200,7 +198,9 @@ enyo.kind({
 
 	initSettings:function(){
 		this.getValuesFromLocalStorage();
-		this.initUI();
+		this.initUI(this.settings);
+		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
+		this.doApplySettings();
 	},
 	
 	getSettingFromLS: function(){
@@ -208,30 +208,28 @@ enyo.kind({
 		return this.settings;
 	},
 
-	initUI:function(){
+	initUI:function(settings){
 		//set UI items with values from localStorage
 		//change value of toggle button programmaticaly fire event onChange
 		//onyx toggle button API says that it not working when the value is changed programmatically
-		this.$.highLightButton.setValue(this.settings.highlight);
-		this.$.wordWrapButton.setValue(this.settings.wordwrap);
+		this.$.highLightButton.setValue(settings.highlight);
+		this.$.wordWrapButton.setValue(settings.wordwrap);
 
 		var themesControls = this.$.themes.getClientControls();
 		enyo.forEach(themesControls, function(control) {
-			if (control.content == this.settings.theme) {
+			if (control.content == settings.theme) {
 				this.$.themes.setSelected(control);
 			}
 		}, this);
 
 		var fontSizeControls = this.$.fontSizePicker.getClientControls();
 		enyo.forEach(fontSizeControls, function(control) {
-			if (control.content == this.settings.fontsize) {
+			if (control.content == settings.fontsize) {
 				this.$.fontSizePicker.setSelected(control);
 			}
 		}, this);
 
-		this.$.rightPaneButton.setValue(this.settings.rightpane);
-		//deep copy: settings in previewSettings
-		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
+		this.$.rightPaneButton.setValue(settings.rightpane);
 	},
 
 	themeSelected: function(inSender, inEvent) {
@@ -306,23 +304,27 @@ enyo.kind({
 	},
 
 	saveSettings: function() {
-		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, enyo.json.stringify(this.previewSettings)); //push to ls
-		//Local storage modified, reading new settings from local storage
-		this.getValuesFromLocalStorage(); 
-		this.initUI();
+		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, enyo.json.stringify(this.previewSettings)); //push to ls 
+		this.initUI(this.previewSettings);
 		this.doCloseSettings();
 	},
 
 	resetSettings: function(){
-		this.getValuesFromLocalStorage(); 
-		this.initUI();
+		this.initUI(this.getValuesFromLocalStorage());
+		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
 		this.doApplySettings();
-		//this.doCloseSettings();
 	},
 
 	cancelSettings: function(){
-		this.initUI();
+		this.initUI(this.settings);
+		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
 		this.doApplySettings();
 		this.doCloseSettings();
+	},
+
+	restoreDefaults: function(){
+		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.defaultsSettings));
+		this.initUI(this.defaultsSettings);
+		this.doChangeSettings();
 	}
 });
