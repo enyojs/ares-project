@@ -187,11 +187,12 @@ enyo.kind({
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
 		this.$.rightPaneButton.value = this.settings.rightpane;
+
 		this.$.autoTraceButton.value = this.settings.autoTrace;
 		this.$.autoTraceInputLine.setValue(this.settings.autoTraceLine);
-		var themesControls = this.$.themes.getClientControls();
 		this.$.autoTraceInputBox.setShowing(this.settings.autoTrace);
 
+		var themesControls = this.$.themes.getClientControls();
 		enyo.forEach(themesControls, function(control) {
 			if (control.content == this.settings.theme) {
 				this.$.themes.setSelected(control);
@@ -252,6 +253,8 @@ enyo.kind({
 		this.$.highLightButton.setValue(settings.highlight);
 		this.$.wordWrapButton.setValue(settings.wordwrap);
 
+		this.$.autoTraceInputBox.setShowing( settings.autoTrace );
+
 		var themesControls = this.$.themes.getClientControls();
 		enyo.forEach(themesControls, function(control) {
 			if (control.content == settings.theme) {
@@ -267,7 +270,6 @@ enyo.kind({
 		}, this);
 
 		this.$.rightPaneButton.setValue(settings.rightpane);
-		this.$.autoTraceInputBox.setShowing(this.settings.autoTrace);
 	},
 
 	themeSelected: function(inSender, inEvent) {
