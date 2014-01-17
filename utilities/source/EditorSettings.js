@@ -1,3 +1,5 @@
+/*global enyo, ares, Ares */
+
 enyo.kind({
 	name: "editorSettings",
 	kind: "FittableRows",
