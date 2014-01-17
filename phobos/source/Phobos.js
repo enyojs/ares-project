@@ -616,9 +616,14 @@ enyo.kind({
 				commaTerminated = true;
 			}
 
+			// refresh editorSettings content from localStorage. This
+			// is necessary when editor settings were modified in the
+			// EditorSetting kind owned by Ares
+			this.$.editorSettings.initSettings();
+			var edSettings = this.$.editorSettings.settings;
+
 			// Prepare the code to insert
 			var codeToInsert = "";
-			var edSettings = this.$.editorSettings.settings;
 			for(var item in declared) {
 				if (item !== "" && existing[item] === undefined) {
 					// use correct line terminations
