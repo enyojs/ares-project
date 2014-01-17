@@ -132,7 +132,9 @@ enyo.kind({
 		onErrorTooltipReset: "resetErrorTooltip",
 		onAceGotFocus: "switchProjectToCurrentDoc",
 		onChildRequest: "handleCall",
-		onAceFocus: "aceFocus"
+		onAceFocus: "aceFocus",
+		onNewcss: "newCss",
+		onReplacecss: "replacecss",
 	},
 	debug: false,
 	create: function() {
@@ -961,11 +963,19 @@ enyo.kind({
 	 * show/goto the hera
 	 */
 	doCss: function (){
-		ComponentsRegistry.getComponent("phobos").cssAction();
+		this.$.phobos.cssAction();
 		this.$.editorControls.setShowing(false);
 		this.$.deimosControls.setShowing(false);
 		this.$.cssControls.setShowing(true);
 		this.$.toolbar.resized();
+	},
+	/*
+	* write the new css to the end of the file
+	* @protected
+	*/
+	newCss: function(inSender, inEvent){
+		console.log(this);
+		this.$.phobos.newcss(ComponentsRegistry.getComponent("hera").out);
 	},
 	closecssDesigner: function(){
 		ComponentsRegistry.getComponent("hera").csssave();
@@ -975,6 +985,14 @@ enyo.kind({
 		this.$.toolbar.resized();
 		this.doCloseCss();
 	},
+	
+	/*
+	* replace the old data in the css file with the new css rules
+	* @protected
+	*/
+	replacecss: function(inSender, inEvent){
+		this.$.phobos .replacecss(ComponentsRegistry.getComponent("hera").old, ComponentsRegistry.getComponent("hera").out);
+	}
 
 });
 

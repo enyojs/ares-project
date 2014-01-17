@@ -76,7 +76,7 @@ enyo.kind({
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.helper = new analyzer.Analyzer.KindHelper();
-		this.doRegisterMe({name:"phobos", reference:this});
+	//	this.doRegisterMe({name:"phobos", reference:this});
 	},
 	getProjectController: function() {
 		// create projectCtrl only when needed. In any case, there's only

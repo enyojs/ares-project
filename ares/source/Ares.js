@@ -67,8 +67,6 @@ enyo.kind({
 	handlers: {
 		onCssDocument: "cssDocument",
 		onCloseCss: "closecss", 
-		onNewcss: "newCss", 
-		onReplacecss: "replacecss",
 		onReloadServices: "handleReloadServices",
 		onUpdateAuth: "handleUpdateAuth",
 		onShowWaitPopup: "showWaitPopup",
@@ -454,21 +452,8 @@ enyo.kind({
 	*/
 	closecss: function(inSender, inEvent){
 		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.phobosViewIndex);
-	},
-	/*
-	* write the new css to the end of the file
-	* @protected
-	*/
-	newCss: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("phobos").newcss(ComponentsRegistry.getComponent("hera").out);
-	},
-	/*
-	* replace the old data in the css file with the new css rules
-	* @protected
-	*/
-	replacecss: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("phobos").replacecss(ComponentsRegistry.getComponent("hera").old, ComponentsRegistry.getComponent("hera").out);
 	}
+
 });
 
 if ( ! Ares.isBrowserSupported()) {
