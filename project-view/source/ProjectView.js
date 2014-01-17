@@ -169,8 +169,9 @@ enyo.kind({
 	initializeDownloadStatus: function(inProject, inPhonegapEnabled) {
 		if (inProject.getDownloadStatus() === undefined && inPhonegapEnabled) {
 			var downloadStatus = {};
-			
-			for (var index = 0 in Phonegap.UIConfiguration.platformDrawersContent) {
+			var index = 0;
+
+			for (index in Phonegap.UIConfiguration.platformDrawersContent) {
 				downloadStatus[Phonegap.UIConfiguration.platformDrawersContent[index].id] = "Ready for download";
 			}
 
