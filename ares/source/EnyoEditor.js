@@ -406,10 +406,11 @@ enyo.kind({
 			service: doc.getProjectData().getService(),
 			fileId: doc.getFileId()
 		};
-		this.saveFile(doc.getName(), content, where);
+		this.saveFile(doc.getName(), content, where, ares.noNext);
 	},
 
 	saveFile: function(name, content, where, next){
+		ares.assertCb(next);
 		var req;
 
 		if (where.fileId) {
@@ -445,12 +446,12 @@ enyo.kind({
 			}
 			this.hideWaitPopup();
 			this.analyseData(docData);
-			if (next) {next(null, savedFile);}
+			next(null, savedFile);
 		}).error(this, function(inSender, inErr) {
 			this.trace('saveFile response failed with ' , inErr , ' for ', name, where);
 			this.hideWaitPopup();
 			this.doError({msg: "Unable to save the file: " + inErr });
-			if (next) {next(inErr);}
+			next(inErr);
 		});
 	},
 
@@ -530,9 +531,6 @@ enyo.kind({
 		var myNext = (function(err,result) {
 			this.trace("err:", err);
 			this.hideWaitPopup();
-			if (typeof param.next === 'function') {
-				param.next(err, result);
-			}
 		}).bind(this);
 
 		if (!file) {
@@ -631,6 +629,7 @@ enyo.kind({
 	},
 
 	switchToNewTabAndDoc: function(projectData, file, inContent,next) {
+		ares.assertCb(next);
 		this.trace("projectData:", projectData.getName(), ", file:", file.name);
 		var fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
 		ComponentsRegistry.getComponent("documentToolbar")
@@ -670,6 +669,7 @@ enyo.kind({
 	 * @throws {String} throw an error when File ID is not found in cache
 	 */
 	switchToDocument: function(newDoc, popupMsg, next) {
+		ares.assertCb(next);
 		// safety net
 		if ( ! newDoc ) {
 			if  (this.debug) { throw("File ID " + newDoc + " not found in cache!");}
@@ -729,9 +729,10 @@ enyo.kind({
 	// FIXME ENYO-3624: this function must trigger a reload of the designer
 	// to take into account code modification discarded by user
 	reloadDoc: function(doc,next) {
+		ares.assertCb(next);
 		var reloadedDoc = this.activeDocument ;
 		this.activeDocument = null;// reset to trigger reload
-		this._switchDoc(reloadedDoc, next || function(){/* nop */} );
+		this._switchDoc(reloadedDoc, next);
 	},
 
 	/**
@@ -740,6 +741,7 @@ enyo.kind({
 	 * @param {Function} next
 	 */
 	_switchDoc: function(newDoc,next) {
+		ares.assertCb(next);
 		var newProject;
 		var phobos = this.$.phobos;
 
@@ -865,6 +867,7 @@ enyo.kind({
 	 * @param {Function} next
 	 */
 	requestSave: function(doc, next) {
+		ares.assertCb(next);
 		var popup = this.$.savePopup ;
 		if (doc.getEdited() === true) {
 			this.trace("request save doc on ", doc.getName());
@@ -884,7 +887,7 @@ enyo.kind({
 
 			popup.setCancelCallback(
 				(function() {
-					this.reloadDoc(doc);
+					this.reloadDoc(doc, ares.noNext);
 					this.aceFocus();
 					next(new Error('canceled'));
 				}).bind(this)

@@ -1,5 +1,4 @@
-/* jshint indent: false */ // TODO: ENYO-3311
-/*global analyzer, ares, enyo, $L, ProjectCtrl */
+/*global analyzer, ares, enyo, $L, ProjectCtrl, setTimeout */
 
 enyo.kind({
 	name: "Phobos",
@@ -379,42 +378,42 @@ enyo.kind({
 		};
 		this.trace("called with mode " , mode , " inhibitUpdate " , inhibitUpdate , " on " + module.name);
 		switch(mode) {
-			case "javascript":
-				try {
-					this.analysis = module;
-					this.projectData.getProjectIndexer().reIndexModule(module);
-					if (inhibitUpdate !== true) {
-						this.projectData.updateProjectIndexer();
-					}
-					this.updateObjectsLines(module);
-
-					// dump the object where the cursor is positioned, if it exists
-					this.dumpInfo(module.objects && module.objects[module.currentObject]);
-
-					// Give the information to the autocomplete component
-					this.$.autocomplete.setAnalysis(this.analysis);
-
-					codeLooksGood = true;
-				} catch(error) {
-					enyo.log("An error occured during the code analysis: " , error);
-					this.dumpInfo(null);
-					this.$.autocomplete.setAnalysis(null);
+		case "javascript":
+			try {
+				this.analysis = module;
+				this.projectData.getProjectIndexer().reIndexModule(module);
+				if (inhibitUpdate !== true) {
+					this.projectData.updateProjectIndexer();
 				}
-				break;
-			case "json":
-				if (module.name.slice(-7) == ".design") {
-					this.projectData.getProjectIndexer().reIndexDesign(module);
-					if (inhibitUpdate !== true) {
-						this.projectData.updateProjectIndexer();
-					}
+				this.updateObjectsLines(module);
+
+				// dump the object where the cursor is positioned, if it exists
+				this.dumpInfo(module.objects && module.objects[module.currentObject]);
+
+				// Give the information to the autocomplete component
+				this.$.autocomplete.setAnalysis(this.analysis);
+
+				codeLooksGood = true;
+			} catch(error) {
+				enyo.log("An error occured during the code analysis: " , error);
+				this.dumpInfo(null);
+				this.$.autocomplete.setAnalysis(null);
+			}
+			break;
+		case "json":
+			if (module.name.slice(-7) == ".design") {
+				this.projectData.getProjectIndexer().reIndexDesign(module);
+				if (inhibitUpdate !== true) {
+					this.projectData.updateProjectIndexer();
 				}
-				this.analysis = null;
-				this.$.autocomplete.setAnalysis(null);
-				break;
-			default:
-				this.analysis = null;
-				this.$.autocomplete.setAnalysis(null);
-				break;
+			}
+			this.analysis = null;
+			this.$.autocomplete.setAnalysis(null);
+			break;
+		default:
+			this.analysis = null;
+			this.$.autocomplete.setAnalysis(null);
+			break;
 		}
 		return codeLooksGood ;
 	},
@@ -920,12 +919,16 @@ enyo.kind({
 	//* Send up an updated copy of the code
 	updateCodeInDesigner: function(next) {
 		// Update the projectIndexer and notify watchers
+		ares.assertCb(next);
 		this.reparseUsersCode(true);
 		
 		var data = {kinds: this.extractKindsData(), projectData: this.projectData, fileIndexer: this.analysis};
 		if (data.kinds.length > 0) {
 			this.doChildRequest({task: [ "loadDesignerUI", data, next ]});
 		} // else - The error has been displayed by extractKindsData()
+		else {
+			setTimeout(next,0);
+		}
 	},
 	cssAction: function(){
 	// Update the projectIndexer and notify watchers
@@ -962,7 +965,10 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "rightPanels", kind: "Panels", wrap: false, draggable:false,
+	name: "rightPanels",
+	kind: "Panels",
+	wrap: false,
+	draggable:false,
 	events: {
 		onCss: "",
 		onReparseAsked: "",

@@ -40,12 +40,13 @@ enyo.kind({
 		return true; //Stop event propagation
 	},
 	setProject: function(project, next) {
+		ares.assertCb(next);
 		this.trace("project:", project);
 		if (project !== null) {
 			this.$.hermesFileTree.connectProject(project, next).showFileOpButtons();
 		} else {
 			this.$.hermesFileTree.hideFileOpButtons().clear();
-			if (next) { setTimeout(next,0); }
+			setTimeout(next,0);
 		}
 	},
 	showGrabber:function(){

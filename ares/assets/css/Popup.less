@@ -31,6 +31,42 @@
 
 .ares-classic-popup .title.left-align { padding-left: 6px; }
 
+
+.ares-radio-group {
+	line-height: unit((@ares-popup-title-height/@ares-font-size-large)/2) ;
+	display: inline-block;
+	vertical-align: bottom;
+}
+
+.ares-radio-group>button {
+	line-height: 32px;
+	padding: 0;
+	margin:0;
+	background-image: none;
+	color: @ares-radiogroup-text-color;
+	border: 1px solid @ares-radiogroup-border-color;
+	width: 182px;
+}
+
+.ares-radio-group>button.active {
+	background-image: none;
+	background-color: @ares-radiogroup-active-background;
+	color: @ares-active-text-color;
+	border: 1px solid @ares-radiogroup-active-border;
+	.ares-box-shadow(inset 0px 0px 15px @ares-radiogroup-boxshadow-color);
+}
+
+.ares-bottom-check {
+	height: 8px;
+	width: 0;
+	position: relative;
+	border-bottom: 8px solid @ares-background;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	bottom: -6px;
+	right: 43%;
+}
+
 .bottom-toolbar {
 	position: relative;
 	background-image: none;
