@@ -29,8 +29,22 @@ enyo.kind({
 		]},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
 		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide:"doAceFocus", onClose: "findClose", onReplaceFind: "replacefind"},
-		{name: "editorSettingsPopup", kind: "EditorSettings", classes: "enyo-unselectable", centered: true, modal: true, floating: true, autoDismiss: false,
-		onChangeSettings:"applySettings", onChangeRightPane: "changeRightPane", onClose: "closeEditorPop", onTabSizsChange: "tabSize"}
+		{
+			name: "editorSettingsPopup", 
+			kind: "onyx.Popup", 
+			classes:"enyo-unselectable ares-classic-popup", 
+			centered: true, 
+			modal: true, 
+			floating: true, 
+			autoDismiss: false,
+			onCloseSettings: "closeEditorPopup", 
+			onChangeSettings:"applyPreviewSettings", 
+			onChangeRightPane: "changeRightPane",
+			components: [
+				{name:"title", classes: "title draggable", kind: "Ares.PopupTitle", content: "EDITOR GLOBAL SETTINGS"},
+				{kind: "editorSettings", classes:"ace-settings-popup" }
+			],	  
+		}
 	],
 	events: {
 		onHideWaitPopup: "",
@@ -125,8 +139,8 @@ enyo.kind({
 
 		this.docData.setMode(mode);
 
-		var hasAce = this.adjustPanelsForMode(mode, this.$.editorSettingsPopup.getSettings().rightpane);
-		
+		var hasAce = this.adjustPanelsForMode(mode, this.$.editorSettings.getSettingFromLS().rightpane);
+
 		if (hasAce) {
 			var aceSession = this.docData.getAceSession();
 			if (aceSession) {
@@ -142,7 +156,7 @@ enyo.kind({
 			this.focusEditor();
 
 			/* set editor to user pref */
-			this.$.aceWrapper.applyAceSettings(this.$.editorSettingsPopup.getSettings());
+			this.$.aceWrapper.applyAceSettings(this.$.editorSettings.getSettingFromLS());
 
 			this.$.aceWrapper.editingMode = mode;
 		} else {
@@ -862,49 +876,44 @@ enyo.kind({
 		this.designerAction();
 	},
 	
-	/*  editor setting */
+	//*  editor setting
 
 	editorSettings: function() {
 		this.$.editorSettingsPopup.show();
+		this.$.editorSettings.initSettings();
 	},
 
-	closeEditorPop: function(){
-
-		this.$.editorSettingsPopup.initSettingsPopupFromLocalStorage();
-		//apply changes only saved on Ace
-		this.$.aceWrapper.applyAceSettings(this.$.editorSettingsPopup.getSettings());
-		this.adjustPanelsForMode(this.docData.getMode(), this.$.editorSettingsPopup.getSettings().rightpane);
+	closeEditorPopup: function(){
 		this.$.editorSettingsPopup.hide();
 		this.doAceFocus();
+		return true;		
 	},
-
-	//showing =
-	changeRightPane: function(){
-		this.adjustPanelsForMode(this.docData.getMode(), this.$.editorSettingsPopup.getPreviewSettings().rightpane);
+	changeRightPane: function(settings){
+		if(this.docData){
+			this.adjustPanelsForMode(this.docData.getMode(), settings.rightpane);
+		}	
 	},
-
-	applySettings:function(){
+	applySettings: function(settings){
 		//apply Ace settings
-		this.$.aceWrapper.applyAceSettings(this.$.editorSettingsPopup.getPreviewSettings());
-	},
-
-	tabSize: function() {
-		var ts = this.$.aceWrapper.editorSettingsPopup.Tsize;
-		this.$.aceWrapper.setTabSize(ts);
-	},
-	
+		this.$.aceWrapper.applyAceSettings(settings);
+		if(this.docData){
+			this.adjustPanelsForMode(this.docData.getMode(), settings.rightpane);
+		}
+	},	
 	fkeypressed: function(inSender, inEvent) {
 		var key = inEvent;
-		this.$.aceWrapper.insertAtCursor(this.$.editorSettingsPopup.settings.keys[ key ]);
+		this.$.aceWrapper.insertAtCursor(this.$.editorSettings.settings.keys[ key ]);
 	},
-	
+
 	//* Trigger an Ace undo and bubble updated code
 	undoAndUpdate: function(next) {
+		ares.assertCb(next);
 		this.$.aceWrapper.undo();
 		this.updateCodeInDesigner(next);
 	},
 	//* Trigger an Ace undo and bubble updated code
 	redoAndUpdate: function(next) {
+		ares.assertCb(next);
 		this.$.aceWrapper.redo();
 		this.updateCodeInDesigner(next);
 	},

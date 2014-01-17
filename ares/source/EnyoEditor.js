@@ -130,6 +130,7 @@ enyo.kind({
 	handlers: {
 		onErrorTooltip: "showErrorTooltip",
 		onErrorTooltipReset: "resetErrorTooltip",
+		onAceGotFocus: "switchProjectToCurrentDoc",
 		onChildRequest: "handleCall",
 		onAceFocus: "aceFocus"
 	},
@@ -174,6 +175,12 @@ enyo.kind({
 	},
 	editorSettings: function(){
 		this.$.phobos.editorSettings();
+	},
+	applySettings: function(settings){
+		this.$.phobos.applySettings(settings);
+	},
+	changeRightPane: function(editorSettings){
+		this.$.phobos.changeRightPane(editorSettings);
 	},
 	newKindAction: function() {
 		this.$.phobos.newKindAction();
@@ -317,11 +324,6 @@ enyo.kind({
 	// document currently shown by Ace
 	activeDocument: null,
 
-	// project currently loaded in designer. When all document are
-	// closed, the project is still active until project is switched.
-	// activeProject is never set to null
-	activeProject: null,
-
 	showWaitPopup: function(inMessage) {
 		this.doShowWaitPopup({msg: inMessage});
 	},
@@ -340,7 +342,7 @@ enyo.kind({
 		var project
 				= param instanceof Ares.Model.Project ? param
 				: param instanceof Ares.Model.File    ? param.getProjectData()
-				:                                       this.activeProject;
+				:                                       Ares.Workspace.projects.getActiveProject();
 		var projectName = project.getName();
 
 		function isProjectDoc(model) {
@@ -356,7 +358,7 @@ enyo.kind({
 	 */
 	requestPreview: function() {
 		var previewer = ComponentsRegistry.getComponent("projectView");
-		var project = this.activeProject;
+		var project = Ares.Workspace.projects.getActiveProject();
 		var serialSaver = [] ;
 		this.trace("preview requested on project " + project.getName());
 
@@ -478,7 +480,7 @@ enyo.kind({
 
 	requestSaveDocAs: function() {
 		var file = this.activeDocument.getFile();
-		var projectData = this.activeProject;
+		var projectData = Ares.Workspace.projects.getActiveProject();
 		var buildPopup = function() {
 			var path = file.path;
 			var relativePath = path.substring(
@@ -519,7 +521,7 @@ enyo.kind({
 		var relativePath = param.name.split("/");
 		var name = relativePath[relativePath.length-1];
 		var doc = this.activeDocument;
-		var projectData = this.activeProject;
+		var projectData = Ares.Workspace.projects.getActiveProject();
 		var file= param.file;
 		var content= this.$.phobos.getEditorContent();
 
@@ -597,6 +599,7 @@ enyo.kind({
 		// remove Doc from cache
 		var docId = doc.getId();
 		Ares.Workspace.files.removeEntry(docId);
+		this.$.docToolBar.removeTab(docId);
 		if (! Ares.Workspace.files.length ) {
 			this.doAllDocumentsAreClosed();
 		}
@@ -608,6 +611,7 @@ enyo.kind({
 	 * @param {[Function]} next
 	 */
 	closeDoc: function(param, next) {
+		ares.assertCb(next);
 		var doc = typeof param === 'object' ? param : Ares.Workspace.files.get(param) ;
 
 		var docId = doc ? doc.getId() : undefined;
@@ -621,9 +625,7 @@ enyo.kind({
 			this.trace("called without doc to close");
 		}
 
-		if (typeof next === 'function') {
-			next();
-		}
+		next();
 	},
 
 	switchToNewTabAndDoc: function(projectData, file, inContent,next) {
@@ -632,6 +634,14 @@ enyo.kind({
 		ComponentsRegistry.getComponent("documentToolbar")
 			.createDocTab(file.name, fileData.getId(), file.path);
 		this.switchToDocument(fileData, $L("Opening..."), next);
+	},
+
+	switchProjectToCurrentDoc: function(inSender, inEvent) {
+		var pl = ComponentsRegistry.getComponent("projectList") ;
+		if (! this.switching && this.activeDocument) {
+			pl.selectProject( this.activeDocument.getProjectData(), ares.noNext );
+		}
+		return true;
 	},
 
 	/**
@@ -666,7 +676,7 @@ enyo.kind({
 		}
 
 		var oldDoc = this.activeDocument ; // may be undef when a project is closed
-		var oldProject = this.activeProject; // may be undef before opening the first file
+		var oldProject = Ares.Workspace.projects.getActiveProject(); // may be undef before opening the first file
 		var safeNext = next; // function parameter is not a closure
 
 		// don't open an already opened doc
@@ -679,6 +689,8 @@ enyo.kind({
 		this.trace("switch " + (oldDoc ? "from " + oldDoc.getName() + " " : "") + "to " + newDoc.getName() );
 
 		var serial = [];
+		// used to block onFocus event coming from text editor
+		this.switching = true ;
 
 		// select project if the document comes from a different
 		// project compared to the project of the previous document
@@ -692,7 +704,7 @@ enyo.kind({
 			this.doShowWaitPopup({msg: $L("Switching project...")});
 
 			serial.push(
-				projectList.selectInProjectList.bind(projectList, project),
+				projectList.selectProject.bind(projectList, project),
 				deimos.projectSelected.bind(deimos, project)
 			);
 		}
@@ -700,12 +712,14 @@ enyo.kind({
 		var that = this ;
 		serial.push(
 			function(_next) { that.doShowWaitPopup({msg: popupMsg}); _next();},
-			this._switchDoc.bind(this, newDoc)
+			this._switchDoc.bind(this, newDoc),
+			function(_next) { that.aceFocus(); _next();}
 		);
 
 		// no need to handle error, call outer next without params
 		async.series( serial, function(err){
 			that.doHideWaitPopup();
+			that.switching = false ;
 			safeNext();
 		});
 	},
@@ -724,6 +738,7 @@ enyo.kind({
 	 * @param {Function} next
 	 */
 	_switchDoc: function(newDoc,next) {
+		var newProject;
 		var phobos = this.$.phobos;
 
 		var oldDoc = this.activeDocument ;
@@ -748,9 +763,10 @@ enyo.kind({
 		this.$.toolbar.resized();
 
 		this.activeDocument = newDoc;
-		this.activeProject = newDoc.getProjectData() ;
+		newProject = newDoc.getProjectData() ;
+		Ares.Workspace.projects.setActiveProject( newProject.getName() );
 
-		this.addPreviewTooltip("Preview " +  this.activeProject.id);
+		this.addPreviewTooltip("Preview " +  newProject.id);
 
 		if (currentIF === 'code') {
 			this.$.panels.setIndex(this.phobosViewIndex);
@@ -774,20 +790,14 @@ enyo.kind({
 	 */
 	handleCloseDocument: function(inSender, inEvent) {
 		// inEvent.next callback is ditched. Ares will call removeTab
-		// when file is closed by Ace
+		// when file is closed no matter where the tab removal request
+		// comes from.
 		var doc = Ares.Workspace.files.get(inEvent.userId);
 
-		async.waterfall(
-			[
-				this.requestSave.bind(this, doc),
-				this.closeDoc.bind(this)
-			],
-			function(err) {
-				if (! err) {
-					inEvent.next();
-				}
-			}
-		);
+		async.waterfall([
+			this.requestSave.bind(this, doc),
+			this.closeDoc.bind(this)
+		]);
 		return true; // Stop the propagation of the event
 	},
 
@@ -932,12 +942,14 @@ enyo.kind({
 		this.$.deimos.syncFile(projectName, filename, code);
 	},
 
-	undo: function() {
-		this.$.phobos.undoAndUpdate() ;
+	undo: function(next) {
+		ares.assertCb(next);
+		this.$.phobos.undoAndUpdate(next) ;
 	},
 
-	redo: function() {
-		this.$.phobos.redoAndUpdate() ;
+	redo: function(next) {
+		ares.assertCb(next);
+		this.$.phobos.redoAndUpdate(next) ;
 	},
 
 	loadDesignerUI: function(inData, next) {

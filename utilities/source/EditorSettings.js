@@ -1,14 +1,11 @@
-/* jshint indent: false */ // TODO: ENYO-3311
-/* global ares */
 enyo.kind({
-	name: "EditorSettings",
-	kind: "onyx.Popup",
-	classes:"ares-classic-popup",
+	name: "editorSettings",
+	kind: "FittableRows",
 	events: {
-		onClose: "",
+		onCloseSettings: "",
+		onApplySettings: "",
 		onChangeRightPane: "",
 		onTabSizeChange: "",
-		onSoftTabs: "",
 		onChangeSettings:""
 	},
 	published: {
@@ -27,12 +24,12 @@ enyo.kind({
 			wordwrap:false,
 			rightpane:true,
 			keys:{ }
-		}
+		},
+		mainToolbar: true
 	},
 	SETTINGS_STORAGE_KEY: "com.enyojs.editor.settings",
 	components: [
-		{classes: "title draggable", kind: "Ares.PopupTitle", content: "EDITOR GLOBAL SETTINGS"},
-		{classes:"ace-settings-popup", components: [
+		{classes: "ace-settings-paddings", fit: true, components: [
 			{kind:"FittableColumns", components: [
 				{kind:"FittableRows", components: [
 					{classes: "ares-row", components: [
@@ -54,35 +51,35 @@ enyo.kind({
 						{name : "themesPicker", kind: "onyx.PickerDecorator", components: [
 							{classes:"large-picker"},
 							{name: "themes", kind: "onyx.Picker", onSelect: "themeSelected", components: [
-							{content: "ambiance"},
-							{content: "chaos"},
-							{content: "chrome"},
-							{content: "clouds"},
-							{content: "clouds_midnight"},
-							{content: "cobalt"},
-							{content: "crimson_editor"},
-							{content: "dawn"},
-							{content: "dreamweaver"},
-							{content: "eclipse"},
-							{content: "github"},
-							{content: "idle_fingers"},
-							{content: "kr_theme"},
-							{content: "merbivore"},
-							{content: "merbivore_soft"},
-							{content: "mono_industrial"},
-							{content: "monokai"},
-							{content: "pastel_on_dark"},
-							{content: "solarized_dark"},
-							{content: "solarized_light"},
-							{content: "textmate"},
-							{content: "tomorrow"},
-							{content: "tomorrow_night"},
-							{content: "tomorrow_night_blue"},
-							{content: "tomorrow_night_bright"},
-							{content: "tomorrow_night_eighties"},
-							{content: "twilight"},
-							{content: "vibrant_ink"},
-							{content: "xcode"}
+								{content: "ambiance"},
+								{content: "chaos"},
+								{content: "chrome"},
+								{content: "clouds"},
+								{content: "clouds_midnight"},
+								{content: "cobalt"},
+								{content: "crimson_editor"},
+								{content: "dawn"},
+								{content: "dreamweaver"},
+								{content: "eclipse"},
+								{content: "github"},
+								{content: "idle_fingers"},
+								{content: "kr_theme"},
+								{content: "merbivore"},
+								{content: "merbivore_soft"},
+								{content: "mono_industrial"},
+								{content: "monokai"},
+								{content: "pastel_on_dark"},
+								{content: "solarized_dark"},
+								{content: "solarized_light"},
+								{content: "textmate"},
+								{content: "tomorrow"},
+								{content: "tomorrow_night"},
+								{content: "tomorrow_night_blue"},
+								{content: "tomorrow_night_bright"},
+								{content: "tomorrow_night_eighties"},
+								{content: "twilight"},
+								{content: "vibrant_ink"},
+								{content: "xcode"}
 							]}
 						]}
 					]},
@@ -141,8 +138,8 @@ enyo.kind({
 				]}
 			]}
 		]},
-		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
-			{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "doClose"},
+		{name: "settingsToolbar", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+			{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "cancelSettings"},
 			{name: "change", kind: "onyx.Button", classes:"right", content: "Save", ontap: "saveSettings"}
 		]}
 	],
@@ -153,6 +150,7 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
+		this.mainToolbarChanged();
 		this.getValuesFromLocalStorage();
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
@@ -180,6 +178,12 @@ enyo.kind({
 		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
 	},
 
+	mainToolbarChanged: function(){
+		if(!this.mainToolbar){
+			this.$.settingsToolbar.addClass("white");
+		}
+	},
+
 	getValuesFromLocalStorage:function(){
 		var self = this;
 		Ares.LocalStorage.get(this.SETTINGS_STORAGE_KEY, function(str) {
@@ -194,7 +198,17 @@ enyo.kind({
 		});
 	},
 
-	initSettingsPopupFromLocalStorage:function(){
+	initSettings:function(){
+		this.getValuesFromLocalStorage();
+		this.initUI();
+	},
+	
+	getSettingFromLS: function(){
+		this.getValuesFromLocalStorage();
+		return this.settings;
+	},
+
+	initUI:function(){
 		//set UI items with values from localStorage
 		//change value of toggle button programmaticaly fire event onChange
 		//onyx toggle button API says that it not working when the value is changed programmatically
@@ -292,10 +306,23 @@ enyo.kind({
 	},
 
 	saveSettings: function() {
-		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, enyo.json.stringify(this.previewSettings));
+		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, enyo.json.stringify(this.previewSettings)); //push to ls
 		//Local storage modified, reading new settings from local storage
-		this.getValuesFromLocalStorage();
-		this.initSettingsPopupFromLocalStorage();
-		this.doClose();
+		this.getValuesFromLocalStorage(); 
+		this.initUI();
+		this.doCloseSettings();
+	},
+
+	resetSettings: function(){
+		this.getValuesFromLocalStorage(); 
+		this.initUI();
+		this.doApplySettings();
+		//this.doCloseSettings();
+	},
+
+	cancelSettings: function(){
+		this.initUI();
+		this.doApplySettings();
+		this.doCloseSettings();
 	}
 });

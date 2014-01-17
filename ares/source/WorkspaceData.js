@@ -1,4 +1,4 @@
-/* global _, Ares, Backbone, ares, guid */
+/*global _, Ares, Backbone, ares, guid, localStorage, enyo */
 
 var AresStore = function(name, eraseAll) {
 	this.name = name;
@@ -132,6 +132,17 @@ Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when
 	setService: function(service) {
 		this.set("service", service);
 	},
+	/*
+		FIXME ENYO-3687
+		PGB will become a plugin - therefore should not store its data directly at project level
+		e.g. getPluginData(plugname).getDownloadStatus()
+	*/
+	getDownloadStatus: function() {
+		return this.get("downloadStatus");
+	},
+	setDownloadStatus: function(downloadStatus) {
+		this.set("downloadStatus", downloadStatus);
+	},
 	getConfig: function() {
 		return this.get("config");
 	},
@@ -207,6 +218,36 @@ Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collec
 			oldProject.destroy();
 		}
 	},
+
+	/**
+	 * Store the project name of the project currently loaded in
+	 * designer. When all document are closed, the project is still
+	 * active until project is switched. activeProject is never set to
+	 * null. activeProject is not to be confused with selected
+	 * Project.
+	 * @param {String} name
+	 * @throws {Error}
+	 */
+	setActiveProject: function(name) {
+		var project = this.get(name);
+		if (project) {
+			this.active = name;
+		} else {
+			throw new Error("Unknown project " + name);
+		}
+	},
+	/**
+	 * Returns the project currently loaded in designer. Returns
+	 * undefined if designer is lot loaded
+	 * @returns {Ares.Model.Project|undefined}
+	 */
+	getActiveProject: function() {
+		if (this.active) {
+			return this.get(this.active) ;
+		}
+		return undefined;
+	},
+
 	sync: function(method, model, options) {
 		var store = model.localStorage || model.collection.localStorage;
 		store.sync(method, model, options);

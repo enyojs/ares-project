@@ -37,8 +37,8 @@ enyo.kind({
 					kind: "Harmonia",
 					name: "harmonia",
 					classes: "ares-panel-min-width enyo-fit",
-					onFileDblClick: "openDocument",
-					onFileChanged: "closeDocument",
+					onFileOpenRequest: "openDocument",
+					onFileRemoved: "closeDocument",
 					onFolderChanged: "closeSomeDocuments"
 				},
 				{kind: "Ares.EnyoEditor", name: "enyoEditor"}
@@ -82,7 +82,11 @@ enyo.kind({
 		onAllDocumentsAreClosed: "showProjectView",
 		onCloseProjectDocuments: "closeDocumentsForProject",
 		onRegisterMe : "_registerComponent",
-		onMovePanel : "_movePanel"
+		onMovePanel : "_movePanel",
+		//handlers for editorSettings kind (utilities/EditorSettings.js)
+		onChangeSettings:"applyPreviewSettings", 
+		onChangeRightPane: "changeRightPane", 
+		onApplySettings: "applySettings"
 	},
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
@@ -283,9 +287,7 @@ enyo.kind({
 	},
 
 	showWaitPopup: function(inSender, inEvent) {
-		if(inEvent.service === 'build' && ! inEvent.msg.match(/Starting/)) {
-			// Node server fails if cancel is done during "Starting build" phase
-			// See ENYO-3506
+		if(inEvent.service === 'build' ) {
 			this.$.canceBuildButton.show();
 		}
 		this.$.waitPopupMessage.setContent(inEvent.msg);
@@ -379,6 +381,40 @@ enyo.kind({
 			}
 		}
 	},
+	
+	/**
+	 * Event handler for ace's settings called when settings from localStorage have to be applied (cancel/open)
+	 * 
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 */
+	applySettings: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("enyoEditor").applySettings(inEvent.originator.getSettingFromLS());
+	},
+
+	/**
+	 * Event handler for ace's settings called when a setting is changing (change theme, font size on ui for example)
+	 * 
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 */
+	applyPreviewSettings: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("enyoEditor").applySettings(inEvent.originator.getPreviewSettings());
+	},
+
+	/**
+	 * Event handler for ace's settings called when a right panel is changed
+	 * 
+	 * @private
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 */
+	changeRightPane: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("enyoEditor").changeRightPane(inEvent.originator.getPreviewSettings());
+	},
+
 	/**
 	 * Event handler for ares components registry
 	 * 
