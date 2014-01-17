@@ -191,7 +191,7 @@ enyo.kind({
 					//The creation of the pgbValidation row attribute and its initialization are done in the same time.
 					pgbValidation[pgbUiData[index].id][pgbUiData[index].rows[i].name] = true;
 				}
-				pgbValidation[pgbUiData[index].id]["valideDrawer"] = true;			
+				pgbValidation[pgbUiData[index].id]["validDrawer"] = true;			
 			}
 
 			inProject.setValidPgbConf(pgbValidation);
