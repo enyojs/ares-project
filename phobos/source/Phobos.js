@@ -626,8 +626,8 @@ enyo.kind({
 					commaTerminated = false;
 					codeToInsert += ("\t" + item + ": function(inSender, inEvent) {" + lineTermination);
 					// Auto trace line Insert's
-					if(edSettings.autotrace === true && edSettings.autotraceLine !== null){
-						codeToInsert += ('\t\t' + edSettings.autotraceLine + lineTermination);
+					if(edSettings.autoTrace === true && edSettings.autoTraceLine !== null){
+						codeToInsert += ('\t\t' + edSettings.autoTraceLine + lineTermination);
 					}
 					codeToInsert += ("\t\t// TO DO - Auto-generated code" + lineTermination + "\t}");
 				}
