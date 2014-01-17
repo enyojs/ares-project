@@ -180,58 +180,21 @@ enyo.kind({
 
 	initializeValidPgbConf: function(inProject, inPhonegapEnabled) {
 		if (inProject.getValidPgbConf() === undefined && inPhonegapEnabled) {
-			inProject.setValidPgbConf({
-				"sharedConfiguration": {
-					"validDrawer": true,
-					"phonegap-version": true,
-					"orientation": true,
-					"target-device": true,
-					"fullscreen": true,
-					"icon": true,
-					"splashScreen": true
-				},
-				"android": {
-					"validDrawer": true,
-					"android-installLocation": true,
-					"android-minSdkVersion": true, 
-					"android-targetSdkVersion": true,
-					"android-maxSdkVersion": true,
-					"android-windowSoftInputMode": true,
-					"splash-screen-duration": true,
-					"load-url-timeout": true,
-					"icon": true,
-					"splashScreen": true
-				},
-				"ios": {
-					"validDrawer": true,
-					"webviewbounce": true,
-					"prerendered-icon": true,
-					"ios-statusbarstyle": true, 
-					"detect-data-types": true,
-					"exit-on-suspend": true,
-					"show-splash-screen-spinner": true,
-					"auto-hide-splash-screen": true,
-					"icon": true,
-					"splashScreen": true
-				},
-				"winphone": {
-					"validDrawer": true,
-					"icon": true,
-					"splashScreen": true
-				},
-				
-				"blackberry": {
-					"validDrawer": true,
-					"disable-cursor": true,
-					"icon": true,
-					"splashScreen": true
-				},
-				"webos": {
-					"validDrawer": true,
-					"icon": true,
-					"splashScreen": true
-				}				
-			});
+			var pgbValidation = {};
+			var pgbUiData = Phonegap.UIConfiguration.commonDrawersContent.concat(Phonegap.UIConfiguration.platformDrawersContent);
+			
+			for (var index =0 in pgbUiData) {
+				//The creation of the pgbValidation drawer attribute and its initialization are done in the same time.
+				pgbValidation[pgbUiData[index].id] = {};
+
+				for (var i=0, maxLength = pgbUiData[index].rows.length; i<maxLength; i++) {
+					//The creation of the pgbValidation row attribute and its initialization are done in the same time.
+					pgbValidation[pgbUiData[index].id][pgbUiData[index].rows[i].name] = true;
+				}
+				pgbValidation[pgbUiData[index].id]["valideDrawer"] = true;			
+			}
+
+			inProject.setValidPgbConf(pgbValidation);
 		}
 	},
 
