@@ -1,5 +1,3 @@
-  // Copyright 2013, $ORGANIZATION
-// All rights reserved.
 /* global ares */
 enyo.kind({
 	name: "valueInput",
