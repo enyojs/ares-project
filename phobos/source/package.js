@@ -3,7 +3,6 @@ enyo.depends(
 	"AutoComplete.js",
 	"FindPopup.js",
 	"ProjectCtrl.js",
-	"EditorSettings.js",
 	"AceScroller.js",
 	"AceWrapper.js"
 );
