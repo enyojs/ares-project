@@ -618,6 +618,7 @@ enyo.kind({
 
 			// Prepare the code to insert
 			var codeToInsert = "";
+			var edSettings = this.$.editorSettings.settings;
 			for(var item in declared) {
 				if (item !== "" && existing[item] === undefined) {
 					// use correct line terminations
@@ -625,8 +626,8 @@ enyo.kind({
 					commaTerminated = false;
 					codeToInsert += ("\t" + item + ": function(inSender, inEvent) {" + lineTermination);
 					// Auto trace line Insert's
-					if(this.$.editorSettings.settings.autotrace === true && this.$.editorSettings.settings.autotraceLine !== null){
-						codeToInsert += ('\t\t' + this.$.editorSettings.settings.autotraceLine + lineTermination);
+					if(edSettings.autotrace === true && edSettings.autotraceLine !== null){
+						codeToInsert += ('\t\t' + edSettings.autotraceLine + lineTermination);
 					}
 					codeToInsert += ("\t\t// TO DO - Auto-generated code" + lineTermination + "\t}");
 				}
