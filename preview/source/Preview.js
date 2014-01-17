@@ -122,19 +122,30 @@ enyo.kind(
 			}
 		],
 
-		debug: true ,
+		debug: false ,
 		iframeUrl: null,
 
-		dlog: function() {
-			if (this.debug) {
-				this.log.apply(this, arguments) ;
-			}
+		// retrieve URL from window and setup iframe url
+		create: function() {
+			ares.setupTraceLogger(this);
+			this.inherited(arguments);
+			var param = this.getQueryParams(window.location.search) ;
+			this.iframeUrl = param.url ;
+
+			this.trace("preview url:", param.url);
+
+			this.$.scrolledIframe.setUrl(param.url) ;
+			this.$.projectName.setContent(param.name);
+
+			//display project name in the window title
+			document.title = this.$.projectName.getContent()+" - Ares project preview";
 		},
 
 		zoom: function(inSender, inEvent) {
 			this.scale = 0.3 + 0.7 * inEvent.value / 100 ;
 			this.applyScale() ;
 		},
+
 		applyScale: function() {
 			enyo.dom.transformValue(
 				this.$.scrolledIframe.$.iframe, "scale", this.scale
@@ -146,7 +157,7 @@ enyo.kind(
 			var device = this.$.device.selected ;
 			var orientation = this.$.orientation.selected ;
 
-			this.dlog("size for device " , device.content , " orientation " , orientation.content ) ;
+			this.trace("size for device " , device.content , " orientation " , orientation.content ) ;
 
 			var dw  = device.value.width ;
 			var dh  = device.value.height ;
@@ -187,18 +198,6 @@ enyo.kind(
 			}
 
 			return params;
-		},
-
-		// retrieve URL from window and setup iframe url
-		create: function() {
-			this.inherited(arguments);
-
-			var param = this.getQueryParams(window.location.search) ;
-			this.log("preview url " + param.url) ;
-			this.iframeUrl = param.url ;
-
-			this.$.scrolledIframe.setUrl   (param.url) ;
-			this.$.projectName.setContent(param.name);
 		},
 
 		reload: function() {

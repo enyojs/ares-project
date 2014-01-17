@@ -281,9 +281,7 @@ enyo.kind({
 	},
 
 	showWaitPopup: function(inSender, inEvent) {
-		if(inEvent.service === 'build' && ! inEvent.msg.match(/Starting/)) {
-			// Node server fails if cancel is done during "Starting build" phase
-			// See ENYO-3506
+		if(inEvent.service === 'build' ) {
 			this.$.canceBuildButton.show();
 		}
 		this.$.waitPopupMessage.setContent(inEvent.msg);

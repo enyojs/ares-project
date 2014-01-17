@@ -196,6 +196,9 @@ enyo.kind({
 	authorize: function(next) {
 		var self = this;
 		this.trace();
+		
+		// in case of user cancellation, getUserData may need to call next(error)
+		// to interrupt the build process. same for getToken.
 		this.getUserData(function(err, userData) {
 			if (err) {
 				self._getToken(function(err) {
@@ -204,11 +207,11 @@ enyo.kind({
 					} else {
 						self.getUserData(next);
 					}
-				});
+				}, next);
 			} else {				
 				next(null, userData);				
 			}
-		});
+		}, next);
 	},
 	
 	/**
@@ -258,7 +261,7 @@ enyo.kind({
 	 * @param {Function} next is a CommonJS callback
 	 * @private
 	 */
-	_getToken: function(next) {
+	_getToken: function(next, abort) {
 		this.trace();
 		if(this.config.auth && this.config.auth.token) {
 			this.trace("skipping token obtention");
@@ -276,6 +279,14 @@ enyo.kind({
 			method: 'POST',
 			postBody: data
 		});
+
+		// Get ready for cancellation - (re)set abortAjaxRequest to stop "req" in case of cancellation
+		this.abortAjaxRequest= function() {
+			this.abortAjaxRequest= function() {};		
+			enyo.xhr.cancel(req.xhr);
+			abort (Phonegap.Build.abortBuild);
+		};
+
 		req.response(this, function(inSender, inData) {
 			this.config.auth.token = inData.token;
 			this.trace("Got phonegap token:", this.config.auth.token);
@@ -292,16 +303,25 @@ enyo.kind({
 	 * @param {Function} next is a CommonJS callback
 	 * @private
 	 */
-	getUserData: function(next) {
+	getUserData: function(next, abort) {
 		this.trace();
 		var req = new enyo.Ajax({
 			url: this.url + '/api/v1/me'
 		});
+
+		// Get ready for possible cancellation - (re)set abortAjaxRequest to stop "req" in case of cancellation
+		this.abortAjaxRequest= function() {
+			this.abortAjaxRequest= function() {};		
+			enyo.xhr.cancel(req.xhr);
+			abort (Phonegap.Build.abortBuild);
+		};
+
 		req.response(this, function(inSender, inData) {
 			this.trace("inData: ", inData);
 			this._storeUserData(inData.user);
 			next(null, inData);
 		});
+		
 		req.error(this, this._handleServiceError.bind(this, "Unable to get PhoneGap user data", next));
 		req.go();
 	},	
@@ -478,8 +498,10 @@ enyo.kind({
 			enyo.bind(this, this._submitBuildRequest, project, next /*only called in case of success*/)
 		], function(err) {
 			if (err) {
-				enyo.warn("phonegap.Build#build()", "err:", err);
-				next(err);
+				if (err !== Phonegap.Build.abortBuild) {
+					enyo.warn("phonegap.Build#build()", "err:", err);
+					next(err);
+				}
 			}
 		});
 	},
@@ -515,17 +537,26 @@ enyo.kind({
 				this.error("unable to generate config.xml from:", config);	
 				next();
 			} else {
-				var req, fs = project.getService();
+				var req, aborted, fs;
+				fs = project.getService();
+				aborted = false;
 				req = fs.createFile(project.getFolderId(), "config.xml", configXml, { overwrite: true });
 
 				this.abortAjaxRequest= function() {
-						this.abortAjaxRequest= function() {};		
-						enyo.xhr.cancel(req.xhr);
-					};
+					this.abortAjaxRequest= function() {};		
+					// in case of cancellation, we should let the update complete to prevent 
+					// file corruption but still error out to prevent a successful 
+					// continuation of the process
+					aborted = true;
+				};
 				
 				req.response(this, function _savedConfigXml(inSender, inData) {
-					this.trace("Phonegap.Build#_updateConfigXml()", "wrote config.xml:", inData);	
-					next();
+					this.trace("Phonegap.Build#_updateConfigXml()", "wrote config.xml:", inData);
+					if (!aborted) {
+						next();
+					} else {
+						next (Phonegap.Build.abortBuild);
+					}
 				});
 				req.error(this, this._handleServiceError.bind(this, "Unable to write config.xml", next));
 			}
@@ -544,25 +575,22 @@ enyo.kind({
 	 */
 	_getFiles: function(project, next) {
 		this.trace("...");
-		var req, aborted;
+		var req, aborted = false;
 		this.doShowWaitPopup({msg: $L("Building source archive"), service: "build"});
 		req = project.getService().exportAs(project.getFolderId(), -1 /*infinity*/);
 
 		this.abortAjaxRequest= function() {
 			this.abortAjaxRequest= function() {};		
 			aborted = true ;
-			enyo.xhr.cancel(req.xhr);
 		};
 
 		req.response(this, function _gotFiles(inSender, inData) {
 			this.trace("Phonegap.Build#_getFiles()", "Got the files data");
 			var ctype = req.xhrResponse.headers['x-content-type'];
-			if (aborted) {
-				// response is called on Mac even if xhr was aborted
-				this.trace("ugh, Ajax response was called after an abort");
-				next(new Error('Build canceled by the user'));
-			} else {
+			if (!aborted) {
 				next(null, {content: inData, ctype: ctype});
+			} else {
+				next (Phonegap.Build.abortBuild);
 			}
 		});
 		req.error(this, this._handleServiceError.bind(this, "Unable to fetch application source code", next));
@@ -640,9 +668,10 @@ enyo.kind({
 		});
 
 		this.abortAjaxRequest= function() {
-				this.abortAjaxRequest= function() {};		
-				enyo.xhr.cancel(req.xhr);
-			};
+			this.abortAjaxRequest= function() {};	
+			enyo.xhr.cancel(req.xhr);
+			next(Phonegap.Build.abortBuild);
+		};
 
 		req.response(this, function(inSender, inData) {
 			this.trace("Phonegap.Build#_submitBuildRequest(): response:", inData);
@@ -1214,6 +1243,7 @@ enyo.kind({
 			access : {
 				"origin": Phonegap.UIConfiguration.commonDrawersContent[1].rows[4].defaultValue
 			}
-		}
+		},
+		abortBuild: new Error ("Build canceled by user")
 	}
 });
