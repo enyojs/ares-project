@@ -310,7 +310,8 @@ enyo.kind({
 	},
 
 	resetSettings: function(){
-		this.initUI(this.getValuesFromLocalStorage());
+		this.getValuesFromLocalStorage();
+		this.initUI(this.settings);
 		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
 		this.doApplySettings();
 	},
