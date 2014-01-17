@@ -1,6 +1,6 @@
 {
   "name": "ares-ide",
-  "version": "0.2.10-pre.1",
+  "version": "0.2.10-pre.2",
   "dependencies": {
     "archiver": {
       "version": "0.4.10",
@@ -8,8 +8,9 @@
       "resolved": "https://registry.npmjs.org/archiver/-/archiver-0.4.10.tgz",
       "dependencies": {
         "readable-stream": {
-          "version": "1.0.17",
-          "from": "readable-stream@~1.0.2"
+          "version": "1.0.24",
+          "from": "readable-stream@~1.0.2",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.0.24.tgz"
         },
         "iconv-lite": {
           "version": "0.2.11",
@@ -53,7 +54,7 @@
           "dependencies": {
             "qs": {
               "version": "0.6.6",
-              "from": "qs@~0.6.0"
+              "from": "qs@0.6.6"
             },
             "json-stringify-safe": {
               "version": "5.0.0",
@@ -146,9 +147,9 @@
           }
         },
         "rimraf": {
-          "version": "2.2.5",
-          "from": "rimraf@2.2.5",
-          "resolved": "https://registry.npmjs.org/rimraf/-/rimraf-2.2.5.tgz"
+          "version": "2.2.6",
+          "from": "rimraf@2.2.6",
+          "resolved": "https://registry.npmjs.org/rimraf/-/rimraf-2.2.6.tgz"
         },
         "temp": {
           "version": "0.6.0",
@@ -241,7 +242,7 @@
               "from": "cli@0.4.x",
               "dependencies": {
                 "glob": {
-                  "version": "3.2.7",
+                  "version": "3.2.8",
                   "from": "glob@>= 3.1.4",
                   "dependencies": {
                     "inherits": {
@@ -291,9 +292,9 @@
       }
     },
     "busboy": {
-      "version": "0.0.13",
-      "from": "busboy@0.0.13",
-      "resolved": "https://registry.npmjs.org/busboy/-/busboy-0.0.13.tgz",
+      "version": "0.0.14",
+      "from": "busboy@0.0.14",
+      "resolved": "https://registry.npmjs.org/busboy/-/busboy-0.0.14.tgz",
       "dependencies": {
         "dicer": {
           "version": "0.1.6",
@@ -308,13 +309,13 @@
           }
         },
         "readable-stream": {
-          "version": "1.1.9",
+          "version": "1.1.10",
           "from": "readable-stream@1.1.x",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.1.10.tgz",
           "dependencies": {
             "core-util-is": {
               "version": "1.0.1",
-              "from": "core-util-is@~1.0.0",
-              "resolved": "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.1.tgz"
+              "from": "core-util-is@~1.0.0"
             },
             "debuglog": {
               "version": "0.0.2",
@@ -351,9 +352,9 @@
       }
     },
     "express": {
-      "version": "3.4.7",
-      "from": "express@3.4.7",
-      "resolved": "https://registry.npmjs.org/express/-/express-3.4.7.tgz",
+      "version": "3.4.8",
+      "from": "express@3.4.8",
+      "resolved": "https://registry.npmjs.org/express/-/express-3.4.8.tgz",
       "dependencies": {
         "connect": {
           "version": "2.12.0",
@@ -400,13 +401,13 @@
               "resolved": "https://registry.npmjs.org/multiparty/-/multiparty-2.2.0.tgz",
               "dependencies": {
                 "readable-stream": {
-                  "version": "1.1.9",
+                  "version": "1.1.10",
                   "from": "readable-stream@~1.1.9",
+                  "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.1.10.tgz",
                   "dependencies": {
                     "core-util-is": {
                       "version": "1.0.1",
-                      "from": "core-util-is@~1.0.0",
-                      "resolved": "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.1.tgz"
+                      "from": "core-util-is@~1.0.0"
                     },
                     "debuglog": {
                       "version": "0.0.2",
@@ -566,7 +567,7 @@
       "dependencies": {
         "qs": {
           "version": "0.6.6",
-          "from": "qs@~0.6.0"
+          "from": "qs@0.6.6"
         },
         "json-stringify-safe": {
           "version": "5.0.0",
@@ -643,9 +644,9 @@
       }
     },
     "rimraf": {
-      "version": "2.2.5",
-      "from": "rimraf@2.2.5",
-      "resolved": "https://registry.npmjs.org/rimraf/-/rimraf-2.2.5.tgz"
+      "version": "2.2.6",
+      "from": "rimraf@2.2.6",
+      "resolved": "https://registry.npmjs.org/rimraf/-/rimraf-2.2.6.tgz"
     },
     "semver": {
       "version": "2.1.0",
