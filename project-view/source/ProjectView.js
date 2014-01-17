@@ -1,4 +1,4 @@
-/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo */
+/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo, Phonegap */
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -182,8 +182,9 @@ enyo.kind({
 		if (inProject.getValidPgbConf() === undefined && inPhonegapEnabled) {
 			var pgbValidation = {};
 			var pgbUiData = Phonegap.UIConfiguration.commonDrawersContent.concat(Phonegap.UIConfiguration.platformDrawersContent);
-			
-			for (var index =0 in pgbUiData) {
+			var index =0;
+
+			for (index in pgbUiData) {
 				//The creation of the pgbValidation drawer attribute and its initialization are done in the same time.
 				pgbValidation[pgbUiData[index].id] = {};
 
