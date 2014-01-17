@@ -17,8 +17,8 @@ enyo.kind({
 			fontsize:12,
 			wordwrap:false,
 			rightpane:true,
-			autotrace:false,
-			autotraceLine: 'this.trace("sender:", inSender, ", event:", inEvent);',
+			autoTrace:false,
+			autoTraceLine: 'this.log("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
 		},
 		previewSettings: {
@@ -27,8 +27,8 @@ enyo.kind({
 			fontsize:12,
 			wordwrap:false,
 			rightpane:true,
-			autotrace:false,
-			autotraceLine: 'this.trace("sender:", inSender, ", event:", inEvent);',
+			autoTrace:false,
+			autoTraceLine: 'this.log("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
 		},
 		mainToolbar: true
@@ -108,8 +108,18 @@ enyo.kind({
 						]}
 					]},
 					{classes: "ares-row", components: [
-						{name: "atrace", tag:"label",  classes: "ares-fixed-label ace-label", content: "Automatically add trace line's"},
-						{name: "atracebuttton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "aTrace"}
+						{
+							tag:"label",
+							classes: "ares-fixed-label ace-label",
+							content: "Automatically add log instruction"
+						},
+						{
+							name: "autoTraceButton",
+							kind: "onyx.ToggleButton",
+							onContent: "On",
+							offContent: "Off",
+							onChange: "aTrace"
+						}
 					]}
 				]}
 			]},
@@ -149,12 +159,18 @@ enyo.kind({
 				]}
 			]},
 			{tag:"p", classes:"break"},
-		{name: "autotraceinput", kind:"FittableRows", showing: false, components: [
-				{ classes:"ares-row", content: "Trace line's that get auto add in deimos"},
-				{kind: "onyx.InputDecorator", classes: "ace-input-textarea", name: "autoTraceDecorator", components: [
-					{kind: "onyx.Input", style: "width: 100%;", placeholder: "Enter text here", name: "autotextline", onchange: "atraceline"}
+			{name: "autoTraceInputBox", kind:"FittableRows", showing: false, components: [
+				{ classes:"ares-row", content: "Log instruction injected in your event handlers:"},
+				{kind: "onyx.InputDecorator", classes: "ace-input-textarea", components: [
+					{
+						kind: "onyx.Input",
+						style: "width: 100%;",
+						placeholder: "Enter log instruction here",
+						name: "autoTraceInputLine",
+						onchange: "atraceline"
+					}
 				]}
-			]},
+			]}
 		]},
 		
 		{name: "settingsToolbar", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
@@ -170,14 +186,17 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.mainToolbarChanged();
+
+		// clobbers this.settings from what's in local storage
 		this.getValuesFromLocalStorage();
+
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
 		this.$.rightPaneButton.value = this.settings.rightpane;
-		this.$.atracebuttton.value = this.settings.autotrace;
-		this.$.autotextline.setValue(this.settings.autotraceLine);
+		this.$.autoTraceButton.value = this.settings.autoTrace;
+		this.$.autoTraceInputLine.setValue(this.settings.autoTraceLine);
 		var themesControls = this.$.themes.getClientControls();
-		this.$.autotraceinput.setShowing(this.settings.autotrace);
+		this.$.autoTraceInputBox.setShowing(this.settings.autoTrace);
 
 		enyo.forEach(themesControls, function(control) {
 			if (control.content == this.settings.theme) {
@@ -254,7 +273,7 @@ enyo.kind({
 		this.$.rightPaneButton.setValue(this.settings.rightpane);
 		//deep copy: settings in previewSettings
 		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
-		this.$.autotraceinput.setShowing(this.settings.autotrace);
+		this.$.autoTraceInputBox.setShowing(this.settings.autoTrace);
 	},
 
 	themeSelected: function(inSender, inEvent) {
@@ -350,12 +369,12 @@ enyo.kind({
 	
 	aTrace: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		this.previewSettings.autotrace = inEvent.value;
-		this.$.autotraceinput.setShowing(this.previewSettings.autotrace);
+		this.previewSettings.autoTrace = inEvent.value;
+		this.$.autoTraceInputBox.setShowing(this.previewSettings.autoTrace);
 	},
 	
 	atraceline: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		this.previewSettings.autotraceLine = inSender.value;
+		this.previewSettings.autoTraceLine = inSender.value;
 	}
 });
