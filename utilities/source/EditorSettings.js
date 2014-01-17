@@ -252,11 +252,7 @@ enyo.kind({
 		this.$.rightPaneButton.setValue(this.settings.rightpane);
 		//deep copy: settings in previewSettings
 		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
-		
-		//if(this.settings.autotrace === true){
-			this.$.autotraceinput.setShowing(this.settings.autotrace);
-			console.log(this.settings.autotrace);
-		//}
+		this.$.autotraceinput.setShowing(this.settings.autotrace);
 	},
 
 	themeSelected: function(inSender, inEvent) {
