@@ -15,6 +15,8 @@ enyo.kind({
 			fontsize:12,
 			wordwrap:false,
 			rightpane:true,
+			autotrace:false,
+			autotraceLine: 'this.trace("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
 		},
 		previewSettings: {
@@ -23,6 +25,8 @@ enyo.kind({
 			fontsize:12,
 			wordwrap:false,
 			rightpane:true,
+			autotrace:false,
+			autotraceLine: 'this.trace("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
 		},
 		mainToolbar: true
@@ -100,10 +104,15 @@ enyo.kind({
 								{content: 36}
 							]}
 						]}
+					]},
+					{classes: "ares-row", components: [
+						{name: "atrace", tag:"label",  classes: "ares-fixed-label ace-label", content: "Automatically add trace line's"},
+						{name: "atracebuttton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "aTrace"}
 					]}
 				]}
 			]},
 			{tag:"p", classes:"break"},
+		
 			{kind:"FittableRows", name: "functionKeys", components: [
 				{kind: "Control", name:"osMessage", classes:"ares-row", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
 				{kind: "onyx.MenuDecorator", name:"program_buttons", classes:"ares-row", components: [
@@ -136,8 +145,16 @@ enyo.kind({
 					{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
 					{kind: "onyx.Button", classes:"right", content: "Update", name: "oksave", ontap: "inputChanged"}
 				]}
-			]}
+			]},
+			{tag:"p", classes:"break"},
+		{name: "autotraceinput", kind:"FittableRows", showing: false, components: [
+				{ classes:"ares-row", content: "Trace line's that get auto add in deimos"},
+				{kind: "onyx.InputDecorator", classes: "ace-input-textarea", name: "autoTraceDecorator", components: [
+					{kind: "onyx.Input", style: "width: 100%;", placeholder: "Enter text here", name: "autotextline", onchange: "atraceline"}
+				]}
+			]},
 		]},
+		
 		{name: "settingsToolbar", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
 			{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "cancelSettings"},
 			{name: "change", kind: "onyx.Button", classes:"right", content: "Save", ontap: "saveSettings"}
@@ -155,8 +172,11 @@ enyo.kind({
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
 		this.$.rightPaneButton.value = this.settings.rightpane;
-
+		this.$.atracebuttton.value = this.settings.autotrace;
+		this.$.autotextline.setValue(this.settings.autotraceLine);
 		var themesControls = this.$.themes.getClientControls();
+		this.$.autotraceinput.setShowing(this.settings.autotrace);
+
 		enyo.forEach(themesControls, function(control) {
 			if (control.content == this.settings.theme) {
 				this.$.themes.setSelected(control);
@@ -232,6 +252,7 @@ enyo.kind({
 		this.$.rightPaneButton.setValue(this.settings.rightpane);
 		//deep copy: settings in previewSettings
 		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
+		this.$.autotraceinput.setShowing(this.settings.autotrace);
 	},
 
 	themeSelected: function(inSender, inEvent) {
@@ -259,7 +280,6 @@ enyo.kind({
 		this.previewSettings.rightpane = inEvent.value;
 		this.doChangeRightPane();	
 	},
-
 
 	inputChanged: function(inSender, inEvent) {
 		var key = this.key;	
@@ -324,5 +344,16 @@ enyo.kind({
 		this.initUI();
 		this.doApplySettings();
 		this.doCloseSettings();
+	},
+	
+	aTrace: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.previewSettings.autotrace = inEvent.value;
+		this.$.autotraceinput.setShowing(this.previewSettings.autotrace);
+	},
+	
+	atraceline: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.previewSettings.autotraceLine = inSender.value;
 	}
 });
