@@ -1,4 +1,4 @@
-/*global Ares, ares, ServiceRegistry, ComponentsRegistry, enyo, async, $L */
+/*global Ares, ares, ServiceRegistry, ComponentsRegistry, enyo, async, $L, setTimeout */
 
 
 /**
@@ -41,6 +41,10 @@ enyo.kind({
 						{value: "showAccountConfigurator", classes:"aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$project-view/assets/images/ares_accounts.png", classes: "aresmenu-icon-button"},
 							{content: "Accounts...", classes: "aresmenu-button-label"}
+						]},
+						{classes: "onyx-menu-divider aresmenu-button"},
+						{value: "showAresAbout",  classes:"aresmenu-button", components: [
+							{content: "About...", classes: "aresmenu-button-label"}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
 						{value: "showAresProperties",  classes:"aresmenu-button", components: [
@@ -121,11 +125,11 @@ enyo.kind({
 			]},
 			{name: "removeProjectPopup", kind: "ProjectDeletePopup", onConfirmActionPopup: "confirmRemoveProject"},
 			{kind: "AccountsConfigurator"},
-			{kind: "AresProperties"}
+			{kind: "AresProperties"},
+			{name: "about", kind: "AboutAres"}
 		]},
 		{classes:"hangar"}
 	],
-	selected: null,
 	enyoHelpTab: null,
 	create: function() {
 		ares.setupTraceLogger(this);
@@ -175,15 +179,15 @@ enyo.kind({
 		} else {
 			var project = Ares.Workspace.projects.createProject(name, folderId, serviceId);
 			if(project && !dontSelect){
-				this.selectInProjectList(project);
+				this.selectProject(project, ares.noNext);
 			}
 		}
 	},
 	removeProjectAction: function(inSender, inEvent) {
 		var popup = this.$.removeProjectPopup;
-		if (this.selected) {
+		if (this.selectedProject) {
 			popup.setTitle($L("Remove project"));
-			popup.setMessage(this.$LS("Remove project '#{projectName}' from list?", {projectName: this.selected.getProjectName()}));
+			popup.setMessage(this.$LS("Remove project '#{projectName}' from list?", {projectName: this.selectedProject.getName()}));
 			popup.set("nukeFiles", false) ;
 			popup.show();
 		}
@@ -220,11 +224,11 @@ enyo.kind({
 	},
 
 	confirmRemoveProject: function(inSender, inEvent) {
-		var project = Ares.Workspace.projects.at(this.selected.index);
+		var project = this.selectedProject ;
 		var nukeFiles = this.$.removeProjectPopup.get("nukeFiles");
 		var editor = ComponentsRegistry.getComponent("enyoEditor");
 
-		if (this.selected) {
+		if (project) {
 			async.series(
 				[
 					editor.requestCloseProject.bind(editor, project),
@@ -241,9 +245,9 @@ enyo.kind({
 	removeProjectData: function(project,next) {
 		var name = project.getName();
 
-		if (name === this.selected.projectName) {
+		if (name === this.selectedProject.getName()) {
 			this.trace("called on selected " + name);
-			this.selected = null;
+			this.selectedProject = null;
 			this.doProjectRemoved();
 			this.$.projectMenu.setDisabled(true);
 		} else {
@@ -264,50 +268,102 @@ enyo.kind({
 	projectListTap: function(inSender, inEvent) {
 		var project = Ares.Workspace.projects.at(inEvent.index);
 		if(project) {
-			this.selectInProjectList(project);
+			this.selectProject(project, ares.noNext);
 		}
 	},
-	selectInProjectList:function(project, next){
-		this.trace("select ",project);
-		var oldProject = this.selectedProject ;
-
-		// do something only if project is actually changed
-		if (oldProject && oldProject.getName() === project.getName()) {
-			if (next) {next();}
-			return;
-		}
-
+	_selectInProjectList:function(project){
 		var itemList = this.$.projectList.getClientControls();
 		enyo.forEach(itemList, function(item) {
 			item.$.item.removeClass("on");
 			if(item.$.item.projectName === project.id){
-				this.selected = item.$.item;
 				item.$.item.addClass("on");
-				this.selectProject(project,next);
 			}
 		}, this);
 	},
+
+	/**
+	 * Select a project
+	 * @param {Object} project
+	 * @param {Function} next
+	 */
 	selectProject: function(project,next){
 		var msg, service;
-		this.trace("project ",project, " old ", this.selectedProject);
+		var bailout = 0;
+		var err ;
+		var oldp = this.selectedProject;
+		var oldn = oldp ? oldp.getName() : '';
+		var newn = project.getName();
+		var that = this;
+		this.trace("select project " + newn + (oldp ? " old " + oldn : '') );
+
+		var selectNext = function(err) {
+			var pending = that.pendingSelect ;
+			that.trace("end of selection of project " + newn);
+			that.pendingSelect = null;
+			that.ongoingSelect = null;
+
+			if (err) {
+				setTimeout(function() {next(err);},0);
+			} else if (pending) {
+				that.trace("selecting pending project " + pending.getName() );
+				that.selectProject(pending, next);
+			} else {
+				setTimeout(next,0);
+			}
+		};
+
+		if (this.ongoingSelect) {
+			this.trace("on-going select project " + oldn + " storing request for " + newn );
+			this.pendingSelect = project; // may clobber previous pending select
+			bailout = 1;
+		}
+
+		if (newn === oldn) {
+			this.trace("drop redundant select project " + oldn );
+			bailout = 1;
+		}
+
 		service = ServiceRegistry.instance.resolveServiceId(project.getServiceId());
-		if (service !== undefined) {
-			project.setService(service);
-			this.$.projectMenu.setDisabled(false);
-			this.selectedProject = project;
-			this.owner.setupProjectConfig( project, next );
-		} else {
-			// ...otherwise let
+
+		if (service === undefined) {
 			msg = "Service " + project.getServiceId() + " not found";
 			this.doError({msg: msg});
-			this.error(msg);
+			err = new Error(msg);
+			bailout = 1;
 		}
+
+		if (bailout) {
+			setTimeout(function(){ selectNext(err); },0);
+			return;
+		}
+
+
+		this._selectInProjectList(project);
+
+		this.ongoingSelect = project;
+
+		project.setService(service);
+		this.$.projectMenu.setDisabled(false);
+
+		// setupProjectConfig checks for redundant setup wrt this.selectedProject
+		this.owner.setupProjectConfig( project, selectNext );
+		// so this attribute must be set after calling setupProjectConfig
+		this.selectedProject = project;
 	},
+
+	getSelectedProject: function() {
+		return this.selectedProject;
+	},
+
 	showAccountConfigurator: function() {
 		this.$.accountsConfigurator.show();
 	},
+	showAresAbout: function(){
+		this.$.about.show();
+	},
 	showAresProperties: function(){
 		this.$.aresProperties.show();
+		this.$.aresProperties.initDrawers();
 	},
 	showEnyoHelp: function() {
 		var search = ComponentsRegistry.getComponent("enyoEditor").requestSelectedText();

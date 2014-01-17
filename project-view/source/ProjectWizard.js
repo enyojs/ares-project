@@ -1,4 +1,4 @@
-/*global enyo, Ares, ares, async, ProjectConfig, ServiceRegistry */
+/*global enyo, Ares, ares, async, ProjectConfig, ServiceRegistry, $L */
 
 enyo.kind({
 	name: "ProjectWizardCreate",
@@ -850,7 +850,7 @@ enyo.kind({
 		// Create the project entry in the project list
 		var project = Ares.Workspace.projects.createProject(this.newConfigData.name, this.newFolderId, serviceId);
 		if(project){
-			this.owner.$.projectList.selectInProjectList(project);
+			this.owner.$.projectList.selectProject(project, ares.noNext);
 		}
 		this.doHideWaitPopup();
 	},

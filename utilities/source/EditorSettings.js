@@ -1,14 +1,11 @@
-/* jshint indent: false */ // TODO: ENYO-3311
-/* global ares */
 enyo.kind({
-	name: "EditorSettings",
-	kind: "onyx.Popup",
-	classes:"ares-classic-popup",
+	name: "editorSettings",
+	kind: "FittableRows",
 	events: {
-		onClose: "",
+		onCloseSettings: "",
+		onApplySettings: "",
 		onChangeRightPane: "",
 		onTabSizeChange: "",
-		onSoftTabs: "",
 		onChangeSettings:""
 	},
 	published: {
@@ -31,12 +28,12 @@ enyo.kind({
 			autotrace:false,
 			autotraceLine: 'this.trace("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
-		}
+		},
+		mainToolbar: true
 	},
 	SETTINGS_STORAGE_KEY: "com.enyojs.editor.settings",
 	components: [
-		{classes: "title draggable", kind: "Ares.PopupTitle", content: "EDITOR GLOBAL SETTINGS"},
-		{classes:"ace-settings-popup", components: [
+		{classes: "ace-settings-paddings", fit: true, components: [
 			{kind:"FittableColumns", components: [
 				{kind:"FittableRows", components: [
 					{classes: "ares-row", components: [
@@ -58,35 +55,35 @@ enyo.kind({
 						{name : "themesPicker", kind: "onyx.PickerDecorator", components: [
 							{classes:"large-picker"},
 							{name: "themes", kind: "onyx.Picker", onSelect: "themeSelected", components: [
-							{content: "ambiance"},
-							{content: "chaos"},
-							{content: "chrome"},
-							{content: "clouds"},
-							{content: "clouds_midnight"},
-							{content: "cobalt"},
-							{content: "crimson_editor"},
-							{content: "dawn"},
-							{content: "dreamweaver"},
-							{content: "eclipse"},
-							{content: "github"},
-							{content: "idle_fingers"},
-							{content: "kr_theme"},
-							{content: "merbivore"},
-							{content: "merbivore_soft"},
-							{content: "mono_industrial"},
-							{content: "monokai"},
-							{content: "pastel_on_dark"},
-							{content: "solarized_dark"},
-							{content: "solarized_light"},
-							{content: "textmate"},
-							{content: "tomorrow"},
-							{content: "tomorrow_night"},
-							{content: "tomorrow_night_blue"},
-							{content: "tomorrow_night_bright"},
-							{content: "tomorrow_night_eighties"},
-							{content: "twilight"},
-							{content: "vibrant_ink"},
-							{content: "xcode"}
+								{content: "ambiance"},
+								{content: "chaos"},
+								{content: "chrome"},
+								{content: "clouds"},
+								{content: "clouds_midnight"},
+								{content: "cobalt"},
+								{content: "crimson_editor"},
+								{content: "dawn"},
+								{content: "dreamweaver"},
+								{content: "eclipse"},
+								{content: "github"},
+								{content: "idle_fingers"},
+								{content: "kr_theme"},
+								{content: "merbivore"},
+								{content: "merbivore_soft"},
+								{content: "mono_industrial"},
+								{content: "monokai"},
+								{content: "pastel_on_dark"},
+								{content: "solarized_dark"},
+								{content: "solarized_light"},
+								{content: "textmate"},
+								{content: "tomorrow"},
+								{content: "tomorrow_night"},
+								{content: "tomorrow_night_blue"},
+								{content: "tomorrow_night_bright"},
+								{content: "tomorrow_night_eighties"},
+								{content: "twilight"},
+								{content: "vibrant_ink"},
+								{content: "xcode"}
 							]}
 						]}
 					]},
@@ -109,22 +106,13 @@ enyo.kind({
 						]}
 					]},
 					{classes: "ares-row", components: [
-						{name: "atrace", tag:"label",  classes: "ares-fixed-label ace-label", content: "Auto add trace line's"},
+						{name: "atrace", tag:"label",  classes: "ares-fixed-label ace-label", content: "Automatically add trace line's"},
 						{name: "atracebuttton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "aTrace"}
 					]}
 				]}
 			]},
 			{tag:"p", classes:"break"},
 		
-			{kind:"FittableRows", components: [
-				{ content: "Trace line's that get auot add in deimos"},
-				{kind: "onyx.InputDecorator", classes: "ace-input-textarea", name: "inputDecorator", components: [
-					{kind: "onyx.Input", style: "width: 100%;", placeholder: "Enter text here", name: "autotextline", onchange: "atraceline"}
-				]}
-			]},
-		
-			{tag:"p", classes:"break"},
-			
 			{kind:"FittableRows", name: "functionKeys", components: [
 				{kind: "Control", name:"osMessage", classes:"ares-row", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
 				{kind: "onyx.MenuDecorator", name:"program_buttons", classes:"ares-row", components: [
@@ -157,10 +145,18 @@ enyo.kind({
 					{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
 					{kind: "onyx.Button", classes:"right", content: "Update", name: "oksave", ontap: "inputChanged"}
 				]}
-			]}
+			]},
+			{tag:"p", classes:"break"},
+		{name: "autotraceinput", kind:"FittableRows", showing: false, components: [
+				{ classes:"ares-row", content: "Trace line's that get auto add in deimos"},
+				{kind: "onyx.InputDecorator", classes: "ace-input-textarea", name: "autoTraceDecorator", components: [
+					{kind: "onyx.Input", style: "width: 100%;", placeholder: "Enter text here", name: "autotextline", onchange: "atraceline"}
+				]}
+			]},
 		]},
-		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
-			{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "doClose"},
+		
+		{name: "settingsToolbar", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
+			{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "cancelSettings"},
 			{name: "change", kind: "onyx.Button", classes:"right", content: "Save", ontap: "saveSettings"}
 		]}
 	],
@@ -171,6 +167,7 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
+		this.mainToolbarChanged();
 		this.getValuesFromLocalStorage();
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
@@ -178,6 +175,8 @@ enyo.kind({
 		this.$.atracebuttton.value = this.settings.autotrace;
 		this.$.autotextline.setValue(this.settings.autotraceLine);
 		var themesControls = this.$.themes.getClientControls();
+		this.$.autotraceinput.setShowing(this.settings.autotrace);
+
 		enyo.forEach(themesControls, function(control) {
 			if (control.content == this.settings.theme) {
 				this.$.themes.setSelected(control);
@@ -199,6 +198,12 @@ enyo.kind({
 		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
 	},
 
+	mainToolbarChanged: function(){
+		if(!this.mainToolbar){
+			this.$.settingsToolbar.addClass("white");
+		}
+	},
+
 	getValuesFromLocalStorage:function(){
 		var self = this;
 		Ares.LocalStorage.get(this.SETTINGS_STORAGE_KEY, function(str) {
@@ -213,7 +218,17 @@ enyo.kind({
 		});
 	},
 
-	initSettingsPopupFromLocalStorage:function(){
+	initSettings:function(){
+		this.getValuesFromLocalStorage();
+		this.initUI();
+	},
+	
+	getSettingFromLS: function(){
+		this.getValuesFromLocalStorage();
+		return this.settings;
+	},
+
+	initUI:function(){
 		//set UI items with values from localStorage
 		//change value of toggle button programmaticaly fire event onChange
 		//onyx toggle button API says that it not working when the value is changed programmatically
@@ -237,6 +252,7 @@ enyo.kind({
 		this.$.rightPaneButton.setValue(this.settings.rightpane);
 		//deep copy: settings in previewSettings
 		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
+		this.$.autotraceinput.setShowing(this.settings.autotrace);
 	},
 
 	themeSelected: function(inSender, inEvent) {
@@ -264,7 +280,6 @@ enyo.kind({
 		this.previewSettings.rightpane = inEvent.value;
 		this.doChangeRightPane();	
 	},
-
 
 	inputChanged: function(inSender, inEvent) {
 		var key = this.key;	
@@ -311,15 +326,30 @@ enyo.kind({
 	},
 
 	saveSettings: function() {
-		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, enyo.json.stringify(this.previewSettings));
+		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, enyo.json.stringify(this.previewSettings)); //push to ls
 		//Local storage modified, reading new settings from local storage
-		this.getValuesFromLocalStorage();
-		this.initSettingsPopupFromLocalStorage();
-		this.doClose();
+		this.getValuesFromLocalStorage(); 
+		this.initUI();
+		this.doCloseSettings();
+	},
+
+	resetSettings: function(){
+		this.getValuesFromLocalStorage(); 
+		this.initUI();
+		this.doApplySettings();
+		//this.doCloseSettings();
+	},
+
+	cancelSettings: function(){
+		this.initUI();
+		this.doApplySettings();
+		this.doCloseSettings();
 	},
 	
 	aTrace: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
 		this.previewSettings.autotrace = inEvent.value;
+		this.$.autotraceinput.setShowing(this.previewSettings.autotrace);
 	},
 	
 	atraceline: function(inSender, inEvent){

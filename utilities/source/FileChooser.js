@@ -52,7 +52,9 @@ enyo.kind({
 	project: null,
 	components: [
 		{kind: "FittableRows", classes: "onyx-popup ares-filechooser ares-classic-popup", components: [
-			{tag: "div", name: "header", classes:"title", content: $L("Select a directory")},
+			{classes:"title", components: [
+				{name: "header", tag: "span", content: $L("Select a directory")}
+			]},
 			{kind: "FittableColumns", classes: "onyx-light", fit: true, components: [
 				{kind:"FittableRows", name: "sources", classes:"ares-left-pane-file-chooser", components:[
 					{kind: "onyx.Toolbar", classes: "ares-small-toolbar title-gradient", components: [
