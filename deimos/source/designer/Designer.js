@@ -91,6 +91,7 @@ enyo.kind({
 	 * @param {Function} next
 	 */
 	updateSource: function(inSource, next) {
+		ares.assertCb(next);
 		if (this.updateSourceCallback) {
 			this.log("updateSource called while previous updateSourceCallback is still pending ");
 			this.updateSourcePending.push([inSource, next]);
@@ -233,6 +234,7 @@ enyo.kind({
 	 * @param {Function} next
 	 */
 	renderKind: function(fileName, theKind, inSelectId,next) {
+		ares.assertCb(next);
 		this.trace("reloadNeeded", this.reloadNeeded);
 		if (this.reloadNeeded) {
 			this.reloadNeeded = false;

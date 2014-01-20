@@ -19,7 +19,6 @@ enyo.kind({
 		onSearchProjects: "",
 		onDuplicateProject: "",
 		onProjectRemoved: "",
-		onCloseProjectDocuments:"",
 		onModifySettings: "",
 		onBuild: "",
 		onInstall: "",
