@@ -135,6 +135,8 @@ enyo.kind({
 		onAceFocus: "aceFocus",
 		onNewcss: "newCss",
 		onReplacecss: "replacecss",
+		onCssDocument: "cssDocument",
+		onCloseCss: "closecss"
 	},
 	debug: false,
 	create: function() {
@@ -995,6 +997,22 @@ enyo.kind({
 	*/
 	replacecss: function(inSender, inEvent){
 		this.$.phobos .replacecss(ComponentsRegistry.getComponent("hera").old, ComponentsRegistry.getComponent("hera").out);
+	},
+	
+	/*
+	* open hera
+	* @protected
+	*/
+	cssDocument: function(inSender, inEvent){
+		ComponentsRegistry.getComponent("hera").cssload(inEvent);
+		this.$.panels.setIndex(2) ;
+	},
+	/*
+	* close hera
+	* @protected
+	*/
+	closecss: function(inSender, inEvent){
+		this.$.panels.setIndex(0) ;
 	}
 
 });
