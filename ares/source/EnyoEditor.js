@@ -979,11 +979,10 @@ enyo.kind({
 	* @protected
 	*/
 	newCss: function(inSender, inEvent){
-		console.log(this);
-		this.$.phobos.newcss(ComponentsRegistry.getComponent("hera").out);
+		this.$.phobos.newcss(this.$.hera.out);
 	},
 	closecssDesigner: function(){
-		ComponentsRegistry.getComponent("hera").csssave();
+		this.$.hera.csssave();
 		this.$.editorControls.setShowing(true);
 		this.$.deimosControls.setShowing(false);
 		this.$.cssControls.setShowing(false);
@@ -1004,7 +1003,7 @@ enyo.kind({
 	* @protected
 	*/
 	cssDocument: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("hera").cssload(inEvent);
+		this.$.hera.cssload(inEvent);
 		this.$.panels.setIndex(2) ;
 	},
 	/*

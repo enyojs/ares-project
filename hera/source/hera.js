@@ -76,7 +76,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		ares.setupTraceLogger(this);	
-		this.doRegisterMe({name:"hera", reference:this});
+	//	this.doRegisterMe({name:"hera", reference:this});
 		this.$.outputBox.applyStyle("color", "#FFFFFF");
 		this.$.outputBox.applyStyle("background-color", "#000000");
 		this.trace("Just created a new", this.name, "object", this);
