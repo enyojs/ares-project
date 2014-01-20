@@ -10,8 +10,8 @@ enyo.kind({
 		onChangeSettings:""
 	},
 	published: {
-		settings: null,
-		previewSettings: null,
+		settings: {},
+		previewSettings: {},
 		defaultsSettings: {
 			theme:"clouds",
 			highlight:false,
@@ -181,9 +181,7 @@ enyo.kind({
 
 		// clobbers this.settings from what's in local storage
 		this.getValuesFromLocalStorage();
-		if(!this.settings){
-			this.settings = enyo.json.parse(enyo.json.stringify(this.defaultsSettings));
-		}
+
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
 		this.$.rightPaneButton.value = this.settings.rightpane;
@@ -220,13 +218,22 @@ enyo.kind({
 		}
 	},
 
+	/**
+	 * Load editorSettings values for local storage. Undefined (or
+	 * missing) values are replaced with their default values
+	 */
 	getValuesFromLocalStorage:function(){
 		var self = this;
 		Ares.LocalStorage.get(this.SETTINGS_STORAGE_KEY, function(str) {
 			self.trace("localStorage[", self.SETTINGS_STORAGE_KEY, "] = ", str);
+			var def = self.defaultsSettings;
+			var tmp;
 			try {
 				if(str !== null && str !== undefined){
-					self.settings = enyo.json.parse(str);
+					tmp = enyo.json.parse(str);
+					enyo.forEach(Object.keys(def), function(k) {
+						self.settings[k] = tmp[k] === undefined ? def[k] : tmp[k];
+					});
 				}		
 			} catch(e) {
 				Ares.LocalStorage.remove(self.SETTINGS_STORAGE_KEY);
