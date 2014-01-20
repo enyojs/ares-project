@@ -342,7 +342,9 @@ enyo.kind({
 					onchange: "updateConfigurationValue"
 				}
 			]
-		}
+		},
+		{name: "addButton", kind: "onyx.IconButton", src: "$services/assets/images/add-icon-32x32.png", ontap: "addAccessRow"},
+		{name: "AccessRowsContainer", kind: "FittableColumns"}
 	],
 
 	/**
@@ -387,6 +389,42 @@ enyo.kind({
 	/** @public */
 	getProjectConfig: function (config) {
 		config.access.origin = this.getValue();
+	},
+	/** @private */
+	addAccessRow: function(inSender, inEvent) {
+		this.log(this);
+	
+		this.container.createComponent(
+			{kind: "Phonegap.ProjectProperties.AddedAccessRow"}, 
+			{addBefore: this.container.$.icon}
+		);
+		this.container.render();	
+	}
+	
+});
+enyo.kind({
+	name: "Phonegap.ProjectProperties.AddedAccessRow",
+	kind: "Phonegap.ProjectProperties.Row",
+	classes: "ares-project-properties-drawer-row",
+	debug: false,
+	components: [
+		{name: "label", classes: "ares-project-properties-drawer-row-label"},
+		{
+			kind: "onyx.InputDecorator",
+			classes: "ares-project-properties-input-medium",
+			components: [
+				{
+					kind: "onyx.Input",
+					name: "configurationInput",
+					onchange: "updateConfigurationValue"
+				}
+			]
+		},
+		{name: "deleteButton", kind: "onyx.IconButton", src: "$services/assets/images/delete-icon-32x32.png", ontap: "deleteAccessRow"}
+	],
+	/** @private */
+	deleteAccessRow: function(inSender, inEvent) {
+		this.destroy();	
 	}
 });
 
