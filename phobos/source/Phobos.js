@@ -65,7 +65,7 @@ enyo.kind({
 	},
 	editedDocs:"",
 	injected: false,
-	debug: false,
+	debug: true,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
 	helper: null,			// Analyzer.KindHelper
@@ -91,6 +91,11 @@ enyo.kind({
 		return this.docData.getEdited();
 	},
 
+	/**
+	 * Open document
+	 * @param {} inDocData
+	 * @returns {Bool} true if analysis succeeds
+	 */
 	openDoc: function(inDocData) {
 		// If we are changing documents, reparse any changes into the current projectIndexer
 		if (this.docData && this.docData.getEdited()) {
@@ -162,10 +167,11 @@ enyo.kind({
 			this.$.imageViewer.setAttribute("src", fileUrl);
 		}
 		this.manageDesignerButton();
-		this.reparseUsersCode(true);
+		var codeOk = this.reparseUsersCode(true);
 		this.projectCtrl.buildProjectDb();
 
 		this.docData.setEdited(edited);
+		return codeOk;
 	},
 
 	adjustPanelsForMode: function(mode, rightpane) {
