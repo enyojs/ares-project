@@ -683,13 +683,11 @@ enyo.kind({
 			this.trace("also switch project " + pname + ' to ' + newDoc.getProjectData().getName());
 			var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
 			var projectList = ComponentsRegistry.getComponent("projectList");
-			var deimos = this.$.deimos;
 
 			this.doShowWaitPopup({msg: $L("Switching project...")});
 
 			serial.push(
-				projectList.selectProject.bind(projectList, project),
-				deimos.projectSelected.bind(deimos, project)
+				projectList.selectProject.bind(projectList, project)
 			);
 		}
 
@@ -745,7 +743,7 @@ enyo.kind({
 		}
 
 		// open ace session (or image viewer)
-		phobos.openDoc(newDoc);
+		var codeOk = phobos.openDoc(newDoc);
 		this.$.toolbar.resized();
 
 		this.activeDocument = newDoc;
@@ -763,7 +761,14 @@ enyo.kind({
 		}
 		this._fileEdited();
 		this.$.docToolBar.activateDocWithId(newDoc.getId());
-		setTimeout(next,0) ;
+
+		// enable designer only if code analysis was successful
+		if (codeOk) {
+			this.$.deimos.projectSelected( newDoc.getProjectData(), next ) ;
+		}
+		else {
+			setTimeout(next,0) ;
+		}
 	},
 
 
