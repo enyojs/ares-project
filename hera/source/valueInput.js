@@ -371,8 +371,6 @@ enyo.kind({
 		this.valueout = valueout + ";";
 		valueout = "";
 		this.doValueUpdate();
-		
-		
 	},
 	
 	clear: function(inSender, inEvent){
@@ -425,9 +423,9 @@ enyo.kind({
 	},
 	inputx: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		this.x = inEvent.content;
-		this.doTotalx(this.x);
-		
+		var x = inEvent.content;
+		x = x.toString();
+		this.doTotalx(x);
 	},
 });
 
@@ -456,8 +454,9 @@ enyo.kind({
 	},
 	inputy: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		this.y = inEvent.content;
-		this.doTotaly(this.y);
+		var y = inEvent.content;
+		y = y.toString();
+		this.doTotaly(y);
 	},
 });
 
@@ -486,8 +485,9 @@ enyo.kind({
 	},
 	inputz: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		this.z = inEvent.content;
-		this.doTotalz(this.z);
+		var z = inEvent.content;
+		z = z.toString();
+		this.doTotalz(z);
 	},
 });
 
