@@ -979,7 +979,7 @@ enyo.kind({
 	* @protected
 	*/
 	newCss: function(inSender, inEvent){
-		this.$.phobos.newcss(this.$.hera.out);
+		this.$.phobos.newcss(this.hera.out);
 	},
 	closecssDesigner: function(){
 		this.$.hera.csssave();
@@ -995,7 +995,7 @@ enyo.kind({
 	* @protected
 	*/
 	replacecss: function(inSender, inEvent){
-		this.$.phobos .replacecss(ComponentsRegistry.getComponent("hera").old, ComponentsRegistry.getComponent("hera").out);
+		this.$.phobos .replacecss(this.$.hera.old, this.$.hera.out);
 	},
 	
 	/*
