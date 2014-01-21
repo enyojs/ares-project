@@ -253,6 +253,28 @@ Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collec
 		}
 		return undefined;
 	},
+	/**
+	 * Store the currently selected project
+	 * @param {String} name The name of the selected project.
+	 */
+	setSelectedProject: function(name) {
+		var project = this.get(name);
+		if (project) {
+			this.selectedProject = name;
+		} else {
+			throw new Error("Unknown project " + name);
+		}
+	},
+	/**
+	 * Returns the currently selected project.
+	 * @return {Ares.Model.Project|undefined}
+	 */
+	getSelectedProject: function() {
+		if (this.selectedProject) {
+			return this.get(this.selectedProject) ;
+		}
+		return undefined;
+	},
 
 	sync: function(method, model, options) {
 		var store = model.localStorage || model.collection.localStorage;
