@@ -524,7 +524,7 @@ enyo.kind({
 	},
 	
 	/**
-	 * Show an error message under the picker & disable the 'OK' button of the Pop-up.
+	 * Show an error message next to the picker & disable the 'OK' button of the Pop-up.
 	 * @param  {String} erroneousValue     The incorrect value spoted from the file 'project.json'
 	 * @param  {String} highLightedPicker Name of the picker row.
 	 * @param  {String} errorMsg           Displayed error message
