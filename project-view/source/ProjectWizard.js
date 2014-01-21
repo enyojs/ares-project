@@ -375,6 +375,7 @@ enyo.kind({
 	chooser: null,
 	checker: null,
 	displayedTab: null,
+	versions: [],
 
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
@@ -386,7 +387,10 @@ enyo.kind({
 	start: function(target) {
 		if (target) {
 			var config = target.getConfig();
-			
+			var deploy = null;
+			var serviceConfig = config.service.config;
+			var home = serviceConfig.origin+serviceConfig.pathname+"/file";
+
 			this.targetProject = target ;
 			this.$.propertiesWidget.setTargetProject(target);		
 			
@@ -400,13 +404,130 @@ enyo.kind({
 			var req = config.service.propfind(config.folderId, 3);
 			req.response(this, function(inSender, inFile) {
 				this.$.propertiesWidget.$.projectPathValue.setContent(inFile.path);
+				//read path to version's file from deploy.json file
+				var found = false ;
+				enyo.forEach(inFile.children, function(file) {
+					if(!file.isDir && file.name === "deploy.json"){
+						found = true;
+						var request = config.service.getFile(file.id);
+						request.response(this, function(inSender, inResponse) {
+							try {
+								deploy = enyo.json.parse(inResponse.content);
+								this.trace("Parsed deploy.json file", deploy);
+								this.searchForVersions(deploy, inFile.path, home);
+							} catch(err) {
+								this.warn(new Error("Unable to parse 'deploy.json', skipping it..."));
+							}
+						});
+						request.error(this, function(inSender, inError) {
+							next(new Error(inError.toString));
+						});
+					}
+				}, this);
+				if (!found) {
+					this.searchForVersions(deploy, inFile.path, home);
+				}
 			});
-			
 			this.$.propertiesWidget.activateFileChoosers(true);
 			this.$.propertiesWidget.checkFileChoosers();			
 		}
 	},
-	
+	/**
+	 * @private
+	 * Read version.js files for enyo and other libs
+	 * @param {Object} pathDeploy, paths read form deploy.json file 
+	 * @param {String} pathProject, path to project
+	 * @param {String} urlHome, home url
+	 */
+	searchForVersions: function(pathDeploy, pathProject, urlHome){
+		this.trace(pathDeploy, pathProject, urlHome);
+		var pathArray = [],
+			urls = [],
+			serviceHome = urlHome+pathProject,
+			pathString = "",
+			enyoVersionFile = "/source/boot/version.js",
+			versionFile = "/version.js",
+			urlPaths = [],
+			read = [];
+
+		//define the default path to use if the deploy.json file doesn't exists
+		if(!pathDeploy){
+			pathDeploy = {enyo: "./enyo", libs: ["./lib/onyx", "./lib/layout"]};
+		}
+
+		for (var key in pathDeploy) {
+			if(key === "enyo" || key === "libs"){
+				pathArray.push(pathDeploy[key]);
+			}
+		}
+
+		enyo.forEach(pathArray, function(path){
+			pathString = pathString+path+",";
+		}, this);
+
+		this.trace(pathString);
+
+		urlPaths = pathString.split(',');
+		
+		enyo.forEach(urlPaths, function(url){
+			if(url){
+				if(url.match(/enyo/)){
+					urls.push(serviceHome+url.substring(1)+enyoVersionFile);
+				} else{
+					urls.push(serviceHome+url.substring(1)+versionFile);
+				}
+			}
+		}, this);
+
+		this.trace("found urls", urls);
+
+		if(urls.length){
+			this.versions = [];
+			var self = this;
+			enyo.forEach(urls, function(url){
+				var readFunction = self.readFileFromUrl.bind(self,url);
+				read.push(readFunction);
+			}, this);
+
+			async.parallel(read, this.setVersionLabel.bind(this));
+		}
+	},
+	/**
+	 * @private
+	 * Read file's content from a url
+	 * @param {String} url, url for version.js file 
+	 * @param {[Function]} next
+	 */
+	readFileFromUrl: function(url, next){
+		var req = new enyo.Ajax({url: url});
+		var content = "";
+		var version = "";
+		var expr = new RegExp("enyo.version.|=|:", "g");
+		//var expr2 = new RegExp(/=/);
+		req.response(this, function(inSender, inValue) {
+			if(inValue){
+				content = inValue.match(/{\s*(enyo[^\n,;]+)/);
+				version = content[1];
+				
+				//if(expr.test(version)){
+					version = version.replace(expr, " ");
+				//}
+				this.versions = this.versions+version+" | ";
+			}
+			next();
+		});
+		req.error(this, function(err){
+			this.versions = "Not found";
+			next(err);
+		});
+		req.go();
+	},
+	/**
+	 * Display version label
+	 */
+	setVersionLabel: function(){
+		this.$.propertiesWidget.setVersionLabel(this.versions);
+	},
 	/**
 	 * Function used to display the Edit Pop-up with the specification of the defaut tab to be displayed
 	 * @param  {Object} target         Object contains meta-data of the selected project.
