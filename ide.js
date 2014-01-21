@@ -621,22 +621,36 @@ var corsHeaders,
     allowedHeaders = ['Content-Type','Authorization','Cache-Control','X-HTTP-Method-Override'];
 
 function setCorsHeaders(req, res, next) {
+	var cors = ide.res.cors || {};
+	var origins = (Array.isArray(cors.origins) && cors.origins.length > 0 && cors.origins);
+
+	// one time setup - allowed methods and headers don't change per request
 	if (!corsHeaders) {
-		var cors = ide.res.cors || {},
-		    origins = (Array.isArray(cors.origins) && cors.origins.length > 0 && cors.origins),
-		    methods = Array.isArray(cors.methods) && cors.methods,
+		var methods = Array.isArray(cors.methods) && cors.methods,
 		    headers = Object.keys(ide.res.headers || {});
 		corsHeaders = {};
-		corsHeaders['Access-Control-Allow-Origin'] = (origins || [origin]).join(',');
 		corsHeaders['Access-Control-Allow-Methods'] = allowedMethods.concat(methods).join(',');
 		corsHeaders['Access-Control-Allow-Headers'] = allowedHeaders.concat(headers).join(',');
 		log.info("setCorsHeaders()", "CORS will use:", corsHeaders);
 	}
-	for (var h in corsHeaders) {
-		log.silly("setCorsHeaders()", h, ":", corsHeaders[h]);
-		// Lowercase HTTP headers, work-around an iPhone bug
-		res.header(h.toLowerCase(), corsHeaders[h]);
-	}
+
+	// request time: is this a CORS request? [if yes, there's an origin]
+	if (req.headers && req.headers.origin) {
+		if (origins.indexOf("*") !== -1) {
+			corsHeaders['Access-Control-Allow-Origin'] = "*";
+		} else {
+			if (origins.indexOf(req.headers.origin) !== -1) {
+				corsHeaders['Access-Control-Allow-Origin'] = req.headers.origin;
+			} else {
+				corsHeaders['Access-Control-Allow-Origin'] = "";
+			}
+		}
+		for (var h in corsHeaders) {
+			log.silly("setCorsHeaders()", h, ":", corsHeaders[h]);
+			// Lowercase HTTP headers, work-around an iPhone bug
+			res.header(h.toLowerCase(), corsHeaders[h]);
+		}
+	} 
 	if ('OPTIONS' === req.method) {
 		res.status(200).end();
 	} else {
