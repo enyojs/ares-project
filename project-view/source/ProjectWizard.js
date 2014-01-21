@@ -387,10 +387,9 @@ enyo.kind({
 	start: function(target) {
 		if (target) {
 			var config = target.getConfig();
-			var deploy = null;
 			var serviceConfig = config.service.config;
 			var home = serviceConfig.origin+serviceConfig.pathname+"/file";
-
+	
 			this.targetProject = target ;
 			this.$.propertiesWidget.setTargetProject(target);		
 			
@@ -405,32 +404,28 @@ enyo.kind({
 			req.response(this, function(inSender, inFile) {
 				this.$.propertiesWidget.$.projectPathValue.setContent(inFile.path);
 				//read path to version's file from deploy.json file
-				var found = false ;
-				enyo.forEach(inFile.children, function(file) {
-					if(!file.isDir && file.name === "deploy.json"){
-						found = true;
-						var request = config.service.getFile(file.id);
-						request.response(this, function(inSender, inResponse) {
-							try {
-								deploy = enyo.json.parse(inResponse.content);
-								this.trace("Parsed deploy.json file", deploy);
-								this.searchForVersions(deploy, inFile.path, home);
-							} catch(err) {
-								this.warn(new Error("Unable to parse 'deploy.json', skipping it..."));
-							}
-						});
-						request.error(this, function(inSender, inError) {
-							next(new Error(inError.toString));
-						});
-					}
-				}, this);
-				if (!found) {
-					this.searchForVersions(deploy, inFile.path, home);
-				}
+				this.readDeployFile(inFile.path, home);
 			});
 			this.$.propertiesWidget.activateFileChoosers(true);
 			this.$.propertiesWidget.checkFileChoosers();			
 		}
+	},
+	/**
+	 * @private
+	 * Read deploy.json file
+	 * @param {String} pathProject, path to project
+	 * @param {String} urlHome, home url
+	 */
+	readDeployFile: function(pathProject, urlHome){
+		var url = urlHome+pathProject+"/deploy.json";
+		var req = new enyo.Ajax({url: url, handleAs: "json"});
+		req.response(this, function(inSender, inValue) {
+			this.searchForVersions(inValue, pathProject, urlHome);
+		});
+		req.error(this, function(err){
+			this.searchForVersions(null, pathProject, urlHome);
+		});
+		req.go();
 	},
 	/**
 	 * @private
@@ -452,6 +447,7 @@ enyo.kind({
 
 		//define the default path to use if the deploy.json file doesn't exists
 		if(!pathDeploy){
+			// doesn't work for added libs
 			pathDeploy = {enyo: "./enyo", libs: ["./lib/onyx", "./lib/layout"]};
 		}
 
@@ -471,11 +467,7 @@ enyo.kind({
 		
 		enyo.forEach(urlPaths, function(url){
 			if(url){
-				if(url.match(/enyo/)){
-					urls.push(serviceHome+url.substring(1)+enyoVersionFile);
-				} else{
-					urls.push(serviceHome+url.substring(1)+versionFile);
-				}
+				urls.push(serviceHome+url.substring(1)+ (url.match(/enyo/) ? enyoVersionFile : versionFile));
 			}
 		}, this);
 
@@ -485,7 +477,7 @@ enyo.kind({
 			this.versions = [];
 			var self = this;
 			enyo.forEach(urls, function(url){
-				var readFunction = self.readFileFromUrl.bind(self,url);
+				var readFunction = self.readVersionFileFromUrl.bind(self,url);
 				read.push(readFunction);
 			}, this);
 
@@ -498,20 +490,15 @@ enyo.kind({
 	 * @param {String} url, url for version.js file 
 	 * @param {[Function]} next
 	 */
-	readFileFromUrl: function(url, next){
-		var req = new enyo.Ajax({url: url});
+	readVersionFileFromUrl: function(url, next){
+		var req = new enyo.Ajax({url: url, handleAs: "text"});
 		var content = "";
 		var version = "";
 		var expr = new RegExp("enyo.version.|=|:", "g");
-		//var expr2 = new RegExp(/=/);
 		req.response(this, function(inSender, inValue) {
 			if(inValue){
 				content = inValue.match(/{\s*(enyo[^\n,;]+)/);
-				version = content[1];
-				
-				//if(expr.test(version)){
-					version = version.replace(expr, " ");
-				//}
+				version = content[1].replace(expr, " ");
 				this.versions = this.versions+version+" | ";
 			}
 			next();
