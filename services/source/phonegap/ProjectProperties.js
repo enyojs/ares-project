@@ -354,15 +354,6 @@ enyo.kind({
 	
 	
 	statics: {
-		
-		downloadStatus: {
-			"android": "Ready for download", 
-			"ios": "Ready for download", 
-			"winphone": "Ready for download", 
-			"blackberry": "Ready for download", 
-			"webos": "Ready for download"
-		},
-
 		getProvider: function () {
 			this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('phonegap');
 			return this.provider;
@@ -382,8 +373,14 @@ enyo.kind({
 		config: {},
 		fold: true
 	},
+
+	handlers: {
+		onEnableErrorHighLight: "enableDrawerHighLight",
+		onDisableErrorHighLight: "disableDrawerHighLight"
+	},
+
 	components: [
-			{tag: "div", classes: "ares-project-properties-label-background", ontap: "unfold",
+			{name: "labelContainer", tag: "div", classes: "ares-project-properties-label-background", ontap: "unfold",
 			components: [
 				{tag: "label", name: "drawerLbl", classes: "ares-project-properties-common_drawer_header"}
 			]},			 
@@ -433,7 +430,23 @@ enyo.kind({
 	unfold: function () {
 		var isOpen = this.$.drawer.open;
 		this.$.drawer.setOpen(!isOpen);
-	}
+	}, 
+
+	/**
+	 * Apply the css style associated to the error state on a drawer header.
+	 * @private
+	 */
+	enableDrawerHighLight: function() {		
+		this.$.labelContainer.setClassAttribute("ares-project-properties-label-background ares-project-properties-label-background_error");
+	}, 
+
+	/**
+	 * Apply the css style associated to a valid state on a drawer header.
+	 * @private
+	 */
+	disableDrawerHighLight: function() {
+		this.$.labelContainer.setClassAttribute("ares-project-properties-label-background");
+	},
 });
 
 
@@ -570,7 +583,7 @@ enyo.kind({
 	},
 	components: [
 		 
-		{tag: "div", classes: "ares-project-properties-label-background", ontap: "unfold", 
+		{name: "labelContainer", tag: "div", classes: "ares-project-properties-label-background", ontap: "unfold", 
 		components: [
 			{name: "targetChkBx", kind: "onyx.Checkbox", onchange: "updateDrawer"},
 			{tag: "label", name: "targetLbl", classes: "ares-project-properties-platform_drawer_header"}
