@@ -885,7 +885,8 @@ enyo.kind({
 		this.trace();
 		// send all files being edited to the designer, this will send code to designerFrame
 		this.syncEditedFiles(inData.projectData);
-		// then load palette and inspector, and tune serialiser behavior sends option data to designerFrame
+		// then load palette and inspector, and tune serialiser
+		// behavior sends option data to designerFrame and render main kind
 		this.$.deimos.loadDesignerUI(
 			inData,
 			(function(err) {

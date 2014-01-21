@@ -320,7 +320,10 @@ enyo.kind({
 	},
 
 	/**
-	 * Pass inCode down to the designerFrame (to avoid needing to reload the iFrame)
+	 * Pass inCode down to the designerFrame (to avoid needing to
+	 * reload the iFrame). Typically called to load files modified by
+	 * Ace into designerFrame. Also called for each project file when
+	 * switching to designer.
 	 * @param {String} projectName
 	 * @param {String} filename
 	 * @param {String} inCode
