@@ -298,7 +298,7 @@ enyo.kind({
 	 * @private
 	 */
 	downloadPackage: function(inSender, inEvent) {
-		this.provider.downloadPackage(this.provider.getCurrentProject(), this.selectedPlatform, this.buildStatusData, enyo.bind(this, this.getPackage));
+		this.provider.downloadPackage(this.provider.getSelectedProject(), this.selectedPlatform, this.buildStatusData, enyo.bind(this, this.getPackage));
 
 		//set the download status to "Download on progress"
 		this.$.downloadStatus.setDownloadStatus(this.selectedPlatform, 2);		
@@ -389,7 +389,7 @@ enyo.kind({
 			However we'll need to revise the backbone store for Phonegap build as we transform it into a plugin
 		*/
 		
-		this.provider.getCurrentProject().getDownloadStatus()[inPlatform] = inDownloadStatus === 1 ? "Download complete": 
+		this.provider.getSelectedProject().getDownloadStatus()[inPlatform] = inDownloadStatus === 1 ? "Download complete": 
 		inDownloadStatus === 0 ? "Download failed" : "Download in progress";
 
 		this.bubble("onUpdateStatusMessage");	
@@ -403,7 +403,7 @@ enyo.kind({
 	 * @public
 	 */
 	getDownloadStatus: function(inPlatform) {
-		return this.provider.getCurrentProject().getDownloadStatus()[inPlatform];
+		return this.provider.getSelectedProject().getDownloadStatus()[inPlatform];
 	}	
 
 });
