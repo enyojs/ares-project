@@ -70,13 +70,12 @@ enyo.kind({
 	],
 	
 	declaration: [],
-	pro: [],			
+	properties: [],			
 	value: [],
 	
 	create: function() {
 		this.inherited(arguments);
 		ares.setupTraceLogger(this);	
-		this.doRegisterMe({name:"hera", reference:this});
 		this.$.outputBox.applyStyle("color", "#FFFFFF");
 		this.$.outputBox.applyStyle("background-color", "#000000");
 		this.trace("Just created a new", this.name, "object", this);
@@ -122,13 +121,13 @@ enyo.kind({
 		var a = 0;
 		this.newvalue = inEvent.originator.valueout;
 		
-		while(this.pro[a] !== undefined && this.pro[a] !== "null"){
-			if(this.pro[a].indexOf(this.$.property) !== -1 ){
+		while(this.properties[a] !== undefined && this.properties[a] !== "null"){
+			if(this.properties[a].indexOf(this.$.property) !== -1 ){
 				break;	
 			}
 			a++;
 		}
-		this.pro[a] = "\t" + this.$.property;
+		this.properties[a] = "\t" + this.$.property;
 		this.value[a] = this.newvalue;
 		this.updateBox();
 	},
@@ -144,14 +143,14 @@ enyo.kind({
 		var outPut = this.className + " " + "{<br>" ;
 		var outString =  this.className + " " + "{\n" ;
 	
-		while(this.pro[a] !== undefined && this.pro[a] !== "null"){
-			if(this.pro[a] === "font-family"){
-				this.pro[a] =  "\t" + this.pro[a];
+		while(this.properties[a] !== undefined && this.properties[a] !== "null"){
+			if(this.properties[a] === "font-family"){
+				this.properties[a] =  "\t" + this.properties[a];
 			}
-			outPut = outPut + tab + this.pro[a] + ":" + this.value[a] + "<br>";
-			outString = outString + this.pro[a] + ":" + this.value[a] + "\n";
-			this.$.Sample.applyStyle(this.pro[a], this.value[a]);
-			this.$.sampletext.applyStyle(this.pro[a], this.value[a]);
+			outPut = outPut + tab + this.properties[a] + ":" + this.value[a] + "<br>";
+			outString = outString + this.properties[a] + ":" + this.value[a] + "\n";
+			this.$.Sample.applyStyle(this.properties[a], this.value[a]);
+			this.$.sampletext.applyStyle(this.properties[a], this.value[a]);
 			a++;
 		}		
 		this.$.bg.setContent(outPut + "}");		// write in to the preview box
@@ -179,13 +178,13 @@ enyo.kind({
 			this.$.valueinput.showsblank();
 			this.$.property = "font-family";
 			
-			while(this.pro[a] !== undefined && this.pro[a] !== "null"){
-				if(this.pro[a].indexOf(this.$.property) !== -1 ){
+			while(this.properties[a] !== undefined && this.properties[a] !== "null"){
+				if(this.properties[a].indexOf(this.$.property) !== -1 ){
 					break;	
 				}
 				a++;
 			}
-			this.pro[a] = this.$.property;
+			this.properties[a] = this.$.property;
 			this.value[a] = " " + inEvent.name +  ";";
 			this.updateBox();		
 		}
@@ -245,7 +244,7 @@ enyo.kind({
 	
 	reset: function(){
 		this.$.valueinput.showsblank();
-		this.pro.length = 0;			
+		this.properties.length = 0;			
 		this.value.length = 0;	
 		this.old = null;
 		this.className = null;	
@@ -321,7 +320,7 @@ enyo.kind({
 						if(s[0].indexOf("}") === 0){
 							break;
 						}
-						this.pro[a] = s[0];
+						this.properties[a] = s[0];
 						this.value[a] = s[1];						
 						a++;
 					}

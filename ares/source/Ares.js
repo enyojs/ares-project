@@ -65,8 +65,6 @@ enyo.kind({
 		{kind: "Ares.PackageMunger", name: "packageMunger"}
 	],
 	handlers: {
-		onCssDocument: "cssDocument",
-		onCloseCss: "closecss", 
 		onReloadServices: "handleReloadServices",
 		onUpdateAuth: "handleUpdateAuth",
 		onShowWaitPopup: "showWaitPopup",
@@ -88,7 +86,6 @@ enyo.kind({
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
 	enyoEditorIndex: 2,
-	heraViewIndex: 2,
 	projectListWidth: 300,
 	isProjectView: true,
 	create: function() {
@@ -411,21 +408,7 @@ enyo.kind({
 		},
 		instance: null
 	},
-	/*
-	* open hera
-	* @protected
-	*/
-	cssDocument: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("hera").cssload(inEvent);
-		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.heraViewIndex);
-	},
-	/*
-	* close hera
-	* @protected
-	*/
-	closecss: function(inSender, inEvent){
-		ComponentsRegistry.getComponent("enyoEditor").$.panels.setIndex(this.phobosViewIndex);
-	}
+
 
 });
 
