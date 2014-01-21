@@ -348,6 +348,8 @@ enyo.kind({
 		this.owner.setupProjectConfig( project, selectNext );
 		// so this attribute must be set after calling setupProjectConfig
 		this.selectedProject = project;
+		// save the selected project in the model 
+		Ares.Workspace.projects.setSelectedProject(project);
 	},
 
 	getSelectedProject: function() {
