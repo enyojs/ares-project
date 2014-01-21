@@ -414,6 +414,8 @@ enyo.kind({
 	},
 	
 	disableOkButton: function(inSender, inEvent) {
+		var provider = Phonegap.ProjectProperties.getProvider();
+
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		this.$.ok.setDisabled(true);
 		var contentError = inEvent.reason || "Check project properties tabs for errors";
@@ -429,11 +431,10 @@ enyo.kind({
 		}else{
 			this.$.errTooltip.setContent(contentError);
 		}
-		this.$.errTooltip.show();
-		var provider = Phonegap.ProjectProperties.getProvider();
-	
-		provider.getCurrentProject().attributes.validPgbConf[inEvent.originator.platform][inEvent.originator.name] = false;
-		provider.getCurrentProject().attributes.validPgbConf[inEvent.originator.platform]["validDrawer"] = false;
+		this.$.errTooltip.show();		
+
+		provider.getSelectedProject().attributes.validPgbConf[inEvent.originator.platform][inEvent.originator.name] = false;
+		provider.getSelectedProject().attributes.validPgbConf[inEvent.originator.platform]["validDrawer"] = false;
 	},
 
 
@@ -454,23 +455,23 @@ enyo.kind({
 		var provider = Phonegap.ProjectProperties.getProvider();
 
 		// Set in the array {this.validatePhonegapUiValues} the originator UI row as valid
-		provider.getCurrentProject().attributes.validPgbConf[inEvent.originator.platform][inEvent.originator.name] = true;
+		provider.getSelectedProject().attributes.validPgbConf[inEvent.originator.platform][inEvent.originator.name] = true;
 
 		// Check the validation state of all controled PGB attributes by platform (it includes also the shared configuration attributes)
 		// to update the validation state of the drawer
-		for(var option in provider.getCurrentProject().attributes.validPgbConf[this.platform]){
-			if(!provider.getCurrentProject().attributes.validPgbConf[this.platform][option]){
+		for(var option in provider.getSelectedProject().attributes.validPgbConf[this.platform]){
+			if(!provider.getSelectedProject().attributes.validPgbConf[this.platform][option]){
 				validDrawer = false;
 			}					
 		}
 		if (validDrawer) {
-			provider.getCurrentProject().attributes.validPgbConf[inEvent.originator.platform]["validDrawer"] = true;
+			provider.getSelectedProject().attributes.validPgbConf[inEvent.originator.platform]["validDrawer"] = true;
 		}	
 		
 		// Check the validation state of all the controled PGB drawer
 		// to enable/disable the Ok button
-		for(var drawer in provider.getCurrentProject().attributes.validPgbConf) {
-			if (!provider.getCurrentProject().attributes.validPgbConf[drawer]["validDrawer"]) {
+		for(var drawer in provider.getSelectedProject().attributes.validPgbConf) {
+			if (!provider.getSelectedProject().attributes.validPgbConf[drawer]["validDrawer"]) {
 				okDisabled = true;	
 			}
 		}
