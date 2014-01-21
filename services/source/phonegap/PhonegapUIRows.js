@@ -54,13 +54,13 @@ enyo.kind({
 		
 		var provider = Phonegap.ProjectProperties.getProvider();
 
-		for(var key in provider.getSelectedProject().attributes.validPgbConf[this.platform]){
-			if(!provider.getSelectedProject().attributes.validPgbConf[this.platform][key]){
-				provider.getSelectedProject().attributes.validPgbConf[this.platform]["validDrawer"] = false;
+		for(var key in provider.getSelectedProject().getValidPgbConf()[this.platform]){
+			if(!provider.getSelectedProject().getValidPgbConf()[this.platform][key]){
+				provider.getSelectedProject().getValidPgbConf()[this.platform]["validDrawer"] = false;
 			}
 		}
 				
-		if (provider.getSelectedProject().attributes.validPgbConf[this.platform]["validDrawer"]) {
+		if (provider.getSelectedProject().getValidPgbConf()[this.platform]["validDrawer"]) {
 			this.doDisableErrorHighLight();
 		}		
 	}
