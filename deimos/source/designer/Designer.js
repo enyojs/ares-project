@@ -147,12 +147,12 @@ enyo.kind({
 			return;
 		}
 		
-		// designerFrame is initialized and ready to do work.
 		if(msg.op === "state" && msg.val === "initialized") {
+			// designerFrame is initialized and ready to do work.
 			// reply op: "containerData"
 			this.sendDesignerFrameContainerData();
-		// designerFrame received container data
 		} else if(msg.op === "state" && msg.val === "ready") {
+			// designerFrame received container data
 			// no reply
 			this.setDesignerFrameReady(true);
 			if(this.reloading) {
@@ -160,36 +160,35 @@ enyo.kind({
 				this.reloading = false;
 			}
 			this._runUpdateSourceCb('done') ;
-		// Loaded event sent from designerFrame and awaiting aresOptions.
 		} else if(msg.op === "state" && msg.val === "loaded") {
+			// Loaded event sent from designerFrame and awaiting aresOptions.
 			// reply op: "initializeOptions"
 			this.designerFrameLoaded();
-		// The current kind was successfully rendered in the iframe
 		} else if(msg.op === "rendered") {
+			// The current kind was successfully rendered in the iframe
 			// no reply
 			this.updateKind(msg);
-		// Select event sent from here was completed successfully. Set _this.selection_.
 		} else if(msg.op === "selected") {
+			// Select event sent from here was completed successfully. Set _this.selection_.
 			// no reply
 			this.selection = enyo.json.codify.from(msg.val);
 			this.doSelected({component: this.selection});
-		// New select event triggered in designerFrame. Set _this.selection_ and bubble.
 		} else if(msg.op === "select") {
+			// New select event triggered in designerFrame. Set _this.selection_ and bubble.
 			// no reply
 			this.selection = enyo.json.codify.from(msg.val);
 			this.doSelect({component: this.selection});
-
 		} else if(msg.op === "syncDropTargetHighlighting") {
 			// Highlight drop target in inspector to mimic what's
 			// happening in designerFrame
 			// no reply
 			this.doSyncDropTargetHighlighting({component: enyo.json.codify.from(msg.val)});
-		// New component dropped in designerFrame
 		} else if(msg.op === "createItem") {
+			// New component dropped in designerFrame
 			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doCreateItem(msg.val);
-		// Existing component dropped in designerFrame
 		} else if(msg.op === "moveItem") {
+			// Existing component dropped in designerFrame
 			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doMoveItem(msg.val);
 		} else if(msg.op === "error") {
@@ -207,16 +206,16 @@ enyo.kind({
 			}
 			this.doError(msg.val);
 			// TODO: We should store the error into a kind of rotating error log - ENYO-2462
-		// Existing component resized
 		} else if(msg.op === "resize") {
+			// Existing component resized
 			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doResizeItem(msg.val);
-		// Returning requested position value
 		} else if(msg.op === "returnPositionValue") {
+			// Returning requested position value
 			// no reply
 			this.doReturnPositionValue(msg.val);
-		// Default case
 		} else {
+			// Default case
 			enyo.warn("Deimos designer received unknown message op:", msg);
 		}
 	},
