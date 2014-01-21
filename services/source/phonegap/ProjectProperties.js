@@ -354,15 +354,6 @@ enyo.kind({
 	
 	
 	statics: {
-		
-		downloadStatus: {
-			"android": "Ready for download", 
-			"ios": "Ready for download", 
-			"winphone": "Ready for download", 
-			"blackberry": "Ready for download", 
-			"webos": "Ready for download"
-		},
-
 		getProvider: function () {
 			this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('phonegap');
 			return this.provider;
