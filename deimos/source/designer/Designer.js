@@ -23,7 +23,7 @@ enyo.kind({
 		onScaleChange: ""
 	},
 	components: [
-		{name: "client", tag: "iframe", classes: "ares-designer-frame-client"},
+		{name: "designerFrame", tag: "iframe", classes: "ares-designer-frame-client"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"}
 	],
 	baseSource: "designerFrame.html",
@@ -39,24 +39,24 @@ enyo.kind({
 	},
 	rendered: function() {
 		this.inherited(arguments);
-		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
+		this.$.communicator.setRemote(this.$.designerFrame.hasNode().contentWindow);
 	},
 	heightChanged: function() {
-		this.$.client.applyStyle("height", this.getHeight()+"px");
-		this.resizeClient();
-		this.repositionClient();
+		this.$.designerFrame.applyStyle("height", this.getHeight()+"px");
+		this.resizeDesignerFrame();
+		this.repositionDesignerFrame();
 	},
 	widthChanged: function() {
-		this.$.client.applyStyle("width", this.getWidth()+"px");
-		this.resizeClient();
-		this.repositionClient();
+		this.$.designerFrame.applyStyle("width", this.getWidth()+"px");
+		this.resizeDesignerFrame();
+		this.repositionDesignerFrame();
 		this.applyZoom();
 	},
 	zoom: function(inScale) {
 		this.scale = (inScale >= 0) ? Math.max(inScale / 100, 0.2) : 1;
-		enyo.dom.transformValue(this.$.client, "scale", this.scale);
-		this.$.client.resized();
-		this.repositionClient();
+		enyo.dom.transformValue(this.$.designerFrame, "scale", this.scale);
+		this.$.designerFrame.resized();
+		this.repositionDesignerFrame();
 	},
 	zoomFromWidth: function(){
 		var scale = (this.width > 0) ? Math.round((this.getBounds().width * 100)/this.width) : 100;
@@ -73,7 +73,7 @@ enyo.kind({
 		this.applyZoom();
 		return true;
 	},
-	repositionClient: function() {
+	repositionDesignerFrame: function() {
 		var height = this.getHeight(),
 			width = this.getWidth(),
 			scaledHeight = height * this.scale,
@@ -81,7 +81,7 @@ enyo.kind({
 			y = -1*(height - scaledHeight)/2,
 			x = -1*(width  - scaledWidth)/2;
 		
-		this.$.client.addStyles("top: " + y + "px; left: " + x + "px");
+		this.$.designerFrame.addStyles("top: " + y + "px; left: " + x + "px");
 	},
 	
 	updateSourcePending: [],
@@ -103,7 +103,7 @@ enyo.kind({
 		this.projectPath = serviceConfig.origin + serviceConfig.pathname + "/file";
 		var iframeUrl = this.projectSource.getProjectUrl() + "/" + this.baseSource + "?overlay=designer";
 		this.trace("Setting designerFrame url: ", iframeUrl);
-		this.$.client.hasNode().src = iframeUrl;
+		this.$.designerFrame.hasNode().src = iframeUrl;
 		// next callback is run once a "ready" message is received from designerFrame
 		this.updateSourceCallback = next;
 	},
@@ -149,9 +149,11 @@ enyo.kind({
 		
 		// designerFrame is initialized and ready to do work.
 		if(msg.op === "state" && msg.val === "initialized") {
+			// reply op: "containerData"
 			this.sendDesignerFrameContainerData();
 		// designerFrame received container data
 		} else if(msg.op === "state" && msg.val === "ready") {
+			// no reply
 			this.setDesignerFrameReady(true);
 			if(this.reloading) {
 				this.doReloadComplete();
@@ -160,48 +162,58 @@ enyo.kind({
 			this._runUpdateSourceCb('done') ;
 		// Loaded event sent from designerFrame and awaiting aresOptions.
 		} else if(msg.op === "state" && msg.val === "loaded") {
+			// reply op: "initializeOptions"
 			this.designerFrameLoaded();
 		// The current kind was successfully rendered in the iframe
 		} else if(msg.op === "rendered") {
+			// no reply
 			this.updateKind(msg);
 		// Select event sent from here was completed successfully. Set _this.selection_.
 		} else if(msg.op === "selected") {
+			// no reply
 			this.selection = enyo.json.codify.from(msg.val);
 			this.doSelected({component: this.selection});
 		// New select event triggered in designerFrame. Set _this.selection_ and bubble.
 		} else if(msg.op === "select") {
+			// no reply
 			this.selection = enyo.json.codify.from(msg.val);
 			this.doSelect({component: this.selection});
-		// Highlight drop target to minic what's happening in designerFrame
+
 		} else if(msg.op === "syncDropTargetHighlighting") {
+			// Highlight drop target in inspector to mimic what's
+			// happening in designerFrame
+			// no reply
 			this.doSyncDropTargetHighlighting({component: enyo.json.codify.from(msg.val)});
 		// New component dropped in designerFrame
 		} else if(msg.op === "createItem") {
+			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doCreateItem(msg.val);
 		// Existing component dropped in designerFrame
 		} else if(msg.op === "moveItem") {
+			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doMoveItem(msg.val);
-		} else if (msg.op === "reloadNeeded") {
-			this.reloadNeeded = true;
 		} else if(msg.op === "error") {
-			if (( ! msg.val.hasOwnProperty('popup')) || msg.val.popup === true) {
-				if ( msg.val.triggeredByOp === 'render' && this.renderCallback ) {
-					this.log("dropping renderCallback after error ", msg.val.msg);
-					this.renderCallback = null;
-				}
-				if (msg.val.requestReload === true) {
-					msg.val.callback = deimos.closeDesigner.bind(deimos);
-					msg.val.action = "Switching back to code editor";
-				}
-				this.doError(msg.val);
-			} else {
-				// TODO: We should store the error into a kind of rotating error log - ENYO-2462
+			// no reply
+			if ( msg.val.triggeredByOp === 'render' && this.renderCallback ) {
+				this.log("dropping renderCallback after error ", msg.val.msg);
+				this.renderCallback = null;
 			}
+			if (msg.val.reloadNeeded === true) {
+				this.reloadNeeded = true;
+			}
+			if (msg.val.requestReload === true) {
+				msg.val.callback = deimos.closeDesigner.bind(deimos);
+				msg.val.action = "Switching back to code editor";
+			}
+			this.doError(msg.val);
+			// TODO: We should store the error into a kind of rotating error log - ENYO-2462
 		// Existing component resized
 		} else if(msg.op === "resize") {
+			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doResizeItem(msg.val);
 		// Returning requested position value
 		} else if(msg.op === "returnPositionValue") {
+			// no reply
 			this.doReturnPositionValue(msg.val);
 		// Default case
 		} else {
@@ -222,17 +234,20 @@ enyo.kind({
 	 */
 	renderKind: function(fileName, theKind, inSelectId,next) {
 		ares.assertCb(next);
-		this.trace("reloadNeeded", this.reloadNeeded);
 		if (this.reloadNeeded) {
 			this.reloadNeeded = false;
 			// trigger a complete reload of designerFrame
+			// FIXME: the reason why render was called is then lost
+			// should recall renderKind once reload is done
 			this.reload();
+			this.log("warning: called in state reloadNeeded");
 			setTimeout(next(new Error('reload started')), 0);
 			return;
 		}
 
 		if(!this.getDesignerFrameReady()) {
 			// frame is still being reloaded.
+			this.log("warning: called in state != ready");
 			setTimeout(next(new Error('on-going reload')), 0);
 			return;
 		}
@@ -326,7 +341,7 @@ enyo.kind({
 		}
 	},
 
-	resizeClient: function() {
+	resizeDesignerFrame: function() {
 		this.sendMessage({op: "resize"});
 	},
 	//* Prerender simulated drop in designerFrame

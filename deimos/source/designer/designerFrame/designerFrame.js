@@ -58,8 +58,7 @@ enyo.kind({
 		var file = url.replace(/.*\/services(?=\/)/,'');
 		var errMsg = "user app load FAILED with error '" + msg + "' in " + file + " line " + linenumber  ;
 		this.trace(errMsg);
-		this.sendMessage({op: "reloadNeeded"});
-		this.sendMessage({op: "error", val: {msg: errMsg}});
+		this.sendMessage({op: "error", val: {msg: errMsg, reloadNeeded: true}});
 		return true;
 	},
 	rendered: function() {
@@ -184,48 +183,66 @@ enyo.kind({
 
 		switch (msg.op) {
 		case "containerData":
+			// reply with msg op state val ready
 			this.setContainerData(msg.val);
 			break;
 		case "render":
+			// async (call selectItem) reply with msg:
+			// op rendered
+			// op: error
+			// op: error with reload Needed in case of big problem
 			this.renderKind(msg.val, msg.filename, msg.op);
 			break;
 		case "initializeOptions":
+			// reply with msg op state val initialized
 			this.initializeAllKindsAresOptions(msg.options);
 			break;
 		case "select":
+			// async, reply with op select val: bunch of code
 			this.selectItem(msg.val);
 			break;
 		case "highlight":
+			// no reply
 			this.highlightDropTarget(this.getControlById(msg.val.aresId));
 			break;
 		case "unhighlight":
+			// no reply
 			this.unhighlightDropTargets(msg.val);
 			break;
 		case "modify":
+			// async, calls selectItem reply with op select val: bunch of code
 			this.modifyProperty(msg.val, msg.filename);
 			break;
 		case "codeUpdate":
+			// no reply, eval done on msg.val
 			this.codeUpdate(msg.val);
 			break;
 		case "cssUpdate":
+			// no reply
 			this.cssUpdate(msg.val);
 			break;
 		case "cleanUp":
+			// no reply
 			this.cleanUpKind();
 			break;
 		case "resize":
+			// no reply
 			this.resized();
 			break;
 		case "prerenderDrop":
+			// no reply even though async code is involved to render animation
 			this.foreignPrerenderDrop(msg.val);
 			break;
 		case "requestPositionValue":
+			// immediately replies op: "returnPositionValue"
 			this.requestPositionValue(msg.val);
 			break;
 		case "serializerOptions":
+			// no reply
 			this.$.serializer.setSerializerOptions(msg.val);
 			break;
 		case "dragStart":
+			// no reply
 			this.setDragType(msg.val);
 			break;
 		default:
@@ -435,6 +452,7 @@ enyo.kind({
 	},
 	//* Render the specified kind
 	renderKind: function(inKind, inFileName, cmd) {
+		// on msg "render"
 		var errMsg;
 
 		try {
@@ -500,8 +518,7 @@ enyo.kind({
 			errMsg = "Unable to render kind '" + inKind.name + "':" + ( typeof error === 'object' ? error.message : error );
 			var errStack = typeof error === 'object' ? error.stack : '' ;
 			this.error(errMsg, errStack );
-			this.sendMessage({op: "reloadNeeded"});
-			this.sendMessage({op: "error", val: {msg: errMsg, triggeredByOp: cmd, requestReload: true, err: {stack: errStack}}});
+			this.sendMessage({op: "error", val: {msg: errMsg, triggeredByOp: cmd, requestReload: true, reloadNeeded: true, err: {stack: errStack}}});
 		}
 	},
 	//* Rerender current selection
@@ -527,6 +544,7 @@ enyo.kind({
 	 * and send back a state message.
 	 */
 	initializeAllKindsAresOptions: function(inOptions) {
+		// on msg "initializeOptions"
 		// genuine enyo.kind's master function extension
 		var self = this;
 		this.trace("starting user app initialization within designer iframe");
@@ -850,6 +868,7 @@ enyo.kind({
 	},
 	syncDropTargetHighlighting: function() {
 		var dropTarget = this.currentDropTarget ? this.$.serializer.serializeComponent(this.currentDropTarget, true) : null;
+		// to move the inspector spotlight during drag
 		this.sendMessage({op: "syncDropTargetHighlighting", val: dropTarget});
 	},
 	//* Set _inItem_ to _this.selected_ and notify Deimos

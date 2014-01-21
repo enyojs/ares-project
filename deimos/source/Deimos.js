@@ -118,7 +118,7 @@ enyo.kind({
 		this.trace("called");
 		var initItem = this.$.devicePicker.getClientControls()[0];
 		this.$.devicePicker.setSelected(initItem);
-		this.deviceChosen(null, {selected: initItem});
+		this.deviceChosen();
 		var i, z;
 		for (i = 0; (z = this.zoomValues[i]); i++) {
 			this.$.zoomPicker.createComponent({content: z+"%", value: z, active: z === this.zoomValues[this.initZoomIndex]});
@@ -860,7 +860,7 @@ enyo.kind({
 		var selected = this.$.devicePicker.getSelected();
 
 		if(!selected.value) {
-			return;
+			return true; // stop bubble
 		}
 
 		// Update fields with predefined values
