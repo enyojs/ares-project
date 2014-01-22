@@ -82,10 +82,14 @@ enyo.kind({
 				this.updateKind(msg);
 			}
 		},
-		error: function(eventName,from, to, args, errorCode, errorMessage) {
-			this.trace("got " + eventName + " while in state " + from +", stashing event");
-			this.fsmStash.push([eventName, args]);
-			return 'event ' + eventName + ' was naughty :- ' + errorMessage;
+		error: function(eventName,from, to, args, errorCode, errorMessage,error) {
+			if (errorCode === 300) {
+				// Invalid callback. See state-machine source code for error codes :-/
+				throw error || errorMessage ;
+			} else {
+				this.trace("got " + eventName + " while in state " + from +", stashing event");
+				this.fsmStash.push([eventName, args]);
+			}
 		}
 	},
 
