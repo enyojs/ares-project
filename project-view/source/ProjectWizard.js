@@ -436,13 +436,11 @@ enyo.kind({
 	 */
 	searchForVersions: function(pathDeploy, pathProject, urlHome){
 		this.trace(pathDeploy, pathProject, urlHome);
-		var pathArray = [],
+		var	pathArray = [],
 			urls = [],
 			serviceHome = urlHome+pathProject,
-			pathString = "",
 			enyoVersionFile = "/source/boot/version.js",
 			versionFile = "/version.js",
-			urlPaths = [],
 			parrallelReads = [];
 
 		//define the default path to use if the deploy.json file doesn't exists
@@ -451,19 +449,10 @@ enyo.kind({
 			pathDeploy = {enyo: "./enyo", libs: ["./lib/onyx", "./lib/layout"]};
 		}
 
-		for (var key in pathDeploy) {
-			if(key === "enyo" || key === "libs"){
-				pathArray.push(pathDeploy[key]);
-			}
-		}
-
-		enyo.forEach(pathArray, function(path){
-			pathString = pathString+path+",";
+		pathArray.push(pathDeploy["enyo"]);
+		enyo.forEach(pathDeploy["libs"], function(path){
+			pathArray.push(path);
 		}, this);
-
-		this.trace(pathString);
-
-		urlPaths = pathString.split(',');
 		
 		enyo.forEach(urlPaths, function(url){
 			if(url){
@@ -475,9 +464,8 @@ enyo.kind({
 
 		if(urls.length){
 			this.versions = [];
-			var self = this;
 			enyo.forEach(urls, function(url){
-				var readFunction = self.readVersionFileFromUrl.bind(self,url);
+				var readFunction = this.readVersionFileFromUrl.bind(this,url);
 				parrallelReads.push(readFunction);
 			}, this);
 
