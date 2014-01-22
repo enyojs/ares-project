@@ -443,7 +443,7 @@ enyo.kind({
 			enyoVersionFile = "/source/boot/version.js",
 			versionFile = "/version.js",
 			urlPaths = [],
-			read = [];
+			parrallelReads = [];
 
 		//define the default path to use if the deploy.json file doesn't exists
 		if(!pathDeploy){
@@ -478,10 +478,10 @@ enyo.kind({
 			var self = this;
 			enyo.forEach(urls, function(url){
 				var readFunction = self.readVersionFileFromUrl.bind(self,url);
-				read.push(readFunction);
+				parrallelReads.push(readFunction);
 			}, this);
 
-			async.parallel(read, this.setVersionLabel.bind(this));
+			async.parallel(parrallelReads, this.setVersionLabel.bind(this));
 		}
 	},
 	/**
