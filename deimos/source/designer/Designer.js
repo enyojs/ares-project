@@ -1,4 +1,4 @@
-/*global ProjectKindsModel, ares, enyo, setTimeout */
+/*global ProjectKindsModel, ares, enyo, setTimeout, StateMachine */
 
 enyo.kind({
 	name: "Designer",
@@ -31,10 +31,74 @@ enyo.kind({
 	selection: null,
 	reloadNeeded: false,
 	scale: 1,
-	reloading: false,
 	debug: false,
+
+	fsm: null,
+	fsmStruct: {
+		initial: 'off',
+		events: [
+			// start designer
+			{name: 'projectSelected', from: ['off','ready'], to : 'reloading'},
+			// user tapped 'reload' button
+			{name: 'reloadRequest', from: 'ready', to : 'reloading'},
+			// received rendered message, send initializeOptions
+			{name: 'dfLoaded', from: 'reloading', to: 'initializing'},
+			{name: 'dfInitialized', from: 'initializing', to: 'initialized'},
+			{name: 'dfReady', from: 'initialized', to: 'ready'}
+		],
+		callbacks: {
+			onenterstate: function(event, from, to) {
+				if (this.trace) {
+					this.trace("fsm got event " + event + ' from ' + from + ' to ' + to );
+				}
+			},
+			onleaveoff: function(event, from, to) {
+				this.fsmStash = [];
+			},
+			ondfReady: function(event, from, to) { // pop
+				if (this.pendingCb) {
+					this.pendingCb();
+				}
+				if (this.fsmStash.length) {
+					var resume = this.fsmStash.shift();
+					var that = this;
+					var evtName = resume[0];
+					var evtNext = this[evtName];
+					var evtArgs = resume[1];
+					this.trace("resume " + evtName);
+					window.setTimeout( function(){ evtNext.apply(that,evtArgs); });
+				}
+			},
+			onprojectSelected: function(event, from, to, inSource, next){
+				this.pendingCb = next;
+				this.designer._reloadDesignerFrame(inSource);
+			},
+			ondfLoaded: function(event, from, to) {
+				this.designer.designerFrameLoaded();
+			},
+			ondfInitialized: function(event, from, to) {
+				this.designer.sendDesignerFrameContainerData();
+			},
+			onleavedfInitialized: function(event, from, to) {
+				// only sent after reloading phase
+				this.designer.doReloadComplete();
+			},
+			onGotRendered: function(event, from, to,msg) {
+				this.updateKind(msg);
+			}
+		},
+		error: function(eventName,from, to, args, errorCode, errorMessage) {
+			this.trace("got " + eventName + " while in state " + from +", stashing event");
+			this.fsmStash.push([eventName, args]);
+			return 'event ' + eventName + ' was naughty :- ' + errorMessage;
+		}
+	},
+
 	create: function() {
 		ares.setupTraceLogger(this);
+		this.fsm = StateMachine.create( this.fsmStruct );
+		this.fsm.trace = this.trace.bind(this);
+		this.fsm.designer = this ;
 		this.inherited(arguments);
 	},
 	rendered: function() {
@@ -86,17 +150,16 @@ enyo.kind({
 	
 	updateSourcePending: [],
 	/**
-	 *
+	 * Reload designerFrame and update current source from all project files loaded in Ares.
 	 * @param {Ares.Model.Project} inSource is a backbone object defined in WorkspaceData.js
 	 * @param {Function} next
 	 */
 	updateSource: function(inSource, next) {
 		ares.assertCb(next);
-		if (this.updateSourceCallback) {
-			this.log("updateSource called while previous updateSourceCallback is still pending ");
-			this.updateSourcePending.push([inSource, next]);
-			return ;
-		}
+		this.fsm.projectSelected(inSource,next);
+	},
+
+	_reloadDesignerFrame: function(inSource) {
 		var serviceConfig = inSource.getService().config;
 		this.setDesignerFrameReady(false);
 		this.projectSource = inSource;
@@ -104,28 +167,9 @@ enyo.kind({
 		var iframeUrl = this.projectSource.getProjectUrl() + "/" + this.baseSource + "?overlay=designer";
 		this.trace("Setting designerFrame url: ", iframeUrl);
 		this.$.designerFrame.hasNode().src = iframeUrl;
-		// next callback is run once a "ready" message is received from designerFrame
-		this.updateSourceCallback = next;
-	},
-
-	_runUpdateSourceCb: function(txt) {
-		var cbData;
-		// call back *once* the function passed to updateSource
-		if (this.updateSourceCallback) {
-			this.trace("update source " + txt);
-			this.updateSourceCallback();
-			this.updateSourceCallback = null;
-			// FIXME a real state machine is needed here
-			if (this.updateSourcePending.length) {
-				this.log("resuming delayed update source");
-				cbData = this.updateSourcePending.shift() ;
-				this.updateSource(cbData[0], cbData[1]);
-			}
-		}
 	},
 
 	reload: function() {
-		this.reloading = true;
 		this.updateSource(this.projectSource, function(){} );
 	},
 	
@@ -150,20 +194,16 @@ enyo.kind({
 		if(msg.op === "state" && msg.val === "initialized") {
 			// designerFrame is initialized and ready to do work.
 			// reply op: "containerData"
-			this.sendDesignerFrameContainerData();
+			this.fsm.dfInitialized();
 		} else if(msg.op === "state" && msg.val === "ready") {
 			// designerFrame received container data
 			// no reply
 			this.setDesignerFrameReady(true);
-			if(this.reloading) {
-				this.doReloadComplete();
-				this.reloading = false;
-			}
-			this._runUpdateSourceCb('done') ;
+			this.fsm.dfReady();
 		} else if(msg.op === "state" && msg.val === "loaded") {
 			// Loaded event sent from designerFrame and awaiting aresOptions.
 			// reply op: "initializeOptions"
-			this.designerFrameLoaded();
+			this.fsm.dfLoaded();
 		} else if(msg.op === "rendered") {
 			// The current kind was successfully rendered in the iframe
 			// no reply
