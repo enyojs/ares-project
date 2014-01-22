@@ -430,7 +430,7 @@ enyo.kind({
 	/**
 	 * @private
 	 * Read version.js files for enyo and other libs
-	 * @param {Object} pathDeploy, paths read form deploy.json file 
+	 * @param {Object} pathDeploy, paths read from deploy.json file
 	 * @param {String} pathProject, path to project
 	 * @param {String} urlHome, home url
 	 */
