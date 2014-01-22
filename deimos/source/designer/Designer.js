@@ -44,6 +44,10 @@ enyo.kind({
 			{name: 'dfReady',         from: 'initialized',   to: 'ready'},
 			{name: 'dfReloadNeeded',  from: 'reloading',     to: 'off'},
 
+			{name: 'render',          from: 'ready',         to: 'rendering'},
+			{name: 'dfRendered',      from: 'rendering',     to: 'ready'},
+			{name: 'dfRenderError',   from: 'rendering',     to: 'ready'},
+			{name: 'dfRequestReload', from: 'rendering',     to: 'off'},
 		],
 		callbacks: {
 			onenterstate: function(event, from, to) {
@@ -77,8 +81,15 @@ enyo.kind({
 			ondfInitialized: function(event, from, to) {
 				this.designer.sendDesignerFrameContainerData();
 			},
-			onGotRendered: function(event, from, to,msg) {
-				this.updateKind(msg);
+
+			onrender: function(event, from, to, fileName, theKind, inSelectId,next) {
+				this.pendingCb = next;
+				this.designer._renderKind(fileName, theKind, inSelectId);
+			},
+			ondfRendered: function(event, from, to, msg) {
+				this.pendingCb();
+				this.pendingDb = null;
+				this.designer.updateKind(msg);
 			}
 		},
 		error: function(eventName,from, to, args, errorCode, errorMessage,error) {
@@ -207,7 +218,7 @@ enyo.kind({
 		} else if(msg.op === "rendered") {
 			// The current kind was successfully rendered in the iframe
 			// no reply
-			this.updateKind(msg);
+			this.fsm.dfRendered(msg);
 		} else if(msg.op === "selected") {
 			// Select event sent from here was completed successfully. Set _this.selection_.
 			// no reply
@@ -234,16 +245,23 @@ enyo.kind({
 		} else if(msg.op === "error") {
 			// no reply
 			if ( msg.val.triggeredByOp === 'render' && this.renderCallback ) {
+				// fsm-obsolete
 				this.log("dropping renderCallback after error ", msg.val.msg);
 				this.renderCallback = null;
 			}
-			if (msg.val.reloadNeeded === true) {
-				this.reloadNeeded = true;
-			}
+
 			if (msg.val.requestReload === true) {
 				this.fsm.dfRequestReload();
 				msg.val.callback = deimos.closeDesigner.bind(deimos);
 				msg.val.action = "Switching back to code editor";
+			} else if (msg.val.reloadNeeded === true) {
+				this.fsm.dfReloadNeeded();
+				this.reloadNeeded = true;
+			} else if ( msg.val.triggeredByOp === 'render' ) {
+				// missing constructor or missing prototype
+				this.fsm.dfRenderError();
+			} else {
+				this.log("unexpected error message from designer", msg);
 			}
 			this.doError(msg.val);
 			// TODO: We should store the error into a kind of rotating error log - ENYO-2462
@@ -301,9 +319,13 @@ enyo.kind({
 			setTimeout(next(new Error('on-going rendering')), 0);
 			return;
 		}
-		this.currentFileName = fileName;
-		this.renderCallback = next ;
 
+		this.renderCallback = next ;
+		this.fsm.render(fileName, theKind, inSelectId, next);
+	},
+
+	_renderKind: function(fileName, theKind, inSelectId) {
+		this.currentFileName = fileName;
 		var components = [theKind];
 		this.sendMessage({
 			op: "render",
@@ -331,6 +353,7 @@ enyo.kind({
 	},
 	//* Send message to Deimos with new kind/components from designerFrame
 	updateKind: function(msg) {
+		this.trace("called by op " + msg.triggeredByOp + " for file " + msg.filename );
 		var deimos = this.owner;
 
 		// need to check if the rendered was done for the current file
