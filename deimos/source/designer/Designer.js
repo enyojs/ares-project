@@ -76,10 +76,6 @@ enyo.kind({
 			ondfInitialized: function(event, from, to) {
 				this.designer.sendDesignerFrameContainerData();
 			},
-			onleavedfInitialized: function(event, from, to) {
-				// only sent after reloading phase
-				this.designer.doReloadComplete();
-			},
 			onGotRendered: function(event, from, to,msg) {
 				this.updateKind(msg);
 			}
@@ -168,7 +164,8 @@ enyo.kind({
 	},
 
 	reload: function() {
-		this.updateSource(this.projectSource, function(){} );
+		this.trace("reload requested by user");
+		this.updateSource(this.projectSource, this.doReloadComplete.bind(this) );
 	},
 	
 	//* Send message via communicator
