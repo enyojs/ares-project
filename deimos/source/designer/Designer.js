@@ -38,13 +38,10 @@ enyo.kind({
 		initial: 'off',
 		events: [
 			// start designer
-			{name: 'projectSelected', from: ['off','ready'], to : 'reloading'},
-			// user tapped 'reload' button
-			{name: 'reloadRequest', from: 'ready', to : 'reloading'},
-			// received rendered message, send initializeOptions
-			{name: 'dfLoaded', from: 'reloading', to: 'initializing'},
-			{name: 'dfInitialized', from: 'initializing', to: 'initialized'},
-			{name: 'dfReady', from: 'initialized', to: 'ready'}
+			{name: 'projectSelected', from: ['off','ready'], to: 'reloading'},
+			{name: 'dfLoaded',        from: 'reloading',     to: 'initializing'},
+			{name: 'dfInitialized',   from: 'initializing',  to: 'initialized'},
+			{name: 'dfReady',         from: 'initialized',   to: 'ready'},
 		],
 		callbacks: {
 			onenterstate: function(event, from, to) {
