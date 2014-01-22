@@ -55,9 +55,8 @@ enyo.kind({
 				this.fsmStash = [];
 			},
 			ondfReady: function(event, from, to) { // pop
-				if (this.pendingCb) {
-					this.pendingCb();
-				}
+				this.pendingCb();
+				this.pendingDb = null;
 				if (this.fsmStash.length) {
 					var resume = this.fsmStash.shift();
 					var that = this;
