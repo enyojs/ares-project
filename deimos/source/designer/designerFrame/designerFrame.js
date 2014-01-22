@@ -214,7 +214,7 @@ enyo.kind({
 			this.modifyProperty(msg.val, msg.filename);
 			break;
 		case "codeUpdate":
-			// no reply, eval done on msg.val
+			// do an eval on msg.val. Replies "updated" (maybe with error)
 			this.codeUpdate(msg.val);
 			break;
 		case "cssUpdate":

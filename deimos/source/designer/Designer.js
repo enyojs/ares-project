@@ -160,6 +160,7 @@ enyo.kind({
 	},
 
 	_reloadDesignerFrame: function(inSource) {
+		// called by fsm
 		var serviceConfig = inSource.getService().config;
 		this.setDesignerFrameReady(false);
 		this.projectSource = inSource;
@@ -259,7 +260,10 @@ enyo.kind({
 			enyo.warn("Deimos designer received unknown message op:", msg);
 		}
 	},
-	//* Pass _isContainer_ info down to designerFrame
+
+	/**
+	 * Pass _isContainer_ info down to designerFrame, called in fsm
+	 */
 	sendDesignerFrameContainerData: function() {
 		this.sendMessage({op: "containerData", val: ProjectKindsModel.getFlattenedContainerInfo()});
 	},
