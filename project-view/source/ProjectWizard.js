@@ -454,9 +454,11 @@ enyo.kind({
 			pathArray.push(path);
 		}, this);
 		
-		enyo.forEach(urlPaths, function(url){
-			if(url){
-				urls.push(serviceHome+url.substring(1)+ (url.match(/enyo/) ? enyoVersionFile : versionFile));
+		enyo.forEach(pathArray, function(path){
+			if(path){
+				//a path can be started with ./ or nothing
+				path = path.replace(/^\.\//, ""); //if the path starts with ./, it is replaced by nothing
+				urls.push(serviceHome+"/"+path+ (path.match(/enyo/) ? enyoVersionFile : versionFile));
 			}
 		}, this);
 
