@@ -42,6 +42,8 @@ enyo.kind({
 			{name: 'dfLoaded',        from: 'reloading',     to: 'initializing'},
 			{name: 'dfInitialized',   from: 'initializing',  to: 'initialized'},
 			{name: 'dfReady',         from: 'initialized',   to: 'ready'},
+			{name: 'dfReloadNeeded',  from: 'reloading',     to: 'off'},
+
 		],
 		callbacks: {
 			onenterstate: function(event, from, to) {
@@ -236,6 +238,7 @@ enyo.kind({
 				this.reloadNeeded = true;
 			}
 			if (msg.val.requestReload === true) {
+				this.fsm.dfRequestReload();
 				msg.val.callback = deimos.closeDesigner.bind(deimos);
 				msg.val.action = "Switching back to code editor";
 			}
