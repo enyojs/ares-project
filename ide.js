@@ -703,7 +703,7 @@ app.configure(function(){
 		res.status(200).json({timestamp: ide.res.timestamp});
 	});
 	app.get('/res/services', function(req, res, next) {
-		log.http('main', m("GET /res/services:", ide.res.services));
+		log.verbose('main', m("GET /res/services:", ide.res.services));
 		res.status(200).json({services: ide.res.services});
 	});
 	app.get('/res/aboutares', function(req, res, next) {		

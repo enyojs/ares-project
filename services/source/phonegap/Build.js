@@ -61,8 +61,8 @@ enyo.kind({
 	 * Return an instance of the current selected project from the project list UI.
 	 * @public
 	 */
-	getCurrentProject: function() {
-		return ComponentsRegistry.getComponent("projectView").currentProject;
+	getSelectedProject: function() {
+		return Ares.Workspace.projects.getSelectedProject();
 	},
 
 	/**

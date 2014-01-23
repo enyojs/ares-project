@@ -1,4 +1,4 @@
-/*global enyo, ares, ProjectConfig */
+/*global enyo, ares, ProjectConfig, Phonegap */
 
 /**
  * This kind provide a widget to tune project properties
@@ -47,12 +47,20 @@ enyo.kind({
 				{kind: "FittableRows", components: [
 					{kind: "FittableColumns", classes: "ares-row", components: [
 						{components: [
-							{tag: "label", name: "projectPathLabel", classes : "ares-label", content: ""},
+							{tag: "label", name: "projectPathLabel", classes : "ares-fixed-label ares-small-label", content: ""},
 						]},
 						{fit: true, components: [
 							{tag: "label", name: "projectPathValue", classes : "ares-label", content: ""},
 						]}
-					]}
+					]},
+					{kind: "FittableColumns", classes: "ares-row", components: [
+						{components: [
+							{tag: "label", classes : "ares-fixed-label ares-small-label", content: "Versions: "},
+						]},
+						{fit: true, components: [
+							{tag: "label", name: "enyoVersions", classes : "ares-label", content: ""}
+						]}
+					]},
 				]},
 				{tag: "p", classes:"break"},
 				{kind: "FittableColumns", components: [
@@ -158,22 +166,6 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
-		this.validatePhonegapUiValues = {
-			"sharedConfiguration-icon": true,
-			"sharedConfiguration-splashScreen": true, 
-			"splash-screen-duration": true,
-			"load-url-timeout": true,
-			"android-minSdkVersion": true,
-			"android-maxSdkVersion": true,
-			"ios-icon": true,
-			"ios-splashScreen": true,
-			"winphone-icon": true,
-			"winphone-splashScreen": true,
-			"blackberry-icon": true,
-			"blackberry-splashScreen": true,
-			"webos-icon": true,
-			"webos-splashScreen": true
-		};
 	},
 	/**
 	 * Set the default tab
@@ -430,6 +422,8 @@ enyo.kind({
 	},
 	
 	disableOkButton: function(inSender, inEvent) {
+		var provider = Phonegap.ProjectProperties.getProvider();
+
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		this.$.ok.setDisabled(true);
 		var contentError = inEvent.reason || "Check project properties tabs for errors";
@@ -445,29 +439,12 @@ enyo.kind({
 		}else{
 			this.$.errTooltip.setContent(contentError);
 		}
-		this.$.errTooltip.show();
-		this.validatePhonegapUiValues[this.defineValidationArrayKey(inEvent.originator)] = false;
+		this.$.errTooltip.show();		
+
+		provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform][inEvent.originator.name] = false;
+		provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]["validDrawer"] = false;
 	},
 
-	/**
-	 * @private
-	 * Function to define the name of the element of the array {this.validatePhonegapUiValues}
-	 * to be marked as correct.
-	 * 
-	 * @param  {Object} inOriginator to object that fired the event.
-	 * @return {String} corresponding name of the key of the array {this.validatePhonegapUiValues}
-	 */
-	defineValidationArrayKey: function(inOriginator) {
-		if (inOriginator.name === "icon") {
-			return inOriginator && inOriginator.platform + "-icon";
-		} else {
-			if (inOriginator.name === "splashScreen") {
-				return inOriginator && inOriginator.platform + "-splashScreen";
-			} else {
-				return inOriginator.name;
-			}
-		}
-	},
 
 	/**
 	 * Enable the OK button of the project properties Pop-up if all the values are 
@@ -481,16 +458,28 @@ enyo.kind({
 	 */
 	enableOkButton: function(inSender, inEvent){	
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
-
-		// Set in the array {this.validatePhonegapUiValues} the originator UI row as valide
-		this.validatePhonegapUiValues[this.defineValidationArrayKey(inEvent.originator)] = true;
-		
 		var okDisabled = false;
+		var validDrawer = true;
+		var provider = Phonegap.ProjectProperties.getProvider();
+
+		// Set in the array {this.validatePhonegapUiValues} the originator UI row as valid
+		provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform][inEvent.originator.name] = true;
+
+		// Check the validation state of all controled PGB attributes by platform (it includes also the shared configuration attributes)
+		// to update the validation state of the drawer
+		for(var option in provider.getSelectedProject().getValidPgbConf()[this.platform]){
+			if(!provider.getSelectedProject().getValidPgbConf()[this.platform][option]){
+				validDrawer = false;
+			}					
+		}
+		if (validDrawer) {
+			provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]["validDrawer"] = true;
+		}	
 		
-		// Reevaluate all the array {this.validatePhonegapUiValues} in order to enable the 
-		// button OK if all the array's elements have the value true.
-		for(var key in this.validatePhonegapUiValues) {
-			if (this.validatePhonegapUiValues[key] === false) {
+		// Check the validation state of all the controled PGB drawer
+		// to enable/disable the Ok button
+		for(var drawer in provider.getSelectedProject().getValidPgbConf()) {
+			if (!provider.getSelectedProject().getValidPgbConf()[drawer]["validDrawer"]) {
 				okDisabled = true;	
 			}
 		}
@@ -637,6 +626,9 @@ enyo.kind({
 		input.setStatus(status);
 		this.fileChooserChecked();
 		return true;
+	},
+	setVersionLabel: function(value){
+		this.$.enyoVersions.setContent(value);
 	}
 });
 
