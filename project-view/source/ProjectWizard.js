@@ -417,7 +417,7 @@ enyo.kind({
 	 * @param {String} urlHome, home url
 	 */
 	readDeployFile: function(pathProject, urlHome){
-		var url = urlHome+pathProject+"/deploy.json";
+		var url = urlHome + pathProject + "/deploy.json";
 		var req = new enyo.Ajax({url: url, handleAs: "json"});
 		req.response(this, function(inSender, inValue) {
 			this.searchForVersions(inValue, pathProject, urlHome);
@@ -458,7 +458,7 @@ enyo.kind({
 			if(path){
 				//a path can be started with ./ or nothing
 				path = path.replace(/^\.\//, ""); //if the path starts with ./, it is replaced by nothing
-				urls.push(serviceHome+"/"+path+ (path.match(/enyo/) ? enyoVersionFile : versionFile));
+				urls.push(serviceHome + "/" + path + (path.match(/enyo/) ? enyoVersionFile : versionFile));
 			}
 		}, this);
 
