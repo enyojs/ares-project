@@ -904,16 +904,50 @@ enyo.kind({
 		return enyo.json.codify.from(this.$.serializer.serializeComponent(inComponent, true));
 	},
 
-	//* Eval code passed in by designer
+	/**
+	 * Eval code passed in by designer
+	 * @param {String} inCode
+	 */
 	codeUpdate: function(inCode) {
-		/* jshint evil: true */
-		eval(inCode); // TODO: ENYO-2074, replace eval.
-		/* jshint evil: false */
+		var msg;
+		try {
+			/* jshint evil: true */
+			eval(inCode); // TODO: ENYO-2074, replace eval.
+			/* jshint evil: false */
+			msg = {op: "updated"};
+		}
+		catch (e) {
+			msg = {
+				op: "error",
+				triggeredByOp: "codeUpdate",
+				requestReload: true,
+				msg: "caught error: " + e
+			};
+		}
+		this.sendMessage(msg);
 	},
+
 	//* Update CSS by replacing the link/style tag in the head with an updated style tag
 	cssUpdate: function(inData) {
+		var next = (function(err) {
+			var msg =  {op: "updated"};
+			if (err) {
+				msg = {
+					op: "error",
+					triggeredByOp: "cssUpdate",
+					msg: err
+				};
+			}
+			this.sendMessage(msg);
+		}).bind(this);
+
+		this._cssUpdate(inData, next);
+	},
+
+	_cssUpdate: function(inData, next) {
 		if(!inData.filename || !inData.code) {
 			enyo.warn("Invalid data sent for CSS update:", inData);
+			next ("Invalid data sent for CSS update. Check console for more information");
 			return;
 		}
 
@@ -930,6 +964,7 @@ enyo.kind({
 		for(i = 0; (el = links[i]); i++) {
 			if(el.getAttribute("rel") === "stylesheet" && el.getAttribute("type") === "text/css" && el.getAttribute("href") === filename) {
 				this.updateStyle(filename, code, el);
+				next();
 				return;
 			}
 		}
@@ -938,9 +973,12 @@ enyo.kind({
 		for(i=0;(el = styles[i]);i++) {
 			if(el.getAttribute("data-href") === filename) {
 				this.updateStyle(filename, code, el);
+				next();
 				return;
 			}
 		}
+		this.trace("Did not find anything to call updateStyle on");
+		next();
 	},
 	//* Replace _inElementToReplace_ with a new style tag containing _inNewCode_
 	updateStyle: function(inFilename, inNewCode, inElementToReplace) {

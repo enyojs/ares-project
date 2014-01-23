@@ -38,16 +38,23 @@ enyo.kind({
 		initial: 'off',
 		events: [
 			// start designer
-			{name: 'projectSelected', from: ['off','ready'], to: 'reloading'},
+			{name: 'projectSelected', from: ['off','ready','broken'], to: 'reloading'},
 			{name: 'dfLoaded',        from: 'reloading',     to: 'initializing'},
 			{name: 'dfInitialized',   from: 'initializing',  to: 'initialized'},
 			{name: 'dfReady',         from: 'initialized',   to: 'ready'},
-			{name: 'dfReloadNeeded',  from: 'reloading',     to: 'off'},
+			{name: 'dfReloadNeeded',  from: 'reloading',     to: 'broken'},
 
 			{name: 'render',          from: 'ready',         to: 'rendering'},
 			{name: 'dfRendered',      from: 'rendering',     to: 'ready'},
 			{name: 'dfRenderError',   from: 'rendering',     to: 'ready'},
 			{name: 'dfRequestReload', from: 'rendering',     to: 'off'},
+
+			{name: 'syncFile',        from: 'ready',         to: 'updating'},
+			{name: 'dfRequestReload', from: 'updating',      to: 'off'},
+			{name: 'dfUpdated',       from: 'updating',      to: 'ready'},
+			{name: 'dfReloadNeeded',  from: 'updating',      to: 'broken'},
+
+			{name: 'render',          from: 'broken',        to: 'reloading'},
 		],
 		callbacks: {
 			onenterstate: function(event, from, to) {
@@ -59,8 +66,7 @@ enyo.kind({
 				this.fsmStash = [];
 			},
 			ondfReady: function(event, from, to) { // pop
-				this.pendingCb();
-				this.pendingDb = null;
+				this.execCb();
 				if (this.fsmStash.length) {
 					var resume = this.fsmStash.shift();
 					var that = this;
@@ -82,21 +88,50 @@ enyo.kind({
 				this.designer.sendDesignerFrameContainerData();
 			},
 
-			onrender: function(event, from, to, fileName, theKind, inSelectId,next) {
-				this.pendingCb = next;
-				this.designer._renderKind(fileName, theKind, inSelectId);
+			onrender: function(event, from, to, fileName, theKind, inSelectId, next) {
+				ares.assertCb(next);
+				var df = this.designer;
+				if (from === 'broken') {
+					// render will be replayed in ready state
+					this.fsmStash.push([event, [fileName, theKind, inSelectId, next]]);
+					df._reloadDesignerFrame(df.projectSource);
+				} else {
+					this.pendingCb = next;
+					df._renderKind(fileName, theKind, inSelectId);
+				}
 			},
 			ondfRendered: function(event, from, to, msg) {
-				this.pendingCb();
-				this.pendingDb = null;
-				this.designer.updateKind(msg);
-			}
+				this.execCb();
+				this.designer._updateKind(msg);
+			},
+
+			onsyncFile: function(event, from, to, filename, inCode, next) {
+				this.pendingCb = next;
+				this.designer._syncFile(filename, inCode);
+			},
+			ondfUpdated: function(event, from, to) {
+				this.execCb();
+			},
+
+			// error handling
+			ondfRequestReload: function(event, from, to, err) {
+				var deimos = this.designer.owner;
+				err.callback = deimos.closeDesigner.bind(deimos);
+				err.action = "Switching back to code editor";
+				this.designer.doError(err);
+			},
+			ondfReloadNeeded: function(event, from, to, err) {
+				this.designer.doError(err);
+			},
+			ondfRenderError: function(event, from, to, err) {
+				this.designer.doError(err);
+			},
 		},
 		error: function(eventName,from, to, args, errorCode, errorMessage,error) {
 			if (errorCode === 300) {
 				// Invalid callback. See state-machine source code for error codes :-/
 				throw error || errorMessage ;
-			} else if (eventName.test(/^df/) ) {
+			} else if ( /^df/.test(eventName) ) {
 				// don't delay event coming from designer frame
 				throw ("Unexpected event " + eventName + " coming from designer in state " + from) ;
 			} else {
@@ -108,9 +143,16 @@ enyo.kind({
 
 	create: function() {
 		ares.setupTraceLogger(this);
-		this.fsm = StateMachine.create( this.fsmStruct );
-		this.fsm.trace = this.trace.bind(this);
-		this.fsm.designer = this ;
+		var fsm = StateMachine.create( this.fsmStruct );
+		fsm.trace = this.trace.bind(this);
+		fsm.execCb = (function() {
+			var cb = this.pendingCb;
+			this.pendingCb = null;
+			cb();
+		}).bind(fsm);
+		fsm.designer = this ;
+		this.fsm = fsm;
+
 		this.inherited(arguments);
 	},
 	rendered: function() {
@@ -196,7 +238,6 @@ enyo.kind({
 	receiveMessage: function(inSender, inEvent) {
 		
 		var msg = inEvent.message;
-		var deimos = this.owner;
 		var err;
 
 		this.trace("Op: ", msg.op, msg);
@@ -259,18 +300,13 @@ enyo.kind({
 			err = { msg: msg.val.msg, err: msg.val.err } ;
 
 			if (msg.val.requestReload === true) {
-				this.fsm.dfRequestReload();
-				err.callback = deimos.closeDesigner.bind(deimos);
-				err.action = "Switching back to code editor";
-				this.doError(err);
+				this.fsm.dfRequestReload(err);
 			} else if (msg.val.reloadNeeded === true) {
-				this.fsm.dfReloadNeeded();
-				this.reloadNeeded = true;
-				this.doError(err);
+				this.fsm.dfReloadNeeded(err);
+				this.reloadNeeded = true; // obsolete
 			} else if ( msg.val.triggeredByOp === 'render' ) {
 				// missing constructor or missing prototype
-				this.fsm.dfRenderError();
-				this.doError(err);
+				this.fsm.dfRenderError(err);
 			} else {
 				this.log("unexpected error message from designer", msg);
 				this.doError(err);
@@ -331,11 +367,12 @@ enyo.kind({
 			return;
 		}
 
-		this.renderCallback = next ;
+		//this.renderCallback = next ;
 		this.fsm.render(fileName, theKind, inSelectId, next);
 	},
 
 	_renderKind: function(fileName, theKind, inSelectId) {
+		// called from fsm
 		this.currentFileName = fileName;
 		var components = [theKind];
 		this.sendMessage({
@@ -362,8 +399,10 @@ enyo.kind({
 	modifyProperty: function(inProperty, inValue) {
 		this.sendMessage({op: "modify", filename: this.currentFileName, val: {property: inProperty, value: inValue}});
 	},
+
 	//* Send message to Deimos with new kind/components from designerFrame
-	updateKind: function(msg) {
+	_updateKind: function(msg) {
+		// called by fsm
 		this.trace("called by op " + msg.triggeredByOp + " for file " + msg.filename );
 		var deimos = this.owner;
 
@@ -406,18 +445,26 @@ enyo.kind({
 	 * @param {String} filename
 	 * @param {String} inCode
 	 */
-	syncFile: function(projectName, filename, inCode) {
+	syncFile: function(projectName, filename, inCode, next) {
+		ares.assertCb(next);
 		// check if the file is indeed part of the current project
 		if (projectName === this.projectSource.getName() ){
-			if( /\.css$/i.test(filename) ) {
-				// Sync the CSS in inCode with the designerFrame (to avoid needing to reload the iFrame)
-				this.sendMessage({op: "cssUpdate", val: {filename: this.projectPath + filename, code: inCode}});
-			} else if( /\.js$/i.test(filename) ) {
-				this.sendMessage({op: "codeUpdate", val: inCode});
-			}
+			this.fsm.syncFile(filename, inCode, next);
 		} else {
-			this.warn("syncFile aborted: project mismatch. Expected " + this.projectSource.getName()
-					  + ' got '+ projectName + ' with file ' + filename);
+			var msg = "syncFile aborted: project mismatch. Expected " + this.projectSource.getName()
+					  + ' got '+ projectName + ' with file ' + filename;
+			var err = new Error(msg);
+			setTimeout(function () { next(err);} ,0);
+		}
+	},
+
+	_syncFile: function (filename, inCode) {
+		// called by fsm
+		if( /\.css$/i.test(filename) ) {
+			// Sync the CSS in inCode with the designerFrame (to avoid needing to reload the iFrame)
+			this.sendMessage({op: "cssUpdate", val: {filename: this.projectPath + filename, code: inCode}});
+		} else if( /\.js$/i.test(filename) ) {
+			this.sendMessage({op: "codeUpdate", val: inCode});
 		}
 	},
 

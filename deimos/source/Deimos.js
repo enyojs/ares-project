@@ -822,8 +822,9 @@ enyo.kind({
 	reloadComplete: function() {
 		this.rerenderKind();
 	},
-	syncFile: function(project, filename, code) {
-		this.$.designer.syncFile(project, filename, code);
+	syncFile: function(project, filename, code, next) {
+		ares.assertCb(next);
+		this.$.designer.syncFile(project, filename, code, next);
 	},
 	addAresIds: function(inComponents) {
 		for(var i = 0; i < inComponents.length; i++) {
