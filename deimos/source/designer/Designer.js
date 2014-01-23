@@ -96,6 +96,9 @@ enyo.kind({
 			if (errorCode === 300) {
 				// Invalid callback. See state-machine source code for error codes :-/
 				throw error || errorMessage ;
+			} else if (eventName.test(/^df/) ) {
+				// don't delay event coming from designer frame
+				throw ("Unexpected event " + eventName + " coming from designer in state " + from) ;
 			} else {
 				this.trace("got " + eventName + " while in state " + from +", stashing event");
 				this.fsmStash.push([eventName, args]);
