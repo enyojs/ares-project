@@ -197,6 +197,7 @@ enyo.kind({
 		
 		var msg = inEvent.message;
 		var deimos = this.owner;
+		var err;
 
 		this.trace("Op: ", msg.op, msg);
 
@@ -245,28 +246,35 @@ enyo.kind({
 			// Existing component dropped in designerFrame
 			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doMoveItem(msg.val);
+		} else if (msg.op === "updated") {
+			// code was updated live in designerFrame
+			this.fsm.dfUpdated();
 		} else if(msg.op === "error") {
 			// no reply
 			if ( msg.val.triggeredByOp === 'render' && this.renderCallback ) {
 				// fsm-obsolete
-				this.log("dropping renderCallback after error ", msg.val.msg);
 				this.renderCallback = null;
 			}
 
+			err = { msg: msg.val.msg, err: msg.val.err } ;
+
 			if (msg.val.requestReload === true) {
 				this.fsm.dfRequestReload();
-				msg.val.callback = deimos.closeDesigner.bind(deimos);
-				msg.val.action = "Switching back to code editor";
+				err.callback = deimos.closeDesigner.bind(deimos);
+				err.action = "Switching back to code editor";
+				this.doError(err);
 			} else if (msg.val.reloadNeeded === true) {
 				this.fsm.dfReloadNeeded();
 				this.reloadNeeded = true;
+				this.doError(err);
 			} else if ( msg.val.triggeredByOp === 'render' ) {
 				// missing constructor or missing prototype
 				this.fsm.dfRenderError();
+				this.doError(err);
 			} else {
 				this.log("unexpected error message from designer", msg);
+				this.doError(err);
 			}
-			this.doError(msg.val);
 			// TODO: We should store the error into a kind of rotating error log - ENYO-2462
 		} else if(msg.op === "resize") {
 			// Existing component resized
