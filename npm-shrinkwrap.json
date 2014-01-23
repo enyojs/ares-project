@@ -1,6 +1,6 @@
 {
   "name": "ares-ide",
-  "version": "0.2.10-pre.3",
+  "version": "0.2.11-pre.2",
   "dependencies": {
     "archiver": {
       "version": "0.4.10",
@@ -353,7 +353,7 @@
             },
             "qs": {
               "version": "0.6.6",
-              "from": "qs@0.6.6"
+              "from": "qs@~0.6.0"
             },
             "bytes": {
               "version": "0.2.1",
@@ -634,8 +634,9 @@
       }
     },
     "tunnel": {
-      "version": "0.0.2",
-      "from": "tunnel@0.0.2"
+      "version": "0.0.3",
+      "from": "tunnel@0.0.3",
+      "resolved": "https://registry.npmjs.org/tunnel/-/tunnel-0.0.3.tgz"
     }
   }
 }
