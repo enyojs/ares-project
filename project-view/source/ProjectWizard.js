@@ -488,7 +488,7 @@ enyo.kind({
 		req.response(this, function(inSender, inValue) {
 			if(inValue){
 				content = inValue.match(/{\s*(enyo[^\n,;]+)/);
-				version = content[1].replace(expr, "");
+				version = content[1].replace(expr, "").replace(/[\w\.]+/,"$&:");
 				this.versions.push(version);
 			}
 			next();
