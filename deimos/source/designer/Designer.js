@@ -292,10 +292,6 @@ enyo.kind({
 			this.fsm.dfUpdated();
 		} else if(msg.op === "error") {
 			// no reply
-			if ( msg.val.triggeredByOp === 'render' && this.renderCallback ) {
-				// fsm-obsolete
-				this.renderCallback = null;
-			}
 
 			err = { msg: msg.val.msg, err: msg.val.err } ;
 
@@ -360,14 +356,6 @@ enyo.kind({
 			return;
 		}
 		
-		if (this.renderCallback) {
-			// a rendering is on-going
-			this.log("dropped rendering: another one is on-going");
-			setTimeout(next(new Error('on-going rendering')), 0);
-			return;
-		}
-
-		//this.renderCallback = next ;
 		this.fsm.render(fileName, theKind, inSelectId, next);
 	},
 
@@ -411,17 +399,8 @@ enyo.kind({
 			deimos.buildComponentView(msg);
 			deimos.updateCodeInEditor(msg.filename); // based on new Component view
 
-			// updateKind may be called by other op than 'render'
-			if (this.renderCallback && msg.triggeredByOp === 'render') {
-				this.renderCallback() ;
-				this.renderCallback = null;
-			}
 		} else {
 			this.log("dropped rendered message for stale file ",msg.filename);
-			if (this.renderCallback && msg.triggeredByOp === 'render') {
-				// other cleanup may be needed...
-				this.renderCallback = null;
-			}
 		}
 	},
 	//* Initialize the designerFrame depending on aresOptions
