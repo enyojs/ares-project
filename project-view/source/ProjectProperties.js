@@ -47,12 +47,20 @@ enyo.kind({
 				{kind: "FittableRows", components: [
 					{kind: "FittableColumns", classes: "ares-row", components: [
 						{components: [
-							{tag: "label", name: "projectPathLabel", classes : "ares-label", content: ""},
+							{tag: "label", name: "projectPathLabel", classes : "ares-fixed-label ares-small-label", content: ""},
 						]},
 						{fit: true, components: [
 							{tag: "label", name: "projectPathValue", classes : "ares-label", content: ""},
 						]}
-					]}
+					]},
+					{kind: "FittableColumns", classes: "ares-row", components: [
+						{components: [
+							{tag: "label", classes : "ares-fixed-label ares-small-label", content: "Versions: "},
+						]},
+						{fit: true, components: [
+							{tag: "label", name: "enyoVersions", classes : "ares-label", content: ""}
+						]}
+					]},
 				]},
 				{tag: "p", classes:"break"},
 				{kind: "FittableColumns", components: [
@@ -618,6 +626,9 @@ enyo.kind({
 		input.setStatus(status);
 		this.fileChooserChecked();
 		return true;
+	},
+	setVersionLabel: function(value){
+		this.$.enyoVersions.setContent(value);
 	}
 });
 
