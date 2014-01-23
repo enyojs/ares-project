@@ -484,12 +484,12 @@ enyo.kind({
 		var req = new enyo.Ajax({url: url, handleAs: "text"});
 		var content = "";
 		var version = "";
-		var expr = new RegExp("enyo.version.|=|:", "g");
+		var expr = new RegExp("enyo.version.|=|:|\"", "g");
 		req.response(this, function(inSender, inValue) {
 			if(inValue){
 				content = inValue.match(/{\s*(enyo[^\n,;]+)/);
-				version = content[1].replace(expr, " ");
-				this.versions = this.versions+version+" | ";
+				version = content[1].replace(expr, "");
+				this.versions.push(version);
 			}
 			next();
 		});
@@ -503,7 +503,7 @@ enyo.kind({
 	 * Display version label
 	 */
 	setVersionLabel: function(){
-		this.$.propertiesWidget.setVersionLabel(this.versions);
+		this.$.propertiesWidget.setVersionLabel(this.versions.join(", "));
 	},
 	/**
 	 * Function used to display the Edit Pop-up with the specification of the defaut tab to be displayed
