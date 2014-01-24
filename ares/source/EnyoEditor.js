@@ -686,6 +686,8 @@ enyo.kind({
 
 			this.doShowWaitPopup({msg: $L("Switching project...")});
 
+			this.resetErrorTooltip();
+
 			serial.push(
 				projectList.selectProject.bind(projectList, project)
 			);
