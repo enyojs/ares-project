@@ -3,7 +3,6 @@
 enyo.kind({
 	name: "Designer",
 	published: {
-		designerFrameReady: false,
 		height: null,
 		width: null,
 		currentFileName: "",
@@ -259,7 +258,6 @@ enyo.kind({
 	_reloadDesignerFrame: function(inSource) {
 		// called by fsm
 		var serviceConfig = inSource.getService().config;
-		this.setDesignerFrameReady(false);
 		this.projectSource = inSource;
 		this.projectPath = serviceConfig.origin + serviceConfig.pathname + "/file";
 		var iframeUrl = this.projectSource.getProjectUrl() + "/" + this.baseSource + "?overlay=designer";
@@ -296,7 +294,6 @@ enyo.kind({
 			this.fsm.dfInitialized();
 		} else if(msg.op === "state" && msg.val === "ready") {
 			// designerFrame received container data, no reply
-			this.setDesignerFrameReady(true);
 			this.fsm.dfReady();
 		} else if(msg.op === "state" && msg.val === "loaded") {
 			// Loaded event sent from designerFrame and awaiting aresOptions.
@@ -372,14 +369,6 @@ enyo.kind({
 	 */
 	renderKind: function(fileName, theKind, inSelectId,next) {
 		ares.assertCb(next);
-
-		if(!this.getDesignerFrameReady()) {
-			// frame is still being reloaded.
-			this.log("warning: called in state != ready");
-			setTimeout(next(new Error('on-going reload')), 0);
-			return;
-		}
-		
 		this.fsm.render(fileName, theKind, inSelectId, next);
 	},
 
