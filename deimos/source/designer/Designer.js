@@ -29,7 +29,6 @@ enyo.kind({
 	baseSource: "designerFrame.html",
 	projectSource: null,
 	selection: null, // extensively (and directly) used by Deimos
-	reloadNeeded: false,
 	scale: 1,
 	debug: false,
 
@@ -336,7 +335,6 @@ enyo.kind({
 				this.fsm.dfRequestReload(err);
 			} else if (msg.val.reloadNeeded === true) {
 				this.fsm.dfReloadNeeded(err);
-				this.reloadNeeded = true; // obsolete
 			} else if ( msg.val.triggeredByOp === 'render' ) {
 				// missing constructor or missing prototype
 				this.fsm.dfRenderError(err);
@@ -374,16 +372,6 @@ enyo.kind({
 	 */
 	renderKind: function(fileName, theKind, inSelectId,next) {
 		ares.assertCb(next);
-		if (this.reloadNeeded) {
-			this.reloadNeeded = false;
-			// trigger a complete reload of designerFrame
-			// FIXME: the reason why render was called is then lost
-			// should recall renderKind once reload is done
-			this.reload();
-			this.log("warning: called in state reloadNeeded");
-			setTimeout(next(new Error('reload started')), 0);
-			return;
-		}
 
 		if(!this.getDesignerFrameReady()) {
 			// frame is still being reloaded.
