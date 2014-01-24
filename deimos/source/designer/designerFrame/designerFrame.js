@@ -199,7 +199,7 @@ enyo.kind({
 			break;
 		case "select":
 			// async, reply with op select val: bunch of code
-			this.selectItem(msg.val);
+			this.selectItem(msg.val, "selected");
 			break;
 		case "highlight":
 			// no reply
@@ -255,7 +255,7 @@ enyo.kind({
 		var dragTarget = this.getEventDragTarget(e.dispatchTarget);
 
 		if (dragTarget && dragTarget.aresComponent) {
-			this._selectItem(dragTarget);
+			this._selectItem(dragTarget, "select");
 		}
 
 		// Using encoded 1px x 1px transparent png
@@ -512,7 +512,7 @@ enyo.kind({
 
 			// Select a control if so requested
 			if (inKind.selectId) {
-				this.selectItem({aresId: inKind.selectId});
+				this.selectItem({aresId: inKind.selectId},"select");
 			}
 		} catch(error) {
 			errMsg = "Unable to render kind '" + inKind.name + "':" + ( typeof error === 'object' ? error.message : error );
@@ -642,13 +642,10 @@ enyo.kind({
 		this.highlightSelection();
 	},
 	/**
-	 Response to message sent from Deimos. Highlight the specified conrol
+	 Response to message sent from Deimos. Highlight the specified control
 	 and send a message with a serialized copy of the control.
 	 */
-	selectItem: function(inItem) {
-		if(!inItem) {
-			return;
-		}
+	selectItem: function(inItem, reply) {
 
 		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
 			if(c.aresId === inItem.aresId) {
@@ -660,7 +657,7 @@ enyo.kind({
 				// are used to draw the highlight rectangle. The call
 				// to timeout ensures that _selectItem is called once
 				// the rendering phase is done.
-				setTimeout(this._selectItem.bind(this, c), 0);
+				setTimeout(this._selectItem.bind(this, c, reply), 0);
 				return;
 			}
 		}
@@ -673,7 +670,7 @@ enyo.kind({
 			this.updateProperty(inData.property, inData.value);
 		}
 		this.rerenderKind(inFileName);
-		this.selectItem(this.selection);
+		this.selectItem(this.selection, "select");
 	},
 	removeProperty: function(inProperty) {
 		delete this.selection[inProperty];
@@ -872,13 +869,10 @@ enyo.kind({
 		this.sendMessage({op: "syncDropTargetHighlighting", val: dropTarget});
 	},
 	//* Set _inItem_ to _this.selected_ and notify Deimos
-	_selectItem: function(inItem, noMessage) {
+	_selectItem: function(inItem, reply) {
 		this.selection = inItem;
 		this.highlightSelection();
-		if (noMessage) {
-			return;
-		}
-		this.sendMessage({op: "select",	 val: this.$.serializer.serializeComponent(this.selection, true)});
+		this.sendMessage({op: reply, val: this.$.serializer.serializeComponent(this.selection, true)});
 	},
 	/**
 	 Find any children in _inControl_ that match kind components of the parent instance,

@@ -100,7 +100,6 @@ enyo.kind({
 	index: null,
 	previousContent: "",
 	fileName: "",
-	selectFromComponentView: false,
 	zoomValues: [25, 50, 100, 125, 150, 200, 400],
 	initZoomIndex: 2,
 	create: function() {
@@ -269,19 +268,17 @@ enyo.kind({
 	designerSelect: function(inSender, inEvent) {
 		var c = inSender.selection;
 		this.refreshInspector();
-		var haveToScroll = !this.selectFromComponentView;
-		this.$.componentView.setSelected(c, haveToScroll);
-		this.selectFromComponentView = false;
+		this.$.componentView.setSelected(c, true); // -> ask for scroll
 		return true;
 	},
 	// Select event triggered by component view was completed. Refresh inspector.
 	designerSelected: function(inSender, inEvent) {
 		this.refreshInspector();
+		this.$.componentView.setSelected(inSender.selection, false);
 		return true;
 	},
 	componentViewSelect: function(inSender, inEvent) {
 		this.$.designer.select(inEvent.component);
-		this.selectFromComponentView = true;
 		return true;
 	},
 	syncComponentViewDropTargetHighlighting: function(inSender, inEvent) {
