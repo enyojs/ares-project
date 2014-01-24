@@ -631,10 +631,12 @@ function setCorsHeaders(req, res, next) {
 		corsHeaders = {};
 		corsHeaders['Access-Control-Allow-Methods'] = allowedMethods.concat(methods).join(',');
 		corsHeaders['Access-Control-Allow-Headers'] = allowedHeaders.concat(headers).join(',');
+		corsHeaders['Access-Control-Expose-Headers'] = exposedHeaders.concat(headers).join(',');
+		corsHeaders['Access-Control-Max-Age'] = '86400';
 		log.info("setCorsHeaders()", "CORS will use:", corsHeaders);
 	}
 
-	// request time: is this a CORS request? [if yes, there's an origin]
+	// request time: is this a CORS request? [CLUE: if yes, there's an origin]
 	if (req.headers && req.headers.origin) {
 		if (origins.indexOf("*") !== -1) {
 			corsHeaders['Access-Control-Allow-Origin'] = "*";
