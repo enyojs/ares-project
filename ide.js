@@ -635,6 +635,7 @@ defineServerTimeout(argv.timeout);
 
 var corsHeaders,
     allowedMethods = ['GET', 'PUT', 'POST', 'DELETE'],
+    exposedHeaders = ['x-content-type'],
     allowedHeaders = ['Content-Type','Authorization','Cache-Control','X-HTTP-Method-Override'];
 
 function setCorsHeaders(req, res, next) {
@@ -648,6 +649,7 @@ function setCorsHeaders(req, res, next) {
 		corsHeaders = {};
 		corsHeaders['Access-Control-Allow-Methods'] = allowedMethods.concat(methods).join(',');
 		corsHeaders['Access-Control-Allow-Headers'] = allowedHeaders.concat(headers).join(',');
+		corsHeaders['Access-Control-Expose-Headers'] = exposedHeaders.concat(headers).join(',');
 		corsHeaders['Access-Control-Max-Age'] = '86400';
 		log.info("setCorsHeaders()", "CORS will use:", corsHeaders);
 	}
