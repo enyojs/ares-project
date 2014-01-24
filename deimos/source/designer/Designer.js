@@ -393,10 +393,20 @@ enyo.kind({
 		this.fsm.select(inControl);
 	},
 	highlightDropTarget: function(inControl) {
-		this.sendMessage({op: "highlight", val: inControl});
+		if (this.fsm.is('ready')) {
+			this.sendMessage({op: "highlight", val: inControl});
+		}
+		else {
+			this.trace("dropped highlight control while fsm in in state " + this.fsm.current);
+		}
 	},
 	unHighlightDropTargets: function() {
-		this.sendMessage({op: "unhighlight"});
+		if (this.fsm.is('ready')) {
+			this.sendMessage({op: "unhighlight"});
+		}
+		else {
+			this.trace("dropped unhighlight control while fsm in in state " + this.fsm.current);
+		}
 	},
 	//* Property was modified in Inspector, update designerFrame.
 	modifyProperty: function(inProperty, inValue) {
