@@ -7,7 +7,7 @@ enyo.kind({
 		height: null,
 		width: null,
 		currentFileName: "",
-		autoZoom: false,
+		autoZoom: false
 	},
 	events: {
 		onSelect: "",
@@ -62,7 +62,7 @@ enyo.kind({
 
 			{name: 'modifyProperty',  from: 'ready',         to: 'rendering'},
 
-			{name: 'render',          from: 'broken',        to: 'reloading'},
+			{name: 'render',          from: 'broken',        to: 'reloading'}
 		],
 		callbacks: {
 			onenterstate: function(event, from, to) {
@@ -161,7 +161,7 @@ enyo.kind({
 			},
 			ondfRenderError: function(event, from, to, err) {
 				this.designer.doError(err);
-			},
+			}
 		},
 		error: function(eventName,from, to, args, errorCode, errorMessage,error) {
 			if (errorCode === 300) {
