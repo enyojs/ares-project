@@ -58,8 +58,7 @@ enyo.kind({
 		var file = url.replace(/.*\/services(?=\/)/,'');
 		var errMsg = "user app load FAILED with error '" + msg + "' in " + file + " line " + linenumber  ;
 		this.trace(errMsg);
-		this.sendMessage({op: "reloadNeeded"});
-		this.sendMessage({op: "error", val: {msg: errMsg}});
+		this.sendMessage({op: "error", val: {msg: errMsg, reloadNeeded: true}});
 		return true;
 	},
 	rendered: function() {
@@ -184,48 +183,66 @@ enyo.kind({
 
 		switch (msg.op) {
 		case "containerData":
+			// reply with msg op state val ready
 			this.setContainerData(msg.val);
 			break;
 		case "render":
+			// async (call selectItem) reply with msg:
+			// op rendered
+			// op: error
+			// op: error with reload Needed in case of big problem
 			this.renderKind(msg.val, msg.filename, msg.op);
 			break;
 		case "initializeOptions":
+			// reply with msg op state val initialized
 			this.initializeAllKindsAresOptions(msg.options);
 			break;
 		case "select":
-			this.selectItem(msg.val);
+			// async, reply with op select val: bunch of code
+			this.selectItem(msg.val, "selected");
 			break;
 		case "highlight":
+			// no reply
 			this.highlightDropTarget(this.getControlById(msg.val.aresId));
 			break;
 		case "unhighlight":
+			// no reply
 			this.unhighlightDropTargets(msg.val);
 			break;
 		case "modify":
+			// async, calls selectItem reply with op select val: bunch of code
 			this.modifyProperty(msg.val, msg.filename);
 			break;
 		case "codeUpdate":
+			// do an eval on msg.val. Replies "updated" (maybe with error)
 			this.codeUpdate(msg.val);
 			break;
 		case "cssUpdate":
+			// no reply
 			this.cssUpdate(msg.val);
 			break;
 		case "cleanUp":
+			// no reply
 			this.cleanUpKind();
 			break;
 		case "resize":
+			// no reply
 			this.resized();
 			break;
 		case "prerenderDrop":
+			// no reply even though async code is involved to render animation
 			this.foreignPrerenderDrop(msg.val);
 			break;
 		case "requestPositionValue":
+			// immediately replies op: "returnPositionValue"
 			this.requestPositionValue(msg.val);
 			break;
 		case "serializerOptions":
+			// no reply
 			this.$.serializer.setSerializerOptions(msg.val);
 			break;
 		case "dragStart":
+			// no reply
 			this.setDragType(msg.val);
 			break;
 		default:
@@ -238,7 +255,7 @@ enyo.kind({
 		var dragTarget = this.getEventDragTarget(e.dispatchTarget);
 
 		if (dragTarget && dragTarget.aresComponent) {
-			this._selectItem(dragTarget);
+			this._selectItem(dragTarget, "select");
 		}
 
 		// Using encoded 1px x 1px transparent png
@@ -435,6 +452,7 @@ enyo.kind({
 	},
 	//* Render the specified kind
 	renderKind: function(inKind, inFileName, cmd) {
+		// on msg "render"
 		var errMsg;
 
 		try {
@@ -494,21 +512,20 @@ enyo.kind({
 
 			// Select a control if so requested
 			if (inKind.selectId) {
-				this.selectItem({aresId: inKind.selectId});
+				this.selectItem({aresId: inKind.selectId},"select");
 			}
 		} catch(error) {
 			errMsg = "Unable to render kind '" + inKind.name + "':" + ( typeof error === 'object' ? error.message : error );
 			var errStack = typeof error === 'object' ? error.stack : '' ;
 			this.error(errMsg, errStack );
-			this.sendMessage({op: "reloadNeeded"});
-			this.sendMessage({op: "error", val: {msg: errMsg, triggeredByOp: cmd, requestReload: true, err: {stack: errStack}}});
+			this.sendMessage({op: "error", val: {msg: errMsg, triggeredByOp: cmd, requestReload: true, reloadNeeded: true, err: {stack: errStack}}});
 		}
 	},
 	//* Rerender current selection
-	rerenderKind: function(inFileName) {
+	rerenderKind: function(inFileName, cmd) {
 		var copy = this.getSerializedCopyOfComponent(this.parentInstance).components;
 		copy[0].componentKinds = copy;
-		this.renderKind(copy[0], inFileName);
+		this.renderKind(copy[0], inFileName, cmd);
 	},
 	checkXtorForAllKinds: function(kinds) {
 		enyo.forEach(kinds, function(kindDefinition) {
@@ -527,6 +544,7 @@ enyo.kind({
 	 * and send back a state message.
 	 */
 	initializeAllKindsAresOptions: function(inOptions) {
+		// on msg "initializeOptions"
 		// genuine enyo.kind's master function extension
 		var self = this;
 		this.trace("starting user app initialization within designer iframe");
@@ -624,13 +642,10 @@ enyo.kind({
 		this.highlightSelection();
 	},
 	/**
-	 Response to message sent from Deimos. Highlight the specified conrol
+	 Response to message sent from Deimos. Highlight the specified control
 	 and send a message with a serialized copy of the control.
 	 */
-	selectItem: function(inItem) {
-		if(!inItem) {
-			return;
-		}
+	selectItem: function(inItem, reply) {
 
 		for(var i=0, c;(c=this.flattenChildren(this.$.client.children)[i]);i++) {
 			if(c.aresId === inItem.aresId) {
@@ -642,7 +657,7 @@ enyo.kind({
 				// are used to draw the highlight rectangle. The call
 				// to timeout ensures that _selectItem is called once
 				// the rendering phase is done.
-				setTimeout(this._selectItem.bind(this, c), 0);
+				setTimeout(this._selectItem.bind(this, c, reply), 0);
 				return;
 			}
 		}
@@ -654,8 +669,8 @@ enyo.kind({
 		} else {
 			this.updateProperty(inData.property, inData.value);
 		}
-		this.rerenderKind(inFileName);
-		this.selectItem(this.selection);
+		this.rerenderKind(inFileName, "modify");
+		this.selectItem(this.selection, "select");
 	},
 	removeProperty: function(inProperty) {
 		delete this.selection[inProperty];
@@ -850,16 +865,14 @@ enyo.kind({
 	},
 	syncDropTargetHighlighting: function() {
 		var dropTarget = this.currentDropTarget ? this.$.serializer.serializeComponent(this.currentDropTarget, true) : null;
+		// to move the inspector spotlight during drag
 		this.sendMessage({op: "syncDropTargetHighlighting", val: dropTarget});
 	},
 	//* Set _inItem_ to _this.selected_ and notify Deimos
-	_selectItem: function(inItem, noMessage) {
+	_selectItem: function(inItem, reply) {
 		this.selection = inItem;
 		this.highlightSelection();
-		if (noMessage) {
-			return;
-		}
-		this.sendMessage({op: "select",	 val: this.$.serializer.serializeComponent(this.selection, true)});
+		this.sendMessage({op: reply, val: this.$.serializer.serializeComponent(this.selection, true)});
 	},
 	/**
 	 Find any children in _inControl_ that match kind components of the parent instance,
@@ -885,16 +898,50 @@ enyo.kind({
 		return enyo.json.codify.from(this.$.serializer.serializeComponent(inComponent, true));
 	},
 
-	//* Eval code passed in by designer
+	/**
+	 * Eval code passed in by designer
+	 * @param {String} inCode
+	 */
 	codeUpdate: function(inCode) {
-		/* jshint evil: true */
-		eval(inCode); // TODO: ENYO-2074, replace eval.
-		/* jshint evil: false */
+		var msg;
+		try {
+			/* jshint evil: true */
+			eval(inCode); // TODO: ENYO-2074, replace eval.
+			/* jshint evil: false */
+			msg = {op: "updated"};
+		}
+		catch (e) {
+			msg = {
+				op: "error",
+				triggeredByOp: "codeUpdate",
+				requestReload: true,
+				msg: "caught error: " + e
+			};
+		}
+		this.sendMessage(msg);
 	},
+
 	//* Update CSS by replacing the link/style tag in the head with an updated style tag
 	cssUpdate: function(inData) {
+		var next = (function(err) {
+			var msg =  {op: "updated"};
+			if (err) {
+				msg = {
+					op: "error",
+					triggeredByOp: "cssUpdate",
+					msg: err
+				};
+			}
+			this.sendMessage(msg);
+		}).bind(this);
+
+		this._cssUpdate(inData, next);
+	},
+
+	_cssUpdate: function(inData, next) {
 		if(!inData.filename || !inData.code) {
 			enyo.warn("Invalid data sent for CSS update:", inData);
+			next ("Invalid data sent for CSS update. Check console for more information");
 			return;
 		}
 
@@ -911,6 +958,7 @@ enyo.kind({
 		for(i = 0; (el = links[i]); i++) {
 			if(el.getAttribute("rel") === "stylesheet" && el.getAttribute("type") === "text/css" && el.getAttribute("href") === filename) {
 				this.updateStyle(filename, code, el);
+				next();
 				return;
 			}
 		}
@@ -919,9 +967,12 @@ enyo.kind({
 		for(i=0;(el = styles[i]);i++) {
 			if(el.getAttribute("data-href") === filename) {
 				this.updateStyle(filename, code, el);
+				next();
 				return;
 			}
 		}
+		this.trace("Did not find anything to call updateStyle on");
+		next();
 	},
 	//* Replace _inElementToReplace_ with a new style tag containing _inNewCode_
 	updateStyle: function(inFilename, inNewCode, inElementToReplace) {

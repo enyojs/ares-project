@@ -1,13 +1,12 @@
-/*global ProjectKindsModel, ares, enyo, setTimeout */
+/*global ProjectKindsModel, ares, enyo, setTimeout, StateMachine */
 
 enyo.kind({
 	name: "Designer",
 	published: {
-		designerFrameReady: false,
 		height: null,
 		width: null,
 		currentFileName: "",
-		autoZoom: false,
+		autoZoom: false
 	},
 	events: {
 		onSelect: "",
@@ -23,40 +22,202 @@ enyo.kind({
 		onScaleChange: ""
 	},
 	components: [
-		{name: "client", tag: "iframe", classes: "ares-designer-frame-client"},
+		{name: "designerFrame", tag: "iframe", classes: "ares-designer-frame-client"},
 		{name: "communicator", kind: "RPCCommunicator", onMessage: "receiveMessage"}
 	],
 	baseSource: "designerFrame.html",
 	projectSource: null,
-	selection: null,
-	reloadNeeded: false,
+	selection: null, // extensively (and directly) used by Deimos
 	scale: 1,
-	reloading: false,
 	debug: false,
+
+	fsm: null,
+	fsmStruct: {
+		initial: 'off',
+		events: [
+			// start designer
+			{name: 'projectSelected', from: ['off','ready','broken'], to: 'reloading'},
+			{name: 'dfLoaded',        from: 'reloading',     to: 'initializing'},
+			{name: 'dfInitialized',   from: 'initializing',  to: 'initialized'},
+			{name: 'dfReady',         from: 'initialized',   to: 'ready'},
+			{name: 'dfReloadNeeded',  from: 'reloading',     to: 'broken'},
+
+			{name: 'render',          from: 'ready',         to: 'rendering'},
+			{name: 'dfRendered',      from: 'rendering',     to: 'ready'},
+			{name: 'dfRenderError',   from: 'rendering',     to: 'ready'},
+			{name: 'dfRequestReload', from: 'rendering',     to: 'off'},
+
+			{name: 'syncFile',        from: ['ready','closed'],  to: 'updating'},
+			{name: 'dfRequestReload', from: 'updating',      to: 'off'},
+			{name: 'dfUpdated',       from: 'updating',      to: 'ready'},
+			{name: 'dfReloadNeeded',  from: 'updating',      to: 'broken'},
+
+			{name: 'select',          from: 'ready',         to: 'selecting'},
+			{name: 'dfSelected',      from: 'selecting',     to: 'ready'},
+			{name: 'dfSelect',        from: 'ready',         to: 'ready'},
+
+			{name: 'cleanUp',         from: 'ready',         to: 'closed'},
+
+			{name: 'modifyProperty',  from: 'ready',         to: 'rendering'},
+
+			{name: 'render',          from: 'broken',        to: 'reloading'}
+		],
+		callbacks: {
+			onenterstate: function(event, from, to) {
+				if (this.trace) {
+					this.trace("fsm got event " + event + ' from ' + from + ' to ' + to );
+				}
+			},
+			onleaveoff: function(event, from, to) {
+				this.fsmStash = [];
+			},
+			ondfReady: function(event, from, to) { // pop
+				this.execCb();
+				if (this.fsmStash.length) {
+					var resume = this.fsmStash.shift();
+					var that = this;
+					var evtName = resume[0];
+					var evtNext = this[evtName];
+					var evtArgs = resume[1];
+					this.trace("resume " + evtName);
+					window.setTimeout( function(){ evtNext.apply(that,evtArgs); });
+				}
+			},
+			onprojectSelected: function(event, from, to, inSource, next){
+				this.pendingCb = next;
+				this.designer._reloadDesignerFrame(inSource);
+			},
+			ondfLoaded: function(event, from, to) {
+				this.designer.designerFrameLoaded();
+			},
+			ondfInitialized: function(event, from, to) {
+				this.designer.sendDesignerFrameContainerData();
+			},
+
+			onrender: function(event, from, to, fileName, theKind, inSelectId, next) {
+				ares.assertCb(next);
+				var df = this.designer;
+				if (from === 'broken') {
+					// render will be replayed in ready state
+					this.fsmStash.push([event, [fileName, theKind, inSelectId, next]]);
+					df._reloadDesignerFrame(df.projectSource);
+				} else {
+					this.pendingCb = next;
+					df._renderKind(fileName, theKind, inSelectId);
+				}
+			},
+			ondfRendered: function(event, from, to, msg) {
+				this.execCb();
+				this.designer._updateKind(msg);
+			},
+
+			onsyncFile: function(event, from, to, filename, inCode, next) {
+				this.pendingCb = next;
+				this.designer._syncFile(filename, inCode);
+			},
+			ondfUpdated: function(event, from, to) {
+				this.execCb();
+			},
+
+			onselect: function(event, from, to, inControl) {
+				this.designer.sendMessage({op: "select", val: inControl});
+			},
+			ondfSelected: function(event, from, to, msg) {
+				var selection = enyo.json.codify.from(msg.val);
+				this.designer.selection = selection;
+				this.designer.doSelected({component: selection});
+			},
+			ondfSelect: function(event, from, to, msg) {
+				var selection = enyo.json.codify.from(msg.val);
+				this.designer.selection = selection;
+				// note the subtle difference: doSelect_ed_ event is sent
+				this.designer.doSelect({component: selection});
+			},
+
+			onmodifyProperty:  function(event, from, to, inProperty, inValue, next) {
+				this.pendingCb = next;
+				this.designer.sendMessage({
+					op: "modify",
+					filename: this.designer.currentFileName,
+					val: {property: inProperty, value: inValue}
+				});
+			},
+
+			oncleanUp: function(event, from, to) {
+				this.designer.sendMessage({op: "cleanUp"});
+			},
+
+			// error handling
+			ondfRequestReload: function(event, from, to, err) {
+				var deimos = this.designer.owner;
+				err.callback = deimos.closeDesigner.bind(deimos);
+				err.action = "Switching back to code editor";
+				this.designer.doError(err);
+			},
+			ondfReloadNeeded: function(event, from, to, err) {
+				this.designer.doError(err);
+			},
+			ondfRenderError: function(event, from, to, err) {
+				this.designer.doError(err);
+			}
+		},
+		error: function(eventName,from, to, args, errorCode, errorMessage,error) {
+			if (errorCode === 300) {
+				// Invalid callback. See state-machine source code for error codes :-/
+				throw error || errorMessage ;
+			} else if ( /^df/.test(eventName) ) {
+				// don't delay event coming from designer frame
+				throw ("Unexpected event " + eventName + " coming from designer in state " + from) ;
+			} else {
+				this.trace("got " + eventName + " while in state " + from +", stashing event");
+				this.fsmStash.push([eventName, args]);
+			}
+		}
+	},
+
 	create: function() {
 		ares.setupTraceLogger(this);
+		var fsm = StateMachine.create( this.fsmStruct );
+		fsm.trace = this.trace.bind(this);
+		fsm.execCb = (function() {
+			var cb = this.pendingCb;
+			this.pendingCb = null;
+			cb();
+		}).bind(fsm);
+		fsm.designer = this ;
+		this.fsm = fsm;
+
 		this.inherited(arguments);
 	},
+
+	/**
+	 * Check if designerFrame needs a project reload
+	 * @returns {Boolean} true when designer is off or broken
+	 */
+	isBroken: function() {
+		return  ( this.fsm.is('broken') || this.fsm.is('off'));
+	},
+
 	rendered: function() {
 		this.inherited(arguments);
-		this.$.communicator.setRemote(this.$.client.hasNode().contentWindow);
+		this.$.communicator.setRemote(this.$.designerFrame.hasNode().contentWindow);
 	},
 	heightChanged: function() {
-		this.$.client.applyStyle("height", this.getHeight()+"px");
-		this.resizeClient();
-		this.repositionClient();
+		this.$.designerFrame.applyStyle("height", this.getHeight()+"px");
+		this.resizeDesignerFrame();
+		this.repositionDesignerFrame();
 	},
 	widthChanged: function() {
-		this.$.client.applyStyle("width", this.getWidth()+"px");
-		this.resizeClient();
-		this.repositionClient();
+		this.$.designerFrame.applyStyle("width", this.getWidth()+"px");
+		this.resizeDesignerFrame();
+		this.repositionDesignerFrame();
 		this.applyZoom();
 	},
 	zoom: function(inScale) {
 		this.scale = (inScale >= 0) ? Math.max(inScale / 100, 0.2) : 1;
-		enyo.dom.transformValue(this.$.client, "scale", this.scale);
-		this.$.client.resized();
-		this.repositionClient();
+		enyo.dom.transformValue(this.$.designerFrame, "scale", this.scale);
+		this.$.designerFrame.resized();
+		this.repositionDesignerFrame();
 	},
 	zoomFromWidth: function(){
 		var scale = (this.width > 0) ? Math.round((this.getBounds().width * 100)/this.width) : 100;
@@ -73,7 +234,7 @@ enyo.kind({
 		this.applyZoom();
 		return true;
 	},
-	repositionClient: function() {
+	repositionDesignerFrame: function() {
 		var height = this.getHeight(),
 			width = this.getWidth(),
 			scaledHeight = height * this.scale,
@@ -81,29 +242,27 @@ enyo.kind({
 			y = -1*(height - scaledHeight)/2,
 			x = -1*(width  - scaledWidth)/2;
 		
-		this.$.client.addStyles("top: " + y + "px; left: " + x + "px");
+		this.$.designerFrame.addStyles("top: " + y + "px; left: " + x + "px");
 	},
 	
-	updateSourcePending: [],
 	/**
-	 *
+	 * Reload designerFrame and update current source from all project files loaded in Ares.
 	 * @param {Ares.Model.Project} inSource is a backbone object defined in WorkspaceData.js
 	 * @param {Function} next
 	 */
 	updateSource: function(inSource, next) {
 		ares.assertCb(next);
-		if (this.updateSourceCallback) {
-			this.log("updateSource called while previous updateSourceCallback is still pending ");
-			this.updateSourcePending.push([inSource, next]);
-			return ;
-		}
+		this.fsm.projectSelected(inSource,next);
+	},
+
+	_reloadDesignerFrame: function(inSource) {
+		// called by fsm
 		var serviceConfig = inSource.getService().config;
-		this.setDesignerFrameReady(false);
 		this.projectSource = inSource;
 		this.projectPath = serviceConfig.origin + serviceConfig.pathname + "/file";
 		var iframeUrl = this.projectSource.getProjectUrl() + "/" + this.baseSource + "?overlay=designer";
 		this.trace("Setting designerFrame url: ", iframeUrl);
-		this.$.client.hasNode().src = iframeUrl;
+		this.$.designerFrame.hasNode().src = iframeUrl;
 
 		var mopUp = function() {
 			var msg = "designerFrame load failed. Please check console log for errors";
@@ -113,8 +272,7 @@ enyo.kind({
 		};
 
 		var timer = setTimeout(mopUp.bind(this), 3000);
-		// next callback is run once a "ready" message is received from designerFrame
-		this.updateSourceCallback = function () {
+		this.updateSourceCallback = function () { // FIXME pass this to state machine
 			window.clearTimeout(timer);
 			next();
 		};
@@ -138,8 +296,8 @@ enyo.kind({
 	},
 
 	reload: function() {
-		this.reloading = true;
-		this.updateSource(this.projectSource, function(){} );
+		this.trace("reload requested by user");
+		this.updateSource(this.projectSource, this.doReloadComplete.bind(this) );
 	},
 	
 	//* Send message via communicator
@@ -151,7 +309,7 @@ enyo.kind({
 	receiveMessage: function(inSender, inEvent) {
 		
 		var msg = inEvent.message;
-		var deimos = this.owner;
+		var err;
 
 		this.trace("Op: ", msg.op, msg);
 
@@ -160,68 +318,74 @@ enyo.kind({
 			return;
 		}
 		
-		// designerFrame is initialized and ready to do work.
 		if(msg.op === "state" && msg.val === "initialized") {
-			this.sendDesignerFrameContainerData();
-		// designerFrame received container data
+			// designerFrame is initialized and ready to do work.
+			// reply op: "containerData"
+			this.fsm.dfInitialized();
 		} else if(msg.op === "state" && msg.val === "ready") {
-			this.setDesignerFrameReady(true);
-			if(this.reloading) {
-				this.doReloadComplete();
-				this.reloading = false;
-			}
-			this._runUpdateSourceCb('done') ;
-		// Loaded event sent from designerFrame and awaiting aresOptions.
+			// designerFrame received container data, no reply
+			this.fsm.dfReady();
 		} else if(msg.op === "state" && msg.val === "loaded") {
-			this.designerFrameLoaded();
-		// The current kind was successfully rendered in the iframe
+			// Loaded event sent from designerFrame and awaiting aresOptions.
+			// reply op: "initializeOptions"
+			this.fsm.dfLoaded();
 		} else if(msg.op === "rendered") {
-			this.updateKind(msg);
-		// Select event sent from here was completed successfully. Set _this.selection_.
+			// The current kind was successfully rendered in the iframe, no reply
+			this.fsm.dfRendered(msg);
 		} else if(msg.op === "selected") {
-			this.selection = enyo.json.codify.from(msg.val);
-			this.doSelected({component: this.selection});
-		// New select event triggered in designerFrame. Set _this.selection_ and bubble.
+			// Select event sent from here was completed successfully. no reply
+			this.fsm.dfSelected(msg);
 		} else if(msg.op === "select") {
-			this.selection = enyo.json.codify.from(msg.val);
-			this.doSelect({component: this.selection});
-		// Highlight drop target to minic what's happening in designerFrame
+			// New select event triggered in designerFrame. no reply
+			this.fsm.dfSelect(msg);
 		} else if(msg.op === "syncDropTargetHighlighting") {
+			// Highlight drop target in inspector to mimic what's
+			// happening in designerFrame, no reply
 			this.doSyncDropTargetHighlighting({component: enyo.json.codify.from(msg.val)});
-		// New component dropped in designerFrame
 		} else if(msg.op === "createItem") {
+			// New component dropped in designerFrame
+			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doCreateItem(msg.val);
-		// Existing component dropped in designerFrame
 		} else if(msg.op === "moveItem") {
+			// Existing component dropped in designerFrame
+			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doMoveItem(msg.val);
-		} else if (msg.op === "reloadNeeded") {
-			this.reloadNeeded = true;
+		} else if (msg.op === "updated") {
+			// code was updated live in designerFrame
+			this.fsm.dfUpdated();
 		} else if(msg.op === "error") {
-			if (( ! msg.val.hasOwnProperty('popup')) || msg.val.popup === true) {
-				if ( msg.val.triggeredByOp === 'render' && this.renderCallback ) {
-					this.log("dropping renderCallback after error ", msg.val.msg);
-					this.renderCallback = null;
-				}
-				if (msg.val.requestReload === true) {
-					msg.val.callback = deimos.closeDesigner.bind(deimos);
-					msg.val.action = "Switching back to code editor";
-				}
-				this.doError(msg.val);
+			// no reply
+
+			err = { msg: msg.val.msg, err: msg.val.err } ;
+
+			if (msg.val.requestReload === true) {
+				this.fsm.dfRequestReload(err);
+			} else if (msg.val.reloadNeeded === true) {
+				this.fsm.dfReloadNeeded(err);
+			} else if ( msg.val.triggeredByOp === 'render' ) {
+				// missing constructor or missing prototype
+				this.fsm.dfRenderError(err);
 			} else {
-				// TODO: We should store the error into a kind of rotating error log - ENYO-2462
+				this.log("unexpected error message from designer", msg);
+				this.doError(err);
 			}
-		// Existing component resized
+			// TODO: We should store the error into a kind of rotating error log - ENYO-2462
 		} else if(msg.op === "resize") {
+			// Existing component resized
+			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doResizeItem(msg.val);
-		// Returning requested position value
 		} else if(msg.op === "returnPositionValue") {
+			// Returning requested position value, no reply
 			this.doReturnPositionValue(msg.val);
-		// Default case
 		} else {
+			// Default case
 			enyo.warn("Deimos designer received unknown message op:", msg);
 		}
 	},
-	//* Pass _isContainer_ info down to designerFrame
+
+	/**
+	 * Pass _isContainer_ info down to designerFrame, called in fsm
+	 */
 	sendDesignerFrameContainerData: function() {
 		this.sendMessage({op: "containerData", val: ProjectKindsModel.getFlattenedContainerInfo()});
 	},
@@ -235,30 +399,12 @@ enyo.kind({
 	 */
 	renderKind: function(fileName, theKind, inSelectId,next) {
 		ares.assertCb(next);
-		this.trace("reloadNeeded", this.reloadNeeded);
-		if (this.reloadNeeded) {
-			this.reloadNeeded = false;
-			// trigger a complete reload of designerFrame
-			this.reload();
-			setTimeout(next(new Error('reload started')), 0);
-			return;
-		}
+		this.fsm.render(fileName, theKind, inSelectId, next);
+	},
 
-		if(!this.getDesignerFrameReady()) {
-			// frame is still being reloaded.
-			setTimeout(next(new Error('on-going reload')), 0);
-			return;
-		}
-		
-		if (this.renderCallback) {
-			// a rendering is on-going
-			this.log("dropped rendering: another one is on-going");
-			setTimeout(next(new Error('on-going rendering')), 0);
-			return;
-		}
+	_renderKind: function(fileName, theKind, inSelectId) {
+		// called from fsm
 		this.currentFileName = fileName;
-		this.renderCallback = next ;
-
 		var components = [theKind];
 		this.sendMessage({
 			op: "render",
@@ -272,20 +418,45 @@ enyo.kind({
 		});
 	},
 	select: function(inControl) {
-		this.sendMessage({op: "select", val: inControl});
+		this.fsm.select(inControl);
 	},
+
+	/**
+	 * Send message to designer frame only if state machine is in
+	 * state 'ready'. Otherwise, the message is dropped
+	 * @param {} msg
+	 */
+	sendMessageIfReady: function(msg) {
+		if (this.fsm.is('ready')) {
+			this.sendMessage(msg);
+		}
+		else {
+			this.trace('dropped msg "' + msg.op + '" while fsm is in state ' + this.fsm.current);
+		}
+	},
+
 	highlightDropTarget: function(inControl) {
-		this.sendMessage({op: "highlight", val: inControl});
+		this.sendMessageIfReady({op: "highlight", val: inControl});
 	},
 	unHighlightDropTargets: function() {
-		this.sendMessage({op: "unhighlight"});
+		this.sendMessageIfReady({op: "unhighlight"});
 	},
-	//* Property was modified in Inspector, update designerFrame.
-	modifyProperty: function(inProperty, inValue) {
-		this.sendMessage({op: "modify", filename: this.currentFileName, val: {property: inProperty, value: inValue}});
+
+	/**
+	 * Property was modified in Inspector, update designerFrame.
+	 * @param {String} inProperty: property name
+	 * @param {String} inValue: prop value
+	 * @param {Function} next
+	 */
+	modifyProperty: function(inProperty, inValue, next) {
+		ares.assertCb(next);
+		this.fsm.modifyProperty(inProperty, inValue, next);
 	},
+
 	//* Send message to Deimos with new kind/components from designerFrame
-	updateKind: function(msg) {
+	_updateKind: function(msg) {
+		// called by fsm
+		this.trace("called by op " + msg.triggeredByOp + " for file " + msg.filename );
 		var deimos = this.owner;
 
 		// need to check if the rendered was done for the current file
@@ -293,21 +464,13 @@ enyo.kind({
 			deimos.buildComponentView(msg);
 			deimos.updateCodeInEditor(msg.filename); // based on new Component view
 
-			// updateKind may be called by other op than 'render'
-			if (this.renderCallback && msg.triggeredByOp === 'render') {
-				this.renderCallback() ;
-				this.renderCallback = null;
-			}
 		} else {
 			this.log("dropped rendered message for stale file ",msg.filename);
-			if (this.renderCallback && msg.triggeredByOp === 'render') {
-				// other cleanup may be needed...
-				this.renderCallback = null;
-			}
 		}
 	},
 	//* Initialize the designerFrame depending on aresOptions
 	designerFrameLoaded: function() {
+		// called by fsm
 		// FIXME: ENYO-3433 : options are hard-coded with
 		// defaultKindOptions that are currently known. the whole/real
 		// set must be determined indeed.
@@ -315,45 +478,57 @@ enyo.kind({
 	},
 	//* Clean up the designerFrame before closing designer
 	cleanUp: function() {
-		this.sendMessage({op: "cleanUp"});
+		this.fsm.cleanUp();
 	},
 
 	/**
-	 * Pass inCode down to the designerFrame (to avoid needing to reload the iFrame)
+	 * Pass inCode down to the designerFrame (to avoid needing to
+	 * reload the iFrame). Typically called to load files modified by
+	 * Ace into designerFrame. Also called for each project file when
+	 * switching to designer.
 	 * @param {String} projectName
 	 * @param {String} filename
 	 * @param {String} inCode
 	 */
-	syncFile: function(projectName, filename, inCode) {
+	syncFile: function(projectName, filename, inCode, next) {
+		ares.assertCb(next);
 		// check if the file is indeed part of the current project
 		if (projectName === this.projectSource.getName() ){
-			if( /\.css$/i.test(filename) ) {
-				// Sync the CSS in inCode with the designerFrame (to avoid needing to reload the iFrame)
-				this.sendMessage({op: "cssUpdate", val: {filename: this.projectPath + filename, code: inCode}});
-			} else if( /\.js$/i.test(filename) ) {
-				this.sendMessage({op: "codeUpdate", val: inCode});
-			}
+			this.fsm.syncFile(filename, inCode, next);
 		} else {
-			this.warn("syncFile aborted: project mismatch. Expected " + this.projectSource.getName()
-					  + ' got '+ projectName + ' with file ' + filename);
+			var msg = "syncFile aborted: project mismatch. Expected " + this.projectSource.getName()
+					  + ' got '+ projectName + ' with file ' + filename;
+			var err = new Error(msg);
+			setTimeout(function () { next(err);} ,0);
 		}
 	},
 
-	resizeClient: function() {
-		this.sendMessage({op: "resize"});
+	_syncFile: function (filename, inCode) {
+		// called by fsm
+		if( /\.css$/i.test(filename) ) {
+			// Sync the CSS in inCode with the designerFrame (to avoid needing to reload the iFrame)
+			this.sendMessage({op: "cssUpdate", val: {filename: this.projectPath + filename, code: inCode}});
+		} else if( /\.js$/i.test(filename) ) {
+			this.sendMessage({op: "codeUpdate", val: inCode});
+		}
+	},
+
+	resizeDesignerFrame: function() {
+		this.sendMessageIfReady({op: "resize"});
 	},
 	//* Prerender simulated drop in designerFrame
 	prerenderDrop: function(inTargetId, inBeforeId) {
-		this.sendMessage({op: "prerenderDrop", val: {targetId: inTargetId, beforeId: inBeforeId}});
+		this.sendMessageIfReady({op: "prerenderDrop", val: {targetId: inTargetId, beforeId: inBeforeId}});
 	},
 	//* Request auto-generated position value from designerFrame
 	requestPositionValue: function(inProp) {
-		this.sendMessage({op: "requestPositionValue", val: inProp});
+		this.sendMessageIfReady({op: "requestPositionValue", val: inProp});
 	},
 	sendSerializerOptions: function(serializerOptions) {
+		// not used in the designerFrame, but in serialiser. No need to check fsm state
 		this.sendMessage({op: "serializerOptions", val: serializerOptions});	
 	},
 	sendDragType: function(type) {
-		this.sendMessage({op: "dragStart", val: type});
+		this.sendMessageIfReady({op: "dragStart", val: type});
 	}
 });

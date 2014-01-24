@@ -100,7 +100,6 @@ enyo.kind({
 	index: null,
 	previousContent: "",
 	fileName: "",
-	selectFromComponentView: false,
 	zoomValues: [25, 50, 100, 125, 150, 200, 400],
 	initZoomIndex: 2,
 	create: function() {
@@ -118,12 +117,16 @@ enyo.kind({
 		this.trace("called");
 		var initItem = this.$.devicePicker.getClientControls()[0];
 		this.$.devicePicker.setSelected(initItem);
-		this.deviceChosen(null, {selected: initItem});
+		this.deviceChosen();
 		var i, z;
 		for (i = 0; (z = this.zoomValues[i]); i++) {
 			this.$.zoomPicker.createComponent({content: z+"%", value: z, active: z === this.zoomValues[this.initZoomIndex]});
 		}
 		this.zoomDesigner(null, {selected: this.$.zoomPicker.getSelected()});
+	},
+
+	isDesignerBroken: function() {
+		return this.$.designer.isBroken();
 	},
 
 	/**
@@ -269,19 +272,17 @@ enyo.kind({
 	designerSelect: function(inSender, inEvent) {
 		var c = inSender.selection;
 		this.refreshInspector();
-		var haveToScroll = !this.selectFromComponentView;
-		this.$.componentView.setSelected(c, haveToScroll);
-		this.selectFromComponentView = false;
+		this.$.componentView.setSelected(c, true); // -> ask for scroll
 		return true;
 	},
 	// Select event triggered by component view was completed. Refresh inspector.
 	designerSelected: function(inSender, inEvent) {
 		this.refreshInspector();
+		this.$.componentView.setSelected(inSender.selection, false);
 		return true;
 	},
 	componentViewSelect: function(inSender, inEvent) {
 		this.$.designer.select(inEvent.component);
-		this.selectFromComponentView = true;
 		return true;
 	},
 	syncComponentViewDropTargetHighlighting: function(inSender, inEvent) {
@@ -300,7 +301,7 @@ enyo.kind({
 			return true;
 		}
 
-		this.$.designer.modifyProperty(inEvent.name, inEvent.value);
+		this.$.designer.modifyProperty(inEvent.name, inEvent.value, ares.noNext);
 		return true;
 	},
 	inspectorRequestPositionValue: function(inSender, inEvent) {
@@ -822,8 +823,9 @@ enyo.kind({
 	reloadComplete: function() {
 		this.rerenderKind();
 	},
-	syncFile: function(project, filename, code) {
-		this.$.designer.syncFile(project, filename, code);
+	syncFile: function(project, filename, code, next) {
+		ares.assertCb(next);
+		this.$.designer.syncFile(project, filename, code, next);
 	},
 	addAresIds: function(inComponents) {
 		for(var i = 0; i < inComponents.length; i++) {
@@ -860,7 +862,7 @@ enyo.kind({
 		var selected = this.$.devicePicker.getSelected();
 
 		if(!selected.value) {
-			return;
+			return true; // stop bubble
 		}
 
 		// Update fields with predefined values
