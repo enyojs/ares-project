@@ -60,7 +60,7 @@ enyo.kind({
 					{
 						name: "phonegap-version",
 						label:"Phonegap version",
-						content:["3.1.0", "2.9.0", "2.7.0", "2.5.0"],
+						content:["3.1.0", "3.0.0", "2.9.0", "2.7.0", "2.5.0"],
 						defaultValue: "3.1.0", // As recommended by PGB [doc|https://build.phonegap.com/docs/config-xml] see Multi-platform
 						type: "PickerRow", 
 						jsonSection: "preferences"
