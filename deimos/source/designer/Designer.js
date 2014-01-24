@@ -238,7 +238,6 @@ enyo.kind({
 		this.$.designerFrame.addStyles("top: " + y + "px; left: " + x + "px");
 	},
 	
-	updateSourcePending: [],
 	/**
 	 * Reload designerFrame and update current source from all project files loaded in Ares.
 	 * @param {Ares.Model.Project} inSource is a backbone object defined in WorkspaceData.js
@@ -288,8 +287,7 @@ enyo.kind({
 			// reply op: "containerData"
 			this.fsm.dfInitialized();
 		} else if(msg.op === "state" && msg.val === "ready") {
-			// designerFrame received container data
-			// no reply
+			// designerFrame received container data, no reply
 			this.setDesignerFrameReady(true);
 			this.fsm.dfReady();
 		} else if(msg.op === "state" && msg.val === "loaded") {
@@ -297,8 +295,7 @@ enyo.kind({
 			// reply op: "initializeOptions"
 			this.fsm.dfLoaded();
 		} else if(msg.op === "rendered") {
-			// The current kind was successfully rendered in the iframe
-			// no reply
+			// The current kind was successfully rendered in the iframe, no reply
 			this.fsm.dfRendered(msg);
 		} else if(msg.op === "selected") {
 			// Select event sent from here was completed successfully. no reply
@@ -308,8 +305,7 @@ enyo.kind({
 			this.fsm.dfSelect(msg);
 		} else if(msg.op === "syncDropTargetHighlighting") {
 			// Highlight drop target in inspector to mimic what's
-			// happening in designerFrame
-			// no reply
+			// happening in designerFrame, no reply
 			this.doSyncDropTargetHighlighting({component: enyo.json.codify.from(msg.val)});
 		} else if(msg.op === "createItem") {
 			// New component dropped in designerFrame
@@ -345,8 +341,7 @@ enyo.kind({
 			// reply op:render (or do a complete reload) after a detour through deimos
 			this.doResizeItem(msg.val);
 		} else if(msg.op === "returnPositionValue") {
-			// Returning requested position value
-			// no reply
+			// Returning requested position value, no reply
 			this.doReturnPositionValue(msg.val);
 		} else {
 			// Default case
