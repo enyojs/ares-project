@@ -125,6 +125,10 @@ enyo.kind({
 		this.zoomDesigner(null, {selected: this.$.zoomPicker.getSelected()});
 	},
 
+	isDesignerBroken: function() {
+		return this.$.designer.isBroken();
+	},
+
 	/**
 	 * Loads the first kind passed thru the data parameter.
 	 * This function acts on pallete, inspector, kindPicker and (may be) sends

@@ -191,6 +191,15 @@ enyo.kind({
 
 		this.inherited(arguments);
 	},
+
+	/**
+	 * Check if designerFrame needs a project reload
+	 * @returns {Boolean} true when designer is off or broken
+	 */
+	isBroken: function() {
+		return  ( this.fsm.is('broken') || this.fsm.is('off'));
+	},
+
 	rendered: function() {
 		this.inherited(arguments);
 		this.$.communicator.setRemote(this.$.designerFrame.hasNode().contentWindow);

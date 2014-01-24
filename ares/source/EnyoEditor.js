@@ -884,24 +884,33 @@ enyo.kind({
 	designDocument: function(inData) {
 		this.trace();
 		var deimos = this.$.deimos;
+		var project = inData.projectData ;
+		var todo = [];
+
+		if ( deimos.isDesignerBroken() ) {
+			// reload designer
+			todo.push( deimos.projectSelected.bind(deimos, project) );
+		}
+
+		// send all files being edited to the designer, this
+		// will send code to designerFrame
+		todo.push( this.syncEditedFiles.bind(this,inData.projectData) );
+
+		// then load palette and inspector, and tune serialiser
+		// behavior sends option data to designerFrame and render main
+		// kind
+		todo.push( deimos.loadDesignerUI.bind(deimos, inData) );
+
+		todo.push((function(next) {
+			// switch to Deimos editor
+			this.showDeimosPanel();
+			// update an internal variable
+			this.activeDocument.setCurrentIF('designer');
+			next();
+		}).bind(this));
 
 		async.series(
-			[
-				// send all files being edited to the designer, this
-				// will send code to designerFrame
-				this.syncEditedFiles.bind(this,inData.projectData),
-				// then load palette and inspector, and tune
-				// serialiser behavior sends option data to
-				// designerFrame and render main kind
-				deimos.loadDesignerUI.bind(deimos, inData),
-				(function(next) {
-					// switch to Deimos editor
-					this.showDeimosPanel();
-					// update an internal variable
-					this.activeDocument.setCurrentIF('designer');
-					next();
-				}).bind(this)
-			],
+			todo,
 			(function(err) {
 				if (err) {
 					this.trace("designDocument -> loadDesignerUI done, err is ",err);
