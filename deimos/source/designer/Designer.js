@@ -28,7 +28,7 @@ enyo.kind({
 	],
 	baseSource: "designerFrame.html",
 	projectSource: null,
-	selection: null,
+	selection: null, // extensively (and directly) used by Deimos
 	reloadNeeded: false,
 	scale: 1,
 	debug: false,
@@ -53,6 +53,10 @@ enyo.kind({
 			{name: 'dfRequestReload', from: 'updating',      to: 'off'},
 			{name: 'dfUpdated',       from: 'updating',      to: 'ready'},
 			{name: 'dfReloadNeeded',  from: 'updating',      to: 'broken'},
+
+			{name: 'select',          from: 'ready',         to: 'selecting'},
+			{name: 'dfSelected',      from: 'selecting',     to: 'ready'},
+			{name: 'dfSelect',        from: 'ready',         to: 'ready'},
 
 			{name: 'render',          from: 'broken',        to: 'reloading'},
 		],
@@ -111,6 +115,21 @@ enyo.kind({
 			},
 			ondfUpdated: function(event, from, to) {
 				this.execCb();
+			},
+
+			onselect: function(event, from, to, inControl) {
+				this.designer.sendMessage({op: "select", val: inControl});
+			},
+			ondfSelected: function(event, from, to, msg) {
+				var selection = enyo.json.codify.from(msg.val);
+				this.designer.selection = selection;
+				this.designer.doSelected({component: selection});
+			},
+			ondfSelect: function(event, from, to, msg) {
+				var selection = enyo.json.codify.from(msg.val);
+				this.designer.selection = selection;
+				// note the subtle difference: doSelect_ed_ event is sent
+				this.designer.doSelect({component: selection});
 			},
 
 			// error handling
@@ -265,15 +284,11 @@ enyo.kind({
 			// no reply
 			this.fsm.dfRendered(msg);
 		} else if(msg.op === "selected") {
-			// Select event sent from here was completed successfully. Set _this.selection_.
-			// no reply
-			this.selection = enyo.json.codify.from(msg.val);
-			this.doSelected({component: this.selection});
+			// Select event sent from here was completed successfully. no reply
+			this.fsm.dfSelected(msg);
 		} else if(msg.op === "select") {
-			// New select event triggered in designerFrame. Set _this.selection_ and bubble.
-			// no reply
-			this.selection = enyo.json.codify.from(msg.val);
-			this.doSelect({component: this.selection});
+			// New select event triggered in designerFrame. no reply
+			this.fsm.dfSelect(msg);
 		} else if(msg.op === "syncDropTargetHighlighting") {
 			// Highlight drop target in inspector to mimic what's
 			// happening in designerFrame
@@ -375,7 +390,7 @@ enyo.kind({
 		});
 	},
 	select: function(inControl) {
-		this.sendMessage({op: "select", val: inControl});
+		this.fsm.select(inControl);
 	},
 	highlightDropTarget: function(inControl) {
 		this.sendMessage({op: "highlight", val: inControl});
