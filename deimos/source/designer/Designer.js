@@ -49,7 +49,7 @@ enyo.kind({
 			{name: 'dfRenderError',   from: 'rendering',     to: 'ready'},
 			{name: 'dfRequestReload', from: 'rendering',     to: 'off'},
 
-			{name: 'syncFile',        from: 'ready',         to: 'updating'},
+			{name: 'syncFile',        from: ['ready','closed'],  to: 'updating'},
 			{name: 'dfRequestReload', from: 'updating',      to: 'off'},
 			{name: 'dfUpdated',       from: 'updating',      to: 'ready'},
 			{name: 'dfReloadNeeded',  from: 'updating',      to: 'broken'},
@@ -57,6 +57,8 @@ enyo.kind({
 			{name: 'select',          from: 'ready',         to: 'selecting'},
 			{name: 'dfSelected',      from: 'selecting',     to: 'ready'},
 			{name: 'dfSelect',        from: 'ready',         to: 'ready'},
+
+			{name: 'cleanUp',         from: 'ready',         to: 'closed'},
 
 			{name: 'modifyProperty',  from: 'ready',         to: 'rendering'},
 
@@ -141,6 +143,10 @@ enyo.kind({
 					filename: this.designer.currentFileName,
 					val: {property: inProperty, value: inValue}
 				});
+			},
+
+			oncleanUp: function(event, from, to) {
+				this.designer.sendMessage({op: "cleanUp"});
 			},
 
 			// error handling
@@ -448,6 +454,7 @@ enyo.kind({
 	},
 	//* Initialize the designerFrame depending on aresOptions
 	designerFrameLoaded: function() {
+		// called by fsm
 		// FIXME: ENYO-3433 : options are hard-coded with
 		// defaultKindOptions that are currently known. the whole/real
 		// set must be determined indeed.
@@ -455,7 +462,7 @@ enyo.kind({
 	},
 	//* Clean up the designerFrame before closing designer
 	cleanUp: function() {
-		this.sendMessage({op: "cleanUp"});
+		this.fsm.cleanUp();
 	},
 
 	/**
