@@ -503,20 +503,21 @@ enyo.kind({
 	},
 
 	resizeDesignerFrame: function() {
-		this.sendMessage({op: "resize"});
+		this.sendMessageIfReady({op: "resize"});
 	},
 	//* Prerender simulated drop in designerFrame
 	prerenderDrop: function(inTargetId, inBeforeId) {
-		this.sendMessage({op: "prerenderDrop", val: {targetId: inTargetId, beforeId: inBeforeId}});
+		this.sendMessageIfReady({op: "prerenderDrop", val: {targetId: inTargetId, beforeId: inBeforeId}});
 	},
 	//* Request auto-generated position value from designerFrame
 	requestPositionValue: function(inProp) {
-		this.sendMessage({op: "requestPositionValue", val: inProp});
+		this.sendMessageIfReady({op: "requestPositionValue", val: inProp});
 	},
 	sendSerializerOptions: function(serializerOptions) {
+		// not used in the designerFrame, but in serialiser. No need to check fsm state
 		this.sendMessage({op: "serializerOptions", val: serializerOptions});	
 	},
 	sendDragType: function(type) {
-		this.sendMessage({op: "dragStart", val: type});
+		this.sendMessageIfReady({op: "dragStart", val: type});
 	}
 });
