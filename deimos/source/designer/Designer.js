@@ -409,21 +409,26 @@ enyo.kind({
 	select: function(inControl) {
 		this.fsm.select(inControl);
 	},
-	highlightDropTarget: function(inControl) {
+
+	/**
+	 * Send message to designer frame only if state machine is in
+	 * state 'ready'. Otherwise, the message is dropped
+	 * @param {} msg
+	 */
+	sendMessageIfReady: function(msg) {
 		if (this.fsm.is('ready')) {
-			this.sendMessage({op: "highlight", val: inControl});
+			this.sendMessage(msg);
 		}
 		else {
-			this.trace("dropped highlight control while fsm in in state " + this.fsm.current);
+			this.trace('dropped msg "' + msg.op + '" while fsm is in state ' + this.fsm.current);
 		}
 	},
+
+	highlightDropTarget: function(inControl) {
+		this.sendMessageIfReady({op: "highlight", val: inControl});
+	},
 	unHighlightDropTargets: function() {
-		if (this.fsm.is('ready')) {
-			this.sendMessage({op: "unhighlight"});
-		}
-		else {
-			this.trace("dropped unhighlight control while fsm in in state " + this.fsm.current);
-		}
+		this.sendMessageIfReady({op: "unhighlight"});
 	},
 
 	/**
