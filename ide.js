@@ -469,6 +469,13 @@ function startService(service) {
 	subProcesses.push(subProcess);
 }
 
+var unproxyfiableHeaders = [
+	"Access-Control-Allow-Methods", 
+	"Access-Control-Allow-Headers", 
+	"Access-Control-Allow-Origin", 
+	"Access-Control-Expose-Headers"
+];
+
 function proxyServices(req, res, next) {
 	log.verbose('proxyServices()', m("req.params:", req.params, ", req.query:", req.query));
 	var query = {},
@@ -501,6 +508,12 @@ function proxyServices(req, res, next) {
 	};
 	log.verbose('proxyServices()', m("options:", options));
 
+	// ENYO-3634: if we proxyfy a CORS request, it's not CORS anymore between ARES and proxyfied service
+	// so we remove CORS request headers (note that OPTIONS requests should never make it to here!)
+	if (options.headers && options.headers.origin) {
+		delete options.headers.origin;
+	}
+
 	var creq = http.request(options, function(cres) {
 		// transmit every header verbatim, but cookies
 		log.verbose('proxyServices()', m("cres.headers:", cres.headers));
@@ -511,7 +524,11 @@ function proxyServices(req, res, next) {
 				var cookies = parseSetCookie(val);
 				cookies.forEach(translateCookie.bind(this, service, res));
 			} else {
-				res.header(key, val);
+				// ENYO-3634 / CORS is the sole responsibility of the ARES server when services are proxified
+				// therefore should the service have fixed CORS headers, they are ignored.
+				if (unproxyfiableHeaders.indexOf(key) === -1) {
+					res.header(key, val);
+				}
 			}
 		}
 		res.writeHead(cres.statusCode);
@@ -618,25 +635,42 @@ defineServerTimeout(argv.timeout);
 
 var corsHeaders,
     allowedMethods = ['GET', 'PUT', 'POST', 'DELETE'],
+    exposedHeaders = ['x-content-type'],
     allowedHeaders = ['Content-Type','Authorization','Cache-Control','X-HTTP-Method-Override'];
 
 function setCorsHeaders(req, res, next) {
+	var cors = ide.res.cors || {};
+	var origins = (Array.isArray(cors.origins) && cors.origins.length > 0 && cors.origins);
+
+	// one time setup - allowed methods and headers don't change per request
 	if (!corsHeaders) {
-		var cors = ide.res.cors || {},
-		    origins = (Array.isArray(cors.origins) && cors.origins.length > 0 && cors.origins),
-		    methods = Array.isArray(cors.methods) && cors.methods,
+		var methods = Array.isArray(cors.methods) && cors.methods,
 		    headers = Object.keys(ide.res.headers || {});
 		corsHeaders = {};
-		corsHeaders['Access-Control-Allow-Origin'] = (origins || [origin]).join(',');
 		corsHeaders['Access-Control-Allow-Methods'] = allowedMethods.concat(methods).join(',');
 		corsHeaders['Access-Control-Allow-Headers'] = allowedHeaders.concat(headers).join(',');
+		corsHeaders['Access-Control-Expose-Headers'] = exposedHeaders.concat(headers).join(',');
+		corsHeaders['Access-Control-Max-Age'] = '86400';
 		log.info("setCorsHeaders()", "CORS will use:", corsHeaders);
 	}
-	for (var h in corsHeaders) {
-		log.silly("setCorsHeaders()", h, ":", corsHeaders[h]);
-		// Lowercase HTTP headers, work-around an iPhone bug
-		res.header(h.toLowerCase(), corsHeaders[h]);
-	}
+
+	// request time: is this a CORS request? [CLUE: if yes, there's an origin]
+	if (req.headers && req.headers.origin) {
+		if (origins.indexOf("*") !== -1) {
+			corsHeaders['Access-Control-Allow-Origin'] = "*";
+		} else {
+			if (origins.indexOf(req.headers.origin) !== -1) {
+				corsHeaders['Access-Control-Allow-Origin'] = req.headers.origin;
+			} else {
+				corsHeaders['Access-Control-Allow-Origin'] = "";
+			}
+		}
+		for (var h in corsHeaders) {
+			log.silly("setCorsHeaders()", h, ":", corsHeaders[h]);
+			// Lowercase HTTP headers, work-around an iPhone bug
+			res.header(h.toLowerCase(), corsHeaders[h]);
+		}
+	} 
 	if ('OPTIONS' === req.method) {
 		res.status(200).end();
 	} else {
@@ -689,7 +723,7 @@ app.configure(function(){
 		res.status(200).json({timestamp: ide.res.timestamp});
 	});
 	app.get('/res/services', function(req, res, next) {
-		log.http('main', m("GET /res/services:", ide.res.services));
+		log.verbose('main', m("GET /res/services:", ide.res.services));
 		res.status(200).json({services: ide.res.services});
 	});
 	app.get('/res/aboutares', function(req, res, next) {		

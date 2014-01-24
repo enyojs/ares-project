@@ -1,6 +1,7 @@
+/*global enyo, ares, Ares */
+
 enyo.kind({
 	name: "editorSettings",
-	kind: "FittableRows",
 	events: {
 		onCloseSettings: "",
 		onApplySettings: "",
@@ -9,27 +10,23 @@ enyo.kind({
 		onChangeSettings:""
 	},
 	published: {
-		settings: {
+		settings: {},
+		previewSettings: {},
+		defaultsSettings: {
 			theme:"clouds",
 			highlight:false,
 			fontsize:12,
 			wordwrap:false,
 			rightpane:true,
-			keys:{ }
-		},
-		previewSettings: {
-			theme:"clouds",
-			highlight:false,
-			fontsize:12,
-			wordwrap:false,
-			rightpane:true,
+			autoTrace:false,
+			autoTraceLine: 'this.log("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
 		},
 		mainToolbar: true
 	},
 	SETTINGS_STORAGE_KEY: "com.enyojs.editor.settings",
 	components: [
-		{classes: "ace-settings-paddings", fit: true, components: [
+		{classes: "ace-settings-paddings", components: [
 			{kind:"FittableColumns", components: [
 				{kind:"FittableRows", components: [
 					{classes: "ares-row", components: [
@@ -100,10 +97,25 @@ enyo.kind({
 								{content: 36}
 							]}
 						]}
+					]},
+					{classes: "ares-row", components: [
+						{
+							tag:"label",
+							classes: "ares-fixed-label ace-label",
+							content: "Automatically add log instruction"
+						},
+						{
+							name: "autoTraceButton",
+							kind: "onyx.ToggleButton",
+							onContent: "On",
+							offContent: "Off",
+							onChange: "aTrace"
+						}
 					]}
 				]}
 			]},
 			{tag:"p", classes:"break"},
+		
 			{kind:"FittableRows", name: "functionKeys", components: [
 				{kind: "Control", name:"osMessage", classes:"ares-row", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
 				{kind: "onyx.MenuDecorator", name:"program_buttons", classes:"ares-row", components: [
@@ -136,10 +148,25 @@ enyo.kind({
 					{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
 					{kind: "onyx.Button", classes:"right", content: "Update", name: "oksave", ontap: "inputChanged"}
 				]}
+			]},
+			{tag:"p", classes:"break"},
+			{name: "autoTraceInputBox", kind:"FittableRows", showing: false, components: [
+				{ classes:"ares-row", content: "Log instruction injected in your event handlers:"},
+				{kind: "onyx.InputDecorator", classes: "ace-input-textarea", components: [
+					{
+						kind: "onyx.Input",
+						style: "width: 100%;",
+						placeholder: "Enter log instruction here",
+						name: "autoTraceInputLine",
+						onchange: "atraceline"
+					}
+				]}
 			]}
 		]},
+		
 		{name: "settingsToolbar", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
 			{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "cancelSettings"},
+			{name: "restoreDefault", kind: "onyx.Button",  content: "Restore defaults", ontap: "restoreDefaults"},
 			{name: "change", kind: "onyx.Button", classes:"right", content: "Save", ontap: "saveSettings"}
 		]}
 	],
@@ -151,10 +178,17 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.mainToolbarChanged();
+
+		// clobbers this.settings from what's in local storage
 		this.getValuesFromLocalStorage();
+
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
 		this.$.rightPaneButton.value = this.settings.rightpane;
+
+		this.$.autoTraceButton.value = this.settings.autoTrace;
+		this.$.autoTraceInputLine.setValue(this.settings.autoTraceLine);
+		this.$.autoTraceInputBox.setShowing(this.settings.autoTrace);
 
 		var themesControls = this.$.themes.getClientControls();
 		enyo.forEach(themesControls, function(control) {
@@ -184,13 +218,22 @@ enyo.kind({
 		}
 	},
 
+	/**
+	 * Load editorSettings values for local storage. Undefined (or
+	 * missing) values are replaced with their default values
+	 */
 	getValuesFromLocalStorage:function(){
 		var self = this;
 		Ares.LocalStorage.get(this.SETTINGS_STORAGE_KEY, function(str) {
 			self.trace("localStorage[", self.SETTINGS_STORAGE_KEY, "] = ", str);
+			var def = self.defaultsSettings;
+			var tmp;
 			try {
 				if(str !== null && str !== undefined){
-					self.settings = enyo.json.parse(str);
+					tmp = enyo.json.parse(str);
+					enyo.forEach(Object.keys(def), function(k) {
+						self.settings[k] = tmp[k] === undefined ? def[k] : tmp[k];
+					});
 				}		
 			} catch(e) {
 				Ares.LocalStorage.remove(self.SETTINGS_STORAGE_KEY);
@@ -200,7 +243,9 @@ enyo.kind({
 
 	initSettings:function(){
 		this.getValuesFromLocalStorage();
-		this.initUI();
+		this.initUI(this.settings);
+		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
+		this.doApplySettings();
 	},
 	
 	getSettingFromLS: function(){
@@ -208,30 +253,32 @@ enyo.kind({
 		return this.settings;
 	},
 
-	initUI:function(){
+	initUI:function(settings){
 		//set UI items with values from localStorage
 		//change value of toggle button programmaticaly fire event onChange
 		//onyx toggle button API says that it not working when the value is changed programmatically
-		this.$.highLightButton.setValue(this.settings.highlight);
-		this.$.wordWrapButton.setValue(this.settings.wordwrap);
+		this.$.highLightButton.setValue(settings.highlight);
+		this.$.wordWrapButton.setValue(settings.wordwrap);
+
+		this.$.autoTraceInputLine.setValue( settings.autoTraceLine );
+		this.$.autoTraceButton.setValue( settings.autoTrace );
+		this.$.autoTraceInputBox.setShowing( settings.autoTrace );
 
 		var themesControls = this.$.themes.getClientControls();
 		enyo.forEach(themesControls, function(control) {
-			if (control.content == this.settings.theme) {
+			if (control.content == settings.theme) {
 				this.$.themes.setSelected(control);
 			}
 		}, this);
 
 		var fontSizeControls = this.$.fontSizePicker.getClientControls();
 		enyo.forEach(fontSizeControls, function(control) {
-			if (control.content == this.settings.fontsize) {
+			if (control.content == settings.fontsize) {
 				this.$.fontSizePicker.setSelected(control);
 			}
 		}, this);
 
-		this.$.rightPaneButton.setValue(this.settings.rightpane);
-		//deep copy: settings in previewSettings
-		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
+		this.$.rightPaneButton.setValue(settings.rightpane);
 	},
 
 	themeSelected: function(inSender, inEvent) {
@@ -259,7 +306,6 @@ enyo.kind({
 		this.previewSettings.rightpane = inEvent.value;
 		this.doChangeRightPane();	
 	},
-
 
 	inputChanged: function(inSender, inEvent) {
 		var key = this.key;	
@@ -306,23 +352,39 @@ enyo.kind({
 	},
 
 	saveSettings: function() {
-		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, enyo.json.stringify(this.previewSettings)); //push to ls
-		//Local storage modified, reading new settings from local storage
-		this.getValuesFromLocalStorage(); 
-		this.initUI();
+		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, enyo.json.stringify(this.previewSettings)); //push to ls 
+		this.initUI(this.previewSettings);
 		this.doCloseSettings();
 	},
 
 	resetSettings: function(){
-		this.getValuesFromLocalStorage(); 
-		this.initUI();
+		this.getValuesFromLocalStorage();
+		this.initUI(this.settings);
+		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
 		this.doApplySettings();
-		//this.doCloseSettings();
 	},
 
 	cancelSettings: function(){
-		this.initUI();
+		this.initUI(this.settings);
+		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
 		this.doApplySettings();
 		this.doCloseSettings();
+	},
+
+	restoreDefaults: function(){
+		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.defaultsSettings));
+		this.initUI(this.defaultsSettings);
+		this.doChangeSettings();
+	},
+	
+	aTrace: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.previewSettings.autoTrace = inEvent.value;
+		this.$.autoTraceInputBox.setShowing(this.previewSettings.autoTrace);
+	},
+	
+	atraceline: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.previewSettings.autoTraceLine = inSender.value;
 	}
 });

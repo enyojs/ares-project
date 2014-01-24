@@ -1,6 +1,6 @@
 {
 	"cors": {
-		"origins": [],
+		"origins": [ "http://localhost:9009" ],
 		"methods": []
 	},
 	"globalProxyUrl": null,
