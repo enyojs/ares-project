@@ -469,6 +469,13 @@ function startService(service) {
 	subProcesses.push(subProcess);
 }
 
+var unproxyfiableHeaders = [
+	"Access-Control-Allow-Methods", 
+	"Access-Control-Allow-Headers", 
+	"Access-Control-Allow-Origin", 
+	"Access-Control-Expose-Headers"
+];
+
 function proxyServices(req, res, next) {
 	log.verbose('proxyServices()', m("req.params:", req.params, ", req.query:", req.query));
 	var query = {},
@@ -501,6 +508,12 @@ function proxyServices(req, res, next) {
 	};
 	log.verbose('proxyServices()', m("options:", options));
 
+	// ENYO-3634: if we proxyfy a CORS request, it's not CORS anymore between ARES and proxyfied service
+	// so we remove CORS request headers (note that OPTIONS requests should never make it to here!)
+	if (options.headers && options.headers.origin) {
+		delete options.headers.origin;
+	}
+
 	var creq = http.request(options, function(cres) {
 		// transmit every header verbatim, but cookies
 		log.verbose('proxyServices()', m("cres.headers:", cres.headers));
@@ -511,7 +524,11 @@ function proxyServices(req, res, next) {
 				var cookies = parseSetCookie(val);
 				cookies.forEach(translateCookie.bind(this, service, res));
 			} else {
-				res.header(key, val);
+				// ENYO-3634 / CORS is the sole responsibility of the ARES server when services are proxified
+				// therefore should the service have fixed CORS headers, they are ignored.
+				if (unproxyfiableHeaders.indexOf(key) === -1) {
+					res.header(key, val);
+				}
 			}
 		}
 		res.writeHead(cres.statusCode);
