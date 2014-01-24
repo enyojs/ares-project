@@ -65,7 +65,7 @@ enyo.kind({
 	},
 	editedDocs:"",
 	injected: false,
-	debug: true,
+	debug: false,
 	// Container of the code to analyze and of the analysis result
 	analysis: {},
 	helper: null,			// Analyzer.KindHelper
