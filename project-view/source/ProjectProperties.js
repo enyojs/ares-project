@@ -21,7 +21,8 @@ enyo.kind({
 		onDone: "",
 		onSelectFile: "",
 		onCheckPath: "",
-		onFileChoosersChecked: ""
+		onFileChoosersChecked: "",
+		onAddVersions: ""
 	},
 	handlers: {
 		onAddSource: "addNewSource",
@@ -43,7 +44,7 @@ enyo.kind({
 			]}
 		]},
 		{name: "projectDrawer", kind: "onyx.Drawer", open: true, components: [		
-			{classes: "ares-project-properties",components:[
+			{classes: "ares-project-properties", kind: "Scroller", components:[
 				{kind: "FittableRows", components: [
 					{kind: "FittableColumns", classes: "ares-row", components: [
 						{components: [
@@ -53,14 +54,13 @@ enyo.kind({
 							{tag: "label", name: "projectPathValue", classes : "ares-label", content: ""},
 						]}
 					]},
-					{kind: "FittableColumns", classes: "ares-row", components: [
-						{components: [
-							{tag: "label", classes : "ares-fixed-label ares-small-label", content: "Versions: "},
-						]},
-						{fit: true, components: [
-							{tag: "label", name: "enyoVersions", classes : "ares-label", content: ""}
+					{tag: "p", classes:"break"},
+					{kind: "onyx.Groupbox", classes:"onyx-sample-result-box", components: [
+						{kind: "onyx.GroupboxHeader", content: "Versions"},
+						{name:"versionReapeter", kind: "enyo.Repeater", onSetupItem: "addVersions",  classes: "ares-properties-groupbox-line ares-properties-groupbox-border", components: [
+							{name: "item"}
 						]}
-					]},
+					]}
 				]},
 				{tag: "p", classes:"break"},
 				{kind: "FittableColumns", components: [
@@ -193,7 +193,6 @@ enyo.kind({
 	setDisplayedTab: function(inIndex) {
 		this.$.thumbnail.children[inIndex].setActive(true);
 	},
-
 	/**
 	 * Receive the {onServicesChange} broadcast notification
 	 * @param {Object} inEvent.serviceRegistry
@@ -646,8 +645,12 @@ enyo.kind({
 		this.fileChooserChecked();
 		return true;
 	},
-	setVersionLabel: function(value){
-		this.$.enyoVersions.setContent(value);
+	initVersionsRepeater: function(value){
+		this.$.versionReapeter.setCount(0);
+		this.$.versionReapeter.setCount(value);
+	},
+	addVersions: function(inSender, inEvent){
+		this.doAddVersions({item: inEvent.item});
 	}
 });
 
