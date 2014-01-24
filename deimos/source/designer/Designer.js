@@ -84,7 +84,24 @@ enyo.kind({
 				}
 			},
 			onprojectSelected: function(event, from, to, inSource, next){
-				this.pendingCb = next;
+
+				var mopUp = function() {
+					var msg = "designerFrame load failed. Please check console log for errors";
+					this.doError(msg);
+					// do not propagate error as code editor needs to load file
+					next();
+				};
+
+				this.trace("setup dead designer timer");
+				var timer = setTimeout(mopUp.bind(this.designer), 5000);
+
+				var myNext = function () {
+					this.trace("Clearing dead designer timer");
+					window.clearTimeout(timer);
+					next();
+				};
+
+				this.pendingCb = myNext.bind(this.designer);
 				this.designer._reloadDesignerFrame(inSource);
 			},
 			ondfLoaded: function(event, from, to) {
@@ -263,36 +280,6 @@ enyo.kind({
 		var iframeUrl = this.projectSource.getProjectUrl() + "/" + this.baseSource + "?overlay=designer";
 		this.trace("Setting designerFrame url: ", iframeUrl);
 		this.$.designerFrame.hasNode().src = iframeUrl;
-
-		var mopUp = function() {
-			var msg = "designerFrame load failed. Please check console log for errors";
-			this.doError(msg);
-			// do not propagate error as code editor needs to load file
-			this._runUpdateSourceCb('failed');
-		};
-
-		var timer = setTimeout(mopUp.bind(this), 3000);
-		this.updateSourceCallback = function () { // FIXME pass this to state machine
-			window.clearTimeout(timer);
-			next();
-		};
-
-	},
-
-	_runUpdateSourceCb: function(txt) {
-		var cbData;
-		// call back *once* the function passed to updateSource
-		if (this.updateSourceCallback) {
-			this.trace("update source " + txt);
-			this.updateSourceCallback();
-			this.updateSourceCallback = null;
-			// FIXME a real state machine is needed here
-			if (this.updateSourcePending.length) {
-				this.log("resuming delayed update source");
-				cbData = this.updateSourcePending.shift() ;
-				this.updateSource(cbData[0], cbData[1]);
-			}
-		}
 	},
 
 	reload: function() {
