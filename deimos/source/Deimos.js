@@ -297,7 +297,7 @@ enyo.kind({
 			return true;
 		}
 
-		this.$.designer.modifyProperty(inEvent.name, inEvent.value);
+		this.$.designer.modifyProperty(inEvent.name, inEvent.value, ares.noNext);
 		return true;
 	},
 	inspectorRequestPositionValue: function(inSender, inEvent) {

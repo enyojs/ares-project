@@ -58,6 +58,8 @@ enyo.kind({
 			{name: 'dfSelected',      from: 'selecting',     to: 'ready'},
 			{name: 'dfSelect',        from: 'ready',         to: 'ready'},
 
+			{name: 'modifyProperty',  from: 'ready',         to: 'rendering'},
+
 			{name: 'render',          from: 'broken',        to: 'reloading'},
 		],
 		callbacks: {
@@ -130,6 +132,15 @@ enyo.kind({
 				this.designer.selection = selection;
 				// note the subtle difference: doSelect_ed_ event is sent
 				this.designer.doSelect({component: selection});
+			},
+
+			onmodifyProperty:  function(event, from, to, inProperty, inValue, next) {
+				this.pendingCb = next;
+				this.designer.sendMessage({
+					op: "modify",
+					filename: this.designer.currentFileName,
+					val: {property: inProperty, value: inValue}
+				});
 			},
 
 			// error handling
@@ -408,9 +419,16 @@ enyo.kind({
 			this.trace("dropped unhighlight control while fsm in in state " + this.fsm.current);
 		}
 	},
-	//* Property was modified in Inspector, update designerFrame.
-	modifyProperty: function(inProperty, inValue) {
-		this.sendMessage({op: "modify", filename: this.currentFileName, val: {property: inProperty, value: inValue}});
+
+	/**
+	 * Property was modified in Inspector, update designerFrame.
+	 * @param {String} inProperty: property name
+	 * @param {String} inValue: prop value
+	 * @param {Function} next
+	 */
+	modifyProperty: function(inProperty, inValue, next) {
+		ares.assertCb(next);
+		this.fsm.modifyProperty(inProperty, inValue, next);
 	},
 
 	//* Send message to Deimos with new kind/components from designerFrame

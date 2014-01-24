@@ -522,10 +522,10 @@ enyo.kind({
 		}
 	},
 	//* Rerender current selection
-	rerenderKind: function(inFileName) {
+	rerenderKind: function(inFileName, cmd) {
 		var copy = this.getSerializedCopyOfComponent(this.parentInstance).components;
 		copy[0].componentKinds = copy;
-		this.renderKind(copy[0], inFileName);
+		this.renderKind(copy[0], inFileName, cmd);
 	},
 	checkXtorForAllKinds: function(kinds) {
 		enyo.forEach(kinds, function(kindDefinition) {
@@ -669,7 +669,7 @@ enyo.kind({
 		} else {
 			this.updateProperty(inData.property, inData.value);
 		}
-		this.rerenderKind(inFileName);
+		this.rerenderKind(inFileName, "modify");
 		this.selectItem(this.selection, "select");
 	},
 	removeProperty: function(inProperty) {
