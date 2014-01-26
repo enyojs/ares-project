@@ -40,7 +40,6 @@ enyo.kind({
 		this.$.drawer.setOpen(!open);
 		this.$.indicator.addRemoveClass("turned", !open);
 	},
-	
 
 	setupItem: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
@@ -248,7 +247,8 @@ enyo.kind({
 		{name: "border-top-color", input:"color"},
 		{name: "border-right-color", input:"color"},
 		{name: "border-left-color", input:"color"},
-		{name: "border-bottom-color", input:"color"},		
+		{name: "border-bottom-color", input:"color"},
+		{name: "border-width", input: "bw"},
 		{name: "padding-top", input: "picker"},
 		{name: "padding-left", input: "picker"},
 		{name: "padding-right", input: "picker"},
@@ -257,7 +257,8 @@ enyo.kind({
 		{name: "margin-top", input: "picker"},
 		{name: "margin-right", input: "picker"},
 		{name: "margin-left", input: "picker"},
-		{name: "margin-bottom", input: "picker"}
+		{name: "margin-bottom", input: "picker"},
+		
 	]
 	
 });

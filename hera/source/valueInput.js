@@ -16,7 +16,7 @@ enyo.kind({
 	},
 	
 	components: [
-		{kind: "Panels", arrangerKind: "CardArranger",  style: "border: solid black thin;", classes: "enyo-fit",	components: [
+		{kind: "Panels", arrangerKind: "CardArranger",  style: "border: solid black thin;", classes: "enyo-fit", components: [
 			{name: "blank", kind: "Control", showing: true},
 		
 			{name: "sliders", kind: "Control", showing: false, components: [
@@ -133,7 +133,9 @@ enyo.kind({
 			
 			{kind: "bc"},
 			
-			{kind: "bgr"}
+			{kind: "bgr"},
+			
+			{kind: "border_width"}
 		]},
 		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "fileChosen"}
 	],
@@ -148,6 +150,8 @@ enyo.kind({
 	filepicker: 7,
 	bc: 8,
 	br: 9,
+	borderwidth: 10,
+	
 	create: function() {
 		this.inherited(arguments);
 		ares.setupTraceLogger(this);
@@ -271,6 +275,7 @@ enyo.kind({
 	},
 	
 	showpicker: function(inSender, inEvent){
+		console.log(inSender, inEvent);
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.clear();
 		this.$.panels.setIndex(this.picker);
@@ -394,6 +399,13 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.clear();
 		this.$.panels.setIndex(this.br);		
+	},
+	
+	bw: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.clear();
+		this.$.panels.setIndex(this.borderwidth);	
+	
 	}
 	
 });
@@ -593,6 +605,94 @@ enyo.kind({
 	},
 	itemSelected: function(inSender, inEvent){
 		this.valueout = "	" + inEvent.content + ";";
+		this.doValueUpdate();
+	}
+});
+
+enyo.kind({
+	name: "border_width",
+	kind: "Control",
+	published: {
+	},
+	
+	events: {
+		onValueUpdate: "",
+	},
+	
+	components: [
+		{style: "text-align: center; ", content: "Border-width ..... \n" },
+		{style: "height: 15px"},
+		{style: "height: 15px;  text-align: center; ", content: "border-width: width                  /* One-value syntax */" },
+		{style: "text-align: center; ", content: "border-width: horizontal vertical    /* Two-value syntax */" },
+		{style: "text-align: center; ", content: "border-width: top vertical bottom    /* Three-value syntax */" },
+		{style: "text-align: center; ", content: "border-width: top right bottom left  /* Four-value syntax */" },
+		{style: "height: 15px"},
+		{kind: "enyo.FittableColumns", style: "width: 15%; height: 100%;", components:[
+			{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [
+				{kind: "onyx.PickerButton", content: "Pick One...", classes: "border_width_input"},
+				{kind: "onyx.Picker", onSelect: "one_value", components: [
+					{content: "thin"},
+					{content: "medium"},
+					{content: "thick"}
+				]},
+			]},
+			{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [
+				{name: "bwPicker2", showing: false,kind: "onyx.PickerButton", content: "Pick One...", classes: "border_width_input"},
+				{kind: "onyx.Picker", onSelect: "two_value", components: [
+					{content: "thin"},
+					{content: "medium"},
+					{content: "thick"}
+				]},
+			]},
+			{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [
+				{name: "bwPicker3", showing: false,kind: "onyx.PickerButton", content: "Pick One...", classes: "border_width_input"},
+				{kind: "onyx.Picker", onSelect: "three_value", components: [
+					{content: "thin"},
+					{content: "medium"},
+					{content: "thick"}
+				]},
+			]},
+			{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [
+				{name: "bwPicker4", showing: false, kind: "onyx.PickerButton", content: "Pick One...", },
+				{kind: "onyx.Picker", onSelect: "four_value", components: [
+					{content: "thin"},
+					{content: "medium"},
+					{content: "thick"}
+				]},
+			]}
+		]},
+	],
+	
+	create: function() {
+		this.inherited(arguments);
+		ares.setupTraceLogger(this);
+		// initialization code goes here
+	},
+	
+	one_value: function(inSender, inEvent){
+		this.bw1 = inEvent.content;
+		this.valueout = "	" + this.bw1 + ";";
+		this.$.bwPicker2.setShowing(true);
+		this.doValueUpdate();
+	},
+	
+	two_value: function(inSender, inEvent){
+		this.bw2 = inEvent.content;
+		this.valueout = "	" + this.bw1 + " " + " " + this.bw2 + ";";
+		this.$.bwPicker3.setShowing(true);
+		this.doValueUpdate();
+	},
+	
+	three_value: function(inSender, inEvent){
+		this.bw3 = inEvent.content;
+		this.valueout = "	" + this.bw1 + " " + this.bw2 + " " + this.bw3 + ";";
+		this.$.bwPicker4.setShowing(true);
+		this.doValueUpdate();
+	},
+	
+	four_value: function(inSender, inEvent){
+		this.bw4 = inEvent.content;
+		this.valueout = "	" + this.bw1 + " " + this.bw2 + " " + this.bw3 + " " + this.bw4 + ";";
 		this.doValueUpdate();
 	}
 });

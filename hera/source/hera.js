@@ -18,13 +18,12 @@ enyo.kind({
 		onRegisterMe: "",
 		onNewcss: "",			// insert at end of file
 		onReplacecss: "",		// replace it in ace
-		
+		onEditcss: ""			// call to reload the css editor and data
 	},	
 	handlers: {
 		onPickdeclaration: "radioActivated",
 		onValueUpdate: "change",
 		onUnitChange: "unitchange",
-		onCloseCss: "save"
 	},
 	components: [
 		{kind: "enyo.FittableColumns", style: "width: 33%; height: 100%;", components:[
@@ -104,10 +103,8 @@ enyo.kind({
 			this.doNewcss();
 			this.reset();
 		}
-		
 		if(this.mode === "editing"){
 			this.doReplacecss();
-			this.reset();
 		}
 		return true;
 	},
@@ -216,6 +213,10 @@ enyo.kind({
 		if (inEvent.input === "bgr"){
 			this.$.valueinput.bgr();
 		}
+		
+		if (inEvent.input === "bw"){
+			this.$.valueinput.bw();
+		}
 		this.updateBox();
 	},
 
@@ -301,6 +302,7 @@ enyo.kind({
 		var c = inEvent.index;
 		var r = "";
 		var n = [];
+		this.csssave();
 		this.reset();
 		n = (this.file.split("\n"));			// split the file up by lines
 
@@ -362,7 +364,6 @@ enyo.kind({
 	*/
 	setupItem: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
-	//	console.log(inSender, inEvent);
 		var i = inEvent.index;
 		var n = this.declaration[i];
 		this.$.item.addRemoveClass("list-sample-selected", inSender.isSelected(i));
