@@ -141,8 +141,8 @@ enyo.kind({
 					self.trace("ProjectView: setup project set config on "+ project.getName() );
 					project.setConfig(config);
 					
-					self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled);
-					self.initializeValidPgbConf(project, config.data.providers.phonegap.enabled);
+					self.initializeDownloadStatus(project);
+					self.initializeValidPgbConf(project);
 					next();
 				},
 				function (next) {
@@ -168,8 +168,8 @@ enyo.kind({
 	 * this attribute is used only by Phonegap Build.
 	 * @private
 	 */
-	initializeDownloadStatus: function(inProject, inPhonegapEnabled) {
-		if (inProject.getDownloadStatus() === undefined && inPhonegapEnabled) {
+	initializeDownloadStatus: function(inProject) {
+		if (inProject.getDownloadStatus() === undefined) {
 			var downloadStatus = {};
 			var index = 0;
 
@@ -181,8 +181,8 @@ enyo.kind({
 		}
 	},
 
-	initializeValidPgbConf: function(inProject, inPhonegapEnabled) {
-		if (inProject.getValidPgbConf() === undefined && inPhonegapEnabled) {
+	initializeValidPgbConf: function(inProject) {
+		if (inProject.getValidPgbConf() === undefined) {
 			var pgbValidation = {};
 			var pgbUiData = Phonegap.UIConfiguration.commonDrawersContent.concat(Phonegap.UIConfiguration.platformDrawersContent);
 			var index =0;
