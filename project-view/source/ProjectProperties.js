@@ -54,8 +54,7 @@ enyo.kind({
 							{tag: "label", name: "projectPathValue", classes : "ares-label", content: ""},
 						]}
 					]},
-					{tag: "p", classes:"break"},
-					{kind: "onyx.Groupbox", classes:"onyx-sample-result-box", components: [
+					{kind: "onyx.Groupbox", name: "versions", classes:"ares-row", components: [
 						{kind: "onyx.GroupboxHeader", content: "Versions"},
 						{name:"versionReapeter", kind: "enyo.Repeater", onSetupItem: "addVersions",  classes: "ares-properties-groupbox-line ares-properties-groupbox-border", components: [
 							{name: "item"}
@@ -632,6 +631,9 @@ enyo.kind({
 	},
 	addVersions: function(inSender, inEvent){
 		this.doAddVersions({item: inEvent.item});
+	},
+	hideVersions: function(){
+		this.$.versions.hide();
 	}
 });
 

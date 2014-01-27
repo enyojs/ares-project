@@ -205,6 +205,7 @@ enyo.kind({
 	_showProjectPropPopup: function(next) {
 		this.$.selectDirectoryPopup.hide();
 		this.$.selectDirectoryPopup.reset();
+		this.$.propertiesWidget.hideVersions();
 		this.show();
 		next();
 	},
