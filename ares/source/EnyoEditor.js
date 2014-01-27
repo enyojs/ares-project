@@ -372,6 +372,10 @@ enyo.kind({
 		this.foreachProjectDocs(this.saveDoc.bind(this));
 	},
 
+	saveAllDocs: function() {
+		Ares.Workspace.files.forEach(this.saveDoc.bind(this), this);
+	},
+
 	saveCurrentDoc: function() {
 		this.saveDoc(this.activeDocument);
 	},
@@ -971,6 +975,10 @@ enyo.kind({
 			{name: "saveProjectButton", value: "saveProjectDocs", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save Project")}
+			]},
+			{name: "saveProjectButton", value: "saveAllDocs", classes:"aresmenu-button", components: [
+				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
+				{content: $L("Save all")}
 			]},
 			{classes: "onyx-menu-divider"},
 			{name: "closeButton", value: "requestCloseCurrentDoc", classes:"aresmenu-button", components: [
