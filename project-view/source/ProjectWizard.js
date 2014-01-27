@@ -909,6 +909,8 @@ enyo.kind({
 
 			this.$.propertiesWidget.$.projectPathLabel.setContent($L("Parent project path: "));
 			this.$.propertiesWidget.$.projectPathValue.setContent("");
+			//TO DO: hide versions label for copy not tested, copy isn't working
+			this.$.propertiesWidget.hideVersions();
 			var config = target.getConfig();
 			var req = config.service.propfind(config.folderId, 3);
 			req.response(this, function(inSender, inFile) {
