@@ -277,7 +277,8 @@ enyo.kind({
 		var req = new enyo.Ajax({
 			url: this.url + '/token',
 			method: 'POST',
-			postBody: data
+			postBody: data,
+			xhrFields: { withCredentials: true}
 		});
 
 		// Get ready for cancellation - (re)set abortAjaxRequest to stop "req" in case of cancellation
@@ -306,7 +307,8 @@ enyo.kind({
 	getUserData: function(next, abort) {
 		this.trace();
 		var req = new enyo.Ajax({
-			url: this.url + '/api/v1/me'
+			url: this.url + '/api/v1/me',
+			xhrFields: { withCredentials: true}
 		});
 
 		// Get ready for possible cancellation - (re)set abortAjaxRequest to stop "req" in case of cancellation
@@ -354,7 +356,8 @@ enyo.kind({
 		
 		//Creation of the Ajax request
 		var req = new enyo.Ajax({
-			url: url
+			url: url,
+			xhrFields: { withCredentials: true}
 		});
 
 		//in case of sucess send the obtained JSON object to the next function
@@ -664,7 +667,8 @@ enyo.kind({
 			url: this.url + '/op/build',
 			method: 'POST',
 			postBody: data.content,
-			contentType: data.ctype
+			contentType: data.ctype,
+			xhrFields: { withCredentials: true}
 		});
 
 		this.abortAjaxRequest= function() {
@@ -924,7 +928,8 @@ enyo.kind({
 			
 			var req = new enyo.Ajax({
 				url: url,
-				handleAs: 'text'
+				handleAs: 'text',
+				xhrFields: { withCredentials: true}
 			});		
 			req.response(this, function(inSender, inData) {
 				this.trace("response: received ", inData.length, " bytes typeof: ", (typeof inData));
