@@ -363,8 +363,7 @@ enyo.kind({
 		onModifiedSource: "populateProject",
 		onSelectFile: "selectFile",
 		onCheckPath: "checkPath",
-		onPathChecked: "pathChecked",
-		onAddVersions: "addVersions"
+		onPathChecked: "pathChecked"
 	},
 	classes:"ares-masked-content-popup",
 	components: [
@@ -476,7 +475,7 @@ enyo.kind({
 				parrallelReads.push(readFunction);
 			}, this);
 
-			async.parallel(parrallelReads, this.setVersionsRepeater.bind(this));
+			async.parallel(parrallelReads, this.setVersionLabel.bind(this));
 		}
 	},
 	/**
@@ -505,12 +504,13 @@ enyo.kind({
 		});
 		req.go();
 	},
+
 	/**
 	 * Display version label
 	 */
-	setVersionsRepeater: function(){
+	setVersionLabel: function(){
 		this.versions.sort(this.compareLibs);
-		this.$.propertiesWidget.initVersionsRepeater(this.versions.length);
+		this.$.propertiesWidget.setVersionLabel(this.versions.join(", "));
 	},
 
 	/**

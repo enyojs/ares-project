@@ -21,8 +21,7 @@ enyo.kind({
 		onDone: "",
 		onSelectFile: "",
 		onCheckPath: "",
-		onFileChoosersChecked: "",
-		onAddVersions: ""
+		onFileChoosersChecked: ""
 	},
 	handlers: {
 		onAddSource: "addNewSource",
@@ -54,10 +53,12 @@ enyo.kind({
 							{tag: "label", name: "projectPathValue", classes : "ares-label", content: ""},
 						]}
 					]},
-					{kind: "onyx.Groupbox", name: "versions", classes:"ares-row", components: [
-						{kind: "onyx.GroupboxHeader", content: "Versions"},
-						{name:"versionReapeter", kind: "enyo.Repeater", onSetupItem: "addVersions",  classes: "ares-properties-groupbox-line ares-properties-groupbox-border", components: [
-							{name: "item"}
+					{kind: "FittableColumns", name: "versions", classes: "ares-row", components: [
+						{components: [
+							{tag: "label", classes : "ares-fixed-label ares-small-label", content: "Versions: "},
+						]},
+						{fit: true, components: [
+							{tag: "label", name: "enyoVersions", classes : "ares-label", content: ""}
 						]}
 					]}
 				]},
@@ -625,13 +626,11 @@ enyo.kind({
 		this.fileChooserChecked();
 		return true;
 	},
-	initVersionsRepeater: function(value){
-		this.$.versionReapeter.setCount(0);
-		this.$.versionReapeter.setCount(value);
+
+	setVersionLabel: function(value){
+		this.$.enyoVersions.setContent(value);
 	},
-	addVersions: function(inSender, inEvent){
-		this.doAddVersions({item: inEvent.item});
-	},
+
 	hideVersions: function(){
 		this.$.versions.hide();
 	}
