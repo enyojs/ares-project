@@ -651,6 +651,7 @@ function setCorsHeaders(req, res, next) {
 		corsHeaders['Access-Control-Allow-Headers'] = allowedHeaders.concat(headers).join(',');
 		corsHeaders['Access-Control-Expose-Headers'] = exposedHeaders.concat(headers).join(',');
 		corsHeaders['Access-Control-Max-Age'] = '86400';
+		corsHeaders['Access-Control-Allow-Credentials'] = 'true';
 		log.info("setCorsHeaders()", "CORS will use:", corsHeaders);
 	}
 
