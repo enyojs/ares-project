@@ -318,6 +318,7 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		_parse.bind(this),
 		this.minify.bind(this, req, res),
 		_postMinify.bind(this, req),
+		_addEnyoLoadErrorHandler.bind(this, req),
 		this.zip.bind(this, req, res),
 		_upload.bind(this),
 		this.returnBody.bind(this, req, res),
@@ -361,6 +362,29 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 		log.silly("BdPhoneGap#build#_parse(): appData:", appData);
 		setImmediate(next);
 	}
+
+	// ENYO-3561: adding a fake "debug.html" page to PGB app in case
+	// of error during initialization
+	// If this fails for whatever reason, we trace with a WARN and ignore the error as this is not 
+	// a showstopper to build the app
+	function _addEnyoLoadErrorHandler (req, next) {
+		var dbg = path.join(req.appDir.zipRoot, "debug.html");
+		var url = req.headers.host + '/ide/ares/error.html';
+		request(url, function (error, res, body) {
+			if (!error) {
+				fs.writeFile (dbg, body, function(err) { 
+					if (err) {
+						log.warn("BdPhoneGap#build#_addEnyoLoadErrorHandler():fileWrite " + err);
+					}
+					setImmediate(next); 
+				});
+			} else {
+				log.warn("BdPhoneGap#build#_addEnyoLoadErrorHandler(): " + error);
+				setImmediate(next);
+			}
+		});
+	}
+
 
 	function _postMinify(req, next) {
 		log.info("BdPhoneGap#build#_postMinify()");
