@@ -977,7 +977,7 @@ enyo.kind({
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save Project")}
 			]},
-			{name: "saveProjectButton", value: "saveAllDocs", classes:"aresmenu-button", components: [
+			{name: "saveAllDocsButton", value: "saveAllDocs", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save all")}
 			]},
