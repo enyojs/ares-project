@@ -368,8 +368,54 @@ enyo.kind({
 
 	// Save actions
 
+	/**
+	 * Save all docs of current project
+	 */
 	saveProjectDocs: function() {
 		this.foreachProjectDocs(this.saveDoc.bind(this));
+	},
+
+	/**
+	 * Request (once) to save all docs of a project and call back
+	 * @param {Ares.Model.Project} project
+	 * @param {Function} next
+	 */
+	saveProjectDocsWithCb: function(project, next) {
+		var popup = this.$.savePopup ;
+		var todo = [];
+		var toSave = [];
+
+		// check which files need to be saved
+		var action = function(doc) {
+			if (doc.getEdited() === true) {
+				todo.push(this.saveDoc.bind(this, doc)) ;
+				toSave.push(doc.getName());
+			}
+		};
+		this.foreachProjectDocs( action.bind(this), project );
+
+		if (todo.length) {
+			this.trace("request save project doc on ", project.getName());
+			var verb = todo.length > 1 ? 'were' : 'was' ;
+			popup.setMessage('"' + toSave.join('", "') + '" ' + verb + ' modified.') ;
+			popup.setTitle($L("Project was modified!"));
+
+			popup.setActionButton($L("Don't Save"));
+			popup.setActionCallback( next );
+
+			popup.setAction1Button($L("Save"));
+			popup.setAction1Callback( async.series.bind(null, todo, next) );
+
+			popup.setCancelCallback(
+				(function() {
+					next(new Error('canceled'));
+				}).bind(this)
+			) ;
+
+			popup.show();
+		} else {
+			setTimeout( next, 0);
+		}
 	},
 
 	saveAllDocs: function() {
