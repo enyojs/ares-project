@@ -31,7 +31,8 @@ enyo.kind({
 				{
 					name: "projectView",
 					kind: "ProjectView",
-					classes: "ares-panel-min-width "
+					classes: "ares-panel-min-width ",
+					onProjectSave: "saveProjectFiles"
 				},
 				{
 					kind: "Harmonia",
@@ -214,6 +215,13 @@ enyo.kind({
 	_fsEventAction: function(inSender, inEvent) {
 		var harmonia = ComponentsRegistry.getComponent("harmonia");
 		harmonia.refreshFileTree(inEvent.nodeId);
+	},
+
+	saveProjectFiles: function(inSender, inEvent) {
+		ComponentsRegistry.getComponent("enyoEditor").saveProjectDocsWithCb(
+			inEvent.project,
+			inEvent.callback
+		);
 	},
 
 	handleBeforeUnload: function() {

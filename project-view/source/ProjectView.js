@@ -44,6 +44,7 @@ enyo.kind({
 		onShowWaitPopup: "",
 		onError: "",
 		onProjectSelected: "",
+		onProjectSave: "",
 		onRegisterMe: ""
 	},
 	create: function() {
@@ -287,6 +288,17 @@ enyo.kind({
 	},
 
 	launchPreview: function (project) {
+		var cb = function (err) {
+			if (err) {
+				this.trace(err);
+			} else {
+				this._launchPreview(project);
+			}
+		};
+		this.doProjectSave({ project: project, callback: cb.bind(this) });
+	},
+
+	_launchPreview: function (project) {
 		var config = project.getConfig() ;
 		var topFile = config.data.preview.top_file ;
 		var projectUrl = project.getProjectUrl() + '/' + topFile ;
