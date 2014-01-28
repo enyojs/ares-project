@@ -216,7 +216,7 @@ enyo.kind({
 	buildAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
 		if (project) {
-			this.projectAction(project, 'build', 'build');
+			this.projectSaveAndAction(project, 'build', 'build');
 		}
 		return true; // stop bubble-up
 	},
@@ -231,7 +231,7 @@ enyo.kind({
 	installAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
 		if (project) {
-			this.projectAction(project, 'test', 'install');
+			this.projectSaveAndAction(project, 'test', 'install');
 		}
 		return true; // stop bubble-up
 	},
@@ -245,7 +245,7 @@ enyo.kind({
 	runAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
 		if (project) {
-			this.projectAction(project, 'test', 'run');
+			this.projectSaveAndAction(project, 'test', 'run');
 		}
 		return true; // stop bubble-up
 	},
@@ -259,10 +259,30 @@ enyo.kind({
 	runDebugAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
 		if (project) {
-			this.projectAction(project, 'test', 'runDebug');
+			this.projectSaveAndAction(project, 'test', 'runDebug');
 		}
 		return true; // stop bubble-up
 	},
+
+	/**
+	 * Request to save project and perform action
+	 * @param {Ares.Model.Project} project
+	 * @param {String} serviceType
+	 * @param {String} action
+	 */
+	projectSaveAndAction: function(project, serviceType, action) {
+		var cb = function (err) {
+			if (err) {
+				this.trace(err);
+			} else {
+				this.projectAction( project, serviceType, action);
+			}
+		};
+		if (project) {
+			this.doProjectSave({ project: project, callback: cb });
+		}
+	},
+
 	/**
 	 * @private
 	 */
