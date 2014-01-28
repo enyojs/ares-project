@@ -377,10 +377,11 @@ enyo.kind({
 	},
 
 	saveCurrentDoc: function() {
-		this.saveDoc(this.activeDocument);
+		this.saveDoc(this.activeDocument, ares.noNext);
 	},
 
-	saveDoc: function(doc) {
+	saveDoc: function(doc, next) {
+		ares.assertCb(next);
 		var content;
 		if (doc === this.activeDocument) {
 			content = this.$.phobos.getEditorContent();
@@ -392,7 +393,7 @@ enyo.kind({
 			service: doc.getProjectData().getService(),
 			fileId: doc.getFileId()
 		};
-		this.saveFile(doc.getName(), content, where, ares.noNext);
+		this.saveFile(doc.getName(), content, where, next);
 	},
 
 	saveFile: function(name, content, where, next){
