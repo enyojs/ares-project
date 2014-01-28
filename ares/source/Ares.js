@@ -139,7 +139,7 @@ enyo.kind({
 
 		// hide projectView only the first time a file is opened in a project
 		// otherwise, let the user handle this
-		var mayHideProjectView = Ares.Workspace.files.length ? function() { next();}
+		var mayHideProjectView = Ares.Workspace.files.length ? function(next) { next();}
 			: function(next) { this.hideProjectView(); next();} ;
 
 		this.trace("open document with project ", projectData.getName(), " file ", file.name, " using cache ", fileData);
