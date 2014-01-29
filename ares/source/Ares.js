@@ -127,7 +127,9 @@ enyo.kind({
 	openDocument: function(inSender, inEvent) {
 		this._openDocument(inEvent.projectData, inEvent.file, ares.noNext );
 	},
-	/** @private */
+
+	// used only in _openDocument
+	onGoingOpen: false,
 	_openDocument: function(projectData, file, next) {
 		ares.assertCb(next);
 		var fileDataId = Ares.Workspace.files.computeId(file);
