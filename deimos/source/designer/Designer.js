@@ -73,6 +73,8 @@ enyo.kind({
 			},
 			ondfReady: function(event, from, to) { // pop
 				this.execCb();
+			},
+			onready: function(event, from, to) {
 				if (this.fsmStash.length) {
 					var resume = this.fsmStash.shift();
 					var that = this;
