@@ -163,8 +163,8 @@ enyo.kind({
 		},
 		error: function(eventName,from, to, args, errorCode, errorMessage,error) {
 			if (errorCode === 300) {
-				// Invalid callback. See state-machine source code for error codes :-/
-				throw error || errorMessage ;
+				// Invalid fsm callback. See state-machine source code for error codes :-/
+				this.designer.doError( { err: error, msg: "Internal error: " + errorMessage} );
 			} else if ( /^df/.test(eventName) ) {
 				// don't delay event coming from designer frame
 				throw ("Unexpected event " + eventName + " coming from designer in state " + from) ;
