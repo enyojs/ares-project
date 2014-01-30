@@ -170,6 +170,12 @@ enyo.kind({
 			} else {
 				this.designer.doError ("Unexpected event " + eventName + " coming from Ares in state " + from) ;
 			}
+
+			// in case of error, any pending call-back must be called
+			// to dismiss on-going waitpopups
+			if (this.pendingCb) {
+				this.execCb(errorMessage);
+			}
 		}
 	},
 
