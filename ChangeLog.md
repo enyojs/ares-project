@@ -1,5 +1,85 @@
 ChangeLog
 =========
+Ares Sprint 22 Jan 09th - Jan 30th
+-----------------------------------
+
+**Release: ares-ide 0.2.10**
+
+Brief:
+
+Details:
+
+ENYO-1040	Comma position issue when inserting missing handler functions
+ENYO-1943	Code editor: Context-sensitive help: via context-sensitive popup
+ENYO-2118 *	Designer: feature to set zoom to "fit" the available space
+ENYO-2217 *	AAAD, I can launch the PhoneGap build of my app and I am notified when the package is locally stored..
+ENYO-2933 *	programble keys input box
+ENYO-3067	Project Properties: in the project tab, showing bootplate version could be useful
+ENYO-3104 *	Move Ares About to menu Ares -> About
+ENYO-3143	For preview, the project name should be displayed in the window title
+ENYO-3191 *	Native packaging for Windows (.MSI, based on NPM)
+ENYO-3282	Global Editor Settings: add button for reset to default settings
+ENYO-3284 *	Phonegap build UI: Highlight the drawer that contains an error
+ENYO-3305 *	Little inconsistency in project's context switching
+ENYO-3316	Ares should implement new PhoneGap platform build selection
+ENYO-3373 *	Unable to resize by typing a size of a component(toolbar) in a font-style input box
+ENYO-3375 *	I can fold or unfold all UI components palette window at once
+ENYO-3391	Button is resized to its initial size
+ENYO-3506	Enable the "cancel build" action on the first build step
+ENYO-3565	Set the environment to deploy an .xap built application on a device
+ENYO-3573	Properties: Ares must show the libraries version used by the developped application
+ENYO-3576 *	Ares/PhoneGap should not use class static variables to exchange data between views
+ENYO-3580	Project Properties: empty tooltip is visible for the popup
+ENYO-3627 *	cleanup backward compat code after upgrade to onyx pilot-12++
+ENYO-3629 *	Callback parameter should not be optional
+ENYO-3634	ARES: cannot create project on out-of-the-box npm installation
+ENYO-3637 *	Ares npm package must be installable without network
+ENYO-3640 *	Ares: Create & Test weekly pre package for ares-0.2.10 (Sprint 21)
+ENYO-3643 *	Set the defaut "phonegap-version" to 3.1.0
+ENYO-3644 *	Add "android-targetSdkVersion" in android preferences
+ENYO-3659 *	[chert] create a cartesianChart and polarChart (base for barchart and piechart)
+ENYO-3665	Ares: designer zoom/ preview zoom enyo.Select is not scaled
+ENYO-3666	Impossible to move (drag'n'drop), rename or delete file in file manager.
+ENYO-3676	Ares: Imported project cannot be selected
+ENYO-3677	Designer: undo/redo doesn't work
+ENYO-3678	FileManager: refresh is not performed after a DnD action
+ENYO-3680	Designer: File/Close Project doesn't work
+ENYO-3681	Ares: file tab keep a previous file after rename operation
+ENYO-3682	Ares: All files are reopened after File/close all menu action
+ENYO-3683	Ares: the title of the "open project" pop-up is cut
+ENYO-3689 *	[chert] add filterlevel, inputtype and descriptions to the .design file
+ENYO-3691	Inspector: nothing happens after choose file action on src attribute
+ENYO-3727 *	Ares's ChangeLog.md was not updated since ares-0.1.4 (Sprint 14)
+ENYO-3732 *	Change ares-generator's json substitutions being able to have new properties
+ENYO-3739 *	Projects actions: cannot duplicate a newly created/opened project
+ENYO-3758 *	PhoneGap Build: 3.0.0 is not an allowed value
+ENYO-3759 *	add version.js to chert lib
+ENYO-3765 *	Reimplement support for version 3.0.0 in phonegap
+ENYO-3771 *	CORS issue / cannot authenticate to PGB service under CORS conditions 
+ENYO-3244 *	"Save all" is needed as "Close all"
+ENYO-3311	Add indentation checking thru jshint and travis CI
+ENYO-3355 *	No more initial login into a PhoneGap Build account
+ENYO-3503 *	During PhoneGap build, the propertiesWidget_phonegapDrawer is opened but doesn't point build status	
+ENYO-3561 *	Ares built apps have incorrect index.html in apk files
+ENYO-3587 *	Ares: update Enyo/Onyx/layout/extra ... to pilot-13, rc1, rc2 or rc3
+ENYO-3600	PGB UI must allow the user to define multiple Access Origin instances
+ENYO-3626	Ares.openDocument() allows multiple file open in parallel
+ENYO-3630	Remove the verbose mode at Ares start up
+ENYO-3632	No calback for codeUpdate message
+ENYO-3645	[chert] handle data update with different number of datasets
+ENYO-3646	FileManager: Double-click on the node icon of a folder opens an empty gap in the filetree
+ENYO-3647	[chert] handle variable number of data within datasets
+ENYO-3651	Ares: libraries update - 2.3.0-RC4 and above
+ENYO-3658	Switching to a non-Enyo project never ends
+ENYO-3660	[chert] support for enyo.collection
+ENYO-3687	Phonegap Build feature must be integrated as a plugin in Ares
+ENYO-3692	Create a simplistic mobile application using Ares
+ENYO-3700	Ares: Create & Test weekly pre package for ares-0.2.11 (Sprint 22)
+ENYO-3738 *	QA Ares IDE: Sprint 22
+ENYO-3757 *	A template name too long it doesn't fit in the drop down
+ENYO-3760 *	Ares: Editor Settings aren't initialised if localStorage is empty
+ENYO-3762 *	PGB Controls fails on new project - ENYO-3284 regression
+
 
 Ares Sprint 21 Dec 12th - Jan 08th
 -----------------------------------
