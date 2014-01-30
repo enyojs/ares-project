@@ -151,15 +151,18 @@ enyo.kind({
 
 			// error handling
 			ondfRequestReload: function(event, from, to, err) {
+				this.execCb();
 				var deimos = this.designer.owner;
 				err.callback = deimos.closeDesigner.bind(deimos, /* bleach */ false);
 				err.action = "Switching back to code editor";
 				this.designer.doError(err);
 			},
 			ondfReloadNeeded: function(event, from, to, err) {
+				this.execCb();
 				this.designer.doError(err);
 			},
 			ondfRenderError: function(event, from, to, err) {
+				this.execCb();
 				this.designer.doError(err);
 			}
 		},
