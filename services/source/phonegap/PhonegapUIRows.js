@@ -430,9 +430,9 @@ enyo.kind({
 	components: [
 		{name: "label",	classes: "ares-project-properties-drawer-row-label"},
 		{
-			kind: "onyx.PickerDecorator",
+			kind: "Ares.PickerDecorator",
 			components: [
-				{kind: "onyx.PickerButton", name: "configurationPickerButton", classes: "ares-project-properties-picker"},
+				{name: "configurationPickerButton", classes: "ares-project-properties-picker"},
 				{kind: "onyx.Picker", name: "configurationPicker", onSelect: "updateConfigurationValue"}
 			]
 		},
@@ -735,7 +735,7 @@ enyo.kind({
 		},
 		{kind: "onyx.IconButton", name:"AndroidImgButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"},
 		{
-			kind: "onyx.PickerDecorator",
+			kind: "Ares.PickerDecorator",
 			classes: "ares-project-properties-picker-small",
 			components: [
 				{kind: "onyx.PickerButton"},
@@ -1081,9 +1081,9 @@ enyo.kind({
 			kind: "FittableRows",
 			components: [
 				{
-					name: "keyPicker", kind: "onyx.PickerDecorator", onSelect: "selectKey",
+					name: "keyPicker", kind: "Ares.PickerDecorator", onSelect: "selectKey",
 					components: [
-						{kind: "onyx.PickerButton",	content: "Choose...", classes: "ares-project-properties-picker"}, 
+						{name: "keyPickerButton", classes: "ares-project-properties-picker"}, 
 						{kind: "onyx.Picker", name: "keys"}
 					]
 				},
@@ -1113,7 +1113,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.labelChanged();
 		this.setProvider(Phonegap.ProjectProperties.getProvider());
-		
+		this.$.keyPickerButton.setPickerContent("Choose...");
 		this.activeKeyIdChanged();
 	},
 

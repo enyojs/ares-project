@@ -471,9 +471,9 @@ enyo.kind({
 			components: [
 				{content: "Application"},
 				{
-					kind: "onyx.PickerDecorator",
+					kind: "Ares.PickerDecorator",
 					components: [
-						{kind: "onyx.PickerButton", content:"Select AppId",	classes: "ares-project-properties-picker-AppId"},
+						{kind: "Ares.PickerButton", name: "appIdPickerButton", classes: "ares-project-properties-picker-AppId"},
 						{kind: "onyx.Picker", name: "AppIdList", onSelect: "updateSelectedAppId"}
 					]
 				}			
@@ -493,7 +493,10 @@ enyo.kind({
 			]
 		}
 	],
-
+	create: function(){
+		this.inherited(arguments);
+		this.$.appIdPickerButton.setPickerContent("Select AppId");
+	},
 	/**@private*/
 	userDataChanged: function(){
 		
