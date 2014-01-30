@@ -7,8 +7,10 @@ Ares Sprint 22 Jan 09th - Jan 30th
 
 Brief:
 
-A major refactoring has been done inside Ares to improve file and
-project switching while designer is opened.
+* A major refactoring has been done inside Ares to improve file and project switching while designer is opened.
+* CORS issue fixes.
+* PhoneGap build enhancements.
+...
 
 Details:
 
