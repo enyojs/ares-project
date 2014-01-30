@@ -152,7 +152,7 @@ enyo.kind({
 			// error handling
 			ondfRequestReload: function(event, from, to, err) {
 				var deimos = this.designer.owner;
-				err.callback = deimos.closeDesigner.bind(deimos);
+				err.callback = deimos.closeDesigner.bind(deimos, /* bleach */ false);
 				err.action = "Switching back to code editor";
 				this.designer.doError(err);
 			},

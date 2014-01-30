@@ -246,7 +246,7 @@ enyo.kind({
 	},
 
 	closeDesigner: function(inSender, inEvent){
-		this.$.deimos.closeDesigner();
+		this.$.deimos.closeDesigner(/* bleach */ true);
 		return true;
 	},
 

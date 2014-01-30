@@ -426,14 +426,18 @@ enyo.kind({
 
 		return inContent;
 	},
-	closeDesigner: function() {
-		this.$.designer.cleanUp();
 
+	/**
+	 * Close Designer and switch editor back to code mode
+	 * @param {Bool} bleach: when 1, cleanup edited kind from designer
+	 */
+	closeDesigner: function(bleach) {
+		if (bleach) {
+			this.$.designer.cleanUp();
+		}
 		this.updateCodeInEditor(this.fileName);
 		this.setProjectData(null);
 		this.doChildRequest({task: "switchToCodeMode" });
-
-		return true;
 	},
 
 	// When the designer finishes rendering, re-build the components view
