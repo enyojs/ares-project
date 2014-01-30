@@ -72,7 +72,7 @@ enyo.kind({
 				this.fsmStash = [];
 			},
 			ondfReady: function(event, from, to) { // pop
-				this.execCb();
+				this.execCb( event, from, to );
 			},
 			onready: function(event, from, to) {
 				if (this.fsmStash.length) {
@@ -109,7 +109,7 @@ enyo.kind({
 				}
 			},
 			ondfRendered: function(event, from, to, msg) {
-				this.execCb();
+				this.execCb( event, from, to );
 				this.designer._updateKind(msg);
 			},
 
@@ -118,7 +118,7 @@ enyo.kind({
 				this.designer._syncFile(filename, inCode);
 			},
 			ondfUpdated: function(event, from, to) {
-				this.execCb();
+				this.execCb( event, from, to );
 			},
 
 			onselect: function(event, from, to, inControl) {
@@ -151,18 +151,18 @@ enyo.kind({
 
 			// error handling
 			ondfRequestReload: function(event, from, to, err) {
-				this.execCb();
+				this.execCb( event, from, to );
 				var deimos = this.designer.owner;
 				err.callback = deimos.closeDesigner.bind(deimos, /* bleach */ false);
 				err.action = "Switching back to code editor";
 				this.designer.doError(err);
 			},
 			ondfReloadNeeded: function(event, from, to, err) {
-				this.execCb();
+				this.execCb( event, from, to );
 				this.designer.doError(err);
 			},
 			ondfRenderError: function(event, from, to, err) {
-				this.execCb();
+				this.execCb( event, from, to );
 				this.designer.doError(err);
 			}
 		},
@@ -188,10 +188,17 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		var fsm = StateMachine.create( this.fsmStruct );
 		fsm.trace = this.trace.bind(this);
-		fsm.execCb = (function() {
+		fsm.execCb = (function( event, from, to ) {
 			var cb = this.pendingCb;
 			this.pendingCb = null;
-			cb();
+
+			if (cb) {
+				cb();
+			} else {
+				var msg = "Internal error: missing call-back in event " + event ;
+				msg += " from state " + from + " to state " + to;
+				this.designer.doError(msg) ;
+			}
 		}).bind(fsm);
 		fsm.designer = this ;
 		this.fsm = fsm;
