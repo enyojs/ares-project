@@ -166,11 +166,9 @@ enyo.kind({
 				// Invalid fsm callback. See state-machine source code for error codes :-/
 				this.designer.doError( { err: error, msg: "Internal error: " + errorMessage} );
 			} else if ( /^df/.test(eventName) ) {
-				// don't delay event coming from designer frame
-				throw ("Unexpected event " + eventName + " coming from designer in state " + from) ;
+				this.designer.doError ("Unexpected event " + eventName + " coming from designer in state " + from) ;
 			} else {
-				this.trace("got " + eventName + " while in state " + from +", stashing event");
-				this.fsmStash.push([eventName, args]);
+				this.designer.doError ("Unexpected event " + eventName + " coming from Ares in state " + from) ;
 			}
 		}
 	},
