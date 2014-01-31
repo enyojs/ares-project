@@ -369,17 +369,17 @@ BdPhoneGap.prototype.build = function(req, res, next) {
 	// a showstopper to build the app
 	function _addEnyoLoadErrorHandler (req, next) {
 		var dbg = path.join(req.appDir.zipRoot, "debug.html");
-		var url = req.headers.host + '/ide/ares/error.html';
+		var url = 'http://' + req.headers.host + '/ide/ares/error.html';
 		request(url, function (error, res, body) {
 			if (!error) {
 				fs.writeFile (dbg, body, function(err) { 
 					if (err) {
-						log.warn("BdPhoneGap#build#_addEnyoLoadErrorHandler():fileWrite " + err);
+						log.warn("BdPhoneGap#build#_addEnyoLoadErrorHandler():fileWrite " + err + ' writing ' + dbg);
 					}
 					setImmediate(next); 
 				});
 			} else {
-				log.warn("BdPhoneGap#build#_addEnyoLoadErrorHandler(): " + error);
+				log.warn("BdPhoneGap#build#_addEnyoLoadErrorHandler(): " + error + ' calling ' + url);
 				setImmediate(next);
 			}
 		});
