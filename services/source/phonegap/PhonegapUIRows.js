@@ -20,7 +20,9 @@ enyo.kind({
 	},
 	events: {
 		onEnableOkButton: "",
-		onDisableOkButton: ""
+		onDisableOkButton: "",
+		onEnableErrorHighLight: "",
+		onDisableErrorHighLight: ""
 	},
 	/**
 	 * @private
@@ -31,14 +33,36 @@ enyo.kind({
 		this.errChanged();
 	},
 
+	getDrawer: function() {
+		return this.container.container;
+	},
+
 	errChanged: function(prevErr) {
 		this.trace("err:", this.err && this.err.toString(), "<-", prevErr && prevErr.toString());
 		if (prevErr && !this.err) {
 			this.doEnableOkButton();
+			this.disableDrawerHighLight();
 		} else if (!prevErr && this.err) {
 			this.warn(this.err);
 			this.doDisableOkButton({reason: this.err.toString()});
 		}
+	},
+	/**
+	 * @private
+	 */
+	disableDrawerHighLight: function() {
+		
+		var provider = Phonegap.ProjectProperties.getProvider();
+
+		for(var key in provider.getSelectedProject().getValidPgbConf()[this.platform]){
+			if(!provider.getSelectedProject().getValidPgbConf()[this.platform][key]){
+				provider.getSelectedProject().getValidPgbConf()[this.platform]["validDrawer"] = false;
+			}
+		}
+				
+		if (provider.getSelectedProject().getValidPgbConf()[this.platform]["validDrawer"]) {
+			this.doDisableErrorHighLight();
+		}		
 	}
 });
 
@@ -239,6 +263,7 @@ enyo.kind({
 			var err = new Error(this.$.label.getContent().toString() + ": '" + inSender.getValue().toString() + "' is not a number");
 			this.$.errorMsg.setContent(err.toString());
 			this.$.errorMsg.show();
+			this.doEnableErrorHighLight();
 			this.setErr(err);
 		}
 		
@@ -537,18 +562,19 @@ enyo.kind({
 	},
 	
 	/**
-	 * Show an error message under the picker & disable the 'OK' button of the Pop-up.
+	 * Show an error message next to the picker & disable the 'OK' button of the Pop-up.
 	 * @param  {String} erroneousValue     The incorrect value spoted from the file 'project.json'
-	 * @param  {String} hightLightedPicker Name of the picker row.
+	 * @param  {String} highLightedPicker Name of the picker row.
 	 * @param  {String} errorMsg           Displayed error message
 	 * @private
 	 */
-	showErrorMessage: function(pickerButtonValue, hightLightedPicker, errorMsg) {
+	showErrorMessage: function(pickerButtonValue, highLightedPicker, errorMsg) {
 		var err = new Error(this.$.label.getContent().toString() + ": '" + pickerButtonValue + "' is not an allowed value");
 		
-		this.container.$[hightLightedPicker].$.configurationPickerButton.setContent(pickerButtonValue);
-		this.container.$[hightLightedPicker].$.errorMsg.setContent(errorMsg);
-		this.container.$[hightLightedPicker].$.errorMsg.show();
+		this.container.$[highLightedPicker].$.configurationPickerButton.setContent(pickerButtonValue);
+		this.container.$[highLightedPicker].$.errorMsg.setContent(errorMsg);
+		this.container.$[highLightedPicker].$.errorMsg.show();		
+		this.doEnableErrorHighLight();
 		
 		this.setErr(err);
 	},
@@ -966,8 +992,10 @@ enyo.kind({
 			this.setErr(null);
 		} else{
 			var err = new Error("Height and Width values must be numbers");
+			this.doEnableErrorHighLight();
 			this.$.errorMsg.setContent(err.toString());
-			this.$.errorMsg.show();
+			this.$.errorMsg.show();			
+			this.doEnableErrorHighLight();
 			this.setErr(err);
 		}
 	},
@@ -982,7 +1010,9 @@ enyo.kind({
 			this.setErr(null);
 		} else{
 			var err = new Error("Height and Width values must be numbers");
-			this.$.errorMsg.setContent(err.toString());
+			this.doEnableErrorHighLight();
+			this.$.errorMsg.setContent(err.toString());			
+			this.doEnableErrorHighLight();
 			this.$.errorMsg.show();
 			this.setErr(err);
 		}

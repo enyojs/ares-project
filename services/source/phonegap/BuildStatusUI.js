@@ -126,16 +126,18 @@ enyo.kind({
 	 * @private
 	 */
 	createIconButtons: function() {
-		for (var key in Phonegap.ProjectProperties.downloadStatus) {
+
+		for (var i = 0, length = Phonegap.UIConfiguration.platformDrawersContent.length; i < length ; i++) {
+			var p = Phonegap.UIConfiguration.platformDrawersContent[i].id;
 			this.$.platformIconContainer.createComponent(
 				{
-					name: key + "Decorator", 
+					name: p + "Decorator", 
 					classes: "ares-project-properties-build-status-icon",
 					components: [						
 						{
-							name: key + "Button", 
+							name: p + "Button", 
 							kind: "Phonegap.ProjectProperties.PlatformBuildStatus", 
-							platform: key
+							platform: p
 						}
 					]
 				}, 
@@ -230,8 +232,9 @@ enyo.kind({
 	 * @private
 	 */
 	removeHightlightIconButton: function() {
-		for(var key in Phonegap.ProjectProperties.downloadStatus) {
-			this.$[key + "Decorator"].removeClass("ares-project-properties-buildStatus-icon-highlight");			
+		for(var i = 0, length = Phonegap.UIConfiguration.platformDrawersContent.length; i < length ; i++) {
+			var platform = Phonegap.UIConfiguration.platformDrawersContent[i].id;
+			this.$[platform + "Decorator"].removeClass("ares-project-properties-buildStatus-icon-highlight");			
 		}
 	},
 
@@ -295,7 +298,7 @@ enyo.kind({
 	 * @private
 	 */
 	downloadPackage: function(inSender, inEvent) {
-		this.provider.downloadPackage(this.provider.getCurrentProject(), this.selectedPlatform, this.buildStatusData, enyo.bind(this, this.getPackage));
+		this.provider.downloadPackage(this.provider.getSelectedProject(), this.selectedPlatform, this.buildStatusData, enyo.bind(this, this.getPackage));
 
 		//set the download status to "Download on progress"
 		this.$.downloadStatus.setDownloadStatus(this.selectedPlatform, 2);		
@@ -386,7 +389,7 @@ enyo.kind({
 			However we'll need to revise the backbone store for Phonegap build as we transform it into a plugin
 		*/
 		
-		this.provider.getCurrentProject().getDownloadStatus()[inPlatform] = inDownloadStatus === 1 ? "Download complete": 
+		this.provider.getSelectedProject().getDownloadStatus()[inPlatform] = inDownloadStatus === 1 ? "Download complete": 
 		inDownloadStatus === 0 ? "Download failed" : "Download in progress";
 
 		this.bubble("onUpdateStatusMessage");	
@@ -400,7 +403,7 @@ enyo.kind({
 	 * @public
 	 */
 	getDownloadStatus: function(inPlatform) {
-		return this.provider.getCurrentProject().getDownloadStatus()[inPlatform];
+		return this.provider.getSelectedProject().getDownloadStatus()[inPlatform];
 	}	
 
 });
