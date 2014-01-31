@@ -17,7 +17,7 @@ enyo.kind({
 			], onUpdateAuth: "handleUpdateAuth"},
 		]},
 		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
-			{kind: "onyx.Button", content: "Cancel", ontap: "dismiss"}
+			{kind: "onyx.Button", content: "Done", ontap: "dismiss"}
 		]},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "", details: "", autoDismiss: false, modal: true},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, classes: "ares-waitpopup", components: [
