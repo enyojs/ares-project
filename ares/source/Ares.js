@@ -127,7 +127,9 @@ enyo.kind({
 	openDocument: function(inSender, inEvent) {
 		this._openDocument(inEvent.projectData, inEvent.file, ares.noNext );
 	},
-	/** @private */
+
+	// used only in _openDocument
+	onGoingOpen: false,
 	_openDocument: function(projectData, file, next) {
 		ares.assertCb(next);
 		var fileDataId = Ares.Workspace.files.computeId(file);
@@ -137,9 +139,22 @@ enyo.kind({
 		}
 		var fileData = Ares.Workspace.files.get(fileDataId);
 
+		if (this.onGoingOpen) {
+			var msg = "Aborted: openDocument is already on-going";
+			this.log(msg);
+			next(new Error(msg));
+			return;
+		}
+
+		this.onGoingOpen = true;
+		var myNext = (function(err) {
+			this.onGoingOpen = false;
+			next(err);
+		}).bind(this);
+
 		// hide projectView only the first time a file is opened in a project
 		// otherwise, let the user handle this
-		var mayHideProjectView = Ares.Workspace.files.length ? function() { next();}
+		var mayHideProjectView = Ares.Workspace.files.length ? function(next) { next();}
 			: function(next) { this.hideProjectView(); next();} ;
 
 		this.trace("open document with project ", projectData.getName(), " file ", file.name, " using cache ", fileData);
@@ -147,7 +162,7 @@ enyo.kind({
 		if (fileData) {
 			// switch triggered by double-clicking an already opened
 			// file in HermesFileTree
-			editor.switchToDocument(fileData, $L("Switching files..."), next) ;
+			editor.switchToDocument(fileData, $L("Switching files..."), myNext) ;
 		} else {
 			this.showWaitPopup(this, {msg: $L("Fetching file...")});
 			async.waterfall(
@@ -158,7 +173,7 @@ enyo.kind({
 				],
 				(function(err) {
 					this.hideWaitPopup();
-					next(err);
+					myNext(err);
 				}).bind(this)
 			);
 		}
