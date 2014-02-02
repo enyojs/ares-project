@@ -77,3 +77,7 @@
 .onyx-highlight.list-sample-selected {
 	background-color: #dedfdf;
 }
+
+.border_width_input {
+	width: 90px;
+}
