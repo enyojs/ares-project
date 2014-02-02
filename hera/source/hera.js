@@ -12,7 +12,8 @@ enyo.kind({
 		y: "0",
 		z: "0",
 		misc: "",
-		toggle: ""
+		toggle: "",
+		file_source_dir: ""
 	},
 	events: {
 		onRegisterMe: "",
@@ -86,6 +87,7 @@ enyo.kind({
 	*/
 	cssload: function(data){
 		this.trace("data", data);
+		this.filesourcedir = data.originator.docData.attributes.file.path;
 		var d = data.originator.$.aceWrapper.value;
 		this.dePuzzle(d);
 	},
@@ -117,6 +119,11 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
 		this.newvalue = inEvent.originator.valueout;
+		
+		if(this.newvalue.indexOf("url") != -1){
+			this.fixurl(this.newvalue);
+		}
+		
 		
 		while(this.properties[a] !== undefined && this.properties[a] !== "null"){
 			if(this.properties[a].indexOf(this.$.property) !== -1 ){
@@ -381,5 +388,38 @@ enyo.kind({
         this.declaration[index] = "New";
         this.$.list.reset();
     },
+    
+	fixurl: function(address){
+		this.log("address:", address);
+		var project = Ares.Workspace.projects.active;
+		var urlin = address.split("/");
+		var currntfileurl = this.filesourcedir;
+		var a = currntfileurl.split("/");
+		var add = "";
+		var b = "";
+	
+		for (var i=1; i < a.length; i++) {		//  work our way back to the project root from the css file
+			if(a[i] === project){
+				i++;
+				for(i; i < a.length; i++){
+					add = add + ".";
+				}
+				add = add ;
+			}
+		}
+		
+		for (var j = 1; j < urlin.length; j++){		// work our way out from root to the image file
+			if(urlin[j] === project){
+				j++;
+				for(j;  j < urlin.length; j++){
+					b = b + "/" + urlin[j];
+				}
+			
+			}
+		}
+		var urlout = "url(" + add + b + ");";
+		this.newvalue = urlout;
+		return;
+    }
 
 });
