@@ -206,23 +206,16 @@ enyo.kind({
 	 * @param {array} kinds
 	 */
 	initKindPicker: function(kinds) {
-		var maxLen ;
-
 		this.$.kindPicker.destroyClientControls();
-
 		for (var i = 0; i < kinds.length; i++) {
 			var k = kinds[i];
 			this.$.kindPicker.createComponent({
 				content: k.name,
 				index: i
 			});
-			maxLen = Math.max(k.name.length, maxLen);
 		}
-
 		this.$.kindButton.setContent(kinds[0].name);
-		this.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.$.kindPicker.render();
-		this.resized();
 	},
 
 	designerAction: function() {
