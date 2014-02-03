@@ -71,6 +71,7 @@ enyo.kind({
 			kind: "DocumentToolbar",
 			onTabRemoveRequested: "handleCloseDocument",
 			onTabChangeRequested: 'handleSwitchDoc',
+			onTabChanged: 'handleSwitchDocNoCb', // called when doc is switched after tab removal
 			classes: "ares-bottom-bar"
 		},
 		{
@@ -633,6 +634,18 @@ enyo.kind({
 		var newDoc = Ares.Workspace.files.get(inEvent.userId);
 		this.trace(inEvent.id, newDoc);
 		this.switchToDocument(newDoc, $L("Switching files..."), inEvent.next);
+		return true;
+	},
+
+	/**
+	 * Handle switch doc event
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 * @returns {true}
+	 */
+	handleSwitchDocNoCb: function(inSender, inEvent) {
+		var newDoc = Ares.Workspace.files.get(inEvent.userId);
+		this.switchToDocument(newDoc, $L("Switching files..."), ares.noNext);
 		return true;
 	},
 
