@@ -1161,7 +1161,8 @@ enyo.kind({
                 classes: "ares-project-properties-picker"
             }, 
             {
-                kind: "onyx.Picker", name: "keys"
+                kind: "onyx.Picker",
+                name: "keys"
             }]
         },
 
