@@ -1,4 +1,4 @@
-/* jshint indent: false */ // TODO: ENYO-3311
+/*global enyo */
 
 enyo.kind({
 	name: "ComponentView",
@@ -30,7 +30,7 @@ enyo.kind({
 	holdoverTimeout:   null,
 	holdoverTimeoutMS: 500,
 	scroll: false,
-	
+
 	//* Draw component view visualization of component tree
 	visualize: function(inComponents) {
 		this.destroyClientControls();
@@ -110,26 +110,26 @@ enyo.kind({
 			this.unhighlightDropTargets();
 			return true;
 		}
-		
+
 		// Enable HTML5 drop
 		inEvent.preventDefault();
-		
+
 		dropDetails = this.calcDropDetails(target, inEvent.clientY);
-		
+
 		// No need to redo the work if the data hasn't changed
 		if (this.dropDetails && dropDetails.pos === this.dropDetails.pos && dropDetails.target === this.dropDetails.target) {
 			return true;
 		}
-		
+
 		this.dropDetails = dropDetails;
 		dropTarget = dropDetails.target;
-		
+
 		// Clear the placeholder on every dragover
 		this.destroyPlaceholder();
-		
+
 		// Reset the holdover timeout on every dragover
 		this.resetHoldoverTimeout();
-		
+
 		if (dropDetails.pos === "center") {
 			this.highlightDropTarget(dropTarget);
 			dropTargetId = dropTarget.comp.aresId;
@@ -142,42 +142,42 @@ enyo.kind({
 			beforeItem = beforeTarget ? beforeTarget.comp : null;
 			beforeId = beforeItem ? beforeItem.aresId : null;
 		}
-		
+
 		this.setHoldoverTimeout(dropTargetId, beforeId);
 		return true;
-	}, 
+	},
 	//* When a component is dropped on another component
 	itemDrop: function(inSender, inEvent) {
 		this.destroyPlaceholder();
-		
+
 		var dropData = this.getDropData(inEvent),
 			before,
 			containerId,
 			beforeId;
-		
+
 		// If the item was dropped in the center, add dragged control to target's controls
 		if (this.dropDetails.pos === "center") {
 			this.completeDrop(dropData, this.dropDetails.target.getAresId(), null);
-		
+
 		} else {
 			before = this.findControlBeforeTarget(this.dropDetails.target, this.dropDetails.pos);
-			
+
 			// If dropping into the highest level control
 			if (this.dropDetails.target.owner === this) {
 				beforeId = (typeof before === "undefined" || before === null) ? null : before.getAresId();
 				this.completeDrop(dropData, null, beforeId);
-			
-			// If _before_ === null, drop this item at the end of it's container (there is no before item)
+
+				// If _before_ === null, drop this item at the end of it's container (there is no before item)
 			} else if (before === null) {
 				this.completeDrop(dropData, this.dropDetails.target.owner.getAresId(), null);
-			
-			// Otherwise drop current item before _before_
+
+				// Otherwise drop current item before _before_
 			} else {
 				containerId = (this.dropDetails.target.owner === this) ? null : this.dropDetails.target.owner.getAresId();
 				this.completeDrop(dropData, containerId, before.getAresId());
 			}
 		}
-		
+
 		return true;
 	},
 	itemDragend: function(inSender, inEvent) {
@@ -186,12 +186,12 @@ enyo.kind({
 	//* When a component is dropped on a placeholder
 	placeholderDrop: function(inSender, inEvent) {
 		this.destroyPlaceholder();
-		
+
 		var dropData = this.getDropData(inEvent),
 			containerId = (this.dropDetails.target.owner.comp) ? this.dropDetails.target.owner.getAresId() : null,
 			before = this.findControlBeforeTarget(this.dropDetails.target, this.dropDetails.pos),
 			beforeId = (before && before.comp) ? before.getAresId() : null;
-		
+
 		this.completeDrop(dropData, containerId, beforeId);
 		return true;
 	},
@@ -203,26 +203,26 @@ enyo.kind({
 	},
 	completeDrop: function(inDropData, inTargetId, inBeforeId) {
 		switch (inDropData.type) {
-			case "ares/moveitem":
-				this.doMoveItem({
-					itemId:   inDropData.data.aresId,
-					targetId: inTargetId,
-					beforeId: inBeforeId
-				});
-				break;
-			case "ares/createitem":
-				this.doCreateItem({
-					config:   inDropData.data.config,
-					options:  inDropData.data.options,
-					targetId: inTargetId,
-					beforeId: inBeforeId
-				});
-				break;
-			default:
-				enyo.warn("Component view received unknown drop: ", inDropData);
-				break;
+		case "ares/moveitem":
+			this.doMoveItem({
+				itemId:   inDropData.data.aresId,
+				targetId: inTargetId,
+				beforeId: inBeforeId
+			});
+			break;
+		case "ares/createitem":
+			this.doCreateItem({
+				config:   inDropData.data.config,
+				options:  inDropData.data.options,
+				targetId: inTargetId,
+				beforeId: inBeforeId
+			});
+			break;
+		default:
+			enyo.warn("Component view received unknown drop: ", inDropData);
+			break;
 		}
-		
+
 		this.resetDropDetails();
 	},
 	setHoldoverTimeout: function (inTargetId, inBeforeId) {
@@ -238,13 +238,13 @@ enyo.kind({
 		if (!inTarget.hasNode()) {
 			return null;
 		}
-		
+
 		var rect = inTarget.hasNode().getBoundingClientRect(),
 			topEdge = 5,
 			bottomEdge = rect.height - topEdge,
 			distanceFromTop = inClientY - rect.top,
 			pos = (distanceFromTop <= topEdge) ? "top" : (distanceFromTop >= bottomEdge) ? "bottom" : "center";
-		
+
 		return {pos: pos, target: inTarget};
 	},
 	findControlFromDropDetails: function(inTarget, inPos) {
@@ -257,14 +257,14 @@ enyo.kind({
 			leftMargin = (typeof beforeControl === "undefined")
 				?	"0px"
 				:	(beforeControl === null)
-					?	inTarget.owner.domStyles["padding-left"] || "0px"
-					:	beforeControl.domStyles["padding-left"]  || "0px",
+				?	inTarget.owner.domStyles["padding-left"] || "0px"
+				:	beforeControl.domStyles["padding-left"]  || "0px",
 			placeholder = {kind: "ComponentViewPlaceholder", style: "margin-left:" + leftMargin};
-		
+
 		if (beforeControl) {
 			placeholder.addBefore = beforeControl;
 		}
-		
+
 		this.dropPlaceholder = inTarget.owner.createComponent(placeholder);
 		this.dropPlaceholder.render();
 	},
@@ -276,7 +276,7 @@ enyo.kind({
 		var owner = inTarget.owner,
 			targetIndex = owner.indexOfControl(inTarget),
 			addBeforeIndex = (inPos === "top") ? targetIndex : targetIndex + 1;
-		
+
 		return (addBeforeIndex > owner.getClientControls().length + 1) ? -1 : addBeforeIndex;
 	},
 	destroyPlaceholder: function() {
@@ -312,12 +312,12 @@ enyo.kind({
 		if (inComponents.length === 0) {
 			return;
 		}
-		
+
 		for (var i=0, c; (c=inComponents[i]); i++) {
 			if(c === this.selection || c.kind === "ComponentViewPlaceholder") {
 				continue;
 			}
-			
+
 			this.unHighlightItem(c);
 			this._unhighlightDropTargets(c.getClientControls());
 		}
@@ -330,7 +330,7 @@ enyo.kind({
 		if (inComponents.length === 0) {
 			return;
 		}
-		
+
 		for (var i=0, c; (c=inComponents[i]); i++) {
 			if(c === this.selection || !c.comp) {
 				continue;
@@ -338,7 +338,7 @@ enyo.kind({
 				this.highlightDropTarget(c);
 				continue;
 			}
-			
+
 			this.unHighlightItem(c);
 			this._syncDropTargetHighlighting(inId, c.getClientControls());
 		}
@@ -389,7 +389,7 @@ enyo.kind({
 	getAresId: function() {
 		return this.getComp().aresId;
 	},
-	
+
 	down: function(inSender, inEvent) {
 		this.doItemDown(inEvent);
 
@@ -402,7 +402,7 @@ enyo.kind({
 		if(!inEvent.dataTransfer) {
 			return true;
 		}
-		
+
 		var dragData = {
 			type: "ares/moveitem",
 			item: inEvent.originator.comp
@@ -410,7 +410,7 @@ enyo.kind({
 
 		// Set drag data
 		inEvent.dataTransfer.setData("text", enyo.json.codify.to(dragData));
-		
+
 		// Hide the drag image ghost on platforms where it exists
 		if (inEvent.dataTransfer.setDragImage) {
 			inEvent.dataTransfer.setDragImage(this.dragImage, 0, 0);

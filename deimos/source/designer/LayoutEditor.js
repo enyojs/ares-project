@@ -1,4 +1,4 @@
-/* jshint indent: false */ // TODO: ENYO-3311
+/*global enyo */
 
 enyo.kind({
 	name: "Inspector.LayoutEditor",
@@ -89,12 +89,12 @@ enyo.kind({
 			returnProps = {},
 			prop
 		;
-		
+
 		// Go through each default, and if it doesn't exist in _this.styleProps_, use the default
 		for (prop in defaultProps) {
 			returnProps[prop] = (props[prop]) ? enyo.clone(props[prop]) : enyo.clone(defaultProps[prop]);
 		}
-		
+
 		this.setStyleProps(enyo.clone(returnProps));
 	},
 	//* Create an instance of _Inspector.PositionEditor_ passing in _this.styleProps_
@@ -111,7 +111,7 @@ enyo.kind({
 			prop,
 			row
 		;
-		
+
 		for (prop in properties) {
 			row = this.createComponent({classes: "ares-inspector-row"});
 			row.createComponent(
@@ -137,7 +137,7 @@ enyo.kind({
 			requestData,
 			focused
 		;
-		
+
 		for(var i = 0, prop; (prop = inEvent.changedProps[i]); i++) {
 			$field = this.$["attributeVal-" + prop];
 			if (inEvent.props[prop].disabled) {
@@ -152,13 +152,13 @@ enyo.kind({
 				}
 			}
 		}
-		
+
 		if (requestData) {
 			this.doRequestPositionValue(requestData);
 		} else if (!focused) {
 			this.dataPositionUpdated();
 		}
-		
+
 		return true;
 	},
 	//* Set the auto-generated field value for the specified property
@@ -180,13 +180,13 @@ enyo.kind({
 				width: ""
 			}
 		;
-	
+
 		for (var prop in props) {
 			$field = this.$["attributeVal-" + prop];
 			value = $field.getFieldValue();
 			props[prop] = value;
 		}
-		
+
 		this.doPositionDataUpdated({props: props});
 	}
 });
@@ -245,143 +245,143 @@ enyo.kind({
 			props = this.props,
 			changedProps = [side]
 		;
-		
+
 		props[side].disabled = !props[side].disabled;
-		
+
 		switch (side) {
-			case "top":
-				if (props.top.disabled) {
-					// Top: off, Bottom: off --> Bottom: on
-					if (props.bottom.disabled) {
-						props.bottom.disabled = false;
-						changedProps.push("bottom");
-					// Top: off, Bottom: on, Height: off --> Height: on
-					} else if (props.height.disabled) {
-						props.height.disabled = false;
-						changedProps.push("height");
-					}
-				} else {
-					if (!props.bottom.disabled) {
-						// Top: on, Bottom: on, Height: on --> Height: off
-						if (!props.height.disabled) {
-							props.height.disabled = true;
-							changedProps.push("height");
-						}
-					}
-				}
-				break;
-			case "right":
-				if (props.right.disabled) {
-					// Right: off, Left: off --> Left: on
-					if (props.left.disabled) {
-						props.left.disabled = false;
-						changedProps.push("left");
-					// Right: off, Left: on, Width: off --> Width: on
-					} else if (props.width.disabled) {
-						props.width.disabled = false;
-						changedProps.push("width");
-					}
-				} else {
-					if (!props.left.disabled) {
-						// Right: on, Left: on, Width: on --> Width: off
-						if (!props.width.disabled) {
-							props.width.disabled = true;
-							changedProps.push("width");
-						}
-					}
-				}
-				break;
-			case "bottom":
-				// Bottom: off, Top: off --> Top: on
+		case "top":
+			if (props.top.disabled) {
+				// Top: off, Bottom: off --> Bottom: on
 				if (props.bottom.disabled) {
-					if (props.top.disabled) {
-						props.top.disabled = false;
-						changedProps.push("top");
-					// Bottom: off, Top: on, Height: off --> Height: on
-					} else if (props.height.disabled) {
-						props.height.disabled = false;
+					props.bottom.disabled = false;
+					changedProps.push("bottom");
+					// Top: off, Bottom: on, Height: off --> Height: on
+				} else if (props.height.disabled) {
+					props.height.disabled = false;
+					changedProps.push("height");
+				}
+			} else {
+				if (!props.bottom.disabled) {
+					// Top: on, Bottom: on, Height: on --> Height: off
+					if (!props.height.disabled) {
+						props.height.disabled = true;
 						changedProps.push("height");
 					}
-				} else {
-					if (!props.top.disabled) {
-						// Bottom: on, Top: on, Height: on --> Height: off
-						if (!props.height.disabled) {
-							props.height.disabled = true;
-							changedProps.push("height");
-						}
-					}
 				}
-				break;
-			case "left":
+			}
+			break;
+		case "right":
+			if (props.right.disabled) {
+				// Right: off, Left: off --> Left: on
 				if (props.left.disabled) {
-					// Left: off, Right: off --> Right: on
-					if (props.right.disabled) {
-						props.right.disabled = false;
-						changedProps.push("right");
-					// Left: off, Right: on, Width: off --> Width: on
-					} else if (props.width.disabled) {
-						props.width.disabled = false;
+					props.left.disabled = false;
+					changedProps.push("left");
+					// Right: off, Left: on, Width: off --> Width: on
+				} else if (props.width.disabled) {
+					props.width.disabled = false;
+					changedProps.push("width");
+				}
+			} else {
+				if (!props.left.disabled) {
+					// Right: on, Left: on, Width: on --> Width: off
+					if (!props.width.disabled) {
+						props.width.disabled = true;
 						changedProps.push("width");
 					}
-				} else {
-					if (!props.right.disabled) {
-						// Left: on, Right: on, Width: on --> Width: off
-						if (!props.width.disabled) {
-							props.width.disabled = true;
-							changedProps.push("width");
-						}
+				}
+			}
+			break;
+		case "bottom":
+			// Bottom: off, Top: off --> Top: on
+			if (props.bottom.disabled) {
+				if (props.top.disabled) {
+					props.top.disabled = false;
+					changedProps.push("top");
+					// Bottom: off, Top: on, Height: off --> Height: on
+				} else if (props.height.disabled) {
+					props.height.disabled = false;
+					changedProps.push("height");
+				}
+			} else {
+				if (!props.top.disabled) {
+					// Bottom: on, Top: on, Height: on --> Height: off
+					if (!props.height.disabled) {
+						props.height.disabled = true;
+						changedProps.push("height");
 					}
 				}
-				break;
-			case "width":
-				if (props.width.disabled) {
-					// Width: off, Left: off --> Left: on
-					if (props.left.disabled) {
-						props.left.disabled = false;
-						changedProps.push("left");
+			}
+			break;
+		case "left":
+			if (props.left.disabled) {
+				// Left: off, Right: off --> Right: on
+				if (props.right.disabled) {
+					props.right.disabled = false;
+					changedProps.push("right");
+					// Left: off, Right: on, Width: off --> Width: on
+				} else if (props.width.disabled) {
+					props.width.disabled = false;
+					changedProps.push("width");
+				}
+			} else {
+				if (!props.right.disabled) {
+					// Left: on, Right: on, Width: on --> Width: off
+					if (!props.width.disabled) {
+						props.width.disabled = true;
+						changedProps.push("width");
 					}
-					// Width: off, Right: off --> Right: on
-					if (props.right.disabled) {
-						props.right.disabled = false;
+				}
+			}
+			break;
+		case "width":
+			if (props.width.disabled) {
+				// Width: off, Left: off --> Left: on
+				if (props.left.disabled) {
+					props.left.disabled = false;
+					changedProps.push("left");
+				}
+				// Width: off, Right: off --> Right: on
+				if (props.right.disabled) {
+					props.right.disabled = false;
+					changedProps.push("right");
+				}
+			} else {
+				if (!props.left.disabled) {
+					// Width: on, Left: on, Right: on --> Right: off
+					if (!props.right.disabled) {
+						props.right.disabled = true;
 						changedProps.push("right");
 					}
-				} else {
-					if (!props.left.disabled) {
-						// Width: on, Left: on, Right: on --> Right: off
-						if (!props.right.disabled) {
-							props.right.disabled = true;
-							changedProps.push("right");
-						}
-					}
 				}
-				break;
-			case "height":
-				if (props.height.disabled) {
-					// Height: off, Top: off --> Top: on
-					if (props.top.disabled) {
-						props.top.disabled = false;
-						changedProps.push("top");
-					}
-					// Height: off, Bottom: off --> Bottom: on
-					if (props.bottom.disabled) {
-						props.bottom.disabled = false;
+			}
+			break;
+		case "height":
+			if (props.height.disabled) {
+				// Height: off, Top: off --> Top: on
+				if (props.top.disabled) {
+					props.top.disabled = false;
+					changedProps.push("top");
+				}
+				// Height: off, Bottom: off --> Bottom: on
+				if (props.bottom.disabled) {
+					props.bottom.disabled = false;
+					changedProps.push("bottom");
+				}
+			} else {
+				if (!props.top.disabled) {
+					// Height: on, Top: on, Bottom: on --> Bottom: off
+					if (!props.bottom.disabled) {
+						props.bottom.disabled = true;
 						changedProps.push("bottom");
 					}
-				} else {
-					if (!props.top.disabled) {
-						// Height: on, Top: on, Bottom: on --> Bottom: off
-						if (!props.bottom.disabled) {
-							props.bottom.disabled = true;
-							changedProps.push("bottom");
-						}
-					}
 				}
-				break;
-			default:
-				break;
+			}
+			break;
+		default:
+			break;
 		}
-		
-		 this.propsChanged();
-		 this.doUpdateProps({changedSide: side, changedProps: changedProps, props: props});
+
+		this.propsChanged();
+		this.doUpdateProps({changedSide: side, changedProps: changedProps, props: props});
 	}
 });
