@@ -71,10 +71,7 @@ enyo.kind({
 			kind: "DocumentToolbar",
 			onTabRemoveRequested: "handleCloseDocument",
 			onTabChangeRequested: 'handleSwitchDoc',
-			// FIXME ENYO-3627
-			// backward compatibility: the following event handler can
-			// be removed once onyx pilot-13 is integrated in Ares
-			onTabChanged: 'handleSwitchDoc',
+			onTabChanged: 'handleSwitchDocNoCb', // called when doc is switched after tab removal
 			classes: "ares-bottom-bar"
 		},
 		{
@@ -636,10 +633,19 @@ enyo.kind({
 	handleSwitchDoc: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.userId);
 		this.trace(inEvent.id, newDoc);
-		// FIXME ENYO-3627
-		// older TabBar doesn't provide callback
-		var next = inEvent.next || function() {} ;
-		this.switchToDocument(newDoc, $L("Switching files..."), next);
+		this.switchToDocument(newDoc, $L("Switching files..."), inEvent.next);
+		return true;
+	},
+
+	/**
+	 * Handle switch doc event
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 * @returns {true}
+	 */
+	handleSwitchDocNoCb: function(inSender, inEvent) {
+		var newDoc = Ares.Workspace.files.get(inEvent.userId);
+		this.switchToDocument(newDoc, $L("Switching files..."), ares.noNext);
 		return true;
 	},
 

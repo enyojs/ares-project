@@ -234,7 +234,9 @@ enyo.kind({
 					enyo.forEach(Object.keys(def), function(k) {
 						self.settings[k] = tmp[k] === undefined ? def[k] : tmp[k];
 					});
-				}		
+				}else{
+					self.settings = enyo.json.parse(enyo.json.stringify(self.defaultsSettings));
+				}	
 			} catch(e) {
 				Ares.LocalStorage.remove(self.SETTINGS_STORAGE_KEY);
 			}

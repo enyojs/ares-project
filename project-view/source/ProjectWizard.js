@@ -205,6 +205,7 @@ enyo.kind({
 	_showProjectPropPopup: function(next) {
 		this.$.selectDirectoryPopup.hide();
 		this.$.selectDirectoryPopup.reset();
+		this.$.propertiesWidget.hideVersions();
 		this.show();
 		next();
 	},
@@ -438,6 +439,7 @@ enyo.kind({
 		this.trace(pathDeploy, pathProject, urlHome);
 		var	pathArray = [],
 			urls = [],
+			urlObject = {},
 			serviceHome = urlHome+pathProject,
 			enyoVersionFile = "/source/boot/version.js",
 			versionFile = "/version.js",
@@ -458,7 +460,9 @@ enyo.kind({
 			if(path){
 				//a path can be started with ./ or nothing
 				path = path.replace(/^\.\//, ""); //if the path starts with ./, it is replaced by nothing
-				urls.push(serviceHome + "/" + path + (path.match(/enyo/) ? enyoVersionFile : versionFile));
+				var lib = path.replace(/^lib\//, "");
+				urlObject = {"lib" : lib, "url": serviceHome + "/" + path + (path.match(/^enyo/) ? enyoVersionFile : versionFile)};
+				urls.push(urlObject);
 			}
 		}, this);
 
@@ -481,10 +485,11 @@ enyo.kind({
 	 * @param {[Function]} next
 	 */
 	readVersionFileFromUrl: function(url, next){
-		var req = new enyo.Ajax({url: url, handleAs: "text"});
+		var req = new enyo.Ajax({url: url["url"], handleAs: "text"});
 		var content = "";
 		var version = "";
 		var expr = new RegExp("enyo.version.|=|:|\"", "g");
+
 		req.response(this, function(inSender, inValue) {
 			if(inValue){
 				content = inValue.match(/{\s*(enyo[^\n,;]+)/);
@@ -494,16 +499,46 @@ enyo.kind({
 			next();
 		});
 		req.error(this, function(err){
-			this.versions = "Not found";
-			next(err);
+			this.versions.push( url["lib"]+ ": not found");
+			next();
 		});
 		req.go();
 	},
+
 	/**
 	 * Display version label
 	 */
 	setVersionLabel: function(){
+		this.versions.sort(this.compareLibs);
 		this.$.propertiesWidget.setVersionLabel(this.versions.join(", "));
+	},
+
+	/**
+	 * @private
+	 * Used to set the enyo version at the top of the array
+	 * @param {String} libA
+	 * @param {String} libB
+	 */
+	compareLibs: function (libA, libB){
+		var re = new RegExp("^enyo:");
+		if(libA.match(re) && libB.match(re)){
+			return 0;
+		} else if (libA.match(re)) {
+			return -1;
+		} else if (libB.match(re)) {
+			return 1;
+		}
+		return 0;
+	},
+	/**
+	 * @private
+	 * Add content to version repeater item
+	 */
+	addVersions: function(inSender, inEvent){
+		var item = inEvent.item.$.item,
+			index = inEvent.item.index;
+		item.setContent(this.versions[index]);
+		return true;
 	},
 	/**
 	 * Function used to display the Edit Pop-up with the specification of the defaut tab to be displayed
@@ -874,6 +909,8 @@ enyo.kind({
 
 			this.$.propertiesWidget.$.projectPathLabel.setContent($L("Parent project path: "));
 			this.$.propertiesWidget.$.projectPathValue.setContent("");
+			//TO DO: hide versions label for copy not tested, copy isn't working
+			this.$.propertiesWidget.hideVersions();
 			var config = target.getConfig();
 			var req = config.service.propfind(config.folderId, 3);
 			req.response(this, function(inSender, inFile) {
