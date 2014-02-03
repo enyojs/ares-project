@@ -1,4 +1,4 @@
-/*global enyo, ares */
+/*global enyo, ares, Ares */
 
 enyo.kind({
 	name: "Hera",
@@ -408,8 +408,8 @@ enyo.kind({
 			}
 		}
 		
-		for (var j = 1; j < urlin.length; j++){		// work our way out from root to the image file
-			if(urlin[j] === project){
+		for (var j = 0; j < urlin.length; j++){		// work our way out from root to the image file
+			if(urlin[j] === "url("){
 				j++;
 				for(j;  j < urlin.length; j++){
 					b = b + "/" + urlin[j];
@@ -417,7 +417,7 @@ enyo.kind({
 			
 			}
 		}
-		var urlout = "url(" + add + b + ");";
+		var urlout = "	url(" + add + b;
 		this.newvalue = urlout;
 		return;
     }

@@ -1,4 +1,4 @@
-/* global ares */
+/* global ares, Ares*/
 enyo.kind({
 	name: "valueInput",
 	kind: "Control",
@@ -287,12 +287,19 @@ enyo.kind({
 		this.$.panels.setIndex(this.lrc);		
 	},
 	
-	fileinput: function(inSender, inEvent){
-		this.trace("sender:", inSender, ", event:", inEvent);
+	fileinput: function(inSender, inData){
+		this.trace("sender:", inSender, ", event:", inData);
+		var project = Ares.Workspace.projects.getActiveProject();
+		this.$.selectFilePopup.reset();
+		this.$.selectFilePopup.connectProject(project, (function() {
+			this.$.selectFilePopup.setHeaderText("Select image");
+			this.$.selectFilePopup.connectProject(project);
+			this.$.selectFilePopup.show();
+		}).bind(this));
+		
 		this.clear();
 		this.$.panels.setIndex(this.filepicker);
 		this.$.selectFilePopup.reset();
-		this.$.selectFilePopup.show();
 	},
 	
 	fileChosen: function(inSender, inEvent){
