@@ -3,11 +3,11 @@ enyo.kind({
 	name:"Ares.EnyoEditor",
 	kind:"FittableRows", 
 	components:[
-		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels", layoutKind: "FittableColumnsLayout", noStretch: true, components: [
+		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels", components: [
 			{kind: "onyx.Grabber", classes: "ares-grabber ares-icon", ontap: "activePanel", components:[
 				{kind: "aresGrabber", name: "aresGrabberDirection", classes:"lleftArrow"}
 			]},
-			{name:"editorControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline", components:[
+			{name:"editorControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline editor-controls", components:[
 				{name: "editorFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
 				{name: "newKindDecorator", kind: "onyx.TooltipDecorator", components: [
 					{name: "newKindButton", kind: "onyx.IconButton", src: "assets/images/new_kind.png", ontap: "newKindAction"},
@@ -24,11 +24,11 @@ enyo.kind({
 					{name: "designerTooltipBroken", kind: "Ares.ErrorTooltip", content: $L("Designer")}
 				]}
 			]},
-			{name:"deimosControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline", components:[
+			{name:"deimosControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline editor-controls", components:[
 				{name: "designerFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
 				{name: "docLabel", content: "Deimos", classes: "ares-left-margin"},
 				{kind: "onyx.PickerDecorator", classes: "ares-right-margin", components: [
-					{name: "kindButton", classes:"ares-toolbar-picker", kind: "onyx.PickerButton"},
+					{name: "kindButton", classes:"ares-toolbar-picker deimos-kind-picker", kind: "onyx.PickerButton"},
 					{name: "kindPicker", kind: "onyx.Picker", onChange: "kindSelected", components: [
 					]}
 				]},
@@ -193,7 +193,7 @@ enyo.kind({
 			deimos.selectKind.bind(deimos, index),
 			(function(name,next) {
 				this.$.kindButton.setContent(name);
-				this.$.toolbar.reflow();
+				this.$.toolbar.resized();
 				next();
 			}).bind(this)
 		]);
