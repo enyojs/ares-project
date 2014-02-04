@@ -1,6 +1,6 @@
 /* global ares, Ares*/
 enyo.kind({
-	name: "valueInput",
+	name: "Ares.Hera.ValueInput",
 	kind: "Control",
 	published: {
 	},
@@ -49,8 +49,8 @@ enyo.kind({
 				{style: "height: 15px;  text-align: center; ", content: "X and Y Inputs" },
 				{style: "height: 5px"},
 				{kind: "FittableColumns", fit: true, classes:"left-input-col",  components: [
-					{kind: "xinput"},
-					{kind: "yinput"},
+					{kind: "Ares.Hera.Xinput"},
+					{kind: "Ares.Hera.Yinput"},
 					{kind: "onyx.PickerDecorator", style: " width: 40px;", components: [
 						{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
 						{kind: "onyx.Picker", onSelect: "unit_type", components: [
@@ -73,9 +73,9 @@ enyo.kind({
 				
 				{kind: "FittableColumns", fit: true, classes:"left-input-col",  components: [
 					{tag:"span"	, content:"  "},
-					{kind: "xinput"},
-					{kind: "yinput"},
-					{kind: "zinput"},
+					{kind: "Ares.Hera.Xinput"},
+					{kind: "Ares.Hera.Yinput"},
+					{kind: "Ares.Hera.Zinput"},
 					{kind: "onyx.PickerDecorator", style: " width: 40px;", components: [
 						{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
 						{kind: "onyx.Picker", onSelect: "unit_type", components: [
@@ -99,16 +99,15 @@ enyo.kind({
 				]},
 			]},	//xyz
 			
-			{name: "Picker", kind: "Control", showing: false, components: [
+			{name: "pickinput", kind: "Control", showing: false, components: [
 				{style: "height: 5px"},
 				{style: "height: 15px;  text-align: center; ", content: "Picker Inputs" },
 				{style: "height: 5px", tag: "br"},
 				{kind: "FittableColumns", fit: true, components: [			
 					{kind: "onyx.PickerDecorator", components: [
 						{style: "min-width: 80px; font-size: 10px;"},
-						{name: "Input", kind: "onyx.Picker", onSelect: "input_picker"},
+						{name: "pinput", kind: "onyx.Picker", onSelect: "input_picker"},
 					]},
-				//{kind: "xinput"},
 				
 					{kind: "onyx.PickerDecorator", style: "width: 40px;", components: [
 						{style: "min-width: 40px; font-size: 10px;"},
@@ -124,18 +123,18 @@ enyo.kind({
 				]}
 			]},	// picker
 			
-			{kind: "lrc"},
+			{kind: "Ares.Hera.Lrc"},
 			
 			{name: "filepicker", kind: "Control", showing: false, components: [
 				{style: "height: 5px"},
 				{style: "height: 15px;  text-align: center; ", content: "File Picker Input" },
 			]},
 			
-			{kind: "bc"},
+			{kind: "Ares.Hera.Bc"},
 			
-			{kind: "bgr"},
+			{kind: "Ares.Hera.Bgr"},
 			
-			{kind: "border_width"}
+			{kind: "Ares.Hera.BorderWidth"}
 		]},
 		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "fileChosen"}
 	],
@@ -156,7 +155,7 @@ enyo.kind({
 		this.inherited(arguments);
 		ares.setupTraceLogger(this);
 		// initialization code goes here
-		this.doRegisterMe({name:"valueInput", reference:this});
+		this.doRegisterMe({name: "valueInput", reference:this});
 		this.red = "00";
 		this.blue = "00";
 		this.green = "00";
@@ -165,15 +164,15 @@ enyo.kind({
 		var step = 1;
 		for (var j = 0; j < 2000; j+= step) {
 			if(j <= 9){
-				this.$.Input.createComponent({content: j, active: !j});
+				this.$.pinput.createComponent({content: j, active: !j});
 			}
 			if(j >= 10 && j <= 40){
 				step = 2;
-				this.$.Input.createComponent({content: j, active: !j});
+				this.$.pinput.createComponent({content: j, active: !j});
 			}
 			if(j > 40){
 				step = 10;
-				this.$.Input.createComponent({content: j, active: !j});
+				this.$.pinput.createComponent({content: j, active: !j});
 			}
 		}
 	},
@@ -275,7 +274,6 @@ enyo.kind({
 	},
 	
 	showpicker: function(inSender, inEvent){
-		console.log(inSender, inEvent);
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.clear();
 		this.$.panels.setIndex(this.picker);
@@ -418,7 +416,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "xinput",
+	name: "Ares.Hera.Xinput",
 	kind: "Control",
 	published: {
 	},
@@ -428,7 +426,7 @@ enyo.kind({
 	components: [
 		{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [						
 			{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
-			{name: "Inputx", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputx"},
+			{name: "inputx", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputx"},
 		]},
 	],
 	create: function() {
@@ -437,7 +435,7 @@ enyo.kind({
 		// initialization code goes here
 		var step = 1;
 		for (var j = 0; j < 11; j+= step) {
-			this.$.Inputx.createComponent({content: j, active: !j});
+			this.$.inputx.createComponent({content: j, active: !j});
 		}
 	},
 	inputx: function(inSender, inEvent){
@@ -449,7 +447,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "yinput",
+	name: "Ares.Hera.Yinput",
 	kind: "Control",
 	published: {
 	},
@@ -459,7 +457,7 @@ enyo.kind({
 	components: [
 		{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [						
 			{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
-			{name: "Inputx", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputy"},
+			{name: "inputy", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputy"},
 		]},
 	],
 	create: function() {
@@ -468,7 +466,7 @@ enyo.kind({
 		// initialization code goes here
 		var step = 1;
 		for (var j = 0; j < 11; j+= step) {
-			this.$.Inputx.createComponent({content: j, active: !j});
+			this.$.inputy.createComponent({content: j, active: !j});
 		}
 	},
 	inputy: function(inSender, inEvent){
@@ -480,7 +478,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "zinput",
+	name: "Ares.Hera.Zinput",
 	kind: "Control",
 	published: {
 	},
@@ -490,7 +488,7 @@ enyo.kind({
 	components: [
 		{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [						
 			{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
-			{name: "Inputz", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputz"},
+			{name: "inputz", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputz"},
 		]},
 	],
 	create: function() {
@@ -499,7 +497,7 @@ enyo.kind({
 		// initialization code goes here
 		var step = 1;
 		for (var j = 0; j < 11; j+= step) {
-			this.$.Inputz.createComponent({content: j, active: !j});
+			this.$.inputz.createComponent({content: j, active: !j});
 		}
 	},
 	inputz: function(inSender, inEvent){
@@ -511,7 +509,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "lrc",
+	name: "Ares.Hera.Lrc",
 	kind: "Control",
 	published: {
 	},
@@ -550,7 +548,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "bc",
+	name: "Ares.Hera.Bc",
 	kind: "Control",
 	published: {
 	},
@@ -582,7 +580,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "bgr",
+	name: "Ares.Hera.Bgr",
 	kind: "Control",
 	published: {
 	},
@@ -617,7 +615,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "border_width",
+	name: "Ares.Hera.BorderWidth",
 	kind: "Control",
 	published: {
 	},

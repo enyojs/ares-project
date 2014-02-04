@@ -106,7 +106,7 @@ enyo.kind({
 					{kind: "Deimos"}
 				]},
 				{components: [
-					{kind: "Hera"},
+					{kind: "Ares.Hera"},
 				]}
 			]
 		}
