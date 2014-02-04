@@ -83,7 +83,9 @@ enyo.kind({
 	// events and published are defined by the base kind
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
-		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
+		{kind: "onyx.InputDecorator", classes: "inspector-enyo-input-like", components: [
+			{kind: "onyx.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
+		]}
 	],
 
 	//* @public
@@ -122,7 +124,9 @@ enyo.kind({
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
 		{kind: "onyx.MenuDecorator", style: "display: inline-block", onSelect: "itemSelected", components: [
-			{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
+			{kind: "onyx.InputDecorator", classes: "inspector-enyo-input-like", components: [
+				{kind: "onyx.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
+			]},
 			{kind: "enyo.Button", name: "button", classes:"inspector-event-button"},
 			{kind: "onyx.Menu", name: "menu", floating: true, components: [
 				// Will be filled at create() time
@@ -269,7 +273,9 @@ enyo.kind({
 	// events and published are defined by the base kind
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
-		{kind: "enyo.Input", classes: "inspector-size-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
+		{kind: "onyx.InputDecorator", classes: "inspector-enyo-input-like", components: [
+			{kind: "onyx.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
+		]},
 		{name: "unit", kind: "Inspector.Internal.Select", classes: "css-editor-select-box", values: ["px","cm","em","ern","rem", "%"], onChange: "unitChanged"},
 		{name: "slider", kind: "onyx.Slider", value: 0, style:"width:91%", onChanging:"sliderChanged", onChange:"sliderChanged"}
 	],
@@ -341,7 +347,9 @@ enyo.kind({
 	// events and published are defined by the base kind
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
-		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", onclick: "handleDblClick", ondblclick: "handleDblClick"},
+		{kind: "onyx.InputDecorator", classes: "inspector-enyo-input-like", components: [
+			{kind: "onyx.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", onclick: "handleDblClick", ondblclick: "handleDblClick"}
+		]},
 		{name: "color", classes: "inspector-color-button"}
 	],
 	//* @public
