@@ -752,16 +752,25 @@ enyo.kind({
     },
     {
         kind: "onyx.InputDecorator",
-        classes: "ares-project-properties-input-medium",
         components: [{
             kind: "onyx.Input",
+            classes: "ares-project-properties-input-icon",
             name: "AndroidImgPath",
+            disabled: true
+        },
+        {
+            kind: "onyx.IconButton", 
+            name:"pathInputButtonBroken", 
+            classes: "ares-file-broken-icon", 
+            src: "$project-view/assets/images/file_broken-20x17.png", 
+            showing: false,
             disabled: true
         }]
     },
     {
         kind: "onyx.IconButton",
         name: "AndroidImgButton",
+        classes: "ares-file-selector-icon", 
         src: "$project-view/assets/images/file-32x32.png",
         ontap: "pathInputTap"
     },
@@ -867,10 +876,10 @@ enyo.kind({
     },
     /** @private */
     statusChanged: function() {
-        if (this.status) {
-            this.$.AndroidImgButton.setSrc("$project-view/assets/images/file-32x32.png");
-        } else {
-            this.$.AndroidImgButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+        if(this.status){
+            this.$.pathInputButtonBroken.setShowing(false);
+        } else{
+            this.$.pathInputButtonBroken.setShowing(true);
         }
     },
     /** @private */
@@ -930,16 +939,25 @@ enyo.kind({
     },
     {
         kind: "onyx.InputDecorator",
-        classes: "ares-project-properties-input-medium",
         components: [{
             kind: "onyx.Input",
             name: "ImgPath",
+            classes: "ares-project-properties-input-icon",
+            disabled: true
+        },
+        {
+            kind: "onyx.IconButton", 
+            name:"pathInputButtonBroken", 
+            classes: "ares-file-broken-icon", 
+            src: "$project-view/assets/images/file_broken-20x17.png", 
+            showing: false,
             disabled: true
         }]
     },
     {
         kind: "onyx.IconButton",
         name: "ImgButton",
+        classes: "ares-file-selector-icon", 
         src: "$project-view/assets/images/file-32x32.png",
         ontap: "pathInputTap"
     },
@@ -1084,10 +1102,10 @@ enyo.kind({
     },
     /** @private */
     statusChanged: function() {
-        if (this.status) {
-            this.$.ImgButton.setSrc("$project-view/assets/images/file-32x32.png");
-        } else {
-            this.$.ImgButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+        if(this.status){
+            this.$.pathInputButtonBroken.setShowing(false);
+        } else{
+            this.$.pathInputButtonBroken.setShowing(true);
         }
     },
     /** @private */
