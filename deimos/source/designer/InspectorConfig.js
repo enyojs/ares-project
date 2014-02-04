@@ -404,7 +404,10 @@ enyo.kind({
 	},
 	components: [
 		{tag: "label", classes: "inspector-field-caption", name: "title"},
-		{kind: "Input", classes: "enyo-input inspector-field-editor", name: "value", onchange: "handleChange"},
+		{kind: "onyx.InputDecorator", classes: "inspector-enyo-input-like", components: [
+			{kind: "onyx.Input", classes: "enyo-input inspector-field-editor", name: "value", onchange: "handleChange"},
+			{kind: "onyx.IconButton", name:"pathInputButtonBroken", classes: "ares-file-broken-icon", src: "$project-view/assets/images/file_broken-20x17.png", showing: false, disabled: true}
+		]},
 		{kind: "onyx.IconButton", name:"pathInputButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
 	],
 	debug: false,
@@ -439,10 +442,10 @@ enyo.kind({
 	},
 	/** @private */
 	statusChanged: function () {
-		if (this.status) {
-			this.$.pathInputButton.setSrc("$project-view/assets/images/file-32x32.png");
-		} else {
-			this.$.pathInputButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		if(this.status){
+			this.$.pathInputButtonBroken.setShowing(false);
+		} else{
+			this.$.pathInputButtonBroken.setShowing(true);
 		}
 	},
 	/** @private */
