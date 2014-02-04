@@ -372,7 +372,11 @@ enyo.kind({
 	 * Save all docs of current project
 	 */
 	saveProjectDocs: function() {
-		this.foreachProjectDocs(this.saveDoc.bind(this));
+		var saveOne = function(doc) {
+			this.saveDoc(doc, ares.noNext);
+		};
+
+		this.foreachProjectDocs( saveOne.bind(this) );
 	},
 
 	/**
@@ -419,7 +423,10 @@ enyo.kind({
 	},
 
 	saveAllDocs: function() {
-		Ares.Workspace.files.forEach(this.saveDoc.bind(this), this);
+		var saveOne = function(doc) {
+			this.saveDoc(doc, ares.noNext);
+		};
+		Ares.Workspace.files.forEach( saveOne.bind(this) );
 	},
 
 	saveCurrentDoc: function() {
