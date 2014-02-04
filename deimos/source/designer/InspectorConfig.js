@@ -303,7 +303,6 @@ enyo.kind({
 		} else{
 			this.fieldValue = "";
 		}
-		this.log(unit, size);
 		this.doChange({target: this});
 		return true;
 	},
