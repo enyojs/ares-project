@@ -442,9 +442,8 @@ enyo.kind({
         classes: "ares-project-properties-drawer-row-label"
     },
     {
-        kind: "onyx.PickerDecorator",
+        kind: "Ares.PickerDecorator",
         components: [{
-            kind: "onyx.PickerButton",
             name: "configurationPickerButton",
             classes: "ares-project-properties-picker"
         },
@@ -766,10 +765,10 @@ enyo.kind({
         ontap: "pathInputTap"
     },
     {
-        kind: "onyx.PickerDecorator",
+        kind: "Ares.PickerDecorator",
         classes: "ares-project-properties-picker-small",
         components: [{
-            kind: "onyx.PickerButton"
+            kind: "Ares.PickerButton"
         },
         {
             kind: "onyx.Picker",
@@ -1154,13 +1153,13 @@ enyo.kind({
         kind: "FittableRows",
         components: [{
             name: "keyPicker",
-            kind: "onyx.PickerDecorator",
+            kind: "Ares.PickerDecorator",
             onSelect: "selectKey",
             components: [{
-                kind: "onyx.PickerButton",
-                content: "Choose...",
+                kind: "Ares.PickerButton",
+                name: "keyPickerButton", 
                 classes: "ares-project-properties-picker"
-            },
+            }, 
             {
                 kind: "onyx.Picker",
                 name: "keys"
@@ -1210,11 +1209,12 @@ enyo.kind({
         this.inherited(arguments);
         this.labelChanged();
         this.setProvider(Phonegap.ProjectProperties.getProvider());
-
+        this.$.keyPickerButton.setPickerContent("Choose...");
         this.activeKeyIdChanged();
     },
 
     /**
+>>>>>>> master
 	 * Set the content of the row's label when the row is created
 	 * @private
 	 */

@@ -527,10 +527,10 @@ enyo.kind({
             content: "Application"
         },
         {
-            kind: "onyx.PickerDecorator",
+            kind: "Ares.PickerDecorator",
             components: [{
-                kind: "onyx.PickerButton",
-                content: "Select AppId",
+                kind: "Ares.PickerButton", 
+                name: "appIdPickerButton",
                 classes: "ares-project-properties-picker-AppId"
             },
             {
@@ -551,7 +551,10 @@ enyo.kind({
             name: "applicationQrCode"
         }]
     }],
-
+    create: function(){
+        this.inherited(arguments);
+        this.$.appIdPickerButton.setPickerContent("Select AppId");
+    },
     /**@private*/
     userDataChanged: function() {
 
@@ -644,8 +647,7 @@ enyo.kind({
             }
         }
         this.$.AppIdList.render();
-    },
-
+    }
 });
 
 /**
