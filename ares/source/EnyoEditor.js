@@ -831,9 +831,9 @@ enyo.kind({
 		// comes from.
 		var doc = Ares.Workspace.files.get(inEvent.userId);
 
-		async.waterfall([
+		async.series([
 			this.requestSave.bind(this, doc),
-			this.closeDoc.bind(this)
+			this.closeDoc.bind(this, doc)
 		]);
 		return true; // Stop the propagation of the event
 	},
@@ -846,9 +846,9 @@ enyo.kind({
 	 * @returns {true}
 	 */
 	requestCloseCurrentDoc: function(inSender, inEvent) {
-		async.waterfall([
+		async.series([
 			this.requestSave.bind(this, this.activeDocument),
-			this.closeDoc.bind(this)
+			this.closeDoc.bind(this, this.activeDocument)
 		]);
 		return true; // Stop the propagation of the event
 	},
@@ -918,12 +918,7 @@ enyo.kind({
 			popup.setActionCallback( function() {next(null, doc);});
 
 			popup.setAction1Button($L("Save"));
-			popup.setAction1Callback(
-				(function() {
-					this.saveDoc(doc);
-					next(null, doc);
-				}).bind(this)
-			);
+			popup.setAction1Callback( this.saveDoc.bind(this, doc, next) );
 
 			popup.setCancelCallback(
 				(function() {
