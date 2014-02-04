@@ -99,16 +99,15 @@ enyo.kind({
 				]},
 			]},	//xyz
 			
-			{name: "Picker", kind: "Control", showing: false, components: [
+			{name: "pickinput", kind: "Control", showing: false, components: [
 				{style: "height: 5px"},
 				{style: "height: 15px;  text-align: center; ", content: "Picker Inputs" },
 				{style: "height: 5px", tag: "br"},
 				{kind: "FittableColumns", fit: true, components: [			
 					{kind: "onyx.PickerDecorator", components: [
 						{style: "min-width: 80px; font-size: 10px;"},
-						{name: "Input", kind: "onyx.Picker", onSelect: "input_picker"},
+						{name: "pinput", kind: "onyx.Picker", onSelect: "input_picker"},
 					]},
-				//{kind: "xinput"},
 				
 					{kind: "onyx.PickerDecorator", style: "width: 40px;", components: [
 						{style: "min-width: 40px; font-size: 10px;"},
@@ -156,7 +155,7 @@ enyo.kind({
 		this.inherited(arguments);
 		ares.setupTraceLogger(this);
 		// initialization code goes here
-		this.doRegisterMe({name:"valueInput", reference:this});
+		this.doRegisterMe({name: "valueInput", reference:this});
 		this.red = "00";
 		this.blue = "00";
 		this.green = "00";
@@ -165,15 +164,15 @@ enyo.kind({
 		var step = 1;
 		for (var j = 0; j < 2000; j+= step) {
 			if(j <= 9){
-				this.$.Input.createComponent({content: j, active: !j});
+				this.$.pinput.createComponent({content: j, active: !j});
 			}
 			if(j >= 10 && j <= 40){
 				step = 2;
-				this.$.Input.createComponent({content: j, active: !j});
+				this.$.pinput.createComponent({content: j, active: !j});
 			}
 			if(j > 40){
 				step = 10;
-				this.$.Input.createComponent({content: j, active: !j});
+				this.$.pinput.createComponent({content: j, active: !j});
 			}
 		}
 	},
@@ -288,7 +287,6 @@ enyo.kind({
 	
 	fileinput: function(inSender, inData){
 		this.trace("sender:", inSender, ", event:", inData);
-		console.log("filepicker",inSender);
 		var project = Ares.Workspace.projects.getActiveProject();
 		this.$.selectFilePopup.reset();
 		this.$.selectFilePopup.connectProject(project, (function() {
@@ -428,7 +426,7 @@ enyo.kind({
 	components: [
 		{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [						
 			{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
-			{name: "Inputx", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputx"},
+			{name: "inputx", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputx"},
 		]},
 	],
 	create: function() {
@@ -437,7 +435,7 @@ enyo.kind({
 		// initialization code goes here
 		var step = 1;
 		for (var j = 0; j < 11; j+= step) {
-			this.$.Inputx.createComponent({content: j, active: !j});
+			this.$.inputx.createComponent({content: j, active: !j});
 		}
 	},
 	inputx: function(inSender, inEvent){
@@ -459,7 +457,7 @@ enyo.kind({
 	components: [
 		{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [						
 			{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
-			{name: "Inputx", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputy"},
+			{name: "inputy", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputy"},
 		]},
 	],
 	create: function() {
@@ -468,7 +466,7 @@ enyo.kind({
 		// initialization code goes here
 		var step = 1;
 		for (var j = 0; j < 11; j+= step) {
-			this.$.Inputx.createComponent({content: j, active: !j});
+			this.$.inputy.createComponent({content: j, active: !j});
 		}
 	},
 	inputy: function(inSender, inEvent){
@@ -490,7 +488,7 @@ enyo.kind({
 	components: [
 		{kind: "onyx.PickerDecorator", classes:"left-input-dec", components: [						
 			{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
-			{name: "Inputz", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputz"},
+			{name: "inputz", kind: "onyx.Picker", classes:"left-input-dec", content: "0", onSelect: "inputz"},
 		]},
 	],
 	create: function() {
@@ -499,7 +497,7 @@ enyo.kind({
 		// initialization code goes here
 		var step = 1;
 		for (var j = 0; j < 11; j+= step) {
-			this.$.Inputz.createComponent({content: j, active: !j});
+			this.$.inputz.createComponent({content: j, active: !j});
 		}
 	},
 	inputz: function(inSender, inEvent){
