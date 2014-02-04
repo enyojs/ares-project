@@ -819,7 +819,7 @@ enyo.kind({
 
 
 	/**
-	 * handle request close doc events
+	 * handle request close doc events coming from TabBar
 	 * Request to save doc and close if user agrees
 	 * @param {Object} inSender
 	 * @param {Object} inEvent
@@ -838,6 +838,13 @@ enyo.kind({
 		return true; // Stop the propagation of the event
 	},
 
+	/**
+	 * handle request close doc events coming from File menu
+	 * Request to save doc and close if user agrees
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 * @returns {true}
+	 */
 	requestCloseCurrentDoc: function(inSender, inEvent) {
 		async.waterfall([
 			this.requestSave.bind(this, this.activeDocument),
