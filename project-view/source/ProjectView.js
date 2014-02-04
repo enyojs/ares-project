@@ -279,7 +279,7 @@ enyo.kind({
 			}
 		};
 		if (project) {
-			this.doProjectSave({ project: project, callback: cb });
+			this.doProjectSave({ project: project, callback: cb.bind(this) });
 		}
 	},
 
