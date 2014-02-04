@@ -1,7 +1,7 @@
 /*global enyo, ares, Ares */
 
 enyo.kind({
-	name: "Hera",
+	name: "Ares.Hera",
 	kind: "Control",
 	published: {
 		red: '00',
@@ -29,7 +29,7 @@ enyo.kind({
 	components: [
 		{kind: "enyo.FittableColumns", style: "width: 33%; height: 100%;", components:[
 			
-			{name: "cssleft", kind: "leftpannel", style: "width: 100%; height: 100%; ",	classes:"ares_deimos_left"},	// left
+			{name: "cssleft", kind: "Ares.Hera.Leftpannel", style: "width: 100%; height: 100%; ",	classes:"ares_deimos_left"},	// left
 			
 			{name: "center", kind: "enyo.FittableRows", style: "width: 100%; height: 100%; ", components: [
 				
@@ -54,7 +54,7 @@ enyo.kind({
 				]},
 
 				{kind: "enyo.FittableColumns", style: "width: 100%; height: 40%;", fit: true, classes: "enyo-unselectable", components: [
-					{name: "valueinput", kind: "valueInput", onUpdate: "change"},
+					{name: "valueinput", kind: "Ares.Hera.ValueInput", onUpdate: "change"},
 					
 				]}
 			]},	// right

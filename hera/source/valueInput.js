@@ -1,6 +1,6 @@
 /* global ares, Ares*/
 enyo.kind({
-	name: "valueInput",
+	name: "Ares.Hera.ValueInput",
 	kind: "Control",
 	published: {
 	},
@@ -49,8 +49,8 @@ enyo.kind({
 				{style: "height: 15px;  text-align: center; ", content: "X and Y Inputs" },
 				{style: "height: 5px"},
 				{kind: "FittableColumns", fit: true, classes:"left-input-col",  components: [
-					{kind: "xinput"},
-					{kind: "yinput"},
+					{kind: "Ares.Hera.Xinput"},
+					{kind: "Ares.Hera.Yinput"},
 					{kind: "onyx.PickerDecorator", style: " width: 40px;", components: [
 						{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
 						{kind: "onyx.Picker", onSelect: "unit_type", components: [
@@ -73,9 +73,9 @@ enyo.kind({
 				
 				{kind: "FittableColumns", fit: true, classes:"left-input-col",  components: [
 					{tag:"span"	, content:"  "},
-					{kind: "xinput"},
-					{kind: "yinput"},
-					{kind: "zinput"},
+					{kind: "Ares.Hera.Xinput"},
+					{kind: "Ares.Hera.Yinput"},
+					{kind: "Ares.Hera.Zinput"},
 					{kind: "onyx.PickerDecorator", style: " width: 40px;", components: [
 						{style: "min-width: 40px; font-size: 10px; padding-right: 4px;"},
 						{kind: "onyx.Picker", onSelect: "unit_type", components: [
@@ -124,18 +124,18 @@ enyo.kind({
 				]}
 			]},	// picker
 			
-			{kind: "lrc"},
+			{kind: "Ares.Hera.Lrc"},
 			
 			{name: "filepicker", kind: "Control", showing: false, components: [
 				{style: "height: 5px"},
 				{style: "height: 15px;  text-align: center; ", content: "File Picker Input" },
 			]},
 			
-			{kind: "bc"},
+			{kind: "Ares.Hera.Bc"},
 			
-			{kind: "bgr"},
+			{kind: "Ares.Hera.Bgr"},
 			
-			{kind: "border_width"}
+			{kind: "Ares.Hera.BorderWidth"}
 		]},
 		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "fileChosen"}
 	],
@@ -275,7 +275,6 @@ enyo.kind({
 	},
 	
 	showpicker: function(inSender, inEvent){
-		console.log(inSender, inEvent);
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.clear();
 		this.$.panels.setIndex(this.picker);
@@ -289,6 +288,7 @@ enyo.kind({
 	
 	fileinput: function(inSender, inData){
 		this.trace("sender:", inSender, ", event:", inData);
+		console.log("filepicker",inSender);
 		var project = Ares.Workspace.projects.getActiveProject();
 		this.$.selectFilePopup.reset();
 		this.$.selectFilePopup.connectProject(project, (function() {
@@ -418,7 +418,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "xinput",
+	name: "Ares.Hera.Xinput",
 	kind: "Control",
 	published: {
 	},
@@ -449,7 +449,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "yinput",
+	name: "Ares.Hera.Yinput",
 	kind: "Control",
 	published: {
 	},
@@ -480,7 +480,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "zinput",
+	name: "Ares.Hera.Zinput",
 	kind: "Control",
 	published: {
 	},
@@ -511,7 +511,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "lrc",
+	name: "Ares.Hera.Lrc",
 	kind: "Control",
 	published: {
 	},
@@ -550,7 +550,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "bc",
+	name: "Ares.Hera.Bc",
 	kind: "Control",
 	published: {
 	},
@@ -582,7 +582,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "bgr",
+	name: "Ares.Hera.Bgr",
 	kind: "Control",
 	published: {
 	},
@@ -617,7 +617,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "border_width",
+	name: "Ares.Hera.BorderWidth",
 	kind: "Control",
 	published: {
 	},

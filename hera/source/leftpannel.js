@@ -1,7 +1,7 @@
-/* global ares */
+/* global ares, Ares */
 
 enyo.kind({
-	name: "ColorItem",
+	name: "Ares.Hera.ColorItem",
 	events: {
 		onPickdeclaration: "",
 		onUncheck: "",
@@ -88,7 +88,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "FontsItem",
+	name: "Ares.Hera.FontsItem",
 	events: {
 		onPickdeclaration: "",
 		onUncheck: "",		
@@ -168,7 +168,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "BorderItem",
+	name: "Ares.Hera.BorderItem",
 	events: {
 		onPickdeclaration: "",
 		onUncheck: "",
@@ -264,7 +264,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "ImageItem",
+	name: "Ares.Hera.ImageItem",
 	events: {
 		onPickdeclaration: "",
 		onUncheck: "",
@@ -340,7 +340,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "leftpannel",
+	name: "Ares.Hera.Leftpannel",
 	kind: "Control",
 	published: {
 		
@@ -356,10 +356,10 @@ enyo.kind({
 		{kind: "enyo.FittableRows", classes: "enyo-fit", components: [
 			{kind: "Scroller", fit: true, components: [
 				
-				{kind: "ColorItem"},
-				{kind: "FontsItem"},
-				{kind: "BorderItem"},
-				{kind: "ImageItem"},
+				{kind: "Ares.Hera.ColorItem"},
+				{kind: "Ares.Hera.FontsItem"},
+				{kind: "Ares.Hera.BorderItem"},
+				{kind: "Ares.Hera.ImageItem"},
 			]},
 		]},
 	],
