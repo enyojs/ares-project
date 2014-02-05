@@ -189,7 +189,7 @@ enyo.kind({
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
 		this.$.rightPaneButton.value = this.settings.rightpane;
-		this.$.heraButton.valve = this.settings.hera;
+		this.$.heraButton.value = this.settings.hera;
 		this.$.autoTraceButton.value = this.settings.autoTrace;
 		this.$.autoTraceInputLine.setValue(this.settings.autoTraceLine);
 		this.$.autoTraceInputBox.setShowing(this.settings.autoTrace);
@@ -388,6 +388,7 @@ enyo.kind({
 		this.log("sender:", inSender, ", event:", inEvent);
 		this.previewSettings.hera = inEvent.value;
 	},
+
 	aTrace: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.previewSettings.autoTrace = inEvent.value;
