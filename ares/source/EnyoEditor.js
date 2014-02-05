@@ -358,15 +358,73 @@ enyo.kind({
 
 	// Save actions
 
+	/**
+	 * Save all docs of current project
+	 */
 	saveProjectDocs: function() {
-		this.foreachProjectDocs(this.saveDoc.bind(this));
+		var saveOne = function(doc) {
+			this.saveDoc(doc, ares.noNext);
+		};
+
+		this.foreachProjectDocs( saveOne.bind(this) );
+	},
+
+	/**
+	 * Request (once) to save all docs of a project and call back
+	 * @param {Ares.Model.Project} project
+	 * @param {Function} next
+	 */
+	saveProjectDocsWithCb: function(project, next) {
+		var popup = this.$.savePopup ;
+		var todo = [];
+		var toSave = [];
+
+		// check which files need to be saved
+		var action = function(doc) {
+			if (doc.getEdited() === true) {
+				todo.push(this.saveDoc.bind(this, doc)) ;
+				toSave.push(doc.getName());
+			}
+		};
+		this.foreachProjectDocs( action.bind(this), project );
+
+		if (todo.length) {
+			this.trace("request save project doc on ", project.getName());
+			var verb = todo.length > 1 ? 'were' : 'was' ;
+			popup.setMessage('"' + toSave.join('", "') + '" ' + verb + ' modified.') ;
+			popup.setTitle($L("Project was modified!"));
+
+			popup.setActionButton($L("Don't Save"));
+			popup.setActionCallback( next );
+
+			popup.setAction1Button($L("Save"));
+			popup.setAction1Callback( async.series.bind(null, todo, next) );
+
+			popup.setCancelCallback(
+				(function() {
+					next(new Error('canceled'));
+				}).bind(this)
+			) ;
+
+			popup.show();
+		} else {
+			setTimeout( next, 0);
+		}
+	},
+
+	saveAllDocs: function() {
+		var saveOne = function(doc) {
+			this.saveDoc(doc, ares.noNext);
+		};
+		Ares.Workspace.files.forEach( saveOne.bind(this) );
 	},
 
 	saveCurrentDoc: function() {
-		this.saveDoc(this.activeDocument);
+		this.saveDoc(this.activeDocument, ares.noNext);
 	},
 
-	saveDoc: function(doc) {
+	saveDoc: function(doc, next) {
+		ares.assertCb(next);
 		var content;
 		if (doc === this.activeDocument) {
 			content = this.$.phobos.getEditorContent();
@@ -378,7 +436,7 @@ enyo.kind({
 			service: doc.getProjectData().getService(),
 			fileId: doc.getFileId()
 		};
-		this.saveFile(doc.getName(), content, where, ares.noNext);
+		this.saveFile(doc.getName(), content, where, next);
 	},
 
 	saveFile: function(name, content, where, next){
@@ -767,7 +825,7 @@ enyo.kind({
 
 
 	/**
-	 * handle request close doc events
+	 * handle request close doc events coming from TabBar
 	 * Request to save doc and close if user agrees
 	 * @param {Object} inSender
 	 * @param {Object} inEvent
@@ -779,17 +837,24 @@ enyo.kind({
 		// comes from.
 		var doc = Ares.Workspace.files.get(inEvent.userId);
 
-		async.waterfall([
+		async.series([
 			this.requestSave.bind(this, doc),
-			this.closeDoc.bind(this)
+			this.closeDoc.bind(this, doc)
 		]);
 		return true; // Stop the propagation of the event
 	},
 
+	/**
+	 * handle request close doc events coming from File menu
+	 * Request to save doc and close if user agrees
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 * @returns {true}
+	 */
 	requestCloseCurrentDoc: function(inSender, inEvent) {
-		async.waterfall([
+		async.series([
 			this.requestSave.bind(this, this.activeDocument),
-			this.closeDoc.bind(this)
+			this.closeDoc.bind(this, this.activeDocument)
 		]);
 		return true; // Stop the propagation of the event
 	},
@@ -859,12 +924,7 @@ enyo.kind({
 			popup.setActionCallback( function() {next(null, doc);});
 
 			popup.setAction1Button($L("Save"));
-			popup.setAction1Callback(
-				(function() {
-					this.saveDoc(doc);
-					next(null, doc);
-				}).bind(this)
-			);
+			popup.setAction1Callback( this.saveDoc.bind(this, doc, next) );
 
 			popup.setCancelCallback(
 				(function() {
@@ -970,6 +1030,10 @@ enyo.kind({
 			{name: "saveProjectButton", value: "saveProjectDocs", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save Project")}
+			]},
+			{name: "saveAllDocsButton", value: "saveAllDocs", classes:"aresmenu-button", components: [
+				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
+				{content: $L("Save all")}
 			]},
 			{classes: "onyx-menu-divider"},
 			{name: "closeButton", value: "requestCloseCurrentDoc", classes:"aresmenu-button", components: [
