@@ -642,6 +642,12 @@ enyo.kind({
 				commaTerminated = true;
 			}
 
+			// refresh editorSettings content from localStorage. This
+			// is necessary when editor settings were modified in the
+			// EditorSetting kind owned by Ares
+			this.$.editorSettings.initSettings();
+			var edSettings = this.$.editorSettings.settings;
+
 			// Prepare the code to insert
 			var codeToInsert = "";
 			for(var item in declared) {
@@ -649,8 +655,12 @@ enyo.kind({
 					// use correct line terminations
 					codeToInsert += (commaTerminated ? "" : "," + lineTermination);
 					commaTerminated = false;
-					codeToInsert += ("\t" + item + ": function(inSender, inEvent) {" + lineTermination + "\t\t// TO");
-					codeToInsert += ("DO - Auto-generated code" + lineTermination + "\t}");
+					codeToInsert += ("\t" + item + ": function(inSender, inEvent) {" + lineTermination);
+					// Auto trace line Insert's
+					if(edSettings.autoTrace === true && edSettings.autoTraceLine !== null){
+						codeToInsert += ('\t\t' + edSettings.autoTraceLine + lineTermination);
+					}
+					codeToInsert += ("\t\t// TO DO - Auto-generated code" + lineTermination + "\t}");
 				}
 			}
 

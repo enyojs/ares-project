@@ -1,4 +1,4 @@
-/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo */
+/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo, Phonegap */
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -70,8 +70,8 @@ enyo.kind({
 		this.$.projectWizardScan.show();
 		return true; //Stop event propagation
 	},
-	duplicateProjectAction: function(InSender, inEvent) {	
-		if(InSender.selected == null){	
+	duplicateProjectAction: function(inSender, inEvent) {	
+		if(!this.currentProject()){	
 			this.doError({msg: "Please project list select item."});
 			return false;
 		}
@@ -142,6 +142,7 @@ enyo.kind({
 					project.setConfig(config);
 					
 					self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled);
+					self.initializeValidPgbConf(project, config.data.providers.phonegap.enabled);
 					next();
 				},
 				function (next) {
@@ -169,15 +170,38 @@ enyo.kind({
 	 */
 	initializeDownloadStatus: function(inProject, inPhonegapEnabled) {
 		if (inProject.getDownloadStatus() === undefined && inPhonegapEnabled) {
-			inProject.setDownloadStatus({
-				"android": "Ready for download", 
-				"ios": "Ready for download", 
-				"winphone": "Ready for download", 
-				"blackberry": "Ready for download", 
-				"webos": "Ready for download"
-			});
+			var downloadStatus = {};
+			var index = 0;
+
+			for (index in Phonegap.UIConfiguration.platformDrawersContent) {
+				downloadStatus[Phonegap.UIConfiguration.platformDrawersContent[index].id] = "Ready for download";
+			}
+
+			inProject.setDownloadStatus(downloadStatus);
 		}
-	}, 
+	},
+
+	initializeValidPgbConf: function(inProject, inPhonegapEnabled) {
+		if (inProject.getValidPgbConf() === undefined && inPhonegapEnabled) {
+			var pgbValidation = {};
+			var pgbUiData = Phonegap.UIConfiguration.commonDrawersContent.concat(Phonegap.UIConfiguration.platformDrawersContent);
+			var index =0;
+
+			for (index in pgbUiData) {
+				//The creation of the pgbValidation drawer attribute and its initialization are done in the same time.
+				pgbValidation[pgbUiData[index].id] = {};
+
+				for (var i=0, maxLength = pgbUiData[index].rows.length; i<maxLength; i++) {
+					//The creation of the pgbValidation row attribute and its initialization are done in the same time.
+					pgbValidation[pgbUiData[index].id][pgbUiData[index].rows[i].name] = true;
+				}
+				pgbValidation[pgbUiData[index].id]["validDrawer"] = true;			
+			}
+
+			inProject.setValidPgbConf(pgbValidation);
+		}
+	},
+
 	projectRemoved: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("harmonia").setProject(null, ares.noNext);
 	},

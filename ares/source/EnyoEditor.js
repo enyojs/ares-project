@@ -3,11 +3,11 @@ enyo.kind({
 	name:"Ares.EnyoEditor",
 	kind:"FittableRows", 
 	components:[
-		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels", layoutKind: "FittableColumnsLayout", noStretch: true, components: [
+		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels", components: [
 			{kind: "onyx.Grabber", classes: "ares-grabber ares-icon", ontap: "activePanel", components:[
 				{kind: "aresGrabber", name: "aresGrabberDirection", classes:"lleftArrow"}
 			]},
-			{name:"editorControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline", components:[
+			{name:"editorControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline editor-controls", components:[
 				{name: "editorFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
 				{name: "newKindDecorator", kind: "onyx.TooltipDecorator", components: [
 					{name: "newKindButton", kind: "onyx.IconButton", src: "assets/images/new_kind.png", ontap: "newKindAction"},
@@ -28,11 +28,11 @@ enyo.kind({
 					{kind: "onyx.Tooltip", content: $L("Css Designer")}
 				]}
 			]},
-			{name:"deimosControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline", components:[
+			{name:"deimosControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline editor-controls", components:[
 				{name: "designerFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
 				{name: "docLabel", content: "Deimos", classes: "ares-left-margin"},
 				{kind: "onyx.PickerDecorator", classes: "ares-right-margin", components: [
-					{name: "kindButton", classes:"ares-toolbar-picker", kind: "onyx.PickerButton"},
+					{name: "kindButton", classes:"ares-toolbar-picker deimos-kind-picker", kind: "onyx.PickerButton"},
 					{name: "kindPicker", kind: "onyx.Picker", onChange: "kindSelected", components: [
 					]}
 				]},
@@ -82,10 +82,7 @@ enyo.kind({
 			kind: "DocumentToolbar",
 			onTabRemoveRequested: "handleCloseDocument",
 			onTabChangeRequested: 'handleSwitchDoc',
-			// FIXME ENYO-3627
-			// backward compatibility: the following event handler can
-			// be removed once onyx pilot-13 is integrated in Ares
-			onTabChanged: 'handleSwitchDoc',
+			onTabChanged: 'handleSwitchDocNoCb', // called when doc is switched after tab removal
 			classes: "ares-bottom-bar"
 		},
 		{
@@ -217,7 +214,7 @@ enyo.kind({
 			deimos.selectKind.bind(deimos, index),
 			(function(name,next) {
 				this.$.kindButton.setContent(name);
-				this.$.toolbar.reflow();
+				this.$.toolbar.resized();
 				next();
 			}).bind(this)
 		]);
@@ -230,23 +227,16 @@ enyo.kind({
 	 * @param {array} kinds
 	 */
 	initKindPicker: function(kinds) {
-		var maxLen ;
-
 		this.$.kindPicker.destroyClientControls();
-
 		for (var i = 0; i < kinds.length; i++) {
 			var k = kinds[i];
 			this.$.kindPicker.createComponent({
 				content: k.name,
 				index: i
 			});
-			maxLen = Math.max(k.name.length, maxLen);
 		}
-
 		this.$.kindButton.setContent(kinds[0].name);
-		this.$.kindButton.applyStyle("width", (maxLen+2) + "em");
 		this.$.kindPicker.render();
-		this.resized();
 	},
 
 	designerAction: function() {
@@ -657,10 +647,19 @@ enyo.kind({
 	handleSwitchDoc: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.userId);
 		this.trace(inEvent.id, newDoc);
-		// FIXME ENYO-3627
-		// older TabBar doesn't provide callback
-		var next = inEvent.next || function() {} ;
-		this.switchToDocument(newDoc, $L("Switching files..."), next);
+		this.switchToDocument(newDoc, $L("Switching files..."), inEvent.next);
+		return true;
+	},
+
+	/**
+	 * Handle switch doc event
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 * @returns {true}
+	 */
+	handleSwitchDocNoCb: function(inSender, inEvent) {
+		var newDoc = Ares.Workspace.files.get(inEvent.userId);
+		this.switchToDocument(newDoc, $L("Switching files..."), ares.noNext);
 		return true;
 	},
 

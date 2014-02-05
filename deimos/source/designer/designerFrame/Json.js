@@ -1,4 +1,4 @@
-/* jshint indent: false */ // TODO: ENYO-3311
+/*global enyo */
 
 enyo.json.codify = {
 	_block: function(p, inDent) {
@@ -33,30 +33,30 @@ enyo.json.codify = {
 	value: function(v, inDent) {
 		var t = (v === null || v === undefined) ? "" : typeof v;
 		switch (t) {
-			case "string":
-				v = v.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\"/g, "\\\"");
-				return '"' + v + '"';
-			case "function":
-				// stringify the function body 
-				// FIXME: browser incompatibilities. Instead, we probably should cache the method block
-				// in string form and never interpret it.
-				var lines = v.toString();
-				// turn "\r" or "\n\r" into "\n"
-				lines = lines.replace(/\n*\r/g, "\n");
-				// FIXME: webkit doesn't seem to support \t in textarea
-				// TODO: finalize editor. Assuming we aren't using textarea, above doesn't matter.
-				// replace leading spaces with tabs, 4 spaces to a tab
-				lines = lines.replace(/(^\.\.\.\.)|[\.\t]+(\.\.\.\.)/g, "\t");
-				// replace 4-space tabs with 2-space tabs
-				//lines = lines.replace(/(^\.\.\.\.)|[\.\t]+(\.\.)/g, "\t");
-				// divide on newlines
-				lines = lines.split("\n");
-				// add indent, combine with newlines
-				return lines.join("\n" + inDent);
-			case "object":
-				return (v.constructor == Array) ? this.array(v, inDent) : this.obj(v, inDent);
-			default: 
-				return v;
+		case "string":
+			v = v.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\"/g, "\\\"");
+			return '"' + v + '"';
+		case "function":
+			// stringify the function body
+			// FIXME: browser incompatibilities. Instead, we probably should cache the method block
+			// in string form and never interpret it.
+			var lines = v.toString();
+			// turn "\r" or "\n\r" into "\n"
+			lines = lines.replace(/\n*\r/g, "\n");
+			// FIXME: webkit doesn't seem to support \t in textarea
+			// TODO: finalize editor. Assuming we aren't using textarea, above doesn't matter.
+			// replace leading spaces with tabs, 4 spaces to a tab
+			lines = lines.replace(/(^\.\.\.\.)|[\.\t]+(\.\.\.\.)/g, "\t");
+			// replace 4-space tabs with 2-space tabs
+			//lines = lines.replace(/(^\.\.\.\.)|[\.\t]+(\.\.)/g, "\t");
+			// divide on newlines
+			lines = lines.split("\n");
+			// add indent, combine with newlines
+			return lines.join("\n" + inDent);
+		case "object":
+			return (v.constructor == Array) ? this.array(v, inDent) : this.obj(v, inDent);
+		default:
+			return v;
 		}
 	},
 	to: function(inValue) {

@@ -1,3 +1,5 @@
+/*global enyo, ares, Ares */
+
 enyo.kind({
 	name: "editorSettings",
 	events: {
@@ -8,14 +10,16 @@ enyo.kind({
 		onChangeSettings:""
 	},
 	published: {
-		settings: null,
-		previewSettings: null,
+		settings: {},
+		previewSettings: {},
 		defaultsSettings: {
 			theme:"clouds",
 			highlight:false,
 			fontsize:12,
 			wordwrap:false,
 			rightpane:true,
+			autoTrace:false,
+			autoTraceLine: 'this.log("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
 		},
 		mainToolbar: true
@@ -45,7 +49,7 @@ enyo.kind({
 				{kind:"FittableRows", components: [
 					{classes: "ares-row", components: [
 						{name: "editorThemesLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Editor Themes"},
-						{name : "themesPicker", kind: "onyx.PickerDecorator", components: [
+						{name : "themesPicker", kind: "Ares.PickerDecorator", components: [
 							{classes:"large-picker"},
 							{name: "themes", kind: "onyx.Picker", onSelect: "themeSelected", components: [
 								{content: "ambiance"},
@@ -82,7 +86,7 @@ enyo.kind({
 					]},
 					{classes: "ares-row", components: [
 						{name: "fontSizeLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Font Size"},
-						{kind: "onyx.PickerDecorator", components: [
+						{kind: "Ares.PickerDecorator", components: [
 							{classes:"small-picker"},
 							{name: "fontSizePicker",  kind: "onyx.Picker", onSelect: "fontSize", components:[
 								{content: 6},
@@ -97,10 +101,25 @@ enyo.kind({
 								{content: 36}
 							]}
 						]}
+					]},
+					{classes: "ares-row", components: [
+						{
+							tag:"label",
+							classes: "ares-fixed-label ace-label",
+							content: "Automatically add log instruction"
+						},
+						{
+							name: "autoTraceButton",
+							kind: "onyx.ToggleButton",
+							onContent: "On",
+							offContent: "Off",
+							onChange: "aTrace"
+						}
 					]}
 				]}
 			]},
 			{tag:"p", classes:"break"},
+		
 			{kind:"FittableRows", name: "functionKeys", components: [
 				{kind: "Control", name:"osMessage", classes:"ares-row", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
 				{kind: "onyx.MenuDecorator", name:"program_buttons", classes:"ares-row", components: [
@@ -133,8 +152,22 @@ enyo.kind({
 					{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
 					{kind: "onyx.Button", classes:"right", content: "Update", name: "oksave", ontap: "inputChanged"}
 				]}
+			]},
+			{tag:"p", classes:"break"},
+			{name: "autoTraceInputBox", kind:"FittableRows", showing: false, components: [
+				{ classes:"ares-row", content: "Log instruction injected in your event handlers:"},
+				{kind: "onyx.InputDecorator", classes: "ace-input-textarea", components: [
+					{
+						kind: "onyx.Input",
+						style: "width: 100%;",
+						placeholder: "Enter log instruction here",
+						name: "autoTraceInputLine",
+						onchange: "atraceline"
+					}
+				]}
 			]}
 		]},
+		
 		{name: "settingsToolbar", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
 			{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "cancelSettings"},
 			{name: "restoreDefault", kind: "onyx.Button",  content: "Restore defaults", ontap: "restoreDefaults"},
@@ -149,14 +182,18 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.mainToolbarChanged();
+
+		// clobbers this.settings from what's in local storage
 		this.getValuesFromLocalStorage();
-		if(!this.settings){
-			this.settings = enyo.json.parse(enyo.json.stringify(this.defaultsSettings));
-		}
+
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
 		this.$.rightPaneButton.value = this.settings.rightpane;
 		this.$.heraButton.valve = this.settings.hera;
+		this.$.autoTraceButton.value = this.settings.autoTrace;
+		this.$.autoTraceInputLine.setValue(this.settings.autoTraceLine);
+		this.$.autoTraceInputBox.setShowing(this.settings.autoTrace);
+
 		var themesControls = this.$.themes.getClientControls();
 		enyo.forEach(themesControls, function(control) {
 			if (control.content == this.settings.theme) {
@@ -185,14 +222,25 @@ enyo.kind({
 		}
 	},
 
+	/**
+	 * Load editorSettings values for local storage. Undefined (or
+	 * missing) values are replaced with their default values
+	 */
 	getValuesFromLocalStorage:function(){
 		var self = this;
 		Ares.LocalStorage.get(this.SETTINGS_STORAGE_KEY, function(str) {
 			self.trace("localStorage[", self.SETTINGS_STORAGE_KEY, "] = ", str);
+			var def = self.defaultsSettings;
+			var tmp;
 			try {
 				if(str !== null && str !== undefined){
-					self.settings = enyo.json.parse(str);
-				}		
+					tmp = enyo.json.parse(str);
+					enyo.forEach(Object.keys(def), function(k) {
+						self.settings[k] = tmp[k] === undefined ? def[k] : tmp[k];
+					});
+				}else{
+					self.settings = enyo.json.parse(enyo.json.stringify(self.defaultsSettings));
+				}	
 			} catch(e) {
 				Ares.LocalStorage.remove(self.SETTINGS_STORAGE_KEY);
 			}
@@ -217,6 +265,10 @@ enyo.kind({
 		//onyx toggle button API says that it not working when the value is changed programmatically
 		this.$.highLightButton.setValue(settings.highlight);
 		this.$.wordWrapButton.setValue(settings.wordwrap);
+
+		this.$.autoTraceInputLine.setValue( settings.autoTraceLine );
+		this.$.autoTraceButton.setValue( settings.autoTrace );
+		this.$.autoTraceInputBox.setShowing( settings.autoTrace );
 
 		var themesControls = this.$.themes.getClientControls();
 		enyo.forEach(themesControls, function(control) {
@@ -261,7 +313,6 @@ enyo.kind({
 		this.previewSettings.rightpane = inEvent.value;
 		this.doChangeRightPane();	
 	},
-
 
 	inputChanged: function(inSender, inEvent) {
 		var key = this.key;	
@@ -336,5 +387,15 @@ enyo.kind({
 	heraChanged: function(inSender, inEvent){
 		this.log("sender:", inSender, ", event:", inEvent);
 		this.previewSettings.hera = inEvent.value;
+	},
+	aTrace: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.previewSettings.autoTrace = inEvent.value;
+		this.$.autoTraceInputBox.setShowing(this.previewSettings.autoTrace);
+	},
+	
+	atraceline: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.previewSettings.autoTraceLine = inSender.value;
 	}
 });

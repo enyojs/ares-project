@@ -1,7 +1,8 @@
-/* jshint indent: false */ // TODO: ENYO-3311
+/*global enyo */
+
 /**
  * Represents a directory or a file in {HermesFileTree}
- * 
+ *
  * @class hermes.Node
  * @augments {enyo.Node}
  */
@@ -27,7 +28,7 @@ enyo.kind({
 	},
 	published: {
 		service: null,
-		
+
 		// allows subnodes to be draggable or not (not per default).
 		dragAllowed: false
 	},
@@ -44,11 +45,11 @@ enyo.kind({
 	attributes: {
 		dropTarget: "true"
 	},
-	
+
 	// expandable nodes may only be opened by tapping the icon; tapping the content label
 	// will fire the nodeTap event, but will not expand the node.
 	onlyIconExpands: true,
-	
+
 	debug: false,
 
 	// used to deactivate Hermes right-click menu and allow the
@@ -64,7 +65,7 @@ enyo.kind({
 		if (inEvent.which === 1) {
 			this.doItemDown(inEvent);
 		}
-		
+
 		return true;
 	},
 	/** @private */
@@ -72,7 +73,7 @@ enyo.kind({
 		if(!inEvent.dataTransfer) {
 			return true;
 		}
-		
+
 		this.doItemDragstart(inEvent);
 		return true;
 	},
@@ -81,7 +82,7 @@ enyo.kind({
 		if (!inEvent.dataTransfer) {
 			return true;
 		}
-		
+
 		this.doItemDragenter(inEvent);
 		return true;
 	},
@@ -90,7 +91,7 @@ enyo.kind({
 		if (!inEvent.dataTransfer) {
 			return true;
 		}
-		
+
 		this.doItemDragover(inEvent);
 		return true;
 	},
@@ -99,7 +100,7 @@ enyo.kind({
 		if (!inEvent.dataTransfer) {
 			return true;
 		}
-		
+
 		this.doItemDragleave(inEvent);
 		return true;
 	},
@@ -108,7 +109,7 @@ enyo.kind({
 		if (inEvent.which === 1) {
 			this.doItemUp(inEvent);
 		}
-		
+
 		return true;
 	},
 	/** @private */
@@ -116,7 +117,7 @@ enyo.kind({
 		if (!inEvent.dataTransfer) {
 			return true;
 		}
-		
+
 		this.doItemDrop(inEvent);
 		return true;
 	},
@@ -129,7 +130,7 @@ enyo.kind({
 		this.doItemDragend(inEvent);
 		return true;
 	},
-	
+
 	// Note: this function does not recurse
 	updateNodes: function() {
 		this.startLoading(this);
@@ -150,8 +151,7 @@ enyo.kind({
 			})
 			.error(this, function() {
 				this.stopLoading();
-			})
-			;
+			});
 	},
 	startLoading: function() {
 		this.$.extra.setContent('&nbsp;<img src="' + enyo.path.rewrite("$services/assets/images/busy.gif") + '"/>');
@@ -161,7 +161,7 @@ enyo.kind({
 	},
 	updateNodeContent: function(files) {
 		var i = 0, rfiles, tfiles, res, newNode, k = 0, nfiles;
-		
+
 		this.trace( "updateNodeContent on", this ) ;
 
 		// Add dir property to files, which is a project-relative path
@@ -176,7 +176,7 @@ enyo.kind({
 		rfiles = this.filesToNodes( files ) ; // with prefix in name
 
 		// detach visual subnodes
-		tfiles = this.getNodeFiles() ;		
+		tfiles = this.getNodeFiles() ;
 		for ( var j = 0; j < tfiles.length; j++ ) {
 			this.removeControl( tfiles[j] );
 		}
@@ -190,47 +190,47 @@ enyo.kind({
 			    : this.fileNameSort( tfiles[k], rfiles[i] );
 
 			switch(res) {
-				case -1:
-					this.trace( tfiles[k].name, "was removed" ) ;
-					tfiles[k].destroy() ;
+			case -1:
+				this.trace( tfiles[k].name, "was removed" ) ;
+				tfiles[k].destroy() ;
 
-					k++;
+				k++;
 
-					break;
-				case 0:
-					this.trace( tfiles[k].name, "is kept" ) ;
-					this.addControl( tfiles[k] ) ;
+				break;
+			case 0:
+				this.trace( tfiles[k].name, "is kept" ) ;
+				this.addControl( tfiles[k] ) ;
 
-					k++;
-					i++;
-					
-					break;
-				case 1:
-					this.trace( rfiles[i].name, "was created" ) ;
-					if (this.dragAllowed) {
-						newNode = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node", dragAllowed: true, attributes: {draggable : true}} ) ;
-					} else {
-						newNode = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node"} ) ;
-					}
-					newNode.setService(this.service);
-					this.trace( newNode, "has been created " ) ;
+				k++;
+				i++;
 
-					nfiles = this.getNodeFiles() ;
-					/*
-					 FIXME: allow to manually change
-					 PhoneGap parameters from Ares.
-					 DEMANDS to relad Ares after each
-					 project.json manual change
+				break;
+			case 1:
+				this.trace( rfiles[i].name, "was created" ) ;
+				if (this.dragAllowed) {
+					newNode = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node", dragAllowed: true, attributes: {draggable : true}} ) ;
+				} else {
+					newNode = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node"} ) ;
+				}
+				newNode.setService(this.service);
+				this.trace( newNode, "has been created " ) ;
 
-						if (nfiles[i].name === '$project.json') {
-							// project.json file is internal to Ares
-							nfiles[i].hide();
-						}
-					 */
+				nfiles = this.getNodeFiles() ;
+				/*
+				 FIXME: allow to manually change
+				 PhoneGap parameters from Ares.
+				 DEMANDS to relad Ares after each
+				 project.json manual change
 
-					i++;
-					
-					break;
+				 if (nfiles[i].name === '$project.json') {
+				 // project.json file is internal to Ares
+				 nfiles[i].hide();
+				 }
+				 */
+
+				i++;
+
+				break;
 			}
 		}
 
@@ -290,7 +290,7 @@ enyo.kind({
 		var nameMatch = function(e){
 			return (e.name === '$'+ name) ;
 		} ;
-		
+
 		return this.getControls().filter( nameMatch )[0];
 	},
 
@@ -327,7 +327,7 @@ enyo.kind({
 	},
 	nodeExpand: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
-		
+
 		var subnode = inEvent.originator;
 		this.trace("nodeExpand called while node Expanded is ", subnode.expanded) ;
 		// update icon for expanded state
@@ -346,7 +346,7 @@ enyo.kind({
 		// handled here (don't bubble)
 		return true;
 	},
-	
+
 	// All parameters are optional.
 	// - toSelectId is optional. refresh will select this entry if specified.
 	//   Nothing is selected otherwise.
@@ -355,8 +355,8 @@ enyo.kind({
 		this.trace(this) ;
 
 		this.trace('running refreshTree with ' +
-			 this.controls.length + ' controls with content ' + this.content +
-			 ' force select ' + toSelectId );
+				   this.controls.length + ' controls with content ' + this.content +
+				   ' force select ' + toSelectId );
 
 		tracker.inc() ; // for updadeNodes
 		this.updateNodes().
@@ -367,7 +367,7 @@ enyo.kind({
 				enyo.forEach(this.getNodeFiles(), function(f) {
 					var c = this.$[f.name] ; // c is a node
 					this.trace('running INNER function of refreshTree on ' + f.name +
-								 ' id ' + c.file.id);
+							   ' id ' + c.file.id);
 					if ( c.file.id === toSelectId ) {
 						this.trace('force select of ', c.file.id);
 						c.doNodeTap();
@@ -410,11 +410,11 @@ enyo.kind({
 					}
 				}
 			})
-			.error(this, function (inSender, inError) {
-				if (typeof next === 'function') {
-					next(inError);
-				}
-			});
+				.error(this, function (inSender, inError) {
+					if (typeof next === 'function') {
+						next(inError);
+					}
+				});
 		} else {
 			if (typeof next === 'function') {
 				next();
