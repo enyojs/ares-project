@@ -1,7 +1,7 @@
-/* global ares */
+/* global ares, Ares */
 
 enyo.kind({
-	name: "ColorItem",
+	name: "Ares.Hera.ColorItem",
 	events: {
 		onPickdeclaration: "",
 		onUncheck: "",
@@ -16,8 +16,8 @@ enyo.kind({
 				{name: "drawName", tag:"span", content:"Color"}
 			]},
 			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
-				{name: "Colorlist", kind: "Repeater", classes: "list-sample-list enyo-border-box", count: 0, onSetupItem: "setupItem", components: [					
-					{name:"item", classes: "list-sample-item ", components: [
+				{name: "colorlist", kind: "Repeater", classes: "list-sample-list enyo-border-box", count: 0, onSetupItem: "setupItem", components: [					
+					{name: "item", classes: "list-sample-item ", components: [
 						{name: "declaration", ontap: "tap"}
 					]}
 				]}
@@ -28,7 +28,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		ares.setupTraceLogger(this);
-		this.$.Colorlist.setCount(this.dec.length);
+		this.$.colorlist.setCount(this.dec.length);
 	},
 	/**
 	* @private
@@ -40,7 +40,6 @@ enyo.kind({
 		this.$.drawer.setOpen(!open);
 		this.$.indicator.addRemoveClass("turned", !open);
 	},
-	
 
 	setupItem: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
@@ -49,7 +48,7 @@ enyo.kind({
 		var dec = this.dec[index];
 		if (this.highlight === index){
 		
-			this.$.Colorlist.addRemoveClass("list-sample-selected", this.selected);
+			this.$.colorlist.addRemoveClass("list-sample-selected", this.selected);
 			
 			item.$.declaration.addRemoveClass("list-sample-selected", this.selected);	// dose just the text	
 			
@@ -68,7 +67,7 @@ enyo.kind({
 		this.doUncheck();
 		this.highlight = index;	
 		this.selected = true;
-		this.$.Colorlist.renderRow(index);
+		this.$.colorlist.renderRow(index);
 		
 		this.doPickdeclaration(this.dec[index]);
 	},
@@ -77,7 +76,7 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.selected = false;
 		for(var i = 0; i < this.dec.length; i++){
-			this.$.Colorlist.renderRow(i);
+			this.$.colorlist.renderRow(i);
 		}
 	},
 	
@@ -89,7 +88,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "FontsItem",
+	name: "Ares.Hera.FontsItem",
 	events: {
 		onPickdeclaration: "",
 		onUncheck: "",		
@@ -100,9 +99,9 @@ enyo.kind({
 				{name: "indicator", classes: "indicator turned"},
 				{name: "name", tag:"span", content:"Font"}
 			]},
-			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
+			{kind: "onyx.Drawer", name: "drawer", open:true, components: [
 				{name: "Fontlist", kind: "Repeater", classes: "list-sample-list", count: 0, onSetupItem: "setupItem", components: [					
-					{name:"item", classes: "list-sample-item enyo-border-box", components: [
+					{name: "item", classes: "list-sample-item enyo-border-box", components: [
 						{name: "font", ontap: "tap"}
 					]}
 					
@@ -169,7 +168,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "BorderItem",
+	name: "Ares.Hera.BorderItem",
 	events: {
 		onPickdeclaration: "",
 		onUncheck: "",
@@ -183,9 +182,9 @@ enyo.kind({
 				{name: "indicator", classes: "indicator turned"},
 				{name: "name", tag:"span", content:"Border/Margin.."}
 			]},
-			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
+			{kind: "onyx.Drawer", name: "drawer", open:true, components: [
 				{name: "borderlist", kind: "Repeater", classes: "list-sample-list", count: 0, onSetupItem: "setupItem", components: [					
-					{name:"item", classes: "list-sample-item enyo-border-box", components: [
+					{name: "item", classes: "list-sample-item enyo-border-box", components: [
 						{name: "border", ontap: "tap"}
 					]}
 					
@@ -248,7 +247,8 @@ enyo.kind({
 		{name: "border-top-color", input:"color"},
 		{name: "border-right-color", input:"color"},
 		{name: "border-left-color", input:"color"},
-		{name: "border-bottom-color", input:"color"},		
+		{name: "border-bottom-color", input:"color"},
+		{name: "border-width", input: "bw"},
 		{name: "padding-top", input: "picker"},
 		{name: "padding-left", input: "picker"},
 		{name: "padding-right", input: "picker"},
@@ -257,13 +257,14 @@ enyo.kind({
 		{name: "margin-top", input: "picker"},
 		{name: "margin-right", input: "picker"},
 		{name: "margin-left", input: "picker"},
-		{name: "margin-bottom", input: "picker"}
+		{name: "margin-bottom", input: "picker"},
+		
 	]
 	
 });
 
 enyo.kind({
-	name: "ImageItem",
+	name: "Ares.Hera.ImageItem",
 	events: {
 		onPickdeclaration: "",
 		onUncheck: "",
@@ -276,7 +277,7 @@ enyo.kind({
 			]},
 			{kind: "onyx.Drawer", name:"drawer", open:true, components: [
 				{name: "imagelist", kind: "Repeater", classes: "list-sample-list", count: 0, onSetupItem: "setupItem", components: [					
-					{name:"item", classes: "list-sample-item enyo-border-box", components: [
+					{name: "item", classes: "list-sample-item enyo-border-box", components: [
 						{name: "image", ontap: "tap"}
 					]}
 					
@@ -339,7 +340,7 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "leftpannel",
+	name: "Ares.Hera.Leftpannel",
 	kind: "Control",
 	published: {
 		
@@ -355,10 +356,10 @@ enyo.kind({
 		{kind: "enyo.FittableRows", classes: "enyo-fit", components: [
 			{kind: "Scroller", fit: true, components: [
 				
-				{kind: "ColorItem"},
-				{kind: "FontsItem"},
-				{kind: "BorderItem"},
-				{kind: "ImageItem"},
+				{kind: "Ares.Hera.ColorItem"},
+				{kind: "Ares.Hera.FontsItem"},
+				{kind: "Ares.Hera.BorderItem"},
+				{kind: "Ares.Hera.ImageItem"},
 			]},
 		]},
 	],

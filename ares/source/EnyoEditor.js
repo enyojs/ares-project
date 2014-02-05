@@ -106,7 +106,7 @@ enyo.kind({
 					{kind: "Deimos"}
 				]},
 				{components: [
-					{kind: "Hera"},
+					{kind: "Ares.Hera"},
 				]}
 			]
 		}
@@ -136,7 +136,8 @@ enyo.kind({
 		onNewcss: "newCss",
 		onReplacecss: "replacecss",
 		onCssDocument: "cssDocument",
-		onCloseCss: "closecss"
+		onCloseCss: "closecss",
+		onEditcss: "doCss"
 	},
 	debug: false,
 	create: function() {
@@ -995,7 +996,7 @@ enyo.kind({
 	* @protected
 	*/
 	replacecss: function(inSender, inEvent){
-		this.$.phobos .replacecss(this.$.hera.old, this.$.hera.out);
+		this.$.phobos.replacecss(this.$.hera.old, this.$.hera.out);
 	},
 	
 	/*

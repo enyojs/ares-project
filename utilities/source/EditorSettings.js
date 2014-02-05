@@ -36,6 +36,10 @@ enyo.kind({
 					{classes: "ares-row", components: [
 						{name: "rightpane",tag:"label",  classes: "ares-fixed-label ace-label", content: "Right Panel (only for js files)"},
 						{name: "rightPaneButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "rightPaneChanged"}
+					]},
+					{classes: "ares-row", components: [
+						{name: "hera",tag:"label",  classes: "ares-fixed-label ace-label", content: "Hera on/off"},
+						{name: "heraButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "heraChanged"}
 					]}
 				]},
 				{kind:"FittableRows", components: [
@@ -152,7 +156,7 @@ enyo.kind({
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
 		this.$.rightPaneButton.value = this.settings.rightpane;
-
+		this.$.heraButton.valve = this.settings.hera;
 		var themesControls = this.$.themes.getClientControls();
 		enyo.forEach(themesControls, function(control) {
 			if (control.content == this.settings.theme) {
@@ -229,6 +233,7 @@ enyo.kind({
 		}, this);
 
 		this.$.rightPaneButton.setValue(settings.rightpane);
+		this.$.heraButton.setValue( settings.hera);
 	},
 
 	themeSelected: function(inSender, inEvent) {
@@ -326,5 +331,10 @@ enyo.kind({
 		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.defaultsSettings));
 		this.initUI(this.defaultsSettings);
 		this.doChangeSettings();
+	},
+	
+	heraChanged: function(inSender, inEvent){
+		this.log("sender:", inSender, ", event:", inEvent);
+		this.previewSettings.hera = inEvent.value;
 	}
 });

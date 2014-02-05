@@ -1,7 +1,7 @@
-/*global enyo, ares */
+/*global enyo, ares, Ares */
 
 enyo.kind({
-	name: "Hera",
+	name: "Ares.Hera",
 	kind: "Control",
 	published: {
 		red: '00',
@@ -12,24 +12,24 @@ enyo.kind({
 		y: "0",
 		z: "0",
 		misc: "",
-		toggle: ""
+		toggle: "",
+		file_source_dir: ""
 	},
 	events: {
 		onRegisterMe: "",
 		onNewcss: "",			// insert at end of file
 		onReplacecss: "",		// replace it in ace
-		
+		onEditcss: ""			// call to reload the css editor and data
 	},	
 	handlers: {
 		onPickdeclaration: "radioActivated",
 		onValueUpdate: "change",
 		onUnitChange: "unitchange",
-		onCloseCss: "save"
 	},
 	components: [
 		{kind: "enyo.FittableColumns", style: "width: 33%; height: 100%;", components:[
 			
-			{name: "cssleft", kind: "leftpannel", style: "width: 100%; height: 100%; ",	classes:"ares_deimos_left"},	// left
+			{name: "cssleft", kind: "Ares.Hera.Leftpannel", style: "width: 100%; height: 100%; ",	classes:"ares_deimos_left"},	// left
 			
 			{name: "center", kind: "enyo.FittableRows", style: "width: 100%; height: 100%; ", components: [
 				
@@ -54,7 +54,7 @@ enyo.kind({
 				]},
 
 				{kind: "enyo.FittableColumns", style: "width: 100%; height: 40%;", fit: true, classes: "enyo-unselectable", components: [
-					{name: "valueinput", kind: "valueInput", onUpdate: "change"},
+					{name: "valueinput", kind: "Ares.Hera.ValueInput", onUpdate: "change"},
 					
 				]}
 			]},	// right
@@ -87,6 +87,7 @@ enyo.kind({
 	*/
 	cssload: function(data){
 		this.trace("data", data);
+		this.filesourcedir = data.originator.docData.attributes.file.path;
 		var d = data.originator.$.aceWrapper.value;
 		this.dePuzzle(d);
 	},
@@ -104,10 +105,8 @@ enyo.kind({
 			this.doNewcss();
 			this.reset();
 		}
-		
 		if(this.mode === "editing"){
 			this.doReplacecss();
-			this.reset();
 		}
 		return true;
 	},
@@ -120,6 +119,11 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
 		this.newvalue = inEvent.originator.valueout;
+		
+		if(this.newvalue.indexOf("url") != -1){
+			this.fixurl(this.newvalue);
+		}
+		
 		
 		while(this.properties[a] !== undefined && this.properties[a] !== "null"){
 			if(this.properties[a].indexOf(this.$.property) !== -1 ){
@@ -216,6 +220,10 @@ enyo.kind({
 		if (inEvent.input === "bgr"){
 			this.$.valueinput.bgr();
 		}
+		
+		if (inEvent.input === "bw"){
+			this.$.valueinput.bw();
+		}
 		this.updateBox();
 	},
 
@@ -301,6 +309,7 @@ enyo.kind({
 		var c = inEvent.index;
 		var r = "";
 		var n = [];
+		this.csssave();
 		this.reset();
 		n = (this.file.split("\n"));			// split the file up by lines
 
@@ -362,7 +371,6 @@ enyo.kind({
 	*/
 	setupItem: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
-	//	console.log(inSender, inEvent);
 		var i = inEvent.index;
 		var n = this.declaration[i];
 		this.$.item.addRemoveClass("list-sample-selected", inSender.isSelected(i));
@@ -380,5 +388,38 @@ enyo.kind({
         this.declaration[index] = "New";
         this.$.list.reset();
     },
+    
+	fixurl: function(address){
+		this.log("address:", address);
+		var project = Ares.Workspace.projects.active;
+		var urlin = address.split("/");
+		var currntfileurl = this.filesourcedir;
+		var a = currntfileurl.split("/");
+		var add = "";
+		var b = "";
+	
+		for (var i=1; i < a.length; i++) {		//  work our way back to the project root from the css file
+			if(a[i] === project){
+				i++;
+				for(i; i < a.length; i++){
+					add = add + ".";
+				}
+				add = add ;
+			}
+		}
+		
+		for (var j = 0; j < urlin.length; j++){		// work our way out from root to the image file
+			if(urlin[j] === "url("){
+				j++;
+				for(j;  j < urlin.length; j++){
+					b = b + "/" + urlin[j];
+				}
+			
+			}
+		}
+		var urlout = "	url(" + add + b;
+		this.newvalue = urlout;
+		return;
+    }
 
 });

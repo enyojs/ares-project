@@ -172,6 +172,7 @@ enyo.kind({
 
 	adjustPanelsForMode: function(mode, rightpane) {
 		this.trace("mode:", mode);
+		var h = this.$.editorSettings.settings.hera;
 		var showModes = {
 			javascript: {
 				imageViewer: false,
@@ -210,7 +211,7 @@ enyo.kind({
 				saveAsButton: true,
 				newKindButton: false,
 				designerDecorator: false,
-				cssButton: true,
+				cssButton: h,
 				right: false		
 			},
 			less: {
@@ -220,7 +221,7 @@ enyo.kind({
 				saveAsButton: true,
 				newKindButton: false,
 				designerDecorator: false,
-				cssButton: true,
+				cssButton: h,
 				right: false		
 			}
 		};
