@@ -19,6 +19,7 @@ enyo.kind({
 			wordwrap:false,
 			rightpane:true,
 			autoTrace:false,
+			hera: false,
 			autoTraceLine: 'this.log("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
 		},
