@@ -388,6 +388,7 @@ enyo.kind({
 	heraChanged: function(inSender, inEvent){
 		this.log("sender:", inSender, ", event:", inEvent);
 		this.previewSettings.hera = inEvent.value;
+		this.doChangeSettings();
 	},
 
 	aTrace: function(inSender, inEvent){
