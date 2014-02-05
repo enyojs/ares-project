@@ -1,4 +1,4 @@
-/* global ares, Ares */
+/*global ares, enyo */
 
 enyo.kind({
 	name: "Ares.Hera.ColorItem",
