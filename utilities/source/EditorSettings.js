@@ -43,7 +43,7 @@ enyo.kind({
 						{name: "rightPaneButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "rightPaneChanged"}
 					]},
 					{classes: "ares-row", components: [
-						{name: "hera",tag:"label",  classes: "ares-fixed-label ace-label", content: "Hera on/off"},
+						{name: "hera",tag:"label",  classes: "ares-fixed-label ace-label", content: "Css editor (experimental)"},
 						{name: "heraButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "heraChanged"}
 					]}
 				]},
