@@ -266,8 +266,8 @@ enyo.kind({
 			image:		{rightIndex: 0}
 		};
 
-		var settings = modes[mode]||modes['text'];
-		this.$.right.setIndex(settings.rightIndex);
+		var show = modes[mode]||modes['text'];
+		this.$.right.setIndex(show.rightIndex);
 		this.resizeHandler();
 		return showSettings.aceWrapper ;
 	},
