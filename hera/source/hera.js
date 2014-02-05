@@ -393,8 +393,8 @@ enyo.kind({
 		this.log("address:", address);
 		var project = Ares.Workspace.projects.active;
 		var urlin = address.split("/");
-		var currntfileurl = this.filesourcedir;
-		var a = currntfileurl.split("/");
+		var currentFileUrl = this.filesourcedir;
+		var a = currentFileUrl.split("/");
 		var add = "";
 		var b = "";
 	
