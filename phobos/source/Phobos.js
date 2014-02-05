@@ -170,9 +170,16 @@ enyo.kind({
 		this.docData.setEdited(edited);
 	},
 
+	/**
+	 * Show/hide right panel and button depending on editor mode and editor settings.
+	 * settings is used for right panel and css editor button
+	 * @param {String} mode. typically 'javascript', 'css'...
+	 * @param {Object} settings
+	 * @returns {Boolean}
+	 */
 	adjustPanelsForMode: function(mode, settings) {
-		this.trace("mode:", mode);
-		var h = this.$.editorSettings.settings.hera;
+		this.trace("mode:", mode, " settings:", settings);
+
 		var showModes = {
 			javascript: {
 				imageViewer: false,
@@ -211,7 +218,7 @@ enyo.kind({
 				saveAsButton: true,
 				newKindButton: false,
 				designerDecorator: false,
-				cssButton: h,
+				cssButton: settings.hera,
 				right: false		
 			},
 			less: {
@@ -221,7 +228,7 @@ enyo.kind({
 				saveAsButton: true,
 				newKindButton: false,
 				designerDecorator: false,
-				cssButton: h,
+				cssButton: settings.hera,
 				right: false		
 			}
 		};
