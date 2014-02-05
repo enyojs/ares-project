@@ -138,7 +138,7 @@ enyo.kind({
 
 		this.docData.setMode(mode);
 
-		var hasAce = this.adjustPanelsForMode(mode, this.$.editorSettings.getSettingFromLS().rightpane);
+		var hasAce = this.adjustPanelsForMode(mode, this.$.editorSettings.getSettingFromLS());
 
 		if (hasAce) {
 			var aceSession = this.docData.getAceSession();
@@ -170,7 +170,7 @@ enyo.kind({
 		this.docData.setEdited(edited);
 	},
 
-	adjustPanelsForMode: function(mode, rightpane) {
+	adjustPanelsForMode: function(mode, settings) {
 		this.trace("mode:", mode);
 		var h = this.$.editorSettings.settings.hera;
 		var showModes = {
@@ -182,7 +182,7 @@ enyo.kind({
 				newKindButton: true,
 				designerDecorator: true,
 				cssButton: false,
-				right: rightpane
+				right: settings.rightpane
 			},
 			image: {
 				imageViewer: true,
@@ -900,14 +900,14 @@ enyo.kind({
 	},
 	changeRightPane: function(settings){
 		if(this.docData){
-			this.adjustPanelsForMode(this.docData.getMode(), settings.rightpane);
+			this.adjustPanelsForMode(this.docData.getMode(), settings);
 		}	
 	},
 	applySettings: function(settings){
 		//apply Ace settings
 		this.$.aceWrapper.applyAceSettings(settings);
 		if(this.docData){
-			this.adjustPanelsForMode(this.docData.getMode(), settings.rightpane);
+			this.adjustPanelsForMode(this.docData.getMode(), settings);
 		}
 	},	
 	fkeypressed: function(inSender, inEvent) {
