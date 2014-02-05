@@ -390,7 +390,7 @@ enyo.kind({
     },
     
 	fixurl: function(address){
-		this.log("address:", address);
+		this.trace("address:", address);
 		var project = Ares.Workspace.projects.active;
 		var urlin = address.split("/");
 		var currentFileUrl = this.filesourcedir;
