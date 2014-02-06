@@ -410,6 +410,21 @@ enyo.kind({
 	setProjectConfig: function (config) {
 		this.setValue(config.access.origin);
 		this.valueChanged();
+		
+		for (var key in config.access) {
+			if (key !== "origin" ) {
+				this.log(key);
+
+				
+				if (typeof this.container.$[key] != "undefined"){
+					this.container.$[key].set("value", config.access[key]);
+				} else {
+					//if the row instance doesn't existe create it 
+					this.addAccessRow().set("value", config.access[key]);
+
+				}							
+			} 		
+		}
 	},
 	/** @public */
 	getProjectConfig: function (config) {
