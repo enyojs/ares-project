@@ -166,20 +166,20 @@ enyo.kind({
 				this.designer.doError(err);
 			}
 		},
-		error: function(eventName,from, to, args, errorCode, errorMessage,error) {
+		error: function(event,from, to, args, errorCode, errorMessage,error) {
 			if (errorCode === 300) {
 				// Invalid fsm callback. See state-machine source code for error codes :-/
 				this.designer.doError( { err: error, msg: "Internal error: " + errorMessage} );
-			} else if ( /^df/.test(eventName) ) {
-				this.designer.doError ("Unexpected event " + eventName + " coming from designer in state " + from) ;
+			} else if ( /^df/.test(event) ) {
+				this.designer.doError ("Unexpected event " + event + " coming from designer in state " + from) ;
 			} else {
-				this.designer.doError ("Unexpected event " + eventName + " coming from Ares in state " + from) ;
+				this.designer.doError ("Unexpected event " + event + " coming from Ares in state " + from) ;
 			}
 
 			// in case of error, any pending call-back must be called
 			// to dismiss on-going waitpopups
 			if (this.pendingCb) {
-				this.execCb(errorMessage);
+				this.execCb(event,from, to, errorMessage);
 			}
 		}
 	},
@@ -188,18 +188,20 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		var fsm = StateMachine.create( this.fsmStruct );
 		fsm.trace = this.trace.bind(this);
-		fsm.execCb = (function( event, from, to ) {
+
+		fsm.execCb = (function( event, from, to, err ) {
 			var cb = this.pendingCb;
 			this.pendingCb = null;
 
 			if (cb) {
-				cb();
+				cb(err);
 			} else {
 				var msg = "Internal error: missing call-back in event " + event ;
 				msg += " from state " + from + " to state " + to;
-				this.designer.doError(msg) ;
+				this.designer.doError({msg: msg, err: err}) ;
 			}
 		}).bind(fsm);
+
 		fsm.designer = this ;
 		this.fsm = fsm;
 
