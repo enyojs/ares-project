@@ -42,7 +42,7 @@ enyo.kind(
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Device"},
 							{
-								kind: "onyx.PickerDecorator",
+								kind: "Ares.PickerDecorator",
 								onSelect: "resize",
 								components:
 								[
@@ -65,7 +65,7 @@ enyo.kind(
 						components: [
 							{kind: "onyx.GroupboxHeader", content: "Screen"},
 							{
-								kind: "onyx.PickerDecorator",
+								kind: "Ares.PickerDecorator",
 								onSelect: "resize",
 								components:
 								[
