@@ -464,6 +464,32 @@ enyo.kind({
 		},
 		{name: "deleteButton", kind: "onyx.IconButton", src: "$services/assets/images/delete-icon-32x32.png", ontap: "deleteAccessRow"}
 	],
+
+	valueChanged: function () {
+		this.$.configurationInput.setValue(this.value);		
+	},
+
+	/**
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 *
+	 * @private
+	 */
+	updateConfigurationValue: function (inSender, inValue) {
+		this.setValue(inSender.getValue());		
+		return true;
+	},
+
+	/** @public */
+	setProjectConfig: function (config) {
+		this.setValue(config.access[this.name]);
+		this.valueChanged();
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config.access[this.name] = this.getValue();
+	},
+	
 	/** @private */
 	deleteAccessRow: function(inSender, inEvent) {
 		this.destroy();	
