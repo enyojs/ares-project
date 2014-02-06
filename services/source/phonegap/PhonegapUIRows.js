@@ -746,34 +746,14 @@ enyo.kind({
         onInputButtonTap: "",
         onPathChecked: ""
     },
+    handlers: {
+        onFileChooserAction: "pathInputTap" 
+    },  
     components: [{
         name: "label",
         classes: "ares-project-properties-drawer-row-label"
     },
-    {
-        kind: "onyx.InputDecorator",
-        components: [{
-            kind: "onyx.Input",
-            classes: "ares-project-properties-input-icon",
-            name: "AndroidImgPath",
-            disabled: true
-        },
-        {
-            kind: "onyx.IconButton", 
-            name:"pathInputButtonBroken", 
-            classes: "ares-file-broken-icon", 
-            src: "$project-view/assets/images/file_broken-20x17.png", 
-            showing: false,
-            disabled: true
-        }]
-    },
-    {
-        kind: "onyx.IconButton",
-        name: "AndroidImgButton",
-        classes: "ares-file-selector-icon", 
-        src: "$project-view/assets/images/file-32x32.png",
-        ontap: "pathInputTap"
-    },
+    {kind: "Ares.FileChooserInput", name: "AndroidImgPath", inputDisabled: true, inputClasses: "ares-project-properties-input-icon"},
     {
         kind: "onyx.PickerDecorator",
         classes: "ares-project-properties-picker-small",
@@ -858,33 +838,27 @@ enyo.kind({
 
     /** @private */
     valueChanged: function() {
-        this.$.AndroidImgPath.setValue(this.value);
+        this.$.AndroidImgPath.setPathValue(this.value);
         this.setStatus(true);
     },
     /** @private */
     inputTipChanged: function() {
-        this.$.AndroidImgPath.setAttribute("title", this.inputTip);
+        this.$.AndroidImgPath.setInputTip(this.inputTip);
     },
     /** @private */
     activatedChanged: function() {
+       this.$.AndroidImgPath.setActivePathInputButton(this.activated);
         if (this.activated) {
-            this.$.AndroidImgButton.show();
             this.statusChanged();
-        } else {
-            this.$.AndroidImgButton.hide();
         }
     },
     /** @private */
     statusChanged: function() {
-        if(this.status){
-            this.$.pathInputButtonBroken.setShowing(false);
-        } else{
-            this.$.pathInputButtonBroken.setShowing(true);
-        }
+        this.$.AndroidImgPath.setStatus(this.status);
     },
     /** @private */
     buttonTipChanged: function() {
-        this.$.AndroidImgButton.setAttribute("title", this.buttonTip);
+        this.$.AndroidImgPath.setButtonTip(this.buttonTip);
     },
 
     /** @private */
@@ -924,6 +898,9 @@ enyo.kind({
         onInputButtonTap: "",
         onPathChecked: ""
     },
+    handlers: {
+        onFileChooserAction: "pathInputTap" 
+    },
     published: {
         height: "",
         width: "",
@@ -937,30 +914,7 @@ enyo.kind({
         name: "label",
         classes: "ares-project-properties-drawer-row-label"
     },
-    {
-        kind: "onyx.InputDecorator",
-        components: [{
-            kind: "onyx.Input",
-            name: "ImgPath",
-            classes: "ares-project-properties-input-icon",
-            disabled: true
-        },
-        {
-            kind: "onyx.IconButton", 
-            name:"pathInputButtonBroken", 
-            classes: "ares-file-broken-icon", 
-            src: "$project-view/assets/images/file_broken-20x17.png", 
-            showing: false,
-            disabled: true
-        }]
-    },
-    {
-        kind: "onyx.IconButton",
-        name: "ImgButton",
-        classes: "ares-file-selector-icon", 
-        src: "$project-view/assets/images/file-32x32.png",
-        ontap: "pathInputTap"
-    },
+    {kind: "Ares.FileChooserInput", name: "ImgPath", inputDisabled: true, inputClasses: "ares-project-properties-input-icon"},
     {
         content: "Height",
         classes: "ares-project-properties-drawer-row-attribute-label"
@@ -1084,33 +1038,27 @@ enyo.kind({
 
     /** @private */
     valueChanged: function() {
-        this.$.ImgPath.setValue(this.value);
+        this.$.ImgPath.setPathValue(this.value);
         this.setStatus(true);
     },
     /** @private */
     inputTipChanged: function() {
-        this.$.ImgPath.setAttribute("title", this.inputTip);
+        this.$.ImgPath.setInputTip(this.inputTip);
     },
     /** @private */
     activatedChanged: function() {
+         this.$.ImgPath.setActivePathInputButton(this.activated);
         if (this.activated) {
-            this.$.ImgButton.show();
             this.statusChanged();
-        } else {
-            this.$.ImgButton.hide();
         }
     },
     /** @private */
     statusChanged: function() {
-        if(this.status){
-            this.$.pathInputButtonBroken.setShowing(false);
-        } else{
-            this.$.pathInputButtonBroken.setShowing(true);
-        }
+        this.$.ImgPath.setStatus(this.status);
     },
     /** @private */
     buttonTipChanged: function() {
-        this.$.ImgButton.setAttribute("title", this.buttonTip);
+        this.$.ImgPath.setButtonTip(this.buttonTip);
     },
 
     /** @private */

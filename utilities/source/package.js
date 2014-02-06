@@ -13,5 +13,6 @@ enyo.depends(
 	"PanelGrabber.js",
 	"PopupTitle.js",
 	"Logo.js",
-	"EditorSettings.js" 
+	"EditorSettings.js",
+	"FileChooserInput.js" 
 );

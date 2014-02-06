@@ -673,19 +673,16 @@ enyo.kind({
 		onInputButtonTap: "",
 		onPathChecked: ""
 	},
+	handlers: {
+		onFileChooserAction: "pathInputTap"
+	},
 	components: [
 		{tag: "label", name: "pathInputLabel", classes:"ares-fixed-label"},
-		{kind: "onyx.InputDecorator", components: [
-			{kind: "Input", name: "pathInputValue", disabled: true},
-			{kind: "onyx.IconButton", name:"pathInputButtonBroken", classes: "ares-file-broken-icon", src: "$project-view/assets/images/file_broken-20x17.png", showing: false, disabled: true}
-		]},
-		{kind: "onyx.IconButton", name:"pathInputButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
+		{name: "fileChooserInput", kind: "Ares.FileChooserInput", inputDisabled: true},
 	],
 	debug: false,
-
 	create: function () {
 		this.inherited(arguments);
-
 		this.labelChanged();
 		this.valueChanged();
 		this.inputTipChanged();
@@ -699,33 +696,27 @@ enyo.kind({
 	},
 	/** @private */
 	valueChanged: function () {
-		this.$.pathInputValue.setValue(this.value);
-		this.setStatus(true);
+		this.$.fileChooserInput.setPathValue(this.value);
+		this.$.fileChooserInput.setStatus(true);
 	},
 	/** @private */
 	inputTipChanged: function () {
-		this.$.pathInputValue.setAttribute("title", this.inputTip);
+		this.$.fileChooserInput.setInputTip(this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function () {
+		this.$.fileChooserInput.setActivePathInputButton(this.activated);
 		if (this.activated) {
-			this.$.pathInputButton.show();
 			this.statusChanged();
-		} else {
-			this.$.pathInputButton.hide();
-		}
+		} 
 	},
 	/** @private */
 	statusChanged: function () {
-		if(this.status){
-			this.$.pathInputButtonBroken.setShowing(false);
-		} else{
-			this.$.pathInputButtonBroken.setShowing(true);
-		}
+		this.$.fileChooserInput.setStatus(this.status);
 	},
 	/** @private */
 	buttonTipChanged: function () {
-		this.$.pathInputButton.setAttribute("title", this.buttonTip);
+		this.$.fileChooserInput.setButtonTip(this.buttonTip);
 	},
 	/** @private */
 	pathInputTap: function (inSender, inEvent) {
