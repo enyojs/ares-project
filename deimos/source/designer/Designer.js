@@ -482,7 +482,13 @@ enyo.kind({
 		ares.assertCb(next);
 		// check if the file is indeed part of the current project
 		if (projectName === this.projectSource.getName() ){
-			this.fsm.syncFile(filename, inCode, next);
+			if( /\.(css|js)$/i.test(filename) ) {
+				this.fsm.syncFile(filename, inCode, next);
+			} else {
+				// ignore no js or css files
+				this.trace("Dropping syncFile on " + filename);
+				setTimeout( next, 0);
+			}
 		} else {
 			var msg = "syncFile aborted: project mismatch. Expected " + this.projectSource.getName()
 					  + ' got '+ projectName + ' with file ' + filename;
