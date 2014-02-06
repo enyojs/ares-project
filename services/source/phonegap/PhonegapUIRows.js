@@ -430,18 +430,20 @@ enyo.kind({
 	getProjectConfig: function (config) {
 		config.access.origin = this.getValue();
 	},
-	/** @private */
-	addAccessRow: function(inSender, inEvent) {
-		this.log(this);
 	
-		this.container.createComponent(
+	/** @private */
+	addAccessRow: function() {
+		var newComponent = 	this.container.createComponent(
 			{kind: "Phonegap.ProjectProperties.AddedAccessRow"}, 
 			{addBefore: this.container.$.icon}
 		);
-		this.container.render();	
+		this.container.render();
+
+		return newComponent;	
 	}
 	
 });
+
 enyo.kind({
 	name: "Phonegap.ProjectProperties.AddedAccessRow",
 	kind: "Phonegap.ProjectProperties.Row",
