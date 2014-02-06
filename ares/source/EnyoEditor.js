@@ -914,6 +914,7 @@ enyo.kind({
 			(function(err) {
 				if (err) {
 					this.trace("designDocument -> loadDesignerUI done, err is ",err);
+					this.doError({msg: "designDocument ended with error", err: err});
 				}
 				else {
 					this.trace("designDocument done");
