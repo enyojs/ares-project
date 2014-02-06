@@ -167,20 +167,30 @@ enyo.kind({
 			}
 		},
 		error: function(event,from, to, args, errorCode, errorMessage,error) {
-			if (errorCode === 300) {
-				// Invalid fsm callback. See state-machine source code for error codes :-/
-				this.designer.doError( { err: error, msg: "Internal error: " + errorMessage} );
-			} else if ( /^df/.test(event) ) {
-				this.designer.doError ("Unexpected event " + event + " coming from designer in state " + from) ;
-			} else {
-				this.designer.doError ("Unexpected event " + event + " coming from Ares in state " + from) ;
-			}
+			var errCb, errData ;
 
 			// in case of error, any pending call-back must be called
 			// to dismiss on-going waitpopups
 			if (this.pendingCb) {
-				this.execCb(event,from, to, errorMessage);
+				errCb = ( function() { this.execCb(event,from, to, errorMessage);}).bind(this);
+			} else {
+				errCb = ares.noNext ;
 			}
+
+			// arrange a callback to be invoked once user acknowledges the error
+			errData = { callback: errCb } ;
+
+			if (errorCode === 300) {
+				// Invalid fsm callback. See state-machine source code for error codes :-/
+				errData.err = error;
+				errData.msg =  "Internal error: " + errorMessage ;
+			} else if ( /^df/.test(event) ) {
+				errData.msg = "Unexpected event " + event + " coming from designer in state " + from ;
+			} else {
+				errData.msg = "Unexpected event " + event + " coming from Ares in state " + from ;
+			}
+
+			this.designer.doError( errData );
 		}
 	},
 
@@ -198,7 +208,7 @@ enyo.kind({
 			} else {
 				var msg = "Internal error: missing call-back in event " + event ;
 				msg += " from state " + from + " to state " + to;
-				this.designer.doError({msg: msg, err: err}) ;
+				this.designer.doError({msg: msg}) ;
 			}
 		}).bind(fsm);
 
