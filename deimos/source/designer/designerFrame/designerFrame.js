@@ -323,7 +323,7 @@ enyo.kind({
 	},
 	drag: function(inEvent) {
 		if (this.resizing) {
-			this.resize(inEvent);
+			this.resizeOnEvent(inEvent);
 		}
 	},
 	dragenter: function(inEvent) {
@@ -1738,7 +1738,7 @@ enyo.kind({
 
 		return false;
 	},
-	resize: function(inEvent) {
+	resizeOnEvent: function(inEvent) {
 		this.resizeWidth(inEvent.dx);
 		this.resizeHeight(inEvent.dy);
 		this.renderSelectHighlight();

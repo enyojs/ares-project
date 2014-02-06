@@ -18,8 +18,8 @@ enyo.kind({
 						{content: "Fit"},
 						{kind: "onyx.Checkbox", onchange: "autoZoomDesigner"}, //checkbox is here as a workaround for ENYO-3648
 						{content: "Size:"},
-						{kind: "onyx.PickerDecorator", classes: "deimos-device-picker deimos-designer-toolbar-spacing", components: [
-							{style: "width:100%;"},
+						{kind: "Ares.PickerDecorator", classes: "deimos-designer-toolbar-spacing", components: [
+							{classes: "deimos-device-picker"},
 							{kind: "onyx.Picker", name: "devicePicker", ontap: "deviceChosen", components: [
 								{content: "(600 x 800) Default",		value: { height: 800,  width: 600 }},
 								{content: "(1024 x 600) HP Slate7",      value: { height:  1024, width:  600, ppi: 170, dpr: 1 }},

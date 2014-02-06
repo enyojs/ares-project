@@ -143,6 +143,12 @@ Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when
 	setDownloadStatus: function(downloadStatus) {
 		this.set("downloadStatus", downloadStatus);
 	},
+	getValidPgbConf: function() {
+		return this.get("validPgbConf");
+	},
+	setValidPgbConf: function(conf) {
+		this.set("validPgbConf", conf);
+	},
 	getConfig: function() {
 		return this.get("config");
 	},
@@ -244,6 +250,28 @@ Ares.Model.Projects = Backbone.Collection.extend({		// TODO: move to enyo.Collec
 	getActiveProject: function() {
 		if (this.active) {
 			return this.get(this.active) ;
+		}
+		return undefined;
+	},
+	/**
+	 * Store the currently selected project
+	 * @param {String} name The name of the selected project.
+	 */
+	setSelectedProject: function(name) {
+		var project = this.get(name);
+		if (project) {
+			this.selectedProject = name;
+		} else {
+			throw new Error("Unknown project " + name);
+		}
+	},
+	/**
+	 * Returns the currently selected project.
+	 * @return {Ares.Model.Project|undefined}
+	 */
+	getSelectedProject: function() {
+		if (this.selectedProject) {
+			return this.get(this.selectedProject) ;
 		}
 		return undefined;
 	},
