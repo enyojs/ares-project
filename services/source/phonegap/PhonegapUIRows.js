@@ -440,8 +440,6 @@ enyo.kind({
 		
 		for (var key in config.access) {
 			if (key !== "origin" ) {
-				this.log(key);
-
 				
 				if (typeof this.container.$[key] != "undefined"){
 					this.container.$[key].set("value", config.access[key]);
@@ -509,7 +507,6 @@ enyo.kind({
 	/**
 	 * @param  {Object} inSender the event sender
 	 * @param  {Object} inValue  the event value
-	 *
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
