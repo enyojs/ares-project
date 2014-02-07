@@ -431,8 +431,9 @@ enyo.kind({
 		var disabled = this.getDisabled();
 		this.$.fileChooserInput.setInputDisabled(disabled);
 		this.$.fileChooserInput.setActivePathInputButton(!disabled);
-		if(!disabled){
+		if(!disabled && this.fieldValue){
 			this.statusChanged();
+			this.$.fileChooserInput.statusChanged();
 		}
 	},
 	disableFileChooser: function(disabled){

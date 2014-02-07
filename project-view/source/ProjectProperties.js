@@ -697,7 +697,7 @@ enyo.kind({
 	/** @private */
 	valueChanged: function () {
 		this.$.fileChooserInput.setPathValue(this.value);
-		this.$.fileChooserInput.setStatus(true);
+		this.setStatus(true);
 	},
 	/** @private */
 	inputTipChanged: function () {
@@ -708,6 +708,7 @@ enyo.kind({
 		this.$.fileChooserInput.setActivePathInputButton(this.activated);
 		if (this.activated) {
 			this.statusChanged();
+			this.$.fileChooserInput.statusChanged();
 		} 
 	},
 	/** @private */

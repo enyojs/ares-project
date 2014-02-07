@@ -30,6 +30,7 @@ enyo.kind({
 		this.pathValueChanged();
 		this.inputDisabledChanged();
 		this.activePathInputButtonChanged();
+		this.statusChanged();
 		this.inputTipChanged();
 		this.buttonTipChanged();
 		if(this.inputClasses) {

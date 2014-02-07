@@ -850,6 +850,7 @@ enyo.kind({
        this.$.AndroidImgPath.setActivePathInputButton(this.activated);
         if (this.activated) {
             this.statusChanged();
+            this.$.AndroidImgPath.statusChanged();
         }
     },
     /** @private */
@@ -1050,6 +1051,7 @@ enyo.kind({
          this.$.ImgPath.setActivePathInputButton(this.activated);
         if (this.activated) {
             this.statusChanged();
+            this.$.ImgPath.statusChanged();
         }
     },
     /** @private */
