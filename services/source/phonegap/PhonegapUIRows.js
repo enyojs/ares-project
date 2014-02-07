@@ -37,6 +37,33 @@ enyo.kind({
 		return this.container.container;
 	},
 
+	/**
+	 * @private
+	 */
+	getPhonegapProvider: function() {
+		return Phonegap.ProjectProperties.getProvider();
+	}, 
+	
+	/**
+	 * @private
+	 */
+	getProjectInstance: function() {
+		var provider = this.getPhonegapProvider();
+		return provider.getSelectedProject()
+	},
+
+	/**
+	 * @private
+	 * @param  {String} inAttribute the Phonegap attribute.
+	 * @return {Object}
+	 */
+	getProjectInstanceAttribute: function(inAttribute) {
+		return this.getProjectInstance().getConfig().data.providers.phonegap[inAttribute];
+	},
+
+	/**
+	 * @private
+	 */
 	errChanged: function(prevErr) {
 		this.trace("err:", this.err && this.err.toString(), "<-", prevErr && prevErr.toString());
 		if (prevErr && !this.err) {
@@ -462,9 +489,19 @@ enyo.kind({
 				}
 			]
 		},
-		{name: "deleteButton", kind: "onyx.IconButton", src: "$services/assets/images/delete-icon-32x32.png", ontap: "deleteAccessRow"}
+		{name: "deleteButton", kind: "onyx.IconButton", parentRowName: "", src: "$services/assets/images/delete-icon-32x32.png", ontap: "deleteAccessRow"}
 	],
+	/**
+	 * @private
+	 */
+	create: function() {
+		this.inherited(arguments);
+		this.$.deleteButton.set("parentRowName", this.name);
+	},
 
+	/**
+	 * @private
+	 */
 	valueChanged: function () {
 		this.$.configurationInput.setValue(this.value);		
 	},
@@ -492,6 +529,10 @@ enyo.kind({
 	
 	/** @private */
 	deleteAccessRow: function(inSender, inEvent) {
+		//Delete the row value from the project model object.
+		delete this.getProjectInstanceAttribute("access")[inSender.get("parentName")];
+		
+		//Delete the row form the UI.
 		this.destroy();	
 	}
 });
