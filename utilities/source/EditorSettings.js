@@ -45,7 +45,7 @@ enyo.kind({
 				{kind:"FittableRows", components: [
 					{classes: "ares-row", components: [
 						{name: "editorThemesLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Editor Themes"},
-						{name : "themesPicker", kind: "onyx.PickerDecorator", components: [
+						{name : "themesPicker", kind: "Ares.PickerDecorator", components: [
 							{classes:"large-picker"},
 							{name: "themes", kind: "onyx.Picker", onSelect: "themeSelected", components: [
 								{content: "ambiance"},
@@ -82,7 +82,7 @@ enyo.kind({
 					]},
 					{classes: "ares-row", components: [
 						{name: "fontSizeLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Font Size"},
-						{kind: "onyx.PickerDecorator", components: [
+						{kind: "Ares.PickerDecorator", components: [
 							{classes:"small-picker"},
 							{name: "fontSizePicker",  kind: "onyx.Picker", onSelect: "fontSize", components:[
 								{content: 6},

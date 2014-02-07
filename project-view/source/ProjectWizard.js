@@ -689,7 +689,7 @@ enyo.kind({
 	floating: true,
 	autoDismiss: false,
 	folderChooser: true,
-
+	serverSelectable: false,
 	classes: "enyo-unselectable",
 	events: {
 		onAddProjectInList: "",
@@ -793,7 +793,7 @@ enyo.kind({
 	searchProjects: function (inSender, inEvent) {
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 
-		if (!inEvent.file) {
+		if (!inEvent.file || !inEvent.file.service) {
 			this.hide();
 			this.reset();
 			return;

@@ -31,20 +31,10 @@
 	padding:6px 18px;
 }
 
-.onyx-picker-decorator .onyx-button:before {
-	position: relative; 
-	content: @ares-small-arrow;
-	width:25px; 
-	vertical-align: middle;
-	display: inline-block;
-	float:right;
-	margin-right: -20px;
-}
-
 /*onyx toolbar*/
 
 .onyx-toolbar .onyx-button {
-	height: 28px;
+	height: 2.4em;
 	background: @ares-button-gradient @onyx-button-background;
 }
 
@@ -541,6 +531,27 @@ div.large-fixed { width: 80%; }
 }
 .ares-path-input{
 	display: inline-block;
+}
+
+/* Ares picker with an arrow */
+.onyx-picker-decorator .ares-picker{
+	text-overflow:clip;
+	min-width: 6em;
+	padding: 6px 0;
+}
+.ares-picker-value {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	padding: 0 2px;
+	width: 85%;
+}
+.ares-picker-arrow{
+	position: absolute;
+	background:  @ares-small-arrow;
+	width: 11px;
+	height: 11px;
+	top: 35%;
+	right: 0.2em;
 }
 
 @import "assets/css/Popup.less";

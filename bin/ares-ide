@@ -12,7 +12,7 @@ case `uname` in
 esac
 
 if [ -x "$basedir/node" ]; then
-  "$basedir/node"  "$basedir/./node_modules/ares-ide/ide.js" "$@"
+  "$basedir/x86/node"  "$basedir/./node_modules/ares-ide/ide.js" "$@"
   ret=$?
 else 
   node  "$basedir/./node_modules/ares-ide/ide.js" "$@"

@@ -14,5 +14,7 @@ enyo.depends(
 	"PopupTitle.js",
 	"Logo.js",
 	"EditorSettings.js",
-	"FileChooserInput.js" 
+	"AresPickerButton.js",
+	"AresPickerDecorator.js",
+	"FileChooserInput.js"
 );

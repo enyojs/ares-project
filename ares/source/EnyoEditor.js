@@ -236,7 +236,7 @@ enyo.kind({
 	},
 
 	closeDesigner: function(inSender, inEvent){
-		this.$.deimos.closeDesigner();
+		this.$.deimos.closeDesigner(/* bleach */ true);
 		return true;
 	},
 
@@ -358,15 +358,73 @@ enyo.kind({
 
 	// Save actions
 
+	/**
+	 * Save all docs of current project
+	 */
 	saveProjectDocs: function() {
-		this.foreachProjectDocs(this.saveDoc.bind(this));
+		var saveOne = function(doc) {
+			this.saveDoc(doc, ares.noNext);
+		};
+
+		this.foreachProjectDocs( saveOne.bind(this) );
+	},
+
+	/**
+	 * Request (once) to save all docs of a project and call back
+	 * @param {Ares.Model.Project} project
+	 * @param {Function} next
+	 */
+	saveProjectDocsWithCb: function(project, next) {
+		var popup = this.$.savePopup ;
+		var todo = [];
+		var toSave = [];
+
+		// check which files need to be saved
+		var action = function(doc) {
+			if (doc.getEdited() === true) {
+				todo.push(this.saveDoc.bind(this, doc)) ;
+				toSave.push(doc.getName());
+			}
+		};
+		this.foreachProjectDocs( action.bind(this), project );
+
+		if (todo.length) {
+			this.trace("request save project doc on ", project.getName());
+			var verb = todo.length > 1 ? 'were' : 'was' ;
+			popup.setMessage('"' + toSave.join('", "') + '" ' + verb + ' modified.') ;
+			popup.setTitle($L("Project was modified!"));
+
+			popup.setActionButton($L("Don't Save"));
+			popup.setActionCallback( next );
+
+			popup.setAction1Button($L("Save"));
+			popup.setAction1Callback( async.series.bind(null, todo, next) );
+
+			popup.setCancelCallback(
+				(function() {
+					next(new Error('canceled'));
+				}).bind(this)
+			) ;
+
+			popup.show();
+		} else {
+			setTimeout( next, 0);
+		}
+	},
+
+	saveAllDocs: function() {
+		var saveOne = function(doc) {
+			this.saveDoc(doc, ares.noNext);
+		};
+		Ares.Workspace.files.forEach( saveOne.bind(this) );
 	},
 
 	saveCurrentDoc: function() {
-		this.saveDoc(this.activeDocument);
+		this.saveDoc(this.activeDocument, ares.noNext);
 	},
 
-	saveDoc: function(doc) {
+	saveDoc: function(doc, next) {
+		ares.assertCb(next);
 		var content;
 		if (doc === this.activeDocument) {
 			content = this.$.phobos.getEditorContent();
@@ -378,7 +436,7 @@ enyo.kind({
 			service: doc.getProjectData().getService(),
 			fileId: doc.getFileId()
 		};
-		this.saveFile(doc.getName(), content, where, ares.noNext);
+		this.saveFile(doc.getName(), content, where, next);
 	},
 
 	saveFile: function(name, content, where, next){
@@ -767,7 +825,7 @@ enyo.kind({
 
 
 	/**
-	 * handle request close doc events
+	 * handle request close doc events coming from TabBar
 	 * Request to save doc and close if user agrees
 	 * @param {Object} inSender
 	 * @param {Object} inEvent
@@ -779,17 +837,24 @@ enyo.kind({
 		// comes from.
 		var doc = Ares.Workspace.files.get(inEvent.userId);
 
-		async.waterfall([
+		async.series([
 			this.requestSave.bind(this, doc),
-			this.closeDoc.bind(this)
+			this.closeDoc.bind(this, doc)
 		]);
 		return true; // Stop the propagation of the event
 	},
 
+	/**
+	 * handle request close doc events coming from File menu
+	 * Request to save doc and close if user agrees
+	 * @param {Object} inSender
+	 * @param {Object} inEvent
+	 * @returns {true}
+	 */
 	requestCloseCurrentDoc: function(inSender, inEvent) {
-		async.waterfall([
+		async.series([
 			this.requestSave.bind(this, this.activeDocument),
-			this.closeDoc.bind(this)
+			this.closeDoc.bind(this, this.activeDocument)
 		]);
 		return true; // Stop the propagation of the event
 	},
@@ -859,12 +924,7 @@ enyo.kind({
 			popup.setActionCallback( function() {next(null, doc);});
 
 			popup.setAction1Button($L("Save"));
-			popup.setAction1Callback(
-				(function() {
-					this.saveDoc(doc);
-					next(null, doc);
-				}).bind(this)
-			);
+			popup.setAction1Callback( this.saveDoc.bind(this, doc, next) );
 
 			popup.setCancelCallback(
 				(function() {
@@ -882,26 +942,51 @@ enyo.kind({
 
 	designDocument: function(inData) {
 		this.trace();
-		// send all files being edited to the designer, this will send code to designerFrame
-		this.syncEditedFiles(inData.projectData);
-		// then load palette and inspector, and tune serialiser behavior sends option data to designerFrame
-		this.$.deimos.loadDesignerUI(
-			inData,
+		var deimos = this.$.deimos;
+		var project = inData.projectData ;
+		var todo = [];
+
+		if ( deimos.isDesignerBroken() ) {
+			// reload designer
+			todo.push( deimos.projectSelected.bind(deimos, project) );
+		}
+
+		// send all files being edited to the designer, this
+		// will send code to designerFrame
+		todo.push( this.syncEditedFiles.bind(this,inData.projectData) );
+
+		// then load palette and inspector, and tune serialiser
+		// behavior sends option data to designerFrame and render main
+		// kind
+		todo.push( deimos.loadDesignerUI.bind(deimos, inData) );
+
+		todo.push((function(next) {
+			// switch to Deimos editor
+			this.showDeimosPanel();
+			// update an internal variable
+			this.activeDocument.setCurrentIF('designer');
+			next();
+		}).bind(this));
+
+		async.series(
+			todo,
 			(function(err) {
-				this.trace("designDocument -> loadDesignerUI done, err is ",err);
+				if (err) {
+					this.trace("designDocument -> loadDesignerUI done, err is ",err);
+					this.doError({msg: "designDocument ended with error", err: err});
+				}
+				else {
+					this.trace("designDocument done");
+				}
 			}).bind(this)
 		);
-		// switch to Deimos editor
-		this.showDeimosPanel();
-		// update an internal variable
-		this.activeDocument.setCurrentIF('designer');
 	},
 
 	/**
 	 * Update code running in designer
 	 * @param {Ares.Model.Project} project, backbone object defined in WorkspaceData.js
 	 */
-	syncEditedFiles: function(project) {
+	syncEditedFiles: function(project, next) {
 		var projectName = project.getName();
 		this.trace("update all edited files on project", projectName);
 
@@ -910,14 +995,20 @@ enyo.kind({
 				&& model.getProjectData().getName() === projectName ;
 		}
 		// backbone collection
-		Ares.Workspace.files.filter(isProjectFile).forEach(this.updateCode, this);
+		var tasks = [];
+		var pushTask = function(doc) {
+			tasks.push( this.updateCode.bind(this, doc) );
+		} ;
+		Ares.Workspace.files.filter(isProjectFile).forEach(pushTask, this);
+
+		async.series(tasks, next);
 	},
 
 	/**
 	 *
 	 * @param {Ares.Model.File} inDoc is a backbone object defined in FileData.js
 	 */
-	updateCode: function(inDoc) {
+	updateCode: function(inDoc, next) {
 		var filename = inDoc.getFile().path,
 			aceSession = inDoc.getAceSession(),
 			code = aceSession && aceSession.getValue();
@@ -925,7 +1016,7 @@ enyo.kind({
 		var projectName = inDoc.getProjectData().getName();
 		this.trace('code update on file', filename,' project ' , projectName);
 
-		this.$.deimos.syncFile(projectName, filename, code);
+		this.$.deimos.syncFile(projectName, filename, code, next);
 	},
 
 	undo: function(next) {
@@ -970,6 +1061,10 @@ enyo.kind({
 			{name: "saveProjectButton", value: "saveProjectDocs", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
 				{content: $L("Save Project")}
+			]},
+			{name: "saveAllDocsButton", value: "saveAllDocs", classes:"aresmenu-button", components: [
+				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
+				{content: $L("Save all")}
 			]},
 			{classes: "onyx-menu-divider"},
 			{name: "closeButton", value: "requestCloseCurrentDoc", classes:"aresmenu-button", components: [
