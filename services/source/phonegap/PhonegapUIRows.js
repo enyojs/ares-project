@@ -48,7 +48,7 @@ enyo.kind({
 	 */
 	getProjectInstance: function() {
 		var provider = this.getPhonegapProvider();
-		return provider.getSelectedProject()
+		return provider.getSelectedProject();
 	},
 
 	/**
@@ -393,24 +393,34 @@ enyo.kind({
 	kind: "Phonegap.ProjectProperties.Row",
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
-	components: [{
-		name: "label",
-		classes: "ares-project-properties-drawer-row-label"
+	components: [
+		{
+			name: "label",
+			classes: "ares-project-properties-drawer-row-label"
 		},
 		{
 			kind: "onyx.InputDecorator",
 			classes: "ares-project-properties-input-medium",
-			components: [{
+			components: [
+				{
 					kind: "onyx.Input",
 					name: "configurationInput",
 					onchange: "updateConfigurationValue"
 				}
 			]
 		},
-		{name: "addButton", kind: "onyx.IconButton", src: "$services/assets/images/add-icon-25x25.png", ontap: "addAccessRow"},
-		{name: "AccessRowsContainer", kind: "FittableColumns"}
+		{
+			name: "addButton",
+			kind: "onyx.IconButton",
+			src: "$services/assets/images/add-icon-25x25.png",
+			ontap: "addAccessRow"
+		},
+		{
+			name: "AccessRowsContainer",
+			kind: "FittableColumns"
+		}
 	],
-		
+
 
 	/**
 	 * @private
@@ -460,8 +470,8 @@ enyo.kind({
 					//if the row instance doesn't existe create it 
 					this.addAccessRow().set("value", config.access[key]);
 
-				}							
-			} 		
+				}
+			}
 		}
 	},
 	/** @public */
@@ -471,13 +481,13 @@ enyo.kind({
 	
 	/** @private */
 	addAccessRow: function() {
-		var newComponent = 	this.container.createComponent(
-			{kind: "Phonegap.ProjectProperties.AddedAccessRow"}, 
+		var newComponent = this.container.createComponent(
+			{kind: "Phonegap.ProjectProperties.AddedAccessRow"},
 			{addBefore: this.container.$.icon}
 		);
 		this.container.render();
 
-		return newComponent;	
+		return newComponent;
 	}
 	
 });
@@ -498,7 +508,7 @@ enyo.kind({
 					kind: "onyx.Input",
 					name: "configurationInput",
 					onchange: "updateConfigurationValue"
-				}				
+				}
 			]
 		},
 		{name: "deleteButton", kind: "onyx.IconButton", parentRowName: "", src: "$services/assets/images/delete-icon-25x25.png", ontap: "deleteAccessRow"}
@@ -524,7 +534,7 @@ enyo.kind({
 	 * @private
 	 */
 	updateConfigurationValue: function (inSender, inValue) {
-		this.setValue(inSender.getValue());		
+		this.setValue(inSender.getValue());
 		return true;
 	},
 
