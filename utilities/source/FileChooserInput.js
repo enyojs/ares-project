@@ -46,7 +46,6 @@ enyo.kind({
 		this.$.pathInputValue.setValue(this.pathValue);
 	},
 	statusChanged: function(){
-		this.log("this.status : ", this.status);
 		if(this.status){
 			this.$.pathInputButtonBroken.setShowing(false);
 		} else{
