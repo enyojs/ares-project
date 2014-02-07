@@ -1,4 +1,3 @@
-/* jshint indent: false */ // TODO: ENYO-3311
 /* jshint node:true */
 /* global it */
 /**
@@ -19,208 +18,208 @@ module.exports = FsSpec;
 
 function FsSpec(argv) {
 
-var log = npmlog;
+	var log = npmlog;
 
-log.info("fs.spec.js", "FsSpec()");
+	log.info("fs.spec.js", "FsSpec()");
 
-argv.port = argv.port || 0;
-argv.name = argv.name || path.basename(argv.filesystem);
+	argv.port = argv.port || 0;
+	argv.name = argv.name || path.basename(argv.filesystem);
 
-log.verbose("fs.spec.js", "argv:", argv);
+	log.verbose("fs.spec.js", "argv:", argv);
 
-var Fs = require(argv.filesystem);
-var myFs;
+	var Fs = require(argv.filesystem);
+	var myFs;
 
-function get(prefix, path, query, next) {
-	var reqOptions = {
-		hostname: "127.0.0.1",
-		port: argv.port,
-		method: 'GET',
-		headers: {},
-		path: path
-	};
+	function get(prefix, path, query, next) {
+		var reqOptions = {
+			hostname: "127.0.0.1",
+			port: argv.port,
+			method: 'GET',
+			headers: {},
+			path: path
+		};
 
-	if (query && query._method) {
-		reqOptions.headers['x-http-method-override'] = query._method;
-		delete query._method;
-	}
-
-	if (argv.auth) {
-		query.auth = JSON.stringify(argv.auth);
-	}
-
-	if (query && Object.keys(query).length > 0) {
-		reqOptions.path += '?' + querystring.stringify(query);
-	}
-
-	call(prefix, reqOptions, undefined /*reqBody*/, undefined /*reqParts*/, next);
-}
-
-function post(prefix, path, query, content, contentType, next) {
-	var reqBody, reqParts;
-	var reqOptions = {
-		hostname: "127.0.0.1",
-		port: argv.port,
-		method: 'POST',
-		headers: {},
-		path: path
-	};
-
-	if (query && query._method) {
-		reqOptions.headers['x-http-method-override'] = query._method;
-		delete query._method;
-	}
-
-	if (contentType) {
-		if (!contentType instanceof String) {
-			throw new Error("bad parameter: missing contentType");
+		if (query && query._method) {
+			reqOptions.headers['x-http-method-override'] = query._method;
+			delete query._method;
 		}
-		reqOptions.headers['content-type'] = contentType;
 
-		if (contentType.match(/^text\/plain/)) {
-			if (!content instanceof String) {
-				throw new Error("bad parameter: not a String");
-			}
-			reqBody = content;
-		} else if (contentType.match(/^application\/xml/)) {
-			if (!content instanceof String) {
-				throw new Error("bad parameter: not a String");
-			}
-			reqBody = content;	// XXX or convert an Object to XML
-		} else if (contentType.match(/^application\/json/)) {
-			if (!content instanceof Object) {
-				throw new Error("bad parameter: not an Object");
-			}
-			reqBody = JSON.stringify(content);
-		} else if (contentType === 'application/x-www-form-urlencoded') {
-			query = query || {};
-			if (content) {
-				if (!Buffer.isBuffer(content)) {
-					throw new Error("bad parameter: not a Buffer");
-				}
-				query.content = content.toString('base64');
-			}	
-			if (Object.keys(query).length > 0) {
-				reqBody = querystring.stringify(query);
-			}
-		} else if (contentType.match(/multipart\/form-data/)) {
-			reqParts = content;
-		} else if (content && contentType instanceof String) {
-			if (contentType) {
-				reqOptions.headers['x-content-type'] = contentType; // original value
-			}
-			reqOptions.headers['content-type'] = 'text/plain; charset=x-binary';
-			reqBody = content.toString('x-binary'); // do not decode/encode
+		if (argv.auth) {
+			query.auth = JSON.stringify(argv.auth);
 		}
+
+		if (query && Object.keys(query).length > 0) {
+			reqOptions.path += '?' + querystring.stringify(query);
+		}
+
+		call(prefix, reqOptions, undefined /*reqBody*/, undefined /*reqParts*/, next);
 	}
 
-	if (argv.auth) {
-		query.auth = JSON.stringify(argv.auth);
-	}
+	function post(prefix, path, query, content, contentType, next) {
+		var reqBody, reqParts;
+		var reqOptions = {
+			hostname: "127.0.0.1",
+			port: argv.port,
+			method: 'POST',
+			headers: {},
+			path: path
+		};
 
-	if (query && Object.keys(query).length > 0) {
-		reqOptions.path += '?' + querystring.stringify(query);
-	}
+		if (query && query._method) {
+			reqOptions.headers['x-http-method-override'] = query._method;
+			delete query._method;
+		}
 
-	call(prefix, reqOptions, reqBody, reqParts, next);
-}
-
-function call(prefix, reqOptions, reqBody, reqParts, next) {
-	log.verbose(prefix, "reqOptions="+util.inspect(reqOptions));
-	log.verbose(prefix, "reqBody="+util.inspect(reqBody));
-	var req = http.request(reqOptions, function(res) {
-		var bufs = [];
-		res.on('data', function(chunk){
-			bufs.push(chunk);
-		});
-		res.on('end', function() {
-			var mime = res.headers['content-type'];
-			var data = {
-				statusCode: res.statusCode,
-				headers: res.headers
-			};
-			if (mime) {
-				data.mime = mime;
-				data.buffer = Buffer.concat(bufs);
-				if (mime.match('^application/json')) {
-					data.json = JSON.parse(data.buffer.toString());
-				}
-				if (mime.match('^text/plain')) {
-					data.text = data.buffer.toString();
-				}
+		if (contentType) {
+			if (!contentType instanceof String) {
+				throw new Error("bad parameter: missing contentType");
 			}
-			log.verbose(prefix, "response: "+util.inspect(data));
-			if (data.statusCode < 200 || data.statusCode >= 300) {
-				next(data);
-			} else {
-				next(null, data);
+			reqOptions.headers['content-type'] = contentType;
+
+			if (contentType.match(/^text\/plain/)) {
+				if (!content instanceof String) {
+					throw new Error("bad parameter: not a String");
+				}
+				reqBody = content;
+			} else if (contentType.match(/^application\/xml/)) {
+				if (!content instanceof String) {
+					throw new Error("bad parameter: not a String");
+				}
+				reqBody = content;	// XXX or convert an Object to XML
+			} else if (contentType.match(/^application\/json/)) {
+				if (!content instanceof Object) {
+					throw new Error("bad parameter: not an Object");
+				}
+				reqBody = JSON.stringify(content);
+			} else if (contentType === 'application/x-www-form-urlencoded') {
+				query = query || {};
+				if (content) {
+					if (!Buffer.isBuffer(content)) {
+						throw new Error("bad parameter: not a Buffer");
+					}
+					query.content = content.toString('base64');
+				}
+				if (Object.keys(query).length > 0) {
+					reqBody = querystring.stringify(query);
+				}
+			} else if (contentType.match(/multipart\/form-data/)) {
+				reqParts = content;
+			} else if (content && contentType instanceof String) {
+				if (contentType) {
+					reqOptions.headers['x-content-type'] = contentType; // original value
+				}
+				reqOptions.headers['content-type'] = 'text/plain; charset=x-binary';
+				reqBody = content.toString('x-binary'); // do not decode/encode
 			}
-		});
-		res.on('close', function(err) {
-			console.dir(err);
-			next(err);
-		});
-	});
-	if (reqBody) {
-		req.write(reqBody);
+		}
+
+		if (argv.auth) {
+			query.auth = JSON.stringify(argv.auth);
+		}
+
+		if (query && Object.keys(query).length > 0) {
+			reqOptions.path += '?' + querystring.stringify(query);
+		}
+
+		call(prefix, reqOptions, reqBody, reqParts, next);
 	}
-	if (reqParts) {
-		var boundaryKey = generateBoundary();
-		req.setHeader('Content-Type', 'multipart/form-data; boundary="'+boundaryKey+'"');
-		if (Array.isArray(reqParts)) {
-			reqParts.forEach(function(part) {
-				sendOnePart(req, part.name, part.filename, part.input, boundaryKey);
+
+	function call(prefix, reqOptions, reqBody, reqParts, next) {
+		log.verbose(prefix, "reqOptions="+util.inspect(reqOptions));
+		log.verbose(prefix, "reqBody="+util.inspect(reqBody));
+		var req = http.request(reqOptions, function(res) {
+			var bufs = [];
+			res.on('data', function(chunk){
+				bufs.push(chunk);
 			});
-		} else {
-			sendOnePart(req, reqParts.name, reqParts.filename, reqParts.input, boundaryKey);
+			res.on('end', function() {
+				var mime = res.headers['content-type'];
+				var data = {
+					statusCode: res.statusCode,
+					headers: res.headers
+				};
+				if (mime) {
+					data.mime = mime;
+					data.buffer = Buffer.concat(bufs);
+					if (mime.match('^application/json')) {
+						data.json = JSON.parse(data.buffer.toString());
+					}
+					if (mime.match('^text/plain')) {
+						data.text = data.buffer.toString();
+					}
+				}
+				log.verbose(prefix, "response: "+util.inspect(data));
+				if (data.statusCode < 200 || data.statusCode >= 300) {
+					next(data);
+				} else {
+					next(null, data);
+				}
+			});
+			res.on('close', function(err) {
+				console.dir(err);
+				next(err);
+			});
+		});
+		if (reqBody) {
+			req.write(reqBody);
 		}
-		sendClosingBoundary(req, boundaryKey);
-	} else {
-		req.end();
+		if (reqParts) {
+			var boundaryKey = generateBoundary();
+			req.setHeader('Content-Type', 'multipart/form-data; boundary="'+boundaryKey+'"');
+			if (Array.isArray(reqParts)) {
+				reqParts.forEach(function(part) {
+					sendOnePart(req, part.name, part.filename, part.input, boundaryKey);
+				});
+			} else {
+				sendOnePart(req, reqParts.name, reqParts.filename, reqParts.input, boundaryKey);
+			}
+			sendClosingBoundary(req, boundaryKey);
+		} else {
+			req.end();
+		}
+		req.on('error', next);
 	}
-	req.on('error', next);
-}
 
-function generateBoundary() {
-	// This generates a 50 character boundary similar to those used by Firefox.
-	// They are optimized for boyer-moore parsing.
-	var boundary = '--------------------------';
-	for (var i = 0; i < 24; i++) {
-		boundary += Math.floor(Math.random() * 10).toString(16);
+	function generateBoundary() {
+		// This generates a 50 character boundary similar to those used by Firefox.
+		// They are optimized for boyer-moore parsing.
+		var boundary = '--------------------------';
+		for (var i = 0; i < 24; i++) {
+			boundary += Math.floor(Math.random() * 10).toString(16);
+		}
+		return boundary;
 	}
-	return boundary;
-}
 
-function sendOnePart(req, name, filename, input, boundaryKey, contentTransferEncoding) {
-	req.write('--' + boundaryKey + '\r\n' +
-		// use your file's mime type here, if known
-		'Content-Type: application/octet-stream\r\n' +
-		// "name" is the name of the form field
-		// "filename" is the name of the original file
-		'Content-Disposition: form-data; name="' + name + '"; filename="' + filename + '"\r\n');
-	contentTransferEncoding = false /*'base64'*/;
-	if (contentTransferEncoding) {
-		req.write('Content-Transfer-Encoding: ' + contentTransferEncoding + '\r\n');
+	function sendOnePart(req, name, filename, input, boundaryKey, contentTransferEncoding) {
+		req.write('--' + boundaryKey + '\r\n' +
+				  // use your file's mime type here, if known
+				  'Content-Type: application/octet-stream\r\n' +
+				  // "name" is the name of the form field
+				  // "filename" is the name of the original file
+				  'Content-Disposition: form-data; name="' + name + '"; filename="' + filename + '"\r\n');
+		contentTransferEncoding = false /*'base64'*/;
+		if (contentTransferEncoding) {
+			req.write('Content-Transfer-Encoding: ' + contentTransferEncoding + '\r\n');
+			req.write('\r\n');
+			req.write(input.toString(contentTransferEncoding));
+		} else {
+			req.write('\r\n');
+			req.write(input);
+		}
 		req.write('\r\n');
-		req.write(input.toString(contentTransferEncoding));
-	} else {
-		req.write('\r\n');
-		req.write(input);
 	}
-	req.write('\r\n');
-}
 
-function sendClosingBoundary(req, boundaryKey) {
-	req.end('--' + boundaryKey + '--');
-}
-
-function checkBuffer(buf, ref) {
-	for (var i = 0; i < ref.length; ++i) {
-		should.exist(buf[i]);
-		should.exist(ref[i]);
-		buf[i].should.equal(ref[i]);
+	function sendClosingBoundary(req, boundaryKey) {
+		req.end('--' + boundaryKey + '--');
 	}
-}
+
+	function checkBuffer(buf, ref) {
+		for (var i = 0; i < ref.length; ++i) {
+			should.exist(buf[i]);
+			should.exist(ref[i]);
+			buf[i].should.equal(ref[i]);
+		}
+	}
 
 	it("t0. should start", function(done) {
 		myFs = new Fs(argv, function(err, service) {
@@ -302,7 +301,7 @@ function checkBuffer(buf, ref) {
 			}
 		], done);
 	});
-	
+
 	it("t1.1. should have an empty root-level folder (depth=0)", function(done) {
 		get("t1.1", '/id/' + rootId, {_method: "PROPFIND", depth: 0} /*query*/, function(err, res) {
 			should.not.exist(err);
@@ -316,7 +315,7 @@ function checkBuffer(buf, ref) {
 			done();
 		});
 	});
-	
+
 	it("t1.2. should have an empty root-level folder (depth=1)", function(done) {
 		get("t1.2", '/id/' + rootId, {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
 			should.not.exist(err);
@@ -333,7 +332,7 @@ function checkBuffer(buf, ref) {
 			done();
 		});
 	});
-	
+
 	it("t2.1.0. should create a folder", function(done) {
 		post("t2.1.0", '/id/' + rootId, {_method: "MKCOL",name: "toto"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
 			should.not.exist(err);
@@ -427,7 +426,7 @@ function checkBuffer(buf, ref) {
 			done();
 		});
 	});
-	
+
 	var titiId;
 
 	it("t2.5. should create a sub-folder", function(done) {
@@ -750,7 +749,7 @@ function checkBuffer(buf, ref) {
 		});
 	});
 
-	var iconId, 
+	var iconId,
 	    iconBuffer = fs.readFileSync(path.join(__dirname, '..', '..', 'ares', 'assets', 'images', 'ares_48x48.ico'));
 	it("t4.8. create & compare a binary file (using 'multipart/form-data')", function(done) {
 		var content = {
@@ -815,7 +814,7 @@ function checkBuffer(buf, ref) {
 		});
 	});
 
-	 var tata1Id;
+	var tata1Id;
 
 	it("t6.1. should copy file in the same folder, as a new file", function(done) {
 		post("t6.1", '/id/' + tataId, {_method: "COPY", name: "tata.1"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
@@ -878,7 +877,7 @@ function checkBuffer(buf, ref) {
 					should.exist(res.buffer);
 					contentStr = res.buffer.toString();
 					contentStr.should.equal(contentStr);
-					
+
 					done();
 				});
 			});
@@ -1006,7 +1005,7 @@ function checkBuffer(buf, ref) {
 		});
 	});
 
-	 var toto3Id;
+	var toto3Id;
 
 	it("t7.5. should move file into another folder", function(done) {
 		post("t7.5/1", '/id/' + rootId, {_method: "MKCOL",name: "toto.3"} /*query*/, undefined /*content*/, undefined /*contentType*/, function(err, res) {
@@ -1076,7 +1075,7 @@ function checkBuffer(buf, ref) {
 					should.exist(res);
 					should.exist(res.statusCode);
 					res.statusCode.should.equal(201); // Created
-					
+
 					get("t7.6/4", '/file' + rootPath + '/toto.4/titi', {_method: "PROPFIND", depth: 1} /*query*/, function(err, res) {
 						should.not.exist(err);
 						should.exist(res);
@@ -1087,7 +1086,7 @@ function checkBuffer(buf, ref) {
 						res.json.isDir.should.equal(true);
 						should.exist(res.json.children);
 						res.json.children.length.should.equal(nbChildren);
-						
+
 						done();
 					});
 				});

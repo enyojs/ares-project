@@ -1,6 +1,4 @@
-/* jshint indent: false */ // TODO: ENYO-3311
-
-/* global ares, Phonegap */
+/*global ares, Phonegap, enyo */
 
 /**
  * UI: Phonegap pane in the ProjectProperties popup
@@ -8,8 +6,8 @@
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.PlatformBuildStatus",
-	kind: "onyx.IconButton",	
-	ontap: "showStatusMessage",	
+	kind: "onyx.IconButton",
+	ontap: "showStatusMessage",
 	published: {
 		platform: null,
 		status: null
@@ -18,40 +16,40 @@ enyo.kind({
 	/**
 	 * Update the image for the platform IconButton depending on the status of the related platform
 	 * described in buildStatusData.
-	 * 
+	 *
 	 * @private
 	 */
 	statusChanged: function() {
 
 		if (this.status === "complete") {
-					
+
 			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-complete-32x32.png");
-			return ; 
+			return;
 		}
 
-		if (this.status === "error"){
+		if (this.status === "error") {
 			this.show();
 			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-error-32x32.png");
-			return ;
+			return;
 		}
-		
+
 		this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
-		
+
 	}
 });
 
 /**
  * The widget "Build status", show the building state of the application
- * for each platform.  
+ * for each platform.
  */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.BuildStatus",
 	kind: "FittableRows",
 	buildStatusData: {},
 	published: {
-		appId: "",		
+		appId: "",
 		phongapUrl: "https://build.phonegap.com",
-		provider: {}, 
+		provider: {},
 		selectedPlatform: null
 	},
 	events: {
@@ -59,56 +57,54 @@ enyo.kind({
 	},
 	handlers: {
 		onUpdateStatusMessage: "updateDownloadMessageContent"
-	}, 
-	components: [
-		{
-			name: "buildStatusContainer", kind: "FittableRows", classes: "ares-project-properties-build-status-container",
-			components: [
-				{	
-					name: "platformIconContainer",
-					classes:"ares-project-properties-platform-icon-container",
-					kind: "FittableColumns",					
-				},				
+	},
+	components: [{
+		name: "buildStatusContainer",
+		kind: "FittableRows",
+		classes: "ares-project-properties-build-status-container",
+		components: [{
+			name: "platformIconContainer",
+			classes: "ares-project-properties-platform-icon-container",
+			kind: "FittableColumns",
+		},
 
-				{ name: "downloadStatus", kind: "Phonegap.ProjectProperties.DownloadStatus" },
-				{
-					name: "messageContainer",
-					classes: "ares-project-properties-status-message-container",
-					showing: false,
-					components: [
-						{
-							name: "hideStatusContainer",
-							kind: "onyx.IconButton",
-							src: "$project-view/assets/images/close-button-16x16.png",
-							classes: "ares-project-properties-hide-status-button",
-							ontap:"hideMessageContainer"
-						},				
-						{
-							name: "statusMessage",
-							classes: "ares-project-properties-status-message"
-						}
-					]
-				},
-				{
-					kind: "FittableColumns",
-					style: "height: 32px; position: relative; top:-6em;",
-					components: [
-						{
-							name:"separatorForDownloadButton"
-						},
-						{
-							name: "downloadButton",
-							kind: "onyx.IconButton",
-							src: "$services/assets/images/download-icon.png",
-							showing: false,
-							ontap: "downloadPackage"
-						}
-					]
-				}
-									
-			]
+		{
+			name: "downloadStatus",
+			kind: "Phonegap.ProjectProperties.DownloadStatus"
+		},
+		{
+			name: "messageContainer",
+			classes: "ares-project-properties-status-message-container",
+			showing: false,
+			components: [{
+				name: "hideStatusContainer",
+				kind: "onyx.IconButton",
+				src: "$project-view/assets/images/close-button-16x16.png",
+				classes: "ares-project-properties-hide-status-button",
+				ontap: "hideMessageContainer"
+			},
+			{
+				name: "statusMessage",
+				classes: "ares-project-properties-status-message"
+			}]
+		},
+		{
+			kind: "FittableColumns",
+			style: "height: 32px; position: relative; top:-6em;",
+			components: [{
+				name: "separatorForDownloadButton"
+			},
+			{
+				name: "downloadButton",
+				kind: "onyx.IconButton",
+				src: "$services/assets/images/download-icon.png",
+				showing: false,
+				ontap: "downloadPackage"
+			}]
 		}
-	],
+
+		]
+	}],
 	/**@private*/
 	create: function() {
 
@@ -122,43 +118,41 @@ enyo.kind({
 	/**
 	 * Create the IconButtons displaying the build state of the application
 	 * for all platforms defined in the object {Phonegap.ProjectProperties.downloadStatus}
-	 * 
+	 *
 	 * @private
 	 */
 	createIconButtons: function() {
 
-		for (var i = 0, length = Phonegap.UIConfiguration.platformDrawersContent.length; i < length ; i++) {
+		for (var i = 0, length = Phonegap.UIConfiguration.platformDrawersContent.length; i < length; i++) {
 			var p = Phonegap.UIConfiguration.platformDrawersContent[i].id;
-			this.$.platformIconContainer.createComponent(
-				{
-					name: p + "Decorator", 
-					classes: "ares-project-properties-build-status-icon",
-					components: [						
-						{
-							name: p + "Button", 
-							kind: "Phonegap.ProjectProperties.PlatformBuildStatus", 
-							platform: p
-						}
-					]
-				}, 
-				{owner: this}
-			);			
+			this.$.platformIconContainer.createComponent({
+				name: p + "Decorator",
+				classes: "ares-project-properties-build-status-icon",
+				components: [{
+					name: p + "Button",
+					kind: "Phonegap.ProjectProperties.PlatformBuildStatus",
+					platform: p
+				}]
+			},
+			{
+				owner: this
+			});
 		}
 	},
 
 	/**
-	 * Charge the icon showing the build status of the application of a a given platform depending on 
+	 * Charge the icon showing the build status of the application of a a given platform depending on
 	 * its status. the status is checked from the "buildStatusData" object.
 	 * By clicking on the icon, the status message is displayed.
-	 * 
-	 * @private	 
+	 *
+	 * @private
 	 */
-	updateBuildStatusData: function(inBuildStatus){
+	updateBuildStatusData: function(inBuildStatus) {
 		this.buildStatusData = inBuildStatus;
 		var pendingApplication = false;
-		
+
 		//Check if there is a pending build.
-		for(var key1 in this.buildStatusData && this.buildStatusData.status) {
+		for (var key1 in this.buildStatusData && this.buildStatusData.status) {
 			if (this.buildStatusData.status[key1] === "pending") {
 				pendingApplication = true;
 			}
@@ -167,25 +161,27 @@ enyo.kind({
 		//If there is a pending build, another buildStatus Request is sent after 600 ms timeout.
 		if (pendingApplication) {
 			enyo.job("updateBuildStatus", function() {
-				this.sendBuildStatusRequest(); 
-			}.bind(this), 3000);			
+				this.sendBuildStatusRequest();
+			}.bind(this), 3000);
 		}
 
-		// Get only the Enyo control that have the "platform" attribute 
+		// Get only the Enyo control that have the "platform" attribute
 		// => {Phonegap.ProjectProperties.PlatformBuildStatus} instance
-		for(var key2 in this.$){
+		for (var key2 in this.$) {
 
 			var platform = this.$[key2].platform;
 			var status = this.buildStatusData && this.buildStatusData.status[platform];
-			
+
 			if (platform !== undefined) {
 				this.$[key2].setStatus(status || "notAvailable");
 			}
 		}
 
 		//Update to Status container if a platform is selected.
-		if(this.selectedPlatform !== null) {
-			this.showStatusMessage({platform: this.selectedPlatform});
+		if (this.selectedPlatform !== null) {
+			this.showStatusMessage({
+				platform: this.selectedPlatform
+			});
 		}
 	},
 
@@ -194,8 +190,8 @@ enyo.kind({
 	 * @private
 	 */
 	sendBuildStatusRequest: function() {
-		
-		if(this.appId === "" || this.appId === undefined){
+
+		if (this.appId === "" || this.appId === undefined) {
 			this.updateBuildStatusData(null);
 		} else {
 			this.provider.getAppData(this.appId, enyo.bind(this, this.getBuildStatusData));
@@ -210,7 +206,7 @@ enyo.kind({
 
 		this.$.statusMessage.setContent(this.$.downloadStatus.getDownloadStatus(this.selectedPlatform));
 		this.$.statusMessage.show();
-		this.updateDownloadMessageDisplay(this.selectedPlatform);		
+		this.updateDownloadMessageDisplay(this.selectedPlatform);
 
 		//stop the propagation of the bubble event
 		return true;
@@ -232,14 +228,14 @@ enyo.kind({
 	 * @private
 	 */
 	removeHightlightIconButton: function() {
-		for(var i = 0, length = Phonegap.UIConfiguration.platformDrawersContent.length; i < length ; i++) {
+		for (var i = 0, length = Phonegap.UIConfiguration.platformDrawersContent.length; i < length; i++) {
 			var platform = Phonegap.UIConfiguration.platformDrawersContent[i].id;
-			this.$[platform + "Decorator"].removeClass("ares-project-properties-buildStatus-icon-highlight");			
+			this.$[platform + "Decorator"].removeClass("ares-project-properties-buildStatus-icon-highlight");
 		}
 	},
 
 	/**
-	 * 
+	 *
 	 * @param  {String} inPlatform Mobile platform supported by Phonegap.
 	 * @private
 	 */
@@ -252,7 +248,7 @@ enyo.kind({
 	},
 
 	/**@private*/
-	showStatusMessage: function(inSender){
+	showStatusMessage: function(inSender) {
 
 		this.setSelectedPlatform(inSender.platform);
 		this.$.messageContainer.show();
@@ -263,70 +259,69 @@ enyo.kind({
 		if (status === "complete") {
 			this.updateDownloadMessageContent();
 			this.updateDownloadMessageDisplay(inSender.platform);
-			return true;			 
+			return true;
 		}
 
 		this.$.downloadButton.hide();
 		this.bubble("onHideMessageContainer");
 
-		if (status === "skip"){			
+		if (status === "skip") {
 			this.$.statusMessage.setContent("Build skipped for this platform");
 			return true;
 		}
-		
+
 		if (status === "pending") {
 			this.$.statusMessage.setContent("Build in progress");
-			return true;			
+			return true;
 		}
 
 		if (status === "error") {
-			this.$.statusMessage.setContent("Error: " + this.buildStatusData.error[inSender.platform] );
+			this.$.statusMessage.setContent("Error: " + this.buildStatusData.error[inSender.platform]);
 			return true;
 		}
-		
+
 		this.$.statusMessage.setContent("Application not built yet");
 
 		return true;
 
-			
 	},
 
 	/**
 	 * Listener to launch the download request form the Phonegap Build service manager.
-	 * @param  {Object} inSender 
-	 * @param  {Object} inEvent  
+	 * @param  {Object} inSender
+	 * @param  {Object} inEvent
 	 * @private
 	 */
 	downloadPackage: function(inSender, inEvent) {
 		this.provider.downloadPackage(this.provider.getSelectedProject(), this.selectedPlatform, this.buildStatusData, enyo.bind(this, this.getPackage));
 
 		//set the download status to "Download on progress"
-		this.$.downloadStatus.setDownloadStatus(this.selectedPlatform, 2);		
+		this.$.downloadStatus.setDownloadStatus(this.selectedPlatform, 2);
 	},
 
 	/**
 	 * Callback used in the function "downloadPackage()"" in "Build.js"
 	 * Update the status message to show the current status of the download request.
-	 * 
-	 * @param  {Object} err       error object
+	 *
+	 * @param  {Object} err error object
 	 * @private
 	 */
 	getPackage: function(err) {
-		if(err) {
+		if (err) {
 			//set the download status to "Download failed"
 			this.$.downloadStatus.setDownloadStatus(this.selectedPlatform, 0);
 		} else {
 			//set the download status to "Download complete"
 			this.$.downloadStatus.setDownloadStatus(this.selectedPlatform, 1);
 		}
-	},	
+	},
 
 	/**@private*/
 	hideMessageContainer: function() {
 		//Unselect the focused platform
 		this.setSelectedPlatform(undefined);
 		this.removeHightlightIconButton();
-		
+
 		this.$.messageContainer.hide();
 		this.$.downloadButton.hide();
 
@@ -336,24 +331,27 @@ enyo.kind({
 	/**@private*/
 	hideMessageContent: function() {
 		this.$.downloadButton.hide();
-	}, 
+	},
 
 	/**@private*/
-	appIdChanged: function(){
-		this.sendBuildStatusRequest();		
+	appIdChanged: function() {
+		this.sendBuildStatusRequest();
 	},
 
 	/**
-	 * Callback function to initialize the "buildStatusData" object. 
-	 * 
-	 * @param  {Object} err               error object
+	 * Callback function to initialize the "buildStatusData" object.
+	 *
+	 * @param  {Object} err				  error object
 	 * @param  {Object} inBuildStatusData Object returned by Phonegap build, it contains several informations
-	 *                                    about the built application.
+	 *									  about the built application.
 	 * @private
 	 */
-	getBuildStatusData: function (err, inBuildStatusData) {
+	getBuildStatusData: function(err, inBuildStatusData) {
 		if (err) {
-			this.doError({msg: err.toString(), err: err});
+			this.doError({
+				msg: err.toString(),
+				err: err
+			});
 		} else {
 			this.updateBuildStatusData(inBuildStatusData.user);
 		}
@@ -377,33 +375,32 @@ enyo.kind({
 
 	/**
 	 * Set the download status for a platform defined in {this.downloadStatus}.
-	 * 
-	 * @param {String} inPlatform       platform defined in {this.downloadStatus}
+	 *
+	 * @param {String} inPlatform platform defined in {this.downloadStatus}
 	 * @param {integer} inDownloadStatus code status: 0 => failed, 1 => complete, other => on progress
 	 * @public
 	 */
 	setDownloadStatus: function(inPlatform, inDownloadStatus) {
 		/*
-			FIXME: ENYO-3687
-			This need further work to make sure that what we store in backbone is atomic data (not references/arrays)
-			However we'll need to revise the backbone store for Phonegap build as we transform it into a plugin
-		*/
-		
-		this.provider.getSelectedProject().getDownloadStatus()[inPlatform] = inDownloadStatus === 1 ? "Download complete": 
-		inDownloadStatus === 0 ? "Download failed" : "Download in progress";
+		 FIXME: ENYO-3687
+		 This need further work to make sure that what we store in backbone is atomic data (not references/arrays)
+		 However we'll need to revise the backbone store for Phonegap build as we transform it into a plugin
+		 */
 
-		this.bubble("onUpdateStatusMessage");	
+		this.provider.getSelectedProject().getDownloadStatus()[inPlatform] = inDownloadStatus === 1 ? "Download complete" : inDownloadStatus === 0 ? "Download failed" : "Download in progress";
+
+		this.bubble("onUpdateStatusMessage");
 	},
 
 	/**
 	 * Get the download status value by platform.
-	 * 
+	 *
 	 * @param  {String} inPlatform [description]
 	 * @return {String} status message
 	 * @public
 	 */
 	getDownloadStatus: function(inPlatform) {
 		return this.provider.getSelectedProject().getDownloadStatus()[inPlatform];
-	}	
+	}
 
 });

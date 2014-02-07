@@ -1,4 +1,4 @@
-/* jshint indent: false */ // TODO: ENYO-3311
+/*global enyo */
 
 /**
  * This "abstract" kind defines the interface needed for the
@@ -85,16 +85,16 @@ enyo.kind({
 		{classes: "inspector-field-caption", name: "title"},
 		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
 	],
-	
+
 	//* @public
-	
+
 	//* Facade for _enyo.Input.focus()_
 	focus: function() {
 		this.$.value.focus();
 	},
-	
+
 	//* @protected
-	
+
 	//* Stop extraneous activate event from being fired when box is initially checked
 	handleChange: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
@@ -116,18 +116,18 @@ enyo.kind({
 	name: "Inspector.Config.Event",
 	kind: "Inspector.Config.IF",
 	// events and published are defined by the base kind
-	
+
 	// TODO: YDM the style above in MenuDecorator should be replaced by a CSS class - Potential issue between less and css files
-	
+
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
 		{kind: "onyx.MenuDecorator", style: "display: inline-block", onSelect: "itemSelected", components: [
-				{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
-				{kind: "enyo.Button", name: "button", classes:"inspector-event-button"},
-				{kind: "onyx.Menu", name: "menu", floating: true, components: [
-					// Will be filled at create() time
-				]}
+			{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
+			{kind: "enyo.Button", name: "button", classes:"inspector-event-button"},
+			{kind: "onyx.Menu", name: "menu", floating: true, components: [
+				// Will be filled at create() time
 			]}
+		]}
 	],
 	handlers: {
 		onActivate: "preventMenuActivation"
@@ -181,16 +181,16 @@ enyo.kind({
 	initComponents: function() {
 		this.initFinished = false;
 		this.inherited(arguments);
-		
+
 		var components = [],
 			selected,
 			i;
-		
+
 		for (i = 0; i < this.values.length; i++) {
 			selected = (this.values[i] === this.fieldValue);
 			components.push({content: this.values[i], value: this.values[i], active: selected});
 		}
-		
+
 		this.$.decorator.createComponents([
 			{name: "pickerButton"},
 			{kind: "onyx.Picker", classes: "inspector-field-editor", name: "value", components: components}
@@ -241,7 +241,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.createComponent({name: "selector", kind: "Inspector.Internal.Select",
-							fieldValue: this.fieldValue, values: this.values}, {owner: this});
+							  fieldValue: this.fieldValue, values: this.values}, {owner: this});
 		this.$.selector.setDisabled(this.getDisabled());
 	},
 	disabledChanged: function() {
@@ -273,16 +273,16 @@ enyo.kind({
 		{name: "unit", kind: "Inspector.Internal.Select", classes: "css-editor-select-box", values: ["px","cm","em","ern","rem", "%"], onChange: "unitChanged"},
 		{name: "slider", kind: "onyx.Slider", value: 0, style:"width:91%", onChanging:"sliderChanged", onChange:"sliderChanged"}
 	],
-	
+
 	//* @public
-	
+
 	//* Facade for _enyo.Input.focus()_
 	focus: function() {
 		this.$.value.focus();
 	},
-	
+
 	//* @protected
-	
+
 	//* Stop extraneous activate event from being fired when box is initially checked
 	handleChange: function(inSender, inEvent) {
 		var result = this.parseFieldValue(this.$.value.getValue());
@@ -291,7 +291,7 @@ enyo.kind({
 		if(result){
 			unit = result[2] || this.unit;
 			size = result[1] || "";
-		} 
+		}
 		if(size){
 			this.fieldValue = size + unit;
 		} else{
@@ -308,7 +308,7 @@ enyo.kind({
 	},
 	unitChanged: function(inSender, inEvent) {
 		if (this.size === "") {
-			this.$.unit.setFieldValue(this.unit);	
+			this.$.unit.setFieldValue(this.unit);
 		} else {
 			this.setFieldValue(this.size + inEvent.content);
 			this.doChange({target: this});
@@ -345,14 +345,14 @@ enyo.kind({
 		{name: "color", classes: "inspector-color-button"}
 	],
 	//* @public
-	
+
 	//* Facade for _enyo.Input.focus()_
 	focus: function() {
 		this.$.value.focus();
 	},
-	
+
 	//* @protected
-	
+
 	//* Stop extraneous activate event from being fired when box is initially checked
 	handleChange: function(inSender, inEvent) {
 		this.fieldValue = this.$.value.getValue();
@@ -361,7 +361,7 @@ enyo.kind({
 	},
 	handleDblClick: function(inSender, inEvent) {
 		if (!this.$.palette) {
-			this.createComponent({name: "palette", kind: "PalettePicker", onChange: "colorChanged"}).render();							
+			this.createComponent({name: "palette", kind: "PalettePicker", onChange: "colorChanged"}).render();
 		} else {
 			this.$.palette.destroy();
 		}
@@ -376,7 +376,7 @@ enyo.kind({
 		this.doChange({target: this});
 		if (this.$.palette) {
 			this.$.palette.destroy();
-		}		
+		}
 		return true;
 	},
 });

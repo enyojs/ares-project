@@ -17,8 +17,12 @@ enyo.kind({
 	},
 	resizeHandler: function(inSender, inEvent) {
 		this.inherited(arguments);
-		var cn = Ares.instance.hasNode();
-		this.containerBounds = cn ? {width: cn.clientWidth, height: cn.clientHeight} : {};
+		if (Ares.instance && Ares.instance.hasNode()) {
+			var cn = Ares.instance.hasNode();
+			this.containerBounds = cn ? {width: cn.clientWidth, height: cn.clientHeight} : {};
+		} else {
+			this.containerBounds = {};
+		}
 	},
 	/** @private */
 	_dragAction: function(inSender, inEvent) {

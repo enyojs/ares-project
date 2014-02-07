@@ -1,4 +1,5 @@
-/* jshint indent: false */ // TODO: ENYO-3311
+/*global enyo, $L */
+
 
 /* global ares */
 enyo.kind({
@@ -20,23 +21,23 @@ enyo.kind({
 	classes: "ares-classic-popup",
 	components: [
 	    {tag: "div", name: "title", classes: "title"},
-			{classes:"ares-error-popup", fit: true, components: [
-				{name: "msg", allowHtml:true},
-				{name: "action", showing: false},
-				{classes: "ares-error-details", components: [
-					{classes: "button", components: [
-						{tag: "label", classes:" label", name: "detailsBtn", content: $L("Details"), ontap: "toggleDetails", showing: false},
-						{name: "detailsArrow", classes: "optionDownArrow", ontap: "toggleDetails", showing: false},
-						{name: "detailsDrw", kind: "onyx.Drawer", open: false, showing: false, classes: "ares-error-drawer", components: [
-							{name: "detailsText", kind: "onyx.TextArea", disabled: true, fit: true, classes: "ares-error-text"},
-							{name: "detailsHtml", allowHtml: true, fit: true}
-						]}
+		{classes:"ares-error-popup", fit: true, components: [
+			{name: "msg", allowHtml:true},
+			{name: "action", showing: false},
+			{classes: "ares-error-details", components: [
+				{classes: "button", components: [
+					{tag: "label", classes:" label", name: "detailsBtn", content: $L("Details"), ontap: "toggleDetails", showing: false},
+					{name: "detailsArrow", classes: "optionDownArrow", ontap: "toggleDetails", showing: false},
+					{name: "detailsDrw", kind: "onyx.Drawer", open: false, showing: false, classes: "ares-error-drawer", components: [
+						{name: "detailsText", kind: "onyx.TextArea", disabled: true, fit: true, classes: "ares-error-text"},
+						{name: "detailsHtml", allowHtml: true, fit: true}
 					]}
 				]}
-			]},
-			{kind: "onyx.Toolbar", name: "bottomToolbar",  classes: "bottom-toolbar", components: [
-				{name: "okButton", kind: "onyx.Button", ontap: "hideErrorPopup"}
 			]}
+		]},
+		{kind: "onyx.Toolbar", name: "bottomToolbar",  classes: "bottom-toolbar", components: [
+			{name: "okButton", kind: "onyx.Button", ontap: "hideErrorPopup"}
+		]}
 	],
 	create: function() {
 		ares.setupTraceLogger(this);
@@ -46,7 +47,7 @@ enyo.kind({
 		this.detailsHtmlChanged();
 		this.detailsTextChanged();
 		this.okButtonChanged();
-	},    
+	},
 	titleChanged: function (oldVal) {
 		this.trace(oldVal, "->", this.title);
 		this.$.title.setContent(this.title);
@@ -63,7 +64,7 @@ enyo.kind({
 	},
 	actionMsgChanged: function() {
 		if (this.actionMsg) {
-			this.$.action.setContent(this.actionMsg);			
+			this.$.action.setContent(this.actionMsg);
 			this.$.action.setShowing(true);
 		} else {
 			this.$.action.setShowing(false);
@@ -135,10 +136,10 @@ enyo.kind({
 			} else {
 				err = evt.err;
 				msg = evt.msg || (err && err.toString());
-				
+
 				if(evt.title !== undefined) {
 					this.$.title.setContent(evt.title);
-				}				
+				}
 			}
 		} else {
 			msg = evt.toString();
@@ -160,4 +161,4 @@ enyo.kind({
 		this.set("detailsTxt", "");
 		this.set("okButton", $L("Close"));
 	}
-});	
+});

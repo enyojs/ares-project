@@ -85,8 +85,8 @@ enyo.kind({
 						]},
 						{classes:"ares-row", name: "templatesEntry", showing: false, components: [
 							{tag: "label", classes :"ares-fixed-label ares-small-label", content: $L("Template:")},
-							{kind: "onyx.PickerDecorator", fit: true, components: [
-								{name: "templateButton", classes:"very-large-width", kind: "onyx.PickerButton", fit: true},
+							{kind: "Ares.PickerDecorator", fit: true, components: [
+								{name: "templateButton", classes:"very-large-width"},
 								{kind: "onyx.FlyweightPicker", name: "templatePicker", components: [
 									{name: "template"}
 								], onSetupItem: "templateSetupItem", onSelect: "templateSelected"}
