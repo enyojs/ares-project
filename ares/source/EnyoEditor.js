@@ -236,7 +236,7 @@ enyo.kind({
 	},
 
 	closeDesigner: function(inSender, inEvent){
-		this.$.deimos.closeDesigner();
+		this.$.deimos.closeDesigner(/* bleach */ true);
 		return true;
 	},
 
@@ -942,26 +942,51 @@ enyo.kind({
 
 	designDocument: function(inData) {
 		this.trace();
-		// send all files being edited to the designer, this will send code to designerFrame
-		this.syncEditedFiles(inData.projectData);
-		// then load palette and inspector, and tune serialiser behavior sends option data to designerFrame
-		this.$.deimos.loadDesignerUI(
-			inData,
+		var deimos = this.$.deimos;
+		var project = inData.projectData ;
+		var todo = [];
+
+		if ( deimos.isDesignerBroken() ) {
+			// reload designer
+			todo.push( deimos.projectSelected.bind(deimos, project) );
+		}
+
+		// send all files being edited to the designer, this
+		// will send code to designerFrame
+		todo.push( this.syncEditedFiles.bind(this,inData.projectData) );
+
+		// then load palette and inspector, and tune serialiser
+		// behavior sends option data to designerFrame and render main
+		// kind
+		todo.push( deimos.loadDesignerUI.bind(deimos, inData) );
+
+		todo.push((function(next) {
+			// switch to Deimos editor
+			this.showDeimosPanel();
+			// update an internal variable
+			this.activeDocument.setCurrentIF('designer');
+			next();
+		}).bind(this));
+
+		async.series(
+			todo,
 			(function(err) {
-				this.trace("designDocument -> loadDesignerUI done, err is ",err);
+				if (err) {
+					this.trace("designDocument -> loadDesignerUI done, err is ",err);
+					this.doError({msg: "designDocument ended with error", err: err});
+				}
+				else {
+					this.trace("designDocument done");
+				}
 			}).bind(this)
 		);
-		// switch to Deimos editor
-		this.showDeimosPanel();
-		// update an internal variable
-		this.activeDocument.setCurrentIF('designer');
 	},
 
 	/**
 	 * Update code running in designer
 	 * @param {Ares.Model.Project} project, backbone object defined in WorkspaceData.js
 	 */
-	syncEditedFiles: function(project) {
+	syncEditedFiles: function(project, next) {
 		var projectName = project.getName();
 		this.trace("update all edited files on project", projectName);
 
@@ -970,14 +995,20 @@ enyo.kind({
 				&& model.getProjectData().getName() === projectName ;
 		}
 		// backbone collection
-		Ares.Workspace.files.filter(isProjectFile).forEach(this.updateCode, this);
+		var tasks = [];
+		var pushTask = function(doc) {
+			tasks.push( this.updateCode.bind(this, doc) );
+		} ;
+		Ares.Workspace.files.filter(isProjectFile).forEach(pushTask, this);
+
+		async.series(tasks, next);
 	},
 
 	/**
 	 *
 	 * @param {Ares.Model.File} inDoc is a backbone object defined in FileData.js
 	 */
-	updateCode: function(inDoc) {
+	updateCode: function(inDoc, next) {
 		var filename = inDoc.getFile().path,
 			aceSession = inDoc.getAceSession(),
 			code = aceSession && aceSession.getValue();
@@ -985,7 +1016,7 @@ enyo.kind({
 		var projectName = inDoc.getProjectData().getName();
 		this.trace('code update on file', filename,' project ' , projectName);
 
-		this.$.deimos.syncFile(projectName, filename, code);
+		this.$.deimos.syncFile(projectName, filename, code, next);
 	},
 
 	undo: function(next) {
