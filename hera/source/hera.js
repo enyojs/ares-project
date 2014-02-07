@@ -72,7 +72,7 @@ enyo.kind({
 	declaration: [],
 	properties: [],			
 	value: [],
-	
+
 	create: function() {
 		this.inherited(arguments);
 		ares.setupTraceLogger(this);	
@@ -168,16 +168,9 @@ enyo.kind({
 	radioActivated: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
-		this.$.property = inEvent.name;
 	
-		if(inEvent.input === 'color'){
-			this.$.valueinput.showssliders();
-		}
-			
-		if (inEvent.input === "misc"){
-			this.$.valueinput.showmisc();
-		}
-			
+		this.$.property = inEvent.name;
+		
 		if (inEvent.input === "font"){
 			this.$.valueinput.showsblank();
 			this.$.property = "font-family";
@@ -193,37 +186,8 @@ enyo.kind({
 			this.updateBox();		
 		}
 		
-		if (inEvent.input === "xy"){
-			this.$.valueinput.showxy();
-		}
-		
-		if (inEvent.input === "xyz"){
-			this.$.valueinput.showxyz();
-		}
-		
-		if (inEvent.input === "picker"){
-			this.$.valueinput.showpicker();
-		}
-		
-		if (inEvent.input === "lrc"){
-			this.$.valueinput.showlrc();
-		}
-		
-		if (inEvent.input === "filepicker"){
-			this.$.valueinput.fileinput();
-		}
-			
-		if (inEvent.input === "bgc"){
-			this.$.valueinput.bgc();
-		}
-		
-		if (inEvent.input === "bgr"){
-			this.$.valueinput.bgr();
-		}
-		
-		if (inEvent.input === "bw"){
-			this.$.valueinput.bw();
-		}
+		this.$.valueinput.inputtype(inEvent.input);
+
 		this.updateBox();
 	},
 
@@ -388,13 +352,16 @@ enyo.kind({
         this.declaration[index] = "New";
         this.$.list.reset();
     },
-    
+  
+   /*
+   * fix the in coming url to package 
+   */
 	fixurl: function(address){
-		this.trace("address:", address);
+		this.log("address:", address);
 		var project = Ares.Workspace.projects.active;
 		var urlin = address.split("/");
-		var currentFileUrl = this.filesourcedir;
-		var a = currentFileUrl.split("/");
+		var currntfileurl = this.filesourcedir;
+		var a = currntfileurl.split("/");
 		var add = "";
 		var b = "";
 	
@@ -408,6 +375,7 @@ enyo.kind({
 			}
 		}
 		
+
 		for (var j = 0; j < urlin.length; j++){		// work our way out from root to the image file
 			if(urlin[j] === "url("){
 				j++;
@@ -417,7 +385,8 @@ enyo.kind({
 			
 			}
 		}
-		var urlout = "	url(" + add + b;
+
+		var urlout = "url(" + add + b + ");";
 		this.newvalue = urlout;
 		return;
     }
