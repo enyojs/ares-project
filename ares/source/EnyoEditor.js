@@ -217,6 +217,7 @@ enyo.kind({
 		}
 		this.$.kindButton.setContent(kinds[0].name);
 		this.$.kindPicker.render();
+		this.$.toolbar.resized();
 	},
 
 	designerAction: function() {
@@ -803,7 +804,6 @@ enyo.kind({
 
 		// open ace session (or image viewer)
 		var codeOk = phobos.openDoc(newDoc);
-		this.$.toolbar.resized();
 
 		this.activeDocument = newDoc;
 		newProject = newDoc.getProjectData() ;
@@ -838,6 +838,7 @@ enyo.kind({
 		var _switchDocEnd = function (err) {
 			this.manageControls(willManageControls);
 			this._fileEdited();
+			this.$.toolbar.resized();
 			this.$.docToolBar.activateDocWithId(newDoc.getId());
 			this.trace("_switchDoc done with err ", err);
 			setTimeout(next,0) ;
