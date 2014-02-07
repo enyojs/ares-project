@@ -1,4 +1,4 @@
-/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo */
+/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo, Phonegap */
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -44,6 +44,7 @@ enyo.kind({
 		onShowWaitPopup: "",
 		onError: "",
 		onProjectSelected: "",
+		onProjectSave: "",
 		onRegisterMe: ""
 	},
 	create: function() {
@@ -70,8 +71,8 @@ enyo.kind({
 		this.$.projectWizardScan.show();
 		return true; //Stop event propagation
 	},
-	duplicateProjectAction: function(InSender, inEvent) {	
-		if(InSender.selected == null){	
+	duplicateProjectAction: function(inSender, inEvent) {	
+		if(!this.currentProject()){	
 			this.doError({msg: "Please project list select item."});
 			return false;
 		}
@@ -142,6 +143,7 @@ enyo.kind({
 					project.setConfig(config);
 					
 					self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled);
+					self.initializeValidPgbConf(project, config.data.providers.phonegap.enabled);
 					next();
 				},
 				function (next) {
@@ -169,15 +171,38 @@ enyo.kind({
 	 */
 	initializeDownloadStatus: function(inProject, inPhonegapEnabled) {
 		if (inProject.getDownloadStatus() === undefined && inPhonegapEnabled) {
-			inProject.setDownloadStatus({
-				"android": "Ready for download", 
-				"ios": "Ready for download", 
-				"winphone": "Ready for download", 
-				"blackberry": "Ready for download", 
-				"webos": "Ready for download"
-			});
+			var downloadStatus = {};
+			var index = 0;
+
+			for (index in Phonegap.UIConfiguration.platformDrawersContent) {
+				downloadStatus[Phonegap.UIConfiguration.platformDrawersContent[index].id] = "Ready for download";
+			}
+
+			inProject.setDownloadStatus(downloadStatus);
 		}
-	}, 
+	},
+
+	initializeValidPgbConf: function(inProject, inPhonegapEnabled) {
+		if (inProject.getValidPgbConf() === undefined && inPhonegapEnabled) {
+			var pgbValidation = {};
+			var pgbUiData = Phonegap.UIConfiguration.commonDrawersContent.concat(Phonegap.UIConfiguration.platformDrawersContent);
+			var index =0;
+
+			for (index in pgbUiData) {
+				//The creation of the pgbValidation drawer attribute and its initialization are done in the same time.
+				pgbValidation[pgbUiData[index].id] = {};
+
+				for (var i=0, maxLength = pgbUiData[index].rows.length; i<maxLength; i++) {
+					//The creation of the pgbValidation row attribute and its initialization are done in the same time.
+					pgbValidation[pgbUiData[index].id][pgbUiData[index].rows[i].name] = true;
+				}
+				pgbValidation[pgbUiData[index].id]["validDrawer"] = true;			
+			}
+
+			inProject.setValidPgbConf(pgbValidation);
+		}
+	},
+
 	projectRemoved: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("harmonia").setProject(null, ares.noNext);
 	},
@@ -191,7 +216,7 @@ enyo.kind({
 	buildAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
 		if (project) {
-			this.projectAction(project, 'build', 'build');
+			this.projectSaveAndAction(project, 'build', 'build');
 		}
 		return true; // stop bubble-up
 	},
@@ -206,7 +231,7 @@ enyo.kind({
 	installAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
 		if (project) {
-			this.projectAction(project, 'test', 'install');
+			this.projectSaveAndAction(project, 'test', 'install');
 		}
 		return true; // stop bubble-up
 	},
@@ -220,7 +245,7 @@ enyo.kind({
 	runAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
 		if (project) {
-			this.projectAction(project, 'test', 'run');
+			this.projectSaveAndAction(project, 'test', 'run');
 		}
 		return true; // stop bubble-up
 	},
@@ -234,10 +259,30 @@ enyo.kind({
 	runDebugAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
 		if (project) {
-			this.projectAction(project, 'test', 'runDebug');
+			this.projectSaveAndAction(project, 'test', 'runDebug');
 		}
 		return true; // stop bubble-up
 	},
+
+	/**
+	 * Request to save project and perform action
+	 * @param {Ares.Model.Project} project
+	 * @param {String} serviceType
+	 * @param {String} action
+	 */
+	projectSaveAndAction: function(project, serviceType, action) {
+		var cb = function (err) {
+			if (err) {
+				this.trace(err);
+			} else {
+				this.projectAction( project, serviceType, action);
+			}
+		};
+		if (project) {
+			this.doProjectSave({ project: project, callback: cb.bind(this) });
+		}
+	},
+
 	/**
 	 * @private
 	 */
@@ -263,6 +308,17 @@ enyo.kind({
 	},
 
 	launchPreview: function (project) {
+		var cb = function (err) {
+			if (err) {
+				this.trace(err);
+			} else {
+				this._launchPreview(project);
+			}
+		};
+		this.doProjectSave({ project: project, callback: cb.bind(this) });
+	},
+
+	_launchPreview: function (project) {
 		var config = project.getConfig() ;
 		var topFile = config.data.preview.top_file ;
 		var projectUrl = project.getProjectUrl() + '/' + topFile ;

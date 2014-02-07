@@ -72,7 +72,9 @@ enyo.kind({
 				this.fsmStash = [];
 			},
 			ondfReady: function(event, from, to) { // pop
-				this.execCb();
+				this.execCb( event, from, to );
+			},
+			onready: function(event, from, to) {
 				if (this.fsmStash.length) {
 					var resume = this.fsmStash.shift();
 					var that = this;
@@ -124,7 +126,7 @@ enyo.kind({
 				}
 			},
 			ondfRendered: function(event, from, to, msg) {
-				this.execCb();
+				this.execCb( event, from, to );
 				this.designer._updateKind(msg);
 			},
 
@@ -133,7 +135,7 @@ enyo.kind({
 				this.designer._syncFile(filename, inCode);
 			},
 			ondfUpdated: function(event, from, to) {
-				this.execCb();
+				this.execCb( event, from, to );
 			},
 
 			onselect: function(event, from, to, inControl) {
@@ -166,29 +168,46 @@ enyo.kind({
 
 			// error handling
 			ondfRequestReload: function(event, from, to, err) {
+				this.execCb( event, from, to );
 				var deimos = this.designer.owner;
-				err.callback = deimos.closeDesigner.bind(deimos);
+				err.callback = deimos.closeDesigner.bind(deimos, /* bleach */ false);
 				err.action = "Switching back to code editor";
 				this.designer.doError(err);
 			},
 			ondfReloadNeeded: function(event, from, to, err) {
+				this.execCb( event, from, to );
 				this.designer.doError(err);
 			},
 			ondfRenderError: function(event, from, to, err) {
+				this.execCb( event, from, to );
 				this.designer.doError(err);
 			}
 		},
-		error: function(eventName,from, to, args, errorCode, errorMessage,error) {
-			if (errorCode === 300) {
-				// Invalid callback. See state-machine source code for error codes :-/
-				throw error || errorMessage ;
-			} else if ( /^df/.test(eventName) ) {
-				// don't delay event coming from designer frame
-				throw ("Unexpected event " + eventName + " coming from designer in state " + from) ;
+		error: function(event,from, to, args, errorCode, errorMessage,error) {
+			var errCb, errData ;
+
+			// in case of error, any pending call-back must be called
+			// to dismiss on-going waitpopups
+			if (this.pendingCb) {
+				errCb = ( function() { this.execCb(event,from, to, errorMessage);}).bind(this);
 			} else {
-				this.trace("got " + eventName + " while in state " + from +", stashing event");
-				this.fsmStash.push([eventName, args]);
+				errCb = ares.noNext ;
 			}
+
+			// arrange a callback to be invoked once user acknowledges the error
+			errData = { callback: errCb } ;
+
+			if (errorCode === 300) {
+				// Invalid fsm callback. See state-machine source code for error codes :-/
+				errData.err = error;
+				errData.msg =  "Internal error: " + errorMessage ;
+			} else if ( /^df/.test(event) ) {
+				errData.msg = "Unexpected event " + event + " coming from designer in state " + from ;
+			} else {
+				errData.msg = "Unexpected event " + event + " coming from Ares in state " + from ;
+			}
+
+			this.designer.doError( errData );
 		}
 	},
 
@@ -196,11 +215,20 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		var fsm = StateMachine.create( this.fsmStruct );
 		fsm.trace = this.trace.bind(this);
-		fsm.execCb = (function() {
+
+		fsm.execCb = (function( event, from, to, err ) {
 			var cb = this.pendingCb;
 			this.pendingCb = null;
-			cb();
+
+			if (cb) {
+				cb(err);
+			} else {
+				var msg = "Internal error: missing call-back in event " + event ;
+				msg += " from state " + from + " to state " + to;
+				this.designer.doError({msg: msg}) ;
+			}
 		}).bind(fsm);
+
 		fsm.designer = this ;
 		this.fsm = fsm;
 
@@ -481,7 +509,13 @@ enyo.kind({
 		ares.assertCb(next);
 		// check if the file is indeed part of the current project
 		if (projectName === this.projectSource.getName() ){
-			this.fsm.syncFile(filename, inCode, next);
+			if( /\.(css|js)$/i.test(filename) ) {
+				this.fsm.syncFile(filename, inCode, next);
+			} else {
+				// ignore no js or css files
+				this.trace("Dropping syncFile on " + filename);
+				setTimeout( next, 0);
+			}
 		} else {
 			var msg = "syncFile aborted: project mismatch. Expected " + this.projectSource.getName()
 					  + ' got '+ projectName + ' with file ' + filename;

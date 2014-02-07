@@ -6,7 +6,7 @@
 ) 
 
 @IF EXIST "%~dp0\node.exe" (
-  "%~dp0\node.exe"  %SCRIPT% %*
+  "%~dp0\x86\node.exe"  %SCRIPT% %*
 ) ELSE (
   node  %SCRIPT% %*
 )
