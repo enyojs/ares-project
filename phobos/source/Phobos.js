@@ -444,7 +444,9 @@ enyo.kind({
 	/**
 	 * Navigate from Phobos to Deimos. Pass Deimos all relevant info.
 	 */
-	designerAction: function() {
+	designerAction: function(next) {
+		ares.assertCb(next);
+
 		// Update the projectIndexer and notify watchers
 		this.reparseUsersCode();
 		
@@ -457,7 +459,7 @@ enyo.kind({
 		
 		if (kinds.length > 0) {
 			// Request to design the current document, passing info about all kinds in the file
-			this.doChildRequest({ task: [ 'designDocument',  data ]});
+			this.doChildRequest({ task: [ 'designDocument',  data, next ]});
 		} // else - The error has been displayed by extractKindsData()
 	},
 	//* Extract info about kinds from the current file needed by the designer
@@ -843,7 +845,7 @@ enyo.kind({
 	},
 	
 	/**
-	 * Add a new kind (requested from the designer)
+	 * Add a new kind (requested from phobos or palette)
 	 * A switch to the designer is performed to fully reload the kinds in the designer.
 	 * @param config 
 	 * @public
@@ -851,10 +853,10 @@ enyo.kind({
 	addNewKind: function(config) {
 		var newKind = 'enyo.kind('+config+'\n);';
 		this.$.aceWrapper.insertAtEndOfFile(newKind, '@cursor@');
-		this.designerAction();
+		this.designerAction(ares.noNext);
 	},
 	/**
-	 * Insert a new kind (requested from the designer)
+	 * Insert a new kind (requested from phobos or palette )
 	 * A switch to the designer is performed to fully reload the kinds in the designer.
 	 * @param kind_index, config 
 	 * @public
@@ -863,7 +865,7 @@ enyo.kind({
 		var obj = this.analysis.objects[kind_index];
 		var range = this.$.aceWrapper.mapToLineColumnRange(obj.block.start, obj.block.end);
 		this.$.aceWrapper.replaceRange(range, config);
-		this.designerAction();
+		this.designerAction(ares.noNext);
 	},
 	
 	//*  editor setting

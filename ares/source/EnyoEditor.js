@@ -223,7 +223,7 @@ enyo.kind({
 		if(this.$.phobos.editorUserSyntaxError() !== 0) {
 			this.userSyntaxErrorPop();
 		} else {
-			this.$.phobos.designerAction();
+			this.$.phobos.designerAction(ares.noNext);
 			this.manageControls(true);
 		}
 	},
@@ -811,23 +811,40 @@ enyo.kind({
 
 		this.addPreviewTooltip("Preview " +  newProject.id);
 
-		if (currentIF === 'code') {
-			this.$.panels.setIndex(this.phobosViewIndex);
-			this.manageControls(false);
-		} else {
-			phobos.designerAction();
-			this.manageControls(true);
-		}
-		this._fileEdited();
-		this.$.docToolBar.activateDocWithId(newDoc.getId());
+		var deimos = this.$.deimos ;
+		var willManageControls = false ;
 
+		var todo = [];
 		// enable designer only if code analysis was successful
 		if (codeOk) {
-			this.$.deimos.projectSelected( newDoc.getProjectData(), next ) ;
+			todo.push( deimos.projectSelected.bind(deimos, newDoc.getProjectData() ) ) ;
 		}
-		else {
+
+		if (currentIF === 'code') {
+			todo.push(
+				(function(next) {
+					this.$.panels.setIndex(this.phobosViewIndex);
+					next();
+				}).bind(this)
+			);
+		} else if (codeOk) {
+			// really switch to designer if code is fine and already in designer mode
+			willManageControls = true ;
+			todo.push(
+				phobos.designerAction.bind(phobos)
+			) ;
+		}
+
+		var _switchDocEnd = function (err) {
+			this.manageControls(willManageControls);
+			this._fileEdited();
+			this.$.docToolBar.activateDocWithId(newDoc.getId());
+			this.trace("_switchDoc done with err ", err);
 			setTimeout(next,0) ;
-		}
+		};
+
+		async.series( todo, _switchDocEnd.bind(this) );
+
 	},
 
 
@@ -947,8 +964,9 @@ enyo.kind({
 		}
 	},
 
-	designDocument: function(inData) {
-		this.trace();
+	designDocument: function(inData, next) {
+		ares.assertCb(next);
+
 		var deimos = this.$.deimos;
 		var project = inData.projectData ;
 		var todo = [];
@@ -980,10 +998,11 @@ enyo.kind({
 			(function(err) {
 				if (err) {
 					this.trace("designDocument -> loadDesignerUI done, err is ",err);
-					this.doError({msg: "designDocument ended with error", err: err});
+					this.doError({msg: "designDocument ended with error", err: err, callback: next()});
 				}
 				else {
 					this.trace("designDocument done");
+					setTimeout(next, 0);
 				}
 			}).bind(this)
 		);
