@@ -396,18 +396,21 @@ enyo.kind({
 	components: [{
 		name: "label",
 		classes: "ares-project-properties-drawer-row-label"
-	},
-	{
-		kind: "onyx.InputDecorator",
-		classes: "ares-project-properties-input-medium",
-		components: [{
-			kind: "onyx.Input",
-			name: "configurationInput",
-			onchange: "updateConfigurationValue"
-		}]
-	}],
+		},
+		{
+			kind: "onyx.InputDecorator",
+			classes: "ares-project-properties-input-medium",
+			components: [{
+					kind: "onyx.Input",
+					name: "configurationInput",
+					onchange: "updateConfigurationValue"
+				}
+			]
+		},
 		{name: "addButton", kind: "onyx.IconButton", src: "$services/assets/images/add-icon-25x25.png", ontap: "addAccessRow"},
 		{name: "AccessRowsContainer", kind: "FittableColumns"}
+	],
+		
 
 	/**
 	 * @private
@@ -498,7 +501,7 @@ enyo.kind({
 				}				
 			]
 		},
-		{name: "deleteButton", kind: "onyx.IconButton", parentRowName: "", src: "$services/assets/images/delete-icon-25x25.png", ontap: "deleteAccessRow"}		
+		{name: "deleteButton", kind: "onyx.IconButton", parentRowName: "", src: "$services/assets/images/delete-icon-25x25.png", ontap: "deleteAccessRow"}
 	],
 	/**
 	 * @private
