@@ -200,7 +200,6 @@ enyo.kind({
 		this.log("sender:", inSender, ", event:", inEvent);
 		this.mode = "new";
 		this.$.newCssPopup.show();
-		this.updateBox();
 	},
 
 	/*
@@ -213,6 +212,8 @@ enyo.kind({
 		this.$.newCssPopup.hide();
 		this.mode ="new";
 		this.updateBox();
+		this.csssave();		// a quick save and reload
+		this.doEditcss();
 		return;
 	},
 
@@ -270,7 +271,6 @@ enyo.kind({
 			}
 		}
 		this.$.list.setCount(j);
-		this.addNewItem();
 		this.$.list.reset();
 	},
 
@@ -352,17 +352,6 @@ enyo.kind({
 		return true;
 	},
 	
-	/*
-	* add  the "New declarations" to the list
-	*/
-	addNewItem: function( inSender, inEvent ) {
-		this.trace("sender:", inSender, ", event:", inEvent);
-        var index = this.$.list.getCount();
-        this.$.list.setCount( index+1 );
-        this.declaration[index] = "New";
-        this.$.list.reset();
-    },
-  
    /*
    * fix the in coming url to package 
    */
