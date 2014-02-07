@@ -207,6 +207,7 @@ enyo.kind({
 				errData.msg = "Unexpected event " + event + " coming from Ares in state " + from ;
 			}
 
+			this.trace("fsm error: " + errData.msg );
 			this.designer.doError( errData );
 		}
 	},
