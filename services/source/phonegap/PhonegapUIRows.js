@@ -509,10 +509,11 @@ enyo.kind({
 	},
 
 	/**
-	 * This function change the displayed value of the picker to the parameter "inContent".
-	 * The parameter must be contained in an existing picker's item.
-	 * @param  {String} inContent A String value originated from the attribut of "project.json
-	 *                            "associated to the picker widget.
+	 * This function change the displayed value of the picker to the
+	 * parameter "inContent". The parameter must be contained in an
+	 * existing picker's item.
+	 * @param {String} inContent A String value originated from the
+	 * attribute of "project.json" associated to the picker widget.
 	 * @private
 	 */
 	activatePickerItemByContent: function(inContent) {
