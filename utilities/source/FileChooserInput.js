@@ -4,9 +4,10 @@ enyo.kind({
 	components: [
 		{kind: "onyx.InputDecorator", name: "pathInputDecorator", components: [
 			{kind: "onyx.Input", name: "pathInputValue", disabled: true, onchange: "pathInputChanged"},
-			{kind: "onyx.IconButton", name:"pathInputButtonBroken", classes: "ares-file-broken-icon", src: "$project-view/assets/images/file_broken-20x17.png", showing: false, disabled: true}
+			{kind: "onyx.IconButton", name:"pathInputButtonBroken", classes: "ares-file-broken-icon", src: "$project-view/assets/images/broken_path.png", showing: false, disabled: true},
+			{kind: "onyx.IconButton", name:"pathInputButtonValid", classes: "ares-file-broken-icon", src: "$project-view/assets/images/valid_path.png", showing: false, disabled: true}
 		]},
-		{kind: "onyx.IconButton", name:"pathInputButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
+		{kind: "onyx.IconButton", name:"pathInputButton", src: "$harmonia/images/folder-open.png", ontap: "pathInputTap"}
 	],
 	published: {
 		pathValue: "",
@@ -46,11 +47,21 @@ enyo.kind({
 	pathValueChanged: function(){
 		this.$.pathInputValue.setValue(this.pathValue);
 	},
+	hideStatusNotification: function(){
+		this.$.pathInputButtonBroken.setShowing(false);
+		this.$.pathInputButtonValid.setShowing(false);
+	},
 	statusChanged: function(){
 		if(this.status){
 			this.$.pathInputButtonBroken.setShowing(false);
-		} else{
+			this.$.pathInputButtonValid.setShowing(true);
+		} else {
 			this.$.pathInputButtonBroken.setShowing(true);
+			this.$.pathInputButtonValid.setShowing(false);
+		}
+
+		if(!this.activePathInputButton){
+			this.hideStatusNotification();
 		}
 	},
 	inputDisabledChanged: function(){
