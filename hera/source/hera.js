@@ -52,7 +52,9 @@ enyo.kind({
 						]},				
 					]},
 				]},
-
+				
+				{kind:"onyx.Button", content: "New Css rule", ontap:"newRule"},
+				
 				{kind: "enyo.FittableColumns", style: "width: 100%; height: 40%;", fit: true, classes: "enyo-unselectable", components: [
 					{name: "valueinput", kind: "Ares.Hera.ValueInput", onUpdate: "change"},
 					
@@ -192,6 +194,16 @@ enyo.kind({
 	},
 
 	/*
+	*
+	*/
+	newRule: function(inSender, inEvent){
+		this.log("sender:", inSender, ", event:", inEvent);
+		this.mode = "new";
+		this.$.newCssPopup.show();
+		this.updateBox();
+	},
+
+	/*
 	* this is were we get the "new CSS declarations name "  from the popup
 	* @protected
 	*/
@@ -278,9 +290,7 @@ enyo.kind({
 		n = (this.file.split("\n"));			// split the file up by lines
 
 		if ( this.declaration[c] === "New"){		// check to see if were making a new declartion	
-			this.mode = "new";
-			this.$.newCssPopup.show();
-			this.updateBox();
+			
 		}else{
 			this.mode = "editing";
 			for (var i=0; i < n.length; i++) {
