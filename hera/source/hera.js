@@ -91,6 +91,7 @@ enyo.kind({
 		this.trace("data", data);
 		this.filesourcedir = data.originator.docData.attributes.file.path;
 		var d = data.originator.$.aceWrapper.value;
+		this.reset();
 		this.dePuzzle(d);
 	},
 	
@@ -103,10 +104,6 @@ enyo.kind({
 		console.log("saving");
 		if(this.mode === "reset"){
 			return;
-		}
-		if(this.mode === "new"){
-			this.doNewcss();
-			this.reset();
 		}
 		if(this.mode === "editing"){
 			this.doReplacecss();
@@ -126,7 +123,6 @@ enyo.kind({
 		if(this.newvalue.indexOf("url") != -1){
 			this.fixurl(this.newvalue);
 		}
-		
 		
 		while(this.properties[a] !== undefined && this.properties[a] !== "null"){
 			if(this.properties[a].indexOf(this.$.property) !== -1 ){
@@ -205,7 +201,6 @@ enyo.kind({
 	*/
 	newRule: function(inSender, inEvent){
 		this.log("sender:", inSender, ", event:", inEvent);
-		this.mode = "new";
 		this.$.newCssPopup.show();
 	},
 
@@ -218,14 +213,10 @@ enyo.kind({
 		this.out = "";
 		this.className = this.$.input.hasNode().value;
 		this.$.newCssPopup.hide();
-		this.mode ="new";
 		this.out = this.className + " " + "{\n" + "}";
-	//	this.updateBox();
-		console.log(this.out);
-		this.doNewcss();
+		this.doNewcss();		// a quick save 
 		this.reset();
-		//this.csssave();		// a quick save and reload
-		this.doEditcss();
+		this.doEditcss();		// and a  reload
 		return;
 	},
 
@@ -244,22 +235,14 @@ enyo.kind({
 		this.properties.length = 0;			
 		this.value.length = 0;	
 		this.old = null;
-		this.className = null;	
-		this.outPut = null;	
-			
-	//	this.$.bgImage = null;
-	//	this.x = null;
-	//	this.y = null;
-	//	this.z = null;	
-		
-		this.$.outPut = null;
+		this.className = "";	
+		this.outPut = "";	
+		this.$.outPut = "";
 		this.$.property = null;	
 		this.mode = "rest";
 		this.$.outputBox.applyStyle("color", "#FFFFFF");
 		this.$.outputBox.applyStyle("background-color", "#000000");
 		this.$.bg.setContent("");	
-		this.updateBox();
-
 	},
 
 	/*
@@ -276,9 +259,7 @@ enyo.kind({
 			if ("." === line[i].charAt(0) || "#" === line[i].charAt(0) ){
 				n = line[i].split("{");				
 				this.declaration[j] = n[0];
-	
 				j++;
-			//	k = 0;
 				n = "";
 			}
 		}
@@ -310,7 +291,6 @@ enyo.kind({
 				if(this.declaration[c] === r[0]){
 					this.className = this.declaration[c];
 					for(var j = i+1;  j < n.length; j++){
-					
 						s = n[j].split(":");
 						if(s[0].indexOf("}") === 0){
 							break;
@@ -348,7 +328,6 @@ enyo.kind({
 				}
 			}
 		}
-		
 		return;
 	},
 
