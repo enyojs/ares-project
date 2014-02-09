@@ -100,6 +100,7 @@ enyo.kind({
 	*/
 	csssave: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
+		console.log("saving");
 		if(this.mode === "reset"){
 			return;
 		}
@@ -155,8 +156,14 @@ enyo.kind({
 			}
 			outPut = outPut + tab + this.properties[a] + ":" + this.value[a] + "<br>";
 			outString = outString + this.properties[a] + ":" + this.value[a] + "\n";
-			this.$.Sample.applyStyle(this.properties[a], this.value[a]);
-			this.$.sampletext.applyStyle(this.properties[a], this.value[a]);
+			
+			if(this.value[a].indexOf("url") != -1){
+				//	this.$.Sample.applyStyle(this.properties[a], this.proUrl);		// write url out to sapmle box here  
+				//	this.$.sampletext.applyStyle(this.properties[a], this.proUrl);
+			}else{
+				this.$.Sample.applyStyle(this.properties[a], this.value[a]);
+				this.$.sampletext.applyStyle(this.properties[a], this.value[a]);
+			}
 			a++;
 		}		
 		this.$.bg.setContent(outPut + "}");		// write in to the preview box
@@ -194,7 +201,7 @@ enyo.kind({
 	},
 
 	/*
-	*
+	* the start of a new rule show the popup
 	*/
 	newRule: function(inSender, inEvent){
 		this.log("sender:", inSender, ", event:", inEvent);
@@ -208,11 +215,16 @@ enyo.kind({
 	*/
 	newDeclaration: function(inSender, inEvent){	
 		this.trace("sender:", inSender, ", event:", inEvent);
+		this.out = "";
 		this.className = this.$.input.hasNode().value;
 		this.$.newCssPopup.hide();
 		this.mode ="new";
-		this.updateBox();
-		this.csssave();		// a quick save and reload
+		this.out = this.className + " " + "{\n" + "}";
+	//	this.updateBox();
+		console.log(this.out);
+		this.doNewcss();
+		this.reset();
+		//this.csssave();		// a quick save and reload
 		this.doEditcss();
 		return;
 	},
@@ -235,10 +247,10 @@ enyo.kind({
 		this.className = null;	
 		this.outPut = null;	
 			
-		this.$.bgImage = null;
-		this.x = null;
-		this.y = null;
-		this.z = null;	
+	//	this.$.bgImage = null;
+	//	this.x = null;
+	//	this.y = null;
+	//	this.z = null;	
 		
 		this.$.outPut = null;
 		this.$.property = null;	
@@ -356,38 +368,39 @@ enyo.kind({
    * fix the in coming url to package 
    */
 	fixurl: function(address){
-		this.log("address:", address);
+		this.trace("address:", address);
 		var project = Ares.Workspace.projects.active;
+	
 		var urlin = address.split("/");
-		var currntfileurl = this.filesourcedir;
-		var a = currntfileurl.split("/");
+		var currentFileUrl = this.filesourcedir;
+		var a = currentFileUrl.split("/");
 		var add = "";
 		var b = "";
-	
+		var pUrl = "";
+			
 		for (var i=1; i < a.length; i++) {		//  work our way back to the project root from the css file
+			pUrl = pUrl + a[i] + "/";
+			
 			if(a[i] === project){
 				i++;
 				for(i; i < a.length; i++){
 					add = add + ".";
 				}
-				add = add ;
 			}
 		}
 		
-
 		for (var j = 0; j < urlin.length; j++){		// work our way out from root to the image file
-			if(urlin[j] === "url("){
+			if(urlin[j] === project){
 				j++;
 				for(j;  j < urlin.length; j++){
 					b = b + "/" + urlin[j];
 				}
-			
 			}
 		}
-
-		var urlout = "url(" + add + b + ");";
+		var urlout = "	url(" + add + b ;
 		this.newvalue = urlout;
+		this.proUrl = "	url(" + pUrl + "/" + b.slice(1);
 		return;
-    }
+    },
 
 });
