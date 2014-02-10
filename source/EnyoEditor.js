@@ -39,7 +39,7 @@ enyo.kind({
 				]}
 			]},
 			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
-				{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_preview.png", ontap: "requestPreview"},
+				{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_preview.png", ontap: "requestPreview"},
 				{kind: "onyx.Tooltip", name:"previewTooltip", content: "Preview"}
 			]},
 			{classes:"ares-logo-container", components:[
@@ -1051,32 +1051,32 @@ enyo.kind({
 		{tag:"button", content: "File"},
 		{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
 			{name: "saveButton", value: "saveCurrentDoc", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
+				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-save-darken.png"},
 				{content: $L("Save")}
 			]},
 			{name: "saveAsButton", value: "requestSaveDocAs", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
+				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-save-darken.png"},
 				{content: $L("Save as...")}
 			]},
 			{name: "saveProjectButton", value: "saveProjectDocs", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
+				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-save-darken.png"},
 				{content: $L("Save Project")}
 			]},
 			{name: "saveAllDocsButton", value: "saveAllDocs", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-save-darken.png"},
+				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-save-darken.png"},
 				{content: $L("Save all")}
 			]},
 			{classes: "onyx-menu-divider"},
 			{name: "closeButton", value: "requestCloseCurrentDoc", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
+				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-stop.png"},
 				{content: $L("Close")}
 			]},
 			{name: "closeProjectButton", value: "requestCloseCurrentProject", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
+				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-stop.png"},
 				{content: $L("Close Project")}
 			]},
 			{name: "closeAllButton", value: "requestCloseAll", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$phobos/assets/images/menu-icon-stop.png"},
+				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-stop.png"},
 				{content: $L("Close All")}
 			]}
 		]}

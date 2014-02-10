@@ -23,17 +23,17 @@ enyo.kind({
 
 		if (this.status === "complete") {
 
-			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-complete-32x32.png");
+			this.setSrc("$assets/services/images/platforms/" + this.platform + "-logo-complete-32x32.png");
 			return;
 		}
 
 		if (this.status === "error") {
 			this.show();
-			this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-error-32x32.png");
+			this.setSrc("$assets/services/images/platforms/" + this.platform + "-logo-error-32x32.png");
 			return;
 		}
 
-		this.setSrc("$services/assets/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
+		this.setSrc("$assets/services/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
 
 	}
 });
@@ -79,7 +79,7 @@ enyo.kind({
 			components: [{
 				name: "hideStatusContainer",
 				kind: "onyx.IconButton",
-				src: "$project-view/assets/images/close-button-16x16.png",
+				src: "$assets/project-view/images/close-button-16x16.png",
 				classes: "ares-project-properties-hide-status-button",
 				ontap: "hideMessageContainer"
 			},
@@ -97,7 +97,7 @@ enyo.kind({
 			{
 				name: "downloadButton",
 				kind: "onyx.IconButton",
-				src: "$services/assets/images/download-icon.png",
+				src: "$assets/services/images/download-icon.png",
 				showing: false,
 				ontap: "downloadPackage"
 			}]

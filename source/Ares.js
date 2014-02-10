@@ -3,7 +3,7 @@
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets",
 	// deprecated aliases
-	"utilities"	: "$enyo/../utilities",
+	//"utilities"	: "$enyo/../utilities",
 	"services"	: "$enyo/../services",
 	"phobos"	: "$enyo/../phobos",
 	"deimos"	: "$enyo/../deimos",
@@ -54,7 +54,7 @@ enyo.kind({
 			modal: true,
 			style: "text-align: center; padding: 20px; width: 200px;",
 			components: [
-				{kind: "Image", src: "$phobos/assets/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
+				{kind: "Image", src: "$assets/phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
 				{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}, 
 				{kind: "onyx.Button", name:"canceBuildButton", content: "Cancel", ontap: "cancelService", style: "margin-top: 10px;", showing: false}						
 			]

@@ -45,25 +45,25 @@ enyo.kind({
 		{kind: "onyx.MenuDecorator", name: "hermesMenu", classes: "hermesMenu", onSelect: "hermesMenuItemSelected", components: [
 			{kind: "onyx.Menu", name: "hermesMenuList", classes: "hermesMenu-list", maxHeight: "100%", components: [
 				{name: "newFolderItem", value: "newFolderClick", classes: "hermesMenu-button", components: [
-					{kind: "onyx.IconButton", src: "$harmonia/images/folder_new_16.png"},
+					{kind: "onyx.IconButton", src: "$assets/harmonia/images/folder_new_16.png"},
 					{content: $L("New Folder...")}
 				]},
 				{name: "newFileDivider", classes: "onyx-menu-divider hermesMenu-button"},
 				{name: "newFileItem", value: "newFileClick", classes: "hermesMenu-button", components: [
-					{kind: "onyx.IconButton", src: "$harmonia/images/document_new_16.png"},
+					{kind: "onyx.IconButton", src: "$assets/harmonia/images/document_new_16.png"},
 					{content: $L("New File...")}
 				]},
 				{name: "nodeDivider", classes: "onyx-menu-divider hermesMenu-button"},
 				{name: "renameItem", value: "renameClick", classes: "hermesMenu-button", components: [
-					{kind: "onyx.IconButton", src: "$harmonia/images/document_edit_16.png"},
+					{kind: "onyx.IconButton", src: "$assets/harmonia/images/document_edit_16.png"},
 					{content: $L("Rename...")}
 				]},
 				{name: "copyItem", value: "copyClick", classes: "hermesMenu-button", components: [
-					{kind: "onyx.IconButton", src: "$harmonia/images/copy_16.png"},
+					{kind: "onyx.IconButton", src: "$assets/harmonia/images/copy_16.png"},
 					{content: $L("Copy...")}
 				]},
 				{name: "deleteItem", value: "deleteClick", classes: "hermesMenu-button", components: [
-					{kind: "onyx.IconButton", src: "$harmonia/images/document_delete_16.png"},
+					{kind: "onyx.IconButton", src: "$assets/harmonia/images/document_delete_16.png"},
 					{content: $L("Delete...")}
 				]}
 			]}
@@ -71,31 +71,31 @@ enyo.kind({
 
 		{kind: "onyx.Toolbar", name: "hermesToolbar", classes:"ares-small-toolbar title-gradient", components: [
 			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
-				{name: "newFolderButton", kind: "onyx.IconButton", src: "$harmonia/images/folder_new.png", ontap: "newFolderClick"},
+				{name: "newFolderButton", kind: "onyx.IconButton", src: "$assets/harmonia/images/folder_new.png", ontap: "newFolderClick"},
 				{kind: "onyx.Tooltip", content: $L("New Folder...")}
 			]},
 			{name: "reloadAll", kind: "onyx.TooltipDecorator", components: [
-				{kind: "onyx.IconButton", src: "$harmonia/images/folder_reload.png", ontap: "reloadClick"},
+				{kind: "onyx.IconButton", src: "$assets/harmonia/images/folder_reload.png", ontap: "reloadClick"},
 				{kind: "onyx.Tooltip", content: $L("Reload...")}
 			]},
 			{name: "newFile", kind: "onyx.TooltipDecorator", components: [
-				{name: "newFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_new.png", ontap: "newFileClick"},
+				{name: "newFileButton", kind: "onyx.IconButton", src: "$assets/harmonia/images/document_new.png", ontap: "newFileClick"},
 				{kind: "onyx.Tooltip", content: $L("New File...")}
 			]},
 			{name: "renameFile", kind: "onyx.TooltipDecorator", components: [
-				{name: "renameFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_edit.png", ontap: "renameClick"},
+				{name: "renameFileButton", kind: "onyx.IconButton", src: "$assets/harmonia/images/document_edit.png", ontap: "renameClick"},
 				{kind: "onyx.Tooltip", content: $L("Rename...")}
 			]},
 			{name: "copyFile", kind: "onyx.TooltipDecorator", components: [
-				{name: "copyFileButton", kind: "onyx.IconButton", src: "$harmonia/images/copy.png", ontap: "copyClick"},
+				{name: "copyFileButton", kind: "onyx.IconButton", src: "$assets/harmonia/images/copy.png", ontap: "copyClick"},
 				{kind: "onyx.Tooltip", content: $L("Copy...")}
 			]},
 			{name: "deleteFile", kind: "onyx.TooltipDecorator", components: [
-				{name: "deleteFileButton", kind: "onyx.IconButton", src: "$harmonia/images/document_delete.png", ontap: "deleteClick"},
+				{name: "deleteFileButton", kind: "onyx.IconButton", src: "$assets/harmonia/images/document_delete.png", ontap: "deleteClick"},
 				{kind: "onyx.Tooltip", content: $L("Delete...")}
 			]},
 			{name: "revertMove", kind: "onyx.TooltipDecorator", components: [
-				{name: "revertMoveButton", kind: "onyx.IconButton", src: "$harmonia/images/undo.png", ontap: "revertClick"},
+				{name: "revertMoveButton", kind: "onyx.IconButton", src: "$assets/harmonia/images/undo.png", ontap: "revertClick"},
 				{kind: "onyx.Tooltip", classes:"ares-tooltip-last", content: $L("Revert move...")}
 			]}
 		]},
@@ -146,7 +146,7 @@ enyo.kind({
 		this.enableDisableButtons();
 		this.createComponent(
 			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable hermesFileTree-root",
-				showing: false, content: "server", icon: "$services/assets/images/antenna.png",
+				showing: false, content: "server", icon: "$assets/services/images/antenna.png",
 				expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed
 			}
 		);
@@ -375,7 +375,7 @@ enyo.kind({
 			
 			inTargetNode.setExpanded(true);
 			// update icon for expanded state
-			inTargetNode.setIcon("$services/assets/images/arrowDown.png");
+			inTargetNode.setIcon("$assets/services/images/arrowDown.png");
 			inTargetNode.addClass("hermesFileTree-folder-highlight");
 						
 			// handle lazy-load when expanding
@@ -916,7 +916,7 @@ enyo.kind({
 			if (!parentNode.expanded) {
 				parentNode.setExpanded(true);
 				// update icon for expanded state
-				parentNode.setIcon("$services/assets/images/arrowDown.png");
+				parentNode.setIcon("$assets/services/images/arrowDown.png");
 							
 				// handle lazy-load when expanding
 				parentNode.updateNodes().
@@ -1477,7 +1477,7 @@ enyo.kind({
 			if (!parentNode.expanded) {
 				parentNode.setExpanded(true);
 				// update icon for expanded state
-				parentNode.setIcon("$services/assets/images/arrowDown.png");
+				parentNode.setIcon("$assets/services/images/arrowDown.png");
 							
 				// handle lazy-load when expanding
 				parentNode.updateNodes().
@@ -1559,7 +1559,7 @@ enyo.kind({
 			if (!addParentNode.expanded) {
 				addParentNode.setExpanded(true);
 				// update icon for expanded state
-				addParentNode.setIcon("$services/assets/images/arrowDown.png");
+				addParentNode.setIcon("$assets/services/images/arrowDown.png");
 							
 				// handle lazy-load when expanding
 				addParentNode.updateNodes().

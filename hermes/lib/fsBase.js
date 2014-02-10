@@ -125,7 +125,7 @@ FsBase.prototype.route = function() {
 
 	var overlays = {
 		// "$deimos/source/designer/designerFrame/*"
-		designer: path.join(__dirname, "..", "..", "deimos", "source", "designer", "designerFrame"),
+		designer: path.join(__dirname, "..", "..", "source", "deimos", "designer", "designerFrame"),
 		// "node_modules/less/dist/*"
 		less: path.join(__dirname, "..", "..", "node_modules", "less", "dist")
 	};

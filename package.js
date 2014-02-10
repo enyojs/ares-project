@@ -6,11 +6,5 @@ enyo.depends(
 	"$lib/extra/analyzer2",
 	"$lib/foss",
 	"source",
-	"Ares.less",
-	"utilities",
-	"services",
-	"phobos",
-	"deimos",
-	"harmonia",
-	"project-view"
+	"Ares.less"
 );

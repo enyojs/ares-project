@@ -4,5 +4,11 @@ enyo.depends(
 	"FileData.js",
 	"WorkspaceData.js",
 	"PackageMunger.js",
-	"EnyoEditor.js"
+	"EnyoEditor.js",
+	"utilities",
+	"services",
+	"phobos",
+	"deimos",
+	"harmonia",
+	"project-view"
 );

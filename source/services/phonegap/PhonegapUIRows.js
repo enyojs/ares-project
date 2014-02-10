@@ -762,7 +762,7 @@ enyo.kind({
 	{
 		kind: "onyx.IconButton",
 		name: "AndroidImgButton",
-		src: "$project-view/assets/images/file-32x32.png",
+		src: "$assets/project-view/images/file-32x32.png",
 		ontap: "pathInputTap"
 	},
 	{
@@ -868,9 +868,9 @@ enyo.kind({
 	/** @private */
 	statusChanged: function() {
 		if (this.status) {
-			this.$.AndroidImgButton.setSrc("$project-view/assets/images/file-32x32.png");
+			this.$.AndroidImgButton.setSrc("$assets/project-view/images/file-32x32.png");
 		} else {
-			this.$.AndroidImgButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+			this.$.AndroidImgButton.setSrc("$assets/project-view/images/file_broken-32x32.png");
 		}
 	},
 	/** @private */
@@ -940,7 +940,7 @@ enyo.kind({
 	{
 		kind: "onyx.IconButton",
 		name: "ImgButton",
-		src: "$project-view/assets/images/file-32x32.png",
+		src: "$assets/project-view/images/file-32x32.png",
 		ontap: "pathInputTap"
 	},
 	{
@@ -1085,9 +1085,9 @@ enyo.kind({
 	/** @private */
 	statusChanged: function() {
 		if (this.status) {
-			this.$.ImgButton.setSrc("$project-view/assets/images/file-32x32.png");
+			this.$.ImgButton.setSrc("$assets/project-view/images/file-32x32.png");
 		} else {
-			this.$.ImgButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+			this.$.ImgButton.setSrc("$assets/project-view/images/file_broken-32x32.png");
 		}
 	},
 	/** @private */

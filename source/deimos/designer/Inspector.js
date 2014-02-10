@@ -20,7 +20,7 @@ enyo.kind({
 		{name: "filterLevel", kind: "Inspector.FilterLevel", onValueChanged: "updateFilterLevel"},
 		{name: "partialFilter", kind: "onyx.InputDecorator", classes: "properties-filter", layoutKind: "FittableColumnsLayout", showing: false, components: [
 			{kind: "onyx.Input", name: "filterProperties", fit: true, placeholder: "filter", oninput: "propertiesFiltering"},
-			{kind: "onyx.Icon", classes: "filter-icon", name: "filterPropertiesIcon", src: "$deimos/images/search-input-search.png", ontap: "resetFilter"}
+			{kind: "onyx.Icon", classes: "filter-icon", name: "filterPropertiesIcon", src: "$assets/images/deimos/search-input-search.png", ontap: "resetFilter"}
 		]},
 		{name: "selectFilePopup", kind: "Ares.FileChooser", classes:"ares-masked-content-popup", showing: false, folderChooser: false, allowToolbar: false, onFileChosen: "selectFileChosen"}
 	],
@@ -561,9 +561,9 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 
 		if (this.$.filterProperties.getValue() === "") {
-			this.$.filterPropertiesIcon.set("src", "$deimos/images/search-input-search.png");
+			this.$.filterPropertiesIcon.set("src", "$assets/images/deimos/search-input-search.png");
 		} else {
-			this.$.filterPropertiesIcon.set("src", "$deimos/images/search-input-cancel.png");
+			this.$.filterPropertiesIcon.set("src", "$assets/images/deimos/search-input-cancel.png");
 		}
 		this.filterProperties();
 

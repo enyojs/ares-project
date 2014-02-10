@@ -154,7 +154,7 @@ enyo.kind({
 			});
 	},
 	startLoading: function() {
-		this.$.extra.setContent('&nbsp;<img src="' + enyo.path.rewrite("$services/assets/images/busy.gif") + '"/>');
+		this.$.extra.setContent('&nbsp;<img src="' + enyo.path.rewrite("$assets/services/images/busy.gif") + '"/>');
 	},
 	stopLoading: function() {
 		this.$.extra.setContent("");
@@ -320,7 +320,7 @@ enyo.kind({
 				name: '$' + f.name, // prefix avoids clobberring non-files components like icon
 				content: f.name,
 				expandable: f.isDir,
-				icon: "$services/assets/images/" + (f.isDir ? "arrowRight.png" : "file.png")
+				icon: "$assets/services/images/" + (f.isDir ? "arrowRight.png" : "file.png")
 			});
 		}
 		return nodes;
@@ -332,7 +332,7 @@ enyo.kind({
 		this.trace("nodeExpand called while node Expanded is ", subnode.expanded) ;
 		// update icon for expanded state
 		if (subnode.file.isDir) {
-			subnode.setIcon("$services/assets/images/" + (subnode.expanded ? "arrowDown.png" : "arrowRight.png"));
+			subnode.setIcon("$assets/services/images/" + (subnode.expanded ? "arrowDown.png" : "arrowRight.png"));
 		}
 		// handle lazy-load when expanding
 		if (subnode.expanded) {
