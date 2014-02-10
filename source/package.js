@@ -7,8 +7,7 @@ enyo.depends(
 	"EnyoEditor.js",
 	"utilities",
 	"services",
-	"phobos",
-	"deimos",
+	"enyo-editor",
 	"harmonia",
 	"project-view"
 );

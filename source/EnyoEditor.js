@@ -1051,32 +1051,32 @@ enyo.kind({
 		{tag:"button", content: "File"},
 		{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
 			{name: "saveButton", value: "saveCurrentDoc", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-save-darken.png"},
+				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-save-darken.png"},
 				{content: $L("Save")}
 			]},
 			{name: "saveAsButton", value: "requestSaveDocAs", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-save-darken.png"},
+				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-save-darken.png"},
 				{content: $L("Save as...")}
 			]},
 			{name: "saveProjectButton", value: "saveProjectDocs", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-save-darken.png"},
+				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-save-darken.png"},
 				{content: $L("Save Project")}
 			]},
 			{name: "saveAllDocsButton", value: "saveAllDocs", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-save-darken.png"},
+				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-save-darken.png"},
 				{content: $L("Save all")}
 			]},
 			{classes: "onyx-menu-divider"},
 			{name: "closeButton", value: "requestCloseCurrentDoc", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-stop.png"},
+				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-stop.png"},
 				{content: $L("Close")}
 			]},
 			{name: "closeProjectButton", value: "requestCloseCurrentProject", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-stop.png"},
+				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-stop.png"},
 				{content: $L("Close Project")}
 			]},
 			{name: "closeAllButton", value: "requestCloseAll", classes:"aresmenu-button", components: [
-				{kind: "onyx.IconButton", src: "$assets/phobos/images/menu-icon-stop.png"},
+				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-stop.png"},
 				{content: $L("Close All")}
 			]}
 		]}

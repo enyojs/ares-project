@@ -87,7 +87,7 @@ enyo.kind({
 				if (c) {
 					var v = inModel[n];
 					if (c.kind == "Image") {
-						c.setSrc("$assets/images/deimos/" + v);
+						c.setSrc("$assets/enyo-editor/deimos/images/" + v);
 						c.setShowing(true);
 					} else {
 						c.setContent(v);
@@ -121,7 +121,7 @@ enyo.kind({
 			]},
 			{kind: "onyx.InputDecorator", style: "width:100%; margin-top:10px;", layoutKind: "FittableColumnsLayout", components: [
 				{kind: "onyx.Input", name: "filterPalette", fit:true, placeholder: "filter", oninput: "paletteFiltering"},
-				{kind: "onyx.Icon", name: "filterPaletteIcon", src: "$assets/images/deimos/search-input-search.png", style: "height:20px;", ontap: "resetFilter"}
+				{kind: "onyx.Icon", name: "filterPaletteIcon", src: "$assets/enyo-editor/deimos/images/search-input-search.png", style: "height:20px;", ontap: "resetFilter"}
 			]}
 		]}
 	],
@@ -291,9 +291,9 @@ enyo.kind({
 		this.trace(inSender, "=>", inEvent);
 		
 		if (this.$.filterPalette.getValue() === "") {
-			this.$.filterPaletteIcon.set("src", "$assets/images/deimos/search-input-search.png");		
+			this.$.filterPaletteIcon.set("src", "$assets/enyo-editor/deimos/images/search-input-search.png");		
 		} else {
-			this.$.filterPaletteIcon.set("src", "$assets/images/deimos/search-input-cancel.png");
+			this.$.filterPaletteIcon.set("src", "$assets/enyo-editor/deimos/images/search-input-cancel.png");
 		}
 		this.$.expandAllCategoriesButton.setDisabled(true);
 		this.$.collapseAllCategoriesButton.setDisabled(false);
