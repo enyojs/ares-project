@@ -53,7 +53,10 @@ enyo.kind({
 					]},
 				]},
 				
-				{kind:"onyx.Button", content: "New Css rule", ontap:"newRule"},
+				{kind: "enyo.FittableColumns", style: "width: 100%; height: 5%", components:[
+					{kind:"onyx.Button", content: "Dlelete rule", ontap:"deleteRule"},
+					{kind:"onyx.Button", content: "New Css rule", ontap:"newRule"},
+				]},
 				
 				{kind: "enyo.FittableColumns", style: "width: 100%; height: 40%;", fit: true, classes: "enyo-unselectable", components: [
 					{name: "valueinput", kind: "Ares.Hera.ValueInput", onUpdate: "change"},
@@ -381,5 +384,16 @@ enyo.kind({
 		this.proUrl = "	url(" + pUrl + "/" + b.slice(1);
 		return;
     },
+    
+    /*
+    *	delete a css rule
+    */
+    deleteRule: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+			this.out = "";
+			this.doReplacecss();	// replace it with nothing
+			this.doEditcss();		// and a  reload
+	
+	}
 
 });
