@@ -1,4 +1,4 @@
-/* global ares */
+/*global ares,enyo*/
 enyo.kind({
 	name: "PhonegapUserdata",
 	kind: "Ares.Groupbox",

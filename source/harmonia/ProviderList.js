@@ -1,4 +1,4 @@
-/* global ares */
+/*global ares, enyo*/
 
 enyo.kind({
 	name: "ProviderList",
@@ -22,7 +22,7 @@ enyo.kind({
 				{name: "item", classes: "enyo-children-inline", ontap: "itemTap", ondblclick: "dblClick", /*onConfirm: "removeProvider",*/ components: [
 					{name: "icon", kind: "onyx.Icon"},
 					{name: "name"},
-					{name: "auth", kind: "Image", src: "$harmonia/images/valid-check.png", showing: false}
+					{name: "auth", kind: "Image", src: "$assets/harmonia/images/valid-check.png", showing: false}
 				]}
 			]}
 		]},
