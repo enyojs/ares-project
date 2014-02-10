@@ -673,18 +673,16 @@ enyo.kind({
 		onInputButtonTap: "",
 		onPathChecked: ""
 	},
+	handlers: {
+		onFileChooserAction: "pathInputTap"
+	},
 	components: [
 		{tag: "label", name: "pathInputLabel", classes:"ares-fixed-label"},
-		{kind: "onyx.InputDecorator", components: [
-			{kind: "Input", name: "pathInputValue", disabled: true}
-		]},
-		{kind: "onyx.IconButton", name:"pathInputButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
+		{name: "fileChooserInput", kind: "Ares.FileChooserInput", inputDisabled: true},
 	],
 	debug: false,
-
 	create: function () {
 		this.inherited(arguments);
-
 		this.labelChanged();
 		this.valueChanged();
 		this.inputTipChanged();
@@ -698,33 +696,28 @@ enyo.kind({
 	},
 	/** @private */
 	valueChanged: function () {
-		this.$.pathInputValue.setValue(this.value);
+		this.$.fileChooserInput.setPathValue(this.value);
 		this.setStatus(true);
 	},
 	/** @private */
 	inputTipChanged: function () {
-		this.$.pathInputValue.setAttribute("title", this.inputTip);
+		this.$.fileChooserInput.setInputTip(this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function () {
+		this.$.fileChooserInput.setActivePathInputButton(this.activated);
 		if (this.activated) {
-			this.$.pathInputButton.show();
 			this.statusChanged();
-		} else {
-			this.$.pathInputButton.hide();
-		}
+			this.$.fileChooserInput.statusChanged();
+		} 
 	},
 	/** @private */
 	statusChanged: function () {
-		if (this.status) {
-			this.$.pathInputButton.setSrc("$project-view/assets/images/file-32x32.png");
-		} else {
-			this.$.pathInputButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
-		}
+		this.$.fileChooserInput.setStatus(this.status);
 	},
 	/** @private */
 	buttonTipChanged: function () {
-		this.$.pathInputButton.setAttribute("title", this.buttonTip);
+		this.$.fileChooserInput.setButtonTip(this.buttonTip);
 	},
 	/** @private */
 	pathInputTap: function (inSender, inEvent) {
