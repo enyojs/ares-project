@@ -323,8 +323,10 @@ enyo.kind({
 		var topFile = config.data.preview.top_file ;
 		var projectUrl = project.getProjectUrl() + '/' + topFile ;
 
-		// the last replace method is needed for test environment only
-		var winLoc = window.location.toString().replace('ares','preview').replace('test', 'index') ;
+		var winLoc = window.location.toString()
+			    .replace('index.html','preview.html') // Ares minified
+			    .replace('debug.html','preview.html') // Ares debug (every files)
+			    .replace('test.html','preview.html'); // Ares-under-test
 		var previewUrl = winLoc
 				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
 				+ 'url=' + encodeURIComponent(projectUrl)+'&name=' + project.id;

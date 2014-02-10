@@ -1,14 +1,7 @@
 /*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, $L */
 
 enyo.path.addPaths({
-	"assets"	: "$enyo/../assets",
-	// deprecated aliases
-	//"utilities"	: "$enyo/../utilities",
-	"services"	: "$enyo/../services",
-	"phobos"	: "$enyo/../phobos",
-	"deimos"	: "$enyo/../deimos",
-	"harmonia"	: "$enyo/../harmonia",
-	"project-view"	: "$enyo/../project-view"
+	"assets"	: "$enyo/../assets"
 });
 
 enyo.kind({

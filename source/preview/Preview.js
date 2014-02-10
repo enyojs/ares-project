@@ -1,3 +1,9 @@
+/*global enyo, ares, Ares */
+
+enyo.path.addPaths({
+	"assets"	: "$enyo/../assets"
+});
+
 enyo.kind(
 	{
 		name: "PreviewDevicePicker",
@@ -107,7 +113,7 @@ enyo.kind(
 						ontap:"reload",
 						classes: "ares-preview-buttons",
 						components: [
-							{tag: 'img', attributes: { src: "assets/images/preview_reload.png"} }
+							{tag: 'img', attributes: { src: "assets/preview/images/preview_reload.png"} }
 						]
 					},
 					{
