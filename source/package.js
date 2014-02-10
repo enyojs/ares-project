@@ -6,7 +6,6 @@ enyo.depends(
 	"PackageMunger.js",
 	"EnyoEditor.js",
 	"utilities",
-	"services",
 	"enyo-editor",
 	"harmonia",
 	"project-view"

@@ -9,22 +9,33 @@ Basic architecture
 The Ares project architecture is divided into several main pieces:
 
 * **Ares** - The front-end designer/editor web application, with the following main components:
-	* **Harmonia** - File system layer, communicating with the server-side _Hermes_ components.
-	* **Phobos** - Document management
+	* **Harmonia** - Client-side Ares system layer, communicating with the server-side _Hermes_ components.
+	* **Phobos** - Code editor
 	* **Deimos** - Visual designer
-* **Hermes Components** - Pluggable server-side components that provide interfaces to Ares clients for cloud-based services such as file storage and build services.  We're leveraging node.js, but Hermes components can use any server-side tech.
+    * **Hermes** - Server-side Ares system layer.  Pluggable server-side components that provide interfaces to Ares clients for cloud-based services such as file storage and build services.  We're using node.js, but Hermes components can use any server-side technology.
 * **Ares plugins** - Based on Hermes pluggable server-side components, Ares plugins can bring:  
   * New server-side services with their own configuration
   * The corresponding browser side code that will be loaded into the Ares IDE  
 See [Ares plugins](README.md#ares-plugins) for more details.
- 
+
+```
+source/*            Multi-Project View
+├── enyo-editor     File Editor
+│   ├── deimos      Drag-n-Drop Designer
+│   └── phobos      Code Editor
+├── harmonia        Access to Ares Server (ide.js) Services
+│   └── services
+├── preview         Preview Current Project
+├── project-view    Single-Project View
+└── utilities       As it says...
+```
 
 Real stuff - Code
 -----------------
 
 ### Setup a developement environment
 
-1. Install Node.js & NPM 0.8.x (>= 0.8.19).  Preferably from the [Official Download Page](http://nodejs.org/#download).
+1. Install Node.js & NPM 0.10.x.  Preferably from the [Official Download Page](http://nodejs.org/#download).
 1. Install git (or a graphical git client).  See the [Github.com help](https://help.github.com/articles/set-up-git) for hints
 1. Pick a GitHub account
 

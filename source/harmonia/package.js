@@ -1,4 +1,5 @@
 enyo.depends(
+	"services",
 	"FieldDecorator.js",
 	"DropboxAuthConfig.js",
 	"ProviderList.js",
