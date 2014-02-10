@@ -83,7 +83,9 @@ enyo.kind({
 	// events and published are defined by the base kind
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
-		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
+		{kind: "onyx.InputDecorator", classes: "inspector-enyo-input-like", components: [
+			{kind: "onyx.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
+		]}
 	],
 
 	//* @public
@@ -122,7 +124,9 @@ enyo.kind({
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
 		{kind: "onyx.MenuDecorator", style: "display: inline-block", onSelect: "itemSelected", components: [
-			{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
+			{kind: "onyx.InputDecorator", classes: "inspector-enyo-input-like", components: [
+				{kind: "onyx.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
+			]},
 			{kind: "enyo.Button", name: "button", classes:"inspector-event-button"},
 			{kind: "onyx.Menu", name: "menu", floating: true, components: [
 				// Will be filled at create() time
@@ -269,7 +273,9 @@ enyo.kind({
 	// events and published are defined by the base kind
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
-		{kind: "enyo.Input", classes: "inspector-size-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"},
+		{kind: "onyx.InputDecorator", classes: "inspector-enyo-input-like", components: [
+			{kind: "onyx.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", ondblclick: "handleDblClick"}
+		]},
 		{name: "unit", kind: "Inspector.Internal.Select", classes: "css-editor-select-box", values: ["px","cm","em","ern","rem", "%"], onChange: "unitChanged"},
 		{name: "slider", kind: "onyx.Slider", value: 0, style:"width:91%", onChanging:"sliderChanged", onChange:"sliderChanged"}
 	],
@@ -297,7 +303,6 @@ enyo.kind({
 		} else{
 			this.fieldValue = "";
 		}
-		this.log(unit, size);
 		this.doChange({target: this});
 		return true;
 	},
@@ -341,7 +346,9 @@ enyo.kind({
 	// events and published are defined by the base kind
 	components: [
 		{classes: "inspector-field-caption", name: "title"},
-		{kind: "enyo.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", onclick: "handleDblClick", ondblclick: "handleDblClick"},
+		{kind: "onyx.InputDecorator", classes: "inspector-enyo-input-like", components: [
+			{kind: "onyx.Input", classes: "inspector-field-editor", name: "value", onchange: "handleChange", onclick: "handleDblClick", ondblclick: "handleDblClick"}
+		]},
 		{name: "color", classes: "inspector-color-button"}
 	],
 	//* @public
@@ -395,10 +402,13 @@ enyo.kind({
 		onInputButtonTap: "",
 		onPathChecked: ""
 	},
+	handlers: {
+		onFileChooserAction: "pathInputTap",
+		onInputChanged: "handleChange"
+	},
 	components: [
 		{tag: "label", classes: "inspector-field-caption", name: "title"},
-		{kind: "Input", classes: "enyo-input inspector-field-editor", name: "value", onchange: "handleChange"},
-		{kind: "onyx.IconButton", name:"pathInputButton", src: "$assets/project-view/images/file-32x32.png", ontap: "pathInputTap"}
+		{name: "fileChooserInput", kind: "Ares.FileChooserInput", inputDisabled: true, inputClasses: "enyo-input inspector-field-editor", decoratorClasses: "inspector-enyo-input-like" }
 	],
 	debug: false,
 
@@ -408,39 +418,34 @@ enyo.kind({
 		this.statusChanged();
 	},
 	handleChange: function () {
-		this.disableFileChooser(true);
-		this.fieldValue = this.$.value.getValue();
+		this.$.fileChooserInput.setActivePathInputButton(true);
+		this.fieldValue = this.$.fileChooserInput.getPathValue();
 		this.doChange({target: this});
 		return true;
 	},
 	/** @private */
 	inputTipChanged: function () {
-		this.$.pathInputValue.setAttribute("title", this.inputTip);
+		this.$.fileChooserInput.setInputTip(this.inputTip);
 	},
 	disabledChanged: function() {
 		var disabled = this.getDisabled();
-		this.$.value.setDisabled(disabled);
-		if(!disabled){
-			this.$.pathInputButton.show();
+		this.$.fileChooserInput.setInputDisabled(disabled);
+		this.$.fileChooserInput.setActivePathInputButton(!disabled);
+		if(!disabled && this.fieldValue){
 			this.statusChanged();
-		} else {
-			this.$.pathInputButton.hide();
+			this.$.fileChooserInput.statusChanged();
 		}
 	},
 	disableFileChooser: function(disabled){
-		this.$.pathInputButton.setDisabled(disabled);
+		this.$.fileChooserInput.setActivePathInputButton(!disabled);
 	},
 	/** @private */
 	statusChanged: function () {
-		if (this.status) {
-			this.$.pathInputButton.setSrc("$assets/project-view/images/file-32x32.png");
-		} else {
-			this.$.pathInputButton.setSrc("$assets/project-view/images/file_broken-32x32.png");
-		}
+		this.$.fileChooserInput.setStatus(this.status);
 	},
 	/** @private */
 	buttonTipChanged: function () {
-		this.$.pathInputButton.setAttribute("title", this.buttonTip);
+		this.$.fileChooserInput.setButtonTip(this.buttonTip);
 	},
 	/** @private */
 	pathInputTap: function (inSender, inEvent) {
@@ -449,6 +454,6 @@ enyo.kind({
 	},
 	fieldValueChanged: function() {
 		this.setStatus(true);
-		this.$.value.setValue(this.fieldValue);
+		this.$.fileChooserInput.setPathValue(this.fieldValue);
 	}
 });

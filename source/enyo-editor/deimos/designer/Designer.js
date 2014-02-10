@@ -86,7 +86,24 @@ enyo.kind({
 				}
 			},
 			onprojectSelected: function(event, from, to, inSource, next){
-				this.pendingCb = next;
+
+				var mopUp = function() {
+					var msg = "designerFrame load failed. Please check console log for errors";
+					this.doError(msg);
+					// do not propagate error as code editor needs to load file
+					next();
+				};
+
+				this.trace("setup dead designer timer");
+				var timer = setTimeout(mopUp.bind(this.designer), 5000);
+
+				var myNext = function () {
+					this.trace("Clearing dead designer timer");
+					window.clearTimeout(timer);
+					next();
+				};
+
+				this.pendingCb = myNext.bind(this.designer);
 				this.designer._reloadDesignerFrame(inSource);
 			},
 			ondfLoaded: function(event, from, to) {
@@ -190,6 +207,7 @@ enyo.kind({
 				errData.msg = "Unexpected event " + event + " coming from Ares in state " + from ;
 			}
 
+			this.trace("fsm error: " + errData.msg );
 			this.designer.doError( errData );
 		}
 	},
