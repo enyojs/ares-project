@@ -1,4 +1,4 @@
-/*global enyo, ares, Ares */
+/*global enyo, ares */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets"
