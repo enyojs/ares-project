@@ -1,3 +1,16 @@
 enyo.depends(
-	"ares"
+	"$lib/g11n",
+	"$lib/layout",
+	"$lib/onyx/source",
+	"$lib/onyx/source/wip-package.js",
+	"$lib/extra/analyzer2",
+	"$lib/foss",
+	"source",
+	"Ares.less",
+	"utilities",
+	"services",
+	"phobos",
+	"deimos",
+	"harmonia",
+	"project-view"
 );

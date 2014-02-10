@@ -709,7 +709,7 @@ app.configure(function(){
 	app.use(setCorsHeaders);
 	app.use(setUserHeaders);
 
-	app.use(express.favicon(myDir + '/ares/assets/images/ares_48x48.ico'));
+	app.use(express.favicon(myDir + '/assets/images/ares_48x48.ico'));
 
 	app.use('/ide', express.static(enyojsRoot));
 	app.use('/test', express.static(path.join(enyojsRoot, '/test')));
@@ -718,7 +718,7 @@ app.configure(function(){
 
 	app.get('/', function(req, res, next) {
 		log.http('main', "GET /");
-		res.redirect('/ide/ares/');
+		res.redirect('/ide/');
 	});
 	app.get('/res/timestamp', function(req, res, next) {
 		res.status(200).json({timestamp: ide.res.timestamp});
@@ -774,7 +774,7 @@ server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, f
 	var tcpAddr = server.address(),
 	    info;
 	origin = "http://" + (argv.host || "127.0.0.1") + ":" + tcpAddr.port;
-	url = origin + "/ide/ares/" + page;
+	url = origin + "/ide/" + page;
 	if (argv.browser) {
 		// Open default browser
 		info = platformOpen[process.platform] ;

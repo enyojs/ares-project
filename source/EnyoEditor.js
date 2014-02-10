@@ -39,7 +39,7 @@ enyo.kind({
 				]}
 			]},
 			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
-				{kind: "onyx.IconButton", src: "../project-view/assets/images/project_view_preview.png", ontap: "requestPreview"},
+				{kind: "onyx.IconButton", src: "$project-view/assets/images/project_view_preview.png", ontap: "requestPreview"},
 				{kind: "onyx.Tooltip", name:"previewTooltip", content: "Preview"}
 			]},
 			{classes:"ares-logo-container", components:[

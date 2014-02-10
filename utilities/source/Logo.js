@@ -1,3 +1,5 @@
+/*global enyo */
+
 enyo.kind({
 	name: "Ares.Logo",
 	classes: "ares-logo",
@@ -6,7 +8,7 @@ enyo.kind({
 	alt:"logo",
 	create:function(){
 		this.inherited(arguments);
-		this.setSource("../ares/assets/images/enyo-logo.png");
+		this.setSource("/ide/assets/images/enyo-logo.png");
 	},
 	setSource: function(src){
 		this.setAttribute("src", src);
