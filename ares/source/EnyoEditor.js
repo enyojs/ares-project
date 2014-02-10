@@ -217,13 +217,14 @@ enyo.kind({
 		}
 		this.$.kindButton.setContent(kinds[0].name);
 		this.$.kindPicker.render();
+		this.$.toolbar.resized();
 	},
 
 	designerAction: function() {
 		if(this.$.phobos.editorUserSyntaxError() !== 0) {
 			this.userSyntaxErrorPop();
 		} else {
-			this.$.phobos.designerAction();
+			this.$.phobos.designerAction(ares.noNext);
 			this.manageControls(true);
 		}
 	},
@@ -740,13 +741,13 @@ enyo.kind({
 			this.trace("also switch project " + pname + ' to ' + newDoc.getProjectData().getName());
 			var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
 			var projectList = ComponentsRegistry.getComponent("projectList");
-			var deimos = this.$.deimos;
 
 			this.doShowWaitPopup({msg: $L("Switching project...")});
 
+			this.resetErrorTooltip();
+
 			serial.push(
-				projectList.selectProject.bind(projectList, project),
-				deimos.projectSelected.bind(deimos, project)
+				projectList.selectProject.bind(projectList, project)
 			);
 		}
 
@@ -802,8 +803,7 @@ enyo.kind({
 		}
 
 		// open ace session (or image viewer)
-		phobos.openDoc(newDoc);
-		this.$.toolbar.resized();
+		var codeOk = phobos.openDoc(newDoc);
 
 		this.activeDocument = newDoc;
 		newProject = newDoc.getProjectData() ;
@@ -811,16 +811,41 @@ enyo.kind({
 
 		this.addPreviewTooltip("Preview " +  newProject.id);
 
-		if (currentIF === 'code') {
-			this.$.panels.setIndex(this.phobosViewIndex);
-			this.manageControls(false);
-		} else {
-			phobos.designerAction();
-			this.manageControls(true);
+		var deimos = this.$.deimos ;
+		var willManageControls = false ;
+
+		var todo = [];
+		// enable designer only if code analysis was successful
+		if (codeOk) {
+			todo.push( deimos.projectSelected.bind(deimos, newDoc.getProjectData() ) ) ;
 		}
-		this._fileEdited();
-		this.$.docToolBar.activateDocWithId(newDoc.getId());
-		setTimeout(next,0) ;
+
+		if (currentIF === 'code') {
+			todo.push(
+				(function(next) {
+					this.$.panels.setIndex(this.phobosViewIndex);
+					next();
+				}).bind(this)
+			);
+		} else if (codeOk) {
+			// really switch to designer if code is fine and already in designer mode
+			willManageControls = true ;
+			todo.push(
+				phobos.designerAction.bind(phobos)
+			) ;
+		}
+
+		var _switchDocEnd = function (err) {
+			this.manageControls(willManageControls);
+			this._fileEdited();
+			this.$.toolbar.resized();
+			this.$.docToolBar.activateDocWithId(newDoc.getId());
+			this.trace("_switchDoc done with err ", err);
+			setTimeout(next,0) ;
+		};
+
+		async.series( todo, _switchDocEnd.bind(this) );
+
 	},
 
 
@@ -940,8 +965,9 @@ enyo.kind({
 		}
 	},
 
-	designDocument: function(inData) {
-		this.trace();
+	designDocument: function(inData, next) {
+		ares.assertCb(next);
+
 		var deimos = this.$.deimos;
 		var project = inData.projectData ;
 		var todo = [];
@@ -973,10 +999,11 @@ enyo.kind({
 			(function(err) {
 				if (err) {
 					this.trace("designDocument -> loadDesignerUI done, err is ",err);
-					this.doError({msg: "designDocument ended with error", err: err});
+					this.doError({msg: "designDocument ended with error", err: err, callback: next()});
 				}
 				else {
 					this.trace("designDocument done");
+					setTimeout(next, 0);
 				}
 			}).bind(this)
 		);
