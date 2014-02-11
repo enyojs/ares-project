@@ -53,9 +53,9 @@ enyo.kind({
 					]},
 				]},
 				
-				{kind: "enyo.FittableColumns", style: "width: 100%; height: 5%", components:[
-					{kind:"onyx.Button", content: "Dlelete rule", ontap:"deleteRule"},
-					{kind:"onyx.Button", content: "New Css rule", ontap:"newRule"},
+				{kind: "enyo.FittableColumns", style: "width: 100%; height: 5%;", classes: "hera_buttonbox", components:[
+					{kind:"onyx.Button", classes: "hera_newrule_button", content: "Delete rule", ontap:"deleteRule"},
+					{kind:"onyx.Button", classes:"hera_newrule_button", content: "New Css rule", ontap:"newRule"},
 				]},
 				
 				{kind: "enyo.FittableColumns", style: "width: 100%; height: 40%;", fit: true, classes: "enyo-unselectable", components: [
@@ -104,7 +104,6 @@ enyo.kind({
 	*/
 	csssave: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-		console.log("saving");
 		if(this.mode === "reset"){
 			return;
 		}
