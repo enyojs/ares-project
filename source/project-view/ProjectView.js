@@ -9,7 +9,7 @@ enyo.kind({
 	name: "ProjectView",
 	kind: "FittableColumns",
 	classes: "enyo-unselectable",
-	debug: false,
+	debug: true,
 	published: {
 		// harcoded until ENYO-2755 is fixed
 		panelIndex: 0
@@ -324,8 +324,8 @@ enyo.kind({
 		var projectUrl = project.getProjectUrl() + '/' + topFile ;
 
 		var winLoc = window.location.toString()
-			    .replace('index.html','preview.html') // Ares minified
-			    .replace('debug.html','preview.html') // Ares debug (every files)
+			    .replace('ide/index.html','preview/preview.html') // Ares minified
+			    .replace('ide/debug.html','ide/preview.html') // Ares debug (every files)
 			    .replace('test.html','preview.html'); // Ares-under-test
 		var previewUrl = winLoc
 				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )

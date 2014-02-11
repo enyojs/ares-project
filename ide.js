@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* jshint node:true */
-/*global setImmediate*/
+/*global setImmediate,require,process*/
 /**
  *  ARES IDE server
  */
@@ -32,6 +32,8 @@ var knownOpts = {
 	"host":            String,
 	"timeout":         Number,
 	"listen_all":      Boolean,
+	"ide-root":        path,
+	"preview-root":    path,
 	"config":          path,
 	"level":           ['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 	"log":             Boolean,
@@ -47,6 +49,8 @@ var shortHands = {
 	"t": ["--timeout"],
 	"a": ["--listen_all"],
 	"c": ["--config"],
+	"I": ["--ide-root"],
+	"P": ["--preview-root"],
 	"l": ["--level"],
 	"L": ["--log"],
 	"V": ["--version"]
@@ -78,6 +82,8 @@ if (argv.help) {
 		"  -t, --timeout     b   milliseconds of inactivity before a server socket is presumed to have timed out       [default: '240000']\n" +
 		"  -a, --listen_all  b   When set, listen to all adresses. By default, listen to the address specified with -H [boolean]\n" +
 		"  -c, --config      b   IDE configuration file                                                                [default: './ide.json']\n" +
+		"  -I, --ide-root        IDE client files location                                                             [default: '.']\n" +
+		"  -P, --preview-root    Preview client files location                                                             [default: '.']\n" +
 		"  -l, --level       b   IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')                 [default: 'http']\n" +
 		"  -L, --log         b   Log IDE debug to ./ide.log                                                            [boolean]\n");
 	process.exit(0);
@@ -149,7 +155,6 @@ var configPath, tester;
 var configStats;
 var aresAboutData;
 var serviceMap = {};
-
 
 if (argv.runtest) {
 	tester = require('./test/tester/main.js');
@@ -602,8 +607,6 @@ ide.res.services.filter(function(service){
 
 // Start the ide server
 
-var enyojsRoot = path.resolve(myDir,".");
-
 var app = express(),
     server = http.createServer(app);
 
@@ -711,8 +714,19 @@ app.configure(function(){
 
 	app.use(express.favicon(myDir + '/assets/images/ares_48x48.ico'));
 
-	app.use('/ide', express.static(enyojsRoot));
-	app.use('/test', express.static(path.join(enyojsRoot, '/test')));
+	["preview", "ide"].forEach(function(client) {
+		var dir = path.resolve(myDir, "_" + client);
+		if (!fs.existsSync(dir)) {
+			dir = myDir;
+		}
+		dir = argv[client + "-root"] || dir;
+		log.info("main", "Loading url: /" + client + " from folder:", dir);
+		app.use('/' + client, express.static(dir));
+		app.use('/' + client + '/lib', express.static(path.join(myDir, 'lib')));
+		app.use('/' + client + '/assets', express.static(path.join(myDir, 'assets')));
+	});
+
+	app.use('/test', express.static(path.join(myDir, '/test')));
 
 	app.use(express.logger('dev'));
 
