@@ -381,7 +381,7 @@ enyo.kind({
 		}
 		
 		if( inSender === "borderwidth"){
-		this.$.panels.setIndex(this.borderwidth);
+			this.$.panels.setIndex(this.borderwidth);
 		}
 		
 		if(inSender === "filepicker"){

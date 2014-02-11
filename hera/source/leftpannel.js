@@ -355,7 +355,6 @@ enyo.kind({
 	components: [
 		{kind: "enyo.FittableRows", classes: "enyo-fit", components: [
 			{kind: "Scroller", fit: true, components: [
-				
 				{kind: "Ares.Hera.ColorItem"},
 				{kind: "Ares.Hera.FontsItem"},
 				{kind: "Ares.Hera.BorderItem"},
@@ -367,7 +366,6 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		ares.setupTraceLogger(this);
-		
 	},
 	
 	selected: function(inSender, inEvent){

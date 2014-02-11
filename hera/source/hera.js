@@ -19,7 +19,7 @@ enyo.kind({
 		onRegisterMe: "",
 		onNewcss: "",			// insert at end of file
 		onReplacecss: "",		// replace it in ace
-		onEditcss: ""			// call to reload the css editor and data
+		onEditcss: "",			// call to reload the css editor and data
 	},	
 	handlers: {
 		onPickdeclaration: "radioActivated",
@@ -121,7 +121,7 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
 		this.newvalue = inEvent.originator.valueout;
-		
+
 		if(this.newvalue.indexOf("url") != -1){
 			this.fixurl(this.newvalue);
 		}
@@ -147,7 +147,10 @@ enyo.kind({
 		var tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
 		var outPut = this.className + " " + "{<br>" ;
 		var outString =  this.className + " " + "{\n" ;
-	
+			
+		if( this.className === null || this.className === ""){
+			return;
+		}
 		while(this.properties[a] !== undefined && this.properties[a] !== "null"){
 			if(this.properties[a] === "font-family"){
 				this.properties[a] =  "\t" + this.properties[a];
@@ -175,7 +178,11 @@ enyo.kind({
 	radioActivated: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
-	
+		
+		if( this.className === null || this.className === ""){
+			return;
+		}
+		
 		this.$.property = inEvent.name;
 		
 		if (inEvent.input === "font"){
@@ -389,10 +396,9 @@ enyo.kind({
     */
     deleteRule: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-			this.out = "";
-			this.doReplacecss();	// replace it with nothing
-			this.doEditcss();		// and a  reload
-	
+		this.out = "";
+		this.doReplacecss();	// replace it with nothing
+		this.doEditcss();		// and a  reload
 	}
 
 });
