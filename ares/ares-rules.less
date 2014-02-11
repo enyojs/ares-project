@@ -118,11 +118,9 @@
 }
 
 .ares-top-toolbar{
-	border-right: 0;
-	border-left: 0;
 	height:64px; 
 	line-height: 30px;
-	border-bottom: 1px solid #222; 
+	border: 1px solid #222; 
 	background: @ares-toolbar-gradient;
 	background-size: auto; /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
 	z-index: auto;
@@ -158,13 +156,6 @@
 	z-index: 9 ; // behind top-toolbar so tooltip are not hidden on Safari
 }
 
-.ares-top-toolbar.ares-designer-panels{
-	z-index: 10;
-}
-
-.ares-top-toolbar.ares-designer-panels>div {
-	margin : 0 1px;
-}
 .ares-designer-panels > .enyo-fittable-columns-layout.onyx-toolbar-inline > * {
 	vertical-align: inherit;
 }

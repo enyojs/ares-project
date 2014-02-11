@@ -3,7 +3,7 @@ enyo.kind({
 	name:"Ares.EnyoEditor",
 	kind:"FittableRows", 
 	components:[
-		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels enyo-border-box", components: [
+		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels", components: [
 			{kind: "onyx.Grabber", classes: "ares-grabber ares-icon", ontap: "activePanel", components:[
 				{kind: "aresGrabber", name: "aresGrabberDirection", classes:"lleftArrow"}
 			]},
