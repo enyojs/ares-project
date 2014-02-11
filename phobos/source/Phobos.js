@@ -484,10 +484,13 @@ enyo.kind({
 				o = this.analysis.objects[i];
 				var start = o.componentsBlockStart;
 				var end = o.componentsBlockEnd;
+				// components hierarchy is present in o.properties
+				// also hides an eval in there
 				var kindBlock = enyo.json.codify.from(c.substring(o.block.start, o.block.end));
 				var name = o.name;
 				var kind = kindBlock.kind || o.superkind;
 				var comps = [];
+
 				if (start && end) {
 					var js = c.substring(start, end);
 					/* jshint evil: true */
