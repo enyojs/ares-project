@@ -505,7 +505,7 @@ enyo.kind({
 				for (var j=0; j < o.properties.length; j++) {
 					var prop = o.properties[j];
 					var pName = prop.name;
-					var value = this.verifyValueType(analyzer.Documentor.stripQuotes(prop.value[0].name));
+					var value = this.verifyValueType(analyzer.Documentor.stripQuotes(prop.value[0].token)); // is not a token
 					if ((start === undefined || prop.start < start) && pName !== "components") {
 						if (value === "{" || value === "[" || value === "function") {
 							comp[pName] = kindBlock[pName];
