@@ -3,40 +3,37 @@ enyo.kind({
 	name:"Ares.EnyoEditor",
 	kind:"FittableRows", 
 	components:[
-		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels", components: [
+		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels enyo-border-box", components: [
 			{kind: "onyx.Grabber", classes: "ares-grabber ares-icon", ontap: "activePanel", components:[
 				{kind: "aresGrabber", name: "aresGrabberDirection", classes:"lleftArrow"}
 			]},
-			{name:"editorControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline editor-controls", components:[
-				{name: "editorFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
-				{name: "newKindDecorator", kind: "onyx.TooltipDecorator", components: [
-					{name: "newKindButton", kind: "onyx.IconButton", src: "assets/images/new_kind.png", ontap: "newKindAction"},
-					{kind: "onyx.Tooltip", content: $L("New Kind")}
-				]},
-				{fit: true},
-				{name: "editorSettingDecorator", kind: "onyx.TooltipDecorator", components: [
-					{name: "editorButton", kind: "onyx.IconButton", src: "assets/images/editor_settings.png", ontap: "editorSettings"},
-					{kind: "onyx.Tooltip", content: "Editor Settings"}
-				]},
+			{name: "designerFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
+			{name: "editorFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
+			{name: "newKindDecorator", kind: "onyx.TooltipDecorator", components: [
+				{name: "newKindButton", kind: "onyx.IconButton", src: "assets/images/new_kind.png", ontap: "newKindAction"},
+				{kind: "onyx.Tooltip", content: $L("New Kind")}
+			]},
+			{name: "docLabel", content: "Deimos", classes: "ares-left-margin"},
+			{name: "deimosKind", kind: "onyx.PickerDecorator", classes: "ares-right-margin", components: [
+				{name: "kindButton", classes:"ares-toolbar-picker deimos-kind-picker", kind: "onyx.PickerButton"},
+				{name: "kindPicker", kind: "onyx.Picker", onChange: "kindSelected", components: [
+				]}
+			]},
+			{fit: true},
+			{name: "editorSettingDecorator", kind: "onyx.TooltipDecorator", components: [
+				{name: "editorButton", kind: "onyx.IconButton", src: "assets/images/editor_settings.png", ontap: "editorSettings"},
+				{kind: "onyx.Tooltip", content: "Editor Settings"}
+			]},
+			{name: "designerButtonContainer", components: [ //TO DO: needs to avoid the confusion with phobos adjustPanelForMode
 				{name: "designerDecorator", kind: "onyx.TooltipDecorator", components: [
 					{name: "designerButton", kind: "onyx.IconButton", src: "assets/images/designer.png", ontap: "designerAction"},
 					{name: "designerButtonBroken", kind: "onyx.IconButton", src: "assets/images/designer_broken.png", ontap: "doDesignerBroken"},
 					{name: "designerTooltipBroken", kind: "Ares.ErrorTooltip", content: $L("Designer")}
 				]}
 			]},
-			{name:"deimosControls", kind: "FittableColumns", fit:true, classes: "onyx-toolbar-inline editor-controls", components:[
-				{name: "designerFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
-				{name: "docLabel", content: "Deimos", classes: "ares-left-margin"},
-				{kind: "onyx.PickerDecorator", classes: "ares-right-margin", components: [
-					{name: "kindButton", classes:"ares-toolbar-picker deimos-kind-picker", kind: "onyx.PickerButton"},
-					{name: "kindPicker", kind: "onyx.Picker", onChange: "kindSelected", components: [
-					]}
-				]},
-				{fit: true},
-				{name: "codeEditorDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
-					{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closeDesigner"},
-					{kind: "onyx.Tooltip", content: "Code editor"}
-				]}
+			{name: "codeEditorDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
+				{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closeDesigner"},
+				{kind: "onyx.Tooltip", content: "Code editor"}
 			]},
 			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
 				{kind: "onyx.IconButton", src: "../project-view/assets/images/project_view_preview.png", ontap: "requestPreview"},
@@ -217,6 +214,7 @@ enyo.kind({
 		}
 		this.$.kindButton.setContent(kinds[0].name);
 		this.$.kindPicker.render();
+		this.$.toolbar.resized();
 	},
 
 	designerAction: function() {
@@ -256,8 +254,18 @@ enyo.kind({
 	 */
 	manageControls: function(designer){
 		this.setAceActive(!designer);
-		this.$.editorControls.setShowing(!designer);
-		this.$.deimosControls.setShowing(designer);
+
+		//designer mode items
+		this.$.designerFileMenu.setShowing(designer);
+		this.$.docLabel.setShowing(designer);
+		this.$.deimosKind.setShowing(designer);
+		this.$.codeEditorDecorator.setShowing(designer);
+		//code editor mode items
+		this.$.editorFileMenu.setShowing(!designer);
+		this.$.newKindDecorator.setShowing(!designer);
+		this.$.editorSettingDecorator.setShowing(!designer);
+		this.$.designerButtonContainer.setShowing(!designer);
+
 		this.$.toolbar.resized();
 	},
 	switchGrabberDirection: function(active){
