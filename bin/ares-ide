@@ -11,7 +11,7 @@ case `uname` in
     *CYGWIN*) basedir=`cygpath -w "$basedir"`;;
 esac
 
-if [ -x "$basedir/node" ]; then
+if [ -x "$basedir/x86/node" ]; then
   "$basedir/x86/node"  "$basedir/./node_modules/ares-ide/ide.js" "$@"
   ret=$?
 else 
