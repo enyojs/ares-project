@@ -324,6 +324,7 @@ enyo.kind({
 		var projectUrl = project.getProjectUrl() + '/' + topFile ;
 
 		var winLoc = window.location.toString()
+			    .replace(/\/ide\/$/,'/ide/preview.html') // Ares std
 			    .replace('index.html','preview.html') // Ares minified
 			    .replace('debug.html','preview.html') // Ares debug (every files)
 			    .replace('test.html','preview.html'); // Ares-under-test
