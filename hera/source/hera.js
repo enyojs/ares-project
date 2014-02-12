@@ -104,11 +104,13 @@ enyo.kind({
 	*/
 	csssave: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
+	
 		if(this.mode === "reset"){
 			return;
 		}
 		if(this.mode === "editing"){
 			this.doReplacecss();
+			this.reset();
 		}
 		return true;
 	},
@@ -143,12 +145,14 @@ enyo.kind({
 	*/
 	updateBox: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
+	
+		this.removeStyles();
 		var a = 0;
 		var tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
 		var outPut = this.className + " " + "{<br>" ;
 		var outString =  this.className + " " + "{\n" ;
 			
-		if( this.className === null || this.className === ""){
+		if( this.className === ""){
 			return;
 		}
 		while(this.properties[a] !== undefined && this.properties[a] !== "null"){
@@ -158,10 +162,7 @@ enyo.kind({
 			outPut = outPut + tab + this.properties[a] + ":" + this.value[a] + "<br>";
 			outString = outString + this.properties[a] + ":" + this.value[a] + "\n";
 			
-			if(this.value[a].indexOf("url") != -1){
-				//	this.$.Sample.applyStyle(this.properties[a], this.proUrl);		// write url out to sapmle box here  
-				//	this.$.sampletext.applyStyle(this.properties[a], this.proUrl);
-			}else{
+			if(this.value[a].indexOf("url") === -1){
 				this.$.Sample.applyStyle(this.properties[a], this.value[a]);
 				this.$.sampletext.applyStyle(this.properties[a], this.value[a]);
 			}
@@ -179,7 +180,7 @@ enyo.kind({
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
 		
-		if( this.className === null || this.className === ""){
+		if( this.className === ""){
 			return;
 		}
 		
@@ -209,7 +210,7 @@ enyo.kind({
 	* the start of a new rule show the popup
 	*/
 	newRule: function(inSender, inEvent){
-		this.log("sender:", inSender, ", event:", inEvent);
+		this.trace("sender:", inSender, ", event:", inEvent);
 		this.$.newCssPopup.show();
 	},
 
@@ -249,7 +250,7 @@ enyo.kind({
 		this.$.outPut = "";
 		this.$.property = null;	
 		this.mode = "rest";
-		this.$.outputBox.applyStyle("color", "#FFFFFF");
+		this.$.sampletext.applyStyle("color", "#FFFFFF; font-size: 10px;" );
 		this.$.outputBox.applyStyle("background-color", "#000000");
 		this.$.bg.setContent("");	
 	},
@@ -289,6 +290,8 @@ enyo.kind({
 		var n = [];
 		this.csssave();
 		this.reset();
+		this.doEditcss();
+		
 		n = (this.file.split("\n"));			// split the file up by lines
 
 		if ( this.declaration[c] === "New"){		// check to see if were making a new declartion	
@@ -399,6 +402,31 @@ enyo.kind({
 		this.out = "";
 		this.doReplacecss();	// replace it with nothing
 		this.doEditcss();		// and a  reload
+	},
+	
+	/*
+	*	this function is ti stip out old styles from the preview samples
+	*/
+	removeStyles: function(inSender, inEvent){
+		var a = 0;
+		var p = "";
+		var s = "";
+	
+		if(this.out !== undefined){
+			var	n = (this.out.split("\n"));
+		
+			for (var i=0; i < n.length; i++) {
+				for(var j = i+1;  j < n.length; j++){
+					s = n[j].split(":");
+					if(s[0].indexOf("}") === 0){
+						break;
+					}
+					p[a] = s[0];
+					this.$.Sample.addStyles(s[0], "null");
+					this.$.sampletext.applyStyle(s[0], "null");
+					a++;
+				}
+			}
+		}
 	}
-
 });
