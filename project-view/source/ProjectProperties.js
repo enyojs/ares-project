@@ -459,7 +459,7 @@ enyo.kind({
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		var okDisabled = false;
 		var validDrawer = true;
-		var validPgbConf = Phonegap.ProjectProperties.getValidPgbConf();		
+		var validPgbConf = Phonegap.ProjectProperties.getValidPgbConf();
 		
 		// Set in the array {this.validatePhonegapUiValues} the originator UI row as valid
 		validPgbConf[inEvent.originator.platform][inEvent.originator.name] = true;

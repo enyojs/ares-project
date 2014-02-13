@@ -53,15 +53,15 @@ enyo.kind({
 	 */
 	disableDrawerHighLight: function() {
 
-		var provider = Phonegap.ProjectProperties.getProvider();
+		var validPgbConf = Phonegap.ProjectProperties.getValidPgbConf();
 
-		for (var key in provider.getSelectedProject().getValidPgbConf()[this.platform]) {
-			if (!provider.getSelectedProject().getValidPgbConf()[this.platform][key]) {
-				provider.getSelectedProject().getValidPgbConf()[this.platform]["validDrawer"] = false;
+		for (var key in validPgbConf[this.platform]) {
+			if (!validPgbConf[this.platform][key]) {
+				validPgbConf[this.platform]["validDrawer"] = false;
 			}
 		}
 
-		if (provider.getSelectedProject().getValidPgbConf()[this.platform]["validDrawer"]) {
+		if (validPgbConf[this.platform]["validDrawer"]) {
 			this.doDisableErrorHighLight();
 		}
 	}
@@ -746,30 +746,19 @@ enyo.kind({
 		onInputButtonTap: "",
 		onPathChecked: ""
 	},
+	handlers: {
+		onFileChooserAction: "pathInputTap" 
+	},  
 	components: [{
 		name: "label",
 		classes: "ares-project-properties-drawer-row-label"
 	},
+	{kind: "Ares.FileChooserInput", name: "AndroidImgPath", inputDisabled: true, inputClasses: "ares-project-properties-input-icon"},
 	{
-		kind: "onyx.InputDecorator",
-		classes: "ares-project-properties-input-medium",
-		components: [{
-			kind: "onyx.Input",
-			name: "AndroidImgPath",
-			disabled: true
-		}]
-	},
-	{
-		kind: "onyx.IconButton",
-		name: "AndroidImgButton",
-		src: "$project-view/assets/images/file-32x32.png",
-		ontap: "pathInputTap"
-	},
-	{
-		kind: "Ares.PickerDecorator",
+		kind: "onyx.PickerDecorator",
 		classes: "ares-project-properties-picker-small",
 		components: [{
-			kind: "Ares.PickerButton"
+			kind: "onyx.PickerButton"
 		},
 		{
 			kind: "onyx.Picker",
@@ -790,7 +779,6 @@ enyo.kind({
 			}]
 		}]
 	}],
-
 	/**
 	 * @private
 	 */
@@ -849,33 +837,28 @@ enyo.kind({
 
 	/** @private */
 	valueChanged: function() {
-		this.$.AndroidImgPath.setValue(this.value);
+		this.$.AndroidImgPath.setPathValue(this.value);
 		this.setStatus(true);
 	},
 	/** @private */
 	inputTipChanged: function() {
-		this.$.AndroidImgPath.setAttribute("title", this.inputTip);
+		this.$.AndroidImgPath.setInputTip(this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function() {
+		this.$.AndroidImgPath.setActivePathInputButton(this.activated);
 		if (this.activated) {
-			this.$.AndroidImgButton.show();
 			this.statusChanged();
-		} else {
-			this.$.AndroidImgButton.hide();
+			this.$.AndroidImgPath.statusChanged();
 		}
 	},
 	/** @private */
 	statusChanged: function() {
-		if (this.status) {
-			this.$.AndroidImgButton.setSrc("$project-view/assets/images/file-32x32.png");
-		} else {
-			this.$.AndroidImgButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
-		}
+		this.$.AndroidImgPath.setStatus(this.status);
 	},
 	/** @private */
 	buttonTipChanged: function() {
-		this.$.AndroidImgButton.setAttribute("title", this.buttonTip);
+		this.$.AndroidImgPath.setButtonTip(this.buttonTip);
 	},
 
 	/** @private */
@@ -915,6 +898,9 @@ enyo.kind({
 		onInputButtonTap: "",
 		onPathChecked: ""
 	},
+	handlers: {
+		onFileChooserAction: "pathInputTap" 
+	},
 	published: {
 		height: "",
 		width: "",
@@ -928,21 +914,7 @@ enyo.kind({
 		name: "label",
 		classes: "ares-project-properties-drawer-row-label"
 	},
-	{
-		kind: "onyx.InputDecorator",
-		classes: "ares-project-properties-input-medium",
-		components: [{
-			kind: "onyx.Input",
-			name: "ImgPath",
-			disabled: true
-		}]
-	},
-	{
-		kind: "onyx.IconButton",
-		name: "ImgButton",
-		src: "$project-view/assets/images/file-32x32.png",
-		ontap: "pathInputTap"
-	},
+	{kind: "Ares.FileChooserInput", name: "ImgPath", inputDisabled: true, inputClasses: "ares-project-properties-input-icon"},
 	{
 		content: "Height",
 		classes: "ares-project-properties-drawer-row-attribute-label"
@@ -975,7 +947,6 @@ enyo.kind({
 		classes: "ares-project-properties-input-error-message small"
 	},
 	],
-
 	/**
 	 * @private
 	 */
@@ -1066,33 +1037,28 @@ enyo.kind({
 
 	/** @private */
 	valueChanged: function() {
-		this.$.ImgPath.setValue(this.value);
+		this.$.ImgPath.setPathValue(this.value);
 		this.setStatus(true);
 	},
 	/** @private */
 	inputTipChanged: function() {
-		this.$.ImgPath.setAttribute("title", this.inputTip);
+		this.$.ImgPath.setInputTip(this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function() {
+		this.$.ImgPath.setActivePathInputButton(this.activated);
 		if (this.activated) {
-			this.$.ImgButton.show();
 			this.statusChanged();
-		} else {
-			this.$.ImgButton.hide();
+			this.$.ImgPath.statusChanged();
 		}
 	},
 	/** @private */
 	statusChanged: function() {
-		if (this.status) {
-			this.$.ImgButton.setSrc("$project-view/assets/images/file-32x32.png");
-		} else {
-			this.$.ImgButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
-		}
+		this.$.ImgPath.setStatus(this.status);
 	},
 	/** @private */
 	buttonTipChanged: function() {
-		this.$.ImgButton.setAttribute("title", this.buttonTip);
+		this.$.ImgPath.setButtonTip(this.buttonTip);
 	},
 
 	/** @private */
