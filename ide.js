@@ -716,10 +716,18 @@ app.configure(function(){
 
 	app.use(express.logger('dev'));
 
+	// Real home is '/ide/'
 	app.get('/', function(req, res, next) {
 		log.http('main', "GET /");
 		res.redirect('/ide/');
 	});
+	// Compatibility redirection to not invalidate bookmarks to
+	// former home.
+	app.get('/ide/ares*', function(req, res, next) {
+		log.http('main', "GET /ide/ares*");
+		res.redirect('/ide/');
+	});
+
 	app.get('/res/timestamp', function(req, res, next) {
 		res.status(200).json({timestamp: ide.res.timestamp});
 	});
