@@ -152,6 +152,13 @@ enyo.kind({
 		}
 	},
 
+	/**
+	 * Set the frame to create a new project.
+	 * Start from the selection of a project creation action, & finish when
+	 * the Project wizard pop-up is displayed.
+	 * 
+	 * @private.
+	 */
 	_createProject: function() {
 		this.trace();
 		var conf = ares.clone(ProjectConfig.PREFILLED_CONFIG_FOR_UI);
@@ -163,6 +170,16 @@ enyo.kind({
 		], this._waitOk.bind(this));
 	},
 
+	
+	/**
+	 * Initialize the project's directory instance & the configuration for the Project properties
+	 * View.
+	 * 
+	 * @param  {Boolean}  isCreation Specify wether if it's a creation or an edition of the project.
+	 * @param  {Object}   conf       The prefilled configuration of the project.
+	 * @param  {Function} next       CommonJs callback.
+	 * @Private
+	 */
 	_fillProjectPropPopup: function(isCreation, conf, next) {
 		this.trace("conf:", conf);
 		var propW = this.$.propertiesWidget;
@@ -183,7 +200,14 @@ enyo.kind({
 		next();
 	},
 
-	_getSources: function(type, next) {
+	/**
+	 * Send a request to the ServiceRegistery in order to initialize the service instance.
+	 * 
+	 * @param  {String}   type [description]
+	 * @param  {Function} next CommonJs callback
+	 * @private
+	 */
+	_getSources: function(type ,next) {
 		this.trace("type:", type);
 		var propW = this.$.propertiesWidget;
 		// Getting template list
@@ -202,6 +226,13 @@ enyo.kind({
 		}
 	},
 
+
+	/**
+	 * Display the Project wizard pop-up.
+	 * 
+	 * @param  {Function} next CommonJs callback
+	 * @private
+	 */
 	_showProjectPropPopup: function(next) {
 		this.$.selectDirectoryPopup.hide();
 		this.$.selectDirectoryPopup.reset();
@@ -210,6 +241,12 @@ enyo.kind({
 		next();
 	},
 
+	/**
+	 * Display an error pop-up in the case where an exception occurs.
+	 * 
+	 * @param  {Object} err error instance.
+	 * @private
+	 */
 	_waitOk:function(err) {
 		this.trace("err:", err);
 		this.doHideWaitPopup();
