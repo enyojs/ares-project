@@ -399,6 +399,25 @@ enyo.kind({
 	},
 
 	statics: {
+		getValidPgbConf: function() {
+			var pgbValidation = {};
+			var pgbUiData = Phonegap.UIConfiguration.commonDrawersContent.concat(Phonegap.UIConfiguration.platformDrawersContent);
+			var index =0;
+
+			for (index in pgbUiData) {
+				//The creation of the pgbValidation drawer attribute and its initialization are done in the same time.
+				pgbValidation[pgbUiData[index].id] = {};
+
+				for (var i=0, maxLength = pgbUiData[index].rows.length; i<maxLength; i++) {
+					//The creation of the pgbValidation row attribute and its initialization are done in the same time.
+					pgbValidation[pgbUiData[index].id][pgbUiData[index].rows[i].name] = true;
+				}
+				pgbValidation[pgbUiData[index].id]["validDrawer"] = true;			
+			}
+
+			return pgbValidation;
+		},
+
 		getProvider: function() {
 			this.provider = this.provider || ServiceRegistry.instance.resolveServiceId('phonegap');
 			return this.provider;
