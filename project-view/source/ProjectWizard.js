@@ -854,7 +854,15 @@ enyo.kind({
 		}
 
 		function _next(err) {
+			
 			this.doHideWaitPopup();
+			
+			if(projects.length === 0) {
+				var error = new Error("This folder can't be opened as a project. Project.json file not found.");
+				this.doError({msg: error.message});
+				this.warn(error);
+			}
+			
 			if (err) {
 				this.warn("Unable to open project:", err);
 				if (!this.recurse) {
