@@ -60,19 +60,19 @@ _.extend(AresStore.prototype, {
 	find: function(model) {
 		return this.data[model.id];
 	},
-    
-    // Return the array of all models currently in storage.
-    findAll: function() {
-		return _.values(this.data);
-    },
 
-    // Delete a model from `this.data`, returning it.
-    destroy: function(model) {
+	// Return the array of all models currently in storage.
+	findAll: function() {
+		return _.values(this.data);
+	},
+
+	// Delete a model from `this.data`, returning it.
+	destroy: function(model) {
 		delete this.data[model.id];
 		this.save();
 		return model;
-    },
-    sync: function(method, model, options) {
+	},
+	sync: function(method, model, options) {
 		var resp;
 
 		switch (method) {
