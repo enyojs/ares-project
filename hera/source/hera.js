@@ -169,7 +169,6 @@ enyo.kind({
 				this.$.sampletext.applyStyle(this.properties[a], this.value[a]);
 			}else{
 				this.$.Sample.applyStyle(this.properties[a], this.proUrl );
-				this.$.sampletext.applyStyle(this.properties[a], this.value[a]);	
 			}
 			a++;
 		}		
@@ -393,7 +392,7 @@ enyo.kind({
 			}
 		}
 		
-		var urlout = "	url(" + add + b ;
+		var urlout = "	url(" + add + b + ");";
 		this.valueout = urlout;
 		this.proUrl = "	url(http://127.0.0.1:9009/res/services/home/id/" + id + ")";
 		this.change(this.valueout);
