@@ -8,6 +8,7 @@ enyo.kind({
 		onValueUpdate: "",
 		onUnitChange: "",
 		onRegisterMe: "",
+		onUrlout: "",
 	},
 	handlers: {
 		onTotalx: "inputx",
@@ -250,8 +251,8 @@ enyo.kind({
 	},
 	
 	fileChosen: function(inSender, inEvent){
-		this.valueout = "url(" + inEvent.name + ");";
-		this.doValueUpdate();
+		this.event = inEvent	
+		this.doUrlout(this.event);
 	},
 	
 	input_picker: function(inSender, inEvent){
