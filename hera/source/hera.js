@@ -25,6 +25,7 @@ enyo.kind({
 		onPickdeclaration: "radioActivated",
 		onValueUpdate: "change",
 		onUnitChange: "unitchange",
+		onUrlout: "fixurl"		
 	},
 	components: [
 		{kind: "enyo.FittableColumns", style: "width: 33%; height: 100%;", components:[
@@ -122,12 +123,13 @@ enyo.kind({
 	change: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
-		this.newvalue = inEvent.originator.valueout;
-
-		if(this.newvalue.indexOf("url") != -1){
-			this.fixurl(this.newvalue);
-		}
 		
+		if(inEvent === undefined){
+			this.newvalue = this.valueout;
+		}else{
+			this.newvalue = inEvent.originator.valueout;
+		}
+
 		while(this.properties[a] !== undefined && this.properties[a] !== "null"){
 			if(this.properties[a].indexOf(this.$.property) !== -1 ){
 				break;	
@@ -165,6 +167,9 @@ enyo.kind({
 			if(this.value[a].indexOf("url") === -1){
 				this.$.Sample.applyStyle(this.properties[a], this.value[a]);
 				this.$.sampletext.applyStyle(this.properties[a], this.value[a]);
+			}else{
+				this.$.Sample.applyStyle(this.properties[a], this.proUrl );
+				this.$.sampletext.applyStyle(this.properties[a], this.value[a]);	
 			}
 			a++;
 		}		
@@ -358,25 +363,24 @@ enyo.kind({
    /*
    * fix the in coming url to package 
    */
-	fixurl: function(address){
-		this.trace("address:", address);
-		var project = Ares.Workspace.projects.active;
-	
-		var urlin = address.split("/");
+	fixurl: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		var project = Ares.Workspace.projects.active;		
+		var id = inEvent.file.id
+			
+		var urlin = inEvent.name.split("/");
 		var currentFileUrl = this.filesourcedir;
 		var a = currentFileUrl.split("/");
 		var add = "";
 		var b = "";
-		var pUrl = "";
-			
+				
 		for (var i=1; i < a.length; i++) {		//  work our way back to the project root from the css file
-			pUrl = pUrl + a[i] + "/";
-			
 			if(a[i] === project){
 				i++;
 				for(i; i < a.length; i++){
 					add = add + ".";
 				}
+
 			}
 		}
 		
@@ -388,10 +392,11 @@ enyo.kind({
 				}
 			}
 		}
+		
 		var urlout = "	url(" + add + b ;
-		this.newvalue = urlout;
-		this.proUrl = "	url(" + pUrl + "/" + b.slice(1);
-		return;
+		this.valueout = urlout;
+		this.proUrl = "	url(http://127.0.0.1:9009/res/services/home/id/" + id + ")";
+		this.change(this.valueout);
     },
     
     /*

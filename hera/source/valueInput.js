@@ -251,7 +251,7 @@ enyo.kind({
 	},
 	
 	fileChosen: function(inSender, inEvent){
-		this.event = inEvent	
+		this.event = inEvent;	
 		this.doUrlout(this.event);
 	},
 	
