@@ -365,7 +365,7 @@ enyo.kind({
 	fixurl: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var project = Ares.Workspace.projects.active;		
-		var id = inEvent.file.id
+		var id = inEvent.file.id;
 			
 		var urlin = inEvent.name.split("/");
 		var currentFileUrl = this.filesourcedir;
