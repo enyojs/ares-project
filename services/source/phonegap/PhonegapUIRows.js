@@ -52,8 +52,8 @@ enyo.kind({
 	 * @private
 	 */
 	disableDrawerHighLight: function() {
-
-		var validPgbConf = Phonegap.ProjectProperties.getValidPgbConf();
+		var provider = Phonegap.ProjectProperties.getProvider();
+		var validPgbConf = provider.getSelectedProject().getValidPgbConf();
 
 		for (var key in validPgbConf[this.platform]) {
 			if (!validPgbConf[this.platform][key]) {

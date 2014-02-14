@@ -421,7 +421,8 @@ enyo.kind({
 	},
 	
 	disableOkButton: function(inSender, inEvent) {
-		var validPgbConf = Phonegap.ProjectProperties.getValidPgbConf();
+		var provider = Phonegap.ProjectProperties.getProvider();
+		var validPgbConf = provider.getSelectedProject().getValidPgbConf();
 
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		this.$.ok.setDisabled(true);
@@ -459,7 +460,8 @@ enyo.kind({
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		var okDisabled = false;
 		var validDrawer = true;
-		var validPgbConf = Phonegap.ProjectProperties.getValidPgbConf();
+		var provider = Phonegap.ProjectProperties.getProvider();
+		var validPgbConf = provider.getSelectedProject().getValidPgbConf();
 		
 		// Set in the array {this.validatePhonegapUiValues} the originator UI row as valid
 		validPgbConf[inEvent.originator.platform][inEvent.originator.name] = true;

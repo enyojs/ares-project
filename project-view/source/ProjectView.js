@@ -140,6 +140,7 @@ enyo.kind({
 				config.init.bind(config, initData) ,
 				function (next) {
 					self.trace("ProjectView: setup project set config on "+ project.getName() );
+					self.initializeValidPgbConf(project, config.data.providers.phonegap.enabled);
 					project.setConfig(config);
 					
 					self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled);					
@@ -180,6 +181,30 @@ enyo.kind({
 			inProject.setDownloadStatus(downloadStatus);
 		}
 	},
+
+
+	initializeValidPgbConf: function(inProject, inPhonegapEnabled) {
+		if (inProject.getValidPgbConf() === undefined && inPhonegapEnabled) {
+			var pgbValidation = {};
+			var pgbUiData = Phonegap.UIConfiguration.commonDrawersContent.concat(Phonegap.UIConfiguration.platformDrawersContent);
+			var index =0;
+
+			for (index in pgbUiData) {
+				//The creation of the pgbValidation drawer attribute and its initialization are done in the same time.
+				pgbValidation[pgbUiData[index].id] = {};
+
+				for (var i=0, maxLength = pgbUiData[index].rows.length; i<maxLength; i++) {
+					//The creation of the pgbValidation row attribute and its initialization are done in the same time.
+					pgbValidation[pgbUiData[index].id][pgbUiData[index].rows[i].name] = true;
+				}
+				pgbValidation[pgbUiData[index].id]["validDrawer"] = true;
+			}
+
+			inProject.setValidPgbConf(pgbValidation);
+		}
+	},
+
+	
 	
 	projectRemoved: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("harmonia").setProject(null, ares.noNext);
