@@ -75,7 +75,7 @@ input.inspector-field-checkbox {
 
 .inspector-event-button { width: 74px; height: 21px; padding:2px;}
 .inspector-event-button:before {
-	content: url(../../../ares/assets/images/smallArrowDown.png);
+	content: url(../../../../assets/images/smallArrowDown.png);
 }
 
 .inspector-color-button {
