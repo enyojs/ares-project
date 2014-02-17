@@ -144,7 +144,7 @@ Ares.Model.Project = Backbone.Model.extend({				// TODO: Move to enyo.Model when
 		this.set("downloadStatus", downloadStatus);
 	},
 	getValidPgbConf: function() {
- 		return this.get("validPgbConf");
+		return this.get("validPgbConf");
 	},
 	setValidPgbConf: function(conf) {
 		this.set("validPgbConf", conf);
