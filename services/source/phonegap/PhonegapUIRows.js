@@ -464,7 +464,16 @@ enyo.kind({
 	setProjectConfig: function(config) {
 		this.setValue(config.access.origin);
 		this.valueChanged();
-		
+
+		this.initializeAddedAccessRows(config);	
+	},
+	/** @public */
+	getProjectConfig: function(config) {
+		config.access.origin = this.getValue();
+	},
+	
+	/** @private */
+	initializeAddedAccessRows: function(config) {
 		// Browse the JSON object "config.access" to set the value of each addedAccessRow instance.
 		for (var key in config.access) {
 			
@@ -478,10 +487,6 @@ enyo.kind({
 				}
 			}
 		}
-	},
-	/** @public */
-	getProjectConfig: function(config) {
-		config.access.origin = this.getValue();
 	},
 	
 	/** 
