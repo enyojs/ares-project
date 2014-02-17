@@ -36,6 +36,33 @@ enyo.kind({
 		return this.container.container;
 	},
 
+	/**
+	 * @private
+	 */
+	getPhonegapProvider: function() {
+		return Phonegap.ProjectProperties.getProvider();
+	}, 
+	
+	/**
+	 * @private
+	 */
+	getProjectInstance: function() {
+		var provider = this.getPhonegapProvider();
+		return provider.getSelectedProject();
+	},
+
+	/**
+	 * @private
+	 * @param  {String} inAttribute the Phonegap attribute.
+	 * @return {Object}
+	 */
+	getProjectInstanceAttribute: function(inAttribute) {
+		return this.getProjectInstance().getConfig().data.providers.phonegap[inAttribute];
+	},
+
+	/**
+	 * @private
+	 */
 	errChanged: function(prevErr) {
 		this.trace("err:", this.err && this.err.toString(), "<-", prevErr && prevErr.toString());
 		if (prevErr && !this.err) {
@@ -361,24 +388,43 @@ enyo.kind({
 	}
 });
 
+/**
+ * This kind will define an access row that will let the user define 
+ * a URL to an external ressource for the Phonegap application.
+ * This row will have an "Add" button to dynamicaly append instances of 
+ * the kind "Phonegap.ProjectProperties.AddedAccessRow".
+ * The Phonegap Build UI have one & only one instance of this kind.
+ * In the project.json file, the value of recovred from an instance of this
+ * kind will be associated to the key "origin".
+ */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.AccessRow",
 	kind: "Phonegap.ProjectProperties.Row",
 	classes: "ares-project-properties-drawer-row",
 	debug: false,
-	components: [{
-		name: "label",
-		classes: "ares-project-properties-drawer-row-label"
-	},
-	{
-		kind: "onyx.InputDecorator",
-		classes: "ares-project-properties-input-medium",
-		components: [{
-			kind: "onyx.Input",
-			name: "configurationInput",
-			onchange: "updateConfigurationValue"
-		}]
-	}],
+	components: [
+		{
+			name: "label",
+			classes: "ares-project-properties-drawer-row-label"
+		},
+		{
+			kind: "onyx.InputDecorator",
+			classes: "ares-project-properties-input-medium",
+			components: [
+				{
+					kind: "onyx.Input",
+					name: "configurationInput",
+					onchange: "updateConfigurationValue"
+				}
+			]
+		},
+		{
+			name: "addButton",
+			kind: "onyx.IconButton",
+			src: "$assets/services/images/add-icon-25x25.png",
+			ontap: "addAccessRow"
+		}		
+	],
 
 	/**
 	 * @private
@@ -418,10 +464,126 @@ enyo.kind({
 	setProjectConfig: function(config) {
 		this.setValue(config.access.origin);
 		this.valueChanged();
+
+		this.initializeAddedAccessRows(config);	
 	},
 	/** @public */
 	getProjectConfig: function(config) {
 		config.access.origin = this.getValue();
+	},
+	
+	/** @private */
+	initializeAddedAccessRows: function(config) {
+		// Browse the JSON object "config.access" to set the value of each addedAccessRow instance.
+		for (var key in config.access) {
+			
+			if (key !== "origin" ) {
+				if (typeof this.container.$[key] !== "undefined"){
+					// If The instance "addedAccessRow" existe, then set its value.
+					this.container.$[key].set("value", config.access[key]);
+				} else {
+					// If the row instance doesn't existe, then create the instance and set its value.
+					this.addAccessRow().set("value", config.access[key]);
+				}
+			}
+		}
+	},
+	
+	/** 
+	 * The "Phonegap.ProjectProperties.AddedAccessRow" instances will be added
+	 * to the container "AccessRowsContainer".
+	 * @private
+	 */
+	addAccessRow: function() {
+		var newComponent = this.container.createComponent(
+			{kind: "Phonegap.ProjectProperties.AddedAccessRow"},
+			{addBefore: this.container.$.icon}
+		);
+		this.container.render();
+
+		return newComponent;
+	}
+	
+});
+
+/**
+ * This widget let the user define additionnal row to add more Access entries
+ * to the Phonegap application.
+ * An addedAccessRow will have a "Remove" button to delete the added entry.
+ * The Phonegap Build UI have 0..* instance of this kind.
+ * In the project.json file, the value of recovred from an instance of this
+ * kind will be associated to the key "addedAccessRowX", where X is an integer
+ * number corresponding to the "Phonegap.ProjectProperties.AddedAccessRow" auto-generated
+ * instance number.
+ */
+enyo.kind({
+	name: "Phonegap.ProjectProperties.AddedAccessRow",
+	kind: "Phonegap.ProjectProperties.Row",
+	classes: "ares-project-properties-drawer-row",
+	debug: false,
+	components: [
+		{name: "label", classes: "ares-project-properties-drawer-row-label"},
+		{	
+			kind: "onyx.InputDecorator",
+			name: "AccessRowDecorator",
+			classes: "ares-project-properties-input-medium",
+			components: [
+				{
+					kind: "onyx.Input",
+					name: "configurationInput",
+					onchange: "updateConfigurationValue"
+				}
+			]
+		},
+		{
+			name: "deleteButton",
+			kind: "onyx.IconButton",
+			parentRowName: "",
+			src: "$assets/services/images/delete-icon-25x25.png",
+			ontap: "deleteAccessRow"
+		}
+	],
+	/**
+	 * @private
+	 */
+	create: function() {
+		this.inherited(arguments);
+		this.$.deleteButton.set("parentRowName", this.name);
+	},
+
+	/**
+	 * @private
+	 */
+	valueChanged: function () {
+		this.$.configurationInput.setValue(this.value);		
+	},
+
+	/**
+	 * @param  {Object} inSender the event sender
+	 * @param  {Object} inValue  the event value
+	 * @private
+	 */
+	updateConfigurationValue: function (inSender, inValue) {
+		this.setValue(inSender.getValue());
+		return true;
+	},
+
+	/** @public */
+	setProjectConfig: function (config) {
+		//the setting of the project configuration is done in the kind "Phonegap.ProjectProperties.AccessRow".
+	},
+	/** @public */
+	getProjectConfig: function (config) {
+		config.access[this.name] = this.getValue();
+	},
+	
+	/** @private */
+	deleteAccessRow: function(inSender, inEvent) {
+		//Delete the row value from the project model object.
+		delete this.getProjectInstanceAttribute("access")[inSender.get("parentName")];
+		
+		//Delete the row form the UI.
+		this.destroy();	
 	}
 });
 

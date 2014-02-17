@@ -1163,13 +1163,13 @@ enyo.kind({
 			createSplashScreenXMLRow.call(self, target);			
 		}, this);
 
-		xw.writeComment("Access external websites ressources");
-		
-		xw.writeStartElement('access');
-		xw.writeAttributeString('origin', phonegap.access.origin);		
-		xw.writeEndElement(); // access			
-		
-		
+		xw.writeComment("Access external websites ressources");		
+		for (var origin in phonegap.access){
+			xw.writeStartElement('access');
+			xw.writeAttributeString('origin', phonegap.access[origin]);		
+			xw.writeEndElement();
+		}
+				
 
 		xw.writeEndElement();	// widget
 
