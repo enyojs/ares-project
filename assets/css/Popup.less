@@ -1,0 +1,358 @@
+.ares-classic-popup {
+	background-color: @ares-popup-backgrond-color;
+	color: @ares-popup-text-color;
+	.ares-rounded-corners(@ares-popup-radius);
+	.ares-box-shadow(0px 0px 10px #000000);
+	padding:0;
+}
+
+.ares-classic-popup .title {
+	min-height: @ares-popup-title-height;
+	line-height: @ares-popup-title-height;
+	font-size: @ares-font-size-large;
+	padding-left: 20px;
+	background-color: @ares-popup-bar-background-color;
+	text-transform: uppercase;
+	border-bottom: 2px solid @ares-popup-bar-border-color;
+	.ares-rounded-corners(@ares-popup-radius @ares-popup-radius 0px 0px);
+}
+
+//use a span inside the title div if your pop-up's title is on more then one line
+.title >span{
+	line-height: unit((@ares-popup-title-height/@ares-font-size-large)/2) ;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.ares-classic-popup .title.draggable {
+	cursor: pointer;
+	cursor: hand;
+}
+
+.ares-classic-popup .title.left-align { padding-left: 6px; }
+
+
+.ares-radio-group {
+	line-height: unit((@ares-popup-title-height/@ares-font-size-large)/2) ;
+	display: inline-block;
+	vertical-align: bottom;
+}
+
+.ares-radio-group>button {
+	line-height: 32px;
+	padding: 0;
+	margin:0;
+	background-image: none;
+	color: @ares-radiogroup-text-color;
+	border: 1px solid @ares-radiogroup-border-color;
+	width: 182px;
+}
+
+.ares-radio-group>button.active {
+	background-image: none;
+	background-color: @ares-radiogroup-active-background;
+	color: @ares-active-text-color;
+	border: 1px solid @ares-radiogroup-active-border;
+	.ares-box-shadow(inset 0px 0px 15px @ares-radiogroup-boxshadow-color);
+}
+
+.ares-bottom-check {
+	height: 8px;
+	width: 0;
+	position: relative;
+	border-bottom: 8px solid @ares-background;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	bottom: -6px;
+	right: 43%;
+}
+
+.bottom-toolbar {
+	position: relative;
+	background-image: none;
+	background-color: @ares-popup-bar-background-color;
+	padding: 7px;
+	border:0;
+	border-top: 1px solid @ares-popup-bar-border-color;
+	.ares-rounded-corners(0px 0px @ares-popup-radius @ares-popup-radius);
+	min-height: 28px;
+}
+.bottom-toolbar.white{
+	background-color: white;
+	
+}
+.bottom-toolbar > .onyx-button {
+	border: 1px solid @ares-popup-bar-border-color;
+	margin: 0 1px;
+}
+
+.bottom-toolbar>.onyx-button.right { position: absolute; right: 7px; }
+
+.ares-small-popup { width:325px; height:150px; padding: 5px 10px; }
+
+.ares-small-popup-details { position:relative; width: 300px; word-wrap: break-word; }
+
+.ares-small-popup-details { padding-top: 10px; position:relative; }
+
+.ares-small-popup-details { 
+	position:relative;
+	width: 300px;
+	word-wrap: break-word;
+	padding: 10px 0 0 10px;
+	background: transparent; 
+	height: auto;
+	text-align: left;
+}
+
+.ares-error-popup { width:340px; min-height:170px; padding: 5px 10px; }
+
+.ares-error-text { width: 98%; margin:5px 0px; height: 105px; resize: vertical; }
+
+.ares-error-details .button { padding-top: 10px; position:relative; }
+
+.ares-error-details .label { 
+	border: none; 
+	color:#000000; 
+	background: transparent; 
+	height: auto; 
+	padding-left: 10px; 
+	text-align: left; 
+}
+
+.ares-error-drawer { padding-top: 3px; }
+
+.ares-masked-content-popup { background: none; box-shadow: none; border:none; }
+
+.ares-waitpopup {
+	margin-left: auto;
+	margin-right: auto;
+	width: 20%; 
+}
+
+/* Ares "Phonegap build" panel.*/
+.ares-project-properties-appid-id { 
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+.ares-project-properties-appid-title {
+	margin-left: 30px;
+	margin-right: 10px;
+}
+
+.ares-project-properties-drawer-row-attribute-label {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.ares-project-properties-application-panel {
+	height: 11em;
+}
+.ares-project-properties-help-button {
+	position: absolute;
+	display: inline;
+	right: 0px;
+}
+.ares-project-properties-common_drawer_header { 
+	margin-left: 50px;
+	color: @ares-drawer-label;
+	font-weight:bold;
+}
+.ares-project-properties-build-option-panel {
+	margin-top: 40px;
+}
+.ares-project-properties-appid-container {
+	margin-top: 1em;
+}
+
+.ares-project-properties-platform_drawer_header { 
+	margin-left: 10px; 
+	color: @ares-drawer-label;
+	font-weight:bold;
+	vertical-align: middle;
+}
+
+.ares-project-properties-picker-AppId{
+	
+	width: 24em!important;	
+	margin-right: 30px;
+	margin-left: 1em;
+	margin-bottom: 15px;
+}
+
+.onyx-menu-item.ares-project-properties-picker-item-align-left  {
+	text-align: left;
+	margin-left: 0.3em;
+}
+
+.ares-project-properties-picker {
+	width: 15em;
+}
+.ares-project-properties-picker-small {
+	width: 50px;
+	margin-left: 10px;
+}
+
+.ares-project-properties-api-version-picker-element {
+	text-align: left !important;
+}
+
+.ares-project-properties-input-small > input {
+	width: 50px;	
+}
+.ares-project-properties-input-medium > input {
+	width: 14em;
+}
+
+.ares-project-properties-input-error-message {
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	max-width: 56%;
+	background-color: #FFD323;
+	margin-left: 5px;
+	.ares-rounded-corners();	
+	word-wrap: break-word;
+	overflow: hidden;
+}
+.ares-project-properties-input-error-message.small{
+	max-width: 25%;
+}
+.ares-project-properties-textarea-wide > textarea {
+	width: 500px;
+	height: 85px;
+}
+.ares-project-properties-password {
+	width: 9em !important;
+}
+.ares-project-properties-show-sk {
+	width: 15em;
+	background-color: #aaaaaa;
+	text-align: center;
+	padding-top: 0.5em;
+	margin-right: 3em;
+	.ares-rounded-corners (@ares-drawer-radius);
+}
+.ares-project-properties-label-background { 
+	background-color: @ares-background;
+	.ares-box-shadow (inset 0px 0px 30px rgba(0,0,0,0.3));
+	line-height: 1.5;
+	padding: 3px;
+	margin-bottom: 4px;
+	.ares-rounded-corners (@ares-drawer-radius);
+	cursor: hand;
+	cursor: pointer;
+}
+
+.ares-project-properties-label-background:hover {
+	background-color: @ares-backgound-hover
+}
+
+.ares-project-properties-label-background_error {
+	background-color: #d66;
+}
+
+.ares-project-properties-label-background_error:hover {
+	background-color: #e88;
+}
+
+.ares-project-properties-status-message {
+	position: relative;
+	top: 2.5em;
+	left: 2.8em;
+}
+.ares-project-properties-status-message-container {
+	background-color: #ddd;
+	.ares-rounded-corners (3px);
+	width: 35em;
+	height: 7em!important;
+}
+.ares-project-properties-hide-status-button {
+	position: relative;
+	left: 32.5em;
+	top: 0.2em;
+	height: 1.3em;
+	// otherwise button partly hides behind the fittable columns
+	// containing the download icon
+	z-index: 4;
+}
+.ares-project-properties-build-status-container {
+	margin-left: 3em;
+	height: 120px;
+}
+.ares-project-properties-build-status-icon {
+	width: 34px;
+	height: 34px;
+
+	padding-right: 5px;
+	margin-left: 1em;
+}
+.ares-project-properties-platform-icon-container {
+	height: 32px;	
+}
+.ares-project-properties-qrcode-image {
+	position: relative;
+	top: -16px;
+	left: 50px;
+}
+.ares-project-properties-buildStatus-icon-highlight {
+	background-color: #ddd;
+}
+.ares-project-properties-margin-right {
+	margin-right: 5px;
+	margin-left: 5px;
+}
+.ares-project-properties-buildStatus-download-button-android {
+	margin-left: 1em;
+}
+.ares-project-properties-buildStatus-download-button-ios {
+	margin-left: 4.7em;
+}
+.ares-project-properties-buildStatus-download-button-winphone {
+	margin-left: 8.5em;
+}
+.ares-project-properties-buildStatus-download-button-blackberry {
+	margin-left: 12em;
+}
+.ares-project-properties-buildStatus-download-button-webos {
+	margin-left: 15.6em;
+}
+.ares-group-box>.onyx-input-decorator{ box-shadow: none; }
+
+.ares-project-properties-refresh-button{ left: 200px; }
+
+.ares-project-properties-drawer-row{ margin-top: 3px; height: 2.5em; }
+
+.ares-project-properties-drawer-row-label{ width: 11em; margin-left:3em; margin-right: 10px; text-align: right; overflow: hidden}
+
+.ares-project-properties-drawer-row-check-box-label{ margin-left: 30px; margin-right: 10px; }
+
+label.ares-project-properties-label{
+	vertical-align: baseline;
+}
+.panels-phonegap-grid{
+	min-height: 4em;
+}
+.ares-project-properties{
+	font-size: 12px;
+}
+.ares-project-properties .onyx-picker-decorator .onyx-button{
+	padding: 4px 18px;
+}
+.ares-project-properties .onyx-input-decorator{
+	padding: 2px 5px 2px 8px;
+	height: 85%;
+}
+.ares-project-properties .onyx-button{
+	padding: 4px 18px;
+}
+.ares-project-properties .ares-project-properties-drawer-row .ares-path-input{
+	position: relative;
+	top: -3px;
+	height: 85%;
+}
+/* Ares about popup */
+.ares-about-drawer { height: 145px; min-width: 400px; padding: 5px 10px; margin-top: 15px; }
+
+.onyx-input-decorator > input.ares-project-properties-input-icon{
+	width: 10rem;
+}

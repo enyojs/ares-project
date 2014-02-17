@@ -1,0 +1,96 @@
+.inspector-field-caption {
+	display: inline-block;
+	width: 120px;
+	text-align: right;
+	padding-right: 4px;
+}
+.onyx-input-decorator > .inspector-field-editor,
+.inspector-field-editor {
+	width: 5rem;
+}
+
+.inspector-enyo-input-like{
+	background: white;
+	padding: 0;
+}
+
+input.inspector-field-checkbox {
+	margin: 6px 0 10px 0;
+}
+
+.onyx-radiobutton.inspector-tabbutton {
+	font-size: 10px;
+	padding: 5px; 
+	background-color: #CCC; 
+	text-transform: uppercase; 
+}
+.onyx-radiobutton.inspector-tabbutton.active {
+	color:black;
+}
+
+.onyx-radiobutton.inspector-tabbutton.filter{
+	margin-bottom: 0px;
+}
+.halves {
+	width: 50%;
+}
+.thirds {
+	width: 33%;
+}
+.thirds:last-child {
+	width: 34%;
+}
+.fourths {
+	width: 25%;
+}
+
+.inspector-panel{
+	padding-top: 8px; 
+	white-space: nowrap;
+}
+
+.ares-inspector-row {
+	border-bottom: 1px solid #ddd;
+	padding: 4px;
+}
+
+.ares-inspector-row * {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+
+.ares-inspector-row.disabled .enyo-checkbox,
+.ares-inspector-row.disabled > div {
+	opacity: 1;
+}
+.ares-inspector-row.disabled * {
+	opacity: 0.6;
+}
+
+.event-menu-item {
+  display: block;
+  padding: 2px;
+}
+
+.inspector-event-button { width: 74px; height: 21px; padding:2px;}
+.inspector-event-button:before {
+	content: url(../../../../assets/images/smallArrowDown.png);
+}
+
+.inspector-color-button {
+	height: 17px;
+	min-width: 71px;
+	border: 1px solid Black;
+	border-radius: 6px;
+	margin: 1px;
+	display: inline-block;
+	vertical-align: middle;
+}
+.properties-filter{
+	width: 100%;
+	margin-top: 5px;
+}
+.enyo-fittable-columns-layout.enyo-stretch > .filter-icon{
+	height:20px;
+}

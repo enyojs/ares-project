@@ -1,0 +1,557 @@
+@import "lib/onyx/css/onyx-rules.less";
+
+/*Onyx rules overrides */
+
+/*onyx button*/
+
+.onyx-button {
+	line-height:16px;
+	cursor:hand;
+	cursor:pointer;
+	background: @ares-button-gradient @onyx-button-background;
+	background-size: auto;
+	min-width:75px;
+	position:relative;
+	.ares-box-shadow(inset 0px .5px 0px rgba(255, 255, 255, 0.2));
+}
+
+.onyx-button[disabled] { zoom:1; }
+
+/*onyx picker*/
+
+.onyx-picker {
+	padding:0px;
+	color: @ares-picker-text-color;
+	.ares-box-shadow(0px 0px 10px rgba(0, 0, 0, 0.5));
+	.ares-rounded-corners(@ares-button-radius);
+	overflow:hidden; 
+}
+
+.onyx-picker-decorator .onyx-button {
+	padding:6px 18px;
+}
+
+/*onyx toolbar*/
+
+.onyx-toolbar .onyx-button {
+	height: 2.4em;
+	background: @ares-button-gradient @onyx-button-background;
+}
+
+/*onyx item*/
+
+.onyx-item {
+	padding:10px;
+	line-height: 13px;
+}
+
+/*onyx input*/
+
+.onyx-input-decorator {
+	background-color: @ares-light-background;
+	overflow: visible;
+	position: relative;
+	padding: 5px 5px 3px 8px;
+	border: 1px solid @ares-light-background;
+	.ares-box-shadow(~"0 1px 0 #F2F2F2, 0 -1px 0 #ccc");
+}
+
+
+.onyx-input-decorator > input {
+	height: 20px;
+	width: 200px;
+	color: @ares-input-text-color;
+}
+
+/*onyx radiobutton*/
+
+.onyx-radiobutton {
+	margin-bottom: 15px;
+}
+
+/*onyx group box*/
+
+.onyx-groupbox > * {
+	border-color: @ares-groupbox-border-color;
+}
+
+.onyx-groupbox > .onyx-input-decorator{
+	border-color: @ares-groupbox-border-color;
+}
+
+/*==========================*/
+
+.ares-panels {
+	margin-top: 85px;
+}
+
+.ares-panels>* {
+	width: 100%;
+	height: 100%;
+	padding: 30px 10px 10px 10px;
+	box-sizing:border-box;
+}
+
+.ares-panels>*>*{
+	width: 100%;
+	height: 100%;
+	position:relative;
+	border: 1px solid #555;
+	.ares-box-shadow(0 0 20px rgba(0,0,0,0.6));
+	.ares-rounded-corners (@ares-pannel-radius);
+}
+
+.ares-main-panels {
+	min-height: 100%;
+}
+
+.ares-main-panels > * {
+	background-color : @ares-background;
+}
+
+.ares-panel-min-width {
+	min-width: 300px;
+}
+
+.ares-small-screen {
+	width: 300px;
+}
+
+.ares-top-toolbar{
+	height:64px; 
+	line-height: 30px;
+	border: 1px solid #222; 
+	background: @ares-toolbar-gradient;
+	background-size: auto; /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
+	z-index: auto;
+}
+
+.ares-small-toolbar{
+	height:50px;
+	line-height: 1.8;
+	padding: 5px;
+	border-top:none;
+	border-left:none;
+	border-right:none;
+	background-size: auto; /*background size is contain in onyx-toolbar css, if missing to change it, problems on safari, bg display all image*/
+}
+
+.onyx-tab-bar.ares-small-toolbar{
+	padding: 0;
+}
+
+.onyx-tab-bar.ares-small-toolbar>div{
+	margin: 0;
+}
+
+.ares-small-toolbar>div>div>div>.onyx-tab-rug{
+	padding:  0.7em;
+}
+
+.ares-small-toolbar>div {
+	margin : 0 2px;
+}
+
+.ares-bottom-bar {
+	z-index: 9 ; // behind top-toolbar so tooltip are not hidden on Safari
+}
+
+.ares-top-toolbar.ares-designer-panels{
+	z-index: 10; //needed for Safari tooltips displayed in the code editor toolbar  
+}
+
+.ares-designer-panels > .enyo-fittable-columns-layout.onyx-toolbar-inline > * {
+	vertical-align: inherit;
+}
+
+.onyx-toolbar .onyx-button.ares-toolbar-picker{
+	border: 1px solid @ares-toolbar-background ;
+    background: @ares-grabber-from-background;
+    background: -moz-linear-gradient(top, @ares-grabber-from-background 0%,@ares-grabber-to-background 100%); // FF3.6+ 
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, @ares-grabber-from-background), color-stop(100%, @ares-grabber-to-background)); //Chrome,Safari4+
+    background: -webkit-linear-gradient(top, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // Chrome10+,Safari5.1+ 
+    background: -o-linear-gradient(top, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // Opera 11.10+ 
+    background: -ms-linear-gradient(top, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // IE10+
+    background: linear-gradient(180deg, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // W3C*/
+}
+
+.ares-tab-label {
+	display: inline-block;
+}
+
+/* Why z-index: 11? Because otherwise, on Opera, parts of the editor show through */
+.ares-files-slider {
+	width: 100%;
+	height: 100%;
+	z-index: 11;
+	.ares-box-shadow(0 0 20px rgba(0,0,0,0.6));
+}
+
+.ares-padleft {
+	padding-left: 8px;
+}
+
+.ares-right-toolbar {
+	margin-top:8px;
+	text-align: right;
+}
+
+.ares-label {
+	margin-right: 4px;
+	padding-left: 8px;
+}
+
+.ares-fixed-label {
+	min-width: 82px;
+	padding: 0 4px;
+	text-align: right;
+	display: inline-block;
+	vertical-align: middle;
+	overflow: hidden;
+}
+
+.ares-small-label {
+	min-width: 70px;
+	width: 70px;
+}
+
+.ares-row {
+	padding: 3px 0;
+}
+
+.ares-more-row {
+	padding: 10px 0;
+}
+
+.ares-row .onyx-picker-decorator{
+	display: inline-block;
+}
+
+.ares-drawer {
+	margin-top: 9px;
+	.ares-rounded-corners (@ares-drawer-radius);
+	padding:4px;
+	text-align: left;
+	border: 1px solid @ares-darken-background;
+	background-color: lighten(@ares-background, 5%);
+}
+
+/* Ares menu */
+.aresmenu .onyx-button {
+    width: 82px;
+    cursor: pointer;
+    cursor: hand;
+    font-weight: normal;
+    text-shadow: 0 -1px 0 #000000;
+    border: none;
+    background: none;
+    text-align: left;
+    padding: 6px 0;
+    box-shadow: none;
+    .ares-rounded-corners(0);
+}
+
+.aresmenu .onyx-button.active,
+.aresmenu .onyx-button.pressed {
+    border: none;
+    background: transparent;
+    .ares-box-shadow(none);
+    .ares-rounded-corners(0);
+}
+
+.aresmenu button:after{
+    position: relative;
+    content: @ares-lsmall-arrow;
+    width:25px;
+    display: inline-block;
+    padding-left: 10px;
+}
+
+.aresmenu button:active:hover:not([disabled]) {
+  background-image: none;
+  border-top: none;
+  box-shadow: none;
+}
+
+.sub-aresmenu {
+    background-image: none;
+    background-color: @ares-menu-background;
+    .ares-box-shadow(0 5px 5px rgba(0, 0, 0, 0.5));
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    text-align: left;
+    .ares-rounded-corners(@ares-border-radius);
+    min-width: 140px;
+}
+
+.onyx-menu-item.aresmenu-button {
+    font-size:14px;
+    margin: 0;
+    padding: 0 10px;
+    cursor: pointer;
+    cursor: hand;
+    line-height: 36px;
+    color: @ares-dark-color; 
+}
+.aresmenu-button-label {
+	margin-left: 5px;
+}
+
+.ares-about-description {
+	margin-right: 8px;
+}
+
+.aresmenu-button:hover{
+    background: none;
+    .ares-box-shadow(inset 0px 0px 20px 0px rgba(0,0,0, 0.5));
+}
+
+/*file chooser*/
+.ares-filechooser, .ares-phonegap-config { height: 400px; width: 625px; }
+
+.ares-filechooser-header { padding: 0 0.5em; vertical-align: middle; }
+
+.ares-filechooser-footer { vertical-align: middle; background: @ares-background-filechooser; }
+
+.ares-create-sources {
+	height: 24%;
+	width: 100%;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.ares-left-pane-file-chooser {
+	background-color: @ares-background-filechooser;
+}
+
+.ares-left-pane-file-chooser > .ares_harmonia_providerList {
+	width: 100%;
+}
+
+.ares-file-choser-row { border-top: 1px solid #999999; }
+
+.ares-file-chooser-label { min-width: 127px; }
+
+/*Project properties popup*/
+
+.ares-project-properties { 
+	height: 400px;
+	width: 930px;
+	padding: 5px 10px;
+	margin-top: 15px; 
+}
+
+.ares-project-properties-sign-in-error-msg {
+	margin-left: 30px;
+	font-weight: bold;
+}
+
+/* Ares group box */
+
+.ares-datas>div:not([class="onyx-groupbox-header"]) {
+	cursor:pointer;
+	background-color: @ares-groupbox-backgound;
+}
+
+.ares-datas>div.hover { background-color: @ares-backgound-hover;}
+
+.ares-datas>.active {
+	background-color: @ares-background;
+	.ares-box-shadow (inset 0px 0px 30px rgba(0,0,0,0.3));
+}
+
+.ares-group-box>div {
+	padding-left: 3px;
+	line-height: 1.9;
+}
+
+.ares-group-box>.onyx-input-decorator { .ares-box-shadow(none); }
+
+.ares-groupbox-item-key, .ares-groupbox-item-value {
+	width: 50%;
+	display: inline-block;
+}
+
+.ares-tooltip-last {
+	left: -55px;
+}
+
+.ares-tooltip-last:before {
+	left: 71px;
+}
+
+.ares-tooltip-last-phoneGap {
+	left: -100px;
+}
+
+.ares-tooltip-last-phoneGap:before {
+	left: 110px;
+}
+
+.ares-grabber {
+	position: relative;
+	height: 28px;
+	width: 28px;
+	border: 1px solid @ares-toolbar-background ;
+	cursor: pointer;
+	cursor: hand;
+	.ares-rounded-corners (3px);
+    background: @ares-grabber-from-background;
+    background: -moz-linear-gradient(top, @ares-grabber-from-background 0%,@ares-grabber-to-background 100%); // FF3.6+ 
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, @ares-grabber-from-background), color-stop(100%, @ares-grabber-to-background)); //Chrome,Safari4+
+    background: -webkit-linear-gradient(top, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // Chrome10+,Safari5.1+ 
+    background: -o-linear-gradient(top, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // Opera 11.10+ 
+    background: -ms-linear-gradient(top, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // IE10+
+    background: linear-gradient(180deg, @ares-grabber-from-background 0%, @ares-grabber-to-background 100%); // W3C*/
+}
+
+.ares-grabber .lleftArrow  {
+	position: absolute;
+	top: 2px;
+	left: -4px;
+}
+
+.ares-grabber .lrightArrow  {
+	position: absolute;
+	top: 2px;
+	left: -3px;
+}
+
+p.break { padding: 1px 0; }
+
+.file-chooser-input>input { width: 470px; }
+
+.ares-align-right { text-align: right; }
+
+.ares-align-right>button { margin-left:5px; }
+
+input.ares-small-input { width: 75px;}
+
+.ares-margin-right { margin-right: 3px;}
+
+.small-picker { width: 77px; }
+
+.large-picker { width: 150px; }
+
+.middle-width { width: 200px; }
+
+.very-large-width { width: 217px; }
+
+div.large-fixed { width: 80%; }
+
+.ares-large-content { height: 390px; }
+
+.onyx-toolbar-inline>.ares-right-margin {
+	margin-right: 30px;
+}
+
+.onyx-toolbar-inline>.ares-left-margin {
+	margin-left: 15px;
+}
+
+.title-gradient {
+	border-bottom:1px solid #FFFFFF;
+	background: @ares-title-gradient @ares-project-list-background-active;
+}
+
+.hangar {
+	background: @ares-sprites-vertical repeat-y scroll 0 0;
+}
+
+.enyo-fittable-columns-layout>.hangar{
+	width: 7px;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+}
+
+.lsmallDownArrow {
+	height: 25px;
+	width: 25px;
+	background: @ares-lsmall-dowm-arrow;
+	vertical-align: middle;
+	display: inline-block;
+}
+
+.lrightArrow {
+	height:25px;
+	width:25px;
+	background: @ares-lrightArrow;
+	vertical-align: middle;
+	display: inline-block;
+}
+
+.lleftArrow {
+	height:25px;
+	width:25px;
+	background: @ares-lleftArrow;
+	vertical-align: middle;
+	display: inline-block;
+}
+
+.optionDownArrow {
+	position: absolute;
+	margin-top: 2px;
+	right: 1px;
+	top: 8px;
+	height: 1em;
+	width: 1.5em;
+	background: @option-down-arrow;
+	vertical-align: middle;
+	display: inline-block;
+	border: 1px solid gray;
+	padding-top: 4px;
+}
+.enyo-fittable-columns-layout.onyx-toolbar-inline>.ares-logo-container{
+	margin-left: 25px;
+}
+.ares-logo-container{
+	height: 42px;
+	width: 42px;
+}
+.ares-logo{
+	position: absolute;
+	height: 42px;
+	width: 42px;
+	right: 0;
+}
+.onyx-icon.ares-file-broken-icon{
+	height:20px;
+	width: 20px;
+}
+.ares-file-broken-icon.disabled{
+	opacity: 1;
+}
+.ares-path-input{
+	display: inline-block;
+}
+
+/* Ares picker with an arrow */
+.onyx-picker-decorator .ares-picker{
+	text-overflow:clip;
+	min-width: 6em;
+	padding: 6px 0;
+}
+.ares-picker-value {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	padding: 0 2px;
+	width: 85%;
+}
+.ares-picker-arrow{
+	position: absolute;
+	background:  @ares-small-arrow;
+	width: 11px;
+	height: 11px;
+	top: 35%;
+	right: 0.2em;
+}
+
+@import "source/enyo-editor/EnyoEditor.less";
+@import "assets/css/Popup.less";
+@import "assets/services/css/HermesFileTree.less";
+@import "assets/services/css/HermesNode.less";
+@import "source/harmonia/Harmonia.less";
+@import "source/project-view/ProjectView.less";
