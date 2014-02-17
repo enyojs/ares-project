@@ -9,7 +9,7 @@ enyo.kind({
 	name: "ProjectView",
 	kind: "FittableColumns",
 	classes: "enyo-unselectable",
-	debug: true,
+	debug: false,
 	published: {
 		// harcoded until ENYO-2755 is fixed
 		panelIndex: 0
