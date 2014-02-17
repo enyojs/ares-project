@@ -388,6 +388,15 @@ enyo.kind({
 	}
 });
 
+/**
+ * This kind will define an access row that will let the user define 
+ * a URL to an external ressource for the Phonegap application.
+ * This row will have an "Add" button to dynamicaly append instances of 
+ * the kind "Phonegap.ProjectProperties.AddedAccessRow".
+ * The Phonegap Build UI have one & only one instance of this kind.
+ * In the project.json file, the value of recovred from an instance of this
+ * kind will be associated to the key "origin".
+ */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.AccessRow",
 	kind: "Phonegap.ProjectProperties.Row",
@@ -461,15 +470,16 @@ enyo.kind({
 		this.setValue(config.access.origin);
 		this.valueChanged();
 		
+		// Browse the JSON object "config.access" to set the value of each addedAccessRow instance.
 		for (var key in config.access) {
+			
 			if (key !== "origin" ) {
-				
-				if (typeof this.container.$[key] != "undefined"){
+				if (typeof this.container.$[key] !== "undefined"){
+					// If The instance "addedAccessRow" existe, then set its value.
 					this.container.$[key].set("value", config.access[key]);
 				} else {
-					//if the row instance doesn't existe create it 
+					// If the row instance doesn't existe, then create the instance and set its value.
 					this.addAccessRow().set("value", config.access[key]);
-
 				}
 			}
 		}
@@ -479,7 +489,11 @@ enyo.kind({
 		config.access.origin = this.getValue();
 	},
 	
-	/** @private */
+	/** 
+	 * The "Phonegap.ProjectProperties.AddedAccessRow" instances will be added
+	 * to the container "AccessRowsContainer".
+	 * @private
+	 */
 	addAccessRow: function() {
 		var newComponent = this.container.createComponent(
 			{kind: "Phonegap.ProjectProperties.AddedAccessRow"},
@@ -492,6 +506,16 @@ enyo.kind({
 	
 });
 
+/**
+ * This widget let the user define additionnal row to add more Access entries
+ * to the Phonegap application.
+ * An addedAccessRow will have a "Remove" button to delete the added entry.
+ * The Phonegap Build UI have 0..* instance of this kind.
+ * In the project.json file, the value of recovred from an instance of this
+ * kind will be associated to the key "addedAccessRowX", where X is an integer
+ * number corresponding to the "Phonegap.ProjectProperties.AddedAccessRow" auto-generated
+ * instance number.
+ */
 enyo.kind({
 	name: "Phonegap.ProjectProperties.AddedAccessRow",
 	kind: "Phonegap.ProjectProperties.Row",
