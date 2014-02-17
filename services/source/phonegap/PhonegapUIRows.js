@@ -423,13 +423,8 @@ enyo.kind({
 			kind: "onyx.IconButton",
 			src: "$services/assets/images/add-icon-25x25.png",
 			ontap: "addAccessRow"
-		},
-		{
-			name: "AccessRowsContainer",
-			kind: "FittableColumns"
-		}
+		}		
 	],
-
 
 	/**
 	 * @private
