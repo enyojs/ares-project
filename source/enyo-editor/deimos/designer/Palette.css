@@ -1,0 +1,37 @@
+.palette-category {
+	 border-radius: 4px; 
+	 border: 1px solid #D0D0D0; 
+	 margin-bottom: 1px;
+}
+
+.palette-category-name {
+	padding: 5px; 
+	background-color: #CCC; 
+	text-transform: uppercase; 
+	font-weight: bold;
+	vertical-align: middle;
+}
+
+.palette-item {
+	background-color: #F5F5F5; 
+	border-bottom: 1px solid #D0D0D0; 
+	padding: 5px;
+}
+
+.palette-item > * {
+	display: inline-block;
+}
+
+.indicator {
+	height: 16px;
+	width: 16px;
+	padding-right: 5px;
+	background-image: url('../../../../assets/enyo-editor/deimos/images/triangle.png');
+	background-repeat: no-repeat;
+	background-position: 0px 0px;
+	display: inline-block;
+}
+
+.turned {
+	background-position: 0px -16px;
+}
