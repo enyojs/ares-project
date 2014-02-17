@@ -564,8 +564,7 @@ enyo.kind({
 
 	/** @public */
 	setProjectConfig: function (config) {
-		this.setValue(config.access[this.name]);
-		this.valueChanged();
+		//the setting of the project configuration is done in the kind "Phonegap.ProjectProperties.AccessRow".
 	},
 	/** @public */
 	getProjectConfig: function (config) {
