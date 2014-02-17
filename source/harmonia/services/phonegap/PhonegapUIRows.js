@@ -421,7 +421,7 @@ enyo.kind({
 		{
 			name: "addButton",
 			kind: "onyx.IconButton",
-			src: "$services/assets/images/add-icon-25x25.png",
+			src: "$assets/services/images/add-icon-25x25.png",
 			ontap: "addAccessRow"
 		}		
 	],
@@ -535,7 +535,13 @@ enyo.kind({
 				}
 			]
 		},
-		{name: "deleteButton", kind: "onyx.IconButton", parentRowName: "", src: "$services/assets/images/delete-icon-25x25.png", ontap: "deleteAccessRow"}
+		{
+			name: "deleteButton",
+			kind: "onyx.IconButton",
+			parentRowName: "",
+			src: "$assets/services/images/delete-icon-25x25.png",
+			ontap: "deleteAccessRow"
+		}
 	],
 	/**
 	 * @private
