@@ -6,7 +6,9 @@ var path = require('path'),
 
 //FIXME: add "npm dedupe"
 
-var cmd = [process.env.npm_node_execpath, path.join(__dirname, "..", "enyo", "tools", "deploy.js") /*, "-v"*/].join(' ');
+var node = '"' + process.env.npm_node_execpath + '"';
+
+var cmd = [node, path.join(__dirname, "..", "enyo", "tools", "deploy.js") /*, "-v"*/].join(' ');
 deploys.forEach(function(app) {
 	var cmdline = [cmd];
 	for (var opt in app) {
