@@ -12,7 +12,8 @@ deploys.forEach(function(app) {
 	for (var opt in app) {
 		cmdline = cmdline.concat(["-" + opt, app[opt]]);
 	}
-	console.log(cmdline);
+	console.log("Deploying '" + app.o + "'");
+	console.log("> " + cmdline);
 	var p = shell.exec(cmdline.join(" "), { silent: false, async: false });
 	if (p.code !== 0) {
 		// only if you set `silent: true` above

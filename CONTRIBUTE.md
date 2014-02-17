@@ -156,7 +156,7 @@ For all contributions on Ares project and before commit, please execute the avai
 Build an Ares package
 ---------------------
 
-In order to produce Ares on a build server:
+In order to produce a minified Ares on a build server:
 
 1. Make sure Node and NPM are installed on the build server.  Version >=0.8.21 is known to work
 1. In the build script, run:
@@ -179,6 +179,10 @@ In order to produce Ares on a build server:
 		$ mkdir ../test && cd ../test
 		$ npm install ../ares-project/ares-ide-0.0.2.tgz
 		$ node_modules/.bin/ares-ide
+
+1. Whatever the packaging/re-packaging option you choose, make sure you clean-up `_ide` and `_preview` folders created by the `npm prepublish` stage that is built-in `npm pack`.
+
+		$ npm run-script postpublish
 
 Release & Publish Ares
 ----------------------
