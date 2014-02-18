@@ -2,17 +2,8 @@
 
 enyo.kind({
 	name: "Ares.Hera",
-	kind: "Control",
+//	kind: "Control",
 	published: {
-		red: '00',
-		blue: '00',
-		green: '00',
-		color: "000000",
-		x: "0",
-		y: "0",
-		z: "0",
-		misc: "",
-		toggle: "",
 		file_source_dir: ""
 	},
 	events: {
@@ -28,13 +19,16 @@ enyo.kind({
 		onUrlout: "fixurl"		
 	},
 	components: [
-		{kind: "enyo.FittableColumns", style: "width: 33%; height: 100%;", components:[
+		
+		{kind: "enyo.FittableColumns", style: " height: 100%;", components:[
 			
-			{name: "cssleft", kind: "Ares.Hera.Leftpannel", style: "width: 100%; height: 100%; ",	classes:"ares_deimos_left"},	// left
+			{ kind: "FittableRows", style: "width: 33%; height: 100%;", components: [
+				{name: "cssleft", kind: "Ares.Hera.Leftpannel", style: "width: 100%; height: 100%; ",	classes:"ares_deimos_left"},
+			]},	// left
 			
-			{name: "center", kind: "enyo.FittableRows", style: "width: 100%; height: 100%; ", components: [
+			{name: "center", kind: "enyo.FittableRows", style: "width: 33%; height: 100%; ", components: [
 				
-				{name:"sampleBox", kind: "enyo.FittableColumns",	style: "width: 100%; height: 60%; ", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
+				{name:"sampleBox", kind: "enyo.FittableColumns",	style: "width: 33%; height: 60%; ", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
 					{name: "Sample", allowHtml: true, style: "height: 60%; font-size: 10px;", components: [
 						{name: "sampletext", content: "Sample Text"},
 					]}
@@ -43,23 +37,23 @@ enyo.kind({
 				{name:"outputBox", kind: "enyo.FittableColumns",	style: "width: 100%; height: 40%; ", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
 					{name: "bg", allowHtml: true, style: "font-size: 13px;", content: ""},
 				]},	
-			]},// center
+			]},	// center
 			
-			{kind: "FittableRows", style: "width: 100%; height: 100%;", components: [
-				{kind: "enyo.FittableColumns",  style: "width: 100%; height: 60%;", classes: "enyo-unselectable", components: [
-					{name: "list", kind: "List", count: 100, multiSelect: false, classes: "list-sample-list", onSetupItem: "setupItem", components: [
+			{kind: "FittableRows", style: "width: 33%; height: 100%;", components: [
+				{kind: "enyo.FittableColumns",  style: "width: 100%; height: 53%;", classes: "enyo-unselectable", components: [
+					{name: "list", kind: "List", count: 0, multiSelect: false, classes: "list-sample-list", onSetupItem: "setupItem", components: [
 						{name: "item", style: "width: 100%;", classes: "list-sample-item enyo-border-box", ontap: "classGrabber", components: [
 							{name: "name2", style: "width: 100%;"}
 						]},				
 					]},
 				]},
 				
-				{kind: "enyo.FittableColumns", style: "width: 100%; height: 5%;", classes: "hera_buttonbox", components:[
+				{kind: "enyo.FittableColumns", style: "width: 90%; height: 5%;", classes: "hera_buttonbox", components:[
 					{kind:"onyx.Button", classes: "hera_newrule_button", content: "Delete rule", ontap:"deleteRule"},
 					{kind:"onyx.Button", classes:"hera_newrule_button", content: "New Css rule", ontap:"newRule"},
-				]},
+				]},	// buttons
 				
-				{kind: "enyo.FittableColumns", style: "width: 100%; height: 40%;", fit: true, classes: "enyo-unselectable", components: [
+				{kind: "enyo.FittableColumns", style: "width: 100%;", fit: true, classes: "enyo-unselectable", components: [
 					{name: "valueinput", kind: "Ares.Hera.ValueInput", onUpdate: "change"},
 					
 				]}
@@ -131,12 +125,12 @@ enyo.kind({
 		}
 
 		while(this.properties[a] !== undefined && this.properties[a] !== "null"){
-			if(this.properties[a].indexOf(this.$.property) !== -1 ){
+			if(this.properties[a].indexOf(this.property) !== -1 ){
 				break;	
 			}
 			a++;
 		}
-		this.properties[a] = "\t" + this.$.property;
+		this.properties[a] = "\t" + this.property;
 		this.value[a] = this.newvalue;
 		this.updateBox();
 	},
@@ -188,19 +182,19 @@ enyo.kind({
 			return;
 		}
 		
-		this.$.property = inEvent.name;
+		this.property = inEvent.name;
 		
 		if (inEvent.input === "font"){
 			this.$.valueinput.showsblank();
-			this.$.property = "font-family";
+			this.property = "font-family";
 			
 			while(this.properties[a] !== undefined && this.properties[a] !== "null"){
-				if(this.properties[a].indexOf(this.$.property) !== -1 ){
+				if(this.properties[a].indexOf(this.property) !== -1 ){
 					break;	
 				}
 				a++;
 			}
-			this.properties[a] = this.$.property;
+			this.properties[a] = this.property;
 			this.value[a] = " " + inEvent.name +  ";";
 			this.updateBox();		
 		}
@@ -246,14 +240,15 @@ enyo.kind({
 	
 	reset: function(){
 		this.$.valueinput.showsblank();
+		this.$.valueinput.clear();
+		this.$.cssleft.selected();
 		this.properties.length = 0;			
 		this.value.length = 0;	
 		this.old = null;
 		this.className = "";	
 		this.outPut = "";	
-		this.$.outPut = "";
-		this.$.property = null;	
-		this.mode = "rest";
+		this.property = null;	
+		this.mode = "reset";
 		this.$.sampletext.applyStyle("color", "#FFFFFF; font-size: 10px;" );
 		this.$.outputBox.applyStyle("background-color", "#000000");
 		this.$.bg.setContent("");	

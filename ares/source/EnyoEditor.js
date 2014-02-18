@@ -133,7 +133,6 @@ enyo.kind({
 		onNewcss: "newCss",
 		onReplacecss: "replacecss",
 		onCssDocument: "cssDocument",
-		onCloseCss: "closecss",
 		onEditcss: "doCss"
 	},
 	debug: false,
@@ -965,7 +964,7 @@ enyo.kind({
 	
 	/**
 	 *  @private
-	 * show/goto the hera
+	 * show controls and load data
 	 */
 	doCss: function (){
 		this.$.phobos.cssAction();
@@ -974,20 +973,26 @@ enyo.kind({
 		this.$.cssControls.setShowing(true);
 		this.$.toolbar.resized();
 	},
+
+	/*
+	* close hera
+	* @protected
+	*/
+	closecssDesigner: function(){
+		this.$.hera.csssave();
+		this.$.editorControls.setShowing(true);
+		this.$.deimosControls.setShowing(false);
+		this.$.cssControls.setShowing(false);
+		this.$.panels.setIndex(0) ;
+		this.$.toolbar.resized();
+	},	
+	
 	/*
 	* write the new css to the end of the file
 	* @protected
 	*/
 	newCss: function(inSender, inEvent){
 		this.$.phobos.newcss(this.$.hera.out);
-	},
-	closecssDesigner: function(){
-		this.$.hera.csssave();
-		this.$.editorControls.setShowing(true);
-		this.$.deimosControls.setShowing(false);
-		this.$.cssControls.setShowing(false);
-		this.$.toolbar.resized();
-		this.doCloseCss();
 	},
 	
 	/*
@@ -998,6 +1003,7 @@ enyo.kind({
 		this.$.phobos.replacecss(this.$.hera.old, this.$.hera.out);
 	},
 	
+	
 	/*
 	* open hera
 	* @protected
@@ -1006,14 +1012,7 @@ enyo.kind({
 		this.$.hera.cssload(inEvent);
 		this.$.panels.setIndex(2) ;
 	},
-	/*
-	* close hera
-	* @protected
-	*/
-	closecss: function(inSender, inEvent){
-		this.$.panels.setIndex(0) ;
-	}
-
+	
 });
 
 /**
