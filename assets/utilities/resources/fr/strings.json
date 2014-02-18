@@ -1,0 +1,17 @@
+{
+	"Cancel": "Annuler",
+	"Close": "Fermer",
+	"Delete": "Supprimer",
+	"Details": "Détails",
+	"error": "erreur",
+	"File": "Fichier",
+	"File name: ": "Nom du Fichier : ",
+	"OK": "OK",
+	"Path #{path} contains illegal characters": "Le chemin #{path} contient des caractères spéciaux",
+	"Select a directory": "Sélectionner un répertoire",
+	"Select a File": "Sélectionner un Fichier",
+	"Select a Folder": "Sélectionner un Dossier",
+	"Sources": "Sources",
+	"unknown error": "erreur inconnue",
+	"warning": "attention"
+}

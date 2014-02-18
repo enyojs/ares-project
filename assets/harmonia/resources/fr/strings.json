@@ -1,0 +1,8 @@
+{
+	"Cancel": "Annuler",
+	"Path: ": "Chemin : ",
+	"Revert": "Faire revenir",
+	"Revert {type}: {name}?": "Faire revenir le {type} : {name}?",
+	"Revert?": "Faire revenir ?",
+	"to {destination}": "à {destination}"
+}
