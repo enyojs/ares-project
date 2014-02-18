@@ -32,6 +32,7 @@ var knownOpts = {
 	"host":            String,
 	"timeout":         Number,
 	"listen_all":      Boolean,
+	"dev-mode":        Boolean,
 	"ide-root":        path,
 	"preview-root":    path,
 	"config":          path,
@@ -46,6 +47,7 @@ var shortHands = {
 	"B": ["--bundled-browser"],
 	"p": ["--port"],
 	"H": ["--host"],
+	"D": ["--dev-mode"],
 	"t": ["--timeout"],
 	"a": ["--listen_all"],
 	"c": ["--config"],
@@ -77,6 +79,7 @@ if (argv.help) {
 		"  -T, --runtest         Run the non-regression test suite                                                     [boolean]\n" +
 		"  -b, --browser         Open the default browser on the Ares URL                                              [boolean]\n" +
 		"  -B, --bundled-browser Open the included browser on the Ares URL                                             [boolean]\n" +
+		"  -D, --dev-mode        Load non-minified version of Ares and Enyo for Ares debug and development             [boolean]\n" +
 		"  -p, --port        b   port (o) local IP port of the express server (default: 9009, 0: dynamic)              [default: '9009']\n" +
 		"  -H, --host        b   host to bind the express server onto                                                  [default: '127.0.0.1']\n" +
 		"  -t, --timeout     b   milliseconds of inactivity before a server socket is presumed to have timed out       [default: '240000']\n" +
@@ -716,7 +719,7 @@ app.configure(function(){
 
 	["preview", "ide"].forEach(function(client) {
 		var dir = path.resolve(myDir, "_" + client);
-		if (!fs.existsSync(dir)) {
+		if (argv['dev-mode'] || !fs.existsSync(dir)) {
 			dir = myDir;
 		}
 		dir = argv[client + "-root"] || dir;

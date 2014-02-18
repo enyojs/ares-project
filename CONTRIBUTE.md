@@ -52,7 +52,7 @@ Real stuff - Code
 		$ cd ares-project
 		$ npm -d install
 
-1. Run Ares using `node ide.js` from the GitHub root folder
+1. Run Ares using `node ide.js --dev-mode` from the GitHub root folder (`--dev-mode` to avoid using the minified version of Ares)
 
 **Update workspace** if you already have a working environment (with a remote named `origin`), run the following sequence.
 
