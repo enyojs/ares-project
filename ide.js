@@ -733,13 +733,13 @@ app.configure(function(){
 	// Real home is '/ide/'
 	app.get('/', function(req, res, next) {
 		log.http('main', "GET /");
-		res.redirect('/ide/');
+		res.redirect(req.url.replace(/$|\?/,"ide/$&"));
 	});
 	// Compatibility redirection to not invalidate bookmarks to
 	// former home.
 	app.get('/ide/ares*', function(req, res, next) {
 		log.http('main', "GET /ide/ares*");
-		res.redirect('/ide/');
+		res.redirect(req.url.replace(/ares($|\/|\?)/,""));
 	});
 
 	app.get('/res/timestamp', function(req, res, next) {
