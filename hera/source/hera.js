@@ -2,7 +2,7 @@
 
 enyo.kind({
 	name: "Ares.Hera",
-//	kind: "Control",
+	kind: "enyo.Control",
 	published: {
 		file_source_dir: ""
 	},
