@@ -1,8 +1,0 @@
-{
-	"Cancel": "Cancel",
-	"Path: ": "Path: ",
-	"Revert": "Revert",
-	"Revert {type}: {name}?": "Revert {type}: {name}?",
-	"Revert?": "Revert?",
-	"to {destination}": "to {destination}"
-}
