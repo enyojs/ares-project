@@ -33,8 +33,6 @@ var knownOpts = {
 	"timeout":         Number,
 	"listen_all":      Boolean,
 	"dev-mode":        Boolean,
-	"ide-root":        path,
-	"preview-root":    path,
 	"config":          path,
 	"level":           ['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 	"log":             Boolean,
@@ -51,8 +49,6 @@ var shortHands = {
 	"t": ["--timeout"],
 	"a": ["--listen_all"],
 	"c": ["--config"],
-	"I": ["--ide-root"],
-	"P": ["--preview-root"],
 	"l": ["--level"],
 	"L": ["--log"],
 	"V": ["--version"]
@@ -85,8 +81,6 @@ if (argv.help) {
 		"  -t, --timeout     b   milliseconds of inactivity before a server socket is presumed to have timed out       [default: '240000']\n" +
 		"  -a, --listen_all  b   When set, listen to all adresses. By default, listen to the address specified with -H [boolean]\n" +
 		"  -c, --config      b   IDE configuration file                                                                [default: './ide.json']\n" +
-		"  -I, --ide-root        IDE client files location                                                             [default: '.']\n" +
-		"  -P, --preview-root    Preview client files location                                                             [default: '.']\n" +
 		"  -l, --level       b   IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')                 [default: 'http']\n" +
 		"  -L, --log         b   Log IDE debug to ./ide.log                                                            [boolean]\n");
 	process.exit(0);
@@ -722,7 +716,6 @@ app.configure(function(){
 		if (argv['dev-mode'] || !fs.existsSync(dir)) {
 			dir = myDir;
 		}
-		dir = argv[client + "-root"] || dir;
 		log.info("main", "Loading url: /" + client + " from folder:", dir);
 		app.use('/' + client, express.static(dir));
 		app.use('/' + client + '/lib', express.static(path.join(myDir, 'lib')));
