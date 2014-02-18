@@ -146,7 +146,7 @@ enyo.kind({
 		this.enableDisableButtons();
 		this.createComponent(
 			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable hermesFileTree-root",
-				showing: false, content: "server", icon: "$assets/services/images/antenna.png",
+				showing: false, content: "server", icon: "$assets/harmonia/services/images/antenna.png",
 				expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed
 			}
 		);
