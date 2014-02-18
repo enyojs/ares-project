@@ -373,11 +373,10 @@ enyo.kind({
 		this.hide() ;
 		return true;
 	},
-
 	/** @private */
 	$LS: function(msg, params) {
-		var tmp = new enyo.g11n.Template($L(msg));
-		return tmp.evaluate(params);
+		var template = new enyo.ilib.String($L(msg));
+		return template.format(params);
 	}
 });
 
@@ -992,7 +991,7 @@ enyo.kind({
 		var destination = inEvent.data.name;
 		var known = Ares.Workspace.projects.get(destination);
 		if (known) {
-			this.doError({msg: this.$LS("Unable to duplicate the project, the project '#{destination}' already exists", {destination: destination})});
+			this.doError({msg: this.$LS("Unable to duplicate the project, the project '{destination}' already exists", {destination: destination})});
 			return true ; // stop bubble			
 		}
 
@@ -1002,7 +1001,7 @@ enyo.kind({
 			var msg = $L("Unable to duplicate the project");
 			if (status === 412 /*Precondition-Failed*/) {
 				this.warn("Unable to duplicate the project, directory '", destination, "' already exists", status);
-				msg = this.$LS("Unable to duplicate the project, directory '#{destination}' already exists", {destination: destination});
+				msg = this.$LS("Unable to duplicate the project, directory '{destination}' already exists", {destination: destination});
 			} else {
 				this.warn("Unable to duplicate the project", status);
 			}
@@ -1046,8 +1045,9 @@ enyo.kind({
 		}
 		this.doHideWaitPopup();
 	},
+	/** @private */
 	$LS: function(msg, params) {
-		var tmp = new enyo.g11n.Template($L(msg));
-		return tmp.evaluate(params);
+		var template = new enyo.ilib.String($L(msg));
+		return template.format(params);
 	}
 });

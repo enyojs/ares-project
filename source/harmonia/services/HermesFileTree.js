@@ -455,7 +455,7 @@ enyo.kind({
 		// (possibly remote & always asynchronous) file system
 		this.connectService(service, enyo.bind(this, (function(inError) {
 			if (inError) {
-				this.showErrorPopup(this.$LS("Internal Error (#{error}) from filesystem service", {error: inError.toString()}));
+				this.showErrorPopup(this.$LS("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
 			} else {
 				this.trace("HFT: service is now connected for project" + inProjectData.getName() + '. Requesting project URL');
 				if (this.selectedNode) {
@@ -486,7 +486,7 @@ enyo.kind({
 				});
 				rootFinding.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");
-					this.showErrorPopup(this.$LS("Internal Error (#{error}) from filesystem service", {error: inError.toString()}));
+					this.showErrorPopup(this.$LS("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
 				});
 			}
 		})));
@@ -942,7 +942,7 @@ enyo.kind({
 			if (this.findNodeExtension(name) !== null) {
 				this.refreshFileTree( function() {parentNode.getNodeWithId(inFolder.id).doAdjustScroll(); }, inFolder.id /*selectId*/ );
 			} else {
-				this.showWarningPopup(this.$LS("Folder named '#{name}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: name}));
+				this.showWarningPopup(this.$LS("Folder named '{name}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: name}));
 				this.refreshFileTree();
 			}
 			this.doHideWaitPopup();
@@ -1029,7 +1029,7 @@ enyo.kind({
 
 			if (matchingNodes.length !== 0) {
 				this.doHideWaitPopup();
-				this.showErrorPopup(this.$LS("File '#{name}' already exists", {name: name}));
+				this.showErrorPopup(this.$LS("File '{name}' already exists", {name: name}));
 				return true;
 			}
 
@@ -1063,9 +1063,9 @@ enyo.kind({
 				if (error === 404){
 					this.createFile(name, folderId);
 					if (type === null) {
-						this.showWarningPopup(this.$LS("File named '#{name}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: name}));
+						this.showWarningPopup(this.$LS("File named '{name}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: name}));
 					} else {
-						this.showWarningPopup(this.$LS("No template found for '.#{extension}' files. Created an empty one.", {extension: type}));
+						this.showWarningPopup(this.$LS("No template found for '.{extension}' files. Created an empty one.", {extension: type}));
 					}
 				} else {
 					this.warn("error while fetching ", templatePath, ': ', error);
@@ -1114,26 +1114,26 @@ enyo.kind({
 		// Warning about file extension modification		
 		if (this.selectedNode.file.isDir) {
 			if (type === null) {
-				this.showWarningPopup(this.$LS("The new folder '#{newFolder}' will be hidden.", {newFolder: newName}));
+				this.showWarningPopup(this.$LS("The new folder '{newFolder}' will be hidden.", {newFolder: newName}));
 			} else {
 				oldType = this.findNodeExtension(this.selectedNode.file.name);
 				if (oldType === null) {
-					this.showWarningPopup(this.$LS("The new folder '#{newFolder}' will be no more hidden.", {newFolder: newName}));
+					this.showWarningPopup(this.$LS("The new folder '{newFolder}' will be no more hidden.", {newFolder: newName}));
 				}
 			}
 		} else {
 			if (type === null) {
-				this.showWarningPopup(this.$LS("The new file '#{newFile}' will be hidden.", {newFile: newName}));
+				this.showWarningPopup(this.$LS("The new file '{newFile}' will be hidden.", {newFile: newName}));
 			} else {
 				oldType = this.findNodeExtension(this.selectedNode.file.name);
 				if (oldType === null) {
-					this.showWarningPopup(this.$LS("The new file '#{newFile}' will be no more hidden.", {newFile: newName}));
+					this.showWarningPopup(this.$LS("The new file '{newFile}' will be no more hidden.", {newFile: newName}));
 				} else {
 					if (type !== 'js' && type !== 'txt' && type !== 'md' && type !== 'png' && type !== 'jpg' && type !== 'json' && type !== 'yml') {
-						this.showWarningPopup(this.$LS("Unknown '.#{extension}' file.", {extension: type}));
+						this.showWarningPopup(this.$LS("Unknown '.{extension}' file.", {extension: type}));
 					} else {
 						if (oldType !== 'js' && type === 'js') {
-							this.showWarningPopup(this.$LS("The new file '#{newFile}' will be added to related 'package.js' file.", {newFile: newName}));
+							this.showWarningPopup(this.$LS("The new file '{newFile}' will be added to related 'package.js' file.", {newFile: newName}));
 						}
 					}
 				}
@@ -1168,7 +1168,7 @@ enyo.kind({
 			if (type !== null) {
 				this.refreshFileTree( function() { parentNode.getNodeWithId(inFsNode.id).doAdjustScroll(); }, inFsNode.id /*selectId*/ );
 			} else {
-				this.showWarningPopup(this.$LS("Node named '#{newName}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: newName}));
+				this.showWarningPopup(this.$LS("Node named '{newName}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: newName}));
 				this.refreshFileTree();
 			}
 			this.doHideWaitPopup();
@@ -1176,7 +1176,7 @@ enyo.kind({
 		nodeCopying.error(this, function(inSender, inError) {
 			this.doHideWaitPopup();
 			this.warn("Unable to copy:", this.selectedNode.file, "as", newName, inError);
-			this.showErrorPopup(this.$LS("Creating file '#{copyName}' as copy of '#{name}' failed: #{error}", {copyName: newName, name: this.selectedNode.file.name, error: inError.toString()}));
+			this.showErrorPopup(this.$LS("Creating file '{copyName}' as copy of '{name}' failed: {error}", {copyName: newName, name: this.selectedNode.file.name, error: inError.toString()}));
 		});
 	},
 	/** @private */
@@ -1213,36 +1213,36 @@ enyo.kind({
 		if (!this.selectedNode.file.isServer) {
 			if (this.selectedNode.file.isDir) {
 				if (type === null) {
-					this.showWarningPopup(this.$LS("Folder '#{newFolder}' is now hidden.", {newFolder: newName}));
+					this.showWarningPopup(this.$LS("Folder '{newFolder}' is now hidden.", {newFolder: newName}));
 				} else {
 					oldType = this.findNodeExtension(this.selectedNode.file.name);
 					if (oldType === null) {
-						this.showWarningPopup(this.$LS("Folder '#{newFolder}' is no more hidden.", {newFolder: newName}));
+						this.showWarningPopup(this.$LS("Folder '{newFolder}' is no more hidden.", {newFolder: newName}));
 					}
 				}
 			} else {
 				if (type === null) {
-					this.showWarningPopup(this.$LS("File '#{newFile}' is now hidden.", {newFile: newName}));
+					this.showWarningPopup(this.$LS("File '{newFile}' is now hidden.", {newFile: newName}));
 				} else {
 					oldType = this.findNodeExtension(this.selectedNode.file.name);
 					if (oldType === null) {
-						this.showWarningPopup(this.$LS("File '#{newFile}' is no more hidden.", {newFile: newName}));
+						this.showWarningPopup(this.$LS("File '{newFile}' is no more hidden.", {newFile: newName}));
 					} else {
 						if (type !== 'js') {
 							if (oldType === 'js') {
 								if (type !== 'txt' && type !== 'md' && type !== 'png' && type !== 'jpg' && type !== 'json' && type !== 'yml') {
-									this.showWarningPopup(this.$LS("Unknown '.#{extension}' file. File '#{oldFile}' will be removed from related 'package.js' file.", {extension: type, oldFile: this.selectedNode.file.name}));
+									this.showWarningPopup(this.$LS("Unknown '.{extension}' file. File '{oldFile}' will be removed from related 'package.js' file.", {extension: type, oldFile: this.selectedNode.file.name}));
 								} else {
-									this.showWarningPopup(this.$LS("File '#{oldFile}' will be removed from related 'package.js' file.", {oldFile: this.selectedNode.file.name}));
+									this.showWarningPopup(this.$LS("File '{oldFile}' will be removed from related 'package.js' file.", {oldFile: this.selectedNode.file.name}));
 								}
 							} else {
 								if (type !== 'txt' && type !== 'md' && type !== 'png' && type !== 'jpg' && type !== 'json' && type !== 'yml') {
-									this.showWarningPopup(this.$LS("Unknown '.#{extension}' file.", {extension: type}));
+									this.showWarningPopup(this.$LS("Unknown '.{extension}' file.", {extension: type}));
 								}								
 							}
 						} else {
 							if (oldType !== 'js') {
-								this.showWarningPopup(this.$LS("File '#{newFile}' will be added to related 'package.js' file.", {newFile: newName}));
+								this.showWarningPopup(this.$LS("File '{newFile}' will be added to related 'package.js' file.", {newFile: newName}));
 							}
 						}
 					}
@@ -1314,7 +1314,7 @@ enyo.kind({
 		nodeRenaming.error(this, function(inSender, inError) {
 			this.doHideWaitPopup();
 			this.warn("Unable to rename:", this.selectedNode.file, "into", newName, inError);
-			this.showErrorPopup(this.$LS("Renaming file '#{oldName}' as '#{newName}' failed", {oldName: this.selectedNode.file.name, newName: newName}));
+			this.showErrorPopup(this.$LS("Renaming file '{oldName}' as '{newName}' failed", {oldName: this.selectedNode.file.name, newName: newName}));
 		});
 	},
 	/** @private */
@@ -1377,7 +1377,7 @@ enyo.kind({
 		});
 		nodeRemoving.error(this, function(inSender, inError) {
 			this.warn("Unable to delete:", this.selectedNode.file, inError);
-			this.showErrorPopup(this.$LS("Deleting '#{name}' failed", {name: this.selectedNode.file.name}));
+			this.showErrorPopup(this.$LS("Deleting '{name}' failed", {name: this.selectedNode.file.name}));
 			this.doHideWaitPopup();
 		});
 	},
@@ -1587,14 +1587,15 @@ enyo.kind({
 		});
 		nodeMoving.error(this, function(inSender, inError) {
 			this.warn("Unable to move:", inNode.file.name, inError);
-			this.showErrorPopup(this.$LS("Moving #{nodeName} failed: #{error}", {nodeName: inNode.file.name, error: inError.toString()}));
+			this.showErrorPopup(this.$LS("Moving {nodeName} failed: {error}", {nodeName: inNode.file.name, error: inError.toString()}));
 		});
 
 		return nodeMoving;
 	},
+	/** @private */
 	$LS: function(msg, params) {
-		var tmp = new enyo.g11n.Template($L(msg));
-		return tmp.evaluate(params);
+		var template = new enyo.ilib.String($L(msg));
+		return template.format(params);
 	},
 	gotoNodePath: function (nodePath) {
 		var track = this.$.serverNode,
@@ -1673,7 +1674,7 @@ enyo.kind({
 		var illegal = /[<>\/\\!?$%&*,:;"|]/i;
 
 		if (path.match(illegal)) {
-			this.showErrorPopup(this.$LS("Path #{path} contains illegal characters", {path: path}));
+			this.showErrorPopup(this.$LS("Path {path} contains illegal characters", {path: path}));
 			return false;
 		}
 

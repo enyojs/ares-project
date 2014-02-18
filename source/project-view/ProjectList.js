@@ -186,7 +186,7 @@ enyo.kind({
 		var popup = this.$.removeProjectPopup;
 		if (this.selectedProject) {
 			popup.setTitle($L("Remove project"));
-			popup.setMessage(this.$LS("Remove project '#{projectName}' from list?", {projectName: this.selectedProject.getName()}));
+			popup.setMessage(this.$LS("Remove project '{projectName}' from list?", {projectName: this.selectedProject.getName()}));
 			popup.set("nukeFiles", false) ;
 			popup.show();
 		}
@@ -392,9 +392,10 @@ enyo.kind({
 		}
 		return value;	// Accept
 	},
+	/** @private */
 	$LS: function(msg, params) {
-		var tmp = new enyo.g11n.Template($L(msg));
-		return tmp.evaluate(params);
+		var template = new enyo.ilib.String($L(msg));
+		return template.format(params);
 	}
 });
 

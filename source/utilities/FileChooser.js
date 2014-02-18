@@ -362,9 +362,10 @@ enyo.kind({
 		this.$.errorPopup.setErrorMsg(msg);
 		this.$.errorPopup.show();
 	},
+	/** @private */
 	$LS: function(msg, params) {
-		var tmp = new enyo.g11n.Template($L(msg));
-		return tmp.evaluate(params);
+		var template = new enyo.ilib.String($L(msg));
+		return template.format(params);
 	}
 });
 
