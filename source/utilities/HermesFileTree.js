@@ -146,7 +146,7 @@ enyo.kind({
 		this.enableDisableButtons();
 		this.createComponent(
 			{name: "serverNode", container: this.$.scroller, kind: "hermes.Node", classes: "enyo-unselectable hermesFileTree-root",
-				showing: false, content: "server", icon: "$assets/harmonia/services/images/antenna.png",
+				showing: false, content: "server", icon: "$assets/utilities/images/antenna.png",
 				expandable: true, expanded: true, collapsible: false, dragAllowed: this.dragAllowed
 			}
 		);
@@ -375,7 +375,7 @@ enyo.kind({
 			
 			inTargetNode.setExpanded(true);
 			// update icon for expanded state
-			inTargetNode.setIcon("$assets/services/images/arrowDown.png");
+			inTargetNode.setIcon("$assets/utilities/arrowDown.png");
 			inTargetNode.addClass("hermesFileTree-folder-highlight");
 						
 			// handle lazy-load when expanding
@@ -916,7 +916,7 @@ enyo.kind({
 			if (!parentNode.expanded) {
 				parentNode.setExpanded(true);
 				// update icon for expanded state
-				parentNode.setIcon("$assets/services/images/arrowDown.png");
+				parentNode.setIcon("$assets/utilities/images/arrowDown.png");
 							
 				// handle lazy-load when expanding
 				parentNode.updateNodes().
@@ -1477,7 +1477,7 @@ enyo.kind({
 			if (!parentNode.expanded) {
 				parentNode.setExpanded(true);
 				// update icon for expanded state
-				parentNode.setIcon("$assets/services/images/arrowDown.png");
+				parentNode.setIcon("$assets/utilities/images/arrowDown.png");
 							
 				// handle lazy-load when expanding
 				parentNode.updateNodes().
@@ -1559,7 +1559,7 @@ enyo.kind({
 			if (!addParentNode.expanded) {
 				addParentNode.setExpanded(true);
 				// update icon for expanded state
-				addParentNode.setIcon("$assets/services/images/arrowDown.png");
+				addParentNode.setIcon("$assets/utilities/images/arrowDown.png");
 							
 				// handle lazy-load when expanding
 				addParentNode.updateNodes().
