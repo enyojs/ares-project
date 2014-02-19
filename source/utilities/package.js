@@ -9,7 +9,7 @@ enyo.depends(
 	"IFrame.js",
 	"LocalStorage.js",
 	"HermesNode.js",
-	"HermesFileSystem.js",
+	"HermesFileTree.js",
 	"FileChooser.js",
 	"LinkController.js",
 	"PanelGrabber.js",
