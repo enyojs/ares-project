@@ -453,7 +453,6 @@ enyo.kind({
 	 * 
 	 * @param  {Object} inSender container of the originator of the event
 	 * @param  {Object} inEvent  contain the new state of the event originator
-	 * @return {boolean}         stop the bubbling.
 	 */
 	enableOkButton: function(inSender, inEvent){	
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
