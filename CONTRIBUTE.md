@@ -9,22 +9,33 @@ Basic architecture
 The Ares project architecture is divided into several main pieces:
 
 * **Ares** - The front-end designer/editor web application, with the following main components:
-	* **Harmonia** - File system layer, communicating with the server-side _Hermes_ components.
-	* **Phobos** - Document management
+	* **Harmonia** - Client-side Ares system layer, communicating with the server-side _Hermes_ components.
+	* **Phobos** - Code editor
 	* **Deimos** - Visual designer
-* **Hermes Components** - Pluggable server-side components that provide interfaces to Ares clients for cloud-based services such as file storage and build services.  We're leveraging node.js, but Hermes components can use any server-side tech.
+    * **Hermes** - Server-side Ares system layer.  Pluggable server-side components that provide interfaces to Ares clients for cloud-based services such as file storage and build services.  We're using node.js, but Hermes components can use any server-side technology.
 * **Ares plugins** - Based on Hermes pluggable server-side components, Ares plugins can bring:  
   * New server-side services with their own configuration
   * The corresponding browser side code that will be loaded into the Ares IDE  
 See [Ares plugins](README.md#ares-plugins) for more details.
- 
+
+```
+source/*            Multi-Project View
+├── enyo-editor     File Editor
+│   ├── deimos      Drag-n-Drop Designer
+│   └── phobos      Code Editor
+├── harmonia        Access to Ares Server (ide.js) Services
+│   └── services
+├── preview         Preview Current Project
+├── project-view    Single-Project View
+└── utilities       As it says...
+```
 
 Real stuff - Code
 -----------------
 
 ### Setup a developement environment
 
-1. Install Node.js & NPM 0.8.x (>= 0.8.19).  Preferably from the [Official Download Page](http://nodejs.org/#download).
+1. Install Node.js & NPM 0.10.x.  Preferably from the [Official Download Page](http://nodejs.org/#download).
 1. Install git (or a graphical git client).  See the [Github.com help](https://help.github.com/articles/set-up-git) for hints
 1. Pick a GitHub account
 
@@ -41,7 +52,7 @@ Real stuff - Code
 		$ cd ares-project
 		$ npm -d install
 
-1. Run Ares using `node ide.js` from the GitHub root folder
+1. Run Ares using `node ide.js --dev-mode` from the GitHub root folder (`--dev-mode` to avoid using the minified version of Ares)
 
 **Update workspace** if you already have a working environment (with a remote named `origin`), run the following sequence.
 
@@ -54,7 +65,6 @@ Real stuff - Code
 **Note:** 
 
 1. Until recently, `ares-project/node_modules` contained 3rd-party modules directly archived into `ares-project` own Git repository.  So existing repository owners _may_ need to run `rm -rf ares-project/node_modules` to properly update their trees.
-2. Do **NOT** use Node.js 0.10.0: Ares does not work yet using this brand new version of Node.  [We are aware of the issue](https://enyojs.atlassian.net/browse/ENYO-2063).
 
 #### Some Git+NPM Automation Examples
 
@@ -145,7 +155,7 @@ For all contributions on Ares project and before commit, please execute the avai
 Build an Ares package
 ---------------------
 
-In order to produce Ares on a build server:
+In order to produce a minified Ares on a build server:
 
 1. Make sure Node and NPM are installed on the build server.  Version >=0.8.21 is known to work
 1. In the build script, run:
@@ -168,6 +178,10 @@ In order to produce Ares on a build server:
 		$ mkdir ../test && cd ../test
 		$ npm install ../ares-project/ares-ide-0.0.2.tgz
 		$ node_modules/.bin/ares-ide
+
+1. Whatever the packaging/re-packaging option you choose, make sure you clean-up `_ide` and `_preview` folders created by the `npm prepublish` stage that is built-in `npm pack`.
+
+		$ npm run-script postpublish
 
 Release & Publish Ares
 ----------------------

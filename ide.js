@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* jshint node:true */
-/*global setImmediate*/
+/*global setImmediate,require,process*/
 /**
  *  ARES IDE server
  */
@@ -32,6 +32,7 @@ var knownOpts = {
 	"host":            String,
 	"timeout":         Number,
 	"listen_all":      Boolean,
+	"dev-mode":        Boolean,
 	"config":          path,
 	"level":           ['silly', 'verbose', 'info', 'http', 'warn', 'error'],
 	"log":             Boolean,
@@ -44,6 +45,7 @@ var shortHands = {
 	"B": ["--bundled-browser"],
 	"p": ["--port"],
 	"H": ["--host"],
+	"D": ["--dev-mode"],
 	"t": ["--timeout"],
 	"a": ["--listen_all"],
 	"c": ["--config"],
@@ -73,6 +75,7 @@ if (argv.help) {
 		"  -T, --runtest         Run the non-regression test suite                                                     [boolean]\n" +
 		"  -b, --browser         Open the default browser on the Ares URL                                              [boolean]\n" +
 		"  -B, --bundled-browser Open the included browser on the Ares URL                                             [boolean]\n" +
+		"  -D, --dev-mode        Load non-minified version of Ares and Enyo for Ares debug and development             [boolean]\n" +
 		"  -p, --port        b   port (o) local IP port of the express server (default: 9009, 0: dynamic)              [default: '9009']\n" +
 		"  -H, --host        b   host to bind the express server onto                                                  [default: '127.0.0.1']\n" +
 		"  -t, --timeout     b   milliseconds of inactivity before a server socket is presumed to have timed out       [default: '240000']\n" +
@@ -149,7 +152,6 @@ var configPath, tester;
 var configStats;
 var aresAboutData;
 var serviceMap = {};
-
 
 if (argv.runtest) {
 	tester = require('./test/tester/main.js');
@@ -602,8 +604,6 @@ ide.res.services.filter(function(service){
 
 // Start the ide server
 
-var enyojsRoot = path.resolve(myDir,".");
-
 var app = express(),
     server = http.createServer(app);
 
@@ -709,17 +709,35 @@ app.configure(function(){
 	app.use(setCorsHeaders);
 	app.use(setUserHeaders);
 
-	app.use(express.favicon(myDir + '/ares/assets/images/ares_48x48.ico'));
+	app.use(express.favicon(myDir + '/assets/images/ares_48x48.ico'));
 
-	app.use('/ide', express.static(enyojsRoot));
-	app.use('/test', express.static(path.join(enyojsRoot, '/test')));
+	["preview", "ide"].forEach(function(client) {
+		var dir = path.resolve(myDir, "_" + client);
+		if (argv['dev-mode'] || !fs.existsSync(dir)) {
+			dir = myDir;
+		}
+		log.info("main", "Loading url: /" + client + " from folder:", dir);
+		app.use('/' + client, express.static(dir));
+		app.use('/' + client + '/lib', express.static(path.join(myDir, 'lib')));
+		app.use('/' + client + '/assets', express.static(path.join(myDir, 'assets')));
+	});
+
+	app.use('/test', express.static(path.join(myDir, '/test')));
 
 	app.use(express.logger('dev'));
 
+	// Real home is '/ide/'
 	app.get('/', function(req, res, next) {
 		log.http('main', "GET /");
-		res.redirect('/ide/ares/');
+		res.redirect(req.url.replace(/$|\?/,"ide/$&"));
 	});
+	// Compatibility redirection to not invalidate bookmarks to
+	// former home.
+	app.get('/ide/ares*', function(req, res, next) {
+		log.http('main', "GET /ide/ares*");
+		res.redirect(req.url.replace(/ares($|\/|\?)/,""));
+	});
+
 	app.get('/res/timestamp', function(req, res, next) {
 		res.status(200).json({timestamp: ide.res.timestamp});
 	});
@@ -774,7 +792,7 @@ server.listen(argv.port, argv.listen_all ? null : argv.host, null /*backlog*/, f
 	var tcpAddr = server.address(),
 	    info;
 	origin = "http://" + (argv.host || "127.0.0.1") + ":" + tcpAddr.port;
-	url = origin + "/ide/ares/" + page;
+	url = origin + "/ide/" + page;
 	if (argv.browser) {
 		// Open default browser
 		info = platformOpen[process.platform] ;

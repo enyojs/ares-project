@@ -9,7 +9,7 @@
 		{
 			"active":true,
 			"id":"home",
-			"icon":"$harmonia/images/providers/home-32x32.png",
+			"icon":"$assets/harmonia/images/providers/home-32x32.png",
 			"name":"Home Directory",
 			"type": ["filesystem"],
 			"provider": "hermes",
@@ -22,7 +22,7 @@
 		{
 			"active":false,
 			"id":"dropbox",
-			"icon":"$harmonia/images/providers/dropbox.com-32x32.png",
+			"icon":"$assets/harmonia/images/providers/dropbox.com-32x32.png",
 			"name":"Dropbox",
 			"type": ["filesystem"],
 			"provider": "hermes",
@@ -51,7 +51,7 @@
 		{
 			"active":true,
 			"id":"phonegap",
-			"icon":"$harmonia/images/providers/build.phonegap.com-32x32.png",
+			"icon":"$assets/harmonia/images/providers/build.phonegap.com-32x32.png",
 			"name":"PhoneGap Build",
 			"type": ["build"],
 			"command":"@NODE@", "params":[
@@ -149,7 +149,7 @@
 		{
 			"active":false,
 			"id":"Example",
-			"icon":"$harmonia/images/providers/box_white-32x32.png",
+			"icon":"$assets/harmonia/images/providers/box_white-32x32.png",
 			"name":"Example drive",
 			"type": ["filesystem"],
 			"provider": "hermes",
