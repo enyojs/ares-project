@@ -232,7 +232,6 @@ enyo.kind({
 	 * @param  {Function} next CommonJs callback
 	 * @private
 	 */
-	 */
 	_showProjectPropPopup: function(next) {
 		this.$.selectDirectoryPopup.hide();
 		this.$.selectDirectoryPopup.reset();
