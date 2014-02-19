@@ -479,13 +479,13 @@ enyo.kind({
 			}
 
 			return validDrawer;
-		}		
+		};
 	
 		/**
-		 * 	Browse the drawer in the project attribute "validPgbConf"
-		 *	If at least on drawer is not valid
-		 *	Then the "Ok" button of the Pop-up will be kept disabled.
-		 *	
+		 *  Browse the drawer in the project attribute "validPgbConf"
+		 *  If at least on drawer is not valid
+		 *  Then the "Ok" button of the Pop-up will be kept disabled.
+		 *
 		 * @return {boolean} Phonegap build UI validation value.
 		 */
 		var updateOkButtonState = function() {
@@ -497,7 +497,7 @@ enyo.kind({
 				}				
 			}
 			return okDisabled;
-		}		
+		};
 		
 		// Update de validation state of the drawer in the Project model instance if the drawer is valid.
 		if (updateDrawerValidation.call(this)) {			
