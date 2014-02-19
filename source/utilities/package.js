@@ -8,6 +8,8 @@ enyo.depends(
 	"AsyncError.js",
 	"IFrame.js",
 	"LocalStorage.js",
+	"HermesNode.js",
+	"HermesFileSystem.js",
 	"FileChooser.js",
 	"LinkController.js",
 	"PanelGrabber.js",
