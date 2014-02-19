@@ -1,4 +1,4 @@
-/* global async, ares */
+/* global async, ares, ilibHarmonia */
 /**
  * @see https://www.dropbox.com/developers/reference/api
  * @see https://www.dropbox.com/developers/blog/20
@@ -38,33 +38,33 @@ enyo.kind({
 		{kind: "Ares.Groupbox", components: [
 			{kind: "onyx.GroupboxHeader", name: "serviceName"},
 			{components: [
-				{content: "User Name: ", kind: "Ares.GroupBoxItemKey"},
+				{content: ilibHarmonia("User Name:"), kind: "Ares.GroupBoxItemKey"},
 				{name: "name", kind: "Ares.GroupBoxItemValue"}
 			]},
 			{components: [
-				{content: "Email: ", kind: "Ares.GroupBoxItemKey"},
+				{content: ilibHarmonia("Email:"), kind: "Ares.GroupBoxItemKey"},
 				{name: "email", kind: "Ares.GroupBoxItemValue"}
 			]},
 			{components: [
-				{content: "Country Code:", kind: "Ares.GroupBoxItemKey"},
+				{content: ilibHarmonia("Country Code:"), kind: "Ares.GroupBoxItemKey"},
 				{name: "countryCode", kind: "Ares.GroupBoxItemValue"}
 			]},
 			{components: [
-				{content: "Quota (Max):", kind: "Ares.GroupBoxItemKey"},
+				{content: ilibHarmonia("Quota (Max):"), kind: "Ares.GroupBoxItemKey"},
 				{name: "quota", kind: "Ares.GroupBoxItemValue"}
 			]},
 			{components: [
-				{content: "Usage (Private):", kind: "Ares.GroupBoxItemKey"},
+				{content: ilibHarmonia("Usage (Private):"), kind: "Ares.GroupBoxItemKey"},
 				{name: "privateBytes", kind: "Ares.GroupBoxItemValue"}
 			]},
 			{components: [
-				{content: "Usage (Shared):", kind: "Ares.GroupBoxItemKey"},
+				{content: ilibHarmonia("Usage (Shared):"), kind: "Ares.GroupBoxItemKey"},
 				{name: "sharedBytes", kind: "Ares.GroupBoxItemValue"}
 			]}
 		]},
 		{kind: "FittableColumns", components: [
-			{name: "renewBtn", kind: "onyx.Button", content: "Renew", disabled: false, ontap: "renew"},
-			{name: "checkBtn", kind: "onyx.Button", content: "Check", disabled: true, ontap: "check"}
+			{name: "renewBtn", kind: "onyx.Button", content: ilibHarmonia("Renew"), disabled: false, ontap: "renew"},
+			{name: "checkBtn", kind: "onyx.Button", content: ilibHarmonia("Check"), disabled: true, ontap: "check"}
 		]},
 		{name: "footnote"}
 	],
@@ -85,7 +85,7 @@ enyo.kind({
 		if (ares.isPopupAllowed()) {
 			this.$.footnote.setContent("");
 		} else {
-			this.$.footnote.setContent("You need to accept Dropbox popup when asked...");
+			this.$.footnote.setContent(ilibHarmonia("You need to accept Dropbox popup when asked..."));
 		}
 		this.inherited(arguments);
 	},

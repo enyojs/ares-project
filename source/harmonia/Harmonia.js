@@ -1,4 +1,63 @@
-/*global ares, enyo, setTimeout */
+/*global ares, enyo, ilib, setTimeout */
+var ilibHarmonia = function(msg, params) {
+	var resolveString = function(string) {
+		var str;
+		if (!ilibHarmonia.rb) {
+			ilibHarmonia.setLocale();
+		}
+		if (typeof(string) === 'string') {
+			if (!ilibHarmonia.rb) {
+				return string;
+			}
+			str = ilibHarmonia.rb.getString(string);
+		} else if (typeof(string) === 'object') {
+			if (typeof(string.key) !== 'undefined' && typeof(string.value) !== 'undefined') {
+				if (!ilibHarmonia.rb) {
+					return string.value;
+				}
+				str = ilibHarmonia.rb.getString(string.value, string.key);
+			} else {
+				str = "";
+			}
+		} else {
+			str = string;
+		}
+		return str.toString();
+	};
+
+	var stringResolved = resolveString(msg);
+	if (params) {
+		var template = new ilib.String(stringResolved);
+		return template.format(params);
+	} 
+
+	return stringResolved;
+};
+
+ilibHarmonia.setLocale = function (spec) {
+	var locale = new ilib.Locale(spec);
+	if (!ilibHarmonia.rb || spec !== ilibHarmonia.rb.getLocale().getSpec()) {
+		ilibHarmonia.rb = new ilib.ResBundle({
+			locale: locale,
+			type: "html",
+			name: "strings",
+			sync: true,
+			lengthen: true,		// if pseudo-localizing, this tells it to lengthen strings
+			loadParams: {
+				root: "$assets/harmonia/resources"
+			}
+		});
+	}
+};
+
+enyo.updateLocale = function() {
+	ilibHarmonia.setLocale(navigator.language);
+	enyo.updateI18NClasses();
+};
+
+// we go ahead and run this once during loading of iLib settings are valid
+// during the loads of later libraries.
+enyo.updateLocale();
 
 enyo.kind({
 	name: "Harmonia",
@@ -18,39 +77,39 @@ enyo.kind({
 	},
 	components: [
 		{kind:"FittableRows", classes:"enyo-fit", components:[
-			{kind: "onyx.Toolbar", classes: "ares-top-toolbar", components: [
+			{kind: "onyx.MoreToolbar", classes: "ares-top-toolbar", components: [
 				{kind: "onyx.Grabber", classes: "ares-grabber" , name: "filePanelGrabber", showing: false, ontap: "activePanel", components: [
 					{kind: "aresGrabber", name: "aresGrabberDirection"}
 				]},
 				{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
-					{content: "Project", name: "projectMenu", disabled: true},
+					{content: ilibHarmonia("Project"), name: "projectMenu", disabled: true},
 					{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
 						{value: "doModifySettings",  classes:"aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_edit.png"},
-							{content: "Edit..."}
+							{content: ilibHarmonia("Edit...")}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
 						{value: "doPreview",  classes:"aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_preview.png"},
-							{content: "Preview"}
+							{content: ilibHarmonia("Preview")}
 						]},
 						{value: "doBuild",  classes:"aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_build.png"},
-							{content: "Build..."}
+							{content: ilibHarmonia("Build...")}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
 						{value: "doInstall",  classes:"aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_install.png"},
-							{content: "Install..."}
+							{content: ilibHarmonia("Install...")}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
 						{value: "doRun",  classes:"aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_run.png"},
-							{content: "Run..."}
+							{content: ilibHarmonia("Run...")}
 						]},
 						{value: "doRunDebug",  classes:"aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_debug.png"},
-							{content: "Debug..."}
+							{content: ilibHarmonia("Debug...")}
 						]}
 					]}
 				]},

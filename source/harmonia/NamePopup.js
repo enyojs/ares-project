@@ -1,8 +1,9 @@
+/* global ilibHarmonia */
 enyo.kind({
 	name: "NamePopup",
 	kind: "onyx.Popup",
 	published: {
-		title: "New",
+		title: ilibHarmonia("New"),
 		type: "",
 		path: "",
 		folderId: "",
@@ -21,19 +22,19 @@ enyo.kind({
 	centered: true,
 	floating: true,
 	components: [
-		{tag: "div", name: "title", classes:"title", content: "Name for new object"},
+		{tag: "div", name: "title", classes: "title", content: ilibHarmonia("Name for new object")},
 		{kind: "enyo.Scroller", classes:"ares-small-popup", fit: true, components: [
-			{tag:"p", classes:"break"},
+			{tag: "p", classes: "break"},
 			{kind: "onyx.InputDecorator", components: [
 				{name: "fileName", kind: "onyx.Input", onkeyup: "nameChanged", placeholder: ""}
 			]},
 			{classes:"ares-small-popup-details", components:[
-				{name: "path", tag: "p", content: "Path: "}
+				{name: "path", tag: "p", content: ilibHarmonia("Path:")}
 			]}
 		]},
-		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
-			{name:"cancelButton", kind: "onyx.Button", content: "Cancel", ontap: "newCancel"},
-			{name:"confirmButton", classes:"right", kind: "onyx.Button", content: "Create", ontap: "newConfirm"}
+		{kind: "onyx.Toolbar", classes: "bottom-toolbar", components: [
+			{name:"cancelButton", kind: "onyx.Button", content: ilibHarmonia("Cancel"), ontap: "newCancel"},
+			{name:"confirmButton", classes: "right", kind: "onyx.Button", content: ilibHarmonia("Create"), ontap: "newConfirm"}
 		]}
 	],
 	create: function() {

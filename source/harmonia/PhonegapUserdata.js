@@ -1,4 +1,4 @@
-/*global ares,enyo*/
+/*global ares, enyo, ilibHarmonia */
 enyo.kind({
 	name: "PhonegapUserdata",
 	kind: "Ares.Groupbox",
@@ -7,33 +7,33 @@ enyo.kind({
 		userData: {}
 	},
 	components: [
-		{kind: "onyx.GroupboxHeader", content: "PhoneGap Account"},
+		{kind: "onyx.GroupboxHeader", content: ilibHarmonia("PhoneGap Account")},
 		{kind:"control.Link", components: [
-			{content: "User ID:", kind: "Ares.GroupBoxItemKey"},
+			{content: ilibHarmonia("User ID:"), kind: "Ares.GroupBoxItemKey"},
 			{name: "userId", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageAccount"},
 		{kind:"control.Link", components: [
-			{content: "User Login: ", kind: "Ares.GroupBoxItemKey"},
+			{content: ilibHarmonia("User Login:"), kind: "Ares.GroupBoxItemKey"},
 			{name: "username", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageAccount"},
 		{kind:"control.Link", components: [
-			{content: "User Email: ", kind: "Ares.GroupBoxItemKey"},
+			{content: ilibHarmonia("User Email:"), kind: "Ares.GroupBoxItemKey"},
 			{name: "email", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageAccount"},
 		{kind:"control.Link", components: [
-			{content: "Signing Keys (Android):", kind: "Ares.GroupBoxItemKey"},
+			{content: ilibHarmonia("Signing Keys (Android):"), kind: "Ares.GroupBoxItemKey"},
 			{name: "androidKeys", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageAccount"},
 		{kind:"control.Link", components: [
-			{content: "Signing Keys (Blackberry):", kind: "Ares.GroupBoxItemKey"},
+			{content: ilibHarmonia("Signing Keys (Blackberry):"), kind: "Ares.GroupBoxItemKey"},
 			{name: "blackberryKeys", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageAccount"},
 		{kind:"control.Link", components: [
-			{content: "Signing Keys (iOS):", kind: "Ares.GroupBoxItemKey"},
+			{content: ilibHarmonia("Signing Keys (iOS):"), kind: "Ares.GroupBoxItemKey"},
 			{name: "iosKeys", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageAccount"},
 		{kind:"control.Link", components: [
-			{content: "Registered Applications:", kind: "Ares.GroupBoxItemKey"},
+			{content: ilibHarmonia("Registered Applications:"), kind: "Ares.GroupBoxItemKey"},
 			{name: "apps", kind: "Ares.GroupBoxItemValue"}
 		], ontap: "manageApps"}
 	],
