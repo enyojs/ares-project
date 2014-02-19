@@ -1,4 +1,4 @@
-/*global enyo, ares, ProjectConfig, Phonegap */
+/*global enyo, ares, ProjectConfig, Phonegap, ilibProjectView */
 
 /**
  * This kind provide a widget to tune project properties
@@ -34,11 +34,11 @@ enyo.kind({
 	components: [
 		{classes:"title left-align", content:"Project properties", components:[
 			{kind: "onyx.RadioGroup", onActivate: "switchDrawers", name: "thumbnail", classes:"ares-radio-group", components: [
-				{serviceId: "project", active: true, attributes: { title: $L("project attributes...") }, components: [
-					{classes: "large-fixed", content: $L("Project")}, {tag: "span", classes:"ares-bottom-check"}
+				{serviceId: "project", active: true, attributes: { title: ilibProjectView("project attributes...") }, components: [
+					{classes: "large-fixed", content: ilibProjectView("Project")}, {tag: "span", classes:"ares-bottom-check"}
 				]},
-				{serviceId: "preview", attributes: { title: $L("project preview parameters...") }, components: [
-					{classes: "large-fixed", content: $L("Preview")}, {tag:"span", classes:"ares-bottom-check"}
+				{serviceId: "preview", attributes: { title: ilibProjectView("project preview parameters...") }, components: [
+					{classes: "large-fixed", content: ilibProjectView("Preview")}, {tag:"span", classes:"ares-bottom-check"}
 				]}
 			]}
 		]},
@@ -62,29 +62,29 @@ enyo.kind({
 						]}
 					]}
 				]},
-				{tag: "p", classes:"break"},
+				{tag: "p", classes: "break"},
 				{kind: "FittableColumns", components: [
 					{kind: "FittableRows", components: [
 						{classes: "ares-row", components: [
-							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Name: ")},
+							{tag: "label", classes : "ares-fixed-label ares-small-label", content: ilibProjectView("Name: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectName"}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Version: ")},
+							{tag: "label", classes : "ares-fixed-label ares-small-label", content: ilibProjectView("Version: ")},
 							{kind: "onyx.InputDecorator", components: [
-								{kind: "Input", defaultFocus: true, name: "projectVersion", placeholder:"0.0.1"}
+								{kind: "Input", defaultFocus: true, name: "projectVersion", placeholder: "0.0.1"}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Author name: ")},
+							{tag: "label", classes : "ares-fixed-label ares-small-label", content: ilibProjectView("Author name: ")},
 							{kind: "onyx.InputDecorator", components: [
-								{kind: "Input", name: "projectAuthor", attributes: {title: $L("Vendor / Committer Name")}, placeholder: $L("My Company")}
+								{kind: "Input", name: "projectAuthor", attributes: {title: ilibProjectView("Vendor / Committer Name")}, placeholder: ilibProjectView("My Company")}
 							]}
 						]},
 						{classes:"ares-row", name: "templatesEntry", showing: false, components: [
-							{tag: "label", classes :"ares-fixed-label ares-small-label", content: $L("Template:")},
+							{tag: "label", classes :"ares-fixed-label ares-small-label", content: ilibProjectView("Template:")},
 							{kind: "Ares.PickerDecorator", fit: true, components: [
 								{name: "templateButton", classes:"very-large-width"},
 								{kind: "onyx.FlyweightPicker", name: "templatePicker", components: [
@@ -95,23 +95,23 @@ enyo.kind({
 					]},
 					{kind: "FittableRows", components: [
 						{classes: "ares-row", components: [
-							{tag: "label", classes: "ares-fixed-label ares-small-label", content: $L("Title: ")},
+							{tag: "label", classes: "ares-fixed-label ares-small-label", content: ilibProjectView("Title: ")},
 							{kind: "onyx.InputDecorator", components: [
-								{kind: "Input", defaultFocus: true, name: "projectTitle", placeholder: $L("My Example App")}
+								{kind: "Input", defaultFocus: true, name: "projectTitle", placeholder: ilibProjectView("My Example App")}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Id: ")},
+							{tag: "label", classes : "ares-fixed-label ares-small-label", content: ilibProjectView("Id: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", defaultFocus: true, name: "projectId",
-								 attributes: {title: $L("Application ID in reverse domain-name format: com.example.apps.myapp")}, placeholder: "com.example.apps.myapp"}
+								 attributes: {title: ilibProjectView("Application ID in reverse domain-name format: com.example.apps.myapp")}, placeholder: "com.example.apps.myapp"}
 							]}
 						]},
 						{classes: "ares-row", components: [
-							{tag: "label", classes : "ares-fixed-label ares-small-label", content: $L("Contact: ")},
+							{tag: "label", classes : "ares-fixed-label ares-small-label", content: ilibProjectView("Contact: ")},
 							{kind: "onyx.InputDecorator", components: [
 								{kind: "Input", name: "projectContact",
-								 attributes: {title: $L("mail address or home page of the author")}, placeholder: $L("support@example.com")
+								 attributes: {title: ilibProjectView("mail address or home page of the author")}, placeholder: "support@example.com"
 								}
 							]}
 						]}
@@ -120,13 +120,13 @@ enyo.kind({
 				{tag: "p", classes: "break"},
 				{kind: "FittableColumns", components: [
 					{classes: "ares-row", components: [
-						{tag: "label", classes: "ares-fixed-label  ares-small-label", content: $L("Description:")},
+						{tag: "label", classes: "ares-fixed-label  ares-small-label", content: ilibProjectView("Description:")},
 						{kind: "onyx.InputDecorator", classes: "ares-project-properties-textarea-wide", components: [
-							{kind: "onyx.TextArea", name: "projectDescription", fit: true, content: "", placeholder: $L("My project description...")}
+							{kind: "onyx.TextArea", name: "projectDescription", fit: true, content: "", placeholder: ilibProjectView("My application description...")}
 						]}
 					]}
 				]},
-				{tag:"p", classes:"break"},
+				{tag: "p", classes: "break"},
 				{kind: "enyo.FittableColumns", classes: "ares-row", name: "servicesList"}
 			]}
 		]},
@@ -135,16 +135,16 @@ enyo.kind({
 				{kind: "FittableRows", components: [
 					{kind: "ProjectProperties.PathInputRow", 
 					 name: "topFileRow", 
-					 label: $L("Top application file: "), 
-					 inputTip: $L("top file of your application. Typically '/index.html', but per default '/debug.html' for debug mode."), 
-					 buttonTip: $L("select file...")}
+					 label: ilibProjectView("Top application file: "), 
+					 inputTip: ilibProjectView("top file of your application. Typically '/index.html', but per default '/debug.html' for debug mode."), 
+					 buttonTip: ilibProjectView("select file...")}
 				]}
 			]}
 		]},
 		{name: "errTooltipDecorator", kind: "onyx.TooltipDecorator", components: [
 			{name: "toolbarId", kind: "onyx.Toolbar", classes: "bottom-toolbar", components: [
-				{kind: "onyx.Button", content: $L("Cancel"), ontap: "doDone"},
-				{kind: "onyx.Button", name: "ok", classes: "right", content: $L("OK"), ontap: "confirmTap"}
+				{kind: "onyx.Button", content: ilibProjectView("Cancel"), ontap: "doDone"},
+				{kind: "onyx.Button", name: "ok", classes: "right", content: ilibProjectView("OK"), ontap: "confirmTap"}
 			]}
 		]},
 
@@ -674,7 +674,7 @@ enyo.kind({
 	},
 	components: [
 		{name: "chkBx", kind: "onyx.Checkbox", onchange: "onCheckedAction"},
-		{tag:"label", classes:"ares-label", content: ""}
+		{tag: "label", classes: "ares-label", content: ""}
 	],
 	onCheckedAction: function(inSender, inEvent) {
 		this.doLibChecked({
@@ -701,7 +701,7 @@ enyo.kind({
 		onPathChecked: ""
 	},
 	components: [
-		{tag: "label", name: "pathInputLabel", classes:"ares-fixed-label"},
+		{tag: "label", name: "pathInputLabel", classes: "ares-fixed-label"},
 		{kind: "onyx.InputDecorator", components: [
 			{kind: "Input", name: "pathInputValue", disabled: true}
 		]},
@@ -755,7 +755,7 @@ enyo.kind({
 	},
 	/** @private */
 	pathInputTap: function (inSender, inEvent) {
-		this.doInputButtonTap({header: $L("Select top file...")});
+		this.doInputButtonTap({header: ilibProjectView("Select top file...")});
 		return true;
 	}
 });

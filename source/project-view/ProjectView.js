@@ -1,4 +1,64 @@
-/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo, Phonegap */
+/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo, Phonegap, ilib */
+var ilibProjectView = function(msg, params) {
+	var resolveString = function(string) {
+		var str;
+		if (!ilibProjectView.rb) {
+			ilibProjectView.setLocale();
+		}
+		if (typeof(string) === 'string') {
+			if (!ilibProjectView.rb) {
+				return string;
+			}
+			str = ilibProjectView.rb.getString(string);
+		} else if (typeof(string) === 'object') {
+			if (typeof(string.key) !== 'undefined' && typeof(string.value) !== 'undefined') {
+				if (!ilibProjectView.rb) {
+					return string.value;
+				}
+				str = ilibProjectView.rb.getString(string.value, string.key);
+			} else {
+				str = "";
+			}
+		} else {
+			str = string;
+		}
+		return str.toString();
+	};
+
+	var stringResolved = resolveString(msg);
+	if (params) {
+		var template = new ilib.String(stringResolved);
+		return template.format(params);
+	} 
+
+	return stringResolved;
+};
+
+ilibProjectView.setLocale = function (spec) {
+	var locale = new ilib.Locale(spec);
+	if (!ilibProjectView.rb || spec !== ilibProjectView.rb.getLocale().getSpec()) {
+		ilibProjectView.rb = new ilib.ResBundle({
+			locale: locale,
+			type: "html",
+			name: "strings",
+			sync: true,
+			lengthen: true,		// if pseudo-localizing, this tells it to lengthen strings
+			loadParams: {
+				root: "$assets/project-view/resources"
+			}
+		});
+	}
+};
+
+enyo.updateLocale = function() {
+	ilibProjectView.setLocale(navigator.language);
+	enyo.updateI18NClasses();
+};
+
+// we go ahead and run this once during loading of iLib settings are valid
+// during the loads of later libraries.
+enyo.updateLocale();
+
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -54,13 +114,13 @@ enyo.kind({
 		ComponentsRegistry.getComponent("harmonia").refreshFileTree(toSelectId,next);
 	},
 	searchProjectsAction: function(inSender, inEvent) {
-		this.$.projectWizardScan.setHeaderText('Select a folder hierarchy');
+		this.$.projectWizardScan.setHeaderText(ilibProjectView("Select a folder hierarchy"));
 		this.$.projectWizardScan.setRecurse(true);
 		this.$.projectWizardScan.show();
 		return true; //Stop event propagation
 	},
 	openProjectAction: function(inSender, inEvent) {
-		this.$.projectWizardScan.setHeaderText('Select an existing Ares application folder (contains a project.json file)');
+		this.$.projectWizardScan.setHeaderText(ilibProjectView("Select an existing Ares application folder (contains a project.json file)"));
 		this.$.projectWizardScan.setRecurse(false);
 		this.$.projectWizardScan.show();
 		return true; //Stop event propagation

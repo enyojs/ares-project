@@ -1,4 +1,4 @@
-/* global ares, ProjectConfig, ServiceRegistry */
+/* global ares, ProjectConfig, ServiceRegistry, ilibProjectView */
 
 /**
  * This kind holds the consistency between the project.json and the
@@ -166,10 +166,10 @@ enyo.kind({
 			id: "com.examples.apps.myapp",
 			name: "BUG IF YOU SEE THIS",
 			version: "0.0.1",
-			title: "Example: My Application",
-			description: "Description of My Application",
+			title: ilibProjectView("Example: My Application"),
+			description: ilibProjectView("My application description..."),
 			author: {
-				name: "An Example Company",
+				name: ilibProjectView("An Example Company"),
 				href: "http://www.example.com"
 			},
 			providers: {},
