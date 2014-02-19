@@ -55,8 +55,60 @@ ilibAres.setLocale = function (spec) {
 	}
 };
 
+var ilibUtilities = function(msg, params) {
+	var resolveString = function(string) {
+		var str;
+		if (!ilibUtilities.rb) {
+			ilibUtilities.setLocale();
+		}
+		if (typeof(string) === 'string') {
+			if (!ilibUtilities.rb) {
+				return string;
+			}
+			str = ilibUtilities.rb.getString(string);
+		} else if (typeof(string) === 'object') {
+			if (typeof(string.key) !== 'undefined' && typeof(string.value) !== 'undefined') {
+				if (!ilibUtilities.rb) {
+					return string.value;
+				}
+				str = ilibUtilities.rb.getString(string.value, string.key);
+			} else {
+				str = "";
+			}
+		} else {
+			str = string;
+		}
+		return str.toString();
+	};
+
+	var stringResolved = resolveString(msg);
+	if (params) {
+		var template = new ilib.String(stringResolved);
+		return template.format(params);
+	} 
+
+	return stringResolved;
+};
+
+ilibUtilities.setLocale = function (spec) {
+	var locale = new ilib.Locale(spec);
+	if (!ilibUtilities.rb || spec !== ilibUtilities.rb.getLocale().getSpec()) {
+		ilibUtilities.rb = new ilib.ResBundle({
+			locale: locale,
+			type: "html",
+			name: "strings",
+			sync: true,
+			lengthen: true,		// if pseudo-localizing, this tells it to lengthen strings
+			loadParams: {
+				root: "$assets/utilities/resources"
+			}
+		});
+	}
+};
+
 enyo.updateLocale = function() {
 	ilibAres.setLocale(navigator.language);
+	ilibUtilities.setLocale(navigator.language);
 	enyo.updateI18NClasses();
 };
 
