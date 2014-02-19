@@ -1,4 +1,4 @@
-/* global ilibHarmonia */
+/*global ilibHarmonia */
 enyo.kind({
 	name: "FieldDecorator", 
 	kind: "ToolDecorator",

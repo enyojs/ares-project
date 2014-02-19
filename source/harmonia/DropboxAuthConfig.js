@@ -1,4 +1,4 @@
-/* global async, ares, ilibHarmonia */
+/*global async, ares, ilibHarmonia */
 /**
  * @see https://www.dropbox.com/developers/reference/api
  * @see https://www.dropbox.com/developers/blog/20
