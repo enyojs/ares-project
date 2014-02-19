@@ -16,7 +16,6 @@ enyo.kind({
 	},
 	components: [
 		{kind: "ProjectList",
-			onModifySettings: "modifySettingsAction",
 			onCreateProject: "createProjectAction",
 			onOpenProject: "openProjectAction",
 			onSearchProjects: "searchProjectsAction",
@@ -32,12 +31,7 @@ enyo.kind({
 		{kind: "ProjectWizardCopy", name: "projectWizardCopy", classes:"ares-masked-content-popup"}
 	],
 	handlers: {
-		onAddProjectInList: "addProjectInList",
-		onPreview: "previewAction",
-		onBuild: "buildAction",
-		onInstall: "installAction",
-		onRun: "runAction",
-		onRunDebug: "runDebugAction"
+		onAddProjectInList: "addProjectInList"
 	},
 	events: {
 		onHideWaitPopup: "",
@@ -84,12 +78,6 @@ enyo.kind({
 		this.$.projectWizardCreate.start();
 		return true; //Stop event propagation
 	},
-	modifySettingsAction: function(inSender, inEvent) {
-		this.$.projectWizardModify.start( this.currentProject() );
-		
-		return true; //Stop event propagation
-	},
-
 	addProjectInList: function(inSender, inEvent) {
 		this.doHideWaitPopup();
 		try {
@@ -207,64 +195,6 @@ enyo.kind({
 		ComponentsRegistry.getComponent("harmonia").setProject(null, ares.noNext);
 	},
 	/**
-	 * Event handler: handle build project action (select provider & run action)
-	 * @param {enyo.Component} inSender
-	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project 
-	 * @private
-	 */
-	buildAction: function(inSender, inEvent) {
-		var project = inEvent && inEvent.project;
-		if (project) {
-			this.projectSaveAndAction(project, 'build', 'build');
-		}
-		return true; // stop bubble-up
-	},
-	
-	/**
-	 * Event handler: handle install application action (select provider & run action)
-	 * @param {enyo.Component} inSender
-	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project
-	 * @private
-	 */
-	installAction: function(inSender, inEvent) {
-		var project = inEvent && inEvent.project;
-		if (project) {
-			this.projectSaveAndAction(project, 'test', 'install');
-		}
-		return true; // stop bubble-up
-	},
-	/**
-	 * Event handler: handle run application action (select provider & run action)
-	 * @param {enyo.Component} inSender
-	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project
-	 * @private
-	 */
-	runAction: function(inSender, inEvent) {
-		var project = inEvent && inEvent.project;
-		if (project) {
-			this.projectSaveAndAction(project, 'test', 'run');
-		}
-		return true; // stop bubble-up
-	},
-	/**
-	 * Event handler: handle debug application action (select provider & run action)
-	 * @param {enyo.Component} inSender
-	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project
-	 * @private
-	 */
-	runDebugAction: function(inSender, inEvent) {
-		var project = inEvent && inEvent.project;
-		if (project) {
-			this.projectSaveAndAction(project, 'test', 'runDebug');
-		}
-		return true; // stop bubble-up
-	},
-
-	/**
 	 * Request to save project and perform action
 	 * @param {Ares.Model.Project} project
 	 * @param {String} serviceType
@@ -282,7 +212,6 @@ enyo.kind({
 			this.doProjectSave({ project: project, callback: cb.bind(this) });
 		}
 	},
-
 	/**
 	 * @private
 	 */
@@ -340,20 +269,5 @@ enyo.kind({
 			'scrollbars=0,menubar=1,resizable=1',
 			false
 		);
-	},
-
-	/**
-	 * Event handler: Launch a preview widget of the selected project in a separate frame
-	 * @param {enyo.Component} inSender
-	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project 
-	 * @private
-	 */
-	previewAction: function(inSender, inEvent) {
-		var project = inEvent.project;
-		if ( project) {
-			this.launchPreview(project);
-		}
-		return true; // stop the bubble
 	}
 });

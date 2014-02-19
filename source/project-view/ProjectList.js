@@ -19,12 +19,7 @@ enyo.kind({
 		onSearchProjects: "",
 		onDuplicateProject: "",
 		onProjectRemoved: "",
-		onModifySettings: "",
-		onBuild: "",
-		onInstall: "",
-		onRun: "",
-		onRunDebug: "",
-		onPreview: "",
+		onDisableProjectMenu: "",
 		onError: "",
 		onRegisterMe: "",
 		onShowWaitPopup: "",
@@ -80,38 +75,6 @@ enyo.kind({
 						{value: "removeProjectAction",  classes:"aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_delete.png"},
 							{content: "Delete"}
-						]}
-					]}
-				]},
-				{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
-					{content: "Project", name: "projectMenu", disabled: true},
-					{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
-						{value: "doModifySettings",  classes:"aresmenu-button", components: [
-							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_edit.png"},
-							{content: "Edit..."}
-						]},
-						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "doPreview",  classes:"aresmenu-button", components: [
-							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_preview.png"},
-							{content: "Preview"}
-						]},
-						{value: "doBuild",  classes:"aresmenu-button", components: [
-							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_build.png"},
-							{content: "Build..."}
-						]},
-						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "doInstall",  classes:"aresmenu-button", components: [
-							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_install.png"},
-							{content: "Install..."}
-						]},
-						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "doRun",  classes:"aresmenu-button", components: [
-							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_run.png"},
-							{content: "Run..."}
-						]},
-						{value: "doRunDebug",  classes:"aresmenu-button", components: [
-							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_debug.png"},
-							{content: "Debug..." }
 						]}
 					]}
 				]}
@@ -248,7 +211,7 @@ enyo.kind({
 			this.trace("called on selected " + name);
 			this.selectedProject = null;
 			this.doProjectRemoved();
-			this.$.projectMenu.setDisabled(true);
+			this.doDisableProjectMenu({disable: true});
 		} else {
 			this.trace("called on " + name);
 		}
@@ -342,7 +305,7 @@ enyo.kind({
 		this.ongoingSelect = project;
 
 		project.setService(service);
-		this.$.projectMenu.setDisabled(false);
+		this.doDisableProjectMenu({disable: false});
 
 		// setupProjectConfig checks for redundant setup wrt this.selectedProject
 		this.owner.setupProjectConfig( project, selectNext );

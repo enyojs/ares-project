@@ -33,7 +33,13 @@ enyo.kind({
 					classes: "ares-panel-min-width enyo-fit",
 					onFileOpenRequest: "openDocument",
 					onFileRemoved: "closeDocument",
-					onFolderChanged: "closeSomeDocuments"
+					onFolderChanged: "closeSomeDocuments",
+					onModifySettings: "modifySettingsAction",
+					onPreview: "previewAction",
+					onBuild: "buildAction",
+					onInstall: "installAction",
+					onRun: "runAction",
+					onRunDebug: "runDebugAction"
 				},
 				{kind: "Ares.EnyoEditor", name: "enyoEditor"}
 			]
@@ -75,7 +81,9 @@ enyo.kind({
 		//handlers for editorSettings kind (utilities/EditorSettings.js)
 		onChangeSettings:"applyPreviewSettings", 
 		onChangeRightPane: "changeRightPane", 
-		onApplySettings: "applySettings"
+		onApplySettings: "applySettings",
+		//handlers for editorSettings kind (project-view/ProjectList.js)
+		onDisableProjectMenu: "disableProjectMenu"
 	},
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
@@ -86,7 +94,7 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
-		this._registerComponent(null,{name: "ares", reference: this});
+		this._registerComponent(null, {name: "ares", reference: this});
 		ComponentsRegistry.getComponent("enyoEditor").showPhobosPanel();
 		ServiceRegistry.instance.setOwner(this); // plumb services events all the way up
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
@@ -415,6 +423,93 @@ enyo.kind({
 	stopEvent: function(){
 		return true;
 	},
+	/** @private */
+	disableProjectMenu: function(inSender, inEvent) {
+		var disable = inEvent && inEvent.disable;
+		ComponentsRegistry.getComponent("harmonia").disableProjectMenu(disable);
+
+		return true;
+	},
+	/** @private */
+	modifySettingsAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if ( project) {
+			ComponentsRegistry.getComponent("projectView").$.projectWizardModify.start( project );
+		}
+
+		return true; //Stop event propagation
+	},
+	/**
+	 * Event handler: Launch a preview widget of the selected project in a separate frame
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project 
+	 * @private
+	 */
+	previewAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if ( project) {
+			ComponentsRegistry.getComponent("projectView").launchPreview(project);
+		}
+		return true; // stop the bubble
+	},
+	/**
+	 * Event handler: handle build project action (select provider & run action)
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project 
+	 * @private
+	 */
+	buildAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (project) {
+			ComponentsRegistry.getComponent("projectView").projectSaveAndAction(project, 'build', 'build');
+		}
+		return true; // stop bubble-up
+	},	
+	/**
+	 * Event handler: handle install application action (select provider & run action)
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project
+	 * @private
+	 */
+	installAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (project) {
+			ComponentsRegistry.getComponent("projectView").projectSaveAndAction(project, 'test', 'install');
+		}
+		return true; // stop bubble-up
+	},
+	/**
+	 * Event handler: handle run application action (select provider & run action)
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project
+	 * @private
+	 */
+	runAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (project) {
+			ComponentsRegistry.getComponent("projectView").projectSaveAndAction(project, 'test', 'run');
+		}
+		return true; // stop bubble-up
+	},
+	/**
+	 * Event handler: handle debug application action (select provider & run action)
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project
+	 * @private
+	 */
+	runDebugAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (project) {
+			ComponentsRegistry.getComponent("projectView").projectSaveAndAction(project, 'test', 'runDebug');
+		}
+		return true; // stop bubble-up
+	},
+
 	statics: {
 		isBrowserSupported: function() {
 			if (enyo.platform.ie && enyo.platform.ie <= 8) {
