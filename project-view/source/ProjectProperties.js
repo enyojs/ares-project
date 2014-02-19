@@ -471,9 +471,9 @@ enyo.kind({
 		 */
 		var updateDrawerValidation = function() {
 			var validDrawer = true;
-			for(var option in provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]){
+			for(var rowName in provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]){
 
-				if(!provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform][option] && option !== "validDrawer"){
+				if(!provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform][rowName] && rowName !== "validDrawer"){
 					validDrawer = false;
 				}					
 			}
@@ -490,9 +490,9 @@ enyo.kind({
 		 */
 		var updateOkButtonState = function() {
 			var okDisabled = false;
-			for(var drawer in provider.getSelectedProject().getValidPgbConf()) {
+			for(var drawerName in provider.getSelectedProject().getValidPgbConf()) {
 
-				if (!provider.getSelectedProject().getValidPgbConf()[drawer]["validDrawer"]) {
+				if (!provider.getSelectedProject().getValidPgbConf()[drawerName]["validDrawer"]) {
 					okDisabled = true;
 				}				
 			}
@@ -503,7 +503,7 @@ enyo.kind({
 		if (updateDrawerValidation.call(this)) {			
 			provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]["validDrawer"] = true;
 		}
-		
+
 		// Update the "OK" button state.
 		this.$.ok.setDisabled(updateOkButtonState.call(this));			
 		
