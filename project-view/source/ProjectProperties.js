@@ -422,7 +422,6 @@ enyo.kind({
 	
 	disableOkButton: function(inSender, inEvent) {
 		var provider = Phonegap.ProjectProperties.getProvider();
-		var validPgbConf = provider.getSelectedProject().getValidPgbConf();
 
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
 		this.$.ok.setDisabled(true);
@@ -441,8 +440,8 @@ enyo.kind({
 		}
 		this.$.errTooltip.show();		
 		
-		validPgbConf[inEvent.originator.platform][inEvent.originator.name] = false;
-		validPgbConf[inEvent.originator.platform]["validDrawer"] = false;		
+		provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform][inEvent.originator.name] = false;
+		provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]["validDrawer"] = false;		
 	},
 
 
@@ -461,10 +460,11 @@ enyo.kind({
 		var okDisabled = false;
 		var validDrawer = true;
 		var provider = Phonegap.ProjectProperties.getProvider();
-		var validPgbConf = provider.getSelectedProject().getValidPgbConf();
+
+		// Update the validation value of the originator row to true in the Project model.
+		provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform][inEvent.originator.name] = true;
 		
 		// Set in the array {this.validatePhonegapUiValues} the originator UI row as valid
-		validPgbConf[inEvent.originator.platform][inEvent.originator.name] = true;
 
 		// Check the validation state of all controled PGB attributes by platform (it includes also the shared configuration attributes)
 		// to update the validation state of the drawer
@@ -472,6 +472,7 @@ enyo.kind({
 			if(!validPgbConf[this.platform][option]){
 				validDrawer = false;
 			}					
+			provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]["validDrawer"] = true;
 		}
 		if (validDrawer) {
 			validPgbConf[inEvent.originator.platform]["validDrawer"] = true;
