@@ -1,4 +1,4 @@
-/*global Ares, ares, enyo, ilibAres */
+/*global Ares, ares, enyo, ilibUtilities */
 
 /**
  * Represents a file tree made with {hermes.Node}
@@ -46,25 +46,25 @@ enyo.kind({
 			{kind: "onyx.Menu", name: "hermesMenuList", classes: "hermesMenu-list", maxHeight: "100%", components: [
 				{name: "newFolderItem", value: "newFolderClick", classes: "hermesMenu-button", components: [
 					{kind: "onyx.IconButton", src: "$assets/utilities/images/folder_new_16.png"},
-					{content: ilibAres("New Folder...")}
+					{content: ilibUtilities("New Folder...")}
 				]},
 				{name: "newFileDivider", classes: "onyx-menu-divider hermesMenu-button"},
 				{name: "newFileItem", value: "newFileClick", classes: "hermesMenu-button", components: [
 					{kind: "onyx.IconButton", src: "$assets/utilities/images/document_new_16.png"},
-					{content: ilibAres("New File...")}
+					{content: ilibUtilities("New File...")}
 				]},
 				{name: "nodeDivider", classes: "onyx-menu-divider hermesMenu-button"},
 				{name: "renameItem", value: "renameClick", classes: "hermesMenu-button", components: [
 					{kind: "onyx.IconButton", src: "$assets/utilities/images/document_edit_16.png"},
-					{content: ilibAres("Rename...")}
+					{content: ilibUtilities("Rename...")}
 				]},
 				{name: "copyItem", value: "copyClick", classes: "hermesMenu-button", components: [
 					{kind: "onyx.IconButton", src: "$assets/utilities/images/copy_16.png"},
-					{content: ilibAres("Copy...")}
+					{content: ilibUtilities("Copy...")}
 				]},
 				{name: "deleteItem", value: "deleteClick", classes: "hermesMenu-button", components: [
 					{kind: "onyx.IconButton", src: "$assets/utilities/images/document_delete_16.png"},
-					{content: ilibAres("Delete...")}
+					{content: ilibUtilities("Delete...")}
 				]}
 			]}
 		]},
@@ -72,31 +72,31 @@ enyo.kind({
 		{kind: "onyx.Toolbar", name: "hermesToolbar", classes:"ares-small-toolbar title-gradient", components: [
 			{name: "newFolder", kind: "onyx.TooltipDecorator", components: [
 				{name: "newFolderButton", kind: "onyx.IconButton", src: "$assets/utilities/images/folder_new.png", ontap: "newFolderClick"},
-				{kind: "onyx.Tooltip", content: ilibAres("New Folder...")}
+				{kind: "onyx.Tooltip", content: ilibUtilities("New Folder...")}
 			]},
 			{name: "reloadAll", kind: "onyx.TooltipDecorator", components: [
 				{kind: "onyx.IconButton", src: "$assets/utilities/images/folder_reload.png", ontap: "reloadClick"},
-				{kind: "onyx.Tooltip", content: ilibAres("Reload...")}
+				{kind: "onyx.Tooltip", content: ilibUtilities("Reload...")}
 			]},
 			{name: "newFile", kind: "onyx.TooltipDecorator", components: [
 				{name: "newFileButton", kind: "onyx.IconButton", src: "$assets/utilities/images/document_new.png", ontap: "newFileClick"},
-				{kind: "onyx.Tooltip", content: ilibAres("New File...")}
+				{kind: "onyx.Tooltip", content: ilibUtilities("New File...")}
 			]},
 			{name: "renameFile", kind: "onyx.TooltipDecorator", components: [
 				{name: "renameFileButton", kind: "onyx.IconButton", src: "$assets/utilities/images/document_edit.png", ontap: "renameClick"},
-				{kind: "onyx.Tooltip", content: ilibAres("Rename...")}
+				{kind: "onyx.Tooltip", content: ilibUtilities("Rename...")}
 			]},
 			{name: "copyFile", kind: "onyx.TooltipDecorator", components: [
 				{name: "copyFileButton", kind: "onyx.IconButton", src: "$assets/utilities/images/copy.png", ontap: "copyClick"},
-				{kind: "onyx.Tooltip", content: ilibAres("Copy...")}
+				{kind: "onyx.Tooltip", content: ilibUtilities("Copy...")}
 			]},
 			{name: "deleteFile", kind: "onyx.TooltipDecorator", components: [
 				{name: "deleteFileButton", kind: "onyx.IconButton", src: "$assets/utilities/images/document_delete.png", ontap: "deleteClick"},
-				{kind: "onyx.Tooltip", content: ilibAres("Delete...")}
+				{kind: "onyx.Tooltip", content: ilibUtilities("Delete...")}
 			]},
 			{name: "revertMove", kind: "onyx.TooltipDecorator", components: [
 				{name: "revertMoveButton", kind: "onyx.IconButton", src: "$assets/utilities/images/undo.png", ontap: "revertClick"},
-				{kind: "onyx.Tooltip", classes:"ares-tooltip-last", content: ilibAres("Revert move...")}
+				{kind: "onyx.Tooltip", classes:"ares-tooltip-last", content: ilibUtilities("Revert move...")}
 			]}
 		]},
 		
@@ -111,12 +111,12 @@ enyo.kind({
 
 		// Hermes popups
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "Service returned an error"},
-		{name: "nameFilePopup", kind: "NamePopup", type: "file", fileName:"", placeHolder: ilibAres("File Name"), onCancel: "newFileCancel", onConfirm: "newFileConfirm"},
-		{name: "nameFolderPopup", kind: "NamePopup", type: "folder", fileName: "", placeHolder: ilibAres("Folder Name"), onCancel: "newFolderCancel", onConfirm: "newFolderConfirm"},
-		{name: "nameCopyPopup", kind: "NamePopup", title: ilibAres("Name for copy of"), fileName: ilibAres("Copy of foo.js"), onCancel: "copyFileCancel", onConfirm: "copyFileConfirm"},
+		{name: "nameFilePopup", kind: "NamePopup", type: "file", fileName:"", placeHolder: ilibUtilities("File Name"), onCancel: "newFileCancel", onConfirm: "newFileConfirm"},
+		{name: "nameFolderPopup", kind: "NamePopup", type: "folder", fileName: "", placeHolder: ilibUtilities("Folder Name"), onCancel: "newFolderCancel", onConfirm: "newFolderConfirm"},
+		{name: "nameCopyPopup", kind: "NamePopup", title: ilibUtilities("Name for copy of"), fileName: ilibUtilities("Copy of foo.js"), onCancel: "copyFileCancel", onConfirm: "copyFileConfirm"},
 		{name: "deletePopup", kind: "DeletePopup", onCancel: "deleteCancel", onConfirm: "deleteConfirm"},
-		{name: "renamePopup", kind: "RenamePopup", title: ilibAres("New name for "), fileName: "foo.js", onCancel: "renameCancel", onConfirm: "renameConfirm"},
-		{name: "revertPopup", kind: "RevertPopup", title: ilibAres("Revert node moving"), fileName: "foo.js", onCancel: "revertCancel", onConfirm: "revertConfirm"}
+		{name: "renamePopup", kind: "RenamePopup", title: ilibUtilities("New name for "), fileName: "foo.js", onCancel: "renameCancel", onConfirm: "renameConfirm"},
+		{name: "revertPopup", kind: "RevertPopup", title: ilibUtilities("Revert node moving"), fileName: "foo.js", onCancel: "revertCancel", onConfirm: "revertConfirm"}
 	],
 
 	// warning: this variable duplicates an information otherwise stored in this.$.selection
@@ -455,7 +455,7 @@ enyo.kind({
 		// (possibly remote & always asynchronous) file system
 		this.connectService(service, enyo.bind(this, (function(inError) {
 			if (inError) {
-				this.showErrorPopup(ilibAres("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
+				this.showErrorPopup(ilibUtilities("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
 			} else {
 				this.trace("HFT: service is now connected for project" + inProjectData.getName() + '. Requesting project URL');
 				if (this.selectedNode) {
@@ -486,7 +486,7 @@ enyo.kind({
 				});
 				rootFinding.error(this, function(inSender, inError) {
 					this.projectData.setProjectUrl("");
-					this.showErrorPopup(ilibAres("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
+					this.showErrorPopup(ilibUtilities("Internal Error ({error}) from filesystem service", {error: inError.toString()}));
 				});
 			}
 		})));
@@ -882,10 +882,10 @@ enyo.kind({
 				this.$.nameFolderPopup.setPath(folder.path);
 				this.$.nameFolderPopup.show();
 			} else {
-				this.showErrorPopup(ilibAres("Select a parent folder first"));
+				this.showErrorPopup(ilibUtilities("Select a parent folder first"));
 			}
 		} else {
-			this.showErrorPopup(ilibAres("Select a file system first"));
+			this.showErrorPopup(ilibUtilities("Select a file system first"));
 		}
 	},
 	/** @private */
@@ -942,7 +942,7 @@ enyo.kind({
 			if (this.findNodeExtension(name) !== null) {
 				this.refreshFileTree( function() {parentNode.getNodeWithId(inFolder.id).doAdjustScroll(); }, inFolder.id /*selectId*/ );
 			} else {
-				this.showWarningPopup(ilibAres("Folder named '{name}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: name}));
+				this.showWarningPopup(ilibUtilities("Folder named '{name}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: name}));
 				this.refreshFileTree();
 			}
 			this.doHideWaitPopup();
@@ -991,7 +991,7 @@ enyo.kind({
 			this.$.nameFilePopup.setPath(folder.path);
 			this.$.nameFilePopup.show();
 		} else {
-			this.showErrorPopup(ilibAres("Select a parent folder first"));
+			this.showErrorPopup(ilibUtilities("Select a parent folder first"));
 		}
 	},
 	/** @private */
@@ -1029,7 +1029,7 @@ enyo.kind({
 
 			if (matchingNodes.length !== 0) {
 				this.doHideWaitPopup();
-				this.showErrorPopup(ilibAres("File '{name}' already exists", {name: name}));
+				this.showErrorPopup(ilibUtilities("File '{name}' already exists", {name: name}));
 				return true;
 			}
 
@@ -1063,9 +1063,9 @@ enyo.kind({
 				if (error === 404){
 					this.createFile(name, folderId);
 					if (type === null) {
-						this.showWarningPopup(ilibAres("File named '{name}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: name}));
+						this.showWarningPopup(ilibUtilities("File named '{name}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: name}));
 					} else {
-						this.showWarningPopup(ilibAres("No template found for '.{extension}' files. Created an empty one.", {extension: type}));
+						this.showWarningPopup(ilibUtilities("No template found for '.{extension}' files. Created an empty one.", {extension: type}));
 					}
 				} else {
 					this.warn("error while fetching ", templatePath, ': ', error);
@@ -1076,7 +1076,7 @@ enyo.kind({
 		});
 		nodeUpdating.error(this, function() {
 			this.doHideWaitPopup();
-			this.showErrorPopup(ilibAres("Cannot reach filesystem"));
+			this.showErrorPopup(ilibUtilities("Cannot reach filesystem"));
 			return true;
 		});
 	},
@@ -1091,7 +1091,7 @@ enyo.kind({
 			this.$.nameCopyPopup.setFolderId(this.selectedNode.file.id);
 			this.$.nameCopyPopup.show();
 		} else {
-			this.showErrorPopup(ilibAres("First select a file or folder to copy"));
+			this.showErrorPopup(ilibUtilities("First select a file or folder to copy"));
 		}
 	},
 	/** @private */
@@ -1114,26 +1114,26 @@ enyo.kind({
 		// Warning about file extension modification		
 		if (this.selectedNode.file.isDir) {
 			if (type === null) {
-				this.showWarningPopup(ilibAres("The new folder '{newFolder}' will be hidden.", {newFolder: newName}));
+				this.showWarningPopup(ilibUtilities("The new folder '{newFolder}' will be hidden.", {newFolder: newName}));
 			} else {
 				oldType = this.findNodeExtension(this.selectedNode.file.name);
 				if (oldType === null) {
-					this.showWarningPopup(ilibAres("The new folder '{newFolder}' will be no more hidden.", {newFolder: newName}));
+					this.showWarningPopup(ilibUtilities("The new folder '{newFolder}' will be no more hidden.", {newFolder: newName}));
 				}
 			}
 		} else {
 			if (type === null) {
-				this.showWarningPopup(ilibAres("The new file '{newFile}' will be hidden.", {newFile: newName}));
+				this.showWarningPopup(ilibUtilities("The new file '{newFile}' will be hidden.", {newFile: newName}));
 			} else {
 				oldType = this.findNodeExtension(this.selectedNode.file.name);
 				if (oldType === null) {
-					this.showWarningPopup(ilibAres("The new file '{newFile}' will be no more hidden.", {newFile: newName}));
+					this.showWarningPopup(ilibUtilities("The new file '{newFile}' will be no more hidden.", {newFile: newName}));
 				} else {
 					if (type !== 'js' && type !== 'txt' && type !== 'md' && type !== 'png' && type !== 'jpg' && type !== 'json' && type !== 'yml') {
-						this.showWarningPopup(ilibAres("Unknown '.{extension}' file.", {extension: type}));
+						this.showWarningPopup(ilibUtilities("Unknown '.{extension}' file.", {extension: type}));
 					} else {
 						if (oldType !== 'js' && type === 'js') {
-							this.showWarningPopup(ilibAres("The new file '{newFile}' will be added to related 'package.js' file.", {newFile: newName}));
+							this.showWarningPopup(ilibUtilities("The new file '{newFile}' will be added to related 'package.js' file.", {newFile: newName}));
 						}
 					}
 				}
@@ -1168,7 +1168,7 @@ enyo.kind({
 			if (type !== null) {
 				this.refreshFileTree( function() { parentNode.getNodeWithId(inFsNode.id).doAdjustScroll(); }, inFsNode.id /*selectId*/ );
 			} else {
-				this.showWarningPopup(ilibAres("Node named '{newName}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: newName}));
+				this.showWarningPopup(ilibUtilities("Node named '{newName}' is an hidden one. It won't be shown in the file tree and will be empty.", {name: newName}));
 				this.refreshFileTree();
 			}
 			this.doHideWaitPopup();
@@ -1176,7 +1176,7 @@ enyo.kind({
 		nodeCopying.error(this, function(inSender, inError) {
 			this.doHideWaitPopup();
 			this.warn("Unable to copy:", this.selectedNode.file, "as", newName, inError);
-			this.showErrorPopup(ilibAres("Creating file '{copyName}' as copy of '{name}' failed: {error}", {copyName: newName, name: this.selectedNode.file.name, error: inError.toString()}));
+			this.showErrorPopup(ilibUtilities("Creating file '{copyName}' as copy of '{name}' failed: {error}", {copyName: newName, name: this.selectedNode.file.name, error: inError.toString()}));
 		});
 	},
 	/** @private */
@@ -1190,7 +1190,7 @@ enyo.kind({
 			this.$.renamePopup.setPath(this.selectedNode.file.path);
 			this.$.renamePopup.show();
 		} else {
-			this.showErrorPopup(ilibAres("Select a file or folder to rename first"));
+			this.showErrorPopup(ilibUtilities("Select a file or folder to rename first"));
 		}
 	},
 	/** @private */
@@ -1213,36 +1213,36 @@ enyo.kind({
 		if (!this.selectedNode.file.isServer) {
 			if (this.selectedNode.file.isDir) {
 				if (type === null) {
-					this.showWarningPopup(ilibAres("Folder '{newFolder}' is now hidden.", {newFolder: newName}));
+					this.showWarningPopup(ilibUtilities("Folder '{newFolder}' is now hidden.", {newFolder: newName}));
 				} else {
 					oldType = this.findNodeExtension(this.selectedNode.file.name);
 					if (oldType === null) {
-						this.showWarningPopup(ilibAres("Folder '{newFolder}' is no more hidden.", {newFolder: newName}));
+						this.showWarningPopup(ilibUtilities("Folder '{newFolder}' is no more hidden.", {newFolder: newName}));
 					}
 				}
 			} else {
 				if (type === null) {
-					this.showWarningPopup(ilibAres("File '{newFile}' is now hidden.", {newFile: newName}));
+					this.showWarningPopup(ilibUtilities("File '{newFile}' is now hidden.", {newFile: newName}));
 				} else {
 					oldType = this.findNodeExtension(this.selectedNode.file.name);
 					if (oldType === null) {
-						this.showWarningPopup(ilibAres("File '{newFile}' is no more hidden.", {newFile: newName}));
+						this.showWarningPopup(ilibUtilities("File '{newFile}' is no more hidden.", {newFile: newName}));
 					} else {
 						if (type !== 'js') {
 							if (oldType === 'js') {
 								if (type !== 'txt' && type !== 'md' && type !== 'png' && type !== 'jpg' && type !== 'json' && type !== 'yml') {
-									this.showWarningPopup(ilibAres("Unknown '.{extension}' file. File '{oldFile}' will be removed from related 'package.js' file.", {extension: type, oldFile: this.selectedNode.file.name}));
+									this.showWarningPopup(ilibUtilities("Unknown '.{extension}' file. File '{oldFile}' will be removed from related 'package.js' file.", {extension: type, oldFile: this.selectedNode.file.name}));
 								} else {
-									this.showWarningPopup(ilibAres("File '{oldFile}' will be removed from related 'package.js' file.", {oldFile: this.selectedNode.file.name}));
+									this.showWarningPopup(ilibUtilities("File '{oldFile}' will be removed from related 'package.js' file.", {oldFile: this.selectedNode.file.name}));
 								}
 							} else {
 								if (type !== 'txt' && type !== 'md' && type !== 'png' && type !== 'jpg' && type !== 'json' && type !== 'yml') {
-									this.showWarningPopup(ilibAres("Unknown '.{extension}' file.", {extension: type}));
+									this.showWarningPopup(ilibUtilities("Unknown '.{extension}' file.", {extension: type}));
 								}								
 							}
 						} else {
 							if (oldType !== 'js') {
-								this.showWarningPopup(ilibAres("File '{newFile}' will be added to related 'package.js' file.", {newFile: newName}));
+								this.showWarningPopup(ilibUtilities("File '{newFile}' will be added to related 'package.js' file.", {newFile: newName}));
 							}
 						}
 					}
@@ -1314,7 +1314,7 @@ enyo.kind({
 		nodeRenaming.error(this, function(inSender, inError) {
 			this.doHideWaitPopup();
 			this.warn("Unable to rename:", this.selectedNode.file, "into", newName, inError);
-			this.showErrorPopup(ilibAres("Renaming file '{oldName}' as '{newName}' failed", {oldName: this.selectedNode.file.name, newName: newName}));
+			this.showErrorPopup(ilibUtilities("Renaming file '{oldName}' as '{newName}' failed", {oldName: this.selectedNode.file.name, newName: newName}));
 		});
 	},
 	/** @private */
@@ -1322,12 +1322,12 @@ enyo.kind({
 	deleteClick: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		if (this.selectedNode) {
-			this.$.deletePopup.setType(this.selectedNode.file.isDir ? ilibAres("folder") : ilibAres("file"));
+			this.$.deletePopup.setType(this.selectedNode.file.isDir ? ilibUtilities("folder") : ilibUtilities("file"));
 			this.$.deletePopup.setName(this.selectedNode.file.name);
 			this.$.deletePopup.setPath(this.selectedNode.file.path);
 			this.$.deletePopup.show();
 		} else {
-			this.showErrorPopup(ilibAres("Select a file or folder to delete first"));
+			this.showErrorPopup(ilibUtilities("Select a file or folder to delete first"));
 		}
 	},
 	/** @private */
@@ -1377,7 +1377,7 @@ enyo.kind({
 		});
 		nodeRemoving.error(this, function(inSender, inError) {
 			this.warn("Unable to delete:", this.selectedNode.file, inError);
-			this.showErrorPopup(ilibAres("Deleting '{name}' failed", {name: this.selectedNode.file.name}));
+			this.showErrorPopup(ilibUtilities("Deleting '{name}' failed", {name: this.selectedNode.file.name}));
 			this.doHideWaitPopup();
 		});
 	},
@@ -1386,12 +1386,12 @@ enyo.kind({
 	revertClick: function(inSender, inEvent) {
 		this.trace(inSender, "=>", inEvent);
 		if (this.revertMove) {
-			this.$.revertPopup.setType(this.movedNode.file.isDir ? ilibAres("folder") : ilibAres("file"));
+			this.$.revertPopup.setType(this.movedNode.file.isDir ? ilibUtilities("folder") : ilibUtilities("file"));
 			this.$.revertPopup.setName(this.movedNode.file.name);
 			this.$.revertPopup.setPath(this.originNode.file.path);
 			this.$.revertPopup.show();
 		} else {
-			this.showErrorPopup(ilibAres("No more node moving to revert"));
+			this.showErrorPopup(ilibUtilities("No more node moving to revert"));
 		}
 	},
 	/** @private */
@@ -1416,7 +1416,7 @@ enyo.kind({
 		nodeMoving.error(this, function(inSender, inError) {
 			this.doHideWaitPopup();
 			this.warn("Unable to revert:", this.movedNode.file.name, "into", this.originNode.file.path, inError);
-			this.showErrorPopup(ilibAres("Reverting '{name}' to '{oldpath}' failed", {name: this.movedNode.file.name, oldpath: this.originNode.file.path}));
+			this.showErrorPopup(ilibUtilities("Reverting '{name}' to '{oldpath}' failed", {name: this.movedNode.file.name, oldpath: this.originNode.file.path}));
 		});
 	},
 
@@ -1425,7 +1425,7 @@ enyo.kind({
 		this.$.errorPopup.show();
 	},
 	showWarningPopup : function(msg) {
-		this.$.errorPopup.set("title", ilibAres("warning"));
+		this.$.errorPopup.set("title", ilibUtilities("warning"));
 		this.showErrorPopup(msg);
 	},
 	enableDisableButtons: function() {
@@ -1587,7 +1587,7 @@ enyo.kind({
 		});
 		nodeMoving.error(this, function(inSender, inError) {
 			this.warn("Unable to move:", inNode.file.name, inError);
-			this.showErrorPopup(ilibAres("Moving {nodeName} failed: {error}", {nodeName: inNode.file.name, error: inError.toString()}));
+			this.showErrorPopup(ilibUtilities("Moving {nodeName} failed: {error}", {nodeName: inNode.file.name, error: inError.toString()}));
 		});
 
 		return nodeMoving;
@@ -1669,7 +1669,7 @@ enyo.kind({
 		var illegal = /[<>\/\\!?$%&*,:;"|]/i;
 
 		if (path.match(illegal)) {
-			this.showErrorPopup(ilibAres("Path {path} contains illegal characters", {path: path}));
+			this.showErrorPopup(ilibUtilities("Path '{path}' contains illegal characters", {path: path}));
 			return false;
 		}
 

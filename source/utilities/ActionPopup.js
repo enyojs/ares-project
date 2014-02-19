@@ -1,4 +1,4 @@
-/*global ares, enyo, $L */
+/*global ares, enyo, ilibUtilities */
 
 // Action popup now accept call back that will be run when user click
 // on ok or cancel. Note that events are not fired when callback are
@@ -35,7 +35,7 @@ enyo.kind({
 		{kind: "onyx.Toolbar", classes:"bottom-toolbar", name: "buttons", components: [
 			{name:"actionButton", kind: "onyx.Button", content: "Action", ontap: "actionConfirm"},
 			{name:"action1Button", kind: "onyx.Button", content: "Action1", ontap: "action1Confirm", showing: false},
-			{name:"cancelButton", classes:"right", kind: "onyx.Button", content: $L("Cancel"), ontap: "actionCancel"}
+			{name:"cancelButton", classes:"right", kind: "onyx.Button", content: ilibUtilities("Cancel"), ontap: "actionCancel"}
 		]}
 	],
 	callbacks: {},

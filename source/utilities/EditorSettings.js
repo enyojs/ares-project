@@ -1,4 +1,4 @@
-/*global enyo, ares, Ares */
+/*global enyo, ares, Ares, ilibUtilities */
 
 enyo.kind({
 	name: "editorSettings",
@@ -7,18 +7,18 @@ enyo.kind({
 		onApplySettings: "",
 		onChangeRightPane: "",
 		onTabSizeChange: "",
-		onChangeSettings:""
+		onChangeSettings: ""
 	},
 	published: {
 		settings: {},
 		previewSettings: {},
 		defaultsSettings: {
-			theme:"clouds",
-			highlight:false,
-			fontsize:12,
-			wordwrap:false,
-			rightpane:true,
-			autoTrace:false,
+			theme: "clouds",
+			highlight: false,
+			fontsize: 12,
+			wordwrap: false,
+			rightpane: true,
+			autoTrace: false,
 			autoTraceLine: 'this.log("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
 		},
@@ -30,21 +30,21 @@ enyo.kind({
 			{kind:"FittableColumns", components: [
 				{kind:"FittableRows", components: [
 					{classes: "ares-row", components: [
-						{name: "highLightLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "High light active line"},
+						{name: "highLightLabel", tag:"label", classes: "ares-fixed-label ace-label", content: ilibUtilities("High light active line")},
 						{name: "highLightButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "buttonToggle"}
 					]},
 					{classes: "ares-row", components: [
-						{name: "wordWrapLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Word Wrap"},
+						{name: "wordWrapLabel", tag:"label", classes: "ares-fixed-label ace-label", content: ilibUtilities("Word Wrap")},
 						{name: "wordWrapButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "wordWrapToggle"}
 					]},
 					{classes: "ares-row", components: [
-						{name: "rightpane",tag:"label",  classes: "ares-fixed-label ace-label", content: "Right Panel (only for js files)"},
+						{name: "rightpane",tag:"label",  classes: "ares-fixed-label ace-label", content: ilibUtilities("Right Panel (only for js files)")},
 						{name: "rightPaneButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "rightPaneChanged"}
 					]}
 				]},
 				{kind:"FittableRows", components: [
 					{classes: "ares-row", components: [
-						{name: "editorThemesLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Editor Themes"},
+						{name: "editorThemesLabel", tag:"label", classes: "ares-fixed-label ace-label", content: ilibUtilities("Editor Themes")},
 						{name : "themesPicker", kind: "Ares.PickerDecorator", components: [
 							{classes:"large-picker"},
 							{name: "themes", kind: "onyx.Picker", onSelect: "themeSelected", components: [
@@ -81,7 +81,7 @@ enyo.kind({
 						]}
 					]},
 					{classes: "ares-row", components: [
-						{name: "fontSizeLabel", tag:"label", classes: "ares-fixed-label ace-label", content: "Font Size"},
+						{name: "fontSizeLabel", tag:"label", classes: "ares-fixed-label ace-label", content: ilibUtilities("Font Size")},
 						{kind: "Ares.PickerDecorator", components: [
 							{classes:"small-picker"},
 							{name: "fontSizePicker",  kind: "onyx.Picker", onSelect: "fontSize", components:[
@@ -102,7 +102,7 @@ enyo.kind({
 						{
 							tag:"label",
 							classes: "ares-fixed-label ace-label",
-							content: "Automatically add log instruction"
+							content: ilibUtilities("Automatically add log instruction")
 						},
 						{
 							name: "autoTraceButton",
@@ -114,26 +114,26 @@ enyo.kind({
 					]}
 				]}
 			]},
-			{tag:"p", classes:"break"},
+			{tag: "p", classes:"break"},
 		
 			{kind:"FittableRows", name: "functionKeys", components: [
-				{kind: "Control", name:"osMessage", classes:"ares-row", content: "Programmable buttons Ctrl-SHIFT F1 to F12"},
+				{kind: "Control", name:"osMessage", classes:"ares-row", content: ilibUtilities("Programmable buttons Ctrl-SHIFT F1 to F12")},
 				{kind: "onyx.MenuDecorator", name:"program_buttons", classes:"ares-row", components: [
 					{ kind: "FittableColumns", classes:"ace-keys", components:[
-						{kind: "onyx.Button", content: "F-1", name: "F1", ontap: "showPopup"},
-						{kind: "onyx.Button", content: "F-2", name: "F2", ontap: "showPopup"},
-						{kind: "onyx.Button", content: "F-3", name: "F3", ontap: "showPopup"},
-						{kind: "onyx.Button", content: "F-4", name: "F4", ontap: "showPopup"},
-						{kind: "onyx.Button", content: "F-5", name: "F5", ontap: "showPopup"},
-						{kind: "onyx.Button", content: "F-6", name: "F6", ontap: "showPopup"}
+						{kind: "onyx.Button", content: ilibUtilities("F-1"), name: "F1", ontap: "showPopup"},
+						{kind: "onyx.Button", content: ilibUtilities("F-2"), name: "F2", ontap: "showPopup"},
+						{kind: "onyx.Button", content: ilibUtilities("F-3"), name: "F3", ontap: "showPopup"},
+						{kind: "onyx.Button", content: ilibUtilities("F-4"), name: "F4", ontap: "showPopup"},
+						{kind: "onyx.Button", content: ilibUtilities("F-5"), name: "F5", ontap: "showPopup"},
+						{kind: "onyx.Button", content: ilibUtilities("F-6"), name: "F6", ontap: "showPopup"}
 					]},
 					{ kind: "FittableColumns", classes:"ace-keys", components:[
-						{kind: "onyx.Button", content: "F-7", name: "F7", ontap: "showPopup"},
-						{kind: "onyx.Button", content: "F-8", name: "F8", ontap: "showPopup"},
-						{kind: "onyx.Button", content: "F-9", name: "F9", ontap: "showPopup"},
-						{kind: "onyx.Button", content: "F-10", name: "F10", ontap: "showPopup"},
-						{kind: "onyx.Button", content: "F-11", name: "F11", ontap: "showPopup"},
-						{kind: "onyx.Button", content: "F-12", name: "F12", ontap: "showPopup"}
+						{kind: "onyx.Button", content: ilibUtilities("F-7"), name: "F7", ontap: "showPopup"},
+						{kind: "onyx.Button", content: ilibUtilities("F-8"), name: "F8", ontap: "showPopup"},
+						{kind: "onyx.Button", content: ilibUtilities("F-9"), name: "F9", ontap: "showPopup"},
+						{kind: "onyx.Button", content: ilibUtilities("F-10"), name: "F10", ontap: "showPopup"},
+						{kind: "onyx.Button", content: ilibUtilities("F-11"), name: "F11", ontap: "showPopup"},
+						{kind: "onyx.Button", content: ilibUtilities("F-12"), name: "F12", ontap: "showPopup"}
 					]}
 				]}
 			]},
@@ -141,22 +141,22 @@ enyo.kind({
 			components: [
 				{kind: "Control", classes: "ace-input-popup", name: "altInputbox", components: [
 					{kind: "onyx.InputDecorator", classes: "ace-input-textarea", name: "inputDecorator", components: [
-						{kind: "onyx.TextArea", placeholder: "Enter text here", name: "textArea"}
+						{kind: "onyx.TextArea", placeholder: ilibUtilities("Enter text here"), name: "textArea"}
 					]}
 				]},
 				{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
 					{kind: "onyx.Button", content: "Close", name: "closeinput", ontap: "closeModalPopup"},
-					{kind: "onyx.Button", classes:"right", content: "Update", name: "oksave", ontap: "inputChanged"}
+					{kind: "onyx.Button", classes:"right", content: ilibUtilities("Update"), name: "oksave", ontap: "inputChanged"}
 				]}
 			]},
 			{tag:"p", classes:"break"},
 			{name: "autoTraceInputBox", kind:"FittableRows", showing: false, components: [
-				{ classes:"ares-row", content: "Log instruction injected in your event handlers:"},
+				{ classes:"ares-row", content: ilibUtilities("Log instruction injected in your event handlers:")},
 				{kind: "onyx.InputDecorator", classes: "ace-input-textarea", components: [
 					{
 						kind: "onyx.Input",
 						style: "width: 100%;",
-						placeholder: "Enter log instruction here",
+						placeholder: ilibUtilities("Enter log instruction here"),
 						name: "autoTraceInputLine",
 						onchange: "atraceline"
 					}
@@ -165,9 +165,9 @@ enyo.kind({
 		]},
 		
 		{name: "settingsToolbar", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
-			{name: "close", kind: "onyx.Button", content: "Cancel", ontap: "cancelSettings"},
-			{name: "restoreDefault", kind: "onyx.Button",  content: "Restore defaults", ontap: "restoreDefaults"},
-			{name: "change", kind: "onyx.Button", classes:"right", content: "Save", ontap: "saveSettings"}
+			{name: "close", kind: "onyx.Button", content: ilibUtilities("Cancel"), ontap: "cancelSettings"},
+			{name: "restoreDefault", kind: "onyx.Button",  content: ilibUtilities("Restore defaults"), ontap: "restoreDefaults"},
+			{name: "change", kind: "onyx.Button", classes: "right", content: ilibUtilities("Save"), ontap: "saveSettings"}
 		]}
 	],
 	/**

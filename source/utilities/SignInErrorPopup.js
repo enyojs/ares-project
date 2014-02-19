@@ -1,3 +1,4 @@
+/*global ilibUtilities */
 enyo.kind({
 	name: "Ares.SignInErrorPopup",
 	kind: "Ares.ErrorPopup", 
@@ -5,7 +6,7 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.$.bottomToolbar.createComponent(
-			{name: "signInButton", kind: "onyx.Button", content: "Sign In",owner: this, ontap: "showAccountConfiguration"}
+			{name: "signInButton", kind: "onyx.Button", content: ilibUtilities("Sign In"), owner: this, ontap: "showAccountConfiguration"}
 		);
 	}, 
 	
