@@ -1,8 +1,68 @@
-/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, $L */
+/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, ilib */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets"
 });
+
+var ilibAres = function(msg, params) {
+	var resolveString = function(string) {
+		var str;
+		if (!ilibAres.rb) {
+			ilibAres.setLocale();
+		}
+		if (typeof(string) === 'string') {
+			if (!ilibAres.rb) {
+				return string;
+			}
+			str = ilibAres.rb.getString(string);
+		} else if (typeof(string) === 'object') {
+			if (typeof(string.key) !== 'undefined' && typeof(string.value) !== 'undefined') {
+				if (!ilibAres.rb) {
+					return string.value;
+				}
+				str = ilibAres.rb.getString(string.value, string.key);
+			} else {
+				str = "";
+			}
+		} else {
+			str = string;
+		}
+		return str.toString();
+	};
+
+	var stringResolved = resolveString(msg);
+	if (params) {
+		var template = new ilib.String(stringResolved);
+		return template.format(params);
+	} 
+
+	return stringResolved;
+};
+
+ilibAres.setLocale = function (spec) {
+	var locale = new ilib.Locale(spec);
+	if (!ilibAres.rb || spec !== ilibAres.rb.getLocale().getSpec()) {
+		ilibAres.rb = new ilib.ResBundle({
+			locale: locale,
+			type: "html",
+			name: "strings",
+			sync: true,
+			lengthen: true,		// if pseudo-localizing, this tells it to lengthen strings
+			loadParams: {
+				root: "$assets/resources"
+			}
+		});
+	}
+};
+
+enyo.updateLocale = function() {
+	ilibAres.setLocale(navigator.language);
+	enyo.updateI18NClasses();
+};
+
+// we go ahead and run this once during loading of iLib settings are valid
+// during the loads of later libraries.
+enyo.updateLocale();
 
 enyo.kind({
 	name: "Ares",
@@ -54,13 +114,13 @@ enyo.kind({
 			style: "text-align: center; padding: 20px; width: 200px;",
 			components: [
 				{kind: "Image", src: "$assets/enyo-editor/phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
-				{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}, 
-				{kind: "onyx.Button", name:"canceBuildButton", content: "Cancel", ontap: "cancelService", style: "margin-top: 10px;", showing: false}						
+				{name: "waitPopupMessage", content: ilibAres("Ongoing..."), style: "padding-top: 10px;"}, 
+				{kind: "onyx.Button", name:"canceBuildButton", content: ilibAres("Cancel"), ontap: "cancelService", style: "margin-top: 10px;", showing: false}						
 			]
 		},
 		
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
-		{name: "signInErrorPopup", kind: "Ares.SignInErrorPopup", msg: "unknown error", details: ""},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: ilibAres("Unknown error"), details: ""},
+		{name: "signInErrorPopup", kind: "Ares.SignInErrorPopup", msg: ilibAres("Unknown error"), details: ""},
 		{kind: "ServiceRegistry"},
 		{kind: "Ares.PackageMunger", name: "packageMunger"}
 	],
@@ -164,9 +224,9 @@ enyo.kind({
 		if (fileData) {
 			// switch triggered by double-clicking an already opened
 			// file in HermesFileTree
-			editor.switchToDocument(fileData, $L("Switching files..."), myNext) ;
+			editor.switchToDocument(fileData, ilibAres("Switching file..."), myNext) ;
 		} else {
-			this.showWaitPopup(this, {msg: $L("Fetching file...")});
+			this.showWaitPopup(this, {msg: ilibAres("Fetching file...")});
 			async.waterfall(
 				[
 					this._fetchDocument.bind(this,projectData, file),
@@ -523,7 +583,7 @@ enyo.kind({
 });
 
 if ( ! Ares.isBrowserSupported()) {
-	alert($L("Ares is designed for the latest version of IE. We recommend that you upgrade your browser or use Chrome"));
+	alert(ilibAres("Ares is designed for the latest version of IE. We recommend that you upgrade your browser or use Chrome"));
 }
 
 /**
