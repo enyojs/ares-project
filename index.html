@@ -22,7 +22,7 @@
 		<script>
 			if (!window.Ares) {
 				alert('No minified Ares found, redirecting to debug.html.');
-				location = document.URL.replace("index","debug");
+				location = document.URL.replace(/\/(index.html)?($|\?)/,"/debug.html$2");
 			}
 			new Ares().renderInto(document.body);
 		</script>
