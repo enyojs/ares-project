@@ -128,10 +128,10 @@ enyo.kind({
 				config.init.bind(config, initData) ,
 				function (next) {
 					self.trace("ProjectView: setup project set config on "+ project.getName() );
+					self.initializeValidPgbConf(project, config.data.providers.phonegap.enabled);
 					project.setConfig(config);
 					
-					self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled);
-					self.initializeValidPgbConf(project, config.data.providers.phonegap.enabled);
+					self.initializeDownloadStatus(project, config.data.providers.phonegap.enabled);					
 					next();
 				},
 				function (next) {
@@ -170,6 +170,7 @@ enyo.kind({
 		}
 	},
 
+
 	initializeValidPgbConf: function(inProject, inPhonegapEnabled) {
 		if (inProject.getValidPgbConf() === undefined && inPhonegapEnabled) {
 			var pgbValidation = {};
@@ -184,13 +185,15 @@ enyo.kind({
 					//The creation of the pgbValidation row attribute and its initialization are done in the same time.
 					pgbValidation[pgbUiData[index].id][pgbUiData[index].rows[i].name] = true;
 				}
-				pgbValidation[pgbUiData[index].id]["validDrawer"] = true;			
+				pgbValidation[pgbUiData[index].id]["validDrawer"] = true;
 			}
 
 			inProject.setValidPgbConf(pgbValidation);
 		}
 	},
 
+	
+	
 	projectRemoved: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("harmonia").setProject(null, ares.noNext);
 	},

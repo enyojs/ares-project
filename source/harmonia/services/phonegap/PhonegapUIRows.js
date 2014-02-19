@@ -79,16 +79,16 @@ enyo.kind({
 	 * @private
 	 */
 	disableDrawerHighLight: function() {
-
 		var provider = Phonegap.ProjectProperties.getProvider();
+		var validPgbConf = provider.getSelectedProject().getValidPgbConf();
 
-		for (var key in provider.getSelectedProject().getValidPgbConf()[this.platform]) {
-			if (!provider.getSelectedProject().getValidPgbConf()[this.platform][key]) {
-				provider.getSelectedProject().getValidPgbConf()[this.platform]["validDrawer"] = false;
+		for (var key in validPgbConf[this.platform]) {
+			if (!validPgbConf[this.platform][key]) {
+				validPgbConf[this.platform]["validDrawer"] = false;
 			}
 		}
 
-		if (provider.getSelectedProject().getValidPgbConf()[this.platform]["validDrawer"]) {
+		if (validPgbConf[this.platform]["validDrawer"]) {
 			this.doDisableErrorHighLight();
 		}
 	}

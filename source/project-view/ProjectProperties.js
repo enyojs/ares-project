@@ -439,9 +439,9 @@ enyo.kind({
 			this.$.errTooltip.setContent(contentError);
 		}
 		this.$.errTooltip.show();		
-
+		
 		provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform][inEvent.originator.name] = false;
-		provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]["validDrawer"] = false;
+		provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]["validDrawer"] = false;		
 	},
 
 
@@ -453,39 +453,66 @@ enyo.kind({
 	 * 
 	 * @param  {Object} inSender container of the originator of the event
 	 * @param  {Object} inEvent  contain the new state of the event originator
-	 * @return {boolean}         stop the bubbling.
 	 */
 	enableOkButton: function(inSender, inEvent){	
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
-		var okDisabled = false;
-		var validDrawer = true;
+
 		var provider = Phonegap.ProjectProperties.getProvider();
 
-		// Set in the array {this.validatePhonegapUiValues} the originator UI row as valid
+		// Update the validation value of the originator row to true in the Project model.
 		provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform][inEvent.originator.name] = true;
+			
+		/**
+		 *  Browse the validation states of the originator drawer's rows.
+		 *	If all the rows are valid
+		 *	Then the variable "validDrawer" will be set to "true".
+		 *		
+		 *  @return {boolean} drawer validation value.
+		 */
+		var updateDrawerValidation = function() {
+			var validDrawer = true;
+			for(var rowName in provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]){
 
-		// Check the validation state of all controled PGB attributes by platform (it includes also the shared configuration attributes)
-		// to update the validation state of the drawer
-		for(var option in provider.getSelectedProject().getValidPgbConf()[this.platform]){
-			if(!provider.getSelectedProject().getValidPgbConf()[this.platform][option]){
-				validDrawer = false;
-			}					
-		}
-		if (validDrawer) {
-			provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]["validDrawer"] = true;
-		}	
-		
-		// Check the validation state of all the controled PGB drawer
-		// to enable/disable the Ok button
-		for(var drawer in provider.getSelectedProject().getValidPgbConf()) {
-			if (!provider.getSelectedProject().getValidPgbConf()[drawer]["validDrawer"]) {
-				okDisabled = true;	
+				if(!provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform][rowName] && rowName !== "validDrawer"){
+					validDrawer = false;
+				}					
 			}
+
+			return validDrawer;
+		};
+	
+		/**
+		 *  Browse the drawer in the project attribute "validPgbConf"
+		 *  If at least on drawer is not valid
+		 *  Then the "Ok" button of the Pop-up will be kept disabled.
+		 *
+		 * @return {boolean} Phonegap build UI validation value.
+		 */
+		var updateOkButtonState = function() {
+			var okDisabled = false;
+			for(var drawerName in provider.getSelectedProject().getValidPgbConf()) {
+
+				if (!provider.getSelectedProject().getValidPgbConf()[drawerName]["validDrawer"]) {
+					okDisabled = true;
+				}				
+			}
+			return okDisabled;
+		};
+		
+		// Update de validation state of the drawer in the Project model instance if the drawer is valid.
+		if (updateDrawerValidation.call(this)) {			
+			provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]["validDrawer"] = true;
 		}
+
+		// Update the "OK" button state.
+		this.$.ok.setDisabled(updateOkButtonState.call(this));			
+		
+		// Destroy the displayed error tooltip. 
 		if(this.$.errTooltip){
 			this.$.errTooltip.destroy();
 		}
-		this.$.ok.setDisabled(okDisabled);		
+
+			
 	},
 
 	/** @public */
@@ -673,16 +700,18 @@ enyo.kind({
 		onInputButtonTap: "",
 		onPathChecked: ""
 	},
-	handlers: {
-		onFileChooserAction: "pathInputTap"
-	},
 	components: [
 		{tag: "label", name: "pathInputLabel", classes:"ares-fixed-label"},
-		{name: "fileChooserInput", kind: "Ares.FileChooserInput", inputDisabled: true},
+		{kind: "onyx.InputDecorator", components: [
+			{kind: "Input", name: "pathInputValue", disabled: true}
+		]},
+		{kind: "onyx.IconButton", name:"pathInputButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
 	],
 	debug: false,
+
 	create: function () {
 		this.inherited(arguments);
+
 		this.labelChanged();
 		this.valueChanged();
 		this.inputTipChanged();
@@ -696,28 +725,33 @@ enyo.kind({
 	},
 	/** @private */
 	valueChanged: function () {
-		this.$.fileChooserInput.setPathValue(this.value);
+		this.$.pathInputValue.setValue(this.value);
 		this.setStatus(true);
 	},
 	/** @private */
 	inputTipChanged: function () {
-		this.$.fileChooserInput.setInputTip(this.inputTip);
+		this.$.pathInputValue.setAttribute("title", this.inputTip);
 	},
 	/** @private */
 	activatedChanged: function () {
-		this.$.fileChooserInput.setActivePathInputButton(this.activated);
 		if (this.activated) {
+			this.$.pathInputButton.show();
 			this.statusChanged();
-			this.$.fileChooserInput.statusChanged();
-		} 
+		} else {
+			this.$.pathInputButton.hide();
+		}
 	},
 	/** @private */
 	statusChanged: function () {
-		this.$.fileChooserInput.setStatus(this.status);
+		if (this.status) {
+			this.$.pathInputButton.setSrc("$project-view/assets/images/file-32x32.png");
+		} else {
+			this.$.pathInputButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+		}
 	},
 	/** @private */
 	buttonTipChanged: function () {
-		this.$.fileChooserInput.setButtonTip(this.buttonTip);
+		this.$.pathInputButton.setAttribute("title", this.buttonTip);
 	},
 	/** @private */
 	pathInputTap: function (inSender, inEvent) {
