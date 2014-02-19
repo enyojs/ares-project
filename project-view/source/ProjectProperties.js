@@ -457,38 +457,63 @@ enyo.kind({
 	 */
 	enableOkButton: function(inSender, inEvent){	
 		this.trace("inSender:", inSender, "inEvent:", inEvent);
-		var okDisabled = false;
-		var validDrawer = true;
+
 		var provider = Phonegap.ProjectProperties.getProvider();
 
 		// Update the validation value of the originator row to true in the Project model.
 		provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform][inEvent.originator.name] = true;
-		
-		// Set in the array {this.validatePhonegapUiValues} the originator UI row as valid
+			
+		/**
+		 *  Browse the validation states of the originator drawer's rows.
+		 *	If all the rows are valid
+		 *	Then the variable "validDrawer" will be set to "true".
+		 *		
+		 *  @return {boolean} drawer validation value.
+		 */
+		var updateDrawerValidation = function() {
+			var validDrawer = true;
+			for(var option in provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]){
 
-		// Check the validation state of all controled PGB attributes by platform (it includes also the shared configuration attributes)
-		// to update the validation state of the drawer
-		for(var option in validPgbConf[this.platform]){
-			if(!validPgbConf[this.platform][option]){
-				validDrawer = false;
-			}					
+				if(!provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform][option] && option !== "validDrawer"){
+					validDrawer = false;
+				}					
+			}
+
+			return validDrawer;
+		}		
+	
+		/**
+		 * 	Browse the drawer in the project attribute "validPgbConf"
+		 *	If at least on drawer is not valid
+		 *	Then the "Ok" button of the Pop-up will be kept disabled.
+		 *	
+		 * @return {boolean} Phonegap build UI validation value.
+		 */
+		var updateOkButtonState = function() {
+			var okDisabled = false;
+			for(var drawer in provider.getSelectedProject().getValidPgbConf()) {
+
+				if (!provider.getSelectedProject().getValidPgbConf()[drawer]["validDrawer"]) {
+					okDisabled = true;
+				}				
+			}
+			return okDisabled;
+		}		
+		
+		// Update de validation state of the drawer in the Project model instance if the drawer is valid.
+		if (updateDrawerValidation.call(this)) {			
 			provider.getSelectedProject().getValidPgbConf()[inEvent.originator.platform]["validDrawer"] = true;
 		}
-		if (validDrawer) {
-			validPgbConf[inEvent.originator.platform]["validDrawer"] = true;
-		}	
 		
-		// Check the validation state of all the controled PGB drawer
-		// to enable/disable the Ok button
-		for(var drawer in validPgbConf) {
-			if (!validPgbConf[drawer]["validDrawer"]) {
-				okDisabled = true;	
-			}
-		}
+		// Update the "OK" button state.
+		this.$.ok.setDisabled(updateOkButtonState.call(this));			
+		
+		// Destroy the displayed error tooltip. 
 		if(this.$.errTooltip){
 			this.$.errTooltip.destroy();
 		}
-		this.$.ok.setDisabled(okDisabled);		
+
+			
 	},
 
 	/** @public */
