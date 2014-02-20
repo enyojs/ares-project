@@ -1,4 +1,4 @@
-/*global enyo */
+/*global enyo, ilibPhobos */
 
 enyo.kind({
     published: {
@@ -17,7 +17,7 @@ enyo.kind({
         kind: "onyx.Toolbar",
         components: [{
             kind: "onyx.Button",
-            content: "Insert css",
+            content: ilibPhobos("Insert css"),
             ontap: "newCssAction"
         },
         {
@@ -29,7 +29,7 @@ enyo.kind({
     {
         kind: "onyx.Input",
         name: "input",
-        placeholder: "Enter your class name!..",
+        placeholder: ilibPhobos("Enter your class name!.."),
         onchange: "inputChange"
     },
     {
@@ -66,7 +66,7 @@ enyo.kind({
                 components: [{
                     name: "name",
                     style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;",
-                    content: "Color "
+                    content: ilibPhobos("Color ")
                 },
 
                 {
@@ -211,7 +211,7 @@ enyo.kind({
                 components: [{
                     name: "imageborder",
                     style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;",
-                    content: "Border/Margin..."
+                    content: ilibPhobos("Border/Margin...")
                 },
 
                 {
@@ -219,7 +219,7 @@ enyo.kind({
                     components: [{
                         classes: "onyx-toolbar-inline",
                         components: [{
-                            content: "Height",
+                            content: ilibPhobos("Height"),
                             classes: "css_builder_picker"
                         },
                         {
@@ -237,7 +237,7 @@ enyo.kind({
                     {
                         classes: "onyx-toolbar-inline",
                         components: [{
-                            content: "Width",
+                            content: ilibPhobos("Width"),
                             classes: "css_builder_picker"
                         },
                         {
@@ -258,7 +258,7 @@ enyo.kind({
                     components: [{
                         classes: "onyx-toolbar-inline",
                         components: [{
-                            content: "Margin Size",
+                            content: ilibPhobos("Margin Size"),
                             classes: "css_builder_picker"
                         },
                         {
@@ -277,7 +277,7 @@ enyo.kind({
                     {
                         classes: "onyx-toolbar-inline",
                         components: [{
-                            content: "Border Size",
+                            content: ilibPhobos("Border Size"),
                             classes: "css_builder_picker"
                         },
                         {
@@ -299,7 +299,7 @@ enyo.kind({
                     components: [{
                         classes: "onyx-toolbar-inline",
                         components: [{
-                            content: "Radius",
+                            content: ilibPhobos("Radius"),
                             classes: "css_builder_picker"
                         },
                         {
@@ -318,7 +318,7 @@ enyo.kind({
                     {
                         classes: "onyx-toolbar-inline",
                         components: [{
-                            content: "Padding",
+                            content: ilibPhobos("Padding"),
                             classes: "css_builder_picker"
                         },
                         {
@@ -337,7 +337,7 @@ enyo.kind({
                 {
                     kind: "onyx.Button",
                     classes: "css_builder_button ",
-                    content: "Box Shadow",
+                    content: ilibPhobos("Box Shadow"),
                     ontap: "boxshadow"
                 }]
             },
@@ -348,7 +348,7 @@ enyo.kind({
                 components: [{
                     name: "border",
                     style: "padding: 8px; background-color: #E1E2E4; color: #5CA7E8; text-transform: uppercase; font-weight: bold; font-size: 1.2em;",
-                    content: "Images..."
+                    content: ilibPhobos("Images...")
                 },
 
                 {
@@ -357,7 +357,7 @@ enyo.kind({
                 {
                     kind: "onyx.Input",
                     name: "imageInput",
-                    placeholder: "Enter image url:...",
+                    placeholder: ilibPhobos("Enter image url:..."),
                     onchange: "imageInput"
                 },
 
@@ -367,12 +367,12 @@ enyo.kind({
                 {
                     kind: "enyo.FittableColumns",
                     components: [{
-                        kind: "Checkbox",
+                        kind: ilibPhobos("Checkbox"),
                         style: "height: 35px; width: 35px;",
                         onchange: "hrepeat"
                     },
                     {
-                        content: "Repeat X"
+                        content: ilibPhobos("Repeat X")
                     }]
                 },
 
@@ -387,7 +387,7 @@ enyo.kind({
                         onchange: "vrepeat"
                     },
                     {
-                        content: "Repeat Y"
+                        content: ilibPhobos("Repeat Y")
                     }]
                 },
 
@@ -403,7 +403,7 @@ enyo.kind({
                         onchange: "norepeat"
                     },
                     {
-                        content: "No Repeat"
+                        content: ilibPhobos("No Repeat")
                     }
                     //
 
@@ -428,14 +428,14 @@ enyo.kind({
             Xstyle: "margin: 10px;",
             components: [{
                 name: "shadowBar",
-                content: "Text Shadow"
+                content: ilibPhobos("Text Shadow")
             }]
         },
 
         {
             classes: "onyx-toolbar-inline",
             components: [{
-                content: "Horizontal shadow",
+                content: ilibPhobos("Horizontal shadow"),
                 classes: "css_builder_picker"
             },
             {
@@ -453,7 +453,7 @@ enyo.kind({
         {
             classes: "onyx-toolbar-inline",
             components: [{
-                content: "Vertical shadow--- ",
+                content: ilibPhobos("Vertical shadow--- "),
                 classes: "css_builder_picker"
             },
             {
@@ -471,7 +471,7 @@ enyo.kind({
         {
             classes: "onyx-toolbar-inline",
             components: [{
-                content: "Blur distance-------",
+                content: ilibPhobos("Blur distance-------"),
                 classes: "css_builder_picker"
             },
             {
@@ -493,7 +493,7 @@ enyo.kind({
             allowHtml: true,
             Xstyle: "padding: 10px;",
             components: [{
-                content: "Text Shadow Color!"
+                content: ilibPhobos("Text Shadow Color!")
             }]
         },
         {
@@ -532,7 +532,7 @@ enyo.kind({
             },
             {
                 kind: "onyx.Button",
-                content: "Close",
+                content: ilibPhobos("Close"),
                 ontap: "closePopup"
             }]
         }]
@@ -551,14 +551,14 @@ enyo.kind({
             Xstyle: "margin: 10px;",
             components: [{
                 name: "boxShadowBar",
-                content: "Box Shadow"
+                content: ilibPhobos("Box Shadow")
             }]
         },
 
         {
             classes: "onyx-toolbar-inline",
             components: [{
-                content: "Horizontal shadow",
+                content: ilibPhobos("Horizontal shadow"),
                 classes: "css_builder_picker"
             },
             {
@@ -576,7 +576,7 @@ enyo.kind({
         {
             classes: "onyx-toolbar-inline",
             components: [{
-                content: "Vertical shadow--- ",
+                content: ilibPhobos("Vertical shadow--- "),
                 classes: "css_builder_picker"
             },
             {
@@ -594,7 +594,7 @@ enyo.kind({
         {
             classes: "onyx-toolbar-inline",
             components: [{
-                content: "Blur distance-------",
+                content: ilibPhobos("Blur distance-------"),
                 classes: "css_builder_picker"
             },
             {
@@ -652,7 +652,7 @@ enyo.kind({
             },
             {
                 kind: "onyx.Button",
-                content: "Close",
+                content: ilibPhobos("Close"),
                 ontap: "closePopup"
             }]
         }]

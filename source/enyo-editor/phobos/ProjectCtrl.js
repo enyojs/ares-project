@@ -1,4 +1,4 @@
-/*global enyo, ares */
+/*global enyo, ares, ilibPhobos */
 
 /**
  One ProjectCtrl instance is created per project (when the first file of a project
@@ -104,8 +104,8 @@ enyo.kind({
 		var cleaner = new RegExp('.*' + this.projectUrl) ;
 		var rmdots  = new RegExp('[^/]+/\\.\\./');
 		var barUrl = inEvent.msg.replace(cleaner,'').replace(rmdots,'');
-		this.log("analyser cannot load ",barUrl);
-		this.doErrorTooltip({msg: "analyser cannot load " + barUrl });
+		this.log("analyser cannot load ", barUrl);
+		this.doErrorTooltip({msg: ilibPhobos("analyser cannot load '{barUrl}'", {barUrl: barUrl})});
 		this.runPendingAnalysis('analyser load error');
 	},
 	/**
