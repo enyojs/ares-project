@@ -50,14 +50,7 @@ ilibProjectView.setLocale = function (spec) {
 	}
 };
 
-enyo.updateLocale = function() {
-	ilibProjectView.setLocale(navigator.language);
-	enyo.updateI18NClasses();
-};
-
-// we go ahead and run this once during loading of iLib settings are valid
-// during the loads of later libraries.
-enyo.updateLocale();
+ilibProjectView.setLocale(navigator.language);
 
 /**
  * This kind is the top kind of project handling. It contains:

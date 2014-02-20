@@ -55,6 +55,8 @@ ilibAres.setLocale = function (spec) {
 	}
 };
 
+ilibAres.setLocale(navigator.language);
+
 var ilibUtilities = function(msg, params) {
 	var resolveString = function(string) {
 		var str;
@@ -106,15 +108,7 @@ ilibUtilities.setLocale = function (spec) {
 	}
 };
 
-enyo.updateLocale = function() {
-	ilibAres.setLocale(navigator.language);
-	ilibUtilities.setLocale(navigator.language);
-	enyo.updateI18NClasses();
-};
-
-// we go ahead and run this once during loading of iLib settings are valid
-// during the loads of later libraries.
-enyo.updateLocale();
+ilibUtilities.setLocale(navigator.language);
 
 enyo.kind({
 	name: "Ares",

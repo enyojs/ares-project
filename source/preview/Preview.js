@@ -55,14 +55,7 @@ ilibPreview.setLocale = function (spec) {
 	}
 };
 
-enyo.updateLocale = function() {
-	ilibPreview.setLocale(navigator.language);
-	enyo.updateI18NClasses();
-};
-
-// we go ahead and run this once during loading of iLib settings are valid
-// during the loads of later libraries.
-enyo.updateLocale();
+ilibPreview.setLocale(navigator.language);
 
 enyo.kind(
 	{
