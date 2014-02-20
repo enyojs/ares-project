@@ -124,6 +124,9 @@ enyo.kind({
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.doRegisterMe({name:"harmonia", reference:this});
+
+		// i18n checking
+		this.trace("ilibHarmonia: Cancel=", ilibHarmonia("Cancel"));
 	},
 	handleSelectProvider: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);

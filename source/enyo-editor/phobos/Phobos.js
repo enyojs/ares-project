@@ -126,6 +126,9 @@ enyo.kind({
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.helper = new analyzer.Analyzer.KindHelper();
+
+		// i18n checking
+		this.trace("ilibPhobos: Close=", ilibPhobos("Close"));
 	},
 	getProjectController: function() {
 		// create projectCtrl only when needed. In any case, there's only

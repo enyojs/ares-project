@@ -212,6 +212,10 @@ enyo.kind({
 		}
 
 		Ares.instance = this;
+
+		// i18n checking
+		this.trace("ilibAres: Cancel=", ilibAres("Cancel"));
+		this.trace("ilibUtilities: Close=", ilibUtilities("Close"));
 	},
 
 	rendered: function() {

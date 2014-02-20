@@ -98,6 +98,9 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.doRegisterMe({name:"projectView", reference:this});
+
+		// i18n Checking
+		this.trace("ilibProjectView: Cancel=", ilibProjectView("Cancel"));
 	},
 	/**
 	 * Refresh the {ProjectView} (if relevant), following a change of the given file

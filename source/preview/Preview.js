@@ -255,6 +255,10 @@ enyo.kind(
 
 			//display project name in the window title
 			document.title = ilibPreview("{projectName} - Ares project preview", {projectName: this.$.projectName.getContent()});
+
+			// i18n checking
+			this.trace("ilibPreview: Screen=", ilibPreview("Screen"));
+			this.trace("ilibUtilities: Close=", ilibUtilities("Close"));
 		},
 
 		zoom: function(inSender, inEvent) {
