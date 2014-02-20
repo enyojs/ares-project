@@ -24,4 +24,4 @@
 	url = ../../enyojs/ares-generator.git
 [submodule "lib/enyo-ilib"]
 	path = lib/enyo-ilib
-url=../../enyo-ilib.git
+url=../../enyojs/enyo-ilib.git
