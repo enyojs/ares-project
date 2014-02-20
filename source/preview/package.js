@@ -4,6 +4,7 @@ enyo.depends(
 	"$lib/layout",
 	"$lib/onyx/source",
 	"$lib/foss",
+	"../I18n.js",
 	"Preview.js",
 	"Preview.less",
 	"../utilities"

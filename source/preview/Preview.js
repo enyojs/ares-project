@@ -1,114 +1,12 @@
-/*global enyo, ares, ilib */
+/*global enyo, ares, AresI18n */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets"
 });
 
-var ilibPreview = function(msg, params) {
-	var resolveString = function(string) {
-		var str;
-		if (!ilibPreview.rb) {
-			ilibPreview.setLocale();
-		}
-		if (typeof(string) === 'string') {
-			if (!ilibPreview.rb) {
-				return string;
-			}
-			str = ilibPreview.rb.getString(string);
-		} else if (typeof(string) === 'object') {
-			if (typeof(string.key) !== 'undefined' && typeof(string.value) !== 'undefined') {
-				if (!ilibPreview.rb) {
-					return string.value;
-				}
-				str = ilibPreview.rb.getString(string.value, string.key);
-			} else {
-				str = "";
-			}
-		} else {
-			str = string;
-		}
-		return str.toString();
-	};
-
-	var stringResolved = resolveString(msg);
-	if (params) {
-		var template = new ilib.String(stringResolved);
-		return template.format(params);
-	} 
-
-	return stringResolved;
-};
-
-ilibPreview.setLocale = function (spec) {
-	var locale = new ilib.Locale(spec);
-	if (!ilibPreview.rb || spec !== ilibPreview.rb.getLocale().getSpec()) {
-		ilibPreview.rb = new ilib.ResBundle({
-			locale: locale,
-			type: "html",
-			name: "strings",
-			sync: true,
-			lengthen: true,		// if pseudo-localizing, this tells it to lengthen strings
-			loadParams: {
-				root: "$assets/preview/resources"
-			}
-		});
-	}
-};
-
-ilibPreview.setLocale(navigator.language);
-
-var ilibUtilities = function(msg, params) {
-	var resolveString = function(string) {
-		var str;
-		if (!ilibUtilities.rb) {
-			ilibUtilities.setLocale();
-		}
-		if (typeof(string) === 'string') {
-			if (!ilibUtilities.rb) {
-				return string;
-			}
-			str = ilibUtilities.rb.getString(string);
-		} else if (typeof(string) === 'object') {
-			if (typeof(string.key) !== 'undefined' && typeof(string.value) !== 'undefined') {
-				if (!ilibUtilities.rb) {
-					return string.value;
-				}
-				str = ilibUtilities.rb.getString(string.value, string.key);
-			} else {
-				str = "";
-			}
-		} else {
-			str = string;
-		}
-		return str.toString();
-	};
-
-	var stringResolved = resolveString(msg);
-	if (params) {
-		var template = new ilib.String(stringResolved);
-		return template.format(params);
-	} 
-
-	return stringResolved;
-};
-
-ilibUtilities.setLocale = function (spec) {
-	var locale = new ilib.Locale(spec);
-	if (!ilibUtilities.rb || spec !== ilibUtilities.rb.getLocale().getSpec()) {
-		ilibUtilities.rb = new ilib.ResBundle({
-			locale: locale,
-			type: "html",
-			name: "strings",
-			sync: true,
-			lengthen: true,		// if pseudo-localizing, this tells it to lengthen strings
-			loadParams: {
-				root: "$assets/utilities/resources"
-			}
-		});
-	}
-};
-
-ilibUtilities.setLocale(navigator.language);
+var ilibPreview = AresI18n.setBundle.bind(null, AresI18n.setLocale(navigator.language, "$assets/preview/resources"));
+// ilibUtilities is used by Ares.js too
+var ilibUtilities = AresI18n.setBundle.bind(null, AresI18n.setLocale(navigator.language, "$assets/utilities/resources"));
 
 enyo.kind(
 	{

@@ -1,114 +1,12 @@
-/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, ilib */
+/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, AresI18n */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets"
 });
 
-var ilibAres = function(msg, params) {
-	var resolveString = function(string) {
-		var str;
-		if (!ilibAres.rb) {
-			ilibAres.setLocale();
-		}
-		if (typeof(string) === 'string') {
-			if (!ilibAres.rb) {
-				return string;
-			}
-			str = ilibAres.rb.getString(string);
-		} else if (typeof(string) === 'object') {
-			if (typeof(string.key) !== 'undefined' && typeof(string.value) !== 'undefined') {
-				if (!ilibAres.rb) {
-					return string.value;
-				}
-				str = ilibAres.rb.getString(string.value, string.key);
-			} else {
-				str = "";
-			}
-		} else {
-			str = string;
-		}
-		return str.toString();
-	};
-
-	var stringResolved = resolveString(msg);
-	if (params) {
-		var template = new ilib.String(stringResolved);
-		return template.format(params);
-	} 
-
-	return stringResolved;
-};
-
-ilibAres.setLocale = function (spec) {
-	var locale = new ilib.Locale(spec);
-	if (!ilibAres.rb || spec !== ilibAres.rb.getLocale().getSpec()) {
-		ilibAres.rb = new ilib.ResBundle({
-			locale: locale,
-			type: "html",
-			name: "strings",
-			sync: true,
-			lengthen: true,		// if pseudo-localizing, this tells it to lengthen strings
-			loadParams: {
-				root: "$assets/resources"
-			}
-		});
-	}
-};
-
-ilibAres.setLocale(navigator.language);
-
-var ilibUtilities = function(msg, params) {
-	var resolveString = function(string) {
-		var str;
-		if (!ilibUtilities.rb) {
-			ilibUtilities.setLocale();
-		}
-		if (typeof(string) === 'string') {
-			if (!ilibUtilities.rb) {
-				return string;
-			}
-			str = ilibUtilities.rb.getString(string);
-		} else if (typeof(string) === 'object') {
-			if (typeof(string.key) !== 'undefined' && typeof(string.value) !== 'undefined') {
-				if (!ilibUtilities.rb) {
-					return string.value;
-				}
-				str = ilibUtilities.rb.getString(string.value, string.key);
-			} else {
-				str = "";
-			}
-		} else {
-			str = string;
-		}
-		return str.toString();
-	};
-
-	var stringResolved = resolveString(msg);
-	if (params) {
-		var template = new ilib.String(stringResolved);
-		return template.format(params);
-	} 
-
-	return stringResolved;
-};
-
-ilibUtilities.setLocale = function (spec) {
-	var locale = new ilib.Locale(spec);
-	if (!ilibUtilities.rb || spec !== ilibUtilities.rb.getLocale().getSpec()) {
-		ilibUtilities.rb = new ilib.ResBundle({
-			locale: locale,
-			type: "html",
-			name: "strings",
-			sync: true,
-			lengthen: true,		// if pseudo-localizing, this tells it to lengthen strings
-			loadParams: {
-				root: "$assets/utilities/resources"
-			}
-		});
-	}
-};
-
-ilibUtilities.setLocale(navigator.language);
+var ilibAres = AresI18n.setBundle.bind(null, AresI18n.setLocale(navigator.language, "$assets/resources"));
+// ilibUtilities is used by Preview.js too
+var ilibUtilities = AresI18n.setBundle.bind(null, AresI18n.setLocale(navigator.language, "$assets/utilities/resources")); 
 
 enyo.kind({
 	name: "Ares",

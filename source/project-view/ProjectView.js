@@ -1,56 +1,5 @@
-/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo, Phonegap, ilib */
-var ilibProjectView = function(msg, params) {
-	var resolveString = function(string) {
-		var str;
-		if (!ilibProjectView.rb) {
-			ilibProjectView.setLocale();
-		}
-		if (typeof(string) === 'string') {
-			if (!ilibProjectView.rb) {
-				return string;
-			}
-			str = ilibProjectView.rb.getString(string);
-		} else if (typeof(string) === 'object') {
-			if (typeof(string.key) !== 'undefined' && typeof(string.value) !== 'undefined') {
-				if (!ilibProjectView.rb) {
-					return string.value;
-				}
-				str = ilibProjectView.rb.getString(string.value, string.key);
-			} else {
-				str = "";
-			}
-		} else {
-			str = string;
-		}
-		return str.toString();
-	};
-
-	var stringResolved = resolveString(msg);
-	if (params) {
-		var template = new ilib.String(stringResolved);
-		return template.format(params);
-	} 
-
-	return stringResolved;
-};
-
-ilibProjectView.setLocale = function (spec) {
-	var locale = new ilib.Locale(spec);
-	if (!ilibProjectView.rb || spec !== ilibProjectView.rb.getLocale().getSpec()) {
-		ilibProjectView.rb = new ilib.ResBundle({
-			locale: locale,
-			type: "html",
-			name: "strings",
-			sync: true,
-			lengthen: true,		// if pseudo-localizing, this tells it to lengthen strings
-			loadParams: {
-				root: "$assets/project-view/resources"
-			}
-		});
-	}
-};
-
-ilibProjectView.setLocale(navigator.language);
+/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo, Phonegap, AresI18n */
+var ilibProjectView = AresI18n.setBundle.bind(null, AresI18n.setLocale(navigator.language, "$assets/project-view/resources")); 
 
 /**
  * This kind is the top kind of project handling. It contains:

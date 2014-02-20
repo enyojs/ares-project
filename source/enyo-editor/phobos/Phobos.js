@@ -1,56 +1,5 @@
-/*global analyzer, ares, enyo, ilib, ProjectCtrl, setTimeout */
-var ilibPhobos = function(msg, params) {
-	var resolveString = function(string) {
-		var str;
-		if (!ilibPhobos.rb) {
-			ilibPhobos.setLocale();
-		}
-		if (typeof(string) === 'string') {
-			if (!ilibPhobos.rb) {
-				return string;
-			}
-			str = ilibPhobos.rb.getString(string);
-		} else if (typeof(string) === 'object') {
-			if (typeof(string.key) !== 'undefined' && typeof(string.value) !== 'undefined') {
-				if (!ilibPhobos.rb) {
-					return string.value;
-				}
-				str = ilibPhobos.rb.getString(string.value, string.key);
-			} else {
-				str = "";
-			}
-		} else {
-			str = string;
-		}
-		return str.toString();
-	};
-
-	var stringResolved = resolveString(msg);
-	if (params) {
-		var template = new ilib.String(stringResolved);
-		return template.format(params);
-	} 
-
-	return stringResolved;
-};
-
-ilibPhobos.setLocale = function (spec) {
-	var locale = new ilib.Locale(spec);
-	if (!ilibPhobos.rb || spec !== ilibPhobos.rb.getLocale().getSpec()) {
-		ilibPhobos.rb = new ilib.ResBundle({
-			locale: locale,
-			type: "html",
-			name: "strings",
-			sync: true,
-			lengthen: true,		// if pseudo-localizing, this tells it to lengthen strings
-			loadParams: {
-				root: "$assets/enyo-editor/phobos/resources"
-			}
-		});
-	}
-};
-
-ilibPhobos.setLocale(navigator.language);
+/*global analyzer, ares, enyo, AresI18n, ProjectCtrl, setTimeout */
+var ilibPhobos = AresI18n.setBundle.bind(null, AresI18n.setLocale(navigator.language, "$assets/enyo-editor/phobos/resources"));
 
 enyo.kind({
 	name: "Phobos",

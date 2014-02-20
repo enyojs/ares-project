@@ -1,4 +1,5 @@
 enyo.depends(
+	"I18n.js",
 	"Ares.js",
 	"DocumentToolbar.js",
 	"FileData.js",

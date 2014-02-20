@@ -1,56 +1,5 @@
-/*global ares, enyo, ilib, setTimeout */
-var ilibHarmonia = function(msg, params) {
-	var resolveString = function(string) {
-		var str;
-		if (!ilibHarmonia.rb) {
-			ilibHarmonia.setLocale();
-		}
-		if (typeof(string) === 'string') {
-			if (!ilibHarmonia.rb) {
-				return string;
-			}
-			str = ilibHarmonia.rb.getString(string);
-		} else if (typeof(string) === 'object') {
-			if (typeof(string.key) !== 'undefined' && typeof(string.value) !== 'undefined') {
-				if (!ilibHarmonia.rb) {
-					return string.value;
-				}
-				str = ilibHarmonia.rb.getString(string.value, string.key);
-			} else {
-				str = "";
-			}
-		} else {
-			str = string;
-		}
-		return str.toString();
-	};
-
-	var stringResolved = resolveString(msg);
-	if (params) {
-		var template = new ilib.String(stringResolved);
-		return template.format(params);
-	} 
-
-	return stringResolved;
-};
-
-ilibHarmonia.setLocale = function (spec) {
-	var locale = new ilib.Locale(spec);
-	if (!ilibHarmonia.rb || spec !== ilibHarmonia.rb.getLocale().getSpec()) {
-		ilibHarmonia.rb = new ilib.ResBundle({
-			locale: locale,
-			type: "html",
-			name: "strings",
-			sync: true,
-			lengthen: true,		// if pseudo-localizing, this tells it to lengthen strings
-			loadParams: {
-				root: "$assets/harmonia/resources"
-			}
-		});
-	}
-};
-
-ilibHarmonia.setLocale(navigator.language);
+/*global ares, enyo, AresI18n, setTimeout */
+var ilibHarmonia = AresI18n.setBundle.bind(null, AresI18n.setLocale(navigator.language, "$assets/harmonia/resources"));
 
 enyo.kind({
 	name: "Harmonia",
