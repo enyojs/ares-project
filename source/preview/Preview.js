@@ -4,9 +4,13 @@ enyo.path.addPaths({
 	"assets"	: "$enyo/../assets"
 });
 
-var ilibPreview = AresI18n.setBundle.bind(null, AresI18n.setLocale(navigator.language, "$assets/preview/resources"));
-// ilibUtilities is used by Ares.js too
-var ilibUtilities = AresI18n.setBundle.bind(null, AresI18n.setLocale(navigator.language, "$assets/utilities/resources"));
+/* ilibPreview covers Preview main translations */
+var ilibPreview = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/preview/resources"));
+/* 
+ * ilibUtilities covers Utilities specific translations.
+ * Because ilibUtilities is used by Ares.js too, this bundle has been separated from Ares one.
+ */
+var ilibUtilities = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/utilities/resources"));
 
 enyo.kind(
 	{

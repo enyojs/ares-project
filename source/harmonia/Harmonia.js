@@ -1,5 +1,7 @@
 /*global ares, enyo, AresI18n, setTimeout */
-var ilibHarmonia = AresI18n.setBundle.bind(null, AresI18n.setLocale(navigator.language, "$assets/harmonia/resources"));
+
+/* ilibProjectView covers Harmonia specific translations. */
+var ilibHarmonia = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/harmonia/resources"));
 
 enyo.kind({
 	name: "Harmonia",
