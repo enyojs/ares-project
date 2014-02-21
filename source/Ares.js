@@ -1,8 +1,16 @@
-/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, $L */
+/*global Ares, ServiceRegistry, enyo, async, ares, alert, ComponentsRegistry, AresI18n */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets"
 });
+
+/* ilibAres covers Ares main translations */
+var ilibAres = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/resources"));
+/* 
+ * ilibUtilities covers Utilities specific translations.
+ * Because ilibUtilities is used by Preview.js too, this bundle has been separated from Ares one.
+ */
+var ilibUtilities = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/utilities/resources")); 
 
 enyo.kind({
 	name: "Ares",
@@ -33,7 +41,13 @@ enyo.kind({
 					classes: "ares-panel-min-width enyo-fit",
 					onFileOpenRequest: "openDocument",
 					onFileRemoved: "closeDocument",
-					onFolderChanged: "closeSomeDocuments"
+					onFolderChanged: "closeSomeDocuments",
+					onModifySettings: "modifySettingsAction",
+					onPreview: "previewAction",
+					onBuild: "buildAction",
+					onInstall: "installAction",
+					onRun: "runAction",
+					onRunDebug: "runDebugAction"
 				},
 				{kind: "Ares.EnyoEditor", name: "enyoEditor"}
 			]
@@ -48,13 +62,13 @@ enyo.kind({
 			style: "text-align: center; padding: 20px; width: 200px;",
 			components: [
 				{kind: "Image", src: "$assets/enyo-editor/phobos/images/save-spinner.gif", style: "width: 54px; height: 55px;"},
-				{name: "waitPopupMessage", content: "Ongoing...", style: "padding-top: 10px;"}, 
-				{kind: "onyx.Button", name:"canceBuildButton", content: "Cancel", ontap: "cancelService", style: "margin-top: 10px;", showing: false}						
+				{name: "waitPopupMessage", content: ilibAres("Ongoing..."), style: "padding-top: 10px;"}, 
+				{kind: "onyx.Button", name:"canceBuildButton", content: ilibAres("Cancel"), ontap: "cancelService", style: "margin-top: 10px;", showing: false}						
 			]
 		},
 		
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "unknown error", details: ""},
-		{name: "signInErrorPopup", kind: "Ares.SignInErrorPopup", msg: "unknown error", details: ""},
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: ilibAres("Unknown error"), details: ""},
+		{name: "signInErrorPopup", kind: "Ares.SignInErrorPopup", msg: ilibAres("Unknown error"), details: ""},
 		{kind: "ServiceRegistry"},
 		{kind: "Ares.PackageMunger", name: "packageMunger"}
 	],
@@ -75,7 +89,9 @@ enyo.kind({
 		//handlers for editorSettings kind (utilities/EditorSettings.js)
 		onChangeSettings:"applyPreviewSettings", 
 		onChangeRightPane: "changeRightPane", 
-		onApplySettings: "applySettings"
+		onApplySettings: "applySettings",
+		//handlers for editorSettings kind (project-view/ProjectList.js)
+		onDisableProjectMenu: "disableProjectMenu"
 	},
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
@@ -86,7 +102,7 @@ enyo.kind({
 	create: function() {
 		ares.setupTraceLogger(this);		// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
-		this._registerComponent(null,{name: "ares", reference: this});
+		this._registerComponent(null, {name: "ares", reference: this});
 		ComponentsRegistry.getComponent("enyoEditor").showPhobosPanel();
 		ServiceRegistry.instance.setOwner(this); // plumb services events all the way up
 		window.onbeforeunload = enyo.bind(this, "handleBeforeUnload");
@@ -98,6 +114,10 @@ enyo.kind({
 		}
 
 		Ares.instance = this;
+
+		// i18n checking
+		this.trace("ilibAres: Cancel=", ilibAres("Cancel"));
+		this.trace("ilibUtilities: Close=", ilibUtilities("Close"));
 	},
 
 	rendered: function() {
@@ -156,9 +176,9 @@ enyo.kind({
 		if (fileData) {
 			// switch triggered by double-clicking an already opened
 			// file in HermesFileTree
-			editor.switchToDocument(fileData, $L("Switching files..."), myNext) ;
+			editor.switchToDocument(fileData, ilibAres("Switching file..."), myNext) ;
 		} else {
-			this.showWaitPopup(this, {msg: $L("Fetching file...")});
+			this.showWaitPopup(this, {msg: ilibAres("Fetching file...")});
 			async.waterfall(
 				[
 					this._fetchDocument.bind(this,projectData, file),
@@ -415,6 +435,93 @@ enyo.kind({
 	stopEvent: function(){
 		return true;
 	},
+	/** @private */
+	disableProjectMenu: function(inSender, inEvent) {
+		var disable = inEvent && inEvent.disable;
+		ComponentsRegistry.getComponent("harmonia").disableProjectMenu(disable);
+
+		return true;
+	},
+	/** @private */
+	modifySettingsAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if ( project) {
+			ComponentsRegistry.getComponent("projectView").$.projectWizardModify.start( project );
+		}
+
+		return true; //Stop event propagation
+	},
+	/**
+	 * Event handler: Launch a preview widget of the selected project in a separate frame
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project 
+	 * @private
+	 */
+	previewAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if ( project) {
+			ComponentsRegistry.getComponent("projectView").launchPreview(project);
+		}
+		return true; // stop the bubble
+	},
+	/**
+	 * Event handler: handle build project action (select provider & run action)
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project 
+	 * @private
+	 */
+	buildAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (project) {
+			ComponentsRegistry.getComponent("projectView").projectSaveAndAction(project, 'build', 'build');
+		}
+		return true; // stop bubble-up
+	},	
+	/**
+	 * Event handler: handle install application action (select provider & run action)
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project
+	 * @private
+	 */
+	installAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (project) {
+			ComponentsRegistry.getComponent("projectView").projectSaveAndAction(project, 'test', 'install');
+		}
+		return true; // stop bubble-up
+	},
+	/**
+	 * Event handler: handle run application action (select provider & run action)
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project
+	 * @private
+	 */
+	runAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (project) {
+			ComponentsRegistry.getComponent("projectView").projectSaveAndAction(project, 'test', 'run');
+		}
+		return true; // stop bubble-up
+	},
+	/**
+	 * Event handler: handle debug application action (select provider & run action)
+	 * @param {enyo.Component} inSender
+	 * @param {Object} inEvent
+	 * @property inEvent {Ares.Model.Project} project
+	 * @private
+	 */
+	runDebugAction: function(inSender, inEvent) {
+		var project = inEvent && inEvent.project;
+		if (project) {
+			ComponentsRegistry.getComponent("projectView").projectSaveAndAction(project, 'test', 'runDebug');
+		}
+		return true; // stop bubble-up
+	},
+
 	statics: {
 		isBrowserSupported: function() {
 			if (enyo.platform.ie && enyo.platform.ie <= 8) {
@@ -428,7 +535,7 @@ enyo.kind({
 });
 
 if ( ! Ares.isBrowserSupported()) {
-	alert($L("Ares is designed for the latest version of IE. We recommend that you upgrade your browser or use Chrome"));
+	alert(ilibAres("Ares is designed for the latest version of IE. We recommend that you upgrade your browser or use Chrome"));
 }
 
 /**

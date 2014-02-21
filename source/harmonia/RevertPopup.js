@@ -1,3 +1,4 @@
+/* global ilibHarmonia */
 enyo.kind({
 	name: "RevertPopup",
 	kind: "onyx.Popup",
@@ -15,16 +16,16 @@ enyo.kind({
 	centered: true,
 	floating: true,
 	components: [
-		{tag: "div", name: "title", classes:"title", content: $L("Revert?")},
+		{tag: "div", name: "title", classes: "title", content: ilibHarmonia("Revert?")},
 		{kind: "enyo.Scroller", classes:"ares-small-popup", fit: true, components: [
 			{classes:"ares-small-popup-details", components:[
-				{tag: "p", name: "path", content: $L("Path: ")}
+				{tag: "p", name: "path", content: ilibHarmonia("Path:")}
 			]},
 			{tag: "p", classes: "break"}
 		]},
 		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
-			{name: "revertCancelButton", kind: "onyx.Button", content: $L("Cancel"), ontap: "revertCancel"},
-			{name: "revertDeleteButton", kind: "onyx.Button", classes:"right", content: $L("Revert"), ontap: "revertConfirm"}
+			{name: "revertCancelButton", kind: "onyx.Button", content: ilibHarmonia("Cancel"), ontap: "revertCancel"},
+			{name: "revertDeleteButton", kind: "onyx.Button", classes:"right", content: ilibHarmonia("Revert"), ontap: "revertConfirm"}
 		]}
 	],
 	create: function() {
@@ -34,13 +35,13 @@ enyo.kind({
 		this.pathChanged();
 	},
 	typeChanged: function() {
-		this.$.title.setContent($L("Revert {type}: {name}?").replace("{type}", this.type).replace("{name}", this.name));
+		this.$.title.setContent(ilibHarmonia("Revert {type}: {name}?", {type: this.type, name: this.name}));
 	},
 	nameChanged: function() {
-		this.$.title.setContent($L("Revert {type}: {name}?").replace("{type}", this.type).replace("{name}", this.name));
+		this.$.title.setContent(ilibHarmonia("Revert {type}: {name}?", {type: this.type, name: this.name}));
 	},
 	pathChanged: function() {
-		this.$.path.setContent($L("to {destination}").replace("{destination}", this.path));
+		this.$.path.setContent(ilibHarmonia("to {destination}", {destination: this.path}));
 	},
 	revertCancel: function(inSender, inEvent) {
 		this.hide();

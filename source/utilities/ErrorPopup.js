@@ -1,4 +1,4 @@
-/*global enyo, $L */
+/*global enyo, ilibUtilities */
 
 
 /* global ares */
@@ -10,13 +10,13 @@ enyo.kind({
 	floating: true,
 	autoDismiss: true,
 	published: {
-		title: $L("Error"),
-		errorMsg: $L("unknown error"),
+		title: ilibUtilities("Error"),
+		errorMsg: ilibUtilities("unknown error"),
 		actionMsg: undefined,
 		detailsHtml: "",
 		detailsText: "",
 		callback: null,
-		okButton: $L("Close")
+		okButton: ilibUtilities("Close")
 	},
 	classes: "ares-classic-popup",
 	components: [
@@ -26,7 +26,7 @@ enyo.kind({
 			{name: "action", showing: false},
 			{classes: "ares-error-details", components: [
 				{classes: "button", components: [
-					{tag: "label", classes:" label", name: "detailsBtn", content: $L("Details"), ontap: "toggleDetails", showing: false},
+					{tag: "label", classes:" label", name: "detailsBtn", content: ilibUtilities("Details"), ontap: "toggleDetails", showing: false},
 					{name: "detailsArrow", classes: "optionDownArrow", ontap: "toggleDetails", showing: false},
 					{name: "detailsDrw", kind: "onyx.Drawer", open: false, showing: false, classes: "ares-error-drawer", components: [
 						{name: "detailsText", kind: "onyx.TextArea", disabled: true, fit: true, classes: "ares-error-text"},
@@ -154,11 +154,11 @@ enyo.kind({
 		this.show();
 	},
 	reset: function() {
-		this.set("title", $L("error"));
-		this.set("errorMsg", $L("unknown error"));
+		this.set("title", ilibUtilities("error"));
+		this.set("errorMsg", ilibUtilities("unknown error"));
 		this.set("actionMsg", undefined);
 		this.set("detailsHtml", "");
 		this.set("detailsTxt", "");
-		this.set("okButton", $L("Close"));
+		this.set("okButton", ilibUtilities("Close"));
 	}
 });

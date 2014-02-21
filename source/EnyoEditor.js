@@ -1,4 +1,4 @@
-/*global ComponentsRegistry, ares, Ares, async, enyo, $L, setTimeout */
+/*global ComponentsRegistry, ares, Ares, async, enyo, ilibAres, setTimeout */
 enyo.kind({
 	name:"Ares.EnyoEditor",
 	kind:"FittableRows", 
@@ -11,7 +11,7 @@ enyo.kind({
 			{name: "editorFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
 			{name: "newKindDecorator", kind: "onyx.TooltipDecorator", components: [
 				{name: "newKindButton", kind: "onyx.IconButton", src: "assets/images/new_kind.png", ontap: "newKindAction"},
-				{kind: "onyx.Tooltip", content: $L("New Kind")}
+				{kind: "onyx.Tooltip", content: ilibAres("New Kind")}
 			]},
 			{name: "docLabel", content: "Deimos", classes: "ares-left-margin"},
 			{name: "deimosKind", kind: "onyx.PickerDecorator", classes: "ares-right-margin", components: [
@@ -22,22 +22,22 @@ enyo.kind({
 			{fit: true},
 			{name: "editorSettingDecorator", kind: "onyx.TooltipDecorator", components: [
 				{name: "editorButton", kind: "onyx.IconButton", src: "assets/images/editor_settings.png", ontap: "editorSettings"},
-				{kind: "onyx.Tooltip", content: "Editor Settings"}
+				{kind: "onyx.Tooltip", content: ilibAres("Editor Settings")}
 			]},
 			{name: "designerButtonContainer", components: [ //TO DO: needs to avoid the confusion with phobos adjustPanelForMode
 				{name: "designerDecorator", kind: "onyx.TooltipDecorator", components: [
 					{name: "designerButton", kind: "onyx.IconButton", src: "assets/images/designer.png", ontap: "designerAction"},
 					{name: "designerButtonBroken", kind: "onyx.IconButton", src: "assets/images/designer_broken.png", ontap: "doDesignerBroken"},
-					{name: "designerTooltipBroken", kind: "Ares.ErrorTooltip", content: $L("Designer")}
+					{name: "designerTooltipBroken", kind: "Ares.ErrorTooltip", content: ilibAres("Designer")}
 				]}
 			]},
 			{name: "codeEditorDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
 				{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closeDesigner"},
-				{kind: "onyx.Tooltip", content: "Code editor"}
+				{kind: "onyx.Tooltip", content: ilibAres("Code editor")}
 			]},
 			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
 				{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_preview.png", ontap: "requestPreview"},
-				{kind: "onyx.Tooltip", name:"previewTooltip", content: "Preview"}
+				{kind: "onyx.Tooltip", name:"previewTooltip", content: ilibAres("Preview")}
 			]},
 			{classes:"ares-logo-container", components:[
 				{name:"logo", kind:"Ares.Logo"}
@@ -49,7 +49,7 @@ enyo.kind({
 			kind: "Ares.FileChooser",
 			classes:"ares-masked-content-popup",
 			showing: false,
-			headerText: $L("Save as..."),
+			headerText: ilibAres("Save as..."),
 			folderChooser: false,
 			onFileChosen: "saveAsFileChosen",
 			allowCreateFolder: true,
@@ -59,9 +59,9 @@ enyo.kind({
 		{
 			name: "overwritePopup",
 			kind: "Ares.ActionPopup",
-			title: $L("Overwrite"),
-			message: $L("Overwrite existing file?"),
-			actionButton: $L("Overwrite")
+			title: ilibAres("Overwrite"),
+			message: ilibAres("Overwrite existing file?"),
+			actionButton: ilibAres("Overwrite")
 		},
 		{
 			name: "docToolBar",
@@ -230,7 +230,7 @@ enyo.kind({
 		this.$.designerButtonBroken.setShowing(! enable);
 	},
 	userSyntaxErrorPop: function(){
-		this.doError({msg: $L("Designer cannot work on a file with a syntax error. Please fix the error highlighted in code editor before launching the designer."), title: $L("Syntax Error")});
+		this.doError({msg: ilibAres("Designer cannot work on a file with a syntax error. Please fix the error highlighted in code editor before launching the designer."), title: ilibAres("Syntax Error")});
 	},
 
 	closeDesigner: function(inSender, inEvent){
@@ -400,12 +400,12 @@ enyo.kind({
 			this.trace("request save project doc on ", project.getName());
 			var verb = todo.length > 1 ? 'were' : 'was' ;
 			popup.setMessage('"' + toSave.join('", "') + '" ' + verb + ' modified.') ;
-			popup.setTitle($L("Project was modified!"));
+			popup.setTitle(ilibAres("Project was modified!"));
 
-			popup.setActionButton($L("Don't Save"));
+			popup.setActionButton(ilibAres("Don't Save"));
 			popup.setActionCallback( next );
 
-			popup.setAction1Button($L("Save"));
+			popup.setAction1Button(ilibAres("Save"));
 			popup.setAction1Callback( async.series.bind(null, todo, next) );
 
 			popup.setCancelCallback(
@@ -462,7 +462,7 @@ enyo.kind({
 		}
 
 		// hide is done in the callbacks below
-		this.showWaitPopup($L("Saving ") + name + " ...");
+		this.showWaitPopup(ilibAres("Saving ") + name + " ...");
 
 		req.response(this, function(inSender, inData) {
 			this.trace('saveFile response ', inData);
@@ -672,7 +672,7 @@ enyo.kind({
 		var fileData = Ares.Workspace.files.newEntry(file, inContent, projectData);
 		ComponentsRegistry.getComponent("documentToolbar")
 			.createDocTab(file.name, fileData.getId(), file.path);
-		this.switchToDocument(fileData, $L("Opening..."), next);
+		this.switchToDocument(fileData, ilibAres("Opening..."), next);
 	},
 
 	switchProjectToCurrentDoc: function(inSender, inEvent) {
@@ -692,7 +692,7 @@ enyo.kind({
 	handleSwitchDoc: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.userId);
 		this.trace(inEvent.id, newDoc);
-		this.switchToDocument(newDoc, $L("Switching files..."), inEvent.next);
+		this.switchToDocument(newDoc, ilibAres("Switching file..."), inEvent.next);
 		return true;
 	},
 
@@ -704,7 +704,7 @@ enyo.kind({
 	 */
 	handleSwitchDocNoCb: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.userId);
-		this.switchToDocument(newDoc, $L("Switching files..."), ares.noNext);
+		this.switchToDocument(newDoc, ilibAres("Switching file..."), ares.noNext);
 		return true;
 	},
 
@@ -749,7 +749,7 @@ enyo.kind({
 			var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
 			var projectList = ComponentsRegistry.getComponent("projectList");
 
-			this.doShowWaitPopup({msg: $L("Switching project...")});
+			this.doShowWaitPopup({msg: ilibAres("Switching project...")});
 
 			this.resetErrorTooltip();
 
@@ -816,7 +816,7 @@ enyo.kind({
 		newProject = newDoc.getProjectData() ;
 		Ares.Workspace.projects.setActiveProject( newProject.getName() );
 
-		this.addPreviewTooltip("Preview " +  newProject.id);
+		this.addPreviewTooltip(ilibAres("Preview {projectID}", {projectID: newProject.id}));
 
 		var deimos = this.$.deimos ;
 		var willManageControls = false ;
@@ -950,12 +950,12 @@ enyo.kind({
 		if (doc.getEdited() === true) {
 			this.trace("request save doc on ", doc.getName());
 			popup.setMessage('"' + doc.getFile().path + '" was modified.<br/><br/>Save it before closing?') ;
-			popup.setTitle($L("Document was modified!"));
+			popup.setTitle(ilibAres("Document was modified!"));
 
-			popup.setActionButton($L("Don't Save"));
+			popup.setActionButton(ilibAres("Don't Save"));
 			popup.setActionCallback( function() {next(null, doc);});
 
-			popup.setAction1Button($L("Save"));
+			popup.setAction1Button(ilibAres("Save"));
 			popup.setAction1Callback( this.saveDoc.bind(this, doc, next) );
 
 			popup.setCancelCallback(
@@ -1086,32 +1086,32 @@ enyo.kind({
 		{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
 			{name: "saveButton", value: "saveCurrentDoc", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-save-darken.png"},
-				{content: $L("Save")}
+				{content: ilibAres("Save")}
 			]},
 			{name: "saveAsButton", value: "requestSaveDocAs", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-save-darken.png"},
-				{content: $L("Save as...")}
+				{content: ilibAres("Save as...")}
 			]},
 			{name: "saveProjectButton", value: "saveProjectDocs", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-save-darken.png"},
-				{content: $L("Save Project")}
+				{content: ilibAres("Save Project")}
 			]},
 			{name: "saveAllDocsButton", value: "saveAllDocs", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-save-darken.png"},
-				{content: $L("Save all")}
+				{content: ilibAres("Save all")}
 			]},
 			{classes: "onyx-menu-divider"},
 			{name: "closeButton", value: "requestCloseCurrentDoc", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-stop.png"},
-				{content: $L("Close")}
+				{content: ilibAres("Close")}
 			]},
 			{name: "closeProjectButton", value: "requestCloseCurrentProject", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-stop.png"},
-				{content: $L("Close Project")}
+				{content: ilibAres("Close Project")}
 			]},
 			{name: "closeAllButton", value: "requestCloseAll", classes:"aresmenu-button", components: [
 				{kind: "onyx.IconButton", src: "$assets/enyo-editor/phobos/images/menu-icon-stop.png"},
-				{content: $L("Close All")}
+				{content: ilibAres("Close All")}
 			]}
 		]}
 	]

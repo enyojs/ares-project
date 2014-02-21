@@ -1,4 +1,7 @@
-/*global analyzer, ares, enyo, $L, ProjectCtrl, setTimeout */
+/*global analyzer, ares, enyo, AresI18n, ProjectCtrl, setTimeout */
+
+/* ilibPhobos covers Phobos specific translations. */
+var ilibPhobos = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/enyo-editor/phobos/resources"));
 
 enyo.kind({
 	name: "Phobos",
@@ -27,10 +30,10 @@ enyo.kind({
 			]}
 		]},
 		{name: "autocomplete", kind: "Phobos.AutoComplete"},
-		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll:"replaceAll", onHide:"doAceFocus", onClose: "findClose", onReplaceFind: "replacefind"},
+		{name: "findpop", kind: "FindPopup", centered: true, modal: true, floating: true, onFindNext: "findNext", onFindPrevious: "findPrevious", onReplace: "replace", onReplaceAll: "replaceAll", onHide: "doAceFocus", onClose: "findClose", onReplaceFind: "replacefind"},
 		{
 			name: "editorSettingsPopup", 
-			kind: "onyx.Popup", 
+			kind: "onyx.Popup",
 			classes:"enyo-unselectable ares-classic-popup", 
 			centered: true, 
 			modal: true, 
@@ -40,7 +43,7 @@ enyo.kind({
 			onChangeSettings:"applyPreviewSettings", 
 			onChangeRightPane: "changeRightPane",
 			components: [
-				{name:"title", classes: "title draggable", kind: "Ares.PopupTitle", content: "EDITOR GLOBAL SETTINGS"},
+				{name:"title", classes: "title draggable", kind: "Ares.PopupTitle", content: ilibPhobos("EDITOR GLOBAL SETTINGS")},
 				{kind: "editorSettings", classes:"ace-settings-popup" }
 			],	  
 		}
@@ -74,6 +77,9 @@ enyo.kind({
 		ares.setupTraceLogger(this);	// Setup this.trace() function according to this.debug value
 		this.inherited(arguments);
 		this.helper = new analyzer.Analyzer.KindHelper();
+
+		// i18n checking
+		this.trace("ilibPhobos: Close=", ilibPhobos("Close"));
 	},
 	getProjectController: function() {
 		// create projectCtrl only when needed. In any case, there's only
@@ -475,13 +481,13 @@ enyo.kind({
 			for (i=0; i < oLen; i++) {
 				o = this.analysis.objects[i];
 				if (o.type !== "kind") {
-					errorMsg = $L("Ares does not support methods out of a kind. Please place '" + o.name + "' into a separate .js file");
+					errorMsg = ilibPhobos("Ares does not support methods out of a kind. Please place '{name}' into a separate .js file", {name: o.name});
 				} else {
 					nbKinds++;
 				}
 			}
 			if (nbKinds === 0) {
-				errorMsg = $L("No kinds found in this file");
+				errorMsg = ilibPhobos("No kinds found in this file");
 			}
 			if (errorMsg) {
 				this.doError({msg: errorMsg});
@@ -949,7 +955,7 @@ enyo.kind({
 				{kind: "onyx.Button", content: "Reparse",  ontap: "doReparseAsked"},
 				{kind: "enyo.Scroller", classes: "enyo-fit ace-helper-panel",components: [
 					{tag:"ul", kind: "enyo.Repeater", name: "dump", onSetupItem: "sendInitHelperReapeter", ontap: "sendNavigate", components: [
-						{tag:"li", classes:"ace-helper-list", kind:"RightPanel.Helper", name: "item"}
+						{tag:"li", classes:"ace-helper-list", kind: "RightPanel.Helper", name: "item"}
 					]}
 				]}
 			]}

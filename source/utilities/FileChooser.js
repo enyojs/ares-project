@@ -1,4 +1,4 @@
-/* global async, ares */
+/* global async, ares, ilibUtilities */
 
 enyo.kind({
 	name: "Ares.FileChooser",
@@ -53,12 +53,12 @@ enyo.kind({
 	components: [
 		{kind: "FittableRows", classes: "onyx-popup ares-filechooser ares-classic-popup", components: [
 			{classes:"title", components: [
-				{name: "header", tag: "span", content: $L("Select a directory")}
+				{name: "header", tag: "span", content: ilibUtilities("Select a directory")}
 			]},
 			{kind: "FittableColumns", classes: "onyx-light", fit: true, components: [
 				{kind:"FittableRows", name: "sources", classes:"ares-left-pane-file-chooser", components:[
 					{kind: "onyx.Toolbar", classes: "ares-small-toolbar title-gradient", components: [
-						{content: $L("Sources"), classes:"ares-create-sources"}
+						{content: ilibUtilities("Sources"), classes:"ares-create-sources"}
 					]},
 					{kind: "ProviderList", selector: ["type", "filesystem"], fit:"true", name: "providerList", onSelectProvider: "handleSelectProvider"}
 				]},
@@ -68,22 +68,22 @@ enyo.kind({
 				{classes:"ares-row ares-file-choser-row", name:"foldersPathRow", showing: true, components:[
 					{tag:"label", name:"foldersPathLabel", classes: "ares-fixed-label ares-file-chooser-label"},
 					{name: "foldersPathSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline file-chooser-input", showing: true, components: [
-						{name: "selectedFoldersPath", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("/Folders/File_Name")}
+						{name: "selectedFoldersPath", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: ilibUtilities("/Folders/File_Name")}
 					]}
 				]},
 				{classes:"ares-row", name:"fileNameRow", showing: false, components:[
-					{tag:"label", name:"fileNameLabel", classes: "ares-fixed-label ares-file-chooser-label", content: $L("File name: ")},
+					{tag:"label", name:"fileNameLabel", classes: "ares-fixed-label ares-file-chooser-label", content: ilibUtilities("File name: ")},
 					{name: "fileNameSelector", kind: "onyx.InputDecorator", classes: "onyx-toolbar-inline file-chooser-input", showing: false, components: [
-						{name: "selectedFileName", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: $L("File_Name"), selectOnFocus: true, oninput: "updateSelectedName", onchange: "updateSelectedName"}
+						{name: "selectedFileName", kind: "onyx.Input", classes: "only-light", disabled: true, placeholder: ilibUtilities("File_Name"), selectOnFocus: true, oninput: "updateSelectedName", onchange: "updateSelectedName"}
 					]}
 				]}
 			]},
 			{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
-				{name: "cancel", kind: "onyx.Button", content: $L("Cancel"), ontap: "cancel"},
-				{name: "confirm", kind: "onyx.Button", content: $L("OK"), classes:"right", ontap: "confirm", disabled: true}
+				{name: "cancel", kind: "onyx.Button", content: ilibUtilities("Cancel"), ontap: "cancel"},
+				{name: "confirm", kind: "onyx.Button", content: ilibUtilities("OK"), classes:"right", ontap: "confirm", disabled: true}
 			]}
 		]},
-		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: $L("Error message")}
+		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: ilibUtilities("Error message")}
 	],
 	events: {
 		/**
@@ -125,9 +125,9 @@ enyo.kind({
 
 		if (!this.headerText) {
 			if (this.folderChooser) {
-				this.setHeaderText($L("Select a Folder"));
+				this.setHeaderText(ilibUtilities("Select a Folder"));
 			} else {
-				this.setHeaderText($L("Select a File"));
+				this.setHeaderText(ilibUtilities("Select a File"));
 			}
 		} else {
 			this.headerTextChanged();
@@ -141,7 +141,7 @@ enyo.kind({
 	/** @private */
 	folderChooserChanged: function () {
 		if (this.folderChooser) {
-			this.$.foldersPathLabel.setContent($L("Folder path: "));
+			this.$.foldersPathLabel.setContent(ilibUtilities("Folder path: "));
 		} else {
 			this.allowNewFileChanged();
 		}		
@@ -158,7 +158,7 @@ enyo.kind({
 	allowNewFileChanged: function () {
 		if (!this.folderChooser) {
 			if (this.allowNewFile) {
-				this.$.foldersPathLabel.setContent($L("Folder path: "));
+				this.$.foldersPathLabel.setContent(ilibUtilities("Folder path: "));
 				this.$.fileNameRow.show();
 				this.$.fileNameSelector.show();
 				this.$.selectedFileName.setDisabled(false);
@@ -166,7 +166,7 @@ enyo.kind({
 			}
 		}
 
-		this.$.foldersPathLabel.setContent($L("File path: "));
+		this.$.foldersPathLabel.setContent(ilibUtilities("File path: "));
 		this.$.fileNameRow.hide();
 		this.$.fileNameSelector.hide();
 		this.$.selectedFileName.setDisabled(true);
@@ -352,7 +352,7 @@ enyo.kind({
 		var illegal = /[<>\\!?$%&*,:;"|]/i;
 
 		if (path.match(illegal)) {
-			this.showErrorPopup(this.$LS("Path #{path} contains illegal characters", {path: path}));
+			this.showErrorPopup(ilibUtilities("Path '{path}' contains illegal characters", {path: path}));
 			return false;
 		}
 
@@ -361,10 +361,6 @@ enyo.kind({
 	showErrorPopup : function(msg) {
 		this.$.errorPopup.setErrorMsg(msg);
 		this.$.errorPopup.show();
-	},
-	$LS: function(msg, params) {
-		var tmp = new enyo.g11n.Template($L(msg));
-		return tmp.evaluate(params);
 	}
 });
 

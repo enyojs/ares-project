@@ -23,17 +23,17 @@ enyo.kind({
 
 		if (this.status === "complete") {
 
-			this.setSrc("$assets/services/images/platforms/" + this.platform + "-logo-complete-32x32.png");
+			this.setSrc("$assets/harmonia/services/images/platforms/" + this.platform + "-logo-complete-32x32.png");
 			return;
 		}
 
 		if (this.status === "error") {
 			this.show();
-			this.setSrc("$assets/services/images/platforms/" + this.platform + "-logo-error-32x32.png");
+			this.setSrc("$assets/harmonia/services/images/platforms/" + this.platform + "-logo-error-32x32.png");
 			return;
 		}
 
-		this.setSrc("$assets/services/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
+		this.setSrc("$assets/harmonia/services/images/platforms/" + this.platform + "-logo-not-available-32x32.png");
 
 	}
 });
@@ -97,7 +97,7 @@ enyo.kind({
 			{
 				name: "downloadButton",
 				kind: "onyx.IconButton",
-				src: "$assets/services/images/download-icon.png",
+				src: "$assets/harmonia/services/images/download-icon.png",
 				showing: false,
 				ontap: "downloadPackage"
 			}]

@@ -55,7 +55,7 @@ enyo.kind({
 						components: [{
 							name: "phonegapBuildButton",
 							kind: "onyx.IconButton",
-							src: "$assets/services/images/Phonegap_build_help.png",
+							src: "$assets/harmonia/services/images/Phonegap_build_help.png",
 							ontap: "phonegapBuildClick"
 							/*, classes: "ares-project-properties-help-button"*/
 						},

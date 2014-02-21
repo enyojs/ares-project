@@ -1,4 +1,8 @@
-/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo, Phonegap */
+/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo, Phonegap, AresI18n */
+
+/* ilibProjectView covers Project-view specific translations. */
+var ilibProjectView = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/project-view/resources")); 
+
 /**
  * This kind is the top kind of project handling. It contains:
  * - The project list
@@ -16,7 +20,6 @@ enyo.kind({
 	},
 	components: [
 		{kind: "ProjectList",
-			onModifySettings: "modifySettingsAction",
 			onCreateProject: "createProjectAction",
 			onOpenProject: "openProjectAction",
 			onSearchProjects: "searchProjectsAction",
@@ -32,12 +35,7 @@ enyo.kind({
 		{kind: "ProjectWizardCopy", name: "projectWizardCopy", classes:"ares-masked-content-popup"}
 	],
 	handlers: {
-		onAddProjectInList: "addProjectInList",
-		onPreview: "previewAction",
-		onBuild: "buildAction",
-		onInstall: "installAction",
-		onRun: "runAction",
-		onRunDebug: "runDebugAction"
+		onAddProjectInList: "addProjectInList"
 	},
 	events: {
 		onHideWaitPopup: "",
@@ -51,6 +49,9 @@ enyo.kind({
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
 		this.doRegisterMe({name:"projectView", reference:this});
+
+		// i18n Checking
+		this.trace("ilibProjectView: Cancel=", ilibProjectView("Cancel"));
 	},
 	/**
 	 * Refresh the {ProjectView} (if relevant), following a change of the given file
@@ -60,13 +61,13 @@ enyo.kind({
 		ComponentsRegistry.getComponent("harmonia").refreshFileTree(toSelectId,next);
 	},
 	searchProjectsAction: function(inSender, inEvent) {
-		this.$.projectWizardScan.setHeaderText('Select a folder hierarchy');
+		this.$.projectWizardScan.setHeaderText(ilibProjectView("Select a folder hierarchy"));
 		this.$.projectWizardScan.setRecurse(true);
 		this.$.projectWizardScan.show();
 		return true; //Stop event propagation
 	},
 	openProjectAction: function(inSender, inEvent) {
-		this.$.projectWizardScan.setHeaderText('Select an existing Ares application folder (contains a project.json file)');
+		this.$.projectWizardScan.setHeaderText(ilibProjectView("Select an existing Ares application folder (contains a project.json file)"));
 		this.$.projectWizardScan.setRecurse(false);
 		this.$.projectWizardScan.show();
 		return true; //Stop event propagation
@@ -84,12 +85,6 @@ enyo.kind({
 		this.$.projectWizardCreate.start();
 		return true; //Stop event propagation
 	},
-	modifySettingsAction: function(inSender, inEvent) {
-		this.$.projectWizardModify.start( this.currentProject() );
-		
-		return true; //Stop event propagation
-	},
-
 	addProjectInList: function(inSender, inEvent) {
 		this.doHideWaitPopup();
 		try {
@@ -210,64 +205,6 @@ enyo.kind({
 		ComponentsRegistry.getComponent("harmonia").setProject(null, ares.noNext);
 	},
 	/**
-	 * Event handler: handle build project action (select provider & run action)
-	 * @param {enyo.Component} inSender
-	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project 
-	 * @private
-	 */
-	buildAction: function(inSender, inEvent) {
-		var project = inEvent && inEvent.project;
-		if (project) {
-			this.projectSaveAndAction(project, 'build', 'build');
-		}
-		return true; // stop bubble-up
-	},
-	
-	/**
-	 * Event handler: handle install application action (select provider & run action)
-	 * @param {enyo.Component} inSender
-	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project
-	 * @private
-	 */
-	installAction: function(inSender, inEvent) {
-		var project = inEvent && inEvent.project;
-		if (project) {
-			this.projectSaveAndAction(project, 'test', 'install');
-		}
-		return true; // stop bubble-up
-	},
-	/**
-	 * Event handler: handle run application action (select provider & run action)
-	 * @param {enyo.Component} inSender
-	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project
-	 * @private
-	 */
-	runAction: function(inSender, inEvent) {
-		var project = inEvent && inEvent.project;
-		if (project) {
-			this.projectSaveAndAction(project, 'test', 'run');
-		}
-		return true; // stop bubble-up
-	},
-	/**
-	 * Event handler: handle debug application action (select provider & run action)
-	 * @param {enyo.Component} inSender
-	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project
-	 * @private
-	 */
-	runDebugAction: function(inSender, inEvent) {
-		var project = inEvent && inEvent.project;
-		if (project) {
-			this.projectSaveAndAction(project, 'test', 'runDebug');
-		}
-		return true; // stop bubble-up
-	},
-
-	/**
 	 * Request to save project and perform action
 	 * @param {Ares.Model.Project} project
 	 * @param {String} serviceType
@@ -285,7 +222,6 @@ enyo.kind({
 			this.doProjectSave({ project: project, callback: cb.bind(this) });
 		}
 	},
-
 	/**
 	 * @private
 	 */
@@ -343,20 +279,5 @@ enyo.kind({
 			'scrollbars=0,menubar=1,resizable=1',
 			false
 		);
-	},
-
-	/**
-	 * Event handler: Launch a preview widget of the selected project in a separate frame
-	 * @param {enyo.Component} inSender
-	 * @param {Object} inEvent
-	 * @property inEvent {Ares.Model.Project} project 
-	 * @private
-	 */
-	previewAction: function(inSender, inEvent) {
-		var project = inEvent.project;
-		if ( project) {
-			this.launchPreview(project);
-		}
-		return true; // stop the bubble
 	}
 });

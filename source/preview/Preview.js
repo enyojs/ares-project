@@ -1,15 +1,23 @@
-/*global enyo, ares */
+/*global enyo, ares, AresI18n */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets"
 });
+
+/* ilibPreview covers Preview main translations */
+var ilibPreview = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/preview/resources"));
+/* 
+ * ilibUtilities covers Utilities specific translations.
+ * Because ilibUtilities is used by Ares.js too, this bundle has been separated from Ares one.
+ */
+var ilibUtilities = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/utilities/resources"));
 
 enyo.kind(
 	{
 		name: "PreviewDevicePicker",
 		kind: "onyx.Picker",
 		components: [
-			{content: "default",           value: { height:  800, width:  600, ppi: 163, dpr: 1 }, active: true},
+			{content: ilibPreview("default"),           value: { height:  800, width:  600, ppi: 163, dpr: 1 }, active: true},
 			
 			{content: "HP Slate 7",      value: { height:  1024, width:  600, ppi: 170, dpr: 1 }},
 			
@@ -38,7 +46,7 @@ enyo.kind(
 						kind: 'onyx.Groupbox',
 						classes : "ares-preview-groupbox",
 						components: [
-							{kind: "onyx.GroupboxHeader", content: "Project"},
+							{kind: "onyx.GroupboxHeader", content: ilibPreview("Project")},
 							{name:"projectName"}
 						]
 					},
@@ -46,7 +54,7 @@ enyo.kind(
 						kind: 'onyx.Groupbox',
 						classes : "ares-preview-groupbox",
 						components: [
-							{kind: "onyx.GroupboxHeader", content: "Device"},
+							{kind: "onyx.GroupboxHeader", content: ilibPreview("Device")},
 							{
 								kind: "Ares.PickerDecorator",
 								onSelect: "resize",
@@ -59,17 +67,17 @@ enyo.kind(
 									}
 								]
 							},
-							{content: "width: 600 px",  name: "devWidth"},
-							{content: "height: 800 px", name: "devHeight"},
-							{content: "DPR: 1",        name: "devDPR",
-							 attributes: {title: "display pixel ratio"} }
+							{content: ilibPreview("width: 600 px"),  name: "devWidth"},
+							{content: ilibPreview("height: 800 px"), name: "devHeight"},
+							{content: ilibPreview("DPR: 1"),        name: "devDPR",
+							 attributes: {title: ilibPreview("display pixel ratio")} }
 						]
 					},
 					{
 						kind: 'onyx.Groupbox',
 						classes : "ares-preview-groupbox",
 						components: [
-							{kind: "onyx.GroupboxHeader", content: "Screen"},
+							{kind: "onyx.GroupboxHeader", content: ilibPreview("Screen")},
 							{
 								kind: "Ares.PickerDecorator",
 								onSelect: "resize",
@@ -80,17 +88,17 @@ enyo.kind(
 										kind: "onyx.Picker",
 										name: "orientation",
 										components: [
-											{name:"portrait", content: "portrait", active: true },
-											{name:"landscape", content: "landscape"              }
+											{name: "portrait", content: ilibPreview("portrait"), active: true },
+											{name: "landscape", content: ilibPreview("landscape")              }
 										]
 									}
 								]
 							},
-							{content: "width: 600 px",  name: "screenWidth",
-							 attributes: { title: "device width divided by DPR" }
+							{content: ilibPreview("width: 600 px"),  name: "screenWidth",
+							 attributes: { title: ilibPreview("device width divided by DPR") }
 							},
-							{content: "height: 800 px", name: "screenHeight",
-							 attributes: { title: "device height divided by DPR" }
+							{content: ilibPreview("height: 800 px"), name: "screenHeight",
+							 attributes: { title: ilibPreview("device height divided by DPR") }
 							}
 						]
 					},
@@ -98,12 +106,12 @@ enyo.kind(
 						kind: 'onyx.Groupbox',
 						classes : "ares-preview-groupbox",
 						components: [
-							{kind: "onyx.GroupboxHeader", content: "Zoom"},
+							{kind: "onyx.GroupboxHeader", content: ilibPreview("Zoom")},
 							{classes: "zoom-slider", components: [
 								{kind: "onyx.RangeSlider", rangeMin: 0, rangeMax: 400, rangeStart: 0, rangeEnd: 100, interval: 1, onChange: 'zoom', onChanging: 'zoom'}
 							]},
 							{components: [
-								{tag: "label", classes: "zoom-label", content: "Applied zoom:"},
+								{tag: "label", classes: "zoom-label", content: ilibPreview("Applied zoom:")},
 								{tag: "label", name: "zoomValue", content: "100%"}
 							]}
 						]
@@ -118,10 +126,10 @@ enyo.kind(
 					},
 					{
 						kind:"onyx.Button",
-						content: "Detach test",
+						content: ilibPreview("Detach test"),
 						ontap:"detachIframe",
 						classes: "ares-preview-buttons",
-						attributes: { title: "detach test device, then right click to enable Ripple emulator"}
+						attributes: { title: ilibPreview("detach test device, then right click to enable Ripple emulator")}
 					}
 				]
 			},
@@ -148,7 +156,11 @@ enyo.kind(
 			this.$.projectName.setContent(param.name);
 
 			//display project name in the window title
-			document.title = this.$.projectName.getContent()+" - Ares project preview";
+			document.title = ilibPreview("{projectName} - Ares project preview", {projectName: this.$.projectName.getContent()});
+
+			// i18n checking
+			this.trace("ilibPreview: Screen=", ilibPreview("Screen"));
+			this.trace("ilibUtilities: Close=", ilibUtilities("Close"));
 		},
 
 		zoom: function(inSender, inEvent) {
@@ -160,7 +172,7 @@ enyo.kind(
 
 		applyScale: function() {
 			enyo.dom.transformValue(
-				this.$.scrolledIframe.$.iframe, "scale", this.scale
+				this.$.scrolledIframe.$.iframe, ilibPreview("scale"), this.scale
 			) ;
 			this.resized() ;
 		},
@@ -176,9 +188,9 @@ enyo.kind(
 			var dpr = device.value.dpr;
 			var landscapeOnly = device.value.landscapeOnly; 
 
-			this.$.devWidth .setContent("width: "  + dw + ' px') ;
-			this.$.devHeight.setContent("height: " + dh + ' px') ;
-			this.$.devDPR   .setContent("DPR: "    + dpr) ;
+			this.$.devWidth .setContent(ilibPreview("width: {width} px", {width: dw})) ;
+			this.$.devHeight.setContent(ilibPreview("height: {height} px", {height: dh})) ;
+			this.$.devDPR.setContent(ilibPreview("DPR: {dpr}", {dpr: dpr})) ;
 
 			// there's no logical xor in javascript. Emulate one :-/
 			var wantWide = orientation.content === 'landscape' || landscapeOnly;
@@ -189,8 +201,8 @@ enyo.kind(
 			var targetH  = ( swap ? dw : dh ) / dpr ;
 
 			this.$.scrolledIframe.setGeometry( targetW , targetH) ;
-			this.$.screenWidth .setContent("width: "  + targetW + 'px') ;
-			this.$.screenHeight.setContent("height: " + targetH + 'px') ;
+			this.$.screenWidth.setContent(ilibPreview("width: {dw} px", {dw: targetW})) ;
+			this.$.screenHeight.setContent(ilibPreview("height: {height} px", {height: targetH})) ;
 			if(landscapeOnly){
 				this.$.landscape.setActive(true);
 				this.$.screenPicker.setDisabled(true);

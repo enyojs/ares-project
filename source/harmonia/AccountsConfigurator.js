@@ -1,4 +1,4 @@
-/* global ServiceRegistry, ares */
+/* global ServiceRegistry, ares, ilibHarmonia */
 enyo.kind({
 	name: "AccountsConfigurator",
 	kind: "onyx.Popup",
@@ -9,7 +9,7 @@ enyo.kind({
 	debug: false,
 	classes:"ares-classic-popup",
 	components: [
-		{tag: "div", classes:"title", content: "Accounts"},
+		{tag: "div", classes:"title", content: ilibHarmonia("Accounts")},
 		{kind: "FittableRows", classes:"ares-phonegap-config", fit: true, components: [
 			{kind: "FittableColumns", fit: true, components: [
 				{kind: "ProviderList", name: "accountsList", selector: ["auth"], onSelectProvider: "handleSelectProvider"},
@@ -17,12 +17,12 @@ enyo.kind({
 			], onUpdateAuth: "handleUpdateAuth"},
 		]},
 		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
-			{kind: "onyx.Button", content: "Done", ontap: "dismiss"}
+			{kind: "onyx.Button", content: ilibHarmonia("Done"), ontap: "dismiss"}
 		]},
 		{name: "errorPopup", kind: "Ares.ErrorPopup", msg: "", details: "", autoDismiss: false, modal: true},
 		{name: "waitPopup", kind: "onyx.Popup", centered: true, floating: true, autoDismiss: false, modal: true, classes: "ares-waitpopup", components: [
 			{kind: "onyx.Spinner", classes: "onyx-dark"},
-			{name: "waitPopupMsg", content: "Ongoing..."}
+			{name: "waitPopupMsg", content: ilibHarmonia("Ongoing...")}
 		]}
 	],
 	events: {

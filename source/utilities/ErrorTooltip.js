@@ -1,10 +1,10 @@
-/* global ares */
+/* global ares, ilibUtilities */
 enyo.kind({
 	name: "Ares.ErrorTooltip",
 	kind: "onyx.Tooltip",
 	allowHtml: true,
 	published: {
-		errorTooltip: $L("unknown error"),
+		errorTooltip: ilibUtilities("unknown error"),
 		error: ""
 	},
 	create: function() {

@@ -1,3 +1,4 @@
+/*global ilibHarmonia */
 enyo.kind({
 	name: "DeletePopup",
 	kind: "onyx.Popup",
@@ -15,19 +16,19 @@ enyo.kind({
 	floating: true,
 	classes:"ares-classic-popup",
 	components: [
-		{tag: "div", name: "title", classes:"title", content: "Delete "},
+		{tag: "div", name: "title", classes: "title", content: ilibHarmonia("Delete")},
 		{kind: "enyo.Scroller", classes:"ares-small-popup", fit: true, components: [
-			{tag:"p", classes:"break"},
+			{tag:"p", classes: "break"},
 			{kind: "onyx.InputDecorator", components: [
 				{name: "name", kind: "onyx.Input", disabled: true}
 			]},
 			{classes:"ares-small-popup-details", components:[
-				{name: "path", tag: "p", content: "Path: "}
+				{name: "path", tag: "p", content: ilibHarmonia("Path: ")}
 			]}
 		]},
 		{kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
-			{name:"deleteCancelButton", kind: "onyx.Button", content: "Cancel", ontap: "deleteCancel"},
-			{name:"deleteDeleteButton", classes:"right", kind: "onyx.Button", content: "Delete", ontap: "deleteConfirm"}
+			{name:"deleteCancelButton", kind: "onyx.Button", content: ilibHarmonia("Cancel"), ontap: "deleteCancel"},
+			{name:"deleteDeleteButton", classes:"right", kind: "onyx.Button", content: ilibHarmonia("Delete"), ontap: "deleteConfirm"}
 		]}
 	],
 	create: function() {

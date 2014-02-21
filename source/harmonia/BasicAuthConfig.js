@@ -1,4 +1,4 @@
-/* global async, ServiceRegistry, ares */
+/* global async, ServiceRegistry, ares, ilibHarmonia */
 enyo.kind({
 	name: "BasicAuthConfig",
 
@@ -23,17 +23,17 @@ enyo.kind({
 		{kind:"enyo.Scroller", fit:true, classes:"ares-large-content", components:[
 			{kind: "Ares.Groupbox", classes:"ares-group-box", components: [
 				{kind: "onyx.GroupboxHeader", name: "serviceName"},
-				{content: "User Name:"},
+				{content: ilibHarmonia("User Name:")},
 				{kind: "onyx.InputDecorator", components: [
-					{name:"username", kind: "onyx.Input", placeholder: "login"}
+					{name:"username", kind: "onyx.Input", placeholder: ilibHarmonia("login")}
 				]},
 				{content: "Password:"},
 				{kind: "onyx.InputDecorator", components: [
-					{name:"password", kind: "onyx.Input", placeholder: "password", type: "password"}
+					{name:"password", kind: "onyx.Input", placeholder: ilibHarmonia("password"), type: "password"}
 				]}
 			]},
 			{name: "accountOps", classes:"ares-align-right ares-row", components: [
-				{kind: "onyx.Button", name: "checkBtn", content: "Check", ontap: "check"},
+				{kind: "onyx.Button", name: "checkBtn", content: ilibHarmonia("Check"), ontap: "check"},
 			]},
 			{name: "userData"}
 		]}

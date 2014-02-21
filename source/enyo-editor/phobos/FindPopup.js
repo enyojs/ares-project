@@ -1,3 +1,4 @@
+/*global ilibPhobos */
 enyo.kind({
 	name: "FindPopup",
 	kind: "onyx.Popup",
@@ -18,17 +19,17 @@ enyo.kind({
 		onShow: "shown"
 	},
 	components: [
-		{classes: "title draggable", kind: "Ares.PopupTitle", content: "FIND/REPLACE"},
+		{classes: "title draggable", kind: "Ares.PopupTitle", content: ilibPhobos("FIND/REPLACE")},
 		{classes: "ace-find-popup", components: [
 			{kind: "FittableRows", components: [
 				{classes: "ares-row", components: [
-					{tag: "label", classes: "ares-fixed-label ace-find-label", content: "Find:"},
+					{tag: "label", classes: "ares-fixed-label ace-find-label", content: ilibPhobos("Find:")},
 					{kind: "onyx.InputDecorator", components: [
 						{name: "find", kind: "onyx.Input", oninput: "findChanged"}
 					]}
 				]},
 				{classes: "ares-row", components: [
-					{tag: "label", classes: "ares-fixed-label ace-find-label",  content: "Replace:"},
+					{tag: "label", classes: "ares-fixed-label ace-find-label",  content: ilibPhobos("Replace:")},
 					{kind: "onyx.InputDecorator", components: [
 						{name: "replace", kind: "onyx.Input", oninput: "replaceChanged"}
 					]}
@@ -38,25 +39,25 @@ enyo.kind({
 				]},
 				{classes: "ares-row", components: [
 					{kind: "FittableColumns", classes: "ace-find-left", fit: true, components: [
-						{name: "findnext", kind: "onyx.Button", classes: "ace-find-button", content: "Find", ontap: "doFindNext"},
-						{name: "findprevious", kind: "onyx.Button", classes: "ace-find-button", content: "Find Prev", ontap: "doFindPrevious"}
+						{name: "findnext", kind: "onyx.Button", classes: "ace-find-button", content: ilibPhobos("Find"), ontap: "doFindNext"},
+						{name: "findprevious", kind: "onyx.Button", classes: "ace-find-button", content: ilibPhobos("Find Prev"), ontap: "doFindPrevious"}
 					]}
 				]},
 				{classes: "ares-row", components: [
 					{kind: "FittableColumns", classes: "ace-find-left", fit: true, components: [
-						{name: "replaceFind", kind: "onyx.Button", classes: "ace-find-button", content: "Replace/Find", ontap: "doReplaceFind"},			
-						{name: "replaceOne", kind: "onyx.Button", classes: "ace-find-button", content: "Replace", ontap: "doReplace"}
+						{name: "replaceFind", kind: "onyx.Button", classes: "ace-find-button", content: ilibPhobos("Replace/Find"), ontap: "doReplaceFind"},			
+						{name: "replaceOne", kind: "onyx.Button", classes: "ace-find-button", content: ilibPhobos("Replace"), ontap: "doReplace"}
 					]}
 				]},
 				{classes: "ares-row", components: [
 					{kind: "FittableColumns", classes: "ace-find-left", fit: true, components: [
-						{name: "replaceAll", kind: "onyx.Button", classes: "ace-find-button", content: "Replace All", ontap: "doReplaceAll"}
+						{name: "replaceAll", kind: "onyx.Button", classes: "ace-find-button", content: ilibPhobos("Replace All"), ontap: "doReplaceAll"}
 					]}
 				]}
 			]}
 		]},
 		{kind: "onyx.Toolbar", classes: "bottom-toolbar", components: [
-			{name: "close", kind: "onyx.Button", content: "Close", ontap: "doClose"},
+			{name: "close", kind: "onyx.Button", content: ilibPhobos("Close"), ontap: "doClose"},
 		]}
 	],
 	create: function(){
@@ -90,9 +91,9 @@ enyo.kind({
 	},
 	updateMessage: function(inResult, occurences){
 		if(!inResult || occurences === 0){
-			this.$.message.setContent(this.findValue+" not found");
+			this.$.message.setContent(ilibPhobos("'{value}' not found", {value: this.findValue}));
 		} else if(occurences > 0) {
-			this.$.message.setContent(occurences+" matches replaced");
+			this.$.message.setContent(ilibPhobos("{occurences} matches replaced"), {occurences: occurences});
 		} else {
 			this.removeMessage();
 		}

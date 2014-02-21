@@ -16,12 +16,12 @@
 [submodule "lib/foss/underscore"]
 	path = lib/foss/underscore
 	url = ../../documentcloud/underscore.git
-[submodule "lib/g11n"]
-	path = lib/g11n
-	url = ../../enyojs/g11n.git
 [submodule "lib/foss/ace-builds"]
 	path = lib/foss/ace-builds
 	url = ../../ajaxorg/ace-builds.git
 [submodule "node_modules/ares-generator"]
 	path = node_modules/ares-generator
 	url = ../../enyojs/ares-generator.git
+[submodule "lib/enyo-ilib"]
+	path = lib/enyo-ilib
+url=../../enyojs/enyo-ilib.git

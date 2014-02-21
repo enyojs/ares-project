@@ -1,4 +1,4 @@
-/*global enyo, Ares, ares, async, ProjectConfig, ServiceRegistry, $L */
+/*global enyo, Ares, ares, async, ProjectConfig, ServiceRegistry, ilibProjectView */
 
 enyo.kind({
 	name: "ProjectWizardCreate",
@@ -28,9 +28,9 @@ enyo.kind({
 
 	components: [
 		{kind: "ProjectProperties", name: "propertiesWidget", onApplyAddSource: "notifyChangeSource"},
-		{kind: "Ares.FileChooser", header: "Select a directory containing the new project", canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true, allowCreateFolder: true, serverSelectable: false},
-		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: $L("unknown error")},
-		{kind: "Ares.ActionPopup", name: "confirmOverwriteOrLoadPopup", title: $L("Non-empty folder"), message: $L("Use existing folder content or overwrite it?"), actionButton: $L("Overwrite"), onConfirmActionPopup: "_confirmedOverwriteAction", action1Button: $L("Use"), onConfirmAction1Popup: "_confirmedUseAction", cancelButton: $L("Cancel")}
+		{kind: "Ares.FileChooser", header: ilibProjectView("Select a directory containing the new project"), canGenerate: false, name: "selectDirectoryPopup", classes:"ares-masked-content-popup", folderChooser: true, allowCreateFolder: true, serverSelectable: false},
+		{kind: "Ares.ErrorPopup", name: "errorPopup", msg: ilibProjectView("unknown error")},
+		{kind: "Ares.ActionPopup", name: "confirmOverwriteOrLoadPopup", title: ilibProjectView("Non-empty folder"), message: ilibProjectView("Use existing folder content or overwrite it?"), actionButton: ilibProjectView("Overwrite"), onConfirmActionPopup: "_confirmedOverwriteAction", action1Button: ilibProjectView("Use"), onConfirmAction1Popup: "_confirmedUseAction", cancelButton: ilibProjectView("Cancel")}
 	],
 
 	debug: false,
@@ -192,7 +192,7 @@ enyo.kind({
 
 		// Pre-fill project properties widget
 		propW.preFill(conf);
-		propW.$.projectPathLabel.setContent($L("Project path: "));
+		propW.$.projectPathLabel.setContent(ilibProjectView("Project path: "));
 		propW.$.projectPathValue.setContent(this.selectedDir.path);
 		propW.$.projectName.setValue(this.selectedDir.name);
 		propW.activateFileChoosers(false);
@@ -298,7 +298,7 @@ enyo.kind({
 			return;
 		}
 		var sources = [];
-		this.doShowWaitPopup({msg: "Creating project from template '" + template + "'"});
+		this.doShowWaitPopup({msg: ilibProjectView("Creating project from template '{template}'.", {template: template})});
 
 		// XXX webOS-specific substitution
 		var substitutions = [{
@@ -372,12 +372,6 @@ enyo.kind({
 		this.$.selectDirectoryPopup.reset();
 		this.hide() ;
 		return true;
-	},
-
-	/** @private */
-	$LS: function(msg, params) {
-		var tmp = new enyo.g11n.Template($L(msg));
-		return tmp.evaluate(params);
 	}
 });
 
@@ -434,7 +428,7 @@ enyo.kind({
 			this.$.propertiesWidget.setupModif();
 			this.$.propertiesWidget.preFill(config.data);
 
-			this.$.propertiesWidget.$.projectPathLabel.setContent($L("Project path: "));
+			this.$.propertiesWidget.$.projectPathLabel.setContent(ilibProjectView("Project path: "));
 			this.$.propertiesWidget.$.projectPathValue.setContent("");
 			
 			var req = config.service.propfind(config.folderId, 3);
@@ -654,7 +648,7 @@ enyo.kind({
 		var req = service.createFiles(folderId, {content: inData.content, ctype: inData.ctype});
 		req.response(this, this.projectRefresh);
 		req.error(this, function(inEvent, inError) {
-			this.$.errorPopup.raise($L("Unable to create projet content from the template"));
+			this.$.errorPopup.raise(ilibProjectView("Unable to create projet content from the template"));
 			this.doHideWaitPopup();
 		});
 		return true;
@@ -964,7 +958,7 @@ enyo.kind({
 			this.$.propertiesWidget.setupModif() ;
 			this.$.propertiesWidget.preFill(data);
 
-			this.$.propertiesWidget.$.projectPathLabel.setContent($L("Parent project path: "));
+			this.$.propertiesWidget.$.projectPathLabel.setContent(ilibProjectView("Parent project path: "));
 			this.$.propertiesWidget.$.projectPathValue.setContent("");
 			//TO DO: hide versions label for copy not tested, copy isn't working
 			this.$.propertiesWidget.hideVersions();
@@ -983,7 +977,7 @@ enyo.kind({
 	// step 2:
 	copyProject: function(inSender, inEvent) {
 		this.trace("Copying project", this.targetProject.getConfig().data.name);
-		this.doShowWaitPopup({msg: "Duplicating project"});
+		this.doShowWaitPopup({msg: ilibProjectView("Duplicating project")});
 
 		var service = this.targetProject.getService();
 		var folderId = this.targetProject.getFolderId();
@@ -992,17 +986,17 @@ enyo.kind({
 		var destination = inEvent.data.name;
 		var known = Ares.Workspace.projects.get(destination);
 		if (known) {
-			this.doError({msg: this.$LS("Unable to duplicate the project, the project '#{destination}' already exists", {destination: destination})});
+			this.doError({msg: ilibProjectView("Unable to duplicate the project, the project '{destination}' already exists", {destination: destination})});
 			return true ; // stop bubble			
 		}
 
 		var req = service.copy(folderId, {name: destination});
 		req.response(this, this.saveProjectJson);
 		req.error(this, function(inSender, status) {
-			var msg = $L("Unable to duplicate the project");
+			var msg = ilibProjectView("Unable to duplicate the project");
 			if (status === 412 /*Precondition-Failed*/) {
 				this.warn("Unable to duplicate the project, directory '", destination, "' already exists", status);
-				msg = this.$LS("Unable to duplicate the project, directory '#{destination}' already exists", {destination: destination});
+				msg = ilibProjectView("Unable to duplicate the project, directory '{destination}' already exists", {destination: destination});
 			} else {
 				this.warn("Unable to duplicate the project", status);
 			}
@@ -1025,7 +1019,7 @@ enyo.kind({
 
 		if (! fileId) {
 			this.warn("Unable to duplicate the project, no 'project.json' found", inData);
-			this.doError({msg: $L("Unable to duplicate the project, no 'project.json' found")});
+			this.doError({msg: ilibProjectView("Unable to duplicate the project, no 'project.json' found")});
 			return;
 		}
 
@@ -1033,7 +1027,7 @@ enyo.kind({
 		req.response(this, this.createProjectEntry);
 		req.error(this, function(inSender, inError) {
 			this.warn("Unable to duplicate the project, unable to update 'project.json'", inError);
-			this.doError({msg: $L("Unable to duplicate the project, unable to update 'project.json'")});
+			this.doError({msg: ilibProjectView("Unable to duplicate the project, unable to update 'project.json'")});
 		});
 	},
 	createProjectEntry: function(inSender, inData) {
@@ -1045,9 +1039,5 @@ enyo.kind({
 			this.owner.$.projectList.selectProject(project, ares.noNext);
 		}
 		this.doHideWaitPopup();
-	},
-	$LS: function(msg, params) {
-		var tmp = new enyo.g11n.Template($L(msg));
-		return tmp.evaluate(params);
 	}
 });
