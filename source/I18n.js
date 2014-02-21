@@ -15,67 +15,69 @@
  */
 var AresI18n = {};
 
-/**
- * _resolveString resolves the translation according to the locale for a specific entry
- * 
- * @param  {Object} bundle Translation bundle where the string entry has been defined
- * @param  {String} string String entry to translate
- * @returns {String} Related tranlated string
- * @private
- */
-var _resolveString = function(bundle, string) {
-	var str;
-	if (typeof(string) === 'string') {
-		str = bundle.getString(string);
-	} else if (typeof(string) === 'object') {
-		if (typeof(string.key) !== 'undefined' && typeof(string.value) !== 'undefined') {
-			str = bundle.getString(string.value, string.key);
+(function() {
+	/**
+	 * _resolveString resolves the translation according to the locale for a specific entry
+	 * 
+	 * @param  {Object} bundle Translation bundle where the string entry has been defined
+	 * @param  {String} string String entry to translate
+	 * @returns {String} Related tranlated string
+	 * @private
+	 */
+	var _resolveString = function(bundle, string) {
+		var str;
+		if (typeof(string) === 'string') {
+			str = bundle.getString(string);
+		} else if (typeof(string) === 'object') {
+			if (typeof(string.key) !== 'undefined' && typeof(string.value) !== 'undefined') {
+				str = bundle.getString(string.value, string.key);
+			} else {
+				throw "Parameter 'string' is not well defined.";
+			}
 		} else {
-			throw "Parameter 'string' is not well defined.";
+			throw "Parameter 'string' is not an object.";
 		}
-	} else {
-		throw "Parameter 'string' is not an object.";
-	}
-	return str.toString();
-};
+		return str.toString();
+	};
 
-/**
- * resolve return the translation (parametrized or not) based on the related translation domain. 
- * 
- * @param {Object} bundle Translation bundle where the string entry has been defined
- * @param {String} msg    String entry to translate
- * @param {Object} params Key/Value parameters used to customize the thanslation
- * @returns {String} Translated (and parametrized if required) string related to "msg" string entry
- * @public
- */
-AresI18n.resolve = function(bundle, msg, params) {
-	var stringResolved = _resolveString(bundle, msg);
-	if (params) {
-		var template = new ilib.String(stringResolved);
-		return template.format(params);
-	} 
+	/**
+	 * resolve return the translation (parametrized or not) based on the related translation domain. 
+	 * 
+	 * @param {Object} bundle Translation bundle where the string entry has been defined
+	 * @param {String} msg    String entry to translate
+	 * @param {Object} params Key/Value parameters used to customize the thanslation
+	 * @returns {String} Translated (and parametrized if required) string related to "msg" string entry
+	 * @public
+	 */
+	AresI18n.resolve = function(bundle, msg, params) {
+		var stringResolved = _resolveString(bundle, msg);
+		if (params) {
+			var template = new ilib.String(stringResolved);
+			return template.format(params);
+		} 
 
-	return stringResolved;
-};
+		return stringResolved;
+	};
 
-/**
- * setLocale defines a translation bundle based on a translation domain.
- * 
- * @param {String} spec   Specified locale code: en-US, fr-FR, ko-KR, en-CA...
- * @param {String} path   Path to related translation resources folder entry (here translation resources are named strings.json files)
- * @param {Object} bundle Translation bundle where the string entry has been defined
- * @returns {Object} Translation bundle based on a specific translation domain according to the locale specified
- * @public
- */
-AresI18n.setBundle = function (spec, path, bundle) {
-	return new ilib.ResBundle({
-		locale: new ilib.Locale(spec),
-		type: "html",
-		name: "strings",
-		sync: true,
-		lengthen: true, // if pseudo-localizing, this tells it to lengthen strings
-		loadParams: {
-			root: path
-		}
-	});
-};
+	/**
+	 * setLocale defines a translation bundle based on a translation domain.
+	 * 
+	 * @param {String} spec   Specified locale code: en-US, fr-FR, ko-KR, en-CA...
+	 * @param {String} path   Path to related translation resources folder entry (here translation resources are named strings.json files)
+	 * @param {Object} bundle Translation bundle where the string entry has been defined
+	 * @returns {Object} Translation bundle based on a specific translation domain according to the locale specified
+	 * @public
+	 */
+	AresI18n.setBundle = function (spec, path, bundle) {
+		return new ilib.ResBundle({
+			locale: new ilib.Locale(spec),
+			type: "html",
+			name: "strings",
+			sync: true,
+			lengthen: true, // if pseudo-localizing, this tells it to lengthen strings
+			loadParams: {
+				root: path
+			}
+		});
+	};
+})();
