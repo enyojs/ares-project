@@ -293,26 +293,22 @@ enyo.kind({
 		
 		n = (this.file.split("\n"));			// split the file up by lines
 
-		if ( this.declaration[c] === "New"){		// check to see if were making a new declartion	
-			
-		}else{
-			this.mode = "editing";
-			for (var i=0; i < n.length; i++) {
-				r = n[i].split("{");
-				if(this.declaration[c] === r[0]){
-					this.className = this.declaration[c];
-					for(var j = i+1;  j < n.length; j++){
-						s = n[j].split(":");
-						if(s[0].indexOf("}") === 0){
-							break;
-						}
-						this.properties[a] = s[0];
-						this.value[a] = s[1];						
-						a++;
+		this.mode = "editing";
+		for (var i=0; i < n.length; i++) {
+			r = n[i].split("{");
+			if(this.declaration[c] === r[0]){
+				this.className = this.declaration[c];
+				for(var j = i+1;  j < n.length; j++){
+					s = n[j].split(":");
+					if(s[0].indexOf("}") === 0){
+						break;
 					}
-					this.oldcss(this.className);
-					this.updateBox();
+					this.properties[a] = s[0];
+					this.value[a] = s[1];						
+					a++;
 				}
+				this.oldcss(this.className);
+				this.updateBox();
 			}
 		}
 	},
