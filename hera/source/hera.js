@@ -179,6 +179,7 @@ enyo.kind({
 		var a = 0;
 		
 		if( this.className === ""){
+			this.$.cssleft.selected();
 			return;
 		}
 		
