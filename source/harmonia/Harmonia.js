@@ -21,7 +21,7 @@ enyo.kind({
 	},
 	components: [
 		{kind:"FittableRows", classes:"enyo-fit", components:[
-			{kind: "onyx.MoreToolbar", classes: "ares-top-toolbar", components: [
+			{kind: "onyx.MoreToolbar", classes: "ares-top-toolbar ares-harmonia-panels", components: [
 				{kind: "onyx.Grabber", classes: "ares-grabber" , name: "filePanelGrabber", showing: false, ontap: "activePanel", components: [
 					{kind: "aresGrabber", name: "aresGrabberDirection"}
 				]},
