@@ -29,50 +29,50 @@ enyo.kind({
 	components: [
 		{kind:"FittableRows", classes: "project-list", components:[
 			{kind: "onyx.MoreToolbar", classes: "ares-top-toolbar", isContainer: true, name: "toolbar", components: [
-				{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
-					{tag:"button", content: ilibProjectView("Ares")},
-					{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", components: [
-						{value: "showAccountConfigurator", classes:"aresmenu-button", components: [
+				{kind: "onyx.MenuDecorator", classes: "aresmenu", onSelect: "menuItemSelected", components: [
+					{tag: "button", content: ilibProjectView("Ares")},
+					{kind: "onyx.Menu", floating: true, classes: "sub-aresmenu", components: [
+						{value: "showAccountConfigurator", classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/ares_accounts.png", classes: "aresmenu-icon-button"},
 							{content: ilibProjectView("Accounts..."), classes: "aresmenu-button-label"}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "showAresAbout",  classes:"aresmenu-button", components: [
+						{value: "showAresAbout",  classes: "aresmenu-button", components: [
 							{content: ilibProjectView("About..."), classes: "aresmenu-button-label"}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "showAresProperties",  classes:"aresmenu-button", components: [
+						{value: "showAresProperties",  classes: "aresmenu-button", components: [
 							{content: ilibProjectView("Properties..."), classes: "aresmenu-button-label"}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "showEnyoHelp",  classes:"aresmenu-button", components: [
+						{value: "showEnyoHelp",  classes: "aresmenu-button", components: [
 							{content: ilibProjectView("Enyo API Viewer"), classes: "aresmenu-button-label"}
 						]}
 					]}
 				]},
 				{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
 					{content: ilibProjectView("Projects")},
-					{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", components: [
-						{value: "doCreateProject",  classes:"aresmenu-button", components: [
+					{kind: "onyx.Menu", floating: true, classes: "sub-aresmenu", components: [
+						{value: "doCreateProject",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_new.png"},
 							{content: ilibProjectView("New...")}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "doOpenProject",  classes:"aresmenu-button", components: [
+						{value: "doOpenProject",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_open.png"},
 							{content: ilibProjectView("Open...")}
 						]},
-						{value: "doSearchProjects",  classes:"aresmenu-button", components: [
+						{value: "doSearchProjects",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_search.png"},
 							{content: ilibProjectView("Search...")}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "doDuplicateProject",  classes:"aresmenu-button", components: [
+						{value: "doDuplicateProject",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_duplicate.png"},
 							{content: ilibProjectView("Duplicate...")}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "removeProjectAction",  classes:"aresmenu-button", components: [
+						{value: "removeProjectAction",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_delete.png"},
 							{content: ilibProjectView("Delete")}
 						]}
