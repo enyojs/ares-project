@@ -49,7 +49,6 @@ enyo.kind({
 		}
 	],
 	events: {
-		onHideWaitPopup: "",
 		onError: "",
 		onRegisterMe: "",
 		onFileEdited: " ",
@@ -120,7 +119,6 @@ enyo.kind({
 		var file = this.docData.getFile();
 		var extension = file.name.split(".").pop();
 
-		this.hideWaitPopup();
 		this.analysis = null;
 
 		var mode = {
@@ -256,9 +254,6 @@ enyo.kind({
 		this.$.right.setIndex(settings.rightIndex);
 		this.resizeHandler();
 		return showSettings.aceWrapper ;
-	},
-	hideWaitPopup: function() {
-		this.doHideWaitPopup();
 	},
 	//
 	setAutoCompleteData: function() {
