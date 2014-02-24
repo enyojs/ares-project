@@ -743,13 +743,13 @@ enyo.kind({
 
 		// select project if the document comes from a different
 		// project compared to the project of the previous document
-		if (!oldProject || oldProject.getName() !== newName){
+		if (oldProject !== undefined && oldProject.getName() !== newName) {
 			var pname =  oldProject ? "from " + oldProject.getName()  + " " : "" ;
 			this.trace("also switch project " + pname + ' to ' + newDoc.getProjectData().getName());
 			var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
 			var projectList = ComponentsRegistry.getComponent("projectList");
 
-			this.doShowWaitPopup({msg: ilibAres("Switching project...")});
+			popupMsg = ilibAres("Switching project...");
 
 			this.resetErrorTooltip();
 
