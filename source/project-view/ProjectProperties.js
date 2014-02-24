@@ -249,6 +249,10 @@ enyo.kind({
 		var serviceId = inEvent.originator.serviceId,
 		    checked = inEvent.originator.checked;
 		this.trace("serviceId:", serviceId, 'checked:', checked);
+		// if provider {serviceId} has not been instancied once before...
+		if (this.config.providers[serviceId] === undefined) {
+			this.config.providers[serviceId] = {};
+		}
 		this.config.providers[serviceId].enabled = checked;
 		this.showService(serviceId);
 	},
