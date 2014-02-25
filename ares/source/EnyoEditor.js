@@ -133,7 +133,8 @@ enyo.kind({
 		onNewcss: "newCss",
 		onReplacecss: "replacecss",
 		onCssDocument: "cssDocument",
-		onEditcss: "doCss"
+		onEditcss: "doCss",
+		onReflowed: "reflowed"
 	},
 	debug: false,
 	create: function() {
@@ -992,6 +993,7 @@ enyo.kind({
 	* @protected
 	*/
 	newCss: function(inSender, inEvent){
+		this.trace(inSender, inEvent);
 		this.$.phobos.newcss(this.$.hera.out);
 	},
 	
@@ -1000,6 +1002,7 @@ enyo.kind({
 	* @protected
 	*/
 	replacecss: function(inSender, inEvent){
+		this.trace(inSender, inEvent);
 		this.$.phobos.replacecss(this.$.hera.old, this.$.hera.out);
 	},
 	
@@ -1009,9 +1012,24 @@ enyo.kind({
 	* @protected
 	*/
 	cssDocument: function(inSender, inEvent){
+		this.trace(inSender, inEvent);
 		this.$.hera.cssload(inEvent);
 		this.$.panels.setIndex(2) ;
 	},
+	
+	/*
+	* a reflow to fix deimos fro poking through here
+	*/
+	reflowed: function(inSender, inEvent){
+		this.trace(inSender, inEvent);	
+		var width = this.width * 3;
+		var index = this.$.panels.getIndex();
+		var styleis = "-webkit-transform: translateX(" + width + "px);";
+	
+		if(index === 2 ){
+			this.$.deimos.setStyle(styleis);
+		}
+	}
 	
 });
 

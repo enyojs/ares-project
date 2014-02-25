@@ -52,7 +52,8 @@ enyo.kind({
 		onCssDocument: "",
 		onFileEdited: " ",
 		onChildRequest: "",
-		onAceFocus: ""
+		onAceFocus: "",
+		onReflowed: ""
 	},
 	handlers: {
 		onNewcss: "newcss",
@@ -979,6 +980,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.$.body.reflow();
 		this.$.aceWrapper.resize();
+		this.doReflowed();
 	}
 });
 
