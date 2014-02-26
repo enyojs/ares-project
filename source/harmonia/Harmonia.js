@@ -21,43 +21,43 @@ enyo.kind({
 	},
 	components: [
 		{kind:"FittableRows", classes:"enyo-fit", components:[
-			{kind: "onyx.MoreToolbar", classes: "ares-top-toolbar", components: [
+			{kind: "onyx.MoreToolbar", classes: "ares-top-toolbar ares-harmonia-panels", components: [
 				{kind: "onyx.Grabber", classes: "ares-grabber" , name: "filePanelGrabber", showing: false, ontap: "activePanel", components: [
 					{kind: "aresGrabber", name: "aresGrabberDirection"}
 				]},
-				{kind: "onyx.MenuDecorator", classes:"aresmenu", onSelect: "menuItemSelected", components: [
+				{kind: "onyx.MenuDecorator", classes: "aresmenu", onSelect: "menuItemSelected", components: [
 					{content: ilibHarmonia("Project"), name: "projectMenu", disabled: true},
-					{kind: "onyx.Menu", floating: true, classes:"sub-aresmenu", maxHeight: "100%", components: [
-						{value: "doModifySettings",  classes:"aresmenu-button", components: [
+					{kind: "onyx.Menu", floating: true, classes: "sub-aresmenu", maxHeight: "100%", components: [
+						{value: "doModifySettings",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_edit.png"},
 							{content: ilibHarmonia("Edit...")}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "doPreview",  classes:"aresmenu-button", components: [
+						{value: "doPreview",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_preview.png"},
 							{content: ilibHarmonia("Preview")}
 						]},
-						{value: "doBuild",  classes:"aresmenu-button", components: [
+						{value: "doBuild",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_build.png"},
 							{content: ilibHarmonia("Build...")}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "doInstall",  classes:"aresmenu-button", components: [
+						{value: "doInstall",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_install.png"},
 							{content: ilibHarmonia("Install...")}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "doRun",  classes:"aresmenu-button", components: [
+						{value: "doRun",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_run.png"},
 							{content: ilibHarmonia("Run...")}
 						]},
-						{value: "doRunDebug",  classes:"aresmenu-button", components: [
+						{value: "doRunDebug",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_debug.png"},
 							{content: ilibHarmonia("Debug...")}
 						]}
 					]}
 				]},
-				{classes:"ares-logo-container", name:"logoContainer", components:[
+				{classes:"ares-logo-container", name: "logoContainer", components:[
 					{name:"logo", kind:"Ares.Logo"}
 				]}
 			]},

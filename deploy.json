@@ -2,9 +2,11 @@
 	"enyo": "./enyo",
 	"packagejs": "./package.js",
 	"assets": [
-		"./index.html", "./assets",
+		"./index.html", 
+		"./assets",
 		"./preview.html",
-		"./lib/foss/ace-builds/src-min", "./lib/foss/state-machine-2.2.0.min.js"
+		"./lib/foss/ace-builds/src-min", 
+		"./lib/foss/state-machine-2.2.0.min.js"
 	],
-	"libs": ["./lib/onyx", "./lib/layout", "./lib/extra", "./lib/g11n"]
+	"libs": ["./lib/onyx", "./lib/layout", "./lib/extra", "./lib/enyo-ilib"]
 }
