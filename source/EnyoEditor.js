@@ -35,10 +35,6 @@ enyo.kind({
 				{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closeDesigner"},
 				{kind: "onyx.Tooltip", content: ilibAres("Code editor")}
 			]},
-			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
-				{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_preview.png", ontap: "requestPreview"},
-				{kind: "onyx.Tooltip", name: "previewTooltip", content: ilibAres("Preview")}
-			]},
 			{classes:"ares-logo-container", components:[
 				{name:"logo", kind:"Ares.Logo"}
 			]}
@@ -271,9 +267,6 @@ enyo.kind({
 	switchGrabberDirection: function(active){
 		this.$.aresGrabberDirection.switchGrabberDirection(active);
 	},
-	addPreviewTooltip: function(message){
-		this.$.previewTooltip.setContent(message);
-	},
 	updateDeimosLabel: function(edited) {
 		if (edited) {
 			this.$.docLabel.setContent("Deimos *");
@@ -332,36 +325,6 @@ enyo.kind({
 		}
 		// backbone collection
 		Ares.Workspace.files.filter(isProjectDoc).forEach(action, this);
-	},
-
-	/**
-	 * request to save project files one by one and then launch
-	 * preview
-	 */
-	requestPreview: function() {
-		var previewer = ComponentsRegistry.getComponent("projectView");
-		var project = Ares.Workspace.projects.getActiveProject();
-		var serialSaver = [] ;
-		this.trace("preview requested on project " + project.getName());
-
-		// build the serie of functions to be fed to async.series
-		this.foreachProjectDocs(
-			function(doc) {
-				serialSaver.push(
-					this.requestSave.bind(this, doc)
-				);
-			}
-		);
-
-		// the real work is done below
-		async.series(
-			serialSaver,
-			function(err) {
-				if (! err) {
-					previewer.launchPreview(project);
-				}
-			}
-		);
 	},
 
 	// Save actions
@@ -815,8 +778,6 @@ enyo.kind({
 		this.activeDocument = newDoc;
 		newProject = newDoc.getProjectData() ;
 		Ares.Workspace.projects.setActiveProject( newProject.getName() );
-
-		this.addPreviewTooltip(ilibAres("Preview {projectID}", {projectID: newProject.id}));
 
 		var deimos = this.$.deimos ;
 		var willManageControls = false ;
