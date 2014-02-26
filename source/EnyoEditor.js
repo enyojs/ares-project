@@ -3,7 +3,7 @@ enyo.kind({
 	name:"Ares.EnyoEditor",
 	kind:"FittableRows", 
 	components:[
-		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels", components: [
+		{kind: "onyx.MoreToolbar", name: "toolbar", classes: "ares-top-toolbar ares-designer-panels", components: [
 			{kind: "onyx.Grabber", classes: "ares-grabber ares-icon", ontap: "activePanel", components:[
 				{kind: "aresGrabber", name: "aresGrabberDirection", classes: "lleftArrow"}
 			]},
@@ -37,7 +37,7 @@ enyo.kind({
 			]},
 			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
 				{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_preview.png", ontap: "requestPreview"},
-				{kind: "onyx.Tooltip", name:"previewTooltip", content: ilibAres("Preview")}
+				{kind: "onyx.Tooltip", name: "previewTooltip", content: ilibAres("Preview")}
 			]},
 			{classes:"ares-logo-container", components:[
 				{name:"logo", kind:"Ares.Logo"}
@@ -743,13 +743,13 @@ enyo.kind({
 
 		// select project if the document comes from a different
 		// project compared to the project of the previous document
-		if (!oldProject || oldProject.getName() !== newName){
+		if (oldProject !== undefined && oldProject.getName() !== newName) {
 			var pname =  oldProject ? "from " + oldProject.getName()  + " " : "" ;
 			this.trace("also switch project " + pname + ' to ' + newDoc.getProjectData().getName());
 			var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
 			var projectList = ComponentsRegistry.getComponent("projectList");
 
-			this.doShowWaitPopup({msg: ilibAres("Switching project...")});
+			popupMsg = ilibAres("Switching project...");
 
 			this.resetErrorTooltip();
 

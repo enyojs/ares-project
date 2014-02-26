@@ -156,11 +156,15 @@
 	z-index: 9 ; // behind top-toolbar so tooltip are not hidden on Safari
 }
 
-.ares-top-toolbar.ares-designer-panels{
+.ares-top-toolbar.ares-designer-panels .ares-top-toolbar.ares-harmonia-panel{
 	z-index: 10; //needed for Safari tooltips displayed in the code editor toolbar  
 }
 
 .ares-designer-panels > .enyo-fittable-columns-layout.onyx-toolbar-inline > * {
+	vertical-align: inherit;
+}
+
+.ares-harmonia-panels > .enyo-fittable-columns-layout.onyx-toolbar-inline > * {
 	vertical-align: inherit;
 }
 
