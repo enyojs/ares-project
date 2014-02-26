@@ -5,7 +5,7 @@ enyo.kind({
 	components:[
 		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels", components: [
 			{kind: "onyx.Grabber", classes: "ares-grabber ares-icon", ontap: "activePanel", components:[
-				{kind: "aresGrabber", name: "aresGrabberDirection", classes:"lleftArrow"}
+				{kind: "aresGrabber", name: "aresGrabberDirection", classes: "lleftArrow"}
 			]},
 			{name: "designerFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
 			{name: "editorFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
@@ -137,7 +137,7 @@ enyo.kind({
 
 	activePanel : function(){
 		// my index within the main Ares panels, not index phobos and deimos panels
-		this.doMovePanel({panelIndex:this.panelIndex});
+		this.doMovePanel({panelIndex: this.panelIndex});
 	},
 	showDeimosPanel: function () {
 		this.$.panels.setIndex(1) ;
