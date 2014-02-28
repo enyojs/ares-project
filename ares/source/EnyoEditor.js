@@ -647,7 +647,10 @@ enyo.kind({
 	handleSwitchDoc: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.userId);
 		this.trace(inEvent.id, newDoc);
+		this.closecssDesigner();
+		this.reflowed();
 		this.switchToDocument(newDoc, $L("Switching files..."), inEvent.next);
+
 		return true;
 	},
 
@@ -984,7 +987,7 @@ enyo.kind({
 		this.$.editorControls.setShowing(true);
 		this.$.deimosControls.setShowing(false);
 		this.$.cssControls.setShowing(false);
-		this.$.panels.setIndex(0) ;
+		this.$.panels.setIndex(0);
 		this.$.toolbar.resized();
 	},	
 	

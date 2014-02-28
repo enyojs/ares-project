@@ -168,6 +168,7 @@ enyo.kind({
 		}		
 		this.$.bg.setContent(outPut + "}");		// write in to the preview box
 		this.out = outString + "}\n";
+		this.mode = "editing";
 	},
 
 	/*
