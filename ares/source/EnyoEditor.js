@@ -647,8 +647,11 @@ enyo.kind({
 	handleSwitchDoc: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.userId);
 		this.trace(inEvent.id, newDoc);
-		this.closecssDesigner();
-		this.reflowed();
+	
+		if(this.$.panels.getIndex() === 2){		// save and close hera if user switches tabs away from hera
+			this.closecssDesigner();
+			this.reflowed();
+		}
 		this.switchToDocument(newDoc, $L("Switching files..."), inEvent.next);
 
 		return true;
