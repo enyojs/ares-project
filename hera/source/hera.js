@@ -35,7 +35,9 @@ enyo.kind({
 				]},					
 				
 				{name:"outputBox", kind: "enyo.FittableColumns",	style: "width: 100%; height: 40%; ", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
-					{name: "bg", allowHtml: true, style: "font-size: 13px;", content: ""},
+					{kind: "Scroller", classes: "enyo-fit", components: [
+						{name: "bg", allowHtml: true, style: "font-size: 13px;", content: ""},
+					]},
 				]},	
 			]},	// center
 			
