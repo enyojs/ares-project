@@ -1,4 +1,4 @@
-/*global ares, enyo, AresI18n, setTimeout */
+/*global ares, enyo, AresI18n, setTimeout, ServiceRegistry */
 
 /* ilibProjectView covers Harmonia specific translations. */
 var ilibHarmonia = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/harmonia/resources"));
