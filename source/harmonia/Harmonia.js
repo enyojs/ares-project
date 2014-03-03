@@ -37,21 +37,21 @@ enyo.kind({
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_preview.png"},
 							{content: ilibHarmonia("Preview")}
 						]},
-						{value: "doBuild",  classes: "aresmenu-button", components: [
+						{name: "buildItem", value: "doBuild",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_build.png"},
 							{content: ilibHarmonia("Build...")}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "doInstall",  classes: "aresmenu-button", components: [
+						{name: "installItem", value: "doInstall",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_install.png"},
 							{content: ilibHarmonia("Install...")}
 						]},
 						{classes: "onyx-menu-divider aresmenu-button"},
-						{value: "doRun",  classes: "aresmenu-button", components: [
+						{name: "runItem", value: "doRun",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_run.png"},
 							{content: ilibHarmonia("Run...")}
 						]},
-						{value: "doRunDebug",  classes: "aresmenu-button", components: [
+						{name: "runDebugItem", value: "doRunDebug",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_debug.png"},
 							{content: ilibHarmonia("Debug...")}
 						]}
