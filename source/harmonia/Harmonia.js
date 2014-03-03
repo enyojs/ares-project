@@ -1,4 +1,4 @@
-/*global ares, enyo, AresI18n, setTimeout */
+/*global ares, enyo, AresI18n, ServiceRegistry, setTimeout */
 
 /* ilibProjectView covers Harmonia specific translations. */
 var ilibHarmonia = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/harmonia/resources"));
@@ -14,7 +14,8 @@ enyo.kind({
 		onInstall: "",
 		onRun: "",
 		onRunDebug: "",
-		onPreview: ""
+		onPreview: "",
+		onProjectSave: ""
 	},
 	handlers: {
 		onDisableProjectMenu: "disableProjectMenu"
@@ -144,4 +145,84 @@ enyo.kind({
 			this.trace("*** BUG: '", fn, "' is not a known function");
 		}
 	},
+	/**
+	 * Request to save project and perform action
+	 * @param {Ares.Model.Project} project
+	 * @param {String} serviceType
+	 * @param {String} action
+	 */
+	projectSaveAndAction: function(project, serviceType, action) {
+		var cb = function (err) {
+			if (err) {
+				this.trace(err);
+			} else {
+				this.projectAction( project, serviceType, action);
+			}
+		};
+		if (project) {
+			this.doProjectSave({ project: project, callback: cb.bind(this) });
+		}
+	},
+	/**
+	 * @private
+	 */
+	projectAction: function(project, serviceType, action) {
+		var self = this;
+		this.doShowWaitPopup({msg: "Starting: " + action, service: serviceType});
+		// TODO: Must be reworked to allow the selection of builder/tester in the UI - ENYO-2049
+		var services = ServiceRegistry.instance.getServicesByType(serviceType);
+		var provider =	services[services.length - 1];
+		if (!provider) {
+			this.doError({msg: 'No ' + serviceType + ' service available'});
+		} else if (typeof provider[action] !== 'function') {
+			this.doError({msg: 'Service ' + provider.name + ' does not provide action: ' + action});
+		} else {
+			provider[action](project, function(inError) {
+				self.doHideWaitPopup();
+				self.refreshFileTree(project.getFolderId());
+				if (inError) {
+					self.doError({msg: inError.toString(), err: inError});
+				}
+			});
+		}
+	},
+
+	launchPreview: function (project) {
+		var cb = function (err) {
+			if (err) {
+				this.trace(err);
+			} else {
+				this._launchPreview(project);
+			}
+		};
+		this.doProjectSave({ project: project, callback: cb.bind(this) });
+	},
+
+	_launchPreview: function (project) {
+		var config = project.getConfig() ;
+		var topFile = config.data.preview.top_file ;
+		var projectUrl = project.getProjectUrl() + '/' + topFile ;
+
+		this.log("location", window.location.toString()) ;
+
+		var winLoc = window.location.toString()
+			    .replace(/\/ide\/$/,'/preview/preview.html') // Ares std
+			    .replace('/ide/index.html','/preview/preview.html') // Ares minified
+			    .replace('/ide/debug.html','/ide/preview.html') // Ares debug (every files)
+			    .replace('/ide/test.html','/ide/preview.html'); // Ares-under-test
+		this.log("winLoc", winLoc) ;
+		var previewUrl = winLoc
+				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
+				+ 'url=' + encodeURIComponent(projectUrl)+'&name=' + project.id;
+
+		this.trace("preview on URL ", previewUrl) ;
+		this.log("preview on URL ", previewUrl) ;
+
+		window.open(
+			previewUrl,
+			'_blank', // ensure that a new window is created each time preview is tapped
+			'scrollbars=0,menubar=1,resizable=1',
+			false
+		);
+	}
 });
