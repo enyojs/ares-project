@@ -27,7 +27,7 @@ enyo.kind({
 		onAdjustScroll: ""
 	},
 	published: {
-		service: null,
+		file: null,
 
 		// allows subnodes to be draggable or not (not per default).
 		dragAllowed: false
@@ -135,7 +135,7 @@ enyo.kind({
 	updateNodes: function() {
 		this.startLoading(this);
 		this.trace(this) ;
-		return this.service.listFiles(this.file && this.file.id)
+		return this.file.service.listFiles(this.file && this.file.id)
 			.response(this, function(inSender, inFiles) {
 				var sortedFiles = inFiles.sort(this.fileNameSort) ;
 				if (inFiles && !this.showing) {
@@ -212,7 +212,6 @@ enyo.kind({
 				} else {
 					newNode = this.createComponent( rfiles[i], {kind: "hermes.Node", classes: "hermesFileTree-node"} ) ;
 				}
-				newNode.setService(this.service);
 				this.trace( newNode, "has been created " ) ;
 
 				nfiles = this.getNodeFiles() ;
@@ -314,7 +313,7 @@ enyo.kind({
 		inFiles.sort(this.fileNameSort); // TODO: Other sort orders
 		for (var i=0; i < inFiles.length; i++) {
 			f=inFiles[i];
-			f.service = this.service;
+			f.service = this.file.service;
 			nodes.push({
 				file: f,
 				name: '$' + f.name, // prefix avoids clobberring non-files components like icon
